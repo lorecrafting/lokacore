@@ -8,7 +8,7 @@ import Config
 config :exmud, ExmudWeb.Endpoint, cache_static_manifest: "priv/static/cache_manifest.json"
 
 # SSL is handled by Fly.io's edge proxy, so we don't need force_ssl here.
-# The proxy terminates SSL and forwards plain HTTP to our app.
+# The proxy terminates SSL and forwards plain HTTP to our app on port 8080.
 # Uncomment below if you need HSTS headers:
 # config :exmud, ExmudWeb.Endpoint,
 #   force_ssl: [rewrite_on: [:x_forwarded_proto], hsts: false]
