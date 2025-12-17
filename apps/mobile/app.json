@@ -32,6 +32,12 @@
         "projectId": "0b1bdb3a-5877-4987-9f75-32a51c4e5d46"
       }
     },
-    "owner": "lorecrafting"
+    "owner": "lorecrafting",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/0b1bdb3a-5877-4987-9f75-32a51c4e5d46"
+    }
   }
 }
