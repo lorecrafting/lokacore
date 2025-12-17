@@ -24,6 +24,7 @@ defmodule ExmudWeb.Router do
   scope "/", ExmudWeb do
     pipe_through :browser
 
+    # Redirect root to game client
     get "/", PageController, :home
   end
 
