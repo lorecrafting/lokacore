@@ -11,7 +11,7 @@ kill_timeout = '5s'
 [build]
 
 [deploy]
-  release_command = '/app/bin/migrate'
+  release_command = '/usr/local/bin/entrypoint.sh /app/bin/migrate'
 
 [env]
   DATABASE_PATH = '/mnt/name/name.db'
