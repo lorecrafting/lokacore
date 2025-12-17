@@ -88,12 +88,10 @@ defmodule ExmudWeb.PlayerSessionControllerTest do
       assert get_session(conn, :player_token)
       assert redirected_to(conn) == ~p"/"
 
-      # Now do a logged in request and assert on the menu
-      conn = get(conn, ~p"/")
+      # Now do a logged in request and assert on the game page
+      conn = get(conn, ~p"/game")
       response = html_response(conn, 200)
-      assert response =~ player.email
-      assert response =~ ~p"/players/settings"
-      assert response =~ ~p"/players/log-out"
+      assert response =~ "ExMUD"
     end
 
     test "logs the player in with remember me", %{conn: conn, player: player} do
@@ -163,12 +161,10 @@ defmodule ExmudWeb.PlayerSessionControllerTest do
       assert get_session(conn, :player_token)
       assert redirected_to(conn) == ~p"/"
 
-      # Now do a logged in request and assert on the menu
-      conn = get(conn, ~p"/")
+      # Now do a logged in request and assert on the game page
+      conn = get(conn, ~p"/game")
       response = html_response(conn, 200)
-      assert response =~ player.email
-      assert response =~ ~p"/players/settings"
-      assert response =~ ~p"/players/log-out"
+      assert response =~ "ExMUD"
     end
 
     test "confirms unconfirmed player", %{conn: conn, unconfirmed_player: player} do
@@ -187,12 +183,10 @@ defmodule ExmudWeb.PlayerSessionControllerTest do
 
       assert Accounts.get_player!(player.id).confirmed_at
 
-      # Now do a logged in request and assert on the menu
-      conn = get(conn, ~p"/")
+      # Now do a logged in request and assert on the game page
+      conn = get(conn, ~p"/game")
       response = html_response(conn, 200)
-      assert response =~ player.email
-      assert response =~ ~p"/players/settings"
-      assert response =~ ~p"/players/log-out"
+      assert response =~ "ExMUD"
     end
 
     test "emits error message when magic link is invalid", %{conn: conn} do

@@ -1,8 +1,8 @@
 defmodule ExmudWeb.PageControllerTest do
   use ExmudWeb.ConnCase
 
-  test "GET /", %{conn: conn} do
+  test "GET / redirects to /game", %{conn: conn} do
     conn = get(conn, ~p"/")
-    assert html_response(conn, 200) =~ "Peace of mind from prototype to production"
+    assert redirected_to(conn) == ~p"/game"
   end
 end

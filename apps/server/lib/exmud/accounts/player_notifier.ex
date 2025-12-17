@@ -6,10 +6,14 @@ defmodule Exmud.Accounts.PlayerNotifier do
 
   # Delivers the email using the application mailer.
   defp deliver(recipient, subject, body) do
+    from_config = Application.get_env(:exmud, :mailer_from, [])
+    from_name = Keyword.get(from_config, :name, "ExMUD")
+    from_email = Keyword.get(from_config, :email, "noreply@example.com")
+
     email =
       new()
       |> to(recipient)
-      |> from({"Exmud", "contact@example.com"})
+      |> from({from_name, from_email})
       |> subject(subject)
       |> text_body(body)
 
