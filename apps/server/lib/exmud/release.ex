@@ -1,6 +1,7 @@
 defmodule Exmud.Release do
   @moduledoc """
-  Used for executing DB release tasks when run in production without Mix installed.
+  Used for executing DB release tasks when run in production without Mix
+  installed.
   """
   @app :exmud
 
@@ -22,6 +23,8 @@ defmodule Exmud.Release do
   end
 
   defp load_app do
-    Application.load(@app)
+    # Many platforms require SSL when connecting to the database
+    Application.ensure_all_started(:ssl)
+    Application.ensure_loaded(@app)
   end
 end
