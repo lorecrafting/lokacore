@@ -65,25 +65,41 @@ export const useStore = create<AppState>((set, get) => ({
 
   // Auth actions
   login: async (email: string, password: string) => {
-    const response = await api.login(email, password);
-    await SecureStore.setItemAsync(TOKEN_KEY, response.token);
-    api.setToken(response.token);
-    set({
-      token: response.token,
-      player: response.player,
-      isAuthenticated: true,
-    });
+    try {
+      console.log('Attempting login...');
+      const response = await api.login(email, password);
+      console.log('Login successful, saving token...');
+      await SecureStore.setItemAsync(TOKEN_KEY, response.token);
+      api.setToken(response.token);
+      set({
+        token: response.token,
+        player: response.player,
+        isAuthenticated: true,
+      });
+      console.log('Login complete');
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
   },
 
   register: async (email: string, password: string) => {
-    const response = await api.register(email, password);
-    await SecureStore.setItemAsync(TOKEN_KEY, response.token);
-    api.setToken(response.token);
-    set({
-      token: response.token,
-      player: response.player,
-      isAuthenticated: true,
-    });
+    try {
+      console.log('Attempting registration...');
+      const response = await api.register(email, password);
+      console.log('Registration successful, saving token...');
+      await SecureStore.setItemAsync(TOKEN_KEY, response.token);
+      api.setToken(response.token);
+      set({
+        token: response.token,
+        player: response.player,
+        isAuthenticated: true,
+      });
+      console.log('Registration complete');
+    } catch (error) {
+      console.error('Registration error:', error);
+      throw error;
+    }
   },
 
   logout: async () => {
@@ -105,7 +121,9 @@ export const useStore = create<AppState>((set, get) => ({
 
   loadToken: async () => {
     try {
+      console.log('Loading token from SecureStore...');
       const token = await SecureStore.getItemAsync(TOKEN_KEY);
+      console.log('Token loaded:', token ? 'Found' : 'Not found');
       if (token) {
         api.setToken(token);
         const response = await api.me();
@@ -118,8 +136,13 @@ export const useStore = create<AppState>((set, get) => ({
       } else {
         set({ isLoading: false });
       }
-    } catch {
-      await SecureStore.deleteItemAsync(TOKEN_KEY);
+    } catch (error) {
+      console.error('Error loading token:', error);
+      try {
+        await SecureStore.deleteItemAsync(TOKEN_KEY);
+      } catch (deleteError) {
+        console.error('Error deleting token:', deleteError);
+      }
       set({ isLoading: false });
     }
   },
