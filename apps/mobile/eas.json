@@ -34,10 +34,5 @@
   },
   "submit": {
     "production": {}
-  },
-  "update": {
-    "main": {
-      "channel": "main"
-    }
   }
 }
