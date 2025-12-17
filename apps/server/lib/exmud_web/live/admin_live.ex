@@ -237,15 +237,15 @@ defmodule ExmudWeb.AdminLive do
             <dl class="space-y-2 text-sm">
               <div class="flex justify-between">
                 <dt class="text-base-content/70">Elixir Version</dt>
-                <dd><%= System.version() %></dd>
+                <dd>{System.version()}</dd>
               </div>
               <div class="flex justify-between">
                 <dt class="text-base-content/70">OTP Version</dt>
-                <dd><%= :erlang.system_info(:otp_release) %></dd>
+                <dd>{:erlang.system_info(:otp_release)}</dd>
               </div>
               <div class="flex justify-between">
                 <dt class="text-base-content/70">Phoenix Version</dt>
-                <dd><%= Application.spec(:phoenix, :vsn) %></dd>
+                <dd>{Application.spec(:phoenix, :vsn)}</dd>
               </div>
             </dl>
           </div>
@@ -294,8 +294,8 @@ defmodule ExmudWeb.AdminLive do
             <.icon name={@icon} class="size-6 text-primary" />
           </div>
           <div>
-            <p class="text-2xl font-bold"><%= @value %></p>
-            <p class="text-sm text-base-content/70"><%= @title %></p>
+            <p class="text-2xl font-bold">{@value}</p>
+            <p class="text-sm text-base-content/70">{@title}</p>
           </div>
         </div>
       </div>

@@ -37,7 +37,7 @@ defmodule ExmudWeb.GameLive do
         phx-hook="ScrollToBottom"
       >
         <div :for={line <- @output} class={output_class(line)}>
-          <%= line.text %>
+          {line.text}
         </div>
       </div>
 
