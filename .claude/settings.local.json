@@ -10,7 +10,11 @@
       "Bash(mix format:*)",
       "Bash(git add:*)",
       "Bash(elixir --version:*)",
-      "Bash(fly logs:*)"
+      "Bash(fly logs:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebSearch",
+      "WebFetch(domain:www.evennia.com)"
     ]
   }
 }

@@ -7,6 +7,8 @@ defmodule ExmudWeb.GameLive do
   """
   use ExmudWeb, :live_view
 
+  alias Exmud.Engine.TextParser
+
   @impl true
   def mount(_params, _session, socket) do
     if connected?(socket) do
@@ -34,10 +36,10 @@ defmodule ExmudWeb.GameLive do
       <div
         id="game-output"
         class="flex-1 bg-base-200 rounded-lg p-4 overflow-y-auto font-mono text-sm space-y-1"
-        phx-hook="ScrollToBottom"
+        phx-hook="GameOutput"
       >
         <div :for={line <- @output} class={output_class(line)}>
-          {line.text}
+          {line.html}
         </div>
       </div>
 
@@ -119,12 +121,12 @@ defmodule ExmudWeb.GameLive do
   defp process_command(socket, "help") do
     help_text = """
     Available commands:
-      look        - Look around the current room
-      go <dir>    - Move in a direction (north, south, east, west)
-      say <msg>   - Say something to the room
-      inventory   - Check your inventory
-      help        - Show this help message
-      clear       - Clear the screen
+      |cmd:look|        - Look around the current room
+      |lcgo north|ltgo <dir>|le    - Move in a direction (north, south, east, west)
+      |lcsay hello|ltsay <msg>|le   - Say something to the room
+      |cmd:inventory|   - Check your inventory
+      |cmd:help|        - Show this help message
+      |cmd:clear|       - Clear the screen
     """
 
     add_output(socket, :system, help_text)
@@ -139,9 +141,11 @@ defmodule ExmudWeb.GameLive do
     room_desc = """
     [The Starting Room]
     You find yourself in a simple stone chamber. Torchlight flickers on the walls,
-    casting dancing shadows. A wooden door leads north.
+    casting dancing shadows. A |lcexamine door|ltwooden door|le leads |lcgo north|ltnorth|le.
 
-    Exits: north
+    You can |cmd:inventory| to check your belongings.
+
+    Exits: |cmd:go north|
     """
 
     add_output(socket, :room, room_desc)
@@ -164,7 +168,9 @@ defmodule ExmudWeb.GameLive do
   end
 
   defp add_output(socket, type, text) do
-    line = %{type: type, text: text, timestamp: DateTime.utc_now()}
+    # Parse text for clickable commands and convert to safe HTML
+    html = TextParser.parse(text)
+    line = %{type: type, html: html, timestamp: DateTime.utc_now()}
     update(socket, :output, fn output -> output ++ [line] end)
   end
 
@@ -180,14 +186,16 @@ defmodule ExmudWeb.GameLive do
   defp output_class(_), do: "text-base-content"
 
   defp welcome_message do
+    text = """
+    Welcome to ExMUD!
+    A text-based adventure awaits you.
+
+    Type |cmd:help| to see available commands, or |cmd:look| to look around.
+    """
+
     %{
       type: :system,
-      text: """
-      Welcome to ExMUD!
-      A text-based adventure awaits you.
-
-      Type 'help' to see available commands.
-      """,
+      html: TextParser.parse(text),
       timestamp: DateTime.utc_now()
     }
   end

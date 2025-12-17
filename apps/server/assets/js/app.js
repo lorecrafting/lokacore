@@ -27,6 +27,39 @@ import topbar from "../vendor/topbar"
 
 // Custom hooks for game client
 const Hooks = {
+  // Combined hook for game output: auto-scroll + command link handling
+  GameOutput: {
+    mounted() {
+      this.scrollToBottom()
+      this.handleClick = this.handleClick.bind(this)
+      this.el.addEventListener("click", this.handleClick)
+    },
+
+    updated() {
+      this.scrollToBottom()
+    },
+
+    destroyed() {
+      this.el.removeEventListener("click", this.handleClick)
+    },
+
+    scrollToBottom() {
+      this.el.scrollTop = this.el.scrollHeight
+    },
+
+    handleClick(e) {
+      const cmdLink = e.target.closest(".cmd-link")
+      if (cmdLink) {
+        e.preventDefault()
+        const cmd = cmdLink.dataset.cmd
+        if (cmd) {
+          this.pushEvent("send_command", { command: cmd })
+        }
+      }
+    }
+  },
+
+  // Keep ScrollToBottom for backwards compatibility
   ScrollToBottom: {
     mounted() {
       this.scrollToBottom()

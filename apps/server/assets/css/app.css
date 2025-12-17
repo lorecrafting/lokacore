@@ -103,3 +103,27 @@
 [data-phx-session], [data-phx-teleported-src] { display: contents }
 
 /* This file is for your main application CSS */
+
+/* Clickable command links in game output */
+.cmd-link {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  cursor: pointer;
+  color: oklch(70% 0.15 250);
+  transition: color 0.15s ease;
+}
+
+.cmd-link:hover {
+  color: oklch(80% 0.2 250);
+  text-decoration-style: solid;
+}
+
+/* URL links in game output */
+.url-link {
+  text-decoration: underline;
+  color: oklch(65% 0.15 200);
+}
+
+.url-link:hover {
+  color: oklch(75% 0.2 200);
+}
