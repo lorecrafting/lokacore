@@ -14,6 +14,7 @@ kill_timeout = '5s'
   release_command = '/usr/local/bin/entrypoint.sh /app/bin/migrate'
 
 [env]
+  PHX_SERVER = 'true'
   DATABASE_PATH = '/mnt/name/name.db'
   PHX_HOST = 'exmud.fly.dev'
   PORT = '8080'
