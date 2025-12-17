@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import { ActivityIndicator, View, StyleSheet, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -55,10 +55,24 @@ function LoadingScreen() {
 
 export default function App() {
   const { isLoading, isAuthenticated, loadToken } = useStore();
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadToken();
+    console.log('ExMUD App starting... v1.0.1');
+    loadToken().catch((err) => {
+      console.error('Failed to load token:', err);
+      setError(err.message || 'Failed to initialize app');
+    });
   }, [loadToken]);
+
+  if (error) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.errorText}>Error: {error}</Text>
+        <Text style={styles.errorSubtext}>Check console for details</Text>
+      </View>
+    );
+  }
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -80,5 +94,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#1a1a2e',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  errorText: {
+    color: '#e94560',
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 8,
+    paddingHorizontal: 20,
+  },
+  errorSubtext: {
+    color: '#888',
+    fontSize: 14,
+    textAlign: 'center',
   },
 });
