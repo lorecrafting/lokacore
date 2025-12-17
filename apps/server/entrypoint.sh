@@ -8,4 +8,4 @@ if [ -d "/mnt/name" ]; then
 fi
 
 # Drop privileges and run as nobody user
-exec su-exec nobody "$@"
+exec gosu nobody "$@"
