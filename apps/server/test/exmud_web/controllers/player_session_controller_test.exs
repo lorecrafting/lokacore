@@ -42,7 +42,10 @@ defmodule ExmudWeb.PlayerSessionControllerTest do
   end
 
   describe "GET /players/log-in/:token" do
-    test "renders confirmation page for unconfirmed player", %{conn: conn, unconfirmed_player: player} do
+    test "renders confirmation page for unconfirmed player", %{
+      conn: conn,
+      unconfirmed_player: player
+    } do
       token =
         extract_player_token(fn url ->
           Accounts.deliver_login_instructions(player, url)

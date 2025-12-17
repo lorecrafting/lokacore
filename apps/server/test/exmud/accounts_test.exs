@@ -139,7 +139,11 @@ defmodule Exmud.AccountsTest do
 
       token =
         extract_player_token(fn url ->
-          Accounts.deliver_player_update_email_instructions(%{player | email: email}, player.email, url)
+          Accounts.deliver_player_update_email_instructions(
+            %{player | email: email},
+            player.email,
+            url
+          )
         end)
 
       %{player: player, token: token, email: email}

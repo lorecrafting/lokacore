@@ -105,13 +105,22 @@ defmodule ExmudWeb.PlayerSettingsControllerTest do
 
       token =
         extract_player_token(fn url ->
-          Accounts.deliver_player_update_email_instructions(%{player | email: email}, player.email, url)
+          Accounts.deliver_player_update_email_instructions(
+            %{player | email: email},
+            player.email,
+            url
+          )
         end)
 
       %{token: token, email: email}
     end
 
-    test "updates the player email once", %{conn: conn, player: player, token: token, email: email} do
+    test "updates the player email once", %{
+      conn: conn,
+      player: player,
+      token: token,
+      email: email
+    } do
       conn = get(conn, ~p"/players/settings/confirm-email/#{token}")
       assert redirected_to(conn) == ~p"/players/settings"
 

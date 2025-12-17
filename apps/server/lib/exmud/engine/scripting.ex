@@ -86,10 +86,11 @@ defmodule Exmud.Engine.Scripting do
   end
 
   defp api_message([target_id, message], lua) when is_binary(target_id) and is_binary(message) do
-    event = Event.new(:message, %{
-      target: target_id,
-      payload: %{text: message}
-    })
+    event =
+      Event.new(:message, %{
+        target: target_id,
+        payload: %{text: message}
+      })
 
     EventBus.emit(event)
     {[], lua}
@@ -109,7 +110,10 @@ defmodule Exmud.Engine.Scripting do
   defp to_lua_value(v) when is_number(v), do: v
   defp to_lua_value(v) when is_boolean(v), do: v
   defp to_lua_value(v) when is_atom(v), do: to_string(v)
-  defp to_lua_value(v) when is_map(v), do: Enum.map(v, fn {k, val} -> {to_string(k), to_lua_value(val)} end)
+
+  defp to_lua_value(v) when is_map(v),
+    do: Enum.map(v, fn {k, val} -> {to_string(k), to_lua_value(val)} end)
+
   defp to_lua_value(_), do: nil
 
   # Security checks

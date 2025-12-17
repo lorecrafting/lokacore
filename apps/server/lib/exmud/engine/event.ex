@@ -21,8 +21,8 @@ defmodule Exmud.Engine.Event do
           metadata: map()
         }
 
+  # Movement
   @type event_type ::
-          # Movement
           :move
           | :enter_room
           | :leave_room

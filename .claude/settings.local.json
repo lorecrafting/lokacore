@@ -6,7 +6,8 @@
       "Bash(npx --version:*)",
       "Bash(npx create-expo-app@latest:*)",
       "Bash(npm install:*)",
-      "Bash(mix test:*)"
+      "Bash(mix test:*)",
+      "Bash(mix format:*)"
     ]
   }
 }

@@ -63,7 +63,9 @@ defmodule ExmudWeb.PlayerAuthTest do
     end
 
     test "writes a cookie if remember_me is configured", %{conn: conn, player: player} do
-      conn = conn |> fetch_cookies() |> PlayerAuth.log_in_player(player, %{"remember_me" => "true"})
+      conn =
+        conn |> fetch_cookies() |> PlayerAuth.log_in_player(player, %{"remember_me" => "true"})
+
       assert get_session(conn, :player_token) == conn.cookies[@remember_me_cookie]
       assert get_session(conn, :player_remember_me) == true
 
@@ -72,8 +74,13 @@ defmodule ExmudWeb.PlayerAuthTest do
       assert max_age == @remember_me_cookie_max_age
     end
 
-    test "writes a cookie if remember_me was set in previous session", %{conn: conn, player: player} do
-      conn = conn |> fetch_cookies() |> PlayerAuth.log_in_player(player, %{"remember_me" => "true"})
+    test "writes a cookie if remember_me was set in previous session", %{
+      conn: conn,
+      player: player
+    } do
+      conn =
+        conn |> fetch_cookies() |> PlayerAuth.log_in_player(player, %{"remember_me" => "true"})
+
       assert get_session(conn, :player_token) == conn.cookies[@remember_me_cookie]
       assert get_session(conn, :player_remember_me) == true
 
@@ -126,7 +133,9 @@ defmodule ExmudWeb.PlayerAuthTest do
       player_token = Accounts.generate_player_session_token(player)
 
       conn =
-        conn |> put_session(:player_token, player_token) |> PlayerAuth.fetch_current_scope_for_player([])
+        conn
+        |> put_session(:player_token, player_token)
+        |> PlayerAuth.fetch_current_scope_for_player([])
 
       assert conn.assigns.current_scope.player.id == player.id
       assert conn.assigns.current_scope.player.authenticated_at == player.authenticated_at
@@ -158,7 +167,10 @@ defmodule ExmudWeb.PlayerAuthTest do
       refute conn.assigns.current_scope
     end
 
-    test "reissues a new token after a few days and refreshes cookie", %{conn: conn, player: player} do
+    test "reissues a new token after a few days and refreshes cookie", %{
+      conn: conn,
+      player: player
+    } do
       logged_in_conn =
         conn |> fetch_cookies() |> PlayerAuth.log_in_player(player, %{"remember_me" => "true"})
 
@@ -186,7 +198,10 @@ defmodule ExmudWeb.PlayerAuthTest do
   end
 
   describe "require_sudo_mode/2" do
-    test "allows players that have authenticated in the last 10 minutes", %{conn: conn, player: player} do
+    test "allows players that have authenticated in the last 10 minutes", %{
+      conn: conn,
+      player: player
+    } do
       conn =
         conn
         |> fetch_flash()
