@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "ExMUD",
-    "slug": "exmud-mobile",
+    "slug": "lokacore",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -29,9 +29,9 @@
     },
     "extra": {
       "eas": {
-        "projectId": "your-project-id"
+        "projectId": "0b1bdb3a-5877-4987-9f75-32a51c4e5d46"
       }
     },
-    "owner": "your-expo-username"
+    "owner": "lorecrafting"
   }
 }
