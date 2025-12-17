@@ -58,9 +58,16 @@ defmodule Exmud.Accounts.PlayerNotifier do
   Deliver instructions to log in with a magic link.
   """
   def deliver_login_instructions(player, url) do
+    Logger.warning("[PlayerNotifier] deliver_login_instructions called for #{player.email}")
+
     case player do
-      %Player{confirmed_at: nil} -> deliver_confirmation_instructions(player, url)
-      _ -> deliver_magic_link_instructions(player, url)
+      %Player{confirmed_at: nil} ->
+        Logger.warning("[PlayerNotifier] Player not confirmed, sending confirmation email")
+        deliver_confirmation_instructions(player, url)
+
+      _ ->
+        Logger.warning("[PlayerNotifier] Player confirmed, sending magic link email")
+        deliver_magic_link_instructions(player, url)
     end
   end
 
