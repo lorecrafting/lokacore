@@ -120,30 +120,57 @@ fly secrets set GUARDIAN_SECRET_KEY=$(mix phx.gen.secret)
 - `FLY_API_TOKEN` - Fly.io API token for deployments
 - `EXPO_TOKEN` - Expo token for EAS builds
 
-## iOS Build Setup
+## Mobile Preview Setup
 
-iOS builds in CI are currently disabled because they require Apple Developer credentials. To enable iOS builds:
+The mobile app uses **EAS Update** to publish instant previews without building native apps. Every push to `main` automatically publishes an update that you can view on your phone.
 
-1. **Configure EAS with Apple Developer Account:**
+### Setup (One-time)
+
+1. **Install Expo Go on your phone:**
+   - iOS: [App Store](https://apps.apple.com/app/apple-store/id982107779)
+   - Android: [Play Store](https://play.google.com/store/apps/details?id=host.exp.exponent)
+
+2. **Get your project URL:**
    ```bash
    cd apps/mobile
-   eas credentials  # Configure Apple credentials interactively
+   npx expo start
+   # Scan the QR code with Expo Go
+   # Or visit: exp://your-expo-project-url
    ```
 
-2. **Enable iOS builds in CI:**
-   - Edit `.github/workflows/mobile-preview.yml`
-   - Uncomment the iOS build step (lines 67-70)
+3. **Switch to preview channel:**
+   - In Expo Go, go to project settings
+   - Select branch: `preview`
+   - Updates from CI will now appear automatically
 
-3. **Manual iOS builds:**
-   ```bash
-   cd apps/mobile
-   eas build --platform ios --profile preview
-   ```
+### How It Works
 
-**Why Android-only in CI?**
-- Android builds don't require credentials in non-interactive mode
-- iOS builds need provisioning profiles and certificates configured in EAS
-- iOS can be built manually when needed without blocking CI/CD
+```
+Push to main → GitHub Actions → Publishes EAS Update → Phone gets update instantly
+```
+
+- No native builds required
+- No credentials needed
+- Updates appear in seconds
+- Works on both iOS and Android
+
+### Manual Updates
+
+Publish an update manually:
+```bash
+cd apps/mobile
+eas update --branch preview --message "Your update message"
+```
+
+### Building Native Apps (Optional)
+
+If you need standalone APK/IPA files, you'll need to configure credentials first:
+
+```bash
+cd apps/mobile
+eas credentials  # Configure keystores/certificates
+eas build --platform android --profile preview
+```
 
 ## Key Design Decisions
 
