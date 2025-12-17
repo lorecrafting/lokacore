@@ -8,7 +8,8 @@
 
 | Layer | Technology | Version |
 |-------|------------|---------|
-| Backend | Elixir/Phoenix | 1.8.3 |
+| Backend | Elixir/Phoenix | 1.19.4 / Phoenix 1.8.3 |
+| Runtime | Erlang/OTP | 28.3 |
 | Real-time | Phoenix LiveView + Channels | 1.1.19 |
 | Database | SQLite (via Ecto) | ecto_sqlite3 |
 | Auth | phx.gen.auth (magic link) + Guardian (JWT) | 2.4.0 |
@@ -118,6 +119,31 @@ fly secrets set GUARDIAN_SECRET_KEY=$(mix phx.gen.secret)
 ### GitHub Actions Secrets
 - `FLY_API_TOKEN` - Fly.io API token for deployments
 - `EXPO_TOKEN` - Expo token for EAS builds
+
+## iOS Build Setup
+
+iOS builds in CI are currently disabled because they require Apple Developer credentials. To enable iOS builds:
+
+1. **Configure EAS with Apple Developer Account:**
+   ```bash
+   cd apps/mobile
+   eas credentials  # Configure Apple credentials interactively
+   ```
+
+2. **Enable iOS builds in CI:**
+   - Edit `.github/workflows/mobile-preview.yml`
+   - Uncomment the iOS build step (lines 67-70)
+
+3. **Manual iOS builds:**
+   ```bash
+   cd apps/mobile
+   eas build --platform ios --profile preview
+   ```
+
+**Why Android-only in CI?**
+- Android builds don't require credentials in non-interactive mode
+- iOS builds need provisioning profiles and certificates configured in EAS
+- iOS can be built manually when needed without blocking CI/CD
 
 ## Key Design Decisions
 
