@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, View, StyleSheet, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createStackNavigator } from '@react-navigation/stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import LoginScreen from './src/screens/LoginScreen';
@@ -16,7 +16,7 @@ export type RootStackParamList = {
   Game: undefined;
 };
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
+const Stack = createStackNavigator<RootStackParamList>();
 
 function AuthStack() {
   return (
