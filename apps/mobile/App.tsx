@@ -9,6 +9,7 @@ import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 import GameScreen from './src/screens/GameScreen';
 import useStore from './src/store/useStore';
+import DebugLogger from './src/components/DebugLogger';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -67,15 +68,23 @@ export default function App() {
 
   if (error) {
     return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.errorText}>Error: {error}</Text>
-        <Text style={styles.errorSubtext}>Check console for details</Text>
-      </View>
+      <>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.errorText}>Error: {error}</Text>
+          <Text style={styles.errorSubtext}>Long press 🐛 to see logs</Text>
+        </View>
+        <DebugLogger />
+      </>
     );
   }
 
   if (isLoading) {
-    return <LoadingScreen />;
+    return (
+      <>
+        <LoadingScreen />
+        <DebugLogger />
+      </>
+    );
   }
 
   return (
@@ -84,6 +93,7 @@ export default function App() {
         <StatusBar style="light" />
         {isAuthenticated ? <AppStack /> : <AuthStack />}
       </NavigationContainer>
+      <DebugLogger />
     </SafeAreaProvider>
   );
 }
