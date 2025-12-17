@@ -9,7 +9,8 @@
       "Bash(mix test:*)",
       "Bash(mix format:*)",
       "Bash(git add:*)",
-      "Bash(elixir --version:*)"
+      "Bash(elixir --version:*)",
+      "Bash(fly logs:*)"
     ]
   }
 }
