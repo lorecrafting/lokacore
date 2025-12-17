@@ -7,11 +7,11 @@ import Config
 # before starting your production server.
 config :exmud, ExmudWeb.Endpoint, cache_static_manifest: "priv/static/cache_manifest.json"
 
-# Force using SSL in production. This also sets the "strict-security-transport" header,
-# known as HSTS. Exclude health check endpoint from SSL redirect.
-# Note `:force_ssl` is required to be set at compile-time.
-config :exmud, ExmudWeb.Endpoint,
-  force_ssl: [rewrite_on: [:x_forwarded_proto], exclude: ["api/health"]]
+# SSL is handled by Fly.io's edge proxy, so we don't need force_ssl here.
+# The proxy terminates SSL and forwards plain HTTP to our app.
+# Uncomment below if you need HSTS headers:
+# config :exmud, ExmudWeb.Endpoint,
+#   force_ssl: [rewrite_on: [:x_forwarded_proto], hsts: false]
 
 # Configure Swoosh API Client
 config :swoosh, api_client: Swoosh.ApiClient.Req
