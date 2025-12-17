@@ -10,11 +10,10 @@
 |-------|------------|---------|
 | Backend | Elixir/Phoenix | 1.19.4 / Phoenix 1.8.3 |
 | Runtime | Erlang/OTP | 28.3 |
-| Real-time | Phoenix LiveView + Channels | 1.1.19 |
+| Real-time | Phoenix LiveView | 1.1.19 |
 | Database | SQLite (via Ecto) | ecto_sqlite3 |
 | Auth | phx.gen.auth (magic link) + Guardian (JWT) | 2.4.0 |
 | Scripting | Lua (via Luerl) | 1.5.1 |
-| Mobile | React Native/Expo | SDK 54 |
 | Deployment | Fly.io | ~$5/month |
 
 ## Architecture
@@ -43,38 +42,51 @@
 ```
 lokacore/
 ├── apps/
-│   ├── server/                     # Elixir/Phoenix
-│   │   ├── lib/exmud/
-│   │   │   ├── accounts/           # Auth (phx.gen.auth)
-│   │   │   ├── auth/               # Guardian JWT
-│   │   │   ├── engine/             # Core engine
-│   │   │   │   ├── entity.ex       # Entity struct
-│   │   │   │   ├── event.ex        # Event struct
-│   │   │   │   ├── event_bus.ex    # PubSub wrapper
-│   │   │   │   ├── command.ex      # Command behaviour
-│   │   │   │   ├── behavior.ex     # Behavior protocol
-│   │   │   │   └── scripting.ex    # Lua sandbox
-│   │   │   └── release.ex          # Release tasks
-│   │   ├── lib/exmud_web/
-│   │   │   ├── controllers/api/    # REST API
-│   │   │   ├── plugs/              # Auth pipeline
-│   │   │   └── live/               # LiveView
-│   │   ├── config/
-│   │   ├── fly.toml
-│   │   └── Dockerfile
-│   └── mobile/                     # React Native/Expo
-│       ├── src/
-│       │   ├── screens/            # Login, Register, Game
-│       │   ├── services/           # API, Socket
-│       │   ├── store/              # Zustand state
-│       │   └── hooks/
-│       ├── app.json
-│       └── eas.json
+│   └── server/                     # Elixir/Phoenix
+│       ├── lib/exmud/
+│       │   ├── accounts/           # Auth (phx.gen.auth)
+│       │   ├── auth/               # Guardian JWT
+│       │   ├── engine/             # Core engine
+│       │   │   ├── entity.ex       # Entity struct
+│       │   │   ├── event.ex        # Event struct
+│       │   │   ├── event_bus.ex    # PubSub wrapper
+│       │   │   ├── command.ex      # Command behaviour
+│       │   │   ├── behavior.ex     # Behavior protocol
+│       │   │   └── scripting.ex    # Lua sandbox
+│       │   └── release.ex          # Release tasks
+│       ├── lib/exmud_web/
+│       │   ├── controllers/api/    # REST API (for future mobile)
+│       │   ├── plugs/              # Auth pipeline
+│       │   └── live/               # LiveView clients
+│       │       ├── game_live.ex    # Game client (players)
+│       │       └── admin_live.ex   # Admin dashboard
+│       ├── assets/js/app.js        # JS hooks for LiveView
+│       ├── config/
+│       ├── fly.toml
+│       └── Dockerfile
+├── _shelved/
+│   └── mobile/                     # Shelved React Native app
 ├── .github/workflows/
-│   ├── server-ci.yml               # Fly.io deploy on push
-│   └── mobile-preview.yml          # EAS preview builds
+│   └── server-ci.yml               # Fly.io deploy on push
 └── CLAUDE.md
 ```
+
+## Web Clients
+
+### Game Client (`/game`)
+- Mobile-responsive LiveView interface
+- Text-based MUD experience
+- Real-time updates via Phoenix PubSub
+- Command history with arrow keys
+- Accessible at: `http://localhost:4000/game` (requires login)
+
+### Admin Dashboard (`/admin`)
+- World building tools
+- Player management
+- Entity/NPC management
+- Lua script editor
+- System monitoring
+- Accessible at: `http://localhost:4000/admin` (requires login)
 
 ## Quick Commands
 
@@ -86,18 +98,20 @@ mix ecto.create && mix ecto.migrate # Setup database
 mix phx.server                     # Start server at localhost:4000
 mix test                           # Run tests
 
-# Mobile Development
-cd apps/mobile
-npm install                        # Install dependencies
-npx expo start                     # Start Expo dev server
-
 # Deployment (requires secrets setup)
 cd apps/server
 fly deploy                         # Deploy to Fly.io
-
-cd apps/mobile
-eas build --profile preview        # Build preview for testing
 ```
+
+## Routes
+
+| Path | Description | Auth |
+|------|-------------|------|
+| `/` | Landing page | No |
+| `/game` | Game client | Yes |
+| `/admin` | Admin dashboard | Yes (admin) |
+| `/players/register` | Register account | No |
+| `/players/log-in` | Login page | No |
 
 ## API Endpoints
 
@@ -118,64 +132,15 @@ fly secrets set GUARDIAN_SECRET_KEY=$(mix phx.gen.secret)
 
 ### GitHub Actions Secrets
 - `FLY_API_TOKEN` - Fly.io API token for deployments
-- `EXPO_TOKEN` - Expo token for EAS builds
-
-## Mobile Preview Setup
-
-The mobile app uses **EAS Update** to publish instant previews without building native apps. Every push to `main` automatically publishes an update that you can view on your phone.
-
-### Setup (One-time)
-
-1. **Install Expo Go on your phone:**
-   - iOS: [App Store](https://apps.apple.com/app/apple-store/id982107779)
-   - Android: [Play Store](https://play.google.com/store/apps/details?id=host.exp.exponent)
-
-2. **Connect to your project:**
-   ```bash
-   cd apps/mobile
-   npx expo start
-   # Scan the QR code with Expo Go
-   ```
-
-3. **That's it!** Updates from CI will appear automatically on the `main` branch
-
-### How It Works
-
-```
-Push to main → GitHub Actions → Publishes EAS Update → Phone gets update instantly
-```
-
-- No native builds required
-- No credentials needed
-- Updates appear in seconds
-- Works on both iOS and Android
-
-### Manual Updates
-
-Publish an update manually:
-```bash
-cd apps/mobile
-eas update --branch main --message "Your update message"
-```
-
-### Building Native Apps (Optional)
-
-If you need standalone APK/IPA files, you'll need to configure credentials first:
-
-```bash
-cd apps/mobile
-eas credentials  # Configure keystores/certificates
-eas build --platform android --profile preview
-```
 
 ## Key Design Decisions
 
-1. **SQLite over PostgreSQL**: Simpler, cheaper, sufficient for single-server MVP
-2. **No Redis**: ETS handles caching until multi-server is needed
-3. **Lua for Scripting**: Safe sandbox for game creators to customize NPCs/quests
-4. **LiveView for Web**: Native real-time, no separate frontend build
-5. **Channels for Mobile**: JWT auth + WebSocket for React Native client
-6. **Magic Link Auth**: Phoenix 1.8 default, password optional
+1. **Web-First**: LiveView for all clients (game + admin) - single codebase, instant updates, no App Store fees
+2. **SQLite over PostgreSQL**: Simpler, cheaper, sufficient for single-server MVP
+3. **No Redis**: ETS handles caching until multi-server is needed
+4. **Lua for Scripting**: Safe sandbox for game creators to customize NPCs/quests
+5. **Magic Link Auth**: Phoenix 1.8 default, password optional
+6. **Mobile-Responsive**: Web app works great on phones, native apps shelved for now
 
 ## Development Guidelines
 
@@ -184,6 +149,8 @@ eas build --platform android --profile preview
 - Commands return `{:ok, [Event.t()]}` - never mutate state directly
 - Scripts execute in sandboxed Lua with CPU/memory limits
 - Auto-save dirty entities every 5 minutes
+- LiveViews are in `lib/exmud_web/live/`
+- JS hooks are in `assets/js/app.js`
 
 ## Testing
 
@@ -197,6 +164,13 @@ mix test test/exmud/engine/entity_test.exs
 # Run with coverage
 mix test --cover
 ```
+
+## Shelved Code
+
+The `_shelved/` directory contains code that's been deferred:
+- `_shelved/mobile/` - React Native/Expo app (shelved in favor of web-first approach)
+
+This code is kept for reference and potential future use when native mobile apps become necessary.
 
 ## References
 

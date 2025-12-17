@@ -27,6 +27,21 @@ defmodule ExmudWeb.Router do
     get "/", PageController, :home
   end
 
+  # Game client (requires authentication)
+  scope "/", ExmudWeb do
+    pipe_through [:browser, :require_authenticated_player]
+
+    live "/game", GameLive, :index
+  end
+
+  # Admin panel (requires authentication + admin role)
+  # TODO: Add admin role check when roles are implemented
+  scope "/admin", ExmudWeb do
+    pipe_through [:browser, :require_authenticated_player]
+
+    live "/", AdminLive, :index
+  end
+
   # Health check endpoint for Fly.io
   scope "/api", ExmudWeb.Api do
     pipe_through :api
