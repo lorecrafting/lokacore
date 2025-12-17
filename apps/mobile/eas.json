@@ -1,0 +1,38 @@
+{
+  "cli": {
+    "version": ">= 12.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "ios": {
+        "simulator": false
+      },
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://exmud.fly.dev",
+        "EXPO_PUBLIC_WS_URL": "wss://exmud.fly.dev/socket"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://exmud.fly.dev",
+        "EXPO_PUBLIC_WS_URL": "wss://exmud.fly.dev/socket"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

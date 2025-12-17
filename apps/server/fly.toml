@@ -1,0 +1,46 @@
+# fly.toml - Fly.io deployment configuration for ExMUD
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+
+app = "exmud"
+primary_region = "sjc"
+kill_signal = "SIGTERM"
+kill_timeout = "5s"
+
+[build]
+
+[deploy]
+  release_command = "/app/bin/migrate"
+
+[env]
+  PHX_HOST = "exmud.fly.dev"
+  DATABASE_PATH = "/data/exmud.db"
+  PORT = "8080"
+
+[mounts]
+  source = "exmud_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [http_service.concurrency]
+    type = "connections"
+    hard_limit = 1000
+    soft_limit = 1000
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    path = "/api/health"
+    timeout = "5s"
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1

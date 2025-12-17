@@ -1,0 +1,57 @@
+# Dependencies and build artifacts
+deps/
+_build/
+node_modules/
+
+# SQLite database files
+*.db
+*.db-*
+
+# Generated files
+*.beam
+*.ez
+erl_crash.dump
+*.o
+*.so
+
+# Elixir/Phoenix
+/apps/server/priv/static/assets/
+/apps/server/.fetch
+/apps/server/tmp/
+/apps/server/data/
+
+# React Native/Expo
+.expo/
+dist/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+*.env
+
+# Test artifacts
+/apps/server/cover/
+
+# Secrets (never commit)
+*.pem
+secrets.json
+credentials.json
