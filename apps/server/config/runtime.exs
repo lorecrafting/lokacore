@@ -20,6 +20,18 @@ if System.get_env("PHX_SERVER") do
   config :exmud, ExmudWeb.Endpoint, server: true
 end
 
+# Configure log level (default: info, set LOG_LEVEL=debug for verbose output)
+log_level =
+  case System.get_env("LOG_LEVEL", "info") do
+    "debug" -> :debug
+    "info" -> :info
+    "warning" -> :warning
+    "error" -> :error
+    _ -> :info
+  end
+
+config :logger, level: log_level
+
 # Basic http config for dev/test - production overrides this below
 config :exmud, ExmudWeb.Endpoint,
   http: [
