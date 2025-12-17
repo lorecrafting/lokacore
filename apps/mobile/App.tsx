@@ -68,23 +68,15 @@ export default function App() {
 
   if (error) {
     return (
-      <>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.errorText}>Error: {error}</Text>
-          <Text style={styles.errorSubtext}>Long press 🐛 to see logs</Text>
-        </View>
-        <DebugLogger />
-      </>
+      <View style={styles.loadingContainer}>
+        <Text style={styles.errorText}>Error: {error}</Text>
+        <Text style={styles.errorSubtext}>Check logs for details</Text>
+      </View>
     );
   }
 
   if (isLoading) {
-    return (
-      <>
-        <LoadingScreen />
-        <DebugLogger />
-      </>
-    );
+    return <LoadingScreen />;
   }
 
   return (
@@ -93,7 +85,6 @@ export default function App() {
         <StatusBar style="light" />
         {isAuthenticated ? <AppStack /> : <AuthStack />}
       </NavigationContainer>
-      <DebugLogger />
     </SafeAreaProvider>
   );
 }
