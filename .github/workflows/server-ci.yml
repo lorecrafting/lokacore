@@ -4,13 +4,13 @@ on:
   push:
     branches: [main]
     paths:
-      - 'apps/server/**'
-      - '.github/workflows/server-ci.yml'
+      - "apps/server/**"
+      - ".github/workflows/server-ci.yml"
   pull_request:
     branches: [main]
     paths:
-      - 'apps/server/**'
-      - '.github/workflows/server-ci.yml'
+      - "apps/server/**"
+      - ".github/workflows/server-ci.yml"
 
 defaults:
   run:
@@ -18,8 +18,8 @@ defaults:
 
 env:
   MIX_ENV: test
-  ELIXIR_VERSION: '1.16.2'
-  OTP_VERSION: '26.2.4'
+  ELIXIR_VERSION: "1.19.4"
+  OTP_VERSION: "28.3"
 
 jobs:
   test:

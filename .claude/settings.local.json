@@ -7,7 +7,9 @@
       "Bash(npx create-expo-app@latest:*)",
       "Bash(npm install:*)",
       "Bash(mix test:*)",
-      "Bash(mix format:*)"
+      "Bash(mix format:*)",
+      "Bash(git add:*)",
+      "Bash(elixir --version:*)"
     ]
   }
 }
