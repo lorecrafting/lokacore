@@ -65,7 +65,7 @@ jobs:
         run: npm ci
 
       - name: Publish EAS Update
-        run: eas update --branch preview --message "Automated update from CI - ${{ github.event.head_commit.message }}"
+        run: eas update --branch main --message "Automated update from CI - ${{ github.event.head_commit.message }}"
 
       # Full native builds can be done manually if needed:
       # cd apps/mobile && eas build --platform android --profile preview

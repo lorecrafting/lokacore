@@ -36,8 +36,8 @@
     "production": {}
   },
   "update": {
-    "preview": {
-      "channel": "preview"
+    "main": {
+      "channel": "main"
     }
   }
 }

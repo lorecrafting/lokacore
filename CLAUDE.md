@@ -130,18 +130,14 @@ The mobile app uses **EAS Update** to publish instant previews without building 
    - iOS: [App Store](https://apps.apple.com/app/apple-store/id982107779)
    - Android: [Play Store](https://play.google.com/store/apps/details?id=host.exp.exponent)
 
-2. **Get your project URL:**
+2. **Connect to your project:**
    ```bash
    cd apps/mobile
    npx expo start
    # Scan the QR code with Expo Go
-   # Or visit: exp://your-expo-project-url
    ```
 
-3. **Switch to preview channel:**
-   - In Expo Go, go to project settings
-   - Select branch: `preview`
-   - Updates from CI will now appear automatically
+3. **That's it!** Updates from CI will appear automatically on the `main` branch
 
 ### How It Works
 
@@ -159,7 +155,7 @@ Push to main → GitHub Actions → Publishes EAS Update → Phone gets update i
 Publish an update manually:
 ```bash
 cd apps/mobile
-eas update --branch preview --message "Your update message"
+eas update --branch main --message "Your update message"
 ```
 
 ### Building Native Apps (Optional)
