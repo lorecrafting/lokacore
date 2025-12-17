@@ -113,7 +113,7 @@ if config_env() == :prod do
 
   if resend_api_key do
     config :exmud, Exmud.Mailer,
-      adapter: Swoosh.Adapters.Resend,
+      adapter: Resend.Swoosh.Adapter,
       api_key: resend_api_key
   end
 
