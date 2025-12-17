@@ -1,5 +1,6 @@
 defmodule Exmud.Accounts.PlayerNotifier do
   import Swoosh.Email
+  require Logger
 
   alias Exmud.Mailer
   alias Exmud.Accounts.Player
@@ -9,6 +10,11 @@ defmodule Exmud.Accounts.PlayerNotifier do
     from_config = Application.get_env(:exmud, :mailer_from, [])
     from_name = Keyword.get(from_config, :name, "ExMUD")
     from_email = Keyword.get(from_config, :email, "noreply@example.com")
+    mailer_config = Application.get_env(:exmud, Exmud.Mailer, [])
+
+    Logger.info(
+      "[PlayerNotifier] Attempting to send email: to=#{recipient}, subject=#{subject}, from=#{from_email}, adapter=#{inspect(Keyword.get(mailer_config, :adapter))}"
+    )
 
     email =
       new()
@@ -17,8 +23,14 @@ defmodule Exmud.Accounts.PlayerNotifier do
       |> subject(subject)
       |> text_body(body)
 
-    with {:ok, _metadata} <- Mailer.deliver(email) do
-      {:ok, email}
+    case Mailer.deliver(email) do
+      {:ok, metadata} ->
+        Logger.info("[PlayerNotifier] Email sent successfully: #{inspect(metadata)}")
+        {:ok, email}
+
+      {:error, reason} ->
+        Logger.error("[PlayerNotifier] Failed to send email: #{inspect(reason)}")
+        {:error, reason}
     end
   end
 
