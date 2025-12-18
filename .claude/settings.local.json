@@ -14,7 +14,13 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebSearch",
-      "WebFetch(domain:www.evennia.com)"
+      "WebFetch(domain:www.evennia.com)",
+      "Bash(ls:*)",
+      "Bash(mix deps.unlock:*)",
+      "Bash(grep:*)",
+      "Bash(mix xref:*)",
+      "Bash(git rm:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
