@@ -15,13 +15,13 @@ kill_timeout = '5s'
 
 [env]
   PHX_SERVER = 'true'
-  DATABASE_PATH = '/mnt/name/name.db'
+  DATABASE_PATH = '/mnt/exmud_data/exmud.db'
   PHX_HOST = 'exmud.fly.dev'
   PORT = '8080'
 
 [[mounts]]
-  source = 'name'
-  destination = '/mnt/name'
+  source = 'exmud_data'
+  destination = '/mnt/exmud_data'
   auto_extend_size_threshold = 80
   auto_extend_size_increment = '1GB'
   auto_extend_size_limit = '10GB'
@@ -49,4 +49,3 @@ kill_timeout = '5s'
 [[vm]]
   memory = '512mb'
   cpus = 1
-  memory_mb = 512

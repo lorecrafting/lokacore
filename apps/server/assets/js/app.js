@@ -1,7 +1,3 @@
-// If you want to use Phoenix channels, run `mix help phx.gen.channel`
-// to get started and then uncomment the line below.
-// import "./user_socket.js"
-
 // You can include dependencies in two ways.
 //
 // The simplest option is to put them in assets/vendor and
@@ -56,19 +52,6 @@ const Hooks = {
           this.pushEvent("send_command", { command: cmd })
         }
       }
-    }
-  },
-
-  // Keep ScrollToBottom for backwards compatibility
-  ScrollToBottom: {
-    mounted() {
-      this.scrollToBottom()
-    },
-    updated() {
-      this.scrollToBottom()
-    },
-    scrollToBottom() {
-      this.el.scrollTop = this.el.scrollHeight
     }
   }
 }

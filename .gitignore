@@ -51,6 +51,9 @@ Thumbs.db
 # Test artifacts
 /apps/server/cover/
 
+# Claude Code local settings
+.claude/settings.local.json
+
 # Secrets (never commit)
 *.pem
 secrets.json
