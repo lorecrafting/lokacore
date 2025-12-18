@@ -21,6 +21,10 @@ defmodule ExmudWeb.Router do
     plug ExmudWeb.Plugs.AuthPipeline
   end
 
+  pipeline :require_admin do
+    plug ExmudWeb.Plugs.RequireAdmin
+  end
+
   scope "/", ExmudWeb do
     pipe_through :browser
 
@@ -36,9 +40,8 @@ defmodule ExmudWeb.Router do
   end
 
   # Admin panel (requires authentication + admin role)
-  # TODO: Add admin role check when roles are implemented
   scope "/admin", ExmudWeb do
-    pipe_through [:browser, :require_authenticated_player]
+    pipe_through [:browser, :require_authenticated_player, :require_admin]
 
     live "/", AdminLive, :index
   end

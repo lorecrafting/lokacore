@@ -8,6 +8,85 @@ defmodule Exmud.Accounts do
 
   alias Exmud.Accounts.{Player, PlayerToken, PlayerNotifier}
 
+  ## Player listing and admin management
+
+  @doc """
+  Lists all players.
+
+  ## Examples
+
+      iex> list_players()
+      [%Player{}, ...]
+
+  """
+  def list_players do
+    Player
+    |> order_by([p], asc: p.email)
+    |> Repo.all()
+  end
+
+  @doc """
+  Counts all players.
+  """
+  def count_players do
+    Repo.aggregate(Player, :count)
+  end
+
+  @doc """
+  Toggles a player's admin status.
+
+  ## Examples
+
+      iex> toggle_admin(player)
+      {:ok, %Player{is_admin: true}}
+
+  """
+  def toggle_admin(%Player{is_admin: is_admin} = player) do
+    player
+    |> Player.admin_changeset(%{is_admin: !is_admin})
+    |> Repo.update()
+  end
+
+  @doc """
+  Sets a player's admin status.
+
+  ## Examples
+
+      iex> set_admin(player, true)
+      {:ok, %Player{is_admin: true}}
+
+  """
+  def set_admin(%Player{} = player, is_admin) when is_boolean(is_admin) do
+    player
+    |> Player.admin_changeset(%{is_admin: is_admin})
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a player and all their tokens.
+
+  ## Examples
+
+      iex> delete_player(player)
+      {:ok, %Player{}}
+
+  """
+  def delete_player(%Player{} = player) do
+    Repo.delete(player)
+  end
+
+  @doc """
+  Checks if a player is an admin.
+
+  ## Examples
+
+      iex> admin?(player)
+      true
+
+  """
+  def admin?(%Player{is_admin: true}), do: true
+  def admin?(_), do: false
+
   ## Database getters
 
   @doc """

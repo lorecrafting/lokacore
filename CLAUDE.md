@@ -44,10 +44,18 @@ lokacore/
 ├── apps/
 │   └── server/                     # Elixir/Phoenix
 │       ├── lib/exmud/
-│       │   ├── accounts/           # Auth (phx.gen.auth)
+│       │   ├── accounts/           # Auth (phx.gen.auth + is_admin)
 │       │   ├── auth/               # Guardian JWT
+│       │   ├── ecto/               # Custom Ecto types
+│       │   │   └── term.ex         # Erlang term serialization
 │       │   ├── engine/             # Core engine
 │       │   │   ├── entity.ex       # Entity struct
+│       │   │   ├── entities.ex     # Entity CRUD context
+│       │   │   ├── scripts.ex      # Script CRUD context
+│       │   │   ├── schema/         # Ecto schemas
+│       │   │   │   ├── entity_schema.ex
+│       │   │   │   ├── entity_attribute.ex
+│       │   │   │   └── script_schema.ex
 │       │   │   ├── event.ex        # Event struct
 │       │   │   ├── event_bus.ex    # PubSub wrapper
 │       │   │   ├── command.ex      # Command behaviour
@@ -55,15 +63,25 @@ lokacore/
 │       │   │   └── scripting.ex    # Lua sandbox
 │       │   └── release.ex          # Release tasks
 │       ├── lib/exmud_web/
-│       │   ├── controllers/api/    # REST API (for future mobile)
-│       │   ├── plugs/              # Auth pipeline
+│       │   ├── controllers/api/    # REST API
+│       │   ├── plugs/              # Auth pipeline + RequireAdmin
 │       │   └── live/               # LiveView clients
 │       │       ├── game_live.ex    # Game client (players)
-│       │       └── admin_live.ex   # Admin dashboard
+│       │       └── admin_live.ex   # Admin dashboard (6 tabs)
 │       ├── assets/js/app.js        # JS hooks for LiveView
 │       ├── config/
 │       ├── fly.toml
 │       └── Dockerfile
+├── docs/                           # Architecture documentation
+│   ├── architecture/
+│   │   ├── README.md               # Overview and navigation
+│   │   ├── entity-system.md        # Entity-Component-Behavior
+│   │   ├── persistence.md          # Evennia-style DB design
+│   │   ├── events.md               # Event bus, PubSub
+│   │   ├── scripting.md            # Lua sandbox
+│   │   └── commands.md             # Command pipeline
+│   └── admin/
+│       └── dashboard.md            # Admin interface guide
 ├── _shelved/
 │   └── mobile/                     # Shelved React Native app
 ├── .github/workflows/
@@ -81,12 +99,13 @@ lokacore/
 - Accessible at: `http://localhost:4000/game` (requires login)
 
 ### Admin Dashboard (`/admin`)
-- World building tools
-- Player management
-- Entity/NPC management
-- Lua script editor
-- System monitoring
-- Accessible at: `http://localhost:4000/admin` (requires login)
+- **Dashboard Tab**: Real-time stats (players, rooms, entities, scripts)
+- **Players Tab**: List, toggle admin, delete players
+- **Rooms Tab**: CRUD for room entities
+- **Entities Tab**: CRUD for NPCs, items, exits
+- **Scripts Tab**: Lua script editor with test execution
+- **System Tab**: Export/import world data, reload scripts
+- Accessible at: `http://localhost:4000/admin` (requires admin role)
 
 ## Quick Commands
 
@@ -174,5 +193,15 @@ This code is kept for reference and potential future use when native mobile apps
 
 ## References
 
-- `ExMUD_Engine_Architecture.md` - Full technical specification
+### Architecture Documentation
+- `docs/architecture/README.md` - Architecture overview and index
+- `docs/architecture/entity-system.md` - Entity-Component-Behavior pattern
+- `docs/architecture/persistence.md` - Evennia-style database design
+- `docs/architecture/events.md` - Event bus and PubSub patterns
+- `docs/architecture/scripting.md` - Lua scripting sandbox
+- `docs/architecture/commands.md` - Command pipeline
+
+### Admin & Quick Reference
+- `docs/admin/dashboard.md` - Admin dashboard guide
 - `ExMUD_Quick_Reference.md` - Setup commands and cost summary
+- `ExMUD_Engine_Architecture.md` - Full technical specification (200KB)

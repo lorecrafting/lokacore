@@ -20,7 +20,8 @@
       "Bash(grep:*)",
       "Bash(mix xref:*)",
       "Bash(git rm:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(mix ecto.migrate:*)"
     ]
   }
 }

@@ -8,6 +8,7 @@ defmodule Exmud.Accounts.Player do
     field :hashed_password, :string, redact: true
     field :confirmed_at, :utc_datetime
     field :authenticated_at, :utc_datetime, virtual: true
+    field :is_admin, :boolean, default: false
 
     timestamps(type: :utc_datetime)
   end
@@ -128,5 +129,13 @@ defmodule Exmud.Accounts.Player do
   def valid_password?(_, _) do
     Bcrypt.no_user_verify()
     false
+  end
+
+  @doc """
+  A player changeset for updating admin status.
+  """
+  def admin_changeset(player, attrs) do
+    player
+    |> cast(attrs, [:is_admin])
   end
 end

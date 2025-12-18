@@ -398,4 +398,98 @@ defmodule Exmud.AccountsTest do
       refute inspect(%Player{password: "123456"}) =~ "password: \"123456\""
     end
   end
+
+  describe "list_players/0" do
+    test "returns all players ordered by email" do
+      player1 = player_fixture(%{email: "a_player@example.com"})
+      player2 = player_fixture(%{email: "b_player@example.com"})
+
+      players = Accounts.list_players()
+      assert length(players) == 2
+      assert hd(players).id == player1.id
+      assert List.last(players).id == player2.id
+    end
+
+    test "returns empty list when no players" do
+      assert Accounts.list_players() == []
+    end
+  end
+
+  describe "count_players/0" do
+    test "returns count of all players" do
+      assert Accounts.count_players() == 0
+      player_fixture()
+      assert Accounts.count_players() == 1
+      player_fixture()
+      assert Accounts.count_players() == 2
+    end
+  end
+
+  describe "toggle_admin/1" do
+    test "toggles admin from false to true" do
+      player = player_fixture()
+      assert player.is_admin == false
+
+      {:ok, updated} = Accounts.toggle_admin(player)
+      assert updated.is_admin == true
+    end
+
+    test "toggles admin from true to false" do
+      player = player_fixture()
+      {:ok, admin_player} = Accounts.set_admin(player, true)
+
+      {:ok, updated} = Accounts.toggle_admin(admin_player)
+      assert updated.is_admin == false
+    end
+  end
+
+  describe "set_admin/2" do
+    test "sets admin to true" do
+      player = player_fixture()
+      {:ok, updated} = Accounts.set_admin(player, true)
+      assert updated.is_admin == true
+    end
+
+    test "sets admin to false" do
+      player = player_fixture()
+      {:ok, admin_player} = Accounts.set_admin(player, true)
+      {:ok, updated} = Accounts.set_admin(admin_player, false)
+      assert updated.is_admin == false
+    end
+  end
+
+  describe "admin?/1" do
+    test "returns true for admin player" do
+      player = player_fixture()
+      {:ok, admin_player} = Accounts.set_admin(player, true)
+      assert Accounts.admin?(admin_player) == true
+    end
+
+    test "returns false for non-admin player" do
+      player = player_fixture()
+      assert Accounts.admin?(player) == false
+    end
+
+    test "returns false for nil" do
+      assert Accounts.admin?(nil) == false
+    end
+  end
+
+  describe "delete_player/1" do
+    test "deletes player" do
+      player = player_fixture()
+      assert {:ok, %Player{}} = Accounts.delete_player(player)
+      assert_raise Ecto.NoResultsError, fn -> Accounts.get_player!(player.id) end
+    end
+
+    test "deletes player tokens when player is deleted" do
+      player = player_fixture()
+      _token = Accounts.generate_player_session_token(player)
+
+      {:ok, _} = Accounts.delete_player(player)
+
+      # Tokens should be cascade deleted
+      refute Repo.get_by(PlayerToken, player_id: player.id)
+    end
+  end
 end
