@@ -44,7 +44,17 @@ defmodule Exmud.Engine.Schema.EntitySchema do
   end
 
   @required_fields [:type, :key]
-  @optional_fields [:name, :description, :location_id, :components, :behaviors, :tags, :locks, :scripts, :metadata]
+  @optional_fields [
+    :name,
+    :description,
+    :location_id,
+    :components,
+    :behaviors,
+    :tags,
+    :locks,
+    :scripts,
+    :metadata
+  ]
 
   @doc """
   Creates a changeset for entity creation or update.
@@ -76,13 +86,14 @@ defmodule Exmud.Engine.Schema.EntitySchema do
       tags: schema.tags || [],
       scripts: schema.scripts || %{},
       locks: schema.locks || %{},
-      metadata: Map.merge(
-        schema.metadata || %{},
-        %{
-          inserted_at: schema.inserted_at,
-          updated_at: schema.updated_at
-        }
-      )
+      metadata:
+        Map.merge(
+          schema.metadata || %{},
+          %{
+            inserted_at: schema.inserted_at,
+            updated_at: schema.updated_at
+          }
+        )
     }
   end
 
@@ -106,11 +117,13 @@ defmodule Exmud.Engine.Schema.EntitySchema do
   end
 
   defp extract_content_ids(%__MODULE__{contents: %Ecto.Association.NotLoaded{}}), do: []
+
   defp extract_content_ids(%__MODULE__{contents: contents}) when is_list(contents) do
     Enum.map(contents, & &1.id)
   end
 
   defp extract_attributes(%__MODULE__{attributes: %Ecto.Association.NotLoaded{}}), do: %{}
+
   defp extract_attributes(%__MODULE__{attributes: attrs}) when is_list(attrs) do
     attrs
     |> Enum.group_by(& &1.category)

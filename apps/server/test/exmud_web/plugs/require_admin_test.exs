@@ -34,7 +34,9 @@ defmodule ExmudWeb.Plugs.RequireAdminTest do
 
       assert conn.halted
       assert redirected_to(conn) == "/"
-      assert Phoenix.Flash.get(conn.assigns.flash, :error) == "You must be an admin to access this page."
+
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
+               "You must be an admin to access this page."
     end
 
     test "redirects when no current_scope", %{conn: conn} do

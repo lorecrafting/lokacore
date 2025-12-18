@@ -36,6 +36,7 @@ defmodule Exmud.Ecto.TermTest do
         inventory: [%{id: 1, name: "sword"}, %{id: 2, name: "shield"}],
         flags: {:some, :tuple}
       }
+
       binary = :erlang.term_to_binary(complex)
       assert {:ok, ^complex} = Term.load(binary)
     end
@@ -64,6 +65,7 @@ defmodule Exmud.Ecto.TermTest do
         inventory: [%{id: 1, name: "sword"}, %{id: 2, name: "shield"}],
         flags: {:some, :tuple}
       }
+
       {:ok, binary} = Term.dump(complex)
       assert :erlang.binary_to_term(binary) == complex
     end

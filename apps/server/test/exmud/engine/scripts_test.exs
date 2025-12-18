@@ -75,7 +75,10 @@ defmodule Exmud.Engine.ScriptsTest do
 
     test "returns error for duplicate name" do
       script = script_fixture()
-      assert {:error, changeset} = Scripts.create_script(%{name: script.name, source: "return true"})
+
+      assert {:error, changeset} =
+               Scripts.create_script(%{name: script.name, source: "return true"})
+
       assert %{name: ["has already been taken"]} = errors_on(changeset)
     end
 
