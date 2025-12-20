@@ -1,13 +1,11 @@
 defmodule ExmudWeb.GameLive do
   @moduledoc """
-  LiveView game client for ExMUD.
+  LiveView game client for ExMUD - "Living Ebook" aesthetic.
 
-  Provides a mobile-responsive text-based interface for playing the game.
-  Uses Phoenix.PubSub for real-time updates.
+  A literary, book-like interface with touch/click-based interactions.
+  No text input - all interactions via underlined links and menus.
   """
   use ExmudWeb, :live_view
-
-  alias Exmud.Engine.TextParser
 
   @impl true
   def mount(_params, _session, socket) do
@@ -16,187 +14,284 @@ defmodule ExmudWeb.GameLive do
       # Phoenix.PubSub.subscribe(Exmud.PubSub, "player:#{player_id}")
     end
 
+    # Sample room data for development
+    room = %{
+      title: "Under a Giant Oak Tree",
+      description: "A serene and rustic space nestled beneath the sprawling branches of a majestic oak. The air is fragrant with the earthy scent of moss and wildflowers, providing a tranquil retreat from the world. Above, the oak's massive limbs cradle a dense canopy, filtering sunlight into dappled patterns that dance across the ground.",
+      entities: [
+        %{id: "druid-1", name: "druid", short_desc: "in dark green robes hobbles over an altar preparing a ceremony"},
+        %{id: "explorer-1", name: "explorer", short_desc: "A grizzled", suffix: "latches onto his canteen full of rum sits here"},
+        %{id: "adventurer-1", name: "adventurer", short_desc: "A dark eyed", suffix: "waits here patiently"}
+      ],
+      items: [
+        %{id: "leaf-1", name: "leaf", desc: "has meandered its way to the ground"},
+        %{id: "chalice-1", name: "chalice", desc: "A golden", suffix: "sits here on the floor"},
+        %{id: "sword-1", name: "sword", desc: "A dusty wooden practice", suffix: "sits here on the ground"}
+      ],
+      exits: [
+        %{direction: "north", destination: "Deep Forest"},
+        %{direction: "east", destination: "Village Path"},
+        %{direction: "west", destination: "River Bank"}
+      ]
+    }
+
     {:ok,
      socket
-     |> assign(:output, [welcome_message()])
-     |> assign(:command, "")
-     |> assign(:history, [])
-     |> assign(:history_index, -1)}
+     |> assign(:room, room)
+     |> assign(:context_entity, nil)
+     |> assign(:compass_open, false)
+     |> assign(:events, sample_events())}
   end
 
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="flex flex-col h-[calc(100vh-8rem)] max-w-4xl mx-auto">
-      <div class="flex-none mb-4">
-        <h1 class="text-2xl font-bold text-primary">ExMUD</h1>
-        <p class="text-sm text-base-content/70">Text Adventure Game Client</p>
-      </div>
+    <div class="ebook-page" style="padding-bottom: 5rem;">
+      <%= if @context_entity do %>
+        <.context_panel
+          entity={@context_entity}
+          room_title={@room.title}
+          compass_open={@compass_open}
+          exits={@room.exits}
+        />
+      <% else %>
+        <.room_view
+          room={@room}
+          events={@events}
+          compass_open={@compass_open}
+        />
+      <% end %>
 
-      <div
-        id="game-output"
-        class="flex-1 bg-base-200 rounded-lg p-4 overflow-y-auto font-mono text-sm space-y-1"
-        phx-hook="GameOutput"
-      >
-        <div :for={line <- @output} class={output_class(line)}>
-          {line.html}
-        </div>
-      </div>
-
-      <form phx-submit="send_command" class="flex-none mt-4">
-        <div class="flex gap-2">
-          <input
-            type="text"
-            name="command"
-            value={@command}
-            phx-keydown="handle_keydown"
-            placeholder="Enter command..."
-            autocomplete="off"
-            autofocus
-            class="input input-bordered flex-1 font-mono"
-          />
-          <button type="submit" class="btn btn-primary">
-            Send
-          </button>
-        </div>
-        <p class="text-xs text-base-content/50 mt-2">
-          Type <code class="kbd kbd-sm">help</code> for available commands.
-          Use <span class="kbd kbd-sm">↑</span>/<span class="kbd kbd-sm">↓</span> for command history.
-        </p>
-      </form>
+      <.bottom_bar compass_open={@compass_open} exits={@room.exits} />
     </div>
     """
   end
 
+  # Room View Component
+  attr :room, :map, required: true
+  attr :events, :list, required: true
+  attr :compass_open, :boolean, required: true
+
+  defp room_view(assigns) do
+    ~H"""
+    <div class="ebook-context">
+      <h1 class="ebook-title">{@room.title}</h1>
+
+      <p class="ebook-prose">{@room.description}</p>
+
+      <.entities_section entities={@room.entities} items={@room.items} />
+
+      <.events_section events={@events} />
+    </div>
+    """
+  end
+
+  # Entities Section
+  attr :entities, :list, required: true
+  attr :items, :list, required: true
+
+  defp entities_section(assigns) do
+    ~H"""
+    <div class="mt-6">
+      <p class="ebook-prose" style="text-indent: 0;">
+        <%= for {entity, idx} <- Enum.with_index(@entities) do %>
+          <%= if idx > 0 do %> <% end %>
+          <%= entity.short_desc %>
+          <span
+            class="ebook-link"
+            phx-click="click_entity"
+            phx-value-id={entity.id}
+            phx-value-type="npc"
+          ><%= entity.name %></span><%= if entity[:suffix], do: " #{entity.suffix}", else: "" %>.<%= if idx < length(@entities) - 1, do: "" %>
+        <% end %>
+        <%= if length(@entities) > 3 do %>
+          <span class="ebook-more">[...{length(@entities) - 3} more]</span>
+        <% end %>
+      </p>
+
+      <p class="ebook-prose" style="text-indent: 0;">
+        <%= for {item, idx} <- Enum.with_index(@items) do %>
+          <%= if idx > 0 do %> <% end %>
+          <%= item.desc %>
+          <span
+            class="ebook-link"
+            phx-click="click_entity"
+            phx-value-id={item.id}
+            phx-value-type="item"
+          ><%= item.name %></span><%= if item[:suffix], do: " #{item.suffix}", else: "" %>.
+        <% end %>
+      </p>
+    </div>
+    """
+  end
+
+  # Events Section
+  attr :events, :list, required: true
+
+  defp events_section(assigns) do
+    ~H"""
+    <div :if={length(@events) > 0} class="ebook-events">
+      <div :for={event <- @events} class="ebook-event">
+        {event.text}
+      </div>
+    </div>
+    """
+  end
+
+  # Context Panel Component (when entity is clicked)
+  attr :entity, :map, required: true
+  attr :room_title, :string, required: true
+  attr :compass_open, :boolean, required: true
+  attr :exits, :list, required: true
+
+  defp context_panel(assigns) do
+    ~H"""
+    <div class="ebook-context">
+      <h1 class="ebook-title ebook-title--muted">{@room_title}</h1>
+
+      <p class="ebook-prose" style="text-indent: 0;">{@entity.description}</p>
+
+      <ul class="ebook-menu">
+        <li class="ebook-menu-item" phx-click="menu_action" phx-value-action="inspect">
+          Inspect
+        </li>
+        <li class="ebook-menu-item" phx-click="menu_action" phx-value-action="talk">
+          Talk
+        </li>
+        <li class="ebook-menu-item" phx-click="menu_action" phx-value-action="trade">
+          Trade
+        </li>
+        <li class="ebook-menu-item" phx-click="menu_action" phx-value-action="quest">
+          Quest
+        </li>
+        <li class="ebook-menu-item" phx-click="menu_action" phx-value-action="attack">
+          Attack
+        </li>
+        <li class="ebook-menu-item" phx-click="leave_context">
+          Leave
+        </li>
+      </ul>
+    </div>
+    """
+  end
+
+  # Bottom Bar with Compass
+  attr :compass_open, :boolean, required: true
+  attr :exits, :list, required: true
+
+  defp bottom_bar(assigns) do
+    ~H"""
+    <div class="ebook-bottombar">
+      <div class="ebook-compass" phx-click="toggle_compass">
+        <span class="ebook-compass-icon">⊕</span>
+
+        <div class={"ebook-compass-popup #{if @compass_open, do: "ebook-compass-popup--open", else: ""}"}>
+          <%= if length(@exits) > 0 do %>
+            <div :for={exit <- @exits}>
+              <span
+                class="ebook-compass-direction"
+                phx-click="navigate"
+                phx-value-direction={exit.direction}
+              >
+                {String.capitalize(exit.direction)} — {exit.destination}
+              </span>
+            </div>
+          <% else %>
+            <div class="ebook-compass-direction--disabled">No exits</div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  # Event Handlers
+
   @impl true
-  def handle_event("send_command", %{"command" => command}, socket) do
-    command = String.trim(command)
+  def handle_event("click_entity", %{"id" => id, "type" => type}, socket) do
+    # Find the entity and show context panel
+    entity = find_entity(socket.assigns.room, id, type)
 
-    if command == "" do
-      {:noreply, socket}
-    else
-      socket =
-        socket
-        |> add_output(:input, "> #{command}")
-        |> process_command(command)
-        |> add_to_history(command)
-        |> assign(:command, "")
-        |> assign(:history_index, -1)
+    {:noreply,
+     socket
+     |> assign(:context_entity, entity)
+     |> assign(:compass_open, false)}
+  end
 
-      {:noreply, socket}
+  def handle_event("leave_context", _params, socket) do
+    {:noreply, assign(socket, :context_entity, nil)}
+  end
+
+  def handle_event("menu_action", %{"action" => action}, socket) do
+    entity = socket.assigns.context_entity
+
+    # Add event for the action
+    event = %{
+      text: action_text(action, entity),
+      timestamp: DateTime.utc_now()
+    }
+
+    {:noreply,
+     socket
+     |> assign(:context_entity, nil)
+     |> update(:events, fn events -> events ++ [event] end)}
+  end
+
+  def handle_event("toggle_compass", _params, socket) do
+    {:noreply, update(socket, :compass_open, &(!&1))}
+  end
+
+  def handle_event("navigate", %{"direction" => direction}, socket) do
+    # TODO: Integrate with engine for actual room navigation
+    event = %{
+      text: "You head #{direction}...",
+      timestamp: DateTime.utc_now()
+    }
+
+    {:noreply,
+     socket
+     |> assign(:compass_open, false)
+     |> update(:events, fn events -> events ++ [event] end)}
+  end
+
+  # Helper Functions
+
+  defp find_entity(room, id, "npc") do
+    entity = Enum.find(room.entities, fn e -> e.id == id end)
+    if entity do
+      %{
+        id: entity.id,
+        name: entity.name,
+        type: :npc,
+        description: "A #{entity.name} #{entity.short_desc}, whispering various incantations and mumbling verses of the ancients."
+      }
     end
   end
 
-  def handle_event("handle_keydown", %{"key" => "ArrowUp"}, socket) do
-    history = socket.assigns.history
-    current_index = socket.assigns.history_index
-
-    new_index = min(current_index + 1, length(history) - 1)
-    command = Enum.at(history, new_index, "")
-
-    {:noreply,
-     socket
-     |> assign(:history_index, new_index)
-     |> assign(:command, command)}
+  defp find_entity(room, id, "item") do
+    item = Enum.find(room.items, fn i -> i.id == id end)
+    if item do
+      %{
+        id: item.id,
+        name: item.name,
+        type: :item,
+        description: "#{item.desc} #{item.name}. It looks well-worn but still functional."
+      }
+    end
   end
 
-  def handle_event("handle_keydown", %{"key" => "ArrowDown"}, socket) do
-    history = socket.assigns.history
-    current_index = socket.assigns.history_index
+  defp action_text("inspect", entity), do: "You carefully inspect the #{entity.name}."
+  defp action_text("talk", entity), do: "The #{entity.name} nods in acknowledgment."
+  defp action_text("trade", entity), do: "The #{entity.name} has nothing to trade."
+  defp action_text("quest", entity), do: "The #{entity.name} has no quests for you."
+  defp action_text("attack", entity), do: "You ready yourself against the #{entity.name}."
+  defp action_text(_, _), do: "Nothing happens."
 
-    new_index = max(current_index - 1, -1)
-    command = if new_index == -1, do: "", else: Enum.at(history, new_index, "")
-
-    {:noreply,
-     socket
-     |> assign(:history_index, new_index)
-     |> assign(:command, command)}
-  end
-
-  def handle_event("handle_keydown", _params, socket) do
-    {:noreply, socket}
-  end
-
-  # Command processing - placeholder for engine integration
-  defp process_command(socket, "help") do
-    help_text = """
-    Available commands:
-      |cmd:look|        - Look around the current room
-      |lcgo north|ltgo <dir>|le    - Move in a direction (north, south, east, west)
-      |lcsay hello|ltsay <msg>|le   - Say something to the room
-      |cmd:inventory|   - Check your inventory
-      |cmd:help|        - Show this help message
-      |cmd:clear|       - Clear the screen
-    """
-
-    add_output(socket, :system, help_text)
-  end
-
-  defp process_command(socket, "clear") do
-    assign(socket, :output, [])
-  end
-
-  defp process_command(socket, "look") do
-    # TODO: Integrate with engine to get actual room description
-    room_desc = """
-    [The Starting Room]
-    You find yourself in a simple stone chamber. Torchlight flickers on the walls,
-    casting dancing shadows. A |lcexamine door|ltwooden door|le leads |lcgo north|ltnorth|le.
-
-    You can |cmd:inventory| to check your belongings.
-
-    Exits: |cmd:go north|
-    """
-
-    add_output(socket, :room, room_desc)
-  end
-
-  defp process_command(socket, "inventory") do
-    add_output(socket, :system, "You are carrying: nothing")
-  end
-
-  defp process_command(socket, "go " <> direction) do
-    add_output(socket, :error, "You cannot go #{direction} from here.")
-  end
-
-  defp process_command(socket, "say " <> message) do
-    add_output(socket, :speech, "You say: \"#{message}\"")
-  end
-
-  defp process_command(socket, command) do
-    add_output(socket, :error, "Unknown command: #{command}. Type 'help' for available commands.")
-  end
-
-  defp add_output(socket, type, text) do
-    # Parse text for clickable commands and convert to safe HTML
-    html = TextParser.parse(text)
-    line = %{type: type, html: html, timestamp: DateTime.utc_now()}
-    update(socket, :output, fn output -> output ++ [line] end)
-  end
-
-  defp add_to_history(socket, command) do
-    update(socket, :history, fn history -> [command | history] end)
-  end
-
-  defp output_class(%{type: :input}), do: "text-primary font-bold"
-  defp output_class(%{type: :error}), do: "text-error"
-  defp output_class(%{type: :system}), do: "text-info whitespace-pre-wrap"
-  defp output_class(%{type: :room}), do: "text-success whitespace-pre-wrap"
-  defp output_class(%{type: :speech}), do: "text-warning"
-  defp output_class(_), do: "text-base-content"
-
-  defp welcome_message do
-    text = """
-    Welcome to ExMUD!
-    A text-based adventure awaits you.
-
-    Type |cmd:help| to see available commands, or |cmd:look| to look around.
-    """
-
-    %{
-      type: :system,
-      html: TextParser.parse(text),
-      timestamp: DateTime.utc_now()
-    }
+  defp sample_events do
+    [
+      %{text: "A druid in dark green robes has arrived from the west.", timestamp: DateTime.utc_now()},
+      %{text: "A druid in dark green robes says to you, \"Greetings fellow traveler. How may I assist you?\"", timestamp: DateTime.utc_now()},
+      %{text: "A flock of birds take flight with the eastern winds.", timestamp: DateTime.utc_now()}
+    ]
   end
 end

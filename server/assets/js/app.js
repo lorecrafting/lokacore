@@ -21,37 +21,18 @@ import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/exmud"
 import topbar from "../vendor/topbar"
 
-// Custom hooks for game client
+// Custom hooks for ebook-style game client
 const Hooks = {
-  // Combined hook for game output: auto-scroll + command link handling
-  GameOutput: {
+  // Auto-scroll events section to keep latest events visible
+  EbookEvents: {
     mounted() {
       this.scrollToBottom()
-      this.handleClick = this.handleClick.bind(this)
-      this.el.addEventListener("click", this.handleClick)
     },
-
     updated() {
       this.scrollToBottom()
     },
-
-    destroyed() {
-      this.el.removeEventListener("click", this.handleClick)
-    },
-
     scrollToBottom() {
       this.el.scrollTop = this.el.scrollHeight
-    },
-
-    handleClick(e) {
-      const cmdLink = e.target.closest(".cmd-link")
-      if (cmdLink) {
-        e.preventDefault()
-        const cmd = cmdLink.dataset.cmd
-        if (cmd) {
-          this.pushEvent("send_command", { command: cmd })
-        }
-      }
     }
   }
 }
@@ -63,8 +44,8 @@ const liveSocket = new LiveSocket("/live", Socket, {
   hooks: {...colocatedHooks, ...Hooks},
 })
 
-// Show progress bar on live navigation and form submits
-topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
+// Show progress bar on live navigation and form submits (grayscale for ebook aesthetic)
+topbar.config({barColors: {0: "#222"}, shadowColor: "rgba(0, 0, 0, .1)"})
 window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
 window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
 

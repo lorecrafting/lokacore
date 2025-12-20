@@ -1,28 +1,38 @@
-<Layouts.app flash={@flash} current_scope={@current_scope}>
-  <div class="mx-auto max-w-sm">
-    <div class="text-center">
-      <.header>Welcome {@player.email}</.header>
-    </div>
+<div class="ebook-page">
+  <div class="ebook-auth">
+    <h1 class="ebook-auth-title">Welcome, Traveler</h1>
+
+    <p class="ebook-prose" style="text-align: center; text-indent: 0; margin-bottom: 2rem;">
+      {@player.email}
+    </p>
 
     <.form
       :if={!@player.confirmed_at}
       for={@form}
       id="confirmation_form"
       action={~p"/players/log-in?_action=confirmed"}
-      phx-mounted={JS.focus_first()}
+      class="ebook-auth-form"
     >
       <input type="hidden" name={@form[:token].name} value={@form[:token].value} />
-      <.button
+
+      <button
+        type="submit"
         name={@form[:remember_me].name}
         value="true"
+        class="ebook-submit"
         phx-disable-with="Confirming..."
-        class="btn btn-primary w-full"
+        style="display: block; margin-bottom: 1rem;"
       >
-        Confirm and stay logged in
-      </.button>
-      <.button phx-disable-with="Confirming..." class="btn btn-primary btn-soft w-full mt-2">
-        Confirm and log in only this time
-      </.button>
+        Confirm and remember me
+      </button>
+
+      <button
+        type="submit"
+        class="ebook-submit"
+        phx-disable-with="Confirming..."
+      >
+        Confirm for this visit only
+      </button>
     </.form>
 
     <.form
@@ -30,30 +40,34 @@
       for={@form}
       id="login_form"
       action={~p"/players/log-in"}
-      phx-mounted={JS.focus_first()}
+      class="ebook-auth-form"
     >
       <input type="hidden" name={@form[:token].name} value={@form[:token].value} />
+
       <%= if @current_scope do %>
-        <.button variant="primary" phx-disable-with="Logging in..." class="btn btn-primary w-full">
-          Log in
-        </.button>
+        <button type="submit" class="ebook-submit" phx-disable-with="Entering...">
+          Continue
+        </button>
       <% else %>
-        <.button
+        <button
+          type="submit"
           name={@form[:remember_me].name}
           value="true"
-          phx-disable-with="Logging in..."
-          class="btn btn-primary w-full"
+          class="ebook-submit"
+          phx-disable-with="Entering..."
+          style="display: block; margin-bottom: 1rem;"
         >
-          Keep me logged in on this device
-        </.button>
-        <.button phx-disable-with="Logging in..." class="btn btn-primary btn-soft w-full mt-2">
-          Log me in only this time
-        </.button>
+          Remember me on this device
+        </button>
+
+        <button type="submit" class="ebook-submit" phx-disable-with="Entering...">
+          Enter for this visit only
+        </button>
       <% end %>
     </.form>
 
-    <p :if={!@player.confirmed_at} class="alert alert-outline mt-8">
-      Tip: If you prefer passwords, you can enable them in the player settings.
-    </p>
+    <div :if={!@player.confirmed_at} class="ebook-auth-footer">
+      <p style="font-style: italic;">You may enable passwords in your settings after entering.</p>
+    </div>
   </div>
-</Layouts.app>
+</div>

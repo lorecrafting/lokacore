@@ -1,31 +1,33 @@
-<Layouts.app flash={@flash} current_scope={@current_scope}>
-  <div class="mx-auto max-w-sm">
-    <div class="text-center">
-      <.header>
-        Register for an account
-        <:subtitle>
-          Already registered?
-          <.link navigate={~p"/players/log-in"} class="font-semibold text-brand hover:underline">
-            Log in
-          </.link>
-          to your account now.
-        </:subtitle>
-      </.header>
-    </div>
+<div class="ebook-page">
+  <div class="ebook-auth">
+    <h1 class="ebook-auth-title">Begin Your Journey</h1>
 
-    <.form :let={f} for={@changeset} action={~p"/players/register"}>
-      <.input
-        field={f[:email]}
-        type="email"
-        label="Email"
-        autocomplete="email"
-        required
-        phx-mounted={JS.focus()}
-      />
+    <.form :let={f} for={@changeset} action={~p"/players/register"} class="ebook-auth-form">
+      <div style="margin-bottom: 1.5rem; text-align: left;">
+        <label class="ebook-label">Your email address</label>
+        <input
+          type="email"
+          name={f[:email].name}
+          value={f[:email].value}
+          class="ebook-input"
+          autocomplete="email"
+          required
+          phx-mounted={JS.focus()}
+        />
+        <%= if @changeset.action && @changeset.errors[:email] do %>
+          <p style="color: var(--ebook-text-muted); font-size: 0.875rem; margin-top: 0.5rem;">
+            <%= elem(hd(@changeset.errors[:email]), 0) %>
+          </p>
+        <% end %>
+      </div>
 
-      <.button phx-disable-with="Creating account..." class="btn btn-primary w-full">
-        Create an account
-      </.button>
+      <button type="submit" class="ebook-submit" phx-disable-with="Creating account...">
+        Create account
+      </button>
     </.form>
+
+    <div class="ebook-auth-footer">
+      <p>Already a traveler? <.link navigate={~p"/players/log-in"} class="ebook-link">Enter the world</.link></p>
+    </div>
   </div>
-</Layouts.app>
+</div>

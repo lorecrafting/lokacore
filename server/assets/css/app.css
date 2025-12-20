@@ -127,3 +127,315 @@
 .url-link:hover {
   color: oklch(75% 0.2 200);
 }
+
+/* ========================================
+   EBOOK "LIVING BOOK" AESTHETIC
+   Black/white only, serif typography
+   ======================================== */
+
+:root {
+  /* Ebook Color Palette - Grayscale only */
+  --ebook-bg: #FAFAFA;
+  --ebook-text: #222222;
+  --ebook-text-muted: #999999;
+  --ebook-text-faint: #CCCCCC;
+  --ebook-border: #E5E5E5;
+
+  /* Typography */
+  --ebook-font: 'Crimson Text', Georgia, 'Times New Roman', serif;
+
+  /* Spacing */
+  --ebook-max-width: 42rem;
+  --ebook-padding: 1.5rem;
+
+  /* Transitions */
+  --ebook-transition: 150ms ease;
+}
+
+/* Ebook Page Container */
+.ebook-page {
+  font-family: var(--ebook-font);
+  background-color: var(--ebook-bg);
+  color: var(--ebook-text);
+  max-width: var(--ebook-max-width);
+  margin: 0 auto;
+  padding: var(--ebook-padding);
+  min-height: 100vh;
+  min-height: 100dvh;
+  line-height: 1.7;
+  font-size: 1.125rem;
+}
+
+/* Room/Chapter Title */
+.ebook-title {
+  font-family: var(--ebook-font);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--ebook-text);
+  text-align: center;
+  margin-bottom: 1.5rem;
+  line-height: 1.3;
+}
+
+.ebook-title--muted {
+  color: var(--ebook-text-muted);
+}
+
+/* Prose/Body Text */
+.ebook-prose {
+  font-family: var(--ebook-font);
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: var(--ebook-text);
+  text-indent: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.ebook-prose:first-of-type {
+  text-indent: 0;
+}
+
+/* Interactive Links (underlined text) */
+.ebook-link {
+  color: var(--ebook-text);
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color var(--ebook-transition);
+}
+
+.ebook-link:hover {
+  color: #000000;
+}
+
+/* Text Menu (for actions like Inspect, Talk, etc.) */
+.ebook-menu {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+}
+
+.ebook-menu-item {
+  font-family: var(--ebook-font);
+  font-size: 1rem;
+  color: var(--ebook-text);
+  padding: 0.5rem 0;
+  cursor: pointer;
+  transition: color var(--ebook-transition);
+}
+
+.ebook-menu-item:hover {
+  color: #000000;
+}
+
+/* Form Input - Underline only, no box */
+.ebook-input {
+  font-family: var(--ebook-font);
+  font-size: 1.125rem;
+  color: var(--ebook-text);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--ebook-text);
+  padding: 0.5rem 0;
+  width: 100%;
+  outline: none;
+  transition: border-color var(--ebook-transition);
+}
+
+.ebook-input:focus {
+  border-bottom-color: #000000;
+}
+
+.ebook-input::placeholder {
+  color: var(--ebook-text-muted);
+}
+
+/* Form Label */
+.ebook-label {
+  font-family: var(--ebook-font);
+  font-size: 1rem;
+  color: var(--ebook-text-muted);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+/* Submit Action (underlined text, not button) */
+.ebook-submit {
+  font-family: var(--ebook-font);
+  font-size: 1.125rem;
+  color: var(--ebook-text);
+  background: transparent;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 1.5rem;
+  display: inline-block;
+  transition: color var(--ebook-transition);
+}
+
+.ebook-submit:hover {
+  color: #000000;
+}
+
+.ebook-submit:disabled {
+  color: var(--ebook-text-muted);
+  cursor: not-allowed;
+}
+
+/* Event Stream */
+.ebook-events {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ebook-border);
+}
+
+.ebook-event {
+  font-family: var(--ebook-font);
+  font-size: 1rem;
+  color: var(--ebook-text);
+  margin-bottom: 0.75rem;
+  opacity: 0;
+  animation: ebook-fade-in var(--ebook-transition) forwards;
+}
+
+@keyframes ebook-fade-in {
+  to { opacity: 1; }
+}
+
+/* Bottom Bar */
+.ebook-bottombar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--ebook-bg);
+  border-top: 1px solid var(--ebook-border);
+  padding: 0.75rem var(--ebook-padding);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+}
+
+/* Compass */
+.ebook-compass {
+  width: 3rem;
+  height: 3rem;
+  border: 1px solid var(--ebook-text);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color var(--ebook-transition);
+  position: relative;
+}
+
+.ebook-compass:hover {
+  background-color: var(--ebook-border);
+}
+
+.ebook-compass-icon {
+  font-family: var(--ebook-font);
+  font-size: 0.75rem;
+  color: var(--ebook-text);
+}
+
+/* Compass Popup */
+.ebook-compass-popup {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ebook-bg);
+  border: 1px solid var(--ebook-border);
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  min-width: 10rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--ebook-transition), visibility var(--ebook-transition);
+}
+
+.ebook-compass-popup--open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.ebook-compass-direction {
+  font-family: var(--ebook-font);
+  font-size: 1rem;
+  color: var(--ebook-text);
+  padding: 0.25rem 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.ebook-compass-direction:hover {
+  color: #000000;
+}
+
+.ebook-compass-direction--disabled {
+  color: var(--ebook-text-faint);
+  text-decoration: none;
+  cursor: default;
+}
+
+/* Context Panel Fade Transition */
+.ebook-context {
+  animation: ebook-fade-in var(--ebook-transition) forwards;
+}
+
+/* Truncation indicator */
+.ebook-more {
+  font-family: var(--ebook-font);
+  font-size: 0.875rem;
+  color: var(--ebook-text-muted);
+  font-style: italic;
+}
+
+/* Auth Page Centered Layout */
+.ebook-auth {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  text-align: center;
+}
+
+.ebook-auth-title {
+  font-family: var(--ebook-font);
+  font-size: 1.75rem;
+  font-weight: 400;
+  color: var(--ebook-text);
+  margin-bottom: 2rem;
+}
+
+.ebook-auth-form {
+  width: 100%;
+  max-width: 20rem;
+}
+
+.ebook-auth-footer {
+  margin-top: 2rem;
+  font-family: var(--ebook-font);
+  font-size: 1rem;
+  color: var(--ebook-text-muted);
+}
+
+.ebook-auth-footer a,
+.ebook-auth-footer .ebook-link {
+  color: var(--ebook-text);
+}
+
+/* Utility: Hide navbar on ebook pages */
+.ebook-page ~ .menu,
+body:has(.ebook-page) > .menu {
+  display: none;
+}
+
+/* Override body background for ebook pages */
+body:has(.ebook-page) {
+  background-color: var(--ebook-bg);
+}

@@ -1,70 +1,37 @@
-<Layouts.app flash={@flash} current_scope={@current_scope}>
-  <div class="mx-auto max-w-sm space-y-4">
-    <div class="text-center">
-      <.header>
-        <p>Log in</p>
-        <:subtitle>
-          <%= if @current_scope do %>
-            You need to reauthenticate to perform sensitive actions on your account.
-          <% else %>
-            Don't have an account? <.link
-              navigate={~p"/players/register"}
-              class="font-semibold text-brand hover:underline"
-              phx-no-format
-            >Sign up</.link> for an account now.
-          <% end %>
-        </:subtitle>
-      </.header>
+<div class="ebook-page">
+  <div class="ebook-auth">
+    <h1 class="ebook-auth-title">Enter the World</h1>
+
+    <div :if={local_mail_adapter?()} style="margin-bottom: 1.5rem; color: var(--ebook-text-muted); font-size: 0.875rem;">
+      <p>Development mode: <a href="/dev/mailbox" class="ebook-link">view sent emails</a></p>
     </div>
 
-    <div :if={local_mail_adapter?()} class="alert alert-info">
-      <.icon name="hero-information-circle" class="size-6 shrink-0" />
-      <div>
-        <p>You are running the local mail adapter.</p>
-        <p>
-          To see sent emails, visit <.link href="/dev/mailbox" class="underline">the mailbox page</.link>.
-        </p>
+    <.form :let={f} for={@form} as={:player} action={~p"/players/log-in"} class="ebook-auth-form">
+      <div style="margin-bottom: 1.5rem; text-align: left;">
+        <label class="ebook-label">Your email address</label>
+        <input
+          type="email"
+          name={f[:email].name}
+          value={f[:email].value}
+          class="ebook-input"
+          autocomplete="email"
+          required
+          phx-mounted={JS.focus()}
+          readonly={!!@current_scope}
+        />
       </div>
+
+      <button type="submit" class="ebook-submit">
+        Send magic link
+      </button>
+    </.form>
+
+    <div class="ebook-auth-footer">
+      <%= if @current_scope do %>
+        <p>You need to reauthenticate to perform sensitive actions.</p>
+      <% else %>
+        <p>New to this realm? <.link navigate={~p"/players/register"} class="ebook-link">Create an account</.link></p>
+      <% end %>
     </div>
-
-    <.form :let={f} for={@form} as={:player} id="login_form_magic" action={~p"/players/log-in"}>
-      <.input
-        readonly={!!@current_scope}
-        field={f[:email]}
-        type="email"
-        label="Email"
-        autocomplete="email"
-        required
-        phx-mounted={JS.focus()}
-      />
-      <.button class="btn btn-primary w-full">
-        Log in with email <span aria-hidden="true">→</span>
-      </.button>
-    </.form>
-
-    <div class="divider">or</div>
-
-    <.form :let={f} for={@form} as={:player} id="login_form_password" action={~p"/players/log-in"}>
-      <.input
-        readonly={!!@current_scope}
-        field={f[:email]}
-        type="email"
-        label="Email"
-        autocomplete="email"
-        required
-      />
-      <.input
-        field={f[:password]}
-        type="password"
-        label="Password"
-        autocomplete="current-password"
-      />
-      <.button class="btn btn-primary w-full" name={@form[:remember_me].name} value="true">
-        Log in and stay logged in <span aria-hidden="true">→</span>
-      </.button>
-      <.button class="btn btn-primary btn-soft w-full mt-2">
-        Log in only this time
-      </.button>
-    </.form>
   </div>
-</Layouts.app>
+</div>
