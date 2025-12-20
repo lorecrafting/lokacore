@@ -58,3 +58,6 @@ Thumbs.db
 *.pem
 secrets.json
 credentials.json
+
+# bv (beads viewer) local config and caches
+.bv/
