@@ -79,8 +79,10 @@ lokacore/
 │   │   ├── events.md               # Event bus, PubSub
 │   │   ├── scripting.md            # Lua sandbox
 │   │   └── commands.md             # Command pipeline
-│   └── admin/
-│       └── dashboard.md            # Admin interface guide
+│   ├── admin/
+│   │   └── dashboard.md            # Admin interface guide
+│   └── ui/
+│       └── living-ebook-style-guide.md  # UI style guide
 ├── _shelved/
 │   └── mobile/                     # Shelved React Native app
 ├── .github/workflows/
@@ -91,10 +93,13 @@ lokacore/
 ## Web Clients
 
 ### Game Client (`/game`)
-- Mobile-responsive LiveView interface
-- Text-based MUD experience
-- Real-time updates via Phoenix PubSub
-- Command history with arrow keys
+- **"Living Ebook" aesthetic** - Literary, book-like interface
+- Touch/click-based interactions (no text input)
+- Serif typography (Crimson Text), grayscale only
+- Underlined text for interactive elements
+- Context panel for entity interactions
+- Compass navigation for room movement
+- See `docs/ui/living-ebook-style-guide.md` for UI standards
 - Accessible at: `http://localhost:4000/game` (requires login)
 
 ### Admin Dashboard (`/admin`)
@@ -199,6 +204,9 @@ This code is kept for reference and potential future use when native mobile apps
 - `docs/architecture/events.md` - Event bus and PubSub patterns
 - `docs/architecture/scripting.md` - Lua scripting sandbox
 - `docs/architecture/commands.md` - Command pipeline
+
+### UI & Design
+- `docs/ui/living-ebook-style-guide.md` - **UI style guide for game client**
 
 ### Admin & Quick Reference
 - `docs/admin/dashboard.md` - Admin dashboard guide
