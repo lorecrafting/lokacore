@@ -56,7 +56,7 @@ mkdir -p exmud/apps/{server,mobile}
 cd exmud
 
 # 2. Server setup
-cd apps/server
+cd server
 mix phx.new . --app exmud --database sqlite --live
 mix deps.get
 mix phx.gen.auth Accounts Player players

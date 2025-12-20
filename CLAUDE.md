@@ -41,37 +41,36 @@
 
 ```
 lokacore/
-├── apps/
-│   └── server/                     # Elixir/Phoenix
-│       ├── lib/exmud/
-│       │   ├── accounts/           # Auth (phx.gen.auth + is_admin)
-│       │   ├── auth/               # Guardian JWT
-│       │   ├── ecto/               # Custom Ecto types
-│       │   │   └── term.ex         # Erlang term serialization
-│       │   ├── engine/             # Core engine
-│       │   │   ├── entity.ex       # Entity struct
-│       │   │   ├── entities.ex     # Entity CRUD context
-│       │   │   ├── scripts.ex      # Script CRUD context
-│       │   │   ├── schema/         # Ecto schemas
-│       │   │   │   ├── entity_schema.ex
-│       │   │   │   ├── entity_attribute.ex
-│       │   │   │   └── script_schema.ex
-│       │   │   ├── event.ex        # Event struct
-│       │   │   ├── event_bus.ex    # PubSub wrapper
-│       │   │   ├── command.ex      # Command behaviour
-│       │   │   ├── behavior.ex     # Behavior protocol
-│       │   │   └── scripting.ex    # Lua sandbox
-│       │   └── release.ex          # Release tasks
-│       ├── lib/exmud_web/
-│       │   ├── controllers/api/    # REST API
-│       │   ├── plugs/              # Auth pipeline + RequireAdmin
-│       │   └── live/               # LiveView clients
-│       │       ├── game_live.ex    # Game client (players)
-│       │       └── admin_live.ex   # Admin dashboard (6 tabs)
-│       ├── assets/js/app.js        # JS hooks for LiveView
-│       ├── config/
-│       ├── fly.toml
-│       └── Dockerfile
+├── server/                         # Elixir/Phoenix
+│   ├── lib/exmud/
+│   │   ├── accounts/           # Auth (phx.gen.auth + is_admin)
+│   │   ├── auth/               # Guardian JWT
+│   │   ├── ecto/               # Custom Ecto types
+│   │   │   └── term.ex         # Erlang term serialization
+│   │   ├── engine/             # Core engine
+│   │   │   ├── entity.ex       # Entity struct
+│   │   │   ├── entities.ex     # Entity CRUD context
+│   │   │   ├── scripts.ex      # Script CRUD context
+│   │   │   ├── schema/         # Ecto schemas
+│   │   │   │   ├── entity_schema.ex
+│   │   │   │   ├── entity_attribute.ex
+│   │   │   │   └── script_schema.ex
+│   │   │   ├── event.ex        # Event struct
+│   │   │   ├── event_bus.ex    # PubSub wrapper
+│   │   │   ├── command.ex      # Command behaviour
+│   │   │   ├── behavior.ex     # Behavior protocol
+│   │   │   └── scripting.ex    # Lua sandbox
+│   │   └── release.ex          # Release tasks
+│   ├── lib/exmud_web/
+│   │   ├── controllers/api/    # REST API
+│   │   ├── plugs/              # Auth pipeline + RequireAdmin
+│   │   └── live/               # LiveView clients
+│   │       ├── game_live.ex    # Game client (players)
+│   │       └── admin_live.ex   # Admin dashboard (6 tabs)
+│   ├── assets/js/app.js        # JS hooks for LiveView
+│   ├── config/
+│   ├── fly.toml
+│   └── Dockerfile
 ├── docs/                           # Architecture documentation
 │   ├── architecture/
 │   │   ├── README.md               # Overview and navigation
@@ -111,14 +110,14 @@ lokacore/
 
 ```bash
 # Server Development
-cd apps/server
+cd server
 mix deps.get                       # Install dependencies
 mix ecto.create && mix ecto.migrate # Setup database
 mix phx.server                     # Start server at localhost:4000
 mix test                           # Run tests
 
 # Deployment (requires secrets setup)
-cd apps/server
+cd server
 fly deploy                         # Deploy to Fly.io
 ```
 
@@ -175,7 +174,7 @@ fly secrets set GUARDIAN_SECRET_KEY=$(mix phx.gen.secret)
 
 ```bash
 # Run all server tests
-cd apps/server && mix test
+cd server && mix test
 
 # Run specific test file
 mix test test/exmud/engine/entity_test.exs

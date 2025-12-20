@@ -15,10 +15,10 @@ erl_crash.dump
 *.so
 
 # Elixir/Phoenix
-/apps/server/priv/static/assets/
-/apps/server/.fetch
-/apps/server/tmp/
-/apps/server/data/
+/server/priv/static/assets/
+/server/.fetch
+/server/tmp/
+/server/data/
 
 # React Native/Expo
 .expo/
@@ -49,7 +49,7 @@ Thumbs.db
 *.env
 
 # Test artifacts
-/apps/server/cover/
+/server/cover/
 
 # Claude Code local settings
 .claude/settings.local.json

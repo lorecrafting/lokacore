@@ -5924,7 +5924,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'apps/server/**'
+      - 'server/**'
       - '.github/workflows/server-deploy.yml'
   workflow_dispatch:
 
@@ -5936,7 +5936,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: apps/server
+        working-directory: server
     
     # No services needed! SQLite runs in-process
     
@@ -5953,8 +5953,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            apps/server/deps
-            apps/server/_build
+            server/deps
+            server/_build
           key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
           restore-keys: ${{ runner.os }}-mix-
       
@@ -5985,7 +5985,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: apps/server
+        working-directory: server
     
     steps:
       - uses: actions/checkout@v4
@@ -6090,7 +6090,7 @@ jobs:
 ### B.5 Fly.io Configuration
 
 ```toml
-# apps/server/fly.toml
+# server/fly.toml
 
 app = "exmud"
 primary_region = "sjc"  # San Jose, or your preferred region
@@ -6146,7 +6146,7 @@ primary_region = "sjc"  # San Jose, or your preferred region
 ### B.6 Server Dockerfile
 
 ```dockerfile
-# apps/server/Dockerfile
+# server/Dockerfile
 
 # Build stage
 FROM hexpm/elixir:1.16.0-erlang-26.2.1-debian-bookworm-20231009-slim AS build
@@ -6370,7 +6370,7 @@ command -v flyctl >/dev/null 2>&1 || { echo "Fly CLI is required but not install
 
 # Setup server
 echo "📦 Setting up server..."
-cd apps/server
+cd server
 mix deps.get
 mix ecto.setup
 cd ../..
@@ -6384,7 +6384,7 @@ cd ../..
 # Setup environment files
 echo "⚙️ Creating environment files..."
 
-cat > apps/server/.env << EOF
+cat > server/.env << EOF
 SECRET_KEY_BASE=$(mix phx.gen.secret)
 GUARDIAN_SECRET_KEY=$(mix phx.gen.secret)
 PHX_HOST=localhost
@@ -6400,7 +6400,7 @@ EOF
 echo "✅ Setup complete!"
 echo ""
 echo "To start development:"
-echo "  Server: cd apps/server && mix ecto.create && mix ecto.migrate && mix phx.server"
+echo "  Server: cd server && mix ecto.create && mix ecto.migrate && mix phx.server"
 echo "  Mobile: cd apps/mobile && npx expo start"
 ```
 
@@ -6414,7 +6414,7 @@ set -e
 
 # Start server in background
 echo "🔥 Starting Phoenix server..."
-cd apps/server
+cd server
 mix ecto.create 2>/dev/null || true  # Create if not exists
 mix ecto.migrate
 mix phx.server &
@@ -6479,7 +6479,7 @@ When using Claude Code on your phone to make changes:
 # ============================================================
 
 # Local development
-cd apps/server
+cd server
 mix phx.server                    # Start server
 mix test                          # Run tests
 mix ecto.migrate                  # Run migrations
@@ -6515,9 +6515,9 @@ eas update --branch production    # Push OTA update to production
 # USEFUL ALIASES (add to .bashrc/.zshrc)
 # ============================================================
 
-alias exmud-server="cd ~/exmud/apps/server && mix phx.server"
+alias exmud-server="cd ~/exmud/server && mix phx.server"
 alias exmud-mobile="cd ~/exmud/apps/mobile && npx expo start --tunnel"
-alias exmud-deploy="cd ~/exmud/apps/server && flyctl deploy"
+alias exmud-deploy="cd ~/exmud/server && flyctl deploy"
 alias exmud-logs="flyctl logs -a exmud"
 ```
 
@@ -6602,10 +6602,10 @@ cat > package.json << 'EOF'
   "private": true,
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
-    "server": "cd apps/server && mix phx.server",
+    "server": "cd server && mix phx.server",
     "mobile": "cd apps/mobile && npx expo start",
     "mobile:tunnel": "cd apps/mobile && npx expo start --tunnel",
-    "deploy": "cd apps/server && fly deploy",
+    "deploy": "cd server && fly deploy",
     "logs": "fly logs -a exmud",
     "debug": "./scripts/debug.sh"
   }
@@ -6615,7 +6615,7 @@ EOF
 
 ### 2. Server Setup (Elixir/Phoenix)
 ```bash
-cd apps/server
+cd server
 
 # Create new Phoenix app with SQLite
 mix phx.new . --app exmud --database sqlite --live
@@ -6662,7 +6662,7 @@ npx eas-cli build:configure
 
 ### 4. Fly.io Setup (SQLite + Volume)
 ```bash
-cd apps/server
+cd server
 
 # Launch Fly app (creates fly.toml)
 fly launch --name exmud --region sjc --no-deploy
@@ -6699,7 +6699,7 @@ fly ssh console -C "/app/bin/migrate"
 
 **Phase 1: Server Foundation**
 ```
-apps/server/
+server/
 ├── mix.exs                              # Dependencies
 ├── config/config.exs                    # Base config
 ├── config/dev.exs                       # Dev config
@@ -6724,7 +6724,7 @@ apps/server/
 
 **Phase 2: Game Engine Core**
 ```
-apps/server/lib/exmud/
+server/lib/exmud/
 ├── engine/
 │   ├── entity.ex                        # Entity struct
 │   ├── entity_server.ex                 # GenServer per entity
@@ -6834,11 +6834,11 @@ EXPO_TOKEN               # npx eas-cli login
 
 ```bash
 # Local development
-cd apps/server && mix phx.server          # Start server
+cd server && mix phx.server          # Start server
 cd apps/mobile && npx expo start --tunnel # Start mobile (accessible from phone)
 
 # Deployment
-cd apps/server && fly deploy              # Deploy server
+cd server && fly deploy              # Deploy server
 cd apps/mobile && eas build --profile preview # Build mobile preview
 
 # Debugging
@@ -6855,7 +6855,7 @@ fly ssh console -C "sqlite3 /data/exmud.db '.backup /data/backup.db'"
 fly sftp get /data/backup.db              # Download backup locally
 
 # Testing
-cd apps/server && mix test                # Server tests
+cd server && mix test                # Server tests
 cd apps/mobile && npm test                # Mobile tests
 ```
 

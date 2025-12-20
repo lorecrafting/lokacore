@@ -4,17 +4,17 @@ on:
   push:
     branches: [main]
     paths:
-      - "apps/server/**"
+      - "server/**"
       - ".github/workflows/server-ci.yml"
   pull_request:
     branches: [main]
     paths:
-      - "apps/server/**"
+      - "server/**"
       - ".github/workflows/server-ci.yml"
 
 defaults:
   run:
-    working-directory: apps/server
+    working-directory: server
 
 env:
   MIX_ENV: test
@@ -40,9 +40,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            apps/server/deps
-            apps/server/_build
-          key: ${{ runner.os }}-mix-${{ hashFiles('apps/server/mix.lock') }}
+            server/deps
+            server/_build
+          key: ${{ runner.os }}-mix-${{ hashFiles('server/mix.lock') }}
           restore-keys: |
             ${{ runner.os }}-mix-
 
@@ -73,6 +73,6 @@ jobs:
 
       - name: Deploy to Fly.io
         run: flyctl deploy --remote-only
-        working-directory: apps/server
+        working-directory: server
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
