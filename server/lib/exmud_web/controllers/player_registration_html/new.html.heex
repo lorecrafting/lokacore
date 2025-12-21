@@ -18,7 +18,7 @@
           <% email_errors = Keyword.get_values(@changeset.errors, :email) %>
           <%= if email_errors != [] do %>
             <p style="color: #c00; font-size: 0.875rem; margin-top: 0.5rem;">
-              <%= elem(hd(email_errors), 0) %>
+              {elem(hd(email_errors), 0)}
             </p>
           <% end %>
         <% end %>
@@ -30,7 +30,10 @@
     </.form>
 
     <div class="ebook-auth-footer">
-      <p>Already a traveler? <.link navigate={~p"/players/log-in"} class="ebook-link">Enter the world</.link></p>
+      <p>
+        Already a traveler?
+        <.link navigate={~p"/players/log-in"} class="ebook-link">Enter the world</.link>
+      </p>
     </div>
   </div>
 </div>

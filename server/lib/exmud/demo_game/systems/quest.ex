@@ -177,6 +177,7 @@ defmodule Exmud.DemoGame.Systems.Quest do
     {new_active, completed} =
       Enum.reduce(active, {%{}, []}, fn {quest_id, quest_data}, {acc_active, acc_completed} ->
         objectives = quest_data["objectives"] || quest_data[:objectives] || %{}
+
         {updated_objectives, newly_completed} =
           update_quest_objectives(objectives, event_type, target_id, count, quest_id)
 
@@ -240,6 +241,7 @@ defmodule Exmud.DemoGame.Systems.Quest do
 
       quest_data ->
         objectives = quest_data["objectives"] || quest_data[:objectives] || %{}
+
         Enum.all?(objectives, fn {_id, obj} ->
           Map.get(obj, "completed") || Map.get(obj, :completed, false)
         end)
@@ -274,7 +276,9 @@ defmodule Exmud.DemoGame.Systems.Quest do
 
           new_active = Map.delete(active, quest_id)
           new_completed = [quest_id | completed]
-          new_quests = quests
+
+          new_quests =
+            quests
             |> Map.put("active", new_active)
             |> Map.put("completed", new_completed)
 
@@ -299,6 +303,7 @@ defmodule Exmud.DemoGame.Systems.Quest do
 
       objectives = quest_data["objectives"] || quest_data[:objectives] || %{}
       accepted_at = quest_data["accepted_at"] || quest_data[:accepted_at]
+
       %{
         id: quest_id,
         name: quest_def && quest_def.name,

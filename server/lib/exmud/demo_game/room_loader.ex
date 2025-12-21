@@ -90,10 +90,12 @@ defmodule Exmud.DemoGame.RoomLoader do
     contents = Entities.get_contents(room.id)
 
     # Separate by type, filtering out despawned NPCs
-    npcs = contents
-           |> Enum.filter(&(&1.type == :npc))
-           |> Enum.reject(&is_despawned?/1)
-           |> Enum.map(&format_npc/1)
+    npcs =
+      contents
+      |> Enum.filter(&(&1.type == :npc))
+      |> Enum.reject(&is_despawned?/1)
+      |> Enum.map(&format_npc/1)
+
     items = contents |> Enum.filter(&(&1.type == :item)) |> Enum.map(&format_item/1)
     exits = contents |> Enum.filter(&(&1.type == :exit)) |> Enum.map(&format_exit/1)
 

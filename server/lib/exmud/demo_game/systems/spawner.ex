@@ -21,7 +21,8 @@ defmodule Exmud.DemoGame.Systems.Spawner do
 
   alias Exmud.Engine.Entities
 
-  @default_respawn_delay_ms 30_000  # 30 seconds
+  # 30 seconds
+  @default_respawn_delay_ms 30_000
 
   # Client API
 
@@ -122,9 +123,11 @@ defmodule Exmud.DemoGame.Systems.Spawner do
 
   @impl true
   def handle_call(:list_despawned, _from, state) do
-    despawned_list = Enum.map(state.despawned, fn {id, info} ->
-      %{entity_id: id, respawn_at: info.respawn_at}
-    end)
+    despawned_list =
+      Enum.map(state.despawned, fn {id, info} ->
+        %{entity_id: id, respawn_at: info.respawn_at}
+      end)
+
     {:reply, despawned_list, state}
   end
 
@@ -154,9 +157,10 @@ defmodule Exmud.DemoGame.Systems.Spawner do
         combatant = Map.get(entity.components || %{}, "combatant", %{})
         restored_combatant = Map.put(combatant, "health", despawn_info.original_health)
 
-        updated_components = entity.components
-                             |> Map.put("combatant", restored_combatant)
-                             |> Map.delete("despawned")
+        updated_components =
+          entity.components
+          |> Map.put("combatant", restored_combatant)
+          |> Map.delete("despawned")
 
         {:ok, _} = Entities.update_entity(entity, %{components: updated_components})
 

@@ -47,13 +47,14 @@ defmodule Exmud.DemoGame.Components.Equipable do
   def from_map(nil), do: nil
 
   def from_map(data) when is_map(data) do
-    slot = case data["slot"] || data[:slot] do
-      "weapon" -> :weapon
-      "armor" -> :armor
-      "accessory" -> :accessory
-      atom when is_atom(atom) -> atom
-      _ -> :accessory
-    end
+    slot =
+      case data["slot"] || data[:slot] do
+        "weapon" -> :weapon
+        "armor" -> :armor
+        "accessory" -> :accessory
+        atom when is_atom(atom) -> atom
+        _ -> :accessory
+      end
 
     bonuses = data["bonuses"] || data[:bonuses] || %{}
     requirements = data["requirements"] || data[:requirements] || %{}

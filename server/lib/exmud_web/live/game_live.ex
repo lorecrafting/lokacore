@@ -8,7 +8,18 @@ defmodule ExmudWeb.GameLive do
   use ExmudWeb, :live_view
 
   alias Exmud.DemoGame.{PlayerGameState, RoomLoader}
-  alias Exmud.DemoGame.Systems.{Inventory, Equipment, Dialogue, Quest, Combat, Spawner, Progression, Skills}
+
+  alias Exmud.DemoGame.Systems.{
+    Inventory,
+    Equipment,
+    Dialogue,
+    Quest,
+    Combat,
+    Spawner,
+    Progression,
+    Skills
+  }
+
   alias Exmud.Engine.Entities
 
   @impl true
@@ -103,50 +114,50 @@ defmodule ExmudWeb.GameLive do
           />
         <% else %>
           <%= if @dialogue do %>
-          <.dialogue_panel
-            dialogue={@dialogue}
-            npc={@dialogue_npc}
-            room_title={@room.title}
-          />
-        <% else %>
-          <%= if @stats_open do %>
-          <.stats_panel
-            game_state={@game_state}
-            health={@health}
-          />
-        <% else %>
-          <%= if @quest_open do %>
-          <.quest_panel
-            active_quests={@active_quests}
-            completed_quests={@completed_quests}
-          />
-        <% else %>
-          <%= if @inventory_open do %>
-            <.inventory_panel
-              inventory_items={@inventory_items}
-              equipped_items={@equipped_items}
-              stats={@stats}
-              health={@health}
+            <.dialogue_panel
+              dialogue={@dialogue}
+              npc={@dialogue_npc}
+              room_title={@room.title}
             />
           <% else %>
-            <%= if @context_entity do %>
-              <.context_panel
-                entity={@context_entity}
-                room_title={@room.title}
-                compass_open={@compass_open}
-                exits={@room.exits}
+            <%= if @stats_open do %>
+              <.stats_panel
+                game_state={@game_state}
+                health={@health}
               />
             <% else %>
-              <.room_view
-                room={@room}
-                events={@events}
-                compass_open={@compass_open}
-              />
+              <%= if @quest_open do %>
+                <.quest_panel
+                  active_quests={@active_quests}
+                  completed_quests={@completed_quests}
+                />
+              <% else %>
+                <%= if @inventory_open do %>
+                  <.inventory_panel
+                    inventory_items={@inventory_items}
+                    equipped_items={@equipped_items}
+                    stats={@stats}
+                    health={@health}
+                  />
+                <% else %>
+                  <%= if @context_entity do %>
+                    <.context_panel
+                      entity={@context_entity}
+                      room_title={@room.title}
+                      compass_open={@compass_open}
+                      exits={@room.exits}
+                    />
+                  <% else %>
+                    <.room_view
+                      room={@room}
+                      events={@events}
+                      compass_open={@compass_open}
+                    />
+                  <% end %>
+                <% end %>
+              <% end %>
             <% end %>
           <% end %>
-        <% end %>
-        <% end %>
-        <% end %>
         <% end %>
       <% end %>
 
@@ -189,14 +200,20 @@ defmodule ExmudWeb.GameLive do
     <div class="mt-6">
       <p class="ebook-prose" style="text-indent: 0;">
         <%= for {entity, idx} <- Enum.with_index(@entities) do %>
-          <%= if idx > 0 do %> <% end %>
-          <%= entity.short_desc %>
+          <%= if idx > 0 do %>
+          <% end %>
+          {entity.short_desc}
           <span
             class="ebook-link"
             phx-click="click_entity"
             phx-value-id={entity.id}
             phx-value-type="npc"
-          ><%= entity.name %></span><%= if entity[:suffix], do: " #{entity.suffix}", else: "" %>.<%= if idx < length(@entities) - 1, do: "" %>
+          ><%= entity.name %></span>{if entity[:suffix], do: " #{entity.suffix}", else: ""}.{if idx <
+                                                                                                  length(
+                                                                                                    @entities
+                                                                                                  ) -
+                                                                                                    1,
+                                                                                                do: ""}
         <% end %>
         <%= if length(@entities) > 3 do %>
           <span class="ebook-more">[...{length(@entities) - 3} more]</span>
@@ -205,14 +222,15 @@ defmodule ExmudWeb.GameLive do
 
       <p class="ebook-prose" style="text-indent: 0;">
         <%= for {item, idx} <- Enum.with_index(@items) do %>
-          <%= if idx > 0 do %> <% end %>
-          <%= item.desc %>
+          <%= if idx > 0 do %>
+          <% end %>
+          {item.desc}
           <span
             class="ebook-link"
             phx-click="click_entity"
             phx-value-id={item.id}
             phx-value-type="item"
-          ><%= item.name %></span><%= if item[:suffix], do: " #{item.suffix}", else: "" %>.
+          ><%= item.name %></span>{if item[:suffix], do: " #{item.suffix}", else: ""}.
         <% end %>
       </p>
     </div>
@@ -296,7 +314,8 @@ defmodule ExmudWeb.GameLive do
 
       <div class="mt-4">
         <p class="ebook-prose" style="text-indent: 0; font-style: italic; opacity: 0.7;">
-          Health: {@health["current"] || @health[:current] || 100} / {@health["max"] || @health[:max] || 100}
+          Health: {@health["current"] || @health[:current] || 100} / {@health["max"] || @health[:max] ||
+            100}
         </p>
       </div>
 
@@ -305,7 +324,10 @@ defmodule ExmudWeb.GameLive do
         <ul class="ebook-menu">
           <.equipment_slot slot="weapon" item={@equipped_items[:weapon] || @equipped_items["weapon"]} />
           <.equipment_slot slot="armor" item={@equipped_items[:armor] || @equipped_items["armor"]} />
-          <.equipment_slot slot="accessory" item={@equipped_items[:accessory] || @equipped_items["accessory"]} />
+          <.equipment_slot
+            slot="accessory"
+            item={@equipped_items[:accessory] || @equipped_items["accessory"]}
+          />
         </ul>
       </div>
 
@@ -379,7 +401,10 @@ defmodule ExmudWeb.GameLive do
               {quest.description}
             </p>
             <ul class="ebook-objectives">
-              <li :for={obj <- quest.objectives || []} class={"ebook-objective #{if obj.completed, do: "ebook-objective--done", else: ""}"}>
+              <li
+                :for={obj <- quest.objectives || []}
+                class={"ebook-objective #{if obj.completed, do: "ebook-objective--done", else: ""}"}
+              >
                 <%= if obj.completed do %>
                   ✓
                 <% else %>
@@ -559,9 +584,17 @@ defmodule ExmudWeb.GameLive do
     <div class="ebook-context">
       <h1 class="ebook-title">Combat</h1>
 
-      <div class="ebook-combat-log" style="max-height: 300px; overflow-y: auto; padding: 1rem; border: 1px solid #333; margin-bottom: 1rem; font-family: 'Crimson Text', Georgia, serif;">
-        <p class="ebook-prose" style="text-indent: 0; margin-bottom: 0.75rem; border-bottom: 1px solid #ccc; padding-bottom: 0.5rem;">
-          You face the {String.capitalize(@combat.enemy.name)}. [HP: {get_enemy_health_current(@combat)}/{get_enemy_health_max(@combat)}]
+      <div
+        class="ebook-combat-log"
+        style="max-height: 300px; overflow-y: auto; padding: 1rem; border: 1px solid #333; margin-bottom: 1rem; font-family: 'Crimson Text', Georgia, serif;"
+      >
+        <p
+          class="ebook-prose"
+          style="text-indent: 0; margin-bottom: 0.75rem; border-bottom: 1px solid #ccc; padding-bottom: 0.5rem;"
+        >
+          You face the {String.capitalize(@combat.enemy.name)}. [HP: {get_enemy_health_current(
+            @combat
+          )}/{get_enemy_health_max(@combat)}]
         </p>
         <p class="ebook-prose" style="text-indent: 0; margin-bottom: 0.75rem; opacity: 0.8;">
           Your health: {get_health_current(@health)}/{get_health_max(@health)}
@@ -619,7 +652,10 @@ defmodule ExmudWeb.GameLive do
 
   defp cutscene_panel(assigns) do
     ~H"""
-    <div class="ebook-context" style="min-height: 60vh; display: flex; flex-direction: column; justify-content: center;">
+    <div
+      class="ebook-context"
+      style="min-height: 60vh; display: flex; flex-direction: column; justify-content: center;"
+    >
       <div class="ebook-cutscene" style="text-align: center; padding: 2rem;">
         <%= if @cutscene.title do %>
           <h1 class="ebook-title" style="font-size: 2rem; margin-bottom: 2rem; letter-spacing: 0.1em;">
@@ -629,7 +665,10 @@ defmodule ExmudWeb.GameLive do
 
         <div class="ebook-cutscene-text" style="max-width: 500px; margin: 0 auto;">
           <%= for {line, idx} <- Enum.with_index(@cutscene.pages |> Enum.at(@cutscene.current_page, []) |> List.wrap()) do %>
-            <p class="ebook-prose" style={"text-indent: 0; margin-bottom: 1rem; opacity: #{if idx == 0, do: 1, else: 0.9}; font-size: 1.1rem; line-height: 1.8;"}>
+            <p
+              class="ebook-prose"
+              style={"text-indent: 0; margin-bottom: 1rem; opacity: #{if idx == 0, do: 1, else: 0.9}; font-size: 1.1rem; line-height: 1.8;"}
+            >
               {line}
             </p>
           <% end %>
@@ -673,14 +712,22 @@ defmodule ExmudWeb.GameLive do
         title: "The Journey Begins",
         current_page: 0,
         pages: [
-          ["You awaken beneath the ancient oak tree, its massive branches stretching toward the sky like the arms of a sleeping giant.",
-           "The air is thick with the scent of moss and wildflowers. How did you come to be here? The memories are hazy, like a half-forgotten dream."],
-          ["A voice echoes in your mind—or is it the wind through the leaves?",
-           "\"Traveler... the forest has chosen you. Your path lies ahead, shrouded in mystery.\""],
-          ["You rise to your feet, brushing leaves from your clothes. The world feels different somehow—more vivid, more alive.",
-           "In the distance, you hear the murmur of a stream and the call of unfamiliar birds."],
-          ["Whatever brought you here, whatever fate awaits, one thing is certain:",
-           "Your adventure begins now."]
+          [
+            "You awaken beneath the ancient oak tree, its massive branches stretching toward the sky like the arms of a sleeping giant.",
+            "The air is thick with the scent of moss and wildflowers. How did you come to be here? The memories are hazy, like a half-forgotten dream."
+          ],
+          [
+            "A voice echoes in your mind—or is it the wind through the leaves?",
+            "\"Traveler... the forest has chosen you. Your path lies ahead, shrouded in mystery.\""
+          ],
+          [
+            "You rise to your feet, brushing leaves from your clothes. The world feels different somehow—more vivid, more alive.",
+            "In the distance, you hear the murmur of a stream and the call of unfamiliar birds."
+          ],
+          [
+            "Whatever brought you here, whatever fate awaits, one thing is certain:",
+            "Your adventure begins now."
+          ]
         ]
       }
 
@@ -793,12 +840,15 @@ defmodule ExmudWeb.GameLive do
           # Track quest progress for get_item objectives
           # Use the entity key (e.g. "rusty_sword") for quest matching
           item_key = item_entity.key || entity.id
+
           {new_game_state, objective_events} =
             case Quest.update_progress(new_game_state, %{type: :get_item, target_id: item_key}) do
               {:ok, updated_state, completed_objectives} ->
-                events = Enum.map(completed_objectives, fn {_quest_id, obj_id} ->
-                  %{text: "Objective complete: #{obj_id}", timestamp: DateTime.utc_now()}
-                end)
+                events =
+                  Enum.map(completed_objectives, fn {_quest_id, obj_id} ->
+                    %{text: "Objective complete: #{obj_id}", timestamp: DateTime.utc_now()}
+                  end)
+
                 {updated_state, events}
 
               {:error, _} ->
@@ -951,7 +1001,10 @@ defmodule ExmudWeb.GameLive do
       {:ok, new_combat, %{action: :attack, damage: damage}} ->
         # Apply damage to player
         current_health = socket.assigns.health
-        current_hp = Map.get(current_health, "current") || Map.get(current_health, :current) || 100
+
+        current_hp =
+          Map.get(current_health, "current") || Map.get(current_health, :current) || 100
+
         new_hp = max(0, current_hp - damage)
         new_health = Map.put(current_health, "current", new_hp)
 
@@ -1003,23 +1056,27 @@ defmodule ExmudWeb.GameLive do
     Spawner.despawn_mob(combat.enemy_id)
 
     # Apply rewards (may include level up)
-    {new_game_state, level_up_event} = case Combat.apply_rewards(game_state, rewards) do
-      {:ok, updated_state} ->
-        {updated_state, nil}
+    {new_game_state, level_up_event} =
+      case Combat.apply_rewards(game_state, rewards) do
+        {:ok, updated_state} ->
+          {updated_state, nil}
 
-      {:ok, updated_state, level_up_info} ->
-        level_event = %{
-          text: "LEVEL UP! You are now level #{level_up_info.new_level}. Gained #{level_up_info.skill_points_gained} skill points!",
-          timestamp: DateTime.utc_now()
-        }
-        {updated_state, level_event}
-    end
+        {:ok, updated_state, level_up_info} ->
+          level_event = %{
+            text:
+              "LEVEL UP! You are now level #{level_up_info.new_level}. Gained #{level_up_info.skill_points_gained} skill points!",
+            timestamp: DateTime.utc_now()
+          }
+
+          {updated_state, level_event}
+      end
 
     # Reload room to reflect mob despawn
     {:ok, room} = RoomLoader.load_room_for_display(socket.assigns.room.id)
 
     victory_event = %{
-      text: "Victory! You defeated the #{combat.enemy.name}. Gained #{rewards.xp} XP and #{rewards.gold} gold.",
+      text:
+        "Victory! You defeated the #{combat.enemy.name}. Gained #{rewards.xp} XP and #{rewards.gold} gold.",
       timestamp: DateTime.utc_now()
     }
 
@@ -1416,6 +1473,7 @@ defmodule ExmudWeb.GameLive do
 
   defp find_entity(room, id, "npc") do
     entity = Enum.find(room.entities, fn e -> e.id == id end)
+
     if entity do
       # Load full entity from DB to get components
       db_entity = Entities.get_entity(id)
@@ -1433,6 +1491,7 @@ defmodule ExmudWeb.GameLive do
 
   defp find_entity(room, id, "item") do
     item = Enum.find(room.items, fn i -> i.id == id end)
+
     if item do
       # Load full entity from DB to get components
       db_entity = Entities.get_entity(id)

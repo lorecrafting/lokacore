@@ -310,12 +310,13 @@ defmodule Exmud.Engine.EntitiesTest do
 
   describe "to_entity/1" do
     test "converts EntitySchema to Entity struct" do
-      schema = entity_fixture(%{
-        name: "Test Entity",
-        description: "A test",
-        components: %{health: 100},
-        tags: ["test"]
-      })
+      schema =
+        entity_fixture(%{
+          name: "Test Entity",
+          description: "A test",
+          components: %{health: 100},
+          tags: ["test"]
+        })
 
       entity = Entities.to_entity(schema)
 
@@ -333,7 +334,8 @@ defmodule Exmud.Engine.EntitiesTest do
 
   describe "save_entity/1" do
     test "creates new entity when id is nil" do
-      entity = Entity.new(:room, %{key: "save_test_#{System.unique_integer()}", name: "Saved Room"})
+      entity =
+        Entity.new(:room, %{key: "save_test_#{System.unique_integer()}", name: "Saved Room"})
 
       assert {:ok, saved} = Entities.save_entity(entity)
       assert saved.name == "Saved Room"

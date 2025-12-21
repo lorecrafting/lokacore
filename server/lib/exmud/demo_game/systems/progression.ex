@@ -77,26 +77,30 @@ defmodule Exmud.DemoGame.Systems.Progression do
       levels_gained = new_level - current_level
       skill_points_gained = levels_gained * @skill_points_per_level
 
-      new_stats = stats
-                  |> Map.put("xp", new_xp)
-                  |> Map.put("level", new_level)
-                  |> Map.put("skill_points", current_skill_points + skill_points_gained)
+      new_stats =
+        stats
+        |> Map.put("xp", new_xp)
+        |> Map.put("level", new_level)
+        |> Map.put("skill_points", current_skill_points + skill_points_gained)
 
       # Also increase max health on level up (+10 per level)
       health = game_state.health || %{"current" => 100, "max" => 100}
       max_hp = get_stat(health, "max", 100)
       current_hp = get_stat(health, "current", max_hp)
-      new_max_hp = max_hp + (levels_gained * 10)
-      new_current_hp = current_hp + (levels_gained * 10)  # Heal on level up
+      new_max_hp = max_hp + levels_gained * 10
+      # Heal on level up
+      new_current_hp = current_hp + levels_gained * 10
 
-      new_health = health
-                   |> Map.put("max", new_max_hp)
-                   |> Map.put("current", new_current_hp)
+      new_health =
+        health
+        |> Map.put("max", new_max_hp)
+        |> Map.put("current", new_current_hp)
 
-      {:ok, updated_state} = PlayerGameState.update_state(game_state, %{
-        stats: new_stats,
-        health: new_health
-      })
+      {:ok, updated_state} =
+        PlayerGameState.update_state(game_state, %{
+          stats: new_stats,
+          health: new_health
+        })
 
       level_up_info = %{
         new_level: new_level,
@@ -135,7 +139,8 @@ defmodule Exmud.DemoGame.Systems.Progression do
       total_xp: xp,
       xp_into_level: xp_into_level,
       xp_needed_for_next: xp_needed,
-      xp_progress_percent: if(xp_needed > 0, do: trunc(xp_into_level / xp_needed * 100), else: 100),
+      xp_progress_percent:
+        if(xp_needed > 0, do: trunc(xp_into_level / xp_needed * 100), else: 100),
       skill_points: skill_points,
       learned_skills: learned_skills
     }
@@ -168,9 +173,10 @@ defmodule Exmud.DemoGame.Systems.Progression do
         {:error, :not_enough_skill_points}
 
       true ->
-        new_stats = stats
-                    |> Map.put("skill_points", skill_points - skill_cost)
-                    |> Map.put("skills", learned_skills ++ [skill_id])
+        new_stats =
+          stats
+          |> Map.put("skill_points", skill_points - skill_cost)
+          |> Map.put("skills", learned_skills ++ [skill_id])
 
         PlayerGameState.update_state(game_state, %{stats: new_stats})
     end

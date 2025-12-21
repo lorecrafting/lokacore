@@ -140,10 +140,13 @@ defmodule Exmud.DemoGame.Systems.Combat do
   - `:ongoing` - Combat continues
   """
   def check_combat_end(combat_state, %PlayerGameState{} = game_state) do
-    enemy_hp = get_in(combat_state.enemy.health, ["current"]) ||
-               get_in(combat_state.enemy.health, [:current]) || 0
-    player_hp = get_in(game_state.health, ["current"]) ||
-                get_in(game_state.health, [:current]) || 0
+    enemy_hp =
+      get_in(combat_state.enemy.health, ["current"]) ||
+        get_in(combat_state.enemy.health, [:current]) || 0
+
+    player_hp =
+      get_in(game_state.health, ["current"]) ||
+        get_in(game_state.health, [:current]) || 0
 
     cond do
       Map.get(combat_state, :fled, false) ->
@@ -154,6 +157,7 @@ defmodule Exmud.DemoGame.Systems.Combat do
           xp: combat_state.enemy.xp_reward,
           gold: combat_state.enemy.gold_reward
         }
+
         {:victory, rewards}
 
       player_hp <= 0 ->
@@ -174,8 +178,10 @@ defmodule Exmud.DemoGame.Systems.Combat do
     gold_amount = Map.get(rewards, :gold, 0)
 
     # First add gold
-    current_gold = get_in(game_state.stats, ["gold"]) ||
-                   get_in(game_state.stats, [:gold]) || 0
+    current_gold =
+      get_in(game_state.stats, ["gold"]) ||
+        get_in(game_state.stats, [:gold]) || 0
+
     new_gold = current_gold + gold_amount
 
     new_stats = Map.put(game_state.stats || %{}, "gold", new_gold)
@@ -199,15 +205,17 @@ defmodule Exmud.DemoGame.Systems.Combat do
 
   defp execute_player_attack(combat_state, game_state) do
     # Get player stats
-    player_str = get_in(game_state.stats, ["str"]) ||
-                 get_in(game_state.stats, [:str]) || 10
+    player_str =
+      get_in(game_state.stats, ["str"]) ||
+        get_in(game_state.stats, [:str]) || 10
 
     # Get weapon bonus from equipment
     weapon_bonus = get_weapon_bonus(game_state)
 
     # Enemy defense
-    enemy_def = get_in(combat_state.enemy.stats, ["defense"]) ||
-                get_in(combat_state.enemy.stats, [:defense]) || 0
+    enemy_def =
+      get_in(combat_state.enemy.stats, ["defense"]) ||
+        get_in(combat_state.enemy.stats, [:defense]) || 0
 
     # Apply defense bonus if enemy is defending
     defense_multiplier = if combat_state.enemy_defending, do: 1.5, else: 1.0
@@ -218,16 +226,20 @@ defmodule Exmud.DemoGame.Systems.Combat do
     damage = max(1, base_damage - effective_defense)
 
     # Add variance (+/- 20%)
-    variance = :rand.uniform(41) - 21  # -20 to +20
+    # -20 to +20
+    variance = :rand.uniform(41) - 21
     final_damage = max(1, trunc(damage * (1 + variance / 100)))
 
     # Apply damage to enemy
-    current_hp = get_in(combat_state.enemy.health, ["current"]) ||
-                 get_in(combat_state.enemy.health, [:current]) || 0
+    current_hp =
+      get_in(combat_state.enemy.health, ["current"]) ||
+        get_in(combat_state.enemy.health, [:current]) || 0
+
     new_hp = max(0, current_hp - final_damage)
 
-    new_enemy_health = combat_state.enemy.health
-                       |> Map.put("current", new_hp)
+    new_enemy_health =
+      combat_state.enemy.health
+      |> Map.put("current", new_hp)
 
     new_enemy = %{combat_state.enemy | health: new_enemy_health}
 
@@ -240,11 +252,12 @@ defmodule Exmud.DemoGame.Systems.Combat do
     }
 
     # Update combat state
-    new_state = %{combat_state |
-      enemy: new_enemy,
-      player_turn: false,
-      player_defending: false,
-      log: combat_state.log ++ [log_entry]
+    new_state = %{
+      combat_state
+      | enemy: new_enemy,
+        player_turn: false,
+        player_defending: false,
+        log: combat_state.log ++ [log_entry]
     }
 
     {:ok, new_state, %{action: :attack, damage: final_damage}}
@@ -257,10 +270,11 @@ defmodule Exmud.DemoGame.Systems.Combat do
       turn: combat_state.turn_count
     }
 
-    new_state = %{combat_state |
-      player_turn: false,
-      player_defending: true,
-      log: combat_state.log ++ [log_entry]
+    new_state = %{
+      combat_state
+      | player_turn: false,
+        player_defending: true,
+        log: combat_state.log ++ [log_entry]
     }
 
     {:ok, new_state, %{action: :defend}}
@@ -269,7 +283,7 @@ defmodule Exmud.DemoGame.Systems.Combat do
   defp execute_player_flee(combat_state, _game_state) do
     # 40% base chance to flee, modified by enemy level
     enemy_level = combat_state.enemy.level || 1
-    flee_chance = max(10, 40 - (enemy_level * 5))
+    flee_chance = max(10, 40 - enemy_level * 5)
 
     if :rand.uniform(100) <= flee_chance do
       log_entry = %{
@@ -278,10 +292,7 @@ defmodule Exmud.DemoGame.Systems.Combat do
         turn: combat_state.turn_count
       }
 
-      new_state = %{combat_state |
-        fled: true,
-        log: combat_state.log ++ [log_entry]
-      }
+      new_state = %{combat_state | fled: true, log: combat_state.log ++ [log_entry]}
 
       {:ok, new_state, %{action: :flee, success: true}}
     else
@@ -291,10 +302,11 @@ defmodule Exmud.DemoGame.Systems.Combat do
         turn: combat_state.turn_count
       }
 
-      new_state = %{combat_state |
-        player_turn: false,
-        player_defending: false,
-        log: combat_state.log ++ [log_entry]
+      new_state = %{
+        combat_state
+        | player_turn: false,
+          player_defending: false,
+          log: combat_state.log ++ [log_entry]
       }
 
       {:ok, new_state, %{action: :flee, success: false}}
@@ -303,12 +315,14 @@ defmodule Exmud.DemoGame.Systems.Combat do
 
   defp execute_enemy_attack(combat_state, game_state) do
     # Get enemy stats
-    enemy_atk = get_in(combat_state.enemy.stats, ["attack"]) ||
-                get_in(combat_state.enemy.stats, [:attack]) || 5
+    enemy_atk =
+      get_in(combat_state.enemy.stats, ["attack"]) ||
+        get_in(combat_state.enemy.stats, [:attack]) || 5
 
     # Player defense
-    player_def = get_in(game_state.stats, ["sta"]) ||
-                 get_in(game_state.stats, [:sta]) || 10
+    player_def =
+      get_in(game_state.stats, ["sta"]) ||
+        get_in(game_state.stats, [:sta]) || 10
 
     # Apply defense bonus if player is defending
     defense_multiplier = if combat_state.player_defending, do: 2.0, else: 1.0
@@ -322,20 +336,24 @@ defmodule Exmud.DemoGame.Systems.Combat do
     final_damage = max(1, trunc(damage * (1 + variance / 100)))
 
     # Create log entry
-    defense_text = if combat_state.player_defending, do: " Your defense reduces the blow!", else: ""
+    defense_text =
+      if combat_state.player_defending, do: " Your defense reduces the blow!", else: ""
+
     log_entry = %{
-      text: "The #{combat_state.enemy.name} attacks you for #{final_damage} damage!#{defense_text}",
+      text:
+        "The #{combat_state.enemy.name} attacks you for #{final_damage} damage!#{defense_text}",
       type: :enemy_attack,
       damage: final_damage,
       turn: combat_state.turn_count
     }
 
     # Update combat state (damage applied to player separately)
-    new_state = %{combat_state |
-      player_turn: true,
-      turn_count: combat_state.turn_count + 1,
-      enemy_defending: false,
-      log: combat_state.log ++ [log_entry]
+    new_state = %{
+      combat_state
+      | player_turn: true,
+        turn_count: combat_state.turn_count + 1,
+        enemy_defending: false,
+        log: combat_state.log ++ [log_entry]
     }
 
     {:ok, new_state, %{action: :attack, damage: final_damage}}
@@ -348,11 +366,12 @@ defmodule Exmud.DemoGame.Systems.Combat do
       turn: combat_state.turn_count
     }
 
-    new_state = %{combat_state |
-      player_turn: true,
-      turn_count: combat_state.turn_count + 1,
-      enemy_defending: true,
-      log: combat_state.log ++ [log_entry]
+    new_state = %{
+      combat_state
+      | player_turn: true,
+        turn_count: combat_state.turn_count + 1,
+        enemy_defending: true,
+        log: combat_state.log ++ [log_entry]
     }
 
     {:ok, new_state, %{action: :defend}}
@@ -360,12 +379,15 @@ defmodule Exmud.DemoGame.Systems.Combat do
 
   defp get_weapon_bonus(game_state) do
     # Check if player has a weapon equipped
-    weapon_id = get_in(game_state.equipment, ["weapon"]) ||
-                get_in(game_state.equipment, [:weapon])
+    weapon_id =
+      get_in(game_state.equipment, ["weapon"]) ||
+        get_in(game_state.equipment, [:weapon])
 
     if weapon_id do
       case Entities.get_entity(weapon_id) do
-        nil -> 0
+        nil ->
+          0
+
         entity_schema ->
           entity = Entities.to_entity(entity_schema)
           equipable = Map.get(entity.components || %{}, "equipable", %{})

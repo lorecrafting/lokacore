@@ -199,7 +199,8 @@ defmodule Exmud.DemoGame.Systems.Inventory do
 
     # Remove item and update health
     with {:ok, state} <- remove_item(state, item_id),
-         {:ok, state} <- PlayerGameState.update_state(state, %{health: %{current_health | current: new_current}}) do
+         {:ok, state} <-
+           PlayerGameState.update_state(state, %{health: %{current_health | current: new_current}}) do
       {:ok, state, %{healed: actual_healed}}
     end
   end
