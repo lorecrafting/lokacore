@@ -6,9 +6,17 @@ defmodule Exmud.DemoGame.Systems.Combat do
   and combat resolution. Combat state is stored in LiveView socket
   assigns rather than the database since it's temporary.
 
+  ## Combat Types
+
+  - **PvE** - Player vs Enemy (NPCs with combatant component)
+  - **PvP** - Player vs Player (other online players)
+
+  Both types share the same core mechanics (actions, damage, turns).
+  The differences are in initialization and rewards.
+
   ## Combat Flow
 
-  1. Player clicks "Attack" on a combatant NPC
+  1. Player clicks "Attack" on a combatant NPC or another player
   2. Combat starts with player's turn
   3. Each turn, combatant can: Attack, Defend, or Flee
   4. Combat ends when either side reaches 0 HP or player flees
@@ -18,6 +26,7 @@ defmodule Exmud.DemoGame.Systems.Combat do
       %{
         enemy_id: "uuid",
         enemy: %{name: "wolf", health: %{current: 30, max: 30}, ...},
+        pvp: false,                # true for PvP combat
         player_turn: true,
         turn_count: 1,
         player_defending: false,
@@ -29,11 +38,14 @@ defmodule Exmud.DemoGame.Systems.Combat do
 
       alias Exmud.DemoGame.Systems.Combat
 
-      # Start combat
+      # Start PvE combat
       {:ok, combat_state} = Combat.start_combat(entity_id, game_state)
 
-      # Player attacks
-      {:ok, combat_state, events} = Combat.player_action(combat_state, :attack, game_state)
+      # Start PvP combat
+      {:ok, combat_state} = Combat.start_pvp_combat(player_id, player_name, game_state)
+
+      # Player attacks (same for both types)
+      {:ok, combat_state, result} = Combat.player_action(combat_state, :attack, game_state)
 
       # Check if combat ended
       case Combat.check_combat_end(combat_state, game_state) do
@@ -47,6 +59,11 @@ defmodule Exmud.DemoGame.Systems.Combat do
   alias Exmud.Engine.Entities
   alias Exmud.DemoGame.PlayerGameState
   alias Exmud.DemoGame.Systems.Progression
+  alias Exmud.Utils.MapHelpers
+
+  # =============================================================================
+  # Combat Initialization
+  # =============================================================================
 
   @doc """
   Starts combat with a combatant entity.
@@ -74,6 +91,7 @@ defmodule Exmud.DemoGame.Systems.Combat do
               xp_reward: Map.get(combatant, "xp_reward", 10),
               gold_reward: Map.get(combatant, "gold_reward", 5)
             },
+            pvp: false,
             player_turn: true,
             turn_count: 1,
             player_defending: false,
@@ -87,6 +105,63 @@ defmodule Exmud.DemoGame.Systems.Combat do
         end
     end
   end
+
+  @doc """
+  Starts PvP combat with another player.
+
+  Takes the target player's id and name, and looks up their game state
+  to get their stats for combat.
+
+  Returns `{:ok, combat_state}` or `{:error, reason}`.
+  """
+  def start_pvp_combat(target_player_id, target_player_name, %PlayerGameState{} = _game_state) do
+    case PlayerGameState.get_state(target_player_id) do
+      nil ->
+        {:error, :player_not_found}
+
+      target_state ->
+        # Get target player's stats
+        target_stats = target_state.stats || %{}
+        target_health = target_state.health || %{"current" => 100, "max" => 100}
+
+        # Calculate combat stats from player stats
+        target_str = Map.get(target_stats, "str") || Map.get(target_stats, :str) || 10
+        target_sta = Map.get(target_stats, "sta") || Map.get(target_stats, :sta) || 10
+        target_level = Map.get(target_stats, "level") || Map.get(target_stats, :level) || 1
+
+        combat_state = %{
+          enemy_id: target_player_id,
+          enemy: %{
+            name: target_player_name,
+            description: "A fellow adventurer",
+            health: %{
+              "current" => MapHelpers.get_flexible(target_health, :current, 100),
+              "max" => MapHelpers.get_flexible(target_health, :max, 100)
+            },
+            stats: %{
+              "attack" => target_str,
+              "defense" => div(target_sta, 2)
+            },
+            level: target_level,
+            # PvP rewards are reduced
+            xp_reward: target_level * 5,
+            gold_reward: 0
+          },
+          pvp: true,
+          player_turn: true,
+          turn_count: 1,
+          player_defending: false,
+          enemy_defending: false,
+          log: [%{text: "Combat with #{target_player_name} begins!", type: :info, turn: 0}]
+        }
+
+        {:ok, combat_state}
+    end
+  end
+
+  # =============================================================================
+  # Combat Actions (shared by PvE and PvP)
+  # =============================================================================
 
   @doc """
   Executes a player action during combat.
@@ -129,6 +204,10 @@ defmodule Exmud.DemoGame.Systems.Combat do
       end
     end
   end
+
+  # =============================================================================
+  # Combat Resolution
+  # =============================================================================
 
   @doc """
   Checks if combat has ended.
@@ -197,7 +276,9 @@ defmodule Exmud.DemoGame.Systems.Combat do
     end
   end
 
-  # Private Functions
+  # =============================================================================
+  # Private Functions - Damage Calculation and Combat Execution
+  # =============================================================================
 
   defp get_combatant_component(entity) do
     Map.get(entity.components || %{}, "combatant")

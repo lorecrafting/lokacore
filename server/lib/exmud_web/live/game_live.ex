@@ -22,6 +22,9 @@ defmodule ExmudWeb.GameLive do
 
   alias Exmud.Engine.Entities
   alias Exmud.Accounts
+  alias Exmud.Utils.MapHelpers
+
+  import ExmudWeb.GameLive.Components
 
   @impl true
   def mount(_params, _session, socket) do
@@ -55,9 +58,23 @@ defmodule ExmudWeb.GameLive do
     # Load other players in the room
     other_players = load_other_players(room.id, player.id)
 
+    # UI state - panel visibility and transient UI state
+    ui_state = %{
+      compass_open: false,
+      inventory_open: false,
+      quest_open: false,
+      stats_open: false,
+      chat_open: false,
+      chat_message: "",
+      context_entity: nil
+    }
+
     {:ok,
      socket
+     # Game world state
      |> assign(:room, room)
+     |> assign(:other_players, other_players)
+     # Player game state from DB
      |> assign(:game_state, game_state)
      |> assign(:inventory, game_state.inventory || [])
      |> assign(:inventory_items, inventory_items)
@@ -68,14 +85,9 @@ defmodule ExmudWeb.GameLive do
      |> assign(:completed_quests, completed_quests)
      |> assign(:stats, game_state.stats || %{})
      |> assign(:health, game_state.health || %{})
-     |> assign(:other_players, other_players)
-     |> assign(:context_entity, nil)
-     |> assign(:compass_open, false)
-     |> assign(:inventory_open, false)
-     |> assign(:quest_open, false)
-     |> assign(:stats_open, false)
-     |> assign(:chat_open, false)
-     |> assign(:chat_message, "")
+     # UI state
+     |> assign(:ui, ui_state)
+     # Interaction state (modals/overlays)
      |> assign(:dialogue, nil)
      |> assign(:dialogue_npc, nil)
      |> assign(:combat, nil)
@@ -133,78 +145,84 @@ defmodule ExmudWeb.GameLive do
   def render(assigns) do
     ~H"""
     <div class="ebook-page" style="padding-bottom: 5rem;">
-      <%= if @cutscene do %>
-        <.cutscene_panel cutscene={@cutscene} />
-      <% else %>
-        <%= if @combat do %>
-          <.combat_panel
-            combat={@combat}
-            health={@health}
-            stats={@stats}
-            room_title={@room.title}
-          />
-        <% else %>
-          <%= if @dialogue do %>
-            <.dialogue_panel
-              dialogue={@dialogue}
-              npc={@dialogue_npc}
-              room_title={@room.title}
-            />
-          <% else %>
-            <%= if @stats_open do %>
-              <.stats_panel
-                game_state={@game_state}
-                health={@health}
-              />
-            <% else %>
-              <%= if @quest_open do %>
-                <.quest_panel
-                  active_quests={@active_quests}
-                  completed_quests={@completed_quests}
-                />
-              <% else %>
-                <%= if @inventory_open do %>
-                  <.inventory_panel
-                    inventory_items={@inventory_items}
-                    equipped_items={@equipped_items}
-                    stats={@stats}
-                    health={@health}
-                  />
-                <% else %>
-                  <%= if @context_entity do %>
-                    <.context_panel
-                      entity={@context_entity}
-                      room_title={@room.title}
-                      compass_open={@compass_open}
-                      exits={@room.exits}
-                    />
-                  <% else %>
-                    <.room_view
-                      room={@room}
-                      events={@events}
-                      compass_open={@compass_open}
-                      other_players={@other_players}
-                    />
-                  <% end %>
-                <% end %>
-              <% end %>
-            <% end %>
-          <% end %>
-        <% end %>
-      <% end %>
+      <.active_panel {assigns} />
 
-      <.chat_input_panel :if={@chat_open} />
+      <.chat_input_panel :if={@ui.chat_open} />
 
       <.bottom_bar
-        compass_open={@compass_open}
+        compass_open={@ui.compass_open}
         exits={@room.exits}
-        inventory_open={@inventory_open}
-        quest_open={@quest_open}
-        stats_open={@stats_open}
-        chat_open={@chat_open}
+        inventory_open={@ui.inventory_open}
+        quest_open={@ui.quest_open}
+        stats_open={@ui.stats_open}
+        chat_open={@ui.chat_open}
       />
     </div>
     """
+  end
+
+  # Determines which main panel to show based on current state
+  # Priority order: cutscene > combat > dialogue > panels > context > room
+  defp active_panel(assigns) do
+    cond do
+      assigns[:cutscene] ->
+        ~H"<.cutscene_panel cutscene={@cutscene} />"
+
+      assigns[:combat] ->
+        ~H"""
+        <.combat_panel
+          combat={@combat}
+          health={@health}
+          stats={@stats}
+          room_title={@room.title}
+        />
+        """
+
+      assigns[:dialogue] ->
+        ~H"""
+        <.dialogue_panel
+          dialogue={@dialogue}
+          npc={@dialogue_npc}
+          room_title={@room.title}
+        />
+        """
+
+      assigns.ui.stats_open ->
+        ~H"<.stats_panel game_state={@game_state} health={@health} />"
+
+      assigns.ui.quest_open ->
+        ~H"<.quest_panel active_quests={@active_quests} completed_quests={@completed_quests} />"
+
+      assigns.ui.inventory_open ->
+        ~H"""
+        <.inventory_panel
+          inventory_items={@inventory_items}
+          equipped_items={@equipped_items}
+          stats={@stats}
+          health={@health}
+        />
+        """
+
+      assigns.ui.context_entity ->
+        ~H"""
+        <.context_panel
+          entity={@ui.context_entity}
+          room_title={@room.title}
+          compass_open={@ui.compass_open}
+          exits={@room.exits}
+        />
+        """
+
+      true ->
+        ~H"""
+        <.room_view
+          room={@room}
+          events={@events}
+          compass_open={@ui.compass_open}
+          other_players={@other_players}
+        />
+        """
+    end
   end
 
   # Chat Input Panel - overlay for typing messages
@@ -228,560 +246,7 @@ defmodule ExmudWeb.GameLive do
     """
   end
 
-  # Room View Component
-  attr :room, :map, required: true
-  attr :events, :list, required: true
-  attr :compass_open, :boolean, required: true
-  attr :other_players, :list, required: true
-
-  defp room_view(assigns) do
-    ~H"""
-    <div class="ebook-context">
-      <h1 class="ebook-title">{@room.title}</h1>
-
-      <p class="ebook-prose">{@room.description}</p>
-
-      <.entities_section entities={@room.entities} items={@room.items} />
-
-      <.players_section other_players={@other_players} />
-
-      <.events_section events={@events} />
-    </div>
-    """
-  end
-
-  # Players Section - shows other players in the room
-  attr :other_players, :list, required: true
-
-  defp players_section(assigns) do
-    ~H"""
-    <div :if={length(@other_players) > 0} class="mt-4">
-      <p class="ebook-prose" style="text-indent: 0;">
-        <%= for {player, idx} <- Enum.with_index(@other_players) do %>
-          <%= if idx > 0 do %>
-            {if idx == length(@other_players) - 1, do: " and ", else: ", "}
-          <% end %>
-          <span class="ebook-link--static">{player.name}</span>
-        <% end %>
-        <%= if length(@other_players) == 1 do %>
-          is here.
-        <% else %>
-          are here.
-        <% end %>
-      </p>
-    </div>
-    """
-  end
-
-  # Entities Section
-  attr :entities, :list, required: true
-  attr :items, :list, required: true
-
-  defp entities_section(assigns) do
-    ~H"""
-    <div class="mt-6">
-      <p class="ebook-prose" style="text-indent: 0;">
-        <%= for {entity, idx} <- Enum.with_index(@entities) do %>
-          <%= if idx > 0 do %>
-          <% end %>
-          {entity.short_desc}
-          <span
-            class="ebook-link"
-            phx-click="click_entity"
-            phx-value-id={entity.id}
-            phx-value-type="npc"
-          ><%= entity.name %></span>{if entity[:suffix], do: " #{entity.suffix}", else: ""}.{if idx <
-                                                                                                  length(
-                                                                                                    @entities
-                                                                                                  ) -
-                                                                                                    1,
-                                                                                                do: ""}
-        <% end %>
-        <%= if length(@entities) > 3 do %>
-          <span class="ebook-more">[...{length(@entities) - 3} more]</span>
-        <% end %>
-      </p>
-
-      <p class="ebook-prose" style="text-indent: 0;">
-        <%= for {item, idx} <- Enum.with_index(@items) do %>
-          <%= if idx > 0 do %>
-          <% end %>
-          {item.desc}
-          <span
-            class="ebook-link"
-            phx-click="click_entity"
-            phx-value-id={item.id}
-            phx-value-type="item"
-          ><%= item.name %></span>{if item[:suffix], do: " #{item.suffix}", else: ""}.
-        <% end %>
-      </p>
-    </div>
-    """
-  end
-
-  # Events Section
-  attr :events, :list, required: true
-
-  defp events_section(assigns) do
-    ~H"""
-    <div :if={length(@events) > 0} class="ebook-events">
-      <div :for={event <- @events} class="ebook-event">
-        {event.text}
-      </div>
-    </div>
-    """
-  end
-
-  # Context Panel Component (when entity is clicked)
-  attr :entity, :map, required: true
-  attr :room_title, :string, required: true
-  attr :compass_open, :boolean, required: true
-  attr :exits, :list, required: true
-
-  defp context_panel(assigns) do
-    ~H"""
-    <div class="ebook-context">
-      <h1 class="ebook-title ebook-title--muted">{@room_title}</h1>
-
-      <p class="ebook-prose" style="text-indent: 0;">{@entity.description}</p>
-
-      <ul class="ebook-menu">
-        <li class="ebook-menu-item" phx-click="menu_action" phx-value-action="inspect">
-          Inspect
-        </li>
-        <%= if @entity.type == :item do %>
-          <li class="ebook-menu-item" phx-click="menu_action" phx-value-action="get">
-            Get
-          </li>
-        <% else %>
-          <%= if has_component?(@entity, "conversant") do %>
-            <li class="ebook-menu-item" phx-click="menu_action" phx-value-action="talk">
-              Talk
-            </li>
-          <% end %>
-          <%= if has_component?(@entity, "trader") do %>
-            <li class="ebook-menu-item" phx-click="menu_action" phx-value-action="trade">
-              Trade
-            </li>
-          <% end %>
-          <%= if has_component?(@entity, "quest_giver") do %>
-            <li class="ebook-menu-item" phx-click="menu_action" phx-value-action="quest">
-              Quest
-            </li>
-          <% end %>
-          <%= if has_component?(@entity, "combatant") do %>
-            <li class="ebook-menu-item" phx-click="menu_action" phx-value-action="attack">
-              Attack
-            </li>
-          <% end %>
-        <% end %>
-        <li class="ebook-menu-item" phx-click="leave_context">
-          Leave
-        </li>
-      </ul>
-    </div>
-    """
-  end
-
-  # Inventory Panel Component
-  attr :inventory_items, :list, required: true
-  attr :equipped_items, :map, required: true
-  attr :stats, :map, required: true
-  attr :health, :map, required: true
-
-  defp inventory_panel(assigns) do
-    ~H"""
-    <div class="ebook-context">
-      <h1 class="ebook-title">Inventory</h1>
-
-      <div class="mt-4">
-        <p class="ebook-prose" style="text-indent: 0; font-style: italic; opacity: 0.7;">
-          Health: {@health["current"] || @health[:current] || 100} / {@health["max"] || @health[:max] ||
-            100}
-        </p>
-      </div>
-
-      <div class="mt-4">
-        <h2 class="ebook-subtitle">Equipment</h2>
-        <ul class="ebook-menu">
-          <.equipment_slot slot="weapon" item={@equipped_items[:weapon] || @equipped_items["weapon"]} />
-          <.equipment_slot slot="armor" item={@equipped_items[:armor] || @equipped_items["armor"]} />
-          <.equipment_slot
-            slot="accessory"
-            item={@equipped_items[:accessory] || @equipped_items["accessory"]}
-          />
-        </ul>
-      </div>
-
-      <div class="mt-4">
-        <h2 class="ebook-subtitle">Carried Items</h2>
-        <%= if length(@inventory_items) > 0 do %>
-          <ul class="ebook-menu">
-            <li :for={item <- @inventory_items} class="ebook-menu-item--row">
-              <span class="ebook-item-name">{item.name}</span>
-              <span class="ebook-item-actions">
-                <%= if is_equipable?(item) do %>
-                  <span class="ebook-link" phx-click="equip_item" phx-value-id={item.id}>equip</span>
-                <% end %>
-                <span class="ebook-link" phx-click="drop_item" phx-value-id={item.id}>drop</span>
-              </span>
-            </li>
-          </ul>
-        <% else %>
-          <p class="ebook-prose" style="text-indent: 0; font-style: italic; opacity: 0.7;">
-            Your inventory is empty.
-          </p>
-        <% end %>
-      </div>
-
-      <div class="mt-6">
-        <span class="ebook-link" phx-click="toggle_inventory">Close</span>
-      </div>
-    </div>
-    """
-  end
-
-  attr :slot, :string, required: true
-  attr :item, :map, default: nil
-
-  defp equipment_slot(assigns) do
-    ~H"""
-    <li class="ebook-menu-item--row">
-      <span class="ebook-item-name">{String.capitalize(@slot)}:</span>
-      <%= if @item do %>
-        <span class="ebook-item-actions">
-          <span class="ebook-item-equipped">{@item.name}</span>
-          <span class="ebook-link" phx-click="unequip_item" phx-value-slot={@slot}>unequip</span>
-        </span>
-      <% else %>
-        <span class="ebook-link--muted">empty</span>
-      <% end %>
-    </li>
-    """
-  end
-
-  # Quest Panel Component
-  attr :active_quests, :list, required: true
-  attr :completed_quests, :list, required: true
-
-  defp quest_panel(assigns) do
-    ~H"""
-    <div class="ebook-context">
-      <h1 class="ebook-title">Quest Log</h1>
-
-      <div class="mt-4">
-        <h2 class="ebook-subtitle">Active Quests</h2>
-        <%= if length(@active_quests) > 0 do %>
-          <div :for={quest <- @active_quests} class="ebook-quest">
-            <p class="ebook-quest-title">
-              {quest.name || quest.id}
-              <%= if quest.is_complete do %>
-                <span class="ebook-tag">[complete]</span>
-              <% end %>
-            </p>
-            <p class="ebook-prose" style="text-indent: 0; font-size: 0.9em; opacity: 0.8;">
-              {quest.description}
-            </p>
-            <ul class="ebook-objectives">
-              <li
-                :for={obj <- quest.objectives || []}
-                class={"ebook-objective #{if obj.completed, do: "ebook-objective--done", else: ""}"}
-              >
-                <%= if obj.completed do %>
-                  ✓
-                <% else %>
-                  ○
-                <% end %>
-                {obj.description}
-                <%= if obj.target_count > 1 do %>
-                  ({obj.progress}/{obj.target_count})
-                <% end %>
-              </li>
-            </ul>
-            <%= if quest.is_complete do %>
-              <div class="mt-2">
-                <span class="ebook-link" phx-click="turn_in_quest" phx-value-id={quest.id}>
-                  Turn in quest
-                </span>
-              </div>
-            <% end %>
-          </div>
-        <% else %>
-          <p class="ebook-prose" style="text-indent: 0; font-style: italic; opacity: 0.7;">
-            No active quests. Speak with villagers to find adventure.
-          </p>
-        <% end %>
-      </div>
-
-      <%= if length(@completed_quests) > 0 do %>
-        <div class="mt-4">
-          <h2 class="ebook-subtitle">Completed</h2>
-          <p class="ebook-prose" style="text-indent: 0; opacity: 0.7;">
-            {length(@completed_quests)} quest(s) completed
-          </p>
-        </div>
-      <% end %>
-
-      <div class="mt-6">
-        <span class="ebook-link" phx-click="toggle_quest">Close</span>
-      </div>
-    </div>
-    """
-  end
-
-  # Stats Panel Component - Shows player stats, XP, level, skill points
-  attr :game_state, :map, required: true
-  attr :health, :map, required: true
-
-  defp stats_panel(assigns) do
-    progression = Progression.get_progression_stats(assigns.game_state)
-    stats = assigns.game_state.stats || %{}
-    assigns = assign(assigns, :progression, progression)
-    assigns = assign(assigns, :stats, stats)
-
-    ~H"""
-    <div class="ebook-context">
-      <h1 class="ebook-title">Character</h1>
-
-      <div class="mt-4">
-        <h2 class="ebook-subtitle">Vitals</h2>
-        <p class="ebook-prose" style="text-indent: 0;">
-          Health: {get_health_current(@health)} / {get_health_max(@health)}
-        </p>
-      </div>
-
-      <div class="mt-4">
-        <h2 class="ebook-subtitle">Progression</h2>
-        <p class="ebook-prose" style="text-indent: 0;">
-          Level: {@progression.level}
-        </p>
-        <p class="ebook-prose" style="text-indent: 0;">
-          Experience: {@progression.xp_into_level} / {@progression.xp_needed_for_next} ({@progression.xp_progress_percent}%)
-        </p>
-        <p class="ebook-prose" style="text-indent: 0;">
-          Total XP: {@progression.total_xp}
-        </p>
-        <p class="ebook-prose" style="text-indent: 0; font-weight: bold;">
-          Skill Points: {@progression.skill_points}
-        </p>
-      </div>
-
-      <div class="mt-4">
-        <h2 class="ebook-subtitle">Attributes</h2>
-        <p class="ebook-prose" style="text-indent: 0;">
-          Strength: {get_stat(@stats, "str", 10)}
-        </p>
-        <p class="ebook-prose" style="text-indent: 0;">
-          Dexterity: {get_stat(@stats, "dex", 10)}
-        </p>
-        <p class="ebook-prose" style="text-indent: 0;">
-          Stamina: {get_stat(@stats, "sta", 10)}
-        </p>
-      </div>
-
-      <div class="mt-4">
-        <h2 class="ebook-subtitle">Wealth</h2>
-        <p class="ebook-prose" style="text-indent: 0;">
-          Gold: {get_stat(@stats, "gold", 0)}
-        </p>
-      </div>
-
-      <%= if length(@progression.learned_skills) > 0 do %>
-        <div class="mt-4">
-          <h2 class="ebook-subtitle">Skills</h2>
-          <ul class="ebook-menu">
-            <li :for={skill <- @progression.learned_skills} class="ebook-menu-item--row">
-              {format_skill_name(skill)}
-            </li>
-          </ul>
-        </div>
-      <% end %>
-
-      <div class="mt-6">
-        <span class="ebook-link" phx-click="toggle_stats">Close</span>
-      </div>
-    </div>
-    """
-  end
-
-  defp get_stat(stats, key, default) do
-    Map.get(stats, key) || Map.get(stats, String.to_atom(key)) || default
-  end
-
-  defp format_skill_name(skill_id) do
-    skill_id
-    |> String.replace("_", " ")
-    |> String.split(" ")
-    |> Enum.map(&String.capitalize/1)
-    |> Enum.join(" ")
-  end
-
-  # Dialogue Panel Component
-  attr :dialogue, :map, required: true
-  attr :npc, :map, required: true
-  attr :room_title, :string, required: true
-
-  defp dialogue_panel(assigns) do
-    ~H"""
-    <div class="ebook-context">
-      <h1 class="ebook-title ebook-title--muted">{@room_title}</h1>
-
-      <div class="ebook-dialogue">
-        <p class="ebook-dialogue-speaker">
-          The <span class="ebook-link--static">{@npc.name}</span> says:
-        </p>
-        <p class="ebook-prose ebook-dialogue-text">
-          "{@dialogue.text}"
-        </p>
-      </div>
-
-      <%= if length(@dialogue.choices) > 0 do %>
-        <ul class="ebook-menu">
-          <li
-            :for={choice <- @dialogue.choices}
-            class="ebook-menu-item"
-            phx-click="dialogue_choice"
-            phx-value-index={choice.index}
-          >
-            {choice.text}
-          </li>
-        </ul>
-      <% else %>
-        <div class="mt-4">
-          <span class="ebook-link" phx-click="end_dialogue">Continue</span>
-        </div>
-      <% end %>
-    </div>
-    """
-  end
-
-  # Combat Panel Component - Text-only scrolling log with action queue
-  attr :combat, :map, required: true
-  attr :health, :map, required: true
-  attr :stats, :map, required: true
-  attr :room_title, :string, required: true
-
-  defp combat_panel(assigns) do
-    ~H"""
-    <div class="ebook-context">
-      <h1 class="ebook-title">Combat</h1>
-
-      <div
-        class="ebook-combat-log"
-        style="max-height: 300px; overflow-y: auto; padding: 1rem; border: 1px solid #333; margin-bottom: 1rem; font-family: 'Crimson Text', Georgia, serif;"
-      >
-        <p
-          class="ebook-prose"
-          style="text-indent: 0; margin-bottom: 0.75rem; border-bottom: 1px solid #ccc; padding-bottom: 0.5rem;"
-        >
-          You face the {String.capitalize(@combat.enemy.name)}. [HP: {get_enemy_health_current(
-            @combat
-          )}/{get_enemy_health_max(@combat)}]
-        </p>
-        <p class="ebook-prose" style="text-indent: 0; margin-bottom: 0.75rem; opacity: 0.8;">
-          Your health: {get_health_current(@health)}/{get_health_max(@health)}
-        </p>
-        <%= for entry <- @combat.log do %>
-          <p class="ebook-prose" style="text-indent: 0; margin-bottom: 0.5rem;">
-            {entry.text}
-          </p>
-        <% end %>
-      </div>
-
-      <%= if @combat.player_turn do %>
-        <p class="ebook-prose" style="text-indent: 0; font-style: italic; margin-bottom: 1rem;">
-          Your turn. Choose your action:
-        </p>
-        <ul class="ebook-menu">
-          <li class="ebook-menu-item" phx-click="combat_action" phx-value-action="attack">
-            Attack
-          </li>
-          <li class="ebook-menu-item" phx-click="combat_action" phx-value-action="defend">
-            Defend
-          </li>
-          <li class="ebook-menu-item" phx-click="combat_action" phx-value-action="flee">
-            Flee
-          </li>
-        </ul>
-      <% else %>
-        <p class="ebook-prose" style="text-indent: 0; font-style: italic;">
-          Enemy's turn...
-        </p>
-      <% end %>
-    </div>
-    """
-  end
-
-  # Combat helper functions
-  defp get_health_current(health) do
-    Map.get(health, "current") || Map.get(health, :current) || 100
-  end
-
-  defp get_health_max(health) do
-    Map.get(health, "max") || Map.get(health, :max) || 100
-  end
-
-  defp get_enemy_health_current(combat) do
-    Map.get(combat.enemy.health, "current") || Map.get(combat.enemy.health, :current) || 0
-  end
-
-  defp get_enemy_health_max(combat) do
-    Map.get(combat.enemy.health, "max") || Map.get(combat.enemy.health, :max) || 50
-  end
-
-  # Cutscene Panel Component
-  attr :cutscene, :map, required: true
-
-  defp cutscene_panel(assigns) do
-    ~H"""
-    <div
-      class="ebook-context"
-      style="min-height: 60vh; display: flex; flex-direction: column; justify-content: center;"
-    >
-      <div class="ebook-cutscene" style="text-align: center; padding: 2rem;">
-        <%= if @cutscene.title do %>
-          <h1 class="ebook-title" style="font-size: 2rem; margin-bottom: 2rem; letter-spacing: 0.1em;">
-            {@cutscene.title}
-          </h1>
-        <% end %>
-
-        <div class="ebook-cutscene-text" style="max-width: 500px; margin: 0 auto;">
-          <%= for {line, idx} <- Enum.with_index(@cutscene.pages |> Enum.at(@cutscene.current_page, []) |> List.wrap()) do %>
-            <p
-              class="ebook-prose"
-              style={"text-indent: 0; margin-bottom: 1rem; opacity: #{if idx == 0, do: 1, else: 0.9}; font-size: 1.1rem; line-height: 1.8;"}
-            >
-              {line}
-            </p>
-          <% end %>
-        </div>
-
-        <div class="ebook-cutscene-nav" style="margin-top: 2rem;">
-          <%= if @cutscene.current_page < length(@cutscene.pages) - 1 do %>
-            <span class="ebook-link" phx-click="cutscene_next" style="font-size: 1.1rem;">
-              Continue →
-            </span>
-          <% else %>
-            <span class="ebook-link" phx-click="cutscene_end" style="font-size: 1.1rem;">
-              Begin your journey...
-            </span>
-          <% end %>
-        </div>
-
-        <div class="ebook-cutscene-pages" style="margin-top: 1rem; opacity: 0.5; font-size: 0.9rem;">
-          {page_indicator(@cutscene.current_page, length(@cutscene.pages))}
-        </div>
-      </div>
-    </div>
-    """
-  end
-
-  defp page_indicator(current, total) do
-    Enum.map(0..(total - 1), fn i ->
-      if i == current, do: "●", else: "○"
-    end)
-    |> Enum.join(" ")
-  end
+  # Components are imported from ExmudWeb.GameLive.Components
 
   # Check if this is the player's first login and show intro cutscene
   defp maybe_show_intro_cutscene(socket, game_state) do
@@ -819,102 +284,29 @@ defmodule ExmudWeb.GameLive do
     end
   end
 
-  defp is_equipable?(item) do
-    components = item[:components] || item.components || %{}
-    Map.has_key?(components, "equipable")
-  end
-
-  defp has_component?(entity, component_name) do
-    components = entity[:components] || %{}
-    Map.has_key?(components, component_name)
-  end
-
-  # Bottom Bar with Compass, Inventory, Quest Log, and Chat
-  attr :compass_open, :boolean, required: true
-  attr :exits, :list, required: true
-  attr :inventory_open, :boolean, required: true
-  attr :quest_open, :boolean, required: true
-  attr :stats_open, :boolean, required: true
-  attr :chat_open, :boolean, required: true
-
-  defp bottom_bar(assigns) do
-    ~H"""
-    <div class="ebook-bottombar">
-      <div class="ebook-bottombar-left">
-        <div class="ebook-compass" phx-click="toggle_compass">
-          <span class="ebook-compass-icon">⊕</span>
-
-          <div class={"ebook-compass-popup #{if @compass_open, do: "ebook-compass-popup--open", else: ""}"}>
-            <%= if length(@exits) > 0 do %>
-              <div :for={exit <- @exits}>
-                <span
-                  class="ebook-compass-direction"
-                  phx-click="navigate"
-                  phx-value-direction={exit.direction}
-                >
-                  {String.capitalize(exit.direction)} — {exit.destination}
-                </span>
-              </div>
-            <% else %>
-              <div class="ebook-compass-direction--disabled">No exits</div>
-            <% end %>
-          </div>
-        </div>
-      </div>
-
-      <div class="ebook-bottombar-right">
-        <span
-          class={"ebook-bottombar-btn #{if @chat_open, do: "ebook-bottombar-btn--active", else: ""}"}
-          phx-click="toggle_chat"
-          title="Say"
-        >
-          💬
-        </span>
-        <span
-          class={"ebook-bottombar-btn #{if @stats_open, do: "ebook-bottombar-btn--active", else: ""}"}
-          phx-click="toggle_stats"
-          title="Character Stats"
-        >
-          ♦
-        </span>
-        <span
-          class={"ebook-bottombar-btn #{if @quest_open, do: "ebook-bottombar-btn--active", else: ""}"}
-          phx-click="toggle_quest"
-          title="Quest Log"
-        >
-          ⚑
-        </span>
-        <span
-          class={"ebook-bottombar-btn #{if @inventory_open, do: "ebook-bottombar-btn--active", else: ""}"}
-          phx-click="toggle_inventory"
-          title="Inventory"
-        >
-          ☰
-        </span>
-      </div>
-    </div>
-    """
-  end
-
   # Event Handlers
 
   @impl true
+  def handle_event("click_entity", %{"id" => id, "type" => "player"}, socket) do
+    # Find the player in other_players list
+    entity = find_player_entity(socket.assigns.other_players, id)
+
+    {:noreply, update_ui(socket, %{context_entity: entity, compass_open: false})}
+  end
+
   def handle_event("click_entity", %{"id" => id, "type" => type}, socket) do
     # Find the entity and show context panel
     entity = find_entity(socket.assigns.room, id, type)
 
-    {:noreply,
-     socket
-     |> assign(:context_entity, entity)
-     |> assign(:compass_open, false)}
+    {:noreply, update_ui(socket, %{context_entity: entity, compass_open: false})}
   end
 
   def handle_event("leave_context", _params, socket) do
-    {:noreply, assign(socket, :context_entity, nil)}
+    {:noreply, update_ui(socket, %{context_entity: nil})}
   end
 
   def handle_event("menu_action", %{"action" => "get"}, socket) do
-    entity = socket.assigns.context_entity
+    entity = socket.assigns.ui.context_entity
     game_state = socket.assigns.game_state
 
     # Get the item entity from database
@@ -967,7 +359,7 @@ defmodule ExmudWeb.GameLive do
            |> assign(:active_quests, active_quests)
            |> assign(:completed_quests, completed_quests)
            |> assign(:room, room)
-           |> assign(:context_entity, nil)
+           |> update_ui(%{context_entity: nil})
            |> update(:events, fn events -> events ++ [event] ++ objective_events end)}
 
         {:error, _reason} ->
@@ -978,25 +370,26 @@ defmodule ExmudWeb.GameLive do
 
           {:noreply,
            socket
-           |> assign(:context_entity, nil)
+           |> update_ui(%{context_entity: nil})
            |> update(:events, fn events -> events ++ [event] end)}
       end
     else
-      {:noreply, assign(socket, :context_entity, nil)}
+      {:noreply, update_ui(socket, %{context_entity: nil})}
     end
   end
 
   def handle_event("menu_action", %{"action" => "talk"}, socket) do
-    entity = socket.assigns.context_entity
+    entity = socket.assigns.ui.context_entity
+    player_quests = socket.assigns.quests
 
-    # Try to start a dialogue with this NPC
-    case Dialogue.start_conversation(entity.id) do
+    # Try to start a dialogue with this NPC, passing quest state to filter choices
+    case Dialogue.start_conversation(entity.id, player_quests: player_quests) do
       {:ok, dialogue_node} ->
         {:noreply,
          socket
          |> assign(:dialogue, dialogue_node)
          |> assign(:dialogue_npc, entity)
-         |> assign(:context_entity, nil)}
+         |> update_ui(%{context_entity: nil})}
 
       {:error, _reason} ->
         # NPC has no dialogue, show default message
@@ -1007,13 +400,13 @@ defmodule ExmudWeb.GameLive do
 
         {:noreply,
          socket
-         |> assign(:context_entity, nil)
+         |> update_ui(%{context_entity: nil})
          |> update(:events, fn events -> events ++ [event] end)}
     end
   end
 
   def handle_event("menu_action", %{"action" => "attack"}, socket) do
-    entity = socket.assigns.context_entity
+    entity = socket.assigns.ui.context_entity
     game_state = socket.assigns.game_state
 
     # Start combat with this entity
@@ -1022,7 +415,7 @@ defmodule ExmudWeb.GameLive do
         {:noreply,
          socket
          |> assign(:combat, combat_state)
-         |> assign(:context_entity, nil)}
+         |> update_ui(%{context_entity: nil})}
 
       {:error, :not_combatant} ->
         event = %{
@@ -1032,16 +425,56 @@ defmodule ExmudWeb.GameLive do
 
         {:noreply,
          socket
-         |> assign(:context_entity, nil)
+         |> update_ui(%{context_entity: nil})
          |> update(:events, fn events -> events ++ [event] end)}
 
       {:error, _reason} ->
-        {:noreply, assign(socket, :context_entity, nil)}
+        {:noreply, update_ui(socket, %{context_entity: nil})}
+    end
+  end
+
+  def handle_event("menu_action", %{"action" => "attack_player"}, socket) do
+    entity = socket.assigns.ui.context_entity
+    player = socket.assigns.current_scope.player
+    player_name = player_display_name(player)
+    game_state = socket.assigns.game_state
+    room = socket.assigns.room
+
+    # Start PvP combat
+    case Combat.start_pvp_combat(entity.id, entity.name, game_state) do
+      {:ok, combat_state} ->
+        # Broadcast attack to room (so target player and others see it)
+        if room.id do
+          Phoenix.PubSub.broadcast(
+            Exmud.PubSub,
+            "room:#{room.id}",
+            {:player_attacks, player.id, player_name, entity.id, entity.name}
+          )
+        end
+
+        {:noreply,
+         socket
+         |> assign(:combat, combat_state)
+         |> update_ui(%{context_entity: nil})}
+
+      {:error, :player_not_found} ->
+        event = %{
+          text: "#{entity.name} is no longer here.",
+          timestamp: DateTime.utc_now()
+        }
+
+        {:noreply,
+         socket
+         |> update_ui(%{context_entity: nil})
+         |> update(:events, fn events -> events ++ [event] end)}
+
+      {:error, _reason} ->
+        {:noreply, update_ui(socket, %{context_entity: nil})}
     end
   end
 
   def handle_event("menu_action", %{"action" => action}, socket) do
-    entity = socket.assigns.context_entity
+    entity = socket.assigns.ui.context_entity
 
     # Add event for the action
     event = %{
@@ -1051,16 +484,18 @@ defmodule ExmudWeb.GameLive do
 
     {:noreply,
      socket
-     |> assign(:context_entity, nil)
+     |> update_ui(%{context_entity: nil})
      |> update(:events, fn events -> events ++ [event] end)}
   end
 
   # Combat event handlers
+  @combat_actions %{"attack" => :attack, "defend" => :defend, "flee" => :flee}
+
   def handle_event("combat_action", %{"action" => action}, socket) do
     combat = socket.assigns.combat
     game_state = socket.assigns.game_state
 
-    action_atom = String.to_existing_atom(action)
+    action_atom = Map.get(@combat_actions, action, :attack)
 
     case Combat.player_action(combat, action_atom, game_state) do
       {:ok, new_combat, _result} ->
@@ -1110,15 +545,16 @@ defmodule ExmudWeb.GameLive do
   end
 
   def handle_event("toggle_compass", _params, socket) do
-    {:noreply, update(socket, :compass_open, &(!&1))}
+    {:noreply, toggle_ui_panel(socket, :compass_open)}
   end
 
   def handle_event("dialogue_choice", %{"index" => index_str}, socket) do
     index = String.to_integer(index_str)
     npc = socket.assigns.dialogue_npc
     current_node = socket.assigns.dialogue
+    player_quests = socket.assigns.quests
 
-    case Dialogue.choose_option(npc.id, index, current_node.id) do
+    case Dialogue.choose_option(npc.id, index, current_node.id, player_quests: player_quests) do
       {:ok, :end, %{action: action}} ->
         socket = handle_dialogue_action(socket, action)
 
@@ -1148,47 +584,19 @@ defmodule ExmudWeb.GameLive do
   end
 
   def handle_event("toggle_inventory", _params, socket) do
-    {:noreply,
-     socket
-     |> update(:inventory_open, &(!&1))
-     |> assign(:compass_open, false)
-     |> assign(:quest_open, false)
-     |> assign(:stats_open, false)
-     |> assign(:chat_open, false)
-     |> assign(:context_entity, nil)}
+    {:noreply, toggle_ui_panel(socket, :inventory_open)}
   end
 
   def handle_event("toggle_quest", _params, socket) do
-    {:noreply,
-     socket
-     |> update(:quest_open, &(!&1))
-     |> assign(:compass_open, false)
-     |> assign(:inventory_open, false)
-     |> assign(:stats_open, false)
-     |> assign(:chat_open, false)
-     |> assign(:context_entity, nil)}
+    {:noreply, toggle_ui_panel(socket, :quest_open)}
   end
 
   def handle_event("toggle_stats", _params, socket) do
-    {:noreply,
-     socket
-     |> update(:stats_open, &(!&1))
-     |> assign(:compass_open, false)
-     |> assign(:inventory_open, false)
-     |> assign(:quest_open, false)
-     |> assign(:chat_open, false)
-     |> assign(:context_entity, nil)}
+    {:noreply, toggle_ui_panel(socket, :stats_open)}
   end
 
   def handle_event("toggle_chat", _params, socket) do
-    {:noreply,
-     socket
-     |> update(:chat_open, &(!&1))
-     |> assign(:compass_open, false)
-     |> assign(:inventory_open, false)
-     |> assign(:quest_open, false)
-     |> assign(:stats_open, false)
-     |> assign(:context_entity, nil)}
+    {:noreply, toggle_ui_panel(socket, :chat_open)}
   end
 
   def handle_event("say", %{"message" => message}, socket) do
@@ -1216,15 +624,15 @@ defmodule ExmudWeb.GameLive do
 
       {:noreply,
        socket
-       |> assign(:chat_open, false)
+       |> update_ui(%{chat_open: false})
        |> update(:events, fn events -> events ++ [event] end)}
     else
-      {:noreply, assign(socket, :chat_open, false)}
+      {:noreply, update_ui(socket, %{chat_open: false})}
     end
   end
 
   def handle_event("chat_keydown", %{"key" => "Escape"}, socket) do
-    {:noreply, assign(socket, :chat_open, false)}
+    {:noreply, update_ui(socket, %{chat_open: false})}
   end
 
   def handle_event("chat_keydown", _params, socket) do
@@ -1255,7 +663,7 @@ defmodule ExmudWeb.GameLive do
          |> assign(:active_quests, active_quests)
          |> assign(:completed_quests, completed_quests)
          |> assign(:stats, new_game_state.stats)
-         |> assign(:quest_open, false)
+         |> update_ui(%{quest_open: false})
          |> update(:events, fn events -> events ++ [event] end)}
 
       {:error, :quest_not_complete} ->
@@ -1283,7 +691,7 @@ defmodule ExmudWeb.GameLive do
 
       {:noreply,
        socket
-       |> assign(:inventory_open, false)
+       |> update_ui(%{inventory_open: false})
        |> update(:events, fn events -> events ++ [event] end)}
     else
       {:noreply, socket}
@@ -1382,34 +790,40 @@ defmodule ExmudWeb.GameLive do
     end
   end
 
+  @equipment_slots %{"weapon" => :weapon, "armor" => :armor, "accessory" => :accessory}
+
   def handle_event("unequip_item", %{"slot" => slot_string}, socket) do
     game_state = socket.assigns.game_state
-    slot = String.to_existing_atom(slot_string)
+    slot = Map.get(@equipment_slots, slot_string)
 
-    case Equipment.unequip(game_state, slot) do
-      {:ok, new_game_state} ->
-        inventory_items = Inventory.list_items(new_game_state)
-        equipped_items = Equipment.get_equipped(new_game_state)
+    if slot do
+      case Equipment.unequip(game_state, slot) do
+        {:ok, new_game_state} ->
+          inventory_items = Inventory.list_items(new_game_state)
+          equipped_items = Equipment.get_equipped(new_game_state)
 
-        event = %{
-          text: "You unequip your #{slot_string}.",
-          timestamp: DateTime.utc_now()
-        }
+          event = %{
+            text: "You unequip your #{slot_string}.",
+            timestamp: DateTime.utc_now()
+          }
 
-        {:noreply,
-         socket
-         |> assign(:game_state, new_game_state)
-         |> assign(:inventory, new_game_state.inventory)
-         |> assign(:inventory_items, inventory_items)
-         |> assign(:equipment, new_game_state.equipment)
-         |> assign(:equipped_items, equipped_items)
-         |> update(:events, fn events -> events ++ [event] end)}
+          {:noreply,
+           socket
+           |> assign(:game_state, new_game_state)
+           |> assign(:inventory, new_game_state.inventory)
+           |> assign(:inventory_items, inventory_items)
+           |> assign(:equipment, new_game_state.equipment)
+           |> assign(:equipped_items, equipped_items)
+           |> update(:events, fn events -> events ++ [event] end)}
 
-      {:error, :slot_empty} ->
-        {:noreply, socket}
+        {:error, :slot_empty} ->
+          {:noreply, socket}
 
-      {:error, _} ->
-        {:noreply, socket}
+        {:error, _} ->
+          {:noreply, socket}
+      end
+    else
+      {:noreply, socket}
     end
   end
 
@@ -1434,7 +848,7 @@ defmodule ExmudWeb.GameLive do
 
         {:noreply,
          socket
-         |> assign(:compass_open, false)
+         |> update_ui(%{compass_open: false})
          |> update(:events, fn events -> events ++ [event] end)}
 
       %{destination_id: destination_id} ->
@@ -1483,8 +897,7 @@ defmodule ExmudWeb.GameLive do
              |> assign(:room, new_room)
              |> assign(:game_state, new_game_state)
              |> assign(:other_players, other_players)
-             |> assign(:compass_open, false)
-             |> assign(:context_entity, nil)
+             |> update_ui(%{compass_open: false, context_entity: nil})
              |> assign(:events, [event])}
 
           {:error, :not_found} ->
@@ -1495,7 +908,7 @@ defmodule ExmudWeb.GameLive do
 
             {:noreply,
              socket
-             |> assign(:compass_open, false)
+             |> update_ui(%{compass_open: false})
              |> update(:events, fn events -> events ++ [event] end)}
         end
     end
@@ -1510,8 +923,7 @@ defmodule ExmudWeb.GameLive do
         # Apply damage to player
         current_health = socket.assigns.health
 
-        current_hp =
-          Map.get(current_health, "current") || Map.get(current_health, :current) || 100
+        current_hp = MapHelpers.get_flexible(current_health, :current, 100)
 
         new_hp = max(0, current_hp - damage)
         new_health = Map.put(current_health, "current", new_hp)
@@ -1609,6 +1021,63 @@ defmodule ExmudWeb.GameLive do
     end
   end
 
+  # Handle player attacking another player
+  def handle_info({:player_attacks, attacker_id, attacker_name, target_id, _target_name}, socket) do
+    current_player = socket.assigns.current_scope.player
+
+    # Ignore our own attack (we already added it locally)
+    if attacker_id == current_player.id do
+      {:noreply, socket}
+    else
+      event =
+        if target_id == current_player.id do
+          # We are the target!
+          %{
+            text: "#{attacker_name} attacks you!",
+            timestamp: DateTime.utc_now()
+          }
+        else
+          # We're just a bystander
+          %{
+            text: "#{attacker_name} attacks another player!",
+            timestamp: DateTime.utc_now()
+          }
+        end
+
+      {:noreply, update(socket, :events, fn events -> events ++ [event] end)}
+    end
+  end
+
+  # Handle player being defeated in PvP
+  def handle_info(
+        {:player_defeated, victor_id, victor_name, defeated_id, _defeated_name},
+        socket
+      ) do
+    current_player = socket.assigns.current_scope.player
+
+    # Ignore our own victory (we already handled it locally)
+    if victor_id == current_player.id do
+      {:noreply, socket}
+    else
+      event =
+        if defeated_id == current_player.id do
+          # We were defeated!
+          %{
+            text: "You have been defeated by #{victor_name}!",
+            timestamp: DateTime.utc_now()
+          }
+        else
+          # We're just a bystander
+          %{
+            text: "#{victor_name} has defeated another player!",
+            timestamp: DateTime.utc_now()
+          }
+        end
+
+      {:noreply, update(socket, :events, fn events -> events ++ [event] end)}
+    end
+  end
+
   # Handle mob respawn notifications
   def handle_info({:mob_respawned, _entity_id, mob_name}, socket) do
     # Reload room to show the respawned mob
@@ -1627,9 +1096,26 @@ defmodule ExmudWeb.GameLive do
 
   defp handle_combat_victory(socket, combat, rewards) do
     game_state = socket.assigns.game_state
+    room = socket.assigns.room
+    is_pvp = Map.get(combat, :pvp, false)
 
-    # Despawn the defeated mob (will respawn after delay)
-    Spawner.despawn_mob(combat.enemy_id)
+    # For PvE, despawn the defeated mob (will respawn after delay)
+    # For PvP, broadcast defeat to the target player
+    if is_pvp do
+      player = socket.assigns.current_scope.player
+      player_name = player_display_name(player)
+
+      # Broadcast to room that we defeated the player
+      if room.id do
+        Phoenix.PubSub.broadcast(
+          Exmud.PubSub,
+          "room:#{room.id}",
+          {:player_defeated, player.id, player_name, combat.enemy_id, combat.enemy.name}
+        )
+      end
+    else
+      Spawner.despawn_mob(combat.enemy_id)
+    end
 
     # Apply rewards (may include level up)
     {new_game_state, level_up_event} =
@@ -1647,14 +1133,22 @@ defmodule ExmudWeb.GameLive do
           {updated_state, level_event}
       end
 
-    # Reload room to reflect mob despawn
-    {:ok, room} = RoomLoader.load_room_for_display(socket.assigns.room.id)
+    # Reload room to reflect mob despawn (for PvE)
+    {:ok, updated_room} = RoomLoader.load_room_for_display(room.id)
 
-    victory_event = %{
-      text:
-        "Victory! You defeated the #{combat.enemy.name}. Gained #{rewards.xp} XP and #{rewards.gold} gold.",
-      timestamp: DateTime.utc_now()
-    }
+    victory_event =
+      if is_pvp do
+        %{
+          text: "Victory! You defeated #{combat.enemy.name}. Gained #{rewards.xp} XP.",
+          timestamp: DateTime.utc_now()
+        }
+      else
+        %{
+          text:
+            "Victory! You defeated the #{combat.enemy.name}. Gained #{rewards.xp} XP and #{rewards.gold} gold.",
+          timestamp: DateTime.utc_now()
+        }
+      end
 
     events = [victory_event] ++ if(level_up_event, do: [level_up_event], else: [])
 
@@ -1664,7 +1158,7 @@ defmodule ExmudWeb.GameLive do
      |> assign(:game_state, new_game_state)
      |> assign(:stats, new_game_state.stats)
      |> assign(:health, new_game_state.health)
-     |> assign(:room, room)
+     |> assign(:room, updated_room)
      |> update(:events, fn e -> e ++ events end)}
   end
 
@@ -1683,7 +1177,7 @@ defmodule ExmudWeb.GameLive do
   defp handle_combat_defeat(socket, combat, game_state) do
     # Reset player health to max (respawn)
     current_health = game_state.health
-    max_hp = Map.get(current_health, "max") || Map.get(current_health, :max) || 100
+    max_hp = MapHelpers.get_flexible(current_health, :max, 100)
     new_health = Map.put(current_health, "current", max_hp)
 
     {:ok, new_game_state} = PlayerGameState.update_state(game_state, %{health: new_health})
@@ -1735,6 +1229,20 @@ defmodule ExmudWeb.GameLive do
         type: :item,
         description: item.description || "#{item.desc} #{item.name}.",
         components: components
+      }
+    end
+  end
+
+  defp find_player_entity(other_players, id) do
+    player = Enum.find(other_players, fn p -> to_string(p.id) == to_string(id) end)
+
+    if player do
+      %{
+        id: player.id,
+        name: player.name,
+        type: :player,
+        description: "#{player.name} stands here, a fellow adventurer.",
+        components: %{}
       }
     end
   end
@@ -1913,4 +1421,29 @@ defmodule ExmudWeb.GameLive do
   end
 
   defp player_display_name(_), do: "Someone"
+
+  # UI state helpers
+
+  # Updates the ui assign map with new values
+  defp update_ui(socket, updates) when is_map(updates) do
+    update(socket, :ui, fn ui -> Map.merge(ui, updates) end)
+  end
+
+  # Panel toggle helper - toggles the specified panel and closes all others
+  @ui_panels [:compass_open, :inventory_open, :quest_open, :stats_open, :chat_open]
+
+  defp toggle_ui_panel(socket, panel) when panel in @ui_panels do
+    current_value = socket.assigns.ui[panel]
+    new_value = !current_value
+
+    # Close all panels, then set the toggled one
+    closed_panels = Map.new(@ui_panels, fn p -> {p, false} end)
+
+    updates =
+      closed_panels
+      |> Map.put(panel, new_value)
+      |> Map.put(:context_entity, nil)
+
+    update_ui(socket, updates)
+  end
 end
