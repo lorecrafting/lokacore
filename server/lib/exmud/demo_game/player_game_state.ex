@@ -162,4 +162,36 @@ defmodule Exmud.DemoGame.PlayerGameState do
       state -> delete_state(state)
     end
   end
+
+  @doc """
+  Gets all players currently in a specific room.
+
+  Returns a list of player_ids for players whose current_room_id matches.
+  Optionally excludes a specific player_id (useful for excluding yourself).
+
+  ## Examples
+
+      iex> get_players_in_room(room_id)
+      [player_id1, player_id2, ...]
+
+      iex> get_players_in_room(room_id, exclude: my_player_id)
+      [player_id1, player_id2, ...]
+  """
+  def get_players_in_room(room_id, opts \\ []) do
+    exclude_player_id = Keyword.get(opts, :exclude)
+
+    query =
+      from s in PlayerGameState,
+        where: s.current_room_id == ^room_id,
+        select: s.player_id
+
+    query =
+      if exclude_player_id do
+        from s in query, where: s.player_id != ^exclude_player_id
+      else
+        query
+      end
+
+    Repo.all(query)
+  end
 end

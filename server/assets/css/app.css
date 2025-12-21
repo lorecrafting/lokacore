@@ -641,3 +641,94 @@ body:has(.ebook-page) {
   gap: 0.25rem;
   font-size: 0.875rem;
 }
+
+/* ========================================
+   EBOOK CHAT OVERLAY
+   ======================================== */
+
+.ebook-chat-overlay {
+  position: fixed;
+  bottom: 4rem;
+  left: 0;
+  right: 0;
+  background: var(--ebook-bg);
+  border-top: 1px solid var(--ebook-border);
+  padding: 1rem var(--ebook-padding);
+  animation: ebook-fade-in var(--ebook-transition) forwards;
+}
+
+.ebook-chat-form {
+  max-width: var(--ebook-max-width);
+  margin: 0 auto;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.ebook-chat-input {
+  flex: 1;
+  font-family: var(--ebook-font);
+  font-size: 1rem;
+  color: var(--ebook-text);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--ebook-text);
+  padding: 0.5rem 0;
+  outline: none;
+}
+
+.ebook-chat-input:focus {
+  border-bottom-color: #000000;
+}
+
+.ebook-chat-input::placeholder {
+  color: var(--ebook-text-muted);
+}
+
+.ebook-chat-send,
+.ebook-chat-cancel {
+  font-family: var(--ebook-font);
+  font-size: 1rem;
+  color: var(--ebook-text);
+  background: transparent;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  transition: color var(--ebook-transition);
+}
+
+.ebook-chat-send:hover,
+.ebook-chat-cancel:hover {
+  color: #000000;
+}
+
+.ebook-chat-cancel {
+  color: var(--ebook-text-muted);
+}
+
+/* Static link style (non-interactive, just styled) */
+.ebook-link--static {
+  color: var(--ebook-text);
+  text-decoration: underline;
+}
+
+/* Bottom Bar adjustments for chat button */
+.ebook-bottombar-left,
+.ebook-bottombar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ebook-bottombar-btn {
+  font-size: 1.25rem;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity var(--ebook-transition);
+}
+
+.ebook-bottombar-btn:hover,
+.ebook-bottombar-btn--active {
+  opacity: 1;
+}

@@ -21,6 +21,7 @@ defmodule ExmudWeb.GameLive do
   }
 
   alias Exmud.Engine.Entities
+  alias Exmud.Accounts
 
   @impl true
   def mount(_params, _session, socket) do
@@ -36,6 +37,13 @@ defmodule ExmudWeb.GameLive do
     if connected?(socket) and room.id do
       Phoenix.PubSub.subscribe(Exmud.PubSub, "room:#{room.id}")
       Phoenix.PubSub.subscribe(Exmud.PubSub, "player:#{player.id}")
+
+      # Broadcast that this player entered the room
+      Phoenix.PubSub.broadcast(
+        Exmud.PubSub,
+        "room:#{room.id}",
+        {:player_entered, player.id, player_display_name(player)}
+      )
     end
 
     # Load inventory item details
@@ -43,6 +51,9 @@ defmodule ExmudWeb.GameLive do
     equipped_items = Equipment.get_equipped(game_state)
     active_quests = Quest.get_active_quests(game_state)
     completed_quests = Quest.get_completed_quests(game_state)
+
+    # Load other players in the room
+    other_players = load_other_players(room.id, player.id)
 
     {:ok,
      socket
@@ -57,17 +68,37 @@ defmodule ExmudWeb.GameLive do
      |> assign(:completed_quests, completed_quests)
      |> assign(:stats, game_state.stats || %{})
      |> assign(:health, game_state.health || %{})
+     |> assign(:other_players, other_players)
      |> assign(:context_entity, nil)
      |> assign(:compass_open, false)
      |> assign(:inventory_open, false)
      |> assign(:quest_open, false)
      |> assign(:stats_open, false)
+     |> assign(:chat_open, false)
+     |> assign(:chat_message, "")
      |> assign(:dialogue, nil)
      |> assign(:dialogue_npc, nil)
      |> assign(:combat, nil)
      |> assign(:cutscene, nil)
      |> assign(:events, [])
      |> maybe_show_intro_cutscene(game_state)}
+  end
+
+  @impl true
+  def terminate(_reason, socket) do
+    # Broadcast that player left when they disconnect
+    player = socket.assigns[:current_scope] && socket.assigns.current_scope.player
+    room = socket.assigns[:room]
+
+    if player && room && room.id do
+      Phoenix.PubSub.broadcast(
+        Exmud.PubSub,
+        "room:#{room.id}",
+        {:player_left, player.id, player_display_name(player), "away"}
+      )
+    end
+
+    :ok
   end
 
   # Load the player's current room, falling back to starting room
@@ -152,6 +183,7 @@ defmodule ExmudWeb.GameLive do
                       room={@room}
                       events={@events}
                       compass_open={@compass_open}
+                      other_players={@other_players}
                     />
                   <% end %>
                 <% end %>
@@ -161,13 +193,37 @@ defmodule ExmudWeb.GameLive do
         <% end %>
       <% end %>
 
+      <.chat_input_panel :if={@chat_open} />
+
       <.bottom_bar
         compass_open={@compass_open}
         exits={@room.exits}
         inventory_open={@inventory_open}
         quest_open={@quest_open}
         stats_open={@stats_open}
+        chat_open={@chat_open}
       />
+    </div>
+    """
+  end
+
+  # Chat Input Panel - overlay for typing messages
+  defp chat_input_panel(assigns) do
+    ~H"""
+    <div class="ebook-chat-overlay">
+      <form phx-submit="say" class="ebook-chat-form">
+        <input
+          type="text"
+          name="message"
+          placeholder="Say something..."
+          autofocus
+          autocomplete="off"
+          class="ebook-chat-input"
+          phx-keydown="chat_keydown"
+        />
+        <button type="submit" class="ebook-chat-send">Say</button>
+        <button type="button" phx-click="toggle_chat" class="ebook-chat-cancel">Cancel</button>
+      </form>
     </div>
     """
   end
@@ -176,6 +232,7 @@ defmodule ExmudWeb.GameLive do
   attr :room, :map, required: true
   attr :events, :list, required: true
   attr :compass_open, :boolean, required: true
+  attr :other_players, :list, required: true
 
   defp room_view(assigns) do
     ~H"""
@@ -186,7 +243,32 @@ defmodule ExmudWeb.GameLive do
 
       <.entities_section entities={@room.entities} items={@room.items} />
 
+      <.players_section other_players={@other_players} />
+
       <.events_section events={@events} />
+    </div>
+    """
+  end
+
+  # Players Section - shows other players in the room
+  attr :other_players, :list, required: true
+
+  defp players_section(assigns) do
+    ~H"""
+    <div :if={length(@other_players) > 0} class="mt-4">
+      <p class="ebook-prose" style="text-indent: 0;">
+        <%= for {player, idx} <- Enum.with_index(@other_players) do %>
+          <%= if idx > 0 do %>
+            {if idx == length(@other_players) - 1, do: " and ", else: ", "}
+          <% end %>
+          <span class="ebook-link--static">{player.name}</span>
+        <% end %>
+        <%= if length(@other_players) == 1 do %>
+          is here.
+        <% else %>
+          are here.
+        <% end %>
+      </p>
     </div>
     """
   end
@@ -747,12 +829,13 @@ defmodule ExmudWeb.GameLive do
     Map.has_key?(components, component_name)
   end
 
-  # Bottom Bar with Compass, Inventory, and Quest Log
+  # Bottom Bar with Compass, Inventory, Quest Log, and Chat
   attr :compass_open, :boolean, required: true
   attr :exits, :list, required: true
   attr :inventory_open, :boolean, required: true
   attr :quest_open, :boolean, required: true
   attr :stats_open, :boolean, required: true
+  attr :chat_open, :boolean, required: true
 
   defp bottom_bar(assigns) do
     ~H"""
@@ -780,6 +863,13 @@ defmodule ExmudWeb.GameLive do
       </div>
 
       <div class="ebook-bottombar-right">
+        <span
+          class={"ebook-bottombar-btn #{if @chat_open, do: "ebook-bottombar-btn--active", else: ""}"}
+          phx-click="toggle_chat"
+          title="Say"
+        >
+          💬
+        </span>
         <span
           class={"ebook-bottombar-btn #{if @stats_open, do: "ebook-bottombar-btn--active", else: ""}"}
           phx-click="toggle_stats"
@@ -993,138 +1083,6 @@ defmodule ExmudWeb.GameLive do
     end
   end
 
-  @impl true
-  def handle_info({:enemy_turn, combat}, socket) do
-    game_state = socket.assigns.game_state
-
-    case Combat.enemy_turn(combat, game_state) do
-      {:ok, new_combat, %{action: :attack, damage: damage}} ->
-        # Apply damage to player
-        current_health = socket.assigns.health
-
-        current_hp =
-          Map.get(current_health, "current") || Map.get(current_health, :current) || 100
-
-        new_hp = max(0, current_hp - damage)
-        new_health = Map.put(current_health, "current", new_hp)
-
-        # Update game state in DB
-        {:ok, new_game_state} = PlayerGameState.update_state(game_state, %{health: new_health})
-
-        # Check if player died
-        case Combat.check_combat_end(new_combat, new_game_state) do
-          {:defeat} ->
-            handle_combat_defeat(socket, new_combat, new_game_state)
-
-          :ongoing ->
-            {:noreply,
-             socket
-             |> assign(:combat, new_combat)
-             |> assign(:health, new_health)
-             |> assign(:game_state, new_game_state)}
-        end
-
-      {:ok, new_combat, _result} ->
-        # Enemy defended
-        {:noreply, assign(socket, :combat, new_combat)}
-
-      {:error, _reason} ->
-        {:noreply, socket}
-    end
-  end
-
-  # Handle mob respawn notifications
-  def handle_info({:mob_respawned, _entity_id, mob_name}, socket) do
-    # Reload room to show the respawned mob
-    {:ok, room} = RoomLoader.load_room_for_display(socket.assigns.room.id)
-
-    event = %{
-      text: "A #{mob_name} emerges from the shadows.",
-      timestamp: DateTime.utc_now()
-    }
-
-    {:noreply,
-     socket
-     |> assign(:room, room)
-     |> update(:events, fn events -> events ++ [event] end)}
-  end
-
-  defp handle_combat_victory(socket, combat, rewards) do
-    game_state = socket.assigns.game_state
-
-    # Despawn the defeated mob (will respawn after delay)
-    Spawner.despawn_mob(combat.enemy_id)
-
-    # Apply rewards (may include level up)
-    {new_game_state, level_up_event} =
-      case Combat.apply_rewards(game_state, rewards) do
-        {:ok, updated_state} ->
-          {updated_state, nil}
-
-        {:ok, updated_state, level_up_info} ->
-          level_event = %{
-            text:
-              "LEVEL UP! You are now level #{level_up_info.new_level}. Gained #{level_up_info.skill_points_gained} skill points!",
-            timestamp: DateTime.utc_now()
-          }
-
-          {updated_state, level_event}
-      end
-
-    # Reload room to reflect mob despawn
-    {:ok, room} = RoomLoader.load_room_for_display(socket.assigns.room.id)
-
-    victory_event = %{
-      text:
-        "Victory! You defeated the #{combat.enemy.name}. Gained #{rewards.xp} XP and #{rewards.gold} gold.",
-      timestamp: DateTime.utc_now()
-    }
-
-    events = [victory_event] ++ if(level_up_event, do: [level_up_event], else: [])
-
-    {:noreply,
-     socket
-     |> assign(:combat, nil)
-     |> assign(:game_state, new_game_state)
-     |> assign(:stats, new_game_state.stats)
-     |> assign(:health, new_game_state.health)
-     |> assign(:room, room)
-     |> update(:events, fn e -> e ++ events end)}
-  end
-
-  defp handle_combat_fled(socket, combat) do
-    event = %{
-      text: "You fled from the #{combat.enemy.name}!",
-      timestamp: DateTime.utc_now()
-    }
-
-    {:noreply,
-     socket
-     |> assign(:combat, nil)
-     |> update(:events, fn events -> events ++ [event] end)}
-  end
-
-  defp handle_combat_defeat(socket, combat, game_state) do
-    # Reset player health to max (respawn)
-    current_health = game_state.health
-    max_hp = Map.get(current_health, "max") || Map.get(current_health, :max) || 100
-    new_health = Map.put(current_health, "current", max_hp)
-
-    {:ok, new_game_state} = PlayerGameState.update_state(game_state, %{health: new_health})
-
-    event = %{
-      text: "You were defeated by the #{combat.enemy.name}... You wake up feeling disoriented.",
-      timestamp: DateTime.utc_now()
-    }
-
-    {:noreply,
-     socket
-     |> assign(:combat, nil)
-     |> assign(:health, new_health)
-     |> assign(:game_state, new_game_state)
-     |> update(:events, fn events -> events ++ [event] end)}
-  end
-
   # Cutscene event handlers
   def handle_event("cutscene_next", _params, socket) do
     cutscene = socket.assigns.cutscene
@@ -1196,6 +1154,7 @@ defmodule ExmudWeb.GameLive do
      |> assign(:compass_open, false)
      |> assign(:quest_open, false)
      |> assign(:stats_open, false)
+     |> assign(:chat_open, false)
      |> assign(:context_entity, nil)}
   end
 
@@ -1206,6 +1165,7 @@ defmodule ExmudWeb.GameLive do
      |> assign(:compass_open, false)
      |> assign(:inventory_open, false)
      |> assign(:stats_open, false)
+     |> assign(:chat_open, false)
      |> assign(:context_entity, nil)}
   end
 
@@ -1216,7 +1176,59 @@ defmodule ExmudWeb.GameLive do
      |> assign(:compass_open, false)
      |> assign(:inventory_open, false)
      |> assign(:quest_open, false)
+     |> assign(:chat_open, false)
      |> assign(:context_entity, nil)}
+  end
+
+  def handle_event("toggle_chat", _params, socket) do
+    {:noreply,
+     socket
+     |> update(:chat_open, &(!&1))
+     |> assign(:compass_open, false)
+     |> assign(:inventory_open, false)
+     |> assign(:quest_open, false)
+     |> assign(:stats_open, false)
+     |> assign(:context_entity, nil)}
+  end
+
+  def handle_event("say", %{"message" => message}, socket) do
+    message = String.trim(message)
+
+    if message != "" do
+      player = socket.assigns.current_scope.player
+      player_name = player_display_name(player)
+      room = socket.assigns.room
+
+      # Broadcast to room
+      if room.id do
+        Phoenix.PubSub.broadcast(
+          Exmud.PubSub,
+          "room:#{room.id}",
+          {:player_says, player.id, player_name, message}
+        )
+      end
+
+      # Add event for self (we'll also receive the broadcast, but filter it out)
+      event = %{
+        text: "You say, \"#{message}\"",
+        timestamp: DateTime.utc_now()
+      }
+
+      {:noreply,
+       socket
+       |> assign(:chat_open, false)
+       |> update(:events, fn events -> events ++ [event] end)}
+    else
+      {:noreply, assign(socket, :chat_open, false)}
+    end
+  end
+
+  def handle_event("chat_keydown", %{"key" => "Escape"}, socket) do
+    {:noreply, assign(socket, :chat_open, false)}
+  end
+
+  def handle_event("chat_keydown", _params, socket) do
+    {:noreply, socket}
   end
 
   def handle_event("turn_in_quest", %{"id" => quest_id}, socket) do
@@ -1426,8 +1438,17 @@ defmodule ExmudWeb.GameLive do
          |> update(:events, fn events -> events ++ [event] end)}
 
       %{destination_id: destination_id} ->
-        # Unsubscribe from old room
+        player = socket.assigns.current_scope.player
+        player_name = player_display_name(player)
+
+        # Broadcast leave to old room before unsubscribing
         if room.id do
+          Phoenix.PubSub.broadcast(
+            Exmud.PubSub,
+            "room:#{room.id}",
+            {:player_left, player.id, player_name, direction}
+          )
+
           Phoenix.PubSub.unsubscribe(Exmud.PubSub, "room:#{room.id}")
         end
 
@@ -1441,6 +1462,16 @@ defmodule ExmudWeb.GameLive do
             # Subscribe to new room events
             Phoenix.PubSub.subscribe(Exmud.PubSub, "room:#{new_room.id}")
 
+            # Broadcast enter to new room
+            Phoenix.PubSub.broadcast(
+              Exmud.PubSub,
+              "room:#{new_room.id}",
+              {:player_entered, player.id, player_name}
+            )
+
+            # Load other players in new room
+            other_players = load_other_players(new_room.id, player.id)
+
             # Create movement event for display
             event = %{
               text: "You head #{direction} to #{new_room.title}.",
@@ -1451,6 +1482,7 @@ defmodule ExmudWeb.GameLive do
              socket
              |> assign(:room, new_room)
              |> assign(:game_state, new_game_state)
+             |> assign(:other_players, other_players)
              |> assign(:compass_open, false)
              |> assign(:context_entity, nil)
              |> assign(:events, [event])}
@@ -1467,6 +1499,206 @@ defmodule ExmudWeb.GameLive do
              |> update(:events, fn events -> events ++ [event] end)}
         end
     end
+  end
+
+  @impl true
+  def handle_info({:enemy_turn, combat}, socket) do
+    game_state = socket.assigns.game_state
+
+    case Combat.enemy_turn(combat, game_state) do
+      {:ok, new_combat, %{action: :attack, damage: damage}} ->
+        # Apply damage to player
+        current_health = socket.assigns.health
+
+        current_hp =
+          Map.get(current_health, "current") || Map.get(current_health, :current) || 100
+
+        new_hp = max(0, current_hp - damage)
+        new_health = Map.put(current_health, "current", new_hp)
+
+        # Update game state in DB
+        {:ok, new_game_state} = PlayerGameState.update_state(game_state, %{health: new_health})
+
+        # Check if player died
+        case Combat.check_combat_end(new_combat, new_game_state) do
+          {:defeat} ->
+            handle_combat_defeat(socket, new_combat, new_game_state)
+
+          :ongoing ->
+            {:noreply,
+             socket
+             |> assign(:combat, new_combat)
+             |> assign(:health, new_health)
+             |> assign(:game_state, new_game_state)}
+        end
+
+      {:ok, new_combat, _result} ->
+        # Enemy defended
+        {:noreply, assign(socket, :combat, new_combat)}
+
+      {:error, _reason} ->
+        {:noreply, socket}
+    end
+  end
+
+  # Handle player entering the room
+  def handle_info({:player_entered, player_id, player_name}, socket) do
+    current_player = socket.assigns.current_scope.player
+
+    # Ignore our own enter event
+    if player_id == current_player.id do
+      {:noreply, socket}
+    else
+      # Add player to other_players list
+      new_player = %{id: player_id, name: player_name}
+
+      other_players =
+        socket.assigns.other_players
+        |> Enum.reject(fn p -> p.id == player_id end)
+        |> Kernel.++([new_player])
+
+      event = %{
+        text: "#{player_name} arrives.",
+        timestamp: DateTime.utc_now()
+      }
+
+      {:noreply,
+       socket
+       |> assign(:other_players, other_players)
+       |> update(:events, fn events -> events ++ [event] end)}
+    end
+  end
+
+  # Handle player leaving the room
+  def handle_info({:player_left, player_id, player_name, direction}, socket) do
+    current_player = socket.assigns.current_scope.player
+
+    # Ignore our own leave event
+    if player_id == current_player.id do
+      {:noreply, socket}
+    else
+      # Remove player from other_players list
+      other_players = Enum.reject(socket.assigns.other_players, fn p -> p.id == player_id end)
+
+      event = %{
+        text: "#{player_name} leaves #{direction}.",
+        timestamp: DateTime.utc_now()
+      }
+
+      {:noreply,
+       socket
+       |> assign(:other_players, other_players)
+       |> update(:events, fn events -> events ++ [event] end)}
+    end
+  end
+
+  # Handle player chat messages
+  def handle_info({:player_says, player_id, player_name, message}, socket) do
+    current_player = socket.assigns.current_scope.player
+
+    # Ignore our own message (we already added it locally)
+    if player_id == current_player.id do
+      {:noreply, socket}
+    else
+      event = %{
+        text: "#{player_name} says, \"#{message}\"",
+        timestamp: DateTime.utc_now()
+      }
+
+      {:noreply, update(socket, :events, fn events -> events ++ [event] end)}
+    end
+  end
+
+  # Handle mob respawn notifications
+  def handle_info({:mob_respawned, _entity_id, mob_name}, socket) do
+    # Reload room to show the respawned mob
+    {:ok, room} = RoomLoader.load_room_for_display(socket.assigns.room.id)
+
+    event = %{
+      text: "A #{mob_name} emerges from the shadows.",
+      timestamp: DateTime.utc_now()
+    }
+
+    {:noreply,
+     socket
+     |> assign(:room, room)
+     |> update(:events, fn events -> events ++ [event] end)}
+  end
+
+  defp handle_combat_victory(socket, combat, rewards) do
+    game_state = socket.assigns.game_state
+
+    # Despawn the defeated mob (will respawn after delay)
+    Spawner.despawn_mob(combat.enemy_id)
+
+    # Apply rewards (may include level up)
+    {new_game_state, level_up_event} =
+      case Combat.apply_rewards(game_state, rewards) do
+        {:ok, updated_state} ->
+          {updated_state, nil}
+
+        {:ok, updated_state, level_up_info} ->
+          level_event = %{
+            text:
+              "LEVEL UP! You are now level #{level_up_info.new_level}. Gained #{level_up_info.skill_points_gained} skill points!",
+            timestamp: DateTime.utc_now()
+          }
+
+          {updated_state, level_event}
+      end
+
+    # Reload room to reflect mob despawn
+    {:ok, room} = RoomLoader.load_room_for_display(socket.assigns.room.id)
+
+    victory_event = %{
+      text:
+        "Victory! You defeated the #{combat.enemy.name}. Gained #{rewards.xp} XP and #{rewards.gold} gold.",
+      timestamp: DateTime.utc_now()
+    }
+
+    events = [victory_event] ++ if(level_up_event, do: [level_up_event], else: [])
+
+    {:noreply,
+     socket
+     |> assign(:combat, nil)
+     |> assign(:game_state, new_game_state)
+     |> assign(:stats, new_game_state.stats)
+     |> assign(:health, new_game_state.health)
+     |> assign(:room, room)
+     |> update(:events, fn e -> e ++ events end)}
+  end
+
+  defp handle_combat_fled(socket, combat) do
+    event = %{
+      text: "You fled from the #{combat.enemy.name}!",
+      timestamp: DateTime.utc_now()
+    }
+
+    {:noreply,
+     socket
+     |> assign(:combat, nil)
+     |> update(:events, fn events -> events ++ [event] end)}
+  end
+
+  defp handle_combat_defeat(socket, combat, game_state) do
+    # Reset player health to max (respawn)
+    current_health = game_state.health
+    max_hp = Map.get(current_health, "max") || Map.get(current_health, :max) || 100
+    new_health = Map.put(current_health, "current", max_hp)
+
+    {:ok, new_game_state} = PlayerGameState.update_state(game_state, %{health: new_health})
+
+    event = %{
+      text: "You were defeated by the #{combat.enemy.name}... You wake up feeling disoriented.",
+      timestamp: DateTime.utc_now()
+    }
+
+    {:noreply,
+     socket
+     |> assign(:combat, nil)
+     |> assign(:health, new_health)
+     |> assign(:game_state, new_game_state)
+     |> update(:events, fn events -> events ++ [event] end)}
   end
 
   # Helper Functions
@@ -1656,4 +1888,29 @@ defmodule ExmudWeb.GameLive do
   end
 
   defp handle_dialogue_action(socket, _unknown_action), do: socket
+
+  # Load other players in a room (excluding self)
+  defp load_other_players(nil, _player_id), do: []
+
+  defp load_other_players(room_id, player_id) do
+    room_id
+    |> PlayerGameState.get_players_in_room(exclude: player_id)
+    |> Enum.map(fn pid ->
+      case Accounts.get_player(pid) do
+        nil -> nil
+        player -> %{id: player.id, name: player_display_name(player)}
+      end
+    end)
+    |> Enum.reject(&is_nil/1)
+  end
+
+  # Extract display name from player (uses email username)
+  defp player_display_name(%{email: email}) when is_binary(email) do
+    email
+    |> String.split("@")
+    |> List.first()
+    |> String.capitalize()
+  end
+
+  defp player_display_name(_), do: "Someone"
 end
