@@ -1,5 +1,7 @@
 # Exmud
 
+[![Issues tracked with beads](https://img.shields.io/badge/issues-beads-blue)](https://github.com/anthropics/beads)
+
 To start your Phoenix server:
 
 * Run `mix setup` to install and setup dependencies

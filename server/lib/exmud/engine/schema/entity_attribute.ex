@@ -27,7 +27,7 @@ defmodule Exmud.Engine.Schema.EntityAttribute do
   schema "entity_attributes" do
     field :key, :string
     field :category, :string, default: "default"
-    field :value, Exmud.Ecto.Term
+    field :value, Exmud.Ecto.Json
     field :str_value, :string
 
     belongs_to :entity, EntitySchema, type: :binary_id

@@ -31,6 +31,25 @@ defmodule Exmud.Engine.Scripting do
 end
 ```
 
+## Entity Data in Scripts
+
+Entity data is injected into scripts from JSON storage. In Lua, you access entity properties using dot notation or bracket notation with string keys:
+
+```lua
+-- Both work because Lua tables support string keys
+local health = entity.health.current      -- dot notation
+local health = entity["health"]["current"] -- bracket notation
+
+-- Components from database have string keys
+local equipable = entity.components["equipable"]
+local slot = equipable["slot"]
+
+-- Attributes are accessed via helper functions
+local quest_progress = game.get_attribute("quest_progress")
+```
+
+**Note**: Unlike Elixir maps (which have atom keys), Lua table keys from JSON are always strings.
+
 ## Game API for Scripts
 
 Functions exposed to Lua scripts:

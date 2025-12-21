@@ -29,21 +29,21 @@ defmodule ExmudWeb.AdminLive do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
-      <div class="min-h-screen">
-        <div class="navbar bg-base-200 mb-6">
+      <div class="admin-layout">
+        <div class="admin-header">
           <div class="flex-1">
-            <span class="text-xl font-bold text-primary">ExMUD Admin</span>
+            <span class="admin-header-title">ExMUD Admin</span>
           </div>
           <div class="flex-none">
-            <a href={~p"/game"} class="btn btn-ghost btn-sm">
+            <a href={~p"/game"} class="admin-btn--ghost">
               <.icon name="hero-play" class="size-4" /> Play Game
             </a>
           </div>
         </div>
 
-        <div class="flex gap-6 px-4">
-          <aside class="w-64 flex-none">
-            <ul class="menu bg-base-200 rounded-lg">
+        <div class="admin-content">
+          <aside class="admin-sidebar">
+            <ul class="admin-nav">
               <li>
                 <button
                   phx-click="switch_tab"
@@ -101,7 +101,7 @@ defmodule ExmudWeb.AdminLive do
             </ul>
           </aside>
 
-          <main class="flex-1">
+          <main class="admin-main">
             <.tab_content
               tab={@active_tab}
               stats={assigns[:stats]}
@@ -136,23 +136,23 @@ defmodule ExmudWeb.AdminLive do
 
   defp tab_content(%{tab: :dashboard} = assigns) do
     ~H"""
-    <div class="space-y-6">
-      <h2 class="text-2xl font-bold">Dashboard</h2>
+    <div class="admin-section">
+      <h2 class="admin-section-title">Dashboard</h2>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="admin-grid-stats">
         <.stat_card title="Total Players" value={@stats.total_players} icon="hero-users" />
         <.stat_card title="Total Rooms" value={@stats.total_rooms} icon="hero-map" />
         <.stat_card title="Total Entities" value={@stats.total_entities} icon="hero-cube" />
         <.stat_card title="Scripts Loaded" value={@stats.scripts_loaded} icon="hero-code-bracket" />
       </div>
 
-      <div class="card bg-base-200">
-        <div class="card-body">
-          <h3 class="card-title">Quick Start</h3>
-          <p class="text-base-content/70 mb-4">
+      <div class="admin-card">
+        <div class="admin-card-body">
+          <h3 class="admin-card-title">Quick Start</h3>
+          <p class="admin-empty-text mb-4">
             Welcome to the ExMUD Admin Dashboard. Use the sidebar to navigate between sections.
           </p>
-          <ul class="list-disc list-inside space-y-1 text-sm">
+          <ul class="admin-quickstart-list">
             <li><strong>Rooms</strong> - Create and manage game locations</li>
             <li><strong>Entities</strong> - Create NPCs, items, and other objects</li>
             <li><strong>Scripts</strong> - Write Lua scripts for custom behavior</li>
@@ -166,13 +166,13 @@ defmodule ExmudWeb.AdminLive do
 
   defp tab_content(%{tab: :players} = assigns) do
     ~H"""
-    <div class="space-y-6">
-      <div class="flex justify-between items-center">
-        <h2 class="text-2xl font-bold">Players ({length(@players || [])})</h2>
+    <div class="admin-section">
+      <div class="admin-section-header">
+        <h2 class="admin-section-title">Players ({length(@players || [])})</h2>
       </div>
 
-      <div :if={@players && length(@players) > 0} class="overflow-x-auto">
-        <table class="table table-zebra w-full">
+      <div :if={@players && length(@players) > 0} class="admin-table-wrapper">
+        <table class="admin-table">
           <thead>
             <tr>
               <th>Email</th>
@@ -183,30 +183,30 @@ defmodule ExmudWeb.AdminLive do
             </tr>
           </thead>
           <tbody>
-            <tr :for={player <- @players} class="hover">
+            <tr :for={player <- @players} class="admin-table-row">
               <td>{player.email}</td>
               <td>
                 <span class={[
-                  "badge",
-                  if(player.is_admin, do: "badge-primary", else: "badge-ghost")
+                  "admin-badge",
+                  if(player.is_admin, do: "admin-badge--primary", else: "admin-badge--ghost")
                 ]}>
                   {if player.is_admin, do: "Admin", else: "Player"}
                 </span>
               </td>
               <td>
                 <span class={[
-                  "badge",
-                  if(player.confirmed_at, do: "badge-success", else: "badge-warning")
+                  "admin-badge",
+                  if(player.confirmed_at, do: "admin-badge--success", else: "admin-badge--warning")
                 ]}>
                   {if player.confirmed_at, do: "Yes", else: "No"}
                 </span>
               </td>
               <td>{Calendar.strftime(player.inserted_at, "%Y-%m-%d")}</td>
-              <td class="flex gap-2">
+              <td class="admin-table-actions">
                 <button
                   phx-click="toggle_admin"
                   phx-value-id={player.id}
-                  class="btn btn-ghost btn-xs"
+                  class="admin-btn--ghost-xs"
                 >
                   {if player.is_admin, do: "Revoke Admin", else: "Make Admin"}
                 </button>
@@ -214,7 +214,7 @@ defmodule ExmudWeb.AdminLive do
                   phx-click="delete_player"
                   phx-value-id={player.id}
                   data-confirm="Are you sure you want to delete this player?"
-                  class="btn btn-ghost btn-xs text-error"
+                  class="admin-btn--danger"
                 >
                   Delete
                 </button>
@@ -224,9 +224,9 @@ defmodule ExmudWeb.AdminLive do
         </table>
       </div>
 
-      <div :if={@players == [] or @players == nil} class="card bg-base-200">
-        <div class="card-body">
-          <p class="text-base-content/70">No players registered yet.</p>
+      <div :if={@players == [] or @players == nil} class="admin-empty">
+        <div class="admin-card-body">
+          <p class="admin-empty-text">No players registered yet.</p>
         </div>
       </div>
     </div>
@@ -235,16 +235,16 @@ defmodule ExmudWeb.AdminLive do
 
   defp tab_content(%{tab: :rooms, form: nil} = assigns) do
     ~H"""
-    <div class="space-y-6">
-      <div class="flex justify-between items-center">
-        <h2 class="text-2xl font-bold">Rooms ({length(@rooms || [])})</h2>
-        <button phx-click="new_room" class="btn btn-primary btn-sm">
+    <div class="admin-section">
+      <div class="admin-section-header">
+        <h2 class="admin-section-title">Rooms ({length(@rooms || [])})</h2>
+        <button phx-click="new_room" class="admin-btn--primary">
           <.icon name="hero-plus" class="size-4" /> Create Room
         </button>
       </div>
 
-      <div :if={@rooms && length(@rooms) > 0} class="overflow-x-auto">
-        <table class="table table-zebra w-full">
+      <div :if={@rooms && length(@rooms) > 0} class="admin-table-wrapper">
+        <table class="admin-table">
           <thead>
             <tr>
               <th>Key</th>
@@ -254,19 +254,19 @@ defmodule ExmudWeb.AdminLive do
             </tr>
           </thead>
           <tbody>
-            <tr :for={room <- @rooms} class="hover">
-              <td class="font-mono text-sm">{room.key}</td>
+            <tr :for={room <- @rooms} class="admin-table-row">
+              <td class="admin-table-cell-mono">{room.key}</td>
               <td>{room.name || "(unnamed)"}</td>
-              <td class="max-w-xs truncate">{room.description || "(no description)"}</td>
-              <td class="flex gap-2">
-                <button phx-click="edit_room" phx-value-id={room.id} class="btn btn-ghost btn-xs">
+              <td class="admin-table-cell-truncate">{room.description || "(no description)"}</td>
+              <td class="admin-table-actions">
+                <button phx-click="edit_room" phx-value-id={room.id} class="admin-btn--ghost-xs">
                   Edit
                 </button>
                 <button
                   phx-click="delete_room"
                   phx-value-id={room.id}
                   data-confirm="Are you sure you want to delete this room?"
-                  class="btn btn-ghost btn-xs text-error"
+                  class="admin-btn--danger"
                 >
                   Delete
                 </button>
@@ -276,9 +276,9 @@ defmodule ExmudWeb.AdminLive do
         </table>
       </div>
 
-      <div :if={@rooms == [] or @rooms == nil} class="card bg-base-200">
-        <div class="card-body">
-          <p class="text-base-content/70">
+      <div :if={@rooms == [] or @rooms == nil} class="admin-empty">
+        <div class="admin-card-body">
+          <p class="admin-empty-text">
             No rooms created yet. Click "Create Room" to add your first location.
           </p>
         </div>
@@ -289,21 +289,21 @@ defmodule ExmudWeb.AdminLive do
 
   defp tab_content(%{tab: :rooms, form: form} = assigns) when not is_nil(form) do
     ~H"""
-    <div class="space-y-6">
-      <div class="flex justify-between items-center">
-        <h2 class="text-2xl font-bold">{if @editing, do: "Edit Room", else: "Create Room"}</h2>
-        <button phx-click="cancel_form" class="btn btn-ghost btn-sm">
+    <div class="admin-section">
+      <div class="admin-section-header">
+        <h2 class="admin-section-title">{if @editing, do: "Edit Room", else: "Create Room"}</h2>
+        <button phx-click="cancel_form" class="admin-btn--ghost">
           <.icon name="hero-x-mark" class="size-4" /> Cancel
         </button>
       </div>
 
-      <div class="card bg-base-200">
-        <div class="card-body">
-          <.form for={@form} phx-submit="save_room" class="space-y-4">
+      <div class="admin-card">
+        <div class="admin-card-body">
+          <.form for={@form} phx-submit="save_room" class="admin-form">
             <.input field={@form[:key]} type="text" label="Key (unique identifier)" required />
             <.input field={@form[:name]} type="text" label="Name" />
             <.input field={@form[:description]} type="textarea" label="Description" rows="4" />
-            <div class="flex justify-end gap-2 mt-6">
+            <div class="admin-form-actions">
               <button type="button" phx-click="cancel_form" class="btn btn-ghost">Cancel</button>
               <button type="submit" class="btn btn-primary">
                 {if @editing, do: "Update Room", else: "Create Room"}
@@ -318,16 +318,16 @@ defmodule ExmudWeb.AdminLive do
 
   defp tab_content(%{tab: :entities, form: nil} = assigns) do
     ~H"""
-    <div class="space-y-6">
-      <div class="flex justify-between items-center">
-        <h2 class="text-2xl font-bold">Entities ({length(@entities || [])})</h2>
-        <button phx-click="new_entity" class="btn btn-primary btn-sm">
+    <div class="admin-section">
+      <div class="admin-section-header">
+        <h2 class="admin-section-title">Entities ({length(@entities || [])})</h2>
+        <button phx-click="new_entity" class="admin-btn--primary">
           <.icon name="hero-plus" class="size-4" /> Create Entity
         </button>
       </div>
 
-      <div :if={@entities && length(@entities) > 0} class="overflow-x-auto">
-        <table class="table table-zebra w-full">
+      <div :if={@entities && length(@entities) > 0} class="admin-table-wrapper">
+        <table class="admin-table">
           <thead>
             <tr>
               <th>Type</th>
@@ -338,24 +338,24 @@ defmodule ExmudWeb.AdminLive do
             </tr>
           </thead>
           <tbody>
-            <tr :for={entity <- @entities} class="hover">
+            <tr :for={entity <- @entities} class="admin-table-row">
               <td>
-                <span class={["badge", entity_type_badge(entity.type)]}>
+                <span class={["admin-badge", entity_type_badge(entity.type)]}>
                   {entity.type}
                 </span>
               </td>
-              <td class="font-mono text-sm">{entity.key}</td>
+              <td class="admin-table-cell-mono">{entity.key}</td>
               <td>{entity.name || "(unnamed)"}</td>
-              <td class="font-mono text-xs">{entity.location_id || "(none)"}</td>
-              <td class="flex gap-2">
-                <button phx-click="edit_entity" phx-value-id={entity.id} class="btn btn-ghost btn-xs">
+              <td class="admin-table-cell-mono-xs">{entity.location_id || "(none)"}</td>
+              <td class="admin-table-actions">
+                <button phx-click="edit_entity" phx-value-id={entity.id} class="admin-btn--ghost-xs">
                   Edit
                 </button>
                 <button
                   phx-click="delete_entity"
                   phx-value-id={entity.id}
                   data-confirm="Are you sure you want to delete this entity?"
-                  class="btn btn-ghost btn-xs text-error"
+                  class="admin-btn--danger"
                 >
                   Delete
                 </button>
@@ -365,9 +365,9 @@ defmodule ExmudWeb.AdminLive do
         </table>
       </div>
 
-      <div :if={@entities == [] or @entities == nil} class="card bg-base-200">
-        <div class="card-body">
-          <p class="text-base-content/70">
+      <div :if={@entities == [] or @entities == nil} class="admin-empty">
+        <div class="admin-card-body">
+          <p class="admin-empty-text">
             No entities created yet. Entities include NPCs, items, and other game objects.
           </p>
         </div>
@@ -378,17 +378,17 @@ defmodule ExmudWeb.AdminLive do
 
   defp tab_content(%{tab: :entities, form: form} = assigns) when not is_nil(form) do
     ~H"""
-    <div class="space-y-6">
-      <div class="flex justify-between items-center">
-        <h2 class="text-2xl font-bold">{if @editing, do: "Edit Entity", else: "Create Entity"}</h2>
-        <button phx-click="cancel_form" class="btn btn-ghost btn-sm">
+    <div class="admin-section">
+      <div class="admin-section-header">
+        <h2 class="admin-section-title">{if @editing, do: "Edit Entity", else: "Create Entity"}</h2>
+        <button phx-click="cancel_form" class="admin-btn--ghost">
           <.icon name="hero-x-mark" class="size-4" /> Cancel
         </button>
       </div>
 
-      <div class="card bg-base-200">
-        <div class="card-body">
-          <.form for={@form} phx-submit="save_entity" class="space-y-4">
+      <div class="admin-card">
+        <div class="admin-card-body">
+          <.form for={@form} phx-submit="save_entity" class="admin-form">
             <.input
               field={@form[:type]}
               type="select"
@@ -400,7 +400,7 @@ defmodule ExmudWeb.AdminLive do
             <.input field={@form[:name]} type="text" label="Name" />
             <.input field={@form[:description]} type="textarea" label="Description" rows="3" />
             <.input field={@form[:location_id]} type="text" label="Location ID (room UUID)" />
-            <div class="flex justify-end gap-2 mt-6">
+            <div class="admin-form-actions">
               <button type="button" phx-click="cancel_form" class="btn btn-ghost">Cancel</button>
               <button type="submit" class="btn btn-primary">
                 {if @editing, do: "Update Entity", else: "Create Entity"}
@@ -415,16 +415,16 @@ defmodule ExmudWeb.AdminLive do
 
   defp tab_content(%{tab: :scripts, form: nil} = assigns) do
     ~H"""
-    <div class="space-y-6">
-      <div class="flex justify-between items-center">
-        <h2 class="text-2xl font-bold">Scripts ({length(@scripts || [])})</h2>
-        <button phx-click="new_script" class="btn btn-primary btn-sm">
+    <div class="admin-section">
+      <div class="admin-section-header">
+        <h2 class="admin-section-title">Scripts ({length(@scripts || [])})</h2>
+        <button phx-click="new_script" class="admin-btn--primary">
           <.icon name="hero-plus" class="size-4" /> New Script
         </button>
       </div>
 
-      <div :if={@scripts && length(@scripts) > 0} class="overflow-x-auto">
-        <table class="table table-zebra w-full">
+      <div :if={@scripts && length(@scripts) > 0} class="admin-table-wrapper">
+        <table class="admin-table">
           <thead>
             <tr>
               <th>Name</th>
@@ -435,33 +435,33 @@ defmodule ExmudWeb.AdminLive do
             </tr>
           </thead>
           <tbody>
-            <tr :for={script <- @scripts} class="hover">
+            <tr :for={script <- @scripts} class="admin-table-row">
               <td class="font-semibold">{script.name}</td>
               <td>
-                <span class="badge badge-outline">{script.hook || "custom"}</span>
+                <span class="admin-badge admin-badge--outline">{script.hook || "custom"}</span>
               </td>
               <td>
                 <input
                   type="checkbox"
-                  class="toggle toggle-primary toggle-sm"
+                  class="admin-toggle"
                   checked={script.enabled}
                   phx-click="toggle_script"
                   phx-value-id={script.id}
                 />
               </td>
               <td>{Calendar.strftime(script.updated_at, "%Y-%m-%d %H:%M")}</td>
-              <td class="flex gap-2">
-                <button phx-click="edit_script" phx-value-id={script.id} class="btn btn-ghost btn-xs">
+              <td class="admin-table-actions">
+                <button phx-click="edit_script" phx-value-id={script.id} class="admin-btn--ghost-xs">
                   Edit
                 </button>
-                <button phx-click="test_script" phx-value-id={script.id} class="btn btn-ghost btn-xs">
+                <button phx-click="test_script" phx-value-id={script.id} class="admin-btn--ghost-xs">
                   Test
                 </button>
                 <button
                   phx-click="delete_script"
                   phx-value-id={script.id}
                   data-confirm="Are you sure you want to delete this script?"
-                  class="btn btn-ghost btn-xs text-error"
+                  class="admin-btn--danger"
                 >
                   Delete
                 </button>
@@ -471,12 +471,12 @@ defmodule ExmudWeb.AdminLive do
         </table>
       </div>
 
-      <div :if={@scripts == [] or @scripts == nil} class="card bg-base-200">
-        <div class="card-body">
-          <p class="text-base-content/70 mb-4">
+      <div :if={@scripts == [] or @scripts == nil} class="admin-empty">
+        <div class="admin-card-body">
+          <p class="admin-empty-text mb-4">
             No scripts created yet. Scripts allow you to customize NPC behavior using Lua.
           </p>
-          <pre class="bg-base-300 p-4 rounded-lg text-sm font-mono"><code>{example_lua_script()}</code></pre>
+          <pre class="admin-code"><code>{example_lua_script()}</code></pre>
         </div>
       </div>
     </div>
@@ -485,17 +485,17 @@ defmodule ExmudWeb.AdminLive do
 
   defp tab_content(%{tab: :scripts, form: form} = assigns) when not is_nil(form) do
     ~H"""
-    <div class="space-y-6">
-      <div class="flex justify-between items-center">
-        <h2 class="text-2xl font-bold">{if @editing, do: "Edit Script", else: "Create Script"}</h2>
-        <button phx-click="cancel_form" class="btn btn-ghost btn-sm">
+    <div class="admin-section">
+      <div class="admin-section-header">
+        <h2 class="admin-section-title">{if @editing, do: "Edit Script", else: "Create Script"}</h2>
+        <button phx-click="cancel_form" class="admin-btn--ghost">
           <.icon name="hero-x-mark" class="size-4" /> Cancel
         </button>
       </div>
 
-      <div class="card bg-base-200">
-        <div class="card-body">
-          <.form for={@form} phx-submit="save_script" class="space-y-4">
+      <div class="admin-card">
+        <div class="admin-card-body">
+          <.form for={@form} phx-submit="save_script" class="admin-form">
             <.input field={@form[:name]} type="text" label="Script Name" required />
             <.input field={@form[:description]} type="text" label="Description" />
             <.input
@@ -523,7 +523,7 @@ defmodule ExmudWeb.AdminLive do
               placeholder="-- Enter your Lua script here"
             />
             <.input field={@form[:enabled]} type="checkbox" label="Enabled" />
-            <div class="flex justify-end gap-2 mt-6">
+            <div class="admin-form-actions">
               <button type="button" phx-click="cancel_form" class="btn btn-ghost">Cancel</button>
               <button type="submit" class="btn btn-primary">
                 {if @editing, do: "Update Script", else: "Create Script"}
@@ -538,46 +538,46 @@ defmodule ExmudWeb.AdminLive do
 
   defp tab_content(%{tab: :system} = assigns) do
     ~H"""
-    <div class="space-y-6">
-      <h2 class="text-2xl font-bold">System</h2>
+    <div class="admin-section">
+      <h2 class="admin-section-title">System</h2>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="card bg-base-200">
-          <div class="card-body">
-            <h3 class="card-title">Server Info</h3>
-            <dl class="space-y-2 text-sm">
-              <div class="flex justify-between">
-                <dt class="text-base-content/70">Elixir Version</dt>
+      <div class="admin-grid-system">
+        <div class="admin-card">
+          <div class="admin-card-body">
+            <h3 class="admin-card-title">Server Info</h3>
+            <dl class="admin-dl">
+              <div class="admin-dl-row">
+                <dt class="admin-dl-term">Elixir Version</dt>
                 <dd>{@system_info.elixir_version}</dd>
               </div>
-              <div class="flex justify-between">
-                <dt class="text-base-content/70">OTP Version</dt>
+              <div class="admin-dl-row">
+                <dt class="admin-dl-term">OTP Version</dt>
                 <dd>{@system_info.otp_version}</dd>
               </div>
-              <div class="flex justify-between">
-                <dt class="text-base-content/70">Phoenix Version</dt>
+              <div class="admin-dl-row">
+                <dt class="admin-dl-term">Phoenix Version</dt>
                 <dd>{@system_info.phoenix_version}</dd>
               </div>
-              <div class="flex justify-between">
-                <dt class="text-base-content/70">Memory Usage</dt>
+              <div class="admin-dl-row">
+                <dt class="admin-dl-term">Memory Usage</dt>
                 <dd>{format_bytes(@system_info.memory_usage)}</dd>
               </div>
-              <div class="flex justify-between">
-                <dt class="text-base-content/70">Process Count</dt>
+              <div class="admin-dl-row">
+                <dt class="admin-dl-term">Process Count</dt>
                 <dd>{@system_info.process_count}</dd>
               </div>
             </dl>
           </div>
         </div>
 
-        <div class="card bg-base-200">
-          <div class="card-body">
-            <h3 class="card-title">Actions</h3>
+        <div class="admin-card">
+          <div class="admin-card-body">
+            <h3 class="admin-card-title">Actions</h3>
             <div class="space-y-2">
-              <button phx-click="reload_scripts" class="btn btn-outline btn-sm w-full">
+              <button phx-click="reload_scripts" class="admin-btn--outline">
                 <.icon name="hero-arrow-path" class="size-4" /> Reload Scripts
               </button>
-              <button phx-click="export_world" class="btn btn-outline btn-sm w-full">
+              <button phx-click="export_world" class="admin-btn--outline">
                 <.icon name="hero-arrow-down-tray" class="size-4" /> Export World
               </button>
             </div>
@@ -590,7 +590,7 @@ defmodule ExmudWeb.AdminLive do
 
   defp tab_content(assigns) do
     ~H"""
-    <div class="alert alert-warning">
+    <div class="admin-alert admin-alert--warning">
       <.icon name="hero-exclamation-triangle" class="size-4" />
       <span>Unknown tab selected.</span>
     </div>
@@ -607,15 +607,15 @@ defmodule ExmudWeb.AdminLive do
 
   defp stat_card(assigns) do
     ~H"""
-    <div class="card bg-base-200">
-      <div class="card-body">
-        <div class="flex items-center gap-4">
-          <div class="bg-primary/10 p-3 rounded-lg">
+    <div class="admin-stat-card">
+      <div class="admin-stat-content">
+        <div class="admin-stat-icon-wrapper">
+          <div class="admin-stat-icon">
             <.icon name={@icon} class="size-6 text-primary" />
           </div>
           <div>
-            <p class="text-2xl font-bold">{@value}</p>
-            <p class="text-sm text-base-content/70">{@title}</p>
+            <p class="admin-stat-value">{@value}</p>
+            <p class="admin-stat-label">{@title}</p>
           </div>
         </div>
       </div>
@@ -901,10 +901,10 @@ defmodule ExmudWeb.AdminLive do
 
   defp load_tab_data(socket, _), do: socket
 
-  defp entity_type_badge(:npc), do: "badge-info"
-  defp entity_type_badge(:item), do: "badge-success"
-  defp entity_type_badge(:exit), do: "badge-warning"
-  defp entity_type_badge(_), do: "badge-ghost"
+  defp entity_type_badge(:npc), do: "admin-badge--npc"
+  defp entity_type_badge(:item), do: "admin-badge--item"
+  defp entity_type_badge(:exit), do: "admin-badge--exit"
+  defp entity_type_badge(_), do: "admin-badge--ghost"
 
   defp format_bytes(bytes) when bytes < 1024, do: "#{bytes} B"
   defp format_bytes(bytes) when bytes < 1_048_576, do: "#{Float.round(bytes / 1024, 1)} KB"

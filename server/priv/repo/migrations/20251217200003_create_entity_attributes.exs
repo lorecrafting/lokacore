@@ -6,7 +6,7 @@ defmodule Exmud.Repo.Migrations.CreateEntityAttributes do
       add :entity_id, references(:entities, type: :uuid, on_delete: :delete_all), null: false
       add :key, :string, null: false
       add :category, :string, default: "default"
-      add :value, :binary, null: false
+      add :value, :text, null: false
       add :str_value, :string
 
       timestamps(type: :utc_datetime)

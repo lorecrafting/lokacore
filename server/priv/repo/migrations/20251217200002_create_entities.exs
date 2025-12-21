@@ -10,13 +10,13 @@ defmodule Exmud.Repo.Migrations.CreateEntities do
       add :description, :text
       add :location_id, references(:entities, type: :uuid, on_delete: :nilify_all)
 
-      # Serialized complex data (Erlang term binary)
-      add :components, :binary
-      add :behaviors, :binary
+      # Serialized complex data (JSON text for queryability)
+      add :components, :text
+      add :behaviors, :text
       add :tags, {:array, :string}, default: []
-      add :locks, :binary
-      add :scripts, :binary
-      add :metadata, :binary
+      add :locks, :text
+      add :scripts, :text
+      add :metadata, :text
 
       timestamps(type: :utc_datetime)
     end

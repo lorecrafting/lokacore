@@ -2,6 +2,10 @@
   <div class="ebook-auth">
     <h1 class="ebook-auth-title">Enter the World</h1>
 
+    <div :if={Phoenix.Flash.get(@flash, :error)} class="ebook-error" style="margin-bottom: 1rem; color: #c00; text-align: center;">
+      {Phoenix.Flash.get(@flash, :error)}
+    </div>
+
     <div :if={local_mail_adapter?()} style="margin-bottom: 1.5rem; color: var(--ebook-text-muted); font-size: 0.875rem;">
       <p>Development mode: <a href="/dev/mailbox" class="ebook-link">view sent emails</a></p>
     </div>

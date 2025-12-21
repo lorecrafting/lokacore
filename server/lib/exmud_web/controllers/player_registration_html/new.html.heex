@@ -14,10 +14,13 @@
           required
           phx-mounted={JS.focus()}
         />
-        <%= if @changeset.action && @changeset.errors[:email] do %>
-          <p style="color: var(--ebook-text-muted); font-size: 0.875rem; margin-top: 0.5rem;">
-            <%= elem(hd(@changeset.errors[:email]), 0) %>
-          </p>
+        <%= if @changeset.action do %>
+          <% email_errors = Keyword.get_values(@changeset.errors, :email) %>
+          <%= if email_errors != [] do %>
+            <p style="color: #c00; font-size: 0.875rem; margin-top: 0.5rem;">
+              <%= elem(hd(email_errors), 0) %>
+            </p>
+          <% end %>
         <% end %>
       </div>
 

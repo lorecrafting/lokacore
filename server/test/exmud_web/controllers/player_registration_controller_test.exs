@@ -7,9 +7,9 @@ defmodule ExmudWeb.PlayerRegistrationControllerTest do
     test "renders registration page", %{conn: conn} do
       conn = get(conn, ~p"/players/register")
       response = html_response(conn, 200)
-      assert response =~ "Register"
+      assert response =~ "Begin Your Journey"
       assert response =~ ~p"/players/log-in"
-      assert response =~ ~p"/players/register"
+      assert response =~ "Create account"
     end
 
     test "redirects if already logged in", %{conn: conn} do
@@ -43,7 +43,7 @@ defmodule ExmudWeb.PlayerRegistrationControllerTest do
         })
 
       response = html_response(conn, 200)
-      assert response =~ "Register"
+      assert response =~ "Begin Your Journey"
       assert response =~ "must have the @ sign and no spaces"
     end
   end

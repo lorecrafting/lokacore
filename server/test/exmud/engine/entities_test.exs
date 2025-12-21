@@ -2,6 +2,7 @@ defmodule Exmud.Engine.EntitiesTest do
   use Exmud.DataCase
 
   alias Exmud.Engine.Entities
+  alias Exmud.Engine.Entity
   alias Exmud.Engine.Schema.EntitySchema
 
   import Exmud.EngineFixtures
@@ -204,6 +205,164 @@ defmodule Exmud.Engine.EntitiesTest do
       {:ok, _} = Entities.set_attribute(entity.id, "health", 100)
       {1, nil} = Entities.delete_attribute(entity.id, "health")
       assert is_nil(Entities.get_attribute(entity.id, "health"))
+    end
+
+    test "clear_attributes/1 removes all attributes" do
+      entity = entity_fixture()
+      {:ok, _} = Entities.set_attribute(entity.id, "health", 100)
+      {:ok, _} = Entities.set_attribute(entity.id, "mana", 50)
+
+      {count, nil} = Entities.clear_attributes(entity.id)
+      assert count == 2
+      assert Entities.get_attributes(entity.id) == %{}
+    end
+  end
+
+  describe "get_entity_by_key/1" do
+    test "returns entity with given key" do
+      entity = entity_fixture(%{key: "unique_key_test"})
+      assert Entities.get_entity_by_key("unique_key_test").id == entity.id
+    end
+
+    test "returns nil for non-existent key" do
+      assert is_nil(Entities.get_entity_by_key("nonexistent_key"))
+    end
+  end
+
+  describe "list_entities/1 with location filter" do
+    test "filters by location_id" do
+      room = room_fixture()
+      item_in_room = entity_fixture(%{type: :item, location_id: room.id})
+      _item_elsewhere = item_fixture()
+
+      results = Entities.list_entities(location_id: room.id)
+      assert length(results) == 1
+      assert hd(results).id == item_in_room.id
+    end
+
+    test "filters by multiple types" do
+      room = room_fixture()
+      npc = npc_fixture()
+      _item = item_fixture()
+
+      results = Entities.list_entities(type: [:room, :npc])
+      result_ids = Enum.map(results, & &1.id)
+
+      assert room.id in result_ids
+      assert npc.id in result_ids
+      assert length(results) == 2
+    end
+  end
+
+  describe "list_rooms/0" do
+    test "returns only room entities" do
+      room1 = room_fixture()
+      room2 = room_fixture()
+      _npc = npc_fixture()
+
+      rooms = Entities.list_rooms()
+      room_ids = Enum.map(rooms, & &1.id)
+
+      assert room1.id in room_ids
+      assert room2.id in room_ids
+      assert Enum.all?(rooms, &(&1.type == :room))
+    end
+  end
+
+  describe "get_room/1" do
+    test "returns room by id" do
+      room = room_fixture()
+      result = Entities.get_room(room.id)
+      assert result.id == room.id
+      assert result.type == :room
+    end
+
+    test "returns nil for non-room entity" do
+      npc = npc_fixture()
+      assert is_nil(Entities.get_room(npc.id))
+    end
+
+    test "returns nil for non-existent id" do
+      assert is_nil(Entities.get_room(Ecto.UUID.generate()))
+    end
+  end
+
+  describe "get_contents/1" do
+    test "returns entities at location" do
+      room = room_fixture()
+      item1 = entity_fixture(%{type: :item, location_id: room.id})
+      item2 = entity_fixture(%{type: :item, location_id: room.id})
+      _item_elsewhere = item_fixture()
+
+      contents = Entities.get_contents(room.id)
+      content_ids = Enum.map(contents, & &1.id)
+
+      assert item1.id in content_ids
+      assert item2.id in content_ids
+      assert length(contents) == 2
+    end
+
+    test "returns empty list when no contents" do
+      room = room_fixture()
+      assert Entities.get_contents(room.id) == []
+    end
+  end
+
+  describe "to_entity/1" do
+    test "converts EntitySchema to Entity struct" do
+      schema = entity_fixture(%{
+        name: "Test Entity",
+        description: "A test",
+        components: %{health: 100},
+        tags: ["test"]
+      })
+
+      entity = Entities.to_entity(schema)
+
+      assert %Entity{} = entity
+      assert entity.id == schema.id
+      assert entity.name == "Test Entity"
+      assert entity.components == %{health: 100}
+      assert entity.tags == ["test"]
+    end
+
+    test "returns nil for nil input" do
+      assert is_nil(Entities.to_entity(nil))
+    end
+  end
+
+  describe "save_entity/1" do
+    test "creates new entity when id is nil" do
+      entity = Entity.new(:room, %{key: "save_test_#{System.unique_integer()}", name: "Saved Room"})
+
+      assert {:ok, saved} = Entities.save_entity(entity)
+      assert saved.name == "Saved Room"
+      assert Entities.get_entity(saved.id) != nil
+    end
+
+    test "updates existing entity" do
+      schema = entity_fixture(%{name: "Original"})
+      entity = Entities.to_entity(schema)
+      updated_entity = %{entity | name: "Updated"}
+
+      assert {:ok, saved} = Entities.save_entity(updated_entity)
+      assert saved.name == "Updated"
+    end
+  end
+
+  describe "change_entity/2" do
+    test "returns a changeset" do
+      entity = entity_fixture()
+      changeset = Entities.change_entity(entity, %{name: "New Name"})
+      assert %Ecto.Changeset{} = changeset
+      assert changeset.changes == %{name: "New Name"}
+    end
+
+    test "returns changeset with no changes for empty attrs" do
+      entity = entity_fixture()
+      changeset = Entities.change_entity(entity)
+      assert %Ecto.Changeset{} = changeset
+      assert changeset.changes == %{}
     end
   end
 end

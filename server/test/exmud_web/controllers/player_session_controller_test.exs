@@ -12,9 +12,9 @@ defmodule ExmudWeb.PlayerSessionControllerTest do
     test "renders login page", %{conn: conn} do
       conn = get(conn, ~p"/players/log-in")
       response = html_response(conn, 200)
-      assert response =~ "Log in"
+      assert response =~ "Enter the World"
       assert response =~ ~p"/players/register"
-      assert response =~ "Log in with email"
+      assert response =~ "Send magic link"
     end
 
     test "renders login page with email filled in (sudo mode)", %{conn: conn, player: player} do
@@ -26,18 +26,18 @@ defmodule ExmudWeb.PlayerSessionControllerTest do
 
       assert html =~ "You need to reauthenticate"
       refute html =~ "Register"
-      assert html =~ "Log in with email"
+      assert html =~ "Send magic link"
 
       assert html =~
-               ~s(<input type="email" name="player[email]" id="login_form_magic_email" value="#{player.email}")
+               ~s(<input type="email" name="player[email]" value="#{player.email}")
     end
 
-    test "renders login page (email + password)", %{conn: conn} do
-      conn = get(conn, ~p"/players/log-in?mode=password")
+    test "renders login page (magic link mode)", %{conn: conn} do
+      conn = get(conn, ~p"/players/log-in")
       response = html_response(conn, 200)
-      assert response =~ "Log in"
+      assert response =~ "Enter the World"
       assert response =~ ~p"/players/register"
-      assert response =~ "Log in with email"
+      assert response =~ "Send magic link"
     end
   end
 
@@ -52,7 +52,7 @@ defmodule ExmudWeb.PlayerSessionControllerTest do
         end)
 
       conn = get(conn, ~p"/players/log-in/#{token}")
-      assert html_response(conn, 200) =~ "Confirm and stay logged in"
+      assert html_response(conn, 200) =~ "Confirm and remember me"
     end
 
     test "renders login page for confirmed player", %{conn: conn, player: player} do
@@ -64,7 +64,7 @@ defmodule ExmudWeb.PlayerSessionControllerTest do
       conn = get(conn, ~p"/players/log-in/#{token}")
       html = html_response(conn, 200)
       refute html =~ "Confirm my account"
-      assert html =~ "Log in"
+      assert html =~ "Welcome, Traveler"
     end
 
     test "raises error for invalid token", %{conn: conn} do
@@ -129,12 +129,12 @@ defmodule ExmudWeb.PlayerSessionControllerTest do
 
     test "emits error message with invalid credentials", %{conn: conn, player: player} do
       conn =
-        post(conn, ~p"/players/log-in?mode=password", %{
+        post(conn, ~p"/players/log-in", %{
           "player" => %{"email" => player.email, "password" => "invalid_password"}
         })
 
       response = html_response(conn, 200)
-      assert response =~ "Log in"
+      assert response =~ "Enter the World"
       assert response =~ "Invalid email or password"
     end
   end

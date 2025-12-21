@@ -439,3 +439,253 @@ body:has(.ebook-page) > .menu {
 body:has(.ebook-page) {
   background-color: var(--ebook-bg);
 }
+
+/* ========================================
+   ADMIN DASHBOARD STYLES
+   Organized CSS for admin interface
+   ======================================== */
+
+/* Admin Page Layout */
+.admin-layout {
+  @apply min-h-screen;
+}
+
+.admin-header {
+  @apply navbar bg-base-200 mb-6;
+}
+
+.admin-header-title {
+  @apply text-xl font-bold text-primary;
+}
+
+.admin-content {
+  @apply flex gap-6 px-4;
+}
+
+/* Admin Sidebar Navigation */
+.admin-sidebar {
+  @apply w-64 flex-none;
+}
+
+.admin-nav {
+  @apply menu bg-base-200 rounded-lg;
+}
+
+.admin-nav-item {
+  @apply flex items-center gap-2;
+}
+
+/* Admin Main Content Area */
+.admin-main {
+  @apply flex-1;
+}
+
+.admin-section {
+  @apply space-y-6;
+}
+
+.admin-section-header {
+  @apply flex justify-between items-center;
+}
+
+.admin-section-title {
+  @apply text-2xl font-bold;
+}
+
+/* Admin Cards */
+.admin-card {
+  @apply card bg-base-200;
+}
+
+.admin-card-body {
+  @apply card-body;
+}
+
+.admin-card-title {
+  @apply card-title;
+}
+
+/* Admin Stat Cards */
+.admin-stat-card {
+  @apply card bg-base-200;
+}
+
+.admin-stat-content {
+  @apply card-body;
+}
+
+.admin-stat-icon-wrapper {
+  @apply flex items-center gap-4;
+}
+
+.admin-stat-icon {
+  @apply bg-primary/10 p-3 rounded-lg;
+}
+
+.admin-stat-value {
+  @apply text-2xl font-bold;
+}
+
+.admin-stat-label {
+  @apply text-sm text-base-content/70;
+}
+
+/* Admin Tables */
+.admin-table-wrapper {
+  @apply overflow-x-auto;
+}
+
+.admin-table {
+  @apply table table-zebra w-full;
+}
+
+.admin-table-row {
+  @apply hover;
+}
+
+.admin-table-cell-mono {
+  @apply font-mono text-sm;
+}
+
+.admin-table-cell-mono-xs {
+  @apply font-mono text-xs;
+}
+
+.admin-table-cell-truncate {
+  @apply max-w-xs truncate;
+}
+
+.admin-table-actions {
+  @apply flex gap-2;
+}
+
+/* Admin Badges */
+.admin-badge {
+  @apply badge;
+}
+
+.admin-badge--primary {
+  @apply badge-primary;
+}
+
+.admin-badge--success {
+  @apply badge-success;
+}
+
+.admin-badge--warning {
+  @apply badge-warning;
+}
+
+.admin-badge--ghost {
+  @apply badge-ghost;
+}
+
+.admin-badge--outline {
+  @apply badge-outline;
+}
+
+.admin-badge--info {
+  @apply badge-info;
+}
+
+/* Entity Type Badges */
+.admin-badge--npc {
+  @apply badge-info;
+}
+
+.admin-badge--item {
+  @apply badge-success;
+}
+
+.admin-badge--exit {
+  @apply badge-warning;
+}
+
+/* Admin Buttons */
+.admin-btn {
+  @apply btn;
+}
+
+.admin-btn--primary {
+  @apply btn-primary btn-sm;
+}
+
+.admin-btn--ghost {
+  @apply btn-ghost btn-sm;
+}
+
+.admin-btn--ghost-xs {
+  @apply btn-ghost btn-xs;
+}
+
+.admin-btn--outline {
+  @apply btn-outline btn-sm w-full;
+}
+
+.admin-btn--danger {
+  @apply btn-ghost btn-xs text-error;
+}
+
+/* Admin Forms */
+.admin-form {
+  @apply space-y-4;
+}
+
+.admin-form-actions {
+  @apply flex justify-end gap-2 mt-6;
+}
+
+/* Admin Toggle */
+.admin-toggle {
+  @apply toggle toggle-primary toggle-sm;
+}
+
+/* Admin Empty State */
+.admin-empty {
+  @apply card bg-base-200;
+}
+
+.admin-empty-text {
+  @apply text-base-content/70;
+}
+
+/* Admin Code Block */
+.admin-code {
+  @apply bg-base-300 p-4 rounded-lg text-sm font-mono;
+}
+
+/* Admin Alert */
+.admin-alert {
+  @apply alert;
+}
+
+.admin-alert--warning {
+  @apply alert-warning;
+}
+
+/* Admin Definition List (System Info) */
+.admin-dl {
+  @apply space-y-2 text-sm;
+}
+
+.admin-dl-row {
+  @apply flex justify-between;
+}
+
+.admin-dl-term {
+  @apply text-base-content/70;
+}
+
+/* Admin Grid Layouts */
+.admin-grid-stats {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4;
+}
+
+.admin-grid-system {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+}
+
+/* Admin Quick Start List */
+.admin-quickstart-list {
+  @apply list-disc list-inside space-y-1 text-sm;
+}

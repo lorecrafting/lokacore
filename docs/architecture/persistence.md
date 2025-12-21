@@ -10,9 +10,11 @@ Like Evennia, ExMUD separates structured data (entities) from flexible attribute
 |---------|------------------|
 | TypedObject | EntitySchema |
 | AttributeHandler | EntityAttribute (EAV table) |
-| `db.attr` | Entity components (binary) |
+| `db.attr` | Entity components (JSON text) |
 | `ndb.attr` | Not persisted (in-memory) |
-| pickle serialization | `:erlang.term_to_binary` |
+| pickle serialization | JSON (via `Exmud.Ecto.Json`) |
+
+**Note**: Unlike Evennia's pickle serialization, ExMUD uses JSON for queryability and human-readability. This means **map keys become strings** when loaded from the database.
 
 ## Database Schema
 
@@ -26,13 +28,13 @@ create table(:entities, primary_key: false) do
   add :description, :text
   add :location_id, references(:entities, type: :uuid, on_delete: :nilify_all)
 
-  # Serialized binary fields (Erlang terms)
-  add :components, :binary             # Map of components
-  add :behaviors, :binary              # List of behavior modules
+  # Serialized JSON text fields (queryable)
+  add :components, :text               # Map of components
+  add :behaviors, :text                # List of behavior modules
   add :tags, {:array, :string}, default: []
-  add :locks, :binary                  # Access control map
-  add :scripts, :binary                # Lua script assignments
-  add :metadata, :binary               # Timestamps, versions
+  add :locks, :text                    # Access control map
+  add :scripts, :text                  # Lua script assignments
+  add :metadata, :text                 # Timestamps, versions
 
   timestamps(type: :utc_datetime)
 end
@@ -45,7 +47,7 @@ create table(:entity_attributes, primary_key: false) do
   add :entity_id, references(:entities, type: :uuid, on_delete: :delete_all), null: false
   add :key, :string, null: false       # Attribute name
   add :category, :string, default: "default"
-  add :value, :binary, null: false     # Erlang term serialized
+  add :value, :text, null: false       # JSON serialized
   add :str_value, :string              # Searchable string representation
 
   timestamps(type: :utc_datetime)
@@ -67,30 +69,56 @@ create table(:scripts) do
 end
 ```
 
-## Custom Ecto Type for Erlang Terms
+## Custom Ecto Type for JSON Serialization
 
 ```elixir
-defmodule Exmud.Ecto.Term do
+defmodule Exmud.Ecto.Json do
   @moduledoc """
-  Custom Ecto type for storing arbitrary Erlang terms as binary.
-  Uses :erlang.term_to_binary/1 for serialization (like Evennia uses pickle).
+  Custom Ecto type for storing arbitrary Elixir terms as JSON.
+  Provides queryability and human-readable storage.
+
+  IMPORTANT: Map keys become strings when loaded from the database.
+  Code must use string keys: `Map.get(data, "key")` not `data.key`
   """
   use Ecto.Type
 
-  def type, do: :binary
+  def type, do: :string
 
   def cast(term), do: {:ok, term}
 
   def load(nil), do: {:ok, nil}
-  def load(binary) when is_binary(binary) do
-    {:ok, :erlang.binary_to_term(binary)}
-  rescue
-    ArgumentError -> :error
+  def load(json) when is_binary(json) do
+    case Jason.decode(json) do
+      {:ok, term} -> {:ok, term}
+      {:error, _} -> :error
+    end
   end
 
   def dump(nil), do: {:ok, nil}
-  def dump(term), do: {:ok, :erlang.term_to_binary(term)}
+  def dump(term) do
+    case Jason.encode(prepare_for_json(term)) do
+      {:ok, json} -> {:ok, json}
+      {:error, _} -> :error
+    end
+  end
+
+  # Converts atoms to strings, tuples to lists, etc.
+  defp prepare_for_json(term), do: # ... conversion logic
 end
+```
+
+### String Keys on Load
+
+When data is loaded from the database, all map keys will be strings:
+
+```elixir
+# Saving (atom keys work)
+entity = %Entity{components: %{health: %{current: 100, max: 100}}}
+Entities.save_entity(entity)
+
+# Loading (use string keys!)
+loaded = Entities.get_entity!(id)
+loaded.components["health"]["current"]  # => 100
 ```
 
 ## Attribute System (EAV)

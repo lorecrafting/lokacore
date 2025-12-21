@@ -27,13 +27,13 @@ defmodule Exmud.Engine.Schema.EntitySchema do
     field :description, :string
     field :location_id, :binary_id
 
-    # Serialized complex data
-    field :components, Exmud.Ecto.Term, default: %{}
-    field :behaviors, Exmud.Ecto.Term, default: []
+    # Serialized complex data (stored as JSON for queryability)
+    field :components, Exmud.Ecto.Json, default: %{}
+    field :behaviors, Exmud.Ecto.Json, default: []
     field :tags, {:array, :string}, default: []
-    field :locks, Exmud.Ecto.Term, default: %{}
-    field :scripts, Exmud.Ecto.Term, default: %{}
-    field :metadata, Exmud.Ecto.Term, default: %{}
+    field :locks, Exmud.Ecto.Json, default: %{}
+    field :scripts, Exmud.Ecto.Json, default: %{}
+    field :metadata, Exmud.Ecto.Json, default: %{}
 
     # Relationships
     has_many :attributes, EntityAttribute, foreign_key: :entity_id

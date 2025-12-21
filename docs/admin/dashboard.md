@@ -44,6 +44,11 @@ Entity management for NPCs, items, and other objects:
 - Edit entity properties
 - Manage tags and components
 
+**JSON Serialization**: Entity components, behaviors, locks, scripts, and metadata are stored as JSON text in the database. When editing these fields through the admin interface or API:
+- Map keys become strings when saved and loaded
+- You can use atom keys when editing, but they'll be string keys when loaded
+- Example: `%{health: 100}` becomes `%{"health" => 100}` after save/load
+
 **Entity Form Fields**:
 | Field | Description |
 |-------|-------------|

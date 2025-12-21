@@ -27,7 +27,9 @@ end
 
 ## Component System
 
-Components are pure data containers that can be attached to any entity:
+Components are pure data containers that can be attached to any entity.
+
+**Important**: Components are stored as JSON, so when loaded from the database, map keys become strings. Use helper functions like `Component.from_map/1` to convert DB data back to structs:
 
 ```elixir
 # Combat-capable entities
