@@ -30,12 +30,12 @@ defmodule ExmudWeb.AdminLive do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <div class="admin-layout">
-        <div class="admin-header">
+        <div class="navbar bg-base-200 mb-6">
           <div class="flex-1">
-            <span class="admin-header-title">ExMUD Admin</span>
+            <span class="admin-header-title text-primary">ExMUD Admin</span>
           </div>
           <div class="flex-none">
-            <a href={~p"/game"} class="admin-btn--ghost">
+            <a href={~p"/game"} class="btn btn-ghost btn-sm">
               <.icon name="hero-play" class="size-4" /> Play Game
             </a>
           </div>
@@ -43,7 +43,7 @@ defmodule ExmudWeb.AdminLive do
 
         <div class="admin-content">
           <aside class="admin-sidebar">
-            <ul class="admin-nav">
+            <ul class="menu bg-base-200 rounded-lg">
               <li>
                 <button
                   phx-click="switch_tab"
@@ -146,9 +146,9 @@ defmodule ExmudWeb.AdminLive do
         <.stat_card title="Scripts Loaded" value={@stats.scripts_loaded} icon="hero-code-bracket" />
       </div>
 
-      <div class="admin-card">
-        <div class="admin-card-body">
-          <h3 class="admin-card-title">Quick Start</h3>
+      <div class="card bg-base-200">
+        <div class="card-body">
+          <h3 class="card-title">Quick Start</h3>
           <p class="admin-empty-text mb-4">
             Welcome to the ExMUD Admin Dashboard. Use the sidebar to navigate between sections.
           </p>
@@ -172,7 +172,7 @@ defmodule ExmudWeb.AdminLive do
       </div>
 
       <div :if={@players && length(@players) > 0} class="admin-table-wrapper">
-        <table class="admin-table">
+        <table class="table table-zebra w-full">
           <thead>
             <tr>
               <th>Email</th>
@@ -183,20 +183,20 @@ defmodule ExmudWeb.AdminLive do
             </tr>
           </thead>
           <tbody>
-            <tr :for={player <- @players} class="admin-table-row">
+            <tr :for={player <- @players} class="hover">
               <td>{player.email}</td>
               <td>
                 <span class={[
-                  "admin-badge",
-                  if(player.is_admin, do: "admin-badge--primary", else: "admin-badge--ghost")
+                  "badge",
+                  if(player.is_admin, do: "badge-primary", else: "badge-ghost")
                 ]}>
                   {if player.is_admin, do: "Admin", else: "Player"}
                 </span>
               </td>
               <td>
                 <span class={[
-                  "admin-badge",
-                  if(player.confirmed_at, do: "admin-badge--success", else: "admin-badge--warning")
+                  "badge",
+                  if(player.confirmed_at, do: "badge-success", else: "badge-warning")
                 ]}>
                   {if player.confirmed_at, do: "Yes", else: "No"}
                 </span>
@@ -206,7 +206,7 @@ defmodule ExmudWeb.AdminLive do
                 <button
                   phx-click="toggle_admin"
                   phx-value-id={player.id}
-                  class="admin-btn--ghost-xs"
+                  class="btn btn-ghost btn-xs"
                 >
                   {if player.is_admin, do: "Revoke Admin", else: "Make Admin"}
                 </button>
@@ -214,7 +214,7 @@ defmodule ExmudWeb.AdminLive do
                   phx-click="delete_player"
                   phx-value-id={player.id}
                   data-confirm="Are you sure you want to delete this player?"
-                  class="admin-btn--danger"
+                  class="btn btn-ghost btn-xs text-error"
                 >
                   Delete
                 </button>
@@ -224,8 +224,8 @@ defmodule ExmudWeb.AdminLive do
         </table>
       </div>
 
-      <div :if={@players == [] or @players == nil} class="admin-empty">
-        <div class="admin-card-body">
+      <div :if={@players == [] or @players == nil} class="card bg-base-200">
+        <div class="card-body">
           <p class="admin-empty-text">No players registered yet.</p>
         </div>
       </div>
@@ -238,13 +238,13 @@ defmodule ExmudWeb.AdminLive do
     <div class="admin-section">
       <div class="admin-section-header">
         <h2 class="admin-section-title">Rooms ({length(@rooms || [])})</h2>
-        <button phx-click="new_room" class="admin-btn--primary">
+        <button phx-click="new_room" class="btn btn-primary btn-sm">
           <.icon name="hero-plus" class="size-4" /> Create Room
         </button>
       </div>
 
       <div :if={@rooms && length(@rooms) > 0} class="admin-table-wrapper">
-        <table class="admin-table">
+        <table class="table table-zebra w-full">
           <thead>
             <tr>
               <th>Key</th>
@@ -254,19 +254,19 @@ defmodule ExmudWeb.AdminLive do
             </tr>
           </thead>
           <tbody>
-            <tr :for={room <- @rooms} class="admin-table-row">
+            <tr :for={room <- @rooms} class="hover">
               <td class="admin-table-cell-mono">{room.key}</td>
               <td>{room.name || "(unnamed)"}</td>
               <td class="admin-table-cell-truncate">{room.description || "(no description)"}</td>
               <td class="admin-table-actions">
-                <button phx-click="edit_room" phx-value-id={room.id} class="admin-btn--ghost-xs">
+                <button phx-click="edit_room" phx-value-id={room.id} class="btn btn-ghost btn-xs">
                   Edit
                 </button>
                 <button
                   phx-click="delete_room"
                   phx-value-id={room.id}
                   data-confirm="Are you sure you want to delete this room?"
-                  class="admin-btn--danger"
+                  class="btn btn-ghost btn-xs text-error"
                 >
                   Delete
                 </button>
@@ -276,8 +276,8 @@ defmodule ExmudWeb.AdminLive do
         </table>
       </div>
 
-      <div :if={@rooms == [] or @rooms == nil} class="admin-empty">
-        <div class="admin-card-body">
+      <div :if={@rooms == [] or @rooms == nil} class="card bg-base-200">
+        <div class="card-body">
           <p class="admin-empty-text">
             No rooms created yet. Click "Create Room" to add your first location.
           </p>
@@ -292,13 +292,13 @@ defmodule ExmudWeb.AdminLive do
     <div class="admin-section">
       <div class="admin-section-header">
         <h2 class="admin-section-title">{if @editing, do: "Edit Room", else: "Create Room"}</h2>
-        <button phx-click="cancel_form" class="admin-btn--ghost">
+        <button phx-click="cancel_form" class="btn btn-ghost btn-sm">
           <.icon name="hero-x-mark" class="size-4" /> Cancel
         </button>
       </div>
 
-      <div class="admin-card">
-        <div class="admin-card-body">
+      <div class="card bg-base-200">
+        <div class="card-body">
           <.form for={@form} phx-submit="save_room" class="admin-form">
             <.input field={@form[:key]} type="text" label="Key (unique identifier)" required />
             <.input field={@form[:name]} type="text" label="Name" />
@@ -321,13 +321,13 @@ defmodule ExmudWeb.AdminLive do
     <div class="admin-section">
       <div class="admin-section-header">
         <h2 class="admin-section-title">Entities ({length(@entities || [])})</h2>
-        <button phx-click="new_entity" class="admin-btn--primary">
+        <button phx-click="new_entity" class="btn btn-primary btn-sm">
           <.icon name="hero-plus" class="size-4" /> Create Entity
         </button>
       </div>
 
       <div :if={@entities && length(@entities) > 0} class="admin-table-wrapper">
-        <table class="admin-table">
+        <table class="table table-zebra w-full">
           <thead>
             <tr>
               <th>Type</th>
@@ -338,9 +338,9 @@ defmodule ExmudWeb.AdminLive do
             </tr>
           </thead>
           <tbody>
-            <tr :for={entity <- @entities} class="admin-table-row">
+            <tr :for={entity <- @entities} class="hover">
               <td>
-                <span class={["admin-badge", entity_type_badge(entity.type)]}>
+                <span class={["badge", entity_type_badge(entity.type)]}>
                   {entity.type}
                 </span>
               </td>
@@ -348,14 +348,14 @@ defmodule ExmudWeb.AdminLive do
               <td>{entity.name || "(unnamed)"}</td>
               <td class="admin-table-cell-mono-xs">{entity.location_id || "(none)"}</td>
               <td class="admin-table-actions">
-                <button phx-click="edit_entity" phx-value-id={entity.id} class="admin-btn--ghost-xs">
+                <button phx-click="edit_entity" phx-value-id={entity.id} class="btn btn-ghost btn-xs">
                   Edit
                 </button>
                 <button
                   phx-click="delete_entity"
                   phx-value-id={entity.id}
                   data-confirm="Are you sure you want to delete this entity?"
-                  class="admin-btn--danger"
+                  class="btn btn-ghost btn-xs text-error"
                 >
                   Delete
                 </button>
@@ -365,8 +365,8 @@ defmodule ExmudWeb.AdminLive do
         </table>
       </div>
 
-      <div :if={@entities == [] or @entities == nil} class="admin-empty">
-        <div class="admin-card-body">
+      <div :if={@entities == [] or @entities == nil} class="card bg-base-200">
+        <div class="card-body">
           <p class="admin-empty-text">
             No entities created yet. Entities include NPCs, items, and other game objects.
           </p>
@@ -381,13 +381,13 @@ defmodule ExmudWeb.AdminLive do
     <div class="admin-section">
       <div class="admin-section-header">
         <h2 class="admin-section-title">{if @editing, do: "Edit Entity", else: "Create Entity"}</h2>
-        <button phx-click="cancel_form" class="admin-btn--ghost">
+        <button phx-click="cancel_form" class="btn btn-ghost btn-sm">
           <.icon name="hero-x-mark" class="size-4" /> Cancel
         </button>
       </div>
 
-      <div class="admin-card">
-        <div class="admin-card-body">
+      <div class="card bg-base-200">
+        <div class="card-body">
           <.form for={@form} phx-submit="save_entity" class="admin-form">
             <.input
               field={@form[:type]}
@@ -418,13 +418,13 @@ defmodule ExmudWeb.AdminLive do
     <div class="admin-section">
       <div class="admin-section-header">
         <h2 class="admin-section-title">Scripts ({length(@scripts || [])})</h2>
-        <button phx-click="new_script" class="admin-btn--primary">
+        <button phx-click="new_script" class="btn btn-primary btn-sm">
           <.icon name="hero-plus" class="size-4" /> New Script
         </button>
       </div>
 
       <div :if={@scripts && length(@scripts) > 0} class="admin-table-wrapper">
-        <table class="admin-table">
+        <table class="table table-zebra w-full">
           <thead>
             <tr>
               <th>Name</th>
@@ -435,15 +435,15 @@ defmodule ExmudWeb.AdminLive do
             </tr>
           </thead>
           <tbody>
-            <tr :for={script <- @scripts} class="admin-table-row">
+            <tr :for={script <- @scripts} class="hover">
               <td class="font-semibold">{script.name}</td>
               <td>
-                <span class="admin-badge admin-badge--outline">{script.hook || "custom"}</span>
+                <span class="badge badge-outline">{script.hook || "custom"}</span>
               </td>
               <td>
                 <input
                   type="checkbox"
-                  class="admin-toggle"
+                  class="toggle toggle-primary toggle-sm"
                   checked={script.enabled}
                   phx-click="toggle_script"
                   phx-value-id={script.id}
@@ -451,17 +451,17 @@ defmodule ExmudWeb.AdminLive do
               </td>
               <td>{Calendar.strftime(script.updated_at, "%Y-%m-%d %H:%M")}</td>
               <td class="admin-table-actions">
-                <button phx-click="edit_script" phx-value-id={script.id} class="admin-btn--ghost-xs">
+                <button phx-click="edit_script" phx-value-id={script.id} class="btn btn-ghost btn-xs">
                   Edit
                 </button>
-                <button phx-click="test_script" phx-value-id={script.id} class="admin-btn--ghost-xs">
+                <button phx-click="test_script" phx-value-id={script.id} class="btn btn-ghost btn-xs">
                   Test
                 </button>
                 <button
                   phx-click="delete_script"
                   phx-value-id={script.id}
                   data-confirm="Are you sure you want to delete this script?"
-                  class="admin-btn--danger"
+                  class="btn btn-ghost btn-xs text-error"
                 >
                   Delete
                 </button>
@@ -471,12 +471,12 @@ defmodule ExmudWeb.AdminLive do
         </table>
       </div>
 
-      <div :if={@scripts == [] or @scripts == nil} class="admin-empty">
-        <div class="admin-card-body">
+      <div :if={@scripts == [] or @scripts == nil} class="card bg-base-200">
+        <div class="card-body">
           <p class="admin-empty-text mb-4">
             No scripts created yet. Scripts allow you to customize NPC behavior using Lua.
           </p>
-          <pre class="admin-code"><code>{example_lua_script()}</code></pre>
+          <pre class="admin-code bg-base-300"><code>{example_lua_script()}</code></pre>
         </div>
       </div>
     </div>
@@ -488,13 +488,13 @@ defmodule ExmudWeb.AdminLive do
     <div class="admin-section">
       <div class="admin-section-header">
         <h2 class="admin-section-title">{if @editing, do: "Edit Script", else: "Create Script"}</h2>
-        <button phx-click="cancel_form" class="admin-btn--ghost">
+        <button phx-click="cancel_form" class="btn btn-ghost btn-sm">
           <.icon name="hero-x-mark" class="size-4" /> Cancel
         </button>
       </div>
 
-      <div class="admin-card">
-        <div class="admin-card-body">
+      <div class="card bg-base-200">
+        <div class="card-body">
           <.form for={@form} phx-submit="save_script" class="admin-form">
             <.input field={@form[:name]} type="text" label="Script Name" required />
             <.input field={@form[:description]} type="text" label="Description" />
@@ -542,9 +542,9 @@ defmodule ExmudWeb.AdminLive do
       <h2 class="admin-section-title">System</h2>
 
       <div class="admin-grid-system">
-        <div class="admin-card">
-          <div class="admin-card-body">
-            <h3 class="admin-card-title">Server Info</h3>
+        <div class="card bg-base-200">
+          <div class="card-body">
+            <h3 class="card-title">Server Info</h3>
             <dl class="admin-dl">
               <div class="admin-dl-row">
                 <dt class="admin-dl-term">Elixir Version</dt>
@@ -570,14 +570,14 @@ defmodule ExmudWeb.AdminLive do
           </div>
         </div>
 
-        <div class="admin-card">
-          <div class="admin-card-body">
-            <h3 class="admin-card-title">Actions</h3>
+        <div class="card bg-base-200">
+          <div class="card-body">
+            <h3 class="card-title">Actions</h3>
             <div class="space-y-2">
-              <button phx-click="reload_scripts" class="admin-btn--outline">
+              <button phx-click="reload_scripts" class="btn btn-outline btn-sm w-full">
                 <.icon name="hero-arrow-path" class="size-4" /> Reload Scripts
               </button>
-              <button phx-click="export_world" class="admin-btn--outline">
+              <button phx-click="export_world" class="btn btn-outline btn-sm w-full">
                 <.icon name="hero-arrow-down-tray" class="size-4" /> Export World
               </button>
             </div>
@@ -590,7 +590,7 @@ defmodule ExmudWeb.AdminLive do
 
   defp tab_content(assigns) do
     ~H"""
-    <div class="admin-alert admin-alert--warning">
+    <div role="alert" class="alert alert-warning">
       <.icon name="hero-exclamation-triangle" class="size-4" />
       <span>Unknown tab selected.</span>
     </div>
@@ -901,10 +901,10 @@ defmodule ExmudWeb.AdminLive do
 
   defp load_tab_data(socket, _), do: socket
 
-  defp entity_type_badge(:npc), do: "admin-badge--npc"
-  defp entity_type_badge(:item), do: "admin-badge--item"
-  defp entity_type_badge(:exit), do: "admin-badge--exit"
-  defp entity_type_badge(_), do: "admin-badge--ghost"
+  defp entity_type_badge(:npc), do: "badge-primary"
+  defp entity_type_badge(:item), do: "badge-secondary"
+  defp entity_type_badge(:exit), do: "badge-accent"
+  defp entity_type_badge(_), do: "badge-ghost"
 
   defp format_bytes(bytes) when bytes < 1024, do: "#{bytes} B"
   defp format_bytes(bytes) when bytes < 1_048_576, do: "#{Float.round(bytes / 1024, 1)} KB"

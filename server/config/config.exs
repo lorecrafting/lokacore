@@ -24,6 +24,10 @@ config :exmud,
   ecto_repos: [Exmud.Repo],
   generators: [timestamp_type: :utc_datetime]
 
+# Game configuration
+config :exmud, :game,
+  starting_room_key: "room_oak_tree"
+
 # Configure the endpoint
 config :exmud, ExmudWeb.Endpoint,
   url: [host: "localhost"],
