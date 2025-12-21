@@ -26,8 +26,8 @@ defmodule Exmud.Utils.ErrorHandler do
   - Skill errors: `:not_enough_skill_points`, `:already_learned`
   """
 
+  # Entity errors
   @type error_reason ::
-          # Entity errors
           :entity_not_found
           | :npc_not_found
           | :item_not_found

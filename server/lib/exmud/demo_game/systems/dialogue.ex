@@ -133,7 +133,9 @@ defmodule Exmud.DemoGame.Systems.Dialogue do
 
                   next_node ->
                     # Check for completed variant on the next node
-                    next_node = maybe_use_completed_variant(next_node, dialogue_tree, player_quests)
+                    next_node =
+                      maybe_use_completed_variant(next_node, dialogue_tree, player_quests)
+
                     {:ok, format_node(next_node, next_node_id, player_quests), %{action: action}}
                 end
               else
