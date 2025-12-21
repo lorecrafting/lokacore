@@ -8,12 +8,12 @@ defmodule ExmudWeb.GameLive do
   use ExmudWeb, :live_view
 
   alias Exmud.DemoGame.{PlayerGameState, RoomLoader}
-  alias Exmud.DemoGame.Systems.{Inventory, Equipment, Dialogue, Quest}
+  alias Exmud.DemoGame.Systems.{Inventory, Equipment, Dialogue, Quest, Combat, Spawner, Progression, Skills}
   alias Exmud.Engine.Entities
 
   @impl true
   def mount(_params, _session, socket) do
-    player = socket.assigns.current_player
+    player = socket.assigns.current_scope.player
 
     # Get or create player game state
     {:ok, game_state} = PlayerGameState.get_or_create_state(player.id)
@@ -50,9 +50,13 @@ defmodule ExmudWeb.GameLive do
      |> assign(:compass_open, false)
      |> assign(:inventory_open, false)
      |> assign(:quest_open, false)
+     |> assign(:stats_open, false)
      |> assign(:dialogue, nil)
      |> assign(:dialogue_npc, nil)
-     |> assign(:events, [])}
+     |> assign(:combat, nil)
+     |> assign(:cutscene, nil)
+     |> assign(:events, [])
+     |> maybe_show_intro_cutscene(game_state)}
   end
 
   # Load the player's current room, falling back to starting room
@@ -87,14 +91,31 @@ defmodule ExmudWeb.GameLive do
   def render(assigns) do
     ~H"""
     <div class="ebook-page" style="padding-bottom: 5rem;">
-      <%= if @dialogue do %>
-        <.dialogue_panel
-          dialogue={@dialogue}
-          npc={@dialogue_npc}
-          room_title={@room.title}
-        />
+      <%= if @cutscene do %>
+        <.cutscene_panel cutscene={@cutscene} />
       <% else %>
-        <%= if @quest_open do %>
+        <%= if @combat do %>
+          <.combat_panel
+            combat={@combat}
+            health={@health}
+            stats={@stats}
+            room_title={@room.title}
+          />
+        <% else %>
+          <%= if @dialogue do %>
+          <.dialogue_panel
+            dialogue={@dialogue}
+            npc={@dialogue_npc}
+            room_title={@room.title}
+          />
+        <% else %>
+          <%= if @stats_open do %>
+          <.stats_panel
+            game_state={@game_state}
+            health={@health}
+          />
+        <% else %>
+          <%= if @quest_open do %>
           <.quest_panel
             active_quests={@active_quests}
             completed_quests={@completed_quests}
@@ -124,6 +145,9 @@ defmodule ExmudWeb.GameLive do
             <% end %>
           <% end %>
         <% end %>
+        <% end %>
+        <% end %>
+        <% end %>
       <% end %>
 
       <.bottom_bar
@@ -131,6 +155,7 @@ defmodule ExmudWeb.GameLive do
         exits={@room.exits}
         inventory_open={@inventory_open}
         quest_open={@quest_open}
+        stats_open={@stats_open}
       />
     </div>
     """
@@ -397,6 +422,93 @@ defmodule ExmudWeb.GameLive do
     """
   end
 
+  # Stats Panel Component - Shows player stats, XP, level, skill points
+  attr :game_state, :map, required: true
+  attr :health, :map, required: true
+
+  defp stats_panel(assigns) do
+    progression = Progression.get_progression_stats(assigns.game_state)
+    stats = assigns.game_state.stats || %{}
+    assigns = assign(assigns, :progression, progression)
+    assigns = assign(assigns, :stats, stats)
+
+    ~H"""
+    <div class="ebook-context">
+      <h1 class="ebook-title">Character</h1>
+
+      <div class="mt-4">
+        <h2 class="ebook-subtitle">Vitals</h2>
+        <p class="ebook-prose" style="text-indent: 0;">
+          Health: {get_health_current(@health)} / {get_health_max(@health)}
+        </p>
+      </div>
+
+      <div class="mt-4">
+        <h2 class="ebook-subtitle">Progression</h2>
+        <p class="ebook-prose" style="text-indent: 0;">
+          Level: {@progression.level}
+        </p>
+        <p class="ebook-prose" style="text-indent: 0;">
+          Experience: {@progression.xp_into_level} / {@progression.xp_needed_for_next} ({@progression.xp_progress_percent}%)
+        </p>
+        <p class="ebook-prose" style="text-indent: 0;">
+          Total XP: {@progression.total_xp}
+        </p>
+        <p class="ebook-prose" style="text-indent: 0; font-weight: bold;">
+          Skill Points: {@progression.skill_points}
+        </p>
+      </div>
+
+      <div class="mt-4">
+        <h2 class="ebook-subtitle">Attributes</h2>
+        <p class="ebook-prose" style="text-indent: 0;">
+          Strength: {get_stat(@stats, "str", 10)}
+        </p>
+        <p class="ebook-prose" style="text-indent: 0;">
+          Dexterity: {get_stat(@stats, "dex", 10)}
+        </p>
+        <p class="ebook-prose" style="text-indent: 0;">
+          Stamina: {get_stat(@stats, "sta", 10)}
+        </p>
+      </div>
+
+      <div class="mt-4">
+        <h2 class="ebook-subtitle">Wealth</h2>
+        <p class="ebook-prose" style="text-indent: 0;">
+          Gold: {get_stat(@stats, "gold", 0)}
+        </p>
+      </div>
+
+      <%= if length(@progression.learned_skills) > 0 do %>
+        <div class="mt-4">
+          <h2 class="ebook-subtitle">Skills</h2>
+          <ul class="ebook-menu">
+            <li :for={skill <- @progression.learned_skills} class="ebook-menu-item--row">
+              {format_skill_name(skill)}
+            </li>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="mt-6">
+        <span class="ebook-link" phx-click="toggle_stats">Close</span>
+      </div>
+    </div>
+    """
+  end
+
+  defp get_stat(stats, key, default) do
+    Map.get(stats, key) || Map.get(stats, String.to_atom(key)) || default
+  end
+
+  defp format_skill_name(skill_id) do
+    skill_id
+    |> String.replace("_", " ")
+    |> String.split(" ")
+    |> Enum.map(&String.capitalize/1)
+    |> Enum.join(" ")
+  end
+
   # Dialogue Panel Component
   attr :dialogue, :map, required: true
   attr :npc, :map, required: true
@@ -436,6 +548,148 @@ defmodule ExmudWeb.GameLive do
     """
   end
 
+  # Combat Panel Component - Text-only scrolling log with action queue
+  attr :combat, :map, required: true
+  attr :health, :map, required: true
+  attr :stats, :map, required: true
+  attr :room_title, :string, required: true
+
+  defp combat_panel(assigns) do
+    ~H"""
+    <div class="ebook-context">
+      <h1 class="ebook-title">Combat</h1>
+
+      <div class="ebook-combat-log" style="max-height: 300px; overflow-y: auto; padding: 1rem; border: 1px solid #333; margin-bottom: 1rem; font-family: 'Crimson Text', Georgia, serif;">
+        <p class="ebook-prose" style="text-indent: 0; margin-bottom: 0.75rem; border-bottom: 1px solid #ccc; padding-bottom: 0.5rem;">
+          You face the {String.capitalize(@combat.enemy.name)}. [HP: {get_enemy_health_current(@combat)}/{get_enemy_health_max(@combat)}]
+        </p>
+        <p class="ebook-prose" style="text-indent: 0; margin-bottom: 0.75rem; opacity: 0.8;">
+          Your health: {get_health_current(@health)}/{get_health_max(@health)}
+        </p>
+        <%= for entry <- @combat.log do %>
+          <p class="ebook-prose" style="text-indent: 0; margin-bottom: 0.5rem;">
+            {entry.text}
+          </p>
+        <% end %>
+      </div>
+
+      <%= if @combat.player_turn do %>
+        <p class="ebook-prose" style="text-indent: 0; font-style: italic; margin-bottom: 1rem;">
+          Your turn. Choose your action:
+        </p>
+        <ul class="ebook-menu">
+          <li class="ebook-menu-item" phx-click="combat_action" phx-value-action="attack">
+            Attack
+          </li>
+          <li class="ebook-menu-item" phx-click="combat_action" phx-value-action="defend">
+            Defend
+          </li>
+          <li class="ebook-menu-item" phx-click="combat_action" phx-value-action="flee">
+            Flee
+          </li>
+        </ul>
+      <% else %>
+        <p class="ebook-prose" style="text-indent: 0; font-style: italic;">
+          Enemy's turn...
+        </p>
+      <% end %>
+    </div>
+    """
+  end
+
+  # Combat helper functions
+  defp get_health_current(health) do
+    Map.get(health, "current") || Map.get(health, :current) || 100
+  end
+
+  defp get_health_max(health) do
+    Map.get(health, "max") || Map.get(health, :max) || 100
+  end
+
+  defp get_enemy_health_current(combat) do
+    Map.get(combat.enemy.health, "current") || Map.get(combat.enemy.health, :current) || 0
+  end
+
+  defp get_enemy_health_max(combat) do
+    Map.get(combat.enemy.health, "max") || Map.get(combat.enemy.health, :max) || 50
+  end
+
+  # Cutscene Panel Component
+  attr :cutscene, :map, required: true
+
+  defp cutscene_panel(assigns) do
+    ~H"""
+    <div class="ebook-context" style="min-height: 60vh; display: flex; flex-direction: column; justify-content: center;">
+      <div class="ebook-cutscene" style="text-align: center; padding: 2rem;">
+        <%= if @cutscene.title do %>
+          <h1 class="ebook-title" style="font-size: 2rem; margin-bottom: 2rem; letter-spacing: 0.1em;">
+            {@cutscene.title}
+          </h1>
+        <% end %>
+
+        <div class="ebook-cutscene-text" style="max-width: 500px; margin: 0 auto;">
+          <%= for {line, idx} <- Enum.with_index(@cutscene.pages |> Enum.at(@cutscene.current_page, []) |> List.wrap()) do %>
+            <p class="ebook-prose" style={"text-indent: 0; margin-bottom: 1rem; opacity: #{if idx == 0, do: 1, else: 0.9}; font-size: 1.1rem; line-height: 1.8;"}>
+              {line}
+            </p>
+          <% end %>
+        </div>
+
+        <div class="ebook-cutscene-nav" style="margin-top: 2rem;">
+          <%= if @cutscene.current_page < length(@cutscene.pages) - 1 do %>
+            <span class="ebook-link" phx-click="cutscene_next" style="font-size: 1.1rem;">
+              Continue →
+            </span>
+          <% else %>
+            <span class="ebook-link" phx-click="cutscene_end" style="font-size: 1.1rem;">
+              Begin your journey...
+            </span>
+          <% end %>
+        </div>
+
+        <div class="ebook-cutscene-pages" style="margin-top: 1rem; opacity: 0.5; font-size: 0.9rem;">
+          {page_indicator(@cutscene.current_page, length(@cutscene.pages))}
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  defp page_indicator(current, total) do
+    Enum.map(0..(total - 1), fn i ->
+      if i == current, do: "●", else: "○"
+    end)
+    |> Enum.join(" ")
+  end
+
+  # Check if this is the player's first login and show intro cutscene
+  defp maybe_show_intro_cutscene(socket, game_state) do
+    flags = game_state.flags || %{}
+    seen_intro = Map.get(flags, "seen_intro", false) || Map.get(flags, :seen_intro, false)
+
+    if not seen_intro do
+      cutscene = %{
+        id: "intro",
+        title: "The Journey Begins",
+        current_page: 0,
+        pages: [
+          ["You awaken beneath the ancient oak tree, its massive branches stretching toward the sky like the arms of a sleeping giant.",
+           "The air is thick with the scent of moss and wildflowers. How did you come to be here? The memories are hazy, like a half-forgotten dream."],
+          ["A voice echoes in your mind—or is it the wind through the leaves?",
+           "\"Traveler... the forest has chosen you. Your path lies ahead, shrouded in mystery.\""],
+          ["You rise to your feet, brushing leaves from your clothes. The world feels different somehow—more vivid, more alive.",
+           "In the distance, you hear the murmur of a stream and the call of unfamiliar birds."],
+          ["Whatever brought you here, whatever fate awaits, one thing is certain:",
+           "Your adventure begins now."]
+        ]
+      }
+
+      assign(socket, :cutscene, cutscene)
+    else
+      socket
+    end
+  end
+
   defp is_equipable?(item) do
     components = item[:components] || item.components || %{}
     Map.has_key?(components, "equipable")
@@ -451,6 +705,7 @@ defmodule ExmudWeb.GameLive do
   attr :exits, :list, required: true
   attr :inventory_open, :boolean, required: true
   attr :quest_open, :boolean, required: true
+  attr :stats_open, :boolean, required: true
 
   defp bottom_bar(assigns) do
     ~H"""
@@ -478,6 +733,13 @@ defmodule ExmudWeb.GameLive do
       </div>
 
       <div class="ebook-bottombar-right">
+        <span
+          class={"ebook-bottombar-btn #{if @stats_open, do: "ebook-bottombar-btn--active", else: ""}"}
+          phx-click="toggle_stats"
+          title="Character Stats"
+        >
+          ♦
+        </span>
         <span
           class={"ebook-bottombar-btn #{if @quest_open, do: "ebook-bottombar-btn--active", else: ""}"}
           phx-click="toggle_quest"
@@ -610,6 +872,34 @@ defmodule ExmudWeb.GameLive do
     end
   end
 
+  def handle_event("menu_action", %{"action" => "attack"}, socket) do
+    entity = socket.assigns.context_entity
+    game_state = socket.assigns.game_state
+
+    # Start combat with this entity
+    case Combat.start_combat(entity.id, game_state) do
+      {:ok, combat_state} ->
+        {:noreply,
+         socket
+         |> assign(:combat, combat_state)
+         |> assign(:context_entity, nil)}
+
+      {:error, :not_combatant} ->
+        event = %{
+          text: "The #{entity.name} doesn't want to fight.",
+          timestamp: DateTime.utc_now()
+        }
+
+        {:noreply,
+         socket
+         |> assign(:context_entity, nil)
+         |> update(:events, fn events -> events ++ [event] end)}
+
+      {:error, _reason} ->
+        {:noreply, assign(socket, :context_entity, nil)}
+    end
+  end
+
   def handle_event("menu_action", %{"action" => action}, socket) do
     entity = socket.assigns.context_entity
 
@@ -623,6 +913,185 @@ defmodule ExmudWeb.GameLive do
      socket
      |> assign(:context_entity, nil)
      |> update(:events, fn events -> events ++ [event] end)}
+  end
+
+  # Combat event handlers
+  def handle_event("combat_action", %{"action" => action}, socket) do
+    combat = socket.assigns.combat
+    game_state = socket.assigns.game_state
+
+    action_atom = String.to_existing_atom(action)
+
+    case Combat.player_action(combat, action_atom, game_state) do
+      {:ok, new_combat, _result} ->
+        # Check if combat ended after player action
+        case Combat.check_combat_end(new_combat, game_state) do
+          {:victory, rewards} ->
+            handle_combat_victory(socket, new_combat, rewards)
+
+          {:fled} ->
+            handle_combat_fled(socket, new_combat)
+
+          :ongoing ->
+            # Enemy takes their turn after a short delay
+            send(self(), {:enemy_turn, new_combat})
+            {:noreply, assign(socket, :combat, new_combat)}
+        end
+
+      {:error, _reason} ->
+        {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_info({:enemy_turn, combat}, socket) do
+    game_state = socket.assigns.game_state
+
+    case Combat.enemy_turn(combat, game_state) do
+      {:ok, new_combat, %{action: :attack, damage: damage}} ->
+        # Apply damage to player
+        current_health = socket.assigns.health
+        current_hp = Map.get(current_health, "current") || Map.get(current_health, :current) || 100
+        new_hp = max(0, current_hp - damage)
+        new_health = Map.put(current_health, "current", new_hp)
+
+        # Update game state in DB
+        {:ok, new_game_state} = PlayerGameState.update_state(game_state, %{health: new_health})
+
+        # Check if player died
+        case Combat.check_combat_end(new_combat, new_game_state) do
+          {:defeat} ->
+            handle_combat_defeat(socket, new_combat, new_game_state)
+
+          :ongoing ->
+            {:noreply,
+             socket
+             |> assign(:combat, new_combat)
+             |> assign(:health, new_health)
+             |> assign(:game_state, new_game_state)}
+        end
+
+      {:ok, new_combat, _result} ->
+        # Enemy defended
+        {:noreply, assign(socket, :combat, new_combat)}
+
+      {:error, _reason} ->
+        {:noreply, socket}
+    end
+  end
+
+  # Handle mob respawn notifications
+  def handle_info({:mob_respawned, _entity_id, mob_name}, socket) do
+    # Reload room to show the respawned mob
+    {:ok, room} = RoomLoader.load_room_for_display(socket.assigns.room.id)
+
+    event = %{
+      text: "A #{mob_name} emerges from the shadows.",
+      timestamp: DateTime.utc_now()
+    }
+
+    {:noreply,
+     socket
+     |> assign(:room, room)
+     |> update(:events, fn events -> events ++ [event] end)}
+  end
+
+  defp handle_combat_victory(socket, combat, rewards) do
+    game_state = socket.assigns.game_state
+
+    # Despawn the defeated mob (will respawn after delay)
+    Spawner.despawn_mob(combat.enemy_id)
+
+    # Apply rewards (may include level up)
+    {new_game_state, level_up_event} = case Combat.apply_rewards(game_state, rewards) do
+      {:ok, updated_state} ->
+        {updated_state, nil}
+
+      {:ok, updated_state, level_up_info} ->
+        level_event = %{
+          text: "LEVEL UP! You are now level #{level_up_info.new_level}. Gained #{level_up_info.skill_points_gained} skill points!",
+          timestamp: DateTime.utc_now()
+        }
+        {updated_state, level_event}
+    end
+
+    # Reload room to reflect mob despawn
+    {:ok, room} = RoomLoader.load_room_for_display(socket.assigns.room.id)
+
+    victory_event = %{
+      text: "Victory! You defeated the #{combat.enemy.name}. Gained #{rewards.xp} XP and #{rewards.gold} gold.",
+      timestamp: DateTime.utc_now()
+    }
+
+    events = [victory_event] ++ if(level_up_event, do: [level_up_event], else: [])
+
+    {:noreply,
+     socket
+     |> assign(:combat, nil)
+     |> assign(:game_state, new_game_state)
+     |> assign(:stats, new_game_state.stats)
+     |> assign(:health, new_game_state.health)
+     |> assign(:room, room)
+     |> update(:events, fn e -> e ++ events end)}
+  end
+
+  defp handle_combat_fled(socket, combat) do
+    event = %{
+      text: "You fled from the #{combat.enemy.name}!",
+      timestamp: DateTime.utc_now()
+    }
+
+    {:noreply,
+     socket
+     |> assign(:combat, nil)
+     |> update(:events, fn events -> events ++ [event] end)}
+  end
+
+  defp handle_combat_defeat(socket, combat, game_state) do
+    # Reset player health to max (respawn)
+    current_health = game_state.health
+    max_hp = Map.get(current_health, "max") || Map.get(current_health, :max) || 100
+    new_health = Map.put(current_health, "current", max_hp)
+
+    {:ok, new_game_state} = PlayerGameState.update_state(game_state, %{health: new_health})
+
+    event = %{
+      text: "You were defeated by the #{combat.enemy.name}... You wake up feeling disoriented.",
+      timestamp: DateTime.utc_now()
+    }
+
+    {:noreply,
+     socket
+     |> assign(:combat, nil)
+     |> assign(:health, new_health)
+     |> assign(:game_state, new_game_state)
+     |> update(:events, fn events -> events ++ [event] end)}
+  end
+
+  # Cutscene event handlers
+  def handle_event("cutscene_next", _params, socket) do
+    cutscene = socket.assigns.cutscene
+    new_cutscene = %{cutscene | current_page: cutscene.current_page + 1}
+    {:noreply, assign(socket, :cutscene, new_cutscene)}
+  end
+
+  def handle_event("cutscene_end", _params, socket) do
+    cutscene = socket.assigns.cutscene
+    game_state = socket.assigns.game_state
+
+    # Mark the cutscene as seen
+    if cutscene.id == "intro" do
+      flags = game_state.flags || %{}
+      new_flags = Map.put(flags, "seen_intro", true)
+      {:ok, new_game_state} = PlayerGameState.update_state(game_state, %{flags: new_flags})
+
+      {:noreply,
+       socket
+       |> assign(:cutscene, nil)
+       |> assign(:game_state, new_game_state)}
+    else
+      {:noreply, assign(socket, :cutscene, nil)}
+    end
   end
 
   def handle_event("toggle_compass", _params, socket) do
@@ -668,6 +1137,8 @@ defmodule ExmudWeb.GameLive do
      socket
      |> update(:inventory_open, &(!&1))
      |> assign(:compass_open, false)
+     |> assign(:quest_open, false)
+     |> assign(:stats_open, false)
      |> assign(:context_entity, nil)}
   end
 
@@ -677,6 +1148,17 @@ defmodule ExmudWeb.GameLive do
      |> update(:quest_open, &(!&1))
      |> assign(:compass_open, false)
      |> assign(:inventory_open, false)
+     |> assign(:stats_open, false)
+     |> assign(:context_entity, nil)}
+  end
+
+  def handle_event("toggle_stats", _params, socket) do
+    {:noreply,
+     socket
+     |> update(:stats_open, &(!&1))
+     |> assign(:compass_open, false)
+     |> assign(:inventory_open, false)
+     |> assign(:quest_open, false)
      |> assign(:context_entity, nil)}
   end
 
@@ -1069,6 +1551,45 @@ defmodule ExmudWeb.GameLive do
     case PlayerGameState.update_state(game_state, %{flags: new_flags}) do
       {:ok, new_game_state} ->
         assign(socket, :game_state, new_game_state)
+
+      {:error, _} ->
+        socket
+    end
+  end
+
+  defp handle_dialogue_action(socket, {:learn_skill, skill_id, skill_cost}) do
+    game_state = socket.assigns.game_state
+    skill = Skills.get_skill(skill_id)
+
+    case Progression.learn_skill(game_state, skill_id, skill_cost) do
+      {:ok, new_game_state} ->
+        skill_name = if skill, do: skill.name, else: skill_id
+
+        event = %{
+          text: "You have learned #{skill_name}! (#{skill_cost} skill points spent)",
+          timestamp: DateTime.utc_now()
+        }
+
+        socket
+        |> assign(:game_state, new_game_state)
+        |> assign(:stats, new_game_state.stats)
+        |> update(:events, fn events -> events ++ [event] end)
+
+      {:error, :not_enough_skill_points} ->
+        event = %{
+          text: "You don't have enough skill points to learn this skill.",
+          timestamp: DateTime.utc_now()
+        }
+
+        update(socket, :events, fn events -> events ++ [event] end)
+
+      {:error, :already_learned} ->
+        event = %{
+          text: "You already know this skill.",
+          timestamp: DateTime.utc_now()
+        }
+
+        update(socket, :events, fn events -> events ++ [event] end)
 
       {:error, _} ->
         socket

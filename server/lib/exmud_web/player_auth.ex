@@ -7,6 +7,35 @@ defmodule ExmudWeb.PlayerAuth do
   alias Exmud.Accounts
   alias Exmud.Accounts.Scope
 
+  # LiveView on_mount callback for authentication
+  def on_mount(:mount_current_scope, _params, session, socket) do
+    socket = mount_current_scope(socket, session)
+    {:cont, socket}
+  end
+
+  def on_mount(:ensure_authenticated, _params, session, socket) do
+    socket = mount_current_scope(socket, session)
+
+    if socket.assigns.current_scope && socket.assigns.current_scope.player do
+      {:cont, socket}
+    else
+      {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/players/log-in")}
+    end
+  end
+
+  defp mount_current_scope(socket, session) do
+    Phoenix.Component.assign_new(socket, :current_scope, fn ->
+      if token = session["player_token"] do
+        case Accounts.get_player_by_session_token(token) do
+          {player, _inserted_at} -> Scope.for_player(player)
+          nil -> Scope.for_player(nil)
+        end
+      else
+        Scope.for_player(nil)
+      end
+    end)
+  end
+
   # Make the remember me cookie valid for 14 days. This should match
   # the session validity setting in PlayerToken.
   @max_cookie_age_in_days 14

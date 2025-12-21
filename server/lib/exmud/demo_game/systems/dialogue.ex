@@ -201,6 +201,7 @@ defmodule Exmud.DemoGame.Systems.Dialogue do
 
   defp parse_action(action) when is_list(action) do
     case action do
+      [type, arg1, arg2] -> {String.to_atom(type), arg1, arg2}
       [type, arg] -> {String.to_atom(type), arg}
       [type] -> {String.to_atom(type), nil}
       _ -> nil
@@ -209,6 +210,7 @@ defmodule Exmud.DemoGame.Systems.Dialogue do
 
   defp parse_action(action) when is_map(action) do
     case action do
+      %{"type" => type, "arg1" => arg1, "arg2" => arg2} -> {String.to_atom(type), arg1, arg2}
       %{"type" => type, "arg" => arg} -> {String.to_atom(type), arg}
       %{"type" => type} -> {String.to_atom(type), nil}
       _ -> nil

@@ -89,8 +89,11 @@ defmodule Exmud.DemoGame.RoomLoader do
     # Get all entities at this location
     contents = Entities.get_contents(room.id)
 
-    # Separate by type
-    npcs = contents |> Enum.filter(&(&1.type == :npc)) |> Enum.map(&format_npc/1)
+    # Separate by type, filtering out despawned NPCs
+    npcs = contents
+           |> Enum.filter(&(&1.type == :npc))
+           |> Enum.reject(&is_despawned?/1)
+           |> Enum.map(&format_npc/1)
     items = contents |> Enum.filter(&(&1.type == :item)) |> Enum.map(&format_item/1)
     exits = contents |> Enum.filter(&(&1.type == :exit)) |> Enum.map(&format_exit/1)
 
@@ -102,6 +105,12 @@ defmodule Exmud.DemoGame.RoomLoader do
       items: items,
       exits: exits
     }
+  end
+
+  # Check if an entity is despawned (dead, waiting to respawn)
+  defp is_despawned?(entity) do
+    components = entity.components || %{}
+    Map.get(components, "despawned", false)
   end
 
   defp format_npc(npc) do

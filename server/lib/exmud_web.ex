@@ -52,6 +52,8 @@ defmodule ExmudWeb do
     quote do
       use Phoenix.LiveView
 
+      on_mount {ExmudWeb.PlayerAuth, :mount_current_scope}
+
       unquote(html_helpers())
     end
   end

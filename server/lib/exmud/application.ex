@@ -14,8 +14,8 @@ defmodule Exmud.Application do
        repos: Application.fetch_env!(:exmud, :ecto_repos), skip: skip_migrations?()},
       {DNSCluster, query: Application.get_env(:exmud, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Exmud.PubSub},
-      # Start a worker by calling: Exmud.Worker.start_link(arg)
-      # {Exmud.Worker, arg},
+      # Game systems
+      Exmud.DemoGame.Systems.Spawner,
       # Start to serve requests, typically the last entry
       ExmudWeb.Endpoint
     ]
