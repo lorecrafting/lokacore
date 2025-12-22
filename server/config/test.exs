@@ -26,6 +26,9 @@ config :exmud, Exmud.Mailer, adapter: Swoosh.Adapters.Test
 # Disable swoosh api client as it is only required for production adapters
 config :swoosh, :api_client, false
 
+# Disable TUI server during tests (we test it explicitly)
+config :exmud, Exmud.Tui.Server, enabled: false
+
 # Print only warnings and errors during test
 config :logger, level: :warning
 

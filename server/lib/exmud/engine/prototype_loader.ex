@@ -82,6 +82,23 @@ defmodule Exmud.Engine.PrototypeLoader do
   end
 
   @doc """
+  Lists all prototypes marked as templates.
+
+  Templates are reusable prototypes meant for instantiation in the editor,
+  not for direct world spawning.
+  """
+  def list_templates(server \\ __MODULE__) do
+    GenServer.call(server, :list_templates)
+  end
+
+  @doc """
+  Lists templates of a specific type.
+  """
+  def list_templates_by_type(type, server \\ __MODULE__) when is_atom(type) do
+    GenServer.call(server, {:list_templates_by_type, type})
+  end
+
+  @doc """
   Returns all loaded prototypes.
   """
   def all(server \\ __MODULE__) do
@@ -174,6 +191,26 @@ defmodule Exmud.Engine.PrototypeLoader do
       |> Enum.filter(&(&1.type == type))
 
     {:reply, prototypes, state}
+  end
+
+  @impl true
+  def handle_call(:list_templates, _from, state) do
+    templates =
+      state.resolved_prototypes
+      |> Map.values()
+      |> Enum.filter(&Prototype.template?/1)
+
+    {:reply, templates, state}
+  end
+
+  @impl true
+  def handle_call({:list_templates_by_type, type}, _from, state) do
+    templates =
+      state.resolved_prototypes
+      |> Map.values()
+      |> Enum.filter(fn p -> p.type == type and Prototype.template?(p) end)
+
+    {:reply, templates, state}
   end
 
   @impl true

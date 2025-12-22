@@ -25,6 +25,9 @@ defmodule Exmud.Application do
       # Framework layer
       Exmud.Framework.Combat.Spawner,
 
+      # TUI Server (Unix socket for Go TUI client)
+      Exmud.Tui.Server,
+
       # Start to serve requests, typically the last entry
       ExmudWeb.Endpoint
     ]

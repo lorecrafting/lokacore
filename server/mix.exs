@@ -80,6 +80,9 @@ defmodule Exmud.MixProject do
 
       # YAML parsing for prototype files
       {:yaml_elixir, "~> 2.9"}
+
+      # TUI for game editor (blocked by ex_termbox/Python 3.11+ incompatibility)
+      # {:ratatouille, "~> 0.5"}
     ]
   end
 

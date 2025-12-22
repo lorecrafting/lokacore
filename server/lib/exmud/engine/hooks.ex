@@ -264,7 +264,9 @@ defmodule Exmud.Engine.Hooks do
         apply(module, function, args)
       rescue
         e ->
-          Logger.error("Hooks: error in #{hook_type} hook #{inspect(module)}.#{function}: #{inspect(e)}")
+          Logger.error(
+            "Hooks: error in #{hook_type} hook #{inspect(module)}.#{function}: #{inspect(e)}"
+          )
       end
     end)
 
@@ -284,7 +286,10 @@ defmodule Exmud.Engine.Hooks do
           end
         rescue
           e ->
-            Logger.error("Hooks: error in #{hook_type} hook #{inspect(module)}.#{function}: #{inspect(e)}")
+            Logger.error(
+              "Hooks: error in #{hook_type} hook #{inspect(module)}.#{function}: #{inspect(e)}"
+            )
+
             {:cont, :ok}
         end
       end)

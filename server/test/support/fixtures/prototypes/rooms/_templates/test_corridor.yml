@@ -1,0 +1,11 @@
+key: test_corridor
+is_template: true
+type: room
+name: "Test Corridor"
+description: "A test corridor template."
+tags:
+  - dungeon
+  - corridor
+components:
+  lighting:
+    level: dim

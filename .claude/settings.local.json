@@ -21,7 +21,20 @@
       "Bash(mix xref:*)",
       "Bash(git rm:*)",
       "Bash(git commit:*)",
-      "Bash(mix ecto.migrate:*)"
+      "Bash(mix ecto.migrate:*)",
+      "WebFetch(domain:hexdocs.pm)",
+      "Bash(find:*)",
+      "WebFetch(domain:dev.to)",
+      "WebFetch(domain:ndreynolds.com)",
+      "mcp__plugin_beads_beads__set_context",
+      "mcp__plugin_beads_beads__create",
+      "mcp__plugin_beads_beads__dep",
+      "mcp__plugin_beads_beads__stats",
+      "mcp__plugin_beads_beads__list",
+      "mcp__plugin_beads_beads__ready",
+      "mcp__plugin_beads_beads__blocked",
+      "mcp__plugin_beads_beads__show",
+      "mcp__plugin_beads_beads__update"
     ]
   }
 }

@@ -60,7 +60,10 @@ defmodule Exmud.Engine.WorldExporter do
         output_dir: output_dir
       }
 
-      Logger.info("WorldExporter: Exported #{stats.rooms + stats.npcs + stats.items + stats.exits} entities")
+      Logger.info(
+        "WorldExporter: Exported #{stats.rooms + stats.npcs + stats.items + stats.exits} entities"
+      )
+
       {:ok, stats}
     end
   end
@@ -289,7 +292,25 @@ defmodule Exmud.Engine.WorldExporter do
   defp list_item_to_yaml(item, _indent), do: to_string(item)
 
   defp needs_quoting?(str) do
-    String.contains?(str, [": ", "#", "\"", "'", "[", "]", "{", "}", ",", "&", "*", "!", "|", ">", "%", "@", "`"]) or
+    String.contains?(str, [
+      ": ",
+      "#",
+      "\"",
+      "'",
+      "[",
+      "]",
+      "{",
+      "}",
+      ",",
+      "&",
+      "*",
+      "!",
+      "|",
+      ">",
+      "%",
+      "@",
+      "`"
+    ]) or
       String.starts_with?(str, [" ", "-"]) or
       String.match?(str, ~r/^\d/)
   end

@@ -244,6 +244,77 @@ defmodule Exmud.Engine.SpawnerTest do
     end
   end
 
+  describe "spawn_from_template/2" do
+    test "spawns room from template prototype" do
+      {:ok, room} = Spawner.spawn_from_template("test_corridor", x: 5, y: 3)
+
+      assert room.type == :room
+      assert String.starts_with?(room.key, "test_corridor_")
+      assert room.name == "Test Corridor"
+      assert "dungeon" in room.tags
+      assert "corridor" in room.tags
+
+      # Verify coordinates
+      coords = room.components["coordinates"]
+      assert coords["x"] == 5
+      assert coords["y"] == 3
+      assert coords["z"] == 0
+    end
+
+    test "spawns template with name override" do
+      {:ok, room} = Spawner.spawn_from_template("test_corridor", name: "North Corridor")
+
+      assert room.name == "North Corridor"
+    end
+
+    test "spawns template with custom key" do
+      {:ok, room} = Spawner.spawn_from_template("test_corridor", key: "corridor_a1")
+
+      assert room.key == "corridor_a1"
+    end
+
+    test "spawns template with additional tags" do
+      {:ok, room} = Spawner.spawn_from_template("test_corridor", tags: ["secret"])
+
+      assert "dungeon" in room.tags
+      assert "corridor" in room.tags
+      assert "secret" in room.tags
+    end
+
+    test "spawns template with component override" do
+      {:ok, room} =
+        Spawner.spawn_from_template("test_corridor",
+          components: %{"lighting" => %{"level" => "bright"}}
+        )
+
+      assert room.components["lighting"]["level"] == "bright"
+    end
+
+    test "generates unique keys for each spawn" do
+      {:ok, room1} = Spawner.spawn_from_template("test_corridor", x: 1, y: 1)
+      {:ok, room2} = Spawner.spawn_from_template("test_corridor", x: 2, y: 1)
+
+      assert room1.key != room2.key
+      assert room1.id != room2.id
+    end
+
+    test "returns error for non-template prototype" do
+      assert {:error, {:not_a_template, _}} = Spawner.spawn_from_template("town_square")
+    end
+
+    test "returns error for unknown prototype" do
+      assert {:error, :not_found} = Spawner.spawn_from_template("nonexistent_template")
+    end
+
+    test "persists spawned room to database" do
+      {:ok, room} = Spawner.spawn_from_template("test_corridor")
+
+      assert schema = Entities.get_entity(room.id)
+      # Schema stores type as atom
+      assert schema.type == :room
+    end
+  end
+
   describe "integration" do
     test "spawned entities can be queried from database" do
       {:ok, room} = Spawner.spawn("town_square")

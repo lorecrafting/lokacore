@@ -1,0 +1,23 @@
+# Binaries
+exmud-tui
+exmud-tui-*
+
+# Test binary
+*.test
+
+# Output of go coverage tool
+*.out
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

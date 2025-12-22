@@ -1,0 +1,18 @@
+key: guard_room
+is_template: true
+type: room
+name: "Guard Room"
+description: |
+  A small chamber where guards take their breaks. A wooden table
+  and chairs occupy the center, with weapon racks lining the walls.
+tags:
+  - dungeon
+  - military
+  - indoor
+components:
+  lighting:
+    level: normal
+    source: torches
+spawns:
+  - prototype: base_npc
+    name: "Guard"

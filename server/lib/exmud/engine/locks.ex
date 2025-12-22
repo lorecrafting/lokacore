@@ -215,7 +215,8 @@ defmodule Exmud.Engine.Locks do
   def check_permission(_entity, accessor, args) do
     perm_name = List.first(args)
 
-    permissions = get_in_map(accessor, [:permissions]) || get_in_map(accessor, ["permissions"]) || []
+    permissions =
+      get_in_map(accessor, [:permissions]) || get_in_map(accessor, ["permissions"]) || []
 
     is_admin = get_in_map(accessor, [:is_admin]) || get_in_map(accessor, ["is_admin"]) || false
 

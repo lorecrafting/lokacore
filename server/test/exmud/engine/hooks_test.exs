@@ -46,15 +46,25 @@ defmodule Exmud.Engine.HooksTest do
     end
 
     test "registers with custom priority", %{server: server} do
-      :ok = Hooks.register(:at_entity_creation, TestHooks, :simple_hook, server: server, priority: 50)
+      :ok =
+        Hooks.register(:at_entity_creation, TestHooks, :simple_hook, server: server, priority: 50)
 
       hooks = Hooks.list_hooks(:at_entity_creation, server: server)
       assert [{50, {TestHooks, :simple_hook}}] = hooks
     end
 
     test "maintains priority order", %{server: server} do
-      :ok = Hooks.register(:at_entity_creation, TestHooks, :simple_hook, server: server, priority: 100)
-      :ok = Hooks.register(:at_entity_creation, TestHooks, :another_hook, server: server, priority: 10)
+      :ok =
+        Hooks.register(:at_entity_creation, TestHooks, :simple_hook,
+          server: server,
+          priority: 100
+        )
+
+      :ok =
+        Hooks.register(:at_entity_creation, TestHooks, :another_hook,
+          server: server,
+          priority: 10
+        )
 
       hooks = Hooks.list_hooks(:at_entity_creation, server: server)
 
@@ -135,8 +145,14 @@ defmodule Exmud.Engine.HooksTest do
     test "continues execution even when hook raises", %{server: server} do
       {:ok, agent} = Agent.start_link(fn -> [] end, name: :hook_collector)
 
-      :ok = Hooks.register(:at_entity_creation, TestHooks, :error_hook, server: server, priority: 10)
-      :ok = Hooks.register(:at_entity_creation, TestHooks, :collecting_hook, server: server, priority: 20)
+      :ok =
+        Hooks.register(:at_entity_creation, TestHooks, :error_hook, server: server, priority: 10)
+
+      :ok =
+        Hooks.register(:at_entity_creation, TestHooks, :collecting_hook,
+          server: server,
+          priority: 20
+        )
 
       # Should not raise, and should continue to next hook
       assert :ok = Hooks.run(:at_entity_creation, [:test], server: server)
@@ -197,8 +213,14 @@ defmodule Exmud.Engine.HooksTest do
     end
 
     test "returns all registered hooks in order", %{server: server} do
-      :ok = Hooks.register(:at_entity_creation, TestHooks, :simple_hook, server: server, priority: 50)
-      :ok = Hooks.register(:at_entity_creation, TestHooks, :another_hook, server: server, priority: 10)
+      :ok =
+        Hooks.register(:at_entity_creation, TestHooks, :simple_hook, server: server, priority: 50)
+
+      :ok =
+        Hooks.register(:at_entity_creation, TestHooks, :another_hook,
+          server: server,
+          priority: 10
+        )
 
       hooks = Hooks.list_hooks(:at_entity_creation, server: server)
 

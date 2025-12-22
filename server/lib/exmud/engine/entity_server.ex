@@ -272,6 +272,28 @@ defmodule Exmud.Engine.EntityServer do
     handle_cast({:event, event}, state)
   end
 
+  # Handle player entered room notification (from GameLive)
+  @impl true
+  def handle_info({:player_entered, _player_id, _player_name}, state) do
+    # Room was notified that a player entered
+    # Could trigger NPC reactions, room scripts, etc.
+    {:noreply, touch_state(state)}
+  end
+
+  # Handle player left room notification
+  @impl true
+  def handle_info({:player_left, _player_id, _player_name}, state) do
+    # Room was notified that a player left
+    {:noreply, touch_state(state)}
+  end
+
+  # Catch-all for unknown messages to prevent crashes
+  @impl true
+  def handle_info(msg, state) do
+    Logger.debug("EntityServer #{state.entity_id} received unknown message: #{inspect(msg)}")
+    {:noreply, state}
+  end
+
   @impl true
   def terminate(reason, state) do
     # Always try to save on termination

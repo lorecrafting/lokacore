@@ -5,11 +5,13 @@ on:
     branches: [main]
     paths:
       - "server/**"
+      - "tui/**"
       - ".github/workflows/server-ci.yml"
   pull_request:
     branches: [main]
     paths:
       - "server/**"
+      - "tui/**"
       - ".github/workflows/server-ci.yml"
 
 defaults:
@@ -20,6 +22,7 @@ env:
   MIX_ENV: test
   ELIXIR_VERSION: "1.19.4"
   OTP_VERSION: "28.3"
+  GO_VERSION: "1.24"
 
 jobs:
   test:
@@ -36,7 +39,13 @@ jobs:
           elixir-version: ${{ env.ELIXIR_VERSION }}
           otp-version: ${{ env.OTP_VERSION }}
 
-      - name: Cache deps
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: tui/go.sum
+
+      - name: Cache Elixir deps
         uses: actions/cache@v4
         with:
           path: |
@@ -55,6 +64,12 @@ jobs:
       - name: Compile
         run: mix compile --warnings-as-errors
 
+      - name: Build Go TUI
+        run: |
+          cd ../tui
+          go mod tidy
+          go build -o /dev/null .
+
       - name: Run tests
         run: mix test
 
@@ -70,6 +85,9 @@ jobs:
 
       - name: Set up Fly CLI
         uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Copy TUI source for Docker build
+        run: cp -r tui server/tui
 
       - name: Deploy to Fly.io
         run: flyctl deploy --remote-only

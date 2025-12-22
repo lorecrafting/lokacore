@@ -1,0 +1,15 @@
+key: stone_corridor
+is_template: true
+type: room
+name: "Stone Corridor"
+description: |
+  A long corridor of worn stone blocks. Torchlight flickers from
+  sconces along the walls, casting dancing shadows on the floor.
+tags:
+  - dungeon
+  - corridor
+  - indoor
+components:
+  lighting:
+    level: dim
+    source: torches

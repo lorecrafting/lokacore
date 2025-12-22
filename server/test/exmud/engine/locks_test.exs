@@ -38,14 +38,18 @@ defmodule Exmud.Engine.LocksTest do
       result = Locks.parse("perm(admin) OR id(123) AND tag(owner)")
 
       # AND has higher precedence than OR
-      assert {:ok, {:or, {:func, "perm", ["admin"]}, {:and, {:func, "id", ["123"]}, {:func, "tag", ["owner"]}}}} =
+      assert {:ok,
+              {:or, {:func, "perm", ["admin"]},
+               {:and, {:func, "id", ["123"]}, {:func, "tag", ["owner"]}}}} =
                result
     end
 
     test "parses parenthesized expression" do
       result = Locks.parse("(perm(admin) OR id(123)) AND tag(owner)")
 
-      assert {:ok, {:and, {:or, {:func, "perm", ["admin"]}, {:func, "id", ["123"]}}, {:func, "tag", ["owner"]}}} =
+      assert {:ok,
+              {:and, {:or, {:func, "perm", ["admin"]}, {:func, "id", ["123"]}},
+               {:func, "tag", ["owner"]}}} =
                result
     end
 
@@ -342,7 +346,14 @@ defmodule Exmud.Engine.LocksTest do
       # Use maps for accessors that need permissions/contents fields
       commoner = %{id: "p1", type: :character, key: "commoner", permissions: [], contents: []}
       noble = %{id: "p2", type: :character, key: "noble", permissions: ["royalty"], contents: []}
-      guard = %{id: "p3", type: :character, key: "guard", permissions: [], contents: [%{key: "castle_key"}]}
+
+      guard = %{
+        id: "p3",
+        type: :character,
+        key: "guard",
+        permissions: [],
+        contents: [%{key: "castle_key"}]
+      }
 
       assert {:denied, _} = Locks.check(door, commoner, "traverse")
       assert :ok = Locks.check(door, noble, "traverse")

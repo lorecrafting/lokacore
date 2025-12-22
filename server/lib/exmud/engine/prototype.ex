@@ -28,6 +28,7 @@ defmodule Exmud.Engine.Prototype do
           type: entity_type(),
           name: String.t() | nil,
           description: String.t() | nil,
+          is_template: boolean(),
           components: map(),
           behaviors: [module()],
           attributes: map(),
@@ -47,6 +48,7 @@ defmodule Exmud.Engine.Prototype do
     :type,
     :name,
     :description,
+    is_template: false,
     components: %{},
     behaviors: [],
     attributes: %{},
@@ -84,6 +86,7 @@ defmodule Exmud.Engine.Prototype do
       type: normalize_type(Map.get(attrs, :type)),
       name: Map.get(attrs, :name),
       description: Map.get(attrs, :description),
+      is_template: Map.get(attrs, :is_template, false) == true,
       components: Map.get(attrs, :components, %{}),
       behaviors: normalize_behaviors(Map.get(attrs, :behaviors, [])),
       attributes: Map.get(attrs, :attributes, %{}),
@@ -158,6 +161,7 @@ defmodule Exmud.Engine.Prototype do
       type: child.type || parent.type,
       name: child.name || parent.name,
       description: child.description || parent.description,
+      is_template: child.is_template,
       components: deep_merge(parent.components, child.components),
       behaviors: merge_lists(child.behaviors, parent.behaviors),
       attributes: deep_merge(parent.attributes, child.attributes),
@@ -168,6 +172,15 @@ defmodule Exmud.Engine.Prototype do
       spawns: child.spawns ++ parent.spawns
     }
   end
+
+  @doc """
+  Checks if a prototype is marked as a reusable template.
+
+  Templates are meant for inheritance/instantiation in the editor,
+  not for direct spawning into the world.
+  """
+  @spec template?(t()) :: boolean()
+  def template?(%__MODULE__{is_template: is_template}), do: is_template == true
 
   @doc """
   Converts a prototype to an Entity struct.

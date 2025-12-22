@@ -910,7 +910,10 @@ defmodule ExmudWeb.GameLive do
         }
 
         # Run before_move hook - can block movement
-        case Hooks.run_until_halt(:at_before_move, [player_context, %{destination_id: destination_id, direction: direction}]) do
+        case Hooks.run_until_halt(:at_before_move, [
+               player_context,
+               %{destination_id: destination_id, direction: direction}
+             ]) do
           {:halt, reason} ->
             event = %{
               text: "You can't go that way: #{reason}",

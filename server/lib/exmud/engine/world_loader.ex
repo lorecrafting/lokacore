@@ -22,7 +22,7 @@ defmodule Exmud.Engine.WorldLoader do
 
   require Logger
 
-  alias Exmud.Engine.{PrototypeLoader, Spawner, Entities}
+  alias Exmud.Engine.{PrototypeLoader, Spawner, Entities, WorldGraph}
 
   @starting_room "town_square"
 
@@ -56,6 +56,22 @@ defmodule Exmud.Engine.WorldLoader do
     # Spawn rooms in connected order (BFS from starting room)
     case spawn_room_chain(starting_room, opts) do
       {:ok, room_results} ->
+        # Link all exits to their destination room IDs
+        linked_count = link_all_exits(room_results)
+        Logger.info("WorldLoader: Linked #{linked_count} exits to destination IDs")
+
+        # Auto-layout rooms with coordinates if requested
+        if Keyword.get(opts, :auto_layout, false) do
+          case get_starting_room() do
+            {:ok, start_room} ->
+              {:ok, count} = WorldGraph.auto_layout(start_room.id)
+              Logger.info("WorldLoader: Auto-laid out #{count} rooms with coordinates")
+
+            _ ->
+              :ok
+          end
+        end
+
         # Calculate stats
         stats = calculate_stats(room_results)
 
@@ -155,7 +171,10 @@ defmodule Exmud.Engine.WorldLoader do
                   )
 
                 {:error, reason} ->
-                  Logger.warning("WorldLoader: Failed to spawn room #{room_key}: #{inspect(reason)}")
+                  Logger.warning(
+                    "WorldLoader: Failed to spawn room #{room_key}: #{inspect(reason)}"
+                  )
+
                   spawn_rooms_bfs(queue, MapSet.put(visited, room_key), results, max_remaining)
               end
           end
@@ -292,5 +311,122 @@ defmodule Exmud.Engine.WorldLoader do
       {:ok, room} -> room.id
       {:error, _} -> nil
     end
+  end
+
+  @doc """
+  Links all exits to their destination room IDs.
+
+  This resolves destination_key to destination_id for faster runtime navigation.
+  Should be called after spawning rooms.
+
+  ## Returns
+
+  The number of exits linked.
+  """
+  @spec link_all_exits(list()) :: integer()
+  def link_all_exits(room_results) do
+    # Build key->id map from room results
+    key_to_id =
+      room_results
+      |> Enum.map(fn %{room: room} -> {room.key, room.id} end)
+      |> Map.new()
+
+    # Also check for rooms that might already exist in the database
+    existing_rooms = Entities.list_by_type(:room)
+
+    key_to_id =
+      Enum.reduce(existing_rooms, key_to_id, fn room_schema, acc ->
+        room = Entities.to_entity(room_schema)
+        Map.put_new(acc, room.key, room.id)
+      end)
+
+    # Get all exits from spawn results
+    exits =
+      room_results
+      |> Enum.flat_map(fn %{spawned: spawned} ->
+        Enum.filter(spawned, fn e -> e.type == :exit end)
+      end)
+
+    # Link each exit
+    linked =
+      Enum.count(exits, fn exit ->
+        exit_component = Map.get(exit.components, "exit", %{})
+        dest_key = Map.get(exit_component, "destination_key")
+
+        if dest_key do
+          case Map.get(key_to_id, dest_key) do
+            nil ->
+              # Try to find by key in database (might be from a different spawn batch)
+              case Entities.get_entity_by_key(dest_key) do
+                nil ->
+                  Logger.debug(
+                    "WorldLoader: Could not find destination for exit #{exit.key} -> #{dest_key}"
+                  )
+
+                  false
+
+                dest_schema ->
+                  link_exit(exit, dest_schema.id)
+                  true
+              end
+
+            dest_id ->
+              link_exit(exit, dest_id)
+              true
+          end
+        else
+          false
+        end
+      end)
+
+    linked
+  end
+
+  defp link_exit(exit, destination_id) do
+    exit_component = Map.get(exit.components, "exit", %{})
+    updated_component = Map.put(exit_component, "destination_id", destination_id)
+    updated_components = Map.put(exit.components, "exit", updated_component)
+    updated_exit = %{exit | components: updated_components}
+
+    case Entities.save_entity(updated_exit) do
+      {:ok, _} ->
+        Logger.debug("WorldLoader: Linked exit #{exit.key} -> #{destination_id}")
+
+      {:error, reason} ->
+        Logger.warning("WorldLoader: Failed to link exit #{exit.key}: #{inspect(reason)}")
+    end
+  end
+
+  @doc """
+  Re-links all exits in the database.
+
+  Useful for fixing exits after manual room creation.
+  """
+  @spec relink_all_exits() :: {:ok, integer()}
+  def relink_all_exits do
+    # Get all exits
+    exits = Entities.list_by_type(:exit)
+
+    linked =
+      Enum.count(exits, fn exit_schema ->
+        exit = Entities.to_entity(exit_schema)
+        exit_component = Map.get(exit.components, "exit", %{})
+        dest_key = Map.get(exit_component, "destination_key")
+
+        if dest_key do
+          case Entities.get_entity_by_key(dest_key) do
+            nil ->
+              false
+
+            dest_schema ->
+              link_exit(exit, dest_schema.id)
+              true
+          end
+        else
+          false
+        end
+      end)
+
+    {:ok, linked}
   end
 end
