@@ -1,0 +1,23 @@
+key: health_potion
+parent: base_item
+type: item
+name: "Health Potion"
+description: |
+  A small glass vial containing a ruby-red liquid that swirls
+  gently even when still. Its cork is sealed with wax.
+components:
+  physical:
+    weight: 0.3
+    stackable: true
+    max_stack: 10
+  consumable:
+    effect: heal
+    amount: 25
+    use_message: "You drink the potion. Warmth spreads through your body."
+tags:
+  - item
+  - consumable
+  - potion
+  - healing
+attributes:
+  base_price: 25

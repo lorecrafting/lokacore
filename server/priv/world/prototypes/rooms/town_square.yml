@@ -1,0 +1,21 @@
+key: town_square
+parent: base_room
+type: room
+name: "Town Square"
+description: |
+  You stand in the heart of a small village. A weathered stone
+  fountain bubbles in the center, surrounded by cobblestones worn
+  smooth by countless feet. Buildings cluster around the square:
+  a general store to the north, and a lively tavern to the east.
+  A dusty path leads south toward the forest.
+exits:
+  north: general_store
+  east: tavern
+  south: forest_path
+spawns:
+  - prototype: merchant
+tags:
+  - town
+  - safe_zone
+  - starting_area
+  - outdoor

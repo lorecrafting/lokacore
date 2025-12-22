@@ -1,0 +1,12 @@
+key: base_npc
+type: npc
+name: "Base NPC"
+description: "A generic non-player character."
+components:
+  combatant:
+    health:
+      current: 100
+      max: 100
+    level: 1
+tags:
+  - npc

@@ -1,0 +1,12 @@
+key: town_square
+type: room
+name: "Town Square"
+description: |
+  You stand in the heart of a small village. A weathered stone
+  fountain bubbles in the center, surrounded by cobblestones.
+exits:
+  north: general_store
+  east: tavern
+tags:
+  - town
+  - safe_zone

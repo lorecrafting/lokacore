@@ -7,7 +7,7 @@ defmodule ExmudWeb.GameLive.Components do
   """
   use Phoenix.Component
 
-  alias Exmud.DemoGame.Systems.Progression
+  alias Exmud.Framework.Progression
   alias Exmud.Utils.MapHelpers
 
   # ============================================================================

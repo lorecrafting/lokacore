@@ -1,0 +1,11 @@
+key: base_item
+type: item
+name: "Base Item"
+description: "A generic item."
+components:
+  physical:
+    weight: 1.0
+    stackable: false
+    max_stack: 1
+tags:
+  - item

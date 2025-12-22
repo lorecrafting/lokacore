@@ -1,0 +1,7 @@
+key: base_room
+type: room
+name: "Base Room"
+description: "An empty room."
+components: {}
+tags:
+  - room

@@ -1,0 +1,260 @@
+# Prototype System
+
+ExMUD uses an Evennia-inspired prototype system that allows defining game content in YAML files without code changes.
+
+## Overview
+
+Prototypes are templates for creating entities. They support:
+- **Inheritance**: Child prototypes inherit from parents via the `parent` field
+- **Deep merging**: Maps are recursively merged, lists are concatenated
+- **Hot reload**: Reload prototypes without restarting the server
+
+## Directory Structure
+
+```
+priv/world/prototypes/
+├── _base/              # Base prototypes (parents)
+│   ├── base_npc.yml
+│   ├── base_room.yml
+│   ├── base_item.yml
+│   └── base_weapon.yml
+├── rooms/              # Room prototypes
+│   ├── town_square.yml
+│   ├── tavern.yml
+│   └── forest_path.yml
+├── npcs/               # NPC prototypes
+│   ├── goblin.yml
+│   ├── merchant.yml
+│   └── guard.yml
+├── items/              # Item prototypes
+│   ├── torch.yml
+│   ├── gold_key.yml
+│   └── healing_potion.yml
+└── exits/              # Exit prototypes
+    └── locked_door.yml
+```
+
+## YAML Format
+
+### Basic Prototype
+
+```yaml
+key: goblin               # Unique identifier (required)
+type: npc                 # room | npc | item | exit | character (required)
+parent: base_npc          # Inherits from this prototype (optional)
+name: "Goblin"
+description: "A sneaky green creature with pointed ears."
+tags:
+  - hostile
+  - monster
+  - goblinoid
+components:
+  combatant:
+    health: { current: 30, max: 30 }
+    stats: { str: 8, dex: 14, sta: 8 }
+    level: 1
+  loot:
+    table:
+      - { item: gold_coin, chance: 0.8, min: 1, max: 5 }
+      - { item: rusty_dagger, chance: 0.2 }
+```
+
+### Base Prototype (Parent)
+
+```yaml
+# _base/base_npc.yml
+key: base_npc
+type: npc
+name: "Base NPC"
+description: "A generic NPC."
+components:
+  combatant:
+    health: { current: 100, max: 100 }
+    stats: { str: 10, dex: 10, sta: 10 }
+    level: 1
+behaviors:
+  - Exmud.Framework.Combat
+tags:
+  - npc
+```
+
+### Room with Exits and Spawns
+
+```yaml
+key: town_square
+parent: base_room
+type: room
+name: "Town Square"
+description: "The heart of the village. A stone fountain burbles at the center."
+exits:
+  north: general_store    # Creates exit to room with key "general_store"
+  east: tavern
+  south: forest_path
+  west: blacksmith
+spawns:
+  - prototype: merchant   # Spawn merchant NPC here
+  - prototype: torch
+    name: "Flickering Torch"  # Override the default name
+  - prototype: guard
+    components:           # Override components
+      combatant:
+        level: 5
+```
+
+## Inheritance
+
+Child prototypes inherit all fields from parents with deep merging:
+
+```yaml
+# Parent: base_weapon.yml
+key: base_weapon
+type: item
+components:
+  equipable:
+    slot: weapon
+  damage:
+    min: 1
+    max: 3
+    type: physical
+tags:
+  - weapon
+
+# Child: iron_sword.yml
+key: iron_sword
+parent: base_weapon
+name: "Iron Sword"
+components:
+  damage:
+    min: 5     # Overrides parent
+    max: 10    # Overrides parent
+    # type: physical inherited from parent
+tags:
+  - sword     # Added to parent's tags: [weapon, sword]
+```
+
+**Merge rules**:
+- Scalar values: child overrides parent
+- Maps: deep merge (child keys override, parent keys preserved)
+- Lists: concatenate (child items added to parent items)
+
+## Prototype API
+
+### PrototypeLoader
+
+```elixir
+# Loads all YAML files into ETS (called on startup)
+PrototypeLoader.reload()
+
+# Get prototype by key (with inheritance resolved)
+PrototypeLoader.get("goblin")
+# => %Prototype{key: "goblin", parent: "base_npc", ...}
+
+# List prototypes by type
+PrototypeLoader.list_by_type(:npc)
+# => [%Prototype{key: "goblin", ...}, %Prototype{key: "merchant", ...}]
+
+# Validate all prototypes (check for broken references, cycles)
+PrototypeLoader.validate_all()
+# => {:ok, stats} | {:error, errors}
+```
+
+### Spawner
+
+```elixir
+# Spawn entity from prototype
+{:ok, entity} = Spawner.spawn("goblin")
+{:ok, entity} = Spawner.spawn("goblin", location_id: room_id)
+
+# Spawn with overrides
+{:ok, entity} = Spawner.spawn("goblin",
+  location_id: room_id,
+  name: "Elite Goblin",
+  components: %{combatant: %{level: 5}}
+)
+
+# Spawn room with all exits and spawned contents
+{:ok, room} = Spawner.spawn_room("town_square")
+
+# Despawn (delete) entity
+:ok = Spawner.despawn(entity_id)
+```
+
+### WorldLoader
+
+```elixir
+# Spawn entire world from starting room (BFS traversal)
+{:ok, stats} = WorldLoader.spawn_world()
+# stats = %{rooms: 15, npcs: 42, items: 87, exits: 30}
+
+# Spawn from specific starting room
+{:ok, stats} = WorldLoader.spawn_world(start: "dungeon_entrance", max_rooms: 50)
+
+# Validate world references
+WorldLoader.validate()
+# Checks for: broken exit destinations, missing spawn prototypes
+
+# Reset world (delete all, respawn from prototypes)
+WorldLoader.reset_world()
+
+# Get starting room entity
+WorldLoader.get_starting_room()
+```
+
+### WorldExporter
+
+```elixir
+# Export all entities to YAML (backup/snapshot)
+WorldExporter.export_all("output/")
+# Creates: output/rooms/, output/npcs/, output/items/, output/exits/
+
+# Export specific type
+WorldExporter.export_by_type(:npc, "output/npcs/")
+
+# Convert single entity to YAML string
+yaml = WorldExporter.entity_to_yaml(entity)
+
+# Convert entity to prototype-compatible map
+proto_map = WorldExporter.entity_to_prototype(entity)
+```
+
+## Prototype Struct
+
+```elixir
+defmodule Exmud.Engine.Prototype do
+  defstruct [
+    :key,           # Unique identifier (required)
+    :type,          # :room | :npc | :item | :exit | :character (required)
+    :parent,        # Parent prototype key (optional)
+    :name,
+    :description,
+    :components,    # Map of component_type => data
+    :behaviors,     # List of behavior module names
+    :attributes,    # Flexible key-value storage
+    :tags,          # List of categorization tags
+    :scripts,       # Map of hook => script_name
+    :locks,         # Map of action => lock_string
+    :exits,         # (rooms only) Map of direction => room_key
+    :spawns,        # (rooms only) List of spawn definitions
+  ]
+end
+```
+
+## Hot Reload
+
+Prototypes can be reloaded without restarting:
+
+```elixir
+# Via code
+PrototypeLoader.reload()
+
+# Via admin dashboard (System tab)
+# Click "Reload Prototypes" button
+```
+
+**Note**: Existing entities are NOT updated. Hot reload only affects newly spawned entities.
+
+## Related
+
+- [Entity System](./entity-system.md) - How entities work
+- [Persistence](./persistence.md) - How entities are stored
+- [Entity Lifecycle](./entity-lifecycle.md) - EntityServer and spawning

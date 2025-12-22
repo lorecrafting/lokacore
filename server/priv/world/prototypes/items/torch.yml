@@ -1,0 +1,22 @@
+key: torch
+parent: base_item
+type: item
+name: "Torch"
+description: |
+  A wooden shaft wrapped with oil-soaked rags at one end.
+  When lit, it provides flickering light and warmth.
+components:
+  physical:
+    weight: 0.5
+    stackable: true
+    max_stack: 5
+  light_source:
+    radius: 3
+    duration: 3600
+    lit: false
+tags:
+  - item
+  - tool
+  - light_source
+attributes:
+  base_price: 2

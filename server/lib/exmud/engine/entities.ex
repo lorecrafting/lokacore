@@ -220,6 +220,13 @@ defmodule Exmud.Engine.Entities do
   # =============================================================================
 
   @doc """
+  Lists all entities of a given type.
+  """
+  def list_by_type(type) do
+    list_entities(type: type)
+  end
+
+  @doc """
   Lists rooms with their contents preloaded.
   """
   def list_rooms do
@@ -243,6 +250,27 @@ defmodule Exmud.Engine.Entities do
     EntitySchema
     |> where([e], e.location_id == ^location_id)
     |> Repo.all()
+  end
+
+  @doc """
+  Finds an entity by its prototype key in metadata.
+  """
+  def find_by_prototype_key(prototype_key) do
+    # Search in metadata JSONB field for prototype_key
+    EntitySchema
+    |> where([e], fragment("json_extract(?, '$.prototype_key') = ?", e.metadata, ^prototype_key))
+    |> limit(1)
+    |> Repo.one()
+  end
+
+  @doc """
+  Deletes all entities in the database.
+
+  Returns the count of deleted entities.
+  """
+  def delete_all do
+    {count, _} = Repo.delete_all(EntitySchema)
+    count
   end
 
   # =============================================================================

@@ -29,7 +29,7 @@ end
 
 Components are pure data containers that can be attached to any entity.
 
-**Important**: Components are stored as JSON, so when loaded from the database, map keys become strings. Use helper functions like `Component.from_map/1` to convert DB data back to structs:
+**Important**: Components are stored as JSON, so when loaded from the database, map keys become strings. Use atom keys when working with components in code:
 
 ```elixir
 # Combat-capable entities
@@ -106,70 +106,44 @@ end
 
 ## Entity Lifecycle
 
+Entity lifecycle is managed via the **Hooks** system. Key lifecycle events:
+
+| Hook | When Called | Purpose |
+|------|-------------|---------|
+| `:at_entity_creation` | Entity first created | Set initial state |
+| `:at_post_load` | Entity loaded into memory | Restore runtime state |
+| `:at_pre_save` | Before entity is persisted | Validate, clean up |
+| `:at_entity_delete` | Entity being destroyed | Cleanup references |
+
 ```elixir
-defmodule EntityLifecycle do
-  # Creation hooks
-  @doc "Called once when entity is first created"
-  def at_entity_creation(entity), do: # Set initial state, defaults
+# Register a lifecycle hook
+Hooks.register(:at_entity_creation, MyGame.Combat, :on_create, priority: 10)
 
-  @doc "Called every time entity is loaded into memory"
-  def at_entity_init(entity), do: # Restore runtime state
-
-  @doc "Called before entity is persisted"
-  def at_entity_save(entity), do: # Validate, clean up
-
-  @doc "Called when entity is being destroyed"
-  def at_entity_delete(entity), do: # Cleanup references
-
-  # The Registry pattern for active entities
-  def get_or_load(entity_id) do
-    case Registry.lookup(Exmud.EntityRegistry, entity_id) do
-      [{pid, _}] -> {:ok, pid}
-      [] -> start_entity_process(entity_id)
-    end
-  end
-end
+# The Registry pattern for active entities (lazy loading)
+EntityRegistry.get_or_start(entity_id)  # Returns {:ok, pid}
 ```
+
+See [Entity Lifecycle](./entity-lifecycle.md) for detailed documentation of the EntityRegistry, EntityServer, and EntitySupervisor pattern.
 
 ## Entity GenServer
 
-Each active entity is a GenServer process:
+Each active entity runs as an `EntityServer` GenServer process:
 
 ```elixir
-defmodule EntityServer do
-  use GenServer
-
-  defstruct [:entity, :dirty?, :last_saved]
-
-  def start_link(entity_id) do
-    GenServer.start_link(__MODULE__, entity_id,
-      name: via_tuple(entity_id))
-  end
-
-  defp via_tuple(entity_id) do
-    {:via, Registry, {Exmud.EntityRegistry, entity_id}}
-  end
-
-  @impl true
-  def init(entity_id) do
-    # Load entity from database
-    entity = Repo.get_entity(entity_id)
-    entity = EntityLifecycle.at_entity_init(entity)
-
-    # Schedule periodic saves (every 5 minutes)
-    Process.send_after(self(), :auto_save, :timer.minutes(5))
-
-    {:ok, %__MODULE__{entity: entity, dirty?: false}}
-  end
-
-  @impl true
-  def handle_info(:auto_save, %{dirty?: true} = state) do
-    Repo.save_entity(state.entity)
-    Process.send_after(self(), :auto_save, :timer.minutes(5))
-    {:noreply, %{state | dirty?: false}}
-  end
-end
+# Key API
+EntityServer.get_entity(pid)           # Get current state
+EntityServer.update(pid, update_fn)    # Update entity (marks dirty)
+EntityServer.handle_event(pid, event)  # Process event
+EntityServer.save_now(pid)             # Force immediate save
+EntityServer.touch(pid)                # Reset idle timer
 ```
+
+**Lifecycle timings** (configurable):
+- Auto-save: Every 60 seconds if dirty
+- Hibernate: After 120 seconds idle (reduce memory)
+- Stop: After 300 seconds idle (final save, process removed)
+
+See [Entity Lifecycle](./entity-lifecycle.md) for implementation details.
 
 ## Entity Types
 
@@ -182,6 +156,9 @@ end
 | exit | Connection between rooms | destination, locks |
 
 ## Related
+- [Entity Lifecycle](./entity-lifecycle.md) - EntityRegistry, EntityServer, EntitySupervisor
+- [Prototypes](./prototypes.md) - YAML-based entity templates
+- [Hooks & Locks](./hooks-and-locks.md) - Lifecycle hooks and access control
 - [Persistence](./persistence.md) - How entities are stored
 - [Events](./events.md) - How entities communicate
 - [Commands](./commands.md) - How players interact with entities

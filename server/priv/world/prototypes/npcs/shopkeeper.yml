@@ -1,0 +1,44 @@
+key: shopkeeper
+parent: base_npc
+type: npc
+name: "Kindly Shopkeeper"
+description: |
+  An elderly woman with silver hair and spectacles perched on her nose.
+  She moves with practiced efficiency among the crowded shelves,
+  knowing exactly where everything is kept.
+components:
+  combatant:
+    health:
+      current: 60
+      max: 60
+  conversant:
+    default_greeting: "Hello, dear! Can I help you find something?"
+    dialogue_tree:
+      start:
+        text: "Hello, dear! Looking for something specific today?"
+        choices:
+          - label: "What do you sell?"
+            next: inventory
+          - label: "Tell me about the town"
+            next: town_info
+          - label: "Just browsing, thanks"
+            next: goodbye
+      inventory:
+        text: "Provisions, rope, torches, that sort of thing. Nothing fancy, but reliable."
+        action: open_shop
+      town_info:
+        text: "Our little village has stood here for three generations. Quiet folk, mostly farmers. The tavern's the heart of the community."
+        choices:
+          - label: "Back"
+            next: start
+      goodbye:
+        text: "Take care now!"
+        action: end_conversation
+tags:
+  - friendly
+  - merchant
+attributes:
+  shop_inventory:
+    - torch
+    - rope
+    - health_potion

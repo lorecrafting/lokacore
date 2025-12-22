@@ -1,0 +1,18 @@
+key: general_store
+parent: base_room
+type: room
+name: "General Store"
+description: |
+  Wooden shelves line the walls of this modest shop, stocked with
+  an assortment of provisions, tools, and sundries. The smell of
+  leather and dried herbs fills the air. A worn counter separates
+  you from the shopkeeper's domain.
+exits:
+  south: town_square
+spawns:
+  - prototype: shopkeeper
+tags:
+  - town
+  - safe_zone
+  - shop
+  - indoor

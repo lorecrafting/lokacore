@@ -1,0 +1,20 @@
+key: tavern
+parent: base_room
+type: room
+name: "The Rusty Tankard"
+description: |
+  Warmth and the smell of hearty stew embrace you as you enter
+  this cozy tavern. A crackling fire illuminates rough-hewn tables
+  where locals share drinks and tall tales. A stout barkeep polishes
+  mugs behind a bar of dark, scarred oak.
+exits:
+  west: town_square
+spawns:
+  - prototype: tavern_keeper
+tags:
+  - town
+  - safe_zone
+  - tavern
+  - indoor
+attributes:
+  ambient_sound: "cheerful_crowd"

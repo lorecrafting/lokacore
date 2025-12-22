@@ -1,0 +1,16 @@
+key: base_weapon
+parent: base_item
+type: item
+name: "Base Weapon"
+description: "A generic weapon."
+components:
+  physical:
+    weight: 2.0
+  weapon:
+    damage: 5
+    damage_type: "physical"
+    speed: 1.0
+tags:
+  - item
+  - weapon
+  - equippable

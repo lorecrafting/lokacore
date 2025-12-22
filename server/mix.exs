@@ -76,7 +76,10 @@ defmodule Exmud.MixProject do
       {:luerl, "~> 1.5"},
 
       # UUID generation for entities
-      {:elixir_uuid, "~> 1.2"}
+      {:elixir_uuid, "~> 1.2"},
+
+      # YAML parsing for prototype files
+      {:yaml_elixir, "~> 2.9"}
     ]
   end
 

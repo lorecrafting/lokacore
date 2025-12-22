@@ -1,0 +1,16 @@
+key: goblin
+parent: base_npc
+type: npc
+name: "Goblin"
+description: "A small, green-skinned creature with sharp teeth."
+components:
+  combatant:
+    health:
+      current: 30
+      max: 30
+    level: 2
+attributes:
+  respawn_time: 300
+tags:
+  - hostile
+  - goblinoid

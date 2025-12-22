@@ -1,0 +1,25 @@
+key: leather_armor
+parent: base_item
+type: item
+name: "Leather Armor"
+description: |
+  A simple suit of hardened leather. Scratches and scuffs mark
+  its surface, but it remains sturdy protection. The straps
+  are adjustable for a comfortable fit.
+components:
+  physical:
+    weight: 5.0
+  armor:
+    defense: 3
+    armor_type: "light"
+    slot: "chest"
+tags:
+  - item
+  - armor
+  - equippable
+  - light_armor
+attributes:
+  base_price: 40
+  durability:
+    current: 100
+    max: 100

@@ -7,20 +7,18 @@ defmodule ExmudWeb.GameLive do
   """
   use ExmudWeb, :live_view
 
-  alias Exmud.DemoGame.{PlayerGameState, RoomLoader}
+  alias Exmud.Framework.Player.GameState, as: PlayerGameState
+  alias Exmud.Framework.World.RoomLoader
+  alias Exmud.Framework.Inventory
+  alias Exmud.Framework.Equipment
+  alias Exmud.Framework.Dialogue
+  alias Exmud.Framework.Quest
+  alias Exmud.Framework.Combat
+  alias Exmud.Framework.Combat.Spawner
+  alias Exmud.Framework.Progression
+  alias Exmud.Framework.Skills
 
-  alias Exmud.DemoGame.Systems.{
-    Inventory,
-    Equipment,
-    Dialogue,
-    Quest,
-    Combat,
-    Spawner,
-    Progression,
-    Skills
-  }
-
-  alias Exmud.Engine.Entities
+  alias Exmud.Engine.{Entities, EntityRegistry, EntityServer, Hooks, WorldLoader}
   alias Exmud.Accounts
   alias Exmud.Utils.MapHelpers
 
@@ -115,17 +113,63 @@ defmodule ExmudWeb.GameLive do
 
   # Load the player's current room, falling back to starting room
   defp load_player_room(game_state) do
-    room_id = game_state.current_room_id || RoomLoader.get_starting_room_id()
+    # Try Framework's RoomLoader first, fallback to engine's WorldLoader
+    room_id =
+      game_state.current_room_id ||
+        RoomLoader.get_starting_room_id() ||
+        WorldLoader.get_starting_room_id()
 
     case RoomLoader.load_room_for_display(room_id) do
       {:ok, room} ->
         # Update player's room if they didn't have one set
         game_state = ensure_room_assigned(game_state, room.id)
+
+        # Activate the room entity (on-demand process management)
+        activate_room_entity(room.id)
+
         {room, game_state}
 
       {:error, :not_found} ->
         # No rooms in database - show void
         {RoomLoader.empty_room(), game_state}
+    end
+  end
+
+  # Activate room entity via EntityRegistry (on-demand process management)
+  defp activate_room_entity(nil), do: :ok
+
+  defp activate_room_entity(room_id) do
+    case EntityRegistry.get_or_start(room_id) do
+      {:ok, pid} ->
+        EntityServer.touch(pid)
+        :ok
+
+      {:error, _reason} ->
+        # Room may not have an engine entity process - that's ok
+        :ok
+    end
+  end
+
+  # Touch an entity to keep its EntityServer alive (on-demand process management)
+  defp touch_entity(nil), do: :ok
+
+  defp touch_entity(entity_id) do
+    case EntityRegistry.lookup(entity_id) do
+      {:ok, pid} ->
+        EntityServer.touch(pid)
+        :ok
+
+      :not_found ->
+        # Entity doesn't have an active process - start one if it exists in DB
+        case EntityRegistry.get_or_start(entity_id) do
+          {:ok, pid} ->
+            EntityServer.touch(pid)
+            :ok
+
+          {:error, _reason} ->
+            # Entity may not have an engine entity process - that's ok
+            :ok
+        end
     end
   end
 
@@ -297,6 +341,9 @@ defmodule ExmudWeb.GameLive do
   def handle_event("click_entity", %{"id" => id, "type" => type}, socket) do
     # Find the entity and show context panel
     entity = find_entity(socket.assigns.room, id, type)
+
+    # Touch the entity to keep it alive (on-demand process management)
+    touch_entity(id)
 
     {:noreply, update_ui(socket, %{context_entity: entity, compass_open: false})}
   end
@@ -830,6 +877,7 @@ defmodule ExmudWeb.GameLive do
   def handle_event("navigate", %{"direction" => direction}, socket) do
     room = socket.assigns.room
     game_state = socket.assigns.game_state
+    player = socket.assigns.current_scope.player
 
     # Find the exit for this direction
     exit = Enum.find(room.exits, fn e -> e.direction == direction end)
@@ -852,57 +900,20 @@ defmodule ExmudWeb.GameLive do
          |> update(:events, fn events -> events ++ [event] end)}
 
       %{destination_id: destination_id} ->
-        player = socket.assigns.current_scope.player
         player_name = player_display_name(player)
 
-        # Broadcast leave to old room before unsubscribing
-        if room.id do
-          Phoenix.PubSub.broadcast(
-            Exmud.PubSub,
-            "room:#{room.id}",
-            {:player_left, player.id, player_name, direction}
-          )
+        # Build player context for hooks
+        player_context = %{
+          player_id: player.id,
+          player_name: player_name,
+          type: :player
+        }
 
-          Phoenix.PubSub.unsubscribe(Exmud.PubSub, "room:#{room.id}")
-        end
-
-        # Update player's current room
-        {:ok, new_game_state} =
-          PlayerGameState.update_state(game_state, %{current_room_id: destination_id})
-
-        # Load new room
-        case RoomLoader.load_room_for_display(destination_id) do
-          {:ok, new_room} ->
-            # Subscribe to new room events
-            Phoenix.PubSub.subscribe(Exmud.PubSub, "room:#{new_room.id}")
-
-            # Broadcast enter to new room
-            Phoenix.PubSub.broadcast(
-              Exmud.PubSub,
-              "room:#{new_room.id}",
-              {:player_entered, player.id, player_name}
-            )
-
-            # Load other players in new room
-            other_players = load_other_players(new_room.id, player.id)
-
-            # Create movement event for display
+        # Run before_move hook - can block movement
+        case Hooks.run_until_halt(:at_before_move, [player_context, %{destination_id: destination_id, direction: direction}]) do
+          {:halt, reason} ->
             event = %{
-              text: "You head #{direction} to #{new_room.title}.",
-              timestamp: DateTime.utc_now()
-            }
-
-            {:noreply,
-             socket
-             |> assign(:room, new_room)
-             |> assign(:game_state, new_game_state)
-             |> assign(:other_players, other_players)
-             |> update_ui(%{compass_open: false, context_entity: nil})
-             |> assign(:events, [event])}
-
-          {:error, :not_found} ->
-            event = %{
-              text: "Something went wrong... the path #{direction} leads to nowhere.",
+              text: "You can't go that way: #{reason}",
               timestamp: DateTime.utc_now()
             }
 
@@ -910,6 +921,73 @@ defmodule ExmudWeb.GameLive do
              socket
              |> update_ui(%{compass_open: false})
              |> update(:events, fn events -> events ++ [event] end)}
+
+          :ok ->
+            # Run leave_room hook
+            Hooks.run(:at_leave_room, [player_context, %{room_id: room.id, direction: direction}])
+
+            # Broadcast leave to old room before unsubscribing
+            if room.id do
+              Phoenix.PubSub.broadcast(
+                Exmud.PubSub,
+                "room:#{room.id}",
+                {:player_left, player.id, player_name, direction}
+              )
+
+              Phoenix.PubSub.unsubscribe(Exmud.PubSub, "room:#{room.id}")
+            end
+
+            # Update player's current room
+            {:ok, new_game_state} =
+              PlayerGameState.update_state(game_state, %{current_room_id: destination_id})
+
+            # Load new room
+            case RoomLoader.load_room_for_display(destination_id) do
+              {:ok, new_room} ->
+                # Activate the destination room entity (on-demand process management)
+                activate_room_entity(new_room.id)
+
+                # Run enter_room hook
+                Hooks.run(:at_enter_room, [player_context, %{room_id: new_room.id}])
+
+                # Subscribe to new room events
+                Phoenix.PubSub.subscribe(Exmud.PubSub, "room:#{new_room.id}")
+
+                # Broadcast enter to new room
+                Phoenix.PubSub.broadcast(
+                  Exmud.PubSub,
+                  "room:#{new_room.id}",
+                  {:player_entered, player.id, player_name}
+                )
+
+                # Load other players in new room
+                other_players = load_other_players(new_room.id, player.id)
+
+                # Create movement event for display
+                event = %{
+                  text: "You head #{direction} to #{new_room.title}.",
+                  timestamp: DateTime.utc_now()
+                }
+
+                {:noreply,
+                 socket
+                 |> assign(:room, new_room)
+                 |> assign(:game_state, new_game_state)
+                 |> assign(:other_players, other_players)
+                 |> update_ui(%{compass_open: false, context_entity: nil})
+                 |> assign(:events, [event])}
+
+              {:error, :not_found} ->
+                event = %{
+                  text: "Something went wrong... the path #{direction} leads to nowhere.",
+                  timestamp: DateTime.utc_now()
+                }
+
+                {:noreply,
+                 socket
+                 |> update_ui(%{compass_open: false})
+                 |> update(:events, fn events -> events ++ [event] end)}
+            end
         end
     end
   end

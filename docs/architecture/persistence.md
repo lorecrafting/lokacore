@@ -176,23 +176,16 @@ end
 
 ## Auto-Save System
 
-Active entities auto-save every 5 minutes if dirty:
+Active entities auto-save every 60 seconds if dirty (via EntityServer):
 
 ```elixir
-@impl true
-def handle_info(:auto_save, %{dirty?: true} = state) do
-  Repo.save_entity(state.entity)
-  Process.send_after(self(), :auto_save, :timer.minutes(5))
-  {:noreply, %{state | dirty?: false, last_saved: DateTime.utc_now()}}
-end
-
-@impl true
-def handle_info(:auto_save, %{dirty?: false} = state) do
-  # Nothing to save, schedule next check
-  Process.send_after(self(), :auto_save, :timer.minutes(5))
-  {:noreply, state}
-end
+# EntityServer lifecycle timings (configurable)
+@save_interval 60_000     # 60 seconds
+@hibernate_after 120_000  # 2 minutes - reduce memory usage
+@idle_timeout 300_000     # 5 minutes - stop process
 ```
+
+See [Entity Lifecycle](./entity-lifecycle.md) for full EntityServer implementation.
 
 ## Conversion: Schema ↔ Entity Struct
 
@@ -233,6 +226,36 @@ def to_schema_params(%Entity{} = entity) do
 end
 ```
 
+## Prototype-Based Content
+
+Game content is defined in YAML files and loaded into entities via the prototype system:
+
+```
+priv/world/prototypes/
+├── _base/          # Parent prototypes (base_npc, base_room, etc.)
+├── rooms/          # Room prototypes
+├── npcs/           # NPC prototypes
+├── items/          # Item prototypes
+└── exits/          # Exit prototypes
+```
+
+**Flow**: YAML → PrototypeLoader (ETS) → Spawner → EntitySchema (SQLite)
+
+```elixir
+# Load prototypes on startup
+PrototypeLoader.reload()
+
+# Spawn entity from prototype
+Spawner.spawn("goblin", location_id: room_id)
+
+# Export entities back to YAML (backup)
+WorldExporter.export_all("output/")
+```
+
+See [Prototypes](./prototypes.md) for YAML format and inheritance.
+
 ## Related
 - [Entity System](./entity-system.md) - Entity structure and behaviors
+- [Entity Lifecycle](./entity-lifecycle.md) - EntityServer auto-save
+- [Prototypes](./prototypes.md) - YAML-based entity templates
 - [Full Specification](../../ExMUD_Engine_Architecture.md) - Part 9: Persistence Layer

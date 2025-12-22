@@ -14,8 +14,17 @@ defmodule Exmud.Application do
        repos: Application.fetch_env!(:exmud, :ecto_repos), skip: skip_migrations?()},
       {DNSCluster, query: Application.get_env(:exmud, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Exmud.PubSub},
-      # Game systems
-      Exmud.DemoGame.Systems.Spawner,
+
+      # Engine Core - New Components (order matters!)
+      Exmud.Engine.Hooks,
+      Exmud.Engine.PrototypeLoader,
+      {Registry, keys: :unique, name: Exmud.Engine.EntityRegistry.Registry},
+      {Exmud.Engine.EntitySupervisor, name: Exmud.Engine.EntitySupervisor},
+      Exmud.Engine.EntityRegistry,
+
+      # Framework layer
+      Exmud.Framework.Combat.Spawner,
+
       # Start to serve requests, typically the last entry
       ExmudWeb.Endpoint
     ]

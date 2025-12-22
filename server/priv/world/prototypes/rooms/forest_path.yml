@@ -1,0 +1,16 @@
+key: forest_path
+parent: base_room
+type: room
+name: "Forest Path"
+description: |
+  A narrow dirt path winds through ancient oaks and gnarled pines.
+  Dappled sunlight filters through the thick canopy above. The
+  sounds of the village fade behind you, replaced by birdsong and
+  the rustle of leaves. The path continues deeper into the forest.
+exits:
+  north: town_square
+  south: forest_clearing
+tags:
+  - wilderness
+  - forest
+  - outdoor
