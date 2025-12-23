@@ -11,7 +11,7 @@ description: |
   blankets, and simple tools share space with the occasional curious
   trinket from distant lands.
 exits:
-  west: village
+  north: village
 spawns:
   - prototype: merchant_dorje
 tags:

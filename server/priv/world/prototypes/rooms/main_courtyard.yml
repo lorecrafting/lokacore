@@ -9,14 +9,12 @@ description: |
   its waters trickling with patient persistence.
 
   Buildings surround the courtyard: the golden-roofed temple to the
-  north, the meditation hall to the east, the dining hall to the west,
-  and a modest guest hall tucked in the northeast corner. The main
-  gate lies to the south.
+  north, the meditation hall to the east, and the dining hall to the
+  west. The main gate lies to the south.
 exits:
   north: temple
   east: meditation_hall
   west: dining_hall
-  northeast: guest_hall
   south: monastery_gate
 tags:
   - outdoor

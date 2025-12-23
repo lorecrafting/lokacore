@@ -12,7 +12,7 @@ description: |
   smells faintly of cedar and dried herbs, a welcoming respite from
   the mountain cold.
 exits:
-  south: main_courtyard
+  south: meditation_hall
 tags:
   - indoor
   - monastery

@@ -11,8 +11,8 @@ description: |
   mountain life. Prayer wheels spin in doorways, their mantras joining
   the distant chanting from above.
 exits:
-  northeast: monastery_gate
-  east: market
+  east: monastery_gate
+  south: market
   north: cemetery
 spawns:
   - prototype: butcher_sonam

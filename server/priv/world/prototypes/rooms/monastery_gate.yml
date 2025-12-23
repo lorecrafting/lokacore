@@ -13,7 +13,7 @@ description: |
 exits:
   north: main_courtyard
   south: cliff_path
-  southwest: village
+  west: village
   east: cemetery
 tags:
   - outdoor

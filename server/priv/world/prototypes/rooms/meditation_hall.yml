@@ -15,6 +15,7 @@ description: |
 exits:
   west: main_courtyard
   east: tenzins_cell
+  north: guest_hall
 spawns:
   - prototype: teacher_lobsang
 tags:
