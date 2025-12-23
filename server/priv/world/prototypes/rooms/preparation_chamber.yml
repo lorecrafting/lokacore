@@ -17,6 +17,7 @@ exits:
   north: attachment_chamber
   east: aversion_chamber
   south: ignorance_chamber
+  down: heart_cave
 tags:
   - indoor
   - cave

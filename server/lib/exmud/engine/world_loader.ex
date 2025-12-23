@@ -107,10 +107,10 @@ defmodule Exmud.Engine.WorldLoader do
 
     # Get the starting prototype
     case PrototypeLoader.get(starting_room_key) do
-      nil ->
+      {:error, :not_found} ->
         {:error, {:prototype_not_found, starting_room_key}}
 
-      _prototype ->
+      {:ok, _prototype} ->
         # BFS through room exits
         queue = :queue.from_list([starting_room_key])
         visited = MapSet.new()
@@ -137,11 +137,11 @@ defmodule Exmud.Engine.WorldLoader do
         else
           # Get prototype
           case PrototypeLoader.get(room_key) do
-            nil ->
+            {:error, :not_found} ->
               Logger.warning("WorldLoader: Room prototype not found: #{room_key}")
               spawn_rooms_bfs(queue, MapSet.put(visited, room_key), results, max_remaining)
 
-            prototype ->
+            {:ok, prototype} ->
               # Spawn this room
               case Spawner.spawn_room(room_key) do
                 {:ok, room, spawned} ->
@@ -225,8 +225,8 @@ defmodule Exmud.Engine.WorldLoader do
 
         Enum.flat_map(exits, fn {dir, dest_key} ->
           case PrototypeLoader.get(dest_key) do
-            nil -> [{:broken_exit, proto.key, dir, dest_key}]
-            _ -> []
+            {:error, :not_found} -> [{:broken_exit, proto.key, dir, dest_key}]
+            {:ok, _} -> []
           end
         end)
       end)
@@ -239,8 +239,8 @@ defmodule Exmud.Engine.WorldLoader do
         Enum.flat_map(spawns, fn
           spawn_entry when is_binary(spawn_entry) ->
             case PrototypeLoader.get(spawn_entry) do
-              nil -> [{:broken_spawn, proto.key, spawn_entry}]
-              _ -> []
+              {:error, :not_found} -> [{:broken_spawn, proto.key, spawn_entry}]
+              {:ok, _} -> []
             end
 
           spawn_entry when is_map(spawn_entry) ->
@@ -248,8 +248,8 @@ defmodule Exmud.Engine.WorldLoader do
 
             if spawn_key do
               case PrototypeLoader.get(spawn_key) do
-                nil -> [{:broken_spawn, proto.key, spawn_key}]
-                _ -> []
+                {:error, :not_found} -> [{:broken_spawn, proto.key, spawn_key}]
+                {:ok, _} -> []
               end
             else
               []

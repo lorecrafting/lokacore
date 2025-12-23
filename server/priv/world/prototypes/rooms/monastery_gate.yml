@@ -13,6 +13,8 @@ description: |
 exits:
   north: main_courtyard
   south: cliff_path
+  southwest: village
+  east: cemetery
 tags:
   - outdoor
   - starting_room
