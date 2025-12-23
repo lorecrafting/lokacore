@@ -7,9 +7,9 @@ defmodule Exmud.Engine.WorldExporterTest do
     # Clear any existing entities
     Entities.delete_all()
 
-    # Reload prototypes and spawn a world
+    # Reload prototypes and spawn a world using production starting room
     PrototypeLoader.reload()
-    WorldLoader.spawn_world(starting_room: "forest_clearing")
+    WorldLoader.spawn_world(starting_room: "monastery_gate")
 
     # Create a temp directory for exports
     export_dir = Path.join(System.tmp_dir!(), "exmud_export_test_#{:rand.uniform(10000)}")
