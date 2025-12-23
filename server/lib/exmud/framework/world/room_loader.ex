@@ -143,12 +143,26 @@ defmodule Exmud.Framework.World.RoomLoader do
 
   defp format_exit(exit_entity) do
     components = exit_entity.components || %{}
+    exit_data = components["exit"] || %{}
+
+    # Get destination name by looking up the destination room
+    destination_id = exit_data["destination_id"]
+    destination_name = get_destination_name(destination_id)
 
     %{
       id: exit_entity.id,
-      direction: components["direction"] || "unknown",
-      destination: components["destination_name"] || "somewhere",
-      destination_id: components["destination_id"]
+      direction: exit_data["direction"] || exit_entity.name || "unknown",
+      destination: destination_name,
+      destination_id: destination_id
     }
+  end
+
+  defp get_destination_name(nil), do: "somewhere"
+
+  defp get_destination_name(destination_id) do
+    case Entities.get_entity(destination_id) do
+      nil -> "somewhere"
+      room -> room.name || "somewhere"
+    end
   end
 end
