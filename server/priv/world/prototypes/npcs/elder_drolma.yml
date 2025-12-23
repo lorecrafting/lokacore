@@ -12,6 +12,7 @@ tags:
   - lore
   - monastery
 components:
+  short_desc: "An ancient nun with a face like a map of wrinkles tends the hall."
   combatant:
     health:
       current: 80

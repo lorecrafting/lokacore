@@ -7,6 +7,7 @@ description: |
   garment shimmers between visibility. Spirits seem to
   pass through its wearer without harm.
 components:
+  short_desc: "a pale shimmering garment"
   armor:
     defense: 5
     slot: body

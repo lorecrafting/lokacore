@@ -6,6 +6,7 @@ description: |
   Layered wool and cotton provide modest protection
   against the mountain cold and clumsy blows alike.
 components:
+  short_desc: "layered wool and cotton robes"
   armor:
     defense: 6
     slot: body

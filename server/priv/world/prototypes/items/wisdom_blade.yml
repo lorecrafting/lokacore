@@ -7,6 +7,7 @@ description: |
   enough to cut through illusion itself. Each strike resonates
   with crystalline clarity.
 components:
+  short_desc: "a singing blade that cuts through illusion"
   weapon:
     damage: 10
     damage_type: slashing

@@ -11,6 +11,7 @@ tags:
   - village
   - atmosphere
 components:
+  short_desc: "A lean farmer with sun-darkened skin rests from his labors."
   combatant:
     health:
       current: 60

@@ -13,6 +13,7 @@ tags:
   - cave
   - elite
 components:
+  short_desc: "Your own twisted reflection steps out of the darkness."
   combatant:
     level: 4
     health:

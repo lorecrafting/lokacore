@@ -7,6 +7,7 @@ description: |
   transparency and opacity. It pulses with grey light,
   never quite revealing its true form.
 components:
+  short_desc: "a shard that shifts between transparency and opacity"
   seal_fragment:
     type: ignorance
     combines_with:

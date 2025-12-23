@@ -6,6 +6,7 @@ description: |
   Lamellar armor worn by temple guardians, its metal plates
   inscribed with protective mantras. Heavy but reliable.
 components:
+  short_desc: "lamellar armor inscribed with mantras"
   armor:
     defense: 10
     slot: body

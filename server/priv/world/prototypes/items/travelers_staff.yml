@@ -6,6 +6,7 @@ description: |
   A sturdy wooden staff, worn smooth by miles of mountain roads.
   Simple but reliable, the weapon of pilgrims and wanderers.
 components:
+  short_desc: "a sturdy wooden walking staff"
   weapon:
     damage: 3
     damage_type: blunt

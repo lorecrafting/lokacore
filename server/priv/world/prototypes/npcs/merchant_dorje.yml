@@ -11,6 +11,7 @@ tags:
   - merchant
   - village
 components:
+  short_desc: "A weathered trader with a ready smile minds his bulging pack of goods."
   combatant:
     health:
       current: 70

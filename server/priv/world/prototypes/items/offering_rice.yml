@@ -6,6 +6,7 @@ description: |
   Pure white rice set aside for offerings to spirits and
   shrine guardians. To give freely is to receive.
 components:
+  short_desc: "pure white rice for offerings"
   usable:
     effect: offering
     on_use_message: "You scatter the rice as an offering."

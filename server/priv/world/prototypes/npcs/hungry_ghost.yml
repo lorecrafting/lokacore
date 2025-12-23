@@ -12,6 +12,7 @@ tags:
   - attachment
   - cemetery
 components:
+  short_desc: "A translucent figure with hollow eyes drifts toward you, moaning."
   combatant:
     level: 2
     health:

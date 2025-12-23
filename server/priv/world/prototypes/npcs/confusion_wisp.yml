@@ -12,6 +12,7 @@ tags:
   - ignorance
   - cave
 components:
+  short_desc: "A pale orb of light dances erratically through the darkness."
   combatant:
     level: 3
     health:

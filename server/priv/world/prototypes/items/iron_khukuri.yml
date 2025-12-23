@@ -6,6 +6,7 @@ description: |
   A curved blade from the mountain kingdoms, its edge keen and
   its balance perfect for quick strikes.
 components:
+  short_desc: "a curved mountain blade"
   weapon:
     damage: 8
     damage_type: slashing

@@ -7,6 +7,7 @@ description: |
   serviceable. They offer little protection but freedom
   of movement.
 components:
+  short_desc: "simple road-worn cotton robes"
   armor:
     defense: 0
     slot: body

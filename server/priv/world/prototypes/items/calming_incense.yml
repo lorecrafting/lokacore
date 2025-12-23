@@ -6,6 +6,7 @@ description: |
   Lavender and lotus essence, blessed for peaceful meditation.
   Its smoke soothes anger and brings inner stillness.
 components:
+  short_desc: "lavender and lotus incense"
   consumable:
     effect: buff
     buff_type: calm

@@ -6,6 +6,7 @@ description: |
   Rice offered at the temple altar and blessed by morning
   prayers. When eaten, it carries that blessing into the body.
 components:
+  short_desc: "rice blessed by morning prayers"
   consumable:
     effect: heal
     amount: 30

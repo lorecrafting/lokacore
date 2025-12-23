@@ -8,6 +8,7 @@ description: |
   compassion, it becomes whatever is needed. It weighs nothing
   and everything.
 components:
+  short_desc: "pure intention made manifest"
   weapon:
     damage: 20
     damage_type: sacred

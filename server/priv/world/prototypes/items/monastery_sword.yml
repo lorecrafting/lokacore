@@ -7,6 +7,7 @@ description: |
   silk. Though weapons are rarely used within these walls, when
   they must be drawn, they are drawn with purpose.
 components:
+  short_desc: "a temple guardian's blade"
   weapon:
     damage: 12
     damage_type: slashing

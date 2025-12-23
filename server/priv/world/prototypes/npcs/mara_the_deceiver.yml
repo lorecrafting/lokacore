@@ -13,6 +13,7 @@ tags:
   - final_boss
   - mara
 components:
+  short_desc: "A being of impossible beauty and ugliness wears a crown of the three poisons."
   combatant:
     level: 6
     health:

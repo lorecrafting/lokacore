@@ -6,6 +6,7 @@ description: |
   Juniper and sandalwood blended with rare mountain herbs.
   Its smoke dispels confusion and reveals hidden truths.
 components:
+  short_desc: "juniper and sandalwood incense"
   consumable:
     effect: buff
     buff_type: clarity

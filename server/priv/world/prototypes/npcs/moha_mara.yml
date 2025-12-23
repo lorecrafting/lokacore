@@ -14,6 +14,7 @@ tags:
   - ignorance
   - mara
 components:
+  short_desc: "Dozens of identical figures surround you, each claiming to be real."
   combatant:
     level: 4
     health:

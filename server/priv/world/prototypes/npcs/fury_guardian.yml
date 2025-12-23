@@ -13,6 +13,7 @@ tags:
   - cave
   - elite
 components:
+  short_desc: "An armored spirit wreathed in flames of pure anger bars your path."
   combatant:
     level: 4
     health:

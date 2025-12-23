@@ -6,6 +6,7 @@ description: |
   Hot salted tea enriched with yak butter, the traditional
   drink of the mountains. Warming and restorative.
 components:
+  short_desc: "hot salted tea with yak butter"
   consumable:
     effect: heal
     amount: 15

@@ -7,6 +7,7 @@ description: |
   an instrument of protection rather than harm. It gleams with
   an inner light when shadows draw near.
 components:
+  short_desc: "a transformed cleaver that gleams with inner light"
   weapon:
     damage: 7
     damage_type: slashing

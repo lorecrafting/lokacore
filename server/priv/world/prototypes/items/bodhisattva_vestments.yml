@@ -7,6 +7,7 @@ description: |
   embrace the wearer with the warmth of countless beings'
   gratitude. To wear them is to carry their hopes.
 components:
+  short_desc: "robes woven from liberated suffering"
   armor:
     defense: 12
     slot: body

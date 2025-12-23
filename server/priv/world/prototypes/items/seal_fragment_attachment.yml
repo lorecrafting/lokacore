@@ -6,6 +6,7 @@ description: |
   A shard of crystallized desire, still warm from Raga Mara's
   defeat. It pulses with golden light, yearning to be whole.
 components:
+  short_desc: "a shard of crystallized desire pulsing with golden light"
   seal_fragment:
     type: attachment
     combines_with:

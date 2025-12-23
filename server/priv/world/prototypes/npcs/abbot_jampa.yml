@@ -11,6 +11,7 @@ tags:
   - quest_giver
   - monastery
 components:
+  short_desc: "An elderly monk with kind eyes stands here, radiating calm authority."
   combatant:
     health:
       current: 150

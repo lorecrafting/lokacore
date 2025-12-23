@@ -12,6 +12,7 @@ tags:
   - aversion
   - dangerous
 components:
+  short_desc: "A dark figure wreathed in crimson mist snarls with rage."
   combatant:
     level: 3
     health:

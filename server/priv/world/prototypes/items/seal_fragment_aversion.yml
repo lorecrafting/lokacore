@@ -7,6 +7,7 @@ description: |
   that still lick its surface. It pulses with red light,
   seeking its lost parts.
 components:
+  short_desc: "a shard of crystallized hatred wreathed in flame"
   seal_fragment:
     type: aversion
     combines_with:

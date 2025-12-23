@@ -6,6 +6,7 @@ description: |
   A smooth white stone from the waterfall pool, its surface
   marked with natural patterns said to contain wisdom.
 components:
+  short_desc: "a smooth white stone with natural wisdom patterns"
   physical:
     weight: 0.3
     stackable: true

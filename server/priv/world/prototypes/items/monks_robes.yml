@@ -7,6 +7,7 @@ description: |
   woven with protective prayers. A gift from the temple
   to those who would face darkness.
 components:
+  short_desc: "saffron robes blessed by the monastery"
   armor:
     defense: 3
     slot: body

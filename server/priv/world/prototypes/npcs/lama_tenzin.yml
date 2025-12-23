@@ -12,6 +12,7 @@ tags:
   - monastery
   - trance
 components:
+  short_desc: "An ancient monk sits motionless, surrounded by a faint golden glow."
   combatant:
     health:
       current: 200

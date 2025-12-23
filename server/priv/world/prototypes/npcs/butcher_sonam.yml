@@ -12,6 +12,7 @@ tags:
   - village
   - troubled
 components:
+  short_desc: "A heavyset man with haunted eyes stands apart from the others."
   combatant:
     health:
       current: 90

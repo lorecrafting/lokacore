@@ -6,6 +6,7 @@ description: |
   A potent medicine brewed from high mountain herbs, following
   recipes passed down through generations of healers.
 components:
+  short_desc: "a potent herbal medicine"
   consumable:
     effect: heal
     amount: 50

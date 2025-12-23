@@ -7,6 +7,7 @@ description: |
   protective mantras. It was passed to you by Abbot Jampa
   along with Tenzin's blessing.
 components:
+  short_desc: "an ancient brass key inscribed with mantras"
   key:
     unlocks: cave_entrance
   physical:

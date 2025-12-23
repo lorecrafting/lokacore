@@ -12,6 +12,7 @@ tags:
   - sacred
   - magic
 components:
+  short_desc: "An ethereal figure draped in mist stands near the waterfall."
   combatant:
     health:
       current: 90

@@ -535,6 +535,23 @@ defmodule ExmudWeb.GameLive do
     end
   end
 
+  def handle_event("menu_action", %{"action" => "inspect"}, socket) do
+    entity = socket.assigns.ui.context_entity
+
+    # For inspect, show the entity's full description
+    description = entity.description || "You see nothing remarkable."
+
+    event = %{
+      text: "You carefully examine the #{entity.name}.\n\n#{description}",
+      timestamp: DateTime.utc_now()
+    }
+
+    {:noreply,
+     socket
+     |> update_ui(%{context_entity: nil})
+     |> update(:events, fn events -> events ++ [event] end)}
+  end
+
   def handle_event("menu_action", %{"action" => action}, socket) do
     entity = socket.assigns.ui.context_entity
 

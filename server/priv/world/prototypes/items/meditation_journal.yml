@@ -7,6 +7,7 @@ description: |
   handwriting. The final entries describe preparations for
   a deep meditation journey - and the dangers that await.
 components:
+  short_desc: "a worn journal filled with cramped handwriting"
   readable:
     text: |
       "The Three Poisons have grown strong. They feed on our

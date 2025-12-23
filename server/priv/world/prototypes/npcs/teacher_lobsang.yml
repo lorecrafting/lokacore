@@ -12,6 +12,7 @@ tags:
   - monastery
   - defense
 components:
+  short_desc: "A broad-shouldered monk with a gentle face teaches nearby."
   combatant:
     health:
       current: 140

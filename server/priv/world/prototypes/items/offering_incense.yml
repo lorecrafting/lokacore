@@ -6,6 +6,7 @@ description: |
   Pure sandalwood, the traditional temple offering. Its smoke
   carries prayers skyward and reminds the mind of impermanence.
 components:
+  short_desc: "pure sandalwood temple incense"
   consumable:
     effect: buff
     buff_type: non_attachment

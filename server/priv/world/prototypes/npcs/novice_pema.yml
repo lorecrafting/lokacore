@@ -11,6 +11,7 @@ tags:
   - companion
   - monastery
 components:
+  short_desc: "A young monk with earnest eyes waits anxiously here."
   combatant:
     health:
       current: 40

@@ -12,6 +12,7 @@ tags:
   - monastery
   - combat
 components:
+  short_desc: "A warrior-monk with scarred hands stands in perfect stillness."
   combatant:
     health:
       current: 120

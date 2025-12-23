@@ -14,6 +14,7 @@ tags:
   - attachment
   - mara
 components:
+  short_desc: "A being of pure golden light takes shape, beautiful beyond imagining."
   combatant:
     level: 4
     health:

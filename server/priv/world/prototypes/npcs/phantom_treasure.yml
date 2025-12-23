@@ -12,6 +12,7 @@ tags:
   - attachment
   - cave
 components:
+  short_desc: "A gleaming pile of gold and jewels glitters temptingly."
   combatant:
     level: 3
     health:

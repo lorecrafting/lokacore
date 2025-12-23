@@ -11,6 +11,7 @@ tags:
   - quest_giver
   - eccentric
 components:
+  short_desc: "A wild-haired yogi squats near a smoky fire, humming strange melodies."
   combatant:
     health:
       current: 60

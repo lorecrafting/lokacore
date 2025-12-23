@@ -7,6 +7,7 @@ description: |
   Its words seem to shimmer and change, always offering exactly
   the teaching needed in this moment.
 components:
+  short_desc: "an ancient text whose words shimmer and change"
   readable:
     text: |
       "Form is emptiness, emptiness is form. There is no
