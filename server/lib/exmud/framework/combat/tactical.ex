@@ -1,8 +1,9 @@
-defmodule Exmud.Framework.Combat.CombatEnhanced do
+defmodule Exmud.Framework.Combat.Tactical do
   @moduledoc """
-  Enhanced combat system with action points, initiative, and combos.
+  Tactical combat features: action points, initiative, and combos.
 
-  This module extends the base combat system with additional tactical features:
+  This module provides optional advanced features that can be integrated with
+  the core `Exmud.Framework.Combat` module:
 
   ## Features
 
