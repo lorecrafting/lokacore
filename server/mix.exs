@@ -11,7 +11,63 @@ defmodule Exmud.MixProject do
       aliases: aliases(),
       deps: deps(),
       compilers: [:phoenix_live_view] ++ Mix.compilers(),
-      listeners: [Phoenix.CodeReloader]
+      listeners: [Phoenix.CodeReloader],
+
+      # ExDoc configuration
+      name: "ExMUD",
+      source_url: "https://github.com/yourusername/lokacore",
+      docs: docs()
+    ]
+  end
+
+  defp docs do
+    [
+      main: "readme",
+      extras: [
+        "README.md",
+        "../docs/architecture/README.md": [title: "Architecture Overview"],
+        "../docs/architecture/entity-system.md": [title: "Entity System"],
+        "../docs/architecture/prototypes.md": [title: "Prototypes"],
+        "../docs/architecture/hooks-and-locks.md": [title: "Hooks & Locks"],
+        "../docs/ui/living-ebook-style-guide.md": [title: "UI Style Guide"]
+      ],
+      groups_for_modules: [
+        # Engine Core
+        "Engine - Core": ~r/^Exmud\.Engine\.(Entity|Entities|EntityServer|EntityRegistry|EntitySupervisor)$/,
+        "Engine - Prototypes": ~r/^Exmud\.Engine\.(Prototype|PrototypeLoader|Spawner|WorldLoader|WorldExporter)$/,
+        "Engine - Systems": ~r/^Exmud\.Engine\.(Event|EventBus|Command|Behavior|Hooks|Locks|Scripting|Scripts)$/,
+        "Engine - Schema": ~r/^Exmud\.Engine\.Schema/,
+
+        # Framework Systems
+        "Framework - Combat": ~r/^Exmud\.Framework\.Combat/,
+        "Framework - Inventory": ~r/^Exmud\.Framework\.Inventory/,
+        "Framework - Abilities": ~r/^Exmud\.Framework\.Abilities/,
+        "Framework - Status": ~r/^Exmud\.Framework\.Status/,
+        "Framework - Progression": ~r/^Exmud\.Framework\.Progression/,
+        "Framework - Skills": ~r/^Exmud\.Framework\.Skills/,
+        "Framework - Quest": ~r/^Exmud\.Framework\.Quest/,
+        "Framework - Resources": ~r/^Exmud\.Framework\.Resources/,
+        "Framework - Crafting": ~r/^Exmud\.Framework\.Crafting/,
+        "Framework - Farming": ~r/^Exmud\.Framework\.Farming/,
+        "Framework - Gathering": ~r/^Exmud\.Framework\.Gathering/,
+        "Framework - Economy": ~r/^Exmud\.Framework\.Economy/,
+        "Framework - World": ~r/^Exmud\.Framework\.World/,
+        "Framework - Dialogue": ~r/^Exmud\.Framework\.Dialogue/,
+        "Framework - Player": ~r/^Exmud\.Framework\.Player/,
+        "Framework - Other": ~r/^Exmud\.Framework\.(Companion|Appearance|Messaging|Faction|Hometown|Housing|Magic)/,
+
+        # Web Layer
+        "Web - Controllers": ~r/^ExmudWeb\..*Controller$/,
+        "Web - LiveView": ~r/^ExmudWeb\..*Live/,
+        "Web - Components": ~r/^ExmudWeb\.(Components|CoreComponents|Layouts)/,
+
+        # Accounts & Auth
+        "Accounts": ~r/^Exmud\.(Accounts|Auth)/
+      ],
+      groups_for_extras: [
+        "Architecture": ~r/architecture/,
+        "UI & Design": ~r/ui/
+      ]
     ]
   end
 
@@ -79,7 +135,10 @@ defmodule Exmud.MixProject do
       {:elixir_uuid, "~> 1.2"},
 
       # YAML parsing for prototype files
-      {:yaml_elixir, "~> 2.9"}
+      {:yaml_elixir, "~> 2.9"},
+
+      # Documentation generation
+      {:ex_doc, "~> 0.34", only: :dev, runtime: false}
 
       # TUI for game editor (blocked by ex_termbox/Python 3.11+ incompatibility)
       # {:ratatouille, "~> 0.5"}
