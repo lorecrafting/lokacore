@@ -25,8 +25,9 @@
 │   Rooms, NPCs, Items, Exits - defined without code          │
 ├─────────────────────────────────────────────────────────────┤
 │ GAME FRAMEWORK (lib/exmud/framework/)                       │
-│   Combat, Quests, Inventory, Progression, Dialogue          │
-│   Player state, Room loading for UI                         │
+│   22 subsystems: Combat, Quests, Inventory, Progression,    │
+│   Dialogue, Abilities, Skills, Status, Resources, Economy,  │
+│   Crafting, Farming, Gathering, Magic, Factions, and more   │
 ├─────────────────────────────────────────────────────────────┤
 │ ENGINE CORE (lib/exmud/engine/)                             │
 │   Entities, EntityServer, Registry, Supervisor              │
@@ -58,22 +59,43 @@ lokacore/
 │   │   ├── auth/                   # Guardian JWT
 │   │   ├── ecto/                   # Custom Ecto types
 │   │   ├── engine/                 # Core engine (see Engine section below)
-│   │   ├── framework/              # Game framework systems
-│   │   │   ├── combat/             # Combat + spawner
+│   │   ├── framework/              # Game framework systems (22 subsystems)
+│   │   │   ├── abilities/          # Ability system + cooldowns
+│   │   │   ├── appearance/         # Character appearance
+│   │   │   ├── combat/             # Combat + spawner + tactical system
+│   │   │   ├── companion/          # Companion/pet system
+│   │   │   ├── crafting/           # Crafting recipes
 │   │   │   ├── dialogue/           # NPC dialogue trees
+│   │   │   ├── economy/            # Shops, trading, currency
+│   │   │   ├── faction/            # Faction reputation
+│   │   │   ├── farming/            # Farming/crops system
+│   │   │   ├── gathering/          # Resource gathering
+│   │   │   ├── hometown/           # Player hometown
+│   │   │   ├── housing/            # Player housing
 │   │   │   ├── inventory/          # Inventory + equipment
+│   │   │   ├── magic/              # Magic/spell system
+│   │   │   ├── messaging/          # In-game mail
+│   │   │   ├── player/             # Player game state
 │   │   │   ├── progression/        # XP, levels, skills
 │   │   │   ├── quest/              # Quest system
-│   │   │   ├── player/             # Player game state
-│   │   │   └── world/              # Room loader for UI
+│   │   │   ├── resources/          # Resource pools (mana, stamina)
+│   │   │   ├── skills/             # Skill definitions
+│   │   │   ├── status/             # Status effects (buffs/debuffs)
+│   │   │   └── world/              # Room loader, weather, day/night
 │   │   ├── utils/                  # Utility helpers
 │   │   └── release.ex              # Release tasks
 │   ├── lib/exmud_web/
 │   │   ├── controllers/api/        # REST API
 │   │   ├── plugs/                  # Auth pipeline + RequireAdmin
 │   │   └── live/                   # LiveView clients
-│   │       ├── game_live.ex        # Game client (players)
-│   │       └── admin_live.ex       # Admin dashboard (6 tabs)
+│   │       ├── game_live.ex        # Game client (main module)
+│   │       ├── game_live/          # Game client helpers
+│   │       │   ├── room_manager.ex     # Room loading, navigation
+│   │       │   ├── combat_manager.ex   # Combat handlers
+│   │       │   ├── inventory_manager.ex # Inventory handlers
+│   │       │   ├── dialogue_manager.ex  # Dialogue handlers
+│   │       │   └── components.ex       # UI components
+│   │       └── admin_live/         # Admin dashboard (6 tabs)
 │   ├── priv/world/                     # Game content (YAML)
 │   │   └── prototypes/             # Entity templates
 │   │       ├── _base/              # Base prototypes (parents)

@@ -1,4 +1,4 @@
-# ExMUD Quick Reference - Simplified Architecture
+# ExMUD Quick Reference
 
 ## Cost Summary
 
@@ -8,13 +8,14 @@
 | Fly.io Volume (1GB) | $0.15 |
 | **Total** | **~$5/month** |
 
-## Tech Stack (Simplified)
+## Tech Stack
 
 ```
 +----------------------------------+
 |          CLIENTS                 |
-|  React Native (iOS + Android)   |
-|  LiveView (Web)                  |
+|  Phoenix LiveView (Web)          |
+|  - Game Client (/game)           |
+|  - Admin Dashboard (/admin)      |
 +----------------+-----------------+
                  |
             WebSocket
@@ -24,8 +25,8 @@
 |                                  |
 |  +----------------------------+  |
 |  |     PHOENIX SERVER         |  |
-|  |  - Custom Auth (Guardian)  |  |
-|  |  - Phoenix Channels        |  |
+|  |  - Magic Link Auth         |  |
+|  |  - Guardian JWT (API)      |  |
 |  |  - LiveView                |  |
 |  |  - REST API                |  |
 |  +-------------+--------------+  |
@@ -44,34 +45,22 @@
 | Removed | Reason |
 |---------|--------|
 | PostgreSQL | Costs $15+/month extra |
-| Supabase | External dependency, latency |
-| ElectricSQL | Adds complexity, not needed yet |
 | Redis | ETS handles caching for now |
+| Native Mobile Apps | Web-first approach (shelved for now) |
 
 ## Quick Setup Commands
 
 ```bash
-# 1. Create project
-mkdir -p exmud/apps/{server,mobile}
-cd exmud
-
-# 2. Server setup
+# Server setup
 cd server
-mix phx.new . --app exmud --database sqlite --live
 mix deps.get
-mix phx.gen.auth Accounts Player players
-# Add {:guardian, "~> 2.3"} to mix.exs
-mkdir -p data
 mix ecto.create && mix ecto.migrate
+mix phx.server  # Visit localhost:4000
 
-# 3. Mobile setup  
-cd ../mobile
-npx create-expo-app . --template expo-template-blank-typescript
-npm install phoenix zustand @react-navigation/native react-native-iap
-eas init
+# Run tests
+mix test
 
-# 4. Fly.io setup
-cd ../server
+# Fly.io deployment
 fly launch --name exmud --region sjc --no-deploy
 fly volumes create exmud_data --region sjc --size 1
 fly secrets set SECRET_KEY_BASE=$(mix phx.gen.secret)
@@ -101,26 +90,17 @@ primary_region = "sjc"
   memory_mb = 512
 ```
 
-## Database Config (config/runtime.exs)
-
-```elixir
-if config_env() == :prod do
-  config :exmud, ExMUD.Repo,
-    database: "/data/exmud.db",
-    pool_size: 5
-end
-```
-
 ## Key Commands
 
 ```bash
 # Development
-mix phx.server                    # Start server
-npx expo start                    # Start mobile
+mix phx.server                    # Start server at localhost:4000
+
+# Testing
+mix test                          # Run all tests
 
 # Deployment
-fly deploy                        # Deploy server
-eas build --profile preview       # Build mobile
+fly deploy                        # Deploy to Fly.io
 
 # Debugging
 fly logs -a exmud                 # Stream server logs
@@ -132,42 +112,43 @@ fly ssh console -C "sqlite3 /data/exmud.db '.backup /data/backup.db'"
 fly sftp get /data/backup.db      # Download locally
 ```
 
-## Auth Flow
+## Routes
 
-```
-Mobile App                    Phoenix Server
-    |                              |
-    |-- POST /api/v1/auth/login -->|
-    |                              |-- Verify password
-    |<-- JWT token + player -------|
-    |                              |
-    |-- WebSocket + token -------->|
-    |                              |-- Validate JWT
-    |<-- Channel joined -----------|
-    |                              |
-    |-- game:command ------------->|
-    |<-- game:state_update --------|
-```
+| Path | Description | Auth |
+|------|-------------|------|
+| `/` | Landing page | No |
+| `/game` | Game client (Living Ebook UI) | Yes |
+| `/admin` | Admin dashboard (6 tabs) | Yes (admin) |
+| `/players/register` | Register account | No |
+| `/players/log-in` | Login page | No |
+
+## API Endpoints
+
+| Method | Path | Description | Auth |
+|--------|------|-------------|------|
+| GET | `/api/health` | Health check | No |
+| POST | `/api/v1/auth/register` | Register player | No |
+| POST | `/api/v1/auth/login` | Login (returns JWT) | No |
+| GET | `/api/v1/auth/me` | Get current player | Bearer |
 
 ## Data Flow
 
 ```
-1. REAL-TIME (Phoenix Channels)
-   - Game commands
+1. REAL-TIME (Phoenix LiveView)
+   - Game interactions
    - Room updates
-   - Chat messages
    - Combat
+   - NPC dialogue
 
 2. REST API (Phoenix Controllers)
    - Auth (login/register)
-   - IAP verification
    - Account settings
 
 3. PERSISTENCE (Ecto + SQLite)
    - Player accounts
-   - Character saves
-   - World definitions
-   - Transactions
+   - Game state
+   - Entity data (via EAV pattern)
+   - World prototypes (YAML)
 ```
 
 ## When to Upgrade
@@ -175,44 +156,29 @@ Mobile App                    Phoenix Server
 | Trigger | Action |
 |---------|--------|
 | Need multiple servers | Add PostgreSQL + Redis |
-| 10K+ concurrent users | Add ElectricSQL for caching |
+| 10K+ concurrent users | Consider distributed architecture |
 | Social login demand | Add Ueberauth |
 | Full-text search | Enable SQLite FTS5 (built-in) |
 
-## File Structure
+## Project Structure
 
 ```
-exmud/
-├── apps/
-│   ├── server/               # Elixir/Phoenix
-│   │   ├── lib/exmud/
-│   │   │   ├── accounts/     # Auth (phx.gen.auth)
-│   │   │   ├── auth/         # Guardian JWT
-│   │   │   ├── engine/       # Game engine
-│   │   │   └── game/         # Game logic
-│   │   ├── lib/exmud_web/
-│   │   │   ├── channels/     # Phoenix Channels
-│   │   │   ├── controllers/  # REST API
-│   │   │   └── live/         # LiveView
-│   │   ├── config/
-│   │   ├── fly.toml
-│   │   └── Dockerfile
-│   └── mobile/               # React Native
-│       ├── src/
-│       │   ├── screens/
-│       │   ├── components/
-│       │   ├── hooks/
-│       │   ├── services/
-│       │   └── store/
-│       ├── app.json
-│       └── eas.json
+lokacore/
+├── server/                    # Elixir/Phoenix
+│   ├── lib/exmud/
+│   │   ├── accounts/          # Auth (phx.gen.auth)
+│   │   ├── auth/              # Guardian JWT
+│   │   ├── engine/            # Core engine (entities, spawner, etc.)
+│   │   └── framework/         # Game systems (combat, quests, etc.)
+│   ├── lib/exmud_web/
+│   │   ├── controllers/       # REST API
+│   │   └── live/              # LiveView (game_live, admin_live)
+│   ├── priv/world/            # YAML prototypes
+│   ├── config/
+│   ├── fly.toml
+│   └── Dockerfile
+├── docs/                      # Architecture documentation
 ├── .github/workflows/
-│   ├── server-ci.yml
-│   └── mobile-preview.yml
-└── scripts/
-    └── dev.sh
+│   └── server-ci.yml          # CI/CD to Fly.io
+└── CLAUDE.md                  # Development guide
 ```
-
----
-
-**Total complexity reduced by ~60%** compared to original architecture with PostgreSQL, Supabase, and ElectricSQL.

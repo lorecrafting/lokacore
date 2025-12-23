@@ -1,20 +1,93 @@
-# Exmud
+# ExMUD Server
 
 [![Issues tracked with beads](https://img.shields.io/badge/issues-beads-blue)](https://github.com/anthropics/beads)
 
-To start your Phoenix server:
+An Elixir MUD (Multi-User Dungeon) engine framework for building text-based RPGs. Like Evennia (Python), but leveraging Elixir's strengths: OTP concurrency, fault tolerance, and real-time LiveView.
 
-* Run `mix setup` to install and setup dependencies
-* Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
+## Quick Start
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+```bash
+# Install dependencies
+mix deps.get
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+# Setup database
+mix ecto.create && mix ecto.migrate
 
-## Learn more
+# Start server
+mix phx.server
+```
 
-* Official website: https://www.phoenixframework.org/
-* Guides: https://hexdocs.pm/phoenix/overview.html
-* Docs: https://hexdocs.pm/phoenix
-* Forum: https://elixirforum.com/c/phoenix-forum
-* Source: https://github.com/phoenixframework/phoenix
+Visit [`localhost:4000`](http://localhost:4000) to see the landing page.
+
+## Routes
+
+| Path | Description | Auth Required |
+|------|-------------|---------------|
+| `/` | Landing page | No |
+| `/game` | Game client (Living Ebook UI) | Yes |
+| `/admin` | Admin dashboard | Yes (admin) |
+| `/players/register` | Create account | No |
+| `/players/log-in` | Login | No |
+
+## Project Structure
+
+```
+lib/
+├── exmud/
+│   ├── accounts/      # Player auth (phx.gen.auth + magic link)
+│   ├── auth/          # Guardian JWT for API
+│   ├── engine/        # Core: entities, behaviors, commands, hooks
+│   └── framework/     # Game systems: combat, quests, inventory, etc.
+├── exmud_web/
+│   ├── controllers/   # REST API
+│   └── live/          # LiveView clients (game, admin)
+priv/
+└── world/
+    └── prototypes/    # YAML entity templates (rooms, NPCs, items)
+```
+
+## Key Commands
+
+```bash
+# Development
+mix phx.server           # Start server
+mix test                 # Run tests
+mix format               # Format code
+
+# Database
+mix ecto.migrate         # Run migrations
+mix ecto.reset           # Reset database
+
+# Deployment (Fly.io)
+fly deploy               # Deploy to production
+fly logs                 # View logs
+```
+
+## Architecture
+
+- **Entity-Component-Behavior**: Composition over inheritance
+- **Prototype System**: YAML templates with inheritance for game content
+- **GenServer per Entity**: Active entities are supervised processes
+- **Event Bus**: Phoenix.PubSub for entity communication
+- **Hooks**: 22 lifecycle event types for extensibility
+
+See `CLAUDE.md` in the project root for comprehensive development documentation.
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Backend | Elixir 1.19 / Phoenix 1.8 |
+| Real-time | Phoenix LiveView |
+| Database | SQLite (via ecto_sqlite3) |
+| Auth | phx.gen.auth + Guardian JWT |
+| Scripting | Lua (via Luerl) |
+| Deployment | Fly.io |
+
+## Tests
+
+```bash
+mix test                    # Run all tests
+mix test --cover            # With coverage
+mix test path/to/test.exs   # Specific file
+```
