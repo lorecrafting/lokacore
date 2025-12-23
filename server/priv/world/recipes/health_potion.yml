@@ -1,0 +1,31 @@
+key: recipe_health_potion
+name: "Brew Health Potion"
+skill_required: alchemy
+skill_level: 1
+station_type: alchemy_bench
+ingredients:
+  - item: herb_healing
+    quantity: 2
+  - item: water_flask
+    quantity: 1
+tools:
+  - alchemy_kit
+output:
+  - item: health_potion
+    quantity: 1
+xp_reward:
+  skill: alchemy
+  amount: 10
+failure_chance: 0.1
+failure_output:
+  - item: ruined_potion
+    quantity: 1
+time_required: 30
+description: "Combine healing herbs with water to create a restorative potion."
+craft_message: "You carefully combine the ingredients..."
+success_message: "Success! You've brewed a health potion."
+failure_message: "The mixture bubbles over and is ruined."
+tags:
+  - alchemy
+  - potion
+  - healing

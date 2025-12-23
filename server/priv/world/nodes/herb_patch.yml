@@ -1,0 +1,24 @@
+key: herb_patch
+name: "Herb Patch"
+skill_required: herbalism
+skill_level: 1
+yields:
+  - item: herb_healing
+    chance: 0.6
+    quantity: [1, 3]
+  - item: herb_rare
+    chance: 0.1
+    quantity: 1
+respawn_time: 300
+uses_per_respawn: 3
+tool_required: gathering_knife
+xp_reward:
+  skill: herbalism
+  amount: 5
+gather_message: "You carefully harvest from the herb patch."
+success_message: "You find some useful herbs!"
+failure_message: "You find nothing of value."
+exhausted_message: "The herb patch has been picked clean."
+tags:
+  - herbalism
+  - outdoor

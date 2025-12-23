@@ -1,0 +1,69 @@
+# Damage Type and Armor Type Definitions
+# Defines physical damage types and how they interact with armor
+#
+# Multipliers:
+#   effective_against: 1.25x damage (25% bonus)
+#   weak_against: 0.75x damage (25% penalty)
+#   neutral: 1.0x damage
+
+damage_types:
+  slashing:
+    name: "Slashing"
+    description: "Cutting attacks from bladed weapons"
+    effective_against: [cloth, leather]
+    weak_against: [plate, stone]
+
+  piercing:
+    name: "Piercing"
+    description: "Stabbing attacks from pointed weapons"
+    effective_against: [leather, hide]
+    weak_against: [plate, chain]
+
+  bludgeoning:
+    name: "Bludgeoning"
+    description: "Crushing attacks from blunt weapons"
+    effective_against: [plate, bone]
+    weak_against: [cloth, leather]
+
+  cleaving:
+    name: "Cleaving"
+    description: "Heavy chopping attacks that both cut and crush"
+    effective_against: [hide, bone]
+    weak_against: [plate]
+
+armor_types:
+  none:
+    name: "None"
+    description: "No armor protection"
+
+  cloth:
+    name: "Cloth"
+    description: "Light fabric protection (robes, clothing)"
+
+  leather:
+    name: "Leather"
+    description: "Treated hide armor"
+
+  hide:
+    name: "Hide"
+    description: "Thick untreated animal skin"
+
+  chain:
+    name: "Chain"
+    description: "Linked metal rings (chainmail)"
+
+  plate:
+    name: "Plate"
+    description: "Solid metal plates"
+
+  bone:
+    name: "Bone"
+    description: "Skeletal armor from creatures"
+
+  stone:
+    name: "Stone"
+    description: "Rock or mineral-based armor"
+
+  scale:
+    name: "Scale"
+    description: "Overlapping natural or metal scales"
