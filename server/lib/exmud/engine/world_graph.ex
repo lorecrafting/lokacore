@@ -214,7 +214,8 @@ defmodule Exmud.Engine.WorldGraph do
 
     Enum.flat_map(exits, fn exit_schema ->
       exit_entity = Entities.to_entity(exit_schema)
-      exit_component = Map.get(exit_entity.components, "exit", %{})
+      # Exit data may be nested under "exit" key or directly in components
+      exit_component = Map.get(exit_entity.components, "exit", exit_entity.components)
       direction = Map.get(exit_component, "direction")
       dest_id = Map.get(exit_component, "destination_id")
       dest_key = Map.get(exit_component, "destination_key")

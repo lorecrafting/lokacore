@@ -3,7 +3,10 @@ defmodule Exmud.Tui.Handlers.Players do
   RPC handlers for player management.
   """
 
+  import Ecto.Query
   alias Exmud.Accounts
+  alias Exmud.Repo
+  alias Exmud.Framework.Player.GameState
 
   @doc """
   Handles player RPC methods.
@@ -103,6 +106,32 @@ defmodule Exmud.Tui.Handlers.Players do
     {:ok, %{count: Accounts.count_players()}}
   end
 
+  def handle("online", params) do
+    room_id = Map.get(params, "room_id")
+
+    # Query game states with non-null current_room_id (i.e., "online" players)
+    query =
+      if room_id do
+        from gs in GameState,
+          where: gs.current_room_id == ^room_id,
+          select: %{player_id: gs.player_id, room_id: gs.current_room_id}
+      else
+        from gs in GameState,
+          where: not is_nil(gs.current_room_id),
+          select: %{player_id: gs.player_id, room_id: gs.current_room_id}
+      end
+
+    game_states = Repo.all(query)
+
+    # Load player info for each game state
+    players =
+      game_states
+      |> Enum.map(&load_player_with_room/1)
+      |> Enum.reject(&is_nil/1)
+
+    {:ok, %{players: players, total: length(players)}}
+  end
+
   def handle(action, _params) do
     {:error, {:method_not_found, "Unknown players action: #{action}"}}
   end
@@ -118,4 +147,29 @@ defmodule Exmud.Tui.Handlers.Players do
       inserted_at: player.inserted_at && DateTime.to_iso8601(player.inserted_at)
     }
   end
+
+  defp load_player_with_room(%{player_id: pid, room_id: rid}) do
+    case Accounts.get_player(pid) do
+      nil ->
+        nil
+
+      player ->
+        %{
+          id: player.id,
+          email: player.email,
+          name: extract_display_name(player.email),
+          room_id: rid,
+          is_admin: player.is_admin
+        }
+    end
+  end
+
+  defp extract_display_name(email) when is_binary(email) do
+    email
+    |> String.split("@")
+    |> List.first()
+    |> String.capitalize()
+  end
+
+  defp extract_display_name(_), do: "Unknown"
 end

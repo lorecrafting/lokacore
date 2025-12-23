@@ -3,9 +3,12 @@ package mapview
 
 import (
 	"fmt"
+	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/key"
+	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -24,16 +27,16 @@ const (
 	ModeConfirmDelete  // Confirming room deletion
 	ModeSelectNPC      // Selecting NPC prototype to spawn
 	ModeSelectItem     // Selecting item prototype to spawn
-	ModeViewContents   // Viewing room contents
 	ModeSelectTemplate // Selecting template to place
+	ModeEntityDetail   // Viewing/editing entity details
 )
 
 // Constants for rendering
 const (
-	RoomWidth  = 9  // Width of room box (including borders)
-	RoomHeight = 3  // Height of room box
-	GridSpaceX = 2  // Horizontal space between rooms
-	GridSpaceY = 1  // Vertical space between rooms
+	RoomWidth  = 5  // Width of room box (including borders) - square appearance
+	RoomHeight = 3  // Height of room box (including borders)
+	GridSpaceX = 3  // Horizontal space between rooms (for exit lines)
+	GridSpaceY = 1  // Vertical space between rooms (for exit lines)
 	CellWidth  = RoomWidth + GridSpaceX
 	CellHeight = RoomHeight + GridSpaceY
 )
@@ -68,10 +71,26 @@ var (
 			Align(lipgloss.Center).
 			Bold(true)
 
+	emptyCursorStyle = lipgloss.NewStyle().
+				Border(lipgloss.NormalBorder()).
+				BorderForeground(lipgloss.Color("238")).
+				Width(RoomWidth - 2).
+				Height(RoomHeight - 2).
+				Align(lipgloss.Center).
+				Foreground(lipgloss.Color("238"))
+
 	emptyStyle = lipgloss.NewStyle().
 			Width(RoomWidth).
 			Height(RoomHeight).
 			Foreground(lipgloss.Color("238"))
+
+	// Exit line styles
+	exitLineStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("240"))
+
+	// Online player indicator style (green dot)
+	onlinePlayerStyle = lipgloss.NewStyle().
+				Foreground(lipgloss.Color("42"))
 
 	inspectorStyle = lipgloss.NewStyle().
 			Border(lipgloss.RoundedBorder()).
@@ -87,6 +106,11 @@ var (
 
 	inspectorValueStyle = lipgloss.NewStyle().
 				Foreground(lipgloss.Color("229"))
+
+	inspectorSelectedStyle = lipgloss.NewStyle().
+				Foreground(lipgloss.Color("229")).
+				Background(lipgloss.Color("24")).
+				Bold(true)
 
 	helpStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("241")).
@@ -172,6 +196,16 @@ type Room struct {
 	Y           int
 	Z           int
 	Tags        []string
+	Exits       []RoomExit // Exits from this room
+}
+
+// RoomExit represents an exit from a room
+type RoomExit struct {
+	Direction     string
+	DestinationID string
+	DestX         int // Destination coordinates (for drawing lines)
+	DestY         int
+	DestZ         int
 }
 
 // UndoActionType represents the type of undoable action
@@ -196,6 +230,14 @@ type Exit struct {
 	SourceID    string
 	DestID      string
 	Direction   string
+}
+
+// editableField represents a field that can be edited in the detail view
+type editableField struct {
+	key      string // Field key (e.g., "name", "description", "components.combatant.health")
+	label    string // Display label
+	value    string // Current value as string
+	fieldType string // "string", "number", "tags"
 }
 
 // Messages for async operations
@@ -233,7 +275,23 @@ type roomContentsLoadedMsg struct {
 	entities []client.Entity
 }
 
+type roomContentsDetailedMsg struct {
+	contents *client.RoomContentsDetailed
+}
+
+type onlinePlayersLoadedMsg struct {
+	players []client.OnlinePlayer
+}
+
 type entitySpawnedMsg struct {
+	entity *client.Entity
+}
+
+type entityDeletedMsg struct {
+	entityID string
+}
+
+type entityUpdatedMsg struct {
 	entity *client.Entity
 }
 
@@ -289,9 +347,23 @@ type Model struct {
 	spawnTargetRoom   *Room // Room to spawn entity in
 
 	// Room contents view
-	roomContents       []client.Entity
-	roomContentsRoom   *Room
-	roomContentsCursor int
+	roomContents         []client.Entity
+	roomContentsDetailed *client.RoomContentsDetailed
+	roomContentsRoom     *Room
+	roomContentsCursor   int
+	inspectorFocused     bool // true = inspector has focus, false = map has focus
+
+	// Entity detail view
+	selectedEntity     *components.EntityData
+	entityDetailScroll int
+	detailCursor       int              // Which field is selected (0=name, 1=description, 2+=components)
+	editingField       string           // Which field is being edited ("", "name", "description", "tag", etc.)
+	editInput          textinput.Model  // Text input for editing single-line fields
+	editTextarea       textarea.Model   // Textarea for editing multi-line fields (description)
+	editableFields     []editableField  // List of editable fields for cursor navigation
+
+	// Online players
+	onlinePlayers []client.OnlinePlayer
 
 	// Template selection
 	templateSelector *components.Selector
@@ -308,12 +380,28 @@ func New(c *client.Client) Model {
 	ti.CharLimit = 50
 	ti.Width = 30
 
+	// Edit input for entity field editing (single-line)
+	editTi := textinput.New()
+	editTi.Placeholder = ""
+	editTi.CharLimit = 500
+	editTi.Width = 40
+
+	// Textarea for multi-line editing (description)
+	editTa := textarea.New()
+	editTa.Placeholder = "Enter description..."
+	editTa.CharLimit = 2000
+	editTa.SetWidth(40)
+	editTa.SetHeight(6)
+	editTa.ShowLineNumbers = false
+
 	return Model{
-		client:    c,
-		roomMap:   make(map[string]*Room),
-		loading:   true,
-		mode:      ModeNormal,
-		nameInput: ti,
+		client:       c,
+		roomMap:      make(map[string]*Room),
+		loading:      true,
+		mode:         ModeNormal,
+		nameInput:    ti,
+		editInput:    editTi,
+		editTextarea: editTa,
 	}
 }
 
@@ -327,14 +415,36 @@ func (m *Model) SetSize(width, height int) {
 	m.width = width
 	m.height = height
 
-	// Calculate grid dimensions (leave room for inspector panel)
-	mapWidth := width * 2 / 3 // 2/3 for map, 1/3 for inspector
+	// Calculate grid dimensions (50/50 split with inspector)
+	mapWidth := width / 2
 	m.gridWidth = mapWidth / CellWidth
 	m.gridHeight = (height - 6) / CellHeight // Leave room for title, help, and input
 
 	if m.gridWidth < 3 {
 		m.gridWidth = 3
 	}
+
+	// Update edit input width based on panel size
+	editWidth := width/2 - 20 // Leave room for label and borders
+	if editWidth < 20 {
+		editWidth = 20
+	}
+	if editWidth > 100 {
+		editWidth = 100
+	}
+	m.editInput.Width = editWidth
+
+	// Update textarea dimensions
+	m.editTextarea.SetWidth(editWidth)
+	textareaHeight := height/3 - 2
+	if textareaHeight < 4 {
+		textareaHeight = 4
+	}
+	if textareaHeight > 10 {
+		textareaHeight = 10
+	}
+	m.editTextarea.SetHeight(textareaHeight)
+
 	if m.gridHeight < 3 {
 		m.gridHeight = 3
 	}
@@ -356,10 +466,10 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		return m.updateConfirmDeleteMode(msg)
 	case ModeSelectNPC, ModeSelectItem:
 		return m.updateSelectPrototypeMode(msg)
-	case ModeViewContents:
-		return m.updateViewContentsMode(msg)
 	case ModeSelectTemplate:
 		return m.updateSelectTemplateMode(msg)
+	case ModeEntityDetail:
+		return m.updateEntityDetailMode(msg)
 	}
 
 	switch msg := msg.(type) {
@@ -386,6 +496,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 					m.cursorX = worldX
 					m.cursorY = worldY
 					m.adjustViewport()
+					return m, m.loadCurrentRoomContents()
 				}
 			}
 		}
@@ -396,34 +507,108 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m.lastAction = ""
 		m.lastResult = ""
 
+		// Tab switches focus between map and inspector
+		if msg.String() == "tab" {
+			m.inspectorFocused = !m.inspectorFocused
+			if m.inspectorFocused {
+				m.roomContentsCursor = 0
+			}
+			return m, nil
+		}
+
+		// Handle navigation based on focus
+		if m.inspectorFocused {
+			// Inspector navigation
+			switch {
+			case key.Matches(msg, keys.Up):
+				if m.roomContentsCursor > 0 {
+					m.roomContentsCursor--
+				}
+				return m, nil
+			case key.Matches(msg, keys.Down):
+				maxCursor := m.getTotalContentItems() - 1
+				if maxCursor >= 0 && m.roomContentsCursor < maxCursor {
+					m.roomContentsCursor++
+				}
+				return m, nil
+			case key.Matches(msg, keys.Select):
+				// Open entity detail view
+				entity := m.getSelectedContentEntity()
+				if entity != nil {
+					m.selectedEntity = entity
+					m.entityDetailScroll = 0
+					m.editableFields = nil
+					m.detailCursor = 0
+					m.mode = ModeEntityDetail
+				}
+				return m, nil
+			case msg.String() == "e":
+				// Edit the room at cursor (from inspector)
+				room := m.getRoomAt(m.cursorX, m.cursorY, m.cursorZ)
+				if room != nil {
+					m.selectedEntity = &components.EntityData{
+						ID:          room.ID,
+						Type:        "room",
+						Key:         room.Key,
+						Name:        room.Name,
+						Description: room.Description,
+						Tags:        room.Tags,
+						Components:  make(map[string]interface{}),
+					}
+					m.selectedEntity.Components["coordinates"] = map[string]interface{}{
+						"x": float64(room.X),
+						"y": float64(room.Y),
+						"z": float64(room.Z),
+					}
+					m.editableFields = nil
+					m.detailCursor = 0
+					m.mode = ModeEntityDetail
+				}
+				return m, nil
+			case key.Matches(msg, keys.Delete):
+				// Delete selected entity
+				entity := m.getSelectedContentEntity()
+				if entity != nil {
+					m.selectedEntity = entity
+					return m, m.deleteEntity(entity.ID)
+				}
+				return m, nil
+			case key.Matches(msg, keys.Cancel):
+				m.inspectorFocused = false
+				return m, nil
+			}
+			return m, nil
+		}
+
+		// Map navigation (when map is focused)
 		switch {
 		case key.Matches(msg, keys.Up):
 			m.cursorY--
 			m.adjustViewport()
-			return m, nil
+			return m, m.loadCurrentRoomContents()
 
 		case key.Matches(msg, keys.Down):
 			m.cursorY++
 			m.adjustViewport()
-			return m, nil
+			return m, m.loadCurrentRoomContents()
 
 		case key.Matches(msg, keys.Left):
 			m.cursorX--
 			m.adjustViewport()
-			return m, nil
+			return m, m.loadCurrentRoomContents()
 
 		case key.Matches(msg, keys.Right):
 			m.cursorX++
 			m.adjustViewport()
-			return m, nil
+			return m, m.loadCurrentRoomContents()
 
 		case key.Matches(msg, keys.ZUp):
 			m.cursorZ++
-			return m, nil
+			return m, m.loadCurrentRoomContents()
 
 		case key.Matches(msg, keys.ZDown):
 			m.cursorZ--
-			return m, nil
+			return m, m.loadCurrentRoomContents()
 
 		case key.Matches(msg, keys.Refresh):
 			m.loading = true
@@ -482,20 +667,36 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			}
 			return m, nil
 
-		case key.Matches(msg, keys.ViewContents):
-			// View room contents if cursor is on a room
-			room := m.getRoomAt(m.cursorX, m.cursorY, m.cursorZ)
-			if room != nil {
-				m.roomContentsRoom = room
-				m.roomContentsCursor = 0
-				return m, m.loadRoomContents(room.ID)
-			}
-			return m, nil
-
 		case key.Matches(msg, keys.Templates):
 			// Open template browser if cell is empty
 			if m.getRoomAt(m.cursorX, m.cursorY, m.cursorZ) == nil {
 				return m, m.loadTemplates()
+			}
+			return m, nil
+
+		case msg.String() == "e":
+			// Edit the room at cursor
+			room := m.getRoomAt(m.cursorX, m.cursorY, m.cursorZ)
+			if room != nil {
+				// Create entity data from room for editing
+				m.selectedEntity = &components.EntityData{
+					ID:          room.ID,
+					Type:        "room",
+					Key:         room.Key,
+					Name:        room.Name,
+					Description: room.Description,
+					Tags:        room.Tags,
+					Components:  make(map[string]interface{}),
+				}
+				// Add coordinates as a component for editing
+				m.selectedEntity.Components["coordinates"] = map[string]interface{}{
+					"x": float64(room.X),
+					"y": float64(room.Y),
+					"z": float64(room.Z),
+				}
+				m.editableFields = nil
+				m.detailCursor = 0
+				m.mode = ModeEntityDetail
 			}
 			return m, nil
 
@@ -517,7 +718,11 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m.lastError = nil
 		m.rooms = msg.rooms
 		m.buildRoomMap()
-		return m, nil
+		// Load online players and contents for current cursor room
+		return m, tea.Batch(
+			m.loadOnlinePlayers(""),
+			m.loadCurrentRoomContents(),
+		)
 
 	case roomsErrorMsg:
 		m.loading = false
@@ -590,7 +795,16 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 	case roomContentsLoadedMsg:
 		m.roomContents = msg.entities
-		m.mode = ModeViewContents
+		// Don't change mode - contents now display in inspector panel
+		return m, nil
+
+	case roomContentsDetailedMsg:
+		m.roomContentsDetailed = msg.contents
+		// Don't change mode - contents now display in inspector panel
+		return m, nil
+
+	case onlinePlayersLoadedMsg:
+		m.onlinePlayers = msg.players
 		return m, nil
 
 	case entitySpawnedMsg:
@@ -600,6 +814,42 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m.prototypeSelector = nil
 		m.spawnTargetRoom = nil
 		return m, nil
+
+	case entityDeletedMsg:
+		m.lastAction = "Deleted"
+		if m.selectedEntity != nil {
+			m.lastResult = m.selectedEntity.Name
+		}
+		m.selectedEntity = nil
+		m.editableFields = nil
+		m.mode = ModeNormal
+		// Reload room contents
+		if m.roomContentsRoom != nil {
+			return m, m.loadRoomContentsDetailed(m.roomContentsRoom.ID)
+		}
+		return m, nil
+
+	case entityUpdatedMsg:
+		m.lastAction = "Updated"
+		m.lastResult = msg.entity.Name
+		// Update the selected entity with new data
+		if m.selectedEntity != nil && m.selectedEntity.ID == msg.entity.ID {
+			m.selectedEntity.Name = msg.entity.Name
+			m.selectedEntity.Description = msg.entity.Description
+			m.selectedEntity.Tags = msg.entity.Tags
+			m.selectedEntity.Components = msg.entity.Components
+			// Rebuild editable fields with new values
+			m.editableFields = nil
+			m.buildEditableFields()
+		}
+		// Refresh rooms list to reflect changes (in case name/coords changed)
+		var cmds []tea.Cmd
+		cmds = append(cmds, m.fetchRooms())
+		// Also reload room contents if viewing a room
+		if m.roomContentsRoom != nil {
+			cmds = append(cmds, m.loadRoomContentsDetailed(m.roomContentsRoom.ID))
+		}
+		return m, tea.Batch(cmds...)
 
 	case templatesLoadedMsg:
 		// Create selector from templates
@@ -829,31 +1079,113 @@ func (m Model) updateSelectPrototypeMode(msg tea.Msg) (Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m Model) updateViewContentsMode(msg tea.Msg) (Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch {
-		case key.Matches(msg, keys.Cancel):
-			m.mode = ModeNormal
-			m.roomContentsRoom = nil
-			m.roomContents = nil
-			return m, nil
 
-		case key.Matches(msg, keys.Up):
-			if m.roomContentsCursor > 0 {
-				m.roomContentsCursor--
-			}
-			return m, nil
-
-		case key.Matches(msg, keys.Down):
-			if m.roomContentsCursor < len(m.roomContents)-1 {
-				m.roomContentsCursor++
-			}
-			return m, nil
+// getTotalContentItems returns the total number of items across all sections
+func (m Model) getTotalContentItems() int {
+	if m.roomContentsDetailed == nil {
+		return len(m.roomContents)
+	}
+	total := len(m.roomContentsDetailed.NPCs)
+	total += len(m.roomContentsDetailed.Items)
+	total += len(m.roomContentsDetailed.Exits)
+	total += len(m.roomContentsDetailed.Characters)
+	// Also count online players in this room
+	for _, p := range m.onlinePlayers {
+		if p.RoomID == m.roomContentsRoom.ID {
+			total++
 		}
 	}
+	return total
+}
 
-	return m, nil
+// getSelectedContentEntity returns the entity at the current cursor position
+func (m Model) getSelectedContentEntity() *components.EntityData {
+	if m.roomContentsDetailed == nil {
+		// Fallback to basic contents
+		if m.roomContentsCursor < len(m.roomContents) {
+			e := m.roomContents[m.roomContentsCursor]
+			return &components.EntityData{
+				ID:          e.ID,
+				Type:        e.Type,
+				Key:         e.Key,
+				Name:        e.Name,
+				Description: e.Description,
+				Components:  e.Components,
+				Tags:        e.Tags,
+			}
+		}
+		return nil
+	}
+
+	idx := m.roomContentsCursor
+	contents := m.roomContentsDetailed
+
+	// NPCs
+	if idx < len(contents.NPCs) {
+		e := contents.NPCs[idx]
+		return &components.EntityData{
+			ID:          e.ID,
+			Type:        e.Type,
+			Key:         e.Key,
+			Name:        e.Name,
+			Description: e.Description,
+			Components:  e.Components,
+			Tags:        e.Tags,
+		}
+	}
+	idx -= len(contents.NPCs)
+
+	// Items
+	if idx < len(contents.Items) {
+		e := contents.Items[idx]
+		return &components.EntityData{
+			ID:          e.ID,
+			Type:        e.Type,
+			Key:         e.Key,
+			Name:        e.Name,
+			Description: e.Description,
+			Components:  e.Components,
+			Tags:        e.Tags,
+		}
+	}
+	idx -= len(contents.Items)
+
+	// Exits
+	if idx < len(contents.Exits) {
+		e := contents.Exits[idx]
+		return &components.EntityData{
+			ID:              e.ID,
+			Type:            e.Type,
+			Key:             e.Key,
+			Name:            e.Name,
+			Description:     e.Description,
+			Components:      e.Components,
+			Tags:            e.Tags,
+			Direction:       e.Direction,
+			DestinationID:   e.DestinationID,
+			DestinationName: e.DestinationName,
+			DestinationKey:  e.DestinationKey,
+		}
+	}
+	idx -= len(contents.Exits)
+
+	// Characters
+	if idx < len(contents.Characters) {
+		e := contents.Characters[idx]
+		return &components.EntityData{
+			ID:          e.ID,
+			Type:        e.Type,
+			Key:         e.Key,
+			Name:        e.Name,
+			Description: e.Description,
+			Components:  e.Components,
+			Tags:        e.Tags,
+		}
+	}
+	idx -= len(contents.Characters)
+
+	// Online players (can't inspect players)
+	return nil
 }
 
 func (m Model) updateSelectTemplateMode(msg tea.Msg) (Model, tea.Cmd) {
@@ -877,6 +1209,245 @@ func (m Model) updateSelectTemplateMode(msg tea.Msg) (Model, tea.Cmd) {
 	}
 
 	return m, nil
+}
+
+func (m Model) updateEntityDetailMode(msg tea.Msg) (Model, tea.Cmd) {
+	if m.selectedEntity == nil {
+		m.mode = ModeNormal
+		return m, nil
+	}
+
+	// Build editable fields list if not already built
+	if len(m.editableFields) == 0 {
+		m.buildEditableFields()
+	}
+
+	// Handle editing mode
+	if m.editingField != "" {
+		isDescriptionEdit := m.editingField == "description"
+
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch msg.String() {
+			case "esc":
+				// Cancel editing
+				m.editingField = ""
+				if isDescriptionEdit {
+					m.editTextarea.Blur()
+				} else {
+					m.editInput.Blur()
+				}
+				return m, nil
+			case "ctrl+s":
+				// Save (for textarea, since Enter adds newlines)
+				var value string
+				if isDescriptionEdit {
+					value = m.editTextarea.Value()
+					m.editTextarea.Blur()
+				} else {
+					value = m.editInput.Value()
+					m.editInput.Blur()
+				}
+				fieldKey := m.editingField
+				m.editingField = ""
+				return m, m.updateEntityField(m.selectedEntity.ID, fieldKey, value)
+			case "enter":
+				// For non-description fields, Enter saves. For description, Enter adds newline.
+				if !isDescriptionEdit {
+					value := m.editInput.Value()
+					fieldKey := m.editingField
+					m.editingField = ""
+					m.editInput.Blur()
+					return m, m.updateEntityField(m.selectedEntity.ID, fieldKey, value)
+				}
+				// For description, fall through to forward to textarea
+				fallthrough
+			default:
+				// Forward to appropriate input
+				var cmd tea.Cmd
+				if isDescriptionEdit {
+					m.editTextarea, cmd = m.editTextarea.Update(msg)
+				} else {
+					m.editInput, cmd = m.editInput.Update(msg)
+				}
+				return m, cmd
+			}
+		}
+		return m, nil
+	}
+
+	// Normal navigation mode
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "esc", "q":
+			m.mode = ModeNormal
+			m.selectedEntity = nil
+			m.editableFields = nil
+			m.detailCursor = 0
+			return m, nil
+		case "up", "k":
+			if m.detailCursor > 0 {
+				m.detailCursor--
+			}
+			return m, nil
+		case "down", "j":
+			if m.detailCursor < len(m.editableFields)-1 {
+				m.detailCursor++
+			}
+			return m, nil
+		case "enter", "e":
+			// Start editing the selected field
+			if m.detailCursor < len(m.editableFields) {
+				field := m.editableFields[m.detailCursor]
+				m.editingField = field.key
+
+				// Set edit input width based on panel size
+				editWidth := m.width/2 - 20
+				if editWidth < 20 {
+					editWidth = 20
+				}
+				if editWidth > 100 {
+					editWidth = 100
+				}
+
+				// Use textarea for description, textinput for other fields
+				if field.key == "description" {
+					m.editTextarea.SetWidth(editWidth)
+					textareaHeight := m.height/3 - 2
+					if textareaHeight < 4 {
+						textareaHeight = 4
+					}
+					if textareaHeight > 10 {
+						textareaHeight = 10
+					}
+					m.editTextarea.SetHeight(textareaHeight)
+					m.editTextarea.SetValue(field.value)
+					m.editTextarea.Focus()
+					return m, textarea.Blink
+				} else {
+					m.editInput.Width = editWidth
+					m.editInput.SetValue(field.value)
+					m.editInput.Focus()
+					m.editInput.CursorEnd()
+					return m, textinput.Blink
+				}
+			}
+			return m, nil
+		case "d":
+			// Delete this entity
+			entityID := m.selectedEntity.ID
+			return m, m.deleteEntity(entityID)
+		}
+	}
+
+	return m, nil
+}
+
+func (m *Model) buildEditableFields() {
+	m.editableFields = nil
+	e := m.selectedEntity
+	if e == nil {
+		return
+	}
+
+	// Basic fields
+	m.editableFields = append(m.editableFields, editableField{
+		key:       "name",
+		label:     "Name",
+		value:     e.Name,
+		fieldType: "string",
+	})
+	m.editableFields = append(m.editableFields, editableField{
+		key:       "description",
+		label:     "Description",
+		value:     e.Description,
+		fieldType: "string",
+	})
+
+	// Tags
+	m.editableFields = append(m.editableFields, editableField{
+		key:       "tags",
+		label:     "Tags",
+		value:     strings.Join(e.Tags, ", "),
+		fieldType: "tags",
+	})
+
+	// Component fields (flatten for editing)
+	if e.Components != nil {
+		keys := make([]string, 0, len(e.Components))
+		for k := range e.Components {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+
+		for _, compKey := range keys {
+			compValue := e.Components[compKey]
+			m.addComponentFields(compKey, compValue, "")
+		}
+	}
+}
+
+func (m *Model) addComponentFields(compKey string, value interface{}, prefix string) {
+	fullKey := compKey
+	if prefix != "" {
+		fullKey = prefix + "." + compKey
+	}
+
+	switch v := value.(type) {
+	case map[string]interface{}:
+		// For nested maps, add each sub-field
+		keys := make([]string, 0, len(v))
+		for k := range v {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+
+		for _, k := range keys {
+			m.addComponentFields(k, v[k], fullKey)
+		}
+	case string:
+		m.editableFields = append(m.editableFields, editableField{
+			key:       "components." + fullKey,
+			label:     fullKey,
+			value:     v,
+			fieldType: "string",
+		})
+	case float64:
+		m.editableFields = append(m.editableFields, editableField{
+			key:       "components." + fullKey,
+			label:     fullKey,
+			value:     fmt.Sprintf("%v", v),
+			fieldType: "number",
+		})
+	case bool:
+		m.editableFields = append(m.editableFields, editableField{
+			key:       "components." + fullKey,
+			label:     fullKey,
+			value:     fmt.Sprintf("%v", v),
+			fieldType: "string",
+		})
+	case []interface{}:
+		// Arrays - show as JSON-ish string
+		items := make([]string, len(v))
+		for i, item := range v {
+			items[i] = fmt.Sprintf("%v", item)
+		}
+		m.editableFields = append(m.editableFields, editableField{
+			key:       "components." + fullKey,
+			label:     fullKey,
+			value:     strings.Join(items, ", "),
+			fieldType: "array",
+		})
+	default:
+		// Fallback
+		m.editableFields = append(m.editableFields, editableField{
+			key:       "components." + fullKey,
+			label:     fullKey,
+			value:     fmt.Sprintf("%v", v),
+			fieldType: "string",
+		})
+	}
 }
 
 func (m *Model) buildRoomMap() {
@@ -914,6 +1485,16 @@ func (m Model) getRoomAt(x, y, z int) *Room {
 	return m.roomMap[key]
 }
 
+// hasOnlinePlayers checks if a room has any online players
+func (m Model) hasOnlinePlayers(roomID string) bool {
+	for _, p := range m.onlinePlayers {
+		if p.RoomID == roomID {
+			return true
+		}
+	}
+	return false
+}
+
 // View renders the Map tab
 func (m Model) View() string {
 	if m.loading && len(m.rooms) == 0 {
@@ -925,8 +1506,13 @@ func (m Model) View() string {
 			errorStyle.Render(fmt.Sprintf("  Error: %s", m.lastError.Error()))
 	}
 
-	// Title with room count
-	title := fmt.Sprintf("Map (%d rooms)", len(m.rooms))
+	// Title with room count and focus indicator
+	var title string
+	if m.inspectorFocused {
+		title = fmt.Sprintf("Map (%d rooms)  [Tab: Inspector]", len(m.rooms))
+	} else {
+		title = fmt.Sprintf("Map (%d rooms)  [Tab: Map]", len(m.rooms))
+	}
 
 	// Coordinates indicator
 	coords := fmt.Sprintf("Cursor: (%d, %d, Z=%d)", m.cursorX, m.cursorY, m.cursorZ)
@@ -934,11 +1520,16 @@ func (m Model) View() string {
 	// Render grid
 	grid := m.renderGrid()
 
-	// Render inspector
-	inspector := m.renderInspector()
+	// Render inspector or entity detail
+	var inspector string
+	if m.mode == ModeEntityDetail {
+		inspector = m.renderEntityDetail()
+	} else {
+		inspector = m.renderInspector()
+	}
 
-	// Combine grid and inspector side by side
-	mapWidth := m.width * 2 / 3
+	// Combine grid and inspector side by side (50/50 split)
+	mapWidth := m.width / 2
 	inspectorWidth := m.width - mapWidth - 2
 
 	gridStyled := lipgloss.NewStyle().Width(mapWidth).Render(grid)
@@ -990,14 +1581,12 @@ func (m Model) View() string {
 			inputLabelStyle.Render(fmt.Sprintf("Create exit: %s → %s (%s)", srcName, dstName, direction)) +
 				"\n" + helpStyle.Render("Create return exit? [Y]es  [N]o  Esc: Cancel"),
 		)
-	case ModeViewContents:
-		inputSection = m.renderContentsView()
 	}
 
 	// Help
 	var help string
 	if m.mode == ModeNormal {
-		help = "  ←↑↓→:Move  </>:Level  n:New  t:Template  d:Delete  c:Connect  u:Undo  Ctrl+Y:Redo  r:Refresh"
+		help = "  ←↑↓→:Move  </>:Level  n:New  t:Template  e:Edit  d:Delete  c:Connect  u:Undo  r:Refresh"
 	}
 
 	parts := []string{
@@ -1036,29 +1625,222 @@ func (m Model) View() string {
 }
 
 func (m Model) renderGrid() string {
-	var lines []string
+	// Build a character grid that includes rooms and exit lines
+	// Each cell is CellWidth x CellHeight, with room at top-left corner
+	// Exit lines go between rooms
 
+	gridChars := make([][]rune, m.gridHeight*CellHeight)
+	gridColors := make([][]lipgloss.Style, m.gridHeight*CellHeight)
+	totalWidth := m.gridWidth * CellWidth
+
+	// Initialize grid with spaces
+	for y := range gridChars {
+		gridChars[y] = make([]rune, totalWidth)
+		gridColors[y] = make([]lipgloss.Style, totalWidth)
+		for x := range gridChars[y] {
+			gridChars[y][x] = ' '
+			gridColors[y][x] = lipgloss.NewStyle()
+		}
+	}
+
+	// Draw rooms and exits
 	for row := 0; row < m.gridHeight; row++ {
-		var rowParts []string
 		worldY := m.viewportY + row
-
 		for col := 0; col < m.gridWidth; col++ {
 			worldX := m.viewportX + col
 			room := m.getRoomAt(worldX, worldY, m.cursorZ)
-
 			isCursor := worldX == m.cursorX && worldY == m.cursorY
 
+			// Calculate pixel position for this cell
+			px := col * CellWidth
+			py := row * CellHeight
+
 			if room != nil {
-				rowParts = append(rowParts, m.renderRoomBox(room, isCursor))
-			} else {
-				rowParts = append(rowParts, m.renderEmptyCell(isCursor))
+				m.drawRoomBox(gridChars, gridColors, px, py, room, isCursor)
+				m.drawExitLines(gridChars, gridColors, px, py, room, col, row)
+			} else if isCursor {
+				m.drawEmptyCursor(gridChars, gridColors, px, py)
 			}
 		}
+	}
 
-		lines = append(lines, lipgloss.JoinHorizontal(lipgloss.Top, rowParts...))
+	// Convert grid to string with colors
+	var lines []string
+	for y := range gridChars {
+		var line strings.Builder
+		for x := range gridChars[y] {
+			style := gridColors[y][x]
+			line.WriteString(style.Render(string(gridChars[y][x])))
+		}
+		lines = append(lines, line.String())
 	}
 
 	return strings.Join(lines, "\n")
+}
+
+func (m Model) drawRoomBox(chars [][]rune, colors [][]lipgloss.Style, px, py int, room *Room, isCursor bool) {
+	// Draw a 5x3 box (bare, no title)
+	// ╭───╮
+	// │   │
+	// ╰───╯
+	var borderColor lipgloss.Color
+	var topLeft, topRight, botLeft, botRight, hLine, vLine rune
+
+	if isCursor {
+		borderColor = lipgloss.Color("226") // Yellow for cursor
+		topLeft, topRight, botLeft, botRight = '╔', '╗', '╚', '╝'
+		hLine, vLine = '═', '║'
+	} else if m.mode == ModeConnect && m.connectSourceRoom != nil && room.ID == m.connectSourceRoom.ID {
+		borderColor = lipgloss.Color("39") // Blue for selected
+		topLeft, topRight, botLeft, botRight = '╭', '╮', '╰', '╯'
+		hLine, vLine = '─', '│'
+	} else {
+		borderColor = lipgloss.Color("240") // Gray
+		topLeft, topRight, botLeft, botRight = '╭', '╮', '╰', '╯'
+		hLine, vLine = '─', '│'
+	}
+
+	style := lipgloss.NewStyle().Foreground(borderColor)
+
+	// Top row
+	if py < len(chars) && px < len(chars[py]) {
+		chars[py][px] = topLeft
+		colors[py][px] = style
+	}
+	for x := 1; x < RoomWidth-1; x++ {
+		if py < len(chars) && px+x < len(chars[py]) {
+			chars[py][px+x] = hLine
+			colors[py][px+x] = style
+		}
+	}
+	if py < len(chars) && px+RoomWidth-1 < len(chars[py]) {
+		chars[py][px+RoomWidth-1] = topRight
+		colors[py][px+RoomWidth-1] = style
+	}
+
+	// Middle row (sides only, empty inside)
+	if py+1 < len(chars) {
+		if px < len(chars[py+1]) {
+			chars[py+1][px] = vLine
+			colors[py+1][px] = style
+		}
+		if px+RoomWidth-1 < len(chars[py+1]) {
+			chars[py+1][px+RoomWidth-1] = vLine
+			colors[py+1][px+RoomWidth-1] = style
+		}
+		// Add green dot in center if room has online players
+		centerX := px + RoomWidth/2
+		if m.hasOnlinePlayers(room.ID) && centerX < len(chars[py+1]) {
+			chars[py+1][centerX] = '●'
+			colors[py+1][centerX] = onlinePlayerStyle
+		}
+	}
+
+	// Bottom row
+	if py+2 < len(chars) {
+		if px < len(chars[py+2]) {
+			chars[py+2][px] = botLeft
+			colors[py+2][px] = style
+		}
+		for x := 1; x < RoomWidth-1; x++ {
+			if px+x < len(chars[py+2]) {
+				chars[py+2][px+x] = hLine
+				colors[py+2][px+x] = style
+			}
+		}
+		if px+RoomWidth-1 < len(chars[py+2]) {
+			chars[py+2][px+RoomWidth-1] = botRight
+			colors[py+2][px+RoomWidth-1] = style
+		}
+	}
+}
+
+func (m Model) drawExitLines(chars [][]rune, colors [][]lipgloss.Style, px, py int, room *Room, col, row int) {
+	style := exitLineStyle
+
+	for _, exit := range room.Exits {
+		// Only draw exits to adjacent rooms on the same Z level
+		if exit.DestZ != room.Z {
+			continue
+		}
+
+		dx := exit.DestX - room.X
+		dy := exit.DestY - room.Y
+
+		// Draw line based on direction
+		switch {
+		case dx == 1 && dy == 0: // East
+			// Draw horizontal line to the right of the room
+			lineY := py + 1 // Middle of room
+			for x := px + RoomWidth; x < px+CellWidth && x < len(chars[0]); x++ {
+				if lineY < len(chars) {
+					chars[lineY][x] = '─'
+					colors[lineY][x] = style
+				}
+			}
+		case dx == -1 && dy == 0: // West
+			// Line drawn by the western room's east exit
+		case dx == 0 && dy == 1: // South
+			// Draw vertical line below the room
+			lineX := px + RoomWidth/2 // Center of room
+			for y := py + RoomHeight; y < py+CellHeight && y < len(chars); y++ {
+				if lineX < len(chars[y]) {
+					chars[y][lineX] = '│'
+					colors[y][lineX] = style
+				}
+			}
+		case dx == 0 && dy == -1: // North
+			// Line drawn by the northern room's south exit
+		case dx == 1 && dy == -1: // Northeast
+			// Diagonal line
+			if py > 0 && px+RoomWidth < len(chars[0]) {
+				lineY := py
+				lineX := px + RoomWidth
+				if lineY < len(chars) && lineX < len(chars[lineY]) {
+					chars[lineY][lineX] = '╱'
+					colors[lineY][lineX] = style
+				}
+			}
+		case dx == -1 && dy == -1: // Northwest
+			// Drawn by NW room
+		case dx == 1 && dy == 1: // Southeast
+			if py+RoomHeight < len(chars) && px+RoomWidth < len(chars[0]) {
+				chars[py+RoomHeight][px+RoomWidth] = '╲'
+				colors[py+RoomHeight][px+RoomWidth] = style
+			}
+		case dx == -1 && dy == 1: // Southwest
+			// Drawn by SW room
+		}
+	}
+}
+
+func (m Model) drawEmptyCursor(chars [][]rune, colors [][]lipgloss.Style, px, py int) {
+	// Draw a dotted box for empty cursor position
+	style := lipgloss.NewStyle().Foreground(lipgloss.Color("238"))
+
+	// Simple dotted corners
+	if py < len(chars) && px < len(chars[py]) {
+		chars[py][px] = '┌'
+		colors[py][px] = style
+	}
+	if py < len(chars) && px+RoomWidth-1 < len(chars[py]) {
+		chars[py][px+RoomWidth-1] = '┐'
+		colors[py][px+RoomWidth-1] = style
+	}
+	if py+2 < len(chars) && px < len(chars[py+2]) {
+		chars[py+2][px] = '└'
+		colors[py+2][px] = style
+	}
+	if py+2 < len(chars) && px+RoomWidth-1 < len(chars[py+2]) {
+		chars[py+2][px+RoomWidth-1] = '┘'
+		colors[py+2][px+RoomWidth-1] = style
+	}
+
+	// Center dot
+	if py+1 < len(chars) && px+RoomWidth/2 < len(chars[py+1]) {
+		chars[py+1][px+RoomWidth/2] = '·'
+		colors[py+1][px+RoomWidth/2] = style
+	}
 }
 
 func (m Model) renderRoomBox(room *Room, isCursor bool) string {
@@ -1113,15 +1895,15 @@ func (m Model) renderInspector() string {
 		content.WriteString(inspectorLabelStyle.Render(fmt.Sprintf("  Position: (%d, %d, %d)\n", m.cursorX, m.cursorY, m.cursorZ)))
 		content.WriteString("\n")
 		content.WriteString(inspectorLabelStyle.Render("  Press 'n' to create room"))
-		return inspectorStyle.Width(m.width/3 - 4).Render(content.String())
+		return inspectorStyle.Width(m.width/2 - 4).Render(content.String())
 	}
 
 	// Room details
-	content.WriteString(inspectorLabelStyle.Render("  Key: "))
-	content.WriteString(inspectorValueStyle.Render(room.Key) + "\n")
-
 	content.WriteString(inspectorLabelStyle.Render("  Name: "))
 	content.WriteString(inspectorValueStyle.Render(room.Name) + "\n")
+
+	content.WriteString(inspectorLabelStyle.Render("  Key: "))
+	content.WriteString(inspectorValueStyle.Render(room.Key) + "\n")
 
 	content.WriteString(inspectorLabelStyle.Render("  Coords: "))
 	content.WriteString(inspectorValueStyle.Render(fmt.Sprintf("(%d, %d, %d)", room.X, room.Y, room.Z)) + "\n")
@@ -1132,53 +1914,280 @@ func (m Model) renderInspector() string {
 	}
 
 	if room.Description != "" {
-		content.WriteString("\n")
-		content.WriteString(inspectorLabelStyle.Render("  Description:\n"))
-		// Wrap description
 		desc := room.Description
-		if len(desc) > 100 {
-			desc = desc[:97] + "..."
+		if len(desc) > 80 {
+			desc = desc[:77] + "..."
 		}
-		content.WriteString(inspectorValueStyle.Render("  " + desc) + "\n")
+		content.WriteString(inspectorLabelStyle.Render("  Desc: "))
+		content.WriteString(inspectorValueStyle.Render(desc) + "\n")
 	}
 
-	content.WriteString("\n")
-	content.WriteString(inspectorLabelStyle.Render("  Press 'd' to delete"))
+	// Show room contents from detailed data
+	cursorIdx := 0
 
-	return inspectorStyle.Width(m.width/3 - 4).Render(content.String())
-}
+	if m.roomContentsDetailed != nil {
+		contents := m.roomContentsDetailed
 
-func (m Model) renderContentsView() string {
-	var content strings.Builder
-
-	if m.roomContentsRoom == nil {
-		return ""
-	}
-
-	content.WriteString(inputLabelStyle.Render(fmt.Sprintf("Contents of: %s", m.roomContentsRoom.Name)))
-	content.WriteString("\n\n")
-
-	if len(m.roomContents) == 0 {
-		content.WriteString(inspectorLabelStyle.Render("  (empty room)"))
-	} else {
-		for i, entity := range m.roomContents {
-			prefix := "  "
-			if i == m.roomContentsCursor {
-				prefix = "> "
-				content.WriteString(selectedRoomStyle.Foreground(lipgloss.Color("229")).Render(prefix + entity.Name))
-			} else {
-				content.WriteString(inspectorValueStyle.Render(prefix + entity.Name))
+		// NPCs
+		if len(contents.NPCs) > 0 {
+			content.WriteString("\n")
+			content.WriteString(inspectorTitleStyle.Render(fmt.Sprintf("  NPCs (%d)", len(contents.NPCs))) + "\n")
+			for _, npc := range contents.NPCs {
+				prefix := "    • "
+				if m.inspectorFocused && cursorIdx == m.roomContentsCursor {
+					content.WriteString(inspectorSelectedStyle.Render("  > " + npc.Name))
+				} else {
+					content.WriteString(inspectorValueStyle.Render(prefix + npc.Name))
+				}
+				content.WriteString("\n")
+				cursorIdx++
 			}
-			content.WriteString(" ")
-			content.WriteString(inspectorLabelStyle.Render(fmt.Sprintf("[%s]", entity.Type)))
+		}
+
+		// Items
+		if len(contents.Items) > 0 {
+			content.WriteString("\n")
+			content.WriteString(inspectorTitleStyle.Render(fmt.Sprintf("  Items (%d)", len(contents.Items))) + "\n")
+			for _, item := range contents.Items {
+				prefix := "    • "
+				if m.inspectorFocused && cursorIdx == m.roomContentsCursor {
+					content.WriteString(inspectorSelectedStyle.Render("  > " + item.Name))
+				} else {
+					content.WriteString(inspectorValueStyle.Render(prefix + item.Name))
+				}
+				content.WriteString("\n")
+				cursorIdx++
+			}
+		}
+
+		// Exits
+		if len(contents.Exits) > 0 {
+			content.WriteString("\n")
+			content.WriteString(inspectorTitleStyle.Render(fmt.Sprintf("  Exits (%d)", len(contents.Exits))) + "\n")
+			for _, exit := range contents.Exits {
+				exitName := exit.Direction
+				if exit.DestinationName != "" {
+					exitName = fmt.Sprintf("%s → %s", exit.Direction, exit.DestinationName)
+				}
+				prefix := "    • "
+				if m.inspectorFocused && cursorIdx == m.roomContentsCursor {
+					content.WriteString(inspectorSelectedStyle.Render("  > " + exitName))
+				} else {
+					content.WriteString(inspectorValueStyle.Render(prefix + exitName))
+				}
+				content.WriteString("\n")
+				cursorIdx++
+			}
+		}
+
+		// Characters (player characters in room)
+		if len(contents.Characters) > 0 {
+			content.WriteString("\n")
+			content.WriteString(inspectorTitleStyle.Render(fmt.Sprintf("  Characters (%d)", len(contents.Characters))) + "\n")
+			for _, char := range contents.Characters {
+				prefix := "    • "
+				if m.inspectorFocused && cursorIdx == m.roomContentsCursor {
+					content.WriteString(inspectorSelectedStyle.Render("  > " + char.Name))
+				} else {
+					content.WriteString(inspectorValueStyle.Render(prefix + char.Name))
+				}
+				content.WriteString("\n")
+				cursorIdx++
+			}
+		}
+	} else if len(room.Exits) > 0 {
+		// Fallback to room exit data if detailed not loaded yet
+		content.WriteString("\n")
+		content.WriteString(inspectorTitleStyle.Render(fmt.Sprintf("  Exits (%d)", len(room.Exits))) + "\n")
+		for _, exit := range room.Exits {
+			prefix := "    • "
+			if m.inspectorFocused && cursorIdx == m.roomContentsCursor {
+				content.WriteString(inspectorSelectedStyle.Render("  > " + exit.Direction))
+			} else {
+				content.WriteString(inspectorValueStyle.Render(prefix + exit.Direction))
+			}
+			content.WriteString("\n")
+			cursorIdx++
+		}
+	}
+
+	// Show online players in this room
+	playersHere := m.getPlayersInRoom(room.ID)
+	if len(playersHere) > 0 {
+		content.WriteString("\n")
+		content.WriteString(successStyle.Render(fmt.Sprintf("  ● Players Online (%d)", len(playersHere))) + "\n")
+		for _, player := range playersHere {
+			content.WriteString(successStyle.Render("    • " + player.Name))
+			if player.IsAdmin {
+				content.WriteString(inspectorLabelStyle.Render(" [admin]"))
+			}
 			content.WriteString("\n")
 		}
 	}
 
 	content.WriteString("\n")
-	content.WriteString(helpStyle.Render("  ↑/↓: Navigate  Esc: Close"))
+	if m.inspectorFocused {
+		content.WriteString(inspectorLabelStyle.Render("  ↑/↓:Navigate  Enter:Details  e:Edit Room  d:Delete  Tab:Map"))
+	} else {
+		content.WriteString(inspectorLabelStyle.Render("  Tab:Browse  e:Edit Room  a:NPC  i:Item"))
+	}
 
-	return inputStyle.Render(content.String())
+	return inspectorStyle.Width(m.width/2 - 4).Render(content.String())
+}
+
+func (m Model) renderEntityDetail() string {
+	if m.selectedEntity == nil {
+		return ""
+	}
+
+	e := m.selectedEntity
+	var content strings.Builder
+
+	// Title with entity name
+	content.WriteString(inspectorTitleStyle.Render(fmt.Sprintf("  Edit: %s", e.Name)) + "\n")
+	content.WriteString(inspectorLabelStyle.Render(fmt.Sprintf("  Type: %s  Key: %s", e.Type, e.Key)) + "\n")
+	content.WriteString(inspectorLabelStyle.Render(fmt.Sprintf("  ID: %s", e.ID)) + "\n\n")
+
+	// Editable fields section
+	content.WriteString(inspectorTitleStyle.Render("  Editable Fields") + "\n")
+
+	maxWidth := m.width/2 - 12
+	if maxWidth < 20 {
+		maxWidth = 20
+	}
+
+	for i, field := range m.editableFields {
+		isSelected := i == m.detailCursor
+		isEditing := m.editingField == field.key
+
+		// Format label
+		label := field.label
+		if len(label) > 20 {
+			label = "..." + label[len(label)-17:]
+		}
+
+		// For description field, show full text with word wrap when selected
+		isDescriptionField := field.key == "description"
+
+		if isEditing && isDescriptionField {
+			// Show textarea for description editing
+			content.WriteString(inspectorSelectedStyle.Render(fmt.Sprintf("  > %s:", label)) + "\n")
+			content.WriteString("    " + m.editTextarea.View() + "\n")
+		} else if isEditing {
+			// Show text input for other fields
+			content.WriteString(inspectorSelectedStyle.Render(fmt.Sprintf("  > %s: ", label)))
+			content.WriteString(m.editInput.View())
+			content.WriteString("\n")
+		} else if isSelected && isDescriptionField && len(field.value) > 0 {
+			// Show full description with word wrap when selected
+			content.WriteString(inspectorSelectedStyle.Render(fmt.Sprintf("  > %s:", label)) + "\n")
+			// Word wrap the description
+			wrapped := wrapText(field.value, maxWidth-4)
+			for _, line := range wrapped {
+				content.WriteString(inspectorSelectedStyle.Render("      "+line) + "\n")
+			}
+		} else if isSelected {
+			// Highlight selected (non-description or empty)
+			value := field.value
+			if len(value) > maxWidth {
+				value = value[:maxWidth-3] + "..."
+			}
+			line := fmt.Sprintf("  > %s: %s", label, value)
+			content.WriteString(inspectorSelectedStyle.Render(line) + "\n")
+		} else {
+			// Normal display - truncate if too long
+			value := field.value
+			if len(value) > maxWidth {
+				value = value[:maxWidth-3] + "..."
+			}
+			content.WriteString(inspectorLabelStyle.Render(fmt.Sprintf("    %s: ", label)))
+			content.WriteString(inspectorValueStyle.Render(value) + "\n")
+		}
+	}
+
+	// Exit-specific info (read-only)
+	if e.Direction != "" {
+		content.WriteString("\n" + inspectorTitleStyle.Render("  Exit Info (read-only)") + "\n")
+		content.WriteString(inspectorLabelStyle.Render("    Direction: ") + inspectorValueStyle.Render(e.Direction) + "\n")
+		if e.DestinationName != "" {
+			content.WriteString(inspectorLabelStyle.Render("    Destination: ") + inspectorValueStyle.Render(e.DestinationName) + "\n")
+		}
+	}
+
+	// Help footer
+	content.WriteString("\n")
+	if m.editingField == "description" {
+		content.WriteString(inspectorLabelStyle.Render("  Ctrl+S:Save  Esc:Cancel  (Enter adds newline)"))
+	} else if m.editingField != "" {
+		content.WriteString(inspectorLabelStyle.Render("  Enter:Save  Esc:Cancel"))
+	} else {
+		content.WriteString(inspectorLabelStyle.Render("  ↑/↓:Select  Enter/e:Edit  d:Delete  Esc:Close"))
+	}
+
+	// Create bordered panel
+	panelStyle := lipgloss.NewStyle().
+		Border(lipgloss.RoundedBorder()).
+		BorderForeground(lipgloss.Color("39")).
+		Padding(1, 2).
+		Width(m.width/2 - 4).
+		Height(m.height - 8)
+
+	return panelStyle.Render(content.String())
+}
+
+func (m Model) renderComponentValue(content *strings.Builder, value interface{}, indent int) {
+	indentStr := strings.Repeat("  ", indent)
+
+	switch v := value.(type) {
+	case map[string]interface{}:
+		keys := make([]string, 0, len(v))
+		for k := range v {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+
+		for _, k := range keys {
+			subVal := v[k]
+			switch sv := subVal.(type) {
+			case map[string]interface{}:
+				content.WriteString(inspectorLabelStyle.Render(indentStr+k+":") + "\n")
+				m.renderComponentValue(content, sv, indent+1)
+			case []interface{}:
+				content.WriteString(inspectorLabelStyle.Render(indentStr+k+": ") + inspectorValueStyle.Render(m.formatArrayValue(sv)) + "\n")
+			default:
+				content.WriteString(inspectorLabelStyle.Render(indentStr+k+": ") + inspectorValueStyle.Render(fmt.Sprintf("%v", sv)) + "\n")
+			}
+		}
+	case []interface{}:
+		content.WriteString(inspectorValueStyle.Render(indentStr+m.formatArrayValue(v)) + "\n")
+	default:
+		content.WriteString(inspectorValueStyle.Render(indentStr+fmt.Sprintf("%v", v)) + "\n")
+	}
+}
+
+func (m Model) formatArrayValue(arr []interface{}) string {
+	if len(arr) == 0 {
+		return "[]"
+	}
+	items := make([]string, len(arr))
+	for i, v := range arr {
+		items[i] = fmt.Sprintf("%v", v)
+	}
+	result := "[" + strings.Join(items, ", ") + "]"
+	if len(result) > 50 {
+		return result[:47] + "...]"
+	}
+	return result
+}
+
+func (m Model) getPlayersInRoom(roomID string) []client.OnlinePlayer {
+	var players []client.OnlinePlayer
+	for _, p := range m.onlinePlayers {
+		if p.RoomID == roomID {
+			players = append(players, p)
+		}
+	}
+	return players
 }
 
 // Async commands
@@ -1196,6 +2205,18 @@ func (m Model) fetchRooms() tea.Cmd {
 
 		result := make([]Room, len(rooms))
 		for i, r := range rooms {
+			// Convert exits
+			exits := make([]RoomExit, len(r.Exits))
+			for j, e := range r.Exits {
+				exits[j] = RoomExit{
+					Direction:     e.Direction,
+					DestinationID: e.DestinationID,
+					DestX:         e.DestX,
+					DestY:         e.DestY,
+					DestZ:         e.DestZ,
+				}
+			}
+
 			result[i] = Room{
 				ID:          r.ID,
 				Key:         r.Key,
@@ -1205,6 +2226,7 @@ func (m Model) fetchRooms() tea.Cmd {
 				Y:           r.Y,
 				Z:           r.Z,
 				Tags:        r.Tags,
+				Exits:       exits,
 			}
 		}
 
@@ -1299,6 +2321,49 @@ func (m Model) loadRoomContents(roomID string) tea.Cmd {
 	}
 }
 
+func (m Model) loadRoomContentsDetailed(roomID string) tea.Cmd {
+	return func() tea.Msg {
+		if m.client == nil {
+			return actionErrorMsg{action: "Load Contents", err: fmt.Errorf("not connected")}
+		}
+
+		contents, err := m.client.GetRoomContentsDetailed(roomID)
+		if err != nil {
+			return actionErrorMsg{action: "Load Contents", err: err}
+		}
+
+		return roomContentsDetailedMsg{contents: contents}
+	}
+}
+
+// loadCurrentRoomContents loads contents for the room at the current cursor position
+func (m Model) loadCurrentRoomContents() tea.Cmd {
+	room := m.getRoomAt(m.cursorX, m.cursorY, m.cursorZ)
+	if room == nil {
+		// Clear contents when moving to empty cell
+		return func() tea.Msg {
+			return roomContentsDetailedMsg{contents: nil}
+		}
+	}
+	return m.loadRoomContentsDetailed(room.ID)
+}
+
+func (m Model) loadOnlinePlayers(roomID string) tea.Cmd {
+	return func() tea.Msg {
+		if m.client == nil {
+			return actionErrorMsg{action: "Load Players", err: fmt.Errorf("not connected")}
+		}
+
+		players, err := m.client.GetOnlinePlayers(roomID)
+		if err != nil {
+			// Don't fail if players can't be loaded - just return empty
+			return onlinePlayersLoadedMsg{players: nil}
+		}
+
+		return onlinePlayersLoadedMsg{players: players}
+	}
+}
+
 func (m Model) spawnEntity(prototypeKey, roomID string) tea.Cmd {
 	return func() tea.Msg {
 		if m.client == nil {
@@ -1351,6 +2416,148 @@ func (m Model) spawnFromTemplate(templateKey string) tea.Cmd {
 			},
 		}
 	}
+}
+
+func (m Model) deleteEntity(entityID string) tea.Cmd {
+	return func() tea.Msg {
+		if m.client == nil {
+			return actionErrorMsg{action: "Delete Entity", err: fmt.Errorf("not connected")}
+		}
+
+		err := m.client.DeleteEntity(entityID)
+		if err != nil {
+			return actionErrorMsg{action: "Delete Entity", err: err}
+		}
+
+		return entityDeletedMsg{entityID: entityID}
+	}
+}
+
+func (m Model) updateEntityField(entityID, fieldKey, value string) tea.Cmd {
+	return func() tea.Msg {
+		if m.client == nil {
+			return actionErrorMsg{action: "Update Entity", err: fmt.Errorf("not connected")}
+		}
+
+		updates := make(map[string]interface{})
+
+		// Handle different field types
+		switch {
+		case fieldKey == "name":
+			updates["name"] = value
+		case fieldKey == "description":
+			updates["description"] = value
+		case fieldKey == "tags":
+			// Parse comma-separated tags
+			tags := strings.Split(value, ",")
+			cleanTags := make([]string, 0, len(tags))
+			for _, t := range tags {
+				t = strings.TrimSpace(t)
+				if t != "" {
+					cleanTags = append(cleanTags, t)
+				}
+			}
+			updates["tags"] = cleanTags
+		case strings.HasPrefix(fieldKey, "components."):
+			// Handle component field updates
+			// Parse the path: components.combatant.health.current -> ["combatant", "health", "current"]
+			path := strings.TrimPrefix(fieldKey, "components.")
+			parts := strings.Split(path, ".")
+
+			// Build nested map structure
+			if m.selectedEntity != nil && m.selectedEntity.Components != nil {
+				// Clone the components
+				newComponents := deepCopyMap(m.selectedEntity.Components)
+
+				// Navigate to the parent and set the value
+				setNestedValue(newComponents, parts, value)
+				updates["components"] = newComponents
+			}
+		}
+
+		entity, err := m.client.UpdateEntity(entityID, updates)
+		if err != nil {
+			return actionErrorMsg{action: "Update Entity", err: err}
+		}
+
+		return entityUpdatedMsg{entity: entity}
+	}
+}
+
+// deepCopyMap creates a deep copy of a map
+func deepCopyMap(m map[string]interface{}) map[string]interface{} {
+	result := make(map[string]interface{})
+	for k, v := range m {
+		switch val := v.(type) {
+		case map[string]interface{}:
+			result[k] = deepCopyMap(val)
+		case []interface{}:
+			newSlice := make([]interface{}, len(val))
+			copy(newSlice, val)
+			result[k] = newSlice
+		default:
+			result[k] = v
+		}
+	}
+	return result
+}
+
+// setNestedValue sets a value in a nested map structure
+func setNestedValue(m map[string]interface{}, path []string, value string) {
+	if len(path) == 0 {
+		return
+	}
+
+	if len(path) == 1 {
+		// Try to parse as number if it looks like one
+		if num, err := strconv.ParseFloat(value, 64); err == nil {
+			m[path[0]] = num
+		} else if value == "true" {
+			m[path[0]] = true
+		} else if value == "false" {
+			m[path[0]] = false
+		} else {
+			m[path[0]] = value
+		}
+		return
+	}
+
+	// Navigate deeper
+	key := path[0]
+	if _, ok := m[key]; !ok {
+		m[key] = make(map[string]interface{})
+	}
+	if nested, ok := m[key].(map[string]interface{}); ok {
+		setNestedValue(nested, path[1:], value)
+	}
+}
+
+// wrapText wraps text to fit within maxWidth characters per line
+func wrapText(text string, maxWidth int) []string {
+	if maxWidth <= 0 {
+		maxWidth = 40
+	}
+
+	var lines []string
+	words := strings.Fields(text)
+	if len(words) == 0 {
+		return lines
+	}
+
+	currentLine := words[0]
+	for _, word := range words[1:] {
+		if len(currentLine)+1+len(word) <= maxWidth {
+			currentLine += " " + word
+		} else {
+			lines = append(lines, currentLine)
+			currentLine = word
+		}
+	}
+	if currentLine != "" {
+		lines = append(lines, currentLine)
+	}
+
+	return lines
 }
 
 func (m Model) performUndo() tea.Cmd {
@@ -1493,5 +2700,5 @@ func abbreviate(s string, maxLen int) string {
 
 // ShortHelp returns the short help text
 func (m Model) ShortHelp() string {
-	return "←↑↓→:Move  </>:Level  n:New  t:Template  d:Delete  c:Connect  u:Undo  Ctrl+Y:Redo  r:Refresh"
+	return "←↑↓→:Move  </>:Level  n:New  t:Template  e:Edit  d:Delete  c:Connect  u:Undo  r:Refresh"
 }

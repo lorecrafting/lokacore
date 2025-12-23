@@ -60,8 +60,8 @@ defmodule Exmud.Engine.WorldLoader do
         linked_count = link_all_exits(room_results)
         Logger.info("WorldLoader: Linked #{linked_count} exits to destination IDs")
 
-        # Auto-layout rooms with coordinates if requested
-        if Keyword.get(opts, :auto_layout, false) do
+        # Auto-layout rooms with coordinates (default: true)
+        if Keyword.get(opts, :auto_layout, true) do
           case get_starting_room() do
             {:ok, start_room} ->
               {:ok, count} = WorldGraph.auto_layout(start_room.id)

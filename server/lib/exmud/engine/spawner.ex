@@ -24,7 +24,7 @@ defmodule Exmud.Engine.Spawner do
       {:ok, room, spawned} = Spawner.spawn_room("forest_clearing")
   """
 
-  alias Exmud.Engine.{Prototype, PrototypeLoader, Entities, Entity}
+  alias Exmud.Engine.{Prototype, PrototypeLoader, Entities, Entity, Hooks}
   alias Exmud.Engine.Schema.EntitySchema
 
   require Logger
@@ -265,7 +265,9 @@ defmodule Exmud.Engine.Spawner do
 
     case Entities.save_entity(exit_entity) do
       {:ok, schema} ->
-        {:ok, Entities.to_entity(schema)}
+        exit = Entities.to_entity(schema)
+        Hooks.run(:at_entity_creation, [exit, %{created_by: "spawner"}])
+        {:ok, exit}
 
       {:error, changeset} ->
         {:error, {:save_failed, changeset}}
@@ -309,7 +311,9 @@ defmodule Exmud.Engine.Spawner do
 
     case Entities.save_entity(exit_entity) do
       {:ok, schema} ->
-        {:ok, Entities.to_entity(schema)}
+        exit = Entities.to_entity(schema)
+        Hooks.run(:at_entity_creation, [exit, %{created_by: "spawner"}])
+        {:ok, exit}
 
       {:error, changeset} ->
         {:error, {:save_failed, changeset}}
@@ -614,6 +618,15 @@ defmodule Exmud.Engine.Spawner do
     dest_id = Keyword.get(attrs, :destination_id)
     create_return = Keyword.get(attrs, :create_return, false)
 
+    # Check if exit already exists in this direction from source
+    if exit_exists?(source_id, direction) do
+      {:error, {:exit_exists, "Exit already exists: #{direction} from this room"}}
+    else
+      do_create_exit_unchecked(attrs, direction, source_id, dest_id, create_return)
+    end
+  end
+
+  defp do_create_exit_unchecked(attrs, direction, source_id, dest_id, create_return) do
     # Get destination room for key reference
     dest_room = Entities.get_entity(dest_id)
     dest_key = if dest_room, do: Entities.to_entity(dest_room).key, else: nil
@@ -655,6 +668,9 @@ defmodule Exmud.Engine.Spawner do
         exit = Entities.to_entity(schema)
         Logger.info("Created exit #{exit_key} -> #{dest_key || dest_id}")
 
+        # Trigger hooks for exit creation (for auto-layout)
+        Hooks.run(:at_entity_creation, [exit, %{created_by: "spawner"}])
+
         if create_return do
           # Create return exit
           return_direction = get_opposite_direction(direction)
@@ -695,6 +711,23 @@ defmodule Exmud.Engine.Spawner do
       "southwest" -> "northeast"
       other -> other
     end
+  end
+
+  defp exit_exists?(source_id, direction) do
+    direction = String.downcase(to_string(direction))
+
+    Entities.get_contents(source_id)
+    |> Enum.any?(fn entity ->
+      entity.type == :exit &&
+        get_exit_direction(entity) == direction
+    end)
+  end
+
+  defp get_exit_direction(exit_entity) do
+    # Exit data may be nested under "exit" key or directly in components
+    components = exit_entity.components || %{}
+    exit_data = Map.get(components, "exit", components)
+    Map.get(exit_data, "direction", "") |> String.downcase()
   end
 
   defp generate_unique_key(name) when is_binary(name) do

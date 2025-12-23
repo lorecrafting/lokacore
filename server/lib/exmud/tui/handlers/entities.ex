@@ -164,7 +164,12 @@ defmodule Exmud.Tui.Handlers.Entities do
   defp broadcast_change(action, entity) do
     Server.broadcast(%{
       method: "entity.changed",
-      params: %{action: action, type: to_string(entity.type), id: entity.id}
+      params: %{
+        action: action,
+        type: to_string(entity.type),
+        id: entity.id,
+        room_id: entity.location_id
+      }
     })
   end
 

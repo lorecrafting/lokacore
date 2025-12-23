@@ -21,6 +21,7 @@ defmodule Exmud.Application do
       {Registry, keys: :unique, name: Exmud.Engine.EntityRegistry.Registry},
       {Exmud.Engine.EntitySupervisor, name: Exmud.Engine.EntitySupervisor},
       Exmud.Engine.EntityRegistry,
+      Exmud.Engine.WorldGraph.LayoutManager,
 
       # Framework layer
       Exmud.Framework.Combat.Spawner,

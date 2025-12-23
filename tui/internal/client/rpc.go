@@ -61,14 +61,24 @@ type Entity struct {
 
 // Room represents a room entity with coordinates.
 type Room struct {
-	ID          string   `json:"id"`
-	Key         string   `json:"key"`
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	X           int      `json:"x"`
-	Y           int      `json:"y"`
-	Z           int      `json:"z"`
-	Tags        []string `json:"tags"`
+	ID          string     `json:"id"`
+	Key         string     `json:"key"`
+	Name        string     `json:"name"`
+	Description string     `json:"description"`
+	X           int        `json:"x"`
+	Y           int        `json:"y"`
+	Z           int        `json:"z"`
+	Tags        []string   `json:"tags"`
+	Exits       []RoomExit `json:"exits"`
+}
+
+// RoomExit represents an exit from a room with destination coordinates.
+type RoomExit struct {
+	Direction     string `json:"direction"`
+	DestinationID string `json:"destination_id"`
+	DestX         int    `json:"dest_x"`
+	DestY         int    `json:"dest_y"`
+	DestZ         int    `json:"dest_z"`
 }
 
 // Exit represents an exit between rooms.
@@ -101,6 +111,52 @@ type Player struct {
 	IsAdmin     bool    `json:"is_admin"`
 	ConfirmedAt *string `json:"confirmed_at"`
 	InsertedAt  string  `json:"inserted_at"`
+}
+
+// OnlinePlayer represents a player currently in the game world.
+type OnlinePlayer struct {
+	ID      string `json:"id"`
+	Email   string `json:"email"`
+	Name    string `json:"name"`
+	RoomID  string `json:"room_id"`
+	IsAdmin bool   `json:"is_admin"`
+}
+
+// EntityDetailed represents a full entity with all component data.
+type EntityDetailed struct {
+	ID          string                 `json:"id"`
+	Type        string                 `json:"type"`
+	Key         string                 `json:"key"`
+	Name        string                 `json:"name"`
+	Description string                 `json:"description"`
+	Components  map[string]interface{} `json:"components"`
+	Tags        []string               `json:"tags"`
+	LocationID  string                 `json:"location_id,omitempty"`
+}
+
+// ExitDetailed represents a full exit entity with destination info.
+type ExitDetailed struct {
+	ID              string                 `json:"id"`
+	Type            string                 `json:"type"`
+	Key             string                 `json:"key"`
+	Name            string                 `json:"name"`
+	Description     string                 `json:"description"`
+	Direction       string                 `json:"direction"`
+	DestinationID   string                 `json:"destination_id"`
+	DestinationName string                 `json:"destination_name"`
+	DestinationKey  string                 `json:"destination_key"`
+	Components      map[string]interface{} `json:"components"`
+	Tags            []string               `json:"tags"`
+}
+
+// RoomContentsDetailed holds grouped room contents with full entity data.
+type RoomContentsDetailed struct {
+	RoomID     string           `json:"room_id"`
+	NPCs       []EntityDetailed `json:"npcs"`
+	Items      []EntityDetailed `json:"items"`
+	Exits      []ExitDetailed   `json:"exits"`
+	Characters []EntityDetailed `json:"characters"`
+	Total      int              `json:"total"`
 }
 
 // SystemInfo represents server system information.
@@ -576,20 +632,60 @@ func (c *Client) SpawnFromTemplate(templateKey string, x, y, z int, name string)
 	return &room, nil
 }
 
-// GetRoomContents retrieves entities located in a room.
+// GetRoomContents retrieves entities located in a room (basic).
 func (c *Client) GetRoomContents(roomID string) ([]Entity, error) {
-	// Get all entities and filter by location_id
-	// TODO: Add a dedicated server method for this
-	entities, _, err := c.ListEntities("", 500, 0)
+	result, err := c.Call("rooms.contents", map[string]interface{}{
+		"id": roomID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	var contents []Entity
-	for _, e := range entities {
-		if e.LocationID != nil && *e.LocationID == roomID {
-			contents = append(contents, e)
-		}
+	var resp struct {
+		Entities []Entity `json:"entities"`
+		Total    int      `json:"total"`
 	}
-	return contents, nil
+	if err := json.Unmarshal(result, &resp); err != nil {
+		return nil, fmt.Errorf("failed to parse room contents: %w", err)
+	}
+	return resp.Entities, nil
+}
+
+// GetRoomContentsDetailed retrieves grouped room contents with full entity data.
+func (c *Client) GetRoomContentsDetailed(roomID string) (*RoomContentsDetailed, error) {
+	result, err := c.Call("rooms.contents_detailed", map[string]interface{}{
+		"id": roomID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var contents RoomContentsDetailed
+	if err := json.Unmarshal(result, &contents); err != nil {
+		return nil, fmt.Errorf("failed to parse room contents: %w", err)
+	}
+	return &contents, nil
+}
+
+// GetOnlinePlayers retrieves players currently in the game world.
+// If roomID is provided, returns only players in that room.
+func (c *Client) GetOnlinePlayers(roomID string) ([]OnlinePlayer, error) {
+	params := map[string]interface{}{}
+	if roomID != "" {
+		params["room_id"] = roomID
+	}
+
+	result, err := c.Call("players.online", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Players []OnlinePlayer `json:"players"`
+		Total   int            `json:"total"`
+	}
+	if err := json.Unmarshal(result, &resp); err != nil {
+		return nil, fmt.Errorf("failed to parse online players: %w", err)
+	}
+	return resp.Players, nil
 }

@@ -232,10 +232,24 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Dispatch notification to relevant tabs based on type
 		switch msg.Method {
-		case "entity.changed", "script.changed":
+		case "entity.changed":
+			// Refresh Map tab when entities change (rooms, exits, etc.)
+			if m.activeTab == TabMap {
+				cmds = append(cmds, m.mapTab.Init())
+			}
 			// Refresh System tab stats when entities change
 			if m.activeTab == TabSystem {
 				cmds = append(cmds, m.systemTab.Init())
+			}
+		case "script.changed":
+			// Refresh System tab stats when scripts change
+			if m.activeTab == TabSystem {
+				cmds = append(cmds, m.systemTab.Init())
+			}
+		case "player.moved", "player.connected", "player.disconnected":
+			// Refresh Map tab online player indicators
+			if m.activeTab == TabMap {
+				cmds = append(cmds, m.mapTab.Init())
 			}
 		}
 		return m, tea.Batch(cmds...)

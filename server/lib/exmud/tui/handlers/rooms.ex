@@ -141,6 +141,40 @@ defmodule Exmud.Tui.Handlers.Rooms do
     {:error, {:invalid_params, "Missing id parameter"}}
   end
 
+  def handle("contents_detailed", %{"id" => id}) do
+    case Entities.get_room(id) do
+      nil ->
+        {:error, {:not_found, "Room not found: #{id}"}}
+
+      _room ->
+        contents = Entities.get_contents(id)
+
+        # Group entities by type
+        grouped =
+          contents
+          |> Enum.group_by(& &1.type)
+
+        npcs = Map.get(grouped, :npc, []) |> Enum.map(&serialize_full_entity/1)
+        items = Map.get(grouped, :item, []) |> Enum.map(&serialize_full_entity/1)
+        exits = Map.get(grouped, :exit, []) |> Enum.map(&serialize_full_exit/1)
+        characters = Map.get(grouped, :character, []) |> Enum.map(&serialize_full_entity/1)
+
+        {:ok,
+         %{
+           room_id: id,
+           npcs: npcs,
+           items: items,
+           exits: exits,
+           characters: characters,
+           total: length(contents)
+         }}
+    end
+  end
+
+  def handle("contents_detailed", _params) do
+    {:error, {:invalid_params, "Missing id parameter"}}
+  end
+
   def handle(
         "connect",
         %{"source_id" => source_id, "destination_id" => dest_id, "direction" => direction} =
@@ -174,6 +208,9 @@ defmodule Exmud.Tui.Handlers.Rooms do
 
       {:error, :destination_id_required} ->
         {:error, {:invalid_params, "Missing destination_id parameter"}}
+
+      {:error, {:exit_exists, msg}} ->
+        {:error, {:exit_exists, msg}}
 
       {:error, reason} ->
         {:error, {:create_failed, inspect(reason)}}
@@ -244,8 +281,48 @@ defmodule Exmud.Tui.Handlers.Rooms do
     }
   end
 
+  defp serialize_full_entity(entity) do
+    %{
+      id: entity.id,
+      type: to_string(entity.type),
+      key: entity.key,
+      name: entity.name,
+      description: entity.description || "",
+      components: entity.components || %{},
+      tags: entity.tags || [],
+      location_id: entity.location_id
+    }
+  end
+
+  defp serialize_full_exit(exit) do
+    exit_data = get_in(exit.components, ["exit"]) || exit.components || %{}
+    dest_id = Map.get(exit_data, "destination_id")
+
+    # Get destination room info if available
+    {dest_name, dest_key} =
+      case dest_id && Entities.get_entity(dest_id) do
+        nil -> {nil, nil}
+        dest_room -> {dest_room.name, dest_room.key}
+      end
+
+    %{
+      id: exit.id,
+      type: "exit",
+      key: exit.key,
+      name: exit.name,
+      description: exit.description || "",
+      direction: Map.get(exit_data, "direction"),
+      destination_id: dest_id,
+      destination_name: dest_name,
+      destination_key: dest_key,
+      components: exit.components || %{},
+      tags: exit.tags || []
+    }
+  end
+
   defp serialize_room_with_coords(room) do
     coords = get_coordinates(room)
+    exits = get_room_exits(room.id)
 
     %{
       id: room.id,
@@ -255,8 +332,35 @@ defmodule Exmud.Tui.Handlers.Rooms do
       x: coords.x,
       y: coords.y,
       z: coords.z,
-      tags: room.tags || []
+      tags: room.tags || [],
+      exits: exits
     }
+  end
+
+  defp get_room_exits(room_id) do
+    Entities.get_contents(room_id)
+    |> Enum.filter(fn e -> e.type == :exit end)
+    |> Enum.map(fn exit ->
+      exit_data = get_in(exit.components, ["exit"]) || exit.components || %{}
+      dest_id = Map.get(exit_data, "destination_id")
+
+      # Get destination room coordinates if available
+      {dest_x, dest_y, dest_z} =
+        case dest_id && Entities.get_entity(dest_id) do
+          nil -> {0, 0, 0}
+          dest_room ->
+            dest_coords = get_coordinates(dest_room)
+            {dest_coords.x, dest_coords.y, dest_coords.z}
+        end
+
+      %{
+        direction: Map.get(exit_data, "direction"),
+        destination_id: dest_id,
+        dest_x: dest_x,
+        dest_y: dest_y,
+        dest_z: dest_z
+      }
+    end)
   end
 
   defp get_coordinates(room) do
@@ -272,7 +376,12 @@ defmodule Exmud.Tui.Handlers.Rooms do
   defp broadcast_change(action, entity) do
     Server.broadcast(%{
       method: "entity.changed",
-      params: %{action: action, type: "room", id: entity.id}
+      params: %{
+        action: action,
+        type: to_string(entity.type),
+        id: entity.id,
+        room_id: entity.location_id
+      }
     })
   end
 
