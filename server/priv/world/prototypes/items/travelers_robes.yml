@@ -1,0 +1,21 @@
+key: travelers_robes
+name: "Traveler's Robes"
+type: item
+parent: base_item
+description: |
+  Simple cotton robes, patched and road-worn but still
+  serviceable. They offer little protection but freedom
+  of movement.
+components:
+  armor:
+    defense: 0
+    slot: body
+  physical:
+    weight: 1
+  valuable:
+    base_price: 2
+tags:
+  - item
+  - armor
+  - equippable
+  - starting

@@ -1,0 +1,28 @@
+key: poisoned
+name: "Poisoned"
+type: debuff
+duration: 5
+stackable: true
+max_stacks: 3
+effects:
+  - trigger: on_turn_start
+    effect: damage
+    amount: 3
+    damage_type: poison
+  - trigger: passive
+    effect: stat_modify
+    stat: str
+    modifier: -2
+cure_items:
+  - antidote
+  - greater_antidote
+cure_abilities:
+  - cure_poison
+  - greater_heal
+  - purify
+display_icon: poison
+display_color: green
+description: "Poison courses through your veins, dealing damage each turn."
+tags:
+  - poison
+  - damage_over_time

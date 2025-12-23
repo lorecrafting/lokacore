@@ -1,0 +1,23 @@
+key: butter_tea
+name: "Butter Tea"
+type: item
+parent: base_item
+description: |
+  Hot salted tea enriched with yak butter, the traditional
+  drink of the mountains. Warming and restorative.
+components:
+  consumable:
+    effect: heal
+    amount: 15
+    on_use_message: "The warm tea spreads through your body, restoring vitality."
+  physical:
+    weight: 0.5
+    stackable: true
+    max_stack: 10
+  valuable:
+    base_price: 5
+tags:
+  - item
+  - consumable
+  - healing
+  - shop

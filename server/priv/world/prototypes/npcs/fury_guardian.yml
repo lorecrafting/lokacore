@@ -1,0 +1,33 @@
+key: fury_guardian
+name: "Fury Guardian"
+type: npc
+parent: base_npc
+description: |
+  An armored spirit wreathed in flames of pure anger, its form
+  that of an ancient warrior bound by rage to this place. Each
+  strike against it only feeds its fury.
+tags:
+  - hostile
+  - spirit
+  - aversion
+  - cave
+  - elite
+components:
+  combatant:
+    level: 4
+    health:
+      current: 50
+      max: 50
+    stats:
+      str: 14
+      dex: 10
+      sta: 10
+    xp_value: 35
+  loot:
+    drops:
+      - item: fury_essence
+        chance: 0.2
+  behavior:
+    ai: counter
+    enrages_when_damaged: true
+    counterattacks: true

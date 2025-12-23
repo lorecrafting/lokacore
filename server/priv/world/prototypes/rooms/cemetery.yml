@@ -1,0 +1,25 @@
+key: cemetery
+parent: base_room
+type: room
+name: "Cemetery"
+description: |
+  Weathered burial mounds dot this quiet hillside, each marked with
+  prayer flags that have faded to ghostly white. Tall grass whispers
+  between the graves, and ancient prayer wheels stand sentinel at
+  the corners, their mantras worn smooth by countless turnings.
+
+  The air grows heavier here at dusk, when shadows lengthen and the
+  boundary between worlds grows thin. Moon blossoms open their pale
+  petals only in twilight's grey light.
+exits:
+  west: monastery_gate
+  east: old_stupa
+spawns:
+  - prototype: hungry_ghost
+    conditions:
+      time_of_day: [dusk, night]
+tags:
+  - outdoor
+  - cemetery
+  - haunted
+  - gathering_node

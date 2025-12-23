@@ -1,0 +1,25 @@
+key: cave_entrance
+parent: base_room
+type: room
+name: "Cave Entrance"
+description: |
+  An ancient stone doorway is carved into the mountain itself, its
+  surface covered in warnings written in a script so old that even
+  the monastery elders cannot fully translate it. What little they
+  understand speaks of trials, of three poisons made manifest.
+
+  Beyond the threshold, darkness waits. The air that flows from
+  within is neither warm nor cold but somehow both at once, as if
+  the caves exist outside of ordinary time.
+
+  Only those who carry the master's blessing may pass within.
+exits:
+  west: tenzins_cell
+  east: threshold
+locks:
+  enter_east: "has_item(cave_entrance_key)"
+tags:
+  - indoor
+  - cave
+  - transition_zone
+  - quest_gate

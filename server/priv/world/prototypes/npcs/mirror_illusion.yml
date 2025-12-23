@@ -1,0 +1,33 @@
+key: mirror_illusion
+name: "Mirror Illusion"
+type: npc
+parent: base_npc
+description: |
+  Your own reflection steps out of the darkness, but twisted,
+  wrong somehow. It wears your face with a mocking smile,
+  mimicking your movements a heartbeat behind.
+tags:
+  - hostile
+  - illusion
+  - ignorance
+  - cave
+  - elite
+components:
+  combatant:
+    level: 4
+    health:
+      current: 45
+      max: 45
+    stats:
+      str: 10
+      dex: 12
+      sta: 8
+    xp_value: 35
+  loot:
+    drops:
+      - item: mirror_shard
+        chance: 0.2
+  behavior:
+    ai: mirror
+    copies_player: true
+    confuses_targeting: true

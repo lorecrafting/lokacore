@@ -1,0 +1,9 @@
+key: ki
+name: "Ki"
+max_formula: "level * 8 + str * 2"
+regen_rate: 1
+regen_condition: resting
+color: orange
+description: "Inner life force. Regenerates slowly through meditation."
+min_value: 0
+starts_full: true

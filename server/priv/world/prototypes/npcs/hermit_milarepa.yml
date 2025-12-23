@@ -1,0 +1,33 @@
+key: hermit_milarepa
+name: "Hermit Milarepa"
+type: npc
+parent: base_npc
+description: |
+  A wild-haired yogi squats near a smoky fire, his body thin as
+  a reed but vibrating with strange energy. He hums a melody that
+  bends the air. His eyes, when they find you, see everything.
+tags:
+  - friendly
+  - quest_giver
+  - eccentric
+components:
+  combatant:
+    health:
+      current: 60
+      max: 60
+    stats:
+      str: 4
+      dex: 12
+      sta: 8
+    level: 6
+  dialogue:
+    greeting: "Ha! The mountain sends another! Come in, come in, if you can find the door."
+    topics:
+      song:
+        text: "I sing the hundred thousand songs. Each one opens a different door. Which door do you seek?"
+      wisdom:
+        text: "Empty your cup before you fill it. Give away everything and you will have everything. Simple, yes?"
+      quest:
+        text: "Bring me nettle soup! I have eaten nothing else for twelve years. The monastery kitchen makes the best. Or... did."
+  quests:
+    - hermits_song

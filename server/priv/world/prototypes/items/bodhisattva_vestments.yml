@@ -1,0 +1,26 @@
+key: bodhisattva_vestments
+name: "Bodhisattva Vestments"
+type: item
+parent: base_item
+description: |
+  Robes of compassion woven from liberated suffering. They
+  embrace the wearer with the warmth of countless beings'
+  gratitude. To wear them is to carry their hopes.
+components:
+  armor:
+    defense: 12
+    slot: body
+    bonus:
+      - type: max_health
+        amount: 20
+  physical:
+    weight: 1
+  valuable:
+    base_price: 0
+    cannot_sell: true
+tags:
+  - item
+  - armor
+  - equippable
+  - final_reward
+  - sacred

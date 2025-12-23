@@ -1,0 +1,29 @@
+key: incense_of_clarity
+name: "Incense of Clarity"
+type: item
+parent: base_item
+description: |
+  Juniper and sandalwood blended with rare mountain herbs.
+  Its smoke dispels confusion and reveals hidden truths.
+components:
+  consumable:
+    effect: buff
+    buff_type: clarity
+    duration: 300
+    bonus:
+      - type: damage
+        amount: 5
+        vs_tags:
+          - ignorance
+    on_use_message: "The fragrant smoke clears your mind. You see through illusion."
+  physical:
+    weight: 0.1
+    stackable: true
+    max_stack: 5
+  valuable:
+    base_price: 25
+tags:
+  - item
+  - consumable
+  - buff
+  - incense

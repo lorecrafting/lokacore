@@ -1,0 +1,25 @@
+key: seal_fragment_aversion
+name: "Seal Fragment (Aversion)"
+type: item
+parent: base_item
+description: |
+  A shard of crystallized hatred, cold despite the flames
+  that still lick its surface. It pulses with red light,
+  seeking its lost parts.
+components:
+  seal_fragment:
+    type: aversion
+    combines_with:
+      - seal_fragment_attachment
+      - seal_fragment_ignorance
+    creates: heart_cave_key
+  physical:
+    weight: 0.1
+  valuable:
+    base_price: 0
+    cannot_sell: true
+tags:
+  - item
+  - quest_item
+  - key_item
+  - seal_fragment

@@ -1,0 +1,19 @@
+key: white_river_stone
+name: "White River Stone"
+type: item
+parent: base_item
+description: |
+  A smooth white stone from the waterfall pool, its surface
+  marked with natural patterns said to contain wisdom.
+components:
+  physical:
+    weight: 0.3
+    stackable: true
+    max_stack: 10
+  valuable:
+    base_price: 5
+tags:
+  - item
+  - material
+  - quest_item
+  - gathering

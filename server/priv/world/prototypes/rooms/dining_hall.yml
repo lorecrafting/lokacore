@@ -1,0 +1,21 @@
+key: dining_hall
+parent: base_room
+type: room
+name: "Dining Hall"
+description: |
+  Long wooden tables stretch across this modest hall, their surfaces
+  marked by generations of shared meals. The kitchen area at the far
+  end still holds the warmth of the morning's cooking fires, and
+  the scent of butter tea lingers in the air.
+
+  Simple wooden bowls and cups sit stacked near the entrance, ready
+  for the next gathering. Despite the current troubles, someone has
+  placed fresh wildflowers in a clay pot on the central table.
+exits:
+  east: main_courtyard
+spawns:
+  - prototype: elder_drolma
+tags:
+  - indoor
+  - monastery
+  - safe_zone

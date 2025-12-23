@@ -1,0 +1,40 @@
+key: teacher_lobsang
+name: "Teacher Lobsang"
+type: npc
+parent: base_npc
+description: |
+  A broad-shouldered monk with a gentle face, his robes stretched
+  across a frame built for protection, not aggression. He teaches
+  the Dharma Path - defense through understanding.
+tags:
+  - friendly
+  - trainer
+  - monastery
+  - defense
+components:
+  combatant:
+    health:
+      current: 140
+      max: 140
+    stats:
+      str: 10
+      dex: 8
+      sta: 18
+    level: 5
+  dialogue:
+    greeting: "The mountain stands unmoved by wind. So too must you stand."
+    topics:
+      training:
+        text: "The Dharma Path is patience made manifest. We endure, we protect, we do not break. I will show you how."
+      defense:
+        text: "A shield is not just for yourself. It is for everyone behind you."
+      quest:
+        text: "True effort requires reaching the peak at dawn. Bring me the sutra you find there, and I will teach you Fortitude."
+  teacher:
+    skills:
+      - shield_wall
+      - parry
+      - fortitude
+    mantras: []
+  quests:
+    - mountain_peak

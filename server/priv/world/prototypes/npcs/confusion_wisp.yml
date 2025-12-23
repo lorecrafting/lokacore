@@ -1,0 +1,31 @@
+key: confusion_wisp
+name: "Confusion Wisp"
+type: npc
+parent: base_npc
+description: |
+  A pale orb of light that dances erratically through the darkness,
+  leaving trails of disorienting luminescence. Its movements are
+  impossible to predict, its intentions unknowable.
+tags:
+  - hostile
+  - spirit
+  - ignorance
+  - cave
+components:
+  combatant:
+    level: 3
+    health:
+      current: 30
+      max: 30
+    stats:
+      str: 8
+      dex: 14
+      sta: 6
+    xp_value: 20
+  loot:
+    drops:
+      - item: wisp_light
+        chance: 0.25
+  behavior:
+    ai: erratic
+    inflicts_debuff: confusion

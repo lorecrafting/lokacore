@@ -1,0 +1,21 @@
+key: market
+parent: base_room
+type: room
+name: "Market"
+description: |
+  Colorful awnings stretch over a small plaza where merchants display
+  their wares on weathered wooden tables. The air buzzes with quiet
+  haggling and the clink of coins changing hands.
+
+  Despite the monastery's crisis, trade continues. Dried herbs, woven
+  blankets, and simple tools share space with the occasional curious
+  trinket from distant lands.
+exits:
+  west: village
+spawns:
+  - prototype: merchant_dorje
+tags:
+  - outdoor
+  - village
+  - safe_zone
+  - shop

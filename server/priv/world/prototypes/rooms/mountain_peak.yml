@@ -1,0 +1,28 @@
+key: mountain_peak
+parent: base_room
+type: room
+name: "Mountain Peak"
+description: |
+  The summit rises above the clouds, a stark crown of wind-scoured
+  stone. Prayer flags stream from a tall cairn, their colors vivid
+  against the endless blue sky. On clear days, ranges upon ranges
+  of mountains stretch to every horizon.
+
+  At dawn, when the first light touches this peak before any other
+  place in the valley, ancient texts speak of revelations granted
+  to those with eyes to see. The Sutra of Perfect Wisdom awaits
+  such a seeker.
+exits:
+  down: cliff_path
+tags:
+  - outdoor
+  - mountain
+  - sacred
+  - weather_affected
+  - quest_location
+components:
+  room_elements:
+    air: high
+  time_locked_items:
+    - item: sutra_of_perfect_wisdom
+      time: dawn

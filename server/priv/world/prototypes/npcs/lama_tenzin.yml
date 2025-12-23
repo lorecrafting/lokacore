@@ -1,0 +1,35 @@
+key: lama_tenzin
+name: "Lama Tenzin"
+type: npc
+parent: base_npc
+description: |
+  An ancient monk sits motionless, his form surrounded by a faint
+  golden glow. His breath is imperceptible, his expression serene
+  yet somehow troubled. He exists between worlds.
+tags:
+  - friendly
+  - quest_giver
+  - monastery
+  - trance
+components:
+  combatant:
+    health:
+      current: 200
+      max: 200
+    stats:
+      str: 6
+      dex: 6
+      sta: 20
+    level: 10
+  dialogue:
+    greeting: "[He does not respond. His eyes remain closed, his breath barely visible.]"
+    topics:
+      vision:
+        text: "[In your mind, you hear a distant voice: 'The path is within. Face what I could not face alone.']"
+      end_wisdom:
+        text: "You have done what I could not. The poisons are transformed, not destroyed. This is the wisdom path."
+      end_power:
+        text: "The darkness is scattered... but not transformed. It will return. Watch for it in yourself."
+  state:
+    trance: true
+    awakens_at: mara_defeated

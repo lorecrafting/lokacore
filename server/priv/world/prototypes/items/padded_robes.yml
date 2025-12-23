@@ -1,0 +1,20 @@
+key: padded_robes
+name: "Padded Robes"
+type: item
+parent: base_item
+description: |
+  Layered wool and cotton provide modest protection
+  against the mountain cold and clumsy blows alike.
+components:
+  armor:
+    defense: 6
+    slot: body
+  physical:
+    weight: 3
+  valuable:
+    base_price: 75
+tags:
+  - item
+  - armor
+  - equippable
+  - shop

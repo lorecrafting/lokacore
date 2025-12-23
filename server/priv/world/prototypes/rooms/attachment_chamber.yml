@@ -1,0 +1,28 @@
+key: attachment_chamber
+parent: base_room
+type: room
+name: "Chamber of Attachment"
+description: |
+  Golden light fills this chamber, emanating from piles of treasure
+  that line the walls. Coins, jewels, silks, and precious objects
+  gleam with impossible beauty. Every desire you have ever felt
+  seems to take physical form here.
+
+  Yet something is wrong. The treasures shift when you look away,
+  rearranging themselves. Phantom hands reach from the piles,
+  beckoning. This is Raga's domain - the realm of craving, where
+  attachment manifests as seductive illusion.
+exits:
+  south: preparation_chamber
+  north: ragas_core
+spawns:
+  - prototype: phantom_treasure
+tags:
+  - indoor
+  - cave
+  - ancient
+  - dim_light
+  - dangerous
+  - trial_chamber
+components:
+  on_enter_script: attachment_temptation

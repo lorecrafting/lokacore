@@ -1,0 +1,24 @@
+key: temple
+parent: base_room
+type: room
+name: "Temple"
+description: |
+  The temple's interior glows with soft golden light. Hundreds of
+  butter lamps flicker before a towering Buddha statue, its serene
+  face gazing down with infinite compassion. The air hangs thick
+  with sandalwood incense, and the low murmur of chanted sutras
+  seems to emanate from the walls themselves.
+
+  Silk thangkas depicting enlightened beings line the walls, their
+  colors still vibrant despite the passage of countless years. A
+  sense of profound peace pervades this sacred space.
+exits:
+  south: main_courtyard
+spawns:
+  - prototype: abbot_jampa
+  - prototype: master_chen
+tags:
+  - indoor
+  - monastery
+  - safe_zone
+  - sacred

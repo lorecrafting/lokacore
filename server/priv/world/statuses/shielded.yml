@@ -1,0 +1,19 @@
+key: shielded
+name: "Shielded"
+type: buff
+duration: 5
+stackable: false
+effects:
+  - trigger: passive
+    effect: stat_modify
+    stat: defense
+    modifier: 10
+  - trigger: on_damage_taken
+    effect: reflect_damage
+    percentage: 10
+display_icon: shield
+display_color: blue
+description: "A magical barrier protects you from harm."
+tags:
+  - protection
+  - defense

@@ -1,0 +1,20 @@
+key: monastery_gate
+parent: base_room
+type: room
+name: "Monastery Gate"
+description: |
+  Ancient stone pillars rise against the mountain sky, their surfaces
+  worn smooth by centuries of wind and prayer. Faded prayer flags
+  snap and flutter overhead, their mantras scattered to the winds.
+
+  Beyond the gate, the monastery sprawls across the mountainside,
+  its golden rooftops catching the light. The air carries the faint
+  scent of juniper incense from somewhere within.
+exits:
+  north: main_courtyard
+  south: cliff_path
+tags:
+  - outdoor
+  - starting_room
+  - monastery
+  - safe_zone

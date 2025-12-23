@@ -1,0 +1,39 @@
+key: master_chen
+name: "Master Chen"
+type: npc
+parent: base_npc
+description: |
+  A middle-aged warrior-monk with scarred hands and steady eyes.
+  His posture is perfect stillness, like a coiled spring. He
+  teaches the Buddha Path - transforming aggression into wisdom.
+tags:
+  - friendly
+  - trainer
+  - monastery
+  - combat
+components:
+  combatant:
+    health:
+      current: 120
+      max: 120
+    stats:
+      str: 16
+      dex: 14
+      sta: 12
+    level: 5
+  dialogue:
+    greeting: "Stance. Breath. Intent. Everything else follows."
+    topics:
+      training:
+        text: "The Buddha Path uses strength with wisdom. We do not fight out of anger, but out of necessity. I will teach you, if you are ready."
+      combat:
+        text: "Strike once, strike true. Every movement has purpose. Waste nothing."
+      philosophy:
+        text: "A warrior who fights for ego gains nothing. A warrior who fights for others gains everything."
+  teacher:
+    skills:
+      - power_strike
+      - critical_eye
+      - berserkers_focus
+    mantras:
+      - om_ah_hum_vajra_guru

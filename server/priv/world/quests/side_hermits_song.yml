@@ -1,0 +1,37 @@
+id: side_hermits_song
+name: "The Hermit's Song"
+description: |
+  The hermit Milarepa requires seven white river stones for a
+  special ceremony. A test of generosity - giving your time
+  and effort to help another.
+giver: hermit_milarepa
+type: side
+paramita: generosity
+level_requirement: 1
+objectives:
+  - id: talk_milarepa
+    type: talk
+    target_id: hermit_milarepa
+    description: "Speak with the Hermit Milarepa"
+    dialogue_topic: quest
+  - id: collect_stones
+    type: get_item
+    target_id: white_river_stone
+    target_count: 7
+    description: "Collect 7 White River Stones from the Waterfall Shrine"
+    location_hint: waterfall_shrine
+  - id: return_stones
+    type: talk
+    target_id: hermit_milarepa
+    description: "Return the stones to Milarepa"
+rewards:
+  xp: 75
+  insight: 1
+  items:
+    - wisdom_blade
+  teaches:
+    - defense_mantra
+journal_entries:
+  start: "Milarepa needs white river stones. They can be found at the waterfall."
+  collecting: "I've found some stones. I need seven in total."
+  complete: "The hermit thanks me with a song. I feel... lighter somehow."

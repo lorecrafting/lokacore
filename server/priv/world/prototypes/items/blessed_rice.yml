@@ -1,0 +1,23 @@
+key: blessed_rice
+name: "Blessed Rice"
+type: item
+parent: base_item
+description: |
+  Rice offered at the temple altar and blessed by morning
+  prayers. When eaten, it carries that blessing into the body.
+components:
+  consumable:
+    effect: heal
+    amount: 30
+    on_use_message: "The blessed rice fills you with warmth and peace."
+  physical:
+    weight: 0.3
+    stackable: true
+    max_stack: 10
+  valuable:
+    base_price: 15
+tags:
+  - item
+  - consumable
+  - healing
+  - shop

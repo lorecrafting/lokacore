@@ -1,0 +1,38 @@
+key: novice_pema
+name: "Novice Pema"
+type: npc
+parent: base_npc
+description: |
+  A young monk barely past childhood, with earnest eyes and a
+  determined set to her jaw. She attends Lama Tenzin's meditation
+  chamber, refusing to leave his side even as days pass.
+tags:
+  - friendly
+  - companion
+  - monastery
+components:
+  combatant:
+    health:
+      current: 40
+      max: 40
+    stats:
+      str: 6
+      dex: 10
+      sta: 6
+    level: 1
+  dialogue:
+    greeting: "You've come to help! I knew someone would come."
+    topics:
+      tenzin:
+        text: "He entered meditation willingly. I saw him prepare - he knew what he was facing. He left his journal behind... I think he wanted someone to find it."
+      join:
+        text: "Take me with you. I've served him since I was small. I know the caves better than anyone."
+      truth:
+        text: "The master spoke of Mara in his sleep before he descended. I think... I think he went to face his own demons."
+  companion:
+    can_join: true
+    combat_style: support
+    growth_arc: courage
+    abilities:
+      - minor_heal
+      - encourage

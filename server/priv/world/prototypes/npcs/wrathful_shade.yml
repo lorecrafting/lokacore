@@ -1,0 +1,31 @@
+key: wrathful_shade
+name: "Wrathful Shade"
+type: npc
+parent: base_npc
+description: |
+  A dark figure wreathed in crimson mist, its features twisted
+  into a permanent snarl of rage. The air around it crackles
+  with barely contained fury.
+tags:
+  - hostile
+  - undead
+  - aversion
+  - dangerous
+components:
+  combatant:
+    level: 3
+    health:
+      current: 35
+      max: 35
+    stats:
+      str: 12
+      dex: 8
+      sta: 8
+    xp_value: 20
+  loot:
+    drops:
+      - item: shade_fragment
+        chance: 0.25
+  behavior:
+    ai: aggressive
+    charges: true

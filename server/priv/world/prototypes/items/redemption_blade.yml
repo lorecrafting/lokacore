@@ -1,0 +1,28 @@
+key: redemption_blade
+name: "Redemption Blade"
+type: item
+parent: base_weapon
+description: |
+  Once a butcher's cleaver, transformed by vow and blessing into
+  an instrument of protection rather than harm. It gleams with
+  an inner light when shadows draw near.
+components:
+  weapon:
+    damage: 7
+    damage_type: slashing
+    speed: 1.0
+    bonus:
+      - type: damage
+        amount: 3
+        vs_tags:
+          - shadow
+          - undead
+  physical:
+    weight: 3
+  valuable:
+    base_price: 150
+tags:
+  - item
+  - weapon
+  - equippable
+  - quest_reward

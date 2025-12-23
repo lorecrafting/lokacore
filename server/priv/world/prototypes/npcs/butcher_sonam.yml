@@ -1,0 +1,34 @@
+key: butcher_sonam
+name: "Butcher Sonam"
+type: npc
+parent: base_npc
+description: |
+  A heavyset man with haunted eyes, his hands stained by a lifetime
+  of work he can no longer bear. He stands apart from the other
+  villagers, carrying a weight they cannot see.
+tags:
+  - friendly
+  - quest_giver
+  - village
+  - troubled
+components:
+  combatant:
+    health:
+      current: 90
+      max: 90
+    stats:
+      str: 14
+      dex: 8
+      sta: 10
+    level: 3
+  dialogue:
+    greeting: "Don't... don't come too close. The spirits know what I've done."
+    topics:
+      burden:
+        text: "A thousand lives. A thousand deaths by my hand. The monks say karma can be purified, but I feel their eyes on me still."
+      quest:
+        text: "The old stupa... they say offerings there can ease the passage of spirits. But I cannot go myself. Will you make an offering in my name?"
+      redemption:
+        text: "You would do this? For a butcher? Perhaps... perhaps there is hope after all."
+  quests:
+    - butchers_burden

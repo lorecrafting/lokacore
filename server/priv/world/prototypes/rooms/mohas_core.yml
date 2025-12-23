@@ -1,0 +1,29 @@
+key: mohas_core
+parent: base_room
+type: room
+name: "Moha's Core"
+description: |
+  A thousand versions of reality overlap here. The chamber exists
+  in all states at once - vast and cramped, bright and dark, full
+  and empty. Your own hands seem to belong to someone else.
+
+  Moha Mara stands at the center, or appears to. Dozens of copies
+  surround you, each identical, each claiming to be the true demon
+  of ignorance. Only the light of wisdom - the Om Tare Tuttare
+  mantra - can pierce this final veil and reveal the true form.
+exits:
+  north: ignorance_chamber
+spawns:
+  - prototype: moha_mara
+items:
+  - prototype: seal_fragment_ignorance
+  - prototype: vajra_armor
+tags:
+  - indoor
+  - cave
+  - ancient
+  - boss_room
+  - trial_chamber
+components:
+  room_elements:
+    shadow: high

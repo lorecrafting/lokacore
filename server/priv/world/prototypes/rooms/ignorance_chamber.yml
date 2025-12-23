@@ -1,0 +1,31 @@
+key: ignorance_chamber
+parent: base_room
+type: room
+name: "Chamber of Ignorance"
+description: |
+  Darkness swallows light here. Your torch illuminates only a
+  few feet before being consumed by shadows that seem almost
+  alive. The passage twists and doubles back, walls appearing
+  where none stood moments before.
+
+  Confusion Wisps drift through the murk, their pale light
+  leading nowhere. Mirror Illusions reflect distorted versions
+  of yourself, blocking the true path. This is Moha's domain -
+  the realm of delusion, where ignorance clouds all perception.
+exits:
+  north: preparation_chamber
+  south: mohas_core
+spawns:
+  - prototype: confusion_wisp
+  - prototype: mirror_illusion
+tags:
+  - indoor
+  - cave
+  - ancient
+  - dark
+  - dangerous
+  - trial_chamber
+components:
+  on_enter_script: ignorance_confusion
+  room_elements:
+    shadow: high

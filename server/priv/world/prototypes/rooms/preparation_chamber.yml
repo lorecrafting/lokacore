@@ -1,0 +1,26 @@
+key: preparation_chamber
+parent: base_room
+type: room
+name: "Preparation Chamber"
+description: |
+  A circular chamber opens at the crossing of three passages, each
+  leading into darkness. Ancient meditation cushions line the walls,
+  left here by seekers of ages past. A small cache of supplies sits
+  in an alcove - offerings from the monastery for those who would
+  face the trials ahead.
+
+  Three archways stand before you, each carved with different symbols:
+  gold coins to the north, flames to the east, a coiled serpent to
+  the south. The air pulses with latent energy, waiting.
+exits:
+  west: threshold
+  north: attachment_chamber
+  east: aversion_chamber
+  south: ignorance_chamber
+tags:
+  - indoor
+  - cave
+  - ancient
+  - dim_light
+  - safe_zone
+  - rest_point

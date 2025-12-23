@@ -1,0 +1,30 @@
+key: waterfall_shrine
+parent: base_room
+type: room
+name: "Waterfall Shrine"
+description: |
+  Crystal water cascades down the mountainside, filling a natural pool
+  worn smooth by ages of patient flow. A small shrine has been built
+  at the water's edge, offerings of flowers and incense placed on its
+  wet stones.
+
+  The air is thick with mist and the thunder of falling water. White
+  river stones gleam beneath the surface of the pool, their patterns
+  said to reveal truths to those who know how to read them.
+exits:
+  west: cliff_path
+spawns:
+  - prototype: lama_yeshe
+tags:
+  - outdoor
+  - sacred
+  - water
+  - offering_shrine
+  - gathering_node
+components:
+  room_elements:
+    water: high
+    stone: medium
+  offering_shrine:
+    type: attachment
+    bonus: 10

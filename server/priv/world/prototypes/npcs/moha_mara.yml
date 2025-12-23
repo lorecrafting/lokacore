@@ -1,0 +1,45 @@
+key: moha_mara
+name: "Moha Mara"
+type: npc
+parent: base_npc
+description: |
+  Dozens of identical figures surround you, each claiming to be
+  real, each moving differently. Which is true? Perhaps none.
+  Perhaps all. The demon of ignorance laughs with a thousand
+  voices.
+tags:
+  - hostile
+  - boss
+  - mini_boss
+  - ignorance
+  - mara
+components:
+  combatant:
+    level: 4
+    health:
+      current: 70
+      max: 70
+    stats:
+      str: 10
+      dex: 14
+      sta: 12
+    xp_value: 75
+  loot:
+    drops:
+      - item: seal_fragment_ignorance
+        chance: 1.0
+      - item: vajra_armor
+        chance: 1.0
+  behavior:
+    ai: illusionist
+    creates_copies: 5
+    only_true_takes_damage: true
+    revealed_by: om_tare_tuttare
+    weakness: wisdom_mantra
+  boss:
+    is_boss: true
+    phase_changes: 2
+    dialogue:
+      intro: "Which am I? Which are you? Do either of us truly exist?"
+      phase_2: "You cannot know! Knowledge itself is illusion!"
+      defeat: "Light... clarity... the veil... lifts..."

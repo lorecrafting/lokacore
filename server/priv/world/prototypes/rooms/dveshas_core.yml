@@ -1,0 +1,30 @@
+key: dveshas_core
+parent: base_room
+type: room
+name: "Dvesha's Core"
+description: |
+  The chamber burns with cold fire - hatred crystallized into
+  form. Every enemy you have ever known stands here in phantom
+  array, their faces twisted with malice. Old wounds ache, old
+  angers rise.
+
+  At the center, wreathed in flames that do not consume, stands
+  Dvesha Mara. The demon of aversion wears armor of solidified
+  rage, its eyes pits of endless fury. It reflects back every
+  strike with greater force - only patience can pierce its guard.
+exits:
+  west: aversion_chamber
+spawns:
+  - prototype: dvesha_mara
+items:
+  - prototype: seal_fragment_aversion
+  - prototype: dharma_edge
+tags:
+  - indoor
+  - cave
+  - ancient
+  - boss_room
+  - trial_chamber
+components:
+  room_elements:
+    fire: high

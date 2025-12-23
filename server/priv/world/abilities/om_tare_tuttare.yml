@@ -1,0 +1,26 @@
+key: om_tare_tuttare
+name: "Om Tare Tuttare Ture Soha"
+type: utility
+cost:
+  insight: 2
+cooldown: 10
+target: area
+effects:
+  - type: dispel
+    dispels:
+      - illusion
+      - confusion
+      - fear
+  - type: reveal
+    reveals:
+      - hidden_enemy
+      - mirror_illusion
+      - moha_true_form
+description: "Tara's mantra dispels illusions and fear, revealing truth."
+cast_message: "Green light suffuses the area as illusions fade to nothing."
+learn_from: lama_yeshe
+tags:
+  - mantra
+  - dispel
+  - tara
+  - wisdom

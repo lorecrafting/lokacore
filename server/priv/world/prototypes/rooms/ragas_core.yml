@@ -1,0 +1,26 @@
+key: ragas_core
+parent: base_room
+type: room
+name: "Raga's Core"
+description: |
+  At the heart of attachment's domain, the illusions intensify.
+  Everything you have ever wanted materializes before you - wealth,
+  love, power, beauty - all within reach. The air itself thrums
+  with desire.
+
+  In the center of the chamber, a figure of pure golden light
+  takes shape. Raga Mara, the demon of craving, wears a thousand
+  faces, each one reflecting your deepest longings. Its voice
+  is honey and promise.
+exits:
+  south: attachment_chamber
+spawns:
+  - prototype: raga_mara
+items:
+  - prototype: seal_fragment_attachment
+tags:
+  - indoor
+  - cave
+  - ancient
+  - boss_room
+  - trial_chamber

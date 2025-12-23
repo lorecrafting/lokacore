@@ -1,0 +1,26 @@
+key: fireball
+name: "Fireball"
+type: offensive
+cost:
+  mana: 15
+cooldown: 3
+target: enemy
+effects:
+  - type: damage
+    amount: 25
+    damage_type: fire
+    scaling: str
+    scaling_factor: 0.5
+  - type: status
+    status: burning
+    duration: 3
+    potency: 1
+requirements:
+  level: 5
+description: "Hurls a ball of flame at the target, potentially setting them ablaze."
+cast_message: "You conjure flames and hurl them at {target}!"
+fail_message: "Your flames sputter and die."
+tags:
+  - fire
+  - elemental
+  - aoe_potential

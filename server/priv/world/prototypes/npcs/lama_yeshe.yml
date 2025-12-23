@@ -1,0 +1,39 @@
+key: lama_yeshe
+name: "Lama Yeshe"
+type: npc
+parent: base_npc
+description: |
+  An ethereal figure draped in mist from the waterfall, her eyes
+  holding the depth of still pools. She teaches the Sangha Path -
+  magic through connection with all beings.
+tags:
+  - friendly
+  - trainer
+  - sacred
+  - magic
+components:
+  combatant:
+    health:
+      current: 90
+      max: 90
+    stats:
+      str: 6
+      dex: 10
+      sta: 10
+    level: 5
+  dialogue:
+    greeting: "The water falls and never stops. Like compassion, it flows to all beings equally."
+    topics:
+      training:
+        text: "The Sangha Path draws power from connection - to all beings, to all elements. Separation is illusion. I will teach you to see through it."
+      magic:
+        text: "Magic is not forcing the world to obey. It is asking, and being answered."
+      mantra:
+        text: "Om Tare Tuttare Ture Soha. Tara dispels all fears, all illusions. In the caves, this mantra will save your life."
+  teacher:
+    skills:
+      - heal
+      - flame_touch
+      - arcane_shield
+    mantras:
+      - om_tare_tuttare

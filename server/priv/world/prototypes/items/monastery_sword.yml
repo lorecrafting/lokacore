@@ -1,0 +1,22 @@
+key: monastery_sword
+name: "Monastery Sword"
+type: item
+parent: base_weapon
+description: |
+  A temple guardian's blade, its hilt wrapped in prayer-blessed
+  silk. Though weapons are rarely used within these walls, when
+  they must be drawn, they are drawn with purpose.
+components:
+  weapon:
+    damage: 12
+    damage_type: slashing
+    speed: 1.0
+  physical:
+    weight: 3
+  valuable:
+    base_price: 120
+tags:
+  - item
+  - weapon
+  - equippable
+  - shop

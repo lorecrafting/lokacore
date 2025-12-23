@@ -1,0 +1,30 @@
+key: tenzins_cell
+parent: base_room
+type: room
+name: "Tenzin's Cell"
+description: |
+  The master's private meditation chamber is smaller than expected,
+  barely large enough for a single cushion and a low writing desk.
+  Yet the space feels vast somehow, as if it contains more than
+  stone walls should allow.
+
+  Lama Tenzin sits motionless on his cushion, eyes closed, breath
+  so subtle he might be carved from stillness itself. A worn
+  meditation journal lies open on the desk, its pages covered in
+  cramped script.
+
+  A draft of cold air flows from a narrow passage in the eastern
+  wall, carrying the scent of deep earth.
+exits:
+  west: meditation_hall
+  east: cave_entrance
+spawns:
+  - prototype: lama_tenzin
+  - prototype: novice_pema
+items:
+  - prototype: meditation_journal
+tags:
+  - indoor
+  - monastery
+  - safe_zone
+  - quest_location

@@ -1,0 +1,29 @@
+key: aversion_chamber
+parent: base_room
+type: room
+name: "Chamber of Aversion"
+description: |
+  Heat blasts from this chamber, waves of anger made manifest.
+  The walls are carved with scenes of battle, betrayal, and
+  vengeance - every wrong ever suffered, every slight unavenged.
+  The stone itself seems to seethe with ancient rage.
+
+  Fury Guardians patrol the passage, wrathful spirits bound to
+  this place, attacking all who dare enter. This is Dvesha's
+  domain - the realm of hatred, where aversion feeds upon itself.
+exits:
+  west: preparation_chamber
+  east: dveshas_core
+spawns:
+  - prototype: fury_guardian
+tags:
+  - indoor
+  - cave
+  - ancient
+  - dim_light
+  - dangerous
+  - trial_chamber
+components:
+  on_enter_script: aversion_anger
+  room_elements:
+    fire: medium

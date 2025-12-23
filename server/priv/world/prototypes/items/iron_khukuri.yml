@@ -1,0 +1,21 @@
+key: iron_khukuri
+name: "Iron Khukuri"
+type: item
+parent: base_weapon
+description: |
+  A curved blade from the mountain kingdoms, its edge keen and
+  its balance perfect for quick strikes.
+components:
+  weapon:
+    damage: 8
+    damage_type: slashing
+    speed: 1.1
+  physical:
+    weight: 2
+  valuable:
+    base_price: 50
+tags:
+  - item
+  - weapon
+  - equippable
+  - shop

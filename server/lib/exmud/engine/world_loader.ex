@@ -8,7 +8,7 @@ defmodule Exmud.Engine.WorldLoader do
       {:ok, stats} = WorldLoader.spawn_world()
 
       # Spawn a connected chain of rooms starting from a room
-      {:ok, rooms} = WorldLoader.spawn_room_chain("town_square")
+      {:ok, rooms} = WorldLoader.spawn_room_chain("monastery_gate")
 
       # Validate all references in prototypes
       {:ok, issues} = WorldLoader.validate()
@@ -24,7 +24,7 @@ defmodule Exmud.Engine.WorldLoader do
 
   alias Exmud.Engine.{PrototypeLoader, Spawner, Entities, WorldGraph}
 
-  @starting_room "town_square"
+  @starting_room "monastery_gate"
 
   @doc """
   Spawn the entire game world from prototypes.
@@ -34,7 +34,7 @@ defmodule Exmud.Engine.WorldLoader do
 
   ## Options
 
-  - `:starting_room` - The prototype key of the starting room (default: "town_square")
+  - `:starting_room` - The prototype key of the starting room (default: "monastery_gate")
 
   ## Returns
 

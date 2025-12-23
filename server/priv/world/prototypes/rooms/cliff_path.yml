@@ -1,0 +1,24 @@
+key: cliff_path
+parent: base_room
+type: room
+name: "Cliff Path"
+description: |
+  A narrow path carved into the living rock winds along the cliff face,
+  barely wide enough for single file. Loose stones skitter away into
+  the void below where mist obscures the valley floor.
+
+  Wind howls through gaps in the stone, carrying whispers that might be
+  prayers or warnings. Wrathful spirits are said to haunt these heights,
+  guardians or remnants of some ancient conflict.
+exits:
+  south: monastery_gate
+  north: hermits_cave
+  east: waterfall_shrine
+  up: mountain_peak
+spawns:
+  - prototype: wrathful_shade
+tags:
+  - outdoor
+  - dangerous
+  - mountain
+  - weather_affected

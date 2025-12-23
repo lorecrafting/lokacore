@@ -1,0 +1,24 @@
+key: meditation_journal
+name: "Meditation Journal"
+type: item
+parent: base_item
+description: |
+  Lama Tenzin's personal journal, filled with his cramped
+  handwriting. The final entries describe preparations for
+  a deep meditation journey - and the dangers that await.
+components:
+  readable:
+    text: |
+      "The Three Poisons have grown strong. They feed on our
+      neglect. I must face them directly, in the place where
+      they were born. If I fail... find one who walks the
+      middle way. Give them my blessing. The caves will open."
+  physical:
+    weight: 0.5
+  valuable:
+    base_price: 0
+    cannot_sell: true
+tags:
+  - item
+  - quest_item
+  - key_item

@@ -1,0 +1,19 @@
+key: tayata_om_bekanze
+name: "Tayata Om Bekanze"
+type: healing
+cost:
+  insight: 1
+cooldown: 5
+target: self_or_ally
+effects:
+  - type: heal
+    amount: 20
+    scaling: insight
+    scaling_factor: 2
+description: "The Medicine Buddha's healing mantra brings restoration."
+cast_message: "You invoke the Medicine Buddha's blessing. Warmth spreads through the body."
+learn_from: elder_drolma
+tags:
+  - mantra
+  - healing
+  - medicine_buddha

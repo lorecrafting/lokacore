@@ -1,0 +1,20 @@
+key: guest_hall
+parent: base_room
+type: room
+name: "Guest Hall"
+description: |
+  Simple wooden beds line the walls of this modest dormitory, each
+  made with care and covered in wool blankets woven with traditional
+  patterns. Small storage chests sit at the foot of each bed, their
+  brass fittings dulled by years of use.
+
+  Through the window, the main courtyard is visible below. The room
+  smells faintly of cedar and dried herbs, a welcoming respite from
+  the mountain cold.
+exits:
+  south: main_courtyard
+tags:
+  - indoor
+  - monastery
+  - safe_zone
+  - rest_point

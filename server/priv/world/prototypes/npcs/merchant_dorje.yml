@@ -1,0 +1,43 @@
+key: merchant_dorje
+name: "Merchant Dorje"
+type: npc
+parent: base_npc
+description: |
+  A weathered trader with shrewd eyes and a ready smile, his pack
+  bulging with goods from distant valleys. He has traveled every
+  mountain path and lived to profit from it.
+tags:
+  - friendly
+  - merchant
+  - village
+components:
+  combatant:
+    health:
+      current: 70
+      max: 70
+    stats:
+      str: 10
+      dex: 12
+      sta: 8
+    level: 3
+  dialogue:
+    greeting: "Welcome, friend! The best prices this side of the mountains, I guarantee it."
+    topics:
+      trade:
+        text: "Weapons, armor, supplies - I have what you need. The caves are dangerous, but Dorje's goods keep travelers alive."
+      tips:
+        text: "Butter lamps for the dark places. Incense for the spirits. And always, always carry extra tea."
+      monastery:
+        text: "Bad business, this crisis. No pilgrims, no trade. But I stay. These people need supplies more than ever."
+  shop:
+    sells:
+      - wooden_staff
+      - cloth_robe
+      - butter_lamp
+      - incense_bundle
+      - butter_tea
+      - healing_herbs
+    buys:
+      - ghost_essence
+      - shade_fragment
+      - wisp_light

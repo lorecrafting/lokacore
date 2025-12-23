@@ -1,0 +1,45 @@
+key: dvesha_mara
+name: "Dvesha Mara"
+type: npc
+parent: base_npc
+description: |
+  A towering figure armored in crystallized hatred, flames that
+  do not burn wreathing its form. Every enemy you have ever
+  faced, every wrong ever done to you, reflects in its eyes.
+  Its voice is steel and vengeance.
+tags:
+  - hostile
+  - boss
+  - mini_boss
+  - aversion
+  - mara
+components:
+  combatant:
+    level: 4
+    health:
+      current: 90
+      max: 90
+    stats:
+      str: 16
+      dex: 8
+      sta: 10
+    xp_value: 75
+  loot:
+    drops:
+      - item: seal_fragment_aversion
+        chance: 1.0
+      - item: dharma_edge
+        chance: 1.0
+  behavior:
+    ai: retaliator
+    reflects_reckless_damage: true
+    weakened_by_defend: true
+    weakness: patience
+    weakness: non_reactivity
+  boss:
+    is_boss: true
+    phase_changes: 2
+    dialogue:
+      intro: "THEY WRONGED YOU. Feel it. Let the anger in. STRIKE ME."
+      phase_2: "Your patience is weakness! How can you not hate?!"
+      defeat: "No... anger... this cannot... be..."

@@ -1,0 +1,16 @@
+key: regenerating
+name: "Regenerating"
+type: buff
+duration: 8
+stackable: true
+max_stacks: 2
+effects:
+  - trigger: on_turn_end
+    effect: heal
+    amount: 5
+display_icon: heal
+display_color: green
+description: "Your wounds slowly heal over time."
+tags:
+  - healing
+  - regen

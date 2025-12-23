@@ -1,0 +1,20 @@
+key: heal
+name: "Heal"
+type: defensive
+cost:
+  mana: 20
+cooldown: 4
+target: self
+effects:
+  - type: heal
+    amount: 40
+    scaling: sta
+    scaling_factor: 0.8
+requirements:
+  level: 2
+description: "Restores health to yourself through magical healing."
+cast_message: "You channel healing energy into your body."
+tags:
+  - healing
+  - restoration
+  - self

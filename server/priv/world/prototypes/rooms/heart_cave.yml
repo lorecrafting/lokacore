@@ -1,0 +1,33 @@
+key: heart_cave
+parent: base_room
+type: room
+name: "Heart Cave"
+description: |
+  Beyond the trials, at the mountain's very heart, lies this
+  sacred chamber. Here, where the three poisons originated,
+  here where they can be finally overcome.
+
+  Lama Tenzin sits in deep meditation at the cave's center,
+  his form surrounded by a sphere of golden light. Before him,
+  darkness coalesces into something vast and terrible - Mara
+  the Deceiver, lord of all delusion, wearing a crown of
+  combined craving, hatred, and ignorance.
+
+  The three Seal Fragments resonate in your possession. The
+  final confrontation awaits.
+exits:
+  up: preparation_chamber
+locks:
+  enter: "has_item(seal_fragment_attachment) AND has_item(seal_fragment_aversion) AND has_item(seal_fragment_ignorance)"
+spawns:
+  - prototype: lama_tenzin_meditating
+  - prototype: mara_the_deceiver
+tags:
+  - indoor
+  - cave
+  - ancient
+  - boss_room
+  - final_chamber
+  - quest_location
+components:
+  on_enter_script: mara_revelation

@@ -1,0 +1,20 @@
+key: protectors_mail
+name: "Protector's Mail"
+type: item
+parent: base_item
+description: |
+  Lamellar armor worn by temple guardians, its metal plates
+  inscribed with protective mantras. Heavy but reliable.
+components:
+  armor:
+    defense: 10
+    slot: body
+  physical:
+    weight: 8
+  valuable:
+    base_price: 250
+tags:
+  - item
+  - armor
+  - equippable
+  - shop

@@ -1,0 +1,32 @@
+key: hungry_ghost
+name: "Hungry Ghost"
+type: npc
+parent: base_npc
+description: |
+  A translucent figure with hollow eyes and grasping hands, its
+  form flickering like a guttering candle. It drifts toward you,
+  moaning with endless hunger that can never be satisfied.
+tags:
+  - hostile
+  - undead
+  - attachment
+  - cemetery
+components:
+  combatant:
+    level: 2
+    health:
+      current: 25
+      max: 25
+    stats:
+      str: 6
+      dex: 12
+      sta: 4
+    xp_value: 15
+  loot:
+    drops:
+      - item: ghost_essence
+        chance: 0.3
+  behavior:
+    ai: grasping
+    can_be_calmed: true
+    calmed_by: offering

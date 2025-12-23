@@ -1,0 +1,48 @@
+id: side_restless_spirits
+name: "Restless Spirits"
+description: |
+  Hungry ghosts haunt the cemetery, preventing proper funeral
+  rites. Violence only feeds their hunger. Find another way.
+  A lesson in patience - that not all problems yield to force.
+giver: abbot_jampa
+type: side
+paramita: patience
+level_requirement: 2
+objectives:
+  - id: visit_cemetery
+    type: go_to
+    target_id: cemetery
+    description: "Visit the Cemetery at dusk"
+    time_required: dusk
+  - id: attempt_fight
+    type: kill
+    target_id: hungry_ghost
+    target_count: 3
+    description: "Attempt to defeat the hungry ghosts"
+    note: "They respawn endlessly"
+    fail_forward: true
+  - id: learn_truth
+    type: talk
+    target_id: abbot_jampa
+    description: "Return to the Abbot and learn the truth"
+    dialogue_topic: ghosts
+  - id: get_offering
+    type: get_item
+    target_id: offering_rice
+    description: "Obtain offering rice from Elder Drolma"
+    source: elder_drolma
+  - id: peaceful_resolution
+    type: use_item
+    item_id: offering_rice
+    location: cemetery
+    description: "Make an offering to the hungry ghosts"
+rewards:
+  xp: 125
+  insight: 1
+  items:
+    - ghost_shroud
+journal_entries:
+  start: "Ghosts haunt the cemetery. I should investigate at dusk."
+  fight_failed: "Fighting is pointless - they simply return. There must be another way."
+  abbot_wisdom: "The Abbot speaks of offerings. Violence feeds their hunger; generosity calms it."
+  complete: "The ghosts are at peace. Patience and compassion succeed where force failed."

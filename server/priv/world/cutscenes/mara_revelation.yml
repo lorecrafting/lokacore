@@ -1,0 +1,42 @@
+id: mara_revelation
+name: "Mara Revealed"
+trigger:
+  type: enter_room
+  location: heart_cave
+  condition: "player.has_all_seals() && !player.has_flag('mara_revealed')"
+sequence:
+  - type: fade_out
+    duration: 1
+  - type: narration
+    text: "Tenzin sits motionless, surrounded by swirling darkness."
+  - type: pause
+    duration: 2
+  - type: narration
+    text: "The darkness coalesces into a figure - your figure."
+  - type: pause
+    duration: 1
+  - type: dialogue
+    speaker: mara
+    text: "I am Mara."
+  - type: dialogue
+    speaker: mara
+    text: "I am everything you fear you are."
+  - type: dialogue
+    speaker: mara
+    text: "I am the lie you believe is truth."
+  - type: pause
+    duration: 1
+  - type: dialogue
+    speaker: mara
+    text: "Face me."
+  - type: fade_in
+    duration: 1
+  - type: spawn_enemy
+    enemy: mara_the_deceiver
+    hostile: true
+effects:
+  - type: set_flag
+    flag: mara_revealed
+    value: true
+  - type: start_combat
+    enemy: mara_the_deceiver

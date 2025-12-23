@@ -1,0 +1,21 @@
+key: summon_familiar
+name: "Summon Familiar"
+type: utility
+cost:
+  mana: 40
+cooldown: 20
+target: room
+effects:
+  - type: summon
+    prototype_key: familiar_spirit
+    count: 1
+    duration: 30
+    allegiance: friendly
+requirements:
+  level: 8
+description: "Summons a magical familiar to aid you in battle."
+cast_message: "You call forth a spirit from the ethereal plane."
+tags:
+  - summoning
+  - companion
+  - duration

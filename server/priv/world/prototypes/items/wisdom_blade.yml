@@ -1,0 +1,26 @@
+key: wisdom_blade
+name: "Wisdom Blade"
+type: item
+parent: base_weapon
+description: |
+  A singing blade forged in the hermit's cave, its edge keen
+  enough to cut through illusion itself. Each strike resonates
+  with crystalline clarity.
+components:
+  weapon:
+    damage: 10
+    damage_type: slashing
+    speed: 0.9
+    bonus:
+      - type: insight
+        amount: 1
+        on: kill
+  physical:
+    weight: 2
+  valuable:
+    base_price: 200
+tags:
+  - item
+  - weapon
+  - equippable
+  - quest_reward

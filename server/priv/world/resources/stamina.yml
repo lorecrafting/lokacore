@@ -1,0 +1,9 @@
+key: stamina
+name: "Stamina"
+max_formula: "100 + sta * 5"
+regen_rate: 5
+regen_condition: always
+color: green
+description: "Physical endurance used for running, fighting, and physical abilities."
+min_value: 0
+starts_full: true

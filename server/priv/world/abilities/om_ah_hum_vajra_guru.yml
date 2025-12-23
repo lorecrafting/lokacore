@@ -1,0 +1,22 @@
+key: om_ah_hum_vajra_guru
+name: "Om Ah Hum Vajra Guru"
+type: buff
+cost:
+  insight: 1
+cooldown: 30
+duration: 60
+target: self
+effects:
+  - type: stat_buff
+    stat: attack
+    amount: 5
+  - type: stat_buff
+    stat: critical_chance
+    amount: 10
+description: "Padmasambhava's mantra empowers the warrior's strikes."
+cast_message: "Diamond-hard resolve fills your being. Your strikes will find their mark."
+learn_from: master_chen
+tags:
+  - mantra
+  - combat
+  - padmasambhava

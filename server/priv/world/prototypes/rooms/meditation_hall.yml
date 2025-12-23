@@ -1,0 +1,24 @@
+key: meditation_hall
+parent: base_room
+type: room
+name: "Meditation Hall"
+description: |
+  Rows of worn meditation cushions face a simple altar bearing a
+  single lotus flower in a bronze vase. The hall is austere yet
+  welcoming, its wooden floors polished by countless hours of
+  seated practice. Narrow windows admit shafts of mountain light
+  that fall like silent blessings.
+
+  The air is utterly still here, as if the room itself holds its
+  breath. A doorway in the eastern wall leads to the private cells
+  beyond.
+exits:
+  west: main_courtyard
+  east: tenzins_cell
+spawns:
+  - prototype: teacher_lobsang
+tags:
+  - indoor
+  - monastery
+  - safe_zone
+  - meditation

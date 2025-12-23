@@ -1,0 +1,39 @@
+key: elder_drolma
+name: "Elder Drolma"
+type: npc
+parent: base_npc
+description: |
+  An ancient nun whose face is a map of wrinkles, each line a story.
+  She moves with deliberate grace, her clouded eyes seeing more than
+  most with clear sight. She tends the dining hall as she has for
+  sixty years.
+tags:
+  - friendly
+  - lore
+  - monastery
+components:
+  combatant:
+    health:
+      current: 80
+      max: 80
+    stats:
+      str: 4
+      dex: 4
+      sta: 10
+    level: 3
+  dialogue:
+    greeting: "Come, sit. Even in dark times, we must eat. Take some tea."
+    topics:
+      lore:
+        text: "These caves are older than the monastery. The first teachers came here to face themselves. Mara lives in us all, child."
+      teaching:
+        text: "The Three Poisons - attachment, aversion, ignorance. They are not enemies to destroy, but teachers to learn from."
+      offerings:
+        text: "Take this rice. In the caves, offerings have power. What you give freely cannot be taken from you."
+  teacher:
+    skills: []
+    mantras:
+      - tayata_om_bekanze
+  gives_items:
+    - offering_rice
+    - butter_tea

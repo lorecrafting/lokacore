@@ -1,0 +1,21 @@
+key: threshold
+parent: base_room
+type: room
+name: "Threshold"
+description: |
+  Beyond the ancient doorway, the world changes. The mountain stone
+  gives way to walls carved with symbols older than the monastery
+  itself - mandalas, protective deities, warnings in forgotten scripts.
+
+  Butter lamps flicker in wall niches, their flames casting dancing
+  shadows across the carvings. The air is still and cold, carrying
+  the weight of ages. Whatever lies ahead, there is no mistaking
+  that this is sacred ground.
+exits:
+  west: cave_entrance
+  east: preparation_chamber
+tags:
+  - indoor
+  - cave
+  - ancient
+  - dim_light

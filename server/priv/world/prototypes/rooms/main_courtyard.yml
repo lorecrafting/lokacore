@@ -1,0 +1,25 @@
+key: main_courtyard
+parent: base_room
+type: room
+name: "Main Courtyard"
+description: |
+  A broad courtyard of worn flagstones opens before you, embraced
+  by the monastery's whitewashed walls. At its heart, an ancient
+  cherry tree spreads its branches over a moss-covered fountain,
+  its waters trickling with patient persistence.
+
+  Buildings surround the courtyard: the golden-roofed temple to the
+  north, the meditation hall to the east, the dining hall to the west,
+  and a modest guest hall tucked in the northeast corner. The main
+  gate lies to the south.
+exits:
+  north: temple
+  east: meditation_hall
+  west: dining_hall
+  northeast: guest_hall
+  south: monastery_gate
+tags:
+  - outdoor
+  - monastery
+  - safe_zone
+  - central_hub

@@ -1,0 +1,48 @@
+key: mara_the_deceiver
+name: "Mara the Deceiver"
+type: npc
+parent: base_npc
+description: |
+  The three aspects merge into one terrible form - a being of
+  impossible beauty and ugliness, calm and rage, clarity and
+  confusion. It wears a crown of combined craving, hatred, and
+  ignorance. The lord of all delusion speaks with your own voice.
+tags:
+  - hostile
+  - boss
+  - final_boss
+  - mara
+components:
+  combatant:
+    level: 6
+    health:
+      current: 200
+      max: 200
+    stats:
+      str: 18
+      dex: 12
+      sta: 16
+    xp_value: 300
+  loot:
+    drops:
+      - item: enlightenment_seal
+        chance: 1.0
+      - item: bodhisattva_vestments
+        chance: 1.0
+  behavior:
+    ai: unified_mara
+    uses_all_mara_abilities: true
+    insight_weakens: true
+    insight_damage_percent: 10
+    cannot_die_by_violence_alone: true
+    final_choice: destroy_or_liberate
+  boss:
+    is_boss: true
+    is_final_boss: true
+    phase_changes: 3
+    dialogue:
+      intro: "At last. I have worn many faces for you. Shall I wear yours?"
+      phase_2: "You think you know yourself? You know NOTHING. I AM you!"
+      phase_3: "What... what is this feeling? Compassion? For ME?"
+      defeat_power: "You have destroyed me. For now. I will return. I always return."
+      defeat_wisdom: "You... liberate me? Is this... peace? Thank you, bodhisattva. Thank you."

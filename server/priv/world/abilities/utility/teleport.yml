@@ -1,0 +1,19 @@
+key: teleport
+name: "Teleport"
+type: utility
+cost:
+  mana: 50
+cooldown: 10
+target: self
+effects:
+  - type: teleport
+    room_key: recall_point
+    message: "Reality bends around you as you are whisked away."
+requirements:
+  level: 10
+description: "Instantly transports you to your recall point."
+cast_message: "You speak the words of power and vanish in a flash of light."
+tags:
+  - movement
+  - escape
+  - high_level

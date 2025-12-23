@@ -1,0 +1,30 @@
+key: sutra_of_perfect_wisdom
+name: "Sutra of Perfect Wisdom"
+type: item
+parent: base_item
+description: |
+  An ancient text revealed by dawn light on the mountain peak.
+  Its words seem to shimmer and change, always offering exactly
+  the teaching needed in this moment.
+components:
+  readable:
+    text: |
+      "Form is emptiness, emptiness is form. There is no
+      ignorance and no ending of ignorance. No suffering,
+      no origin, no cessation, no path. No wisdom and no
+      attainment. Gate gate paragate parasamgate bodhi svaha."
+  collectible:
+    type: sutra
+    bonus:
+      - type: insight
+        amount: 2
+  physical:
+    weight: 0.3
+  valuable:
+    base_price: 0
+    cannot_sell: true
+tags:
+  - item
+  - collectible
+  - sutra
+  - sacred

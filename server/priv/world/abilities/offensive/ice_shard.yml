@@ -1,0 +1,23 @@
+key: ice_shard
+name: "Ice Shard"
+type: offensive
+cost:
+  mana: 10
+cooldown: 2
+target: enemy
+effects:
+  - type: damage
+    amount: 18
+    damage_type: ice
+  - type: debuff
+    stat: dex
+    modifier: 3
+    duration: 2
+requirements:
+  level: 3
+description: "Launches a sharp shard of ice that slows the target."
+cast_message: "You fling a razor-sharp ice shard at {target}!"
+tags:
+  - ice
+  - elemental
+  - slow

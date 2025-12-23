@@ -1,0 +1,23 @@
+key: old_stupa
+parent: base_room
+type: room
+name: "Old Stupa"
+description: |
+  An ancient stupa rises from the hillside, its whitewashed surface
+  cracked and weathered by centuries of mountain storms. The all-seeing
+  eyes painted on its spire gaze serenely in four directions, their
+  gold leaf long since worn away.
+
+  A stone offering platform sits before the monument, its surface
+  blackened by countless butter lamps. This place feels old beyond
+  memory, a link to the earliest days of dharma in these mountains.
+exits:
+  west: cemetery
+tags:
+  - outdoor
+  - sacred
+  - offering_shrine
+components:
+  offering_shrine:
+    type: aversion
+    bonus: 10

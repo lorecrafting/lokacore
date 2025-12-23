@@ -1,0 +1,23 @@
+key: hermits_cave
+parent: base_room
+type: room
+name: "Hermit's Cave"
+description: |
+  A natural cave opens in the cliff face, its entrance marked by faded
+  prayer flags and the smoke stains of countless fires. Within, the
+  space has been made barely habitable: a worn meditation cushion, a
+  small hearth, a few scattered texts.
+
+  The hermit who dwells here has achieved what most only dream of -
+  complete renunciation of worldly concerns. His songs echo off the
+  stone walls at dawn and dusk, strange melodies that seem to bend
+  the air itself.
+exits:
+  south: cliff_path
+spawns:
+  - prototype: hermit_milarepa
+tags:
+  - indoor
+  - cave
+  - safe_zone
+  - quest_location

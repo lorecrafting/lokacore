@@ -1,0 +1,22 @@
+key: monks_robes
+name: "Monk's Robes"
+type: item
+parent: base_item
+description: |
+  Saffron robes blessed by the monastery, their fabric
+  woven with protective prayers. A gift from the temple
+  to those who would face darkness.
+components:
+  armor:
+    defense: 3
+    slot: body
+  physical:
+    weight: 1
+  valuable:
+    base_price: 25
+    cannot_sell: true
+tags:
+  - item
+  - armor
+  - equippable
+  - gift

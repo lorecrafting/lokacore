@@ -1,0 +1,39 @@
+id: side_butchers_burden
+name: "The Butcher's Burden"
+description: |
+  Butcher Sonam carries the weight of countless lives taken.
+  Help him find a path to redemption. A lesson in ethics -
+  that transformation is always possible.
+giver: butcher_sonam
+type: side
+paramita: ethics
+level_requirement: 1
+objectives:
+  - id: hear_confession
+    type: talk
+    target_id: butcher_sonam
+    description: "Listen to Sonam's confession"
+    dialogue_topic: burden
+  - id: consult_drolma
+    type: talk
+    target_id: elder_drolma
+    description: "Consult Elder Drolma about purification"
+    dialogue_topic: karma
+  - id: go_stupa
+    type: go_to
+    target_id: old_stupa
+    description: "Accompany Sonam to the Old Stupa"
+  - id: witness_vow
+    type: trigger
+    trigger_id: sonam_vow_ceremony
+    description: "Witness Sonam's vow ceremony"
+rewards:
+  xp: 100
+  insight: 1
+  karma: wisdom
+  items:
+    - redemption_blade
+journal_entries:
+  start: "Sonam seeks redemption for his past. Perhaps Drolma can help."
+  drolma_advice: "Drolma speaks of offerings at the old stupa."
+  complete: "Sonam has taken a vow. His cleaver becomes a blade of protection."

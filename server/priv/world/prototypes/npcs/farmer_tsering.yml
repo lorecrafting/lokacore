@@ -1,0 +1,31 @@
+key: farmer_tsering
+name: "Farmer Tsering"
+type: npc
+parent: base_npc
+description: |
+  A lean farmer with sun-darkened skin and calloused hands, his
+  simple clothes patched many times over. He works the terraced
+  fields below the monastery with quiet contentment.
+tags:
+  - friendly
+  - village
+  - atmosphere
+components:
+  combatant:
+    health:
+      current: 60
+      max: 60
+    stats:
+      str: 12
+      dex: 8
+      sta: 10
+    level: 2
+  dialogue:
+    greeting: "Good day to you. The barley grows well this year, despite everything."
+    topics:
+      wisdom:
+        text: "The monastery folk talk of high things - emptiness, enlightenment. Me, I just plant seeds and watch them grow. Maybe that's enough."
+      karma:
+        text: "You reap what you sow, they say. True in the fields, true in life. Plant good seeds, friend."
+      monastery:
+        text: "Lama Tenzin blessed our fields every spring. Without him... well, we pray. What else can we do?"

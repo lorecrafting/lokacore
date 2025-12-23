@@ -1,0 +1,22 @@
+key: om_mani_padme_hum
+name: "Om Mani Padme Hum"
+type: utility
+cost:
+  insight: 0
+cooldown: 3
+target: enemy
+effects:
+  - type: status
+    status: calmed
+    duration: 1
+    chance: 0.75
+  - type: cure_status
+    status: aversion
+    on_self: true
+description: "The mantra of compassion, Avalokiteshvara's blessing."
+cast_message: "You chant: Om Mani Padme Hum. Peace radiates outward."
+learn_from: abbot_jampa
+tags:
+  - mantra
+  - compassion
+  - basic

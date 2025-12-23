@@ -1,0 +1,50 @@
+id: side_mountain_peak
+name: "The Mountain Peak"
+description: |
+  Teacher Lobsang challenges you to reach the mountain peak
+  before dawn. Face the wrathful shades and prove your
+  determination. A lesson in effort - perseverance through difficulty.
+giver: teacher_lobsang
+type: side
+paramita: effort
+level_requirement: 2
+objectives:
+  - id: accept_challenge
+    type: talk
+    target_id: teacher_lobsang
+    description: "Accept Teacher Lobsang's challenge"
+    dialogue_topic: quest
+  - id: traverse_path
+    type: go_to
+    target_id: cliff_path
+    description: "Traverse the dangerous cliff path"
+  - id: defeat_shades
+    type: kill
+    target_id: wrathful_shade
+    target_count: 2
+    description: "Overcome the wrathful shades"
+  - id: reach_peak
+    type: go_to
+    target_id: mountain_peak
+    description: "Reach the mountain peak"
+    time_limit: before_dawn
+  - id: find_sutra
+    type: get_item
+    target_id: sutra_of_perfect_wisdom
+    description: "Find the Sutra revealed by dawn light"
+    time_required: dawn
+  - id: return_lobsang
+    type: talk
+    target_id: teacher_lobsang
+    description: "Return to Teacher Lobsang"
+rewards:
+  xp: 100
+  insight: 1
+  teaches:
+    - fortitude
+journal_entries:
+  start: "Lobsang challenges me to reach the peak before dawn."
+  climbing: "The path is treacherous. Shades bar the way."
+  peak_reached: "I've reached the summit! Now I wait for dawn."
+  sutra_found: "The first light reveals ancient words. The Sutra of Perfect Wisdom."
+  complete: "Lobsang is pleased. True effort requires both body and mind."

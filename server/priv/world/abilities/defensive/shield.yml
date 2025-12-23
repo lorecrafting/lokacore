@@ -1,0 +1,24 @@
+key: shield
+name: "Arcane Shield"
+type: defensive
+cost:
+  mana: 25
+cooldown: 6
+target: self
+effects:
+  - type: buff
+    stat: defense
+    modifier: 10
+    duration: 5
+  - type: status
+    status: shielded
+    duration: 5
+    potency: 2
+requirements:
+  level: 4
+description: "Creates a magical barrier that absorbs damage."
+cast_message: "You weave a shimmering shield of arcane energy around yourself."
+tags:
+  - protection
+  - buff
+  - self

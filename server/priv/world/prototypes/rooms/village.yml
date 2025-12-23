@@ -1,0 +1,22 @@
+key: village
+parent: base_room
+type: room
+name: "Village"
+description: |
+  A small settlement clings to the mountainside below the monastery,
+  its rough stone houses huddled together against the wind. Smoke rises
+  from cooking fires, carrying the scent of tsampa and yak butter.
+
+  Villagers go about their daily tasks with the unhurried rhythm of
+  mountain life. Prayer wheels spin in doorways, their mantras joining
+  the distant chanting from above.
+exits:
+  north: monastery_gate
+  east: market
+spawns:
+  - prototype: butcher_sonam
+  - prototype: farmer_tsering
+tags:
+  - outdoor
+  - village
+  - safe_zone
