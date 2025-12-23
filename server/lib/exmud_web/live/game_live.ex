@@ -113,25 +113,40 @@ defmodule ExmudWeb.GameLive do
 
   # Load the player's current room, falling back to starting room
   defp load_player_room(game_state) do
-    # Try Framework's RoomLoader first, fallback to engine's WorldLoader
-    room_id =
-      game_state.current_room_id ||
-        RoomLoader.get_starting_room_id() ||
-        WorldLoader.get_starting_room_id()
-
-    case RoomLoader.load_room_for_display(room_id) do
+    # Try player's current room first
+    case try_load_room(game_state.current_room_id) do
       {:ok, room} ->
-        # Update player's room if they didn't have one set
         game_state = ensure_room_assigned(game_state, room.id)
-
-        # Activate the room entity (on-demand process management)
         activate_room_entity(room.id)
-
         {room, game_state}
 
       {:error, :not_found} ->
-        # No rooms in database - show void
-        {RoomLoader.empty_room(), game_state}
+        # Player's room doesn't exist - try starting room
+        starting_room_id = RoomLoader.get_starting_room_id() || WorldLoader.get_starting_room_id()
+
+        case try_load_room(starting_room_id) do
+          {:ok, room} ->
+            # Reset player to starting room
+            game_state = force_room_assignment(game_state, room.id)
+            activate_room_entity(room.id)
+            {room, game_state}
+
+          {:error, :not_found} ->
+            # No rooms at all - show void
+            {RoomLoader.empty_room(), game_state}
+        end
+    end
+  end
+
+  # Try to load a room, returning {:error, :not_found} for nil
+  defp try_load_room(nil), do: {:error, :not_found}
+  defp try_load_room(room_id), do: RoomLoader.load_room_for_display(room_id)
+
+  # Force update player's room (used when resetting to starting room)
+  defp force_room_assignment(game_state, room_id) do
+    case PlayerGameState.update_state(game_state, %{current_room_id: room_id}) do
+      {:ok, updated} -> updated
+      _ -> game_state
     end
   end
 

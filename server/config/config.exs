@@ -25,7 +25,7 @@ config :exmud,
   generators: [timestamp_type: :utc_datetime]
 
 # Game configuration
-config :exmud, :game, starting_room_key: "room_oak_tree"
+config :exmud, :game, starting_room_key: "monastery_gate"
 
 # Configure the endpoint
 config :exmud, ExmudWeb.Endpoint,
