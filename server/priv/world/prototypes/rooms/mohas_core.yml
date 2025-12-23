@@ -15,7 +15,6 @@ exits:
   north: ignorance_chamber
 spawns:
   - prototype: moha_mara
-items:
   - prototype: seal_fragment_ignorance
   - prototype: vajra_armor
 tags:

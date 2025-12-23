@@ -16,7 +16,6 @@ exits:
   west: aversion_chamber
 spawns:
   - prototype: dvesha_mara
-items:
   - prototype: seal_fragment_aversion
   - prototype: dharma_edge
 tags:

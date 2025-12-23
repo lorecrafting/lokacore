@@ -21,15 +21,74 @@ components:
       dex: 10
       sta: 6
     level: 1
-  dialogue:
-    greeting: "You've come to help! I knew someone would come."
-    topics:
-      tenzin:
-        text: "He entered meditation willingly. I saw him prepare - he knew what he was facing. He left his journal behind... I think he wanted someone to find it."
-      join:
-        text: "Take me with you. I've served him since I was small. I know the caves better than anyone."
-      truth:
-        text: "The master spoke of Mara in his sleep before he descended. I think... I think he went to face his own demons."
+  dialogue_tree:
+    start:
+      text: "You've come! The mountain has answered our prayers. I am Pema, a novice here. Something terrible has happened to Master Tenzin."
+      choices:
+        - text: "What happened to Master Tenzin?"
+          next: "tenzin_info"
+        - text: "Who is Master Tenzin?"
+          next: "who_tenzin"
+        - text: "How can I help?"
+          next: "how_help"
+        - text: "I should look around first."
+          next: null
+    who_tenzin:
+      text: "Lama Tenzin is our meditation master - the heart of this monastery. He has guided souls along the path for forty years. Seven days ago, he entered deep meditation... and has not returned."
+      choices:
+        - text: "What do you mean, 'not returned'?"
+          next: "tenzin_info"
+        - text: "I will do what I can."
+          next: "how_help"
+    tenzin_info:
+      text: "He entered meditation willingly. I saw him prepare - he knew what he was facing. He spoke of Mara in his sleep before he descended. I think... he went to face his own demons. He left his journal behind. I think he wanted someone to find it."
+      choices:
+        - text: "Where is this journal?"
+          next: "journal_location"
+        - text: "What are these demons you speak of?"
+          next: "demons_info"
+        - text: "Who else can tell me more?"
+          next: "how_help"
+    journal_location:
+      text: "It should still be in his meditation cell. Go through the courtyard to the north, then find the guest hall. His cell is in the back. Be careful - strange things have been happening there."
+      choices:
+        - text: "What strange things?"
+          next: "strange_things"
+        - text: "I'll find the journal."
+          next: null
+    strange_things:
+      text: "Shadows that move on their own. Whispers in empty rooms. The other monks are frightened. Some say the Three Poisons have taken form."
+      choices:
+        - text: "The Three Poisons?"
+          next: "demons_info"
+        - text: "I'll investigate."
+          next: null
+    demons_info:
+      text: "In our teachings, the Three Poisons are attachment, aversion, and ignorance - the roots of all suffering. Master Tenzin believed they could manifest... become real. The caves beneath the monastery are said to hold such power."
+      choices:
+        - text: "Where are these caves?"
+          next: "caves_info"
+        - text: "I should speak with the Abbot first."
+          next: "how_help"
+    caves_info:
+      text: "The cave entrance is beyond the cemetery to the east, but it is sealed. Only the Abbot holds the key. You must speak with Abbot Jampa in the temple first."
+      choices:
+        - text: "Where is the temple?"
+          next: "how_help"
+        - text: "Thank you for the information."
+          next: null
+    how_help:
+      text: "Please, speak with Abbot Jampa. He is in the temple, through the courtyard to the north. He will tell you everything. The Abbot has been waiting for someone like you."
+      choices:
+        - text: "I'll go to the temple now."
+          next: null
+        - text: "Tell me more about the monastery first."
+          next: "monastery_info"
+    monastery_info:
+      text: "The courtyard is just north of here. The temple is at its north end - you'll see the golden roof. The meditation hall is to the east, and the dining hall to the west. Please hurry to the Abbot."
+      choices:
+        - text: "Thank you. I'll find him."
+          next: null
   companion:
     can_join: true
     combat_style: support

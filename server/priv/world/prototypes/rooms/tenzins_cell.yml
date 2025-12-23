@@ -20,8 +20,6 @@ exits:
   east: cave_entrance
 spawns:
   - prototype: lama_tenzin
-  - prototype: novice_pema
-items:
   - prototype: meditation_journal
 tags:
   - indoor

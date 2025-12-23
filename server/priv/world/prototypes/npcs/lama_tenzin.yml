@@ -22,15 +22,47 @@ components:
       dex: 6
       sta: 20
     level: 10
-  dialogue:
-    greeting: "[He does not respond. His eyes remain closed, his breath barely visible.]"
-    topics:
-      vision:
-        text: "[In your mind, you hear a distant voice: 'The path is within. Face what I could not face alone.']"
-      end_wisdom:
-        text: "You have done what I could not. The poisons are transformed, not destroyed. This is the wisdom path."
-      end_power:
-        text: "The darkness is scattered... but not transformed. It will return. Watch for it in yourself."
+  dialogue_tree:
+    start:
+      text: "[He does not respond. His eyes remain closed, his breath barely visible. Yet somehow, you sense awareness within.]"
+      choices:
+        - text: "[Reach out with your mind]"
+          next: "vision"
+        - text: "[Examine him closely]"
+          next: "examine"
+        - text: "[Leave him in peace]"
+          next: null
+    examine:
+      text: "His chest rises and falls with breath so subtle it might be imagination. A faint golden glow surrounds his form. He is alive, but far away - trapped somewhere between this world and the next."
+      choices:
+        - text: "[Try to sense where he has gone]"
+          next: "vision"
+        - text: "[Step back]"
+          next: null
+    vision:
+      text: "[In your mind, you hear a distant voice, thin as mountain wind:] 'The path is within. Three poisons block the way. Face what I could not face alone. The caves... the caves remember...'"
+      choices:
+        - text: "[Ask about the caves]"
+          next: "caves_hint"
+        - text: "[Withdraw from the connection]"
+          next: null
+    caves_hint:
+      text: "[The voice grows fainter:] 'Attachment. Aversion. Ignorance. They have taken form. Defeat them not with hatred, but with understanding. The Abbot... holds the key...'"
+      choices:
+        - text: "I will find a way to help you."
+          next: null
+    awakened:
+      text: "You have done what I could not do alone. The poisons are transformed, not destroyed - this is the wisdom path. Thank you, traveler. The monastery is in your debt."
+      choices:
+        - text: "What happens now?"
+          next: "aftermath"
+        - text: "I'm glad you're safe."
+          next: null
+    aftermath:
+      text: "I will need time to recover, but I will return to my teaching. And you... you have learned much on this journey. The dharma reveals itself through action. Remember what you have faced within those caves."
+      choices:
+        - text: "I won't forget."
+          next: null
   state:
     trance: true
     awakens_at: mara_defeated

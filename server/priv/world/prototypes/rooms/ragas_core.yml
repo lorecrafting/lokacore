@@ -16,7 +16,6 @@ exits:
   south: attachment_chamber
 spawns:
   - prototype: raga_mara
-items:
   - prototype: seal_fragment_attachment
 tags:
   - indoor

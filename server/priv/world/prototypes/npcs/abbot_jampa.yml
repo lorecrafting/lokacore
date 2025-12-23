@@ -21,19 +21,123 @@ components:
       dex: 8
       sta: 12
     level: 5
-  dialogue:
-    greeting: "Ah, traveler. The mountain has brought you to us in our hour of need."
-    topics:
-      crisis:
-        text: "Lama Tenzin entered deep meditation seven days ago. We thought it was his usual practice, but he has not returned. Something holds him in the realm between."
-      help:
-        text: "Will you help us? The ancient caves hold answers, but also danger. The Three Poisons have grown strong."
-      tenzin:
-        text: "He is the heart of this monastery. Without him, we are lost."
+  dialogue_tree:
+    start:
+      text: "Ah, traveler. The mountain has brought you to us in our hour of need. I am Jampa, Abbot of this monastery. I sense you have already spoken with young Pema?"
+      choices:
+        - text: "She told me about Master Tenzin."
+          next: "crisis"
+        - text: "What is happening here?"
+          next: "crisis"
+        - text: "I'm just passing through."
+          next: "passing"
+    passing:
+      text: "Perhaps. But the mountain does not bring travelers here by accident. Something called you to this place. Stay, listen. You may find your path leads through our troubles."
+      choices:
+        - text: "Tell me what's wrong."
+          next: "crisis"
+        - text: "I should go."
+          next: null
+    crisis:
+      text: "Lama Tenzin entered deep meditation seven days ago. We thought it was his usual practice, but he has not returned. His body sits in his cell, breathing but empty. His spirit wanders in the realm between."
+      choices:
+        - text: "What is holding him there?"
+          next: "three_poisons"
+        - text: "Can nothing be done?"
+          next: "help_request"
+        - text: "Tell me about Tenzin."
+          next: "about_tenzin"
+    about_tenzin:
+      text: "He is the heart of this monastery. For forty years he has guided us. He knew something was coming - the Three Poisons growing strong in the caves below. He went to face them alone, despite my warnings."
+      choices:
+        - text: "The Three Poisons?"
+          next: "three_poisons"
+        - text: "What caves?"
+          next: "caves_info"
+    three_poisons:
+      text: "Attachment, aversion, and ignorance - the roots of all suffering. In the ancient caves beneath our monastery, they have taken form. Mara, the demon of delusion, draws power from them. Tenzin sought to confront Mara directly."
+      choices:
+        - text: "Who is Mara?"
+          next: "about_mara"
+        - text: "How can I help?"
+          next: "help_request"
+    about_mara:
+      text: "Mara is not truly a demon from outside - that is the greatest teaching. Mara is the shadow within each of us. But in the caves, that shadow has gained terrible power. It holds Tenzin's spirit captive."
+      choices:
+        - text: "I will free him."
+          next: "help_request"
+        - text: "This seems beyond me."
+          next: "encouragement"
+    encouragement:
+      text: "The fact that you are here says otherwise. The mountain chose you. Whether you came seeking adventure, wisdom, or merely shelter - you were brought here for a reason."
+      choices:
+        - text: "What would you have me do?"
+          next: "help_request"
+        - text: "I need to think about this."
+          next: null
+    caves_info:
+      text: "Beneath the cemetery to the east lies the entrance to ancient caves. They were sealed generations ago when the power there grew too strong. I hold the only key."
+      choices:
+        - text: "Give me the key."
+          next: "help_request"
+        - text: "What's inside?"
+          next: "cave_dangers"
+    cave_dangers:
+      text: "Three trials await - chambers where the Three Poisons manifest. Raga Mara, the demon of attachment. Dvesha Mara, the demon of aversion. Moha Mara, the demon of ignorance. Defeat all three, and you may reach the Heart Cave where Tenzin's spirit is held."
+      choices:
+        - text: "I will face these trials."
+          next: "help_request"
+        - text: "How do I defeat them?"
+          next: "defeat_advice"
+    defeat_advice:
+      text: "Each poison has an antidote. Attachment is overcome by non-attachment. Aversion by compassion. Ignorance by wisdom. But understanding this in words and living it in the moment... that is the true challenge."
+      choices:
+        - text: "I understand. Let me help."
+          next: "help_request"
+        - text: "I need to prepare first."
+          next: null
+    help_request:
+      text: "Will you help us, traveler? First, visit Tenzin's cell and find his meditation journal - it may hold clues to what he faced. Then return to me, and I will give you the key to the caves."
+      show_if:
+        quest_not_active: "main_sleeping_master"
+      choices:
+        - text: "I accept. I will find the journal."
+          next: "quest_accepted"
+          action: ["accept_quest", "main_sleeping_master"]
+        - text: "Where is his cell?"
+          next: "cell_location"
+        - text: "I need more time to decide."
+          next: null
+    cell_location:
+      text: "Go through the courtyard and find the guest hall to the north. Tenzin's meditation cell is in the quiet corner. Young Pema has been keeping vigil there - she can guide you."
+      choices:
+        - text: "I will investigate."
+          next: "quest_accepted"
+          action: ["accept_quest", "main_sleeping_master"]
+        - text: "I need to prepare first."
+          next: null
+    quest_accepted:
+      text: "Thank you, traveler. May the wisdom of the dharma guide your steps. Return to me when you have found the journal. I will be here, holding vigil for Tenzin's return."
+      choices:
+        - text: "I'll return with answers."
+          next: null
+    start_completed:
+      completed_quest: "main_sleeping_master"
+      text: "You have done a great service, traveler. Tenzin's spirit stirs - I can feel it. The monastery owes you a debt we can never repay. Rest here as long as you need."
+      choices:
+        - text: "What now?"
+          next: "after_quest"
+        - text: "I should continue my journey."
+          next: null
+    after_quest:
+      text: "Your path forward is your own to choose. But know this: the caves still hold secrets, and the village below has its own troubles. A hero is always needed somewhere."
+      choices:
+        - text: "Thank you for your wisdom."
+          next: null
   teacher:
     skills: []
     mantras:
       - om_mani_padme_hum
   quests:
-    - sleeping_master
-    - restless_spirits
+    - main_sleeping_master
+    - side_restless_spirits

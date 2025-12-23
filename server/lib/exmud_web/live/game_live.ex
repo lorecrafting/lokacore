@@ -315,24 +315,28 @@ defmodule ExmudWeb.GameLive do
     if not seen_intro do
       cutscene = %{
         id: "intro",
-        title: "The Journey Begins",
+        title: "The Jeweled Path",
         current_page: 0,
         pages: [
           [
-            "You awaken beneath the ancient oak tree, its massive branches stretching toward the sky like the arms of a sleeping giant.",
-            "The air is thick with the scent of moss and wildflowers. How did you come to be here? The memories are hazy, like a half-forgotten dream."
+            "The mountain wind carries the distant sound of temple bells as you approach the ancient monastery gates.",
+            "Prayer flags snap overhead, their faded mantras scattered to the winds. You have journeyed far to reach this place."
           ],
           [
-            "A voice echoes in your mind—or is it the wind through the leaves?",
-            "\"Traveler... the forest has chosen you. Your path lies ahead, shrouded in mystery.\""
+            "Word has spread through the valleys below: something is wrong at the monastery.",
+            "Lama Tenzin, the beloved meditation master, has not emerged from his cell in seven days. The monks whisper of demons and dark omens."
           ],
           [
-            "You rise to your feet, brushing leaves from your clothes. The world feels different somehow—more vivid, more alive.",
-            "In the distance, you hear the murmur of a stream and the call of unfamiliar birds."
+            "You were drawn here by more than rumor. A dream, perhaps. A calling you cannot quite name.",
+            "The scent of juniper incense reaches you from somewhere within the monastery walls."
           ],
           [
-            "Whatever brought you here, whatever fate awaits, one thing is certain:",
-            "Your adventure begins now."
+            "A young novice in saffron robes notices your arrival and approaches with worried eyes.",
+            "\"Traveler, the mountain has brought you to us. Perhaps you are the help we have prayed for.\""
+          ],
+          [
+            "Whatever answers lie within these ancient walls, whatever trials await,",
+            "Your journey along the Jeweled Path begins now."
           ]
         ]
       }

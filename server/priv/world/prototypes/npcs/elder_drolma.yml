@@ -22,15 +22,88 @@ components:
       dex: 4
       sta: 10
     level: 3
-  dialogue:
-    greeting: "Come, sit. Even in dark times, we must eat. Take some tea."
-    topics:
-      lore:
-        text: "These caves are older than the monastery. The first teachers came here to face themselves. Mara lives in us all, child."
-      teaching:
-        text: "The Three Poisons - attachment, aversion, ignorance. They are not enemies to destroy, but teachers to learn from."
-      offerings:
-        text: "Take this rice. In the caves, offerings have power. What you give freely cannot be taken from you."
+  dialogue_tree:
+    start:
+      text: "Come, sit. Even in dark times, we must eat. I am Drolma. Would you like some tea?"
+      choices:
+        - text: "Yes, please. [Accept tea]"
+          next: "tea_given"
+          action: ["give_item", "butter_tea"]
+        - text: "Tell me about the monastery."
+          next: "lore"
+        - text: "What do you know about the caves?"
+          next: "caves_lore"
+        - text: "I should keep moving."
+          next: null
+    tea_given:
+      text: "[She pours warm butter tea with practiced hands.] Drink. It will give you strength for the journey ahead. I can see in your eyes that you are troubled. All who come here now are troubled."
+      choices:
+        - text: "What do you know about what's happening?"
+          next: "current_crisis"
+        - text: "Tell me about the monastery's history."
+          next: "lore"
+        - text: "Thank you for the tea."
+          next: null
+    current_crisis:
+      text: "Tenzin went where all masters must eventually go - to face the shadow within. The Three Poisons grow stronger when we ignore them. He thought to confront them directly. [She shakes her head.] Perhaps it was wise. Perhaps it was foolish. The line between is thin."
+      choices:
+        - text: "Can anything be done?"
+          next: "hope"
+        - text: "Tell me about the Three Poisons."
+          next: "teaching"
+    hope:
+      text: "You are here, are you not? [She smiles.] The mountain has sent help. Take this with you. [She offers blessed rice.] In the caves, offerings have power. What you give freely cannot be taken from you."
+      choices:
+        - text: "[Accept the blessed rice]"
+          next: "rice_given"
+          action: ["give_item", "offering_rice"]
+        - text: "I don't understand."
+          next: "teaching"
+    rice_given:
+      text: "Use it when the darkness seems overwhelming. An offering of compassion can turn aside the fiercest demon. Remember: Mara feeds on our fear and desire. Give freely, and you starve it."
+      choices:
+        - text: "Thank you, Elder."
+          next: null
+        - text: "Tell me more about Mara."
+          next: "caves_lore"
+    lore:
+      text: "These caves are older than the monastery. The first teachers came here to face themselves. They built this place as a reminder - the enemy is within, and so is the liberation. Sixty years I have served tea here. Sixty years watching seekers come and go."
+      choices:
+        - text: "What have you learned in sixty years?"
+          next: "wisdom"
+        - text: "Tell me about the caves."
+          next: "caves_lore"
+    wisdom:
+      text: "That everything passes. Joy, sorrow, fear, peace - all clouds across the sky of mind. The sky remains. You will face terrible things in those caves. Remember: they too will pass."
+      choices:
+        - text: "How do I face the Three Poisons?"
+          next: "teaching"
+        - text: "Thank you for your wisdom."
+          next: null
+    caves_lore:
+      text: "Mara lives in us all, child. The caves merely... concentrate it. Give it form. The Three Poisons - attachment, aversion, ignorance - have manifest there as demons. But they are our demons, not creatures from outside."
+      choices:
+        - text: "How do I defeat them?"
+          next: "teaching"
+        - text: "That sounds terrifying."
+          next: "comfort"
+    comfort:
+      text: "[She pats your hand.] Fear is natural. Even Tenzin feared. But he went anyway. Courage is not absence of fear - it is going forward despite it. You have that courage. I can see it."
+      choices:
+        - text: "Thank you, Elder."
+          next: null
+    teaching:
+      text: "The Three Poisons - attachment, aversion, ignorance. They are not enemies to destroy, but teachers to learn from. Attachment teaches us what we cling to. Aversion teaches us what we push away. Ignorance teaches us what we refuse to see."
+      choices:
+        - text: "How do I use this knowledge?"
+          next: "practical"
+        - text: "I'll remember this."
+          next: null
+    practical:
+      text: "When attachment offers you everything you desire - let go. When aversion strikes with fury - respond with patience. When ignorance clouds your sight - seek the light of wisdom. The mantras will help. Ask Master Chen or Teacher Lobsang."
+      choices:
+        - text: "Thank you for your guidance."
+          next: null
   teacher:
     skills: []
     mantras:
