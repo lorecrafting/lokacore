@@ -13,6 +13,7 @@ defmodule ExmudWeb.GameLive.RoomManager do
   alias Exmud.Framework.World.RoomLoader
   alias Exmud.Engine.{EntityRegistry, EntityServer, Hooks, WorldLoader}
   alias Exmud.Accounts
+  alias Exmud.Session
 
   @doc """
   Loads the player's current room, falling back to starting room if needed.
@@ -227,6 +228,9 @@ defmodule ExmudWeb.GameLive.RoomManager do
     case RoomLoader.load_room_for_display(destination_id) do
       {:ok, new_room} ->
         activate_room_entity(new_room.id)
+
+        # Update session system with new room (for unified messaging)
+        Session.update_room(player.id, new_room.id)
 
         # Run enter_room hook
         Hooks.run(:at_enter_room, [player_context, %{room_id: new_room.id}])

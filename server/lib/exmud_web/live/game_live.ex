@@ -19,6 +19,7 @@ defmodule ExmudWeb.GameLive do
   alias Exmud.Framework.Equipment
   alias Exmud.Framework.Quest
   alias Exmud.Engine.Entities
+  alias Exmud.Session
 
   alias ExmudWeb.GameLive.RoomManager
   alias ExmudWeb.GameLive.CombatManager
@@ -45,6 +46,10 @@ defmodule ExmudWeb.GameLive do
     if connected?(socket) and room.id do
       Phoenix.PubSub.subscribe(Exmud.PubSub, "room:#{room.id}")
       Phoenix.PubSub.subscribe(Exmud.PubSub, "player:#{player.id}")
+
+      # Register with session system for unified client messaging
+      {:ok, _session_pid} = Session.connect(player, :liveview, self())
+      Session.update_room(player.id, room.id)
 
       # Broadcast that this player entered the room
       Phoenix.PubSub.broadcast(
@@ -637,6 +642,38 @@ defmodule ExmudWeb.GameLive do
      socket
      |> assign(:room, room)
      |> update(:events, fn events -> events ++ [event] end)}
+  end
+
+  # =============================================================================
+  # Session Message Handlers (Unified Client Messaging)
+  # =============================================================================
+
+  def handle_info({:session_message, message}, socket) do
+    handle_session_message(message, socket)
+  end
+
+  defp handle_session_message({:room_message, text}, socket) do
+    event = %{text: text, timestamp: DateTime.utc_now()}
+    {:noreply, update(socket, :events, fn events -> events ++ [event] end)}
+  end
+
+  defp handle_session_message({:announcement, text}, socket) do
+    event = %{text: "[Announcement] #{text}", timestamp: DateTime.utc_now()}
+    {:noreply, update(socket, :events, fn events -> events ++ [event] end)}
+  end
+
+  defp handle_session_message({:force_disconnect, reason}, socket) do
+    {:noreply, redirect(socket, to: ~p"/players/log-in?reason=#{reason}")}
+  end
+
+  defp handle_session_message({:player_action, player_name, action_text}, socket) do
+    event = %{text: "#{player_name} #{action_text}.", timestamp: DateTime.utc_now()}
+    {:noreply, update(socket, :events, fn events -> events ++ [event] end)}
+  end
+
+  defp handle_session_message(_unknown, socket) do
+    # Ignore unknown message types gracefully
+    {:noreply, socket}
   end
 
   # =============================================================================

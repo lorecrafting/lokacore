@@ -15,6 +15,12 @@ defmodule Exmud.Application do
       {DNSCluster, query: Application.get_env(:exmud, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Exmud.PubSub},
 
+      # Session System (unified client messaging)
+      # Order: Registry for lookups → Supervisor for session processes
+      {Registry, keys: :unique, name: Exmud.Session.PlayerRegistry},
+      Exmud.Session.Registry,
+      Exmud.Session.Supervisor,
+
       # Engine Core - New Components (order matters!)
       Exmud.Engine.Hooks,
       Exmud.Engine.PrototypeLoader,

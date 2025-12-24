@@ -34,6 +34,10 @@
 │   Prototypes, Spawner, WorldLoader                          │
 │   Events, Commands, Behaviors, Hooks, Locks, Scripting      │
 ├─────────────────────────────────────────────────────────────┤
+│ SESSION LAYER (lib/exmud/session/)                          │
+│   Unified client messaging: LiveView, TUI, SSH (future)     │
+│   Multi-client support, reconnect grace, admin visibility   │
+├─────────────────────────────────────────────────────────────┤
 │ PLATFORM                                                    │
 │   Phoenix 1.8, LiveView, Ecto + SQLite                      │
 └─────────────────────────────────────────────────────────────┘
@@ -48,6 +52,7 @@
 - **Command Pipeline**: Parse → Validate → Execute → Emit Events.
 - **Hooks**: 22 lifecycle event types for extensibility.
 - **Locks**: Evennia-style string-based access control.
+- **Session System**: Unified client messaging layer supporting multiple client types (LiveView, TUI, future SSH/mobile).
 
 ## Project Structure
 
@@ -59,6 +64,7 @@ lokacore/
 │   │   ├── auth/                   # Guardian JWT
 │   │   ├── ecto/                   # Custom Ecto types
 │   │   ├── engine/                 # Core engine (see Engine section below)
+│   │   ├── session/                # Unified client messaging (see Session section)
 │   │   ├── framework/              # Game framework systems (22 subsystems)
 │   │   │   ├── abilities/          # Ability system + cooldowns
 │   │   │   ├── appearance/         # Character appearance
@@ -345,6 +351,7 @@ This code is kept for reference and potential future use when native mobile apps
 - `docs/architecture/events.md` - Event bus and PubSub patterns
 - `docs/architecture/scripting.md` - Lua scripting sandbox
 - `docs/architecture/commands.md` - Command pipeline
+- `docs/architecture/session-system.md` - **Unified client messaging layer**
 
 ### UI & Design
 - `docs/ui/living-ebook-style-guide.md` - **UI style guide for game client**
