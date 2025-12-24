@@ -114,7 +114,6 @@ defmodule Exmud.Framework.QuestTest do
       assert objectives["talk_obj"]["completed"] == true
     end
 
-    @tag :skip
     test "complete_objective/3 is delegated" do
       player = player_fixture()
       state = game_state_fixture(player.id)
@@ -157,7 +156,6 @@ defmodule Exmud.Framework.QuestTest do
       assert Quest.is_complete?(state, "complete_check") == true
     end
 
-    @tag :skip
     test "turn_in_quest/2 is delegated" do
       player = player_fixture()
 
@@ -272,7 +270,6 @@ defmodule Exmud.Framework.QuestTest do
   end
 
   describe "integration test: full quest workflow" do
-    @tag :skip
     test "complete workflow from accept to turn in" do
       player = player_fixture()
 

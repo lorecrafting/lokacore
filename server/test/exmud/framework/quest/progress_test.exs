@@ -333,11 +333,6 @@ defmodule Exmud.Framework.Quest.ProgressTest do
   end
 
   describe "complete_objective/3" do
-    # NOTE: The following test reveals a bug in the source code at line 149
-    # where quest_data.objectives uses dot notation on a map with string keys
-    # instead of quest_data["objectives"]
-
-    @tag :skip
     test "manually completes an objective" do
       player = player_fixture()
       state = game_state_fixture(player.id)
@@ -370,7 +365,6 @@ defmodule Exmud.Framework.Quest.ProgressTest do
                Progress.complete_objective(state, "nonexistent", "obj1")
     end
 
-    @tag :skip
     test "returns error for nonexistent objective" do
       player = player_fixture()
       state = game_state_fixture(player.id)
@@ -445,12 +439,6 @@ defmodule Exmud.Framework.Quest.ProgressTest do
   end
 
   describe "turn_in_quest/2" do
-    # NOTE: The following tests reveal a bug in the source code where apply_rewards
-    # doesn't properly unwrap {:ok, state} tuples from apply_xp_reward and apply_gold_reward.
-    # This causes nested tuples like {:ok, {:ok, state}} to be returned.
-    # The bug needs to be fixed in lib/exmud/framework/quest/progress.ex lines 349-351
-
-    @tag :skip
     test "turns in a completed quest and applies rewards" do
       player = player_fixture()
 
@@ -522,7 +510,6 @@ defmodule Exmud.Framework.Quest.ProgressTest do
       assert {:error, :quest_not_complete} = Progress.turn_in_quest(state, "incomplete")
     end
 
-    @tag :skip
     test "returns error for quest not found" do
       player = player_fixture()
       state = game_state_fixture(player.id)
@@ -536,7 +523,6 @@ defmodule Exmud.Framework.Quest.ProgressTest do
       assert {:error, :quest_not_found} = Progress.turn_in_quest(state, "fake_quest")
     end
 
-    @tag :skip
     test "handles empty rewards" do
       player = player_fixture()
       state = game_state_fixture(player.id, %{stats: %{"xp" => 50}})
@@ -551,7 +537,6 @@ defmodule Exmud.Framework.Quest.ProgressTest do
       assert updated_state.stats["xp"] == 50
     end
 
-    @tag :skip
     test "handles partial rewards" do
       player = player_fixture()
       state = game_state_fixture(player.id, %{stats: %{"xp" => 0}})

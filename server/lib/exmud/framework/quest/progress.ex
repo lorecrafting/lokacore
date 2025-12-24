@@ -146,7 +146,9 @@ defmodule Exmud.Framework.Quest.Progress do
         {:error, :quest_not_active}
 
       quest_data ->
-        case Map.get(quest_data.objectives, objective_id) do
+        objectives = quest_data["objectives"] || quest_data[:objectives] || %{}
+
+        case Map.get(objectives, objective_id) do
           nil ->
             {:error, :objective_not_found}
 
@@ -346,9 +348,11 @@ defmodule Exmud.Framework.Quest.Progress do
     gold = Map.get(rewards, "gold") || Map.get(rewards, :gold, 0)
     items = Map.get(rewards, "items") || Map.get(rewards, :items, [])
 
-    state = apply_xp_reward(state, xp)
-    state = apply_gold_reward(state, gold)
-    apply_item_rewards(state, items)
+    with {:ok, state} <- apply_xp_reward(state, xp),
+         {:ok, state} <- apply_gold_reward(state, gold),
+         {:ok, state} <- apply_item_rewards(state, items) do
+      {:ok, state}
+    end
   end
 
   defp apply_xp_reward(state, 0), do: {:ok, state}
