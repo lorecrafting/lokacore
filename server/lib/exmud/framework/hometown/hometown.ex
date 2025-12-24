@@ -144,10 +144,12 @@ defmodule Exmud.Framework.Hometown do
 
   @impl true
   def handle_call({:get, key}, _from, state) do
-    result = case Map.get(state.hometowns, key) do
-      nil -> {:error, :not_found}
-      hometown -> {:ok, hometown}
-    end
+    result =
+      case Map.get(state.hometowns, key) do
+        nil -> {:error, :not_found}
+        hometown -> {:ok, hometown}
+      end
+
     {:reply, result, state}
   end
 
@@ -173,6 +175,7 @@ defmodule Exmud.Framework.Hometown do
       {:ok, new_state} ->
         Logger.info("Hometown reloaded #{map_size(new_state.hometowns)} hometowns")
         {:reply, :ok, new_state}
+
       {:error, errors} ->
         {:reply, {:error, errors}, state}
     end
@@ -245,31 +248,42 @@ defmodule Exmud.Framework.Hometown do
   end
 
   defp apply_stat_bonuses(game_state, bonuses) when map_size(bonuses) == 0, do: game_state
+
   defp apply_stat_bonuses(game_state, bonuses) do
     stats = game_state.stats
-    updated_stats = Enum.reduce(bonuses, stats, fn {stat, bonus}, acc ->
-      current = MapHelpers.get_flexible(acc, stat, 10)
-      Map.put(acc, stat, current + bonus)
-    end)
+
+    updated_stats =
+      Enum.reduce(bonuses, stats, fn {stat, bonus}, acc ->
+        current = MapHelpers.get_flexible(acc, stat, 10)
+        Map.put(acc, stat, current + bonus)
+      end)
+
     %{game_state | stats: updated_stats}
   end
 
   defp apply_skill_bonuses(game_state, skills) when map_size(skills) == 0, do: game_state
+
   defp apply_skill_bonuses(game_state, skill_bonuses) do
     stats = game_state.stats
     current_skills = MapHelpers.get_flexible(stats, :skills, %{})
-    updated_skills = Enum.reduce(skill_bonuses, current_skills, fn {skill, level}, acc ->
-      Map.put(acc, skill, %{level: level, xp: 0})
-    end)
+
+    updated_skills =
+      Enum.reduce(skill_bonuses, current_skills, fn {skill, level}, acc ->
+        Map.put(acc, skill, %{level: level, xp: 0})
+      end)
+
     %{game_state | stats: Map.put(stats, :skills, updated_skills)}
   end
 
   defp apply_starting_items(game_state, []), do: game_state
+
   defp apply_starting_items(game_state, items) do
     %{game_state | inventory: game_state.inventory ++ items}
   end
 
-  defp apply_faction_standings(game_state, standings) when map_size(standings) == 0, do: game_state
+  defp apply_faction_standings(game_state, standings) when map_size(standings) == 0,
+    do: game_state
+
   defp apply_faction_standings(game_state, standings) do
     stats = game_state.stats
     current_factions = MapHelpers.get_flexible(stats, :factions, %{})
@@ -278,6 +292,7 @@ defmodule Exmud.Framework.Hometown do
   end
 
   defp apply_traits(game_state, []), do: game_state
+
   defp apply_traits(game_state, traits) do
     stats = game_state.stats
     current_traits = MapHelpers.get_flexible(stats, :traits, [])

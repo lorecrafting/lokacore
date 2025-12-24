@@ -78,11 +78,12 @@ defmodule Exmud.Framework.Quest.DefinitionsTest do
 
   describe "get_quest_definition/1" do
     test "returns quest definition for existing quest" do
-      entity = create_quest_entity(%{
-        key: "simple_quest",
-        name: "Simple Quest",
-        description: "A simple test quest"
-      })
+      entity =
+        create_quest_entity(%{
+          key: "simple_quest",
+          name: "Simple Quest",
+          description: "A simple test quest"
+        })
 
       quest = Definitions.get_quest_definition(entity.key)
 

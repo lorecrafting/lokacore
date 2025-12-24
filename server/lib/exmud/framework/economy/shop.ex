@@ -64,16 +64,14 @@ defmodule Exmud.Framework.Economy.Shop do
           farewell: String.t()
         }
 
-  defstruct [
-    shop_type: "general",
-    buy_multiplier: 0.5,
-    sell_multiplier: 1.0,
-    stock: [],
-    currency: "gold",
-    faction_discounts: true,
-    greeting: "Welcome to my shop!",
-    farewell: "Come again!"
-  ]
+  defstruct shop_type: "general",
+            buy_multiplier: 0.5,
+            sell_multiplier: 1.0,
+            stock: [],
+            currency: "gold",
+            faction_discounts: true,
+            greeting: "Welcome to my shop!",
+            farewell: "Come again!"
 
   @valid_shop_types ["general", "weapons", "armor", "magic", "alchemy", "food", "blacksmith"]
 

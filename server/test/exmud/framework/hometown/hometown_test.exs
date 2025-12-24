@@ -33,7 +33,10 @@ defmodule Exmud.Framework.HometownTest do
       # Generate truly unique name to avoid conflicts
       unique_name = :"no_load_server_#{System.unique_integer([:positive])}"
       unique_id = :"no_load_id_#{System.unique_integer([:positive])}"
-      {:ok, pid} = start_supervised({Hometown, load_on_start: false, name: unique_name}, id: unique_id)
+
+      {:ok, pid} =
+        start_supervised({Hometown, load_on_start: false, name: unique_name}, id: unique_id)
+
       assert Process.alive?(pid)
     end
 
@@ -218,9 +221,12 @@ defmodule Exmud.Framework.HometownTest do
       {:ok, updated_state} = Hometown.apply_hometown_bonuses(state, "tara", :test_hometown_server)
 
       # Tara gives +2 STR, +1 CON
-      assert updated_state.stats["str"] == 12  # 10 + 2
-      assert updated_state.stats["con"] == 11  # 10 + 1
-      assert updated_state.stats["dex"] == 10  # unchanged
+      # 10 + 2
+      assert updated_state.stats["str"] == 12
+      # 10 + 1
+      assert updated_state.stats["con"] == 11
+      # unchanged
+      assert updated_state.stats["dex"] == 10
     end
 
     test "applies starting skills to game state" do
@@ -281,7 +287,7 @@ defmodule Exmud.Framework.HometownTest do
       state = game_state_fixture(player.id)
 
       assert {:error, :not_found} =
-        Hometown.apply_hometown_bonuses(state, "nonexistent", :test_hometown_server)
+               Hometown.apply_hometown_bonuses(state, "nonexistent", :test_hometown_server)
     end
 
     test "handles hometown with no bonuses" do
@@ -334,9 +340,10 @@ defmodule Exmud.Framework.HometownTest do
     test "preserves existing stats when applying bonuses" do
       player = player_fixture()
       # Start with custom stats
-      state = game_state_fixture(player.id, %{
-        stats: %{"str" => 15, "dex" => 12, "con" => 8, "int" => 10}
-      })
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{"str" => 15, "dex" => 12, "con" => 8, "int" => 10}
+        })
 
       {:ok, updated_state} = Hometown.apply_hometown_bonuses(state, "tara", :test_hometown_server)
 
@@ -349,9 +356,11 @@ defmodule Exmud.Framework.HometownTest do
 
     test "appends starting items to existing inventory" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        inventory: ["existing_item"]
-      })
+
+      state =
+        game_state_fixture(player.id, %{
+          inventory: ["existing_item"]
+        })
 
       {:ok, updated_state} = Hometown.apply_hometown_bonuses(state, "tara", :test_hometown_server)
 
@@ -363,9 +372,11 @@ defmodule Exmud.Framework.HometownTest do
 
     test "appends traits to existing traits" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{"traits" => ["existing_trait"]}
-      })
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{"traits" => ["existing_trait"]}
+        })
 
       {:ok, updated_state} = Hometown.apply_hometown_bonuses(state, "tara", :test_hometown_server)
 
@@ -377,9 +388,11 @@ defmodule Exmud.Framework.HometownTest do
 
     test "merges faction standings with existing factions" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{"factions" => %{"existing_faction" => 50}}
-      })
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{"factions" => %{"existing_faction" => 50}}
+        })
 
       {:ok, updated_state} = Hometown.apply_hometown_bonuses(state, "tara", :test_hometown_server)
 
@@ -395,10 +408,12 @@ defmodule Exmud.Framework.HometownTest do
       # Generate truly unique name to avoid conflicts
       unique_name = :"empty_server_#{System.unique_integer([:positive])}"
       unique_id = :"empty_id_#{System.unique_integer([:positive])}"
-      {:ok, pid} = start_supervised(
-        {Hometown, path: "nonexistent/path", name: unique_name},
-        id: unique_id
-      )
+
+      {:ok, pid} =
+        start_supervised(
+          {Hometown, path: "nonexistent/path", name: unique_name},
+          id: unique_id
+        )
 
       assert Process.alive?(pid)
       assert Hometown.count(unique_name) == 0
@@ -409,7 +424,9 @@ defmodule Exmud.Framework.HometownTest do
   describe "invalid YAML handling" do
     setup do
       # Create a temporary directory with invalid YAML
-      temp_dir = Path.join(System.tmp_dir!(), "invalid_hometown_#{System.unique_integer([:positive])}")
+      temp_dir =
+        Path.join(System.tmp_dir!(), "invalid_hometown_#{System.unique_integer([:positive])}")
+
       File.mkdir_p!(temp_dir)
 
       # Write invalid YAML file
@@ -427,10 +444,12 @@ defmodule Exmud.Framework.HometownTest do
       # Generate unique name to avoid conflicts across test runs
       unique_name = :"invalid_yaml_server_#{System.unique_integer([:positive])}"
       unique_id = :"invalid_yaml_id_#{System.unique_integer([:positive])}"
-      {:ok, pid} = start_supervised(
-        {Hometown, path: temp_dir, name: unique_name},
-        id: unique_id
-      )
+
+      {:ok, pid} =
+        start_supervised(
+          {Hometown, path: temp_dir, name: unique_name},
+          id: unique_id
+        )
 
       # Server should start but have no valid hometowns
       assert Process.alive?(pid)
@@ -439,27 +458,29 @@ defmodule Exmud.Framework.HometownTest do
 
   describe "ETS table concurrency" do
     test "can read from multiple processes concurrently", %{} do
-      tasks = for _ <- 1..10 do
-        Task.async(fn ->
-          Hometown.get("tara", :test_hometown_server)
-        end)
-      end
+      tasks =
+        for _ <- 1..10 do
+          Task.async(fn ->
+            Hometown.get("tara", :test_hometown_server)
+          end)
+        end
 
       results = Task.await_many(tasks)
 
       # All reads should succeed
       assert Enum.all?(results, fn
-        {:ok, hometown} -> hometown.key == "tara"
-        _ -> false
-      end)
+               {:ok, hometown} -> hometown.key == "tara"
+               _ -> false
+             end)
     end
 
     test "count is consistent across reads", %{} do
-      tasks = for _ <- 1..10 do
-        Task.async(fn ->
-          Hometown.count(:test_hometown_server)
-        end)
-      end
+      tasks =
+        for _ <- 1..10 do
+          Task.async(fn ->
+            Hometown.count(:test_hometown_server)
+          end)
+        end
 
       counts = Task.await_many(tasks)
 

@@ -6,12 +6,15 @@ defmodule Exmud.Framework.Magic.SpellWordsTest do
 
   setup do
     # Start the default SpellWords server if not running
-    pid = case Process.whereis(SpellWords) do
-      nil ->
-        {:ok, p} = SpellWords.start_link(name: SpellWords, load_on_start: true)
-        p
-      existing -> existing
-    end
+    pid =
+      case Process.whereis(SpellWords) do
+        nil ->
+          {:ok, p} = SpellWords.start_link(name: SpellWords, load_on_start: true)
+          p
+
+        existing ->
+          existing
+      end
 
     # Create a test GameState
     game_state = %GameState{
@@ -46,7 +49,8 @@ defmodule Exmud.Framework.Magic.SpellWordsTest do
     test "returns all loaded words" do
       words = SpellWords.all_words()
       assert is_list(words)
-      assert length(words) >= 4  # Default has at least 4 words
+      # Default has at least 4 words
+      assert length(words) >= 4
 
       word_keys = Enum.map(words, & &1.key)
       assert "ignis" in word_keys
@@ -176,7 +180,8 @@ defmodule Exmud.Framework.Magic.SpellWordsTest do
       assert {:ok, result} = SpellWords.cast(game_state, ["ignis", "creo"])
 
       assert result.spell == "fireball"
-      assert result.power == 15  # ignis (10) + creo (5)
+      # ignis (10) + creo (5)
+      assert result.power == 15
       assert is_binary(result.description)
       assert result.words_used == ["ignis", "creo"]
     end
@@ -189,7 +194,8 @@ defmodule Exmud.Framework.Magic.SpellWordsTest do
     end
 
     test "returns error for unknown combination", %{game_state: game_state} do
-      assert {:error, :unknown_combination, words} = SpellWords.cast(game_state, ["ignis", "aqua"])
+      assert {:error, :unknown_combination, words} =
+               SpellWords.cast(game_state, ["ignis", "aqua"])
 
       assert "ignis" in words
       assert "aqua" in words
@@ -262,7 +268,9 @@ defmodule Exmud.Framework.Magic.SpellWordsTest do
 
     test "accepts custom path option" do
       server_name = :"spell_words_test_#{System.unique_integer([:positive])}"
-      {:ok, pid} = SpellWords.start_link(name: server_name, path: "/custom/path", load_on_start: false)
+
+      {:ok, pid} =
+        SpellWords.start_link(name: server_name, path: "/custom/path", load_on_start: false)
 
       # Should start without error even with custom path
       assert Process.alive?(pid)

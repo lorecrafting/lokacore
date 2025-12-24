@@ -5,16 +5,18 @@ defmodule Exmud.Framework.Economy.ShopTest do
 
   # Helper to create a merchant NPC entity
   defp create_merchant(attrs \\ %{}) do
-    merchant_component = attrs[:merchant] || %{
-      shop_type: "general",
-      buy_multiplier: 0.5,
-      sell_multiplier: 1.0,
-      stock: [],
-      currency: "gold",
-      faction_discounts: true,
-      greeting: "Welcome!",
-      farewell: "Goodbye!"
-    }
+    merchant_component =
+      attrs[:merchant] ||
+        %{
+          shop_type: "general",
+          buy_multiplier: 0.5,
+          sell_multiplier: 1.0,
+          stock: [],
+          currency: "gold",
+          faction_discounts: true,
+          greeting: "Welcome!",
+          farewell: "Goodbye!"
+        }
 
     {:ok, entity} =
       Exmud.Engine.Entities.create_entity(%{
@@ -55,17 +57,18 @@ defmodule Exmud.Framework.Economy.ShopTest do
     end
 
     test "returns shop struct for merchant NPC with atom keys" do
-      merchant = create_merchant(%{
-        merchant: %{
-          shop_type: "weapons",
-          buy_multiplier: 0.6,
-          sell_multiplier: 1.2,
-          stock: [],
-          currency: "silver",
-          greeting: "Arms and armor!",
-          farewell: "Safe travels!"
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            shop_type: "weapons",
+            buy_multiplier: 0.6,
+            sell_multiplier: 1.2,
+            stock: [],
+            currency: "silver",
+            greeting: "Arms and armor!",
+            farewell: "Safe travels!"
+          }
+        })
 
       shop = Shop.get_shop(merchant)
 
@@ -79,18 +82,19 @@ defmodule Exmud.Framework.Economy.ShopTest do
     end
 
     test "returns shop struct for merchant NPC with string keys" do
-      merchant = create_merchant(%{
-        merchant: %{
-          "shop_type" => "magic",
-          "buy_multiplier" => 0.4,
-          "sell_multiplier" => 1.5,
-          "stock" => [],
-          "currency" => "gold",
-          "faction_discounts" => true,
-          "greeting" => "Mystical wares!",
-          "farewell" => "May magic guide you!"
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            "shop_type" => "magic",
+            "buy_multiplier" => 0.4,
+            "sell_multiplier" => 1.5,
+            "stock" => [],
+            "currency" => "gold",
+            "faction_discounts" => true,
+            "greeting" => "Mystical wares!",
+            "farewell" => "May magic guide you!"
+          }
+        })
 
       shop = Shop.get_shop(merchant)
 
@@ -101,11 +105,12 @@ defmodule Exmud.Framework.Economy.ShopTest do
     end
 
     test "uses default values for missing fields" do
-      merchant = create_merchant(%{
-        merchant: %{
-          shop_type: "alchemy"
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            shop_type: "alchemy"
+          }
+        })
 
       shop = Shop.get_shop(merchant)
 
@@ -231,16 +236,17 @@ defmodule Exmud.Framework.Economy.ShopTest do
     end
 
     test "lists stock items with calculated prices" do
-      merchant = create_merchant(%{
-        merchant: %{
-          buy_multiplier: 0.5,
-          sell_multiplier: 1.0,
-          stock: [
-            %{item: "health_potion", quantity: 10, unlimited: false},
-            %{item: "mana_potion", quantity: 5, unlimited: false}
-          ]
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            buy_multiplier: 0.5,
+            sell_multiplier: 1.0,
+            stock: [
+              %{item: "health_potion", quantity: 10, unlimited: false},
+              %{item: "mana_potion", quantity: 5, unlimited: false}
+            ]
+          }
+        })
 
       base_prices = %{
         "health_potion" => 20,
@@ -253,23 +259,28 @@ defmodule Exmud.Framework.Economy.ShopTest do
 
       health_potion = Enum.find(items, &(&1.item == "health_potion"))
       assert health_potion.quantity == 10
-      assert health_potion.buy_price == 20  # 20 * 1.0
-      assert health_potion.sell_price == 10  # 20 * 0.5
+      # 20 * 1.0
+      assert health_potion.buy_price == 20
+      # 20 * 0.5
+      assert health_potion.sell_price == 10
 
       mana_potion = Enum.find(items, &(&1.item == "mana_potion"))
       assert mana_potion.quantity == 5
-      assert mana_potion.buy_price == 30  # 30 * 1.0
-      assert mana_potion.sell_price == 15  # 30 * 0.5
+      # 30 * 1.0
+      assert mana_potion.buy_price == 30
+      # 30 * 0.5
+      assert mana_potion.sell_price == 15
     end
 
     test "shows :unlimited for unlimited items" do
-      merchant = create_merchant(%{
-        merchant: %{
-          stock: [
-            %{item: "rope", quantity: 100, unlimited: true}
-          ]
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            stock: [
+              %{item: "rope", quantity: 100, unlimited: true}
+            ]
+          }
+        })
 
       items = Shop.list_stock(merchant)
 
@@ -279,15 +290,16 @@ defmodule Exmud.Framework.Economy.ShopTest do
     end
 
     test "filters out items with zero quantity" do
-      merchant = create_merchant(%{
-        merchant: %{
-          stock: [
-            %{item: "available", quantity: 5, unlimited: false},
-            %{item: "sold_out", quantity: 0, unlimited: false},
-            %{item: "unlimited", quantity: 0, unlimited: true}
-          ]
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            stock: [
+              %{item: "available", quantity: 5, unlimited: false},
+              %{item: "sold_out", quantity: 0, unlimited: false},
+              %{item: "unlimited", quantity: 0, unlimited: true}
+            ]
+          }
+        })
 
       items = Shop.list_stock(merchant)
 
@@ -300,41 +312,47 @@ defmodule Exmud.Framework.Economy.ShopTest do
     end
 
     test "uses default base price when not provided" do
-      merchant = create_merchant(%{
-        merchant: %{
-          buy_multiplier: 0.5,
-          sell_multiplier: 1.0,
-          stock: [
-            %{item: "unknown_item", quantity: 1, unlimited: false}
-          ]
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            buy_multiplier: 0.5,
+            sell_multiplier: 1.0,
+            stock: [
+              %{item: "unknown_item", quantity: 1, unlimited: false}
+            ]
+          }
+        })
 
       items = Shop.list_stock(merchant, %{})
 
       assert length(items) == 1
       [item] = items
-      assert item.buy_price == 10  # default 10 * 1.0
-      assert item.sell_price == 5   # default 10 * 0.5
+      # default 10 * 1.0
+      assert item.buy_price == 10
+      # default 10 * 0.5
+      assert item.sell_price == 5
     end
 
     test "applies custom price multipliers" do
-      merchant = create_merchant(%{
-        merchant: %{
-          buy_multiplier: 0.3,
-          sell_multiplier: 2.0,
-          stock: [
-            %{item: "rare_gem", quantity: 1, unlimited: false}
-          ]
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            buy_multiplier: 0.3,
+            sell_multiplier: 2.0,
+            stock: [
+              %{item: "rare_gem", quantity: 1, unlimited: false}
+            ]
+          }
+        })
 
       base_prices = %{"rare_gem" => 100}
       items = Shop.list_stock(merchant, base_prices)
 
       [gem] = items
-      assert gem.buy_price == 200  # 100 * 2.0
-      assert gem.sell_price == 30   # 100 * 0.3
+      # 100 * 2.0
+      assert gem.buy_price == 200
+      # 100 * 0.3
+      assert gem.sell_price == 30
     end
   end
 
@@ -345,39 +363,46 @@ defmodule Exmud.Framework.Economy.ShopTest do
     end
 
     test "calculates buy price with default quantity" do
-      merchant = create_merchant(%{
-        merchant: %{sell_multiplier: 1.5}
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{sell_multiplier: 1.5}
+        })
 
       assert {:ok, price} = Shop.get_buy_price(merchant, "sword", 100)
-      assert price == 150  # 100 * 1.5 * 1
+      # 100 * 1.5 * 1
+      assert price == 150
     end
 
     test "calculates buy price with custom quantity" do
-      merchant = create_merchant(%{
-        merchant: %{sell_multiplier: 1.2}
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{sell_multiplier: 1.2}
+        })
 
       assert {:ok, price} = Shop.get_buy_price(merchant, "potion", 50, 5)
-      assert price == 300  # 50 * 1.2 * 5 = 300
+      # 50 * 1.2 * 5 = 300
+      assert price == 300
     end
 
     test "handles zero multiplier" do
-      merchant = create_merchant(%{
-        merchant: %{sell_multiplier: 0.0}
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{sell_multiplier: 0.0}
+        })
 
       assert {:ok, price} = Shop.get_buy_price(merchant, "item", 100)
       assert price == 0
     end
 
     test "rounds fractional prices" do
-      merchant = create_merchant(%{
-        merchant: %{sell_multiplier: 1.25}
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{sell_multiplier: 1.25}
+        })
 
       assert {:ok, price} = Shop.get_buy_price(merchant, "item", 10)
-      assert price == 13  # round(10 * 1.25) = 13
+      # round(10 * 1.25) = 13
+      assert price == 13
     end
   end
 
@@ -388,39 +413,46 @@ defmodule Exmud.Framework.Economy.ShopTest do
     end
 
     test "calculates sell price with default quantity" do
-      merchant = create_merchant(%{
-        merchant: %{buy_multiplier: 0.5}
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{buy_multiplier: 0.5}
+        })
 
       assert {:ok, price} = Shop.get_sell_price(merchant, "sword", 100)
-      assert price == 50  # 100 * 0.5 * 1
+      # 100 * 0.5 * 1
+      assert price == 50
     end
 
     test "calculates sell price with custom quantity" do
-      merchant = create_merchant(%{
-        merchant: %{buy_multiplier: 0.6}
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{buy_multiplier: 0.6}
+        })
 
       assert {:ok, price} = Shop.get_sell_price(merchant, "ore", 25, 10)
-      assert price == 150  # 25 * 0.6 * 10 = 150
+      # 25 * 0.6 * 10 = 150
+      assert price == 150
     end
 
     test "handles zero multiplier" do
-      merchant = create_merchant(%{
-        merchant: %{buy_multiplier: 0.0}
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{buy_multiplier: 0.0}
+        })
 
       assert {:ok, price} = Shop.get_sell_price(merchant, "item", 100)
       assert price == 0
     end
 
     test "rounds fractional prices" do
-      merchant = create_merchant(%{
-        merchant: %{buy_multiplier: 0.75}
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{buy_multiplier: 0.75}
+        })
 
       assert {:ok, price} = Shop.get_sell_price(merchant, "item", 10)
-      assert price == 8  # round(10 * 0.75) = 8
+      # round(10 * 0.75) = 8
+      assert price == 8
     end
   end
 
@@ -431,25 +463,27 @@ defmodule Exmud.Framework.Economy.ShopTest do
     end
 
     test "returns false when item not in stock list" do
-      merchant = create_merchant(%{
-        merchant: %{
-          stock: [
-            %{item: "sword", quantity: 5, unlimited: false}
-          ]
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            stock: [
+              %{item: "sword", quantity: 5, unlimited: false}
+            ]
+          }
+        })
 
       assert Shop.in_stock?(merchant, "shield") == false
     end
 
     test "returns true when item has sufficient quantity" do
-      merchant = create_merchant(%{
-        merchant: %{
-          stock: [
-            %{item: "potion", quantity: 10, unlimited: false}
-          ]
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            stock: [
+              %{item: "potion", quantity: 10, unlimited: false}
+            ]
+          }
+        })
 
       assert Shop.in_stock?(merchant, "potion") == true
       assert Shop.in_stock?(merchant, "potion", 5) == true
@@ -457,37 +491,40 @@ defmodule Exmud.Framework.Economy.ShopTest do
     end
 
     test "returns false when quantity insufficient" do
-      merchant = create_merchant(%{
-        merchant: %{
-          stock: [
-            %{item: "potion", quantity: 3, unlimited: false}
-          ]
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            stock: [
+              %{item: "potion", quantity: 3, unlimited: false}
+            ]
+          }
+        })
 
       assert Shop.in_stock?(merchant, "potion", 5) == false
     end
 
     test "returns false when out of stock" do
-      merchant = create_merchant(%{
-        merchant: %{
-          stock: [
-            %{item: "potion", quantity: 0, unlimited: false}
-          ]
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            stock: [
+              %{item: "potion", quantity: 0, unlimited: false}
+            ]
+          }
+        })
 
       assert Shop.in_stock?(merchant, "potion") == false
     end
 
     test "returns true for unlimited items regardless of quantity" do
-      merchant = create_merchant(%{
-        merchant: %{
-          stock: [
-            %{item: "rope", quantity: 1, unlimited: true}
-          ]
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            stock: [
+              %{item: "rope", quantity: 1, unlimited: true}
+            ]
+          }
+        })
 
       assert Shop.in_stock?(merchant, "rope") == true
       assert Shop.in_stock?(merchant, "rope", 1) == true
@@ -496,13 +533,14 @@ defmodule Exmud.Framework.Economy.ShopTest do
     end
 
     test "returns true for unlimited items even with zero quantity" do
-      merchant = create_merchant(%{
-        merchant: %{
-          stock: [
-            %{item: "magic_item", quantity: 0, unlimited: true}
-          ]
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            stock: [
+              %{item: "magic_item", quantity: 0, unlimited: true}
+            ]
+          }
+        })
 
       assert Shop.in_stock?(merchant, "magic_item", 999) == true
     end
@@ -515,13 +553,14 @@ defmodule Exmud.Framework.Economy.ShopTest do
     end
 
     test "returns shop with unchanged stock when no restock configured" do
-      merchant = create_merchant(%{
-        merchant: %{
-          stock: [
-            %{item: "sword", quantity: 5, unlimited: false, restock_time: nil}
-          ]
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            stock: [
+              %{item: "sword", quantity: 5, unlimited: false, restock_time: nil}
+            ]
+          }
+        })
 
       {:ok, shop} = Shop.tick_restock(merchant)
       [sword] = shop.stock
@@ -531,13 +570,14 @@ defmodule Exmud.Framework.Economy.ShopTest do
     end
 
     test "does not restock unlimited items" do
-      merchant = create_merchant(%{
-        merchant: %{
-          stock: [
-            %{item: "rope", quantity: 1, unlimited: true, restock_time: 3600}
-          ]
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            stock: [
+              %{item: "rope", quantity: 1, unlimited: true, restock_time: 3600}
+            ]
+          }
+        })
 
       {:ok, shop} = Shop.tick_restock(merchant, 1000)
       [rope] = shop.stock
@@ -548,13 +588,14 @@ defmodule Exmud.Framework.Economy.ShopTest do
     end
 
     test "does not restock items already at max quantity" do
-      merchant = create_merchant(%{
-        merchant: %{
-          stock: [
-            %{item: "potion", quantity: 10, unlimited: false, restock_time: 3600}
-          ]
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            stock: [
+              %{item: "potion", quantity: 10, unlimited: false, restock_time: 3600}
+            ]
+          }
+        })
 
       {:ok, shop} = Shop.tick_restock(merchant, 1000)
       [potion] = shop.stock
@@ -567,13 +608,14 @@ defmodule Exmud.Framework.Economy.ShopTest do
     test "starts restock timer when quantity below max" do
       # Note: parse_stock sets max_quantity = quantity initially,
       # so to test below-max scenarios, we need to start with quantity: 0
-      merchant = create_merchant(%{
-        merchant: %{
-          stock: [
-            %{item: "potion", quantity: 0, unlimited: false, restock_time: 3600}
-          ]
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            stock: [
+              %{item: "potion", quantity: 0, unlimited: false, restock_time: 3600}
+            ]
+          }
+        })
 
       current_time = 1000
       {:ok, updated_shop} = Shop.tick_restock(merchant, current_time)
@@ -585,20 +627,22 @@ defmodule Exmud.Framework.Economy.ShopTest do
       # the implementation doesn't start a timer (line 235-236)
       assert potion.quantity == 0
       assert potion.max_quantity == 0
-      assert potion.restock_timer == nil  # NOT 4600, because quantity == max_quantity
+      # NOT 4600, because quantity == max_quantity
+      assert potion.restock_timer == nil
     end
 
     test "does not restart timer if already running" do
       # This test name is misleading because the implementation can't preserve
       # timer state through from_component. Instead, test that items at max
       # quantity don't get timers set even if they have restock_time configured
-      merchant = create_merchant(%{
-        merchant: %{
-          stock: [
-            %{item: "potion", quantity: 3, unlimited: false, restock_time: 3600}
-          ]
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            stock: [
+              %{item: "potion", quantity: 3, unlimited: false, restock_time: 3600}
+            ]
+          }
+        })
 
       {:ok, updated_shop} = Shop.tick_restock(merchant, 1000)
       [potion] = updated_shop.stock
@@ -607,20 +651,22 @@ defmodule Exmud.Framework.Economy.ShopTest do
       # So quantity >= max_quantity, no timer is set
       assert potion.quantity == 3
       assert potion.max_quantity == 3
-      assert potion.restock_timer == nil  # No timer when at max
+      # No timer when at max
+      assert potion.restock_timer == nil
     end
 
     test "restocks when timer elapses" do
       # Can't test this scenario because from_component always resets restock_timer to nil
       # The implementation doesn't support loading existing timer state from component data
       # This test needs to test something else that's actually possible
-      merchant = create_merchant(%{
-        merchant: %{
-          stock: [
-            %{item: "potion", quantity: 10, unlimited: false, restock_time: 3600}
-          ]
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            stock: [
+              %{item: "potion", quantity: 10, unlimited: false, restock_time: 3600}
+            ]
+          }
+        })
 
       {:ok, updated_shop} = Shop.tick_restock(merchant, 1000)
       [potion] = updated_shop.stock
@@ -634,32 +680,35 @@ defmodule Exmud.Framework.Economy.ShopTest do
     test "does not restock before timer elapses" do
       # Can't test this because from_component doesn't preserve restock_timer
       # Let's test that items with no restock_time don't get timers
-      merchant = create_merchant(%{
-        merchant: %{
-          stock: [
-            %{item: "potion", quantity: 0, unlimited: false, restock_time: nil}
-          ]
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            stock: [
+              %{item: "potion", quantity: 0, unlimited: false, restock_time: nil}
+            ]
+          }
+        })
 
       {:ok, updated_shop} = Shop.tick_restock(merchant, 4000)
       [potion] = updated_shop.stock
 
       assert potion.quantity == 0
-      assert potion.restock_timer == nil  # No timer when restock_time is nil
+      # No timer when restock_time is nil
+      assert potion.restock_timer == nil
     end
 
     test "handles multiple items with different restock states" do
       # Test that different item types are handled correctly
-      merchant = create_merchant(%{
-        merchant: %{
-          stock: [
-            %{item: "sword", quantity: 5, unlimited: false, restock_time: nil},
-            %{item: "rope", quantity: 100, unlimited: true, restock_time: 3600},
-            %{item: "potion", quantity: 0, unlimited: false, restock_time: 1800}
-          ]
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            stock: [
+              %{item: "sword", quantity: 5, unlimited: false, restock_time: nil},
+              %{item: "rope", quantity: 100, unlimited: true, restock_time: 3600},
+              %{item: "potion", quantity: 0, unlimited: false, restock_time: 1800}
+            ]
+          }
+        })
 
       {:ok, updated_shop} = Shop.tick_restock(merchant, 1000)
 
@@ -685,13 +734,14 @@ defmodule Exmud.Framework.Economy.ShopTest do
     test "uses current system time when not provided" do
       # Can't test timer setting because parse_stock sets quantity == max_quantity
       # Let's test that the function succeeds without a time parameter
-      merchant = create_merchant(%{
-        merchant: %{
-          stock: [
-            %{item: "potion", quantity: 10, unlimited: false, restock_time: 3600}
-          ]
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            stock: [
+              %{item: "potion", quantity: 10, unlimited: false, restock_time: 3600}
+            ]
+          }
+        })
 
       # Call without explicit time - should not error
       assert {:ok, updated_shop} = Shop.tick_restock(merchant)
@@ -733,14 +783,15 @@ defmodule Exmud.Framework.Economy.ShopTest do
     end
 
     test "handles stock items with various configurations" do
-      merchant = create_merchant(%{
-        merchant: %{
-          stock: [
-            %{item: "item1", quantity: 5, unlimited: false},
-            %{item: "item2", quantity: 3, unlimited: true}
-          ]
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            stock: [
+              %{item: "item1", quantity: 5, unlimited: false},
+              %{item: "item2", quantity: 3, unlimited: true}
+            ]
+          }
+        })
 
       shop = Shop.get_shop(merchant)
 
@@ -757,13 +808,14 @@ defmodule Exmud.Framework.Economy.ShopTest do
     end
 
     test "in_stock? with default quantity of 1" do
-      merchant = create_merchant(%{
-        merchant: %{
-          stock: [
-            %{item: "single_item", quantity: 1, unlimited: false}
-          ]
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            stock: [
+              %{item: "single_item", quantity: 1, unlimited: false}
+            ]
+          }
+        })
 
       assert Shop.in_stock?(merchant, "single_item") == true
       assert Shop.in_stock?(merchant, "single_item", 1) == true
@@ -771,46 +823,53 @@ defmodule Exmud.Framework.Economy.ShopTest do
     end
 
     test "price calculations with very small multipliers" do
-      merchant = create_merchant(%{
-        merchant: %{
-          buy_multiplier: 0.01,
-          sell_multiplier: 0.01
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            buy_multiplier: 0.01,
+            sell_multiplier: 0.01
+          }
+        })
 
       assert {:ok, buy_price} = Shop.get_buy_price(merchant, "item", 100)
-      assert buy_price == 1  # round(100 * 0.01)
+      # round(100 * 0.01)
+      assert buy_price == 1
 
       assert {:ok, sell_price} = Shop.get_sell_price(merchant, "item", 100)
-      assert sell_price == 1  # round(100 * 0.01)
+      # round(100 * 0.01)
+      assert sell_price == 1
     end
 
     test "price calculations with very large multipliers" do
-      merchant = create_merchant(%{
-        merchant: %{
-          buy_multiplier: 10.0,
-          sell_multiplier: 10.0
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            buy_multiplier: 10.0,
+            sell_multiplier: 10.0
+          }
+        })
 
       assert {:ok, buy_price} = Shop.get_buy_price(merchant, "item", 100)
-      assert buy_price == 1000  # 100 * 10.0
+      # 100 * 10.0
+      assert buy_price == 1000
 
       assert {:ok, sell_price} = Shop.get_sell_price(merchant, "item", 100)
-      assert sell_price == 1000  # 100 * 10.0
+      # 100 * 10.0
+      assert sell_price == 1000
     end
 
     test "tick_restock handles exact timer match" do
       # This test can't work because from_component doesn't preserve
       # restock_timer or max_quantity from Shop structs or maps.
       # Let's test that restock timers work correctly for items at max
-      merchant = create_merchant(%{
-        merchant: %{
-          stock: [
-            %{item: "potion", quantity: 5, restock_time: 100}
-          ]
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            stock: [
+              %{item: "potion", quantity: 5, restock_time: 100}
+            ]
+          }
+        })
 
       {:ok, updated_shop} = Shop.tick_restock(merchant, 1000)
       [potion] = updated_shop.stock
@@ -822,14 +881,15 @@ defmodule Exmud.Framework.Economy.ShopTest do
     end
 
     test "list_stock handles missing base prices gracefully" do
-      merchant = create_merchant(%{
-        merchant: %{
-          stock: [
-            %{item: "unknown1", quantity: 1, unlimited: false},
-            %{item: "unknown2", quantity: 2, unlimited: false}
-          ]
-        }
-      })
+      merchant =
+        create_merchant(%{
+          merchant: %{
+            stock: [
+              %{item: "unknown1", quantity: 1, unlimited: false},
+              %{item: "unknown2", quantity: 2, unlimited: false}
+            ]
+          }
+        })
 
       items = Shop.list_stock(merchant)
 

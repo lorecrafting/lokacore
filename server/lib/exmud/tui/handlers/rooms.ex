@@ -229,7 +229,9 @@ defmodule Exmud.Tui.Handlers.Rooms do
     ]
 
     # Add optional overrides
-    opts = if Map.has_key?(params, "name"), do: Keyword.put(opts, :name, params["name"]), else: opts
+    opts =
+      if Map.has_key?(params, "name"), do: Keyword.put(opts, :name, params["name"]), else: opts
+
     opts = if Map.has_key?(params, "key"), do: Keyword.put(opts, :key, params["key"]), else: opts
 
     case Spawner.spawn_from_template(template_key, opts) do
@@ -347,7 +349,9 @@ defmodule Exmud.Tui.Handlers.Rooms do
       # Get destination room coordinates if available
       {dest_x, dest_y, dest_z} =
         case dest_id && Entities.get_entity(dest_id) do
-          nil -> {0, 0, 0}
+          nil ->
+            {0, 0, 0}
+
           dest_room ->
             dest_coords = get_coordinates(dest_room)
             {dest_coords.x, dest_coords.y, dest_coords.z}

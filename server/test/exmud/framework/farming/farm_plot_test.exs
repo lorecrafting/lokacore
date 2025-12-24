@@ -224,7 +224,14 @@ defmodule Exmud.Framework.Farming.FarmPlotTest do
       plot = %FarmPlot{
         slots: 4,
         crops: [
-          %{slot: 0, crop_key: "wheat", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil}
+          %{
+            slot: 0,
+            crop_key: "wheat",
+            current_stage: "planted",
+            stage_timer: nil,
+            watered: false,
+            wither_timer: nil
+          }
         ]
       }
 
@@ -250,8 +257,22 @@ defmodule Exmud.Framework.Farming.FarmPlotTest do
       plot = %FarmPlot{
         slots: 4,
         crops: [
-          %{slot: 0, crop_key: "wheat", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil},
-          %{slot: 2, crop_key: "carrot", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil}
+          %{
+            slot: 0,
+            crop_key: "wheat",
+            current_stage: "planted",
+            stage_timer: nil,
+            watered: false,
+            wither_timer: nil
+          },
+          %{
+            slot: 2,
+            crop_key: "carrot",
+            current_stage: "planted",
+            stage_timer: nil,
+            watered: false,
+            wither_timer: nil
+          }
         ]
       }
 
@@ -270,7 +291,15 @@ defmodule Exmud.Framework.Farming.FarmPlotTest do
     end
 
     test "returns crop when slot is occupied" do
-      crop = %{slot: 1, crop_key: "wheat", current_stage: "growing", stage_timer: 1000, watered: true, wither_timer: nil}
+      crop = %{
+        slot: 1,
+        crop_key: "wheat",
+        current_stage: "growing",
+        stage_timer: 1000,
+        watered: true,
+        wither_timer: nil
+      }
+
       plot = %FarmPlot{slots: 4, crops: [crop]}
 
       result = FarmPlot.get_crop_in_slot(plot, 1)
@@ -279,9 +308,32 @@ defmodule Exmud.Framework.Farming.FarmPlotTest do
     end
 
     test "returns correct crop when multiple crops exist" do
-      crop1 = %{slot: 0, crop_key: "wheat", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil}
-      crop2 = %{slot: 2, crop_key: "carrot", current_stage: "growing", stage_timer: 5000, watered: true, wither_timer: nil}
-      crop3 = %{slot: 3, crop_key: "tomato", current_stage: "mature", stage_timer: nil, watered: false, wither_timer: nil}
+      crop1 = %{
+        slot: 0,
+        crop_key: "wheat",
+        current_stage: "planted",
+        stage_timer: nil,
+        watered: false,
+        wither_timer: nil
+      }
+
+      crop2 = %{
+        slot: 2,
+        crop_key: "carrot",
+        current_stage: "growing",
+        stage_timer: 5000,
+        watered: true,
+        wither_timer: nil
+      }
+
+      crop3 = %{
+        slot: 3,
+        crop_key: "tomato",
+        current_stage: "mature",
+        stage_timer: nil,
+        watered: false,
+        wither_timer: nil
+      }
 
       plot = %FarmPlot{slots: 4, crops: [crop1, crop2, crop3]}
 
@@ -303,8 +355,22 @@ defmodule Exmud.Framework.Farming.FarmPlotTest do
       plot = %FarmPlot{
         slots: 4,
         crops: [
-          %{slot: 0, crop_key: "wheat", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil},
-          %{slot: 2, crop_key: "carrot", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil}
+          %{
+            slot: 0,
+            crop_key: "wheat",
+            current_stage: "planted",
+            stage_timer: nil,
+            watered: false,
+            wither_timer: nil
+          },
+          %{
+            slot: 2,
+            crop_key: "carrot",
+            current_stage: "planted",
+            stage_timer: nil,
+            watered: false,
+            wither_timer: nil
+          }
         ]
       }
 
@@ -315,9 +381,30 @@ defmodule Exmud.Framework.Farming.FarmPlotTest do
       plot = %FarmPlot{
         slots: 6,
         crops: [
-          %{slot: 3, crop_key: "wheat", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil},
-          %{slot: 1, crop_key: "carrot", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil},
-          %{slot: 5, crop_key: "tomato", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil}
+          %{
+            slot: 3,
+            crop_key: "wheat",
+            current_stage: "planted",
+            stage_timer: nil,
+            watered: false,
+            wither_timer: nil
+          },
+          %{
+            slot: 1,
+            crop_key: "carrot",
+            current_stage: "planted",
+            stage_timer: nil,
+            watered: false,
+            wither_timer: nil
+          },
+          %{
+            slot: 5,
+            crop_key: "tomato",
+            current_stage: "planted",
+            stage_timer: nil,
+            watered: false,
+            wither_timer: nil
+          }
         ]
       }
 
@@ -336,8 +423,22 @@ defmodule Exmud.Framework.Farming.FarmPlotTest do
       plot = %FarmPlot{
         slots: 2,
         crops: [
-          %{slot: 0, crop_key: "wheat", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil},
-          %{slot: 1, crop_key: "carrot", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil}
+          %{
+            slot: 0,
+            crop_key: "wheat",
+            current_stage: "planted",
+            stage_timer: nil,
+            watered: false,
+            wither_timer: nil
+          },
+          %{
+            slot: 1,
+            crop_key: "carrot",
+            current_stage: "planted",
+            stage_timer: nil,
+            watered: false,
+            wither_timer: nil
+          }
         ]
       }
 
@@ -348,8 +449,22 @@ defmodule Exmud.Framework.Farming.FarmPlotTest do
       plot = %FarmPlot{
         slots: 4,
         crops: [
-          %{slot: 0, crop_key: "wheat", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil},
-          %{slot: 2, crop_key: "carrot", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil}
+          %{
+            slot: 0,
+            crop_key: "wheat",
+            current_stage: "planted",
+            stage_timer: nil,
+            watered: false,
+            wither_timer: nil
+          },
+          %{
+            slot: 2,
+            crop_key: "carrot",
+            current_stage: "planted",
+            stage_timer: nil,
+            watered: false,
+            wither_timer: nil
+          }
         ]
       }
 
@@ -360,9 +475,30 @@ defmodule Exmud.Framework.Farming.FarmPlotTest do
       plot = %FarmPlot{
         slots: 6,
         crops: [
-          %{slot: 1, crop_key: "wheat", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil},
-          %{slot: 3, crop_key: "carrot", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil},
-          %{slot: 5, crop_key: "tomato", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil}
+          %{
+            slot: 1,
+            crop_key: "wheat",
+            current_stage: "planted",
+            stage_timer: nil,
+            watered: false,
+            wither_timer: nil
+          },
+          %{
+            slot: 3,
+            crop_key: "carrot",
+            current_stage: "planted",
+            stage_timer: nil,
+            watered: false,
+            wither_timer: nil
+          },
+          %{
+            slot: 5,
+            crop_key: "tomato",
+            current_stage: "planted",
+            stage_timer: nil,
+            watered: false,
+            wither_timer: nil
+          }
         ]
       }
 
@@ -444,7 +580,15 @@ defmodule Exmud.Framework.Farming.FarmPlotTest do
   describe "add_crop/2" do
     test "adds crop to empty plot" do
       plot = %FarmPlot{slots: 4, crops: []}
-      crop = %{slot: 0, crop_key: "wheat", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil}
+
+      crop = %{
+        slot: 0,
+        crop_key: "wheat",
+        current_stage: "planted",
+        stage_timer: nil,
+        watered: false,
+        wither_timer: nil
+      }
 
       updated = FarmPlot.add_crop(plot, crop)
 
@@ -453,10 +597,26 @@ defmodule Exmud.Framework.Farming.FarmPlotTest do
     end
 
     test "adds crop to plot with existing crops" do
-      existing_crop = %{slot: 0, crop_key: "wheat", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil}
+      existing_crop = %{
+        slot: 0,
+        crop_key: "wheat",
+        current_stage: "planted",
+        stage_timer: nil,
+        watered: false,
+        wither_timer: nil
+      }
+
       plot = %FarmPlot{slots: 4, crops: [existing_crop]}
 
-      new_crop = %{slot: 1, crop_key: "carrot", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil}
+      new_crop = %{
+        slot: 1,
+        crop_key: "carrot",
+        current_stage: "planted",
+        stage_timer: nil,
+        watered: false,
+        wither_timer: nil
+      }
+
       updated = FarmPlot.add_crop(plot, new_crop)
 
       assert length(updated.crops) == 2
@@ -466,7 +626,15 @@ defmodule Exmud.Framework.Farming.FarmPlotTest do
 
     test "preserves plot metadata when adding crop" do
       plot = %FarmPlot{slots: 6, soil_quality: "excellent", quality_bonus: 1.5, crops: []}
-      crop = %{slot: 2, crop_key: "tomato", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil}
+
+      crop = %{
+        slot: 2,
+        crop_key: "tomato",
+        current_stage: "planted",
+        stage_timer: nil,
+        watered: false,
+        wither_timer: nil
+      }
 
       updated = FarmPlot.add_crop(plot, crop)
 
@@ -479,7 +647,15 @@ defmodule Exmud.Framework.Farming.FarmPlotTest do
 
   describe "remove_crop/2" do
     test "removes crop from slot" do
-      crop = %{slot: 0, crop_key: "wheat", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil}
+      crop = %{
+        slot: 0,
+        crop_key: "wheat",
+        current_stage: "planted",
+        stage_timer: nil,
+        watered: false,
+        wither_timer: nil
+      }
+
       plot = %FarmPlot{slots: 4, crops: [crop]}
 
       updated = FarmPlot.remove_crop(plot, 0)
@@ -488,9 +664,32 @@ defmodule Exmud.Framework.Farming.FarmPlotTest do
     end
 
     test "removes specific crop from multiple crops" do
-      crop1 = %{slot: 0, crop_key: "wheat", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil}
-      crop2 = %{slot: 1, crop_key: "carrot", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil}
-      crop3 = %{slot: 2, crop_key: "tomato", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil}
+      crop1 = %{
+        slot: 0,
+        crop_key: "wheat",
+        current_stage: "planted",
+        stage_timer: nil,
+        watered: false,
+        wither_timer: nil
+      }
+
+      crop2 = %{
+        slot: 1,
+        crop_key: "carrot",
+        current_stage: "planted",
+        stage_timer: nil,
+        watered: false,
+        wither_timer: nil
+      }
+
+      crop3 = %{
+        slot: 2,
+        crop_key: "tomato",
+        current_stage: "planted",
+        stage_timer: nil,
+        watered: false,
+        wither_timer: nil
+      }
 
       plot = %FarmPlot{slots: 4, crops: [crop1, crop2, crop3]}
 
@@ -503,7 +702,15 @@ defmodule Exmud.Framework.Farming.FarmPlotTest do
     end
 
     test "does nothing when slot is empty" do
-      crop = %{slot: 0, crop_key: "wheat", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil}
+      crop = %{
+        slot: 0,
+        crop_key: "wheat",
+        current_stage: "planted",
+        stage_timer: nil,
+        watered: false,
+        wither_timer: nil
+      }
+
       plot = %FarmPlot{slots: 4, crops: [crop]}
 
       updated = FarmPlot.remove_crop(plot, 2)
@@ -513,7 +720,15 @@ defmodule Exmud.Framework.Farming.FarmPlotTest do
     end
 
     test "preserves plot metadata when removing crop" do
-      crop = %{slot: 0, crop_key: "wheat", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil}
+      crop = %{
+        slot: 0,
+        crop_key: "wheat",
+        current_stage: "planted",
+        stage_timer: nil,
+        watered: false,
+        wither_timer: nil
+      }
+
       plot = %FarmPlot{slots: 6, soil_quality: "good", quality_bonus: 1.2, crops: [crop]}
 
       updated = FarmPlot.remove_crop(plot, 0)
@@ -527,7 +742,15 @@ defmodule Exmud.Framework.Farming.FarmPlotTest do
 
   describe "update_crop/3" do
     test "updates crop in specified slot" do
-      crop = %{slot: 0, crop_key: "wheat", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil}
+      crop = %{
+        slot: 0,
+        crop_key: "wheat",
+        current_stage: "planted",
+        stage_timer: nil,
+        watered: false,
+        wither_timer: nil
+      }
+
       plot = %FarmPlot{slots: 4, crops: [crop]}
 
       updated = FarmPlot.update_crop(plot, 0, %{current_stage: "growing", watered: true})
@@ -540,24 +763,55 @@ defmodule Exmud.Framework.Farming.FarmPlotTest do
     end
 
     test "updates specific crop among multiple crops" do
-      crop1 = %{slot: 0, crop_key: "wheat", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil}
-      crop2 = %{slot: 1, crop_key: "carrot", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil}
-      crop3 = %{slot: 2, crop_key: "tomato", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil}
+      crop1 = %{
+        slot: 0,
+        crop_key: "wheat",
+        current_stage: "planted",
+        stage_timer: nil,
+        watered: false,
+        wither_timer: nil
+      }
+
+      crop2 = %{
+        slot: 1,
+        crop_key: "carrot",
+        current_stage: "planted",
+        stage_timer: nil,
+        watered: false,
+        wither_timer: nil
+      }
+
+      crop3 = %{
+        slot: 2,
+        crop_key: "tomato",
+        current_stage: "planted",
+        stage_timer: nil,
+        watered: false,
+        wither_timer: nil
+      }
 
       plot = %FarmPlot{slots: 4, crops: [crop1, crop2, crop3]}
 
-      updated = FarmPlot.update_crop(plot, 1, %{current_stage: "mature", stage_timer: 999999})
+      updated = FarmPlot.update_crop(plot, 1, %{current_stage: "mature", stage_timer: 999_999})
 
       crops_by_slot = Enum.group_by(updated.crops, & &1.slot)
 
       assert crops_by_slot[0] |> List.first() |> Map.get(:current_stage) == "planted"
       assert crops_by_slot[1] |> List.first() |> Map.get(:current_stage) == "mature"
-      assert crops_by_slot[1] |> List.first() |> Map.get(:stage_timer) == 999999
+      assert crops_by_slot[1] |> List.first() |> Map.get(:stage_timer) == 999_999
       assert crops_by_slot[2] |> List.first() |> Map.get(:current_stage) == "planted"
     end
 
     test "updates multiple fields at once" do
-      crop = %{slot: 0, crop_key: "wheat", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil}
+      crop = %{
+        slot: 0,
+        crop_key: "wheat",
+        current_stage: "planted",
+        stage_timer: nil,
+        watered: false,
+        wither_timer: nil
+      }
+
       plot = %FarmPlot{slots: 4, crops: [crop]}
 
       updates = %{
@@ -577,7 +831,15 @@ defmodule Exmud.Framework.Farming.FarmPlotTest do
     end
 
     test "does nothing when slot does not exist" do
-      crop = %{slot: 0, crop_key: "wheat", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil}
+      crop = %{
+        slot: 0,
+        crop_key: "wheat",
+        current_stage: "planted",
+        stage_timer: nil,
+        watered: false,
+        wither_timer: nil
+      }
+
       plot = %FarmPlot{slots: 4, crops: [crop]}
 
       updated = FarmPlot.update_crop(plot, 5, %{current_stage: "mature"})
@@ -586,7 +848,15 @@ defmodule Exmud.Framework.Farming.FarmPlotTest do
     end
 
     test "preserves plot metadata when updating crop" do
-      crop = %{slot: 0, crop_key: "wheat", current_stage: "planted", stage_timer: nil, watered: false, wither_timer: nil}
+      crop = %{
+        slot: 0,
+        crop_key: "wheat",
+        current_stage: "planted",
+        stage_timer: nil,
+        watered: false,
+        wither_timer: nil
+      }
+
       plot = %FarmPlot{slots: 6, soil_quality: "excellent", quality_bonus: 1.5, crops: [crop]}
 
       updated = FarmPlot.update_crop(plot, 0, %{watered: true})

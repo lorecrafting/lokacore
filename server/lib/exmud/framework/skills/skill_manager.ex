@@ -173,7 +173,8 @@ defmodule Exmud.Framework.Skills.SkillManager do
           xp_needed = Skill.xp_for_level(skill_def, current_level + 1)
 
           {final_level, final_xp} =
-            if new_xp >= xp_needed and can_afford_next_level?(game_state, skill_def, current_level) do
+            if new_xp >= xp_needed and
+                 can_afford_next_level?(game_state, skill_def, current_level) do
               {current_level + 1, new_xp - xp_needed}
             else
               {current_level, new_xp}

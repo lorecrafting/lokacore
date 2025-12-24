@@ -96,10 +96,12 @@ defmodule Exmud.Framework.Skills.SkillRegistry do
 
   @impl true
   def handle_call({:get, key}, _from, state) do
-    result = case Map.get(state.skills, key) do
-      nil -> {:error, :not_found}
-      skill -> {:ok, skill}
-    end
+    result =
+      case Map.get(state.skills, key) do
+        nil -> {:error, :not_found}
+        skill -> {:ok, skill}
+      end
+
     {:reply, result, state}
   end
 
@@ -131,6 +133,7 @@ defmodule Exmud.Framework.Skills.SkillRegistry do
       {:ok, new_state} ->
         Logger.info("SkillRegistry reloaded #{map_size(new_state.skills)} skills")
         {:reply, :ok, new_state}
+
       {:error, errors} ->
         {:reply, {:error, errors}, state}
     end
@@ -139,9 +142,10 @@ defmodule Exmud.Framework.Skills.SkillRegistry do
   # Test helper - only use in tests
   @impl true
   def handle_call({:put_test_skills, skills}, _from, state) do
-    skill_map = Enum.reduce(skills, %{}, fn skill, acc ->
-      Map.put(acc, skill.key, skill)
-    end)
+    skill_map =
+      Enum.reduce(skills, %{}, fn skill, acc ->
+        Map.put(acc, skill.key, skill)
+      end)
 
     :ets.delete_all_objects(state.table)
     Enum.each(skill_map, fn {key, skill} -> :ets.insert(state.table, {key, skill}) end)

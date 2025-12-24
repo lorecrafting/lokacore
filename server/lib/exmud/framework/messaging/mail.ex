@@ -61,7 +61,8 @@ defmodule Exmud.Framework.Messaging.Mail do
     mail = %{
       id: generate_mail_id(),
       from: from_id,
-      from_name: "Player",  # Would look up actual name
+      # Would look up actual name
+      from_name: "Player",
       to: to_id,
       subject: subject,
       body: body,
@@ -107,6 +108,7 @@ defmodule Exmud.Framework.Messaging.Mail do
   """
   def get_inbox(%GameState{} = game_state) do
     mailbox = get_mailbox(game_state)
+
     mailbox.inbox
     |> Enum.reject(& &1.archived)
     |> Enum.sort_by(& &1.sent_at, :desc)
@@ -125,6 +127,7 @@ defmodule Exmud.Framework.Messaging.Mail do
   """
   def get_sent(%GameState{} = game_state) do
     mailbox = get_mailbox(game_state)
+
     mailbox.sent
     |> Enum.sort_by(& &1.sent_at, :desc)
   end
@@ -134,6 +137,7 @@ defmodule Exmud.Framework.Messaging.Mail do
   """
   def get_archived(%GameState{} = game_state) do
     mailbox = get_mailbox(game_state)
+
     mailbox.inbox
     |> Enum.filter(& &1.archived)
     |> Enum.sort_by(& &1.sent_at, :desc)

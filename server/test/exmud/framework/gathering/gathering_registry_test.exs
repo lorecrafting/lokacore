@@ -27,7 +27,9 @@ defmodule Exmud.Framework.Gathering.GatheringRegistryTest do
 
   describe "start_link/1" do
     test "starts registry with default options" do
-      assert {:ok, pid} = GatheringRegistry.start_link(name: :test_registry_1, load_on_start: false)
+      assert {:ok, pid} =
+               GatheringRegistry.start_link(name: :test_registry_1, load_on_start: false)
+
       assert Process.alive?(pid)
       GenServer.stop(pid)
     end
@@ -53,11 +55,12 @@ defmodule Exmud.Framework.Gathering.GatheringRegistryTest do
     end
 
     test "starts empty when path doesn't exist", %{registry: name} do
-      {:ok, pid} = GatheringRegistry.start_link(
-        name: name,
-        path: "nonexistent/path",
-        load_on_start: true
-      )
+      {:ok, pid} =
+        GatheringRegistry.start_link(
+          name: name,
+          path: "nonexistent/path",
+          load_on_start: true
+        )
 
       assert Process.alive?(pid)
       assert GatheringRegistry.count(name) == 0
@@ -71,11 +74,12 @@ defmodule Exmud.Framework.Gathering.GatheringRegistryTest do
       name: "Herb Patch"
       """)
 
-      {:ok, pid} = GatheringRegistry.start_link(
-        name: name,
-        path: @test_nodes_dir,
-        load_on_start: false
-      )
+      {:ok, pid} =
+        GatheringRegistry.start_link(
+          name: name,
+          path: @test_nodes_dir,
+          load_on_start: false
+        )
 
       assert Process.alive?(pid)
       assert GatheringRegistry.count(name) == 0
@@ -582,6 +586,7 @@ defmodule Exmud.Framework.Gathering.GatheringRegistryTest do
       """)
 
       File.mkdir_p!(@test_nodes_dir)
+
       File.write!(
         Path.join(@test_nodes_dir, "node2.yaml"),
         """
@@ -640,11 +645,12 @@ defmodule Exmud.Framework.Gathering.GatheringRegistryTest do
       File.write!(Path.join(@test_nodes_dir, "bad.yml"), "key: test\n  invalid: : : yaml")
 
       # Registry should start but may have errors
-      {:ok, pid} = GatheringRegistry.start_link(
-        name: name,
-        path: @test_nodes_dir,
-        load_on_start: true
-      )
+      {:ok, pid} =
+        GatheringRegistry.start_link(
+          name: name,
+          path: @test_nodes_dir,
+          load_on_start: true
+        )
 
       assert Process.alive?(pid)
       # No nodes should be loaded from invalid file
@@ -662,11 +668,12 @@ defmodule Exmud.Framework.Gathering.GatheringRegistryTest do
         "key: bad_node\nskill_required: mining"
       )
 
-      {:ok, pid} = GatheringRegistry.start_link(
-        name: name,
-        path: @test_nodes_dir,
-        load_on_start: true
-      )
+      {:ok, pid} =
+        GatheringRegistry.start_link(
+          name: name,
+          path: @test_nodes_dir,
+          load_on_start: true
+        )
 
       # Node with missing fields should not be loaded
       assert GatheringRegistry.count(name) == 0
@@ -723,6 +730,7 @@ defmodule Exmud.Framework.Gathering.GatheringRegistryTest do
       key: node2
       name: "Node 2"
       """)
+
       File.rm!(Path.join(@test_nodes_dir, "node1.yml"))
 
       GatheringRegistry.reload(name)
@@ -739,12 +747,13 @@ defmodule Exmud.Framework.Gathering.GatheringRegistryTest do
       {:ok, _pid} = start_registry_with_test_nodes(name)
 
       # Spawn multiple processes that read concurrently
-      tasks = for _ <- 1..10 do
-        Task.async(fn ->
-          {:ok, node} = GatheringRegistry.get("herb_patch", name)
-          assert node.key == "herb_patch"
-        end)
-      end
+      tasks =
+        for _ <- 1..10 do
+          Task.async(fn ->
+            {:ok, node} = GatheringRegistry.get("herb_patch", name)
+            assert node.key == "herb_patch"
+          end)
+        end
 
       # All tasks should complete successfully
       Enum.each(tasks, &Task.await/1)
@@ -753,12 +762,13 @@ defmodule Exmud.Framework.Gathering.GatheringRegistryTest do
     test "handles concurrent by_skill queries", %{registry: name} do
       {:ok, _pid} = start_registry_with_test_nodes(name)
 
-      tasks = for _ <- 1..10 do
-        Task.async(fn ->
-          nodes = GatheringRegistry.by_skill("herbalism", name)
-          assert length(nodes) == 1
-        end)
-      end
+      tasks =
+        for _ <- 1..10 do
+          Task.async(fn ->
+            nodes = GatheringRegistry.by_skill("herbalism", name)
+            assert length(nodes) == 1
+          end)
+        end
 
       Enum.each(tasks, &Task.await/1)
     end

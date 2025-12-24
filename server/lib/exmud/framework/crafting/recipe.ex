@@ -36,7 +36,11 @@ defmodule Exmud.Framework.Crafting.Recipe do
   alias Exmud.Utils.MapHelpers
 
   @type ingredient :: %{item: String.t(), quantity: pos_integer()}
-  @type output_item :: %{item: String.t(), quantity: pos_integer() | {pos_integer(), pos_integer()}, chance: float()}
+  @type output_item :: %{
+          item: String.t(),
+          quantity: pos_integer() | {pos_integer(), pos_integer()},
+          chance: float()
+        }
 
   @type t :: %__MODULE__{
           key: String.t(),
@@ -101,8 +105,10 @@ defmodule Exmud.Framework.Crafting.Recipe do
         station_type: MapHelpers.get_flexible(data, :station_type, nil),
         description: MapHelpers.get_flexible(data, :description, ""),
         craft_message: MapHelpers.get_flexible(data, :craft_message, "You begin crafting..."),
-        success_message: MapHelpers.get_flexible(data, :success_message, "You successfully craft the item!"),
-        failure_message: MapHelpers.get_flexible(data, :failure_message, "Your crafting attempt fails."),
+        success_message:
+          MapHelpers.get_flexible(data, :success_message, "You successfully craft the item!"),
+        failure_message:
+          MapHelpers.get_flexible(data, :failure_message, "Your crafting attempt fails."),
         tags: MapHelpers.get_flexible(data, :tags, [])
       }
 
@@ -173,13 +179,17 @@ defmodule Exmud.Framework.Crafting.Recipe do
 
   defp parse_xp_reward(data) do
     case MapHelpers.get_flexible(data, :xp_reward, nil) do
-      nil -> nil
+      nil ->
+        nil
+
       reward when is_map(reward) ->
         %{
           skill: MapHelpers.get_flexible(reward, :skill, nil),
           amount: MapHelpers.get_flexible(reward, :amount, 0)
         }
-      _ -> nil
+
+      _ ->
+        nil
     end
   end
 

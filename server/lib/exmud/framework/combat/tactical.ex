@@ -471,7 +471,8 @@ defmodule Exmud.Framework.Combat.Tactical do
       config = %{
         initiative: MapHelpers.get_flexible(combat_data, :initiative, true),
         action_points: MapHelpers.get_flexible(combat_data, :action_points, 3),
-        action_costs: parse_action_costs(MapHelpers.get_flexible(combat_data, :action_costs, %{})),
+        action_costs:
+          parse_action_costs(MapHelpers.get_flexible(combat_data, :action_costs, %{})),
         combo_system: MapHelpers.get_flexible(combat_data, :combo_system, true),
         elemental_system: MapHelpers.get_flexible(combat_data, :elemental_system, true)
       }

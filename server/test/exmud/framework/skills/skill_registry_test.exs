@@ -48,11 +48,12 @@ defmodule Exmud.Framework.Skills.SkillRegistryTest do
     end
 
     test "starts empty when path doesn't exist", %{registry: name} do
-      {:ok, pid} = SkillRegistry.start_link(
-        name: name,
-        path: "nonexistent/path",
-        load_on_start: true
-      )
+      {:ok, pid} =
+        SkillRegistry.start_link(
+          name: name,
+          path: "nonexistent/path",
+          load_on_start: true
+        )
 
       assert Process.alive?(pid)
       assert SkillRegistry.count(name) == 0
@@ -414,6 +415,7 @@ defmodule Exmud.Framework.Skills.SkillRegistryTest do
       """)
 
       File.mkdir_p!(@test_skills_dir)
+
       File.write!(
         Path.join(@test_skills_dir, "skill2.yaml"),
         """

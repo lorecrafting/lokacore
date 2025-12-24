@@ -136,7 +136,9 @@ defmodule Exmud.Framework.Farming do
       stage_def = Crop.get_stage(crop_def, initial_stage)
       duration = stage_def && stage_def.duration
 
-      crop_state = FarmPlot.new_crop_state(slot, crop_def.key, initial_stage, current_time, duration)
+      crop_state =
+        FarmPlot.new_crop_state(slot, crop_def.key, initial_stage, current_time, duration)
+
       _updated_plot = FarmPlot.add_crop(plot, crop_state)
 
       result = %{
@@ -349,7 +351,12 @@ defmodule Exmud.Framework.Farming do
                 nil
               end
 
-            %{crop_state | current_stage: next_stage.stage, stage_timer: new_timer, watered: false}
+            %{
+              crop_state
+              | current_stage: next_stage.stage,
+                stage_timer: new_timer,
+                watered: false
+            }
         end
     end
   end

@@ -98,8 +98,16 @@ defmodule Exmud.Framework.FarmingTest do
 
     test "parses plot with existing crops" do
       crops = [
-        %{"slot" => 0, "crop_key" => "wheat", "current_stage" => "planted", "stage_timer" => nil, "watered" => false, "wither_timer" => nil}
+        %{
+          "slot" => 0,
+          "crop_key" => "wheat",
+          "current_stage" => "planted",
+          "stage_timer" => nil,
+          "watered" => false,
+          "wither_timer" => nil
+        }
       ]
+
       room = room_with_plot_fixture(plot: %{crops: crops})
 
       plot = Farming.get_plot(room)
@@ -129,8 +137,22 @@ defmodule Exmud.Framework.FarmingTest do
 
     test "returns list of crops when plot has crops" do
       crops = [
-        %{"slot" => 0, "crop_key" => "wheat", "current_stage" => "planted", "stage_timer" => nil, "watered" => false, "wither_timer" => nil},
-        %{"slot" => 1, "crop_key" => "carrots", "current_stage" => "sprouting", "stage_timer" => nil, "watered" => true, "wither_timer" => nil}
+        %{
+          "slot" => 0,
+          "crop_key" => "wheat",
+          "current_stage" => "planted",
+          "stage_timer" => nil,
+          "watered" => false,
+          "wither_timer" => nil
+        },
+        %{
+          "slot" => 1,
+          "crop_key" => "carrots",
+          "current_stage" => "sprouting",
+          "stage_timer" => nil,
+          "watered" => true,
+          "wither_timer" => nil
+        }
       ]
 
       room = room_with_plot_fixture(plot: %{crops: crops})
@@ -164,7 +186,14 @@ defmodule Exmud.Framework.FarmingTest do
     test "returns error for unknown crop key" do
       # Skipped: Requires CropRegistry to be running
       crops = [
-        %{"slot" => 0, "crop_key" => "unknown_crop", "current_stage" => "planted", "stage_timer" => nil, "watered" => false, "wither_timer" => nil}
+        %{
+          "slot" => 0,
+          "crop_key" => "unknown_crop",
+          "current_stage" => "planted",
+          "stage_timer" => nil,
+          "watered" => false,
+          "wither_timer" => nil
+        }
       ]
 
       room = room_with_plot_fixture(plot: %{crops: crops})
@@ -191,7 +220,8 @@ defmodule Exmud.Framework.FarmingTest do
       room = room_with_plot_fixture(plot: %{slots: 2})
       game_state = game_state_fixture(player.id, %{inventory: ["wheat_seeds"]})
 
-      assert {:error, {:invalid_slot, 5, 2}} = Farming.can_plant?(game_state, room, 5, "wheat_seeds")
+      assert {:error, {:invalid_slot, 5, 2}} =
+               Farming.can_plant?(game_state, room, 5, "wheat_seeds")
     end
 
     test "returns error when slot is negative" do
@@ -199,14 +229,24 @@ defmodule Exmud.Framework.FarmingTest do
       room = room_with_plot_fixture()
       game_state = game_state_fixture(player.id, %{inventory: ["wheat_seeds"]})
 
-      assert {:error, {:invalid_slot, -1, 4}} = Farming.can_plant?(game_state, room, -1, "wheat_seeds")
+      assert {:error, {:invalid_slot, -1, 4}} =
+               Farming.can_plant?(game_state, room, -1, "wheat_seeds")
     end
 
     test "returns error when slot is occupied" do
       player = player_fixture()
+
       crops = [
-        %{"slot" => 0, "crop_key" => "wheat", "current_stage" => "planted", "stage_timer" => nil, "watered" => false, "wither_timer" => nil}
+        %{
+          "slot" => 0,
+          "crop_key" => "wheat",
+          "current_stage" => "planted",
+          "stage_timer" => nil,
+          "watered" => false,
+          "wither_timer" => nil
+        }
       ]
+
       room = room_with_plot_fixture(plot: %{crops: crops})
       game_state = game_state_fixture(player.id, %{inventory: ["wheat_seeds"]})
 
@@ -260,9 +300,18 @@ defmodule Exmud.Framework.FarmingTest do
 
     test "returns error when slot is occupied" do
       player = player_fixture()
+
       crops = [
-        %{"slot" => 0, "crop_key" => "wheat", "current_stage" => "planted", "stage_timer" => nil, "watered" => false, "wither_timer" => nil}
+        %{
+          "slot" => 0,
+          "crop_key" => "wheat",
+          "current_stage" => "planted",
+          "stage_timer" => nil,
+          "watered" => false,
+          "wither_timer" => nil
+        }
       ]
+
       room = room_with_plot_fixture(plot: %{crops: crops})
       game_state = game_state_fixture(player.id, %{inventory: ["wheat_seeds"]})
 
@@ -291,8 +340,16 @@ defmodule Exmud.Framework.FarmingTest do
     test "returns error when crop doesn't exist in registry" do
       # Skipped: Requires CropRegistry to be running
       crops = [
-        %{"slot" => 0, "crop_key" => "unknown_crop", "current_stage" => "planted", "stage_timer" => nil, "watered" => false, "wither_timer" => 999}
+        %{
+          "slot" => 0,
+          "crop_key" => "unknown_crop",
+          "current_stage" => "planted",
+          "stage_timer" => nil,
+          "watered" => false,
+          "wither_timer" => 999
+        }
       ]
+
       room = room_with_plot_fixture(plot: %{crops: crops})
 
       assert {:error, :not_found} = Farming.water(room, 0)
@@ -320,8 +377,16 @@ defmodule Exmud.Framework.FarmingTest do
     test "returns error when crop doesn't exist in registry" do
       # Skipped: Requires CropRegistry to be running
       crops = [
-        %{"slot" => 0, "crop_key" => "unknown_crop", "current_stage" => "harvestable", "stage_timer" => nil, "watered" => true, "wither_timer" => nil}
+        %{
+          "slot" => 0,
+          "crop_key" => "unknown_crop",
+          "current_stage" => "harvestable",
+          "stage_timer" => nil,
+          "watered" => true,
+          "wither_timer" => nil
+        }
       ]
+
       room = room_with_plot_fixture(plot: %{crops: crops})
 
       assert {:error, :not_found} = Farming.can_harvest?(room, 0)
@@ -353,8 +418,16 @@ defmodule Exmud.Framework.FarmingTest do
     test "returns error when crop doesn't exist in registry" do
       # Skipped: Requires CropRegistry to be running
       crops = [
-        %{"slot" => 0, "crop_key" => "unknown_crop", "current_stage" => "harvestable", "stage_timer" => nil, "watered" => false, "wither_timer" => nil}
+        %{
+          "slot" => 0,
+          "crop_key" => "unknown_crop",
+          "current_stage" => "harvestable",
+          "stage_timer" => nil,
+          "watered" => false,
+          "wither_timer" => nil
+        }
       ]
+
       room = room_with_plot_fixture(plot: %{crops: crops})
       player = player_fixture()
       game_state = game_state_fixture(player.id)
@@ -388,8 +461,16 @@ defmodule Exmud.Framework.FarmingTest do
       current_time = System.system_time(:second)
 
       crops = [
-        %{"slot" => 0, "crop_key" => "unknown_crop", "current_stage" => "planted", "stage_timer" => current_time + 100, "watered" => false, "wither_timer" => nil}
+        %{
+          "slot" => 0,
+          "crop_key" => "unknown_crop",
+          "current_stage" => "planted",
+          "stage_timer" => current_time + 100,
+          "watered" => false,
+          "wither_timer" => nil
+        }
       ]
+
       room = room_with_plot_fixture(plot: %{crops: crops})
 
       # Should not crash, just return crop as-is when registry lookup fails
@@ -404,9 +485,24 @@ defmodule Exmud.Framework.FarmingTest do
       future_time = current_time + 1000
 
       crops = [
-        %{"slot" => 0, "crop_key" => "unknown_crop_1", "current_stage" => "planted", "stage_timer" => future_time, "watered" => false, "wither_timer" => nil},
-        %{"slot" => 1, "crop_key" => "unknown_crop_2", "current_stage" => "planted", "stage_timer" => future_time, "watered" => false, "wither_timer" => nil}
+        %{
+          "slot" => 0,
+          "crop_key" => "unknown_crop_1",
+          "current_stage" => "planted",
+          "stage_timer" => future_time,
+          "watered" => false,
+          "wither_timer" => nil
+        },
+        %{
+          "slot" => 1,
+          "crop_key" => "unknown_crop_2",
+          "current_stage" => "planted",
+          "stage_timer" => future_time,
+          "watered" => false,
+          "wither_timer" => nil
+        }
       ]
+
       room = room_with_plot_fixture(plot: %{crops: crops})
 
       assert {:ok, updated_plot} = Farming.tick_growth(room, current_time)

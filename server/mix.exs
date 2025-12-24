@@ -33,9 +33,12 @@ defmodule Exmud.MixProject do
       ],
       groups_for_modules: [
         # Engine Core
-        "Engine - Core": ~r/^Exmud\.Engine\.(Entity|Entities|EntityServer|EntityRegistry|EntitySupervisor)$/,
-        "Engine - Prototypes": ~r/^Exmud\.Engine\.(Prototype|PrototypeLoader|Spawner|WorldLoader|WorldExporter)$/,
-        "Engine - Systems": ~r/^Exmud\.Engine\.(Event|EventBus|Command|Behavior|Hooks|Locks|Scripting|Scripts)$/,
+        "Engine - Core":
+          ~r/^Exmud\.Engine\.(Entity|Entities|EntityServer|EntityRegistry|EntitySupervisor)$/,
+        "Engine - Prototypes":
+          ~r/^Exmud\.Engine\.(Prototype|PrototypeLoader|Spawner|WorldLoader|WorldExporter)$/,
+        "Engine - Systems":
+          ~r/^Exmud\.Engine\.(Event|EventBus|Command|Behavior|Hooks|Locks|Scripting|Scripts)$/,
         "Engine - Schema": ~r/^Exmud\.Engine\.Schema/,
 
         # Framework Systems
@@ -54,7 +57,8 @@ defmodule Exmud.MixProject do
         "Framework - World": ~r/^Exmud\.Framework\.World/,
         "Framework - Dialogue": ~r/^Exmud\.Framework\.Dialogue/,
         "Framework - Player": ~r/^Exmud\.Framework\.Player/,
-        "Framework - Other": ~r/^Exmud\.Framework\.(Companion|Appearance|Messaging|Faction|Hometown|Housing|Magic)/,
+        "Framework - Other":
+          ~r/^Exmud\.Framework\.(Companion|Appearance|Messaging|Faction|Hometown|Housing|Magic)/,
 
         # Web Layer
         "Web - Controllers": ~r/^ExmudWeb\..*Controller$/,
@@ -62,10 +66,10 @@ defmodule Exmud.MixProject do
         "Web - Components": ~r/^ExmudWeb\.(Components|CoreComponents|Layouts)/,
 
         # Accounts & Auth
-        "Accounts": ~r/^Exmud\.(Accounts|Auth)/
+        Accounts: ~r/^Exmud\.(Accounts|Auth)/
       ],
       groups_for_extras: [
-        "Architecture": ~r/architecture/,
+        Architecture: ~r/architecture/,
         "UI & Design": ~r/ui/
       ]
     ]

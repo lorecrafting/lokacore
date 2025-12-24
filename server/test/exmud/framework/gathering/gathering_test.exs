@@ -91,9 +91,10 @@ defmodule Exmud.Framework.GatheringTest do
 
   # Helper to create a room with gathering nodes
   defp room_with_nodes_fixture(node_keys) do
-    nodes_map = Enum.reduce(node_keys, %{}, fn key, acc ->
-      Map.put(acc, key, %{uses_remaining: 3, respawn_at: nil})
-    end)
+    nodes_map =
+      Enum.reduce(node_keys, %{}, fn key, acc ->
+        Map.put(acc, key, %{uses_remaining: 3, respawn_at: nil})
+      end)
 
     components = %{
       "gathering_nodes" => nodes_map
@@ -112,17 +113,19 @@ defmodule Exmud.Framework.GatheringTest do
 
     {:ok, game_state} = GameState.create_state(player.id)
 
-    stats = Map.merge(
-      %{"str" => 10, "dex" => 10, "sta" => 10, "level" => 1, "xp" => 0, "gold" => 0},
-      Map.get(attrs, :stats, %{})
-    )
+    stats =
+      Map.merge(
+        %{"str" => 10, "dex" => 10, "sta" => 10, "level" => 1, "xp" => 0, "gold" => 0},
+        Map.get(attrs, :stats, %{})
+      )
 
     inventory = Map.get(attrs, :inventory, [])
 
-    {:ok, game_state} = GameState.update_state(game_state, %{
-      stats: stats,
-      inventory: inventory
-    })
+    {:ok, game_state} =
+      GameState.update_state(game_state, %{
+        stats: stats,
+        inventory: inventory
+      })
 
     game_state
   end
@@ -141,12 +144,12 @@ defmodule Exmud.Framework.GatheringTest do
 
       # Check that we get tuples of {key, definition, state}
       assert Enum.any?(nodes, fn {key, def, _state} ->
-        key == "herb_patch" && def.name == herb_node.name
-      end)
+               key == "herb_patch" && def.name == herb_node.name
+             end)
 
       assert Enum.any?(nodes, fn {key, def, _state} ->
-        key == "berry_bush" && def.name == simple_node.name
-      end)
+               key == "berry_bush" && def.name == simple_node.name
+             end)
     end
 
     test "returns empty list for room with no nodes" do
@@ -234,7 +237,7 @@ defmodule Exmud.Framework.GatheringTest do
       game_state = game_state_fixture()
 
       assert {:error, {:node_not_in_room, "herb_patch"}} =
-        Gathering.can_gather?(game_state, room, "herb_patch")
+               Gathering.can_gather?(game_state, room, "herb_patch")
     end
 
     test "returns error when node is exhausted" do
@@ -255,36 +258,42 @@ defmodule Exmud.Framework.GatheringTest do
       game_state = game_state_fixture(%{stats: %{"skills" => %{"herbalism" => 0}}})
 
       assert {:error, {:skill_required, "herbalism", 1, 0}} =
-        Gathering.can_gather?(game_state, room, "herb_patch")
+               Gathering.can_gather?(game_state, room, "herb_patch")
     end
 
     test "returns :ok when skill requirement is met" do
       room = room_with_nodes_fixture(["herb_patch"])
-      game_state = game_state_fixture(%{
-        stats: %{"skills" => %{"herbalism" => 5}},
-        inventory: ["gathering_knife"]
-      })
+
+      game_state =
+        game_state_fixture(%{
+          stats: %{"skills" => %{"herbalism" => 5}},
+          inventory: ["gathering_knife"]
+        })
 
       assert :ok = Gathering.can_gather?(game_state, room, "herb_patch")
     end
 
     test "returns error when required tool is missing" do
       room = room_with_nodes_fixture(["herb_patch"])
-      game_state = game_state_fixture(%{
-        stats: %{"skills" => %{"herbalism" => 5}},
-        inventory: []
-      })
+
+      game_state =
+        game_state_fixture(%{
+          stats: %{"skills" => %{"herbalism" => 5}},
+          inventory: []
+        })
 
       assert {:error, {:tool_required, "gathering_knife"}} =
-        Gathering.can_gather?(game_state, room, "herb_patch")
+               Gathering.can_gather?(game_state, room, "herb_patch")
     end
 
     test "returns :ok when required tool is in inventory" do
       room = room_with_nodes_fixture(["herb_patch"])
-      game_state = game_state_fixture(%{
-        stats: %{"skills" => %{"herbalism" => 5}},
-        inventory: ["gathering_knife", "other_item"]
-      })
+
+      game_state =
+        game_state_fixture(%{
+          stats: %{"skills" => %{"herbalism" => 5}},
+          inventory: ["gathering_knife", "other_item"]
+        })
 
       assert :ok = Gathering.can_gather?(game_state, room, "herb_patch")
     end
@@ -352,10 +361,12 @@ defmodule Exmud.Framework.GatheringTest do
 
     test "returns XP reward when items are gathered" do
       room = room_with_nodes_fixture(["herb_patch"])
-      game_state = game_state_fixture(%{
-        stats: %{"skills" => %{"herbalism" => 5}},
-        inventory: ["gathering_knife"]
-      })
+
+      game_state =
+        game_state_fixture(%{
+          stats: %{"skills" => %{"herbalism" => 5}},
+          inventory: ["gathering_knife"]
+        })
 
       {:ok, result} = Gathering.gather(game_state, room, "herb_patch")
 
@@ -403,6 +414,7 @@ defmodule Exmud.Framework.GatheringTest do
 
       assert result.items == []
       assert result.xp == nil
+
       # When node is exhausted (uses_per_respawn is 1, so it becomes exhausted after first gather),
       # the exhausted message gets appended
       assert result.message == "Nothing found. Empty."
@@ -411,14 +423,16 @@ defmodule Exmud.Framework.GatheringTest do
 
     test "returns error when cannot gather" do
       room = room_with_nodes_fixture(["herb_patch"])
-      game_state = game_state_fixture(%{
-        stats: %{"skills" => %{}},
-        inventory: []
-      })
+
+      game_state =
+        game_state_fixture(%{
+          stats: %{"skills" => %{}},
+          inventory: []
+        })
 
       # Missing skill requirement
       assert {:error, {:skill_required, "herbalism", 1, 0}} =
-        Gathering.gather(game_state, room, "herb_patch")
+               Gathering.gather(game_state, room, "herb_patch")
     end
   end
 
@@ -546,6 +560,7 @@ defmodule Exmud.Framework.GatheringTest do
 
     test "respawns node when timer elapses", %{simple_node: simple_node} do
       respawn_time = 1000
+
       components = %{
         "gathering_nodes" => %{
           "berry_bush" => %{uses_remaining: 0, respawn_at: respawn_time}
@@ -553,7 +568,8 @@ defmodule Exmud.Framework.GatheringTest do
       }
 
       room = room_fixture(%{components: components})
-      current_time = respawn_time + 1  # Time has passed
+      # Time has passed
+      current_time = respawn_time + 1
 
       updated_nodes = Gathering.tick_respawn(room, current_time)
 
@@ -564,6 +580,7 @@ defmodule Exmud.Framework.GatheringTest do
 
     test "keeps timer active when time hasn't elapsed" do
       respawn_time = 2000
+
       components = %{
         "gathering_nodes" => %{
           "berry_bush" => %{uses_remaining: 0, respawn_at: respawn_time}
@@ -571,7 +588,8 @@ defmodule Exmud.Framework.GatheringTest do
       }
 
       room = room_fixture(%{components: components})
-      current_time = 1500  # Not yet time
+      # Not yet time
+      current_time = 1500
 
       updated_nodes = Gathering.tick_respawn(room, current_time)
 
@@ -670,10 +688,11 @@ defmodule Exmud.Framework.GatheringTest do
     test "node with partial item ID match in inventory" do
       room = room_with_nodes_fixture(["herb_patch"])
       # Player has item that starts with tool_required
-      game_state = game_state_fixture(%{
-        stats: %{"skills" => %{"herbalism" => 5}},
-        inventory: ["gathering_knife_rusty"]
-      })
+      game_state =
+        game_state_fixture(%{
+          stats: %{"skills" => %{"herbalism" => 5}},
+          inventory: ["gathering_knife_rusty"]
+        })
 
       # Should match because inventory check uses String.starts_with?
       assert :ok = Gathering.can_gather?(game_state, room, "herb_patch")
@@ -681,16 +700,19 @@ defmodule Exmud.Framework.GatheringTest do
 
     test "gathering from node with range quantities" do
       room = room_with_nodes_fixture(["herb_patch"])
-      game_state = game_state_fixture(%{
-        stats: %{"skills" => %{"herbalism" => 5}},
-        inventory: ["gathering_knife"]
-      })
+
+      game_state =
+        game_state_fixture(%{
+          stats: %{"skills" => %{"herbalism" => 5}},
+          inventory: ["gathering_knife"]
+        })
 
       {:ok, result} = Gathering.gather(game_state, room, "herb_patch")
 
       # herb_patch yields have range {1, 3}
       if length(result.items) > 0 do
         healing_herb = Enum.find(result.items, &(&1.item == "herb_healing"))
+
         if healing_herb do
           assert healing_herb.quantity >= 1
           assert healing_herb.quantity <= 3

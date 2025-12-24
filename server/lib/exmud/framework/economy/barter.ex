@@ -77,13 +77,27 @@ defmodule Exmud.Framework.Economy.Barter do
   """
   def add_to_offer(offer, :offerer, item_key, quantity) do
     item = %{item: item_key, quantity: quantity}
-    updated = %{offer | offerer_items: [item | offer.offerer_items], offerer_accepted: false, recipient_accepted: false}
+
+    updated = %{
+      offer
+      | offerer_items: [item | offer.offerer_items],
+        offerer_accepted: false,
+        recipient_accepted: false
+    }
+
     {:ok, updated}
   end
 
   def add_to_offer(offer, :recipient, item_key, quantity) do
     item = %{item: item_key, quantity: quantity}
-    updated = %{offer | recipient_items: [item | offer.recipient_items], offerer_accepted: false, recipient_accepted: false}
+
+    updated = %{
+      offer
+      | recipient_items: [item | offer.recipient_items],
+        offerer_accepted: false,
+        recipient_accepted: false
+    }
+
     {:ok, updated}
   end
 
@@ -92,12 +106,16 @@ defmodule Exmud.Framework.Economy.Barter do
   """
   def remove_from_offer(offer, :offerer, item_key) do
     updated_items = Enum.reject(offer.offerer_items, &(&1.item == item_key))
-    {:ok, %{offer | offerer_items: updated_items, offerer_accepted: false, recipient_accepted: false}}
+
+    {:ok,
+     %{offer | offerer_items: updated_items, offerer_accepted: false, recipient_accepted: false}}
   end
 
   def remove_from_offer(offer, :recipient, item_key) do
     updated_items = Enum.reject(offer.recipient_items, &(&1.item == item_key))
-    {:ok, %{offer | recipient_items: updated_items, offerer_accepted: false, recipient_accepted: false}}
+
+    {:ok,
+     %{offer | recipient_items: updated_items, offerer_accepted: false, recipient_accepted: false}}
   end
 
   @doc """

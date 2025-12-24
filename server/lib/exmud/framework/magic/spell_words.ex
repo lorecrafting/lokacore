@@ -200,7 +200,10 @@ defmodule Exmud.Framework.Magic.SpellWords do
     if load_on_start do
       case do_load_all(state, path) do
         {:ok, new_state} ->
-          Logger.info("SpellWords loaded #{map_size(new_state.words)} words, #{length(new_state.combinations)} combinations")
+          Logger.info(
+            "SpellWords loaded #{map_size(new_state.words)} words, #{length(new_state.combinations)} combinations"
+          )
+
           {:ok, new_state}
 
         {:error, errors} ->
@@ -214,10 +217,12 @@ defmodule Exmud.Framework.Magic.SpellWords do
 
   @impl true
   def handle_call({:get_word, word_key}, _from, state) do
-    result = case Map.get(state.words, word_key) do
-      nil -> {:error, :not_found}
-      word -> {:ok, word}
-    end
+    result =
+      case Map.get(state.words, word_key) do
+        nil -> {:error, :not_found}
+        word -> {:ok, word}
+      end
+
     {:reply, result, state}
   end
 
@@ -228,9 +233,10 @@ defmodule Exmud.Framework.Magic.SpellWords do
 
   @impl true
   def handle_call({:get_combination, sorted_words}, _from, state) do
-    combination = Enum.find(state.combinations, fn combo ->
-      Enum.sort(combo.words) == sorted_words
-    end)
+    combination =
+      Enum.find(state.combinations, fn combo ->
+        Enum.sort(combo.words) == sorted_words
+      end)
 
     result = if combination, do: {:ok, combination}, else: {:error, :not_found}
     {:reply, result, state}
@@ -242,6 +248,7 @@ defmodule Exmud.Framework.Magic.SpellWords do
       {:ok, new_state} ->
         Logger.info("SpellWords reloaded")
         {:reply, :ok, new_state}
+
       {:error, errors} ->
         {:reply, {:error, errors}, state}
     end
@@ -292,6 +299,7 @@ defmodule Exmud.Framework.Magic.SpellWords do
         type: MapHelpers.get_flexible(data, :type, "noun"),
         discovered_by_default: MapHelpers.get_flexible(data, :discovered_by_default, false)
       }
+
       {to_string(key), word}
     end)
     |> Enum.into(%{})
@@ -320,18 +328,62 @@ defmodule Exmud.Framework.Magic.SpellWords do
 
   defp default_words do
     %{
-      "ignis" => %{key: "ignis", name: "Ignis", meaning: "fire", power: 10, element: "fire", type: "noun", discovered_by_default: true},
-      "aqua" => %{key: "aqua", name: "Aqua", meaning: "water", power: 8, element: "water", type: "noun", discovered_by_default: true},
-      "creo" => %{key: "creo", name: "Creo", meaning: "create", power: 5, element: nil, type: "verb", discovered_by_default: true},
-      "perdo" => %{key: "perdo", name: "Perdo", meaning: "destroy", power: 7, element: nil, type: "verb", discovered_by_default: false}
+      "ignis" => %{
+        key: "ignis",
+        name: "Ignis",
+        meaning: "fire",
+        power: 10,
+        element: "fire",
+        type: "noun",
+        discovered_by_default: true
+      },
+      "aqua" => %{
+        key: "aqua",
+        name: "Aqua",
+        meaning: "water",
+        power: 8,
+        element: "water",
+        type: "noun",
+        discovered_by_default: true
+      },
+      "creo" => %{
+        key: "creo",
+        name: "Creo",
+        meaning: "create",
+        power: 5,
+        element: nil,
+        type: "verb",
+        discovered_by_default: true
+      },
+      "perdo" => %{
+        key: "perdo",
+        name: "Perdo",
+        meaning: "destroy",
+        power: 7,
+        element: nil,
+        type: "verb",
+        discovered_by_default: false
+      }
     }
   end
 
   defp default_combinations do
     [
-      %{words: ["creo", "ignis"], result: "fireball", description: "A ball of fire shoots forward!"},
-      %{words: ["aqua", "creo"], result: "water_jet", description: "A jet of water bursts forth!"},
-      %{words: ["ignis", "perdo"], result: "fire_shield", description: "Flames surround you protectively."}
+      %{
+        words: ["creo", "ignis"],
+        result: "fireball",
+        description: "A ball of fire shoots forward!"
+      },
+      %{
+        words: ["aqua", "creo"],
+        result: "water_jet",
+        description: "A jet of water bursts forth!"
+      },
+      %{
+        words: ["ignis", "perdo"],
+        result: "fire_shield",
+        description: "Flames surround you protectively."
+      }
     ]
   end
 end

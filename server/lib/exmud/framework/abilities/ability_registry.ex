@@ -256,7 +256,9 @@ defmodule Exmud.Framework.Abilities.AbilityRegistry do
   @impl true
   def handle_call({:available_for, game_state}, _from, state) do
     player_level = get_in(game_state.stats, ["level"]) || get_in(game_state.stats, [:level]) || 1
-    player_skills = get_in(game_state.stats, ["skills"]) || get_in(game_state.stats, [:skills]) || []
+
+    player_skills =
+      get_in(game_state.stats, ["skills"]) || get_in(game_state.stats, [:skills]) || []
 
     abilities =
       state.abilities

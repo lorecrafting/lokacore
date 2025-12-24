@@ -120,7 +120,9 @@ defmodule Exmud.Framework.Status.StatusManagerTest do
 
   setup %{temp_dir: temp_dir} do
     # Start fresh managers for each test
-    {:ok, _registry_pid} = start_supervised({StatusRegistry, name: StatusRegistry, path: temp_dir})
+    {:ok, _registry_pid} =
+      start_supervised({StatusRegistry, name: StatusRegistry, path: temp_dir})
+
     {:ok, _manager_pid} = start_supervised({StatusManager, name: StatusManager})
 
     on_exit(fn ->
@@ -153,7 +155,8 @@ defmodule Exmud.Framework.Status.StatusManagerTest do
       entity_id = Ecto.UUID.generate()
       source_id = Ecto.UUID.generate()
 
-      assert {:ok, active} = StatusManager.apply_status(entity_id, "poisoned", source_id, stacks: 2)
+      assert {:ok, active} =
+               StatusManager.apply_status(entity_id, "poisoned", source_id, stacks: 2)
 
       assert active.stacks == 2
     end

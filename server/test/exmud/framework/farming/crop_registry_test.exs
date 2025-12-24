@@ -57,11 +57,12 @@ defmodule Exmud.Framework.Farming.CropRegistryTest do
     end
 
     test "starts empty when path doesn't exist", %{registry: name} do
-      {:ok, pid} = CropRegistry.start_link(
-        name: name,
-        path: "nonexistent/path",
-        load_on_start: true
-      )
+      {:ok, pid} =
+        CropRegistry.start_link(
+          name: name,
+          path: "nonexistent/path",
+          load_on_start: true
+        )
 
       assert Process.alive?(pid)
       assert CropRegistry.count(name) == 0
@@ -574,6 +575,7 @@ defmodule Exmud.Framework.Farming.CropRegistryTest do
       """)
 
       File.mkdir_p!(@test_crops_dir)
+
       File.write!(
         Path.join(@test_crops_dir, "crop2.yaml"),
         """
@@ -709,19 +711,20 @@ defmodule Exmud.Framework.Farming.CropRegistryTest do
       {:ok, pid} = start_registry_with_test_crops(name)
 
       # Spawn multiple processes reading concurrently
-      tasks = for _ <- 1..20 do
-        Task.async(fn ->
-          CropRegistry.get("wheat_crop", name)
-        end)
-      end
+      tasks =
+        for _ <- 1..20 do
+          Task.async(fn ->
+            CropRegistry.get("wheat_crop", name)
+          end)
+        end
 
       results = Task.await_many(tasks)
 
       # All reads should succeed
       assert Enum.all?(results, fn
-        {:ok, crop} -> crop.key == "wheat_crop"
-        _ -> false
-      end)
+               {:ok, crop} -> crop.key == "wheat_crop"
+               _ -> false
+             end)
 
       GenServer.stop(pid)
     end

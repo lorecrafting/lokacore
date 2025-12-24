@@ -251,11 +251,13 @@ defmodule Exmud.Framework.Resources.ResourceTest do
 
     test "handles complex context with multiple flags" do
       resource = %Resource{regen_condition: :out_of_combat}
+
       context = %{
         in_combat: false,
         resting: true,
         other_flag: true
       }
+
       assert Resource.should_regen?(resource, context) == true
     end
   end

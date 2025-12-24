@@ -153,7 +153,8 @@ defmodule Exmud.Framework.FactionTest do
       # Create another instance without loading
       {:ok, pid} =
         start_supervised(
-          {Faction, [name: :test_faction_no_load, path: @test_faction_path, load_on_start: false]},
+          {Faction,
+           [name: :test_faction_no_load, path: @test_faction_path, load_on_start: false]},
           id: :test_faction_no_load_supervisor
         )
 
@@ -218,8 +219,7 @@ defmodule Exmud.Framework.FactionTest do
     test "returns empty list when no factions loaded" do
       {:ok, empty_server} =
         start_supervised(
-          {Faction,
-           [name: :empty_faction, path: "non_existent_path", load_on_start: false]},
+          {Faction, [name: :empty_faction, path: "non_existent_path", load_on_start: false]},
           id: :empty_faction_supervisor
         )
 
@@ -517,9 +517,10 @@ defmodule Exmud.Framework.FactionTest do
     # The tier effects ARE correctly stored (see "faction has correct tier structure" test),
     # but they're not being accessed correctly.
 
-    test "attempts to get multiplier for hostile reputation (currently returns default due to bug)", %{
-      faction_server: server
-    } do
+    test "attempts to get multiplier for hostile reputation (currently returns default due to bug)",
+         %{
+           faction_server: server
+         } do
       game_state =
         game_state_fixture(%{
           stats: %{
@@ -614,9 +615,10 @@ defmodule Exmud.Framework.FactionTest do
 
     # NOTE: Same bug as get_shop_multiplier - atom/string key mismatch
     # causes can_enter to always return the default value of true
-    test "attempts to check entry for hostile reputation (currently returns default due to bug)", %{
-      faction_server: server
-    } do
+    test "attempts to check entry for hostile reputation (currently returns default due to bug)",
+         %{
+           faction_server: server
+         } do
       game_state =
         game_state_fixture(%{
           stats: %{

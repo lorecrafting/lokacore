@@ -9,7 +9,8 @@ defmodule Exmud.Framework.Crafting.CraftingStationTest do
     # Start the CraftingRegistry for tests that need it
     # Use the default name since CraftingStation hardcodes it
     # Set async: false for this test module to avoid conflicts
-    {:ok, _pid} = start_supervised({CraftingRegistry, name: CraftingRegistry, load_on_start: false})
+    {:ok, _pid} =
+      start_supervised({CraftingRegistry, name: CraftingRegistry, load_on_start: false})
 
     # Create sample recipes for testing
     recipe1 = %Recipe{

@@ -187,7 +187,8 @@ defmodule Exmud.Framework.Appearance.Clothing do
     case disguises do
       [] -> nil
       [single] -> single
-      multiple -> multiple  # Multiple disguises might conflict
+      # Multiple disguises might conflict
+      multiple -> multiple
     end
   end
 

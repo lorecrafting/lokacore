@@ -75,7 +75,16 @@ defmodule Exmud.Framework.Skills.Skill do
     tags: []
   ]
 
-  @valid_categories ["combat", "magic", "crafting", "gathering", "social", "knowledge", "survival", "general"]
+  @valid_categories [
+    "combat",
+    "magic",
+    "crafting",
+    "gathering",
+    "social",
+    "knowledge",
+    "survival",
+    "general"
+  ]
 
   @doc """
   Creates a Skill struct from a map (typically loaded from YAML).

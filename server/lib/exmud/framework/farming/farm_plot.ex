@@ -50,12 +50,10 @@ defmodule Exmud.Framework.Farming.FarmPlot do
           crops: [crop_state()]
         }
 
-  defstruct [
-    slots: 4,
-    soil_quality: "normal",
-    quality_bonus: 1.0,
-    crops: []
-  ]
+  defstruct slots: 4,
+            soil_quality: "normal",
+            quality_bonus: 1.0,
+            crops: []
 
   @soil_bonuses %{
     "poor" => 0.8,

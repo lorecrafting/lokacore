@@ -63,7 +63,8 @@ defmodule Exmud.Framework.World.Weather do
   require Logger
 
   @weather_table :exmud_weather
-  @tick_interval 300_000  # 5 minutes in milliseconds
+  # 5 minutes in milliseconds
+  @tick_interval 300_000
 
   @default_weather_types %{
     "clear" => %{
@@ -144,7 +145,9 @@ defmodule Exmud.Framework.World.Weather do
   """
   def get_effects(region \\ "default", server \\ __MODULE__) do
     case get_weather(region, server) do
-      nil -> %{}
+      nil ->
+        %{}
+
       weather_key ->
         case get_weather_type(weather_key, server) do
           nil -> %{}
@@ -192,11 +195,12 @@ defmodule Exmud.Framework.World.Weather do
       timer_ref: nil
     }
 
-    state = if auto_tick do
-      schedule_tick(state)
-    else
-      state
-    end
+    state =
+      if auto_tick do
+        schedule_tick(state)
+      else
+        state
+      end
 
     Logger.info("Weather system initialized")
     {:ok, state}
@@ -204,7 +208,9 @@ defmodule Exmud.Framework.World.Weather do
 
   @impl true
   def handle_call({:get_weather, region}, _from, state) do
-    weather = Map.get(state.current_weather, region, Map.get(state.current_weather, "default", "clear"))
+    weather =
+      Map.get(state.current_weather, region, Map.get(state.current_weather, "default", "clear"))
+
     {:reply, weather, state}
   end
 
@@ -253,7 +259,9 @@ defmodule Exmud.Framework.World.Weather do
 
   defp calculate_weather_changes(state) do
     Enum.map(state.current_weather, fn {region, _current} ->
-      chances = Map.get(state.region_chances, region, Map.get(state.region_chances, "default", %{}))
+      chances =
+        Map.get(state.region_chances, region, Map.get(state.region_chances, "default", %{}))
+
       new_weather = roll_weather(chances)
       {region, new_weather}
     end)
@@ -266,6 +274,7 @@ defmodule Exmud.Framework.World.Weather do
     chances
     |> Enum.reduce({0.0, "clear"}, fn {weather, chance}, {acc, current} ->
       new_acc = acc + chance
+
       if roll <= new_acc and roll > acc do
         {new_acc, Atom.to_string(weather)}
       else

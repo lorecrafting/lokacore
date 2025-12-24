@@ -105,10 +105,13 @@ defmodule Exmud.Framework.Farming.Crop do
         skill_required: MapHelpers.get_flexible(data, :skill_required, nil),
         skill_level: MapHelpers.get_flexible(data, :skill_level, 0),
         xp_reward: parse_xp_reward(data),
-        plant_message: MapHelpers.get_flexible(data, :plant_message, "You plant the seeds in the soil."),
-        water_message: MapHelpers.get_flexible(data, :water_message, "You water the growing plants."),
+        plant_message:
+          MapHelpers.get_flexible(data, :plant_message, "You plant the seeds in the soil."),
+        water_message:
+          MapHelpers.get_flexible(data, :water_message, "You water the growing plants."),
         harvest_message: MapHelpers.get_flexible(data, :harvest_message, "You harvest the crop."),
-        wither_message: MapHelpers.get_flexible(data, :wither_message, "The plants have withered from neglect."),
+        wither_message:
+          MapHelpers.get_flexible(data, :wither_message, "The plants have withered from neglect."),
         tags: MapHelpers.get_flexible(data, :tags, [])
       }
 
@@ -162,13 +165,17 @@ defmodule Exmud.Framework.Farming.Crop do
 
   defp parse_xp_reward(data) do
     case MapHelpers.get_flexible(data, :xp_reward, nil) do
-      nil -> nil
+      nil ->
+        nil
+
       reward when is_map(reward) ->
         %{
           skill: MapHelpers.get_flexible(reward, :skill, nil),
           amount: MapHelpers.get_flexible(reward, :amount, 0)
         }
-      _ -> nil
+
+      _ ->
+        nil
     end
   end
 

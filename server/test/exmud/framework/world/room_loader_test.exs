@@ -29,6 +29,7 @@ defmodule Exmud.Framework.World.RoomLoaderTest do
     test "returns {:error, :not_found} when starting room doesn't exist" do
       # Ensure no room with starting key exists
       starting_key = RoomLoader.starting_room_key()
+
       case Entities.get_entity_by_key(starting_key) do
         nil -> :ok
         room -> Entities.delete_entity(room.id)
@@ -49,6 +50,7 @@ defmodule Exmud.Framework.World.RoomLoaderTest do
     test "returns nil when starting room doesn't exist" do
       # Ensure no room with starting key exists
       starting_key = RoomLoader.starting_room_key()
+
       case Entities.get_entity_by_key(starting_key) do
         nil -> :ok
         room -> Entities.delete_entity(room.id)
@@ -60,10 +62,11 @@ defmodule Exmud.Framework.World.RoomLoaderTest do
 
   describe "load_room_for_display/1" do
     test "loads a room with all basic fields" do
-      room = room_fixture(%{
-        name: "Test Room",
-        description: "A test room for testing."
-      })
+      room =
+        room_fixture(%{
+          name: "Test Room",
+          description: "A test room for testing."
+        })
 
       assert {:ok, display_room} = RoomLoader.load_room_for_display(room.id)
 
@@ -77,11 +80,13 @@ defmodule Exmud.Framework.World.RoomLoaderTest do
 
     test "loads a room with NPCs" do
       room = room_fixture()
-      npc = npc_fixture(%{
-        name: "Guard",
-        description: "A stern guard.",
-        location_id: room.id
-      })
+
+      npc =
+        npc_fixture(%{
+          name: "Guard",
+          description: "A stern guard.",
+          location_id: room.id
+        })
 
       assert {:ok, display_room} = RoomLoader.load_room_for_display(room.id)
 
@@ -95,13 +100,14 @@ defmodule Exmud.Framework.World.RoomLoaderTest do
     test "loads a room with items" do
       room = room_fixture()
 
-      {:ok, item} = Entities.create_entity(%{
-        key: "test_sword",
-        name: "Iron Sword",
-        description: "A sturdy iron sword.",
-        type: "item",
-        location_id: room.id
-      })
+      {:ok, item} =
+        Entities.create_entity(%{
+          key: "test_sword",
+          name: "Iron Sword",
+          description: "A sturdy iron sword.",
+          type: "item",
+          location_id: room.id
+        })
 
       assert {:ok, display_room} = RoomLoader.load_room_for_display(room.id)
 
@@ -116,18 +122,19 @@ defmodule Exmud.Framework.World.RoomLoaderTest do
       room1 = room_fixture(%{name: "Room 1"})
       room2 = room_fixture(%{name: "Room 2"})
 
-      {:ok, exit} = Entities.create_entity(%{
-        key: "exit_north",
-        name: "north",
-        type: "exit",
-        location_id: room1.id,
-        components: %{
-          "exit" => %{
-            "direction" => "north",
-            "destination_id" => room2.id
+      {:ok, exit} =
+        Entities.create_entity(%{
+          key: "exit_north",
+          name: "north",
+          type: "exit",
+          location_id: room1.id,
+          components: %{
+            "exit" => %{
+              "direction" => "north",
+              "destination_id" => room2.id
+            }
           }
-        }
-      })
+        })
 
       assert {:ok, display_room} = RoomLoader.load_room_for_display(room1.id)
 
@@ -143,19 +150,21 @@ defmodule Exmud.Framework.World.RoomLoaderTest do
       room = room_fixture()
 
       # Create a regular NPC
-      npc1 = npc_fixture(%{
-        name: "Guard",
-        location_id: room.id
-      })
+      npc1 =
+        npc_fixture(%{
+          name: "Guard",
+          location_id: room.id
+        })
 
       # Create a despawned NPC
-      {:ok, npc2} = Entities.create_entity(%{
-        key: "dead_goblin",
-        name: "Goblin",
-        type: "npc",
-        location_id: room.id,
-        components: %{"despawned" => true}
-      })
+      {:ok, npc2} =
+        Entities.create_entity(%{
+          key: "dead_goblin",
+          name: "Goblin",
+          type: "npc",
+          location_id: room.id,
+          components: %{"despawned" => true}
+        })
 
       assert {:ok, display_room} = RoomLoader.load_room_for_display(room.id)
 
@@ -169,13 +178,14 @@ defmodule Exmud.Framework.World.RoomLoaderTest do
     test "handles NPCs with short_desc component" do
       room = room_fixture()
 
-      npc = npc_fixture(%{
-        name: "Merchant",
-        location_id: room.id,
-        components: %{
-          "short_desc" => "selling wares"
-        }
-      })
+      npc =
+        npc_fixture(%{
+          name: "Merchant",
+          location_id: room.id,
+          components: %{
+            "short_desc" => "selling wares"
+          }
+        })
 
       assert {:ok, display_room} = RoomLoader.load_room_for_display(room.id)
 
@@ -186,13 +196,14 @@ defmodule Exmud.Framework.World.RoomLoaderTest do
     test "handles NPCs with suffix component" do
       room = room_fixture()
 
-      npc = npc_fixture(%{
-        name: "King",
-        location_id: room.id,
-        components: %{
-          "suffix" => "of the realm"
-        }
-      })
+      npc =
+        npc_fixture(%{
+          name: "King",
+          location_id: room.id,
+          components: %{
+            "suffix" => "of the realm"
+          }
+        })
 
       assert {:ok, display_room} = RoomLoader.load_room_for_display(room.id)
 
@@ -203,15 +214,16 @@ defmodule Exmud.Framework.World.RoomLoaderTest do
     test "handles items with desc component" do
       room = room_fixture()
 
-      {:ok, item} = Entities.create_entity(%{
-        key: "test_potion",
-        name: "Health Potion",
-        type: "item",
-        location_id: room.id,
-        components: %{
-          "desc" => "glowing red"
-        }
-      })
+      {:ok, item} =
+        Entities.create_entity(%{
+          key: "test_potion",
+          name: "Health Potion",
+          type: "item",
+          location_id: room.id,
+          components: %{
+            "desc" => "glowing red"
+          }
+        })
 
       assert {:ok, display_room} = RoomLoader.load_room_for_display(room.id)
 
@@ -222,18 +234,19 @@ defmodule Exmud.Framework.World.RoomLoaderTest do
     test "handles exits with missing destination" do
       room = room_fixture()
 
-      {:ok, exit} = Entities.create_entity(%{
-        key: "broken_exit",
-        name: "door",
-        type: "exit",
-        location_id: room.id,
-        components: %{
-          "exit" => %{
-            "direction" => "west",
-            "destination_id" => "nonexistent-id"
+      {:ok, exit} =
+        Entities.create_entity(%{
+          key: "broken_exit",
+          name: "door",
+          type: "exit",
+          location_id: room.id,
+          components: %{
+            "exit" => %{
+              "direction" => "west",
+              "destination_id" => "nonexistent-id"
+            }
           }
-        }
-      })
+        })
 
       assert {:ok, display_room} = RoomLoader.load_room_for_display(room.id)
 
@@ -245,17 +258,18 @@ defmodule Exmud.Framework.World.RoomLoaderTest do
     test "handles exits without destination_id" do
       room = room_fixture()
 
-      {:ok, exit} = Entities.create_entity(%{
-        key: "incomplete_exit",
-        name: "passage",
-        type: "exit",
-        location_id: room.id,
-        components: %{
-          "exit" => %{
-            "direction" => "east"
+      {:ok, exit} =
+        Entities.create_entity(%{
+          key: "incomplete_exit",
+          name: "passage",
+          type: "exit",
+          location_id: room.id,
+          components: %{
+            "exit" => %{
+              "direction" => "east"
+            }
           }
-        }
-      })
+        })
 
       assert {:ok, display_room} = RoomLoader.load_room_for_display(room.id)
 
@@ -275,66 +289,73 @@ defmodule Exmud.Framework.World.RoomLoaderTest do
     end
 
     test "loads room with no name as 'Unknown Room'" do
-      {:ok, room} = Entities.create_entity(%{
-        key: "nameless_room",
-        type: "room",
-        description: "A room without a name."
-      })
+      {:ok, room} =
+        Entities.create_entity(%{
+          key: "nameless_room",
+          type: "room",
+          description: "A room without a name."
+        })
 
       assert {:ok, display_room} = RoomLoader.load_room_for_display(room.id)
       assert display_room.title == "Unknown Room"
     end
 
     test "loads room with no description as 'An empty room.'" do
-      {:ok, room} = Entities.create_entity(%{
-        key: "empty_room",
-        name: "Empty Room",
-        type: "room"
-      })
+      {:ok, room} =
+        Entities.create_entity(%{
+          key: "empty_room",
+          name: "Empty Room",
+          type: "room"
+        })
 
       assert {:ok, display_room} = RoomLoader.load_room_for_display(room.id)
       assert display_room.description == "An empty room."
     end
 
     test "loads complex room with multiple entity types" do
-      room = room_fixture(%{
-        name: "Busy Market",
-        description: "A bustling marketplace."
-      })
+      room =
+        room_fixture(%{
+          name: "Busy Market",
+          description: "A bustling marketplace."
+        })
 
       # Add NPCs
       npc1 = npc_fixture(%{name: "Merchant", location_id: room.id})
       npc2 = npc_fixture(%{name: "Guard", location_id: room.id})
 
       # Add items
-      {:ok, item1} = Entities.create_entity(%{
-        key: "apple",
-        name: "Apple",
-        type: "item",
-        location_id: room.id
-      })
+      {:ok, item1} =
+        Entities.create_entity(%{
+          key: "apple",
+          name: "Apple",
+          type: "item",
+          location_id: room.id
+        })
 
-      {:ok, item2} = Entities.create_entity(%{
-        key: "bread",
-        name: "Bread",
-        type: "item",
-        location_id: room.id
-      })
+      {:ok, item2} =
+        Entities.create_entity(%{
+          key: "bread",
+          name: "Bread",
+          type: "item",
+          location_id: room.id
+        })
 
       # Add exits
       room2 = room_fixture(%{name: "Town Square"})
-      {:ok, exit} = Entities.create_entity(%{
-        key: "exit_north",
-        name: "north",
-        type: "exit",
-        location_id: room.id,
-        components: %{
-          "exit" => %{
-            "direction" => "north",
-            "destination_id" => room2.id
+
+      {:ok, exit} =
+        Entities.create_entity(%{
+          key: "exit_north",
+          name: "north",
+          type: "exit",
+          location_id: room.id,
+          components: %{
+            "exit" => %{
+              "direction" => "north",
+              "destination_id" => room2.id
+            }
           }
-        }
-      })
+        })
 
       assert {:ok, display_room} = RoomLoader.load_room_for_display(room.id)
 
@@ -388,13 +409,14 @@ defmodule Exmud.Framework.World.RoomLoaderTest do
     test "handles nil components gracefully" do
       room = room_fixture()
 
-      {:ok, npc} = Entities.create_entity(%{
-        key: "simple_npc",
-        name: "Villager",
-        type: "npc",
-        location_id: room.id,
-        components: nil
-      })
+      {:ok, npc} =
+        Entities.create_entity(%{
+          key: "simple_npc",
+          name: "Villager",
+          type: "npc",
+          location_id: room.id,
+          components: nil
+        })
 
       assert {:ok, display_room} = RoomLoader.load_room_for_display(room.id)
 
@@ -407,13 +429,14 @@ defmodule Exmud.Framework.World.RoomLoaderTest do
     test "handles empty components map" do
       room = room_fixture()
 
-      {:ok, npc} = Entities.create_entity(%{
-        key: "basic_npc",
-        name: "Citizen",
-        type: "npc",
-        location_id: room.id,
-        components: %{}
-      })
+      {:ok, npc} =
+        Entities.create_entity(%{
+          key: "basic_npc",
+          name: "Citizen",
+          type: "npc",
+          location_id: room.id,
+          components: %{}
+        })
 
       assert {:ok, display_room} = RoomLoader.load_room_for_display(room.id)
 
@@ -425,16 +448,17 @@ defmodule Exmud.Framework.World.RoomLoaderTest do
     test "prefers description in components over entity description" do
       room = room_fixture()
 
-      {:ok, npc} = Entities.create_entity(%{
-        key: "npc_with_component_desc",
-        name: "Mage",
-        description: "Original description",
-        type: "npc",
-        location_id: room.id,
-        components: %{
-          "description" => "Component description"
-        }
-      })
+      {:ok, npc} =
+        Entities.create_entity(%{
+          key: "npc_with_component_desc",
+          name: "Mage",
+          description: "Original description",
+          type: "npc",
+          location_id: room.id,
+          components: %{
+            "description" => "Component description"
+          }
+        })
 
       assert {:ok, display_room} = RoomLoader.load_room_for_display(room.id)
 
@@ -446,12 +470,13 @@ defmodule Exmud.Framework.World.RoomLoaderTest do
     test "falls back to default description for NPC without description" do
       room = room_fixture()
 
-      {:ok, npc} = Entities.create_entity(%{
-        key: "mysterious_npc",
-        name: "Stranger",
-        type: "npc",
-        location_id: room.id
-      })
+      {:ok, npc} =
+        Entities.create_entity(%{
+          key: "mysterious_npc",
+          name: "Stranger",
+          type: "npc",
+          location_id: room.id
+        })
 
       assert {:ok, display_room} = RoomLoader.load_room_for_display(room.id)
 
@@ -462,12 +487,13 @@ defmodule Exmud.Framework.World.RoomLoaderTest do
     test "falls back to default description for item without description" do
       room = room_fixture()
 
-      {:ok, item} = Entities.create_entity(%{
-        key: "unknown_item",
-        name: "Object",
-        type: "item",
-        location_id: room.id
-      })
+      {:ok, item} =
+        Entities.create_entity(%{
+          key: "unknown_item",
+          name: "Object",
+          type: "item",
+          location_id: room.id
+        })
 
       assert {:ok, display_room} = RoomLoader.load_room_for_display(room.id)
 
@@ -481,18 +507,19 @@ defmodule Exmud.Framework.World.RoomLoaderTest do
       room1 = room_fixture()
       room2 = room_fixture(%{name: "Destination"})
 
-      {:ok, exit} = Entities.create_entity(%{
-        key: "exit_south",
-        name: "passage",
-        type: "exit",
-        location_id: room1.id,
-        components: %{
-          "exit" => %{
-            "direction" => "south",
-            "destination_id" => room2.id
+      {:ok, exit} =
+        Entities.create_entity(%{
+          key: "exit_south",
+          name: "passage",
+          type: "exit",
+          location_id: room1.id,
+          components: %{
+            "exit" => %{
+              "direction" => "south",
+              "destination_id" => room2.id
+            }
           }
-        }
-      })
+        })
 
       assert {:ok, display_room} = RoomLoader.load_room_for_display(room1.id)
 
@@ -504,17 +531,18 @@ defmodule Exmud.Framework.World.RoomLoaderTest do
       room1 = room_fixture()
       room2 = room_fixture(%{name: "Destination"})
 
-      {:ok, exit} = Entities.create_entity(%{
-        key: "exit_west",
-        name: "west",
-        type: "exit",
-        location_id: room1.id,
-        components: %{
-          "exit" => %{
-            "destination_id" => room2.id
+      {:ok, exit} =
+        Entities.create_entity(%{
+          key: "exit_west",
+          name: "west",
+          type: "exit",
+          location_id: room1.id,
+          components: %{
+            "exit" => %{
+              "destination_id" => room2.id
+            }
           }
-        }
-      })
+        })
 
       assert {:ok, display_room} = RoomLoader.load_room_for_display(room1.id)
 
@@ -526,16 +554,17 @@ defmodule Exmud.Framework.World.RoomLoaderTest do
       room1 = room_fixture()
       room2 = room_fixture(%{name: "Destination"})
 
-      {:ok, exit} = Entities.create_entity(%{
-        key: "mystery_exit",
-        type: "exit",
-        location_id: room1.id,
-        components: %{
-          "exit" => %{
-            "destination_id" => room2.id
+      {:ok, exit} =
+        Entities.create_entity(%{
+          key: "mystery_exit",
+          type: "exit",
+          location_id: room1.id,
+          components: %{
+            "exit" => %{
+              "destination_id" => room2.id
+            }
           }
-        }
-      })
+        })
 
       assert {:ok, display_room} = RoomLoader.load_room_for_display(room1.id)
 

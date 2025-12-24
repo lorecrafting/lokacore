@@ -62,17 +62,15 @@ defmodule Exmud.Framework.Inventory.Container do
           description_closed: String.t()
         }
 
-  defstruct [
-    capacity: 10,
-    weight_capacity: nil,
-    accepts: [],
-    rejects: [],
-    locked: false,
-    lock_key: nil,
-    contents: [],
-    description_open: "The container is open.",
-    description_closed: "A closed container."
-  ]
+  defstruct capacity: 10,
+            weight_capacity: nil,
+            accepts: [],
+            rejects: [],
+            locked: false,
+            lock_key: nil,
+            contents: [],
+            description_open: "The container is open.",
+            description_closed: "A closed container."
 
   @doc """
   Checks if an entity is a container.
@@ -110,8 +108,10 @@ defmodule Exmud.Framework.Inventory.Container do
       locked: MapHelpers.get_flexible(data, :locked, false),
       lock_key: MapHelpers.get_flexible(data, :lock_key, nil),
       contents: MapHelpers.get_flexible(data, :contents, []),
-      description_open: MapHelpers.get_flexible(data, :description_open, "The container is open."),
-      description_closed: MapHelpers.get_flexible(data, :description_closed, "A closed container.")
+      description_open:
+        MapHelpers.get_flexible(data, :description_open, "The container is open."),
+      description_closed:
+        MapHelpers.get_flexible(data, :description_closed, "A closed container.")
     }
   end
 

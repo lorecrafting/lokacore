@@ -254,8 +254,11 @@ defmodule Exmud.Framework.World.ExtendedDescriptionsTest do
         }
       }
 
-      assert ExtendedDescriptions.get_detail(entity, "tree") == "An ancient oak dominates the clearing."
-      assert ExtendedDescriptions.get_detail(entity, "flowers") == "Colorful wildflowers dot the grass."
+      assert ExtendedDescriptions.get_detail(entity, "tree") ==
+               "An ancient oak dominates the clearing."
+
+      assert ExtendedDescriptions.get_detail(entity, "flowers") ==
+               "Colorful wildflowers dot the grass."
     end
 
     test "returns nil for nonexistent detail" do

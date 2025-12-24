@@ -232,14 +232,17 @@ defmodule Exmud.Framework.ProgressionTest do
       player = player_fixture()
       state = game_state_fixture(player.id, %{stats: %{"skill_points" => 1, "skills" => []}})
 
-      assert {:error, :not_enough_skill_points} = Progression.learn_skill(state, "power_strike", 2)
+      assert {:error, :not_enough_skill_points} =
+               Progression.learn_skill(state, "power_strike", 2)
     end
 
     test "returns error when skill already learned" do
       player = player_fixture()
 
       state =
-        game_state_fixture(player.id, %{stats: %{"skill_points" => 5, "skills" => ["power_strike"]}})
+        game_state_fixture(player.id, %{
+          stats: %{"skill_points" => 5, "skills" => ["power_strike"]}
+        })
 
       assert {:error, :already_learned} = Progression.learn_skill(state, "power_strike", 2)
     end

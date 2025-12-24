@@ -114,7 +114,9 @@ defmodule Exmud.Framework.Companion do
   """
   def rename(%GameState{} = game_state, new_name) do
     case get_companion(game_state) do
-      nil -> {:error, :no_companion}
+      nil ->
+        {:error, :no_companion}
+
       companion ->
         updated = Map.put(companion, :name, new_name)
         {:ok, set_companion(game_state, updated)}
@@ -146,7 +148,9 @@ defmodule Exmud.Framework.Companion do
 
   defp update_mode(game_state, mode) do
     case get_companion(game_state) do
-      nil -> {:error, :no_companion}
+      nil ->
+        {:error, :no_companion}
+
       companion ->
         updated = Map.put(companion, :mode, mode)
         {:ok, set_companion(game_state, updated)}
@@ -274,7 +278,9 @@ defmodule Exmud.Framework.Companion do
   """
   def get_combat_assist(%GameState{} = game_state) do
     case get_companion(game_state) do
-      nil -> nil
+      nil ->
+        nil
+
       companion ->
         if companion.mode in [:following, :attacking] and companion.loyalty > 20 do
           # Return combat assist info

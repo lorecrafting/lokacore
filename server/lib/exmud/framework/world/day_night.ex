@@ -68,7 +68,8 @@ defmodule Exmud.Framework.World.DayNight do
   use GenServer
   require Logger
 
-  @default_cycle_duration 3600  # 1 real hour = 1 game day
+  # 1 real hour = 1 game day
+  @default_cycle_duration 3600
   @hours_per_day 24
   @minutes_per_hour 60
 
@@ -76,7 +77,12 @@ defmodule Exmud.Framework.World.DayNight do
     dawn: %{start_hour: 5, end_hour: 7, light_level: 0.5, effects: %{perception: -0.1}},
     day: %{start_hour: 7, end_hour: 17, light_level: 1.0, effects: %{}},
     dusk: %{start_hour: 17, end_hour: 19, light_level: 0.5, effects: %{perception: -0.1}},
-    night: %{start_hour: 19, end_hour: 5, light_level: 0.1, effects: %{perception: -0.3, requires_light: true}}
+    night: %{
+      start_hour: 19,
+      end_hour: 5,
+      light_level: 0.1,
+      effects: %{perception: -0.3, requires_light: true}
+    }
   }
 
   # =============================================================================
@@ -213,7 +219,11 @@ defmodule Exmud.Framework.World.DayNight do
   def handle_call({:set_time, hour, minute}, _from, state) do
     # Calculate offset to make current time match requested time
     current_elapsed = rem(System.system_time(:second) - state.cycle_start, state.cycle_duration)
-    target_seconds = hour_to_seconds(hour, state.cycle_duration) + minute_to_seconds(minute, state.cycle_duration)
+
+    target_seconds =
+      hour_to_seconds(hour, state.cycle_duration) +
+        minute_to_seconds(minute, state.cycle_duration)
+
     new_offset = target_seconds - current_elapsed
 
     {:reply, :ok, %{state | offset_seconds: new_offset}}
@@ -226,7 +236,9 @@ defmodule Exmud.Framework.World.DayNight do
   defp calculate_time(state) do
     elapsed = System.system_time(:second) - state.cycle_start + state.offset_seconds
     raw_position = rem(elapsed, state.cycle_duration)
-    cycle_position = if raw_position < 0, do: raw_position + state.cycle_duration, else: raw_position
+
+    cycle_position =
+      if raw_position < 0, do: raw_position + state.cycle_duration, else: raw_position
 
     # Convert to game hours and minutes
     seconds_per_hour = state.cycle_duration / @hours_per_day

@@ -26,7 +26,9 @@ defmodule Exmud.Framework.Crafting.CraftingRegistryTest do
 
   describe "start_link/1" do
     test "starts registry with default options" do
-      assert {:ok, pid} = CraftingRegistry.start_link(name: :test_registry_1, load_on_start: false)
+      assert {:ok, pid} =
+               CraftingRegistry.start_link(name: :test_registry_1, load_on_start: false)
+
       assert Process.alive?(pid)
       GenServer.stop(pid)
     end
@@ -54,11 +56,12 @@ defmodule Exmud.Framework.Crafting.CraftingRegistryTest do
     end
 
     test "starts empty when path doesn't exist", %{registry: name} do
-      {:ok, pid} = CraftingRegistry.start_link(
-        name: name,
-        path: "nonexistent/path",
-        load_on_start: true
-      )
+      {:ok, pid} =
+        CraftingRegistry.start_link(
+          name: name,
+          path: "nonexistent/path",
+          load_on_start: true
+        )
 
       assert Process.alive?(pid)
       assert CraftingRegistry.count(name) == 0

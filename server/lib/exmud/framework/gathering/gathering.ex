@@ -126,7 +126,9 @@ defmodule Exmud.Framework.Gathering do
       exhausted = new_uses == 0
 
       # Build result
-      message = if Enum.empty?(items), do: node_def.failure_message, else: node_def.success_message
+      message =
+        if Enum.empty?(items), do: node_def.failure_message, else: node_def.success_message
+
       message = if exhausted, do: "#{message} #{node_def.exhausted_message}", else: message
 
       result = %{
@@ -262,7 +264,14 @@ defmodule Exmud.Framework.Gathering do
 
   defp get_room_nodes(room_entity) do
     components = Map.get(room_entity, :components, %{})
-    nodes_data = MapHelpers.get_flexible(components, :gathering_nodes, %{})
+
+    # Handle nil components
+    nodes_data =
+      if is_map(components) do
+        MapHelpers.get_flexible(components, :gathering_nodes, %{})
+      else
+        %{}
+      end
 
     # Handle both list and map formats
     case nodes_data do

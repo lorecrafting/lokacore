@@ -35,7 +35,8 @@ defmodule Exmud.Framework.Messaging.MailTest do
     end
 
     test "sends mail with attachments", %{game_state: game_state} do
-      {:ok, _mail_id, mail} = Mail.send(game_state, "recipient_123", "Gift", "Here's a gift", ["sword_01", "potion_02"])
+      {:ok, _mail_id, mail} =
+        Mail.send(game_state, "recipient_123", "Gift", "Here's a gift", ["sword_01", "potion_02"])
 
       assert mail.attachments == ["sword_01", "potion_02"]
     end
@@ -72,7 +73,8 @@ defmodule Exmud.Framework.Messaging.MailTest do
 
   describe "send_system/4" do
     test "sends system mail", %{} do
-      {:ok, mail_id, mail} = Mail.send_system("recipient_123", "System Notice", "This is a system message")
+      {:ok, mail_id, mail} =
+        Mail.send_system("recipient_123", "System Notice", "This is a system message")
 
       assert is_binary(mail_id)
       assert mail.from == "system"
@@ -84,7 +86,8 @@ defmodule Exmud.Framework.Messaging.MailTest do
     end
 
     test "sends system mail with attachments", %{} do
-      {:ok, _mail_id, mail} = Mail.send_system("recipient_123", "Quest Reward", "Congrats!", ["gold_coin"])
+      {:ok, _mail_id, mail} =
+        Mail.send_system("recipient_123", "Quest Reward", "Congrats!", ["gold_coin"])
 
       assert mail.attachments == ["gold_coin"]
     end
@@ -276,7 +279,14 @@ defmodule Exmud.Framework.Messaging.MailTest do
 
   describe "collect_attachments/2" do
     test "collects attachments and removes them from mail", %{game_state: game_state} do
-      mail = %{id: "mail_1", sent_at: 100, read: false, archived: false, attachments: ["sword", "potion"]}
+      mail = %{
+        id: "mail_1",
+        sent_at: 100,
+        read: false,
+        archived: false,
+        attachments: ["sword", "potion"]
+      }
+
       game_state = %{game_state | stats: %{mailbox: %{inbox: [mail], sent: []}}}
 
       {:ok, items, updated_state} = Mail.collect_attachments(game_state, "mail_1")
@@ -325,9 +335,10 @@ defmodule Exmud.Framework.Messaging.MailTest do
 
     test "cleans inbox when at max size", %{game_state: game_state} do
       # Create 100 old archived/read messages (max inbox size)
-      old_mails = Enum.map(1..100, fn i ->
-        %{id: "old_#{i}", sent_at: i, read: true, archived: true}
-      end)
+      old_mails =
+        Enum.map(1..100, fn i ->
+          %{id: "old_#{i}", sent_at: i, read: true, archived: true}
+        end)
 
       game_state = %{game_state | stats: %{mailbox: %{inbox: old_mails, sent: []}}}
 
@@ -345,9 +356,11 @@ defmodule Exmud.Framework.Messaging.MailTest do
     test "prioritizes unread messages when cleaning", %{game_state: game_state} do
       # Create inbox at capacity with mix of read/unread
       unread_mail = %{id: "unread", sent_at: 50, read: false, archived: false}
-      read_mails = Enum.map(1..99, fn i ->
-        %{id: "read_#{i}", sent_at: i, read: true, archived: false}
-      end)
+
+      read_mails =
+        Enum.map(1..99, fn i ->
+          %{id: "read_#{i}", sent_at: i, read: true, archived: false}
+        end)
 
       all_mails = [unread_mail | read_mails]
       game_state = %{game_state | stats: %{mailbox: %{inbox: all_mails, sent: []}}}

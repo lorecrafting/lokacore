@@ -88,7 +88,16 @@ defmodule ExmudWeb.GameLive.RoomManager do
              |> update_events([event])}
 
           :ok ->
-            do_navigation(socket, room, destination_id, direction, player, player_name, player_context, game_state)
+            do_navigation(
+              socket,
+              room,
+              destination_id,
+              direction,
+              player,
+              player_name,
+              player_context,
+              game_state
+            )
         end
     end
   end
@@ -184,7 +193,16 @@ defmodule ExmudWeb.GameLive.RoomManager do
     end
   end
 
-  defp do_navigation(socket, room, destination_id, direction, player, player_name, player_context, game_state) do
+  defp do_navigation(
+         socket,
+         room,
+         destination_id,
+         direction,
+         player,
+         player_name,
+         player_context,
+         game_state
+       ) do
     import Phoenix.Component, only: [assign: 3]
 
     # Run leave_room hook

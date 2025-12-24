@@ -26,15 +26,17 @@ defmodule Exmud.Framework.HousingTest do
         name: attrs[:name] || "Test Cottage",
         description: attrs[:description] || "A cozy cottage",
         type: "room",
-        components: attrs[:components] || %{
-          "housing" => %{
-            "price" => 5000,
-            "rent_weekly" => 100,
-            "max_furniture" => 20,
-            "max_storage" => 100,
-            "upgradeable" => true
-          }
-        },
+        components:
+          attrs[:components] ||
+            %{
+              "housing" => %{
+                "price" => 5000,
+                "rent_weekly" => 100,
+                "max_furniture" => 20,
+                "max_storage" => 100,
+                "upgradeable" => true
+              }
+            },
         tags: attrs[:tags] || []
       })
 
@@ -72,24 +74,26 @@ defmodule Exmud.Framework.HousingTest do
 
     test "returns existing housing state" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{
-          housing: %{
-            home_room_id: "room_123",
-            furniture: ["chair", "table"],
-            storage: ["sword"],
-            rent_paid_until: 1234567890,
-            upgrades: ["expanded_storage"]
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{
+            housing: %{
+              home_room_id: "room_123",
+              furniture: ["chair", "table"],
+              storage: ["sword"],
+              rent_paid_until: 1_234_567_890,
+              upgrades: ["expanded_storage"]
+            }
           }
-        }
-      })
+        })
 
       housing = Housing.get_housing_state(state)
 
       assert housing.home_room_id == "room_123"
       assert housing.furniture == ["chair", "table"]
       assert housing.storage == ["sword"]
-      assert housing.rent_paid_until == 1234567890
+      assert housing.rent_paid_until == 1_234_567_890
       assert housing.upgrades == ["expanded_storage"]
     end
   end
@@ -104,9 +108,11 @@ defmodule Exmud.Framework.HousingTest do
 
     test "returns home room ID when player has home" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{housing: %{home_room_id: "room_123"}}
-      })
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{housing: %{home_room_id: "room_123"}}
+        })
 
       assert Housing.get_home(state) == "room_123"
     end
@@ -122,9 +128,11 @@ defmodule Exmud.Framework.HousingTest do
 
     test "returns true when player has home" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{housing: %{home_room_id: "room_123"}}
-      })
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{housing: %{home_room_id: "room_123"}}
+        })
 
       assert Housing.has_home?(state) == true
     end
@@ -133,31 +141,37 @@ defmodule Exmud.Framework.HousingTest do
   describe "rent_current?/1" do
     test "returns true when home is owned (no rent)" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{housing: %{home_room_id: "room_123", rent_paid_until: nil}}
-      })
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{housing: %{home_room_id: "room_123", rent_paid_until: nil}}
+        })
 
       assert Housing.rent_current?(state) == true
     end
 
     test "returns true when rent is paid and current" do
       player = player_fixture()
-      future_time = System.system_time(:second) + 86400 # 1 day in future
+      # 1 day in future
+      future_time = System.system_time(:second) + 86400
 
-      state = game_state_fixture(player.id, %{
-        stats: %{housing: %{home_room_id: "room_123", rent_paid_until: future_time}}
-      })
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{housing: %{home_room_id: "room_123", rent_paid_until: future_time}}
+        })
 
       assert Housing.rent_current?(state) == true
     end
 
     test "returns false when rent is expired" do
       player = player_fixture()
-      past_time = System.system_time(:second) - 86400 # 1 day in past
+      # 1 day in past
+      past_time = System.system_time(:second) - 86400
 
-      state = game_state_fixture(player.id, %{
-        stats: %{housing: %{home_room_id: "room_123", rent_paid_until: past_time}}
-      })
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{housing: %{home_room_id: "room_123", rent_paid_until: past_time}}
+        })
 
       assert Housing.rent_current?(state) == false
     end
@@ -250,9 +264,11 @@ defmodule Exmud.Framework.HousingTest do
 
     test "updates existing home" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{housing: %{home_room_id: "old_room"}}
-      })
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{housing: %{home_room_id: "old_room"}}
+        })
 
       assert {:ok, updated_state} = Housing.set_home(state, "new_room")
 
@@ -264,17 +280,19 @@ defmodule Exmud.Framework.HousingTest do
   describe "abandon_home/1" do
     test "resets housing state to default" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{
-          housing: %{
-            home_room_id: "room_123",
-            furniture: ["chair"],
-            storage: ["sword"],
-            rent_paid_until: 123456,
-            upgrades: ["expanded_storage"]
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{
+            housing: %{
+              home_room_id: "room_123",
+              furniture: ["chair"],
+              storage: ["sword"],
+              rent_paid_until: 123_456,
+              upgrades: ["expanded_storage"]
+            }
           }
-        }
-      })
+        })
 
       assert {:ok, updated_state} = Housing.abandon_home(state)
 
@@ -290,9 +308,11 @@ defmodule Exmud.Framework.HousingTest do
   describe "pay_rent/2" do
     test "extends rent for one week by default" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{housing: %{home_room_id: "room_123", rent_paid_until: nil}}
-      })
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{housing: %{home_room_id: "room_123", rent_paid_until: nil}}
+        })
 
       current_time = System.system_time(:second)
       week_seconds = 7 * 24 * 60 * 60
@@ -305,9 +325,11 @@ defmodule Exmud.Framework.HousingTest do
 
     test "extends rent for multiple weeks" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{housing: %{home_room_id: "room_123", rent_paid_until: nil}}
-      })
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{housing: %{home_room_id: "room_123", rent_paid_until: nil}}
+        })
 
       current_time = System.system_time(:second)
       week_seconds = 7 * 24 * 60 * 60
@@ -315,18 +337,20 @@ defmodule Exmud.Framework.HousingTest do
       assert {:ok, updated_state} = Housing.pay_rent(state, 3)
 
       housing = Housing.get_housing_state(updated_state)
-      assert_in_delta housing.rent_paid_until, current_time + (3 * week_seconds), 5
+      assert_in_delta housing.rent_paid_until, current_time + 3 * week_seconds, 5
     end
 
     test "extends from current rent_paid_until if in future" do
       player = player_fixture()
       current_time = System.system_time(:second)
-      future_time = current_time + 86400 # 1 day in future
+      # 1 day in future
+      future_time = current_time + 86400
       week_seconds = 7 * 24 * 60 * 60
 
-      state = game_state_fixture(player.id, %{
-        stats: %{housing: %{home_room_id: "room_123", rent_paid_until: future_time}}
-      })
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{housing: %{home_room_id: "room_123", rent_paid_until: future_time}}
+        })
 
       assert {:ok, updated_state} = Housing.pay_rent(state)
 
@@ -338,12 +362,14 @@ defmodule Exmud.Framework.HousingTest do
     test "extends from current time if rent is expired" do
       player = player_fixture()
       current_time = System.system_time(:second)
-      past_time = current_time - 86400 # 1 day in past
+      # 1 day in past
+      past_time = current_time - 86400
       week_seconds = 7 * 24 * 60 * 60
 
-      state = game_state_fixture(player.id, %{
-        stats: %{housing: %{home_room_id: "room_123", rent_paid_until: past_time}}
-      })
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{housing: %{home_room_id: "room_123", rent_paid_until: past_time}}
+        })
 
       assert {:ok, updated_state} = Housing.pay_rent(state)
 
@@ -356,17 +382,19 @@ defmodule Exmud.Framework.HousingTest do
   describe "place_furniture/3" do
     test "places furniture in home" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{
-          housing: %{
-            home_room_id: "room_123",
-            furniture: [],
-            storage: [],
-            rent_paid_until: nil,
-            upgrades: []
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{
+            housing: %{
+              home_room_id: "room_123",
+              furniture: [],
+              storage: [],
+              rent_paid_until: nil,
+              upgrades: []
+            }
           }
-        }
-      })
+        })
 
       assert {:ok, updated_state} = Housing.place_furniture(state, "chair_01")
 
@@ -376,17 +404,19 @@ defmodule Exmud.Framework.HousingTest do
 
     test "can place multiple furniture items" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{
-          housing: %{
-            home_room_id: "room_123",
-            furniture: [],
-            storage: [],
-            rent_paid_until: nil,
-            upgrades: []
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{
+            housing: %{
+              home_room_id: "room_123",
+              furniture: [],
+              storage: [],
+              rent_paid_until: nil,
+              upgrades: []
+            }
           }
-        }
-      })
+        })
 
       {:ok, state} = Housing.place_furniture(state, "chair_01")
       {:ok, state} = Housing.place_furniture(state, "table_01")
@@ -407,9 +437,10 @@ defmodule Exmud.Framework.HousingTest do
       player = player_fixture()
       existing_furniture = Enum.map(1..20, &"item_#{&1}")
 
-      state = game_state_fixture(player.id, %{
-        stats: %{housing: %{home_room_id: "room_123", furniture: existing_furniture}}
-      })
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{housing: %{home_room_id: "room_123", furniture: existing_furniture}}
+        })
 
       assert {:error, :furniture_limit_reached} = Housing.place_furniture(state, "chair_21")
     end
@@ -418,9 +449,10 @@ defmodule Exmud.Framework.HousingTest do
       player = player_fixture()
       existing_furniture = Enum.map(1..10, &"item_#{&1}")
 
-      state = game_state_fixture(player.id, %{
-        stats: %{housing: %{home_room_id: "room_123", furniture: existing_furniture}}
-      })
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{housing: %{home_room_id: "room_123", furniture: existing_furniture}}
+        })
 
       assert {:error, :furniture_limit_reached} = Housing.place_furniture(state, "chair_11", 10)
     end
@@ -429,9 +461,11 @@ defmodule Exmud.Framework.HousingTest do
   describe "remove_furniture/2" do
     test "removes furniture from home" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{housing: %{home_room_id: "room_123", furniture: ["chair_01", "table_01"]}}
-      })
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{housing: %{home_room_id: "room_123", furniture: ["chair_01", "table_01"]}}
+        })
 
       assert {:ok, updated_state, removed_id} = Housing.remove_furniture(state, "chair_01")
 
@@ -443,18 +477,22 @@ defmodule Exmud.Framework.HousingTest do
 
     test "returns error when furniture not found" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{housing: %{home_room_id: "room_123", furniture: ["chair_01"]}}
-      })
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{housing: %{home_room_id: "room_123", furniture: ["chair_01"]}}
+        })
 
       assert {:error, :furniture_not_found} = Housing.remove_furniture(state, "table_01")
     end
 
     test "removes only one instance of duplicate furniture" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{housing: %{home_room_id: "room_123", furniture: ["chair", "chair", "table"]}}
-      })
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{housing: %{home_room_id: "room_123", furniture: ["chair", "chair", "table"]}}
+        })
 
       {:ok, updated_state, _} = Housing.remove_furniture(state, "chair")
 
@@ -467,26 +505,30 @@ defmodule Exmud.Framework.HousingTest do
   describe "list_furniture/1" do
     test "returns empty list when no furniture" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{
-          housing: %{
-            home_room_id: "room_123",
-            furniture: [],
-            storage: [],
-            rent_paid_until: nil,
-            upgrades: []
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{
+            housing: %{
+              home_room_id: "room_123",
+              furniture: [],
+              storage: [],
+              rent_paid_until: nil,
+              upgrades: []
+            }
           }
-        }
-      })
+        })
 
       assert Housing.list_furniture(state) == []
     end
 
     test "returns all furniture" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{housing: %{home_room_id: "room_123", furniture: ["chair", "table", "bed"]}}
-      })
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{housing: %{home_room_id: "room_123", furniture: ["chair", "table", "bed"]}}
+        })
 
       furniture = Housing.list_furniture(state)
       assert length(furniture) == 3
@@ -499,17 +541,19 @@ defmodule Exmud.Framework.HousingTest do
   describe "store_item/3" do
     test "stores item in home storage" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{
-          housing: %{
-            home_room_id: "room_123",
-            furniture: [],
-            storage: [],
-            rent_paid_until: nil,
-            upgrades: []
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{
+            housing: %{
+              home_room_id: "room_123",
+              furniture: [],
+              storage: [],
+              rent_paid_until: nil,
+              upgrades: []
+            }
           }
-        }
-      })
+        })
 
       assert {:ok, updated_state} = Housing.store_item(state, "sword_01")
 
@@ -519,17 +563,19 @@ defmodule Exmud.Framework.HousingTest do
 
     test "can store multiple items" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{
-          housing: %{
-            home_room_id: "room_123",
-            furniture: [],
-            storage: [],
-            rent_paid_until: nil,
-            upgrades: []
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{
+            housing: %{
+              home_room_id: "room_123",
+              furniture: [],
+              storage: [],
+              rent_paid_until: nil,
+              upgrades: []
+            }
           }
-        }
-      })
+        })
 
       {:ok, state} = Housing.store_item(state, "sword_01")
       {:ok, state} = Housing.store_item(state, "armor_01")
@@ -550,17 +596,18 @@ defmodule Exmud.Framework.HousingTest do
       player = player_fixture()
       existing_storage = Enum.map(1..100, &"item_#{&1}")
 
-      state = game_state_fixture(player.id, %{
-        stats: %{
-          housing: %{
-            home_room_id: "room_123",
-            furniture: [],
-            storage: existing_storage,
-            rent_paid_until: nil,
-            upgrades: []
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{
+            housing: %{
+              home_room_id: "room_123",
+              furniture: [],
+              storage: existing_storage,
+              rent_paid_until: nil,
+              upgrades: []
+            }
           }
-        }
-      })
+        })
 
       assert {:error, :storage_full} = Housing.store_item(state, "sword_101")
     end
@@ -569,9 +616,10 @@ defmodule Exmud.Framework.HousingTest do
       player = player_fixture()
       existing_storage = Enum.map(1..50, &"item_#{&1}")
 
-      state = game_state_fixture(player.id, %{
-        stats: %{housing: %{home_room_id: "room_123", storage: existing_storage, upgrades: []}}
-      })
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{housing: %{home_room_id: "room_123", storage: existing_storage, upgrades: []}}
+        })
 
       assert {:error, :storage_full} = Housing.store_item(state, "sword_51", 50)
     end
@@ -581,15 +629,16 @@ defmodule Exmud.Framework.HousingTest do
       # With expanded_storage upgrade, limit becomes 100 + 50 = 150
       existing_storage = Enum.map(1..100, &"item_#{&1}")
 
-      state = game_state_fixture(player.id, %{
-        stats: %{
-          housing: %{
-            home_room_id: "room_123",
-            storage: existing_storage,
-            upgrades: ["expanded_storage"]
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{
+            housing: %{
+              home_room_id: "room_123",
+              storage: existing_storage,
+              upgrades: ["expanded_storage"]
+            }
           }
-        }
-      })
+        })
 
       # Should succeed because of upgrade bonus
       assert {:ok, _updated_state} = Housing.store_item(state, "sword_101")
@@ -599,9 +648,11 @@ defmodule Exmud.Framework.HousingTest do
   describe "retrieve_item/2" do
     test "retrieves item from storage" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{housing: %{home_room_id: "room_123", storage: ["sword_01", "armor_01"]}}
-      })
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{housing: %{home_room_id: "room_123", storage: ["sword_01", "armor_01"]}}
+        })
 
       assert {:ok, updated_state, retrieved_id} = Housing.retrieve_item(state, "sword_01")
 
@@ -613,18 +664,22 @@ defmodule Exmud.Framework.HousingTest do
 
     test "returns error when item not found" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{housing: %{home_room_id: "room_123", storage: ["sword_01"]}}
-      })
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{housing: %{home_room_id: "room_123", storage: ["sword_01"]}}
+        })
 
       assert {:error, :item_not_found} = Housing.retrieve_item(state, "armor_01")
     end
 
     test "removes only one instance of duplicate items" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{housing: %{home_room_id: "room_123", storage: ["potion", "potion", "sword"]}}
-      })
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{housing: %{home_room_id: "room_123", storage: ["potion", "potion", "sword"]}}
+        })
 
       {:ok, updated_state, _} = Housing.retrieve_item(state, "potion")
 
@@ -637,26 +692,30 @@ defmodule Exmud.Framework.HousingTest do
   describe "list_storage/1" do
     test "returns empty list when no items in storage" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{
-          housing: %{
-            home_room_id: "room_123",
-            furniture: [],
-            storage: [],
-            rent_paid_until: nil,
-            upgrades: []
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{
+            housing: %{
+              home_room_id: "room_123",
+              furniture: [],
+              storage: [],
+              rent_paid_until: nil,
+              upgrades: []
+            }
           }
-        }
-      })
+        })
 
       assert Housing.list_storage(state) == []
     end
 
     test "returns all stored items" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{housing: %{home_room_id: "room_123", storage: ["sword", "armor", "potion"]}}
-      })
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{housing: %{home_room_id: "room_123", storage: ["sword", "armor", "potion"]}}
+        })
 
       storage = Housing.list_storage(state)
       assert length(storage) == 3
@@ -669,17 +728,19 @@ defmodule Exmud.Framework.HousingTest do
   describe "purchase_upgrade/2" do
     test "purchases an upgrade" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{
-          housing: %{
-            home_room_id: "room_123",
-            furniture: [],
-            storage: [],
-            rent_paid_until: nil,
-            upgrades: []
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{
+            housing: %{
+              home_room_id: "room_123",
+              furniture: [],
+              storage: [],
+              rent_paid_until: nil,
+              upgrades: []
+            }
           }
-        }
-      })
+        })
 
       assert {:ok, updated_state} = Housing.purchase_upgrade(state, "expanded_storage")
 
@@ -689,17 +750,19 @@ defmodule Exmud.Framework.HousingTest do
 
     test "can purchase multiple upgrades" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{
-          housing: %{
-            home_room_id: "room_123",
-            furniture: [],
-            storage: [],
-            rent_paid_until: nil,
-            upgrades: []
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{
+            housing: %{
+              home_room_id: "room_123",
+              furniture: [],
+              storage: [],
+              rent_paid_until: nil,
+              upgrades: []
+            }
           }
-        }
-      })
+        })
 
       {:ok, state} = Housing.purchase_upgrade(state, "expanded_storage")
       {:ok, state} = Housing.purchase_upgrade(state, "garden")
@@ -711,9 +774,11 @@ defmodule Exmud.Framework.HousingTest do
 
     test "returns error when upgrade already purchased" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{housing: %{home_room_id: "room_123", upgrades: ["expanded_storage"]}}
-      })
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{housing: %{home_room_id: "room_123", upgrades: ["expanded_storage"]}}
+        })
 
       assert {:error, :already_purchased} = Housing.purchase_upgrade(state, "expanded_storage")
     end
@@ -722,17 +787,19 @@ defmodule Exmud.Framework.HousingTest do
   describe "has_upgrade?/2" do
     test "returns true when player has upgrade" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{
-          housing: %{
-            home_room_id: nil,
-            furniture: [],
-            storage: [],
-            rent_paid_until: nil,
-            upgrades: ["expanded_storage", "garden"]
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{
+            housing: %{
+              home_room_id: nil,
+              furniture: [],
+              storage: [],
+              rent_paid_until: nil,
+              upgrades: ["expanded_storage", "garden"]
+            }
           }
-        }
-      })
+        })
 
       assert Housing.has_upgrade?(state, "expanded_storage") == true
       assert Housing.has_upgrade?(state, "garden") == true
@@ -740,34 +807,38 @@ defmodule Exmud.Framework.HousingTest do
 
     test "returns false when player does not have upgrade" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{
-          housing: %{
-            home_room_id: nil,
-            furniture: [],
-            storage: [],
-            rent_paid_until: nil,
-            upgrades: ["expanded_storage"]
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{
+            housing: %{
+              home_room_id: nil,
+              furniture: [],
+              storage: [],
+              rent_paid_until: nil,
+              upgrades: ["expanded_storage"]
+            }
           }
-        }
-      })
+        })
 
       assert Housing.has_upgrade?(state, "garden") == false
     end
 
     test "returns false when no upgrades" do
       player = player_fixture()
-      state = game_state_fixture(player.id, %{
-        stats: %{
-          housing: %{
-            home_room_id: nil,
-            furniture: [],
-            storage: [],
-            rent_paid_until: nil,
-            upgrades: []
+
+      state =
+        game_state_fixture(player.id, %{
+          stats: %{
+            housing: %{
+              home_room_id: nil,
+              furniture: [],
+              storage: [],
+              rent_paid_until: nil,
+              upgrades: []
+            }
           }
-        }
-      })
+        })
 
       assert Housing.has_upgrade?(state, "expanded_storage") == false
     end

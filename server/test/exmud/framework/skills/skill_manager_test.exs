@@ -63,7 +63,10 @@ defmodule Exmud.Framework.Skills.SkillManagerTest do
     }
 
     # Add skills to the registry's state
-    GenServer.call(SkillRegistry, {:put_test_skills, [basic_combat, swordsmanship, expensive_skill, capped_skill]})
+    GenServer.call(
+      SkillRegistry,
+      {:put_test_skills, [basic_combat, swordsmanship, expensive_skill, capped_skill]}
+    )
   end
 
   # Helper to set player skills
@@ -118,6 +121,7 @@ defmodule Exmud.Framework.Skills.SkillManagerTest do
         "basic_combat" => %{level: 10, xp: 25},
         "swordsmanship" => %{level: 5, xp: 100}
       }
+
       state = set_skills(state, skills)
 
       trained = SkillManager.list_trained_skills(state)
@@ -132,6 +136,7 @@ defmodule Exmud.Framework.Skills.SkillManagerTest do
         "basic_combat" => %{level: 10, xp: 0},
         "untrained" => %{level: 0, xp: 50}
       }
+
       state = set_skills(state, skills)
 
       trained = SkillManager.list_trained_skills(state)
@@ -161,6 +166,7 @@ defmodule Exmud.Framework.Skills.SkillManagerTest do
         "basic_combat" => %{level: 3, xp: 0},
         "swordsmanship" => %{level: 2, xp: 0}
       }
+
       state = set_skills(state, skills)
 
       assert SkillManager.points_spent(state) == 9
@@ -179,6 +185,7 @@ defmodule Exmud.Framework.Skills.SkillManagerTest do
         "basic_combat" => %{level: 5, xp: 0},
         "unused" => %{level: 0, xp: 0}
       }
+
       state = set_skills(state, skills)
 
       # Only basic_combat should count (1+2+3+4+5 = 15)

@@ -184,6 +184,7 @@ defmodule Exmud.Framework.World.RoomElements do
 
   defp parse_water(data) do
     water = MapHelpers.get_flexible(data, :water, %{})
+
     %{
       level: parse_level(MapHelpers.get_flexible(water, :level, :none)),
       type: MapHelpers.get_flexible(water, :type, nil)
@@ -192,6 +193,7 @@ defmodule Exmud.Framework.World.RoomElements do
 
   defp parse_darkness(data) do
     darkness = MapHelpers.get_flexible(data, :darkness, %{})
+
     %{
       level: parse_darkness_level(MapHelpers.get_flexible(darkness, :level, :none)),
       light_required: MapHelpers.get_flexible(darkness, :light_required, false)
@@ -200,6 +202,7 @@ defmodule Exmud.Framework.World.RoomElements do
 
   defp parse_elevation(data) do
     elevation = MapHelpers.get_flexible(data, :elevation, %{})
+
     %{
       type: parse_elevation_type(MapHelpers.get_flexible(elevation, :type, :ground)),
       height: MapHelpers.get_flexible(elevation, :height, 0)
@@ -209,14 +212,17 @@ defmodule Exmud.Framework.World.RoomElements do
   defp parse_terrain(data) do
     terrain = MapHelpers.get_flexible(data, :terrain, %{})
     terrain_type = parse_terrain_type(MapHelpers.get_flexible(terrain, :type, :normal))
+
     %{
       type: terrain_type,
-      movement_cost: MapHelpers.get_flexible(terrain, :movement_cost, @terrain_costs[terrain_type])
+      movement_cost:
+        MapHelpers.get_flexible(terrain, :movement_cost, @terrain_costs[terrain_type])
     }
   end
 
   defp parse_temperature(data) do
     temperature = MapHelpers.get_flexible(data, :temperature, %{})
+
     %{
       level: parse_temperature_level(MapHelpers.get_flexible(temperature, :level, :normal))
     }
@@ -224,6 +230,7 @@ defmodule Exmud.Framework.World.RoomElements do
 
   defp parse_vegetation(data) do
     vegetation = MapHelpers.get_flexible(data, :vegetation, %{})
+
     %{
       density: parse_level(MapHelpers.get_flexible(vegetation, :density, :none)),
       type: MapHelpers.get_flexible(vegetation, :type, nil)

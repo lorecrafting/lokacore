@@ -37,8 +37,15 @@ defmodule Exmud.Framework.Status.StatusEffect do
   alias Exmud.Utils.MapHelpers
 
   @type status_type :: :buff | :debuff | :neutral
-  @type trigger :: :on_apply | :on_remove | :on_turn_start | :on_turn_end |
-                   :on_damage_taken | :on_damage_dealt | :on_ability_use | :passive
+  @type trigger ::
+          :on_apply
+          | :on_remove
+          | :on_turn_start
+          | :on_turn_end
+          | :on_damage_taken
+          | :on_damage_dealt
+          | :on_ability_use
+          | :passive
 
   @type t :: %__MODULE__{
           key: String.t(),
@@ -77,10 +84,26 @@ defmodule Exmud.Framework.Status.StatusEffect do
   ]
 
   @valid_types [:buff, :debuff, :neutral]
-  @valid_triggers [:on_apply, :on_remove, :on_turn_start, :on_turn_end,
-                   :on_damage_taken, :on_damage_dealt, :on_ability_use, :passive]
-  @valid_actions [:damage, :heal, :stat_modify, :resource_drain,
-                  :prevent_action, :reflect_damage, :immunity, :resource_regen]
+  @valid_triggers [
+    :on_apply,
+    :on_remove,
+    :on_turn_start,
+    :on_turn_end,
+    :on_damage_taken,
+    :on_damage_dealt,
+    :on_ability_use,
+    :passive
+  ]
+  @valid_actions [
+    :damage,
+    :heal,
+    :stat_modify,
+    :resource_drain,
+    :prevent_action,
+    :reflect_damage,
+    :immunity,
+    :resource_regen
+  ]
 
   # =============================================================================
   # Struct Creation
@@ -157,11 +180,13 @@ defmodule Exmud.Framework.Status.StatusEffect do
   end
 
   defp parse_atom(value, _default) when is_atom(value), do: value
+
   defp parse_atom(value, default) when is_binary(value) do
     String.to_existing_atom(value)
   rescue
     ArgumentError -> default
   end
+
   defp parse_atom(_, default), do: default
 
   # =============================================================================

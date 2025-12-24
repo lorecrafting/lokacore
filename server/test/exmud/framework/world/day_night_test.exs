@@ -5,7 +5,9 @@ defmodule Exmud.Framework.World.DayNightTest do
 
   describe "start_link/1" do
     test "starts the GenServer with default options" do
-      assert {:ok, pid} = DayNight.start_link(name: :"DayNight#{System.unique_integer([:positive])}")
+      assert {:ok, pid} =
+               DayNight.start_link(name: :"DayNight#{System.unique_integer([:positive])}")
+
       assert Process.alive?(pid)
       GenServer.stop(pid)
     end

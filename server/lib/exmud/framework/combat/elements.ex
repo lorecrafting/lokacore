@@ -364,7 +364,8 @@ defmodule Exmud.Framework.Combat.Elements do
           element = %{
             key: atom_key,
             name: MapHelpers.get_flexible(value, :name, to_string(key)),
-            strong_against: parse_element_list(MapHelpers.get_flexible(value, :strong_against, [])),
+            strong_against:
+              parse_element_list(MapHelpers.get_flexible(value, :strong_against, [])),
             weak_against: parse_element_list(MapHelpers.get_flexible(value, :weak_against, [])),
             color: MapHelpers.get_flexible(value, :color, "gray")
           }

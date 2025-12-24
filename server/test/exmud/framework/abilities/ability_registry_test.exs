@@ -110,8 +110,7 @@ defmodule Exmud.Framework.Abilities.AbilityRegistryTest do
 
       {:ok, pid} =
         start_supervised(
-          {AbilityRegistry,
-           name: EmptyRegistry, path: empty_path, load_on_start: true},
+          {AbilityRegistry, name: EmptyRegistry, path: empty_path, load_on_start: true},
           id: :empty_registry
         )
 
@@ -360,10 +359,7 @@ defmodule Exmud.Framework.Abilities.AbilityRegistryTest do
           stats: %{level: 10, skills: ["fire_magic", "healing_magic"]}
         })
 
-      {:ok,
-       state_low: state_low_level,
-       state_mid: state_mid_level,
-       state_high: state_high_level}
+      {:ok, state_low: state_low_level, state_mid: state_mid_level, state_high: state_high_level}
     end
 
     test "returns no abilities for low-level player without skills", %{state_low: state} do
@@ -414,8 +410,7 @@ defmodule Exmud.Framework.Abilities.AbilityRegistryTest do
       # Registry should start but report errors
       {:ok, pid} =
         start_supervised(
-          {AbilityRegistry,
-           name: InvalidRegistry, path: invalid_path, load_on_start: true},
+          {AbilityRegistry, name: InvalidRegistry, path: invalid_path, load_on_start: true},
           id: :invalid_registry
         )
 
@@ -438,8 +433,7 @@ defmodule Exmud.Framework.Abilities.AbilityRegistryTest do
 
       {:ok, _pid} =
         start_supervised(
-          {AbilityRegistry,
-           name: MissingFieldsRegistry, path: invalid_path, load_on_start: true},
+          {AbilityRegistry, name: MissingFieldsRegistry, path: invalid_path, load_on_start: true},
           id: :missing_fields_registry
         )
 

@@ -148,7 +148,10 @@ defmodule Exmud.Framework.Appearance.ClothingTest do
       visible = %{appearance_text: "wearing a cloak", visibility: true}
       invisible = %{appearance_text: "wearing hidden armor", visibility: false}
 
-      game_state = %{game_state | stats: %{equipment: %{clothing: %{cloak: visible, torso: invisible}}}}
+      game_state = %{
+        game_state
+        | stats: %{equipment: %{clothing: %{cloak: visible, torso: invisible}}}
+      }
 
       description = Clothing.get_appearance_description(game_state)
 
@@ -160,7 +163,10 @@ defmodule Exmud.Framework.Appearance.ClothingTest do
       under = %{appearance_text: "under shirt", visibility: true, layer: :under}
       middle = %{appearance_text: "middle vest", visibility: true, layer: :middle}
 
-      game_state = %{game_state | stats: %{equipment: %{clothing: %{cloak: outer, torso: middle, neck: under}}}}
+      game_state = %{
+        game_state
+        | stats: %{equipment: %{clothing: %{cloak: outer, torso: middle, neck: under}}}
+      }
 
       description = Clothing.get_appearance_description(game_state)
 
@@ -200,14 +206,18 @@ defmodule Exmud.Framework.Appearance.ClothingTest do
       hat = %{social_bonus: 3}
       gloves = %{social_bonus: 2}
 
-      game_state = %{game_state | stats: %{equipment: %{clothing: %{cloak: cloak, head: hat, hands: gloves}}}}
+      game_state = %{
+        game_state
+        | stats: %{equipment: %{clothing: %{cloak: cloak, head: hat, hands: gloves}}}
+      }
 
       assert Clothing.get_social_bonus(game_state) == 10
     end
 
     test "handles items without social_bonus", %{game_state: game_state} do
       cloak = %{social_bonus: 5}
-      hat = %{}  # No social_bonus key
+      # No social_bonus key
+      hat = %{}
 
       game_state = %{game_state | stats: %{equipment: %{clothing: %{cloak: cloak, head: hat}}}}
 
@@ -232,14 +242,18 @@ defmodule Exmud.Framework.Appearance.ClothingTest do
       hat = %{warmth: 3}
       gloves = %{warmth: 2}
 
-      game_state = %{game_state | stats: %{equipment: %{clothing: %{cloak: cloak, head: hat, hands: gloves}}}}
+      game_state = %{
+        game_state
+        | stats: %{equipment: %{clothing: %{cloak: cloak, head: hat, hands: gloves}}}
+      }
 
       assert Clothing.get_warmth(game_state) == 15
     end
 
     test "handles items without warmth", %{game_state: game_state} do
       cloak = %{warmth: 10}
-      hat = %{}  # No warmth key
+      # No warmth key
+      hat = %{}
 
       game_state = %{game_state | stats: %{equipment: %{clothing: %{cloak: cloak, head: hat}}}}
 
@@ -270,7 +284,10 @@ defmodule Exmud.Framework.Appearance.ClothingTest do
       guard_uniform = %{faction_disguise: "guards"}
       noble_cloak = %{faction_disguise: "nobility"}
 
-      game_state = %{game_state | stats: %{equipment: %{clothing: %{torso: guard_uniform, cloak: noble_cloak}}}}
+      game_state = %{
+        game_state
+        | stats: %{equipment: %{clothing: %{torso: guard_uniform, cloak: noble_cloak}}}
+      }
 
       result = Clothing.get_active_disguise(game_state)
 
@@ -283,7 +300,10 @@ defmodule Exmud.Framework.Appearance.ClothingTest do
       guard_shirt = %{faction_disguise: "guards"}
       guard_pants = %{faction_disguise: "guards"}
 
-      game_state = %{game_state | stats: %{equipment: %{clothing: %{torso: guard_shirt, legs: guard_pants}}}}
+      game_state = %{
+        game_state
+        | stats: %{equipment: %{clothing: %{torso: guard_shirt, legs: guard_pants}}}
+      }
 
       assert Clothing.get_active_disguise(game_state) == "guards"
     end
@@ -321,7 +341,8 @@ defmodule Exmud.Framework.Appearance.ClothingTest do
     end
 
     test "item without dyeable key defaults to not dyeable", %{game_state: game_state} do
-      cloak = %{color: "red"}  # No dyeable key
+      # No dyeable key
+      cloak = %{color: "red"}
       game_state = %{game_state | stats: %{equipment: %{clothing: %{cloak: cloak}}}}
 
       assert {:error, :not_dyeable} = Clothing.dye(game_state, :cloak, "blue")

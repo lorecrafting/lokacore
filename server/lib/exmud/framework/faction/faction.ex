@@ -98,9 +98,11 @@ defmodule Exmud.Framework.Faction do
   def get_tier(faction_key, reputation, server \\ __MODULE__) do
     case get(faction_key, server) do
       {:ok, faction} ->
-        tier = Enum.find(faction.tiers, fn t ->
-          reputation >= t.min and reputation <= t.max
-        end)
+        tier =
+          Enum.find(faction.tiers, fn t ->
+            reputation >= t.min and reputation <= t.max
+          end)
+
         if tier, do: tier.name, else: "Unknown"
 
       {:error, _} ->
@@ -134,9 +136,10 @@ defmodule Exmud.Framework.Faction do
 
     case get(faction_key, server) do
       {:ok, faction} ->
-        tier = Enum.find(faction.tiers, fn t ->
-          reputation >= t.min and reputation <= t.max
-        end)
+        tier =
+          Enum.find(faction.tiers, fn t ->
+            reputation >= t.min and reputation <= t.max
+          end)
 
         if tier do
           Map.get(tier.effects || %{}, :shop_multiplier, 1.0)
@@ -157,9 +160,10 @@ defmodule Exmud.Framework.Faction do
 
     case get(faction_key, server) do
       {:ok, faction} ->
-        tier = Enum.find(faction.tiers, fn t ->
-          reputation >= t.min and reputation <= t.max
-        end)
+        tier =
+          Enum.find(faction.tiers, fn t ->
+            reputation >= t.min and reputation <= t.max
+          end)
 
         if tier do
           Map.get(tier.effects || %{}, :can_enter, true)
@@ -201,10 +205,12 @@ defmodule Exmud.Framework.Faction do
 
   @impl true
   def handle_call({:get, key}, _from, state) do
-    result = case Map.get(state.factions, key) do
-      nil -> {:error, :not_found}
-      faction -> {:ok, faction}
-    end
+    result =
+      case Map.get(state.factions, key) do
+        nil -> {:error, :not_found}
+        faction -> {:ok, faction}
+      end
+
     {:reply, result, state}
   end
 
@@ -219,6 +225,7 @@ defmodule Exmud.Framework.Faction do
       {:ok, new_state} ->
         Logger.info("Faction reloaded #{map_size(new_state.factions)} factions")
         {:reply, :ok, new_state}
+
       {:error, errors} ->
         {:reply, {:error, errors}, state}
     end
@@ -296,16 +303,20 @@ defmodule Exmud.Framework.Faction do
   end
 
   defp apply_allied_changes(game_state, [], _amount, _server), do: game_state
+
   defp apply_allied_changes(game_state, allies, amount, _server) do
     allied_amount = div(amount, 2)
+
     Enum.reduce(allies, game_state, fn ally_key, gs ->
       do_modify_reputation(gs, ally_key, allied_amount)
     end)
   end
 
   defp apply_enemy_changes(game_state, [], _amount, _server), do: game_state
+
   defp apply_enemy_changes(game_state, enemies, amount, _server) do
     enemy_amount = -div(amount, 2)
+
     Enum.reduce(enemies, game_state, fn enemy_key, gs ->
       do_modify_reputation(gs, enemy_key, enemy_amount)
     end)

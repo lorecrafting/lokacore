@@ -324,7 +324,8 @@ defmodule Exmud.Framework.Crafting do
   end
 
   defp do_consume_ingredients(game_state, ingredients) do
-    Enum.reduce_while(ingredients, {:ok, game_state}, fn %{item: item_key, quantity: qty}, {:ok, state} ->
+    Enum.reduce_while(ingredients, {:ok, game_state}, fn %{item: item_key, quantity: qty},
+                                                         {:ok, state} ->
       case remove_items(state, item_key, qty) do
         {:ok, new_state} -> {:cont, {:ok, new_state}}
         {:error, reason} -> {:halt, {:error, reason}}

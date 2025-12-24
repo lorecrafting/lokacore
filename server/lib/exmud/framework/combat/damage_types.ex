@@ -386,7 +386,8 @@ defmodule Exmud.Framework.Combat.DamageTypes do
             key: atom_key,
             name: MapHelpers.get_flexible(value, :name, to_string(key)),
             description: MapHelpers.get_flexible(value, :description, ""),
-            effective_against: parse_type_list(MapHelpers.get_flexible(value, :effective_against, [])),
+            effective_against:
+              parse_type_list(MapHelpers.get_flexible(value, :effective_against, [])),
             weak_against: parse_type_list(MapHelpers.get_flexible(value, :weak_against, []))
           }
 

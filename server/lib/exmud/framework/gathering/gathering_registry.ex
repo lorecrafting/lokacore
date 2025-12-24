@@ -235,6 +235,13 @@ defmodule Exmud.Framework.Gathering.GatheringRegistry do
     end
   end
 
+  @impl true
+  def handle_call({:register_test_node, node}, _from, state) do
+    new_nodes = Map.put(state.nodes, node.key, node)
+    update_ets(state.table, new_nodes)
+    {:reply, :ok, %{state | nodes: new_nodes}}
+  end
+
   # =============================================================================
   # Private Implementation
   # =============================================================================

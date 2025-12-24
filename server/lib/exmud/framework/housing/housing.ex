@@ -108,7 +108,8 @@ defmodule Exmud.Framework.Housing do
     housing = get_housing_state(game_state)
 
     case housing.rent_paid_until do
-      nil -> true  # Owned, no rent
+      # Owned, no rent
+      nil -> true
       timestamp -> System.system_time(:second) < timestamp
     end
   end

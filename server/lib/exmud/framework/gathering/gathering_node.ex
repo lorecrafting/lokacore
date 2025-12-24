@@ -92,10 +92,14 @@ defmodule Exmud.Framework.Gathering.GatheringNode do
         uses_per_respawn: MapHelpers.get_flexible(data, :uses_per_respawn, 1),
         tool_required: MapHelpers.get_flexible(data, :tool_required, nil),
         xp_reward: parse_xp_reward(data),
-        gather_message: MapHelpers.get_flexible(data, :gather_message, "You gather from the node."),
-        success_message: MapHelpers.get_flexible(data, :success_message, "You find something useful!"),
-        failure_message: MapHelpers.get_flexible(data, :failure_message, "You find nothing of value."),
-        exhausted_message: MapHelpers.get_flexible(data, :exhausted_message, "This resource has been depleted."),
+        gather_message:
+          MapHelpers.get_flexible(data, :gather_message, "You gather from the node."),
+        success_message:
+          MapHelpers.get_flexible(data, :success_message, "You find something useful!"),
+        failure_message:
+          MapHelpers.get_flexible(data, :failure_message, "You find nothing of value."),
+        exhausted_message:
+          MapHelpers.get_flexible(data, :exhausted_message, "This resource has been depleted."),
         tags: MapHelpers.get_flexible(data, :tags, [])
       }
 
@@ -137,13 +141,17 @@ defmodule Exmud.Framework.Gathering.GatheringNode do
 
   defp parse_xp_reward(data) do
     case MapHelpers.get_flexible(data, :xp_reward, nil) do
-      nil -> nil
+      nil ->
+        nil
+
       reward when is_map(reward) ->
         %{
           skill: MapHelpers.get_flexible(reward, :skill, nil),
           amount: MapHelpers.get_flexible(reward, :amount, 0)
         }
-      _ -> nil
+
+      _ ->
+        nil
     end
   end
 
