@@ -42,3 +42,7 @@ config :phoenix_live_view,
 # Sort query params output of verified routes for robust url comparisons
 config :phoenix,
   sort_verified_routes_query_params: true
+
+# Guardian JWT secret for testing only
+config :exmud, Exmud.Auth.Guardian,
+  secret_key: "test_only_guardian_secret_key_not_for_production_use"

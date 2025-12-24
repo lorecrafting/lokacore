@@ -52,7 +52,42 @@ defmodule Exmud.Engine.Scripting do
   # Private functions
 
   defp init_sandbox do
-    :luerl.init()
+    lua = :luerl.init()
+
+    # Remove dangerous global functions from the Lua environment
+    # This provides runtime protection even if pattern checks are bypassed
+    dangerous_globals = [
+      "dofile",
+      "loadfile",
+      "load",
+      "loadstring",
+      "rawget",
+      "rawset",
+      "rawequal",
+      "rawlen",
+      "getmetatable",
+      "setmetatable",
+      "collectgarbage",
+      "module",
+      "require",
+      "newproxy"
+    ]
+
+    # Remove dangerous modules entirely
+    dangerous_modules = ["os", "io", "debug", "package", "coroutine"]
+
+    lua =
+      Enum.reduce(dangerous_globals, lua, fn func, state ->
+        :luerl.set_table([func], nil, state)
+      end)
+
+    lua =
+      Enum.reduce(dangerous_modules, lua, fn mod, state ->
+        :luerl.set_table([mod], nil, state)
+      end)
+
+    # Remove string.dump (bytecode generation)
+    :luerl.set_table(["string", "dump"], nil, lua)
   end
 
   defp inject_entity(lua, %Entity{} = entity) do
@@ -116,19 +151,52 @@ defmodule Exmud.Engine.Scripting do
 
   defp to_lua_value(_), do: nil
 
-  # Security checks
+  # Security checks - block dangerous Lua functions and patterns
+  # These patterns prevent sandbox escapes via:
+  # - File/OS access (os, io, file, dofile, loadfile, require)
+  # - Debug access (debug module gives full introspection)
+  # - Package/module loading (require, package)
+  # - Raw table access bypassing metatables (rawget, rawset)
+  # - Metatable manipulation (getmetatable, setmetatable can escape sandbox)
+  # - Code loading (load, loadstring execute arbitrary code)
+  # - Global table direct access (_G can bypass restrictions)
+  # - Bytecode manipulation (string.dump creates bytecode)
+  # - GC manipulation (collectgarbage)
+  # - Coroutine abuse (can be used for timing attacks)
 
   @blocked_patterns [
+    # File and OS access
     ~r/os\./,
     ~r/io\./,
     ~r/file\./,
     ~r/require\s*\(/,
     ~r/dofile\s*\(/,
     ~r/loadfile\s*\(/,
+    # Debug and package systems
     ~r/debug\./,
     ~r/package\./,
+    # Raw table access
     ~r/rawget\s*\(/,
-    ~r/rawset\s*\(/
+    ~r/rawset\s*\(/,
+    ~r/rawequal\s*\(/,
+    ~r/rawlen\s*\(/,
+    # Metatable manipulation (CRITICAL - sandbox escape vector)
+    ~r/getmetatable\s*\(/,
+    ~r/setmetatable\s*\(/,
+    # Dynamic code loading (CRITICAL - arbitrary code execution)
+    ~r/\bload\s*\(/,
+    ~r/loadstring\s*\(/,
+    # Global table access (can bypass sandbox)
+    ~r/_G\b/,
+    ~r/_ENV\b/,
+    # Bytecode and low-level string ops
+    ~r/string\.dump\s*\(/,
+    # GC manipulation
+    ~r/collectgarbage\s*\(/,
+    # Coroutine (potential for abuse)
+    ~r/coroutine\./,
+    # Module and chunk loading
+    ~r/module\s*\(/
   ]
 
   defp check_blocked_patterns(source) do

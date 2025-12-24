@@ -208,10 +208,20 @@ fly deploy                         # Deploy to Fly.io
 
 | Method | Path | Description | Auth |
 |--------|------|-------------|------|
-| GET | `/api/health` | Health check | No |
-| POST | `/api/v1/auth/register` | Register player | No |
-| POST | `/api/v1/auth/login` | Login (returns JWT) | No |
+| GET | `/api/health` | Liveness check | No |
+| GET | `/api/health/ready` | Readiness check | No |
+| GET | `/api/health/detailed` | System metrics | No |
+| POST | `/api/v1/auth/register` | Register player (3/hour limit) | No |
+| POST | `/api/v1/auth/login` | Login, returns JWT (5/min limit) | No |
+| POST | `/api/v1/auth/refresh` | Refresh access token | Bearer |
 | GET | `/api/v1/auth/me` | Get current player | Bearer |
+
+### JWT Token Expiration
+
+- **Access tokens**: 1 hour TTL
+- **Refresh tokens**: 7 days TTL
+
+Clients should refresh tokens before expiration using `/api/v1/auth/refresh`.
 
 ## Environment Variables (Production)
 
@@ -339,7 +349,14 @@ This code is kept for reference and potential future use when native mobile apps
 ### UI & Design
 - `docs/ui/living-ebook-style-guide.md` - **UI style guide for game client**
 
-### Admin & Quick Reference
+### Admin & Operations
 - `docs/admin/dashboard.md` - Admin dashboard guide
+- `docs/admin/backup-restore.md` - Database backup and restore procedures
+- `docs/operations/monitoring.md` - Monitoring, health checks, telemetry
+
+### Security
+- `docs/security/README.md` - **Security measures and best practices**
+
+### Quick Reference
 - `ExMUD_Quick_Reference.md` - Setup commands and cost summary
 - `ExMUD_Engine_Architecture.md` - Full technical specification (200KB)

@@ -386,11 +386,12 @@ defmodule Exmud.Accounts do
   defp update_player_and_delete_all_tokens(changeset) do
     Repo.transact(fn ->
       with {:ok, player} <- Repo.update(changeset) do
-        tokens_to_expire = Repo.all_by(PlayerToken, player_id: player.id)
+        # Delete all tokens for this player and get count
+        {deleted_count, _} = Repo.delete_all(from(t in PlayerToken, where: t.player_id == ^player.id))
 
-        Repo.delete_all(
-          from(t in PlayerToken, where: t.id in ^Enum.map(tokens_to_expire, & &1.id))
-        )
+        # Return empty list for backwards compatibility (tokens are already deleted)
+        tokens_to_expire = []
+        _ = deleted_count
 
         {:ok, {player, tokens_to_expire}}
       end

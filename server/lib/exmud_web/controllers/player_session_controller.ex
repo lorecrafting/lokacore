@@ -51,16 +51,17 @@ defmodule ExmudWeb.PlayerSessionController do
   # magic link request
   def create(conn, %{"player" => %{"email" => email}}) do
     require Logger
+    alias Exmud.Utils.LogSanitizer
 
     if player = Accounts.get_player_by_email(email) do
-      Logger.warning("[PlayerSession] Player found for #{email}, sending login instructions")
+      Logger.debug("[PlayerSession] Player found, sending login instructions [#{LogSanitizer.hash_id(email)}]")
 
       Accounts.deliver_login_instructions(
         player,
         &url(~p"/players/log-in/#{&1}")
       )
     else
-      Logger.warning("[PlayerSession] No player found for #{email}, skipping email")
+      Logger.debug("[PlayerSession] No player found for email lookup [#{LogSanitizer.hash_id(email)}]")
     end
 
     info =

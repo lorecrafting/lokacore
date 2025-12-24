@@ -87,3 +87,8 @@ config :phoenix_live_view,
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
+
+# Guardian JWT secret for development only - DO NOT USE IN PRODUCTION
+# Production uses GUARDIAN_SECRET_KEY environment variable via runtime.exs
+config :exmud, Exmud.Auth.Guardian,
+  secret_key: "dev_only_guardian_secret_key_not_for_production_use"
