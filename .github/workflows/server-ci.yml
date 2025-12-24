@@ -78,6 +78,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    outputs:
+      app_url: ${{ steps.get_url.outputs.url }}
 
     steps:
       - name: Checkout code
@@ -94,3 +96,79 @@ jobs:
         working-directory: server
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Get app URL
+        id: get_url
+        run: |
+          APP_NAME=$(grep '^app' fly.toml | cut -d'"' -f2)
+          echo "url=https://${APP_NAME}.fly.dev" >> $GITHUB_OUTPUT
+        working-directory: server
+
+  smoke-test:
+    name: Post-Deploy Smoke Tests
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Wait for deployment to stabilize
+        run: sleep 30
+
+      - name: Check health endpoint (liveness)
+        run: |
+          echo "Checking health endpoint..."
+          RESPONSE=$(curl -sf "${{ needs.deploy.outputs.app_url }}/api/health" || echo "FAILED")
+          echo "Response: $RESPONSE"
+          if echo "$RESPONSE" | grep -q '"status":"ok"'; then
+            echo "Health check passed"
+          else
+            echo "Health check failed"
+            exit 1
+          fi
+
+      - name: Check readiness endpoint
+        run: |
+          echo "Checking readiness endpoint..."
+          RESPONSE=$(curl -sf "${{ needs.deploy.outputs.app_url }}/api/health/ready" || echo "FAILED")
+          echo "Response: $RESPONSE"
+          if echo "$RESPONSE" | grep -q '"status":"ready"'; then
+            echo "Readiness check passed"
+          else
+            echo "Readiness check failed - app may still be starting"
+            # Allow retry
+            sleep 10
+            RESPONSE=$(curl -sf "${{ needs.deploy.outputs.app_url }}/api/health/ready" || echo "FAILED")
+            if echo "$RESPONSE" | grep -q '"status":"ready"'; then
+              echo "Readiness check passed on retry"
+            else
+              echo "Readiness check failed after retry"
+              exit 1
+            fi
+          fi
+
+      - name: Check login page loads
+        run: |
+          echo "Checking login page..."
+          STATUS=$(curl -sL -o /dev/null -w "%{http_code}" "${{ needs.deploy.outputs.app_url }}/players/log-in")
+          echo "Status code: $STATUS"
+          if [ "$STATUS" = "200" ]; then
+            echo "Login page check passed"
+          else
+            echo "Login page check failed"
+            exit 1
+          fi
+
+      - name: Check API version
+        run: |
+          echo "Checking API version..."
+          VERSION=$(curl -sf "${{ needs.deploy.outputs.app_url }}/api/health" | jq -r '.version')
+          echo "Deployed version: $VERSION"
+          if [ -n "$VERSION" ] && [ "$VERSION" != "null" ]; then
+            echo "Version check passed"
+          else
+            echo "Version check failed"
+            exit 1
+          fi
+
+      - name: Smoke tests passed
+        run: echo "All smoke tests passed successfully"
