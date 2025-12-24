@@ -71,11 +71,18 @@ defmodule ExmudWeb.Router do
     live "/", AdminLive, :index
   end
 
-  # Health check endpoint for Fly.io
+  # Health check endpoints for Fly.io and monitoring
   scope "/api", ExmudWeb.Api do
     pipe_through :api
 
+    # Liveness probe - basic check that app is running
     get "/health", HealthController, :index
+
+    # Readiness probe - verify dependencies are healthy
+    get "/health/ready", HealthController, :ready
+
+    # Detailed metrics - useful for monitoring dashboards
+    get "/health/detailed", HealthController, :detailed
   end
 
   # Public API routes with rate limiting
