@@ -78,8 +78,22 @@ config :phoenix, :json_library, Jason
 
 # Guardian JWT configuration - issuer only, secret_key set per environment
 # IMPORTANT: secret_key MUST be set in dev.exs/test.exs or via GUARDIAN_SECRET_KEY env var
+#
+# Token TTL (time-to-live) configuration:
+# - access: Short-lived tokens for API requests (1 hour)
+# - refresh: Longer-lived tokens for obtaining new access tokens (7 days)
+#
+# Tokens expire after TTL and require re-authentication or refresh
 config :exmud, Exmud.Auth.Guardian,
-  issuer: "exmud"
+  issuer: "exmud",
+  ttl: {1, :hour},
+  token_ttl: %{
+    "access" => {1, :hour},
+    "refresh" => {7, :days}
+  },
+  # Verify issuer and expiration claims
+  allowed_algos: ["HS512"],
+  verify_issuer: true
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

@@ -94,6 +94,7 @@ defmodule ExmudWeb.Router do
     pipe_through [:api, :api_auth]
 
     get "/auth/me", AuthController, :me
+    post "/auth/refresh", AuthController, :refresh
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
