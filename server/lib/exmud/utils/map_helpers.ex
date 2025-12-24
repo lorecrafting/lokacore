@@ -93,9 +93,10 @@ defmodule Exmud.Utils.MapHelpers do
   end
 
   @doc """
-  Converts all string keys in a map to atoms (non-recursive).
+  Converts string keys to EXISTING atoms only (safe for untrusted input).
 
-  Use with caution on untrusted input as this creates atoms.
+  Keys that don't have corresponding existing atoms are kept as strings.
+  This prevents atom table exhaustion attacks.
 
   ## Examples
 
@@ -109,15 +110,22 @@ defmodule Exmud.Utils.MapHelpers do
   @spec atomize_keys(map()) :: map()
   def atomize_keys(map) when is_map(map) do
     Map.new(map, fn
-      {k, v} when is_binary(k) -> {String.to_atom(k), v}
-      {k, v} -> {k, v}
+      {k, v} when is_binary(k) ->
+        case safe_to_existing_atom(k) do
+          nil -> {k, v}
+          atom -> {atom, v}
+        end
+
+      {k, v} ->
+        {k, v}
     end)
   end
 
   @doc """
-  Converts all string keys in a map to atoms (recursive for nested maps).
+  Converts string keys to EXISTING atoms recursively (safe for untrusted input).
 
-  Use with caution on untrusted input as this creates atoms.
+  Keys that don't have corresponding existing atoms are kept as strings.
+  This prevents atom table exhaustion attacks.
 
   ## Examples
 
@@ -128,10 +136,25 @@ defmodule Exmud.Utils.MapHelpers do
   @spec deep_atomize_keys(map()) :: map()
   def deep_atomize_keys(map) when is_map(map) do
     Map.new(map, fn
-      {k, v} when is_binary(k) and is_map(v) -> {String.to_atom(k), deep_atomize_keys(v)}
-      {k, v} when is_binary(k) -> {String.to_atom(k), v}
-      {k, v} when is_map(v) -> {k, deep_atomize_keys(v)}
-      {k, v} -> {k, v}
+      {k, v} when is_binary(k) and is_map(v) ->
+        key = case safe_to_existing_atom(k) do
+          nil -> k
+          atom -> atom
+        end
+
+        {key, deep_atomize_keys(v)}
+
+      {k, v} when is_binary(k) ->
+        case safe_to_existing_atom(k) do
+          nil -> {k, v}
+          atom -> {atom, v}
+        end
+
+      {k, v} when is_map(v) ->
+        {k, deep_atomize_keys(v)}
+
+      {k, v} ->
+        {k, v}
     end)
   end
 end

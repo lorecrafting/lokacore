@@ -35,9 +35,23 @@ defmodule Exmud.Framework.Dialogue do
   - `{"accept_quest", "quest_id"}` - Accepts the offered quest
   - `{"give_item", "item_id"}` - Gives an item to the player
   - `{"set_flag", "flag_name"}` - Sets a player flag
+  - `{"learn_skill", "skill_id", skill_cost}` - Teaches a skill
   """
 
   alias Exmud.Engine.Entities
+
+  # Whitelist of valid action types to prevent atom exhaustion attacks
+  @valid_action_types ~w(
+    offer_quest accept_quest complete_quest
+    give_item take_item
+    set_flag clear_flag
+    learn_skill
+    give_xp give_gold
+    heal teleport
+    start_combat
+    open_shop
+    trigger_event
+  )a
 
   @doc """
   Starts a conversation with an NPC.
@@ -377,21 +391,55 @@ defmodule Exmud.Framework.Dialogue do
 
   defp parse_action(action) when is_list(action) do
     case action do
-      [type, arg1, arg2] -> {String.to_atom(type), arg1, arg2}
-      [type, arg] -> {String.to_atom(type), arg}
-      [type] -> {String.to_atom(type), nil}
+      [type, arg1, arg2] -> safe_action_tuple(type, arg1, arg2)
+      [type, arg] -> safe_action_tuple(type, arg, nil)
+      [type] -> safe_action_tuple(type, nil, nil)
       _ -> nil
     end
   end
 
   defp parse_action(action) when is_map(action) do
     case action do
-      %{"type" => type, "arg1" => arg1, "arg2" => arg2} -> {String.to_atom(type), arg1, arg2}
-      %{"type" => type, "arg" => arg} -> {String.to_atom(type), arg}
-      %{"type" => type} -> {String.to_atom(type), nil}
+      %{"type" => type, "arg1" => arg1, "arg2" => arg2} -> safe_action_tuple(type, arg1, arg2)
+      %{"type" => type, "arg" => arg} -> safe_action_tuple(type, arg, nil)
+      %{"type" => type} -> safe_action_tuple(type, nil, nil)
       _ -> nil
     end
   end
 
   defp parse_action(_), do: nil
+
+  # Safely convert action type string to atom using whitelist
+  defp safe_action_tuple(type, arg1, arg2) when is_binary(type) do
+    atom_type =
+      try do
+        String.to_existing_atom(type)
+      rescue
+        ArgumentError -> nil
+      end
+
+    if atom_type && atom_type in @valid_action_types do
+      case {arg1, arg2} do
+        {nil, nil} -> {atom_type, nil}
+        {arg, nil} -> {atom_type, arg}
+        {a1, a2} -> {atom_type, a1, a2}
+      end
+    else
+      nil
+    end
+  end
+
+  defp safe_action_tuple(type, arg1, arg2) when is_atom(type) do
+    if type in @valid_action_types do
+      case {arg1, arg2} do
+        {nil, nil} -> {type, nil}
+        {arg, nil} -> {type, arg}
+        {a1, a2} -> {type, a1, a2}
+      end
+    else
+      nil
+    end
+  end
+
+  defp safe_action_tuple(_, _, _), do: nil
 end

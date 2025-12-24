@@ -76,10 +76,10 @@ config :logger, :default_formatter,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
-# Guardian JWT configuration
+# Guardian JWT configuration - issuer only, secret_key set per environment
+# IMPORTANT: secret_key MUST be set in dev.exs/test.exs or via GUARDIAN_SECRET_KEY env var
 config :exmud, Exmud.Auth.Guardian,
-  issuer: "exmud",
-  secret_key: "development_secret_key_replace_in_prod"
+  issuer: "exmud"
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

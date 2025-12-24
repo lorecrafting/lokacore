@@ -7,11 +7,18 @@ import Config
 # before starting your production server.
 config :exmud, ExmudWeb.Endpoint, cache_static_manifest: "priv/static/cache_manifest.json"
 
-# SSL is handled by Fly.io's edge proxy, so we don't need force_ssl here.
-# The proxy terminates SSL and forwards plain HTTP to our app on port 8080.
-# Uncomment below if you need HSTS headers:
-# config :exmud, ExmudWeb.Endpoint,
-#   force_ssl: [rewrite_on: [:x_forwarded_proto], hsts: false]
+# SSL is handled by Fly.io's edge proxy, which terminates SSL and forwards
+# plain HTTP to our app on port 8080. We enable force_ssl to:
+# 1. Redirect any HTTP requests to HTTPS (via x_forwarded_proto header)
+# 2. Set HSTS headers for browser security (max_age: 1 year)
+# 3. Include subdomains in HSTS policy
+config :exmud, ExmudWeb.Endpoint,
+  force_ssl: [
+    rewrite_on: [:x_forwarded_proto],
+    hsts: true,
+    host: nil,
+    expires: 31_536_000  # 1 year in seconds
+  ]
 
 # Configure Swoosh API Client
 config :swoosh, api_client: Swoosh.ApiClient.Req

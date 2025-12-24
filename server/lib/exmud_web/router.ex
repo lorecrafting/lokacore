@@ -9,12 +9,37 @@ defmodule ExmudWeb.Router do
     plug :fetch_live_flash
     plug :put_root_layout, html: {ExmudWeb.Layouts, :root}
     plug :protect_from_forgery
-    plug :put_secure_browser_headers
+    plug :put_secure_browser_headers, %{
+      "content-security-policy" =>
+        "default-src 'self'; " <>
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " <>
+        "style-src 'self' 'unsafe-inline'; " <>
+        "img-src 'self' data: blob:; " <>
+        "font-src 'self' data:; " <>
+        "connect-src 'self' wss: ws:; " <>
+        "frame-ancestors 'none';"
+    }
     plug :fetch_current_scope_for_player
   end
 
   pipeline :api do
     plug :accepts, ["json"]
+  end
+
+  # Rate limiting for auth endpoints - 5 requests per minute per IP
+  pipeline :rate_limit_auth do
+    plug ExmudWeb.Plugs.RateLimiter,
+      max_requests: 5,
+      window_ms: 60_000,
+      error_message: "Too many authentication attempts. Please wait before trying again."
+  end
+
+  # Rate limiting for registration - 3 per hour per IP (stricter)
+  pipeline :rate_limit_register do
+    plug ExmudWeb.Plugs.RateLimiter,
+      max_requests: 3,
+      window_ms: 3_600_000,
+      error_message: "Too many registration attempts. Please try again later."
   end
 
   pipeline :api_auth do
@@ -53,12 +78,15 @@ defmodule ExmudWeb.Router do
     get "/health", HealthController, :index
   end
 
-  # Public API routes (no auth required)
-  scope "/api/v1", ExmudWeb.Api do
-    pipe_through :api
+  # Public API routes with rate limiting
+  scope "/api/v1/auth", ExmudWeb.Api do
+    pipe_through [:api, :rate_limit_register]
+    post "/register", AuthController, :register
+  end
 
-    post "/auth/register", AuthController, :register
-    post "/auth/login", AuthController, :login
+  scope "/api/v1/auth", ExmudWeb.Api do
+    pipe_through [:api, :rate_limit_auth]
+    post "/login", AuthController, :login
   end
 
   # Protected API routes (auth required)
@@ -87,8 +115,9 @@ defmodule ExmudWeb.Router do
 
   ## Authentication routes
 
+  # Registration with rate limiting
   scope "/", ExmudWeb do
-    pipe_through [:browser, :redirect_if_player_is_authenticated]
+    pipe_through [:browser, :redirect_if_player_is_authenticated, :rate_limit_register]
 
     get "/players/register", PlayerRegistrationController, :new
     post "/players/register", PlayerRegistrationController, :create
@@ -102,12 +131,18 @@ defmodule ExmudWeb.Router do
     get "/players/settings/confirm-email/:token", PlayerSettingsController, :confirm_email
   end
 
+  # Login with rate limiting (except logout and token confirmation)
+  scope "/", ExmudWeb do
+    pipe_through [:browser, :rate_limit_auth]
+
+    get "/players/log-in", PlayerSessionController, :new
+    post "/players/log-in", PlayerSessionController, :create
+  end
+
   scope "/", ExmudWeb do
     pipe_through [:browser]
 
-    get "/players/log-in", PlayerSessionController, :new
     get "/players/log-in/:token", PlayerSessionController, :confirm
-    post "/players/log-in", PlayerSessionController, :create
     delete "/players/log-out", PlayerSessionController, :delete
   end
 end

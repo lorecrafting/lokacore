@@ -4,6 +4,7 @@ defmodule Exmud.Accounts.PlayerNotifier do
 
   alias Exmud.Mailer
   alias Exmud.Accounts.Player
+  alias Exmud.Utils.LogSanitizer
 
   # Delivers the email using the application mailer.
   defp deliver(recipient, subject, body) do
@@ -12,8 +13,8 @@ defmodule Exmud.Accounts.PlayerNotifier do
     from_email = Keyword.get(from_config, :email, "noreply@example.com")
     mailer_config = Application.get_env(:exmud, Exmud.Mailer, [])
 
-    Logger.info(
-      "[PlayerNotifier] Attempting to send email: to=#{recipient}, subject=#{subject}, from=#{from_email}, adapter=#{inspect(Keyword.get(mailer_config, :adapter))}"
+    Logger.debug(
+      "[PlayerNotifier] Sending email: to=#{LogSanitizer.mask_email(recipient)}, subject=#{subject}, adapter=#{inspect(Keyword.get(mailer_config, :adapter))}"
     )
 
     email =
@@ -24,12 +25,13 @@ defmodule Exmud.Accounts.PlayerNotifier do
       |> text_body(body)
 
     case Mailer.deliver(email) do
-      {:ok, metadata} ->
-        Logger.info("[PlayerNotifier] Email sent successfully: #{inspect(metadata)}")
+      {:ok, _metadata} ->
+        Logger.debug("[PlayerNotifier] Email sent successfully")
         {:ok, email}
 
       {:error, reason} ->
-        Logger.error("[PlayerNotifier] Failed to send email: #{inspect(reason)}")
+        # Log error without potentially sensitive details
+        Logger.error("[PlayerNotifier] Failed to send email: #{sanitize_error(reason)}")
         {:error, reason}
     end
   end
@@ -58,18 +60,23 @@ defmodule Exmud.Accounts.PlayerNotifier do
   Deliver instructions to log in with a magic link.
   """
   def deliver_login_instructions(player, url) do
-    Logger.warning("[PlayerNotifier] deliver_login_instructions called for #{player.email}")
+    Logger.debug("[PlayerNotifier] deliver_login_instructions called [#{LogSanitizer.hash_id(player.email)}]")
 
     case player do
       %Player{confirmed_at: nil} ->
-        Logger.warning("[PlayerNotifier] Player not confirmed, sending confirmation email")
+        Logger.debug("[PlayerNotifier] Player not confirmed, sending confirmation email")
         deliver_confirmation_instructions(player, url)
 
       _ ->
-        Logger.warning("[PlayerNotifier] Player confirmed, sending magic link email")
+        Logger.debug("[PlayerNotifier] Player confirmed, sending magic link email")
         deliver_magic_link_instructions(player, url)
     end
   end
+
+  # Sanitize error messages to avoid leaking sensitive info
+  defp sanitize_error(reason) when is_atom(reason), do: reason
+  defp sanitize_error(%{message: msg}) when is_binary(msg), do: msg
+  defp sanitize_error(_), do: "delivery_failed"
 
   defp deliver_magic_link_instructions(player, url) do
     deliver(player.email, "Log in instructions", """
