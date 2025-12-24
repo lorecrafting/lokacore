@@ -149,11 +149,13 @@ defmodule Exmud.Framework.Skills.Skill do
   @doc """
   Calculates total points spent on a skill at a given level.
   """
-  def total_points_spent(%__MODULE__{} = skill, level) do
+  def total_points_spent(%__MODULE__{} = skill, level) when level > 0 do
     Enum.reduce(1..level, 0, fn lvl, acc ->
       acc + point_cost(skill, lvl)
     end)
   end
+
+  def total_points_spent(%__MODULE__{}, 0), do: 0
 
   @doc """
   Checks if prerequisites are met.

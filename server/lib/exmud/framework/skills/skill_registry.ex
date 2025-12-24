@@ -136,6 +136,19 @@ defmodule Exmud.Framework.Skills.SkillRegistry do
     end
   end
 
+  # Test helper - only use in tests
+  @impl true
+  def handle_call({:put_test_skills, skills}, _from, state) do
+    skill_map = Enum.reduce(skills, %{}, fn skill, acc ->
+      Map.put(acc, skill.key, skill)
+    end)
+
+    :ets.delete_all_objects(state.table)
+    Enum.each(skill_map, fn {key, skill} -> :ets.insert(state.table, {key, skill}) end)
+
+    {:reply, :ok, %{state | skills: skill_map}}
+  end
+
   # =============================================================================
   # Private Implementation
   # =============================================================================
