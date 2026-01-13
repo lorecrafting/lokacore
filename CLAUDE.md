@@ -124,6 +124,136 @@ fly deploy
 3. **No Redis**: ETS handles caching until multi-server needed
 4. **Elixir Scripting**: Sandboxed Elixir for game customization (replaces Lua)
 
+## Scripts vs Framework Code (Decision Guide)
+
+**Core principle:** Scripts customize game content. Framework code adds capabilities.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ DECISION TREE: Where does this change belong?               │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  "I need to make [X] happen in the game"                    │
+│                                                             │
+│  Q1: Does the scripting API already support this?           │
+│      YES → Write a script (priv/world/scripts/ or DB)       │
+│      NO  → Q2                                               │
+│                                                             │
+│  Q2: Is this game-specific content or a reusable system?    │
+│      CONTENT → Add new script API function, then script     │
+│      SYSTEM  → Framework code (lib/loka/framework/)         │
+│                                                             │
+│  Q3: Does this change HOW scripts work (not WHAT they do)?  │
+│      YES → Engine code (lib/loka/engine/script/)            │
+│      NO  → Framework code                                   │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Use Scripts When...
+
+Scripts live in `priv/world/scripts/`, `builder_scripts` YAML field, or `scripts` DB table.
+
+| Scenario | Example | Why Script? |
+|----------|---------|-------------|
+| NPC personality/reactions | Guard attacks thieves, Elder speaks cryptically | Behavior customization |
+| Room environmental effects | Cave echoes speech, temple heals on enter | Location-specific logic |
+| Quest triggers/callbacks | Spawn boss when player enters, reward on completion | Quest-specific events |
+| Custom dialogue responses | NPC reacts to player's inventory or flags | Dynamic conversation |
+| Timed events for content | NPC patrols, weather changes | Content-driven scheduling |
+
+**Script examples:**
+```elixir
+# priv/world/scripts/guard_on_steal.exs
+if has_flag?("caught_stealing") do
+  say("Stop right there, thief!")
+  start_combat(player.id)
+else
+  say("Move along, citizen.")
+end
+```
+
+### Use Framework Code When...
+
+Framework code lives in `lib/loka/framework/`.
+
+| Scenario | Example | Why Framework? |
+|----------|---------|----------------|
+| New objective type | "escort NPC" objectives for quests | New capability for ALL quests |
+| New combat mechanic | Flanking bonus, combo system | System-wide combat change |
+| New script API function | `teleport_player()`, `create_instance()` | Enable new script capabilities |
+| Bug fixes | Quest not tracking kills correctly | Fix existing system |
+| Performance | Optimize pathfinding, cache lookups | System-level improvement |
+| New game system | Guilds, auction house, crafting | Major feature addition |
+
+**Framework examples:**
+```elixir
+# lib/loka/framework/scripting/bindings/movement.ex
+# Adding new API function for scripts to use
+def teleport_player(context, room_key) do
+  # Implementation that scripts can call
+end
+```
+
+### Use Engine Code When...
+
+Engine code lives in `lib/loka/engine/`. **Rarely needed.**
+
+| Scenario | Example | Why Engine? |
+|----------|---------|-------------|
+| Sandbox security | Block new dangerous module | Script isolation |
+| Entity fundamentals | Change how entities spawn/save | Core infrastructure |
+| Script execution | Change how scripts are parsed/run | Execution model |
+
+### Red Flags: Wrong Layer Detected
+
+🚩 **You're modifying framework code but...**
+- The change is specific to ONE NPC/room/quest → Should be a script
+- You're hardcoding a character name or location → Should be YAML/script
+- Another game using Loka wouldn't want this behavior → Should be a script
+
+🚩 **You're writing a script but...**
+- You need to `import` or `require` modules → Needs framework API addition
+- The sandbox blocks what you need → Needs framework API addition
+- Multiple scripts would duplicate this logic → Needs framework abstraction
+
+🚩 **You're modifying engine code but...**
+- It's about game logic (combat, quests) → Should be framework
+- It's about specific content → Should be script/YAML
+
+### The Litmus Test
+
+> **"Would a builder creating a different game want to customize this?"**
+>
+> - YES → It should be scriptable (either already is, or add API)
+> - NO → It's a system/engine concern
+
+**Examples applying the test:**
+
+| Request | Litmus Test | Verdict |
+|---------|-------------|---------|
+| "Make the blacksmith insult players" | Other games have different blacksmiths | **Script** |
+| "Add poison damage over time" | All games might want DoT mechanics | **Framework** (new combat system) |
+| "Temple room heals players on entry" | Other temples might not heal | **Script** |
+| "Add HP regeneration system" | All games might want regen | **Framework** (new system) |
+| "Fix quest completion not saving" | Bug affects all games | **Framework** (bug fix) |
+
+### Workflow: Adding New Script Capability
+
+When a script needs something the API doesn't support:
+
+1. **Don't** hack around it in the script
+2. **Don't** modify framework to hardcode the behavior
+3. **Do** add a new API function to `lib/loka/framework/scripting/bindings/`
+4. **Then** use that function in your script
+
+```
+Need: Script should be able to teleport players
+Wrong: Hardcode teleport logic in framework for specific quest
+Right: 1. Add teleport_player() to bindings/movement.ex
+       2. Script calls teleport_player("destination_room")
+```
+
 ## Scripting System Development
 
 Scripts allow builders to customize game content without code access.

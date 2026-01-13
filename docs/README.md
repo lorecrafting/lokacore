@@ -93,10 +93,13 @@ docs/
 │ ═══════════════════════════════════════════════════════════
 │
 ├── admin/                       # Dashboard & admin tools
-│   └── dashboard.md                 # Admin UI guide
+│   ├── dashboard.md                 # Admin UI guide
+│   └── backup-restore.md            # Backup and restore procedures
 │
 ├── operations/                  # Live game operations
-│   └── live-operations-guide.md     # Hot-reload, deployments, scaling
+│   ├── live-operations-guide.md     # Hot-reload, deployments, scaling
+│   ├── monitoring.md                # Monitoring and observability
+│   └── Loka_Quick_Reference.md      # Quick reference card
 │
 ├── security/                    # Security documentation
 │   └── README.md                    # Auth, rate limiting, sandbox
@@ -107,6 +110,7 @@ docs/
 │
 ├── guides/                      # Workflow guides
 │   ├── README.md                    # Human oversight guide
+│   ├── ai-workflow-guide.md         # AI-assisted development guide
 │   ├── reviewing-changes.md         # Code review checklist
 │   ├── common-workflows.md          # How to ask Claude for tasks
 │   └── troubleshooting.md           # When things go wrong
