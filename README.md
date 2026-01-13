@@ -158,8 +158,7 @@ Loka is designed for AI-assisted development. The codebase includes context file
 | File | Purpose |
 |------|---------|
 | `CLAUDE.md` | Primary context - architecture, patterns, commands |
-| `docs/architecture/` | Deep-dive documentation for each subsystem |
-| `docs/builder-reference/` | LLM-specific references for content creation |
+| `docs/README.md` | Documentation index organized by role |
 | `.beads/` | Issue tracking with dependency graphs |
 
 **Getting started with an AI assistant:**
@@ -167,18 +166,28 @@ Loka is designed for AI-assisted development. The codebase includes context file
 2. Use `docs/builder-reference/*.md` for content creation (quests, dialogues, entities)
 3. Run `mix loka.test.validate` to verify content changes
 
-The project uses [beads](https://github.com/anthropics/claude-code) for issue tracking - run `bd ready` to see available work.
+The project uses beads for issue tracking - run `bd ready` to see available work.
 
 ## Documentation
 
+Organized by [traditional MUD roles](docs/README.md):
+
+| Role | Directory | Content |
+|------|-----------|---------|
+| **Builder** | [docs/builder-reference/](docs/builder-reference/) | YAML specs (quests, dialogues, entities) |
+| **Developer** | [docs/architecture/](docs/architecture/), [docs/framework/](docs/framework/) | Elixir code, system design |
+| **Admin** | [docs/admin/](docs/admin/), [docs/operations/](docs/operations/) | Dashboard, live ops, security |
+| **Game** | [docs/game/](docs/game/) | Game-specific lore (Monastery Arc) |
+
+### Key References
+
 | Topic | Location |
 |-------|----------|
+| **Documentation Index** | [docs/README.md](docs/README.md) |
 | Architecture Overview | [docs/architecture/README.md](docs/architecture/README.md) |
-| Entity System | [docs/architecture/entity-system.md](docs/architecture/entity-system.md) |
-| Hooks & Locks | [docs/architecture/hooks-and-locks.md](docs/architecture/hooks-and-locks.md) |
-| Scripting | [docs/architecture/elixir-scripts-design.md](docs/architecture/elixir-scripts-design.md) |
+| Quest/Dialogue/Entity YAML | [docs/builder-reference/](docs/builder-reference/) |
+| Scripting API | [docs/architecture/elixir-scripts-design.md](docs/architecture/elixir-scripts-design.md) |
 | Channel API | [docs/api/channel-contract.md](docs/api/channel-contract.md) |
-| UI Style Guide | [docs/ui/living-ebook-style-guide.md](docs/ui/living-ebook-style-guide.md) |
 | Full Specification | [docs/Loka_Engine_Architecture.md](docs/Loka_Engine_Architecture.md) |
 
 ## Deployment

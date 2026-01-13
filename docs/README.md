@@ -7,9 +7,9 @@ Documentation is organized by **traditional MUD roles**, though work often cross
 | Role | Directory | Audience | Content |
 |------|-----------|----------|---------|
 | **Builder** | `builder-reference/` | Content creators | YAML specs for quests, dialogues, entities |
-| **Developer** | `architecture/`, `framework/` | Engine developers | Elixir code, system design, APIs |
+| **Developer** | `architecture/`, `framework/`, `api/` | Engine developers | Elixir code, system design, APIs |
 | **Admin** | `admin/`, `operations/`, `security/` | Game operators | Dashboard, live ops, security |
-| **Game** | `game/` | Story/lore reference | Game-specific content (Monastery Arc lore, characters) |
+| **Game** | `game/` | Story/lore reference | Game-specific content (Monastery Arc) |
 
 ### Cross-Cutting Work
 
@@ -29,70 +29,158 @@ With LLM-assisted development, most sessions are **cross-cutting**:
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Directory Structure
+## Complete Directory Structure
 
 ```
 docs/
-├── builder-reference/     # Engine: How to build games (game-agnostic)
-│   ├── quest-reference.md       # Quest format, objectives, rewards
-│   ├── dialogue-reference.md    # Dialogue trees, actions, conditions
-│   ├── entity-reference.md      # NPCs, items, rooms, components
-│   ├── quest-dialogue-patterns.md  # Common issues & fixes
-│   ├── world-design/            # Game-agnostic design principles
-│   │   ├── world-designer.md    # World design principles
-│   │   └── world-liveliness.md  # Making worlds feel alive
-│   └── README.md                # Quick start for builders
 │
-├── game/                  # Game-specific content (stories, lore)
-│   └── monastery-arc/           # The demo game
-│       └── lore-bible.md        # Setting, characters, themes
+│ ═══════════════════════════════════════════════════════════
+│ BUILDER - Content Creation (Game-Agnostic)
+│ ═══════════════════════════════════════════════════════════
 │
-├── architecture/          # System design (Developer)
-│   ├── entity-system.md         # Entity-Component-Behavior model
-│   ├── commands.md              # Command pipeline
-│   ├── events.md                # Event bus, PubSub
-│   ├── hooks-and-locks.md       # Lifecycle hooks, access control
-│   ├── scripting.md             # Elixir sandbox scripting
-│   └── ...
+├── builder-reference/           # YAML specs & templates
+│   ├── README.md                    # Quick start for builders
+│   ├── quest-reference.md           # Quest format, objectives, rewards
+│   ├── dialogue-reference.md        # Dialogue trees, actions, conditions
+│   ├── entity-reference.md          # NPCs, items, rooms, components
+│   ├── quest-dialogue-patterns.md   # Common issues & fixes
+│   └── world-design/                # Design principles
+│       ├── world-designer.md            # World building guide
+│       └── world-liveliness.md          # Making worlds feel alive
 │
-├── framework/             # Elixir APIs (Developer)
-│   ├── quest-system.md          # Quest framework internals
-│   ├── quest-listeners.md       # Hook-based auto-tracking
-│   ├── combat.md                # Combat system
-│   └── ...
+│ ═══════════════════════════════════════════════════════════
+│ GAME - Story & Lore (Game-Specific)
+│ ═══════════════════════════════════════════════════════════
 │
-├── admin/                 # Dashboard & tools (Admin)
-│   └── dashboard.md             # Admin UI guide
+├── game/                        # Game-specific content
+│   └── monastery-arc/               # The demo game
+│       └── lore-bible.md                # Setting, characters, themes
 │
-├── operations/            # Live game operations (Admin)
-│   └── live-operations-guide.md # Hot-reload, deployments
+│ ═══════════════════════════════════════════════════════════
+│ DEVELOPER - Engine & Framework
+│ ═══════════════════════════════════════════════════════════
 │
-├── security/              # Security measures (Admin)
-│   └── README.md                # Auth, rate limiting, sandbox
+├── architecture/                # System design deep-dives
+│   ├── README.md                    # Architecture overview
+│   ├── entity-system.md             # Entity-Component-Behavior model
+│   ├── entity-lifecycle.md          # Entity spawn, save, destroy
+│   ├── commands.md                  # Command pipeline
+│   ├── events.md                    # Event bus, PubSub
+│   ├── hooks-and-locks.md           # Lifecycle hooks, access control
+│   ├── scripting.md                 # Elixir sandbox (overview)
+│   ├── elixir-scripts-design.md     # Scripting API reference
+│   ├── elixir-scripts-implementation.md  # Scripting internals
+│   ├── persistence.md               # Database schema
+│   ├── session-system.md            # Client sessions
+│   └── ...                          # Many more subsystems
 │
-├── guides/                # Cross-cutting workflows
-│   ├── reviewing-changes.md     # Code review checklist
-│   ├── common-workflows.md      # How to ask Claude for tasks
-│   └── troubleshooting.md       # When things go wrong
+├── framework/                   # Elixir APIs for game systems
+│   ├── quest-system.md              # Quest framework internals
+│   ├── quest-listeners.md           # Hook-based auto-tracking
+│   ├── behaviors.md                 # NPC behaviors
+│   └── README.md                    # Framework overview
 │
-├── design/                # Design proposals & specs
-├── research/              # Research & comparisons
-└── devlog/                # Historical development logs
+├── api/                         # API contracts
+│   ├── README.md                    # API overview
+│   └── channel-contract.md          # WebSocket channel protocol
+│
+├── reference/                   # Technical references
+│   ├── game-client.md               # Game client architecture
+│   └── environmental-effects-reference.md
+│
+│ ═══════════════════════════════════════════════════════════
+│ ADMIN - Operations & Security
+│ ═══════════════════════════════════════════════════════════
+│
+├── admin/                       # Dashboard & admin tools
+│   └── dashboard.md                 # Admin UI guide
+│
+├── operations/                  # Live game operations
+│   └── live-operations-guide.md     # Hot-reload, deployments, scaling
+│
+├── security/                    # Security documentation
+│   └── README.md                    # Auth, rate limiting, sandbox
+│
+│ ═══════════════════════════════════════════════════════════
+│ CROSS-CUTTING
+│ ═══════════════════════════════════════════════════════════
+│
+├── guides/                      # Workflow guides
+│   ├── README.md                    # Human oversight guide
+│   ├── reviewing-changes.md         # Code review checklist
+│   ├── common-workflows.md          # How to ask Claude for tasks
+│   └── troubleshooting.md           # When things go wrong
+│
+├── ui/                          # UI/UX documentation
+│   ├── living-ebook-style-guide.md  # Visual design guide
+│   └── accessibility.md             # Accessibility guidelines
+│
+├── testing/                     # Testing guides
+│   └── bot-migration-guide.md       # Test bot documentation
+│
+├── development/                 # Development setup
+│   └── git-hooks.md                 # Git hooks configuration
+│
+│ ═══════════════════════════════════════════════════════════
+│ PLANNING & HISTORY
+│ ═══════════════════════════════════════════════════════════
+│
+├── design/                      # Design proposals & specs
+│   ├── README.md                    # Design docs index
+│   ├── llm-assisted-gameplay.md     # AI gameplay design
+│   ├── world-platform.md            # Platform vision
+│   └── ...                          # Monetization, features, etc.
+│
+├── research/                    # Research & comparisons
+│   ├── mud-engine-analysis.md       # MUD engine comparison
+│   ├── scripting-systems-deep-dive.md
+│   └── user-research-anecdotes.md
+│
+├── devlog/                      # Historical development logs
+│   ├── DEVELOPMENT_LOG.md           # Internal dev log
+│   ├── BLOG_POSTS.md                # Blog content
+│   └── PUBLIC_DEVLOG.md             # Public updates
+│
+├── audits/                      # Code audits
+│   └── world-builder-audit-*.md     # Audit reports
+│
+│ ═══════════════════════════════════════════════════════════
+│ COMPREHENSIVE REFERENCES
+│ ═══════════════════════════════════════════════════════════
+│
+├── Loka_Engine_Architecture.md  # Full engine specification
+├── LOKA_SYSTEM_STUDY_GUIDE.md   # Learning guide
+└── LOAD_TESTING_PLAN.md         # Performance testing plan
 ```
 
 ## Quick Reference by Task
 
+### Building Content
 | Task | Start Here |
 |------|------------|
 | Create a quest | `builder-reference/quest-reference.md` |
 | Add NPC dialogue | `builder-reference/dialogue-reference.md` |
-| Fix broken quest | `builder-reference/quest-dialogue-patterns.md` |
-| Extend quest system | `framework/quest-system.md` |
+| Create entities (NPCs, items, rooms) | `builder-reference/entity-reference.md` |
+| Fix broken quest/dialogue | `builder-reference/quest-dialogue-patterns.md` |
+| Design world content | `builder-reference/world-design/` |
+| Monastery Arc lore | `game/monastery-arc/lore-bible.md` |
+
+### Developing Engine
+| Task | Start Here |
+|------|------------|
+| Understand entity system | `architecture/entity-system.md` |
 | Add new command | `architecture/commands.md` |
-| Understand events | `architecture/events.md` |
-| Write scripts | `architecture/scripting.md` |
-| Deploy changes | `operations/live-operations-guide.md` |
+| Work with events | `architecture/events.md` |
+| Write Elixir scripts | `architecture/elixir-scripts-design.md` |
+| Extend quest system | `framework/quest-system.md` |
+| WebSocket API | `api/channel-contract.md` |
+
+### Admin & Operations
+| Task | Start Here |
+|------|------------|
 | Admin dashboard | `admin/dashboard.md` |
+| Deploy changes | `operations/live-operations-guide.md` |
+| Security overview | `security/README.md` |
 
 ## Validation Commands
 
@@ -100,8 +188,8 @@ docs/
 # Validate all content
 mix loka.test.validate
 
-# Run storyline bot test
-mix loka.test.storyline monastery_arc --run
+# Run storyline tests (ChannelBot - 95% production parity)
+mix test test/integration/storyline_channel_test.exs
 
 # Check dependencies (in IEx)
 alias Loka.WorldBuilder.Analysis.DependencyGraph
