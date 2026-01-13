@@ -9,6 +9,7 @@ Documentation is organized by **traditional MUD roles**, though work often cross
 | **Builder** | `builder-reference/` | Content creators | YAML specs for quests, dialogues, entities |
 | **Developer** | `architecture/`, `framework/` | Engine developers | Elixir code, system design, APIs |
 | **Admin** | `admin/`, `operations/`, `security/` | Game operators | Dashboard, live ops, security |
+| **Game** | `game/` | Story/lore reference | Game-specific content (Monastery Arc lore, characters) |
 
 ### Cross-Cutting Work
 
@@ -32,16 +33,19 @@ With LLM-assisted development, most sessions are **cross-cutting**:
 
 ```
 docs/
-├── builder-reference/     # YAML content creation
+├── builder-reference/     # Engine: How to build games (game-agnostic)
 │   ├── quest-reference.md       # Quest format, objectives, rewards
 │   ├── dialogue-reference.md    # Dialogue trees, actions, conditions
 │   ├── entity-reference.md      # NPCs, items, rooms, components
 │   ├── quest-dialogue-patterns.md  # Common issues & fixes
-│   ├── world-design/            # World building guides
-│   │   ├── lore-bible.md        # Lore & setting
+│   ├── world-design/            # Game-agnostic design principles
 │   │   ├── world-designer.md    # World design principles
 │   │   └── world-liveliness.md  # Making worlds feel alive
 │   └── README.md                # Quick start for builders
+│
+├── game/                  # Game-specific content (stories, lore)
+│   └── monastery-arc/           # The demo game
+│       └── lore-bible.md        # Setting, characters, themes
 │
 ├── architecture/          # System design (Developer)
 │   ├── entity-system.md         # Entity-Component-Behavior model
