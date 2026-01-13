@@ -1,0 +1,147 @@
+# Mountain Guide Dorje - Expert climber and wilderness guide
+# Teaches local_lore skill, provides mountain survival knowledge
+
+key: mountain_guide
+type: npc
+parent: base_npc
+
+short_desc: "Mountain Guide Dorje"
+long_desc: "A weathered man with sun-dark skin and eyes that have seen every peak."
+extra_desc: |
+  This lean, wiry man moves with the easy confidence of one who has
+  spent a lifetime on treacherous paths. His sun-darkened face is
+  creased with laugh lines and wind burns, and his calloused hands
+  know every handhold on the mountain. A coil of yak-hair rope hangs
+  from his belt, and he carries a gnarled walking staff worn smooth
+  by years of use.
+keywords:
+  - guide
+  - dorje
+  - climber
+  - mountaineer
+primary_keyword: guide
+mood: patient
+
+tags:
+  - friendly
+  - village
+  - teacher
+  - guide
+
+components:
+  ambient_actions:
+    messages:
+      - "Guide Dorje studies the clouds, reading weather in their shapes."
+      - "The mountain guide adjusts the rope coiled at his belt."
+      - "Dorje's eyes scan the cliff face, noting invisible paths."
+      - "The weathered man sips from a leather flask, eyes on distant peaks."
+      - "Guide Dorje tests the air with a wet finger, gauging the wind."
+      - "The guide stretches his legs, loosening muscles for the climb."
+    interval_min: 30
+    interval_max: 60
+    chance: 0.5
+  combatant:
+    health:
+      current: 80
+      max: 80
+    stats:
+      str: 12
+      dex: 14
+      sta: 15
+    level: 6
+  dialogue_tree:
+    start:
+      text: "The mountains have moods, stranger. Learn them, or they'll teach you the hard way. I am Dorje - I've climbed every peak you can see, and a few you can't. What brings you to the high places?"
+      choices:
+        - text: "Can you teach me about the mountains?"
+          next: "teach_lore"
+        - text: "I need to reach the mountain peak."
+          next: "peak_advice"
+        - text: "What's it like up there?"
+          next: "mountain_stories"
+        - text: "Just exploring."
+          next: "exploration_advice"
+    teach_lore:
+      text: "Ah, wisdom! Most just charge up the slopes like young yaks. But you - you want to understand. Good. I can teach you the old knowledge - how to read the weather, find safe paths, know which spirits watch which peaks. This is local lore, passed from guide to guide."
+      choices:
+        - text: "Please teach me. (Local Lore skill)"
+          next: "learn_lore"
+          action: ["learn_skill", "local_lore", 1]
+        - text: "What kind of spirits?"
+          next: "mountain_spirits"
+        - text: "Maybe another time."
+          next: null
+    learn_lore:
+      text: "[Dorje points to the peaks, naming each.] That one? She's gentle - good grazing on her slopes. That one? Never climb after midday - afternoon storms come fast. And the high peak above the monastery? Sacred. The spirits there test all who climb. Now you know a little. Come back, I'll teach you more."
+      choices:
+        - text: "What else should I know?"
+          next: "advanced_lore"
+        - text: "Thank you, Guide Dorje."
+          next: null
+    advanced_lore:
+      text: "The caves in the cliff face - stay away after dark. The wrathful shades walk then. The waterfall shrine is safe, protected by Lama Yeshe's prayers. And if you hear singing from the hermit's cave, stop and listen - Milarepa's songs carry wisdom."
+      choices:
+        - text: "Tell me about the wrathful shades."
+          next: "shades_warning"
+        - text: "Thank you for the warnings."
+          next: null
+    shades_warning:
+      text: "Angry spirits, trapped between worlds. Some say they were climbers who fell, their resentment keeping them bound. Others say they guard something ancient. Either way - if you must pass them, do it with respect. Offerings help. And never run from them."
+      choices:
+        - text: "What kind of offerings?"
+          next: "offering_advice"
+        - text: "I'll be careful."
+          next: null
+    offering_advice:
+      text: "Incense is traditional. Rice, if you have it. Or simply a prayer - sincere words carry weight in the high places. The spirits know the difference between fear and respect."
+      choices:
+        - text: "I understand."
+          next: null
+    peak_advice:
+      text: "The peak above the monastery? A worthy goal. The path leads south from the gate, along the cliff face. It's treacherous - loose stones, high winds, and the air grows thin. Bring water, pace yourself, and watch where the prayer flags point. They mark the safe route."
+      choices:
+        - text: "Is there anything special at the top?"
+          next: "peak_secrets"
+        - text: "Any other dangers?"
+          next: "peak_dangers"
+        - text: "Thank you for the advice."
+          next: null
+    peak_secrets:
+      text: "At dawn, when the first light touches the cairn... some say visions come. The monks speak of sutras hidden in stone alcoves, revealed only to the worthy. And the view - ah, the view! On a clear day, you can see five kingdoms spread below you."
+      choices:
+        - text: "I'll climb it."
+          next: null
+        - text: "Sounds worth the effort."
+          next: null
+    peak_dangers:
+      text: "The wind is the worst. It comes sudden, from nowhere, strong enough to pull you off the path. Keep low when it rises. And the cold - even in summer, the peak wears a cap of ice. Don't linger too long, or the mountain keeps you forever."
+      choices:
+        - text: "I'll be prepared."
+          next: null
+    mountain_stories:
+      text: "Above the clouds, the world changes. You see things clearly - which is small, which is eternal. I've watched storms roll in like armies, seen lightning dance on peaks like angry gods. Once, in a blizzard, I swear the mountain itself sheltered me in a crevice that wasn't there before. The mountains are alive, stranger. Remember that."
+      choices:
+        - text: "You've had quite a life."
+          next: "life_reflections"
+        - text: "Can you teach me your knowledge?"
+          next: "teach_lore"
+    life_reflections:
+      text: "Every peak teaches something. Every storm shows you who you really are. I could have stayed in the village, tended yaks like my father. But the mountains called, and I answered. No regrets - just weathered bones and good memories."
+      choices:
+        - text: "Thank you for sharing."
+          next: null
+    exploration_advice:
+      text: "Good! The mountains reward the curious. Start with the cliff path - it's demanding but not deadly. The waterfall shrine is worth seeing, and safe. The hermit in his cave is strange but wise. Avoid the cemetery at dusk, though. Some things are better left undisturbed."
+      choices:
+        - text: "I'll keep that in mind."
+          next: null
+    mountain_spirits:
+      text: "Every peak has its guardian. Some are gentle - they watch the yaks, guide lost travelers home. Others are fierce - they test those who climb, punish the disrespectful. The monks say they're manifestations of the mountain's will. I say they're very, very real. Treat them with respect."
+      choices:
+        - text: "How do I show respect?"
+          next: "offering_advice"
+        - text: "I understand."
+          next: null
+  teacher:
+    skills:
+      - local_lore

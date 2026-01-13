@@ -1,0 +1,97 @@
+# Pick Up Item Flow
+# Tests: Clicking on item in room -> Get action -> Item appears in inventory
+#
+# Prerequisites:
+# - Player logged in
+# - Player in room with a pickup-able item
+
+appId: com.loka.game
+tags:
+  - inventory
+  - interaction
+---
+
+# Launch app
+- launchApp
+
+# Wait for game to load
+- extendedWaitUntil:
+    visible:
+      id: "room-view"
+    timeout: 15000
+
+# Look for items in the room (they appear after NPCs)
+- extendedWaitUntil:
+    visible:
+      id: "room-items"
+    timeout: 10000
+    label: "Wait for items to appear"
+    optional: true
+
+# Tap on the first item
+- tapOn:
+    id: "entity-item-0"
+    label: "Tap on first item"
+    optional: true
+
+# Wait for entity context to open
+- extendedWaitUntil:
+    visible:
+      id: "entity-context-modal"
+    timeout: 5000
+    label: "Wait for item context"
+
+- takeScreenshot: "item_context_open"
+
+# Look for Get action
+- assertVisible:
+    text: "Get"
+    label: "Get action available"
+
+# Tap Get to pick up the item
+- tapOn:
+    text: "Get"
+    label: "Pick up item"
+
+# Modal should close after action
+- extendedWaitUntil:
+    notVisible:
+      id: "entity-context-modal"
+    timeout: 3000
+    label: "Modal closes after pickup"
+
+# Verify event shows pickup
+- assertVisible:
+    id: "room-events"
+    label: "Events area visible"
+
+# Open menu to check inventory
+- tapOn:
+    id: "menu-button"
+    label: "Open menu"
+
+- extendedWaitUntil:
+    visible:
+      id: "menu-panel"
+    timeout: 3000
+
+# Navigate to inventory tab
+- tapOn:
+    text: "Inventory"
+    label: "Open inventory tab"
+
+- extendedWaitUntil:
+    visible:
+      id: "inventory-panel"
+    timeout: 3000
+
+- takeScreenshot: "inventory_with_item"
+
+# Close menu
+- tapOn:
+    id: "close-menu"
+    label: "Close menu"
+
+- assertVisible:
+    id: "room-view"
+    label: "Back to room view"

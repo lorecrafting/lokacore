@@ -1,0 +1,20 @@
+{
+  "name": "loka-e2e",
+  "version": "1.0.0",
+  "description": "E2E tests for Loka MUD engine",
+  "private": true,
+  "scripts": {
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui",
+    "e2e:headed": "playwright test --headed",
+    "e2e:debug": "playwright test --debug",
+    "e2e:report": "playwright show-report",
+    "e2e:codegen": "playwright codegen http://localhost:4000"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0",
+    "yaml": "^2.3.0"
+  }
+}

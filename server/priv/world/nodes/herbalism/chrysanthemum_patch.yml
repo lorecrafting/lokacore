@@ -1,0 +1,28 @@
+# Chrysanthemum Patch - Herb Garden gathering node
+# Ju Hua (Chrysanthemum) - clears heat, brightens the eyes
+
+key: chrysanthemum_patch
+name: "Chrysanthemum Bed"
+skill_required: herbalism
+skill_level: 2
+yields:
+  - item: ju_hua
+    chance: 0.85
+    quantity: [2, 5]
+  - item: ju_hua
+    chance: 0.15
+    quantity: [1, 3]
+respawn_time: 240
+uses_per_respawn: 4
+tool_required: null
+xp_reward:
+  skill: herbalism
+  amount: 4
+gather_message: "You cup a golden chrysanthemum bloom in your palm, breathing in its clarifying fragrance."
+success_message: "The flower heads release easily, their petals still dewy with morning mist."
+failure_message: "These blooms are not yet open. Let them unfold in their own time."
+exhausted_message: "The bed has been picked clean. New flowers will bloom in time."
+tags:
+  - herb_garden
+  - medicinal
+  - cooling

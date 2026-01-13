@@ -1,0 +1,9 @@
+key: mana
+name: "Mana"
+max_formula: "level * 10 + sta * 2"
+regen_rate: 2
+regen_condition: out_of_combat
+color: blue
+description: "Magical energy used for casting spells and abilities."
+min_value: 0
+starts_full: true

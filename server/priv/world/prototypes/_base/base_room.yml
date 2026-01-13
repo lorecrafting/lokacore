@@ -1,0 +1,12 @@
+key: base_room
+type: room
+
+# LegendMUD-style description fields
+short_desc: "Base Room"
+long_desc: "You are in an empty room."
+extra_desc: "An empty room."
+keywords: []
+
+components: {}
+tags:
+  - room

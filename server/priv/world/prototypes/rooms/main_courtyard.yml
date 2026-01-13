@@ -1,0 +1,34 @@
+key: main_courtyard
+parent: base_room
+type: room
+short_desc: "Main Courtyard"
+long_desc: "A broad courtyard with an ancient cherry tree shading a moss-covered fountain."
+extra_desc: |
+  Worn flagstones stretch beneath an ancient cherry tree shading a moss-covered fountain whose waters trickle patiently. The temple rises to the north, meditation hall to the east, dining hall west.
+keywords: []
+exits:
+  north: temple
+  east: meditation_hall
+  west: dining_hall
+  south: monastery_gate
+spawns:
+  - prototype: monastery_guard
+  - prototype: wandering_musician
+  - prototype: temple_cat
+  - prototype: wandering_pilgrim
+tags:
+  - outdoor
+  - monastery
+  - safe_zone
+  - central_hub
+components:
+  ambient_messages:
+    dawn:
+      - "The fountain's waters catch the first light, sending ripples of gold across the stones."
+    day:
+      - "Water trickles softly from the moss-covered fountain."
+      - "Cherry blossoms drift down from the ancient tree, pink against the grey stones."
+      - "A raven lands on the cherry tree, regarding the courtyard with knowing eyes."
+      - "Incense smoke drifts from the temple doors, sweet and ancient."
+    night:
+      - "Moonlight silvers the fountain's waters as the courtyard rests in stillness."

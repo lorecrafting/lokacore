@@ -1,0 +1,28 @@
+key: travelers_staff
+short_desc: "Traveler's Staff"
+long_desc: "a sturdy wooden walking staff"
+keywords:
+  - traveler
+  - staff
+  - walking
+  - wooden
+primary_keyword: staff
+type: item
+parent: base_weapon
+extra_desc: |
+  A sturdy wooden staff, worn smooth by miles of mountain roads.
+  Simple but reliable, the weapon of pilgrims and wanderers.
+components:
+  weapon:
+    damage: 3
+    damage_type: blunt
+    speed: 1.0
+  physical:
+    weight: 2
+  valuable:
+    base_price: 5
+tags:
+  - item
+  - weapon
+  - equippable
+  - starting

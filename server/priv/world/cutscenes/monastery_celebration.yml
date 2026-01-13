@@ -1,0 +1,49 @@
+# Cutscene: Monastery Celebration
+# Triggers when player returns to monastery after liberation
+
+id: monastery_celebration
+name: "Homecoming"
+trigger:
+  type: enter_room
+  location: main_courtyard
+  condition: "player.has_flag('tenzin_liberated') && !player.has_flag('celebration_seen')"
+sequence:
+  - type: narration
+    text: "The monastery is transformed."
+  - type: pause
+    duration: 1
+  - type: narration
+    text: "Prayer flags stream in joyous colors. Monks line the courtyard, smiling."
+  - type: narration
+    text: "At their center stands Abbot Jampa, tears streaming down his weathered face."
+  - type: pause
+    duration: 1
+  - type: dialogue
+    speaker: abbot_jampa
+    text: "You have done what we could not. You have returned our teacher to us."
+  - type: narration
+    text: "The monks begin a chant - a song of thanksgiving."
+  - type: pause
+    duration: 2
+  - type: dialogue
+    speaker: abbot_jampa
+    text: "From this day, you are no longer a stranger here. You are family."
+  - type: narration
+    text: "Incense smoke rises. Butter lamps flicker in windows."
+  - type: narration
+    text: "For one perfect moment, all is peace."
+  - type: pause
+    duration: 2
+  - type: narration
+    text: "But every ending is also a beginning..."
+  - type: narration
+    text: "What path will you walk now?"
+effects:
+  - type: set_flag
+    flag: celebration_seen
+    value: true
+  - type: set_flag
+    flag: monastery_family
+    value: true
+  - type: give_xp
+    amount: 200

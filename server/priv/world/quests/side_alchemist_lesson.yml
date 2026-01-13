@@ -1,0 +1,39 @@
+# Side Quest: Alchemist's Lesson
+# A simple quest to test crafting objectives
+# Used by bot testing to verify crafting integration
+
+id: side_alchemist_lesson
+name: "The Alchemist's Lesson"
+description: "Teacher Lobsang offers to teach you the art of preparing meditation incense."
+giver: teacher_lobsang
+
+objectives:
+  - id: learn_incense
+    type: talk
+    target_id: teacher_lobsang
+    dialogue_topic: alchemist_accepted
+    description: "Speak with Teacher Lobsang about incense making"
+    target_count: 1
+
+  - id: craft_incense
+    type: craft
+    target_id: recipe_meditation_incense
+    description: "Prepare meditation incense"
+    target_count: 1
+
+  - id: return_to_teacher
+    type: talk
+    target_id: teacher_lobsang
+    dialogue_topic: alchemist_complete
+    description: "Return to Teacher Lobsang with the incense"
+    target_count: 1
+
+rewards:
+  xp: 25
+  gold: 10
+
+tags:
+  - side_quest
+  - crafting
+  - tutorial
+  - test

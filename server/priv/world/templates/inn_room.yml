@@ -1,0 +1,14 @@
+template_name: Inn Room
+name: Cozy Inn Room
+description: A warm and inviting room in a roadside inn with a comfortable bed and wooden furnishings.
+tags:
+  - inn
+  - building
+  - interior
+  - rest
+x: 0
+y: 0
+z: 0
+attributes:
+  ambiance: warm
+  lighting: candlelight

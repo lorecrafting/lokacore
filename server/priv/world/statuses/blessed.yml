@@ -1,0 +1,24 @@
+key: blessed
+name: "Blessed"
+type: buff
+duration: 10
+stackable: false
+effects:
+  - trigger: passive
+    effect: stat_modify
+    stat: str
+    modifier: 3
+  - trigger: passive
+    effect: stat_modify
+    stat: sta
+    modifier: 3
+  - trigger: on_turn_start
+    effect: resource_regen
+    resource: mana
+    amount: 2
+display_icon: blessing
+display_color: gold
+description: "Divine blessing enhances your abilities."
+tags:
+  - holy
+  - buff

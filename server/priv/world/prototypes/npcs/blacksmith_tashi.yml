@@ -1,0 +1,209 @@
+key: blacksmith_tashi
+type: npc
+parent: base_npc
+
+short_desc: "Blacksmith Tashi"
+long_desc: "A muscular smith works at his forge, sparks flying with each hammer blow."
+extra_desc: |
+  A powerfully built man with arms like tree trunks and a face marked
+  by old burns. Despite his intimidating appearance, his eyes are gentle
+  and thoughtful. He works metal with an almost reverent care, treating
+  each piece as a meditation. Prayer flags hang from his forge rafters,
+  fluttering in the heat.
+keywords:
+  - blacksmith
+  - smith
+  - tashi
+  - forger
+primary_keyword: smith
+mood: focused
+
+tags:
+  - friendly
+  - merchant
+  - village
+  - craftsman
+
+components:
+  ambient_actions:
+    messages:
+      - "Tashi's hammer rings against hot metal, sending sparks flying."
+      - "The smith wipes soot from his brow, studying his work."
+      - "Tashi pumps the bellows, coaxing the forge to greater heat."
+      - "The blacksmith plunges a blade into water, steam hissing upward."
+      - "Tashi runs a calloused thumb along a blade's edge, testing its sharpness."
+      - "The smith murmurs a blessing over his latest creation."
+      - "Tashi reorganizes his tools with absent-minded precision."
+      - "The forge crackles and pops, flames dancing in the darkness."
+    interval_min: 20
+    interval_max: 40
+    chance: 0.6
+  combatant:
+    health:
+      current: 90
+      max: 90
+    stats:
+      str: 16
+      dex: 10
+      sta: 14
+    level: 4
+  dialogue_tree:
+    # ==========================================================================
+    # BEST PRACTICE: Quest offers should be upfront in the first dialogue node.
+    # ==========================================================================
+
+    # Default start - quest offer upfront
+    start:
+      text: "Hmm? *He looks up from his work* Welcome to my forge. I can forge a blessed blade for you - one that strikes true against spirits. Bring me ghost essence from the caves and a blessing from the Abbot."
+      show_if:
+        quest_not_active: "side_the_forge_blessing"
+      choices:
+        - text: "[Accept Quest] I'll gather those materials."
+          next: "accept_forge_blessing"
+          action: ["accept_quest", "side_the_forge_blessing"]
+        - text: "Where do I find ghost essence?"
+          next: "materials_info"
+        - text: "What else do you sell?"
+          next: "shop_talk"
+          action: ["open_shop", null]
+        - text: "Just looking."
+          next: null
+
+    materials_info:
+      text: "Ghost essence drops from spirits in the caves or cemetery when they're defeated. The Abbot can provide a blessing scroll - just ask him for the forge blessing."
+      choices:
+        - text: "[Accept Quest] I'll find what you need."
+          next: "accept_forge_blessing"
+          action: ["accept_quest", "side_the_forge_blessing"]
+        - text: "I'll think about it."
+          next: null
+    # Start when quest is active - reminder
+    start_active:
+      text: "*Tashi looks up eagerly* Ah, it's you! Have you gathered the ghost essence and obtained the Abbot's blessing? I'm ready to forge when you are."
+      show_if:
+        quest_active: "side_the_forge_blessing"
+      choices:
+        - text: "Still gathering materials."
+          next: null
+        - text: "Remind me what I need."
+          next: "materials_reminder"
+        - text: "Let me see your other wares."
+          next: "shop_talk"
+          action: ["open_shop", null]
+    # Start when quest ready to turn in
+    start_ready_to_turn_in:
+      text: "*Tashi's eyes light up* I can feel it - you have everything! The ghost essence hums with power. Show me, show me!"
+      show_if:
+        quest_complete: "side_the_forge_blessing"
+      choices:
+        - text: "Here are the materials."
+          next: "ready_to_forge"
+    # Start after quest completed
+    start_completed:
+      completed_quest: "side_the_forge_blessing"
+      text: "*Tashi smiles proudly* Ah, the bearer of the blessed blade! How does it serve you? That's some of my finest work - the spirits will think twice before crossing you now."
+      choices:
+        - text: "It serves me well."
+          next: null
+        - text: "What else can you make?"
+          next: "shop_talk"
+          action: ["open_shop", null]
+        - text: "Tell me more about your craft."
+          next: "craft_philosophy"
+    # Materials reminder
+    materials_reminder:
+      text: "You'll need ghost essence from the spirits in the caves - they sometimes drop it when defeated. And seek the Abbot's blessing scroll. With both, I can forge something truly special."
+      choices:
+        - text: "I'll find them."
+          next: null
+    shop_talk:
+      text: "I forge what the mountain provides. Blades, tools, armor. Nothing fancy, but everything strong. Quality takes time - I don't rush my work."
+      choices:
+        - text: "Let me see your wares."
+          next: null
+    craft_philosophy:
+      text: "Each piece of metal has a spirit. My job is to listen, to shape it into what it wants to become. The monks taught me that. Forging is my prayer."
+      choices:
+        - text: "That's a beautiful way to see it."
+          next: "more_craft"
+        - text: "Can you make anything special?"
+          next: "special_work"
+    more_craft:
+      text: "My father was a smith, and his father before him. Seven generations of fire-workers. But I'm the first to learn from the monks too. They say my blades hold mantras in their steel."
+      choices:
+        - text: "What kind of mantras?"
+          next: "mantras"
+        - text: "I should look at your wares."
+          next: "shop_talk"
+          action: ["open_shop", null]
+    mantras:
+      text: "Protection, mostly. Courage. Clarity. When I work, I chant. The rhythm of hammer and mantra... the metal remembers. Or so I believe."
+      choices:
+        - text: "Fascinating."
+          next: null
+    special_work:
+      text: "I can reinforce armor, sharpen blades. For something truly special, bring me materials from the caves - ghost essence, shade fragments. Strange things, but they hold power. Power I can work into steel."
+      show_if:
+        quest_not_active: "side_the_forge_blessing"
+      choices:
+        - text: "[Accept Quest] I'd like a blessed blade. What do you need?"
+          next: "accept_forge_blessing"
+          action: ["accept_quest", "side_the_forge_blessing"]
+        - text: "I'll keep that in mind."
+          next: null
+    accept_forge_blessing:
+      text: "A blessed blade, eh? For that, I need two things: ghost essence from the spirits in the caves or cemetery, and a blessing scroll from the Abbot himself. Bring me both, and I'll forge you something truly special."
+      choices:
+        - text: "I'll gather what you need."
+          next: null
+    info:
+      text: "I'm no scholar, but I know metal and I know fire. What would you ask?"
+      choices:
+        - text: "What do you know about the caves?"
+          next: "cave_knowledge"
+        - text: "Tell me about the village."
+          next: "village_info"
+    cave_knowledge:
+      text: "Bad place. The ore there is tainted - beautiful to look at, but it sings when you work it. Wrong songs. I won't touch the stuff. Whatever's down there... it's not meant for mortal hands."
+      choices:
+        - text: "Have you ever been down there?"
+          next: "cave_memory"
+        - text: "Thank you for the warning."
+          next: null
+    cave_memory:
+      text: "Once. Just to the entrance. The darkness there isn't natural. It... breathes. I felt something looking back at me. Never again."
+      choices:
+        - text: "That's unsettling."
+          next: null
+    village_info:
+      text: "Good people here. Simple folk who farm the terraces and tend their flocks. We depend on the monastery - their blessings keep the harvests good and the beasts at bay. Without Lama Tenzin..."
+      choices:
+        - text: "I'll do what I can to help."
+          next: null
+    ready_to_forge:
+      text: "[He examines the ghost essence and the blessing scroll.] You have everything. The essence hums with power, and the Abbot's mantras... yes, yes. Stand back. This will take concentration."
+      show_if:
+        quest_active: "side_the_forge_blessing"
+      choices:
+        - text: "[Watch him work]"
+          next: "forging_complete"
+    forging_complete:
+      text: "[Sparks fly as Tashi works the metal, chanting under his breath. The blade seems to glow briefly before cooling.] It is done. A blessed blade - it will strike true against spirits and shadows alike."
+      choices:
+        - text: "[Complete Quest] Thank you, Tashi."
+          next: null
+          action: ["complete_quest", "side_the_forge_blessing"]
+  shop:
+    sells:
+      - iron_khukuri
+      - monastery_sword
+      - padded_robes
+      - protectors_mail
+      - wooden_staff
+      - iron_helm
+      - travelers_staff
+    buys:
+      - ghost_essence
+      - shade_fragment
+      - wisp_light
+      - broken_blade

@@ -1,0 +1,39 @@
+key: willpower_tonic
+type: item
+parent: base_item
+short_desc: "Willpower Tonic"
+long_desc: "a vial of bitter liquid that fortifies the spirit"
+extra_desc: |
+  A dark, viscous liquid that smells of earth and ancient secrets.
+  Its taste is legendarily bitter, but those who drink it find
+  their resolve strengthened against the whispers of desire and
+  the fog of confusion.
+keywords:
+  - tonic
+  - potion
+  - willpower
+  - bitter
+primary_keyword: vial
+tags:
+  - item
+  - consumable
+  - alchemical
+  - rare
+components:
+  physical:
+    weight: 0.3
+    stackable: true
+    max_stack: 3
+  consumable:
+    effects:
+      - type: cure_status
+        status: attached
+      - type: apply_status
+        status: warded
+        duration: 5
+      - type: resource_restore
+        resource: insight
+        amount: 1
+    use_message: "You drink the bitter tonic, grimacing at its taste. Your mind clears, your will strengthens."
+  valuable:
+    base_price: 50

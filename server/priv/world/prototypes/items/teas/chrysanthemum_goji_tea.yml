@@ -1,0 +1,42 @@
+# Chrysanthemum Goji Tea - Crafted consumable
+# Brightens eyes and restores health
+
+key: chrysanthemum_goji_tea
+type: item
+parent: base_item
+
+short_desc: "Chrysanthemum Goji Tea"
+long_desc: "a steaming cup of golden tea with floating flower petals"
+extra_desc: |
+  A fragrant golden tea with delicate chrysanthemum petals floating
+  on the surface and plump goji berries settled at the bottom. The
+  aroma is floral and slightly sweet. This classic combination is
+  renowned for brightening tired eyes and nourishing the blood.
+
+keywords:
+  - tea
+  - chrysanthemum
+  - goji
+  - drink
+  - golden
+primary_keyword: tea
+
+tags:
+  - item
+  - consumable
+  - crafted
+  - tcm
+  - healing
+
+components:
+  physical:
+    weight: 0.3
+    stackable: true
+    max_stack: 10
+  consumable:
+    effect: heal
+    amount: 20
+    cure_status: blurred
+    use_message: "You sip the fragrant tea. Its warmth spreads through you, clearing your vision."
+  valuable:
+    base_price: 12

@@ -1,0 +1,20 @@
+key: stunned
+name: "Stunned"
+type: debuff
+duration: 2
+stackable: false
+effects:
+  - trigger: passive
+    effect: prevent_action
+    action_type: attack
+  - trigger: passive
+    effect: prevent_action
+    action_type: ability
+cure_abilities:
+  - cleanse
+display_icon: stun
+display_color: yellow
+description: "You are stunned and cannot act!"
+tags:
+  - crowd_control
+  - incapacitate

@@ -1,0 +1,47 @@
+# Sound Mappings Configuration
+# Follows the same tag-based, phase-aware pattern as ambient_messages.yml
+#
+# Sound keys here map to audio files on the mobile client.
+# The server computes which sounds should play; the client handles playback.
+
+# Tag-based ambient sounds (room tags → sound keys)
+# Currently disabled - only using weather sounds
+tag_sounds: {}
+
+# Weather overlay sounds (additive layer on top of ambient)
+# These play alongside ambient sounds when weather conditions are active
+weather_sounds:
+  clear: []
+  cloudy: []
+  rain:
+    - rain_light
+  storm:
+    - rain_heavy
+    # Note: thunder_rumble is played as one-shot with lightning effect on client
+  fog:
+    - fog_ambient
+    - wind_muffled
+  snow:
+    - snow_wind
+
+# Light source sounds (when player has a light source equipped)
+light_sounds:
+  torch:
+    - torch_crackle
+  candle: []  # Too quiet to need sound
+  lantern: []  # Silent
+
+# Indoor modifier settings
+# When a room has the 'indoor' tag, outdoor sounds are modified
+indoor_modifier:
+  # Reduce volume of outdoor ambient sounds when indoors
+  volume_reduction: 0.3
+  # Don't play weather sounds indoors
+  exclude_weather: true
+
+# Phase transition sounds (one-shots during transitions)
+transition_sounds:
+  sunrise:
+    - rooster_crow
+  sunset:
+    - evening_bells

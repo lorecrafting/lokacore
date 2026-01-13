@@ -1,0 +1,12 @@
+# Helper: Try to navigate east
+appId: com.loka.game
+---
+- tapOn:
+    id: "nav-east"
+    label: "Navigate east"
+
+# Wait for room update
+- extendedWaitUntil:
+    visible:
+      id: "room-view"
+    timeout: 5000

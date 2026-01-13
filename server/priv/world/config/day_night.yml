@@ -1,0 +1,39 @@
+# Day/Night Cycle Configuration
+# Defines time phases and their effects on gameplay
+
+# Real seconds per game day (3600 = 1 hour real time = 1 game day)
+cycle_duration: 3600
+
+# Time phases with their properties
+phases:
+  dawn:
+    start_hour: 5
+    end_hour: 7
+    light_level: 0.5
+    description: "The first light of dawn breaks over the horizon."
+    effects:
+      perception: -0.1
+
+  day:
+    start_hour: 7
+    end_hour: 17
+    light_level: 1.0
+    description: "The sun shines brightly overhead."
+    effects: {}
+
+  dusk:
+    start_hour: 17
+    end_hour: 19
+    light_level: 0.5
+    description: "The sun sets, painting the sky in orange and red."
+    effects:
+      perception: -0.1
+
+  night:
+    start_hour: 19
+    end_hour: 5
+    light_level: 0.1
+    description: "Stars twinkle in the dark night sky."
+    effects:
+      perception: -0.3
+      requires_light: true

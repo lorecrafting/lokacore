@@ -1,0 +1,114 @@
+# Monastery Zone - The Mountain Monastery area
+#
+# This zone defines the respawn rules for the monastery complex.
+# NPCs and items will respawn every 30 minutes when no players are present.
+
+key: monastery
+name: "The Mountain Monastery"
+
+# Include all rooms tagged with 'monastery'
+rooms_with_tag: monastery
+
+# Also include these specific rooms
+rooms:
+  - monastery_gate
+  - main_courtyard
+  - dining_hall
+  - meditation_hall
+  - guest_hall
+  - herb_garden
+  - terraced_fields
+
+# Reset every 30 minutes
+lifespan_minutes: 30
+
+# Only reset when no players are in the zone
+reset_mode: empty
+
+# Reset commands executed in order
+resets:
+  # Novice Pema at the monastery gate
+  - type: mob
+    prototype: novice_pema
+    room: monastery_gate
+    max: 1
+
+  # Elder Drolma in the main courtyard
+  - type: mob
+    prototype: elder_drolma
+    room: main_courtyard
+    max: 1
+
+  # Teacher Lobsang in the meditation hall
+  - type: mob
+    prototype: teacher_lobsang
+    room: meditation_hall
+    max: 1
+
+  # Merchant Dorje in the market
+  - type: mob
+    prototype: merchant_dorje
+    room: market
+    max: 1
+
+  # Ensure meditation hall incense is present
+  # (uncomment when incense prototype exists)
+  # - type: object
+  #   prototype: incense_burner
+  #   room: meditation_hall
+  #   max: 1
+
+  # ============================================
+  # TCM Herbs - Spawn in herb garden and fields
+  # ============================================
+
+  # Tier 1 Common Herbs (herb_garden) - more plentiful
+  - type: object
+    prototype: sheng_jiang
+    room: herb_garden
+    max: 3
+  - type: object
+    prototype: da_zao
+    room: herb_garden
+    max: 3
+  - type: object
+    prototype: gan_cao
+    room: herb_garden
+    max: 2
+  - type: object
+    prototype: ju_hua
+    room: herb_garden
+    max: 3
+
+  # Tier 2 Uncommon Herbs (terraced_fields) - fewer
+  - type: object
+    prototype: gou_qi_zi
+    room: terraced_fields
+    max: 2
+  - type: object
+    prototype: long_yan_rou
+    room: terraced_fields
+    max: 1
+  - type: object
+    prototype: bai_zhu
+    room: terraced_fields
+    max: 2
+
+  # Poria grows near pine roots in the garden
+  - type: object
+    prototype: fu_ling
+    room: herb_garden
+    max: 1
+
+  # ============================================
+  # Cleanup
+  # ============================================
+
+  # Clean up any corpses in public areas
+  - type: remove
+    prototype: corpse
+    room: main_courtyard
+
+  - type: remove
+    prototype: corpse
+    room: monastery_gate

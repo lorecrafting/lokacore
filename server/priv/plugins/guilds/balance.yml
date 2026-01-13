@@ -1,0 +1,28 @@
+# Guild System Balance Configuration
+# These values are merged with the main balance.yml at plugin load
+
+guilds:
+  # Cost to create a new guild
+  creation_cost: 1000
+
+  # Base maximum members for a new guild
+  max_members_base: 20
+
+  # Additional members per guild level
+  max_members_per_level: 5
+
+  # Base treasury capacity
+  treasury_base: 10000
+
+  # XP required for level 2 (scales exponentially)
+  xp_base: 1000
+
+  # XP scaling exponent (level = (xp/base)^(1/exponent) + 1)
+  xp_exponent: 1.5
+
+  # Guild XP rewards
+  xp_rewards:
+    quest_complete: 50
+    boss_kill: 100
+    member_levelup: 25
+    donation_per_1000: 10

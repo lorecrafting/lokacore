@@ -1,0 +1,41 @@
+key: terraced_fields
+parent: base_room
+type: room
+short_desc: "Terraced Fields"
+long_desc: "Stone-walled terraces cascade down the mountainside, green with growing barley."
+extra_desc: |
+  Graceful terraces sculpted by centuries of labor step down the mountainside, barley waving golden in the thin air. Distant yak bells drift down from the higher slopes as farmers tend narrow paths between the fields.
+keywords: []
+exits:
+  east: village
+  north: herb_garden
+spawns:
+  - prototype: working_farmer
+  - prototype: herb_patch_goji        # Goji berries (Gou Qi Zi)
+  - prototype: herb_patch_longan      # Longan fruit (Long Yan Rou)
+  - prototype: herb_patch_atractylodes  # Atractylodes root (Bai Zhu)
+  - prototype: herb_patch_poria       # Poria fungus (Fu Ling)
+tags:
+  - outdoor
+  - village
+  - farming
+components:
+  gathering_nodes:
+    goji_patch:
+      uses_remaining: 3
+    longan_tree:
+      uses_remaining: 3
+  ambient_messages:
+    dawn:
+      - "Meltwater from the high peaks glistens in the irrigation channels."
+      - "Farmers discuss the spring planting, their voices carrying on the wind."
+    day:
+      - "Barley waves in the thin mountain air, golden heads nodding in the breeze."
+      - "Distant yak bells make faint music, drifting down from the higher slopes."
+      - "A farmer pauses to wipe sweat from their brow, squinting at the sun."
+      - "The scent of fresh earth mingles with the green smell of growing things."
+    dusk:
+      - "The autumn harvest nears - barley heads hang heavy and golden."
+      - "The view stretches forever, tiny villages scattered across the vast green valley."
+    night:
+      - "Stone walls, built by generations of hands, stand firm against time."

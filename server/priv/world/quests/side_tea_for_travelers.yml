@@ -1,0 +1,47 @@
+id: side_tea_for_travelers
+name: "Tea for Travelers"
+description: |
+  The tea vendor Karma asks for help gathering ingredients for
+  her famous Chrysanthemum Goji Tea. A simple kindness that will
+  be repaid with warmth and gratitude.
+giver: tea_vendor
+type: side
+paramita: generosity
+level_requirement: 1
+
+objectives:
+  - id: talk_karma
+    type: talk
+    target_id: tea_vendor
+    description: "Speak with Tea Vendor Karma"
+    dialogue_topic: help_needed
+  - id: gather_chrysanthemum
+    type: get_item
+    target_id: ju_hua
+    target_count: 3
+    description: "Gather 3 chrysanthemum flowers"
+    location_hint: herb_garden
+  - id: gather_goji
+    type: get_item
+    target_id: gou_qi_zi
+    target_count: 3
+    description: "Gather 3 clusters of goji berries"
+    location_hint: terraced_fields
+  - id: return_ingredients
+    type: talk
+    target_id: tea_vendor
+    description: "Return the herbs to Karma"
+    dialogue_topic: ingredients_ready
+
+rewards:
+  xp: 50
+  gold: 15
+  items:
+    - chrysanthemum_goji_tea
+    - chrysanthemum_goji_tea
+    - ginger_jujube_tea
+
+journal_entries:
+  accepted: "Karma needs chrysanthemum and goji berries for her famous tea. The monastery gardens should have what she needs."
+  gathering: "I should look for chrysanthemum flowers in the herb garden and goji berries in the terraced fields."
+  completed: "Karma was so grateful. She pressed several cups of her finest tea into my hands as thanks."

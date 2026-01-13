@@ -1,0 +1,42 @@
+# Poria Mushroom (Fu Ling)
+# Drains dampness, calms spirit, strengthens digestion
+
+key: fu_ling
+type: item
+parent: base_herb
+
+short_desc: "Poria Mushroom"
+long_desc: "A white poria fungus grows near the pine tree roots."
+extra_desc: |
+  A pale, potato-shaped fungus that grows underground near pine tree
+  roots. The flesh is white and slightly spongy, with a mild, earthy
+  taste. This humble mushroom is prized for its ability to drain
+  excess moisture from the body and calm an anxious spirit. It is
+  gentle enough for everyday use.
+
+keywords:
+  - poria
+  - mushroom
+  - fungus
+  - fu
+  - ling
+  - white
+primary_keyword: poria
+
+tags:
+  - item
+  - herb
+  - tcm
+  - draining
+
+components:
+  physical:
+    weight: 0.2
+    stackable: true
+    max_stack: 20
+  valuable:
+    base_price: 8
+  herb:
+    category: draining
+    nature: neutral
+    flavor: bland

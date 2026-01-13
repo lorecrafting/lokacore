@@ -1,0 +1,17 @@
+key: stone_corridor
+is_template: true
+type: room
+short_desc: "Stone Corridor"
+long_desc: "A long passage of worn stone blocks lit by flickering torches."
+extra_desc: |
+  A long corridor of worn stone blocks. Torchlight flickers from
+  sconces along the walls, casting dancing shadows on the floor.
+keywords: []
+tags:
+  - dungeon
+  - corridor
+  - indoor
+components:
+  lighting:
+    level: dim
+    source: torches

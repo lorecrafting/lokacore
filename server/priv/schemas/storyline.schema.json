@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://loka.game/schemas/storyline.schema.json",
+  "title": "Storyline Definition",
+  "description": "Schema for storyline definitions. Storylines are placed in priv/world/storylines/",
+  "type": "object",
+  "required": ["key", "name", "description", "acts"],
+  "additionalProperties": false,
+  "properties": {
+    "key": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "Unique storyline key"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Display name of the storyline"
+    },
+    "description": {
+      "type": "string",
+      "description": "Overview of the storyline arc"
+    },
+    "starting_room": {
+      "type": "string",
+      "description": "Room key where this storyline begins"
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Tags for categorization (main, side, etc.)"
+    },
+    "acts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/act"
+      },
+      "description": "Ordered list of story acts"
+    },
+    "side_quests": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Quest IDs for optional side quests in this storyline"
+    }
+  },
+  "definitions": {
+    "act": {
+      "type": "object",
+      "required": ["id", "name", "quests"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Unique act ID within storyline"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name of the act"
+        },
+        "description": {
+          "type": "string",
+          "description": "Overview of what happens in this act"
+        },
+        "quests": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" },
+          "description": "Quest IDs that must be completed in this act"
+        },
+        "requires": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Act IDs that must be completed before this act"
+        }
+      }
+    }
+  }
+}

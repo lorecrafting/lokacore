@@ -1,0 +1,32 @@
+key: warded
+name: "Warded"
+type: buff
+duration: 3
+stackable: false
+effects:
+  - trigger: passive
+    effect: damage_reduction
+    amount: 15
+    damage_types:
+      - shadow
+      - spiritual
+      - psychic
+  - trigger: passive
+    effect: immunity
+    type: confused
+  - trigger: on_damage_taken
+    effect: reflect_damage
+    percent: 10
+    damage_type: shadow
+display_icon: ward
+display_color: silver
+description: "An ancient song shields you from dark influences."
+apply_message: "A subtle shimmer surrounds you, warding off darkness."
+expire_message: "The ward's protection fades, leaving you exposed once more."
+exclusive_with:
+  - vulnerable
+  - cursed
+tags:
+  - protection
+  - song
+  - ancient

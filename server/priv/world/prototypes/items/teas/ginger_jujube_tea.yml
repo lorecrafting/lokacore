@@ -1,0 +1,46 @@
+# Ginger Jujube Tea - Crafted consumable
+# Warming tea with cold resistance buff
+
+key: ginger_jujube_tea
+type: item
+parent: base_item
+
+short_desc: "Ginger Jujube Tea"
+long_desc: "a steaming cup of spicy-sweet amber tea"
+extra_desc: |
+  A rich amber tea with a spicy-sweet aroma. Slices of ginger float
+  alongside plump red jujube dates. The first sip spreads warmth
+  through your chest, driving away any chill. The monks drink this
+  before venturing into the cold mountain passes.
+
+keywords:
+  - tea
+  - ginger
+  - jujube
+  - drink
+  - amber
+  - warming
+primary_keyword: tea
+
+tags:
+  - item
+  - consumable
+  - crafted
+  - tcm
+  - warming
+
+components:
+  physical:
+    weight: 0.3
+    stackable: true
+    max_stack: 10
+  consumable:
+    effect: heal
+    amount: 15
+    buff:
+      type: cold_resistance
+      duration: 300
+      modifier: 0.25
+    use_message: "Warmth spreads through your body, driving away the cold."
+  valuable:
+    base_price: 10

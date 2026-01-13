@@ -1,0 +1,55 @@
+# Spell Word Definitions
+# Words combine to form spells. Players discover words through exploration.
+#
+# Word Types:
+#   - noun: Elemental/object words (fire, water, stone)
+#   - verb: Action words (create, destroy, protect)
+#
+# discovered_by_default: true = player starts knowing this word
+
+words:
+  ignis:
+    name: "Ignis"
+    meaning: fire
+    power: 10
+    element: fire
+    type: noun
+    discovered_by_default: true
+
+  aqua:
+    name: "Aqua"
+    meaning: water
+    power: 8
+    element: water
+    type: noun
+    discovered_by_default: true
+
+  creo:
+    name: "Creo"
+    meaning: create
+    power: 5
+    element: null
+    type: verb
+    discovered_by_default: true
+
+  perdo:
+    name: "Perdo"
+    meaning: destroy
+    power: 7
+    element: null
+    type: verb
+    discovered_by_default: false
+
+# Spell combinations - what happens when words are combined
+combinations:
+  - words: [creo, ignis]
+    result: fireball
+    description: "A ball of fire shoots forward!"
+
+  - words: [aqua, creo]
+    result: water_jet
+    description: "A jet of water bursts forth!"
+
+  - words: [ignis, perdo]
+    result: fire_shield
+    description: "Flames surround you protectively."

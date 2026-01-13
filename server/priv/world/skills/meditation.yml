@@ -1,0 +1,11 @@
+key: meditation
+name: "Meditation"
+category: magic
+description: "Deepen your inner calm. Each level adds +3 to all healing received."
+max_level: 10
+cost_per_level: 1
+effect:
+  type: heal_bonus
+  per_level: 3
+trainers:
+  - lama_yeshe

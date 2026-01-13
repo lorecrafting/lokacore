@@ -1,0 +1,30 @@
+[
+  verbose: false,
+  private: false,
+  skip: true,
+  router: "lib/loka_web/router.ex",
+  exit: "low",
+  format: "txt",
+  out: "",
+  threshold: "low",
+  ignore: ["DOS.StringToAtom", "Config.HTTPS"],
+  ignore_files: [
+    "lib/loka/engine/prototype_loader.ex",
+    "lib/loka/engine/social_loader.ex",
+    "lib/loka/engine/world_exporter.ex",
+    "lib/loka/engine/world_importer.ex",
+    "lib/loka/engine/zone_loader.ex",
+    "lib/loka/framework/registry_base.ex",
+    "lib/loka/framework/faction/faction.ex",
+    "lib/loka/framework/hometown/hometown.ex",
+    "lib/loka/framework/quest/quest_registry.ex",
+    "lib/loka/framework/quest/chain_registry.ex",
+    "lib/loka/framework/combat/elements.ex",
+    "lib/loka/framework/combat/damage_types.ex",
+    "lib/loka/framework/combat/tactical.ex",
+    "lib/loka/framework/magic/spell_words.ex",
+    "lib/loka/testing/content/quest_validator.ex",
+    "lib/loka/testing/bot/bot_actions.ex",
+    "lib/loka/release.ex"
+  ]
+]

@@ -1,0 +1,164 @@
+# Balance Configuration
+# All game formulas and multipliers in one place for easy tuning
+#
+# Variables available in formulas:
+#   level, str, dex, sta, int, wis, cha
+#   weapon_bonus, armor_bonus, skill_level
+
+combat:
+  # Damage calculation
+  damage:
+    # Base damage formula: (str + weapon_bonus) * level_multiplier
+    base_formula: "str + weapon_bonus"
+    level_multiplier: 1.0
+
+    # Damage variance range (applied as multiplier)
+    variance_min: 0.8
+    variance_max: 1.2
+
+    # Minimum damage (always deal at least this much)
+    minimum: 1
+
+    # Critical hits
+    critical:
+      base_chance: 5          # Base 5% crit chance
+      dex_bonus: 0.5          # +0.5% per DEX point
+      multiplier: 2.0         # Crits deal 2x damage
+
+    # Defense calculation
+    defense:
+      formula: "sta / 2 + armor_bonus"
+      cap_percent: 75         # Defense can't reduce damage below 25%
+
+    # Defending stance bonus
+    defend_multiplier: 1.5    # +50% defense when defending
+
+  # Healing calculation
+  healing:
+    # Base healing formula
+    base_formula: "int + level * 2"
+
+    # Variance range
+    variance_min: 0.9
+    variance_max: 1.1
+
+    # Overheal (can exceed max HP temporarily)
+    allow_overheal: false
+    overheal_cap: 1.2         # If enabled, max 120% of max HP
+
+  # Success checks
+  checks:
+    # Skill check formula: skill_level * 5 + stat
+    base_formula: "skill_level * 5 + stat"
+
+    # Difficulty modifiers
+    difficulty:
+      trivial: -20
+      easy: -10
+      normal: 0
+      hard: 10
+      very_hard: 20
+      legendary: 30
+
+progression:
+  # XP required per level: 100 * level^xp_exponent
+  # With 1.8 exponent, progression is gentler than quadratic (2.0)
+  xp_base: 100
+  xp_exponent: 1.8
+
+  # Skill/Stat points per level
+  skill_points_per_level: 3
+
+  # HP gained per level up
+  hp_per_level: 10
+
+  # Base stats at level 1
+  base_stats:
+    str: 10
+    dex: 10
+    sta: 10
+    int: 10
+    wis: 10
+    cha: 10
+
+  # Max level
+  max_level: 50
+
+resources:
+  # Health pool
+  health:
+    max_formula: "50 + sta * 5 + level * 10"
+    regen_rate: 1
+    regen_condition: "out_of_combat"
+
+  # Mana pool
+  mana:
+    max_formula: "20 + int * 3 + level * 5"
+    regen_rate: 2
+    regen_condition: "always"
+
+  # Stamina pool
+  stamina:
+    max_formula: "30 + sta * 2 + level * 3"
+    regen_rate: 5
+    regen_condition: "always"
+
+abilities:
+  # Global cooldown between any actions
+  global_cooldown_ms: 1000
+
+  # Specific ability costs and cooldowns
+  power_strike:
+    stamina_cost: 20
+    cooldown_ms: 5000
+    damage_multiplier: 1.5
+
+  flee:
+    stamina_cost: 10
+    cooldown_ms: 3000
+    base_success_rate: 60
+    level_penalty: 3          # -3% per enemy level
+
+economy:
+  # Gold drops
+  gold_drop:
+    base_formula: "level * 2"
+    variance_min: 0.5
+    variance_max: 1.5
+
+  # Shop prices
+  shop:
+    buy_multiplier: 1.0       # Players pay 100% of base price
+    sell_multiplier: 0.5      # Players get 50% when selling
+
+  # Repair costs
+  repair:
+    cost_formula: "item_value * 0.1"
+
+gathering:
+  # Base success rate
+  base_success: 70
+
+  # Skill bonus per level
+  skill_bonus_per_level: 2
+
+  # Quality chances (if successful)
+  quality_weights:
+    common: 70
+    uncommon: 20
+    rare: 8
+    epic: 2
+
+crafting:
+  # Base success rate
+  base_success: 80
+
+  # Skill bonus per level
+  skill_bonus_per_level: 3
+
+  # Quality chances (if successful)
+  quality_weights:
+    normal: 60
+    fine: 25
+    superior: 12
+    masterwork: 3

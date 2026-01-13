@@ -1,0 +1,29 @@
+# Maestro E2E Test Configuration
+# https://maestro.mobile.dev/reference/yaml/configuration
+
+# App configuration
+appId: com.loka.game
+
+# Test execution settings
+initFlow:
+  appId: com.loka.game
+
+# Environment variables for tests
+# These can be overridden via CLI: maestro test --env SERVER_URL=...
+env:
+  # Default to local development server
+  SERVER_URL: "http://localhost:4000"
+  # Test timeout (ms)
+  TIMEOUT: 30000
+  # Unique test run ID (set by runner script)
+  TEST_RUN_ID: ""
+
+# Test execution
+executionOrder:
+  continueOnFailure: false
+
+# Screenshot on failure
+onFlowComplete:
+  - takeScreenshot: "flow_complete"
+onFlowStart:
+  - takeScreenshot: "flow_start"

@@ -1,0 +1,30 @@
+key: ragas_core
+parent: base_room
+type: room
+short_desc: "Raga's Core"
+long_desc: "The heart of craving where Raga Mara waits, wearing a thousand faces of desire."
+extra_desc: |
+  Everything you have ever wanted materializes—wealth, love, power, beauty. At the center, Raga Mara takes shape in pure golden light, wearing a thousand faces that reflect your deepest longings.
+keywords: []
+exits:
+  south: attachment_chamber
+spawns:
+  - prototype: raga_mara
+  - prototype: seal_fragment_attachment
+tags:
+  - indoor
+  - cave
+  - ancient
+  - boss_room
+  - trial_chamber
+components:
+  ambient_messages:
+    day:
+      - "Raga Mara shifts through a thousand faces, each reflecting your deepest longing."
+      - "The air thrums with desire so thick you can taste it."
+      - "Everything you have ever wanted materializes at the edge of vision."
+      - "Golden light pulses with seductive promise, irresistible and hollow."
+      - "The demon's voice is honey and poison, offering everything."
+      - "Illusions of love, power, beauty dance just out of reach."
+      - "Your heart aches with wanting things that were never real."
+      - "Craving personified watches you with a thousand hungry eyes."

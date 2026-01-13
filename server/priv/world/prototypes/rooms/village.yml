@@ -1,0 +1,32 @@
+key: village
+parent: base_room
+type: room
+short_desc: "Village"
+long_desc: "A small mountain settlement huddled against the wind, alive with the rhythm of daily life."
+extra_desc: |
+  Rough stone houses huddle together against the mountain wind, smoke rising from cooking fires carrying the scent of tsampa and yak butter. Prayer wheels spin in doorways as villagers go about their daily tasks.
+keywords: []
+exits:
+  up: cliff_path
+  south: village_square
+  north: cemetery
+  west: terraced_fields
+spawns:
+  - prototype: butcher_sonam
+  - prototype: farmer_tsering
+tags:
+  - outdoor
+  - village
+  - safe_zone
+components:
+  ambient_messages:
+    dawn:
+      - "Spring repairs begin on the stone walls, winter's damage being mended."
+    day:
+      - "A yak lows in the distance, its bell tinkling faintly."
+      - "An old woman spins her prayer wheel, murmuring softly."
+      - "Pilgrims pass through on their way to the monastery above."
+    dusk:
+      - "Autumn stores are being laid in - vegetables dried in the thin mountain air."
+    night:
+      - "The wind carries the distant sound of the monastery's bell."

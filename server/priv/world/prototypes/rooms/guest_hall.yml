@@ -1,0 +1,26 @@
+key: guest_hall
+parent: base_room
+type: room
+short_desc: "Guest Hall"
+long_desc: "A modest dormitory of simple beds and wool blankets, a welcoming respite from the cold."
+extra_desc: |
+  Simple wooden beds line the walls, each covered in wool blankets woven with traditional patterns. The room smells of cedar and dried herbs, a welcoming respite from the mountain cold.
+keywords: []
+exits:
+  south: meditation_hall
+tags:
+  - indoor
+  - monastery
+  - safe_zone
+  - rest_point
+components:
+  ambient_messages:
+    dawn:
+      - "Pilgrims stir from sleep as the morning bells sound below."
+    day:
+      - "The scent of cedar and dried herbs brings a sense of comfort."
+      - "The old brass fittings on the storage chests gleam dully in the light."
+      - "Prayer beads click softly in a pilgrim's restless hands."
+    night:
+      - "Wool blankets rustle softly as someone stirs in their sleep."
+      - "Someone sighs contentedly, wrapped in warmth against the mountain chill."

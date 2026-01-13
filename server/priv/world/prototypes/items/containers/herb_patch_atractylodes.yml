@@ -1,0 +1,50 @@
+# Atractylodes Patch - Bai Zhu (白术)
+# Strengthens spleen and qi, dries dampness
+
+key: herb_patch_atractylodes
+parent: base_container
+type: item
+
+short_desc: "Atractylodes Bed"
+long_desc: "A bed of atractylodes plants grows here, their thick leaves hiding valuable roots."
+extra_desc: |
+  Low-growing atractylodes plants spread across this cultivated bed,
+  their broad, serrated leaves forming a dense green carpet. Though
+  the plants appear modest, the monks value the thick rhizomes hidden
+  beneath the soil. These bitter roots strengthen the spleen and
+  banish dampness from the body - essential in mountain medicine.
+keywords:
+  - atractylodes
+  - bed
+  - plants
+  - bai
+  - zhu
+  - roots
+primary_keyword: bed
+
+components:
+  physical:
+    weight: 0
+    stackable: false
+  container:
+    capacity: 3
+    can_take: true
+    can_put: false
+    description_open: "You examine the atractylodes bed carefully."
+    state_descriptions:
+      full: "Healthy atractylodes plants are ready for harvest."
+      partial: "A few atractylodes plants remain."
+      empty: "The bed has been harvested. New roots will grow in time."
+    respawn:
+      enabled: true
+      delay_seconds: 360
+      loot_table:
+        - item: bai_zhu
+          weight: 100
+          quantity: [1, 3]
+
+tags:
+  - container
+  - herb_patch
+  - no_get
+  - furniture

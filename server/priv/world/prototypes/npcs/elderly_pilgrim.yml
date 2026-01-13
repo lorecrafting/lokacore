@@ -1,0 +1,99 @@
+key: elderly_pilgrim
+type: npc
+parent: base_npc
+
+short_desc: "Elderly Pilgrim"
+long_desc: "A wizened pilgrim sits in contemplation, prayer beads moving through gnarled fingers."
+extra_desc: |
+  An elderly woman with deeply lined face and eyes that hold both
+  sorrow and peace. Her travel-worn robes speak of a long journey,
+  and the prayer beads in her hands have been polished smooth by
+  years of devotion. She seems content to simply sit and pray.
+keywords:
+  - pilgrim
+  - old
+  - woman
+  - elder
+  - grandmother
+primary_keyword: pilgrim
+mood: serene
+
+tags:
+  - friendly
+  - pilgrim
+  - atmosphere
+  - spiritual
+
+components:
+  ambient_actions:
+    messages:
+      - "The elderly pilgrim's lips move in silent prayer."
+      - "The pilgrim's prayer beads click softly as they pass through her fingers."
+      - "A peaceful smile crosses the pilgrim's weathered face."
+      - "The elderly pilgrim gazes at the sky, lost in memory."
+      - "The pilgrim sighs contentedly, her eyes half-closed."
+      - "The elderly pilgrim hums a fragment of an ancient hymn."
+      - "The pilgrim traces a blessing symbol in the air with aged fingers."
+      - "The elderly pilgrim's breath steadies into meditation."
+    interval_min: 35
+    interval_max: 55
+    chance: 0.5
+  combatant:
+    health:
+      current: 30
+      max: 30
+    stats:
+      str: 4
+      dex: 5
+      sta: 5
+    level: 1
+  dialogue_tree:
+    start:
+      text: "Ah, a young face. Sit with me awhile, if you have time."
+      choices:
+        - text: "Tell me about yourself."
+          next: "pilgrimage"
+        - text: "Do you have any wisdom to share?"
+          next: "wisdom"
+        - text: "What do you know about the monastery?"
+          next: "tenzin"
+        - text: "I should keep moving."
+          next: "blessing"
+    pilgrimage:
+      text: "I have walked these mountains for sixty years, visiting every shrine, every temple. This monastery... this is where I will finish my journey. [She smiles peacefully.] It is a good place to rest."
+      choices:
+        - text: "Sixty years is a long time."
+          next: "wisdom"
+        - text: "Why this monastery?"
+          next: "tenzin"
+        - text: "Safe travels, grandmother."
+          next: "blessing"
+    wisdom:
+      text: "At my age, you learn that everything passes - joy, sorrow, even this old body. Only the practice remains. Only the breath. Only the moment. [Her prayer beads click softly.] This is the only truth."
+      choices:
+        - text: "How do I find peace like yours?"
+          next: "peace_advice"
+        - text: "That's beautiful."
+          next: "blessing"
+    peace_advice:
+      text: "Stop grasping. Stop pushing away. Simply be with what is. [She chuckles.] Simple words, but a lifetime of practice. Start now, and perhaps by my age, you will understand."
+      choices:
+        - text: "I'll try to remember."
+          next: "blessing"
+    tenzin:
+      text: "I met Lama Tenzin once, long ago. He gave me a teaching that changed my life: 'The path is not found. The path is walked. Each step is both journey and destination.' [Her eyes grow distant.] I hope he wakes soon."
+      choices:
+        - text: "I'm trying to help him."
+          next: "encouragement"
+        - text: "Tell me more about your journey."
+          next: "pilgrimage"
+    encouragement:
+      text: "Then you are blessed, young one. The dharma works through you. Trust your path, even when it leads through darkness. Light follows."
+      choices:
+        - text: "Thank you."
+          next: "blessing"
+    blessing:
+      text: "May your path be clear, young one. May you find what you seek, even if it is not what you expected. [She bows her head.]"
+      choices:
+        - text: "And may you find peace."
+          next: null

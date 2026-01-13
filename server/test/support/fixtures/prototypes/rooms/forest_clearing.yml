@@ -1,0 +1,15 @@
+key: forest_clearing
+type: room
+short_desc: "Forest Clearing"
+extra_desc: |
+  A small clearing in the dense forest. Sunlight filters
+  through the leaves overhead.
+exits:
+  north: town_square
+spawns:
+  - prototype: goblin
+  - prototype: goblin
+    short_desc: "Goblin Scout"
+tags:
+  - forest
+  - outdoor

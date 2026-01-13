@@ -1,0 +1,32 @@
+key: incense_bundle
+short_desc: "Incense Bundle"
+long_desc: "a bundle of fragrant incense sticks"
+keywords:
+  - incense
+  - bundle
+  - fragrant
+  - sticks
+primary_keyword: incense
+type: item
+parent: base_item
+extra_desc: |
+  A bundle of incense sticks wrapped in thin paper. The blend
+  includes juniper, sage, and mountain herbs. Said to purify
+  spaces and calm troubled spirits.
+components:
+  consumable:
+    effect: buff
+    buff_type: spirit_ward
+    duration: 180
+    on_use_message: "Fragrant smoke rises, creating a zone of calm."
+  physical:
+    weight: 0.1
+    stackable: true
+    max_stack: 10
+  valuable:
+    base_price: 5
+tags:
+  - item
+  - consumable
+  - utility
+  - incense

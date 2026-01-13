@@ -1,0 +1,43 @@
+# Chrysanthemum Goji Tea - Tier 1 Simple Tea
+# The most basic TCM tea, brightens eyes and nourishes blood
+
+key: recipe_chrysanthemum_goji_tea
+name: "Brew Chrysanthemum Goji Tea"
+skill_required: herbalism
+skill_level: 1
+station_type: alchemy_bench
+
+ingredients:
+  - item: ju_hua
+    quantity: 2
+  - item: gou_qi_zi
+    quantity: 2
+
+tools: []
+
+output:
+  - item: chrysanthemum_goji_tea
+    quantity: 2
+    chance: 1.0
+
+failure_chance: 0.05
+failure_output:
+  - item: bitter_dregs
+    quantity: 1
+
+time_required: 20
+
+xp_reward:
+  skill: herbalism
+  amount: 10
+
+description: "The Queen of Flowers meets the King of Berries in this classic healing tea."
+craft_message: "You steep the delicate flowers and bright berries in hot water..."
+success_message: "A fragrant golden tea with floating chrysanthemum petals."
+failure_message: "The tea turns murky and loses its fragrance."
+
+tags:
+  - herbalism
+  - tea
+  - basic
+  - tcm

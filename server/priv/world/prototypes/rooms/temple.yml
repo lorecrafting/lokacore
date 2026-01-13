@@ -1,0 +1,43 @@
+key: temple
+parent: base_room
+type: room
+short_desc: "Temple"
+long_desc: "A sacred space glowing with golden light from hundreds of butter lamps before a towering Buddha."
+extra_desc: |
+  Hundreds of butter lamps flicker before a towering Buddha whose serene face gazes down with infinite compassion. Sandalwood incense hangs thick in the air while silk thangkas line the walls, their colors still vibrant.
+keywords: []
+exits:
+  south: main_courtyard
+spawns:
+  - prototype: abbot_jampa
+  - prototype: master_chen
+tags:
+  - indoor
+  - monastery
+  - safe_zone
+  - sacred
+components:
+  ambient_messages:
+    dawn:
+      - "Monks file in silently for morning prayers, their robes rustling softly."
+      - "The first butter lamps are lit, one by one, as the temple awakens."
+    day:
+      - "Butter lamps flicker, sending shadows dancing across the Buddha's serene face."
+      - "The low drone of chanting rises and falls like breathing."
+      - "Sandalwood incense curls toward the ceiling in lazy spirals."
+      - "A monk prostrates before the altar, lost in devotion."
+      - "The golden light seems to pulse gently, almost like a heartbeat."
+      - "Peace settles over you like a warm blanket."
+    dusk:
+      - "The evening prayers begin, voices blending in ancient harmony."
+      - "A monk tends to the butter lamps, ensuring each flame burns true."
+    night:
+      - "A single monk sits in meditation before the Buddha, utterly still."
+      - "The butter lamps cast a warm glow against the night's darkness."
+      - "Silence fills the temple, broken only by the occasional crackle of a lamp."
+attributes:
+  room_effect:
+    on_enter:
+      apply_status: blessed
+      duration: 3
+      message: "The temple's sacred atmosphere washes over you."

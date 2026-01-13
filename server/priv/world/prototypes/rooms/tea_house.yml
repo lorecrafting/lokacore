@@ -1,0 +1,31 @@
+key: tea_house
+parent: base_room
+type: room
+short_desc: "Tea House"
+long_desc: "A warm, fragrant shelter where travelers rest and villagers gather."
+extra_desc: |
+  Warm air thick with butter tea and honey envelops the modest space. Low tables worn smooth by countless elbows fill the room, and a small shrine to the kitchen goddess glows in the corner.
+keywords: []
+exits:
+  north: village_square
+spawns: []
+tags:
+  - indoor
+  - village
+  - safe_zone
+  - rest_point
+components:
+  ambient_messages:
+    dawn:
+      - "The first tea of the day brews, steam rising in the morning light."
+    day:
+      - "Steam rises from a freshly poured cup, fragrant with butter and salt."
+      - "The butter lamp before the kitchen shrine flickers, casting dancing shadows."
+      - "Someone murmurs a quiet prayer before sipping their tea."
+      - "The sweet scent of honey-glazed rice mingles with woodsmoke."
+    night:
+      - "A cat stretches lazily by the fire, the picture of contentment."
+      - "Outside, the wind howls, but here all is warm and peaceful."
+  rest_point:
+    heal_rate: 5
+    rest_message: "You rest in the warm tea house, letting tension drain from your limbs."

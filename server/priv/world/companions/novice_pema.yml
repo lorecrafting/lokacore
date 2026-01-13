@@ -1,0 +1,71 @@
+key: novice_pema
+name: "Novice Pema"
+type: combat
+description: |
+  A young novice monk, barely past childhood, with earnest eyes
+  and a determined set to her jaw. She served Lama Tenzin since
+  she was small and refuses to abandon him now.
+base_stats:
+  health: 60
+  attack: 5
+  defense: 8
+  speed: 7
+abilities:
+  - id: first_aid
+    name: "First Aid"
+    effect: heal_player
+    amount: 15
+    cooldown: 30
+  - id: encourage
+    name: "Encourage"
+    effect: buff
+    buff: courage
+    duration: 60
+    cooldown: 60
+commands:
+  - follow
+  - stay
+  - heal_player
+  - attack_target
+  - defend
+loyalty:
+  starting: 50
+  max: 100
+  gain_events:
+    - event: protect_pema
+      amount: 10
+    - event: compassionate_choice
+      amount: 5
+    - event: liberate_mara
+      amount: 25
+  loss_events:
+    - event: violent_solution
+      amount: -5
+    - event: destroy_mara
+      amount: -15
+join_condition:
+  quest: main_sleeping_master
+  objective: talk_pema
+  dialogue_choice: accept_companion
+growth:
+  levels:
+    - level: 1
+      health_bonus: 0
+      abilities: [first_aid, encourage]
+    - level: 2
+      health_bonus: 20
+      abilities: [first_aid, encourage, minor_heal]
+    - level: 3
+      health_bonus: 40
+      abilities: [first_aid, encourage, minor_heal, protect]
+dialogue:
+  idle:
+    - "The master always said the path reveals itself."
+    - "I wonder what he sees in his meditation."
+    - "We will save him. We must."
+  combat:
+    - "I won't let you face this alone!"
+    - "For the master!"
+  low_health:
+    - "I... I can keep going..."
+    - "Don't worry about me."

@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="iPhone 17 Pro - iOS 26.2 - 37BAC28D-BBCD-46C6-B191-14E4C9BBD4D9" tests="1" failures="1" time="59.0">
+    <testcase id="quest-tracking" name="quest-tracking" classname="quest-tracking" time="59.0" status="ERROR">
+      <failure>Assertion is false: id: menu-button is visible</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

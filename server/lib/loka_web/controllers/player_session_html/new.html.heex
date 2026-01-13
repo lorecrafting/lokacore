@@ -1,0 +1,62 @@
+<div class="ebook-page">
+  <div class="ebook-auth">
+    <h1 class="ebook-auth-title">Enter the World</h1>
+
+    <div :if={Phoenix.Flash.get(@flash, :error)} class="ebook-flash ebook-flash--error">
+      {Phoenix.Flash.get(@flash, :error)}
+    </div>
+
+    <div :if={local_mail_adapter?()} class="ebook-dev-notice">
+      <p>Development mode: <a href="/dev/mailbox" class="ebook-link">view sent emails</a></p>
+    </div>
+
+    <div :if={Mix.env() == :dev} class="ebook-dev-notice" style="margin-top: 1rem;">
+      <p><strong>Admin credentials:</strong> admin@loka.local / adminadmin12</p>
+      <p style="font-size: 0.9em; margin-top: 0.5rem;">
+        Use password login below for quick access
+      </p>
+    </div>
+
+    <.form :let={f} for={@form} as={:player} action={~p"/players/log-in"} class="ebook-auth-form">
+      <div class="ebook-form-group">
+        <label class="ebook-label">Your email address</label>
+        <input
+          type="email"
+          name={f[:email].name}
+          value={if Mix.env() == :dev, do: "admin@loka.local", else: f[:email].value}
+          class="ebook-input"
+          autocomplete="email"
+          required
+          phx-mounted={JS.focus()}
+          readonly={!!@current_scope}
+        />
+      </div>
+
+      <div class="ebook-form-group">
+        <label class="ebook-label">Password (optional - leave blank for magic link)</label>
+        <input
+          type="password"
+          name={f[:password].name}
+          value={if Mix.env() == :dev, do: "adminadmin12", else: f[:password].value}
+          class="ebook-input"
+          autocomplete="current-password"
+        />
+      </div>
+
+      <button type="submit" class="ebook-submit ebook-submit--center">
+        Log in
+      </button>
+    </.form>
+
+    <div class="ebook-auth-footer">
+      <%= if @current_scope do %>
+        <p>You need to reauthenticate to perform sensitive actions.</p>
+      <% else %>
+        <p>
+          New to this realm?
+          <.link navigate={~p"/players/register"} class="ebook-link">Create an account</.link>
+        </p>
+      <% end %>
+    </div>
+  </div>
+</div>

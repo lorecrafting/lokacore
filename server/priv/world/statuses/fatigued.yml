@@ -1,0 +1,34 @@
+key: fatigued
+name: "Fatigued"
+type: debuff
+duration: 4
+stackable: true
+max_stacks: 3
+effects:
+  - trigger: passive
+    effect: stat_modify
+    stat: str
+    modifier: -2
+  - trigger: passive
+    effect: stat_modify
+    stat: dex
+    modifier: -1
+  - trigger: on_turn_end
+    effect: resource_drain
+    resource: stamina
+    amount: 1
+display_icon: fatigue
+display_color: gray
+description: "Exhaustion weighs upon you, slowing your movements."
+apply_message: "Weariness seeps into your limbs."
+expire_message: "You catch your breath, feeling somewhat restored."
+cure_items:
+  - butter_tea
+  - sweet_rice
+  - herbal_remedy
+cure_abilities:
+  - tayata_om_bekanze
+tags:
+  - exhaustion
+  - physical
+  - debuff

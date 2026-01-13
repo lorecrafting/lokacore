@@ -1,0 +1,29 @@
+# Ghost Flowers - Cemetery gathering node
+# Spirit flowers that bloom where the veil is thin
+
+key: ghost_flowers
+name: "Ghost Flower Patch"
+skill_required: herbalism
+skill_level: 10
+yields:
+  - item: ghost_flower
+    chance: 0.5
+    quantity: 1
+  - item: ghost_essence
+    chance: 0.2
+    quantity: 1
+respawn_time: 1200
+uses_per_respawn: 2
+tool_required: null
+xp_reward:
+  skill: herbalism
+  amount: 20
+gather_message: "Among the weathered grave markers, translucent flowers sway without wind."
+success_message: "A ghost flower releases into your hand, cold to the touch, glowing faintly."
+failure_message: "The flowers fade from view as you reach for them. Perhaps an offering first?"
+exhausted_message: "The spirits have shared what they will. Return when the moon is new."
+tags:
+  - cemetery
+  - spirit
+  - rare
+  - night_only

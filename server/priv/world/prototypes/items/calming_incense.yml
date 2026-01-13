@@ -1,0 +1,36 @@
+key: calming_incense
+short_desc: "Calming Incense"
+long_desc: "lavender and lotus incense"
+keywords:
+  - calming
+  - incense
+  - lavender
+  - lotus
+primary_keyword: incense
+type: item
+parent: base_item
+extra_desc: |
+  Lavender and lotus essence, blessed for peaceful meditation.
+  Its smoke soothes anger and brings inner stillness.
+components:
+  consumable:
+    effect: buff
+    buff_type: calm
+    duration: 300
+    bonus:
+      - type: damage
+        amount: 5
+        vs_tags:
+          - aversion
+    on_use_message: "Peace settles over you like gentle rain. Anger cannot touch you."
+  physical:
+    weight: 0.1
+    stackable: true
+    max_stack: 5
+  valuable:
+    base_price: 25
+tags:
+  - item
+  - consumable
+  - buff
+  - incense

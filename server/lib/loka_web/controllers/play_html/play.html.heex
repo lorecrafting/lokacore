@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loka - Text Adventure</title>
+    <style>
+      :root {
+        --bg: #1a1a1a;
+        --text: #c0c0c0;
+        --text-bright: #ffffff;
+        --text-dim: #707070;
+        --accent: #8fa;
+        --input-bg: #0a0a0a;
+        --border: #333;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 16px;
+        line-height: 1.5;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      #terminal {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem;
+        padding-bottom: 0;
+      }
+
+      .output-line {
+        margin-bottom: 0.25rem;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+
+      .output-line.room-title {
+        color: var(--text-bright);
+        font-weight: bold;
+      }
+
+      .output-line.system {
+        color: var(--text-dim);
+        font-style: italic;
+      }
+
+      .output-line.error {
+        color: #f66;
+      }
+
+      .output-line.chat {
+        color: #6cf;
+      }
+
+      .output-line.emote {
+        color: #fc6;
+      }
+
+      #input-area {
+        display: flex;
+        border-top: 1px solid var(--border);
+        background: var(--input-bg);
+        padding: 0.5rem 1rem;
+      }
+
+      #prompt {
+        color: var(--accent);
+        margin-right: 0.5rem;
+        user-select: none;
+      }
+
+      #command-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: var(--text-bright);
+        font-family: inherit;
+        font-size: inherit;
+        outline: none;
+      }
+
+      #command-input::placeholder {
+        color: var(--text-dim);
+      }
+
+      #status-bar {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.25rem 1rem;
+        background: #0f0f0f;
+        border-top: 1px solid var(--border);
+        font-size: 0.875rem;
+        color: var(--text-dim);
+      }
+
+      .vitals {
+        display: flex;
+        gap: 1rem;
+      }
+
+      .vital {
+        color: var(--text);
+      }
+
+      .vital-label {
+        color: var(--text-dim);
+      }
+
+      #header-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        background: #0f0f0f;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.875rem;
+      }
+
+      #header-bar .logo {
+        color: var(--accent);
+        font-weight: bold;
+      }
+
+      #header-bar .user-info {
+        color: var(--text-dim);
+      }
+
+      #header-bar a {
+        color: var(--text);
+        text-decoration: underline;
+        margin-left: 1rem;
+      }
+
+      #header-bar a:hover {
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header with user info -->
+    <div id="header-bar">
+      <span class="logo">LOKA</span>
+      <div class="user-info">
+        {@player.email}
+        <a href="/players/log-out" data-method="delete">Logout</a>
+        <a href="/game">Touch UI</a>
+      </div>
+    </div>
+    
+<!-- Game Screen -->
+    <div id="terminal"></div>
+    <div id="status-bar">
+      <div class="vitals">
+        <span class="vital">
+          <span class="vital-label">HP:</span> <span id="hp">100/100</span>
+        </span>
+        <span class="vital">
+          <span class="vital-label">MA:</span> <span id="ma">100/100</span>
+        </span>
+        <span class="vital">
+          <span class="vital-label">MV:</span> <span id="mv">150/150</span>
+        </span>
+      </div>
+      <div id="exits">Exits: none</div>
+    </div>
+    <div id="input-area">
+      <span id="prompt">&gt;</span>
+      <input type="text" id="command-input" placeholder="Enter command..." autofocus />
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/phoenix@1.7.0/priv/static/phoenix.min.js">
+    </script>
+    <script>
+      // Token provided by server (authenticated via magic link)
+      const token = "<%= @token %>";
+
+      let socket = null;
+      let channel = null;
+      let commandHistory = [];
+      let historyIndex = -1;
+
+      // DOM Elements
+      const terminal = document.getElementById('terminal');
+      const commandInput = document.getElementById('command-input');
+      const hpEl = document.getElementById('hp');
+      const maEl = document.getElementById('ma');
+      const mvEl = document.getElementById('mv');
+      const exitsEl = document.getElementById('exits');
+
+      // Start game immediately (already authenticated)
+      startGame();
+
+      function startGame() {
+        // Connect to Phoenix socket with server-provided token
+        socket = new Phoenix.Socket('/socket', { params: { token } });
+        socket.connect();
+
+        channel = socket.channel('game:lobby', {});
+
+        channel.join()
+          .receive('ok', () => {
+            appendOutput('Connected to Loka.', 'system');
+            appendOutput('Type "help" for available commands.', 'system');
+            appendOutput('', 'system');
+          })
+          .receive('error', (resp) => {
+            if (resp.reason === 'character_not_created') {
+              appendOutput('You need to create a character first.', 'error');
+              appendOutput('Visit /game to create your character, then return here.', 'system');
+            } else {
+              appendOutput(`Connection failed: ${resp.reason}`, 'error');
+            }
+          });
+
+        // Game state
+        channel.on('game_state', (state) => {
+          updateVitals(state);
+          updateExits(state.room.exits);
+          appendRoomDescription(state.room, state.atmosphere);
+        });
+
+        // Room updates
+        channel.on('room_update', (data) => {
+          updateExits(data.room.exits);
+          appendRoomDescription(data.room, data.atmosphere);
+        });
+
+        // Text output (for command responses)
+        channel.on('output', (data) => {
+          appendOutput(data.text);
+        });
+
+        // Game events
+        channel.on('event', (data) => {
+          appendOutput(data.text, 'chat');
+        });
+
+        // Resource updates
+        channel.on('resources_update', (data) => {
+          updateResources(data.resources);
+        });
+
+        // Focus input
+        commandInput.focus();
+      }
+
+      function appendOutput(text, className = '') {
+        const lines = text.split('\n');
+        lines.forEach(line => {
+          const div = document.createElement('div');
+          div.className = 'output-line' + (className ? ` ${className}` : '');
+          div.textContent = line;
+          terminal.appendChild(div);
+        });
+        terminal.scrollTop = terminal.scrollHeight;
+      }
+
+      function appendRoomDescription(room, atmosphere) {
+        appendOutput('');
+        appendOutput(room.title, 'room-title');
+        appendOutput('-'.repeat(room.title.length));
+        if (atmosphere) {
+          appendOutput(atmosphere, 'system');
+        }
+        appendOutput('');
+        appendOutput(room.description);
+        appendOutput('');
+
+        // Entities
+        (room.entities || []).forEach(e => {
+          appendOutput(`${e.name} is here.`);
+        });
+
+        // Items
+        (room.items || []).forEach(i => {
+          appendOutput(`${i.name} lies on the ground.`);
+        });
+
+        // Exits
+        const exits = (room.exits || []).filter(e => e.destination_id).map(e => e.direction);
+        appendOutput('');
+        appendOutput(`Exits: ${exits.length ? exits.join(', ') : 'none'}`);
+      }
+
+      function updateVitals(state) {
+        const health = state.health || { current: 100, max: 100 };
+        const resources = state.resources || {};
+        const mana = resources.mana || { current: 100, max: 100 };
+        const mv = resources.mv || { current: 150, max: 150 };
+
+        hpEl.textContent = `${health.current}/${health.max}`;
+        maEl.textContent = `${mana.current}/${mana.max}`;
+        mvEl.textContent = `${mv.current}/${mv.max}`;
+      }
+
+      function updateResources(resources) {
+        const mana = resources.mana || { current: 100, max: 100 };
+        const mv = resources.mv || { current: 150, max: 150 };
+        maEl.textContent = `${mana.current}/${mana.max}`;
+        mvEl.textContent = `${mv.current}/${mv.max}`;
+      }
+
+      function updateExits(exits) {
+        const dirs = (exits || []).filter(e => e.destination_id).map(e => e.direction);
+        exitsEl.textContent = `Exits: ${dirs.length ? dirs.join(', ') : 'none'}`;
+      }
+
+      // Command input handling
+      commandInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          const input = commandInput.value.trim();
+          if (input) {
+            // Echo command
+            appendOutput(`> ${input}`, 'system');
+
+            // Add to history
+            commandHistory.push(input);
+            historyIndex = commandHistory.length;
+
+            // Send to server
+            channel.push('command', { input });
+
+            // Clear input
+            commandInput.value = '';
+          }
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (historyIndex > 0) {
+            historyIndex--;
+            commandInput.value = commandHistory[historyIndex];
+          }
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          if (historyIndex < commandHistory.length - 1) {
+            historyIndex++;
+            commandInput.value = commandHistory[historyIndex];
+          } else {
+            historyIndex = commandHistory.length;
+            commandInput.value = '';
+          }
+        }
+      });
+
+      // Keep input focused
+      document.addEventListener('click', () => {
+        commandInput.focus();
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,28 @@
+# Licorice Patch - Herb Garden gathering node
+# Gan Cao (Licorice Root) - harmonizes other herbs, soothes the throat
+
+key: licorice_patch
+name: "Licorice Root Bed"
+skill_required: herbalism
+skill_level: 3
+yields:
+  - item: gan_cao
+    chance: 0.7
+    quantity: [1, 2]
+  - item: gan_cao
+    chance: 0.2
+    quantity: 1
+respawn_time: 480
+uses_per_respawn: 2
+tool_required: null
+xp_reward:
+  skill: herbalism
+  amount: 8
+gather_message: "You dig carefully around the licorice plant, seeking its deep-growing roots."
+success_message: "The fibrous root emerges, sweetly fragrant - the great harmonizer of medicines."
+failure_message: "The roots here are tangled and too young. Better to let them mature."
+exhausted_message: "You have taken all that can be safely harvested without harming the plant."
+tags:
+  - herb_garden
+  - medicinal
+  - harmonizer

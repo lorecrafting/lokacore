@@ -1,0 +1,33 @@
+key: recipe_health_potion
+name: "Brew Health Potion"
+skill_required: alchemy
+skill_level: 1
+station_type: alchemy_bench
+ingredients:
+  - item: sheng_jiang
+    quantity: 1
+  - item: gan_cao
+    quantity: 1
+  - item: water_flask
+    quantity: 1
+tools:
+  - alchemy_kit
+output:
+  - item: health_potion
+    quantity: 1
+xp_reward:
+  skill: alchemy
+  amount: 10
+failure_chance: 0.1
+failure_output:
+  - item: ruined_potion
+    quantity: 1
+time_required: 30
+description: "Combine warming ginger and harmonizing licorice with water to create a restorative potion."
+craft_message: "You carefully simmer the ginger and licorice together..."
+success_message: "Success! You've brewed a health potion."
+failure_message: "The mixture bubbles over and is ruined."
+tags:
+  - alchemy
+  - potion
+  - healing

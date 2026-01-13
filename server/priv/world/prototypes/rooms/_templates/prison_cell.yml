@@ -1,0 +1,20 @@
+key: prison_cell
+is_template: true
+type: room
+short_desc: "Prison Cell"
+long_desc: "A cramped cell with rough stone walls and moldy straw for bedding."
+extra_desc: |
+  A cramped cell with rough stone walls. A pile of moldy straw
+  serves as a bed in one corner. Iron bars block the only exit.
+keywords: []
+tags:
+  - dungeon
+  - prison
+  - indoor
+  - small
+components:
+  lighting:
+    level: dark
+    source: none
+  size:
+    category: small

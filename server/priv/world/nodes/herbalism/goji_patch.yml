@@ -1,0 +1,28 @@
+# Goji Patch - Terraced Fields gathering node
+# Gou Qi Zi (Goji Berries) - nourishes yin, brightens eyes
+
+key: goji_patch
+name: "Goji Berry Bush"
+skill_required: herbalism
+skill_level: 5
+yields:
+  - item: gou_qi_zi
+    chance: 0.75
+    quantity: [3, 6]
+  - item: gou_qi_zi
+    chance: 0.4
+    quantity: [1, 3]
+respawn_time: 420
+uses_per_respawn: 3
+tool_required: null
+xp_reward:
+  skill: herbalism
+  amount: 10
+gather_message: "You carefully pluck the bright red berries, avoiding the thorny branches."
+success_message: "The goji berries are perfectly ripe, bursting with vitality-giving essence."
+failure_message: "The berries here are still pale. They need more sun to ripen."
+exhausted_message: "All ripe berries have been gathered. The bush will bear more in time."
+tags:
+  - terraced_fields
+  - medicinal
+  - yin_nourishing

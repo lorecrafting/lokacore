@@ -1,0 +1,28 @@
+# Cave Mushrooms - Hermit's Cave gathering node
+# Fu Ling (Poria) - calms spirit, promotes sleep
+
+key: cave_mushrooms
+name: "Cave Mushroom Colony"
+skill_required: herbalism
+skill_level: 8
+yields:
+  - item: fu_ling
+    chance: 0.65
+    quantity: [1, 2]
+  - item: rare_cave_fungus
+    chance: 0.15
+    quantity: 1
+respawn_time: 900
+uses_per_respawn: 2
+tool_required: null
+xp_reward:
+  skill: herbalism
+  amount: 15
+gather_message: "In the cool darkness of the cave, you search for the pale mushrooms that grow near water."
+success_message: "Poria fungus emerges from the damp stone - a powerful ally for calming the mind."
+failure_message: "The conditions are not right. Mushrooms are shy creatures of shadow and moisture."
+exhausted_message: "The colony needs time to regrow. Hermit Milarepa would counsel patience."
+tags:
+  - hermits_cave
+  - medicinal
+  - spirit_calming

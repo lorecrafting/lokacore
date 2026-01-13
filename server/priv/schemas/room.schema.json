@@ -1,0 +1,121 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://loka.game/schemas/room.schema.json",
+  "title": "Room Prototype",
+  "description": "Schema for room prototype definitions. Rooms are placed in priv/world/prototypes/rooms/",
+  "type": "object",
+  "required": ["key", "type", "short_desc"],
+  "additionalProperties": true,
+  "properties": {
+    "key": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "Unique room key. Use lowercase with underscores"
+    },
+    "type": {
+      "const": "room",
+      "description": "Must be 'room' for room prototypes"
+    },
+    "parent": {
+      "type": "string",
+      "default": "base_room",
+      "description": "Parent prototype to inherit from"
+    },
+    "short_desc": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Room name shown in title (e.g., 'Temple')"
+    },
+    "long_desc": {
+      "type": "string",
+      "description": "Description shown when entering room"
+    },
+    "extra_desc": {
+      "type": "string",
+      "description": "Extended description for 'look room' command"
+    },
+    "keywords": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Keywords for interacting with room features"
+    },
+    "exits": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "propertyNames": {
+        "enum": ["north", "south", "east", "west", "up", "down"]
+      },
+      "description": "Map of direction to target room key"
+    },
+    "spawns": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/spawn_def"
+      },
+      "description": "NPCs and items that spawn in this room"
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Tags for room properties (indoor, outdoor, safe_zone, etc.)"
+    },
+    "attributes": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "ambient_messages": {
+          "$ref": "#/definitions/ambient_messages"
+        },
+        "room_effect": {
+          "$ref": "#/definitions/room_effect"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "spawn_def": {
+      "type": "object",
+      "required": ["prototype"],
+      "properties": {
+        "prototype": {
+          "type": "string",
+          "description": "Prototype key of NPC or item to spawn"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1,
+          "description": "Number to spawn"
+        }
+      }
+    },
+    "ambient_messages": {
+      "type": "object",
+      "properties": {
+        "interval_seconds": {
+          "type": "integer",
+          "minimum": 10,
+          "description": "Seconds between ambient messages"
+        },
+        "messages": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Random messages shown periodically"
+        }
+      }
+    },
+    "room_effect": {
+      "type": "object",
+      "properties": {
+        "on_enter": {
+          "type": "object",
+          "properties": {
+            "apply_status": { "type": "string" },
+            "duration": { "type": "integer" },
+            "message": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

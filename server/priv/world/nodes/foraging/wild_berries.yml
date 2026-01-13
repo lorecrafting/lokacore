@@ -1,0 +1,26 @@
+# Wild Berries - Cliff Path gathering node
+# Common foraged food - restores MV
+
+key: wild_berries
+name: "Wild Berry Bush"
+skill_required: null
+skill_level: 0
+yields:
+  - item: wild_berries
+    chance: 0.9
+    quantity: [2, 5]
+  - item: wild_berries
+    chance: 0.5
+    quantity: [1, 3]
+respawn_time: 180
+uses_per_respawn: 5
+tool_required: null
+xp_reward: null
+gather_message: "You search among the bushes along the cliff path for ripe berries."
+success_message: "Sweet mountain berries stain your fingers purple as you gather them."
+failure_message: "Birds have beaten you to most of the ripe ones today."
+exhausted_message: "The bush has been thoroughly picked. Give it time to bear more fruit."
+tags:
+  - cliff_path
+  - food
+  - common

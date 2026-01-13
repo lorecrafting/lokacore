@@ -1,0 +1,88 @@
+# Weather System Configuration
+# Defines weather types and regional weather chances
+
+weather_types:
+  clear:
+    name: "Clear"
+    description: "The sky is clear and bright."
+    effects: {}
+
+  cloudy:
+    name: "Cloudy"
+    description: "Grey clouds cover the sky."
+    effects: {}
+
+  rain:
+    name: "Rain"
+    description: "Rain falls steadily from grey clouds."
+    effects:
+      fire_damage: -0.25
+      auto_water_crops: true
+      movement_speed: -0.1
+
+  storm:
+    name: "Storm"
+    description: "Thunder rumbles and lightning flashes."
+    effects:
+      fire_damage: -0.5
+      lightning_damage: 0.25
+      movement_speed: -0.25
+
+  fog:
+    name: "Fog"
+    description: "Thick fog limits visibility."
+    effects:
+      visibility: -0.5
+      ranged_accuracy: -0.2
+
+  snow:
+    name: "Snow"
+    description: "Snowflakes drift down from the sky."
+    effects:
+      cold_damage: 0.1
+      movement_speed: -0.15
+
+# Regional weather probabilities (must sum to 1.0)
+regions:
+  default:
+    clear: 0.5
+    cloudy: 0.25
+    rain: 0.15
+    storm: 0.05
+    fog: 0.05
+
+  forest:
+    clear: 0.35
+    cloudy: 0.25
+    rain: 0.25
+    storm: 0.1
+    fog: 0.05
+
+  desert:
+    clear: 0.7
+    cloudy: 0.2
+    rain: 0.05
+    storm: 0.02
+    fog: 0.03
+
+  coastal:
+    clear: 0.3
+    cloudy: 0.25
+    rain: 0.25
+    storm: 0.15
+    fog: 0.05
+
+  mountain:
+    clear: 0.4
+    cloudy: 0.2
+    rain: 0.15
+    storm: 0.1
+    snow: 0.1
+    fog: 0.05
+
+  tundra:
+    clear: 0.3
+    cloudy: 0.2
+    snow: 0.35
+    storm: 0.1
+    fog: 0.05

@@ -1,0 +1,49 @@
+# Mirror of Truth - Key item for revealing illusions
+# Used in the Attachment trial to see through desires
+
+key: mirror_of_truth
+short_desc: "Mirror of Truth"
+long_desc: "a small bronze mirror with eight auspicious symbols etched around its rim"
+keywords:
+  - mirror
+  - truth
+  - bronze
+  - reflection
+primary_keyword: mirror
+type: item
+parent: base_item
+extra_desc: |
+  This ancient bronze mirror is smooth as still water. Around
+  its rim are etched the eight auspicious symbols, and its
+  surface seems to show not your face, but your true nature.
+  In its reflection, illusions of desire cannot hide - every
+  phantom treasure appears as it truly is.
+components:
+  physical:
+    weight: 0.8
+  valuable:
+    base_price: 0
+    cannot_sell: true
+  usable:
+    use_message: "You gaze into the mirror. For a moment, you see not your face but the truth beneath all surfaces."
+    use_effect:
+      type: buff
+      buff_type: true_sight
+      duration: 300
+      bonus:
+        - type: damage
+          amount: 10
+          vs_tags:
+            - attachment
+            - illusion
+            - phantom
+        - type: accuracy
+          amount: 10
+          vs_tags:
+            - illusion
+    cooldown: 60
+tags:
+  - item
+  - quest_item
+  - key_item
+  - sacred

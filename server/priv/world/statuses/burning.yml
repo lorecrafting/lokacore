@@ -1,0 +1,23 @@
+key: burning
+name: "Burning"
+type: debuff
+duration: 3
+stackable: false
+effects:
+  - trigger: on_turn_start
+    effect: damage
+    amount: 5
+    damage_type: fire
+cure_items:
+  - water_flask
+cure_abilities:
+  - ice_shard
+  - quench
+display_icon: fire
+display_color: orange
+description: "You are on fire! Take damage each turn."
+exclusive_with:
+  - frozen
+tags:
+  - fire
+  - damage_over_time

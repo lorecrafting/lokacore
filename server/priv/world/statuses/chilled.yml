@@ -1,0 +1,30 @@
+key: chilled
+name: "Chilled"
+type: debuff
+duration: 3
+stackable: true
+max_stacks: 3
+effects:
+  - trigger: passive
+    effect: stat_modify
+    stat: dex
+    modifier: -2
+  - trigger: on_turn_start
+    effect: damage
+    amount: 2
+    damage_type: cold
+display_icon: snowflake
+display_color: lightblue
+description: "The mountain cold seeps into your bones."
+apply_message: "You shiver as cold seeps through you."
+expire_message: "Warmth returns to your limbs."
+cure_items:
+  - butter_tea
+  - spiced_wine
+cure_abilities:
+  - inner_fire
+tags:
+  - cold
+  - mountain
+  - environment
+  - debuff

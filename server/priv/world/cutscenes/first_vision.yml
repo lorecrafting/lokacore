@@ -1,0 +1,37 @@
+id: first_vision
+name: "First Vision"
+trigger:
+  type: meditate
+  location: meditation_hall
+  condition: "!player.has_flag('first_vision')"
+sequence:
+  - type: fade_out
+    duration: 2
+  - type: narration
+    text: "The world fades. You find yourself in darkness."
+  - type: pause
+    duration: 1
+  - type: dialogue
+    speaker: mysterious_voice
+    text: "You who seek answers..."
+  - type: dialogue
+    speaker: mysterious_voice
+    text: "The demons you will face are not outside you."
+  - type: dialogue
+    speaker: mysterious_voice
+    text: "Every monster was once a thought given form."
+  - type: dialogue
+    speaker: mysterious_voice
+    text: "Look within, and find the path."
+  - type: pause
+    duration: 1
+  - type: fade_in
+    duration: 2
+  - type: narration
+    text: "You return to awareness, the incense smoke curling before you."
+effects:
+  - type: set_flag
+    flag: first_vision
+    value: true
+  - type: add_insight
+    amount: 1

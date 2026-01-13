@@ -1,0 +1,10 @@
+key: merchant
+parent: base_npc
+type: npc
+short_desc: "Merchant"
+extra_desc: "A friendly trader offering wares."
+tags:
+  - friendly
+  - shopkeeper
+attributes:
+  shop_type: general

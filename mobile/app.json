@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "Loka",
+    "slug": "loka",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "loka",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#FAFAFA"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.loka.game"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#FAFAFA"
+      },
+      "package": "com.loka.game"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-asset"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

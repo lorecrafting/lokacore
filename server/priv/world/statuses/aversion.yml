@@ -1,0 +1,28 @@
+key: aversion
+name: "Aversion"
+type: debuff
+category: poison
+duration: 60
+stackable: false
+effects:
+  - trigger: on_attack
+    effect: damage_reflect
+    modifier: 10
+    description: "Your anger burns you as well"
+  - trigger: passive
+    effect: stat_modify
+    stat: defense
+    modifier: -3
+  - trigger: on_combat
+    effect: dvesha_reflect
+    description: "Dvesha Mara reflects your hasty strikes"
+cure_items:
+  - calming_incense
+cure_abilities:
+  - om_mani_padme_hum
+cure_action: defend
+icon: red_flame
+color: red
+description: "Anger consumes you from within."
+apply_message: "Rage floods through you. Everything is an enemy."
+remove_message: "The anger fades. Stillness returns to your mind."

@@ -1,0 +1,49 @@
+# Compassion Offering - Special offering for trial shrines
+# Can be offered to ease the suffering of trial spirits
+
+key: compassion_offering
+short_desc: "Compassion Offering"
+long_desc: "a small bundle wrapped in white cloth, radiating warmth"
+keywords:
+  - offering
+  - compassion
+  - bundle
+  - white
+primary_keyword: offering
+type: item
+parent: base_item
+extra_desc: |
+  A small bundle wrapped in pure white cloth - inside are seven
+  grains of rice, a small flower, a drop of honey, and a prayer
+  written on paper. Together they represent the essence of
+  compassion: nourishment, beauty, sweetness, and good wishes.
+  When offered at a shrine, it is said the suffering spirits
+  find momentary peace.
+components:
+  physical:
+    weight: 0.2
+    stackable: true
+    max_stack: 3
+  valuable:
+    base_price: 50
+  usable:
+    use_message: "You unwrap the offering, releasing the fragrance of honey and flower. A wave of warmth spreads outward."
+    use_effect:
+      type: buff
+      buff_type: compassionate
+      duration: 300
+      bonus:
+        - type: defense
+          amount: 5
+          vs_tags:
+            - spirit
+            - ghost
+        - type: karma
+          amount: 5
+    cooldown: 0
+tags:
+  - item
+  - consumable
+  - offering
+  - sacred
+  - karma_positive

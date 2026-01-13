@@ -1,0 +1,33 @@
+key: preparation_chamber
+parent: base_room
+type: room
+short_desc: "Preparation Chamber"
+long_desc: "A circular chamber at the crossing of three trial passages, lined with ancient cushions."
+extra_desc: |
+  A circular chamber at the crossing of three dark passages. Ancient cushions line the walls while three archways await: gold coins north, flames east, coiled serpent south. A cache of supplies sits in an alcove.
+keywords: []
+exits:
+  west: threshold
+  north: attachment_chamber
+  east: aversion_chamber
+  south: ignorance_chamber
+  down: heart_cave
+tags:
+  - indoor
+  - cave
+  - ancient
+  - dim_light
+  - safe_zone
+  - rest_point
+components:
+  ambient_messages:
+    day:
+      - "The three archways pulse with distinct energies: gold, flame, shadow."
+      - "Ancient cushions hold the impressions of seekers long past."
+      - "The air at the center feels calm, a sanctuary between storms."
+      - "Coins glint from the northern passage. Flames flicker from the east. Darkness coils to the south."
+      - "Prayer beads left by past seekers click softly, moved by invisible hands."
+      - "Three trials await. Three poisons made manifest. Three chances for transformation."
+    night:
+      - "From below, a deeper darkness calls, patient as the mountain itself."
+      - "The supply cache in the alcove offers hope against what waits beyond."

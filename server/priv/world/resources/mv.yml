@@ -1,0 +1,23 @@
+key: mv
+name: "Movement"
+display_name: "MV"
+max_formula: "100 + sta * 5 + dex * 2"
+regen_rate: 3
+regen_condition: always
+regen_rate_resting: 10
+color: green
+icon: boot
+description: "Physical endurance for moving through the world. Different terrain costs different amounts."
+min_value: 0
+starts_full: true
+movement_costs:
+  default: 5
+  outdoor: 5
+  indoor: 3
+  safe_zone: 2
+  road: 3
+  forest: 7
+  mountain: 10
+  cave: 6
+  water: 12
+  climbing: 15

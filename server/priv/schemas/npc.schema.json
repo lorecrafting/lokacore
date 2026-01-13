@@ -1,0 +1,215 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://loka.game/schemas/npc.schema.json",
+  "title": "NPC Prototype",
+  "description": "Schema for NPC prototype definitions. NPCs are placed in priv/world/prototypes/npcs/",
+  "type": "object",
+  "required": ["key", "type", "short_desc"],
+  "additionalProperties": true,
+  "properties": {
+    "key": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "Unique prototype key. Use lowercase with underscores"
+    },
+    "type": {
+      "const": "npc",
+      "description": "Must be 'npc' for NPC prototypes"
+    },
+    "parent": {
+      "type": "string",
+      "default": "base_npc",
+      "description": "Parent prototype to inherit from (usually 'base_npc')"
+    },
+    "short_desc": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Short name shown in room listings (e.g., 'Abbot Jampa')"
+    },
+    "long_desc": {
+      "type": "string",
+      "description": "Full description shown when looking at NPC in room"
+    },
+    "extra_desc": {
+      "type": "string",
+      "description": "Extended description shown when examining NPC"
+    },
+    "keywords": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Words that can be used to refer to this NPC (e.g., ['abbot', 'jampa', 'monk'])"
+    },
+    "primary_keyword": {
+      "type": "string",
+      "description": "The main keyword shown in clickable UI links"
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Tags for filtering (e.g., 'friendly', 'hostile', 'quest_giver', 'vendor')"
+    },
+    "behaviors": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Behavior modules (e.g., 'patrol', 'guard', 'scavenger')"
+    },
+    "attributes": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Custom attributes (respawn_time, aggro_range, etc.)"
+    },
+    "components": {
+      "$ref": "#/definitions/components",
+      "description": "NPC components (combatant, dialogue_tree, shop, teacher)"
+    }
+  },
+  "definitions": {
+    "components": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "combatant": {
+          "$ref": "#/definitions/combatant",
+          "description": "Combat stats and abilities"
+        },
+        "dialogue_tree": {
+          "$ref": "#/definitions/dialogue_tree",
+          "description": "Dialogue nodes for conversation"
+        },
+        "shop": {
+          "$ref": "#/definitions/shop",
+          "description": "Items available for sale"
+        },
+        "teacher": {
+          "$ref": "#/definitions/teacher",
+          "description": "Skills and abilities this NPC can teach"
+        },
+        "quests": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Quest IDs this NPC is associated with"
+        }
+      }
+    },
+    "combatant": {
+      "type": "object",
+      "properties": {
+        "health": {
+          "type": "object",
+          "properties": {
+            "current": { "type": "integer", "minimum": 1 },
+            "max": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "stats": {
+          "type": "object",
+          "properties": {
+            "str": { "type": "integer", "minimum": 1, "description": "Strength" },
+            "dex": { "type": "integer", "minimum": 1, "description": "Dexterity" },
+            "sta": { "type": "integer", "minimum": 1, "description": "Stamina" }
+          }
+        },
+        "level": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "dialogue_tree": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/dialogue_node"
+      },
+      "description": "Map of node_id to dialogue node. Must have 'start' node"
+    },
+    "dialogue_node": {
+      "type": "object",
+      "required": ["text"],
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "What the NPC says"
+        },
+        "show_if": {
+          "type": "object",
+          "description": "Conditions for showing this node",
+          "properties": {
+            "quest_active": { "type": "string" },
+            "quest_not_active": { "type": "string" },
+            "quest_complete": { "type": "string" },
+            "has_flag": { "type": "string" },
+            "not_has_flag": { "type": "string" }
+          }
+        },
+        "completed_quest": {
+          "type": "string",
+          "description": "Only show this node after quest is completed"
+        },
+        "action": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Action to perform: ['accept_quest', 'quest_id'], ['complete_quest', 'quest_id'], ['set_flag', 'flag_name'], ['give_item', 'item_id']"
+        },
+        "choices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/dialogue_choice"
+          },
+          "description": "Player response options"
+        }
+      }
+    },
+    "dialogue_choice": {
+      "type": "object",
+      "required": ["text"],
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "What the player says"
+        },
+        "next": {
+          "type": ["string", "null"],
+          "description": "Node to go to (null to end dialogue)"
+        },
+        "action": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Action to perform when chosen"
+        },
+        "show_if": {
+          "type": "object",
+          "description": "Conditions for showing this choice"
+        }
+      }
+    },
+    "shop": {
+      "type": "object",
+      "properties": {
+        "sells": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Item prototype keys available for sale"
+        },
+        "buys": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tags of items this shop will buy"
+        }
+      }
+    },
+    "teacher": {
+      "type": "object",
+      "properties": {
+        "skills": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Skill IDs this NPC can teach"
+        },
+        "mantras": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Mantras this NPC can teach"
+        }
+      }
+    }
+  }
+}

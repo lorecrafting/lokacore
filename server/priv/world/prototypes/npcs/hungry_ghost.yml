@@ -1,0 +1,45 @@
+key: hungry_ghost
+short_desc: "Hungry Ghost"
+long_desc: "A translucent figure with hollow eyes drifts toward you, moaning."
+type: npc
+parent: base_npc
+keywords:
+  - hungry
+  - ghost
+  - spirit
+  - preta
+  - figure
+primary_keyword: figure
+extra_desc: |
+  A translucent figure with hollow eyes and grasping hands, its
+  form flickering like a guttering candle. It drifts toward you,
+  moaning with endless hunger that can never be satisfied.
+tags:
+  - hostile
+  - undead
+  - attachment
+  - cemetery
+components:
+  combatant:
+    level: 2
+    health:
+      current: 25
+      max: 25
+    stats:
+      str: 6
+      dex: 12
+      sta: 4
+    xp_value: 15
+    gold_value: 8
+  loot:
+    drops:
+      - item: ghost_essence
+        chance: 0.35
+      - item: ruined_potion
+        chance: 0.10
+      - item: bitter_dregs
+        chance: 0.15
+  behavior:
+    ai: grasping
+    can_be_calmed: true
+    calmed_by: offering

@@ -1,0 +1,1508 @@
+# =============================================================================
+# Social/Emote Commands
+# =============================================================================
+# Data-driven social commands for roleplay and expression.
+#
+# Each social has message slots for different contexts:
+#   - no_target: When used alone (e.g., "smile")
+#   - with_target: When targeting someone (e.g., "smile bob")
+#   - self_target: When targeting yourself (e.g., "smile self")
+#   - not_found: When target isn't found
+#
+# Variables available in messages:
+#   {actor}           - The person performing the action
+#   {target}          - The person being targeted
+#   {actor_subjective} - he/she/they (actor)
+#   {actor_objective}  - him/her/them (actor)
+#   {actor_possessive} - his/her/their (actor)
+#   {target_subjective} - he/she/they (target)
+#   {target_objective}  - him/her/them (target)
+#   {target_possessive} - his/her/their (target)
+#   {self_pronoun}     - himself/herself/themself
+# =============================================================================
+
+socials:
+
+  # ---------------------------------------------------------------------------
+  # EMOTIONS - Basic emotional expressions
+  # ---------------------------------------------------------------------------
+
+  smile:
+    aliases: [grin]
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You smile happily."
+        to_room: "{actor} smiles happily."
+      with_target:
+        to_actor: "You smile at {target}."
+        to_target: "{actor} smiles at you warmly."
+        to_room: "{actor} smiles at {target}."
+      self_target:
+        to_actor: "You smile to yourself."
+        to_room: "{actor} smiles to {self_pronoun}."
+      not_found:
+        to_actor: "Smile at whom?"
+
+  laugh:
+    aliases: [lol]
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You laugh out loud."
+        to_room: "{actor} laughs out loud."
+      with_target:
+        to_actor: "You laugh at {target}."
+        to_target: "{actor} laughs at you."
+        to_room: "{actor} laughs at {target}."
+      self_target:
+        to_actor: "You laugh at yourself."
+        to_room: "{actor} laughs at {self_pronoun}."
+      not_found:
+        to_actor: "Laugh at whom?"
+
+  giggle:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You giggle."
+        to_room: "{actor} giggles."
+      with_target:
+        to_actor: "You giggle at {target}."
+        to_target: "{actor} giggles at you."
+        to_room: "{actor} giggles at {target}."
+      not_found:
+        to_actor: "Giggle at whom?"
+
+  chuckle:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You chuckle softly."
+        to_room: "{actor} chuckles softly."
+      with_target:
+        to_actor: "You chuckle at {target}."
+        to_target: "{actor} chuckles at you."
+        to_room: "{actor} chuckles at {target}."
+      not_found:
+        to_actor: "Chuckle at whom?"
+
+  snicker:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You snicker."
+        to_room: "{actor} snickers."
+      with_target:
+        to_actor: "You snicker at {target}."
+        to_target: "{actor} snickers at you."
+        to_room: "{actor} snickers at {target}."
+      not_found:
+        to_actor: "Snicker at whom?"
+
+  cry:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You cry."
+        to_room: "{actor} cries."
+      with_target:
+        to_actor: "You cry on {target}'s shoulder."
+        to_target: "{actor} cries on your shoulder."
+        to_room: "{actor} cries on {target}'s shoulder."
+      not_found:
+        to_actor: "Cry on whose shoulder?"
+
+  sob:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You sob uncontrollably."
+        to_room: "{actor} sobs uncontrollably."
+      with_target:
+        to_actor: "You sob on {target}'s shoulder."
+        to_target: "{actor} sobs on your shoulder."
+        to_room: "{actor} sobs on {target}'s shoulder."
+      not_found:
+        to_actor: "Sob on whose shoulder?"
+
+  weep:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You weep softly."
+        to_room: "{actor} weeps softly."
+      with_target:
+        to_actor: "You weep for {target}."
+        to_target: "{actor} weeps for you."
+        to_room: "{actor} weeps for {target}."
+      not_found:
+        to_actor: "Weep for whom?"
+
+  frown:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You frown."
+        to_room: "{actor} frowns."
+      with_target:
+        to_actor: "You frown at {target}."
+        to_target: "{actor} frowns at you."
+        to_room: "{actor} frowns at {target}."
+      not_found:
+        to_actor: "Frown at whom?"
+
+  sigh:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You sigh."
+        to_room: "{actor} sighs."
+      with_target:
+        to_actor: "You sigh at {target}."
+        to_target: "{actor} sighs at you."
+        to_room: "{actor} sighs at {target}."
+      not_found:
+        to_actor: "Sigh at whom?"
+
+  groan:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You groan."
+        to_room: "{actor} groans."
+      with_target:
+        to_actor: "You groan at {target}."
+        to_target: "{actor} groans at you."
+        to_room: "{actor} groans at {target}."
+      not_found:
+        to_actor: "Groan at whom?"
+
+  moan:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You moan."
+        to_room: "{actor} moans."
+      with_target:
+        to_actor: "You moan at {target}."
+        to_target: "{actor} moans at you."
+        to_room: "{actor} moans at {target}."
+      not_found:
+        to_actor: "Moan at whom?"
+
+  # ---------------------------------------------------------------------------
+  # GREETINGS - Ways to acknowledge others
+  # ---------------------------------------------------------------------------
+
+  wave:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You wave."
+        to_room: "{actor} waves."
+      with_target:
+        to_actor: "You wave at {target}."
+        to_target: "{actor} waves at you."
+        to_room: "{actor} waves at {target}."
+      not_found:
+        to_actor: "Wave at whom?"
+
+  bow:
+    min_position: standing
+    messages:
+      no_target:
+        to_actor: "You bow gracefully."
+        to_room: "{actor} bows gracefully."
+      with_target:
+        to_actor: "You bow before {target}."
+        to_target: "{actor} bows before you."
+        to_room: "{actor} bows before {target}."
+      not_found:
+        to_actor: "Bow before whom?"
+
+  curtsy:
+    min_position: standing
+    messages:
+      no_target:
+        to_actor: "You curtsy gracefully."
+        to_room: "{actor} curtsies gracefully."
+      with_target:
+        to_actor: "You curtsy before {target}."
+        to_target: "{actor} curtsies before you."
+        to_room: "{actor} curtsies before {target}."
+      not_found:
+        to_actor: "Curtsy before whom?"
+
+  salute:
+    min_position: standing
+    messages:
+      no_target:
+        to_actor: "You salute smartly."
+        to_room: "{actor} salutes smartly."
+      with_target:
+        to_actor: "You salute {target}."
+        to_target: "{actor} salutes you."
+        to_room: "{actor} salutes {target}."
+      not_found:
+        to_actor: "Salute whom?"
+
+  nod:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You nod."
+        to_room: "{actor} nods."
+      with_target:
+        to_actor: "You nod at {target}."
+        to_target: "{actor} nods at you."
+        to_room: "{actor} nods at {target}."
+      not_found:
+        to_actor: "Nod at whom?"
+
+  shake:
+    min_position: standing
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You shake hands with {target}."
+        to_target: "{actor} shakes your hand."
+        to_room: "{actor} shakes hands with {target}."
+      not_found:
+        to_actor: "Shake hands with whom?"
+
+  greet:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You greet everyone warmly."
+        to_room: "{actor} greets everyone warmly."
+      with_target:
+        to_actor: "You greet {target} warmly."
+        to_target: "{actor} greets you warmly."
+        to_room: "{actor} greets {target} warmly."
+      not_found:
+        to_actor: "Greet whom?"
+
+  # ---------------------------------------------------------------------------
+  # AFFECTION - Friendly and romantic gestures
+  # ---------------------------------------------------------------------------
+
+  hug:
+    min_position: standing
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You hug {target} warmly."
+        to_target: "{actor} hugs you warmly."
+        to_room: "{actor} hugs {target}."
+      self_target:
+        to_actor: "You wrap your arms around yourself."
+        to_room: "{actor} hugs {self_pronoun}."
+      not_found:
+        to_actor: "Hug whom?"
+
+  kiss:
+    min_position: standing
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You kiss {target}."
+        to_target: "{actor} kisses you."
+        to_room: "{actor} kisses {target}."
+      self_target:
+        to_actor: "You kiss your own hand."
+        to_room: "{actor} kisses {actor_possessive} own hand."
+      not_found:
+        to_actor: "Kiss whom?"
+
+  cuddle:
+    min_position: resting
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You cuddle with {target}."
+        to_target: "{actor} cuddles with you."
+        to_room: "{actor} cuddles with {target}."
+      not_found:
+        to_actor: "Cuddle with whom?"
+
+  snuggle:
+    min_position: resting
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You snuggle up to {target}."
+        to_target: "{actor} snuggles up to you."
+        to_room: "{actor} snuggles up to {target}."
+      not_found:
+        to_actor: "Snuggle with whom?"
+
+  pat:
+    min_position: resting
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You pat {target} on the back."
+        to_target: "{actor} pats you on the back."
+        to_room: "{actor} pats {target} on the back."
+      self_target:
+        to_actor: "You pat yourself on the back."
+        to_room: "{actor} pats {self_pronoun} on the back."
+      not_found:
+        to_actor: "Pat whom?"
+
+  caress:
+    min_position: resting
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You caress {target} gently."
+        to_target: "{actor} caresses you gently."
+        to_room: "{actor} caresses {target} gently."
+      not_found:
+        to_actor: "Caress whom?"
+
+  squeeze:
+    min_position: standing
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You squeeze {target} affectionately."
+        to_target: "{actor} squeezes you affectionately."
+        to_room: "{actor} squeezes {target} affectionately."
+      not_found:
+        to_actor: "Squeeze whom?"
+
+  # ---------------------------------------------------------------------------
+  # AGGRESSION - Hostile and confrontational gestures
+  # ---------------------------------------------------------------------------
+
+  slap:
+    min_position: standing
+    messages:
+      no_target:
+        to_actor: "You slap at the air in frustration."
+        to_room: "{actor} slaps at the air."
+      with_target:
+        to_actor: "You slap {target} across the face!"
+        to_target: "{actor} slaps you hard across the face!"
+        to_room: "{actor} slaps {target} across the face!"
+      self_target:
+        to_actor: "You slap yourself. That hurt!"
+        to_room: "{actor} slaps {self_pronoun}. Odd."
+      not_found:
+        to_actor: "Slap whom?"
+
+  punch:
+    min_position: standing
+    messages:
+      no_target:
+        to_actor: "You punch the air."
+        to_room: "{actor} punches the air."
+      with_target:
+        to_actor: "You punch {target}!"
+        to_target: "{actor} punches you!"
+        to_room: "{actor} punches {target}!"
+      not_found:
+        to_actor: "Punch whom?"
+
+  kick:
+    min_position: standing
+    messages:
+      no_target:
+        to_actor: "You kick at the ground."
+        to_room: "{actor} kicks at the ground."
+      with_target:
+        to_actor: "You kick {target}!"
+        to_target: "{actor} kicks you!"
+        to_room: "{actor} kicks {target}!"
+      not_found:
+        to_actor: "Kick whom?"
+
+  shove:
+    min_position: standing
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You shove {target}!"
+        to_target: "{actor} shoves you!"
+        to_room: "{actor} shoves {target}!"
+      not_found:
+        to_actor: "Shove whom?"
+
+  glare:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You glare around the room."
+        to_room: "{actor} glares around the room."
+      with_target:
+        to_actor: "You glare icily at {target}."
+        to_target: "{actor} glares icily at you."
+        to_room: "{actor} glares icily at {target}."
+      not_found:
+        to_actor: "Glare at whom?"
+
+  snarl:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You snarl menacingly."
+        to_room: "{actor} snarls menacingly."
+      with_target:
+        to_actor: "You snarl at {target}."
+        to_target: "{actor} snarls at you."
+        to_room: "{actor} snarls at {target}."
+      not_found:
+        to_actor: "Snarl at whom?"
+
+  growl:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You growl."
+        to_room: "{actor} growls."
+      with_target:
+        to_actor: "You growl at {target}."
+        to_target: "{actor} growls at you."
+        to_room: "{actor} growls at {target}."
+      not_found:
+        to_actor: "Growl at whom?"
+
+  spit:
+    min_position: standing
+    messages:
+      no_target:
+        to_actor: "You spit on the ground."
+        to_room: "{actor} spits on the ground."
+      with_target:
+        to_actor: "You spit at {target}!"
+        to_target: "{actor} spits at you!"
+        to_room: "{actor} spits at {target}!"
+      not_found:
+        to_actor: "Spit at whom?"
+
+  threaten:
+    min_position: standing
+    messages:
+      no_target:
+        to_actor: "You make threatening gestures."
+        to_room: "{actor} makes threatening gestures."
+      with_target:
+        to_actor: "You threaten {target}."
+        to_target: "{actor} threatens you!"
+        to_room: "{actor} threatens {target}."
+      not_found:
+        to_actor: "Threaten whom?"
+
+  # ---------------------------------------------------------------------------
+  # GESTURES - Body language and hand signals
+  # ---------------------------------------------------------------------------
+
+  point:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You point."
+        to_room: "{actor} points."
+      with_target:
+        to_actor: "You point at {target}."
+        to_target: "{actor} points at you."
+        to_room: "{actor} points at {target}."
+      not_found:
+        to_actor: "Point at whom?"
+
+  beckon:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You beckon."
+        to_room: "{actor} beckons."
+      with_target:
+        to_actor: "You beckon to {target}."
+        to_target: "{actor} beckons to you."
+        to_room: "{actor} beckons to {target}."
+      not_found:
+        to_actor: "Beckon to whom?"
+
+  shrug:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You shrug helplessly."
+        to_room: "{actor} shrugs helplessly."
+      with_target:
+        to_actor: "You shrug at {target}."
+        to_target: "{actor} shrugs at you."
+        to_room: "{actor} shrugs at {target}."
+      not_found:
+        to_actor: "Shrug at whom?"
+
+  wink:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You wink suggestively."
+        to_room: "{actor} winks suggestively."
+      with_target:
+        to_actor: "You wink at {target}."
+        to_target: "{actor} winks at you."
+        to_room: "{actor} winks at {target}."
+      not_found:
+        to_actor: "Wink at whom?"
+
+  blink:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You blink."
+        to_room: "{actor} blinks."
+      with_target:
+        to_actor: "You blink at {target}."
+        to_target: "{actor} blinks at you."
+        to_room: "{actor} blinks at {target}."
+      not_found:
+        to_actor: "Blink at whom?"
+
+  stare:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You stare into space."
+        to_room: "{actor} stares into space."
+      with_target:
+        to_actor: "You stare at {target}."
+        to_target: "{actor} stares at you."
+        to_room: "{actor} stares at {target}."
+      not_found:
+        to_actor: "Stare at whom?"
+
+  gaze:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You gaze off into the distance."
+        to_room: "{actor} gazes off into the distance."
+      with_target:
+        to_actor: "You gaze at {target}."
+        to_target: "{actor} gazes at you."
+        to_room: "{actor} gazes at {target}."
+      not_found:
+        to_actor: "Gaze at whom?"
+
+  clap:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You clap your hands together."
+        to_room: "{actor} claps."
+      with_target:
+        to_actor: "You clap for {target}."
+        to_target: "{actor} claps for you."
+        to_room: "{actor} claps for {target}."
+      not_found:
+        to_actor: "Clap for whom?"
+
+  applaud:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You applaud enthusiastically."
+        to_room: "{actor} applauds enthusiastically."
+      with_target:
+        to_actor: "You applaud {target}."
+        to_target: "{actor} applauds you."
+        to_room: "{actor} applauds {target}."
+      not_found:
+        to_actor: "Applaud whom?"
+
+  snap:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You snap your fingers."
+        to_room: "{actor} snaps {actor_possessive} fingers."
+      with_target:
+        to_actor: "You snap your fingers at {target}."
+        to_target: "{actor} snaps {actor_possessive} fingers at you."
+        to_room: "{actor} snaps {actor_possessive} fingers at {target}."
+      not_found:
+        to_actor: "Snap at whom?"
+
+  # ---------------------------------------------------------------------------
+  # PHYSICAL - Body movements and actions
+  # ---------------------------------------------------------------------------
+
+  dance:
+    min_position: standing
+    messages:
+      no_target:
+        to_actor: "You dance around."
+        to_room: "{actor} dances around."
+      with_target:
+        to_actor: "You dance with {target}."
+        to_target: "{actor} dances with you."
+        to_room: "{actor} dances with {target}."
+      not_found:
+        to_actor: "Dance with whom?"
+
+  spin:
+    min_position: standing
+    messages:
+      no_target:
+        to_actor: "You spin around."
+        to_room: "{actor} spins around."
+      with_target:
+        to_actor: "You spin {target} around."
+        to_target: "{actor} spins you around."
+        to_room: "{actor} spins {target} around."
+      not_found:
+        to_actor: "Spin whom?"
+
+  twirl:
+    min_position: standing
+    messages:
+      no_target:
+        to_actor: "You twirl gracefully."
+        to_room: "{actor} twirls gracefully."
+      with_target:
+        to_actor: "You twirl {target} around."
+        to_target: "{actor} twirls you around."
+        to_room: "{actor} twirls {target} around."
+      not_found:
+        to_actor: "Twirl whom?"
+
+  jump:
+    min_position: standing
+    messages:
+      no_target:
+        to_actor: "You jump up and down."
+        to_room: "{actor} jumps up and down."
+      with_target:
+        to_actor: "You jump at {target}."
+        to_target: "{actor} jumps at you."
+        to_room: "{actor} jumps at {target}."
+      not_found:
+        to_actor: "Jump at whom?"
+
+  skip:
+    min_position: standing
+    messages:
+      no_target:
+        to_actor: "You skip around happily."
+        to_room: "{actor} skips around happily."
+      with_target:
+        to_actor: "You skip around {target}."
+        to_target: "{actor} skips around you."
+        to_room: "{actor} skips around {target}."
+      not_found:
+        to_actor: "Skip around whom?"
+
+  stretch:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You stretch your limbs."
+        to_room: "{actor} stretches."
+      with_target:
+        to_actor: "You stretch towards {target}."
+        to_target: "{actor} stretches towards you."
+        to_room: "{actor} stretches towards {target}."
+      not_found:
+        to_actor: "Stretch towards whom?"
+
+  yawn:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You yawn."
+        to_room: "{actor} yawns."
+      with_target:
+        to_actor: "You yawn at {target}."
+        to_target: "{actor} yawns at you."
+        to_room: "{actor} yawns at {target}."
+      not_found:
+        to_actor: "Yawn at whom?"
+
+  flex:
+    min_position: standing
+    messages:
+      no_target:
+        to_actor: "You flex your muscles impressively."
+        to_room: "{actor} flexes impressively."
+      with_target:
+        to_actor: "You flex at {target}."
+        to_target: "{actor} flexes at you."
+        to_room: "{actor} flexes at {target}."
+      not_found:
+        to_actor: "Flex at whom?"
+
+  kneel:
+    min_position: standing
+    messages:
+      no_target:
+        to_actor: "You kneel down."
+        to_room: "{actor} kneels down."
+      with_target:
+        to_actor: "You kneel before {target}."
+        to_target: "{actor} kneels before you."
+        to_room: "{actor} kneels before {target}."
+      not_found:
+        to_actor: "Kneel before whom?"
+
+  # ---------------------------------------------------------------------------
+  # REACTIONS - Responses to events or others
+  # ---------------------------------------------------------------------------
+
+  gasp:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You gasp in surprise."
+        to_room: "{actor} gasps in surprise."
+      with_target:
+        to_actor: "You gasp at {target}."
+        to_target: "{actor} gasps at you."
+        to_room: "{actor} gasps at {target}."
+      not_found:
+        to_actor: "Gasp at whom?"
+
+  cringe:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You cringe."
+        to_room: "{actor} cringes."
+      with_target:
+        to_actor: "You cringe away from {target}."
+        to_target: "{actor} cringes away from you."
+        to_room: "{actor} cringes away from {target}."
+      not_found:
+        to_actor: "Cringe from whom?"
+
+  wince:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You wince."
+        to_room: "{actor} winces."
+      with_target:
+        to_actor: "You wince at {target}."
+        to_target: "{actor} winces at you."
+        to_room: "{actor} winces at {target}."
+      not_found:
+        to_actor: "Wince at whom?"
+
+  flinch:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You flinch."
+        to_room: "{actor} flinches."
+      with_target:
+        to_actor: "You flinch away from {target}."
+        to_target: "{actor} flinches away from you."
+        to_room: "{actor} flinches away from {target}."
+      not_found:
+        to_actor: "Flinch from whom?"
+
+  shudder:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You shudder."
+        to_room: "{actor} shudders."
+      with_target:
+        to_actor: "You shudder at the thought of {target}."
+        to_target: "{actor} shudders at the thought of you."
+        to_room: "{actor} shudders at the thought of {target}."
+      not_found:
+        to_actor: "Shudder at whom?"
+
+  tremble:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You tremble."
+        to_room: "{actor} trembles."
+      with_target:
+        to_actor: "You tremble before {target}."
+        to_target: "{actor} trembles before you."
+        to_room: "{actor} trembles before {target}."
+      not_found:
+        to_actor: "Tremble before whom?"
+
+  cower:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You cower in fear."
+        to_room: "{actor} cowers in fear."
+      with_target:
+        to_actor: "You cower before {target}."
+        to_target: "{actor} cowers before you."
+        to_room: "{actor} cowers before {target}."
+      not_found:
+        to_actor: "Cower before whom?"
+
+  # ---------------------------------------------------------------------------
+  # EXPRESSIONS - Facial expressions
+  # ---------------------------------------------------------------------------
+
+  smirk:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You smirk."
+        to_room: "{actor} smirks."
+      with_target:
+        to_actor: "You smirk at {target}."
+        to_target: "{actor} smirks at you."
+        to_room: "{actor} smirks at {target}."
+      not_found:
+        to_actor: "Smirk at whom?"
+
+  sneer:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You sneer."
+        to_room: "{actor} sneers."
+      with_target:
+        to_actor: "You sneer at {target}."
+        to_target: "{actor} sneers at you."
+        to_room: "{actor} sneers at {target}."
+      not_found:
+        to_actor: "Sneer at whom?"
+
+  pout:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You pout."
+        to_room: "{actor} pouts."
+      with_target:
+        to_actor: "You pout at {target}."
+        to_target: "{actor} pouts at you."
+        to_room: "{actor} pouts at {target}."
+      not_found:
+        to_actor: "Pout at whom?"
+
+  scowl:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You scowl."
+        to_room: "{actor} scowls."
+      with_target:
+        to_actor: "You scowl at {target}."
+        to_target: "{actor} scowls at you."
+        to_room: "{actor} scowls at {target}."
+      not_found:
+        to_actor: "Scowl at whom?"
+
+  beam:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You beam with joy."
+        to_room: "{actor} beams with joy."
+      with_target:
+        to_actor: "You beam at {target}."
+        to_target: "{actor} beams at you."
+        to_room: "{actor} beams at {target}."
+      not_found:
+        to_actor: "Beam at whom?"
+
+  blush:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You blush."
+        to_room: "{actor} blushes."
+      with_target:
+        to_actor: "You blush at {target}."
+        to_target: "{actor} blushes at you."
+        to_room: "{actor} blushes at {target}."
+      not_found:
+        to_actor: "Blush at whom?"
+
+  gawk:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You gawk around."
+        to_room: "{actor} gawks around."
+      with_target:
+        to_actor: "You gawk at {target}."
+        to_target: "{actor} gawks at you."
+        to_room: "{actor} gawks at {target}."
+      not_found:
+        to_actor: "Gawk at whom?"
+
+  # ---------------------------------------------------------------------------
+  # SOCIAL - Polite and social interactions
+  # ---------------------------------------------------------------------------
+
+  thank:
+    min_position: resting
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You thank {target}."
+        to_target: "{actor} thanks you."
+        to_room: "{actor} thanks {target}."
+      not_found:
+        to_actor: "Thank whom?"
+
+  apologize:
+    aliases: [sorry]
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You apologize."
+        to_room: "{actor} apologizes."
+      with_target:
+        to_actor: "You apologize to {target}."
+        to_target: "{actor} apologizes to you."
+        to_room: "{actor} apologizes to {target}."
+      not_found:
+        to_actor: "Apologize to whom?"
+
+  agree:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You nod in agreement."
+        to_room: "{actor} nods in agreement."
+      with_target:
+        to_actor: "You agree with {target}."
+        to_target: "{actor} agrees with you."
+        to_room: "{actor} agrees with {target}."
+      not_found:
+        to_actor: "Agree with whom?"
+
+  disagree:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You shake your head in disagreement."
+        to_room: "{actor} shakes {actor_possessive} head in disagreement."
+      with_target:
+        to_actor: "You disagree with {target}."
+        to_target: "{actor} disagrees with you."
+        to_room: "{actor} disagrees with {target}."
+      not_found:
+        to_actor: "Disagree with whom?"
+
+  comfort:
+    min_position: resting
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You comfort {target}."
+        to_target: "{actor} comforts you."
+        to_room: "{actor} comforts {target}."
+      not_found:
+        to_actor: "Comfort whom?"
+
+  congratulate:
+    aliases: [congrats]
+    min_position: resting
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You congratulate {target}."
+        to_target: "{actor} congratulates you."
+        to_room: "{actor} congratulates {target}."
+      not_found:
+        to_actor: "Congratulate whom?"
+
+  welcome:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You welcome everyone."
+        to_room: "{actor} welcomes everyone."
+      with_target:
+        to_actor: "You welcome {target}."
+        to_target: "{actor} welcomes you."
+        to_room: "{actor} welcomes {target}."
+      not_found:
+        to_actor: "Welcome whom?"
+
+  # ---------------------------------------------------------------------------
+  # FUN - Playful interactions
+  # ---------------------------------------------------------------------------
+
+  tickle:
+    min_position: standing
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You tickle {target}."
+        to_target: "{actor} tickles you."
+        to_room: "{actor} tickles {target}."
+      not_found:
+        to_actor: "Tickle whom?"
+
+  poke:
+    min_position: resting
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You poke {target}."
+        to_target: "{actor} pokes you."
+        to_room: "{actor} pokes {target}."
+      self_target:
+        to_actor: "You poke yourself in the eye. Ouch!"
+        to_room: "{actor} pokes {self_pronoun} in the eye."
+      not_found:
+        to_actor: "Poke whom?"
+
+  nudge:
+    min_position: resting
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You nudge {target}."
+        to_target: "{actor} nudges you."
+        to_room: "{actor} nudges {target}."
+      not_found:
+        to_actor: "Nudge whom?"
+
+  tease:
+    min_position: resting
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You tease {target} playfully."
+        to_target: "{actor} teases you playfully."
+        to_room: "{actor} teases {target} playfully."
+      not_found:
+        to_actor: "Tease whom?"
+
+  flirt:
+    min_position: resting
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You flirt with {target}."
+        to_target: "{actor} flirts with you."
+        to_room: "{actor} flirts with {target}."
+      not_found:
+        to_actor: "Flirt with whom?"
+
+  woo:
+    min_position: standing
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You woo {target}."
+        to_target: "{actor} woos you."
+        to_room: "{actor} woos {target}."
+      not_found:
+        to_actor: "Woo whom?"
+
+  tackle:
+    min_position: standing
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You tackle {target}!"
+        to_target: "{actor} tackles you!"
+        to_room: "{actor} tackles {target}!"
+      not_found:
+        to_actor: "Tackle whom?"
+
+  ruffle:
+    min_position: standing
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You ruffle {target}'s hair."
+        to_target: "{actor} ruffles your hair."
+        to_room: "{actor} ruffles {target}'s hair."
+      not_found:
+        to_actor: "Ruffle whose hair?"
+
+  # ---------------------------------------------------------------------------
+  # MISCELLANEOUS - Various other actions
+  # ---------------------------------------------------------------------------
+
+  think:
+    aliases: [ponder]
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You think deeply."
+        to_room: "{actor} thinks deeply."
+      with_target:
+        to_actor: "You think about {target}."
+        to_target: "{actor} thinks about you."
+        to_room: "{actor} thinks about {target}."
+      not_found:
+        to_actor: "Think about whom?"
+
+  wonder:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You wonder about things."
+        to_room: "{actor} wonders about things."
+      with_target:
+        to_actor: "You wonder about {target}."
+        to_target: "{actor} wonders about you."
+        to_room: "{actor} wonders about {target}."
+      not_found:
+        to_actor: "Wonder about whom?"
+
+  pray:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You pray."
+        to_room: "{actor} prays."
+      with_target:
+        to_actor: "You pray for {target}."
+        to_target: "{actor} prays for you."
+        to_room: "{actor} prays for {target}."
+      not_found:
+        to_actor: "Pray for whom?"
+
+  meditate:
+    min_position: sitting
+    messages:
+      no_target:
+        to_actor: "You meditate peacefully."
+        to_room: "{actor} meditates peacefully."
+      with_target:
+        to_actor: "You meditate on {target}."
+        to_target: "{actor} meditates on you. How strange."
+        to_room: "{actor} meditates on {target}."
+      not_found:
+        to_actor: "Meditate on whom?"
+
+  grumble:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You grumble."
+        to_room: "{actor} grumbles."
+      with_target:
+        to_actor: "You grumble about {target}."
+        to_target: "{actor} grumbles about you."
+        to_room: "{actor} grumbles about {target}."
+      not_found:
+        to_actor: "Grumble about whom?"
+
+  mutter:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You mutter under your breath."
+        to_room: "{actor} mutters under {actor_possessive} breath."
+      with_target:
+        to_actor: "You mutter about {target}."
+        to_target: "{actor} mutters something about you."
+        to_room: "{actor} mutters about {target}."
+      not_found:
+        to_actor: "Mutter about whom?"
+
+  whistle:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You whistle innocently."
+        to_room: "{actor} whistles innocently."
+      with_target:
+        to_actor: "You whistle at {target}."
+        to_target: "{actor} whistles at you."
+        to_room: "{actor} whistles at {target}."
+      not_found:
+        to_actor: "Whistle at whom?"
+
+  hum:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You hum a little tune."
+        to_room: "{actor} hums a little tune."
+      with_target:
+        to_actor: "You hum at {target}."
+        to_target: "{actor} hums at you."
+        to_room: "{actor} hums at {target}."
+      not_found:
+        to_actor: "Hum at whom?"
+
+  sing:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You sing a song."
+        to_room: "{actor} sings a song."
+      with_target:
+        to_actor: "You sing to {target}."
+        to_target: "{actor} sings to you."
+        to_room: "{actor} sings to {target}."
+      not_found:
+        to_actor: "Sing to whom?"
+
+  scream:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You scream!"
+        to_room: "{actor} screams!"
+      with_target:
+        to_actor: "You scream at {target}!"
+        to_target: "{actor} screams at you!"
+        to_room: "{actor} screams at {target}!"
+      not_found:
+        to_actor: "Scream at whom?"
+
+  whine:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You whine pitifully."
+        to_room: "{actor} whines pitifully."
+      with_target:
+        to_actor: "You whine at {target}."
+        to_target: "{actor} whines at you."
+        to_room: "{actor} whines at {target}."
+      not_found:
+        to_actor: "Whine at whom?"
+
+  sulk:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You sulk in the corner."
+        to_room: "{actor} sulks in the corner."
+      with_target:
+        to_actor: "You sulk at {target}."
+        to_target: "{actor} sulks at you."
+        to_room: "{actor} sulks at {target}."
+      not_found:
+        to_actor: "Sulk at whom?"
+
+  brood:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You brood darkly."
+        to_room: "{actor} broods darkly."
+      with_target:
+        to_actor: "You brood about {target}."
+        to_target: "{actor} broods about you."
+        to_room: "{actor} broods about {target}."
+      not_found:
+        to_actor: "Brood about whom?"
+
+  snore:
+    min_position: sleeping
+    messages:
+      no_target:
+        to_actor: "You snore loudly."
+        to_room: "{actor} snores loudly."
+
+  drool:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You drool."
+        to_room: "{actor} drools."
+      with_target:
+        to_actor: "You drool over {target}."
+        to_target: "{actor} drools over you. Ew."
+        to_room: "{actor} drools over {target}."
+      not_found:
+        to_actor: "Drool over whom?"
+
+  hiccup:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You hiccup."
+        to_room: "{actor} hiccups."
+
+  cough:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You cough."
+        to_room: "{actor} coughs."
+      with_target:
+        to_actor: "You cough at {target}."
+        to_target: "{actor} coughs at you."
+        to_room: "{actor} coughs at {target}."
+      not_found:
+        to_actor: "Cough at whom?"
+
+  sneeze:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You sneeze."
+        to_room: "{actor} sneezes."
+      with_target:
+        to_actor: "You sneeze on {target}."
+        to_target: "{actor} sneezes on you. Gross!"
+        to_room: "{actor} sneezes on {target}."
+      not_found:
+        to_actor: "Sneeze on whom?"
+
+  burp:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You burp loudly."
+        to_room: "{actor} burps loudly."
+      with_target:
+        to_actor: "You burp at {target}."
+        to_target: "{actor} burps at you."
+        to_room: "{actor} burps at {target}."
+      not_found:
+        to_actor: "Burp at whom?"
+
+  twiddle:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You twiddle your thumbs."
+        to_room: "{actor} twiddles {actor_possessive} thumbs."
+
+  tap:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You tap your foot impatiently."
+        to_room: "{actor} taps {actor_possessive} foot impatiently."
+      with_target:
+        to_actor: "You tap {target} on the shoulder."
+        to_target: "{actor} taps you on the shoulder."
+        to_room: "{actor} taps {target} on the shoulder."
+      not_found:
+        to_actor: "Tap whom?"
+
+  scratch:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You scratch yourself."
+        to_room: "{actor} scratches {self_pronoun}."
+      with_target:
+        to_actor: "You scratch {target}'s back."
+        to_target: "{actor} scratches your back."
+        to_room: "{actor} scratches {target}'s back."
+      not_found:
+        to_actor: "Scratch whom?"
+
+  dismiss:
+    min_position: resting
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You dismiss {target} with a wave of your hand."
+        to_target: "{actor} dismisses you with a wave."
+        to_room: "{actor} dismisses {target} with a wave."
+      not_found:
+        to_actor: "Dismiss whom?"
+
+  ignore:
+    min_position: resting
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You pointedly ignore {target}."
+        to_target: "{actor} pointedly ignores you."
+        to_room: "{actor} pointedly ignores {target}."
+      not_found:
+        to_actor: "Ignore whom?"
+
+  mock:
+    min_position: resting
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You mock {target}."
+        to_target: "{actor} mocks you."
+        to_room: "{actor} mocks {target}."
+      not_found:
+        to_actor: "Mock whom?"
+
+  mimic:
+    min_position: standing
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You mimic {target}."
+        to_target: "{actor} mimics you."
+        to_room: "{actor} mimics {target}."
+      not_found:
+        to_actor: "Mimic whom?"
+
+  eyeroll:
+    aliases: [roll]
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You roll your eyes."
+        to_room: "{actor} rolls {actor_possessive} eyes."
+      with_target:
+        to_actor: "You roll your eyes at {target}."
+        to_target: "{actor} rolls {actor_possessive} eyes at you."
+        to_room: "{actor} rolls {actor_possessive} eyes at {target}."
+      not_found:
+        to_actor: "Roll your eyes at whom?"
+
+  cheer:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You cheer!"
+        to_room: "{actor} cheers!"
+      with_target:
+        to_actor: "You cheer for {target}!"
+        to_target: "{actor} cheers for you!"
+        to_room: "{actor} cheers for {target}!"
+      not_found:
+        to_actor: "Cheer for whom?"
+
+  toast:
+    min_position: standing
+    messages:
+      no_target:
+        to_actor: "You raise a toast!"
+        to_room: "{actor} raises a toast!"
+      with_target:
+        to_actor: "You raise a toast to {target}!"
+        to_target: "{actor} raises a toast to you!"
+        to_room: "{actor} raises a toast to {target}!"
+      not_found:
+        to_actor: "Toast whom?"
+
+  highfive:
+    aliases: [hi5]
+    min_position: standing
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You high-five {target}!"
+        to_target: "{actor} high-fives you!"
+        to_room: "{actor} high-fives {target}!"
+      not_found:
+        to_actor: "High-five whom?"
+
+  fistbump:
+    min_position: standing
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You fist-bump {target}."
+        to_target: "{actor} fist-bumps you."
+        to_room: "{actor} fist-bumps {target}."
+      not_found:
+        to_actor: "Fist-bump whom?"

@@ -1,0 +1,33 @@
+key: mortar_and_pestle
+type: item
+parent: base_item
+short_desc: "Mortar and Pestle"
+long_desc: "a stone mortar and pestle for grinding herbs"
+extra_desc: |
+  A heavy stone mortar bowl with a matching pestle, worn smooth
+  from years of use. Essential for any herbalist, it can grind
+  dried herbs and roots into fine powders for medicines and teas.
+keywords:
+  - mortar
+  - pestle
+  - grinder
+  - stone
+  - tool
+primary_keyword: mortar
+tags:
+  - item
+  - tool
+  - crafting
+  - herbalism
+components:
+  crafting_tool:
+    station_type: herbalism_station
+    recipes_enabled:
+      - recipe_calming_tea
+      - recipe_willpower_tonic
+      - recipe_health_potion
+  physical:
+    weight: 2.0
+    stackable: false
+  valuable:
+    base_price: 35

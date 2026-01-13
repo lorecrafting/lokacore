@@ -1,0 +1,165 @@
+key: novice_pema
+type: npc
+parent: base_npc
+
+# LegendMUD-style description fields
+short_desc: "Novice Pema"
+long_desc: "A young monk with earnest eyes waits anxiously here."
+extra_desc: |
+  A young monk barely past childhood, with earnest eyes and a
+  determined set to her jaw. She attends Lama Tenzin's meditation
+  chamber, refusing to leave his side even as days pass.
+keywords:
+  - monk
+  - young
+  - pema
+  - novice
+primary_keyword: monk
+mood: anxious
+
+tags:
+  - friendly
+  - companion
+  - monastery
+components:
+  ambient_actions:
+    messages:
+      - "Pema shifts nervously, glancing toward the meditation chamber."
+      - "The young novice wrings her hands anxiously."
+      - "Pema whispers a quiet prayer under her breath."
+      - "The novice paces a few steps, then stops, composing herself."
+      - "Pema brushes a stray tear from her cheek."
+    interval_min: 25
+    interval_max: 50
+    chance: 0.6
+  combatant:
+    health:
+      current: 40
+      max: 40
+    stats:
+      str: 6
+      dex: 10
+      sta: 6
+    level: 1
+  dialogue_tree:
+    # ==========================================================================
+    # BEST PRACTICE: Quest offers should be upfront in the first dialogue node.
+    # Players can accept immediately or ask for more context.
+    # Pattern: [Accept Quest] first, then [Ask Questions], then [Decline/Leave]
+    # ==========================================================================
+
+    # Start when player has the journal - show it to Pema (highest priority)
+    start_has_journal:
+      text: "[Pema's eyes widen as she sees the journal.] Master Tenzin's journal! You found it! [She takes it reverently, reading quickly.] These final entries... he knew. He went to face the Three Poisons willingly. He went into the caves to confront Mara himself."
+      show_if:
+        quest_active: "main_sleeping_master"
+      choices:
+        - text: "The Abbot needs to see this."
+          next: "return_to_abbot"
+        - text: "What do you make of this?"
+          next: "tenzin_info"
+    # Response after showing journal - directs back to Abbot
+    return_to_abbot:
+      text: "Yes! Take this to Abbot Jampa immediately. He will know what to do. And... when the time comes to enter the caves, I want to come with you. Master Tenzin believed in me. I won't abandon him now."
+      choices:
+        - text: "We'll face this together."
+          next: null
+        - text: "I'll return to the Abbot."
+          next: null
+
+    # Default start - quest offer upfront
+    start:
+      text: "You've come! The mountain has answered our prayers. I am Pema, a novice here. Something terrible has happened to Master Tenzin - please, will you speak with Abbot Jampa in the temple? He desperately needs help."
+      show_if:
+        quest_not_active: "intro_find_temple"
+      action: ["complete_quest", "intro_welcome"]
+      choices:
+        - text: "[Accept Quest] I'll go to the temple now."
+          next: "quest_given"
+          action: ["accept_quest", "intro_find_temple"]
+        - text: "Tell me more about what happened."
+          next: "more_info"
+        - text: "I should look around first."
+          next: null
+
+    # More info branch for curious players
+    more_info:
+      text: "Master Tenzin is our meditation master - the heart of this monastery. Seven days ago, he entered deep meditation and has not returned. He spoke of Mara in his sleep... I think he went to face his own demons. The Abbot knows more."
+      choices:
+        - text: "[Accept Quest] I'll speak with the Abbot."
+          next: "quest_given"
+          action: ["accept_quest", "intro_find_temple"]
+        - text: "What are these demons?"
+          next: "demons_info"
+        - text: "I need to think about this."
+          next: null
+
+    # Start when intro_find_temple is active - reminder
+    start_active:
+      text: "You're back! Have you found the temple yet? The Abbot awaits - go north through the courtyard. Please, hurry!"
+      show_if:
+        quest_active: "intro_find_temple"
+      choices:
+        - text: "I'm on my way."
+          next: null
+        - text: "Tell me the directions again."
+          next: "monastery_info"
+
+    # Start after intro_find_temple completed
+    start_completed:
+      completed_quest: "intro_find_temple"
+      text: "Thank the mountain you found the Abbot! I knew you would help us. Is there anything else you need to know?"
+      choices:
+        - text: "Tell me more about Tenzin."
+          next: "tenzin_info"
+        - text: "What are these caves everyone speaks of?"
+          next: "caves_info"
+        - text: "I should continue my journey."
+          next: null
+
+    tenzin_info:
+      text: "He entered meditation willingly. I saw him prepare - he knew what he was facing. He left his journal behind in his meditation cell. I think he wanted someone to find it."
+      choices:
+        - text: "Where is this journal?"
+          next: "journal_location"
+        - text: "What demons was he facing?"
+          next: "demons_info"
+
+    journal_location:
+      text: "It should still be in his meditation cell. Go through the courtyard to the north, then find the guest hall. His cell is in the back. Be careful - strange things have been happening there. Shadows that move on their own. Whispers in empty rooms."
+      choices:
+        - text: "I'll find the journal."
+          next: null
+
+    demons_info:
+      text: "In our teachings, the Three Poisons are attachment, aversion, and ignorance - the roots of all suffering. Master Tenzin believed they could manifest... become real. The caves beneath the monastery are said to hold such power."
+      choices:
+        - text: "Where are these caves?"
+          next: "caves_info"
+        - text: "I understand."
+          next: null
+
+    caves_info:
+      text: "The cave entrance is beyond the cemetery to the east, but it is sealed. Only the Abbot holds the key. You must speak with Abbot Jampa in the temple first."
+      choices:
+        - text: "Thank you for the information."
+          next: null
+
+    quest_given:
+      text: "Thank you, traveler. The temple is through the courtyard to the north - you'll see the golden roof. The Abbot will know what to do. Please, hurry."
+      choices:
+        - text: "I'll find him."
+          next: null
+
+    monastery_info:
+      text: "The courtyard is just north of here. The temple is at its north end - you'll see the golden roof. The meditation hall is to the east, and the dining hall to the west."
+      choices:
+        - text: "Thank you."
+          next: null
+  companion:
+    can_join: true
+    combat_style: support
+    growth_arc: courage
+    abilities:
+      - minor_heal
+      - encourage

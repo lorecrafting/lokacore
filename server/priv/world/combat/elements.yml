@@ -1,0 +1,76 @@
+# Element Definitions
+# Defines elemental damage types and their relationships
+#
+# Multipliers:
+#   strong_against: 1.5x damage (50% bonus)
+#   weak_against: 0.5x damage (50% penalty)
+#   neutral: 1.0x damage
+
+elements:
+  fire:
+    name: "Fire"
+    strong_against: [ice, plant]
+    weak_against: [water, earth]
+    color: red
+
+  water:
+    name: "Water"
+    strong_against: [fire, earth]
+    weak_against: [lightning, ice]
+    color: blue
+
+  lightning:
+    name: "Lightning"
+    strong_against: [water, metal]
+    weak_against: [earth, wood]
+    color: yellow
+
+  earth:
+    name: "Earth"
+    strong_against: [lightning, poison]
+    weak_against: [water, plant]
+    color: brown
+
+  ice:
+    name: "Ice"
+    strong_against: [water, plant]
+    weak_against: [fire, metal]
+    color: cyan
+
+  plant:
+    name: "Plant"
+    strong_against: [earth, water]
+    weak_against: [fire, ice]
+    color: green
+
+  poison:
+    name: "Poison"
+    strong_against: [plant, flesh]
+    weak_against: [earth, metal]
+    color: purple
+
+  metal:
+    name: "Metal"
+    strong_against: [ice, bone]
+    weak_against: [lightning, fire]
+    color: silver
+
+  light:
+    name: "Light"
+    strong_against: [shadow, undead]
+    weak_against: []
+    color: white
+
+  shadow:
+    name: "Shadow"
+    strong_against: [light, mind]
+    weak_against: [light]
+    color: black
+
+  # Game-specific elements can be added here
+  # Example for Buddhist-themed game:
+  # wisdom:
+  #   name: "Wisdom"
+  #   strong_against: [ignorance, illusion]
+  #   weak_against: []
+  #   color: gold

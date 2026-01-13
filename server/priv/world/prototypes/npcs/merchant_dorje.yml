@@ -1,0 +1,102 @@
+key: merchant_dorje
+short_desc: "Merchant Dorje"
+long_desc: "A weathered trader with a ready smile minds his bulging pack of goods."
+type: npc
+parent: base_npc
+keywords:
+  - merchant
+  - dorje
+  - trader
+primary_keyword: trader
+extra_desc: |
+  A weathered trader with shrewd eyes and a ready smile, his pack
+  bulging with goods from distant valleys. He has traveled every
+  mountain path and lived to profit from it.
+tags:
+  - friendly
+  - merchant
+  - village
+components:
+  ambient_actions:
+    messages:
+      - "Dorje rearranges items in his pack with practiced efficiency."
+      - "The merchant polishes a piece of jade with a soft cloth."
+      - "Dorje counts coins, lips moving silently."
+      - "The trader examines a bundle of incense, nodding approvingly."
+      - "Dorje glances toward the mountain pass, as if expecting travelers."
+    interval_min: 30
+    interval_max: 60
+    chance: 0.6
+  combatant:
+    health:
+      current: 70
+      max: 70
+    stats:
+      str: 10
+      dex: 12
+      sta: 8
+    level: 3
+  dialogue_tree:
+    start:
+      text: "Welcome, friend! The best prices this side of the mountains, I guarantee it."
+      choices:
+        - text: "Show me your wares."
+          next: "trade"
+          actions: ["open_shop"]
+        - text: "Any tips for a traveler?"
+          next: "tips"
+        - text: "How is business at the monastery?"
+          next: "monastery"
+        - text: "Farewell."
+          next: null
+    trade:
+      text: "Weapons, armor, supplies - I have what you need. The caves are dangerous, but Dorje's goods keep travelers alive."
+      choices:
+        - text: "Let me see what you have."
+          next: null
+          actions: ["open_shop"]
+        - text: "Any other advice?"
+          next: "tips"
+        - text: "Farewell."
+          next: null
+    tips:
+      text: "Butter lamps for the dark places. Incense for the spirits. And always, always carry extra tea."
+      choices:
+        - text: "Show me your wares."
+          next: "trade"
+          actions: ["open_shop"]
+        - text: "How is business?"
+          next: "monastery"
+        - text: "Farewell."
+          next: null
+    monastery:
+      text: "Bad business, this crisis. No pilgrims, no trade. But I stay. These people need supplies more than ever."
+      choices:
+        - text: "Show me your wares."
+          next: "trade"
+          actions: ["open_shop"]
+        - text: "Any tips for a traveler?"
+          next: "tips"
+        - text: "Farewell."
+          next: null
+  shop:
+    sells:
+      - wooden_staff
+      - reinforced_staff
+      - cloth_robe
+      - quilted_tunic
+      - butter_lamp
+      - incense_bundle
+      - butter_tea
+      - sheng_jiang
+      - da_zao
+      - prayer_beads
+      - offering_incense
+      - incense_of_clarity
+      - calming_incense
+      - travelers_robes
+      - monks_robe
+    buys:
+      - ghost_essence
+      - shade_fragment
+      - wisp_light

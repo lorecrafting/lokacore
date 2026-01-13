@@ -1,0 +1,15 @@
+template_name: Forest Clearing
+name: Peaceful Forest Clearing
+description: A small clearing in the forest with dappled sunlight filtering through the trees.
+tags:
+  - forest
+  - outdoor
+  - nature
+  - peaceful
+x: 0
+y: 0
+z: 0
+attributes:
+  biome: forest
+  lighting: natural
+  terrain: grass

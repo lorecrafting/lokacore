@@ -1,0 +1,11 @@
+key: toughness
+name: "Toughness"
+category: defense
+description: "Harden your body against blows. Each level reduces incoming damage by 1."
+max_level: 10
+cost_per_level: 1
+effect:
+  type: damage_reduction
+  per_level: 1
+trainers:
+  - teacher_lobsang

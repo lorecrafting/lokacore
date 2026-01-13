@@ -1,0 +1,46 @@
+# Longan Vitality Tea - Crafted consumable
+# Restores health and boosts stamina regeneration
+
+key: longan_vitality_tea
+type: item
+parent: base_item
+
+short_desc: "Longan Vitality Tea"
+long_desc: "a cup of rich, dark tea that glows with warmth"
+extra_desc: |
+  A deeply colored tea that seems to glow with inner warmth. Pieces
+  of longan, jujube, and goji berries nestle at the bottom of the
+  cup, having given their essence to the brew. The taste is
+  intensely sweet and nourishing. Excellent for recovery after
+  exhaustion or illness.
+
+keywords:
+  - tea
+  - longan
+  - vitality
+  - drink
+  - sweet
+primary_keyword: tea
+
+tags:
+  - item
+  - consumable
+  - crafted
+  - tcm
+  - vitality
+
+components:
+  physical:
+    weight: 0.3
+    stackable: true
+    max_stack: 10
+  consumable:
+    effect: heal
+    amount: 30
+    buff:
+      type: stamina_regen
+      duration: 300
+      modifier: 0.1
+    use_message: "The sweet tea fills you with renewed vitality. Your weariness fades."
+  valuable:
+    base_price: 18

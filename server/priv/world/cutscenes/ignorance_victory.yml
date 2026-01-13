@@ -1,0 +1,39 @@
+# Cutscene: Victory over Moha Mara (Ignorance)
+# Triggers when player defeats Moha Mara
+
+id: ignorance_victory
+name: "Light in the Darkness"
+trigger:
+  type: enemy_defeated
+  target: moha_mara
+  location: mohas_core
+sequence:
+  - type: narration
+    text: "The labyrinth of mirrors shatters."
+  - type: pause
+    duration: 1
+  - type: narration
+    text: "Moha Mara's endless reflections collapse into one true form."
+  - type: dialogue
+    speaker: moha_voice
+    text: "But... you saw through all of them? Every lie? How?"
+  - type: pause
+    duration: 1
+  - type: narration
+    text: "Because you chose to see. The lamp of wisdom burns in your heart now."
+  - type: narration
+    text: "A seal fragment floats down from where the mirrors hung - clear as truth."
+  - type: pause
+    duration: 2
+  - type: narration
+    text: "The Three Poisons are overcome. The way to the Heart Cave opens."
+  - type: narration
+    text: "But Mara himself still waits."
+effects:
+  - type: set_flag
+    flag: ignorance_defeated
+    value: true
+  - type: give_item
+    item: seal_fragment_ignorance
+  - type: give_xp
+    amount: 100

@@ -1,0 +1,11 @@
+key: endurance
+name: "Endurance"
+category: defense
+description: "Build stamina and constitution. Each level adds +5 maximum HP."
+max_level: 10
+cost_per_level: 1
+effect:
+  type: max_hp_bonus
+  per_level: 5
+trainers:
+  - teacher_lobsang

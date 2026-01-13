@@ -1,0 +1,42 @@
+# White Atractylodes (Bai Zhu)
+# Premier spleen qi tonic, dries dampness
+
+key: bai_zhu
+type: item
+parent: base_herb
+
+short_desc: "White Atractylodes Root"
+long_desc: "A pale atractylodes rhizome with an aromatic scent lies here."
+extra_desc: |
+  A thick, pale rhizome from the daisy family, its cut surface
+  revealing a creamy white interior. The aroma is warm and slightly
+  bitter. Old texts say "Ginseng in the North, Atractylodes in the
+  South" - this root is equally valued for strengthening digestion
+  and building endurance.
+
+keywords:
+  - atractylodes
+  - bai
+  - zhu
+  - root
+  - white
+  - rhizome
+primary_keyword: atractylodes
+
+tags:
+  - item
+  - herb
+  - tcm
+  - qi_tonic
+
+components:
+  physical:
+    weight: 0.15
+    stackable: true
+    max_stack: 20
+  valuable:
+    base_price: 10
+  herb:
+    category: qi_tonic
+    nature: warm
+    flavor: bitter

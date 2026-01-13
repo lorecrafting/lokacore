@@ -1,0 +1,14 @@
+template_name: Shop
+name: General Store
+description: A well-stocked general store with shelves filled with supplies and a friendly shopkeeper.
+tags:
+  - shop
+  - building
+  - interior
+  - commerce
+x: 0
+y: 0
+z: 0
+attributes:
+  shop_type: general
+  merchant_present: true

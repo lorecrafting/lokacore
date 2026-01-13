@@ -1,0 +1,33 @@
+key: dveshas_core
+parent: base_room
+type: room
+short_desc: "Dvesha's Core"
+long_desc: "A chamber burning with cold fire where hatred takes form and old angers rise."
+extra_desc: |
+  Cold fire burns—hatred crystallized into form. Phantom enemies stand with malice-twisted faces as old wounds ache. At the center, Dvesha Mara stands wreathed in flames, wearing armor of solidified rage.
+keywords: []
+exits:
+  west: aversion_chamber
+spawns:
+  - prototype: dvesha_mara
+  - prototype: seal_fragment_aversion
+  - prototype: dharma_edge
+tags:
+  - indoor
+  - cave
+  - ancient
+  - boss_room
+  - trial_chamber
+components:
+  ambient_messages:
+    day:
+      - "Cold fire burns without consuming, hatred given form."
+      - "Phantom enemies stand in array, their faces twisted with malice."
+      - "Old wounds ache as if freshly dealt. Old angers surge."
+      - "Dvesha Mara's armor of rage reflects your own fury back at you."
+      - "The demon's eyes are pits of endless fury, challenging you to strike."
+      - "Every blow you've ever received echoes in your bones."
+      - "Flames that do not burn wrap the chamber in terrible light."
+      - "Hatred personified waits at the center, patient and eternal."
+  room_elements:
+    fire: high

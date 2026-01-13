@@ -1,0 +1,153 @@
+# Tag-based Ambient Messages
+#
+# Messages broadcast to rooms based on their tags when time phases are active.
+# Rooms can have multiple tags, so they may receive messages from multiple categories.
+# Room-specific messages (defined in room YAML) are combined with these.
+#
+# Phases: dawn, day, dusk, night
+
+tag_messages:
+  # Monastery environments
+  monastery:
+    dawn:
+      - "Temple bells ring across the monastery, calling monks to morning prayers."
+      - "The sound of shuffling feet echoes as monks make their way to the temple."
+    day:
+      - "The rhythmic murmur of chanting drifts through the air."
+      - "A monk passes by, prayer beads clicking softly."
+    dusk:
+      - "The evening gong resonates through the monastery, signaling vespers."
+      - "Monks gather their robes as they head toward evening prayers."
+    night:
+      - "The monastery settles into contemplative silence."
+      - "Distant chanting carries on the night air."
+
+  # Sacred spaces (temples, shrines, stupas)
+  sacred:
+    dawn:
+      - "The first light touches the sacred space with golden warmth."
+      - "Morning prayers rise like incense smoke."
+    day:
+      - "Butter lamps flicker with quiet devotion."
+    dusk:
+      - "Shadows lengthen across the sacred ground."
+    night:
+      - "Starlight filters through, lending an ethereal quality to the space."
+
+  # Outdoor areas
+  outdoor:
+    dawn:
+      - "Birds begin their morning chorus."
+      - "Dew glistens on every surface as the sun rises."
+      - "The air is crisp and fresh with morning chill."
+    day:
+      - "A gentle breeze stirs the prayer flags."
+      - "Clouds drift lazily across the mountain peaks."
+    dusk:
+      - "The sky blazes with sunset colors."
+      - "Long shadows stretch across the ground."
+      - "Birds settle into their roosts for the night."
+    night:
+      - "Crickets chirp in the surrounding darkness."
+      - "Stars wheel slowly overhead."
+      - "The moon casts silver light across the landscape."
+
+  # Village areas
+  village:
+    dawn:
+      - "Roosters crow as the village stirs to life."
+      - "Smoke rises from chimneys as cooking fires are lit."
+      - "Villagers emerge, greeting the new day."
+    day:
+      - "The rhythm of daily village life continues."
+      - "Children's voices echo between the buildings."
+      - "The smell of cooking wafts through the air."
+    dusk:
+      - "Families gather as the day's work ends."
+      - "The scent of evening meals drifts through the village."
+      - "Elders settle onto benches to watch the sunset."
+    night:
+      - "The village grows quiet as families retire."
+      - "A dog barks somewhere in the darkness."
+      - "Lamplight glows warmly from a few windows."
+
+  # Indoor spaces
+  indoor:
+    dawn:
+      - "Pale morning light filters through the windows."
+    day:
+      - "Dust motes drift lazily in the light."
+    dusk:
+      - "The fading daylight casts long shadows."
+    night:
+      - "Candles flicker, casting dancing shadows on the walls."
+
+  # Market/trade areas
+  market:
+    dawn:
+      - "Merchants arrive early, setting up their wares."
+    day:
+      - "Haggling voices rise and fall in the busy market."
+      - "The clatter of commerce fills the air."
+      - "A merchant calls out, advertising their goods."
+    dusk:
+      - "Merchants pack away their wares as the day ends."
+      - "The last customers hurry through before closing."
+    night:
+      - "Empty stalls stand silent in the darkness."
+
+  # Mountain/high altitude
+  mountain:
+    dawn:
+      - "The peaks catch the first golden light of dawn."
+      - "Mist rises from the valleys below."
+    day:
+      - "Eagles circle on the mountain thermals."
+      - "The thin air carries sounds from far away."
+    dusk:
+      - "The mountains turn purple in the fading light."
+    night:
+      - "The stars seem close enough to touch at this altitude."
+      - "Cold mountain winds whisper through the peaks."
+
+  # Cave/underground
+  cave:
+    dawn:
+      - "A faint glow hints at the world outside."
+    day:
+      - "Water drips somewhere in the darkness."
+      - "The cave breathes with a slight draft."
+    dusk:
+      - "The light at the entrance fades to grey."
+    night:
+      - "Total darkness envelops everything beyond the torchlight."
+      - "Strange echoes carry through the cavern."
+
+  # Forest/wooded areas
+  forest:
+    dawn:
+      - "Birdsong fills the canopy as the forest awakens."
+      - "Shafts of golden light pierce the leaves."
+    day:
+      - "Leaves rustle in the gentle breeze."
+      - "A squirrel chatters from a nearby branch."
+    dusk:
+      - "The forest grows dim as shadows deepen."
+      - "Nocturnal creatures begin to stir."
+    night:
+      - "Owls hoot in the darkness."
+      - "The forest is alive with mysterious night sounds."
+
+  # Water features (rivers, lakes, streams)
+  water:
+    dawn:
+      - "Mist rises from the water's surface."
+      - "The water catches the first light, shimmering gold."
+    day:
+      - "Sunlight sparkles on the water."
+      - "The gentle sound of flowing water soothes the soul."
+    dusk:
+      - "The water reflects the sunset's colors."
+    night:
+      - "Moonlight ripples across the dark water."
+      - "Frogs sing their nightly chorus."

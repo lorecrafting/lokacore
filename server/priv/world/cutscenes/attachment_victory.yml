@@ -1,0 +1,39 @@
+# Cutscene: Victory over Raga Mara (Attachment)
+# Triggers when player defeats Raga Mara
+
+id: attachment_victory
+name: "Letting Go"
+trigger:
+  type: enemy_defeated
+  target: raga_mara
+  location: ragas_core
+sequence:
+  - type: narration
+    text: "Raga Mara dissolves into motes of golden light."
+  - type: pause
+    duration: 1
+  - type: narration
+    text: "The treasure fades. The chamber grows still."
+  - type: dialogue
+    speaker: raga_voice
+    text: "You... let go. How did you... let go?"
+  - type: pause
+    duration: 1
+  - type: narration
+    text: "The voice fades, confused. In its place, something gleams."
+  - type: narration
+    text: "A seal fragment - crimson as desire, cooling as it settles in your palm."
+  - type: pause
+    duration: 1
+  - type: narration
+    text: "The first chain binding Tenzin weakens."
+  - type: narration
+    text: "One poison overcome. Two remain."
+effects:
+  - type: set_flag
+    flag: attachment_defeated
+    value: true
+  - type: give_item
+    item: seal_fragment_attachment
+  - type: give_xp
+    amount: 100

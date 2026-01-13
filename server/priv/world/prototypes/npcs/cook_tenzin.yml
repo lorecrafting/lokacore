@@ -1,0 +1,229 @@
+# Cook Tenzin - Monastery Cook
+# Teaches cooking skill and sells prepared foods
+
+key: cook_tenzin
+type: npc
+parent: base_npc
+
+short_desc: "Cook Tenzin"
+long_desc: "A rotund monk with a perpetual smile tends a bubbling pot of something delicious."
+extra_desc: |
+  This jolly monk seems born to feed others. His round belly speaks
+  of tasting his own creations, while his stained apron tells of
+  countless hours over the cooking fire. Steam swirls around him
+  like incense, and the aromas he conjures could tempt a ascetic.
+  His hands move with practiced grace among pots and ladles.
+keywords:
+  - cook
+  - tenzin
+  - monk
+  - chef
+primary_keyword: cook
+mood: cheerful
+
+tags:
+  - friendly
+  - monastery
+  - teacher
+  - vendor
+
+components:
+  ambient_actions:
+    messages:
+      - "Cook Tenzin stirs a bubbling pot, humming an old mountain tune."
+      - "The cook samples his creation with a wooden spoon, nodding approvingly."
+      - "Tenzin adds a pinch of spice, filling the air with warmth."
+      - "The monk wipes his hands on his apron, already reaching for more ingredients."
+      - "Cook Tenzin ladles fragrant broth into waiting bowls."
+      - "The cook's belly shakes with quiet laughter at some private joke."
+      - "Tenzin arranges fresh vegetables with an artist's eye."
+    interval_min: 25
+    interval_max: 45
+    chance: 0.7
+  combatant:
+    health:
+      current: 60
+      max: 60
+    stats:
+      str: 8
+      dex: 6
+      sta: 12
+    level: 4
+  dialogue_tree:
+    # Quest offer upfront
+    start:
+      text: "Welcome, welcome! The body is a temple, yes, but a hungry temple serves no one! I'm preparing a special meal for the monks, but I need fresh ingredients. Would you help me gather them? I'll teach you the art of cooking in return!"
+      show_if:
+        quest_not_active: "side_cooks_apprentice"
+        quest_not_completed: "side_cooks_apprentice"
+      choices:
+        - text: "[Accept Quest] I'd be happy to help."
+          next: "quest_accepted"
+          action: ["accept_quest", "side_cooks_apprentice"]
+        - text: "What ingredients do you need?"
+          next: "ingredient_quest_info"
+        - text: "Can you teach me to cook first?"
+          next: "teach_cooking"
+        - text: "I'd like to buy some food."
+          next: "shop_intro"
+        - text: "Just passing through."
+          next: null
+
+    # Dialogue topic for quest objective
+    help_cooking:
+      text: "Ah, you want to help in the kitchen? Perfect timing! I'm preparing a special meal but need fresh ingredients. Would you gather some wild berries and ginger for me? I'll teach you cooking in return!"
+      choices:
+        - text: "[Accept Quest] I'd be happy to help."
+          next: "quest_accepted"
+          action: ["accept_quest", "side_cooks_apprentice"]
+        - text: "What exactly do you need?"
+          next: "ingredient_quest_info"
+        - text: "Maybe another time."
+          next: null
+
+    quest_accepted:
+      text: "Wonderful! I need wild berries from the cliff path - five handfuls should do. And two ginger roots from the herb garden. Bring them back and I'll show you how to make something special!"
+      choices:
+        - text: "I'll return soon."
+          next: null
+
+    ingredient_quest_info:
+      text: "Wild berries from the cliff path - they grow on bushes along the way. And ginger from the herb garden - the monks tend fine patches there. Simple ingredients, but the joy is in the combining!"
+      choices:
+        - text: "[Accept Quest] I'll gather them."
+          next: "quest_accepted"
+          action: ["accept_quest", "side_cooks_apprentice"]
+        - text: "Maybe later."
+          next: null
+
+    # Quest active reminder
+    start_active:
+      text: "Ah, my helper returns! Have you found the wild berries and ginger? The cliff path has berries, the herb garden has ginger."
+      show_if:
+        quest_active: "side_cooks_apprentice"
+      choices:
+        - text: "I'm still gathering."
+          next: null
+        - text: "Where do I find them again?"
+          next: "ingredient_locations"
+
+    ingredient_locations:
+      text: "Wild berries grow on the cliff path - look for the bushes with purple fruit. Ginger is in the herb garden near the monastery gate. Can't miss the spicy smell!"
+      choices:
+        - text: "I'll find them."
+          next: null
+
+    # Quest ready to turn in
+    start_ready:
+      text: "I can smell the ginger from here! And those berries look perfect! Give them here, and let's cook together!"
+      show_if:
+        quest_complete: "side_cooks_apprentice"
+      choices:
+        - text: "[Complete Quest] Here are the ingredients."
+          next: "quest_complete"
+
+    # Dialogue topic for quest objective - turn in ingredients
+    ingredients_gathered:
+      text: "Ah, you have the berries and ginger! Perfect! Let me see them... [He examines the ingredients with a practiced eye.] Fresh and fragrant! Now, let me show you what we can make with these."
+      choices:
+        - text: "[Complete Quest] I'm ready to learn."
+          next: "quest_complete"
+
+    quest_complete:
+      text: "[Cook Tenzin combines the ingredients with practiced hands.] Watch now - the berries add sweetness, the ginger adds warmth. Balance! That's the secret. Here, taste... good, yes? [He wraps a portion in cloth.] Take this compassion offering. When you face hatred in those caves, offer it freely. Anger cannot consume what is given with love."
+      action: ["complete_quest", "side_cooks_apprentice"]
+      choices:
+        - text: "[Accept the compassion offering] Thank you, Cook Tenzin."
+          next: null
+          action: ["give_item", "compassion_offering"]
+        - text: "Teach me more about cooking."
+          next: "teach_cooking"
+
+    # Post-quest start
+    start_completed:
+      text: "Welcome back, my cooking apprentice! The kitchen is always open. Would you like to learn more, or perhaps buy some supplies?"
+      show_if:
+        quest_completed: "side_cooks_apprentice"
+      choices:
+        - text: "Teach me more about cooking."
+          next: "teach_cooking"
+        - text: "I'd like to buy some food."
+          next: "shop_intro"
+        - text: "Tell me about monastery cooking."
+          next: "cooking_philosophy"
+        - text: "Just visiting."
+          next: null
+    teach_cooking:
+      text: "Ah, a student! Cooking is meditation, you know. The knife must move with intention, the fire must be tended with patience. I can teach you the basics - how to combine ingredients, balance flavors, sustain both body and spirit."
+      choices:
+        - text: "I'd like to learn. (Cooking skill)"
+          next: "learn_cooking"
+          action: ["learn_skill", "cooking", 1]
+        - text: "What recipes can you teach?"
+          next: "recipe_list"
+        - text: "Maybe later."
+          next: null
+    learn_cooking:
+      text: "[Cook Tenzin guides your hands through basic knife work and fire tending.] Good, good! Remember - we cook not just to fill bellies, but to bring joy. A meal shared is a bond strengthened. Practice with simple things first - tsampa, butter tea. Master these, and greater recipes will follow."
+      choices:
+        - text: "What ingredients should I gather?"
+          next: "ingredient_advice"
+        - text: "Thank you, Cook Tenzin."
+          next: null
+    recipe_list:
+      text: "I can teach you simple things - butter tea to warm the bones, tsampa porridge to sustain long journeys, and sweet rice for celebrations. Later, perhaps, more complex dishes - things that heal as well as nourish."
+      choices:
+        - text: "Teach me cooking then."
+          next: "learn_cooking"
+          action: ["learn_skill", "cooking", 1]
+        - text: "I'll think about it."
+          next: null
+    ingredient_advice:
+      text: "The terraced fields grow barley for tsampa. The herb garden has ginger and jujube for warming teas. For special dishes, seek wild berries on the cliff path, or trade with villagers for butter and cheese. Good ingredients make good food!"
+      choices:
+        - text: "I'll start gathering."
+          next: null
+        - text: "What about the medicinal teas?"
+          next: "medicinal_teas"
+    medicinal_teas:
+      text: "Ah, those are Herb Master Dolkar's domain. I provide sustenance, she provides healing. Together, we keep the monastery healthy! But I know a few simple combinations - ginger tea for cold days, sweet rice for celebrations."
+      choices:
+        - text: "Thank you for the advice."
+          next: null
+    cooking_philosophy:
+      text: "In the kitchen, I see the dharma clearly. Ingredients arise, are transformed, become nourishment, and pass away. Nothing is wasted - vegetable scraps become soup, day-old bread becomes porridge. This is practice, you see?"
+      choices:
+        - text: "That's a beautiful way to see it."
+          next: "philosophy_continued"
+        - text: "Can you teach me to cook?"
+          next: "teach_cooking"
+    philosophy_continued:
+      text: "And feeding others! What greater joy? When a cold traveler wraps hands around a warm bowl, when a tired pilgrim tastes home in a simple meal... this is my meditation, my offering. [He beams.] Now, are you hungry?"
+      choices:
+        - text: "Show me what you're selling."
+          next: null
+          action: ["open_shop", null]
+        - text: "Not right now, thank you."
+          next: null
+    shop_intro:
+      text: "Of course! I have butter tea to warm you, tsampa for the road, and sometimes special treats. The kitchen is always open!"
+      choices:
+        - text: "Show me."
+          next: null
+          action: ["open_shop", null]
+  teacher:
+    skills:
+      - cooking
+  shop:
+    sells:
+      - butter_tea
+      - blessed_rice
+      - sweet_rice
+      - wild_berries
+      - water_flask
+    buys:
+      - wild_berries
+      - sheng_jiang
+      - da_zao
+  gives_items:
+    - compassion_offering

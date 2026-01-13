@@ -1,0 +1,34 @@
+key: hermits_cave
+parent: base_room
+type: room
+short_desc: "Hermit's Cave"
+long_desc: "A natural cave dwelling where a renunciate hermit sings strange melodies at dawn and dusk."
+extra_desc: |
+  A natural cave marked by faded prayer flags opens in the cliff face. Within sits a worn cushion, small hearth, and scattered texts. The hermit's strange songs echo off stone at dawn and dusk.
+keywords: []
+exits:
+  north: cliff_path
+spawns:
+  - prototype: hermit_milarepa
+tags:
+  - indoor
+  - cave
+  - safe_zone
+  - quest_location
+components:
+  gathering_nodes:
+    cave_mushrooms:
+      uses_remaining: 2
+  ambient_messages:
+    dawn:
+      - "The hermit's dawn song rises, strange notes that seem to bend the air."
+    day:
+      - "Smoke from the small hearth rises in spiral patterns, almost intentional."
+      - "Faded prayer flags at the entrance flutter in a wind that doesn't reach inside."
+      - "Ancient texts lie scattered, their pages covered in cramped, ecstatic script."
+      - "The cave walls seem to breathe, expanding and contracting with the hermit's breath."
+    dusk:
+      - "Echoes of the hermit's dusk song linger in the stone itself."
+    night:
+      - "Complete silence falls, so profound it feels like its own kind of sound."
+      - "The worn meditation cushion holds the shape of countless hours of stillness."

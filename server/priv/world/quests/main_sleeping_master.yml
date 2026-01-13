@@ -1,0 +1,62 @@
+id: main_sleeping_master
+name: "The Sleeping Master"
+description: |
+  Lama Tenzin, the monastery's beloved meditation master, has not
+  moved in seven days. The monks are frightened. Find out what
+  has happened and what can be done.
+giver: abbot_jampa
+type: main
+act: 1
+level_requirement: 1
+objectives:
+  - id: talk_abbot
+    type: talk
+    target_id: abbot_jampa
+    description: "Speak with Abbot Jampa in the Temple"
+    # Note: No dialogue_topic required - just talking to accept the quest satisfies this
+  - id: visit_cell
+    type: go_to
+    target_id: tenzins_cell
+    description: "Visit Lama Tenzin's meditation cell"
+  - id: find_journal
+    type: get_item
+    target_id: meditation_journal
+    description: "Find Tenzin's meditation journal"
+  - id: talk_pema
+    type: talk
+    target_id: novice_pema
+    description: "Show the journal to Novice Pema"
+    dialogue_topic: tenzin_info
+  - id: return_abbot
+    type: talk
+    target_id: abbot_jampa
+    description: "Return to Abbot Jampa with what you've learned"
+    # Note: No dialogue_topic required - reaching start_ready_to_turn_in node satisfies this
+rewards:
+  xp: 100
+  items:
+    - cave_entrance_key
+  unlocks:
+    - main_three_trials
+  companion_available: novice_pema
+journal_entries:
+  accepted:
+    lua: |
+      local gold = game.player.get_stat("gold") or 0
+      if gold > 500 then
+        return "The Abbot has asked me to investigate Lama Tenzin's condition. Perhaps my generous purse will earn the monks' trust."
+      elseif gold > 100 then
+        return "The Abbot has asked me to investigate Lama Tenzin's condition. I have enough coin to sustain this journey."
+      else
+        return "The Abbot has asked me to investigate Lama Tenzin's condition. My purse is light, but the monks may provide shelter."
+      end
+  objective_complete_talk_abbot: "The Abbot spoke of great worry. Seven days without movement - is Lama Tenzin even alive?"
+  objective_complete_visit_cell: "The meditation cell is small and sparse. Nothing seems amiss, yet something feels wrong."
+  objective_complete_find_journal:
+    lua: |
+      if game.player.has_flag("read_journal_deeply") then
+        return "Tenzin's journal speaks of confronting the Three Poisons. The final entry mentions a secret cave. He knew the danger - and accepted it willingly."
+      else
+        return "Tenzin's journal speaks of confronting the Three Poisons. He knew the danger."
+      end
+  completed: "Novice Pema wishes to join me. The caves await."

@@ -1,0 +1,32 @@
+key: prayer_beads
+type: item
+parent: base_item
+short_desc: "Prayer Beads"
+long_desc: "a string of wooden prayer beads worn on the wrist"
+extra_desc: |
+  A string of 108 sandalwood beads, each carved with a tiny
+  mantra. The beads are warm to the touch and carry a faint
+  scent of incense. Those who wear them feel a calm clarity
+  of mind.
+keywords:
+  - prayer
+  - beads
+  - mala
+  - sandalwood
+primary_keyword: beads
+tags:
+  - item
+  - accessory
+  - equippable
+  - blessed
+components:
+  physical:
+    weight: 0.1
+  valuable:
+    base_price: 30
+  equipable:
+    slot: wrist_left
+    bonuses:
+      spirit_resistance: 3
+      mana_regen: 1
+    requirements: {}

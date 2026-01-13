@@ -1,0 +1,51 @@
+# Guild Hall Prototypes
+# Example guild hall rooms that can be spawned for guilds
+
+basic_guild_hall:
+  type: room
+  tags:
+    - guild_hall
+    - indoor
+  name: "Guild Hall"
+  description: |
+    A modest hall with stone walls and a wooden floor. Banners bearing the
+    guild's colors hang from the rafters. A large table dominates the center,
+    surrounded by sturdy chairs.
+  capacity: 20
+  features:
+    - guild_chest
+    - notice_board
+    - meeting_table
+
+grand_guild_hall:
+  parent: basic_guild_hall
+  name: "Grand Guild Hall"
+  description: |
+    An impressive hall with marble floors and soaring ceilings. Crystal
+    chandeliers cast warm light across the ornate tapestries. A massive
+    oak table serves as the centerpiece, with the guild leader's throne
+    at its head.
+  capacity: 50
+  features:
+    - guild_vault
+    - notice_board
+    - grand_table
+    - trophy_display
+    - armory
+
+guild_treasury:
+  type: room
+  tags:
+    - guild_hall
+    - secure
+    - indoor
+  name: "Guild Treasury"
+  description: |
+    A secure vault protected by heavy iron doors. Shelves line the walls,
+    holding the guild's accumulated wealth and treasures. Only officers
+    may access this room.
+  locks:
+    - guild_officer
+  features:
+    - guild_vault
+    - display_cases

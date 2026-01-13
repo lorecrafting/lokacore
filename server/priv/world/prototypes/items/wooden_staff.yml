@@ -1,0 +1,27 @@
+key: wooden_staff
+short_desc: "Wooden Staff"
+long_desc: "a simple wooden staff"
+keywords:
+  - wooden
+  - staff
+  - simple
+primary_keyword: staff
+type: item
+parent: base_weapon
+extra_desc: |
+  A plain wooden staff, unadorned but solid. Common among
+  travelers and novice monks as both walking aid and defense.
+components:
+  weapon:
+    damage: 2
+    damage_type: blunt
+    speed: 1.0
+  physical:
+    weight: 2
+  valuable:
+    base_price: 3
+tags:
+  - item
+  - weapon
+  - equippable
+  - starting

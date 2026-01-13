@@ -1,0 +1,50 @@
+{
+  "enabledPlugins": {
+    "beads@beads-marketplace": true
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "/Users/raymondluong/dev/lokacore/.claude/statusline.sh"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cmd=$(cat | jq -r '.tool_input.command' 2>/dev/null); if [[ \"$cmd\" == git\\ commit* ]]; then cd /Users/raymondluong/dev/lokacore/server && mix loka.test.validate --quiet 2>&1 || (echo '{\"permissionDecision\": \"deny\", \"reason\": \"Content validation failed. Run mix loka.test.validate to see errors.\"}' >&2; exit 2); fi",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "file_path=$(cat | jq -r '.tool_input.file_path' 2>/dev/null); if [[ \"$file_path\" == *.ex ]] || [[ \"$file_path\" == *.exs ]]; then cd /Users/raymondluong/dev/lokacore/server && mix format \"$file_path\" 2>/dev/null; fi",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "file_path=$(cat | jq -r '.tool_input.file_path' 2>/dev/null); if [[ \"$file_path\" == */priv/world/* ]] && [[ \"$file_path\" == *.yml ]]; then cd /Users/raymondluong/dev/lokacore/server && mix loka.test.validate --quiet 2>&1 | head -20; fi",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /Users/raymondluong/dev/lokacore/server && echo '--- Loka Session ---' && git branch --show-current && git status --short | head -8"
+          }
+        ]
+      }
+    ]
+  }
+}

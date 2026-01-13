@@ -1,0 +1,49 @@
+# Goji Berry Patch - Gou Qi Zi (枸杞子)
+# Nourishes liver and kidneys, brightens eyes
+
+key: herb_patch_goji
+parent: base_container
+type: item
+
+short_desc: "Goji Bush"
+long_desc: "A thorny goji bush grows here, dotted with small red berries."
+extra_desc: |
+  A sprawling goji bush with long, arching branches covered in thorns.
+  Clusters of bright red berries hang among the small green leaves,
+  their color vibrant against the dusty soil. The monks prize these
+  berries for their ability to nourish the liver and brighten the eyes.
+keywords:
+  - goji
+  - bush
+  - berries
+  - gou
+  - qi
+  - zi
+primary_keyword: bush
+
+components:
+  physical:
+    weight: 0
+    stackable: false
+  container:
+    capacity: 5
+    can_take: true
+    can_put: false
+    description_open: "You examine the goji bush carefully."
+    state_descriptions:
+      full: "The bush is laden with ripe red berries."
+      partial: "Some berries remain on the thorny branches."
+      empty: "The berries have all been picked. More will ripen in time."
+    respawn:
+      enabled: true
+      delay_seconds: 300
+      loot_table:
+        - item: gou_qi_zi
+          weight: 100
+          quantity: [3, 5]
+
+tags:
+  - container
+  - herb_patch
+  - no_get
+  - furniture

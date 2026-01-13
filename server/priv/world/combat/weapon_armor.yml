@@ -1,0 +1,50 @@
+# Weapon/Armor Effectiveness Matrix
+# Defines damage multipliers for weapon types against armor types.
+# Values: 1.0 = normal, >1.0 = effective, <1.0 = resisted
+
+# Weapon Types:
+# - slashing: Swords, axes (cuts through soft materials)
+# - bludgeoning: Maces, hammers (crushes rigid armor)
+# - piercing: Spears, arrows (finds gaps in flexible armor)
+# - magic: Spell damage (slightly resisted by cloth/leather)
+
+# Armor Types:
+# - none: Unarmored
+# - cloth: Robes, clothing
+# - leather: Hide armor
+# - chain: Chainmail
+# - scale: Scale armor
+# - plate: Full plate armor
+
+effectiveness_matrix:
+  slashing:
+    none: 1.0
+    cloth: 1.25
+    leather: 1.15
+    chain: 1.0
+    scale: 0.85
+    plate: 0.75
+
+  bludgeoning:
+    none: 1.0
+    cloth: 1.0
+    leather: 0.9
+    chain: 1.1
+    scale: 1.0
+    plate: 1.25
+
+  piercing:
+    none: 1.0
+    cloth: 1.15
+    leather: 1.1
+    chain: 1.25
+    scale: 0.9
+    plate: 0.7
+
+  magic:
+    none: 1.0
+    cloth: 0.9
+    leather: 0.95
+    chain: 1.0
+    scale: 1.0
+    plate: 1.0

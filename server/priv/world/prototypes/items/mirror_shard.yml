@@ -1,0 +1,29 @@
+key: mirror_shard
+short_desc: "Mirror Shard"
+long_desc: "a sharp fragment of enchanted mirror glass"
+keywords:
+  - mirror
+  - shard
+  - glass
+  - fragment
+  - reflection
+primary_keyword: shard
+type: item
+parent: base_item
+extra_desc: |
+  A jagged piece of mirror glass that somehow still reflects
+  perfectly despite its broken state. When you look into it,
+  your reflection moves with a slight delay, as if watching
+  you from the other side.
+components:
+  carriable:
+    weight: 0.2
+    stackable: true
+    max_stack: 10
+  valuable:
+    base_price: 20
+tags:
+  - material
+  - crafting
+  - cave_loot
+  - illusion

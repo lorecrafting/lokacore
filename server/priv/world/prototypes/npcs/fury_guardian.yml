@@ -1,0 +1,43 @@
+key: fury_guardian
+short_desc: "Fury Guardian"
+long_desc: "An armored spirit wreathed in flames of pure anger bars your path."
+type: npc
+parent: base_npc
+keywords:
+  - fury
+  - guardian
+  - spirit
+  - warrior
+primary_keyword: spirit
+extra_desc: |
+  An armored spirit wreathed in flames of pure anger, its form
+  that of an ancient warrior bound by rage to this place. Each
+  strike against it only feeds its fury.
+tags:
+  - hostile
+  - spirit
+  - aversion
+  - cave
+  - elite
+components:
+  combatant:
+    level: 4
+    health:
+      current: 50
+      max: 50
+    stats:
+      str: 14
+      dex: 10
+      sta: 10
+    xp_value: 35
+    gold_value: 25
+  loot:
+    drops:
+      - item: fury_essence
+        chance: 0.2
+      - item: broken_blade
+        chance: 0.15
+  behavior:
+    ai: counter
+    enrages_when_damaged: true
+    counterattacks: true

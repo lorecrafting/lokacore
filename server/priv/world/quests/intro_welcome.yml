@@ -1,0 +1,20 @@
+id: intro_welcome
+name: "A Stranger Arrives"
+description: |
+  You have arrived at the gates of Serene Valley Monastery.
+  A young novice monk stands nearby - perhaps they can tell you
+  what is happening here.
+giver: system
+type: main
+act: 1
+level_requirement: 1
+objectives:
+  - id: talk_pema
+    type: talk
+    target_id: novice_pema
+    description: "Speak with Novice Pema at the monastery gate"
+rewards:
+  xp: 10
+journal_entries:
+  start: "I have arrived at a remote mountain monastery. A young novice stands at the gate."
+  complete: "Novice Pema has told me of a crisis at the monastery. The Abbot awaits."

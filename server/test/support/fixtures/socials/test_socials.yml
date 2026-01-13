@@ -1,0 +1,46 @@
+# Test socials for unit tests
+socials:
+  smile:
+    aliases:
+      - grin
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You smile happily."
+        to_room: "{actor} smiles happily."
+      with_target:
+        to_actor: "You smile at {target}."
+        to_target: "{actor} smiles at you."
+        to_room: "{actor} smiles at {target}."
+      self_target:
+        to_actor: "You smile to yourself."
+        to_room: "{actor} smiles to {self_pronoun}."
+      not_found:
+        to_actor: "Smile at whom?"
+
+  hug:
+    min_position: standing
+    requires_target: true
+    messages:
+      with_target:
+        to_actor: "You hug {target} warmly."
+        to_target: "{actor} hugs you warmly."
+        to_room: "{actor} hugs {target}."
+      self_target:
+        to_actor: "You wrap your arms around yourself."
+        to_room: "{actor} hugs {self_pronoun}."
+      not_found:
+        to_actor: "Hug whom?"
+
+  wave:
+    min_position: resting
+    messages:
+      no_target:
+        to_actor: "You wave."
+        to_room: "{actor} waves."
+      with_target:
+        to_actor: "You wave at {target}."
+        to_target: "{actor} waves at you."
+        to_room: "{actor} waves at {target}."
+      not_found:
+        to_actor: "Wave at whom?"

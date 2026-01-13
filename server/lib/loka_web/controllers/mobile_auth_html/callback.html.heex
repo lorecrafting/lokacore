@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loka - Opening App...</title>
+    <style>
+      :root {
+        --bg: #faf8f5;
+        --text: #2c2c2c;
+        --text-muted: #666;
+        --accent: #1a1a1a;
+        --border: #e0dcd4;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: Georgia, 'Times New Roman', serif;
+        font-size: 18px;
+        line-height: 1.6;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        text-align: center;
+      }
+
+      .container {
+        max-width: 400px;
+        width: 100%;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+        font-weight: normal;
+        margin-bottom: 1rem;
+      }
+
+      p {
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+      }
+
+      .open-app-btn {
+        display: inline-block;
+        background: var(--accent);
+        color: #fff;
+        padding: 0.75rem 2rem;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: 1rem;
+        border: none;
+        cursor: pointer;
+        margin-bottom: 1rem;
+      }
+
+      .open-app-btn:hover {
+        opacity: 0.9;
+      }
+
+      .dev-info {
+        margin-top: 2rem;
+        padding: 1rem;
+        background: #f0f0f0;
+        border: 1px solid var(--border);
+        font-family: monospace;
+        font-size: 0.75rem;
+        text-align: left;
+        word-break: break-all;
+      }
+
+      .dev-label {
+        font-weight: bold;
+        color: var(--text);
+        margin-bottom: 0.25rem;
+      }
+
+      .token-display {
+        color: var(--text-muted);
+        user-select: all;
+      }
+
+      .copy-btn {
+        margin-top: 0.5rem;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Welcome, {@player.email}</h1>
+      <p>Opening the Loka app...</p>
+
+      <a href={@deep_link_url} class="open-app-btn">Open Loka App</a>
+
+      <p style="font-size: 0.875rem;">
+        If the app doesn't open automatically, tap the button above.
+      </p>
+
+      <%= if Application.get_env(:loka, :dev_routes) do %>
+        <div class="dev-info">
+          <div class="dev-label">Development Mode - JWT Token:</div>
+          <div class="token-display" id="token">{@token}</div>
+          <button class="copy-btn" onclick="copyToken()">Copy Token</button>
+        </div>
+      <% end %>
+    </div>
+
+    <script>
+      // Auto-redirect to app on page load
+      window.location.href = "<%= @deep_link_url %>";
+
+      function copyToken() {
+        const token = document.getElementById('token').textContent;
+        navigator.clipboard.writeText(token).then(() => {
+          const btn = document.querySelector('.copy-btn');
+          btn.textContent = 'Copied!';
+          setTimeout(() => { btn.textContent = 'Copy Token'; }, 2000);
+        });
+      }
+    </script>
+  </body>
+</html>

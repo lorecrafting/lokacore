@@ -1,0 +1,110 @@
+key: monastery_guard
+type: npc
+parent: base_npc
+
+short_desc: "Monastery Guard"
+long_desc: "A sturdy monk with a wooden staff patrols the grounds, ever watchful."
+extra_desc: |
+  A sturdy monk with broad shoulders and calm, observant eyes. His
+  simple robes cannot hide his martial bearing, and the wooden staff
+  he carries has clearly seen use beyond walking. He moves with the
+  quiet confidence of one trained in both meditation and combat.
+keywords:
+  - guard
+  - monk
+  - protector
+  - watcher
+primary_keyword: monk
+mood: alert
+
+tags:
+  - friendly
+  - monastery
+  - guard
+  - martial
+
+behaviors:
+  - Loka.Behaviors.Patrol
+
+attributes:
+  behavior_config:
+    patrol:
+      path:
+        - monastery_gate
+        - main_courtyard
+        - temple
+        - main_courtyard
+        - meditation_hall
+        - main_courtyard
+        - dining_hall
+        - main_courtyard
+      pause_seconds: 45
+      loop: true
+      ambient_messages:
+        - "The guard glances around, checking for disturbances."
+        - "The guard adjusts his grip on his staff."
+        - "The guard nods respectfully to passersby."
+        - "The guard pauses to listen to the wind."
+        - "The guard whispers a brief mantra under his breath."
+        - "The guard stretches his shoulders, rolling away tension."
+
+components:
+  combatant:
+    health:
+      current: 80
+      max: 80
+    stats:
+      str: 14
+      dex: 12
+      sta: 12
+    level: 4
+  dialogue_tree:
+    start:
+      text: "Peace be upon you, traveler. The monastery is safe under our watch."
+      choices:
+        - text: "What is your duty here?"
+          next: "duty"
+        - text: "Tell me about your training."
+          next: "training"
+        - text: "Is there danger nearby?"
+          next: "danger"
+        - text: "What do you know of the caves?"
+          next: "caves"
+        - text: "Safe travels."
+          next: null
+    duty:
+      text: "I protect these sacred grounds from threats both physical and spiritual. The recent disturbances have kept us vigilant."
+      choices:
+        - text: "What disturbances?"
+          next: "danger"
+        - text: "Tell me about the caves."
+          next: "caves"
+        - text: "Safe travels."
+          next: null
+    training:
+      text: "We practice the Dharma Protector arts - martial discipline in service of compassion. A strange paradox, perhaps, but necessary."
+      choices:
+        - text: "What threats do you face?"
+          next: "danger"
+        - text: "Tell me about the caves."
+          next: "caves"
+        - text: "Safe travels."
+          next: null
+    danger:
+      text: "Strange shadows move at night. I've heard whispers in empty corridors. Something dark stirs beneath us."
+      choices:
+        - text: "What's beneath the monastery?"
+          next: "caves"
+        - text: "How do you protect against this?"
+          next: "duty"
+        - text: "Safe travels."
+          next: null
+    caves:
+      text: "The caves are forbidden to most. Only the Abbot can grant passage. Whatever awakened down there... it is beyond my skill to face."
+      choices:
+        - text: "Tell me about your duty."
+          next: "duty"
+        - text: "How do you train for this?"
+          next: "training"
+        - text: "Safe travels."
+          next: null

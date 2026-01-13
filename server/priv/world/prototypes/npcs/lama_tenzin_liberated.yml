@@ -1,0 +1,65 @@
+key: lama_tenzin_liberated
+short_desc: "Lama Tenzin"
+long_desc: "An ancient monk sits within a sphere of golden light, awakening from deep meditation."
+type: npc
+parent: base_npc
+keywords:
+  - lama
+  - tenzin
+  - monk
+  - master
+primary_keyword: monk
+extra_desc: |
+  An ancient monk sits at the cave's center, surrounded by a sphere of
+  golden light. As you approach, his eyes flutter open for the first
+  time in days. His expression shifts from distant trance to peaceful
+  awareness.
+tags:
+  - friendly
+  - monastery
+  - quest_giver
+components:
+  ambient_actions:
+    messages:
+      - "Golden light pulses gently around Tenzin's awakening form."
+      - "The Lama's breathing grows stronger, more present."
+      - "Tenzin's eyes hold a profound gratitude as he regards you."
+      - "A sense of peace radiates from the liberated master."
+    interval_min: 40
+    interval_max: 80
+    chance: 0.5
+  combatant:
+    health:
+      current: 200
+      max: 200
+    stats:
+      str: 6
+      dex: 6
+      sta: 20
+    level: 10
+  dialogue_tree:
+    start:
+      text: "[The golden glow intensifies. Tenzin's eyes flutter open for the first time in days.] You have faced the Three Poisons and emerged whole. My spirit is freed. The monastery... the monastery is saved."
+      choices:
+        - text: "[Complete Quest] I'm glad you're free, Master."
+          next: "liberation_thanks"
+          action: ["complete_quest", "main_liberation"]
+    liberation_thanks:
+      text: "Thank you, traveler. You have done what I could not do alone. The poisons are transformed, not destroyed - this is the wisdom path. Rest now. You have earned it."
+      choices:
+        - text: "What happens now?"
+          next: "aftermath"
+        - text: "I'm glad I could help."
+          next: null
+    aftermath:
+      text: "I will need time to recover, but I will return to my teaching. And you... you have learned much on this journey. The dharma reveals itself through action. Remember what you have faced within those caves."
+      choices:
+        - text: "I won't forget."
+          next: null
+    start_completed:
+      text: "You have done a great service, traveler. The monastery owes you a debt we can never repay. May you carry the wisdom of this journey wherever you go."
+      show_if:
+        quest_completed: "main_liberation"
+      choices:
+        - text: "Thank you, Master."
+          next: null

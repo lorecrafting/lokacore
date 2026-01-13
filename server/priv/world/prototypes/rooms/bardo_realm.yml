@@ -1,0 +1,24 @@
+key: bardo_realm
+parent: base_room
+type: room
+short_desc: "The Bardo"
+long_desc: "An infinite grey expanse stretches in all directions, formless and timeless."
+extra_desc: |
+  You drift in the space between worlds, endless grey twilight breathing with you. Other souls flicker at the edges of perception, waiting for the wheel to turn. Time has no meaning here.
+keywords: []
+exits: {}
+tags:
+  - bardo
+  - liminal
+  - safe_zone
+  - no_combat
+  - isolated_room  # Players are teleported here on death, not connected to world
+components:
+  ambient_messages:
+    day:
+      - "Whispers drift past, fragments of prayers from the living world."
+      - "A distant bell tolls, its sound rippling through the grey."
+      - "Shadows of other souls flicker nearby, waiting their turn."
+      - "The grey expanse pulses gently, like a sleeping breath."
+      - "Memories surface unbidden, then fade like morning mist."
+      - "You sense the wheel turning, slowly, inexorably."

@@ -1,0 +1,46 @@
+# Longan Vitality Tea - Tier 2 Compound Tea
+# Three sweet treasures that deeply nourish vitality
+
+key: recipe_longan_vitality_tea
+name: "Brew Longan Vitality Tea"
+skill_required: herbalism
+skill_level: 2
+station_type: alchemy_bench
+
+ingredients:
+  - item: long_yan_rou
+    quantity: 2
+  - item: da_zao
+    quantity: 2
+  - item: gou_qi_zi
+    quantity: 1
+
+tools: []
+
+output:
+  - item: longan_vitality_tea
+    quantity: 2
+    chance: 1.0
+
+failure_chance: 0.1
+failure_output:
+  - item: bitter_dregs
+    quantity: 1
+
+time_required: 35
+
+xp_reward:
+  skill: herbalism
+  amount: 20
+
+description: "Three sweet treasures combined to deeply nourish vitality and calm the spirit."
+craft_message: "You gently simmer the longan, dates, and goji berries together..."
+success_message: "A rich, sweet tea that glows with deep amber warmth."
+failure_message: "The ingredients fail to blend, producing a cloudy, flat tea."
+
+tags:
+  - herbalism
+  - tea
+  - intermediate
+  - tcm
+  - vitality

@@ -1,0 +1,51 @@
+# Longan Fruit Patch - Long Yan Rou (龙眼肉)
+# Tonifies heart and spleen, nourishes blood
+
+key: herb_patch_longan
+parent: base_container
+type: item
+
+short_desc: "Longan Tree"
+long_desc: "A longan tree grows here, its branches laden with clusters of round fruit."
+extra_desc: |
+  A graceful longan tree spreads its canopy over this corner of the
+  terraced field. Clusters of round, brown-skinned fruit hang from
+  the branches like strings of beads. The monks call this "dragon eye"
+  fruit, for when peeled, the translucent flesh reveals a dark seed
+  that resembles a pupil. They dry the flesh to nourish the heart.
+keywords:
+  - longan
+  - tree
+  - fruit
+  - dragon
+  - eye
+  - long
+  - yan
+primary_keyword: tree
+
+components:
+  physical:
+    weight: 0
+    stackable: false
+  container:
+    capacity: 4
+    can_take: true
+    can_put: false
+    description_open: "You examine the longan tree closely."
+    state_descriptions:
+      full: "Heavy clusters of longan fruit bend the branches."
+      partial: "Some longan fruit remain on the branches."
+      empty: "The fruit has all been picked. New longan will ripen in time."
+    respawn:
+      enabled: true
+      delay_seconds: 300
+      loot_table:
+        - item: long_yan_rou
+          weight: 100
+          quantity: [2, 4]
+
+tags:
+  - container
+  - herb_patch
+  - no_get
+  - furniture

@@ -1,0 +1,45 @@
+key: village_square
+parent: base_room
+type: room
+short_desc: "Village Square"
+long_desc: "A dusty square where villagers gather, dominated by an ancient prayer wheel."
+extra_desc: |
+  A modest square worn smooth by countless feet, centered on an ancient prayer wheel still spinning freely despite centuries of age. Prayer flags snap between buildings while elders gather on rough wooden benches.
+keywords: []
+exits:
+  north: village
+  east: forge
+  south: tea_house
+  west: market
+spawns:
+  - prototype: tea_vendor
+  - prototype: elderly_pilgrim
+  - prototype: young_monk
+tags:
+  - outdoor
+  - village
+  - safe_zone
+  - gathering
+components:
+  ambient_messages:
+    dawn:
+      - "The first villagers emerge, greeting each other with sleepy nods."
+      - "Someone gives the prayer wheel its first spin of the day."
+      - "The smell of morning tea drifts from nearby doorways."
+    day:
+      - "The ancient prayer wheel creaks as someone spins it, sending mantras into the wind."
+      - "Children's laughter echoes across the square, bright against the grey mountains."
+      - "An elder settles onto a worn wooden bench with a contented sigh."
+      - "Prayer flags snap overhead, their colors vivid against the pale sky."
+      - "The scent of fresh tea drifts from a nearby doorway."
+      - "A dog trots across the square, pausing to sniff at something interesting."
+      - "Smoke from cooking fires rises in lazy spirals, carrying the scent of tsampa."
+      - "Villagers exchange quiet greetings as they pass, the rhythm of daily life continuing."
+    dusk:
+      - "Families call their children home as shadows lengthen."
+      - "The last merchants pack away their wares."
+      - "Elders linger on the benches, watching the sunset paint the mountains."
+    night:
+      - "The prayer wheel stands still, silhouetted against the stars."
+      - "A lone figure hurries across the empty square."
+      - "The village square lies quiet under the watchful moon."

@@ -1,0 +1,27 @@
+key: wisp_light
+short_desc: "Wisp Light"
+long_desc: "a captured wisp of ghostly light"
+keywords:
+  - wisp
+  - light
+  - ghostly
+  - glow
+primary_keyword: wisp
+type: item
+parent: base_item
+extra_desc: |
+  A small glass vial containing a captured fragment of will-o-wisp
+  luminescence. It pulses with an eerie, cold light that never
+  fades. Useful in crafting enchanted items or as a light source
+  in dark places.
+components:
+  carriable:
+    weight: 0.1
+    stackable: true
+    max_stack: 10
+  valuable:
+    base_price: 12
+tags:
+  - material
+  - crafting
+  - cave_loot

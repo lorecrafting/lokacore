@@ -1,0 +1,42 @@
+key: phantom_treasure
+short_desc: "Phantom Treasure"
+long_desc: "A gleaming pile of gold and jewels glitters temptingly."
+type: npc
+parent: base_npc
+keywords:
+  - phantom
+  - treasure
+  - gold
+  - jewels
+  - mimic
+  - pile
+primary_keyword: pile
+extra_desc: |
+  What appears to be a gleaming pile of gold and jewels suddenly
+  ripples, revealing hungry eyes within. The treasure was never
+  real - only the danger.
+tags:
+  - hostile
+  - illusion
+  - attachment
+  - cave
+components:
+  combatant:
+    level: 3
+    health:
+      current: 40
+      max: 40
+    stats:
+      str: 6
+      dex: 6
+      sta: 14
+    xp_value: 25
+    gold_value: 15
+  loot:
+    drops:
+      - item: fool_gold
+        chance: 0.4
+  behavior:
+    ai: ambush
+    lures_with: treasure_illusion
+    immune_to: greed_attacks

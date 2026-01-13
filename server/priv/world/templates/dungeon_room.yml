@@ -1,0 +1,15 @@
+template_name: Dungeon Room
+name: Dark Dungeon Chamber
+description: A dark stone chamber with moss-covered walls and the faint sound of dripping water.
+tags:
+  - dungeon
+  - underground
+  - combat
+  - dangerous
+x: 0
+y: 0
+z: 0
+attributes:
+  biome: underground
+  lighting: dark
+  danger_level: medium

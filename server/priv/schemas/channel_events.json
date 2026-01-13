@@ -1,0 +1,350 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://loka.game/schemas/channel_events.json",
+  "title": "Loka Channel Events",
+  "description": "Schema definitions for all Phoenix channel events between mobile/web clients and the game server. This is the SINGLE SOURCE OF TRUTH for the API contract.",
+  "version": "1.0.0",
+  "definitions": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "entity_type": {
+      "type": "string",
+      "enum": ["npc", "item", "exit", "player"]
+    },
+    "direction": {
+      "type": "string",
+      "enum": ["north", "south", "east", "west", "up", "down", "northeast", "northwest", "southeast", "southwest"]
+    },
+    "equipment_slot": {
+      "type": "string",
+      "enum": ["head", "body", "hands", "feet", "wield", "shield", "neck", "finger"]
+    }
+  },
+  "events": {
+    "navigate": {
+      "description": "Move the player in a direction",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "direction": { "$ref": "#/definitions/direction" }
+        },
+        "required": ["direction"],
+        "additionalProperties": false
+      },
+      "response": "ok"
+    },
+    "click_entity": {
+      "description": "Click/tap on an entity in the room",
+      "payload": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": { "$ref": "#/definitions/uuid" },
+              "type": { "$ref": "#/definitions/entity_type" }
+            },
+            "required": ["id", "type"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "entity_id": { "$ref": "#/definitions/uuid" }
+            },
+            "required": ["entity_id"],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "response": "ok"
+    },
+    "action": {
+      "description": "Perform an action on an entity",
+      "payload": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "action": { "const": "talk" },
+              "entity_id": { "$ref": "#/definitions/uuid" }
+            },
+            "required": ["action", "entity_id"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "action": { "const": "attack" },
+              "entity_id": { "$ref": "#/definitions/uuid" }
+            },
+            "required": ["action", "entity_id"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "action": { "const": "get" },
+              "entity_id": { "$ref": "#/definitions/uuid" }
+            },
+            "required": ["action", "entity_id"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "action": { "const": "shop" },
+              "entity_id": { "$ref": "#/definitions/uuid" }
+            },
+            "required": ["action", "entity_id"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "action": { "const": "open" },
+              "entity_id": { "$ref": "#/definitions/uuid" }
+            },
+            "required": ["action", "entity_id"],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "response": "ok"
+    },
+    "dialogue_select": {
+      "description": "Select a dialogue choice",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "choice_index": { "type": "integer", "minimum": 0 }
+        },
+        "required": ["choice_index"],
+        "additionalProperties": false
+      },
+      "response": "ok"
+    },
+    "combat_action": {
+      "description": "Perform a combat action",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "action": { "type": "string", "enum": ["flee"] }
+        },
+        "required": ["action"],
+        "additionalProperties": false
+      },
+      "response": "ok"
+    },
+    "inventory": {
+      "description": "Inventory management actions",
+      "payload": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "action": { "const": "drop" },
+              "item_id": { "$ref": "#/definitions/uuid" }
+            },
+            "required": ["action", "item_id"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "action": { "const": "equip" },
+              "item_id": { "$ref": "#/definitions/uuid" }
+            },
+            "required": ["action", "item_id"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "action": { "const": "unequip" },
+              "slot": { "$ref": "#/definitions/equipment_slot" }
+            },
+            "required": ["action", "slot"],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "response": "ok"
+    },
+    "shop": {
+      "description": "Shop interactions",
+      "payload": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "action": { "const": "buy" },
+              "item_key": { "type": "string" },
+              "npc_id": { "$ref": "#/definitions/uuid" }
+            },
+            "required": ["action", "item_key", "npc_id"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "action": { "const": "sell" },
+              "item_id": { "$ref": "#/definitions/uuid" },
+              "npc_id": { "$ref": "#/definitions/uuid" }
+            },
+            "required": ["action", "item_id", "npc_id"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "action": { "const": "close" }
+            },
+            "required": ["action"],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "response": "ok"
+    },
+    "container": {
+      "description": "Container interactions",
+      "payload": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "action": { "const": "take" },
+              "index": { "type": "integer", "minimum": 0 }
+            },
+            "required": ["action", "index"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "action": { "const": "close" }
+            },
+            "required": ["action"],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "response": "ok"
+    },
+    "gather": {
+      "description": "Gather resources from a node",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "node_type": { "type": "string" }
+        },
+        "required": ["node_type"],
+        "additionalProperties": false
+      },
+      "response": "ok"
+    },
+    "craft": {
+      "description": "Craft an item using a recipe",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "recipe_key": { "type": "string" },
+          "tool_id": { "$ref": "#/definitions/uuid" }
+        },
+        "required": ["recipe_key", "tool_id"],
+        "additionalProperties": false
+      },
+      "response": "ok"
+    },
+    "emote": {
+      "description": "Perform an emote action",
+      "payload": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "emote_key": { "type": "string" },
+              "target_id": { "$ref": "#/definitions/uuid" }
+            },
+            "required": ["emote_key", "target_id"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "emote_key": { "type": "string" }
+            },
+            "required": ["emote_key"],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "response": "ok"
+    },
+    "social": {
+      "description": "Social status actions",
+      "payload": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "action": { "const": "set_mood" },
+              "mood": { "type": "string" }
+            },
+            "required": ["action", "mood"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "action": { "const": "set_pose" },
+              "pose": { "type": "string" }
+            },
+            "required": ["action", "pose"],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "response": "ok"
+    },
+    "bardo": {
+      "description": "Death/respawn actions",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "action": { "type": "string", "enum": ["reincarnate"] }
+        },
+        "required": ["action"],
+        "additionalProperties": false
+      },
+      "response": "ok"
+    },
+    "chat": {
+      "description": "Send chat messages",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "mode": { "type": "string", "enum": ["say", "shout"] },
+          "message": { "type": "string", "minLength": 1, "maxLength": 500 }
+        },
+        "required": ["mode", "message"],
+        "additionalProperties": false
+      },
+      "response": "ok"
+    },
+    "command": {
+      "description": "Raw text command input (MUD-style)",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "input": { "type": "string", "minLength": 1, "maxLength": 1000 }
+        },
+        "required": ["input"],
+        "additionalProperties": false
+      },
+      "response": "ok"
+    }
+  }
+}

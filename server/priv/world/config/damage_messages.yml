@@ -1,0 +1,588 @@
+# Damage Message Configuration
+# Tier-based descriptive combat messages for immersive "living ebook" aesthetic
+#
+# Each tier defines messages for three perspectives:
+# - to_attacker: What the attacking player sees
+# - to_defender: What the defending entity sees
+# - to_room: What observers in the room see
+#
+# Variables available:
+# - {attacker} - Attacker's name
+# - {target} - Target's name
+# - {damage} - Numeric damage value (optional display)
+
+# Default melee damage messages
+melee:
+  tiers:
+    - range: [0, 0]
+      verb: "miss"
+      to_attacker:
+        - "You swing at {target} but miss completely."
+        - "Your attack fails to connect with {target}."
+        - "You lunge at {target} but strike only air."
+      to_defender:
+        - "{attacker} swings at you but misses."
+        - "{attacker}'s attack fails to connect."
+        - "{attacker} lunges at you but strikes only air."
+      to_room:
+        - "{attacker} swings at {target} but misses."
+        - "{attacker}'s attack fails to connect with {target}."
+
+    - range: [1, 2]
+      verb: "tickle"
+      to_attacker:
+        - "You barely tickle {target} with your attack."
+        - "Your strike glances harmlessly off {target}."
+        - "You manage only a feeble tap against {target}."
+      to_defender:
+        - "{attacker} barely tickles you."
+        - "{attacker}'s strike glances harmlessly off you."
+        - "{attacker} manages only a feeble tap against you."
+      to_room:
+        - "{attacker} barely tickles {target}."
+        - "{attacker}'s strike glances harmlessly off {target}."
+
+    - range: [3, 5]
+      verb: "barely scratch"
+      to_attacker:
+        - "You barely scratch {target}."
+        - "Your attack leaves only a superficial mark on {target}."
+        - "You nick {target} lightly."
+      to_defender:
+        - "{attacker} barely scratches you."
+        - "{attacker}'s attack leaves only a superficial mark."
+        - "{attacker} nicks you lightly."
+      to_room:
+        - "{attacker} barely scratches {target}."
+        - "{attacker}'s attack leaves a superficial mark on {target}."
+
+    - range: [6, 10]
+      verb: "scratch"
+      to_attacker:
+        - "You scratch {target}."
+        - "Your blow scratches {target}."
+        - "You land a glancing blow on {target}."
+      to_defender:
+        - "{attacker} scratches you."
+        - "{attacker}'s blow scratches you."
+        - "{attacker} lands a glancing blow on you."
+      to_room:
+        - "{attacker} scratches {target}."
+        - "{attacker} lands a glancing blow on {target}."
+
+    - range: [11, 15]
+      verb: "graze"
+      to_attacker:
+        - "You graze {target}."
+        - "Your attack grazes {target}'s defenses."
+        - "You catch {target} with a grazing blow."
+      to_defender:
+        - "{attacker} grazes you."
+        - "{attacker}'s attack grazes your defenses."
+        - "{attacker} catches you with a grazing blow."
+      to_room:
+        - "{attacker} grazes {target}."
+        - "{attacker} catches {target} with a grazing blow."
+
+    - range: [16, 20]
+      verb: "hit"
+      to_attacker:
+        - "You hit {target}."
+        - "You strike {target} solidly."
+        - "Your attack connects with {target}."
+        - "You land a solid blow on {target}."
+      to_defender:
+        - "{attacker} hits you."
+        - "{attacker} strikes you solidly."
+        - "{attacker}'s attack connects."
+        - "{attacker} lands a solid blow on you."
+      to_room:
+        - "{attacker} hits {target}."
+        - "{attacker} strikes {target} solidly."
+        - "{attacker} lands a solid blow on {target}."
+
+    - range: [21, 30]
+      verb: "injure"
+      to_attacker:
+        - "You injure {target}."
+        - "Your blow injures {target} noticeably."
+        - "You strike {target} with telling force."
+      to_defender:
+        - "{attacker} injures you."
+        - "{attacker}'s blow injures you noticeably."
+        - "{attacker} strikes you with telling force."
+      to_room:
+        - "{attacker} injures {target}."
+        - "{attacker} strikes {target} with telling force."
+
+    - range: [31, 45]
+      verb: "wound"
+      to_attacker:
+        - "You wound {target} badly."
+        - "Your attack wounds {target} deeply."
+        - "You deal a grievous wound to {target}."
+      to_defender:
+        - "{attacker} wounds you badly."
+        - "{attacker}'s attack wounds you deeply."
+        - "{attacker} deals you a grievous wound."
+      to_room:
+        - "{attacker} wounds {target} badly."
+        - "{attacker} deals a grievous wound to {target}."
+
+    - range: [46, 60]
+      verb: "maul"
+      to_attacker:
+        - "You maul {target}!"
+        - "Your devastating blow mauls {target}!"
+        - "You tear into {target} viciously!"
+      to_defender:
+        - "{attacker} mauls you!"
+        - "{attacker}'s devastating blow mauls you!"
+        - "{attacker} tears into you viciously!"
+      to_room:
+        - "{attacker} mauls {target}!"
+        - "{attacker} tears into {target} viciously!"
+
+    - range: [61, 80]
+      verb: "devastate"
+      to_attacker:
+        - "You devastate {target}!"
+        - "Your crushing blow devastates {target}!"
+        - "You deliver a devastating strike to {target}!"
+      to_defender:
+        - "{attacker} devastates you!"
+        - "{attacker}'s crushing blow devastates you!"
+        - "{attacker} delivers a devastating strike!"
+      to_room:
+        - "{attacker} devastates {target}!"
+        - "{attacker} delivers a devastating strike to {target}!"
+
+    - range: [81, null]
+      verb: "OBLITERATE"
+      to_attacker:
+        - "You **OBLITERATE** {target}!"
+        - "Your earth-shattering blow **OBLITERATES** {target}!"
+        - "You utterly **ANNIHILATE** {target}!"
+      to_defender:
+        - "{attacker} **OBLITERATES** you!"
+        - "{attacker}'s earth-shattering blow **OBLITERATES** you!"
+        - "{attacker} utterly **ANNIHILATES** you!"
+      to_room:
+        - "{attacker} **OBLITERATES** {target}!"
+        - "{attacker} utterly **ANNIHILATES** {target}!"
+
+# Weapon-specific verb overrides
+# When a weapon type is specified, these verbs replace the default
+weapon_overrides:
+  sword:
+    scratch: "nick"
+    graze: "slice"
+    hit: "slash"
+    injure: "cut"
+    wound: "cleave"
+    maul: "carve"
+    devastate: "rend"
+
+  axe:
+    scratch: "chip"
+    graze: "nick"
+    hit: "chop"
+    injure: "hack"
+    wound: "hew"
+    maul: "cleave"
+    devastate: "split"
+
+  mace:
+    scratch: "bump"
+    graze: "thump"
+    hit: "bash"
+    injure: "batter"
+    wound: "crush"
+    maul: "smash"
+    devastate: "shatter"
+
+  dagger:
+    scratch: "prick"
+    graze: "nick"
+    hit: "stab"
+    injure: "pierce"
+    wound: "puncture"
+    maul: "impale"
+    devastate: "eviscerate"
+
+  spear:
+    scratch: "poke"
+    graze: "jab"
+    hit: "thrust"
+    injure: "pierce"
+    wound: "impale"
+    maul: "skewer"
+    devastate: "run through"
+
+  staff:
+    scratch: "tap"
+    graze: "thwack"
+    hit: "strike"
+    injure: "crack"
+    wound: "bludgeon"
+    maul: "pummel"
+    devastate: "shatter"
+
+  fist:
+    scratch: "tap"
+    graze: "jab"
+    hit: "punch"
+    injure: "pummel"
+    wound: "batter"
+    maul: "pound"
+    devastate: "demolish"
+
+  claw:
+    scratch: "scratch"
+    graze: "scrape"
+    hit: "rake"
+    injure: "rend"
+    wound: "tear"
+    maul: "shred"
+    devastate: "eviscerate"
+
+  bite:
+    scratch: "nip"
+    graze: "gnaw"
+    hit: "bite"
+    injure: "chomp"
+    wound: "maul"
+    maul: "savage"
+    devastate: "ravage"
+
+# Combat avoidance messages
+avoidance:
+  miss:
+    to_attacker:
+      - "You swing at {target} but miss."
+      - "Your attack misses {target} completely."
+      - "You fail to connect with {target}."
+    to_defender:
+      - "{attacker} swings at you but misses."
+      - "{attacker}'s attack misses you completely."
+      - "{attacker} fails to connect."
+    to_room:
+      - "{attacker} swings at {target} but misses."
+      - "{attacker}'s attack misses {target}."
+
+  dodge:
+    to_attacker:
+      - "{target} dodges your attack!"
+      - "{target} deftly sidesteps your blow!"
+      - "Your attack finds only empty air as {target} evades!"
+    to_defender:
+      - "You dodge {attacker}'s attack!"
+      - "You deftly sidestep {attacker}'s blow!"
+      - "You evade {attacker}'s attack!"
+    to_room:
+      - "{target} dodges {attacker}'s attack!"
+      - "{target} deftly sidesteps {attacker}'s blow!"
+
+  parry:
+    to_attacker:
+      - "{target} parries your strike!"
+      - "{target} deflects your blow with a skillful parry!"
+      - "Your attack is turned aside by {target}'s parry!"
+    to_defender:
+      - "You parry {attacker}'s strike!"
+      - "You deflect {attacker}'s blow with a skillful parry!"
+      - "You turn aside {attacker}'s attack!"
+    to_room:
+      - "{target} parries {attacker}'s strike!"
+      - "{target} deflects {attacker}'s blow!"
+
+  block:
+    to_attacker:
+      - "{target} blocks with their shield!"
+      - "{target}'s shield absorbs your blow!"
+      - "Your attack clangs harmlessly off {target}'s shield!"
+    to_defender:
+      - "You block {attacker}'s attack with your shield!"
+      - "Your shield absorbs {attacker}'s blow!"
+      - "{attacker}'s attack clangs harmlessly off your shield!"
+    to_room:
+      - "{target} blocks {attacker}'s attack!"
+      - "{target}'s shield absorbs {attacker}'s blow!"
+
+# Critical hit messages
+critical:
+  melee:
+    to_attacker:
+      - "**CRITICAL!** You strike {target} with devastating precision!"
+      - "**CRITICAL!** You find a gap in {target}'s defenses!"
+      - "**CRITICAL!** Your blow lands with bone-crushing force!"
+    to_defender:
+      - "**CRITICAL!** {attacker} strikes you with devastating precision!"
+      - "**CRITICAL!** {attacker} finds a gap in your defenses!"
+      - "**CRITICAL!** {attacker}'s blow lands with bone-crushing force!"
+    to_room:
+      - "**CRITICAL!** {attacker} strikes {target} with devastating precision!"
+      - "**CRITICAL!** {attacker} finds a gap in {target}'s defenses!"
+
+  backstab:
+    to_attacker:
+      - "You plunge your blade into {target}'s back!"
+      - "Your backstab catches {target} completely unaware!"
+    to_defender:
+      - "{attacker} stabs you in the back!"
+      - "{attacker}'s blade bites into your back!"
+    to_room:
+      - "{attacker} backstabs {target}!"
+      - "{attacker} strikes {target} from behind!"
+
+# Death messages
+death:
+  normal:
+    to_attacker:
+      - "You have slain {target}!"
+      - "{target} falls before your might!"
+      - "With a final blow, you defeat {target}!"
+    to_defender:
+      - "{attacker} has slain you!"
+      - "You fall before {attacker}'s might!"
+      - "{attacker} delivers the killing blow!"
+    to_room:
+      - "{attacker} has slain {target}!"
+      - "{target} falls before {attacker}'s might!"
+      - "{attacker} delivers the killing blow to {target}!"
+
+  overkill:
+    to_attacker:
+      - "You utterly **ANNIHILATE** {target}!"
+      - "You destroy {target} in a brutal display of power!"
+      - "{target} is no match for your overwhelming might!"
+    to_defender:
+      - "{attacker} utterly **ANNIHILATES** you!"
+      - "{attacker} destroys you in a brutal display of power!"
+      - "You are no match for {attacker}'s overwhelming might!"
+    to_room:
+      - "{attacker} utterly **ANNIHILATES** {target}!"
+      - "{attacker} destroys {target} in a brutal display of power!"
+
+# Defensive stance messages
+defense:
+  enter:
+    to_attacker:
+      - "You raise your guard and take a defensive stance."
+      - "You prepare to defend yourself."
+      - "You brace yourself for incoming attacks."
+    to_room:
+      - "{attacker} raises their guard."
+      - "{attacker} takes a defensive stance."
+      - "{attacker} braces for incoming attacks."
+
+  enemy_enter:
+    to_defender:
+      - "{target} raises its guard."
+      - "{target} takes a defensive stance."
+      - "{target} braces itself."
+    to_room:
+      - "{target} raises its guard."
+      - "{target} takes a defensive stance."
+
+# Flee messages
+flee:
+  success:
+    to_attacker:
+      - "You successfully flee from combat!"
+      - "You manage to escape!"
+      - "You disengage and retreat to safety!"
+    to_room:
+      - "{attacker} flees from {target}!"
+      - "{attacker} escapes from combat!"
+
+  fail:
+    to_attacker:
+      - "You try to flee but {target} blocks your escape!"
+      - "Your attempt to flee fails!"
+      - "{target} cuts off your escape route!"
+    to_room:
+      - "{attacker} tries to flee but {target} blocks the escape!"
+      - "{attacker}'s escape attempt is thwarted!"
+
+# Spell damage messages (by element)
+spell:
+  fire:
+    tiers:
+      - range: [1, 10]
+        to_attacker:
+          - "Your flames singe {target}."
+          - "Sparks of fire lick at {target}."
+        to_defender:
+          - "{attacker}'s flames singe you."
+          - "Sparks of fire lick at you."
+        to_room:
+          - "{attacker}'s flames singe {target}."
+      - range: [11, 25]
+        to_attacker:
+          - "Your flames burn {target}!"
+          - "Fire engulfs {target}!"
+        to_defender:
+          - "{attacker}'s flames burn you!"
+          - "Fire engulfs you!"
+        to_room:
+          - "{attacker}'s flames burn {target}!"
+      - range: [26, null]
+        to_attacker:
+          - "Your flames **INCINERATE** {target}!"
+          - "A roaring inferno consumes {target}!"
+        to_defender:
+          - "{attacker}'s flames **INCINERATE** you!"
+          - "A roaring inferno consumes you!"
+        to_room:
+          - "{attacker}'s flames **INCINERATE** {target}!"
+
+  ice:
+    tiers:
+      - range: [1, 10]
+        to_attacker:
+          - "Your frost chills {target}."
+          - "Ice crystals form on {target}."
+        to_defender:
+          - "{attacker}'s frost chills you."
+          - "Ice crystals form on you."
+        to_room:
+          - "{attacker}'s frost chills {target}."
+      - range: [11, 25]
+        to_attacker:
+          - "Your ice freezes {target}!"
+          - "Bitter cold seizes {target}!"
+        to_defender:
+          - "{attacker}'s ice freezes you!"
+          - "Bitter cold seizes you!"
+        to_room:
+          - "{attacker}'s ice freezes {target}!"
+      - range: [26, null]
+        to_attacker:
+          - "Your blizzard **FLASH-FREEZES** {target}!"
+          - "Arctic fury encases {target} in ice!"
+        to_defender:
+          - "{attacker}'s blizzard **FLASH-FREEZES** you!"
+          - "Arctic fury encases you in ice!"
+        to_room:
+          - "{attacker}'s blizzard **FLASH-FREEZES** {target}!"
+
+  lightning:
+    tiers:
+      - range: [1, 10]
+        to_attacker:
+          - "Your lightning sparks against {target}."
+          - "A jolt of electricity zaps {target}."
+        to_defender:
+          - "{attacker}'s lightning sparks against you."
+          - "A jolt of electricity zaps you."
+        to_room:
+          - "{attacker}'s lightning sparks against {target}."
+      - range: [11, 25]
+        to_attacker:
+          - "Your lightning bolt strikes {target}!"
+          - "Crackling energy courses through {target}!"
+        to_defender:
+          - "{attacker}'s lightning bolt strikes you!"
+          - "Crackling energy courses through you!"
+        to_room:
+          - "{attacker}'s lightning bolt strikes {target}!"
+      - range: [26, null]
+        to_attacker:
+          - "Your lightning **ELECTROCUTES** {target}!"
+          - "A devastating thunderbolt **BLASTS** {target}!"
+        to_defender:
+          - "{attacker}'s lightning **ELECTROCUTES** you!"
+          - "A devastating thunderbolt **BLASTS** you!"
+        to_room:
+          - "{attacker}'s lightning **ELECTROCUTES** {target}!"
+
+  poison:
+    tiers:
+      - range: [1, 10]
+        to_attacker:
+          - "Your venom irritates {target}."
+          - "Poison seeps into {target}."
+        to_defender:
+          - "{attacker}'s venom irritates you."
+          - "Poison seeps into you."
+        to_room:
+          - "{attacker}'s venom irritates {target}."
+      - range: [11, 25]
+        to_attacker:
+          - "Your poison courses through {target}!"
+          - "Toxic venom burns {target} from within!"
+        to_defender:
+          - "{attacker}'s poison courses through you!"
+          - "Toxic venom burns you from within!"
+        to_room:
+          - "{attacker}'s poison courses through {target}!"
+      - range: [26, null]
+        to_attacker:
+          - "Your deadly poison **RAVAGES** {target}!"
+          - "Virulent toxins **DEVASTATE** {target}!"
+        to_defender:
+          - "{attacker}'s deadly poison **RAVAGES** you!"
+          - "Virulent toxins **DEVASTATE** you!"
+        to_room:
+          - "{attacker}'s deadly poison **RAVAGES** {target}!"
+
+  shadow:
+    tiers:
+      - range: [1, 10]
+        to_attacker:
+          - "Your shadows brush against {target}."
+          - "Darkness nips at {target}."
+        to_defender:
+          - "{attacker}'s shadows brush against you."
+          - "Darkness nips at you."
+        to_room:
+          - "{attacker}'s shadows brush against {target}."
+      - range: [11, 25]
+        to_attacker:
+          - "Your shadows engulf {target}!"
+          - "Darkness tears at {target}!"
+        to_defender:
+          - "{attacker}'s shadows engulf you!"
+          - "Darkness tears at you!"
+        to_room:
+          - "{attacker}'s shadows engulf {target}!"
+      - range: [26, null]
+        to_attacker:
+          - "Your shadows **CONSUME** {target}!"
+          - "Absolute darkness **DEVOURS** {target}!"
+        to_defender:
+          - "{attacker}'s shadows **CONSUME** you!"
+          - "Absolute darkness **DEVOURS** you!"
+        to_room:
+          - "{attacker}'s shadows **CONSUME** {target}!"
+
+  light:
+    tiers:
+      - range: [1, 10]
+        to_attacker:
+          - "Your light dazzles {target}."
+          - "A flash of radiance strikes {target}."
+        to_defender:
+          - "{attacker}'s light dazzles you."
+          - "A flash of radiance strikes you."
+        to_room:
+          - "{attacker}'s light dazzles {target}."
+      - range: [11, 25]
+        to_attacker:
+          - "Your holy light sears {target}!"
+          - "Brilliant radiance burns {target}!"
+        to_defender:
+          - "{attacker}'s holy light sears you!"
+          - "Brilliant radiance burns you!"
+        to_room:
+          - "{attacker}'s holy light sears {target}!"
+      - range: [26, null]
+        to_attacker:
+          - "Your divine light **SMITES** {target}!"
+          - "Blinding radiance **PURGES** {target}!"
+        to_defender:
+          - "{attacker}'s divine light **SMITES** you!"
+          - "Blinding radiance **PURGES** you!"
+        to_room:
+          - "{attacker}'s divine light **SMITES** {target}!"

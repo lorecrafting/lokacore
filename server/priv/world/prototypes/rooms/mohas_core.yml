@@ -1,0 +1,33 @@
+key: mohas_core
+parent: base_room
+type: room
+short_desc: "Moha's Core"
+long_desc: "A chamber where a thousand realities overlap and Moha Mara waits behind countless illusions."
+extra_desc: |
+  A thousand realities overlap—vast and cramped, bright and dark, full and empty at once. Moha Mara stands surrounded by identical copies, each claiming to be the true demon. Only wisdom pierces this veil.
+keywords: []
+exits:
+  north: ignorance_chamber
+spawns:
+  - prototype: moha_mara
+  - prototype: seal_fragment_ignorance
+  - prototype: vajra_armor
+tags:
+  - indoor
+  - cave
+  - ancient
+  - boss_room
+  - trial_chamber
+components:
+  ambient_messages:
+    day:
+      - "A thousand realities overlap, each one equally real and unreal."
+      - "Moha Mara multiplies endlessly, each copy claiming to be the truth."
+      - "Your own hands seem to belong to someone else, reality slipping."
+      - "The chamber exists in all states at once: vast, cramped, bright, dark."
+      - "Identical demons surround you, each speaking with the same voice."
+      - "Truth and illusion are indistinguishable in this place of ultimate confusion."
+      - "Your thoughts fragment into a thousand contradictory certainties."
+      - "Ignorance personified waits behind countless masks, patient as oblivion."
+  room_elements:
+    shadow: high

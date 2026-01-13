@@ -1,0 +1,31 @@
+key: vajra_armor
+short_desc: "Vajra Armor"
+long_desc: "armor born from shattered illusions"
+type: item
+parent: base_item
+keywords:
+  - vajra
+  - armor
+primary_keyword: armor
+extra_desc: |
+  Born from Moha Mara's shattered illusions, this armor
+  cannot be deceived. It sees through magical attacks
+  and returns clarity to the confused mind.
+components:
+  armor:
+    defense: 8
+    slot: body
+    resistance:
+      - type: magic
+        amount: 30
+      - type: confusion
+        amount: 50
+  physical:
+    weight: 4
+  valuable:
+    base_price: 400
+tags:
+  - item
+  - armor
+  - equippable
+  - boss_drop

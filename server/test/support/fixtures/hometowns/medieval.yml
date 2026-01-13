@@ -1,0 +1,12 @@
+key: medieval_town
+name: "Medieval Town"
+description: "A simple medieval village."
+axiom: medieval
+starting_room: village_square
+stat_bonuses: {}
+starting_skills: {}
+starting_items: []
+faction_standings: {}
+traits: []
+tags:
+  - medieval

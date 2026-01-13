@@ -1,0 +1,299 @@
+key: teacher_lobsang
+short_desc: "Teacher Lobsang"
+long_desc: "A broad-shouldered monk with a gentle face teaches nearby."
+type: npc
+parent: base_npc
+keywords:
+  - teacher
+  - lobsang
+  - monk
+primary_keyword: monk
+extra_desc: |
+  A broad-shouldered monk with a gentle face, his robes stretched
+  across a frame built for protection, not aggression. He teaches
+  the Dharma Path - defense through understanding.
+tags:
+  - friendly
+  - trainer
+  - monastery
+  - defense
+components:
+  ambient_actions:
+    messages:
+      - "Teacher Lobsang assumes a defensive stance, demonstrating to invisible students."
+      - "The broad-shouldered monk breathes deeply, centering himself."
+      - "Lobsang's hands move through a slow form, precise as a prayer."
+      - "The teacher gazes at the mountain peak, contemplating its steadfastness."
+      - "Lobsang stretches his shoulders, rolling away tension."
+    interval_min: 30
+    interval_max: 60
+    chance: 0.6
+  combatant:
+    health:
+      current: 140
+      max: 140
+    stats:
+      str: 10
+      dex: 8
+      sta: 18
+    level: 5
+  dialogue_tree:
+    # ==========================================================================
+    # BEST PRACTICE: Quest offers should be upfront in the first dialogue node.
+    # ==========================================================================
+
+    # Default start - quest offer upfront
+    start:
+      text: "The mountain stands unmoved by wind. So too must you stand. I am Lobsang, teacher of the Dharma Path. If you would learn from me, first prove your will - climb to the mountain peak and retrieve the sacred sutra."
+      show_if:
+        quest_not_active: "side_mountain_peak"
+      choices:
+        - text: "[Accept Quest] I will climb the mountain."
+          next: "quest_accepted"
+          action: ["accept_quest", "side_mountain_peak"]
+        - text: "Tell me more about this task."
+          next: "quest_details"
+        - text: "I would rather learn incense making."
+          next: "alchemist_offer"
+        - text: "What is the Dharma Path?"
+          next: "dharma_path"
+        - text: "I should go."
+          next: null
+
+    quest_details:
+      text: "The cliff path leads south from the monastery gate. At the summit, in a stone alcove, rests a sutra - the teachings of our founder. Bring it to me, and I will teach you Fortitude."
+      choices:
+        - text: "[Accept Quest] I accept the challenge."
+          next: "quest_accepted"
+          action: ["accept_quest", "side_mountain_peak"]
+        - text: "I need to prepare first."
+          next: null
+    # Start when quest is active - reminder
+    start_active:
+      text: "You have returned! Have you found the sutra at the mountain peak? The path leads south from the monastery gate."
+      show_if:
+        quest_active: "side_mountain_peak"
+      choices:
+        - text: "I'm still climbing."
+          next: null
+        - text: "Where is the peak again?"
+          next: "peak_directions"
+        - text: "Teach me more about the Dharma Path while I'm here."
+          next: "dharma_path"
+    # Start when quest ready to turn in
+    start_ready_to_turn_in:
+      text: "I sense it - you carry the sutra! You have proven your will. Let me see it."
+      show_if:
+        quest_complete: "side_mountain_peak"
+      choices:
+        - text: "[Complete Quest] Here is the sutra, Teacher."
+          next: "turn_in"
+    # Start after quest completed
+    start_completed:
+      completed_quest: "side_mountain_peak"
+      text: "Ah, my student returns. The mountain has tested you, and you proved worthy. How may I help you today?"
+      choices:
+        - text: "Teach me more."
+          next: "advanced_training"
+        - text: "Teach me about incense making."
+          next: "alchemist_offer"
+        - text: "Tell me about the Dharma Path."
+          next: "dharma_path"
+        - text: "I should go."
+          next: null
+    # Turn in node
+    turn_in:
+      text: "[He takes the sutra reverently.] You have done well. The view from the peak... it humbles us, yes? Now you understand why we stand firm - not for ourselves, but for all who shelter beneath us. As promised, I will teach you Fortitude. [He produces a small polished mirror.] Take this mirror of truth. When ignorance clouds your sight in the caves, look within it and see clearly."
+      action: ["complete_quest", "side_mountain_peak"]
+      choices:
+        - text: "[Accept the mirror of truth] Thank you, Teacher."
+          next: null
+          action: ["give_item", "mirror_of_truth"]
+    # Peak directions reminder
+    peak_directions:
+      text: "The cliff path leads south from the monastery gate. Follow it upward, ever upward. The sutra rests in a stone alcove near the summit."
+      choices:
+        - text: "I'll find it."
+          next: null
+    # Advanced training after quest
+    advanced_training:
+      text: "You have proven your resolve. I can now teach you the deeper arts - Endurance and Toughness. Which would you learn?"
+      choices:
+        - text: "Teach me Endurance. (1 point per level)"
+          next: "learn_endurance"
+          action: ["learn_skill", "endurance", 1]
+        - text: "Teach me Toughness. (1 point per level)"
+          next: "learn_toughness"
+          action: ["learn_skill", "toughness", 1]
+        - text: "Tell me about each technique."
+          next: "skill_descriptions"
+        - text: "Perhaps another time."
+          next: null
+    skill_descriptions:
+      text: "Endurance builds your constitution - each level adds +5 maximum HP. Toughness hardens your body - each level reduces incoming damage by 1."
+      choices:
+        - text: "Teach me Endurance. (1 point per level)"
+          next: "learn_endurance"
+          action: ["learn_skill", "endurance", 1]
+        - text: "Teach me Toughness. (1 point per level)"
+          next: "learn_toughness"
+          action: ["learn_skill", "toughness", 1]
+        - text: "I need more time to decide."
+          next: null
+    learn_endurance:
+      text: "[Teacher Lobsang guides you through breathing exercises.] The body is a vessel. Make it stronger, and it carries you further."
+      choices:
+        - text: "I want to learn another technique."
+          next: "advanced_training"
+        - text: "Thank you, Teacher."
+          next: null
+    learn_toughness:
+      text: "[Teacher Lobsang demonstrates taking a strike without flinching.] Pain is information. Acknowledge it, but do not yield to it."
+      choices:
+        - text: "I want to learn another technique."
+          next: "advanced_training"
+        - text: "Thank you, Teacher."
+          next: null
+    dharma_path:
+      text: "The Dharma Path is patience made manifest. We endure, we protect, we do not break. When others attack, we absorb. When others falter, we stand firm. This is not weakness - it is the greatest strength."
+      choices:
+        - text: "Will you train me?"
+          next: "training"
+        - text: "That sounds difficult."
+          next: "encouragement"
+    encouragement:
+      text: "All worthy paths are difficult. But you are here, are you not? That alone shows the spirit required. The mountain did not call you without reason."
+      choices:
+        - text: "Teach me, then."
+          next: "training"
+        - text: "I need to think about it."
+          next: null
+    training:
+      text: "I can teach you the ways of defense - Shield Wall, Parry, and with time, Fortitude itself. But true mastery requires more than practice. It requires proof of will."
+      choices:
+        - text: "What kind of proof?"
+          next: "quest_offer"
+        - text: "Just teach me the basics."
+          next: "basic_training"
+    basic_training:
+      text: "Very well. Watch closely - the body is a shield, but only if the mind is steady first. [He demonstrates a defensive stance.] Practice this. Return when you wish to learn more."
+      choices:
+        - text: "Thank you, Teacher."
+          next: null
+    quest_offer:
+      text: "Reach the mountain peak before dawn. There, in a stone alcove, you will find a sutra - the teachings of our founder. Bring it to me, and I will teach you Fortitude."
+      show_if:
+        quest_not_active: "side_mountain_peak"
+      choices:
+        - text: "[Accept Quest] I will climb the mountain."
+          next: "quest_accepted"
+          action: ["accept_quest", "side_mountain_peak"]
+        - text: "The peak sounds dangerous."
+          next: "peak_warning"
+        - text: "Perhaps another time."
+          next: null
+    peak_warning:
+      text: "The path is treacherous, yes. But the view from above... it changes perspective. You will see the monastery, the village, the world spread out below. And you will understand why we stand firm."
+      choices:
+        - text: "[Accept Quest] I accept the challenge."
+          next: "quest_accepted"
+          action: ["accept_quest", "side_mountain_peak"]
+        - text: "I'm not ready yet."
+          next: null
+    quest_accepted:
+      text: "May your steps be sure. The cliff path leads south from the monastery gate. Follow it upward. The sutra awaits one worthy enough to reach it."
+      choices:
+        - text: "I'll return with it."
+          next: null
+    tenzin_info:
+      text: "Master Tenzin... he was the strongest of us all. If the darkness could trap him, what hope do any of us have? [He pauses.] But perhaps that is why you are here. Sometimes strength comes from unexpected places."
+      choices:
+        - text: "I will try to help him."
+          next: "tenzin_hope"
+        - text: "Tell me about the Dharma Path instead."
+          next: "dharma_path"
+    tenzin_hope:
+      text: "Then I pray for your success. Speak with Abbot Jampa - he knows more than he tells. And if you survive the caves... come back. I will teach you everything I know."
+      choices:
+        - text: "Thank you, Teacher."
+          next: null
+
+    # ==========================================================================
+    # ALCHEMIST LESSON QUEST (Crafting Test)
+    # ==========================================================================
+
+    # Offer alchemist lesson - available from completed state
+    alchemist_offer:
+      text: "There is another teaching I can share - the art of preparing meditation incense. It is a simple practice, but profound. The fragrance calms the mind and aids in concentration. Would you learn?"
+      show_if:
+        quest_not_active: "side_alchemist_lesson"
+        quest_not_completed: "side_alchemist_lesson"
+      choices:
+        - text: "[Accept Quest] Teach me to prepare incense."
+          next: "alchemist_accepted"
+          action: ["accept_quest", "side_alchemist_lesson"]
+        - text: "What does the incense do?"
+          next: "alchemist_details"
+        - text: "Perhaps another time."
+          next: null
+
+    alchemist_details:
+      text: "When burned, the incense releases a gentle fragrance that helps focus the mind. Monks use it during meditation to calm wandering thoughts. The preparation itself is a form of meditation - mindful attention to each step."
+      choices:
+        - text: "[Accept Quest] I would like to learn."
+          next: "alchemist_accepted"
+          action: ["accept_quest", "side_alchemist_lesson"]
+        - text: "I need to think about it."
+          next: null
+
+    alchemist_accepted:
+      text: "Good. The process is simple - shaping the fragrant powder into a cone requires only mindful attention. Go now and prepare the incense. When you have done so, return to me."
+      choices:
+        - text: "I will return with the incense."
+          next: null
+
+    # Active quest reminder
+    alchemist_active:
+      text: "Have you prepared the meditation incense? Shape the fragrant powder with mindful attention. Return to me when you have completed the task."
+      show_if:
+        quest_active: "side_alchemist_lesson"
+        quest_not_completed: "side_alchemist_lesson"
+      choices:
+        - text: "I'm still working on it."
+          next: null
+        - text: "Remind me how to prepare it?"
+          next: "alchemist_reminder"
+
+    alchemist_reminder:
+      text: "Focus your mind, let your hands work steadily. The fragrant powder needs only gentle shaping. There is no special station required - your mindful attention is all that is needed."
+      choices:
+        - text: "I understand."
+          next: null
+
+    # Ready to turn in - shows when player has crafted the incense
+    # Named with "start_" prefix so find_start_node picks it up as a conditional start
+    start_alchemist_ready:
+      text: "Ah, I can smell the incense on you. You have completed the task! Show me what you have made."
+      show_if:
+        quest_active: "side_alchemist_lesson"
+        has_item: "meditation_incense"
+      choices:
+        - text: "[Complete Quest] Here is the incense I prepared."
+          next: "alchemist_complete"
+
+    alchemist_complete:
+      text: "[He examines the incense cone appreciatively.] Well done. You have learned that even simple tasks, done with attention, become sacred. May this practice bring you peace in troubled times."
+      action: ["complete_quest", "side_alchemist_lesson"]
+      choices:
+        - text: "Thank you, Teacher."
+          next: null
+
+  teacher:
+    skills:
+      - endurance
+      - toughness
+  quests:
+    - side_mountain_peak
+    - side_alchemist_lesson
+  gives_items:
+    - mirror_of_truth

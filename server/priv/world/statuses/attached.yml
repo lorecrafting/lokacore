@@ -1,0 +1,28 @@
+key: attached
+name: "Attachment"
+type: debuff
+category: poison
+duration: 60
+stackable: false
+effects:
+  - trigger: on_item_use
+    effect: weaken_item
+    modifier: -50
+    description: "Items are less effective while grasping"
+  - trigger: passive
+    effect: stat_modify
+    stat: wisdom
+    modifier: -2
+  - trigger: on_combat
+    effect: raga_strengthen
+    description: "Raga Mara grows stronger from your desires"
+cure_items:
+  - offering_incense
+cure_abilities:
+  - om_mani_padme_hum
+cure_action: meditation
+icon: gold_chain
+color: gold
+description: "Grasping desire clouds your judgment."
+apply_message: "Desire takes hold. You want... something. Everything."
+remove_message: "The grasping eases. You remember: nothing can be truly possessed."

@@ -1,0 +1,40 @@
+# Fresh Ginger (Sheng Jiang)
+# Warming herb used in many basic formulas
+
+key: sheng_jiang
+type: item
+parent: base_herb
+
+short_desc: "Fresh Ginger Root"
+long_desc: "A gnarled golden ginger root pushes through the soil."
+extra_desc: |
+  A knobby, golden-brown root with a pungent, spicy aroma. The flesh
+  inside is pale yellow and fibrous. The monks use fresh ginger to
+  warm the body and aid digestion. Its sharp bite lingers on the
+  tongue, driving away cold and sluggishness.
+
+keywords:
+  - ginger
+  - root
+  - sheng
+  - jiang
+  - golden
+primary_keyword: ginger
+
+tags:
+  - item
+  - herb
+  - tcm
+  - warming
+
+components:
+  physical:
+    weight: 0.2
+    stackable: true
+    max_stack: 20
+  valuable:
+    base_price: 3
+  herb:
+    category: warming
+    nature: warm
+    flavor: pungent

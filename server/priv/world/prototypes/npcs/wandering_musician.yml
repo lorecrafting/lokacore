@@ -1,0 +1,259 @@
+key: wandering_musician
+type: npc
+parent: base_npc
+
+short_desc: "Wandering Musician"
+long_desc: "A traveling bard strums a weathered dramyin, filling the air with haunting melodies."
+extra_desc: |
+  A lean figure with bright, curious eyes and fingers calloused from
+  years of playing. His dramyin - a long-necked lute - bears the
+  marks of countless journeys, its wood darkened by smoke and rain.
+  He carries songs from every valley, every monastery, every forgotten
+  shrine in the mountains.
+keywords:
+  - musician
+  - bard
+  - singer
+  - minstrel
+  - player
+primary_keyword: bard
+mood: whimsical
+
+tags:
+  - friendly
+  - traveler
+  - atmosphere
+  - artist
+
+behaviors:
+  - Loka.Behaviors.Patrol
+
+attributes:
+  behavior_config:
+    patrol:
+      path:
+        - village
+        - market
+        - monastery_gate
+        - main_courtyard
+      pause_seconds: 90
+      loop: true
+      ambient_messages:
+        - "The musician strums a melancholy chord that echoes off the stones."
+        - "A lilting melody drifts from the musician's dramyin."
+        - "The musician hums softly, tuning his instrument."
+        - "The musician's fingers dance across the strings, weaving a wordless story."
+        - "The musician pauses to adjust a tuning peg with practiced care."
+        - "A few notes escape the dramyin, bright as bird song."
+        - "The musician taps his foot, keeping time with an unheard rhythm."
+
+components:
+  combatant:
+    health:
+      current: 45
+      max: 45
+    stats:
+      str: 7
+      dex: 14
+      sta: 8
+    level: 2
+  dialogue_tree:
+    # ==========================================================================
+    # BEST PRACTICE: Quest offers should be upfront in the first dialogue node.
+    # ==========================================================================
+
+    # Default start - quest offer upfront
+    start:
+      text: "Greetings, traveler! I know a song of warding, old as the mountains themselves. Gather three tales from the people of this mountain - the pilgrim's journey, the farmer's wisdom, and the smith's memory - and I will teach it to you."
+      show_if:
+        quest_not_active: "side_the_musicians_tale"
+      choices:
+        - text: "[Accept Quest] I'll gather these stories."
+          next: "quest_accepted"
+          action: ["accept_quest", "side_the_musicians_tale"]
+        - text: "Who should I speak with?"
+          next: "story_sources"
+        - text: "Play me a song instead."
+          next: "song_choice"
+        - text: "Perhaps another time."
+          next: null
+
+    story_sources:
+      text: "Seek the elderly pilgrim - she has walked these mountains for sixty years. Find Farmer Tsering in the terraced fields. And speak with Blacksmith Tashi about the caves. Their stories will prepare you for the song."
+      choices:
+        - text: "[Accept Quest] I'll find them."
+          next: "quest_accepted"
+          action: ["accept_quest", "side_the_musicians_tale"]
+        - text: "That sounds like a lot of work."
+          next: null
+
+    quest_accepted:
+      text: "Stories are the soul of songs. When you understand their tales, you'll be ready for mine. Safe travels, story-gatherer!"
+      choices:
+        - text: "I'll return with the stories."
+          next: null
+    # Start when quest is active - reminder
+    start_active:
+      text: "Ah, the story-gatherer returns! Have you collected the three tales? The pilgrim's journey, the farmer's wisdom, the smith's memory?"
+      show_if:
+        quest_active: "side_the_musicians_tale"
+      choices:
+        - text: "I'm still gathering stories."
+          next: null
+        - text: "Remind me who I need to speak with."
+          next: "story_reminder"
+        - text: "Play me a song while I'm here."
+          next: "song_choice"
+    # Start when quest ready to turn in
+    start_ready_to_turn_in:
+      text: "I can see it in your eyes - you've listened, truly listened. The pilgrim's patience, the farmer's humility, the smith's fear transformed to respect. Yes... you're ready for the song."
+      show_if:
+        quest_complete: "side_the_musicians_tale"
+      choices:
+        - text: "Teach me the song of warding."
+          next: "teach_song"
+    # Start after quest completed
+    start_completed:
+      completed_quest: "side_the_musicians_tale"
+      text: "Ah, my friend who carries the warding song! How fares your journey? Would you hear another melody?"
+      choices:
+        - text: "Play me something."
+          next: "song_choice"
+        - text: "Tell me about your travels."
+          next: "travels"
+        - text: "Perhaps another time."
+          next: null
+    # Story reminder
+    story_reminder:
+      text: "Seek the elderly pilgrim - she has walked these mountains for sixty years. Find Farmer Tsering in the terraced fields. And speak with Blacksmith Tashi about the caves. Their stories will prepare you for the song."
+      choices:
+        - text: "I'll find them."
+          next: null
+    teach_request:
+      text: "Teach you? Hmm... I know a song of warding, old as the mountains themselves. But such songs have power, and power should only go to those who understand it."
+      show_if:
+        quest_not_active: "side_the_musicians_tale"
+      choices:
+        - text: "How can I prove myself?"
+          next: "prove_worthy"
+        - text: "Never mind then."
+          next: null
+    prove_worthy:
+      text: "Stories are the soul of songs. Gather three tales from the people of this mountain - the old pilgrim's journey, the farmer's earthy wisdom, and the smith's dark memory. When you understand their stories, you'll be ready for mine."
+      choices:
+        - text: "[Accept Quest] I'll gather these stories."
+          next: null
+          action: ["accept_quest", "side_the_musicians_tale"]
+        - text: "That sounds like a lot of work."
+          next: null
+    teach_song:
+      text: |
+        *The musician plays a slow, resonant melody, each note seeming to push back the shadows:*
+
+        "Ring of silver, ring of gold,
+        Keep the darkness from our hold,
+        What was sleeping, let it stay,
+        Ward the night, protect the day..."
+
+        *The song seems to settle into your bones.* "Remember it. When the shadows press close, let it rise."
+      choices:
+        - text: "[Complete Quest] Thank you, truly."
+          next: null
+          action: ["complete_quest", "side_the_musicians_tale"]
+    song_choice:
+      text: "Ah, what shall it be? A ballad of the old kings? A lullaby from the southern valleys? Or perhaps... a song about this very monastery and its sleeping master?"
+      choices:
+        - text: "Sing of the sleeping master."
+          next: "tenzin_song"
+        - text: "Something cheerful."
+          next: "cheerful_song"
+        - text: "A song of the mountains."
+          next: "mountain_song"
+    tenzin_song:
+      text: |
+        *The musician's voice drops low, each word weighted with sorrow:*
+
+        "Deep beneath the sacred stone,
+        Where dharma's light has never shone,
+        The master walks through shadow's dream,
+        Where nothing is quite what things seem.
+        Three poisons wait in caverns deep,
+        While above, his disciples weep..."
+
+        *He trails off.* "I dare not finish it. Some songs have power."
+      choices:
+        - text: "That's unsettling."
+          next: "power_of_song"
+        - text: "Do you know more about what happened?"
+          next: "monastery_lore"
+    cheerful_song:
+      text: |
+        *The musician's face brightens as he launches into a quick tune:*
+
+        "The yak said to the mountain goat,
+        'Your horns are quite absurd!'
+        The goat said back with haughty throat,
+        'At least I'm not a walking coat!'"
+
+        *He winks.* "The children love that one."
+      choices:
+        - text: "Ha! Do you have more?"
+          next: "more_songs"
+        - text: "Tell me about your travels instead."
+          next: "travels"
+    mountain_song:
+      text: |
+        *The musician closes his eyes and plays a slow, reverent melody:*
+
+        "Stone and snow and endless sky,
+        Where eagles and the spirits fly,
+        Each peak a throne, each valley prayer,
+        The sacred breath is everywhere..."
+
+        *The last note hangs in the air like incense smoke.*
+      choices:
+        - text: "Beautiful."
+          next: "origin"
+        - text: "You have a gift."
+          next: "origin"
+    power_of_song:
+      text: "Words have power, friend. Names have power. Songs... songs can wake things that sleep, or put them to rest. I learned that the hard way, in a village three valleys east. But that's a story for another time."
+      choices:
+        - text: "What happened there?"
+          next: "dark_story"
+        - text: "Tell me about this monastery."
+          next: "monastery_lore"
+    dark_story:
+      text: "I sang an old song - so old no one remembered it. By the next morning, the village well had gone dry and strange lights danced on the mountainside. The elders made me leave. I never sang that song again."
+      choices:
+        - text: "That's terrifying."
+          next: null
+        - text: "Perhaps music could help here too?"
+          next: "music_help"
+    music_help:
+      text: "Perhaps... There are songs of banishing, songs of peace. But the darkness here is old and deep. It would take more than my simple melodies to reach it."
+      choices:
+        - text: "Thank you for the songs."
+          next: null
+    travels:
+      text: "I've walked from the southern jungles to the northern ice. Played for kings and beggars alike. But the mountains... the mountains always call me back. There's magic here, in the thin air and the ancient stones."
+      choices:
+        - text: "Why this monastery?"
+          next: "monastery_lore"
+        - text: "Play me a song."
+          next: "song_choice"
+    monastery_lore:
+      text: "This place is older than the current monastery - much older. The caves beneath were sacred before the first monks arrived. They say Padmasambhava himself tamed the demons here... but perhaps he only put them to sleep."
+      choices:
+        - text: "Interesting. Thank you."
+          next: null
+    origin:
+      text: "Thank you, friend. Music is my only true possession. Everything else - food, shelter, coin - comes and goes. But the songs remain."
+      choices:
+        - text: "Safe travels, musician."
+          next: null
+    more_songs:
+      text: "Ha! I have songs enough to fill seven lifetimes. But my throat grows dry. Perhaps if you bring me some butter tea from the market, I might remember a few more..."
+      choices:
+        - text: "I'll see what I can do."
+          next: null

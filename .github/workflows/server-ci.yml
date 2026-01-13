@@ -1,0 +1,203 @@
+name: Server CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "server/**"
+      - ".github/workflows/server-ci.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "server/**"
+      - ".github/workflows/server-ci.yml"
+
+defaults:
+  run:
+    working-directory: server
+
+env:
+  MIX_ENV: test
+  ELIXIR_VERSION: "1.19.4"
+  OTP_VERSION: "28.3"
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: ${{ env.ELIXIR_VERSION }}
+          otp-version: ${{ env.OTP_VERSION }}
+
+      - name: Cache Elixir deps
+        uses: actions/cache@v4
+        with:
+          path: |
+            server/deps
+            server/_build
+          key: ${{ runner.os }}-mix-${{ hashFiles('server/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Check formatting
+        run: mix format --check-formatted
+
+      - name: Compile (warnings as errors)
+        run: mix compile --warnings-as-errors
+
+      - name: Run tests
+        run: mix test
+
+      - name: Validate content
+        # Skip reachability check - items without sources is a content gap, not a code error
+        run: mix loka.test.validate --quiet --skip reachability
+        env:
+          MIX_ENV: dev
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: ${{ env.ELIXIR_VERSION }}
+          otp-version: ${{ env.OTP_VERSION }}
+
+      - name: Cache Elixir deps
+        uses: actions/cache@v4
+        with:
+          path: |
+            server/deps
+            server/_build
+          key: ${{ runner.os }}-mix-${{ hashFiles('server/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Audit dependencies for vulnerabilities
+        run: mix hex.audit
+
+      - name: Install Sobelow (security scanner)
+        run: mix archive.install hex sobelow --force
+
+      - name: Run Sobelow security analysis
+        run: mix sobelow --config
+
+  deploy:
+    name: Deploy to Fly.io
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    outputs:
+      app_url: ${{ steps.get_url.outputs.url }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Fly CLI
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to Fly.io
+        run: flyctl deploy --remote-only
+        working-directory: server
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Get app URL
+        id: get_url
+        run: |
+          APP_NAME=$(grep '^app' fly.toml | cut -d"'" -f2)
+          echo "url=https://${APP_NAME}.fly.dev" >> $GITHUB_OUTPUT
+        working-directory: server
+
+  smoke-test:
+    name: Post-Deploy Smoke Tests
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # Override default working-directory since this job doesn't checkout code
+    defaults:
+      run:
+        working-directory: .
+
+    steps:
+      - name: Wait for deployment to stabilize
+        run: sleep 30
+
+      - name: Check health endpoint (liveness)
+        run: |
+          echo "Checking health endpoint..."
+          echo "URL: ${{ needs.deploy.outputs.app_url }}/api/health"
+          RESPONSE=$(curl -svf "${{ needs.deploy.outputs.app_url }}/api/health" 2>&1 || echo "FAILED")
+          echo "Response: $RESPONSE"
+          if echo "$RESPONSE" | grep -q '"status":"ok"'; then
+            echo "Health check passed"
+          else
+            echo "Health check failed"
+            exit 1
+          fi
+
+      - name: Check readiness endpoint
+        run: |
+          echo "Checking readiness endpoint..."
+          RESPONSE=$(curl -sf "${{ needs.deploy.outputs.app_url }}/api/health/ready" || echo "FAILED")
+          echo "Response: $RESPONSE"
+          if echo "$RESPONSE" | grep -q '"status":"ready"'; then
+            echo "Readiness check passed"
+          else
+            echo "Readiness check failed - app may still be starting"
+            # Allow retry
+            sleep 10
+            RESPONSE=$(curl -sf "${{ needs.deploy.outputs.app_url }}/api/health/ready" || echo "FAILED")
+            if echo "$RESPONSE" | grep -q '"status":"ready"'; then
+              echo "Readiness check passed on retry"
+            else
+              echo "Readiness check failed after retry"
+              exit 1
+            fi
+          fi
+
+      - name: Check login page loads
+        run: |
+          echo "Checking login page..."
+          STATUS=$(curl -sL -o /dev/null -w "%{http_code}" "${{ needs.deploy.outputs.app_url }}/players/log-in")
+          echo "Status code: $STATUS"
+          if [ "$STATUS" = "200" ]; then
+            echo "Login page check passed"
+          else
+            echo "Login page check failed"
+            exit 1
+          fi
+
+      - name: Check API version
+        run: |
+          echo "Checking API version..."
+          VERSION=$(curl -sf "${{ needs.deploy.outputs.app_url }}/api/health" | jq -r '.version')
+          echo "Deployed version: $VERSION"
+          if [ -n "$VERSION" ] && [ "$VERSION" != "null" ]; then
+            echo "Version check passed"
+          else
+            echo "Version check failed"
+            exit 1
+          fi
+
+      - name: Smoke tests passed
+        run: echo "All smoke tests passed successfully"

@@ -1,0 +1,48 @@
+# Jujube Date Patch - Red Jujube (Da Zao)
+# Blood tonic and harmonizer, appears in many formulas
+
+key: herb_patch_jujube
+parent: base_container
+type: item
+
+short_desc: "Jujube Tree"
+long_desc: "A small jujube tree grows here, its branches heavy with red-brown dates."
+extra_desc: |
+  A gnarled jujube tree, perhaps a century old, spreads its branches
+  over a quiet corner of the garden. Clusters of wrinkled red-brown
+  dates hang from the branches, their sweet fragrance attracting
+  industrious bees. The monks call these the "King of Nuts."
+keywords:
+  - jujube
+  - tree
+  - dates
+  - da
+  - zao
+primary_keyword: tree
+
+components:
+  physical:
+    weight: 0
+    stackable: false
+  container:
+    capacity: 4
+    can_take: true
+    can_put: false
+    description_open: "You examine the jujube tree closely."
+    state_descriptions:
+      full: "The branches hang heavy with ripe red dates."
+      partial: "A few dates remain on the branches."
+      empty: "The tree has been picked clean. New fruit will ripen in time."
+    respawn:
+      enabled: true
+      delay_seconds: 300
+      loot_table:
+        - item: da_zao
+          weight: 100
+          quantity: [2, 4]
+
+tags:
+  - container
+  - herb_patch
+  - no_get
+  - furniture

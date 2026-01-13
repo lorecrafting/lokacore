@@ -1,0 +1,26 @@
+id: ignorance_maze
+name: "Ignorance's Maze"
+trigger:
+  type: enter_room
+  location: ignorance_chamber
+  condition: "!player.has_flag('ignorance_entered')"
+sequence:
+  - type: narration
+    text: "You cannot tell up from down. The path splits and rejoins."
+  - type: pause
+    duration: 1
+  - type: dialogue
+    speaker: moha_voice
+    text: "Which way? Which choice is right?"
+  - type: narration
+    text: "But perhaps the question itself is the trap."
+  - type: narration
+    text: "Perhaps there is no 'right way' - only seeing clearly."
+  - type: apply_status
+    status: confused
+    duration: 60
+    message: "Confusion clouds your mind."
+effects:
+  - type: set_flag
+    flag: ignorance_entered
+    value: true

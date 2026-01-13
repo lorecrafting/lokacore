@@ -1,0 +1,39 @@
+# Cutscene: Victory over Dvesha Mara (Aversion)
+# Triggers when player defeats Dvesha Mara
+
+id: aversion_victory
+name: "Peace in Fury's Heart"
+trigger:
+  type: enemy_defeated
+  target: dvesha_mara
+  location: dveshas_core
+sequence:
+  - type: narration
+    text: "Dvesha Mara's flames sputter and die."
+  - type: pause
+    duration: 1
+  - type: narration
+    text: "The heat drains from the chamber. Silence replaces screaming."
+  - type: dialogue
+    speaker: dvesha_voice
+    text: "How can you be... calm? I gave you every reason to hate!"
+  - type: pause
+    duration: 1
+  - type: narration
+    text: "You feel only pity. The demon of wrath has never known peace."
+  - type: narration
+    text: "A seal fragment emerges from the cooling embers - blue as deep water."
+  - type: pause
+    duration: 1
+  - type: narration
+    text: "Another chain binding Tenzin weakens."
+  - type: narration
+    text: "Two poisons overcome. One remains."
+effects:
+  - type: set_flag
+    flag: aversion_defeated
+    value: true
+  - type: give_item
+    item: seal_fragment_aversion
+  - type: give_xp
+    amount: 100

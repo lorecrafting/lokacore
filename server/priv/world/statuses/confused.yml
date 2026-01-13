@@ -1,0 +1,29 @@
+key: confused
+name: "Ignorance"
+type: debuff
+category: poison
+duration: 60
+stackable: false
+effects:
+  - trigger: on_ability_use
+    effect: random_target
+    chance: 30
+    description: "Confusion may misdirect your abilities"
+  - trigger: passive
+    effect: stat_modify
+    stat: accuracy
+    modifier: -4
+  - trigger: on_movement
+    effect: random_direction
+    chance: 20
+    description: "You may wander in unexpected directions"
+cure_items:
+  - incense_of_clarity
+cure_abilities:
+  - om_tare_tuttare
+cure_action: rest
+icon: grey_fog
+color: grey
+description: "Confusion obscures your perception."
+apply_message: "The world blurs. Which way is which? What is real?"
+remove_message: "Clarity returns. You see things as they are."

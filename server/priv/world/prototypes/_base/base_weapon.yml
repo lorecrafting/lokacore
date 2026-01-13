@@ -1,0 +1,21 @@
+key: base_weapon
+parent: base_item
+type: item
+
+# LegendMUD-style description fields
+short_desc: "Base Weapon"
+long_desc: "A generic weapon lies here."
+extra_desc: "A generic weapon."
+keywords: []
+
+components:
+  physical:
+    weight: 2.0
+  weapon:
+    damage: 5
+    damage_type: "physical"
+    speed: 1.0
+tags:
+  - item
+  - weapon
+  - equippable

@@ -1,0 +1,186 @@
+import React, { useRef, useMemo } from 'react'
+import { OrbitControls, Grid, Text } from '@react-three/drei'
+import * as THREE from 'three'
+import Exit, { getExitColor } from './Exit'
+
+/**
+ * 3D Viewport Component
+ *
+ * Renders the main 3D scene with:
+ * - Grid floor for reference
+ * - Orbit camera controls
+ * - Room cubes with labels
+ * - Exit arrows connecting rooms
+ * - Multi-select support
+ * - Lighting
+ */
+export default function Viewport({ rooms, selectedRoom, selectedKeys = [], onSelectRoom, isSelected }) {
+  // Build a lookup map for quick room access by key
+  const roomsByKey = useMemo(() => {
+    const map = new Map()
+    rooms.forEach(room => {
+      map.set(room.key, room)
+      if (room.id) map.set(room.id, room)
+    })
+    return map
+  }, [rooms])
+
+  // Build exit connections for rendering
+  const exitConnections = useMemo(() => {
+    const connections = []
+
+    rooms.forEach(room => {
+      if (!room.exits) return
+
+      Object.entries(room.exits).forEach(([direction, destKey]) => {
+        const destRoom = roomsByKey.get(destKey)
+        if (destRoom) {
+          connections.push({
+            key: `${room.key}-${direction}-${destKey}`,
+            from: room,
+            to: destRoom,
+            direction,
+            color: getExitColor(direction)
+          })
+        }
+      })
+    })
+
+    return connections
+  }, [rooms, roomsByKey])
+
+  return (
+    <>
+      {/* Lighting */}
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[10, 10, 5]} intensity={1} />
+      <directionalLight position={[-10, 10, -5]} intensity={0.5} />
+
+      {/* Camera Controls */}
+      <OrbitControls
+        enableDamping
+        dampingFactor={0.05}
+        minDistance={5}
+        maxDistance={100}
+        makeDefault
+      />
+
+      {/* Grid Floor */}
+      <Grid
+        args={[100, 100]}
+        cellSize={1}
+        cellThickness={0.5}
+        cellColor="#444444"
+        sectionSize={10}
+        sectionThickness={1}
+        sectionColor="#666666"
+        fadeDistance={50}
+        fadeStrength={1}
+        position={[0, -0.01, 0]}
+      />
+
+      {/* Render Exit Arrows */}
+      {exitConnections.map((exit) => (
+        <Exit
+          key={exit.key}
+          from={exit.from}
+          to={exit.to}
+          direction={exit.direction}
+          color={exit.color}
+        />
+      ))}
+
+      {/* Render Room Cubes */}
+      {rooms.map((room) => (
+        <RoomCube
+          key={room.key}
+          room={room}
+          selected={selectedRoom === room.key}
+          multiSelected={isSelected && isSelected(room.key)}
+          onSelect={onSelectRoom}
+        />
+      ))}
+    </>
+  )
+}
+
+/**
+ * Room Cube Component
+ *
+ * Renders a single room as a cube with a text label.
+ * Supports single selection and multi-selection with different highlighting.
+ */
+function RoomCube({ room, selected, multiSelected, onSelect }) {
+  const meshRef = useRef()
+  const { x = 0, y = 0, z = 0, name } = room
+
+  const handleClick = (e) => {
+    e.stopPropagation()
+    if (onSelect) {
+      // Pass the shift key state to the parent
+      onSelect(room.key, e.shiftKey)
+    }
+  }
+
+  // Determine cube color based on selection state
+  const cubeColor = multiSelected ? '#ffaa00' : (selected ? '#4a9eff' : '#7eb3ff')
+  const emissiveColor = multiSelected ? '#ff8800' : (selected ? '#2a5eff' : '#0a0a0a')
+  const emissiveIntensity = (multiSelected || selected) ? 0.3 : 0
+
+  return (
+    <group position={[x, 1, y]}>
+      {/* Cube */}
+      <mesh
+        ref={meshRef}
+        castShadow
+        receiveShadow
+        onClick={handleClick}
+        onPointerOver={() => (document.body.style.cursor = 'pointer')}
+        onPointerOut={() => (document.body.style.cursor = 'default')}
+      >
+        <boxGeometry args={[2, 2, 2]} />
+        <meshStandardMaterial
+          color={cubeColor}
+          emissive={emissiveColor}
+          emissiveIntensity={emissiveIntensity}
+          roughness={0.5}
+          metalness={0.2}
+        />
+      </mesh>
+
+      {/* Selection outline for multi-selected rooms */}
+      {multiSelected && !selected && (
+        <lineSegments>
+          <edgesGeometry args={[new THREE.BoxGeometry(2.1, 2.1, 2.1)]} />
+          <lineBasicMaterial color="#ffaa00" linewidth={2} />
+        </lineSegments>
+      )}
+
+      {/* Room Label */}
+      <Text
+        position={[0, 2, 0]}
+        fontSize={0.4}
+        color="white"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.05}
+        outlineColor="#000000"
+      >
+        {name}
+      </Text>
+
+      {/* Room Key (smaller text below) */}
+      <Text
+        position={[0, 1.5, 0]}
+        fontSize={0.25}
+        color="#aaaaaa"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.03}
+        outlineColor="#000000"
+      >
+        {room.key}
+      </Text>
+    </group>
+  )
+}

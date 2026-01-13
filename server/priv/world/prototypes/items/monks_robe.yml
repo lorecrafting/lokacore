@@ -1,0 +1,30 @@
+key: monks_robe
+type: item
+parent: base_item
+short_desc: "Monk's Robe"
+long_desc: "simple robes worn by monastery monks"
+extra_desc: |
+  Simple but well-made robes of undyed wool. Despite their
+  humble appearance, these robes have been blessed by the
+  monastery's senior monks, offering protection from both
+  physical and spiritual harm.
+keywords:
+  - monks
+  - robe
+  - robes
+  - simple
+primary_keyword: robe
+tags:
+  - item
+  - armor
+  - equippable
+  - blessed
+components:
+  armor:
+    defense: 3
+    slot: body
+    spirit_resistance: 5
+  physical:
+    weight: 1.0
+  valuable:
+    base_price: 25

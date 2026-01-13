@@ -1,0 +1,36 @@
+key: offering_incense
+short_desc: "Offering Incense"
+long_desc: "pure sandalwood temple incense"
+keywords:
+  - offering
+  - incense
+  - sandalwood
+  - temple
+primary_keyword: incense
+type: item
+parent: base_item
+extra_desc: |
+  Pure sandalwood, the traditional temple offering. Its smoke
+  carries prayers skyward and reminds the mind of impermanence.
+components:
+  consumable:
+    effect: buff
+    buff_type: non_attachment
+    duration: 300
+    bonus:
+      - type: damage
+        amount: 5
+        vs_tags:
+          - attachment
+    on_use_message: "You remember: nothing can be truly possessed. This is freedom."
+  physical:
+    weight: 0.1
+    stackable: true
+    max_stack: 5
+  valuable:
+    base_price: 25
+tags:
+  - item
+  - consumable
+  - buff
+  - incense

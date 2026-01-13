@@ -1,0 +1,28 @@
+# Jujube Patch - Herb Garden gathering node
+# Da Zao (Red Dates) - nourishes blood, calms the spirit
+
+key: jujube_patch
+name: "Jujube Tree"
+skill_required: herbalism
+skill_level: 1
+yields:
+  - item: da_zao
+    chance: 0.75
+    quantity: [2, 4]
+  - item: da_zao
+    chance: 0.25
+    quantity: [1, 2]
+respawn_time: 360
+uses_per_respawn: 4
+tool_required: null
+xp_reward:
+  skill: herbalism
+  amount: 4
+gather_message: "You reach up to the low-hanging branches, selecting the ripest red dates."
+success_message: "Sweet jujubes come away in your hand, their deep red color promising potency."
+failure_message: "The remaining fruits are still green. Patience is a virtue."
+exhausted_message: "All ripe dates have been picked. The tree needs time to bear more fruit."
+tags:
+  - herb_garden
+  - medicinal
+  - blood_nourishing

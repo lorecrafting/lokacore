@@ -1,0 +1,39 @@
+key: cemetery
+parent: base_room
+type: room
+short_desc: "Cemetery"
+long_desc: "A quiet hillside of weathered graves where the boundary between worlds grows thin at dusk."
+extra_desc: |
+  Weathered burial mounds dot the hillside, marked by prayer flags faded to ghostly white. Ancient prayer wheels stand sentinel at the corners, and at dusk the air grows heavy as shadows lengthen.
+keywords: []
+exits:
+  east: old_stupa
+  south: village
+spawns:
+  - prototype: hungry_ghost
+    conditions:
+      time_of_day: [dusk, night]
+tags:
+  - outdoor
+  - cemetery
+  - haunted
+  - room_entry_effect
+components:
+  gathering_nodes:
+    ghost_flowers:
+      uses_remaining: 2
+  ambient_messages:
+    dawn:
+      - "Spring wildflowers bloom defiantly among the headstones."
+    day:
+      - "The tall grass whispers secrets in a language almost understood."
+      - "The ancient prayer wheels creak slowly in the wind."
+      - "A chill runs down your spine for no apparent reason."
+    dusk:
+      - "The sun sinks toward the horizon, and the boundary between worlds thins."
+      - "Pale moon blossoms begin to open their petals."
+      - "Shadows seem to move at the edge of your vision."
+    night:
+      - "The darkness here feels alive, watchful."
+      - "Cold mist rises from the old graves."
+      - "The air grows heavy, thick with something unseen."

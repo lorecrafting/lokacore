@@ -1,0 +1,35 @@
+# Base prototype for all TCM herbs
+# Herbs are pickable items that spawn on the ground in rooms
+
+key: base_herb
+type: item
+parent: base_item
+
+short_desc: "Medicinal Herb"
+long_desc: "a medicinal herb grows here"
+extra_desc: "A medicinal herb used in traditional remedies."
+
+keywords:
+  - herb
+  - medicinal
+  - plant
+primary_keyword: herb
+
+tags:
+  - item
+  - herb
+  - tcm
+  - material
+  - alchemical
+
+components:
+  physical:
+    weight: 0.1
+    stackable: true
+    max_stack: 20
+  valuable:
+    base_price: 5
+  herb:
+    category: general
+    nature: neutral
+    flavor: bland

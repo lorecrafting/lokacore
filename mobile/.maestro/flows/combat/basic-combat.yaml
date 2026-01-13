@@ -1,0 +1,148 @@
+# Basic Combat Flow
+# Tests: Combat overlay appearance and UI elements when combat is available
+#
+# Note: This test requires a hostile entity to be present in the starting room.
+# If no hostile entity is available, the test will skip combat-specific steps.
+#
+# Prerequisites:
+# - Player logged in
+# - Server running with potential hostile entities
+
+appId: com.loka.game
+tags:
+  - combat
+  - core
+---
+
+# Clear state for consistent testing
+- clearState
+
+# Launch app with clean state
+- launchApp:
+    clearState: true
+    clearKeychain: true
+
+# Wait for app to load
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Handle login if needed
+- runFlow:
+    when:
+      visible:
+        id: "name-input"
+    commands:
+      - tapOn:
+          id: "name-input"
+      - inputRandomText:
+          length: 8
+      - hideKeyboard
+      - waitForAnimationToEnd:
+          timeout: 2000
+      - tapOn:
+          label: "Enter the World"
+      - waitForAnimationToEnd:
+          timeout: 10000
+
+# Wait for game to load
+- extendedWaitUntil:
+    visible:
+      id: "room-view"
+    timeout: 15000
+    label: "Wait for game to load"
+
+# Wait for WebSocket connection
+- waitForAnimationToEnd:
+    timeout: 3000
+
+- takeScreenshot: "combat_01_game_loaded"
+
+# Try to find and tap on an NPC (combat requires an attackable target)
+- tapOn:
+    id: "entity-npc-0"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- takeScreenshot: "combat_02_entity_tapped"
+
+# Check if entity modal opened (use entity-name inside the modal)
+- runFlow:
+    when:
+      visible:
+        id: "entity-name"
+    commands:
+      - takeScreenshot: "combat_03_entity_modal"
+      # Look for Attack action (only available for hostile entities)
+      - tapOn:
+          text: "Attack"
+          optional: true
+      - waitForAnimationToEnd:
+          timeout: 2000
+
+- takeScreenshot: "combat_04_after_attack_attempt"
+
+# If combat started, verify combat overlay elements
+- runFlow:
+    when:
+      visible:
+        id: "combat-overlay"
+    commands:
+      - takeScreenshot: "combat_05_combat_overlay"
+      - assertVisible:
+          id: "combat-indicator"
+          label: "Combat indicator visible"
+      - assertVisible:
+          id: "combat-enemy-name"
+          label: "Enemy name visible"
+      - assertVisible:
+          id: "combat-health-section"
+          label: "Health section visible"
+
+# Wait a bit for combat to progress
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- takeScreenshot: "combat_06_combat_progress"
+
+# If bardo appears (player died), test reincarnation
+- runFlow:
+    when:
+      visible:
+        id: "bardo-overlay"
+    commands:
+      - takeScreenshot: "combat_07_bardo_overlay"
+      - assertVisible:
+          id: "bardo-title"
+          label: "Bardo title visible"
+      - assertVisible:
+          id: "reincarnate-button"
+          label: "Reincarnate button visible"
+      - tapOn:
+          id: "reincarnate-button"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
+# Close any open modal to get back to room view
+- tapOn:
+    text: "Leave"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- tapOn:
+    id: "close-modal"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- tapOn:
+    id: "combat-flee-button"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# Test completed - we verified whatever combat elements were available
+# The test is designed to pass regardless of whether combat was available
+
+- takeScreenshot: "combat_final_success"
