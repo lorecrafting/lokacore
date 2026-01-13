@@ -37,6 +37,10 @@ docs/
 │   ├── dialogue-reference.md    # Dialogue trees, actions, conditions
 │   ├── entity-reference.md      # NPCs, items, rooms, components
 │   ├── quest-dialogue-patterns.md  # Common issues & fixes
+│   ├── world-design/            # World building guides
+│   │   ├── lore-bible.md        # Lore & setting
+│   │   ├── world-designer.md    # World design principles
+│   │   └── world-liveliness.md  # Making worlds feel alive
 │   └── README.md                # Quick start for builders
 │
 ├── architecture/          # System design (Developer)
