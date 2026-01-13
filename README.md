@@ -126,44 +126,60 @@ mix loka.test
 | POST | `/api/v1/auth/login` | Login, returns JWT |
 | POST | `/api/v1/auth/refresh` | Refresh access token |
 
-## Architecture Overview
+## Architecture
 
-### Entity System
-
-Every game object (players, NPCs, items, rooms) is an **Entity** - a GenServer process with:
-- **Components** - Data containers (position, stats, inventory)
-- **Behaviors** - Logic modules (combat, dialogue, movement)
-
-### Prototype System
-
-Game content is defined in YAML files with inheritance:
-
-```yaml
-# priv/world/prototypes/npcs/merchant.yml
-key: merchant
-name: "Traveling Merchant"
-inherits: base_npc
-components:
-  inventory:
-    gold: 500
-behaviors:
-  - trading
-  - dialogue
+```
+┌─────────────────────────────────────────────────────────────┐
+│ GAME CONTENT - priv/world/ (YAML)                           │
+│   Rooms, NPCs, Items, Quests, Dialogues                     │
+├─────────────────────────────────────────────────────────────┤
+│ GAME FRAMEWORK - lib/loka/framework/                        │
+│   Combat, Quests, Inventory, Dialogue, Progression          │
+├─────────────────────────────────────────────────────────────┤
+│ ENGINE CORE - lib/loka/engine/                              │
+│   Entities, Prototypes, Events, Commands, Hooks, Scripting  │
+├─────────────────────────────────────────────────────────────┤
+│ PLATFORM - Phoenix 1.8, LiveView, Ecto + SQLite             │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-### Event-Driven Communication
+**Key concepts:**
+- **Entities** are GenServer processes with components (data) and behaviors (logic)
+- **Prototypes** are YAML templates with inheritance - define content without code
+- **Hooks** provide 22 lifecycle extension points for game logic
+- **Locks** offer string-based access control (`"perm(admin) OR has_item(key)"`)
 
-Entities communicate via Phoenix.PubSub:
-- `room:{id}` - Room events (movement, actions)
-- `player:{id}` - Player-specific events
-- `entity:{id}` - Entity lifecycle events
+See [Architecture Documentation](docs/architecture/README.md) for the full deep-dive.
+
+## AI-Assisted Development
+
+Loka is designed for AI-assisted development. The codebase includes context files that help LLMs understand the architecture:
+
+| File | Purpose |
+|------|---------|
+| `CLAUDE.md` | Primary context - architecture, patterns, commands |
+| `docs/architecture/` | Deep-dive documentation for each subsystem |
+| `docs/llm/` | LLM-specific references for content creation |
+| `.beads/` | Issue tracking with dependency graphs |
+
+**Getting started with an AI assistant:**
+1. Point it at `CLAUDE.md` for project context
+2. Use `docs/llm/*.md` for content creation (quests, dialogues, entities)
+3. Run `mix loka.test.validate` to verify content changes
+
+The project uses [beads](https://github.com/anthropics/claude-code) for issue tracking - run `bd ready` to see available work.
 
 ## Documentation
 
-- [Architecture Overview](docs/architecture/README.md)
-- [Entity System](docs/architecture/entity-system.md)
-- [Scripting Guide](docs/architecture/elixir-scripts-design.md)
-- [Channel API Contract](docs/api/channel-contract.md)
+| Topic | Location |
+|-------|----------|
+| Architecture Overview | [docs/architecture/README.md](docs/architecture/README.md) |
+| Entity System | [docs/architecture/entity-system.md](docs/architecture/entity-system.md) |
+| Hooks & Locks | [docs/architecture/hooks-and-locks.md](docs/architecture/hooks-and-locks.md) |
+| Scripting | [docs/architecture/elixir-scripts-design.md](docs/architecture/elixir-scripts-design.md) |
+| Channel API | [docs/api/channel-contract.md](docs/api/channel-contract.md) |
+| UI Style Guide | [docs/ui/living-ebook-style-guide.md](docs/ui/living-ebook-style-guide.md) |
+| Full Specification | [docs/Loka_Engine_Architecture.md](docs/Loka_Engine_Architecture.md) |
 
 ## Deployment
 
