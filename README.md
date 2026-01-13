@@ -65,7 +65,6 @@ npm install --prefix assets
 # Setup database
 mix ecto.setup
 
-```bash
 cd ../mobile
 
 # Install dependencies
