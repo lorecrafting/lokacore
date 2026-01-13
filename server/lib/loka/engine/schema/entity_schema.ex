@@ -2,7 +2,7 @@ defmodule Loka.Engine.Schema.EntitySchema do
   @moduledoc """
   Ecto schema for persisting entities to the database.
 
-  Uses Evennia-style storage pattern:
+  Uses a hybrid storage pattern:
   - Core fields (id, type, key, short_desc, long_desc, extra_desc) are direct columns
   - Complex data (components, behaviors, locks, scripts) are serialized using Erlang terms
   - Flexible attributes use the EntityAttribute EAV table

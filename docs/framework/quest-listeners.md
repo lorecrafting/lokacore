@@ -43,37 +43,31 @@ alias Loka.Framework.Quest.Listeners, as: QuestListeners
 {updated_state, quest_events} = QuestListeners.check_entity_death(game_state, entity_key, count)
 ```
 
-## Lua Scripting API
+## Elixir Scripting API
 
-### Quest Functions (`game.quest.*`)
+Scripts use sandboxed Elixir bindings. See `docs/architecture/elixir-scripts-design.md` for full API.
 
-```lua
--- Check if quest is active
-if game.quest.is_active("main_quest") then
-  -- Player has this quest
-end
+### Quest Functions
 
--- Check if quest is completed
-if game.quest.is_complete("tutorial") then
-  -- Player finished this quest
-end
+```elixir
+# Check if quest is active
+quest_active?("main_quest")
+
+# Check if quest is completed
+quest_complete?("tutorial")
 ```
 
-### Player Functions (`game.player.*`)
+### Player Functions
 
-```lua
--- Check inventory
-if game.player.has_item("key") then
-  -- Player has the item
-end
+```elixir
+# Check inventory
+has_item?("key")
 
--- Check flags
-if game.player.has_flag("spoke_to_elder") then
-  return "elder_greeting_return"
-end
+# Check flags
+has_flag?("spoke_to_elder")
 
--- Get stats
-local gold = game.player.get_stat("gold")
+# Get stats
+get_stat("gold")
 ```
 
 ## Event Logging

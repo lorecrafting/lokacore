@@ -522,36 +522,14 @@ The builder experience stays similar - write scripts in admin UI with a controll
 - Faster (~1ms vs ~5ms)
 - No Luerl dependency
 
-**Like Evennia But Safer:**
-- Evennia's in-game Python is trust-based only
+**Security Model:**
 - Loka's scripts are truly sandboxed
-- Both store scripts in database
-- Both have event-based triggers
+- Scripts are stored in database
+- Event-based triggers for extensibility
 
 ---
 
 ## Scripting API Surface
-
-### Evennia In-Game Python API
-
-Evennia exposes these to script authors:
-
-| Category | Available | Notes |
-|----------|-----------|-------|
-| **Variables** | `character`, `obj`, `room`, `exit`, `message` | Context-dependent |
-| **Action Control** | `deny()` | Prevent action in `can_*` events |
-| **Object Queries** | `get(id=1)`, `get(name="sword")` | Find objects by criteria |
-| **Event Chaining** | `call_event(obj, "chain_1", 2)` | Delayed event triggers |
-| **Direct Access** | `character.msg()`, `obj.location` | Full object manipulation |
-| **Python Stdlib** | Everything | No sandbox - trust-based |
-
-**Evennia Event Types:**
-- `can_traverse`, `traverse` - Exit traversal
-- `say` - Speech with keyword filtering
-- `time` - Specific game time
-- `enter`, `leave` - Room movement
-- `give`, `get`, `drop` - Object interactions
-- Chain events (`chain_1`, `chain_2`, etc.)
 
 ### Loka Current API (Lua)
 
@@ -711,21 +689,6 @@ all?(list, fn)                       # Enum.all?
 find(list, fn)                       # Enum.find
 count(list)                          # Length
 ```
-
-### API Comparison: Evennia vs Loka
-
-| Capability | Evennia | Loka (Proposed) |
-|------------|---------|-----------------|
-| **Prevent action** | `deny()` | `deny()`, `deny(reason)` |
-| **Find objects** | `get(id=1)` | `entities_in_room()`, `entity_present?()` |
-| **Delayed events** | `call_event(obj, "name", 5)` | `after(5, "script_key")` |
-| **Direct mutation** | Yes (dangerous) | No (queued events) |
-| **Full language** | Yes (Python) | No (restricted Elixir) |
-| **Send messages** | `character.msg()` | `message()`, `say()`, `announce()` |
-| **Quest state** | Custom attributes | Built-in `quest_*` functions |
-| **Time-based** | `time` event type | `time_of_day()`, `current_hour()` |
-| **Random/dice** | Python random | `chance?()`, `roll()`, `pick()` |
-| **Sandbox** | Trust-based only | Static analysis + runtime restriction |
 
 ### Script Return Values
 

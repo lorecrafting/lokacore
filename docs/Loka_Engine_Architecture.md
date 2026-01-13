@@ -7,19 +7,7 @@
 
 ## Executive Summary
 
-Loka is an **engine framework** (not a game) built on Elixir/Phoenix/LiveView, designed to provide the primitives, abstractions, and skeleton that game creators—and LLMs assisting them—can build upon. Similar to how Evennia serves the Python ecosystem, Loka leverages Elixir's unique strengths in concurrency, fault-tolerance, and real-time communication to create a modern MUD development platform.
-
-### Key Differentiators from Evennia
-
-| Aspect | Evennia (Python/Django) | Loka (Elixir/Phoenix) |
-|--------|------------------------|------------------------|
-| Concurrency Model | Twisted async, cooperative | OTP actors, true preemptive |
-| Real-time Delivery | Websockets (bolt-on) | LiveView (native, diff-based) |
-| State Management | Django ORM + in-memory | GenServers + ETS + Ecto |
-| Fault Tolerance | Application-level | Supervision trees (OTP) |
-| Hot Code Reloading | Limited | Native BEAM capability |
-| Process Isolation | Limited | Complete process isolation |
-| Database | PostgreSQL required | SQLite (simple) or PostgreSQL |
+Loka is an **engine framework** (not a game) built on Elixir/Phoenix/LiveView, designed to provide the primitives, abstractions, and skeleton that game creators—and LLMs assisting them—can build upon. Loka leverages Elixir's unique strengths in concurrency, fault-tolerance, and real-time communication to create a modern MUD development platform.
 
 ---
 
@@ -77,7 +65,7 @@ Loka is an **engine framework** (not a game) built on Elixir/Phoenix/LiveView, d
 
 ### 2.1 The Entity-Component-Behavior Model
 
-Unlike Evennia's typeclass system (which uses Python class inheritance), Loka uses a composition-based **Entity-Component-Behavior** model that maps naturally to Elixir's functional paradigm.
+Loka uses a composition-based **Entity-Component-Behavior** model that maps naturally to Elixir's functional paradigm.
 
 ```elixir
 defmodule Loka.Entity do

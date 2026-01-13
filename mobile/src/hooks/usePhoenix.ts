@@ -63,7 +63,7 @@ export interface EntityContext {
   primary_keyword?: string;
   components?: string[];
   tags?: string[];
-  actions?: EntityAction[];  // Server-resolved actions (Evennia-inspired)
+  actions?: EntityAction[];  // Server-resolved actions
 }
 
 // Dialogue state from server

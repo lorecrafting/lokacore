@@ -2,8 +2,7 @@ defmodule Loka.Engine.Schema.EntityAttribute do
   @moduledoc """
   Ecto schema for entity attributes using the EAV (Entity-Attribute-Value) pattern.
 
-  Similar to Evennia's AttributeHandler, this allows storing arbitrary key-value
-  data on entities without modifying the schema. Attributes can be categorized
+  This allows storing arbitrary key-value data on entities without modifying the schema. Attributes can be categorized
   for organizational purposes.
 
   ## Example

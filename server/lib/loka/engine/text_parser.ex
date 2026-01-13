@@ -4,7 +4,7 @@ defmodule Loka.Engine.TextParser do
 
   ## Markup Syntax
 
-  Inspired by Evennia's MXP-style links:
+  MXP-style clickable command links:
 
   - Command links: `|lc<command>|lt<display text>|le`
     - Example: `|lclook|ltlook around|le` -> clickable "look around" that sends "look"

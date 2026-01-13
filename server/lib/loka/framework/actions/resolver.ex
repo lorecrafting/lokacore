@@ -1,10 +1,10 @@
 defmodule Loka.Framework.Actions.Resolver do
   @moduledoc """
-  Resolves available actions by layering modifiers (inspired by Evennia's merge rules).
+  Resolves available actions by layering modifiers.
 
   ## Action Resolution Layers
 
-  Actions are computed through multiple layers, similar to Evennia's CmdSet merging:
+  Actions are computed through multiple layers:
 
   1. **Entity Base Actions** - Actions defined on the entity prototype
   2. **Equipment Grants** (Union) - Equipment can add actions to the player
@@ -13,7 +13,7 @@ defmodule Loka.Framework.Actions.Resolver do
   5. **Script Modifiers** - Scripts can dynamically add/remove actions
   6. **Condition Filtering** - Final filter based on player state conditions
 
-  ## Merge Types (Evennia-inspired)
+  ## Merge Types
 
   - **Union**: Combine actions, no duplicates (used for equipment grants)
   - **Remove**: Filter out specific actions (used for status blocks, room restrictions)

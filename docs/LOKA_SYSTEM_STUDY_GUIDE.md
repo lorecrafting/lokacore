@@ -47,7 +47,7 @@
 
 ## 1. Architecture Overview
 
-Loka is an Elixir-based MUD (Multi-User Dungeon) engine framework inspired by Evennia (Python). It leverages Elixir's OTP for concurrency, fault tolerance, and real-time features.
+Loka is an Elixir-based MUD (Multi-User Dungeon) engine framework. It leverages Elixir's OTP for concurrency, fault tolerance, and real-time features.
 
 ### Tech Stack
 
@@ -87,7 +87,7 @@ Loka is an Elixir-based MUD (Multi-User Dungeon) engine framework inspired by Ev
 | **TypedObject System** | Unified foundation for all game content |
 | Event Bus (PubSub) | Decoupled entity communication |
 | Hooks | 22 lifecycle extension points |
-| Locks | Evennia-style string-based access control |
+| Locks | String-based access control (inspired by [Evennia](https://github.com/evennia/evennia)) |
 
 ### TypedObject Architecture
 
@@ -684,7 +684,7 @@ Hooks.run_async(:at_enter_room, [player, room])  # Quest progress updates
 
 **Key File:** `lib/loka/engine/locks.ex`
 
-Evennia-style string-based access control system.
+String-based access control system.
 
 ### Lock Syntax
 

@@ -1,6 +1,6 @@
 # Loka Engine Architecture
 
-This documentation covers the core engine architecture for Loka - an Elixir MUD framework similar to Evennia but leveraging Elixir/OTP strengths.
+This documentation covers the core engine architecture for Loka - an Elixir MUD framework leveraging Elixir/OTP strengths.
 
 ## Architecture Overview
 
@@ -24,17 +24,6 @@ This documentation covers the core engine architecture for Loka - an Elixir MUD 
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Key Differentiators from Evennia
-
-| Aspect | Evennia (Python/Django) | Loka (Elixir/Phoenix) |
-|--------|------------------------|------------------------|
-| Concurrency Model | Twisted async, cooperative | OTP actors, true preemptive |
-| Real-time Delivery | Websockets (bolt-on) | LiveView (native, diff-based) |
-| State Management | Django ORM + in-memory | GenServers + ETS + Ecto |
-| Fault Tolerance | Application-level | Supervision trees (OTP) |
-| Hot Code Reloading | Limited | Native BEAM capability |
-| Database | PostgreSQL required | SQLite (simple) or PostgreSQL |
-
 ## Documentation Index
 
 ### Visual Diagrams
@@ -45,9 +34,9 @@ This documentation covers the core engine architecture for Loka - an Elixir MUD 
 - [Entity Lifecycle](./entity-lifecycle.md) - Registry, Server, Supervisor pattern
 - [Prototypes](./prototypes.md) - YAML-based content templates
 - [Hooks & Locks](./hooks-and-locks.md) - Lifecycle events & access control
-- [Persistence](./persistence.md) - Evennia-style database design
+- [Persistence](./persistence.md) - Database design with EAV pattern
 - [Events](./events.md) - Event bus and PubSub patterns
-- [Scripting](./scripting.md) - Lua sandbox integration
+- [Scripting](./elixir-scripts-design.md) - Elixir sandbox integration
 - [Commands](./commands.md) - Command pipeline architecture
 - [World Management](./world-management.md) - Coordinates, auto-layout, import/export
 - [Testing Framework](./testing.md) - Bots, balance analysis, content validation
@@ -70,9 +59,9 @@ This documentation covers the core engine architecture for Loka - an Elixir MUD 
 3. **Lazy Entity Loading**: Processes only created when accessed, auto-stop after idle
 4. **GenServer per Entity**: Active entities (rooms, NPCs) are supervised processes with auto-save
 5. **Event Bus**: Phoenix.PubSub for entity communication
-6. **Hooks & Locks**: Evennia-inspired lifecycle hooks and string-based access control
+6. **Hooks & Locks**: Lifecycle hooks and string-based access control
 7. **Command Pipeline**: Parse → Validate → Execute → Emit Events
-8. **Lua Scripting**: Safe sandbox for game creators to customize NPCs/quests
+8. **Elixir Scripting**: Sandboxed Elixir for game creators to customize NPCs/quests
 9. **Web-First**: LiveView for all clients, no App Store dependencies
 
 ## Process Supervision Tree
@@ -82,7 +71,7 @@ This documentation covers the core engine architecture for Loka - an Elixir MUD 
                               │
       ┌─────────────┬─────────┼─────────┬─────────────┐
       │             │         │         │             │
-   Hooks     PrototypeLoader  │   EntityRegistry   Combat.Spawner
+   Hooks     PrototypeLoader  │   EntityRegistry   Combat.RespawnManager
                               │
                     ┌─────────┴─────────┐
                     │                   │

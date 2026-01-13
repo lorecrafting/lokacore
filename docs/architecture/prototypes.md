@@ -1,6 +1,6 @@
 # Prototype System
 
-Loka uses an Evennia-inspired prototype system that allows defining game content in YAML files without code changes.
+Loka uses a prototype system that allows defining game content in YAML files without code changes.
 
 ## Overview
 

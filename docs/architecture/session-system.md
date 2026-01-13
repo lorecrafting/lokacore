@@ -306,17 +306,6 @@ iex> Session.stats()
 | **Race-free state** | GenServer serializes all state changes |
 | **Observable** | Standard OTP introspection works |
 
-## Comparison to Evennia Portal
-
-| Feature | Evennia Portal | Loka Session |
-|---------|----------------|---------------|
-| Unified session | ✅ | ✅ |
-| Multi-client | ✅ | ✅ |
-| Reconnect grace | ✅ | ✅ (30s) |
-| Protocol abstraction | ✅ | Partial (message-level) |
-| Process separation | Portal + Server | Single BEAM VM |
-| Fault tolerance | Limited | OTP Supervisors |
-
 ## Future Enhancements
 
 ### SSH/Telnet Support

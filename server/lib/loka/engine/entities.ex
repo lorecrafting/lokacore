@@ -2,9 +2,8 @@ defmodule Loka.Engine.Entities do
   @moduledoc """
   Context for managing entities in the database.
 
-  Provides CRUD operations for entities and their attributes, following
-  the Evennia-style persistence pattern with serialized complex data and
-  EAV attributes.
+  Provides CRUD operations for entities and their attributes, using
+  serialized complex data and EAV attributes for flexible storage.
   """
 
   import Ecto.Query

@@ -1,20 +1,19 @@
 # Persistence Architecture
 
-Loka uses an Evennia-inspired persistence pattern that balances flexibility with queryability.
+Loka uses a persistence pattern that balances flexibility with queryability.
 
-## Evennia-Style Design
+## Design
 
-Like Evennia, Loka separates structured data (entities) from flexible attributes:
+Loka separates structured data (entities) from flexible attributes:
 
-| Evennia | Loka Equivalent |
-|---------|------------------|
-| TypedObject | EntitySchema |
-| AttributeHandler | EntityAttribute (EAV table) |
-| `db.attr` | Entity components (JSON text) |
-| `ndb.attr` | Not persisted (in-memory) |
-| pickle serialization | JSON (via `Loka.Ecto.Json`) |
+| Concept | Loka Implementation |
+|---------|----------------------|
+| Entity storage | EntitySchema |
+| Flexible attributes | EntityAttribute (EAV table) |
+| Component data | Entity components (JSON text) |
+| Serialization | JSON (via `Loka.Ecto.Json`) |
 
-**Note**: Unlike Evennia's pickle serialization, Loka uses JSON for queryability and human-readability. This means **map keys become strings** when loaded from the database.
+**Note**: Loka uses JSON for queryability and human-readability. This means **map keys become strings** when loaded from the database.
 
 ## Database Schema
 

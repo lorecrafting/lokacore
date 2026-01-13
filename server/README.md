@@ -2,7 +2,7 @@
 
 [![Issues tracked with beads](https://img.shields.io/badge/issues-beads-blue)](https://github.com/anthropics/beads)
 
-An Elixir MUD (Multi-User Dungeon) engine framework for building text-based RPGs. Like Evennia (Python), but leveraging Elixir's strengths: OTP concurrency, fault tolerance, and real-time LiveView.
+An Elixir MUD (Multi-User Dungeon) engine framework for building text-based RPGs. Leverages Elixir's strengths: OTP concurrency, fault tolerance, and real-time LiveView.
 
 ## Quick Start
 

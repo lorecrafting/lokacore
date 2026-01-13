@@ -1,6 +1,6 @@
 # Hooks & Locks
 
-Loka provides two Evennia-inspired systems for extensibility and access control.
+Loka provides two systems for extensibility and access control.
 
 ## Hooks System
 
@@ -127,7 +127,7 @@ Hooks.register(:at_before_move, TriggerTrap, :check, priority: 100)   # Runs las
 
 ## Locks System
 
-Locks provide Evennia-style string-based access control. They're evaluated at runtime to determine if an accessor can perform an action on an entity.
+Locks provide string-based access control. They're evaluated at runtime to determine if an accessor can perform an action on an entity.
 
 ### Lock String Format
 

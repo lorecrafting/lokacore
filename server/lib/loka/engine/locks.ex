@@ -2,8 +2,9 @@ defmodule Loka.Engine.Locks do
   @moduledoc """
   String-based access control system.
 
-  Provides Evennia-style lock strings for flexible access control. Locks are
-  stored as strings that define conditions for various access types.
+  Provides lock strings for flexible access control (inspired by
+  [Evennia](https://github.com/evennia/evennia)). Locks are stored as strings
+  that define conditions for various access types.
 
   ## Lock String Format
 

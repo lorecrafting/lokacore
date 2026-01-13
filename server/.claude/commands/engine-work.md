@@ -20,7 +20,7 @@ Before diving in, clarify:
 - EntityServer auto-saves every 60s - don't manually save
 - TypedObject resolution: Content modules first, then legacy loaders
 - Hook system has 22 lifecycle events (async via Task supervisor)
-- Lock strings follow Evennia pattern
+- Lock strings are string-based access control
 
 ## Development Workflow
 

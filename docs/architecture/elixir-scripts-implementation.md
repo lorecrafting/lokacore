@@ -6,7 +6,7 @@ This document details the implementation plan for replacing Lua scripting with s
 
 **Related Documents:**
 - [Elixir Scripts Design](./elixir-scripts-design.md) - API surface and design decisions
-- [Scripting Deep Dive](../research/scripting-systems-deep-dive.md) - Research on Evennia/tbaMUD
+- [Scripting Deep Dive](../research/scripting-systems-deep-dive.md) - Research on MUD scripting systems
 
 ---
 

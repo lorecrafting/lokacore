@@ -1,6 +1,6 @@
 # Action Resolution System
 
-> Evennia-inspired action resolution for dynamic, context-aware entity actions.
+> Dynamic, context-aware action resolution for entity actions.
 
 ## Overview
 
@@ -49,7 +49,7 @@ The Action Resolution System determines what actions a player can perform on an 
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Merge Rules (Evennia-Inspired)
+## Merge Rules
 
 | Merge Type | Behavior | Use Case |
 |------------|----------|----------|

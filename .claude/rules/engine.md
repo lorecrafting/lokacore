@@ -36,7 +36,7 @@ These are architectural constants that must remain true:
    - Don't block in hooks
    - See `docs/architecture/hooks-and-locks.md`
 
-5. **Lock strings follow Evennia pattern**
+5. **Lock strings pattern**
    - `"owner"` - entity owner only
    - `"wizard:admin"` - admin role required
    - `"lock:key_item"` - requires item

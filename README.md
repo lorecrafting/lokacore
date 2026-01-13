@@ -1,6 +1,6 @@
 # Loka
 
-A text-based RPG engine built with Elixir/Phoenix and React Native. Like [Evennia](https://www.evennia.com/) but with Elixir's OTP concurrency, fault tolerance, and real-time LiveView.
+A text-based RPG engine built with Elixir/Phoenix and React Native. Leverages Elixir's OTP concurrency, fault tolerance, and real-time LiveView for modern MUD development.
 
 ## What is Loka?
 
@@ -172,6 +172,10 @@ Designed for [Fly.io](https://fly.io) deployment:
 ```bash
 fly deploy
 ```
+
+## Acknowledgments
+
+Special thanks to the [Evennia](https://github.com/evennia/evennia) project and community. Evennia's pioneering work in Python MUD development—particularly its elegant approaches to typeclasses, lock strings, and in-game scripting—provided invaluable inspiration and learning. If you're building a MUD in Python, Evennia is an excellent choice.
 
 ## License
 

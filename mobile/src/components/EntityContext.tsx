@@ -84,7 +84,7 @@ export function EntityContextModal({
   // Get available actions - prefer server-resolved actions, fall back to client-side logic
   const getActions = (): { action: string; label: string }[] => {
     // If server provided resolved actions, use them directly
-    // This is the Evennia-inspired action system that considers player state,
+    // Server-resolved actions that consider player state,
     // equipment, status effects, room restrictions, and conditions
     if (entity.actions && entity.actions.length > 0) {
       return entity.actions.map(action => ({

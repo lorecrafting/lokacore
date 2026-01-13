@@ -140,7 +140,7 @@ flowchart TD
         Cmd["Commands"]
         Behavior["Behaviors"]
         Hook["Hooks"]
-        Script["Lua Scripts"]
+        Script["Elixir Scripts"]
     end
 
     subgraph Bus["Event Bus (Phoenix.PubSub)"]
@@ -229,7 +229,7 @@ classDiagram
     }
 
     class ScriptBehavior {
-        +execute Lua scripts
+        +execute Elixir scripts
         +sandbox execution
     }
 

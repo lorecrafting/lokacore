@@ -30,7 +30,7 @@ defmodule Loka.Framework.Quest.QuestItemSpawner do
 
   ## Lock System
 
-  Uses Evennia-style locks. The lock `id(player_id)` means only that specific
+  Uses string-based locks. The lock `id(player_id)` means only that specific
   player can perform the locked action (in this case, "get" the item).
   """
 

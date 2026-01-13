@@ -1,6 +1,6 @@
 # Entity System Architecture
 
-Loka uses a composition-based **Entity-Component-Behavior** model that maps naturally to Elixir's functional paradigm, unlike Evennia's typeclass system which uses Python class inheritance.
+Loka uses a composition-based **Entity-Component-Behavior** model that maps naturally to Elixir's functional paradigm.
 
 ## Core Entity Structure
 

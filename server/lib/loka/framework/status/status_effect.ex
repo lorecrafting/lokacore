@@ -33,7 +33,7 @@ defmodule Loka.Framework.Status.StatusEffect do
   - `:reflect_damage` - Reflect % of damage taken
   - `:immunity` - Immune to damage type or status
 
-  ## Action Modifiers (Evennia-inspired)
+  ## Action Modifiers
 
   Status effects can modify available entity actions:
 
@@ -99,7 +99,7 @@ defmodule Loka.Framework.Status.StatusEffect do
           hidden: boolean(),
           exclusive_with: [String.t()],
           tags: [String.t()],
-          # Action modifiers (Evennia-inspired)
+          # Action modifiers
           removes_actions: [String.t()],
           grants_actions: [map()],
           replaces_all_actions: boolean()
@@ -121,7 +121,7 @@ defmodule Loka.Framework.Status.StatusEffect do
     hidden: false,
     exclusive_with: [],
     tags: [],
-    # Action modifiers (Evennia-inspired)
+    # Action modifiers
     removes_actions: [],
     grants_actions: [],
     replaces_all_actions: false
@@ -177,7 +177,7 @@ defmodule Loka.Framework.Status.StatusEffect do
         hidden: MapHelpers.get_flexible(data, :hidden, false),
         exclusive_with: MapHelpers.get_flexible(data, :exclusive_with, []),
         tags: MapHelpers.get_flexible(data, :tags, []),
-        # Action modifiers (Evennia-inspired)
+        # Action modifiers
         removes_actions: MapHelpers.get_flexible(data, :removes_actions, []),
         grants_actions: MapHelpers.get_flexible(data, :grants_actions, []),
         replaces_all_actions: MapHelpers.get_flexible(data, :replaces_all_actions, false)

@@ -213,9 +213,9 @@ tags: [weapon, staff, wooden]
 
 ---
 
-## Action System (Evennia-Inspired)
+## Action System
 
-Actions available on entities are dynamically resolved based on player state, equipment, status effects, and room context. Actions flow through multiple layers, inspired by Evennia's CmdSet merge rules.
+Actions available on entities are dynamically resolved based on player state, equipment, status effects, and room context. Actions flow through multiple layers with configurable merge rules (inspired by [Evennia's](https://github.com/evennia/evennia) CmdSet system).
 
 ### Resolution Layers
 

@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-**Loka** is an Elixir MUD engine framework for building text-based RPGs. Like Evennia (Python) but with Elixir's OTP concurrency, fault tolerance, and real-time LiveView.
+**Loka** is an Elixir MUD engine framework for building text-based RPGs. Built with Elixir's OTP concurrency, fault tolerance, and real-time LiveView.
 
 ## Tech Stack
 
@@ -40,7 +40,7 @@
 - **GenServer per Entity**: Supervised processes with auto-save
 - **Event Bus**: Phoenix.PubSub for entity communication
 - **Hooks**: 22 lifecycle event types for extensibility
-- **Locks**: Evennia-style string-based access control
+- **Locks**: String-based access control
 
 ### TypedObject System
 

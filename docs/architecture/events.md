@@ -173,7 +173,7 @@ end
 
 ## Event Hooks for Scripting
 
-Predefined hook points that Lua scripts can attach to:
+Predefined hook points that Elixir scripts can attach to:
 
 ```elixir
 @hooks %{
@@ -340,7 +340,7 @@ Events and Hooks serve different purposes:
 - Intercepting/modifying behavior (prevent movement, modify damage)
 - Adding custom logic at lifecycle points (on entity creation, before save)
 - Validation before actions (can player pick this up?)
-- Scripting integration (Lua scripts responding to game events)
+- Scripting integration (Elixir scripts responding to game events)
 
 ### Example: Attack Flow
 
@@ -364,6 +364,6 @@ end
 ## Related
 - [Commands](./commands.md) - How commands emit events
 - [Hooks and Locks](./hooks-and-locks.md) - Hook system details
-- [Scripting](./scripting.md) - Lua scripts responding to events
+- [Scripting](./elixir-scripts-design.md) - Elixir scripts responding to events
 - [Entity System](./entity-system.md) - Behaviors handling events
 - [Session System](./session-system.md) - Client connection management
