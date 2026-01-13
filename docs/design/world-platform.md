@@ -248,14 +248,14 @@ React Native App         Multiplayer Game
 
 - Multiplayer (Session, PubSub, real-time)
 - EntityServer GenServers → plain objects
-- Lua scripting (defer to later phase)
+- Elixir scripting (defer to later phase)
 - Admin dashboard, PvP, chat, parties
 
 ---
 
 ## Open Questions
 
-- **Lua scripts**: Defer entirely, or transpile to JS for SP runtime?
+- **Elixir scripts**: Defer entirely, or transpile to JS for SP runtime?
 - **Difficulty scaling**: Add SP difficulty slider since no MP balance?
 - **World sharing**: Allow creators to share/sell worlds?
 - **AI assistance**: Integrate Claude for world generation from prompts?

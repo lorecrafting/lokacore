@@ -129,39 +129,33 @@ Ecto parameterized queries prevent SQL injection by default. Never use string in
 
 ## Scripting Sandbox
 
-Lua scripts run in a sandboxed environment with restricted capabilities.
+Elixir scripts run in a sandboxed environment with restricted capabilities.
 
-### Blocked Patterns
+### Sandbox Security Model
 
-Scripts are scanned for dangerous patterns before execution:
+Scripts are validated before execution:
 
 ```elixir
-@blocked_patterns [
-  ~r/os\./, ~r/io\./, ~r/file\./, ~r/require\s*\(/,
-  ~r/getmetatable\s*\(/, ~r/setmetatable\s*\(/,
-  ~r/\bload\s*\(/, ~r/loadstring\s*\(/,
-  ~r/_G\b/, ~r/_ENV\b/, ~r/string\.dump\s*\(/,
-  ~r/collectgarbage\s*\(/, ~r/coroutine\./,
-  ~r/debug\./, ~r/package\./, ~r/rawget\s*\(/,
-  ~r/rawset\s*\(/, ~r/rawequal\s*\(/
-]
+# lib/loka/engine/script/validator.ex
+Scripting.validate_script(source)
+# Returns :ok or {:error, {:blocked_pattern, pattern}}
 ```
 
-### Runtime Restrictions
+### Restricted Access
 
-Dangerous globals are removed at runtime:
-
-- `dofile`, `loadfile`, `load`, `loadstring`
-- `os`, `io`, `debug`, `package`, `coroutine` modules
-- `getmetatable`, `setmetatable`, `rawget`, `rawset`
+The sandbox restricts access to:
+- No file system access
+- No network access
+- No system-level operations
+- Whitelisted bindings only (see `docs/architecture/elixir-scripts-design.md`)
 
 ### Resource Limits
 
-- CPU: Instruction count limits
-- Memory: Allocation tracking
-- Time: Execution timeouts
+- Time: Execution timeouts (5 seconds default)
+- Memory: Result size limits prevent memory exhaustion
+- Scope: Only pre-defined API bindings are available
 
-See `lib/loka/engine/scripting.ex` for implementation.
+See `lib/loka/engine/script/sandbox.ex` and `docs/architecture/elixir-scripts-design.md` for implementation.
 
 ## Security Headers
 

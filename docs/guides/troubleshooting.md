@@ -20,9 +20,10 @@ Ask Claude:
 
 Or run yourself:
 ```elixir
-alias Loka.Testing.LLM.DependencyGraph
-DependencyGraph.quest_dependencies("stuck_quest_id")
-DependencyGraph.find_broken_references()
+alias Loka.WorldBuilder.Analysis.DependencyGraph
+{:ok, graph} = DependencyGraph.build()
+DependencyGraph.dependencies_for(graph, "quest:stuck_quest_id")
+DependencyGraph.find_broken_references(graph)
 ```
 
 ### Common Causes

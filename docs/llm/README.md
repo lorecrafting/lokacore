@@ -30,39 +30,24 @@ When working on quest/dialogue/bot issues, use these tools:
 mix loka.test.validate --only quest,dialogue
 ```
 
-### 2. Get Formatted Errors (in IEx)
+### 2. Query Dependency Graph (in IEx)
 ```elixir
-alias Loka.Testing.LLM.ErrorFormatter
-ErrorFormatter.quick_summary()
-{:ok, errors} = ErrorFormatter.format_all_errors()
+alias Loka.WorldBuilder.Analysis.DependencyGraph
 
-# Each error includes:
-# - error_code: Machine-readable code (e.g., "DIAL001")
-# - severity: :critical | :error | :warning
-# - message: Human-readable description
-# - location: File path and field path
-# - fix: Step-by-step fix instructions
-# - related_entities: Other affected entities
-```
-
-### 3. Query Dependency Graph
-```elixir
-alias Loka.Testing.LLM.DependencyGraph
+# Build the graph first
+{:ok, graph} = DependencyGraph.build()
 
 # Find all broken references
-DependencyGraph.find_broken_references()
+DependencyGraph.find_broken_references(graph)
 
 # What does this quest depend on?
-DependencyGraph.quest_dependencies("intro_find_temple")
+DependencyGraph.dependencies_for(graph, "quest:intro_find_temple")
 
 # What references this NPC?
-DependencyGraph.npc_references("abbot_jampa")
-
-# Get full context for any entity
-DependencyGraph.entity_context("quest:intro_find_temple")
+DependencyGraph.dependents_of(graph, "npc:abbot_jampa")
 ```
 
-### 4. Run Bot Test
+### 3. Run Bot Test
 ```bash
 # Validate storyline structure
 mix loka.test.storyline monastery_arc
@@ -82,8 +67,9 @@ mix loka.test.storyline monastery_arc --run
 
 | Module | Purpose |
 |--------|---------|
-| `Loka.Testing.LLM.DependencyGraph` | Queryable entity dependency graph |
-| `Loka.Testing.LLM.ErrorFormatter` | Structured errors with fix suggestions |
+| `Loka.WorldBuilder.Analysis.DependencyGraph` | Queryable entity dependency graph |
+| `Loka.Testing.Content.QuestValidator` | Quest validation with error details |
+| `Loka.Testing.Content.DialogueValidator` | Dialogue validation with error details |
 
 ---
 
@@ -247,40 +233,35 @@ mix loka.test.balance --quick
 
 ### Workflow for Fixing a Broken Quest
 
+```bash
+# 1. Run validation to find issues
+mix loka.test.validate --only quest,dialogue
+```
+
 ```elixir
-# 1. Get overview
-alias Loka.Testing.LLM.{DependencyGraph, ErrorFormatter}
-ErrorFormatter.quick_summary()
+# 2. In IEx, build dependency graph
+alias Loka.WorldBuilder.Analysis.DependencyGraph
+{:ok, graph} = DependencyGraph.build()
 
-# 2. Find specific issues
-{:ok, errors} = ErrorFormatter.format_all_errors()
-quest_errors = Enum.filter(errors, &String.starts_with?(&1.error_code, "QUEST"))
+# 3. Find broken references
+DependencyGraph.find_broken_references(graph)
 
-# 3. Understand dependencies
-DependencyGraph.quest_dependencies("broken_quest_id")
-
-# 4. Find broken references
-DependencyGraph.find_broken_references()
-|> Enum.filter(&String.contains?(&1.edge.from, "broken_quest_id"))
-
-# 5. Each error has fix instructions
-Enum.each(quest_errors, fn e ->
-  IO.puts("#{e.error_code}: #{e.message}")
-  IO.puts("Fix: #{e.fix}")
-  IO.puts("---")
-end)
+# 4. Check specific quest dependencies
+DependencyGraph.dependencies_for(graph, "quest:broken_quest_id")
 ```
 
 ### Workflow for Adding a New Quest
 
-```elixir
+```bash
 # After creating quest YAML, validate
-DependencyGraph.quest_dependencies("new_quest_id")
-# → Shows all required entities
+mix loka.test.validate --only quest
+```
 
-DependencyGraph.find_broken_references()
-|> Enum.filter(&String.contains?(&1.edge.from, "new_quest_id"))
-# → Shows what's missing
+```elixir
+# In IEx, check dependencies
+alias Loka.WorldBuilder.Analysis.DependencyGraph
+{:ok, graph} = DependencyGraph.build()
+DependencyGraph.dependencies_for(graph, "quest:new_quest_id")
 ```
 
 ---

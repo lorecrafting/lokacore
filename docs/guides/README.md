@@ -35,9 +35,10 @@ mix loka.test.storyline monastery_arc --run
 ### Check Specific Quest
 ```elixir
 # In IEx
-alias Loka.Testing.LLM.{DependencyGraph, ErrorFormatter}
-DependencyGraph.quest_dependencies("quest_id")
-ErrorFormatter.format_all_errors()
+alias Loka.WorldBuilder.Analysis.DependencyGraph
+{:ok, graph} = DependencyGraph.build()
+DependencyGraph.dependencies_for(graph, "quest:quest_id")
+DependencyGraph.find_broken_references(graph)
 ```
 
 ## What Claude Knows
@@ -45,7 +46,7 @@ ErrorFormatter.format_all_errors()
 Claude has access to:
 - `docs/llm/` - Comprehensive reference docs
 - `CLAUDE.md` - Project overview and patterns
-- `Loka.Testing.LLM.*` - Query tools for dependencies and errors
+- `Loka.WorldBuilder.Analysis.DependencyGraph` - Query tool for dependencies
 - All validators and their output
 
 ## Your Role

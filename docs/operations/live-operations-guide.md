@@ -45,8 +45,8 @@ This document provides a comprehensive analysis of Loka's capabilities for runni
 - Comprehensive validation suite (`mix loka.test.validate`)
 
 **LLM Development Tooling:**
-- `Loka.Testing.LLM.ErrorFormatter` - Human-readable error reports
-- `Loka.Testing.LLM.DependencyGraph` - Content impact analysis
+- `Loka.WorldBuilder.Analysis.DependencyGraph` - Content impact analysis
+- Content validators (`Loka.Testing.Content.*`) - Validation with detailed errors
 - `/project:check-work` - Post-implementation verification checklist
 - API validation endpoints (`POST /api/test/validate`)
 
@@ -90,7 +90,7 @@ end
 
 **Gap:** ❌ No notification mechanism to inform running EntityServers that their prototype changed.
 
-### Lua Script Hot-Reload
+### Elixir Script Hot-Reload
 
 **File:** `lib/loka/engine/scripting.ex`
 
@@ -127,10 +127,10 @@ edit priv/world/prototypes/npcs/merchant.yml
 # 2. Validate changes
 mix loka.test.validate --only dialogue,quest,reachability
 
-# 3. Use LLM tools to analyze impact
-iex> alias Loka.Testing.LLM.{ErrorFormatter, DependencyGraph}
-iex> DependencyGraph.quest_dependencies("monastery_arc")
-iex> ErrorFormatter.quick_summary()
+# 3. Use dependency analysis tools
+iex> alias Loka.WorldBuilder.Analysis.DependencyGraph
+iex> {:ok, graph} = DependencyGraph.build()
+iex> DependencyGraph.dependencies_for(graph, "quest:monastery_arc")
 
 # 4. Deploy to production
 git add priv/world/prototypes
@@ -392,17 +392,14 @@ end
 mix loka.test.validate
 
 # 2. Check for broken references
-iex> alias Loka.Testing.LLM.DependencyGraph
-iex> DependencyGraph.find_broken_references()
+iex> alias Loka.WorldBuilder.Analysis.DependencyGraph
+iex> {:ok, graph} = DependencyGraph.build()
+iex> DependencyGraph.find_broken_references(graph)
 
 # 3. Analyze change impact
-iex> DependencyGraph.quest_dependencies("monastery_arc")
+iex> DependencyGraph.dependencies_for(graph, "quest:monastery_arc")
 
-# 4. Get human-readable error report
-iex> alias Loka.Testing.LLM.ErrorFormatter
-iex> ErrorFormatter.format_all_errors()
-
-# 5. Run automated tests
+# 4. Run automated tests
 mix test
 mix loka.test.balance --quick
 ```
@@ -419,23 +416,19 @@ mix loka.test.balance --quick
 4. **Dialogue tree validation** - `lib/loka/testing/content/dialogue_validator.ex`
 5. **World reachability check** - BFS traversal ensures no orphaned rooms
 
-**LLM-Friendly Error Messages:**
+**LLM-Friendly Dependency Analysis:**
 
-**File:** `lib/loka/testing/llm/error_formatter.ex`
+**File:** `lib/loka/world_builder/analysis/dependency_graph.ex`
 
 ```elixir
-iex> ErrorFormatter.quick_summary()
-# Returns:
-"""
-=== Content Validation Summary ===
-✗ 3 errors found
-
-[ERROR] Quest "monastery_arc" references missing NPC "abbot_missing"
-  Fix: Create NPC prototype or update quest objective
-
-[ERROR] Room "temple_hall" has exit to "missing_room"
-  Fix: Create room or remove exit from temple_hall.yml
-"""
+iex> alias Loka.WorldBuilder.Analysis.DependencyGraph
+iex> {:ok, graph} = DependencyGraph.build()
+iex> DependencyGraph.find_broken_references(graph)
+# Returns list of broken references:
+[
+  %{from: "quest:monastery_arc", to: "npc:abbot_missing", type: :giver},
+  %{from: "room:temple_hall", to: "room:missing_room", type: :exit}
+]
 ```
 
 ### Rollback Capabilities (Implemented)

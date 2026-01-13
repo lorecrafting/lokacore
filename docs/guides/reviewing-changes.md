@@ -139,9 +139,9 @@ Ask Claude to run diagnostics:
 
 Or run yourself in IEx:
 ```elixir
-alias Loka.Testing.LLM.{DependencyGraph, ErrorFormatter}
-ErrorFormatter.quick_summary()
-DependencyGraph.find_broken_references()
+alias Loka.WorldBuilder.Analysis.DependencyGraph
+{:ok, graph} = DependencyGraph.build()
+DependencyGraph.find_broken_references(graph)
 ```
 
 ---

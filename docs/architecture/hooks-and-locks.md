@@ -299,4 +299,4 @@ end
 - [Entity System](./entity-system.md) - Entity structure
 - [Entity Lifecycle](./entity-lifecycle.md) - When hooks fire
 - [Commands](./commands.md) - Command pipeline and hooks
-- [Scripting](./scripting.md) - Lua scripts and hooks
+- [Scripting](./scripting.md) - Elixir scripts and hooks

@@ -25,9 +25,10 @@ mix loka.test.validate --only quest,dialogue
 mix loka.test.storyline monastery_arc --run
 
 # Use dependency graph (in IEx)
-alias Loka.Testing.LLM.DependencyGraph
-DependencyGraph.find_broken_references()
-DependencyGraph.quest_dependencies("intro_find_temple")
+alias Loka.WorldBuilder.Analysis.DependencyGraph
+{:ok, graph} = DependencyGraph.build()
+DependencyGraph.find_broken_references(graph)
+DependencyGraph.dependencies_for(graph, "quest:intro_find_temple")
 ```
 
 ---
@@ -543,19 +544,13 @@ When a quest/dialogue issue occurs:
 2. **Check dependencies**
    ```elixir
    # In IEx
-   alias Loka.Testing.LLM.DependencyGraph
-   DependencyGraph.quest_dependencies("quest_id")
-   DependencyGraph.find_broken_references()
+   alias Loka.WorldBuilder.Analysis.DependencyGraph
+   {:ok, graph} = DependencyGraph.build()
+   DependencyGraph.dependencies_for(graph, "quest:quest_id")
+   DependencyGraph.find_broken_references(graph)
    ```
 
-3. **Get formatted errors**
-   ```elixir
-   alias Loka.Testing.LLM.ErrorFormatter
-   ErrorFormatter.quick_summary()
-   {:ok, errors} = ErrorFormatter.format_all_errors()
-   ```
-
-4. **Run bot test**
+3. **Run bot test**
    ```bash
    mix loka.test.storyline monastery_arc --run
    ```

@@ -182,16 +182,16 @@ nodes:
                 - resource_gte: { faith: 10 }
 ```
 
-### Via Script API (Lua)
+### Via Script API (Elixir)
 
-```lua
--- Check if player has a granted action
-if game.actions.is_granted("divine_heal") then
-  game.message(entity.id, "Your blessing remains active.")
+```elixir
+# Check if player has a granted action
+if actions_granted?("divine_heal") do
+  message(entity.id, "Your blessing remains active.")
 end
 
--- Get all granted actions
-local granted = game.actions.get_granted()
+# Get all granted actions
+granted = get_granted_actions()
 ```
 
 ---
@@ -253,11 +253,11 @@ nodes:
             - attack_player
 ```
 
-### Checking Blocked Actions (Lua)
+### Checking Blocked Actions (Elixir)
 
-```lua
-if game.actions.is_blocked("attack") then
-  game.message(entity.id, "A curse prevents you from attacking.")
+```elixir
+if actions_blocked?("attack") do
+  message(entity.id, "A curse prevents you from attacking.")
 end
 ```
 
@@ -432,20 +432,20 @@ The client uses server actions if provided, with a fallback to client-side logic
 
 ## Script API Reference
 
-Available in Lua scripts via `game.actions.*`:
+Available in Elixir scripts via scripting bindings:
 
-```lua
--- Check if an action is currently granted by scripts
-game.actions.is_granted("divine_heal")  -- returns boolean
+```elixir
+# Check if an action is currently granted by scripts
+actions_granted?("divine_heal")  # returns boolean
 
--- Check if an action is currently blocked by scripts
-game.actions.is_blocked("attack")  -- returns boolean
+# Check if an action is currently blocked by scripts
+actions_blocked?("attack")  # returns boolean
 
--- Get list of all script-granted action keys
-game.actions.get_granted()  -- returns table of strings
+# Get list of all script-granted action keys
+get_granted_actions()  # returns list of strings
 
--- Get list of all script-blocked action keys
-game.actions.get_blocked()  -- returns table of strings
+# Get list of all script-blocked action keys
+get_blocked_actions()  # returns list of strings
 ```
 
 ---

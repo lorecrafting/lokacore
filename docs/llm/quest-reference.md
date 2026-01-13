@@ -20,6 +20,8 @@ description: |
 
 type: main                    # main | side
 priority: 1                   # Lower = more important
+act: 1                        # Which storyline act (optional)
+level_requirement: 1          # Minimum player level (optional)
 
 # Who gives/receives the quest
 giver: abbot_jampa           # NPC who offers quest
@@ -40,6 +42,7 @@ objectives:
     target_id: elder_monk
     dialogue_topic: wisdom    # Optional: specific node to reach
     description: "Speak with the elder monk"
+    hint: "The monk meditates in the temple"  # Optional player hint
 
 # What player gets
 rewards:
@@ -48,14 +51,11 @@ rewards:
   items:
     - temple_key
 
-# Journal entries
+# Journal entries (key-based format)
 journal_entries:
-  - trigger: accepted
-    text: "I should find the temple and speak with the elder."
-  - trigger: objective:find_temple
-    text: "I found the temple. Now to find the elder monk."
-  - trigger: completed
-    text: "The elder shared ancient wisdom with me."
+  start: "I should find the temple and speak with the elder."
+  find_temple: "I found the temple. Now to find the elder monk."
+  complete: "The elder shared ancient wisdom with me."
 
 # Optional time limit (seconds)
 time_limit: null
@@ -220,11 +220,14 @@ requires_quest: basic_training
 rewards:
   xp: 100                  # Experience points
   gold: 50                 # Gold currency
+  insight: 1               # Insight points (optional)
   items:                   # Item keys to give
     - temple_key
     - rare_gem
   reputation:              # Faction reputation (optional)
     temple_monks: 10
+  unlocks:                 # Quest IDs unlocked on completion (optional)
+    - advanced_training
 ```
 
 **Validation**: All reward item keys must exist as prototypes.
@@ -233,25 +236,29 @@ rewards:
 
 ## Journal Entries
 
-Track quest progress in player's journal:
+Track quest progress in player's journal using key-based format:
 
 ```yaml
 journal_entries:
-  - trigger: accepted
-    text: "Quest accepted message"
-
-  - trigger: objective:find_temple
-    text: "Shows when find_temple objective completes"
-
-  - trigger: completed
-    text: "Quest completion message"
+  start: "Quest accepted message"
+  find_temple: "Shows when find_temple objective completes"
+  complete: "Quest completion message"
 ```
 
-| Trigger | When |
-|---------|------|
-| `accepted` | Quest accepted |
-| `objective:{id}` | Specific objective completed |
-| `completed` | Quest turned in |
+| Key | When |
+|-----|------|
+| `start` | Quest accepted |
+| `{objective_id}` | Specific objective completed (use objective's `id` field) |
+| `complete` | Quest turned in |
+
+**Example from actual quest:**
+```yaml
+journal_entries:
+  start: "The caves open before me. Three trials await."
+  raga_defeated: "Attachment overcome. One seal fragment acquired."
+  dvesha_defeated: "Aversion overcome. Two seal fragments acquired."
+  complete: "The Heart Cave awaits. Mara and Tenzin are within."
+```
 
 ---
 
@@ -371,10 +378,10 @@ mix loka.test.validate --only quest
 # Run storyline bot test
 mix loka.test.storyline monastery_arc --run
 
-# Check dependencies
-# In IEx:
-alias Loka.Testing.LLM.DependencyGraph
-DependencyGraph.quest_dependencies("quest_id")
+# Check dependencies in IEx:
+alias Loka.WorldBuilder.Analysis.DependencyGraph
+{:ok, graph} = DependencyGraph.build()
+DependencyGraph.dependencies_for(graph, "quest:quest_id")
 ```
 
 ---

@@ -43,7 +43,7 @@ components: {}               # See component reference below
 behaviors: []                # Elixir behavior modules
 attributes: {}               # Custom key-value data
 tags: []                     # String tags for filtering
-scripts: {}                  # Lua scripts
+scripts: {}                  # Elixir scripts
 locks: {}                    # Access control strings
 ```
 

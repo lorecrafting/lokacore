@@ -176,7 +176,7 @@ Show me all current validation errors and fix the critical ones.
 
 ### What Claude Will Do
 1. Run all validators
-2. Use ErrorFormatter for structured output
+2. Use DependencyGraph to analyze broken references
 3. Fix critical issues first
 4. Report what was fixed
 

@@ -32,7 +32,7 @@ create table(:entities, primary_key: false) do
   add :behaviors, :text                # List of behavior modules
   add :tags, {:array, :string}, default: []
   add :locks, :text                    # Access control map
-  add :scripts, :text                  # Lua script assignments
+  add :scripts, :text                  # Elixir script assignments
   add :metadata, :text                 # Timestamps, versions
 
   timestamps(type: :utc_datetime)
@@ -65,7 +65,7 @@ create unique_index(:entity_attributes, [:entity_id, :category, :key])
 create table(:scripts) do
   add :name, :string, null: false
   add :description, :text
-  add :source, :text, null: false      # Lua source code
+  add :source, :text, null: false      # Elixir source code
   add :hook, :string                   # on_enter, on_attack, etc.
   add :enabled, :boolean, default: true
 

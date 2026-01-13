@@ -174,19 +174,22 @@ mix loka.test.validate --only quest
 mix loka.test.storyline monastery_arc --run
 ```
 
-### LLM Tools
+### Dependency Analysis Tools
 
 ```elixir
-alias Loka.Testing.LLM.{DependencyGraph, ErrorFormatter}
+alias Loka.WorldBuilder.Analysis.DependencyGraph
+
+# Build the dependency graph
+{:ok, graph} = DependencyGraph.build()
 
 # Find broken quest references
-DependencyGraph.find_broken_references()
+DependencyGraph.find_broken_references(graph)
 
 # Get quest dependencies
-DependencyGraph.quest_dependencies("quest_id")
+DependencyGraph.dependencies_for(graph, "quest:quest_id")
 
-# Format errors with fix suggestions
-ErrorFormatter.format_all_errors()
+# Find what depends on a quest
+DependencyGraph.dependents_of(graph, "quest:quest_id")
 ```
 
 ## See Also

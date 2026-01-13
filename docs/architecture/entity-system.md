@@ -18,7 +18,7 @@ defmodule Loka.Engine.Entity do
     :behaviors,       # List of behavior modules
     :attributes,      # Flexible key-value storage (EAV pattern)
     :tags,            # Categorization tags
-    :scripts,         # Attached Lua scripts
+    :scripts,         # Attached Elixir scripts
     :locks,           # Access control rules
     :metadata,        # System metadata (timestamps, versions)
   ]

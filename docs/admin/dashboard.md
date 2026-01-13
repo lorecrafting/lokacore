@@ -60,7 +60,7 @@ Entity management for NPCs, items, and other objects:
 | Tags | Comma-separated tags |
 
 ### Scripts Tab
-Lua script editor:
+Elixir script editor:
 - List all scripts
 - Create new scripts
 - Edit script source code
@@ -73,7 +73,7 @@ Lua script editor:
 | Name | Script identifier |
 | Description | What the script does |
 | Hook | Event hook (on_enter, on_tick, etc.) |
-| Source | Lua code |
+| Source | Elixir code (sandboxed) |
 | Enabled | Whether script runs |
 
 **Available Hooks**:
