@@ -18,10 +18,13 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
   alias Phoenix.Socket
   alias Loka.Game.Actions
   alias Loka.Game.Actions.{Context, Result}
-  # Room-related aliases removed (RoomLoader, Atmosphere) - not currently needed
+  alias Loka.Channel.Validator
   alias Loka.Session
   alias LokaWeb.Channels.GameChannel.Serializers
   alias LokaWeb.Channels.RoomHelpers
+
+  # Enable validation in dev/test, optional in prod for performance
+  @validate_events Mix.env() in [:dev, :test]
 
   @doc """
   Execute a game action and handle the result.
@@ -38,7 +41,7 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
         {:ok, socket}
 
       {:error, reason} ->
-        Phoenix.Channel.push(socket, "event", %{text: reason})
+        validated_push(socket, "event", %{text: reason})
         {:error, reason, socket}
     end
   end
@@ -146,7 +149,7 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
 
   # Text event
   defp dispatch_event({:event, text}, socket) do
-    Phoenix.Channel.push(socket, "event", %{text: text})
+    validated_push(socket, "event", %{text: text})
     socket
   end
 
@@ -158,7 +161,7 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
     visual_state = Serializers.serialize_visual_state(room: data.room, player: game_state)
     sound_state = Serializers.serialize_sound_state(room: data.room, player: game_state)
 
-    Phoenix.Channel.push(socket, "room_update", %{
+    validated_push(socket, "room_update", %{
       room: data.room,
       atmosphere: data.atmosphere,
       visual_state: visual_state,
@@ -177,7 +180,7 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
     visual_state = Serializers.serialize_visual_state(room: data.room, player: game_state)
     sound_state = Serializers.serialize_sound_state(room: data.room, player: game_state)
 
-    Phoenix.Channel.push(socket, "room_update", %{
+    validated_push(socket, "room_update", %{
       room: data.room,
       atmosphere: data.atmosphere,
       visual_state: visual_state,
@@ -190,106 +193,106 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
 
   # Inventory update
   defp dispatch_event({:inventory_update, data}, socket) do
-    Phoenix.Channel.push(socket, "inventory_update", data)
+    validated_push(socket, "inventory_update", data)
     socket
   end
 
   # Equipment update
   defp dispatch_event({:equipment_update, data}, socket) do
-    Phoenix.Channel.push(socket, "equipment_update", data)
+    validated_push(socket, "equipment_update", data)
     socket
   end
 
   # Stats update
   defp dispatch_event({:stats_update, data}, socket) do
-    Phoenix.Channel.push(socket, "stats_update", data)
+    validated_push(socket, "stats_update", data)
     socket
   end
 
   # Entity context (click response)
   defp dispatch_event({:entity_context, data}, socket) do
-    Phoenix.Channel.push(socket, "entity_context", %{entity: data})
+    validated_push(socket, "entity_context", %{entity: data})
     socket
   end
 
   # Game initialized
   defp dispatch_event({:game_initialized, data}, socket) do
-    Phoenix.Channel.push(socket, "game_state", data)
+    validated_push(socket, "game_state", data)
     socket
   end
 
   # Combat events
   defp dispatch_event({:combat_start, data}, socket) do
-    Phoenix.Channel.push(socket, "combat_start", data)
+    validated_push(socket, "combat_start", data)
     socket
   end
 
   defp dispatch_event({:combat_update, data}, socket) do
-    Phoenix.Channel.push(socket, "combat_update", data)
+    validated_push(socket, "combat_update", data)
     socket
   end
 
   defp dispatch_event({:combat_end, data}, socket) do
-    Phoenix.Channel.push(socket, "combat_end", data)
+    validated_push(socket, "combat_end", data)
     socket
   end
 
   # Dialogue events
   defp dispatch_event({:dialogue_start, data}, socket) do
-    Phoenix.Channel.push(socket, "dialogue_start", data)
+    validated_push(socket, "dialogue_start", data)
     socket
   end
 
   defp dispatch_event({:dialogue_update, data}, socket) do
-    Phoenix.Channel.push(socket, "dialogue_update", data)
+    validated_push(socket, "dialogue_update", data)
     socket
   end
 
   defp dispatch_event({:dialogue_end, data}, socket) do
-    Phoenix.Channel.push(socket, "dialogue_end", data)
+    validated_push(socket, "dialogue_end", data)
     socket
   end
 
   # Shop events
   defp dispatch_event({:shop_open, data}, socket) do
-    Phoenix.Channel.push(socket, "shop_open", data)
+    validated_push(socket, "shop_open", data)
     socket
   end
 
   defp dispatch_event({:shop_close, data}, socket) do
-    Phoenix.Channel.push(socket, "shop_close", data)
+    validated_push(socket, "shop_close", data)
     socket
   end
 
   # Container events
   defp dispatch_event({:container_open, data}, socket) do
-    Phoenix.Channel.push(socket, "container_open", data)
+    validated_push(socket, "container_open", data)
     socket
   end
 
   defp dispatch_event({:container_update, data}, socket) do
-    Phoenix.Channel.push(socket, "container_update", data)
+    validated_push(socket, "container_update", data)
     socket
   end
 
   defp dispatch_event({:container_close, data}, socket) do
-    Phoenix.Channel.push(socket, "container_close", data)
+    validated_push(socket, "container_close", data)
     socket
   end
 
   # Quest events
   defp dispatch_event({:quest_accepted, data}, socket) do
-    Phoenix.Channel.push(socket, "quest_accepted", data)
+    validated_push(socket, "quest_accepted", data)
     socket
   end
 
   defp dispatch_event({:quest_completed, data}, socket) do
-    Phoenix.Channel.push(socket, "quest_completed", data)
+    validated_push(socket, "quest_completed", data)
     socket
   end
 
   defp dispatch_event({:quest_progress, data}, socket) do
-    Phoenix.Channel.push(socket, "quest_progress", data)
+    validated_push(socket, "quest_progress", data)
     socket
   end
 
@@ -301,12 +304,12 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
   end
 
   defp dispatch_event({:bardo_enter, data}, socket) do
-    Phoenix.Channel.push(socket, "bardo_enter", data)
+    validated_push(socket, "bardo_enter", data)
     socket
   end
 
   defp dispatch_event({:bardo_exit, data}, socket) do
-    Phoenix.Channel.push(socket, "bardo_exit", data)
+    validated_push(socket, "bardo_exit", data)
     socket
   end
 
@@ -322,7 +325,7 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
 
   # Resources update
   defp dispatch_event({:resources_update, data}, socket) do
-    Phoenix.Channel.push(socket, "resources_update", data)
+    validated_push(socket, "resources_update", data)
     socket
   end
 
@@ -362,5 +365,36 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
 
   defp player_display_name(player, game_state) do
     game_state.character_name || player.name || player.email
+  end
+
+  # Validated push - validates payload before sending in dev/test
+  defp validated_push(socket, event_name, payload) do
+    if @validate_events do
+      context = %{player_id: socket.assigns[:player] && socket.assigns.player.id}
+
+      case Validator.validate_and_log(:server, event_name, payload, context) do
+        :ok ->
+          validated_push(socket, event_name, payload)
+
+        {:error, reason} ->
+          require Logger
+
+          Logger.error(
+            "[ActionBridge] Validation failed for #{event_name}: #{reason}",
+            payload: inspect(payload, limit: 500)
+          )
+
+          # In dev, raise to catch issues early
+          if Mix.env() == :dev do
+            raise "Channel event validation failed: #{event_name} - #{reason}"
+          end
+
+          # In test, still push but log the error
+          validated_push(socket, event_name, payload)
+      end
+    else
+      # In prod, skip validation for performance
+      validated_push(socket, event_name, payload)
+    end
   end
 end

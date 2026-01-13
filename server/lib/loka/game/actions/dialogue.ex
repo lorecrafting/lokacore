@@ -14,6 +14,7 @@ defmodule Loka.Game.Actions.Dialogue do
   alias Loka.Framework.Dialogue
   alias Loka.Framework.Quest
   alias Loka.Framework.Quest.StateHelper
+  alias LokaWeb.Channels.GameChannel.Serializers
 
   @doc """
   Start a conversation with an NPC.
@@ -234,9 +235,15 @@ defmodule Loka.Game.Actions.Dialogue do
         quest_def = Quest.get_quest_definition(quest_id)
         quest_name = if quest_def, do: quest_def.name, else: quest_id
 
+        # Get the full quest from state and serialize it for the client
+        active_quest = Enum.find(new_game_state.quests, fn q -> q.id == quest_id end)
+
+        serialized_quest =
+          if active_quest, do: hd(Serializers.serialize_quests([active_quest])), else: nil
+
         events = [
           {:event, "New quest — #{quest_name}"},
-          {:quest_accepted, %{quest_id: quest_id, name: quest_name}}
+          {:quest_accepted, %{quest_id: quest_id, name: quest_name, quest: serialized_quest}}
         ]
 
         {new_game_state, events}
@@ -257,9 +264,24 @@ defmodule Loka.Game.Actions.Dialogue do
       {:ok, new_game_state, rewards} ->
         reward_text = format_quest_rewards(rewards)
 
+        # Get quest title for the completion event
+        quest_title =
+          case Quest.get_quest_definition(quest_id) do
+            {:ok, quest_def} -> quest_def.name
+            _ -> quest_id
+          end
+
+        # Single elegant message with title and rewards
+        completion_text =
+          if reward_text != "" do
+            "Quest complete — #{quest_title}! #{reward_text}"
+          else
+            "Quest complete — #{quest_title}"
+          end
+
         events = [
-          {:event, "Quest complete! #{reward_text}"},
-          {:quest_completed, %{quest_id: quest_id, rewards: rewards}}
+          {:event, completion_text},
+          {:quest_completed, %{quest_id: quest_id, title: quest_title, rewards: rewards}}
         ]
 
         events =

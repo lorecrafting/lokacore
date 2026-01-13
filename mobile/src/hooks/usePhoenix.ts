@@ -420,12 +420,7 @@ export function usePhoenix({ token, onDisconnect, onUpdateRequired }: UsePhoenix
       });
     });
 
-    channel.on('health_update', (payload: { health: { current: number; max: number } }) => {
-      setGameState((prev) => {
-        if (!prev) return prev;
-        return { ...prev, health: payload.health };
-      });
-    });
+    // Note: Health updates come via stats_update or combat_update, not a separate event
 
     // ==========================================================================
     // Entity context
@@ -498,15 +493,16 @@ export function usePhoenix({ token, onDisconnect, onUpdateRequired }: UsePhoenix
     channel.on('inventory_update', (payload: { inventory?: InventoryItem[], action?: string }) => {
       // Only update if we receive the full inventory array
       // (ignores legacy delta format with action/item_id)
-      if (payload.inventory) {
+      const newInventory = payload.inventory;
+      if (newInventory) {
         setGameState((prev) => {
           if (!prev) return prev;
-          return { ...prev, inventory: payload.inventory };
+          return { ...prev, inventory: newInventory };
         });
       }
     });
 
-    channel.on('equipped_update', (payload: { equipped: Record<string, EquippedItem> }) => {
+    channel.on('equipment_update', (payload: { equipped: Record<string, EquippedItem> }) => {
       setGameState((prev) => {
         if (!prev) return prev;
         return { ...prev, equipped: payload.equipped };
@@ -562,22 +558,26 @@ export function usePhoenix({ token, onDisconnect, onUpdateRequired }: UsePhoenix
       });
     });
 
-    channel.on('combat_end', (payload: { result: 'victory' | 'defeat' | 'fled' }) => {
+    channel.on('combat_end', (payload: { result: 'victory' | 'defeat' | 'fled'; reason?: string }) => {
       console.log('Combat end:', payload);
       setCombatState(null);
-      addEvent({
-        text: payload.result === 'victory' ? 'Victory!' : payload.result === 'fled' ? 'You fled!' : 'You were defeated.',
-        timestamp: new Date().toISOString(),
-        type: 'combat',
-      });
+      // Server sends text events for victory and fled, only add message for defeat
+      // (defeat leads to bardo which has its own messaging)
+      if (payload.result === 'defeat' || payload.reason === 'defeat') {
+        addEvent({
+          text: 'You were defeated.',
+          timestamp: new Date().toISOString(),
+          type: 'combat',
+        });
+      }
     });
 
     // ==========================================================================
     // Bardo (death) events
     // ==========================================================================
 
-    channel.on('bardo_start', (payload: { bind_point: string }) => {
-      console.log('Bardo start:', payload);
+    channel.on('bardo_enter', (payload: { bind_point: string }) => {
+      console.log('Bardo enter:', payload);
       setBardoState({
         active: true,
         bindPoint: payload.bind_point,
@@ -586,22 +586,17 @@ export function usePhoenix({ token, onDisconnect, onUpdateRequired }: UsePhoenix
       });
     });
 
-    channel.on('bardo_message', (payload: { text: string }) => {
-      setBardoState((prev) => {
-        if (!prev) return prev;
-        return { ...prev, messages: [...prev.messages, payload.text] };
-      });
-    });
+    // Note: Bardo messages are sent via 'event', not 'bardo_message'
 
-    channel.on('bardo_ready', () => {
+    channel.on('bardo_can_reincarnate', () => {
       setBardoState((prev) => {
         if (!prev) return prev;
         return { ...prev, canReincarnate: true };
       });
     });
 
-    channel.on('bardo_end', () => {
-      console.log('Bardo end');
+    channel.on('bardo_exit', () => {
+      console.log('Bardo exit');
       setBardoState(null);
     });
 
@@ -662,46 +657,47 @@ export function usePhoenix({ token, onDisconnect, onUpdateRequired }: UsePhoenix
     // Quest events
     // ==========================================================================
 
-    channel.on('quests_update', (payload: { quests: Quest[]; completed_quests?: Quest[] }) => {
+    // Note: Quest updates come via quest_progress or quest_accepted, not quests_update
+
+    channel.on('quest_accepted', (payload: { quest_id: string; name: string; quest?: Quest }) => {
+      // Server sends the text event via 'event', so no duplicate message needed here.
+      // Just update the quest state if a full quest object is provided.
+      if (payload.quest) {
+        setGameState((prev) => {
+          if (!prev) return prev;
+          return { ...prev, quests: [...prev.quests, payload.quest!] };
+        });
+      }
+    });
+
+    channel.on('quest_progress', (payload: { quests: Quest[] }) => {
+      // Server sends full quests list when any quest objective changes
       setGameState((prev) => {
         if (!prev) return prev;
-        return {
-          ...prev,
-          quests: payload.quests,
-          completedQuests: payload.completed_quests || prev.completedQuests,
-        };
+        return { ...prev, quests: payload.quests };
       });
     });
 
-    channel.on('quest_started', (payload: { quest: Quest }) => {
-      addEvent({
-        text: `Quest started: ${payload.quest.title}`,
-        timestamp: new Date().toISOString(),
-        type: 'quest',
-      });
-      setGameState((prev) => {
-        if (!prev) return prev;
-        return { ...prev, quests: [...prev.quests, payload.quest] };
-      });
+    channel.on('quest_completed', (_payload: { quest?: Quest; quest_id?: string; title?: string }) => {
+      // Server sends the completion message via 'event', so no need to add a duplicate here.
+      // This handler exists for any future state updates on quest completion.
     });
 
-    channel.on('quest_updated', (payload: { quest: Quest }) => {
-      setGameState((prev) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          quests: prev.quests.map((q) => q.id === payload.quest.id ? payload.quest : q),
-        };
-      });
+    // ==========================================================================
+    // System events
+    // ==========================================================================
+
+    channel.on('timer_completed', (payload: { timer_id?: string; timer_type: string; data?: Record<string, unknown> }) => {
+      console.log('Timer completed:', payload);
+      // Timer completion notification - server should send game result via 'event'
+      // This handler is for tracking/state purposes only
     });
 
-    channel.on('quest_completed', (payload: { quest?: Quest; quest_id?: string; title?: string }) => {
-      const title = payload.quest?.title || payload.title || 'Unknown Quest';
-      addEvent({
-        text: `Quest completed: ${title}`,
-        timestamp: new Date().toISOString(),
-        type: 'quest',
-      });
+    channel.on('force_disconnect', (payload: { reason: string }) => {
+      console.log('Force disconnect:', payload);
+      setError(payload.reason || 'Disconnected by server');
+      // Don't attempt reconnect for forced disconnects
+      isIntentionalDisconnectRef.current = true;
     });
 
     channelRef.current = channel;
