@@ -285,18 +285,19 @@ All game content uses YAML as the single source of truth:
 
 **Admin UI:** Scripts tab is read-only (view source only). Editing requires YAML modification.
 
-### Future: Non-Technical Builder Support
+### Future: Templates + Instances Architecture
 
 > **Known Limitation:** The current YAML-only architecture requires file system access.
 > Non-technical builders who can only use the Admin UI cannot create or edit content.
 
 **Proposal**: See `docs/proposals/builder-content-layer.md` for the full design.
 
-**Key decisions** (inspired by [Evennia's prototype system](https://www.evennia.com/docs/latest/Components/Prototypes.html)):
-- **Namespace isolation**: `core:*` (YAML, read-only) vs `builder:*` (DB, mutable)
-- **Inheritance**: Builders can inherit from core prototypes but not override them
-- **Versioning**: Full version history with rollback support
-- **Validation**: Same sandbox/validation rules for both sources
+**Key architecture** (inspired by [Evennia](https://www.evennia.com/docs/latest/Components/Prototypes.html), Unity Prefabs):
+- **Templates** (YAML): Define vocabulary - what kinds of things CAN exist (`base_monk`, `base_guard`)
+- **Instances** (Database): Define content - what things DO exist (`monastery:novice_pema`)
+- **Our content too**: Monastery Arc built as instances, validating builder workflow
+- **Seeding**: Fresh deploy loads instances from `priv/seeds/instances/` YAML
+- **Export**: Nightly job exports DB to YAML for git history/backups
 
 This is deferred until we have actual non-technical builders. See `lokacore-12r`.
 

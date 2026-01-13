@@ -15,6 +15,7 @@ All documents here describe future state, not current system behavior. Check the
 
 | Proposal | Issue | Summary |
 |----------|-------|---------|
+| [Decentralized Autonomous Worlds](decentralized-autonomous-worlds.md) | - | IPFS-based always-on worlds with smart contract patterns |
 | [Builder Content Layer](builder-content-layer.md) | `lokacore-12r` | DB storage for non-technical builder content |
 | [Expo Mobile App](expo-mobile-app.md) | - | React Native mobile client |
 | [Community Relay Infrastructure](community-relay-infrastructure.md) | - | P2P relay for community features |
