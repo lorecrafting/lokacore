@@ -486,15 +486,6 @@ Generic action on entity.
 }
 ```
 
-### Text Commands (MUD-style)
-
-#### `command`
-```typescript
-{
-  input: string  // Raw text command, e.g., "look monk"
-}
-```
-
 ---
 
 ## Type Definitions

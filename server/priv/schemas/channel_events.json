@@ -333,18 +333,6 @@
         "additionalProperties": false
       },
       "response": "ok"
-    },
-    "command": {
-      "description": "Raw text command input (MUD-style)",
-      "payload": {
-        "type": "object",
-        "properties": {
-          "input": { "type": "string", "minLength": 1, "maxLength": 1000 }
-        },
-        "required": ["input"],
-        "additionalProperties": false
-      },
-      "response": "ok"
     }
   }
 }

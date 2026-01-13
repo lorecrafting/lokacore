@@ -3,7 +3,6 @@ defmodule Loka.Engine.Plugin do
   Behaviour for Loka plugins/contribs.
 
   Plugins are self-contained game extensions that can add:
-  - Commands (via CommandRegistry)
   - Hooks (via Hooks system)
   - Content validators (via ContentValidator)
   - Scripting extensions (via ScriptingExtension)
@@ -27,14 +26,6 @@ defmodule Loka.Engine.Plugin do
 
         @impl true
         def dependencies, do: [:faction_system]
-
-        @impl true
-        def commands do
-          [
-            MyGame.Plugins.GuildSystem.Commands.GuildCommand,
-            MyGame.Plugins.GuildSystem.Commands.GuildChatCommand
-          ]
-        end
 
         @impl true
         def hooks do
@@ -106,12 +97,6 @@ defmodule Loka.Engine.Plugin do
   @callback dependencies() :: [atom()]
 
   @doc """
-  Returns list of command modules implementing Loka.Engine.Command.
-  These are registered with CommandRegistry during plugin load.
-  """
-  @callback commands() :: [module()]
-
-  @doc """
   Returns list of hook registrations.
   Format: {hook_type, module, function, opts}
   where opts may include :priority (default 100).
@@ -154,7 +139,6 @@ defmodule Loka.Engine.Plugin do
 
   @optional_callbacks [
     dependencies: 0,
-    commands: 0,
     hooks: 0,
     validators: 0,
     scripting_extensions: 0,
@@ -170,7 +154,6 @@ defmodule Loka.Engine.Plugin do
 
       # Default implementations for optional callbacks
       def dependencies, do: []
-      def commands, do: []
       def hooks, do: []
       def validators, do: []
       def scripting_extensions, do: []
@@ -180,7 +163,6 @@ defmodule Loka.Engine.Plugin do
       def init, do: :ok
 
       defoverridable dependencies: 0,
-                     commands: 0,
                      hooks: 0,
                      validators: 0,
                      scripting_extensions: 0,

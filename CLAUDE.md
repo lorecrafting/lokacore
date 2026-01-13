@@ -290,10 +290,13 @@ All game content uses YAML as the single source of truth:
 > **Known Limitation:** The current YAML-only architecture requires file system access.
 > Non-technical builders who can only use the Admin UI cannot create or edit content.
 
-When supporting non-technical builders, we will need:
-- DB storage for builder-created content (`typed_objects` table exists)
-- Resolution order: DB first (builder overrides), then YAML (base content)
-- World Builder UI writes to DB instead of YAML
+**Architecture**: See `docs/architecture/builder-content-layer.md` for the full design.
+
+**Key decisions** (inspired by [Evennia's prototype system](https://www.evennia.com/docs/latest/Components/Prototypes.html)):
+- **Namespace isolation**: `core:*` (YAML, read-only) vs `builder:*` (DB, mutable)
+- **Inheritance**: Builders can inherit from core prototypes but not override them
+- **Versioning**: Full version history with rollback support
+- **Validation**: Same sandbox/validation rules for both sources
 
 This is deferred until we have actual non-technical builders. See `lokacore-12r`.
 
@@ -393,7 +396,7 @@ NPCManager.create_npc(...)  # Use EntityManager instead!
 
 - Entities are data structs, behaviors implement callbacks
 - PubSub topics: `room:{id}`, `player:{id}`, `entity:{id}`
-- Commands return `{:ok, [Event.t()]}` - never mutate directly
+- Actions return `{:ok, Result.t()}` with events - never mutate directly
 - Auto-save dirty entities every 60s via EntityServer
 - LiveViews in `lib/loka_web/live/`, JS hooks in `assets/js/app.js`
 - **Timers**: Use `Loka.Timers` for persistent timers (crafting, offline progression). Timers survive restarts and continue while players are offline.

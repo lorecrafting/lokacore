@@ -12,7 +12,6 @@ defmodule Loka.Engine.PluginTest do
 
     test "minimal plugin has default values for optional callbacks" do
       assert MinimalPlugin.dependencies() == []
-      assert MinimalPlugin.commands() == []
       assert MinimalPlugin.hooks() == []
       assert MinimalPlugin.validators() == []
       assert MinimalPlugin.scripting_extensions() == []
@@ -27,7 +26,6 @@ defmodule Loka.Engine.PluginTest do
       assert FullPlugin.version() == "2.0.0"
       assert FullPlugin.description() == "A fully-featured test plugin"
       assert FullPlugin.dependencies() == [:minimal_plugin]
-      assert FullPlugin.commands() == []
       assert FullPlugin.hooks() == []
       assert FullPlugin.validators() == []
       assert FullPlugin.scripting_extensions() == []
@@ -48,7 +46,6 @@ defmodule Loka.Engine.PluginTest do
         assert function_exported?(mod, :version, 0)
         assert function_exported?(mod, :description, 0)
         assert function_exported?(mod, :dependencies, 0)
-        assert function_exported?(mod, :commands, 0)
         assert function_exported?(mod, :hooks, 0)
         assert function_exported?(mod, :validators, 0)
         assert function_exported?(mod, :scripting_extensions, 0)

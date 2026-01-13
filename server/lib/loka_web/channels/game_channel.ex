@@ -111,7 +111,6 @@ defmodule LokaWeb.GameChannel do
   alias Loka.Session
   alias LokaWeb.Channels.RoomHelpers
   alias LokaWeb.Channels.GameChannel.Serializers
-  alias LokaWeb.Channels.GameChannel.Handlers.TextCommands
   alias LokaWeb.Channels.GameChannel.ActionBridge
   alias LokaWeb.Channels.VersionCompatibility
 
@@ -531,28 +530,6 @@ defmodule LokaWeb.GameChannel do
     push(socket, "event", %{text: "You shout, \"#{message}\""})
 
     {:reply, :ok, socket}
-  end
-
-  # =============================================================================
-  # Text Command Handling (for web MUD client)
-  # =============================================================================
-
-  @doc """
-  Handle raw text command input from MUD-style clients.
-  Delegates to TextCommands handler for parsing and dispatch.
-  """
-  def handle_in("command", %{"input" => input}, socket) do
-    navigate_fn = fn direction ->
-      handle_in("navigate", %{"direction" => direction}, socket)
-    end
-
-    case TextCommands.handle_command(input, socket, navigate_fn) do
-      {:delegate, event, params} ->
-        handle_in(event, params, socket)
-
-      result ->
-        result
-    end
   end
 
   # Catch-all for unhandled events - log instead of crashing

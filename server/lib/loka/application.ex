@@ -36,11 +36,10 @@ defmodule Loka.Application do
       {Registry, keys: :unique, name: Loka.Engine.EntityRegistry.Registry},
       {Loka.Engine.EntitySupervisor, name: Loka.Engine.EntitySupervisor},
       Loka.Engine.EntityRegistry,
-      Loka.Engine.CommandRegistry,
       Loka.Engine.WorldGraph.LayoutManager,
 
       # Plugin System - must come after Engine core, before Framework layer
-      # Plugins can add commands, hooks, validators, children, prototypes, and balance config
+      # Plugins can add hooks, validators, children, prototypes, and balance config
       {Loka.Engine.PluginSupervisor, []},
       Loka.Engine.PluginLoader,
 
@@ -124,13 +123,12 @@ defmodule Loka.Application do
     opts = [strategy: :one_for_one, name: Loka.Supervisor]
     result = Supervisor.start_link(children, opts)
 
-    # Register hooks and dynamic commands after supervisor starts
+    # Register hooks after supervisor starts
     case result do
       {:ok, _pid} ->
         Loka.Framework.Quest.Listeners.register_all()
         Loka.Framework.World.RoomEvents.register_hooks()
         Loka.Framework.Inventory.Container.register_hooks()
-        Loka.Engine.SocialRegistry.register_all()
 
         # Spawn the world (create room entities from prototypes)
         # Skip in test mode to avoid polluting the sandbox-isolated test database

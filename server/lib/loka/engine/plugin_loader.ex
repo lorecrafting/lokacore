@@ -6,7 +6,7 @@ defmodule Loka.Engine.PluginLoader do
   - Reading plugins from config
   - Resolving dependency order (topological sort)
   - Starting plugin children via PluginSupervisor
-  - Registering commands, hooks, validators, scripting extensions
+  - Registering hooks, validators, scripting extensions
   - Loading additional prototype paths
   - Merging balance configs
   - Calling plugin init callbacks
@@ -18,11 +18,10 @@ defmodule Loka.Engine.PluginLoader do
   3. Resolves dependencies (topological sort)
   4. For each plugin in order:
      a. Start children via PluginSupervisor
-     b. Register commands with CommandRegistry
-     c. Add validators to ContentValidator config
-     d. Add scripting extensions to Scripting config
-     e. Load prototype paths into PrototypeLoader
-     f. Merge balance config
+     b. Add validators to ContentValidator config
+     c. Add scripting extensions to Scripting config
+     d. Load prototype paths into PrototypeLoader
+     e. Merge balance config
   5. After all plugins loaded, register hooks and call init/0 on each
 
   ## Configuration
@@ -41,7 +40,7 @@ defmodule Loka.Engine.PluginLoader do
   use GenServer
   require Logger
 
-  alias Loka.Engine.{CommandRegistry, Hooks, PrototypeLoader, PluginSupervisor}
+  alias Loka.Engine.{Hooks, PrototypeLoader, PluginSupervisor}
   alias Loka.Config.Balance
 
   @default_ets_table :loka_plugins
@@ -183,7 +182,6 @@ defmodule Loka.Engine.PluginLoader do
           version: plugin.version(),
           description: plugin.description(),
           dependencies: safe_call(plugin, :dependencies, []),
-          commands: length(safe_call(plugin, :commands, [])),
           hooks: length(safe_call(plugin, :hooks, [])),
           children: length(safe_call(plugin, :children, []))
         }
@@ -390,7 +388,6 @@ defmodule Loka.Engine.PluginLoader do
     :ets.insert(state.ets_table, {name, plugin_module})
 
     with {:ok, pids} <- start_children(plugin_module),
-         :ok <- register_commands(plugin_module),
          :ok <- add_validators(plugin_module),
          :ok <- add_scripting_extensions(plugin_module),
          :ok <- load_prototype_paths(plugin_module),
@@ -440,24 +437,6 @@ defmodule Loka.Engine.PluginLoader do
     else
       {:error, {:child_start_failed, errors}}
     end
-  end
-
-  defp register_commands(plugin_module) do
-    commands = safe_call(plugin_module, :commands, [])
-
-    Enum.each(commands, fn command_module ->
-      case CommandRegistry.register(command_module) do
-        :ok ->
-          :ok
-
-        {:error, reason} ->
-          Logger.warning(
-            "PluginLoader: Failed to register command #{inspect(command_module)}: #{inspect(reason)}"
-          )
-      end
-    end)
-
-    :ok
   end
 
   defp register_all_hooks(state) do

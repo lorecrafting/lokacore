@@ -15,14 +15,6 @@ defmodule Loka.Plugins.Guilds do
         Loka.Plugins.Guilds
       ]
 
-  ## Commands
-
-  - `/guild create <name>` - Create a new guild
-  - `/guild join <name>` - Request to join a guild
-  - `/guild leave` - Leave your current guild
-  - `/guild info [name]` - View guild information
-  - `/guild donate <amount>` - Donate gold to guild treasury
-
   ## Hooks
 
   - `at_entity_creation` - Initializes guild_member component
@@ -44,13 +36,6 @@ defmodule Loka.Plugins.Guilds do
 
   @impl true
   def dependencies, do: []
-
-  @impl true
-  def commands do
-    [
-      Loka.Plugins.Guilds.Commands.GuildCommand
-    ]
-  end
 
   @impl true
   def hooks do

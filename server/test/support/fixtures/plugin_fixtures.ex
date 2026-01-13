@@ -34,9 +34,6 @@ defmodule Loka.PluginFixtures do
     def dependencies, do: [:minimal_plugin]
 
     @impl true
-    def commands, do: []
-
-    @impl true
     def hooks, do: []
 
     @impl true
