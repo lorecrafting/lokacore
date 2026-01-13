@@ -17,7 +17,7 @@ defmodule LokaWeb.AdminLive.WorldDesignerTab do
   - Player progress overlay
   - Validation warnings and errors
 
-  See `docs/design/world-designer.md` for full design documentation.
+  See `docs/builder-reference/world-design/world-designer.md` for full design documentation.
 
   ## Component Architecture
 

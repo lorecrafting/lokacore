@@ -55,4 +55,4 @@ Review story consistency, lore accuracy, and writing quality.
 1. Inconsistencies with specific locations (bead-ready format)
 2. Writing quality issues with examples
 3. Lore gaps that need filling
-4. Note if docs/design/lore-bible.md should be created
+4. Note if docs/game/monastery-arc/lore-bible.md needs updates

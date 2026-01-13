@@ -126,14 +126,26 @@ docs/
 │   └── git-hooks.md                 # Git hooks configuration
 │
 │ ═══════════════════════════════════════════════════════════
-│ PLANNING & HISTORY
+│ PLANNING & FUTURE WORK
 │ ═══════════════════════════════════════════════════════════
 │
-├── design/                      # Design proposals & specs
-│   ├── README.md                    # Design docs index
+├── proposals/                   # Future work proposals
+│   ├── README.md                    # Proposals index
+│   ├── builder-content-layer.md     # DB storage for builders
+│   ├── expo-mobile-app.md           # Mobile app proposal
+│   └── ...                          # Other planned features
+│
+├── game-design/                 # Game mechanics & philosophy
+│   ├── README.md                    # Game design index
+│   ├── social-primitives.md         # Social systems building blocks
 │   ├── llm-assisted-gameplay.md     # AI gameplay design
+│   └── storyline-design-tips.md     # Writing guidance
+│
+├── product/                     # Business strategy & monetization
+│   ├── README.md                    # Product docs index
 │   ├── world-platform.md            # Platform vision
-│   └── ...                          # Monetization, features, etc.
+│   ├── monetization-*.md            # Revenue models
+│   └── ai-resilience-strategy.md    # AI coexistence strategy
 │
 ├── research/                    # Research & comparisons
 │   ├── mud-engine-analysis.md       # MUD engine comparison

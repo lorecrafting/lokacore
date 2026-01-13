@@ -136,7 +136,7 @@ This stores a summary in long-term memory for future sessions.
 
 **Key rules**:
 - NO file modifications allowed
-- Output goes to `docs/design/`
+- Output goes to `docs/game-design/` or `docs/product/`
 - User decides on implementation
 
 **Verification**: N/A (read-only)
@@ -323,7 +323,7 @@ For quality checks, use the audit suite:
    Web search for approaches
 
 4. Document:                  # Create proposal
-   Write docs/design/proposals/new-feature.md
+   Write docs/proposals/new-feature.md
 
 5. Present to user:           # Let them decide
    Summarize options and recommendation

@@ -290,7 +290,7 @@ All game content uses YAML as the single source of truth:
 > **Known Limitation:** The current YAML-only architecture requires file system access.
 > Non-technical builders who can only use the Admin UI cannot create or edit content.
 
-**Architecture**: See `docs/architecture/builder-content-layer.md` for the full design.
+**Proposal**: See `docs/proposals/builder-content-layer.md` for the full design.
 
 **Key decisions** (inspired by [Evennia's prototype system](https://www.evennia.com/docs/latest/Components/Prototypes.html)):
 - **Namespace isolation**: `core:*` (YAML, read-only) vs `builder:*` (DB, mutable)

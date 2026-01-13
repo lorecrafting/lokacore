@@ -664,7 +664,7 @@ Settlements are **endgame content**. Players need to fall in love with the pilgr
 - How do we handle moderation at scale?
 - Should settlements be persistent or can they decay fully?
 
-*See `docs/design/monetization-ideas.md` for revenue model exploration.*
+*See `docs/product/monetization-ideas.md` for revenue model exploration.*
 
 ---
 

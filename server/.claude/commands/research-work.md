@@ -28,8 +28,9 @@ You are now in **Research Mode** for exploration and ideation.
 ## Output Location
 
 All research output should go to:
-- `docs/design/proposals/` - New feature proposals
-- `docs/design/` - Analysis and ideation documents
+- `docs/proposals/` - New feature proposals
+- `docs/game-design/` - Game mechanics and philosophy
+- `docs/product/` - Business strategy and monetization
 - `docs/research/` - Deep technical research
 
 ## Research Document Format
@@ -63,7 +64,8 @@ What should happen next? (User decides)
 
 | Resource | Purpose |
 |----------|---------|
-| `docs/design/` | Existing design documents |
+| `docs/game-design/` | Game mechanics documents |
+| `docs/product/` | Business/product documents |
 | `docs/research/` | Previous research |
 | `docs/architecture/` | System architecture |
 | Codebase | Pattern analysis |
@@ -97,7 +99,7 @@ Use `research-agent` for isolated exploration:
 ## End of Session
 
 Before finishing:
-1. Document findings in `docs/design/` or `docs/design/proposals/`
+1. Document findings in `docs/game-design/`, `docs/product/`, or `docs/proposals/`
 2. Summarize key insights for user
 3. Present options with trade-offs
 4. Let user decide on implementation
