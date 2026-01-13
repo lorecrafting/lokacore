@@ -1,0 +1,23 @@
+key: player_death_respawn
+type: script
+name: "Player Death and Respawn"
+description: "Shows bardo vision and respawns player at last meditation point"
+tags: [death, respawn, bardo]
+data:
+  hook: at_player_death
+  source: |
+    # Show bardo vision cutscene
+    # show_cutscene("bardo_vision")
+
+    # Get last meditation point or default to monastery gate
+    respawn_room = get_flag("last_meditation_point") || "monastery_gate"
+
+    # Teleport player to respawn point
+    teleport(respawn_room)
+
+    # Restore 50% health
+    # heal(player, div(get_stat("max_health"), 2))
+
+    message("You awaken, as if from a dream within a dream...")
+
+    handled()

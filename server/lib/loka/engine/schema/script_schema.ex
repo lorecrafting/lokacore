@@ -1,9 +1,13 @@
 defmodule Loka.Engine.Schema.ScriptSchema do
   @moduledoc """
-  Ecto schema for Lua scripts.
+  Ecto schema for sandboxed Elixir scripts.
 
   Scripts can be attached to entities to customize their behavior. They are
-  validated against the Lua sandbox security rules before being saved.
+  validated against the Elixir sandbox security rules before being saved.
+
+  > **Note:** This DB schema is kept for future use when non-technical builders
+  > need UI-based script editing. Currently, YAML files in `priv/world/scripts/`
+  > are the primary source of truth. See CLAUDE.md for the YAML-only architecture.
 
   ## Hooks
 
@@ -23,12 +27,11 @@ defmodule Loka.Engine.Schema.ScriptSchema do
         name: "guard_behavior",
         hook: "on_enter",
         source: ~S'''
-        function on_enter(player)
-          if player.level < 10 then
-            game.message(player.id, "The guard blocks your path!")
-            return false
-          end
-          return true
+        if player.level < 10 do
+          message("The guard blocks your path!")
+          deny()
+        else
+          continue()
         end
         '''
       }
@@ -77,7 +80,7 @@ defmodule Loka.Engine.Schema.ScriptSchema do
   """
   def hooks, do: @hooks
 
-  # Validate the Lua source code against the sandbox security rules
+  # Validate the Elixir source code against the sandbox security rules
   defp validate_script_source(changeset) do
     case get_change(changeset, :source) do
       nil ->

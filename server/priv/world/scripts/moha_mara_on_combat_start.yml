@@ -1,0 +1,22 @@
+key: moha_mara_on_combat_start
+type: script
+name: "Moha Mara Illusion Creation"
+description: "Moha Mara creates illusion copies when combat starts"
+tags: [combat, boss, moha_mara]
+data:
+  hook: at_combat_start
+  source: |
+    enemy = context.enemy
+
+    if enemy.key == "moha_mara" do
+      # Create 4 illusion copies
+      # Note: create_illusion would need framework support
+      # spawn_npc("moha_illusion", context.room, %{is_real: false})
+      # spawn_npc("moha_illusion", context.room, %{is_real: false})
+      # spawn_npc("moha_illusion", context.room, %{is_real: false})
+      # spawn_npc("moha_illusion", context.room, %{is_real: false})
+
+      message("Moha Mara splits into multiple forms!")
+    end
+
+    continue()

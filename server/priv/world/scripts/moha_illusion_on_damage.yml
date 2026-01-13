@@ -1,0 +1,24 @@
+key: moha_illusion_on_damage
+type: script
+name: "Moha Illusion Damage Handler"
+description: "Illusions take no damage unless player has clarity status"
+tags: [combat, boss, moha_mara, illusion]
+data:
+  hook: at_damage
+  source: |
+    target = context.target
+
+    # Check if target is a Moha illusion copy
+    if target.is_moha_copy do
+      attacker = context.attacker
+
+      # Illusions take no damage unless revealed with clarity
+      if not has_status?(attacker, "clarity") do
+        message("Your attack passes through an illusion!")
+        default(0)  # No damage
+      else
+        continue()  # Normal damage
+      end
+    else
+      continue()
+    end

@@ -47,6 +47,7 @@ defmodule LokaWeb.AdminLive do
      |> assign(:form, nil)
      |> assign(:editing, nil)
      |> assign(:running, nil)
+     |> assign(:viewing_script, nil)
      |> load_tab_data(:dashboard)}
   end
 
@@ -167,6 +168,7 @@ defmodule LokaWeb.AdminLive do
             rooms={assigns[:rooms]}
             entities={assigns[:entities]}
             scripts={assigns[:scripts]}
+            viewing_script={assigns[:viewing_script]}
             prototypes={assigns[:prototypes]}
             quests_data={assigns[:quests_data]}
             testing_data={assigns[:testing_data]}
@@ -212,6 +214,7 @@ defmodule LokaWeb.AdminLive do
   attr :rooms, :list, default: nil
   attr :entities, :list, default: nil
   attr :scripts, :list, default: nil
+  attr :viewing_script, :any, default: nil
   attr :prototypes, :list, default: nil
   attr :quests_data, :list, default: nil
   attr :testing_data, :map, default: nil
@@ -256,8 +259,7 @@ defmodule LokaWeb.AdminLive do
       module={ScriptsTab}
       id="scripts-tab"
       scripts={@scripts}
-      form={@form}
-      editing={@editing}
+      viewing_script={@viewing_script}
     />
     """
   end
@@ -467,85 +469,70 @@ defmodule LokaWeb.AdminLive do
      |> load_tab_data(:entities)}
   end
 
-  # Script events
+  # Script events (YAML-only - read-only viewer)
+  def handle_event("view_script", %{"key" => key}, socket) do
+    alias Loka.Content.Script
+
+    case Script.get(key) do
+      {:ok, script} ->
+        {:noreply, assign(socket, :viewing_script, script)}
+
+      {:error, :not_found} ->
+        {:noreply, put_flash(socket, :error, "Script '#{key}' not found")}
+    end
+  end
+
+  def handle_event("close_script_view", _, socket) do
+    {:noreply, assign(socket, :viewing_script, nil)}
+  end
+
+  # Legacy DB script handlers (kept for future non-technical builder support)
+  # These will be used when DB-based script editing is enabled for builders
+  # who cannot edit YAML files directly.
+
   def handle_event("new_script", _, socket) do
-    changeset = Scripts.change_script(%ScriptSchema{enabled: true})
-
     {:noreply,
-     socket
-     |> assign(:form, to_form(changeset))
-     |> assign(:editing, nil)}
+     put_flash(
+       socket,
+       :info,
+       "Scripts are now YAML-only. Create files in priv/world/scripts/"
+     )}
   end
 
-  def handle_event("edit_script", %{"id" => id}, socket) do
-    script = Scripts.get_script!(id)
-    changeset = Scripts.change_script(script)
-
+  def handle_event("edit_script", %{"id" => _id}, socket) do
     {:noreply,
-     socket
-     |> assign(:form, to_form(changeset))
-     |> assign(:editing, script)}
+     put_flash(
+       socket,
+       :info,
+       "Scripts are now YAML-only. Edit files in priv/world/scripts/"
+     )}
   end
 
-  def handle_event("save_script", %{"script_schema" => params}, socket) do
-    result =
-      case socket.assigns.editing do
-        nil -> Scripts.create_script(params)
-        script -> Scripts.update_script(script, params)
-      end
-
-    case result do
-      {:ok, _} ->
-        {:noreply,
-         socket
-         |> put_flash(:info, "Script saved successfully")
-         |> assign(:form, nil)
-         |> assign(:editing, nil)
-         |> load_tab_data(:scripts)}
-
-      {:error, changeset} ->
-        {:noreply, assign(socket, :form, to_form(changeset))}
-    end
-  end
-
-  def handle_event("toggle_script", %{"id" => id}, socket) do
-    script = Scripts.get_script!(id)
-    {:ok, _} = Scripts.toggle_script(script)
-    {:noreply, load_tab_data(socket, :scripts)}
-  end
-
-  def handle_event("test_script", %{"id" => id}, socket) do
-    script = Scripts.get_script!(id)
-
-    case Scripts.test_script(script) do
-      {:ok, result} ->
-        # Truncate result to avoid exposing sensitive context data
-        result_str = inspect(result) |> String.slice(0, 200)
-
-        display =
-          if String.length(inspect(result)) > 200, do: result_str <> "...", else: result_str
-
-        {:noreply, put_flash(socket, :info, "Script executed successfully: #{display}")}
-
-      {:error, reason} ->
-        # Truncate error to avoid exposing sensitive context data
-        reason_str = inspect(reason) |> String.slice(0, 200)
-
-        display =
-          if String.length(inspect(reason)) > 200, do: reason_str <> "...", else: reason_str
-
-        {:noreply, put_flash(socket, :error, "Script error: #{display}")}
-    end
-  end
-
-  def handle_event("delete_script", %{"id" => id}, socket) do
-    script = Scripts.get_script!(id)
-    {:ok, _} = Scripts.delete_script(script)
-
+  def handle_event("save_script", _params, socket) do
     {:noreply,
-     socket
-     |> put_flash(:info, "Script deleted successfully")
-     |> load_tab_data(:scripts)}
+     put_flash(
+       socket,
+       :info,
+       "Scripts are now YAML-only. Edit files in priv/world/scripts/"
+     )}
+  end
+
+  def handle_event("toggle_script", %{"id" => _id}, socket) do
+    {:noreply, put_flash(socket, :info, "Toggle disabled - scripts are YAML-only")}
+  end
+
+  def handle_event("test_script", %{"id" => _id}, socket) do
+    {:noreply,
+     put_flash(socket, :info, "Script testing via UI not yet available for YAML scripts")}
+  end
+
+  def handle_event("delete_script", %{"id" => _id}, socket) do
+    {:noreply,
+     put_flash(
+       socket,
+       :info,
+       "Scripts are now YAML-only. Delete files in priv/world/scripts/"
+     )}
   end
 
   # Prototype events
@@ -676,7 +663,7 @@ defmodule LokaWeb.AdminLive do
       total_players: Accounts.count_players(),
       total_rooms: Entities.count_by_type(:room),
       total_entities: Entities.count_all(),
-      scripts_loaded: Scripts.count_scripts()
+      scripts_loaded: length(ScriptsTab.load_scripts())
     })
   end
 
@@ -693,7 +680,9 @@ defmodule LokaWeb.AdminLive do
   end
 
   defp load_tab_data(socket, :scripts) do
-    assign(socket, :scripts, Scripts.list_scripts())
+    socket
+    |> assign(:scripts, ScriptsTab.load_scripts())
+    |> assign(:viewing_script, nil)
   end
 
   defp load_tab_data(socket, :prototypes) do

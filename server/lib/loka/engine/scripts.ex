@@ -1,9 +1,25 @@
 defmodule Loka.Engine.Scripts do
   @moduledoc """
-  Context for managing Lua scripts in the database.
+  Context for managing sandboxed Elixir scripts in the database.
 
-  Provides CRUD operations for scripts and integration with the
-  Lua scripting engine for validation and execution.
+  Provides CRUD operations for scripts stored in the `scripts` table.
+
+  > **Note:** This DB context is kept for future use when non-technical builders
+  > need UI-based script editing. Currently, YAML files in `priv/world/scripts/`
+  > are the primary source of truth via `Loka.Content.Script`.
+  > See CLAUDE.md for the YAML-only architecture decision.
+
+  ## Current Usage
+
+  For most use cases, prefer `Loka.Content.Script` which loads from YAML:
+
+      # Preferred: Load from YAML
+      Loka.Content.Script.all()
+      Loka.Content.Script.get("guard_on_enter")
+
+  This DB context will be used when:
+  - Non-technical builders create scripts via Admin UI
+  - Runtime script overrides are needed (future feature)
   """
 
   import Ecto.Query

@@ -152,7 +152,7 @@ fly deploy
 
 ### Use Scripts When...
 
-Scripts live in `priv/world/scripts/`, `builder_scripts` YAML field, or `scripts` DB table.
+Scripts live in `priv/world/scripts/*.yml` (YAML files are the single source of truth).
 
 | Scenario | Example | Why Script? |
 |----------|---------|-------------|
@@ -258,21 +258,60 @@ Right: 1. Add teleport_player() to bindings/movement.ex
 
 Scripts allow builders to customize game content without code access.
 
+### YAML-Only Architecture (Single Source of Truth)
+
+All game content uses YAML as the single source of truth:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Content Sources                                             │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  priv/world/scripts/*.yml     → Scripts                     │
+│  priv/world/prototypes/*.yml  → NPCs, Items, Rooms          │
+│  priv/world/quests/*.yml      → Quests                      │
+│  priv/world/dialogues/*.yml   → Dialogues                   │
+│                                                             │
+│  All loaded by TypedObject.Loader at startup                │
+│  Hot-reload with: mix loka.reload                           │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Developer workflow:**
+1. Edit YAML files directly (or via Claude)
+2. Run `mix loka.reload` in dev to pick up changes
+3. Deploy to push changes to production
+
+**Admin UI:** Scripts tab is read-only (view source only). Editing requires YAML modification.
+
+### Future: Non-Technical Builder Support
+
+> **Known Limitation:** The current YAML-only architecture requires file system access.
+> Non-technical builders who can only use the Admin UI cannot create or edit content.
+
+When supporting non-technical builders, we will need:
+- DB storage for builder-created content (`typed_objects` table exists)
+- Resolution order: DB first (builder overrides), then YAML (base content)
+- World Builder UI writes to DB instead of YAML
+
+This is deferred until we have actual non-technical builders. See `lokacore-12r`.
+
 ### Layer Boundaries
 
 | Task | Layer | Directory |
 |------|-------|-----------|
 | Sandbox security | Engine | `lib/loka/engine/script/` |
 | API bindings | Framework | `lib/loka/framework/scripting/bindings/` |
-| Script content | Builder | `priv/world/`, `scripts` table |
-| Admin UI | Web | `lib/loka_web/live/admin_live/scripts_tab.ex` |
+| Script content | Builder | `priv/world/scripts/*.yml` |
+| Admin UI | Web | `lib/loka_web/live/admin_live/scripts_tab.ex` (read-only) |
 
 ### Where to Modify
 
 - **Adding new API function**: `lib/loka/framework/scripting/bindings/*.ex`
 - **Security/sandbox changes**: `lib/loka/engine/script/sandbox.ex`, `validator.ex`
 - **Hook integration**: `lib/loka/framework/scripting/hook_integration.ex`
-- **Script content**: Database `scripts` table or YAML `builder_scripts` field
+- **Script content**: YAML files in `priv/world/scripts/`
 
 ### Script API Categories
 

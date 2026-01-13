@@ -1,0 +1,20 @@
+key: raga_mara_on_item_use
+type: script
+name: "Raga Mara Item Use Response"
+description: "Raga Mara gets stronger when player uses items during combat"
+tags: [combat, boss, raga_mara]
+data:
+  hook: at_item_use
+  source: |
+    # Only trigger during combat with Raga Mara
+    if context.in_combat and context.combat_target do
+      target = context.combat_target
+
+      if target.key == "raga_mara" do
+        # Increase attack bonus (would need component update in real impl)
+        message("Raga Mara grows stronger from your desire!")
+        say("Yes! Want more! Use more!")
+      end
+    end
+
+    continue()
