@@ -44,7 +44,7 @@ DependencyGraph.find_broken_references(graph)
 ## What Claude Knows
 
 Claude has access to:
-- `docs/llm/` - Comprehensive reference docs
+- `docs/builder-reference/` - Comprehensive reference docs
 - `CLAUDE.md` - Project overview and patterns
 - `Loka.WorldBuilder.Analysis.DependencyGraph` - Query tool for dependencies
 - All validators and their output
@@ -59,5 +59,5 @@ Claude has access to:
 
 ## See Also
 
-- `docs/llm/` - LLM reference documentation
+- `docs/builder-reference/` - LLM reference documentation
 - `CLAUDE.md` - Project development guide

@@ -49,7 +49,7 @@ mix loka.test.validate
 ```
 
 ### Diagnosis
-Look at the error code in `docs/llm/README.md` or ask Claude:
+Look at the error code in `docs/builder-reference/README.md` or ask Claude:
 ```
 "Explain error DIAL003 and fix it"
 ```

@@ -1,8 +1,11 @@
-# LLM Reference Documentation
+# Builder Reference Documentation
 
-> **This is the primary documentation for LLM consumption.**
+> **Reference docs for creating game content (quests, dialogues, entities)**
 
-This directory contains comprehensive reference documentation optimized for Claude and other LLMs working on Loka's quest, dialogue, and game content systems.
+This directory contains comprehensive reference documentation for building Loka game content. Useful for:
+- LLM-assisted content creation (Claude, etc.)
+- World Builder UI users
+- Direct YAML editing
 
 ## Documentation Structure
 
@@ -21,9 +24,9 @@ For humans guiding LLM work, see `docs/guides/`:
 - [common-workflows.md](../guides/common-workflows.md) - How to ask Claude for tasks
 - [troubleshooting.md](../guides/troubleshooting.md) - When things go wrong
 
-## Quick Start for LLMs
+## Quick Start
 
-When working on quest/dialogue/bot issues, use these tools:
+When working on quest/dialogue/content issues, use these tools:
 
 ### 1. Run Validation First
 ```bash

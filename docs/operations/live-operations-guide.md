@@ -461,7 +461,7 @@ iex> PrototypeLoader.reload()
 - `lib/loka_web/controllers/api/validate_controller.ex` - Validation API endpoint
 - `lib/loka_web/controllers/api/test_controller.ex` - Test harness API
 - `.claude/commands/check-work.md` - Post-implementation verification checklist
-- `docs/llm/README.md` - LLM tooling documentation
+- `docs/builder-reference/README.md` - LLM tooling documentation
 
 **Validation API:**
 ```bash
@@ -737,12 +737,11 @@ end
 - `lib/loka/engine/entity_server.ex` - Entity lifecycle
 - `lib/loka/session/server.ex` - Session management
 - `lib/loka/framework/combat/combat_server.ex` - Combat state
-- `lib/loka/testing/llm/error_formatter.ex` - LLM tooling
-- `lib/loka/testing/llm/dependency_graph.ex` - Impact analysis
+- `lib/loka/world_builder/analysis/dependency_graph.ex` - Content dependency analysis
 - `fly.toml` - Deployment configuration
 
 **Related Documentation:**
 - `docs/architecture/entity-lifecycle.md` - Entity server patterns
-- `docs/llm/README.md` - LLM development tools
+- `docs/builder-reference/README.md` - LLM development tools
 - `.claude/commands/check-work.md` - Verification checklist
 - `CLAUDE.md` - Project overview

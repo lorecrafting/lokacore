@@ -291,7 +291,7 @@ bd sync               # Push to git
 | **Scripting Implementation** | `docs/architecture/elixir-scripts-implementation.md` |
 | **Game Client Architecture** | `docs/reference/game-client.md` |
 | **Channel API Contract** | `docs/api/channel-contract.md` |
-| **Entity/Quest/Dialogue YAML** | `docs/llm/` |
+| **Entity/Quest/Dialogue YAML** | `docs/builder-reference/` |
 | **Architecture Deep-Dive** | `docs/architecture/` |
 | **UI Style Guide** | `docs/ui/living-ebook-style-guide.md` |
 | **Audit Commands** | `.claude/commands/` (run `/audit-*`) |

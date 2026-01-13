@@ -1,6 +1,6 @@
 # Quest System - Developer Guide
 
-> **For YAML format and content creation, see `docs/llm/quest-reference.md`**
+> **For YAML format and content creation, see `docs/builder-reference/quest-reference.md`**
 >
 > This document covers the Elixir architecture for developers extending the quest system.
 
@@ -194,8 +194,8 @@ DependencyGraph.dependents_of(graph, "quest:quest_id")
 
 ## See Also
 
-- `docs/llm/quest-reference.md` - YAML format reference
-- `docs/llm/dialogue-reference.md` - Dialogue integration
-- `docs/llm/quest-dialogue-patterns.md` - Common patterns
+- `docs/builder-reference/quest-reference.md` - YAML format reference
+- `docs/builder-reference/dialogue-reference.md` - Dialogue integration
+- `docs/builder-reference/quest-dialogue-patterns.md` - Common patterns
 - `Quest.Progress` moduledoc - API details
 - `Quest.ObjectiveRegistry` moduledoc - Handler registration

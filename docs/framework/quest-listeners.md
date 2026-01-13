@@ -1,7 +1,7 @@
 # Quest Listeners - Hook-Based Auto-Tracking
 
 > **For custom handlers, see `quest-system.md`**
-> **For YAML format, see `docs/llm/quest-reference.md`**
+> **For YAML format, see `docs/builder-reference/quest-reference.md`**
 
 ## Overview
 
@@ -97,5 +97,5 @@ mix loka.test.validate
 ## See Also
 
 - [quest-system.md](quest-system.md) - Elixir API & custom handlers
-- [docs/llm/quest-reference.md](../llm/quest-reference.md) - YAML format
+- [docs/builder-reference/quest-reference.md](../builder-reference/quest-reference.md) - YAML format
 - [docs/architecture/hooks-and-locks.md](../architecture/hooks-and-locks.md) - Hook system

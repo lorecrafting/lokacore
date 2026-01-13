@@ -160,7 +160,7 @@ DependencyGraph.find_broken_references()
 
 ## Documentation
 
-- `docs/llm/quest-reference.md` - Full quest spec
-- `docs/llm/dialogue-reference.md` - Full dialogue spec
-- `docs/llm/quest-dialogue-patterns.md` - Common patterns & fixes
-- `docs/llm/entity-reference.md` - Entity specifications
+- `docs/builder-reference/quest-reference.md` - Full quest spec
+- `docs/builder-reference/dialogue-reference.md` - Full dialogue spec
+- `docs/builder-reference/quest-dialogue-patterns.md` - Common patterns & fixes
+- `docs/builder-reference/entity-reference.md` - Entity specifications

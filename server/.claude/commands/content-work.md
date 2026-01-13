@@ -74,10 +74,10 @@ DependencyGraph.find_broken_references()
 
 | Topic | Location |
 |-------|----------|
-| Quest Format | `docs/llm/quest-reference.md` |
-| Dialogue Format | `docs/llm/dialogue-reference.md` |
-| Entity Types | `docs/llm/entity-reference.md` |
-| Common Patterns | `docs/llm/quest-dialogue-patterns.md` |
+| Quest Format | `docs/builder-reference/quest-reference.md` |
+| Dialogue Format | `docs/builder-reference/dialogue-reference.md` |
+| Entity Types | `docs/builder-reference/entity-reference.md` |
+| Common Patterns | `docs/builder-reference/quest-dialogue-patterns.md` |
 
 ## Common Mistakes to Avoid
 
