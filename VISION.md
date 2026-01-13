@@ -1,20 +1,89 @@
 # Loka Vision
 
-> *A living world where wisdom traditions breathe and communities grow slowly together.*
+> *A place to belong. A world you build together. A record of light that endures.*
+
+---
+
+## Why We're Building This
+
+### Society Is Crumbling
+
+Trust in institutions is collapsing. Communities are fragmenting. Loneliness is epidemic. Young people are drowning in anxiety and despair. The social fabric that once held us together is fraying, thread by thread.
+
+And our digital spaces—the places where more and more of human connection happens—are actively making it worse.
+
+**The numbers are stark:**
+- [Twenty percent of American adults now have no close friends outside their family](https://abcnews.go.com/US/wireStory/efforts-reconnect-americans-face-challenges-lonely-time-128514418)—up from three percent in 1990
+- Half of Americans spent time in a public space in their community in 2025—down from two-thirds in 2019
+- The places where we used to find each other—churches, unions, lodges, neighborhood bars—have hollowed out
+
+### What's Missing
+
+Existing platforms do many things well. Discord builds gaming communities. Slack coordinates work. Social media connects people across distances. These tools have real value.
+
+But there's something they weren't designed to provide: **persistent, place-based community** where:
+
+- You know people, and they know you
+- Your actions matter and are witnessed
+- You build something together over time
+- You help each other through hard times
+- Your legacy persists after you're gone
+- Virtue is recognized and rewarded
+- Stories unfold in a shared world
+
+Chat scrolls away. Channels are flat lists. There's no *place* to inhabit together—no landscape shaped by collective effort, no monuments to what you've built, no visible history of how you've helped each other.
+
+Loka isn't trying to replace these tools. It's trying to offer something they don't: **a world you build together**.
+
+### Why Games? Why Fiction?
+
+Here's what games understand that social platforms don't:
+
+**Games create shared purpose.** When you're building something together—even in fiction—you develop real bonds. The guild that raids together forms genuine friendships.
+
+**Fiction gives us permission.** In a fictional frame, people can be their better selves. The player who's shy in real life becomes a confident leader in-game.
+
+**Stories shape who we become.** The stories we consume become the templates for who we are. Heroic stories create aspiration. Cynical stories breed cynicism. Virtuous stories plant seeds of virtue.
+
+**Play is how humans learn.** We learn to be good by practicing being good, and games let us practice.
+
+---
 
 ## What Loka Is
 
-Loka is a text-based virtual world designed for **presence, not progress**. It's a place where:
+**Loka is a Discord-like communicator reimagined as a living world** where communities don't just chat—they **build planets together**.
 
-- Stories are walked, not read
-- Questions are sat with, not answered
-- Others on the same path find each other
-- Communities are founded, not competed
-- Nothing is rushed
+Each community exists as a sovereign world with its own lore, culture, and identity. These planets can **federate** with others to form coalitions, creating emergent social structures from the grassroots up.
 
-It is not a game to be won. It is a place to be—alone, then together.
+But Loka goes further: planets can represent **real-world communities**, enabling mutual aid, disaster relief, creator economies, and collective funding of community infrastructure—all wrapped in the shared fiction of building and protecting worlds together.
 
-## Core Experience
+### The Core Concept
+
+| Discord/Slack | Loka |
+|---------------|------|
+| Channels (flat list) | Explorable world (rooms, zones, landmarks) |
+| Server icon, name | Visible culture, architecture, history |
+| Single owner + roles | Collective building, shared stewardship |
+| More members | Physical expansion, richer world |
+| Chat logs | Permanent structures, monuments, lore |
+| Server links, bots | Federation, travel, trade routes |
+
+### What Makes Loka Different
+
+| Traditional Platforms | Loka |
+|----------------------|------|
+| Channels and feeds | Explorable world you build together |
+| Content scrolls away | Structures and history persist |
+| Global scale | Human-scale communities that federate |
+| Creators → audience | Everyone contributes |
+| Optimized for engagement | Optimized for meaning |
+| Platform owns the value | Communities own their value |
+| Anonymous by default | Reputation through presence |
+| Any content | Curated for virtue |
+
+---
+
+## The Core Experience
 
 **"I built something cool, had a great conversation, and I just relaxed."**
 
@@ -46,7 +115,7 @@ These three modes flow into each other:
 *Meditative, personal, pride of craft*
 
 - Tend a garden that grows in real-time
-- Arrange your room to reflect your taste
+- Arrange your space to reflect your taste
 - Write in a journal others might find
 - Craft slowly—sessions, not minutes
 - Contribute to the shared world
@@ -75,313 +144,336 @@ These three modes flow into each other:
 
 **The feel:** Existing, not achieving.
 
-## The Hook: Living Wisdom
+---
 
-What makes Loka different from "just another cozy space":
+## Your Planet, Your World
 
-**Wisdom traditions as lived experience.**
+Each planet creates its own identity. There's no imposed mythology, no mandatory aesthetic, no required backstory.
 
-Not lectures. Not curriculum. Encounters.
+**Your community decides:**
+- Your planet's look and feel (high fantasy, sci-fi, cozy village, cultural heritage, anything)
+- Your values and principles (what your community stands for)
+- Your traditions and customs (how you celebrate, mourn, welcome newcomers)
+- Your governance (how decisions are made)
+- Your stories (the narratives that unfold in your world)
 
-| Tradition | How It Lives in Loka |
-|-----------|---------------------|
+**What's shared across all planets:**
+- The infrastructure (federation protocols, mutual aid systems, the Eternal Record)
+- The Space Between (how planets connect)
+- The core principles (collaboration, virtue, human-scale community)
+- The Eternal Library (where good acts are recorded forever)
+
+### Real-World Example: Diaspora Cultural Preservation
+
+A [Vietnamese diaspora community](https://www.researchgate.net/publication/385150502_Social_Media_as_a_Tool_for_Cultural_Preservation_among_Diaspora_Communities) scattered across continents—grandparents in Saigon, children in Houston, grandchildren in Toronto—currently tries to preserve culture through Facebook groups and video calls. It's inadequate. Culture fades with each generation.
+
+**In Loka**, they could build a world that holds their heritage:
+- A village with the architecture they remember
+- A temple where they gather for Tết
+- A library preserving stories the elders tell
+- Customs learned by *living* them, not watching videos
+
+The culture breathes, rather than fading.
+
+---
+
+## Federation
+
+### Why Federation?
+
+Small communities are precious. A group of 12 friends building a world together has intimacy that a server of 10,000 never will. But small communities can feel isolated, struggle to sustain activity, lack resources for ambitious projects.
+
+**Federation** solves this: small planets remain sovereign while connecting into larger structures for mutual benefit.
+
+### Federation Levels
+
+```
+Level 0: PLANET (Sovereign Community)
+├── 5-50 core members
+├── Full autonomy over internal affairs
+├── Own world, culture, governance
+└── Can exist independently forever
+
+Level 1: CONSTELLATION (Federated Planets)
+├── 2-10 planets with formal ties
+├── Shared: travel routes, trade, mutual defense
+├── Optional: shared resources, joint projects
+└── Governed by: treaty/charter agreed by all planets
+
+Level 2: COALITION (Regional Alliance)
+├── Multiple constellations + independent planets
+├── Shared: major infrastructure, emergency response
+├── Coordinates: large events, cross-community campaigns
+└── Governed by: council of representatives
+
+Level 3: UNIVERSE (All Communities)
+├── All participating communities
+├── Shared: core protocols, emergency broadcast
+├── The Eternal Library accessible to all
+└── Governed by: emergent consensus
+```
+
+### The Space Between
+
+Between planets lies **The Space Between**—a shared realm where:
+- Travelers move between federated planets
+- Trade routes connect distant communities
+- News and rumors propagate organically
+- Coalitions hold their gatherings
+- The Eternal Library stands, accessible to all
+
+Think of it as the roads, ports, and commons that connect sovereign villages—neutral ground where different cultures meet.
+
+---
+
+## Real-World Integration
+
+Here's where Loka becomes more than a game: **planets can represent real-world communities**, and in-game actions can have real-world effects.
+
+This isn't gamification of charity. It's **shared fiction as coordination infrastructure**.
+
+### The Hearth: Mutual Aid Made Visible
+
+Every community can build a **Hearth**—the in-game representation of their mutual aid pot:
+
+- Visible structure in a central location
+- Shows current fund level (abstracted, not exact dollars)
+- Lists recent contributions (with permission)
+- Records disbursements and their stories
+
+When a community member faces crisis, the community can support them through the Hearth. The act of support becomes part of the community's story—witnessed, honored, remembered.
+
+### The Beacon: Disaster Response
+
+**Real-World Problem:** When the [LA wildfires](https://www.directrelief.org/2025/12/the-l-a-wildfires-looking-back-on-a-year-of-response/) displaced 200,000 people and destroyed 16,000 structures, mutual aid networks like [Mutual Aid LA](https://unitedwayla.org/wildfire-response-resources/) scrambled to coordinate through Google Docs and scattered Discord servers.
+
+**In Loka:** When crisis hits a community, they light a **Beacon**.
+
+The light is visible across the federation. Other planets see it in The Space Between. Resources flow—not through bureaucratic channels, but through trust relationships that already exist. The response is tracked, celebrated, recorded.
+
+**Real-World Problem:** When the [Sudan humanitarian crisis](https://disasterphilanthropy.org/press/coalition-for-mutual-aid-in-sudan-expands-its-commitment-to-distribute-at-least-16-million-in-direct-and-flexible-emergency-grants/) displaced 20 million people, grassroots mutual aid groups called "emergency response rooms" became the most effective way to deliver aid—but they struggled with visibility, coordination, and trust verification.
+
+**In Loka:** The infrastructure for coordination already exists. Trust is established through ongoing relationships. Response becomes part of shared lore.
+
+### Great Works: Community Infrastructure
+
+Communities can fund real-world infrastructure through **Great Works**:
+
+| Real-World Project | In-Game Representation |
+|-------------------|----------------------|
+| Community garden | "Sanctuary Grove" |
+| Tool library | "Maker's Hall" |
+| Meeting space | "Gathering Hall" |
+| Youth center | "Hall of Young Heroes" |
+
+The project appears in-game during fundraising (as construction). Contributors are recognized with plaques, named elements, permanent honor. Completion is celebrated. The real and fictional grow together.
+
+### Creator Economy: The Artisan's Market
+
+The artists, dice-makers, leatherworkers, and writers in your community can have **in-game shops** that connect to their real-world crafts:
+
+| Creator Type | In-Game Presence | Real-World Product |
+|--------------|------------------|-------------------|
+| Dice makers | Artisan shop | Physical dice sets |
+| Map artists | Cartographer's guild | Printed maps |
+| Writers | Scribe's quarters | Adventures, zines |
+| Crafters | Workshop | Handmade goods |
+
+Players discover creators through exploration—wandering into a cartographer's workshop, seeing beautiful maps, learning about the person who made them. Not algorithms. Not ads. Discovery through *presence*.
+
+---
+
+## The Eternal Record
+
+Beyond Loka's servers, beyond any single company or platform, there exists **The Eternal Record**—a permanent, decentralized archive of humanity's good acts.
+
+When communities help each other—when mutual aid flows, when disasters are weathered together, when infrastructure is built through collective effort—these moments can be inscribed *permanently* in storage that no one controls.
+
+### Why Permanent Storage?
+
+**The Problem:**
+- Platforms die, taking their data with them
+- Companies get acquired, priorities change
+- Servers crash, backups fail
+- History gets rewritten by those in power
+- Good deeds are forgotten
+
+**The Solution:** Store the record of human goodness in **permanent, decentralized storage** that no single entity controls:
+
+| Technology | Properties | Use Case |
+|------------|------------|----------|
+| **IPFS** | Content-addressed, distributed | Primary distribution |
+| **Arweave** | Permanent storage, paid once | Eternal archival |
+
+Even if Loka disappears tomorrow, the Record remains. Future generations can look back and see: *these communities existed. They helped each other.*
+
+### The Scribe Class
+
+**Scribes** are community members who take an oath to record truthfully:
+
+> *"I swear to record truly what I witness.*
+> *I will not embellish, nor diminish.*
+> *I will protect the privacy of those who wish it.*
+> *I will preserve the memory of good deeds*
+> *so that future generations may know*
+> *what humanity was capable of.*
+> *The light we record today*
+> *becomes the beacon for tomorrow."*
+
+**Scribe Responsibilities:**
+
+| Duty | Description |
+|------|-------------|
+| **Witness** | Be present at significant events |
+| **Verify** | Confirm that recorded events actually happened |
+| **Draft** | Write the record in proper form |
+| **Consecrate** | Perform the ceremony that commits to permanent storage |
+| **Protect** | Ensure privacy of those who request it |
+
+### What Gets Recorded
+
+- Mutual aid disbursements (the act, not the amounts)
+- Great Works completions
+- Disaster response chronicles
+- Community milestones
+- Memorials for those who passed
+- Cross-planet solidarity events
+
+### The Eternal Library
+
+In The Space Between stands the **Eternal Library**—a vast, ever-growing structure representing all consecrated records. Each record adds a book to its shelves, a star to its ceiling.
+
+Any traveler can visit, browse records, read accounts of good deeds from across all communities. It's both a game space and a **living monument to human goodness**.
+
+---
+
+## The First Planet: Tsering Monastery
+
+The first authored experience is the **Mountain Monastery**—a complete, contemplative world that teaches players how to *be* in Loka.
+
+### The Setting
+
+A 500-year-old monastery in a mountain valley. Buddhist-inspired wisdom traditions. Seasonal rhythms. Patient growth.
+
+This isn't the only kind of planet possible—it's ONE example. Other communities will build sci-fi worlds, diaspora homelands, maker workshops, whatever reflects who they are.
+
+### Living Wisdom
+
+| Tradition | How It Lives |
+|-----------|--------------|
 | Buddhist parables | A monk by the river shares a koan. It sits with you. |
 | Stoic philosophy | The old soldier in the garden speaks of what we control. |
-| Taoist tales | The wanderer speaks in paradox. Nothing is explained. |
 | Contemplative texts | Verses discovered on weathered stones. |
 
-Books that could breathe here:
-- *Siddhartha* — a monastery journey
-- *Tao Te Ching* — verses scattered through the world
-- *Meditations* — conversations with a philosophical NPC
-- *The Little Prince* — wonder and essential questions
+The value is in the dwelling, not the knowing.
 
-**The value is in the dwelling, not the knowing.**
+### The Journey
 
-*Note: Wisdom traditions are a natural leaning, not a requirement. Loka can hold other tones too.*
+**Phase 1: Pilgrimage (Solo)**
+- Arrive as a pilgrim with a sketched identity
+- Walk the mountain paths alone
+- Sit with questions without answers
+- Meet NPCs who remember you
+- Learn to slow down
 
-## Who It's For
+**Phase 2: Settlement (Social)**
+- Found or join a settlement (3-12 founders)
+- Build spaces together
+- Tend shared resources
+- Define your community's character
+- Watch it grow over months
 
-- **Seekers** — those sitting with life's questions
-- **Readers** — who want to inhabit stories, not just read them
-- **The exhausted** — seeking digital calm that isn't shallow
-- **The lonely** — wanting connection without performance
-- **Writers** — collaborative storytellers
-- **The contemplative** — meditation and mindfulness practitioners
-- **Builders** — who want to create spaces others can discover
-- **Community founders** — who want to build something lasting with friends
-- **Gardeners** — who understand tending, patience, and seasonal time
-- **The disillusioned** — tired of games that demand, manipulate, compete
+### Settlements Within Planets
 
-## Who It's Not For
+Settlements are **not competitive bases**. They are:
 
-- Achievement hunters
-- Completionists
-- Those seeking competition
-- Anyone wanting fast-paced action
-- Optimizers looking for "best builds"
-- Anyone who needs instant gratification
+**Collaborative Spaces:**
+- 3-12 founders who build together
+- Shared decision-making
+- Roles emerge organically (gardener, builder, teacher, host)
 
-And that's okay.
+**Living Ecosystems:**
+- Gardens need tending (hours between checks)
+- Workshops produce slowly
+- The place breathes whether you're online or not
 
-## Marketing: How to Talk About Loka
+**Expressions of Identity:**
+- Scholarly library? Meditation retreat? Artist colony?
+- Build what reflects your group's values
+- Beauty over efficiency
 
-The vision is unified, but different audiences connect to different aspects:
-
-### For MUD/Text Game Players
-**Pitch:** "A mobile-friendly MUD with beautiful prose, story-driven quests, and eventually: found your own monastery with friends."
-
-**Emphasize:**
-- Deep narrative content
-- Traditional MUD mechanics (exploration, combat, crafting)
-- Mobile accessibility (play on commute)
-- Later: collaborative world-building
-
-**Where:** r/MUD, MUD Discord servers, Top Mud Sites
+**Asynchronous Care:**
+- Check in during your commute
+- See what your friend built while you slept
+- Leave notes for tomorrow
+- Progress happens slowly, continuously
 
 ---
 
-### For Cozy/Contemplative Gamers
-**Pitch:** "A peaceful text world where you explore a mountain monastery, tend gardens, and build communities with friends—all at your own pace."
+## Collaboration Over Competition
 
-**Emphasize:**
-- No competition, no grinding, no pressure
-- Beautiful, meditative prose
-- Real-time growth (gardens, seasons)
-- Gentle social spaces
+Competition is the water we swim in. Our economy, education, games, social media—everything structured around beating others.
 
-**Where:** r/CozyGamers, r/wholesomegames, meditation/mindfulness communities
+Loka is built on a different foundation:
+
+```
+1. THE WORLD IS THE CHALLENGE, NOT OTHER PLAYERS
+   └── We face difficulties together, not each other
+
+2. YOUR SUCCESS DOESN'T DIMINISH MINE
+   └── Abundance mentality, not zero-sum
+
+3. HELPING OTHERS IS THE MAIN GAMEPLAY LOOP
+   └── The most rewarding actions benefit the community
+
+4. REPUTATION IS BUILT BY CONTRIBUTION
+   └── Status comes from what you give, not what you take
+
+5. PROGRESS IS COLLECTIVE
+   └── The community advances together
+```
+
+Friendly competition exists—contests, challenges, rivalries—but it serves collaboration. No griefing, no exploitation, no "winning" by harm.
 
 ---
 
-### For Incremental/Idle Players
-**Pitch:** "Tend gardens that grow while you're away. Build settlements with friends across timezones. Check in during your commute, see what bloomed."
+## Virtuous Stories
 
-**Emphasize:**
-- Async progression (things happen while offline)
-- Collaborative building (not competitive)
-- Mobile-first (15-minute sessions)
-- Meaningful idle mechanics (not number inflation)
+**The stories we tell matter.**
 
-**Where:** r/incremental_games, r/AndroidGaming, r/iosgaming
+Most games and platforms are agnostic about virtue—or actively reward vice. Kill, loot, betray, dominate. The "best" strategies often involve exploitation.
+
+Loka takes a stand: **the stories here will be good.**
+
+Not sanitized. Not preachy. Good stories have conflict, struggle, darkness. But:
+
+| What We Reject | What We Embrace |
+|----------------|-----------------|
+| Cruelty as entertainment | Courage in the face of fear |
+| Exploitation as strategy | Sacrifice for others |
+| Cynicism as wisdom | Hope as strength |
+| Nihilism as sophistication | Meaning as achievement |
+| Domination as success | Service as honor |
+| Betrayal as gameplay | Loyalty as bond |
+
+**Storyteller Guidelines:**
+
+Every narrative should pass this test:
+1. Does this story show humans at their best? (Not perfect—struggling, failing, but *trying*)
+2. Does this story reward virtue? (Courage, compassion, integrity, perseverance)
+3. Does this story build up or tear down?
+4. Would you want your community shaped by this story?
+
+This isn't censorship—it's curation. We're building a garden, not a wilderness.
 
 ---
-
-### For Social Builders
-**Pitch:** "Found a settlement with 3-12 friends. Build a tea house, meditation hall, pottery studio. Watch it grow over months. No competition, just creation."
-
-**Emphasize:**
-- Collaborative not competitive
-- Define your community's identity
-- Async (friends contribute across timezones)
-- Patient, meaningful building
-
-**Where:** Discord communities, former Minecraft/Stardew multiplayer players
-
----
-
-### The Unified Message
-
-**"Start your journey alone in a mountain monastery. When ready, found a settlement with friends. Progress slowly, build meaningfully, tend carefully. No competition, no rushing—just presence."**
-
-This works because:
-- Solo pilgrimage → appeals to story/contemplative players
-- Settlement building → appeals to social/builder/idle players
-- Both are **slow, intentional, non-competitive**
-- Mobile-friendly throughout
-- Async mechanics serve contemplation, not exploitation
-
-## Character Identity
-
-You are a **pilgrim with a sketched identity**.
-
-Not a full character sheet with stats and backstory. Not "yourself" visiting. Something in between.
-
-When you arrive, you answer: *Why did you come here? What did you leave behind?*
-
-This shapes your experience without requiring a 20-field character creation. Your character *is*, they don't need pages of history to *become*.
-
-## RPG Mechanics: Narrative Scaffolding
-
-Loka has RPG systems—combat, quests, skills, progression—but they serve a different purpose.
-
-**These mechanics carry the story forward. They are not the point.**
-
-| Mechanic | Typical RPG | Loka |
-|----------|-------------|------|
-| **Combat** | Grind encounters | Rare, story-gated, meaningful fights |
-| **XP/Levels** | Visible bar, constant feedback | Hidden or soft—growth without meters |
-| **Quests** | "Kill 10 rats" checklist | "Find what happened to the missing pilgrim" |
-| **Loot** | Stats optimization | Mementos, story artifacts, gifts |
-| **Skills** | Min-max builds | Reflect who your character *is* |
-| **Gates** | "Requires level 10" | "Return when you've helped three people" |
-
-### Combat Consequences
-
-When combat exists, losing doesn't mean "game over":
-
-- **Story forks** — Defeat changes the path. The bandits take your supplies. The beast drives you back. You have a different problem now.
-- **Soft setbacks** — You're weakened for a while. Real hours, not session-ending.
-- **Rescue and recovery** — Someone finds you. Time passed. The world moved on.
-
-Stakes without frustration. Consequences without punishment.
-
-## Multiplayer: Present and Absent
-
-Connection doesn't require simultaneous presence.
-
-### When Others Are Here
-- Sit together at the tea house
-- Explore the cave behind the waterfall together
-- Discuss what the old murals mean
-
-### When You're Alone
-- Find traces of those who came before
-- Discover journals left by other pilgrims
-- Visit gardens tended by those now offline
-- Leave messages at significant places
-- Hear from NPCs that "you've been spoken of"
-
-The world remembers. Presence echoes.
-
-*For the most meaningful contributions, permanence through decentralized storage—so traces can outlast even Loka itself.*
-
-## World Structure
-
-### Authored Starting Experiences
-
-Dense, complete narrative zones where you learn to **be** in Loka:
-
-1. **The Mountain Monastery** (contemplative, wisdom-seeking) - *Complete in Alpha*
-2. **The Port City** (trade, stories from afar, hustle and rest) - *Planned*
-3. **The Forest Hermitage** (solitude, nature, listening) - *Planned*
-
-These zones teach mechanics through story. Each is a 20-40 hour pilgrimage—dense with quests, NPCs, interconnected threads.
-
-**You complete one before founding or joining a settlement.**
-
-### Player-Founded Settlements
-
-After your pilgrimage, you can:
-- **Found** a settlement (3+ players, choose location, define purpose)
-- **Join** an existing settlement (apply, get invited, contribute)
-- **Visit** settlements as a traveler (public ones welcome guests)
-- **Stay solo** (continue exploring authored zones, your own hermitage)
-
-Settlements exist alongside authored zones—some in wilderness, some near cities, some hidden in mountains.
-
-### The Vast World Beyond
-
-Between authored zones and settlements lies wilderness:
-
-```
-[Monastery] → sparse paths → [discovery] → sparse → [Port City]
-                    ↓                           ↓
-            [Player Settlement]          [Hermit's Cave]
-```
-
-**Density follows civilization and care.**
-
-- Wilderness is sparse with punctuated discoveries
-- Authored zones are dense with stories
-- Player settlements are as dense as their builders make them
-- Stretches of quiet with hidden features
-- Arriving somewhere feels like *arriving*
-
-## Creation: Personal to Communal
-
-Player creation scales naturally from **self** to **community**:
-
-```
-Personal Room → Small Garden → Settlement → Ecosystem
-     │               │              │            │
-  arrange         tend alone    build together   steward
-  your space                    with 3-12         the land
-```
-
-### The Progression
-
-| Scale | What You Do | Timeline |
-|-------|-------------|----------|
-| **Room** | Arrange furniture, hang art, create your corner | Sessions |
-| **Garden** | Tend plants, watch them grow, see seasons pass | Days to weeks |
-| **Settlement** | Build with others, shape shared spaces, establish identity | Months to years |
-| **Ecosystem** | Terraform geography, restore wilderness, patient stewardship | Months to years |
-
-### How Settlements Work
-
-**Founding (3+ players):**
-- Choose a location in the wilderness
-- Define purpose (monastery? farm? artist colony?)
-- Build initial structures together
-- Set governance (consensus? elected? rotating roles?)
-
-**Building (Collaborative):**
-- Permissions system (who can build where?)
-- Shared resources (communal storehouse, library)
-- Individual spaces within the settlement (your room, your workshop)
-- Public spaces (tea house, meditation hall, garden)
-
-**Tending (Asynchronous):**
-- Gardens need watering (hours between checks)
-- Workshops need stocking (materials from gathering)
-- Spaces need maintenance (but decay is slow, forgiving)
-- Growth happens while you're away
-
-**Flourishing (Patient):**
-- Settlements grow denser over months
-- New buildings emerge as needed
-- Reputation spreads (NPCs speak of you, travelers visit)
-- The place becomes known for something (the pottery settlement, the tea masters, the silent retreat)
-
-### Ecosystem Stewardship
-- Change geography over real months
-- Plant forests that grow slowly, across seasons
-- Restore meadows, dig irrigation, shape the land
-- **Gardening at civilizational scale**
-- Work alone or with your settlement community
-
-### Stewardship and Decay
-- Tended spaces flourish (but slowly)
-- Neglect leads to rewilding, not ruin
-- Untended gardens become meadows, not wastelands
-- Abandoned settlements become ruins—beautiful, explorable, melancholy
-- The world breathes whether you're there or not
-
-## Pacing: Slow but Not Punishing
-
-### Time Scales
-
-| Action | Time |
-|--------|------|
-| Plant something → first growth | Hours to a day |
-| Craft a meaningful item | Across 2-3 sessions |
-| Seasonal cycle | Real weeks |
-| Terraform an ecosystem | Real months |
-
-### The Principle
-
-Slower than typical games. Not so slow it frustrates.
-
-**Sessions matter.** You can accomplish something in an evening. You can also start something that unfolds over weeks.
-
-Patience is rewarded. Impatience gains nothing.
-
-## Seasons and Weather
-
-The world has rhythms you sync to, not control.
-
-- **Seasons gate experiences** — The cave behind the waterfall only accessible in spring rains
-- **Weather matters** — Not just ambiance; it changes what's possible
-- **Seasonal moments** — Cherry blossoms in spring, snow ceremonies in winter
-- **Real-time passage** — Seasons turn whether you're there or not
 
 ## Design Principles
 
 ### Presence Over Progress
 - No XP bars demanding attention
-- Your character *is*, they don't need to *become*
 - Growth happens, but meters don't fill
+- Your character *is*, they don't need to *become*
 
 ### Creation Over Collection
 - Your space reflects your taste, not optimal stats
@@ -407,265 +499,128 @@ The world has rhythms you sync to, not control.
 
 *"A world gentle enough to share, deep enough to stay."*
 
-## Anti-Optimization Architecture
+---
 
-In an age of AI and automation, Loka is designed so that **botting is pointless**:
+## Who This Is For
 
-| What AI Can Do | What Has No Meaning Without Humanity |
-|----------------|-------------------------------------|
-| Grind XP | Enjoy being somewhere |
-| Complete quests | Have relationships that matter |
-| Generate text | Create from genuine taste |
-| Optimize builds | Feel pride in creation |
-| Farm currency | Show up as a presence others know |
+- **The lonely** — seeking connection without performance
+- **The exhausted** — seeking digital calm that isn't shallow
+- **Seekers** — sitting with life's questions
+- **Builders** — who want to create spaces others can discover
+- **The disillusioned** — tired of platforms that manipulate
+- **Community founders** — who want to build something lasting with friends
+- **Helpers** — who want mutual aid to be visible and witnessed
+- **The contemplative** — who understand presence and patience
 
-**If there's nothing to optimize, there's no reason to bot.**
+## Who This Is Not For
 
-The experience requires:
-- Being present
-- Having taste
-- Forming connections
-- Finding personal meaning
+- Achievement hunters
+- Completionists
+- Those seeking domination
+- Anyone needing instant gratification
+- Optimizers looking for "best builds"
 
-None of these can be automated.
+And that's okay.
 
-## A Session in Loka
+---
 
-> *You arrive at the monastery gate. Rain is falling softly.*
->
-> *You head to your small room, check on your bonsai—it's grown.*
->
-> *You wander to the tea house. Two others are there, mid-conversation.*
->
-> *You sit, order tea, listen, then join in.*
->
-> *Someone mentions a cave behind the waterfall. You go together.*
->
-> *Inside: old murals. Nobody knows what they mean. You discuss.*
->
-> *Back at the tea house, theories emerge. Then comfortable silence.*
->
-> *You write something in your journal before logging off.*
->
-> *Nothing "happened." Everything happened.*
+## What We're Not
 
-## The Journey: From Pilgrim to Founder
+**Not a replacement for real life.** Loka frames community, it doesn't substitute for it. The best outcome is that time here strengthens real bonds and supports real-world action.
 
-Loka is structured as a progression from **solitary contemplation** to **communal creation**:
+**Not utopian.** Communities have conflicts. People are imperfect. We build tools to handle this—but we don't pretend it won't happen.
 
-### Phase 1: The Pilgrimage (Solo)
-*"I arrived seeking something. I found myself."*
+**Not a crypto scheme.** No token, no speculation, no play-to-earn. The in-game economy is walled off from real money. What flows in real life—mutual aid, creator sales, infrastructure funding—is real but not gamified.
 
-You begin at the Monastery—a complete, authored experience:
-- Learn through story quests
-- Walk the mountain paths alone
-- Sit with questions without answers
-- Meet NPCs who've walked this path
-- Discover what drew you here
+**Not for everyone.** We're curating for virtue. If you want toxicity or domination fantasies, this isn't it.
 
-**Duration:** First 20-40 hours of play
-**Feel:** Siddhartha's journey, a retreat, inward-facing
+---
 
-### Phase 2: The Founding (Social)
-*"I found others who understand. Together, we built."*
+## Rollout Vision
 
-When ready, you can found or join a **settlement** with others:
-- Build spaces together (temple, garden, workshop)
-- Tend shared resources (orchards, libraries, meditation halls)
-- Welcome newcomers to your community
-- Define your settlement's character (scholarly? artistic? agricultural?)
-- Watch it grow slowly over weeks and months
-
-**Duration:** Ongoing, months to years
-**Feel:** Building a Zen garden together, communal care
-
-### Why This Works
-
-**The monastery teaches presence.** You learn to slow down, to notice, to be.
-
-**The settlement extends it outward.** Now you're practicing presence *with others*—building, tending, creating meaning together.
-
-Both are contemplative. One is solitary, one is communal. Neither is rushed. Neither is competitive.
-
-## Settlements: Contemplative Communities
-
-Player settlements are **not competitive bases**. They are:
-
-### 1. Collaborative Spaces
-- 3-12 founders who build together
-- Shared decision-making on layout, aesthetics, purpose
-- No hierarchy unless the group chooses it
-- Roles emerge organically (gardener, builder, teacher, host)
-
-### 2. Living Ecosystems
-- Gardens need tending (hours to days between checks)
-- Workshops produce slowly (tea dries, pottery fires, ink brews)
-- Visitors leave traces (messages, gifts, memories)
-- The place breathes whether you're online or not
-
-### 3. Expressions of Identity
-- Is your settlement a scholarly library? A meditation retreat? An artist colony?
-- Build what reflects your group's values
-- No "optimal" layout—only meaningful ones
-- Beauty and intention over efficiency
-
-### 4. Asynchronous Care
-- Check in during your commute
-- Harvest the tea you planted yesterday
-- See what your friend built while you slept
-- Leave a note for someone who'll arrive tomorrow
-- Progress happens slowly, continuously, without rushing
-
-### What Settlements Are NOT
-- ❌ Competitive (no leaderboards, no raiding, no "best settlement")
-- ❌ Grindy (no resource scarcity requiring constant attention)
-- ❌ Optimal (there's no "correct" way to build)
-- ❌ Performative (private by default, invite-only if desired)
-- ❌ Rushed (everything takes real time, nothing is instant)
-
-### The Feel
-
-**Like tending a garden with friends across timezones.**
-
-You plant something. They water it. You both harvest. Someone else sees it and wants to join. The garden grows slowly, shaped by many hands, over months.
-
-That's a settlement.
-
-## The Monastery Setting
-
-The monastery isn't arbitrary. It provides:
-
-- **Contemplative context** — slowing down feels natural
-- **Wisdom tradition home** — koans, parables, meditation fit
-- **Architectural variety** — gardens, halls, caves, paths
-- **Seasonal beauty** — cherry blossoms, snow, autumn leaves
-- **Reason for gathering** — pilgrims, seekers, travelers
-- **Template for settlements** — Players can found new monasteries, temples, hermitages
-
-*The monastery is the first starting town—a complete experience that teaches you how to **be** before asking you to **build**.*
-
-## What We're Not Building
-
-- A combat grinder
-- A quest treadmill
-- A competitive space
-- A notification machine
-- A dopamine trap
-- A content consumption platform
-
-## What Success Looks Like
-
-Not:
-- DAU/MAU metrics
-- Time-on-platform
-- Conversion rates
-- Competitive ladders
-
-Instead:
-- People who return because they *want* to
-- Conversations that wouldn't happen elsewhere
-- Creations people are proud of
-- A community that self-governs with kindness
-- Someone saying: "This place helped me think"
-- Settlements that last for years
-- Friends checking in during their commute to water the shared garden
-- A settlement where silence is honored
-- A settlement known for its poetry library
-- An abandoned settlement that's now a beautiful ruin others explore
-- Players who say: "We built this together"
-
-## Phased Rollout: Don't Build Everything at Once
-
-This vision is complete, but it should be **released in phases**:
-
-### Phase 1: Alpha (NOW) — The Monastery Alone
-**Duration:** 2-3 months
-**What's included:**
+### Phase 1: Foundation (Current)
 - Mountain Monastery (complete 20-40 hour story)
-- All core systems (combat, quests, crafting, gathering, dialogue)
-- Solo exploration and narrative
-- Basic social (global chat, seeing other players in rooms)
+- Core systems (exploration, crafting, dialogue)
+- Basic social (seeing others, conversation)
 - Mobile touch controls
 
-**What's NOT included:**
-- Settlements (not implemented yet)
+### Phase 2: Settlements
+- Settlement founding (3-12 players)
 - Collaborative building
-- Multiple starting zones
+- Personal gardens with async growth
+- Second authored zone
 
-**Goal:** Prove the core experience is compelling
-- Can players stay engaged for weeks in one authored zone?
-- Do they want more story content OR social building?
-- What retention looks like without settlements
+### Phase 3: Federation
+- Planet creation tools
+- Basic federation (travel between planets)
+- Community governance tools
+- Constellation formation
 
-**Marketing:** "Mobile-friendly contemplative MUD. Explore a mountain monastery, uncover mysteries, play on your commute."
+### Phase 4: Real-World Integration
+- Mutual aid pot infrastructure
+- Creator storefronts
+- Great Works campaigns
+- Beacon system
 
----
+### Phase 5: The Eternal Record
+- Scribe class and training
+- Decentralized storage integration
+- Consecration ceremonies
+- The Eternal Library
 
-### Phase 2: Beta — Second Zone + Settlement Foundations
-**Duration:** 2-3 months after alpha
-**What's added:**
-- Second starting zone (Port City or Forest Hermitage)
-- Basic settlement system (founding, building, permissions)
-- Personal gardens/rooms with async growth
-- Invite-only settlements (closed beta, 5-10 settlements)
-
-**Goal:** Test settlement mechanics with engaged alpha community
-- Do settlements enhance or distract from contemplation?
-- What governance models emerge?
-- How much building is "enough"?
-
-**Marketing:** "Now with player settlements. Found a monastery with friends."
-
----
-
-### Phase 3: Launch — The Full Vision
-**Duration:** 6+ months after beta
-**What's added:**
-- Third starting zone
-- Public settlements (anyone can found one)
-- Ecosystem terraforming
-- Advanced building tools
-- Settlement reputation/discovery system
-
-**Goal:** Sustainable community-driven world
+### Phase 6: Ecosystem
+- Self-hosting support
+- Open federation protocol
+- Community ownership transition
+- Eternal Record accessible without Loka account
 
 ---
 
-### Why This Matters
+## The Light Endures
 
-**Don't wait to launch settlements before starting alpha.**
+A hundred years from now, will anyone remember that we helped each other?
 
-The monastery is complete. It's enough to:
-- Test if the core experience resonates
-- Build a community of engaged players
-- Learn what players actually want
-- Co-design settlements with your alpha testers
+On most platforms, the answer is no. Chat logs scroll away. Communities dissolve. Good deeds are forgotten. The platforms profit and the people disperse and nothing remains.
 
-Settlements are **endgame content**. Players need to fall in love with the pilgrimage first.
+But in the Eternal Record, they persist. Every mutual aid disbursement, every disaster response, every community that came together—recorded permanently, verified cryptographically, stored beyond the reach of any platform's shutdown.
 
-## Open Questions
+**What if there was a place online that made you better instead of worse?**
 
-*To be refined through building and community:*
+**What if the hours you spent there strengthened your community instead of atomizing it?**
 
-### Immediate (Alpha)
-- Is one starting zone enough for 2-3 months of testing?
-- What retention looks like without settlements?
-- Do players ask for social building or more solo content?
+**What if the stories you consumed planted virtue instead of cynicism?**
 
-### Near-term (Beta)
-- How do permissions work for collaborative building?
-- What prevents griefing in settlements?
-- How granular should building tools be?
-- What governance models work best?
+**What if, generations from now, people could look at the Eternal Record and see: even when things were falling apart, these humans chose to help each other?**
 
-### Long-term (Launch)
-- How do player settlements and authored zones coexist?
-- What does ecosystem simulation look like?
-- How do we handle moderation at scale?
-- Should settlements be persistent or can they decay fully?
-
-*See `docs/product/monetization-ideas.md` for revenue model exploration.*
+That's what we're building.
 
 ---
 
-*This is a living document. The vision sharpens through building, testing, and listening.*
+> *"We do not know who will read these records.*
+> *Perhaps no one. Perhaps millions.*
+> *We do not know what world they will live in.*
+> *Perhaps better than ours. Perhaps worse.*
+> *But we know this:*
+> *When they look back, they will find light.*
+> *Not because darkness didn't exist,*
+> *but because we chose to record the light.*
+> *Every record is a message:*
+> *'We were here. We helped each other. You can too.'"*
+
+---
+
+*Build worlds. Build community. Build each other up.*
+
+***The light endures.***
+
+---
+
+## Sources
+
+- [ABC News: Efforts to reconnect Americans face challenges in a lonely time](https://abcnews.go.com/US/wireStory/efforts-reconnect-americans-face-challenges-lonely-time-128514418)
+- [Direct Relief: The L.A. Wildfires - Looking Back on a Year of Response](https://www.directrelief.org/2025/12/the-l-a-wildfires-looking-back-on-a-year-of-response/)
+- [United Way LA: Wildfire Recovery Resources](https://unitedwayla.org/wildfire-response-resources/)
+- [Center for Disaster Philanthropy: Coalition for Mutual Aid in Sudan](https://disasterphilanthropy.org/press/coalition-for-mutual-aid-in-sudan-expands-its-commitment-to-distribute-at-least-16-million-in-direct-and-flexible-emergency-grants/)
+- [ResearchGate: Social Media as a Tool for Cultural Preservation among Diaspora Communities](https://www.researchgate.net/publication/385150502_Social_Media_as_a_Tool_for_Cultural_Preservation_among_Diaspora_Communities)
+- [Mutual Aid Disaster Relief](https://mutualaiddisasterrelief.org/)
+- [Foundation for Social Connection](https://www.endsocialisolation.org/)
