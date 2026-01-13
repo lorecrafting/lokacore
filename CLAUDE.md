@@ -283,17 +283,28 @@ bd sync               # Push to git
 **Good bead**: Specific file path, line numbers, validation command
 **Bad bead**: "Fix dialogue issue" (too vague)
 
-## Documentation Pointers
+## Documentation Organization
+
+Docs are organized by **traditional MUD roles** (see `docs/README.md` for full structure):
+
+| Role | Directory | Content |
+|------|-----------|---------|
+| **Builder** | `docs/builder-reference/` | YAML specs (quests, dialogues, entities) |
+| **Developer** | `docs/architecture/`, `docs/framework/` | Elixir code, system design |
+| **Admin** | `docs/admin/`, `docs/operations/` | Dashboard, live ops, security |
+
+Work is often **cross-cutting** - use docs from any tier as needed.
+
+### Quick Reference
 
 | Topic | Location |
 |-------|----------|
-| **Scripting API Design** | `docs/architecture/elixir-scripts-design.md` |
-| **Scripting Implementation** | `docs/architecture/elixir-scripts-implementation.md` |
-| **Game Client Architecture** | `docs/reference/game-client.md` |
-| **Channel API Contract** | `docs/api/channel-contract.md` |
-| **Entity/Quest/Dialogue YAML** | `docs/builder-reference/` |
+| **Quest/Dialogue/Entity YAML** | `docs/builder-reference/` |
 | **Architecture Deep-Dive** | `docs/architecture/` |
-| **UI Style Guide** | `docs/ui/living-ebook-style-guide.md` |
+| **Scripting API** | `docs/architecture/elixir-scripts-design.md` |
+| **Game Client** | `docs/reference/game-client.md` |
+| **Channel API** | `docs/api/channel-contract.md` |
+| **Live Operations** | `docs/operations/live-operations-guide.md` |
 | **Audit Commands** | `.claude/commands/` (run `/audit-*`) |
 
 ## API Endpoints
