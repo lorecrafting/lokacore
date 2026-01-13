@@ -53,7 +53,7 @@ git clone https://github.com/lorecrafting/lokacore.git
 - **SQLite** 3.x
 - **Git LFS** (for audio assets): `brew install git-lfs && git lfs install`
 
-### Server Setup
+### Elixir Server & React-Native Expo Dev Setup
 
 ```bash
 cd server
@@ -65,13 +65,19 @@ npm install --prefix assets
 # Setup database
 mix ecto.setup
 
-# Start server
-mix phx.server
+```bash
+cd ../mobile
+
+# Install dependencies
+npm install
+
+# Start both elixir server and react-native expo server
+mix loka.dev
 ```
+React-native expo web client will be available at http://localhost:8081
+The admin web client will be available at http://localhost:4000
 
-The web client will be available at http://localhost:4000
-
-### Mobile Setup (Optional)
+### Standalone Mobile Setup (Optional)
 
 ```bash
 cd mobile
@@ -86,6 +92,7 @@ npm run ios
 # Android (requires Android Studio)
 npm run android
 ```
+
 
 ## Development
 
