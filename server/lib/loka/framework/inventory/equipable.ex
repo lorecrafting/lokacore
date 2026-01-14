@@ -6,27 +6,11 @@ defmodule Loka.Framework.Inventory.Equipable do
 
   ## Fields
 
-  - `slot` - Which equipment slot this item occupies (LegendMUD-style slots)
+  - `slot` - Which equipment slot this item occupies
   - `bonuses` - Map of stat bonuses granted when equipped
   - `requirements` - Map of stat requirements to equip this item
 
-  ## LegendMUD Equipment Slots
-
-  - `:head` - worn on head (helmets, hats)
-  - `:neck` - worn around neck (necklaces, scarves)
-  - `:torso` - worn on torso (shirts, robes, armor)
-  - `:about` - worn about body (cloaks, capes)
-  - `:arms` - worn on arms (bracers, sleeves)
-  - `:hands` - worn on hands (gloves, gauntlets)
-  - `:waist` - worn around waist (belts, sashes)
-  - `:legs` - worn on legs (pants, greaves)
-  - `:feet` - worn on feet (boots, shoes)
-  - `:held` - held in hand (torches, shields)
-  - `:wielded` - wielded weapon (swords, staves)
-  - `:finger_left` - worn on left finger (rings)
-  - `:finger_right` - worn on right finger (rings)
-  - `:wrist_left` - worn on left wrist (bracelets)
-  - `:wrist_right` - worn on right wrist (bracelets)
+  See `Loka.Engine.Constants.EquipmentSlots` for slot definitions.
 
   ## Example
 
@@ -37,46 +21,15 @@ defmodule Loka.Framework.Inventory.Equipable do
       }
   """
 
-  @type slot ::
-          :head
-          | :neck
-          | :torso
-          | :about
-          | :arms
-          | :hands
-          | :waist
-          | :legs
-          | :feet
-          | :held
-          | :wielded
-          | :finger_left
-          | :finger_right
-          | :wrist_left
-          | :wrist_right
+  alias Loka.Engine.Constants.EquipmentSlots
+
+  @type slot :: EquipmentSlots.slot()
 
   @type t :: %__MODULE__{
           slot: slot(),
           bonuses: map(),
           requirements: map()
         }
-
-  @slots [
-    :head,
-    :neck,
-    :torso,
-    :about,
-    :arms,
-    :hands,
-    :waist,
-    :legs,
-    :feet,
-    :held,
-    :wielded,
-    :finger_left,
-    :finger_right,
-    :wrist_left,
-    :wrist_right
-  ]
 
   defstruct slot: :held,
             bonuses: %{},
@@ -97,7 +50,7 @@ defmodule Loka.Framework.Inventory.Equipable do
   def from_map(nil), do: nil
 
   def from_map(data) when is_map(data) do
-    slot = parse_slot(data["slot"] || data[:slot])
+    slot = EquipmentSlots.parse(data["slot"] || data[:slot])
 
     bonuses = data["bonuses"] || data[:bonuses] || %{}
     requirements = data["requirements"] || data[:requirements] || %{}
@@ -108,28 +61,6 @@ defmodule Loka.Framework.Inventory.Equipable do
       requirements: atomize_keys(requirements)
     }
   end
-
-  defp parse_slot(slot) when is_atom(slot) and slot in @slots, do: slot
-  defp parse_slot("head"), do: :head
-  defp parse_slot("neck"), do: :neck
-  defp parse_slot("torso"), do: :torso
-  defp parse_slot("about"), do: :about
-  defp parse_slot("arms"), do: :arms
-  defp parse_slot("hands"), do: :hands
-  defp parse_slot("waist"), do: :waist
-  defp parse_slot("legs"), do: :legs
-  defp parse_slot("feet"), do: :feet
-  defp parse_slot("held"), do: :held
-  defp parse_slot("wielded"), do: :wielded
-  defp parse_slot("finger_left"), do: :finger_left
-  defp parse_slot("finger_right"), do: :finger_right
-  defp parse_slot("wrist_left"), do: :wrist_left
-  defp parse_slot("wrist_right"), do: :wrist_right
-  # Legacy slot mappings for backwards compatibility
-  defp parse_slot("weapon"), do: :wielded
-  defp parse_slot("armor"), do: :torso
-  defp parse_slot("accessory"), do: :held
-  defp parse_slot(_), do: :held
 
   defp atomize_keys(map) when is_map(map) do
     Map.new(map, fn {k, v} ->
@@ -145,12 +76,12 @@ defmodule Loka.Framework.Inventory.Equipable do
   @doc """
   Returns a list of valid equipment slots.
   """
-  def slots, do: @slots
+  defdelegate slots, to: EquipmentSlots, as: :all
 
   @doc """
   Returns true if the given slot is valid.
   """
-  def valid_slot?(slot), do: slot in @slots
+  defdelegate valid_slot?(slot), to: EquipmentSlots, as: :valid?
 
   @doc """
   Checks if a character meets the requirements to equip this item.

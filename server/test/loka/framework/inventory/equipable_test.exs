@@ -90,7 +90,7 @@ defmodule Loka.Framework.Inventory.EquipableTest do
     test "returns all valid LegendMUD-style equipment slots" do
       slots = Equipable.slots()
 
-      # Should include all 15 LegendMUD-style slots
+      # Should include all 16 LegendMUD-style slots
       assert :head in slots
       assert :neck in slots
       assert :torso in slots
@@ -102,12 +102,13 @@ defmodule Loka.Framework.Inventory.EquipableTest do
       assert :feet in slots
       assert :held in slots
       assert :wielded in slots
+      assert :light in slots
       assert :finger_left in slots
       assert :finger_right in slots
       assert :wrist_left in slots
       assert :wrist_right in slots
 
-      assert length(slots) == 15
+      assert length(slots) == 16
     end
   end
 

@@ -23,11 +23,12 @@ defmodule Loka.Engine.Schema.EntitySchema do
 
   alias Loka.Engine.Schema.EntityAttribute
   alias Loka.Engine.Entity
+  alias Loka.Engine.Constants.EntityTypes
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
-  @entity_types [:room, :character, :npc, :item, :exit]
+  @entity_types EntityTypes.all()
 
   schema "entities" do
     field :type, Ecto.Enum, values: @entity_types

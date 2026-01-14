@@ -46,6 +46,7 @@ defmodule Loka.Framework.EquipmentTest do
         "feet" => nil,
         "held" => nil,
         "wielded" => nil,
+        "light" => nil,
         "finger_left" => nil,
         "finger_right" => nil,
         "wrist_left" => nil,
@@ -65,12 +66,13 @@ defmodule Loka.Framework.EquipmentTest do
     test "returns all valid LegendMUD-style equipment slots" do
       slots = Equipment.slots()
 
-      # Should include all 15 LegendMUD-style slots
+      # Should include all 16 LegendMUD-style slots
       assert :head in slots
       assert :torso in slots
       assert :wielded in slots
       assert :held in slots
-      assert length(slots) == 15
+      assert :light in slots
+      assert length(slots) == 16
     end
   end
 

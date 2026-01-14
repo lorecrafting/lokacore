@@ -5,24 +5,7 @@ defmodule Loka.Framework.Equipment do
   Handles equipping, unequipping, and calculating stat bonuses from equipment.
   Works with the PlayerGameState and Inventory system.
 
-  ## LegendMUD Equipment Slots
-
-  - `:head` - worn on head (helmets, hats)
-  - `:neck` - worn around neck (necklaces, scarves)
-  - `:torso` - worn on torso (shirts, robes, armor)
-  - `:about` - worn about body (cloaks, capes)
-  - `:arms` - worn on arms (bracers, sleeves)
-  - `:hands` - worn on hands (gloves, gauntlets)
-  - `:waist` - worn around waist (belts, sashes)
-  - `:legs` - worn on legs (pants, greaves)
-  - `:feet` - worn on feet (boots, shoes)
-  - `:held` - held in hand (torches, shields)
-  - `:wielded` - wielded weapon (swords, staves)
-  - `:light` - light source (lamps, candles)
-  - `:finger_left` - worn on left finger (rings)
-  - `:finger_right` - worn on right finger (rings)
-  - `:wrist_left` - worn on left wrist (bracelets)
-  - `:wrist_right` - worn on right wrist (bracelets)
+  See `Loka.Engine.Constants.EquipmentSlots` for slot definitions.
 
   ## Stat Calculations
 
@@ -54,30 +37,15 @@ defmodule Loka.Framework.Equipment do
   alias Loka.Framework.Player.GameState
   alias Loka.Framework.Inventory
   alias Loka.Framework.Inventory.Equipable
+  alias Loka.Engine.Constants.EquipmentSlots
 
-  @slots [
-    :head,
-    :neck,
-    :torso,
-    :about,
-    :arms,
-    :hands,
-    :waist,
-    :legs,
-    :feet,
-    :held,
-    :wielded,
-    :light,
-    :finger_left,
-    :finger_right,
-    :wrist_left,
-    :wrist_right
-  ]
+  # For use in guards (must be compile-time constant)
+  @slots EquipmentSlots.all()
 
   @doc """
   Returns the list of valid equipment slots.
   """
-  def slots, do: @slots
+  defdelegate slots, to: EquipmentSlots, as: :all
 
   @doc """
   Equips an item from the player's inventory to the appropriate slot.

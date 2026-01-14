@@ -3,7 +3,7 @@
 // =============================================================================
 //
 // Generated from: server/lib/loka/channel/events.ex
-// Generated at: 2026-01-13T21:20:11.763481Z
+// Generated at: 2026-01-13T22:37:07.227339Z
 //
 // To regenerate: cd server && mix loka.gen.channel_types
 //

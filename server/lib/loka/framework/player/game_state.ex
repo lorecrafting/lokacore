@@ -23,29 +23,14 @@ defmodule Loka.Framework.Player.GameState do
   import Ecto.Query
 
   alias Loka.Repo
+  alias Loka.Engine.Constants.EquipmentSlots
   alias __MODULE__
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
   @default_inventory []
-  @default_equipment %{
-    head: nil,
-    neck: nil,
-    torso: nil,
-    about: nil,
-    arms: nil,
-    hands: nil,
-    waist: nil,
-    legs: nil,
-    feet: nil,
-    held: nil,
-    wielded: nil,
-    finger_left: nil,
-    finger_right: nil,
-    wrist_left: nil,
-    wrist_right: nil
-  }
+  @default_equipment EquipmentSlots.default_equipment()
   @default_quests %{}
   @default_flags %{}
   @default_stats %{str: 10, dex: 10, sta: 10, level: 1, xp: 0, skill_points: 0}
@@ -406,25 +391,7 @@ defmodule Loka.Framework.Player.GameState do
   @doc """
   Gets the equipment slot mappings for LegendMUD-style slots.
   """
-  def equipment_slots do
-    [
-      {:head, "Head", "worn on head"},
-      {:neck, "Neck", "worn around neck"},
-      {:torso, "Torso", "worn on torso"},
-      {:about, "About", "worn about body"},
-      {:arms, "Arms", "worn on arms"},
-      {:hands, "Hands", "worn on hands"},
-      {:waist, "Waist", "worn around waist"},
-      {:legs, "Legs", "worn on legs"},
-      {:feet, "Feet", "worn on feet"},
-      {:held, "Held", "held in hand"},
-      {:wielded, "Wielded", "wielded"},
-      {:finger_left, "Left Finger", "worn on left finger"},
-      {:finger_right, "Right Finger", "worn on right finger"},
-      {:wrist_left, "Left Wrist", "worn on left wrist"},
-      {:wrist_right, "Right Wrist", "worn on right wrist"}
-    ]
-  end
+  defdelegate equipment_slots, to: EquipmentSlots, as: :slot_metadata
 
   @doc """
   Gets the game state for a player.

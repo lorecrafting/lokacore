@@ -35,7 +35,7 @@ defmodule Loka.Framework.Resources.Resource do
 
   alias Loka.Utils.MapHelpers
 
-  @type regen_condition :: :always | :out_of_combat | :resting | :never
+  @type regen_condition :: :always | :out_of_combat | :resting | :never | :in_combat
 
   @type t :: %__MODULE__{
           key: String.t(),
