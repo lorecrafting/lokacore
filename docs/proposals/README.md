@@ -15,6 +15,7 @@ All documents here describe future state, not current system behavior. Check the
 
 | Proposal | Issue | Summary |
 |----------|-------|---------|
+| [Operations TUI Tool](ops-tui-tool.md) | - | Terminal UI for production operations over SSH |
 | [Decentralized Autonomous Worlds](decentralized-autonomous-worlds.md) | - | IPFS-based always-on worlds with smart contract patterns |
 | [Builder Content Layer](builder-content-layer.md) | `lokacore-12r` | DB storage for non-technical builder content |
 | [Expo Mobile App](expo-mobile-app.md) | - | React Native mobile client |
