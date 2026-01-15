@@ -22,6 +22,7 @@ All documents here describe future state, not current system behavior. Check the
 | [Community Relay Infrastructure](community-relay-infrastructure.md) | - | P2P relay for community features |
 | [Encrypted P2P Communication](encrypted-p2p-communication.md) | - | End-to-end encrypted messaging |
 | [TCM Herb System Revamp](tcm-herb-system-revamp.md) | - | Redesign of herbalism/alchemy system |
+| [Collaborative Planet Economy](collaborative-planet-economy.md) | - | Civic energy, planet lifecycle, and wellness integration |
 
 ## Writing Proposals
 
