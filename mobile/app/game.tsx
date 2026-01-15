@@ -20,6 +20,8 @@ import { CombatOverlay } from '../src/components/CombatOverlay';
 import { BardoOverlay } from '../src/components/BardoOverlay';
 import { PageContainer } from '../src/components/PageContainer';
 import { EnvironmentProvider } from '../src/components/EnvironmentContext';
+import { DesignVariantsProvider, useDesignVariants } from '../src/contexts/DesignVariantsContext';
+import { DesignVariantPicker } from '../src/components/DesignVariantPicker';
 import { useSound, useAmbientSound } from '../src/audio';
 import { colors, fonts, spacing, getPhaseColors } from '../src/theme';
 import { API_BASE_URL } from '../src/config';
@@ -217,8 +219,11 @@ export default function GameScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: phaseColors.background }]} edges={['top']}>
       <StatusBar style={statusBarStyle} />
+      <DesignVariantsProvider>
       <View ref={setGameViewRef} style={styles.screenshotContainer} collapsable={false}>
         <EnvironmentProvider visualState={gameState.visual_state}>
+          {/* Design Variant Picker Modal */}
+          <DesignVariantPicker />
           <PageContainer>
           {/* Combat Overlay - shown at top during combat */}
           {combatState?.active && (
@@ -311,6 +316,7 @@ export default function GameScreen() {
           )}
         </EnvironmentProvider>
       </View>
+      </DesignVariantsProvider>
     </SafeAreaView>
   );
 }

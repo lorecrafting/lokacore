@@ -16,6 +16,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PageContainer } from './PageContainer';
 import { useEnvironment } from './EnvironmentContext';
+import { useDesignVariants, BOTTOMBAR_VARIANT_LABELS } from '../contexts/DesignVariantsContext';
 import { colors, fonts, spacing } from '../theme';
 import { gameHaptics } from '../utils/haptics';
 import type {
@@ -465,8 +466,28 @@ function SocialsTab({
 }
 
 function SettingsTab({ onLogout }: { onLogout: () => void }) {
+  const { bottomBarVariant, showPicker } = useDesignVariants();
+
+  const handleOpenLayoutPicker = useCallback(() => {
+    gameHaptics.menuSelect();
+    showPicker();
+  }, [showPicker]);
+
   return (
     <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
+      {/* Layout Settings */}
+      <Text style={styles.sectionTitle}>Appearance</Text>
+      <TouchableOpacity onPress={handleOpenLayoutPicker}>
+        <View style={styles.settingRow}>
+          <Text style={styles.link}>Bottom Bar Layout</Text>
+          <Text style={styles.settingValue}>{BOTTOMBAR_VARIANT_LABELS[bottomBarVariant]}</Text>
+        </View>
+      </TouchableOpacity>
+
+      <Text style={styles.divider}>· · ·</Text>
+
+      {/* Account */}
+      <Text style={styles.sectionTitle}>Account</Text>
       <TouchableOpacity onPress={onLogout}>
         <Text style={styles.link}>Log Out</Text>
       </TouchableOpacity>
@@ -741,6 +762,27 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginVertical: spacing.md,
     letterSpacing: 4,
+  },
+  sectionTitle: {
+    fontFamily: fonts.serif,
+    fontSize: 14,
+    color: colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: spacing.sm,
+    marginTop: spacing.sm,
+  },
+  settingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.xs,
+  },
+  settingValue: {
+    fontFamily: fonts.serif,
+    fontSize: 14,
+    color: colors.textMuted,
+    fontStyle: 'italic',
   },
   attributeRow: {
     flexDirection: 'row',
