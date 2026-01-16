@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -10,6 +10,55 @@ import ReactFlow, {
   Position,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
+
+// ============================================================================
+// Validation Utilities
+// ============================================================================
+
+const validateQuest = (nodes, questKey) => {
+  const errors = [];
+  const warnings = [];
+
+  // Check quest key
+  if (!questKey || questKey.trim() === '') {
+    errors.push('Quest key is required');
+  } else if (!/^[a-z][a-z0-9_]*$/.test(questKey)) {
+    errors.push('Quest key must be snake_case (lowercase, underscores)');
+  }
+
+  // Check start node
+  const startNode = nodes.find(n => n.type === 'startNode');
+  if (startNode) {
+    if (!startNode.data.questName) {
+      errors.push('Quest name is required');
+    }
+    if (!startNode.data.giverKey) {
+      warnings.push('No giver NPC specified');
+    }
+  }
+
+  // Check objectives
+  const objectiveNodes = nodes.filter(n => n.type === 'objectiveNode');
+  if (objectiveNodes.length === 0) {
+    errors.push('Quest must have at least one objective');
+  }
+  objectiveNodes.forEach((node, idx) => {
+    if (!node.data.target) {
+      errors.push(`Objective ${idx + 1}: target is required`);
+    }
+    if (!node.data.description) {
+      warnings.push(`Objective ${idx + 1}: description is recommended`);
+    }
+  });
+
+  // Check end node
+  const endNode = nodes.find(n => n.type === 'endNode');
+  if (!endNode) {
+    warnings.push('No end node - quest will not have a completion point');
+  }
+
+  return { errors, warnings };
+};
 
 // ============================================================================
 // Custom Node Components
@@ -216,6 +265,95 @@ const EndNode = ({ data }) => {
 };
 
 // ============================================================================
+// Validation Panel Component
+// ============================================================================
+
+const ValidationPanel = ({ errors, warnings }) => {
+  if (errors.length === 0 && warnings.length === 0) {
+    return (
+      <div className="quest-validation-panel valid">
+        <span className="validation-icon">✓</span>
+        <span>Quest is valid</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="quest-validation-panel">
+      {errors.length > 0 && (
+        <div className="validation-errors">
+          {errors.map((err, i) => (
+            <div key={`e-${i}`} className="validation-error">
+              <span className="validation-icon">✗</span>
+              {err}
+            </div>
+          ))}
+        </div>
+      )}
+      {warnings.length > 0 && (
+        <div className="validation-warnings">
+          {warnings.map((warn, i) => (
+            <div key={`w-${i}`} className="validation-warning">
+              <span className="validation-icon">⚠</span>
+              {warn}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ============================================================================
+// Prerequisites Panel Component
+// ============================================================================
+
+const PrerequisitesPanel = ({ prerequisites, onAdd, onRemove, onChange }) => {
+  return (
+    <div className="quest-prerequisites-panel">
+      <div className="panel-header">
+        <h4>Prerequisites</h4>
+        <button onClick={onAdd} className="btn-sm btn-primary">+ Add</button>
+      </div>
+      {prerequisites.length === 0 ? (
+        <div className="prerequisites-empty">No prerequisites</div>
+      ) : (
+        <div className="prerequisites-list">
+          {prerequisites.map((prereq, idx) => (
+            <div key={idx} className="prerequisite-item">
+              <select
+                value={prereq.type || 'quest'}
+                onChange={(e) => onChange(idx, 'type', e.target.value)}
+                className="input-sm"
+              >
+                <option value="quest">Complete Quest</option>
+                <option value="level">Minimum Level</option>
+                <option value="item">Has Item</option>
+                <option value="flag">Has Flag</option>
+              </select>
+              <input
+                type={prereq.type === 'level' ? 'number' : 'text'}
+                value={prereq.value || ''}
+                onChange={(e) => onChange(idx, 'value', prereq.type === 'level' ? parseInt(e.target.value) : e.target.value)}
+                className="input-sm"
+                placeholder={prereq.type === 'level' ? '1' : 'key'}
+              />
+              <button
+                onClick={() => onRemove(idx)}
+                className="btn-sm btn-danger"
+                title="Remove"
+              >
+                ✗
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ============================================================================
 // Main QuestEditor Component
 // ============================================================================
 
@@ -247,9 +385,33 @@ export default function QuestEditor({ onSave, onCancel, initialData }) {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [questKey, setQuestKey] = useState(initialData?.key || '');
+  const [questDescription, setQuestDescription] = useState(initialData?.description || '');
+  const [prerequisites, setPrerequisites] = useState(initialData?.prerequisites || []);
+  const [levelRange, setLevelRange] = useState(initialData?.level_range || { min: 1, max: 99 });
   const [nodeIdCounter, setNodeIdCounter] = useState(1);
+  const [validation, setValidation] = useState({ errors: [], warnings: [] });
 
   const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
+
+  // Run validation whenever nodes or questKey changes
+  useEffect(() => {
+    setValidation(validateQuest(nodes, questKey));
+  }, [nodes, questKey]);
+
+  // Prerequisites handlers
+  const addPrerequisite = useCallback(() => {
+    setPrerequisites(prev => [...prev, { type: 'quest', value: '' }]);
+  }, []);
+
+  const removePrerequisite = useCallback((idx) => {
+    setPrerequisites(prev => prev.filter((_, i) => i !== idx));
+  }, []);
+
+  const updatePrerequisite = useCallback((idx, field, value) => {
+    setPrerequisites(prev => prev.map((p, i) =>
+      i === idx ? { ...p, [field]: value } : p
+    ));
+  }, []);
 
   // Update node data
   const updateNodeData = useCallback((nodeId, field, value) => {
@@ -295,6 +457,13 @@ export default function QuestEditor({ onSave, onCancel, initialData }) {
   }, [nodeIdCounter, setNodes]);
 
   const handleSave = useCallback(() => {
+    // Run final validation
+    const finalValidation = validateQuest(nodes, questKey);
+    if (finalValidation.errors.length > 0) {
+      setValidation(finalValidation);
+      return;
+    }
+
     // Extract quest data from nodes
     const startNode = nodes.find((n) => n.type === 'startNode');
     const objectiveNodes = nodes.filter((n) => n.type === 'objectiveNode');
@@ -320,17 +489,23 @@ export default function QuestEditor({ onSave, onCancel, initialData }) {
       return acc;
     }, {});
 
+    // Filter valid prerequisites
+    const validPrerequisites = prerequisites.filter(p => p.value && p.value.toString().trim() !== '');
+
     const questData = {
       key: questKey,
       name: startNode?.data.questName || 'New Quest',
+      description: questDescription,
       quest_type: startNode?.data.questType || 'side',
       giver_key: startNode?.data.giverKey || '',
       objectives,
       rewards,
+      prerequisites: validPrerequisites,
+      level_range: levelRange,
     };
 
     onSave(questData);
-  }, [nodes, questKey, onSave]);
+  }, [nodes, questKey, questDescription, prerequisites, levelRange, onSave]);
 
   return (
     <div className="quest-editor-container">
@@ -339,10 +514,10 @@ export default function QuestEditor({ onSave, onCancel, initialData }) {
           <input
             type="text"
             value={questKey}
-            onChange={(e) => setQuestKey(e.target.value)}
+            onChange={(e) => setQuestKey(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '_'))}
             placeholder="quest_key"
             className="input-sm"
-            style={{ width: '200px', marginRight: '12px' }}
+            style={{ width: '180px', marginRight: '8px' }}
           />
           <button onClick={() => addNode('objectiveNode')} className="btn-sm btn-primary">
             + Objective
@@ -361,26 +536,79 @@ export default function QuestEditor({ onSave, onCancel, initialData }) {
           <button onClick={onCancel} className="btn-sm btn-secondary">
             Cancel
           </button>
-          <button onClick={handleSave} className="btn-sm btn-success">
+          <button
+            onClick={handleSave}
+            className="btn-sm btn-success"
+            disabled={validation.errors.length > 0}
+          >
             Save Quest
           </button>
         </div>
       </div>
 
-      <div className="quest-editor-canvas">
-        <ReactFlow
-          nodes={nodesWithHandlers}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          nodeTypes={nodeTypes}
-          fitView
-        >
-          <Controls />
-          <MiniMap />
-          <Background variant="dots" gap={12} size={1} />
-        </ReactFlow>
+      <div className="quest-editor-main">
+        <div className="quest-editor-canvas">
+          <ReactFlow
+            nodes={nodesWithHandlers}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            nodeTypes={nodeTypes}
+            fitView
+          >
+            <Controls />
+            <MiniMap />
+            <Background variant="dots" gap={12} size={1} />
+          </ReactFlow>
+        </div>
+
+        <div className="quest-editor-sidebar">
+          <ValidationPanel errors={validation.errors} warnings={validation.warnings} />
+
+          <div className="quest-details-panel">
+            <h4>Quest Details</h4>
+            <div className="form-group">
+              <label>Description</label>
+              <textarea
+                value={questDescription}
+                onChange={(e) => setQuestDescription(e.target.value)}
+                placeholder="Quest description shown to player..."
+                className="textarea"
+                rows={3}
+              />
+            </div>
+            <div className="form-group">
+              <label>Level Range</label>
+              <div className="level-range-inputs">
+                <input
+                  type="number"
+                  value={levelRange.min}
+                  onChange={(e) => setLevelRange(prev => ({ ...prev, min: parseInt(e.target.value) || 1 }))}
+                  className="input-sm"
+                  min="1"
+                  placeholder="Min"
+                />
+                <span>to</span>
+                <input
+                  type="number"
+                  value={levelRange.max}
+                  onChange={(e) => setLevelRange(prev => ({ ...prev, max: parseInt(e.target.value) || 99 }))}
+                  className="input-sm"
+                  min="1"
+                  placeholder="Max"
+                />
+              </div>
+            </div>
+          </div>
+
+          <PrerequisitesPanel
+            prerequisites={prerequisites}
+            onAdd={addPrerequisite}
+            onRemove={removePrerequisite}
+            onChange={updatePrerequisite}
+          />
+        </div>
       </div>
     </div>
   );

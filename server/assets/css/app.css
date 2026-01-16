@@ -3598,6 +3598,148 @@ body:has(.ebook-page) {
   padding: 6px;
 }
 
+/* Quest Editor Layout */
+.quest-editor-main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.quest-editor-canvas {
+  flex: 1;
+  min-width: 0;
+}
+
+.quest-editor-sidebar {
+  width: 280px;
+  background: #2a2a2a;
+  border-left: 1px solid #3d3d3d;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* Quest Validation Panel */
+.quest-validation-panel {
+  padding: 12px;
+  background: #252525;
+  border-bottom: 1px solid #3d3d3d;
+}
+
+.quest-validation-panel.valid {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #4ade80;
+  font-size: 0.85rem;
+}
+
+.quest-validation-panel .validation-errors,
+.quest-validation-panel .validation-warnings {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.quest-validation-panel .validation-error,
+.quest-validation-panel .validation-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 0.8rem;
+  margin-bottom: 2px;
+}
+
+.quest-validation-panel .validation-error {
+  color: #f87171;
+}
+
+.quest-validation-panel .validation-warning {
+  color: #fbbf24;
+}
+
+/* Quest Details Panel */
+.quest-details-panel {
+  padding: 12px;
+  border-bottom: 1px solid #3d3d3d;
+}
+
+.quest-details-panel h4 {
+  font-size: 0.85rem;
+  color: #909090;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.level-range-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.level-range-inputs span {
+  color: #707070;
+  font-size: 0.8rem;
+}
+
+.level-range-inputs .input-sm {
+  width: 60px;
+}
+
+/* Quest Prerequisites Panel */
+.quest-prerequisites-panel {
+  padding: 12px;
+}
+
+.quest-prerequisites-panel .panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.quest-prerequisites-panel h4 {
+  font-size: 0.85rem;
+  color: #909090;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.prerequisites-empty {
+  color: #606060;
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 12px;
+}
+
+.prerequisites-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.prerequisite-item {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.prerequisite-item select {
+  width: 110px;
+}
+
+.prerequisite-item input {
+  flex: 1;
+  min-width: 0;
+}
+
+.prerequisite-item .btn-sm {
+  padding: 4px 8px;
+  flex-shrink: 0;
+}
+
 /* ============================================================================
    Cutscene Timeline Styles
    ============================================================================ */
