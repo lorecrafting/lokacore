@@ -1,8 +1,8 @@
 # Loka World Builder - Master Design Document
 
 **Status**: Planning
-**Version**: 1.0
-**Last Updated**: 2026-01-07
+**Version**: 2.0
+**Last Updated**: 2026-01-15
 
 ---
 
@@ -51,7 +51,7 @@ Git (auto-commit)
 | **UI Components** | DaisyUI | Matches existing admin UI |
 | **State Bridge** | LiveView PubSub | Sync LiveView ↔ React |
 | **Layout** | D3-force-3d | Auto-layout algorithms |
-| **LLM** | Anthropic Claude API | Content generation (streaming) |
+| **LLM** | Claude Code OAuth (primary) / API Key (secondary) | Content generation (streaming) |
 | **Storage** | YAML + SQLite | Your existing system |
 | **Validation** | Existing validators | quest_validator.ex, etc. |
 
@@ -60,14 +60,15 @@ Git (auto-commit)
 ```
 server/
 ├── lib/loka_web/live/admin_live/
-│   ├── world_builder.ex              # Main LiveView (replaces world_designer_tab.ex)
+│   ├── world_builder_live.ex         # Main LiveView
 │   ├── world_builder/
-│   │   ├── hierarchy_panel.ex        # Tree view (zones, rooms, NPCs, quests)
-│   │   ├── inspector_panel.ex        # Property editor
 │   │   ├── toolbar.ex                # Mode buttons (Edit, View, Test)
-│   │   ├── console_panel.ex          # Validation output
-│   │   ├── llm_chat.ex               # Claude chat interface
-│   │   └── canvas_bridge.ex          # LiveView → React communication
+│   │   ├── hierarchy_panel.ex        # Tree view (zones, rooms, NPCs, quests)
+│   │   ├── viewport_container.ex     # React 3D viewport bridge
+│   │   ├── inspector_panel.ex        # Property editor
+│   │   ├── chat_panel.ex             # Claude chat interface
+│   │   ├── console_panel.ex          # Validation output (collapsible inline)
+│   │   └── input_validator.ex        # Form validation
 │
 ├── assets/js/world_builder/
 │   ├── WorldBuilderApp.jsx           # React root
@@ -87,864 +88,1264 @@ server/
 │       ├── ExitCreator.js            # Drag to connect
 │       └── TemplateInstantiator.js   # Drag template onto canvas
 │
-└── lib/loka/admin/world_builder/
-    ├── llm_assistant.ex              # Claude API integration
+└── lib/loka/world_builder/
+    ├── room_manager.ex               # Room CRUD
+    ├── entity_manager.ex             # NPC/Item CRUD
+    ├── quest_manager.ex              # Quest CRUD
+    ├── cutscene_manager.ex           # Cutscene CRUD
     ├── template_manager.ex           # Load/save templates
-    ├── layout_engine.ex              # Auto-layout algorithms
-    └── validator_runner.ex           # Run all validators
+    ├── layout_manager.ex             # Auto-layout algorithms
+    ├── batch_operations.ex           # Bulk operations
+    ├── validation_manager.ex         # Run all validators
+    └── llm/
+        ├── auth_manager.ex           # OAuth + API key management
+        ├── claude_client.ex          # Claude API integration
+        ├── context_builder.ex        # Build system prompt context
+        ├── conversation_manager.ex   # Persist chat history
+        ├── tool_executor.ex          # Execute tool calls safely
+        ├── sandbox.ex                # Sandboxed tool execution
+        └── style_presets.ex          # Style prompt templates
 ```
 
 ---
 
 ## User Interface Design
 
-### Unity-Style Docking Layout
+### Four-Column Layout with Collapsible Panels
+
+All panels are collapsible to maximize workspace flexibility.
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│ TOOLBAR (48px fixed)                                         │
-│ [🏗️ Edit] [🔍 View] [🧪 Test] │ Search... │ [Filters ▼]     │
-├──────────┬──────────────────────────────────────┬────────────┤
-│          │                                      │            │
-│ HIERARCHY│         3D VIEWPORT                  │ INSPECTOR  │
-│ (250px)  │                                      │ (320px)    │
-│          │   [Rooms as cubes]                   │            │
-│ 🌍 Zones │   [Exits as lines]                   │ Selected:  │
-│  └ Town  │   [NPCs as icons]                    │  tavern_bar│
-│    └Bar  │   [Items as labels]                  │            │
-│    └Shop │                                      │ Name: [__] │
-│  └Forest│   [Camera controls]                  │ Desc: [__] │
-│          │                                      │ Exits:     │
-│ 📜 Quests│                                      │  north →   │
-│  └Act1   │                                      │            │
-│          │                                      │ [YAML ▼]   │
-│          │                                      │            │
-├──────────┴──────────────────────────────────────┴────────────┤
-│ CONSOLE / VALIDATION (200px, collapsible)                    │
-│ ⚠️ 3 warnings │ ✓ 0 errors │ [Run Validation]                │
-│ • Room "tavern" missing description                          │
-│ • Exit "north" points to non-existent room                   │
-└──────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ TOOLBAR (48px fixed)                                                         │
+│ [🏗️ Edit] [🔍 View] [🧪 Test] │ 🔍 Search... │ [Zone ▼] │ [◀ ▶ ◀▶] panels  │
+├───────────┬────────────────────────────────────┬──────────┬───────────────────┤
+│ HIERARCHY │           3D VIEWPORT              │ INSPECTOR│ 💬 CLAUDE CHAT   │
+│ (200px)   │           (flex)                   │ (260px)  │ (320px)          │
+│ [◀ hide]  │                                    │ [hide ▶] │ [hide ▶]         │
+│           │                                    │          │                  │
+│ 🗂️ Zones  │    ┌─────┐   ┌─────┐               │ 📝 Room  │ ┌──────────────┐ │
+│  └ monastery    │room1│───│room2│               │ ────────│ │Context:      │ │
+│    └ temple │   └──┬──┘   └─────┘               │          │ │3 selected    │ │
+│    └ garden │      │                            │ Key:     │ │2 errors      │ │
+│           │    ┌──┴──┐                         │ [______] │ └──────────────┘ │
+│ 📜 Quests │    │room3│                         │          │                  │
+│  └ intro  │    └─────┘                         │ Name:    │ You:             │
+│           │                                    │ [______] │ Create a spooky  │
+│ 👥 NPCs   │                                    │          │ graveyard        │
+│ 📦 Items  │                                    │ Desc:    │                  │
+│ 🎬 Cutscenes                                   │ [______] │ Claude:          │
+│           │   [Cam] [Zoom] [Rotate] [2D/3D]    │ [______] │ I'll create 4    │
+│           │                                    │          │ rooms connected  │
+│ ─ ─ ─ ─ ─ │                                    │ Exits:   │ to forest_edge...│
+│ 🔍 filter │   ┌────────────────────────────┐   │ north →  │                  │
+│           │   │ ⚠️ 2 errors │ [Validate]   │   │ [+ Add]  │ [🔧 create_room] │
+│ [+ Create]│   └────────────────────────────┘   │          │ ✓ graveyard_gate │
+│           │   (Console inline, expand on click)│[Validate]│                  │
+│           │                                    │ [YAML ▼] │ [Type message...] │
+└───────────┴────────────────────────────────────┴──────────┴───────────────────┘
 ```
 
-### Hierarchy Panel (Left)
+### Panel States
 
-**Tree View**:
-```
-🌍 World
-├─ 🗺️ Zones (3)
-│  ├─ 🏘️ Village (12 rooms)
-│  │  ├─ 🏠 village_square
-│  │  ├─ 🍺 tavern_bar
-│  │  └─ 🛍️ general_store
-│  ├─ 🌲 Dark Forest (8 rooms)
-│  └─ 🏔️ Mountain Pass (5 rooms)
-├─ 📜 Quests (15)
-│  ├─ ⚠️ Broken quests (2)
-│  └─ ✓ Valid quests (13)
-├─ 👥 NPCs (45)
-│  ├─ 🟢 Quest Givers (8)
-│  └─ ⚔️ Enemies (37)
-├─ 📦 Items (123)
-└─ 🎬 Cutscenes (6)
-```
+| Panel | Default | Collapsed | Expanded |
+|-------|---------|-----------|----------|
+| **Hierarchy** | 200px | 40px (icons only) | 300px |
+| **Inspector** | 260px | 40px (icon only) | 400px |
+| **Chat** | 320px | 40px (icon only) | 500px |
+| **Console** | Inline (1 line) | Hidden | 200px overlay |
 
-**Actions**:
-- Click → Select (highlights in 3D)
-- Double-click → Edit
-- Right-click → Context menu (Clone, Delete, Properties)
-- Drag → Reorder or move to different parent
+### Keyboard Shortcuts for Panels
 
-### Inspector Panel (Right)
-
-**Context-Sensitive Properties**:
-
-When room selected:
-```
-┌─────────────────────────┐
-│ ROOM: tavern_bar        │
-├─────────────────────────┤
-│ Basic                   │
-│ Name: [Prancing Pony  ] │
-│ Type: [inn ▼]           │
-│ Tags: [safe, indoor]    │
-│                         │
-│ Description             │
-│ [Textarea with editor]  │
-│                         │
-│ Exits                   │
-│ ├─ north → square       │
-│ ├─ up → tavern_rooms    │
-│ [+ Add Exit]            │
-│                         │
-│ Contents                │
-│ NPCs:  [bartender]      │
-│ Items: [table, chair]   │
-│                         │
-│ Scripts                 │
-│ on_enter: [none ▼]      │
-│ on_look:  [ambient ▼]   │
-│                         │
-│ [Show YAML] [Validate]  │
-└─────────────────────────┘
-```
-
-### 3D Viewport (Center)
-
-**Visual Elements**:
-- **Rooms**: Cubes (color-coded by type)
-- **Exits**: Lines (solid=bidirectional, dashed=one-way)
-- **NPCs**: Icons above rooms
-- **Items**: Floating text labels
-- **Quests**: Purple dotted lines connecting rooms
-- **Validation**: Red glow=error, yellow=warning, green=valid
-
-**Interactions**:
-- Click → Select
-- Drag → Move room
-- Ctrl+Drag → Pan camera
-- Scroll → Zoom
-- Right-click → Context menu
-- Shift+Click → Add to selection
-
-**Floating Tools** (bottom-right):
-```
-[2D] [3D] │ [Grid ☑] [Snap ☑] │ [Reset View]
-```
-
-### Console Panel (Bottom)
-
-**Tabs**: `[Validation] [Logs] [LLM Chat]`
-
-**Validation Tab**:
-```
-Errors: 2    Warnings: 5    Info: 0
-
-❌ Quest "dragon_hunt" → NPC "dragon" not found
-❌ Room "secret_cave" unreachable from spawn
-⚠️ Room "tavern" description too short (15 chars)
-⚠️ NPC "merchant" has no items to sell
-⚠️ Item "legendary_sword" drop rate > 50% (too high)
-
-[Auto-Fix Safe Issues] [Export Report] [Run Full Validation]
-```
+| Key | Action |
+|-----|--------|
+| `1` | Toggle Hierarchy |
+| `2` | Toggle Inspector |
+| `3` | Toggle Chat |
+| `~` | Toggle Console |
+| `0` | Reset all panels |
 
 ---
 
-## Feature Tiers
+## LLM Integration: Claude Code OAuth
 
-### Tier 1: Essential Building Tools (Weeks 1-8) 🔥 CRITICAL
+### Authentication Architecture
 
-**Room CRUD**:
-- Create room (wizard or click canvas)
-- Edit all properties (inspector panel)
-- Delete with safety checks ("3 exits point here - redirect?")
-- Drag to reposition in 3D
-- Undo/redo stack (20 actions)
-
-**Exit Management**:
-- Visual exit creator (drag line between rooms)
-- Auto-connect mode (snap adjacent rooms)
-- Bidirectional toggle
-- Exit types: normal, locked, hidden, conditional
-
-**Multi-Select & Batch Operations**:
-- Box select, lasso select, filter select
-- Batch edit properties
-- Clone & offset
-- Delete multiple
-- Mirror/flip selection
-
-**Templates**:
-- Built-in room templates (tavern, shop, dungeon, boss room)
-- Zone templates (village, forest, dungeon)
-- Custom templates (save your own)
-- Drag template onto canvas to instantiate
-
-**Basic Validation**:
-- Real-time validation as you build
-- Visual indicators (green/yellow/red glow)
-- Error list in console
-- Click error → jump to problem entity
-
-### Tier 2: Power Features (Weeks 9-16) ⚡ HIGH VALUE
-
-**NPC/Item Building**:
-- NPC placement in 3D (drag onto room)
-- NPC templates (quest giver, merchant, enemy, boss)
-- Item placement and loot tables
-- Visual loot table editor (pie chart)
-
-**Quest Builder**:
-- Step-by-step quest wizard
-- Visual quest flow editor (node-based)
-- Quest templates (fetch, kill, escort, discovery)
-- Live quest simulation ("Can level 5 player complete?")
-
-**Cutscene Builder**:
-- Timeline editor (drag steps to reorder)
-- Sequence types: dialogue, narration, fade, choice, sound, animation
-- Trigger types: enter_room, quest_complete, talk_to
-- Effects: set_flag, give_item, teleport, start_quest
-- LLM: "Create a ghost encounter cutscene"
-
-**Auto-Layout Algorithms**:
-- Force-directed (organic spread)
-- Grid align (orthogonal)
-- Hierarchical (tree-like)
-- Circular/radial (hub-and-spoke)
-- Layered (by Z-axis for multi-level dungeons)
-
-**Zone Management**:
-- Zones as containers for rooms
-- Drag rooms between zones
-- Zone-level operations ("Set all rooms in zone to level 5-10")
-- Collapse/expand zones in hierarchy
-
-### Tier 3: LLM & Quality Assurance (Weeks 17-24) 🤖 SPEED BOOST
-
-**LLM Integration**:
-- Chat panel for natural language commands
-- Context awareness (current zone, nearby rooms)
-- Content generation:
-  - Single room: "Create a blacksmith shop"
-  - Room cluster: "Generate a 5-room haunted mansion"
-  - NPCs: "Make a grumpy dwarf merchant"
-  - Quests: "Create a 3-quest chain about saving the village"
-  - Cutscenes: "Ghost encounter with choices"
-  - Dialogue trees
-  - Scripts: "Trap that teleports the player"
-- Preview system (translucent blue, accept/reject)
-- Iterative refinement ("Make it harder", "More atmospheric")
-- Toggle LLM on/off (always optional)
-
-**Advanced Validation**:
-- Dependency graph analysis (detect circular deps)
-- Playability simulation (virtual player attempts quest)
-- Content quality checks (LLM-assisted grammar, lore consistency)
-- Semantic validation ("Dark zone with humorous description?")
-- Cross-entity validation (orphan detection, balance checks)
-- Exportable reports (share with team)
-
-**Visual Scripting** (Optional):
-- Node-based script editor (no code required)
-- Trigger nodes (on_enter, on_look, on_combat_start)
-- Condition nodes (has_quest, has_item, level >= X)
-- Action nodes (message, spawn_npc, give_item, teleport)
-- Compile to Elixir (sandboxed)
-
-### Tier 4: Live Ops (Future - NOT NOW) 🔵 LATER
-
-**Only implement after you have players!**
-
-- Real-time player monitoring (avatars in 3D view)
-- Performance analytics (heatmaps, bottlenecks)
-- Player management tools (inspect, teleport, kick)
-- Hot deployment pipeline (staging → production)
-- Admin action logging and audit trail
-
----
-
-## Content Types
-
-Your system already supports all these via TypedObject:
-
-| Type | Subtype | Storage | Builder Support |
-|------|---------|---------|-----------------|
-| **Entity** | `:room` | YAML | ✅ Full CRUD |
-| **Entity** | `:npc` | YAML | ✅ Full CRUD |
-| **Entity** | `:item` | YAML | ✅ Full CRUD |
-| **Entity** | `:exit` | YAML | ✅ Visual creator |
-| **Quest** | - | YAML | ✅ Wizard + visual flow |
-| **Dialogue** | - | YAML | ✅ Tree editor |
-| **Script** | - | Database | ✅ Code + visual editor |
-| **Zone** | - | YAML | ✅ Container management |
-| **Cutscene** | - | YAML | ✅ Timeline editor |
-
----
-
-## Validation System
-
-### Existing Validators (Already Built!)
-
-You have comprehensive validation:
-- `Loka.Testing.Content.QuestValidator`
-- `Loka.Testing.Content.CutsceneValidator`
-- `Loka.Testing.Content.DialogueValidator`
-- `Loka.Testing.Content.WorldValidator`
-- `Loka.Testing.Content.PrototypeLinter`
-- `Loka.Testing.Content.ReachabilityAnalyzer`
-
-**World Builder Integration**:
-```elixir
-# Run all validators
-{:ok, results} = Loka.Admin.WorldBuilder.ValidatorRunner.run_all()
-
-# results
-%{
-  rooms: %{errors: 2, warnings: 5},
-  quests: %{errors: 0, warnings: 3},
-  cutscenes: %{errors: 1, warnings: 0},
-  scripts: %{errors: 0, warnings: 2}
-}
-```
-
-Display in console panel with click-to-jump.
-
-### Real-Time Validation
-
-Validate as you build:
-- Room created → Instant check
-- Exit added → Verify both ends exist
-- Quest objective → Validate target exists
-- Script attached → Syntax + security check
-
-Visual feedback in 3D:
-- Green glow: Valid
-- Yellow glow: Warnings
-- Red glow: Errors (must fix)
-
----
-
-## LLM Integration: Tidewave-Style Embedded Claude
-
-### Architecture Pattern
-
-**Inspiration**: Tidewave, Cursor, Windsurf - Claude embedded directly in the UI with tool access.
-
-**NOT using**:
-- ❌ MCP (Model Context Protocol) - too complex
-- ❌ External CLI - requires context switching
-- ❌ Separate chat window - breaks flow
-
-**Using**:
-- ✅ Embedded chat panel in World Builder UI
-- ✅ Claude calls tools to modify world in real-time
-- ✅ Changes appear immediately in 3D viewport
-- ✅ All in browser, no terminal needed
-
-### System Architecture
+**Primary**: Claude Code OAuth (no API key required)
+**Secondary**: Direct Anthropic API Key (fallback)
 
 ```
-┌─────────────────────────────────────────────────────┐
-│ World Builder UI (Browser)                          │
-│  ┌──────────┬─────────────┬──────────┐              │
-│  │Hierarchy │ 3D Viewport │Inspector │              │
-│  │          │ [Selected:  │          │              │
-│  │          │  5 rooms]   │          │              │
-│  └──────────┴─────────────┴──────────┘              │
-│  ┌─────────────────────────────────────────┐        │
-│  │ 💬 Claude Chat Panel            [⚙️]    │        │
-│  │ ────────────────────────────────────    │        │
-│  │ You: Fix validation errors in these     │        │
-│  │      selected rooms                      │        │
-│  │                                          │        │
-│  │ Claude: I see 5 rooms with errors:      │        │
-│  │ • forest_path: missing exit              │ ◄──────┼── Anthropic API
-│  │ • goblin_camp: empty description         │        │   Streaming
-│  │                                          │        │
-│  │ [🔧 Calling: update_room(...)]           │        │
-│  │ ✓ Fixed forest_path                      │        │
-│  │ [🔧 Calling: update_room(...)]           │        │
-│  │ ✓ Fixed goblin_camp                      │        │
-│  └─────────────────────────────────────────┘        │
-└─────────────────────────────────────────────────────┘
-                      ↓
-       Rooms flash green in 3D as Claude fixes them
-       (real-time via Phoenix PubSub)
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     AUTHENTICATION FLOW                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  OPTION A: Claude Code OAuth (Primary - Recommended)                        │
+│  ─────────────────────────────────────────────────────                      │
+│                                                                             │
+│  User clicks "Connect with Claude" in World Builder                         │
+│      ↓                                                                      │
+│  Redirect to console.anthropic.com OAuth                                    │
+│      ↓                                                                      │
+│  User authorizes Loka World Builder                                         │
+│      ↓                                                                      │
+│  Callback with OAuth token                                                  │
+│      ↓                                                                      │
+│  Store token in user session (encrypted)                                    │
+│      ↓                                                                      │
+│  Use token for Claude API calls (user's quota)                              │
+│                                                                             │
+│  Benefits:                                                                  │
+│  • No server-side API key needed                                            │
+│  • Uses user's own Claude quota/billing                                     │
+│  • Simpler setup for users                                                  │
+│  • No cost to Loka server                                                   │
+│                                                                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  OPTION B: Server API Key (Secondary - Admin Only)                          │
+│  ─────────────────────────────────────────────────                          │
+│                                                                             │
+│  Admin configures ANTHROPIC_API_KEY in server env                           │
+│      ↓                                                                      │
+│  Server proxies all requests through its key                                │
+│      ↓                                                                      │
+│  Server tracks usage per user (rate limiting)                               │
+│                                                                             │
+│  Use cases:                                                                 │
+│  • Shared team environments                                                 │
+│  • Demo/trial accounts                                                      │
+│  • Offline/air-gapped deployments                                           │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Flow Diagram
-
-```
-User types message in chat panel
-    ↓
-Frontend: POST /api/world-builder/claude
-    ↓
-Backend: Build context from LiveView session
-    │ - Current selection (rooms/NPCs/items)
-    │ - Validation errors
-    │ - Zone context
-    │ - Existing keys (prevent duplicates)
-    ↓
-Backend: Call Anthropic API with tools
-    │ - Stream: true (real-time responses)
-    │ - Tools: update_room, create_room, create_npc, etc.
-    │ - System prompt includes context
-    ↓
-Claude generates response + tool calls
-    ↓
-Backend: Execute tool calls
-    │ - POST /api/world-builder/tools/update_room
-    │ - Validate changes
-    │ - Broadcast via PubSub
-    ↓
-Frontend: LiveView receives PubSub event
-    ↓
-3D Viewport: Room flashes green, updates in real-time
-    ↓
-Chat Panel: Shows "✓ Updated forest_path"
-```
-
-### Available Tools
-
-Claude has access to these tools (via Anthropic Tool Use):
+### OAuth Implementation
 
 ```elixir
-tools = [
-  %{
-    name: "update_room",
-    description: "Update room properties (name, description, exits, tags)",
-    input_schema: %{
-      type: "object",
-      properties: %{
-        room_key: %{type: "string"},
-        changes: %{type: "object"}  # name, description, exits, etc.
-      }
-    }
-  },
+# lib/loka/world_builder/llm/auth_manager.ex
+defmodule Loka.WorldBuilder.LLM.AuthManager do
+  @moduledoc """
+  Manages Claude authentication via OAuth or API key.
+
+  Priority:
+  1. User's OAuth token (if connected)
+  2. Server's API key (if configured)
+  3. None (LLM features disabled)
+  """
+
+  @oauth_client_id "loka-world-builder"
+  @oauth_scopes ["messages:write", "messages:read"]
+
+  def get_auth(user) do
+    cond do
+      oauth_token = get_oauth_token(user) ->
+        {:oauth, oauth_token}
+
+      api_key = System.get_env("ANTHROPIC_API_KEY") ->
+        {:api_key, api_key}
+
+      true ->
+        {:error, :no_auth}
+    end
+  end
+
+  def oauth_authorize_url(user_id) do
+    state = generate_state(user_id)
+
+    "https://console.anthropic.com/oauth/authorize?" <>
+    URI.encode_query(%{
+      client_id: @oauth_client_id,
+      redirect_uri: oauth_callback_url(),
+      scope: Enum.join(@oauth_scopes, " "),
+      state: state,
+      response_type: "code"
+    })
+  end
+
+  def handle_oauth_callback(code, state) do
+    with {:ok, user_id} <- verify_state(state),
+         {:ok, token} <- exchange_code_for_token(code) do
+      store_oauth_token(user_id, token)
+      {:ok, user_id}
+    end
+  end
+end
+```
+
+### Sandboxing & API Surface Area
+
+The LLM has access to a **strictly limited set of tools**. All tool execution is sandboxed.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     SANDBOX ARCHITECTURE                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  Claude's Tool Calls                                                        │
+│       ↓                                                                     │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ SANDBOX LAYER (tool_executor.ex)                                     │   │
+│  │                                                                      │   │
+│  │ 1. ALLOWLIST CHECK                                                   │   │
+│  │    Only these tools are permitted:                                   │   │
+│  │    ✓ create_room, update_room, delete_room                          │   │
+│  │    ✓ create_npc, update_npc, delete_npc                             │   │
+│  │    ✓ create_item, update_item, delete_item                          │   │
+│  │    ✓ create_quest, update_quest, delete_quest                       │   │
+│  │    ✓ create_cutscene, update_cutscene, delete_cutscene              │   │
+│  │    ✓ create_dialogue, update_dialogue, delete_dialogue              │   │
+│  │    ✓ add_exit, remove_exit                                          │   │
+│  │    ✓ run_validation                                                 │   │
+│  │    ✓ list_rooms, list_npcs, list_items, list_quests                 │   │
+│  │    ✓ get_room, get_npc, get_item, get_quest                         │   │
+│  │    ✗ NOTHING ELSE                                                    │   │
+│  │                                                                      │   │
+│  │ 2. PARAMETER VALIDATION                                              │   │
+│  │    • Keys must match ^[a-z][a-z0-9_]*$ (safe identifiers)           │   │
+│  │    • Coordinates must be integers in range -1000..1000               │   │
+│  │    • Descriptions max 10,000 characters                              │   │
+│  │    • No path traversal in any field                                  │   │
+│  │    • No code injection in script fields                              │   │
+│  │                                                                      │   │
+│  │ 3. RATE LIMITING                                                     │   │
+│  │    • Max 100 tool calls per conversation                             │   │
+│  │    • Max 50 creates per hour                                         │   │
+│  │    • Max 200 updates per hour                                        │   │
+│  │    • Max 20 deletes per hour                                         │   │
+│  │                                                                      │   │
+│  │ 4. AUDIT LOGGING                                                     │   │
+│  │    • Every tool call logged with user, timestamp, params             │   │
+│  │    • Failures logged with reason                                     │   │
+│  │    • Anomaly detection (unusual patterns)                            │   │
+│  │                                                                      │   │
+│  │ 5. ROLLBACK CAPABILITY                                               │   │
+│  │    • All changes within conversation can be rolled back              │   │
+│  │    • "Undo all" button in chat panel                                 │   │
+│  │                                                                      │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│       ↓                                                                     │
+│  World Builder Managers (RoomManager, EntityManager, etc.)                  │
+│       ↓                                                                     │
+│  TypedObject / YAML Files                                                   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### What Claude CAN and CANNOT Do
+
+| CAN DO | CANNOT DO |
+|--------|-----------|
+| Create/edit/delete rooms, NPCs, items, quests, cutscenes, dialogues | Execute arbitrary Elixir code |
+| Connect rooms with exits | Access database directly |
+| Run validation checks | Read/write arbitrary files |
+| Query existing content | Access player data |
+| Apply style presets | Modify game engine code |
+| Generate descriptions | Access network/external APIs |
+| Suggest fixes for errors | Delete system files |
+| Bulk generate content | Bypass rate limits |
+
+### Tool Definitions
+
+```elixir
+@tools [
+  # ─────────────────────────────────────────────────────────────────────────
+  # ROOM TOOLS
+  # ─────────────────────────────────────────────────────────────────────────
   %{
     name: "create_room",
-    description: "Create a new room in the current zone",
+    description: "Create a new room in the world",
     input_schema: %{
       type: "object",
+      required: ["key", "name"],
       properties: %{
-        key: %{type: "string"},
-        name: %{type: "string"},
-        description: %{type: "string"},
-        coordinates: %{type: "object"}  # {x, y, z}
+        key: %{type: "string", pattern: "^[a-z][a-z0-9_]*$", description: "Unique identifier"},
+        name: %{type: "string", maxLength: 100, description: "Display name"},
+        description: %{type: "string", maxLength: 10000, description: "Room description"},
+        x: %{type: "integer", minimum: -1000, maximum: 1000, description: "X coordinate"},
+        y: %{type: "integer", minimum: -1000, maximum: 1000, description: "Y coordinate"},
+        z: %{type: "integer", minimum: -1000, maximum: 1000, description: "Z coordinate (level)"},
+        zone: %{type: "string", description: "Zone this room belongs to"},
+        tags: %{type: "array", items: %{type: "string"}, description: "Room tags"}
       }
     }
   },
   %{
-    name: "create_npc",
-    description: "Create an NPC in a room",
+    name: "update_room",
+    description: "Update an existing room's properties",
     input_schema: %{
       type: "object",
+      required: ["key"],
       properties: %{
-        key: %{type: "string"},
-        room_key: %{type: "string"},
-        name: %{type: "string"},
-        description: %{type: "string"},
-        level: %{type: "integer"}
+        key: %{type: "string", description: "Room key to update"},
+        name: %{type: "string", maxLength: 100},
+        description: %{type: "string", maxLength: 10000},
+        x: %{type: "integer", minimum: -1000, maximum: 1000},
+        y: %{type: "integer", minimum: -1000, maximum: 1000},
+        z: %{type: "integer", minimum: -1000, maximum: 1000},
+        zone: %{type: "string"},
+        tags: %{type: "array", items: %{type: "string"}}
       }
     }
   },
   %{
-    name: "create_item",
-    description: "Create an item",
-    input_schema: %{type: "object"}
+    name: "delete_room",
+    description: "Delete a room (will also remove all exits pointing to it)",
+    input_schema: %{
+      type: "object",
+      required: ["key"],
+      properties: %{
+        key: %{type: "string", description: "Room key to delete"}
+      }
+    }
   },
   %{
     name: "add_exit",
-    description: "Connect two rooms with an exit",
+    description: "Add an exit from one room to another",
     input_schema: %{
       type: "object",
+      required: ["from_room", "direction", "to_room"],
       properties: %{
-        from_room: %{type: "string"},
-        to_room: %{type: "string"},
-        direction: %{type: "string"}  # north, south, east, west, up, down
+        from_room: %{type: "string", description: "Source room key"},
+        direction: %{type: "string", enum: ["north", "south", "east", "west", "up", "down", "northeast", "northwest", "southeast", "southwest"], description: "Exit direction"},
+        to_room: %{type: "string", description: "Destination room key"},
+        bidirectional: %{type: "boolean", default: true, description: "Also create reverse exit"}
       }
     }
   },
   %{
-    name: "run_validation",
-    description: "Run validation on specific objects",
+    name: "remove_exit",
+    description: "Remove an exit from a room",
+    input_schema: %{
+      type: "object",
+      required: ["from_room", "direction"],
+      properties: %{
+        from_room: %{type: "string", description: "Source room key"},
+        direction: %{type: "string", description: "Exit direction to remove"},
+        bidirectional: %{type: "boolean", default: true, description: "Also remove reverse exit"}
+      }
+    }
+  },
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # NPC TOOLS
+  # ─────────────────────────────────────────────────────────────────────────
+  %{
+    name: "create_npc",
+    description: "Create a new NPC",
+    input_schema: %{
+      type: "object",
+      required: ["key", "name"],
+      properties: %{
+        key: %{type: "string", pattern: "^[a-z][a-z0-9_]*$"},
+        name: %{type: "string", maxLength: 100},
+        description: %{type: "string", maxLength: 10000},
+        level: %{type: "integer", minimum: 1, maximum: 100, default: 1},
+        room_key: %{type: "string", description: "Room where NPC spawns"},
+        npc_type: %{type: "string", enum: ["quest_giver", "merchant", "enemy", "ambient", "boss"]},
+        dialogue_key: %{type: "string", description: "Dialogue tree to use"},
+        tags: %{type: "array", items: %{type: "string"}}
+      }
+    }
+  },
+  %{
+    name: "update_npc",
+    description: "Update an existing NPC",
+    input_schema: %{
+      type: "object",
+      required: ["key"],
+      properties: %{
+        key: %{type: "string"},
+        name: %{type: "string", maxLength: 100},
+        description: %{type: "string", maxLength: 10000},
+        level: %{type: "integer", minimum: 1, maximum: 100},
+        room_key: %{type: "string"},
+        npc_type: %{type: "string", enum: ["quest_giver", "merchant", "enemy", "ambient", "boss"]},
+        dialogue_key: %{type: "string"},
+        tags: %{type: "array", items: %{type: "string"}}
+      }
+    }
+  },
+  %{
+    name: "delete_npc",
+    description: "Delete an NPC",
+    input_schema: %{
+      type: "object",
+      required: ["key"],
+      properties: %{
+        key: %{type: "string"}
+      }
+    }
+  },
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # ITEM TOOLS
+  # ─────────────────────────────────────────────────────────────────────────
+  %{
+    name: "create_item",
+    description: "Create a new item",
+    input_schema: %{
+      type: "object",
+      required: ["key", "name"],
+      properties: %{
+        key: %{type: "string", pattern: "^[a-z][a-z0-9_]*$"},
+        name: %{type: "string", maxLength: 100},
+        description: %{type: "string", maxLength: 10000},
+        item_type: %{type: "string", enum: ["weapon", "armor", "consumable", "quest_item", "misc", "key", "tool"]},
+        tags: %{type: "array", items: %{type: "string"}}
+      }
+    }
+  },
+  %{
+    name: "update_item",
+    description: "Update an existing item",
+    input_schema: %{
+      type: "object",
+      required: ["key"],
+      properties: %{
+        key: %{type: "string"},
+        name: %{type: "string", maxLength: 100},
+        description: %{type: "string", maxLength: 10000},
+        item_type: %{type: "string", enum: ["weapon", "armor", "consumable", "quest_item", "misc", "key", "tool"]},
+        tags: %{type: "array", items: %{type: "string"}}
+      }
+    }
+  },
+  %{
+    name: "delete_item",
+    description: "Delete an item",
+    input_schema: %{
+      type: "object",
+      required: ["key"],
+      properties: %{
+        key: %{type: "string"}
+      }
+    }
+  },
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # QUEST TOOLS
+  # ─────────────────────────────────────────────────────────────────────────
+  %{
+    name: "create_quest",
+    description: "Create a new quest with objectives",
+    input_schema: %{
+      type: "object",
+      required: ["key", "name", "giver_key"],
+      properties: %{
+        key: %{type: "string", pattern: "^[a-z][a-z0-9_]*$"},
+        name: %{type: "string", maxLength: 100},
+        description: %{type: "string", maxLength: 10000},
+        quest_type: %{type: "string", enum: ["main", "side", "daily", "tutorial"]},
+        giver_key: %{type: "string", description: "NPC who gives this quest"},
+        objectives: %{type: "array", items: %{
+          type: "object",
+          properties: %{
+            type: %{type: "string", enum: ["talk", "kill", "get_item", "go_to", "use_item"]},
+            target: %{type: "string"},
+            count: %{type: "integer", minimum: 1},
+            description: %{type: "string"}
+          }
+        }},
+        rewards: %{type: "object", properties: %{
+          xp: %{type: "integer"},
+          gold: %{type: "integer"},
+          items: %{type: "array", items: %{type: "string"}}
+        }},
+        prerequisites: %{type: "array", items: %{type: "string"}, description: "Quest keys that must be completed first"}
+      }
+    }
+  },
+  %{
+    name: "update_quest",
+    description: "Update an existing quest",
+    input_schema: %{
+      type: "object",
+      required: ["key"],
+      properties: %{
+        key: %{type: "string"},
+        name: %{type: "string"},
+        description: %{type: "string"},
+        quest_type: %{type: "string"},
+        giver_key: %{type: "string"},
+        objectives: %{type: "array"},
+        rewards: %{type: "object"},
+        prerequisites: %{type: "array"}
+      }
+    }
+  },
+  %{
+    name: "delete_quest",
+    description: "Delete a quest",
+    input_schema: %{
+      type: "object",
+      required: ["key"],
+      properties: %{
+        key: %{type: "string"}
+      }
+    }
+  },
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # DIALOGUE TOOLS
+  # ─────────────────────────────────────────────────────────────────────────
+  %{
+    name: "create_dialogue",
+    description: "Create a dialogue tree for an NPC",
+    input_schema: %{
+      type: "object",
+      required: ["key", "npc_key"],
+      properties: %{
+        key: %{type: "string", pattern: "^[a-z][a-z0-9_]*$"},
+        npc_key: %{type: "string", description: "NPC this dialogue belongs to"},
+        nodes: %{type: "array", items: %{
+          type: "object",
+          properties: %{
+            id: %{type: "string"},
+            text: %{type: "string"},
+            choices: %{type: "array", items: %{
+              type: "object",
+              properties: %{
+                text: %{type: "string"},
+                next: %{type: "string"},
+                conditions: %{type: "object"},
+                actions: %{type: "array"}
+              }
+            }}
+          }
+        }}
+      }
+    }
+  },
+  %{
+    name: "update_dialogue",
+    description: "Update an existing dialogue tree",
+    input_schema: %{
+      type: "object",
+      required: ["key"],
+      properties: %{
+        key: %{type: "string"},
+        npc_key: %{type: "string"},
+        nodes: %{type: "array"}
+      }
+    }
+  },
+  %{
+    name: "delete_dialogue",
+    description: "Delete a dialogue tree",
+    input_schema: %{
+      type: "object",
+      required: ["key"],
+      properties: %{
+        key: %{type: "string"}
+      }
+    }
+  },
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # CUTSCENE TOOLS
+  # ─────────────────────────────────────────────────────────────────────────
+  %{
+    name: "create_cutscene",
+    description: "Create a cutscene/event sequence",
+    input_schema: %{
+      type: "object",
+      required: ["id", "trigger"],
+      properties: %{
+        id: %{type: "string", pattern: "^[a-z][a-z0-9_]*$"},
+        trigger: %{type: "object", properties: %{
+          type: %{type: "string", enum: ["enter_room", "talk_to", "quest_complete", "use_item", "manual"]},
+          target: %{type: "string"}
+        }},
+        sequence: %{type: "array", items: %{
+          type: "object",
+          properties: %{
+            type: %{type: "string", enum: ["narration", "dialogue", "fade", "wait", "sound", "teleport", "give_item", "set_flag", "start_quest"]},
+            params: %{type: "object"}
+          }
+        }}
+      }
+    }
+  },
+  %{
+    name: "update_cutscene",
+    description: "Update an existing cutscene",
+    input_schema: %{
+      type: "object",
+      required: ["id"],
+      properties: %{
+        id: %{type: "string"},
+        trigger: %{type: "object"},
+        sequence: %{type: "array"}
+      }
+    }
+  },
+  %{
+    name: "delete_cutscene",
+    description: "Delete a cutscene",
+    input_schema: %{
+      type: "object",
+      required: ["id"],
+      properties: %{
+        id: %{type: "string"}
+      }
+    }
+  },
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # QUERY TOOLS (Read-only)
+  # ─────────────────────────────────────────────────────────────────────────
+  %{
+    name: "list_rooms",
+    description: "List all rooms, optionally filtered by zone",
     input_schema: %{
       type: "object",
       properties: %{
-        object_keys: %{type: "array", items: %{type: "string"}}
+        zone: %{type: "string", description: "Filter by zone"},
+        limit: %{type: "integer", maximum: 100, default: 50}
+      }
+    }
+  },
+  %{
+    name: "get_room",
+    description: "Get detailed information about a specific room",
+    input_schema: %{
+      type: "object",
+      required: ["key"],
+      properties: %{
+        key: %{type: "string"}
+      }
+    }
+  },
+  %{
+    name: "list_npcs",
+    description: "List all NPCs, optionally filtered",
+    input_schema: %{
+      type: "object",
+      properties: %{
+        room_key: %{type: "string"},
+        npc_type: %{type: "string"},
+        limit: %{type: "integer", maximum: 100, default: 50}
+      }
+    }
+  },
+  %{
+    name: "list_items",
+    description: "List all items",
+    input_schema: %{
+      type: "object",
+      properties: %{
+        item_type: %{type: "string"},
+        limit: %{type: "integer", maximum: 100, default: 50}
+      }
+    }
+  },
+  %{
+    name: "list_quests",
+    description: "List all quests",
+    input_schema: %{
+      type: "object",
+      properties: %{
+        quest_type: %{type: "string"},
+        giver_key: %{type: "string"},
+        limit: %{type: "integer", maximum: 100, default: 50}
+      }
+    }
+  },
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # VALIDATION TOOLS
+  # ─────────────────────────────────────────────────────────────────────────
+  %{
+    name: "run_validation",
+    description: "Run validation checks on specified entities or all entities",
+    input_schema: %{
+      type: "object",
+      properties: %{
+        entity_keys: %{type: "array", items: %{type: "string"}, description: "Specific keys to validate (empty = all)"},
+        types: %{type: "array", items: %{type: "string", enum: ["room", "npc", "item", "quest", "dialogue", "cutscene"]}, description: "Entity types to validate"}
       }
     }
   }
 ]
 ```
 
-### Context Injection
+---
 
-System prompt automatically includes:
+## Comprehensive Feature Specifications
+
+### 1. Layout & Panels
+
+#### 1.1 Toolbar
+| Feature ID | Feature | Description | Testable |
+|------------|---------|-------------|----------|
+| TB-001 | Mode Buttons | Edit/View/Test mode toggle | Click each mode, verify UI changes |
+| TB-002 | Global Search | Search all entities by name/key | Type "tavern", verify results |
+| TB-003 | Zone Selector | Dropdown to filter by zone | Select zone, verify hierarchy filters |
+| TB-004 | Panel Toggles | Show/hide each panel | Toggle each, verify collapse/expand |
+| TB-005 | Undo/Redo | Ctrl+Z/Ctrl+Y for actions | Create room, undo, verify removed |
+| TB-006 | Save Indicator | Shows unsaved changes | Edit room, verify indicator |
+
+#### 1.2 Hierarchy Panel
+| Feature ID | Feature | Description | Testable |
+|------------|---------|-------------|----------|
+| HP-001 | Tree View | Expandable tree of all entities | Expand/collapse nodes |
+| HP-002 | Entity Counts | Badge showing count per category | Create entity, verify count updates |
+| HP-003 | Click to Select | Single click selects in viewport | Click room, verify 3D selection |
+| HP-004 | Double-click Edit | Opens inspector for editing | Double-click, verify inspector opens |
+| HP-005 | Right-click Menu | Clone, Delete, Properties | Right-click, verify menu appears |
+| HP-006 | Drag to Reorder | Reorder items in tree | Drag room, verify new position |
+| HP-007 | Filter by Type | Filter buttons for entity types | Click "Quests", verify filter |
+| HP-008 | Search in Tree | Local search within hierarchy | Type in filter, verify results |
+| HP-009 | Validation Icons | Warning/error icons on items | Create invalid room, verify icon |
+| HP-010 | Collapse Panel | Toggle to 40px icons-only mode | Click collapse, verify width |
+
+#### 1.3 Viewport (3D)
+| Feature ID | Feature | Description | Testable |
+|------------|---------|-------------|----------|
+| VP-001 | Room Cubes | Render rooms as 3D cubes | Create room, verify cube appears |
+| VP-002 | Exit Lines | Lines connecting rooms | Add exit, verify line draws |
+| VP-003 | NPC Markers | Icons above rooms with NPCs | Create NPC in room, verify icon |
+| VP-004 | Item Labels | Floating text for items | Create item, verify label |
+| VP-005 | Click to Select | Click cube to select | Click room cube, verify selected |
+| VP-006 | Drag to Move | Drag cube to reposition | Drag room, verify coords update |
+| VP-007 | Box Select | Shift+drag to multi-select | Draw box, verify multiple selected |
+| VP-008 | Camera Pan | Ctrl+drag or middle-click | Pan camera, verify movement |
+| VP-009 | Camera Zoom | Scroll wheel zoom | Scroll, verify zoom level |
+| VP-010 | Camera Rotate | Right-drag to orbit | Orbit camera, verify rotation |
+| VP-011 | 2D/3D Toggle | Switch between top-down and 3D | Toggle, verify view mode |
+| VP-012 | Grid Display | Optional grid overlay | Toggle grid, verify display |
+| VP-013 | Snap to Grid | Snap positions to grid | Move room, verify snaps |
+| VP-014 | Validation Glow | Red/yellow/green glow on cubes | Create invalid room, verify red glow |
+| VP-015 | Selection Highlight | Outline on selected items | Select room, verify highlight |
+| VP-016 | Hover Tooltip | Show name on hover | Hover room, verify tooltip |
+| VP-017 | Reset View | Button to reset camera | Click reset, verify default view |
+| VP-018 | Fit to Selection | Zoom to show selected items | Select rooms, click fit, verify |
+
+#### 1.4 Inspector Panel
+| Feature ID | Feature | Description | Testable |
+|------------|---------|-------------|----------|
+| IP-001 | Context Sensitive | Shows form for selected type | Select room, verify room form |
+| IP-002 | Room Form | Key, name, desc, coords, zone, tags | Edit each field, verify saves |
+| IP-003 | NPC Form | Key, name, desc, level, type, room | Edit each field, verify saves |
+| IP-004 | Item Form | Key, name, desc, type, tags | Edit each field, verify saves |
+| IP-005 | Quest Form | Key, name, giver, objectives, rewards | Edit each field, verify saves |
+| IP-006 | Exit Editor | List of exits with add/remove | Add exit, verify in viewport |
+| IP-007 | Contents List | NPCs/items in selected room | Add NPC to room, verify shows |
+| IP-008 | YAML Preview | Toggle to show raw YAML | Click YAML, verify display |
+| IP-009 | Validate Button | Run validation on selected | Click validate, verify results |
+| IP-010 | Delete Button | Delete selected entity | Click delete, verify removed |
+| IP-011 | Clone Button | Clone selected entity | Click clone, verify copy created |
+| IP-012 | Collapse Panel | Toggle to 40px icon mode | Click collapse, verify width |
+| IP-013 | Multi-select Edit | Edit common fields for multiple | Select 3 rooms, edit zone, verify all updated |
+
+#### 1.5 Chat Panel
+| Feature ID | Feature | Description | Testable |
+|------------|---------|-------------|----------|
+| CP-001 | Message Display | Show conversation history | Send message, verify displays |
+| CP-002 | Streaming Response | Real-time streaming from Claude | Send request, verify streams |
+| CP-003 | Tool Call Display | Show [🔧 tool_name] indicators | Send "create room", verify tool shown |
+| CP-004 | Context Summary | Show selected items, errors at top | Select 3 rooms, verify context |
+| CP-005 | Send Message | Input field + send button | Type message, click send |
+| CP-006 | OAuth Connect | "Connect with Claude" button | Click, verify OAuth redirect |
+| CP-007 | Auth Status | Show connected/disconnected | Connect, verify status badge |
+| CP-008 | Conversation History | Persist across refreshes | Send message, refresh, verify persists |
+| CP-009 | Clear History | Button to clear conversation | Click clear, verify empty |
+| CP-010 | Undo All | Rollback all LLM changes | Click undo all, verify reverts |
+| CP-011 | Style Presets | Dropdown for style | Select "dark fantasy", send request |
+| CP-012 | Collapse Panel | Toggle to 40px icon mode | Click collapse, verify width |
+| CP-013 | Error Display | Show API errors gracefully | Disconnect, verify error message |
+
+#### 1.6 Console Panel
+| Feature ID | Feature | Description | Testable |
+|------------|---------|-------------|----------|
+| CN-001 | Inline Display | Show error/warning count inline | Create invalid room, verify count |
+| CN-002 | Expand on Click | Click to expand full console | Click inline, verify expands |
+| CN-003 | Error List | List all validation errors | Run validation, verify list |
+| CN-004 | Click to Select | Click error to select entity | Click error, verify selects in viewport |
+| CN-005 | Auto-Fix Button | Fix safe issues automatically | Click auto-fix, verify fixes |
+| CN-006 | Export Report | Download validation report | Click export, verify download |
+| CN-007 | Filter by Severity | Show only errors/warnings/info | Toggle filter, verify results |
+| CN-008 | Clear Console | Clear all messages | Click clear, verify empty |
+
+### 2. Entity Management
+
+#### 2.1 Room Operations
+| Feature ID | Feature | Description | Testable |
+|------------|---------|-------------|----------|
+| RM-001 | Create Room | Create room via UI | Fill form, submit, verify created |
+| RM-002 | Create Room (LLM) | "Create a tavern" | Send to Claude, verify room created |
+| RM-003 | Update Room | Edit room properties | Change name, verify updated |
+| RM-004 | Update Room (LLM) | "Make it spookier" | Send to Claude, verify updated |
+| RM-005 | Delete Room | Delete room | Click delete, verify removed |
+| RM-006 | Delete Room (LLM) | "Delete the tavern" | Send to Claude, verify deleted |
+| RM-007 | Clone Room | Duplicate room | Click clone, verify copy |
+| RM-008 | Batch Move | Move multiple rooms | Select 3, move by offset |
+| RM-009 | Batch Delete | Delete multiple rooms | Select 3, delete all |
+| RM-010 | Batch Clone | Clone multiple rooms | Select 3, clone with offset |
+| RM-011 | Add Exit | Connect two rooms | Use UI or drag in viewport |
+| RM-012 | Add Exit (LLM) | "Connect tavern to square" | Send to Claude, verify exit |
+| RM-013 | Remove Exit | Remove connection | Click X on exit, verify removed |
+| RM-014 | Bidirectional Exit | Toggle auto-create reverse | Create exit, verify reverse created |
+| RM-015 | Template Create | Create from template | Select template, instantiate |
+| RM-016 | Save as Template | Save room as template | Click save as template, verify |
+| RM-017 | Coordinate Update | Drag updates x/y/z | Drag in viewport, verify coords |
+| RM-018 | Zone Assignment | Assign room to zone | Select zone in form, verify |
+
+#### 2.2 NPC Operations
+| Feature ID | Feature | Description | Testable |
+|------------|---------|-------------|----------|
+| NP-001 | Create NPC | Create NPC via UI | Fill form, submit, verify |
+| NP-002 | Create NPC (LLM) | "Create a grumpy merchant" | Send to Claude, verify |
+| NP-003 | Update NPC | Edit NPC properties | Change level, verify |
+| NP-004 | Delete NPC | Delete NPC | Click delete, verify |
+| NP-005 | Assign to Room | Set spawn room | Select room, verify |
+| NP-006 | Link Dialogue | Connect dialogue tree | Select dialogue, verify |
+| NP-007 | NPC Type | Set type (quest_giver, etc.) | Change type, verify icon |
+
+#### 2.3 Item Operations
+| Feature ID | Feature | Description | Testable |
+|------------|---------|-------------|----------|
+| IT-001 | Create Item | Create item via UI | Fill form, submit, verify |
+| IT-002 | Create Item (LLM) | "Create a magic sword" | Send to Claude, verify |
+| IT-003 | Update Item | Edit item properties | Change type, verify |
+| IT-004 | Delete Item | Delete item | Click delete, verify |
+| IT-005 | Item Type | Set type (weapon, armor, etc.) | Change type, verify |
+
+#### 2.4 Quest Operations
+| Feature ID | Feature | Description | Testable |
+|------------|---------|-------------|----------|
+| QU-001 | Create Quest | Create quest via wizard | Fill form, submit, verify |
+| QU-002 | Create Quest (LLM) | "Create a fetch quest" | Send to Claude, verify |
+| QU-003 | Update Quest | Edit quest properties | Change rewards, verify |
+| QU-004 | Delete Quest | Delete quest | Click delete, verify |
+| QU-005 | Add Objective | Add quest objective | Click add, fill, verify |
+| QU-006 | Remove Objective | Remove objective | Click remove, verify |
+| QU-007 | Set Prerequisites | Link to other quests | Add prereq, verify |
+| QU-008 | Set Rewards | XP, gold, items | Set rewards, verify |
+| QU-009 | Quest Giver | Assign NPC as giver | Select NPC, verify |
+| QU-010 | Quest Validation | Validate quest chain | Run validation, verify |
+
+#### 2.5 Dialogue Operations
+| Feature ID | Feature | Description | Testable |
+|------------|---------|-------------|----------|
+| DI-001 | Create Dialogue | Create dialogue tree | Create nodes, verify |
+| DI-002 | Create Dialogue (LLM) | "Create spooky dialogue" | Send to Claude, verify |
+| DI-003 | Update Dialogue | Edit dialogue nodes | Change text, verify |
+| DI-004 | Delete Dialogue | Delete dialogue | Click delete, verify |
+| DI-005 | Add Node | Add dialogue node | Click add, verify |
+| DI-006 | Add Choice | Add player choice | Click add choice, verify |
+| DI-007 | Link to NPC | Assign to NPC | Select NPC, verify |
+| DI-008 | Add Conditions | Conditional branches | Add condition, verify |
+| DI-009 | Add Actions | Quest start, give item, etc. | Add action, verify |
+
+#### 2.6 Cutscene Operations
+| Feature ID | Feature | Description | Testable |
+|------------|---------|-------------|----------|
+| CU-001 | Create Cutscene | Create cutscene | Create trigger + sequence |
+| CU-002 | Create Cutscene (LLM) | "Create ghost encounter" | Send to Claude, verify |
+| CU-003 | Update Cutscene | Edit cutscene | Change sequence, verify |
+| CU-004 | Delete Cutscene | Delete cutscene | Click delete, verify |
+| CU-005 | Set Trigger | Room enter, talk, etc. | Set trigger, verify |
+| CU-006 | Add Sequence Step | Narration, dialogue, fade | Add step, verify |
+| CU-007 | Reorder Steps | Drag to reorder | Drag step, verify order |
+| CU-008 | Preview Cutscene | Play preview | Click play, verify plays |
+
+### 3. LLM Features
+
+#### 3.1 Authentication
+| Feature ID | Feature | Description | Testable |
+|------------|---------|-------------|----------|
+| AU-001 | OAuth Connect | Connect via Claude OAuth | Click connect, complete flow |
+| AU-002 | OAuth Callback | Handle OAuth callback | Complete flow, verify connected |
+| AU-003 | Token Storage | Store token securely | Connect, verify token persists |
+| AU-004 | Token Refresh | Auto-refresh expired token | Wait for expiry, verify refresh |
+| AU-005 | Disconnect | Remove OAuth connection | Click disconnect, verify |
+| AU-006 | API Key Fallback | Use server key if no OAuth | Configure key, verify works |
+| AU-007 | Auth Status UI | Show connection status | View UI, verify correct status |
+
+#### 3.2 Context Building
+| Feature ID | Feature | Description | Testable |
+|------------|---------|-------------|----------|
+| CX-001 | Selection Context | Include selected entities | Select 3 rooms, send message, verify context |
+| CX-002 | Zone Context | Include current zone info | Select zone, send message, verify context |
+| CX-003 | Validation Errors | Include validation errors | Create invalid room, send message, verify |
+| CX-004 | Existing Keys | Include all keys (no duplicates) | Send "create room", verify unique key |
+| CX-005 | Nearby Entities | Include adjacent rooms | Select room, verify neighbors in context |
+
+#### 3.3 Tool Execution
+| Feature ID | Feature | Description | Testable |
+|------------|---------|-------------|----------|
+| TX-001 | Execute Create | Execute create_* tools | Send "create room", verify created |
+| TX-002 | Execute Update | Execute update_* tools | Send "rename room", verify updated |
+| TX-003 | Execute Delete | Execute delete_* tools | Send "delete room", verify deleted |
+| TX-004 | Execute Query | Execute list_*/get_* tools | Send "list rooms", verify response |
+| TX-005 | Execute Validation | Execute run_validation | Send "validate", verify results |
+| TX-006 | Parameter Validation | Reject invalid params | Send bad key format, verify error |
+| TX-007 | Rate Limiting | Enforce rate limits | Send 51 creates, verify rate limit |
+| TX-008 | Audit Logging | Log all tool calls | Check logs after call |
+
+#### 3.4 Real-time Updates
+| Feature ID | Feature | Description | Testable |
+|------------|---------|-------------|----------|
+| RT-001 | Room Created | Flash animation on create | Create via LLM, verify flash |
+| RT-002 | Room Updated | Flash animation on update | Update via LLM, verify flash |
+| RT-003 | Room Deleted | Fade animation on delete | Delete via LLM, verify fade |
+| RT-004 | Exit Created | Line draws animation | Add exit via LLM, verify animation |
+| RT-005 | Hierarchy Update | Tree updates in real-time | Create entity, verify tree updates |
+| RT-006 | Inspector Update | Inspector refreshes | Update selected, verify inspector |
+
+### 4. Validation
+
+| Feature ID | Feature | Description | Testable |
+|------------|---------|-------------|----------|
+| VA-001 | Room Validation | Missing exits, unreachable | Create orphan room, verify error |
+| VA-002 | Quest Validation | Missing giver, invalid objectives | Create bad quest, verify error |
+| VA-003 | Dialogue Validation | Missing nodes, dead ends | Create broken dialogue, verify |
+| VA-004 | Cutscene Validation | Invalid triggers, missing targets | Create bad cutscene, verify |
+| VA-005 | Cross-entity Validation | NPC references missing room | Create NPC for missing room, verify |
+| VA-006 | Real-time Validation | Validate on every change | Edit room, verify immediate feedback |
+| VA-007 | Batch Validation | Validate all entities | Click "Validate All", verify |
+| VA-008 | Visual Indicators | Glow colors in viewport | Create invalid room, verify red glow |
+| VA-009 | Click to Navigate | Click error to select entity | Click error, verify selection |
+
+### 5. Templates & Presets
+
+| Feature ID | Feature | Description | Testable |
+|------------|---------|-------------|----------|
+| TP-001 | Built-in Templates | Tavern, shop, dungeon, etc. | List templates, verify exists |
+| TP-002 | Template Preview | Preview before instantiate | Hover template, verify preview |
+| TP-003 | Instantiate Template | Create room from template | Select template, instantiate |
+| TP-004 | Save as Template | Save room as template | Save, verify in template list |
+| TP-005 | Template Search | Search templates | Type "dungeon", verify results |
+| TP-006 | Style Presets | Dark fantasy, whimsical, etc. | Select style, send LLM request |
+
+---
+
+## End-to-End Testing Strategy
+
+### Test Harness: Mini Subzone Builder
+
+The E2E test creates a complete **"Test Graveyard" subzone** connected to the main monastery zone, exercises all features, validates data integrity, and tears down cleanly.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     E2E TEST: GRAVEYARD SUBZONE                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  1. SETUP                                                                   │
+│     • Record initial state (room count, NPC count, etc.)                    │
+│     • Start test transaction (for rollback)                                 │
+│                                                                             │
+│  2. CREATE ZONE STRUCTURE                                                   │
+│     Via UI:                                                                 │
+│     • Create room "test_graveyard_entrance"                                 │
+│     • Create room "test_graveyard_center"                                   │
+│     • Create room "test_crypt"                                              │
+│     • Add exits between rooms                                               │
+│     • Connect to monastery zone (test_graveyard_entrance → monastery_gate)  │
+│                                                                             │
+│     Via LLM:                                                                │
+│     • "Create 2 more spooky rooms in the graveyard"                         │
+│     • Verify rooms created with appropriate descriptions                    │
+│     • Verify exits connected                                                │
+│                                                                             │
+│  3. POPULATE WITH ENTITIES                                                  │
+│     Via UI:                                                                 │
+│     • Create NPC "test_ghost" in test_crypt                                 │
+│     • Create NPC "test_gravedigger" in test_graveyard_entrance              │
+│     • Create Item "test_ancient_key" (quest item)                           │
+│     • Create Item "test_rusty_shovel" (tool)                                │
+│                                                                             │
+│     Via LLM:                                                                │
+│     • "Create a spooky dialogue for the ghost"                              │
+│     • "Create a quest where player finds the ancient key"                   │
+│     • Verify quest objectives reference correct entities                    │
+│                                                                             │
+│  4. CREATE CUTSCENE                                                         │
+│     • Create cutscene "test_ghost_encounter"                                │
+│     • Trigger: enter test_crypt                                             │
+│     • Sequence: narration → dialogue → give item                            │
+│     • Verify trigger and sequence valid                                     │
+│                                                                             │
+│  5. VALIDATION CHECKS                                                       │
+│     • Run full validation                                                   │
+│     • Verify 0 errors                                                       │
+│     • Verify all test_* entities connected correctly                        │
+│     • Verify exits are bidirectional                                        │
+│     • Verify quest chain is completable                                     │
+│                                                                             │
+│  6. DATA INTEGRITY CHECKS                                                   │
+│     • Verify rooms in YAML files                                            │
+│     • Verify NPCs in YAML files                                             │
+│     • Verify items in YAML files                                            │
+│     • Verify quest in YAML files                                            │
+│     • Verify dialogue in YAML files                                         │
+│     • Verify cutscene in YAML files                                         │
+│     • Verify all keys are unique                                            │
+│     • Verify no orphaned references                                         │
+│                                                                             │
+│  7. VIEWPORT VERIFICATION                                                   │
+│     • Verify all rooms visible as cubes                                     │
+│     • Verify all exits visible as lines                                     │
+│     • Verify NPC markers on rooms                                           │
+│     • Verify selection works                                                │
+│     • Verify drag-to-move works                                             │
+│                                                                             │
+│  8. INSPECTOR VERIFICATION                                                  │
+│     • Select each room, verify inspector shows correct data                 │
+│     • Edit room via inspector, verify saves                                 │
+│     • Verify exit editor works                                              │
+│     • Verify contents list accurate                                         │
+│                                                                             │
+│  9. LLM INTEGRATION VERIFICATION                                            │
+│     • Verify context includes selected entities                             │
+│     • Verify tool calls execute correctly                                   │
+│     • Verify streaming response works                                       │
+│     • Verify real-time updates flash in viewport                            │
+│                                                                             │
+│  10. TEARDOWN                                                               │
+│     Via LLM:                                                                │
+│     • "Delete all test_* entities"                                          │
+│     • Verify all test entities removed                                      │
+│                                                                             │
+│     Via UI (fallback):                                                      │
+│     • Delete any remaining test_* entities                                  │
+│     • Remove exit from monastery_gate to test zone                          │
+│                                                                             │
+│  11. VERIFY CLEAN STATE                                                     │
+│     • Verify room count matches initial                                     │
+│     • Verify NPC count matches initial                                      │
+│     • Verify no test_* keys remain in any YAML                              │
+│     • Verify validation still passes                                        │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Test Implementation
 
 ```elixir
-# Built from LiveView session state
-context = %{
-  zone: %{
-    id: "forest",
-    name: "Whispering Forest",
-    room_count: 42
-  },
-  selection: [
-    %{key: "forest_path", name: "Forest Path", coordinates: {5, 3, 0}},
-    %{key: "goblin_camp", name: "Goblin Camp", coordinates: {6, 3, 0}}
-  ],
-  validation_errors: [
-    %{
-      object_key: "forest_path",
-      severity: :error,
-      message: "Exit 'north' points to non-existent room 'village_gate'"
-    },
-    %{
-      object_key: "goblin_camp",
-      severity: :warning,
-      message: "Description is empty"
-    }
-  ],
-  nearby_rooms: ["dark_cave", "river_crossing", "old_bridge"],
-  existing_keys: ["forest_path", "goblin_camp", "dark_cave", ...]  # Prevent duplicates
-}
-```
+# test/integration/world_builder_e2e_test.exs
+defmodule Loka.WorldBuilder.E2ETest do
+  use Loka.DataCase, async: false
+  use Loka.FeatureCase
 
-System prompt template:
-```
-You are helping build a MUD world in the Loka World Builder.
+  @test_prefix "test_e2e_"
 
-CURRENT CONTEXT:
-Zone: {{zone.name}} ({{zone.room_count}} rooms)
+  describe "World Builder E2E: Graveyard Subzone" do
+    setup do
+      # Record initial state
+      initial_room_count = RoomManager.count_rooms()
+      initial_npc_count = EntityManager.count_entities(:npc)
 
-Selected Rooms:
-{{#each selection}}
-- {{key}}: "{{name}}" at ({{coordinates}})
-{{/each}}
+      on_exit(fn ->
+        # Cleanup any remaining test entities
+        cleanup_test_entities()
+      end)
 
-Validation Errors:
-{{#each validation_errors}}
-- {{object_key}}: {{message}} ({{severity}})
-{{/each}}
-
-You have tools to modify the world. Use them to make the requested changes.
-Always validate after changes using the run_validation tool.
-```
-
-### User Experience Examples
-
-**Example 1: Fix Validation Errors**
-```
-User selects 3 rooms with red glow → types "Fix these errors"
-
-Claude: I can see 3 validation errors:
-• forest_path: Invalid exit to 'village_gate' (doesn't exist)
-• goblin_camp: Empty description
-• dark_cave: NPC 'bat_swarm' doesn't exist
-
-[🔧 Calling: update_room(forest_path, {exits: {...}})]
-✓ Removed invalid exit from forest_path
-
-[🔧 Calling: update_room(goblin_camp, {description: "..."})]
-✓ Added description to goblin_camp
-
-[🔧 Calling: create_npc(bat_swarm, ...)]
-✓ Created missing NPC in dark_cave
-
-[🔧 Calling: run_validation([forest_path, goblin_camp, dark_cave])]
-✓ All validation errors fixed!
-
-User sees: Rooms flash green in 3D, red glow → green glow
-```
-
-**Example 2: Expand Zone**
-```
-User clicks empty space east of zone → types "Create a haunted graveyard here"
-
-Claude: I'll create a haunted graveyard east of your current zone.
-
-[🔧 Calling: create_room(graveyard_entrance, ...)]
-Created 'Graveyard Entrance' at (8, 0, 0)
-
-[🔧 Calling: create_room(graveyard_center, ...)]
-Created 'Graveyard Center' at (9, 0, 0)
-
-[🔧 Calling: create_room(crypt, ...)]
-Created 'Ancient Crypt' at (9, 1, 0)
-
-[🔧 Calling: add_exit(forest_edge, graveyard_entrance, east)]
-Connected forest → graveyard
-
-[🔧 Calling: create_npc(restless_spirit, graveyard_center, ...)]
-Created ghost NPC 'Restless Spirit'
-
-✓ Haunted graveyard complete! 3 rooms + 1 NPC added.
-
-User sees: 3 cubes fade in with animation, exits draw themselves
-```
-
-**Example 3: Multi-Turn Conversation**
-```
-User: Create a dark forest room
-Claude: [creates room with spooky description]
-
-User: Make it darker
-Claude: [updates description to be more ominous]
-
-User: Add a ghost NPC
-Claude: [creates ghost NPC in that room]
-
-User: Give it a scary dialogue tree
-Claude: [creates dialogue tree with eerie options]
-
-Context preserved across all turns!
-```
-
-### Real-Time Updates
-
-When Claude calls a tool, changes appear instantly:
-
-```jsx
-// Frontend: Subscribe to PubSub
-useEffect(() => {
-  const channel = socket.channel('world_builder:updates')
-
-  channel.on('room_created', (room) => {
-    // Add to 3D scene with animation
-    addRoomWithAnimation(room)
-  })
-
-  channel.on('room_updated', (room) => {
-    // Flash green
-    flashRoom(room.key, 'green', 500)
-    updateRoomInScene(room)
-  })
-
-  channel.join()
-}, [])
-```
-
-### Cost Controls
-
-- **Budget limit**: $50/month (configurable per user)
-- **Max tokens per request**: 4,000
-- **Rate limiting**: 20 requests/hour (backend enforced)
-- **Cost tracker**: Shows "150 tokens / 50,000 budget" in UI
-- **Toggle on/off**: Settings gear in chat panel
-- **Alert at 80%**: "Warning: 80% of monthly budget used"
-
-### Advanced Features (Week 23-24)
-
-- **Style presets**: "Medieval Fantasy" | "Cyberpunk" | "Cosmic Horror"
-- **Preset prompts**: Quick actions dropdown
-- **Template learning**: "Create 3 more rooms like these 5"
-- **Multi-turn memory**: Conversation persists across refreshes
-- **Undo/redo**: Reverse tool calls
-- **Export conversation**: Download chat history
-
-### Implementation Files
-
-**Backend**:
-```
-lib/loka_web/controllers/world_builder/
-├── claude_controller.ex         # Proxy to Anthropic API
-│   - POST /api/world-builder/claude
-│   - Streams responses via SSE
-│   - Builds context from LiveView session
-│   - Handles tool execution pipeline
-│
-└── tools_controller.ex          # Tool execution endpoints
-    - POST /api/world-builder/tools/update_room
-    - POST /api/world-builder/tools/create_room
-    - POST /api/world-builder/tools/create_npc
-    - POST /api/world-builder/tools/create_item
-    - POST /api/world-builder/tools/add_exit
-    - POST /api/world-builder/tools/run_validation
-
-lib/loka/world_builder/claude/
-├── context_builder.ex           # Builds system prompt context
-├── conversation_manager.ex      # Persists chat history
-├── style_presets.ex             # Style prompt templates
-└── cost_tracker.ex              # Budget tracking
-```
-
-**Frontend**:
-```
-assets/js/world_builder/panels/
-├── ClaudePanel.jsx              # Main chat UI
-│   - Message display (streaming)
-│   - Tool call visualization
-│   - Cost tracker
-│   - Settings gear
-│
-├── ClaudePanel/
-│   ├── MessageList.jsx          # Chat history
-│   ├── ToolCallDisplay.jsx      # "🔧 Calling: update_room..."
-│   ├── StylePresets.jsx         # Style dropdown
-│   ├── PresetPrompts.jsx        # Quick actions
-│   └── Settings.jsx             # Toggle, budget limits
-```
-
-**Database Migration**:
-```elixir
-# priv/repo/migrations/xxx_create_world_builder_conversations.exs
-defmodule Loka.Repo.Migrations.CreateWorldBuilderConversations do
-  use Ecto.Migration
-
-  def change do
-    create table(:world_builder_conversations) do
-      add :user_id, references(:users), null: false
-      add :messages, :jsonb, null: false  # Chat history
-      add :context, :jsonb                # Zone, selection at time
-      add :cost_tokens, :integer, default: 0
-
-      timestamps()
+      %{
+        initial_room_count: initial_room_count,
+        initial_npc_count: initial_npc_count
+      }
     end
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # PHASE 1: Room Creation
+    # ─────────────────────────────────────────────────────────────────────────
+
+    test "creates rooms via UI", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/admin/world-builder")
+
+      # Create entrance room
+      view
+      |> element("[data-action='create-room']")
+      |> render_click()
+
+      view
+      |> form("#create-room-form", %{
+        key: "#{@test_prefix}graveyard_entrance",
+        name: "Graveyard Entrance",
+        description: "A rusted iron gate marks the entrance.",
+        x: 100, y: 0, z: 0
+      })
+      |> render_submit()
+
+      # Verify room created
+      assert {:ok, room} = RoomManager.get_room("#{@test_prefix}graveyard_entrance")
+      assert room.name == "Graveyard Entrance"
+
+      # Verify appears in viewport
+      assert view |> element("[data-room-key='#{@test_prefix}graveyard_entrance']") |> has_element?()
+    end
+
+    test "creates rooms via LLM", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/admin/world-builder")
+
+      # Send LLM request
+      view
+      |> element("#chat-input")
+      |> render_change(%{message: "Create a spooky crypt room east of #{@test_prefix}graveyard_entrance"})
+
+      view
+      |> element("[data-action='send-message']")
+      |> render_click()
+
+      # Wait for LLM response
+      assert_receive {:tool_executed, "create_room", _}, 10_000
+
+      # Verify room created
+      rooms = RoomManager.list_rooms()
+      crypt = Enum.find(rooms, &String.contains?(&1.key, "crypt"))
+      assert crypt != nil
+      assert String.contains?(crypt.description, ["spooky", "dark", "crypt"])
+    end
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # PHASE 2: Exit Management
+    # ─────────────────────────────────────────────────────────────────────────
+
+    test "creates exits via UI", %{conn: conn} do
+      # ... (similar pattern)
+    end
+
+    test "creates bidirectional exits via LLM", %{conn: conn} do
+      # ... (similar pattern)
+    end
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # PHASE 3: NPC/Item Creation
+    # ─────────────────────────────────────────────────────────────────────────
+
+    test "creates NPCs with dialogue via LLM", %{conn: conn} do
+      # ... (similar pattern)
+    end
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # PHASE 4: Quest Creation
+    # ─────────────────────────────────────────────────────────────────────────
+
+    test "creates quest with objectives via LLM", %{conn: conn} do
+      # ... (similar pattern)
+    end
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # PHASE 5: Validation
+    # ─────────────────────────────────────────────────────────────────────────
+
+    test "validates entire test zone", %{conn: conn} do
+      # Run validation
+      {:ok, results} = ValidationManager.validate_all()
+
+      # Filter to test entities
+      test_errors = Enum.filter(results.errors, &String.starts_with?(&1.key, @test_prefix))
+
+      # Should have no errors
+      assert test_errors == []
+    end
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # PHASE 6: Data Integrity
+    # ─────────────────────────────────────────────────────────────────────────
+
+    test "verifies YAML file integrity", %{conn: conn} do
+      # Check rooms YAML
+      room_files = Path.wildcard("priv/world/prototypes/rooms/#{@test_prefix}*.yml")
+      assert length(room_files) > 0
+
+      for file <- room_files do
+        {:ok, content} = YamlElixir.read_from_file(file)
+        assert is_map(content)
+        assert Map.has_key?(content, "key")
+      end
+    end
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # PHASE 7: Teardown
+    # ─────────────────────────────────────────────────────────────────────────
+
+    test "tears down test zone via LLM", %{conn: conn, initial_room_count: initial} do
+      {:ok, view, _html} = live(conn, ~p"/admin/world-builder")
+
+      # Request deletion
+      view
+      |> element("#chat-input")
+      |> render_change(%{message: "Delete all entities with keys starting with #{@test_prefix}"})
+
+      view
+      |> element("[data-action='send-message']")
+      |> render_click()
+
+      # Wait for completion
+      Process.sleep(5000)
+
+      # Verify cleanup
+      final_room_count = RoomManager.count_rooms()
+      assert final_room_count == initial
+    end
+  end
+
+  defp cleanup_test_entities do
+    # Delete all test_e2e_* entities
+    RoomManager.list_rooms()
+    |> Enum.filter(&String.starts_with?(&1.key, @test_prefix))
+    |> Enum.each(&RoomManager.delete_room(&1.key))
+
+    EntityManager.list_entities(:npc)
+    |> Enum.filter(&String.starts_with?(&1.key, @test_prefix))
+    |> Enum.each(&EntityManager.delete_entity(&1.id))
+
+    # ... similar for items, quests, dialogues, cutscenes
   end
 end
 ```
 
-**Environment Variables**:
-```bash
-# .env or fly.toml secrets
-ANTHROPIC_API_KEY=sk-ant-...
-```
-
-**Dependencies**:
-```elixir
-# mix.exs
-defp deps do
-  [
-    # ... existing deps
-    {:anthropic, "~> 0.2"},  # Anthropic SDK for Elixir
-    {:jason, "~> 1.4"}       # JSON (already included)
-  ]
-end
-```
-
 ---
 
-## Future-Proofing
+## Implementation Roadmap
 
-### Player Housing Integration
+### Phase 1: Foundation (Weeks 1-4)
+- [ ] Update layout to 4-column with collapsible panels
+- [ ] Implement panel collapse/expand UI
+- [ ] Basic 3D viewport with room cubes
+- [ ] Basic hierarchy tree view
 
-World Builder supports **two modes**:
+### Phase 2: Core CRUD (Weeks 5-8)
+- [ ] Room CRUD (UI)
+- [ ] Exit management (UI)
+- [ ] NPC/Item CRUD (UI)
+- [ ] Inspector panel forms
+- [ ] Real-time PubSub updates
 
-**God Mode** (Admins):
-- Create entire worlds
-- Set spawn rates, loot tables
-- Design quests, NPCs, cutscenes
+### Phase 3: LLM Integration (Weeks 9-12)
+- [ ] OAuth authentication flow
+- [ ] Chat panel UI
+- [ ] Context builder
+- [ ] Tool definitions
+- [ ] Sandbox execution
+- [ ] Streaming responses
 
-**Player Mode** (In-Game):
-- Subset of tools for player housing
-- Restricted placement (only in owned plots)
-- Templates for furniture, decorations
-- Shared building permissions (co-op towns)
+### Phase 4: Advanced Features (Weeks 13-16)
+- [ ] Quest builder
+- [ ] Dialogue tree editor
+- [ ] Cutscene timeline
+- [ ] Templates system
+- [ ] Batch operations
 
-**Implementation**: Same UI, different permissions layer
-```elixir
-if user.role == :admin do
-  # Full access
-else
-  # Restricted to owned plots
-  # Limited entity types (furniture, decorations, not NPCs)
-end
-```
+### Phase 5: Validation & Polish (Weeks 17-20)
+- [ ] Real-time validation
+- [ ] Visual indicators (glow)
+- [ ] Console panel
+- [ ] Click-to-navigate errors
+- [ ] Auto-fix suggestions
 
-### Social/Cooperative Features
-
-- **Collaborative editing**: See other admins' cursors (LiveView Presence)
-- **Shared zones**: Multiple admins can edit same zone
-- **Permission system**: "Let Alice edit my town's shops"
-- **Template marketplace**: Share custom buildings/rooms
-- **Comments**: Leave notes on entities ("TODO: Balance this boss")
-
-### De-Emphasized Grinding Support
-
-LLM trained to generate:
-- **Meaningful quests**: Story-driven, not "kill 10 rats"
-- **Exploration rewards**: Discovery XP, hidden lore
-- **Social hubs**: Gathering spaces, not just combat zones
-- **Crafting/building**: Peaceful progression paths
-- **Calm, cozy content**: Tea ceremonies, stargazing, gardening
-
----
-
-## Success Metrics
-
-### Builder Efficiency
-- **Time to create 10-room zone**:
-  - Before: 2 hours (manual YAML)
-  - After: 20 minutes (LLM + visual tools)
-- **Error rate**:
-  - Before: 15% of content has bugs
-  - After: <2% (validation catches most)
-- **Content reuse**: 60% uses templates/LLM
-
-### World Quality
-- **Validation coverage**: 100% before deploy
-- **Player-reported bugs**:
-  - Before: 5 bugs/week
-  - After: <1 bug/week
-- **Content consistency**: Naming, balance, lore checks pass
-
-### Ease of Learning
-- **Onboarding time**:
-  - Before: 1 week to learn YAML
-  - After: 1 hour with visual tools
-- **Builder satisfaction**: NPS >8/10
-- **Feature adoption**: 80% use LLM, 90% use validation
-
----
-
-## Implementation Strategy
-
-See `IMPLEMENTATION_ROADMAP.md` for detailed week-by-week plan.
-
-**Phase 1** (Weeks 1-4): Foundation (Unity UI + basic 3D)
-**Phase 2** (Weeks 5-8): Core editing tools
-**Phase 3** (Weeks 9-12): Power features (NPCs, quests)
-**Phase 4** (Weeks 13-16): Advanced building (cutscenes, layout)
-**Phase 5** (Weeks 17-20): LLM integration
-**Phase 6** (Weeks 21-24): Validation & polish
-
----
-
-## Appendices
-
-### A. Keyboard Shortcuts
-
-| Key | Action |
-|-----|--------|
-| N | New room |
-| Del | Delete selected |
-| Ctrl+D | Duplicate |
-| Ctrl+Z | Undo |
-| Ctrl+Y | Redo |
-| E | Edit selected |
-| F2 | Rename |
-| Ctrl+F | Search |
-| Ctrl+S | Save |
-| Arrows | Nudge (1 unit) |
-| Shift+Arrows | Nudge (10 units) |
-
-### B. Visual Design Guidelines
-
-**Color Coding**:
-- Rooms: By type (green=safe, red=dangerous, blue=dungeon, yellow=town)
-- NPCs: Green=quest giver, red=enemy, blue=merchant, gray=ambient
-- Items: Yellow labels
-- Quests: Purple lines
-- Validation: Green=valid, yellow=warning, red=error
-
-**3D Aesthetics**:
-- Minimalist, semantic (cubes, not detailed 3D models)
-- Performance over photorealism (60 FPS on admin tool)
-- Clear labels (always readable)
-- Depth cues (shadows, size scaling)
-
-### C. Testing Strategy
-
-**Unit Tests**:
-- Validator integration
-- YAML generation from UI
-- Template instantiation
-
-**Integration Tests**:
-- LiveView ↔ React bridge
-- LLM API calls (mocked)
-- Git auto-commit
-
-**User Testing**:
-- Non-technical builder onboarding (observe, collect feedback)
-- Power user workflow (measure time savings)
-- LLM quality assessment (manual review of generated content)
+### Phase 6: Testing & Documentation (Weeks 21-24)
+- [ ] E2E test suite
+- [ ] Unit tests for managers
+- [ ] Performance optimization
+- [ ] Documentation
+- [ ] User onboarding
 
 ---
 
 **Document Maintainers**: @raymondluong, @claude
-**Last Review**: 2026-01-07
+**Last Review**: 2026-01-15
 **Next Review**: After Phase 1 completion

@@ -253,44 +253,16 @@ mix test test/loka/world_builder/
 
 ---
 
-### 5. Resolve WorldBuilderLive vs WorldDesignerTab Confusion
+### 5. ~~Resolve WorldBuilderLive vs WorldDesignerTab Confusion~~ ✅ RESOLVED
 
-**Priority:** P0 (if WorldBuilderLive is meant to be used)
-**Priority:** P2 (if it's experimental)
-**Effort:** 1 day clarification + 2-3 days migration
-**Risk:** Medium - Wasted effort, user confusion
+**Status:** COMPLETED (2026-01-15)
 
-**Files:**
-- `lib/loka_web/live/admin_live/world_builder_live.ex` (1262 lines, NOT mounted)
-- `lib/loka_web/live/admin_live/world_designer_tab.ex` (mounted in AdminLive)
-- `lib/loka_web/live/admin_live/world_designer/*.ex` (4 component files)
-
-**Investigation Questions:**
-1. Is WorldBuilderLive meant to replace WorldDesignerTab?
-2. Are they for different use cases (simple vs Unity-style)?
-3. Was the migration incomplete?
-4. Should WorldDesignerTab be deprecated?
-
-**Options:**
-
-**Option A: Complete Migration**
-1. Replace WorldDesignerTab with WorldBuilderLive in AdminLive
-2. Update routes to use WorldBuilderLive
-3. Delete old world_designer/ components
-4. Test thoroughly
-
-**Option B: Clarify Names & Coexist**
-1. Rename WorldBuilderLive → UnityStyleWorldEditor
-2. Rename WorldDesignerTab → SimpleWorldEditor
-3. Provide both in UI with clear labels
-4. Document when to use each
-
-**Option C: Delete Unused Code**
-1. If WorldBuilderLive is experimental, move to feature branch
-2. Delete if abandoned
-3. Focus on one system
-
-**Recommended:** Clarify with team/user, then execute appropriate option.
+**Resolution:** Option A executed - Complete Migration
+- Removed `world_designer_tab.ex`
+- Removed `world_designer/` component directory (4 files)
+- Removed `lib/loka/admin/world_designer/data_aggregator.ex`
+- Removed legacy documentation `docs/builder-reference/world-design/world-designer.md`
+- WorldBuilderLive is now the sole world building UI, mounted in AdminLive
 
 ---
 
