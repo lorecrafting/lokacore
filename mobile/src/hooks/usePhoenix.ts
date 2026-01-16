@@ -721,7 +721,10 @@ export function usePhoenix({ token, onDisconnect, onUpdateRequired }: UsePhoenix
   // ==========================================================================
 
   const navigate = useCallback((direction: string) => {
-    channelRef.current?.push('navigate', { direction });
+    console.log('[usePhoenix] navigate called:', direction, 'channel:', !!channelRef.current);
+    const push = channelRef.current?.push('navigate', { direction });
+    push?.receive('ok', (resp) => console.log('[usePhoenix] navigate ok:', resp));
+    push?.receive('error', (err) => console.log('[usePhoenix] navigate error:', err));
   }, []);
 
   // ==========================================================================

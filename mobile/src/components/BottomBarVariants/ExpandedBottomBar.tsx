@@ -165,8 +165,8 @@ export function ExpandedBottomBar({
           </View>
 
           <View style={styles.verticalStack}>
-            <VerticalButton dir="up" label="U" arrow="↑" arrowFirst={false} />
-            <VerticalButton dir="down" label="D" arrow="↓" arrowFirst={true} />
+            <VerticalButton dir="up" label="U" arrow="▲" arrowFirst={false} />
+            <VerticalButton dir="down" label="D" arrow="▼" arrowFirst={true} />
           </View>
         </View>
       </View>

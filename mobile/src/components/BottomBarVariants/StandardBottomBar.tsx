@@ -35,6 +35,7 @@ export function StandardBottomBar({
   }), [envColors]);
 
   const handleNavigate = useCallback((direction: string) => {
+    console.log('[StandardBottomBar] handleNavigate called:', direction, 'previewMode:', previewMode);
     if (previewMode) return;
     gameHaptics.navigate();
     onNavigate(direction);
@@ -135,8 +136,8 @@ export function StandardBottomBar({
 
           {/* Up/Down Stack */}
           <View style={styles.verticalStack}>
-            <VerticalButton dir="up" label="U" arrow="↑" arrowFirst={false} />
-            <VerticalButton dir="down" label="D" arrow="↓" arrowFirst={true} />
+            <VerticalButton dir="up" label="U" arrow="▲" arrowFirst={false} />
+            <VerticalButton dir="down" label="D" arrow="▼" arrowFirst={true} />
           </View>
         </View>
 

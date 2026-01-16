@@ -1,4 +1,4 @@
-# Collaborative Planet Economy - Proposal
+### Collaborative Planet Economy - Proposal
 
 > **Status**: Proposal (not yet implemented)
 > **Issue**: TBD

@@ -465,13 +465,16 @@ function SocialsTab({
   );
 }
 
-function SettingsTab({ onLogout }: { onLogout: () => void }) {
+function SettingsTab({ onLogout, onCloseMenu }: { onLogout: () => void; onCloseMenu: () => void }) {
   const { bottomBarVariant, showPicker } = useDesignVariants();
 
   const handleOpenLayoutPicker = useCallback(() => {
     gameHaptics.menuSelect();
-    showPicker();
-  }, [showPicker]);
+    // Close the menu first, then show picker after a brief delay
+    // This avoids React Native's modal stacking issues
+    onCloseMenu();
+    setTimeout(() => showPicker(), 100);
+  }, [showPicker, onCloseMenu]);
 
   return (
     <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
@@ -583,7 +586,7 @@ export function MenuPanel({
           />
         );
       case 'settings':
-        return <SettingsTab onLogout={onLogout} />;
+        return <SettingsTab onLogout={onLogout} onCloseMenu={onClose} />;
       default:
         return null;
     }
