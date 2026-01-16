@@ -530,6 +530,30 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     end
   end
 
+  # Validate all content (Ctrl+S shortcut)
+  @impl true
+  def handle_event("validate_all", _params, socket) do
+    rooms = socket.assigns.rooms
+    validation = ValidationManager.validation_summary(rooms)
+
+    {:noreply,
+     socket
+     |> assign(:validation, validation)
+     |> log_console(
+       :info,
+       "Validation complete: #{validation.errors} errors, #{validation.warnings} warnings"
+     )
+     |> push_event("validation_complete", %{results: validation.results})}
+  end
+
+  # Toggle grid visibility
+  @impl true
+  def handle_event("toggle_grid", _params, socket) do
+    {:noreply,
+     socket
+     |> push_event("toggle_grid", %{})}
+  end
+
   @impl true
   def handle_event("select_room", %{"key" => key}, socket) do
     {:noreply,

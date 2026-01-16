@@ -4617,6 +4617,65 @@ body:has(.ebook-page) {
   gap: 0.5rem;
 }
 
+/* Keyboard shortcuts help dropdown */
+.toolbar-help-dropdown {
+  position: relative;
+}
+
+.toolbar-help-dropdown .help-dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 6px;
+  padding: 0.75rem;
+  min-width: 200px;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.toolbar-help-dropdown:hover .help-dropdown-content {
+  display: block;
+}
+
+.help-dropdown-content h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.8rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.shortcut-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.shortcut-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.25rem 0;
+  font-size: 0.75rem;
+}
+
+.shortcut-keys {
+  background: #3a3a3a;
+  border-radius: 3px;
+  padding: 0.15rem 0.4rem;
+  font-family: monospace;
+  color: #fff;
+  font-size: 0.7rem;
+}
+
+.shortcut-desc {
+  color: #aaa;
+  margin-left: 1rem;
+}
+
 .animate-spin {
   animation: spin 1s linear infinite;
 }

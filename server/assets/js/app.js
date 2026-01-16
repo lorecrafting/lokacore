@@ -495,6 +495,138 @@ const Hooks = {
 
       // Send initial undo state
       this.pushEvent('undo_state_changed', undoManager.getState())
+
+      // Setup keyboard shortcuts
+      this.keydownHandler = this.handleKeydown.bind(this)
+      document.addEventListener('keydown', this.keydownHandler)
+    },
+
+    handleKeydown(e) {
+      // Skip if typing in an input/textarea
+      const target = e.target
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+        // Allow Escape to blur inputs
+        if (e.key === 'Escape') {
+          target.blur()
+        }
+        return
+      }
+
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0
+      const modKey = isMac ? e.metaKey : e.ctrlKey
+
+      // Ctrl+Z / Cmd+Z: Undo
+      if (modKey && !e.shiftKey && e.key.toLowerCase() === 'z') {
+        e.preventDefault()
+        undoManager.undo()
+        return
+      }
+
+      // Ctrl+Shift+Z / Cmd+Shift+Z or Ctrl+Y / Cmd+Y: Redo
+      if ((modKey && e.shiftKey && e.key.toLowerCase() === 'z') ||
+          (modKey && e.key.toLowerCase() === 'y')) {
+        e.preventDefault()
+        undoManager.redo()
+        return
+      }
+
+      // Ctrl+S / Cmd+S: Save (trigger validation)
+      if (modKey && e.key.toLowerCase() === 's') {
+        e.preventDefault()
+        this.pushEvent('validate_all', {})
+        return
+      }
+
+      // Delete / Backspace: Delete selected
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (this.selectedRoom) {
+          e.preventDefault()
+          this.pushEvent('delete_room', { id: this.selectedRoom })
+        } else if (this.selectedKeys && this.selectedKeys.length > 0) {
+          e.preventDefault()
+          this.pushEvent('batch_delete', {})
+        }
+        return
+      }
+
+      // Ctrl+D / Cmd+D: Duplicate selected
+      if (modKey && e.key.toLowerCase() === 'd') {
+        if (this.selectedRoom || (this.selectedKeys && this.selectedKeys.length > 0)) {
+          e.preventDefault()
+          this.pushEvent('batch_clone', { dx: 5, dy: 5, dz: 0 })
+        }
+        return
+      }
+
+      // Ctrl+A / Cmd+A: Select all in viewport
+      if (modKey && e.key.toLowerCase() === 'a') {
+        e.preventDefault()
+        const allKeys = this.rooms.map(r => r.key)
+        this.selectedKeys = allKeys
+        this.pushEvent('batch_select', { keys: allKeys })
+        return
+      }
+
+      // Escape: Deselect all
+      if (e.key === 'Escape') {
+        this.selectedRoom = null
+        this.selectedKeys = []
+        this.pushEvent('batch_select', { keys: [] })
+        this.pushEvent('select_room', { key: null })
+        this.render()
+        return
+      }
+
+      // Number keys 1-4: Toggle panels (also handled by LiveView but we can be consistent)
+      if (!modKey && !e.shiftKey && ['1', '2', '3', '4'].includes(e.key)) {
+        const panels = ['hierarchy', 'inspector', 'console', 'chat']
+        const panel = panels[parseInt(e.key) - 1]
+        if (panel) {
+          this.pushEvent('toggle_panel', { panel })
+        }
+        return
+      }
+
+      // ~ (backtick): Toggle console
+      if (e.key === '`' || e.key === '~') {
+        this.pushEvent('toggle_panel', { panel: 'console' })
+        return
+      }
+
+      // G: Toggle grid
+      if (e.key.toLowerCase() === 'g' && !modKey) {
+        this.pushEvent('toggle_grid', {})
+        return
+      }
+
+      // N: New entity dropdown / create room
+      if (e.key.toLowerCase() === 'n' && !modKey) {
+        this.pushEvent('create_room', {})
+        return
+      }
+
+      // /: Focus search
+      if (e.key === '/') {
+        e.preventDefault()
+        const searchInput = document.querySelector('.hierarchy-search input')
+        if (searchInput) {
+          searchInput.focus()
+        }
+        return
+      }
+
+      // Ctrl+G / Cmd+G: Open git commit modal
+      if (modKey && e.key.toLowerCase() === 'g') {
+        e.preventDefault()
+        this.pushEvent('show_commit_modal', {})
+        return
+      }
+
+      // F: Fit viewport to selection (send event to React)
+      if (e.key.toLowerCase() === 'f' && !modKey) {
+        // This would be handled by React viewport - future enhancement
+        return
+      }
     },
 
     updated() {
@@ -508,6 +640,10 @@ const Hooks = {
       // Cleanup React root
       if (this.root) {
         this.root.unmount()
+      }
+      // Cleanup keyboard listener
+      if (this.keydownHandler) {
+        document.removeEventListener('keydown', this.keydownHandler)
       }
     },
 

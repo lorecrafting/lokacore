@@ -85,13 +85,79 @@ defmodule LokaWeb.AdminLive.WorldBuilder.Toolbar do
       </div>
 
       <div class="toolbar-section">
-        <button class="toolbar-btn" phx-click="validate_quest_chains" title="Validate Quest Chains">
+        <button
+          class="toolbar-btn"
+          phx-click="validate_quest_chains"
+          title="Validate Quest Chains (Ctrl+S)"
+        >
           <.icon name="hero-shield-check" class="size-4" />
           <span style="font-size: 0.75rem; margin-left: 4px;">Validate</span>
+        </button>
+        <button class="toolbar-btn" phx-click="show_commit_modal" title="Git Commit (Ctrl+G)">
+          <.icon name="hero-cloud-arrow-up" class="size-4" />
+          <span style="font-size: 0.75rem; margin-left: 4px;">Commit</span>
         </button>
       </div>
 
       <div class="toolbar-section toolbar-right">
+        <div class="toolbar-help-dropdown">
+          <button class="toolbar-btn" title="Keyboard Shortcuts">
+            <.icon name="hero-question-mark-circle" class="size-4" />
+          </button>
+          <div class="help-dropdown-content">
+            <h4>Keyboard Shortcuts</h4>
+            <div class="shortcut-list">
+              <div class="shortcut-item">
+                <span class="shortcut-keys">Ctrl+Z</span>
+                <span class="shortcut-desc">Undo</span>
+              </div>
+              <div class="shortcut-item">
+                <span class="shortcut-keys">Ctrl+Y</span>
+                <span class="shortcut-desc">Redo</span>
+              </div>
+              <div class="shortcut-item">
+                <span class="shortcut-keys">Ctrl+S</span>
+                <span class="shortcut-desc">Validate All</span>
+              </div>
+              <div class="shortcut-item">
+                <span class="shortcut-keys">Ctrl+G</span>
+                <span class="shortcut-desc">Git Commit</span>
+              </div>
+              <div class="shortcut-item">
+                <span class="shortcut-keys">Delete</span>
+                <span class="shortcut-desc">Delete Selected</span>
+              </div>
+              <div class="shortcut-item">
+                <span class="shortcut-keys">Ctrl+D</span>
+                <span class="shortcut-desc">Duplicate</span>
+              </div>
+              <div class="shortcut-item">
+                <span class="shortcut-keys">Ctrl+A</span>
+                <span class="shortcut-desc">Select All</span>
+              </div>
+              <div class="shortcut-item">
+                <span class="shortcut-keys">Escape</span>
+                <span class="shortcut-desc">Deselect All</span>
+              </div>
+              <div class="shortcut-item">
+                <span class="shortcut-keys">1-4</span>
+                <span class="shortcut-desc">Toggle Panels</span>
+              </div>
+              <div class="shortcut-item">
+                <span class="shortcut-keys">`</span>
+                <span class="shortcut-desc">Toggle Console</span>
+              </div>
+              <div class="shortcut-item">
+                <span class="shortcut-keys">N</span>
+                <span class="shortcut-desc">New Room</span>
+              </div>
+              <div class="shortcut-item">
+                <span class="shortcut-keys">/</span>
+                <span class="shortcut-desc">Focus Search</span>
+              </div>
+            </div>
+          </div>
+        </div>
         <button
           class="toolbar-btn"
           phx-click="show_settings"
