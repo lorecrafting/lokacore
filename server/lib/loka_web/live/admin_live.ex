@@ -163,6 +163,7 @@ defmodule LokaWeb.AdminLive do
         <main class="admin-main">
           <.tab_content
             tab={@active_tab}
+            socket={@socket}
             stats={assigns[:stats]}
             players={assigns[:players]}
             rooms={assigns[:rooms]}
@@ -209,6 +210,7 @@ defmodule LokaWeb.AdminLive do
   # =============================================================================
 
   attr :tab, :atom, required: true
+  attr :socket, Phoenix.LiveView.Socket, required: true
   attr :stats, :map, default: nil
   attr :players, :list, default: nil
   attr :rooms, :list, default: nil
@@ -289,7 +291,7 @@ defmodule LokaWeb.AdminLive do
 
   defp tab_content(%{tab: :world_designer} = assigns) do
     ~H"""
-    <.live_component module={WorldBuilderLive} id="world-builder-tab" />
+    {live_render(@socket, WorldBuilderLive, id: "world-builder-tab")}
     """
   end
 
