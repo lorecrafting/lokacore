@@ -3807,6 +3807,190 @@ body:has(.ebook-page) {
   flex-direction: column;
 }
 
+/* Effects Panel (Cutscene Editor) */
+.effects-panel {
+  margin-top: 16px;
+  border-top: 1px solid #3d3d3d;
+  padding-top: 12px;
+}
+
+.effects-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.effects-header h4 {
+  font-size: 0.85rem;
+  color: #909090;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.effects-empty {
+  color: #606060;
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 8px;
+}
+
+.effects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.effect-item {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.effect-item select,
+.effect-item input {
+  flex: 1;
+  min-width: 60px;
+}
+
+/* Validation Display (Cutscene Editor) */
+.validation-display {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.75rem;
+}
+
+.validation-display.valid {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  color: #4ade80;
+}
+
+.validation-icon {
+  font-weight: bold;
+}
+
+.validation-errors,
+.validation-warnings {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.validation-error {
+  color: #f87171;
+}
+
+.validation-warning {
+  color: #fbbf24;
+}
+
+/* Preview Panel (Cutscene Editor) */
+.preview-panel {
+  margin-top: 12px;
+  border-top: 1px solid #3d3d3d;
+  padding-top: 12px;
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.preview-header h4 {
+  font-size: 0.85rem;
+  color: #909090;
+  margin: 0;
+}
+
+.preview-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.preview-empty {
+  color: #606060;
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 16px;
+}
+
+.preview-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.preview-step {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  background: #1e1e1e;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.preview-step:hover {
+  background: #252525;
+}
+
+.preview-step.active {
+  background: #3d3d3d;
+  box-shadow: 0 0 0 1px #4a9eff;
+}
+
+.step-number {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #4a9eff;
+  color: white;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.step-type {
+  color: #909090;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.step-text {
+  color: #c9c9c9;
+  font-size: 0.8rem;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.more-types {
+  cursor: pointer;
+  color: #909090;
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  margin-top: 8px;
+}
+
+.more-types:hover {
+  color: #c9c9c9;
+}
+
 /* ========================================================================
    WORLD BUILDER - SETTINGS MODAL
    ======================================================================== */
