@@ -37,7 +37,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     InspectorPanel,
     ConsolePanel,
     InputValidator,
-    SettingsModal
+    SettingsModal,
+    DialogueEditor
   }
 
   # Valid layout algorithms - prevents atom exhaustion attacks
@@ -79,6 +80,11 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:show_item_editor, false)
      |> assign(:show_quest_editor, false)
      |> assign(:show_cutscene_editor, false)
+     |> assign(:show_dialogue_editor, false)
+     |> assign(:editing_dialogue_npc, nil)
+     |> assign(:editing_dialogue_tree, %{})
+     |> assign(:dialogue_selected_node, nil)
+     |> assign(:dialogue_preview_mode, false)
      |> assign(:console_messages, [])
      |> assign(:show_create_modal, false)
      |> assign(:validation, validation)
@@ -335,6 +341,30 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
               data-on-save="create_cutscene"
               data-on-cancel="close_cutscene_editor"
             >
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <%!-- Dialogue Editor Modal --%>
+      <%= if @show_dialogue_editor do %>
+        <div class="modal-overlay" phx-click="close_dialogue_editor">
+          <div
+            class="modal-content modal-fullscreen"
+            phx-click-away="close_dialogue_editor"
+            style="width: 95vw; height: 90vh; max-width: none;"
+          >
+            <div class="modal-header">
+              <h3>Dialogue Tree Editor</h3>
+              <button phx-click="close_dialogue_editor" class="modal-close">&times;</button>
+            </div>
+            <div style="flex: 1; overflow: hidden;">
+              <DialogueEditor.dialogue_editor
+                dialogue_tree={@editing_dialogue_tree}
+                npc_key={@editing_dialogue_npc}
+                selected_node={@dialogue_selected_node}
+                show_preview={@dialogue_preview_mode}
+              />
             </div>
           </div>
         </div>
@@ -955,6 +985,156 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     {:noreply, assign(socket, :show_cutscene_editor, false)}
   end
 
+  # =============================================================================
+  # Dialogue Editor Event Handlers
+  # =============================================================================
+
+  def handle_event("show_dialogue_editor", %{"npc_key" => npc_key}, socket) do
+    # Load NPC's dialogue tree
+    npcs = socket.assigns.npcs
+    npc = Enum.find(npcs, fn n -> n.key == npc_key end)
+
+    dialogue_tree =
+      case npc do
+        nil -> %{}
+        npc -> get_in(npc, [:components, :dialogue_tree]) || %{}
+      end
+
+    {:noreply,
+     socket
+     |> assign(:show_dialogue_editor, true)
+     |> assign(:editing_dialogue_npc, npc_key)
+     |> assign(:editing_dialogue_tree, dialogue_tree)
+     |> assign(:dialogue_selected_node, nil)
+     |> assign(:dialogue_preview_mode, false)}
+  end
+
+  def handle_event("close_dialogue_editor", _params, socket) do
+    {:noreply,
+     socket
+     |> assign(:show_dialogue_editor, false)
+     |> assign(:editing_dialogue_npc, nil)
+     |> assign(:editing_dialogue_tree, %{})
+     |> assign(:dialogue_selected_node, nil)
+     |> assign(:dialogue_preview_mode, false)}
+  end
+
+  def handle_event("dialogue_select_node", %{"key" => node_key}, socket) do
+    {:noreply, assign(socket, :dialogue_selected_node, node_key)}
+  end
+
+  def handle_event("dialogue_toggle_preview", _params, socket) do
+    {:noreply, assign(socket, :dialogue_preview_mode, !socket.assigns.dialogue_preview_mode)}
+  end
+
+  def handle_event("dialogue_preview_reset", _params, socket) do
+    {:noreply,
+     socket
+     |> assign(:dialogue_selected_node, "start")
+     |> assign(:dialogue_preview_mode, true)}
+  end
+
+  def handle_event("dialogue_preview_choice", %{"next" => next}, socket) do
+    if next && next != "" do
+      {:noreply, assign(socket, :dialogue_selected_node, next)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_event("dialogue_add_node", params, socket) do
+    key = params["key"] || "node_#{:erlang.unique_integer([:positive])}"
+    tree = socket.assigns.editing_dialogue_tree
+
+    new_node = %{
+      "text" => "Enter dialogue text...",
+      "choices" => []
+    }
+
+    updated_tree = Map.put(tree, key, new_node)
+
+    {:noreply,
+     socket
+     |> assign(:editing_dialogue_tree, updated_tree)
+     |> assign(:dialogue_selected_node, key)
+     |> save_dialogue_tree(updated_tree)}
+  end
+
+  def handle_event("dialogue_delete_node", %{"key" => node_key}, socket) do
+    tree = socket.assigns.editing_dialogue_tree
+    updated_tree = Map.delete(tree, node_key)
+
+    selected =
+      if socket.assigns.dialogue_selected_node == node_key do
+        nil
+      else
+        socket.assigns.dialogue_selected_node
+      end
+
+    {:noreply,
+     socket
+     |> assign(:editing_dialogue_tree, updated_tree)
+     |> assign(:dialogue_selected_node, selected)
+     |> save_dialogue_tree(updated_tree)}
+  end
+
+  def handle_event("dialogue_update_node", params, socket) do
+    node_key = params["node_key"]
+    tree = socket.assigns.editing_dialogue_tree
+    node = tree[node_key] || %{}
+
+    # Update basic fields
+    updated_node =
+      node
+      |> maybe_update("text", params["text"])
+      |> maybe_update("speaker", params["speaker"])
+
+    # Update choices from form params
+    updated_node = update_node_choices(updated_node, params)
+
+    updated_tree = Map.put(tree, node_key, updated_node)
+
+    {:noreply,
+     socket
+     |> assign(:editing_dialogue_tree, updated_tree)
+     |> save_dialogue_tree(updated_tree)}
+  end
+
+  def handle_event("dialogue_add_choice", %{"node_key" => node_key}, socket) do
+    tree = socket.assigns.editing_dialogue_tree
+    node = tree[node_key] || %{}
+    choices = Map.get(node, "choices", [])
+
+    new_choice = %{
+      "text" => "Response option...",
+      "next" => nil
+    }
+
+    updated_node = Map.put(node, "choices", choices ++ [new_choice])
+    updated_tree = Map.put(tree, node_key, updated_node)
+
+    {:noreply,
+     socket
+     |> assign(:editing_dialogue_tree, updated_tree)
+     |> save_dialogue_tree(updated_tree)}
+  end
+
+  def handle_event("dialogue_delete_choice", %{"node_key" => node_key, "index" => index}, socket) do
+    index = String.to_integer(index)
+    tree = socket.assigns.editing_dialogue_tree
+    node = tree[node_key] || %{}
+    choices = Map.get(node, "choices", [])
+
+    updated_choices = List.delete_at(choices, index)
+    updated_node = Map.put(node, "choices", updated_choices)
+    updated_tree = Map.put(tree, node_key, updated_node)
+
+    {:noreply,
+     socket
+     |> assign(:editing_dialogue_tree, updated_tree)
+     |> save_dialogue_tree(updated_tree)}
+  end
+
   def handle_event("validate_quest_chains", _params, socket) do
     socket = log_console(socket, :info, "Running quest chain validation...")
 
@@ -1049,6 +1229,119 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   end
 
   defp parse_algorithm(_), do: {:error, :invalid_algorithm}
+
+  # Dialogue editor helper functions
+
+  defp maybe_update(map, _key, nil), do: map
+  defp maybe_update(map, _key, ""), do: Map.delete(map, "speaker")
+  defp maybe_update(map, key, value), do: Map.put(map, key, value)
+
+  defp update_node_choices(node, params) do
+    # Extract choice fields from params (choice_0_text, choice_0_next, etc.)
+    choice_params =
+      params
+      |> Enum.filter(fn {k, _v} -> String.starts_with?(k, "choice_") end)
+      |> Enum.group_by(fn {k, _v} ->
+        # Extract index: "choice_0_text" -> 0
+        k
+        |> String.split("_")
+        |> Enum.at(1)
+        |> String.to_integer()
+      end)
+
+    choices = Map.get(node, "choices", [])
+
+    updated_choices =
+      Enum.with_index(choices)
+      |> Enum.map(fn {choice, index} ->
+        choice_updates = Map.get(choice_params, index, [])
+
+        choice
+        |> update_choice_field(choice_updates, index, "text")
+        |> update_choice_field(choice_updates, index, "next")
+        |> update_choice_condition(choice_updates, index)
+        |> update_choice_action(choice_updates, index)
+      end)
+
+    Map.put(node, "choices", updated_choices)
+  end
+
+  defp update_choice_field(choice, updates, index, field) do
+    key = "choice_#{index}_#{field}"
+
+    case Enum.find(updates, fn {k, _v} -> k == key end) do
+      {_, ""} when field == "next" -> Map.put(choice, field, nil)
+      {_, value} -> Map.put(choice, field, value)
+      nil -> choice
+    end
+  end
+
+  defp update_choice_condition(choice, updates, index) do
+    type_key = "choice_#{index}_condition_type"
+    value_key = "choice_#{index}_condition_value"
+
+    type = get_param_value(updates, type_key)
+    value = get_param_value(updates, value_key)
+
+    if type && type != "" && value && value != "" do
+      Map.put(choice, "show_if", %{type => value})
+    else
+      Map.delete(choice, "show_if")
+    end
+  end
+
+  defp update_choice_action(choice, updates, index) do
+    type_key = "choice_#{index}_action_type"
+    value_key = "choice_#{index}_action_value"
+
+    type = get_param_value(updates, type_key)
+    value = get_param_value(updates, value_key)
+
+    if type && type != "" && value && value != "" do
+      Map.put(choice, "action", [type, value])
+    else
+      Map.delete(choice, "action")
+    end
+  end
+
+  defp get_param_value(updates, key) do
+    case Enum.find(updates, fn {k, _} -> k == key end) do
+      {_, value} -> value
+      nil -> nil
+    end
+  end
+
+  defp save_dialogue_tree(socket, tree) do
+    npc_key = socket.assigns.editing_dialogue_npc
+
+    if npc_key do
+      # Find NPC and update its dialogue tree
+      npcs = socket.assigns.npcs
+      npc = Enum.find(npcs, fn n -> n.key == npc_key end)
+
+      if npc do
+        # Update NPC's dialogue tree component
+        components = Map.get(npc, :components) || %{}
+        updated_components = Map.put(components, :dialogue_tree, tree)
+
+        case EntityManager.update_entity(npc.id, %{components: updated_components}) do
+          {:ok, _updated_npc} ->
+            updated_npcs = EntityManager.list_entities(:npc)
+
+            socket
+            |> assign(:npcs, updated_npcs)
+            |> log_console(:info, "Dialogue saved for #{npc_key}")
+
+          {:error, _reason} ->
+            log_console(socket, :error, "Failed to save dialogue")
+        end
+      else
+        socket
+      end
+    else
+      socket
+    end
+  end
 
   # Build CSS classes for panel container based on collapsed state
   defp panel_container_classes(collapsed_panels) do
