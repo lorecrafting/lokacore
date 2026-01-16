@@ -273,7 +273,9 @@ defmodule Loka.WorldBuilder.CutsceneManager do
 
       file_path = Path.join(@cutscenes_dir, "#{cutscene["id"]}.yml")
 
-      case YamlElixir.write_to_file(cutscene, file_path) do
+      yaml_content = build_cutscene_yaml(cutscene)
+
+      case File.write(file_path, yaml_content) do
         :ok ->
           :ok
 
@@ -284,6 +286,73 @@ defmodule Loka.WorldBuilder.CutsceneManager do
       {:error, reason} -> {:error, reason}
     end
   end
+
+  defp build_cutscene_yaml(cutscene) do
+    id = cutscene["id"]
+    trigger = cutscene["trigger"] || %{}
+    sequence = cutscene["sequence"] || []
+    effects = cutscene["effects"] || []
+
+    trigger_yaml = format_cutscene_map(trigger)
+    sequence_yaml = format_cutscene_list(sequence)
+    effects_yaml = format_cutscene_list(effects)
+
+    """
+    id: #{id}
+    trigger: #{trigger_yaml}
+    sequence: #{sequence_yaml}
+    effects: #{effects_yaml}
+    """
+  end
+
+  defp format_cutscene_map(map) when map == %{}, do: "{}"
+
+  defp format_cutscene_map(map) when is_map(map) do
+    inner =
+      map
+      |> Enum.map(fn {k, v} -> "#{k}: #{format_cutscene_value(v)}" end)
+      |> Enum.join(", ")
+
+    "{#{inner}}"
+  end
+
+  defp format_cutscene_list([]), do: "[]"
+
+  defp format_cutscene_list(items) when is_list(items) do
+    formatted =
+      items
+      |> Enum.map(fn item ->
+        if is_map(item) do
+          format_cutscene_map(item)
+        else
+          format_cutscene_value(item)
+        end
+      end)
+      |> Enum.join(", ")
+
+    "[#{formatted}]"
+  end
+
+  defp format_cutscene_value(value) when is_binary(value) do
+    "\"#{escape_cutscene_string(value)}\""
+  end
+
+  defp format_cutscene_value(value) when is_integer(value), do: Integer.to_string(value)
+  defp format_cutscene_value(value) when is_float(value), do: Float.to_string(value)
+  defp format_cutscene_value(value) when is_boolean(value), do: Atom.to_string(value)
+  defp format_cutscene_value(value) when is_nil(value), do: "null"
+  defp format_cutscene_value(value) when is_map(value), do: format_cutscene_map(value)
+  defp format_cutscene_value(value) when is_list(value), do: format_cutscene_list(value)
+  defp format_cutscene_value(value), do: inspect(value)
+
+  defp escape_cutscene_string(str) when is_binary(str) do
+    str
+    |> String.replace("\\", "\\\\")
+    |> String.replace("\"", "\\\"")
+    |> String.replace("\n", "\\n")
+  end
+
+  defp escape_cutscene_string(_), do: ""
 
   defp load_cutscene_file(filename) do
     file_path = Path.join(@cutscenes_dir, filename)

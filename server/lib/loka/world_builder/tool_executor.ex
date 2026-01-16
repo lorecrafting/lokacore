@@ -114,7 +114,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
     room_key = input["room_key"]
 
     case RoomManager.delete_room(room_key) do
-      :ok ->
+      {:ok, _deleted_room} ->
         {:ok,
          %{
            success: true,
@@ -166,17 +166,22 @@ defmodule Loka.WorldBuilder.ToolExecutor do
   # =============================================================================
 
   defp execute_create_npc(input) do
+    level = input["level"] || 1
+
     attrs = %{
       key: input["key"],
       name: input["name"],
       description: input["description"],
-      level: input["level"] || 1,
+      level: level,
       tags: input["tags"] || [],
       parent_key: input["room_key"]
     }
 
     case EntityManager.create_entity(:npc, attrs) do
       {:ok, npc} ->
+        # Level is stored in components, extract it safely
+        npc_level = get_in(npc.components, ["npc_data", "level"]) || level
+
         {:ok,
          %{
            success: true,
@@ -185,7 +190,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
              key: npc.key,
              name: npc.name,
              description: npc.description,
-             level: npc.level
+             level: npc_level
            }
          }}
 
@@ -195,17 +200,22 @@ defmodule Loka.WorldBuilder.ToolExecutor do
   end
 
   defp execute_create_item(input) do
+    item_type = input["item_type"] || "misc"
+
     attrs = %{
       key: input["key"],
       name: input["name"],
       description: input["description"],
-      item_type: input["item_type"],
+      item_type: item_type,
       tags: input["tags"] || [],
       parent_key: input["room_key"]
     }
 
     case EntityManager.create_entity(:item, attrs) do
       {:ok, item} ->
+        # Item type is stored in components, extract it safely
+        stored_item_type = get_in(item.components, ["item", "item_type"]) || item_type
+
         {:ok,
          %{
            success: true,
@@ -214,7 +224,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
              key: item.key,
              name: item.name,
              description: item.description,
-             item_type: item.item_type
+             item_type: stored_item_type
            }
          }}
 

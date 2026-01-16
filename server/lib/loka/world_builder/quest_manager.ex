@@ -288,9 +288,9 @@ defmodule Loka.WorldBuilder.QuestManager do
 
       file_path = Path.join(@quests_dir, "#{quest.key}.yml")
 
-      yaml_data = build_yaml_data(quest)
+      yaml_content = build_yaml_content(quest)
 
-      case YamlElixir.write_to_file(yaml_data, file_path) do
+      case File.write(file_path, yaml_content) do
         :ok ->
           # Reload quests to update registry
           Loader.reload()
@@ -304,26 +304,73 @@ defmodule Loka.WorldBuilder.QuestManager do
     end
   end
 
-  defp build_yaml_data(quest) do
-    base = %{
-      "key" => quest.key,
-      "type" => "quest",
-      "name" => quest.name,
-      "description" => quest.description || "",
-      "tags" => quest.tags || []
-    }
+  defp build_yaml_content(quest) do
+    tags_yaml = format_yaml_list(quest.tags || [])
 
-    # Add data fields
-    data_map =
-      quest.data
+    # Build data section
+    data_yaml = build_data_yaml(quest.data || %{})
+
+    """
+    key: #{quest.key}
+    type: quest
+    name: "#{escape_yaml_string(quest.name || "")}"
+    description: "#{escape_yaml_string(quest.description || "")}"
+    tags: #{tags_yaml}
+    data:
+    #{data_yaml}
+    """
+  end
+
+  defp build_data_yaml(data) when is_map(data) do
+    data
+    |> Enum.map(fn {k, v} ->
+      key = if is_atom(k), do: Atom.to_string(k), else: k
+      "  #{key}: #{format_yaml_value(v)}"
+    end)
+    |> Enum.join("\n")
+  end
+
+  defp format_yaml_value(value) when is_binary(value), do: "\"#{escape_yaml_string(value)}\""
+  defp format_yaml_value(value) when is_integer(value), do: Integer.to_string(value)
+  defp format_yaml_value(value) when is_float(value), do: Float.to_string(value)
+  defp format_yaml_value(value) when is_boolean(value), do: Atom.to_string(value)
+  defp format_yaml_value(value) when is_nil(value), do: "null"
+  defp format_yaml_value(value) when is_list(value), do: format_yaml_list(value)
+
+  defp format_yaml_value(value) when is_map(value) do
+    # For nested maps, use flow style
+    inner =
+      value
       |> Enum.map(fn {k, v} ->
         key = if is_atom(k), do: Atom.to_string(k), else: k
-        {key, v}
+        "#{key}: #{format_yaml_value(v)}"
       end)
-      |> Map.new()
+      |> Enum.join(", ")
 
-    Map.merge(base, %{"data" => data_map})
+    "{#{inner}}"
   end
+
+  defp format_yaml_value(value), do: inspect(value)
+
+  defp format_yaml_list([]), do: "[]"
+
+  defp format_yaml_list(items) when is_list(items) do
+    inner =
+      items
+      |> Enum.map(&format_yaml_value/1)
+      |> Enum.join(", ")
+
+    "[#{inner}]"
+  end
+
+  defp escape_yaml_string(str) when is_binary(str) do
+    str
+    |> String.replace("\\", "\\\\")
+    |> String.replace("\"", "\\\"")
+    |> String.replace("\n", "\\n")
+  end
+
+  defp escape_yaml_string(_), do: ""
 
   defp ensure_quests_dir do
     unless File.exists?(@quests_dir) do

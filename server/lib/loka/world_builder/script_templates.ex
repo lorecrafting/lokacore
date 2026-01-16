@@ -400,7 +400,7 @@ defmodule Loka.WorldBuilder.ScriptTemplates do
     if delay > 0 do
       """
       # Message on Enter (with delay)
-      after(#{delay}, fn ->
+      schedule_after(#{delay}, fn ->
         message(player, "#{escape_string(message)}")
       end)
       """
@@ -761,7 +761,7 @@ defmodule Loka.WorldBuilder.ScriptTemplates do
     """
     # Death Respawn
     message(player, "#{escape_string(death_message)}")#{item_loss_code}#{gold_loss_code}
-    after(3000, fn ->
+    schedule_after(3000, fn ->
       teleport(player, "#{respawn_room}")
       message(player, "#{escape_string(respawn_message)}")
       revive(player)
