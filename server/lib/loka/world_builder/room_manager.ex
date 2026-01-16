@@ -46,11 +46,15 @@ defmodule Loka.WorldBuilder.RoomManager do
   Returns {:ok, room_map} or {:error, :not_found}
   """
   def get_room(room_id) when is_binary(room_id) do
-    case Registry.get(room_id) do
-      {:ok, entity} when entity.subtype == :room ->
+    case get_room_entity(room_id) do
+      {:ok, {:registry, entity}} ->
         {:ok, enrich_room_for_frontend(entity)}
 
-      {:ok, _entity} ->
+      {:ok, {:db, entity_schema}} ->
+        entity = Entities.to_entity(entity_schema)
+        {:ok, enrich_room_for_frontend_from_entity(entity)}
+
+      {:error, :not_a_room} ->
         {:error, :not_a_room}
 
       {:error, :not_found} ->
@@ -69,6 +73,13 @@ defmodule Loka.WorldBuilder.RoomManager do
   def create_room(attrs) when is_map(attrs) do
     attrs = ensure_atom_keys(attrs)
 
+    # Build exits component if provided
+    exits = Map.get(attrs, :exits, %{})
+    # Convert atom keys to string keys for exits
+    exits = for {k, v} <- exits, into: %{}, do: {to_string(k), v}
+
+    components = if map_size(exits) > 0, do: %{"exits" => exits}, else: %{}
+
     # Build keyword list for Spawner.create_room
     create_attrs = [
       key: Map.get(attrs, :key),
@@ -77,7 +88,8 @@ defmodule Loka.WorldBuilder.RoomManager do
       x: Map.get(attrs, :x, 0),
       y: Map.get(attrs, :y, 0),
       z: Map.get(attrs, :z, 0),
-      tags: Map.get(attrs, :tags, [])
+      tags: Map.get(attrs, :tags, []),
+      components: components
     ]
 
     case Spawner.create_room(create_attrs) do
@@ -101,26 +113,41 @@ defmodule Loka.WorldBuilder.RoomManager do
   Returns {:ok, room_map} or {:error, reason}
   """
   def update_room(room_id, attrs) when is_binary(room_id) and is_map(attrs) do
-    with {:ok, entity} <- Registry.get(room_id),
-         :ok <- validate_room_entity(entity) do
-      # Prepare updates with coordinates in attributes
-      updates = prepare_updates(attrs)
+    case get_room_entity(room_id) do
+      {:ok, {:registry, _entity}} ->
+        # Room is in Registry (YAML prototype) - use EntityServer
+        updates = prepare_updates(attrs)
 
-      case EntityServer.update(room_id, updates) do
-        {:ok, _} ->
-          Logger.info("[RoomManager] Updated room: #{room_id}")
-          get_room(room_id)
+        case EntityServer.update(room_id, updates) do
+          {:ok, _} ->
+            Logger.info("[RoomManager] Updated room (registry): #{room_id}")
+            get_room(room_id)
 
-        {:error, reason} ->
-          Logger.error("[RoomManager] Update failed: #{inspect(reason)}")
-          {:error, "Failed to update room: #{inspect(reason)}"}
-      end
-    else
+          {:error, reason} ->
+            Logger.error("[RoomManager] Update failed: #{inspect(reason)}")
+            {:error, "Failed to update room: #{inspect(reason)}"}
+        end
+
+      {:ok, {:db, entity_schema}} ->
+        # Room is in DB - use Entities.update_entity directly
+        updates = prepare_db_updates(attrs)
+
+        case Entities.update_entity(entity_schema, updates) do
+          {:ok, updated_schema} ->
+            Logger.info("[RoomManager] Updated room (db): #{room_id}")
+            entity = Entities.to_entity(updated_schema)
+            {:ok, enrich_room_for_frontend_from_entity(entity)}
+
+          {:error, reason} ->
+            Logger.error("[RoomManager] Update failed: #{inspect(reason)}")
+            {:error, "Failed to update room: #{inspect(reason)}"}
+        end
+
+      {:error, :not_a_room} ->
+        {:error, :not_a_room}
+
       {:error, :not_found} ->
-        {:error, :room_not_found}
-
-      {:error, reason} ->
-        {:error, reason}
+        {:error, :not_found}
     end
   end
 
@@ -130,23 +157,39 @@ defmodule Loka.WorldBuilder.RoomManager do
   Returns :ok or {:error, reason}
   """
   def delete_room(room_id) when is_binary(room_id) do
-    with {:ok, entity} <- Registry.get(room_id),
-         :ok <- validate_room_entity(entity) do
-      case Spawner.despawn(room_id) do
-        :ok ->
-          Logger.info("[RoomManager] Deleted room: #{room_id}")
-          :ok
+    case get_room_entity(room_id) do
+      {:ok, {:registry, entity}} ->
+        # Room is in Registry - use Spawner.despawn
+        case Spawner.despawn(room_id) do
+          :ok ->
+            Logger.info("[RoomManager] Deleted room (registry): #{room_id}")
+            {:ok, enrich_room_for_frontend(entity)}
 
-        {:error, reason} ->
-          Logger.error("[RoomManager] Delete failed: #{inspect(reason)}")
-          {:error, reason}
-      end
-    else
+          {:error, reason} ->
+            Logger.error("[RoomManager] Delete failed: #{inspect(reason)}")
+            {:error, reason}
+        end
+
+      {:ok, {:db, entity_schema}} ->
+        # Room is in DB - use Entities.delete_entity
+        entity = Entities.to_entity(entity_schema)
+        room_map = enrich_room_for_frontend_from_entity(entity)
+
+        case Entities.delete_entity(entity_schema) do
+          {:ok, _} ->
+            Logger.info("[RoomManager] Deleted room (db): #{room_id}")
+            {:ok, room_map}
+
+          {:error, reason} ->
+            Logger.error("[RoomManager] Delete failed: #{inspect(reason)}")
+            {:error, reason}
+        end
+
+      {:error, :not_a_room} ->
+        {:error, :not_a_room}
+
       {:error, :not_found} ->
-        {:error, :room_not_found}
-
-      {:error, reason} ->
-        {:error, reason}
+        {:error, :not_found}
     end
   end
 
@@ -230,10 +273,9 @@ defmodule Loka.WorldBuilder.RoomManager do
     Map.get(room.components, "exits", %{})
   end
 
-  defp get_exits_from_entity(_room) do
-    # For newly created rooms, exits are stored as separate Entity structs
-    # This will be populated by list_rooms which queries the database
-    %{}
+  defp get_exits_from_entity(%Entity{} = room) do
+    # Get exits from components
+    Map.get(room.components, "exits", %{})
   end
 
   defp ensure_atom_keys(attrs) when is_map(attrs) do
@@ -275,6 +317,92 @@ defmodule Loka.WorldBuilder.RoomManager do
     end
   end
 
-  defp validate_room_entity(%TypedObject{type: :entity, subtype: :room}), do: :ok
-  defp validate_room_entity(_), do: {:error, :not_a_room}
+  @doc false
+  # Gets a room entity from either Registry (YAML) or Database.
+  # Returns {:ok, {:registry, TypedObject}} or {:ok, {:db, EntitySchema}} or {:error, reason}
+  defp get_room_entity(room_id) when is_binary(room_id) do
+    # First try Registry (YAML prototypes)
+    case Registry.get(room_id) do
+      {:ok, entity} when entity.subtype == :room ->
+        {:ok, {:registry, entity}}
+
+      {:ok, _entity} ->
+        {:error, :not_a_room}
+
+      {:error, :not_found} ->
+        # Not in Registry, try Database
+        get_room_from_db(room_id)
+    end
+  end
+
+  defp get_room_from_db(room_id) do
+    # Try by ID first, then by key
+    case Entities.get_entity(room_id) do
+      %{type: :room} = schema ->
+        {:ok, {:db, schema}}
+
+      %{} ->
+        {:error, :not_a_room}
+
+      nil ->
+        # Try by key
+        case Entities.get_entity_by_key(room_id) do
+          %{type: :room} = schema ->
+            {:ok, {:db, schema}}
+
+          %{} ->
+            {:error, :not_a_room}
+
+          nil ->
+            {:error, :not_found}
+        end
+    end
+  end
+
+  # Prepare updates for DB entities (EntitySchema format)
+  defp prepare_db_updates(attrs) when is_map(attrs) do
+    attrs = ensure_atom_keys(attrs)
+
+    # Map WorldBuilder fields to EntitySchema fields
+    updates = %{}
+
+    updates =
+      if Map.has_key?(attrs, :name),
+        do: Map.put(updates, :short_desc, attrs[:name]),
+        else: updates
+
+    updates =
+      if Map.has_key?(attrs, :description),
+        do: Map.put(updates, :extra_desc, attrs[:description]),
+        else: updates
+
+    updates =
+      if Map.has_key?(attrs, :tags), do: Map.put(updates, :tags, attrs[:tags]), else: updates
+
+    # Handle coordinates - store in components
+    updates =
+      if Map.has_key?(attrs, :x) || Map.has_key?(attrs, :y) || Map.has_key?(attrs, :z) do
+        coords = %{
+          "x" => Map.get(attrs, :x, 0),
+          "y" => Map.get(attrs, :y, 0),
+          "z" => Map.get(attrs, :z, 0)
+        }
+
+        existing_components = Map.get(updates, :components, %{})
+        Map.put(updates, :components, Map.put(existing_components, "coordinates", coords))
+      else
+        updates
+      end
+
+    # Handle exits if provided
+    updates =
+      if Map.has_key?(attrs, :exits) do
+        existing_components = Map.get(updates, :components, %{})
+        Map.put(updates, :components, Map.put(existing_components, "exits", attrs[:exits]))
+      else
+        updates
+      end
+
+    updates
+  end
 end
