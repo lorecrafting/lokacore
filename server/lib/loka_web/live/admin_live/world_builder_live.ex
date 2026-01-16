@@ -25,7 +25,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     QuestManager,
     CutsceneManager,
     LayoutManager,
-    ValidationManager
+    ValidationManager,
+    ToolExecutor
   }
 
   alias Loka.Testing.Content.DialogueQuestChainValidator
@@ -1205,6 +1206,62 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
   def handle_event("clear_console", _params, socket) do
     {:noreply, assign(socket, :console_messages, [])}
+  end
+
+  # =============================================================================
+  # LLM Tool Execution
+  # =============================================================================
+
+  def handle_event("execute_tool", %{"name" => tool_name, "input" => input}, socket) do
+    # Execute tool via ToolExecutor
+    result = ToolExecutor.execute(tool_name, input)
+    formatted = ToolExecutor.format_result(result)
+
+    # Log to console
+    socket =
+      case result do
+        {:ok, _} ->
+          log_console(socket, :info, "[Tool] #{tool_name}: #{formatted.message}")
+
+        {:error, _} ->
+          log_console(socket, :error, "[Tool] #{tool_name}: #{formatted.message}")
+      end
+
+    # Refresh rooms if a room-related tool was executed
+    socket =
+      if tool_name in [
+           "create_room",
+           "update_room",
+           "delete_room",
+           "create_exit",
+           "remove_exit",
+           "batch_create_rooms"
+         ] do
+        refresh_rooms_with_validation(socket)
+      else
+        socket
+      end
+
+    # Refresh NPCs/items if entity tools were used
+    socket =
+      case tool_name do
+        "create_npc" ->
+          assign(socket, :npcs, EntityManager.list_entities(:npc))
+
+        "create_item" ->
+          assign(socket, :items, EntityManager.list_entities(:item))
+
+        _ ->
+          socket
+      end
+
+    # Send tool result back to ChatPanel
+    {:noreply,
+     socket
+     |> push_event("tool_result", %{
+       tool: tool_name,
+       result: formatted
+     })}
   end
 
   # =============================================================================
