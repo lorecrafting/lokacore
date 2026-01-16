@@ -52,6 +52,8 @@ defmodule Loka.Engine.Locks do
   - `in_room(room_key)` - Accessor is in room with key
   """
 
+  require Logger
+
   alias Loka.Engine.Entity
 
   # ETS table for custom lock functions
@@ -123,6 +125,7 @@ defmodule Loka.Engine.Locks do
   @spec check(Entity.t() | map(), Entity.t() | map(), String.t()) :: :ok | {:denied, String.t()}
   def check(entity, accessor, access_type) do
     lock_string = get_lock(entity, access_type)
+    entity_key = entity[:key] || entity["key"] || "unknown"
 
     case lock_string do
       nil ->
@@ -136,12 +139,24 @@ defmodule Loka.Engine.Locks do
         case parse(lock_str) do
           {:ok, ast} ->
             if evaluate(ast, entity, accessor) do
+              Logger.debug(
+                "[LOCKS] Access granted: entity=#{entity_key} type=#{access_type} lock=#{lock_str}"
+              )
+
               :ok
             else
+              Logger.debug(
+                "[LOCKS] Access denied: entity=#{entity_key} type=#{access_type} lock=#{lock_str}"
+              )
+
               {:denied, "Access denied: #{access_type}"}
             end
 
           {:error, reason} ->
+            Logger.warning(
+              "[LOCKS] Invalid lock: entity=#{entity_key} type=#{access_type} error=#{reason}"
+            )
+
             {:denied, "Invalid lock: #{reason}"}
         end
     end

@@ -247,7 +247,8 @@ components:
           next: null
 
     alchemist_accepted:
-      text: "Good. The process is simple - shaping the fragrant powder into a cone requires only mindful attention. Go now and prepare the incense. When you have done so, return to me."
+      text: "Good. The process is simple - shaping the fragrant powder into a cone requires only mindful attention. [He hands you some dried licorice root.] Here is gan cao - shape it into a cone with care. When you have done so, return to me."
+      action: ["give_item", "gan_cao"]
       choices:
         - text: "I will return with the incense."
           next: null

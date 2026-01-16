@@ -12,6 +12,8 @@ defmodule Loka.Game.Actions.Combat do
   - `:combat_tick` - Process combat round (called by timer)
   """
 
+  require Logger
+
   alias Loka.Game.Actions.{Context, Result}
   alias Loka.Framework.Combat
   alias Loka.Framework.Combat.RespawnManager
@@ -25,8 +27,16 @@ defmodule Loka.Game.Actions.Combat do
   """
   @spec attack(Context.t(), String.t(), map()) :: {:ok, Result.t()} | {:error, String.t()}
   def attack(ctx, entity_id, entity) do
+    Logger.info(
+      "[COMBAT] Attack initiated: player_id=#{ctx.player_id} target=#{entity_id} target_name=#{entity.name}"
+    )
+
     case Combat.start_combat(entity_id, ctx.game_state) do
       {:ok, combat_state} ->
+        Logger.info(
+          "[COMBAT] Combat started: player_id=#{ctx.player_id} enemy=#{entity.name} enemy_hp=#{inspect(combat_state.enemy.health)}"
+        )
+
         result =
           Result.new(
             state: %{combat: combat_state},
@@ -46,9 +56,17 @@ defmodule Loka.Game.Actions.Combat do
         {:ok, result}
 
       {:error, :not_combatant} ->
+        Logger.debug(
+          "[COMBAT] Attack refused - not combatant: player_id=#{ctx.player_id} target=#{entity_id}"
+        )
+
         {:error, "The #{entity.name} doesn't want to fight."}
 
-      {:error, _reason} ->
+      {:error, reason} ->
+        Logger.warning(
+          "[COMBAT] Attack failed: player_id=#{ctx.player_id} target=#{entity_id} reason=#{inspect(reason)}"
+        )
+
         {:error, "You can't attack that."}
     end
   end
@@ -59,10 +77,15 @@ defmodule Loka.Game.Actions.Combat do
   @spec flee(Context.t()) :: {:ok, Result.t()} | {:error, String.t()}
   def flee(ctx) do
     combat = ctx.combat
+    Logger.debug("[COMBAT] Flee attempted: player_id=#{ctx.player_id}")
 
     if combat do
       case Combat.player_action(combat, :flee, ctx.game_state) do
         {:ok, _combat, %{success: true}} ->
+          Logger.info(
+            "[COMBAT] Flee succeeded: player_id=#{ctx.player_id} enemy=#{combat.enemy.name}"
+          )
+
           result =
             Result.new(
               state: %{combat: nil},
@@ -76,6 +99,10 @@ defmodule Loka.Game.Actions.Combat do
           {:ok, result}
 
         {:ok, new_combat, %{success: false}} ->
+          Logger.info(
+            "[COMBAT] Flee blocked: player_id=#{ctx.player_id} enemy=#{combat.enemy.name}"
+          )
+
           result =
             Result.new(
               state: %{combat: new_combat},
@@ -87,12 +114,18 @@ defmodule Loka.Game.Actions.Combat do
           {:ok, result}
 
         {:error, :on_cooldown} ->
+          Logger.debug("[COMBAT] Flee on cooldown: player_id=#{ctx.player_id}")
           {:error, "You must wait before trying to flee again."}
 
-        {:error, _} ->
+        {:error, reason} ->
+          Logger.warning(
+            "[COMBAT] Flee failed: player_id=#{ctx.player_id} reason=#{inspect(reason)}"
+          )
+
           {:error, "Failed to flee."}
       end
     else
+      Logger.debug("[COMBAT] Flee attempted but not in combat: player_id=#{ctx.player_id}")
       {:error, "You're not in combat."}
     end
   end
@@ -105,16 +138,26 @@ defmodule Loka.Game.Actions.Combat do
   @spec process_tick(Context.t()) :: {:ok, Result.t()} | {:error, String.t()}
   def process_tick(ctx) do
     combat = ctx.combat
+    Logger.debug("[COMBAT] Processing tick: player_id=#{ctx.player_id}")
 
     if combat do
       case Combat.execute_combat_tick(combat, ctx.game_state) do
         {:victory, new_combat, rewards, updated_game_state} ->
+          Logger.info(
+            "[COMBAT] Victory: player_id=#{ctx.player_id} enemy=#{new_combat.enemy.name} xp=#{rewards.xp} gold=#{rewards.gold}"
+          )
+
           handle_victory(ctx, new_combat, rewards, updated_game_state)
 
         {:ok, new_combat, player_damage, updated_game_state} ->
+          Logger.debug(
+            "[COMBAT] Tick continues: player_id=#{ctx.player_id} player_damage=#{player_damage} enemy_hp=#{inspect(new_combat.enemy.health)}"
+          )
+
           handle_combat_continues(ctx, new_combat, player_damage, updated_game_state)
       end
     else
+      Logger.debug("[COMBAT] Tick skipped - not in combat: player_id=#{ctx.player_id}")
       {:error, "Not in combat."}
     end
   end
@@ -124,6 +167,8 @@ defmodule Loka.Game.Actions.Combat do
   # =============================================================================
 
   defp handle_victory(_ctx, combat, rewards, game_state) do
+    Logger.debug("[COMBAT] Handling victory: enemy_id=#{combat.enemy_id}")
+
     # Despawn the mob
     RespawnManager.despawn_mob(combat.enemy_id)
 
@@ -173,9 +218,17 @@ defmodule Loka.Game.Actions.Combat do
     {:ok, new_game_state} = PlayerGameState.set_health(game_state, new_health_map)
 
     if damage_result.is_fatal do
+      Logger.info(
+        "[COMBAT] Defeat: player_id=#{ctx.player_id} enemy=#{combat.enemy.name} fatal_damage=#{player_damage}"
+      )
+
       handle_defeat(ctx, combat, new_game_state)
     else
       new_current = new_health_map[:current] || new_health_map["current"]
+
+      Logger.debug(
+        "[COMBAT] Combat continues: player_id=#{ctx.player_id} player_hp=#{new_current}/#{max_hp}"
+      )
 
       result =
         Result.new(

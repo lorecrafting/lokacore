@@ -12,6 +12,8 @@ defmodule Loka.Game.Actions.Shop do
   - `:close_shop` - Close shop interface
   """
 
+  require Logger
+
   alias Loka.Game.Actions.{Context, Result}
   alias Loka.Framework.Player.GameState, as: PlayerGameState
   alias Loka.Framework.Economy
@@ -21,10 +23,15 @@ defmodule Loka.Game.Actions.Shop do
   Open a shop with an NPC merchant.
   """
   @spec open_shop(Context.t(), String.t(), map()) :: {:ok, Result.t()} | {:error, String.t()}
-  def open_shop(_ctx, entity_id, entity) do
+  def open_shop(ctx, entity_id, entity) do
     shop_data = get_shop_data(entity)
 
+    Logger.debug(
+      "[SHOP] Opening shop: player_id=#{ctx.player_id} npc=#{entity_id} items=#{length(shop_data.items)} buys=#{length(shop_data.buys)}"
+    )
+
     if Enum.empty?(shop_data.items) and Enum.empty?(shop_data.buys) do
+      Logger.debug("[SHOP] Shop empty: npc=#{entity_id}")
       {:error, "This merchant has nothing to trade."}
     else
       result =
@@ -49,17 +56,29 @@ defmodule Loka.Game.Actions.Shop do
   """
   @spec buy_item(Context.t(), String.t(), String.t(), map()) ::
           {:ok, Result.t()} | {:error, String.t()}
-  def buy_item(ctx, _npc_id, item_key, npc_entity) do
+  def buy_item(ctx, npc_id, item_key, npc_entity) do
     game_state = ctx.game_state
     shop_data = get_shop_data(npc_entity)
     item_info = Enum.find(shop_data.items, fn i -> i.key == item_key end)
     player_currency = Economy.get_currency(game_state)
 
+    Logger.debug(
+      "[SHOP] Buy attempt: player_id=#{ctx.player_id} item=#{item_key} gold=#{player_currency}"
+    )
+
     cond do
       is_nil(item_info) ->
+        Logger.debug(
+          "[SHOP] Buy failed - item not available: player_id=#{ctx.player_id} item=#{item_key} npc=#{npc_id}"
+        )
+
         {:error, "That item is not available."}
 
       player_currency < item_info.price ->
+        Logger.debug(
+          "[SHOP] Buy failed - insufficient gold: player_id=#{ctx.player_id} item=#{item_key} cost=#{item_info.price} have=#{player_currency}"
+        )
+
         {:error, "You don't have enough gold."}
 
       true ->
@@ -73,6 +92,10 @@ defmodule Loka.Game.Actions.Shop do
             {:ok, new_game_state} =
               PlayerGameState.update_state(state_after_deduct, %{inventory: new_inventory})
 
+            Logger.info(
+              "[SHOP] Purchase completed: player_id=#{ctx.player_id} item=#{item_key} cost=#{item_info.price} remaining_gold=#{Economy.get_currency(new_game_state)}"
+            )
+
             result =
               Result.new(
                 state: %{game_state: new_game_state},
@@ -85,7 +108,11 @@ defmodule Loka.Game.Actions.Shop do
 
             {:ok, result}
 
-          {:error, _} ->
+          {:error, spawn_error} ->
+            Logger.error(
+              "[SHOP] Buy failed - spawn error: player_id=#{ctx.player_id} item=#{item_key} error=#{inspect(spawn_error)}"
+            )
+
             {:error, "Failed to acquire item."}
         end
     end
@@ -96,19 +123,33 @@ defmodule Loka.Game.Actions.Shop do
   """
   @spec sell_item(Context.t(), String.t(), String.t(), map()) ::
           {:ok, Result.t()} | {:error, String.t()}
-  def sell_item(ctx, _npc_id, item_id, npc_entity) do
+  def sell_item(ctx, npc_id, item_id, npc_entity) do
     game_state = ctx.game_state
     shop_data = get_shop_data(npc_entity)
     item_entity = Entities.get_entity(item_id)
 
+    Logger.debug("[SHOP] Sell attempt: player_id=#{ctx.player_id} item_id=#{item_id}")
+
     cond do
       is_nil(item_entity) ->
+        Logger.debug(
+          "[SHOP] Sell failed - item entity not found: player_id=#{ctx.player_id} item_id=#{item_id}"
+        )
+
         {:error, "You don't have that item."}
 
       item_id not in (game_state.inventory || []) ->
+        Logger.debug(
+          "[SHOP] Sell failed - not in inventory: player_id=#{ctx.player_id} item_id=#{item_id}"
+        )
+
         {:error, "You don't have that item."}
 
       item_entity.key not in shop_data.buys ->
+        Logger.debug(
+          "[SHOP] Sell failed - merchant not interested: player_id=#{ctx.player_id} item=#{item_entity.key} npc=#{npc_id}"
+        )
+
         {:error, "The merchant is not interested in that item."}
 
       true ->
@@ -120,6 +161,10 @@ defmodule Loka.Game.Actions.Shop do
           PlayerGameState.update_state(state_after_add, %{inventory: new_inventory})
 
         item_name = item_entity.short_desc || item_entity.key
+
+        Logger.info(
+          "[SHOP] Sale completed: player_id=#{ctx.player_id} item=#{item_entity.key} price=#{sell_price} new_gold=#{Economy.get_currency(new_game_state)}"
+        )
 
         result =
           Result.new(

@@ -15,6 +15,8 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
       end
   """
 
+  require Logger
+
   alias Phoenix.Socket
   alias Loka.Game.Actions
   alias Loka.Game.Actions.{Context, Result}
@@ -33,15 +35,35 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
   """
   @spec execute(Socket.t(), atom(), map()) :: {:ok, Socket.t()} | {:error, String.t(), Socket.t()}
   def execute(socket, action, params) do
+    player_id = socket.assigns[:player] && socket.assigns.player.id
+
+    Logger.debug(
+      "[ACTION_BRIDGE] Executing action=#{action} player_id=#{player_id} params=#{inspect(params, limit: 200)}"
+    )
+
     ctx = build_context(socket)
+    start_time = System.monotonic_time(:millisecond)
 
     case Actions.execute(action, params, ctx) do
       {:ok, result} ->
+        elapsed = System.monotonic_time(:millisecond) - start_time
+        event_count = length(result.events || [])
+
+        Logger.info(
+          "[ACTION_BRIDGE] Action succeeded: action=#{action} player_id=#{player_id} events=#{event_count} elapsed_ms=#{elapsed}"
+        )
+
         socket = apply_result(socket, result)
         {:ok, socket}
 
       {:error, reason} ->
-        validated_push(socket, "event", %{text: reason})
+        elapsed = System.monotonic_time(:millisecond) - start_time
+
+        Logger.warning(
+          "[ACTION_BRIDGE] Action failed: action=#{action} player_id=#{player_id} reason=#{inspect(reason)} elapsed_ms=#{elapsed}"
+        )
+
+        validated_push(socket, "event", %{text: format_error_reason(reason)})
         {:error, reason, socket}
     end
   end
@@ -367,6 +389,45 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
     game_state.character_name || player.name || player.email
   end
 
+  # Format error reasons to strings for client display
+  defp format_error_reason(reason) when is_binary(reason), do: reason
+
+  defp format_error_reason({:missing_ingredients, ingredients}) do
+    items =
+      ingredients
+      |> Enum.map(fn %{item: item, quantity: qty} -> "#{qty}x #{item}" end)
+      |> Enum.join(", ")
+
+    "Missing ingredients: #{items}"
+  end
+
+  defp format_error_reason({:missing_tools, tools}) do
+    "Missing tools: #{Enum.join(tools, ", ")}"
+  end
+
+  defp format_error_reason({:insufficient_resources, resources}) do
+    "Insufficient resources: #{inspect(resources)}"
+  end
+
+  defp format_error_reason({:station_required, station_type}) do
+    "You need a #{station_type} to craft this."
+  end
+
+  defp format_error_reason({:skill_required, skill, level, current}) do
+    "You need #{skill} level #{level} (you have #{current})."
+  end
+
+  defp format_error_reason(reason) when is_atom(reason) do
+    reason
+    |> Atom.to_string()
+    |> String.replace("_", " ")
+    |> String.capitalize()
+  end
+
+  defp format_error_reason(reason) do
+    inspect(reason)
+  end
+
   # Validated push - validates payload before sending in dev/test
   defp validated_push(socket, event_name, payload) do
     if @validate_events do
@@ -374,7 +435,7 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
 
       case Validator.validate_and_log(:server, event_name, payload, context) do
         :ok ->
-          validated_push(socket, event_name, payload)
+          Phoenix.Channel.push(socket, event_name, payload)
 
         {:error, reason} ->
           require Logger
@@ -390,11 +451,11 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
           end
 
           # In test, still push but log the error
-          validated_push(socket, event_name, payload)
+          Phoenix.Channel.push(socket, event_name, payload)
       end
     else
       # In prod, skip validation for performance
-      validated_push(socket, event_name, payload)
+      Phoenix.Channel.push(socket, event_name, payload)
     end
   end
 end

@@ -10,6 +10,8 @@ defmodule Loka.Game.Actions.Gathering do
   - `:craft` - Craft an item using a recipe
   """
 
+  require Logger
+
   alias Loka.Game.Actions.{Context, Result}
   alias Loka.Framework.Player.GameState, as: PlayerGameState
   alias Loka.Engine.Spawner
@@ -23,17 +25,24 @@ defmodule Loka.Game.Actions.Gathering do
     game_state = ctx.game_state
     gathering_node = room[:gathering_node]
 
+    Logger.debug("[GATHERING] Gather attempt: node_type=#{node_type} room=#{room[:key]}")
+
     if gathering_node && gathering_node.type == node_type do
       gathered_items = roll_gathering_yields(gathering_node.yields || [])
 
       event_text =
         if Enum.empty?(gathered_items) do
+          Logger.info("[GATHERING] Nothing found: node_type=#{node_type}")
           "You search the #{String.downcase(gathering_node.name)} but find nothing useful."
         else
           items_list =
             gathered_items
             |> Enum.map(fn {item_key, qty} -> "#{qty}x #{format_item_name(item_key)}" end)
             |> Enum.join(", ")
+
+          Logger.info(
+            "[GATHERING] Gathered: node_type=#{node_type} items=#{inspect(gathered_items)}"
+          )
 
           (gathering_node[:gather_message] ||
              "You harvest from the #{String.downcase(gathering_node.name)}.") <>
@@ -71,6 +80,7 @@ defmodule Loka.Game.Actions.Gathering do
 
       {:ok, result}
     else
+      Logger.debug("[GATHERING] Nothing to gather: node_type=#{node_type} room=#{room[:key]}")
       {:error, "Nothing to gather here."}
     end
   end
@@ -88,6 +98,8 @@ defmodule Loka.Game.Actions.Gathering do
     alias Loka.Framework.Quest
 
     game_state = ctx.game_state
+
+    Logger.debug("[GATHERING] Craft action: recipe=#{recipe_key}")
 
     case Crafting.craft(game_state, recipe_key) do
       {:ok, state_after_craft, craft_result} ->

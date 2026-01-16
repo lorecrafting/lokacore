@@ -236,7 +236,9 @@ defmodule Loka.Game.Actions.Dialogue do
         quest_name = if quest_def, do: quest_def.name, else: quest_id
 
         # Get the full quest from state and serialize it for the client
-        active_quest = Enum.find(new_game_state.quests, fn q -> q.id == quest_id end)
+        # Quest.get_active_quests returns a list of quest maps with proper structure
+        active_quests = Quest.get_active_quests(new_game_state)
+        active_quest = Enum.find(active_quests, fn q -> q.id == quest_id end)
 
         serialized_quest =
           if active_quest, do: hd(Serializers.serialize_quests([active_quest])), else: nil
@@ -301,19 +303,32 @@ defmodule Loka.Game.Actions.Dialogue do
     end
   end
 
-  defp handle_dialogue_action(game_state, {:give_item, item_id}) do
+  defp handle_dialogue_action(game_state, {:give_item, item_key}) do
     alias Loka.Framework.Inventory
+    alias Loka.Engine.Spawner
 
-    case Inventory.add_item(game_state, item_id) do
-      {:ok, new_game_state} ->
-        events = [
-          {:event, "You received an item."},
-          {:inventory_update, %{action: "add", item_id: item_id}}
-        ]
+    # Spawn the item entity from the prototype key
+    case Spawner.spawn(item_key, []) do
+      {:ok, entity} ->
+        # Add the spawned entity to inventory
+        case Inventory.add_item(game_state, entity.id) do
+          {:ok, new_game_state} ->
+            item_name = entity.short_desc || entity.name || item_key
 
-        {new_game_state, events}
+            events = [
+              {:event, "You received #{item_name}."},
+              {:inventory_update, %{action: "add", item_id: entity.id}}
+            ]
+
+            {new_game_state, events}
+
+          {:error, _} ->
+            {game_state, []}
+        end
 
       {:error, _} ->
+        require Logger
+        Logger.warning("[DIALOGUE] Failed to spawn item: #{item_key}")
         {game_state, []}
     end
   end

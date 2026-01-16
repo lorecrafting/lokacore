@@ -25,6 +25,8 @@ defmodule Loka.Framework.Inventory do
       {:ok, state} = Inventory.use_item(state, "health_potion_01")
   """
 
+  require Logger
+
   alias Loka.Framework.Player.GameState
   alias Loka.Engine.Entities
 
@@ -40,12 +42,16 @@ defmodule Loka.Framework.Inventory do
       {:ok, %GameState{inventory: ["sword_01"]}}
   """
   def add_item(%GameState{} = state, item_id) when is_binary(item_id) do
+    Logger.debug("[INVENTORY] Adding item: item_id=#{item_id}")
+
     case get_item_details(item_id) do
       nil ->
+        Logger.warning("[INVENTORY] Add failed - item not found: item_id=#{item_id}")
         {:error, :item_not_found}
 
-      _item ->
+      item ->
         new_inventory = state.inventory ++ [item_id]
+        Logger.info("[INVENTORY] Item added: item=#{item.short_desc || item_id}")
         GameState.update_state(state, %{inventory: new_inventory})
     end
   end
@@ -68,10 +74,14 @@ defmodule Loka.Framework.Inventory do
       {:ok, %GameState{inventory: []}}
   """
   def remove_item(%GameState{inventory: inventory} = state, item_id) do
+    Logger.debug("[INVENTORY] Removing item: item_id=#{item_id}")
+
     if item_id in inventory do
       new_inventory = List.delete(inventory, item_id)
+      Logger.info("[INVENTORY] Item removed: item_id=#{item_id}")
       GameState.update_state(state, %{inventory: new_inventory})
     else
+      Logger.debug("[INVENTORY] Remove failed - item not in inventory: item_id=#{item_id}")
       {:error, :not_found}
     end
   end
@@ -121,16 +131,21 @@ defmodule Loka.Framework.Inventory do
       {:ok, %GameState{}, %{healed: 50}}
   """
   def use_item(%GameState{} = state, item_id) do
+    Logger.debug("[INVENTORY] Using item: item_id=#{item_id}")
+
     cond do
       not has_item?(state, item_id) ->
+        Logger.debug("[INVENTORY] Use failed - not in inventory: item_id=#{item_id}")
         {:error, :not_in_inventory}
 
       true ->
         case get_item_details(item_id) do
           nil ->
+            Logger.warning("[INVENTORY] Use failed - item not found: item_id=#{item_id}")
             {:error, :item_not_found}
 
           item ->
+            Logger.info("[INVENTORY] Item used: item=#{item.short_desc || item_id}")
             apply_item_effect(state, item)
         end
     end

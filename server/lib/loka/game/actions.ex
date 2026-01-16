@@ -215,7 +215,10 @@ defmodule Loka.Game.Actions do
               [
                 {:event, "You pick up the #{entity.name}."},
                 {:inventory_update,
-                 %{inventory: Serializers.serialize_inventory(new_game_state.inventory)}},
+                 %{
+                   inventory:
+                     Serializers.serialize_inventory(Inventory.list_items(new_game_state))
+                 }},
                 {:room_update,
                  %{
                    room: serialize_room(new_room),
@@ -264,7 +267,10 @@ defmodule Loka.Game.Actions do
                 events: [
                   {:event, "You drop the #{item_name}."},
                   {:inventory_update,
-                   %{inventory: Serializers.serialize_inventory(new_game_state.inventory)}},
+                   %{
+                     inventory:
+                       Serializers.serialize_inventory(Inventory.list_items(new_game_state))
+                   }},
                   {:room_update,
                    %{
                      room: serialize_room(new_room),

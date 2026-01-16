@@ -38,6 +38,8 @@ defmodule Loka.Framework.Dialogue do
   - `{"learn_skill", "skill_id", skill_cost}` - Teaches a skill
   """
 
+  require Logger
+
   alias Loka.Engine.Entities
   alias Loka.Engine.TypedObject
   alias Loka.Content
@@ -77,8 +79,11 @@ defmodule Loka.Framework.Dialogue do
     player_quests = Keyword.get(opts, :player_quests, %{})
     game_state = Keyword.get(opts, :game_state, nil)
 
+    Logger.debug("[DIALOGUE] Starting conversation: npc_id=#{npc_id}")
+
     case Entities.get_entity(npc_id) do
       nil ->
+        Logger.debug("[DIALOGUE] Start failed - NPC not found: npc_id=#{npc_id}")
         {:error, :npc_not_found}
 
       npc ->
@@ -90,14 +95,17 @@ defmodule Loka.Framework.Dialogue do
 
           case node do
             nil ->
+              Logger.warning("[DIALOGUE] No start node found: npc_id=#{npc_id}")
               {:error, :no_start_node}
 
             node ->
               # Check if there's a completed variant for this node based on quest state
               node = maybe_use_completed_variant(node, dialogue_tree, player_quests)
+              Logger.info("[DIALOGUE] Conversation started: npc_id=#{npc_id} node=#{node_id}")
               {:ok, format_node(node, node_id, player_quests)}
           end
         else
+          Logger.debug("[DIALOGUE] No dialogue tree: npc_id=#{npc_id}")
           {:error, :no_dialogue}
         end
     end
@@ -126,8 +134,13 @@ defmodule Loka.Framework.Dialogue do
       when is_binary(npc_id) and is_integer(choice_index) and is_binary(current_node_id) do
     player_quests = Keyword.get(opts, :player_quests, %{})
 
+    Logger.debug(
+      "[DIALOGUE] Choice selected: npc_id=#{npc_id} node=#{current_node_id} choice=#{choice_index}"
+    )
+
     case Entities.get_entity(npc_id) do
       nil ->
+        Logger.debug("[DIALOGUE] Choice failed - NPC not found: npc_id=#{npc_id}")
         {:error, :npc_not_found}
 
       npc ->

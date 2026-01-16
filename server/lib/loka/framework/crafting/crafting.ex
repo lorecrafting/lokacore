@@ -26,6 +26,8 @@ defmodule Loka.Framework.Crafting do
       missing = Crafting.get_missing_ingredients(game_state, "recipe_health_potion")
   """
 
+  require Logger
+
   alias Loka.Framework.Crafting.{Recipe, CraftingRegistry, CraftingStation}
   alias Loka.Framework.Player.GameState
   alias Loka.Mechanics.Cost
@@ -78,13 +80,20 @@ defmodule Loka.Framework.Crafting do
   def can_craft?(%GameState{} = game_state, recipe_key, opts \\ []) do
     room_entity = Keyword.get(opts, :room, nil)
 
+    Logger.debug("[CRAFTING] Checking can_craft: recipe=#{recipe_key}")
+
     with {:ok, recipe} <- get_recipe(recipe_key),
          :ok <- check_skill_requirements(game_state, recipe),
          :ok <- check_ingredients(game_state, recipe),
          :ok <- check_tools(game_state, recipe),
          :ok <- check_resource_costs(game_state, recipe),
          :ok <- check_station(room_entity, recipe) do
+      Logger.debug("[CRAFTING] Can craft: recipe=#{recipe_key} - all requirements met")
       :ok
+    else
+      {:error, reason} = error ->
+        Logger.debug("[CRAFTING] Cannot craft: recipe=#{recipe_key} reason=#{inspect(reason)}")
+        error
     end
   end
 
@@ -106,6 +115,8 @@ defmodule Loka.Framework.Crafting do
   def craft(%GameState{} = game_state, recipe_key, opts \\ []) do
     room_entity = Keyword.get(opts, :room, nil)
     station_bonus = get_station_bonus(room_entity)
+
+    Logger.info("[CRAFTING] Craft attempt: recipe=#{recipe_key} station_bonus=#{station_bonus}")
 
     with {:ok, recipe} <- get_recipe(recipe_key),
          :ok <- can_craft?(game_state, recipe_key, opts),
@@ -139,7 +150,21 @@ defmodule Loka.Framework.Crafting do
           result
         end
 
+      if success? do
+        Logger.info(
+          "[CRAFTING] Craft succeeded: recipe=#{recipe_key} items=#{inspect(result.items)} xp=#{inspect(result.xp)}"
+        )
+      else
+        Logger.info(
+          "[CRAFTING] Craft failed: recipe=#{recipe_key} failure_chance=#{recipe.failure_chance}"
+        )
+      end
+
       {:ok, final_state, result_with_quest}
+    else
+      {:error, reason} = error ->
+        Logger.warning("[CRAFTING] Craft aborted: recipe=#{recipe_key} reason=#{inspect(reason)}")
+        error
     end
   end
 
@@ -425,18 +450,25 @@ defmodule Loka.Framework.Crafting do
   end
 
   defp count_item(%GameState{inventory: inventory}, item_key) do
-    # Count occurrences of item in inventory
-    # This assumes inventory is a list of item IDs
-    # For stackable items, we'd need to check item prototypes
+    alias Loka.Engine.Entities
+
+    # Count occurrences of items with matching prototype key
     Enum.count(inventory, fn item_id ->
-      # Check if item_id matches or is an instance of item_key prototype
-      item_id == item_key or String.starts_with?(to_string(item_id), item_key)
+      case Entities.get_entity(item_id) do
+        nil -> false
+        entity -> entity.key == item_key
+      end
     end)
   end
 
   defp has_item?(%GameState{inventory: inventory}, item_key) do
+    alias Loka.Engine.Entities
+
     Enum.any?(inventory, fn item_id ->
-      item_id == item_key or String.starts_with?(to_string(item_id), item_key)
+      case Entities.get_entity(item_id) do
+        nil -> false
+        entity -> entity.key == item_key
+      end
     end)
   end
 
@@ -451,11 +483,16 @@ defmodule Loka.Framework.Crafting do
   end
 
   defp remove_items(game_state, item_key, quantity) do
-    # Find and remove the specified quantity of items
+    alias Loka.Engine.Entities
+
+    # Find item IDs that match the prototype key
     {to_remove, remaining} =
       game_state.inventory
       |> Enum.split_with(fn item_id ->
-        item_id == item_key or String.starts_with?(to_string(item_id), item_key)
+        case Entities.get_entity(item_id) do
+          nil -> false
+          entity -> entity.key == item_key
+        end
       end)
 
     if length(to_remove) >= quantity do

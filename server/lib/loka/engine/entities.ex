@@ -6,6 +6,8 @@ defmodule Loka.Engine.Entities do
   serialized complex data and EAV attributes for flexible storage.
   """
 
+  require Logger
+
   import Ecto.Query
   alias Loka.Repo
   alias Loka.Engine.Entity
@@ -81,9 +83,19 @@ defmodule Loka.Engine.Entities do
   Creates a new entity.
   """
   def create_entity(attrs) do
-    %EntitySchema{}
-    |> EntitySchema.changeset(normalize_attrs(attrs))
-    |> Repo.insert()
+    Logger.debug("[ENTITIES] Creating entity: type=#{inspect(attrs[:type])} key=#{attrs[:key]}")
+
+    case %EntitySchema{}
+         |> EntitySchema.changeset(normalize_attrs(attrs))
+         |> Repo.insert() do
+      {:ok, entity} = result ->
+        Logger.info("[ENTITIES] Created: id=#{entity.id} type=#{entity.type} key=#{entity.key}")
+        result
+
+      {:error, changeset} = error ->
+        Logger.warning("[ENTITIES] Create failed: #{inspect(changeset.errors)}")
+        error
+    end
   end
 
   @doc """
@@ -91,15 +103,32 @@ defmodule Loka.Engine.Entities do
   Accepts either an EntitySchema struct or an entity ID string.
   """
   def update_entity(%EntitySchema{} = entity, attrs) do
-    entity
-    |> EntitySchema.changeset(normalize_attrs(attrs))
-    |> Repo.update()
+    Logger.debug("[ENTITIES] Updating: id=#{entity.id} attrs=#{inspect(Map.keys(attrs))}")
+
+    case entity
+         |> EntitySchema.changeset(normalize_attrs(attrs))
+         |> Repo.update() do
+      {:ok, updated} = result ->
+        Logger.debug("[ENTITIES] Updated: id=#{updated.id}")
+        result
+
+      {:error, changeset} = error ->
+        Logger.warning(
+          "[ENTITIES] Update failed: id=#{entity.id} errors=#{inspect(changeset.errors)}"
+        )
+
+        error
+    end
   end
 
   def update_entity(entity_id, attrs) when is_binary(entity_id) do
     case get_entity(entity_id) do
-      nil -> {:error, :not_found}
-      entity -> update_entity(entity, attrs)
+      nil ->
+        Logger.debug("[ENTITIES] Update failed - not found: id=#{entity_id}")
+        {:error, :not_found}
+
+      entity ->
+        update_entity(entity, attrs)
     end
   end
 
@@ -107,7 +136,23 @@ defmodule Loka.Engine.Entities do
   Deletes an entity.
   """
   def delete_entity(%EntitySchema{} = entity) do
-    Repo.delete(entity)
+    Logger.debug("[ENTITIES] Deleting: id=#{entity.id} type=#{entity.type} key=#{entity.key}")
+
+    case Repo.delete(entity) do
+      {:ok, deleted} = result ->
+        Logger.info(
+          "[ENTITIES] Deleted: id=#{deleted.id} type=#{deleted.type} key=#{deleted.key}"
+        )
+
+        result
+
+      {:error, changeset} = error ->
+        Logger.warning(
+          "[ENTITIES] Delete failed: id=#{entity.id} errors=#{inspect(changeset.errors)}"
+        )
+
+        error
+    end
   end
 
   @doc """
