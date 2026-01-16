@@ -27,7 +27,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     LayoutManager,
     ValidationManager,
     ToolExecutor,
-    ScriptManager
+    ScriptManager,
+    ScriptTemplates
   }
 
   alias Loka.Testing.Content.DialogueQuestChainValidator
@@ -42,7 +43,9 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     InputValidator,
     SettingsModal,
     DialogueEditor,
-    ScriptEditor
+    ScriptEditor,
+    ScriptTemplatePicker,
+    ScriptTemplateConfig
   }
 
   # Valid layout algorithms - prevents atom exhaustion attacks
@@ -87,6 +90,14 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:show_dialogue_editor, false)
      |> assign(:show_script_editor, false)
      |> assign(:editing_script, nil)
+     |> assign(:show_template_picker, false)
+     |> assign(:template_search, "")
+     |> assign(:template_category, nil)
+     |> assign(:show_template_config, false)
+     |> assign(:selected_template, nil)
+     |> assign(:template_config, %{})
+     |> assign(:template_preview_code, "")
+     |> assign(:template_validation_errors, [])
      |> assign(:editing_dialogue_npc, nil)
      |> assign(:editing_dialogue_tree, %{})
      |> assign(:dialogue_selected_node, nil)
@@ -392,6 +403,24 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
       <%!-- Script Editor Modal --%>
       <%= if @show_script_editor do %>
         <ScriptEditor.script_editor script={@editing_script} />
+      <% end %>
+
+      <%!-- Template Picker Modal --%>
+      <%= if @show_template_picker do %>
+        <ScriptTemplatePicker.script_template_picker
+          search={@template_search}
+          selected_category={@template_category}
+        />
+      <% end %>
+
+      <%!-- Template Config Modal --%>
+      <%= if @show_template_config && @selected_template do %>
+        <ScriptTemplateConfig.script_template_config
+          template={@selected_template}
+          config={@template_config}
+          preview_code={@template_preview_code}
+          validation_errors={@template_validation_errors}
+        />
       <% end %>
 
       <%!-- Settings Modal --%>
@@ -1100,6 +1129,189 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
       {:error, reason} ->
         {:noreply, log_console(socket, :error, "Failed to save script: #{inspect(reason)}")}
+    end
+  end
+
+  # =============================================================================
+  # Template Picker Event Handlers
+  # =============================================================================
+
+  def handle_event("show_template_picker", _params, socket) do
+    {:noreply,
+     socket
+     |> assign(:show_template_picker, true)
+     |> assign(:template_search, "")
+     |> assign(:template_category, nil)}
+  end
+
+  def handle_event("close_template_picker", _params, socket) do
+    {:noreply,
+     socket
+     |> assign(:show_template_picker, false)
+     |> assign(:template_search, "")
+     |> assign(:template_category, nil)}
+  end
+
+  def handle_event("template_search", %{"value" => search}, socket) do
+    {:noreply, assign(socket, :template_search, search)}
+  end
+
+  def handle_event("filter_category", %{"category" => ""}, socket) do
+    {:noreply, assign(socket, :template_category, nil)}
+  end
+
+  def handle_event("filter_category", %{"category" => category}, socket) do
+    category_atom = String.to_existing_atom(category)
+    {:noreply, assign(socket, :template_category, category_atom)}
+  rescue
+    ArgumentError -> {:noreply, socket}
+  end
+
+  def handle_event("select_template", %{"id" => template_id}, socket) do
+    case ScriptTemplates.get_template(template_id) do
+      {:ok, template} ->
+        # Initialize config with defaults from schema
+        initial_config =
+          template.config_schema
+          |> Enum.map(fn field ->
+            {Atom.to_string(field.name), Map.get(field, :default)}
+          end)
+          |> Map.new()
+
+        # Generate initial preview
+        preview_code =
+          case ScriptTemplates.generate_code(template_id, initial_config) do
+            {:ok, code} -> code
+            {:error, _} -> "# Configure required fields to see preview"
+          end
+
+        {:noreply,
+         socket
+         |> assign(:show_template_picker, false)
+         |> assign(:show_template_config, true)
+         |> assign(:selected_template, template)
+         |> assign(:template_config, initial_config)
+         |> assign(:template_preview_code, preview_code)
+         |> assign(:template_validation_errors, [])}
+
+      {:error, _} ->
+        {:noreply, log_console(socket, :error, "Template not found: #{template_id}")}
+    end
+  end
+
+  def handle_event("close_template_config", _params, socket) do
+    {:noreply,
+     socket
+     |> assign(:show_template_config, false)
+     |> assign(:selected_template, nil)
+     |> assign(:template_config, %{})
+     |> assign(:template_preview_code, "")
+     |> assign(:template_validation_errors, [])}
+  end
+
+  def handle_event("back_to_picker", _params, socket) do
+    {:noreply,
+     socket
+     |> assign(:show_template_config, false)
+     |> assign(:show_template_picker, true)
+     |> assign(:selected_template, nil)
+     |> assign(:template_config, %{})
+     |> assign(:template_preview_code, "")
+     |> assign(:template_validation_errors, [])}
+  end
+
+  def handle_event("update_template_config", %{"field" => field, "value" => value}, socket) do
+    update_template_config(socket, field, value)
+  end
+
+  def handle_event("update_template_config_bool", %{"field" => field, "value" => value}, socket) do
+    bool_value = value == "true"
+    update_template_config(socket, field, bool_value)
+  end
+
+  def handle_event("update_template_config_select", %{"field" => field, "value" => value}, socket) do
+    update_template_config(socket, field, value)
+  end
+
+  defp update_template_config(socket, field, value) do
+    template = socket.assigns.selected_template
+    config = Map.put(socket.assigns.template_config, field, value)
+
+    # Regenerate preview
+    {preview_code, validation_errors} =
+      case ScriptTemplates.generate_code(template.id, config) do
+        {:ok, code} ->
+          {code, []}
+
+        {:error, {:validation_failed, errors}} ->
+          {"# Fix validation errors to see preview", errors}
+
+        {:error, _} ->
+          {"# Configure required fields to see preview", []}
+      end
+
+    {:noreply,
+     socket
+     |> assign(:template_config, config)
+     |> assign(:template_preview_code, preview_code)
+     |> assign(:template_validation_errors, validation_errors)}
+  end
+
+  def handle_event("create_script_from_template", _params, socket) do
+    template = socket.assigns.selected_template
+    config = socket.assigns.template_config
+
+    script_key = config["script_key"]
+    script_name = config["script_name"] || script_key
+    entity_key = config["entity_key"]
+
+    case ScriptTemplates.generate_code(template.id, config) do
+      {:ok, source_code} ->
+        attrs = %{
+          key: script_key,
+          name: script_name,
+          description: "Generated from template #{template.id}: #{template.name}",
+          hook: template.hook,
+          source: source_code,
+          tags: [Atom.to_string(template.category), "template:#{template.id}"],
+          entity_key: entity_key
+        }
+
+        case ScriptManager.create_script(attrs) do
+          {:ok, script} ->
+            {:noreply,
+             socket
+             |> assign(:show_template_config, false)
+             |> assign(:selected_template, nil)
+             |> assign(:template_config, %{})
+             |> assign(:template_preview_code, "")
+             |> assign(:template_validation_errors, [])
+             |> log_console(:info, "Created script '#{script.key}' from template #{template.id}")}
+
+          {:error, :already_exists} ->
+            {:noreply,
+             assign(socket, :template_validation_errors, [
+               "Script key '#{script_key}' already exists"
+             ])}
+
+          {:error, errors} when is_list(errors) ->
+            {:noreply, assign(socket, :template_validation_errors, errors)}
+
+          {:error, reason} ->
+            {:noreply,
+             assign(socket, :template_validation_errors, [
+               "Failed to create script: #{inspect(reason)}"
+             ])}
+        end
+
+      {:error, {:validation_failed, errors}} ->
+        {:noreply, assign(socket, :template_validation_errors, errors)}
+
+      {:error, reason} ->
+        {:noreply,
+         assign(socket, :template_validation_errors, [
+           "Failed to generate code: #{inspect(reason)}"
+         ])}
     end
   end
 
