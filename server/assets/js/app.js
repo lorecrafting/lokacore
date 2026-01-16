@@ -27,6 +27,7 @@ import { createRoot } from "react-dom/client"
 import WorldBuilderApp from "./world_builder/App.jsx"
 import QuestEditor from "./world_builder/editors/QuestEditor.jsx"
 import CutsceneTimeline from "./world_builder/editors/CutsceneTimeline.jsx"
+import ScriptEditor from "./world_builder/editors/ScriptEditor.jsx"
 import ChatPanel from "./world_builder/ChatPanel.jsx"
 import { undoManager } from "./world_builder/UndoManager.js"
 
@@ -757,6 +758,62 @@ const Hooks = {
           onSave,
           onCancel,
           initialData: null
+        })
+      )
+    },
+
+    destroyed() {
+      if (this.root) {
+        this.root.unmount()
+      }
+    }
+  },
+
+  // =============================================================================
+  // Script Editor - Monaco-based Elixir script editor
+  // =============================================================================
+  ScriptEditor: {
+    mounted() {
+      // Parse initial script data from data attribute
+      const scriptData = JSON.parse(this.el.dataset.script || 'null')
+
+      // Create React root and mount ScriptEditor component
+      this.root = createRoot(this.el)
+
+      const onSave = (scriptData) => {
+        this.pushEvent('save_script', scriptData)
+      }
+
+      const onCancel = () => {
+        this.pushEvent('close_script_editor', {})
+      }
+
+      this.root.render(
+        React.createElement(ScriptEditor, {
+          onSave,
+          onCancel,
+          initialData: scriptData
+        })
+      )
+    },
+
+    updated() {
+      // Re-parse script data when LiveView updates
+      const scriptData = JSON.parse(this.el.dataset.script || 'null')
+
+      const onSave = (scriptData) => {
+        this.pushEvent('save_script', scriptData)
+      }
+
+      const onCancel = () => {
+        this.pushEvent('close_script_editor', {})
+      }
+
+      this.root.render(
+        React.createElement(ScriptEditor, {
+          onSave,
+          onCancel,
+          initialData: scriptData
         })
       )
     },

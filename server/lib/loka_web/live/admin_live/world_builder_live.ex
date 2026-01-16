@@ -26,7 +26,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     CutsceneManager,
     LayoutManager,
     ValidationManager,
-    ToolExecutor
+    ToolExecutor,
+    ScriptManager
   }
 
   alias Loka.Testing.Content.DialogueQuestChainValidator
@@ -40,7 +41,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     ChatPanel,
     InputValidator,
     SettingsModal,
-    DialogueEditor
+    DialogueEditor,
+    ScriptEditor
   }
 
   # Valid layout algorithms - prevents atom exhaustion attacks
@@ -83,6 +85,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:show_quest_editor, false)
      |> assign(:show_cutscene_editor, false)
      |> assign(:show_dialogue_editor, false)
+     |> assign(:show_script_editor, false)
+     |> assign(:editing_script, nil)
      |> assign(:editing_dialogue_npc, nil)
      |> assign(:editing_dialogue_tree, %{})
      |> assign(:dialogue_selected_node, nil)
@@ -383,6 +387,11 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
             </div>
           </div>
         </div>
+      <% end %>
+
+      <%!-- Script Editor Modal --%>
+      <%= if @show_script_editor do %>
+        <ScriptEditor.script_editor script={@editing_script} />
       <% end %>
 
       <%!-- Settings Modal --%>
@@ -1014,6 +1023,84 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
   def handle_event("close_cutscene_editor", _params, socket) do
     {:noreply, assign(socket, :show_cutscene_editor, false)}
+  end
+
+  # =============================================================================
+  # Script Editor Event Handlers
+  # =============================================================================
+
+  def handle_event("show_script_editor", params, socket) do
+    # Load existing script if editing, otherwise start fresh
+    editing_script =
+      case params do
+        %{"key" => key} ->
+          case ScriptManager.get_script(key) do
+            {:ok, script} ->
+              %{
+                key: script.key,
+                name: script.name,
+                description: script.description,
+                hook: Loka.Content.Script.hook(script),
+                source: Loka.Content.Script.source(script),
+                tags: script.tags || [],
+                entity_key: Loka.Content.Script.entity_key(script)
+              }
+
+            {:error, _} ->
+              nil
+          end
+
+        _ ->
+          nil
+      end
+
+    {:noreply,
+     socket
+     |> assign(:show_script_editor, true)
+     |> assign(:editing_script, editing_script)}
+  end
+
+  def handle_event("close_script_editor", _params, socket) do
+    {:noreply,
+     socket
+     |> assign(:show_script_editor, false)
+     |> assign(:editing_script, nil)}
+  end
+
+  def handle_event("save_script", params, socket) do
+    # Validate and filter allowed fields
+    attrs = %{
+      key: params["key"],
+      name: params["name"],
+      description: params["description"] || "",
+      hook: params["hook"],
+      source: params["source"],
+      tags: params["tags"] || [],
+      entity_key: params["entity_key"]
+    }
+
+    result =
+      if socket.assigns.editing_script do
+        ScriptManager.update_script(attrs.key, attrs)
+      else
+        ScriptManager.create_script(attrs)
+      end
+
+    case result do
+      {:ok, script} ->
+        {:noreply,
+         socket
+         |> assign(:show_script_editor, false)
+         |> assign(:editing_script, nil)
+         |> log_console(:info, "Saved script: #{script.key}")}
+
+      {:error, errors} when is_list(errors) ->
+        {:noreply,
+         log_console(socket, :error, "Failed to save script: #{Enum.join(errors, ", ")}")}
+
+      {:error, reason} ->
+        {:noreply, log_console(socket, :error, "Failed to save script: #{inspect(reason)}")}
+    end
   end
 
   # =============================================================================

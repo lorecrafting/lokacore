@@ -4870,3 +4870,192 @@ body:has(.ebook-page) {
   color: #ffcc99;
   margin-bottom: 0.25rem;
 }
+
+/* ============================================================================
+   Script Editor Styles
+   ============================================================================ */
+
+.script-editor-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #1e1e1e;
+  color: #c9c9c9;
+}
+
+.script-editor-header {
+  padding: 12px;
+  background: #2a2a2a;
+  border-bottom: 1px solid #3d3d3d;
+}
+
+.script-editor-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.editor-main {
+  flex: 1;
+  min-width: 0;
+  background: #1e1e1e;
+}
+
+.editor-sidebar {
+  width: 280px;
+  background: #2a2a2a;
+  border-left: 1px solid #3d3d3d;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.sidebar-section {
+  padding: 12px;
+  border-bottom: 1px solid #3d3d3d;
+}
+
+.sidebar-section h4 {
+  font-size: 0.85rem;
+  color: #909090;
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Validation Panel */
+.validation-panel {
+  padding: 12px;
+  background: #2a2a2a;
+  border-bottom: 1px solid #3d3d3d;
+}
+
+.validation-panel.valid {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #4ade80;
+}
+
+.validation-icon {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.validation-panel .validation-error,
+.validation-panel .validation-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 0.8rem;
+  margin-bottom: 4px;
+}
+
+.validation-panel .validation-error {
+  color: #f87171;
+}
+
+.validation-panel .validation-warning {
+  color: #fbbf24;
+}
+
+/* Test Runner Panel */
+.test-runner-panel {
+  padding: 12px;
+  border-bottom: 1px solid #3d3d3d;
+}
+
+.test-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.test-header h4 {
+  font-size: 0.85rem;
+  color: #909090;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.test-result {
+  margin-top: 8px;
+  padding: 8px;
+  border-radius: 4px;
+  background: #1e1e1e;
+}
+
+.test-result.success {
+  border-left: 3px solid #4ade80;
+}
+
+.test-result.error {
+  border-left: 3px solid #f87171;
+}
+
+.test-result pre {
+  margin: 0;
+  font-size: 0.7rem;
+  color: #808080;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* API Reference Panel */
+.api-reference-panel {
+  display: flex;
+  flex-direction: column;
+  max-height: 300px;
+}
+
+.api-search {
+  margin-bottom: 8px;
+}
+
+.api-search .input-sm {
+  width: 100%;
+}
+
+.api-list {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.api-item {
+  padding: 6px 0;
+  border-bottom: 1px solid #333;
+}
+
+.api-item:last-child {
+  border-bottom: none;
+}
+
+.api-sig {
+  display: block;
+  font-size: 0.75rem;
+  color: #7eb3ff;
+  font-family: monospace;
+  margin-bottom: 2px;
+}
+
+.api-desc {
+  font-size: 0.7rem;
+  color: #707070;
+}
+
+/* Script Editor Modal */
+.modal-fullscreen #script-editor-root {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.script-editor-mount {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
