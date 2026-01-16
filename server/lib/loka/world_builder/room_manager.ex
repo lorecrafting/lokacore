@@ -233,6 +233,9 @@ defmodule Loka.WorldBuilder.RoomManager do
     y = TypedObject.get_attribute(room, :y, 0)
     z = TypedObject.get_attribute(room, :z, 0)
 
+    # Extract spawns (NPCs and items that spawn in this room)
+    spawns = get_room_spawns(room)
+
     # Return a map structure optimized for frontend rendering
     %{
       id: room.id,
@@ -243,7 +246,8 @@ defmodule Loka.WorldBuilder.RoomManager do
       y: y,
       z: z,
       tags: room.tags || [],
-      exits: get_room_exits(room)
+      exits: get_room_exits(room),
+      spawns: spawns
     }
   end
 
@@ -255,6 +259,10 @@ defmodule Loka.WorldBuilder.RoomManager do
     y = Map.get(coords, "y", 0)
     z = Map.get(coords, "z", 0)
 
+    # Extract spawns from components
+    spawns = Map.get(room.components, "spawns", [])
+    spawns = categorize_spawns(spawns)
+
     %{
       id: room.id,
       key: room.key,
@@ -264,7 +272,8 @@ defmodule Loka.WorldBuilder.RoomManager do
       y: y,
       z: z,
       tags: room.tags || [],
-      exits: get_exits_from_entity(room)
+      exits: get_exits_from_entity(room),
+      spawns: spawns
     }
   end
 
@@ -276,6 +285,75 @@ defmodule Loka.WorldBuilder.RoomManager do
   defp get_exits_from_entity(%Entity{} = room) do
     # Get exits from components
     Map.get(room.components, "exits", %{})
+  end
+
+  # Extract spawns from TypedObject room
+  defp get_room_spawns(room) when is_struct(room, TypedObject) do
+    spawns = Map.get(room.data, "spawns", []) ++ Map.get(room.data, :spawns, [])
+    categorize_spawns(spawns)
+  end
+
+  # Categorize spawns into NPCs and items
+  defp categorize_spawns(spawns) when is_list(spawns) do
+    {npcs, items} =
+      Enum.reduce(spawns, {[], []}, fn spawn, {npc_acc, item_acc} ->
+        prototype = Map.get(spawn, "prototype") || Map.get(spawn, :prototype)
+
+        if prototype do
+          # Try to determine type from prototype name or lookup
+          case determine_spawn_type(prototype) do
+            :npc -> {[prototype | npc_acc], item_acc}
+            :item -> {npc_acc, [prototype | item_acc]}
+            _ -> {npc_acc, item_acc}
+          end
+        else
+          {npc_acc, item_acc}
+        end
+      end)
+
+    %{npcs: Enum.reverse(npcs), items: Enum.reverse(items)}
+  end
+
+  defp categorize_spawns(_), do: %{npcs: [], items: []}
+
+  # Determine spawn type by looking up the prototype
+  defp determine_spawn_type(prototype_key) do
+    case Registry.get(prototype_key) do
+      {:ok, %TypedObject{subtype: :npc}} ->
+        :npc
+
+      {:ok, %TypedObject{subtype: :item}} ->
+        :item
+
+      _ ->
+        # Fallback: guess from common naming patterns
+        cond do
+          String.contains?(prototype_key, [
+            "_ghost",
+            "_spirit",
+            "_monk",
+            "_elder",
+            "_guard",
+            "_merchant",
+            "_npc"
+          ]) ->
+            :npc
+
+          String.contains?(prototype_key, [
+            "_key",
+            "_sword",
+            "_scroll",
+            "_potion",
+            "_item",
+            "_treasure"
+          ]) ->
+            :item
+
+          # Default to NPC since most spawns are NPCs
+          true ->
+            :npc
+        end
+    end
   end
 
   defp ensure_atom_keys(attrs) when is_map(attrs) do

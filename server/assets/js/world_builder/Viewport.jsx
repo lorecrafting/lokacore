@@ -1,5 +1,5 @@
 import React, { useRef, useMemo } from 'react'
-import { OrbitControls, Grid, Text } from '@react-three/drei'
+import { OrbitControls, Grid, Text, Html } from '@react-three/drei'
 import * as THREE from 'three'
 import Exit, { getExitColor } from './Exit'
 
@@ -109,10 +109,12 @@ export default function Viewport({ rooms, selectedRoom, selectedKeys = [], onSel
  *
  * Renders a single room as a cube with a text label.
  * Supports single selection and multi-selection with different highlighting.
+ * Shows icons for NPCs (👤) and items (📦) inside the cube.
  */
 function RoomCube({ room, selected, multiSelected, onSelect }) {
   const meshRef = useRef()
-  const { x = 0, y = 0, z = 0, name } = room
+  const { x = 0, y = 0, z = 0, name, spawns = {} } = room
+  const { npcs = [], items = [] } = spawns
 
   const handleClick = (e) => {
     e.stopPropagation()
@@ -126,6 +128,11 @@ function RoomCube({ room, selected, multiSelected, onSelect }) {
   const cubeColor = multiSelected ? '#ffaa00' : (selected ? '#4a9eff' : '#7eb3ff')
   const emissiveColor = multiSelected ? '#ff8800' : (selected ? '#2a5eff' : '#0a0a0a')
   const emissiveIntensity = (multiSelected || selected) ? 0.3 : 0
+
+  // Build icon display - show up to 3 icons, then count
+  const npcCount = npcs.length
+  const itemCount = items.length
+  const hasContents = npcCount > 0 || itemCount > 0
 
   return (
     <group position={[x, 1, y]}>
@@ -154,6 +161,94 @@ function RoomCube({ room, selected, multiSelected, onSelect }) {
           <edgesGeometry args={[new THREE.BoxGeometry(2.1, 2.1, 2.1)]} />
           <lineBasicMaterial color="#ffaa00" linewidth={2} />
         </lineSegments>
+      )}
+
+      {/* Entity Icons inside the cube */}
+      {hasContents && (
+        <Html
+          position={[0, 0, 1.01]}
+          center
+          style={{
+            pointerEvents: 'none',
+            userSelect: 'none',
+          }}
+        >
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '2px',
+          }}>
+            {/* NPC icons */}
+            {npcCount > 0 && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '2px',
+              }}>
+                {npcCount <= 3 ? (
+                  // Show individual icons for 1-3 NPCs
+                  [...Array(npcCount)].map((_, i) => (
+                    <span key={`npc-${i}`} style={{
+                      fontSize: '16px',
+                      filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.8))',
+                      color: '#8B5CF6',
+                    }}>👤</span>
+                  ))
+                ) : (
+                  // Show icon with count for 4+ NPCs
+                  <>
+                    <span style={{
+                      fontSize: '16px',
+                      filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.8))',
+                      color: '#8B5CF6',
+                    }}>👤</span>
+                    <span style={{
+                      fontSize: '12px',
+                      color: '#8B5CF6',
+                      fontWeight: 'bold',
+                      textShadow: '0 0 3px rgba(0,0,0,0.8)',
+                    }}>×{npcCount}</span>
+                  </>
+                )}
+              </div>
+            )}
+            {/* Item icons */}
+            {itemCount > 0 && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '2px',
+              }}>
+                {itemCount <= 3 ? (
+                  // Show individual icons for 1-3 items
+                  [...Array(itemCount)].map((_, i) => (
+                    <span key={`item-${i}`} style={{
+                      fontSize: '14px',
+                      filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.8))',
+                      color: '#EAB308',
+                    }}>📦</span>
+                  ))
+                ) : (
+                  // Show icon with count for 4+ items
+                  <>
+                    <span style={{
+                      fontSize: '14px',
+                      filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.8))',
+                      color: '#EAB308',
+                    }}>📦</span>
+                    <span style={{
+                      fontSize: '12px',
+                      color: '#EAB308',
+                      fontWeight: 'bold',
+                      textShadow: '0 0 3px rgba(0,0,0,0.8)',
+                    }}>×{itemCount}</span>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        </Html>
       )}
 
       {/* Room Label */}
