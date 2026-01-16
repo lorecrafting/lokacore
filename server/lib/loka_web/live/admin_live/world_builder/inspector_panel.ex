@@ -6,6 +6,8 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
   - Room properties (name, description, position)
   - Exits
   - Batch operations for multi-selection
+
+  Supports collapse mode (hidden).
   """
   use Phoenix.Component
   import LokaWeb.CoreComponents
@@ -13,16 +15,32 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
   attr :rooms, :list, required: true
   attr :selected_room, :string, default: nil
   attr :selected_keys, :list, default: []
+  attr :collapsed, :boolean, default: false
   attr :class, :string, default: ""
 
   def inspector_panel(assigns) do
     ~H"""
-    <div class={"world-builder-panel world-builder-inspector #{@class}"}>
+    <div class={[
+      "world-builder-panel world-builder-inspector",
+      @collapsed && "panel-collapsed",
+      @class
+    ]}>
       <div class="panel-header">
-        <h3 class="panel-title">Details</h3>
+        <h3 class="panel-title" style={if @collapsed, do: "display: none;", else: ""}>Details</h3>
+        <button
+          class="panel-collapse-btn"
+          phx-click="toggle_panel"
+          phx-value-panel="inspector"
+          title={if @collapsed, do: "Expand (2)", else: "Collapse (2)"}
+        >
+          <.icon
+            name={if @collapsed, do: "hero-chevron-left", else: "hero-chevron-right"}
+            class="size-4"
+          />
+        </button>
       </div>
 
-      <div class="panel-content" style="padding: 0;">
+      <div class="panel-content" style={if @collapsed, do: "display: none;", else: "padding: 0;"}>
         <%= if @selected_room do %>
           <% room = get_room_data(@rooms, @selected_room) %>
           <!-- Inspector header with room name -->

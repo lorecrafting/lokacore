@@ -85,23 +85,25 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:show_settings, false)
      |> assign(:api_key_status, :unconfigured)
      |> assign(:selected_model, "claude-opus-4-5-20251101")
+     |> assign(:collapsed_panels, %{hierarchy: false, inspector: false, console: false})
      |> push_event("init_world_builder", %{rooms: rooms, validation: validation.results})}
   end
 
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="world-builder">
+    <div class="world-builder" phx-window-keydown="keyboard_shortcut">
       <Toolbar.toolbar />
       
     <!-- Main 4-panel layout -->
-      <div class="world-builder-container">
+      <div class={panel_container_classes(@collapsed_panels)}>
         <HierarchyPanel.hierarchy_panel
           rooms={@rooms}
           templates={@templates}
           selected_room={@selected_room}
           template_search={@template_search}
           active_tab={@active_tab}
+          collapsed={@collapsed_panels.hierarchy}
         />
 
         <ViewportContainer.viewport_container rooms={@rooms} selected_room={@selected_room} />
@@ -110,9 +112,13 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
           rooms={@rooms}
           selected_room={@selected_room}
           selected_keys={@selected_keys}
+          collapsed={@collapsed_panels.inspector}
         />
 
-        <ConsolePanel.console_panel console_messages={@console_messages} />
+        <ConsolePanel.console_panel
+          console_messages={@console_messages}
+          collapsed={@collapsed_panels.console}
+        />
       </div>
 
       <%= if @show_create_modal do %>
@@ -374,6 +380,50 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   @impl true
   def handle_event("change_model", %{"value" => model}, socket) do
     {:noreply, assign(socket, :selected_model, model)}
+  end
+
+  # Panel collapse toggle
+  @impl true
+  def handle_event("toggle_panel", %{"panel" => panel}, socket) do
+    panel_atom = String.to_existing_atom(panel)
+
+    if panel_atom in [:hierarchy, :inspector, :console] do
+      collapsed = socket.assigns.collapsed_panels
+      new_collapsed = Map.update!(collapsed, panel_atom, &(!&1))
+
+      {:noreply,
+       socket
+       |> assign(:collapsed_panels, new_collapsed)
+       |> push_event("panel_collapsed", %{panels: new_collapsed})}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  # Keyboard shortcuts for panel toggle (1, 2, 3)
+  @impl true
+  def handle_event("keyboard_shortcut", %{"key" => key}, socket) do
+    # Only handle 1, 2, 3 keys for panel toggle
+    # Ignore if user is in an input field (handled by JS)
+    panel =
+      case key do
+        "1" -> :hierarchy
+        "2" -> :inspector
+        "3" -> :console
+        _ -> nil
+      end
+
+    if panel do
+      collapsed = socket.assigns.collapsed_panels
+      new_collapsed = Map.update!(collapsed, panel, &(!&1))
+
+      {:noreply,
+       socket
+       |> assign(:collapsed_panels, new_collapsed)
+       |> push_event("panel_collapsed", %{panels: new_collapsed})}
+    else
+      {:noreply, socket}
+    end
   end
 
   @impl true
@@ -1000,6 +1050,22 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
   defp parse_algorithm(_), do: {:error, :invalid_algorithm}
 
+  # Build CSS classes for panel container based on collapsed state
+  defp panel_container_classes(collapsed_panels) do
+    base = "world-builder-container"
+
+    classes =
+      [
+        collapsed_panels.hierarchy && "hierarchy-collapsed",
+        collapsed_panels.inspector && "inspector-collapsed",
+        collapsed_panels.console && "console-collapsed"
+      ]
+      |> Enum.filter(& &1)
+      |> Enum.join(" ")
+
+    if classes == "", do: base, else: "#{base} #{classes}"
+  end
+
   # Helper to refresh rooms and validation, then push to frontend
   defp refresh_rooms_with_validation(socket) do
     rooms = RoomManager.list_rooms()
@@ -1021,7 +1087,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
   # Sanitize error messages to prevent information disclosure
   # Logs full error details but returns generic messages to user
-  defp sanitize_error(reason, context \\ "") do
+  defp sanitize_error(reason, context) do
     # Log full error details for debugging (server-side only)
     if context != "" do
       Logger.error("[WorldBuilder] #{context} error: #{inspect(reason)}")

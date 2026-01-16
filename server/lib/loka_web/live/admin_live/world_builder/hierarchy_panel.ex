@@ -6,6 +6,8 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
   - Room hierarchy tree
   - Template library with search
   - Entity selection
+
+  Supports collapse mode (icons-only 40px width).
   """
   use Phoenix.Component
   import LokaWeb.CoreComponents
@@ -15,96 +17,135 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
   attr :selected_room, :string, default: nil
   attr :template_search, :string, default: ""
   attr :active_tab, :atom, default: :rooms
+  attr :collapsed, :boolean, default: false
   attr :class, :string, default: ""
 
   def hierarchy_panel(assigns) do
     ~H"""
-    <div class={"world-builder-panel world-builder-hierarchy #{@class}"}>
+    <div class={[
+      "world-builder-panel world-builder-hierarchy",
+      @collapsed && "panel-collapsed",
+      @class
+    ]}>
       <div class="panel-header">
-        <h3 class="panel-title">Library</h3>
-      </div>
-      
-    <!-- Tabs for Rooms and Templates -->
-      <div class="hierarchy-tabs">
+        <h3 class="panel-title" style={if @collapsed, do: "display: none;", else: ""}>Library</h3>
         <button
-          class={["hierarchy-tab", @active_tab == :rooms && "active"]}
-          phx-click="switch_hierarchy_tab"
-          phx-value-tab="rooms"
+          class="panel-collapse-btn"
+          phx-click="toggle_panel"
+          phx-value-panel="hierarchy"
+          title={if @collapsed, do: "Expand (1)", else: "Collapse (1)"}
         >
-          Rooms ({length(@rooms)})
+          <.icon
+            name={if @collapsed, do: "hero-chevron-right", else: "hero-chevron-left"}
+            class="size-4"
+          />
         </button>
-        <button
-          class={["hierarchy-tab", @active_tab == :templates && "active"]}
-          phx-click="switch_hierarchy_tab"
-          phx-value-tab="templates"
-        >
-          Templates ({length(@templates)})
-        </button>
-      </div>
-      
-    <!-- Search bar -->
-      <div class="hierarchy-search">
-        <.icon name="hero-magnifying-glass" class="size-3" style="color: #606060;" />
-        <input
-          type="text"
-          placeholder="Search templates..."
-          phx-change="search_templates"
-          name="query"
-          value={@template_search}
-        />
       </div>
 
-      <div class="panel-content">
-        <!-- Room Hierarchy -->
-        <div class="hierarchy-tree" style={if @active_tab != :rooms, do: "display: none;", else: ""}>
-          <%= for room <- @rooms do %>
-            <div
-              class={[
-                "hierarchy-item",
-                @selected_room == room.key && "hierarchy-item-selected"
-              ]}
-              phx-click="select_room"
-              phx-value-key={room.key}
-            >
-              <.icon name="hero-cube" class="hierarchy-icon" />
-              <span>{room.name}</span>
-            </div>
-          <% end %>
+      <%= if @collapsed do %>
+        <!-- Collapsed view: icons only -->
+        <div class="panel-collapsed-content">
+          <button
+            class={["collapsed-icon-btn", @active_tab == :rooms && "active"]}
+            phx-click="switch_hierarchy_tab"
+            phx-value-tab="rooms"
+            title="Rooms ({length(@rooms)})"
+          >
+            <.icon name="hero-cube" class="size-5" />
+          </button>
+          <button
+            class={["collapsed-icon-btn", @active_tab == :templates && "active"]}
+            phx-click="switch_hierarchy_tab"
+            phx-value-tab="templates"
+            title="Templates ({length(@templates)})"
+          >
+            <.icon name="hero-document-duplicate" class="size-5" />
+          </button>
+        </div>
+      <% else %>
+        <!-- Expanded view: full content -->
+        <!-- Tabs for Rooms and Templates -->
+        <div class="hierarchy-tabs">
+          <button
+            class={["hierarchy-tab", @active_tab == :rooms && "active"]}
+            phx-click="switch_hierarchy_tab"
+            phx-value-tab="rooms"
+          >
+            Rooms ({length(@rooms)})
+          </button>
+          <button
+            class={["hierarchy-tab", @active_tab == :templates && "active"]}
+            phx-click="switch_hierarchy_tab"
+            phx-value-tab="templates"
+          >
+            Templates ({length(@templates)})
+          </button>
         </div>
         
-    <!-- Template Library -->
-        <div
-          class="template-library"
-          style={if @active_tab != :templates, do: "display: none;", else: ""}
-        >
-          <%= for template <- @templates do %>
-            <div class="template-item">
-              <div class="template-icon">
-                <.icon name="hero-document-duplicate" class="size-5" />
-              </div>
-              <div class="template-info">
-                <div class="template-name">{template.name}</div>
-                <div class="template-tags">
-                  <%= for tag <- template.tags do %>
-                    <span class="template-tag">{tag}</span>
-                  <% end %>
-                </div>
-              </div>
-              <button
-                class="btn-icon-small"
-                phx-click="create_from_template"
-                phx-value-template_key={template.template_key}
-                phx-value-x="0"
-                phx-value-y="0"
-                phx-value-z="0"
-                title="Create from template"
-              >
-                <.icon name="hero-plus" class="size-3" />
-              </button>
-            </div>
-          <% end %>
+    <!-- Search bar -->
+        <div class="hierarchy-search">
+          <.icon name="hero-magnifying-glass" class="size-3" />
+          <input
+            type="text"
+            placeholder="Search templates..."
+            phx-change="search_templates"
+            name="query"
+            value={@template_search}
+          />
         </div>
-      </div>
+
+        <div class="panel-content">
+          <!-- Room Hierarchy -->
+          <div class="hierarchy-tree" style={if @active_tab != :rooms, do: "display: none;", else: ""}>
+            <%= for room <- @rooms do %>
+              <div
+                class={[
+                  "hierarchy-item",
+                  @selected_room == room.key && "hierarchy-item-selected"
+                ]}
+                phx-click="select_room"
+                phx-value-key={room.key}
+              >
+                <.icon name="hero-cube" class="hierarchy-icon" />
+                <span>{room.name}</span>
+              </div>
+            <% end %>
+          </div>
+          
+    <!-- Template Library -->
+          <div
+            class="template-library"
+            style={if @active_tab != :templates, do: "display: none;", else: ""}
+          >
+            <%= for template <- @templates do %>
+              <div class="template-item">
+                <div class="template-icon">
+                  <.icon name="hero-document-duplicate" class="size-5" />
+                </div>
+                <div class="template-info">
+                  <div class="template-name">{template.name}</div>
+                  <div class="template-tags">
+                    <%= for tag <- template.tags do %>
+                      <span class="template-tag">{tag}</span>
+                    <% end %>
+                  </div>
+                </div>
+                <button
+                  class="btn-icon-small"
+                  phx-click="create_from_template"
+                  phx-value-template_key={template.template_key}
+                  phx-value-x="0"
+                  phx-value-y="0"
+                  phx-value-z="0"
+                  title="Create from template"
+                >
+                  <.icon name="hero-plus" class="size-3" />
+                </button>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
     </div>
     """
   end

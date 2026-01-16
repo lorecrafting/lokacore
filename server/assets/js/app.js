@@ -434,6 +434,31 @@ const Hooks = {
         this.selectedRoom = null
         this.render()
       })
+
+      // Listen for panel collapsed events (for localStorage sync)
+      this.handleEvent('panel_collapsed', ({ panels }) => {
+        localStorage.setItem('world_builder_collapsed_panels', JSON.stringify(panels))
+      })
+
+      // Restore collapsed state from localStorage on mount
+      const savedPanels = localStorage.getItem('world_builder_collapsed_panels')
+      if (savedPanels) {
+        try {
+          const panels = JSON.parse(savedPanels)
+          // Apply saved state by toggling each panel that should be collapsed
+          if (panels.hierarchy) {
+            this.pushEvent('toggle_panel', { panel: 'hierarchy' })
+          }
+          if (panels.inspector) {
+            this.pushEvent('toggle_panel', { panel: 'inspector' })
+          }
+          if (panels.console) {
+            this.pushEvent('toggle_panel', { panel: 'console' })
+          }
+        } catch (e) {
+          // Invalid saved state, ignore
+        }
+      }
     },
 
     updated() {
