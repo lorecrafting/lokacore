@@ -27,6 +27,7 @@ import { createRoot } from "react-dom/client"
 import WorldBuilderApp from "./world_builder/App.jsx"
 import QuestEditor from "./world_builder/editors/QuestEditor.jsx"
 import CutsceneTimeline from "./world_builder/editors/CutsceneTimeline.jsx"
+import ChatPanel from "./world_builder/ChatPanel.jsx"
 import { undoManager } from "./world_builder/UndoManager.js"
 
 // Custom hooks for ebook-style game client
@@ -521,6 +522,66 @@ const Hooks = {
           onBatchSelect: (keys) => {
             this.selectedKeys = keys
             this.pushEvent('batch_select', { keys })
+          }
+        })
+      )
+    }
+  },
+
+  // =============================================================================
+  // Chat Panel - React-based LLM chat interface
+  // =============================================================================
+  ChatPanel: {
+    mounted() {
+      const roomsData = JSON.parse(this.el.dataset.rooms || '[]')
+      const selectedRoom = JSON.parse(this.el.dataset.selectedRoom || 'null')
+      const validation = JSON.parse(this.el.dataset.validation || '{}')
+
+      this.root = createRoot(this.el)
+      this.rooms = roomsData
+      this.selectedRoom = selectedRoom
+      this.validation = validation
+
+      this.render()
+
+      // Listen for data updates from LiveView
+      this.handleEvent('chat_data_updated', ({ rooms, selectedRoom, validation }) => {
+        this.rooms = rooms || this.rooms
+        this.selectedRoom = selectedRoom !== undefined ? selectedRoom : this.selectedRoom
+        this.validation = validation || this.validation
+        this.render()
+      })
+    },
+
+    updated() {
+      // Re-parse data when LiveView updates
+      const roomsData = JSON.parse(this.el.dataset.rooms || '[]')
+      const selectedRoom = JSON.parse(this.el.dataset.selectedRoom || 'null')
+      const validation = JSON.parse(this.el.dataset.validation || '{}')
+
+      this.rooms = roomsData
+      this.selectedRoom = selectedRoom
+      this.validation = validation
+      this.render()
+    },
+
+    destroyed() {
+      if (this.root) {
+        this.root.unmount()
+      }
+    },
+
+    render() {
+      this.root.render(
+        React.createElement(ChatPanel, {
+          rooms: this.rooms,
+          selectedRoom: this.selectedRoom,
+          validation: this.validation,
+          onToolResult: (toolName, input, result) => {
+            this.pushEvent('tool_result', { tool: toolName, input, result })
+          },
+          pushEvent: (event, payload) => {
+            this.pushEvent(event, payload)
           }
         })
       )

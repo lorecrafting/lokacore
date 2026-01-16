@@ -36,6 +36,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     ViewportContainer,
     InspectorPanel,
     ConsolePanel,
+    ChatPanel,
     InputValidator,
     SettingsModal,
     DialogueEditor
@@ -91,7 +92,12 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:show_settings, false)
      |> assign(:api_key_status, :unconfigured)
      |> assign(:selected_model, "claude-opus-4-5-20251101")
-     |> assign(:collapsed_panels, %{hierarchy: false, inspector: false, console: false})
+     |> assign(:collapsed_panels, %{
+       hierarchy: false,
+       inspector: false,
+       console: false,
+       chat: false
+     })
      |> assign(:undo_state, %{can_undo: false, can_redo: false, undo_count: 0, redo_count: 0})
      |> push_event("init_world_builder", %{rooms: rooms, validation: validation.results})}
   end
@@ -125,6 +131,13 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
         <ConsolePanel.console_panel
           console_messages={@console_messages}
           collapsed={@collapsed_panels.console}
+        />
+
+        <ChatPanel.chat_panel
+          rooms={@rooms}
+          selected_room={@selected_room}
+          validation={@validation}
+          collapsed={@collapsed_panels.chat}
         />
       </div>
 
@@ -418,7 +431,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   def handle_event("toggle_panel", %{"panel" => panel}, socket) do
     panel_atom = String.to_existing_atom(panel)
 
-    if panel_atom in [:hierarchy, :inspector, :console] do
+    if panel_atom in [:hierarchy, :inspector, :console, :chat] do
       collapsed = socket.assigns.collapsed_panels
       new_collapsed = Map.update!(collapsed, panel_atom, &(!&1))
 
@@ -431,16 +444,17 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     end
   end
 
-  # Keyboard shortcuts for panel toggle (1, 2, 3)
+  # Keyboard shortcuts for panel toggle (1, 2, 3, 4)
   @impl true
   def handle_event("keyboard_shortcut", %{"key" => key}, socket) do
-    # Only handle 1, 2, 3 keys for panel toggle
+    # Only handle 1, 2, 3, 4 keys for panel toggle
     # Ignore if user is in an input field (handled by JS)
     panel =
       case key do
         "1" -> :hierarchy
         "2" -> :inspector
         "3" -> :console
+        "4" -> :chat
         _ -> nil
       end
 
@@ -1506,7 +1520,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
       [
         collapsed_panels.hierarchy && "hierarchy-collapsed",
         collapsed_panels.inspector && "inspector-collapsed",
-        collapsed_panels.console && "console-collapsed"
+        collapsed_panels.console && "console-collapsed",
+        collapsed_panels.chat && "chat-collapsed"
       ]
       |> Enum.filter(& &1)
       |> Enum.join(" ")
