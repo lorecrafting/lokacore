@@ -344,6 +344,25 @@ The telemetry system logs warnings for:
 
 ## Logging
 
+Loka uses structured logging with module prefixes for easy debugging. See the comprehensive **[Logging Guide](./logging-guide.md)** for:
+
+- Module prefix conventions (`[COMBAT]`, `[SHOP]`, `[DIALOGUE]`, etc.)
+- Log level guidelines (debug/info/warning/error)
+- Debugging techniques with log filtering
+- Adding logging to new code
+
+### Quick Reference: Module Prefixes
+
+| Prefix | Module | What It Logs |
+|--------|--------|--------------|
+| `[COMBAT]` | `actions/combat.ex` | Attack, flee, victory, defeat |
+| `[SHOP]` | `actions/shop.ex` | Buy, sell, open shop |
+| `[DIALOGUE]` | `framework/dialogue.ex` | Conversations, choices |
+| `[CRAFTING]` | `framework/crafting.ex` | Craft success/failure |
+| `[INVENTORY]` | `framework/inventory.ex` | Add/remove items |
+| `[ENTITIES]` | `engine/entities.ex` | Create/update/delete |
+| `[ACTION_BRIDGE]` | `action_bridge.ex` | Action execution |
+
 ### Log Levels
 
 Set via `LOG_LEVEL` environment variable:
@@ -355,6 +374,19 @@ Set via `LOG_LEVEL` environment variable:
 | `info` | Production verbose (default) |
 | `debug` | Development only |
 
+### Filtering Logs
+
+```bash
+# Filter by module
+fly logs | grep "\[COMBAT\]"
+
+# Filter by player
+fly logs | grep "player_id=abc123"
+
+# Combine filters
+fly logs | grep "\[SHOP\]" | grep "player_id=abc123"
+```
+
 ### JSON Logging (Production)
 
 Production uses `LoggerJSON` for structured logging:
@@ -363,11 +395,10 @@ Production uses `LoggerJSON` for structured logging:
 {
   "time": "2025-01-01T00:00:00.000Z",
   "level": "info",
-  "message": "Player logged in",
+  "message": "[COMBAT] Victory: player_id=abc123 enemy=Goblin xp=50",
   "metadata": {
     "request_id": "abc123",
-    "session_id": "sess_456",
-    "player_id": "player_789"
+    "session_id": "sess_456"
   }
 }
 ```
