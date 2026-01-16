@@ -26,8 +26,7 @@ defmodule LokaWeb.AdminLive do
     SystemTab,
     PrototypesTab,
     TestingTab,
-    QuestsTab,
-    WorldBuilderLive
+    QuestsTab
   }
 
   alias Loka.Testing.Content.{WorldValidator, QuestValidator, PrototypeLinter}
@@ -119,13 +118,14 @@ defmodule LokaWeb.AdminLive do
             />
 
             <div :if={not @sidebar_collapsed} class="admin-nav-divider">Tools</div>
-            <.nav_item
-              tab={:world_designer}
-              active={@active_tab}
-              icon="hero-globe-alt"
-              label="World Designer"
-              collapsed={@sidebar_collapsed}
-            />
+            <a
+              href={~p"/admin/world-builder"}
+              class={["admin-nav-link", @sidebar_collapsed && "collapsed"]}
+              title={if @sidebar_collapsed, do: "World Builder", else: nil}
+            >
+              <.icon name="hero-globe-alt" class="size-4" />
+              <span :if={not @sidebar_collapsed}>World Builder</span>
+            </a>
             <.nav_item
               tab={:scripts}
               active={@active_tab}
@@ -163,7 +163,6 @@ defmodule LokaWeb.AdminLive do
         <main class="admin-main">
           <.tab_content
             tab={@active_tab}
-            socket={@socket}
             stats={assigns[:stats]}
             players={assigns[:players]}
             rooms={assigns[:rooms]}
@@ -210,7 +209,6 @@ defmodule LokaWeb.AdminLive do
   # =============================================================================
 
   attr :tab, :atom, required: true
-  attr :socket, Phoenix.LiveView.Socket, required: true
   attr :stats, :map, default: nil
   attr :players, :list, default: nil
   attr :rooms, :list, default: nil
@@ -289,12 +287,6 @@ defmodule LokaWeb.AdminLive do
     """
   end
 
-  defp tab_content(%{tab: :world_designer} = assigns) do
-    ~H"""
-    {live_render(@socket, WorldBuilderLive, id: "world-builder-tab")}
-    """
-  end
-
   defp tab_content(%{tab: :system} = assigns) do
     ~H"""
     <.live_component module={SystemTab} id="system-tab" system_info={@system_info} />
@@ -322,7 +314,6 @@ defmodule LokaWeb.AdminLive do
     "scripts" => :scripts,
     "prototypes" => :prototypes,
     "quests" => :quests,
-    "world_designer" => :world_designer,
     "testing" => :testing,
     "system" => :system
   }
@@ -722,9 +713,6 @@ defmodule LokaWeb.AdminLive do
       process_count: :erlang.system_info(:process_count)
     })
   end
-
-  # World Designer loads its own data in the component
-  defp load_tab_data(socket, :world_designer), do: socket
 
   defp load_tab_data(socket, _), do: socket
 end
