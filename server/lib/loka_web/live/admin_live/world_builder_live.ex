@@ -92,6 +92,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:api_key_status, :unconfigured)
      |> assign(:selected_model, "claude-opus-4-5-20251101")
      |> assign(:collapsed_panels, %{hierarchy: false, inspector: false, console: false})
+     |> assign(:undo_state, %{can_undo: false, can_redo: false, undo_count: 0, redo_count: 0})
      |> push_event("init_world_builder", %{rooms: rooms, validation: validation.results})}
   end
 
@@ -99,7 +100,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   def render(assigns) do
     ~H"""
     <div class="world-builder" phx-window-keydown="keyboard_shortcut">
-      <Toolbar.toolbar />
+      <Toolbar.toolbar undo_state={@undo_state} />
       
     <!-- Main 4-panel layout -->
       <div class={panel_container_classes(@collapsed_panels)}>
@@ -503,7 +504,13 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
              |> assign(:show_create_modal, false)
              |> assign(:rooms, RoomManager.list_rooms())
              |> log_console(:info, "Created room: #{room.key}")
-             |> push_event("room_created", %{room: room})}
+             |> push_event("room_created", %{room: room})
+             |> push_event("record_operation", %{
+               type: "create_room",
+               beforeState: nil,
+               afterState: Map.from_struct(room),
+               metadata: %{key: room.key, entity_type: :room}
+             })}
 
           {:error, reason} ->
             {:noreply, log_console(socket, :error, "Failed to create room: #{reason}")}
@@ -600,6 +607,9 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   end
 
   def handle_event("delete_room", %{"id" => room_id}, socket) do
+    # Get room before deletion for undo
+    room_before = Enum.find(socket.assigns.rooms, fn r -> r.key == room_id || r.id == room_id end)
+
     case RoomManager.delete_room(room_id) do
       :ok ->
         {:noreply,
@@ -607,7 +617,13 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
          |> assign(:rooms, RoomManager.list_rooms())
          |> assign(:selected_room, nil)
          |> log_console(:info, "Deleted room: #{room_id}")
-         |> push_event("room_deleted", %{id: room_id})}
+         |> push_event("room_deleted", %{id: room_id})
+         |> push_event("record_operation", %{
+           type: "delete_room",
+           beforeState: room_before && Map.from_struct(room_before),
+           afterState: nil,
+           metadata: %{key: room_id, entity_type: :room}
+         })}
 
       {:error, reason} ->
         {:noreply,
@@ -1175,6 +1191,145 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
   def handle_event("clear_console", _params, socket) do
     {:noreply, assign(socket, :console_messages, [])}
+  end
+
+  # =============================================================================
+  # Undo/Redo System
+  # =============================================================================
+
+  def handle_event("undo_state_changed", params, socket) do
+    undo_state = %{
+      can_undo: params["canUndo"] || false,
+      can_redo: params["canRedo"] || false,
+      undo_count: params["undoCount"] || 0,
+      redo_count: params["redoCount"] || 0
+    }
+
+    {:noreply, assign(socket, :undo_state, undo_state)}
+  end
+
+  def handle_event(
+        "undo_operation",
+        %{"type" => type, "state" => state, "metadata" => metadata},
+        socket
+      ) do
+    # Handle undo by restoring previous state
+    case restore_state(type, state, metadata, socket) do
+      {:ok, socket} ->
+        {:noreply, log_console(socket, :info, "Undo: #{type}")}
+
+      {:error, reason} ->
+        {:noreply, log_console(socket, :error, "Undo failed: #{reason}")}
+    end
+  end
+
+  def handle_event(
+        "redo_operation",
+        %{"type" => type, "state" => state, "metadata" => metadata},
+        socket
+      ) do
+    # Handle redo by restoring the after state
+    case restore_state(type, state, metadata, socket) do
+      {:ok, socket} ->
+        {:noreply, log_console(socket, :info, "Redo: #{type}")}
+
+      {:error, reason} ->
+        {:noreply, log_console(socket, :error, "Redo failed: #{reason}")}
+    end
+  end
+
+  # Trigger undo from toolbar button
+  def handle_event("trigger_undo", _params, socket) do
+    {:noreply, push_event(socket, "trigger_undo", %{})}
+  end
+
+  # Trigger redo from toolbar button
+  def handle_event("trigger_redo", _params, socket) do
+    {:noreply, push_event(socket, "trigger_redo", %{})}
+  end
+
+  # Restore state based on operation type
+  defp restore_state("create_room", nil, %{"key" => key}, socket) do
+    # Undo create = delete
+    case RoomManager.delete_room(key) do
+      :ok ->
+        {:ok,
+         socket
+         |> assign(:rooms, RoomManager.list_rooms())
+         |> assign(:selected_room, nil)
+         |> push_event("room_deleted", %{id: key})}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  defp restore_state("create_room", state, _metadata, socket) when is_map(state) do
+    # Redo create = create
+    case RoomManager.create_room(atomize_keys(state)) do
+      {:ok, room} ->
+        {:ok,
+         socket
+         |> assign(:rooms, RoomManager.list_rooms())
+         |> push_event("room_created", %{room: room})}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  defp restore_state("delete_room", nil, _metadata, socket) do
+    # Redo delete - already deleted, nothing to do
+    {:ok, socket}
+  end
+
+  defp restore_state("delete_room", state, _metadata, socket) when is_map(state) do
+    # Undo delete = create
+    case RoomManager.create_room(atomize_keys(state)) do
+      {:ok, room} ->
+        {:ok,
+         socket
+         |> assign(:rooms, RoomManager.list_rooms())
+         |> push_event("room_created", %{room: room})}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  defp restore_state("update_room", state, %{"key" => key}, socket) when is_map(state) do
+    # Restore room to previous state
+    case RoomManager.update_room(key, atomize_keys(state)) do
+      {:ok, room} ->
+        {:ok,
+         socket
+         |> assign(:rooms, RoomManager.list_rooms())
+         |> push_event("room_updated", %{room: room})}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  defp restore_state(_type, _state, _metadata, socket) do
+    # Unknown operation type, log and continue
+    {:ok, socket}
+  end
+
+  # Convert string keys to atom keys for room operations
+  defp atomize_keys(map) when is_map(map) do
+    Map.new(map, fn
+      {k, v} when is_binary(k) -> {String.to_existing_atom(k), v}
+      {k, v} -> {k, v}
+    end)
+  rescue
+    # If atom doesn't exist, try to create it (only for allowed keys)
+    ArgumentError ->
+      Map.new(map, fn
+        {k, v} when is_binary(k) and k in @allowed_room_fields -> {String.to_atom(k), v}
+        {k, v} when is_binary(k) -> {k, v}
+        {k, v} -> {k, v}
+      end)
   end
 
   # Auto-Layout Algorithms

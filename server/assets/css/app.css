@@ -2590,6 +2590,18 @@ body:has(.ebook-page) {
   color: #ffffff;
 }
 
+.toolbar-btn.disabled,
+.toolbar-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.toolbar-btn.disabled:hover,
+.toolbar-btn:disabled:hover {
+  background: transparent;
+  color: #909090;
+}
+
 .toolbar-separator {
   width: 1px;
   height: 1.5rem;

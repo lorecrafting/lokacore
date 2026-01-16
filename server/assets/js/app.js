@@ -27,6 +27,7 @@ import { createRoot } from "react-dom/client"
 import WorldBuilderApp from "./world_builder/App.jsx"
 import QuestEditor from "./world_builder/editors/QuestEditor.jsx"
 import CutsceneTimeline from "./world_builder/editors/CutsceneTimeline.jsx"
+import { undoManager } from "./world_builder/UndoManager.js"
 
 // Custom hooks for ebook-style game client
 const Hooks = {
@@ -459,6 +460,39 @@ const Hooks = {
           // Invalid saved state, ignore
         }
       }
+
+      // Setup undo/redo manager
+      undoManager.setPushEvent((event, payload) => this.pushEvent(event, payload))
+      undoManager.setOnStateChange((state) => {
+        // Update undo/redo UI state in LiveView
+        this.pushEvent('undo_state_changed', state)
+      })
+
+      // Listen for operation recording events from LiveView
+      this.handleEvent('record_operation', ({ type, beforeState, afterState, metadata }) => {
+        undoManager.record(type, beforeState, afterState, metadata)
+      })
+
+      // Listen for composite operation events
+      this.handleEvent('begin_composite', ({ label }) => {
+        undoManager.beginComposite(label)
+      })
+
+      this.handleEvent('end_composite', () => {
+        undoManager.endComposite()
+      })
+
+      // Listen for undo/redo trigger events (from toolbar buttons)
+      this.handleEvent('trigger_undo', () => {
+        undoManager.undo()
+      })
+
+      this.handleEvent('trigger_redo', () => {
+        undoManager.redo()
+      })
+
+      // Send initial undo state
+      this.pushEvent('undo_state_changed', undoManager.getState())
     },
 
     updated() {

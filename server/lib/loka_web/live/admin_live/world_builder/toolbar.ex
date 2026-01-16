@@ -9,6 +9,9 @@ defmodule LokaWeb.AdminLive.WorldBuilder.Toolbar do
 
   attr :class, :string, default: ""
 
+  attr :undo_state, :map,
+    default: %{can_undo: false, can_redo: false, undo_count: 0, redo_count: 0}
+
   def toolbar(assigns) do
     ~H"""
     <div class={"world-builder-toolbar #{@class}"}>
@@ -24,6 +27,25 @@ defmodule LokaWeb.AdminLive.WorldBuilder.Toolbar do
         </button>
         <button class="toolbar-btn" title="Scale Tool">
           <.icon name="hero-arrows-pointing-out" class="size-4" />
+        </button>
+      </div>
+
+      <div class="toolbar-section">
+        <button
+          class={"toolbar-btn #{unless @undo_state.can_undo, do: "disabled"}"}
+          phx-click="trigger_undo"
+          title={"Undo (Ctrl+Z) - #{@undo_state.undo_count} actions"}
+          disabled={not @undo_state.can_undo}
+        >
+          <.icon name="hero-arrow-uturn-left" class="size-4" />
+        </button>
+        <button
+          class={"toolbar-btn #{unless @undo_state.can_redo, do: "disabled"}"}
+          phx-click="trigger_redo"
+          title={"Redo (Ctrl+Y) - #{@undo_state.redo_count} actions"}
+          disabled={not @undo_state.can_redo}
+        >
+          <.icon name="hero-arrow-uturn-right" class="size-4" />
         </button>
       </div>
 
