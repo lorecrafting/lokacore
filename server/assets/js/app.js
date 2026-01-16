@@ -389,6 +389,7 @@ const Hooks = {
       this.rooms = roomsData
       this.selectedRoom = null
       this.selectedKeys = []
+      this.validation = {}  // Room validation status by key
 
       this.render()
 
@@ -398,9 +399,17 @@ const Hooks = {
         this.render()
       })
 
-      // Listen for init event with rooms data
-      this.handleEvent('init_world_builder', ({ rooms }) => {
+      // Listen for init event with rooms and validation data
+      this.handleEvent('init_world_builder', ({ rooms, validation }) => {
         this.rooms = rooms
+        this.validation = validation || {}
+        this.render()
+      })
+
+      // Listen for rooms updated event (includes validation)
+      this.handleEvent('rooms_updated', ({ rooms, validation }) => {
+        this.rooms = rooms
+        this.validation = validation || {}
         this.render()
       })
 
@@ -411,7 +420,7 @@ const Hooks = {
         this.render()
       })
 
-      // Listen for room updated event
+      // Listen for room updated event (single room)
       this.handleEvent('room_updated', ({ room }) => {
         this.rooms = this.rooms.map(r =>
           (r.id === room.id || r.key === room.key) ? room : r
@@ -446,6 +455,7 @@ const Hooks = {
         React.createElement(WorldBuilderApp, {
           rooms: this.rooms,
           selectedRoom: this.selectedRoom,
+          validation: this.validation,
           onSelectRoom: (key) => {
             this.pushEvent('select_room', { key })
           },

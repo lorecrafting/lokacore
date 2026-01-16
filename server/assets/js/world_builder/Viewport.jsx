@@ -14,7 +14,7 @@ import Exit, { getExitColor } from './Exit'
  * - Multi-select support
  * - Lighting
  */
-export default function Viewport({ rooms, selectedRoom, selectedKeys = [], onSelectRoom, isSelected }) {
+export default function Viewport({ rooms, selectedRoom, selectedKeys = [], validation = {}, onSelectRoom, isSelected }) {
   // Build a lookup map for quick room access by key
   const roomsByKey = useMemo(() => {
     const map = new Map()
@@ -97,6 +97,7 @@ export default function Viewport({ rooms, selectedRoom, selectedKeys = [], onSel
           room={room}
           selected={selectedRoom === room.key}
           multiSelected={isSelected && isSelected(room.key)}
+          validationStatus={validation[room.key]?.status || 'valid'}
           onSelect={onSelectRoom}
         />
       ))}
@@ -110,8 +111,9 @@ export default function Viewport({ rooms, selectedRoom, selectedKeys = [], onSel
  * Renders a single room as a cube with a text label.
  * Supports single selection and multi-selection with different highlighting.
  * Shows icons for NPCs (👤) and items (📦) inside the cube.
+ * Shows validation glow: red=error, yellow=warning, none=valid
  */
-function RoomCube({ room, selected, multiSelected, onSelect }) {
+function RoomCube({ room, selected, multiSelected, validationStatus = 'valid', onSelect }) {
   const meshRef = useRef()
   const { x = 0, y = 0, z = 0, name, spawns = {} } = room
   const { npcs = [], items = [] } = spawns
@@ -124,10 +126,38 @@ function RoomCube({ room, selected, multiSelected, onSelect }) {
     }
   }
 
-  // Determine cube color based on selection state
-  const cubeColor = multiSelected ? '#ffaa00' : (selected ? '#4a9eff' : '#7eb3ff')
-  const emissiveColor = multiSelected ? '#ff8800' : (selected ? '#2a5eff' : '#0a0a0a')
-  const emissiveIntensity = (multiSelected || selected) ? 0.3 : 0
+  // Determine cube color based on selection and validation state
+  // Priority: selection > validation
+  let cubeColor = '#7eb3ff'  // Default blue
+  let emissiveColor = '#0a0a0a'
+  let emissiveIntensity = 0
+
+  if (multiSelected) {
+    cubeColor = '#ffaa00'
+    emissiveColor = '#ff8800'
+    emissiveIntensity = 0.3
+  } else if (selected) {
+    cubeColor = '#4a9eff'
+    emissiveColor = '#2a5eff'
+    emissiveIntensity = 0.3
+  } else {
+    // Show validation glow when not selected
+    switch (validationStatus) {
+      case 'error':
+        cubeColor = '#ff6b6b'  // Light red
+        emissiveColor = '#EF4444'  // Red glow
+        emissiveIntensity = 0.4
+        break
+      case 'warning':
+        cubeColor = '#ffd93d'  // Light yellow
+        emissiveColor = '#F59E0B'  // Yellow glow
+        emissiveIntensity = 0.3
+        break
+      default:
+        // Valid - default blue, no glow
+        break
+    }
+  }
 
   // Build icon display - show up to 3 icons, then count
   const npcCount = npcs.length

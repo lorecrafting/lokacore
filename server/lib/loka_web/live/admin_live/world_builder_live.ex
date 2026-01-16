@@ -24,7 +24,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     EntityManager,
     QuestManager,
     CutsceneManager,
-    LayoutManager
+    LayoutManager,
+    ValidationManager
   }
 
   alias Loka.Testing.Content.DialogueQuestChainValidator
@@ -58,6 +59,9 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     quests = QuestManager.list_quests()
     cutscenes = CutsceneManager.list_cutscenes()
 
+    # Run validation on rooms
+    validation = ValidationManager.validation_summary(rooms)
+
     {:ok,
      socket
      |> assign(:rooms, rooms)
@@ -76,7 +80,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:show_cutscene_editor, false)
      |> assign(:console_messages, [])
      |> assign(:show_create_modal, false)
-     |> push_event("init_world_builder", %{rooms: rooms})}
+     |> assign(:validation, validation)
+     |> push_event("init_world_builder", %{rooms: rooms, validation: validation.results})}
   end
 
   @impl true
@@ -955,6 +960,17 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   end
 
   defp parse_algorithm(_), do: {:error, :invalid_algorithm}
+
+  # Helper to refresh rooms and validation, then push to frontend
+  defp refresh_rooms_with_validation(socket) do
+    rooms = RoomManager.list_rooms()
+    validation = ValidationManager.validation_summary(rooms)
+
+    socket
+    |> assign(:rooms, rooms)
+    |> assign(:validation, validation)
+    |> push_event("rooms_updated", %{rooms: rooms, validation: validation.results})
+  end
 
   # Safely parse integer from string, preventing application crashes on invalid input
   defp parse_integer(value, default \\ 0) do

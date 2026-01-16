@@ -9,8 +9,9 @@ import { useSelection } from './useSelection'
  * React Three Fiber application for 3D world visualization.
  * Mounted into LiveView via WorldBuilder hook.
  * Supports multi-select and batch operations.
+ * Shows validation status (glow) on room cubes.
  */
-export default function App({ rooms = [], selectedRoom = null, onSelectRoom, onBatchSelect }) {
+export default function App({ rooms = [], selectedRoom = null, validation = {}, onSelectRoom, onBatchSelect }) {
   // Multi-select state
   const selection = useSelection((keys) => {
     // Notify LiveView of selection changes
@@ -47,6 +48,7 @@ export default function App({ rooms = [], selectedRoom = null, onSelectRoom, onB
         rooms={rooms}
         selectedRoom={selectedRoom}
         selectedKeys={selection.selectedKeys}
+        validation={validation}
         onSelectRoom={handleRoomClick}
         onBoxSelect={selection.selectMultiple}
         isSelected={selection.isSelected}
