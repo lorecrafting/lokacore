@@ -69,7 +69,14 @@ defmodule LokaWeb.AdminLive.WorldBuilder.Toolbar do
         </button>
       </div>
 
-      <div class="toolbar-section">
+      <div class="toolbar-section toolbar-right">
+        <button
+          class="toolbar-btn"
+          phx-click="show_settings"
+          title="Settings"
+        >
+          <.icon name="hero-cog-6-tooth" class="size-4" />
+        </button>
         <span style="font-size: 0.75rem; color: #909090;">Loka World Builder</span>
       </div>
     </div>

@@ -469,6 +469,122 @@ const Hooks = {
   },
 
   // =============================================================================
+  // API Key Configuration - BYOK for Anthropic API
+  // =============================================================================
+  APIKeyConfig: {
+    mounted() {
+      const input = this.el.querySelector('#api-key-input')
+      const saveBtn = this.el.querySelector('#api-key-save')
+
+      // Load saved key status (key itself stays in localStorage, encrypted)
+      const hasKey = localStorage.getItem('anthropic_api_key_encrypted') !== null
+      if (hasKey) {
+        // Check if key is still valid by testing it
+        this.validateStoredKey()
+      }
+
+      // Handle save button click
+      saveBtn?.addEventListener('click', () => {
+        const key = input?.value?.trim()
+        if (key) {
+          this.saveAndValidateKey(key)
+        }
+      })
+
+      // Handle enter key
+      input?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          const key = input?.value?.trim()
+          if (key) {
+            this.saveAndValidateKey(key)
+          }
+        }
+      })
+    },
+
+    async saveAndValidateKey(key) {
+      // Update UI to show validating
+      this.pushEvent('api_key_validated', { status: 'validating' })
+
+      try {
+        // Validate with a simple API call
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': key,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true'
+          },
+          body: JSON.stringify({
+            model: 'claude-3-5-haiku-20241022',
+            max_tokens: 10,
+            messages: [{ role: 'user', content: 'Hi' }]
+          })
+        })
+
+        if (response.ok) {
+          // Key is valid - store encrypted in localStorage
+          // Simple encryption using base64 and a fixed prefix (not cryptographically secure,
+          // but prevents accidental exposure in plain text)
+          const encrypted = btoa('loka_wb_' + key)
+          localStorage.setItem('anthropic_api_key_encrypted', encrypted)
+          this.pushEvent('api_key_validated', { status: 'valid' })
+
+          // Clear input
+          const input = this.el.querySelector('#api-key-input')
+          if (input) input.value = ''
+        } else {
+          this.pushEvent('api_key_validated', { status: 'invalid' })
+        }
+      } catch (error) {
+        console.error('API key validation failed:', error)
+        this.pushEvent('api_key_validated', { status: 'invalid' })
+      }
+    },
+
+    async validateStoredKey() {
+      const encrypted = localStorage.getItem('anthropic_api_key_encrypted')
+      if (!encrypted) return
+
+      try {
+        const key = atob(encrypted).replace('loka_wb_', '')
+        this.pushEvent('api_key_validated', { status: 'validating' })
+
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': key,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true'
+          },
+          body: JSON.stringify({
+            model: 'claude-3-5-haiku-20241022',
+            max_tokens: 10,
+            messages: [{ role: 'user', content: 'Hi' }]
+          })
+        })
+
+        if (response.ok) {
+          this.pushEvent('api_key_validated', { status: 'valid' })
+        } else {
+          // Key is invalid - remove it
+          localStorage.removeItem('anthropic_api_key_encrypted')
+          this.pushEvent('api_key_validated', { status: 'invalid' })
+        }
+      } catch (error) {
+        console.error('Stored key validation failed:', error)
+        this.pushEvent('api_key_validated', { status: 'unconfigured' })
+      }
+    },
+
+    destroyed() {
+      // Cleanup if needed
+    }
+  },
+
+  // =============================================================================
   // Quest Editor - ReactFlow node-based quest builder
   // =============================================================================
   QuestEditor: {

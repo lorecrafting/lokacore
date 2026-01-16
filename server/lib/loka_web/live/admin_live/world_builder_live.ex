@@ -36,7 +36,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     ViewportContainer,
     InspectorPanel,
     ConsolePanel,
-    InputValidator
+    InputValidator,
+    SettingsModal
   }
 
   # Valid layout algorithms - prevents atom exhaustion attacks
@@ -81,6 +82,9 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:console_messages, [])
      |> assign(:show_create_modal, false)
      |> assign(:validation, validation)
+     |> assign(:show_settings, false)
+     |> assign(:api_key_status, :unconfigured)
+     |> assign(:selected_model, "claude-opus-4-5-20251101")
      |> push_event("init_world_builder", %{rooms: rooms, validation: validation.results})}
   end
 
@@ -329,6 +333,13 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
           </div>
         </div>
       <% end %>
+
+      <%!-- Settings Modal --%>
+      <SettingsModal.settings_modal
+        show={@show_settings}
+        api_key_status={@api_key_status}
+        selected_model={@selected_model}
+      />
     </div>
     """
   end
@@ -336,6 +347,34 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   # =============================================================================
   # Event Handlers
   # =============================================================================
+
+  @impl true
+  def handle_event("show_settings", _params, socket) do
+    {:noreply, assign(socket, :show_settings, true)}
+  end
+
+  @impl true
+  def handle_event("close_settings", _params, socket) do
+    {:noreply, assign(socket, :show_settings, false)}
+  end
+
+  @impl true
+  def handle_event("api_key_validated", %{"status" => status}, socket) do
+    status_atom =
+      case status do
+        "valid" -> :valid
+        "invalid" -> :invalid
+        "validating" -> :validating
+        _ -> :unconfigured
+      end
+
+    {:noreply, assign(socket, :api_key_status, status_atom)}
+  end
+
+  @impl true
+  def handle_event("change_model", %{"value" => model}, socket) do
+    {:noreply, assign(socket, :selected_model, model)}
+  end
 
   @impl true
   def handle_event("select_room", %{"key" => key}, socket) do
