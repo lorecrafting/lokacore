@@ -122,6 +122,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
        console: false,
        chat: false
      })
+     |> assign(:camera_view, "perspective")
      |> assign(:undo_state, %{can_undo: false, can_redo: false, undo_count: 0, redo_count: 0})
      |> push_event("init_world_builder", %{rooms: rooms, validation: validation.results})}
   end
@@ -148,6 +149,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
           selected_room={@selected_room}
           console_messages={@console_messages}
           console_collapsed={@collapsed_panels.console}
+          camera_view={@camera_view}
         />
 
         <InspectorPanel.inspector_panel
@@ -500,6 +502,16 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     else
       {:noreply, socket}
     end
+  end
+
+  # Camera view preset (Perspective, Top, Front, Side)
+  @impl true
+  def handle_event("set_camera_view", %{"view" => view}, socket)
+      when view in ["perspective", "top", "front", "side"] do
+    {:noreply,
+     socket
+     |> assign(:camera_view, view)
+     |> push_event("set_camera_view", %{view: view})}
   end
 
   # Keyboard shortcuts for panel toggle (1, 2, 3, 4)

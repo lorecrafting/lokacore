@@ -12,6 +12,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ViewportContainer do
   attr :selected_room, :string, default: nil
   attr :console_messages, :list, default: []
   attr :console_collapsed, :boolean, default: false
+  attr :camera_view, :string, default: "perspective"
   attr :class, :string, default: ""
 
   def viewport_container(assigns) do
@@ -31,10 +32,34 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ViewportContainer do
     <!-- Viewport overlay controls -->
         <div class="viewport-overlay">
           <div class="viewport-mode-buttons">
-            <button class="viewport-mode-btn active">Perspective</button>
-            <button class="viewport-mode-btn">Top</button>
-            <button class="viewport-mode-btn">Front</button>
-            <button class="viewport-mode-btn">Side</button>
+            <button
+              class={["viewport-mode-btn", @camera_view == "perspective" && "active"]}
+              phx-click="set_camera_view"
+              phx-value-view="perspective"
+            >
+              Perspective
+            </button>
+            <button
+              class={["viewport-mode-btn", @camera_view == "top" && "active"]}
+              phx-click="set_camera_view"
+              phx-value-view="top"
+            >
+              Top
+            </button>
+            <button
+              class={["viewport-mode-btn", @camera_view == "front" && "active"]}
+              phx-click="set_camera_view"
+              phx-value-view="front"
+            >
+              Front
+            </button>
+            <button
+              class={["viewport-mode-btn", @camera_view == "side" && "active"]}
+              phx-click="set_camera_view"
+              phx-value-view="side"
+            >
+              Side
+            </button>
           </div>
 
           <div class="viewport-info">

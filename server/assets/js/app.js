@@ -393,12 +393,19 @@ const Hooks = {
       this.selectedRoom = null
       this.selectedKeys = []
       this.validation = {}  // Room validation status by key
+      this.cameraView = 'perspective'  // Camera view preset
 
       this.render()
 
       // Listen for room selection events from LiveView
       this.handleEvent('select_room', ({ key }) => {
         this.selectedRoom = key
+        this.render()
+      })
+
+      // Listen for camera view changes from LiveView
+      this.handleEvent('set_camera_view', ({ view }) => {
+        this.cameraView = view
         this.render()
       })
 
@@ -653,6 +660,7 @@ const Hooks = {
           rooms: this.rooms,
           selectedRoom: this.selectedRoom,
           validation: this.validation,
+          cameraView: this.cameraView,
           onSelectRoom: (key) => {
             this.pushEvent('select_room', { key })
           },

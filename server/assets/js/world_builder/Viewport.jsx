@@ -1,7 +1,16 @@
-import React, { useRef, useMemo } from 'react'
+import React, { useRef, useMemo, useEffect } from 'react'
 import { OrbitControls, Grid, Text, Html } from '@react-three/drei'
+import { useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import Exit, { getExitColor } from './Exit'
+
+// Camera preset positions
+const CAMERA_PRESETS = {
+  perspective: { position: [15, 15, 15], target: [0, 0, 0] },
+  top: { position: [0, 30, 0], target: [0, 0, 0] },
+  front: { position: [0, 5, 30], target: [0, 0, 0] },
+  side: { position: [30, 5, 0], target: [0, 0, 0] },
+}
 
 /**
  * 3D Viewport Component
@@ -13,8 +22,22 @@ import Exit, { getExitColor } from './Exit'
  * - Exit arrows connecting rooms
  * - Multi-select support
  * - Lighting
+ * - Camera view presets (Perspective, Top, Front, Side)
  */
-export default function Viewport({ rooms, selectedRoom, selectedKeys = [], validation = {}, onSelectRoom, isSelected }) {
+export default function Viewport({ rooms, selectedRoom, selectedKeys = [], validation = {}, onSelectRoom, isSelected, cameraView = 'perspective' }) {
+  const controlsRef = useRef()
+  const { camera } = useThree()
+
+  // Handle camera view changes
+  useEffect(() => {
+    const preset = CAMERA_PRESETS[cameraView] || CAMERA_PRESETS.perspective
+    if (camera && controlsRef.current) {
+      // Animate camera to new position
+      camera.position.set(...preset.position)
+      controlsRef.current.target.set(...preset.target)
+      controlsRef.current.update()
+    }
+  }, [cameraView, camera])
   // Build a lookup map for quick room access by key
   const roomsByKey = useMemo(() => {
     const map = new Map()
@@ -58,6 +81,7 @@ export default function Viewport({ rooms, selectedRoom, selectedKeys = [], valid
 
       {/* Camera Controls */}
       <OrbitControls
+        ref={controlsRef}
         enableDamping
         dampingFactor={0.05}
         minDistance={5}

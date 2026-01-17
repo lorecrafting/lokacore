@@ -10,8 +10,9 @@ import { useSelection } from './useSelection'
  * Mounted into LiveView via WorldBuilder hook.
  * Supports multi-select and batch operations.
  * Shows validation status (glow) on room cubes.
+ * Supports camera view presets (perspective, top, front, side).
  */
-export default function App({ rooms = [], selectedRoom = null, validation = {}, onSelectRoom, onBatchSelect }) {
+export default function App({ rooms = [], selectedRoom = null, validation = {}, onSelectRoom, onBatchSelect, cameraView = 'perspective' }) {
   // Multi-select state
   const selection = useSelection((keys) => {
     // Notify LiveView of selection changes
@@ -52,6 +53,7 @@ export default function App({ rooms = [], selectedRoom = null, validation = {}, 
         onSelectRoom={handleRoomClick}
         onBoxSelect={selection.selectMultiple}
         isSelected={selection.isSelected}
+        cameraView={cameraView}
       />
     </Canvas>
   )
