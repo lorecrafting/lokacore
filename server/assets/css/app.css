@@ -2609,11 +2609,11 @@ body:has(.ebook-page) {
   margin: 0 0.25rem;
 }
 
-/* Main container */
+/* Main container - 4 column layout per master plan */
 .world-builder-container {
   display: grid;
-  grid-template-columns: 18% 1fr 18%;
-  grid-template-rows: 1fr auto;
+  grid-template-columns: 200px 1fr 260px 320px;
+  grid-template-rows: 1fr;
   width: 100%;
   height: calc(100% - 2.5rem);
   gap: 1px;
@@ -2638,6 +2638,7 @@ body:has(.ebook-page) {
   grid-column: 2;
   grid-row: 1;
   background: #252525;
+  position: relative; /* For console overlay positioning */
 }
 
 .world-builder-inspector {
@@ -2646,42 +2647,58 @@ body:has(.ebook-page) {
   background: #1e1e1e;
 }
 
+/* Console is now an overlay inside the viewport */
 .world-builder-console {
-  grid-column: 1 / 3;
-  grid-row: 2;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
   max-height: 200px;
   background: #1e1e1e;
+  border-top: 1px solid #0d0d0d;
+  z-index: 10;
 }
 
+/* Chat is now the 4th column, full height */
 .world-builder-chat {
-  grid-column: 3;
-  grid-row: 2;
-  min-height: 200px;
-  max-height: 200px;
+  grid-column: 4;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
   background: #1e1e1e;
+  border-left: 1px solid #3d3d3d;
 }
 
-/* Panel collapse states */
+/* Panel collapse states - 4 column layout */
 .world-builder-container.hierarchy-collapsed {
-  grid-template-columns: 40px 1fr 18%;
+  grid-template-columns: 40px 1fr 260px 320px;
 }
 
 .world-builder-container.inspector-collapsed {
-  grid-template-columns: 18% 1fr 40px;
+  grid-template-columns: 200px 1fr 40px 320px;
+}
+
+.world-builder-container.chat-collapsed {
+  grid-template-columns: 200px 1fr 260px 40px;
 }
 
 .world-builder-container.hierarchy-collapsed.inspector-collapsed {
-  grid-template-columns: 40px 1fr 40px;
+  grid-template-columns: 40px 1fr 40px 320px;
 }
 
-.world-builder-container.console-collapsed .world-builder-console {
-  max-height: 32px;
+.world-builder-container.hierarchy-collapsed.chat-collapsed {
+  grid-template-columns: 40px 1fr 260px 40px;
 }
 
-.world-builder-container.chat-collapsed .world-builder-chat {
-  max-height: 32px;
-  min-height: 32px;
+.world-builder-container.inspector-collapsed.chat-collapsed {
+  grid-template-columns: 200px 1fr 40px 40px;
 }
+
+.world-builder-container.hierarchy-collapsed.inspector-collapsed.chat-collapsed {
+  grid-template-columns: 40px 1fr 40px 40px;
+}
+
+/* Console collapse handled by .console-collapsed class on the console element itself */
 
 /* Collapsed panel styles */
 .world-builder-panel.panel-collapsed {
@@ -3019,7 +3036,11 @@ body:has(.ebook-page) {
   margin-top: 0.25rem;
 }
 
-/* Console Panel */
+/* Console Panel - now an overlay inside viewport */
+.world-builder-console.console-collapsed {
+  max-height: 32px;
+}
+
 .console-tabs {
   display: flex;
   gap: 0.25rem;
@@ -4162,15 +4183,7 @@ body:has(.ebook-page) {
    WORLD BUILDER - CHAT PANEL
    ======================================================================== */
 
-.world-builder-chat {
-  grid-column: 3;
-  grid-row: 2;
-  display: flex;
-  flex-direction: column;
-  background: #1e1e1e;
-  border-left: 1px solid #3d3d3d;
-  min-height: 200px;
-}
+/* Chat panel extends .world-builder-chat defined above in grid layout */
 
 .chat-panel-tabs {
   display: flex;

@@ -39,7 +39,6 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     HierarchyPanel,
     ViewportContainer,
     InspectorPanel,
-    ConsolePanel,
     ChatPanel,
     InputValidator,
     SettingsModal,
@@ -144,18 +143,18 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
           collapsed={@collapsed_panels.hierarchy}
         />
 
-        <ViewportContainer.viewport_container rooms={@rooms} selected_room={@selected_room} />
+        <ViewportContainer.viewport_container
+          rooms={@rooms}
+          selected_room={@selected_room}
+          console_messages={@console_messages}
+          console_collapsed={@collapsed_panels.console}
+        />
 
         <InspectorPanel.inspector_panel
           rooms={@rooms}
           selected_room={@selected_room}
           selected_keys={@selected_keys}
           collapsed={@collapsed_panels.inspector}
-        />
-
-        <ConsolePanel.console_panel
-          console_messages={@console_messages}
-          collapsed={@collapsed_panels.console}
         />
 
         <ChatPanel.chat_panel
