@@ -149,7 +149,6 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
           selected_room={@selected_room}
           console_messages={@console_messages}
           console_collapsed={@collapsed_panels.console}
-          camera_view={@camera_view}
         />
 
         <InspectorPanel.inspector_panel
@@ -616,7 +615,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
              |> push_event("record_operation", %{
                type: "create_room",
                beforeState: nil,
-               afterState: Map.from_struct(room),
+               afterState: room,
                metadata: %{key: room.key, entity_type: :room}
              })}
 
@@ -719,7 +718,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     room_before = Enum.find(socket.assigns.rooms, fn r -> r.key == room_id || r.id == room_id end)
 
     case RoomManager.delete_room(room_id) do
-      :ok ->
+      {:ok, _deleted_room} ->
         {:noreply,
          socket
          |> assign(:rooms, RoomManager.list_rooms())
@@ -728,7 +727,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
          |> push_event("room_deleted", %{id: room_id})
          |> push_event("record_operation", %{
            type: "delete_room",
-           beforeState: room_before && Map.from_struct(room_before),
+           beforeState: room_before,
            afterState: nil,
            metadata: %{key: room_id, entity_type: :room}
          })}
@@ -1824,7 +1823,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   defp restore_state("create_room", nil, %{"key" => key}, socket) do
     # Undo create = delete
     case RoomManager.delete_room(key) do
-      :ok ->
+      {:ok, _deleted_room} ->
         {:ok,
          socket
          |> assign(:rooms, RoomManager.list_rooms())
