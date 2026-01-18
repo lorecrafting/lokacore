@@ -2897,6 +2897,56 @@ body:has(.ebook-page) {
   pointer-events: auto;
 }
 
+/* Z-Level Tabs */
+.z-level-tabs {
+  display: flex;
+  gap: 0.25rem;
+  background: rgba(30, 30, 30, 0.95);
+  padding: 0.25rem;
+  border-radius: 3px;
+}
+
+.z-level-tab {
+  padding: 0.35rem 0.6rem;
+  background: transparent;
+  border: none;
+  color: #909090;
+  font-size: 0.7rem;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.1s;
+  font-family: monospace;
+}
+
+.z-level-tab:hover {
+  background: #3d3d3d;
+  color: #c9c9c9;
+}
+
+.z-level-tab.active {
+  background: #0e7ad8;
+  color: #ffffff;
+}
+
+/* Viewport Controls Help */
+.viewport-controls-help {
+  display: flex;
+  gap: 0.75rem;
+  background: rgba(30, 30, 30, 0.95);
+  padding: 0.35rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.65rem;
+  color: #707070;
+}
+
+.viewport-controls-help span {
+  cursor: help;
+}
+
+.viewport-controls-help span:hover {
+  color: #909090;
+}
+
 .viewport-mode-buttons {
   display: flex;
   gap: 0.25rem;

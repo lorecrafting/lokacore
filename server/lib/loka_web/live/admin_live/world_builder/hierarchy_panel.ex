@@ -83,16 +83,16 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
         </div>
         
     <!-- Search bar -->
-        <div class="hierarchy-search">
+        <form phx-change="search_templates" class="hierarchy-search">
           <.icon name="hero-magnifying-glass" class="size-3" />
           <input
             type="text"
             placeholder="Search templates..."
-            phx-change="search_templates"
+            phx-debounce="100"
             name="query"
             value={@template_search}
           />
-        </div>
+        </form>
 
         <div class="panel-content">
           <!-- Room Hierarchy -->
