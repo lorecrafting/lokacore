@@ -1,17 +1,71 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { streamMessage, isConfigured } from './AnthropicClient.js';
+import * as AnthropicClient from './AnthropicClient.js';
+import * as OpenAIClient from './OpenAIClient.js';
+import * as DeepSeekClient from './DeepSeekClient.js';
+import * as GeminiClient from './GeminiClient.js';
 import { allTools } from './ToolDefinitions.js';
 import { buildWorldContext } from './ContextBuilder.js';
 
 // ============================================================================
-// Constants
+// Constants - Providers and Models
 // ============================================================================
 
-const MODELS = [
-  { id: 'claude-opus-4-5-20251101', name: 'Claude Opus 4.5', costPer1kInput: 0.015, costPer1kOutput: 0.075 },
-  { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', costPer1kInput: 0.003, costPer1kOutput: 0.015 },
-  { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku', costPer1kInput: 0.0008, costPer1kOutput: 0.004 },
-];
+const PROVIDERS = {
+  anthropic: {
+    name: 'Anthropic',
+    client: AnthropicClient,
+    keyPrefix: 'sk-ant-',
+    models: [
+      { id: 'claude-opus-4-5-20251101', name: 'Claude Opus 4.5', costPer1kInput: 0.015, costPer1kOutput: 0.075 },
+      { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', costPer1kInput: 0.003, costPer1kOutput: 0.015 },
+      { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku', costPer1kInput: 0.0008, costPer1kOutput: 0.004 },
+    ]
+  },
+  openai: {
+    name: 'OpenAI',
+    client: OpenAIClient,
+    keyPrefix: 'sk-',
+    models: [
+      { id: 'gpt-4o', name: 'GPT-4o', costPer1kInput: 0.0025, costPer1kOutput: 0.01 },
+      { id: 'gpt-4o-mini', name: 'GPT-4o Mini', costPer1kInput: 0.00015, costPer1kOutput: 0.0006 },
+      { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', costPer1kInput: 0.01, costPer1kOutput: 0.03 },
+    ]
+  },
+  deepseek: {
+    name: 'DeepSeek',
+    client: DeepSeekClient,
+    keyPrefix: 'sk-',
+    models: [
+      { id: 'deepseek-chat', name: 'DeepSeek V3', costPer1kInput: 0.00014, costPer1kOutput: 0.00028 },
+      { id: 'deepseek-reasoner', name: 'DeepSeek R1', costPer1kInput: 0.00055, costPer1kOutput: 0.00219 },
+    ]
+  },
+  gemini: {
+    name: 'Google Gemini',
+    client: GeminiClient,
+    keyPrefix: 'AIza',
+    models: [
+      { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', costPer1kInput: 0.0001, costPer1kOutput: 0.0004 },
+      { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', costPer1kInput: 0.000075, costPer1kOutput: 0.0003 },
+      { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', costPer1kInput: 0.00125, costPer1kOutput: 0.005 },
+    ]
+  }
+};
+
+// Helper to get client for a provider
+const getClient = (providerId) => PROVIDERS[providerId]?.client || AnthropicClient;
+
+// Helper to check if any provider is configured
+const isAnyProviderConfigured = () => {
+  return Object.values(PROVIDERS).some(p => p.client.isConfigured());
+};
+
+// Helper to get configured providers
+const getConfiguredProviders = () => {
+  return Object.entries(PROVIDERS)
+    .filter(([_, p]) => p.client.isConfigured())
+    .map(([id, _]) => id);
+};
 
 const SYSTEM_PROMPT = `You are an AI assistant helping to build a game world using the Loka MUD engine World Builder.
 
@@ -149,9 +203,18 @@ export default function ChatPanel({
   const [isLoading, setIsLoading] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
   const [pendingToolCalls, setPendingToolCalls] = useState([]);
-  const [selectedModel, setSelectedModel] = useState(MODELS[0].id);
+  const [selectedProvider, setSelectedProvider] = useState(() => {
+    // Default to first configured provider, or anthropic
+    const configured = getConfiguredProviders();
+    return configured[0] || 'anthropic';
+  });
+  const [selectedModel, setSelectedModel] = useState(() => {
+    const configured = getConfiguredProviders();
+    const provider = configured[0] || 'anthropic';
+    return PROVIDERS[provider].models[0].id;
+  });
   const [usage, setUsage] = useState({ inputTokens: 0, outputTokens: 0, totalCost: 0 });
-  const [isConfiguredState, setIsConfiguredState] = useState(isConfigured());
+  const [isConfiguredState, setIsConfiguredState] = useState(isAnyProviderConfigured());
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -161,12 +224,27 @@ export default function ChatPanel({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, streamingContent]);
 
-  // Check if API is configured
+  // Check if any API is configured
   useEffect(() => {
-    const checkConfig = () => setIsConfiguredState(isConfigured());
+    const checkConfig = () => {
+      setIsConfiguredState(isAnyProviderConfigured());
+      // If current provider is no longer configured, switch to a configured one
+      if (!PROVIDERS[selectedProvider]?.client.isConfigured()) {
+        const configured = getConfiguredProviders();
+        if (configured.length > 0 && configured[0] !== selectedProvider) {
+          setSelectedProvider(configured[0]);
+          setSelectedModel(PROVIDERS[configured[0]].models[0].id);
+        }
+      }
+    };
     window.addEventListener('storage', checkConfig);
-    return () => window.removeEventListener('storage', checkConfig);
-  }, []);
+    // Also check periodically in case localStorage was changed by settings modal
+    const interval = setInterval(checkConfig, 1000);
+    return () => {
+      window.removeEventListener('storage', checkConfig);
+      clearInterval(interval);
+    };
+  }, [selectedProvider]);
 
   // Build context for the current state
   const buildCurrentContext = useCallback(() => {
@@ -209,11 +287,13 @@ export default function ChatPanel({
     }));
 
     try {
-      const model = MODELS.find(m => m.id === selectedModel) || MODELS[0];
+      const provider = PROVIDERS[selectedProvider];
+      const model = provider.models.find(m => m.id === selectedModel) || provider.models[0];
+      const client = provider.client;
       let assistantContent = '';
       let toolCalls = [];
 
-      const result = await streamMessage({
+      const result = await client.streamMessage({
         model: selectedModel,
         messages: apiMessages,
         system: systemWithContext,
@@ -273,7 +353,7 @@ export default function ChatPanel({
       setStreamingContent('');
       setPendingToolCalls([]);
     }
-  }, [inputValue, isLoading, messages, selectedModel, buildCurrentContext, onToolResult, pushEvent]);
+  }, [inputValue, isLoading, messages, selectedProvider, selectedModel, buildCurrentContext, onToolResult, pushEvent]);
 
   // Handle keyboard events
   const handleKeyDown = (e) => {
@@ -289,11 +369,21 @@ export default function ChatPanel({
     setUsage({ inputTokens: 0, outputTokens: 0, totalCost: 0 });
   };
 
+  // Handle provider change
+  const handleProviderChange = (newProvider) => {
+    setSelectedProvider(newProvider);
+    // Reset to first model of new provider
+    setSelectedModel(PROVIDERS[newProvider].models[0].id);
+  };
+
   if (!isConfiguredState) {
     return (
       <div className="chat-panel">
         <div className="chat-unconfigured">
-          <p>Configure your Anthropic API key in Settings to enable AI assistance.</p>
+          <p>Configure an API key in Settings to enable AI assistance.</p>
+          <p className="chat-unconfigured-providers">
+            Supported: Anthropic, OpenAI, DeepSeek, Google Gemini
+          </p>
           <button
             className="btn btn-primary btn-sm"
             onClick={() => pushEvent('show_settings', {})}
@@ -305,16 +395,30 @@ export default function ChatPanel({
     );
   }
 
+  const currentProvider = PROVIDERS[selectedProvider];
+  const configuredProviders = getConfiguredProviders();
+
   return (
     <div className="chat-panel">
       <div className="chat-header">
         <div className="chat-header-left">
           <select
+            value={selectedProvider}
+            onChange={(e) => handleProviderChange(e.target.value)}
+            className="provider-selector"
+            title="Select AI Provider"
+          >
+            {configuredProviders.map(id => (
+              <option key={id} value={id}>{PROVIDERS[id].name}</option>
+            ))}
+          </select>
+          <select
             value={selectedModel}
             onChange={(e) => setSelectedModel(e.target.value)}
             className="model-selector"
+            title="Select Model"
           >
-            {MODELS.map(m => (
+            {currentProvider.models.map(m => (
               <option key={m.id} value={m.id}>{m.name}</option>
             ))}
           </select>

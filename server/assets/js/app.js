@@ -1047,6 +1047,194 @@ const Hooks = {
   },
 
   // =============================================================================
+  // Multi-Provider API Key Configuration - BYOK for multiple AI providers
+  // =============================================================================
+  MultiAPIKeyConfig: {
+    mounted() {
+      const providers = ['anthropic', 'openai', 'deepseek', 'gemini']
+
+      // Check stored keys for all providers on mount
+      providers.forEach(provider => {
+        this.validateStoredKey(provider)
+      })
+
+      // Set up event listeners for each provider
+      providers.forEach(provider => {
+        const input = this.el.querySelector(`#api-key-input-${provider}`)
+        const saveBtn = this.el.querySelector(`.api-key-save[data-provider="${provider}"]`)
+        const clearBtn = this.el.querySelector(`.api-key-clear[data-provider="${provider}"]`)
+
+        // Handle save button click
+        saveBtn?.addEventListener('click', () => {
+          const key = input?.value?.trim()
+          if (key) {
+            this.saveAndValidateKey(provider, key)
+          }
+        })
+
+        // Handle enter key in input
+        input?.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            const key = input?.value?.trim()
+            if (key) {
+              this.saveAndValidateKey(provider, key)
+            }
+          }
+        })
+
+        // Handle clear button click
+        clearBtn?.addEventListener('click', () => {
+          this.clearKey(provider)
+        })
+      })
+    },
+
+    async saveAndValidateKey(provider, key) {
+      // Update UI to show validating
+      this.pushEvent('api_key_validated', { provider, status: 'validating' })
+
+      try {
+        const isValid = await this.validateKey(provider, key)
+
+        if (isValid) {
+          // Key is valid - store encrypted in localStorage
+          const encrypted = btoa('loka_wb_' + key)
+          localStorage.setItem(`${provider}_api_key_encrypted`, encrypted)
+          this.pushEvent('api_key_validated', { provider, status: 'valid' })
+
+          // Clear input
+          const input = this.el.querySelector(`#api-key-input-${provider}`)
+          if (input) input.value = ''
+        } else {
+          this.pushEvent('api_key_validated', { provider, status: 'invalid' })
+        }
+      } catch (error) {
+        console.error(`API key validation failed for ${provider}:`, error)
+        this.pushEvent('api_key_validated', { provider, status: 'invalid' })
+      }
+    },
+
+    async validateKey(provider, key) {
+      // Provider-specific validation
+      switch (provider) {
+        case 'anthropic':
+          return this.validateAnthropicKey(key)
+        case 'openai':
+          return this.validateOpenAIKey(key)
+        case 'deepseek':
+          return this.validateDeepSeekKey(key)
+        case 'gemini':
+          return this.validateGeminiKey(key)
+        default:
+          return false
+      }
+    },
+
+    async validateAnthropicKey(key) {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': key,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-3-5-haiku-20241022',
+          max_tokens: 10,
+          messages: [{ role: 'user', content: 'Hi' }]
+        })
+      })
+      return response.ok
+    },
+
+    async validateOpenAIKey(key) {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${key}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          max_tokens: 10,
+          messages: [{ role: 'user', content: 'Hi' }]
+        })
+      })
+      return response.ok
+    },
+
+    async validateDeepSeekKey(key) {
+      const response = await fetch('https://api.deepseek.com/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${key}`
+        },
+        body: JSON.stringify({
+          model: 'deepseek-chat',
+          max_tokens: 10,
+          messages: [{ role: 'user', content: 'Hi' }]
+        })
+      })
+      return response.ok
+    },
+
+    async validateGeminiKey(key) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: 'Hi' }] }],
+          generationConfig: { maxOutputTokens: 10 }
+        })
+      })
+      return response.ok
+    },
+
+    async validateStoredKey(provider) {
+      const encrypted = localStorage.getItem(`${provider}_api_key_encrypted`)
+      if (!encrypted) {
+        this.pushEvent('api_key_validated', { provider, status: 'unconfigured' })
+        return
+      }
+
+      try {
+        const key = atob(encrypted).replace('loka_wb_', '')
+        this.pushEvent('api_key_validated', { provider, status: 'validating' })
+
+        const isValid = await this.validateKey(provider, key)
+
+        if (isValid) {
+          this.pushEvent('api_key_validated', { provider, status: 'valid' })
+        } else {
+          // Key is invalid - remove it
+          localStorage.removeItem(`${provider}_api_key_encrypted`)
+          this.pushEvent('api_key_validated', { provider, status: 'invalid' })
+        }
+      } catch (error) {
+        console.error(`Stored key validation failed for ${provider}:`, error)
+        this.pushEvent('api_key_validated', { provider, status: 'unconfigured' })
+      }
+    },
+
+    clearKey(provider) {
+      localStorage.removeItem(`${provider}_api_key_encrypted`)
+      this.pushEvent('api_key_validated', { provider, status: 'unconfigured' })
+      // Clear the input field
+      const input = this.el.querySelector(`#api-key-input-${provider}`)
+      if (input) input.value = ''
+    },
+
+    destroyed() {
+      // Cleanup if needed
+    }
+  },
+
+  // =============================================================================
   // Quest Editor - ReactFlow node-based quest builder
   // =============================================================================
   QuestEditor: {

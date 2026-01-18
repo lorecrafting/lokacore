@@ -114,7 +114,12 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:show_create_modal, false)
      |> assign(:validation, validation)
      |> assign(:show_settings, false)
-     |> assign(:api_key_status, :unconfigured)
+     |> assign(:api_key_statuses, %{
+       anthropic: :unconfigured,
+       openai: :unconfigured,
+       deepseek: :unconfigured,
+       gemini: :unconfigured
+     })
      |> assign(:selected_model, "claude-opus-4-5-20251101")
      |> assign(:collapsed_panels, %{
        hierarchy: false,
@@ -479,7 +484,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
       <%!-- Settings Modal --%>
       <SettingsModal.settings_modal
         show={@show_settings}
-        api_key_status={@api_key_status}
+        api_key_statuses={@api_key_statuses}
         selected_model={@selected_model}
       />
     </div>
@@ -501,6 +506,28 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   end
 
   @impl true
+  def handle_event("api_key_validated", %{"provider" => provider, "status" => status}, socket) do
+    status_atom =
+      case status do
+        "valid" -> :valid
+        "invalid" -> :invalid
+        "validating" -> :validating
+        _ -> :unconfigured
+      end
+
+    provider_atom = String.to_existing_atom(provider)
+
+    if provider_atom in [:anthropic, :openai, :deepseek, :gemini] do
+      statuses = socket.assigns.api_key_statuses
+      new_statuses = Map.put(statuses, provider_atom, status_atom)
+      {:noreply, assign(socket, :api_key_statuses, new_statuses)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  # Fallback for old single-provider format (backwards compatibility)
+  @impl true
   def handle_event("api_key_validated", %{"status" => status}, socket) do
     status_atom =
       case status do
@@ -510,7 +537,10 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
         _ -> :unconfigured
       end
 
-    {:noreply, assign(socket, :api_key_status, status_atom)}
+    # Default to anthropic for backwards compatibility
+    statuses = socket.assigns.api_key_statuses
+    new_statuses = Map.put(statuses, :anthropic, status_atom)
+    {:noreply, assign(socket, :api_key_statuses, new_statuses)}
   end
 
   @impl true
