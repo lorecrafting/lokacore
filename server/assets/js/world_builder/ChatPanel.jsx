@@ -16,9 +16,16 @@ const PROVIDERS = {
     client: AnthropicClient,
     keyPrefix: 'sk-ant-',
     models: [
+      // Latest models
       { id: 'claude-opus-4-5-20251101', name: 'Claude Opus 4.5', costPer1kInput: 0.015, costPer1kOutput: 0.075 },
       { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', costPer1kInput: 0.003, costPer1kOutput: 0.015 },
+      // Claude 3.5 family
+      { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', costPer1kInput: 0.003, costPer1kOutput: 0.015 },
       { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku', costPer1kInput: 0.0008, costPer1kOutput: 0.004 },
+      // Claude 3 family
+      { id: 'claude-3-opus-20240229', name: 'Claude 3 Opus', costPer1kInput: 0.015, costPer1kOutput: 0.075 },
+      { id: 'claude-3-sonnet-20240229', name: 'Claude 3 Sonnet', costPer1kInput: 0.003, costPer1kOutput: 0.015 },
+      { id: 'claude-3-haiku-20240307', name: 'Claude 3 Haiku', costPer1kInput: 0.00025, costPer1kOutput: 0.00125 },
     ]
   },
   openai: {
@@ -26,9 +33,19 @@ const PROVIDERS = {
     client: OpenAIClient,
     keyPrefix: 'sk-',
     models: [
+      // Reasoning models (o-series)
+      { id: 'o1', name: 'o1 (Reasoning)', costPer1kInput: 0.015, costPer1kOutput: 0.06 },
+      { id: 'o1-mini', name: 'o1 Mini', costPer1kInput: 0.003, costPer1kOutput: 0.012 },
+      { id: 'o1-preview', name: 'o1 Preview', costPer1kInput: 0.015, costPer1kOutput: 0.06 },
+      { id: 'o3-mini', name: 'o3 Mini', costPer1kInput: 0.00115, costPer1kOutput: 0.0044 },
+      // GPT-4o family
       { id: 'gpt-4o', name: 'GPT-4o', costPer1kInput: 0.0025, costPer1kOutput: 0.01 },
       { id: 'gpt-4o-mini', name: 'GPT-4o Mini', costPer1kInput: 0.00015, costPer1kOutput: 0.0006 },
+      // GPT-4 family
       { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', costPer1kInput: 0.01, costPer1kOutput: 0.03 },
+      { id: 'gpt-4', name: 'GPT-4', costPer1kInput: 0.03, costPer1kOutput: 0.06 },
+      // GPT-3.5
+      { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', costPer1kInput: 0.0005, costPer1kOutput: 0.0015 },
     ]
   },
   deepseek: {
@@ -45,9 +62,13 @@ const PROVIDERS = {
     client: GeminiClient,
     keyPrefix: 'AIza',
     models: [
+      // Gemini 2.0
       { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', costPer1kInput: 0.0001, costPer1kOutput: 0.0004 },
-      { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', costPer1kInput: 0.000075, costPer1kOutput: 0.0003 },
+      { id: 'gemini-2.0-flash-thinking-exp', name: 'Gemini 2.0 Flash Thinking', costPer1kInput: 0.0001, costPer1kOutput: 0.0004 },
+      // Gemini 1.5
       { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', costPer1kInput: 0.00125, costPer1kOutput: 0.005 },
+      { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', costPer1kInput: 0.000075, costPer1kOutput: 0.0003 },
+      { id: 'gemini-1.5-flash-8b', name: 'Gemini 1.5 Flash 8B', costPer1kInput: 0.0000375, costPer1kOutput: 0.00015 },
     ]
   }
 };
