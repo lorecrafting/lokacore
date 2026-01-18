@@ -122,6 +122,12 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
        console: false,
        chat: false
      })
+     |> assign(:panel_sizes, %{
+       hierarchy: 200,
+       inspector: 260,
+       chat: 320,
+       console: 150
+     })
      |> assign(:camera_view, "perspective")
      |> assign(:undo_state, %{can_undo: false, can_redo: false, undo_count: 0, redo_count: 0})
      |> push_event("init_world_builder", %{rooms: rooms, validation: validation.results})}
@@ -133,8 +139,13 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     <div class="world-builder" phx-window-keydown="keyboard_shortcut">
       <Toolbar.toolbar undo_state={@undo_state} />
       
-    <!-- Main 4-panel layout -->
-      <div class={panel_container_classes(@collapsed_panels)}>
+    <!-- Main 4-panel layout with resize handles -->
+      <div
+        id="world-builder-panels"
+        class={panel_container_classes(@collapsed_panels)}
+        phx-hook="PanelResize"
+        style={panel_sizes_style(@panel_sizes)}
+      >
         <HierarchyPanel.hierarchy_panel
           rooms={@rooms}
           templates={@templates}
@@ -144,12 +155,27 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
           collapsed={@collapsed_panels.hierarchy}
         />
 
+        <div
+          class="panel-resize-handle"
+          data-resize="hierarchy"
+          style={if @collapsed_panels.hierarchy, do: "display: none;", else: ""}
+        >
+        </div>
+
         <ViewportContainer.viewport_container
           rooms={@rooms}
           selected_room={@selected_room}
           console_messages={@console_messages}
           console_collapsed={@collapsed_panels.console}
+          console_height={@panel_sizes.console}
         />
+
+        <div
+          class="panel-resize-handle"
+          data-resize="inspector"
+          style={if @collapsed_panels.inspector, do: "display: none;", else: ""}
+        >
+        </div>
 
         <InspectorPanel.inspector_panel
           rooms={@rooms}
@@ -157,6 +183,13 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
           selected_keys={@selected_keys}
           collapsed={@collapsed_panels.inspector}
         />
+
+        <div
+          class="panel-resize-handle"
+          data-resize="chat"
+          style={if @collapsed_panels.chat, do: "display: none;", else: ""}
+        >
+        </div>
 
         <ChatPanel.chat_panel
           rooms={@rooms}
@@ -498,6 +531,20 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
        socket
        |> assign(:collapsed_panels, new_collapsed)
        |> push_event("panel_collapsed", %{panels: new_collapsed})}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  # Panel resize handler
+  @impl true
+  def handle_event("resize_panel", %{"panel" => panel, "size" => size}, socket) do
+    panel_atom = String.to_existing_atom(panel)
+
+    if panel_atom in [:hierarchy, :inspector, :chat, :console] do
+      sizes = socket.assigns.panel_sizes
+      new_sizes = Map.put(sizes, panel_atom, size)
+      {:noreply, assign(socket, :panel_sizes, new_sizes)}
     else
       {:noreply, socket}
     end
@@ -2084,6 +2131,14 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
       |> Enum.join(" ")
 
     if classes == "", do: base, else: "#{base} #{classes}"
+  end
+
+  # Build CSS custom properties for panel sizes
+  defp panel_sizes_style(panel_sizes) do
+    "--hierarchy-width: #{panel_sizes.hierarchy}px; " <>
+      "--inspector-width: #{panel_sizes.inspector}px; " <>
+      "--chat-width: #{panel_sizes.chat}px; " <>
+      "--console-height: #{panel_sizes.console}px;"
   end
 
   # Helper to refresh rooms and validation, then push to frontend

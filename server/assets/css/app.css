@@ -2609,15 +2609,55 @@ body:has(.ebook-page) {
   margin: 0 0.25rem;
 }
 
-/* Main container - 4 column layout per master plan */
+/* Main container - 4 column layout with resizable panels */
 .world-builder-container {
   display: grid;
-  grid-template-columns: 200px 1fr 260px 320px;
+  /* Use CSS custom properties for resizable widths */
+  grid-template-columns:
+    var(--hierarchy-width, 200px)
+    4px
+    1fr
+    4px
+    var(--inspector-width, 260px)
+    4px
+    var(--chat-width, 320px);
   grid-template-rows: 1fr;
   width: 100%;
   height: calc(100% - 2.5rem);
-  gap: 1px;
+  gap: 0;
   background: #0d0d0d;
+}
+
+/* Resize handles */
+.panel-resize-handle {
+  background: #0d0d0d;
+  cursor: col-resize;
+  transition: background 0.15s;
+  position: relative;
+  z-index: 20;
+}
+
+.panel-resize-handle:hover,
+.panel-resize-handle.dragging {
+  background: #0e7ad8;
+}
+
+.panel-resize-handle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px;
+  height: 30px;
+  background: #3d3d3d;
+  border-radius: 1px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.panel-resize-handle:hover::after {
+  opacity: 1;
 }
 
 .world-builder-panel {
@@ -2632,70 +2672,87 @@ body:has(.ebook-page) {
   grid-column: 1;
   grid-row: 1;
   background: #1e1e1e;
+  min-width: 150px;
 }
 
 .world-builder-viewport {
-  grid-column: 2;
+  grid-column: 3;
   grid-row: 1;
   background: #252525;
   position: relative; /* For console overlay positioning */
+  min-width: 300px;
 }
 
 .world-builder-inspector {
-  grid-column: 3;
+  grid-column: 5;
   grid-row: 1;
   background: #1e1e1e;
+  min-width: 200px;
 }
 
-/* Console is now an overlay inside the viewport */
+.world-builder-chat {
+  grid-column: 7;
+  grid-row: 1;
+  min-width: 200px;
+}
+
+/* Console is now an overlay inside the viewport with resizable height */
 .world-builder-console {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  max-height: 200px;
+  height: var(--console-height, 150px);
+  max-height: 50%;
+  min-height: 80px;
   background: #1e1e1e;
-  border-top: 1px solid #0d0d0d;
+  border-top: none;
   z-index: 10;
-}
-
-/* Chat is now the 4th column, full height */
-.world-builder-chat {
-  grid-column: 4;
-  grid-row: 1;
   display: flex;
   flex-direction: column;
-  background: #1e1e1e;
-  border-left: 1px solid #3d3d3d;
 }
 
-/* Panel collapse states - 4 column layout */
+/* Console resize handle (horizontal, at top of console) */
+.console-resize-handle {
+  height: 4px;
+  background: #0d0d0d;
+  cursor: row-resize;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.console-resize-handle:hover,
+.console-resize-handle.dragging {
+  background: #0e7ad8;
+}
+
+/* Panel collapse states - 7 column layout with resize handles */
 .world-builder-container.hierarchy-collapsed {
-  grid-template-columns: 40px 1fr 260px 320px;
+  grid-template-columns: 40px 0px 1fr 4px var(--inspector-width, 260px) 4px var(--chat-width, 320px);
 }
 
 .world-builder-container.inspector-collapsed {
-  grid-template-columns: 200px 1fr 40px 320px;
+  grid-template-columns: var(--hierarchy-width, 200px) 4px 1fr 0px 40px 4px var(--chat-width, 320px);
 }
 
 .world-builder-container.chat-collapsed {
-  grid-template-columns: 200px 1fr 260px 40px;
+  grid-template-columns: var(--hierarchy-width, 200px) 4px 1fr 4px var(--inspector-width, 260px) 0px 40px;
 }
 
 .world-builder-container.hierarchy-collapsed.inspector-collapsed {
-  grid-template-columns: 40px 1fr 40px 320px;
+  grid-template-columns: 40px 0px 1fr 0px 40px 4px var(--chat-width, 320px);
 }
 
 .world-builder-container.hierarchy-collapsed.chat-collapsed {
-  grid-template-columns: 40px 1fr 260px 40px;
+  grid-template-columns: 40px 0px 1fr 4px var(--inspector-width, 260px) 0px 40px;
 }
 
 .world-builder-container.inspector-collapsed.chat-collapsed {
-  grid-template-columns: 200px 1fr 40px 40px;
+  grid-template-columns: var(--hierarchy-width, 200px) 4px 1fr 0px 40px 0px 40px;
 }
 
 .world-builder-container.hierarchy-collapsed.inspector-collapsed.chat-collapsed {
-  grid-template-columns: 40px 1fr 40px 40px;
+  grid-template-columns: 40px 0px 1fr 0px 40px 0px 40px;
 }
 
 /* Console collapse handled by .console-collapsed class on the console element itself */

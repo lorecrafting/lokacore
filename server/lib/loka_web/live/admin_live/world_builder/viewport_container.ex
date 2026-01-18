@@ -13,6 +13,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ViewportContainer do
   attr :selected_room, :string, default: nil
   attr :console_messages, :list, default: []
   attr :console_collapsed, :boolean, default: false
+  attr :console_height, :integer, default: 150
   attr :class, :string, default: ""
 
   def viewport_container(assigns) do
@@ -50,7 +51,17 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ViewportContainer do
         </div>
         
     <!-- Console overlay at bottom of viewport -->
-        <div class={["world-builder-console", @console_collapsed && "console-collapsed"]}>
+        <div
+          class={["world-builder-console", @console_collapsed && "console-collapsed"]}
+          style={"--console-height: #{@console_height}px;"}
+        >
+          <!-- Console resize handle -->
+          <div
+            class="console-resize-handle"
+            data-resize="console"
+            style={if @console_collapsed, do: "display: none;", else: ""}
+          >
+          </div>
           <div class="console-tabs">
             <button class="console-tab active">Output Log</button>
             <button class="console-tab">Messages</button>
