@@ -165,7 +165,6 @@ defmodule LokaWeb.AdminLive.WorldBuilder.Toolbar do
         >
           <.icon name="hero-cog-6-tooth" class="size-4" />
         </button>
-        <span style="font-size: 0.75rem; color: #909090;">Loka World Builder</span>
       </div>
     </div>
     """

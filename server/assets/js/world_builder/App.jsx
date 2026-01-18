@@ -43,8 +43,11 @@ export default function App({ rooms = [], selectedRoom = null, validation = {}, 
   return (
     <Canvas
       camera={{ position: [15, 15, 15], fov: 50 }}
-      style={{ width: '100%', height: '100%' }}
+      style={{ width: '100%', height: '100%', background: '#1a1a2e' }}
+      gl={{ alpha: false }}
     >
+      {/* Scene background */}
+      <color attach="background" args={['#1a1a2e']} />
       <Viewport
         rooms={rooms}
         selectedRoom={selectedRoom}

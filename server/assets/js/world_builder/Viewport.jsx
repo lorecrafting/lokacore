@@ -28,6 +28,9 @@ export default function Viewport({ rooms, selectedRoom, selectedKeys = [], valid
   const controlsRef = useRef()
   const { camera } = useThree()
 
+  // Debug: Log when component renders
+  console.log('[Viewport] Rendering with', rooms?.length || 0, 'rooms, camera:', cameraView)
+
   // Handle camera view changes
   useEffect(() => {
     const preset = CAMERA_PRESETS[cameraView] || CAMERA_PRESETS.perspective
@@ -74,6 +77,12 @@ export default function Viewport({ rooms, selectedRoom, selectedKeys = [], valid
 
   return (
     <>
+      {/* DEBUG: Test cube at origin */}
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[5, 5, 5]} />
+        <meshBasicMaterial color="red" />
+      </mesh>
+
       {/* Lighting */}
       <ambientLight intensity={0.5} />
       <directionalLight position={[10, 10, 5]} intensity={1} />

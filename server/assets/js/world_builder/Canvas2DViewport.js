@@ -58,7 +58,7 @@ export default class Canvas2DViewport {
 
     // Grid settings
     this.gridSize = 60 // Pixels per world unit
-    this.roomSize = 50 // Room rectangle size in pixels
+    this.roomSize = 36 // Room rectangle size in pixels (smaller for better connection visibility)
     this.minZoom = 0.2
     this.maxZoom = 3
 
@@ -442,26 +442,51 @@ export default class Canvas2DViewport {
     ctx.fill()
     ctx.stroke()
 
-    // Draw room name (above room)
-    ctx.fillStyle = '#ffffff'
-    ctx.font = `bold ${12 / this.camera.zoom}px sans-serif`
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'bottom'
-    ctx.fillText(room.name || room.key, x, y - halfSize - 4)
+    // Only show labels when zoomed in enough (avoid clutter when zoomed out)
+    const showLabels = this.camera.zoom >= 0.5
+    const showDetailedLabels = this.camera.zoom >= 0.8
 
-    // Draw room key (inside room, smaller)
-    ctx.fillStyle = '#aaaaaa'
-    ctx.font = `${9 / this.camera.zoom}px monospace`
-    ctx.textBaseline = 'top'
-    ctx.fillText(room.key, x, y - halfSize + 4)
+    if (showLabels) {
+      // Draw room name inside the room (truncated to fit)
+      const displayName = this.truncateText(room.name || room.key, size - 8, ctx, 10 / this.camera.zoom)
+      ctx.fillStyle = '#ffffff'
+      ctx.font = `bold ${10 / this.camera.zoom}px sans-serif`
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'top'
+      ctx.fillText(displayName, x, y - halfSize + 4)
 
-    // Draw entity indicators
-    this.drawEntityIndicators(ctx, room, x, y, halfSize)
+      // Draw room key only when zoomed in more (smaller, below name)
+      if (showDetailedLabels) {
+        const displayKey = this.truncateText(room.key, size - 8, ctx, 8 / this.camera.zoom)
+        ctx.fillStyle = '#888888'
+        ctx.font = `${8 / this.camera.zoom}px monospace`
+        ctx.fillText(displayKey, x, y - halfSize + 16)
+      }
 
-    // Draw up/down indicators
-    this.drawVerticalExitIndicators(ctx, room, x, y, halfSize)
+      // Draw entity indicators
+      this.drawEntityIndicators(ctx, room, x, y, halfSize)
+
+      // Draw up/down indicators
+      this.drawVerticalExitIndicators(ctx, room, x, y, halfSize)
+    }
 
     ctx.globalAlpha = 1
+  }
+
+  // Truncate text to fit within maxWidth
+  truncateText(text, maxWidth, ctx, fontSize) {
+    if (!text) return ''
+    ctx.font = `${fontSize}px sans-serif`
+
+    if (ctx.measureText(text).width <= maxWidth) {
+      return text
+    }
+
+    let truncated = text
+    while (truncated.length > 0 && ctx.measureText(truncated + '…').width > maxWidth) {
+      truncated = truncated.slice(0, -1)
+    }
+    return truncated + '…'
   }
 
   drawEntityIndicators(ctx, room, x, y, halfSize) {
@@ -549,14 +574,11 @@ export default class Canvas2DViewport {
     const toX = (toRoom.x || 0) * this.gridSize
     const toY = (toRoom.y || 0) * this.gridSize
 
-    const color = EXIT_COLORS[direction] || EXIT_COLORS.default
+    // Use a single consistent color for all connections
+    const color = '#666677'
 
-    // Calculate start and end points (offset from room centers)
-    const offset = this.roomSize / 2 + 5
-    const dirOffset = DIRECTION_OFFSETS[direction] || { dx: 0, dy: 0 }
-
-    const startX = fromX + dirOffset.dx * offset
-    const startY = fromY + dirOffset.dy * offset
+    // Calculate start and end points (offset from room edges)
+    const offset = this.roomSize / 2 + 2
 
     // Calculate direction to destination
     const dx = toX - fromX
@@ -565,34 +587,24 @@ export default class Canvas2DViewport {
 
     if (dist < 1) return // Rooms at same position
 
-    const endX = toX - (dx / dist) * offset
-    const endY = toY - (dy / dist) * offset
+    // Normalize direction
+    const ndx = dx / dist
+    const ndy = dy / dist
 
-    // Draw line
+    // Start from edge of source room, end at edge of dest room
+    const startX = fromX + ndx * offset
+    const startY = fromY + ndy * offset
+    const endX = toX - ndx * offset
+    const endY = toY - ndy * offset
+
+    // Draw simple bar/line connecting rooms
     ctx.strokeStyle = color
-    ctx.lineWidth = 2 / this.camera.zoom
+    ctx.lineWidth = 3 / this.camera.zoom
+    ctx.lineCap = 'round'
     ctx.beginPath()
     ctx.moveTo(startX, startY)
     ctx.lineTo(endX, endY)
     ctx.stroke()
-
-    // Draw arrowhead
-    const arrowSize = 8 / this.camera.zoom
-    const angle = Math.atan2(toY - fromY, toX - fromX)
-
-    ctx.fillStyle = color
-    ctx.beginPath()
-    ctx.moveTo(endX, endY)
-    ctx.lineTo(
-      endX - arrowSize * Math.cos(angle - Math.PI / 6),
-      endY - arrowSize * Math.sin(angle - Math.PI / 6)
-    )
-    ctx.lineTo(
-      endX - arrowSize * Math.cos(angle + Math.PI / 6),
-      endY - arrowSize * Math.sin(angle + Math.PI / 6)
-    )
-    ctx.closePath()
-    ctx.fill()
   }
 
   roundRect(ctx, x, y, width, height, radius) {

@@ -277,14 +277,37 @@ defmodule Loka.WorldBuilder.RoomManager do
     }
   end
 
-  defp get_room_exits(room) do
-    # Extract exit information from room components
-    Map.get(room.components, "exits", %{})
+  defp get_room_exits(room) when is_struct(room, TypedObject) do
+    # For TypedObject rooms, exits are in room.data (from YAML)
+    # Try both atom and string keys since YAML parsing may vary
+    exits =
+      case {Map.get(room.data, :exits), Map.get(room.data, "exits")} do
+        {nil, nil} -> %{}
+        {nil, exits} -> exits
+        {exits, nil} -> exits
+        {atom_exits, string_exits} -> Map.merge(atom_exits, string_exits)
+      end
+
+    # Normalize keys to strings for frontend
+    for {k, v} <- exits, into: %{}, do: {to_string(k), v}
   end
 
   defp get_exits_from_entity(%Entity{} = room) do
-    # Get exits from components
-    Map.get(room.components, "exits", %{})
+    # Get exits from components first
+    component_exits = Map.get(room.components, "exits", %{})
+
+    if map_size(component_exits) > 0 do
+      component_exits
+    else
+      # Fallback: get exits from the TypedObject prototype
+      case Registry.get(room.key) do
+        {:ok, prototype} when is_struct(prototype, TypedObject) ->
+          get_room_exits(prototype)
+
+        _ ->
+          %{}
+      end
+    end
   end
 
   # Extract spawns from TypedObject room
