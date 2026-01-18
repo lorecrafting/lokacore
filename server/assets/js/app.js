@@ -24,7 +24,8 @@ import topbar from "../vendor/topbar"
 // React and World Builder
 import React from "react"
 import { createRoot } from "react-dom/client"
-import WorldBuilderApp from "./world_builder/App.jsx"
+// Note: WorldBuilderApp replaced with Canvas2DViewport for 2D rendering
+import Canvas2DViewport from "./world_builder/Canvas2DViewport.js"
 import QuestEditor from "./world_builder/editors/QuestEditor.jsx"
 import CutsceneTimeline from "./world_builder/editors/CutsceneTimeline.jsx"
 import ScriptEditor from "./world_builder/editors/ScriptEditor.jsx"
@@ -380,54 +381,81 @@ const Hooks = {
   },
 
   // =============================================================================
-  // World Builder - React Three Fiber 3D editor
+  // World Builder - 2D Canvas viewport (replaced React Three Fiber 3D)
   // =============================================================================
   WorldBuilder: {
     mounted() {
-      // Parse initial rooms data from data attribute
-      const roomsData = JSON.parse(this.el.dataset.rooms || '[]')
+      console.log('[WorldBuilder] Mounting 2D Canvas viewport')
 
-      // Create React root and mount app
-      this.root = createRoot(this.el)
-      this.rooms = roomsData
+      // Get the canvas element (should be created by LiveView template)
+      this.canvas = this.el.querySelector('canvas')
+      if (!this.canvas) {
+        // Create canvas if not present
+        this.canvas = document.createElement('canvas')
+        this.canvas.style.width = '100%'
+        this.canvas.style.height = '100%'
+        this.el.appendChild(this.canvas)
+      }
+
+      // Initialize state
+      this.rooms = []
       this.selectedRoom = null
       this.selectedKeys = []
-      this.validation = {}  // Room validation status by key
-      this.cameraView = 'perspective'  // Camera view preset
+      this.validation = {}
 
-      this.render()
+      // Create 2D viewport
+      this.viewport = new Canvas2DViewport(this.canvas, {
+        onSelectRoom: (key, shiftKey) => {
+          this.selectedRoom = key
+          this.pushEvent('select_room', { key })
+        },
+        onBatchSelect: (keys) => {
+          this.selectedKeys = keys
+          this.pushEvent('batch_select', { keys })
+        }
+      })
 
       // Listen for room selection events from LiveView
       this.handleEvent('select_room', ({ key }) => {
         this.selectedRoom = key
-        this.render()
+        this.viewport.setSelectedRoom(key)
       })
 
-      // Listen for camera view changes from LiveView
-      this.handleEvent('set_camera_view', ({ view }) => {
-        this.cameraView = view
-        this.render()
+      // Listen for Z-level changes
+      this.handleEvent('set_z_level', ({ level }) => {
+        this.viewport.setZLevel(level)
       })
 
       // Listen for init event with rooms and validation data
       this.handleEvent('init_world_builder', ({ rooms, validation }) => {
+        console.log('[WorldBuilder] init_world_builder received:', rooms?.length, 'rooms')
         this.rooms = rooms
         this.validation = validation || {}
-        this.render()
+        this.viewport.setRooms(rooms)
+        this.viewport.setValidation(validation)
+        // Auto-fit to show all rooms on init
+        this.viewport.fitToRooms()
+        // Update Z-level tabs
+        this.updateZLevelTabs()
       })
 
       // Listen for rooms updated event (includes validation)
       this.handleEvent('rooms_updated', ({ rooms, validation }) => {
         this.rooms = rooms
         this.validation = validation || {}
-        this.render()
+        this.viewport.setRooms(rooms)
+        this.viewport.setValidation(validation)
+        this.updateZLevelTabs()
       })
 
       // Listen for room created event
       this.handleEvent('room_created', ({ room }) => {
         this.rooms = [...this.rooms, room]
         this.selectedRoom = room.key
-        this.render()
+        this.viewport.setRooms(this.rooms)
+        this.viewport.setSelectedRoom(room.key)
+        this.viewport.centerOnRoom(room.key)
+        this.updateZLevelTabs()
       })
 
       // Listen for room updated event (single room)
@@ -435,14 +463,16 @@ const Hooks = {
         this.rooms = this.rooms.map(r =>
           (r.id === room.id || r.key === room.key) ? room : r
         )
-        this.render()
+        this.viewport.setRooms(this.rooms)
       })
 
       // Listen for room deleted event
       this.handleEvent('room_deleted', ({ id }) => {
         this.rooms = this.rooms.filter(r => r.id !== id && r.key !== id)
         this.selectedRoom = null
-        this.render()
+        this.viewport.setRooms(this.rooms)
+        this.viewport.setSelectedRoom(null)
+        this.updateZLevelTabs()
       })
 
       // Listen for panel collapsed events (for localStorage sync)
@@ -455,16 +485,9 @@ const Hooks = {
       if (savedPanels) {
         try {
           const panels = JSON.parse(savedPanels)
-          // Apply saved state by toggling each panel that should be collapsed
-          if (panels.hierarchy) {
-            this.pushEvent('toggle_panel', { panel: 'hierarchy' })
-          }
-          if (panels.inspector) {
-            this.pushEvent('toggle_panel', { panel: 'inspector' })
-          }
-          if (panels.console) {
-            this.pushEvent('toggle_panel', { panel: 'console' })
-          }
+          if (panels.hierarchy) this.pushEvent('toggle_panel', { panel: 'hierarchy' })
+          if (panels.inspector) this.pushEvent('toggle_panel', { panel: 'inspector' })
+          if (panels.console) this.pushEvent('toggle_panel', { panel: 'console' })
         } catch (e) {
           // Invalid saved state, ignore
         }
@@ -473,7 +496,6 @@ const Hooks = {
       // Setup undo/redo manager
       undoManager.setPushEvent((event, payload) => this.pushEvent(event, payload))
       undoManager.setOnStateChange((state) => {
-        // Update undo/redo UI state in LiveView
         this.pushEvent('undo_state_changed', state)
       })
 
@@ -482,7 +504,6 @@ const Hooks = {
         undoManager.record(type, beforeState, afterState, metadata)
       })
 
-      // Listen for composite operation events
       this.handleEvent('begin_composite', ({ label }) => {
         undoManager.beginComposite(label)
       })
@@ -491,7 +512,6 @@ const Hooks = {
         undoManager.endComposite()
       })
 
-      // Listen for undo/redo trigger events (from toolbar buttons)
       this.handleEvent('trigger_undo', () => {
         undoManager.undo()
       })
@@ -506,16 +526,47 @@ const Hooks = {
       // Setup keyboard shortcuts
       this.keydownHandler = this.handleKeydown.bind(this)
       document.addEventListener('keydown', this.keydownHandler)
+
+      // Setup Z-level tab click handlers
+      this.setupZLevelTabs()
+    },
+
+    setupZLevelTabs() {
+      // Find Z-level tab container and setup click handlers
+      const tabContainer = document.querySelector('.z-level-tabs')
+      if (tabContainer) {
+        tabContainer.addEventListener('click', (e) => {
+          const btn = e.target.closest('[data-z-level]')
+          if (btn) {
+            const level = parseInt(btn.dataset.zLevel)
+            this.viewport.setZLevel(level)
+            this.updateZLevelTabs()
+          }
+        })
+      }
+    },
+
+    updateZLevelTabs() {
+      const tabContainer = document.querySelector('.z-level-tabs')
+      if (!tabContainer || !this.viewport) return
+
+      const zLevels = this.viewport.getZLevels()
+      const currentLevel = this.viewport.currentZLevel
+
+      // Generate tab HTML
+      let html = ''
+      for (const level of zLevels) {
+        const isActive = level === currentLevel
+        html += `<button class="z-level-tab ${isActive ? 'active' : ''}" data-z-level="${level}">Z: ${level}</button>`
+      }
+      tabContainer.innerHTML = html
     },
 
     handleKeydown(e) {
       // Skip if typing in an input/textarea
       const target = e.target
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
-        // Allow Escape to blur inputs
-        if (e.key === 'Escape') {
-          target.blur()
-        }
+        if (e.key === 'Escape') target.blur()
         return
       }
 
@@ -570,6 +621,7 @@ const Hooks = {
         e.preventDefault()
         const allKeys = this.rooms.map(r => r.key)
         this.selectedKeys = allKeys
+        this.viewport.setSelectedKeys(allKeys)
         this.pushEvent('batch_select', { keys: allKeys })
         return
       }
@@ -578,19 +630,18 @@ const Hooks = {
       if (e.key === 'Escape') {
         this.selectedRoom = null
         this.selectedKeys = []
+        this.viewport.setSelectedRoom(null)
+        this.viewport.setSelectedKeys([])
         this.pushEvent('batch_select', { keys: [] })
         this.pushEvent('select_room', { key: null })
-        this.render()
         return
       }
 
-      // Number keys 1-4: Toggle panels (also handled by LiveView but we can be consistent)
+      // Number keys 1-4: Toggle panels
       if (!modKey && !e.shiftKey && ['1', '2', '3', '4'].includes(e.key)) {
         const panels = ['hierarchy', 'inspector', 'console', 'chat']
         const panel = panels[parseInt(e.key) - 1]
-        if (panel) {
-          this.pushEvent('toggle_panel', { panel })
-        }
+        if (panel) this.pushEvent('toggle_panel', { panel })
         return
       }
 
@@ -600,13 +651,7 @@ const Hooks = {
         return
       }
 
-      // G: Toggle grid
-      if (e.key.toLowerCase() === 'g' && !modKey) {
-        this.pushEvent('toggle_grid', {})
-        return
-      }
-
-      // N: New entity dropdown / create room
+      // N: Create new room
       if (e.key.toLowerCase() === 'n' && !modKey) {
         this.pushEvent('create_room', {})
         return
@@ -616,9 +661,7 @@ const Hooks = {
       if (e.key === '/') {
         e.preventDefault()
         const searchInput = document.querySelector('.hierarchy-search input')
-        if (searchInput) {
-          searchInput.focus()
-        }
+        if (searchInput) searchInput.focus()
         return
       }
 
@@ -629,47 +672,47 @@ const Hooks = {
         return
       }
 
-      // F: Fit viewport to selection (send event to React)
+      // F: Fit viewport to rooms
       if (e.key.toLowerCase() === 'f' && !modKey) {
-        // This would be handled by React viewport - future enhancement
+        this.viewport.fitToRooms()
+        return
+      }
+
+      // R: Reset camera
+      if (e.key.toLowerCase() === 'r' && !modKey) {
+        this.viewport.resetCamera()
+        return
+      }
+
+      // Arrow keys with Ctrl: Change Z-level
+      if (modKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+        e.preventDefault()
+        const zLevels = this.viewport.getZLevels()
+        const currentIdx = zLevels.indexOf(this.viewport.currentZLevel)
+        if (e.key === 'ArrowUp' && currentIdx < zLevels.length - 1) {
+          this.viewport.setZLevel(zLevels[currentIdx + 1])
+          this.updateZLevelTabs()
+        } else if (e.key === 'ArrowDown' && currentIdx > 0) {
+          this.viewport.setZLevel(zLevels[currentIdx - 1])
+          this.updateZLevelTabs()
+        }
         return
       }
     },
 
     updated() {
-      // Re-parse rooms data when LiveView updates
-      const roomsData = JSON.parse(this.el.dataset.rooms || '[]')
-      this.rooms = roomsData
-      this.render()
+      // With phx-update="ignore", this should rarely be called
     },
 
     destroyed() {
-      // Cleanup React root
-      if (this.root) {
-        this.root.unmount()
+      // Cleanup viewport
+      if (this.viewport) {
+        this.viewport.destroy()
       }
       // Cleanup keyboard listener
       if (this.keydownHandler) {
         document.removeEventListener('keydown', this.keydownHandler)
       }
-    },
-
-    render() {
-      this.root.render(
-        React.createElement(WorldBuilderApp, {
-          rooms: this.rooms,
-          selectedRoom: this.selectedRoom,
-          validation: this.validation,
-          cameraView: this.cameraView,
-          onSelectRoom: (key) => {
-            this.pushEvent('select_room', { key })
-          },
-          onBatchSelect: (keys) => {
-            this.selectedKeys = keys
-            this.pushEvent('batch_select', { keys })
-          }
-        })
-      )
     }
   },
 

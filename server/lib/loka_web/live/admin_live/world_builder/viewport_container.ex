@@ -1,8 +1,9 @@
 defmodule LokaWeb.AdminLive.WorldBuilder.ViewportContainer do
   @moduledoc """
-  Center panel 3D viewport component.
+  Center panel 2D canvas viewport component.
 
-  Wraps React Three Fiber canvas with viewport controls.
+  Renders rooms on a 2D canvas with pan/zoom controls.
+  Supports Z-level filtering for multi-level worlds.
   Console is embedded as an overlay at the bottom.
   """
   use Phoenix.Component
@@ -12,59 +13,39 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ViewportContainer do
   attr :selected_room, :string, default: nil
   attr :console_messages, :list, default: []
   attr :console_collapsed, :boolean, default: false
-  attr :camera_view, :string, default: "perspective"
   attr :class, :string, default: ""
 
   def viewport_container(assigns) do
     ~H"""
-    <div class={"world-builder-panel world-builder-viewport #{@class}"}>
-      <div class="panel-content" style="padding: 0;">
-        <!-- React Three Fiber mounts here via hook -->
+    <div id="viewport-panel" class={"world-builder-panel world-builder-viewport #{@class}"}>
+      <div id="viewport-content" class="panel-content" style="padding: 0;">
+        <!-- 2D Canvas viewport - managed by WorldBuilder hook -->
         <div
           id="world-builder-canvas"
           phx-hook="WorldBuilder"
           phx-update="ignore"
           class="world-builder-canvas"
-          data-rooms={Jason.encode!(@rooms)}
         >
+          <canvas style="width: 100%; height: 100%; display: block;"></canvas>
         </div>
         
     <!-- Viewport overlay controls -->
         <div class="viewport-overlay">
-          <div class="viewport-mode-buttons">
-            <button
-              class={["viewport-mode-btn", @camera_view == "perspective" && "active"]}
-              phx-click="set_camera_view"
-              phx-value-view="perspective"
-            >
-              Perspective
-            </button>
-            <button
-              class={["viewport-mode-btn", @camera_view == "top" && "active"]}
-              phx-click="set_camera_view"
-              phx-value-view="top"
-            >
-              Top
-            </button>
-            <button
-              class={["viewport-mode-btn", @camera_view == "front" && "active"]}
-              phx-click="set_camera_view"
-              phx-value-view="front"
-            >
-              Front
-            </button>
-            <button
-              class={["viewport-mode-btn", @camera_view == "side" && "active"]}
-              phx-click="set_camera_view"
-              phx-value-view="side"
-            >
-              Side
-            </button>
+          <!-- Z-Level tabs (populated by JS) -->
+          <div class="z-level-tabs">
+            <button class="z-level-tab active" data-z-level="0">Z: 0</button>
           </div>
 
           <div class="viewport-info">
             <span>Rooms: {length(@rooms)}</span>
             <span>Selected: {@selected_room || "None"}</span>
+          </div>
+          
+    <!-- Viewport controls help -->
+          <div class="viewport-controls-help">
+            <span title="Drag to pan, scroll to zoom">Pan/Zoom</span>
+            <span title="Press F to fit all rooms">F: Fit</span>
+            <span title="Press R to reset view">R: Reset</span>
           </div>
         </div>
         
