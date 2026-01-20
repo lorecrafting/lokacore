@@ -3,6 +3,8 @@ import * as AnthropicClient from './AnthropicClient.js';
 import * as OpenAIClient from './OpenAIClient.js';
 import * as DeepSeekClient from './DeepSeekClient.js';
 import * as GeminiClient from './GeminiClient.js';
+import * as GLMClient from './GLMClient.js';
+import * as MinimaxClient from './MinimaxClient.js';
 import { allTools } from './ToolDefinitions.js';
 import { buildWorldContext } from './ContextBuilder.js';
 
@@ -69,6 +71,30 @@ const PROVIDERS = {
       { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', costPer1kInput: 0.00125, costPer1kOutput: 0.005 },
       { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', costPer1kInput: 0.000075, costPer1kOutput: 0.0003 },
       { id: 'gemini-1.5-flash-8b', name: 'Gemini 1.5 Flash 8B', costPer1kInput: 0.0000375, costPer1kOutput: 0.00015 },
+    ]
+  },
+  glm: {
+    name: 'GLM (Zhipu AI)',
+    client: GLMClient,
+    keyPrefix: '',
+    models: [
+      { id: 'glm-4-plus', name: 'GLM-4 Plus', costPer1kInput: 0.007, costPer1kOutput: 0.007 },
+      { id: 'glm-4-long', name: 'GLM-4 Long (1M)', costPer1kInput: 0.0014, costPer1kOutput: 0.0014 },
+      { id: 'glm-4-flash', name: 'GLM-4 Flash', costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
+      { id: 'glm-4-flashx', name: 'GLM-4 FlashX', costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
+      { id: 'glm-4-air', name: 'GLM-4 Air', costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
+      { id: 'glm-4-airx', name: 'GLM-4 AirX', costPer1kInput: 0.0014, costPer1kOutput: 0.0014 },
+    ]
+  },
+  minimax: {
+    name: 'Minimax',
+    client: MinimaxClient,
+    keyPrefix: '',
+    models: [
+      { id: 'MiniMax-Text-01', name: 'MiniMax Text 01', costPer1kInput: 0.0011, costPer1kOutput: 0.0055 },
+      { id: 'abab6.5s-chat', name: 'ABAB 6.5S', costPer1kInput: 0.0014, costPer1kOutput: 0.0014 },
+      { id: 'abab6.5g-chat', name: 'ABAB 6.5G', costPer1kInput: 0.0007, costPer1kOutput: 0.0007 },
+      { id: 'abab6.5t-chat', name: 'ABAB 6.5T', costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
     ]
   }
 };

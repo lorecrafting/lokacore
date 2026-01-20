@@ -1051,7 +1051,7 @@ const Hooks = {
   // =============================================================================
   MultiAPIKeyConfig: {
     mounted() {
-      const providers = ['anthropic', 'openai', 'deepseek', 'gemini', 'glm']
+      const providers = ['anthropic', 'openai', 'deepseek', 'gemini', 'glm', 'minimax']
 
       // Check stored keys for all providers on mount
       providers.forEach(provider => {
@@ -1127,6 +1127,8 @@ const Hooks = {
           return this.validateGeminiKey(key)
         case 'glm':
           return this.validateGLMKey(key)
+        case 'minimax':
+          return this.validateMinimaxKey(key)
         default:
           return false
       }
@@ -1207,6 +1209,23 @@ const Hooks = {
         },
         body: JSON.stringify({
           model: 'glm-4-flash',
+          max_tokens: 10,
+          messages: [{ role: 'user', content: 'Hi' }]
+        })
+      })
+      return response.ok
+    },
+
+    async validateMinimaxKey(key) {
+      // Minimax uses OpenAI-compatible API
+      const response = await fetch('https://api.minimax.chat/v1/text/chatcompletion_v2', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${key}`
+        },
+        body: JSON.stringify({
+          model: 'MiniMax-Text-01',
           max_tokens: 10,
           messages: [{ role: 'user', content: 'Hi' }]
         })
