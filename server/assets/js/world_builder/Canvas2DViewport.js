@@ -58,7 +58,7 @@ export default class Canvas2DViewport {
 
     // Grid settings
     this.gridSize = 60 // Pixels per world unit
-    this.roomSize = 36 // Room rectangle size in pixels (smaller for better connection visibility)
+    this.roomSize = 48 // Room rectangle size in pixels (balanced for readability and connection visibility)
     this.minZoom = 0.2
     this.maxZoom = 3
 
@@ -448,19 +448,19 @@ export default class Canvas2DViewport {
 
     if (showLabels) {
       // Draw room name inside the room (truncated to fit)
-      const displayName = this.truncateText(room.name || room.key, size - 8, ctx, 10 / this.camera.zoom)
+      const displayName = this.truncateText(room.name || room.key, size - 4, ctx, 11 / this.camera.zoom)
       ctx.fillStyle = '#ffffff'
-      ctx.font = `bold ${10 / this.camera.zoom}px sans-serif`
+      ctx.font = `bold ${11 / this.camera.zoom}px sans-serif`
       ctx.textAlign = 'center'
       ctx.textBaseline = 'top'
-      ctx.fillText(displayName, x, y - halfSize + 4)
+      ctx.fillText(displayName, x, y - halfSize + 5)
 
       // Draw room key only when zoomed in more (smaller, below name)
       if (showDetailedLabels) {
-        const displayKey = this.truncateText(room.key, size - 8, ctx, 8 / this.camera.zoom)
+        const displayKey = this.truncateText(room.key, size - 4, ctx, 9 / this.camera.zoom)
         ctx.fillStyle = '#888888'
-        ctx.font = `${8 / this.camera.zoom}px monospace`
-        ctx.fillText(displayKey, x, y - halfSize + 16)
+        ctx.font = `${9 / this.camera.zoom}px monospace`
+        ctx.fillText(displayKey, x, y - halfSize + 18)
       }
 
       // Draw entity indicators

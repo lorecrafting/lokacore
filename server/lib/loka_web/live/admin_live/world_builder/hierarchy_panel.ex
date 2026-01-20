@@ -149,7 +149,8 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
             title="Templates"
           >
             <.icon name="hero-document-duplicate" class="size-3" />
-            <span>{length(@templates)}</span>
+            <span class="tab-label">Tmpls</span>
+            <span class="tab-count">{length(@templates)}</span>
           </button>
           <button
             class={["hierarchy-tab", @active_tab == :rooms && "active"]}
@@ -158,7 +159,8 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
             title="Rooms"
           >
             <.icon name="hero-cube" class="size-3" />
-            <span>{length(@rooms)}</span>
+            <span class="tab-label">Rooms</span>
+            <span class="tab-count">{length(@rooms)}</span>
           </button>
           <button
             class={["hierarchy-tab", @active_tab == :npcs && "active"]}
@@ -167,7 +169,8 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
             title="NPCs"
           >
             <.icon name="hero-user" class="size-3" />
-            <span>{length(@npcs)}</span>
+            <span class="tab-label">NPCs</span>
+            <span class="tab-count">{length(@npcs)}</span>
           </button>
           <button
             class={["hierarchy-tab", @active_tab == :items && "active"]}
@@ -176,7 +179,8 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
             title="Items"
           >
             <.icon name="hero-cube-transparent" class="size-3" />
-            <span>{length(@items)}</span>
+            <span class="tab-label">Items</span>
+            <span class="tab-count">{length(@items)}</span>
           </button>
         </div>
         

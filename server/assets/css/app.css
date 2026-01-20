@@ -2561,8 +2561,9 @@ body:has(.ebook-page) {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  padding: 0 0.5rem;
-  border-right: 1px solid #2d2d2d;
+  padding: 0 0.75rem;
+  border-right: 1px solid #404040;
+  margin-right: 0.25rem;
 }
 
 .toolbar-section:last-child {
@@ -3490,7 +3491,11 @@ body:has(.ebook-page) {
 
 .hierarchy-tab {
   flex: 1;
-  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  padding: 0.4rem 0.25rem;
   background: transparent;
   border: none;
   color: #909090;
@@ -3508,6 +3513,27 @@ body:has(.ebook-page) {
 .hierarchy-tab.active {
   color: #4a9eff;
   border-bottom-color: #4a9eff;
+}
+
+.hierarchy-tab .tab-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  margin-left: 0.15rem;
+}
+
+.hierarchy-tab .tab-count {
+  font-size: 0.65rem;
+  background: #3a3a3a;
+  padding: 0.1rem 0.3rem;
+  border-radius: 8px;
+  margin-left: 0.15rem;
+  min-width: 1.2rem;
+  text-align: center;
+}
+
+.hierarchy-tab.active .tab-count {
+  background: #1d4ed8;
+  color: white;
 }
 
 .template-library {
