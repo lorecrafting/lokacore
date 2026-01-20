@@ -424,12 +424,14 @@ export default function ChatPanel({
   };
 
   if (!isConfiguredState) {
+    const providerNames = Object.values(PROVIDERS).map(p => p.name).join(', ');
     return (
       <div className="chat-panel">
         <div className="chat-unconfigured">
-          <p>Configure an API key in Settings to enable AI assistance.</p>
+          <p className="chat-unconfigured-title">AI Assistant</p>
+          <p className="chat-unconfigured-desc">Configure an API key to enable AI-powered world building.</p>
           <p className="chat-unconfigured-providers">
-            Supported: Anthropic, OpenAI, DeepSeek, Google Gemini
+            {providerNames}
           </p>
           <button
             className="btn btn-primary btn-sm"

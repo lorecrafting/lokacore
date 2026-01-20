@@ -2560,7 +2560,7 @@ body:has(.ebook-page) {
 .toolbar-section {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.5rem;
   padding: 0 0.75rem;
   border-right: 1px solid #404040;
   margin-right: 0.25rem;
@@ -2574,14 +2574,17 @@ body:has(.ebook-page) {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
+  min-width: 2rem;
+  width: auto;
   height: 2rem;
+  padding: 0 0.5rem;
   background: transparent;
   border: none;
   color: #909090;
   cursor: pointer;
   border-radius: 3px;
   transition: all 0.15s;
+  white-space: nowrap;
 }
 
 .toolbar-btn:hover {
@@ -3447,6 +3450,36 @@ body:has(.ebook-page) {
 .exit-dest {
   color: #c9c9c9;
   font-family: 'Monaco', 'Courier New', monospace;
+}
+
+/* Contents List Styles */
+.contents-category {
+  margin-bottom: 0.25rem;
+}
+
+.contents-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.contents-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  background: #252525;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+  font-size: 0.85rem;
+  color: #c9c9c9;
+  transition: all 0.1s;
+}
+
+.contents-item:hover {
+  background: #2d2d2d;
+  border-color: #4a9eff;
 }
 
 .btn-icon-small {
@@ -4369,10 +4402,23 @@ body:has(.ebook-page) {
   padding: 24px;
   text-align: center;
   color: #909090;
+  gap: 8px;
 }
 
 .chat-unconfigured p {
-  margin-bottom: 16px;
+  margin: 0;
+}
+
+.chat-unconfigured-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #d0d0d0;
+}
+
+.chat-unconfigured-desc {
+  font-size: 0.85rem;
+  color: #909090;
+  margin-bottom: 4px !important;
 }
 
 .context-summary {
