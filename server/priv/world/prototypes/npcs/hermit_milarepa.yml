@@ -16,6 +16,24 @@ tags:
   - friendly
   - quest_giver
   - eccentric
+
+# Behaviors - hermit keeps unconventional hours, more active at night
+behaviors:
+  - script: day_night_schedule
+    config:
+      wake_at: dusk      # He's nocturnal, meditating through the day
+      sleep_at: morning
+
+# Personality emotes
+emotes:
+  waking_up: "*stirs from deep meditation, eyes slowly focusing* Ah! The world remembers I exist!"
+  going_to_sleep: "*settles into stillness, becoming one with his cave*"
+  greeting: "Ha! A visitor! The mountain sends me puzzles!"
+  cackling: "*cackles at some cosmic joke only he understands*"
+  humming: "*hums a melody that seems to bend the air itself*"
+  seeing_visions: "*stares into the fire, eyes reflecting things unseen*"
+  excited: "*bounces with strange energy* Yes, yes, yes!"
+
 components:
   ambient_actions:
     messages:

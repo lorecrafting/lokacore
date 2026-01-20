@@ -17,6 +17,26 @@ tags:
   - friendly
   - village
   - atmosphere
+
+# Behaviors - farmer works from dawn to dusk
+behaviors:
+  - script: day_night_schedule
+    config:
+      wake_at: dawn
+      sleep_at: dusk
+      wake_room: terraced_fields
+      sleep_room: village_homes
+
+# Personality emotes
+emotes:
+  waking_up: "*stretches his back and surveys the fields* Another day's work awaits."
+  going_to_sleep: "*wipes the dirt from his hands* The earth rests, and so shall I."
+  greeting: "*nods warmly* Good day to you, traveler."
+  working: "*bends to his work, hands steady and practiced*"
+  resting: "*leans on his hoe, catching his breath*"
+  weather_watching: "*squints at the sky, reading the clouds*"
+  satisfied: "*runs his hand through the barley with a contented smile*"
+
 components:
   ambient_actions:
     messages:

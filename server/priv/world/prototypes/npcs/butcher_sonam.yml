@@ -18,6 +18,29 @@ tags:
   - quest_giver
   - village
   - troubled
+
+# Behaviors - restless from guilt, wanders but doesn't sleep well
+behaviors:
+  - script: day_night_schedule
+    config:
+      wake_at: dawn
+      sleep_at: night  # He tries to sleep but rarely succeeds
+  - script: wander
+    config:
+      rooms: [village_square, cemetery, old_stupa_area]
+      interval: 600
+      stay_probability: 0.7
+
+# Personality emotes
+emotes:
+  waking_up: "*jolts awake from nightmares, eyes wild with remembered horrors*"
+  going_to_sleep: "*lies down reluctantly, knowing the dreams will come*"
+  greeting: "*flinches, then relaxes slightly* Oh... just a traveler."
+  haunted: "*stares at his hands, seeing blood that isn't there*"
+  praying: "*mutters prayers for forgiveness, lips moving rapidly*"
+  flinching: "*startles at a sound only he can hear*"
+  hopeful: "*a flicker of hope crosses his haunted features*"
+
 components:
   ambient_actions:
     messages:

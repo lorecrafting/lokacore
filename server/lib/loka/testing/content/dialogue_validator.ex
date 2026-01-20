@@ -88,7 +88,8 @@ defmodule Loka.Testing.Content.DialogueValidator do
     "flag_not_set",
     "level_at_least",
     "has_gold",
-    "completed_quest"
+    "completed_quest",
+    "phase"
   ]
 
   # =============================================================================

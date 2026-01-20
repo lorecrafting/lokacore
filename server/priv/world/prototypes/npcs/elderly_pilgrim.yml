@@ -24,6 +24,23 @@ tags:
   - atmosphere
   - spiritual
 
+# Behaviors - elderly pilgrim has a gentle schedule, mostly resting
+behaviors:
+  - script: day_night_schedule
+    config:
+      wake_at: dawn
+      sleep_at: dusk
+
+# Personality emotes
+emotes:
+  waking_up: "*opens her eyes slowly, murmuring morning prayers*"
+  going_to_sleep: "*settles into stillness, breath softening into sleep*"
+  greeting: "*looks up with kind, ancient eyes*"
+  praying: "*her lips move in silent devotion, beads clicking softly*"
+  blessing: "*traces a blessing symbol in the air*"
+  remembering: "*gazes into the distance, lost in memory*"
+  peaceful: "*a serene smile crosses her weathered face*"
+
 components:
   ambient_actions:
     messages:

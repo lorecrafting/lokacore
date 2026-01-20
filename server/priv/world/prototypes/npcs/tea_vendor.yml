@@ -24,6 +24,30 @@ tags:
   - village
   - atmosphere
 
+# Behaviors - Karma works early morning to evening
+behaviors:
+  - script: shopkeeper_hours
+    config:
+      open_at: dawn
+      close_at: dusk
+  - script: day_night_schedule
+    config:
+      wake_at: dawn
+      sleep_at: dusk
+      sleep_room: village_homes
+
+# Personality emotes
+emotes:
+  waking_up: "*yawns and stretches* Time to get the kettles going!"
+  going_to_sleep: "*covers her kettles* Rest well, my pretties. See you at dawn!"
+  opening_shop: "*lights the fires under her kettles* Fresh tea, fresh day!"
+  closing_shop: "*begins packing up her cups* That's all for today, folks!"
+  greeting: "Welcome, welcome! Come warm yourself!"
+  sale_complete: "*beams with satisfaction* Enjoy every sip!"
+  stirring: "*stirs the butter tea thoughtfully, humming an old tune*"
+  laughing: "*laughs heartily, her cheeks rosy from the steam*"
+  gossiping: "*leans in conspiratorially* Now, have you heard..."
+
 components:
   ambient_actions:
     messages:
@@ -52,11 +76,37 @@ components:
     # BEST PRACTICE: Quest offers should be upfront in the first dialogue node.
     # ==========================================================================
 
-    # Default start - quest offer upfront
+    # Night variant - shop is closed
+    start_night:
+      text: "*Karma's stall is dark, the kettles cold* Hmm? Oh, a customer at this hour? I'm afraid I've closed up for the night, dear. Come back at dawn - I'll have fresh butter tea waiting!"
+      show_if:
+        phase: night
+      choices:
+        - text: "I'll come back tomorrow."
+          next: null
+        - text: "Is there anything I can help with?"
+          next: "night_help"
+        - text: "What's the news from the village?"
+          next: "gossip"
+
+    # Night help response
+    night_help:
+      text: "*considers* Well... I suppose if you're still looking for something to do, I could use some ingredients. Chrysanthemum flowers from the herb garden, goji berries from the terraced fields. Bring them tomorrow and I'll make you my famous tea!"
+      show_if:
+        quest_not_active: "side_tea_for_travelers"
+      choices:
+        - text: "[Accept Quest] I'll gather them tonight."
+          next: "quest_accepted"
+          action: ["accept_quest", "side_tea_for_travelers"]
+        - text: "I'll think about it."
+          next: null
+
+    # Default start - quest offer upfront (day version)
     start:
       text: "Welcome, welcome! You look like you could use some warming up. Say, I'm running low on ingredients for my famous Chrysanthemum Goji Tea. Could you gather some from the monastery gardens? I'd be ever so grateful!"
       show_if:
         quest_not_active: "side_tea_for_travelers"
+        phase: day
       choices:
         - text: "[Accept Quest] I can help with that."
           next: "quest_accepted"

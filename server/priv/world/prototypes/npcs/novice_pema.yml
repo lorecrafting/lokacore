@@ -22,14 +22,24 @@ tags:
   - companion
   - monastery
 
+# Behaviors - Pema stays by Tenzin's side but reacts to time
+behaviors:
+  - script: day_night_schedule
+    config:
+      wake_at: dawn
+      sleep_at: midnight  # She barely sleeps, stays late watching over Tenzin
+
 # Personality emotes for behavior events
 emotes:
-  waking_up: "*stretches mindfully* Another day of practice awaits."
-  going_to_sleep: "*settles into meditation posture* May dreams bring wisdom."
+  waking_up: "*rises from her brief rest, immediately checking on Master Tenzin* Another day... please let today be different."
+  going_to_sleep: "*finally allows herself to rest, still sitting vigil* I'll just close my eyes for a moment..."
   greeting: "Peace be with you, traveler."
   meditation_start: "*closes her eyes, breathing deeply*"
-  patrol_arrive: "*looks around the monastery grounds thoughtfully*"
   becoming_anxious: "*wrings her hands, glancing toward the meditation chamber*"
+  praying: "*whispers prayers under her breath, tears glistening*"
+  hopeful: "*looks up suddenly, hope flickering in her eyes*"
+  keeping_vigil: "*adjusts Master Tenzin's blanket gently, checking his breathing*"
+  exhausted: "*stifles a yawn, rubbing her tired eyes*"
 components:
   ambient_actions:
     messages:
@@ -76,11 +86,44 @@ components:
         - text: "I'll return to the Abbot."
           next: null
 
-    # Default start - quest offer upfront
+    # Night variant - she's exhausted and more worried
+    start_night:
+      text: "*yawns wearily* You're here... even at this hour. Forgive me, I haven't slept properly in days. I am Pema, a novice. Something terrible has happened to Master Tenzin. Please - will you speak with Abbot Jampa? We need help desperately."
+      show_if:
+        quest_not_active: "intro_find_temple"
+        phase: night
+      action: ["complete_quest", "intro_welcome"]
+      choices:
+        - text: "[Accept Quest] I'll go to the temple now."
+          next: "quest_given_night"
+          action: ["accept_quest", "intro_find_temple"]
+        - text: "You should rest. Tell me in the morning."
+          next: "cannot_rest"
+        - text: "Tell me what happened."
+          next: "more_info"
+
+    # Response about why she can't rest
+    cannot_rest:
+      text: "*shakes her head firmly* I cannot rest while Master Tenzin lies in that trance. Every night I pray for him to wake, but... *her voice wavers* Please, speak with the Abbot. The temple is north through the courtyard."
+      choices:
+        - text: "[Accept Quest] I'll speak with the Abbot."
+          next: "quest_given_night"
+          action: ["accept_quest", "intro_find_temple"]
+        - text: "I understand. I'll go now."
+          next: null
+
+    quest_given_night:
+      text: "*relief washes over her face* Thank you. The temple... north through the courtyard. The Abbot may be in meditation at this hour, but he will see you. Please... hurry."
+      choices:
+        - text: "I'll find him."
+          next: null
+
+    # Default start - quest offer upfront (day version)
     start:
       text: "You've come! The mountain has answered our prayers. I am Pema, a novice here. Something terrible has happened to Master Tenzin - please, will you speak with Abbot Jampa in the temple? He desperately needs help."
       show_if:
         quest_not_active: "intro_find_temple"
+        phase: day
       action: ["complete_quest", "intro_welcome"]
       choices:
         - text: "[Accept Quest] I'll go to the temple now."

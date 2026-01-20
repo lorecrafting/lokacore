@@ -18,6 +18,13 @@ tags:
   - sacred
   - magic
 
+# Behaviors - ethereal figure is always present but more active at certain times
+behaviors:
+  - script: day_night_schedule
+    config:
+      wake_at: dawn
+      sleep_at: midnight  # She keeps vigil through most of the night
+
 # Personality emotes for behavior events
 emotes:
   meditation_start: "*her form shimmers, becoming one with the mist*"
@@ -47,6 +54,27 @@ components:
       sta: 10
     level: 5
   dialogue_tree:
+    # Night variant - more ethereal and mysterious
+    start_night:
+      text: "*her form glows faintly in the darkness* The night reveals what day conceals. The water sings its secret songs. You seek training, seeker of shadows?"
+      show_if:
+        phase: night
+      choices:
+        - text: "I seek training in magic."
+          next: "training"
+        - text: "Why do you stay here at night?"
+          next: "night_vigil"
+        - text: "I must go."
+          next: null
+
+    night_vigil:
+      text: "The veil between worlds thins when the sun sleeps. Here, by the water, I can hear the voices of those who passed before. They guide me. They guide us all, if we listen."
+      choices:
+        - text: "Can you teach me to hear them?"
+          next: "training"
+        - text: "That's... unsettling."
+          next: null
+
     start:
       text: "The water falls and never stops. Like compassion, it flows to all beings equally."
       choices:

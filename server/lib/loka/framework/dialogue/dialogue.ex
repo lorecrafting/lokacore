@@ -442,6 +442,10 @@ defmodule Loka.Framework.Dialogue do
           # Check if player has item in inventory
           check_has_item(game_state, value)
 
+        "phase" ->
+          # Check if current time phase matches
+          check_phase(value)
+
         # Unknown condition keys are ignored (treated as true)
         _ ->
           true
@@ -457,6 +461,28 @@ defmodule Loka.Framework.Dialogue do
   defp check_has_item(game_state, item_key) do
     alias Loka.Framework.Conditions.Evaluator
     Evaluator.evaluate({:has_item, item_key}, game_state)
+  end
+
+  # Check if current time phase matches the expected phase
+  # Supports: "day", "night", "dawn", "dusk" (strings or atoms)
+  defp check_phase(expected_phase) do
+    alias Loka.Framework.World.DayNight
+
+    current_phase =
+      try do
+        DayNight.get_phase()
+      catch
+        :exit, _ -> :day
+      end
+
+    expected =
+      cond do
+        is_atom(expected_phase) -> expected_phase
+        is_binary(expected_phase) -> String.to_atom(expected_phase)
+        true -> :day
+      end
+
+    current_phase == expected
   end
 
   # Checks if there's a completed variant for this node based on quest state
