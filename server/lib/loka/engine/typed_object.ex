@@ -42,6 +42,7 @@ defmodule Loka.Engine.TypedObject do
   @type content_type :: :quest | :dialogue | :script | :zone
 
   @type behavior_config :: %{script: String.t(), config: map()}
+  @type emotes_map :: %{atom() => String.t()}
 
   @type t :: %__MODULE__{
           id: String.t() | nil,
@@ -65,6 +66,7 @@ defmodule Loka.Engine.TypedObject do
           contents: [String.t()],
           components: map(),
           behaviors: [behavior_config()],
+          emotes: emotes_map(),
           scripts: map()
         }
 
@@ -90,6 +92,7 @@ defmodule Loka.Engine.TypedObject do
     contents: [],
     components: %{},
     behaviors: [],
+    emotes: %{},
     scripts: %{}
   ]
 
@@ -119,7 +122,7 @@ defmodule Loka.Engine.TypedObject do
     id key type subtype parent_key parent is_prototype prototype_key
     name short_desc description long_desc extra_description extra_desc
     keywords attributes tags locks data metadata location_id contents
-    components behaviors scripts
+    components behaviors emotes scripts
   )a
 
   def new(attrs) when is_map(attrs) do
@@ -154,6 +157,7 @@ defmodule Loka.Engine.TypedObject do
       contents: Map.get(struct_attrs, :contents, []),
       components: Map.get(struct_attrs, :components, %{}),
       behaviors: normalize_behaviors(Map.get(struct_attrs, :behaviors, [])),
+      emotes: normalize_emotes(Map.get(struct_attrs, :emotes, %{})),
       scripts: Map.get(struct_attrs, :scripts, %{})
     }
 
@@ -311,6 +315,7 @@ defmodule Loka.Engine.TypedObject do
       contents: child.contents,
       components: MapHelpers.deep_merge(parent.components, child.components),
       behaviors: merge_behaviors(child.behaviors, parent.behaviors),
+      emotes: Map.merge(parent.emotes, child.emotes),
       scripts: MapHelpers.deep_merge(parent.scripts, child.scripts)
     }
   end
@@ -334,7 +339,7 @@ defmodule Loka.Engine.TypedObject do
     id key type subtype parent_key parent is_prototype prototype_key
     name short_desc description long_desc extra_description extra_desc
     keywords attributes tags locks data metadata location_id contents
-    components behaviors scripts
+    components behaviors emotes scripts
   )
 
   defp normalize_keys(map) when is_map(map) do
@@ -482,6 +487,23 @@ defmodule Loka.Engine.TypedObject do
   end
 
   defp normalize_behavior_config(_), do: %{}
+
+  # Normalize emotes map: string keys to atoms, values to strings
+  defp normalize_emotes(emotes) when is_map(emotes) do
+    Map.new(emotes, fn {key, value} ->
+      atom_key =
+        cond do
+          is_atom(key) -> key
+          is_binary(key) -> String.to_atom(key)
+          true -> key
+        end
+
+      string_value = if is_binary(value), do: value, else: to_string(value)
+      {atom_key, string_value}
+    end)
+  end
+
+  defp normalize_emotes(_), do: %{}
 
   defp merge_lists(child, parent) do
     (child ++ parent) |> Enum.uniq()

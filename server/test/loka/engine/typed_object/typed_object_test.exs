@@ -423,6 +423,132 @@ defmodule Loka.Engine.TypedObjectTest do
     end
   end
 
+  describe "emotes parsing" do
+    test "parses emotes with string keys from YAML" do
+      {:ok, to} =
+        TypedObject.new(
+          key: "emotive_npc",
+          type: :entity,
+          subtype: :npc,
+          emotes: %{
+            "waking_up" => "*stretches and yawns*",
+            "patrol_arrive" => "*surveys the area*"
+          }
+        )
+
+      assert map_size(to.emotes) == 2
+      assert to.emotes.waking_up == "*stretches and yawns*"
+      assert to.emotes.patrol_arrive == "*surveys the area*"
+    end
+
+    test "parses emotes with atom keys" do
+      {:ok, to} =
+        TypedObject.new(
+          key: "emotive_npc",
+          type: :entity,
+          subtype: :npc,
+          emotes: %{
+            spotted_player: "Welcome, traveler!",
+            closing_shop: "Shop's closed. Come back tomorrow."
+          }
+        )
+
+      assert to.emotes.spotted_player == "Welcome, traveler!"
+      assert to.emotes.closing_shop == "Shop's closed. Come back tomorrow."
+    end
+
+    test "handles empty emotes map" do
+      {:ok, to} =
+        TypedObject.new(
+          key: "no_emotes",
+          type: :entity,
+          subtype: :npc,
+          emotes: %{}
+        )
+
+      assert to.emotes == %{}
+    end
+
+    test "handles missing emotes (defaults to empty map)" do
+      {:ok, to} =
+        TypedObject.new(
+          key: "no_emotes",
+          type: :entity,
+          subtype: :npc
+        )
+
+      assert to.emotes == %{}
+    end
+
+    test "converts non-string values to strings" do
+      {:ok, to} =
+        TypedObject.new(
+          key: "mixed_values",
+          type: :entity,
+          emotes: %{
+            number_event: 42,
+            atom_event: :some_atom
+          }
+        )
+
+      assert to.emotes.number_event == "42"
+      assert to.emotes.atom_event == "some_atom"
+    end
+  end
+
+  describe "merge_parent/2 with emotes" do
+    test "child emotes override parent emotes for same event" do
+      {:ok, parent} =
+        TypedObject.new(
+          key: "parent_npc",
+          type: :entity,
+          emotes: %{
+            waking_up: "*parent wakes up*",
+            patrol_arrive: "*parent looks around*"
+          }
+        )
+
+      {:ok, child} =
+        TypedObject.new(
+          key: "child_npc",
+          type: :entity,
+          parent_key: "parent_npc",
+          emotes: %{
+            waking_up: "*child stretches dramatically*"
+          }
+        )
+
+      merged = TypedObject.merge_parent(child, parent)
+
+      # Child overrides parent for waking_up
+      assert merged.emotes.waking_up == "*child stretches dramatically*"
+      # Parent's patrol_arrive is preserved
+      assert merged.emotes.patrol_arrive == "*parent looks around*"
+    end
+
+    test "child can add new emotes to parent's set" do
+      {:ok, parent} =
+        TypedObject.new(
+          key: "parent_npc",
+          type: :entity,
+          emotes: %{patrol_arrive: "*looks around*"}
+        )
+
+      {:ok, child} =
+        TypedObject.new(
+          key: "child_npc",
+          type: :entity,
+          parent_key: "parent_npc",
+          emotes: %{spotted_player: "Hello there!"}
+        )
+
+      merged = TypedObject.merge_parent(child, parent)
+
+      assert merged.emotes.patrol_arrive == "*looks around*"
+      assert merged.emotes.spotted_player == "Hello there!"
+    end
+  end
+
   describe "merge_parent/2 with behaviors" do
     test "child behaviors override parent behaviors with same script" do
       {:ok, parent} =
