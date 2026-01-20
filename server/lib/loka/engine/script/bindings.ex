@@ -480,8 +480,13 @@ defmodule Loka.Engine.Script.Bindings do
   end
 
   defp current_hour do
-    # TODO: Integrate with game time system
-    DateTime.utc_now().hour
+    alias Loka.Framework.World.DayNight
+
+    try do
+      DayNight.get_hour()
+    rescue
+      _ -> DateTime.utc_now().hour
+    end
   end
 
   defp current_weather(_player) do

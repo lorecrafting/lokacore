@@ -153,6 +153,17 @@ defmodule Loka.Framework.World.DayNight do
   # Check for phase changes every 30 seconds
   @phase_check_interval 30_000
 
+  # Time event hours - when to broadcast specific time events
+  @time_events %{
+    0 => :midnight,
+    5 => :dawn,
+    9 => :morning,
+    12 => :noon,
+    15 => :afternoon,
+    17 => :dusk,
+    21 => :evening
+  }
+
   # =============================================================================
   # Client API
   # =============================================================================
@@ -253,7 +264,8 @@ defmodule Loka.Framework.World.DayNight do
       cycle_duration: cycle_duration,
       cycle_start: System.system_time(:second),
       offset_seconds: hour_to_seconds(start_hour, cycle_duration),
-      last_phase: nil
+      last_phase: nil,
+      last_event_hour: nil
     }
 
     # Schedule periodic phase checks
@@ -316,11 +328,21 @@ defmodule Loka.Framework.World.DayNight do
     {hour, _minute} = calculate_time(state)
     current_phase = hour_to_phase(hour)
 
+    # Check for phase change
     state =
       if current_phase != state.last_phase do
         # Pass phase directly to avoid self-call deadlock
         broadcast_atmosphere_change(current_phase)
         %{state | last_phase: current_phase}
+      else
+        state
+      end
+
+    # Check for time events (only on hour boundaries we haven't processed)
+    state =
+      if hour != state.last_event_hour do
+        maybe_broadcast_time_event(hour)
+        %{state | last_event_hour: hour}
       else
         state
       end
@@ -387,5 +409,25 @@ defmodule Loka.Framework.World.DayNight do
 
     # Trigger phase-appropriate ambient messages in active rooms
     RoomAmbient.Scheduler.broadcast_phase_change()
+  end
+
+  defp maybe_broadcast_time_event(hour) do
+    case Map.get(@time_events, hour) do
+      nil ->
+        :ok
+
+      event_name ->
+        broadcast_time_event(event_name, hour)
+    end
+  end
+
+  defp broadcast_time_event(event_name, hour) do
+    Logger.debug("[DayNight] Broadcasting time event: #{event_name} at hour #{hour}")
+
+    Phoenix.PubSub.broadcast(
+      Loka.PubSub,
+      "world:events",
+      {:time_event, event_name, %{hour: hour}}
+    )
   end
 end
