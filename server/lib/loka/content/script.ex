@@ -165,6 +165,22 @@ defmodule Loka.Content.Script do
   end
 
   @doc """
+  Gets the config schema for behavior scripts.
+
+  The config schema defines validation rules for behavior configs:
+  - Required fields
+  - Types (string, integer, list, etc.)
+  - Default values
+  - Min/max constraints
+
+  Returns nil if no schema is defined.
+  """
+  @spec config_schema(TypedObject.t()) :: map() | nil
+  def config_schema(%TypedObject{type: :script, data: data}) do
+    Map.get(data, "config_schema") || Map.get(data, :config_schema)
+  end
+
+  @doc """
   Checks if the script source is syntactically valid Elixir.
   """
   @spec valid_syntax?(TypedObject.t()) :: boolean()

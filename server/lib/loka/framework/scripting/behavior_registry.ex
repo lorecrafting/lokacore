@@ -42,6 +42,8 @@ defmodule Loka.Framework.Scripting.BehaviorRegistry do
 
   alias Loka.Engine.Script.Executor
   alias Loka.Engine.Hooks
+  alias Loka.Content.Script, as: ContentScript
+  alias Loka.Framework.Scripting.ConfigSchema
   alias Loka.Timers.Server, as: Timers
 
   @doc """
@@ -77,23 +79,35 @@ defmodule Loka.Framework.Scripting.BehaviorRegistry do
   @doc """
   Registers a single behavior for an entity.
   Determines the trigger type and registers with the appropriate system.
+  Validates config against the script's schema if defined.
   """
   def register_behavior(entity, behavior) do
     case normalize_behavior(behavior) do
       {:ok, script_key, config} ->
-        # Register event triggers (dawn, dusk, etc.)
-        events = Executor.register_behavior_events(entity.id, script_key, config)
+        # Validate and apply defaults from config schema
+        case validate_behavior_config(script_key, config) do
+          {:ok, validated_config} ->
+            # Register event triggers (dawn, dusk, etc.)
+            events = Executor.register_behavior_events(entity.id, script_key, validated_config)
 
-        if Enum.any?(events) do
-          Logger.debug(
-            "[BehaviorRegistry] Registered #{script_key} for events: #{inspect(events)}"
-          )
+            if Enum.any?(events) do
+              Logger.debug(
+                "[BehaviorRegistry] Registered #{script_key} for events: #{inspect(events)}"
+              )
+            end
+
+            # Check for timer triggers in config or script
+            maybe_register_timer(entity, script_key, validated_config)
+
+            :ok
+
+          {:error, errors} ->
+            Logger.warning(
+              "[BehaviorRegistry] Config validation failed for #{script_key}: #{inspect(errors)}"
+            )
+
+            :ok
         end
-
-        # Check for timer triggers in config or script
-        maybe_register_timer(entity, script_key, config)
-
-        :ok
 
       :skip ->
         :ok
@@ -101,6 +115,29 @@ defmodule Loka.Framework.Scripting.BehaviorRegistry do
       {:error, reason} ->
         Logger.warning("[BehaviorRegistry] Failed to register behavior: #{inspect(reason)}")
         :ok
+    end
+  end
+
+  @doc """
+  Validates behavior config against the script's config_schema.
+  Returns {:ok, validated_config} with defaults applied, or {:error, errors}.
+  """
+  def validate_behavior_config(script_key, config) do
+    case ContentScript.get(script_key) do
+      {:ok, script} ->
+        schema = ContentScript.config_schema(script)
+
+        if schema do
+          ConfigSchema.validate(config, schema)
+        else
+          # No schema defined, pass through
+          {:ok, config}
+        end
+
+      {:error, :not_found} ->
+        # Script not found (may be legacy or not loaded yet)
+        # Pass through without validation
+        {:ok, config}
     end
   end
 
