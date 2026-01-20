@@ -1423,12 +1423,22 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   end
 
   def handle_event("show_dialogue_editor_for_entity", %{"entity_key" => key}, socket) do
-    # Open dialogue editor with NPC pre-selected
+    # Open dialogue editor with NPC pre-selected and load existing dialogue
+    npc = Enum.find(socket.assigns.npcs, fn n -> n.key == key end)
+
+    existing_tree =
+      if npc do
+        components = Map.get(npc, :components) || %{}
+        Map.get(components, :dialogue_tree) || Map.get(components, "dialogue_tree") || %{}
+      else
+        %{}
+      end
+
     {:noreply,
      socket
      |> assign(:show_dialogue_editor, true)
      |> assign(:editing_dialogue_npc, key)
-     |> assign(:editing_dialogue_tree, %{})
+     |> assign(:editing_dialogue_tree, existing_tree)
      |> log_console(:info, "Opening dialogue editor for NPC: #{key}")}
   end
 
@@ -1992,9 +2002,26 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   def handle_event("dialogue_update_entity", %{"npc_key" => npc_key}, socket) do
     npc_key = if npc_key == "", do: nil, else: npc_key
 
+    # Load existing dialogue tree when NPC is selected
+    existing_tree =
+      if npc_key do
+        npc = Enum.find(socket.assigns.npcs, fn n -> n.key == npc_key end)
+
+        if npc do
+          components = Map.get(npc, :components) || %{}
+          Map.get(components, :dialogue_tree) || Map.get(components, "dialogue_tree") || %{}
+        else
+          %{}
+        end
+      else
+        %{}
+      end
+
     {:noreply,
      socket
      |> assign(:editing_dialogue_npc, npc_key)
+     |> assign(:editing_dialogue_tree, existing_tree)
+     |> assign(:dialogue_selected_node, nil)
      |> log_console(:info, "Dialogue entity set to: #{npc_key || "none"}")}
   end
 
