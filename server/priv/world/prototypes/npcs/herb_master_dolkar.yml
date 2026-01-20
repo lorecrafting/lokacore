@@ -25,6 +25,22 @@ tags:
   - healer
   - teacher
 
+# Behaviors - gentle herbalist keeps calm hours
+behaviors:
+  - script: day_night_schedule
+    config:
+      wake_at: dawn
+      sleep_at: dusk
+
+# Personality emotes
+emotes:
+  waking_up: "*rises with the herbs, breathing in the dawn-fresh garden air*"
+  going_to_sleep: "*covers the tender seedlings against the night chill and retires*"
+  greeting: "*looks up from her herbs with gentle eyes* Ah, a visitor to the garden."
+  working: "*hums softly while pruning, her fingers knowing each leaf*"
+  teaching: "*speaks with patient clarity, as if explaining to a seedling how to grow*"
+  blessing: "*touches the earth, murmuring gratitude to the soil*"
+
 components:
   ambient_actions:
     messages:

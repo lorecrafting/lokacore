@@ -25,6 +25,22 @@ tags:
   - atmosphere
   - novice
 
+# Behaviors - follows monastic schedule, early rise for chores
+behaviors:
+  - script: day_night_schedule
+    config:
+      wake_at: dawn
+      sleep_at: dusk
+
+# Personality emotes
+emotes:
+  waking_up: "*stumbles out bleary-eyed, fumbling for his broom*"
+  going_to_sleep: "*yawns hugely and shuffles toward the dormitory*"
+  greeting: "*startles, then bows hastily* O-oh! Greetings, traveler!"
+  sweeping: "*sweeps with meditative concentration, or tries to*"
+  distracted: "*glances toward the mountains, then guiltily resumes work*"
+  curious: "*peers at you with barely concealed curiosity*"
+
 components:
   ambient_actions:
     messages:

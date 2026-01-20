@@ -28,6 +28,22 @@ tags:
   - teacher
   - guide
 
+# Behaviors - guides early risers, rests when weather turns
+behaviors:
+  - script: day_night_schedule
+    config:
+      wake_at: dawn
+      sleep_at: dusk
+
+# Personality emotes
+emotes:
+  waking_up: "*checks the sky and tests the wind* Good climbing weather."
+  going_to_sleep: "*coils his rope and banks the fire for the night*"
+  greeting: "*tips his weathered hat* The mountain sends another seeker."
+  reading_weather: "*squints at distant clouds, reading their language*"
+  preparing: "*checks his rope and staff, ritual preparations for the climb*"
+  remembering: "*gazes at a distant peak, lost in some old memory*"
+
 components:
   ambient_actions:
     messages:

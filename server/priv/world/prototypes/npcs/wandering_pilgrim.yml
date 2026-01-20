@@ -25,28 +25,26 @@ tags:
   - sacred
   - atmosphere
 
+# Behaviors - pilgrim walks at dawn, rests during evening
 behaviors:
-  - Loka.Behaviors.Wander
+  - script: day_night_schedule
+    config:
+      wake_at: dawn
+      sleep_at: evening
+  - script: wander
+    config:
+      rooms: [monastery_gate, main_courtyard, temple, waterfall_shrine, village_square, cliff_path]
+      interval: 480
+      stay_probability: 0.8
 
-attributes:
-  behavior_config:
-    wander:
-      allowed_rooms:
-        - monastery_gate
-        - main_courtyard
-        - temple
-        - waterfall_shrine
-        - village
-        - cliff_path
-      move_chance: 0.2
-      tick_interval: 120000
-      phases:
-        - dawn
-        - day
-      idle_messages:
-        - "The pilgrim's lips move in silent prayer."
-        - "The elderly pilgrim pauses, counting her beads."
-        - "The pilgrim bows toward the mountain peak."
+# Personality emotes
+emotes:
+  waking_up: "*rises with the sun, greeting the dawn with prayer*"
+  going_to_sleep: "*settles onto a worn bedroll, beads still in hand*"
+  greeting: "*bows with serene dignity* Blessings upon you, traveler."
+  praying: "*lips move in silent prayer, worn beads clicking softly*"
+  walking: "*moves with patient, measured steps, each one a meditation*"
+  peaceful: "*gazes at the mountains with quiet contentment*"
 
 components:
   ambient_actions:

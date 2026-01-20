@@ -25,29 +25,39 @@ tags:
   - atmosphere
   - artist
 
+# Behaviors - musician travels during day, rests at evening
 behaviors:
-  - Loka.Behaviors.Patrol
+  - script: day_night_schedule
+    config:
+      wake_at: dawn
+      sleep_at: evening
+  - script: patrol
+    config:
+      route: [village_square, monastery_gate, main_courtyard]
+      interval: 300
 
-attributes:
-  behavior_config:
-    patrol:
-      path:
-        - village
-        - market
-        - monastery_gate
-        - main_courtyard
-      pause_seconds: 90
-      loop: true
-      ambient_messages:
-        - "The musician strums a melancholy chord that echoes off the stones."
-        - "A lilting melody drifts from the musician's dramyin."
-        - "The musician hums softly, tuning his instrument."
-        - "The musician's fingers dance across the strings, weaving a wordless story."
-        - "The musician pauses to adjust a tuning peg with practiced care."
-        - "A few notes escape the dramyin, bright as bird song."
-        - "The musician taps his foot, keeping time with an unheard rhythm."
+# Personality emotes
+emotes:
+  waking_up: "*tunes the dramyin with practiced fingers, preparing for the day's songs*"
+  going_to_sleep: "*carefully wraps the dramyin and finds a sheltered spot to rest*"
+  greeting: "*strums a welcoming chord* Ah! Another soul drawn by the music!"
+  playing: "*fingers dance across the strings, eyes half-closed in reverie*"
+  listening: "*cocks head, catching some distant melody only he can hear*"
+  whimsical: "*grins mysteriously* Shall I tell you a story in song?"
 
 components:
+  ambient_actions:
+    messages:
+      - "The musician strums a melancholy chord that echoes off the stones."
+      - "A lilting melody drifts from the musician's dramyin."
+      - "The musician hums softly, tuning his instrument."
+      - "The musician's fingers dance across the strings, weaving a wordless story."
+      - "The musician pauses to adjust a tuning peg with practiced care."
+      - "A few notes escape the dramyin, bright as bird song."
+      - "The musician taps his foot, keeping time with an unheard rhythm."
+    interval_min: 30
+    interval_max: 60
+    chance: 0.6
   combatant:
     health:
       current: 45

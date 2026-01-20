@@ -24,27 +24,26 @@ tags:
   - atmosphere
   - sacred
 
+# Behaviors - cats sleep during the day, more active at dusk
 behaviors:
-  - Loka.Behaviors.Wander
+  - script: day_night_schedule
+    config:
+      wake_at: dusk
+      sleep_at: morning
+  - script: wander
+    config:
+      rooms: [main_courtyard, temple, meditation_hall, dining_hall, monastery_gate]
+      interval: 300
+      stay_probability: 0.75
 
-attributes:
-  behavior_config:
-    wander:
-      allowed_rooms:
-        - main_courtyard
-        - temple
-        - meditation_hall
-        - dining_hall
-        - monastery_gate
-      move_chance: 0.25
-      tick_interval: 90000
-      phases:
-        - day
-        - dusk
-      idle_messages:
-        - "The temple cat watches you with half-closed eyes."
-        - "A soft purr emanates from the grey cat."
-        - "The cat's tail flicks lazily."
+# Personality emotes
+emotes:
+  waking_up: "*stretches luxuriously, claws extending, then surveys her domain*"
+  going_to_sleep: "*curls into a perfect circle in a patch of sunlight*"
+  greeting: "*regards you with ancient, knowing eyes*"
+  purring: "*a deep rumbling purr emanates from the grey cat*"
+  hunting: "*ears flatten, body low, stalking something invisible*"
+  disdainful: "*turns away with regal indifference*"
 
 components:
   ambient_actions:

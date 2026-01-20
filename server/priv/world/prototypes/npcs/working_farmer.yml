@@ -23,6 +23,22 @@ tags:
   - atmosphere
   - worker
 
+# Behaviors - hard working farmer rises early, sleeps when sun sets
+behaviors:
+  - script: day_night_schedule
+    config:
+      wake_at: dawn
+      sleep_at: dusk
+
+# Personality emotes
+emotes:
+  waking_up: "*stretches work-worn muscles and surveys the fields*"
+  going_to_sleep: "*sets down the hoe and wipes tired brow* Another day done."
+  greeting: "*pauses from work, leaning on hoe* Eh? Need something?"
+  working: "*bends to the task, back curved by years of toil*"
+  resting: "*takes a long drink of water, eyes never leaving the crops*"
+  praying: "*murmurs thanks to the mountain spirits for the harvest*"
+
 components:
   ambient_actions:
     messages:

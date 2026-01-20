@@ -18,6 +18,23 @@ tags:
   - trainer
   - monastery
   - combat
+
+# Behaviors - disciplined warrior keeps strict schedule
+behaviors:
+  - script: day_night_schedule
+    config:
+      wake_at: dawn
+      sleep_at: dusk
+
+# Personality emotes
+emotes:
+  waking_up: "*flows through morning exercises with perfect precision*"
+  going_to_sleep: "*bows to the four directions before retiring to meditation*"
+  greeting: "*acknowledges you with a measured nod* Your stance tells me much."
+  training: "*demonstrates a form, each movement deliberate and powerful*"
+  observing: "*watches with still eyes, missing nothing*"
+  correcting: "*adjusts your form with surprising gentleness* Better."
+
 components:
   ambient_actions:
     messages:
