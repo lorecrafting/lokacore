@@ -83,6 +83,9 @@ defmodule Loka.Application do
       Loka.Framework.World.RoomAmbient.Scheduler,
       Loka.Framework.World.NpcAmbient.Scheduler,
 
+      # Scripting - World event handler (subscribes to time/weather events)
+      Loka.Framework.Scripting.WorldEventHandler,
+
       # Zone system - periodic mob/item respawning
       # Order: Loader → Registry → Reset (Reset needs both Loader and Registry)
       Loka.Engine.ZoneLoader,
