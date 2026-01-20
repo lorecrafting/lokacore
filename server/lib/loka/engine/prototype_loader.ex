@@ -268,23 +268,26 @@ defmodule Loka.Engine.PrototypeLoader do
       # Find all YAML files recursively
       yaml_files = find_yaml_files(full_path)
 
-      # Parse all files into raw prototypes
+      # Parse all files into raw prototypes (skip invalid files with warning)
       {raw_prototypes, parse_errors} = parse_yaml_files(yaml_files)
 
+      # Log parse errors but continue with valid prototypes
       if Enum.any?(parse_errors) do
-        {:error, parse_errors}
-      else
-        # Resolve parent inheritance
-        case resolve_all_parents(raw_prototypes) do
-          {:ok, resolved} ->
-            # Update ETS table
-            update_ets(state.table, resolved)
+        Logger.warning(
+          "PrototypeLoader: #{length(parse_errors)} files had errors: #{inspect(parse_errors)}"
+        )
+      end
 
-            {:ok, %{state | raw_prototypes: raw_prototypes, resolved_prototypes: resolved}}
+      # Resolve parent inheritance for valid prototypes
+      case resolve_all_parents(raw_prototypes) do
+        {:ok, resolved} ->
+          # Update ETS table
+          update_ets(state.table, resolved)
 
-          {:error, errors} ->
-            {:error, errors}
-        end
+          {:ok, %{state | raw_prototypes: raw_prototypes, resolved_prototypes: resolved}}
+
+        {:error, errors} ->
+          {:error, errors}
       end
     else
       Logger.debug("PrototypeLoader: path #{full_path} does not exist, starting empty")

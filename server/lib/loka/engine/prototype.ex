@@ -77,6 +77,7 @@ defmodule Loka.Engine.Prototype do
     is_template: false,
     components: %{},
     behaviors: [],
+    emotes: %{},
     attributes: %{},
     tags: [],
     scripts: %{},
@@ -119,6 +120,7 @@ defmodule Loka.Engine.Prototype do
       is_template: Map.get(attrs, :is_template, false) == true,
       components: Map.get(attrs, :components, %{}),
       behaviors: normalize_behaviors(Map.get(attrs, :behaviors, [])),
+      emotes: normalize_emotes(Map.get(attrs, :emotes, %{})),
       attributes: Map.get(attrs, :attributes, %{}),
       tags: Map.get(attrs, :tags, []),
       scripts: Map.get(attrs, :scripts, %{}),
@@ -198,6 +200,7 @@ defmodule Loka.Engine.Prototype do
       is_template: child.is_template,
       components: MapHelpers.deep_merge(parent.components, child.components),
       behaviors: MapHelpers.merge_lists(child.behaviors, parent.behaviors),
+      emotes: Map.merge(parent.emotes || %{}, child.emotes || %{}),
       attributes: MapHelpers.deep_merge(parent.attributes, child.attributes),
       tags: MapHelpers.merge_lists(child.tags, parent.tags),
       scripts: MapHelpers.deep_merge(parent.scripts, child.scripts),
@@ -327,13 +330,23 @@ defmodule Loka.Engine.Prototype do
 
   # Private functions
 
+  # Known prototype keys - convert to atoms for these, keep strings for unknown
+  @known_keys ~w(key parent type short_desc long_desc extra_desc keywords
+                 primary_keyword mood is_template components behaviors
+                 attributes tags scripts locks exits spawns emotes)
+
   defp normalize_keys(map) when is_map(map) do
     Map.new(map, fn
-      {k, v} when is_binary(k) -> {String.to_existing_atom(k), v}
-      {k, v} when is_atom(k) -> {k, v}
+      {k, v} when is_binary(k) ->
+        if k in @known_keys do
+          {String.to_atom(k), v}
+        else
+          {k, v}
+        end
+
+      {k, v} when is_atom(k) ->
+        {k, v}
     end)
-  rescue
-    ArgumentError -> map
   end
 
   defp normalize_type(type) when is_binary(type) do
@@ -392,6 +405,21 @@ defmodule Loka.Engine.Prototype do
 
   defp normalize_behavior_config(_), do: %{}
 
+  defp normalize_emotes(emotes) when is_map(emotes) do
+    Map.new(emotes, fn {key, value} ->
+      atom_key =
+        cond do
+          is_atom(key) -> key
+          is_binary(key) -> String.to_atom(key)
+          true -> key
+        end
+
+      {atom_key, if(is_binary(value), do: value, else: to_string(value))}
+    end)
+  end
+
+  defp normalize_emotes(_), do: %{}
+
   defp validate_key(errors, key) when is_binary(key) and byte_size(key) > 0 do
     if valid_identifier?(key) do
       errors
@@ -415,14 +443,22 @@ defmodule Loka.Engine.Prototype do
   defp validate_components(errors, _), do: ["components must be a map" | errors]
 
   defp validate_behaviors(errors, behaviors) when is_list(behaviors) do
+    # Accept both new format (maps with script/config) and legacy format (atoms)
     invalid =
       behaviors
-      |> Enum.filter(fn b -> not is_atom(b) end)
+      |> Enum.filter(fn
+        %{script: script} when is_binary(script) -> false
+        b when is_atom(b) and not is_nil(b) -> false
+        _ -> true
+      end)
 
     if Enum.empty?(invalid) do
       errors
     else
-      ["behaviors must be a list of module atoms, got invalid: #{inspect(invalid)}" | errors]
+      [
+        "behaviors must be a list of behavior configs or module atoms, got invalid: #{inspect(invalid)}"
+        | errors
+      ]
     end
   end
 

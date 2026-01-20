@@ -41,7 +41,8 @@ defmodule Loka.Engine.PrototypeTest do
       assert proto.key == "goblin_warrior"
       assert proto.parent == "base_npc"
       assert proto.components == %{"combatant" => %{"health" => 30}}
-      assert proto.behaviors == [Loka.Engine.PrototypeTest]
+      # Legacy atom behaviors are converted to new map format
+      assert [%{script: _, config: %{}}] = proto.behaviors
       assert proto.tags == ["hostile", "goblinoid"]
     end
 
@@ -291,7 +292,8 @@ defmodule Loka.Engine.PrototypeTest do
       assert entity.long_desc == "A goblin stands here."
       assert entity.keywords == ["goblin"]
       assert entity.components == %{"combat" => %{"hp" => 30}}
-      assert entity.behaviors == [Kernel]
+      # Legacy atom behaviors are converted to new map format
+      assert [%{script: _, config: %{}}] = entity.behaviors
       assert entity.attributes == %{"level" => 1}
       assert entity.tags == ["hostile"]
       assert entity.scripts == %{"on_death" => "script"}
