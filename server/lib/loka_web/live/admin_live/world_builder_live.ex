@@ -1023,6 +1023,11 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     {:noreply, assign(socket, :templates, templates) |> assign(:template_search, query)}
   end
 
+  # Unified search for all entity types - filtering is done in the component
+  def handle_event("search_entities", %{"query" => query}, socket) do
+    {:noreply, assign(socket, :template_search, query)}
+  end
+
   # NPC & Item Management (using EntityManager)
   def handle_event("create_npc", params, socket) do
     # Validate key and name

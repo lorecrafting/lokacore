@@ -24,6 +24,63 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
   attr :class, :string, default: ""
 
   def hierarchy_panel(assigns) do
+    # Filter entities based on search query
+    search = String.downcase(assigns.template_search || "")
+
+    filtered_rooms =
+      if search == "" do
+        assigns.rooms
+      else
+        Enum.filter(assigns.rooms, fn room ->
+          String.contains?(String.downcase(room.name || ""), search) ||
+            String.contains?(String.downcase(room.key || ""), search)
+        end)
+      end
+
+    filtered_npcs =
+      if search == "" do
+        assigns.npcs
+      else
+        Enum.filter(assigns.npcs, fn npc ->
+          name = npc[:name] || npc[:short_desc] || npc.key || ""
+
+          String.contains?(String.downcase(name), search) ||
+            String.contains?(String.downcase(npc.key || ""), search)
+        end)
+      end
+
+    filtered_items =
+      if search == "" do
+        assigns.items
+      else
+        Enum.filter(assigns.items, fn item ->
+          name = item[:name] || item[:short_desc] || item.key || ""
+
+          String.contains?(String.downcase(name), search) ||
+            String.contains?(String.downcase(item.key || ""), search)
+        end)
+      end
+
+    filtered_templates =
+      if search == "" do
+        assigns.templates
+      else
+        Enum.filter(assigns.templates, fn template ->
+          String.contains?(String.downcase(template.name || ""), search) ||
+            String.contains?(String.downcase(template.template_key || ""), search) ||
+            Enum.any?(template.tags || [], fn tag ->
+              String.contains?(String.downcase(tag), search)
+            end)
+        end)
+      end
+
+    assigns =
+      assigns
+      |> assign(:filtered_rooms, filtered_rooms)
+      |> assign(:filtered_npcs, filtered_npcs)
+      |> assign(:filtered_items, filtered_items)
+      |> assign(:filtered_templates, filtered_templates)
+
     ~H"""
     <div class={[
       "world-builder-panel world-builder-hierarchy",
@@ -124,11 +181,11 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
         </div>
         
     <!-- Search bar -->
-        <form phx-change="search_templates" class="hierarchy-search">
+        <form phx-change="search_entities" class="hierarchy-search">
           <.icon name="hero-magnifying-glass" class="size-3" />
           <input
             type="text"
-            placeholder="Search templates..."
+            placeholder={search_placeholder(@active_tab)}
             phx-debounce="100"
             name="query"
             value={@template_search}
@@ -138,7 +195,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
         <div class="panel-content">
           <!-- Room Hierarchy -->
           <div class="hierarchy-tree" style={if @active_tab != :rooms, do: "display: none;", else: ""}>
-            <%= for room <- @rooms do %>
+            <%= for room <- @filtered_rooms do %>
               <div
                 class={[
                   "hierarchy-item",
@@ -155,12 +212,14 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
           
     <!-- NPC List -->
           <div class="hierarchy-tree" style={if @active_tab != :npcs, do: "display: none;", else: ""}>
-            <%= if @npcs == [] do %>
+            <%= if @filtered_npcs == [] do %>
               <p class="text-muted" style="padding: 1rem; color: #666;">
-                No NPCs. Click + NPC in toolbar.
+                {if @template_search != "",
+                  do: "No matching NPCs.",
+                  else: "No NPCs. Click + NPC in toolbar."}
               </p>
             <% else %>
-              <%= for npc <- @npcs do %>
+              <%= for npc <- @filtered_npcs do %>
                 <div
                   class={[
                     "hierarchy-item",
@@ -180,12 +239,14 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
           
     <!-- Item List -->
           <div class="hierarchy-tree" style={if @active_tab != :items, do: "display: none;", else: ""}>
-            <%= if @items == [] do %>
+            <%= if @filtered_items == [] do %>
               <p class="text-muted" style="padding: 1rem; color: #666;">
-                No items. Click + Item in toolbar.
+                {if @template_search != "",
+                  do: "No matching items.",
+                  else: "No items. Click + Item in toolbar."}
               </p>
             <% else %>
-              <%= for item <- @items do %>
+              <%= for item <- @filtered_items do %>
                 <div
                   class={[
                     "hierarchy-item",
@@ -208,7 +269,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
             class="template-library"
             style={if @active_tab != :templates, do: "display: none;", else: ""}
           >
-            <%= for template <- @templates do %>
+            <%= for template <- @filtered_templates do %>
               <div class="template-item">
                 <div class="template-icon">
                   <.icon name="hero-document-duplicate" class="size-5" />
@@ -240,4 +301,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
     </div>
     """
   end
+
+  defp search_placeholder(:rooms), do: "Search rooms..."
+  defp search_placeholder(:npcs), do: "Search NPCs..."
+  defp search_placeholder(:items), do: "Search items..."
+  defp search_placeholder(:templates), do: "Search templates..."
+  defp search_placeholder(_), do: "Search..."
 end
