@@ -174,6 +174,42 @@ defmodule Loka.Engine.Script.SandboxTest do
 
       assert {:ok, :deny, []} = Sandbox.execute(source, @test_entity, @test_context)
     end
+
+    test "provides config bindings from context" do
+      context_with_config =
+        Map.put(@test_context, :config, %{
+          route: ["gate", "market", "temple"],
+          interval: 180
+        })
+
+      source = "config.route"
+
+      assert {:ok, ["gate", "market", "temple"], []} =
+               Sandbox.execute(source, @test_entity, context_with_config)
+    end
+
+    test "config provides access to scalar values" do
+      context_with_config = Map.put(@test_context, :config, %{interval: 300})
+
+      source = "config.interval"
+
+      assert {:ok, 300, []} = Sandbox.execute(source, @test_entity, context_with_config)
+    end
+
+    test "config returns empty map when not provided" do
+      source = "config"
+
+      assert {:ok, %{}, []} = Sandbox.execute(source, @test_entity, @test_context)
+    end
+
+    test "config converts string keys to atoms" do
+      context_with_string_keys = Map.put(@test_context, :config, %{"route" => ["a", "b"]})
+
+      source = "config.route"
+
+      assert {:ok, ["a", "b"], []} =
+               Sandbox.execute(source, @test_entity, context_with_string_keys)
+    end
   end
 
   describe "execute/4 with timeout" do

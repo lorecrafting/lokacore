@@ -11,6 +11,7 @@ defmodule Loka.Engine.Script.Bindings do
   - `entity` - The entity being scripted
   - `player` - The current player (if applicable)
   - `context` - Additional event context
+  - `config` - Behavior configuration (for behavior scripts)
   - `room()` - Current room data
 
   ### Query Functions
@@ -77,6 +78,9 @@ defmodule Loka.Engine.Script.Bindings do
 
   # Context bindings - read-only data
   defp context_bindings(entity, player, context) do
+    # Extract behavior config from context (for behavior scripts)
+    config = Map.get(context, :config, %{})
+
     [
       # Entity being scripted (read-only map)
       entity: safe_entity_map(entity),
@@ -86,6 +90,10 @@ defmodule Loka.Engine.Script.Bindings do
 
       # Event context
       context: safe_context_map(context),
+
+      # Behavior config (read-only, for behaviors)
+      # Scripts access via config.route, config.interval, etc.
+      config: safe_config_map(config),
 
       # Room query function
       room: fn -> get_room(entity) end
@@ -266,6 +274,20 @@ defmodule Loka.Engine.Script.Bindings do
   end
 
   defp safe_context_map(_), do: %{}
+
+  # Safe config map for behavior scripts
+  # Converts all keys to atoms for consistent access (config.route vs config["route"])
+  defp safe_config_map(config) when is_map(config) do
+    config
+    |> Enum.map(fn
+      {key, value} when is_binary(key) -> {String.to_atom(key), value}
+      {key, value} when is_atom(key) -> {key, value}
+      {key, value} -> {key, value}
+    end)
+    |> Map.new()
+  end
+
+  defp safe_config_map(_), do: %{}
 
   # =============================================================================
   # Query Function Implementations
