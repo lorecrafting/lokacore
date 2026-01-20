@@ -299,4 +299,105 @@ defmodule Loka.Engine.Script.Executor do
   end
 
   defp get_in_entity(_, _), do: nil
+
+  # =============================================================================
+  # Event Trigger Support
+  # =============================================================================
+
+  @doc """
+  Get event triggers defined in a script.
+
+  Scripts can define event triggers in their data:
+
+  ```yaml
+  data:
+    events: [dawn, dusk]  # Short form
+    # OR
+    trigger:
+      type: event
+      events: [time:dawn, time:dusk]  # Full form
+  ```
+
+  Returns list of event atoms like [:dawn, :dusk]
+  """
+  @spec get_script_events(String.t()) :: [atom()]
+  def get_script_events(script_key) do
+    case ContentScript.get(script_key) do
+      {:ok, script} ->
+        parse_script_events(script)
+
+      {:error, _} ->
+        []
+    end
+  end
+
+  defp parse_script_events(script) do
+    data = Map.get(script, :data, %{})
+
+    # Check for events field (short form)
+    events = Map.get(data, :events) || Map.get(data, "events") || []
+
+    # Check for trigger.events (full form)
+    trigger_events =
+      case Map.get(data, :trigger) || Map.get(data, "trigger") do
+        %{} = trigger ->
+          events_list = Map.get(trigger, :events) || Map.get(trigger, "events") || []
+          events_list
+
+        _ ->
+          []
+      end
+
+    # Combine and normalize to atoms
+    (events ++ trigger_events)
+    |> Enum.uniq()
+    |> Enum.map(&normalize_event_name/1)
+  end
+
+  defp normalize_event_name(event) when is_atom(event), do: event
+  defp normalize_event_name("time:" <> name), do: String.to_atom(name)
+  defp normalize_event_name("weather:" <> name), do: String.to_atom(name)
+  defp normalize_event_name(name) when is_binary(name), do: String.to_atom(name)
+
+  @doc """
+  Register an entity's behavior script for world event subscriptions.
+
+  Call this when attaching a behavior to an entity. If the behavior script
+  has event triggers, this will subscribe the entity to those events via
+  WorldEventHandler.
+
+  ## Parameters
+
+  - `entity_id` - ID of the entity
+  - `behavior_key` - Script key of the behavior
+  - `config` - Config to pass when the event fires
+
+  ## Returns
+
+  List of events the entity was subscribed to
+  """
+  @spec register_behavior_events(String.t(), String.t(), map()) :: [atom()]
+  def register_behavior_events(entity_id, behavior_key, config \\ %{}) do
+    alias Loka.Framework.Scripting.WorldEventHandler
+
+    events = get_script_events(behavior_key)
+
+    Enum.each(events, fn event ->
+      WorldEventHandler.subscribe(entity_id, event, behavior_key, config)
+    end)
+
+    events
+  end
+
+  @doc """
+  Unregister all world event subscriptions for an entity.
+
+  Call this when an entity despawns or is removed.
+  """
+  @spec unregister_behavior_events(String.t()) :: :ok
+  def unregister_behavior_events(entity_id) do
+    alias Loka.Framework.Scripting.WorldEventHandler
+
+    WorldEventHandler.unsubscribe_all(entity_id)
+  end
 end
