@@ -132,6 +132,7 @@ defmodule Loka.Application do
         Loka.Framework.Quest.Listeners.register_all()
         Loka.Framework.World.RoomEvents.register_hooks()
         Loka.Framework.Inventory.Container.register_hooks()
+        Loka.Framework.Scripting.BehaviorRegistry.register_hooks()
 
         # Spawn the world (create room entities from prototypes)
         # Skip in test mode to avoid polluting the sandbox-isolated test database
