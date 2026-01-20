@@ -103,8 +103,16 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
       </div>
 
       <%= if @collapsed do %>
-        <!-- Collapsed view: icons only -->
+        <!-- Collapsed view: icons only (Templates first for discovery) -->
         <div class="panel-collapsed-content">
+          <button
+            class={["collapsed-icon-btn", @active_tab == :templates && "active"]}
+            phx-click="switch_hierarchy_tab"
+            phx-value-tab="templates"
+            title="Templates ({length(@templates)})"
+          >
+            <.icon name="hero-document-duplicate" class="size-5" />
+          </button>
           <button
             class={["collapsed-icon-btn", @active_tab == :rooms && "active"]}
             phx-click="switch_hierarchy_tab"
@@ -129,19 +137,20 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
           >
             <.icon name="hero-cube-transparent" class="size-5" />
           </button>
-          <button
-            class={["collapsed-icon-btn", @active_tab == :templates && "active"]}
-            phx-click="switch_hierarchy_tab"
-            phx-value-tab="templates"
-            title="Templates ({length(@templates)})"
-          >
-            <.icon name="hero-document-duplicate" class="size-5" />
-          </button>
         </div>
       <% else %>
         <!-- Expanded view: full content -->
-        <!-- Tabs for Rooms, NPCs, Items, and Templates -->
+        <!-- Tabs ordered by workflow: Templates (discovery) → Rooms → NPCs → Items -->
         <div class="hierarchy-tabs">
+          <button
+            class={["hierarchy-tab", @active_tab == :templates && "active"]}
+            phx-click="switch_hierarchy_tab"
+            phx-value-tab="templates"
+            title="Templates"
+          >
+            <.icon name="hero-document-duplicate" class="size-3" />
+            <span>{length(@templates)}</span>
+          </button>
           <button
             class={["hierarchy-tab", @active_tab == :rooms && "active"]}
             phx-click="switch_hierarchy_tab"
@@ -168,15 +177,6 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
           >
             <.icon name="hero-cube-transparent" class="size-3" />
             <span>{length(@items)}</span>
-          </button>
-          <button
-            class={["hierarchy-tab", @active_tab == :templates && "active"]}
-            phx-click="switch_hierarchy_tab"
-            phx-value-tab="templates"
-            title="Templates"
-          >
-            <.icon name="hero-document-duplicate" class="size-3" />
-            <span>{length(@templates)}</span>
           </button>
         </div>
         

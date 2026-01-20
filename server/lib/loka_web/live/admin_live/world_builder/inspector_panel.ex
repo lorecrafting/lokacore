@@ -46,28 +46,23 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
       <div class="panel-content" style={if @collapsed, do: "display: none;", else: "padding: 0;"}>
         <%= if @selected_room do %>
           <% room = get_room_data(@rooms, @selected_room) %>
-          <!-- Inspector header with room name -->
+          <!-- Inspector header with room icon and key -->
           <div class="inspector-header">
             <.icon name="hero-cube" class="size-5" style="color: #909090;" />
-            <span class="inspector-title">{room.name}</span>
+            <span class="inspector-title">{room.name || room.key}</span>
           </div>
           
-    <!-- Inspector sections -->
+    <!-- Inspector sections - ordered by typical editing workflow -->
           <form phx-change="update_room_field">
             <input type="hidden" name="room_id" value={room.id || room.key} />
             
-    <!-- Properties Section -->
+    <!-- 1. Name & Description - Most commonly edited -->
             <div class="inspector-section">
               <div class="inspector-section-header">
-                <span class="inspector-section-title">Properties</span>
+                <span class="inspector-section-title">Identity</span>
                 <.icon name="hero-chevron-down" class="size-3" />
               </div>
               <div class="inspector-section-content">
-                <div class="form-group">
-                  <label>Key (ID)</label>
-                  <input type="text" class="input" value={room.key} readonly />
-                  <small>Unique identifier - cannot be changed</small>
-                </div>
                 <div class="form-group">
                   <label>Name</label>
                   <input
@@ -75,21 +70,41 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                     name="name"
                     class="input"
                     value={room.name}
+                    placeholder="Room display name..."
                     phx-debounce="500"
+                  />
+                </div>
+                <div class="form-group">
+                  <label>Description</label>
+                  <textarea
+                    name="description"
+                    class="textarea"
+                    rows="4"
+                    placeholder="What the player sees when entering..."
+                    phx-debounce="500"
+                  ><%= room.description %></textarea>
+                </div>
+                <div class="form-group" style="margin-top: 0.5rem;">
+                  <label style="font-size: 0.75rem; color: #666;">Key (ID)</label>
+                  <input
+                    type="text"
+                    class="input"
+                    value={room.key}
+                    readonly
+                    style="font-size: 0.85rem; background: #1a1a1a; color: #666;"
                   />
                 </div>
               </div>
             </div>
             
-    <!-- Transform/Position Section -->
+    <!-- 2. Position - Where it goes on the map -->
             <div class="inspector-section">
               <div class="inspector-section-header">
-                <span class="inspector-section-title">Transform</span>
+                <span class="inspector-section-title">Position</span>
                 <.icon name="hero-chevron-down" class="size-3" />
               </div>
               <div class="inspector-section-content">
                 <div class="form-group">
-                  <label>Position</label>
                   <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.25rem;">
                     <div>
                       <small>X</small>
@@ -126,28 +141,15 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
               </div>
             </div>
             
-    <!-- Description Section -->
+    <!-- 3. Exits - Connections to other rooms -->
             <div class="inspector-section">
               <div class="inspector-section-header">
-                <span class="inspector-section-title">Description</span>
-                <.icon name="hero-chevron-down" class="size-3" />
-              </div>
-              <div class="inspector-section-content">
-                <div class="form-group">
-                  <textarea
-                    name="description"
-                    class="textarea"
-                    rows="4"
-                    phx-debounce="500"
-                  ><%= room.description %></textarea>
-                </div>
-              </div>
-            </div>
-            
-    <!-- Exits Section -->
-            <div class="inspector-section">
-              <div class="inspector-section-header">
-                <span class="inspector-section-title">Exits</span>
+                <span class="inspector-section-title">
+                  Exits
+                  <span style="color: #666; font-weight: normal; margin-left: 0.25rem;">
+                    ({map_size(room.exits || %{})})
+                  </span>
+                </span>
                 <.icon name="hero-chevron-down" class="size-3" />
               </div>
               <div class="inspector-section-content">
@@ -174,7 +176,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                     <% end %>
                   </div>
                 <% else %>
-                  <p class="text-muted" style="margin: 0;">No exits defined</p>
+                  <p class="text-muted" style="margin: 0; font-size: 0.85rem;">No exits defined</p>
                 <% end %>
                 
     <!-- Add Exit Form -->
@@ -202,7 +204,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                       name="to"
                       class="input"
                       style="flex: 2;"
-                      placeholder="Destination room key..."
+                      placeholder="Destination key..."
                       required
                     />
                   </div>
@@ -214,7 +216,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
               </div>
             </div>
             
-    <!-- Actions Section -->
+    <!-- 4. Actions - Less frequently used -->
             <div class="inspector-section">
               <div class="inspector-section-header">
                 <span class="inspector-section-title">Actions</span>
@@ -230,10 +232,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                   phx-value-room_id={room.id || room.key}
                   phx-value-template_key={room.key}
                   phx-value-template_name={room.name}
-                  class="btn btn-primary"
+                  class="btn btn-sm"
                   style="width: 100%;"
                 >
-                  <.icon name="hero-document-duplicate" class="size-4" />
+                  <.icon name="hero-document-duplicate" class="size-3" />
                   <span>Save as Template</span>
                 </button>
 
@@ -241,10 +243,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                   type="button"
                   phx-click="delete_room"
                   phx-value-id={room.id || room.key}
-                  class="btn btn-danger"
+                  class="btn btn-danger btn-sm"
                   data-confirm="Are you sure you want to delete this room?"
                 >
-                  <.icon name="hero-trash" class="size-4" />
+                  <.icon name="hero-trash" class="size-3" />
                   <span>Delete Room</span>
                 </button>
               </div>
@@ -263,18 +265,13 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
           <form phx-change="update_npc_field">
             <input type="hidden" name="npc_key" value={npc.key} />
             
-    <!-- Properties Section -->
+    <!-- 1. Identity - Name & Description first -->
             <div class="inspector-section">
               <div class="inspector-section-header">
-                <span class="inspector-section-title">Properties</span>
+                <span class="inspector-section-title">Identity</span>
                 <.icon name="hero-chevron-down" class="size-3" />
               </div>
               <div class="inspector-section-content">
-                <div class="form-group">
-                  <label>Key (ID)</label>
-                  <input type="text" class="input" value={npc.key} readonly />
-                  <small>Unique identifier - cannot be changed</small>
-                </div>
                 <div class="form-group">
                   <label>Name</label>
                   <input
@@ -282,9 +279,40 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                     name="name"
                     class="input"
                     value={npc[:name] || ""}
+                    placeholder="NPC display name..."
                     phx-debounce="500"
                   />
                 </div>
+                <div class="form-group">
+                  <label>Description</label>
+                  <textarea
+                    name="description"
+                    class="textarea"
+                    rows="3"
+                    placeholder="What the player sees when looking..."
+                    phx-debounce="500"
+                  ><%= npc[:description] || npc[:short_desc] || "" %></textarea>
+                </div>
+                <div class="form-group" style="margin-top: 0.5rem;">
+                  <label style="font-size: 0.75rem; color: #666;">Key (ID)</label>
+                  <input
+                    type="text"
+                    class="input"
+                    value={npc.key}
+                    readonly
+                    style="font-size: 0.85rem; background: #1a1a1a; color: #666;"
+                  />
+                </div>
+              </div>
+            </div>
+            
+    <!-- 2. Attributes - Level and stats -->
+            <div class="inspector-section">
+              <div class="inspector-section-header">
+                <span class="inspector-section-title">Attributes</span>
+                <.icon name="hero-chevron-down" class="size-3" />
+              </div>
+              <div class="inspector-section-content">
                 <div class="form-group">
                   <label>Level</label>
                   <input
@@ -299,34 +327,16 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
               </div>
             </div>
             
-    <!-- Description Section -->
+    <!-- 3. Behavior - Scripts & Dialogues -->
             <div class="inspector-section">
               <div class="inspector-section-header">
-                <span class="inspector-section-title">Description</span>
+                <span class="inspector-section-title">Behavior</span>
                 <.icon name="hero-chevron-down" class="size-3" />
               </div>
-              <div class="inspector-section-content">
-                <div class="form-group">
-                  <textarea
-                    name="description"
-                    class="textarea"
-                    rows="3"
-                    phx-debounce="500"
-                  ><%= npc[:description] || npc[:short_desc] || "" %></textarea>
-                </div>
-              </div>
-            </div>
-            
-    <!-- Scripts Section -->
-            <div class="inspector-section">
-              <div class="inspector-section-header">
-                <span class="inspector-section-title">Scripts</span>
-                <.icon name="hero-chevron-down" class="size-3" />
-              </div>
-              <div class="inspector-section-content">
-                <p class="text-muted" style="margin: 0 0 0.5rem 0; color: #666; font-size: 0.85rem;">
-                  Attach scripts to control NPC behavior
-                </p>
+              <div
+                class="inspector-section-content"
+                style="display: flex; flex-direction: column; gap: 0.5rem;"
+              >
                 <button
                   type="button"
                   phx-click="show_script_editor_for_entity"
@@ -336,21 +346,8 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                   style="width: 100%;"
                 >
                   <.icon name="hero-code-bracket" class="size-3" />
-                  <span>Add Script</span>
+                  <span>Edit Scripts</span>
                 </button>
-              </div>
-            </div>
-            
-    <!-- Dialogues Section -->
-            <div class="inspector-section">
-              <div class="inspector-section-header">
-                <span class="inspector-section-title">Dialogues</span>
-                <.icon name="hero-chevron-down" class="size-3" />
-              </div>
-              <div class="inspector-section-content">
-                <p class="text-muted" style="margin: 0 0 0.5rem 0; color: #666; font-size: 0.85rem;">
-                  Dialogue trees for conversations
-                </p>
                 <button
                   type="button"
                   phx-click="show_dialogue_editor_for_entity"
@@ -359,12 +356,12 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                   style="width: 100%;"
                 >
                   <.icon name="hero-chat-bubble-left-right" class="size-3" />
-                  <span>Add Dialogue</span>
+                  <span>Edit Dialogues</span>
                 </button>
               </div>
             </div>
             
-    <!-- Actions Section -->
+    <!-- 4. Actions -->
             <div class="inspector-section">
               <div class="inspector-section-header">
                 <span class="inspector-section-title">Actions</span>
@@ -378,10 +375,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                   type="button"
                   phx-click="delete_npc"
                   phx-value-key={npc.key}
-                  class="btn btn-danger"
+                  class="btn btn-danger btn-sm"
                   data-confirm="Are you sure you want to delete this NPC?"
                 >
-                  <.icon name="hero-trash" class="size-4" />
+                  <.icon name="hero-trash" class="size-3" />
                   <span>Delete NPC</span>
                 </button>
               </div>
@@ -400,18 +397,13 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
           <form phx-change="update_item_field">
             <input type="hidden" name="item_key" value={item.key} />
             
-    <!-- Properties Section -->
+    <!-- 1. Identity - Name & Description first -->
             <div class="inspector-section">
               <div class="inspector-section-header">
-                <span class="inspector-section-title">Properties</span>
+                <span class="inspector-section-title">Identity</span>
                 <.icon name="hero-chevron-down" class="size-3" />
               </div>
               <div class="inspector-section-content">
-                <div class="form-group">
-                  <label>Key (ID)</label>
-                  <input type="text" class="input" value={item.key} readonly />
-                  <small>Unique identifier - cannot be changed</small>
-                </div>
                 <div class="form-group">
                   <label>Name</label>
                   <input
@@ -419,9 +411,40 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                     name="name"
                     class="input"
                     value={item[:name] || ""}
+                    placeholder="Item display name..."
                     phx-debounce="500"
                   />
                 </div>
+                <div class="form-group">
+                  <label>Description</label>
+                  <textarea
+                    name="description"
+                    class="textarea"
+                    rows="3"
+                    placeholder="What the player sees when examining..."
+                    phx-debounce="500"
+                  ><%= item[:description] || item[:short_desc] || "" %></textarea>
+                </div>
+                <div class="form-group" style="margin-top: 0.5rem;">
+                  <label style="font-size: 0.75rem; color: #666;">Key (ID)</label>
+                  <input
+                    type="text"
+                    class="input"
+                    value={item.key}
+                    readonly
+                    style="font-size: 0.85rem; background: #1a1a1a; color: #666;"
+                  />
+                </div>
+              </div>
+            </div>
+            
+    <!-- 2. Attributes - Item Type -->
+            <div class="inspector-section">
+              <div class="inspector-section-header">
+                <span class="inspector-section-title">Attributes</span>
+                <.icon name="hero-chevron-down" class="size-3" />
+              </div>
+              <div class="inspector-section-content">
                 <div class="form-group">
                   <label>Item Type</label>
                   <select name="item_type" class="input" phx-debounce="500">
@@ -439,34 +462,13 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
               </div>
             </div>
             
-    <!-- Description Section -->
+    <!-- 3. Behavior - Scripts -->
             <div class="inspector-section">
               <div class="inspector-section-header">
-                <span class="inspector-section-title">Description</span>
+                <span class="inspector-section-title">Behavior</span>
                 <.icon name="hero-chevron-down" class="size-3" />
               </div>
               <div class="inspector-section-content">
-                <div class="form-group">
-                  <textarea
-                    name="description"
-                    class="textarea"
-                    rows="3"
-                    phx-debounce="500"
-                  ><%= item[:description] || item[:short_desc] || "" %></textarea>
-                </div>
-              </div>
-            </div>
-            
-    <!-- Scripts Section -->
-            <div class="inspector-section">
-              <div class="inspector-section-header">
-                <span class="inspector-section-title">Scripts</span>
-                <.icon name="hero-chevron-down" class="size-3" />
-              </div>
-              <div class="inspector-section-content">
-                <p class="text-muted" style="margin: 0 0 0.5rem 0; color: #666; font-size: 0.85rem;">
-                  Attach scripts for item events (on_use, on_pickup)
-                </p>
                 <button
                   type="button"
                   phx-click="show_script_editor_for_entity"
@@ -476,12 +478,12 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                   style="width: 100%;"
                 >
                   <.icon name="hero-code-bracket" class="size-3" />
-                  <span>Add Script</span>
+                  <span>Edit Scripts</span>
                 </button>
               </div>
             </div>
             
-    <!-- Actions Section -->
+    <!-- 4. Actions -->
             <div class="inspector-section">
               <div class="inspector-section-header">
                 <span class="inspector-section-title">Actions</span>
@@ -495,10 +497,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                   type="button"
                   phx-click="delete_item"
                   phx-value-key={item.key}
-                  class="btn btn-danger"
+                  class="btn btn-danger btn-sm"
                   data-confirm="Are you sure you want to delete this item?"
                 >
-                  <.icon name="hero-trash" class="size-4" />
+                  <.icon name="hero-trash" class="size-3" />
                   <span>Delete Item</span>
                 </button>
               </div>

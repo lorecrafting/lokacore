@@ -48,24 +48,22 @@ defmodule LokaWeb.AdminLive.WorldBuilder.Toolbar do
           <.icon name="hero-arrow-uturn-right" class="size-4" />
         </button>
       </div>
-
+      
+    <!-- Primary Creation: Room (main world-building action) -->
       <div class="toolbar-section">
-        <button class="toolbar-btn" title="Play">
-          <.icon name="hero-play" class="size-4" />
-        </button>
-        <button class="toolbar-btn" title="Pause">
-          <.icon name="hero-pause" class="size-4" />
-        </button>
-        <button class="toolbar-btn" title="Stop">
-          <.icon name="hero-stop" class="size-4" />
-        </button>
-      </div>
-
-      <div class="toolbar-section">
-        <button class="toolbar-btn" phx-click="create_room" title="Create Room">
+        <button
+          class="toolbar-btn toolbar-btn-primary"
+          phx-click="create_room"
+          title="Create Room (N)"
+          style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white;"
+        >
           <.icon name="hero-plus" class="size-4" />
           <span style="font-size: 0.75rem; margin-left: 4px;">Room</span>
         </button>
+      </div>
+      
+    <!-- Entity Creation: NPCs and Items (populate rooms) -->
+      <div class="toolbar-section">
         <button class="toolbar-btn" phx-click="show_npc_editor" title="Create NPC">
           <.icon name="hero-user" class="size-4" />
           <span style="font-size: 0.75rem; margin-left: 4px;">NPC</span>
@@ -74,14 +72,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.Toolbar do
           <.icon name="hero-cube-transparent" class="size-4" />
           <span style="font-size: 0.75rem; margin-left: 4px;">Item</span>
         </button>
-        <button class="toolbar-btn" phx-click="show_quest_editor" title="Create Quest">
-          <.icon name="hero-flag" class="size-4" />
-          <span style="font-size: 0.75rem; margin-left: 4px;">Quest</span>
-        </button>
-        <button class="toolbar-btn" phx-click="show_cutscene_editor" title="Create Cutscene">
-          <.icon name="hero-film" class="size-4" />
-          <span style="font-size: 0.75rem; margin-left: 4px;">Cutscene</span>
-        </button>
+      </div>
+      
+    <!-- Content Creation: Behavior and story elements -->
+      <div class="toolbar-section">
         <button class="toolbar-btn" phx-click="show_script_editor" title="Create Script">
           <.icon name="hero-code-bracket" class="size-4" />
           <span style="font-size: 0.75rem; margin-left: 4px;">Script</span>
@@ -89,6 +83,14 @@ defmodule LokaWeb.AdminLive.WorldBuilder.Toolbar do
         <button class="toolbar-btn" phx-click="show_dialogue_editor" title="Create Dialogue">
           <.icon name="hero-chat-bubble-left-right" class="size-4" />
           <span style="font-size: 0.75rem; margin-left: 4px;">Dialogue</span>
+        </button>
+        <button class="toolbar-btn" phx-click="show_quest_editor" title="Create Quest">
+          <.icon name="hero-flag" class="size-4" />
+          <span style="font-size: 0.75rem; margin-left: 4px;">Quest</span>
+        </button>
+        <button class="toolbar-btn" phx-click="show_cutscene_editor" title="Create Cutscene">
+          <.icon name="hero-film" class="size-4" />
+          <span style="font-size: 0.75rem; margin-left: 4px;">Cutscene</span>
         </button>
       </div>
 

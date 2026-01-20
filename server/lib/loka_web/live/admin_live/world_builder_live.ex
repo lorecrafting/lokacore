@@ -80,7 +80,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:selected_keys, [])
      |> assign(:templates, templates)
      |> assign(:template_search, "")
-     |> assign(:active_tab, :rooms)
+     |> assign(:active_tab, :templates)
      |> assign(:npcs, npcs)
      |> assign(:items, items)
      |> assign(:selected_entity, nil)
@@ -222,20 +222,14 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
             </div>
             <form phx-submit="submit_create_room">
               <div class="form-group">
-                <label>Room Key</label>
+                <label>Room Name</label>
                 <input
                   type="text"
-                  name="key"
+                  name="name"
                   class="input"
-                  placeholder="e.g., tavern_main"
+                  placeholder="e.g., Main Tavern"
                   required
                 />
-                <small>Unique identifier (no spaces)</small>
-              </div>
-
-              <div class="form-group">
-                <label>Room Name</label>
-                <input type="text" name="name" class="input" placeholder="e.g., Main Tavern" required />
               </div>
 
               <div class="form-group">
@@ -244,17 +238,30 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
                   name="description"
                   class="textarea"
                   rows="3"
-                  placeholder="Describe the room..."
+                  placeholder="What the player sees when entering..."
                 ></textarea>
               </div>
 
               <div class="form-group">
-                <label>Coordinates</label>
+                <label>Position</label>
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
                   <input type="number" name="x" class="input" placeholder="X" value="0" />
                   <input type="number" name="y" class="input" placeholder="Y" value="0" />
                   <input type="number" name="z" class="input" placeholder="Z" value="0" />
                 </div>
+              </div>
+
+              <div class="form-group">
+                <label>
+                  Room Key <span style="color: #666; font-weight: normal;">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  name="key"
+                  class="input"
+                  placeholder="Auto-generated from name if empty"
+                />
+                <small style="color: #666;">Unique identifier - leave blank to auto-generate</small>
               </div>
 
               <div class="modal-footer">
@@ -278,18 +285,6 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
             </div>
             <form phx-submit="create_npc">
               <div class="form-group">
-                <label>NPC Key</label>
-                <input
-                  type="text"
-                  name="key"
-                  class="input"
-                  placeholder="e.g., guard_captain"
-                  required
-                />
-                <small>Unique identifier (no spaces)</small>
-              </div>
-
-              <div class="form-group">
                 <label>NPC Name</label>
                 <input
                   type="text"
@@ -306,13 +301,26 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
                   name="description"
                   class="textarea"
                   rows="3"
-                  placeholder="Describe the NPC..."
+                  placeholder="What the player sees when looking..."
                 ></textarea>
               </div>
 
               <div class="form-group">
                 <label>Level</label>
                 <input type="number" name="level" class="input" value="1" min="1" />
+              </div>
+
+              <div class="form-group">
+                <label>
+                  NPC Key <span style="color: #666; font-weight: normal;">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  name="key"
+                  class="input"
+                  placeholder="Auto-generated from name if empty"
+                />
+                <small style="color: #666;">Unique identifier - leave blank to auto-generate</small>
               </div>
 
               <div class="modal-footer">
@@ -336,30 +344,14 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
             </div>
             <form phx-submit="create_item">
               <div class="form-group">
-                <label>Item Key</label>
+                <label>Item Name</label>
                 <input
                   type="text"
-                  name="key"
+                  name="name"
                   class="input"
-                  placeholder="e.g., iron_sword"
+                  placeholder="e.g., Iron Sword"
                   required
                 />
-                <small>Unique identifier (no spaces)</small>
-              </div>
-
-              <div class="form-group">
-                <label>Item Name</label>
-                <input type="text" name="name" class="input" placeholder="e.g., Iron Sword" required />
-              </div>
-
-              <div class="form-group">
-                <label>Description</label>
-                <textarea
-                  name="description"
-                  class="textarea"
-                  rows="3"
-                  placeholder="Describe the item..."
-                ></textarea>
               </div>
 
               <div class="form-group">
@@ -371,6 +363,29 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
                   <option value="consumable">Consumable</option>
                   <option value="quest_item">Quest Item</option>
                 </select>
+              </div>
+
+              <div class="form-group">
+                <label>Description</label>
+                <textarea
+                  name="description"
+                  class="textarea"
+                  rows="3"
+                  placeholder="What the player sees when examining..."
+                ></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>
+                  Item Key <span style="color: #666; font-weight: normal;">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  name="key"
+                  class="input"
+                  placeholder="Auto-generated from name if empty"
+                />
+                <small style="color: #666;">Unique identifier - leave blank to auto-generate</small>
               </div>
 
               <div class="modal-footer">
@@ -728,11 +743,21 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   end
 
   def handle_event("submit_create_room", params, socket) do
+    # Auto-generate key from name if not provided
+    key =
+      case params["key"] do
+        nil -> slugify(params["name"])
+        "" -> slugify(params["name"])
+        k -> k
+      end
+
+    params_with_key = Map.put(params, "key", key)
+
     # Validate user input before processing
-    case InputValidator.validate_room_attrs(params) do
+    case InputValidator.validate_room_attrs(params_with_key) do
       {:ok, _} ->
         attrs = %{
-          key: params["key"],
+          key: key,
           name: params["name"],
           description: params["description"] || "",
           x: parse_integer(params["x"], 0),
@@ -1037,12 +1062,20 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
   # NPC & Item Management (using EntityManager)
   def handle_event("create_npc", params, socket) do
-    # Validate key and name
-    with {:ok, _} <- InputValidator.validate_key(params["key"] || ""),
+    # Auto-generate key from name if not provided
+    key =
+      case params["key"] do
+        nil -> slugify(params["name"])
+        "" -> slugify(params["name"])
+        k -> k
+      end
+
+    # Validate name and description (key is now auto-generated if empty)
+    with {:ok, _} <- InputValidator.validate_key(key),
          {:ok, _} <- InputValidator.validate_name(params["name"] || ""),
          {:ok, _} <- InputValidator.validate_description(params["description"]) do
       attrs = %{
-        key: params["key"],
+        key: key,
         name: params["name"],
         description: params["description"] || "",
         level: parse_integer(params["level"], 1)
@@ -1067,12 +1100,20 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   end
 
   def handle_event("create_item", params, socket) do
-    # Validate key and name
-    with {:ok, _} <- InputValidator.validate_key(params["key"] || ""),
+    # Auto-generate key from name if not provided
+    key =
+      case params["key"] do
+        nil -> slugify(params["name"])
+        "" -> slugify(params["name"])
+        k -> k
+      end
+
+    # Validate name and description (key is now auto-generated if empty)
+    with {:ok, _} <- InputValidator.validate_key(key),
          {:ok, _} <- InputValidator.validate_name(params["name"] || ""),
          {:ok, _} <- InputValidator.validate_description(params["description"]) do
       attrs = %{
-        key: params["key"],
+        key: key,
         name: params["name"],
         description: params["description"] || "",
         item_type: params["item_type"] || "misc"
@@ -2363,6 +2404,22 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     case Integer.parse(value || "#{default}") do
       {int, _} -> int
       :error -> default
+    end
+  end
+
+  # Generate a URL-safe key from a name
+  defp slugify(nil), do: "room_#{:erlang.unique_integer([:positive])}"
+  defp slugify(""), do: "room_#{:erlang.unique_integer([:positive])}"
+
+  defp slugify(name) do
+    name
+    |> String.downcase()
+    |> String.replace(~r/[^a-z0-9_]/, "_")
+    |> String.replace(~r/_+/, "_")
+    |> String.trim("_")
+    |> case do
+      "" -> "room_#{:erlang.unique_integer([:positive])}"
+      slug -> slug
     end
   end
 
