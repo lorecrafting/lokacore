@@ -3,13 +3,17 @@ defmodule Loka.WorldBuilder.RoomManager do
   Room CRUD operations for the World Builder.
 
   Manages room creation, editing, and deletion using TypedObject as the underlying data structure.
-  All operations validate data and persist to the database via EntityServer.
+  All operations persist to YAML files in priv/world/prototypes/rooms/ following the YAML-only
+  architecture documented in docs/proposals/builder-content-layer.md.
   """
 
   require Logger
 
   alias Loka.Engine.{TypedObject, Spawner, EntityServer, Entity, Entities}
   alias Loka.Engine.TypedObject.Registry
+  alias Loka.Engine.TypedObject.Loader
+
+  @rooms_dir Path.join([:code.priv_dir(:loka), "world", "prototypes", "rooms"])
 
   @doc """
   Lists all rooms in the world.
@@ -73,29 +77,48 @@ defmodule Loka.WorldBuilder.RoomManager do
   def create_room(attrs) when is_map(attrs) do
     attrs = ensure_atom_keys(attrs)
 
-    # Build exits component if provided
+    key = Map.get(attrs, :key)
+    name = Map.get(attrs, :name, Map.get(attrs, :key, "New Room"))
+    description = Map.get(attrs, :description, "A room in the world")
     exits = Map.get(attrs, :exits, %{})
-    # Convert atom keys to string keys for exits
-    exits = for {k, v} <- exits, into: %{}, do: {to_string(k), v}
+    tags = Map.get(attrs, :tags, [])
 
-    components = if map_size(exits) > 0, do: %{"exits" => exits}, else: %{}
+    # Build room data for YAML
+    room_data = %{
+      key: key,
+      name: name,
+      description: description,
+      exits: exits,
+      tags: tags
+    }
 
-    # Build keyword list for Spawner.create_room
-    create_attrs = [
-      key: Map.get(attrs, :key),
-      name: Map.get(attrs, :name, Map.get(attrs, :key, "New Room")),
-      description: Map.get(attrs, :description, "A room in the world"),
-      x: Map.get(attrs, :x, 0),
-      y: Map.get(attrs, :y, 0),
-      z: Map.get(attrs, :z, 0),
-      tags: Map.get(attrs, :tags, []),
-      components: components
-    ]
+    # Save to YAML file
+    case save_room_yaml(room_data) do
+      :ok ->
+        # Reload to get the room into the registry
+        case Registry.get(key) do
+          {:ok, room} ->
+            Logger.info("[RoomManager] Created room: #{key}")
+            {:ok, enrich_room_for_frontend(room)}
 
-    case Spawner.create_room(create_attrs) do
-      {:ok, room_entity} ->
-        Logger.info("[RoomManager] Created room: #{room_entity.key} (#{room_entity.id})")
-        {:ok, enrich_room_for_frontend_from_entity(room_entity)}
+          {:error, _} ->
+            # Room created but not yet in registry - build a response
+            Logger.info("[RoomManager] Created room: #{key} (pending reload)")
+
+            {:ok,
+             %{
+               id: key,
+               key: key,
+               name: name,
+               description: description,
+               x: 0,
+               y: 0,
+               z: 0,
+               tags: tags,
+               exits: exits,
+               spawns: %{npcs: [], items: []}
+             }}
+        end
 
       {:error, reason} ->
         Logger.error("[RoomManager] Failed to create room: #{inspect(reason)}")
@@ -114,13 +137,27 @@ defmodule Loka.WorldBuilder.RoomManager do
   """
   def update_room(room_id, attrs) when is_binary(room_id) and is_map(attrs) do
     case get_room_entity(room_id) do
-      {:ok, {:registry, _entity}} ->
-        # Room is in Registry (YAML prototype) - use EntityServer
-        updates = prepare_updates(attrs)
+      {:ok, {:registry, entity}} ->
+        # Room is in Registry (YAML prototype) - update YAML file
+        attrs = ensure_atom_keys(attrs)
 
-        case EntityServer.update(room_id, updates) do
-          {:ok, _} ->
-            Logger.info("[RoomManager] Updated room (registry): #{room_id}")
+        # Build updated room data from existing + new attrs
+        existing_exits = get_room_exits(entity)
+        existing_tags = entity.tags || []
+
+        room_data = %{
+          key: entity.key,
+          name: Map.get(attrs, :name, entity.name || entity.key),
+          description: Map.get(attrs, :description, entity.description || ""),
+          exits: Map.get(attrs, :exits, existing_exits),
+          tags: Map.get(attrs, :tags, existing_tags),
+          spawns: get_spawns_list(entity),
+          components: get_components(entity)
+        }
+
+        case save_room_yaml(room_data) do
+          :ok ->
+            Logger.info("[RoomManager] Updated room (YAML): #{room_id}")
             get_room(room_id)
 
           {:error, reason} ->
@@ -506,4 +543,208 @@ defmodule Loka.WorldBuilder.RoomManager do
 
     updates
   end
+
+  # =============================================================================
+  # YAML Persistence
+  # =============================================================================
+
+  defp save_room_yaml(room_data) do
+    with :ok <- validate_safe_key(room_data.key) do
+      ensure_rooms_dir()
+
+      file_path = Path.join(@rooms_dir, "#{room_data.key}.yml")
+      yaml_content = build_room_yaml(room_data)
+
+      case File.write(file_path, yaml_content) do
+        :ok ->
+          # Reload to update registry
+          Loader.reload()
+          :ok
+
+        {:error, reason} ->
+          {:error, reason}
+      end
+    else
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  defp build_room_yaml(room_data) do
+    key = room_data.key
+    name = room_data.name || key
+    description = room_data.description || ""
+    exits = room_data[:exits] || %{}
+    tags = room_data[:tags] || []
+    spawns = room_data[:spawns] || []
+    components = room_data[:components] || %{}
+
+    # Build YAML content
+    yaml = """
+    key: #{key}
+    parent: base_room
+    type: room
+    short_desc: "#{escape_yaml_string(name)}"
+    long_desc: "#{escape_yaml_string(description)}"
+    extra_desc: |
+      #{indent_multiline(description, 2)}
+    keywords: []
+    """
+
+    # Add exits if any
+    yaml =
+      if map_size(exits) > 0 do
+        exits_yaml =
+          exits
+          |> Enum.map(fn {dir, dest} -> "  #{dir}: #{dest}" end)
+          |> Enum.join("\n")
+
+        yaml <> "exits:\n" <> exits_yaml <> "\n"
+      else
+        yaml <> "exits: {}\n"
+      end
+
+    # Add spawns if any
+    yaml =
+      if length(spawns) > 0 do
+        spawns_yaml =
+          spawns
+          |> Enum.map(fn spawn ->
+            prototype = spawn["prototype"] || spawn[:prototype] || spawn
+            "  - prototype: #{prototype}"
+          end)
+          |> Enum.join("\n")
+
+        yaml <> "spawns:\n" <> spawns_yaml <> "\n"
+      else
+        yaml
+      end
+
+    # Add tags
+    yaml =
+      if length(tags) > 0 do
+        tags_yaml = tags |> Enum.map(&"  - #{&1}") |> Enum.join("\n")
+        yaml <> "tags:\n" <> tags_yaml <> "\n"
+      else
+        yaml <> "tags: []\n"
+      end
+
+    # Add components if any (preserve ambient_messages, etc.)
+    yaml =
+      if map_size(components) > 0 do
+        yaml <> "components:\n" <> build_components_yaml(components, 2)
+      else
+        yaml
+      end
+
+    yaml
+  end
+
+  defp build_components_yaml(components, indent) when is_map(components) do
+    prefix = String.duplicate(" ", indent)
+
+    components
+    |> Enum.map(fn {key, value} ->
+      "#{prefix}#{key}:\n#{build_yaml_value(value, indent + 2)}"
+    end)
+    |> Enum.join("")
+  end
+
+  defp build_yaml_value(value, indent) when is_map(value) do
+    prefix = String.duplicate(" ", indent)
+
+    value
+    |> Enum.map(fn {k, v} ->
+      if is_list(v) do
+        "#{prefix}#{k}:\n#{build_yaml_list(v, indent + 2)}"
+      else
+        "#{prefix}#{k}: #{format_inline_value(v)}\n"
+      end
+    end)
+    |> Enum.join("")
+  end
+
+  defp build_yaml_value(value, indent) when is_list(value) do
+    build_yaml_list(value, indent)
+  end
+
+  defp build_yaml_value(value, indent) do
+    prefix = String.duplicate(" ", indent)
+    "#{prefix}#{format_inline_value(value)}\n"
+  end
+
+  defp build_yaml_list(items, indent) when is_list(items) do
+    prefix = String.duplicate(" ", indent)
+
+    items
+    |> Enum.map(fn item ->
+      if is_binary(item) do
+        "#{prefix}- \"#{escape_yaml_string(item)}\"\n"
+      else
+        "#{prefix}- #{format_inline_value(item)}\n"
+      end
+    end)
+    |> Enum.join("")
+  end
+
+  defp format_inline_value(value) when is_binary(value), do: "\"#{escape_yaml_string(value)}\""
+  defp format_inline_value(value) when is_integer(value), do: Integer.to_string(value)
+  defp format_inline_value(value) when is_float(value), do: Float.to_string(value)
+  defp format_inline_value(value) when is_boolean(value), do: Atom.to_string(value)
+  defp format_inline_value(value) when is_nil(value), do: "null"
+  defp format_inline_value(value) when is_atom(value), do: Atom.to_string(value)
+  defp format_inline_value(value), do: inspect(value)
+
+  defp escape_yaml_string(str) when is_binary(str) do
+    str
+    |> String.replace("\\", "\\\\")
+    |> String.replace("\"", "\\\"")
+    |> String.replace("\n", "\\n")
+  end
+
+  defp escape_yaml_string(_), do: ""
+
+  defp indent_multiline(text, spaces) when is_binary(text) do
+    prefix = String.duplicate(" ", spaces)
+
+    text
+    |> String.split("\n")
+    |> Enum.map(&"#{prefix}#{&1}")
+    |> Enum.join("\n")
+    |> String.trim_trailing()
+  end
+
+  defp indent_multiline(_, _), do: ""
+
+  defp validate_safe_key(key) when is_binary(key) do
+    # Prevent path traversal attacks
+    if String.contains?(key, [".", "/", "\\"]) do
+      {:error, "Invalid key: contains illegal characters"}
+    else
+      :ok
+    end
+  end
+
+  defp validate_safe_key(_), do: {:error, "Invalid key: must be a string"}
+
+  defp ensure_rooms_dir do
+    unless File.exists?(@rooms_dir) do
+      File.mkdir_p!(@rooms_dir)
+    end
+  end
+
+  # Extract spawns list from TypedObject
+  defp get_spawns_list(room) when is_struct(room, TypedObject) do
+    Map.get(room.data, "spawns", []) ++ Map.get(room.data, :spawns, [])
+  end
+
+  # Extract components from TypedObject (preserving ambient_messages, etc.)
+  defp get_components(room) when is_struct(room, TypedObject) do
+    # Get from data.components or direct components
+    data_components = Map.get(room.data, "components", %{}) |> ensure_map()
+    atom_components = Map.get(room.data, :components, %{}) |> ensure_map()
+    Map.merge(data_components, atom_components)
+  end
+
+  defp ensure_map(val) when is_map(val), do: val
+  defp ensure_map(_), do: %{}
 end
