@@ -1,36 +1,43 @@
-# check-balance
+# Check Game Balance
 
-Quick balance verification after content or combat system changes.
+Run balance verification after content or combat system changes.
 
-## Purpose
+## Usage
 
-Run balance checks to ensure NPCs, rewards, and progression are properly tuned.
+```
+/check-game-balance [--quick] [--combat-only] [--progression-only]
+```
 
 ## Instructions
 
-Execute balance analysis after changes to:
-- NPC stats (health, damage, armor)
-- Combat mechanics
-- Quest rewards
-- Item stats
-- Progression curves
+### Step 1: Determine Scope
 
-### 1. Determine Scope
-
-**If content changed** (NPCs, quests, items):
+**Quick check** (100 iterations):
 ```bash
 cd server && mix loka.test.balance --quick
 ```
 
-**If combat system changed**:
+**Full check** (1000 iterations - default):
 ```bash
-cd server && mix loka.test.balance --thorough
+cd server && mix loka.test.balance
 ```
 
-**If only checking specific content**:
-Use the Balance Analyzer API directly with specific world/quest specs.
+**Extended check** (custom iterations):
+```bash
+cd server && mix loka.test.balance --iterations 5000
+```
 
-### 2. Review Balance Report
+**Combat only**:
+```bash
+cd server && mix loka.test.balance --combat-only
+```
+
+**Progression only**:
+```bash
+cd server && mix loka.test.balance --progression-only
+```
+
+### Step 2: Review Balance Report
 
 Parse the output for:
 
@@ -49,23 +56,14 @@ Parse the output for:
 - **High**: Difficulty spikes between quests
 - **Medium**: Uneven progression curve
 
-### 3. Flag Critical Issues Only
-
-Focus on issues that:
-- Break game balance (too easy/hard to progress)
-- Create dead ends (impossible encounters)
-- Make content unrewarding (effort >> reward)
-
-Ignore minor issues (<5% off target) unless systematic.
-
-### 4. Simulation Results
+### Step 3: Simulation Results
 
 Review combat simulations:
 - **Win rate target**: 70% (range: 60-80%)
 - **Turns target**: 4 (range: 2-6)
 - **Sample size**: 100 (quick) or 1000 (thorough)
 
-### 5. Quick Fix Suggestions
+### Step 4: Suggest Fixes
 
 For critical issues, suggest:
 - NPC stat adjustments (±10-20% health/damage)
@@ -79,32 +77,27 @@ For critical issues, suggest:
 
 ## Overall Score: X/10
 
-## ⚠️ Critical Issues (Requires Immediate Fix)
+## Critical Issues (Requires Immediate Fix)
 
 ### 1. [NPC/Quest Name]
 **Issue**: Win rate 45% (target: 70%)
 **Location**: priv/world/prototypes/npcs/[file]
 **Suggested Fix**: Reduce NPC health by 20% (50 → 40)
 
-## 🔧 High Priority (Should Fix Soon)
+## High Priority
+[List issues]
 
-### 1. [Issue]
-...
-
-## 📊 Simulation Stats
+## Simulation Stats
 - Total simulations: N
 - NPCs analyzed: X
 - Quests analyzed: Y
 - Average balance score: Z/10
 
-## ✅ Well-Balanced Content
-- [List NPCs/quests with good balance scores]
+## Well-Balanced Content
+[List NPCs/quests with good balance scores]
 
 ## Summary
 Status: ✅ BALANCED | ⚠️ NEEDS TUNING | ❌ CRITICAL ISSUES
-
-Next Steps:
-1. [Specific action items]
 ```
 
 ## Success Criteria

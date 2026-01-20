@@ -1,10 +1,12 @@
-# simplify-code
+# Simplify Code
 
 Refactor and clean up code after implementation is complete.
 
-## Purpose
+## Usage
 
-Identify opportunities to simplify, clarify, and improve code quality without changing functionality.
+```
+/simplify-code [path/to/file_or_directory]
+```
 
 ## Instructions
 
@@ -22,11 +24,7 @@ Search for duplicated code:
 
 ### 2. Long Functions (>50 lines)
 
-Find functions exceeding 50 lines:
-```bash
-# Use Grep or Read to identify long functions
-# Look in lib/loka/, lib/loka_web/
-```
+Find functions exceeding 50 lines.
 
 **Action**: Suggest breaking into smaller, focused functions with clear names
 
@@ -69,7 +67,7 @@ Find unclear variable/function names:
 - Single letter variables (except i, x, y in obvious contexts)
 - Abbreviations without context
 - Generic names (data, result, temp, tmp)
-- Misleading names (doesn't match what it does)
+- Misleading names
 
 **Action**: Suggest descriptive renames
 
@@ -84,13 +82,6 @@ Find comments that could be self-documenting code:
 - Remove obvious comments, improve names instead
 - Convert TODOs to beads
 - Update or remove outdated comments
-
-## Focus Areas
-
-Prioritize by impact:
-1. **High Impact**: Security issues, bugs, performance problems
-2. **Medium Impact**: Code duplication, unclear logic, poor naming
-3. **Low Impact**: Style inconsistencies, minor optimizations
 
 ## Elixir Idioms to Prefer
 
@@ -136,7 +127,8 @@ Prioritize by impact:
 ## Summary
 - Total suggestions: X
 - High priority: Y
-- Estimated time to implement: Z hours
+- Medium priority: Z
+- Low priority: W
 ```
 
 ## Exclusions

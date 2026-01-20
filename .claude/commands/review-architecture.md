@@ -1,14 +1,16 @@
-# review-architecture
+# Review Architecture
 
 Check layer separation and MUD architectural patterns.
 
-## Purpose
+## Usage
 
-Review code changes for architectural violations, ensuring clean separation of concerns and adherence to Loka's design patterns.
+```
+/review-architecture [path/to/check]
+```
 
 ## Instructions
 
-Analyze the codebase for architectural issues in these areas:
+Analyze the codebase for architectural violations in these areas:
 
 ### 1. Layer Separation
 
@@ -99,14 +101,6 @@ end
 - Extend via behaviors/hooks, not by modifying core
 - New features should add modules, not modify existing
 
-#### Liskov Substitution
-- Behaviors are swappable
-- Protocol implementations are complete
-
-#### Interface Segregation
-- Small, focused behaviors
-- Don't require implementers to stub unused callbacks
-
 #### Dependency Inversion
 - Depend on behaviors/protocols, not concrete modules
 - Use dependency injection for testability
@@ -115,9 +109,6 @@ end
 ```bash
 # Find large modules
 find lib/loka -name "*.ex" -exec wc -l {} \; | sort -rn | head -20
-
-# Find modules with multiple concerns (look for "and" in module docs)
-grep -r "@moduledoc" lib/loka/ | grep -i "and"
 ```
 
 ### 6. Error Handling
@@ -142,16 +133,12 @@ grep -r "Repo.get!\|Repo.fetch!\|Enum.fetch!\|Map.fetch!" lib/loka_web/
 - Hibernate after idle timeout
 - Clean shutdown with terminate/2
 
-**Check**:
-- No GenServer modules outside lib/loka/engine/entity_server.ex (except infrastructure)
-- All entities use EntityServer, not custom GenServers
-
 ## Output Format
 
 ```markdown
 # Architecture Review Report
 
-## 🚨 Critical Violations (Fix Immediately)
+## Critical Violations (Fix Immediately)
 
 ### 1. Layer Separation Violation
 **File**: lib/loka/engine/spawner.ex
@@ -160,32 +147,25 @@ grep -r "Repo.get!\|Repo.fetch!\|Enum.fetch!\|Map.fetch!" lib/loka_web/
 **Impact**: Creates circular dependency, breaks architecture
 **Fix**: Move combat logic to Framework, Engine only handles entity creation
 
-## ⚠️ High Priority
+## High Priority
+[List violations]
 
-### 1. [Violation]
-...
+## Medium Priority
+[List issues]
 
-## 📋 Medium Priority
-
-### 1. [Issue]
-...
-
-## ✅ Architecture Strengths
-
+## Architecture Strengths
 - Clean layer separation in X modules
 - Proper use of Entity-Component pattern
 - Event-driven communication
 
-## 📊 Metrics
-
+## Metrics
 - Modules analyzed: X
 - Large modules (>500 lines): Y
 - Layer violations: Z
 - SOLID violations: W
 
 ## Summary
-
-Status: ✅ CLEAN | ⚠️ NEEDS REFACTORING | 🚨 CRITICAL ISSUES
+Status: ✅ CLEAN | ⚠️ NEEDS REFACTORING | ❌ CRITICAL ISSUES
 
 Priority Actions:
 1. [Specific fix]
@@ -206,10 +186,3 @@ Priority Actions:
 - After adding new subsystems
 - After major refactoring
 - When in doubt about design decisions
-
-## Notes
-
-- Some warnings are acceptable (document why)
-- Balance pragmatism with purity (don't over-engineer)
-- Focus on critical path first (engine/framework core)
-- Web layer can be more pragmatic

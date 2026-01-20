@@ -1,6 +1,6 @@
 {
   "enabledPlugins": {
-    "beads@beads-marketplace": true
+    "beads@beads-marketplace": false
   },
   "statusLine": {
     "type": "command",
@@ -42,6 +42,16 @@
           {
             "type": "command",
             "command": "cd /Users/raymondluong/dev/lokacore/server && echo '--- Loka Session ---' && git branch --show-current && git status --short | head -8"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/raymondluong/dev/lokacore/.claude/hooks/skill-extractor-activator.sh"
           }
         ]
       }
