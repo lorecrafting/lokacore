@@ -21,11 +21,25 @@ data:
     sleep_room:
       type: string
       description: "Room key to move to when sleeping (optional)"
+    stagger_max:
+      type: integer
+      default: 90
+      min: 0
+      max: 300
+      description: "Maximum seconds to randomly delay emotes (prevents all NPCs emoting at once)"
+    emote_chance:
+      type: float
+      default: 0.85
+      min: 0.0
+      max: 1.0
+      description: "Probability (0.0-1.0) of emoting on wake/sleep events"
   source: |
-    # Day/Night Schedule - respond to time events
+    # Day/Night Schedule - respond to time events with staggered emotes
     event = context.event
     wake_event = config.wake_at || :dawn
     sleep_event = config.sleep_at || :dusk
+    stagger_max = config.stagger_max || 90
+    emote_chance = config.emote_chance || 0.85
 
     # Convert config to atoms for comparison if needed
     wake_event = if is_binary(wake_event), do: String.to_atom(wake_event), else: wake_event
@@ -34,13 +48,19 @@ data:
     cond do
       # Wake up event
       event == wake_event ->
-        emit(:waking_up)
+        # Schedule staggered emote (random delay prevents spam when multiple NPCs wake)
+        stagger_delay = if stagger_max > 0, do: :rand.uniform(stagger_max), else: 0
+        set_behavior_state(:pending_emote, :waking_up)
+        set_behavior_state(:pending_emote_chance, emote_chance)
+        after(stagger_delay, "day_night_staggered_emote")
 
-        # Move to wake room if configured
+        # Move to wake room if configured (immediate, not staggered)
         wake_room = config.wake_room
         if wake_room do
           teleport(entity.id, wake_room)
-          emit(:arrived_at_work)
+          # Schedule arrival emote with additional stagger
+          set_behavior_state(:pending_emote, :arrived_at_work)
+          after(stagger_delay + 5, "day_night_staggered_emote")
         end
 
         set_behavior_state(:awake, true)
@@ -48,13 +68,18 @@ data:
 
       # Sleep event
       event == sleep_event ->
-        emit(:going_to_sleep)
+        # Schedule staggered emote
+        stagger_delay = if stagger_max > 0, do: :rand.uniform(stagger_max), else: 0
+        set_behavior_state(:pending_emote, :going_to_sleep)
+        set_behavior_state(:pending_emote_chance, emote_chance)
+        after(stagger_delay, "day_night_staggered_emote")
 
         # Move to sleep room if configured
         sleep_room = config.sleep_room
         if sleep_room do
           teleport(entity.id, sleep_room)
-          emit(:arrived_home)
+          set_behavior_state(:pending_emote, :arrived_home)
+          after(stagger_delay + 5, "day_night_staggered_emote")
         end
 
         set_behavior_state(:awake, false)
