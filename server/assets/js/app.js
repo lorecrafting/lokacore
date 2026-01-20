@@ -1408,6 +1408,10 @@ const ConnectionStatus = {
   mounted() {
     this.lastStatus = 'connected'
     this.wasDisconnected = false
+    this.overlay = null
+
+    // Create the overlay element
+    this.createOverlay()
 
     // Listen for LiveSocket connection events
     window.addEventListener('phx:disconnect', () => this.handleDisconnect())
@@ -1425,6 +1429,45 @@ const ConnectionStatus = {
     if (this.checkInterval) {
       clearInterval(this.checkInterval)
     }
+    if (this.overlay && this.overlay.parentNode) {
+      this.overlay.parentNode.removeChild(this.overlay)
+    }
+  },
+
+  createOverlay() {
+    // Create overlay if it doesn't exist
+    if (document.getElementById('connection-overlay')) {
+      this.overlay = document.getElementById('connection-overlay')
+      return
+    }
+
+    this.overlay = document.createElement('div')
+    this.overlay.id = 'connection-overlay'
+    this.overlay.className = 'connection-overlay'
+    this.overlay.setAttribute('role', 'alert')
+    this.overlay.setAttribute('aria-live', 'assertive')
+    this.overlay.innerHTML = `
+      <div class="connection-overlay-content">
+        <div class="connection-overlay-spinner"></div>
+        <div class="connection-overlay-title">Reconnecting</div>
+        <div class="connection-overlay-message">
+          Please wait<span class="connection-overlay-dots"></span>
+        </div>
+      </div>
+    `
+    document.body.appendChild(this.overlay)
+  },
+
+  showOverlay() {
+    if (this.overlay) {
+      this.overlay.classList.add('visible')
+    }
+  },
+
+  hideOverlay() {
+    if (this.overlay) {
+      this.overlay.classList.remove('visible')
+    }
   },
 
   handleDisconnect() {
@@ -1432,6 +1475,7 @@ const ConnectionStatus = {
 
     this.lastStatus = 'disconnected'
     this.wasDisconnected = true
+    this.showOverlay()
     this.addEventLogMessage('[Connection lost... reconnecting]')
     this.announceToScreenReader('Connection lost. Attempting to reconnect.')
   },
@@ -1440,6 +1484,7 @@ const ConnectionStatus = {
     if (this.lastStatus === 'connected') return
 
     this.lastStatus = 'connected'
+    this.hideOverlay()
 
     // Only show reconnected message if we were actually disconnected
     if (this.wasDisconnected) {
