@@ -41,6 +41,8 @@ defmodule Loka.Engine.TypedObject do
   @type entity_subtype :: :npc | :room | :item | :exit | :character
   @type content_type :: :quest | :dialogue | :script | :zone
 
+  @type behavior_config :: %{script: String.t(), config: map()}
+
   @type t :: %__MODULE__{
           id: String.t() | nil,
           key: String.t(),
@@ -62,7 +64,7 @@ defmodule Loka.Engine.TypedObject do
           location_id: String.t() | nil,
           contents: [String.t()],
           components: map(),
-          behaviors: [module()],
+          behaviors: [behavior_config()],
           scripts: map()
         }
 
@@ -308,7 +310,7 @@ defmodule Loka.Engine.TypedObject do
       location_id: child.location_id,
       contents: child.contents,
       components: MapHelpers.deep_merge(parent.components, child.components),
-      behaviors: merge_lists(child.behaviors, parent.behaviors),
+      behaviors: merge_behaviors(child.behaviors, parent.behaviors),
       scripts: MapHelpers.deep_merge(parent.scripts, child.scripts)
     }
   end
@@ -413,26 +415,108 @@ defmodule Loka.Engine.TypedObject do
 
   defp normalize_keywords(_), do: []
 
+  # Normalize behaviors from YAML format to standardized config format
+  # New format: [%{script: "patrol", config: %{route: [...]}}, ...]
+  # Legacy format: module names (atoms or strings) - converted to new format
   defp normalize_behaviors(behaviors) when is_list(behaviors) do
     Enum.map(behaviors, fn
+      # New format: map with script key
+      %{"script" => script} = b ->
+        %{
+          script: to_string(script),
+          config: normalize_behavior_config(Map.get(b, "config", %{}))
+        }
+
+      %{script: script} = b ->
+        %{
+          script: to_string(script),
+          config: normalize_behavior_config(Map.get(b, :config, %{}))
+        }
+
+      # Legacy format: module name as string
       b when is_binary(b) ->
-        module_string = if String.starts_with?(b, "Elixir."), do: b, else: "Elixir.#{b}"
+        # Convert module name to script key format
+        script_key =
+          b
+          |> String.replace(~r/^(Elixir\.)?Loka\.Behaviors\./, "")
+          |> Macro.underscore()
 
-        try do
-          String.to_existing_atom(module_string)
-        rescue
-          ArgumentError -> b
-        end
+        %{script: script_key, config: %{}}
 
-      b when is_atom(b) ->
-        b
+      # Legacy format: module name as atom (but not nil/true/false)
+      b when is_atom(b) and not is_nil(b) and b not in [true, false] ->
+        script_key =
+          b
+          |> to_string()
+          |> String.replace(~r/^(Elixir\.)?Loka\.Behaviors\./, "")
+          |> Macro.underscore()
+
+        %{script: script_key, config: %{}}
+
+      # Unknown format - skip
+      _ ->
+        nil
     end)
+    |> Enum.reject(&is_nil/1)
   end
 
   defp normalize_behaviors(_), do: []
 
+  # Normalize behavior config keys to atoms (shallow, for top-level config keys)
+  defp normalize_behavior_config(config) when is_map(config) do
+    Map.new(config, fn
+      {k, v} when is_binary(k) ->
+        # Try to convert to existing atom, otherwise keep as string
+        atom_key =
+          try do
+            String.to_existing_atom(k)
+          rescue
+            ArgumentError -> k
+          end
+
+        {atom_key, v}
+
+      {k, v} ->
+        {k, v}
+    end)
+  end
+
+  defp normalize_behavior_config(_), do: %{}
+
   defp merge_lists(child, parent) do
     (child ++ parent) |> Enum.uniq()
+  end
+
+  # Merge behaviors by script key - child config overrides parent
+  defp merge_behaviors(child, parent) do
+    # Build map of parent behaviors by script key
+    parent_map =
+      parent
+      |> Enum.filter(&is_map/1)
+      |> Enum.into(%{}, fn b -> {Map.get(b, :script), b} end)
+
+    # Overlay child behaviors, deep merging config
+    child
+    |> Enum.filter(&is_map/1)
+    |> Enum.reduce(parent_map, fn behavior, acc ->
+      script_key = Map.get(behavior, :script)
+
+      case Map.get(acc, script_key) do
+        nil ->
+          Map.put(acc, script_key, behavior)
+
+        parent_behavior ->
+          # Deep merge config: parent first, child overrides
+          merged_config =
+            Loka.Utils.MapHelpers.deep_merge(
+              Map.get(parent_behavior, :config, %{}),
+              Map.get(behavior, :config, %{})
+            )
+
+          Map.put(acc, script_key, %{script: script_key, config: merged_config})
+      end
+    end)
+    |> Map.values()
   end
 
   # Validation helpers

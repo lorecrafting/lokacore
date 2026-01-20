@@ -297,4 +297,215 @@ defmodule Loka.Engine.TypedObjectTest do
       assert :character in subtypes
     end
   end
+
+  describe "behaviors parsing" do
+    test "parses new behavior format with script and config" do
+      {:ok, to} =
+        TypedObject.new(
+          key: "patrol_npc",
+          type: :entity,
+          subtype: :npc,
+          behaviors: [
+            %{"script" => "patrol", "config" => %{"route" => ["gate", "market", "temple"]}}
+          ]
+        )
+
+      assert length(to.behaviors) == 1
+      [behavior] = to.behaviors
+      assert behavior.script == "patrol"
+      # Config keys that match existing atoms get normalized to atoms
+      assert behavior.config.route == ["gate", "market", "temple"]
+    end
+
+    test "parses behavior format with atom keys" do
+      {:ok, to} =
+        TypedObject.new(
+          key: "schedule_npc",
+          type: :entity,
+          subtype: :npc,
+          behaviors: [
+            %{script: "day_night_schedule", config: %{wake_at: :dawn, sleep_at: :dusk}}
+          ]
+        )
+
+      assert length(to.behaviors) == 1
+      [behavior] = to.behaviors
+      assert behavior.script == "day_night_schedule"
+      assert behavior.config == %{wake_at: :dawn, sleep_at: :dusk}
+    end
+
+    test "parses multiple behaviors" do
+      {:ok, to} =
+        TypedObject.new(
+          key: "complex_npc",
+          type: :entity,
+          subtype: :npc,
+          behaviors: [
+            %{"script" => "patrol", "config" => %{"interval" => 300}},
+            %{"script" => "day_night_schedule", "config" => %{"wake_at" => "dawn"}}
+          ]
+        )
+
+      assert length(to.behaviors) == 2
+      scripts = Enum.map(to.behaviors, & &1.script)
+      assert "patrol" in scripts
+      assert "day_night_schedule" in scripts
+    end
+
+    test "handles behavior without config" do
+      {:ok, to} =
+        TypedObject.new(
+          key: "simple_behavior",
+          type: :entity,
+          subtype: :npc,
+          behaviors: [
+            %{"script" => "wander"}
+          ]
+        )
+
+      assert length(to.behaviors) == 1
+      [behavior] = to.behaviors
+      assert behavior.script == "wander"
+      assert behavior.config == %{}
+    end
+
+    test "handles empty behaviors list" do
+      {:ok, to} =
+        TypedObject.new(
+          key: "no_behaviors",
+          type: :entity,
+          subtype: :npc,
+          behaviors: []
+        )
+
+      assert to.behaviors == []
+    end
+
+    test "filters out invalid behavior entries" do
+      {:ok, to} =
+        TypedObject.new(
+          key: "mixed_behaviors",
+          type: :entity,
+          subtype: :npc,
+          behaviors: [
+            %{"script" => "patrol"},
+            123,
+            nil,
+            %{no_script_key: "invalid"}
+          ]
+        )
+
+      # Only the valid map entry with script key should remain
+      # Integers, nil, and maps without script key are filtered out
+      assert length(to.behaviors) == 1
+      [behavior] = to.behaviors
+      assert behavior.script == "patrol"
+    end
+
+    test "legacy string format converts to new format" do
+      {:ok, to} =
+        TypedObject.new(
+          key: "legacy_behaviors",
+          type: :entity,
+          subtype: :npc,
+          behaviors: [
+            "Loka.Behaviors.Patrol",
+            :wander
+          ]
+        )
+
+      # Legacy formats get converted to new format with empty config
+      assert length(to.behaviors) == 2
+      scripts = Enum.map(to.behaviors, & &1.script)
+      assert "patrol" in scripts
+      assert "wander" in scripts
+      assert Enum.all?(to.behaviors, fn b -> b.config == %{} end)
+    end
+  end
+
+  describe "merge_parent/2 with behaviors" do
+    test "child behaviors override parent behaviors with same script" do
+      {:ok, parent} =
+        TypedObject.new(
+          key: "parent_npc",
+          type: :entity,
+          behaviors: [
+            %{script: "patrol", config: %{interval: 300, route: ["a", "b"]}}
+          ]
+        )
+
+      {:ok, child} =
+        TypedObject.new(
+          key: "child_npc",
+          type: :entity,
+          parent_key: "parent_npc",
+          behaviors: [
+            %{script: "patrol", config: %{route: ["c", "d", "e"]}}
+          ]
+        )
+
+      merged = TypedObject.merge_parent(child, parent)
+
+      assert length(merged.behaviors) == 1
+      [behavior] = merged.behaviors
+      assert behavior.script == "patrol"
+      # Child route overrides parent route
+      assert behavior.config.route == ["c", "d", "e"]
+      # Parent interval is preserved
+      assert behavior.config.interval == 300
+    end
+
+    test "combines unique behaviors from parent and child" do
+      {:ok, parent} =
+        TypedObject.new(
+          key: "parent_npc",
+          type: :entity,
+          behaviors: [
+            %{script: "patrol", config: %{interval: 300}}
+          ]
+        )
+
+      {:ok, child} =
+        TypedObject.new(
+          key: "child_npc",
+          type: :entity,
+          parent_key: "parent_npc",
+          behaviors: [
+            %{script: "day_night_schedule", config: %{wake_at: :dawn}}
+          ]
+        )
+
+      merged = TypedObject.merge_parent(child, parent)
+
+      assert length(merged.behaviors) == 2
+      scripts = Enum.map(merged.behaviors, & &1.script)
+      assert "patrol" in scripts
+      assert "day_night_schedule" in scripts
+    end
+
+    test "child can add new behaviors to empty parent" do
+      {:ok, parent} =
+        TypedObject.new(
+          key: "parent_npc",
+          type: :entity,
+          behaviors: []
+        )
+
+      {:ok, child} =
+        TypedObject.new(
+          key: "child_npc",
+          type: :entity,
+          parent_key: "parent_npc",
+          behaviors: [
+            %{script: "wander", config: %{range: 5}}
+          ]
+        )
+
+      merged = TypedObject.merge_parent(child, parent)
+
+      assert length(merged.behaviors) == 1
+      [behavior] = merged.behaviors
+      assert behavior.script == "wander"
+    end
+  end
 end
