@@ -46,7 +46,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     ScriptEditor,
     ScriptTemplatePicker,
     ScriptTemplateConfig,
-    CommitModal
+    CommitModal,
+    ValidationPanel
   }
 
   # Valid layout algorithms - prevents atom exhaustion attacks
@@ -114,6 +115,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:console_messages, [])
      |> assign(:show_create_modal, false)
      |> assign(:validation, validation)
+     |> assign(:show_validation_panel, false)
      |> assign(:show_settings, false)
      |> assign(:api_key_statuses, %{
        anthropic: :unconfigured,
@@ -518,6 +520,11 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
         api_key_statuses={@api_key_statuses}
         selected_model={@selected_model}
       />
+
+      <%!-- Validation Panel --%>
+      <%= if @show_validation_panel do %>
+        <ValidationPanel.validation_panel validation_results={@validation} />
+      <% end %>
     </div>
     """
   end
@@ -1877,40 +1884,57 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   end
 
   def handle_event("validate_quest_chains", _params, socket) do
-    socket = log_console(socket, :info, "Running quest chain validation...")
+    # Run room validation first
+    rooms = socket.assigns.rooms
+    room_validation = ValidationManager.validation_summary(rooms)
 
-    case DialogueQuestChainValidator.validate_all() do
-      {:ok, results} ->
-        socket = log_console(socket, :info, "Total checks: #{results.total_checks}")
-        socket = log_console(socket, :info, "Passed: #{results.passed}")
+    # Log summary to console
+    socket = log_console(socket, :info, "Running validation...")
 
-        socket =
-          if length(results.errors) > 0 do
-            socket = log_console(socket, :error, "Found #{length(results.errors)} error(s):")
+    socket =
+      log_console(
+        socket,
+        :info,
+        "Rooms: #{room_validation.error_count} errors, #{room_validation.warning_count} warnings"
+      )
 
-            Enum.reduce(results.errors, socket, fn {:error, error}, acc ->
-              log_console(acc, :error, format_validation_error(error))
-            end)
-          else
-            log_console(socket, :info, "No errors found!")
-          end
+    # Update validation and show panel
+    {:noreply,
+     socket
+     |> assign(:validation, room_validation)
+     |> assign(:show_validation_panel, true)}
+  end
 
-        socket =
-          if length(results.warnings) > 0 do
-            socket =
-              log_console(socket, :warning, "Found #{length(results.warnings)} warning(s):")
+  def handle_event("close_validation_panel", _params, socket) do
+    {:noreply, assign(socket, :show_validation_panel, false)}
+  end
 
-            Enum.reduce(results.warnings, socket, fn {:warning, warning}, acc ->
-              log_console(acc, :warning, format_validation_warning(warning))
-            end)
-          else
-            socket
-          end
+  def handle_event("validation_jump_to", %{"message" => message}, socket) do
+    # Try to extract room key from message like "Room 'xxx' is missing..."
+    case Regex.run(~r/Room '([^']+)'/, message) do
+      [_, room_key] ->
+        {:noreply,
+         socket
+         |> assign(:selected_room, room_key)
+         |> assign(:selected_entity, nil)
+         |> assign(:active_tab, :rooms)
+         |> assign(:show_validation_panel, false)
+         |> log_console(:info, "Jumped to room: #{room_key}")
+         |> push_event("select_room", %{key: room_key})}
 
-        {:noreply, socket}
+      _ ->
+        # Try to extract exit destination
+        case Regex.run(~r/Exit '[^']+' points to non-existent room '([^']+)'/, message) do
+          [_, dest_key] ->
+            {:noreply,
+             socket
+             |> assign(:template_search, dest_key)
+             |> assign(:show_validation_panel, false)
+             |> log_console(:info, "Searching for: #{dest_key}")}
 
-      {:error, :no_storylines} ->
-        {:noreply, log_console(socket, :error, "No storylines found to validate")}
+          _ ->
+            {:noreply, socket}
+        end
     end
   end
 
