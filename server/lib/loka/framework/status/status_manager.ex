@@ -268,25 +268,29 @@ defmodule Loka.Framework.Status.StatusManager do
 
   @impl true
   def handle_call({:remove_status, entity_id, status_key}, _from, state) do
+    result = do_remove_status(entity_id, status_key)
+    {:reply, result, state}
+  end
+
+  # Internal implementation of remove_status - can be called from other handlers
+  # to avoid recursive GenServer.call deadlock
+  defp do_remove_status(entity_id, status_key) do
     active_statuses = get_active(entity_id)
     existing = Enum.find(active_statuses, &(&1.status_key == status_key))
 
-    result =
-      if existing do
-        # Process on_remove effects
-        case StatusRegistry.get(status_key) do
-          {:ok, status} -> process_trigger(entity_id, status, existing, :on_remove)
-          _ -> nil
-        end
-
-        updated_statuses = Enum.reject(active_statuses, &(&1.status_key == status_key))
-        :ets.insert(@active_status_table, {entity_id, updated_statuses})
-        :ok
-      else
-        {:error, :not_found}
+    if existing do
+      # Process on_remove effects
+      case StatusRegistry.get(status_key) do
+        {:ok, status} -> process_trigger(entity_id, status, existing, :on_remove)
+        _ -> nil
       end
 
-    {:reply, result, state}
+      updated_statuses = Enum.reject(active_statuses, &(&1.status_key == status_key))
+      :ets.insert(@active_status_table, {entity_id, updated_statuses})
+      :ok
+    else
+      {:error, :not_found}
+    end
   end
 
   @impl true
@@ -358,7 +362,8 @@ defmodule Loka.Framework.Status.StatusManager do
             end
 
           if can_cure do
-            GenServer.call(__MODULE__, {:remove_status, entity_id, status_key})
+            # Call internal function directly to avoid recursive GenServer.call deadlock
+            do_remove_status(entity_id, status_key)
           else
             {:error, :cannot_cure}
           end
@@ -424,8 +429,19 @@ defmodule Loka.Framework.Status.StatusManager do
     end)
   end
 
+  # Helper to get values from effect maps that may have string or atom keys (from YAML)
+  defp get_effect_value(effect, key, default \\ nil) do
+    # Try atom key first, then string key
+    case Map.get(effect, key) do
+      nil -> Map.get(effect, Atom.to_string(key), default)
+      value -> value
+    end
+  end
+
   defp process_effect(effect, active) do
-    action = effect.action
+    # Effect action may be atom or string from YAML
+    action = get_effect_value(effect, :action) || get_effect_value(effect, :effect)
+    action = normalize_stat(action)
 
     base_result = %{
       action: action,
@@ -437,8 +453,9 @@ defmodule Loka.Framework.Status.StatusManager do
     case action do
       :damage ->
         # Use Mechanics.Damage for DoT effects
-        amount = (Map.get(effect, :amount) || 0) * active.stacks
-        damage_type = Map.get(effect, :damage_type) || :poison
+        amount = (get_effect_value(effect, :amount) || 0) * active.stacks
+        damage_type = get_effect_value(effect, :damage_type) || :poison
+        damage_type = normalize_stat(damage_type)
 
         # Create a mock health pool to calculate damage result
         # The caller will apply this to the actual entity's health
@@ -453,7 +470,7 @@ defmodule Loka.Framework.Status.StatusManager do
 
       :heal ->
         # Use Mechanics.Heal for HoT effects
-        amount = (Map.get(effect, :amount) || 0) * active.stacks
+        amount = (get_effect_value(effect, :amount) || 0) * active.stacks
 
         # Create a mock health pool to calculate heal result
         mock_health = ResourcePool.new(current: 50, max: 100)
@@ -465,14 +482,14 @@ defmodule Loka.Framework.Status.StatusManager do
         })
 
       :stat_modify ->
-        stat = Map.get(effect, :stat)
-        modifier = (Map.get(effect, :modifier) || 0) * active.stacks
+        stat = get_effect_value(effect, :stat)
+        modifier = (get_effect_value(effect, :modifier) || 0) * active.stacks
         Map.merge(base_result, %{stat: stat, modifier: modifier})
 
       :resource_drain ->
         # Use Mechanics.Cost for resource drain effects
-        resource = Map.get(effect, :resource)
-        amount = (Map.get(effect, :amount) || 0) * active.stacks
+        resource = get_effect_value(effect, :resource)
+        amount = (get_effect_value(effect, :amount) || 0) * active.stacks
 
         # Create cost map for the mechanic
         costs = %{resource => amount}
@@ -485,8 +502,8 @@ defmodule Loka.Framework.Status.StatusManager do
 
       :resource_regen ->
         # Resource regen is similar to healing but for non-health resources
-        resource = Map.get(effect, :resource)
-        amount = (Map.get(effect, :amount) || 0) * active.stacks
+        resource = get_effect_value(effect, :resource)
+        amount = (get_effect_value(effect, :amount) || 0) * active.stacks
 
         Map.merge(base_result, %{
           resource: resource,
@@ -494,15 +511,15 @@ defmodule Loka.Framework.Status.StatusManager do
         })
 
       :prevent_action ->
-        action_type = Map.get(effect, :action_type)
+        action_type = get_effect_value(effect, :action_type)
         Map.merge(base_result, %{prevented: action_type})
 
       :reflect_damage ->
-        percentage = Map.get(effect, :percentage) || 0
+        percentage = get_effect_value(effect, :percentage) || 0
         Map.merge(base_result, %{percentage: percentage})
 
       :immunity ->
-        immune_to = Map.get(effect, :immune_to)
+        immune_to = get_effect_value(effect, :immune_to)
         Map.merge(base_result, %{immune_to: immune_to})
 
       _ ->

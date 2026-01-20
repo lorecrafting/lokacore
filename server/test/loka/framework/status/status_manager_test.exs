@@ -326,9 +326,6 @@ defmodule Loka.Framework.Status.StatusManagerTest do
     end
   end
 
-  # NOTE: process_effect has a bug where it expects atom keys in effects (:amount, :damage_type)
-  # but YAML files produce string keys ("amount", "damage_type"). As a result, these values
-  # default to 0/nil. Tests adjusted to reflect actual behavior rather than expected behavior.
   describe "tick/2" do
     test "processes status effects for trigger" do
       entity_id = Ecto.UUID.generate()
@@ -341,9 +338,8 @@ defmodule Loka.Framework.Status.StatusManagerTest do
       assert length(results) == 1
       result = List.first(results)
       assert result.action == :damage
-      # BUG: amount should be 5 but is 0 due to process_effect using atom keys
-      assert result.amount == 0
-      # Default damage type is now :poison (more appropriate for status effect DoT)
+      # Fixed: now correctly reads amount from YAML string keys
+      assert result.amount == 5
       assert result.damage_type == :poison
       assert result.status_key == "poisoned"
       assert result.stacks == 1
@@ -358,8 +354,8 @@ defmodule Loka.Framework.Status.StatusManagerTest do
       results = StatusManager.tick(entity_id, :on_turn_start)
 
       result = List.first(results)
-      # BUG: should be 15 (5 * 3 stacks) but is 0 due to process_effect bug
-      assert result.amount == 0
+      # Fixed: correctly calculates 5 * 3 stacks = 15
+      assert result.amount == 15
     end
 
     test "returns multiple results for multiple statuses" do
@@ -441,46 +437,46 @@ defmodule Loka.Framework.Status.StatusManagerTest do
     end
   end
 
-  # SKIPPED: try_cure has a bug in the source code (line 356 creates recursive GenServer.call)
-  # These tests would work if the bug is fixed by calling handle_call directly or using send
-  # describe "try_cure/3" do
-  #   test "cures status with correct item" do
-  #     entity_id = Ecto.UUID.generate()
-  #     source_id = Ecto.UUID.generate()
-  #
-  #     {:ok, _} = StatusManager.apply_status(entity_id, "poisoned", source_id)
-  #
-  #     assert :ok = StatusManager.try_cure(entity_id, "poisoned", "antidote", :item)
-  #     assert StatusManager.has?(entity_id, "poisoned") == false
-  #   end
-  #
-  #   test "cures status with correct ability" do
-  #     entity_id = Ecto.UUID.generate()
-  #     source_id = Ecto.UUID.generate()
-  #
-  #     {:ok, _} = StatusManager.apply_status(entity_id, "poisoned", source_id)
-  #
-  #     assert :ok = StatusManager.try_cure(entity_id, "poisoned", "cure_poison", :ability)
-  #     assert StatusManager.has?(entity_id, "poisoned") == false
-  #   end
-  #
-  #   test "returns error with incorrect item" do
-  #     entity_id = Ecto.UUID.generate()
-  #     source_id = Ecto.UUID.generate()
-  #
-  #     {:ok, _} = StatusManager.apply_status(entity_id, "poisoned", source_id)
-  #
-  #     assert {:error, :cannot_cure} = StatusManager.try_cure(entity_id, "poisoned", "potion", :item)
-  #     assert StatusManager.has?(entity_id, "poisoned") == true
-  #   end
-  #
-  #   test "returns error for non-existent status" do
-  #     entity_id = Ecto.UUID.generate()
-  #
-  #     assert {:error, :status_not_found} =
-  #              StatusManager.try_cure(entity_id, "nonexistent", "antidote", :item)
-  #   end
-  # end
+  describe "try_cure/3" do
+    test "cures status with correct item" do
+      entity_id = Ecto.UUID.generate()
+      source_id = Ecto.UUID.generate()
+
+      {:ok, _} = StatusManager.apply_status(entity_id, "poisoned", source_id)
+
+      assert :ok = StatusManager.try_cure(entity_id, "poisoned", "antidote", :item)
+      assert StatusManager.has?(entity_id, "poisoned") == false
+    end
+
+    test "cures status with correct ability" do
+      entity_id = Ecto.UUID.generate()
+      source_id = Ecto.UUID.generate()
+
+      {:ok, _} = StatusManager.apply_status(entity_id, "poisoned", source_id)
+
+      assert :ok = StatusManager.try_cure(entity_id, "poisoned", "cure_poison", :ability)
+      assert StatusManager.has?(entity_id, "poisoned") == false
+    end
+
+    test "returns error with incorrect item" do
+      entity_id = Ecto.UUID.generate()
+      source_id = Ecto.UUID.generate()
+
+      {:ok, _} = StatusManager.apply_status(entity_id, "poisoned", source_id)
+
+      assert {:error, :cannot_cure} =
+               StatusManager.try_cure(entity_id, "poisoned", "potion", :item)
+
+      assert StatusManager.has?(entity_id, "poisoned") == true
+    end
+
+    test "returns error for non-existent status" do
+      entity_id = Ecto.UUID.generate()
+
+      assert {:error, :status_not_found} =
+               StatusManager.try_cure(entity_id, "nonexistent", "antidote", :item)
+    end
+  end
 
   describe "get_stat_modifiers/2" do
     test "returns sum of stat modifiers from all statuses" do
