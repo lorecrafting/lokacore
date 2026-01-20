@@ -13,8 +13,11 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
   import LokaWeb.CoreComponents
 
   attr :rooms, :list, required: true
+  attr :npcs, :list, default: []
+  attr :items, :list, default: []
   attr :templates, :list, required: true
   attr :selected_room, :string, default: nil
+  attr :selected_entity, :map, default: nil
   attr :template_search, :string, default: ""
   attr :active_tab, :atom, default: :rooms
   attr :collapsed, :boolean, default: false
@@ -54,6 +57,22 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
             <.icon name="hero-cube" class="size-5" />
           </button>
           <button
+            class={["collapsed-icon-btn", @active_tab == :npcs && "active"]}
+            phx-click="switch_hierarchy_tab"
+            phx-value-tab="npcs"
+            title="NPCs ({length(@npcs)})"
+          >
+            <.icon name="hero-user" class="size-5" />
+          </button>
+          <button
+            class={["collapsed-icon-btn", @active_tab == :items && "active"]}
+            phx-click="switch_hierarchy_tab"
+            phx-value-tab="items"
+            title="Items ({length(@items)})"
+          >
+            <.icon name="hero-cube-transparent" class="size-5" />
+          </button>
+          <button
             class={["collapsed-icon-btn", @active_tab == :templates && "active"]}
             phx-click="switch_hierarchy_tab"
             phx-value-tab="templates"
@@ -64,21 +83,43 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
         </div>
       <% else %>
         <!-- Expanded view: full content -->
-        <!-- Tabs for Rooms and Templates -->
+        <!-- Tabs for Rooms, NPCs, Items, and Templates -->
         <div class="hierarchy-tabs">
           <button
             class={["hierarchy-tab", @active_tab == :rooms && "active"]}
             phx-click="switch_hierarchy_tab"
             phx-value-tab="rooms"
+            title="Rooms"
           >
-            Rooms ({length(@rooms)})
+            <.icon name="hero-cube" class="size-3" />
+            <span>{length(@rooms)}</span>
+          </button>
+          <button
+            class={["hierarchy-tab", @active_tab == :npcs && "active"]}
+            phx-click="switch_hierarchy_tab"
+            phx-value-tab="npcs"
+            title="NPCs"
+          >
+            <.icon name="hero-user" class="size-3" />
+            <span>{length(@npcs)}</span>
+          </button>
+          <button
+            class={["hierarchy-tab", @active_tab == :items && "active"]}
+            phx-click="switch_hierarchy_tab"
+            phx-value-tab="items"
+            title="Items"
+          >
+            <.icon name="hero-cube-transparent" class="size-3" />
+            <span>{length(@items)}</span>
           </button>
           <button
             class={["hierarchy-tab", @active_tab == :templates && "active"]}
             phx-click="switch_hierarchy_tab"
             phx-value-tab="templates"
+            title="Templates"
           >
-            Templates ({length(@templates)})
+            <.icon name="hero-document-duplicate" class="size-3" />
+            <span>{length(@templates)}</span>
           </button>
         </div>
         
@@ -109,6 +150,56 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
                 <.icon name="hero-cube" class="hierarchy-icon" />
                 <span>{room.name}</span>
               </div>
+            <% end %>
+          </div>
+          
+    <!-- NPC List -->
+          <div class="hierarchy-tree" style={if @active_tab != :npcs, do: "display: none;", else: ""}>
+            <%= if @npcs == [] do %>
+              <p class="text-muted" style="padding: 1rem; color: #666;">
+                No NPCs. Click + NPC in toolbar.
+              </p>
+            <% else %>
+              <%= for npc <- @npcs do %>
+                <div
+                  class={[
+                    "hierarchy-item",
+                    @selected_entity && @selected_entity.type == :npc &&
+                      @selected_entity.key == npc.key && "hierarchy-item-selected"
+                  ]}
+                  phx-click="select_entity"
+                  phx-value-type="npc"
+                  phx-value-key={npc.key}
+                >
+                  <.icon name="hero-user" class="hierarchy-icon" />
+                  <span>{npc[:name] || npc[:short_desc] || npc.key}</span>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+          
+    <!-- Item List -->
+          <div class="hierarchy-tree" style={if @active_tab != :items, do: "display: none;", else: ""}>
+            <%= if @items == [] do %>
+              <p class="text-muted" style="padding: 1rem; color: #666;">
+                No items. Click + Item in toolbar.
+              </p>
+            <% else %>
+              <%= for item <- @items do %>
+                <div
+                  class={[
+                    "hierarchy-item",
+                    @selected_entity && @selected_entity.type == :item &&
+                      @selected_entity.key == item.key && "hierarchy-item-selected"
+                  ]}
+                  phx-click="select_entity"
+                  phx-value-type="item"
+                  phx-value-key={item.key}
+                >
+                  <.icon name="hero-cube-transparent" class="hierarchy-icon" />
+                  <span>{item[:name] || item[:short_desc] || item.key}</span>
+                </div>
+              <% end %>
             <% end %>
           </div>
           

@@ -13,7 +13,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
   import LokaWeb.CoreComponents
 
   attr :rooms, :list, required: true
+  attr :npcs, :list, default: []
+  attr :items, :list, default: []
   attr :selected_room, :string, default: nil
+  attr :selected_entity, :map, default: nil
   attr :selected_keys, :list, default: []
   attr :collapsed, :boolean, default: false
   attr :class, :string, default: ""
@@ -249,6 +252,260 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
           </form>
         <% end %>
 
+        <%!-- NPC Inspector --%>
+        <%= if @selected_entity && @selected_entity.type == :npc do %>
+          <% npc = get_npc_data(@npcs, @selected_entity.key) %>
+          <div class="inspector-header">
+            <.icon name="hero-user" class="size-5" style="color: #909090;" />
+            <span class="inspector-title">{npc[:name] || npc.key}</span>
+          </div>
+
+          <form phx-change="update_npc_field">
+            <input type="hidden" name="npc_key" value={npc.key} />
+            
+    <!-- Properties Section -->
+            <div class="inspector-section">
+              <div class="inspector-section-header">
+                <span class="inspector-section-title">Properties</span>
+                <.icon name="hero-chevron-down" class="size-3" />
+              </div>
+              <div class="inspector-section-content">
+                <div class="form-group">
+                  <label>Key (ID)</label>
+                  <input type="text" class="input" value={npc.key} readonly />
+                  <small>Unique identifier - cannot be changed</small>
+                </div>
+                <div class="form-group">
+                  <label>Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    class="input"
+                    value={npc[:name] || ""}
+                    phx-debounce="500"
+                  />
+                </div>
+                <div class="form-group">
+                  <label>Level</label>
+                  <input
+                    type="number"
+                    name="level"
+                    class="input"
+                    value={npc[:level] || 1}
+                    min="1"
+                    phx-debounce="500"
+                  />
+                </div>
+              </div>
+            </div>
+            
+    <!-- Description Section -->
+            <div class="inspector-section">
+              <div class="inspector-section-header">
+                <span class="inspector-section-title">Description</span>
+                <.icon name="hero-chevron-down" class="size-3" />
+              </div>
+              <div class="inspector-section-content">
+                <div class="form-group">
+                  <textarea
+                    name="description"
+                    class="textarea"
+                    rows="3"
+                    phx-debounce="500"
+                  ><%= npc[:description] || npc[:short_desc] || "" %></textarea>
+                </div>
+              </div>
+            </div>
+            
+    <!-- Scripts Section -->
+            <div class="inspector-section">
+              <div class="inspector-section-header">
+                <span class="inspector-section-title">Scripts</span>
+                <.icon name="hero-chevron-down" class="size-3" />
+              </div>
+              <div class="inspector-section-content">
+                <p class="text-muted" style="margin: 0 0 0.5rem 0; color: #666; font-size: 0.85rem;">
+                  Attach scripts to control NPC behavior
+                </p>
+                <button
+                  type="button"
+                  phx-click="show_script_editor_for_entity"
+                  phx-value-entity_type="npc"
+                  phx-value-entity_key={npc.key}
+                  class="btn btn-sm"
+                  style="width: 100%;"
+                >
+                  <.icon name="hero-code-bracket" class="size-3" />
+                  <span>Add Script</span>
+                </button>
+              </div>
+            </div>
+            
+    <!-- Dialogues Section -->
+            <div class="inspector-section">
+              <div class="inspector-section-header">
+                <span class="inspector-section-title">Dialogues</span>
+                <.icon name="hero-chevron-down" class="size-3" />
+              </div>
+              <div class="inspector-section-content">
+                <p class="text-muted" style="margin: 0 0 0.5rem 0; color: #666; font-size: 0.85rem;">
+                  Dialogue trees for conversations
+                </p>
+                <button
+                  type="button"
+                  phx-click="show_dialogue_editor_for_entity"
+                  phx-value-entity_key={npc.key}
+                  class="btn btn-sm"
+                  style="width: 100%;"
+                >
+                  <.icon name="hero-chat-bubble-left-right" class="size-3" />
+                  <span>Add Dialogue</span>
+                </button>
+              </div>
+            </div>
+            
+    <!-- Actions Section -->
+            <div class="inspector-section">
+              <div class="inspector-section-header">
+                <span class="inspector-section-title">Actions</span>
+                <.icon name="hero-chevron-down" class="size-3" />
+              </div>
+              <div
+                class="inspector-section-content"
+                style="display: flex; flex-direction: column; gap: 0.5rem;"
+              >
+                <button
+                  type="button"
+                  phx-click="delete_npc"
+                  phx-value-key={npc.key}
+                  class="btn btn-danger"
+                  data-confirm="Are you sure you want to delete this NPC?"
+                >
+                  <.icon name="hero-trash" class="size-4" />
+                  <span>Delete NPC</span>
+                </button>
+              </div>
+            </div>
+          </form>
+        <% end %>
+
+        <%!-- Item Inspector --%>
+        <%= if @selected_entity && @selected_entity.type == :item do %>
+          <% item = get_item_data(@items, @selected_entity.key) %>
+          <div class="inspector-header">
+            <.icon name="hero-cube-transparent" class="size-5" style="color: #909090;" />
+            <span class="inspector-title">{item[:name] || item.key}</span>
+          </div>
+
+          <form phx-change="update_item_field">
+            <input type="hidden" name="item_key" value={item.key} />
+            
+    <!-- Properties Section -->
+            <div class="inspector-section">
+              <div class="inspector-section-header">
+                <span class="inspector-section-title">Properties</span>
+                <.icon name="hero-chevron-down" class="size-3" />
+              </div>
+              <div class="inspector-section-content">
+                <div class="form-group">
+                  <label>Key (ID)</label>
+                  <input type="text" class="input" value={item.key} readonly />
+                  <small>Unique identifier - cannot be changed</small>
+                </div>
+                <div class="form-group">
+                  <label>Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    class="input"
+                    value={item[:name] || ""}
+                    phx-debounce="500"
+                  />
+                </div>
+                <div class="form-group">
+                  <label>Item Type</label>
+                  <select name="item_type" class="input" phx-debounce="500">
+                    <option value="misc" selected={item[:item_type] == "misc"}>Miscellaneous</option>
+                    <option value="weapon" selected={item[:item_type] == "weapon"}>Weapon</option>
+                    <option value="armor" selected={item[:item_type] == "armor"}>Armor</option>
+                    <option value="consumable" selected={item[:item_type] == "consumable"}>
+                      Consumable
+                    </option>
+                    <option value="quest_item" selected={item[:item_type] == "quest_item"}>
+                      Quest Item
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+    <!-- Description Section -->
+            <div class="inspector-section">
+              <div class="inspector-section-header">
+                <span class="inspector-section-title">Description</span>
+                <.icon name="hero-chevron-down" class="size-3" />
+              </div>
+              <div class="inspector-section-content">
+                <div class="form-group">
+                  <textarea
+                    name="description"
+                    class="textarea"
+                    rows="3"
+                    phx-debounce="500"
+                  ><%= item[:description] || item[:short_desc] || "" %></textarea>
+                </div>
+              </div>
+            </div>
+            
+    <!-- Scripts Section -->
+            <div class="inspector-section">
+              <div class="inspector-section-header">
+                <span class="inspector-section-title">Scripts</span>
+                <.icon name="hero-chevron-down" class="size-3" />
+              </div>
+              <div class="inspector-section-content">
+                <p class="text-muted" style="margin: 0 0 0.5rem 0; color: #666; font-size: 0.85rem;">
+                  Attach scripts for item events (on_use, on_pickup)
+                </p>
+                <button
+                  type="button"
+                  phx-click="show_script_editor_for_entity"
+                  phx-value-entity_type="item"
+                  phx-value-entity_key={item.key}
+                  class="btn btn-sm"
+                  style="width: 100%;"
+                >
+                  <.icon name="hero-code-bracket" class="size-3" />
+                  <span>Add Script</span>
+                </button>
+              </div>
+            </div>
+            
+    <!-- Actions Section -->
+            <div class="inspector-section">
+              <div class="inspector-section-header">
+                <span class="inspector-section-title">Actions</span>
+                <.icon name="hero-chevron-down" class="size-3" />
+              </div>
+              <div
+                class="inspector-section-content"
+                style="display: flex; flex-direction: column; gap: 0.5rem;"
+              >
+                <button
+                  type="button"
+                  phx-click="delete_item"
+                  phx-value-key={item.key}
+                  class="btn btn-danger"
+                  data-confirm="Are you sure you want to delete this item?"
+                >
+                  <.icon name="hero-trash" class="size-4" />
+                  <span>Delete Item</span>
+                </button>
+              </div>
+            </div>
+          </form>
+        <% end %>
+
         <%= if @selected_keys != [] do %>
           <div class="inspector-header">
             <.icon name="hero-squares-2x2" class="size-5" style="color: #909090;" />
@@ -342,7 +599,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
           </div>
         <% end %>
 
-        <%= if @selected_room == nil && @selected_keys == [] do %>
+        <%= if @selected_room == nil && @selected_entity == nil && @selected_keys == [] do %>
           <div class="inspector-empty">
             <p>Select an object to view details</p>
             <p style="font-size: 0.8rem; color: #666; margin-top: 0.5rem;">
@@ -365,6 +622,26 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
         y: 0,
         z: 0,
         exits: %{}
+      }
+  end
+
+  defp get_npc_data(npcs, npc_key) do
+    Enum.find(npcs, fn n -> n.key == npc_key end) ||
+      %{
+        key: npc_key,
+        name: "Unknown NPC",
+        description: "",
+        level: 1
+      }
+  end
+
+  defp get_item_data(items, item_key) do
+    Enum.find(items, fn i -> i.key == item_key end) ||
+      %{
+        key: item_key,
+        name: "Unknown Item",
+        description: "",
+        item_type: "misc"
       }
   end
 end

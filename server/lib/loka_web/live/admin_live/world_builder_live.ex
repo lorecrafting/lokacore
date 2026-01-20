@@ -82,6 +82,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:active_tab, :rooms)
      |> assign(:npcs, npcs)
      |> assign(:items, items)
+     |> assign(:selected_entity, nil)
      |> assign(:quests, quests)
      |> assign(:cutscenes, cutscenes)
      |> assign(:show_npc_editor, false)
@@ -153,8 +154,11 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
       >
         <HierarchyPanel.hierarchy_panel
           rooms={@rooms}
+          npcs={@npcs}
+          items={@items}
           templates={@templates}
           selected_room={@selected_room}
+          selected_entity={@selected_entity}
           template_search={@template_search}
           active_tab={@active_tab}
           collapsed={@collapsed_panels.hierarchy}
@@ -184,7 +188,10 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
         <InspectorPanel.inspector_panel
           rooms={@rooms}
+          npcs={@npcs}
+          items={@items}
           selected_room={@selected_room}
+          selected_entity={@selected_entity}
           selected_keys={@selected_keys}
           collapsed={@collapsed_panels.inspector}
         />
@@ -670,13 +677,34 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     {:noreply,
      socket
      |> assign(:selected_room, key)
+     |> assign(:selected_entity, nil)
      |> assign(:selected_keys, [])
      |> log_console(:info, "Selected room: #{key}")
      |> push_event("select_room", %{key: key})}
   end
 
+  def handle_event("select_entity", %{"type" => type, "key" => key}, socket) do
+    type_atom = String.to_existing_atom(type)
+
+    {:noreply,
+     socket
+     |> assign(:selected_entity, %{type: type_atom, key: key})
+     |> assign(:selected_room, nil)
+     |> assign(:selected_keys, [])
+     |> log_console(:info, "Selected #{type}: #{key}")}
+  end
+
   def handle_event("switch_hierarchy_tab", %{"tab" => tab}, socket) do
-    tab_atom = String.to_existing_atom(tab)
+    # Allow npcs, items tabs in addition to rooms, templates
+    tab_atom =
+      case tab do
+        "rooms" -> :rooms
+        "npcs" -> :npcs
+        "items" -> :items
+        "templates" -> :templates
+        _ -> :rooms
+      end
+
     {:noreply, assign(socket, :active_tab, tab_atom)}
   end
 
@@ -1056,12 +1084,16 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     end
   end
 
-  def handle_event("delete_npc", %{"id" => npc_id}, socket) do
+  def handle_event("delete_npc", params, socket) do
+    # Support both "id" and "key" params
+    npc_id = params["id"] || params["key"]
+
     case EntityManager.delete_entity(npc_id) do
       :ok ->
         {:noreply,
          socket
          |> assign(:npcs, EntityManager.list_entities(:npc))
+         |> assign(:selected_entity, nil)
          |> log_console(:info, "Deleted NPC: #{npc_id}")}
 
       {:error, reason} ->
@@ -1070,18 +1102,90 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     end
   end
 
-  def handle_event("delete_item", %{"id" => item_id}, socket) do
+  def handle_event("delete_item", params, socket) do
+    # Support both "id" and "key" params
+    item_id = params["id"] || params["key"]
+
     case EntityManager.delete_entity(item_id) do
       :ok ->
         {:noreply,
          socket
          |> assign(:items, EntityManager.list_entities(:item))
+         |> assign(:selected_entity, nil)
          |> log_console(:info, "Deleted Item: #{item_id}")}
 
       {:error, reason} ->
         {:noreply,
          log_console(socket, :error, "Failed to delete item: #{sanitize_error(reason, "")}")}
     end
+  end
+
+  def handle_event("update_npc_field", params, socket) do
+    npc_key = params["npc_key"]
+    # Remove npc_key from params to get only the update fields
+    updates =
+      params
+      |> Map.drop(["npc_key", "_target"])
+      |> Enum.into(%{}, fn {k, v} ->
+        case k do
+          "level" -> {:level, parse_integer(v, 1)}
+          _ -> {String.to_atom(k), v}
+        end
+      end)
+
+    case EntityManager.update_entity(npc_key, updates) do
+      {:ok, _npc} ->
+        {:noreply,
+         socket
+         |> assign(:npcs, EntityManager.list_entities(:npc))}
+
+      {:error, reason} ->
+        {:noreply,
+         log_console(socket, :error, "Failed to update NPC: #{sanitize_error(reason, "")}")}
+    end
+  end
+
+  def handle_event("update_item_field", params, socket) do
+    item_key = params["item_key"]
+    # Remove item_key from params to get only the update fields
+    updates =
+      params
+      |> Map.drop(["item_key", "_target"])
+      |> Enum.into(%{}, fn {k, v} -> {String.to_atom(k), v} end)
+
+    case EntityManager.update_entity(item_key, updates) do
+      {:ok, _item} ->
+        {:noreply,
+         socket
+         |> assign(:items, EntityManager.list_entities(:item))}
+
+      {:error, reason} ->
+        {:noreply,
+         log_console(socket, :error, "Failed to update Item: #{sanitize_error(reason, "")}")}
+    end
+  end
+
+  def handle_event(
+        "show_script_editor_for_entity",
+        %{"entity_type" => type, "entity_key" => key},
+        socket
+      ) do
+    # Open script editor with entity pre-selected
+    {:noreply,
+     socket
+     |> assign(:show_script_editor, true)
+     |> assign(:editing_script, %{entity_key: key, entity_type: type})
+     |> log_console(:info, "Opening script editor for #{type}: #{key}")}
+  end
+
+  def handle_event("show_dialogue_editor_for_entity", %{"entity_key" => key}, socket) do
+    # Open dialogue editor with NPC pre-selected
+    {:noreply,
+     socket
+     |> assign(:show_dialogue_editor, true)
+     |> assign(:editing_dialogue_npc, key)
+     |> assign(:editing_dialogue_tree, %{})
+     |> log_console(:info, "Opening dialogue editor for NPC: #{key}")}
   end
 
   def handle_event("show_npc_editor", _params, socket) do
