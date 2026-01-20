@@ -70,8 +70,8 @@ defmodule Loka.Framework.HometownTest do
     test "retrieves hometown with stat bonuses", %{} do
       assert {:ok, hometown} = Hometown.get("tara", :test_hometown_server)
 
-      # Stat bonuses are currently empty in fixtures due to known bug
-      assert hometown.stat_bonuses == %{}
+      # Stat bonuses now work correctly
+      assert hometown.stat_bonuses == %{"str" => 2, "con" => 1}
     end
 
     test "retrieves hometown with starting skills", %{} do
@@ -214,11 +214,9 @@ defmodule Loka.Framework.HometownTest do
   end
 
   describe "apply_hometown_bonuses/3" do
-    # NOTE: There's a bug in Hometown module line 251 where it passes string keys from YAML
-    # to MapHelpers.get_flexible/3 which requires atom keys. This causes stat_bonuses to fail.
-    # Tests involving stat_bonuses are tagged as :skip until the source code is fixed.
+    # Fixed: Hometown module now correctly handles YAML string keys by converting
+    # to atoms for MapHelpers.get_flexible lookup.
 
-    @tag :skip
     test "applies stat bonuses to game state" do
       player = player_fixture()
       state = game_state_fixture(player.id)
@@ -342,7 +340,7 @@ defmodule Loka.Framework.HometownTest do
       assert updated_state.stats[:hometown] == "rome"
     end
 
-    test "preserves existing stats when applying bonuses" do
+    test "adds stat bonuses to existing stats" do
       player = player_fixture()
       # Start with custom stats
       state =
@@ -352,10 +350,14 @@ defmodule Loka.Framework.HometownTest do
 
       {:ok, updated_state} = Hometown.apply_hometown_bonuses(state, "tara", :test_hometown_server)
 
-      # Stat bonuses are disabled in fixtures, so stats remain unchanged
-      assert updated_state.stats["str"] == 15
-      assert updated_state.stats["con"] == 8
+      # Tara gives +2 STR, +1 CON - added to existing values
+      # 15 + 2
+      assert updated_state.stats["str"] == 17
+      # 8 + 1
+      assert updated_state.stats["con"] == 9
+      # unchanged
       assert updated_state.stats["dex"] == 12
+      # unchanged
       assert updated_state.stats["int"] == 10
     end
 

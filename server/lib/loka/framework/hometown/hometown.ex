@@ -255,8 +255,13 @@ defmodule Loka.Framework.Hometown do
 
     updated_stats =
       Enum.reduce(bonuses, stats, fn {stat, bonus}, acc ->
-        current = MapHelpers.get_flexible(acc, stat, 10)
-        Map.put(acc, stat, current + bonus)
+        # YAML loads string keys (e.g., "str"). The stats map also uses string keys.
+        # Use get_any to try both atom and string keys for lookup.
+        stat_string = if is_binary(stat), do: stat, else: Atom.to_string(stat)
+
+        # Try to get current value with both string and atom keys
+        current = MapHelpers.get_any(acc, [stat_string, String.to_atom(stat_string)], 10)
+        Map.put(acc, stat_string, current + bonus)
       end)
 
     %{game_state | stats: updated_stats}
