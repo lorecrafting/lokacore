@@ -1,0 +1,48 @@
+key: shopkeeper_hours
+type: script
+name: "Shopkeeper Hours Behavior"
+description: "Makes an NPC follow shop open/close hours based on time events"
+tags: [behavior, shop, schedule]
+data:
+  hook: behavior
+  events: [dawn, morning, noon, afternoon, dusk, evening]
+  config_schema:
+    open_at:
+      type: atom
+      default: morning
+      description: "Time event to open shop (morning, dawn, noon)"
+    close_at:
+      type: atom
+      default: evening
+      description: "Time event to close shop (evening, dusk)"
+    shop_room:
+      type: string
+      description: "Room where shop operates (optional, for validation)"
+  source: |
+    # Shopkeeper Hours - toggle shop open/closed based on time
+    event = context.event
+    open_event = config.open_at || :morning
+    close_event = config.close_at || :evening
+
+    # Convert config to atoms for comparison
+    open_event = if is_binary(open_event), do: String.to_atom(open_event), else: open_event
+    close_event = if is_binary(close_event), do: String.to_atom(close_event), else: close_event
+
+    cond do
+      # Opening time
+      event == open_event ->
+        set_flag("shop_open", true)
+        emit(:opening_shop)
+        set_behavior_state(:shop_open, true)
+        handled()
+
+      # Closing time
+      event == close_event ->
+        set_flag("shop_open", false)
+        emit(:closing_shop)
+        set_behavior_state(:shop_open, false)
+        handled()
+
+      true ->
+        continue()
+    end

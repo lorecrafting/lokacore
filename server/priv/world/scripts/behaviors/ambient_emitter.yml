@@ -1,0 +1,42 @@
+key: ambient_emitter
+type: script
+name: "Ambient Emitter Behavior"
+description: "Periodically emits ambient flavor text with configurable chance"
+tags: [behavior, ambient, atmosphere]
+data:
+  hook: behavior
+  config_schema:
+    interval:
+      type: integer
+      default: 300
+      min: 30
+      max: 3600
+      description: "Seconds between emission attempts"
+    emote_key:
+      type: atom
+      default: ambient
+      description: "Which emote key to emit"
+    chance:
+      type: integer
+      default: 100
+      min: 0
+      max: 100
+      description: "Probability (0-100) to emit each cycle"
+  source: |
+    # Ambient emitter - periodically emit flavor text
+    chance_value = config.chance || 100
+    emote_key = config.emote_key || :ambient
+
+    # Convert emote_key to atom if string
+    emote_key = if is_binary(emote_key), do: String.to_atom(emote_key), else: emote_key
+
+    # Check if we should emit this cycle
+    if chance?(chance_value) do
+      emit(emote_key)
+    end
+
+    # Schedule next emission attempt
+    interval = config.interval || 300
+    after(interval, "ambient_emitter")
+
+    continue()

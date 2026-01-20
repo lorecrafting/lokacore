@@ -1,0 +1,67 @@
+key: nocturnal
+type: script
+name: "Nocturnal Behavior"
+description: "Makes an NPC active only at night, hiding during the day"
+tags: [behavior, schedule, nocturnal]
+data:
+  hook: behavior
+  events: [dawn, dusk, evening, midnight]
+  config_schema:
+    wake_at:
+      type: atom
+      default: dusk
+      description: "Time event to become active (dusk, evening)"
+    sleep_at:
+      type: atom
+      default: dawn
+      description: "Time event to go dormant (dawn, morning)"
+    active_room:
+      type: string
+      description: "Room key to move to when active (optional)"
+    hide_room:
+      type: string
+      description: "Room key to hide in during day (optional)"
+  source: |
+    # Nocturnal behavior - inverse of day_night_schedule
+    event = context.event
+    wake_event = config.wake_at || :dusk
+    sleep_event = config.sleep_at || :dawn
+
+    # Convert config to atoms for comparison
+    wake_event = if is_binary(wake_event), do: String.to_atom(wake_event), else: wake_event
+    sleep_event = if is_binary(sleep_event), do: String.to_atom(sleep_event), else: sleep_event
+
+    cond do
+      # Become active at night
+      event == wake_event ->
+        emit(:becoming_active)
+
+        # Move to active room if configured
+        active_room = config.active_room
+        if active_room do
+          teleport(entity.id, active_room)
+          emit(:emerged)
+        end
+
+        set_flag("active", true)
+        set_behavior_state(:active, true)
+        handled()
+
+      # Go dormant during day
+      event == sleep_event ->
+        emit(:going_dormant)
+
+        # Move to hide room if configured
+        hide_room = config.hide_room
+        if hide_room do
+          teleport(entity.id, hide_room)
+          emit(:hidden)
+        end
+
+        set_flag("active", false)
+        set_behavior_state(:active, false)
+        handled()
+
+      true ->
+        continue()
+    end

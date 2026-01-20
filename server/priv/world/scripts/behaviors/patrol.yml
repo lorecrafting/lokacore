@@ -1,0 +1,86 @@
+key: patrol
+type: script
+name: "Patrol Behavior"
+description: "Makes an entity walk a defined route, moving between rooms on a schedule"
+tags: [behavior, movement, patrol]
+data:
+  hook: behavior
+  config_schema:
+    route:
+      type: list
+      required: true
+      description: "List of room keys to patrol through"
+    interval:
+      type: integer
+      default: 300
+      min: 30
+      max: 3600
+      description: "Seconds between patrol moves"
+    loop:
+      type: boolean
+      default: true
+      description: "Loop route (true) or ping-pong (false)"
+  source: |
+    # Patrol behavior - move entity through a route of rooms
+    route = config.route || []
+
+    if route == [] do
+      log("Patrol: No route defined for #{entity.key}")
+      continue()
+    else
+      # Get current state
+      index = get_behavior_state(:patrol_index) || 0
+      direction = get_behavior_state(:patrol_direction) || 1
+      loop_mode = config.loop != false
+
+      # Get target room
+      target_room = Enum.at(route, index)
+
+      if target_room do
+        # Move to target room
+        current_room = room()
+        current_room_key = if current_room, do: current_room.key, else: nil
+
+        if current_room_key != target_room do
+          # Find and teleport to the target room
+          teleport(entity.id, target_room)
+        end
+
+        # Emit patrol_arrive event for emotes
+        emit(:patrol_arrive)
+
+        # Calculate next index
+        next_index = index + direction
+        max_index = length(route) - 1
+
+        {new_index, new_direction} =
+          cond do
+            # Loop mode: wrap around
+            loop_mode && next_index > max_index ->
+              {0, 1}
+
+            loop_mode && next_index < 0 ->
+              {0, 1}
+
+            # Ping-pong mode: reverse at ends
+            not loop_mode && next_index > max_index ->
+              {max_index - 1, -1}
+
+            not loop_mode && next_index < 0 ->
+              {1, 1}
+
+            true ->
+              {next_index, direction}
+          end
+
+        # Save state for next iteration
+        set_behavior_state(:patrol_index, new_index)
+        set_behavior_state(:patrol_direction, new_direction)
+      end
+
+      # Schedule next patrol move
+      interval = config.interval || 300
+      after(interval, "patrol")
+
+      continue()
+    end

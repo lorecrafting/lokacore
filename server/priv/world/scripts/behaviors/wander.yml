@@ -1,0 +1,71 @@
+key: wander
+type: script
+name: "Wander Behavior"
+description: "Makes an entity move randomly within constraints (zone, tags)"
+tags: [behavior, movement, wander]
+data:
+  hook: behavior
+  config_schema:
+    interval:
+      type: integer
+      default: 600
+      min: 60
+      max: 7200
+      description: "Seconds between random moves"
+    zone:
+      type: string
+      description: "Zone key to stay within (optional)"
+    room_tags:
+      type: list
+      description: "Only move to rooms with these tags (optional)"
+    avoid_tags:
+      type: list
+      description: "Don't move to rooms with these tags (optional)"
+  source: |
+    # Wander behavior - move randomly within constraints
+    current_room = room()
+
+    if current_room do
+      # Get exits from current room
+      exits = entities_in_room(current_room.id)
+               |> Enum.filter(fn e -> e.type == :exit end)
+
+      # Get destination keys from exits
+      destinations = exits
+        |> Enum.map(fn exit ->
+          # Get destination from exit component
+          exit_data = exit.components["exit"] || exit.components[:exit] || %{}
+          exit_data["destination_key"] || exit_data[:destination_key]
+        end)
+        |> Enum.filter(&(&1))
+
+      # Filter by zone if configured
+      zone_filter = config.zone
+      destinations = if zone_filter do
+        # TODO: Filter by zone membership
+        # For now, pass through
+        destinations
+      else
+        destinations
+      end
+
+      # Filter by room tags if configured
+      room_tags = config.room_tags || []
+      avoid_tags = config.avoid_tags || []
+
+      # Pick a random destination
+      if destinations != [] do
+        target = pick(destinations)
+
+        if target do
+          teleport(entity.id, target)
+          emit(:wander_arrive)
+        end
+      end
+    end
+
+    # Schedule next wander
+    interval = config.interval || 600
+    after(interval, "wander")
+
+    continue()

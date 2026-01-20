@@ -1,0 +1,65 @@
+key: day_night_schedule
+type: script
+name: "Day/Night Schedule Behavior"
+description: "Makes an NPC follow a wake/sleep cycle, moving between locations and emitting events"
+tags: [behavior, schedule, day_night]
+data:
+  hook: behavior
+  events: [dawn, dusk, morning, evening, noon, midnight]
+  config_schema:
+    wake_at:
+      type: atom
+      default: dawn
+      description: "Time event to wake at (dawn, morning, noon)"
+    sleep_at:
+      type: atom
+      default: dusk
+      description: "Time event to sleep at (dusk, evening, midnight)"
+    wake_room:
+      type: string
+      description: "Room key to move to when waking (optional)"
+    sleep_room:
+      type: string
+      description: "Room key to move to when sleeping (optional)"
+  source: |
+    # Day/Night Schedule - respond to time events
+    event = context.event
+    wake_event = config.wake_at || :dawn
+    sleep_event = config.sleep_at || :dusk
+
+    # Convert config to atoms for comparison if needed
+    wake_event = if is_binary(wake_event), do: String.to_atom(wake_event), else: wake_event
+    sleep_event = if is_binary(sleep_event), do: String.to_atom(sleep_event), else: sleep_event
+
+    cond do
+      # Wake up event
+      event == wake_event ->
+        emit(:waking_up)
+
+        # Move to wake room if configured
+        wake_room = config.wake_room
+        if wake_room do
+          teleport(entity.id, wake_room)
+          emit(:arrived_at_work)
+        end
+
+        set_behavior_state(:awake, true)
+        handled()
+
+      # Sleep event
+      event == sleep_event ->
+        emit(:going_to_sleep)
+
+        # Move to sleep room if configured
+        sleep_room = config.sleep_room
+        if sleep_room do
+          teleport(entity.id, sleep_room)
+          emit(:arrived_home)
+        end
+
+        set_behavior_state(:awake, false)
+        handled()
+
+      true ->
+        continue()
+    end

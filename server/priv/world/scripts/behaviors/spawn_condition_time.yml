@@ -1,0 +1,80 @@
+key: spawn_condition_time
+type: script
+name: "Time-Based Spawn Condition Behavior"
+description: "Controls entity spawning based on time of day (active hours)"
+tags: [behavior, spawn, time]
+data:
+  hook: behavior
+  events: [dawn, morning, noon, afternoon, dusk, evening, midnight]
+  config_schema:
+    prototype:
+      type: string
+      required: true
+      description: "Entity prototype key to spawn"
+    active_hours:
+      type: list
+      required: true
+      description: "List of hours (0-23) when spawning is allowed"
+    max_count:
+      type: integer
+      default: 1
+      min: 1
+      max: 100
+      description: "Maximum number of this entity type to have spawned"
+    spawn_chance:
+      type: integer
+      default: 100
+      min: 0
+      max: 100
+      description: "Probability (0-100) to spawn when conditions met"
+  source: |
+    # Time-based spawn condition - spawn/despawn entities based on time
+    prototype_key = config.prototype
+    active_hours = config.active_hours || []
+    max_count = config.max_count || 1
+    spawn_chance_value = config.spawn_chance || 100
+
+    # Get current hour
+    hour = current_hour()
+
+    # Check if current hour is in active hours
+    is_active_time = hour in active_hours
+
+    # Get current spawned count in this room/zone
+    current_room = room()
+    spawned_count = if current_room do
+      entities_in_room(current_room.id)
+      |> Enum.filter(fn e ->
+        e.key == prototype_key or
+        (e.metadata && e.metadata["prototype_key"] == prototype_key)
+      end)
+      |> length()
+    else
+      0
+    end
+
+    cond do
+      # Active time and under max - maybe spawn
+      is_active_time and spawned_count < max_count and chance?(spawn_chance_value) ->
+        if current_room do
+          spawn_at(prototype_key, current_room.id)
+          emit(:spawned_entity)
+        end
+        handled()
+
+      # Inactive time and entities exist - despawn them
+      not is_active_time and spawned_count > 0 ->
+        if current_room do
+          entities_in_room(current_room.id)
+          |> Enum.filter(fn e ->
+            e.key == prototype_key or
+            (e.metadata && e.metadata["prototype_key"] == prototype_key)
+          end)
+          |> Enum.each(fn e -> despawn(e.id) end)
+          emit(:despawned_entities)
+        end
+        handled()
+
+      true ->
+        continue()
+    end
