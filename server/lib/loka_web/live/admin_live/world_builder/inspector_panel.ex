@@ -15,6 +15,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
   attr :rooms, :list, required: true
   attr :npcs, :list, default: []
   attr :items, :list, default: []
+  attr :room_spawns, :map, default: %{}
   attr :selected_room, :string, default: nil
   attr :selected_entity, :map, default: nil
   attr :selected_keys, :list, default: []
@@ -216,64 +217,80 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
               </div>
             </div>
             
-    <!-- 4. Contents - NPCs and Items in this room -->
-            <% room_npcs = Enum.filter(@npcs, fn npc -> npc[:room] == room.key end) %>
-            <% room_items = Enum.filter(@items, fn item -> item[:room] == room.key end) %>
+    <!-- 4. Spawns - What spawns in this room (from zone resets) -->
+            <% spawns = Map.get(@room_spawns, room.key, []) %>
+            <% mob_spawns = Enum.filter(spawns, fn s -> s.type == :mob end) %>
+            <% item_spawns = Enum.filter(spawns, fn s -> s.type == :item end) %>
             <div class="inspector-section">
               <div class="inspector-section-header">
                 <span class="inspector-section-title">
-                  Contents
+                  Spawns
                   <span style="color: #666; font-weight: normal; margin-left: 0.25rem;">
-                    ({length(room_npcs) + length(room_items)})
+                    ({length(spawns)})
                   </span>
                 </span>
                 <.icon name="hero-chevron-down" class="size-3" />
               </div>
               <div class="inspector-section-content">
-                <%= if length(room_npcs) > 0 do %>
+                <%= if length(mob_spawns) > 0 do %>
                   <div class="contents-category">
                     <small style="color: #666; font-weight: 500;">NPCs</small>
                     <div class="contents-list">
-                      <%= for npc <- room_npcs do %>
+                      <%= for spawn <- mob_spawns do %>
                         <div
                           class="contents-item"
                           phx-click="select_entity"
                           phx-value-type="npc"
-                          phx-value-key={npc.key}
+                          phx-value-key={spawn.prototype}
                           style="cursor: pointer;"
+                          title={"From zone: #{spawn.zone}"}
                         >
                           <.icon name="hero-user" class="size-3" style="color: #10b981;" />
-                          <span>{npc.name || npc.key}</span>
+                          <span>{spawn.prototype}</span>
+                          <%= if spawn.max > 1 do %>
+                            <span style="color: #666; font-size: 0.75rem; margin-left: auto;">
+                              ×{spawn.max}
+                            </span>
+                          <% end %>
                         </div>
                       <% end %>
                     </div>
                   </div>
                 <% end %>
-                <%= if length(room_items) > 0 do %>
+                <%= if length(item_spawns) > 0 do %>
                   <div
                     class="contents-category"
-                    style={if length(room_npcs) > 0, do: "margin-top: 0.5rem;", else: ""}
+                    style={if length(mob_spawns) > 0, do: "margin-top: 0.5rem;", else: ""}
                   >
                     <small style="color: #666; font-weight: 500;">Items</small>
                     <div class="contents-list">
-                      <%= for item <- room_items do %>
+                      <%= for spawn <- item_spawns do %>
                         <div
                           class="contents-item"
                           phx-click="select_entity"
                           phx-value-type="item"
-                          phx-value-key={item.key}
+                          phx-value-key={spawn.prototype}
                           style="cursor: pointer;"
+                          title={"From zone: #{spawn.zone}"}
                         >
                           <.icon name="hero-cube-transparent" class="size-3" style="color: #f59e0b;" />
-                          <span>{item.name || item.key}</span>
+                          <span>{spawn.prototype}</span>
+                          <%= if spawn.max > 1 do %>
+                            <span style="color: #666; font-size: 0.75rem; margin-left: auto;">
+                              ×{spawn.max}
+                            </span>
+                          <% end %>
                         </div>
                       <% end %>
                     </div>
                   </div>
                 <% end %>
-                <%= if length(room_npcs) == 0 and length(room_items) == 0 do %>
+                <%= if length(spawns) == 0 do %>
                   <p class="text-muted" style="margin: 0; font-size: 0.85rem;">
-                    No NPCs or items in this room
+                    No spawns defined for this room
+                  </p>
+                  <p class="text-muted" style="margin: 0.5rem 0 0 0; font-size: 0.75rem; color: #555;">
+                    Add spawns in zone files (priv/world/zones/)
                   </p>
                 <% end %>
               </div>

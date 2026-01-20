@@ -33,6 +33,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   }
 
   alias Loka.Testing.Content.DialogueQuestChainValidator
+  alias Loka.Content.Zone
 
   alias LokaWeb.AdminLive.WorldBuilder.{
     Toolbar,
@@ -70,6 +71,10 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     quests = QuestManager.list_quests()
     cutscenes = CutsceneManager.list_cutscenes()
 
+    # Load zones and build room -> spawns mapping
+    zones = Zone.all()
+    room_spawns = build_room_spawns_map(zones)
+
     # Run validation on rooms
     validation = ValidationManager.validation_summary(rooms)
 
@@ -86,6 +91,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:selected_entity, nil)
      |> assign(:quests, quests)
      |> assign(:cutscenes, cutscenes)
+     |> assign(:zones, zones)
+     |> assign(:room_spawns, room_spawns)
      |> assign(:show_npc_editor, false)
      |> assign(:show_item_editor, false)
      |> assign(:show_quest_editor, false)
@@ -196,6 +203,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
           rooms={@rooms}
           npcs={@npcs}
           items={@items}
+          room_spawns={@room_spawns}
           selected_room={@selected_room}
           selected_entity={@selected_entity}
           selected_keys={@selected_keys}
@@ -2673,4 +2681,44 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
         "Unknown warning: #{inspect(warning)}"
     end
   end
+
+  # Build a map of room_key -> list of spawn entries from zone resets
+  # Each spawn entry is: %{type: :mob|:item, prototype: key, max: count, zone: zone_key}
+  defp build_room_spawns_map(zones) do
+    Enum.reduce(zones, %{}, fn zone, acc ->
+      zone_key = zone.key
+      resets = Zone.resets(zone)
+
+      Enum.reduce(resets, acc, fn reset, room_acc ->
+        # Handle both string and atom keys from YAML
+        room_key = Map.get(reset, "room") || Map.get(reset, :room)
+        spawn_type = Map.get(reset, "type") || Map.get(reset, :type)
+        prototype = Map.get(reset, "prototype") || Map.get(reset, :prototype)
+        max_count = Map.get(reset, "max") || Map.get(reset, :max, 1)
+
+        if room_key && prototype do
+          spawn_entry = %{
+            type: normalize_spawn_type(spawn_type),
+            prototype: prototype,
+            max: max_count,
+            zone: zone_key
+          }
+
+          Map.update(room_acc, room_key, [spawn_entry], fn existing ->
+            [spawn_entry | existing]
+          end)
+        else
+          room_acc
+        end
+      end)
+    end)
+  end
+
+  defp normalize_spawn_type("mob"), do: :mob
+  defp normalize_spawn_type("object"), do: :item
+  defp normalize_spawn_type("item"), do: :item
+  defp normalize_spawn_type(:mob), do: :mob
+  defp normalize_spawn_type(:object), do: :item
+  defp normalize_spawn_type(:item), do: :item
+  defp normalize_spawn_type(_), do: :unknown
 end
