@@ -210,6 +210,64 @@ defmodule Loka.Engine.Script.SandboxTest do
       assert {:ok, ["a", "b"], []} =
                Sandbox.execute(source, @test_entity, context_with_string_keys)
     end
+
+    test "get_behavior_state returns default when no state exists" do
+      context = Map.put(@test_context, :behavior_key, "patrol")
+
+      source = "get_behavior_state.(:patrol_index, 0)"
+
+      assert {:ok, 0, []} = Sandbox.execute(source, @test_entity, context)
+    end
+
+    test "get_behavior_state returns stored state value" do
+      entity_with_state =
+        Map.put(@test_entity, :behavior_state, %{
+          "patrol" => %{patrol_index: 2}
+        })
+
+      context = Map.put(@test_context, :behavior_key, "patrol")
+
+      source = "get_behavior_state.(:patrol_index, 0)"
+
+      assert {:ok, 2, []} = Sandbox.execute(source, entity_with_state, context)
+    end
+
+    test "set_behavior_state queues action" do
+      context = Map.put(@test_context, :behavior_key, "patrol")
+
+      source = """
+      set_behavior_state.(:patrol_index, 5)
+      :ok
+      """
+
+      assert {:ok, :ok, actions} = Sandbox.execute(source, @test_entity, context)
+      assert length(actions) == 1
+
+      {:set_behavior_state, params} = hd(actions)
+      assert params.entity_id == "test-npc"
+      assert params.behavior_key == "patrol"
+      assert params.state_key == :patrol_index
+      assert params.value == 5
+    end
+
+    test "behavior state is isolated per behavior" do
+      entity_with_state =
+        Map.put(@test_entity, :behavior_state, %{
+          "patrol" => %{index: 1},
+          "schedule" => %{index: 99}
+        })
+
+      # When running as patrol behavior
+      patrol_context = Map.put(@test_context, :behavior_key, "patrol")
+      source = "get_behavior_state.(:index, 0)"
+
+      assert {:ok, 1, []} = Sandbox.execute(source, entity_with_state, patrol_context)
+
+      # When running as schedule behavior
+      schedule_context = Map.put(@test_context, :behavior_key, "schedule")
+
+      assert {:ok, 99, []} = Sandbox.execute(source, entity_with_state, schedule_context)
+    end
   end
 
   describe "execute/4 with timeout" do

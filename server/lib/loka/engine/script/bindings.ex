@@ -80,6 +80,8 @@ defmodule Loka.Engine.Script.Bindings do
   defp context_bindings(entity, player, context) do
     # Extract behavior config from context (for behavior scripts)
     config = Map.get(context, :config, %{})
+    # Extract behavior key for state storage (keyed per-behavior)
+    behavior_key = Map.get(context, :behavior_key)
 
     [
       # Entity being scripted (read-only map)
@@ -94,6 +96,16 @@ defmodule Loka.Engine.Script.Bindings do
       # Behavior config (read-only, for behaviors)
       # Scripts access via config.route, config.interval, etc.
       config: safe_config_map(config),
+
+      # Behavior state (persists across script executions)
+      # get_behavior_state(:key, default) - read state
+      # set_behavior_state(:key, value) - queue state update
+      get_behavior_state: fn key, default ->
+        get_behavior_state(entity, behavior_key, key, default)
+      end,
+      set_behavior_state: fn key, value ->
+        queue_set_behavior_state(entity, behavior_key, key, value)
+      end,
 
       # Room query function
       room: fn -> get_room(entity) end
@@ -621,6 +633,44 @@ defmodule Loka.Engine.Script.Bindings do
          data: data
        }}
     )
+
+    :ok
+  end
+
+  # Behavior state - persists per-behavior across executions
+  # State is stored in entity.behavior_state[behavior_key][state_key]
+
+  defp get_behavior_state(entity, behavior_key, state_key, default) do
+    behavior_state = Map.get(entity, :behavior_state, %{})
+
+    cond do
+      # No behavior key - fall back to global state
+      is_nil(behavior_key) ->
+        Map.get(behavior_state, state_key, default)
+
+      # Get state for this specific behavior
+      true ->
+        behavior_key_state = Map.get(behavior_state, behavior_key, %{})
+        Map.get(behavior_key_state, state_key, default)
+    end
+  end
+
+  defp queue_set_behavior_state(entity, behavior_key, state_key, value) do
+    entity_id = Map.get(entity, :id)
+
+    if entity_id do
+      ActionQueue.queue(
+        {:set_behavior_state,
+         %{
+           entity_id: entity_id,
+           behavior_key: behavior_key,
+           state_key: state_key,
+           value: value
+         }}
+      )
+    else
+      Logger.warning("[Bindings] Cannot set behavior state without entity id")
+    end
 
     :ok
   end

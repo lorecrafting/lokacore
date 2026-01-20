@@ -57,6 +57,7 @@ defmodule Loka.Engine.Script.ActionQueue do
           | :unlock_exit
           | :schedule
           | :emit_event
+          | :set_behavior_state
 
   @type action :: {action_type(), term()}
 
@@ -547,6 +548,27 @@ defmodule Loka.Engine.Script.ActionQueue do
   defp execute_action({:emit_event, %{event_name: name, data: data}}, _context) do
     event_name = if is_binary(name), do: String.to_atom(name), else: name
     event = Event.new(event_name, %{payload: data})
+    EventBus.emit(event)
+    :ok
+  end
+
+  defp execute_action(
+         {:set_behavior_state,
+          %{entity_id: entity_id, behavior_key: behavior_key, state_key: state_key, value: value}},
+         _context
+       ) do
+    # Emit event to update entity's behavior state
+    # The EntityServer will handle storing this in the entity
+    event =
+      Event.new(:set_behavior_state, %{
+        target: entity_id,
+        payload: %{
+          behavior_key: behavior_key,
+          state_key: state_key,
+          value: value
+        }
+      })
+
     EventBus.emit(event)
     :ok
   end
