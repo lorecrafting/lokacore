@@ -27,11 +27,11 @@ git commit --no-verify -m "message"
 
 ### Pre-push (`.git/hooks/pre-push`)
 
-Runs before pushing to remote. Managed by beads (bd) for issue tracking sync.
+Runs before pushing to remote. Managed by beads (`br`) for issue tracking sync.
 
 **Checks:**
 - Uncommitted `.beads/` changes
-- Offers to run `bd sync` if changes detected
+- Offers to run `br sync` if changes detected
 
 ```bash
 # Normal push
@@ -98,7 +98,7 @@ mix loka.test --quick  # Run tests (optional but recommended)
 ### Before Pushing
 
 ```bash
-bd sync                 # Sync beads issues
+br sync                 # Sync beads issues
 git push
 ```
 
@@ -123,7 +123,7 @@ git commit --amend
 ### "Uncommitted beads changes"
 
 ```bash
-bd sync
+br sync
 git push
 ```
 
@@ -141,5 +141,5 @@ chmod +x .git/hooks/pre-commit
 | Variable | Effect |
 |----------|--------|
 | `EXMUD_VALIDATE=1` | Enable content validation in pre-commit |
-| `BD_SYNC_IN_PROGRESS` | Set by `bd sync` to prevent circular errors |
+| `BR_SYNC_IN_PROGRESS` | Set by `br sync` to prevent circular errors |
 | `BEADS_SYNC_BRANCH` | Override beads sync branch |

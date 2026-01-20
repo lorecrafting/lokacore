@@ -722,6 +722,11 @@ defmodule LokaWeb.GameChannel do
     {:noreply, socket}
   end
 
+  def handle_info({:session_message, {:broadcast_message, text, type}}, socket) do
+    push(socket, "broadcast", %{text: text, type: Atom.to_string(type)})
+    {:noreply, socket}
+  end
+
   # =============================================================================
   # Combat Tick Handler
   # =============================================================================

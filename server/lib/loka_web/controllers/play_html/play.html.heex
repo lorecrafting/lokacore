@@ -251,6 +251,13 @@
           updateResources(data.resources);
         });
 
+        // Broadcast messages (system announcements, events, emergencies)
+        channel.on('broadcast', (data) => {
+          const typeClass = data.type === 'emergency' ? 'error' :
+                           data.type === 'event' ? 'chat' : 'system';
+          appendOutput(data.text, typeClass);
+        });
+
         // Focus input
         commandInput.focus();
       }
