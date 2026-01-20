@@ -2,6 +2,9 @@ defmodule Loka.WorldBuilder.EntityManager do
   @moduledoc """
   Unified entity management for World Builder UI.
 
+  All operations persist to YAML files in priv/world/prototypes/ following the YAML-only
+  architecture documented in docs/proposals/builder-content-layer.md.
+
   ## Architecture Pattern
 
   World Builder follows this layered approach:
@@ -15,6 +18,7 @@ defmodule Loka.WorldBuilder.EntityManager do
      - Generic CRUD operations for World Builder UI
      - UI enrichment (TypedObject → frontend maps)
      - Cross-cutting concerns (listing, filtering, search)
+     - Saves to YAML files in priv/world/prototypes/
 
   3. **Specialized Managers** (when needed)
      - RoomManager: exits and coordinate management
@@ -49,6 +53,9 @@ defmodule Loka.WorldBuilder.EntityManager do
 
   alias Loka.Engine.{TypedObject, Spawner, EntityServer, Entity, Entities}
   alias Loka.Engine.TypedObject.Registry
+  alias Loka.Engine.TypedObject.Loader
+
+  @prototypes_dir Path.join([:code.priv_dir(:loka), "world", "prototypes"])
 
   @doc """
   Create a new entity of any subtype.
@@ -67,39 +74,51 @@ defmodule Loka.WorldBuilder.EntityManager do
     name = Map.get(attrs, :name, "New #{subtype}")
     description = Map.get(attrs, :description, "")
 
-    # Build entity struct directly (not from prototype)
-    entity = %Entity{
-      id: UUID.uuid4(),
-      type: subtype,
+    # Build entity data for YAML
+    entity_data = %{
       key: key,
-      short_desc: name,
-      long_desc: description,
-      extra_desc: description,
-      keywords: [key],
-      location_id: nil,
-      contents: [],
-      components: build_components(subtype, attrs),
-      behaviors: [],
-      attributes: %{},
+      subtype: subtype,
+      name: name,
+      description: description,
       tags: Map.get(attrs, :tags, []),
-      scripts: %{},
-      locks: %{},
-      metadata: %{
-        created_at: DateTime.utc_now(),
-        updated_at: DateTime.utc_now(),
-        created_by: "world_builder"
-      }
+      components: build_components(subtype, attrs),
+      # Subtype-specific fields
+      level: Map.get(attrs, :level),
+      item_type: Map.get(attrs, :item_type),
+      keywords: [key]
     }
 
-    case Entities.save_entity(entity) do
-      {:ok, schema} ->
-        saved_entity = Entities.to_entity(schema)
-        Logger.info("[EntityManager] Created #{subtype}: #{key} (#{saved_entity.id})")
-        {:ok, enrich_entity_for_ui(saved_entity)}
+    # Save to YAML file
+    case save_entity_yaml(entity_data) do
+      :ok ->
+        # Reload to get the entity into the registry
+        case Registry.get(key) do
+          {:ok, entity} ->
+            Logger.info("[EntityManager] Created #{subtype}: #{key}")
+            {:ok, enrich_for_ui(entity)}
 
-      {:error, changeset} ->
-        Logger.error("[EntityManager] Failed to create #{subtype}: #{inspect(changeset)}")
-        {:error, "Failed to create #{subtype}"}
+          {:error, _} ->
+            # Entity created but not yet in registry - build a response
+            Logger.info("[EntityManager] Created #{subtype}: #{key} (pending reload)")
+
+            {:ok,
+             %{
+               id: key,
+               key: key,
+               type: :entity,
+               subtype: subtype,
+               name: name,
+               description: description,
+               tags: Map.get(attrs, :tags, []),
+               attributes: %{},
+               components: build_components(subtype, attrs),
+               data: %{}
+             }}
+        end
+
+      {:error, reason} ->
+        Logger.error("[EntityManager] Failed to create #{subtype}: #{inspect(reason)}")
+        {:error, "Failed to create #{subtype}: #{inspect(reason)}"}
     end
   end
 
@@ -124,12 +143,26 @@ defmodule Loka.WorldBuilder.EntityManager do
   Returns {:ok, entity_map} or {:error, reason}
   """
   def update_entity(entity_id, attrs) when is_binary(entity_id) and is_map(attrs) do
-    with {:ok, _entity} <- Registry.get(entity_id) do
-      updates = ensure_atom_keys(attrs)
+    with {:ok, entity} <- Registry.get(entity_id) do
+      attrs = ensure_atom_keys(attrs)
 
-      case EntityServer.update(entity_id, updates) do
-        {:ok, _} ->
-          Logger.info("[EntityManager] Updated entity: #{entity_id}")
+      # Build updated entity data from existing + new attrs
+      entity_data = %{
+        key: entity.key,
+        subtype: entity.subtype,
+        name: Map.get(attrs, :name, entity.name || entity.key),
+        description: Map.get(attrs, :description, entity.description || ""),
+        tags: Map.get(attrs, :tags, entity.tags || []),
+        components: merge_components(entity, attrs),
+        keywords: entity.keywords || [entity.key],
+        # Preserve subtype-specific fields
+        level: get_level(entity, attrs),
+        item_type: get_item_type(entity, attrs)
+      }
+
+      case save_entity_yaml(entity_data) do
+        :ok ->
+          Logger.info("[EntityManager] Updated entity (YAML): #{entity_id}")
           get_entity(entity_id)
 
         {:error, reason} ->
@@ -148,14 +181,22 @@ defmodule Loka.WorldBuilder.EntityManager do
   Returns :ok or {:error, reason}
   """
   def delete_entity(entity_id) when is_binary(entity_id) do
-    case Spawner.despawn(entity_id) do
-      :ok ->
-        Logger.info("[EntityManager] Deleted entity: #{entity_id}")
-        :ok
+    # Get entity to find its subtype for the correct directory
+    case Registry.get(entity_id) do
+      {:ok, entity} ->
+        # Delete the YAML file
+        case delete_entity_yaml(entity.key, entity.subtype) do
+          :ok ->
+            Logger.info("[EntityManager] Deleted entity: #{entity_id}")
+            :ok
 
-      {:error, reason} ->
-        Logger.error("[EntityManager] Delete failed: #{inspect(reason)}")
-        {:error, reason}
+          {:error, reason} ->
+            Logger.error("[EntityManager] Delete failed: #{inspect(reason)}")
+            {:error, reason}
+        end
+
+      {:error, :not_found} ->
+        {:error, :entity_not_found}
     end
   end
 
@@ -285,5 +326,251 @@ defmodule Loka.WorldBuilder.EntityManager do
       components: entity.components || %{},
       data: %{}
     }
+  end
+
+  # =============================================================================
+  # YAML Persistence
+  # =============================================================================
+
+  defp save_entity_yaml(entity_data) do
+    with :ok <- validate_safe_key(entity_data.key) do
+      subtype = entity_data.subtype
+      dir = get_subtype_dir(subtype)
+      ensure_dir(dir)
+
+      file_path = Path.join(dir, "#{entity_data.key}.yml")
+      yaml_content = build_entity_yaml(entity_data)
+
+      case File.write(file_path, yaml_content) do
+        :ok ->
+          # Reload to update registry
+          Loader.reload()
+          :ok
+
+        {:error, reason} ->
+          {:error, reason}
+      end
+    else
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  defp delete_entity_yaml(key, subtype) do
+    dir = get_subtype_dir(subtype)
+    file_path = Path.join(dir, "#{key}.yml")
+
+    case File.rm(file_path) do
+      :ok ->
+        Loader.reload()
+        :ok
+
+      {:error, :enoent} ->
+        # File doesn't exist, that's fine
+        :ok
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  defp get_subtype_dir(:npc), do: Path.join(@prototypes_dir, "npcs")
+  defp get_subtype_dir(:item), do: Path.join(@prototypes_dir, "items")
+  defp get_subtype_dir(subtype), do: Path.join(@prototypes_dir, "#{subtype}s")
+
+  defp build_entity_yaml(entity_data) do
+    subtype = entity_data.subtype
+    key = entity_data.key
+    name = entity_data.name || key
+    description = entity_data.description || ""
+    tags = entity_data[:tags] || []
+    components = entity_data[:components] || %{}
+    keywords = entity_data[:keywords] || [key]
+
+    parent = get_parent(subtype)
+
+    # Build YAML content
+    yaml = """
+    key: #{key}
+    type: #{subtype}
+    parent: #{parent}
+    short_desc: "#{escape_yaml_string(name)}"
+    long_desc: "#{escape_yaml_string(description)}"
+    extra_desc: |
+      #{indent_multiline(description, 2)}
+    keywords: #{format_yaml_list(keywords)}
+    primary_keyword: #{List.first(keywords) || key}
+    """
+
+    # Add subtype-specific fields
+    yaml =
+      case subtype do
+        :npc ->
+          yaml <> "mood: neutral\n"
+
+        :item ->
+          yaml
+
+        _ ->
+          yaml
+      end
+
+    # Add tags
+    yaml =
+      if length(tags) > 0 do
+        tags_yaml = tags |> Enum.map(&"  - #{&1}") |> Enum.join("\n")
+        yaml <> "tags:\n" <> tags_yaml <> "\n"
+      else
+        yaml <> "tags: []\n"
+      end
+
+    # Add components if any
+    yaml =
+      if map_size(components) > 0 do
+        yaml <> "components:\n" <> build_components_yaml(components, 2)
+      else
+        yaml
+      end
+
+    yaml
+  end
+
+  defp get_parent(:npc), do: "base_npc"
+  defp get_parent(:item), do: "base_item"
+  defp get_parent(_), do: "base_entity"
+
+  defp build_components_yaml(components, indent) when is_map(components) do
+    prefix = String.duplicate(" ", indent)
+
+    components
+    |> Enum.map(fn {key, value} ->
+      key_str = if is_atom(key), do: Atom.to_string(key), else: key
+      "#{prefix}#{key_str}:\n#{build_yaml_value(value, indent + 2)}"
+    end)
+    |> Enum.join("")
+  end
+
+  defp build_yaml_value(value, indent) when is_map(value) do
+    prefix = String.duplicate(" ", indent)
+
+    value
+    |> Enum.map(fn {k, v} ->
+      key_str = if is_atom(k), do: Atom.to_string(k), else: k
+
+      if is_list(v) do
+        "#{prefix}#{key_str}:\n#{build_yaml_list_block(v, indent + 2)}"
+      else
+        "#{prefix}#{key_str}: #{format_inline_value(v)}\n"
+      end
+    end)
+    |> Enum.join("")
+  end
+
+  defp build_yaml_value(value, indent) when is_list(value) do
+    build_yaml_list_block(value, indent)
+  end
+
+  defp build_yaml_value(value, indent) do
+    prefix = String.duplicate(" ", indent)
+    "#{prefix}#{format_inline_value(value)}\n"
+  end
+
+  defp build_yaml_list_block(items, indent) when is_list(items) do
+    prefix = String.duplicate(" ", indent)
+
+    items
+    |> Enum.map(fn item ->
+      if is_binary(item) do
+        "#{prefix}- \"#{escape_yaml_string(item)}\"\n"
+      else
+        "#{prefix}- #{format_inline_value(item)}\n"
+      end
+    end)
+    |> Enum.join("")
+  end
+
+  defp format_yaml_list([]), do: "[]"
+
+  defp format_yaml_list(items) when is_list(items) do
+    inner =
+      items
+      |> Enum.map(fn item ->
+        if is_binary(item), do: item, else: inspect(item)
+      end)
+      |> Enum.join(", ")
+
+    "[#{inner}]"
+  end
+
+  defp format_inline_value(value) when is_binary(value), do: "\"#{escape_yaml_string(value)}\""
+  defp format_inline_value(value) when is_integer(value), do: Integer.to_string(value)
+  defp format_inline_value(value) when is_float(value), do: Float.to_string(value)
+  defp format_inline_value(value) when is_boolean(value), do: Atom.to_string(value)
+  defp format_inline_value(value) when is_nil(value), do: "null"
+  defp format_inline_value(value) when is_atom(value), do: Atom.to_string(value)
+  defp format_inline_value(value), do: inspect(value)
+
+  defp escape_yaml_string(str) when is_binary(str) do
+    str
+    |> String.replace("\\", "\\\\")
+    |> String.replace("\"", "\\\"")
+    |> String.replace("\n", "\\n")
+  end
+
+  defp escape_yaml_string(_), do: ""
+
+  defp indent_multiline(text, spaces) when is_binary(text) do
+    prefix = String.duplicate(" ", spaces)
+
+    text
+    |> String.split("\n")
+    |> Enum.map(&"#{prefix}#{&1}")
+    |> Enum.join("\n")
+    |> String.trim_trailing()
+  end
+
+  defp indent_multiline(_, _), do: ""
+
+  defp validate_safe_key(key) when is_binary(key) do
+    # Prevent path traversal attacks
+    if String.contains?(key, [".", "/", "\\"]) do
+      {:error, "Invalid key: contains illegal characters"}
+    else
+      :ok
+    end
+  end
+
+  defp validate_safe_key(_), do: {:error, "Invalid key: must be a string"}
+
+  defp ensure_dir(dir) do
+    unless File.exists?(dir) do
+      File.mkdir_p!(dir)
+    end
+  end
+
+  # Merge components from existing entity with new attrs
+  defp merge_components(entity, attrs) do
+    existing =
+      (Map.get(entity.data, "components", %{}) || %{})
+      |> Map.merge(Map.get(entity.data, :components, %{}) || %{})
+      |> Map.merge(entity.components || %{})
+
+    new_components = Map.get(attrs, :components, %{})
+    Map.merge(existing, new_components)
+  end
+
+  # Extract level from entity or attrs
+  defp get_level(entity, attrs) do
+    Map.get(attrs, :level) ||
+      get_in(entity.data, ["components", "combatant", "level"]) ||
+      get_in(entity.data, [:components, :combatant, :level]) ||
+      1
+  end
+
+  # Extract item_type from entity or attrs
+  defp get_item_type(entity, attrs) do
+    Map.get(attrs, :item_type) ||
+      get_in(entity.data, ["components", "item", "item_type"]) ||
+      get_in(entity.data, [:components, :item, :item_type]) ||
+      "misc"
   end
 end
