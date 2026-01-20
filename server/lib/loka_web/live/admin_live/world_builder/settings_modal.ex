@@ -17,7 +17,8 @@ defmodule LokaWeb.AdminLive.WorldBuilder.SettingsModal do
       anthropic: :unconfigured,
       openai: :unconfigured,
       deepseek: :unconfigured,
-      gemini: :unconfigured
+      gemini: :unconfigured,
+      glm: :unconfigured
     }
 
   attr :selected_model, :string, default: "claude-opus-4-5-20251101"
@@ -26,7 +27,8 @@ defmodule LokaWeb.AdminLive.WorldBuilder.SettingsModal do
     %{id: "anthropic", name: "Anthropic", placeholder: "sk-ant-...", icon: "hero-sparkles"},
     %{id: "openai", name: "OpenAI", placeholder: "sk-...", icon: "hero-bolt"},
     %{id: "deepseek", name: "DeepSeek", placeholder: "sk-...", icon: "hero-beaker"},
-    %{id: "gemini", name: "Google Gemini", placeholder: "AIza...", icon: "hero-globe-alt"}
+    %{id: "gemini", name: "Google Gemini", placeholder: "AIza...", icon: "hero-globe-alt"},
+    %{id: "glm", name: "GLM (Zhipu AI)", placeholder: "...", icon: "hero-cpu-chip"}
   ]
 
   @doc """

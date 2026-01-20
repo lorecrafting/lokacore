@@ -1051,7 +1051,7 @@ const Hooks = {
   // =============================================================================
   MultiAPIKeyConfig: {
     mounted() {
-      const providers = ['anthropic', 'openai', 'deepseek', 'gemini']
+      const providers = ['anthropic', 'openai', 'deepseek', 'gemini', 'glm']
 
       // Check stored keys for all providers on mount
       providers.forEach(provider => {
@@ -1125,6 +1125,8 @@ const Hooks = {
           return this.validateDeepSeekKey(key)
         case 'gemini':
           return this.validateGeminiKey(key)
+        case 'glm':
+          return this.validateGLMKey(key)
         default:
           return false
       }
@@ -1190,6 +1192,23 @@ const Hooks = {
         body: JSON.stringify({
           contents: [{ parts: [{ text: 'Hi' }] }],
           generationConfig: { maxOutputTokens: 10 }
+        })
+      })
+      return response.ok
+    },
+
+    async validateGLMKey(key) {
+      // GLM (Zhipu AI) uses OpenAI-compatible API
+      const response = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${key}`
+        },
+        body: JSON.stringify({
+          model: 'glm-4-flash',
+          max_tokens: 10,
+          messages: [{ role: 'user', content: 'Hi' }]
         })
       })
       return response.ok

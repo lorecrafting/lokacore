@@ -121,7 +121,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
        anthropic: :unconfigured,
        openai: :unconfigured,
        deepseek: :unconfigured,
-       gemini: :unconfigured
+       gemini: :unconfigured,
+       glm: :unconfigured
      })
      |> assign(:selected_model, "claude-opus-4-5-20251101")
      |> assign(:collapsed_panels, %{
@@ -680,7 +681,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
     provider_atom = String.to_existing_atom(provider)
 
-    if provider_atom in [:anthropic, :openai, :deepseek, :gemini] do
+    if provider_atom in [:anthropic, :openai, :deepseek, :gemini, :glm] do
       statuses = socket.assigns.api_key_statuses
       new_statuses = Map.put(statuses, provider_atom, status_atom)
       {:noreply, assign(socket, :api_key_statuses, new_statuses)}
