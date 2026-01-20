@@ -28,6 +28,13 @@ emotes:
   training: "*moves through forms with the grace of flowing water*"
   encouragement: "*places a steadying hand on your shoulder* You have the spirit."
 
+# Behaviors - teacher follows monastic schedule
+behaviors:
+  - script: day_night_schedule
+    config:
+      wake_at: dawn
+      sleep_at: dusk
+
 components:
   ambient_actions:
     messages:

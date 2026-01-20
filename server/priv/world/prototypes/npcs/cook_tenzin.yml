@@ -37,6 +37,13 @@ emotes:
   tasting: "*samples his creation, eyes closing in concentration*"
   humming: "*hums a cheerful tune while chopping vegetables*"
 
+# Behaviors - cook rises early to prepare meals
+behaviors:
+  - script: day_night_schedule
+    config:
+      wake_at: dawn
+      sleep_at: evening
+
 components:
   ambient_actions:
     messages:

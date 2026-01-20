@@ -27,6 +27,13 @@ emotes:
   blessing: "*traces a sacred symbol in the air* Go with wisdom."
   concerned: "*furrows his brow, prayer beads moving faster*"
 
+# Behaviors - abbot rises early for morning prayers
+behaviors:
+  - script: day_night_schedule
+    config:
+      wake_at: dawn
+      sleep_at: evening
+
 components:
   ambient_actions:
     messages:

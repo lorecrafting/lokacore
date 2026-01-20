@@ -28,6 +28,13 @@ emotes:
   teaching: "*her voice grows stronger as ancient wisdom flows through her*"
   remembering: "*gazes into the distance, seeing memories long past*"
 
+# Behaviors - elder follows a gentle schedule
+behaviors:
+  - script: day_night_schedule
+    config:
+      wake_at: morning
+      sleep_at: dusk
+
 components:
   ambient_actions:
     messages:

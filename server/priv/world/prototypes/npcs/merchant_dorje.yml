@@ -27,6 +27,17 @@ emotes:
   haggling: "*strokes his chin thoughtfully, calculating*"
   sale_complete: "*bows slightly* A fair trade! May it serve you well."
 
+# Behaviors - traveling merchant with flexible hours
+behaviors:
+  - script: shopkeeper_hours
+    config:
+      open_at: morning
+      close_at: evening
+  - script: day_night_schedule
+    config:
+      wake_at: dawn
+      sleep_at: dusk
+
 components:
   ambient_actions:
     messages:

@@ -34,6 +34,17 @@ emotes:
   working: "*hammer rings against hot metal in steady rhythm*"
   forging_complete: "*holds the finished piece up to the light, examining it*"
 
+# Behaviors - shopkeeper with regular hours
+behaviors:
+  - script: shopkeeper_hours
+    config:
+      open_at: morning
+      close_at: evening
+  - script: day_night_schedule
+    config:
+      wake_at: dawn
+      sleep_at: dusk
+
 components:
   ambient_actions:
     messages:
