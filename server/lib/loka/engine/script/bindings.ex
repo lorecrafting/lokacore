@@ -310,13 +310,26 @@ defmodule Loka.Engine.Script.Bindings do
     if room_id, do: get_room_data(room_id), else: nil
   end
 
-  # NOTE: Stub awaiting framework integration
-  # This function will be integrated with Loka.Engine.Registry once room
-  # entities are fully implemented. For now, returns placeholder data.
-  defp get_room_data(_room_id) do
-    # TODO: Integrate with Loka.Engine.Registry.get/1
-    %{id: nil, name: "Unknown", exits: %{}}
+  # Get room data from TypedObject.Registry
+  defp get_room_data(room_id) when is_binary(room_id) do
+    alias Loka.Engine.TypedObject.Registry, as: TypedRegistry
+
+    case TypedRegistry.get(room_id) do
+      {:ok, room} ->
+        %{
+          id: room.key,
+          name: room.short_desc || room.key,
+          description: room.long_desc,
+          exits: Map.get(room.data, :exits, %{}),
+          tags: room.tags
+        }
+
+      {:error, :not_found} ->
+        %{id: room_id, name: "Unknown", exits: %{}}
+    end
   end
+
+  defp get_room_data(_), do: %{id: nil, name: "Unknown", exits: %{}}
 
   defp get_location(entity) do
     Map.get(entity, :location_id)
@@ -383,40 +396,75 @@ defmodule Loka.Engine.Script.Bindings do
     Map.get(attrs, attr_name) || Map.get(attrs, String.to_atom(attr_name))
   end
 
-  # NOTE: Stub awaiting framework integration
-  # These entity query functions will be integrated with Loka.Engine.Registry
-  # once the entity spawning and room containment systems are fully connected
-  # to the scripting layer. For now, they return empty/placeholder data.
-  #
-  # Integration tasks:
-  # - Connect to Registry.list_by_location/1 for room queries
-  # - Filter by TypedObject.subtype for player vs NPC distinction
-  # - Implement tag-based queries via TypedObject.has_tag?/2
+  # Entity query functions - query active entities in rooms
 
-  defp entities_in_room(_player) do
-    # TODO: Integrate with Loka.Engine.Registry.list_by_location/1
-    []
+  defp entities_in_room(player) do
+    alias Loka.Engine.{EntityRegistry, EntityServer}
+
+    room_id = get_player_room_id(player)
+
+    if room_id do
+      # Get entity IDs in this room from the in-memory tracking
+      entity_ids = EntityRegistry.get_room_occupants(room_id)
+
+      # Fetch entity data for each (only active ones)
+      entity_ids
+      |> Enum.map(fn entity_id ->
+        case EntityRegistry.lookup(entity_id) do
+          {:ok, pid} -> EntityServer.get_entity(pid)
+          :not_found -> nil
+        end
+      end)
+      |> Enum.reject(&is_nil/1)
+      |> Enum.map(&safe_entity_map/1)
+    else
+      []
+    end
   end
 
-  defp players_in_room(_player) do
-    # TODO: Filter entities_in_room by subtype: :character
-    []
+  defp players_in_room(player) do
+    # Filter entities_in_room to only include players
+    entities_in_room(player)
+    |> Enum.filter(fn entity ->
+      entity[:type] == :character || entity[:type] == :player
+    end)
   end
 
-  defp entity_present?(_player, _entity_key) do
-    # TODO: Check Registry for entity with matching key in same room
-    false
+  defp entity_present?(player, entity_key) do
+    entities_in_room(player)
+    |> Enum.any?(fn entity ->
+      entity[:key] == entity_key || entity[:id] == entity_key
+    end)
   end
 
-  defp find_entity(_player, _opts) do
-    # TODO: Query Registry with filtering options
-    nil
+  defp find_entity(player, opts) when is_map(opts) do
+    # Find entity by key, id, or other criteria
+    key = Map.get(opts, :key) || Map.get(opts, "key")
+    id = Map.get(opts, :id) || Map.get(opts, "id")
+
+    entities_in_room(player)
+    |> Enum.find(fn entity ->
+      (key && entity[:key] == key) || (id && entity[:id] == id)
+    end)
   end
 
-  defp find_entities_by_tag(_player, _tag) do
-    # TODO: Query Registry and filter by TypedObject.has_tag?/2
-    []
+  defp find_entity(player, key) when is_binary(key) do
+    find_entity(player, %{key: key})
   end
+
+  defp find_entities_by_tag(player, tag) do
+    entities_in_room(player)
+    |> Enum.filter(fn entity ->
+      tags = entity[:tags] || []
+      tag in tags
+    end)
+  end
+
+  defp get_player_room_id(player) when is_map(player) do
+    Map.get(player, :location_id) || Map.get(player, :location)
+  end
+
+  defp get_player_room_id(_), do: nil
 
   defp time_of_day do
     hour = current_hour()
