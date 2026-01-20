@@ -51,10 +51,15 @@ defmodule Loka.Timers.Server do
 
   alias Loka.Timers.Timer
   alias Loka.Session.Server, as: SessionServer
+  alias Loka.Engine.Script.Executor
+  alias Loka.Engine.{EntityRegistry, EntityServer}
 
   @type timer_type :: :crafting | :gathering | :quest | :cooldown
 
-  # State: %{timer_id => timer_ref}
+  # State: %{
+  #   timer_refs: %{timer_id => timer_ref},  # Persistent timer refs
+  #   script_timers: %{ref => timer_data}    # In-memory script timer refs
+  # }
   # Maps timer IDs to their Process.send_after references for cancellation
 
   # =============================================================================
@@ -63,6 +68,37 @@ defmodule Loka.Timers.Server do
 
   def start_link(_opts) do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
+  end
+
+  @doc """
+  Schedule a script to run after a delay.
+
+  Unlike persistent timers, script timers are in-memory only and don't survive
+  server restarts. This is appropriate for behavior timers (patrol, schedule)
+  that can restart cleanly.
+
+  ## Parameters
+
+  - `entity_id` - The entity ID to run the script on
+  - `delay_seconds` - Delay in seconds before running the script
+  - `script_key` - Key of the script to run
+  - `context` - Additional context to pass to the script (config, etc.)
+
+  ## Returns
+
+  - `{:ok, ref}` - Timer scheduled, returns reference for cancellation
+  """
+  @spec schedule_script(String.t(), number(), String.t(), map()) :: {:ok, reference()}
+  def schedule_script(entity_id, delay_seconds, script_key, context \\ %{}) do
+    GenServer.call(__MODULE__, {:schedule_script, entity_id, delay_seconds, script_key, context})
+  end
+
+  @doc """
+  Cancel a script timer by reference.
+  """
+  @spec cancel_script_timer(reference()) :: :ok
+  def cancel_script_timer(ref) do
+    GenServer.call(__MODULE__, {:cancel_script_timer, ref})
   end
 
   @doc """
@@ -149,7 +185,7 @@ defmodule Loka.Timers.Server do
       |> Enum.reject(&is_nil/1)
       |> Map.new()
 
-    {:ok, %{timer_refs: timer_refs}}
+    {:ok, %{timer_refs: timer_refs, script_timers: %{}}}
   end
 
   @impl true
@@ -197,6 +233,34 @@ defmodule Loka.Timers.Server do
   end
 
   @impl true
+  def handle_call({:schedule_script, entity_id, delay_seconds, script_key, context}, _from, state) do
+    delay_ms = round(delay_seconds * 1000)
+
+    timer_data = %{
+      entity_id: entity_id,
+      script_key: script_key,
+      context: context,
+      scheduled_at: DateTime.utc_now()
+    }
+
+    ref = Process.send_after(self(), {:script_timer_complete, timer_data}, delay_ms)
+
+    Logger.debug(
+      "[Timers.Server] Scheduled script timer: #{script_key} for entity #{entity_id} in #{delay_seconds}s"
+    )
+
+    new_script_timers = Map.put(state.script_timers, ref, timer_data)
+    {:reply, {:ok, ref}, %{state | script_timers: new_script_timers}}
+  end
+
+  @impl true
+  def handle_call({:cancel_script_timer, ref}, _from, state) do
+    Process.cancel_timer(ref)
+    new_script_timers = Map.delete(state.script_timers, ref)
+    {:reply, :ok, %{state | script_timers: new_script_timers}}
+  end
+
+  @impl true
   def handle_info({:timer_complete, timer_id}, state) do
     case Timer.get(timer_id) do
       nil ->
@@ -226,6 +290,20 @@ defmodule Loka.Timers.Server do
         new_refs = Map.delete(state.timer_refs, timer_id)
         {:noreply, %{state | timer_refs: new_refs}}
     end
+  end
+
+  @impl true
+  def handle_info({:script_timer_complete, timer_data}, state) do
+    %{entity_id: entity_id, script_key: script_key, context: context} = timer_data
+
+    Logger.debug("[Timers.Server] Script timer complete: #{script_key} for entity #{entity_id}")
+
+    # Run the script asynchronously to avoid blocking the timer server
+    Task.start(fn ->
+      run_scheduled_script(entity_id, script_key, context)
+    end)
+
+    {:noreply, state}
   end
 
   @impl true
@@ -284,5 +362,31 @@ defmodule Loka.Timers.Server do
        scheduled_at: timer.scheduled_at,
        completed_at: timer.completed_at
      }}
+  end
+
+  # Run a scheduled script with the entity context
+  defp run_scheduled_script(entity_id, script_key, context) do
+    # Look up the entity from the EntityRegistry (active entities)
+    case EntityRegistry.get_or_start(entity_id) do
+      {:ok, pid} ->
+        entity = EntityServer.get_entity(pid)
+        # Merge scheduled context with a minimal context
+        script_context = Map.merge(%{scheduled: true}, context)
+
+        case Executor.run_by_key(script_key, entity, script_context) do
+          {:ok, _result} ->
+            Logger.debug("[Timers.Server] Scheduled script #{script_key} completed successfully")
+
+          {:error, reason} ->
+            Logger.warning(
+              "[Timers.Server] Scheduled script #{script_key} failed: #{inspect(reason)}"
+            )
+        end
+
+      {:error, reason} ->
+        Logger.warning(
+          "[Timers.Server] Entity #{entity_id} not found for scheduled script #{script_key}: #{inspect(reason)}"
+        )
+    end
   end
 end

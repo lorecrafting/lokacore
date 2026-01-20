@@ -469,17 +469,37 @@ defmodule Loka.Engine.Script.ActionQueue do
   end
 
   defp execute_action(
-         {:schedule, %{delay: delay, script_key: script_key, context: ctx}},
+         {:schedule, %{delay: delay, script_key: script_key, entity_id: entity_id, context: ctx}},
          _context
        ) do
-    # Schedule execution after delay (uses Loka.Timers or Process.send_after)
-    event =
-      Event.new(:schedule_script, %{
-        payload: %{delay: delay, script_key: script_key, context: ctx}
-      })
+    # Schedule script execution via the Timers system
+    case Loka.Timers.Server.schedule_script(entity_id, delay, script_key, ctx) do
+      {:ok, _ref} ->
+        :ok
 
-    EventBus.emit(event)
-    :ok
+      {:error, reason} ->
+        Logger.warning("[ActionQueue] Failed to schedule script: #{inspect(reason)}")
+        {:error, reason}
+    end
+  end
+
+  # Legacy format without entity_id (for backwards compatibility)
+  defp execute_action(
+         {:schedule, %{delay: delay, script_key: script_key, context: ctx}},
+         context
+       ) do
+    # Try to extract entity_id from context
+    entity_id = Map.get(context, :entity_id)
+
+    if entity_id do
+      execute_action(
+        {:schedule, %{delay: delay, script_key: script_key, entity_id: entity_id, context: ctx}},
+        context
+      )
+    else
+      Logger.warning("[ActionQueue] Cannot schedule script without entity_id")
+      {:error, :missing_entity_id}
+    end
   end
 
   defp execute_action({:emit_event, %{event_name: name, data: data}}, _context) do

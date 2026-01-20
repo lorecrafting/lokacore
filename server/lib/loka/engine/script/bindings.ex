@@ -169,8 +169,8 @@ defmodule Loka.Engine.Script.Bindings do
       lock_exit: fn direction -> queue_lock_exit(entity, direction) end,
       unlock_exit: fn direction -> queue_unlock_exit(entity, direction) end,
 
-      # Scheduling
-      after: fn delay, script_key -> queue_schedule(delay, script_key, %{}) end,
+      # Scheduling (capture entity for later execution)
+      after: fn delay, script_key -> queue_schedule(entity, delay, script_key, %{}) end,
 
       # Events
       emit: fn event_name, data -> queue_emit(event_name, data) end
@@ -560,8 +560,17 @@ defmodule Loka.Engine.Script.Bindings do
     :ok
   end
 
-  defp queue_schedule(delay, script_key, ctx) do
-    ActionQueue.queue({:schedule, %{delay: delay, script_key: script_key, context: ctx}})
+  defp queue_schedule(entity, delay, script_key, ctx) do
+    entity_id = Map.get(entity, :id)
+
+    if entity_id do
+      ActionQueue.queue(
+        {:schedule, %{delay: delay, script_key: script_key, entity_id: entity_id, context: ctx}}
+      )
+    else
+      Logger.warning("[Bindings] Cannot schedule script without entity id")
+    end
+
     :ok
   end
 

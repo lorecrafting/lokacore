@@ -186,4 +186,52 @@ defmodule Loka.Engine.Script.ActionQueueTest do
       assert limits.damage_total == 1000
     end
   end
+
+  describe "schedule action" do
+    test "queues a schedule action with entity_id" do
+      action =
+        {:schedule,
+         %{
+           delay: 60,
+           script_key: "patrol_script",
+           entity_id: "npc_guard_1",
+           context: %{route: ["a", "b", "c"]}
+         }}
+
+      assert :ok = ActionQueue.queue(action)
+
+      [{:schedule, params}] = ActionQueue.get()
+      assert params.delay == 60
+      assert params.script_key == "patrol_script"
+      assert params.entity_id == "npc_guard_1"
+      assert params.context.route == ["a", "b", "c"]
+    end
+
+    test "enforces schedule limit" do
+      for i <- 1..5 do
+        assert :ok =
+                 ActionQueue.queue(
+                   {:schedule,
+                    %{
+                      delay: 60,
+                      script_key: "script_#{i}",
+                      entity_id: "entity_1",
+                      context: %{}
+                    }}
+                 )
+      end
+
+      # Next one should fail
+      assert {:error, :rate_limited} =
+               ActionQueue.queue(
+                 {:schedule,
+                  %{
+                    delay: 60,
+                    script_key: "script_6",
+                    entity_id: "entity_1",
+                    context: %{}
+                  }}
+               )
+    end
+  end
 end
