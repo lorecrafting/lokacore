@@ -1305,6 +1305,7 @@ const Hooks = {
     mounted() {
       // Parse initial script data from data attribute
       const scriptData = JSON.parse(this.el.dataset.script || 'null')
+      const entities = JSON.parse(this.el.dataset.entities || '[]')
 
       // Create React root and mount ScriptEditor component
       this.root = createRoot(this.el)
@@ -1321,7 +1322,8 @@ const Hooks = {
         React.createElement(ScriptEditor, {
           onSave,
           onCancel,
-          initialData: scriptData
+          initialData: scriptData,
+          entities: entities
         })
       )
     },
@@ -1329,6 +1331,7 @@ const Hooks = {
     updated() {
       // Re-parse script data when LiveView updates
       const scriptData = JSON.parse(this.el.dataset.script || 'null')
+      const entities = JSON.parse(this.el.dataset.entities || '[]')
 
       const onSave = (scriptData) => {
         this.pushEvent('save_script', scriptData)
@@ -1342,7 +1345,8 @@ const Hooks = {
         React.createElement(ScriptEditor, {
           onSave,
           onCancel,
-          initialData: scriptData
+          initialData: scriptData,
+          entities: entities
         })
       )
     },

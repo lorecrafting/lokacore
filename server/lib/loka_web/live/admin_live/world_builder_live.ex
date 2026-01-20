@@ -390,6 +390,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
             <div
               id="quest-editor-root"
               phx-hook="QuestEditor"
+              phx-update="ignore"
               style="flex: 1; overflow: hidden;"
               data-on-save="create_quest"
               data-on-cancel="close_quest_editor"
@@ -414,6 +415,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
             <div
               id="cutscene-editor-root"
               phx-hook="CutsceneEditor"
+              phx-update="ignore"
               style="flex: 1; overflow: hidden;"
               data-on-save="create_cutscene"
               data-on-cancel="close_cutscene_editor"
@@ -433,6 +435,25 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
           >
             <div class="modal-header">
               <h3>Dialogue Tree Editor</h3>
+              <div
+                class="dialogue-entity-selector"
+                style="display: flex; align-items: center; gap: 0.5rem; margin-left: 1rem;"
+              >
+                <label style="color: #909090; font-size: 0.875rem;">Entity:</label>
+                <select
+                  phx-change="dialogue_update_entity"
+                  name="npc_key"
+                  class="input"
+                  style="width: 200px; padding: 0.25rem 0.5rem; font-size: 0.875rem;"
+                >
+                  <option value="">None (standalone)</option>
+                  <%= for npc <- @npcs do %>
+                    <option value={npc.key} selected={@editing_dialogue_npc == npc.key}>
+                      {npc[:name] || npc[:short_desc] || npc.key} ({npc.key})
+                    </option>
+                  <% end %>
+                </select>
+              </div>
               <button phx-click="close_dialogue_editor" class="modal-close">&times;</button>
             </div>
             <div style="flex: 1; overflow: hidden;">
@@ -449,7 +470,10 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
       <%!-- Script Editor Modal --%>
       <%= if @show_script_editor do %>
-        <ScriptEditor.script_editor script={@editing_script} />
+        <ScriptEditor.script_editor
+          script={@editing_script}
+          entities={build_entity_list(@rooms, @npcs, @items)}
+        />
       <% end %>
 
       <%!-- Template Picker Modal --%>
@@ -707,8 +731,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   end
 
   def handle_event("update_room_field", params, socket) do
-    room_id = params["id"]
-    updates = Map.drop(params, ["id", "_target"])
+    room_id = params["room_id"]
+    updates = Map.drop(params, ["room_id", "_target"])
 
     # Validate fields if present
     validation_result =
@@ -1597,22 +1621,13 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   # Dialogue Editor Event Handlers
   # =============================================================================
 
-  def handle_event("show_dialogue_editor", %{"npc_key" => npc_key}, socket) do
-    # Load NPC's dialogue tree
-    npcs = socket.assigns.npcs
-    npc = Enum.find(npcs, fn n -> n.key == npc_key end)
-
-    dialogue_tree =
-      case npc do
-        nil -> %{}
-        npc -> get_in(npc, [:components, :dialogue_tree]) || %{}
-      end
-
+  # Handle dialogue editor without NPC (create new dialogue)
+  def handle_event("show_dialogue_editor", _params, socket) do
     {:noreply,
      socket
      |> assign(:show_dialogue_editor, true)
-     |> assign(:editing_dialogue_npc, npc_key)
-     |> assign(:editing_dialogue_tree, dialogue_tree)
+     |> assign(:editing_dialogue_npc, nil)
+     |> assign(:editing_dialogue_tree, %{})
      |> assign(:dialogue_selected_node, nil)
      |> assign(:dialogue_preview_mode, false)}
   end
@@ -1625,6 +1640,15 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:editing_dialogue_tree, %{})
      |> assign(:dialogue_selected_node, nil)
      |> assign(:dialogue_preview_mode, false)}
+  end
+
+  def handle_event("dialogue_update_entity", %{"npc_key" => npc_key}, socket) do
+    npc_key = if npc_key == "", do: nil, else: npc_key
+
+    {:noreply,
+     socket
+     |> assign(:editing_dialogue_npc, npc_key)
+     |> log_console(:info, "Dialogue entity set to: #{npc_key || "none"}")}
   end
 
   def handle_event("dialogue_select_node", %{"key" => node_key}, socket) do
@@ -2014,6 +2038,26 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     message = %{timestamp: timestamp, level: level, text: text}
 
     assign(socket, :console_messages, socket.assigns.console_messages ++ [message])
+  end
+
+  # Build a combined list of entities (rooms, NPCs, items) for script attachment
+  defp build_entity_list(rooms, npcs, items) do
+    room_entities =
+      Enum.map(rooms, fn r ->
+        %{key: r.key, name: r.name || r.key, type: "room"}
+      end)
+
+    npc_entities =
+      Enum.map(npcs, fn n ->
+        %{key: n.key, name: n[:name] || n[:short_desc] || n.key, type: "npc"}
+      end)
+
+    item_entities =
+      Enum.map(items, fn i ->
+        %{key: i.key, name: i[:name] || i[:short_desc] || i.key, type: "item"}
+      end)
+
+    room_entities ++ npc_entities ++ item_entities
   end
 
   # Safely parse algorithm string to atom, preventing atom exhaustion attacks

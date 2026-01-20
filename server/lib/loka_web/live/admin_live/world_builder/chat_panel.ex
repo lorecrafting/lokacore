@@ -45,6 +45,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
         class="panel-content chat-panel-content"
         style={if @collapsed, do: "display: none;"}
         phx-hook="ChatPanel"
+        phx-update="ignore"
         data-rooms={Jason.encode!(@rooms)}
         data-selected-room={Jason.encode!(@selected_room)}
         data-validation={Jason.encode!(@validation)}

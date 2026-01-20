@@ -82,6 +82,14 @@ defmodule LokaWeb.AdminLive.WorldBuilder.Toolbar do
           <.icon name="hero-film" class="size-4" />
           <span style="font-size: 0.75rem; margin-left: 4px;">Cutscene</span>
         </button>
+        <button class="toolbar-btn" phx-click="show_script_editor" title="Create Script">
+          <.icon name="hero-code-bracket" class="size-4" />
+          <span style="font-size: 0.75rem; margin-left: 4px;">Script</span>
+        </button>
+        <button class="toolbar-btn" phx-click="show_dialogue_editor" title="Create Dialogue">
+          <.icon name="hero-chat-bubble-left-right" class="size-4" />
+          <span style="font-size: 0.75rem; margin-left: 4px;">Dialogue</span>
+        </button>
       </div>
 
       <div class="toolbar-section">

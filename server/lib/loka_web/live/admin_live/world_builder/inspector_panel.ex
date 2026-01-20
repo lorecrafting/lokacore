@@ -51,7 +51,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
           
     <!-- Inspector sections -->
           <form phx-change="update_room_field">
-            <input type="hidden" name="id" value={room.id || room.key} />
+            <input type="hidden" name="room_id" value={room.id || room.key} />
             
     <!-- Properties Section -->
             <div class="inspector-section">

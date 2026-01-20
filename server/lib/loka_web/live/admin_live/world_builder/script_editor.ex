@@ -12,9 +12,18 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptEditor do
   import LokaWeb.CoreComponents
 
   attr :script, :map, default: nil
+  attr :entities, :list, default: []
   attr :class, :string, default: ""
 
   def script_editor(assigns) do
+    # Format entities for the dropdown: [{key, name, type}, ...]
+    entities_data =
+      Enum.map(assigns.entities, fn e ->
+        %{key: e.key, name: e[:name] || e[:short_desc] || e.key, type: e[:type] || "entity"}
+      end)
+
+    assigns = assign(assigns, :entities_data, entities_data)
+
     ~H"""
     <div class="modal-overlay" phx-click="close_script_editor">
       <div
@@ -31,7 +40,9 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptEditor do
           id="script-editor-root"
           class="script-editor-mount"
           phx-hook="ScriptEditor"
+          phx-update="ignore"
           data-script={Jason.encode!(@script)}
+          data-entities={Jason.encode!(@entities_data)}
           style="flex: 1; min-height: 0;"
         >
           <!-- React ScriptEditor mounts here -->

@@ -165,7 +165,7 @@ const TestRunnerPanel = ({ onRunTest, testResult, isRunning }) => {
 // Main Script Editor Component
 // ============================================================================
 
-export default function ScriptEditor({ onSave, onCancel, initialData }) {
+export default function ScriptEditor({ onSave, onCancel, initialData, entities = [] }) {
   // Form state
   const [scriptKey, setScriptKey] = useState(initialData?.key || '');
   const [scriptName, setScriptName] = useState(initialData?.name || '');
@@ -365,13 +365,32 @@ export default function ScriptEditor({ onSave, onCancel, initialData }) {
 
           <div className="form-group-inline">
             <label>Entity:</label>
-            <input
-              type="text"
+            <select
               value={entityKey}
               onChange={(e) => setEntityKey(e.target.value)}
               className="input-sm"
-              placeholder="optional_entity_key"
-            />
+            >
+              <option value="">None (standalone script)</option>
+              {entities.length > 0 && (
+                <>
+                  <optgroup label="NPCs">
+                    {entities.filter(e => e.type === 'npc').map(e => (
+                      <option key={e.key} value={e.key}>{e.name} ({e.key})</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Rooms">
+                    {entities.filter(e => e.type === 'room').map(e => (
+                      <option key={e.key} value={e.key}>{e.name} ({e.key})</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Items">
+                    {entities.filter(e => e.type === 'item').map(e => (
+                      <option key={e.key} value={e.key}>{e.name} ({e.key})</option>
+                    ))}
+                  </optgroup>
+                </>
+              )}
+            </select>
           </div>
         </div>
       </div>
