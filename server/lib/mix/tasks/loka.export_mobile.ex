@@ -142,7 +142,7 @@ defmodule Mix.Tasks.Loka.ExportMobile do
 
   defp export_rooms(world_filter) do
     rooms =
-      Loka.Engine.TypedObject.Loader.list_prototypes(:room)
+      Loka.Engine.TypedObject.Loader.list_by_type(:room)
       |> maybe_filter_by_world(world_filter)
       |> Enum.map(&load_and_transform_room/1)
       |> Enum.reject(&is_nil/1)
@@ -153,7 +153,7 @@ defmodule Mix.Tasks.Loka.ExportMobile do
 
   defp export_npcs(world_filter) do
     npcs =
-      Loka.Engine.TypedObject.Loader.list_prototypes(:npc)
+      Loka.Engine.TypedObject.Loader.list_by_type(:npc)
       |> maybe_filter_by_world(world_filter)
       |> Enum.map(&load_and_transform_npc/1)
       |> Enum.reject(&is_nil/1)
@@ -164,7 +164,7 @@ defmodule Mix.Tasks.Loka.ExportMobile do
 
   defp export_items(world_filter) do
     items =
-      Loka.Engine.TypedObject.Loader.list_prototypes(:item)
+      Loka.Engine.TypedObject.Loader.list_by_type(:item)
       |> maybe_filter_by_world(world_filter)
       |> Enum.map(&load_and_transform_item/1)
       |> Enum.reject(&is_nil/1)
@@ -205,107 +205,95 @@ defmodule Mix.Tasks.Loka.ExportMobile do
 
   # --- Transform Functions ---
 
-  defp load_and_transform_room(key) do
-    case Loka.Engine.TypedObject.Loader.load(key) do
-      {:ok, proto} ->
-        %{
-          id: key,
-          name: proto.attrs["name"] || key,
-          description: proto.attrs["description"] || "",
-          exits: transform_exits(proto.attrs["exits"] || []),
-          spawns: proto.attrs["spawns"] || [],
-          zone: proto.attrs["zone"],
-          coordinates: proto.attrs["coordinates"],
-          # SP adaptations
-          ambient_messages: proto.attrs["ambient_messages"] || [],
-          biome: proto.attrs["biome"] || "temperate",
-          light_level: proto.attrs["light_level"] || "normal"
-        }
-
-      _ ->
-        nil
-    end
+  defp load_and_transform_room(%{key: key} = proto) do
+    %{
+      id: key,
+      name: proto.name || key,
+      description: proto.description || "",
+      exits: transform_exits(Map.get(proto.data, "exits") || []),
+      spawns: Map.get(proto.data, "spawns") || [],
+      zone: Map.get(proto.data, "zone"),
+      coordinates: Map.get(proto.data, "coordinates"),
+      # SP adaptations
+      ambient_messages: Map.get(proto.data, "ambient_messages") || [],
+      biome: Map.get(proto.data, "biome") || "temperate",
+      light_level: Map.get(proto.data, "light_level") || "normal"
+    }
   end
 
-  defp load_and_transform_npc(key) do
-    case Loka.Engine.TypedObject.Loader.load(key) do
-      {:ok, proto} ->
-        %{
-          id: key,
-          name: proto.attrs["name"] || key,
-          description: proto.attrs["description"] || "",
-          level: proto.attrs["level"] || 1,
-          stats: proto.attrs["stats"] || %{},
-          dialogue_key: proto.attrs["dialogue"],
-          shop: proto.attrs["shop"],
-          # Combat stats for hostile NPCs
-          hostile: proto.attrs["hostile"] || false,
-          health: proto.attrs["health"] || %{"current" => 100, "max" => 100},
-          xp_reward: proto.attrs["xp_reward"] || 0,
-          gold_reward: proto.attrs["gold_reward"] || 0,
-          loot_table: proto.attrs["loot_table"]
-        }
+  defp load_and_transform_room(_), do: nil
 
-      _ ->
-        nil
-    end
+  defp load_and_transform_npc(%{key: key} = proto) do
+    %{
+      id: key,
+      name: proto.name || key,
+      description: proto.description || "",
+      level: Map.get(proto.data, "level") || 1,
+      stats: Map.get(proto.data, "stats") || %{},
+      dialogue_key: Map.get(proto.data, "dialogue"),
+      shop: Map.get(proto.data, "shop"),
+      # Combat stats for hostile NPCs
+      hostile: Map.get(proto.data, "hostile") || false,
+      health: Map.get(proto.data, "health") || %{"current" => 100, "max" => 100},
+      xp_reward: Map.get(proto.data, "xp_reward") || 0,
+      gold_reward: Map.get(proto.data, "gold_reward") || 0,
+      loot_table: Map.get(proto.data, "loot_table")
+    }
   end
 
-  defp load_and_transform_item(key) do
-    case Loka.Engine.TypedObject.Loader.load(key) do
-      {:ok, proto} ->
-        %{
-          id: key,
-          name: proto.attrs["name"] || key,
-          description: proto.attrs["description"] || "",
-          item_type: proto.attrs["item_type"] || "misc",
-          slot: proto.attrs["slot"],
-          stackable: proto.attrs["stackable"] || false,
-          max_stack: proto.attrs["max_stack"] || 1,
-          value: proto.attrs["value"] || 0,
-          bonuses: proto.attrs["bonuses"] || %{},
-          effect: proto.attrs["effect"],
-          requirements: proto.attrs["requirements"] || %{}
-        }
+  defp load_and_transform_npc(_), do: nil
 
-      _ ->
-        nil
-    end
+  defp load_and_transform_item(%{key: key} = proto) do
+    %{
+      id: key,
+      name: proto.name || key,
+      description: proto.description || "",
+      item_type: Map.get(proto.data, "item_type") || "misc",
+      slot: Map.get(proto.data, "slot"),
+      stackable: Map.get(proto.data, "stackable") || false,
+      max_stack: Map.get(proto.data, "max_stack") || 1,
+      value: Map.get(proto.data, "value") || 0,
+      bonuses: Map.get(proto.data, "bonuses") || %{},
+      effect: Map.get(proto.data, "effect"),
+      requirements: Map.get(proto.data, "requirements") || %{}
+    }
   end
+
+  defp load_and_transform_item(_), do: nil
 
   defp load_and_transform_quest(typed_object) do
     %{
       id: typed_object.key,
-      name: typed_object.attrs["name"] || typed_object.key,
-      description: typed_object.attrs["description"] || "",
-      objectives: transform_objectives(typed_object.attrs["objectives"] || []),
-      rewards: typed_object.attrs["rewards"] || %{},
-      giver: typed_object.attrs["giver"],
-      turn_in_npc: typed_object.attrs["turn_in_npc"],
-      prerequisites: typed_object.attrs["prerequisites"] || [],
+      name: typed_object.name || typed_object.key,
+      description: typed_object.description || "",
+      objectives: transform_objectives(Map.get(typed_object.data, "objectives") || []),
+      rewards: Map.get(typed_object.data, "rewards") || %{},
+      giver: Map.get(typed_object.data, "giver"),
+      turn_in_npc: Map.get(typed_object.data, "turn_in_npc"),
+      prerequisites: Map.get(typed_object.data, "prerequisites") || [],
       # SP adaptations
-      is_main_quest: typed_object.attrs["is_main_quest"] || false,
-      journal_entries: typed_object.attrs["journal_entries"] || []
+      is_main_quest: Map.get(typed_object.data, "is_main_quest") || false,
+      journal_entries: Map.get(typed_object.data, "journal_entries") || []
     }
   end
 
   defp load_and_transform_recipe(typed_object) do
     %{
       id: typed_object.key,
-      name: typed_object.attrs["name"] || typed_object.key,
-      description: typed_object.attrs["description"] || "",
-      ingredients: typed_object.attrs["ingredients"] || [],
-      result: typed_object.attrs["result"],
-      result_quantity: typed_object.attrs["result_quantity"] || 1,
-      skill_required: typed_object.attrs["skill_required"],
-      crafting_time: typed_object.attrs["crafting_time"] || 0
+      name: typed_object.name || typed_object.key,
+      description: typed_object.description || "",
+      ingredients: Map.get(typed_object.data, "ingredients") || [],
+      result: Map.get(typed_object.data, "result"),
+      result_quantity: Map.get(typed_object.data, "result_quantity") || 1,
+      skill_required: Map.get(typed_object.data, "skill_required"),
+      crafting_time: Map.get(typed_object.data, "crafting_time") || 0
     }
   end
 
   defp load_and_transform_dialogue(typed_object) do
     %{
       id: typed_object.key,
-      nodes: transform_dialogue_nodes(typed_object.attrs["nodes"] || %{})
+      nodes: transform_dialogue_nodes(Map.get(typed_object.data, "nodes") || %{})
     }
   end
 

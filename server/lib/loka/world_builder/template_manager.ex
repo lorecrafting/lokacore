@@ -74,7 +74,9 @@ defmodule Loka.WorldBuilder.TemplateManager do
 
       ensure_templates_dir()
 
-      case YamlElixir.write_to_file(template_data, file_path) do
+      yaml_content = build_yaml_content(template_data)
+
+      case File.write(file_path, yaml_content) do
         :ok ->
           Logger.info("[TemplateManager] Saved template: #{template_key}")
           {:ok, file_path}
@@ -206,6 +208,48 @@ defmodule Loka.WorldBuilder.TemplateManager do
     name = data["name"] || "Unnamed"
     tags = Enum.join(data["tags"] || [], ", ")
     "#{name} [#{tags}]"
+  end
+
+  # YAML serialization helpers
+  defp build_yaml_content(data) when is_map(data) do
+    data
+    |> Enum.map(fn {k, v} -> "#{k}: #{format_yaml_value(v)}" end)
+    |> Enum.join("\n")
+  end
+
+  defp format_yaml_value(value) when is_binary(value), do: ~s("#{escape_yaml_string(value)}")
+  defp format_yaml_value(value) when is_integer(value), do: Integer.to_string(value)
+  defp format_yaml_value(value) when is_float(value), do: Float.to_string(value)
+  defp format_yaml_value(value) when is_boolean(value), do: Atom.to_string(value)
+  defp format_yaml_value(nil), do: "null"
+
+  defp format_yaml_value(value) when is_list(value) do
+    if Enum.empty?(value) do
+      "[]"
+    else
+      items = Enum.map(value, &format_yaml_value/1)
+      "[#{Enum.join(items, ", ")}]"
+    end
+  end
+
+  defp format_yaml_value(value) when is_map(value) do
+    if Enum.empty?(value) do
+      "{}"
+    else
+      items =
+        Enum.map(value, fn {k, v} -> "#{k}: #{format_yaml_value(v)}" end)
+
+      "{#{Enum.join(items, ", ")}}"
+    end
+  end
+
+  defp format_yaml_value(value) when is_atom(value), do: Atom.to_string(value)
+
+  defp escape_yaml_string(str) do
+    str
+    |> String.replace("\\", "\\\\")
+    |> String.replace("\"", "\\\"")
+    |> String.replace("\n", "\\n")
   end
 
   defp ensure_atom_keys(map) when is_map(map) do

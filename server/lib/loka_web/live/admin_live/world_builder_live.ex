@@ -1342,8 +1342,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
                 description: script.description,
                 hook: Loka.Content.Script.hook(script),
                 source: Loka.Content.Script.source(script),
-                tags: script.tags || [],
-                entity_key: Loka.Content.Script.entity_key(script)
+                tags: script.tags || []
               }
 
             {:error, _} ->
