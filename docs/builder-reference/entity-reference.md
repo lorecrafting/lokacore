@@ -40,7 +40,8 @@ primary_keyword: "goblin"    # Single keyword for UI display
 
 # COMPONENTS & BEHAVIORS
 components: {}               # See component reference below
-behaviors: []                # Elixir behavior modules
+behaviors: []                # Reusable behavior scripts (see behaviors.md)
+emotes: {}                   # Personality text for emit() events (see emotes.md)
 attributes: {}               # Custom key-value data
 tags: []                     # String tags for filtering
 scripts: {}                  # Elixir scripts
@@ -130,6 +131,25 @@ components:
     buys: [ghost_essence]
 
 tags: [friendly, merchant]
+
+# EMOTES - personality text triggered by behaviors
+emotes:
+  waking_up: "*unfolds merchant's cloth* Time for business!"
+  going_to_sleep: "*wraps pack securely* Tomorrow brings opportunities."
+  opening_shop: "*spreads wares with a flourish* Come see my treasures!"
+  closing_shop: "*carefully packs goods* Until next time!"
+  greeting: "*rubs hands together* Welcome, welcome!"
+
+# BEHAVIORS - reusable mechanics
+behaviors:
+  - script: shopkeeper_hours
+    config:
+      open_at: morning
+      close_at: evening
+  - script: day_night_schedule
+    config:
+      wake_at: dawn
+      sleep_at: dusk
 ```
 
 ### NPC Validation Rules

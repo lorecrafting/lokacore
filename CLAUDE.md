@@ -98,12 +98,25 @@ lokacore/
 # Development
 cd server
 mix deps.get && mix ecto.setup    # Setup
-mix phx.server                     # Start at localhost:4000
+mix phx.server                     # Start Phoenix at localhost:4000
+mix loka.dev                       # Start Phoenix + mobile Expo (with debug logs)
+mix loka.dev --server              # Phoenix only (with mobile debug log streaming)
 mix test                           # Run tests
 
 # Validation
 mix loka.test                     # All tests (unit + content + balance)
+mix loka.test --quick             # Skip slow balance simulations
 mix loka.test.validate            # Validate prototypes, quests, dialogues
+mix loka.test.storyline --list    # List available storylines
+mix loka.test.storyline <id>      # Validate storyline structure (legacy)
+
+# Recommended: ChannelBot storyline test (95% production parity)
+mix test test/integration/storyline_channel_test.exs
+
+# Content Scaffolding
+mix loka.new quest <name>         # Generate quest YAML scaffold
+mix loka.new npc <name>           # Generate NPC YAML scaffold
+mix loka.new room <name>          # Generate room YAML scaffold
 
 # Deployment
 fly deploy
@@ -285,6 +298,46 @@ All game content uses YAML as the single source of truth:
 
 **Admin UI:** Scripts tab is read-only (view source only). Editing requires YAML modification.
 
+### Behaviors, Emotes, and Scripts Pattern
+
+Three complementary systems for NPC/entity customization:
+
+| Layer | Purpose | Files | Example |
+|-------|---------|-------|---------|
+| **Behaviors** | Reusable mechanics | `priv/world/scripts/behaviors/*.yml` | patrol, day_night_schedule |
+| **Emotes** | Personality text | Entity YAML `emotes:` section | waking_up, greeting |
+| **Scripts** | Custom one-off logic | `priv/world/scripts/*.yml` | quest-specific triggers |
+
+**Pattern**: Behaviors emit events → Emotes display personality text
+
+```yaml
+# NPC with behavior that triggers emotes
+key: monastery_guard
+type: npc
+emotes:
+  waking_up: "*stretches and performs exercises* The watch begins."
+  patrol_arrive: "*scans the area with vigilance*"
+  going_to_sleep: "*sets staff beside mat* May the night be peaceful."
+behaviors:
+  - script: patrol
+    config:
+      route: [gate, courtyard, temple]
+      interval: 180
+  - script: day_night_schedule
+    config:
+      wake_at: dawn
+      sleep_at: dusk
+```
+
+**When to use each:**
+- **Behavior**: When the *mechanic* is reusable (patrol, schedules, spawning)
+- **Emote**: When you want *personality* in event responses
+- **Script**: When you need *custom logic* specific to one entity
+
+**Available behaviors**: patrol, day_night_schedule, shopkeeper_hours, wander, ambient_emitter, nocturnal, spawn_condition_time
+
+See `docs/builder-reference/behaviors.md` and `docs/builder-reference/emotes.md` for full reference.
+
 ### Future: Templates + Instances Architecture
 
 > **Known Limitation:** The current YAML-only architecture requires file system access.
@@ -445,12 +498,14 @@ For React Native UI testing, we'll use **Detox or Maestro**:
 
 ## Beads (Issue Tracking)
 
+Using **beads_rust** (`br`) - Jeffrey Emanuel's lightweight Rust port.
+
 ```bash
-bd ready              # Find available work
-bd show <id>          # Review issue
-bd update <id> --status=in_progress
-bd close <id>         # Mark complete
-bd sync               # Push to git
+br ready              # Find available work
+br show <id>          # Review issue
+br update <id> --status=in_progress
+br close <id>         # Mark complete
+# Note: br doesn't auto-sync - commit .beads/ changes manually with git
 ```
 
 **Good bead**: Specific file path, line numbers, validation command
