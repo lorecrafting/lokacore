@@ -138,6 +138,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      })
      |> assign(:camera_view, "perspective")
      |> assign(:undo_state, %{can_undo: false, can_redo: false, undo_count: 0, redo_count: 0})
+     # Confirmation modal state (replaces browser-native confirm dialogs)
+     |> assign(:confirm_modal, nil)
      |> push_event("init_world_builder", %{rooms: rooms, validation: validation.results})}
   end
 
@@ -540,6 +542,47 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
       <%= if @show_validation_panel do %>
         <ValidationPanel.validation_panel validation_results={@validation} />
       <% end %>
+
+      <%!-- Confirmation Modal (replaces browser-native confirm dialogs) --%>
+      <%= if @confirm_modal do %>
+        <div class="modal-overlay" phx-click="cancel_confirm">
+          <div
+            class="modal-content"
+            style="max-width: 400px;"
+            phx-click-away="cancel_confirm"
+          >
+            <div class="modal-header">
+              <h3>{@confirm_modal.title}</h3>
+              <button phx-click="cancel_confirm" class="modal-close">&times;</button>
+            </div>
+            <div style="padding: 1rem;">
+              <p style="margin: 0 0 1rem 0; color: #ccc;">{@confirm_modal.message}</p>
+              <%= if @confirm_modal[:warning] do %>
+                <p style="margin: 0 0 1rem 0; color: #f59e0b; font-size: 0.85rem;">
+                  <.icon
+                    name="hero-exclamation-triangle"
+                    class="size-4"
+                    style="display: inline; vertical-align: middle;"
+                  />
+                  {@confirm_modal.warning}
+                </p>
+              <% end %>
+            </div>
+            <div class="modal-footer">
+              <button type="button" phx-click="cancel_confirm" class="btn btn-secondary">
+                Cancel
+              </button>
+              <button
+                type="button"
+                phx-click="execute_confirm"
+                class={["btn", (@confirm_modal[:danger] && "btn-danger") || "btn-primary"]}
+              >
+                {@confirm_modal[:confirm_text] || "Confirm"}
+              </button>
+            </div>
+          </div>
+        </div>
+      <% end %>
     </div>
     """
   end
@@ -556,6 +599,73 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   @impl true
   def handle_event("close_settings", _params, socket) do
     {:noreply, assign(socket, :show_settings, false)}
+  end
+
+  # =============================================================================
+  # Confirmation Modal Handlers
+  # =============================================================================
+
+  @impl true
+  def handle_event("show_confirm", params, socket) do
+    confirm_modal = %{
+      title: params["title"] || "Confirm Action",
+      message: params["message"] || "Are you sure?",
+      warning: params["warning"],
+      confirm_text: params["confirm_text"] || "Confirm",
+      danger: params["danger"] == "true",
+      action: params["action"],
+      # Store any additional data needed for the action
+      data: %{
+        "id" => params["id"],
+        "key" => params["key"],
+        "type" => params["type"]
+      }
+    }
+
+    {:noreply, assign(socket, :confirm_modal, confirm_modal)}
+  end
+
+  @impl true
+  def handle_event("cancel_confirm", _params, socket) do
+    {:noreply, assign(socket, :confirm_modal, nil)}
+  end
+
+  @impl true
+  def handle_event("execute_confirm", _params, socket) do
+    case socket.assigns.confirm_modal do
+      nil ->
+        {:noreply, socket}
+
+      %{action: action, data: data} ->
+        # Execute the confirmed action
+        socket = assign(socket, :confirm_modal, nil)
+        execute_confirmed_action(socket, action, data)
+    end
+  end
+
+  # Execute the action that was confirmed
+  defp execute_confirmed_action(socket, "delete_room", %{"id" => id}) do
+    handle_event("delete_room_confirmed", %{"id" => id}, socket)
+  end
+
+  defp execute_confirmed_action(socket, "delete_npc", %{"key" => key}) do
+    handle_event("delete_npc_confirmed", %{"key" => key}, socket)
+  end
+
+  defp execute_confirmed_action(socket, "delete_item", %{"key" => key}) do
+    handle_event("delete_item_confirmed", %{"key" => key}, socket)
+  end
+
+  defp execute_confirmed_action(socket, "batch_delete", _data) do
+    handle_event("batch_delete_confirmed", %{}, socket)
+  end
+
+  defp execute_confirmed_action(socket, "dialogue_delete_node_confirmed", %{"key" => key}) do
+    handle_event("dialogue_delete_node_confirmed", %{"key" => key}, socket)
+  end
+
+  defp execute_confirmed_action(socket, _action, _data) do
+    {:noreply, log_console(socket, :error, "Unknown confirmation action")}
   end
 
   @impl true
@@ -874,7 +984,26 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     end
   end
 
+  # Show confirmation modal for room deletion
   def handle_event("delete_room", %{"id" => room_id}, socket) do
+    room = Enum.find(socket.assigns.rooms, fn r -> r.key == room_id || r.id == room_id end)
+    room_name = if room, do: room.name, else: room_id
+
+    confirm_modal = %{
+      title: "Delete Room",
+      message: "Are you sure you want to delete \"#{room_name}\"?",
+      warning: "This can be undone with Ctrl+Z",
+      confirm_text: "Delete",
+      danger: true,
+      action: "delete_room",
+      data: %{"id" => room_id, "key" => nil, "type" => nil}
+    }
+
+    {:noreply, assign(socket, :confirm_modal, confirm_modal)}
+  end
+
+  # Actually delete the room after confirmation
+  def handle_event("delete_room_confirmed", %{"id" => room_id}, socket) do
     # Get room before deletion for undo
     room_before = Enum.find(socket.assigns.rooms, fn r -> r.key == room_id || r.id == room_id end)
 
@@ -948,7 +1077,25 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     end
   end
 
+  # Show confirmation modal for batch deletion
   def handle_event("batch_delete", _params, socket) do
+    count = length(socket.assigns.selected_keys)
+
+    confirm_modal = %{
+      title: "Delete #{count} Rooms",
+      message: "Are you sure you want to delete all #{count} selected rooms?",
+      warning: "This can be undone with Ctrl+Z",
+      confirm_text: "Delete All",
+      danger: true,
+      action: "batch_delete",
+      data: %{"id" => nil, "key" => nil, "type" => nil}
+    }
+
+    {:noreply, assign(socket, :confirm_modal, confirm_modal)}
+  end
+
+  # Actually batch delete after confirmation
+  def handle_event("batch_delete_confirmed", _params, socket) do
     keys = socket.assigns.selected_keys
 
     case Loka.WorldBuilder.BatchOperations.batch_delete(keys) do
@@ -1137,17 +1284,34 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     end
   end
 
+  # Show confirmation modal for NPC deletion
   def handle_event("delete_npc", params, socket) do
-    # Support both "id" and "key" params
-    npc_id = params["id"] || params["key"]
+    npc_key = params["id"] || params["key"]
+    npc = Enum.find(socket.assigns.npcs, fn n -> n.key == npc_key end)
+    npc_name = if npc, do: npc[:name] || npc.key, else: npc_key
 
-    case EntityManager.delete_entity(npc_id) do
+    confirm_modal = %{
+      title: "Delete NPC",
+      message: "Are you sure you want to delete \"#{npc_name}\"?",
+      warning: "This can be undone with Ctrl+Z",
+      confirm_text: "Delete",
+      danger: true,
+      action: "delete_npc",
+      data: %{"id" => nil, "key" => npc_key, "type" => nil}
+    }
+
+    {:noreply, assign(socket, :confirm_modal, confirm_modal)}
+  end
+
+  # Actually delete the NPC after confirmation
+  def handle_event("delete_npc_confirmed", %{"key" => npc_key}, socket) do
+    case EntityManager.delete_entity(npc_key) do
       :ok ->
         {:noreply,
          socket
          |> assign(:npcs, EntityManager.list_entities(:npc))
          |> assign(:selected_entity, nil)
-         |> log_console(:info, "Deleted NPC: #{npc_id}")}
+         |> log_console(:info, "Deleted NPC: #{npc_key}")}
 
       {:error, reason} ->
         {:noreply,
@@ -1155,17 +1319,34 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     end
   end
 
+  # Show confirmation modal for Item deletion
   def handle_event("delete_item", params, socket) do
-    # Support both "id" and "key" params
-    item_id = params["id"] || params["key"]
+    item_key = params["id"] || params["key"]
+    item = Enum.find(socket.assigns.items, fn i -> i.key == item_key end)
+    item_name = if item, do: item[:name] || item.key, else: item_key
 
-    case EntityManager.delete_entity(item_id) do
+    confirm_modal = %{
+      title: "Delete Item",
+      message: "Are you sure you want to delete \"#{item_name}\"?",
+      warning: "This can be undone with Ctrl+Z",
+      confirm_text: "Delete",
+      danger: true,
+      action: "delete_item",
+      data: %{"id" => nil, "key" => item_key, "type" => nil}
+    }
+
+    {:noreply, assign(socket, :confirm_modal, confirm_modal)}
+  end
+
+  # Actually delete the Item after confirmation
+  def handle_event("delete_item_confirmed", %{"key" => item_key}, socket) do
+    case EntityManager.delete_entity(item_key) do
       :ok ->
         {:noreply,
          socket
          |> assign(:items, EntityManager.list_entities(:item))
          |> assign(:selected_entity, nil)
-         |> log_console(:info, "Deleted Item: #{item_id}")}
+         |> log_console(:info, "Deleted Item: #{item_key}")}
 
       {:error, reason} ->
         {:noreply,
@@ -1849,6 +2030,21 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   end
 
   def handle_event("dialogue_delete_node", %{"key" => node_key}, socket) do
+    # Show confirmation modal
+    confirm_modal = %{
+      title: "Delete Dialogue Node",
+      message: "Are you sure you want to delete the node \"#{node_key}\"?",
+      warning: "Choices pointing to this node will break.",
+      confirm_text: "Delete Node",
+      danger: true,
+      action: "dialogue_delete_node_confirmed",
+      data: %{"key" => node_key}
+    }
+
+    {:noreply, assign(socket, :confirm_modal, confirm_modal)}
+  end
+
+  def handle_event("dialogue_delete_node_confirmed", %{"key" => node_key}, socket) do
     tree = socket.assigns.editing_dialogue_tree
     updated_tree = Map.delete(tree, node_key)
 
@@ -1863,6 +2059,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      socket
      |> assign(:editing_dialogue_tree, updated_tree)
      |> assign(:dialogue_selected_node, selected)
+     |> assign(:confirm_modal, nil)
      |> save_dialogue_tree(updated_tree)}
   end
 

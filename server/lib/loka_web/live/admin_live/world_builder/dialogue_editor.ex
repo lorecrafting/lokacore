@@ -218,7 +218,6 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
           phx-click="dialogue_delete_node"
           phx-value-key={@node_key}
           title="Delete Node"
-          data-confirm="Delete this node? Choices pointing to it will break."
         >
           <.icon name="hero-trash" class="size-4" />
         </button>

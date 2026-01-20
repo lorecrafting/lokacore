@@ -244,7 +244,6 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                   phx-click="delete_room"
                   phx-value-id={room.id || room.key}
                   class="btn btn-danger btn-sm"
-                  data-confirm="Are you sure you want to delete this room?"
                 >
                   <.icon name="hero-trash" class="size-3" />
                   <span>Delete Room</span>
@@ -376,7 +375,6 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                   phx-click="delete_npc"
                   phx-value-key={npc.key}
                   class="btn btn-danger btn-sm"
-                  data-confirm="Are you sure you want to delete this NPC?"
                 >
                   <.icon name="hero-trash" class="size-3" />
                   <span>Delete NPC</span>
@@ -498,7 +496,6 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                   phx-click="delete_item"
                   phx-value-key={item.key}
                   class="btn btn-danger btn-sm"
-                  data-confirm="Are you sure you want to delete this item?"
                 >
                   <.icon name="hero-trash" class="size-3" />
                   <span>Delete Item</span>
@@ -592,7 +589,6 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                 type="button"
                 phx-click="batch_delete"
                 class="btn btn-danger"
-                data-confirm="Are you sure you want to delete all {length(@selected_keys)} selected rooms?"
               >
                 <.icon name="hero-trash" class="size-4" />
                 <span>Delete All ({length(@selected_keys)})</span>
