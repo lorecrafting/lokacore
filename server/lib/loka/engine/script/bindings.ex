@@ -172,8 +172,15 @@ defmodule Loka.Engine.Script.Bindings do
       # Scheduling (capture entity for later execution)
       after: fn delay, script_key -> queue_schedule(entity, delay, script_key, %{}) end,
 
-      # Events
-      emit: fn event_name, data -> queue_emit(event_name, data) end
+      # Events (captures entity for emotes lookup)
+      # emit(:waking_up) or emit(:patrol_arrive, %{location: "market"})
+      emit: fn
+        event_name when is_atom(event_name) ->
+          queue_emit(entity, event_name, %{})
+
+        event_name when is_binary(event_name) ->
+          queue_emit(entity, String.to_atom(event_name), %{})
+      end
     ]
   end
 
@@ -574,8 +581,25 @@ defmodule Loka.Engine.Script.Bindings do
     :ok
   end
 
-  defp queue_emit(event_name, data) do
-    ActionQueue.queue({:emit_event, %{event_name: event_name, data: data}})
+  defp queue_emit(entity, event_name, data) do
+    entity_id = Map.get(entity, :id)
+    # Get emotes from entity for the action handler to check
+    emotes = Map.get(entity, :emotes, %{})
+    # Get scripts from entity for on_{event} script lookup
+    scripts = Map.get(entity, :scripts, %{}) || Map.get(entity, :builder_scripts, %{})
+
+    ActionQueue.queue(
+      {:emit_event,
+       %{
+         event_name: event_name,
+         entity_id: entity_id,
+         entity: entity,
+         emotes: emotes,
+         scripts: scripts,
+         data: data
+       }}
+    )
+
     :ok
   end
 

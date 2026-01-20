@@ -187,6 +187,46 @@ defmodule Loka.Engine.Script.ActionQueueTest do
     end
   end
 
+  describe "emit_event action" do
+    test "queues emit_event with entity context for emotes" do
+      entity = %{
+        id: "npc_elder",
+        short_desc: "Elder Monk",
+        emotes: %{waking_up: "*stretches and yawns*"},
+        scripts: %{on_waking_up: "elder_waking_script"}
+      }
+
+      action =
+        {:emit_event,
+         %{
+           event_name: :waking_up,
+           entity_id: entity.id,
+           entity: entity,
+           emotes: entity.emotes,
+           scripts: entity.scripts,
+           data: %{}
+         }}
+
+      assert :ok = ActionQueue.queue(action)
+
+      [{:emit_event, params}] = ActionQueue.get()
+      assert params.event_name == :waking_up
+      assert params.entity_id == "npc_elder"
+      assert params.emotes[:waking_up] == "*stretches and yawns*"
+      assert params.scripts[:on_waking_up] == "elder_waking_script"
+    end
+
+    test "queues legacy emit_event format" do
+      action = {:emit_event, %{event_name: "custom_event", data: %{foo: "bar"}}}
+
+      assert :ok = ActionQueue.queue(action)
+
+      [{:emit_event, params}] = ActionQueue.get()
+      assert params.event_name == "custom_event"
+      assert params.data == %{foo: "bar"}
+    end
+  end
+
   describe "schedule action" do
     test "queues a schedule action with entity_id" do
       action =

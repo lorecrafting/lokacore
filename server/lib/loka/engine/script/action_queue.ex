@@ -502,8 +502,51 @@ defmodule Loka.Engine.Script.ActionQueue do
     end
   end
 
+  # New emit_event format with entity context for emotes chain
+  defp execute_action(
+         {:emit_event,
+          %{event_name: event_name, entity: entity, emotes: emotes, scripts: scripts}},
+         _context
+       ) do
+    event_key = if is_atom(event_name), do: event_name, else: String.to_atom(event_name)
+    event_string = Atom.to_string(event_key)
+
+    # 1. Check emotes for this event
+    emote_text = get_emote(emotes, event_key) || get_emote(emotes, event_string)
+
+    if emote_text do
+      # Say the emote text
+      emote_event =
+        Event.new(:say, %{
+          source: entity[:id],
+          source_name: entity[:short_desc] || entity[:name] || "Someone",
+          payload: %{text: emote_text}
+        })
+
+      EventBus.emit(emote_event)
+    end
+
+    # 2. Check for on_{event} script
+    script_key = get_event_script(scripts, event_key) || get_event_script(scripts, event_string)
+
+    if script_key do
+      # Run the script asynchronously
+      Task.start(fn ->
+        run_event_script(entity, script_key)
+      end)
+    end
+
+    # 3. Also emit to EventBus for other subscribers
+    event = Event.new(event_key, %{source: entity[:id], payload: %{}})
+    EventBus.emit(event)
+
+    :ok
+  end
+
+  # Legacy emit_event format (backwards compatibility)
   defp execute_action({:emit_event, %{event_name: name, data: data}}, _context) do
-    event = Event.new(String.to_atom(name), %{payload: data})
+    event_name = if is_binary(name), do: String.to_atom(name), else: name
+    event = Event.new(event_name, %{payload: data})
     EventBus.emit(event)
     :ok
   end
@@ -511,5 +554,39 @@ defmodule Loka.Engine.Script.ActionQueue do
   defp execute_action(action, _context) do
     Logger.warning("[ActionQueue] Unknown action: #{inspect(action)}")
     {:error, :unknown_action}
+  end
+
+  # =============================================================================
+  # Emit Event Helpers
+  # =============================================================================
+
+  # Get emote text from emotes map (supports atom and string keys)
+  defp get_emote(emotes, key) when is_map(emotes) do
+    Map.get(emotes, key) || Map.get(emotes, to_string(key))
+  end
+
+  defp get_emote(_, _), do: nil
+
+  # Get on_{event} script key from scripts map
+  defp get_event_script(scripts, event_key) when is_map(scripts) do
+    on_key = :"on_#{event_key}"
+    on_string = "on_#{event_key}"
+
+    Map.get(scripts, on_key) || Map.get(scripts, on_string)
+  end
+
+  defp get_event_script(_, _), do: nil
+
+  # Run a script for an emit event
+  defp run_event_script(entity, script_key) do
+    alias Loka.Engine.Script.Executor
+
+    case Executor.run_by_key(script_key, entity, %{triggered_by: :emit}) do
+      {:ok, _result} ->
+        Logger.debug("[ActionQueue] Emit script #{script_key} completed")
+
+      {:error, reason} ->
+        Logger.warning("[ActionQueue] Emit script #{script_key} failed: #{inspect(reason)}")
+    end
   end
 end
