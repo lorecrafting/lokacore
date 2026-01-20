@@ -345,23 +345,52 @@ defmodule Loka.Engine.Prototype do
   defp normalize_type(type), do: type
 
   defp normalize_behaviors(behaviors) when is_list(behaviors) do
-    Enum.map(behaviors, fn
+    behaviors
+    |> Enum.map(fn
+      # New format: map with "script" and optional "config"
+      %{"script" => script} = b ->
+        %{script: to_string(script), config: normalize_behavior_config(Map.get(b, "config", %{}))}
+
+      # New format with atom keys
+      %{script: script} = b ->
+        %{script: to_string(script), config: normalize_behavior_config(Map.get(b, :config, %{}))}
+
+      # Legacy format: module string like "Elixir.Foo.Bar" or "Foo.Bar"
       b when is_binary(b) ->
-        # Convert module string like "Elixir.Foo.Bar" or "Foo.Bar" to atom
-        module_string = if String.starts_with?(b, "Elixir."), do: b, else: "Elixir.#{b}"
+        # Convert to script key format (underscore)
+        script_key =
+          b
+          |> String.replace(~r/^(Elixir\.)?Loka\.Behaviors\./, "")
+          |> Macro.underscore()
 
-        try do
-          String.to_existing_atom(module_string)
-        rescue
-          ArgumentError -> b
-        end
+        %{script: script_key, config: %{}}
 
-      b when is_atom(b) ->
-        b
+      # Legacy format: module atom
+      b when is_atom(b) and not is_nil(b) and b not in [true, false] ->
+        script_key =
+          b
+          |> to_string()
+          |> String.replace(~r/^(Elixir\.)?Loka\.Behaviors\./, "")
+          |> Macro.underscore()
+
+        %{script: script_key, config: %{}}
+
+      _ ->
+        nil
     end)
+    |> Enum.reject(&is_nil/1)
   end
 
   defp normalize_behaviors(_), do: []
+
+  defp normalize_behavior_config(config) when is_map(config) do
+    Map.new(config, fn {k, v} ->
+      key = if is_binary(k), do: String.to_atom(k), else: k
+      {key, v}
+    end)
+  end
+
+  defp normalize_behavior_config(_), do: %{}
 
   defp validate_key(errors, key) when is_binary(key) and byte_size(key) > 0 do
     if valid_identifier?(key) do

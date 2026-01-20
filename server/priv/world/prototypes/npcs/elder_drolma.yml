@@ -17,6 +17,17 @@ tags:
   - friendly
   - lore
   - monastery
+
+# Personality emotes for behavior events
+emotes:
+  waking_up: "*rises stiffly but with purpose* Another day to serve."
+  going_to_sleep: "*settles onto her mat with a contented sigh* Rest comes easy to the peaceful heart."
+  meditation_start: "*her clouded eyes close, face becoming serene*"
+  greeting: "Come, sit. There is always tea for a weary traveler."
+  serving_tea: "*pours butter tea with practiced grace, steam rising*"
+  teaching: "*her voice grows stronger as ancient wisdom flows through her*"
+  remembering: "*gazes into the distance, seeing memories long past*"
+
 components:
   ambient_actions:
     messages:

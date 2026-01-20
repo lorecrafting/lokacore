@@ -17,6 +17,17 @@ tags:
   - trainer
   - monastery
   - defense
+
+# Personality emotes for behavior events
+emotes:
+  waking_up: "*performs morning stretches with fluid precision* The body awakens."
+  going_to_sleep: "*assumes a restful stance* Even the mountain sleeps."
+  meditation_start: "*centers himself, becoming still as stone*"
+  greeting: "*nods with quiet respect* The mountain sees your strength."
+  teaching: "*demonstrates a stance with deliberate, powerful movements*"
+  training: "*moves through forms with the grace of flowing water*"
+  encouragement: "*places a steadying hand on your shoulder* You have the spirit."
+
 components:
   ambient_actions:
     messages:

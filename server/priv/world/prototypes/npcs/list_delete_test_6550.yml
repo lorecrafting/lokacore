@@ -1,0 +1,16 @@
+key: list_delete_test_6550
+type: npc
+parent: base_npc
+short_desc: "Delete From List"
+long_desc: "An NPC in the world"
+extra_desc: |
+    An NPC in the world
+keywords: [list_delete_test_6550]
+primary_keyword: list_delete_test_6550
+mood: neutral
+tags: []
+components:
+  combatant:
+    level: 1
+  npc_data:
+    level: 1

@@ -17,6 +17,15 @@ tags:
   - trainer
   - sacred
   - magic
+
+# Personality emotes for behavior events
+emotes:
+  meditation_start: "*her form shimmers, becoming one with the mist*"
+  greeting: "*her voice seems to come from the waterfall itself* Welcome, seeker."
+  teaching: "*traces luminous symbols that hang briefly in the air*"
+  channeling: "*mist swirls around her as power gathers*"
+  blessing: "*places a cool, ethereal hand on your forehead*"
+
 components:
   ambient_actions:
     messages:

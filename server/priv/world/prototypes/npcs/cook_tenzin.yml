@@ -27,6 +27,16 @@ tags:
   - teacher
   - vendor
 
+# Personality emotes for behavior events
+emotes:
+  waking_up: "*lights the cooking fire with practiced ease* Time to feed hungry souls!"
+  going_to_sleep: "*wipes down the cooking surfaces one last time* The kitchen rests."
+  greeting: "*beams with genuine warmth* Welcome! You look hungry!"
+  cooking: "*stirs a bubbling pot, inhaling the aroma with satisfaction*"
+  serving_meal: "*ladles fragrant stew into a bowl with care* Eat! Eat!"
+  tasting: "*samples his creation, eyes closing in concentration*"
+  humming: "*hums a cheerful tune while chopping vegetables*"
+
 components:
   ambient_actions:
     messages:

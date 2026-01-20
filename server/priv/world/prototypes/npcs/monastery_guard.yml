@@ -23,8 +23,27 @@ tags:
   - guard
   - martial
 
+# Personality emotes for behavior events
+emotes:
+  waking_up: "*stretches and performs morning exercises* The watch begins."
+  going_to_sleep: "*sets staff beside his mat* May the night be peaceful."
+  patrol_arrive: "*scans the area with practiced vigilance*"
+  spotted_player: "*nods in acknowledgment, hand resting on staff*"
+  alert: "*grips staff tightly, eyes narrowing*"
+  standing_watch: "*stands firm, a guardian of the sacred grounds*"
+  greeting: "Peace be upon you. The monastery is safe."
+
 behaviors:
-  - Loka.Behaviors.Patrol
+  - script: patrol
+    config:
+      route:
+        - monastery_gate
+        - main_courtyard
+        - temple
+        - meditation_hall
+        - dining_hall
+      interval: 180
+      loop: true
 
 attributes:
   behavior_config:

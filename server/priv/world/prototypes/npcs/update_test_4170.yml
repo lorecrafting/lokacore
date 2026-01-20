@@ -1,0 +1,16 @@
+key: update_test_4170
+type: npc
+parent: base_npc
+short_desc: "Original Name"
+long_desc: "An NPC in the world"
+extra_desc: |
+    An NPC in the world
+keywords: [update_test_4170]
+primary_keyword: update_test_4170
+mood: neutral
+tags: []
+components:
+  combatant:
+    level: 1
+  npc_data:
+    level: 1

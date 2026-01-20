@@ -1,0 +1,16 @@
+key: e2e_test_guardian
+type: npc
+parent: base_npc
+short_desc: "Zone Guardian"
+long_desc: "The powerful boss of this zone"
+extra_desc: |
+    The powerful boss of this zone
+keywords: [e2e_test_guardian]
+primary_keyword: e2e_test_guardian
+mood: neutral
+tags: []
+components:
+  combatant:
+    level: 20
+  npc_data:
+    level: 20

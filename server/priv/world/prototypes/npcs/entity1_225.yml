@@ -1,0 +1,16 @@
+key: entity1_225
+type: npc
+parent: base_npc
+short_desc: "Entity 1"
+long_desc: "An NPC in the world"
+extra_desc: |
+    An NPC in the world
+keywords: [entity1_225]
+primary_keyword: entity1_225
+mood: neutral
+tags: []
+components:
+  combatant:
+    level: 1
+  npc_data:
+    level: 1

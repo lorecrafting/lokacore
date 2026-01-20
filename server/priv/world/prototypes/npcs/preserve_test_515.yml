@@ -1,0 +1,16 @@
+key: preserve_test_515
+type: npc
+parent: base_npc
+short_desc: "Original"
+long_desc: "An NPC in the world"
+extra_desc: |
+    An NPC in the world
+keywords: [preserve_test_515]
+primary_keyword: preserve_test_515
+mood: neutral
+tags: []
+components:
+  combatant:
+    level: 5
+  npc_data:
+    level: 5

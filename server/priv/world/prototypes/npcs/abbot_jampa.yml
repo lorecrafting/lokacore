@@ -17,6 +17,16 @@ tags:
   - friendly
   - quest_giver
   - monastery
+
+# Personality emotes for behavior events
+emotes:
+  waking_up: "*rises slowly from meditation* The dawn brings new hope."
+  going_to_sleep: "*settles into stillness* May wisdom visit our dreams."
+  meditation_start: "*closes his eyes, hands forming a mudra*"
+  greeting: "May the dharma guide your path, traveler."
+  blessing: "*traces a sacred symbol in the air* Go with wisdom."
+  concerned: "*furrows his brow, prayer beads moving faster*"
+
 components:
   ambient_actions:
     messages:

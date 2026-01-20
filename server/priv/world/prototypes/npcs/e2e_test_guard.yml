@@ -1,0 +1,16 @@
+key: e2e_test_guard
+type: npc
+parent: base_npc
+short_desc: "Zone Guard"
+long_desc: "A vigilant guard"
+extra_desc: |
+    A vigilant guard
+keywords: [e2e_test_guard]
+primary_keyword: e2e_test_guard
+mood: neutral
+tags: []
+components:
+  combatant:
+    level: 5
+  npc_data:
+    level: 5

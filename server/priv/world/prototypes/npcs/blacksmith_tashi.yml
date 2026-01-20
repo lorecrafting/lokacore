@@ -24,6 +24,16 @@ tags:
   - village
   - craftsman
 
+# Personality emotes for behavior events
+emotes:
+  waking_up: "*stokes the forge embers* Time to shape metal and spirit."
+  going_to_sleep: "*banks the forge carefully* The fire rests, and so must I."
+  opening_shop: "*pumps the bellows, bringing the forge to life* Welcome to my forge!"
+  closing_shop: "*covers the anvil with reverence* The work is done for today."
+  greeting: "*wipes soot from his hands* What brings you to my forge?"
+  working: "*hammer rings against hot metal in steady rhythm*"
+  forging_complete: "*holds the finished piece up to the light, examining it*"
+
 components:
   ambient_actions:
     messages:

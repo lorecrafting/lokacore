@@ -21,6 +21,15 @@ tags:
   - friendly
   - companion
   - monastery
+
+# Personality emotes for behavior events
+emotes:
+  waking_up: "*stretches mindfully* Another day of practice awaits."
+  going_to_sleep: "*settles into meditation posture* May dreams bring wisdom."
+  greeting: "Peace be with you, traveler."
+  meditation_start: "*closes her eyes, breathing deeply*"
+  patrol_arrive: "*looks around the monastery grounds thoughtfully*"
+  becoming_anxious: "*wrings her hands, glancing toward the meditation chamber*"
 components:
   ambient_actions:
     messages:

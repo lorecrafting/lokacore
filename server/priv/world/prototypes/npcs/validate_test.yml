@@ -1,0 +1,16 @@
+key: validate_test
+type: npc
+parent: base_npc
+short_desc: ""
+long_desc: ""
+extra_desc: |
+  
+keywords: [validate_test]
+primary_keyword: validate_test
+mood: neutral
+tags: []
+components:
+  combatant:
+    level: 1
+  npc_data:
+    level: 1

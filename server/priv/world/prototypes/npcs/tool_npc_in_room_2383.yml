@@ -1,0 +1,16 @@
+key: tool_npc_in_room_2383
+type: npc
+parent: base_npc
+short_desc: "Room NPC"
+long_desc: ""
+extra_desc: |
+  
+keywords: [tool_npc_in_room_2383]
+primary_keyword: tool_npc_in_room_2383
+mood: neutral
+tags: []
+components:
+  combatant:
+    level: 1
+  npc_data:
+    level: 1

@@ -16,6 +16,17 @@ tags:
   - friendly
   - merchant
   - village
+
+# Personality emotes for behavior events
+emotes:
+  waking_up: "*unfolds his merchant's cloth, arranging wares* Time for business!"
+  going_to_sleep: "*wraps his pack securely* Tomorrow brings new opportunities."
+  opening_shop: "*spreads out his wares with a flourish* Come see my treasures!"
+  closing_shop: "*carefully packs away his goods* Until next time, friend."
+  greeting: "*rubs his hands together with a ready smile* Welcome, welcome!"
+  haggling: "*strokes his chin thoughtfully, calculating*"
+  sale_complete: "*bows slightly* A fair trade! May it serve you well."
+
 components:
   ambient_actions:
     messages:
