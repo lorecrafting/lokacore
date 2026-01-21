@@ -339,10 +339,13 @@ defmodule Loka.Framework.World.DayNight do
       end
 
     # Check for time events (only on hour boundaries we haven't processed)
+    # Use Map.get for backwards compatibility with older state that may lack this key
+    last_event_hour = Map.get(state, :last_event_hour)
+
     state =
-      if hour != state.last_event_hour do
+      if hour != last_event_hour do
         maybe_broadcast_time_event(hour)
-        %{state | last_event_hour: hour}
+        Map.put(state, :last_event_hour, hour)
       else
         state
       end

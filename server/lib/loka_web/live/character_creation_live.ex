@@ -3,11 +3,13 @@ defmodule LokaWeb.CharacterCreationLive do
   LiveView for character creation.
 
   Shown to new players after they confirm their account via magic link.
-  Collects character name, gender, and background before allowing game access.
+  Collects character name, gender, background, and Spark personality traits
+  before allowing game access.
   """
   use LokaWeb, :live_view
 
   alias Loka.Framework.Player.GameState, as: PlayerGameState
+  alias Loka.Framework.Spark
 
   @impl true
   def mount(_params, _session, socket) do
@@ -23,6 +25,7 @@ defmodule LokaWeb.CharacterCreationLive do
     else
       changeset = PlayerGameState.character_creation_changeset(game_state, %{})
       backgrounds = PlayerGameState.available_backgrounds()
+      spark_traits = Spark.trait_options()
 
       {:ok,
        socket
@@ -30,6 +33,8 @@ defmodule LokaWeb.CharacterCreationLive do
        |> assign(:changeset, changeset)
        |> assign(:backgrounds, backgrounds)
        |> assign(:selected_background, nil)
+       |> assign(:spark_traits, spark_traits)
+       |> assign(:selected_traits, [])
        |> assign(:form, to_form(changeset))}
     end
   end
@@ -116,7 +121,43 @@ defmodule LokaWeb.CharacterCreationLive do
             <.field_error field={@form[:background]} />
           </div>
 
-          <button type="submit" class="ebook-submit ebook-submit--center">
+          <div class="ebook-form-group">
+            <label class="ebook-label">
+              Choose two traits for your Spark companion
+              <span class="ebook-label-hint">(Select exactly 2)</span>
+            </label>
+            <p class="ebook-prose ebook-prose--small">
+              A fragment of ancient light has chosen to accompany you. Its personality will emerge from the traits you sense in it.
+            </p>
+            <div class="ebook-trait-options">
+              <label
+                :for={trait <- @spark_traits}
+                class={"ebook-trait-option #{if trait.id in @selected_traits, do: "ebook-trait-option--selected"} #{if length(@selected_traits) >= 2 and trait.id not in @selected_traits, do: "ebook-trait-option--disabled"}"}
+              >
+                <input
+                  type="checkbox"
+                  name="spark_traits[]"
+                  value={trait.id}
+                  checked={trait.id in @selected_traits}
+                  disabled={length(@selected_traits) >= 2 and trait.id not in @selected_traits}
+                  phx-click="toggle_trait"
+                  phx-value-trait={trait.id}
+                  class="ebook-trait-checkbox"
+                />
+                <span class="ebook-trait-name">{trait.name}</span>
+                <span class="ebook-trait-desc">{trait.description}</span>
+              </label>
+            </div>
+            <%= if length(@selected_traits) != 2 do %>
+              <p class="ebook-field-error">Please select exactly 2 traits</p>
+            <% end %>
+          </div>
+
+          <button
+            type="submit"
+            class="ebook-submit ebook-submit--center"
+            disabled={length(@selected_traits) != 2}
+          >
             Begin Your Journey
           </button>
         </.form>
@@ -158,22 +199,59 @@ defmodule LokaWeb.CharacterCreationLive do
   end
 
   @impl true
+  def handle_event("toggle_trait", %{"trait" => trait}, socket) do
+    selected = socket.assigns.selected_traits
+
+    new_selected =
+      if trait in selected do
+        List.delete(selected, trait)
+      else
+        if length(selected) < 2 do
+          [trait | selected]
+        else
+          selected
+        end
+      end
+
+    {:noreply, assign(socket, :selected_traits, new_selected)}
+  end
+
+  @impl true
   def handle_event("create", %{"game_state" => params}, socket) do
     game_state = socket.assigns.game_state
+    player = socket.assigns.current_scope.player
+    selected_traits = socket.assigns.selected_traits
 
-    changeset = PlayerGameState.character_creation_changeset(game_state, params)
+    # Validate trait selection
+    if length(selected_traits) != 2 do
+      {:noreply,
+       socket
+       |> put_flash(:error, "Please select exactly 2 Spark traits")}
+    else
+      changeset = PlayerGameState.character_creation_changeset(game_state, params)
 
-    case Loka.Repo.update(changeset) do
-      {:ok, _updated_state} ->
-        player = socket.assigns.current_scope.player
-        redirect_path = if player.is_admin, do: ~p"/admin/play", else: ~p"/players/log-in"
-        {:noreply, push_navigate(socket, to: redirect_path)}
+      case Loka.Repo.update(changeset) do
+        {:ok, _updated_state} ->
+          # Create the Spark for this player
+          case Spark.create_for_player(player.id, selected_traits) do
+            {:ok, _spark} ->
+              redirect_path = if player.is_admin, do: ~p"/admin/play", else: ~p"/players/log-in"
+              {:noreply, push_navigate(socket, to: redirect_path)}
 
-      {:error, changeset} ->
-        {:noreply,
-         socket
-         |> assign(:changeset, changeset)
-         |> assign(:form, to_form(changeset))}
+            {:error, _spark_changeset} ->
+              # Log but don't block - Spark can be created later if needed
+              require Logger
+              Logger.warning("Failed to create Spark for player #{player.id}")
+              redirect_path = if player.is_admin, do: ~p"/admin/play", else: ~p"/players/log-in"
+              {:noreply, push_navigate(socket, to: redirect_path)}
+          end
+
+        {:error, changeset} ->
+          {:noreply,
+           socket
+           |> assign(:changeset, changeset)
+           |> assign(:form, to_form(changeset))}
+      end
     end
   end
 end
