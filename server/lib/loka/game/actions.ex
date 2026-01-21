@@ -509,6 +509,30 @@ defmodule Loka.Game.Actions do
   end
 
   # =============================================================================
+  # Spark Actions (delegated to Actions.Spark)
+  # =============================================================================
+
+  defp do_action(:spark_status, _params, ctx) do
+    alias Loka.Game.Actions.Spark, as: SparkActions
+    SparkActions.status(ctx)
+  end
+
+  defp do_action(:spark_updates, _params, ctx) do
+    alias Loka.Game.Actions.Spark, as: SparkActions
+    SparkActions.get_updates(ctx)
+  end
+
+  defp do_action(:spark_dismiss_updates, _params, ctx) do
+    alias Loka.Game.Actions.Spark, as: SparkActions
+    SparkActions.dismiss_updates(ctx)
+  end
+
+  defp do_action(:spark_ask, %{question: question}, ctx) do
+    alias Loka.Game.Actions.Spark, as: SparkActions
+    SparkActions.ask(ctx, question)
+  end
+
+  # =============================================================================
   # Fallback
   # =============================================================================
 

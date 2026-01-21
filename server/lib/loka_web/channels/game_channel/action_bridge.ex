@@ -351,6 +351,17 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
     socket
   end
 
+  # Spark events
+  defp dispatch_event({:spark_status, data}, socket) do
+    validated_push(socket, "spark_status", data)
+    socket
+  end
+
+  defp dispatch_event({:spark_updates, data}, socket) do
+    validated_push(socket, "spark_updates", data)
+    socket
+  end
+
   # PubSub broadcasts
   defp dispatch_event({:broadcast_room, room_id, message}, socket) do
     Phoenix.PubSub.broadcast(Loka.PubSub, "room:#{room_id}", message)

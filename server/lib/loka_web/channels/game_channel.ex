@@ -105,7 +105,7 @@ defmodule LokaWeb.GameChannel do
   require Logger
 
   alias Loka.Framework.Player.GameState, as: PlayerGameState
-  alias Loka.Framework.{Inventory, Equipment, Quest}
+  alias Loka.Framework.{Inventory, Equipment, Quest, Spark}
   alias Loka.Framework.World.{Atmosphere, Calendar}
   alias Loka.Framework.Resources.ResourcePool
   alias Loka.Session
@@ -532,6 +532,38 @@ defmodule LokaWeb.GameChannel do
     {:reply, :ok, socket}
   end
 
+  # =============================================================================
+  # Spark Companion
+  # =============================================================================
+
+  def handle_in("spark", %{"action" => "status"}, socket) do
+    case ActionBridge.execute(socket, :spark_status, %{}) do
+      {:ok, socket} -> {:reply, :ok, socket}
+      {:error, _reason, socket} -> {:reply, :ok, socket}
+    end
+  end
+
+  def handle_in("spark", %{"action" => "updates"}, socket) do
+    case ActionBridge.execute(socket, :spark_updates, %{}) do
+      {:ok, socket} -> {:reply, :ok, socket}
+      {:error, _reason, socket} -> {:reply, :ok, socket}
+    end
+  end
+
+  def handle_in("spark", %{"action" => "dismiss"}, socket) do
+    case ActionBridge.execute(socket, :spark_dismiss_updates, %{}) do
+      {:ok, socket} -> {:reply, :ok, socket}
+      {:error, _reason, socket} -> {:reply, :ok, socket}
+    end
+  end
+
+  def handle_in("spark", %{"action" => "ask", "question" => question}, socket) do
+    case ActionBridge.execute(socket, :spark_ask, %{question: question}) do
+      {:ok, socket} -> {:reply, :ok, socket}
+      {:error, _reason, socket} -> {:reply, :ok, socket}
+    end
+  end
+
   # Catch-all for unhandled events - log instead of crashing
   def handle_in(event, payload, socket) do
     Logger.warning(
@@ -591,6 +623,9 @@ defmodule LokaWeb.GameChannel do
     # Get sound state for ambient audio
     sound_state = Serializers.serialize_sound_state(room: room, player: game_state)
 
+    # Get Spark companion data
+    spark_data = Spark.to_client_format(player.id)
+
     # Send full game state to client (including server capabilities for version negotiation)
     push(socket, "game_state", %{
       room: Serializers.serialize_room(room),
@@ -607,6 +642,7 @@ defmodule LokaWeb.GameChannel do
       health: PlayerGameState.get_health(game_state),
       resources: Serializers.serialize_resources(resources),
       timers: Serializers.serialize_timers(active_timers),
+      spark: spark_data,
       player: %{
         id: player.id,
         name: player_display_name(player)
@@ -617,6 +653,9 @@ defmodule LokaWeb.GameChannel do
 
     # Deliver any timers that completed while offline
     deliver_offline_timers(socket, player.id)
+
+    # Deliver Spark updates if player has a Spark with pending updates
+    deliver_spark_greeting(socket, player.id)
 
     socket =
       socket
@@ -880,6 +919,35 @@ defmodule LokaWeb.GameChannel do
       end)
 
       Loka.Timers.mark_delivered(completed_timers)
+    end
+  end
+
+  # Deliver Spark greeting on login with pending update count
+  defp deliver_spark_greeting(socket, player_id) do
+    case Spark.get(player_id) do
+      nil ->
+        # No Spark yet - they haven't completed character creation with Spark
+        :ok
+
+      spark ->
+        pending_count = Spark.count_pending_updates(player_id)
+        name = spark.revealed_name || "Your Spark"
+
+        greeting =
+          cond do
+            pending_count > 0 ->
+              "#{name} pulses warmly. *You sense it has #{pending_count} things to share.*"
+
+            true ->
+              "#{name} glows softly in greeting."
+          end
+
+        push(socket, "event", %{text: greeting})
+
+        # If there are pending updates, also push the spark_updates event
+        if pending_count > 0 do
+          push(socket, "spark_has_updates", %{count: pending_count})
+        end
     end
   end
 end
