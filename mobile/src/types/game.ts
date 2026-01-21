@@ -206,6 +206,32 @@ export interface SocialState {
   pose?: string;
 }
 
+// Spark companion types
+export type SparkBondLevel = 'stranger' | 'acquaintance' | 'companion' | 'friend' | 'bonded';
+export type SparkAwakeningStage = 'dormant' | 'stirring' | 'aware' | 'awakened';
+export type SparkVisualForm = 'mote' | 'flame' | 'geometric' | 'aurora' | 'constellation';
+export type SparkTrait = 'curious' | 'contemplative' | 'warm' | 'earnest' | 'ancient';
+
+export interface SparkState {
+  bond_level: SparkBondLevel;
+  bond_progress: number; // 0-100 percentage to next level
+  awakening_stage: SparkAwakeningStage;
+  personality_traits: SparkTrait[];
+  visual_form: SparkVisualForm;
+  unlocked_forms: SparkVisualForm[];
+  name: string | null; // Revealed at "friend" bond level
+  verbosity: 'quiet' | 'normal' | 'verbose';
+  pending_updates: number;
+}
+
+export interface SparkUpdate {
+  id: string;
+  type: string;
+  summary: string;
+  occurred_at: string;
+  details: Record<string, unknown>;
+}
+
 // Calendar types (Traditional Chinese calendar)
 export interface CalendarState {
   // Compact for status bar
@@ -321,6 +347,7 @@ export interface GameState {
   container?: ContainerState | null;
   bardo?: BardoState | null;
   social?: SocialState;
+  spark?: SparkState | null;
 }
 
 export interface GameEvent {

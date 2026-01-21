@@ -87,6 +87,10 @@ export default function GameScreen() {
     craft,
     setMood,
     setPose,
+    sparkUpdates,
+    sparkAsk,
+    sparkGetUpdates,
+    sparkDismissUpdates,
     clearEvents,
   } = usePhoenix({
     token,
@@ -292,6 +296,11 @@ export default function GameScreen() {
           onSetMood={setMood}
           onSetPose={setPose}
           onLogout={logout}
+          spark={gameState.spark}
+          sparkUpdates={sparkUpdates}
+          onSparkAsk={sparkAsk}
+          onSparkGetUpdates={sparkGetUpdates}
+          onSparkDismissUpdates={sparkDismissUpdates}
         />
 
         {/* Shop Modal */}

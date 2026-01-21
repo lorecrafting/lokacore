@@ -26,9 +26,11 @@ import type {
   EquippedItem,
   Quest,
   CraftingRecipe,
+  SparkState,
+  SparkUpdate,
 } from '../types/game';
 
-type TabKey = 'character' | 'inventory' | 'quest' | 'craft' | 'socials' | 'settings';
+type TabKey = 'character' | 'inventory' | 'quest' | 'craft' | 'spark' | 'socials' | 'settings';
 
 interface MenuPanelProps {
   visible: boolean;
@@ -53,6 +55,12 @@ interface MenuPanelProps {
   onSetMood: (mood: string) => void;
   onSetPose: (pose: string) => void;
   onLogout: () => void;
+  // Spark companion
+  spark?: SparkState | null;
+  sparkUpdates?: SparkUpdate[];
+  onSparkAsk: (question: string) => void;
+  onSparkGetUpdates: () => void;
+  onSparkDismissUpdates: () => void;
 }
 
 const TABS: { key: TabKey; label: string; short: string }[] = [
@@ -60,6 +68,7 @@ const TABS: { key: TabKey; label: string; short: string }[] = [
   { key: 'inventory', label: 'Inventory', short: 'Inv' },
   { key: 'quest', label: 'Quests', short: 'Quest' },
   { key: 'craft', label: 'Crafting', short: 'Craft' },
+  { key: 'spark', label: 'Spark', short: 'Spark' },
   { key: 'socials', label: 'Socials', short: 'Social' },
   { key: 'settings', label: 'Settings', short: '⚙' },
 ];
@@ -405,6 +414,238 @@ function CraftTab({
   );
 }
 
+// === Spark Tab ===
+
+const TRAIT_DESCRIPTIONS: Record<string, string> = {
+  curious: 'Asks questions, interested in everything',
+  contemplative: 'Thoughtful, measured responses',
+  warm: 'Gentle wit, encouraging, never mean',
+  earnest: 'Sincere, occasionally naive',
+  ancient: 'Hints at vast experience, occasional gravity',
+};
+
+const BOND_DESCRIPTIONS: Record<string, string> = {
+  stranger: 'A new presence, still learning to sense you',
+  acquaintance: 'Beginning to recognize your patterns',
+  companion: 'A reliable presence at your side',
+  friend: 'Deeply attuned to your journey',
+  bonded: 'Two souls intertwined by shared experience',
+};
+
+const AWAKENING_DESCRIPTIONS: Record<string, string> = {
+  dormant: 'Still gathering its awareness',
+  stirring: 'Beginning to remember what it once was',
+  aware: 'Conscious of its nature and purpose',
+  awakened: 'Fully realized, wisdom flows freely',
+};
+
+const FORM_EMOJIS: Record<string, string> = {
+  mote: '✦',
+  flame: '🔥',
+  geometric: '◆',
+  aurora: '🌌',
+  constellation: '✧',
+};
+
+function SparkTab({
+  spark,
+  sparkUpdates = [],
+  onSparkAsk,
+  onSparkGetUpdates,
+  onSparkDismissUpdates,
+}: {
+  spark?: SparkState | null;
+  sparkUpdates?: SparkUpdate[];
+  onSparkAsk: (question: string) => void;
+  onSparkGetUpdates: () => void;
+  onSparkDismissUpdates: () => void;
+}) {
+  const [question, setQuestion] = useState('');
+  const [showUpdates, setShowUpdates] = useState(false);
+
+  if (!spark) {
+    return (
+      <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
+        <Text style={styles.muted}>
+          You have not yet bonded with a Spark. Complete character creation to receive your companion.
+        </Text>
+      </ScrollView>
+    );
+  }
+
+  const sparkName = spark.name || 'Your Spark';
+  const formEmoji = FORM_EMOJIS[spark.visual_form] || '✦';
+
+  const handleAsk = () => {
+    if (question.trim()) {
+      onSparkAsk(question.trim());
+      setQuestion('');
+    }
+  };
+
+  const handleGetUpdates = () => {
+    onSparkGetUpdates();
+    setShowUpdates(true);
+  };
+
+  return (
+    <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
+      {/* Spark Identity */}
+      <Text style={styles.sectionHeader}>
+        {formEmoji} {sparkName} {formEmoji}
+      </Text>
+      <Text style={[styles.muted, { textAlign: 'center', marginBottom: spacing.md }]}>
+        {spark.visual_form.charAt(0).toUpperCase() + spark.visual_form.slice(1)} of soft light
+      </Text>
+
+      {/* Bond Level */}
+      <Text style={styles.label}>Bond</Text>
+      <Text style={styles.value}>
+        {spark.bond_level.charAt(0).toUpperCase() + spark.bond_level.slice(1)}
+      </Text>
+      <View style={sparkStyles.progressBar}>
+        <View style={[sparkStyles.progressFill, { width: `${spark.bond_progress}%` }]} />
+      </View>
+      <Text style={styles.muted}>{spark.bond_progress}% to next level</Text>
+      <Text style={[styles.muted, { fontStyle: 'italic' }]}>
+        {BOND_DESCRIPTIONS[spark.bond_level]}
+      </Text>
+
+      <Text style={styles.divider}>· · ·</Text>
+
+      {/* Awakening */}
+      <Text style={styles.label}>Awakening</Text>
+      <Text style={styles.value}>
+        {spark.awakening_stage.charAt(0).toUpperCase() + spark.awakening_stage.slice(1)}
+      </Text>
+      <Text style={[styles.muted, { fontStyle: 'italic' }]}>
+        {AWAKENING_DESCRIPTIONS[spark.awakening_stage]}
+      </Text>
+
+      <Text style={styles.divider}>· · ·</Text>
+
+      {/* Personality Traits */}
+      <Text style={styles.label}>Personality</Text>
+      {spark.personality_traits.map((trait) => (
+        <View key={trait} style={{ marginBottom: spacing.xs }}>
+          <Text style={styles.value}>
+            {trait.charAt(0).toUpperCase() + trait.slice(1)}
+          </Text>
+          <Text style={styles.muted}>{TRAIT_DESCRIPTIONS[trait]}</Text>
+        </View>
+      ))}
+
+      <Text style={styles.divider}>· · ·</Text>
+
+      {/* Pending Updates */}
+      {spark.pending_updates > 0 && (
+        <>
+          <TouchableOpacity onPress={handleGetUpdates}>
+            <Text style={styles.link}>
+              {spark.pending_updates} {spark.pending_updates === 1 ? 'update' : 'updates'} waiting ➤
+            </Text>
+          </TouchableOpacity>
+
+          {showUpdates && sparkUpdates.length > 0 && (
+            <View style={sparkStyles.updatesContainer}>
+              <Text style={styles.label}>While you were away...</Text>
+              {sparkUpdates.map((update) => (
+                <Text key={update.id} style={styles.value}>• {update.summary}</Text>
+              ))}
+              <TouchableOpacity onPress={() => { onSparkDismissUpdates(); setShowUpdates(false); }}>
+                <Text style={[styles.link, { marginTop: spacing.sm }]}>dismiss all</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          <Text style={styles.divider}>· · ·</Text>
+        </>
+      )}
+
+      {/* Unlocked Forms */}
+      {spark.unlocked_forms.length > 1 && (
+        <>
+          <Text style={styles.label}>Visual Forms</Text>
+          <View style={sparkStyles.formsRow}>
+            {spark.unlocked_forms.map((form) => (
+              <Text
+                key={form}
+                style={[
+                  styles.value,
+                  form === spark.visual_form && styles.selected,
+                ]}
+              >
+                {FORM_EMOJIS[form]} {form}
+              </Text>
+            ))}
+          </View>
+          <Text style={styles.divider}>· · ·</Text>
+        </>
+      )}
+
+      {/* Ask Spark */}
+      <Text style={styles.label}>Ask your Spark</Text>
+      <View style={sparkStyles.askContainer}>
+        <View style={sparkStyles.inputContainer}>
+          <Text
+            style={sparkStyles.input}
+            numberOfLines={1}
+          >
+            {question || 'Type a question...'}
+          </Text>
+        </View>
+        <TouchableOpacity onPress={handleAsk} disabled={!question.trim()}>
+          <Text style={question.trim() ? styles.link : styles.muted}>ask</Text>
+        </TouchableOpacity>
+      </View>
+      <Text style={styles.muted}>
+        Ask about quests, locations, or just chat. Your bond grows with each conversation.
+      </Text>
+    </ScrollView>
+  );
+}
+
+const sparkStyles = StyleSheet.create({
+  progressBar: {
+    height: 8,
+    backgroundColor: colors.border,
+    borderRadius: 4,
+    marginVertical: spacing.xs,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: colors.text,
+    borderRadius: 4,
+  },
+  updatesContainer: {
+    marginTop: spacing.sm,
+    paddingLeft: spacing.md,
+  },
+  formsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.md,
+  },
+  askContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginBottom: spacing.xs,
+  },
+  inputContainer: {
+    flex: 1,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    paddingVertical: spacing.xs,
+  },
+  input: {
+    fontFamily: fonts.serif,
+    fontSize: 16,
+    color: colors.textMuted,
+  },
+});
+
 const MOODS = [
   { key: 'neutral', name: 'Neutral' },
   { key: 'cheerful', name: 'Cheerful' },
@@ -528,6 +769,11 @@ export function MenuPanel({
   onSetMood,
   onSetPose,
   onLogout,
+  spark,
+  sparkUpdates,
+  onSparkAsk,
+  onSparkGetUpdates,
+  onSparkDismissUpdates,
 }: MenuPanelProps) {
   const [activeTab, setActiveTab] = useState<TabKey>('character');
 
@@ -576,6 +822,16 @@ export function MenuPanel({
         return <QuestTab activeQuests={activeQuests} completedQuests={completedQuests} />;
       case 'craft':
         return <CraftTab recipes={recipes} inventory={inventory} onCraft={onCraft} />;
+      case 'spark':
+        return (
+          <SparkTab
+            spark={spark}
+            sparkUpdates={sparkUpdates}
+            onSparkAsk={onSparkAsk}
+            onSparkGetUpdates={onSparkGetUpdates}
+            onSparkDismissUpdates={onSparkDismissUpdates}
+          />
+        );
       case 'socials':
         return (
           <SocialsTab

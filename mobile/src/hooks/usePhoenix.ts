@@ -30,6 +30,8 @@ import type {
   CalendarState,
   VisualState,
   SoundState,
+  SparkUpdate,
+  SparkState,
 } from '../types/game';
 
 interface UsePhoenixOptions {
@@ -153,6 +155,12 @@ interface UsePhoenixReturn {
   // Bardo
   reincarnate: () => void;
 
+  // Spark companion
+  sparkUpdates: SparkUpdate[];
+  sparkAsk: (question: string) => void;
+  sparkGetUpdates: () => void;
+  sparkDismissUpdates: () => void;
+
   // Utility
   clearEvents: () => void;
 
@@ -177,6 +185,7 @@ export function usePhoenix({ token, onDisconnect, onUpdateRequired }: UsePhoenix
 
   // Feature-specific state
   const [combatState, setCombatState] = useState<CombatState | null>(null);
+  const [sparkUpdates, setSparkUpdates] = useState<SparkUpdate[]>([]);
   const [shopState, setShopState] = useState<ShopState | null>(null);
   const [containerState, setContainerState] = useState<ContainerState | null>(null);
   const [bardoState, setBardoState] = useState<BardoState | null>(null);
@@ -601,6 +610,36 @@ export function usePhoenix({ token, onDisconnect, onUpdateRequired }: UsePhoenix
     });
 
     // ==========================================================================
+    // Spark companion events
+    // ==========================================================================
+
+    channel.on('spark_updates', (payload: { updates: SparkUpdate[]; count: number }) => {
+      console.log('Spark updates:', payload);
+      setSparkUpdates(payload.updates || []);
+    });
+
+    channel.on('spark_status', (payload: SparkState) => {
+      console.log('Spark status:', payload);
+      // Status is already in gameState.spark, this is for real-time updates
+      setGameState((prev) => {
+        if (!prev) return prev;
+        return { ...prev, spark: payload };
+      });
+    });
+
+    channel.on('spark_has_updates', (payload: { count: number }) => {
+      console.log('Spark has updates:', payload.count);
+      // Update the pending count in game state
+      setGameState((prev) => {
+        if (!prev?.spark) return prev;
+        return {
+          ...prev,
+          spark: { ...prev.spark, pending_updates: payload.count },
+        };
+      });
+    });
+
+    // ==========================================================================
     // Shop events
     // ==========================================================================
 
@@ -894,6 +933,23 @@ export function usePhoenix({ token, onDisconnect, onUpdateRequired }: UsePhoenix
     channelRef.current?.push('bardo', { action: 'reincarnate' });
   }, []);
 
+  // ==========================================================================
+  // Spark companion actions
+  // ==========================================================================
+
+  const sparkAsk = useCallback((question: string) => {
+    channelRef.current?.push('spark', { action: 'ask', question });
+  }, []);
+
+  const sparkGetUpdates = useCallback(() => {
+    channelRef.current?.push('spark', { action: 'updates' });
+  }, []);
+
+  const sparkDismissUpdates = useCallback(() => {
+    channelRef.current?.push('spark', { action: 'dismiss' });
+    setSparkUpdates([]);
+  }, []);
+
   return {
     connected,
     connecting,
@@ -934,6 +990,10 @@ export function usePhoenix({ token, onDisconnect, onUpdateRequired }: UsePhoenix
     setMood,
     setPose,
     reincarnate,
+    sparkUpdates,
+    sparkAsk,
+    sparkGetUpdates,
+    sparkDismissUpdates,
     clearEvents,
   };
 }
