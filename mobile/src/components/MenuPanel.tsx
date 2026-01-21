@@ -12,6 +12,7 @@ import {
   Modal,
   ScrollView,
   TouchableOpacity,
+  TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PageContainer } from './PageContainer';
@@ -586,14 +587,16 @@ function SparkTab({
       {/* Ask Spark */}
       <Text style={styles.label}>Ask your Spark</Text>
       <View style={sparkStyles.askContainer}>
-        <View style={sparkStyles.inputContainer}>
-          <Text
-            style={sparkStyles.input}
-            numberOfLines={1}
-          >
-            {question || 'Type a question...'}
-          </Text>
-        </View>
+        <TextInput
+          style={sparkStyles.textInput}
+          value={question}
+          onChangeText={setQuestion}
+          placeholder="Type a question..."
+          placeholderTextColor={colors.textMuted}
+          returnKeyType="send"
+          onSubmitEditing={handleAsk}
+          blurOnSubmit={false}
+        />
         <TouchableOpacity onPress={handleAsk} disabled={!question.trim()}>
           <Text style={question.trim() ? styles.link : styles.muted}>ask</Text>
         </TouchableOpacity>
@@ -633,16 +636,15 @@ const sparkStyles = StyleSheet.create({
     gap: spacing.sm,
     marginBottom: spacing.xs,
   },
-  inputContainer: {
+  textInput: {
     flex: 1,
+    fontFamily: fonts.serif,
+    fontSize: 16,
+    color: colors.text,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
     paddingVertical: spacing.xs,
-  },
-  input: {
-    fontFamily: fonts.serif,
-    fontSize: 16,
-    color: colors.textMuted,
+    paddingHorizontal: 0,
   },
 });
 
