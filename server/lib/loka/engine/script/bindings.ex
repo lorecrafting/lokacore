@@ -489,19 +489,31 @@ defmodule Loka.Engine.Script.Bindings do
     end
   end
 
-  defp current_weather(_player) do
-    # TODO: Integrate with weather system
-    :clear
+  defp current_weather(player) do
+    room = get_room(player)
+    # Check if we have a valid room and if it's outdoors
+    if room && "outdoor" in (room[:tags] || []) do
+      # For now use default region, in future use room's region/zone
+      Loka.Framework.World.Weather.get_weather("default")
+    else
+      # Indoor always clear/neutral
+      :clear
+    end
   end
 
-  defp is_outdoor?(_player) do
-    # TODO: Check room tags
-    true
+  defp is_outdoor?(player) do
+    room = get_room(player)
+    room && "outdoor" in (room[:tags] || [])
   end
 
-  defp is_dark?(_player) do
-    # TODO: Check room lighting
-    time_of_day() == :night
+  defp is_dark?(player) do
+    # It's dark if it's night time AND we are outdoors
+    # OR if the room has a "dark" tag (e.g. caves)
+    room = get_room(player)
+    tags = room[:tags] || []
+    
+    ("dark" in tags) or 
+    ("outdoor" in tags and time_of_day() == :night)
   end
 
   # =============================================================================

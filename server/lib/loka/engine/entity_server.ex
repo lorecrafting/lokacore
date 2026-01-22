@@ -401,7 +401,9 @@ defmodule Loka.Engine.EntityServer do
   end
 
   defp schedule_auto_save(interval_ms) do
-    Process.send_after(self(), :auto_save, interval_ms)
+    # Add jitter to prevent thundering herd (±10%)
+    jitter = trunc(interval_ms * 0.1 * (:rand.uniform() - 0.5))
+    Process.send_after(self(), :auto_save, interval_ms + jitter)
   end
 
   defp schedule_idle_check(interval_ms) do

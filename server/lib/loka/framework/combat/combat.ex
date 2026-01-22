@@ -58,7 +58,7 @@ defmodule Loka.Framework.Combat do
       end
   """
 
-  alias Loka.Engine.Entities
+  alias Loka.Engine.{Entities, Event, EventBus}
   alias Loka.Framework.Combat.DamageMessage
   alias Loka.Framework.Player.GameState
   alias Loka.Framework.Progression
@@ -341,6 +341,20 @@ defmodule Loka.Framework.Combat do
           defense: trunc(player_def / 2) + toughness_reduction
         )
 
+      # Emit damage event to update the player entity
+      if game_state.player_id do
+        event = Event.new(:damage, %{
+          source: combat_state.enemy_id,
+          target: game_state.player_id,
+          payload: %{
+            amount: final_damage,
+            type: :physical,
+            source_name: combat_state.enemy.name
+          }
+        })
+        EventBus.emit(event)
+      end
+
       {:ok, combat_state, %{action: :attack, damage: final_damage}}
     end
   end
@@ -549,6 +563,20 @@ defmodule Loka.Framework.Combat do
       damage: final_damage,
       turn: combat_state.turn_count
     }
+
+    # Emit damage event to update the real entity (NPC)
+    if combat_state.enemy_id do
+      event = Event.new(:damage, %{
+        source: game_state.player_id,
+        target: combat_state.enemy_id,
+        payload: %{
+          amount: final_damage,
+          type: :physical, # TODO: Support weapon damage types
+          source_name: game_state.character_name
+        }
+      })
+      EventBus.emit(event)
+    end
 
     # Update combat state
     new_state = %{

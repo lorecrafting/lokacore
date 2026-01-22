@@ -84,7 +84,7 @@ defmodule Mix.Tasks.Loka.ExportMobile do
     # Validate first if requested
     if validate? do
       Mix.shell().info("Running validation...")
-      # TODO: Call validation task
+      Mix.Task.run("loka.test.validate", [])
     end
 
     # Create output directory
