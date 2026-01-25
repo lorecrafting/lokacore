@@ -39,12 +39,16 @@ glam = "0.29"
 log = "0.4"
 env_logger = "0.11"
 
-# Serialization (for uniffi later)
+# Serialization and FFI
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+uniffi = { version = "0.28", features = ["build"] }
 
 [target.'cfg(target_os = "ios")'.dependencies]
 # iOS-specific dependencies will go here
+
+[build-dependencies]
+uniffi = { version = "0.28", features = ["build"] }
 
 [dev-dependencies]
 # Testing dependencies

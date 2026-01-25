@@ -1,0 +1,126 @@
+// Uniffi interface for Loka Book Renderer
+// This bridges React Native (TypeScript) with Rust/Bevy renderer
+//
+// Architecture:
+//   Server → Phoenix Channels → RN (TypeScript) → [THIS BRIDGE] → Rust Book Renderer
+//
+// The types here mirror channel.generated.ts from the mobile app
+
+namespace loka_book {
+    // Initialize the book renderer
+    LokaBookBridge create_bridge();
+};
+
+// Main bridge interface
+interface LokaBookBridge {
+    // === Game State Updates (from channel events) ===
+
+    // Update game state from server (game_state event)
+    void update_game_state(string json_payload);
+
+    // Update room information (room_update event)
+    void update_room(string json_payload);
+
+    // Add event to game log (event payload)
+    void add_event(string text, string? event_type);
+
+    // === Dialogue System ===
+
+    // Start dialogue (dialogue_start event)
+    void start_dialogue(string entity_id, string node_id, string text, string choices_json);
+
+    // Update dialogue (dialogue_update event)
+    void update_dialogue(string node_id, string text, string choices_json);
+
+    // End dialogue (dialogue_end event)
+    void end_dialogue();
+
+    // === Combat System ===
+
+    // Start combat (combat_start event)
+    void start_combat(string enemy_id, string enemy_name, u32 enemy_hp, u32 enemy_max_hp);
+
+    // Update combat state (combat_update event)
+    void update_combat(u32? enemy_hp, u32? player_hp, boolean? can_flee);
+
+    // End combat (combat_end event)
+    void end_combat(string result, string? rewards_json);
+
+    // === Container/Loot System ===
+
+    // Open container (container_open event)
+    void open_container(string entity_id, string entity_name, string items_json);
+
+    // Close container (container_close event)
+    void close_container();
+
+    // === Navigation & UI ===
+
+    // Turn to menu page
+    void turn_to_menu();
+
+    // Turn to entity interaction page
+    void turn_to_entity_page(string entity_key);
+
+    // Go back to previous page
+    void go_back();
+
+    // === User Input (RN → Rust) ===
+
+    // Handle tap at screen coordinates (0-1 normalized)
+    TapResult handle_tap(f32 x, f32 y);
+
+    // === Content Retrieval (Rust → RN for rendering) ===
+
+    // Get current page content as formatted text
+    string get_current_page_content();
+
+    // Get player stats for UI overlays
+    PlayerStatsData get_player_stats();
+
+    // Get available exits for navigation buttons
+    sequence<string> get_available_exits();
+
+    // Get current menu tab
+    string? get_current_menu_tab();
+
+    // Get active dialogue state (if any)
+    DialogueStateData? get_dialogue_state();
+};
+
+// === Data Types ===
+
+// Result of a tap gesture
+dictionary TapResult {
+    string action_type;  // "none", "navigate", "menu", "entity_click", "dialogue_choice", etc.
+    string? target;      // Optional target (entity_key, direction, choice_id, etc.)
+    string? details;     // Optional JSON details
+};
+
+// Player stats for UI display
+dictionary PlayerStatsData {
+    u32 hp;
+    u32 max_hp;
+    u32 qi;
+    u32 max_qi;
+    u32 stamina;
+    u32 max_stamina;
+    u32 level;
+    u32 xp;
+    u32 xp_to_next_level;
+    u32 gold;
+};
+
+// Active dialogue state
+dictionary DialogueStateData {
+    string entity_id;
+    string node_id;
+    string current_text;
+    sequence<DialogueChoiceData> choices;
+};
+
+// A single dialogue choice
+dictionary DialogueChoiceData {
+    string id;
+    string text;
+};

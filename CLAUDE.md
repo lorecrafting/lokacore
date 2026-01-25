@@ -144,7 +144,13 @@ lokacore/
 
 ## Rust/Bevy Book Client Development
 
-The `book-client/` folder contains a Rust-based 3D renderer that displays the game UI as a magical book. This is fundamentally different from web/Elixir development.
+The `book-client/` folder contains a Rust-based 3D renderer for immersive visual moments - cinematic quest intros, combat effects, and the magical book interface. This complements React Native, which handles social/chat features.
+
+**Architecture**: See `docs/architecture/client-architecture.md` for the full hybrid React Native + Bevy strategy.
+
+**Key principle**: Use Bevy for "wow moments" (dragon fly-bys, screen shake, spell effects), React Native for daily interactions (chat, inventory lists, settings). Both connect to the same Phoenix Channel backend.
+
+This section covers Bevy-specific development, which is fundamentally different from web/Elixir development.
 
 ### Key Differences from Web Development
 
@@ -698,6 +704,7 @@ Work is often **cross-cutting** - use docs from any tier as needed.
 |-------|----------|
 | **Quest/Dialogue/Entity YAML** | `docs/builder-reference/` |
 | **Architecture Deep-Dive** | `docs/architecture/` |
+| **Client Architecture (React Native + Bevy)** | `docs/architecture/client-architecture.md` |
 | **Scripting API** | `docs/architecture/elixir-scripts-design.md` |
 | **Game Client** | `docs/reference/game-client.md` |
 | **Channel API** | `docs/api/channel-contract.md` |
