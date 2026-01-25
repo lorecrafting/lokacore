@@ -8,6 +8,7 @@ pub mod content;
 pub mod text;
 pub mod effects;
 pub mod input;
+pub mod ui;
 
 use bevy::prelude::*;
 pub use content::{GameState, Room, GameEvent};
@@ -22,6 +23,7 @@ impl Plugin for LokaBookPlugin {
             text::SdfTextPlugin,  // Use SDF for effect support
             effects::EffectsPlugin,
             input::InputPlugin,
+            ui::MenuPlugin,
         ));
     }
 }
