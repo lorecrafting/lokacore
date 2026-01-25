@@ -15,6 +15,15 @@ pub mod bridge;
 use bevy::prelude::*;
 pub use content::{GameState, Room, GameEvent};
 
+// Export bridge types for uniffi
+pub use bridge::{
+    LokaBookBridge, TapResult, PlayerStatsData,
+    DialogueStateData, DialogueChoiceData, create_bridge
+};
+
+// Include uniffi scaffolding at crate root
+uniffi::include_scaffolding!("loka_book");
+
 /// Main plugin for the book renderer
 pub struct LokaBookPlugin;
 

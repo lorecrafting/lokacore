@@ -5,6 +5,9 @@
 use std::sync::{Arc, Mutex};
 use serde::{Deserialize, Serialize};
 
+// NOTE: uniffi::include_scaffolding! is called in lib.rs at crate root
+// This module just provides the implementation types
+
 /// Data types that match the .udl interface
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TapResult {
@@ -40,9 +43,6 @@ pub struct DialogueChoiceData {
     pub id: String,
     pub text: String,
 }
-
-// Include uniffi scaffolding
-uniffi::include_scaffolding!("loka_book");
 
 /// Main bridge implementation
 pub struct LokaBookBridge {
