@@ -4,6 +4,8 @@
 
 mod menu_page;
 mod health_bars;
+mod bottom_bar;
 
 pub use menu_page::*;
 pub use health_bars::*;
+pub use bottom_bar::*;
