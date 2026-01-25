@@ -16,6 +16,7 @@
 | Scripting | Elixir (sandboxed) | Native |
 | Mobile Client | React Native / Expo | 54 |
 | **Book Client** | **Rust / Bevy** | **0.15** |
+| **RN-Rust Bridge** | **uniffi** | **0.28** |
 | Deployment | Fly.io | ~$5/month |
 
 ## Architecture
@@ -137,8 +138,14 @@ lokacore/
 │   │   ├── book/            # Page mesh, curl animation
 │   │   ├── text/            # cosmic-text integration
 │   │   ├── effects/         # Shader effects (fire, ice, etc.)
-│   │   └── input/           # Touch/tap detection
-│   └── shaders/             # WGSL shader files
+│   │   ├── input/           # Touch/tap detection
+│   │   ├── ui/              # Menu pages, entity pages, dialogue
+│   │   ├── dialogue/        # Branching dialogue trees
+│   │   ├── bridge/          # Uniffi RN ↔ Rust bridge
+│   │   └── loka_book.udl    # Uniffi interface (mirrors channel types)
+│   ├── shaders/             # WGSL shader files
+│   ├── build.rs             # Uniffi scaffolding generator
+│   └── README_UNIFFI.md     # Bridge integration guide
 └── CLAUDE.md
 ```
 
