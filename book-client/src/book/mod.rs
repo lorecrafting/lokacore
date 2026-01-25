@@ -5,10 +5,12 @@
 mod mesh;
 mod curl;
 mod material;
+mod pages;
 
 pub use mesh::*;
 pub use curl::*;
 pub use material::*;
+pub use pages::*;
 
 use bevy::prelude::*;
 
@@ -18,12 +20,14 @@ pub struct BookPlugin;
 impl Plugin for BookPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<PageCurlState>()
+            .init_resource::<BookState>()
             .add_systems(Startup, setup_book)
             .add_systems(Update, (
                 store_original_mesh_data,
                 update_page_curl,
                 apply_curl_to_mesh,
             ).chain());
+        info!("BookPlugin initialized with multi-page support");
     }
 }
 
