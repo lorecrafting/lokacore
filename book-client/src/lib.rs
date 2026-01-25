@@ -24,6 +24,7 @@ impl Plugin for LokaBookPlugin {
             effects::EffectsPlugin,
             input::InputPlugin,
             ui::MenuPlugin,
+            ui::HealthBarPlugin,
         ));
     }
 }
