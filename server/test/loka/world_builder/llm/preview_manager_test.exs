@@ -2,10 +2,13 @@ defmodule Loka.WorldBuilder.LLM.PreviewManagerTest do
   use ExUnit.Case, async: false
 
   alias Loka.WorldBuilder.LLM.PreviewManager
+  alias Loka.WorldBuilder.EntityManager
 
   setup do
-    # Ensure PreviewManager is started
-    start_supervised!(PreviewManager)
+    # PreviewManager is started by Application.
+    # Clear state for all users used in tests to ensure isolation.
+    users = ["user", "test_user", "new_user", "user1", "user2", "heavy_user"]
+    Enum.each(users, &PreviewManager.clear_previews/1)
     :ok
   end
 
@@ -73,6 +76,31 @@ defmodule Loka.WorldBuilder.LLM.PreviewManagerTest do
       refute is_nil(result)
     end
 
+    test "accepts and commits an NPC preview" do
+      user_id = "test_user"
+      # Use random key to avoid collisions
+      npc_key = "test_npc_#{:erlang.unique_integer([:positive])}"
+      npc_data = %{
+        key: npc_key,
+        name: "Test NPC",
+        description: "A test NPC",
+        level: 5
+      }
+
+      {:ok, preview_id} = PreviewManager.add_preview(user_id, :npc, npc_data)
+      
+      # Should succeed now that it's implemented
+      assert {:ok, entity} = PreviewManager.accept_preview(preview_id)
+      
+      # Verify returned entity
+      assert entity.key == npc_key
+      assert entity.name == "Test NPC"
+      assert entity.subtype == :npc
+      
+      # Cleanup
+      EntityManager.delete_entity(npc_key)
+    end
+
     test "returns error for non-existent preview" do
       assert {:error, :not_found} = PreviewManager.accept_preview("nonexistent")
     end
@@ -96,8 +124,8 @@ defmodule Loka.WorldBuilder.LLM.PreviewManagerTest do
       assert Enum.all?(previews, fn p -> p.id != preview_id end)
     end
 
-    test "succeeds even for non-existent preview" do
-      assert :ok = PreviewManager.reject_preview("nonexistent")
+    test "returns error for non-existent preview" do
+      assert {:error, :not_found} = PreviewManager.reject_preview("nonexistent")
     end
   end
 

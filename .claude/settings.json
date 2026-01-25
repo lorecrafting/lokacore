@@ -1,7 +1,4 @@
 {
-  "enabledPlugins": {
-    "beads@beads-marketplace": false
-  },
   "statusLine": {
     "type": "command",
     "command": "/Users/raymondluong/dev/lokacore/.claude/statusline.sh"

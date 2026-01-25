@@ -32,7 +32,7 @@ grep -rn "alias Loka.Framework" lib/loka/engine/
 grep -rn "Loka.Framework\." lib/loka/engine/
 ```
 
-Report any violations found. Check `bd list --status=open` to see if violations are already tracked in beads.
+Report any violations found. Check the task list to see if violations are already being tracked.
 
 **Fix strategies**:
 1. **Extension pattern** (preferred): Engine defines behaviour, Framework implements

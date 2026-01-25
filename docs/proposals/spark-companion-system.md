@@ -727,9 +727,9 @@ This reinforces the shared origin while creating social moments.
 - [ ] Semantic search for relevant memories
 - [ ] LLM-generated responses for special moments
 
-## Related Beads
+## Related Tasks
 
-- lokacore-c31: While you were away summary (absorbed into this system)
+- While you were away summary (absorbed into this system)
 - NEW: Create epic for Spark Companion System
 - Future: Spark awakening storyline integration
 - Future: Spark visual customization

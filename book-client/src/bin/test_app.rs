@@ -334,8 +334,9 @@ fn handle_link_tap(
         match action_type {
             "exit" => {
                 // Navigate to the room in that direction
+                info!("Exit link tapped, phase: {:?}, curl: {}", curl_state.phase, curl_state.curl_amount);
                 if curl_state.phase != TurnPhase::Idle {
-                    info!("Cannot navigate - page turn in progress");
+                    info!("Cannot navigate - page turn in progress (phase: {:?})", curl_state.phase);
                     continue;
                 }
 

@@ -22,6 +22,7 @@ defmodule Loka.WorldBuilder.LLM.PreviewManager do
   require Logger
 
   alias Loka.WorldBuilder.RoomManager
+  alias Loka.WorldBuilder.EntityManager
 
   # Configuration
   @preview_ttl_minutes 30
@@ -230,13 +231,7 @@ defmodule Loka.WorldBuilder.LLM.PreviewManager do
   end
 
   defp commit_preview(%{type: :npc, data: npc_data}) do
-    # NOT YET IMPLEMENTED: NPC creation requires EntityManager.create_entity
-    # with proper NPC subtype support and validation
-    Logger.warning(
-      "[PreviewManager] NPC creation not yet implemented, rejecting preview: #{inspect(npc_data[:key] || npc_data.key)}"
-    )
-
-    {:error, :npc_creation_not_implemented}
+    EntityManager.create_entity(:npc, npc_data)
   end
 
   defp commit_preview(%{type: type}) do

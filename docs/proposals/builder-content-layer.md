@@ -117,7 +117,7 @@ priv/world/
 17. [Test Specifications](#test-specifications)
 18. [Migration from Current System](#migration-from-current-system)
 19. [Implementation Phases](#implementation-phases)
-20. [Beads Breakdown](#beads-breakdown)
+20. [Task Breakdown](#task-breakdown)
 
 ---
 
@@ -2705,9 +2705,9 @@ end
 
 ---
 
-## Beads Breakdown
+## Task Breakdown
 
-These are ready to be created as beads when implementation begins.
+These are ready to be tracked as tasks when implementation begins.
 
 ### Phase 1: Foundation
 
@@ -2813,7 +2813,7 @@ lokacore-XXX: Update CLAUDE.md with new architecture
   - Added seeding system for fresh deploys
   - Added export system for backups
   - Added comprehensive edge cases and test specifications
-  - Added beads breakdown for implementation planning
+  - Added task breakdown for implementation planning
 - **2026-01-12**: Added "Implementation Timing" section - marked proposal as deferred
   - Changed status from "Proposal" to "Deferred"
   - Added rationale for why YAML-only is superior during rapid development

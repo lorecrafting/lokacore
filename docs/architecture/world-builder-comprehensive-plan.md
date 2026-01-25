@@ -2141,7 +2141,7 @@ This document provides a complete specification for implementing the Loka World 
 **Timeline**: 10-11 weeks
 **Total Effort**: ~376 hours
 
-Ready for implementation. Create beads issues from this plan and begin Phase 1.
+Ready for implementation. Create tasks from this plan and begin Phase 1.
 
 ---
 

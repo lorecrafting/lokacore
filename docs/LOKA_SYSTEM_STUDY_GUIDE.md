@@ -2,7 +2,7 @@
 
 > **A Complete Technical Reference for Understanding the Loka Game Engine**
 >
-> *Version 3.0 | January 2026*
+> *Version 4.0 | January 2026*
 
 ---
 
@@ -41,7 +41,10 @@
 24. [Testing Framework](#24-testing-framework)
 25. [Mix Tasks & CLI](#25-mix-tasks--cli)
 26. [Creating New Plugins](#26-creating-new-plugins)
-27. [Quick Reference](#27-quick-reference)
+27. [World Builder System](#27-world-builder-system)
+28. [Spark Companion System](#28-spark-companion-system)
+29. [Mobile App Architecture](#29-mobile-app-architecture)
+30. [Quick Reference](#30-quick-reference)
 
 ---
 
@@ -65,9 +68,13 @@ Loka is an Elixir-based MUD (Multi-User Dungeon) engine framework. It leverages 
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
+│ CLIENTS - Mobile (React Native) + Web (LiveView)           │
+├─────────────────────────────────────────────────────────────┤
+│ WORLD BUILDER - lib/loka/world_builder/ (content creation) │
+├─────────────────────────────────────────────────────────────┤
 │ GAME CONTENT - priv/world/prototypes/ (YAML)               │
 ├─────────────────────────────────────────────────────────────┤
-│ GAME FRAMEWORK - lib/loka/framework/ (27 subsystems)       │
+│ GAME FRAMEWORK - lib/loka/framework/ (33 subsystems)       │
 ├─────────────────────────────────────────────────────────────┤
 │ ENGINE CORE - lib/loka/engine/ (entities, events, commands)│
 ├─────────────────────────────────────────────────────────────┤
@@ -1061,7 +1068,7 @@ Timers continue while players are offline:
 
 **Location:** `lib/loka/framework/`
 
-The Framework layer contains 27 reusable game subsystems built on Engine primitives.
+The Framework layer contains 33 reusable game subsystems built on Engine primitives.
 
 ### Subsystem Categories
 
@@ -1105,8 +1112,10 @@ The Framework layer contains 27 reusable game subsystems built on Engine primiti
 | Subsystem | Purpose |
 |-----------|---------|
 | **Social** | Channels, parties, relationships |
-| **Companion** | Pet/companion system |
+| **Companion** | Pet/follower system with loyalty, hunger, happiness |
 | **Messaging** | In-game mail |
+| **Broadcast** | Global announcements (system, event, emergency) |
+| **Spark** | AI companion with bond progression and hints |
 
 ### Player.GameState
 
@@ -2511,7 +2520,380 @@ def hooks, do: [
 
 ---
 
-## 27. Quick Reference
+## 27. World Builder System
+
+**Location:** `lib/loka/world_builder/`
+
+The World Builder is a comprehensive UI-driven content creation system (~7,600 LOC) that allows non-technical builders to create and edit game content through the admin dashboard.
+
+### Architecture Pattern
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ World Builder UI (lib/loka_web/live/admin_live/)            │
+├─────────────────────────────────────────────────────────────┤
+│ Manager Classes (EntityManager, RoomManager, etc.)          │
+├─────────────────────────────────────────────────────────────┤
+│ Content Modules (Content.Quest, Content.Dialogue, etc.)     │
+├─────────────────────────────────────────────────────────────┤
+│ TypedObject.Loader + PrototypeLoader                        │
+├─────────────────────────────────────────────────────────────┤
+│ YAML Files (priv/world/prototypes/, quests/, etc.)          │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Core Managers
+
+| Manager | Purpose | Key Methods |
+|---------|---------|-------------|
+| **EntityManager** | Generic CRUD for NPCs, items, etc. | `create_entity/2`, `update_entity/2`, `list_entities/1` |
+| **RoomManager** | Room CRUD with exits and coordinates | `create_room/1`, `add_exit/3`, `update_exits/2` |
+| **QuestManager** | Quest definition management | `create_quest/1`, `update_quest/2`, `delete_quest/1` |
+| **ScriptManager** | Script YAML management | `create_script/1`, `list_scripts/0` |
+| **TemplateManager** | Room template system | `save_as_template/3`, `create_from_template/2` |
+| **CutsceneManager** | Timeline-based cutscenes | `create_cutscene/1`, `update_cutscene/2` |
+
+### EntityManager Details
+
+`EntityManager` is the unified CRUD layer for all entity types in the World Builder:
+
+```elixir
+# Create an NPC with dialogue
+EntityManager.create_entity(:npc, %{
+  key: "village_elder",
+  name: "Elder Dawa",
+  description: "A wise elder",
+  components: %{
+    "dialogue_tree" => %{
+      "start" => %{
+        "text" => "Greetings, traveler!",
+        "choices" => [
+          %{"text" => "Hello", "next" => nil}
+        ]
+      }
+    }
+  }
+})
+
+# Update entity
+EntityManager.update_entity("village_elder", %{
+  components: %{dialogue_tree: updated_tree}
+})
+
+# List all NPCs
+npcs = EntityManager.list_entities(:npc)
+```
+
+**Key Features:**
+- Merges default components with user-provided components
+- Reloads both `PrototypeLoader` and `TypedObject.Loader` on save
+- Serializes nested maps (including dialogue trees) to proper YAML format
+- Validates safe key names (no path traversal)
+
+### YAML Serialization
+
+The EntityManager handles complex nested structures like dialogue trees:
+
+```yaml
+# Generated YAML for NPC with dialogue
+key: village_elder
+type: npc
+parent: base_npc
+components:
+  dialogue_tree:
+    start:
+      text: "Greetings, traveler!"
+      choices:
+        - next: "more_info"
+          text: "Tell me more"
+        - next: null
+          text: "Goodbye"
+```
+
+### Supporting Systems
+
+| Module | Purpose |
+|--------|---------|
+| `BatchOperations` | Cross-cutting operations for multiple entities |
+| `GitManager` | Git integration for version control |
+| `ValidationManager` | Content integrity checking |
+| `ToolExecutor` | Executes World Builder tools |
+| `LayoutManager` | Room layout and coordinate management |
+| `CoordinateUtils` | Spatial math helpers |
+
+### Usage Guidelines
+
+**DO:**
+- Use `EntityManager` for simple entity CRUD (NPCs, items)
+- Use specialized managers for complex needs (RoomManager for exits)
+- Use Content modules when game logic needs entity data
+
+**DON'T:**
+- Create redundant managers like `NPCManager` (use EntityManager)
+- Put UI-specific code in Content modules
+- Duplicate CRUD logic across managers
+
+---
+
+## 28. Spark Companion System
+
+**Location:** `lib/loka/framework/spark/`
+
+Spark is a player-bonded AI companion that provides hints, tracks world events, and grows alongside the player.
+
+### Core Components
+
+| Module | Purpose |
+|--------|---------|
+| `Spark` | Main API for lifecycle and interactions |
+| `SparkState` | Ecto schema for persistent state |
+| `SparkEvent` | Ecto schema for "while you were away" events |
+
+### Database Schema
+
+**spark_states table:**
+```elixir
+%SparkState{
+  player_id: integer,
+  personality_traits: ["curious", "warm"],  # Exactly 2 traits
+  bond_level: "stranger",                   # stranger→acquaintance→companion→friend→bonded
+  bond_points: 0,                           # Numeric accumulation
+  awakening_stage: "dormant",               # dormant→stirring→aware→awakened
+  visual_form: "mote",                      # mote, flame, geometric, aurora, constellation
+  unlocked_forms: ["mote"],
+  unlocked_memories: [],
+  name: nil,                                # Revealed at "friend" level
+  verbosity: "normal"                       # quiet, normal, verbose
+}
+```
+
+**spark_events table:**
+```elixir
+%SparkEvent{
+  player_id: integer,
+  event_type: "quest_update",               # 8 types available
+  event_key: "main_sleeping_master",
+  summary: "You completed the quest!",
+  details: %{},                             # Flexible JSON
+  delivered: false
+}
+```
+
+### Event Types
+
+| Type | Purpose |
+|------|---------|
+| `time_event` | Time-of-day changes |
+| `weather_event` | Weather changes |
+| `npc_activity` | NPC status changes |
+| `quest_update` | Quest progress |
+| `zone_event` | Zone-level events |
+| `world_event` | Global events |
+| `message` | Direct messages |
+| `achievement` | Achievement unlocks |
+
+### Bond Progression
+
+| Level | Points | Unlocks |
+|-------|--------|---------|
+| Stranger | 0 | Basic hints |
+| Acquaintance | 25 | More dialogue |
+| Companion | 75 | Visual forms |
+| Friend | 150 | Name revealed |
+| Bonded | 300 | Full awakening |
+
+**Bond Point Sources:**
+- Daily login: +1
+- Quest completion: +2-5
+- Visiting awakening sites: +3
+- Asking questions: +1
+- Compassionate choices: +2
+- Story milestones: +10
+
+### API Usage
+
+```elixir
+# Create Spark during character creation
+Spark.create_for_player(player_id, ["curious", "warm"])
+
+# Add bond points
+Spark.add_bond_points(player_id, 5)
+
+# Record world event
+Spark.record_event(player_id, :quest_update, %{
+  quest_id: "main_sleeping_master",
+  summary: "Quest completed!"
+})
+
+# Get pending updates (for "while you were away")
+{:ok, updates} = Spark.get_pending_updates(player_id)
+```
+
+### Mobile Integration
+
+Spark appears in the MenuPanel with:
+- Bond progress visualization
+- Awakening stage display
+- Personality trait badges
+- Pending updates viewer
+- Question input field
+
+### Game Channel Events
+
+| Event | Direction | Purpose |
+|-------|-----------|---------|
+| `spark:ask_question` | Client→Server | Ask Spark a question |
+| `spark_status` | Server→Client | Spark state update |
+| `spark_updates` | Server→Client | Pending update list |
+| `spark_has_updates` | Server→Client | Update count notification |
+
+---
+
+## 29. Mobile App Architecture
+
+**Location:** `mobile/`
+
+A full-stack React Native app with TypeScript, running on Expo for web, iOS, and Android.
+
+### Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Framework | React Native 0.81.5 + Expo 54 |
+| Navigation | Expo Router 6.0.21 (file-based) |
+| State | React Context + hooks |
+| Styling | React Native StyleSheet |
+| WebSocket | Phoenix client library |
+| Testing | Playwright + Maestro |
+
+### Directory Structure
+
+```
+mobile/
+├── app/                           # Expo Router pages
+│   ├── _layout.tsx               # Navigation root
+│   ├── index.tsx                 # Login/auth
+│   └── game.tsx                  # Main game screen
+├── src/
+│   ├── components/               # 28 UI components
+│   │   ├── RoomView.tsx          # Game display
+│   │   ├── BottomBar.tsx         # Action menu
+│   │   ├── MenuPanel.tsx         # Main menu (includes Spark)
+│   │   ├── CombatOverlay.tsx     # Combat UI
+│   │   └── ...
+│   ├── hooks/
+│   │   ├── useAuth.ts            # Auth management
+│   │   └── usePhoenix.ts         # WebSocket connection
+│   ├── types/                    # TypeScript interfaces
+│   ├── audio/                    # Sound effects
+│   └── theme.ts                  # Design system
+└── e2e/                          # E2E tests
+```
+
+### Key Components
+
+| Component | Purpose | Size |
+|-----------|---------|------|
+| `game.tsx` | Main game orchestration | 22KB |
+| `MenuPanel.tsx` | Navigation hub (quests, inventory, Spark) | 32KB |
+| `RoomView.tsx` | Location display | ~8KB |
+| `BottomBar.tsx` | Action shortcuts | 8KB |
+| `usePhoenix.ts` | WebSocket management | ~12KB |
+
+### WebSocket Connection
+
+The `usePhoenix` hook manages real-time communication:
+
+```typescript
+const {
+  connected,
+  gameState,
+  events,
+  dialogueState,
+  combatState,
+  sparkUpdates,
+  navigate,
+  say,
+  clickEntity,
+  performAction,
+  sparkAsk,
+  sparkGetUpdates,
+} = usePhoenix({ token, onDisconnect });
+```
+
+**Channel Events:**
+- Outgoing: `move`, `talk`, `dialogue_choice`, `action`, `spark:ask_question`
+- Incoming: `room_update`, `game_state`, `combat_start`, `dialogue_start`, `spark_status`
+
+### TypeScript Game Types
+
+```typescript
+// src/types/game.ts
+interface GameState {
+  room: Room;
+  player: Player;
+  inventory: InventoryItem[];
+  quests: Quest[];
+  health: { current: number; max: number };
+  spark?: SparkState;
+  combat?: CombatState;
+  // ...
+}
+
+interface SparkState {
+  bond_level: SparkBondLevel;
+  bond_progress: number;
+  awakening_stage: SparkAwakeningStage;
+  personality_traits: SparkTrait[];
+  visual_form: SparkVisualForm;
+  name: string | null;
+  pending_updates: number;
+}
+```
+
+### Server Connection
+
+The app auto-detects the appropriate server URL:
+
+| Platform | URL |
+|----------|-----|
+| iOS Simulator | `localhost:4000` |
+| Android Emulator | `10.0.2.2:4000` |
+| Physical Device | LAN IP (auto-detected) |
+| Web | `localhost:4000` |
+| Production | `https://loka.fly.dev` |
+
+### UI Design Pattern: Living Ebook
+
+The mobile app follows a "Living Ebook" aesthetic:
+- Sepia/parchment backgrounds
+- Serif fonts for narrative text
+- Minimal chrome, story-focused
+- Phase-aware theming (dawn, day, dusk, night)
+- Subtle particle effects for atmosphere
+
+### Running the Mobile App
+
+```bash
+cd mobile
+npm install
+
+# Start both Phoenix server and Expo
+cd ../server
+mix loka.dev
+
+# Or start Expo only
+npx expo start
+
+# Run on specific platform
+npm run ios      # iOS simulator
+npm run android  # Android emulator
+npm run web      # Web browser
+```
+
+---
+
+## 30. Quick Reference
 
 ### Common Commands
 
@@ -2546,11 +2928,14 @@ fly deploy
 
 | Layer | Count |
 |-------|-------|
-| Engine Core | 36 modules |
-| Framework | 85 modules (27 subsystems) |
+| Engine Core | 43 modules |
+| Framework | 100+ modules (33 subsystems) |
+| World Builder | 12 modules |
 | Session/Auth | 8 modules |
+| Game Actions | 10 modules |
+| Content Modules | 4 modules |
 | Web Layer | 40+ modules |
-| **Total** | 233+ modules |
+| **Total** | 250+ modules |
 
 ### PubSub Topics
 

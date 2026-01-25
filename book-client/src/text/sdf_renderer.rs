@@ -176,6 +176,11 @@ impl SdfTextRenderer {
 
     /// Render text to an image with SDF and effects
     pub fn render_to_image(&self, content: &str) -> Image {
+        self.render_to_image_with_links(content, &[])
+    }
+
+    /// Render text to an image with SDF, effects, and underlined links
+    pub fn render_to_image_with_links(&self, content: &str, link_regions: &[LinkRegion]) -> Image {
         info!("render_to_image called with effect: {:?}", self.effect);
 
         // Log the expected color for first pixel based on effect
@@ -267,6 +272,11 @@ impl SdfTextRenderer {
             }
         }
 
+        // Draw underlines for all link regions
+        for link in link_regions {
+            self.draw_underline(&mut pixels, width, height, link);
+        }
+
         Image::new(
             Extent3d {
                 width: width as u32,
@@ -278,6 +288,71 @@ impl SdfTextRenderer {
             TextureFormat::Rgba8UnormSrgb,
             RenderAssetUsages::RENDER_WORLD | RenderAssetUsages::MAIN_WORLD,
         )
+    }
+
+    /// Draw an underline for a link region
+    fn draw_underline(
+        &self,
+        pixels: &mut [u8],
+        width: usize,
+        height: usize,
+        link: &LinkRegion,
+    ) {
+        // Convert UV coordinates (0-1 range, Y=0 at bottom) to pixel coordinates (Y=0 at top)
+        let x_start = (link.bounds.min.x * width as f32) as i32;
+        let x_end = (link.bounds.max.x * width as f32) as i32;
+
+        info!("Drawing underline for '{}' from x={} to x={}", link.text, x_start, x_end);
+
+        // UV Y is flipped, so max.y is actually at the top in pixel space
+        let y_baseline = ((1.0 - link.bounds.max.y) * height as f32) as i32;
+
+        // Underline position: 2 pixels below baseline
+        let underline_y = y_baseline + 2;
+        let underline_thickness = 2; // 2 pixel thick underline
+
+        // Text color (sepia ink)
+        let ink_r = 20;
+        let ink_g = 15;
+        let ink_b = 10;
+        let ink_a = 255;
+
+        // Draw horizontal line
+        for y_offset in 0..underline_thickness {
+            let y = underline_y + y_offset;
+
+            // Bounds check
+            if y < 0 || y >= height as i32 {
+                continue;
+            }
+
+            // Flip Y for texture coordinates (OpenGL convention)
+            let flipped_y = (height as i32 - 1 - y) as usize;
+
+            for x in x_start..x_end {
+                if x < 0 || x >= width as i32 {
+                    continue;
+                }
+
+                let idx = (flipped_y * width + x as usize) * 4;
+
+                if idx + 3 >= pixels.len() {
+                    continue;
+                }
+
+                // Alpha blend with background
+                let bg_r = pixels[idx] as f32;
+                let bg_g = pixels[idx + 1] as f32;
+                let bg_b = pixels[idx + 2] as f32;
+
+                let alpha = ink_a as f32 / 255.0;
+                let inv_alpha = 1.0 - alpha;
+
+                pixels[idx] = (ink_r as f32 * alpha + bg_r * inv_alpha) as u8;
+                pixels[idx + 1] = (ink_g as f32 * alpha + bg_g * inv_alpha) as u8;
+                pixels[idx + 2] = (ink_b as f32 * alpha + bg_b * inv_alpha) as u8;
+            }
+        }
     }
 
     /// Render a single glyph with the current effect
@@ -463,11 +538,14 @@ impl SdfTextRenderer {
                 let link_width = self.measure_text(link_text);
 
                 // Convert to UV coordinates (0-1 range)
+                // Note: Flip Y axis (pixel Y=0 at top, UV Y=0 at bottom)
+                let uv_min_y = 1.0 - ((current_y + self.font_size) / self.height as f32);
+                let uv_max_y = 1.0 - (current_y / self.height as f32);
                 let bounds = Rect::new(
                     link_x_start / self.width as f32,
-                    current_y / self.height as f32,
+                    uv_min_y,
                     (link_x_start + link_width) / self.width as f32,
-                    (current_y + self.font_size) / self.height as f32,
+                    uv_max_y,
                 );
 
                 regions.push(LinkRegion {
@@ -475,6 +553,9 @@ impl SdfTextRenderer {
                     action_id: format!("entity:{}", npc.key),
                     bounds,
                 });
+
+                info!("Link region: '{}' @ ({:.3}, {:.3}) -> ({:.3}, {:.3})",
+                      link_text, bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
 
                 current_y += line_height;
             }
@@ -489,11 +570,14 @@ impl SdfTextRenderer {
                 let link_x_start = self.margin + self.measure_text("  ");
                 let link_width = self.measure_text(link_text);
 
+                // Convert to UV coordinates with Y-axis flip
+                let uv_min_y = 1.0 - ((current_y + self.font_size) / self.height as f32);
+                let uv_max_y = 1.0 - (current_y / self.height as f32);
                 let bounds = Rect::new(
                     link_x_start / self.width as f32,
-                    current_y / self.height as f32,
+                    uv_min_y,
                     (link_x_start + link_width) / self.width as f32,
-                    (current_y + self.font_size) / self.height as f32,
+                    uv_max_y,
                 );
 
                 regions.push(LinkRegion {
@@ -514,11 +598,14 @@ impl SdfTextRenderer {
             let link_x_start = self.margin + self.measure_text("  > ");
             let link_width = self.measure_text(label);
 
+            // Convert to UV coordinates with Y-axis flip
+            let uv_min_y = 1.0 - ((current_y + self.font_size) / self.height as f32);
+            let uv_max_y = 1.0 - (current_y / self.height as f32);
             let bounds = Rect::new(
                 link_x_start / self.width as f32,
-                current_y / self.height as f32,
+                uv_min_y,
                 (link_x_start + link_width) / self.width as f32,
-                (current_y + self.font_size) / self.height as f32,
+                uv_max_y,
             );
 
             regions.push(LinkRegion {

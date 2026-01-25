@@ -1,0 +1,10 @@
+key: update_name_1769071238531_823
+type: script
+name: "Original Name"
+description: ""
+tags: []
+data:
+  hook: on_enter
+  timeout_ms: 5000
+  source: |
+    message(player, "Test")

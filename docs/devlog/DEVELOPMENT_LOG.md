@@ -87,11 +87,11 @@ The project began with initial commits and immediate focus on getting deployment
 
 ---
 
-### December 22, 2025 (Day 7) - TUI & Beads
+### December 22, 2025 (Day 7) - TUI & Issue Tracking
 **Commits**: 3 | **Focus**: TUI exploration, issue tracking
 
 - **TUI System**: Explored terminal UI (later removed)
-- **Beads**: Added JSONL files for issue tracking system
+- **Issue Tracking**: Added JSONL files for issue tracking system
 
 ---
 
@@ -283,7 +283,7 @@ Strategic architecture work:
 - **Manager Extraction**: Gathering, crafting, chat managers from GameLive
 - **VISION.md**: North star design document
 - **Monetization Ideas**: Revenue model brainstorming
-- **55+ Audit Beads**: Comprehensive audit findings
+- **55+ Audit Issues**: Comprehensive audit findings
 - **Audit Fixes**: 19 issues addressed across batches
 - **P0/P1 Implementations**: Layer separation, PostHog, shortcuts, tests
 - **P2 Observability**: Performance and content improvements

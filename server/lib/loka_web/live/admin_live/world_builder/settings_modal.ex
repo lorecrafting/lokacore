@@ -47,7 +47,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.SettingsModal do
 
     ~H"""
     <%= if @show do %>
-      <div class="modal-overlay" phx-click="close_settings">
+      <div class="modal-overlay">
         <div class="settings-modal settings-modal-wide" phx-click-away="close_settings">
           <div class="modal-header">
             <h3>World Builder Settings</h3>

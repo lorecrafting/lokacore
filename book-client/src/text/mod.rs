@@ -59,12 +59,15 @@ fn setup_sdf_texture_deferred(
 ) {
     // Setup current page (the one that curls)
     for entity in current_page_query.iter() {
-        let content = game_state
-            .as_ref()
-            .map(|gs| sdf_renderer.format_room_content(&gs))
-            .unwrap_or_else(|| "Welcome to Loka\n\nUse arrow keys to navigate.".to_string());
+        let (content, links) = if let Some(ref gs) = game_state {
+            let content = sdf_renderer.format_room_content(gs);
+            let links = sdf_renderer.calculate_link_regions(&gs.room);
+            (content, links)
+        } else {
+            ("Welcome to Loka\n\nUse arrow keys to navigate.".to_string(), vec![])
+        };
 
-        let image = sdf_renderer.render_to_image(&content);
+        let image = sdf_renderer.render_to_image_with_links(&content, &links);
         let texture_handle = images.add(image);
 
         let page_material = materials.add(StandardMaterial {
@@ -150,8 +153,12 @@ fn update_sdf_texture(
         render_state.last_animation_render = time.elapsed_secs();
     }
 
-    info!("Re-rendering SDF texture with effect: {:?}", sdf_renderer.effect);
-    let image = sdf_renderer.render_to_image(&content);
+    // Calculate link regions BEFORE rendering so underlines can be drawn
+    link_regions.regions = sdf_renderer.calculate_link_regions(&game_state.room);
+
+    info!("Re-rendering SDF texture with effect: {:?}, {} links",
+          sdf_renderer.effect, link_regions.regions.len());
+    let image = sdf_renderer.render_to_image_with_links(&content, &link_regions.regions);
 
     for (entity, page_texture, material_handle) in current_page_query.iter() {
         // Remove old image
@@ -176,9 +183,6 @@ fn update_sdf_texture(
     }
 
     render_state.last_content_hash = content_hash;
-
-    // Update link regions for the current room
-    link_regions.regions = sdf_renderer.calculate_link_regions(&game_state.room);
     info!("SDF texture updated for room: {} ({} links)",
           game_state.room.name, link_regions.regions.len());
 }
@@ -209,9 +213,12 @@ fn update_next_page_for_navigation(
     let room_name = pending_room.name.clone();
     info!("Rendering destination room '{}' to NextPage", room_name);
 
+    // Calculate link regions for the pending room
+    let link_regions = sdf_renderer.calculate_link_regions(pending_room);
+
     // Format the pending room content
     let content = sdf_renderer.format_room_content_for_room(pending_room);
-    let image = sdf_renderer.render_to_image(&content);
+    let image = sdf_renderer.render_to_image_with_links(&content, &link_regions);
 
     for (entity, page_texture, material_handle) in next_page_query.iter() {
         let old_handle = page_texture.texture_handle.clone();

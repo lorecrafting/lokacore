@@ -11,11 +11,11 @@
 
 cat << 'EOF'
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🧠 MANDATORY SKILL EVALUATION REQUIRED
+♻️  COMPOUND ENGINEERING - AUTOMATIC LEARNING LOOP
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 CRITICAL: After completing this user request, you MUST evaluate whether
-it produced extractable knowledge using the claudeception skill.
+it produced compoundable knowledge using the compound skill.
 
 EVALUATION PROTOCOL (NON-NEGOTIABLE):
 
@@ -26,14 +26,14 @@ EVALUATION PROTOCOL (NON-NEGOTIABLE):
    - Did I discover something not immediately obvious from documentation?
 
 3. IF YES to any question above:
-   ACTIVATE: Use Skill(claudeception) NOW to extract the knowledge
+   ACTIVATE: Use Skill(compound) NOW to feed learnings back into the system
 
 4. IF NO to all questions:
-   SKIP: No skill extraction needed
+   SKIP: No compoundable knowledge this session
 
 This is NOT optional. Failing to evaluate means valuable knowledge is lost.
-The claudeception skill will decide whether to actually create a new
-skill based on its quality criteria.
+The compound skill will analyze the session and extract skills, update docs,
+and make future work easier.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF

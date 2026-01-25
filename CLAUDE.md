@@ -14,6 +14,8 @@
 | Database | SQLite (via Ecto) | ecto_sqlite3 |
 | Auth | phx.gen.auth + Guardian JWT | 2.4.0 |
 | Scripting | Elixir (sandboxed) | Native |
+| Mobile Client | React Native / Expo | 54 |
+| **Book Client** | **Rust / Bevy** | **0.15** |
 | Deployment | Fly.io | ~$5/month |
 
 ## Architecture
@@ -44,7 +46,7 @@
 
 ### TypedObject System
 
-TypedObject provides a unified foundation for all game content. Content modules wrap TypedObject with domain-specific APIs:
+TypedObject provides a unified foundation for all game content. **Content modules** wrap TypedObject with domain-specific APIs:
 
 | Module | Type | Purpose |
 |--------|------|---------|
@@ -53,14 +55,30 @@ TypedObject provides a unified foundation for all game content. Content modules 
 | `Content.Script` | `:script` | Elixir scripts for NPCs |
 | `Content.Zone` | `:zone` | Zone definitions with resets |
 
-**Resolution Order**: Content modules → Legacy loaders (YAML/DB)
+**What are Content modules?** Domain-specific wrappers around `TypedObject.Loader` that provide type-safe, convenient APIs for accessing game content. Think of them as specialized query interfaces.
+
+**Resolution Order**: Content modules → TypedObject.Loader → YAML files
 
 ```elixir
-# Content modules provide domain-specific accessors
-Content.Quest.get("intro_welcome")        # {:ok, %TypedObject{type: :quest}}
-Content.Dialogue.for_entity("elder_npc")  # [%TypedObject{type: :dialogue}]
-Content.Script.get("guard_on_look")       # {:ok, %TypedObject{type: :script}}
+# ✅ PREFER: Content modules (type-safe, convenient)
+{:ok, quest} = Content.Quest.get("intro_welcome")
+objectives = Content.Quest.objectives(quest)          # Domain helper
+giver_key = Content.Quest.giver_key(quest)           # Type-safe accessor
+
+# ❌ DON'T: Direct TypedObject.Loader (verbose, error-prone)
+{:ok, obj} = TypedObject.Loader.get("intro_welcome")
+objectives = get_in(obj.data, ["objectives"]) || []  # Manual data access
 ```
+
+**When to use Content modules:**
+- Game logic needs quest/dialogue/script data
+- You want type safety and helper functions
+- You need validation (e.g., `Content.Quest.validate/1`)
+
+**When to use TypedObject.Loader directly:**
+- Generic operations across all types
+- Custom content types not in Content modules
+- Low-level YAML loading/caching
 
 **YAML Loading**: TypedObject.Loader loads from multiple directories:
 - `priv/world/prototypes/` - Entity prototypes
@@ -68,6 +86,31 @@ Content.Script.get("guard_on_look")       # {:ok, %TypedObject{type: :script}}
 - `priv/world/zones/` - Zone definitions
 - `priv/world/dialogues/` - Dialogue trees
 - `priv/world/scripts/` - Elixir scripts
+
+**Example:**
+```elixir
+# Framework code accessing quest data
+defmodule Loka.Framework.Quest do
+  alias Loka.Content.Quest
+
+  def start_quest(player, quest_key) do
+    # Use Content.Quest for type-safe access
+    with {:ok, quest} <- Quest.get(quest_key),
+         :ok <- Quest.validate(quest),
+         true <- can_accept?(player, quest) do
+      objectives = Quest.objectives(quest)
+      rewards = Quest.rewards(quest)
+      # ...
+    end
+  end
+
+  defp can_accept?(player, quest) do
+    # Content module provides helpers
+    Quest.prerequisites(quest)
+    |> Enum.all?(&quest_complete?(player, &1))
+  end
+end
+```
 
 ## Project Structure
 
@@ -89,16 +132,153 @@ lokacore/
 │       ├── zones/            # Zone definitions
 │       └── scripts/          # Elixir scripts
 ├── docs/                     # Architecture documentation
+├── book-client/              # Rust/Bevy 3D book renderer (NEW)
+│   ├── src/
+│   │   ├── book/            # Page mesh, curl animation
+│   │   ├── text/            # cosmic-text integration
+│   │   ├── effects/         # Shader effects (fire, ice, etc.)
+│   │   └── input/           # Touch/tap detection
+│   └── shaders/             # WGSL shader files
 └── CLAUDE.md
 ```
+
+## Rust/Bevy Book Client Development
+
+The `book-client/` folder contains a Rust-based 3D renderer that displays the game UI as a magical book. This is fundamentally different from web/Elixir development.
+
+### Key Differences from Web Development
+
+| Aspect | Web/Elixir | Rust/Bevy Game Engine |
+|--------|------------|----------------------|
+| Feedback loop | Hot reload (~100ms) | Compile + run (~5-30s) |
+| Testing | Mostly automated | Visual verification + unit tests |
+| Debugging | Print/logger | Logger + visual inspection |
+| State | Server manages | Client local (synced from server) |
+| Performance | "Good enough" | 60fps critical, measure everything |
+
+### Rust/Bevy Development Workflow
+
+```bash
+# Terminal 1: Run the visual test app (primary feedback)
+cd book-client
+cargo run --bin test-app
+# Watch the window! This IS your feedback loop
+
+# Terminal 2: Auto-rebuild on changes (optional)
+cargo watch -x "build --lib"
+
+# Run unit tests (non-visual logic)
+cargo test
+
+# Check for issues without running
+cargo clippy
+cargo fmt --check
+```
+
+### The Visual Verification Loop
+
+Unlike web dev where you can inspect DOM/state, game engine verification is VISUAL:
+
+1. **Change code** → Save
+2. **cargo run** → Watch the window
+3. **Ask yourself:**
+   - Does the page render?
+   - Does the curl look smooth?
+   - Is text readable?
+   - Any flickering/artifacts?
+4. **Check console** → Errors, FPS, debug logs
+5. **Repeat**
+
+### When to Write Tests vs Visual Check
+
+| Scenario | Approach |
+|----------|----------|
+| Math functions (curl calculation) | **Unit test** |
+| Mesh generation (vertex count) | **Unit test** |
+| "Does it look right?" | **Visual verification** |
+| Shader effects | **Visual verification** |
+| Performance (60fps) | **Profiler + visual** |
+| Input handling | **Manual testing** |
+
+### Test App Controls
+
+```
+ESC       - Quit
+SPACE     - Toggle auto curl animation
+UP/DOWN   - Manual curl adjustment
+R         - Reset to flat
+```
+
+### Common Bevy Patterns
+
+```rust
+// Components are data, attached to entities
+#[derive(Component)]
+struct Page { index: u32 }
+
+// Resources are global singletons
+#[derive(Resource)]
+struct PageCurlState { curl_amount: f32 }
+
+// Systems are functions that run every frame
+fn update_curl(
+    time: Res<Time>,                           // Access resources
+    mut query: Query<&mut Transform, With<Page>> // Query entities
+) {
+    for mut transform in query.iter_mut() {
+        // Modify components
+    }
+}
+
+// Plugins group related functionality
+impl Plugin for BookPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, setup)
+           .add_systems(Update, (system_a, system_b));
+    }
+}
+```
+
+### Common Bevy Pitfalls
+
+**UV Coordinate Y-Axis Mismatch**: Bevy's UV space has Y=0 at bottom-left (matches DirectX/Vulkan/Metal), but pixel/screen space has Y=0 at top. When converting pixel coordinates to UV for hit testing or UI bounds, flip the Y axis: `uv_y = 1.0 - (pixel_y / height)`. See the `bevy-0-15-coordinate-state-patterns` skill for details.
+
+**State Machine Reset**: Custom animation state machines must explicitly reset phase enums in reset functions, even if the animation system already transitioned to `Idle`. Race conditions between systems can leave stale state that blocks new transitions. Always include `self.phase = Phase::Idle` in reset methods.
+
+### Performance Debugging
+
+```rust
+// Add to your app for FPS display
+.add_plugins(FrameTimeDiagnosticsPlugin)
+
+// Time operations
+let start = std::time::Instant::now();
+// ... operation ...
+debug!("Operation took: {:?}", start.elapsed());
+
+// Profile with Instruments (macOS)
+// Product > Profile > Time Profiler in Xcode
+```
+
+### Proposal & Plan Documents
+
+- `docs/proposals/rust-book-client.md` - Full feasibility study
+- `docs/proposals/rust-book-client-mvp-plan.md` - Implementation plan
 
 ## Quick Commands
 
 ```bash
-# Development
+# Elixir/Phoenix Development
 cd server
 mix deps.get && mix ecto.setup    # Setup
 mix phx.server                     # Start Phoenix at localhost:4000
+
+# Rust/Bevy Book Client Development
+cd book-client
+cargo build                        # Compile (first time: 5-10 min)
+cargo run --bin test-app          # Run visual test app
+cargo test                        # Run unit tests
+cargo watch -x "run --bin test-app"  # Auto-restart on changes
 mix loka.dev                       # Start Phoenix + mobile Expo (with debug logs)
 mix loka.dev --server              # Phoenix only (with mobile debug log streaming)
 mix test                           # Run tests
@@ -496,20 +676,9 @@ For React Native UI testing, we'll use **Detox or Maestro**:
 - Slower but catches UI/UX bugs
 - Planned for separate implementation
 
-## Beads (Issue Tracking)
+## Issue Tracking
 
-Using **beads_rust** (`br`) - Jeffrey Emanuel's lightweight Rust port.
-
-```bash
-br ready              # Find available work
-br show <id>          # Review issue
-br update <id> --status=in_progress
-br close <id>         # Mark complete
-# Note: br doesn't auto-sync - commit .beads/ changes manually with git
-```
-
-**Good bead**: Specific file path, line numbers, validation command
-**Bad bead**: "Fix dialogue issue" (too vague)
+See `docs/BACKLOG.md` for planned work and issues. Active work is tracked using Claude Code's native task tools during development sessions.
 
 ## Documentation Organization
 

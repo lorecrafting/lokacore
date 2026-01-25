@@ -103,6 +103,7 @@ impl PageCurlState {
     pub fn reset_after_turn(&mut self) {
         self.curl_amount = 0.0;
         self.target_curl = 0.0;
+        self.phase = TurnPhase::Idle;
         self.turn_just_completed = false;
     }
 }

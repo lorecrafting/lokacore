@@ -1,0 +1,10 @@
+key: update_source_1769071237645_662
+type: script
+name: "Source Update Test"
+description: ""
+tags: []
+data:
+  hook: on_enter
+  timeout_ms: 5000
+  source: |
+    message(player, "Original")

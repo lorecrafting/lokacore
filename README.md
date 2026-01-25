@@ -159,14 +159,11 @@ Loka is designed for AI-assisted development. The codebase includes context file
 |------|---------|
 | `CLAUDE.md` | Primary context - architecture, patterns, commands |
 | `docs/README.md` | Documentation index organized by role |
-| `.beads/` | Issue tracking with dependency graphs |
 
 **Getting started with an AI assistant:**
 1. Point it at `CLAUDE.md` for project context
 2. Use `docs/builder-reference/*.md` for content creation (quests, dialogues, entities)
 3. Run `mix loka.test.validate` to verify content changes
-
-The project uses beads for issue tracking - run `bd ready` to see available work.
 
 ## Documentation
 

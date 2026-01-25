@@ -2220,6 +2220,13 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   # LLM Tool Execution
   # =============================================================================
 
+  # Handle tool result from client (logging/confirmation)
+  def handle_event("tool_result", %{"tool" => tool, "result" => result}, socket) do
+    # Just log it, as the actual execution happened in execute_tool
+    # This prevents the crash when the client bounces the result back
+    {:noreply, log_console(socket, :info, "Tool #{tool} finished")}
+  end
+
   def handle_event("execute_tool", %{"name" => tool_name, "input" => input}, socket) do
     # Execute tool via ToolExecutor
     result = ToolExecutor.execute(tool_name, input)

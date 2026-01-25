@@ -1051,41 +1051,52 @@ const Hooks = {
   // =============================================================================
   MultiAPIKeyConfig: {
     mounted() {
+      console.log('MultiAPIKeyConfig mounted')
       const providers = ['anthropic', 'openai', 'deepseek', 'gemini', 'glm', 'minimax']
 
       // Check stored keys for all providers on mount
       providers.forEach(provider => {
-        this.validateStoredKey(provider)
+        try {
+          this.validateStoredKey(provider)
+        } catch (e) {
+          console.error('Error validating stored key for', provider, e)
+        }
       })
 
-      // Set up event listeners for each provider
-      providers.forEach(provider => {
-        const input = this.el.querySelector(`#api-key-input-${provider}`)
-        const saveBtn = this.el.querySelector(`.api-key-save[data-provider="${provider}"]`)
-        const clearBtn = this.el.querySelector(`.api-key-clear[data-provider="${provider}"]`)
+      // Use event delegation to handle clicks on buttons,
+      // which survives DOM updates from LiveView
+      this.el.addEventListener('click', (e) => {
+        const saveBtn = e.target.closest('.api-key-save')
+        const clearBtn = e.target.closest('.api-key-clear')
 
-        // Handle save button click
-        saveBtn?.addEventListener('click', () => {
+        if (saveBtn) {
+          const provider = saveBtn.dataset.provider
+          console.log('Save clicked for', provider)
+          const input = this.el.querySelector(`#api-key-input-${provider}`)
           const key = input?.value?.trim()
+          
+          if (key) {
+            console.log('Key present, saving...')
+            this.saveAndValidateKey(provider, key)
+          } else {
+            console.log('No key entered')
+          }
+        } else if (clearBtn) {
+          const provider = clearBtn.dataset.provider
+          console.log('Clear clicked for', provider)
+          this.clearKey(provider)
+        }
+      })
+
+      // Handle enter key in inputs
+      this.el.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && e.target.classList.contains('api-key-input')) {
+          const provider = e.target.dataset.provider
+          const key = e.target.value.trim()
           if (key) {
             this.saveAndValidateKey(provider, key)
           }
-        })
-
-        // Handle enter key in input
-        input?.addEventListener('keypress', (e) => {
-          if (e.key === 'Enter') {
-            const key = input?.value?.trim()
-            if (key) {
-              this.saveAndValidateKey(provider, key)
-            }
-          }
-        })
-
-        // Handle clear button click
-        clearBtn?.addEventListener('click', () => {
-          this.clearKey(provider)
-        })
+        }
       })
     },
 
@@ -1096,20 +1107,35 @@ const Hooks = {
       try {
         const isValid = await this.validateKey(provider, key)
 
+        // Store encrypted in localStorage regardless of validation status
+        // so the user can at least attempt to use it.
+        // Store encrypted in localStorage regardless of validation status
+        // so the user can at least attempt to use it.
+        // Use unicode-safe encoding
+        const encrypted = btoa(unescape(encodeURIComponent('loka_wb_' + key)))
+        localStorage.setItem(`${provider}_api_key_encrypted`, encrypted)
+
         if (isValid) {
-          // Key is valid - store encrypted in localStorage
-          const encrypted = btoa('loka_wb_' + key)
-          localStorage.setItem(`${provider}_api_key_encrypted`, encrypted)
           this.pushEvent('api_key_validated', { provider, status: 'valid' })
 
-          // Clear input
+          // Clear input only on success
           const input = this.el.querySelector(`#api-key-input-${provider}`)
           if (input) input.value = ''
         } else {
+          // Still mark as configured but invalid status
           this.pushEvent('api_key_validated', { provider, status: 'invalid' })
+          console.warn(`API key for ${provider} was saved but validation failed. Check your key.`)
         }
       } catch (error) {
         console.error(`API key validation failed for ${provider}:`, error)
+        
+        // Even on network error, try to save the key
+        // Store encrypted in localStorage regardless of validation status
+        // so the user can at least attempt to use it.
+        // Use unicode-safe encoding
+        const encrypted = btoa(unescape(encodeURIComponent('loka_wb_' + key)))
+        localStorage.setItem(`${provider}_api_key_encrypted`, encrypted)
+        
         this.pushEvent('api_key_validated', { provider, status: 'invalid' })
       }
     },
@@ -1185,18 +1211,30 @@ const Hooks = {
     },
 
     async validateGeminiKey(key) {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: 'Hi' }] }],
-          generationConfig: { maxOutputTokens: 10 }
+      // Use gemini-1.5-pro for validation as requested/more stable
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${key}`
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: 'Hi' }] }],
+            generationConfig: { maxOutputTokens: 10 }
+          })
         })
-      })
-      return response.ok
+        
+        if (!response.ok) {
+          const errorText = await response.text()
+          console.error('Gemini validation failed:', response.status, errorText)
+        }
+        
+        return response.ok
+      } catch (error) {
+        console.error('Gemini validation network error:', error)
+        return false
+      }
     },
 
     async validateGLMKey(key) {

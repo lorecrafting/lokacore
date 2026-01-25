@@ -1,15 +1,15 @@
 # Agent Instructions
 
-This project uses **beads_rust** (`br`) for issue tracking - Jeffrey Emanuel's lightweight Rust port.
+This project uses **Claude Code native task system** for tracking work during development sessions.
 
 ## Quick Reference
 
 ```bash
-br ready              # Find available work
-br show <id>          # View issue details
-br update <id> --status=in_progress  # Claim work
-br close <id>         # Complete work
-# Note: br doesn't auto-sync - commit .beads/ manually with git
+# Claude Code has built-in task management tools:
+TaskCreate   # Create a new task
+TaskUpdate   # Update task status (pending → in_progress → completed)
+TaskList     # List all tasks
+TaskGet      # Get task details
 ```
 
 ## Landing the Plane (Session Completion)
@@ -18,14 +18,14 @@ br close <id>         # Complete work
 
 **MANDATORY WORKFLOW:**
 
-1. **File issues for remaining work** - Create issues for anything that needs follow-up
+1. **Complete all tasks** - Mark all finished tasks as completed
 2. **Run quality gates** (if code changed) - Tests, linters, builds
-3. **Update issue status** - Close finished work, update in-progress items
+3. **Update task status** - Review TaskList, ensure accurate status
 4. **PUSH TO REMOTE** - This is MANDATORY:
    ```bash
    git pull --rebase
-   git add .beads/
-   git commit -m "Update beads"
+   git add <changed files>
+   git commit -m "descriptive message"
    git push
    git status  # MUST show "up to date with origin"
    ```
@@ -41,40 +41,23 @@ br close <id>         # Complete work
 
 ---
 
-## Beads Workflow Integration
+## Task System Workflow
 
-This project uses **beads_rust** (`br`) - a lightweight, non-invasive issue tracker.
-Issues are stored in `.beads/` and tracked in git.
+Claude Code provides native task tracking during development sessions.
 
-### Essential Commands
+### Task Lifecycle
 
-```bash
-# CLI commands for agents
-br ready              # Show issues ready to work (no blockers)
-br list               # All open issues (default)
-br list --status=closed  # Closed issues
-br show <id>          # Full issue details with dependencies
-br create --title="..." --type=task --priority=2
-br update <id> --status=in_progress
-br close <id>         # Mark complete
-br close <id1> <id2>  # Close multiple issues at once
-br dep add <a> <b>    # Add dependency (a depends on b)
-```
+1. **Create tasks** - Use `TaskCreate` to break down work into manageable pieces
+2. **Start work** - Use `TaskUpdate` to mark tasks as `in_progress`
+3. **Complete work** - Use `TaskUpdate` to mark tasks as `completed`
+4. **Review** - Use `TaskList` to see overall progress
 
-### Workflow Pattern
+### Best Practices
 
-1. **Start**: Run `br ready` to find actionable work
-2. **Claim**: Use `br update <id> --status=in_progress`
-3. **Work**: Implement the task
-4. **Complete**: Use `br close <id>`
-5. **Commit**: `git add .beads/ && git commit -m "Update beads" && git push`
-
-### Key Concepts
-
-- **Dependencies**: Issues can block other issues. `br ready` shows only unblocked work.
-- **Priority**: P0=critical, P1=high, P2=medium, P3=low, P4=backlog (use numbers 0-4)
-- **Types**: task, bug, feature, epic, question, docs
-- **No daemon**: br reads/writes directly to `.beads/` - no background processes
+- **Break down complex work** - Create subtasks for multi-step operations
+- **Update status proactively** - Mark tasks in_progress before starting work
+- **Track blockers** - Use task dependencies (blocks/blockedBy) when needed
+- **Keep descriptions clear** - Include acceptance criteria and context
 
 ### Session Protocol
 
@@ -83,16 +66,14 @@ br dep add <a> <b>    # Add dependency (a depends on b)
 ```bash
 git status              # Check what changed
 git add <files>         # Stage code changes
-git add .beads/         # Stage beads changes
 git commit -m "..."     # Commit everything
 git push                # Push to remote
 ```
 
-### Key Differences from bd (Yegge's beads)
+### Long-term Issue Tracking
 
-| Aspect | br (beads_rust) | bd (beads) |
-|--------|-----------------|------------|
-| Auto-sync | No - manual git | Yes - daemon |
-| CLI flags | `--status=open` | `--status open` |
-| Binary size | ~5MB | ~30MB |
-| Philosophy | Non-invasive | Full orchestration |
+For issues that span multiple sessions or need persistence beyond the current conversation:
+
+- Use `docs/BACKLOG.md` for planned work
+- Document architectural decisions in `docs/architecture/`
+- Track bugs and features in GitHub Issues (when project has external contributors)

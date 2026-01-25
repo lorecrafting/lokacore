@@ -1,0 +1,10 @@
+key: default_timeout_1769071238088_500
+type: script
+name: "Default Timeout Script"
+description: ""
+tags: []
+data:
+  hook: on_enter
+  timeout_ms: 5000
+  source: |
+    :ok

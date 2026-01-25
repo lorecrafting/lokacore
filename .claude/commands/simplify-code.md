@@ -75,12 +75,12 @@ Find unclear variable/function names:
 
 Find comments that could be self-documenting code:
 - Comments explaining what code does (should be obvious from names)
-- TODO comments that should be beads
+- TODO comments that should be tracked as tasks
 - Outdated comments that don't match code
 
 **Action**:
 - Remove obvious comments, improve names instead
-- Convert TODOs to beads
+- Convert TODOs to tracked tasks
 - Update or remove outdated comments
 
 ## Elixir Idioms to Prefer

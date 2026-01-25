@@ -78,9 +78,5 @@ Thumbs.db
 secrets.json
 credentials.json
 
-# bv (beads viewer) local config and caches
-.bv/
-
-# Beads daemon files
-daemon.lock
-daemon.log
+# Generated documentation
+*.pdf

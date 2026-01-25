@@ -51,7 +51,7 @@ defmodule Loka.WorldBuilder.EntityManager do
 
   require Logger
 
-  alias Loka.Engine.{TypedObject, Spawner, EntityServer, Entity, Entities}
+  alias Loka.Engine.{TypedObject, Spawner, EntityServer, Entity, Entities, PrototypeLoader}
   alias Loka.Engine.TypedObject.Registry
   alias Loka.Engine.TypedObject.Loader
 
@@ -74,14 +74,18 @@ defmodule Loka.WorldBuilder.EntityManager do
     name = Map.get(attrs, :name, "New #{subtype}")
     description = Map.get(attrs, :description, "")
 
-    # Build entity data for YAML
+    # Build entity data for YAML - merge default components with user-provided
+    default_components = build_components(subtype, attrs)
+    user_components = Map.get(attrs, :components, %{})
+    merged_components = Map.merge(default_components, user_components)
+
     entity_data = %{
       key: key,
       subtype: subtype,
       name: name,
       description: description,
       tags: Map.get(attrs, :tags, []),
-      components: build_components(subtype, attrs),
+      components: merged_components,
       # Subtype-specific fields
       level: Map.get(attrs, :level),
       item_type: Map.get(attrs, :item_type),
@@ -111,7 +115,7 @@ defmodule Loka.WorldBuilder.EntityManager do
                description: description,
                tags: Map.get(attrs, :tags, []),
                attributes: %{},
-               components: build_components(subtype, attrs),
+               components: merged_components,
                data: %{}
              }}
         end
@@ -343,7 +347,8 @@ defmodule Loka.WorldBuilder.EntityManager do
 
       case File.write(file_path, yaml_content) do
         :ok ->
-          # Reload to update registry
+          # Reload both loaders to update registries
+          PrototypeLoader.reload()
           Loader.reload()
           :ok
 
@@ -361,6 +366,7 @@ defmodule Loka.WorldBuilder.EntityManager do
 
     case File.rm(file_path) do
       :ok ->
+        PrototypeLoader.reload()
         Loader.reload()
         :ok
 
@@ -456,10 +462,16 @@ defmodule Loka.WorldBuilder.EntityManager do
     |> Enum.map(fn {k, v} ->
       key_str = if is_atom(k), do: Atom.to_string(k), else: k
 
-      if is_list(v) do
-        "#{prefix}#{key_str}:\n#{build_yaml_list_block(v, indent + 2)}"
-      else
-        "#{prefix}#{key_str}: #{format_inline_value(v)}\n"
+      cond do
+        is_map(v) and map_size(v) > 0 ->
+          # Recursively handle nested maps
+          "#{prefix}#{key_str}:\n#{build_yaml_value(v, indent + 2)}"
+
+        is_list(v) ->
+          "#{prefix}#{key_str}:\n#{build_yaml_list_block(v, indent + 2)}"
+
+        true ->
+          "#{prefix}#{key_str}: #{format_inline_value(v)}\n"
       end
     end)
     |> Enum.join("")
@@ -479,13 +491,70 @@ defmodule Loka.WorldBuilder.EntityManager do
 
     items
     |> Enum.map(fn item ->
-      if is_binary(item) do
-        "#{prefix}- \"#{escape_yaml_string(item)}\"\n"
-      else
-        "#{prefix}- #{format_inline_value(item)}\n"
+      cond do
+        is_map(item) and map_size(item) > 0 ->
+          # Handle maps in lists (like dialogue choices)
+          # First key-value pair on same line as -, rest indented
+          build_yaml_list_map_item(item, indent)
+
+        is_binary(item) ->
+          "#{prefix}- \"#{escape_yaml_string(item)}\"\n"
+
+        true ->
+          "#{prefix}- #{format_inline_value(item)}\n"
       end
     end)
     |> Enum.join("")
+  end
+
+  # Render a map as a YAML list item: - key: value\n  key2: value2
+  defp build_yaml_list_map_item(map, indent) do
+    prefix = String.duplicate(" ", indent)
+    inner_prefix = String.duplicate(" ", indent + 2)
+
+    items = Enum.to_list(map)
+
+    case items do
+      [] ->
+        "#{prefix}- {}\n"
+
+      [{first_key, first_val} | rest] ->
+        first_key_str = if is_atom(first_key), do: Atom.to_string(first_key), else: first_key
+
+        # First key-value pair on same line as -
+        first_line =
+          cond do
+            is_map(first_val) and map_size(first_val) > 0 ->
+              "#{prefix}- #{first_key_str}:\n#{build_yaml_value(first_val, indent + 4)}"
+
+            is_list(first_val) ->
+              "#{prefix}- #{first_key_str}:\n#{build_yaml_list_block(first_val, indent + 4)}"
+
+            true ->
+              "#{prefix}- #{first_key_str}: #{format_inline_value(first_val)}\n"
+          end
+
+        # Remaining key-value pairs indented
+        rest_lines =
+          rest
+          |> Enum.map(fn {k, v} ->
+            key_str = if is_atom(k), do: Atom.to_string(k), else: k
+
+            cond do
+              is_map(v) and map_size(v) > 0 ->
+                "#{inner_prefix}#{key_str}:\n#{build_yaml_value(v, indent + 4)}"
+
+              is_list(v) ->
+                "#{inner_prefix}#{key_str}:\n#{build_yaml_list_block(v, indent + 4)}"
+
+              true ->
+                "#{inner_prefix}#{key_str}: #{format_inline_value(v)}\n"
+            end
+          end)
+          |> Enum.join("")
+
+        first_line <> rest_lines
+    end
   end
 
   defp format_yaml_list([]), do: "[]"

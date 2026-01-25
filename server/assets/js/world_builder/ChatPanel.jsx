@@ -64,13 +64,17 @@ const PROVIDERS = {
     client: GeminiClient,
     keyPrefix: 'AIza',
     models: [
-      // Gemini 2.0
-      { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', costPer1kInput: 0.0001, costPer1kOutput: 0.0004 },
-      { id: 'gemini-2.0-flash-thinking-exp', name: 'Gemini 2.0 Flash Thinking', costPer1kInput: 0.0001, costPer1kOutput: 0.0004 },
-      // Gemini 1.5
-      { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', costPer1kInput: 0.00125, costPer1kOutput: 0.005 },
-      { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', costPer1kInput: 0.000075, costPer1kOutput: 0.0003 },
-      { id: 'gemini-1.5-flash-8b', name: 'Gemini 1.5 Flash 8B', costPer1kInput: 0.0000375, costPer1kOutput: 0.00015 },
+      // Versioned (Try these if others fail)
+      { id: 'gemini-1.5-flash-001', name: 'Gemini 1.5 Flash-001 (Stable)', costPer1kInput: 0.000075, costPer1kOutput: 0.0003 },
+      { id: 'gemini-1.5-pro-001', name: 'Gemini 1.5 Pro-001 (Stable)', costPer1kInput: 0.00125, costPer1kOutput: 0.005 },
+      
+      // Aliases
+      { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Latest)', costPer1kInput: 0.000075, costPer1kOutput: 0.0003 },
+      { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro (Latest)', costPer1kInput: 0.00125, costPer1kOutput: 0.005 },
+      { id: 'gemini-pro', name: 'Gemini 1.0 Pro', costPer1kInput: 0.0005, costPer1kOutput: 0.0015 },
+      
+      // Experimental
+      { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash (Exp)', costPer1kInput: 0.0001, costPer1kOutput: 0.0004 },
     ]
   },
   glm: {
@@ -104,14 +108,13 @@ const getClient = (providerId) => PROVIDERS[providerId]?.client || AnthropicClie
 
 // Helper to check if any provider is configured
 const isAnyProviderConfigured = () => {
-  return Object.values(PROVIDERS).some(p => p.client.isConfigured());
+  return Object.keys(PROVIDERS).some(id => !!localStorage.getItem(`${id}_api_key_encrypted`));
 };
 
 // Helper to get configured providers
 const getConfiguredProviders = () => {
-  return Object.entries(PROVIDERS)
-    .filter(([_, p]) => p.client.isConfigured())
-    .map(([id, _]) => id);
+  return Object.keys(PROVIDERS)
+    .filter(id => !!localStorage.getItem(`${id}_api_key_encrypted`));
 };
 
 const SYSTEM_PROMPT = `You are an AI assistant helping to build a game world using the Loka MUD engine World Builder.
