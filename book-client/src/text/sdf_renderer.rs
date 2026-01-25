@@ -132,44 +132,56 @@ impl SdfTextRenderer {
         self.format_room_content_for_room(&game_state.room)
     }
 
-    /// Format a specific room into text for rendering
+    /// Format a specific room into text for rendering (structured layout)
     pub fn format_room_content_for_room(&self, room: &Room) -> String {
         let mut lines = Vec::new();
 
-        // Title
-        lines.push(format!("~ {} ~", room.name));
+        // Title - centered, prominent
+        lines.push(format!("╔════════════════════════════════════════╗"));
+        lines.push(format!("║ {:<38} ║", room.name));
+        lines.push(format!("╠════════════════════════════════════════╣"));
         lines.push(String::new());
 
-        // Description - wrap lines
-        for line in self.word_wrap(&room.description, 45) {
-            lines.push(line);
+        // Description - prose paragraph
+        for line in self.word_wrap(&room.description, 38) {
+            lines.push(format!("║ {:<38} ║", line));
         }
-        lines.push(String::new());
+        lines.push(format!("║{:40}║", ""));
+        lines.push(format!("╠════════════════════════════════════════╣"));
 
-        // Characters
+        // Characters section
         if !room.npcs.is_empty() {
-            lines.push("Characters:".to_string());
+            lines.push(format!("║ ── Characters ──{:23}║", ""));
             for npc in &room.npcs {
-                lines.push(format!("  {} - {}", npc.name, self.truncate(&npc.short_desc, 35)));
+                let desc = self.truncate(&npc.short_desc, 30);
+                lines.push(format!("║  • {} - {:<28}║",
+                    self.truncate(&npc.name, 12),
+                    desc
+                ));
             }
-            lines.push(String::new());
+            lines.push(format!("║{:40}║", ""));
         }
 
-        // Items
+        // Items section
         if !room.items.is_empty() {
-            lines.push("Items:".to_string());
+            lines.push(format!("║ ── Items ──{:28}║", ""));
             for item in &room.items {
-                lines.push(format!("  {}", item.name));
+                lines.push(format!("║  • {:<35}║",
+                    self.truncate(&item.name, 35)
+                ));
             }
-            lines.push(String::new());
+            lines.push(format!("║{:40}║", ""));
         }
 
-        // Exits
-        lines.push("Exits:".to_string());
+        // Exits section
+        lines.push(format!("║ ── Exits ──{:28}║", ""));
         for exit in &room.exits {
             let label = exit.label.as_deref().unwrap_or(&exit.direction);
-            lines.push(format!("  > {} ({})", label, exit.direction));
+            let formatted = format!("{} ({})", self.truncate(label, 15), exit.direction.to_uppercase());
+            lines.push(format!("║  → {:<35}║", formatted));
         }
+
+        lines.push(format!("╚════════════════════════════════════════╝"));
 
         lines.join("\n")
     }
