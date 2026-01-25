@@ -9,6 +9,7 @@ pub mod text;
 pub mod effects;
 pub mod input;
 pub mod ui;
+pub mod dialogue;
 
 use bevy::prelude::*;
 pub use content::{GameState, Room, GameEvent};
