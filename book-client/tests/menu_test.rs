@@ -140,3 +140,117 @@ fn test_inventory_tab_content() {
 
     println!("✅ Inventory tab displays equipped items, inventory list, and capacity");
 }
+
+#[test]
+fn test_quest_tab_content() {
+    let mut menu = MenuState::default();
+    menu.switch_to(MenuTab::Quests);
+    let quest_content = menu.get_tab_content();
+
+    // Verify active quests section
+    assert!(quest_content.contains("Active Quests"));
+
+    // Verify quest names are displayed
+    assert!(quest_content.contains("Monastery Trial"));
+    assert!(quest_content.contains("Gather Herbs"));
+
+    // Verify objectives with checkboxes (both complete ✓ and incomplete ○)
+    assert!(quest_content.contains("✓"));  // Completed objective
+    assert!(quest_content.contains("○"));  // Incomplete objective
+
+    // Verify rewards section
+    assert!(quest_content.contains("Reward:"));
+
+    // Verify completed quests section
+    assert!(quest_content.contains("Completed"));
+
+    println!("✅ Quest tab displays active quests, objectives, and completed section");
+}
+
+#[test]
+fn test_craft_tab_content() {
+    let mut menu = MenuState::default();
+    menu.switch_to(MenuTab::Craft);
+    let craft_content = menu.get_tab_content();
+
+    // Verify recipes section
+    assert!(craft_content.contains("Available Recipes"));
+    assert!(craft_content.contains("Health Potion"));
+    assert!(craft_content.contains("Iron Sword"));
+
+    // Verify requirement display
+    assert!(craft_content.contains("Req:"));
+
+    // Verify crafting status indicators
+    assert!(craft_content.contains("✓")); // Can craft
+    assert!(craft_content.contains("○")); // Missing materials
+
+    // Verify tools section
+    assert!(craft_content.contains("Crafting Tools"));
+
+    println!("✅ Craft tab displays recipes, requirements, and tools");
+}
+
+#[test]
+fn test_spark_tab_content() {
+    let mut menu = MenuState::default();
+    menu.switch_to(MenuTab::Spark);
+    let spark_content = menu.get_tab_content();
+
+    // Verify Spark companion presence
+    assert!(spark_content.contains("Spark Companion"));
+    assert!(spark_content.contains("Spark:"));
+
+    // Verify chat history
+    assert!(spark_content.contains("You:"));
+
+    // Verify input prompt
+    assert!(spark_content.contains("Ask Spark"));
+
+    println!("✅ Spark tab displays companion chat and input");
+}
+
+#[test]
+fn test_social_tab_content() {
+    let mut menu = MenuState::default();
+    menu.switch_to(MenuTab::Social);
+    let social_content = menu.get_tab_content();
+
+    // Verify emotes section
+    assert!(social_content.contains("Emotes"));
+    assert!(social_content.contains("Happy"));
+    assert!(social_content.contains("Sad"));
+
+    // Verify poses section
+    assert!(social_content.contains("Poses"));
+    assert!(social_content.contains("Standing"));
+    assert!(social_content.contains("Sitting"));
+
+    // Verify current state display
+    assert!(social_content.contains("Current:"));
+
+    println!("✅ Social tab displays emotes, poses, and current state");
+}
+
+#[test]
+fn test_settings_tab_content() {
+    let mut menu = MenuState::default();
+    menu.switch_to(MenuTab::Settings);
+    let settings_content = menu.get_tab_content();
+
+    // Verify settings sections
+    assert!(settings_content.contains("Game Settings"));
+    assert!(settings_content.contains("Design Variant"));
+
+    // Verify toggles
+    assert!(settings_content.contains("ON"));
+
+    // Verify account section
+    assert!(settings_content.contains("Account"));
+    assert!(settings_content.contains("Logout"));
+
+    // Verify version info
+    assert!(settings_content.contains("Version:"));
+
+    println!("✅ Settings tab displays settings, account, and version info");
+}

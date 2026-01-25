@@ -142,11 +142,11 @@ impl MenuState {
         match self.current_tab {
             MenuTab::Character => self.format_character_tab(),
             MenuTab::Inventory => self.format_inventory_tab(),
-            MenuTab::Quests => "Quests (Coming Soon)".to_string(),
-            MenuTab::Craft => "Crafting (Coming Soon)".to_string(),
-            MenuTab::Spark => "Spark Companion (Coming Soon)".to_string(),
-            MenuTab::Social => "Social & Emotes (Coming Soon)".to_string(),
-            MenuTab::Settings => "Settings (Coming Soon)".to_string(),
+            MenuTab::Quests => self.format_quest_tab(),
+            MenuTab::Craft => self.format_craft_tab(),
+            MenuTab::Spark => self.format_spark_tab(),
+            MenuTab::Social => self.format_social_tab(),
+            MenuTab::Settings => self.format_settings_tab(),
         }
     }
 
@@ -206,6 +206,135 @@ impl MenuState {
         content.push_str("\n");
         content.push_str("Dried Rations (x5)\n");
         content.push_str("  Food for long journeys\n");
+
+        content
+    }
+
+    /// Format Quest tab content
+    fn format_quest_tab(&self) -> String {
+        // Placeholder quest data (will be from game state in future)
+        // TODO: Integrate scrolling for lists >5 quests
+        // TODO: Add expand/collapse functionality for quest details
+        let mut content = String::new();
+
+        // Active quests
+        content.push_str("─── Active Quests ───\n");
+        content.push_str("\n");
+        content.push_str("▸ The Monastery Trial\n");
+        content.push_str("  Prove your worth to join\n");
+        content.push_str("  ✓ Speak with Elder Pema\n");
+        content.push_str("  ✓ Complete meditation task\n");
+        content.push_str("  ○ Pass the combat test\n");
+        content.push_str("  Reward: Novice Robes, 100 XP\n");
+        content.push_str("\n");
+        content.push_str("▸ Gather Herbs\n");
+        content.push_str("  Collect healing herbs\n");
+        content.push_str("  ○ Moonflower (0/3)\n");
+        content.push_str("  ○ Silverleaf (1/5)\n");
+        content.push_str("  Reward: 50 gold, Health Potion\n");
+        content.push_str("\n");
+
+        // Completed quests section
+        content.push_str("─── Completed (2) ───\n");
+        content.push_str("• Welcome to Loka\n");
+        content.push_str("• Find the Monastery\n");
+
+        content
+    }
+
+    /// Format Craft tab content
+    fn format_craft_tab(&self) -> String {
+        // Placeholder crafting data (will be from game state in future)
+        // TODO: Add recipe selection and craft button interaction
+        let mut content = String::new();
+
+        content.push_str("─── Available Recipes ───\n");
+        content.push_str("\n");
+        content.push_str("▸ Health Potion\n");
+        content.push_str("  Req: Moonflower (2), Water\n");
+        content.push_str("  ✓ Can Craft\n");
+        content.push_str("\n");
+        content.push_str("▸ Iron Sword\n");
+        content.push_str("  Req: Iron Ore (3), Coal (1)\n");
+        content.push_str("  ○ Missing: Iron Ore (0/3)\n");
+        content.push_str("\n");
+        content.push_str("▸ Leather Vest\n");
+        content.push_str("  Req: Leather (2), Thread (1)\n");
+        content.push_str("  ○ Missing: Thread (0/1)\n");
+        content.push_str("\n");
+        content.push_str("─── Crafting Tools ───\n");
+        content.push_str("• Alchemy Kit\n");
+        content.push_str("• Forge Access\n");
+
+        content
+    }
+
+    /// Format Spark tab content
+    fn format_spark_tab(&self) -> String {
+        // Placeholder Spark companion data
+        // TODO: Add chat input field and message history
+        let mut content = String::new();
+
+        content.push_str("─── Spark Companion ───\n");
+        content.push_str("\n");
+        content.push_str("Spark: Hello! I'm Spark, your\n");
+        content.push_str("       companion. How can I\n");
+        content.push_str("       help you today?\n");
+        content.push_str("\n");
+        content.push_str("You:   Tell me about quests\n");
+        content.push_str("\n");
+        content.push_str("Spark: You have 2 active quests:\n");
+        content.push_str("       'Monastery Trial' and\n");
+        content.push_str("       'Gather Herbs'. Would you\n");
+        content.push_str("       like details?\n");
+        content.push_str("\n");
+        content.push_str("─── Ask Spark ───\n");
+        content.push_str("[Type your question...]\n");
+
+        content
+    }
+
+    /// Format Social tab content
+    fn format_social_tab(&self) -> String {
+        // Placeholder social/emote data
+        // TODO: Add emote and pose button interactions
+        let mut content = String::new();
+
+        content.push_str("─── Emotes ───\n");
+        content.push_str("😊 Happy    😢 Sad      😠 Angry\n");
+        content.push_str("😄 Laugh    🤔 Think    😴 Tired\n");
+        content.push_str("👋 Wave     🙏 Bow      💪 Flex\n");
+        content.push_str("\n");
+        content.push_str("─── Poses ───\n");
+        content.push_str("🧍 Standing  🪑 Sitting  🧎 Kneeling\n");
+        content.push_str("🏃 Running   🧘 Meditating\n");
+        content.push_str("\n");
+        content.push_str("Current: Standing, Happy\n");
+
+        content
+    }
+
+    /// Format Settings tab content
+    fn format_settings_tab(&self) -> String {
+        // Placeholder settings data
+        // TODO: Add setting controls and logout functionality
+        let mut content = String::new();
+
+        content.push_str("─── Game Settings ───\n");
+        content.push_str("\n");
+        content.push_str("Design Variant:\n");
+        content.push_str("  ⦿ Classic Book Style\n");
+        content.push_str("  ○ Modern Minimal\n");
+        content.push_str("  ○ Ornate Fantasy\n");
+        content.push_str("\n");
+        content.push_str("Sound Effects:  ON\n");
+        content.push_str("Music:          ON\n");
+        content.push_str("Notifications:  ON\n");
+        content.push_str("\n");
+        content.push_str("─── Account ───\n");
+        content.push_str("[Logout]\n");
+        content.push_str("\n");
+        content.push_str("Version: 0.1.0 (Alpha)\n");
 
         content
     }
