@@ -6,11 +6,13 @@ mod mesh;
 mod curl;
 mod material;
 mod pages;
+mod page_navigation;
 
 pub use mesh::*;
 pub use curl::*;
 pub use material::*;
 pub use pages::*;
+pub use page_navigation::*;
 
 use bevy::prelude::*;
 
@@ -23,11 +25,12 @@ impl Plugin for BookPlugin {
             .init_resource::<BookState>()
             .add_systems(Startup, setup_book)
             .add_systems(Update, (
+                page_navigation::trigger_page_turn_on_navigation,
                 store_original_mesh_data,
                 update_page_curl,
                 apply_curl_to_mesh,
             ).chain());
-        info!("BookPlugin initialized with multi-page support");
+        info!("BookPlugin initialized with multi-page support and navigation");
     }
 }
 
