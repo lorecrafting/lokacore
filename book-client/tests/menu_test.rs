@@ -83,3 +83,60 @@ fn test_menu_content_formatting() {
 
     println!("✅ Menu content formatting works");
 }
+
+#[test]
+fn test_character_tab_content() {
+    let menu = MenuState::default();
+    let character_content = menu.get_tab_content();
+
+    // Verify all required elements are present
+    assert!(character_content.contains("Name:"));
+    assert!(character_content.contains("Level:"));
+    assert!(character_content.contains("XP:"));
+    assert!(character_content.contains("Health:"));
+    assert!(character_content.contains("Qi:"));
+    assert!(character_content.contains("Stamina:"));
+
+    // Verify all 6 attributes
+    assert!(character_content.contains("STR:"));
+    assert!(character_content.contains("DEX:"));
+    assert!(character_content.contains("CON:"));
+    assert!(character_content.contains("INT:"));
+    assert!(character_content.contains("WIS:"));
+    assert!(character_content.contains("CHA:"));
+
+    // Verify gold display
+    assert!(character_content.contains("Gold:"));
+
+    // Verify XP progress bar format (contains both current and max XP)
+    assert!(character_content.contains("/"));
+
+    println!("✅ Character tab displays all required stats");
+}
+
+#[test]
+fn test_inventory_tab_content() {
+    let mut menu = MenuState::default();
+    menu.switch_to(MenuTab::Inventory);
+    let inventory_content = menu.get_tab_content();
+
+    // Verify weight/capacity indicator
+    assert!(inventory_content.contains("Capacity:"));
+    assert!(inventory_content.contains("lbs"));
+
+    // Verify equipped items section
+    assert!(inventory_content.contains("Equipped"));
+    assert!(inventory_content.contains("[Weapon]"));
+    assert!(inventory_content.contains("[Armor]"));
+
+    // Verify inventory section
+    assert!(inventory_content.contains("Inventory"));
+
+    // Verify items with quantities
+    assert!(inventory_content.contains("(x"));
+
+    // Verify item descriptions are included
+    assert!(inventory_content.contains("Restores"));
+
+    println!("✅ Inventory tab displays equipped items, inventory list, and capacity");
+}

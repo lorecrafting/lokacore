@@ -137,17 +137,77 @@ impl MenuState {
         content
     }
 
-    /// Get content for the current tab (placeholder for now)
-    fn get_tab_content(&self) -> String {
+    /// Get content for the current tab
+    pub fn get_tab_content(&self) -> String {
         match self.current_tab {
-            MenuTab::Character => "Character Stats (Coming Soon)".to_string(),
-            MenuTab::Inventory => "Inventory (Coming Soon)".to_string(),
+            MenuTab::Character => self.format_character_tab(),
+            MenuTab::Inventory => self.format_inventory_tab(),
             MenuTab::Quests => "Quests (Coming Soon)".to_string(),
             MenuTab::Craft => "Crafting (Coming Soon)".to_string(),
             MenuTab::Spark => "Spark Companion (Coming Soon)".to_string(),
             MenuTab::Social => "Social & Emotes (Coming Soon)".to_string(),
             MenuTab::Settings => "Settings (Coming Soon)".to_string(),
         }
+    }
+
+    /// Format Character tab content
+    fn format_character_tab(&self) -> String {
+        // Placeholder character data (will be from PlayerStats in future)
+        let mut content = String::new();
+        content.push_str("Name: Wanderer             Level: 5\n");
+        content.push_str("\n");
+        content.push_str("XP: [██████████░░░░░░░░░░] 500/1000\n");
+        content.push_str("\n");
+        content.push_str("Health:  100 / 100\n");
+        content.push_str("Qi:       50 /  50\n");
+        content.push_str("Stamina:  80 /  80\n");
+        content.push_str("\n");
+        content.push_str("─── Attributes ───\n");
+        content.push_str("STR: 12    DEX: 14\n");
+        content.push_str("CON: 13    INT: 16\n");
+        content.push_str("WIS: 15    CHA: 10\n");
+        content.push_str("\n");
+        content.push_str("Gold: 150\n");
+        content
+    }
+
+    /// Format Inventory tab content
+    fn format_inventory_tab(&self) -> String {
+        // Placeholder inventory data (will be from game state in future)
+        // TODO: Integrate scrolling for lists >20 items using TextRenderState system
+        // TODO: Add tap detection for items to show context menu (Use, Equip, Drop)
+        // TODO: Context menu actions will queue actions for execution via uniffi (Phase 7)
+        let mut content = String::new();
+
+        // Weight/capacity indicator
+        content.push_str("Capacity: 125 / 200 lbs\n");
+        content.push_str("\n");
+
+        // Equipped items section
+        content.push_str("─── Equipped ───\n");
+        content.push_str("[Weapon] Iron Sword (+5 dmg)\n");
+        content.push_str("[Armor]  Leather Vest (+3 def)\n");
+        content.push_str("[Ring]   Silver Band (+1 CHA)\n");
+        content.push_str("\n");
+
+        // Inventory items
+        content.push_str("─── Inventory ───\n");
+        content.push_str("Health Potion (x3)\n");
+        content.push_str("  Restores 50 HP\n");
+        content.push_str("\n");
+        content.push_str("Qi Elixir (x2)\n");
+        content.push_str("  Restores 30 Qi\n");
+        content.push_str("\n");
+        content.push_str("Ancient Scroll (x1)\n");
+        content.push_str("  Mysterious writings\n");
+        content.push_str("\n");
+        content.push_str("Copper Coins (x50)\n");
+        content.push_str("  Currency for trade\n");
+        content.push_str("\n");
+        content.push_str("Dried Rations (x5)\n");
+        content.push_str("  Food for long journeys\n");
+
+        content
     }
 }
 
