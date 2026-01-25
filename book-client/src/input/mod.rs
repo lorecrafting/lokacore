@@ -17,8 +17,8 @@ impl Plugin for InputPlugin {
         app.init_resource::<TapState>()
             .add_event::<PageTapEvent>()
             .add_event::<LinkTapEvent>()
-            .add_systems(Update, handle_mouse_click);
-        info!("InputPlugin initialized with tap detection");
+            .add_systems(Update, (handle_mouse_click, handle_scroll_input));
+        info!("InputPlugin initialized with tap detection and scrolling");
     }
 }
 
@@ -224,5 +224,41 @@ fn ray_triangle_intersection(
         Some((t, u, v))
     } else {
         None
+    }
+}
+
+/// Handle scroll input (Page Up/Down, Arrow Up/Down)
+fn handle_scroll_input(
+    keyboard: Res<ButtonInput<KeyCode>>,
+    mut render_state: ResMut<crate::text::TextRenderState>,
+) {
+    const SCROLL_SPEED: f32 = 50.0; // pixels per keypress
+
+    let mut scroll_delta = 0.0;
+
+    // Page Up/Down for larger scrolls
+    if keyboard.just_pressed(KeyCode::PageUp) {
+        scroll_delta = -200.0;
+    }
+    if keyboard.just_pressed(KeyCode::PageDown) {
+        scroll_delta = 200.0;
+    }
+
+    // Arrow Up/Down for fine scrolling
+    if keyboard.pressed(KeyCode::ArrowUp) {
+        scroll_delta -= SCROLL_SPEED;
+    }
+    if keyboard.pressed(KeyCode::ArrowDown) {
+        scroll_delta += SCROLL_SPEED;
+    }
+
+    if scroll_delta != 0.0 {
+        render_state.scroll_offset += scroll_delta;
+        render_state.scroll_offset = render_state.scroll_offset.clamp(0.0, render_state.max_scroll);
+
+        // Force re-render with new scroll offset
+        render_state.needs_update = true;
+
+        debug!("Scroll offset: {} (max: {})", render_state.scroll_offset, render_state.max_scroll);
     }
 }

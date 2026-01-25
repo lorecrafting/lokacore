@@ -310,6 +310,10 @@ pub struct TextRenderState {
     pub last_animation_render: f32,
     /// Whether we need to re-render
     pub needs_update: bool,
+    /// Vertical scroll offset in pixels (positive = scrolled down)
+    pub scroll_offset: f32,
+    /// Maximum scroll offset (calculated based on content height)
+    pub max_scroll: f32,
 }
 
 /// Setup the initial page texture (runs in Update until it finds pages)
