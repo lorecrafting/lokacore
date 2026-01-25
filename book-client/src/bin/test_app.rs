@@ -31,6 +31,7 @@ use loka_book::{
     content::{self, GameState, Room, GameEvent, EventType, NavigationState},
     text::{SdfTextRenderer, TextEffect, PageTexture},
     effects::{FireTextMaterial, IceTextMaterial, FireRegionMaterial, IceRegionMaterial, TextRegion},
+    input::LinkTapEvent,
 };
 
 fn main() {
@@ -103,6 +104,7 @@ fn main() {
         .add_systems(Startup, (setup_test_scene, log_current_room))
         .add_systems(Update, (
             handle_navigation_input,
+            handle_link_tap,
             handle_effect_input,
             handle_gpu_shader_input,
             display_debug_info,
@@ -305,6 +307,103 @@ fn handle_navigation_input(
                 text: format!("You can't go {} from here.", dir),
                 timestamp: time.elapsed_secs(),
             });
+        }
+    }
+}
+
+/// Handle link taps on the page (click on NPCs, items, exits)
+fn handle_link_tap(
+    mut link_events: EventReader<LinkTapEvent>,
+    mut game_state: ResMut<GameState>,
+    mut curl_state: ResMut<PageCurlState>,
+    mut nav_state: ResMut<NavigationState>,
+    time: Res<Time>,
+) {
+    for event in link_events.read() {
+        info!("Handling link tap: {}", event.action);
+
+        // Parse the action (format: "type:key")
+        let parts: Vec<&str> = event.action.splitn(2, ':').collect();
+        if parts.len() != 2 {
+            warn!("Invalid action format: {}", event.action);
+            continue;
+        }
+
+        let (action_type, key) = (parts[0], parts[1]);
+
+        match action_type {
+            "exit" => {
+                // Navigate to the room in that direction
+                if curl_state.phase != TurnPhase::Idle {
+                    info!("Cannot navigate - page turn in progress");
+                    continue;
+                }
+
+                if let Some(room_exit) = game_state.room.exits.iter().find(|e| e.direction == key) {
+                    if room_exit.locked {
+                        info!("That way is locked.");
+                        game_state.events.push(GameEvent {
+                            id: (time.elapsed_secs() * 1000.0) as u64,
+                            event_type: EventType::System,
+                            text: "That way is locked.".into(),
+                            timestamp: time.elapsed_secs(),
+                        });
+                    } else if let Some(new_room) = content::get_room(&room_exit.destination) {
+                        let old_room_name = game_state.room.name.clone();
+                        let new_room_name = new_room.name.clone();
+
+                        game_state.events.push(content::movement_event(
+                            &old_room_name,
+                            &new_room_name,
+                            time.elapsed_secs(),
+                        ));
+
+                        log_room(&new_room);
+                        log_events(&game_state.events);
+                        info!("Navigating via link tap to {}", new_room_name);
+
+                        nav_state.start_navigation(new_room);
+                        curl_state.start_turn(true);
+                    }
+                }
+            }
+            "entity" => {
+                // Clicked on an NPC
+                let npc_name = game_state.room.npcs.iter()
+                    .find(|n| n.key == key)
+                    .map(|n| n.name.clone());
+
+                if let Some(name) = npc_name {
+                    info!("Interacted with entity: {}", name);
+                    game_state.events.push(GameEvent {
+                        id: (time.elapsed_secs() * 1000.0) as u64,
+                        event_type: EventType::Action,
+                        text: format!("You approach {}.", name),
+                        timestamp: time.elapsed_secs(),
+                    });
+                    log_events(&game_state.events);
+                }
+            }
+            "item" => {
+                // Clicked on an item
+                let item_name = game_state.room.items.iter()
+                    .find(|i| i.key == key)
+                    .map(|i| i.name.clone());
+
+                if let Some(name) = item_name {
+                    info!("Interacted with item: {}", name);
+                    game_state.events.push(GameEvent {
+                        id: (time.elapsed_secs() * 1000.0) as u64,
+                        event_type: EventType::Action,
+                        text: format!("You examine the {}.", name),
+                        timestamp: time.elapsed_secs(),
+                    });
+                    log_events(&game_state.events);
+                }
+            }
+            _ => {
+                warn!("Unknown action type: {}", action_type);
+            }
         }
     }
 }

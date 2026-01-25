@@ -35,6 +35,7 @@ impl Plugin for SdfTextPlugin {
         app.init_resource::<SdfTextRenderer>()
             .init_resource::<TextRenderState>()
             .init_resource::<NavigationState>()
+            .init_resource::<PageLinkRegions>()
             .add_systems(Update, (
                 setup_sdf_texture_deferred,
                 update_sdf_texture,
@@ -120,6 +121,7 @@ fn update_sdf_texture(
     sdf_renderer: Res<SdfTextRenderer>,
     game_state: Option<Res<GameState>>,
     mut render_state: ResMut<TextRenderState>,
+    mut link_regions: ResMut<PageLinkRegions>,
     time: Res<Time>,
     current_page_query: Query<(Entity, &PageTexture, &MeshMaterial3d<StandardMaterial>), With<crate::book::CurrentPage>>,
 ) {
@@ -174,7 +176,11 @@ fn update_sdf_texture(
     }
 
     render_state.last_content_hash = content_hash;
-    info!("SDF texture updated for room: {}", game_state.room.name);
+
+    // Update link regions for the current room
+    link_regions.regions = sdf_renderer.calculate_link_regions(&game_state.room);
+    info!("SDF texture updated for room: {} ({} links)",
+          game_state.room.name, link_regions.regions.len());
 }
 
 /// Update NextPage texture when navigation starts (before page turn)
@@ -439,4 +445,38 @@ pub struct LinkRegion {
     pub action_id: String,
     /// Bounding box in UV coordinates (0-1 range)
     pub bounds: Rect,
+}
+
+/// Resource storing all link regions for the current page
+#[derive(Resource, Default, Debug)]
+pub struct PageLinkRegions {
+    /// List of clickable links on the current page
+    pub regions: Vec<LinkRegion>,
+}
+
+impl PageLinkRegions {
+    /// Clear all link regions
+    pub fn clear(&mut self) {
+        self.regions.clear();
+    }
+
+    /// Add a link region
+    pub fn add(&mut self, text: String, action_id: String, bounds: Rect) {
+        self.regions.push(LinkRegion {
+            text,
+            action_id,
+            bounds,
+        });
+    }
+
+    /// Hit test a UV coordinate against all link regions
+    /// Returns the action_id if a link was hit
+    pub fn hit_test(&self, uv: Vec2) -> Option<String> {
+        for region in &self.regions {
+            if region.bounds.contains(uv) {
+                return Some(region.action_id.clone());
+            }
+        }
+        None
+    }
 }

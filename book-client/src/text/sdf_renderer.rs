@@ -11,6 +11,7 @@ use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
 use fontdue::{Font, FontSettings};
 
 use crate::content::{GameState, Room};
+use super::LinkRegion;
 
 /// Text effect types that can be applied to text
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
@@ -432,6 +433,114 @@ impl SdfTextRenderer {
         } else {
             format!("{}...", &s[..max_len.saturating_sub(3)])
         }
+    }
+
+    /// Calculate link regions for a room's content
+    /// Returns a list of LinkRegion with UV bounds for each clickable element
+    pub fn calculate_link_regions(&self, room: &Room) -> Vec<LinkRegion> {
+        let mut regions = Vec::new();
+        let line_height = self.font_size * self.line_height;
+
+        // Track current Y position in pixels
+        let mut current_y = self.margin;
+
+        // Skip title (line 1) and blank line (line 2)
+        current_y += line_height; // Title
+        current_y += line_height; // Blank
+
+        // Skip description lines (estimate based on word wrap)
+        let desc_lines = self.word_wrap(&room.description, 45);
+        current_y += line_height * desc_lines.len() as f32;
+        current_y += line_height; // Blank after description
+
+        // Characters section
+        if !room.npcs.is_empty() {
+            current_y += line_height; // "Characters:" header
+            for npc in &room.npcs {
+                // NPC name is a link
+                let link_text = &npc.name;
+                let link_x_start = self.margin + self.measure_text("  "); // "  " indent
+                let link_width = self.measure_text(link_text);
+
+                // Convert to UV coordinates (0-1 range)
+                let bounds = Rect::new(
+                    link_x_start / self.width as f32,
+                    current_y / self.height as f32,
+                    (link_x_start + link_width) / self.width as f32,
+                    (current_y + self.font_size) / self.height as f32,
+                );
+
+                regions.push(LinkRegion {
+                    text: link_text.clone(),
+                    action_id: format!("entity:{}", npc.key),
+                    bounds,
+                });
+
+                current_y += line_height;
+            }
+            current_y += line_height; // Blank after NPCs
+        }
+
+        // Items section
+        if !room.items.is_empty() {
+            current_y += line_height; // "Items:" header
+            for item in &room.items {
+                let link_text = &item.name;
+                let link_x_start = self.margin + self.measure_text("  ");
+                let link_width = self.measure_text(link_text);
+
+                let bounds = Rect::new(
+                    link_x_start / self.width as f32,
+                    current_y / self.height as f32,
+                    (link_x_start + link_width) / self.width as f32,
+                    (current_y + self.font_size) / self.height as f32,
+                );
+
+                regions.push(LinkRegion {
+                    text: link_text.clone(),
+                    action_id: format!("item:{}", item.key),
+                    bounds,
+                });
+
+                current_y += line_height;
+            }
+            current_y += line_height; // Blank after items
+        }
+
+        // Exits section
+        current_y += line_height; // "Exits:" header
+        for exit in &room.exits {
+            let label = exit.label.as_deref().unwrap_or(&exit.direction);
+            let link_x_start = self.margin + self.measure_text("  > ");
+            let link_width = self.measure_text(label);
+
+            let bounds = Rect::new(
+                link_x_start / self.width as f32,
+                current_y / self.height as f32,
+                (link_x_start + link_width) / self.width as f32,
+                (current_y + self.font_size) / self.height as f32,
+            );
+
+            regions.push(LinkRegion {
+                text: label.to_string(),
+                action_id: format!("exit:{}", exit.direction),
+                bounds,
+            });
+
+            current_y += line_height;
+        }
+
+        regions
+    }
+
+    /// Measure the width of a text string in pixels
+    fn measure_text(&self, text: &str) -> f32 {
+        let mut width = 0.0;
+        for ch in text.chars() {
+            let (metrics, _) = self.font.rasterize(ch, self.font_size);
+            width += metrics.advance_width;
+        }
+        width
     }
 }
 
