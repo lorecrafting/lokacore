@@ -14,10 +14,11 @@
 | Database | SQLite (via Ecto) | ecto_sqlite3 |
 | Auth | phx.gen.auth + Guardian JWT | 2.4.0 |
 | Scripting | Elixir (sandboxed) | Native |
-| Mobile Client | React Native / Expo | 54 |
-| **Book Client** | **Rust / Bevy** | **0.15** |
-| **RN-Rust Bridge** | **uniffi** | **0.28** |
+| **Mobile Client** | **Godot** | **4.6** |
 | Deployment | Fly.io | ~$5/month |
+
+> **Note**: React Native + Bevy approach was archived 2026-01-26.
+> See `docs/decisions/2026-01-26-godot-client-migration.md` and branch `archive/react-native-bevy-client`.
 
 ## Architecture
 
@@ -133,150 +134,98 @@ lokacore/
 │       ├── zones/            # Zone definitions
 │       └── scripts/          # Elixir scripts
 ├── docs/                     # Architecture documentation
-├── book-client/              # Rust/Bevy 3D book renderer (NEW)
-│   ├── src/
-│   │   ├── book/            # Page mesh, curl animation
-│   │   ├── text/            # cosmic-text integration
-│   │   ├── effects/         # Shader effects (fire, ice, etc.)
-│   │   ├── input/           # Touch/tap detection
-│   │   ├── ui/              # Menu pages, entity pages, dialogue
-│   │   ├── dialogue/        # Branching dialogue trees
-│   │   ├── bridge/          # Uniffi RN ↔ Rust bridge
-│   │   └── loka_book.udl    # Uniffi interface (mirrors channel types)
-│   ├── shaders/             # WGSL shader files
-│   ├── build.rs             # Uniffi scaffolding generator
-│   └── README_UNIFFI.md     # Bridge integration guide
+├── godot-client/             # Godot 4.6 mobile client
+│   ├── scenes/              # Godot scenes (.tscn)
+│   ├── scripts/             # GDScript (.gd)
+│   │   ├── main.gd          # Main controller, input handling
+│   │   ├── book_page.gd     # 3D page mesh, curl, text rendering
+│   │   ├── game_state.gd    # Room state, navigation (autoload)
+│   │   └── mock_world.gd    # Test world data (autoload)
+│   ├── shaders/             # GLSL shaders (.gdshader)
+│   └── project.godot        # Project configuration
 └── CLAUDE.md
 ```
 
-## Rust/Bevy Book Client Development
+## Godot Client Development
 
-The `book-client/` folder contains a Rust-based 3D renderer for immersive visual moments - cinematic quest intros, combat effects, and the magical book interface. This complements React Native, which handles social/chat features.
+The `godot-client/` folder contains the mobile 3D "magic book" client built with Godot 4.6.
 
-**Architecture**: See `docs/architecture/client-architecture.md` for the full hybrid React Native + Bevy strategy.
+**Why Godot?** See `docs/decisions/2026-01-26-godot-client-migration.md` for the full rationale.
 
-**Key principle**: Use Bevy for "wow moments" (dragon fly-bys, screen shake, spell effects), React Native for daily interactions (chat, inventory lists, settings). Both connect to the same Phoenix Channel backend.
-
-This section covers Bevy-specific development, which is fundamentally different from web/Elixir development.
-
-### Key Differences from Web Development
-
-| Aspect | Web/Elixir | Rust/Bevy Game Engine |
-|--------|------------|----------------------|
-| Feedback loop | Hot reload (~100ms) | Compile + run (~5-30s) |
-| Testing | Mostly automated | Visual verification + unit tests |
-| Debugging | Print/logger | Logger + visual inspection |
-| State | Server manages | Client local (synced from server) |
-| Performance | "Good enough" | 60fps critical, measure everything |
-
-### Rust/Bevy Development Workflow
+### Development Workflow
 
 ```bash
-# Terminal 1: Run the visual test app (primary feedback)
-cd book-client
-cargo run --bin test-app
-# Watch the window! This IS your feedback loop
+# Open in Godot Editor
+cd godot-client
+open -a Godot project.godot   # macOS
+# Or: godot --path . --editor
 
-# Terminal 2: Auto-rebuild on changes (optional)
-cargo watch -x "build --lib"
+# Validate scripts (headless, catches errors)
+./check.sh
 
-# Run unit tests (non-visual logic)
-cargo test
-
-# Check for issues without running
-cargo clippy
-cargo fmt --check
+# Run from command line
+./check.sh --run
 ```
 
-### The Visual Verification Loop
+### Key Files
 
-Unlike web dev where you can inspect DOM/state, game engine verification is VISUAL:
+| File | Purpose |
+|------|---------|
+| `scripts/game_state.gd` | Autoload singleton for room state, navigation |
+| `scripts/mock_world.gd` | Autoload singleton with test world data |
+| `scripts/book_page.gd` | 3D page mesh, SubViewport text, curl animation |
+| `scripts/main.gd` | Camera setup, input routing |
+| `shaders/page_curl.gdshader` | GPU page curl shader (for production) |
 
-1. **Change code** → Save
-2. **cargo run** → Watch the window
-3. **Ask yourself:**
-   - Does the page render?
-   - Does the curl look smooth?
-   - Is text readable?
-   - Any flickering/artifacts?
-4. **Check console** → Errors, FPS, debug logs
-5. **Repeat**
-
-### When to Write Tests vs Visual Check
-
-| Scenario | Approach |
-|----------|----------|
-| Math functions (curl calculation) | **Unit test** |
-| Mesh generation (vertex count) | **Unit test** |
-| "Does it look right?" | **Visual verification** |
-| Shader effects | **Visual verification** |
-| Performance (60fps) | **Profiler + visual** |
-| Input handling | **Manual testing** |
-
-### Test App Controls
+### Architecture
 
 ```
-ESC       - Quit
-SPACE     - Toggle auto curl animation
-UP/DOWN   - Manual curl adjustment
-R         - Reset to flat
+┌─────────────────────────────────────────────────────────────┐
+│ Godot Client (stateless visual layer)                       │
+├─────────────────────────────────────────────────────────────┤
+│ - 3D book page with curl animation                         │
+│ - Text rendered via SubViewport → page texture              │
+│ - Navigation via compass directions                         │
+│ - All game state comes from server                          │
+└─────────────────────────────────────────────────────────────┘
+                           │ WebSocket
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Phoenix Server (source of truth)                            │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-### Common Bevy Patterns
+### GDScript Patterns
 
-```rust
-// Components are data, attached to entities
-#[derive(Component)]
-struct Page { index: u32 }
+```gdscript
+# Signals (Godot 4.6 syntax)
+signal room_changed(new_room: Room)
 
-// Resources are global singletons
-#[derive(Resource)]
-struct PageCurlState { curl_amount: f32 }
+func navigate(direction: String) -> void:
+    room_changed.emit(new_room)  # Modern syntax
 
-// Systems are functions that run every frame
-fn update_curl(
-    time: Res<Time>,                           // Access resources
-    mut query: Query<&mut Transform, With<Page>> // Query entities
-) {
-    for mut transform in query.iter_mut() {
-        // Modify components
-    }
-}
+# Autoload singletons (configured in project.godot)
+GameState.navigate("north")
+MockWorld.get_room("courtyard")
 
-// Plugins group related functionality
-impl Plugin for BookPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup)
-           .add_systems(Update, (system_a, system_b));
-    }
-}
+# SubViewport for text-to-texture
+var viewport = SubViewport.new()
+viewport.size = Vector2i(512, 768)
+var label = RichTextLabel.new()
+label.bbcode_enabled = true
+label.append_text("[b]Room Title[/b]")
+viewport.add_child(label)
+# Apply viewport.get_texture() to 3D mesh material
 ```
 
-### Common Bevy Pitfalls
+### Validation After Changes
 
-**UV Coordinate Y-Axis Mismatch**: Bevy's UV space has Y=0 at bottom-left (matches DirectX/Vulkan/Metal), but pixel/screen space has Y=0 at top. When converting pixel coordinates to UV for hit testing or UI bounds, flip the Y axis: `uv_y = 1.0 - (pixel_y / height)`. See the `bevy-0-15-coordinate-state-patterns` skill for details.
-
-**State Machine Reset**: Custom animation state machines must explicitly reset phase enums in reset functions, even if the animation system already transitioned to `Idle`. Race conditions between systems can leave stale state that blocks new transitions. Always include `self.phase = Phase::Idle` in reset methods.
-
-### Performance Debugging
-
-```rust
-// Add to your app for FPS display
-.add_plugins(FrameTimeDiagnosticsPlugin)
-
-// Time operations
-let start = std::time::Instant::now();
-// ... operation ...
-debug!("Operation took: {:?}", start.elapsed());
-
-// Profile with Instruments (macOS)
-// Product > Profile > Time Profiler in Xcode
+Always run after modifying GDScript:
+```bash
+cd godot-client && ./check.sh
 ```
 
-### Proposal & Plan Documents
-
-- `docs/proposals/rust-book-client.md` - Full feasibility study
-- `docs/proposals/rust-book-client-mvp-plan.md` - Implementation plan
+This runs Godot headlessly to catch script errors before opening the editor.
 
 ## Quick Commands
 
@@ -285,23 +234,18 @@ debug!("Operation took: {:?}", start.elapsed());
 cd server
 mix deps.get && mix ecto.setup    # Setup
 mix phx.server                     # Start Phoenix at localhost:4000
-
-# Rust/Bevy Book Client Development
-cd book-client
-cargo build                        # Compile (first time: 5-10 min)
-cargo run --bin test-app          # Run visual test app
-cargo test                        # Run unit tests
-cargo watch -x "run --bin test-app"  # Auto-restart on changes
-mix loka.dev                       # Start Phoenix + mobile Expo (with debug logs)
-mix loka.dev --server              # Phoenix only (with mobile debug log streaming)
 mix test                           # Run tests
+
+# Godot Client Development
+cd godot-client
+open -a Godot project.godot       # Open in Godot Editor (macOS)
+./check.sh                         # Validate scripts (headless)
+./check.sh --run                   # Run game with console output
 
 # Validation
 mix loka.test                     # All tests (unit + content + balance)
 mix loka.test --quick             # Skip slow balance simulations
 mix loka.test.validate            # Validate prototypes, quests, dialogues
-mix loka.test.storyline --list    # List available storylines
-mix loka.test.storyline <id>      # Validate storyline structure (legacy)
 
 # Recommended: ChannelBot storyline test (95% production parity)
 mix test test/integration/storyline_channel_test.exs
@@ -683,11 +627,10 @@ mix loka.test.storyline monastery_arc --run
 
 ### Mobile E2E Testing (Future)
 
-For React Native UI testing, we'll use **Detox or Maestro**:
-- Tests full stack: UI → WebSocket → Server → UI
-- Complementary to ChannelBot (tests different layer)
-- Slower but catches UI/UX bugs
-- Planned for separate implementation
+For Godot mobile testing:
+- Export to iOS/Android and test on device
+- Use Godot's built-in testing framework for script logic
+- Integration tests via Phoenix ChannelBot + manual verification
 
 ## Issue Tracking
 
@@ -711,7 +654,7 @@ Work is often **cross-cutting** - use docs from any tier as needed.
 |-------|----------|
 | **Quest/Dialogue/Entity YAML** | `docs/builder-reference/` |
 | **Architecture Deep-Dive** | `docs/architecture/` |
-| **Client Architecture (React Native + Bevy)** | `docs/architecture/client-architecture.md` |
+| **Godot Migration Decision** | `docs/decisions/2026-01-26-godot-client-migration.md` |
 | **Scripting API** | `docs/architecture/elixir-scripts-design.md` |
 | **Game Client** | `docs/reference/game-client.md` |
 | **Channel API** | `docs/api/channel-contract.md` |

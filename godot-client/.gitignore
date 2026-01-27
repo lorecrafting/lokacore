@@ -1,0 +1,19 @@
+# Godot 4+ specific ignores
+.godot/
+
+# Godot-specific ignores
+*.translation
+
+# Imported textures and samples
+*.import
+
+# Export presets
+export_presets.cfg
+
+# Builds
+*.apk
+*.aab
+*.ipa
+*.exe
+*.x86_64
+*.pck
