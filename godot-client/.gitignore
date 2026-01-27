@@ -7,10 +7,8 @@
 # Imported textures and samples
 *.import
 
-# Export presets
-export_presets.cfg
-
 # Builds
+build/
 *.apk
 *.aab
 *.ipa

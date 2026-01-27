@@ -1,0 +1,582 @@
+{
+  "_generated": "2026-01-27T05:42:39.401060Z",
+  "_source": "server/lib/loka/channel/events.ex",
+  "_version": "1.0.0",
+  "client_events": {
+    "action": {
+      "action": {
+        "required": true,
+        "type": "string"
+      },
+      "entity_id": {
+        "required": true,
+        "type": "string"
+      }
+    },
+    "bardo": {
+      "action": {
+        "required": true,
+        "type": "enum",
+        "values": [
+          "reincarnate"
+        ]
+      }
+    },
+    "chat": {
+      "message": {
+        "required": true,
+        "type": "string"
+      },
+      "mode": {
+        "required": true,
+        "type": "enum",
+        "values": [
+          "say",
+          "shout"
+        ]
+      }
+    },
+    "click_entity": {
+      "entity_id": {
+        "required": false,
+        "type": "string"
+      },
+      "id": {
+        "required": false,
+        "type": "string"
+      },
+      "type": {
+        "required": false,
+        "type": "string"
+      }
+    },
+    "combat_action": {
+      "action": {
+        "required": true,
+        "type": "enum",
+        "values": [
+          "flee"
+        ]
+      }
+    },
+    "container": {
+      "action": {
+        "required": true,
+        "type": "enum",
+        "values": [
+          "take",
+          "close"
+        ]
+      },
+      "index": {
+        "required": false,
+        "type": "integer"
+      }
+    },
+    "craft": {
+      "recipe_key": {
+        "required": true,
+        "type": "string"
+      },
+      "tool_id": {
+        "required": false,
+        "type": "string"
+      }
+    },
+    "dialogue_select": {
+      "choice_index": {
+        "required": true,
+        "type": "integer"
+      }
+    },
+    "emote": {
+      "emote_key": {
+        "required": true,
+        "type": "string"
+      },
+      "target_id": {
+        "required": false,
+        "type": "string"
+      }
+    },
+    "gather": {
+      "node_type": {
+        "required": true,
+        "type": "string"
+      }
+    },
+    "inventory": {
+      "action": {
+        "required": true,
+        "type": "enum",
+        "values": [
+          "drop",
+          "equip",
+          "unequip"
+        ]
+      },
+      "item_id": {
+        "required": false,
+        "type": "string"
+      },
+      "slot": {
+        "required": false,
+        "type": "string"
+      }
+    },
+    "navigate": {
+      "direction": {
+        "required": true,
+        "type": "enum",
+        "values": [
+          "north",
+          "south",
+          "east",
+          "west",
+          "up",
+          "down",
+          "n",
+          "s",
+          "e",
+          "w",
+          "u",
+          "d"
+        ]
+      }
+    },
+    "shop": {
+      "action": {
+        "required": true,
+        "type": "enum",
+        "values": [
+          "buy",
+          "sell",
+          "close"
+        ]
+      },
+      "item_id": {
+        "required": false,
+        "type": "string"
+      },
+      "item_key": {
+        "required": false,
+        "type": "string"
+      },
+      "npc_id": {
+        "required": false,
+        "type": "string"
+      }
+    },
+    "social": {
+      "action": {
+        "required": true,
+        "type": "enum",
+        "values": [
+          "set_mood",
+          "set_pose"
+        ]
+      },
+      "mood": {
+        "required": false,
+        "type": "string"
+      },
+      "pose": {
+        "required": false,
+        "type": "string"
+      }
+    },
+    "use_item": {
+      "item_id": {
+        "required": true,
+        "type": "string"
+      }
+    }
+  },
+  "server_events": {
+    "atmosphere_update": {
+      "atmosphere": {
+        "required": true,
+        "type": "string"
+      },
+      "calendar": {
+        "required": false,
+        "type": "map"
+      },
+      "sound_state": {
+        "required": false,
+        "type": "map"
+      },
+      "visual_state": {
+        "required": false,
+        "type": "map"
+      }
+    },
+    "bardo_can_reincarnate": {},
+    "bardo_enter": {
+      "bind_point": {
+        "required": true,
+        "type": "string"
+      }
+    },
+    "bardo_exit": {},
+    "capture_screenshot": {},
+    "combat_end": {
+      "reason": {
+        "required": false,
+        "type": "string"
+      },
+      "result": {
+        "required": false,
+        "type": "enum",
+        "values": [
+          "victory",
+          "defeat",
+          "fled"
+        ]
+      },
+      "rewards": {
+        "required": false,
+        "type": "map"
+      }
+    },
+    "combat_start": {
+      "enemy": {
+        "fields": {
+          "health": {
+            "fields": {
+              "current": {
+                "required": true,
+                "type": "integer"
+              },
+              "max": {
+                "required": true,
+                "type": "integer"
+              }
+            },
+            "required": true,
+            "type": "object"
+          },
+          "id": {
+            "required": true,
+            "type": "string"
+          },
+          "name": {
+            "required": true,
+            "type": "string"
+          }
+        },
+        "required": true,
+        "type": "object"
+      },
+      "pvp": {
+        "required": false,
+        "type": "boolean"
+      }
+    },
+    "combat_update": {
+      "can_flee": {
+        "required": false,
+        "type": "boolean"
+      },
+      "enemy_health": {
+        "fields": {
+          "current": {
+            "required": true,
+            "type": "integer"
+          },
+          "max": {
+            "required": true,
+            "type": "integer"
+          }
+        },
+        "required": false,
+        "type": "object"
+      },
+      "player_health": {
+        "fields": {
+          "current": {
+            "required": true,
+            "type": "integer"
+          },
+          "max": {
+            "required": true,
+            "type": "integer"
+          }
+        },
+        "required": false,
+        "type": "object"
+      }
+    },
+    "container_close": {},
+    "container_open": {
+      "entity_id": {
+        "required": true,
+        "type": "string"
+      },
+      "entity_name": {
+        "required": true,
+        "type": "string"
+      },
+      "items": {
+        "required": true,
+        "type": "list"
+      }
+    },
+    "container_update": {
+      "items": {
+        "required": true,
+        "type": "list"
+      }
+    },
+    "dialogue_end": {},
+    "dialogue_start": {
+      "choices": {
+        "required": true,
+        "type": "list"
+      },
+      "entity_id": {
+        "required": true,
+        "type": "string"
+      },
+      "node_id": {
+        "required": true,
+        "type": "string"
+      },
+      "speaker": {
+        "required": false,
+        "type": "string"
+      },
+      "text": {
+        "required": true,
+        "type": "string"
+      }
+    },
+    "dialogue_update": {
+      "choices": {
+        "required": true,
+        "type": "list"
+      },
+      "node_id": {
+        "required": true,
+        "type": "string"
+      },
+      "speaker": {
+        "required": false,
+        "type": "string"
+      },
+      "text": {
+        "required": true,
+        "type": "string"
+      }
+    },
+    "entity_context": {
+      "entity": {
+        "required": true,
+        "type": "map"
+      }
+    },
+    "equipment_update": {
+      "equipped": {
+        "required": true,
+        "type": "map"
+      }
+    },
+    "event": {
+      "text": {
+        "required": true,
+        "type": "string"
+      },
+      "type": {
+        "required": false,
+        "type": "string"
+      }
+    },
+    "force_disconnect": {
+      "reason": {
+        "required": true,
+        "type": "string"
+      }
+    },
+    "game_state": {
+      "atmosphere": {
+        "required": true,
+        "type": "string"
+      },
+      "equipped": {
+        "required": true,
+        "type": "map"
+      },
+      "health": {
+        "fields": {
+          "current": {
+            "required": true,
+            "type": "integer"
+          },
+          "max": {
+            "required": true,
+            "type": "integer"
+          }
+        },
+        "required": true,
+        "type": "object"
+      },
+      "inventory": {
+        "required": true,
+        "type": "list"
+      },
+      "other_players": {
+        "required": true,
+        "type": "list"
+      },
+      "quests": {
+        "required": true,
+        "type": "list"
+      },
+      "resources": {
+        "required": true,
+        "type": "map"
+      },
+      "room": {
+        "required": true,
+        "type": "map"
+      },
+      "server": {
+        "required": false,
+        "type": "map"
+      },
+      "stats": {
+        "required": true,
+        "type": "map"
+      }
+    },
+    "inventory_update": {
+      "action": {
+        "required": false,
+        "type": "string"
+      },
+      "inventory": {
+        "required": false,
+        "type": "list"
+      },
+      "item_id": {
+        "required": false,
+        "type": "string"
+      }
+    },
+    "players_update": {
+      "players": {
+        "required": true,
+        "type": "list"
+      }
+    },
+    "quest_accepted": {
+      "name": {
+        "required": true,
+        "type": "string"
+      },
+      "quest": {
+        "required": false,
+        "type": "map"
+      },
+      "quest_id": {
+        "required": true,
+        "type": "string"
+      }
+    },
+    "quest_completed": {
+      "quest_id": {
+        "required": true,
+        "type": "string"
+      },
+      "rewards": {
+        "required": false,
+        "type": "map"
+      },
+      "title": {
+        "required": true,
+        "type": "string"
+      }
+    },
+    "quest_progress": {
+      "quests": {
+        "required": true,
+        "type": "list"
+      }
+    },
+    "resources_update": {
+      "resources": {
+        "required": true,
+        "type": "map"
+      }
+    },
+    "room_update": {
+      "atmosphere": {
+        "required": true,
+        "type": "string"
+      },
+      "other_players": {
+        "required": true,
+        "type": "list"
+      },
+      "room": {
+        "required": true,
+        "type": "map"
+      },
+      "sound_state": {
+        "required": false,
+        "type": "map"
+      },
+      "visual_state": {
+        "required": false,
+        "type": "map"
+      }
+    },
+    "shop_close": {},
+    "shop_open": {
+      "buys": {
+        "required": true,
+        "type": "list"
+      },
+      "items": {
+        "required": true,
+        "type": "list"
+      },
+      "npc_id": {
+        "required": true,
+        "type": "string"
+      },
+      "npc_name": {
+        "required": true,
+        "type": "string"
+      }
+    },
+    "stats_update": {
+      "stats": {
+        "required": true,
+        "type": "map"
+      }
+    },
+    "timer_completed": {
+      "completed_at": {
+        "required": false,
+        "type": "string"
+      },
+      "data": {
+        "required": false,
+        "type": "map"
+      },
+      "scheduled_at": {
+        "required": false,
+        "type": "string"
+      },
+      "timer_id": {
+        "required": false,
+        "type": "string"
+      },
+      "timer_type": {
+        "required": true,
+        "type": "string"
+      }
+    }
+  }
+}
