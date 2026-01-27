@@ -1,6 +1,6 @@
 defmodule Mix.Tasks.Loka.ExportMobile do
   @moduledoc """
-  Exports world content as a JSON bundle for single-player mobile apps.
+  Exports world content as a JSON bundle for offline/bundled clients.
 
   ## Usage
 
@@ -128,8 +128,8 @@ defmodule Mix.Tasks.Loka.ExportMobile do
         Recipes:  #{map_size(recipes)}
 
       Next steps:
-        1. Copy bundle to mobile/assets/content/
-        2. Run mobile app with offline mode enabled
+        1. Copy bundle to your client assets directory
+        2. Load JSON content from the bundle in your client
       """)
     else
       {:error, reason} ->

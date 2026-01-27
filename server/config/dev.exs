@@ -94,3 +94,4 @@ config :swoosh, :api_client, false
 # Production uses GUARDIAN_SECRET_KEY environment variable via runtime.exs
 config :loka, Loka.Auth.Guardian,
   secret_key: "dev_only_guardian_secret_key_not_for_production_use"
+config :loka, :allow_guest_websocket, true

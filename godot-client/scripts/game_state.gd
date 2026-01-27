@@ -267,14 +267,18 @@ func _convert_server_room(room_data: Dictionary) -> MockWorld.Room:
 				var npc := MockWorld.NPC.new(
 					entity.get("key", entity.get("id", "")),
 					entity.get("short_name", entity.get("name", "Someone")),
-					entity.get("short_desc", entity.get("description", ""))
+					entity.get("primary_keyword", ""),  # keyword for underlining
+					entity.get("long_desc", ""),        # one-liner for room display
+					entity.get("description", "")       # detailed for entity page
 				)
 				npcs.append(npc)
 			elif entity_type == "item":
 				var item := MockWorld.Item.new(
 					entity.get("key", entity.get("id", "")),
 					entity.get("short_name", entity.get("name", "Something")),
-					entity.get("short_desc", entity.get("description", ""))
+					entity.get("primary_keyword", ""),  # keyword for underlining
+					entity.get("long_desc", ""),        # one-liner for room display
+					entity.get("description", "")       # detailed for entity page
 				)
 				items.append(item)
 
@@ -285,7 +289,9 @@ func _convert_server_room(room_data: Dictionary) -> MockWorld.Room:
 			var item := MockWorld.Item.new(
 				item_data.get("key", item_data.get("id", "")),
 				item_data.get("short_name", item_data.get("name", "Something")),
-				item_data.get("short_desc", item_data.get("description", ""))
+				item_data.get("primary_keyword", ""),
+				item_data.get("long_desc", ""),
+				item_data.get("description", "")
 			)
 			items.append(item)
 

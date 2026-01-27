@@ -14,7 +14,8 @@ defmodule Loka.Framework.Spark.SparkState do
   alias Loka.Accounts.Player
 
   @primary_key {:id, :binary_id, autogenerate: true}
-  @foreign_key_type :binary_id
+  # Note: Player uses integer IDs, not binary_id
+  # @foreign_key_type :binary_id  # Removed - causes cast errors
 
   # Personality traits available for selection
   @valid_traits ~w(curious contemplative warm earnest ancient)

@@ -14,7 +14,7 @@ signal page_turn_completed(direction: String)
 signal bottom_bar_pressed(button: String)
 
 ## Page types
-enum PageType { ROOM, MENU }
+enum PageType { ROOM, MENU, ENTITY }
 
 ## Menu tabs
 enum MenuTab { INVENTORY, CHARACTER, SETTINGS }
@@ -39,6 +39,12 @@ const CURL_STRENGTH := 0.3
 const MAX_EVENTS := 5
 const EVENT_FADE_TIME := 10.0  # Seconds before events start fading
 
+## Universal page padding
+const PAGE_PADDING_LEFT := 20
+const PAGE_PADDING_RIGHT := 20
+const PAGE_PADDING_TOP := 24
+const PAGE_PADDING_BOTTOM := 10
+
 ## Page curl progress (0 = flat, 1 = fully curled)
 var curl_progress: float = 0.0:
 	set(value):
@@ -49,6 +55,7 @@ var curl_progress: float = 0.0:
 var current_page: PageType = PageType.ROOM
 var current_menu_tab: MenuTab = MenuTab.INVENTORY
 var pending_page: PageType = PageType.ROOM  # Page to show after turn completes
+var current_entity: Variant = null  # NPC or Item being viewed on entity page
 
 ## Child nodes
 var mesh_instance: MeshInstance3D
@@ -122,10 +129,15 @@ func _handle_page_click(screen_pos: Vector2) -> void:
 	var vp_x := uv_x * VIEWPORT_WIDTH
 	var vp_y := (1.0 - uv_y) * VIEWPORT_HEIGHT
 
-	# Check if click is in bottom bar area
+	# Check if click is in bottom bar area (only for room/menu pages)
 	var bar_top := VIEWPORT_HEIGHT - BOTTOM_BAR_HEIGHT
-	if vp_y >= bar_top:
+	if current_page == PageType.ENTITY:
+		# Entity page has no bottom bar - handle content clicks for actions
+		_handle_entity_content_click(vp_x, vp_y)
+	elif vp_y >= bar_top:
 		_handle_bottom_bar_click(vp_x, vp_y - bar_top)
+	elif current_page == PageType.ROOM:
+		_handle_content_click(vp_x, vp_y)
 
 
 func _setup_viewport() -> void:
@@ -197,14 +209,15 @@ void fragment() {
 	label.fit_content = false
 	label.scroll_active = true
 	label.scroll_following = true
+	# Use anchors with offsets for padding (theme constants don't work for margins)
 	label.set_anchors_preset(Control.PRESET_FULL_RECT)
-	label.add_theme_constant_override("text_left_margin", 40)
-	label.add_theme_constant_override("text_right_margin", 40)
-	label.add_theme_constant_override("text_top_margin", 48)
-	label.add_theme_constant_override("text_bottom_margin", 20)
-	label.add_theme_font_size_override("normal_font_size", 18)
-	label.add_theme_font_size_override("bold_font_size", 20)
-	label.add_theme_font_size_override("italics_font_size", 17)
+	label.offset_left = PAGE_PADDING_LEFT
+	label.offset_right = -PAGE_PADDING_RIGHT
+	label.offset_top = PAGE_PADDING_TOP
+	label.offset_bottom = -PAGE_PADDING_BOTTOM
+	label.add_theme_font_size_override("normal_font_size", 20)
+	label.add_theme_font_size_override("bold_font_size", 22)
+	label.add_theme_font_size_override("italics_font_size", 19)
 	# Dark sepia ink color matching aged manuscript style
 	label.add_theme_color_override("default_color", Color(0.22, 0.16, 0.10))  # #382919
 	content_container.add_child(label)
@@ -307,50 +320,8 @@ func _setup_bottom_bar() -> void:
 	bottom_bar.offset_top = -BOTTOM_BAR_HEIGHT
 	viewport.add_child(bottom_bar)
 
-	# Background - slightly darker aged parchment for bottom bar
-	var bar_bg := ColorRect.new()
-	bar_bg.color = Color(0.82, 0.75, 0.64)  # Darker aged parchment #D1C0A3
-	bar_bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	bottom_bar.add_child(bar_bg)
-
-	# Decorative separator line at top (like a ruled line on old paper)
-	var separator := ColorRect.new()
-	separator.color = Color(0.45, 0.38, 0.30)  # Dark sepia line
-	separator.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	separator.custom_minimum_size = Vector2(0, 1)
-	bottom_bar.add_child(separator)
-
-	# HBox for buttons
-	var hbox := HBoxContainer.new()
-	hbox.set_anchors_preset(Control.PRESET_FULL_RECT)
-	hbox.offset_left = 20
-	hbox.offset_right = -20
-	hbox.offset_top = 10
-	hbox.offset_bottom = -10
-	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	bottom_bar.add_child(hbox)
-
-	# Menu button (left)
-	var menu_btn := _create_bar_button("☰", "menu")
-	hbox.add_child(menu_btn)
-
-	# Spacer
-	var spacer1 := Control.new()
-	spacer1.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hbox.add_child(spacer1)
-
-	# Compass (center)
-	var compass := _create_compass()
-	hbox.add_child(compass)
-
-	# Spacer
-	var spacer2 := Control.new()
-	spacer2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hbox.add_child(spacer2)
-
-	# Say button (right)
-	var say_btn := _create_bar_button("💬", "say")
-	hbox.add_child(say_btn)
+	# Add the actual content
+	_setup_bottom_bar_content()
 
 
 func _create_bar_button(icon: String, action: String) -> Button:
@@ -438,6 +409,155 @@ func _update_compass_buttons() -> void:
 			east.disabled = not available_exits.has("east")
 
 
+## Update bottom bar for entity view (Back, Talk, Examine)
+func _update_entity_bottom_bar() -> void:
+	if not bottom_bar:
+		return
+
+	# Clear existing bottom bar content and rebuild for entity view
+	for child in bottom_bar.get_children():
+		child.queue_free()
+
+	# Background
+	var bar_bg := ColorRect.new()
+	bar_bg.color = Color(0.82, 0.75, 0.64)
+	bar_bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bottom_bar.add_child(bar_bg)
+
+	# Separator line
+	var separator := ColorRect.new()
+	separator.color = Color(0.45, 0.38, 0.30)
+	separator.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	separator.custom_minimum_size = Vector2(0, 1)
+	bottom_bar.add_child(separator)
+
+	# HBox for buttons
+	var hbox := HBoxContainer.new()
+	hbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+	hbox.offset_left = 20
+	hbox.offset_right = -20
+	hbox.offset_top = 10
+	hbox.offset_bottom = -10
+	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	bottom_bar.add_child(hbox)
+
+	# Back button (left)
+	var back_btn := Button.new()
+	back_btn.text = "← Back"
+	back_btn.custom_minimum_size = Vector2(80, BUTTON_SIZE)
+	back_btn.add_theme_font_size_override("font_size", 16)
+	back_btn.pressed.connect(go_back_to_room)
+	hbox.add_child(back_btn)
+
+	# Spacer
+	var spacer1 := Control.new()
+	spacer1.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hbox.add_child(spacer1)
+
+	# Talk button (center)
+	var talk_btn := Button.new()
+	talk_btn.text = "💬 Talk"
+	talk_btn.custom_minimum_size = Vector2(80, BUTTON_SIZE)
+	talk_btn.add_theme_font_size_override("font_size", 16)
+	talk_btn.pressed.connect(_on_entity_talk_pressed)
+	hbox.add_child(talk_btn)
+
+	# Spacer
+	var spacer2 := Control.new()
+	spacer2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hbox.add_child(spacer2)
+
+	# Examine button (right)
+	var examine_btn := Button.new()
+	examine_btn.text = "👁 Look"
+	examine_btn.custom_minimum_size = Vector2(80, BUTTON_SIZE)
+	examine_btn.add_theme_font_size_override("font_size", 16)
+	examine_btn.pressed.connect(_on_entity_examine_pressed)
+	hbox.add_child(examine_btn)
+
+
+## Restore bottom bar for room view
+func _restore_room_bottom_bar() -> void:
+	if not bottom_bar:
+		return
+
+	# Clear and rebuild
+	for child in bottom_bar.get_children():
+		child.queue_free()
+
+	# Rebuild the standard room bottom bar
+	_setup_bottom_bar_content()
+
+
+func _setup_bottom_bar_content() -> void:
+	# Background - slightly darker aged parchment for bottom bar
+	var bar_bg := ColorRect.new()
+	bar_bg.color = Color(0.82, 0.75, 0.64)
+	bar_bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bottom_bar.add_child(bar_bg)
+
+	# Decorative separator line at top
+	var separator := ColorRect.new()
+	separator.color = Color(0.45, 0.38, 0.30)
+	separator.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	separator.custom_minimum_size = Vector2(0, 1)
+	bottom_bar.add_child(separator)
+
+	# HBox for buttons
+	var hbox := HBoxContainer.new()
+	hbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+	hbox.offset_left = 20
+	hbox.offset_right = -20
+	hbox.offset_top = 10
+	hbox.offset_bottom = -10
+	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	bottom_bar.add_child(hbox)
+
+	# Menu button (left)
+	var menu_btn := _create_bar_button("☰", "menu")
+	hbox.add_child(menu_btn)
+
+	# Spacer
+	var spacer1 := Control.new()
+	spacer1.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hbox.add_child(spacer1)
+
+	# Compass (center)
+	var compass := _create_compass()
+	hbox.add_child(compass)
+
+	# Spacer
+	var spacer2 := Control.new()
+	spacer2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hbox.add_child(spacer2)
+
+	# Say button (right)
+	var say_btn := _create_bar_button("💬", "say")
+	hbox.add_child(say_btn)
+
+	# Update compass after setup
+	_update_compass_buttons()
+
+
+## Entity action: Talk
+func _on_entity_talk_pressed() -> void:
+	if current_entity == null:
+		return
+	# Send talk action to server (or show mock response offline)
+	if GameState.is_online:
+		GameState.entity_action("talk", current_entity.key)
+	else:
+		add_event("You speak with %s." % current_entity.name)
+
+
+## Entity action: Examine/Look
+func _on_entity_examine_pressed() -> void:
+	if current_entity == null:
+		return
+	# The long description is already shown, but we can add to event feed
+	add_event("You examine %s closely." % current_entity.name)
+
+
 func _connect_signals() -> void:
 	GameState.room_changed.connect(_on_room_changed)
 	GameState.navigation_failed.connect(_on_navigation_failed)
@@ -469,10 +589,18 @@ func _on_turn_completed_show_page(direction: String) -> void:
 	current_page = pending_page
 	match current_page:
 		PageType.ROOM:
+			# Show bottom bar for room
+			if bottom_bar:
+				bottom_bar.visible = true
+			_restore_room_bottom_bar()
 			if GameState.current_room:
 				display_room(GameState.current_room)
 		PageType.MENU:
-			display_menu()
+			if GameState.current_room:
+				display_menu()
+		PageType.ENTITY:
+			if current_entity:
+				display_entity(current_entity)
 
 
 ## Add an event to the feed (displayed below room content)
@@ -489,8 +617,8 @@ func add_event(text: String) -> void:
 	while events.size() > MAX_EVENTS:
 		events.pop_front()
 
-	# Refresh display
-	if GameState.current_room:
+	# Only refresh room display if we're on the room page
+	if current_page == PageType.ROOM and GameState.current_room:
 		display_room(GameState.current_room)
 		# Scroll to bottom to show new event
 		await get_tree().process_frame
@@ -525,26 +653,36 @@ func display_room(room: MockWorld.Room) -> void:
 	var separator_color := "#8a7a6a"  # Decorative lines
 
 	# Room title (centered, larger)
-	text += "[center][font_size=26][color=%s][b]%s[/b][/color][/font_size][/center]\n\n" % [title_color, room.name]
+	text += "[center][font_size=28][color=%s][b]%s[/b][/color][/font_size][/center]\n\n" % [title_color, room.name]
 
 	# Room description
 	text += "[color=%s]%s[/color]\n\n" % [body_color, room.description]
 
-	# Characters section (NPCs)
+	# Characters section (NPCs) - underline primary_keyword for clickability
 	if room.npcs.size() > 0:
 		var npc_texts: Array[String] = []
 		for npc in room.npcs:
-			var npc_text := npc.short_desc if npc.short_desc != "" else "%s is here." % npc.name
+			# Use long_desc for room display (one-liner with keyword)
+			var npc_text := npc.long_desc if npc.get("long_desc") and npc.long_desc != "" else "%s is here." % npc.name
 			npc_text = npc_text.replace("\n", " ").replace("  ", " ")
+			# Underline the primary keyword to indicate it's clickable
+			var keyword: String = npc.get("primary_keyword") if npc.get("primary_keyword") else ""
+			if keyword != "" and keyword in npc_text:
+				npc_text = npc_text.replace(keyword, "[u]%s[/u]" % keyword)
 			npc_texts.append(npc_text)
 		text += "[color=%s]%s[/color]\n\n" % [secondary_color, " ".join(npc_texts)]
 
-	# Items section
+	# Items section - underline primary_keyword for clickability
 	if room.items.size() > 0:
 		var item_texts: Array[String] = []
 		for item in room.items:
-			var item_text := item.short_desc if item.short_desc != "" else "%s lies here." % item.name
+			# Use long_desc for room display (one-liner with keyword)
+			var item_text := item.long_desc if item.get("long_desc") and item.long_desc != "" else "%s lies here." % item.name
 			item_text = item_text.replace("\n", " ").replace("  ", " ")
+			# Underline the primary keyword to indicate it's clickable
+			var keyword: String = item.get("primary_keyword") if item.get("primary_keyword") else ""
+			if keyword != "" and keyword in item_text:
+				item_text = item_text.replace(keyword, "[u]%s[/u]" % keyword)
 			item_texts.append(item_text)
 		text += "[color=%s]%s[/color]\n\n" % [secondary_color, " ".join(item_texts)]
 
@@ -555,6 +693,132 @@ func display_room(room: MockWorld.Room) -> void:
 			text += "[color=%s][i]%s[/i][/color]\n" % [event_color, event["text"]]
 
 	label.text = text
+
+
+## Handle clicks on entity page (for action options)
+func _handle_entity_content_click(vp_x: float, vp_y: float) -> void:
+	if current_entity == null:
+		return
+
+	# Entity page layout - use simpler thirds-based detection
+	# Top half: title, separator, description - no action
+	# Bottom half: action links - divide into thirds for Talk/Look/Leave
+
+	var content_height := float(VIEWPORT_HEIGHT)
+	var action_zone_start := content_height * 0.35  # Actions start around 35% from top
+
+	if vp_y < action_zone_start:
+		return  # Clicked on title/description, no action
+
+	# Divide remaining area into 4 zones (3 actions + buffer)
+	var action_zone_height := (content_height - action_zone_start) / 4.0
+	var action_index := int((vp_y - action_zone_start) / action_zone_height)
+
+	match action_index:
+		0:  # Talk
+			_on_entity_talk_pressed()
+		1:  # Look
+			_on_entity_examine_pressed()
+		2, 3:  # Leave (with tolerance)
+			go_back_to_room()
+
+
+## Handle clicks in the content area (for selecting entities)
+func _handle_content_click(vp_x: float, vp_y: float) -> void:
+	var room := GameState.current_room
+	if room == null:
+		return
+
+	# Content layout estimate:
+	# - Title: ~48px from top (font_size 26 + margins)
+	# - Description: variable height
+	# - NPCs section: starts after description
+	# - Items section: after NPCs
+
+	# For MVP, use simple vertical zones:
+	# Top third = title/description (no action)
+	# Middle third = NPCs
+	# Bottom third (above bar) = Items
+
+	var content_height := VIEWPORT_HEIGHT - BOTTOM_BAR_HEIGHT
+	var zone_height := content_height / 3.0
+
+	if vp_y < zone_height:
+		# Title/description zone - no action
+		return
+	elif vp_y < zone_height * 2:
+		# NPC zone - select first NPC if available
+		if room.npcs.size() > 0:
+			show_entity_details(room.npcs[0])
+	else:
+		# Item zone - select first item if available
+		if room.items.size() > 0:
+			show_entity_details(room.items[0])
+
+
+## Show entity details page with page flip animation
+func show_entity_details(entity: Variant) -> void:
+	if turn_tween and turn_tween.is_running():
+		return
+
+	current_entity = entity
+	pending_page = PageType.ENTITY
+	turn_page("right")
+
+
+## Display entity details on the page
+func display_entity(entity: Variant) -> void:
+	if entity == null:
+		label.text = ""
+		return
+
+	var text := ""
+
+	# Sepia ink colors
+	var title_color := "#2a1f14"
+	var body_color := "#362816"
+	var action_color := "#4a3828"
+	var separator_color := "#8a7a6a"
+
+	# Entity name as title
+	text += "[center][font_size=28][color=%s][b]%s[/b][/color][/font_size][/center]\n\n" % [title_color, entity.name]
+
+	# Decorative separator
+	text += "[color=%s][center]─────────────────[/center][/color]\n\n" % separator_color
+
+	# Entity description (use 'description' field for detailed view)
+	var desc: String = ""
+	if entity.get("description") and entity.description != "":
+		desc = entity.description
+	elif entity.get("long_desc") and entity.long_desc != "":
+		desc = entity.long_desc
+	else:
+		desc = entity.name
+	# Normalize newlines to spaces for prose flow
+	desc = desc.replace("\n", " ").replace("  ", " ")
+	text += "[color=%s]%s[/color]\n\n" % [body_color, desc]
+
+	# Action options - left aligned, underlined like prose links
+	text += "\n"
+	text += "[color=%s][u]Talk[/u][/color]\n\n" % action_color
+	text += "[color=%s][u]Look[/u][/color]\n\n" % action_color
+	text += "[color=%s][u]Leave[/u][/color]\n" % action_color
+
+	label.text = text
+
+	# Hide bottom bar on entity page
+	if bottom_bar:
+		bottom_bar.visible = false
+
+
+## Return to room view from entity details
+func go_back_to_room() -> void:
+	if turn_tween and turn_tween.is_running():
+		return
+
+	current_entity = null
+	pending_page = PageType.ROOM
+	turn_page("left")
 
 
 ## Display the menu page
@@ -568,7 +832,7 @@ func display_menu() -> void:
 	var hint_color := "#6a5a4a"
 
 	# Menu title
-	text += "[center][font_size=26][color=%s][b]Menu[/b][/color][/font_size][/center]\n\n" % title_color
+	text += "[center][font_size=28][color=%s][b]Menu[/b][/color][/font_size][/center]\n\n" % title_color
 
 	# Tab buttons (text-based)
 	text += "[color=%s]" % tab_color

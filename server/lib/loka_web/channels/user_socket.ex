@@ -28,8 +28,14 @@ defmodule LokaWeb.UserSocket do
     end
   end
 
-  def connect(_params, _socket, _connect_info) do
-    :error
+  # Allow guest connections in dev mode for testing
+  def connect(_params, socket, _connect_info) do
+    if Application.get_env(:loka, :allow_guest_websocket, false) do
+      # Create a guest player for testing
+      {:ok, assign(socket, :player, %{id: "guest-#{:rand.uniform(10000)}", name: "Guest"})}
+    else
+      :error
+    end
   end
 
   @impl true

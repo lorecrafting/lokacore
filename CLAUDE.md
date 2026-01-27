@@ -155,17 +155,42 @@ The `godot-client/` folder contains the mobile 3D "magic book" client built with
 ### Development Workflow
 
 ```bash
-# Open in Godot Editor
+# RECOMMENDED: Dev server with hot reload (fastest iteration)
 cd godot-client
+./dev.sh                      # Watches files, auto-rebuilds, refreshes browser
+
+# Alternative workflows:
+./build_web.sh --fast         # Quick build (skip import, debug mode) ~30s
+./build_web.sh                # Full build (import + release) ~45s
+./build_web.sh --fast --serve # Quick build and serve
+
+# Open in Godot Editor (for visual editing)
 open -a Godot project.godot   # macOS
-# Or: godot --path . --editor
 
 # Validate scripts (headless, catches errors)
 ./check.sh
-
-# Run from command line
-./check.sh --run
 ```
+
+### Build Speed Comparison
+
+| Command | Time | Use Case |
+|---------|------|----------|
+| `./dev.sh` | ~1s per change | Active development (file watcher) |
+| `./build_web.sh --fast` | ~30s | Manual rebuild, CI |
+| `./build_web.sh` | ~45s | Release builds, before commit |
+| Godot Editor + refresh | instant | Visual editing workflow |
+
+### Web Verification Loop (for Claude Code)
+
+When making Godot changes, use this loop for automated verification:
+
+1. **Make code changes** to `.gd` scripts or `.gdshader` files
+2. **Validate syntax**: `./check.sh` (catches script errors headlessly)
+3. **Build web export**: `./build_web.sh --fast` (creates `build/web/`)
+4. **Serve and verify**: `./verify_web.sh --open` or use browser automation
+5. **Iterate** if issues found
+
+This enables tight feedback loops where visual output can be verified programmatically via browser automation (when Claude in Chrome extension is connected) or manually.
 
 ### Key Files
 
@@ -217,6 +242,43 @@ label.append_text("[b]Room Title[/b]")
 viewport.add_child(label)
 # Apply viewport.get_texture() to 3D mesh material
 ```
+
+### Common Gotcha: SubViewport Click Detection on 3D Meshes
+
+Buttons inside a SubViewport rendered as a texture on a 3D mesh don't receive clicks automatically. Solution: raycast to the mesh, convert to UV, then to viewport coordinates:
+
+```gdscript
+func _handle_page_click(screen_pos: Vector2) -> void:
+    var camera := get_viewport().get_camera_3d()
+    var from := camera.project_ray_origin(screen_pos)
+    var dir := camera.project_ray_normal(screen_pos)
+
+    # Plane intersection at z=0
+    var t := -from.z / dir.z
+    var hit_point := from + dir * t
+
+    # Convert to UV (mesh centered at origin)
+    var uv_x := (hit_point.x / PAGE_WIDTH) + 0.5
+    var uv_y := (hit_point.y / PAGE_HEIGHT) + 0.5
+
+    # Convert to viewport (flip Y)
+    var vp_x := uv_x * VIEWPORT_WIDTH
+    var vp_y := (1.0 - uv_y) * VIEWPORT_HEIGHT
+```
+
+Use region-based detection (thirds) rather than pixel-precise for reliability. See `.claude/skills/godot-subviewport-3d-click-detection.md` for full pattern.
+
+### Common Gotcha: UV Orientation on Rotated Meshes
+
+When using SubViewport textures on a rotated PlaneMesh, text may appear mirrored or upside down. Fix by flipping UVs in the shader:
+
+```glsl
+// In fragment shader - flip UV.y for PlaneMesh rotated -90° on X
+vec2 corrected_uv = vec2(UV.x, 1.0 - UV.y);
+vec4 tex_color = texture(page_texture, corrected_uv);
+```
+
+See `.claude/skills/godot-planemesh-uv-fix.md` for detailed patterns.
 
 ### Validation After Changes
 
