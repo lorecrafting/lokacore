@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+		<title>$GODOT_PROJECT_NAME (DEBUG)</title>
+		<style>
+* {
+	box-sizing: border-box;
+}
+
+html, body {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	height: 100%;
+}
+
+body {
+	color: white;
+	background-color: #1a1a1a;
+	overflow: hidden;
+	touch-action: none;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	display: flex;
+	flex-direction: column;
+}
+
+/* Debug toolbar at top */
+#debug-toolbar {
+	background: linear-gradient(180deg, #2d2d2d 0%, #1f1f1f 100%);
+	border-bottom: 1px solid #444;
+	padding: 8px 16px;
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	flex-wrap: wrap;
+	z-index: 100;
+}
+
+#debug-toolbar .section-label {
+	color: #888;
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	margin-right: 4px;
+}
+
+#debug-toolbar .separator {
+	width: 1px;
+	height: 24px;
+	background: #444;
+	margin: 0 8px;
+}
+
+.debug-btn {
+	background: linear-gradient(180deg, #3d3d3d 0%, #2a2a2a 100%);
+	border: 1px solid #555;
+	border-radius: 4px;
+	color: #ddd;
+	padding: 6px 12px;
+	font-size: 12px;
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.debug-btn:hover {
+	background: linear-gradient(180deg, #4a4a4a 0%, #3a3a3a 100%);
+	border-color: #666;
+}
+
+.debug-btn:active {
+	background: linear-gradient(180deg, #2a2a2a 0%, #3d3d3d 100%);
+}
+
+.debug-btn.effect-burn { border-left: 3px solid #ff6b35; }
+.debug-btn.effect-ice { border-left: 3px solid #4da6ff; }
+.debug-btn.effect-glow { border-left: 3px solid #ffd700; }
+.debug-btn.effect-fade { border-left: 3px solid #9370db; }
+.debug-btn.effect-clear { border-left: 3px solid #666; }
+.debug-btn.action-curl { border-left: 3px solid #50c878; }
+.debug-btn.action-flip { border-left: 3px solid #87ceeb; }
+
+/* Canvas container */
+#canvas-container {
+	flex: 1;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: black;
+	overflow: hidden;
+	position: relative;
+}
+
+#canvas {
+	display: block;
+	max-width: 100%;
+	max-height: 100%;
+}
+
+#canvas:focus {
+	outline: none;
+}
+
+/* Status overlay */
+#status, #status-splash, #status-progress {
+	position: absolute;
+	left: 0;
+	right: 0;
+}
+
+#status, #status-splash {
+	top: 0;
+	bottom: 0;
+}
+
+#status {
+	background-color: #242424;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	visibility: hidden;
+}
+
+#status-splash {
+	max-height: 100%;
+	max-width: 100%;
+	margin: auto;
+}
+
+#status-splash.show-image--false { display: none; }
+#status-splash.fullsize--true { height: 100%; width: 100%; object-fit: contain; }
+#status-splash.use-filter--false { image-rendering: pixelated; }
+
+#status-progress, #status-notice { display: none; }
+
+#status-progress {
+	bottom: 10%;
+	width: 50%;
+	margin: 0 auto;
+}
+
+#status-notice {
+	background-color: #5b3943;
+	border-radius: 0.5rem;
+	border: 1px solid #9b3943;
+	color: #e0e0e0;
+	font-family: 'Noto Sans', 'Droid Sans', Arial, sans-serif;
+	line-height: 1.3;
+	margin: 0 2rem;
+	overflow: hidden;
+	padding: 1rem;
+	text-align: center;
+	z-index: 1;
+}
+
+/* Keyboard shortcuts hint */
+#shortcuts-hint {
+	position: absolute;
+	bottom: 10px;
+	left: 10px;
+	background: rgba(0,0,0,0.7);
+	padding: 8px 12px;
+	border-radius: 4px;
+	font-size: 11px;
+	color: #888;
+	pointer-events: none;
+}
+		</style>
+		$GODOT_HEAD_INCLUDE
+	</head>
+	<body>
+		<!-- Debug Toolbar -->
+		<div id="debug-toolbar">
+			<span class="section-label">Effects:</span>
+			<button class="debug-btn effect-burn" onclick="triggerEffect('burn')">Burn</button>
+			<button class="debug-btn effect-ice" onclick="triggerEffect('ice')">Ice</button>
+			<button class="debug-btn effect-glow" onclick="triggerEffect('glow')">Glow</button>
+			<button class="debug-btn effect-fade" onclick="triggerEffect('fade')">Fade</button>
+			<button class="debug-btn effect-clear" onclick="triggerEffect('clear')">Clear</button>
+
+			<div class="separator"></div>
+
+			<span class="section-label">Page:</span>
+			<button class="debug-btn action-curl" onclick="triggerCurl()">Test Curl</button>
+			<button class="debug-btn action-flip" onclick="triggerFlip('left')">Flip Left</button>
+			<button class="debug-btn action-flip" onclick="triggerFlip('right')">Flip Right</button>
+		</div>
+
+		<!-- Canvas Container -->
+		<div id="canvas-container">
+			<canvas id="canvas">
+				Your browser does not support the canvas tag.
+			</canvas>
+
+			<noscript>
+				Your browser does not support JavaScript.
+			</noscript>
+
+			<div id="status">
+				<img id="status-splash" class="$GODOT_SPLASH_CLASSES" src="$GODOT_SPLASH" alt="">
+				<progress id="status-progress"></progress>
+				<div id="status-notice"></div>
+			</div>
+		</div>
+
+		<script src="$GODOT_URL"></script>
+		<script>
+const GODOT_CONFIG = $GODOT_CONFIG;
+const GODOT_THREADS_ENABLED = $GODOT_THREADS_ENABLED;
+const engine = new Engine(GODOT_CONFIG);
+
+// Debug functions that will be connected to Godot
+window.triggerEffect = function(effectName) {
+	console.log('[Debug] Triggering effect:', effectName);
+	if (window.godotTriggerEffect) {
+		window.godotTriggerEffect(effectName);
+	} else {
+		console.warn('Godot effect callback not registered yet');
+	}
+};
+
+window.triggerCurl = function() {
+	console.log('[Debug] Triggering curl');
+	if (window.godotTriggerCurl) {
+		window.godotTriggerCurl();
+	} else {
+		console.warn('Godot curl callback not registered yet');
+	}
+};
+
+window.triggerFlip = function(direction) {
+	console.log('[Debug] Triggering flip:', direction);
+	if (window.godotTriggerFlip) {
+		window.godotTriggerFlip(direction);
+	} else {
+		console.warn('Godot flip callback not registered yet');
+	}
+};
+
+(function () {
+	const statusOverlay = document.getElementById('status');
+	const statusProgress = document.getElementById('status-progress');
+	const statusNotice = document.getElementById('status-notice');
+
+	let initializing = true;
+	let statusMode = '';
+
+	function setStatusMode(mode) {
+		if (statusMode === mode || !initializing) {
+			return;
+		}
+		if (mode === 'hidden') {
+			statusOverlay.remove();
+			initializing = false;
+			return;
+		}
+		statusOverlay.style.visibility = 'visible';
+		statusProgress.style.display = mode === 'progress' ? 'block' : 'none';
+		statusNotice.style.display = mode === 'notice' ? 'block' : 'none';
+		statusMode = mode;
+	}
+
+	function setStatusNotice(text) {
+		while (statusNotice.lastChild) {
+			statusNotice.removeChild(statusNotice.lastChild);
+		}
+		const lines = text.split('\n');
+		lines.forEach((line) => {
+			statusNotice.appendChild(document.createTextNode(line));
+			statusNotice.appendChild(document.createElement('br'));
+		});
+	}
+
+	function displayFailureNotice(err) {
+		console.error(err);
+		if (err instanceof Error) {
+			setStatusNotice(err.message);
+		} else if (typeof err === 'string') {
+			setStatusNotice(err);
+		} else {
+			setStatusNotice('An unknown error occurred.');
+		}
+		setStatusMode('notice');
+		initializing = false;
+	}
+
+	const missing = Engine.getMissingFeatures({
+		threads: GODOT_THREADS_ENABLED,
+	});
+
+	if (missing.length !== 0) {
+		if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] && 'serviceWorker' in navigator) {
+			let serviceWorkerRegistrationPromise;
+			try {
+				serviceWorkerRegistrationPromise = navigator.serviceWorker.getRegistration();
+			} catch (err) {
+				serviceWorkerRegistrationPromise = Promise.reject(new Error('Service worker registration failed.'));
+			}
+			Promise.race([
+				serviceWorkerRegistrationPromise.then((registration) => {
+					if (registration != null) {
+						return Promise.reject(new Error('Service worker already exists.'));
+					}
+					return registration;
+				}).then(() => engine.installServiceWorker()),
+				new Promise((resolve) => {
+					setTimeout(() => resolve(), 2000);
+				}),
+			]).then(() => {
+				window.location.reload();
+			}).catch((err) => {
+				console.error('Error while registering service worker:', err);
+			});
+		} else {
+			const missingMsg = 'Error\nThe following features required to run Godot projects on the Web are missing:\n';
+			displayFailureNotice(missingMsg + missing.join('\n'));
+		}
+	} else {
+		setStatusMode('progress');
+		engine.startGame({
+			'onProgress': function (current, total) {
+				if (current > 0 && total > 0) {
+					statusProgress.value = current;
+					statusProgress.max = total;
+				} else {
+					statusProgress.removeAttribute('value');
+					statusProgress.removeAttribute('max');
+				}
+			},
+		}).then(() => {
+			setStatusMode('hidden');
+		}, displayFailureNotice);
+	}
+}());
+		</script>
+	</body>
+</html>
