@@ -132,6 +132,12 @@ func _show_login_screen() -> void:
 	book_page.visible = false
 	error_label.text = ""
 	status_label.text = ""
+
+	# In debug mode, pre-fill with a unique name for quick dev login
+	if OS.is_debug_build() and name_input.text.is_empty():
+		var suffix := str(Time.get_unix_time_from_system()).right(4)
+		name_input.text = "dev" + suffix
+
 	name_input.grab_focus()
 
 
@@ -162,9 +168,17 @@ func _do_login() -> void:
 		return
 
 	var char_name := name_input.text.strip_edges()
+
+	# In debug mode, auto-generate a unique name if empty
 	if char_name.is_empty():
-		error_label.text = "Please enter your name"
-		return
+		if OS.is_debug_build():
+			var suffix := str(Time.get_unix_time_from_system()).right(6)
+			char_name = "dev" + suffix
+			name_input.text = char_name
+			print("[Main] Dev mode: auto-generated name '%s'" % char_name)
+		else:
+			error_label.text = "Please enter your name"
+			return
 
 	is_logging_in = true
 	login_button.disabled = true

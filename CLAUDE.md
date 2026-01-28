@@ -198,9 +198,10 @@ This enables tight feedback loops where visual output can be verified programmat
 |------|---------|
 | `scripts/game_state.gd` | Autoload singleton for room state, navigation |
 | `scripts/mock_world.gd` | Autoload singleton with test world data |
-| `scripts/book_page.gd` | 3D page mesh, SubViewport text, curl animation |
-| `scripts/main.gd` | Camera setup, input routing |
-| `shaders/page_curl.gdshader` | GPU page curl shader (for production) |
+| `scripts/book_page.gd` | 3D page mesh, dual SubViewport text, curl animation, effects |
+| `scripts/main.gd` | Camera setup, input routing, login flow |
+| `shaders/page_curl.gdshader` | GPU page curl + AAA text effects (burn, ice, glow, fade) |
+| `export_templates/debug_shell.html` | Web debug toolbar with effect buttons |
 
 ### Architecture
 
@@ -267,6 +268,42 @@ func _handle_page_click(screen_pos: Vector2) -> void:
 ```
 
 Use region-based detection (thirds) rather than pixel-precise for reliability. See `.claude/skills/godot-subviewport-3d-click-detection.md` for full pattern.
+
+### Common Gotcha: WebGL Horizontal Banding in gl_compatibility Mode
+
+When using 3D shaders with the `gl_compatibility` renderer (required for WebGL), you may see horizontal banding/lines even with solid color output. This is caused by PBR lighting calculations. Fix by adding `unshaded` to render_mode:
+
+```glsl
+// BEFORE (causes banding)
+shader_type spatial;
+render_mode cull_disabled;
+
+// AFTER (no banding)
+shader_type spatial;
+render_mode cull_disabled, unshaded;
+```
+
+See `.claude/skills/godot-webgl-horizontal-banding-fix.md` for full debugging guide.
+
+### Common Gotcha: JavaScript Callbacks Garbage Collection (Web Export)
+
+When using `JavaScriptBridge.create_callback()` for HTML ↔ Godot communication, callbacks get garbage collected if not stored in member variables:
+
+```gdscript
+# ❌ WRONG - callback gets garbage collected
+func _setup_callbacks() -> void:
+    var callback := JavaScriptBridge.create_callback(_handler)
+    JavaScriptBridge.get_interface("window").myFunc = callback
+
+# ✅ CORRECT - store in member variable
+var _js_callback: JavaScriptObject
+
+func _setup_callbacks() -> void:
+    _js_callback = JavaScriptBridge.create_callback(_handler)
+    JavaScriptBridge.get_interface("window").myFunc = _js_callback
+```
+
+See `.claude/skills/godot-javascript-bridge-callbacks.md` for full pattern.
 
 ### Common Gotcha: UV Orientation on Rotated Meshes
 

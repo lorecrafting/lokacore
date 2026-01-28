@@ -176,8 +176,22 @@ defmodule Loka.Game.Actions do
         {:error, "You don't see that here."}
 
       entity ->
+        # DEBUG: Trace entity components for action resolution
+        components = Map.get(entity, :components) || %{}
+
+        IO.puts(
+          "[click_entity] Entity: #{inspect(entity.id)} / #{inspect(Map.get(entity, :key))}"
+        )
+
+        IO.puts("[click_entity] Components keys: #{inspect(Map.keys(components))}")
+
+        IO.puts(
+          "[click_entity] Has dialogue_tree? #{inspect(Map.has_key?(components, :dialogue_tree) or Map.has_key?(components, "dialogue_tree"))}"
+        )
+
         # Serialize entity with resolved actions based on player state
         entity_context = serialize_entity_context(entity, ctx.game_state, ctx.room)
+        IO.puts("[click_entity] Resolved actions: #{inspect(entity_context[:actions])}")
         result = Result.new(events: [{:entity_context, entity_context}])
         {:ok, result}
     end

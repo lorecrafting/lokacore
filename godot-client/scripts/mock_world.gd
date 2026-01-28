@@ -4,13 +4,15 @@ extends Node
 
 ## NPC data structure
 class NPC:
-	var key: String
+	var id: String               # Entity UUID from database (for server lookups)
+	var key: String              # Prototype key (e.g., "novice_pema")
 	var name: String
 	var primary_keyword: String  # Clickable keyword shown underlined in room
 	var long_desc: String        # One-liner shown in room (should contain primary_keyword)
 	var description: String      # Full description shown on entity details page
 
-	func _init(p_key: String, p_name: String, p_keyword: String, p_long_desc: String = "", p_description: String = "") -> void:
+	func _init(p_id: String, p_key: String, p_name: String, p_keyword: String, p_long_desc: String = "", p_description: String = "") -> void:
+		id = p_id
 		key = p_key
 		name = p_name
 		primary_keyword = p_keyword
@@ -20,13 +22,15 @@ class NPC:
 
 ## Item data structure
 class Item:
-	var key: String
+	var id: String               # Entity UUID from database (for server lookups)
+	var key: String              # Prototype key
 	var name: String
 	var primary_keyword: String  # Clickable keyword shown underlined in room
 	var long_desc: String        # One-liner shown in room (should contain primary_keyword)
 	var description: String      # Full description shown on entity details page
 
-	func _init(p_key: String, p_name: String, p_keyword: String, p_long_desc: String = "", p_description: String = "") -> void:
+	func _init(p_id: String, p_key: String, p_name: String, p_keyword: String, p_long_desc: String = "", p_description: String = "") -> void:
+		id = p_id
 		key = p_key
 		name = p_name
 		primary_keyword = p_keyword
@@ -85,8 +89,8 @@ func _setup_monastery_rooms() -> void:
 		"Monastery Gate [OFFLINE]",
 		"[OFFLINE MODE] Ancient stone pillars frame a weathered wooden gate. Prayer flags flutter in the mountain breeze, their faded colors catching the morning light. The path ahead leads into a peaceful courtyard, while misty peaks rise in the distance.",
 		{"north": "courtyard", "east": "garden_path"},
-		[NPC.new("gate_guard", "Silent Guardian", "monk", "A weathered monk stands watch, his eyes reflecting years of vigilance.", "The Silent Guardian has spent decades at this gate, watching the seasons change and pilgrims come and go. His eyes hold a quiet wisdom, and though he rarely speaks, his presence alone offers both welcome and warning.")],
-		[Item.new("prayer_flags", "Faded Prayer Flags", "flags", "Colorful prayer flags flutter in the breeze.", "These prayer flags have weathered countless storms, their colors faded but their purpose undiminished. Each flutter sends blessings into the mountain wind.")]
+		[NPC.new("gate_guard", "gate_guard", "Silent Guardian", "monk", "A weathered monk stands watch, his eyes reflecting years of vigilance.", "The Silent Guardian has spent decades at this gate, watching the seasons change and pilgrims come and go. His eyes hold a quiet wisdom, and though he rarely speaks, his presence alone offers both welcome and warning.")],
+		[Item.new("prayer_flags", "prayer_flags", "Faded Prayer Flags", "flags", "Colorful prayer flags flutter in the breeze.", "These prayer flags have weathered countless storms, their colors faded but their purpose undiminished. Each flutter sends blessings into the mountain wind.")]
 	)
 
 	# Courtyard - Central hub
@@ -96,10 +100,10 @@ func _setup_monastery_rooms() -> void:
 		"A serene open space surrounded by aged wooden buildings with curved eaves. A small fountain bubbles at the center, its water crystal clear. Monks in saffron robes pass quietly, some carrying scrolls, others deep in meditation.",
 		{"south": "monastery_gate", "north": "temple_entrance", "east": "meditation_hall", "west": "dormitory"},
 		[
-			NPC.new("elder_monk", "Elder Thubten", "elder", "An ancient elder with kind eyes sits on a stone bench.", "Elder Thubten is one of the oldest monks in the monastery. His wrinkled face tells stories of a lifetime spent in contemplation and service. Despite his age, his eyes sparkle with gentle humor and profound wisdom."),
-			NPC.new("young_novice", "Novice Pema", "novice", "A young novice sweeps the courtyard with careful attention.", "Novice Pema arrived at the monastery just three seasons ago. Though young, there is a seriousness about her that belies her years. She attends to her duties with unwavering focus.")
+			NPC.new("elder_monk", "elder_monk", "Elder Thubten", "elder", "An ancient elder with kind eyes sits on a stone bench.", "Elder Thubten is one of the oldest monks in the monastery. His wrinkled face tells stories of a lifetime spent in contemplation and service. Despite his age, his eyes sparkle with gentle humor and profound wisdom."),
+			NPC.new("young_novice", "young_novice", "Novice Pema", "novice", "A young novice sweeps the courtyard with careful attention.", "Novice Pema arrived at the monastery just three seasons ago. Though young, there is a seriousness about her that belies her years. She attends to her duties with unwavering focus.")
 		],
-		[Item.new("stone_fountain", "Stone Fountain", "fountain", "A stone fountain bubbles gently at the center.", "This ancient fountain has stood at the heart of the courtyard for centuries. Its crystal-clear water is said to have healing properties, though the monks attribute this to the serenity it inspires.")]
+		[Item.new("stone_fountain", "stone_fountain", "Stone Fountain", "fountain", "A stone fountain bubbles gently at the center.", "This ancient fountain has stood at the heart of the courtyard for centuries. Its crystal-clear water is said to have healing properties, though the monks attribute this to the serenity it inspires.")]
 	)
 
 	# Temple Entrance
@@ -108,8 +112,8 @@ func _setup_monastery_rooms() -> void:
 		"Temple Entrance",
 		"Massive bronze doors stand open, revealing flickering candlelight within. Incense smoke curls through the air, carrying the scent of sandalwood. Stone guardians flank the entrance, their weathered faces watching all who pass.",
 		{"south": "courtyard", "north": "inner_sanctum"},
-		[NPC.new("incense_keeper", "Incense Keeper", "keeper", "A serene keeper tends the burning incense with quiet devotion.", "The Incense Keeper moves with practiced grace, selecting each stick of incense with care. His robes carry the fragrance of sandalwood and cedar, a scent that has become part of him over years of service.")],
-		[Item.new("bronze_doors", "Bronze Temple Doors", "doors", "Ancient bronze doors are covered in sacred inscriptions.", "These massive bronze doors have stood for over five hundred years. Their surface is covered in intricate inscriptions—prayers and mantras worn smooth by countless reverent touches.")]
+		[NPC.new("incense_keeper", "incense_keeper", "Incense Keeper", "keeper", "A serene keeper tends the burning incense with quiet devotion.", "The Incense Keeper moves with practiced grace, selecting each stick of incense with care. His robes carry the fragrance of sandalwood and cedar, a scent that has become part of him over years of service.")],
+		[Item.new("bronze_doors", "bronze_doors", "Bronze Temple Doors", "doors", "Ancient bronze doors are covered in sacred inscriptions.", "These massive bronze doors have stood for over five hundred years. Their surface is covered in intricate inscriptions—prayers and mantras worn smooth by countless reverent touches.")]
 	)
 
 	# Inner Sanctum
@@ -118,10 +122,10 @@ func _setup_monastery_rooms() -> void:
 		"Inner Sanctum",
 		"Golden light filters through high windows, illuminating a massive bronze statue of the Awakened One. Offerings of flowers and fruit rest at its base. The air feels thick with accumulated prayers and centuries of devotion.",
 		{"south": "temple_entrance"},
-		[NPC.new("head_abbot", "Abbot Dorje", "abbot", "The abbot meditates before the great statue, unmoved by your presence.", "Abbot Dorje has led this monastery for thirty years. His stillness is legendary—it is said he once sat in meditation for seven days without moving. His guidance is sought by monks and travelers alike.")],
+		[NPC.new("head_abbot", "head_abbot", "Abbot Dorje", "abbot", "The abbot meditates before the great statue, unmoved by your presence.", "Abbot Dorje has led this monastery for thirty years. His stillness is legendary—it is said he once sat in meditation for seven days without moving. His guidance is sought by monks and travelers alike.")],
 		[
-			Item.new("bronze_statue", "Bronze Statue", "statue", "A towering bronze statue of the Awakened One dominates the room.", "This magnificent bronze statue depicts the Awakened One in deep meditation. It stands three times the height of a person, its serene expression unchanged for centuries."),
-			Item.new("offering_bowl", "Offering Bowl", "bowl", "An offering bowl filled with fruit and flowers rests at the base.", "Fresh offerings fill this ornate bowl—ripe fruits and fragrant flowers brought by devotees. The bowl itself is ancient silver, polished by generations of hands.")
+			Item.new("bronze_statue", "bronze_statue", "Bronze Statue", "statue", "A towering bronze statue of the Awakened One dominates the room.", "This magnificent bronze statue depicts the Awakened One in deep meditation. It stands three times the height of a person, its serene expression unchanged for centuries."),
+			Item.new("offering_bowl", "offering_bowl", "Offering Bowl", "bowl", "An offering bowl filled with fruit and flowers rests at the base.", "Fresh offerings fill this ornate bowl—ripe fruits and fragrant flowers brought by devotees. The bowl itself is ancient silver, polished by generations of hands.")
 		]
 	)
 
@@ -133,8 +137,8 @@ func _setup_monastery_rooms() -> void:
 		{"west": "courtyard", "north": "library"},
 		[],
 		[
-			Item.new("meditation_cushion", "Meditation Cushion", "cushion", "A well-worn cushion sits ready for meditation.", "This cushion has supported countless hours of meditation. Its fabric is worn soft, molded by years of use into a perfect seat for contemplation."),
-			Item.new("calligraphy_scroll", "Calligraphy Scroll", "scroll", "A calligraphy scroll hangs on the wall, depicting a mountain.", "A single mountain rises from mist in bold brushstrokes. Below it, three characters spell out a teaching: 'Be like the mountain—still, patient, enduring.'")
+			Item.new("meditation_cushion", "meditation_cushion", "Meditation Cushion", "cushion", "A well-worn cushion sits ready for meditation.", "This cushion has supported countless hours of meditation. Its fabric is worn soft, molded by years of use into a perfect seat for contemplation."),
+			Item.new("calligraphy_scroll", "calligraphy_scroll", "Calligraphy Scroll", "scroll", "A calligraphy scroll hangs on the wall, depicting a mountain.", "A single mountain rises from mist in bold brushstrokes. Below it, three characters spell out a teaching: 'Be like the mountain—still, patient, enduring.'")
 		]
 	)
 
@@ -144,10 +148,10 @@ func _setup_monastery_rooms() -> void:
 		"Monastery Library",
 		"Towering shelves hold countless scrolls and bound texts, their spines cracked with age. Dust motes dance in shafts of light from narrow windows. A elderly monk sits at a low desk, carefully copying an ancient manuscript.",
 		{"south": "meditation_hall"},
-		[NPC.new("scribe_monk", "Scribe Lobsang", "scribe", "An elderly scribe peers at you through thick spectacles.", "Scribe Lobsang has copied more texts than anyone can count. His fingers are permanently stained with ink, and his eyesight grows dim, but his dedication never wavers. He is a living connection to generations of knowledge.")],
+		[NPC.new("scribe_monk", "scribe_monk", "Scribe Lobsang", "scribe", "An elderly scribe peers at you through thick spectacles.", "Scribe Lobsang has copied more texts than anyone can count. His fingers are permanently stained with ink, and his eyesight grows dim, but his dedication never wavers. He is a living connection to generations of knowledge.")],
 		[
-			Item.new("ancient_scroll", "Ancient Scroll", "scroll", "A yellowed scroll with faded text lies on a shelf.", "This scroll dates back centuries, its edges crumbling despite careful preservation. The text speaks of meditation techniques long forgotten by most practitioners."),
-			Item.new("writing_desk", "Writing Desk", "desk", "A writing desk is covered in brushes, ink, and parchment.", "An orderly chaos covers this desk—brushes of various sizes, ink stones worn smooth, and stacks of parchment awaiting the scribe's careful hand.")
+			Item.new("ancient_scroll", "ancient_scroll", "Ancient Scroll", "scroll", "A yellowed scroll with faded text lies on a shelf.", "This scroll dates back centuries, its edges crumbling despite careful preservation. The text speaks of meditation techniques long forgotten by most practitioners."),
+			Item.new("writing_desk", "writing_desk", "Writing Desk", "desk", "A writing desk is covered in brushes, ink, and parchment.", "An orderly chaos covers this desk—brushes of various sizes, ink stones worn smooth, and stacks of parchment awaiting the scribe's careful hand.")
 		]
 	)
 

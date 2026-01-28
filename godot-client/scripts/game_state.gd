@@ -18,6 +18,9 @@ signal server_disconnected
 ## Emitted when a game event is received (chat, combat feedback, etc.)
 signal game_event(event: Dictionary)
 
+## Emitted when entity context is received (after clicking an entity)
+signal entity_context_received(entity: Dictionary)
+
 ## Current room the player is in
 var current_room: MockWorld.Room = null
 
@@ -51,6 +54,7 @@ func _connect_phoenix_signals() -> void:
 	_phoenix.game_state_received.connect(_on_server_game_state)
 	_phoenix.room_updated.connect(_on_server_room_update)
 	_phoenix.event_received.connect(_on_server_event)
+	_phoenix.entity_context_received.connect(_on_entity_context)
 
 
 func _init_offline_mode() -> void:
@@ -221,6 +225,11 @@ func _on_server_event(event: Dictionary) -> void:
 	game_event.emit(event)
 
 
+func _on_entity_context(data: Dictionary) -> void:
+	print("[GameState] Received entity context: %s" % data.get("name", "unknown"))
+	entity_context_received.emit(data)
+
+
 # =============================================================================
 # Data Conversion
 # =============================================================================
@@ -265,7 +274,8 @@ func _convert_server_room(room_data: Dictionary) -> MockWorld.Room:
 
 			if entity_type == "npc":
 				var npc := MockWorld.NPC.new(
-					entity.get("key", entity.get("id", "")),
+					entity.get("id", ""),               # Entity UUID for server lookups
+					entity.get("key", ""),              # Prototype key
 					entity.get("short_name", entity.get("name", "Someone")),
 					entity.get("primary_keyword", ""),  # keyword for underlining
 					entity.get("long_desc", ""),        # one-liner for room display
@@ -274,7 +284,8 @@ func _convert_server_room(room_data: Dictionary) -> MockWorld.Room:
 				npcs.append(npc)
 			elif entity_type == "item":
 				var item := MockWorld.Item.new(
-					entity.get("key", entity.get("id", "")),
+					entity.get("id", ""),               # Entity UUID for server lookups
+					entity.get("key", ""),              # Prototype key
 					entity.get("short_name", entity.get("name", "Something")),
 					entity.get("primary_keyword", ""),  # keyword for underlining
 					entity.get("long_desc", ""),        # one-liner for room display
@@ -287,7 +298,8 @@ func _convert_server_room(room_data: Dictionary) -> MockWorld.Room:
 	for item_data in items_data:
 		if item_data is Dictionary:
 			var item := MockWorld.Item.new(
-				item_data.get("key", item_data.get("id", "")),
+				item_data.get("id", ""),               # Entity UUID for server lookups
+				item_data.get("key", ""),              # Prototype key
 				item_data.get("short_name", item_data.get("name", "Something")),
 				item_data.get("primary_keyword", ""),
 				item_data.get("long_desc", ""),

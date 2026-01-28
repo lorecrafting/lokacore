@@ -166,6 +166,18 @@ defmodule LokaWeb.GameChannel do
 
               {:error, %{reason: "character_not_created", detail: "no_name"}}
 
+            {:error, :name_taken} ->
+              Logger.warning(
+                "Character creation failed: name already taken (player_id=#{player.id})"
+              )
+
+              {:error,
+               %{
+                 reason: "character_not_created",
+                 detail: "name_taken",
+                 message: "That character name is already taken. Please choose a different name."
+               }}
+
             {:error, %Ecto.Changeset{} = changeset} ->
               errors = Ecto.Changeset.traverse_errors(changeset, fn {msg, _} -> msg end)
 
@@ -197,20 +209,99 @@ defmodule LokaWeb.GameChannel do
   end
 
   # Auto-create a character for mobile guests who have a name but no character
+  # In dev mode: directly set character name (skip validation for quick testing)
+  # In prod mode: use proper validation
   defp auto_create_character_if_guest(player, game_state) do
     if player.name && player.name != "" do
-      # Use player's name as character name, with default gender and background
-      attrs = %{
-        character_name: sanitize_character_name(player.name),
-        gender: "they/them",
-        background: "pilgrim"
-      }
+      character_name = sanitize_character_name(player.name)
 
-      changeset = PlayerGameState.character_creation_changeset(game_state, attrs)
-      Loka.Repo.update(changeset)
+      if Application.get_env(:loka, :env) == :dev do
+        # DEV MODE: Directly update character_name, bypassing uniqueness check
+        # This allows quick dev testing without worrying about name conflicts
+        dev_create_character(game_state, character_name)
+      else
+        # PROD MODE: Use proper validation
+        prod_create_character(game_state, character_name)
+      end
     else
       {:error, :no_name}
     end
+  end
+
+  # Dev mode: directly set character, find unique name if needed
+  defp dev_create_character(game_state, base_name) do
+    # Try the base name first, then append numbers if taken
+    name = find_available_dev_name(base_name, 0)
+
+    # Direct update bypassing some validation for dev convenience
+    case game_state
+         |> Ecto.Changeset.change(%{
+           character_name: name,
+           gender: "they/them",
+           background: "pilgrim"
+         })
+         |> Loka.Repo.update() do
+      {:ok, state} ->
+        Logger.info("Dev mode: Created character '#{name}' for player #{game_state.player_id}")
+        {:ok, state}
+
+      {:error, changeset} ->
+        {:error, changeset}
+    end
+  end
+
+  # Find an available name by appending numbers
+  defp find_available_dev_name(base_name, attempt) when attempt > 99 do
+    # Give up after 99 attempts
+    base_name <> Integer.to_string(:rand.uniform(9999))
+  end
+
+  defp find_available_dev_name(base_name, attempt) do
+    import Ecto.Query
+
+    name = if attempt == 0, do: base_name, else: "#{base_name}#{attempt}"
+
+    exists? =
+      Loka.Repo.exists?(
+        from g in PlayerGameState,
+          where: fragment("lower(?)", g.character_name) == ^String.downcase(name)
+      )
+
+    if exists? do
+      find_available_dev_name(base_name, attempt + 1)
+    else
+      name
+    end
+  end
+
+  # Prod mode: proper validation with clear error messages
+  defp prod_create_character(game_state, character_name) do
+    attrs = %{
+      character_name: character_name,
+      gender: "they/them",
+      background: "pilgrim"
+    }
+
+    changeset = PlayerGameState.character_creation_changeset(game_state, attrs)
+
+    case Loka.Repo.update(changeset) do
+      {:ok, state} ->
+        {:ok, state}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        if name_taken_error?(changeset) do
+          {:error, :name_taken}
+        else
+          {:error, changeset}
+        end
+    end
+  end
+
+  defp name_taken_error?(changeset) do
+    Enum.any?(changeset.errors, fn
+      {:character_name, {msg, _}} -> String.contains?(msg, "taken")
+      _ -> false
+    end)
   end
 
   # Sanitize name to only allow letters (character name validation)

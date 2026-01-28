@@ -18,6 +18,7 @@ signal combat_ended(data: Dictionary)
 signal dialogue_started(data: Dictionary)
 signal dialogue_updated(data: Dictionary)
 signal dialogue_ended
+signal entity_context_received(data: Dictionary)
 
 # Phoenix protocol constants
 const HEARTBEAT_INTERVAL := 30.0
@@ -180,8 +181,12 @@ func _get_server_url() -> String:
 	if OS.has_environment("LOKA_SERVER_URL"):
 		return OS.get_environment("LOKA_SERVER_URL")
 
-	# Development: localhost
+	# Development builds
 	if OS.is_debug_build():
+		# Mobile devices need Tailscale IP to reach dev server
+		if OS.has_feature("mobile") or OS.has_feature("ios") or OS.has_feature("android"):
+			return "ws://100.69.21.60:4000/socket/websocket"
+		# Desktop/web can use localhost
 		return "ws://localhost:4000/socket/websocket"
 
 	# Production
@@ -371,6 +376,12 @@ func _handle_game_event(event: String, payload: Dictionary) -> void:
 
 		"dialogue_end":
 			dialogue_ended.emit()
+
+		"entity_context":
+			# Server sends {"entity": {...}}, unwrap it
+			var entity_data: Dictionary = payload.get("entity", payload)
+			print("[Phoenix] Received entity_context: %s" % entity_data.get("name", "unknown"))
+			entity_context_received.emit(entity_data)
 
 		_:
 			# Log unhandled events in debug mode

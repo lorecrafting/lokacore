@@ -158,8 +158,12 @@ func _get_api_url() -> String:
 	if OS.has_environment("LOKA_API_URL"):
 		return OS.get_environment("LOKA_API_URL")
 
-	# Development: localhost
+	# Development builds
 	if OS.is_debug_build():
+		# Mobile devices need Tailscale IP to reach dev server
+		if OS.has_feature("mobile") or OS.has_feature("ios") or OS.has_feature("android"):
+			return "http://100.69.21.60:4000/api/v1"
+		# Desktop/web can use localhost
 		return "http://localhost:4000/api/v1"
 
 	# Production
