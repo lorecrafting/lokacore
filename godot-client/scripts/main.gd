@@ -50,8 +50,46 @@ func _ready() -> void:
 
 
 func _setup_camera() -> void:
-	# Very subtle overhead angle to show 3D page curl depth
-	camera.position = Vector3(0, 0.15, 3)
+	# Position camera so page fills the viewport
+	_adjust_camera_for_viewport()
+	get_tree().root.size_changed.connect(_adjust_camera_for_viewport)
+
+
+func _adjust_camera_for_viewport() -> void:
+	var viewport_size := get_viewport().get_visible_rect().size
+	var viewport_aspect := viewport_size.x / viewport_size.y
+
+	# Page dimensions from BookPage
+	var page_width := 1.8
+	var page_height := 3.9
+	var page_aspect := page_width / page_height
+
+	# Calculate camera distance to fill viewport
+	# Using vertical FOV (default 75 degrees)
+	var fov_rad := deg_to_rad(camera.fov)
+	var half_fov := fov_rad / 2.0
+
+	# Distance to fit height
+	var dist_for_height := (page_height / 2.0) / tan(half_fov)
+
+	# Distance to fit width (accounting for aspect ratio)
+	var horizontal_fov := 2.0 * atan(tan(half_fov) * viewport_aspect)
+	var dist_for_width := (page_width / 2.0) / tan(horizontal_fov / 2.0)
+
+	# Use the larger distance (ensures page fits entirely)
+	# But we want to FILL the screen, so use the smaller one and let edges be cut
+	var camera_dist: float
+	if viewport_aspect > page_aspect:
+		# Viewport is wider than page - fit to height
+		camera_dist = dist_for_height
+	else:
+		# Viewport is taller than page - fit to width
+		camera_dist = dist_for_width
+
+	# Small margin (5%) so page doesn't touch edges
+	camera_dist *= 1.05
+
+	camera.position = Vector3(0, 0, camera_dist)
 	camera.look_at(Vector3.ZERO)
 
 

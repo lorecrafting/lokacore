@@ -247,6 +247,10 @@ void fragment() {
 	page.label.meta_clicked.connect(_on_label_meta_clicked)
 	page.text_container.add_child(page.label)
 
+	# Hide scrollbar but keep scroll functionality (touch/mousewheel)
+	var scrollbar := page.label.get_v_scroll_bar()
+	scrollbar.modulate = Color(1, 1, 1, 0)  # Invisible but functional
+
 	# === MESH ===
 	page.mesh_instance = MeshInstance3D.new()
 	var plane := PlaneMesh.new()
@@ -462,19 +466,64 @@ func _on_js_trigger_flip(args: Array) -> void:
 # Input Handling
 # =============================================================================
 
+## Track drag state for scroll
+var _drag_start_pos: Vector2 = Vector2.ZERO
+var _is_dragging: bool = false
+var _drag_start_scroll: int = 0
+
 func _input(event: InputEvent) -> void:
 	if not visible:
 		return
 
-	# Handle mouse/touch clicks on the 3D page
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		_handle_page_click(event.position)
-	elif event is InputEventScreenTouch and event.pressed:
-		_handle_page_click(event.position)
+	# Handle mouse wheel for scrolling
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			_scroll_page(-3)
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			_scroll_page(3)
+		elif event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				_drag_start_pos = event.position
+				_drag_start_scroll = top_page.label.get_v_scroll_bar().value
+				_is_dragging = true
+			else:
+				# Only trigger click if we didn't drag much
+				if _is_dragging and _drag_start_pos.distance_to(event.position) < 10:
+					_handle_page_click(event.position)
+				_is_dragging = false
+
+	# Handle mouse drag for scroll
+	elif event is InputEventMouseMotion and _is_dragging:
+		var delta_y: float = event.position.y - _drag_start_pos.y
+		# Invert: drag down = scroll up (content moves down)
+		var scroll_delta: float = -delta_y * 1.5
+		top_page.label.get_v_scroll_bar().value = _drag_start_scroll + scroll_delta
+
+	# Handle touch
+	elif event is InputEventScreenTouch:
+		if event.pressed:
+			_drag_start_pos = event.position
+			_drag_start_scroll = top_page.label.get_v_scroll_bar().value
+			_is_dragging = true
+		else:
+			if _is_dragging and _drag_start_pos.distance_to(event.position) < 10:
+				_handle_page_click(event.position)
+			_is_dragging = false
+
+	# Handle touch drag for scroll
+	elif event is InputEventScreenDrag and _is_dragging:
+		var delta_y: float = event.position.y - _drag_start_pos.y
+		var scroll_delta: float = -delta_y * 1.5
+		top_page.label.get_v_scroll_bar().value = _drag_start_scroll + scroll_delta
 
 	# Keyboard shortcuts for testing effects
 	if event is InputEventKey and event.pressed:
 		_handle_keyboard_shortcut(event)
+
+
+func _scroll_page(lines: int) -> void:
+	var scrollbar := top_page.label.get_v_scroll_bar()
+	scrollbar.value += lines * 20  # ~20 pixels per line
 
 
 func _handle_keyboard_shortcut(event: InputEventKey) -> void:
@@ -932,26 +981,30 @@ func _render_dialogue_to_page(page: PageMesh, data: Dictionary) -> void:
 
 	text += "[center][font_size=26][color=%s][b]%s[/b][/color][/font_size][/center]\n\n" % [title_color, speaker]
 
+	var event_color := "#5a4a3a"
+
 	for entry in dialogue_history:
 		var entry_speaker: String = entry.get("speaker", "").capitalize()
 		var entry_text: String = entry.get("text", "")
 		var is_player: bool = entry.get("is_player", false)
+		var entry_event: String = entry.get("event", "")
 
 		if is_player:
+			# Show event (like [Accept Quest]) before the player's line
+			if entry_event != "":
+				text += "[color=%s][%s][/color]\n" % [event_color, entry_event]
 			text += "[color=%s]You say, [i]\"%s\"[/i][/color]\n\n" % [player_color, entry_text]
 		else:
-			text += "[color=%s]%s says, [i]\"%s\"[/i][/color]\n\n" % [body_color, entry_speaker, entry_text]
+			text += "[color=%s]%s says, \"%s\"[/color]\n\n" % [body_color, entry_speaker, entry_text]
 
 	var choices: Array = data.get("choices", [])
 	if choices.size() > 0:
 		for i in range(choices.size()):
 			var choice: Dictionary = choices[i]
 			var choice_text: String = choice.get("text", "Continue")
-			text += "[color=%s]%d. [url=%d][u]%s[/u][/url][/color]\n\n" % [choice_color, i + 1, i, choice_text]
+			text += "[color=%s][url=%d][u]%s[/u][/url][/color]\n\n" % [choice_color, i, choice_text]
 	else:
 		text += "[color=%s][url=-1][u]Continue[/u][/url][/color]\n\n" % choice_color
-
-	text += "\n[center][color=%s][i]Tap a choice to continue[/i][/color][/center]" % hint_color
 
 	page.label.text = text
 
@@ -1066,21 +1119,18 @@ func _convert_server_entity(data: Dictionary) -> Dictionary:
 # =============================================================================
 
 func show_entity_details(entity: Variant) -> void:
-	if turn_tween and turn_tween.is_running():
-		return
-
 	current_entity = entity
-	pending_page = PageType.ENTITY
-	turn_page("right")
+	current_page = PageType.ENTITY
+	top_page.bottom_bar.visible = false
+	_render_entity_to_page(top_page, entity)
 
 
 func go_back_to_room() -> void:
-	if turn_tween and turn_tween.is_running():
-		return
-
 	current_entity = null
-	pending_page = PageType.ROOM
-	turn_page("left")
+	current_page = PageType.ROOM
+	top_page.bottom_bar.visible = true
+	if GameState.current_room:
+		_render_room_to_page(top_page, GameState.current_room)
 
 
 func _execute_entity_action(action_key: String) -> void:
@@ -1293,8 +1343,9 @@ func _on_dialogue_started(data: Dictionary) -> void:
 	dialogue_history = []
 	dialogue_data = data
 	pre_dialogue_page = current_page
-	pending_page = PageType.DIALOGUE
-	turn_page("right")
+	current_page = PageType.DIALOGUE
+	top_page.bottom_bar.visible = false
+	_render_dialogue_to_page(top_page, data)
 
 
 func _on_dialogue_updated(data: Dictionary) -> void:
@@ -1308,8 +1359,18 @@ func _on_dialogue_ended() -> void:
 	print("[Dialogue] Ended")
 	dialogue_data = {}
 	dialogue_history = []
-	pending_page = pre_dialogue_page
-	turn_page("left")
+	current_page = pre_dialogue_page
+
+	# Return to the appropriate page
+	match pre_dialogue_page:
+		PageType.ENTITY:
+			top_page.bottom_bar.visible = false
+			if current_entity:
+				_render_entity_to_page(top_page, current_entity)
+		PageType.ROOM, _:
+			top_page.bottom_bar.visible = true
+			if GameState.current_room:
+				_render_room_to_page(top_page, GameState.current_room)
 
 
 func _select_dialogue_choice(choice_index: int) -> void:
@@ -1318,7 +1379,8 @@ func _select_dialogue_choice(choice_index: int) -> void:
 		if choice_index < choices.size():
 			var choice: Dictionary = choices[choice_index]
 			var choice_text: String = choice.get("text", "Continue")
-			dialogue_history.append({"speaker": "You", "text": choice_text, "is_player": true})
+			var choice_event: String = choice.get("event", "")  # e.g., "Accept Quest"
+			dialogue_history.append({"speaker": "You", "text": choice_text, "is_player": true, "event": choice_event})
 
 	if _is_mock_dialogue:
 		_advance_mock_dialogue(choice_index)
@@ -1374,7 +1436,7 @@ func _get_mock_dialogue_node(entity: Variant, node_index: int) -> Dictionary:
 			"speaker": name,
 			"text": "The demons have grown restless. Master Tenzin went to investigate the old temple, but has not returned. We fear the worst.",
 			"choices": [
-				{"text": "I will find him."},
+				{"text": "I will find him.", "event": "Accept Quest"},
 				{"text": "That sounds dangerous."}
 			]
 		}
