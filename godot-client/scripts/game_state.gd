@@ -1,7 +1,25 @@
 ## Global game state singleton.
 ## Manages current room, navigation, and server communication.
 ## Supports both online (Phoenix server) and offline (MockWorld) modes.
+## Single source of truth for all game state - views read from here.
 extends Node
+
+# =============================================================================
+# Page Types
+# =============================================================================
+
+enum PageType {
+	ROOM,       # Main room view with NPCs, items, description
+	MENU,       # Menu tabs (inventory, character, map, social, settings)
+	ENTITY,     # Viewing a specific entity (NPC/item detail)
+	DIALOGUE,   # In a dialogue with an NPC
+	SHOP,       # Shopping interface
+	CONTAINER,  # Container/chest interface
+}
+
+# =============================================================================
+# Signals - Room & Navigation
+# =============================================================================
 
 ## Emitted when the player moves to a new room
 signal room_changed(room: MockWorld.Room)
@@ -9,17 +27,126 @@ signal room_changed(room: MockWorld.Room)
 ## Emitted when navigation fails
 signal navigation_failed(direction: String, reason: String)
 
+# =============================================================================
+# Signals - Connection
+# =============================================================================
+
 ## Emitted when connected to server
 signal server_connected
 
 ## Emitted when disconnected from server
 signal server_disconnected
 
+## Emitted when forcibly disconnected by server
+signal force_disconnect(reason: String)
+
+# =============================================================================
+# Signals - Page & UI State
+# =============================================================================
+
+## Emitted when current page changes
+signal page_changed(new_page: PageType)
+
+## Emitted when current entity changes (for entity page)
+signal entity_changed(entity: Dictionary)
+
+## Emitted when event log changes
+signal events_changed
+
+# =============================================================================
+# Signals - Dialogue
+# =============================================================================
+
+## Emitted when dialogue data changes
+signal dialogue_changed(data: Dictionary)
+
+## Emitted when dialogue ends
+signal dialogue_ended
+
+# =============================================================================
+# Signals - Game Events
+# =============================================================================
+
 ## Emitted when a game event is received (chat, combat feedback, etc.)
 signal game_event(event: Dictionary)
 
 ## Emitted when entity context is received (after clicking an entity)
 signal entity_context_received(entity: Dictionary)
+
+# =============================================================================
+# Signals - Character State
+# =============================================================================
+
+## Emitted when inventory changes
+signal inventory_changed
+
+## Emitted when equipment changes
+signal equipment_changed
+
+## Emitted when stats change
+signal stats_changed
+
+## Emitted when resources (gold, etc.) change
+signal resources_changed
+
+## Emitted when nearby players list changes
+signal players_changed
+
+# =============================================================================
+# Signals - Shop & Container
+# =============================================================================
+
+## Emitted when shop opens
+signal shop_opened(data: Dictionary)
+
+## Emitted when shop closes
+signal shop_closed
+
+## Emitted when container opens
+signal container_opened(data: Dictionary)
+
+## Emitted when container contents update
+signal container_updated(data: Dictionary)
+
+## Emitted when container closes
+signal container_closed
+
+# =============================================================================
+# Signals - Bardo (Death)
+# =============================================================================
+
+## Emitted when player enters bardo (dies)
+signal bardo_entered(data: Dictionary)
+
+## Emitted when player can reincarnate
+signal bardo_can_reincarnate
+
+## Emitted when player exits bardo
+signal bardo_exited
+
+# =============================================================================
+# Signals - Quests
+# =============================================================================
+
+## Emitted when a quest is accepted
+signal quest_accepted(data: Dictionary)
+
+## Emitted when a quest is completed
+signal quest_completed(data: Dictionary)
+
+## Emitted when quest progress updates
+signal quest_progress(data: Dictionary)
+
+# =============================================================================
+# Signals - Atmosphere
+# =============================================================================
+
+## Emitted when atmosphere changes (for visual effects)
+signal atmosphere_changed(atmosphere: String)
+
+# =============================================================================
+# State Variables - Room & Connection
+# =============================================================================
 
 ## Current room the player is in
 var current_room: MockWorld.Room = null
@@ -29,6 +156,63 @@ var server_state: Dictionary = {}
 
 ## Whether we're connected to the server
 var is_online: bool = false
+
+# =============================================================================
+# State Variables - Page & UI
+# =============================================================================
+
+## Current page being displayed
+var current_page: PageType = PageType.ROOM
+
+## Previous page (for returning after dialogue/shop/etc.)
+var previous_page: PageType = PageType.ROOM
+
+## Current entity being viewed on ENTITY page
+var current_entity: Dictionary = {}
+
+# =============================================================================
+# State Variables - Dialogue
+# =============================================================================
+
+## Current dialogue node from server
+var dialogue_data: Dictionary = {}
+
+## Conversation history for UI display
+var dialogue_history: Array = []
+
+# =============================================================================
+# State Variables - Shop & Container
+# =============================================================================
+
+## Shop data when on SHOP page
+var shop_data: Dictionary = {}
+
+## Container data when on CONTAINER page
+var container_data: Dictionary = {}
+
+# =============================================================================
+# State Variables - Bardo
+# =============================================================================
+
+## Bardo state when player has died
+var bardo_data: Dictionary = {}
+
+# =============================================================================
+# State Variables - Event Log
+# =============================================================================
+
+## Event log for room events (chat, actions, etc.)
+var events: Array[Dictionary] = []
+
+## Maximum events to keep in log
+const MAX_EVENTS := 10
+
+# =============================================================================
+# State Variables - Atmosphere
+# =============================================================================
+
+## Current atmosphere (affects visual mood)
+var atmosphere: String = "peaceful"
 
 ## Reference to PhoenixClient autoload
 var _phoenix: Node = null
@@ -48,13 +232,78 @@ func _connect_phoenix_signals() -> void:
 	if _phoenix == null:
 		return
 
+	# Connection signals
 	_phoenix.connected.connect(_on_server_connected)
 	_phoenix.disconnected.connect(_on_server_disconnected)
 	_phoenix.connection_error.connect(_on_connection_error)
+
+	# Core game state signals
 	_phoenix.game_state_received.connect(_on_server_game_state)
 	_phoenix.room_updated.connect(_on_server_room_update)
 	_phoenix.event_received.connect(_on_server_event)
 	_phoenix.entity_context_received.connect(_on_entity_context)
+
+	# Dialogue signals
+	_phoenix.dialogue_started.connect(_on_dialogue_started)
+	_phoenix.dialogue_updated.connect(_on_dialogue_updated)
+	_phoenix.dialogue_ended.connect(_on_dialogue_ended)
+
+	# Combat signals (just log for now)
+	_phoenix.combat_started.connect(_on_combat_started)
+	_phoenix.combat_updated.connect(_on_combat_updated)
+	_phoenix.combat_ended.connect(_on_combat_ended)
+
+	# Character state signals (will be added to PhoenixClient)
+	if _phoenix.has_signal("inventory_updated"):
+		_phoenix.inventory_updated.connect(_on_inventory_update)
+	if _phoenix.has_signal("equipment_updated"):
+		_phoenix.equipment_updated.connect(_on_equipment_update)
+	if _phoenix.has_signal("stats_updated"):
+		_phoenix.stats_updated.connect(_on_stats_update)
+	if _phoenix.has_signal("resources_updated"):
+		_phoenix.resources_updated.connect(_on_resources_update)
+	if _phoenix.has_signal("players_updated"):
+		_phoenix.players_updated.connect(_on_players_update)
+
+	# Shop/Container signals
+	if _phoenix.has_signal("shop_opened"):
+		_phoenix.shop_opened.connect(_on_shop_opened)
+	if _phoenix.has_signal("shop_closed"):
+		_phoenix.shop_closed.connect(_on_shop_closed)
+	if _phoenix.has_signal("container_opened"):
+		_phoenix.container_opened.connect(_on_container_opened)
+	if _phoenix.has_signal("container_updated"):
+		_phoenix.container_updated.connect(_on_container_updated)
+	if _phoenix.has_signal("container_closed"):
+		_phoenix.container_closed.connect(_on_container_closed)
+
+	# Bardo (death) signals
+	if _phoenix.has_signal("bardo_entered"):
+		_phoenix.bardo_entered.connect(_on_bardo_entered)
+	if _phoenix.has_signal("bardo_can_reincarnate"):
+		_phoenix.bardo_can_reincarnate.connect(_on_bardo_can_reincarnate)
+	if _phoenix.has_signal("bardo_exited"):
+		_phoenix.bardo_exited.connect(_on_bardo_exited)
+
+	# Quest signals
+	if _phoenix.has_signal("quest_accepted"):
+		_phoenix.quest_accepted.connect(_on_quest_accepted)
+	if _phoenix.has_signal("quest_completed"):
+		_phoenix.quest_completed.connect(_on_quest_completed)
+	if _phoenix.has_signal("quest_progress"):
+		_phoenix.quest_progress.connect(_on_quest_progress)
+
+	# Atmosphere signals
+	if _phoenix.has_signal("atmosphere_updated"):
+		_phoenix.atmosphere_updated.connect(_on_atmosphere_update)
+
+	# Timer signals
+	if _phoenix.has_signal("timer_completed"):
+		_phoenix.timer_completed.connect(_on_timer_completed)
+
+	# Force disconnect signal
+	if _phoenix.has_signal("force_disconnected"):
+		_phoenix.force_disconnected.connect(_on_force_disconnect)
 
 
 func _init_offline_mode() -> void:
@@ -308,3 +557,358 @@ func _convert_server_room(room_data: Dictionary) -> MockWorld.Room:
 			items.append(item)
 
 	return MockWorld.Room.new(key, name, description, exits, npcs, items)
+
+
+# =============================================================================
+# Page Management
+# =============================================================================
+
+## Set the current page and emit signal
+func set_page(new_page: PageType) -> void:
+	if new_page == current_page:
+		return
+	previous_page = current_page
+	current_page = new_page
+	page_changed.emit(new_page)
+
+
+## Return to the previous page
+func return_to_previous_page() -> void:
+	set_page(previous_page)
+
+
+# =============================================================================
+# Event Log Management
+# =============================================================================
+
+## Add an event to the log
+func add_event(text: String) -> void:
+	if text.strip_edges().is_empty():
+		return
+
+	events.append({
+		"text": text,
+		"timestamp": Time.get_unix_time_from_system()
+	})
+
+	# Trim to max events
+	while events.size() > MAX_EVENTS:
+		events.pop_front()
+
+	events_changed.emit()
+
+
+## Clear all events
+func clear_events() -> void:
+	events.clear()
+	events_changed.emit()
+
+
+## Get recent events as text array
+func get_recent_events() -> Array[String]:
+	var result: Array[String] = []
+	for event in events:
+		result.append(event.get("text", ""))
+	return result
+
+
+# =============================================================================
+# Dialogue Management
+# =============================================================================
+
+## Start a dialogue
+func start_dialogue(data: Dictionary) -> void:
+	dialogue_data = data
+	dialogue_history.clear()
+
+	# Add initial dialogue to history
+	_add_dialogue_entry(data)
+
+	previous_page = current_page
+	set_page(PageType.DIALOGUE)
+	dialogue_changed.emit(data)
+
+
+## Update dialogue with new data
+func update_dialogue(data: Dictionary) -> void:
+	dialogue_data = data
+	_add_dialogue_entry(data)
+	dialogue_changed.emit(data)
+
+
+## End the current dialogue
+func end_dialogue() -> void:
+	dialogue_data = {}
+	dialogue_history.clear()
+	dialogue_ended.emit()
+	return_to_previous_page()
+
+
+## Add a dialogue entry to history
+func _add_dialogue_entry(data: Dictionary) -> void:
+	var entry := {
+		"speaker": data.get("speaker", ""),
+		"text": data.get("text", ""),
+		"is_player": data.get("is_player", false),
+		"event": data.get("event", ""),
+	}
+	if not entry.text.is_empty():
+		dialogue_history.append(entry)
+
+
+## Select a dialogue choice
+func select_dialogue_choice(index: int) -> void:
+	if is_online and _phoenix:
+		_phoenix.dialogue_select(index)
+
+
+# =============================================================================
+# Entity Management
+# =============================================================================
+
+## View an entity (opens ENTITY page)
+func view_entity(entity: Dictionary) -> void:
+	current_entity = entity
+	previous_page = current_page
+	set_page(PageType.ENTITY)
+	entity_changed.emit(entity)
+
+
+## Request entity context from server
+func request_entity_context(entity_id: String) -> void:
+	if is_online and _phoenix:
+		_phoenix.click_entity(entity_id)
+
+
+# =============================================================================
+# Shop Management
+# =============================================================================
+
+## Open shop interface
+func open_shop(data: Dictionary) -> void:
+	shop_data = data
+	previous_page = current_page
+	set_page(PageType.SHOP)
+	shop_opened.emit(data)
+
+
+## Close shop interface
+func close_shop() -> void:
+	shop_data = {}
+	shop_closed.emit()
+	return_to_previous_page()
+
+
+# =============================================================================
+# Container Management
+# =============================================================================
+
+## Open container interface
+func open_container(data: Dictionary) -> void:
+	container_data = data
+	previous_page = current_page
+	set_page(PageType.CONTAINER)
+	container_opened.emit(data)
+
+
+## Update container contents
+func update_container(data: Dictionary) -> void:
+	container_data = data
+	container_updated.emit(data)
+
+
+## Close container interface
+func close_container() -> void:
+	container_data = {}
+	container_closed.emit()
+	return_to_previous_page()
+
+
+# =============================================================================
+# Event Handlers - Dialogue
+# =============================================================================
+
+func _on_dialogue_started(data: Dictionary) -> void:
+	print("[GameState] Dialogue started with: %s" % data.get("speaker", "unknown"))
+	start_dialogue(data)
+
+
+func _on_dialogue_updated(data: Dictionary) -> void:
+	print("[GameState] Dialogue updated")
+	update_dialogue(data)
+
+
+func _on_dialogue_ended() -> void:
+	print("[GameState] Dialogue ended")
+	end_dialogue()
+
+
+# =============================================================================
+# Event Handlers - Combat (Log to events)
+# =============================================================================
+
+func _on_combat_started(data: Dictionary) -> void:
+	var enemy: String = data.get("enemy", "enemy")
+	add_event("Combat begins with %s!" % enemy)
+
+
+func _on_combat_updated(data: Dictionary) -> void:
+	var desc: String = data.get("description", "")
+	if not desc.is_empty():
+		add_event(desc)
+
+
+func _on_combat_ended(data: Dictionary) -> void:
+	var result: String = data.get("result", "ended")
+	add_event("Combat %s." % result)
+
+
+# =============================================================================
+# Event Handlers - Character State
+# =============================================================================
+
+func _on_inventory_update(data: Dictionary) -> void:
+	server_state["inventory"] = data.get("inventory", [])
+	inventory_changed.emit()
+
+
+func _on_equipment_update(data: Dictionary) -> void:
+	server_state["equipment"] = data.get("equipment", {})
+	equipment_changed.emit()
+
+
+func _on_stats_update(data: Dictionary) -> void:
+	server_state["stats"] = data.get("stats", {})
+	stats_changed.emit()
+
+
+func _on_resources_update(data: Dictionary) -> void:
+	server_state["resources"] = data.get("resources", {})
+	resources_changed.emit()
+
+
+func _on_players_update(data: Dictionary) -> void:
+	server_state["other_players"] = data.get("players", [])
+	players_changed.emit()
+	# Refresh room display to show updated player list
+	if current_room:
+		room_changed.emit(current_room)
+
+
+# =============================================================================
+# Event Handlers - Shop & Container
+# =============================================================================
+
+func _on_shop_opened(data: Dictionary) -> void:
+	print("[GameState] Shop opened: %s" % data.get("npc_name", "Shop"))
+	open_shop(data)
+
+
+func _on_shop_closed() -> void:
+	print("[GameState] Shop closed")
+	close_shop()
+
+
+func _on_container_opened(data: Dictionary) -> void:
+	print("[GameState] Container opened: %s" % data.get("entity_name", "Container"))
+	open_container(data)
+
+
+func _on_container_updated(data: Dictionary) -> void:
+	update_container(data)
+
+
+func _on_container_closed() -> void:
+	print("[GameState] Container closed")
+	close_container()
+
+
+# =============================================================================
+# Event Handlers - Bardo (Death)
+# =============================================================================
+
+func _on_bardo_entered(data: Dictionary) -> void:
+	print("[GameState] Entered bardo (death)")
+	bardo_data = data
+	bardo_entered.emit(data)
+
+
+func _on_bardo_can_reincarnate() -> void:
+	print("[GameState] Can now reincarnate")
+	bardo_can_reincarnate.emit()
+
+
+func _on_bardo_exited() -> void:
+	print("[GameState] Exited bardo")
+	bardo_data = {}
+	bardo_exited.emit()
+
+
+# =============================================================================
+# Event Handlers - Quests
+# =============================================================================
+
+func _on_quest_accepted(data: Dictionary) -> void:
+	var quest_name: String = data.get("name", "Unknown Quest")
+	add_event("Quest accepted - %s" % quest_name)
+
+	# Store in quests array
+	if not server_state.has("quests"):
+		server_state["quests"] = []
+	server_state["quests"].append(data.get("quest", {}))
+
+	quest_accepted.emit(data)
+
+
+func _on_quest_completed(data: Dictionary) -> void:
+	var title: String = data.get("title", "Quest")
+	var rewards: Dictionary = data.get("rewards", {})
+
+	var reward_text := ""
+	if rewards.has("gold"):
+		reward_text = " - %d gold" % rewards.get("gold")
+	if rewards.has("exp"):
+		reward_text += " - %d exp" % rewards.get("exp")
+
+	add_event("Quest completed - %s!%s" % [title, reward_text])
+	quest_completed.emit(data)
+
+
+func _on_quest_progress(data: Dictionary) -> void:
+	var quest_name: String = data.get("quest_name", "")
+	var objective: String = data.get("objective", "")
+	var current: int = data.get("current", 0)
+	var total: int = data.get("total", 0)
+
+	if total > 0:
+		add_event("%s: %s (%d/%d)" % [quest_name, objective, current, total])
+	quest_progress.emit(data)
+
+
+# =============================================================================
+# Event Handlers - Atmosphere
+# =============================================================================
+
+func _on_atmosphere_update(data: Dictionary) -> void:
+	atmosphere = data.get("atmosphere", "peaceful")
+	atmosphere_changed.emit(atmosphere)
+
+
+# =============================================================================
+# Event Handlers - Timers
+# =============================================================================
+
+func _on_timer_completed(data: Dictionary) -> void:
+	var timer_type: String = data.get("timer_type", "timer")
+	add_event("Completed - %s" % timer_type.capitalize())
+
+
+# =============================================================================
+# Event Handlers - Force Disconnect
+# =============================================================================
+
+func _on_force_disconnect(data: Dictionary) -> void:
+	var reason: String = data.get("reason", "Disconnected by server")
+	print("[GameState] Force disconnected: %s" % reason)
+	force_disconnect.emit(reason)
+	disconnect_from_server()

@@ -3,22 +3,77 @@
 ## Note: Used as autoload, so no class_name to avoid conflicts.
 extends Node
 
-# Connection state signals
+# =============================================================================
+# Connection State Signals
+# =============================================================================
 signal connected
 signal disconnected
 signal connection_error(message: String)
 
-# Game event signals
+# =============================================================================
+# Core Game State Signals
+# =============================================================================
 signal game_state_received(state: Dictionary)
 signal room_updated(room: Dictionary)
 signal event_received(event: Dictionary)
+signal entity_context_received(data: Dictionary)
+
+# =============================================================================
+# Combat Signals
+# =============================================================================
 signal combat_started(data: Dictionary)
 signal combat_updated(data: Dictionary)
 signal combat_ended(data: Dictionary)
+
+# =============================================================================
+# Dialogue Signals
+# =============================================================================
 signal dialogue_started(data: Dictionary)
 signal dialogue_updated(data: Dictionary)
 signal dialogue_ended
-signal entity_context_received(data: Dictionary)
+
+# =============================================================================
+# Character State Signals
+# =============================================================================
+signal inventory_updated(data: Dictionary)
+signal equipment_updated(data: Dictionary)
+signal stats_updated(data: Dictionary)
+signal resources_updated(data: Dictionary)
+signal players_updated(data: Dictionary)
+
+# =============================================================================
+# Shop & Container Signals
+# =============================================================================
+signal shop_opened(data: Dictionary)
+signal shop_closed
+signal container_opened(data: Dictionary)
+signal container_updated(data: Dictionary)
+signal container_closed
+
+# =============================================================================
+# Bardo (Death) Signals
+# =============================================================================
+signal bardo_entered(data: Dictionary)
+signal bardo_can_reincarnate
+signal bardo_exited
+
+# =============================================================================
+# Quest Signals
+# =============================================================================
+signal quest_accepted(data: Dictionary)
+signal quest_completed(data: Dictionary)
+signal quest_progress(data: Dictionary)
+
+# =============================================================================
+# Environment Signals
+# =============================================================================
+signal atmosphere_updated(data: Dictionary)
+signal timer_completed(data: Dictionary)
+
+# =============================================================================
+# System Signals
+# =============================================================================
+signal force_disconnected(data: Dictionary)
 
 # Phoenix protocol constants
 const HEARTBEAT_INTERVAL := 30.0
@@ -160,6 +215,34 @@ func emote(emote_key: String, target_id: String = "") -> void:
 ## Combat action (e.g., flee)
 func combat_action(action_name: String) -> void:
 	_send_channel_message("combat_action", {"action": action_name})
+
+
+## Bardo action (e.g., reincarnate)
+func bardo_action(action_name: String) -> void:
+	_send_channel_message("bardo", {"action": action_name})
+
+
+## Shop action (buy, sell)
+func shop_action(action_name: String, item_index: int) -> void:
+	_send_channel_message("shop", {"action": action_name, "item_index": item_index})
+
+
+## Close shop
+func shop_close() -> void:
+	_send_channel_message("shop_close", {})
+
+
+## Container action (take, take_all)
+func container_action(action_name: String, item_index: int = -1) -> void:
+	var payload := {"action": action_name}
+	if item_index >= 0:
+		payload["item_index"] = item_index
+	_send_channel_message("container", payload)
+
+
+## Close container
+func container_close() -> void:
+	_send_channel_message("container_close", {})
 
 
 # =============================================================================
@@ -339,6 +422,9 @@ func _handle_reply(payload: Dictionary, ref) -> void:
 
 func _handle_game_event(event: String, payload: Dictionary) -> void:
 	match event:
+		# =====================================================================
+		# Phoenix Protocol Events
+		# =====================================================================
 		"phx_error":
 			# Server-side error (channel crashed)
 			print("[Phoenix] Server error received: %s" % str(payload))
@@ -348,6 +434,9 @@ func _handle_game_event(event: String, payload: Dictionary) -> void:
 			connection_error.emit("Server error: channel crashed")
 			disconnected.emit()
 
+		# =====================================================================
+		# Core Game State Events
+		# =====================================================================
 		"game_state":
 			print("[Phoenix] Received game_state: room=%s" % payload.get("room", {}).get("title", "unknown"))
 			game_state_received.emit(payload)
@@ -359,6 +448,15 @@ func _handle_game_event(event: String, payload: Dictionary) -> void:
 		"event":
 			event_received.emit(payload)
 
+		"entity_context":
+			# Server sends {"entity": {...}}, unwrap it
+			var entity_data: Dictionary = payload.get("entity", payload)
+			print("[Phoenix] Received entity_context: %s" % entity_data.get("name", "unknown"))
+			entity_context_received.emit(entity_data)
+
+		# =====================================================================
+		# Combat Events
+		# =====================================================================
 		"combat_start":
 			combat_started.emit(payload)
 
@@ -368,6 +466,9 @@ func _handle_game_event(event: String, payload: Dictionary) -> void:
 		"combat_end":
 			combat_ended.emit(payload)
 
+		# =====================================================================
+		# Dialogue Events
+		# =====================================================================
 		"dialogue_start":
 			dialogue_started.emit(payload)
 
@@ -377,11 +478,101 @@ func _handle_game_event(event: String, payload: Dictionary) -> void:
 		"dialogue_end":
 			dialogue_ended.emit()
 
-		"entity_context":
-			# Server sends {"entity": {...}}, unwrap it
-			var entity_data: Dictionary = payload.get("entity", payload)
-			print("[Phoenix] Received entity_context: %s" % entity_data.get("name", "unknown"))
-			entity_context_received.emit(entity_data)
+		# =====================================================================
+		# Character State Events
+		# =====================================================================
+		"inventory_update":
+			inventory_updated.emit(payload)
+
+		"equipment_update":
+			equipment_updated.emit(payload)
+
+		"stats_update":
+			stats_updated.emit(payload)
+
+		"resources_update":
+			resources_updated.emit(payload)
+
+		"players_update":
+			players_updated.emit(payload)
+
+		# =====================================================================
+		# Shop Events
+		# =====================================================================
+		"shop_open":
+			print("[Phoenix] Received shop_open")
+			shop_opened.emit(payload)
+
+		"shop_close":
+			print("[Phoenix] Received shop_close")
+			shop_closed.emit()
+
+		# =====================================================================
+		# Container Events
+		# =====================================================================
+		"container_open":
+			print("[Phoenix] Received container_open")
+			container_opened.emit(payload)
+
+		"container_update":
+			container_updated.emit(payload)
+
+		"container_close":
+			print("[Phoenix] Received container_close")
+			container_closed.emit()
+
+		# =====================================================================
+		# Bardo (Death) Events
+		# =====================================================================
+		"bardo_enter":
+			print("[Phoenix] Received bardo_enter")
+			bardo_entered.emit(payload)
+
+		"bardo_can_reincarnate":
+			print("[Phoenix] Received bardo_can_reincarnate")
+			bardo_can_reincarnate.emit()
+
+		"bardo_exit":
+			print("[Phoenix] Received bardo_exit")
+			bardo_exited.emit()
+
+		# =====================================================================
+		# Quest Events
+		# =====================================================================
+		"quest_accepted":
+			print("[Phoenix] Received quest_accepted: %s" % payload.get("name", "unknown"))
+			quest_accepted.emit(payload)
+
+		"quest_completed":
+			print("[Phoenix] Received quest_completed: %s" % payload.get("title", "unknown"))
+			quest_completed.emit(payload)
+
+		"quest_progress":
+			quest_progress.emit(payload)
+
+		# =====================================================================
+		# Environment Events
+		# =====================================================================
+		"atmosphere_update":
+			atmosphere_updated.emit(payload)
+
+		"timer_completed":
+			print("[Phoenix] Received timer_completed: %s" % payload.get("timer_type", "unknown"))
+			timer_completed.emit(payload)
+
+		# =====================================================================
+		# System Events
+		# =====================================================================
+		"force_disconnect":
+			print("[Phoenix] Received force_disconnect: %s" % payload.get("reason", "unknown"))
+			force_disconnected.emit(payload)
+
+		# =====================================================================
+		# Screenshot (client should capture and upload)
+		# =====================================================================
+		"capture_screenshot":
+			# TODO: Implement screenshot capture
+			print("[Phoenix] Screenshot capture requested (not implemented)")
 
 		_:
 			# Log unhandled events in debug mode

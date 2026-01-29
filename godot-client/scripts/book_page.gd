@@ -1073,15 +1073,20 @@ func _style_compass_button(btn: Button, is_available: bool) -> void:
 # =============================================================================
 
 func _connect_signals() -> void:
+	# Room and navigation
 	GameState.room_changed.connect(_on_room_changed)
 	GameState.navigation_failed.connect(_on_navigation_failed)
 	GameState.entity_context_received.connect(_on_entity_context_received)
 
-	if has_node("/root/PhoenixClient"):
-		var phoenix := get_node("/root/PhoenixClient")
-		phoenix.dialogue_started.connect(_on_dialogue_started)
-		phoenix.dialogue_updated.connect(_on_dialogue_updated)
-		phoenix.dialogue_ended.connect(_on_dialogue_ended)
+	# Dialogue - connect to GameState (which routes from PhoenixClient)
+	GameState.dialogue_changed.connect(_on_dialogue_changed)
+	GameState.dialogue_ended.connect(_on_dialogue_ended)
+
+	# Events - connect to GameState's event changes
+	GameState.events_changed.connect(_on_events_changed)
+
+	# Page changes from GameState
+	GameState.page_changed.connect(_on_game_state_page_changed)
 
 
 func _on_room_changed(room: MockWorld.Room) -> void:
@@ -1091,7 +1096,54 @@ func _on_room_changed(room: MockWorld.Room) -> void:
 
 
 func _on_navigation_failed(direction: String, reason: String) -> void:
-	add_event(reason)
+	GameState.add_event(reason)
+
+
+## Called when GameState's event log changes
+func _on_events_changed() -> void:
+	# Sync local events from GameState
+	events.clear()
+	for evt in GameState.events:
+		events.append(evt)
+
+	# Re-render room if we're on room page
+	if current_page == PageType.ROOM and GameState.current_room:
+		display_room(GameState.current_room)
+		await get_tree().process_frame
+		top_page.label.scroll_to_line(top_page.label.get_line_count())
+
+
+## Called when GameState's page changes
+func _on_game_state_page_changed(new_page: GameState.PageType) -> void:
+	# Map GameState.PageType to our local PageType
+	match new_page:
+		GameState.PageType.ROOM:
+			current_page = PageType.ROOM
+			top_page.bottom_bar.visible = true
+			if GameState.current_room:
+				_render_room_to_page(top_page, GameState.current_room)
+		GameState.PageType.MENU:
+			current_page = PageType.MENU
+			top_page.bottom_bar.visible = true
+			_render_menu_to_page(top_page)
+		GameState.PageType.ENTITY:
+			current_page = PageType.ENTITY
+			top_page.bottom_bar.visible = false
+			if not GameState.current_entity.is_empty():
+				current_entity = GameState.current_entity
+				_render_entity_to_page(top_page, current_entity)
+		GameState.PageType.DIALOGUE:
+			current_page = PageType.DIALOGUE
+			top_page.bottom_bar.visible = false
+			_render_dialogue_from_game_state(top_page)
+		GameState.PageType.SHOP:
+			# TODO: Implement shop page
+			current_page = PageType.ROOM  # Fallback for now
+			top_page.bottom_bar.visible = false
+		GameState.PageType.CONTAINER:
+			# TODO: Implement container page
+			current_page = PageType.ROOM  # Fallback for now
+			top_page.bottom_bar.visible = false
 
 
 func _on_entity_context_received(entity_data: Dictionary) -> void:
@@ -1211,27 +1263,17 @@ func _click_entity(entity: Variant) -> void:
 # Events
 # =============================================================================
 
+## Add an event to the log (delegates to GameState)
 func add_event(text: String) -> void:
 	var clean_text := _strip_html_tags(text)
-	var event := {
-		"text": clean_text,
-		"timestamp": Time.get_ticks_msec() / 1000.0
-	}
-	events.append(event)
-
-	while events.size() > MAX_EVENTS:
-		events.pop_front()
-
-	if current_page == PageType.ROOM and GameState.current_room:
-		display_room(GameState.current_room)
-		await get_tree().process_frame
-		top_page.label.scroll_to_line(top_page.label.get_line_count())
+	GameState.add_event(clean_text)
+	# GameState.events_changed signal will trigger _on_events_changed
 
 
+## Clear all events (delegates to GameState)
 func clear_events() -> void:
-	events.clear()
-	if GameState.current_room:
-		display_room(GameState.current_room)
+	GameState.clear_events()
+	# GameState.events_changed signal will trigger _on_events_changed
 
 
 # =============================================================================
@@ -1337,26 +1379,24 @@ func _get_settings_content() -> String:
 # Dialogue System
 # =============================================================================
 
-func _on_dialogue_started(data: Dictionary) -> void:
-	print("[Dialogue] Started: ", data)
+## Called when GameState dialogue changes (replaces direct PhoenixClient connection)
+func _on_dialogue_changed(data: Dictionary) -> void:
+	print("[BookPage] Dialogue changed: ", data.get("speaker", "unknown"))
 	_is_mock_dialogue = false
-	dialogue_history = []
+
+	# GameState manages dialogue_data and dialogue_history now
+	# We just need to update our local display state
 	dialogue_data = data
 	pre_dialogue_page = current_page
 	current_page = PageType.DIALOGUE
 	top_page.bottom_bar.visible = false
-	_render_dialogue_to_page(top_page, data)
 
-
-func _on_dialogue_updated(data: Dictionary) -> void:
-	print("[Dialogue] Updated: ", data)
-	dialogue_data = data
-	if current_page == PageType.DIALOGUE:
-		display_dialogue(dialogue_data)
+	# Render using GameState's dialogue_history
+	_render_dialogue_from_game_state(top_page)
 
 
 func _on_dialogue_ended() -> void:
-	print("[Dialogue] Ended")
+	print("[BookPage] Dialogue ended")
 	dialogue_data = {}
 	dialogue_history = []
 	current_page = pre_dialogue_page
@@ -1373,34 +1413,92 @@ func _on_dialogue_ended() -> void:
 				_render_room_to_page(top_page, GameState.current_room)
 
 
+## Render dialogue using GameState as source of truth
+func _render_dialogue_from_game_state(page: PageMesh) -> void:
+	var data: Dictionary = GameState.dialogue_data
+	if data.is_empty():
+		page.label.text = ""
+		return
+
+	var title_color := "#2a1f14"
+	var body_color := "#362816"
+	var player_color := "#1a3a2a"
+	var choice_color := "#4a3828"
+	var event_color := "#5a4a3a"
+
+	var speaker: String = data.get("speaker", "")
+	if speaker == "":
+		speaker = data.get("entity_id", "Someone")
+	speaker = speaker.capitalize()
+
+	var text := ""
+	text += "[center][font_size=26][color=%s][b]%s[/b][/color][/font_size][/center]\n\n" % [title_color, speaker]
+
+	# Use GameState's dialogue_history
+	for entry in GameState.dialogue_history:
+		var entry_speaker: String = entry.get("speaker", "").capitalize()
+		var entry_text: String = entry.get("text", "")
+		var is_player: bool = entry.get("is_player", false)
+		var entry_event: String = entry.get("event", "")
+
+		if is_player:
+			if entry_event != "":
+				text += "[color=%s][%s][/color]\n" % [event_color, entry_event]
+			text += "[color=%s]You say, [i]\"%s\"[/i][/color]\n\n" % [player_color, entry_text]
+		else:
+			text += "[color=%s]%s says, \"%s\"[/color]\n\n" % [body_color, entry_speaker, entry_text]
+
+	var choices: Array = data.get("choices", [])
+	if choices.size() > 0:
+		for i in range(choices.size()):
+			var choice: Dictionary = choices[i]
+			var choice_text: String = choice.get("text", "Continue")
+			text += "[color=%s][url=%d][u]%s[/u][/url][/color]\n\n" % [choice_color, i, choice_text]
+	else:
+		text += "[color=%s][url=-1][u]Continue[/u][/url][/color]\n\n" % choice_color
+
+	page.label.text = text
+
+
 func _select_dialogue_choice(choice_index: int) -> void:
+	# Add player's choice to history (for display)
 	if choice_index >= 0:
-		var choices: Array = dialogue_data.get("choices", [])
+		var choices: Array = GameState.dialogue_data.get("choices", [])
 		if choice_index < choices.size():
 			var choice: Dictionary = choices[choice_index]
 			var choice_text: String = choice.get("text", "Continue")
 			var choice_event: String = choice.get("event", "")  # e.g., "Accept Quest"
+			# Add to local history for immediate display
 			dialogue_history.append({"speaker": "You", "text": choice_text, "is_player": true, "event": choice_event})
+			# Also add to GameState's history
+			GameState.dialogue_history.append({"speaker": "You", "text": choice_text, "is_player": true, "event": choice_event})
 
 	if _is_mock_dialogue:
 		_advance_mock_dialogue(choice_index)
 		return
 
-	if has_node("/root/PhoenixClient"):
-		var phoenix := get_node("/root/PhoenixClient")
-		if choice_index >= 0:
-			phoenix.dialogue_select(choice_index)
-		else:
-			phoenix.dialogue_select(0)
-	else:
-		_advance_mock_dialogue(choice_index)
+	# Use GameState to send the choice to server
+	GameState.select_dialogue_choice(choice_index if choice_index >= 0 else 0)
 
 
 func _start_mock_dialogue(entity: Variant) -> void:
 	_mock_dialogue_node = 0
-	var mock_data := _get_mock_dialogue_node(entity, 0)
-	_on_dialogue_started(mock_data)
 	_is_mock_dialogue = true
+	var mock_data := _get_mock_dialogue_node(entity, 0)
+
+	# Set up dialogue state locally for mock dialogue
+	dialogue_data = mock_data
+	dialogue_history = []
+	pre_dialogue_page = current_page
+	current_page = PageType.DIALOGUE
+	top_page.bottom_bar.visible = false
+
+	# Add initial NPC line to history
+	var speaker: String = mock_data.get("speaker", "Someone")
+	var text: String = mock_data.get("text", "")
+	dialogue_history.append({"speaker": speaker, "text": text, "is_player": false})
+
+	_render_dialogue_to_page(top_page, mock_data)
 
 
 func _advance_mock_dialogue(choice_index: int) -> void:
@@ -1411,7 +1509,14 @@ func _advance_mock_dialogue(choice_index: int) -> void:
 		return
 
 	var mock_data := _get_mock_dialogue_node(current_entity, _mock_dialogue_node)
-	_on_dialogue_updated(mock_data)
+	dialogue_data = mock_data
+
+	# Add NPC response to history
+	var speaker: String = mock_data.get("speaker", "Someone")
+	var text: String = mock_data.get("text", "")
+	dialogue_history.append({"speaker": speaker, "text": text, "is_player": false})
+
+	_render_dialogue_to_page(top_page, mock_data)
 
 
 func _get_mock_dialogue_node(entity: Variant, node_index: int) -> Dictionary:
