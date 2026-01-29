@@ -50,7 +50,8 @@ func _ready() -> void:
 
 
 func _setup_camera() -> void:
-	camera.position = Vector3(0, 0, 3)
+	# Very subtle overhead angle to show 3D page curl depth
+	camera.position = Vector3(0, 0.15, 3)
 	camera.look_at(Vector3.ZERO)
 
 

@@ -42,35 +42,48 @@ void vertex() {
     float page_half_width = 0.9;
     float normalized_x = (pos.x / page_half_width + 1.0) * 0.5;
 
+    // Determine which side curls based on direction
     float curl_start;
     if (curl_direction > 0.0) {
-        curl_start = 1.0 - normalized_x;
+        curl_start = 1.0 - normalized_x;  // Right side curls first
     } else {
-        curl_start = normalized_x;
+        curl_start = normalized_x;         // Left side curls first
     }
 
-    float curl_zone = curl_amount * 1.2;
+    // Curl zone expands as curl_amount increases
+    float curl_zone = curl_amount * 1.5;  // Larger zone for smoother transition
     curl_factor = 0.0;
     curl_shadow = 0.0;
 
     if (curl_start < curl_zone && curl_amount > 0.01) {
+        // How far into the curl zone (0 = edge, 1 = deepest curl)
         float t = 1.0 - (curl_start / max(curl_zone, 0.001));
         t = clamp(t, 0.0, 1.0);
+
+        // Smooth interpolation for natural page movement
         float smooth_t = t * t * (3.0 - 2.0 * t);
 
-        float dynamic_radius = curl_radius * (1.0 - curl_amount * 0.4);
-        float theta = smooth_t * curl_angle * curl_amount;
+        // Dynamic radius - gets tighter as page curls more
+        float dynamic_radius = curl_radius * (1.0 - curl_amount * 0.3);
+
+        // Rotation angle increases with depth into curl zone
+        float theta = smooth_t * curl_angle;
 
         float cos_theta = cos(theta);
         float sin_theta = sin(theta);
 
+        // LIFT: Page rises up (Y axis) - this creates the 3D page lift effect
         float lift = dynamic_radius * (1.0 - cos_theta);
+
+        // CURL: Page curls toward/away from camera (Z axis)
         float curl_z = dynamic_radius * sin_theta * curl_direction;
 
+        // Apply deformation with increased intensity
         float blend = smooth_t * curl_amount;
-        pos.y += lift * blend * 1.5;
-        pos.z += curl_z * blend;
+        pos.y += lift * blend * 2.5;    // Stronger vertical lift
+        pos.z += curl_z * blend * 1.5;  // More dramatic Z curl
 
+        // Rotate the normal to follow the curved surface
         float norm_angle = theta * blend;
         vec3 rotated_normal;
         rotated_normal.x = norm.x;
@@ -79,12 +92,13 @@ void vertex() {
         norm = normalize(rotated_normal);
 
         curl_factor = smooth_t * curl_amount;
-        curl_shadow = smoothstep(curl_zone, curl_zone * 0.7, curl_start) * curl_amount;
+        curl_shadow = smoothstep(curl_zone, curl_zone * 0.5, curl_start) * curl_amount;
     }
 
+    // Add slight thickness/separation at edges when curling
     if (curl_amount > 0.1) {
         float edge_factor = smoothstep(0.0, 0.1, curl_start) * smoothstep(0.0, 0.1, 1.0 - curl_start);
-        pos.z += page_thickness * (1.0 - edge_factor) * curl_amount * curl_direction;
+        pos.z += page_thickness * 2.0 * (1.0 - edge_factor) * curl_amount * curl_direction;
     }
 
     VERTEX = pos;
