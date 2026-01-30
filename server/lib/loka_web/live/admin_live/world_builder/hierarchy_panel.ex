@@ -11,6 +11,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
   """
   use Phoenix.Component
   import LokaWeb.CoreComponents
+  import LokaWeb.LoadingComponents, only: [empty_state: 1]
 
   attr :rooms, :list, required: true
   attr :npcs, :list, default: []
@@ -199,29 +200,39 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
         <div class="panel-content">
           <!-- Room Hierarchy -->
           <div class="hierarchy-tree" style={if @active_tab != :rooms, do: "display: none;", else: ""}>
-            <%= for room <- @filtered_rooms do %>
-              <div
-                class={[
-                  "hierarchy-item",
-                  @selected_room == room.key && "hierarchy-item-selected"
-                ]}
-                phx-click="select_room"
-                phx-value-key={room.key}
-              >
-                <.icon name="hero-cube" class="hierarchy-icon" />
-                <span>{room.name}</span>
-              </div>
+            <%= if @filtered_rooms == [] do %>
+              <.empty_state
+                icon="hero-map"
+                title={if @template_search != "", do: "No matching rooms", else: "No rooms yet"}
+                description={if @template_search == "", do: "Click + Room in toolbar to create one"}
+                class="py-6"
+              />
+            <% else %>
+              <%= for room <- @filtered_rooms do %>
+                <div
+                  class={[
+                    "hierarchy-item",
+                    @selected_room == room.key && "hierarchy-item-selected"
+                  ]}
+                  phx-click="select_room"
+                  phx-value-key={room.key}
+                >
+                  <.icon name="hero-cube" class="hierarchy-icon" />
+                  <span>{room.name}</span>
+                </div>
+              <% end %>
             <% end %>
           </div>
           
     <!-- NPC List -->
           <div class="hierarchy-tree" style={if @active_tab != :npcs, do: "display: none;", else: ""}>
             <%= if @filtered_npcs == [] do %>
-              <p class="text-muted" style="padding: 1rem; color: #666;">
-                {if @template_search != "",
-                  do: "No matching NPCs.",
-                  else: "No NPCs. Click + NPC in toolbar."}
-              </p>
+              <.empty_state
+                icon="hero-user-group"
+                title={if @template_search != "", do: "No matching NPCs", else: "No NPCs yet"}
+                description={if @template_search == "", do: "Click + NPC in toolbar to create one"}
+                class="py-6"
+              />
             <% else %>
               <%= for npc <- @filtered_npcs do %>
                 <div
@@ -244,11 +255,12 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
     <!-- Item List -->
           <div class="hierarchy-tree" style={if @active_tab != :items, do: "display: none;", else: ""}>
             <%= if @filtered_items == [] do %>
-              <p class="text-muted" style="padding: 1rem; color: #666;">
-                {if @template_search != "",
-                  do: "No matching items.",
-                  else: "No items. Click + Item in toolbar."}
-              </p>
+              <.empty_state
+                icon="hero-cube-transparent"
+                title={if @template_search != "", do: "No matching items", else: "No items yet"}
+                description={if @template_search == "", do: "Click + Item in toolbar to create one"}
+                class="py-6"
+              />
             <% else %>
               <%= for item <- @filtered_items do %>
                 <div

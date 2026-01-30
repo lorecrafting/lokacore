@@ -50,6 +50,9 @@ defmodule Loka.Application do
       # Admin tools - GameLog for debugging/audit (replaces Quest.EventLog)
       Loka.Admin.GameLog,
 
+      # Admin audit logging - Task supervisor for async audit log inserts
+      {Task.Supervisor, name: Loka.Admin.Audit.TaskSupervisor},
+
       # Framework layer - Quest System
       # ObjectiveRegistry must start before QuestRegistry for validation
       Loka.Framework.Quest.ObjectiveRegistry,

@@ -26,7 +26,8 @@ defmodule LokaWeb.AdminLive do
     SystemTab,
     PrototypesTab,
     TestingTab,
-    QuestsTab
+    QuestsTab,
+    AuditLogTab
   }
 
   alias Loka.Testing.Content.{WorldValidator, QuestValidator, PrototypeLinter}
@@ -145,6 +146,13 @@ defmodule LokaWeb.AdminLive do
               active={@active_tab}
               icon="hero-cog-6-tooth"
               label="System"
+              collapsed={@sidebar_collapsed}
+            />
+            <.nav_item
+              tab={:audit_log}
+              active={@active_tab}
+              icon="hero-clipboard-document-list"
+              label="Audit Log"
               collapsed={@sidebar_collapsed}
             />
           </nav>
@@ -293,6 +301,12 @@ defmodule LokaWeb.AdminLive do
     """
   end
 
+  defp tab_content(%{tab: :audit_log} = assigns) do
+    ~H"""
+    <.live_component module={AuditLogTab} id="audit-log-tab" />
+    """
+  end
+
   defp tab_content(assigns) do
     ~H"""
     <div role="alert" class="alert alert-warning">
@@ -315,7 +329,8 @@ defmodule LokaWeb.AdminLive do
     "prototypes" => :prototypes,
     "quests" => :quests,
     "testing" => :testing,
-    "system" => :system
+    "system" => :system,
+    "audit_log" => :audit_log
   }
 
   @impl true
@@ -713,6 +728,9 @@ defmodule LokaWeb.AdminLive do
       process_count: :erlang.system_info(:process_count)
     })
   end
+
+  # Audit log tab loads data via LiveComponent
+  defp load_tab_data(socket, :audit_log), do: socket
 
   defp load_tab_data(socket, _), do: socket
 end

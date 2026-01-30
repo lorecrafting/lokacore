@@ -48,8 +48,12 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     ScriptTemplatePicker,
     ScriptTemplateConfig,
     CommitModal,
-    ValidationPanel
+    ValidationPanel,
+    ConfirmationModal,
+    CreateEntityModal
   }
+
+  alias Loka.Admin.Audit
 
   # Valid layout algorithms - prevents atom exhaustion attacks
   @valid_algorithms ~w(force_directed circular grid hierarchical)a
@@ -149,6 +153,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:undo_state, %{can_undo: false, can_redo: false, undo_count: 0, redo_count: 0})
      # Confirmation modal state (replaces browser-native confirm dialogs)
      |> assign(:confirm_modal, nil)
+     # Initialize audit context for tracking admin actions
+     |> Audit.init_context(socket.assigns[:current_player])
      |> push_event("init_world_builder", %{rooms: rooms, validation: validation.results})}
   end
 
@@ -554,45 +560,11 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
       <% end %>
 
       <%!-- Confirmation Modal (replaces browser-native confirm dialogs) --%>
-      <%= if @confirm_modal do %>
-        <div class="modal-overlay" phx-click="cancel_confirm">
-          <div
-            class="modal-content"
-            style="max-width: 400px;"
-            phx-click-away="cancel_confirm"
-          >
-            <div class="modal-header">
-              <h3>{@confirm_modal.title}</h3>
-              <button phx-click="cancel_confirm" class="modal-close">&times;</button>
-            </div>
-            <div style="padding: 1rem;">
-              <p style="margin: 0 0 1rem 0; color: #ccc;">{@confirm_modal.message}</p>
-              <%= if @confirm_modal[:warning] do %>
-                <p style="margin: 0 0 1rem 0; color: #f59e0b; font-size: 0.85rem;">
-                  <.icon
-                    name="hero-exclamation-triangle"
-                    class="size-4"
-                    style="display: inline; vertical-align: middle;"
-                  />
-                  {@confirm_modal.warning}
-                </p>
-              <% end %>
-            </div>
-            <div class="modal-footer">
-              <button type="button" phx-click="cancel_confirm" class="btn btn-secondary">
-                Cancel
-              </button>
-              <button
-                type="button"
-                phx-click="execute_confirm"
-                class={["btn", (@confirm_modal[:danger] && "btn-danger") || "btn-primary"]}
-              >
-                {@confirm_modal[:confirm_text] || "Confirm"}
-              </button>
-            </div>
-          </div>
-        </div>
-      <% end %>
+      <ConfirmationModal.confirmation_modal
+        modal={@confirm_modal}
+        on_confirm="execute_confirm"
+        on_cancel="cancel_confirm"
+      />
     </div>
     """
   end
@@ -892,6 +864,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
              |> assign(:show_create_modal, false)
              |> assign(:rooms, RoomManager.list_rooms())
              |> log_console(:info, "Created room: #{room.key}")
+             |> Audit.log(:create, :room, room.key, nil, room)
              |> push_event("room_created", %{room: room})
              |> push_event("record_operation", %{
                type: "create_room",
@@ -1024,6 +997,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
          |> assign(:rooms, RoomManager.list_rooms())
          |> assign(:selected_room, nil)
          |> log_console(:info, "Deleted room: #{room_id}")
+         |> Audit.log(:delete, :room, room_id, room_before, nil)
          |> push_event("room_deleted", %{id: room_id})
          |> push_event("record_operation", %{
            type: "delete_room",
@@ -1244,7 +1218,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
            socket
            |> assign(:npcs, EntityManager.list_entities(:npc))
            |> assign(:show_npc_editor, false)
-           |> log_console(:info, "Created NPC: #{npc.name}")}
+           |> log_console(:info, "Created NPC: #{npc.name}")
+           |> Audit.log(:create, :npc, npc.key, nil, npc)}
 
         {:error, reason} ->
           {:noreply,
@@ -1282,7 +1257,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
            socket
            |> assign(:items, EntityManager.list_entities(:item))
            |> assign(:show_item_editor, false)
-           |> log_console(:info, "Created Item: #{item.name}")}
+           |> log_console(:info, "Created Item: #{item.name}")
+           |> Audit.log(:create, :item, item.key, nil, item)}
 
         {:error, reason} ->
           {:noreply,
@@ -1315,13 +1291,17 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
   # Actually delete the NPC after confirmation
   def handle_event("delete_npc_confirmed", %{"key" => npc_key}, socket) do
+    # Get NPC before deletion for audit log
+    npc_before = Enum.find(socket.assigns.npcs, fn n -> n.key == npc_key end)
+
     case EntityManager.delete_entity(npc_key) do
       :ok ->
         {:noreply,
          socket
          |> assign(:npcs, EntityManager.list_entities(:npc))
          |> assign(:selected_entity, nil)
-         |> log_console(:info, "Deleted NPC: #{npc_key}")}
+         |> log_console(:info, "Deleted NPC: #{npc_key}")
+         |> Audit.log(:delete, :npc, npc_key, npc_before, nil)}
 
       {:error, reason} ->
         {:noreply,
@@ -1350,13 +1330,17 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
   # Actually delete the Item after confirmation
   def handle_event("delete_item_confirmed", %{"key" => item_key}, socket) do
+    # Get item before deletion for audit log
+    item_before = Enum.find(socket.assigns.items, fn i -> i.key == item_key end)
+
     case EntityManager.delete_entity(item_key) do
       :ok ->
         {:noreply,
          socket
          |> assign(:items, EntityManager.list_entities(:item))
          |> assign(:selected_entity, nil)
-         |> log_console(:info, "Deleted Item: #{item_key}")}
+         |> log_console(:info, "Deleted Item: #{item_key}")
+         |> Audit.log(:delete, :item, item_key, item_before, nil)}
 
       {:error, reason} ->
         {:noreply,

@@ -37,9 +37,10 @@ Tasks are tracked here with categories and priorities. We use Claude Code's nati
 
 ### UI/UX
 
-- **Add loading/error/empty states to World Builder UI** - Better UX feedback
-- **Add admin audit logging** - Track who creates/modifies content
-- **Extract more LiveView components** - WorldBuilderLive is 1,262+ lines
+- **Extract more LiveView components (Phase 2)** - ModalManager pattern, DialogueEventHandler, EntityUpdateHandler still to extract
+  - WorldBuilderLive reduced from 2,758 to ~2,700 lines (Phase 1 complete)
+  - ConfirmationModal, CreateEntityModal extracted
+  - LoadingComponents module with spinner, progress_bar, empty_state created
 
 ---
 
@@ -71,12 +72,28 @@ Tasks are tracked here with categories and priorities. We use Claude Code's nati
 
 ### Recent Completions
 
+- **World Builder UX & Audit Logging** (2026-01-30)
+  - Added admin audit logging system:
+    - `audit_logs` table with player, action, entity_type, before/after state
+    - `Loka.Admin.AuditLog` schema with query helpers (by_player, by_entity, recent)
+    - `Loka.Admin.Audit` context module with async logging via Task.Supervisor
+    - `AuditLogTab` LiveComponent with filters and pagination
+    - Integrated audit logging in WorldBuilderLive (room/npc/item create/delete)
+  - Added loading/error/empty state components:
+    - `LoadingComponents` module: spinner, loading_overlay, progress_bar, empty_state, loading_button
+    - Updated HierarchyPanel with empty states (icons for rooms, NPCs, items)
+  - Extracted UI components from WorldBuilderLive:
+    - `ConfirmationModal` - reusable confirm dialog
+    - `CreateEntityModal` - generic create form for room/npc/item
+  - Files created: 8 new files, 5 modified
+
 - **Fix room coordinate persistence** (2026-01-30)
   - Room x/y/z coordinates now persist on create and update
-  - Fixed `enrich_room_for_frontend` to check both attributes and data
-  - Fixed `build_room_yaml` to write attributes section with coordinates
+  - Root cause: TypedObject stores top-level YAML fields in `data`, not `attributes`
+  - Fixed `enrich_room_for_frontend` to check both `attributes` AND `data`
+  - Fixed `build_room_yaml` to write `attributes:` section with coordinates
   - Fixed `delete_room` to also delete YAML file (not just registry)
-  - Cleaned up unused functions and aliases
+  - Created skill: `.claude/skills/typed-object-field-storage.md`
 
 - **World Builder LLM Enhancement** (2026-01-30)
   - Enhanced context_builder.ex with NPC/quest/item/zone context
