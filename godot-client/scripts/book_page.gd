@@ -324,7 +324,7 @@ func _create_bottom_bar() -> Control:
 	bar.add_child(hbox)
 
 	# Menu button (left)
-	var menu_btn := _create_bar_button("☰", "menu")
+	var menu_btn := _create_bar_button("Menu", "menu")
 	hbox.add_child(menu_btn)
 
 	# Spacer
@@ -342,7 +342,7 @@ func _create_bottom_bar() -> Control:
 	hbox.add_child(spacer2)
 
 	# Say button (right)
-	var say_btn := _create_bar_button("💬", "say")
+	var say_btn := _create_bar_button("Say", "say")
 	hbox.add_child(say_btn)
 
 	return bar
@@ -911,11 +911,11 @@ func _render_menu_to_page(page: PageMesh) -> void:
 	# Tab bar with clickable icons
 	text += "[center]"
 	var tabs := [
-		{"key": "inventory", "icon": "🎒", "tab": MenuTab.INVENTORY},
-		{"key": "character", "icon": "👤", "tab": MenuTab.CHARACTER},
-		{"key": "map", "icon": "🗺️", "tab": MenuTab.MAP},
-		{"key": "social", "icon": "💬", "tab": MenuTab.SOCIAL},
-		{"key": "settings", "icon": "⚙️", "tab": MenuTab.SETTINGS},
+		{"key": "inventory", "icon": "Inv", "tab": MenuTab.INVENTORY},
+		{"key": "character", "icon": "Char", "tab": MenuTab.CHARACTER},
+		{"key": "map", "icon": "Map", "tab": MenuTab.MAP},
+		{"key": "social", "icon": "Soc", "tab": MenuTab.SOCIAL},
+		{"key": "settings", "icon": "Set", "tab": MenuTab.SETTINGS},
 	]
 
 	for tab in tabs:
@@ -1638,7 +1638,7 @@ func _get_map_content() -> String:
 		current_loc = GameState.current_room.name
 
 	text += "[color=%s]Current Location:[/color]\n" % hint_color
-	text += "[color=%s]  📍 %s[/color]\n\n" % [body_color, current_loc]
+	text += "[color=%s]  * %s[/color]\n\n" % [body_color, current_loc]
 
 	# Show available exits
 	var exits: Array = GameState.get_available_exits()

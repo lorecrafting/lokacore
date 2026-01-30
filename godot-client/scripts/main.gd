@@ -466,7 +466,7 @@ func _setup_bardo_overlay() -> void:
 
 	# Title
 	var title := Label.new()
-	title.text = "☠️ You Have Died ☠️"
+	title.text = "-- You Have Died --"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 28)
 	title.add_theme_color_override("font_color", Color(0.8, 0.6, 0.6))
@@ -518,7 +518,7 @@ func _on_bardo_can_reincarnate() -> void:
 	print("[Main] Can now reincarnate")
 	if reincarnate_btn:
 		reincarnate_btn.disabled = false
-		reincarnate_btn.text = "🔄 Reincarnate"
+		reincarnate_btn.text = "Reincarnate"
 
 
 func _on_bardo_exited() -> void:
