@@ -37,11 +37,6 @@ Tasks are tracked here with categories and priorities. We use Claude Code's nati
 
 ### UI/UX
 
-- **Extract more LiveView components (Phase 2)** - ModalManager pattern, DialogueEventHandler, EntityUpdateHandler still to extract
-  - WorldBuilderLive reduced from 2,758 to ~2,700 lines (Phase 1 complete)
-  - ConfirmationModal, CreateEntityModal extracted
-  - LoadingComponents module with spinner, progress_bar, empty_state created
-
 ---
 
 ## Low Priority / Future Work
@@ -71,6 +66,14 @@ Tasks are tracked here with categories and priorities. We use Claude Code's nati
 ## Done
 
 ### Recent Completions
+
+- **WorldBuilderLive Component Extraction Phase 2** (2026-01-30)
+  - Reduced WorldBuilderLive from ~2,700 to ~2,336 lines (406 lines extracted)
+  - Extracted `DialogueEventHandler` - all dialogue_* event handlers (11 handlers)
+  - Extracted `EntityEventHandler` - NPC/Item CRUD operations (8 handlers)
+  - Created `Helpers` module - shared utilities (parse_integer, slugify, sanitize_error, log_console)
+  - All event handlers now delegate to specialized modules
+  - Clean separation of concerns: handlers, helpers, main LiveView
 
 - **World Builder UX & Audit Logging** (2026-01-30)
   - Added admin audit logging system:
