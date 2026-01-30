@@ -32,7 +32,6 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     GitManager
   }
 
-  alias Loka.Testing.Content.DialogueQuestChainValidator
   alias Loka.Content.Zone
 
   alias LokaWeb.AdminLive.WorldBuilder.{
@@ -50,8 +49,6 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     CommitModal,
     ValidationPanel,
     ConfirmationModal,
-    CreateEntityModal,
-    Helpers,
     DialogueEventHandler,
     EntityEventHandler
   }
@@ -63,10 +60,6 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
   # Allowed fields for mass assignment protection
   @allowed_room_fields ~w(key name description x y z zone tags attributes parent_key)
-  @allowed_npc_fields ~w(key name description level attributes tags parent_key)
-  @allowed_item_fields ~w(key name description item_type attributes tags parent_key)
-  @allowed_quest_fields ~w(key name description quest_type giver_key objectives rewards prerequisites level_range journal_entries tags)
-  @allowed_cutscene_fields ~w(id trigger sequence effects)
 
   @impl true
   def mount(_params, _session, socket) do
@@ -1913,7 +1906,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   # =============================================================================
 
   # Handle tool result from client (logging/confirmation)
-  def handle_event("tool_result", %{"tool" => tool, "result" => result}, socket) do
+  def handle_event("tool_result", %{"tool" => tool, "result" => _result}, socket) do
     # Just log it, as the actual execution happened in execute_tool
     # This prevents the crash when the client bounces the result back
     {:noreply, log_console(socket, :info, "Tool #{tool} finished")}
@@ -2219,7 +2212,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   end
 
   # Safely parse integer from string, preventing application crashes on invalid input
-  defp parse_integer(value, default \\ 0) do
+  defp parse_integer(value, default) do
     case Integer.parse(value || "#{default}") do
       {int, _} -> int
       :error -> default
@@ -2259,38 +2252,6 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
       :api_key_not_configured -> "Service not configured"
       msg when is_binary(msg) and byte_size(msg) < 100 -> msg
       _ -> "Operation failed"
-    end
-  end
-
-  defp format_validation_error(error) do
-    case error do
-      {:broken_quest_chain, npc, quest_id, next_quest, message} ->
-        "[#{npc}] #{quest_id} → #{next_quest}: #{message}"
-
-      {:quest_not_offered_in_dialogue, npc, quest_id} ->
-        "[#{npc}] Quest #{quest_id} is not offered in dialogue"
-
-      {:no_dialogue_tree, npc, quest_id} ->
-        "[#{npc}] No dialogue tree found (needed for quest #{quest_id})"
-
-      {:npc_not_found, npc} ->
-        "NPC not found: #{npc}"
-
-      {:missing_quest_definition, quest_id} ->
-        "Quest definition missing: #{quest_id}"
-
-      _ ->
-        "Unknown error: #{inspect(error)}"
-    end
-  end
-
-  defp format_validation_warning(warning) do
-    case warning do
-      {:no_turnin_dialogue, npc, quest_id} ->
-        "[#{npc}] Quest #{quest_id} has no turn-in dialogue"
-
-      _ ->
-        "Unknown warning: #{inspect(warning)}"
     end
   end
 

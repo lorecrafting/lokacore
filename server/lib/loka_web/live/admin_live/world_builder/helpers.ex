@@ -73,15 +73,4 @@ defmodule LokaWeb.AdminLive.WorldBuilder.Helpers do
     messages = [entry | socket.assigns.console_messages] |> Enum.take(100)
     assign(socket, :console_messages, messages)
   end
-
-  @doc """
-  Returns a map of helper functions for use by extracted event handlers.
-  """
-  def helpers_map do
-    %{
-      parse_integer: &parse_integer/2,
-      slugify: &slugify/1,
-      sanitize_error: &sanitize_error/2
-    }
-  end
 end
