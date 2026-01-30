@@ -1675,7 +1675,7 @@ func _get_map_content() -> String:
 				if is_explored:
 					# Show explored rooms as boxes, current room with dot inside
 					if is_current:
-						row_rooms += "[color=%s][b](.)[/b][/color]" % current_color
+						row_rooms += "[color=%s][b][.][/b][/color]" % current_color
 					else:
 						row_rooms += "[color=%s][ ][/color]" % room_color
 				else:
