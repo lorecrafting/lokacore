@@ -1632,10 +1632,8 @@ func _get_character_content() -> String:
 
 
 func _get_map_content() -> String:
-	var hint_color := "#6a5a4a"
 	var room_color := "#362816"
 	var current_color := "#1a4a2a"  # Green for current room
-	var fog_color := "#8a8a8a"      # Gray for unexplored adjacent rooms
 	var path_color := "#5a4a3a"     # Brown for paths
 
 	# Build room positions using BFS from a known starting point
@@ -1654,13 +1652,17 @@ func _get_map_content() -> String:
 		max_y = maxi(max_y, pos.y)
 
 	# Render the grid (top to bottom = north to south)
-	var text := ""
-	var current_room_key: String = GameState.current_room.key if GameState.current_room else ""
+	var text := "[center]"
+	# Use last explored room as current if GameState.current_room doesn't match MockWorld
+	var current_room_key: String = ""
+	if GameState.current_room and MockWorld.get_room(GameState.current_room.key) != null:
+		current_room_key = GameState.current_room.key
+	elif GameState.explored_rooms.size() > 0:
+		current_room_key = GameState.explored_rooms[GameState.explored_rooms.size() - 1]
 
 	# Render from top (max_y) to bottom (min_y)
 	for y in range(max_y, min_y - 1, -1):
 		var row_rooms := ""
-		var row_paths := ""
 
 		for x in range(min_x, max_x + 1):
 			var room_key := _get_room_at_position(room_positions, x, y)
@@ -1669,60 +1671,71 @@ func _get_map_content() -> String:
 				var room := MockWorld.get_room(room_key)
 				var is_current := room_key == current_room_key
 				var is_explored := GameState.is_room_explored(room_key)
-				var is_visible := GameState.is_room_visible(room_key)
 
-				if is_visible:
-					var abbrev := _get_room_abbreviation(room.name if room else room_key)
+				if is_explored:
+					# Show explored rooms as boxes, current room with dot inside
 					if is_current:
-						row_rooms += "[color=%s][[b]%s[/b]][/color]" % [current_color, abbrev]
-					elif is_explored:
-						row_rooms += "[color=%s][ %s ][/color]" % [room_color, abbrev]
+						row_rooms += "[color=%s][b](.)[/b][/color]" % current_color
 					else:
-						# Adjacent but unexplored - show as fog
-						row_rooms += "[color=%s][ ? ][/color]" % fog_color
+						row_rooms += "[color=%s][ ][/color]" % room_color
 				else:
-					row_rooms += "     "
+					# Fog of war - don't show the room, just empty space
+					row_rooms += " "
 
-				# Check for east connection
+				# Check for east connection (show if either room is explored)
 				if x < max_x:
-					var east_room := _get_room_at_position(room_positions, x + 1, y)
-					if east_room != "" and room and room.exits.has("east"):
-						if is_visible and GameState.is_room_visible(east_room):
-							row_rooms += "[color=%s]--[/color]" % path_color
-						else:
-							row_rooms += "  "
+					var east_room_key := _get_room_at_position(room_positions, x + 1, y)
+					var show_east_path := false
+					if east_room_key != "":
+						var east_room := MockWorld.get_room(east_room_key)
+						var east_explored := GameState.is_room_explored(east_room_key)
+						# Show path if current room is explored and has east exit
+						if is_explored and room and room.exits.has("east"):
+							show_east_path = true
+						# Or if east room is explored and has west exit
+						elif east_explored and east_room and east_room.exits.has("west"):
+							show_east_path = true
+					if show_east_path:
+						row_rooms += "[color=%s]-[/color]" % path_color
 					else:
-						row_rooms += "  "
+						row_rooms += " "
 			else:
-				row_rooms += "     "
+				row_rooms += " "
 				if x < max_x:
-					row_rooms += "  "
+					row_rooms += " "
 
 		text += row_rooms + "\n"
 
-		# Render vertical connections (south paths)
+		# Render vertical connections - only from explored rooms
 		if y > min_y:
 			var vert_paths := ""
 			for x in range(min_x, max_x + 1):
 				var room_key := _get_room_at_position(room_positions, x, y)
-				if room_key != "":
+				var south_room_key := _get_room_at_position(room_positions, x, y - 1)
+
+				var show_path := false
+				if room_key != "" and south_room_key != "":
 					var room := MockWorld.get_room(room_key)
-					var south_room := _get_room_at_position(room_positions, x, y - 1)
-					if south_room != "" and room and room.exits.has("south"):
-						var is_visible := GameState.is_room_visible(room_key)
-						var south_visible := GameState.is_room_visible(south_room)
-						if is_visible and south_visible:
-							vert_paths += "  [color=%s]|[/color]  " % path_color
-						else:
-							vert_paths += "     "
-					else:
-						vert_paths += "     "
+					var south_room := MockWorld.get_room(south_room_key)
+					var room_explored := GameState.is_room_explored(room_key)
+					var south_explored := GameState.is_room_explored(south_room_key)
+
+					# Show path if either room is explored and they're connected
+					if room_explored and room and room.exits.has("south"):
+						show_path = true
+					elif south_explored and south_room and south_room.exits.has("north"):
+						show_path = true
+
+				if show_path:
+					vert_paths += "[color=%s]|[/color]" % path_color
 				else:
-					vert_paths += "     "
+					vert_paths += " "
+
 				if x < max_x:
-					vert_paths += "  "
+					vert_paths += " "
 			text += vert_paths + "\n"
 
+	text += "[/center]"
 	return text
 
 
