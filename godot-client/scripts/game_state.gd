@@ -145,6 +145,13 @@ signal quest_progress(data: Dictionary)
 signal atmosphere_changed(atmosphere: String)
 
 # =============================================================================
+# Signals - Map Exploration
+# =============================================================================
+
+## Emitted when explored rooms change (for map updates)
+signal exploration_changed
+
+# =============================================================================
 # State Variables - Room & Connection
 # =============================================================================
 
@@ -213,6 +220,13 @@ const MAX_EVENTS := 10
 
 ## Current atmosphere (affects visual mood)
 var atmosphere: String = "peaceful"
+
+# =============================================================================
+# State Variables - Map Exploration
+# =============================================================================
+
+## Rooms that have been explored (for fog of war)
+var explored_rooms: Array = []
 
 ## Reference to PhoenixClient autoload
 var _phoenix: Node = null
@@ -311,6 +325,7 @@ func _init_offline_mode() -> void:
 	var start_key := MockWorld.start_room
 	current_room = MockWorld.get_room(start_key)
 	if current_room:
+		mark_room_explored(start_key)
 		room_changed.emit(current_room)
 
 
@@ -370,6 +385,7 @@ func _navigate_offline(direction: String) -> bool:
 		return false
 
 	current_room = new_room
+	mark_room_explored(destination_key)
 	room_changed.emit(current_room)
 	return true
 
@@ -407,8 +423,51 @@ func teleport_to(room_key: String) -> bool:
 		return false
 
 	current_room = room
+	mark_room_explored(room_key)
 	room_changed.emit(current_room)
 	return true
+
+
+# =============================================================================
+# Map Exploration
+# =============================================================================
+
+## Mark a room as explored (for fog of war on map)
+func mark_room_explored(room_key: String) -> void:
+	if room_key not in explored_rooms:
+		explored_rooms.append(room_key)
+		exploration_changed.emit()
+
+
+## Check if a room has been explored
+func is_room_explored(room_key: String) -> bool:
+	return room_key in explored_rooms
+
+
+## Check if a room is visible (explored OR adjacent to any explored room)
+func is_room_visible(room_key: String) -> bool:
+	# Always show explored rooms
+	if is_room_explored(room_key):
+		return true
+
+	# Show rooms adjacent to ANY explored room (fog of war edge)
+	for explored_key in explored_rooms:
+		var explored_room := MockWorld.get_room(explored_key)
+		if explored_room != null:
+			for exit_dir in explored_room.exits:
+				if explored_room.exits[exit_dir] == room_key:
+					return true
+
+	return false
+
+
+## Get all room keys that should be visible on the map
+func get_visible_rooms() -> Array:
+	var visible := []
+	for room_key in MockWorld.get_all_room_keys():
+		if is_room_visible(room_key):
+			visible.append(room_key)
+	return visible
 
 
 # =============================================================================

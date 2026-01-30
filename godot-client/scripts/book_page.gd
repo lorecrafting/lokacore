@@ -1632,33 +1632,174 @@ func _get_character_content() -> String:
 
 
 func _get_map_content() -> String:
-	var title_color := "#2a1f14"
 	var hint_color := "#6a5a4a"
-	var body_color := "#362816"
+	var room_color := "#362816"
+	var current_color := "#1a4a2a"  # Green for current room
+	var fog_color := "#8a8a8a"      # Gray for unexplored adjacent rooms
+	var path_color := "#5a4a3a"     # Brown for paths
 
-	var text := "[color=%s][b]World Map[/b][/color]\n\n" % title_color
+	# Build room positions using BFS from a known starting point
+	var room_positions: Dictionary = _build_room_grid()
 
-	# Show current location
-	var current_loc: String = "Unknown"
-	if GameState.current_room:
-		current_loc = GameState.current_room.name
+	# Find grid bounds
+	var min_x := 0
+	var max_x := 0
+	var min_y := 0
+	var max_y := 0
+	for room_key in room_positions:
+		var pos: Vector2i = room_positions[room_key]
+		min_x = mini(min_x, pos.x)
+		max_x = maxi(max_x, pos.x)
+		min_y = mini(min_y, pos.y)
+		max_y = maxi(max_y, pos.y)
 
-	text += "[color=%s]Current Location:[/color]\n" % hint_color
-	text += "[color=%s]  * %s[/color]\n\n" % [body_color, current_loc]
+	# Render the grid (top to bottom = north to south)
+	var text := ""
+	var current_room_key: String = GameState.current_room.key if GameState.current_room else ""
 
-	# Show available exits
-	var exits: Array = GameState.get_available_exits()
-	if exits.size() > 0:
-		text += "[color=%s]Available Paths:[/color]\n" % hint_color
-		for direction in exits:
-			var dest_name: String = GameState.get_exit_destination_name(direction)
-			var arrow: String = _get_direction_arrow(direction)
-			text += "[color=%s]  %s %s → %s[/color]\n" % [body_color, arrow, direction.capitalize(), dest_name]
-	else:
-		text += "[color=%s][i]No exits from this location.[/i][/color]\n" % hint_color
+	# Render from top (max_y) to bottom (min_y)
+	for y in range(max_y, min_y - 1, -1):
+		var row_rooms := ""
+		var row_paths := ""
 
-	text += "\n[color=%s][i]Full map coming soon...[/i][/color]" % hint_color
+		for x in range(min_x, max_x + 1):
+			var room_key := _get_room_at_position(room_positions, x, y)
+
+			if room_key != "":
+				var room := MockWorld.get_room(room_key)
+				var is_current := room_key == current_room_key
+				var is_explored := GameState.is_room_explored(room_key)
+				var is_visible := GameState.is_room_visible(room_key)
+
+				if is_visible:
+					var abbrev := _get_room_abbreviation(room.name if room else room_key)
+					if is_current:
+						row_rooms += "[color=%s][[b]%s[/b]][/color]" % [current_color, abbrev]
+					elif is_explored:
+						row_rooms += "[color=%s][ %s ][/color]" % [room_color, abbrev]
+					else:
+						# Adjacent but unexplored - show as fog
+						row_rooms += "[color=%s][ ? ][/color]" % fog_color
+				else:
+					row_rooms += "     "
+
+				# Check for east connection
+				if x < max_x:
+					var east_room := _get_room_at_position(room_positions, x + 1, y)
+					if east_room != "" and room and room.exits.has("east"):
+						if is_visible and GameState.is_room_visible(east_room):
+							row_rooms += "[color=%s]--[/color]" % path_color
+						else:
+							row_rooms += "  "
+					else:
+						row_rooms += "  "
+			else:
+				row_rooms += "     "
+				if x < max_x:
+					row_rooms += "  "
+
+		text += row_rooms + "\n"
+
+		# Render vertical connections (south paths)
+		if y > min_y:
+			var vert_paths := ""
+			for x in range(min_x, max_x + 1):
+				var room_key := _get_room_at_position(room_positions, x, y)
+				if room_key != "":
+					var room := MockWorld.get_room(room_key)
+					var south_room := _get_room_at_position(room_positions, x, y - 1)
+					if south_room != "" and room and room.exits.has("south"):
+						var is_visible := GameState.is_room_visible(room_key)
+						var south_visible := GameState.is_room_visible(south_room)
+						if is_visible and south_visible:
+							vert_paths += "  [color=%s]|[/color]  " % path_color
+						else:
+							vert_paths += "     "
+					else:
+						vert_paths += "     "
+				else:
+					vert_paths += "     "
+				if x < max_x:
+					vert_paths += "  "
+			text += vert_paths + "\n"
+
 	return text
+
+
+## Build a grid of room positions using BFS
+func _build_room_grid() -> Dictionary:
+	var positions: Dictionary = {}
+	var visited: Dictionary = {}
+	var queue: Array = []
+
+	# Direction offsets
+	var dir_offset := {
+		"north": Vector2i(0, 1),
+		"south": Vector2i(0, -1),
+		"east": Vector2i(1, 0),
+		"west": Vector2i(-1, 0)
+	}
+
+	# Always start from monastery_gate as the map origin
+	# This ensures consistent positioning regardless of current room
+	var start_key := "monastery_gate"
+	var start_room := MockWorld.get_room(start_key)
+	if start_room == null:
+		# Fallback: try to use any explored room
+		for room_key in GameState.explored_rooms:
+			var room := MockWorld.get_room(room_key)
+			if room != null:
+				start_key = room_key
+				start_room = room
+				break
+		if start_room == null:
+			return positions
+
+	positions[start_key] = Vector2i(0, 0)
+	visited[start_key] = true
+	queue.append(start_key)
+
+	# BFS to build positions for ALL rooms in MockWorld
+	while queue.size() > 0:
+		var current_key: String = queue.pop_front()
+		var current_pos: Vector2i = positions[current_key]
+		var room := MockWorld.get_room(current_key)
+
+		if room == null:
+			continue
+
+		# Add all connected rooms
+		for direction in room.exits:
+			var dest_key: String = room.exits[direction]
+			if visited.has(dest_key):
+				continue
+
+			var offset: Vector2i = dir_offset.get(direction, Vector2i(0, 0))
+			positions[dest_key] = current_pos + offset
+			visited[dest_key] = true
+			queue.append(dest_key)
+
+	return positions
+
+
+## Get room key at a specific grid position
+func _get_room_at_position(positions: Dictionary, x: int, y: int) -> String:
+	for room_key in positions:
+		var pos: Vector2i = positions[room_key]
+		if pos.x == x and pos.y == y:
+			return room_key
+	return ""
+
+
+## Get 3-letter abbreviation for room name
+func _get_room_abbreviation(room_name: String) -> String:
+	# Remove common words and get first 3 chars of significant word
+	var name := room_name.replace("Monastery ", "").replace("'s ", " ")
+	var words := name.split(" ")
+	if words.size() > 0:
+		var word: String = words[0]
+		return word.substr(0, 3).to_upper()
+	return "???"
 
 
 func _get_direction_arrow(direction: String) -> String:
