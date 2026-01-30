@@ -326,6 +326,48 @@ cd godot-client && ./check.sh
 
 This runs Godot headlessly to catch script errors before opening the editor.
 
+### Godot Client Testing
+
+The Godot client uses lightweight unit tests optimized for rapid iteration:
+
+```bash
+# Run all tests
+cd godot-client && ./run_tests.sh
+
+# Run specific test suite
+./run_tests.sh test_game_state
+./run_tests.sh test_phoenix_client
+```
+
+**Test Suites:**
+| Suite | Coverage |
+|-------|----------|
+| `test_game_state` | PageType enum, state transitions, events, dialogue/shop/container lifecycle |
+| `test_book_page` | PageType/MenuTab enums, tab cycling logic |
+| `test_phoenix_client` | All 30+ signal definitions |
+| `test_mock_world` | Room/NPC/Item data classes |
+
+**Testing Philosophy:**
+1. **Unit tests**: State management, enums, signal definitions
+2. **Manual testing**: UI rendering, animations, click handling
+3. **ChannelBot E2E**: Full client-server flows (server-side)
+
+**When to add tests:**
+- New enums/state types → Update enum tests
+- New PhoenixClient signals → Add signal existence tests
+- New data classes → Add class instantiation tests
+
+### VFX & Performance Optimization
+
+When adding visual effects (particles, explosions, magic, etc.), see `.claude/skills/godot-vfx-optimization.md` for:
+- Performance budgets (16.6ms for 60fps)
+- Pre-baked sprite sheet animations (avoid runtime particle physics)
+- Texture atlases (reduce draw calls from 100 to 1)
+- Object pooling (eliminate GC stutters)
+- Shader-based "fake" particles (single quad renders 100+ particles)
+- LOD patterns for effects based on camera distance
+- Mobile/WebGL specific constraints
+
 ## Quick Commands
 
 ```bash
@@ -758,6 +800,7 @@ Work is often **cross-cutting** - use docs from any tier as needed.
 | **Game Client** | `docs/reference/game-client.md` |
 | **Channel API** | `docs/api/channel-contract.md` |
 | **Live Operations** | `docs/operations/live-operations-guide.md` |
+| **VFX Optimization** | `.claude/skills/godot-vfx-optimization.md` |
 | **Audit Commands** | `.claude/commands/` (run `/audit-*`) |
 
 ## API Endpoints
