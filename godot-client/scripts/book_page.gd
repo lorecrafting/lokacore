@@ -653,9 +653,15 @@ func _handle_page_click(screen_pos: Vector2) -> void:
 		_forward_click_to_text_viewport(vp_x, vp_y)
 	elif current_page == PageType.ENTITY:
 		_forward_click_to_text_viewport(vp_x, vp_y)
+	elif current_page == PageType.SHOP:
+		_forward_click_to_text_viewport(vp_x, vp_y)
+	elif current_page == PageType.CONTAINER:
+		_forward_click_to_text_viewport(vp_x, vp_y)
 	elif vp_y >= bar_top:
 		_handle_bottom_bar_click(vp_x, vp_y - bar_top)
 	elif current_page == PageType.ROOM:
+		_forward_click_to_text_viewport(vp_x, vp_y)
+	elif current_page == PageType.MENU:
 		_forward_click_to_text_viewport(vp_x, vp_y)
 
 
@@ -926,7 +932,7 @@ func _render_menu_to_page(page: PageMesh) -> void:
 			text += "[color=%s][url=menu:%s]%s[/url][/color]  " % [tab_color, tab.key, tab.icon]
 
 	text += "[/center]\n"
-	text += "[color=%s]───────────────────[/color]\n\n" % separator_color
+	text += "[color=%s]-------------------[/color]\n\n" % separator_color
 
 	match current_menu_tab:
 		MenuTab.INVENTORY:
@@ -1023,7 +1029,7 @@ func _render_shop_to_page(page: PageMesh) -> void:
 
 			text += " [color=%s](%dg)[/color]\n\n" % [price_color, price]
 
-	text += "[color=%s]───────────────────[/color]\n" % price_color
+	text += "[color=%s]-------------------[/color]\n" % price_color
 	text += "[color=%s]Your Gold: [/color][color=%s]%d[/color]\n\n" % [body_color, gold_color, player_gold]
 
 	text += "[color=%s][url=shop:close][u]Leave Shop[/u][/url][/color]" % action_color
@@ -1063,7 +1069,7 @@ func _render_container_to_page(page: PageMesh) -> void:
 			else:
 				text += "[color=%s][url=container:take:%d]• %s[/url][/color]\n\n" % [item_color, i, item_name]
 
-	text += "[color=%s]───────────────────[/color]\n\n" % hint_color
+	text += "[color=%s]-------------------[/color]\n\n" % hint_color
 
 	if not items.is_empty():
 		text += "[color=%s][url=container:take_all][u]Take All[/u][/url][/color]    " % action_color
@@ -1686,7 +1692,7 @@ func _get_social_content() -> String:
 
 	# Show current player info
 	var player_name: String = str(AuthClient.player.get("name", "You"))
-	text += "[color=%s]───────────────────[/color]\n\n" % hint_color
+	text += "[color=%s]-------------------[/color]\n\n" % hint_color
 	text += "[color=%s]You are:[/color] [color=%s]%s[/color]\n" % [hint_color, body_color, player_name]
 
 	if GameState.is_online:
