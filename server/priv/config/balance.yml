@@ -162,3 +162,173 @@ crafting:
     fine: 25
     superior: 12
     masterwork: 3
+
+# =============================================================================
+# NEW CORE MECHANICS (6-stat system)
+# =============================================================================
+
+stats:
+  # Character creation
+  creation:
+    pool: 60              # Total points to distribute at creation
+    min_per_stat: 5       # Minimum value per stat at creation
+    max_per_stat: 30      # Maximum value per stat at creation
+
+  # Progression
+  points_per_level: 5     # Stat points gained per level
+  max_stat: 100           # Maximum value any stat can reach
+  max_level: 50           # Maximum character level
+
+# Character resources (HP, Mana, MV)
+character_resources:
+  hp:
+    base: 50
+    con_multiplier: 4     # HP = base + (CON * con_mult) + (level * level_mult)
+    level_multiplier: 2
+    regen_rate: 0         # HP doesn't regen automatically
+
+  mana:
+    base: 20
+    int_multiplier: 3     # Mana = base + (INT * int_mult) + (SPI * spi_mult)
+    spi_multiplier: 2
+    regen_base: 5         # Regen = base + (INT / divisor)
+    regen_int_divisor: 5
+
+  mv:
+    base: 100
+    con_multiplier: 2     # MV = base + (CON * con_mult) + (DEX * dex_mult)
+    dex_multiplier: 2
+    regen_base: 10        # Regen = base + (DEX / divisor)
+    regen_dex_divisor: 5
+
+  tick_interval_ms: 5000  # Regen tick every 5 seconds
+  combat_regen_multiplier: 0.5  # 50% regen rate in combat
+
+# Combat stats (derived from base stats)
+combat_stats:
+  # Damage bonuses (stat / divisor)
+  damage_bonus_divisor: 3     # STR/3 for slashing, DEX/3 for piercing, etc.
+
+  # Accuracy
+  hit_bonus:
+    dex_divisor: 4            # DEX/4
+    per_divisor: 6            # + PER/6
+
+  # Critical hits
+  crit:
+    per_divisor: 5            # PER/5 = crit %
+    cap: 20                   # Max 20% crit chance
+
+  # Dodge
+  dodge:
+    dex_divisor: 5            # DEX/5 = dodge %
+    cap: 20                   # Max 20% dodge chance
+
+  # Resistances
+  magic_resist:
+    spi_divisor: 4            # SPI/4 = magic resist %
+    cap: 25                   # Max 25%
+
+  poison_resist:
+    con_divisor: 4            # CON/4 = poison resist %
+    cap: 25                   # Max 25%
+
+  # Spell power
+  spell_power_stat_divisor: 100   # 1 + (INT/100) = spell multiplier
+  heal_power_stat_divisor: 100    # 1 + (SPI/100) = heal multiplier
+  mana_cost_stat_divisor: 200     # 1 - (INT/200) = mana cost multiplier
+
+# Damage types and variance
+damage_types:
+  physical:
+    variance_min: 0.8
+    variance_max: 1.2
+    minimum: 1
+    crit_multiplier: 2.0
+
+  magical:
+    variance_min: 0.9
+    variance_max: 1.1
+    minimum: 1
+
+  healing:
+    variance_min: 0.95
+    variance_max: 1.05
+    minimum: 1
+
+  # DoT damage formulas
+  dot:
+    burning:
+      base: 5
+      stat_divisor: 10        # 5 + INT/10
+      stat: int
+    poisoned:
+      base: 3
+      stat_divisor: 10        # 3 + INT/10
+      stat: int
+    bleeding:
+      base: 3
+      stat_divisor: 10        # 3 + STR/10
+      stat: str
+
+# Binary skill system
+skills:
+  points_per_level: 1         # Skill points gained per level
+  max_total_points: 50        # Total skill points at max level
+
+# Magic system (Sanskrit mantras)
+magic:
+  # Stratum INT requirements
+  stratum:
+    first: 30                 # First Stratum requires INT 30
+    second: 50                # Second Stratum requires INT 50
+    third: 70                 # Third Stratum requires INT 70
+
+  # Guna (modifier) multipliers
+  guna_multipliers:
+    maha: 1.5                 # Great - 1.5x power/cost
+    laghu: 0.5                # Small - 0.5x power/cost
+    dvaya: 2.0                # Twin - cast twice
+    sthira: 1.0               # Lasting - 2x duration (no power change)
+    shighra: 1.0              # Swift - -1 lag (no power change)
+    bheda: 1.0                # Piercing - ignore 50% resist (no power change)
+
+  # Guna cost multipliers
+  guna_cost_multipliers:
+    maha: 1.5
+    laghu: 0.5
+    dvaya: 2.0
+    sthira: 1.3
+    shighra: 1.3
+    bheda: 1.4
+
+  # Quick slot count
+  quick_slots: 5
+
+# Combat rounds
+combat_round:
+  duration_ms: 3000           # 3 second rounds
+  flee_cost: 30               # MV cost to flee
+  flee_base_chance: 60        # Base 60% flee success
+  flee_fail_lag: 2            # 2 rounds lag on failed flee
+
+# Movement (MV) costs
+movement:
+  terrain_costs:
+    road: 5
+    path: 8
+    normal: 10
+    forest: 12
+    rough: 15
+    desert: 15
+    swamp: 18
+    snow: 18
+    water: 20
+    swimming: 20
+    difficult: 20
+    mountain: 25
+    climbing: 25
+
+  default_cost: 10
+  flee_cost: 30
+  sprint_multiplier: 2        # Sprint costs 2x terrain

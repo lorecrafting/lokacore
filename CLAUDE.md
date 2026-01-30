@@ -317,6 +317,20 @@ vec4 tex_color = texture(page_texture, corrected_uv);
 
 See `.claude/skills/godot-planemesh-uv-fix.md` for detailed patterns.
 
+### Common Gotcha: Property Access on GDScript Class Objects
+
+When accessing properties on custom GDScript class instances (like `MockWorld.NPC`, `MockWorld.Item`), use direct property access instead of `.get()`:
+
+```gdscript
+# ❌ WRONG - .get() may not work reliably on class instances
+var keyword: String = npc.get("primary_keyword") if npc.get("primary_keyword") else ""
+
+# ✅ CORRECT - use direct property access
+var keyword: String = npc.primary_keyword if npc.primary_keyword else ""
+```
+
+`.get()` is reliable on Dictionaries (like parsed JSON), but may return `null` on class instances even when the property exists. See `.claude/skills/godot-class-property-access.md` for full pattern.
+
 ### Validation After Changes
 
 Always run after modifying GDScript:

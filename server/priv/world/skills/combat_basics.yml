@@ -1,0 +1,212 @@
+# Combat Basics - Starter skills available from basic trainers
+# These are the first skills most players will learn
+
+skills:
+  # =============================================================================
+  # Melee Combat (STR-based)
+  # =============================================================================
+
+  kick:
+    key: kick
+    name: Kick
+    category: combat_melee
+    cost: 1
+    stat: str
+    prerequisites: []
+    trainers:
+      - combat_trainer
+      - monastery_martial_master
+    lag: 2
+    cooldown: 0
+    mv_cost: 10
+    mana_cost: 0
+    description: >
+      A basic kick attack. Deals bludgeoning damage based on STR.
+    effect:
+      type: damage
+      damage_type: bludgeoning
+      base: 5
+      stat_bonus: str
+      message_self: "You kick $target hard!"
+      message_target: "$actor kicks you hard!"
+      message_room: "$actor kicks $target hard!"
+
+  bash:
+    key: bash
+    name: Bash
+    category: combat_melee
+    cost: 1
+    stat: str
+    prerequisites: []
+    trainers:
+      - combat_trainer
+      - monastery_martial_master
+    lag: 3
+    cooldown: 2
+    mv_cost: 15
+    mana_cost: 0
+    description: >
+      A powerful bash that can stun the target briefly.
+    effect:
+      type: damage_and_effect
+      damage_type: bludgeoning
+      base: 8
+      stat_bonus: str
+      applies:
+        effect: stunned
+        duration: 1
+        chance: 30  # 30% base chance
+      message_self: "You bash $target with all your might!"
+      message_target: "$actor bashes into you!"
+      message_room: "$actor bashes $target!"
+
+  # =============================================================================
+  # Melee Combat (DEX-based)
+  # =============================================================================
+
+  thrust:
+    key: thrust
+    name: Thrust
+    category: combat_melee
+    cost: 1
+    stat: dex
+    prerequisites: []
+    trainers:
+      - combat_trainer
+      - monastery_martial_master
+    lag: 2
+    cooldown: 0
+    mv_cost: 8
+    mana_cost: 0
+    description: >
+      A quick piercing attack. Deals piercing damage based on DEX.
+    effect:
+      type: damage
+      damage_type: piercing
+      base: 4
+      stat_bonus: dex
+      message_self: "You thrust at $target!"
+      message_target: "$actor thrusts at you!"
+      message_room: "$actor thrusts at $target!"
+
+  # =============================================================================
+  # Defense
+  # =============================================================================
+
+  parry:
+    key: parry
+    name: Parry
+    category: combat_defense
+    cost: 1
+    stat: dex
+    prerequisites: []
+    trainers:
+      - combat_trainer
+      - monastery_martial_master
+    lag: 1
+    cooldown: 3
+    mv_cost: 5
+    mana_cost: 0
+    description: >
+      Attempt to parry the next incoming attack, reducing damage.
+    effect:
+      type: buff
+      applies:
+        effect: parrying
+        duration: 1  # Until next attack or 1 round
+        modifier:
+          damage_reduction: 50  # Reduce next hit by 50%
+      message_self: "You ready yourself to parry!"
+      message_room: "$actor readies a defensive stance."
+
+  dodge_skill:
+    key: dodge_skill
+    name: Evasive Maneuver
+    category: combat_defense
+    cost: 2
+    stat: dex
+    prerequisites:
+      - parry
+    trainers:
+      - combat_trainer
+      - monastery_martial_master
+    lag: 2
+    cooldown: 4
+    mv_cost: 20
+    mana_cost: 0
+    description: >
+      A quick evasive maneuver that greatly increases dodge chance.
+    effect:
+      type: buff
+      applies:
+        effect: evading
+        duration: 2
+        modifier:
+          dodge_bonus: 30  # +30% dodge for 2 rounds
+      message_self: "You begin weaving and dodging!"
+      message_room: "$actor begins moving evasively."
+
+  # =============================================================================
+  # Advanced Combat (requires basics)
+  # =============================================================================
+
+  disarm:
+    key: disarm
+    name: Disarm
+    category: combat_melee
+    cost: 2
+    stat: dex
+    prerequisites:
+      - parry
+      - thrust
+    trainers:
+      - monastery_martial_master
+      - weapon_master
+    lag: 3
+    cooldown: 5
+    mv_cost: 15
+    mana_cost: 0
+    description: >
+      Attempt to disarm your opponent, causing them to drop their weapon.
+    effect:
+      type: special
+      action: disarm
+      base_chance: 40
+      stat_bonus: dex  # +1% per DEX point
+      message_success: "You knock $target's weapon from their grasp!"
+      message_fail: "You fail to disarm $target."
+      message_target_success: "$actor knocks your weapon away!"
+      message_room_success: "$actor disarms $target!"
+
+  combo_strike:
+    key: combo_strike
+    name: Combo Strike
+    category: combat_melee
+    cost: 3
+    stat: str
+    prerequisites:
+      - kick
+      - bash
+    trainers:
+      - monastery_martial_master
+      - weapon_master
+    lag: 4
+    cooldown: 6
+    mv_cost: 25
+    mana_cost: 0
+    description: >
+      A devastating combination of strikes. High damage but leaves you vulnerable.
+    effect:
+      type: damage
+      damage_type: bludgeoning
+      base: 15
+      stat_bonus: str
+      multiplier: 1.5
+      self_debuff:
+        effect: winded
+        duration: 2
+        modifier:
+          dodge_penalty: 10
+      message_self: "You unleash a devastating combo on $target!"
+      message_target: "$actor unleashes a devastating combo on you!"
+      message_room: "$actor unleashes a devastating combo on $target!"

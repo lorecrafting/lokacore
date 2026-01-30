@@ -63,19 +63,66 @@ var start_room: String = "monastery_gate"
 
 ## Mock player data for offline mode
 var _mock_player_name: String = "Wanderer"
+
+## 6-stat system: STR, DEX, CON, INT, PER, SPI
+## Resources: HP, Mana, MV (with current/max values)
+## Derived combat stats calculated from base stats
 var _mock_player_stats: Dictionary = {
-	"level": 1,
-	"hp": 85,
-	"max_hp": 100,
-	"experience": 150,
-	"next_level_xp": 500
+	# Basic info
+	"level": 5,
+	"experience": 1250,
+	"next_level_xp": 2000,
+
+	# Base stats (6-stat system)
+	"str": 25,   # Strength - slashing damage
+	"dex": 30,   # Dexterity - piercing damage, dodge, MV
+	"con": 20,   # Constitution - HP, bludgeon damage, poison resist
+	"int": 35,   # Intelligence - spell power, mana
+	"per": 25,   # Perception - crit chance, hit bonus
+	"spi": 20,   # Spirit - healing power, mana, magic resist
+
+	# Resources (current/max)
+	"hp": 118,
+	"max_hp": 140,       # 50 + (CON × 4) + (Level × 2) = 50 + 80 + 10 = 140
+	"mana": 85,
+	"max_mana": 165,     # 20 + (INT × 3) + (SPI × 2) = 20 + 105 + 40 = 165
+	"mv": 180,
+	"max_mv": 200,       # 100 + (CON × 2) + (DEX × 2) = 100 + 40 + 60 = 200
+
+	# Derived combat stats
+	"slashing_bonus": 8,   # STR / 3
+	"piercing_bonus": 10,  # DEX / 3
+	"bludgeon_bonus": 6,   # CON / 3
+	"spell_bonus": 11,     # INT / 3
+	"healing_bonus": 6,    # SPI / 3
+	"hit_bonus": 11,       # DEX/4 + PER/6 = 7 + 4 = 11
+	"crit_chance": 5,      # PER / 5 (cap 20%)
+	"dodge_chance": 6,     # DEX / 5 (cap 20%)
+	"magic_resist": 5,     # SPI / 4 (cap 25%)
+	"poison_resist": 5,    # CON / 4 (cap 25%)
+
+	# Gold (separate from inventory)
+	"gold": 47
 }
+
 var _mock_inventory: Array = [
-	{"key": "worn_sandals", "name": "Worn Sandals", "quantity": 1},
-	{"key": "meditation_beads", "name": "Meditation Beads", "quantity": 1},
 	{"key": "healing_herb", "name": "Healing Herb", "quantity": 3},
-	{"key": "copper_coins", "name": "Copper Coins", "quantity": 12}
+	{"key": "minor_mana_potion", "name": "Minor Mana Potion", "quantity": 2},
+	{"key": "prayer_scroll", "name": "Prayer Scroll", "quantity": 1}
 ]
+
+var _mock_equipment: Dictionary = {
+	"head": null,
+	"neck": {"key": "meditation_beads", "name": "Meditation Beads"},
+	"body": {"key": "novice_robe", "name": "Novice Robe"},
+	"arms": null,
+	"hands": null,
+	"waist": {"key": "cloth_sash", "name": "Cloth Sash"},
+	"legs": null,
+	"feet": {"key": "worn_sandals", "name": "Worn Sandals"},
+	"main_hand": {"key": "walking_staff", "name": "Walking Staff"},
+	"off_hand": null,
+}
 
 
 func _ready() -> void:
@@ -236,3 +283,8 @@ func get_player_stats() -> Dictionary:
 ## Get mock player inventory
 func get_player_inventory() -> Array:
 	return _mock_inventory
+
+
+## Get mock player equipment
+func get_player_equipment() -> Dictionary:
+	return _mock_equipment

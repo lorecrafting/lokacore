@@ -48,7 +48,7 @@ defmodule Loka.WorldBuilder.QuestManager do
   require Logger
 
   alias Loka.Engine.TypedObject
-  alias Loka.Engine.TypedObject.{Loader, Registry}
+  alias Loka.Engine.TypedObject.Loader
   alias Loka.Content.Quest
 
   @quests_dir Path.join([:code.priv_dir(:loka), "world", "quests"])

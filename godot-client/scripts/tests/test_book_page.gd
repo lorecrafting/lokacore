@@ -51,17 +51,19 @@ func test_page_type_enum() -> bool:
 
 
 func test_menu_tab_enum() -> bool:
-	print("[TEST] BookPage.MenuTab enum has 5 tabs")
+	print("[TEST] BookPage.MenuTab enum has 7 tabs")
 
 	# Check all enum values exist
 	var inventory := BookPage.MenuTab.INVENTORY
+	var equipment := BookPage.MenuTab.EQUIPMENT
 	var character := BookPage.MenuTab.CHARACTER
+	var quests := BookPage.MenuTab.QUESTS
 	var map := BookPage.MenuTab.MAP
 	var social := BookPage.MenuTab.SOCIAL
 	var settings := BookPage.MenuTab.SETTINGS
 
-	# Verify they are 5 distinct values
-	var values := [inventory, character, map, social, settings]
+	# Verify they are 7 distinct values
+	var values := [inventory, equipment, character, quests, map, social, settings]
 	var unique := {}
 	for v in values:
 		if unique.has(v):
@@ -69,7 +71,7 @@ func test_menu_tab_enum() -> bool:
 			return false
 		unique[v] = true
 
-	print("  [PASS] All 5 MenuTab values are unique")
+	print("  [PASS] All 7 MenuTab values are unique")
 	return true
 
 
@@ -77,10 +79,12 @@ func test_menu_tab_cycle() -> bool:
 	print("[TEST] Menu tab cycling covers all tabs")
 
 	# Test that cycling through all tabs works
-	# INVENTORY -> CHARACTER -> MAP -> SOCIAL -> SETTINGS -> INVENTORY
+	# INVENTORY -> EQUIPMENT -> CHARACTER -> QUESTS -> MAP -> SOCIAL -> SETTINGS -> INVENTORY
 	var expected_order := [
 		BookPage.MenuTab.INVENTORY,
+		BookPage.MenuTab.EQUIPMENT,
 		BookPage.MenuTab.CHARACTER,
+		BookPage.MenuTab.QUESTS,
 		BookPage.MenuTab.MAP,
 		BookPage.MenuTab.SOCIAL,
 		BookPage.MenuTab.SETTINGS,
@@ -90,16 +94,20 @@ func test_menu_tab_cycle() -> bool:
 	var current := BookPage.MenuTab.INVENTORY
 	var order_index := 0
 
-	for i in range(6):
+	for i in range(7):
 		if current != expected_order[order_index]:
 			print("  [FAIL] Tab cycle order incorrect at step %d" % i)
 			return false
 
-		# Simulate next_menu_tab logic
+		# Simulate next_menu_tab logic (with EQUIPMENT tab)
 		match current:
 			BookPage.MenuTab.INVENTORY:
+				current = BookPage.MenuTab.EQUIPMENT
+			BookPage.MenuTab.EQUIPMENT:
 				current = BookPage.MenuTab.CHARACTER
 			BookPage.MenuTab.CHARACTER:
+				current = BookPage.MenuTab.QUESTS
+			BookPage.MenuTab.QUESTS:
 				current = BookPage.MenuTab.MAP
 			BookPage.MenuTab.MAP:
 				current = BookPage.MenuTab.SOCIAL

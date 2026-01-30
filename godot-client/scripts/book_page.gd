@@ -17,8 +17,8 @@ signal bottom_bar_pressed(button: String)
 ## Page types
 enum PageType { ROOM, MENU, ENTITY, DIALOGUE, SHOP, CONTAINER }
 
-## Menu tabs (5 tabs as per plan)
-enum MenuTab { INVENTORY, CHARACTER, MAP, SOCIAL, SETTINGS }
+## Menu tabs (7 tabs)
+enum MenuTab { INVENTORY, EQUIPMENT, CHARACTER, QUESTS, MAP, SOCIAL, SETTINGS }
 
 ## Text effects (matching shader uniforms)
 enum TextEffect { NONE = 0, BURN = 1, ICE = 2, GLOW = 3, FADE = 4 }
@@ -873,10 +873,11 @@ func _render_room_to_page(page: PageMesh, room: MockWorld.Room) -> void:
 	if room.npcs.size() > 0:
 		var npc_texts: Array[String] = []
 		for npc in room.npcs:
-			var npc_text := npc.long_desc if npc.get("long_desc") and npc.long_desc != "" else "%s is here." % npc.name
+			# Use direct property access for MockWorld.NPC objects
+			var npc_text := npc.long_desc if npc.long_desc != "" else "%s is here." % npc.name
 			npc_text = npc_text.replace("\n", " ").replace("  ", " ")
-			var keyword: String = npc.get("primary_keyword") if npc.get("primary_keyword") else ""
-			var npc_key: String = npc.get("key") if npc.get("key") else ""
+			var keyword: String = npc.primary_keyword if npc.primary_keyword else ""
+			var npc_key: String = npc.key if npc.key else ""
 			if keyword != "" and keyword in npc_text and npc_key != "":
 				npc_text = npc_text.replace(keyword, "[url=npc:%s][u]%s[/u][/url]" % [npc_key, keyword])
 			npc_texts.append(npc_text)
@@ -885,10 +886,11 @@ func _render_room_to_page(page: PageMesh, room: MockWorld.Room) -> void:
 	if room.items.size() > 0:
 		var item_texts: Array[String] = []
 		for item in room.items:
-			var item_text := item.long_desc if item.get("long_desc") and item.long_desc != "" else "%s lies here." % item.name
+			# Use direct property access for MockWorld.Item objects
+			var item_text := item.long_desc if item.long_desc != "" else "%s lies here." % item.name
 			item_text = item_text.replace("\n", " ").replace("  ", " ")
-			var keyword: String = item.get("primary_keyword") if item.get("primary_keyword") else ""
-			var item_key: String = item.get("key") if item.get("key") else ""
+			var keyword: String = item.primary_keyword if item.primary_keyword else ""
+			var item_key: String = item.key if item.key else ""
 			if keyword != "" and keyword in item_text and item_key != "":
 				item_text = item_text.replace(keyword, "[url=item:%s][u]%s[/u][/url]" % [item_key, keyword])
 			item_texts.append(item_text)
@@ -918,7 +920,9 @@ func _render_menu_to_page(page: PageMesh) -> void:
 	text += "[center]"
 	var tabs := [
 		{"key": "inventory", "icon": "Inv", "tab": MenuTab.INVENTORY},
+		{"key": "equipment", "icon": "Eq", "tab": MenuTab.EQUIPMENT},
 		{"key": "character", "icon": "Char", "tab": MenuTab.CHARACTER},
+		{"key": "quests", "icon": "Qst", "tab": MenuTab.QUESTS},
 		{"key": "map", "icon": "Map", "tab": MenuTab.MAP},
 		{"key": "social", "icon": "Soc", "tab": MenuTab.SOCIAL},
 		{"key": "settings", "icon": "Set", "tab": MenuTab.SETTINGS},
@@ -937,16 +941,18 @@ func _render_menu_to_page(page: PageMesh) -> void:
 	match current_menu_tab:
 		MenuTab.INVENTORY:
 			text += _get_inventory_content()
+		MenuTab.EQUIPMENT:
+			text += _get_equipment_content()
 		MenuTab.CHARACTER:
 			text += _get_character_content()
+		MenuTab.QUESTS:
+			text += _get_quests_content()
 		MenuTab.MAP:
 			text += _get_map_content()
 		MenuTab.SOCIAL:
 			text += _get_social_content()
 		MenuTab.SETTINGS:
 			text += _get_settings_content()
-
-	text += "\n\n[center][color=%s][i]Tap icons or swipe to switch tabs[/i][/color][/center]" % hint_color
 
 	page.label.text = text
 
@@ -1393,8 +1399,8 @@ func _select_npc_by_key(npc_key: String) -> void:
 		return
 
 	for npc in room.npcs:
-		var key: String = npc.get("key") if npc.get("key") else ""
-		if key == npc_key:
+		# Use direct property access for MockWorld.NPC objects
+		if npc.key == npc_key:
 			_click_entity(npc)
 			return
 
@@ -1405,8 +1411,8 @@ func _select_item_by_key(item_key: String) -> void:
 		return
 
 	for item in room.items:
-		var key: String = item.get("key") if item.get("key") else ""
-		if key == item_key:
+		# Use direct property access for MockWorld.Item objects
+		if item.key == item_key:
 			_click_entity(item)
 			return
 
@@ -1430,8 +1436,12 @@ func _handle_menu_click(tab_key: String) -> void:
 	match tab_key:
 		"inventory":
 			current_menu_tab = MenuTab.INVENTORY
+		"equipment":
+			current_menu_tab = MenuTab.EQUIPMENT
 		"character":
 			current_menu_tab = MenuTab.CHARACTER
+		"quests":
+			current_menu_tab = MenuTab.QUESTS
 		"map":
 			current_menu_tab = MenuTab.MAP
 		"social":
@@ -1545,8 +1555,12 @@ func clear_events() -> void:
 func next_menu_tab() -> void:
 	match current_menu_tab:
 		MenuTab.INVENTORY:
+			current_menu_tab = MenuTab.EQUIPMENT
+		MenuTab.EQUIPMENT:
 			current_menu_tab = MenuTab.CHARACTER
 		MenuTab.CHARACTER:
+			current_menu_tab = MenuTab.QUESTS
+		MenuTab.QUESTS:
 			current_menu_tab = MenuTab.MAP
 		MenuTab.MAP:
 			current_menu_tab = MenuTab.SOCIAL
@@ -1561,10 +1575,14 @@ func prev_menu_tab() -> void:
 	match current_menu_tab:
 		MenuTab.INVENTORY:
 			current_menu_tab = MenuTab.SETTINGS
-		MenuTab.CHARACTER:
+		MenuTab.EQUIPMENT:
 			current_menu_tab = MenuTab.INVENTORY
-		MenuTab.MAP:
+		MenuTab.CHARACTER:
+			current_menu_tab = MenuTab.EQUIPMENT
+		MenuTab.QUESTS:
 			current_menu_tab = MenuTab.CHARACTER
+		MenuTab.MAP:
+			current_menu_tab = MenuTab.QUESTS
 		MenuTab.SOCIAL:
 			current_menu_tab = MenuTab.MAP
 		MenuTab.SETTINGS:
@@ -1580,8 +1598,9 @@ func _get_inventory_content() -> String:
 	var text := "[color=%s][b]Your Pack[/b][/color]\n\n" % title_color
 
 	var items: Array = []
-	if GameState.is_online and GameState.server_state.has("player"):
-		items = GameState.server_state["player"].get("inventory", [])
+	if GameState.is_online:
+		# Inventory is at top level of server_state, not inside "player"
+		items = GameState.server_state.get("inventory", [])
 	else:
 		items = MockWorld.get_player_inventory()
 
@@ -1599,34 +1618,133 @@ func _get_inventory_content() -> String:
 	return text
 
 
-func _get_character_content() -> String:
+func _get_equipment_content() -> String:
 	var title_color := "#2a1f14"
-	var label_color := "#5a4a3a"
-	var value_color := "#362816"
+	var slot_color := "#5a4a3a"
+	var item_color := "#362816"
+	var empty_color := "#8a7a6a"
 
-	var text := "[color=%s][b]Character[/b][/color]\n\n" % title_color
+	var text := "[color=%s][b]Equipment[/b][/color]\n\n" % title_color
 
-	var player_name: String = "Unknown"
-	var level: int = 1
-	var hp: int = 100
-	var max_hp: int = 100
-
-	if GameState.is_online and GameState.server_state.has("player"):
-		var p: Dictionary = GameState.server_state["player"]
-		player_name = p.get("name", "Unknown")
-		level = p.get("level", 1)
-		hp = p.get("hp", 100)
-		max_hp = p.get("max_hp", 100)
+	# Get equipment from server or mock
+	var equipment: Dictionary = {}
+	if GameState.is_online:
+		equipment = GameState.server_state.get("equipment", {})
 	else:
-		player_name = str(AuthClient.player.get("name", MockWorld.get_player_name()))
-		var stats: Dictionary = MockWorld.get_player_stats()
-		level = stats.get("level", 1)
-		hp = stats.get("hp", 100)
-		max_hp = stats.get("max_hp", 100)
+		equipment = MockWorld.get_player_equipment()
 
-	text += "[color=%s]Name:[/color] [color=%s]%s[/color]\n\n" % [label_color, value_color, player_name]
-	text += "[color=%s]Level:[/color] [color=%s]%d[/color]\n\n" % [label_color, value_color, level]
-	text += "[color=%s]Health:[/color] [color=%s]%d / %d[/color]\n" % [label_color, value_color, hp, max_hp]
+	# Equipment slots in order
+	var slots := [
+		{"key": "head", "label": "Head"},
+		{"key": "neck", "label": "Neck"},
+		{"key": "body", "label": "Body"},
+		{"key": "arms", "label": "Arms"},
+		{"key": "hands", "label": "Hands"},
+		{"key": "waist", "label": "Waist"},
+		{"key": "legs", "label": "Legs"},
+		{"key": "feet", "label": "Feet"},
+		{"key": "main_hand", "label": "Main Hand"},
+		{"key": "off_hand", "label": "Off Hand"},
+	]
+
+	for slot in slots:
+		var slot_key: String = slot.key
+		var slot_label: String = slot.label
+		var equipped = equipment.get(slot_key, null)
+
+		if equipped != null and equipped is Dictionary:
+			var item_name: String = equipped.get("name", "Unknown")
+			text += "[color=%s]%s:[/color] [color=%s]%s[/color]\n" % [slot_color, slot_label, item_color, item_name]
+		else:
+			text += "[color=%s]%s:[/color] [color=%s]-- empty --[/color]\n" % [slot_color, slot_label, empty_color]
+
+	return text
+
+
+func _get_character_content() -> String:
+	# Get mock stats directly - avoid any potential issues with autoloads
+	var stats: Dictionary = MockWorld.get_player_stats()
+	var player_name: String = MockWorld.get_player_name()
+
+	var level: int = stats.get("level", 1)
+	var hp: int = stats.get("hp", 100)
+	var max_hp: int = stats.get("max_hp", 100)
+	var mana: int = stats.get("mana", 50)
+	var max_mana: int = stats.get("max_mana", 50)
+	var mv: int = stats.get("mv", 100)
+	var max_mv: int = stats.get("max_mv", 100)
+
+	var str_val: int = stats.get("str", 10)
+	var dex_val: int = stats.get("dex", 10)
+	var con_val: int = stats.get("con", 10)
+	var int_val: int = stats.get("int", 10)
+	var per_val: int = stats.get("per", 10)
+	var spi_val: int = stats.get("spi", 10)
+
+	var crit: int = stats.get("crit_chance", 0)
+	var dodge: int = stats.get("dodge_chance", 0)
+	var magic_resist: int = stats.get("magic_resist", 0)
+
+	var text := "[center][b]" + player_name + "[/b][/center]\n"
+	text += "[center]Level " + str(level) + "[/center]\n\n"
+	text += "[b]Resources[/b]\n"
+	text += "HP:   " + str(hp) + " / " + str(max_hp) + "\n"
+	text += "Mana: " + str(mana) + " / " + str(max_mana) + "\n"
+	text += "MV:   " + str(mv) + " / " + str(max_mv) + "\n\n"
+	text += "[b]Attributes[/b]\n"
+	text += "STR " + str(str_val) + "    INT " + str(int_val) + "\n"
+	text += "DEX " + str(dex_val) + "    PER " + str(per_val) + "\n"
+	text += "CON " + str(con_val) + "    SPI " + str(spi_val) + "\n\n"
+	text += "[b]Combat[/b]\n"
+	text += "Crit: " + str(crit) + "%  Dodge: " + str(dodge) + "%\n"
+	text += "Magic Resist: " + str(magic_resist) + "%\n"
+
+	return text
+
+
+func _get_quests_content() -> String:
+	var title_color := "#2a1f14"
+	var quest_color := "#362816"
+	var objective_color := "#5a4a3a"
+	var hint_color := "#6a5a4a"
+	var complete_color := "#1a4a2a"  # Green for completed
+
+	var text := "[color=%s][b]Quests[/b][/color]\n\n" % title_color
+
+	var quests: Array = []
+	if GameState.is_online:
+		quests = GameState.server_state.get("quests", [])
+
+	if quests.is_empty():
+		text += "[color=%s][i]No active quests.[/i][/color]\n\n" % hint_color
+		text += "[color=%s]Talk to NPCs to discover quests.[/color]\n" % hint_color
+	else:
+		for quest in quests:
+			var quest_name: String = quest.get("title", quest.get("name", "Unknown Quest"))
+			var status: String = quest.get("status", "active")
+			var objectives: Array = quest.get("objectives", [])
+
+			# Quest title with status indicator
+			if status == "completed":
+				text += "[color=%s][s]%s[/s] (Complete)[/color]\n" % [complete_color, quest_name]
+			else:
+				text += "[color=%s]* %s[/color]\n" % [quest_color, quest_name]
+
+			# Show objectives
+			for obj in objectives:
+				var obj_text: String = obj.get("description", obj.get("text", ""))
+				var current: int = obj.get("current", 0)
+				var total: int = obj.get("total", 1)
+				var obj_complete: bool = obj.get("complete", false) or current >= total
+
+				if obj_complete:
+					text += "[color=%s]  [x] %s[/color]\n" % [complete_color, obj_text]
+				elif total > 1:
+					text += "[color=%s]  [ ] %s (%d/%d)[/color]\n" % [objective_color, obj_text, current, total]
+				else:
+					text += "[color=%s]  [ ] %s[/color]\n" % [objective_color, obj_text]
+
+			text += "\n"
 
 	return text
 

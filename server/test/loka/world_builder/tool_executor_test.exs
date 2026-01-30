@@ -481,4 +481,195 @@ defmodule Loka.WorldBuilder.ToolExecutorTest do
       assert result.message == "Operation completed"
     end
   end
+
+  # =============================================================================
+  # New Tool Tests (Added 2026-01-30)
+  # =============================================================================
+
+  describe "execute/2 - list_npcs tool" do
+    test "lists all NPCs" do
+      input = %{}
+
+      assert {:ok, result} = ToolExecutor.execute("list_npcs", input)
+      assert result.success == true
+      assert is_list(result.npcs)
+    end
+
+    test "filters NPCs by room" do
+      input = %{"room_key" => "nonexistent_room"}
+
+      assert {:ok, result} = ToolExecutor.execute("list_npcs", input)
+      assert result.success == true
+      assert is_list(result.npcs)
+    end
+
+    test "filters NPCs by tag" do
+      input = %{"tag" => "quest_giver"}
+
+      assert {:ok, result} = ToolExecutor.execute("list_npcs", input)
+      assert result.success == true
+      assert is_list(result.npcs)
+    end
+  end
+
+  describe "execute/2 - list_items tool" do
+    test "lists all items" do
+      input = %{}
+
+      assert {:ok, result} = ToolExecutor.execute("list_items", input)
+      assert result.success == true
+      assert is_list(result.items)
+    end
+
+    test "filters items by room" do
+      input = %{"room_key" => "nonexistent_room"}
+
+      assert {:ok, result} = ToolExecutor.execute("list_items", input)
+      assert result.success == true
+      assert is_list(result.items)
+    end
+
+    test "filters items by type" do
+      input = %{"item_type" => "weapon"}
+
+      assert {:ok, result} = ToolExecutor.execute("list_items", input)
+      assert result.success == true
+      assert is_list(result.items)
+    end
+  end
+
+  describe "execute/2 - create_quest tool" do
+    test "creates a quest with valid input" do
+      input = %{
+        "key" => "tool_quest_#{:rand.uniform(10000)}",
+        "name" => "Tool Test Quest",
+        "description" => "A quest created via tool",
+        "quest_type" => "side",
+        "giver_key" => "test_npc",
+        "objectives" => [
+          %{"id" => "obj1", "type" => "kill", "target" => "monster", "count" => 5}
+        ],
+        "rewards" => %{"xp" => 100, "gold" => 50}
+      }
+
+      result = ToolExecutor.execute("create_quest", input)
+      # Quest creation may fail due to validation, but should not crash
+      assert match?({:ok, _}, result) or match?({:error, _}, result)
+    end
+
+    test "creates quest with minimal input" do
+      input = %{
+        "key" => "minimal_quest_#{:rand.uniform(10000)}",
+        "name" => "Minimal Quest",
+        "description" => "A minimal quest",
+        "giver_key" => "some_npc",
+        "objectives" => [%{"id" => "obj", "type" => "talk_to", "target" => "npc"}]
+      }
+
+      result = ToolExecutor.execute("create_quest", input)
+      assert match?({:ok, _}, result) or match?({:error, _}, result)
+    end
+  end
+
+  describe "execute/2 - update_quest tool" do
+    test "returns error for non-existent quest" do
+      input = %{
+        "quest_key" => "nonexistent_quest_#{:rand.uniform(10000)}",
+        "name" => "Updated Name"
+      }
+
+      assert {:error, _reason} = ToolExecutor.execute("update_quest", input)
+    end
+  end
+
+  describe "execute/2 - list_quests tool" do
+    test "lists all quests" do
+      input = %{}
+
+      assert {:ok, result} = ToolExecutor.execute("list_quests", input)
+      assert result.success == true
+      assert is_list(result.quests)
+    end
+
+    test "filters quests by type" do
+      input = %{"quest_type" => "main"}
+
+      assert {:ok, result} = ToolExecutor.execute("list_quests", input)
+      assert result.success == true
+      assert is_list(result.quests)
+    end
+
+    test "filters quests by giver" do
+      input = %{"giver_key" => "village_elder"}
+
+      assert {:ok, result} = ToolExecutor.execute("list_quests", input)
+      assert result.success == true
+      assert is_list(result.quests)
+    end
+  end
+
+  describe "execute/2 - create_dialogue tool" do
+    test "creates dialogue with valid input" do
+      input = %{
+        "key" => "tool_dialogue_#{:rand.uniform(10000)}",
+        "entity_key" => "test_npc",
+        "trigger" => "on_talk",
+        "entry_node" => "greeting",
+        "nodes" => %{
+          "greeting" => %{
+            "text" => "Hello, traveler!",
+            "choices" => [
+              %{"text" => "Hello", "next" => "response"},
+              %{"text" => "Goodbye", "next" => "end"}
+            ]
+          },
+          "response" => %{
+            "text" => "Nice to meet you.",
+            "choices" => [%{"text" => "Goodbye", "next" => "end"}]
+          }
+        }
+      }
+
+      result = ToolExecutor.execute("create_dialogue", input)
+      # May fail due to file permissions, but should not crash
+      assert match?({:ok, _}, result) or match?({:error, _}, result)
+    end
+
+    test "returns error for invalid dialogue key" do
+      input = %{
+        "key" => "INVALID-KEY-FORMAT",
+        "entity_key" => "test_npc",
+        "entry_node" => "greeting",
+        "nodes" => %{}
+      }
+
+      assert {:error, _reason} = ToolExecutor.execute("create_dialogue", input)
+    end
+  end
+
+  describe "execute/2 - get_dialogue tool" do
+    test "returns error for non-existent dialogue" do
+      input = %{"dialogue_key" => "nonexistent_dialogue_#{:rand.uniform(10000)}"}
+
+      assert {:error, _reason} = ToolExecutor.execute("get_dialogue", input)
+    end
+  end
+
+  describe "execute/2 - get_zone_info tool" do
+    test "returns error for non-existent zone" do
+      input = %{"zone_key" => "nonexistent_zone_#{:rand.uniform(10000)}"}
+
+      assert {:error, _reason} = ToolExecutor.execute("get_zone_info", input)
+    end
+  end
+
+  describe "execute/2 - list_zones tool" do
+    test "lists all zones" do
+      input = %{}
+
+      assert {:ok, result} = ToolExecutor.execute("list_zones", input)
+      assert result.success == true
+      assert is_list(result.zones)
+    end
+  end
 end

@@ -88,17 +88,86 @@ defmodule Loka.WorldBuilder.LLM.ConsistencyChecker do
     end
   end
 
-  defp check_npc_consistency(npc_data, warnings, _opts) do
-    # NOT YET IMPLEMENTED: NPC consistency checks need:
-    # - Naming pattern analysis for NPCs
-    # - Dialogue tree validation
-    # - Level/stats range checking
-    # - Zone-appropriate NPC type validation
+  defp check_npc_consistency(npc_data, warnings, opts) do
+    zone_key = opts[:zone_key]
+    npc_key = get_field(npc_data, :key) || "unnamed_npc"
+    npc_name = get_field(npc_data, :name) || "Unnamed NPC"
+    npc_level = get_field(npc_data, :level) || 1
 
-    npc_key = get_field(npc_data, :key) || "unnamed NPC"
-    warning_msg = "NPC consistency checks not yet implemented for #{npc_key}"
+    warnings =
+      if zone_key do
+        # Check level appropriateness for zone
+        case get_zone_level_range(zone_key) do
+          {:ok, {min_level, max_level}} when is_integer(min_level) and is_integer(max_level) ->
+            if npc_level < min_level or npc_level > max_level do
+              [
+                "NPC '#{npc_name}' level #{npc_level} is outside zone level range (#{min_level}-#{max_level})"
+                | warnings
+              ]
+            else
+              warnings
+            end
 
-    [warning_msg | warnings]
+          _ ->
+            warnings
+        end
+      else
+        warnings
+      end
+
+    # Check naming convention
+    warnings =
+      if not String.match?(npc_key, ~r/^[a-z][a-z0-9_]*$/) do
+        [
+          "NPC key '#{npc_key}' should use lowercase_with_underscores format"
+          | warnings
+        ]
+      else
+        warnings
+      end
+
+    # Check for missing description
+    npc_description = get_field(npc_data, :description)
+
+    warnings =
+      if is_nil(npc_description) or npc_description == "" do
+        ["NPC '#{npc_name}' is missing a description" | warnings]
+      else
+        warnings
+      end
+
+    # Check description length
+    warnings =
+      if npc_description && String.length(npc_description) < 20 do
+        ["NPC '#{npc_name}' has a very short description (< 20 chars)" | warnings]
+      else
+        warnings
+      end
+
+    warnings
+  end
+
+  defp get_zone_level_range(zone_key) do
+    alias Loka.Content.Zone
+
+    case Zone.get(zone_key) do
+      {:ok, zone} ->
+        level_range =
+          zone.attributes[:level_range] ||
+            zone[:level_range] ||
+            get_in(zone.data, ["level_range"])
+
+        if level_range do
+          min = level_range[:min] || level_range["min"] || 1
+          max = level_range[:max] || level_range["max"] || 100
+          {:ok, {min, max}}
+        else
+          {:ok, nil}
+        end
+
+      _ ->
+        {:error, :zone_not_found}
+    end
   end
 
   defp check_naming_pattern(new_room, existing_rooms, warnings) do

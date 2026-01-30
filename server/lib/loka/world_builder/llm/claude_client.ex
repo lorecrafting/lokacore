@@ -269,6 +269,10 @@ defmodule Loka.WorldBuilder.LLM.ClaudeClient do
   Defines available tools for Claude to manipulate world content.
   """
   def world_builder_tools do
+    room_tools() ++ entity_tools() ++ quest_tools() ++ dialogue_tools() ++ query_tools()
+  end
+
+  defp room_tools do
     [
       %{
         name: "create_room",
@@ -278,10 +282,18 @@ defmodule Loka.WorldBuilder.LLM.ClaudeClient do
           properties: %{
             key: %{type: "string", description: "Unique room key (e.g., forest_path_1)"},
             name: %{type: "string", description: "Room display name"},
-            description: %{type: "string", description: "Room description"},
-            x: %{type: "number", description: "X coordinate"},
-            y: %{type: "number", description: "Y coordinate"},
-            zone: %{type: "string", description: "Zone key this room belongs to"}
+            description: %{
+              type: "string",
+              description: "Room description (2-4 sentences with sensory details)"
+            },
+            x: %{type: "number", description: "X coordinate for map placement"},
+            y: %{type: "number", description: "Y coordinate for map placement"},
+            zone: %{type: "string", description: "Zone key this room belongs to"},
+            tags: %{
+              type: "array",
+              items: %{type: "string"},
+              description: "Tags for categorization"
+            }
           },
           required: ["key", "name", "description"]
         }
@@ -292,40 +304,350 @@ defmodule Loka.WorldBuilder.LLM.ClaudeClient do
         input_schema: %{
           type: "object",
           properties: %{
-            key: %{type: "string", description: "Room key to update"},
+            room_key: %{type: "string", description: "Room key to update"},
             name: %{type: "string", description: "New room name"},
             description: %{type: "string", description: "New room description"},
-            attributes: %{type: "object", description: "Additional attributes to set"}
+            x: %{type: "number", description: "New X coordinate"},
+            y: %{type: "number", description: "New Y coordinate"},
+            tags: %{type: "array", items: %{type: "string"}, description: "New tags"}
           },
-          required: ["key"]
+          required: ["room_key"]
+        }
+      },
+      %{
+        name: "delete_room",
+        description: "Deletes a room from the world (use with caution)",
+        input_schema: %{
+          type: "object",
+          properties: %{
+            room_key: %{type: "string", description: "Room key to delete"}
+          },
+          required: ["room_key"]
         }
       },
       %{
         name: "create_exit",
-        description: "Creates an exit between two rooms",
+        description: "Creates an exit from one room to another",
         input_schema: %{
           type: "object",
           properties: %{
-            from: %{type: "string", description: "Source room key"},
-            to: %{type: "string", description: "Destination room key"},
-            direction: %{type: "string", description: "Exit direction (north, south, etc.)"}
+            from_room: %{type: "string", description: "Source room key"},
+            direction: %{
+              type: "string",
+              description: "Exit direction",
+              enum: ["north", "south", "east", "west", "up", "down", "enter", "leave"]
+            },
+            to_room: %{type: "string", description: "Destination room key"}
           },
-          required: ["from", "to", "direction"]
+          required: ["from_room", "direction", "to_room"]
         }
       },
       %{
-        name: "create_npc",
-        description: "Creates a new NPC entity",
+        name: "remove_exit",
+        description: "Removes an exit from a room",
         input_schema: %{
           type: "object",
           properties: %{
-            key: %{type: "string", description: "Unique NPC key"},
+            from_room: %{type: "string", description: "Room key to remove exit from"},
+            direction: %{type: "string", description: "Direction of exit to remove"}
+          },
+          required: ["from_room", "direction"]
+        }
+      },
+      %{
+        name: "batch_create_rooms",
+        description: "Creates multiple rooms at once (for efficiency)",
+        input_schema: %{
+          type: "object",
+          properties: %{
+            rooms: %{
+              type: "array",
+              items: %{
+                type: "object",
+                properties: %{
+                  key: %{type: "string"},
+                  name: %{type: "string"},
+                  description: %{type: "string"},
+                  x: %{type: "number"},
+                  y: %{type: "number"}
+                },
+                required: ["key", "name", "description"]
+              },
+              description: "Array of room definitions"
+            }
+          },
+          required: ["rooms"]
+        }
+      }
+    ]
+  end
+
+  defp entity_tools do
+    [
+      %{
+        name: "create_npc",
+        description: "Creates a new NPC entity in a room",
+        input_schema: %{
+          type: "object",
+          properties: %{
+            key: %{type: "string", description: "Unique NPC key (e.g., village_elder)"},
             name: %{type: "string", description: "NPC display name"},
-            description: %{type: "string", description: "NPC description"},
-            room: %{type: "string", description: "Starting room key"},
-            attributes: %{type: "object", description: "NPC attributes (level, hostile, etc.)"}
+            description: %{type: "string", description: "NPC description (appearance, demeanor)"},
+            room_key: %{type: "string", description: "Room key where NPC is located"},
+            level: %{type: "integer", description: "NPC level (1-100)"},
+            tags: %{
+              type: "array",
+              items: %{type: "string"},
+              description: "Tags (quest_giver, shopkeeper, hostile, etc.)"
+            },
+            keywords: %{
+              type: "array",
+              items: %{type: "string"},
+              description: "Words players can use to target this NPC"
+            }
           },
           required: ["key", "name", "description"]
+        }
+      },
+      %{
+        name: "create_item",
+        description: "Creates a new item in a room or inventory",
+        input_schema: %{
+          type: "object",
+          properties: %{
+            key: %{type: "string", description: "Unique item key (e.g., iron_sword)"},
+            name: %{type: "string", description: "Item display name"},
+            description: %{type: "string", description: "Item description"},
+            room_key: %{type: "string", description: "Room key where item is located (optional)"},
+            item_type: %{
+              type: "string",
+              description: "Item type",
+              enum: ["weapon", "armor", "consumable", "quest_item", "container", "misc"]
+            },
+            tags: %{
+              type: "array",
+              items: %{type: "string"},
+              description: "Tags for categorization"
+            }
+          },
+          required: ["key", "name", "description", "item_type"]
+        }
+      },
+      %{
+        name: "list_npcs",
+        description: "Lists all NPCs, optionally filtered",
+        input_schema: %{
+          type: "object",
+          properties: %{
+            room_key: %{type: "string", description: "Filter to NPCs in this room"},
+            tag: %{type: "string", description: "Filter to NPCs with this tag"}
+          }
+        }
+      },
+      %{
+        name: "list_items",
+        description: "Lists all items, optionally filtered",
+        input_schema: %{
+          type: "object",
+          properties: %{
+            room_key: %{type: "string", description: "Filter to items in this room"},
+            item_type: %{type: "string", description: "Filter to items of this type"}
+          }
+        }
+      }
+    ]
+  end
+
+  defp quest_tools do
+    [
+      %{
+        name: "create_quest",
+        description: "Creates a new quest definition",
+        input_schema: %{
+          type: "object",
+          properties: %{
+            key: %{type: "string", description: "Unique quest key (e.g., find_the_artifact)"},
+            name: %{type: "string", description: "Quest display name"},
+            description: %{type: "string", description: "Quest description shown in journal"},
+            quest_type: %{
+              type: "string",
+              description: "Quest type",
+              enum: ["main", "side", "daily", "repeatable"]
+            },
+            giver_key: %{type: "string", description: "NPC key who gives this quest"},
+            objectives: %{
+              type: "array",
+              items: %{
+                type: "object",
+                properties: %{
+                  id: %{type: "string", description: "Unique objective ID within quest"},
+                  type: %{
+                    type: "string",
+                    enum: ["kill", "collect", "reach_room", "talk_to", "use_item"]
+                  },
+                  target: %{type: "string", description: "Target key (NPC, item, or room)"},
+                  count: %{type: "integer", description: "Required count (for kill/collect)"},
+                  description: %{type: "string", description: "Objective description"}
+                },
+                required: ["id", "type", "target"]
+              },
+              description: "Quest objectives"
+            },
+            rewards: %{
+              type: "object",
+              properties: %{
+                xp: %{type: "integer", description: "XP reward"},
+                gold: %{type: "integer", description: "Gold reward"},
+                items: %{
+                  type: "array",
+                  items: %{type: "string"},
+                  description: "Item keys to reward"
+                }
+              },
+              description: "Quest rewards"
+            },
+            prerequisites: %{
+              type: "array",
+              items: %{type: "string"},
+              description: "Quest keys that must be completed first"
+            },
+            level_range: %{
+              type: "object",
+              properties: %{
+                min: %{type: "integer"},
+                max: %{type: "integer"}
+              },
+              description: "Recommended level range"
+            }
+          },
+          required: ["key", "name", "description", "giver_key", "objectives"]
+        }
+      },
+      %{
+        name: "update_quest",
+        description: "Updates an existing quest",
+        input_schema: %{
+          type: "object",
+          properties: %{
+            quest_key: %{type: "string", description: "Quest key to update"},
+            name: %{type: "string", description: "New quest name"},
+            description: %{type: "string", description: "New quest description"},
+            objectives: %{type: "array", description: "New objectives array"},
+            rewards: %{type: "object", description: "New rewards"}
+          },
+          required: ["quest_key"]
+        }
+      },
+      %{
+        name: "list_quests",
+        description: "Lists all quests, optionally filtered",
+        input_schema: %{
+          type: "object",
+          properties: %{
+            quest_type: %{type: "string", description: "Filter by quest type"},
+            giver_key: %{type: "string", description: "Filter by quest giver NPC"}
+          }
+        }
+      }
+    ]
+  end
+
+  defp dialogue_tools do
+    [
+      %{
+        name: "create_dialogue",
+        description: "Creates a dialogue tree for an NPC",
+        input_schema: %{
+          type: "object",
+          properties: %{
+            key: %{type: "string", description: "Unique dialogue key (e.g., elder_greeting)"},
+            entity_key: %{type: "string", description: "NPC key this dialogue belongs to"},
+            trigger: %{
+              type: "string",
+              description: "When dialogue triggers",
+              enum: ["on_talk", "on_enter", "on_quest_start", "on_quest_complete"]
+            },
+            entry_node: %{type: "string", description: "Starting node ID"},
+            nodes: %{
+              type: "object",
+              additionalProperties: %{
+                type: "object",
+                properties: %{
+                  text: %{type: "string", description: "NPC's dialogue text"},
+                  choices: %{
+                    type: "array",
+                    items: %{
+                      type: "object",
+                      properties: %{
+                        text: %{type: "string", description: "Player's choice text"},
+                        next: %{type: "string", description: "Next node ID or 'end'"}
+                      },
+                      required: ["text", "next"]
+                    }
+                  }
+                },
+                required: ["text"]
+              },
+              description: "Dialogue nodes keyed by node ID"
+            }
+          },
+          required: ["key", "entity_key", "entry_node", "nodes"]
+        }
+      },
+      %{
+        name: "get_dialogue",
+        description: "Gets a dialogue definition by key",
+        input_schema: %{
+          type: "object",
+          properties: %{
+            dialogue_key: %{type: "string", description: "Dialogue key to retrieve"}
+          },
+          required: ["dialogue_key"]
+        }
+      }
+    ]
+  end
+
+  defp query_tools do
+    [
+      %{
+        name: "get_room_info",
+        description: "Gets detailed information about a room",
+        input_schema: %{
+          type: "object",
+          properties: %{
+            room_key: %{type: "string", description: "Room key to look up"}
+          },
+          required: ["room_key"]
+        }
+      },
+      %{
+        name: "list_rooms",
+        description: "Lists all rooms, optionally filtered by tag",
+        input_schema: %{
+          type: "object",
+          properties: %{
+            filter_tag: %{type: "string", description: "Filter to rooms with this tag"}
+          }
+        }
+      },
+      %{
+        name: "get_zone_info",
+        description: "Gets information about a zone",
+        input_schema: %{
+          type: "object",
+          properties: %{
+            zone_key: %{type: "string", description: "Zone key to look up"}
+          },
+          required: ["zone_key"]
+        }
+      },
+      %{
+        name: "list_zones",
+        description: "Lists all zones",
+        input_schema: %{
+          type: "object",
+          properties: %{}
         }
       }
     ]
