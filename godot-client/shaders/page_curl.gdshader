@@ -24,6 +24,9 @@ uniform float page_thickness : hint_range(0.0, 0.02) = 0.003;
 uniform float shadow_intensity : hint_range(0.0, 1.0) = 0.3;
 uniform float ambient_occlusion : hint_range(0.0, 1.0) = 0.2;
 
+// === ATMOSPHERE ===
+uniform vec4 atmosphere_tint : source_color = vec4(1.0, 1.0, 1.0, 1.0);
+
 // Varyings
 varying vec3 world_position;
 varying vec3 local_normal;
@@ -156,6 +159,10 @@ void fragment() {
         edge_highlight *= curl_factor;
         final_color += vec3(0.08, 0.06, 0.04) * edge_highlight;
     }
+
+    // === ATMOSPHERE TINT ===
+    // Apply atmosphere color tint (e.g., blue for night, red for danger)
+    final_color *= atmosphere_tint.rgb;
 
     ALBEDO = final_color;
 }

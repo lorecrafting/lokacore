@@ -15,10 +15,10 @@ signal page_turn_completed(direction: String)
 signal bottom_bar_pressed(button: String)
 
 ## Page types
-enum PageType { ROOM, MENU, ENTITY, DIALOGUE }
+enum PageType { ROOM, MENU, ENTITY, DIALOGUE, SHOP, CONTAINER }
 
-## Menu tabs
-enum MenuTab { INVENTORY, CHARACTER, SETTINGS }
+## Menu tabs (5 tabs as per plan)
+enum MenuTab { INVENTORY, CHARACTER, MAP, SOCIAL, SETTINGS }
 
 ## Text effects (matching shader uniforms)
 enum TextEffect { NONE = 0, BURN = 1, ICE = 2, GLOW = 3, FADE = 4 }
@@ -712,10 +712,12 @@ func _on_label_meta_clicked(meta: Variant) -> void:
 	if current_page == PageType.DIALOGUE:
 		var choice_index: int = int(meta)
 		_select_dialogue_choice(choice_index)
+
 	elif current_page == PageType.ENTITY:
 		if meta_str.begins_with("action:"):
 			var action_key: String = meta_str.substr(7)
 			_execute_entity_action(action_key)
+
 	elif current_page == PageType.ROOM:
 		if meta_str.begins_with("npc:"):
 			var npc_key: String = meta_str.substr(4)
@@ -723,6 +725,21 @@ func _on_label_meta_clicked(meta: Variant) -> void:
 		elif meta_str.begins_with("item:"):
 			var item_key: String = meta_str.substr(5)
 			_select_item_by_key(item_key)
+
+	elif current_page == PageType.MENU:
+		if meta_str.begins_with("menu:"):
+			var tab_key: String = meta_str.substr(5)
+			_handle_menu_click(tab_key)
+
+	elif current_page == PageType.SHOP:
+		if meta_str.begins_with("shop:"):
+			var action: String = meta_str.substr(5)
+			_handle_shop_click(action)
+
+	elif current_page == PageType.CONTAINER:
+		if meta_str.begins_with("container:"):
+			var action: String = meta_str.substr(10)
+			_handle_container_click(action)
 
 
 # =============================================================================
@@ -819,6 +836,12 @@ func _render_pending_content_to_page(page: PageMesh, page_type: PageType) -> voi
 			if not dialogue_data.is_empty():
 				_render_dialogue_to_page(page, dialogue_data)
 			page.bottom_bar.visible = false
+		PageType.SHOP:
+			_render_shop_to_page(page)
+			page.bottom_bar.visible = false
+		PageType.CONTAINER:
+			_render_container_to_page(page)
+			page.bottom_bar.visible = false
 
 
 ## Render room content to a page
@@ -879,20 +902,30 @@ func _render_menu_to_page(page: PageMesh) -> void:
 
 	var title_color := "#2a1f14"
 	var tab_color := "#4a3828"
+	var tab_active_color := "#2a1a0a"
 	var separator_color := "#8a7a6a"
 	var hint_color := "#6a5a4a"
 
-	text += "[center][font_size=28][color=%s][b]Menu[/b][/color][/font_size][/center]\n\n" % title_color
+	text += "[center][font_size=28][color=%s][b]Menu[/b][/color][/font_size][/center]\n\n"  % title_color
 
-	text += "[color=%s]" % tab_color
-	match current_menu_tab:
-		MenuTab.INVENTORY:
-			text += "[b]▸ Inventory[/b]    Character    Settings\n"
-		MenuTab.CHARACTER:
-			text += "  Inventory    [b]▸ Character[/b]    Settings\n"
-		MenuTab.SETTINGS:
-			text += "  Inventory    Character    [b]▸ Settings[/b]\n"
-	text += "[/color]\n"
+	# Tab bar with clickable icons
+	text += "[center]"
+	var tabs := [
+		{"key": "inventory", "icon": "🎒", "tab": MenuTab.INVENTORY},
+		{"key": "character", "icon": "👤", "tab": MenuTab.CHARACTER},
+		{"key": "map", "icon": "🗺️", "tab": MenuTab.MAP},
+		{"key": "social", "icon": "💬", "tab": MenuTab.SOCIAL},
+		{"key": "settings", "icon": "⚙️", "tab": MenuTab.SETTINGS},
+	]
+
+	for tab in tabs:
+		var is_active: bool = current_menu_tab == tab.tab
+		if is_active:
+			text += "[color=%s][b][url=menu:%s]%s[/url][/b][/color]  " % [tab_active_color, tab.key, tab.icon]
+		else:
+			text += "[color=%s][url=menu:%s]%s[/url][/color]  " % [tab_color, tab.key, tab.icon]
+
+	text += "[/center]\n"
 	text += "[color=%s]───────────────────[/color]\n\n" % separator_color
 
 	match current_menu_tab:
@@ -900,10 +933,14 @@ func _render_menu_to_page(page: PageMesh) -> void:
 			text += _get_inventory_content()
 		MenuTab.CHARACTER:
 			text += _get_character_content()
+		MenuTab.MAP:
+			text += _get_map_content()
+		MenuTab.SOCIAL:
+			text += _get_social_content()
 		MenuTab.SETTINGS:
 			text += _get_settings_content()
 
-	text += "\n\n[center][color=%s][i]Press Menu or swipe to return[/i][/color][/center]" % hint_color
+	text += "\n\n[center][color=%s][i]Tap icons or swipe to switch tabs[/i][/color][/center]" % hint_color
 
 	page.label.text = text
 
@@ -944,6 +981,94 @@ func _render_entity_to_page(page: PageMesh, entity: Variant) -> void:
 	if "leave" not in current_entity_actions:
 		current_entity_actions.append("leave")
 		text += "[color=%s][url=action:leave][u]Leave[/u][/url][/color]\n" % action_color
+
+	page.label.text = text
+
+
+## Render shop content to a page
+func _render_shop_to_page(page: PageMesh) -> void:
+	var data: Dictionary = GameState.shop_data
+	if data.is_empty():
+		page.label.text = "[center][i]Shop not available[/i][/center]"
+		return
+
+	var title_color := "#2a1f14"
+	var body_color := "#362816"
+	var item_color := "#3a2a1a"
+	var price_color := "#5a4a3a"
+	var gold_color := "#8a6a2a"
+	var action_color := "#4a3828"
+
+	var npc_name: String = data.get("npc_name", "Merchant")
+	var items: Array = data.get("items", [])
+	var player_gold: int = GameState.server_state.get("resources", {}).get("gold", 0)
+
+	var text := ""
+	text += "[center][font_size=28][color=%s][b]%s[/b][/color][/font_size][/center]\n\n" % [title_color, npc_name]
+	text += "[color=%s][i]\"What can I get for you today?\"[/i][/color]\n\n" % body_color
+
+	if items.is_empty():
+		text += "[color=%s][i]No items for sale.[/i][/color]\n\n" % body_color
+	else:
+		for i in range(items.size()):
+			var item: Dictionary = items[i]
+			var item_name: String = item.get("name", "Unknown Item")
+			var price: int = item.get("price", 0)
+			var can_afford: bool = player_gold >= price
+
+			if can_afford:
+				text += "[color=%s][url=shop:buy:%d]• %s[/url][/color]" % [item_color, i, item_name]
+			else:
+				text += "[color=%s]• %s[/color]" % [price_color, item_name]
+
+			text += " [color=%s](%dg)[/color]\n\n" % [price_color, price]
+
+	text += "[color=%s]───────────────────[/color]\n" % price_color
+	text += "[color=%s]Your Gold: [/color][color=%s]%d[/color]\n\n" % [body_color, gold_color, player_gold]
+
+	text += "[color=%s][url=shop:close][u]Leave Shop[/u][/url][/color]" % action_color
+
+	page.label.text = text
+
+
+## Render container content to a page
+func _render_container_to_page(page: PageMesh) -> void:
+	var data: Dictionary = GameState.container_data
+	if data.is_empty():
+		page.label.text = "[center][i]Container not available[/i][/center]"
+		return
+
+	var title_color := "#2a1f14"
+	var body_color := "#362816"
+	var item_color := "#3a2a1a"
+	var hint_color := "#5a4a3a"
+	var action_color := "#4a3828"
+
+	var entity_name: String = data.get("entity_name", "Container")
+	var items: Array = data.get("items", [])
+
+	var text := ""
+	text += "[center][font_size=28][color=%s][b]%s[/b][/color][/font_size][/center]\n\n" % [title_color, entity_name]
+
+	if items.is_empty():
+		text += "[color=%s][i]Empty.[/i][/color]\n\n" % hint_color
+	else:
+		for i in range(items.size()):
+			var item: Dictionary = items[i]
+			var item_name: String = item.get("name", "Unknown Item")
+			var qty: int = item.get("quantity", 1)
+
+			if qty > 1:
+				text += "[color=%s][url=container:take:%d]• %s (×%d)[/url][/color]\n\n" % [item_color, i, item_name, qty]
+			else:
+				text += "[color=%s][url=container:take:%d]• %s[/url][/color]\n\n" % [item_color, i, item_name]
+
+	text += "[color=%s]───────────────────[/color]\n\n" % hint_color
+
+	if not items.is_empty():
+		text += "[color=%s][url=container:take_all][u]Take All[/u][/url][/color]    " % action_color
+
+	text += "[color=%s][url=container:close][u]Close[/u][/url][/color]" % action_color
 
 	page.label.text = text
 
@@ -1088,6 +1213,9 @@ func _connect_signals() -> void:
 	# Page changes from GameState
 	GameState.page_changed.connect(_on_game_state_page_changed)
 
+	# Atmosphere changes
+	GameState.atmosphere_changed.connect(_on_atmosphere_changed)
+
 
 func _on_room_changed(room: MockWorld.Room) -> void:
 	events.clear()
@@ -1137,13 +1265,42 @@ func _on_game_state_page_changed(new_page: GameState.PageType) -> void:
 			top_page.bottom_bar.visible = false
 			_render_dialogue_from_game_state(top_page)
 		GameState.PageType.SHOP:
-			# TODO: Implement shop page
-			current_page = PageType.ROOM  # Fallback for now
+			current_page = PageType.SHOP
 			top_page.bottom_bar.visible = false
+			_render_shop_to_page(top_page)
 		GameState.PageType.CONTAINER:
-			# TODO: Implement container page
-			current_page = PageType.ROOM  # Fallback for now
+			current_page = PageType.CONTAINER
 			top_page.bottom_bar.visible = false
+			_render_container_to_page(top_page)
+
+
+## Called when atmosphere changes (for visual mood)
+func _on_atmosphere_changed(atmo: String) -> void:
+	var tint := Color(1.0, 1.0, 1.0, 1.0)
+
+	match atmo:
+		"peaceful":
+			tint = Color(1.0, 1.0, 1.0, 1.0)  # No tint
+		"tense":
+			tint = Color(1.0, 0.95, 0.9, 1.0)  # Slight warm/red tint
+		"danger":
+			tint = Color(1.0, 0.9, 0.85, 1.0)  # More red
+		"night":
+			tint = Color(0.85, 0.88, 1.0, 1.0)  # Blue tint
+		"storm":
+			tint = Color(0.9, 0.9, 0.95, 1.0)  # Grey tint
+		"mystical":
+			tint = Color(0.95, 0.9, 1.0, 1.0)  # Purple tint
+		"holy":
+			tint = Color(1.0, 1.0, 0.95, 1.0)  # Golden tint
+
+	# Apply to both pages
+	if top_page and top_page.shader_material:
+		top_page.shader_material.set_shader_parameter("atmosphere_tint", tint)
+	if bottom_page and bottom_page.shader_material:
+		bottom_page.shader_material.set_shader_parameter("atmosphere_tint", tint)
+
+	print("[BookPage] Atmosphere changed to: %s" % atmo)
 
 
 func _on_entity_context_received(entity_data: Dictionary) -> void:
@@ -1260,6 +1417,105 @@ func _click_entity(entity: Variant) -> void:
 
 
 # =============================================================================
+# Menu Click Handling
+# =============================================================================
+
+func _handle_menu_click(tab_key: String) -> void:
+	match tab_key:
+		"inventory":
+			current_menu_tab = MenuTab.INVENTORY
+		"character":
+			current_menu_tab = MenuTab.CHARACTER
+		"map":
+			current_menu_tab = MenuTab.MAP
+		"social":
+			current_menu_tab = MenuTab.SOCIAL
+		"settings":
+			current_menu_tab = MenuTab.SETTINGS
+		"quit":
+			# Emit signal for main to handle logout
+			bottom_bar_pressed.emit("quit")
+			return
+
+	_render_menu_to_page(top_page)
+
+
+# =============================================================================
+# Shop Click Handling
+# =============================================================================
+
+func _handle_shop_click(action: String) -> void:
+	if action == "close":
+		GameState.close_shop()
+		return
+
+	if action.begins_with("buy:"):
+		var index: int = int(action.substr(4))
+		_buy_shop_item(index)
+
+
+func _buy_shop_item(index: int) -> void:
+	var items: Array = GameState.shop_data.get("items", [])
+	if index < 0 or index >= items.size():
+		return
+
+	var item: Dictionary = items[index]
+	var price: int = item.get("price", 0)
+	var player_gold: int = GameState.server_state.get("resources", {}).get("gold", 0)
+
+	if player_gold < price:
+		add_event("You cannot afford that.")
+		return
+
+	if GameState.is_online:
+		var phoenix: Node = get_node_or_null("/root/PhoenixClient")
+		if phoenix and phoenix.has_method("shop_action"):
+			phoenix.shop_action("buy", index)
+	else:
+		add_event("Shopping requires server connection.")
+
+
+# =============================================================================
+# Container Click Handling
+# =============================================================================
+
+func _handle_container_click(action: String) -> void:
+	if action == "close":
+		GameState.close_container()
+		return
+
+	if action == "take_all":
+		_take_all_from_container()
+		return
+
+	if action.begins_with("take:"):
+		var index: int = int(action.substr(5))
+		_take_from_container(index)
+
+
+func _take_from_container(index: int) -> void:
+	var items: Array = GameState.container_data.get("items", [])
+	if index < 0 or index >= items.size():
+		return
+
+	if GameState.is_online:
+		var phoenix: Node = get_node_or_null("/root/PhoenixClient")
+		if phoenix and phoenix.has_method("container_action"):
+			phoenix.container_action("take", index)
+	else:
+		add_event("Container interaction requires server connection.")
+
+
+func _take_all_from_container() -> void:
+	if GameState.is_online:
+		var phoenix: Node = get_node_or_null("/root/PhoenixClient")
+		if phoenix and phoenix.has_method("container_action"):
+			phoenix.container_action("take_all")
+	else:
+		add_event("Container interaction requires server connection.")
+
+
+# =============================================================================
 # Events
 # =============================================================================
 
@@ -1285,6 +1541,10 @@ func next_menu_tab() -> void:
 		MenuTab.INVENTORY:
 			current_menu_tab = MenuTab.CHARACTER
 		MenuTab.CHARACTER:
+			current_menu_tab = MenuTab.MAP
+		MenuTab.MAP:
+			current_menu_tab = MenuTab.SOCIAL
+		MenuTab.SOCIAL:
 			current_menu_tab = MenuTab.SETTINGS
 		MenuTab.SETTINGS:
 			current_menu_tab = MenuTab.INVENTORY
@@ -1297,8 +1557,12 @@ func prev_menu_tab() -> void:
 			current_menu_tab = MenuTab.SETTINGS
 		MenuTab.CHARACTER:
 			current_menu_tab = MenuTab.INVENTORY
-		MenuTab.SETTINGS:
+		MenuTab.MAP:
 			current_menu_tab = MenuTab.CHARACTER
+		MenuTab.SOCIAL:
+			current_menu_tab = MenuTab.MAP
+		MenuTab.SETTINGS:
+			current_menu_tab = MenuTab.SOCIAL
 	display_menu()
 
 
@@ -1361,6 +1625,78 @@ func _get_character_content() -> String:
 	return text
 
 
+func _get_map_content() -> String:
+	var title_color := "#2a1f14"
+	var hint_color := "#6a5a4a"
+	var body_color := "#362816"
+
+	var text := "[color=%s][b]World Map[/b][/color]\n\n" % title_color
+
+	# Show current location
+	var current_loc: String = "Unknown"
+	if GameState.current_room:
+		current_loc = GameState.current_room.name
+
+	text += "[color=%s]Current Location:[/color]\n" % hint_color
+	text += "[color=%s]  📍 %s[/color]\n\n" % [body_color, current_loc]
+
+	# Show available exits
+	var exits: Array = GameState.get_available_exits()
+	if exits.size() > 0:
+		text += "[color=%s]Available Paths:[/color]\n" % hint_color
+		for direction in exits:
+			var dest_name: String = GameState.get_exit_destination_name(direction)
+			var arrow: String = _get_direction_arrow(direction)
+			text += "[color=%s]  %s %s → %s[/color]\n" % [body_color, arrow, direction.capitalize(), dest_name]
+	else:
+		text += "[color=%s][i]No exits from this location.[/i][/color]\n" % hint_color
+
+	text += "\n[color=%s][i]Full map coming soon...[/i][/color]" % hint_color
+	return text
+
+
+func _get_direction_arrow(direction: String) -> String:
+	match direction:
+		"north": return "↑"
+		"south": return "↓"
+		"east": return "→"
+		"west": return "←"
+		_: return "•"
+
+
+func _get_social_content() -> String:
+	var title_color := "#2a1f14"
+	var hint_color := "#6a5a4a"
+	var body_color := "#362816"
+	var player_color := "#2a4a3a"
+
+	var text := "[color=%s][b]Players Nearby[/b][/color]\n\n" % title_color
+
+	# Get players from server state
+	var players: Array = GameState.server_state.get("other_players", [])
+
+	if players.is_empty():
+		text += "[color=%s][i]No other players nearby.[/i][/color]\n\n" % hint_color
+	else:
+		for p in players:
+			var name: String = p.get("name", "Unknown")
+			var level: int = p.get("level", 1)
+			text += "[color=%s]• %s[/color] [color=%s](Lv.%d)[/color]\n" % [player_color, name, hint_color, level]
+		text += "\n"
+
+	# Show current player info
+	var player_name: String = str(AuthClient.player.get("name", "You"))
+	text += "[color=%s]───────────────────[/color]\n\n" % hint_color
+	text += "[color=%s]You are:[/color] [color=%s]%s[/color]\n" % [hint_color, body_color, player_name]
+
+	if GameState.is_online:
+		text += "[color=%s]Status:[/color] [color=#2a6a2a]Online[/color]\n" % hint_color
+	else:
+		text += "[color=%s]Status:[/color] [color=#6a3a2a]Offline[/color]\n" % hint_color
+
+	return text
+
+
 func _get_settings_content() -> String:
 	var title_color := "#2a1f14"
 	var item_color := "#4a3828"
@@ -1371,7 +1707,7 @@ func _get_settings_content() -> String:
 	text += "[color=%s][i]Settings coming soon...[/i][/color]\n\n" % hint_color
 	text += "[color=%s]• Sound: On[/color]\n" % item_color
 	text += "[color=%s]• Music: On[/color]\n" % item_color
-	text += "\n\n[center][color=%s][b][ Quit Game ][/b][/color][/center]" % quit_color
+	text += "\n\n[center][color=%s][url=menu:quit][b][ Quit Game ][/b][/url][/color][/center]" % quit_color
 	return text
 
 

@@ -22,6 +22,11 @@ extends Node3D
 @onready var error_label: Label = $CanvasLayer/LoginPanel/VBox/ErrorLabel
 @onready var status_label: Label = $CanvasLayer/LoginPanel/VBox/StatusLabel
 
+## Bardo (death) overlay - created dynamically
+var bardo_overlay: Panel = null
+var bardo_message: Label = null
+var reincarnate_btn: Button = null
+
 ## Swipe detection
 var swipe_start_pos: Vector2 = Vector2.ZERO
 var is_swiping: bool = false
@@ -122,6 +127,12 @@ func _setup_game_state_signals() -> void:
 	GameState.server_connected.connect(_on_server_connected)
 	GameState.server_disconnected.connect(_on_server_disconnected)
 	GameState.game_event.connect(_on_game_event)
+	GameState.force_disconnect.connect(_on_force_disconnect)
+
+	# Bardo (death) signals
+	GameState.bardo_entered.connect(_on_bardo_entered)
+	GameState.bardo_can_reincarnate.connect(_on_bardo_can_reincarnate)
+	GameState.bardo_exited.connect(_on_bardo_exited)
 
 
 # =============================================================================
@@ -413,3 +424,114 @@ func _handle_swipe(delta: Vector2) -> void:
 				book_page.turn_page("left")
 			else:
 				book_page.turn_page("right")
+
+
+# =============================================================================
+# Force Disconnect
+# =============================================================================
+
+func _on_force_disconnect(reason: String) -> void:
+	print("[Main] Force disconnected: %s" % reason)
+	error_label.text = reason
+	_show_login_screen()
+
+
+# =============================================================================
+# Bardo (Death) Overlay
+# =============================================================================
+
+func _setup_bardo_overlay() -> void:
+	if bardo_overlay != null:
+		return  # Already created
+
+	# Create overlay panel
+	bardo_overlay = Panel.new()
+	bardo_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bardo_overlay.visible = false
+
+	# Dark semi-transparent background
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.05, 0.02, 0.08, 0.92)
+	bardo_overlay.add_theme_stylebox_override("panel", style)
+
+	# VBox for content
+	var vbox := VBoxContainer.new()
+	vbox.set_anchors_preset(Control.PRESET_CENTER)
+	vbox.offset_left = -150
+	vbox.offset_right = 150
+	vbox.offset_top = -100
+	vbox.offset_bottom = 100
+	vbox.add_theme_constant_override("separation", 20)
+	bardo_overlay.add_child(vbox)
+
+	# Title
+	var title := Label.new()
+	title.text = "☠️ You Have Died ☠️"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 28)
+	title.add_theme_color_override("font_color", Color(0.8, 0.6, 0.6))
+	vbox.add_child(title)
+
+	# Message
+	bardo_message = Label.new()
+	bardo_message.text = "The spirits guide you to the bardo realm..."
+	bardo_message.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	bardo_message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	bardo_message.add_theme_font_size_override("font_size", 18)
+	bardo_message.add_theme_color_override("font_color", Color(0.7, 0.7, 0.8))
+	vbox.add_child(bardo_message)
+
+	# Spacer
+	var spacer := Control.new()
+	spacer.custom_minimum_size = Vector2(0, 20)
+	vbox.add_child(spacer)
+
+	# Reincarnate button
+	reincarnate_btn = Button.new()
+	reincarnate_btn.text = "Waiting..."
+	reincarnate_btn.disabled = true
+	reincarnate_btn.custom_minimum_size = Vector2(200, 50)
+	reincarnate_btn.add_theme_font_size_override("font_size", 20)
+	reincarnate_btn.pressed.connect(_on_reincarnate_pressed)
+	vbox.add_child(reincarnate_btn)
+
+	# Add to CanvasLayer
+	$CanvasLayer.add_child(bardo_overlay)
+
+
+func _on_bardo_entered(data: Dictionary) -> void:
+	print("[Main] Entered bardo (death)")
+	_setup_bardo_overlay()
+
+	var bind_point: String = data.get("bind_point", "")
+	if bind_point != "":
+		bardo_message.text = "The spirits guide you to the bardo realm...\nYou will return at: %s" % bind_point
+	else:
+		bardo_message.text = "The spirits guide you to the bardo realm..."
+
+	reincarnate_btn.disabled = true
+	reincarnate_btn.text = "Waiting..."
+	bardo_overlay.visible = true
+
+
+func _on_bardo_can_reincarnate() -> void:
+	print("[Main] Can now reincarnate")
+	if reincarnate_btn:
+		reincarnate_btn.disabled = false
+		reincarnate_btn.text = "🔄 Reincarnate"
+
+
+func _on_bardo_exited() -> void:
+	print("[Main] Exited bardo")
+	if bardo_overlay:
+		bardo_overlay.visible = false
+
+
+func _on_reincarnate_pressed() -> void:
+	print("[Main] Reincarnate pressed")
+	reincarnate_btn.disabled = true
+	reincarnate_btn.text = "Reincarnating..."
+
+	var phoenix: Node = get_node_or_null("/root/PhoenixClient")
+	if phoenix and phoenix.has_method("bardo_action"):
+		phoenix.bardo_action("reincarnate")
