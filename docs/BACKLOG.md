@@ -25,8 +25,6 @@ Tasks are tracked here with categories and priorities. We use Claude Code's nati
 
 ### UI/UX
 
-- **Fix room coordinate persistence** - Room x/y/z coordinates not persisting on update (pre-existing bug in RoomManager)
-
 ---
 
 ## Medium Priority
@@ -72,6 +70,13 @@ Tasks are tracked here with categories and priorities. We use Claude Code's nati
 ## Done
 
 ### Recent Completions
+
+- **Fix room coordinate persistence** (2026-01-30)
+  - Room x/y/z coordinates now persist on create and update
+  - Fixed `enrich_room_for_frontend` to check both attributes and data
+  - Fixed `build_room_yaml` to write attributes section with coordinates
+  - Fixed `delete_room` to also delete YAML file (not just registry)
+  - Cleaned up unused functions and aliases
 
 - **World Builder LLM Enhancement** (2026-01-30)
   - Enhanced context_builder.ex with NPC/quest/item/zone context

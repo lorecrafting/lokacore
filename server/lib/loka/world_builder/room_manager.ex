@@ -9,7 +9,7 @@ defmodule Loka.WorldBuilder.RoomManager do
 
   require Logger
 
-  alias Loka.Engine.{TypedObject, Spawner, EntityServer, Entity, Entities}
+  alias Loka.Engine.{TypedObject, Spawner, Entity, Entities}
   alias Loka.Engine.TypedObject.Registry
   alias Loka.Engine.TypedObject.Loader
 
@@ -83,13 +83,19 @@ defmodule Loka.WorldBuilder.RoomManager do
     exits = Map.get(attrs, :exits, %{})
     tags = Map.get(attrs, :tags, [])
 
+    # Extract coordinates for attributes
+    x = Map.get(attrs, :x, 0)
+    y = Map.get(attrs, :y, 0)
+    z = Map.get(attrs, :z, 0)
+
     # Build room data for YAML
     room_data = %{
       key: key,
       name: name,
       description: description,
       exits: exits,
-      tags: tags
+      tags: tags,
+      attributes: %{x: x, y: y, z: z}
     }
 
     # Save to YAML file
@@ -111,9 +117,9 @@ defmodule Loka.WorldBuilder.RoomManager do
                key: key,
                name: name,
                description: description,
-               x: 0,
-               y: 0,
-               z: 0,
+               x: x,
+               y: y,
+               z: z,
                tags: tags,
                exits: exits,
                spawns: %{npcs: [], items: []}
@@ -145,6 +151,25 @@ defmodule Loka.WorldBuilder.RoomManager do
         existing_exits = get_room_exits(entity)
         existing_tags = entity.tags || []
 
+        # Get existing coordinates from attributes or data
+        existing_x =
+          TypedObject.get_attribute(entity, :x) || TypedObject.get_data(entity, :x) || 0
+
+        existing_y =
+          TypedObject.get_attribute(entity, :y) || TypedObject.get_data(entity, :y) || 0
+
+        existing_z =
+          TypedObject.get_attribute(entity, :z) || TypedObject.get_data(entity, :z) || 0
+
+        # Merge existing attributes with coordinate updates
+        existing_attrs = entity.attributes || %{}
+
+        updated_attrs =
+          existing_attrs
+          |> Map.put(:x, Map.get(attrs, :x, existing_x))
+          |> Map.put(:y, Map.get(attrs, :y, existing_y))
+          |> Map.put(:z, Map.get(attrs, :z, existing_z))
+
         room_data = %{
           key: entity.key,
           name: Map.get(attrs, :name, entity.name || entity.key),
@@ -152,7 +177,8 @@ defmodule Loka.WorldBuilder.RoomManager do
           exits: Map.get(attrs, :exits, existing_exits),
           tags: Map.get(attrs, :tags, existing_tags),
           spawns: get_spawns_list(entity),
-          components: get_components(entity)
+          components: get_components(entity),
+          attributes: updated_attrs
         }
 
         case save_room_yaml(room_data) do
@@ -196,14 +222,41 @@ defmodule Loka.WorldBuilder.RoomManager do
   def delete_room(room_id) when is_binary(room_id) do
     case get_room_entity(room_id) do
       {:ok, {:registry, entity}} ->
-        # Room is in Registry - use Spawner.despawn
-        case Spawner.despawn(room_id) do
-          :ok ->
-            Logger.info("[RoomManager] Deleted room (registry): #{room_id}")
-            {:ok, enrich_room_for_frontend(entity)}
+        # Room is in Registry - despawn and delete YAML file
+        room_map = enrich_room_for_frontend(entity)
 
-          {:error, reason} ->
-            Logger.error("[RoomManager] Delete failed: #{inspect(reason)}")
+        # First delete the YAML file
+        file_path = Path.join(@rooms_dir, "#{entity.key}.yml")
+
+        file_result =
+          if File.exists?(file_path) do
+            File.rm(file_path)
+          else
+            :ok
+          end
+
+        # Then remove from registry
+        despawn_result = Spawner.despawn(room_id)
+
+        case {file_result, despawn_result} do
+          {:ok, :ok} ->
+            # Reload registry to reflect deletion
+            Loader.reload()
+            Logger.info("[RoomManager] Deleted room (registry + YAML): #{room_id}")
+            {:ok, room_map}
+
+          {:ok, {:error, :not_found}} ->
+            # Room wasn't spawned but YAML was deleted
+            Loader.reload()
+            Logger.info("[RoomManager] Deleted room (YAML only): #{room_id}")
+            {:ok, room_map}
+
+          {{:error, reason}, _} ->
+            Logger.error("[RoomManager] Delete YAML failed: #{inspect(reason)}")
+            {:error, reason}
+
+          {_, {:error, reason}} ->
+            Logger.error("[RoomManager] Despawn failed: #{inspect(reason)}")
             {:error, reason}
         end
 
@@ -265,17 +318,18 @@ defmodule Loka.WorldBuilder.RoomManager do
   # =============================================================================
 
   defp enrich_room_for_frontend(room) when is_struct(room, TypedObject) do
-    # Extract coordinates from attributes for frontend
-    x = TypedObject.get_attribute(room, :x, 0)
-    y = TypedObject.get_attribute(room, :y, 0)
-    z = TypedObject.get_attribute(room, :z, 0)
+    # Extract coordinates from attributes or data (YAML top-level fields go to data)
+    x = TypedObject.get_attribute(room, :x) || TypedObject.get_data(room, :x) || 0
+    y = TypedObject.get_attribute(room, :y) || TypedObject.get_data(room, :y) || 0
+    z = TypedObject.get_attribute(room, :z) || TypedObject.get_data(room, :z) || 0
 
     # Extract spawns (NPCs and items that spawn in this room)
     spawns = get_room_spawns(room)
 
     # Return a map structure optimized for frontend rendering
+    # Use key as id for YAML rooms since they don't have a separate id
     %{
-      id: room.id,
+      id: room.id || room.key,
       key: room.key,
       name: room.name || room.key,
       description: room.description || "",
@@ -427,34 +481,6 @@ defmodule Loka.WorldBuilder.RoomManager do
       attrs
   end
 
-  defp ensure_coordinates(attrs) do
-    x = Map.get(attrs, :x, 0)
-    y = Map.get(attrs, :y, 0)
-    z = Map.get(attrs, :z, 0)
-
-    # Store coordinates in attributes map for TypedObject
-    current_attrs = Map.get(attrs, :attributes, %{})
-
-    updated_attrs =
-      current_attrs
-      |> Map.put("x", x)
-      |> Map.put("y", y)
-      |> Map.put("z", z)
-
-    Map.put(attrs, :attributes, updated_attrs)
-  end
-
-  defp prepare_updates(attrs) when is_map(attrs) do
-    # Convert coordinates to attributes if provided
-    attrs = ensure_atom_keys(attrs)
-
-    if Map.has_key?(attrs, :x) || Map.has_key?(attrs, :y) || Map.has_key?(attrs, :z) do
-      ensure_coordinates(attrs)
-    else
-      attrs
-    end
-  end
-
   @doc false
   # Gets a room entity from either Registry (YAML) or Database.
   # Returns {:ok, {:registry, TypedObject}} or {:ok, {:db, EntitySchema}} or {:error, reason}
@@ -577,6 +603,7 @@ defmodule Loka.WorldBuilder.RoomManager do
     tags = room_data[:tags] || []
     spawns = room_data[:spawns] || []
     components = room_data[:components] || %{}
+    attributes = room_data[:attributes] || %{}
 
     # Build YAML content
     yaml = """
@@ -636,7 +663,31 @@ defmodule Loka.WorldBuilder.RoomManager do
         yaml
       end
 
+    # Add attributes if any (coordinates, room effects, etc.)
+    yaml =
+      if map_size(attributes) > 0 do
+        yaml <> "attributes:\n" <> build_attributes_yaml(attributes, 2)
+      else
+        yaml
+      end
+
     yaml
+  end
+
+  defp build_attributes_yaml(attributes, indent) when is_map(attributes) do
+    prefix = String.duplicate(" ", indent)
+
+    attributes
+    |> Enum.map(fn {key, value} ->
+      key_str = if is_atom(key), do: Atom.to_string(key), else: key
+
+      if is_map(value) do
+        "#{prefix}#{key_str}:\n#{build_yaml_value(value, indent + 2)}"
+      else
+        "#{prefix}#{key_str}: #{format_inline_value(value)}\n"
+      end
+    end)
+    |> Enum.join("")
   end
 
   defp build_components_yaml(components, indent) when is_map(components) do
