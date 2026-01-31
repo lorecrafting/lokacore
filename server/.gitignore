@@ -54,3 +54,11 @@ npm-debug.log
 .env
 .env.*
 !.env.example
+
+# Test artifacts in world data (created by E2E tests)
+/priv/world/prototypes/*/e2e_test_*.yml
+/priv/world/prototypes/*/accept_room_*.yml
+/priv/world/prototypes/*/mark_test.yml
+/priv/world/prototypes/*/r1.yml
+/priv/world/prototypes/invalid_types/
+/priv/world/templates/e2e_test_*.yml

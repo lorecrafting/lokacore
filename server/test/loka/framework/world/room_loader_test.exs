@@ -16,35 +16,71 @@ defmodule Loka.Framework.World.RoomLoaderTest do
   end
 
   describe "get_starting_room/0" do
-    test "returns {:ok, room} when starting room exists" do
-      # The starting room key (monastery_gate) is pre-loaded by the world loader
-      # Just verify the function returns a room with the correct key
+    setup do
+      # Create the starting room since tests use isolated sandbox
+      starting_key = RoomLoader.starting_room_key()
+
+      {:ok, room} =
+        Entities.create_entity(%{
+          key: starting_key,
+          type: "room",
+          short_desc: "Starting Room",
+          extra_desc: "The starting location."
+        })
+
+      %{starting_room: room}
+    end
+
+    test "returns {:ok, room} when starting room exists", %{starting_room: room} do
       starting_key = RoomLoader.starting_room_key()
 
       assert {:ok, found_room} = RoomLoader.get_starting_room()
       assert found_room.key == starting_key
+      assert found_room.id == room.id
       assert found_room.type == :room
     end
 
-    # Note: Testing "not found" case is not practical since the world is always pre-loaded
-    # and deleting the starting room would break other tests
+    test "returns {:error, :not_found} when starting room does not exist" do
+      # Delete the starting room created in setup
+      starting_key = RoomLoader.starting_room_key()
+      room = Entities.get_entity_by_key(starting_key)
+      Loka.Repo.delete(room)
+
+      assert {:error, :not_found} = RoomLoader.get_starting_room()
+    end
   end
 
   describe "get_starting_room_id/0" do
-    test "returns room ID when starting room exists" do
-      # The starting room is pre-loaded, just verify we get a valid UUID back
+    setup do
+      # Create the starting room since tests use isolated sandbox
       starting_key = RoomLoader.starting_room_key()
 
+      {:ok, room} =
+        Entities.create_entity(%{
+          key: starting_key,
+          type: "room",
+          short_desc: "Starting Room",
+          extra_desc: "The starting location."
+        })
+
+      %{starting_room: room}
+    end
+
+    test "returns room ID when starting room exists", %{starting_room: room} do
       room_id = RoomLoader.get_starting_room_id()
       assert room_id != nil
       assert is_binary(room_id)
-
-      # Verify it matches the starting room
-      {:ok, room} = RoomLoader.get_starting_room()
-      assert room.id == room_id
+      assert room_id == room.id
     end
 
-    # Note: Testing "nil" case is not practical since the world is always pre-loaded
+    test "returns nil when starting room does not exist" do
+      # Delete the starting room created in setup
+      starting_key = RoomLoader.starting_room_key()
+      room = Entities.get_entity_by_key(starting_key)
+      Loka.Repo.delete(room)
+
+      assert RoomLoader.get_starting_room_id() == nil
+    end
   end
 
   describe "load_room_for_display/1" do

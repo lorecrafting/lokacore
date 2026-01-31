@@ -26,7 +26,7 @@ config :loka,
   env: config_env()
 
 # Game configuration
-config :loka, :game, starting_room_key: "limbo"
+config :loka, :game, starting_room_key: "monastery_gate"
 
 # Scripting extensions - modules implementing ScriptingExtension behaviour
 # These provide game-specific Lua API functions (quest, player, etc.)
