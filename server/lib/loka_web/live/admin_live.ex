@@ -13,7 +13,7 @@ defmodule LokaWeb.AdminLive do
 
   alias Loka.Accounts
   alias Loka.Engine.{Entities, Scripts}
-  alias Loka.Engine.Schema.{EntitySchema, ScriptSchema}
+  alias Loka.Engine.Schema.EntitySchema
 
   alias Loka.Engine.{PrototypeLoader, Spawner}
 

@@ -621,31 +621,6 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     end
   end
 
-  # Execute the action that was confirmed
-  defp execute_confirmed_action(socket, "delete_room", %{"id" => id}) do
-    handle_event("delete_room_confirmed", %{"id" => id}, socket)
-  end
-
-  defp execute_confirmed_action(socket, "delete_npc", %{"key" => key}) do
-    handle_event("delete_npc_confirmed", %{"key" => key}, socket)
-  end
-
-  defp execute_confirmed_action(socket, "delete_item", %{"key" => key}) do
-    handle_event("delete_item_confirmed", %{"key" => key}, socket)
-  end
-
-  defp execute_confirmed_action(socket, "batch_delete", _data) do
-    handle_event("batch_delete_confirmed", %{}, socket)
-  end
-
-  defp execute_confirmed_action(socket, "dialogue_delete_node_confirmed", %{"key" => key}) do
-    handle_event("dialogue_delete_node_confirmed", %{"key" => key}, socket)
-  end
-
-  defp execute_confirmed_action(socket, _action, _data) do
-    {:noreply, log_console(socket, :error, "Unknown confirmation action")}
-  end
-
   @impl true
   def handle_event("api_key_validated", %{"provider" => provider, "status" => status}, socket) do
     status_atom =
@@ -1551,30 +1526,6 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     update_template_config(socket, field, value)
   end
 
-  defp update_template_config(socket, field, value) do
-    template = socket.assigns.selected_template
-    config = Map.put(socket.assigns.template_config, field, value)
-
-    # Regenerate preview
-    {preview_code, validation_errors} =
-      case ScriptTemplates.generate_code(template.id, config) do
-        {:ok, code} ->
-          {code, []}
-
-        {:error, {:validation_failed, errors}} ->
-          {"# Fix validation errors to see preview", errors}
-
-        {:error, _} ->
-          {"# Configure required fields to see preview", []}
-      end
-
-    {:noreply,
-     socket
-     |> assign(:template_config, config)
-     |> assign(:template_preview_code, preview_code)
-     |> assign(:template_validation_errors, validation_errors)}
-  end
-
   def handle_event("create_script_from_template", _params, socket) do
     template = socket.assigns.selected_template
     config = socket.assigns.template_config
@@ -2019,6 +1970,84 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     {:noreply, push_event(socket, "trigger_redo", %{})}
   end
 
+  # Auto-Layout Algorithms
+  def handle_event("apply_layout", %{"algorithm" => algorithm, "keys" => keys}, socket) do
+    case parse_algorithm(algorithm) do
+      {:ok, algorithm_atom} ->
+        case LayoutManager.apply_layout(keys, algorithm_atom, %{}) do
+          {:ok, updated_rooms} ->
+            {:noreply,
+             socket
+             |> assign(:rooms, RoomManager.list_rooms())
+             |> log_console(
+               :info,
+               "Applied #{algorithm} layout to #{length(updated_rooms)} rooms"
+             )
+             |> push_event("room_updated", %{rooms: updated_rooms})}
+
+          {:error, reason} ->
+            {:noreply,
+             log_console(socket, :error, "Layout failed: #{sanitize_error(reason, "")}")}
+        end
+
+      {:error, :invalid_algorithm} ->
+        {:noreply, log_console(socket, :error, "Invalid algorithm: #{algorithm}")}
+    end
+  end
+
+  # =============================================================================
+  # Helper Functions
+  # =============================================================================
+
+  # Execute the action that was confirmed
+  defp execute_confirmed_action(socket, "delete_room", %{"id" => id}) do
+    handle_event("delete_room_confirmed", %{"id" => id}, socket)
+  end
+
+  defp execute_confirmed_action(socket, "delete_npc", %{"key" => key}) do
+    handle_event("delete_npc_confirmed", %{"key" => key}, socket)
+  end
+
+  defp execute_confirmed_action(socket, "delete_item", %{"key" => key}) do
+    handle_event("delete_item_confirmed", %{"key" => key}, socket)
+  end
+
+  defp execute_confirmed_action(socket, "batch_delete", _data) do
+    handle_event("batch_delete_confirmed", %{}, socket)
+  end
+
+  defp execute_confirmed_action(socket, "dialogue_delete_node_confirmed", %{"key" => key}) do
+    handle_event("dialogue_delete_node_confirmed", %{"key" => key}, socket)
+  end
+
+  defp execute_confirmed_action(socket, _action, _data) do
+    {:noreply, log_console(socket, :error, "Unknown confirmation action")}
+  end
+
+  defp update_template_config(socket, field, value) do
+    template = socket.assigns.selected_template
+    config = Map.put(socket.assigns.template_config, field, value)
+
+    # Regenerate preview
+    {preview_code, validation_errors} =
+      case ScriptTemplates.generate_code(template.id, config) do
+        {:ok, code} ->
+          {code, []}
+
+        {:error, {:validation_failed, errors}} ->
+          {"# Fix validation errors to see preview", errors}
+
+        {:error, _} ->
+          {"# Configure required fields to see preview", []}
+      end
+
+    {:noreply,
+     socket
+     |> assign(:template_config, config)
+     |> assign(:template_preview_code, preview_code)
+     |> assign(:template_validation_errors, validation_errors)}
+  end
+
   # Restore state based on operation type
   defp restore_state("create_room", nil, %{"key" => key}, socket) do
     # Undo create = delete
@@ -2102,35 +2131,6 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
         {k, v} -> {k, v}
       end)
   end
-
-  # Auto-Layout Algorithms
-  def handle_event("apply_layout", %{"algorithm" => algorithm, "keys" => keys}, socket) do
-    case parse_algorithm(algorithm) do
-      {:ok, algorithm_atom} ->
-        case LayoutManager.apply_layout(keys, algorithm_atom, %{}) do
-          {:ok, updated_rooms} ->
-            {:noreply,
-             socket
-             |> assign(:rooms, RoomManager.list_rooms())
-             |> log_console(
-               :info,
-               "Applied #{algorithm} layout to #{length(updated_rooms)} rooms"
-             )
-             |> push_event("room_updated", %{rooms: updated_rooms})}
-
-          {:error, reason} ->
-            {:noreply,
-             log_console(socket, :error, "Layout failed: #{sanitize_error(reason, "")}")}
-        end
-
-      {:error, :invalid_algorithm} ->
-        {:noreply, log_console(socket, :error, "Invalid algorithm: #{algorithm}")}
-    end
-  end
-
-  # =============================================================================
-  # Helper Functions
-  # =============================================================================
 
   defp log_console(socket, level, text) do
     timestamp = DateTime.utc_now() |> DateTime.to_time() |> Time.to_string()

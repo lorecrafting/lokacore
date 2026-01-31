@@ -343,15 +343,17 @@ defmodule Loka.Framework.Combat do
 
       # Emit damage event to update the player entity
       if game_state.player_id do
-        event = Event.new(:damage, %{
-          source: combat_state.enemy_id,
-          target: game_state.player_id,
-          payload: %{
-            amount: final_damage,
-            type: :physical,
-            source_name: combat_state.enemy.name
-          }
-        })
+        event =
+          Event.new(:damage, %{
+            source: combat_state.enemy_id,
+            target: game_state.player_id,
+            payload: %{
+              amount: final_damage,
+              type: :physical,
+              source_name: combat_state.enemy.name
+            }
+          })
+
         EventBus.emit(event)
       end
 
@@ -566,15 +568,18 @@ defmodule Loka.Framework.Combat do
 
     # Emit damage event to update the real entity (NPC)
     if combat_state.enemy_id do
-      event = Event.new(:damage, %{
-        source: game_state.player_id,
-        target: combat_state.enemy_id,
-        payload: %{
-          amount: final_damage,
-          type: :physical, # TODO: Support weapon damage types
-          source_name: game_state.character_name
-        }
-      })
+      event =
+        Event.new(:damage, %{
+          source: game_state.player_id,
+          target: combat_state.enemy_id,
+          payload: %{
+            amount: final_damage,
+            # TODO: Support weapon damage types
+            type: :physical,
+            source_name: game_state.character_name
+          }
+        })
+
       EventBus.emit(event)
     end
 

@@ -121,16 +121,11 @@ defmodule Loka.Framework.Skills.BinarySkillRegistry do
     state = %{table: table, path: path, skills: %{}}
 
     if load_on_start do
-      case do_load_all(state, path) do
-        {:ok, new_state} ->
-          count = map_size(new_state.skills)
-          Logger.info("#{inspect(__MODULE__)} loaded #{count} binary skills")
-          {:ok, new_state}
-
-        {:error, errors} ->
-          Logger.warning("#{inspect(__MODULE__)} started with errors: #{inspect(errors)}")
-          {:ok, state}
-      end
+      # do_load_all always returns {:ok, state} - it logs warnings internally for any errors
+      {:ok, new_state} = do_load_all(state, path)
+      count = map_size(new_state.skills)
+      Logger.info("#{inspect(__MODULE__)} loaded #{count} binary skills")
+      {:ok, new_state}
     else
       {:ok, state}
     end
@@ -159,15 +154,11 @@ defmodule Loka.Framework.Skills.BinarySkillRegistry do
 
   @impl true
   def handle_call(:reload, _from, state) do
-    case do_load_all(state, state.path) do
-      {:ok, new_state} ->
-        count = map_size(new_state.skills)
-        Logger.info("#{inspect(__MODULE__)} reloaded #{count} binary skills")
-        {:reply, :ok, new_state}
-
-      {:error, errors} ->
-        {:reply, {:error, errors}, state}
-    end
+    # do_load_all always returns {:ok, state} - it logs warnings internally for any errors
+    {:ok, new_state} = do_load_all(state, state.path)
+    count = map_size(new_state.skills)
+    Logger.info("#{inspect(__MODULE__)} reloaded #{count} binary skills")
+    {:reply, :ok, new_state}
   end
 
   @impl true

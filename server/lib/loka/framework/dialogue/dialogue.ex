@@ -528,7 +528,7 @@ defmodule Loka.Framework.Dialogue do
   # 3. Start nodes with show_if: quest_active (quest is active, regardless of objective status)
   # 4. Other start nodes with show_if conditions
   # 5. The default "start" node (fallback)
-  defp find_start_node(dialogue_tree, player_quests, game_state \\ nil) do
+  defp find_start_node(dialogue_tree, player_quests, game_state) do
     completed = get_completed_quests(player_quests)
 
     # Get all start nodes (nodes with keys starting with "start") that have conditions

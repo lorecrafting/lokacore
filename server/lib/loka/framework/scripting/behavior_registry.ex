@@ -111,10 +111,6 @@ defmodule Loka.Framework.Scripting.BehaviorRegistry do
 
       :skip ->
         :ok
-
-      {:error, reason} ->
-        Logger.warning("[BehaviorRegistry] Failed to register behavior: #{inspect(reason)}")
-        :ok
     end
   end
 

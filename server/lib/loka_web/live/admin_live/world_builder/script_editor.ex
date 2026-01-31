@@ -9,7 +9,6 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptEditor do
   - Test runner
   """
   use Phoenix.Component
-  import LokaWeb.CoreComponents
 
   attr :script, :map, default: nil
   attr :entities, :list, default: []

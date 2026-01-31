@@ -15,7 +15,6 @@ defmodule Loka.WorldBuilder.TemplateManager do
   require Logger
 
   alias Loka.WorldBuilder.RoomManager
-  alias Loka.Engine.TypedObject
 
   @templates_dir Path.join([:code.priv_dir(:loka), "world", "templates"])
 

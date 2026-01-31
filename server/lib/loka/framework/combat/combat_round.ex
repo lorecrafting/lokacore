@@ -534,7 +534,7 @@ defmodule Loka.Framework.Combat.CombatRound do
     end
   end
 
-  defp get_armor_class(equipment) do
+  defp get_armor_class(_equipment) do
     # Would sum AC from all armor pieces
     # For now return base
     10

@@ -36,7 +36,8 @@ defmodule Loka.Game.Actions.Spark do
 
         events =
           if pending_count > 0 do
-            events ++ [{:event, spark_voice(spark, "I have #{pending_count} things to tell you.")}]
+            events ++
+              [{:event, spark_voice(spark, "I have #{pending_count} things to tell you.")}]
           else
             events
           end
@@ -181,7 +182,11 @@ defmodule Loka.Game.Actions.Spark do
     prefix =
       cond do
         "curious" in traits ->
-          Enum.random(["*pulses inquisitively*", "*glows with interest*", "*flickers thoughtfully*"])
+          Enum.random([
+            "*pulses inquisitively*",
+            "*glows with interest*",
+            "*flickers thoughtfully*"
+          ])
 
         "warm" in traits ->
           Enum.random(["*glows warmly*", "*hums softly*", "*radiates gently*"])

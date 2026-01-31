@@ -55,8 +55,6 @@ defmodule Loka.WorldBuilder.CutsceneManager do
 
   require Logger
 
-  alias Loka.Testing.Content.CutsceneValidator
-
   @cutscenes_dir Path.join([:code.priv_dir(:loka), "world", "cutscenes"])
 
   @doc """

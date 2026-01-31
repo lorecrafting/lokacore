@@ -272,27 +272,6 @@ defmodule Loka.Framework.Status.StatusManager do
     {:reply, result, state}
   end
 
-  # Internal implementation of remove_status - can be called from other handlers
-  # to avoid recursive GenServer.call deadlock
-  defp do_remove_status(entity_id, status_key) do
-    active_statuses = get_active(entity_id)
-    existing = Enum.find(active_statuses, &(&1.status_key == status_key))
-
-    if existing do
-      # Process on_remove effects
-      case StatusRegistry.get(status_key) do
-        {:ok, status} -> process_trigger(entity_id, status, existing, :on_remove)
-        _ -> nil
-      end
-
-      updated_statuses = Enum.reject(active_statuses, &(&1.status_key == status_key))
-      :ets.insert(@active_status_table, {entity_id, updated_statuses})
-      :ok
-    else
-      {:error, :not_found}
-    end
-  end
-
   @impl true
   def handle_call({:tick, entity_id, trigger}, _from, state) do
     active_statuses = get_active(entity_id)
@@ -420,6 +399,27 @@ defmodule Loka.Framework.Status.StatusManager do
   # =============================================================================
   # Private Functions
   # =============================================================================
+
+  # Internal implementation of remove_status - can be called from other handlers
+  # to avoid recursive GenServer.call deadlock
+  defp do_remove_status(entity_id, status_key) do
+    active_statuses = get_active(entity_id)
+    existing = Enum.find(active_statuses, &(&1.status_key == status_key))
+
+    if existing do
+      # Process on_remove effects
+      case StatusRegistry.get(status_key) do
+        {:ok, status} -> process_trigger(entity_id, status, existing, :on_remove)
+        _ -> nil
+      end
+
+      updated_statuses = Enum.reject(active_statuses, &(&1.status_key == status_key))
+      :ets.insert(@active_status_table, {entity_id, updated_statuses})
+      :ok
+    else
+      {:error, :not_found}
+    end
+  end
 
   defp process_trigger(_entity_id, status, active, trigger) do
     effects = StatusEffect.get_effects_for_trigger(status, trigger)

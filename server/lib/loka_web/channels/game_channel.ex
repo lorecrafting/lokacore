@@ -369,19 +369,6 @@ defmodule LokaWeb.GameChannel do
     end
   end
 
-  # Apply initial stat allocations from character creation
-  defp apply_initial_stats(game_state, stats) do
-    # Stats map: %{"strength" => 2, "agility" => 1, ...}
-    # Apply to game_state.stats
-    current_stats = game_state.stats || %{}
-    updated_stats = Map.merge(current_stats, stats)
-
-    case Ecto.Changeset.change(game_state, %{stats: updated_stats}) |> Loka.Repo.update() do
-      {:ok, state} -> state
-      {:error, _} -> game_state
-    end
-  end
-
   # =============================================================================
   # Navigation
   # =============================================================================
@@ -1040,6 +1027,19 @@ defmodule LokaWeb.GameChannel do
 
   # NOTE: Navigation, inventory, equipment logic moved to Loka.Game.Actions
   # GameChannel now uses ActionBridge.execute/3 for these actions
+
+  # Apply initial stat allocations from character creation
+  defp apply_initial_stats(game_state, stats) do
+    # Stats map: %{"strength" => 2, "agility" => 1, ...}
+    # Apply to game_state.stats
+    current_stats = game_state.stats || %{}
+    updated_stats = Map.merge(current_stats, stats)
+
+    case Ecto.Changeset.change(game_state, %{stats: updated_stats}) |> Loka.Repo.update() do
+      {:ok, state} -> state
+      {:error, _} -> game_state
+    end
+  end
 
   defp find_entity(room, id, "npc") do
     Enum.find(room.entities, fn e -> e.id == id end)

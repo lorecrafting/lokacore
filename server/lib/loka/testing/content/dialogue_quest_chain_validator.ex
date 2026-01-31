@@ -21,7 +21,7 @@ defmodule Loka.Testing.Content.DialogueQuestChainValidator do
   alias Loka.Framework.Quest
   alias Loka.Framework.Quest.Definitions
   alias Loka.Framework.Storyline.{Storyline, StorylineRegistry}
-  alias Loka.Engine.{Entities, PrototypeLoader}
+  alias Loka.Engine.PrototypeLoader
   alias Loka.Content
 
   @doc """

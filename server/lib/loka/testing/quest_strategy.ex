@@ -841,7 +841,7 @@ defmodule Loka.Testing.QuestStrategy do
 
                   {:error, _} ->
                     # No turn-in NPC found - wait and re-check
-                    Logger.warn(
+                    Logger.warning(
                       "[STRATEGY] Quest #{quest_id} needs turn-in but no NPC found, waiting..."
                     )
 
@@ -1153,12 +1153,6 @@ defmodule Loka.Testing.QuestStrategy do
   # Dialogue Helpers
   # ============================================================================
 
-  defp get_dialogue_choices(nil), do: []
-
-  defp get_dialogue_choices(node) do
-    Map.get(node, :choices) || Map.get(node, "choices") || []
-  end
-
   # Filter out dialogue choices that would accept quests not in the filter
   # This prevents the bot from accidentally accepting quests it shouldn't work on
   defp filter_choices_by_quest_filter(choices, nil), do: choices
@@ -1378,7 +1372,6 @@ defmodule Loka.Testing.QuestStrategy do
   # ============================================================================
 
   defp get_entity_field(entity, field), do: BotHelpers.get_entity_field(entity, field)
-  defp entity_type(entity), do: BotHelpers.entity_type(entity)
 
   defp find_entity_in_room(context, target_key),
     do: BotHelpers.find_entity_in_room(context, target_key)
@@ -1472,7 +1465,7 @@ defmodule Loka.Testing.QuestStrategy do
     end
   end
 
-  defp find_next_objective(game_state, quest_id, quest_def, locally_completed \\ []) do
+  defp find_next_objective(game_state, quest_id, quest_def, locally_completed) do
     progress = get_quest_progress(game_state, quest_id)
     objectives_progress = (progress && (progress["objectives"] || progress[:objectives])) || %{}
 

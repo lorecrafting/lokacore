@@ -80,6 +80,7 @@ defmodule Loka.WorldBuilder.LLM.PreviewManagerTest do
       user_id = "test_user"
       # Use random key to avoid collisions
       npc_key = "test_npc_#{:erlang.unique_integer([:positive])}"
+
       npc_data = %{
         key: npc_key,
         name: "Test NPC",
@@ -88,15 +89,15 @@ defmodule Loka.WorldBuilder.LLM.PreviewManagerTest do
       }
 
       {:ok, preview_id} = PreviewManager.add_preview(user_id, :npc, npc_data)
-      
+
       # Should succeed now that it's implemented
       assert {:ok, entity} = PreviewManager.accept_preview(preview_id)
-      
+
       # Verify returned entity
       assert entity.key == npc_key
       assert entity.name == "Test NPC"
       assert entity.subtype == :npc
-      
+
       # Cleanup
       EntityManager.delete_entity(npc_key)
     end

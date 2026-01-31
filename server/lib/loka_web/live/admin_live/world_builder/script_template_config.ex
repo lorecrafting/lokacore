@@ -6,8 +6,6 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptTemplateConfig do
   """
   use Phoenix.Component
 
-  alias Loka.WorldBuilder.ScriptTemplates
-
   attr :template, :map, required: true
   attr :config, :map, default: %{}
   attr :preview_code, :string, default: ""
