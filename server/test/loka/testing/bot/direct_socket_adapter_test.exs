@@ -3,6 +3,23 @@ defmodule Loka.Testing.Bot.DirectSocketAdapterTest do
 
   alias Loka.Testing.Bot.DirectSocketAdapter
   alias Loka.Accounts
+  alias Loka.Engine.Entities
+  alias Loka.Framework.World.RoomLoader
+
+  # Create starting room in sandbox since tests run in isolation
+  setup do
+    starting_key = RoomLoader.starting_room_key()
+
+    {:ok, _room} =
+      Entities.create_entity(%{
+        key: starting_key,
+        type: "room",
+        short_desc: "Test Starting Room",
+        extra_desc: "A test room for bot testing."
+      })
+
+    :ok
+  end
 
   describe "join/1 - system quest granting" do
     test "grants system quests to new bot on first join" do

@@ -51,7 +51,7 @@ defmodule Loka.WorldBuilder.EntityManager do
 
   require Logger
 
-  alias Loka.Engine.{TypedObject, Spawner, EntityServer, Entity, Entities, PrototypeLoader}
+  alias Loka.Engine.{TypedObject, PrototypeLoader}
   alias Loka.Engine.TypedObject.Registry
   alias Loka.Engine.TypedObject.Loader
 
@@ -321,22 +321,6 @@ defmodule Loka.WorldBuilder.EntityManager do
 
   defp build_components(_subtype, _attrs) do
     %{}
-  end
-
-  # Enrich an Entity struct for the UI
-  defp enrich_entity_for_ui(%Entity{} = entity) do
-    %{
-      id: entity.id,
-      key: entity.key,
-      type: entity.type,
-      subtype: entity.type,
-      name: entity.short_desc || entity.key,
-      description: entity.extra_desc || "",
-      tags: entity.tags || [],
-      attributes: entity.attributes || %{},
-      components: entity.components || %{},
-      data: %{}
-    }
   end
 
   # =============================================================================

@@ -378,13 +378,18 @@ defmodule Loka.Engine.Script.Executor do
   """
   @spec register_behavior_events(String.t(), String.t(), map()) :: [atom()]
   def register_behavior_events(entity_id, behavior_key, config \\ %{}) do
-    alias Loka.Framework.Scripting.WorldEventHandler
-
     events = get_script_events(behavior_key)
 
-    Enum.each(events, fn event ->
-      WorldEventHandler.subscribe(entity_id, event, behavior_key, config)
-    end)
+    # Use configured module to avoid Engine → Framework dependency
+    case Application.get_env(:loka, :world_event_handler_module) do
+      nil ->
+        :ok
+
+      module ->
+        Enum.each(events, fn event ->
+          module.subscribe(entity_id, event, behavior_key, config)
+        end)
+    end
 
     events
   end
@@ -396,8 +401,10 @@ defmodule Loka.Engine.Script.Executor do
   """
   @spec unregister_behavior_events(String.t()) :: :ok
   def unregister_behavior_events(entity_id) do
-    alias Loka.Framework.Scripting.WorldEventHandler
-
-    WorldEventHandler.unsubscribe_all(entity_id)
+    # Use configured module to avoid Engine → Framework dependency
+    case Application.get_env(:loka, :world_event_handler_module) do
+      nil -> :ok
+      module -> module.unsubscribe_all(entity_id)
+    end
   end
 end

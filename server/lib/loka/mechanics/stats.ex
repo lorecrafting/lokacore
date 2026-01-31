@@ -234,7 +234,7 @@ defmodule Loka.Mechanics.Stats do
         end)
 
       changes =
-        Enum.map(allocations, fn {stat, points} ->
+        Enum.map(allocations, fn {stat, _points} ->
           %{stat: stat, before: Map.get(stats, stat), after: Map.get(new_stats, stat)}
         end)
 

@@ -8,14 +8,51 @@ defmodule Loka.Testing.QuestBotIntegrationTest do
   - Making decisions with QuestStrategy
   - Progressing through quest objectives
   - Auto-completing system quests
+
+  **Note**: These tests require the full game world (NPCs with dialogues, quests, etc.)
+  and are excluded from normal test runs. Run with: `mix test --include integration`
   """
 
   use Loka.ChannelCase, async: false
 
   alias Loka.Testing.Bot.ChannelBot
   alias Loka.Testing.QuestStrategy
+  alias Loka.Engine.Entities
+  alias Loka.Framework.World.RoomLoader
 
+  # These tests require full world data (dialogues, NPC behaviors, etc.)
+  # Exclude from normal test runs, include explicitly with: --include integration
+  @moduletag :integration
   @moduletag timeout: 600_000
+
+  # Set up the minimum world required for quest bot testing
+  setup do
+    starting_key = RoomLoader.starting_room_key()
+
+    # Create the starting room
+    {:ok, room} =
+      Entities.create_entity(%{
+        key: starting_key,
+        type: "room",
+        short_desc: "Monastery Gate",
+        extra_desc: "Ancient stone pillars mark the entrance."
+      })
+
+    # Create Novice Pema NPC in the starting room (needed for intro_welcome quest)
+    {:ok, _pema} =
+      Entities.create_entity(%{
+        key: "novice_pema",
+        type: "npc",
+        short_desc: "Novice Pema",
+        extra_desc: "A young novice monk with a serene expression.",
+        location_id: room.id,
+        components: %{
+          "dialogue" => %{"key" => "novice_pema_intro"}
+        }
+      })
+
+    %{starting_room: room}
+  end
 
   describe "quest bot integration" do
     test "bot completes intro_welcome quest" do

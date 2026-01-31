@@ -452,7 +452,7 @@ defmodule Loka.Framework.Magic.Spellbook do
     # Magic words share the same skill point pool as regular skills
     # This would need to integrate with BinarySkillManager
     # For now, we'll track separately in spellbook
-    spellbook = get_spellbook(game_state)
+    _spellbook = get_spellbook(game_state)
     max_points = get_max_magic_points(game_state)
     spent = magic_points_spent(game_state)
     max(0, max_points - spent)

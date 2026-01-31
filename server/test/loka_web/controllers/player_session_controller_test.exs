@@ -42,7 +42,7 @@ defmodule LokaWeb.PlayerSessionControllerTest do
       response = html_response(conn, 200)
       assert response =~ "Enter the World"
       assert response =~ ~p"/players/register"
-      assert response =~ "Send magic link"
+      assert response =~ "Log in"
     end
 
     test "renders login page with email filled in (sudo mode)", %{conn: conn, player: player} do
@@ -54,7 +54,7 @@ defmodule LokaWeb.PlayerSessionControllerTest do
 
       assert html =~ "You need to reauthenticate"
       refute html =~ "Register"
-      assert html =~ "Send magic link"
+      assert html =~ "Log in"
 
       assert html =~
                ~s(<input type="email" name="player[email]" value="#{player.email}")
@@ -65,7 +65,7 @@ defmodule LokaWeb.PlayerSessionControllerTest do
       response = html_response(conn, 200)
       assert response =~ "Enter the World"
       assert response =~ ~p"/players/register"
-      assert response =~ "Send magic link"
+      assert response =~ "Log in"
     end
   end
 

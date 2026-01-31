@@ -182,6 +182,7 @@ defmodule Loka.Engine.PluginLoader do
           version: plugin.version(),
           description: plugin.description(),
           dependencies: safe_call(plugin, :dependencies, []),
+          commands: length(safe_call(plugin, :commands, [])),
           hooks: length(safe_call(plugin, :hooks, [])),
           children: length(safe_call(plugin, :children, []))
         }

@@ -28,6 +28,12 @@ config :loka,
 # Game configuration
 config :loka, :game, starting_room_key: "monastery_gate"
 
+# World modules - injected into Engine to maintain layer separation
+# Engine uses these via Application.get_env to avoid direct Framework imports
+config :loka, :world_time_module, Loka.Framework.World.DayNight
+config :loka, :world_weather_module, Loka.Framework.World.Weather
+config :loka, :world_event_handler_module, Loka.Framework.Scripting.WorldEventHandler
+
 # Scripting extensions - modules implementing ScriptingExtension behaviour
 # These provide game-specific Lua API functions (quest, player, etc.)
 config :loka, :scripting_extensions, [

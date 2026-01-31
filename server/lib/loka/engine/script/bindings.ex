@@ -480,12 +480,17 @@ defmodule Loka.Engine.Script.Bindings do
   end
 
   defp current_hour do
-    alias Loka.Framework.World.DayNight
+    # Use configured module to avoid Engine → Framework dependency
+    case Application.get_env(:loka, :world_time_module) do
+      nil ->
+        DateTime.utc_now().hour
 
-    try do
-      DayNight.get_hour()
-    rescue
-      _ -> DateTime.utc_now().hour
+      module ->
+        try do
+          module.get_hour()
+        rescue
+          _ -> DateTime.utc_now().hour
+        end
     end
   end
 
@@ -493,8 +498,11 @@ defmodule Loka.Engine.Script.Bindings do
     room = get_room(player)
     # Check if we have a valid room and if it's outdoors
     if room && "outdoor" in (room[:tags] || []) do
-      # For now use default region, in future use room's region/zone
-      Loka.Framework.World.Weather.get_weather("default")
+      # Use configured module to avoid Engine → Framework dependency
+      case Application.get_env(:loka, :world_weather_module) do
+        nil -> :clear
+        module -> module.get_weather("default")
+      end
     else
       # Indoor always clear/neutral
       :clear
@@ -511,9 +519,9 @@ defmodule Loka.Engine.Script.Bindings do
     # OR if the room has a "dark" tag (e.g. caves)
     room = get_room(player)
     tags = room[:tags] || []
-    
-    ("dark" in tags) or 
-    ("outdoor" in tags and time_of_day() == :night)
+
+    "dark" in tags or
+      ("outdoor" in tags and time_of_day() == :night)
   end
 
   # =============================================================================

@@ -12,7 +12,6 @@ defmodule Loka.WorldBuilder.BatchOperations do
   require Logger
 
   alias Loka.WorldBuilder.RoomManager
-  alias Loka.Engine.TypedObject
 
   @doc """
   Move multiple rooms by an offset.
