@@ -13,6 +13,20 @@ defmodule Loka.WorldBuilder.ToolExecutorTest do
 
   alias Loka.WorldBuilder.ToolExecutor
   alias Loka.WorldBuilder.RoomManager
+  alias Loka.TestCleanup
+
+  # Clean up test files after all tests complete (runs even if tests fail)
+  setup_all do
+    on_exit(fn ->
+      TestCleanup.cleanup_room_test_files()
+      TestCleanup.cleanup_npc_test_files()
+      TestCleanup.cleanup_item_test_files()
+      TestCleanup.cleanup_quest_test_files()
+      TestCleanup.cleanup_dialogue_test_files()
+    end)
+
+    :ok
+  end
 
   describe "execute/2 - tool routing" do
     test "returns error for unknown tool" do

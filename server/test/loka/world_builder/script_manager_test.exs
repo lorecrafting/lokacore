@@ -12,18 +12,20 @@ defmodule Loka.WorldBuilder.ScriptManagerTest do
   use ExUnit.Case, async: false
 
   alias Loka.WorldBuilder.ScriptManager
+  alias Loka.TestCleanup
 
-  @scripts_dir "priv/world/scripts"
+  # Clean up test files after all tests complete (runs even if tests fail)
+  setup_all do
+    on_exit(fn ->
+      TestCleanup.cleanup_script_test_files()
+    end)
+
+    :ok
+  end
 
   # Helper to generate unique test script keys
   defp unique_script_key(prefix \\ "test_script") do
     "#{prefix}_#{System.os_time(:millisecond)}_#{:rand.uniform(1000)}"
-  end
-
-  # Helper to clean up test scripts
-  defp cleanup_script(key) do
-    file_path = Path.join(@scripts_dir, "#{key}.yml")
-    File.rm(file_path)
   end
 
   describe "list_scripts/0" do
@@ -69,7 +71,6 @@ defmodule Loka.WorldBuilder.ScriptManagerTest do
       case result do
         {:ok, script} ->
           assert script.key == key
-          cleanup_script(key)
 
         {:error, reason} ->
           # May fail if script already exists or validation fails
@@ -92,7 +93,6 @@ defmodule Loka.WorldBuilder.ScriptManagerTest do
           # Try to create with same key
           result = ScriptManager.create_script(attrs)
           assert {:error, :already_exists} = result
-          cleanup_script(key)
 
         {:error, _} ->
           :ok
@@ -114,7 +114,6 @@ defmodule Loka.WorldBuilder.ScriptManagerTest do
       case result do
         {:ok, script} ->
           assert script.key == key
-          cleanup_script(key)
 
         {:error, _} ->
           :ok
@@ -133,7 +132,7 @@ defmodule Loka.WorldBuilder.ScriptManagerTest do
 
       case ScriptManager.create_script(attrs) do
         {:ok, _script} ->
-          cleanup_script(key)
+          :ok
 
         {:error, _} ->
           :ok
@@ -164,8 +163,6 @@ defmodule Loka.WorldBuilder.ScriptManagerTest do
               :ok
           end
 
-          cleanup_script(key)
-
         {:error, _} ->
           :ok
       end
@@ -193,8 +190,6 @@ defmodule Loka.WorldBuilder.ScriptManagerTest do
             {:error, _} ->
               :ok
           end
-
-          cleanup_script(key)
 
         {:error, _} ->
           :ok

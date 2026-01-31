@@ -2,6 +2,17 @@ defmodule Loka.WorldBuilder.EntityManagerTest do
   use Loka.DataCase, async: false
 
   alias Loka.WorldBuilder.EntityManager
+  alias Loka.TestCleanup
+
+  # Clean up test files after all tests complete (runs even if tests fail)
+  setup_all do
+    on_exit(fn ->
+      TestCleanup.cleanup_npc_test_files()
+      TestCleanup.cleanup_item_test_files()
+    end)
+
+    :ok
+  end
 
   describe "list_entities/1" do
     test "returns empty list when no entities of type exist" do

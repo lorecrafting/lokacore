@@ -10,17 +10,10 @@ defmodule Loka.Framework.Quest.JournalLuaTest do
   alias Loka.Framework.Quest.Journal
   alias Loka.Framework.Quest.QuestRegistry
   alias Loka.Framework.Player.GameState
+  alias Loka.TestCleanup
 
   # Add test quests to the main quests directory to avoid registry restart issues
   @quests_path "priv/world/quests"
-  @test_quest_files [
-    "test_lua_simple.yml",
-    "test_lua_stats.yml",
-    "test_lua_flags.yml",
-    "test_lua_progress.yml",
-    "test_lua_time.yml",
-    "test_lua_inventory.yml"
-  ]
 
   setup_all do
     # Create test quest files with Lua journal entries in the main quests directory
@@ -142,10 +135,8 @@ defmodule Loka.Framework.Quest.JournalLuaTest do
     :ok = QuestRegistry.reload()
 
     on_exit(fn ->
-      # Clean up test quest files
-      Enum.each(@test_quest_files, fn file ->
-        File.rm(Path.join(@quests_path, file))
-      end)
+      # Clean up test quest files using TestCleanup for robustness
+      TestCleanup.cleanup_quest_test_files()
 
       # Reload registry to remove test quests
       QuestRegistry.reload()
