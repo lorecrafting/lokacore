@@ -120,3 +120,32 @@ use Loka.DataCase, async: true
 # Unsafe - uses ChannelBot (must be serial)
 use Loka.ChannelCase, async: false
 ```
+
+## File Cleanup
+
+### Tests that create files must use on_exit cleanup
+
+Tests that create YAML files in `priv/world/` must use `setup_all` with `on_exit` to ensure cleanup runs even when tests fail:
+
+```elixir
+setup_all do
+  on_exit(fn ->
+    Loka.TestCleanup.cleanup_room_test_files()
+    Loka.TestCleanup.cleanup_npc_test_files()
+  end)
+  :ok
+end
+```
+
+**Never use inline cleanup** - it doesn't run if the test fails before reaching it:
+
+```elixir
+# ❌ WRONG - cleanup won't run if test fails
+test "creates entity" do
+  {:ok, entity} = create_entity(%{key: "test_123"})
+  assert entity.key == "test_123"
+  File.rm("priv/world/prototypes/npcs/test_123.yml")  # Never runs on failure!
+end
+```
+
+See `.claude/skills/test-file-cleanup-pattern.md` for full details.

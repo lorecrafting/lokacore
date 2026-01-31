@@ -785,6 +785,21 @@ mix loka.test.storyline monastery_arc --run
 For Godot mobile testing:
 - Export to iOS/Android and test on device
 - Use Godot's built-in testing framework for script logic
+
+### Test File Cleanup
+
+Tests that create YAML files in `priv/world/` **must use `on_exit` callbacks** for cleanup:
+
+```elixir
+setup_all do
+  on_exit(fn ->
+    Loka.TestCleanup.cleanup_room_test_files()
+  end)
+  :ok
+end
+```
+
+See `.claude/skills/test-file-cleanup-pattern.md` for the full pattern. The `TestCleanup` module at `test/support/test_cleanup.ex` provides cleanup functions for all entity types.
 - Integration tests via Phoenix ChannelBot + manual verification
 
 ## Issue Tracking
