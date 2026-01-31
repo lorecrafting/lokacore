@@ -175,7 +175,7 @@ defmodule Loka.WorldBuilder.EntityManager do
       end
     else
       {:error, :not_found} ->
-        {:error, :entity_not_found}
+        {:error, :not_found}
     end
   end
 
@@ -200,7 +200,7 @@ defmodule Loka.WorldBuilder.EntityManager do
         end
 
       {:error, :not_found} ->
-        {:error, :entity_not_found}
+        {:error, :not_found}
     end
   end
 
@@ -236,8 +236,14 @@ defmodule Loka.WorldBuilder.EntityManager do
 
   defp enrich_for_ui(entity) when is_struct(entity, TypedObject) do
     # Convert TypedObject to UI-friendly map
+    # Use key as id fallback since YAML-loaded entities may not have id set
+    components = entity.components || %{}
+
+    # Extract level from components.combatant.level for NPCs
+    level = get_in(components, ["combatant", "level"]) || get_in(components, [:combatant, :level])
+
     %{
-      id: entity.id,
+      id: entity.id || entity.key,
       key: entity.key,
       type: entity.type,
       subtype: entity.subtype,
@@ -245,8 +251,9 @@ defmodule Loka.WorldBuilder.EntityManager do
       description: entity.description || "",
       tags: entity.tags || [],
       attributes: entity.attributes || %{},
-      components: entity.components || %{},
-      data: entity.data || %{}
+      components: components,
+      data: entity.data || %{},
+      level: level
     }
   end
 
@@ -624,7 +631,16 @@ defmodule Loka.WorldBuilder.EntityManager do
       |> Map.merge(entity.components || %{})
 
     new_components = Map.get(attrs, :components, %{})
-    Map.merge(existing, new_components)
+    merged = Map.merge(existing, new_components)
+
+    # If level is provided in attrs, update combatant.level
+    if Map.has_key?(attrs, :level) do
+      combatant = Map.get(merged, "combatant", %{})
+      updated_combatant = Map.put(combatant, "level", attrs.level)
+      Map.put(merged, "combatant", updated_combatant)
+    else
+      merged
+    end
   end
 
   # Extract level from entity or attrs

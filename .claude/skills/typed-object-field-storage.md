@@ -85,7 +85,33 @@ room_data = %{
 }
 ```
 
+## ID Field Nil for YAML-Loaded Entities
+
+TypedObject has an `id` field, but YAML files use `key` as the identifier. After loading from YAML, `entity.id` is nil.
+
+**Problem:**
+```elixir
+entity = Registry.get("my_npc")
+entity.id  # => nil
+entity.key # => "my_npc"
+```
+
+**Solution: Use key as fallback for id in UI functions:**
+```elixir
+defp enrich_for_ui(entity) do
+  %{
+    id: entity.id || entity.key,  # Fallback to key
+    key: entity.key,
+    # ...
+  }
+end
+```
+
+This pattern is used in:
+- `lib/loka/world_builder/entity_manager.ex` - `enrich_for_ui/1`
+
 ## Related Files
 - `lib/loka/engine/typed_object.ex` - @struct_fields definition, new/1
 - `lib/loka/world_builder/room_manager.ex` - Room CRUD with coordinate handling
+- `lib/loka/world_builder/entity_manager.ex` - Entity CRUD with id fallback
 - `lib/loka/engine/typed_object/loader.ex` - YAML loading

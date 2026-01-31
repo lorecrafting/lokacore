@@ -453,10 +453,15 @@ defmodule Loka.Framework.Crafting do
     alias Loka.Engine.Entities
 
     # Count occurrences of items with matching prototype key
+    # Supports both entity IDs (real gameplay) and prototype keys (tests/simple items)
     Enum.count(inventory, fn item_id ->
       case Entities.get_entity(item_id) do
-        nil -> false
-        entity -> entity.key == item_key
+        nil ->
+          # Fallback: check if item_id is the prototype key directly
+          item_id == item_key
+
+        entity ->
+          entity.key == item_key
       end
     end)
   end
@@ -464,10 +469,15 @@ defmodule Loka.Framework.Crafting do
   defp has_item?(%GameState{inventory: inventory}, item_key) do
     alias Loka.Engine.Entities
 
+    # Supports both entity IDs (real gameplay) and prototype keys (tests/simple items)
     Enum.any?(inventory, fn item_id ->
       case Entities.get_entity(item_id) do
-        nil -> false
-        entity -> entity.key == item_key
+        nil ->
+          # Fallback: check if item_id is the prototype key directly
+          item_id == item_key
+
+        entity ->
+          entity.key == item_key
       end
     end)
   end
@@ -486,12 +496,17 @@ defmodule Loka.Framework.Crafting do
     alias Loka.Engine.Entities
 
     # Find item IDs that match the prototype key
+    # Supports both entity IDs (real gameplay) and prototype keys (tests/simple items)
     {to_remove, remaining} =
       game_state.inventory
       |> Enum.split_with(fn item_id ->
         case Entities.get_entity(item_id) do
-          nil -> false
-          entity -> entity.key == item_key
+          nil ->
+            # Fallback: check if item_id is the prototype key directly
+            item_id == item_key
+
+          entity ->
+            entity.key == item_key
         end
       end)
 

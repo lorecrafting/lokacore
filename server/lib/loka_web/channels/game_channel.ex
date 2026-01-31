@@ -316,6 +316,73 @@ defmodule LokaWeb.GameChannel do
   end
 
   # =============================================================================
+  # Character Creation
+  # =============================================================================
+
+  @impl true
+  def handle_in("create_character", params, socket) do
+    game_state = socket.assigns.game_state
+
+    # Extract character data from params
+    attrs = %{
+      character_name: sanitize_character_name(Map.get(params, "name", game_state.player.name)),
+      gender: Map.get(params, "gender", "they/them"),
+      background: Map.get(params, "background", "pilgrim")
+    }
+
+    # Extract stats allocations if provided
+    stats = Map.get(params, "stats", %{})
+
+    changeset = PlayerGameState.character_creation_changeset(game_state, attrs)
+
+    case Loka.Repo.update(changeset) do
+      {:ok, updated_state} ->
+        # Apply initial stat allocations if provided
+        final_state =
+          if map_size(stats) > 0 do
+            apply_initial_stats(updated_state, stats)
+          else
+            updated_state
+          end
+
+        Logger.info("[GameChannel] Character created: #{attrs.character_name}")
+
+        # Update socket and push success response
+        socket = assign(socket, :game_state, final_state)
+
+        push(socket, "character_created", %{
+          success: true,
+          character_name: final_state.character_name
+        })
+
+        {:reply, {:ok, %{character_name: final_state.character_name}}, socket}
+
+      {:error, changeset} ->
+        error_msg =
+          if name_taken_error?(changeset) do
+            "That name is already taken"
+          else
+            "Failed to create character"
+          end
+
+        {:reply, {:error, %{reason: error_msg}}, socket}
+    end
+  end
+
+  # Apply initial stat allocations from character creation
+  defp apply_initial_stats(game_state, stats) do
+    # Stats map: %{"strength" => 2, "agility" => 1, ...}
+    # Apply to game_state.stats
+    current_stats = game_state.stats || %{}
+    updated_stats = Map.merge(current_stats, stats)
+
+    case Ecto.Changeset.change(game_state, %{stats: updated_stats}) |> Loka.Repo.update() do
+      {:ok, state} -> state
+      {:error, _} -> game_state
+    end
+  end
+
+  # =============================================================================
   # Navigation
   # =============================================================================
 

@@ -316,12 +316,13 @@ func _on_character_created(character_data: Dictionary) -> void:
 	# Hide the panel
 	_hide_character_creation()
 
-	# TODO: Send character data to server
-	# For now, just show the game screen
-	# In the future: PhoenixClient.create_character(character_data)
-
-	# For offline/mock mode, update MockWorld with the stats
-	if not GameState.is_online:
+	# Send character data to server if online
+	if GameState.is_online:
+		var phoenix: Node = get_node_or_null("/root/PhoenixClient")
+		if phoenix:
+			phoenix.create_character(character_data)
+	else:
+		# For offline/mock mode, update MockWorld with the stats
 		var stats: Dictionary = character_data.get("stats", {})
 		MockWorld.update_player_stats(stats)
 

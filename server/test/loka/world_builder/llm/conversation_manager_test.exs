@@ -4,7 +4,13 @@ defmodule Loka.WorldBuilder.LLM.ConversationManagerTest do
   alias Loka.WorldBuilder.LLM.ConversationManager
 
   setup do
-    start_supervised!(ConversationManager)
+    # ConversationManager is already started by application.ex
+    # Just verify it's running and clear any previous test state
+    case Process.whereis(ConversationManager) do
+      nil -> start_supervised!(ConversationManager)
+      _pid -> :ok
+    end
+
     :ok
   end
 
@@ -63,11 +69,14 @@ defmodule Loka.WorldBuilder.LLM.ConversationManagerTest do
     end
 
     test "different users have separate histories" do
-      ConversationManager.add_message("user1", :user, "User 1 message")
-      ConversationManager.add_message("user2", :user, "User 2 message")
+      user1 = "separate_user1_#{System.unique_integer([:positive])}"
+      user2 = "separate_user2_#{System.unique_integer([:positive])}"
 
-      user1_history = ConversationManager.get_history("user1")
-      user2_history = ConversationManager.get_history("user2")
+      ConversationManager.add_message(user1, :user, "User 1 message")
+      ConversationManager.add_message(user2, :user, "User 2 message")
+
+      user1_history = ConversationManager.get_history(user1)
+      user2_history = ConversationManager.get_history(user2)
 
       assert length(user1_history) == 1
       assert length(user2_history) == 1
@@ -86,13 +95,16 @@ defmodule Loka.WorldBuilder.LLM.ConversationManagerTest do
     end
 
     test "does not affect other users' history" do
-      ConversationManager.add_message("user1", :user, "User 1")
-      ConversationManager.add_message("user2", :user, "User 2")
+      user1 = "clear_other_user1_#{System.unique_integer([:positive])}"
+      user2 = "clear_other_user2_#{System.unique_integer([:positive])}"
 
-      ConversationManager.clear_history("user1")
+      ConversationManager.add_message(user1, :user, "User 1")
+      ConversationManager.add_message(user2, :user, "User 2")
 
-      assert [] = ConversationManager.get_history("user1")
-      assert length(ConversationManager.get_history("user2")) == 1
+      ConversationManager.clear_history(user1)
+
+      assert [] = ConversationManager.get_history(user1)
+      assert length(ConversationManager.get_history(user2)) == 1
     end
   end
 
@@ -102,7 +114,7 @@ defmodule Loka.WorldBuilder.LLM.ConversationManagerTest do
       ConversationManager.add_message(user, :user, "Hello")
       ConversationManager.add_message(user, :assistant, "Hi")
 
-      assert {:ok, export} = ConversationManager.export_conversation(user)
+      export = ConversationManager.export_conversation(user)
       assert is_binary(export)
       assert String.contains?(export, "Hello")
       assert String.contains?(export, "Hi")
@@ -112,15 +124,15 @@ defmodule Loka.WorldBuilder.LLM.ConversationManagerTest do
       user = "export_time_user"
       ConversationManager.add_message(user, :user, "Test")
 
-      {:ok, export} = ConversationManager.export_conversation(user)
+      export = ConversationManager.export_conversation(user)
       # Export should contain timestamp information
       assert is_binary(export)
     end
 
     test "exports empty string for users with no history" do
-      result = ConversationManager.export_conversation("empty_user")
-      assert {:ok, export} = result
-      assert is_binary(export) or is_nil(export)
+      export = ConversationManager.export_conversation("empty_user")
+      assert is_binary(export)
+      assert export == ""
     end
   end
 

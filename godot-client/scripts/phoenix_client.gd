@@ -35,6 +35,8 @@ signal dialogue_ended
 # =============================================================================
 # Character State Signals
 # =============================================================================
+signal character_created(data: Dictionary)
+signal character_creation_error(message: String)
 signal inventory_updated(data: Dictionary)
 signal equipment_updated(data: Dictionary)
 signal stats_updated(data: Dictionary)
@@ -243,6 +245,19 @@ func container_action(action_name: String, item_index: int = -1) -> void:
 ## Close container
 func container_close() -> void:
 	_send_channel_message("container_close", {})
+
+
+## Create a character with given data
+## character_data should have: name, gender, background, stats
+func create_character(character_data: Dictionary) -> void:
+	var payload := {
+		"name": character_data.get("name", ""),
+		"gender": character_data.get("gender", "they/them"),
+		"background": character_data.get("background", "pilgrim"),
+		"stats": character_data.get("stats", {})
+	}
+	print("[Phoenix] Creating character: %s" % character_data.get("name", "unknown"))
+	_send_channel_message("create_character", payload)
 
 
 # =============================================================================
@@ -535,6 +550,13 @@ func _handle_game_event(event: String, payload: Dictionary) -> void:
 		"bardo_exit":
 			print("[Phoenix] Received bardo_exit")
 			bardo_exited.emit()
+
+		# =====================================================================
+		# Character Creation Events
+		# =====================================================================
+		"character_created":
+			print("[Phoenix] Received character_created: %s" % payload.get("character_name", "unknown"))
+			character_created.emit(payload)
 
 		# =====================================================================
 		# Quest Events

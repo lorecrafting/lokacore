@@ -121,7 +121,8 @@ defmodule Loka.WorldBuilder.LLM.BulkGenerator do
       created_items: [],
       errors: [],
       started_at: DateTime.utc_now(),
-      task_ref: nil
+      task_ref: nil,
+      task_pid: nil
     }
 
     # Start supervised async task
@@ -130,7 +131,8 @@ defmodule Loka.WorldBuilder.LLM.BulkGenerator do
         run_generation(generation_id, user_id, spec)
       end)
 
-    generation_with_task = %{generation | task_ref: task.ref}
+    # Store both ref (for matching DOWN messages) and pid (for termination)
+    generation_with_task = %{generation | task_ref: task.ref, task_pid: task.pid}
     new_generations = Map.put(state.generations, generation_id, generation_with_task)
 
     {:reply, {:ok, generation_id}, %{state | generations: new_generations}}
@@ -152,11 +154,11 @@ defmodule Loka.WorldBuilder.LLM.BulkGenerator do
 
       gen ->
         # Shutdown the task if running
-        if gen.task_ref do
-          Task.Supervisor.terminate_child(@task_supervisor, gen.task_ref)
+        if gen.task_pid do
+          Task.Supervisor.terminate_child(@task_supervisor, gen.task_pid)
         end
 
-        updated_gen = %{gen | status: :cancelled, task_ref: nil}
+        updated_gen = %{gen | status: :cancelled, task_ref: nil, task_pid: nil}
         new_generations = Map.put(state.generations, generation_id, updated_gen)
         {:reply, :ok, %{state | generations: new_generations}}
     end
@@ -200,7 +202,7 @@ defmodule Loka.WorldBuilder.LLM.BulkGenerator do
         {:noreply, state}
 
       gen ->
-        updated_gen = %{gen | status: status, progress: gen.total, task_ref: nil}
+        updated_gen = %{gen | status: status, progress: gen.total, task_ref: nil, task_pid: nil}
         new_generations = Map.put(state.generations, generation_id, updated_gen)
         {:noreply, %{state | generations: new_generations}}
     end
@@ -224,7 +226,7 @@ defmodule Loka.WorldBuilder.LLM.BulkGenerator do
       {generation_id, gen} ->
         Logger.error("[BulkGenerator] Task crashed for #{generation_id}: #{inspect(reason)}")
 
-        updated_gen = %{gen | status: :failed, task_ref: nil}
+        updated_gen = %{gen | status: :failed, task_ref: nil, task_pid: nil}
         new_generations = Map.put(state.generations, generation_id, updated_gen)
         {:noreply, %{state | generations: new_generations}}
     end
@@ -321,7 +323,7 @@ defmodule Loka.WorldBuilder.LLM.BulkGenerator do
 
     Requirements:
     - Create a unique #{spec.type} matching the template style
-    - Follow naming pattern: #{spec.name_pattern || "sequential"}
+    - Follow naming pattern: #{Map.get(spec, :name_pattern, "sequential")}
     - Maintain consistent style and tone
     - Ensure logical connections if creating connected spaces
     - Use the appropriate tool to create the content
@@ -337,21 +339,27 @@ defmodule Loka.WorldBuilder.LLM.BulkGenerator do
       :room ->
         {:ok,
          %{
-           key: "#{template[:base_key] || template.base_key || "room"}_#{index}",
+           key: "#{template[:base_key] || "room"}_#{index}",
            name: "Generated Room #{index}",
            description: build_room_description(template, index),
-           x:
-             (template[:start_x] || template.start_x || 0) +
-               index * (template[:spacing_x] || template.spacing_x || 100),
-           y: template[:start_y] || template.start_y || 0
+           x: (template[:start_x] || 0) + index * (template[:spacing_x] || 100),
+           y: template[:start_y] || 0
          }}
 
       :npc ->
         {:ok,
          %{
-           key: "#{template[:base_key] || template.base_key || "npc"}_#{index}",
+           key: "#{template[:base_key] || "npc"}_#{index}",
            name: "Generated NPC #{index}",
            description: build_npc_description(template, index)
+         }}
+
+      :item ->
+        {:ok,
+         %{
+           key: "#{template[:base_key] || "item"}_#{index}",
+           name: "Generated Item #{index}",
+           description: template[:description] || "A generated item."
          }}
 
       _ ->
@@ -361,8 +369,8 @@ defmodule Loka.WorldBuilder.LLM.BulkGenerator do
 
   # Generate more varied descriptions based on template
   defp build_room_description(template, index) do
-    base = template[:description_base] || template.description_base || "A room"
-    style = template[:style] || template.style || "neutral"
+    base = template[:description_base] || "A room"
+    style = template[:style] || "neutral"
 
     case style do
       "dark" ->
@@ -380,7 +388,7 @@ defmodule Loka.WorldBuilder.LLM.BulkGenerator do
   end
 
   defp build_npc_description(template, index) do
-    base = template[:description_base] || template.description_base || "A figure"
+    base = template[:description_base] || "A figure"
     "#{base} stands here, watching the surroundings carefully. [NPC #{index}]"
   end
 

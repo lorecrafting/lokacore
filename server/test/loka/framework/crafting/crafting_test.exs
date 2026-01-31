@@ -643,10 +643,10 @@ defmodule Loka.Framework.CraftingTest do
                Crafting.can_craft?(state, "recipe_advanced_item")
     end
 
-    test "handles item matching with prefix" do
+    test "requires exact item key match" do
       player = player_fixture()
 
-      # Items with same prefix
+      # Items with similar prefixes should NOT match exact requirements
       state =
         game_state_fixture(player.id, %{
           inventory: ["ingredient_a_1", "ingredient_a_2", "ingredient_b_1"]
@@ -654,8 +654,9 @@ defmodule Loka.Framework.CraftingTest do
 
       missing = Crafting.get_missing_ingredients(state, "recipe_simple_item")
 
-      # Should detect items that start with ingredient_a and ingredient_b
-      assert missing == []
+      # Should detect that ingredient_a and ingredient_b are missing
+      # (ingredient_a_1 does not match ingredient_a)
+      assert length(missing) == 2
     end
 
     test "station bonus cannot reduce failure chance below 0" do
