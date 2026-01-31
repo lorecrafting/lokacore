@@ -18,11 +18,22 @@ All documents here describe future state, not current system behavior. Check the
 | [Operations TUI Tool](ops-tui-tool.md) | - | Terminal UI for production operations over SSH |
 | [Decentralized Autonomous Worlds](decentralized-autonomous-worlds.md) | - | IPFS-based always-on worlds with smart contract patterns |
 | [Builder Content Layer](builder-content-layer.md) | `lokacore-12r` | DB storage for non-technical builder content |
-| [Expo Mobile App](expo-mobile-app.md) | - | React Native mobile client |
 | [Community Relay Infrastructure](community-relay-infrastructure.md) | - | P2P relay for community features |
 | [Encrypted P2P Communication](encrypted-p2p-communication.md) | - | End-to-end encrypted messaging |
 | [TCM Herb System Revamp](tcm-herb-system-revamp.md) | - | Redesign of herbalism/alchemy system |
 | [Collaborative Planet Economy](collaborative-planet-economy.md) | - | Civic energy, planet lifecycle, and wellness integration |
+| [Spark Companion System](spark-companion-system.md) | - | AI companion system |
+| [Stat/Skill System Design](stat-skill-system-design.md) | - | Character progression and skills |
+| [AI-Generated Game Assets](ai-generated-game-assets.md) | - | Procedural content generation |
+
+## Archived Proposals
+
+These proposals were superseded by other decisions:
+
+| Proposal | Reason |
+|----------|--------|
+| [Rust Book Client](archived/rust-book-client.md) | Superseded by Godot 4.6 migration (see `docs/decisions/2026-01-26-godot-client-migration.md`) |
+| [Rust Book Client MVP Plan](archived/rust-book-client-mvp-plan.md) | Superseded by Godot 4.6 migration |
 
 ## Writing Proposals
 

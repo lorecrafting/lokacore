@@ -1,10 +1,12 @@
-# Loka Lore Bible
+# Cosmic Lore Vision
 
-> **Status:** In Development
+> **Status:** Vision/Future Design (NOT YET IMPLEMENTED)
 > **Created:** 2026-01-18
 > **Last Updated:** 2026-01-18
 
-This document captures all lore decisions for Loka, built collaboratively through guided discussion.
+**Note:** This document describes a future sci-fi universe vision for Loka with multiple planets and gate travel. The **current implemented demo** uses a fantasy monastery setting - see `docs/game/monastery-arc/lore-bible.md` for the active game lore.
+
+This document captures collaborative lore design decisions for a potential future expansion.
 
 ---
 
@@ -553,7 +555,7 @@ Questions that came up but we deferred:
 **How to resume:**
 ```
 "Let's continue designing the Loka lore. We established the cosmic framework.
-Please read docs/game-design/lore-bible.md and continue with the three planets."
+Please read docs/game-design/cosmic-lore-vision.md and continue with the three planets."
 ```
 
 ---

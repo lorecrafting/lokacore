@@ -5,6 +5,12 @@
 
 ---
 
+> **Mobile Client Update (2026-01):** Sections referencing React Native/Expo are historical. The mobile client was migrated to **Godot 4.6** - see `docs/decisions/2026-01-26-godot-client-migration.md`. For current client architecture, see `CLAUDE.md`.
+
+> **Document Role:** This is a comprehensive reference document (~200KB). For everyday development, prefer the modular docs in `docs/architecture/` which are actively maintained. Use this document for deep dives into system design philosophy or when you need the full picture in one place.
+
+---
+
 ## Executive Summary
 
 Loka is an **engine framework** (not a game) built on Elixir/Phoenix/LiveView, designed to provide the primitives, abstractions, and skeleton that game creators—and LLMs assisting them—can build upon. Loka leverages Elixir's unique strengths in concurrency, fault-tolerance, and real-time communication to create a modern MUD development platform.

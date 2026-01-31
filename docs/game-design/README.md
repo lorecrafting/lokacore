@@ -6,6 +6,8 @@ Game mechanics, social systems, and gameplay philosophy for Loka.
 
 | Document | Description |
 |----------|-------------|
+| [Cosmic Lore Vision](cosmic-lore-vision.md) | Future sci-fi universe design (NOT YET IMPLEMENTED) |
+| [Monastery Arc Lore](../game/monastery-arc/lore-bible.md) | Active demo game lore (the current implementation) |
 | [Social Primitives](social-primitives.md) | Building blocks for social systems (communication, relationships, groups) |
 | [Storyline Design Tips](storyline-design-tips.md) | Guidance for writing compelling storylines |
 | [LLM-Assisted Gameplay](llm-assisted-gameplay.md) | How AI enhances gameplay without replacing human interaction |

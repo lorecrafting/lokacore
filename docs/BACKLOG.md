@@ -51,8 +51,6 @@ Tasks are tracked here with categories and priorities. We use Claude Code's nati
 
 ### UI/UX
 
-- **Add React error boundaries** - Better error recovery in 3D viewport
-
 ---
 
 ## Blocked

@@ -161,11 +161,13 @@ docs/
 │   └── world-builder-audit-*.md     # Audit reports
 │
 │ ═══════════════════════════════════════════════════════════
-│ COMPREHENSIVE REFERENCES
+│ COMPREHENSIVE REFERENCES (for deep dives)
 │ ═══════════════════════════════════════════════════════════
 │
-├── Loka_Engine_Architecture.md  # Full engine specification
-├── LOKA_SYSTEM_STUDY_GUIDE.md   # Learning guide
+├── Loka_Engine_Architecture.md  # Full 200KB specification (may be slightly stale)
+├── LOKA_SYSTEM_STUDY_GUIDE.md   # Learning guide for new developers
+├── decisions/                   # Architecture Decision Records (ADRs)
+│   └── 2026-01-26-godot-client-migration.md
 └── LOAD_TESTING_PLAN.md         # Performance testing plan
 ```
 

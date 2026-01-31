@@ -60,13 +60,15 @@ channel.join()
 
 See `LokaWeb.GameChannel` moduledoc for complete API documentation.
 
-## Mobile Client
+## Godot Client
 
-The React Native mobile client (`mobile/`) connects via GameChannel:
+The Godot 4.6 client (`godot-client/`) connects via GameChannel:
 
-- `src/hooks/usePhoenix.ts` - Channel connection and state management
-- `src/components/` - UI panels (Inventory, Combat, Dialogue, etc.)
-- `app/game.tsx` - Main game screen
+- `scripts/phoenix_client.gd` - Channel connection and WebSocket handling
+- `scripts/game_state.gd` - Game state management singleton
+- `scripts/book_page.gd` - 3D book page UI with text rendering
+
+See `CLAUDE.md` for detailed Godot client documentation.
 
 ## UI Style
 

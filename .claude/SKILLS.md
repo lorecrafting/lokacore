@@ -102,6 +102,24 @@ description: Knowledge for creating game content (quests, NPCs, items, rooms, di
 
 ---
 
+### llm-native-doc-audit
+
+```yaml
+name: llm-native-doc-audit
+description: LLM-native documentation auditing methodology. Use when reviewing docs, cleaning up CLAUDE.md, auditing skills/commands, or optimizing token efficiency.
+```
+
+**Activates when**: Documentation review, CLAUDE.md optimization, skill audits
+
+**Knows about**:
+- Token budget awareness (CLAUDE.md loads every session)
+- Skills > inline documentation pattern
+- Path-based skill activation
+- Archive don't delete pattern
+- Audit checklists for docs, skills, rules, commands
+
+---
+
 ## Commands (User-Invoked)
 
 Invoke with `/command-name` in the chat. These are explicit workflows with clear steps.
@@ -266,7 +284,7 @@ Rules auto-load when working in specific directories, providing relevant context
 
 **Paths**: `lib/loka/framework/**`
 
-**Context**: Framework development (27 subsystems, layer boundaries, subsystem patterns)
+**Context**: Framework development (31 subsystems, layer boundaries, subsystem patterns)
 
 ---
 

@@ -1,5 +1,15 @@
 # CLAUDE.md - Loka Development Guide
 
+## Table of Contents
+- [Project Overview](#project-overview) | [Tech Stack](#tech-stack) | [Architecture](#architecture)
+- [Project Structure](#project-structure) | [Godot Client Development](#godot-client-development)
+- [Quick Commands](#quick-commands) | [Routes](#routes) | [Key Design Decisions](#key-design-decisions)
+- [Scripts vs Framework Code](#scripts-vs-framework-code) | [Scripting System](#scripting-system-development)
+- [World Builder Architecture](#world-builder-architecture) | [Testing Strategy](#testing-strategy)
+- [Documentation Organization](#documentation-organization) | [API Endpoints](#api-endpoints)
+
+---
+
 ## Project Overview
 
 **Loka** is an Elixir MUD engine framework for building text-based RPGs. Built with Elixir's OTP concurrency, fault tolerance, and real-time LiveView.
@@ -122,12 +132,12 @@ lokacore/
 │   ├── lib/loka/
 │   │   ├── engine/           # Core: entities, registry, spawner, TypedObject
 │   │   ├── content/          # Content modules (Quest, Dialogue, Script, Zone)
-│   │   ├── framework/        # 27 game subsystems
+│   │   ├── framework/        # 31 game subsystems
 │   │   ├── timers/           # Persistent timers (crafting, offline progression)
 │   │   └── session/          # Client messaging layer
-│   ├── lib/loka_web/live/
-│   │   ├── game_live.ex      # Game client
-│   │   └── admin_live/       # Admin dashboard
+│   ├── lib/loka_web/
+│   │   ├── channels/         # Phoenix Channels (game_channel.ex)
+│   │   └── live/admin_live/  # Admin dashboard + World Builder
 │   └── priv/world/           # YAML game content
 │       ├── prototypes/       # Entity prototypes
 │       ├── quests/           # Quest definitions
@@ -244,92 +254,17 @@ viewport.add_child(label)
 # Apply viewport.get_texture() to 3D mesh material
 ```
 
-### Common Gotcha: SubViewport Click Detection on 3D Meshes
+### Common Gotchas (Quick Reference)
 
-Buttons inside a SubViewport rendered as a texture on a 3D mesh don't receive clicks automatically. Solution: raycast to the mesh, convert to UV, then to viewport coordinates:
+| Issue | Quick Fix | Full Pattern |
+|-------|-----------|--------------|
+| SubViewport clicks on 3D mesh | Raycast → UV → viewport coords | `.claude/skills/godot-subviewport-3d-click-detection.md` |
+| WebGL horizontal banding | Add `unshaded` to render_mode | `.claude/skills/godot-webgl-horizontal-banding-fix.md` |
+| JS callbacks garbage collected | Store in member variable | `.claude/skills/godot-javascript-bridge-callbacks.md` |
+| UV orientation on rotated mesh | Flip UV.y in shader | `.claude/skills/godot-planemesh-uv-fix.md` |
+| `.get()` fails on class instances | Use direct property access | `.claude/skills/godot-class-property-access.md` |
 
-```gdscript
-func _handle_page_click(screen_pos: Vector2) -> void:
-    var camera := get_viewport().get_camera_3d()
-    var from := camera.project_ray_origin(screen_pos)
-    var dir := camera.project_ray_normal(screen_pos)
-
-    # Plane intersection at z=0
-    var t := -from.z / dir.z
-    var hit_point := from + dir * t
-
-    # Convert to UV (mesh centered at origin)
-    var uv_x := (hit_point.x / PAGE_WIDTH) + 0.5
-    var uv_y := (hit_point.y / PAGE_HEIGHT) + 0.5
-
-    # Convert to viewport (flip Y)
-    var vp_x := uv_x * VIEWPORT_WIDTH
-    var vp_y := (1.0 - uv_y) * VIEWPORT_HEIGHT
-```
-
-Use region-based detection (thirds) rather than pixel-precise for reliability. See `.claude/skills/godot-subviewport-3d-click-detection.md` for full pattern.
-
-### Common Gotcha: WebGL Horizontal Banding in gl_compatibility Mode
-
-When using 3D shaders with the `gl_compatibility` renderer (required for WebGL), you may see horizontal banding/lines even with solid color output. This is caused by PBR lighting calculations. Fix by adding `unshaded` to render_mode:
-
-```glsl
-// BEFORE (causes banding)
-shader_type spatial;
-render_mode cull_disabled;
-
-// AFTER (no banding)
-shader_type spatial;
-render_mode cull_disabled, unshaded;
-```
-
-See `.claude/skills/godot-webgl-horizontal-banding-fix.md` for full debugging guide.
-
-### Common Gotcha: JavaScript Callbacks Garbage Collection (Web Export)
-
-When using `JavaScriptBridge.create_callback()` for HTML ↔ Godot communication, callbacks get garbage collected if not stored in member variables:
-
-```gdscript
-# ❌ WRONG - callback gets garbage collected
-func _setup_callbacks() -> void:
-    var callback := JavaScriptBridge.create_callback(_handler)
-    JavaScriptBridge.get_interface("window").myFunc = callback
-
-# ✅ CORRECT - store in member variable
-var _js_callback: JavaScriptObject
-
-func _setup_callbacks() -> void:
-    _js_callback = JavaScriptBridge.create_callback(_handler)
-    JavaScriptBridge.get_interface("window").myFunc = _js_callback
-```
-
-See `.claude/skills/godot-javascript-bridge-callbacks.md` for full pattern.
-
-### Common Gotcha: UV Orientation on Rotated Meshes
-
-When using SubViewport textures on a rotated PlaneMesh, text may appear mirrored or upside down. Fix by flipping UVs in the shader:
-
-```glsl
-// In fragment shader - flip UV.y for PlaneMesh rotated -90° on X
-vec2 corrected_uv = vec2(UV.x, 1.0 - UV.y);
-vec4 tex_color = texture(page_texture, corrected_uv);
-```
-
-See `.claude/skills/godot-planemesh-uv-fix.md` for detailed patterns.
-
-### Common Gotcha: Property Access on GDScript Class Objects
-
-When accessing properties on custom GDScript class instances (like `MockWorld.NPC`, `MockWorld.Item`), use direct property access instead of `.get()`:
-
-```gdscript
-# ❌ WRONG - .get() may not work reliably on class instances
-var keyword: String = npc.get("primary_keyword") if npc.get("primary_keyword") else ""
-
-# ✅ CORRECT - use direct property access
-var keyword: String = npc.primary_keyword if npc.primary_keyword else ""
-```
-
-`.get()` is reliable on Dictionaries (like parsed JSON), but may return `null` on class instances even when the property exists. See `.claude/skills/godot-class-property-access.md` for full pattern.
+See the linked skill files for complete code examples and debugging guides.
 
 ### Validation After Changes
 
@@ -419,12 +354,16 @@ fly deploy
 | Path | Description | Auth |
 |------|-------------|------|
 | `/` | Landing page | No |
-| `/play` | Game client | Yes |
 | `/admin` | Admin dashboard | Admin |
+| `/admin/play` | Text-based MUD client (admin testing) | Admin |
+| `/admin/world-builder` | World Builder UI | Admin |
+| `/character/create` | Character creation | Yes |
+
+> **Note:** The main game client is the Godot app (`godot-client/`), connecting via Phoenix Channels.
 
 ## Key Design Decisions
 
-1. **Web-First**: LiveView for all clients - no App Store fees
+1. **Godot Client**: 3D "magic book" client for mobile/web - faster iteration than alternatives
 2. **SQLite**: Simpler, cheaper, sufficient for single-server MVP
 3. **No Redis**: ETS handles caching until multi-server needed
 4. **Elixir Scripting**: Sandboxed Elixir for game customization (replaces Lua)
@@ -829,6 +768,7 @@ Work is often **cross-cutting** - use docs from any tier as needed.
 | **Game Client** | `docs/reference/game-client.md` |
 | **Channel API** | `docs/api/channel-contract.md` |
 | **Live Operations** | `docs/operations/live-operations-guide.md` |
+| **LLM Development Stability** | `docs/guides/llm-development-stability.md` |
 | **VFX Optimization** | `.claude/skills/godot-vfx-optimization.md` |
 | **Audit Commands** | `.claude/commands/` (run `/audit-*`) |
 

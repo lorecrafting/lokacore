@@ -4,6 +4,8 @@
 >
 > *Version 4.0 | January 2026*
 
+> **Mobile Client Update:** References to React Native/Expo describe historical architecture. The mobile client was migrated to **Godot 4.6** in January 2026. See `docs/decisions/2026-01-26-godot-client-migration.md` for details.
+
 ---
 
 ## Table of Contents
@@ -22,7 +24,7 @@
 9. [YAML Prototypes & Validation](#9-yaml-prototypes--validation)
 10. [Session & Transport Layer](#10-session--transport-layer)
 11. [Timer System](#11-timer-system)
-12. [Framework Subsystems (27)](#12-framework-subsystems)
+12. [Framework Subsystems (31)](#12-framework-subsystems)
 13. [Game Actions Coordinator](#13-game-actions-coordinator)
 14. [Game Mechanics Layer](#14-game-mechanics-layer)
 15. [NPC Behaviors System](#15-npc-behaviors-system)
@@ -3053,7 +3055,7 @@ tags: [weapon, quest_reward]
 - `Plugin`, `PluginLoader`, `PluginSupervisor`
 - Schema modules: `EntitySchema`, `EntityAttribute`, `ScriptSchema`
 
-### Framework (85 modules across 27 subsystems)
+### Framework (85+ modules across 31 subsystems)
 - Player, Inventory (7), Combat (10), Quest (19)
 - Skills (3), Resources (5), Status (3)
 - Social (7), Dialogue, Crafting (4), Gathering (3), Farming (4)

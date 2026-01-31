@@ -1,6 +1,8 @@
 # Client Architecture: React Native + Rust/Bevy Hybrid
 
-## Overview
+> **ARCHIVED**: This document describes a superseded architecture. The mobile client was migrated to **Godot 4.6** in January 2026. See `docs/decisions/2026-01-26-godot-client-migration.md` for the rationale and `CLAUDE.md` for current Godot client documentation.
+
+## Overview (Historical)
 
 Loka uses a **hybrid client architecture** combining React Native and Rust/Bevy to leverage the strengths of each technology:
 

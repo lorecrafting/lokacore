@@ -1,6 +1,6 @@
 # Loka
 
-A text-based RPG engine built with Elixir/Phoenix and React Native. Leverages Elixir's OTP concurrency, fault tolerance, and real-time LiveView for modern MUD development.
+A text-based RPG engine built with Elixir/Phoenix and Godot. Leverages Elixir's OTP concurrency, fault tolerance, and real-time Phoenix Channels for modern MUD development.
 
 ## What is Loka?
 
@@ -9,7 +9,7 @@ Loka is a MUD (Multi-User Dungeon) engine framework for building text-based RPGs
 - **Entity-Component-Behavior architecture** - Composition over inheritance for flexible game objects
 - **Prototype system** - YAML templates with inheritance for rapid content creation
 - **Real-time multiplayer** - Phoenix Channels for instant updates across all clients
-- **Web and mobile clients** - LiveView web client + React Native mobile app
+- **Web and mobile clients** - Admin LiveView dashboard + Godot 3D mobile client
 - **Sandboxed scripting** - Elixir-based scripting for game customization
 - **Quest and dialogue systems** - Built-in support for narrative content
 
@@ -18,9 +18,9 @@ Loka is a MUD (Multi-User Dungeon) engine framework for building text-based RPGs
 | Layer | Technology |
 |-------|------------|
 | Backend | Elixir 1.19 / Phoenix 1.8 |
-| Real-time | Phoenix LiveView + Channels |
+| Real-time | Phoenix Channels |
 | Database | SQLite (via Ecto) |
-| Mobile | React Native + Expo |
+| Mobile Client | Godot 4.6 |
 | Auth | Guardian JWT |
 
 ## Project Structure
@@ -30,7 +30,7 @@ lokacore/
 ├── server/           # Elixir/Phoenix backend
 │   ├── lib/loka/     # Game engine and framework
 │   └── priv/world/   # YAML game content (prototypes, quests, dialogues)
-├── mobile/           # React Native mobile app
+├── godot-client/     # Godot 4.6 mobile/web client
 └── docs/             # Architecture documentation
 ```
 
@@ -49,11 +49,12 @@ git clone https://github.com/lorecrafting/lokacore.git
 ### Prerequisites
 
 - **Elixir** 1.19+ ([install guide](https://elixir-lang.org/install.html))
-- **Node.js** 18+ (for assets and mobile)
+- **Node.js** 18+ (for assets)
 - **SQLite** 3.x
+- **Godot** 4.6+ (for client development)
 - **Git LFS** (for audio assets): `brew install git-lfs && git lfs install`
 
-### Elixir Server & React-Native Expo Dev Setup
+### Server Setup
 
 ```bash
 cd server
@@ -65,32 +66,28 @@ npm install --prefix assets
 # Setup database
 mix ecto.setup
 
-cd ../mobile
-
-# Install dependencies
-npm install
-
-# Start both elixir server and react-native expo server
-mix loka.dev
+# Start server
+mix phx.server
 ```
-React-native expo web client will be available at http://localhost:8081
-The admin web client will be available at http://localhost:4000
 
-### Standalone Mobile Setup (Optional)
+Server runs at http://localhost:4000. Admin dashboard at http://localhost:4000/admin.
+
+### Godot Client Setup
 
 ```bash
-cd mobile
+cd godot-client
 
-# Install dependencies
-npm install
+# Validate scripts
+./check.sh
 
-# iOS (requires macOS + Xcode)
-npx pod-install
-npm run ios
+# Development with hot reload
+./dev.sh
 
-# Android (requires Android Studio)
-npm run android
+# Build web export
+./build_web.sh --fast
 ```
+
+See `CLAUDE.md` for detailed Godot development workflows.
 
 
 ## Development
@@ -115,8 +112,11 @@ mix loka.test
 | Path | Description |
 |------|-------------|
 | `/` | Landing page |
-| `/play` | Web game client (requires login) |
-| `/admin` | Admin dashboard |
+| `/admin` | Admin dashboard (requires auth) |
+| `/admin/play` | Text-based MUD client (admin testing) |
+| `/admin/world-builder` | World Builder UI |
+
+> **Note:** The main game client is the Godot app, which connects via Phoenix Channels (WebSocket).
 
 ### API Endpoints
 
@@ -139,7 +139,7 @@ mix loka.test
 │ ENGINE CORE - lib/loka/engine/                              │
 │   Entities, Prototypes, Events, Commands, Hooks, Scripting  │
 ├─────────────────────────────────────────────────────────────┤
-│ PLATFORM - Phoenix 1.8, LiveView, Ecto + SQLite             │
+│ PLATFORM - Phoenix 1.8, Channels, Ecto + SQLite             │
 └─────────────────────────────────────────────────────────────┘
 ```
 

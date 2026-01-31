@@ -1,6 +1,6 @@
 # Framework Subsystems
 
-Loka's framework layer provides 27 game subsystems that build on the engine core. Each subsystem is designed to be optional and composable, allowing game developers to enable only what they need.
+Loka's framework layer provides 31 game subsystems that build on the engine core. Each subsystem is designed to be optional and composable, allowing game developers to enable only what they need.
 
 > **Documentation Pattern:** This doc provides YAML configuration examples for content creators.
 > For Elixir API details, see each module's `@moduledoc`.
