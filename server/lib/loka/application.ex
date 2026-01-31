@@ -69,6 +69,9 @@ defmodule Loka.Application do
       Loka.Framework.Gathering.GatheringRegistry,
       Loka.Framework.Crafting.CraftingRegistry,
 
+      # Binary Skill system (new mechanics)
+      Loka.Framework.Skills.BinarySkillRegistry,
+
       # Inventory systems
       Loka.Framework.Inventory.ContainerRespawn,
 

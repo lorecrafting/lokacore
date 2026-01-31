@@ -27,6 +27,9 @@ var bardo_overlay: Panel = null
 var bardo_message: Label = null
 var reincarnate_btn: Button = null
 
+## Character creation panel - created dynamically
+var character_creation: CharacterCreation = null
+
 ## Swipe detection
 var swipe_start_pos: Vector2 = Vector2.ZERO
 var is_swiping: bool = false
@@ -195,6 +198,7 @@ func _show_game_screen() -> void:
 	login_panel.visible = false
 	chat_modal.visible = false
 	book_page.visible = true
+	_hide_character_creation()
 
 
 func _try_auto_login() -> void:
@@ -265,6 +269,69 @@ func _on_server_disconnected() -> void:
 	if not login_panel.visible:
 		status_label.text = "Disconnected from server"
 		_show_login_screen()
+
+
+# =============================================================================
+# Character Creation
+# =============================================================================
+
+## Show character creation panel (called when new character needed)
+func show_character_creation() -> void:
+	print("[Main] Showing character creation...")
+	login_panel.visible = false
+	book_page.visible = false
+
+	if character_creation == null:
+		_create_character_creation_panel()
+
+	character_creation.reset()
+	character_creation.visible = true
+
+
+func _hide_character_creation() -> void:
+	if character_creation != null:
+		character_creation.visible = false
+
+
+func _create_character_creation_panel() -> void:
+	# Create the character creation panel
+	character_creation = CharacterCreation.new()
+
+	# Center it on screen
+	var canvas_layer: CanvasLayer = $CanvasLayer
+	canvas_layer.add_child(character_creation)
+
+	# Position in center
+	character_creation.set_anchors_preset(Control.PRESET_CENTER)
+	character_creation.position = -character_creation.size / 2
+
+	# Connect signals
+	character_creation.character_created.connect(_on_character_created)
+	character_creation.creation_cancelled.connect(_on_character_creation_cancelled)
+
+
+func _on_character_created(character_data: Dictionary) -> void:
+	print("[Main] Character created: %s" % character_data)
+
+	# Hide the panel
+	_hide_character_creation()
+
+	# TODO: Send character data to server
+	# For now, just show the game screen
+	# In the future: PhoenixClient.create_character(character_data)
+
+	# For offline/mock mode, update MockWorld with the stats
+	if not GameState.is_online:
+		var stats: Dictionary = character_data.get("stats", {})
+		MockWorld.update_player_stats(stats)
+
+	_show_game_screen()
+
+
+func _on_character_creation_cancelled() -> void:
+	print("[Main] Character creation cancelled")
+	_hide_character_creation()
+	_show_login_screen()
 
 
 # =============================================================================

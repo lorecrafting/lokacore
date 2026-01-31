@@ -335,4 +335,67 @@ defmodule Loka.Engine.Entity do
   """
   @spec valid_types() :: [entity_type()]
   def valid_types, do: [:character, :room, :item, :npc, :exit]
+
+  # =============================================================================
+  # Access Behavior
+  # =============================================================================
+
+  @behaviour Access
+
+  @doc """
+  Implements Access.fetch/2 for bracket notation on Entity structs.
+
+  Allows `entity[:key]` and `entity["key"]` syntax for compatibility with
+  code that handles both maps and structs (e.g., Locks.check/3).
+  """
+  @impl Access
+  def fetch(%__MODULE__{} = entity, key) when is_atom(key) do
+    if Map.has_key?(entity, key) do
+      {:ok, Map.get(entity, key)}
+    else
+      :error
+    end
+  end
+
+  def fetch(%__MODULE__{} = entity, key) when is_binary(key) do
+    # Convert string key to atom if it's a valid struct field
+    atom_key = String.to_existing_atom(key)
+    fetch(entity, atom_key)
+  rescue
+    ArgumentError -> :error
+  end
+
+  @impl Access
+  def get_and_update(%__MODULE__{} = entity, key, fun) when is_atom(key) do
+    current = Map.get(entity, key)
+
+    case fun.(current) do
+      {get_value, update_value} ->
+        {get_value, Map.put(entity, key, update_value)}
+
+      :pop ->
+        # For structs, we can't really "pop" a field, so we set it to nil
+        {current, Map.put(entity, key, nil)}
+    end
+  end
+
+  def get_and_update(%__MODULE__{} = entity, key, fun) when is_binary(key) do
+    atom_key = String.to_existing_atom(key)
+    get_and_update(entity, atom_key, fun)
+  rescue
+    ArgumentError -> {nil, entity}
+  end
+
+  @impl Access
+  def pop(%__MODULE__{} = entity, key) when is_atom(key) do
+    current = Map.get(entity, key)
+    {current, Map.put(entity, key, nil)}
+  end
+
+  def pop(%__MODULE__{} = entity, key) when is_binary(key) do
+    atom_key = String.to_existing_atom(key)
+    pop(entity, atom_key)
+  rescue
+    ArgumentError -> {nil, entity}
+  end
 end

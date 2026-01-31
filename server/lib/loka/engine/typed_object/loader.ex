@@ -237,21 +237,25 @@ defmodule Loka.Engine.TypedObject.Loader do
       # Parse all files into raw TypedObjects
       {raw_objects, parse_errors} = parse_yaml_files(yaml_files)
 
+      # Log parse errors but continue loading valid files (like PrototypeLoader)
       if Enum.any?(parse_errors) do
-        {:error, parse_errors}
-      else
-        # Resolve parent inheritance
-        case resolve_all_parents(raw_objects) do
-          {:ok, resolved} ->
-            # Clear and update registry
-            Registry.clear()
-            Registry.put_all(resolved)
+        Logger.warning(
+          "TypedObject.Loader: #{length(parse_errors)} files had errors: #{inspect(parse_errors)}"
+        )
+      end
 
-            {:ok, %{state | raw_objects: raw_objects, load_errors: []}}
+      # Resolve parent inheritance
+      case resolve_all_parents(raw_objects) do
+        {:ok, resolved} ->
+          # Clear and update registry
+          Registry.clear()
+          Registry.put_all(resolved)
 
-          {:error, errors} ->
-            {:error, errors}
-        end
+          Logger.info("TypedObject.Loader loaded #{map_size(resolved)} objects")
+          {:ok, %{state | raw_objects: raw_objects, load_errors: parse_errors}}
+
+        {:error, errors} ->
+          {:error, errors}
       end
     end
   end
