@@ -87,7 +87,7 @@ defmodule Loka.Engine.Schema.ScriptSchema do
         changeset
 
       source ->
-        case Loka.Engine.Scripting.validate_script(source) do
+        case Loka.Engine.Script.Sandbox.validate(source) do
           :ok -> changeset
           {:error, reason} -> add_error(changeset, :source, "invalid: #{inspect(reason)}")
         end

@@ -126,23 +126,14 @@ defmodule Loka.Engine.Scripts do
   @doc """
   Tests a script by executing it with a mock entity.
 
-  Returns `{:ok, result}` on success or `{:error, reason}` on failure.
+  Returns `{:ok, result, actions}` on success or `{:error, reason}` on failure.
   """
   def test_script(%ScriptSchema{source: source}) do
-    test_entity = %Loka.Engine.Entity{
-      id: "test-entity",
-      type: :npc,
-      key: "test_npc",
-      short_desc: "Test NPC",
-      long_desc: "A test NPC stands here.",
-      extra_desc: "A test entity for script validation."
-    }
-
-    Loka.Engine.Scripting.execute(source, test_entity, %{test: true})
+    test_script(source)
   end
 
   def test_script(source) when is_binary(source) do
-    test_entity = %Loka.Engine.Entity{
+    test_entity = %{
       id: "test-entity",
       type: :npc,
       key: "test_npc",
@@ -151,7 +142,7 @@ defmodule Loka.Engine.Scripts do
       extra_desc: "A test entity for script validation."
     }
 
-    Loka.Engine.Scripting.execute(source, test_entity, %{test: true})
+    Loka.Engine.Script.Sandbox.execute(source, test_entity, %{test: true})
   end
 
   # =============================================================================

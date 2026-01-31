@@ -132,9 +132,6 @@ defmodule Loka.MixProject do
       # Auth - JWT for mobile clients
       {:guardian, "~> 2.4"},
 
-      # Lua scripting for game logic
-      {:luerl, "~> 1.5"},
-
       # UUID generation for entities
       {:elixir_uuid, "~> 1.2"},
 

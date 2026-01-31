@@ -1,14 +1,14 @@
 defmodule Loka.Framework.Quest.Journal do
   @moduledoc """
-  Dynamic quest journal entries with Lua scripting support.
+  Dynamic quest journal entries with Elixir scripting support.
 
   Allows journal entries to be dynamically generated or modified based on player
-  state, quest progress, and game world state using Lua scripts.
+  state, quest progress, and game world state using Elixir scripts.
 
   ## Features
 
   - Static journal entries from YAML
-  - Dynamic entries via Lua scripts
+  - Dynamic entries via Elixir scripts
   - Conditional entry visibility
   - Entry templating with variable substitution
   - Entry ordering and grouping
@@ -23,34 +23,37 @@ defmodule Loka.Framework.Quest.Journal do
         objective_complete_find_temple: "I found the temple entrance."
         completed: "Master Tenzin is safe. The monastery is at peace."
 
-      # Dynamic entries with Lua
+      # Dynamic entries with Elixir
       journal_entries:
         accepted:
-          lua: |
-            local gold = game.player.get_stat("gold") or 0
-            if gold > 100 then
-              return "The abbot promised a generous reward for my services."
+          elixir: |
+            gold = get_stat("gold") || 0
+            if gold > 100 do
+              "The abbot promised a generous reward for my services."
             else
-              return "I hope this quest pays well. My coin purse is light."
+              "I hope this quest pays well. My coin purse is light."
             end
         objective_progress_kill_goblins:
-          lua: |
-            local count = game.quest.get_objective_progress("kill_goblins")
-            local target = 5
-            return string.format("Goblins slain: %d of %d", count, target)
+          elixir: |
+            count = get_objective_progress("kill_goblins")
+            target = 5
+            "Goblins slain: \#{count} of \#{target}"
         completed:
           condition: { flag: "spared_boss" }
           text: "I showed mercy to the goblin king."
           alt_text: "The goblin king fell by my blade."
 
-  ## Lua API
+  ## Elixir Script API
 
   Additional API available for journal scripts:
 
-      game.quest.get_objective_progress(objective_id)  -- Returns current progress
-      game.quest.get_objective_target(objective_id)    -- Returns target count
-      game.quest.get_time_remaining(objective_id)      -- Returns seconds for timed
-      game.journal.format_time(seconds)                -- Formats as "5m 30s"
+      get_objective_progress(objective_id)  # Returns current progress
+      get_objective_target(objective_id)    # Returns target count
+      get_time_remaining(objective_id)      # Returns seconds for timed
+      format_time(seconds)                  # Formats as "5m 30s"
+      get_stat(stat_name)                   # Get player stat
+      has_flag?(flag_name)                  # Check if player has flag
+      has_item?(item_key)                   # Check if player has item
 
   ## Usage
 
@@ -198,10 +201,18 @@ defmodule Loka.Framework.Quest.Journal do
 
   defp render_entry_internal(state, quest_id, entry, progress) when is_map(entry) do
     cond do
-      # Lua script entry
+      # Elixir script entry
+      Map.has_key?(entry, "elixir") || Map.has_key?(entry, :elixir) ->
+        elixir_script = entry["elixir"] || entry[:elixir]
+        execute_elixir_entry(state, quest_id, elixir_script, progress)
+
+      # Legacy Lua script entry (convert to Elixir warning)
       Map.has_key?(entry, "lua") || Map.has_key?(entry, :lua) ->
-        lua_script = entry["lua"] || entry[:lua]
-        execute_lua_entry(state, quest_id, lua_script, progress)
+        Logger.warning(
+          "[Journal] Lua scripts are deprecated, please convert to Elixir: #{quest_id}"
+        )
+
+        {:ok, "[Script error: Lua not supported, use 'elixir:' instead]"}
 
       # Conditional entry with alt_text
       Map.has_key?(entry, "condition") || Map.has_key?(entry, :condition) ->
@@ -232,31 +243,70 @@ defmodule Loka.Framework.Quest.Journal do
     {:error, :invalid_entry_format}
   end
 
-  defp execute_lua_entry(%GameState{} = state, quest_id, script, progress) do
-    lua = init_journal_sandbox()
-    lua = inject_journal_api(lua, state, quest_id, progress)
-    lua = inject_player_api(lua, state)
-    # Note: inject_quest_api is NOT called here because inject_journal_api
-    # already sets up the complete game.quest API (including is_active, etc.)
+  defp execute_elixir_entry(%GameState{} = state, quest_id, script, progress) do
+    # Build bindings for journal script execution
+    bindings = build_journal_bindings(state, quest_id, progress)
 
-    case :luerl.do(script, lua) do
-      {:ok, [result | _], _new_lua} when is_binary(result) ->
-        {:ok, result}
+    try do
+      {result, _bindings} = Code.eval_string(script, bindings)
 
-      {:ok, result, _new_lua} when is_binary(result) ->
-        {:ok, result}
-
-      {:ok, [], _new_lua} ->
-        {:ok, ""}
-
-      {:error, reason, _lua} ->
-        Logger.warning("[Journal] Lua error for #{quest_id}: #{inspect(reason)}")
-        {:error, {:lua_error, reason}}
+      case result do
+        text when is_binary(text) -> {:ok, text}
+        nil -> {:ok, ""}
+        other -> {:ok, to_string(other)}
+      end
+    rescue
+      e ->
+        Logger.warning("[Journal] Elixir error for #{quest_id}: #{Exception.message(e)}")
+        {:error, {:script_error, Exception.message(e)}}
     end
-  rescue
-    e ->
-      Logger.warning("[Journal] Lua exception for #{quest_id}: #{inspect(e)}")
-      {:error, {:lua_exception, e}}
+  end
+
+  defp build_journal_bindings(%GameState{} = state, quest_id, progress) do
+    quest_def = Definitions.get_quest_definition(quest_id)
+
+    [
+      # Player state queries
+      get_stat: fn stat_name ->
+        Map.get(state.stats, stat_name) ||
+          Map.get(state.stats, to_string(stat_name), 0)
+      end,
+      has_flag?: fn flag_name ->
+        !!Map.get(state.flags, flag_name) ||
+          !!Map.get(state.flags, to_string(flag_name))
+      end,
+      get_flag: fn flag_name ->
+        Map.get(state.flags, flag_name) ||
+          Map.get(state.flags, to_string(flag_name))
+      end,
+      has_item?: fn item_key ->
+        item_key in (state.inventory || [])
+      end,
+
+      # Quest queries
+      quest_active?: fn qid ->
+        Progress.get_quest_progress(state, qid || quest_id) != nil
+      end,
+      quest_complete?: fn qid ->
+        Progress.is_complete?(state, qid || quest_id)
+      end,
+      get_objective_progress: fn obj_id ->
+        objectives = (progress || %{})["objectives"] || %{}
+        obj_data = objectives[obj_id] || %{}
+        Map.get(obj_data, "progress") || 0
+      end,
+      get_objective_target: fn obj_id ->
+        obj = quest_def && Enum.find(quest_def.objectives, &(&1.id == obj_id))
+        (obj && obj.target_count) || 1
+      end,
+      get_time_remaining: fn obj_id ->
+        obj = quest_def && Enum.find(quest_def.objectives, &(&1.id == obj_id))
+        get_time_remaining(state.player_id, quest_id, obj) || 0
+      end,
+
+      # Utility
+      format_time: &format_time_display/1
+    ]
   end
 
   # =============================================================================
@@ -371,120 +421,6 @@ defmodule Loka.Framework.Quest.Journal do
       nil -> quest_id
       quest -> quest.name || quest_id
     end
-  end
-
-  # =============================================================================
-  # Private - Lua Sandbox
-  # =============================================================================
-
-  defp init_journal_sandbox do
-    lua = :luerl.init()
-
-    # Remove dangerous functions
-    dangerous = ["dofile", "loadfile", "load", "os", "io", "debug"]
-
-    Enum.reduce(dangerous, lua, fn name, l ->
-      {:ok, new_l} = :luerl.set_table_keys([name], nil, l)
-      new_l
-    end)
-  end
-
-  defp inject_journal_api(lua, state, quest_id, progress) do
-    format_time_fn = fn [seconds], l ->
-      formatted = format_time_display(seconds)
-      {[formatted], l}
-    end
-
-    get_progress_fn = fn [obj_id], l ->
-      objectives = (progress || %{})["objectives"] || %{}
-      obj_data = objectives[obj_id] || %{}
-      prog = Map.get(obj_data, "progress") || 0
-      {[prog], l}
-    end
-
-    get_target_fn = fn [obj_id], l ->
-      quest_def = Definitions.get_quest_definition(quest_id)
-      obj = quest_def && Enum.find(quest_def.objectives, &(&1.id == obj_id))
-      target = (obj && obj.target_count) || 1
-      {[target], l}
-    end
-
-    get_time_fn = fn [obj_id], l ->
-      quest_def = Definitions.get_quest_definition(quest_id)
-      obj = quest_def && Enum.find(quest_def.objectives, &(&1.id == obj_id))
-      remaining = get_time_remaining(state.player_id, quest_id, obj)
-      {[remaining || 0], l}
-    end
-
-    # Quest state functions
-    is_active_fn = fn [qid], l ->
-      result = Progress.get_quest_progress(state, qid || quest_id) != nil
-      {[result], l}
-    end
-
-    is_complete_fn = fn [qid], l ->
-      result = Progress.is_complete?(state, qid || quest_id)
-      {[result], l}
-    end
-
-    is_completed_fn = fn [qid], l ->
-      result = (qid || quest_id) in Progress.get_completed_quests(state)
-      {[result], l}
-    end
-
-    # Create game table first (required for nested tables)
-    {:ok, lua} = :luerl.set_table_keys_dec(["game"], %{}, lua)
-
-    # Add game.journal nested table
-    journal_api = %{"format_time" => format_time_fn}
-    {:ok, lua} = :luerl.set_table_keys_dec(["game", "journal"], journal_api, lua)
-
-    # Add game.quest nested table
-    quest_api = %{
-      "get_objective_progress" => get_progress_fn,
-      "get_objective_target" => get_target_fn,
-      "get_time_remaining" => get_time_fn,
-      "is_active" => is_active_fn,
-      "is_complete" => is_complete_fn,
-      "is_completed" => is_completed_fn
-    }
-
-    {:ok, lua} = :luerl.set_table_keys_dec(["game", "quest"], quest_api, lua)
-
-    lua
-  end
-
-  defp inject_player_api(lua, %GameState{} = state) do
-    has_item_fn = fn [item_id], l ->
-      result = item_id in state.inventory
-      {[result], l}
-    end
-
-    has_flag_fn = fn [flag_name], l ->
-      result = Map.get(state.flags, flag_name) || Map.get(state.flags, to_string(flag_name))
-      {[!!result], l}
-    end
-
-    get_flag_fn = fn [flag_name], l ->
-      result = Map.get(state.flags, flag_name) || Map.get(state.flags, to_string(flag_name))
-      {[result], l}
-    end
-
-    get_stat_fn = fn [stat_name], l ->
-      result = Map.get(state.stats, stat_name) || Map.get(state.stats, to_string(stat_name)) || 0
-      {[result], l}
-    end
-
-    player_api = %{
-      "has_item" => has_item_fn,
-      "has_flag" => has_flag_fn,
-      "get_flag" => get_flag_fn,
-      "get_stat" => get_stat_fn
-    }
-
-    # Add game.player nested table (game table already exists from inject_journal_api)
-    {:ok, lua} = :luerl.set_table_keys_dec(["game", "player"], player_api, lua)
-    lua
   end
 
   # =============================================================================

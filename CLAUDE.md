@@ -26,7 +26,7 @@
 ┌─────────────────────────────────────────────────────────────┐
 │ GAME CONTENT - priv/world/prototypes/ (YAML)               │
 ├─────────────────────────────────────────────────────────────┤
-│ GAME FRAMEWORK - lib/loka/framework/ (27 subsystems)       │
+│ GAME FRAMEWORK - lib/loka/framework/ (31 subsystems)       │
 ├─────────────────────────────────────────────────────────────┤
 │ ENGINE CORE - lib/loka/engine/                             │
 ├─────────────────────────────────────────────────────────────┤
