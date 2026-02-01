@@ -23,18 +23,6 @@ enum MenuTab { INVENTORY, EQUIPMENT, CHARACTER, QUESTS, MAP, SOCIAL, SETTINGS }
 ## Text effects (matching shader uniforms)
 enum TextEffect { NONE = 0, BURN = 1, ICE = 2, GLOW = 3, FADE = 4 }
 
-## Page mesh dimensions (iPhone Pro aspect ratio ~9:19.5)
-const PAGE_WIDTH := 1.8
-const PAGE_HEIGHT := 3.9
-
-## SubViewport resolution for text rendering (iPhone 17 Pro scale)
-const VIEWPORT_WIDTH := 430
-const VIEWPORT_HEIGHT := 932
-
-## Bottom bar dimensions (inside viewport)
-const BOTTOM_BAR_HEIGHT := 120
-const BUTTON_SIZE := 70
-
 ## Animation settings
 const TURN_DURATION := 0.6
 const CURL_STRENGTH := 0.8  # More dramatic curl
@@ -44,46 +32,13 @@ const EFFECT_DURATION := 2.0  # Duration for text effects
 const MAX_EVENTS := 5
 const EVENT_FADE_TIME := 10.0  # Seconds before events start fading
 
-## Universal page padding
-const PAGE_PADDING_LEFT := 20
-const PAGE_PADDING_RIGHT := 20
-const PAGE_PADDING_TOP := 24
-const PAGE_PADDING_BOTTOM := 10
-
-# =============================================================================
-# PageMesh Inner Class - Encapsulates a single page with its viewports
-# =============================================================================
-
-class PageMesh extends RefCounted:
-	var mesh_instance: MeshInstance3D
-	var page_viewport: SubViewport      # Background (parchment) layer
-	var text_viewport: SubViewport      # Text-only layer (transparent bg)
-	var page_bg_container: Control      # Background visuals
-	var text_container: Control         # Text content
-	var label: RichTextLabel            # Main text label
-	var bottom_bar: Control             # Bottom bar
-	var shader_material: ShaderMaterial
-	var curl_progress: float = 0.0
-
-	func set_curl(value: float) -> void:
-		curl_progress = clampf(value, 0.0, 1.0)
-		if shader_material and shader_material.shader:
-			# Full curl amount for maximum effect
-			shader_material.set_shader_parameter("curl_amount", curl_progress)
-			# Larger radius = wider, more visible curl arc
-			var dynamic_radius := lerpf(0.8, 0.5, curl_progress)
-			shader_material.set_shader_parameter("curl_radius", dynamic_radius)
-			# Curl angle in radians (PI = 180 degrees)
-			var dynamic_angle := lerpf(2.5, 3.5, curl_progress)
-			shader_material.set_shader_parameter("curl_angle", dynamic_angle)
-
 # =============================================================================
 # Main BookPage Variables
 # =============================================================================
 
 ## Dual page system - top curls to reveal bottom
-var top_page: PageMesh
-var bottom_page: PageMesh
+var top_page: PageMeshFactory.PageMesh
+var bottom_page: PageMeshFactory.PageMesh
 
 ## Current text effect
 var current_effect: TextEffect = TextEffect.NONE
@@ -127,16 +82,32 @@ var _js_flip_callback: JavaScriptObject
 ## Entity action click zones (calculated after layout)
 var _entity_actions_start_y: float = 0.0  # Y position where action links begin
 
-## Mock dialogue state
+## Mock dialogue state (managed by DialogueController)
 var _mock_dialogue_node: int = 0
 var _is_mock_dialogue: bool = false
 
+## Extracted component instances
+var _menu_renderer: MenuTabRenderer
+var _dialogue_controller: DialogueController
+var _page_factory: PageMeshFactory
+var _shop_container_handler: ShopContainerHandler
+var _content_renderer: PageContentRenderer
+
 
 func _ready() -> void:
+	# Initialize extracted components
+	_menu_renderer = MenuTabRenderer.new()
+	_dialogue_controller = DialogueController.new()
+	_page_factory = PageMeshFactory.new()
+	_page_factory.set_bottom_bar_signal(self, "bottom_bar_pressed")
+	_shop_container_handler = ShopContainerHandler.new()
+	_shop_container_handler.set_event_callback(add_event)
+	_content_renderer = PageContentRenderer.new()
+
 	# Create dual page system - pages stacked like real book
 	# Larger z-offset so pages don't intersect during curl
-	top_page = _create_page_mesh(0.05)     # Top page in front
-	bottom_page = _create_page_mesh(0.0)   # Bottom page at base
+	top_page = _page_factory.create_page_mesh(0.05, _on_label_meta_clicked)
+	bottom_page = _page_factory.create_page_mesh(0.0, _on_label_meta_clicked)
 
 	# Add viewports as children (required for rendering)
 	add_child(top_page.page_viewport)
@@ -160,8 +131,8 @@ func _ready() -> void:
 
 	# Wait for viewports to be ready, then apply textures
 	await get_tree().process_frame
-	await _apply_page_textures(top_page)
-	await _apply_page_textures(bottom_page)
+	await _page_factory.apply_page_textures(top_page, get_tree())
+	await _page_factory.apply_page_textures(bottom_page, get_tree())
 	top_page.mesh_instance.visible = true
 	bottom_page.mesh_instance.visible = true
 
@@ -170,244 +141,6 @@ func _ready() -> void:
 		_render_room_to_page(top_page, GameState.current_room)
 
 
-# =============================================================================
-# Page Mesh Factory
-# =============================================================================
-
-## Create a complete page mesh with viewports
-func _create_page_mesh(z_offset: float) -> PageMesh:
-	var page := PageMesh.new()
-
-	# === PAGE VIEWPORT (Background Layer) ===
-	page.page_viewport = SubViewport.new()
-	page.page_viewport.size = Vector2i(VIEWPORT_WIDTH, VIEWPORT_HEIGHT)
-	page.page_viewport.transparent_bg = false
-	page.page_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-
-	# Background with aged parchment effect
-	page.page_bg_container = Control.new()
-	page.page_bg_container.set_anchors_preset(Control.PRESET_FULL_RECT)
-	page.page_viewport.add_child(page.page_bg_container)
-
-	# Base parchment color - warm aged tan
-	var bg := ColorRect.new()
-	bg.color = Color(0.878, 0.816, 0.706)  # Aged parchment tan #E0D0B4
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	page.page_bg_container.add_child(bg)
-
-	# Subtle vignette for slightly darker edges
-	var vignette := ColorRect.new()
-	vignette.set_anchors_preset(Control.PRESET_FULL_RECT)
-	var vignette_shader := Shader.new()
-	vignette_shader.code = """
-shader_type canvas_item;
-void fragment() {
-	vec2 uv = UV - 0.5;
-	float dist = length(uv * vec2(1.2, 1.0));
-	float vignette = smoothstep(0.4, 0.85, dist);
-	COLOR = vec4(0.35, 0.28, 0.2, vignette * 0.15);
-}
-"""
-	var vignette_mat := ShaderMaterial.new()
-	vignette_mat.shader = vignette_shader
-	vignette.material = vignette_mat
-	page.page_bg_container.add_child(vignette)
-
-	# Setup bottom bar inside page viewport
-	page.bottom_bar = _create_bottom_bar()
-	page.page_viewport.add_child(page.bottom_bar)
-
-	# === TEXT VIEWPORT (Text Layer - Transparent Background) ===
-	page.text_viewport = SubViewport.new()
-	page.text_viewport.size = Vector2i(VIEWPORT_WIDTH, VIEWPORT_HEIGHT)
-	page.text_viewport.transparent_bg = true
-	page.text_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-
-	# Text content container
-	page.text_container = Control.new()
-	page.text_container.set_anchors_preset(Control.PRESET_FULL_RECT)
-	page.text_container.offset_bottom = -BOTTOM_BAR_HEIGHT
-	page.text_viewport.add_child(page.text_container)
-
-	# Create RichTextLabel for formatted text
-	page.label = RichTextLabel.new()
-	page.label.bbcode_enabled = true
-	page.label.fit_content = false
-	page.label.scroll_active = true
-	page.label.scroll_following = true
-	page.label.set_anchors_preset(Control.PRESET_FULL_RECT)
-	page.label.offset_left = PAGE_PADDING_LEFT
-	page.label.offset_right = -PAGE_PADDING_RIGHT
-	page.label.offset_top = PAGE_PADDING_TOP
-	page.label.offset_bottom = -PAGE_PADDING_BOTTOM
-	page.label.add_theme_font_size_override("normal_font_size", 20)
-	page.label.add_theme_font_size_override("bold_font_size", 22)
-	page.label.add_theme_font_size_override("italics_font_size", 19)
-	page.label.add_theme_color_override("default_color", Color(0.09, 0.06, 0.03))
-	page.label.meta_clicked.connect(_on_label_meta_clicked)
-	page.text_container.add_child(page.label)
-
-	# Hide scrollbar but keep scroll functionality (touch/mousewheel)
-	var scrollbar := page.label.get_v_scroll_bar()
-	scrollbar.modulate = Color(1, 1, 1, 0)  # Invisible but functional
-
-	# === MESH ===
-	page.mesh_instance = MeshInstance3D.new()
-	var plane := PlaneMesh.new()
-	plane.size = Vector2(PAGE_WIDTH, PAGE_HEIGHT)
-	# Subdivisions are critical for page curl - more = smoother curl
-	# Width subdivisions control horizontal curl detail
-	# Depth subdivisions control vertical curl detail
-	plane.subdivide_width = 32   # Horizontal segments for curl
-	plane.subdivide_depth = 48   # Vertical segments for page height
-	page.mesh_instance.mesh = plane
-	page.mesh_instance.rotation_degrees = Vector3(-90, 0, 0)
-	page.mesh_instance.position.z = z_offset
-
-	# Create shader material
-	page.shader_material = ShaderMaterial.new()
-	var shader := load("res://shaders/page_curl.gdshader")
-	if shader:
-		page.shader_material.shader = shader
-		page.shader_material.set_shader_parameter("curl_amount", 0.0)
-		page.shader_material.set_shader_parameter("curl_direction", 1.0)
-		page.shader_material.set_shader_parameter("curl_radius", 0.35)
-		page.shader_material.set_shader_parameter("curl_angle", 2.5)
-		page.shader_material.set_shader_parameter("shadow_intensity", 0.3)
-		page.shader_material.set_shader_parameter("ambient_occlusion", 0.2)
-
-	# Hide mesh until textures are ready
-	page.mesh_instance.visible = false
-
-	return page
-
-
-## Apply viewport textures to a page's shader
-func _apply_page_textures(page: PageMesh) -> void:
-	await get_tree().process_frame
-
-	if page.shader_material.shader:
-		var page_tex := page.page_viewport.get_texture()
-		var text_tex := page.text_viewport.get_texture()
-		page.shader_material.set_shader_parameter("page_texture", page_tex)
-		page.shader_material.set_shader_parameter("text_texture", text_tex)
-		page.mesh_instance.set_surface_override_material(0, page.shader_material)
-
-
-## Create the bottom bar Control
-func _create_bottom_bar() -> Control:
-	var bar := Control.new()
-	bar.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	bar.offset_top = -BOTTOM_BAR_HEIGHT
-
-	# Background - slightly darker aged parchment
-	var bar_bg := ColorRect.new()
-	bar_bg.color = Color(0.82, 0.75, 0.64)
-	bar_bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	bar.add_child(bar_bg)
-
-	# Decorative separator line at top
-	var separator := ColorRect.new()
-	separator.color = Color(0.45, 0.38, 0.30)
-	separator.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	separator.custom_minimum_size = Vector2(0, 1)
-	bar.add_child(separator)
-
-	# HBox for buttons
-	var hbox := HBoxContainer.new()
-	hbox.set_anchors_preset(Control.PRESET_FULL_RECT)
-	hbox.offset_left = 20
-	hbox.offset_right = -20
-	hbox.offset_top = 10
-	hbox.offset_bottom = -10
-	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	bar.add_child(hbox)
-
-	# Menu button (left)
-	var menu_btn := _create_bar_button("Menu", "menu")
-	hbox.add_child(menu_btn)
-
-	# Spacer
-	var spacer1 := Control.new()
-	spacer1.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hbox.add_child(spacer1)
-
-	# Compass (center)
-	var compass := _create_compass()
-	hbox.add_child(compass)
-
-	# Spacer
-	var spacer2 := Control.new()
-	spacer2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hbox.add_child(spacer2)
-
-	# Say button (right)
-	var say_btn := _create_bar_button("Say", "say")
-	hbox.add_child(say_btn)
-
-	return bar
-
-
-func _create_bar_button(icon: String, action: String) -> Button:
-	var btn := Button.new()
-	btn.text = icon
-	btn.custom_minimum_size = Vector2(BUTTON_SIZE, BUTTON_SIZE)
-	btn.add_theme_font_size_override("font_size", 24)
-	btn.pressed.connect(func(): bottom_bar_pressed.emit(action))
-	return btn
-
-
-func _create_compass() -> VBoxContainer:
-	var compass := VBoxContainer.new()
-	compass.alignment = BoxContainer.ALIGNMENT_CENTER
-
-	# North
-	var north_btn := Button.new()
-	north_btn.text = "↑"
-	north_btn.name = "NorthBtn"
-	north_btn.custom_minimum_size = Vector2(40, 28)
-	north_btn.add_theme_font_size_override("font_size", 18)
-	north_btn.pressed.connect(func(): bottom_bar_pressed.emit("north"))
-	compass.add_child(north_btn)
-
-	# Middle row (West · East)
-	var mid_row := HBoxContainer.new()
-	mid_row.alignment = BoxContainer.ALIGNMENT_CENTER
-
-	var west_btn := Button.new()
-	west_btn.text = "←"
-	west_btn.name = "WestBtn"
-	west_btn.custom_minimum_size = Vector2(40, 28)
-	west_btn.add_theme_font_size_override("font_size", 18)
-	west_btn.pressed.connect(func(): bottom_bar_pressed.emit("west"))
-	mid_row.add_child(west_btn)
-
-	var dot := Label.new()
-	dot.text = "·"
-	dot.custom_minimum_size = Vector2(24, 0)
-	dot.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	mid_row.add_child(dot)
-
-	var east_btn := Button.new()
-	east_btn.text = "→"
-	east_btn.name = "EastBtn"
-	east_btn.custom_minimum_size = Vector2(40, 28)
-	east_btn.add_theme_font_size_override("font_size", 18)
-	east_btn.pressed.connect(func(): bottom_bar_pressed.emit("east"))
-	mid_row.add_child(east_btn)
-
-	compass.add_child(mid_row)
-
-	# South
-	var south_btn := Button.new()
-	south_btn.text = "↓"
-	south_btn.name = "SouthBtn"
-	south_btn.custom_minimum_size = Vector2(40, 28)
-	south_btn.add_theme_font_size_override("font_size", 18)
-	south_btn.pressed.connect(func(): bottom_bar_pressed.emit("south"))
-	compass.add_child(south_btn)
-
-	return compass
 
 
 # =============================================================================
@@ -637,18 +370,18 @@ func _handle_page_click(screen_pos: Vector2) -> void:
 	var hit_point := from + dir * t
 
 	# Convert hit point to UV coordinates
-	var uv_x := (hit_point.x / PAGE_WIDTH) + 0.5
-	var uv_y := (hit_point.y / PAGE_HEIGHT) + 0.5
+	var uv_x := (hit_point.x / PageMeshFactory.PAGE_WIDTH) + 0.5
+	var uv_y := (hit_point.y / PageMeshFactory.PAGE_HEIGHT) + 0.5
 
 	if uv_x < 0 or uv_x > 1 or uv_y < 0 or uv_y > 1:
 		return
 
 	# Convert UV to viewport pixel coordinates
-	var vp_x := uv_x * VIEWPORT_WIDTH
-	var vp_y := (1.0 - uv_y) * VIEWPORT_HEIGHT
+	var vp_x := uv_x * PageMeshFactory.VIEWPORT_WIDTH
+	var vp_y := (1.0 - uv_y) * PageMeshFactory.VIEWPORT_HEIGHT
 
 	# Check page type and route click
-	var bar_top := VIEWPORT_HEIGHT - BOTTOM_BAR_HEIGHT
+	var bar_top := PageMeshFactory.VIEWPORT_HEIGHT - PageMeshFactory.BOTTOM_BAR_HEIGHT
 	if current_page == PageType.DIALOGUE:
 		_forward_click_to_text_viewport(vp_x, vp_y)
 	elif current_page == PageType.ENTITY:
@@ -683,15 +416,15 @@ func _forward_click_to_text_viewport(vp_x: float, vp_y: float) -> void:
 
 
 func _handle_bottom_bar_click(local_x: float, local_y: float) -> void:
-	var third := VIEWPORT_WIDTH / 3.0
+	var third := PageMeshFactory.VIEWPORT_WIDTH / 3.0
 
 	if local_x < third:
 		bottom_bar_pressed.emit("menu")
-	elif local_x > (VIEWPORT_WIDTH - third):
+	elif local_x > (PageMeshFactory.VIEWPORT_WIDTH - third):
 		bottom_bar_pressed.emit("say")
 	else:
-		var compass_center_x := VIEWPORT_WIDTH / 2.0
-		var compass_center_y := BOTTOM_BAR_HEIGHT / 2.0
+		var compass_center_x := PageMeshFactory.VIEWPORT_WIDTH / 2.0
+		var compass_center_y := PageMeshFactory.BOTTOM_BAR_HEIGHT / 2.0
 
 		var dx := local_x - compass_center_x
 		var dy := local_y - compass_center_y
@@ -825,7 +558,7 @@ func switch_to_page(page_type: PageType, direction: String = "right") -> void:
 # =============================================================================
 
 ## Render pending content to a page's viewports
-func _render_pending_content_to_page(page: PageMesh, page_type: PageType) -> void:
+func _render_pending_content_to_page(page: PageMeshFactory.PageMesh, page_type: PageType) -> void:
 	match page_type:
 		PageType.ROOM:
 			if GameState.current_room:
@@ -850,8 +583,8 @@ func _render_pending_content_to_page(page: PageMesh, page_type: PageType) -> voi
 			page.bottom_bar.visible = false
 
 
-## Render room content to a page
-func _render_room_to_page(page: PageMesh, room: MockWorld.Room) -> void:
+## Render room content to a page (delegates to content renderer)
+func _render_room_to_page(page: PageMeshFactory.PageMesh, room: MockWorld.Room) -> void:
 	if room == null:
 		page.label.text = ""
 		return
@@ -860,251 +593,48 @@ func _render_room_to_page(page: PageMesh, room: MockWorld.Room) -> void:
 	available_exits = room.exits.keys() if room.exits else []
 	_update_compass_buttons_on_page(page)
 
-	var text := ""
-
-	var title_color := "#100a04"
-	var body_color := "#181008"
-	var secondary_color := "#201408"
-	var event_color := "#302010"
-
-	text += "[center][font_size=28][color=%s][b]%s[/b][/color][/font_size][/center]\n\n" % [title_color, room.name]
-	text += "[color=%s]%s[/color]\n" % [body_color, room.description]
-
-	if room.npcs.size() > 0:
-		var npc_texts: Array[String] = []
-		for npc in room.npcs:
-			# Use direct property access for MockWorld.NPC objects
-			var npc_text := npc.long_desc if npc.long_desc != "" else "%s is here." % npc.name
-			npc_text = npc_text.replace("\n", " ").replace("  ", " ")
-			var keyword: String = npc.primary_keyword if npc.primary_keyword else ""
-			var npc_key: String = npc.key if npc.key else ""
-			if keyword != "" and keyword in npc_text and npc_key != "":
-				npc_text = npc_text.replace(keyword, "[url=npc:%s][u]%s[/u][/url]" % [npc_key, keyword])
-			npc_texts.append(npc_text)
-		text += "[color=%s]%s[/color]\n" % [secondary_color, " ".join(npc_texts)]
-
-	if room.items.size() > 0:
-		var item_texts: Array[String] = []
-		for item in room.items:
-			# Use direct property access for MockWorld.Item objects
-			var item_text := item.long_desc if item.long_desc != "" else "%s lies here." % item.name
-			item_text = item_text.replace("\n", " ").replace("  ", " ")
-			var keyword: String = item.primary_keyword if item.primary_keyword else ""
-			var item_key: String = item.key if item.key else ""
-			if keyword != "" and keyword in item_text and item_key != "":
-				item_text = item_text.replace(keyword, "[url=item:%s][u]%s[/u][/url]" % [item_key, keyword])
-			item_texts.append(item_text)
-		text += "[color=%s]%s[/color]\n" % [secondary_color, " ".join(item_texts)]
-
-	if events.size() > 0:
-		text += "\n"
-		for event in events:
-			text += "[color=%s][i]%s[/i][/color]\n" % [event_color, event["text"]]
-
-	page.label.text = text
+	page.label.text = _content_renderer.render_room(room, events)
 
 
-## Render menu content to a page
-func _render_menu_to_page(page: PageMesh) -> void:
-	var text := ""
-
-	var title_color := "#2a1f14"
-	var tab_color := "#4a3828"
-	var tab_active_color := "#2a1a0a"
-	var separator_color := "#8a7a6a"
-	var hint_color := "#6a5a4a"
-
-	text += "[center][font_size=28][color=%s][b]Menu[/b][/color][/font_size][/center]\n\n"  % title_color
-
-	# Tab bar with clickable icons
-	text += "[center]"
-	var tabs := [
-		{"key": "inventory", "icon": "Inv", "tab": MenuTab.INVENTORY},
-		{"key": "equipment", "icon": "Eq", "tab": MenuTab.EQUIPMENT},
-		{"key": "character", "icon": "Char", "tab": MenuTab.CHARACTER},
-		{"key": "quests", "icon": "Qst", "tab": MenuTab.QUESTS},
-		{"key": "map", "icon": "Map", "tab": MenuTab.MAP},
-		{"key": "social", "icon": "Soc", "tab": MenuTab.SOCIAL},
-		{"key": "settings", "icon": "Set", "tab": MenuTab.SETTINGS},
-	]
-
-	for tab in tabs:
-		var is_active: bool = current_menu_tab == tab.tab
-		if is_active:
-			text += "[color=%s][b][url=menu:%s]%s[/url][/b][/color]  " % [tab_active_color, tab.key, tab.icon]
-		else:
-			text += "[color=%s][url=menu:%s]%s[/url][/color]  " % [tab_color, tab.key, tab.icon]
-
-	text += "[/center]\n"
-	text += "[color=%s]-------------------[/color]\n\n" % separator_color
-
-	match current_menu_tab:
-		MenuTab.INVENTORY:
-			text += _get_inventory_content()
-		MenuTab.EQUIPMENT:
-			text += _get_equipment_content()
-		MenuTab.CHARACTER:
-			text += _get_character_content()
-		MenuTab.QUESTS:
-			text += _get_quests_content()
-		MenuTab.MAP:
-			text += _get_map_content()
-		MenuTab.SOCIAL:
-			text += _get_social_content()
-		MenuTab.SETTINGS:
-			text += _get_settings_content()
-
-	page.label.text = text
+## Render menu content to a page (delegates to content renderer)
+func _render_menu_to_page(page: PageMeshFactory.PageMesh) -> void:
+	page.label.text = _content_renderer.render_menu(current_menu_tab, _menu_renderer)
 
 
-## Render entity details to a page
-func _render_entity_to_page(page: PageMesh, entity: Variant) -> void:
+## Render entity details to a page (delegates to content renderer)
+func _render_entity_to_page(page: PageMeshFactory.PageMesh, entity: Variant) -> void:
 	if entity == null:
 		page.label.text = ""
 		return
 
-	var text := ""
-
-	var title_color := "#2a1f14"
-	var body_color := "#362816"
-	var action_color := "#4a3828"
-
-	var entity_name: String = _get_entity_prop(entity, "name", "Unknown")
-	text += "[center][font_size=28][color=%s][b]%s[/b][/color][/font_size][/center]\n\n" % [title_color, entity_name]
-
-	var desc: String = _get_entity_prop(entity, "description", "")
-	if desc == "":
-		desc = _get_entity_prop(entity, "long_desc", "")
-	if desc == "":
-		desc = entity_name
-	desc = desc.replace("\n", " ").replace("  ", " ")
-	text += "[color=%s]%s[/color]\n\n" % [body_color, desc]
-
-	var actions: Array = _get_entity_prop(entity, "actions", [])
-	current_entity_actions = []
-
-	text += "\n"
-	for action in actions:
-		var action_key: String = action.get("key", "") if action is Dictionary else str(action)
-		var action_label: String = action.get("label", action_key.capitalize()) if action is Dictionary else action_key.capitalize()
-		current_entity_actions.append(action_key)
-		text += "[color=%s][url=action:%s][u]%s[/u][/url][/color]\n\n" % [action_color, action_key, action_label]
-
-	if "leave" not in current_entity_actions:
-		current_entity_actions.append("leave")
-		text += "[color=%s][url=action:leave][u]Leave[/u][/url][/color]\n" % action_color
-
-	page.label.text = text
+	var result := _content_renderer.render_entity(entity)
+	page.label.text = result.text
+	current_entity_actions = result.actions
 
 
-## Render shop content to a page
-func _render_shop_to_page(page: PageMesh) -> void:
-	var data: Dictionary = GameState.shop_data
-	if data.is_empty():
-		page.label.text = "[center][i]Shop not available[/i][/center]"
-		return
-
-	var title_color := "#2a1f14"
-	var body_color := "#362816"
-	var item_color := "#3a2a1a"
-	var price_color := "#5a4a3a"
-	var gold_color := "#8a6a2a"
-	var action_color := "#4a3828"
-
-	var npc_name: String = data.get("npc_name", "Merchant")
-	var items: Array = data.get("items", [])
-	var player_gold: int = GameState.server_state.get("resources", {}).get("gold", 0)
-
-	var text := ""
-	text += "[center][font_size=28][color=%s][b]%s[/b][/color][/font_size][/center]\n\n" % [title_color, npc_name]
-	text += "[color=%s][i]\"What can I get for you today?\"[/i][/color]\n\n" % body_color
-
-	if items.is_empty():
-		text += "[color=%s][i]No items for sale.[/i][/color]\n\n" % body_color
-	else:
-		for i in range(items.size()):
-			var item: Dictionary = items[i]
-			var item_name: String = item.get("name", "Unknown Item")
-			var price: int = item.get("price", 0)
-			var can_afford: bool = player_gold >= price
-
-			if can_afford:
-				text += "[color=%s][url=shop:buy:%d]• %s[/url][/color]" % [item_color, i, item_name]
-			else:
-				text += "[color=%s]• %s[/color]" % [price_color, item_name]
-
-			text += " [color=%s](%dg)[/color]\n\n" % [price_color, price]
-
-	text += "[color=%s]-------------------[/color]\n" % price_color
-	text += "[color=%s]Your Gold: [/color][color=%s]%d[/color]\n\n" % [body_color, gold_color, player_gold]
-
-	text += "[color=%s][url=shop:close][u]Leave Shop[/u][/url][/color]" % action_color
-
-	page.label.text = text
+## Render shop content to a page (delegates to handler)
+func _render_shop_to_page(page: PageMeshFactory.PageMesh) -> void:
+	page.label.text = _shop_container_handler.render_shop()
 
 
-## Render container content to a page
-func _render_container_to_page(page: PageMesh) -> void:
-	var data: Dictionary = GameState.container_data
-	if data.is_empty():
-		page.label.text = "[center][i]Container not available[/i][/center]"
-		return
-
-	var title_color := "#2a1f14"
-	var body_color := "#362816"
-	var item_color := "#3a2a1a"
-	var hint_color := "#5a4a3a"
-	var action_color := "#4a3828"
-
-	var entity_name: String = data.get("entity_name", "Container")
-	var items: Array = data.get("items", [])
-
-	var text := ""
-	text += "[center][font_size=28][color=%s][b]%s[/b][/color][/font_size][/center]\n\n" % [title_color, entity_name]
-
-	if items.is_empty():
-		text += "[color=%s][i]Empty.[/i][/color]\n\n" % hint_color
-	else:
-		for i in range(items.size()):
-			var item: Dictionary = items[i]
-			var item_name: String = item.get("name", "Unknown Item")
-			var qty: int = item.get("quantity", 1)
-
-			if qty > 1:
-				text += "[color=%s][url=container:take:%d]• %s (×%d)[/url][/color]\n\n" % [item_color, i, item_name, qty]
-			else:
-				text += "[color=%s][url=container:take:%d]• %s[/url][/color]\n\n" % [item_color, i, item_name]
-
-	text += "[color=%s]-------------------[/color]\n\n" % hint_color
-
-	if not items.is_empty():
-		text += "[color=%s][url=container:take_all][u]Take All[/u][/url][/color]    " % action_color
-
-	text += "[color=%s][url=container:close][u]Close[/u][/url][/color]" % action_color
-
-	page.label.text = text
+## Render container content to a page (delegates to handler)
+func _render_container_to_page(page: PageMeshFactory.PageMesh) -> void:
+	page.label.text = _shop_container_handler.render_container()
 
 
-## Render dialogue content to a page
-func _render_dialogue_to_page(page: PageMesh, data: Dictionary) -> void:
+## Render dialogue content to a page (delegates to content renderer)
+func _render_dialogue_to_page(page: PageMeshFactory.PageMesh, data: Dictionary) -> void:
 	if data.is_empty():
 		page.label.text = ""
 		return
 
-	var title_color := "#2a1f14"
-	var body_color := "#362816"
-	var player_color := "#1a3a2a"
-	var choice_color := "#4a3828"
-	var hint_color := "#6a5a4a"
-
+	# Add current NPC line to history if not already there
 	var speaker: String = data.get("speaker", "")
 	if speaker == "":
 		speaker = data.get("entity_id", "Someone")
-	speaker = speaker.capitalize()
 	var dialogue_text: String = data.get("text", "")
 	dialogue_text = dialogue_text.replace("\n", " ").replace("  ", " ")
 
-	# Add current NPC line to history if not already there
 	var should_add := true
 	if not dialogue_history.is_empty():
 		var last_entry: Dictionary = dialogue_history[-1]
@@ -1114,36 +644,7 @@ func _render_dialogue_to_page(page: PageMesh, data: Dictionary) -> void:
 	if should_add:
 		dialogue_history.append({"speaker": speaker, "text": dialogue_text, "is_player": false})
 
-	var text := ""
-
-	text += "[center][font_size=26][color=%s][b]%s[/b][/color][/font_size][/center]\n\n" % [title_color, speaker]
-
-	var event_color := "#5a4a3a"
-
-	for entry in dialogue_history:
-		var entry_speaker: String = entry.get("speaker", "").capitalize()
-		var entry_text: String = entry.get("text", "")
-		var is_player: bool = entry.get("is_player", false)
-		var entry_event: String = entry.get("event", "")
-
-		if is_player:
-			# Show event (like [Accept Quest]) before the player's line
-			if entry_event != "":
-				text += "[color=%s][%s][/color]\n" % [event_color, entry_event]
-			text += "[color=%s]You say, [i]\"%s\"[/i][/color]\n\n" % [player_color, entry_text]
-		else:
-			text += "[color=%s]%s says, \"%s\"[/color]\n\n" % [body_color, entry_speaker, entry_text]
-
-	var choices: Array = data.get("choices", [])
-	if choices.size() > 0:
-		for i in range(choices.size()):
-			var choice: Dictionary = choices[i]
-			var choice_text: String = choice.get("text", "Continue")
-			text += "[color=%s][url=%d][u]%s[/u][/url][/color]\n\n" % [choice_color, i, choice_text]
-	else:
-		text += "[color=%s][url=-1][u]Continue[/u][/url][/color]\n\n" % choice_color
-
-	page.label.text = text
+	page.label.text = _content_renderer.render_dialogue(data, dialogue_history)
 
 
 # =============================================================================
@@ -1170,7 +671,7 @@ func display_dialogue(data: Dictionary) -> void:
 # Compass and Bottom Bar Updates
 # =============================================================================
 
-func _update_compass_buttons_on_page(page: PageMesh) -> void:
+func _update_compass_buttons_on_page(page: PageMeshFactory.PageMesh) -> void:
 	if not page.bottom_bar:
 		return
 
@@ -1457,78 +958,19 @@ func _handle_menu_click(tab_key: String) -> void:
 
 
 # =============================================================================
-# Shop Click Handling
+# Shop Click Handling (delegates to handler)
 # =============================================================================
 
 func _handle_shop_click(action: String) -> void:
-	if action == "close":
-		GameState.close_shop()
-		return
-
-	if action.begins_with("buy:"):
-		var index: int = int(action.substr(4))
-		_buy_shop_item(index)
-
-
-func _buy_shop_item(index: int) -> void:
-	var items: Array = GameState.shop_data.get("items", [])
-	if index < 0 or index >= items.size():
-		return
-
-	var item: Dictionary = items[index]
-	var price: int = item.get("price", 0)
-	var player_gold: int = GameState.server_state.get("resources", {}).get("gold", 0)
-
-	if player_gold < price:
-		add_event("You cannot afford that.")
-		return
-
-	if GameState.is_online:
-		var phoenix: Node = get_node_or_null("/root/PhoenixClient")
-		if phoenix and phoenix.has_method("shop_action"):
-			phoenix.shop_action("buy", index)
-	else:
-		add_event("Shopping requires server connection.")
+	_shop_container_handler.handle_shop_click(action)
 
 
 # =============================================================================
-# Container Click Handling
+# Container Click Handling (delegates to handler)
 # =============================================================================
 
 func _handle_container_click(action: String) -> void:
-	if action == "close":
-		GameState.close_container()
-		return
-
-	if action == "take_all":
-		_take_all_from_container()
-		return
-
-	if action.begins_with("take:"):
-		var index: int = int(action.substr(5))
-		_take_from_container(index)
-
-
-func _take_from_container(index: int) -> void:
-	var items: Array = GameState.container_data.get("items", [])
-	if index < 0 or index >= items.size():
-		return
-
-	if GameState.is_online:
-		var phoenix: Node = get_node_or_null("/root/PhoenixClient")
-		if phoenix and phoenix.has_method("container_action"):
-			phoenix.container_action("take", index)
-	else:
-		add_event("Container interaction requires server connection.")
-
-
-func _take_all_from_container() -> void:
-	if GameState.is_online:
-		var phoenix: Node = get_node_or_null("/root/PhoenixClient")
-		if phoenix and phoenix.has_method("container_action"):
-			phoenix.container_action("take_all")
-	else:
-		add_event("Container interaction requires server connection.")
+	_shop_container_handler.handle_container_click(action)
 
 
 # =============================================================================
@@ -1590,403 +1032,7 @@ func prev_menu_tab() -> void:
 	display_menu()
 
 
-func _get_inventory_content() -> String:
-	var title_color := "#2a1f14"
-	var item_color := "#362816"
-	var hint_color := "#6a5a4a"
-
-	var text := "[color=%s][b]Your Pack[/b][/color]\n\n" % title_color
-
-	var items: Array = []
-	if GameState.is_online:
-		# Inventory is at top level of server_state, not inside "player"
-		items = GameState.server_state.get("inventory", [])
-	else:
-		items = MockWorld.get_player_inventory()
-
-	if items.is_empty():
-		text += "[color=%s][i]Your pack is empty.[/i][/color]\n" % hint_color
-	else:
-		for item in items:
-			var iname: String = item.get("name", "Unknown")
-			var qty: int = item.get("quantity", 1)
-			if qty > 1:
-				text += "[color=%s]• %s (×%d)[/color]\n" % [item_color, iname, qty]
-			else:
-				text += "[color=%s]• %s[/color]\n" % [item_color, iname]
-
-	return text
-
-
-func _get_equipment_content() -> String:
-	var title_color := "#2a1f14"
-	var slot_color := "#5a4a3a"
-	var item_color := "#362816"
-	var empty_color := "#8a7a6a"
-
-	var text := "[color=%s][b]Equipment[/b][/color]\n\n" % title_color
-
-	# Get equipment from server or mock
-	var equipment: Dictionary = {}
-	if GameState.is_online:
-		equipment = GameState.server_state.get("equipment", {})
-	else:
-		equipment = MockWorld.get_player_equipment()
-
-	# Equipment slots in order
-	var slots := [
-		{"key": "head", "label": "Head"},
-		{"key": "neck", "label": "Neck"},
-		{"key": "body", "label": "Body"},
-		{"key": "arms", "label": "Arms"},
-		{"key": "hands", "label": "Hands"},
-		{"key": "waist", "label": "Waist"},
-		{"key": "legs", "label": "Legs"},
-		{"key": "feet", "label": "Feet"},
-		{"key": "main_hand", "label": "Main Hand"},
-		{"key": "off_hand", "label": "Off Hand"},
-	]
-
-	for slot in slots:
-		var slot_key: String = slot.key
-		var slot_label: String = slot.label
-		var equipped = equipment.get(slot_key, null)
-
-		if equipped != null and equipped is Dictionary:
-			var item_name: String = equipped.get("name", "Unknown")
-			text += "[color=%s]%s:[/color] [color=%s]%s[/color]\n" % [slot_color, slot_label, item_color, item_name]
-		else:
-			text += "[color=%s]%s:[/color] [color=%s]-- empty --[/color]\n" % [slot_color, slot_label, empty_color]
-
-	return text
-
-
-func _get_character_content() -> String:
-	# Get mock stats directly - avoid any potential issues with autoloads
-	var stats: Dictionary = MockWorld.get_player_stats()
-	var player_name: String = MockWorld.get_player_name()
-
-	var level: int = stats.get("level", 1)
-	var hp: int = stats.get("hp", 100)
-	var max_hp: int = stats.get("max_hp", 100)
-	var mana: int = stats.get("mana", 50)
-	var max_mana: int = stats.get("max_mana", 50)
-	var mv: int = stats.get("mv", 100)
-	var max_mv: int = stats.get("max_mv", 100)
-
-	var str_val: int = stats.get("str", 10)
-	var dex_val: int = stats.get("dex", 10)
-	var con_val: int = stats.get("con", 10)
-	var int_val: int = stats.get("int", 10)
-	var per_val: int = stats.get("per", 10)
-	var spi_val: int = stats.get("spi", 10)
-
-	var crit: int = stats.get("crit_chance", 0)
-	var dodge: int = stats.get("dodge_chance", 0)
-	var magic_resist: int = stats.get("magic_resist", 0)
-
-	var text := "[center][b]" + player_name + "[/b][/center]\n"
-	text += "[center]Level " + str(level) + "[/center]\n\n"
-	text += "[b]Resources[/b]\n"
-	text += "HP:   " + str(hp) + " / " + str(max_hp) + "\n"
-	text += "Mana: " + str(mana) + " / " + str(max_mana) + "\n"
-	text += "MV:   " + str(mv) + " / " + str(max_mv) + "\n\n"
-	text += "[b]Attributes[/b]\n"
-	text += "STR " + str(str_val) + "    INT " + str(int_val) + "\n"
-	text += "DEX " + str(dex_val) + "    PER " + str(per_val) + "\n"
-	text += "CON " + str(con_val) + "    SPI " + str(spi_val) + "\n\n"
-	text += "[b]Combat[/b]\n"
-	text += "Crit: " + str(crit) + "%  Dodge: " + str(dodge) + "%\n"
-	text += "Magic Resist: " + str(magic_resist) + "%\n"
-
-	return text
-
-
-func _get_quests_content() -> String:
-	var title_color := "#2a1f14"
-	var quest_color := "#362816"
-	var objective_color := "#5a4a3a"
-	var hint_color := "#6a5a4a"
-	var complete_color := "#1a4a2a"  # Green for completed
-
-	var text := "[color=%s][b]Quests[/b][/color]\n\n" % title_color
-
-	var quests: Array = []
-	if GameState.is_online:
-		quests = GameState.server_state.get("quests", [])
-
-	if quests.is_empty():
-		text += "[color=%s][i]No active quests.[/i][/color]\n\n" % hint_color
-		text += "[color=%s]Talk to NPCs to discover quests.[/color]\n" % hint_color
-	else:
-		for quest in quests:
-			var quest_name: String = quest.get("title", quest.get("name", "Unknown Quest"))
-			var status: String = quest.get("status", "active")
-			var objectives: Array = quest.get("objectives", [])
-
-			# Quest title with status indicator
-			if status == "completed":
-				text += "[color=%s][s]%s[/s] (Complete)[/color]\n" % [complete_color, quest_name]
-			else:
-				text += "[color=%s]* %s[/color]\n" % [quest_color, quest_name]
-
-			# Show objectives
-			for obj in objectives:
-				var obj_text: String = obj.get("description", obj.get("text", ""))
-				var current: int = obj.get("current", 0)
-				var total: int = obj.get("total", 1)
-				var obj_complete: bool = obj.get("complete", false) or current >= total
-
-				if obj_complete:
-					text += "[color=%s]  [x] %s[/color]\n" % [complete_color, obj_text]
-				elif total > 1:
-					text += "[color=%s]  [ ] %s (%d/%d)[/color]\n" % [objective_color, obj_text, current, total]
-				else:
-					text += "[color=%s]  [ ] %s[/color]\n" % [objective_color, obj_text]
-
-			text += "\n"
-
-	return text
-
-
-func _get_map_content() -> String:
-	var room_color := "#362816"
-	var current_color := "#1a4a2a"  # Green for current room
-	var path_color := "#5a4a3a"     # Brown for paths
-
-	# Build room positions using BFS from a known starting point
-	var room_positions: Dictionary = _build_room_grid()
-
-	# Find grid bounds
-	var min_x := 0
-	var max_x := 0
-	var min_y := 0
-	var max_y := 0
-	for room_key in room_positions:
-		var pos: Vector2i = room_positions[room_key]
-		min_x = mini(min_x, pos.x)
-		max_x = maxi(max_x, pos.x)
-		min_y = mini(min_y, pos.y)
-		max_y = maxi(max_y, pos.y)
-
-	# Render the grid (top to bottom = north to south)
-	var text := "[center]"
-	# Use last explored room as current if GameState.current_room doesn't match MockWorld
-	var current_room_key: String = ""
-	if GameState.current_room and MockWorld.get_room(GameState.current_room.key) != null:
-		current_room_key = GameState.current_room.key
-	elif GameState.explored_rooms.size() > 0:
-		current_room_key = GameState.explored_rooms[GameState.explored_rooms.size() - 1]
-
-	# Render from top (max_y) to bottom (min_y)
-	for y in range(max_y, min_y - 1, -1):
-		var row_rooms := ""
-
-		for x in range(min_x, max_x + 1):
-			var room_key := _get_room_at_position(room_positions, x, y)
-
-			if room_key != "":
-				var room := MockWorld.get_room(room_key)
-				var is_current := room_key == current_room_key
-				var is_explored := GameState.is_room_explored(room_key)
-
-				if is_explored:
-					# Show explored rooms as boxes, current room with dot inside
-					if is_current:
-						row_rooms += "[color=%s][b][.][/b][/color]" % current_color
-					else:
-						row_rooms += "[color=%s][ ][/color]" % room_color
-				else:
-					# Fog of war - don't show the room, just empty space
-					row_rooms += " "
-
-				# Check for east connection (show if either room is explored)
-				if x < max_x:
-					var east_room_key := _get_room_at_position(room_positions, x + 1, y)
-					var show_east_path := false
-					if east_room_key != "":
-						var east_room := MockWorld.get_room(east_room_key)
-						var east_explored := GameState.is_room_explored(east_room_key)
-						# Show path if current room is explored and has east exit
-						if is_explored and room and room.exits.has("east"):
-							show_east_path = true
-						# Or if east room is explored and has west exit
-						elif east_explored and east_room and east_room.exits.has("west"):
-							show_east_path = true
-					if show_east_path:
-						row_rooms += "[color=%s]-[/color]" % path_color
-					else:
-						row_rooms += " "
-			else:
-				row_rooms += " "
-				if x < max_x:
-					row_rooms += " "
-
-		text += row_rooms + "\n"
-
-		# Render vertical connections - only from explored rooms
-		if y > min_y:
-			var vert_paths := ""
-			for x in range(min_x, max_x + 1):
-				var room_key := _get_room_at_position(room_positions, x, y)
-				var south_room_key := _get_room_at_position(room_positions, x, y - 1)
-
-				var show_path := false
-				if room_key != "" and south_room_key != "":
-					var room := MockWorld.get_room(room_key)
-					var south_room := MockWorld.get_room(south_room_key)
-					var room_explored := GameState.is_room_explored(room_key)
-					var south_explored := GameState.is_room_explored(south_room_key)
-
-					# Show path if either room is explored and they're connected
-					if room_explored and room and room.exits.has("south"):
-						show_path = true
-					elif south_explored and south_room and south_room.exits.has("north"):
-						show_path = true
-
-				if show_path:
-					vert_paths += "[color=%s]|[/color]" % path_color
-				else:
-					vert_paths += " "
-
-				if x < max_x:
-					vert_paths += " "
-			text += vert_paths + "\n"
-
-	text += "[/center]"
-	return text
-
-
-## Build a grid of room positions using BFS
-func _build_room_grid() -> Dictionary:
-	var positions: Dictionary = {}
-	var visited: Dictionary = {}
-	var queue: Array = []
-
-	# Direction offsets
-	var dir_offset := {
-		"north": Vector2i(0, 1),
-		"south": Vector2i(0, -1),
-		"east": Vector2i(1, 0),
-		"west": Vector2i(-1, 0)
-	}
-
-	# Always start from monastery_gate as the map origin
-	# This ensures consistent positioning regardless of current room
-	var start_key := "monastery_gate"
-	var start_room := MockWorld.get_room(start_key)
-	if start_room == null:
-		# Fallback: try to use any explored room
-		for room_key in GameState.explored_rooms:
-			var room := MockWorld.get_room(room_key)
-			if room != null:
-				start_key = room_key
-				start_room = room
-				break
-		if start_room == null:
-			return positions
-
-	positions[start_key] = Vector2i(0, 0)
-	visited[start_key] = true
-	queue.append(start_key)
-
-	# BFS to build positions for ALL rooms in MockWorld
-	while queue.size() > 0:
-		var current_key: String = queue.pop_front()
-		var current_pos: Vector2i = positions[current_key]
-		var room := MockWorld.get_room(current_key)
-
-		if room == null:
-			continue
-
-		# Add all connected rooms
-		for direction in room.exits:
-			var dest_key: String = room.exits[direction]
-			if visited.has(dest_key):
-				continue
-
-			var offset: Vector2i = dir_offset.get(direction, Vector2i(0, 0))
-			positions[dest_key] = current_pos + offset
-			visited[dest_key] = true
-			queue.append(dest_key)
-
-	return positions
-
-
-## Get room key at a specific grid position
-func _get_room_at_position(positions: Dictionary, x: int, y: int) -> String:
-	for room_key in positions:
-		var pos: Vector2i = positions[room_key]
-		if pos.x == x and pos.y == y:
-			return room_key
-	return ""
-
-
-## Get 3-letter abbreviation for room name
-func _get_room_abbreviation(room_name: String) -> String:
-	# Remove common words and get first 3 chars of significant word
-	var name := room_name.replace("Monastery ", "").replace("'s ", " ")
-	var words := name.split(" ")
-	if words.size() > 0:
-		var word: String = words[0]
-		return word.substr(0, 3).to_upper()
-	return "???"
-
-
-func _get_direction_arrow(direction: String) -> String:
-	match direction:
-		"north": return "↑"
-		"south": return "↓"
-		"east": return "→"
-		"west": return "←"
-		_: return "•"
-
-
-func _get_social_content() -> String:
-	var title_color := "#2a1f14"
-	var hint_color := "#6a5a4a"
-	var body_color := "#362816"
-	var player_color := "#2a4a3a"
-
-	var text := "[color=%s][b]Players Nearby[/b][/color]\n\n" % title_color
-
-	# Get players from server state
-	var players: Array = GameState.server_state.get("other_players", [])
-
-	if players.is_empty():
-		text += "[color=%s][i]No other players nearby.[/i][/color]\n\n" % hint_color
-	else:
-		for p in players:
-			var name: String = p.get("name", "Unknown")
-			var level: int = p.get("level", 1)
-			text += "[color=%s]• %s[/color] [color=%s](Lv.%d)[/color]\n" % [player_color, name, hint_color, level]
-		text += "\n"
-
-	# Show current player info
-	var player_name: String = str(AuthClient.player.get("name", "You"))
-	text += "[color=%s]-------------------[/color]\n\n" % hint_color
-	text += "[color=%s]You are:[/color] [color=%s]%s[/color]\n" % [hint_color, body_color, player_name]
-
-	if GameState.is_online:
-		text += "[color=%s]Status:[/color] [color=#2a6a2a]Online[/color]\n" % hint_color
-	else:
-		text += "[color=%s]Status:[/color] [color=#6a3a2a]Offline[/color]\n" % hint_color
-
-	return text
-
-
-func _get_settings_content() -> String:
-	var title_color := "#2a1f14"
-	var item_color := "#4a3828"
-	var hint_color := "#6a5a4a"
-	var quit_color := "#6b3a2a"
-
-	var text := "[color=%s][b]Settings[/b][/color]\n\n" % title_color
-	text += "[color=%s][i]Settings coming soon...[/i][/color]\n\n" % hint_color
-	text += "[color=%s]• Sound: On[/color]\n" % item_color
-	text += "[color=%s]• Music: On[/color]\n" % item_color
-	text += "\n\n[center][color=%s][url=menu:quit][b][ Quit Game ][/b][/url][/color][/center]" % quit_color
-	return text
+# Menu content functions extracted to MenuTabRenderer
 
 
 # =============================================================================
@@ -2027,51 +1073,14 @@ func _on_dialogue_ended() -> void:
 				_render_room_to_page(top_page, GameState.current_room)
 
 
-## Render dialogue using GameState as source of truth
-func _render_dialogue_from_game_state(page: PageMesh) -> void:
+## Render dialogue using GameState as source of truth (delegates to content renderer)
+func _render_dialogue_from_game_state(page: PageMeshFactory.PageMesh) -> void:
 	var data: Dictionary = GameState.dialogue_data
 	if data.is_empty():
 		page.label.text = ""
 		return
 
-	var title_color := "#2a1f14"
-	var body_color := "#362816"
-	var player_color := "#1a3a2a"
-	var choice_color := "#4a3828"
-	var event_color := "#5a4a3a"
-
-	var speaker: String = data.get("speaker", "")
-	if speaker == "":
-		speaker = data.get("entity_id", "Someone")
-	speaker = speaker.capitalize()
-
-	var text := ""
-	text += "[center][font_size=26][color=%s][b]%s[/b][/color][/font_size][/center]\n\n" % [title_color, speaker]
-
-	# Use GameState's dialogue_history
-	for entry in GameState.dialogue_history:
-		var entry_speaker: String = entry.get("speaker", "").capitalize()
-		var entry_text: String = entry.get("text", "")
-		var is_player: bool = entry.get("is_player", false)
-		var entry_event: String = entry.get("event", "")
-
-		if is_player:
-			if entry_event != "":
-				text += "[color=%s][%s][/color]\n" % [event_color, entry_event]
-			text += "[color=%s]You say, [i]\"%s\"[/i][/color]\n\n" % [player_color, entry_text]
-		else:
-			text += "[color=%s]%s says, \"%s\"[/color]\n\n" % [body_color, entry_speaker, entry_text]
-
-	var choices: Array = data.get("choices", [])
-	if choices.size() > 0:
-		for i in range(choices.size()):
-			var choice: Dictionary = choices[i]
-			var choice_text: String = choice.get("text", "Continue")
-			text += "[color=%s][url=%d][u]%s[/u][/url][/color]\n\n" % [choice_color, i, choice_text]
-	else:
-		text += "[color=%s][url=-1][u]Continue[/u][/url][/color]\n\n" % choice_color
-
-	page.label.text = text
+	page.label.text = _content_renderer.render_dialogue(data, GameState.dialogue_history)
 
 
 func _select_dialogue_choice(choice_index: int) -> void:
