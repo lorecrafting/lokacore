@@ -169,6 +169,8 @@ end
 
 ## Entity Data Structure Reference
 
+**See also:** `.claude/skills/entity-data-structure-differences.md` for detailed differences between TypedObject structs and EntityManager entity maps.
+
 ```elixir
 # TypedObject entity structure
 %TypedObject{
