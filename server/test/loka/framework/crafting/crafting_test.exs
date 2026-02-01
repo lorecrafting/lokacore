@@ -97,11 +97,10 @@ defmodule Loka.Framework.CraftingTest do
     }
   end
 
-  # Helper to register recipes for testing via GenServer call
-  defp register_test_recipe(registry, recipe) do
-    :sys.replace_state(registry, fn state ->
-      %{state | recipes: Map.put(state.recipes, recipe.key, recipe)}
-    end)
+  # Helper to register recipes for testing via the registry API
+  defp register_test_recipe(_registry, recipe) do
+    # Use the registry's register function which updates both state and ETS
+    CraftingRegistry.register(recipe)
   end
 
   # Helper to create a game state for testing

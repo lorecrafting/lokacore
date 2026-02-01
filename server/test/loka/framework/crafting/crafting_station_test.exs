@@ -54,7 +54,7 @@ defmodule Loka.Framework.Crafting.CraftingStationTest do
       skill_level: 0
     }
 
-    # Add recipes to registry
+    # Add recipes to registry using the proper API
     recipes = %{
       "recipe_iron_sword" => recipe1,
       "recipe_steel_sword" => recipe2,
@@ -62,19 +62,10 @@ defmodule Loka.Framework.Crafting.CraftingStationTest do
       "recipe_general_craft" => recipe4
     }
 
-    # Store recipes in the registry state manually
-    state = %{
-      table: :ets.new(:test_recipes, [:set, :protected, read_concurrency: true]),
-      path: "test",
-      recipes: recipes
-    }
-
-    Enum.each(recipes, fn {key, recipe} ->
-      :ets.insert(state.table, {key, recipe})
+    # Register each recipe using the registry's API (updates both state and ETS)
+    Enum.each(recipes, fn {_key, recipe} ->
+      CraftingRegistry.register(recipe)
     end)
-
-    # Update the registry with test recipes using GenServer.call
-    :sys.replace_state(CraftingRegistry, fn _ -> state end)
 
     {:ok, recipes: recipes}
   end
