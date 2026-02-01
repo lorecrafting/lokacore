@@ -8,6 +8,8 @@ defmodule LokaWeb.AdminLive.WorldBuilder.Toolbar do
   import LokaWeb.CoreComponents
 
   attr :class, :string, default: ""
+  attr :show_zone_colors, :boolean, default: true
+  attr :show_npc_paths, :boolean, default: true
 
   attr :undo_state, :map,
     default: %{can_undo: false, can_redo: false, undo_count: 0, redo_count: 0}
@@ -103,76 +105,45 @@ defmodule LokaWeb.AdminLive.WorldBuilder.Toolbar do
           <.icon name="hero-shield-check" class="size-4" />
           <span style="font-size: 0.75rem; margin-left: 4px;">Validate</span>
         </button>
+        <button class="toolbar-btn" phx-click="show_quest_flow" title="View Quest Flow">
+          <.icon name="hero-arrow-trending-up" class="size-4" />
+          <span style="font-size: 0.75rem; margin-left: 4px;">Flow</span>
+        </button>
         <button class="toolbar-btn" phx-click="show_commit_modal" title="Git Commit (Ctrl+G)">
           <.icon name="hero-cloud-arrow-up" class="size-4" />
           <span style="font-size: 0.75rem; margin-left: 4px;">Commit</span>
         </button>
       </div>
 
+      <%!-- View options --%>
+      <div class="toolbar-section">
+        <button
+          class={"toolbar-btn #{if @show_zone_colors, do: "active"}"}
+          phx-click="toggle_zone_colors"
+          title="Toggle Zone Colors (Z)"
+        >
+          <.icon name="hero-map" class="size-4" />
+          <span style="font-size: 0.75rem; margin-left: 4px;">Zones</span>
+        </button>
+        <button
+          class={"toolbar-btn #{if @show_npc_paths, do: "active"}"}
+          phx-click="toggle_npc_paths"
+          title="Toggle NPC Patrol Paths (P)"
+        >
+          <.icon name="hero-arrow-path" class="size-4" />
+          <span style="font-size: 0.75rem; margin-left: 4px;">Paths</span>
+        </button>
+      </div>
+
       <div class="toolbar-section toolbar-right">
-        <div class="toolbar-help-dropdown">
-          <button class="toolbar-btn" title="Keyboard Shortcuts">
-            <.icon name="hero-question-mark-circle" class="size-4" />
-          </button>
-          <div class="help-dropdown-content">
-            <h4>Keyboard Shortcuts</h4>
-            <div class="shortcut-list">
-              <div class="shortcut-item">
-                <span class="shortcut-keys">Ctrl+Z</span>
-                <span class="shortcut-desc">Undo</span>
-              </div>
-              <div class="shortcut-item">
-                <span class="shortcut-keys">Ctrl+Y</span>
-                <span class="shortcut-desc">Redo</span>
-              </div>
-              <div class="shortcut-item">
-                <span class="shortcut-keys">Ctrl+S</span>
-                <span class="shortcut-desc">Validate All</span>
-              </div>
-              <div class="shortcut-item">
-                <span class="shortcut-keys">Ctrl+G</span>
-                <span class="shortcut-desc">Git Commit</span>
-              </div>
-              <div class="shortcut-item">
-                <span class="shortcut-keys">Delete</span>
-                <span class="shortcut-desc">Delete Selected</span>
-              </div>
-              <div class="shortcut-item">
-                <span class="shortcut-keys">Ctrl+D</span>
-                <span class="shortcut-desc">Duplicate</span>
-              </div>
-              <div class="shortcut-item">
-                <span class="shortcut-keys">Ctrl+A</span>
-                <span class="shortcut-desc">Select All</span>
-              </div>
-              <div class="shortcut-item">
-                <span class="shortcut-keys">Escape</span>
-                <span class="shortcut-desc">Deselect All</span>
-              </div>
-              <div class="shortcut-item">
-                <span class="shortcut-keys">1-4</span>
-                <span class="shortcut-desc">Toggle Panels</span>
-              </div>
-              <div class="shortcut-item">
-                <span class="shortcut-keys">`</span>
-                <span class="shortcut-desc">Toggle Console</span>
-              </div>
-              <div class="shortcut-item">
-                <span class="shortcut-keys">N</span>
-                <span class="shortcut-desc">New Room</span>
-              </div>
-              <div class="shortcut-item">
-                <span class="shortcut-keys">/</span>
-                <span class="shortcut-desc">Focus Search</span>
-              </div>
-            </div>
-          </div>
-        </div>
         <button
           class="toolbar-btn"
-          phx-click="show_settings"
-          title="Settings"
+          phx-click="show_keyboard_help"
+          title="Keyboard Shortcuts (?)"
         >
+          <.icon name="hero-question-mark-circle" class="size-4" />
+        </button>
+        <button class="toolbar-btn" phx-click="show_settings" title="Settings">
           <.icon name="hero-cog-6-tooth" class="size-4" />
         </button>
       </div>

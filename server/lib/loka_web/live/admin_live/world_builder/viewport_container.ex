@@ -4,19 +4,34 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ViewportContainer do
 
   Renders rooms on a 2D canvas with pan/zoom controls.
   Supports Z-level filtering for multi-level worlds.
-  Console is embedded as an overlay at the bottom.
+  Console is embedded as an overlay at the bottom with filtering and export.
   """
   use Phoenix.Component
   import LokaWeb.CoreComponents
 
   attr :rooms, :list, required: true
   attr :selected_room, :string, default: nil
+  attr :zones, :list, default: []
+  attr :zone_colors, :map, default: %{}
+  attr :show_zone_colors, :boolean, default: true
   attr :console_messages, :list, default: []
+  attr :console_filter, :string, default: ""
+  attr :level_filter, :string, default: "all"
   attr :console_collapsed, :boolean, default: false
   attr :console_height, :integer, default: 150
   attr :class, :string, default: ""
 
   def viewport_container(assigns) do
+    # Filter messages based on text search and level filter
+    filtered_messages =
+      filter_messages(
+        assigns.console_messages,
+        assigns.console_filter || "",
+        assigns.level_filter || "all"
+      )
+
+    assigns = assign(assigns, :filtered_messages, filtered_messages)
+
     ~H"""
     <div id="viewport-panel" class={"world-builder-panel world-builder-viewport #{@class}"}>
       <div id="viewport-content" class="panel-content" style="padding: 0;">
@@ -48,6 +63,23 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ViewportContainer do
             <span title="Press F to fit all rooms">F: Fit</span>
             <span title="Press R to reset view">R: Reset</span>
           </div>
+          
+    <!-- Zone Legend -->
+          <%= if @show_zone_colors and map_size(@zone_colors) > 0 do %>
+            <div class="zone-legend">
+              <div class="zone-legend-title">Zones</div>
+              <%= for zone <- @zones do %>
+                <div class="zone-legend-item">
+                  <span
+                    class="zone-legend-color"
+                    style={"background-color: #{Map.get(@zone_colors, zone.key, "#888")}"}
+                  >
+                  </span>
+                  <span class="zone-legend-name">{zone.name || zone.key}</span>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
         </div>
         
     <!-- Console overlay at bottom of viewport -->
@@ -62,20 +94,63 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ViewportContainer do
             style={if @console_collapsed, do: "display: none;", else: ""}
           >
           </div>
-          <div class="console-tabs">
-            <button class="console-tab active">Output Log</button>
-            <button class="console-tab">Messages</button>
-            <button class="console-tab" phx-click="clear_console" title="Clear console">Clear</button>
+          <div
+            class="console-tabs"
+            style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap;"
+          >
+            <span style="font-size: 12px; color: #888; padding-right: 8px;">Console</span>
+
+            <input
+              type="text"
+              placeholder="Filter..."
+              value={@console_filter}
+              phx-change="filter_console"
+              phx-debounce="100"
+              name="filter"
+              style="width: 100px; padding: 3px 6px; font-size: 11px; background: #1a1a2e; border: 1px solid #333; border-radius: 3px; color: #ccc;"
+            />
+
+            <select
+              name="level"
+              phx-change="filter_console_level"
+              style="padding: 3px 6px; font-size: 11px; background: #1a1a2e; border: 1px solid #333; border-radius: 3px; color: #ccc;"
+            >
+              <option value="all" selected={@level_filter == "all"}>All</option>
+              <option value="info" selected={@level_filter == "info"}>Info</option>
+              <option value="warning" selected={@level_filter == "warning"}>Warn</option>
+              <option value="error" selected={@level_filter == "error"}>Error</option>
+            </select>
+
+            <span style="color: #555; font-size: 10px;">
+              {length(@filtered_messages)}/{length(@console_messages)}
+            </span>
+
             <div style="flex: 1;"></div>
+
+            <button
+              phx-click="export_console"
+              title="Export to file"
+              style="background: none; border: none; padding: 2px 4px; cursor: pointer; color: #666;"
+            >
+              <.icon name="hero-arrow-down-tray" class="size-3" />
+            </button>
+            <button
+              phx-click="clear_console"
+              title="Clear console"
+              style="background: none; border: none; padding: 2px 4px; cursor: pointer; color: #666;"
+            >
+              <.icon name="hero-trash" class="size-3" />
+            </button>
             <button
               class="panel-collapse-btn"
               phx-click="toggle_panel"
               phx-value-panel="console"
               title={if @console_collapsed, do: "Expand (~)", else: "Collapse (~)"}
+              style="background: none; border: none; padding: 2px 4px; cursor: pointer; color: #666;"
             >
               <.icon
                 name={if @console_collapsed, do: "hero-chevron-up", else: "hero-chevron-down"}
-                class="size-4"
+                class="size-3"
               />
             </button>
           </div>
@@ -84,14 +159,20 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ViewportContainer do
             class="panel-content"
             style={if @console_collapsed, do: "display: none;", else: "padding: 0;"}
           >
-            <div class="console-output">
-              <%= if Enum.empty?(@console_messages) do %>
+            <div class="console-output" id="console-output" phx-hook="ConsoleOutput">
+              <%= if Enum.empty?(@filtered_messages) do %>
                 <div class="console-message">
-                  <span class="console-timestamp">00:00:00</span>
-                  <span class="console-text console-info">World Builder ready</span>
+                  <span class="console-timestamp">--:--:--</span>
+                  <span class="console-text console-info">
+                    <%= if @console_filter != "" or @level_filter != "all" do %>
+                      No matching messages
+                    <% else %>
+                      World Builder ready
+                    <% end %>
+                  </span>
                 </div>
               <% else %>
-                <%= for msg <- @console_messages do %>
+                <%= for msg <- @filtered_messages do %>
                   <div class="console-message">
                     <span class="console-timestamp">{msg.timestamp}</span>
                     <span class={["console-text", "console-#{msg.level}"]}>{msg.text}</span>
@@ -104,5 +185,17 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ViewportContainer do
       </div>
     </div>
     """
+  end
+
+  defp filter_messages(messages, filter, level) do
+    messages
+    |> Enum.filter(fn msg ->
+      level_match = level == "all" || to_string(msg.level) == level
+
+      text_match =
+        filter == "" || String.contains?(String.downcase(msg.text), String.downcase(filter))
+
+      level_match && text_match
+    end)
   end
 end

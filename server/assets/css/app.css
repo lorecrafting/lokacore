@@ -3081,6 +3081,53 @@ body:has(.ebook-page) {
   color: #909090;
 }
 
+/* Zone Legend */
+.zone-legend {
+  position: absolute;
+  bottom: 180px;
+  right: 8px;
+  background: rgba(30, 30, 30, 0.95);
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  min-width: 120px;
+}
+
+.zone-legend-title {
+  font-size: 10px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #444;
+}
+
+.zone-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+}
+
+.zone-legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.zone-legend-name {
+  font-size: 11px;
+  color: #ccc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .viewport-mode-buttons {
   display: flex;
   gap: 0.25rem;
@@ -5415,6 +5462,289 @@ body:has(.ebook-page) {
 .validation-warning {
   color: #ffcc99;
   margin-bottom: 0.25rem;
+}
+
+/* Mock State Panel for Dialogue Testing */
+.dialogue-preview-container {
+  display: flex;
+  height: 100%;
+  gap: 1rem;
+}
+
+.mock-state-panel {
+  width: 220px;
+  flex-shrink: 0;
+  background: #252525;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.mock-state-panel .panel-section-header {
+  background: #2d2d2d;
+  padding: 8px 12px;
+  border-bottom: 1px solid #3d3d3d;
+}
+
+.mock-state-section {
+  padding: 8px 10px;
+  border-bottom: 1px solid #3d3d3d;
+}
+
+.mock-state-section label {
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #888;
+  margin-bottom: 6px;
+}
+
+.mock-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+  min-height: 22px;
+}
+
+.mock-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: #3d5a80;
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+}
+
+.mock-tag button {
+  background: none;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.mock-tag button:hover {
+  color: #ff6b6b;
+}
+
+.mock-tag-completed {
+  background: #4a7c59;
+}
+
+.mock-tag-item {
+  background: #8b6914;
+}
+
+.mock-tag-flag {
+  background: #6b4a8c;
+}
+
+.mock-add-row {
+  display: flex;
+  gap: 4px;
+}
+
+.mock-add-row input {
+  flex: 1;
+  padding: 4px 6px;
+  background: #1a1a1a;
+  border: 1px solid #3d3d3d;
+  border-radius: 3px;
+  color: #ccc;
+  font-size: 11px;
+}
+
+.mock-add-row button {
+  padding: 4px 8px;
+  background: #3d3d3d;
+  border: none;
+  border-radius: 3px;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.mock-add-row button:hover {
+  background: #4d4d4d;
+}
+
+.preview-filtered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #888;
+  padding: 1rem;
+  background: #252525;
+  border-radius: 4px;
+  border: 1px dashed #444;
+}
+
+.choice-condition-badge {
+  margin-left: auto;
+  color: #888;
+}
+
+.dialogue-preview-container .dialogue-preview {
+  flex: 1;
+}
+
+/* Quest Flow Modal */
+.quest-flow-modal {
+  background: #1e1e1e;
+  border: 1px solid #3d3d3d;
+  border-radius: 8px;
+}
+
+.quest-flow-body {
+  position: relative;
+  background: #252525;
+}
+
+.quest-graph-container {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  overflow: auto;
+}
+
+.quest-graph-legend {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(30, 30, 30, 0.95);
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #3d3d3d;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  color: #aaa;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.legend-arrow {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid #3d3d3d;
+}
+
+.quest-graph-edges {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.quest-graph-nodes {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.quest-node {
+  position: absolute;
+  width: 160px;
+  background: #2d2d2d;
+  border: 2px solid #3d3d3d;
+  border-radius: 6px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.quest-node:hover {
+  transform: scale(1.05);
+  z-index: 5;
+}
+
+.quest-type-main {
+  border-color: #4a9eff;
+}
+
+.quest-type-main::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #4a9eff;
+  border-radius: 4px 4px 0 0;
+}
+
+.quest-type-side {
+  border-color: #4aff9e;
+}
+
+.quest-type-side::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #4aff9e;
+  border-radius: 4px 4px 0 0;
+}
+
+.quest-type-tutorial {
+  border-color: #ff9e4a;
+}
+
+.quest-type-tutorial::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #ff9e4a;
+  border-radius: 4px 4px 0 0;
+}
+
+.quest-node-act {
+  font-size: 9px;
+  text-transform: uppercase;
+  color: #888;
+  margin-bottom: 2px;
+}
+
+.quest-node-name {
+  font-weight: 600;
+  color: #fff;
+  font-size: 12px;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quest-node-id {
+  font-size: 10px;
+  color: #666;
+  font-family: monospace;
 }
 
 /* ============================================================================

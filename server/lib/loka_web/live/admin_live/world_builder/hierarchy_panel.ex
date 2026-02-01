@@ -17,26 +17,30 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
   attr :npcs, :list, default: []
   attr :items, :list, default: []
   attr :templates, :list, required: true
+  attr :zones, :list, default: []
   attr :selected_room, :string, default: nil
   attr :selected_entity, :map, default: nil
   attr :template_search, :string, default: ""
+  attr :zone_filter, :string, default: nil
+  attr :tag_filter, :string, default: nil
   attr :active_tab, :atom, default: :rooms
   attr :collapsed, :boolean, default: false
   attr :class, :string, default: ""
 
   def hierarchy_panel(assigns) do
-    # Filter entities based on search query
+    # Filter entities based on search query, zone, and tags
     search = String.downcase(assigns.template_search || "")
+    zone_filter = assigns.zone_filter
+    tag_filter = assigns.tag_filter
 
     filtered_rooms =
-      if search == "" do
-        assigns.rooms
-      else
-        Enum.filter(assigns.rooms, fn room ->
-          String.contains?(String.downcase(room.name || ""), search) ||
-            String.contains?(String.downcase(room.key || ""), search)
-        end)
-      end
+      assigns.rooms
+      |> filter_by_text(search, fn room ->
+        String.contains?(String.downcase(room.name || ""), search) ||
+          String.contains?(String.downcase(room.key || ""), search)
+      end)
+      |> filter_by_zone(zone_filter)
+      |> filter_by_tags(tag_filter)
 
     filtered_npcs =
       if search == "" do
@@ -187,14 +191,46 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
         
     <!-- Search bar -->
         <form phx-change="search_entities" class="hierarchy-search">
-          <.icon name="hero-magnifying-glass" class="size-3" />
-          <input
-            type="text"
-            placeholder={search_placeholder(@active_tab)}
-            phx-debounce="100"
-            name="query"
-            value={@template_search}
-          />
+          <div class="search-row" style="display: flex; gap: 4px; align-items: center;">
+            <.icon name="hero-magnifying-glass" class="size-3" />
+            <input
+              type="text"
+              placeholder={search_placeholder(@active_tab)}
+              phx-debounce="100"
+              name="query"
+              value={@template_search}
+              style="flex: 1;"
+            />
+          </div>
+
+          <%= if @active_tab == :rooms and length(@zones) > 0 do %>
+            <div class="filter-row" style="margin-top: 4px;">
+              <select
+                name="zone_filter"
+                style="width: 100%; padding: 4px 8px; font-size: 11px; background: #1a1a2e; border: 1px solid #333; border-radius: 4px; color: #ccc;"
+              >
+                <option value="" selected={@zone_filter == nil or @zone_filter == ""}>
+                  All Zones
+                </option>
+                <%= for zone <- @zones do %>
+                  <option value={zone.key} selected={@zone_filter == zone.key}>
+                    {zone.name || zone.key}
+                  </option>
+                <% end %>
+              </select>
+            </div>
+          <% end %>
+
+          <div class="filter-row" style="margin-top: 4px;">
+            <input
+              type="text"
+              name="tag_filter"
+              placeholder="Filter by tags (comma-separated)..."
+              phx-debounce="300"
+              value={@tag_filter || ""}
+              style="width: 100%; padding: 4px 8px; font-size: 11px; background: #1a1a2e; border: 1px solid #333; border-radius: 4px; color: #ccc;"
+            />
+          </div>
         </form>
 
         <div class="panel-content">
@@ -323,4 +359,41 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
   defp search_placeholder(:items), do: "Search items..."
   defp search_placeholder(:templates), do: "Search templates..."
   defp search_placeholder(_), do: "Search..."
+
+  # Filter helpers
+  defp filter_by_text(list, "", _filter_fn), do: list
+
+  defp filter_by_text(list, _search, filter_fn) do
+    Enum.filter(list, filter_fn)
+  end
+
+  defp filter_by_zone(rooms, nil), do: rooms
+  defp filter_by_zone(rooms, ""), do: rooms
+
+  defp filter_by_zone(rooms, zone) do
+    Enum.filter(rooms, fn room ->
+      room_zone = room[:zone] || room.zone
+      room_zone == zone
+    end)
+  end
+
+  defp filter_by_tags(entities, nil), do: entities
+  defp filter_by_tags(entities, ""), do: entities
+
+  defp filter_by_tags(entities, tag_filter) do
+    tags =
+      tag_filter
+      |> String.split(",")
+      |> Enum.map(&String.trim/1)
+      |> Enum.reject(&(&1 == ""))
+
+    if tags == [] do
+      entities
+    else
+      Enum.filter(entities, fn entity ->
+        entity_tags = entity[:tags] || entity.tags || []
+        Enum.any?(tags, fn t -> t in entity_tags end)
+      end)
+    end
+  end
 end

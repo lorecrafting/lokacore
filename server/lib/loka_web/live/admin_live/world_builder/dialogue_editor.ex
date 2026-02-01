@@ -26,6 +26,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
   attr :npc_key, :string, default: nil
   attr :selected_node, :string, default: nil
   attr :show_preview, :boolean, default: false
+  attr :mock_state, :map, default: %{}
   attr :on_close, :any, default: nil
 
   def dialogue_editor(assigns) do
@@ -117,6 +118,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
             <.dialogue_preview
               dialogue_tree={@dialogue_tree}
               current_node={@selected_node || "start"}
+              mock_state={@mock_state}
             />
           <% else %>
             <%= if @selected_node && @dialogue_tree[@selected_node] do %>
@@ -420,64 +422,287 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
     """
   end
 
-  # Preview component
+  # Preview component with mock state testing
   attr :dialogue_tree, :map, required: true
   attr :current_node, :string, required: true
+  attr :mock_state, :map, default: %{}
 
   defp dialogue_preview(assigns) do
     node = Map.get(assigns.dialogue_tree || %{}, assigns.current_node)
-    assigns = assign(assigns, :node, node)
+    mock_state = assigns.mock_state || %{}
+
+    # Filter choices based on mock state conditions
+    visible_choices =
+      if node do
+        (node["choices"] || [])
+        |> Enum.with_index()
+        |> Enum.filter(fn {choice, _idx} ->
+          evaluate_condition(choice, mock_state)
+        end)
+      else
+        []
+      end
+
+    assigns =
+      assigns
+      |> assign(:node, node)
+      |> assign(:visible_choices, visible_choices)
 
     ~H"""
-    <div class="dialogue-preview">
-      <div class="panel-section-header">
-        <span>Preview</span>
-        <button
-          type="button"
-          class="btn btn-sm"
-          phx-click="dialogue_preview_reset"
-          title="Reset to start"
-        >
-          <.icon name="hero-arrow-path" class="size-3" /> Reset
-        </button>
+    <div class="dialogue-preview-container">
+      <!-- Mock State Panel -->
+      <div class="mock-state-panel">
+        <div class="panel-section-header">
+          <span>Test State</span>
+          <button
+            type="button"
+            class="btn btn-sm"
+            phx-click="dialogue_mock_reset"
+            title="Clear all mock state"
+          >
+            <.icon name="hero-trash" class="size-3" />
+          </button>
+        </div>
+
+        <div class="mock-state-section">
+          <label>Active Quests</label>
+          <div class="mock-tags">
+            <%= for quest <- Map.get(@mock_state, :active_quests, []) do %>
+              <span class="mock-tag">
+                {quest}
+                <button
+                  type="button"
+                  phx-click="dialogue_mock_remove"
+                  phx-value-type="active_quests"
+                  phx-value-value={quest}
+                >
+                  &times;
+                </button>
+              </span>
+            <% end %>
+          </div>
+          <div class="mock-add-row">
+            <input
+              type="text"
+              placeholder="quest_key"
+              id="mock-active-quest"
+              phx-keydown="dialogue_mock_add_keydown"
+              phx-value-type="active_quests"
+            />
+            <button
+              type="button"
+              phx-click="dialogue_mock_add"
+              phx-value-type="active_quests"
+            >
+              Add
+            </button>
+          </div>
+        </div>
+
+        <div class="mock-state-section">
+          <label>Completed Quests</label>
+          <div class="mock-tags">
+            <%= for quest <- Map.get(@mock_state, :completed_quests, []) do %>
+              <span class="mock-tag mock-tag-completed">
+                {quest}
+                <button
+                  type="button"
+                  phx-click="dialogue_mock_remove"
+                  phx-value-type="completed_quests"
+                  phx-value-value={quest}
+                >
+                  &times;
+                </button>
+              </span>
+            <% end %>
+          </div>
+          <div class="mock-add-row">
+            <input
+              type="text"
+              placeholder="quest_key"
+              id="mock-completed-quest"
+              phx-keydown="dialogue_mock_add_keydown"
+              phx-value-type="completed_quests"
+            />
+            <button
+              type="button"
+              phx-click="dialogue_mock_add"
+              phx-value-type="completed_quests"
+            >
+              Add
+            </button>
+          </div>
+        </div>
+
+        <div class="mock-state-section">
+          <label>Inventory Items</label>
+          <div class="mock-tags">
+            <%= for item <- Map.get(@mock_state, :items, []) do %>
+              <span class="mock-tag mock-tag-item">
+                {item}
+                <button
+                  type="button"
+                  phx-click="dialogue_mock_remove"
+                  phx-value-type="items"
+                  phx-value-value={item}
+                >
+                  &times;
+                </button>
+              </span>
+            <% end %>
+          </div>
+          <div class="mock-add-row">
+            <input
+              type="text"
+              placeholder="item_key"
+              id="mock-item"
+              phx-keydown="dialogue_mock_add_keydown"
+              phx-value-type="items"
+            />
+            <button type="button" phx-click="dialogue_mock_add" phx-value-type="items">
+              Add
+            </button>
+          </div>
+        </div>
+
+        <div class="mock-state-section">
+          <label>Flags</label>
+          <div class="mock-tags">
+            <%= for flag <- Map.get(@mock_state, :flags, []) do %>
+              <span class="mock-tag mock-tag-flag">
+                {flag}
+                <button
+                  type="button"
+                  phx-click="dialogue_mock_remove"
+                  phx-value-type="flags"
+                  phx-value-value={flag}
+                >
+                  &times;
+                </button>
+              </span>
+            <% end %>
+          </div>
+          <div class="mock-add-row">
+            <input
+              type="text"
+              placeholder="flag_name"
+              id="mock-flag"
+              phx-keydown="dialogue_mock_add_keydown"
+              phx-value-type="flags"
+            />
+            <button type="button" phx-click="dialogue_mock_add" phx-value-type="flags">
+              Add
+            </button>
+          </div>
+        </div>
       </div>
-
-      <%= if @node do %>
-        <div class="preview-content">
-          <div class="preview-speaker">
-            {@node["speaker"] || "NPC"}
-          </div>
-          <div class="preview-text">
-            {@node["text"] || "..."}
-          </div>
-
-          <div class="preview-choices">
-            <%= for {choice, index} <- Enum.with_index(@node["choices"] || []) do %>
-              <button
-                type="button"
-                class="preview-choice"
-                phx-click="dialogue_preview_choice"
-                phx-value-index={index}
-                phx-value-next={choice["next"]}
-              >
-                {choice["text"] || "Continue"}
-              </button>
-            <% end %>
-
-            <%= if (@node["choices"] || []) == [] do %>
-              <div class="preview-end">
-                <em>End of dialogue</em>
-              </div>
-            <% end %>
-          </div>
+      
+    <!-- Preview -->
+      <div class="dialogue-preview">
+        <div class="panel-section-header">
+          <span>Preview</span>
+          <button
+            type="button"
+            class="btn btn-sm"
+            phx-click="dialogue_preview_reset"
+            title="Reset to start"
+          >
+            <.icon name="hero-arrow-path" class="size-3" /> Reset
+          </button>
         </div>
-      <% else %>
-        <div class="preview-error">
-          <p>Node "{@current_node}" not found</p>
-        </div>
-      <% end %>
+
+        <%= if @node do %>
+          <div class="preview-content">
+            <div class="preview-speaker">
+              {@node["speaker"] || "NPC"}
+            </div>
+            <div class="preview-text">
+              {@node["text"] || "..."}
+            </div>
+
+            <div class="preview-choices">
+              <%= for {choice, index} <- @visible_choices do %>
+                <button
+                  type="button"
+                  class="preview-choice"
+                  phx-click="dialogue_preview_choice"
+                  phx-value-index={index}
+                  phx-value-next={choice["next"]}
+                >
+                  {choice["text"] || "Continue"}
+                  <%= if has_condition?(choice) do %>
+                    <span class="choice-condition-badge" title="Has condition">
+                      <.icon name="hero-funnel" class="size-3" />
+                    </span>
+                  <% end %>
+                </button>
+              <% end %>
+
+              <%= if @visible_choices == [] and (@node["choices"] || []) != [] do %>
+                <div class="preview-filtered">
+                  <.icon name="hero-funnel" class="size-4" />
+                  <em>
+                    All {length(@node["choices"])} choices hidden by conditions
+                  </em>
+                </div>
+              <% end %>
+
+              <%= if (@node["choices"] || []) == [] do %>
+                <div class="preview-end">
+                  <em>End of dialogue</em>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% else %>
+          <div class="preview-error">
+            <p>Node "{@current_node}" not found</p>
+          </div>
+        <% end %>
+      </div>
     </div>
     """
+  end
+
+  # Evaluate if a choice should be visible based on its condition and mock state
+  defp evaluate_condition(choice, mock_state) do
+    show_if = Map.get(choice, "show_if", %{})
+
+    if map_size(show_if) == 0 do
+      # No condition - always show
+      true
+    else
+      active_quests = Map.get(mock_state, :active_quests, [])
+      completed_quests = Map.get(mock_state, :completed_quests, [])
+      items = Map.get(mock_state, :items, [])
+      flags = Map.get(mock_state, :flags, [])
+
+      cond do
+        Map.has_key?(show_if, "quest_active") ->
+          show_if["quest_active"] in active_quests
+
+        Map.has_key?(show_if, "quest_completed") ->
+          show_if["quest_completed"] in completed_quests
+
+        Map.has_key?(show_if, "quest_not_active") ->
+          show_if["quest_not_active"] not in active_quests
+
+        Map.has_key?(show_if, "has_item") ->
+          show_if["has_item"] in items
+
+        Map.has_key?(show_if, "has_flag") ->
+          show_if["has_flag"] in flags
+
+        true ->
+          # Unknown condition type - show by default
+          true
+      end
+    end
+  end
+
+  defp has_condition?(choice) do
+    show_if = Map.get(choice, "show_if", %{})
+    map_size(show_if) > 0
   end
 
   # Helper functions

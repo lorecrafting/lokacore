@@ -71,6 +71,15 @@ export default class Canvas2DViewport {
     this.currentZLevel = 0
     this.showGhostLayers = true
 
+    // Zone visualization
+    this.zoneColors = {}
+    this.roomZoneMap = {}
+    this.showZoneColors = true
+
+    // NPC path visualization
+    this.npcPaths = {}
+    this.showNPCPaths = true
+
     // Interaction state
     this.isDragging = false
     this.dragStart = { x: 0, y: 0 }
@@ -171,6 +180,31 @@ export default class Canvas2DViewport {
 
   setZLevel(level) {
     this.currentZLevel = level
+    this.render()
+  }
+
+  setZoneColors(colors) {
+    this.zoneColors = colors || {}
+    this.render()
+  }
+
+  setRoomZoneMap(map) {
+    this.roomZoneMap = map || {}
+    this.render()
+  }
+
+  setShowZoneColors(show) {
+    this.showZoneColors = show
+    this.render()
+  }
+
+  setNPCPaths(paths) {
+    this.npcPaths = paths || {}
+    this.render()
+  }
+
+  setShowNPCPaths(show) {
+    this.showNPCPaths = show
     this.render()
   }
 
@@ -338,6 +372,11 @@ export default class Canvas2DViewport {
       this.drawRoomsAtZLevel(ctx, this.currentZLevel + 1, 0.2)
     }
 
+    // Draw NPC patrol paths (before rooms so they're under)
+    if (this.showNPCPaths) {
+      this.drawNPCPaths(ctx)
+    }
+
     // Draw exits for current Z-level
     this.drawExits(ctx)
 
@@ -346,6 +385,110 @@ export default class Canvas2DViewport {
 
     // Restore context
     ctx.restore()
+  }
+
+  drawNPCPaths(ctx) {
+    const pathColors = [
+      '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4',
+      '#ffeaa7', '#dfe6e9', '#fd79a8', '#a29bfe'
+    ]
+    let colorIndex = 0
+
+    for (const [npcKey, pathInfo] of Object.entries(this.npcPaths)) {
+      if (!pathInfo.patrol || !pathInfo.patrol.route) continue
+
+      const route = pathInfo.patrol.route
+      if (route.length < 2) continue
+
+      // Get color for this NPC's path
+      const color = pathColors[colorIndex % pathColors.length]
+      colorIndex++
+
+      // Draw the patrol path as a curved line connecting rooms
+      ctx.save()
+      ctx.strokeStyle = color
+      ctx.lineWidth = 3 / this.camera.zoom
+      ctx.setLineDash([8 / this.camera.zoom, 4 / this.camera.zoom])
+      ctx.globalAlpha = 0.7
+
+      // Build path through rooms
+      ctx.beginPath()
+      let started = false
+
+      for (let i = 0; i < route.length; i++) {
+        const roomKey = route[i]
+        const room = this.roomsByKey.get(roomKey)
+        if (!room) continue
+
+        // Only draw rooms at current Z-level
+        if ((room.z || 0) !== this.currentZLevel) continue
+
+        const x = (room.x || 0) * this.gridSize
+        const y = (room.y || 0) * this.gridSize
+
+        if (!started) {
+          ctx.moveTo(x, y)
+          started = true
+        } else {
+          ctx.lineTo(x, y)
+        }
+      }
+
+      // If loop mode, connect back to start
+      if (pathInfo.patrol.loop !== false && route.length >= 2) {
+        const startRoom = this.roomsByKey.get(route[0])
+        if (startRoom && (startRoom.z || 0) === this.currentZLevel) {
+          const x = (startRoom.x || 0) * this.gridSize
+          const y = (startRoom.y || 0) * this.gridSize
+          ctx.lineTo(x, y)
+        }
+      }
+
+      ctx.stroke()
+
+      // Draw direction arrows
+      this.drawPathArrows(ctx, route, color)
+
+      ctx.restore()
+    }
+  }
+
+  drawPathArrows(ctx, route, color) {
+    ctx.fillStyle = color
+    ctx.globalAlpha = 0.8
+
+    for (let i = 0; i < route.length - 1; i++) {
+      const fromRoom = this.roomsByKey.get(route[i])
+      const toRoom = this.roomsByKey.get(route[i + 1])
+
+      if (!fromRoom || !toRoom) continue
+      if ((fromRoom.z || 0) !== this.currentZLevel) continue
+      if ((toRoom.z || 0) !== this.currentZLevel) continue
+
+      const fromX = (fromRoom.x || 0) * this.gridSize
+      const fromY = (fromRoom.y || 0) * this.gridSize
+      const toX = (toRoom.x || 0) * this.gridSize
+      const toY = (toRoom.y || 0) * this.gridSize
+
+      // Draw arrow at midpoint
+      const midX = (fromX + toX) / 2
+      const midY = (fromY + toY) / 2
+      const angle = Math.atan2(toY - fromY, toX - fromX)
+      const arrowSize = 8 / this.camera.zoom
+
+      ctx.save()
+      ctx.translate(midX, midY)
+      ctx.rotate(angle)
+
+      ctx.beginPath()
+      ctx.moveTo(arrowSize, 0)
+      ctx.lineTo(-arrowSize / 2, -arrowSize / 2)
+      ctx.lineTo(-arrowSize / 2, arrowSize / 2)
+      ctx.closePath()
+      ctx.fill()
+
+      ctx.restore()
+    }
   }
 
   drawGrid(ctx) {
@@ -429,6 +572,12 @@ export default class Canvas2DViewport {
       fillColor = ROOM_COLORS.warning
       borderColor = '#ffaa00'
       borderWidth = 2
+    } else if (this.showZoneColors) {
+      // Use zone color if available
+      const zoneKey = this.roomZoneMap[room.key]
+      if (zoneKey && this.zoneColors[zoneKey]) {
+        fillColor = this.zoneColors[zoneKey]
+      }
     }
 
     ctx.globalAlpha = opacity

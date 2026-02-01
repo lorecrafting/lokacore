@@ -400,6 +400,7 @@ const Hooks = {
       // Initialize state
       this.rooms = []
       this.selectedRoom = null
+      this.selectedEntity = null
       this.selectedKeys = []
       this.validation = {}
 
@@ -418,7 +419,15 @@ const Hooks = {
       // Listen for room selection events from LiveView
       this.handleEvent('select_room', ({ key }) => {
         this.selectedRoom = key
+        this.selectedEntity = null  // Clear entity selection when room selected
         this.viewport.setSelectedRoom(key)
+      })
+
+      // Listen for entity selection events (NPC/Item)
+      this.handleEvent('select_entity', ({ type, key }) => {
+        this.selectedEntity = { type, key }
+        this.selectedRoom = null  // Clear room selection when entity selected
+        this.viewport.setSelectedRoom(null)
       })
 
       // Listen for Z-level changes
@@ -427,16 +436,48 @@ const Hooks = {
       })
 
       // Listen for init event with rooms and validation data
-      this.handleEvent('init_world_builder', ({ rooms, validation }) => {
+      this.handleEvent('init_world_builder', ({ rooms, validation, zone_colors, room_zone_map, show_zone_colors, npc_paths, show_npc_paths }) => {
         console.log('[WorldBuilder] init_world_builder received:', rooms?.length, 'rooms')
         this.rooms = rooms
         this.validation = validation || {}
         this.viewport.setRooms(rooms)
         this.viewport.setValidation(validation)
+        // Set zone visualization data
+        if (zone_colors) {
+          this.viewport.setZoneColors(zone_colors)
+        }
+        if (room_zone_map) {
+          this.viewport.setRoomZoneMap(room_zone_map)
+        }
+        this.viewport.setShowZoneColors(show_zone_colors !== false)
+        // Set NPC paths visualization data
+        if (npc_paths) {
+          this.viewport.setNPCPaths(npc_paths)
+        }
+        this.viewport.setShowNPCPaths(show_npc_paths !== false)
         // Auto-fit to show all rooms on init
         this.viewport.fitToRooms()
         // Update Z-level tabs
         this.updateZLevelTabs()
+      })
+
+      // Listen for zone colors toggle
+      this.handleEvent('zone_colors_changed', ({ enabled, zone_colors, room_zone_map }) => {
+        this.viewport.setShowZoneColors(enabled)
+        if (zone_colors) {
+          this.viewport.setZoneColors(zone_colors)
+        }
+        if (room_zone_map) {
+          this.viewport.setRoomZoneMap(room_zone_map)
+        }
+      })
+
+      // Listen for NPC paths toggle
+      this.handleEvent('npc_paths_changed', ({ enabled, npc_paths }) => {
+        this.viewport.setShowNPCPaths(enabled)
+        if (npc_paths) {
+          this.viewport.setNPCPaths(npc_paths)
+        }
       })
 
       // Listen for rooms updated event (includes validation)
@@ -563,10 +604,17 @@ const Hooks = {
     },
 
     handleKeydown(e) {
-      // Skip if typing in an input/textarea
+      // Skip if typing in an input/textarea or select
       const target = e.target
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable) {
         if (e.key === 'Escape') target.blur()
+        return
+      }
+
+      // Skip most shortcuts if a modal is open (except Escape to close it)
+      const modalOpen = document.querySelector('.modal-overlay')
+      if (modalOpen && e.key !== 'Escape') {
+        // Only allow Escape key when modal is open
         return
       }
 
@@ -609,8 +657,20 @@ const Hooks = {
 
       // Ctrl+D / Cmd+D: Duplicate selected
       if (modKey && e.key.toLowerCase() === 'd') {
-        if (this.selectedRoom || (this.selectedKeys && this.selectedKeys.length > 0)) {
-          e.preventDefault()
+        e.preventDefault()
+        // Check for selected entity (NPC/Item) first
+        if (this.selectedEntity && this.selectedEntity.type && this.selectedEntity.key) {
+          this.pushEvent('duplicate_entity', {
+            type: this.selectedEntity.type,
+            key: this.selectedEntity.key
+          })
+        }
+        // Then check for single selected room
+        else if (this.selectedRoom && (!this.selectedKeys || this.selectedKeys.length <= 1)) {
+          this.pushEvent('duplicate_room', { key: this.selectedRoom })
+        }
+        // Finally check for batch selection
+        else if (this.selectedKeys && this.selectedKeys.length > 0) {
           this.pushEvent('batch_clone', { dx: 5, dy: 5, dz: 0 })
         }
         return
@@ -629,11 +689,13 @@ const Hooks = {
       // Escape: Deselect all
       if (e.key === 'Escape') {
         this.selectedRoom = null
+        this.selectedEntity = null
         this.selectedKeys = []
         this.viewport.setSelectedRoom(null)
         this.viewport.setSelectedKeys([])
         this.pushEvent('batch_select', { keys: [] })
         this.pushEvent('select_room', { key: null })
+        this.pushEvent('select_entity', { type: null, key: null })
         return
       }
 
@@ -696,6 +758,27 @@ const Hooks = {
           this.viewport.setZLevel(zLevels[currentIdx - 1])
           this.updateZLevelTabs()
         }
+        return
+      }
+
+      // Z: Toggle zone colors
+      if (e.key.toLowerCase() === 'z' && !modKey) {
+        e.preventDefault()
+        this.pushEvent('toggle_zone_colors', {})
+        return
+      }
+
+      // P: Toggle NPC paths
+      if (e.key.toLowerCase() === 'p' && !modKey) {
+        e.preventDefault()
+        this.pushEvent('toggle_npc_paths', {})
+        return
+      }
+
+      // ?: Show keyboard shortcuts help
+      if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+        e.preventDefault()
+        this.pushEvent('show_keyboard_help', {})
         return
       }
     },
@@ -1430,6 +1513,88 @@ const Hooks = {
     destroyed() {
       if (this.root) {
         this.root.unmount()
+      }
+    }
+  },
+
+  // Console Output hook for export functionality
+  ConsoleOutput: {
+    mounted() {
+      this.handleEvent("download_text", ({content, filename}) => {
+        const blob = new Blob([content], {type: 'text/plain'})
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = filename
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      })
+    }
+  },
+
+  // Quest Flow Graph - draws edges between quest nodes
+  QuestFlowGraph: {
+    mounted() {
+      this.drawEdges()
+    },
+
+    updated() {
+      this.drawEdges()
+    },
+
+    drawEdges() {
+      try {
+        const nodes = JSON.parse(this.el.dataset.nodes || '[]')
+        const edges = JSON.parse(this.el.dataset.edges || '[]')
+        const svg = this.el.querySelector('.quest-graph-edges')
+        if (!svg) return
+
+        // Clear existing edges
+        svg.innerHTML = ''
+
+        // Create node position map
+        const nodePositions = {}
+        nodes.forEach(node => {
+          nodePositions[node.id] = {
+            x: node.x + 80,  // Center of node
+            y: node.y + 30   // Center of node
+          }
+        })
+
+        // Draw edges as arrows
+        edges.forEach(edge => {
+          const from = nodePositions[edge.from]
+          const to = nodePositions[edge.to]
+          if (!from || !to) return
+
+          // Create arrow line
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+          line.setAttribute('x1', from.x)
+          line.setAttribute('y1', from.y)
+          line.setAttribute('x2', to.x)
+          line.setAttribute('y2', to.y)
+          line.setAttribute('stroke', '#666')
+          line.setAttribute('stroke-width', '2')
+          line.setAttribute('marker-end', 'url(#arrowhead)')
+          svg.appendChild(line)
+        })
+
+        // Add arrowhead marker if not already present
+        if (!svg.querySelector('#arrowhead')) {
+          const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs')
+          defs.innerHTML = `
+            <marker id="arrowhead" markerWidth="10" markerHeight="7"
+                    refX="9" refY="3.5" orient="auto">
+              <polygon points="0 0, 10 3.5, 0 7" fill="#666" />
+            </marker>
+          `
+          svg.appendChild(defs)
+        }
+
+      } catch (e) {
+        console.error('[QuestFlowGraph] Error drawing edges:', e)
       }
     }
   }

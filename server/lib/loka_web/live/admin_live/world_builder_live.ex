@@ -29,7 +29,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     ToolExecutor,
     ScriptManager,
     ScriptTemplates,
-    GitManager
+    GitManager,
+    NPCPathExtractor
   }
 
   alias Loka.Content.Zone
@@ -50,7 +51,9 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     ValidationPanel,
     ConfirmationModal,
     DialogueEventHandler,
-    EntityEventHandler
+    EntityEventHandler,
+    KeyboardHelpModal,
+    QuestFlowModal
   }
 
   alias Loka.Admin.Audit
@@ -74,6 +77,11 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     # Load zones and build room -> spawns mapping
     zones = Zone.all()
     room_spawns = build_room_spawns_map(zones)
+    zone_colors = build_zone_color_map(zones)
+    room_zone_map = build_room_zone_map(zones)
+
+    # Extract NPC patrol paths for visualization
+    npc_paths = NPCPathExtractor.extract_paths(npcs)
 
     # Run validation on rooms
     validation = ValidationManager.validation_summary(rooms)
@@ -85,6 +93,9 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:selected_keys, [])
      |> assign(:templates, templates)
      |> assign(:template_search, "")
+     |> assign(:zone_filter, nil)
+     |> assign(:tag_filter, nil)
+     |> assign(:zones, zones)
      |> assign(:active_tab, :templates)
      |> assign(:npcs, npcs)
      |> assign(:items, items)
@@ -92,6 +103,11 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:quests, quests)
      |> assign(:cutscenes, cutscenes)
      |> assign(:zones, zones)
+     |> assign(:zone_colors, zone_colors)
+     |> assign(:room_zone_map, room_zone_map)
+     |> assign(:show_zone_colors, true)
+     |> assign(:npc_paths, npc_paths)
+     |> assign(:show_npc_paths, true)
      |> assign(:room_spawns, room_spawns)
      |> assign(:show_npc_editor, false)
      |> assign(:show_item_editor, false)
@@ -119,11 +135,21 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:editing_dialogue_tree, %{})
      |> assign(:dialogue_selected_node, nil)
      |> assign(:dialogue_preview_mode, false)
+     |> assign(:dialogue_mock_state, %{
+       active_quests: [],
+       completed_quests: [],
+       items: [],
+       flags: []
+     })
      |> assign(:console_messages, [])
+     |> assign(:console_filter, "")
+     |> assign(:level_filter, "all")
      |> assign(:show_create_modal, false)
      |> assign(:validation, validation)
      |> assign(:show_validation_panel, false)
      |> assign(:show_settings, false)
+     |> assign(:show_keyboard_help, false)
+     |> assign(:show_quest_flow, false)
      |> assign(:api_key_statuses, %{
        anthropic: :unconfigured,
        openai: :unconfigured,
@@ -151,14 +177,26 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:confirm_modal, nil)
      # Initialize audit context for tracking admin actions
      |> Audit.init_context(socket.assigns[:current_player])
-     |> push_event("init_world_builder", %{rooms: rooms, validation: validation.results})}
+     |> push_event("init_world_builder", %{
+       rooms: rooms,
+       validation: validation.results,
+       zone_colors: zone_colors,
+       room_zone_map: room_zone_map,
+       show_zone_colors: true,
+       npc_paths: npc_paths,
+       show_npc_paths: true
+     })}
   end
 
   @impl true
   def render(assigns) do
     ~H"""
     <div class="world-builder" phx-window-keydown="keyboard_shortcut">
-      <Toolbar.toolbar undo_state={@undo_state} />
+      <Toolbar.toolbar
+        undo_state={@undo_state}
+        show_zone_colors={@show_zone_colors}
+        show_npc_paths={@show_npc_paths}
+      />
       
     <!-- Main 4-panel layout with resize handles -->
       <div
@@ -172,9 +210,12 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
           npcs={@npcs}
           items={@items}
           templates={@templates}
+          zones={@zones}
           selected_room={@selected_room}
           selected_entity={@selected_entity}
           template_search={@template_search}
+          zone_filter={@zone_filter}
+          tag_filter={@tag_filter}
           active_tab={@active_tab}
           collapsed={@collapsed_panels.hierarchy}
         />
@@ -189,7 +230,12 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
         <ViewportContainer.viewport_container
           rooms={@rooms}
           selected_room={@selected_room}
+          zones={@zones}
+          zone_colors={@zone_colors}
+          show_zone_colors={@show_zone_colors}
           console_messages={@console_messages}
+          console_filter={@console_filter}
+          level_filter={@level_filter}
           console_collapsed={@collapsed_panels.console}
           console_height={@panel_sizes.console}
         />
@@ -229,7 +275,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
       <%= if @show_create_modal do %>
         <div class="modal-overlay" phx-click="close_create_modal">
-          <div class="modal-content" phx-click-away="close_create_modal">
+          <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header">
               <h3>Create New Room</h3>
               <button phx-click="close_create_modal" class="modal-close">&times;</button>
@@ -292,7 +338,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
       <%!-- NPC Editor Modal --%>
       <%= if @show_npc_editor do %>
         <div class="modal-overlay" phx-click="close_npc_editor">
-          <div class="modal-content" phx-click-away="close_npc_editor">
+          <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header">
               <h3>Create New NPC</h3>
               <button phx-click="close_npc_editor" class="modal-close">&times;</button>
@@ -351,7 +397,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
       <%!-- Item Editor Modal --%>
       <%= if @show_item_editor do %>
         <div class="modal-overlay" phx-click="close_item_editor">
-          <div class="modal-content" phx-click-away="close_item_editor">
+          <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header">
               <h3>Create New Item</h3>
               <button phx-click="close_item_editor" class="modal-close">&times;</button>
@@ -418,7 +464,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
         <div class="modal-overlay" phx-click="close_quest_editor">
           <div
             class="modal-content modal-fullscreen"
-            phx-click-away="close_quest_editor"
+            onclick="event.stopPropagation()"
             style="width: 95vw; height: 90vh; max-width: none;"
           >
             <div class="modal-header">
@@ -443,7 +489,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
         <div class="modal-overlay" phx-click="close_cutscene_editor">
           <div
             class="modal-content modal-fullscreen"
-            phx-click-away="close_cutscene_editor"
+            onclick="event.stopPropagation()"
             style="width: 95vw; height: 90vh; max-width: none;"
           >
             <div class="modal-header">
@@ -468,7 +514,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
         <div class="modal-overlay" phx-click="close_dialogue_editor">
           <div
             class="modal-content modal-fullscreen"
-            phx-click-away="close_dialogue_editor"
+            onclick="event.stopPropagation()"
             style="width: 95vw; height: 90vh; max-width: none;"
           >
             <div class="modal-header">
@@ -500,6 +546,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
                 npc_key={@editing_dialogue_npc}
                 selected_node={@dialogue_selected_node}
                 show_preview={@dialogue_preview_mode}
+                mock_state={@dialogue_mock_state}
               />
             </div>
           </div>
@@ -550,6 +597,12 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
         selected_model={@selected_model}
       />
 
+      <%!-- Keyboard Help Modal --%>
+      <KeyboardHelpModal.keyboard_help_modal show={@show_keyboard_help} />
+
+      <%!-- Quest Flow Modal --%>
+      <QuestFlowModal.quest_flow_modal show={@show_quest_flow} quests={@quests} />
+
       <%!-- Validation Panel --%>
       <%= if @show_validation_panel do %>
         <ValidationPanel.validation_panel validation_results={@validation} />
@@ -577,6 +630,26 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   @impl true
   def handle_event("close_settings", _params, socket) do
     {:noreply, assign(socket, :show_settings, false)}
+  end
+
+  @impl true
+  def handle_event("show_keyboard_help", _params, socket) do
+    {:noreply, assign(socket, :show_keyboard_help, true)}
+  end
+
+  @impl true
+  def handle_event("close_keyboard_help", _params, socket) do
+    {:noreply, assign(socket, :show_keyboard_help, false)}
+  end
+
+  @impl true
+  def handle_event("show_quest_flow", _params, socket) do
+    {:noreply, assign(socket, :show_quest_flow, true)}
+  end
+
+  @impl true
+  def handle_event("close_quest_flow", _params, socket) do
+    {:noreply, assign(socket, :show_quest_flow, false)}
   end
 
   # =============================================================================
@@ -696,6 +769,35 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     end
   end
 
+  # Zone visualization toggle
+  @impl true
+  def handle_event("toggle_zone_colors", _params, socket) do
+    new_value = !socket.assigns.show_zone_colors
+
+    {:noreply,
+     socket
+     |> assign(:show_zone_colors, new_value)
+     |> push_event("zone_colors_changed", %{
+       enabled: new_value,
+       zone_colors: socket.assigns.zone_colors,
+       room_zone_map: socket.assigns.room_zone_map
+     })}
+  end
+
+  # NPC paths visualization toggle
+  @impl true
+  def handle_event("toggle_npc_paths", _params, socket) do
+    new_value = !socket.assigns.show_npc_paths
+
+    {:noreply,
+     socket
+     |> assign(:show_npc_paths, new_value)
+     |> push_event("npc_paths_changed", %{
+       enabled: new_value,
+       npc_paths: socket.assigns.npc_paths
+     })}
+  end
+
   # Camera view preset (Perspective, Top, Front, Side)
   @impl true
   def handle_event("set_camera_view", %{"view" => view}, socket)
@@ -769,14 +871,23 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   end
 
   def handle_event("select_entity", %{"type" => type, "key" => key}, socket) do
-    type_atom = String.to_existing_atom(type)
+    type_atom =
+      case type do
+        nil -> nil
+        "" -> nil
+        t -> String.to_existing_atom(t)
+      end
 
     {:noreply,
      socket
-     |> assign(:selected_entity, %{type: type_atom, key: key})
+     |> assign(:selected_entity, if(type_atom, do: %{type: type_atom, key: key}, else: nil))
      |> assign(:selected_room, nil)
      |> assign(:selected_keys, [])
-     |> log_console(:info, "Selected #{type}: #{key}")}
+     |> log_console(
+       :info,
+       if(type_atom, do: "Selected #{type}: #{key}", else: "Deselected entity")
+     )
+     |> push_event("select_entity", %{type: type, key: key})}
   end
 
   def handle_event("switch_hierarchy_tab", %{"tab" => tab}, socket) do
@@ -1087,6 +1198,46 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     end
   end
 
+  def handle_event("duplicate_room", %{"key" => key}, socket) do
+    case Loka.WorldBuilder.BatchOperations.duplicate_room(key) do
+      {:ok, new_room} ->
+        {:noreply,
+         socket
+         |> assign(:rooms, RoomManager.list_rooms())
+         |> assign(:selected_room, new_room.key)
+         |> log_console(:info, "Duplicated room: #{key} -> #{new_room.key}")
+         |> push_event("room_created", %{room: new_room})}
+
+      {:error, reason} ->
+        {:noreply,
+         log_console(socket, :error, "Failed to duplicate room: #{sanitize_error(reason, "")}")}
+    end
+  end
+
+  def handle_event("duplicate_entity", %{"type" => type, "key" => key}, socket) do
+    type_atom = String.to_existing_atom(type)
+
+    case Loka.WorldBuilder.EntityManager.duplicate_entity(type_atom, key) do
+      {:ok, new_entity} ->
+        # Refresh the appropriate entity list
+        socket =
+          case type_atom do
+            :npc -> assign(socket, :npcs, EntityManager.list_entities(:npc))
+            :item -> assign(socket, :items, EntityManager.list_entities(:item))
+            _ -> socket
+          end
+
+        {:noreply,
+         socket
+         |> assign(:selected_entity, %{type: type_atom, key: new_entity.key})
+         |> log_console(:info, "Duplicated #{type}: #{key} -> #{new_entity.key}")}
+
+      {:error, reason} ->
+        {:noreply,
+         log_console(socket, :error, "Failed to duplicate #{type}: #{sanitize_error(reason, "")}")}
+    end
+  end
+
   def handle_event(
         "save_as_template",
         %{"template_key" => template_key, "room_id" => room_id} = params,
@@ -1158,8 +1309,20 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   end
 
   # Unified search for all entity types - filtering is done in the component
-  def handle_event("search_entities", %{"query" => query}, socket) do
-    {:noreply, assign(socket, :template_search, query)}
+  def handle_event("search_entities", params, socket) do
+    query = Map.get(params, "query", socket.assigns.template_search)
+    zone_filter = Map.get(params, "zone_filter", socket.assigns.zone_filter)
+    tag_filter = Map.get(params, "tag_filter", socket.assigns.tag_filter)
+
+    # Normalize empty strings to nil
+    zone_filter = if zone_filter == "", do: nil, else: zone_filter
+    tag_filter = if tag_filter == "", do: nil, else: tag_filter
+
+    {:noreply,
+     socket
+     |> assign(:template_search, query)
+     |> assign(:zone_filter, zone_filter)
+     |> assign(:tag_filter, tag_filter)}
   end
 
   # =============================================================================
@@ -1793,6 +1956,49 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   def handle_event("dialogue_delete_choice", params, socket),
     do: DialogueEventHandler.handle_event("dialogue_delete_choice", params, socket)
 
+  # Dialogue mock state handlers for testing conditions
+  def handle_event("dialogue_mock_add", %{"type" => _type}, socket) do
+    # Input values are handled via keydown event
+    {:noreply, socket}
+  end
+
+  def handle_event(
+        "dialogue_mock_add_keydown",
+        %{"key" => "Enter", "type" => type, "value" => value},
+        socket
+      )
+      when value != "" do
+    type_atom = String.to_existing_atom(type)
+    current = Map.get(socket.assigns.dialogue_mock_state, type_atom, [])
+
+    unless value in current do
+      new_state = Map.put(socket.assigns.dialogue_mock_state, type_atom, current ++ [value])
+      {:noreply, assign(socket, :dialogue_mock_state, new_state)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_event("dialogue_mock_add_keydown", _params, socket), do: {:noreply, socket}
+
+  def handle_event("dialogue_mock_remove", %{"type" => type, "value" => value}, socket) do
+    type_atom = String.to_existing_atom(type)
+    current = Map.get(socket.assigns.dialogue_mock_state, type_atom, [])
+    new_list = List.delete(current, value)
+    new_state = Map.put(socket.assigns.dialogue_mock_state, type_atom, new_list)
+    {:noreply, assign(socket, :dialogue_mock_state, new_state)}
+  end
+
+  def handle_event("dialogue_mock_reset", _params, socket) do
+    {:noreply,
+     assign(socket, :dialogue_mock_state, %{
+       active_quests: [],
+       completed_quests: [],
+       items: [],
+       flags: []
+     })}
+  end
+
   def handle_event("validate_quest_chains", _params, socket) do
     # Run room validation first
     rooms = socket.assigns.rooms
@@ -1849,7 +2055,30 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   end
 
   def handle_event("clear_console", _params, socket) do
-    {:noreply, assign(socket, :console_messages, [])}
+    {:noreply,
+     socket
+     |> assign(:console_messages, [])
+     |> assign(:console_filter, "")
+     |> assign(:level_filter, "all")}
+  end
+
+  def handle_event("filter_console", %{"filter" => filter}, socket) do
+    {:noreply, assign(socket, :console_filter, filter)}
+  end
+
+  def handle_event("filter_console_level", %{"level" => level}, socket) do
+    {:noreply, assign(socket, :level_filter, level)}
+  end
+
+  def handle_event("export_console", _params, socket) do
+    messages = socket.assigns.console_messages
+    content = format_console_export(messages)
+    filename = "world_builder_log_#{Date.to_string(Date.utc_today())}.txt"
+
+    {:noreply,
+     socket
+     |> push_event("download_text", %{content: content, filename: filename})
+     |> log_console(:info, "Exported #{length(messages)} log entries")}
   end
 
   # =============================================================================
@@ -2139,6 +2368,22 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     assign(socket, :console_messages, socket.assigns.console_messages ++ [message])
   end
 
+  defp format_console_export(messages) do
+    header = """
+    # World Builder Console Log
+    # Exported: #{DateTime.to_string(DateTime.utc_now())}
+    # Total entries: #{length(messages)}
+
+    """
+
+    entries =
+      Enum.map_join(messages, "\n", fn msg ->
+        "[#{msg.timestamp}] [#{String.upcase(to_string(msg.level))}] #{msg.text}"
+      end)
+
+    header <> entries
+  end
+
   # Build a combined list of entities (rooms, NPCs, items) for script attachment
   defp build_entity_list(rooms, npcs, items) do
     room_entities =
@@ -2294,4 +2539,36 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   defp normalize_spawn_type(:object), do: :item
   defp normalize_spawn_type(:item), do: :item
   defp normalize_spawn_type(_), do: :unknown
+
+  # Build zone key -> color mapping for canvas visualization
+  @zone_colors [
+    "#4a9eff",
+    "#4aff9e",
+    "#ff4a9e",
+    "#ffaa4a",
+    "#9e4aff",
+    "#4affff",
+    "#ff9e4a",
+    "#9eff4a"
+  ]
+
+  defp build_zone_color_map(zones) do
+    zones
+    |> Enum.with_index()
+    |> Enum.map(fn {zone, idx} ->
+      color = Enum.at(@zone_colors, rem(idx, length(@zone_colors)))
+      {zone.key, color}
+    end)
+    |> Map.new()
+  end
+
+  # Build room_key -> zone_key mapping for canvas visualization
+  defp build_room_zone_map(zones) do
+    zones
+    |> Enum.flat_map(fn zone ->
+      rooms = Zone.rooms(zone) || []
+      Enum.map(rooms, fn room_key -> {room_key, zone.key} end)
+    end)
+    |> Map.new()
+  end
 end
