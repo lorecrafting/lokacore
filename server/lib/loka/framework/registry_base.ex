@@ -89,9 +89,21 @@ defmodule Loka.Framework.RegistryBase do
       Gets a #{unquote(item_name)} by key.
 
       Returns `{:ok, #{unquote(item_name)}}` or `{:error, :not_found}`.
+
+      Uses direct ETS lookup for O(1) concurrent reads when using the default server.
+      Falls back to GenServer.call for custom server names (useful in tests).
       """
       def get(key, server \\ __MODULE__) when is_binary(key) do
-        GenServer.call(server, {:get, key})
+        if server == __MODULE__ do
+          # Direct ETS lookup - O(1) concurrent reads
+          case :ets.lookup(@table, key) do
+            [{^key, item}] -> {:ok, item}
+            [] -> {:error, :not_found}
+          end
+        else
+          # Custom server (tests) - use GenServer.call
+          GenServer.call(server, {:get, key})
+        end
       end
 
       @doc """
@@ -109,26 +121,55 @@ defmodule Loka.Framework.RegistryBase do
 
       @doc """
       Returns all loaded #{unquote(item_name)}s.
+
+      Uses direct ETS access for concurrent reads when using the default server.
       """
       def all(server \\ __MODULE__) do
-        GenServer.call(server, :all)
+        if server == __MODULE__ do
+          # Direct ETS access
+          :ets.tab2list(@table)
+          |> Enum.map(fn {_key, item} -> item end)
+        else
+          GenServer.call(server, :all)
+        end
       end
 
       @doc """
       Returns the count of loaded #{unquote(item_name)}s.
+
+      Uses direct ETS access for concurrent reads when using the default server.
       """
       def count(server \\ __MODULE__) do
-        GenServer.call(server, :count)
+        if server == __MODULE__ do
+          :ets.info(@table, :size)
+        else
+          GenServer.call(server, :count)
+        end
       end
 
       @doc """
       Checks if a #{unquote(item_name)} exists.
+
+      Uses direct ETS lookup for O(1) concurrent reads when using the default server.
       """
       def exists?(key, server \\ __MODULE__) when is_binary(key) do
-        case get(key, server) do
-          {:ok, _} -> true
-          {:error, _} -> false
+        if server == __MODULE__ do
+          :ets.member(@table, key)
+        else
+          case get(key, server) do
+            {:ok, _} -> true
+            {:error, _} -> false
+          end
         end
+      end
+
+      @doc """
+      Registers a #{unquote(item_name)} in the registry (useful for testing).
+
+      Updates both the GenServer state and ETS table to keep them in sync.
+      """
+      def register(item, server \\ __MODULE__) do
+        GenServer.call(server, {:register, item})
       end
 
       @doc """
@@ -153,8 +194,27 @@ defmodule Loka.Framework.RegistryBase do
       def init(opts) do
         path = Keyword.get(opts, :path, @default_path)
         load_on_start = Keyword.get(opts, :load_on_start, true)
+        server_name = Keyword.get(opts, :name, __MODULE__)
 
-        table = :ets.new(@table, [:set, :protected, read_concurrency: true])
+        # Create ETS table for data storage
+        # - Default server (__MODULE__): Use named table for direct O(1) reads from client API
+        # - Custom server (tests): Use anonymous table to avoid conflicts
+        table =
+          if server_name == __MODULE__ do
+            # Production: named table for direct ETS lookups
+            case :ets.whereis(@table) do
+              :undefined ->
+                :ets.new(@table, [:set, :protected, :named_table, read_concurrency: true])
+
+              existing_table ->
+                # Table exists (app restart) - clear and reuse
+                :ets.delete_all_objects(existing_table)
+                existing_table
+            end
+          else
+            # Test: anonymous table (accessed via GenServer.call)
+            :ets.new(@table, [:set, :protected, read_concurrency: true])
+          end
 
         state =
           %{table: table, path: path}
@@ -197,6 +257,26 @@ defmodule Loka.Framework.RegistryBase do
       @impl true
       def handle_call(:count, _from, state) do
         {:reply, map_size(Map.get(state, @state_key)), state}
+      end
+
+      @impl true
+      def handle_call({:register, item}, _from, state) do
+        # Get the key from the item (assumes item has a :key field)
+        key = Map.get(item, :key) || Map.get(item, "key")
+
+        if key do
+          # Update ETS table
+          :ets.insert(state.table, {key, item})
+
+          # Update state
+          items = Map.get(state, @state_key)
+          new_items = Map.put(items, key, item)
+          new_state = Map.put(state, @state_key, new_items)
+
+          {:reply, :ok, new_state}
+        else
+          {:reply, {:error, :no_key}, state}
+        end
       end
 
       @impl true
@@ -253,6 +333,8 @@ defmodule Loka.Framework.RegistryBase do
           end
         else
           Logger.debug("#{inspect(__MODULE__)}: path #{full_path} does not exist, starting empty")
+          # Also clear the ETS table when path doesn't exist
+          YamlLoader.update_ets(state.table, %{})
           {:ok, Map.put(state, @state_key, %{})}
         end
       end

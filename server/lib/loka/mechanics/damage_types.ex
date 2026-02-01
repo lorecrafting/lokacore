@@ -337,7 +337,9 @@ defmodule Loka.Mechanics.DamageTypes do
   @spec resolve_hit(stats(), stats(), keyword()) :: {:hit | :miss | :dodged, map()}
   def resolve_hit(attacker_stats, defender_stats, opts \\ []) do
     force_hit = Keyword.get(opts, :force_hit)
-    force_dodge = Keyword.get(opts, :force_dodge)
+    # When force_hit is true and force_dodge isn't explicitly set, default to no dodge
+    # This ensures force_hit: true guarantees a :hit outcome
+    force_dodge = Keyword.get(opts, :force_dodge, if(force_hit == true, do: false, else: nil))
 
     hit_bonus = CombatStats.hit_bonus(attacker_stats)
     defense_target = CombatStats.defense_target(defender_stats)
