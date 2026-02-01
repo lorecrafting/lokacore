@@ -150,6 +150,9 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:show_settings, false)
      |> assign(:show_keyboard_help, false)
      |> assign(:show_quest_flow, false)
+     |> assign(:selected_quest_flow, nil)
+     |> assign(:quest_flow_filter, "all")
+     |> assign(:highlighted_npc_path, nil)
      |> assign(:api_key_statuses, %{
        anthropic: :unconfigured,
        openai: :unconfigured,
@@ -233,6 +236,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
           zones={@zones}
           zone_colors={@zone_colors}
           show_zone_colors={@show_zone_colors}
+          npc_paths={@npc_paths}
+          show_npc_paths={@show_npc_paths}
           console_messages={@console_messages}
           console_filter={@console_filter}
           level_filter={@level_filter}
@@ -601,7 +606,12 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
       <KeyboardHelpModal.keyboard_help_modal show={@show_keyboard_help} />
 
       <%!-- Quest Flow Modal --%>
-      <QuestFlowModal.quest_flow_modal show={@show_quest_flow} quests={@quests} />
+      <QuestFlowModal.quest_flow_modal
+        show={@show_quest_flow}
+        quests={@quests}
+        selected_quest={@selected_quest_flow}
+        filter_type={@quest_flow_filter}
+      />
 
       <%!-- Validation Panel --%>
       <%= if @show_validation_panel do %>
@@ -1995,8 +2005,72 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
        active_quests: [],
        completed_quests: [],
        items: [],
-       flags: []
+       flags: [],
+       level: 1,
+       phase: "day",
+       stats: %{},
+       factions: %{}
      })}
+  end
+
+  def handle_event("dialogue_mock_set_level", %{"level" => level}, socket) do
+    level_int =
+      case Integer.parse(level) do
+        {n, _} -> max(1, min(n, 100))
+        :error -> 1
+      end
+
+    new_state = Map.put(socket.assigns.dialogue_mock_state, :level, level_int)
+    {:noreply, assign(socket, :dialogue_mock_state, new_state)}
+  end
+
+  def handle_event("dialogue_mock_set_phase", %{"phase" => phase}, socket) do
+    valid_phases = ~w(day night dawn dusk)
+    phase = if phase in valid_phases, do: phase, else: "day"
+    new_state = Map.put(socket.assigns.dialogue_mock_state, :phase, phase)
+    {:noreply, assign(socket, :dialogue_mock_state, new_state)}
+  end
+
+  # Quest Flow Modal handlers
+  def handle_event("quest_flow_select", %{"key" => ""}, socket) do
+    {:noreply, assign(socket, :selected_quest_flow, nil)}
+  end
+
+  def handle_event("quest_flow_select", %{"key" => key}, socket) do
+    {:noreply, assign(socket, :selected_quest_flow, key)}
+  end
+
+  def handle_event("quest_flow_filter", %{"type" => type}, socket) do
+    {:noreply, assign(socket, :quest_flow_filter, type)}
+  end
+
+  def handle_event("quest_flow_edit_dialogue", %{"npc" => npc_key}, socket) do
+    # Close quest flow and open dialogue editor for the NPC
+    {:noreply,
+     socket
+     |> assign(:show_quest_flow, false)
+     |> assign(:dialogue_editor_npc, npc_key)
+     |> assign(:show_dialogue_editor, true)}
+  end
+
+  # NPC Path highlighting
+  def handle_event("highlight_npc_path", %{"npc" => npc_key}, socket) do
+    # Toggle highlight - if already highlighted, clear it
+    current = socket.assigns[:highlighted_npc_path]
+
+    new_highlight =
+      if current == npc_key do
+        nil
+      else
+        npc_key
+      end
+
+    socket =
+      socket
+      |> assign(:highlighted_npc_path, new_highlight)
+      |> push_event("highlight_npc_path", %{npc_key: new_highlight})
+
+    {:noreply, socket}
   end
 
   def handle_event("validate_quest_chains", _params, socket) do

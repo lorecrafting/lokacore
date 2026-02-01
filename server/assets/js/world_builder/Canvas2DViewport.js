@@ -84,6 +84,15 @@ export default class Canvas2DViewport {
     this.isDragging = false
     this.dragStart = { x: 0, y: 0 }
     this.lastMousePos = { x: 0, y: 0 }
+    this.hoveredRoom = null
+
+    // Minimap state
+    this.showMinimap = true
+    this.minimapSize = 150
+    this.minimapPadding = 10
+
+    // Tooltip element
+    this.tooltip = null
 
     // Callbacks
     this.onSelectRoom = options.onSelectRoom || (() => {})
@@ -118,6 +127,7 @@ export default class Canvas2DViewport {
     this.canvas.addEventListener('mousedown', this.handleMouseDown.bind(this))
     this.canvas.addEventListener('mousemove', this.handleMouseMove.bind(this))
     this.canvas.addEventListener('mouseup', this.handleMouseUp.bind(this))
+    this.canvas.addEventListener('mouseleave', this.handleMouseLeave.bind(this))
     this.canvas.addEventListener('wheel', this.handleWheel.bind(this), { passive: false })
     this.canvas.addEventListener('contextmenu', (e) => e.preventDefault())
 
@@ -127,6 +137,81 @@ export default class Canvas2DViewport {
       this.render()
     })
     this.resizeObserver.observe(this.canvas)
+
+    // Create tooltip element
+    this.createTooltip()
+  }
+
+  createTooltip() {
+    this.tooltip = document.createElement('div')
+    this.tooltip.className = 'viewport-tooltip'
+    this.tooltip.style.cssText = `
+      position: absolute;
+      background: rgba(26, 26, 46, 0.95);
+      border: 1px solid #444;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 12px;
+      color: #ccc;
+      pointer-events: none;
+      z-index: 1000;
+      display: none;
+      max-width: 250px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    `
+    this.canvas.parentElement.appendChild(this.tooltip)
+  }
+
+  showTooltip(room, screenX, screenY) {
+    if (!this.tooltip || !room) return
+
+    const spawns = room.spawns || {}
+    const npcs = spawns.npcs || []
+    const items = spawns.items || []
+    const exits = room.exits || {}
+    const exitCount = Object.keys(exits).length
+
+    let html = `
+      <div style="font-weight: bold; color: #fff; margin-bottom: 4px;">${room.name || room.key}</div>
+      <div style="font-size: 10px; color: #888; margin-bottom: 6px;">${room.key}</div>
+      <div style="font-size: 11px; color: #aaa;">
+        <div>📍 (${room.x || 0}, ${room.y || 0}, Z:${room.z || 0})</div>
+        ${exitCount > 0 ? `<div>🚪 ${exitCount} exit${exitCount > 1 ? 's' : ''}</div>` : ''}
+        ${npcs.length > 0 ? `<div>👤 ${npcs.length} NPC${npcs.length > 1 ? 's' : ''}: ${npcs.slice(0, 3).join(', ')}${npcs.length > 3 ? '...' : ''}</div>` : ''}
+        ${items.length > 0 ? `<div>📦 ${items.length} item${items.length > 1 ? 's' : ''}</div>` : ''}
+      </div>
+    `
+
+    this.tooltip.innerHTML = html
+    this.tooltip.style.display = 'block'
+
+    // Position tooltip near mouse but within bounds
+    const rect = this.canvas.getBoundingClientRect()
+    let x = screenX + 15
+    let y = screenY + 15
+
+    // Keep tooltip within canvas bounds
+    const tooltipRect = this.tooltip.getBoundingClientRect()
+    if (x + tooltipRect.width > rect.width) {
+      x = screenX - tooltipRect.width - 15
+    }
+    if (y + tooltipRect.height > rect.height) {
+      y = screenY - tooltipRect.height - 15
+    }
+
+    this.tooltip.style.left = `${x}px`
+    this.tooltip.style.top = `${y}px`
+  }
+
+  hideTooltip() {
+    if (this.tooltip) {
+      this.tooltip.style.display = 'none'
+    }
+  }
+
+  handleMouseLeave(e) {
+    this.hideTooltip()
+    this.hoveredRoom = null
   }
 
   startRenderLoop() {
@@ -305,11 +390,23 @@ export default class Canvas2DViewport {
       const dy = (y - this.lastMousePos.y) / this.camera.zoom
       this.camera.x += dx
       this.camera.y += dy
+      this.hideTooltip()
       this.render()
     } else {
-      // Update cursor based on what's under mouse
+      // Update cursor and tooltip based on what's under mouse
       const room = this.getRoomAtPoint(x, y)
       this.canvas.style.cursor = room ? 'pointer' : 'grab'
+
+      if (room && room !== this.hoveredRoom) {
+        this.hoveredRoom = room
+        this.showTooltip(room, x, y)
+      } else if (!room && this.hoveredRoom) {
+        this.hoveredRoom = null
+        this.hideTooltip()
+      } else if (room && this.tooltip) {
+        // Update tooltip position
+        this.showTooltip(room, x, y)
+      }
     }
 
     this.lastMousePos = { x, y }
@@ -385,6 +482,88 @@ export default class Canvas2DViewport {
 
     // Restore context
     ctx.restore()
+
+    // Draw minimap (after restoring context, uses screen coordinates)
+    if (this.showMinimap && this.rooms.length > 0) {
+      this.drawMinimap(ctx)
+    }
+  }
+
+  drawMinimap(ctx) {
+    const padding = this.minimapPadding
+    const size = this.minimapSize
+    const x = this.width - size - padding
+    const y = this.height - size - padding - 160 // Account for console
+
+    // Get bounding box of all rooms at current Z-level
+    const currentRooms = this.rooms.filter(r => (r.z || 0) === this.currentZLevel)
+    if (currentRooms.length === 0) return
+
+    let minX = Infinity, maxX = -Infinity
+    let minY = Infinity, maxY = -Infinity
+    for (const room of currentRooms) {
+      minX = Math.min(minX, room.x || 0)
+      maxX = Math.max(maxX, room.x || 0)
+      minY = Math.min(minY, room.y || 0)
+      maxY = Math.max(maxY, room.y || 0)
+    }
+
+    const worldWidth = maxX - minX + 2
+    const worldHeight = maxY - minY + 2
+    const scale = Math.min(size / worldWidth, size / worldHeight) * 0.9
+
+    // Draw minimap background
+    ctx.fillStyle = 'rgba(26, 26, 46, 0.85)'
+    ctx.strokeStyle = '#444'
+    ctx.lineWidth = 1
+    ctx.beginPath()
+    ctx.roundRect(x - 4, y - 4, size + 8, size + 8, 6)
+    ctx.fill()
+    ctx.stroke()
+
+    // Draw rooms as dots
+    ctx.fillStyle = '#7eb3ff'
+    for (const room of currentRooms) {
+      const rx = x + ((room.x || 0) - minX + 1) * scale
+      const ry = y + ((room.y || 0) - minY + 1) * scale
+
+      // Highlight selected room
+      if (room.key === this.selectedRoom) {
+        ctx.fillStyle = '#4a9eff'
+        ctx.beginPath()
+        ctx.arc(rx, ry, 4, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.fillStyle = '#7eb3ff'
+      } else {
+        ctx.beginPath()
+        ctx.arc(rx, ry, 2, 0, Math.PI * 2)
+        ctx.fill()
+      }
+    }
+
+    // Draw viewport rectangle
+    const topLeft = this.screenToWorld(0, 0)
+    const bottomRight = this.screenToWorld(this.width, this.height)
+
+    const viewX = x + (topLeft.x - minX + 1) * scale
+    const viewY = y + (topLeft.y - minY + 1) * scale
+    const viewW = (bottomRight.x - topLeft.x) * scale
+    const viewH = (bottomRight.y - topLeft.y) * scale
+
+    ctx.strokeStyle = '#ff6b6b'
+    ctx.lineWidth = 1.5
+    ctx.strokeRect(viewX, viewY, viewW, viewH)
+
+    // Draw minimap label
+    ctx.fillStyle = '#666'
+    ctx.font = '10px sans-serif'
+    ctx.textAlign = 'right'
+    ctx.fillText('Minimap', x + size, y - 8)
+  }
+
+  setShowMinimap(show) {
+    this.showMinimap = show
+    this.render()
   }
 
   drawNPCPaths(ctx) {

@@ -12,11 +12,23 @@ defmodule LokaWeb.AdminLive.WorldBuilder.QuestFlowModal do
 
   attr :show, :boolean, default: false
   attr :quests, :list, default: []
+  attr :selected_quest, :string, default: nil
+  attr :filter_type, :string, default: "all"
 
   def quest_flow_modal(assigns) do
     # Build graph data from quests
     graph = build_quest_graph(assigns.quests)
-    assigns = assign(assigns, :graph, graph)
+
+    # Get selected quest details
+    selected_quest_data =
+      if assigns.selected_quest do
+        Enum.find(assigns.quests, fn q -> q.key == assigns.selected_quest end)
+      end
+
+    assigns =
+      assigns
+      |> assign(:graph, graph)
+      |> assign(:selected_quest_data, selected_quest_data)
 
     ~H"""
     <%= if @show do %>
@@ -30,6 +42,43 @@ defmodule LokaWeb.AdminLive.WorldBuilder.QuestFlowModal do
             <h3 style="display: flex; align-items: center; gap: 8px; margin: 0;">
               <.icon name="hero-arrow-trending-up" class="size-5" /> Quest Flow
             </h3>
+            
+    <!-- Filter buttons -->
+            <div style="display: flex; gap: 4px; margin-left: 16px;">
+              <button
+                phx-click="quest_flow_filter"
+                phx-value-type="all"
+                class={"quest-filter-btn #{if @filter_type == "all", do: "active", else: ""}"}
+                style={"padding: 4px 8px; font-size: 11px; border-radius: 4px; border: 1px solid #444; cursor: pointer; #{if @filter_type == "all", do: "background: #4a9eff; color: white;", else: "background: #2a2a3e; color: #888;"}"}
+              >
+                All
+              </button>
+              <button
+                phx-click="quest_flow_filter"
+                phx-value-type="main"
+                class={"quest-filter-btn #{if @filter_type == "main", do: "active", else: ""}"}
+                style={"padding: 4px 8px; font-size: 11px; border-radius: 4px; border: 1px solid #444; cursor: pointer; #{if @filter_type == "main", do: "background: #4a9eff; color: white;", else: "background: #2a2a3e; color: #888;"}"}
+              >
+                Main
+              </button>
+              <button
+                phx-click="quest_flow_filter"
+                phx-value-type="side"
+                class={"quest-filter-btn #{if @filter_type == "side", do: "active", else: ""}"}
+                style={"padding: 4px 8px; font-size: 11px; border-radius: 4px; border: 1px solid #444; cursor: pointer; #{if @filter_type == "side", do: "background: #4aff9e; color: #1a1a2e;", else: "background: #2a2a3e; color: #888;"}"}
+              >
+                Side
+              </button>
+              <button
+                phx-click="quest_flow_filter"
+                phx-value-type="tutorial"
+                class={"quest-filter-btn #{if @filter_type == "tutorial", do: "active", else: ""}"}
+                style={"padding: 4px 8px; font-size: 11px; border-radius: 4px; border: 1px solid #444; cursor: pointer; #{if @filter_type == "tutorial", do: "background: #ff9e4a; color: #1a1a2e;", else: "background: #2a2a3e; color: #888;"}"}
+              >
+                Tutorial
+              </button>
+            </div>
+
             <span style="color: #888; font-size: 12px; margin-left: auto;">
               {length(@quests)} quests
             </span>
@@ -77,11 +126,15 @@ defmodule LokaWeb.AdminLive.WorldBuilder.QuestFlowModal do
     <!-- Quest nodes -->
                 <div class="quest-graph-nodes">
                   <%= for node <- @graph.nodes do %>
+                    <% hidden = @filter_type != "all" and node.type != @filter_type %>
                     <div
-                      class={"quest-node quest-type-#{node.type}"}
+                      class={"quest-node quest-type-#{node.type} #{if @selected_quest == node.id, do: "selected", else: ""} #{if hidden, do: "filtered-out", else: ""}"}
                       id={"quest-node-#{node.id}"}
                       data-node-id={node.id}
-                      style={"left: #{node.x}px; top: #{node.y}px;"}
+                      phx-click="quest_flow_select"
+                      phx-value-key={node.id}
+                      style={"left: #{node.x}px; top: #{node.y}px; #{if hidden, do: "opacity: 0.2; pointer-events: none;", else: ""}"}
+                      title={node.name}
                     >
                       <div class="quest-node-act">Act {node.act || "?"}</div>
                       <div class="quest-node-name">{node.name}</div>
@@ -89,6 +142,11 @@ defmodule LokaWeb.AdminLive.WorldBuilder.QuestFlowModal do
                     </div>
                   <% end %>
                 </div>
+                
+    <!-- Selected quest details panel -->
+                <%= if @selected_quest_data do %>
+                  <.quest_details_panel quest={@selected_quest_data} />
+                <% end %>
               </div>
             <% end %>
           </div>
@@ -197,5 +255,114 @@ defmodule LokaWeb.AdminLive.WorldBuilder.QuestFlowModal do
   defp get_unlocks(quest) do
     rewards = get_in(quest, [:data, "rewards"]) || get_in(quest, [:data, :rewards]) || %{}
     Map.get(rewards, "unlocks") || Map.get(rewards, :unlocks, [])
+  end
+
+  # Quest details panel component
+  attr :quest, :map, required: true
+
+  defp quest_details_panel(assigns) do
+    objectives = get_in(assigns.quest, [:data, "objectives"]) || []
+    rewards = get_in(assigns.quest, [:data, "rewards"]) || %{}
+    giver = get_in(assigns.quest, [:data, "giver"]) || "Unknown"
+    requires = get_requires_quest(assigns.quest)
+
+    assigns =
+      assigns
+      |> assign(:objectives, objectives)
+      |> assign(:rewards, rewards)
+      |> assign(:giver, giver)
+      |> assign(:requires, requires)
+
+    ~H"""
+    <div
+      class="quest-details-panel"
+      style="position: absolute; right: 16px; top: 60px; width: 280px; background: #1a1a2e; border: 1px solid #444; border-radius: 8px; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);"
+    >
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <h4 style="margin: 0; color: #fff; font-size: 14px;">{@quest.name || @quest.key}</h4>
+        <button
+          phx-click="quest_flow_select"
+          phx-value-key=""
+          style="background: none; border: none; color: #888; cursor: pointer; font-size: 16px;"
+        >
+          &times;
+        </button>
+      </div>
+
+      <div style="font-size: 11px; color: #888; margin-bottom: 12px;">
+        <span style="background: #333; padding: 2px 6px; border-radius: 3px;">{@quest.key}</span>
+      </div>
+      
+    <!-- Description -->
+      <%= if desc = get_in(@quest, [:data, "description"]) do %>
+        <div style="color: #ccc; font-size: 12px; margin-bottom: 12px; line-height: 1.4;">
+          {desc}
+        </div>
+      <% end %>
+      
+    <!-- Giver -->
+      <div style="margin-bottom: 8px;">
+        <span style="color: #888; font-size: 11px;">Quest Giver:</span>
+        <span style="color: #4aff9e; font-size: 12px; margin-left: 4px;">{@giver}</span>
+        <button
+          phx-click="quest_flow_edit_dialogue"
+          phx-value-npc={@giver}
+          style="background: #333; border: none; color: #4a9eff; font-size: 10px; padding: 2px 6px; border-radius: 3px; margin-left: 8px; cursor: pointer;"
+          title="Edit NPC dialogue"
+        >
+          Edit Dialogue
+        </button>
+      </div>
+      
+    <!-- Requirements -->
+      <%= if @requires do %>
+        <div style="margin-bottom: 8px;">
+          <span style="color: #888; font-size: 11px;">Requires:</span>
+          <span style="color: #ff9e4a; font-size: 12px; margin-left: 4px;">{@requires}</span>
+        </div>
+      <% end %>
+      
+    <!-- Objectives -->
+      <%= if length(@objectives) > 0 do %>
+        <div style="margin-bottom: 12px;">
+          <div style="color: #888; font-size: 11px; margin-bottom: 4px;">
+            Objectives ({length(@objectives)}):
+          </div>
+          <ul style="margin: 0; padding-left: 16px; color: #ccc; font-size: 11px;">
+            <%= for obj <- @objectives do %>
+              <li style="margin-bottom: 2px;">
+                {obj["description"] || obj["type"]}
+                <span style="color: #666;">({obj["type"]})</span>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+      
+    <!-- Rewards -->
+      <%= if map_size(@rewards) > 0 do %>
+        <div style="margin-bottom: 8px;">
+          <div style="color: #888; font-size: 11px; margin-bottom: 4px;">Rewards:</div>
+          <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+            <%= if xp = @rewards["xp"] || @rewards[:xp] do %>
+              <span style="background: #2a3a4e; color: #4aff9e; padding: 2px 6px; border-radius: 3px; font-size: 10px;">
+                +{xp} XP
+              </span>
+            <% end %>
+            <%= if gold = @rewards["gold"] || @rewards[:gold] do %>
+              <span style="background: #4a3a2e; color: #ffd700; padding: 2px 6px; border-radius: 3px; font-size: 10px;">
+                +{gold} Gold
+              </span>
+            <% end %>
+            <%= for item <- (@rewards["items"] || @rewards[:items] || []) do %>
+              <span style="background: #3a2a4e; color: #a29bfe; padding: 2px 6px; border-radius: 3px; font-size: 10px;">
+                {item}
+              </span>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    """
   end
 end

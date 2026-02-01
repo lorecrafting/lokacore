@@ -344,34 +344,63 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
           </select>
         </div>
         
-    <!-- Condition (simplified) -->
+    <!-- Condition (expanded) -->
         <div class="form-group">
           <label>Show If (optional)</label>
           <div class="condition-row">
             <select name={"choice_#{@index}_condition_type"} class="input" style="flex: 1;">
               <option value="">Always show</option>
-              <option value="quest_active" selected={condition_type(@choice) == "quest_active"}>
-                Quest Active
-              </option>
-              <option value="quest_completed" selected={condition_type(@choice) == "quest_completed"}>
-                Quest Completed
-              </option>
-              <option
-                value="quest_not_active"
-                selected={condition_type(@choice) == "quest_not_active"}
-              >
-                Quest Not Active
-              </option>
-              <option value="has_item" selected={condition_type(@choice) == "has_item"}>
-                Has Item
-              </option>
+              <optgroup label="Quests">
+                <option value="quest_active" selected={condition_type(@choice) == "quest_active"}>
+                  Quest Active
+                </option>
+                <option
+                  value="quest_completed"
+                  selected={condition_type(@choice) == "quest_completed"}
+                >
+                  Quest Completed
+                </option>
+                <option
+                  value="quest_not_active"
+                  selected={condition_type(@choice) == "quest_not_active"}
+                >
+                  Quest Not Active
+                </option>
+              </optgroup>
+              <optgroup label="Items">
+                <option value="has_item" selected={condition_type(@choice) == "has_item"}>
+                  Has Item
+                </option>
+                <option value="not_has_item" selected={condition_type(@choice) == "not_has_item"}>
+                  Does NOT Have Item
+                </option>
+              </optgroup>
+              <optgroup label="Player State">
+                <option value="has_flag" selected={condition_type(@choice) == "has_flag"}>
+                  Has Flag
+                </option>
+                <option value="level_gte" selected={condition_type(@choice) == "level_gte"}>
+                  Level >= (number)
+                </option>
+                <option value="stat_gte" selected={condition_type(@choice) == "stat_gte"}>
+                  Stat >= (stat:value)
+                </option>
+              </optgroup>
+              <optgroup label="World State">
+                <option value="phase" selected={condition_type(@choice) == "phase"}>
+                  Time of Day (day/night/dawn/dusk)
+                </option>
+                <option value="faction_gte" selected={condition_type(@choice) == "faction_gte"}>
+                  Faction Rep >= (faction:value)
+                </option>
+              </optgroup>
             </select>
             <input
               type="text"
               name={"choice_#{@index}_condition_value"}
               class="input"
               style="flex: 1;"
-              placeholder="quest_id or item_key"
+              placeholder={condition_placeholder(condition_type(@choice))}
               value={condition_value(@choice)}
             />
           </div>
@@ -595,6 +624,43 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
             </button>
           </div>
         </div>
+        
+    <!-- Level and Phase (compact row) -->
+        <div class="mock-state-section" style="display: flex; gap: 12px;">
+          <div style="flex: 1;">
+            <label>Level</label>
+            <input
+              type="number"
+              min="1"
+              max="100"
+              value={Map.get(@mock_state, :level, 1)}
+              phx-change="dialogue_mock_set_level"
+              name="level"
+              style="width: 100%; padding: 4px 6px; background: #1a1a2e; border: 1px solid #444; border-radius: 4px; color: #ccc;"
+            />
+          </div>
+          <div style="flex: 1;">
+            <label>Time of Day</label>
+            <select
+              phx-change="dialogue_mock_set_phase"
+              name="phase"
+              style="width: 100%; padding: 4px 6px; background: #1a1a2e; border: 1px solid #444; border-radius: 4px; color: #ccc;"
+            >
+              <option value="day" selected={Map.get(@mock_state, :phase, "day") == "day"}>
+                Day
+              </option>
+              <option value="night" selected={Map.get(@mock_state, :phase) == "night"}>
+                Night
+              </option>
+              <option value="dawn" selected={Map.get(@mock_state, :phase) == "dawn"}>
+                Dawn
+              </option>
+              <option value="dusk" selected={Map.get(@mock_state, :phase) == "dusk"}>
+                Dusk
+              </option>
+            </select>
+          </div>
+        </div>
       </div>
       
     <!-- Preview -->
@@ -676,6 +742,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
       completed_quests = Map.get(mock_state, :completed_quests, [])
       items = Map.get(mock_state, :items, [])
       flags = Map.get(mock_state, :flags, [])
+      level = Map.get(mock_state, :level, 1)
+      stats = Map.get(mock_state, :stats, %{})
+      phase = Map.get(mock_state, :phase, "day")
+      factions = Map.get(mock_state, :factions, %{})
 
       cond do
         Map.has_key?(show_if, "quest_active") ->
@@ -690,8 +760,24 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
         Map.has_key?(show_if, "has_item") ->
           show_if["has_item"] in items
 
+        Map.has_key?(show_if, "not_has_item") ->
+          show_if["not_has_item"] not in items
+
         Map.has_key?(show_if, "has_flag") ->
           show_if["has_flag"] in flags
+
+        Map.has_key?(show_if, "level_gte") ->
+          required = parse_int(show_if["level_gte"], 1)
+          level >= required
+
+        Map.has_key?(show_if, "stat_gte") ->
+          parse_stat_condition(show_if["stat_gte"], stats)
+
+        Map.has_key?(show_if, "phase") ->
+          show_if["phase"] == phase
+
+        Map.has_key?(show_if, "faction_gte") ->
+          parse_faction_condition(show_if["faction_gte"], factions)
 
         true ->
           # Unknown condition type - show by default
@@ -699,6 +785,42 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
       end
     end
   end
+
+  defp parse_int(val, default) when is_binary(val) do
+    case Integer.parse(val) do
+      {n, _} -> n
+      :error -> default
+    end
+  end
+
+  defp parse_int(val, _default) when is_integer(val), do: val
+  defp parse_int(_, default), do: default
+
+  defp parse_stat_condition(value, stats) when is_binary(value) do
+    case String.split(value, ":", parts: 2) do
+      [stat, required] ->
+        stat_val = Map.get(stats, stat, 0)
+        stat_val >= parse_int(required, 0)
+
+      _ ->
+        true
+    end
+  end
+
+  defp parse_stat_condition(_, _), do: true
+
+  defp parse_faction_condition(value, factions) when is_binary(value) do
+    case String.split(value, ":", parts: 2) do
+      [faction, required] ->
+        faction_val = Map.get(factions, faction, 0)
+        faction_val >= parse_int(required, 0)
+
+      _ ->
+        true
+    end
+  end
+
+  defp parse_faction_condition(_, _), do: true
 
   defp has_condition?(choice) do
     show_if = Map.get(choice, "show_if", %{})
@@ -717,27 +839,40 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
 
   defp truncate_text(_, _), do: ""
 
+  @condition_types ~w(quest_active quest_completed quest_not_active has_item not_has_item has_flag level_gte stat_gte phase faction_gte)
+
   defp condition_type(choice) do
     show_if = Map.get(choice, "show_if", %{})
 
-    cond do
-      Map.has_key?(show_if, "quest_active") -> "quest_active"
-      Map.has_key?(show_if, "quest_completed") -> "quest_completed"
-      Map.has_key?(show_if, "quest_not_active") -> "quest_not_active"
-      Map.has_key?(show_if, "has_item") -> "has_item"
-      true -> ""
-    end
+    Enum.find(@condition_types, "", fn type ->
+      Map.has_key?(show_if, type)
+    end)
   end
 
   defp condition_value(choice) do
     show_if = Map.get(choice, "show_if", %{})
+    type = condition_type(choice)
 
-    cond do
-      Map.has_key?(show_if, "quest_active") -> show_if["quest_active"]
-      Map.has_key?(show_if, "quest_completed") -> show_if["quest_completed"]
-      Map.has_key?(show_if, "quest_not_active") -> show_if["quest_not_active"]
-      Map.has_key?(show_if, "has_item") -> show_if["has_item"]
-      true -> ""
+    if type != "" do
+      show_if[type] |> to_string()
+    else
+      ""
+    end
+  end
+
+  defp condition_placeholder(type) do
+    case type do
+      "quest_active" -> "quest_key"
+      "quest_completed" -> "quest_key"
+      "quest_not_active" -> "quest_key"
+      "has_item" -> "item_key"
+      "not_has_item" -> "item_key"
+      "has_flag" -> "flag_name"
+      "level_gte" -> "5"
+      "stat_gte" -> "strength:10"
+      "phase" -> "day, night, dawn, dusk"
+      "faction_gte" -> "monks:50"
+      _ -> "value"
     end
   end
 

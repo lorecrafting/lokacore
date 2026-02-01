@@ -14,12 +14,26 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ViewportContainer do
   attr :zones, :list, default: []
   attr :zone_colors, :map, default: %{}
   attr :show_zone_colors, :boolean, default: true
+  attr :npc_paths, :map, default: %{}
+  attr :show_npc_paths, :boolean, default: true
   attr :console_messages, :list, default: []
   attr :console_filter, :string, default: ""
   attr :level_filter, :string, default: "all"
   attr :console_collapsed, :boolean, default: false
   attr :console_height, :integer, default: 150
   attr :class, :string, default: ""
+
+  # Path colors matching Canvas2DViewport.js
+  @path_colors [
+    "#ff6b6b",
+    "#4ecdc4",
+    "#45b7d1",
+    "#96ceb4",
+    "#ffeaa7",
+    "#dfe6e9",
+    "#fd79a8",
+    "#a29bfe"
+  ]
 
   def viewport_container(assigns) do
     # Filter messages based on text search and level filter
@@ -30,7 +44,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ViewportContainer do
         assigns.level_filter || "all"
       )
 
-    assigns = assign(assigns, :filtered_messages, filtered_messages)
+    assigns =
+      assigns
+      |> assign(:filtered_messages, filtered_messages)
+      |> assign(:path_colors, @path_colors)
 
     ~H"""
     <div id="viewport-panel" class={"world-builder-panel world-builder-viewport #{@class}"}>
@@ -76,6 +93,41 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ViewportContainer do
                   >
                   </span>
                   <span class="zone-legend-name">{zone.name || zone.key}</span>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+          
+    <!-- NPC Paths Legend -->
+          <%= if @show_npc_paths and map_size(@npc_paths) > 0 do %>
+            <div class="npc-paths-legend">
+              <div
+                class="zone-legend-title"
+                style="display: flex; justify-content: space-between; align-items: center;"
+              >
+                <span>NPC Paths</span>
+                <span style="font-size: 10px; color: #666;">{map_size(@npc_paths)}</span>
+              </div>
+              <% path_colors = @path_colors %>
+              <%= for {{npc_key, path_info}, idx} <- Enum.with_index(@npc_paths) do %>
+                <% color = Enum.at(path_colors, rem(idx, length(path_colors))) %>
+                <div
+                  class="npc-path-legend-item"
+                  phx-click="highlight_npc_path"
+                  phx-value-npc={npc_key}
+                  style="display: flex; align-items: center; gap: 6px; padding: 2px 4px; cursor: pointer; border-radius: 3px;"
+                  title={"Click to highlight #{path_info[:name] || npc_key}'s patrol route"}
+                >
+                  <span style={"width: 12px; height: 3px; background: #{color}; border-radius: 2px; display: inline-block;"}>
+                  </span>
+                  <span style="font-size: 11px; color: #ccc; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    {path_info[:name] || npc_key}
+                  </span>
+                  <%= if patrol = path_info[:patrol] do %>
+                    <span style="font-size: 9px; color: #666;">
+                      {length(patrol[:route] || [])} rooms
+                    </span>
+                  <% end %>
                 </div>
               <% end %>
             </div>
