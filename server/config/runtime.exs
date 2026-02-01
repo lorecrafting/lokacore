@@ -89,6 +89,16 @@ if config_env() == :prod do
       You can generate one by calling: mix phx.gen.secret
       """
 
+  # Session signing salt for cookie security
+  session_signing_salt =
+    System.get_env("SESSION_SIGNING_SALT") ||
+      raise """
+      environment variable SESSION_SIGNING_SALT is missing.
+      You can generate one by calling: mix phx.gen.secret
+      """
+
+  config :loka, :session_signing_salt, session_signing_salt
+
   host = System.get_env("PHX_HOST") || "example.com"
 
   config :loka, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
@@ -103,6 +113,21 @@ if config_env() == :prod do
     secret_key_base: secret_key_base,
     # HSTS: Force HTTPS with 1-year max-age
     force_ssl: [hsts: true, expires: 31_536_000]
+
+  # CORS origins for production (restrict to known origins)
+  # Set CORS_ORIGINS env var for multiple origins: "https://loka.app,https://www.loka.app"
+  # Falls back to PHX_HOST if not set
+  cors_origins =
+    case System.get_env("CORS_ORIGINS") do
+      nil ->
+        # Default to PHX_HOST with https scheme
+        ["https://#{host}"]
+
+      origins ->
+        origins |> String.split(",") |> Enum.map(&String.trim/1)
+    end
+
+  config :loka, :cors_origins, cors_origins
 
   # Guardian JWT secret for mobile auth
   guardian_secret =

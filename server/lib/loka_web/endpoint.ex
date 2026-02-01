@@ -4,10 +4,15 @@ defmodule LokaWeb.Endpoint do
   # The session will be stored in the cookie and signed,
   # this means its contents can be read but not tampered with.
   # Set :encryption_salt if you would also like to encrypt it.
+  #
+  # Session signing salt is configured per-environment:
+  # - Dev/Test: Uses a fixed salt (safe for local development)
+  # - Production: Requires SESSION_SIGNING_SALT env var (see runtime.exs)
   @session_options [
     store: :cookie,
     key: "_loka_key",
-    signing_salt: System.get_env("SESSION_SIGNING_SALT") || "ZjjzrcyD",
+    signing_salt:
+      Application.compile_env(:loka, :session_signing_salt, "dev_session_salt_do_not_use_in_prod"),
     same_site: "Lax",
     secure: true,
     http_only: true

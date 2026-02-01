@@ -57,3 +57,9 @@ config :loka, :rate_limiter_enabled, false
 # Set content validation to warn mode in tests (don't block startup)
 # Tests may intentionally create invalid content for testing purposes
 config :loka, content_validation: :warn
+
+# CORS: Allow all origins in tests
+config :loka, :cors_origins, :all
+
+# Disable channel rate limiting in tests
+config :loka, LokaWeb.Channels.ChannelRateLimiter, enabled: false

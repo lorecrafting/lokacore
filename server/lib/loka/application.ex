@@ -104,6 +104,7 @@ defmodule Loka.Application do
       Loka.Engine.ContentValidator,
 
       # World Builder - LLM services
+      Loka.WorldBuilder.LLM.ObservabilityLogger,
       Loka.WorldBuilder.LLM.PreviewManager,
       Loka.WorldBuilder.LLM.ConversationManager,
       Loka.WorldBuilder.LLM.BulkGenerator,

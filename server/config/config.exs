@@ -76,6 +76,11 @@ config :loka, :content_validator_plugins, [
 # Example: config :loka, :plugins, [Loka.Plugins.Guilds]
 config :loka, :plugins, []
 
+# Session signing salt - used for cookie security
+# Dev/Test: Fixed salt (configured here for compile-time access)
+# Production: Requires SESSION_SIGNING_SALT env var (see runtime.exs)
+config :loka, :session_signing_salt, "dev_session_salt_do_not_use_in_prod"
+
 # Configure the endpoint
 config :loka, LokaWeb.Endpoint,
   url: [host: "localhost"],
@@ -138,6 +143,13 @@ config :loka, Loka.PromEx,
 config :posthog,
   api_url: "https://us.i.posthog.com",
   api_key: nil
+
+# Channel rate limiting - prevents WebSocket message spam
+config :loka, LokaWeb.Channels.ChannelRateLimiter,
+  enabled: true,
+  max_messages: 30,
+  window_ms: 1000,
+  burst_allowance: 10
 
 # Guardian JWT configuration - issuer only, secret_key set per environment
 # IMPORTANT: secret_key MUST be set in dev.exs/test.exs or via GUARDIAN_SECRET_KEY env var
