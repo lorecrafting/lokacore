@@ -32,10 +32,14 @@ const PLAYER_KEY := "loka_player"
 ## HTTP request node
 var _http_request: HTTPRequest = null
 
+## HTTP timeout in seconds (10s for mobile networks)
+const HTTP_TIMEOUT_SECONDS := 10.0
+
 
 func _ready() -> void:
 	# Create HTTP request node
 	_http_request = HTTPRequest.new()
+	_http_request.timeout = HTTP_TIMEOUT_SECONDS
 	add_child(_http_request)
 
 	# Load or generate device ID
@@ -104,8 +108,9 @@ func _on_login_response(result: int, response_code: int, _headers: PackedStringA
 		_http_request.request_completed.disconnect(_on_login_response)
 
 	if result != HTTPRequest.RESULT_SUCCESS:
-		push_error("[Auth] HTTP request failed: result=%s" % result)
-		login_error.emit("Connection failed")
+		var error_msg := _get_http_error_message(result)
+		push_error("[Auth] HTTP request failed: result=%s (%s)" % [result, error_msg])
+		login_error.emit(error_msg)
 		return
 
 	var response_text := body.get_string_from_utf8()
@@ -237,3 +242,33 @@ func _save_config(key: String, value: String) -> void:
 	config.load(_get_config_path())
 	config.set_value("auth", key, value)
 	config.save(_get_config_path())
+
+
+func _get_http_error_message(result: int) -> String:
+	match result:
+		HTTPRequest.RESULT_CANT_CONNECT:
+			return "Cannot connect to server"
+		HTTPRequest.RESULT_CANT_RESOLVE:
+			return "Cannot resolve server address"
+		HTTPRequest.RESULT_CONNECTION_ERROR:
+			return "Connection error"
+		HTTPRequest.RESULT_TLS_HANDSHAKE_ERROR:
+			return "Secure connection failed"
+		HTTPRequest.RESULT_NO_RESPONSE:
+			return "No response from server"
+		HTTPRequest.RESULT_BODY_SIZE_LIMIT_EXCEEDED:
+			return "Response too large"
+		HTTPRequest.RESULT_BODY_DECOMPRESS_FAILED:
+			return "Failed to decompress response"
+		HTTPRequest.RESULT_REQUEST_FAILED:
+			return "Request failed"
+		HTTPRequest.RESULT_DOWNLOAD_FILE_CANT_OPEN:
+			return "Cannot save file"
+		HTTPRequest.RESULT_DOWNLOAD_FILE_WRITE_ERROR:
+			return "Cannot write file"
+		HTTPRequest.RESULT_REDIRECT_LIMIT_REACHED:
+			return "Too many redirects"
+		HTTPRequest.RESULT_TIMEOUT:
+			return "Connection timed out - please check your network"
+		_:
+			return "Connection failed"
