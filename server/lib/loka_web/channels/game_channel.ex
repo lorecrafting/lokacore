@@ -113,6 +113,7 @@ defmodule LokaWeb.GameChannel do
   alias LokaWeb.Channels.GameChannel.Serializers
   alias LokaWeb.Channels.GameChannel.ActionBridge
   alias LokaWeb.Channels.VersionCompatibility
+  alias LokaWeb.Channels.ChannelRateLimiter
 
   # =============================================================================
   # Configuration Constants
@@ -375,10 +376,12 @@ defmodule LokaWeb.GameChannel do
 
   @impl true
   def handle_in("navigate", %{"direction" => direction}, socket) do
-    case ActionBridge.execute(socket, :navigate, %{direction: direction}) do
-      {:ok, socket} -> {:reply, :ok, socket}
-      {:error, _reason, socket} -> {:reply, :ok, socket}
-    end
+    with_rate_limit(socket, fn ->
+      case ActionBridge.execute(socket, :navigate, %{direction: direction}) do
+        {:ok, socket} -> {:reply, :ok, socket}
+        {:error, _reason, socket} -> {:reply, :ok, socket}
+      end
+    end)
   end
 
   # =============================================================================
@@ -641,40 +644,44 @@ defmodule LokaWeb.GameChannel do
   # =============================================================================
 
   def handle_in("chat", %{"mode" => "say", "message" => message}, socket) do
-    player = socket.assigns.player
-    room = socket.assigns.room
-    player_name = player_display_name(player)
+    with_rate_limit(socket, fn ->
+      player = socket.assigns.player
+      room = socket.assigns.room
+      player_name = player_display_name(player)
 
-    # Broadcast to room
-    Phoenix.PubSub.broadcast(
-      Loka.PubSub,
-      "room:#{room.id}",
-      {:player_says, player.id, player_name, message}
-    )
+      # Broadcast to room
+      Phoenix.PubSub.broadcast(
+        Loka.PubSub,
+        "room:#{room.id}",
+        {:player_says, player.id, player_name, message}
+      )
 
-    # Echo back to sender
-    push(socket, "event", %{text: "You say, \"#{message}\""})
+      # Echo back to sender
+      push(socket, "event", %{text: "You say, \"#{message}\""})
 
-    {:reply, :ok, socket}
+      {:reply, :ok, socket}
+    end)
   end
 
   def handle_in("chat", %{"mode" => "shout", "message" => message}, socket) do
-    player = socket.assigns.player
-    room = socket.assigns.room
-    player_name = player_display_name(player)
+    with_rate_limit(socket, fn ->
+      player = socket.assigns.player
+      room = socket.assigns.room
+      player_name = player_display_name(player)
 
-    # Broadcast to current room and adjacent rooms
-    Phoenix.PubSub.broadcast(
-      Loka.PubSub,
-      "room:#{room.id}",
-      {:player_shouts, player.id, player_name, message}
-    )
+      # Broadcast to current room and adjacent rooms
+      Phoenix.PubSub.broadcast(
+        Loka.PubSub,
+        "room:#{room.id}",
+        {:player_shouts, player.id, player_name, message}
+      )
 
-    # TODO: Broadcast to adjacent rooms
+      # TODO: Broadcast to adjacent rooms
 
-    push(socket, "event", %{text: "You shout, \"#{message}\""})
+      push(socket, "event", %{text: "You shout, \"#{message}\""})
 
-    {:reply, :ok, socket}
+      {:reply, :ok, socket}
+    end)
   end
 
   # =============================================================================
@@ -1057,6 +1064,30 @@ defmodule LokaWeb.GameChannel do
       _ -> player.name || player.email || "Unknown"
     end
   end
+
+  # Rate limiting wrapper for channel handlers
+  defp with_rate_limit(socket, handler_fn) do
+    case ChannelRateLimiter.check(socket) do
+      :ok ->
+        result = handler_fn.()
+        update_result_socket_for_rate_limit(result)
+
+      {:error, :rate_limited} ->
+        push(socket, "event", %{text: "Slow down! You're sending messages too quickly."})
+        {:reply, {:error, %{reason: "rate_limited"}}, socket}
+    end
+  end
+
+  # Update socket in result tuple to track the message for rate limiting
+  defp update_result_socket_for_rate_limit({:reply, reply, socket}) do
+    {:reply, reply, ChannelRateLimiter.track(socket)}
+  end
+
+  defp update_result_socket_for_rate_limit({:noreply, socket}) do
+    {:noreply, ChannelRateLimiter.track(socket)}
+  end
+
+  defp update_result_socket_for_rate_limit(other), do: other
 
   # NOTE: Bardo, Shop, Container, Gathering/Crafting, and Emote/Social helpers
   # moved to Loka.Game.Actions.* modules
