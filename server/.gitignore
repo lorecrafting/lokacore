@@ -65,3 +65,6 @@ npm-debug.log
 
 # LLM observability logs
 priv/llm_logs/*.jsonl
+
+# Test temp files
+test/tmp/
