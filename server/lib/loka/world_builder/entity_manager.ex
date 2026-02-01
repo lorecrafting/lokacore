@@ -215,6 +215,35 @@ defmodule Loka.WorldBuilder.EntityManager do
   end
 
   @doc """
+  Duplicate an entity (NPC or Item) with a new key.
+
+  Returns {:ok, entity_map} or {:error, reason}
+  """
+  def duplicate_entity(type, key) when type in [:npc, :item] and is_binary(key) do
+    Logger.info("[EntityManager] Duplicating #{type}: #{key}")
+
+    with {:ok, entity} <- get_entity(key) do
+      new_key = generate_duplicate_key(key)
+
+      attrs = %{
+        key: new_key,
+        name: "#{entity.name} (copy)",
+        description: entity.description,
+        level: entity[:level],
+        tags: entity.tags,
+        components: entity.components
+      }
+
+      create_entity(type, attrs)
+    end
+  end
+
+  defp generate_duplicate_key(original_key) do
+    suffix = :crypto.strong_rand_bytes(3) |> Base.encode16() |> String.downcase()
+    "#{original_key}_#{suffix}"
+  end
+
+  @doc """
   Search entities by name or description.
 
   Returns list of matching entity maps.

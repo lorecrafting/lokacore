@@ -185,6 +185,35 @@ defmodule Loka.WorldBuilder.BatchOperations do
     end
   end
 
+  @doc """
+  Duplicate a single room with offset.
+
+  Returns {:ok, new_room_map} or {:error, reason}
+  """
+  def duplicate_room(key, offset \\ %{dx: 1, dy: 1, dz: 0}) do
+    Logger.info("[BatchOperations] Duplicating room: #{key}")
+
+    with {:ok, room} <- RoomManager.get_room(key) do
+      new_key = generate_clone_key(key)
+      dx = Map.get(offset, :dx, 1)
+      dy = Map.get(offset, :dy, 1)
+      dz = Map.get(offset, :dz, 0)
+
+      attrs = %{
+        key: new_key,
+        name: "#{room.name} (copy)",
+        description: room.description,
+        x: room.x + dx,
+        y: room.y + dy,
+        z: room.z + dz,
+        tags: room.tags,
+        zone: room.zone
+      }
+
+      RoomManager.create_room(attrs)
+    end
+  end
+
   # =============================================================================
   # Private Helpers
   # =============================================================================
