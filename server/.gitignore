@@ -62,3 +62,6 @@ npm-debug.log
 /priv/world/prototypes/*/r1.yml
 /priv/world/prototypes/invalid_types/
 /priv/world/templates/e2e_test_*.yml
+
+# LLM observability logs
+priv/llm_logs/*.jsonl

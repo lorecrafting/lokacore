@@ -10,6 +10,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
   require Logger
 
   alias Loka.WorldBuilder.{RoomManager, EntityManager, QuestManager}
+  alias Loka.WorldBuilder.LLM.ObservabilityLogger
   alias Loka.Content.{Zone, Dialogue}
 
   @doc """
@@ -23,41 +24,63 @@ defmodule Loka.WorldBuilder.ToolExecutor do
     - {:ok, result} on success
     - {:error, reason} on failure
   """
-  def execute(tool_name, input) when is_binary(tool_name) and is_map(input) do
+  def execute(tool_name, input, opts \\ []) when is_binary(tool_name) and is_map(input) do
     Logger.info("[ToolExecutor] Executing tool: #{tool_name}")
+    session_id = opts[:session_id] || "unknown"
+    start_time = System.monotonic_time(:millisecond)
 
-    case tool_name do
-      # Room tools
-      "create_room" -> execute_create_room(input)
-      "update_room" -> execute_update_room(input)
-      "delete_room" -> execute_delete_room(input)
-      "create_exit" -> execute_create_exit(input)
-      "remove_exit" -> execute_remove_exit(input)
-      "batch_create_rooms" -> execute_batch_create_rooms(input)
-      # Entity tools
-      "create_npc" -> execute_create_npc(input)
-      "create_item" -> execute_create_item(input)
-      "list_npcs" -> execute_list_npcs(input)
-      "list_items" -> execute_list_items(input)
-      # Quest tools
-      "create_quest" -> execute_create_quest(input)
-      "update_quest" -> execute_update_quest(input)
-      "list_quests" -> execute_list_quests(input)
-      # Dialogue tools
-      "create_dialogue" -> execute_create_dialogue(input)
-      "get_dialogue" -> execute_get_dialogue(input)
-      # Query tools
-      "get_room_info" -> execute_get_room_info(input)
-      "list_rooms" -> execute_list_rooms(input)
-      "get_zone_info" -> execute_get_zone_info(input)
-      "list_zones" -> execute_list_zones(input)
-      _ -> {:error, "Unknown tool: #{tool_name}"}
-    end
+    result =
+      case tool_name do
+        # Room tools
+        "create_room" -> execute_create_room(input)
+        "update_room" -> execute_update_room(input)
+        "delete_room" -> execute_delete_room(input)
+        "create_exit" -> execute_create_exit(input)
+        "remove_exit" -> execute_remove_exit(input)
+        "batch_create_rooms" -> execute_batch_create_rooms(input)
+        # Entity tools
+        "create_npc" -> execute_create_npc(input)
+        "create_item" -> execute_create_item(input)
+        "list_npcs" -> execute_list_npcs(input)
+        "list_items" -> execute_list_items(input)
+        # Quest tools
+        "create_quest" -> execute_create_quest(input)
+        "update_quest" -> execute_update_quest(input)
+        "list_quests" -> execute_list_quests(input)
+        # Dialogue tools
+        "create_dialogue" -> execute_create_dialogue(input)
+        "get_dialogue" -> execute_get_dialogue(input)
+        # Query tools
+        "get_room_info" -> execute_get_room_info(input)
+        "list_rooms" -> execute_list_rooms(input)
+        "get_zone_info" -> execute_get_zone_info(input)
+        "list_zones" -> execute_list_zones(input)
+        _ -> {:error, "Unknown tool: #{tool_name}"}
+      end
+
+    # Log the tool call with timing
+    duration = System.monotonic_time(:millisecond) - start_time
+
+    ObservabilityLogger.log_tool_call(session_id, tool_name, input, %{
+      success: match?({:ok, _}, result),
+      duration_ms: duration,
+      result_preview: result_preview(result)
+    })
+
+    result
   end
 
-  def execute(tool_name, _input) do
+  # Catch-all for invalid tool calls
+  def execute(tool_name, _input, _opts) do
     {:error, "Invalid tool call: #{inspect(tool_name)}"}
   end
+
+  defp result_preview({:ok, data}) when is_map(data) do
+    data[:message] || "success"
+  end
+
+  defp result_preview({:error, reason}), do: inspect(reason)
+  defp result_preview(_), do: "unknown"
 
   # =============================================================================
   # Room Tools

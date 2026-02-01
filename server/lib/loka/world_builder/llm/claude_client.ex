@@ -23,6 +23,8 @@ defmodule Loka.WorldBuilder.LLM.ClaudeClient do
 
   require Logger
 
+  alias Loka.WorldBuilder.LLM.ObservabilityLogger
+
   @api_base "https://api.anthropic.com/v1"
   @model "claude-sonnet-4-5-20250929"
   @max_tokens 4000
@@ -54,6 +56,8 @@ defmodule Loka.WorldBuilder.LLM.ClaudeClient do
       api_key when is_binary(api_key) ->
         caller = opts[:caller] || self()
         receive_timeout = opts[:receive_timeout] || @default_receive_timeout
+        session_id = opts[:session_id] || ObservabilityLogger.generate_session_id()
+        start_time = System.monotonic_time(:millisecond)
 
         request_body =
           %{
@@ -64,6 +68,15 @@ defmodule Loka.WorldBuilder.LLM.ClaudeClient do
             stream: true
           }
           |> maybe_add_tools(tools)
+
+        # Log the request
+        ObservabilityLogger.log_request(session_id, %{
+          model: @model,
+          messages_count: length(messages),
+          tools_count: length(tools),
+          max_tokens: opts[:max_tokens] || @max_tokens,
+          system_prompt_length: String.length(system_prompt || "")
+        })
 
         case Req.post(
                url: "#{@api_base}/messages",
@@ -80,22 +93,55 @@ defmodule Loka.WorldBuilder.LLM.ClaudeClient do
                end
              ) do
           {:ok, %Req.Response{status: status}} when status in 200..299 ->
+            duration = System.monotonic_time(:millisecond) - start_time
+
+            ObservabilityLogger.log_response(session_id, %{
+              status: status,
+              duration_ms: duration,
+              success: true
+            })
+
             send(caller, :stream_complete)
             :ok
 
           {:ok, %Req.Response{status: status, body: body}} ->
+            duration = System.monotonic_time(:millisecond) - start_time
             error = {:http_error, status, body}
             Logger.error("[ClaudeClient] API returned status #{status}: #{inspect(body)}")
+
+            ObservabilityLogger.log_response(session_id, %{
+              status: status,
+              duration_ms: duration,
+              success: false,
+              error: inspect(body)
+            })
+
             send(caller, {:stream_error, error})
             {:error, error}
 
           {:error, %Req.TransportError{reason: :timeout}} ->
+            duration = System.monotonic_time(:millisecond) - start_time
             Logger.error("[ClaudeClient] Request timed out after #{receive_timeout}ms")
+
+            ObservabilityLogger.log_response(session_id, %{
+              duration_ms: duration,
+              success: false,
+              error: "timeout"
+            })
+
             send(caller, {:stream_error, :timeout})
             {:error, :timeout}
 
           {:error, reason} ->
+            duration = System.monotonic_time(:millisecond) - start_time
             Logger.error("[ClaudeClient] Request failed: #{inspect(reason)}")
+
+            ObservabilityLogger.log_response(session_id, %{
+              duration_ms: duration,
+              success: false,
+              error: inspect(reason)
+            })
+
             send(caller, {:stream_error, reason})
             {:error, reason}
         end
