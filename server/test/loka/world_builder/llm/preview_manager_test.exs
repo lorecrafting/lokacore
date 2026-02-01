@@ -3,6 +3,17 @@ defmodule Loka.WorldBuilder.LLM.PreviewManagerTest do
 
   alias Loka.WorldBuilder.LLM.PreviewManager
   alias Loka.WorldBuilder.EntityManager
+  alias Loka.TestCleanup
+
+  # Clean up test files after all tests complete (runs even if tests fail)
+  setup_all do
+    on_exit(fn ->
+      TestCleanup.cleanup_room_test_files()
+      TestCleanup.cleanup_npc_test_files()
+    end)
+
+    :ok
+  end
 
   setup do
     # PreviewManager is started by Application.

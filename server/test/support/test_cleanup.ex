@@ -100,7 +100,20 @@ defmodule Loka.TestCleanup do
       "southwest_room",
       "up_room",
       "down_room",
-      "west_room"
+      "west_room",
+      # PreviewManager test prefixes
+      "accept_room_",
+      "mark_test",
+      "reject_test",
+      "preview_room",
+      "r1",
+      "r2",
+      "r3",
+      "u1r1",
+      "u2r1",
+      "room_",
+      # E2E test prefixes
+      "e2e_test_"
     ])
   end
 
@@ -119,7 +132,9 @@ defmodule Loka.TestCleanup do
       "list_delete_test_",
       "validate_test",
       "e2e_test_",
-      "new_npc_"
+      "new_npc_",
+      # PreviewManager test prefixes
+      "preview_npc"
     ])
   end
 
@@ -129,7 +144,9 @@ defmodule Loka.TestCleanup do
   def cleanup_item_test_files do
     cleanup_test_files(:item, [
       "test_item_",
-      "tool_item_"
+      "tool_item_",
+      # E2E test prefixes
+      "e2e_test_"
     ])
   end
 

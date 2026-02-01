@@ -61,6 +61,8 @@ export default class Canvas2DViewport {
     this.roomSize = 48 // Room rectangle size in pixels (balanced for readability and connection visibility)
     this.minZoom = 0.2
     this.maxZoom = 3
+    this.showGrid = true // Grid visibility toggle
+    this.snapSize = 60 // Snap grid size in pixels (default = gridSize = 1 world unit)
 
     // Data
     this.rooms = []
@@ -82,9 +84,14 @@ export default class Canvas2DViewport {
 
     // Interaction state
     this.isDragging = false
+    this.isDraggingRoom = false // Whether we're dragging a room vs panning
+    this.draggedRoom = null // The room being dragged
+    this.dragRoomStartPos = { x: 0, y: 0 } // Original room position when drag started
     this.dragStart = { x: 0, y: 0 }
     this.lastMousePos = { x: 0, y: 0 }
     this.hoveredRoom = null
+    this.isSnapping = false // Whether shift is held for grid snapping
+    this.snapIndicator = null // { x, y } position of snap indicator
 
     // Minimap state
     this.showMinimap = true
@@ -97,6 +104,7 @@ export default class Canvas2DViewport {
     // Callbacks
     this.onSelectRoom = options.onSelectRoom || (() => {})
     this.onBatchSelect = options.onBatchSelect || (() => {})
+    this.onMoveRoom = options.onMoveRoom || (() => {}) // Called when room is moved via drag
 
     // Setup
     this.setupCanvas()
@@ -137,6 +145,12 @@ export default class Canvas2DViewport {
       this.render()
     })
     this.resizeObserver.observe(this.canvas)
+
+    // Keyboard events for grid toggle
+    this.handleKeyDown = this.handleKeyDown.bind(this)
+    this.handleKeyUp = this.handleKeyUp.bind(this)
+    document.addEventListener('keydown', this.handleKeyDown)
+    document.addEventListener('keyup', this.handleKeyUp)
 
     // Create tooltip element
     this.createTooltip()
@@ -222,6 +236,41 @@ export default class Canvas2DViewport {
   destroy() {
     if (this.resizeObserver) {
       this.resizeObserver.disconnect()
+    }
+    document.removeEventListener('keydown', this.handleKeyDown)
+    document.removeEventListener('keyup', this.handleKeyUp)
+  }
+
+  // ============================================================================
+  // Keyboard Event Handlers
+  // ============================================================================
+
+  handleKeyDown(e) {
+    // Toggle grid visibility with 'G' key
+    if (e.key === 'g' || e.key === 'G') {
+      // Don't toggle if user is typing in an input field
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
+      this.showGrid = !this.showGrid
+      this.render()
+    }
+
+    // Track shift key for snapping
+    if (e.key === 'Shift') {
+      this.isSnapping = true
+      if (this.isDraggingRoom) {
+        this.render()
+      }
+    }
+  }
+
+  handleKeyUp(e) {
+    // Track shift key release
+    if (e.key === 'Shift') {
+      this.isSnapping = false
+      this.snapIndicator = null
+      if (this.isDraggingRoom) {
+        this.render()
+      }
     }
   }
 
@@ -351,30 +400,30 @@ export default class Canvas2DViewport {
     const y = e.clientY - rect.top
 
     this.lastMousePos = { x, y }
+    this.dragStart = { x, y }
 
     // Check if clicking on a room
     const room = this.getRoomAtPoint(x, y)
 
     if (room) {
-      // Room click - handle selection
-      if (e.shiftKey) {
-        // Shift+click: toggle in selection
-        if (this.selectedKeys.has(room.key)) {
-          this.selectedKeys.delete(room.key)
-        } else {
-          this.selectedKeys.add(room.key)
-        }
-        this.onBatchSelect(Array.from(this.selectedKeys))
-      } else {
-        // Normal click: single select
+      // Room click - start dragging the room
+      this.isDragging = true
+      this.isDraggingRoom = true
+      this.draggedRoom = room
+      this.dragRoomStartPos = { x: room.x || 0, y: room.y || 0 }
+      this.canvas.style.cursor = 'move'
+
+      // Also select the room if not already selected
+      if (!this.selectedKeys.has(room.key)) {
         this.selectedKeys.clear()
-        this.onSelectRoom(room.key, e.shiftKey)
+        this.onSelectRoom(room.key, false)
       }
       this.render()
     } else {
       // Empty space click - start panning
       this.isDragging = true
-      this.dragStart = { x, y }
+      this.isDraggingRoom = false
+      this.draggedRoom = null
       this.canvas.style.cursor = 'grabbing'
     }
   }
@@ -384,14 +433,41 @@ export default class Canvas2DViewport {
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
 
+    // Track snapping state from shift key
+    this.isSnapping = e.shiftKey
+
     if (this.isDragging) {
-      // Pan the camera
-      const dx = (x - this.lastMousePos.x) / this.camera.zoom
-      const dy = (y - this.lastMousePos.y) / this.camera.zoom
-      this.camera.x += dx
-      this.camera.y += dy
-      this.hideTooltip()
-      this.render()
+      if (this.isDraggingRoom && this.draggedRoom) {
+        // Drag the room
+        const worldPos = this.screenToWorld(x, y)
+        let newX = worldPos.x
+        let newY = worldPos.y
+
+        // Apply grid snapping if shift is held
+        if (this.isSnapping) {
+          const snapWorld = this.snapSize / this.gridSize // Snap size in world units
+          newX = Math.round(newX / snapWorld) * snapWorld
+          newY = Math.round(newY / snapWorld) * snapWorld
+          this.snapIndicator = { x: newX, y: newY }
+        } else {
+          this.snapIndicator = null
+        }
+
+        // Update room position (temporary - will be saved on mouse up)
+        this.draggedRoom.x = newX
+        this.draggedRoom.y = newY
+
+        this.hideTooltip()
+        this.render()
+      } else {
+        // Pan the camera
+        const dx = (x - this.lastMousePos.x) / this.camera.zoom
+        const dy = (y - this.lastMousePos.y) / this.camera.zoom
+        this.camera.x += dx
+        this.camera.y += dy
+        this.hideTooltip()
+        this.render()
+      }
     } else {
       // Update cursor and tooltip based on what's under mouse
       const room = this.getRoomAtPoint(x, y)
@@ -413,8 +489,23 @@ export default class Canvas2DViewport {
   }
 
   handleMouseUp(e) {
+    // If we were dragging a room, notify the callback
+    if (this.isDraggingRoom && this.draggedRoom) {
+      const newX = this.draggedRoom.x
+      const newY = this.draggedRoom.y
+
+      // Only fire callback if position actually changed
+      if (newX !== this.dragRoomStartPos.x || newY !== this.dragRoomStartPos.y) {
+        this.onMoveRoom(this.draggedRoom.key, newX, newY)
+      }
+    }
+
     this.isDragging = false
+    this.isDraggingRoom = false
+    this.draggedRoom = null
+    this.snapIndicator = null
     this.canvas.style.cursor = 'grab'
+    this.render()
   }
 
   handleWheel(e) {
@@ -460,8 +551,10 @@ export default class Canvas2DViewport {
     ctx.scale(this.camera.zoom, this.camera.zoom)
     ctx.translate(this.camera.x, this.camera.y)
 
-    // Draw grid
-    this.drawGrid(ctx)
+    // Draw grid (if visible)
+    if (this.showGrid) {
+      this.drawGrid(ctx)
+    }
 
     // Draw ghost rooms (adjacent Z-levels)
     if (this.showGhostLayers) {
@@ -479,6 +572,11 @@ export default class Canvas2DViewport {
 
     // Draw rooms at current Z-level
     this.drawRoomsAtZLevel(ctx, this.currentZLevel, 1.0)
+
+    // Draw snap indicator if snapping
+    if (this.snapIndicator && this.isDraggingRoom) {
+      this.drawSnapIndicator(ctx)
+    }
 
     // Restore context
     ctx.restore()
@@ -564,6 +662,21 @@ export default class Canvas2DViewport {
   setShowMinimap(show) {
     this.showMinimap = show
     this.render()
+  }
+
+  setShowGrid(show) {
+    this.showGrid = show
+    this.render()
+  }
+
+  toggleGrid() {
+    this.showGrid = !this.showGrid
+    this.render()
+    return this.showGrid
+  }
+
+  setSnapSize(size) {
+    this.snapSize = size
   }
 
   drawNPCPaths(ctx) {
@@ -710,6 +823,60 @@ export default class Canvas2DViewport {
     ctx.moveTo(0, -10)
     ctx.lineTo(0, 10)
     ctx.stroke()
+  }
+
+  drawSnapIndicator(ctx) {
+    if (!this.snapIndicator) return
+
+    const x = this.snapIndicator.x * this.gridSize
+    const y = this.snapIndicator.y * this.gridSize
+
+    // Draw crosshairs at snap position
+    const crosshairLength = 20 / this.camera.zoom
+    const lineWidth = 2 / this.camera.zoom
+
+    ctx.save()
+    ctx.strokeStyle = '#00ff88'
+    ctx.lineWidth = lineWidth
+    ctx.globalAlpha = 0.8
+
+    // Horizontal crosshair
+    ctx.beginPath()
+    ctx.moveTo(x - crosshairLength, y)
+    ctx.lineTo(x + crosshairLength, y)
+    ctx.stroke()
+
+    // Vertical crosshair
+    ctx.beginPath()
+    ctx.moveTo(x, y - crosshairLength)
+    ctx.lineTo(x, y + crosshairLength)
+    ctx.stroke()
+
+    // Draw snap point circle
+    ctx.beginPath()
+    ctx.arc(x, y, 6 / this.camera.zoom, 0, Math.PI * 2)
+    ctx.stroke()
+
+    // Highlight the grid lines near snap point
+    ctx.strokeStyle = '#00ff8844'
+    ctx.lineWidth = 3 / this.camera.zoom
+    ctx.globalAlpha = 0.5
+
+    // Vertical grid line at snap X
+    const topLeft = this.screenToWorld(0, 0)
+    const bottomRight = this.screenToWorld(this.width, this.height)
+    ctx.beginPath()
+    ctx.moveTo(x, topLeft.y * this.gridSize)
+    ctx.lineTo(x, bottomRight.y * this.gridSize)
+    ctx.stroke()
+
+    // Horizontal grid line at snap Y
+    ctx.beginPath()
+    ctx.moveTo(topLeft.x * this.gridSize, y)
+    ctx.lineTo(bottomRight.x * this.gridSize, y)
+    ctx.stroke()
+
+    ctx.restore()
   }
 
   drawRoomsAtZLevel(ctx, zLevel, opacity) {

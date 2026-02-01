@@ -14,6 +14,7 @@ defmodule Loka.Integration.WorldBuilderE2ETest do
   - Quest chain validation
 
   Data isolation is handled by Ecto sandbox - all changes rollback after test.
+  YAML files created during tests are cleaned up via on_exit callback.
   """
 
   use LokaWeb.ConnCase, async: false
@@ -21,6 +22,7 @@ defmodule Loka.Integration.WorldBuilderE2ETest do
   import Phoenix.LiveViewTest
 
   alias Loka.AccountsFixtures
+  alias Loka.TestCleanup
 
   @moduletag :integration
   @moduletag timeout: 120_000
@@ -28,6 +30,17 @@ defmodule Loka.Integration.WorldBuilderE2ETest do
   # Test zone configuration
   @test_zone_prefix "e2e_test"
   @room_spacing 5
+
+  # Clean up test files after all tests complete (runs even if tests fail)
+  setup_all do
+    on_exit(fn ->
+      TestCleanup.cleanup_room_test_files()
+      TestCleanup.cleanup_npc_test_files()
+      TestCleanup.cleanup_item_test_files()
+    end)
+
+    :ok
+  end
 
   setup %{conn: conn} do
     # Create an admin player for World Builder access
