@@ -9,7 +9,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
   """
   require Logger
 
-  alias Loka.WorldBuilder.{RoomManager, EntityManager, QuestManager}
+  alias Loka.WorldBuilder.{RoomManager, EntityManager, QuestManager, Projects, AuditLog}
   alias Loka.WorldBuilder.LLM.ObservabilityLogger
   alias Loka.Content.{Zone, Dialogue}
 
@@ -24,13 +24,30 @@ defmodule Loka.WorldBuilder.ToolExecutor do
     - {:ok, result} on success
     - {:error, reason} on failure
   """
-  def execute(tool_name, input, opts \\ []) when is_binary(tool_name) and is_map(input) do
+  def execute(tool_name, input, opts \\ [])
+
+  def execute(tool_name, input, opts) when is_binary(tool_name) and is_map(input) do
     Logger.info("[ToolExecutor] Executing tool: #{tool_name}")
     session_id = opts[:session_id] || "unknown"
     start_time = System.monotonic_time(:millisecond)
 
+    # Get project context from opts
+    project_key = opts[:project_key]
+
     result =
       case tool_name do
+        # Project tools
+        "create_project" -> execute_create_project(input)
+        "load_project" -> execute_load_project(input)
+        "list_projects" -> execute_list_projects(input)
+        "delete_project" -> execute_delete_project(input)
+        # Document tools
+        "write_doc" -> execute_write_doc(input, project_key)
+        "read_doc" -> execute_read_doc(input, project_key)
+        "list_docs" -> execute_list_docs(input, project_key)
+        "delete_doc" -> execute_delete_doc(input, project_key)
+        # Guidance tools
+        "read_guide" -> execute_read_guide(input)
         # Room tools
         "create_room" -> execute_create_room(input)
         "update_room" -> execute_update_room(input)
@@ -58,6 +75,29 @@ defmodule Loka.WorldBuilder.ToolExecutor do
         _ -> {:error, "Unknown tool: #{tool_name}"}
       end
 
+    # Log to audit log if project context exists
+    if project_key do
+      case result do
+        {:ok, _} ->
+          AuditLog.log_success(
+            project_key,
+            opts[:conversation_id],
+            tool_name,
+            input,
+            nil
+          )
+
+        {:error, reason} ->
+          AuditLog.log_error(
+            project_key,
+            opts[:conversation_id],
+            tool_name,
+            input,
+            inspect(reason)
+          )
+      end
+    end
+
     # Log the tool call with timing
     duration = System.monotonic_time(:millisecond) - start_time
 
@@ -81,6 +121,241 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
   defp result_preview({:error, reason}), do: inspect(reason)
   defp result_preview(_), do: "unknown"
+
+  # =============================================================================
+  # Project Tools
+  # =============================================================================
+
+  defp execute_create_project(input) do
+    key = input["key"]
+    name = input["name"]
+    description = input["description"] || ""
+
+    case Projects.create_project(key, name, description) do
+      {:ok, _doc} ->
+        {:ok,
+         %{
+           success: true,
+           message: "Created project '#{name}' (#{key})",
+           project: %{
+             key: key,
+             name: name
+           }
+         }}
+
+      {:error, changeset} ->
+        {:error, "Failed to create project: #{inspect(changeset.errors)}"}
+    end
+  end
+
+  defp execute_load_project(input) do
+    key = input["key"]
+
+    case Projects.get_project(key) do
+      {:ok, project} ->
+        doc_summaries =
+          Enum.map(project.documents, fn doc ->
+            %{
+              filename: doc.filename,
+              doc_type: doc.doc_type,
+              version: doc.version,
+              preview: String.slice(doc.content, 0, 200)
+            }
+          end)
+
+        {:ok,
+         %{
+           success: true,
+           message: "Loaded project '#{key}'",
+           project: %{
+             key: project.key,
+             stats: project.stats,
+             documents: doc_summaries
+           }
+         }}
+
+      {:error, :not_found} ->
+        {:error, "Project not found: #{key}"}
+    end
+  end
+
+  defp execute_list_projects(_input) do
+    projects = Projects.list_projects()
+
+    {:ok,
+     %{
+       success: true,
+       message: "Found #{length(projects)} projects",
+       projects: projects
+     }}
+  end
+
+  defp execute_delete_project(input) do
+    key = input["key"]
+
+    case Projects.delete_project(key) do
+      {:ok, count} ->
+        {:ok,
+         %{
+           success: true,
+           message: "Deleted project '#{key}' (#{count} documents removed)"
+         }}
+
+      {:error, :not_found} ->
+        {:error, "Project not found: #{key}"}
+    end
+  end
+
+  # =============================================================================
+  # Document Tools
+  # =============================================================================
+
+  defp execute_write_doc(input, project_key) do
+    project_key = input["project_key"] || project_key
+
+    if is_nil(project_key) do
+      {:error, "No project loaded. Use create_project or load_project first."}
+    else
+      filename = input["filename"]
+      content = input["content"]
+      doc_type = input["doc_type"] || "design"
+
+      case Projects.write_doc(project_key, filename, content, doc_type) do
+        {:ok, doc} ->
+          {:ok,
+           %{
+             success: true,
+             message: "Saved document '#{filename}' (v#{doc.version})",
+             document: %{
+               filename: doc.filename,
+               doc_type: doc.doc_type,
+               version: doc.version
+             }
+           }}
+
+        {:error, changeset} ->
+          {:error, "Failed to save document: #{inspect(changeset.errors)}"}
+      end
+    end
+  end
+
+  defp execute_read_doc(input, project_key) do
+    project_key = input["project_key"] || project_key
+
+    if is_nil(project_key) do
+      {:error, "No project loaded. Use create_project or load_project first."}
+    else
+      filename = input["filename"]
+
+      case Projects.get_doc(project_key, filename) do
+        {:ok, doc} ->
+          {:ok,
+           %{
+             success: true,
+             document: %{
+               filename: doc.filename,
+               content: doc.content,
+               doc_type: doc.doc_type,
+               version: doc.version
+             }
+           }}
+
+        {:error, :not_found} ->
+          {:error, "Document not found: #{filename}"}
+      end
+    end
+  end
+
+  defp execute_list_docs(input, project_key) do
+    project_key = input["project_key"] || project_key
+
+    if is_nil(project_key) do
+      {:error, "No project loaded. Use create_project or load_project first."}
+    else
+      doc_type = input["doc_type"]
+      docs = Projects.list_docs(project_key, doc_type)
+
+      doc_list =
+        Enum.map(docs, fn doc ->
+          %{
+            filename: doc.filename,
+            doc_type: doc.doc_type,
+            version: doc.version
+          }
+        end)
+
+      {:ok,
+       %{
+         success: true,
+         message: "Found #{length(doc_list)} documents",
+         documents: doc_list
+       }}
+    end
+  end
+
+  defp execute_delete_doc(input, project_key) do
+    project_key = input["project_key"] || project_key
+
+    if is_nil(project_key) do
+      {:error, "No project loaded. Use create_project or load_project first."}
+    else
+      filename = input["filename"]
+
+      case Projects.delete_doc(project_key, filename) do
+        {:ok, _doc} ->
+          {:ok,
+           %{
+             success: true,
+             message: "Deleted document '#{filename}'"
+           }}
+
+        {:error, :not_found} ->
+          {:error, "Document not found: #{filename}"}
+      end
+    end
+  end
+
+  # =============================================================================
+  # Guidance Tools
+  # =============================================================================
+
+  @guide_topics %{
+    "world_design_process" => "world_design_process.md",
+    "narrative_style" => "narrative_style.md",
+    "story_structure" => "story_structure.md",
+    "weaving_patterns" => "weaving_patterns.md",
+    "entity_patterns" => "entity_patterns.md",
+    "dialogue_patterns" => "dialogue_patterns.md",
+    "quest_patterns" => "quest_patterns.md",
+    "npc_behaviors" => "npc_behaviors.md"
+  }
+
+  defp execute_read_guide(input) do
+    topic = input["topic"]
+
+    case Map.get(@guide_topics, topic) do
+      nil ->
+        available = Map.keys(@guide_topics) |> Enum.join(", ")
+        {:error, "Unknown topic '#{topic}'. Available: #{available}"}
+
+      filename ->
+        guide_path =
+          Path.join([:code.priv_dir(:loka), "world_builder", "guides", filename])
+
+        case File.read(guide_path) do
+          {:ok, content} ->
+            {:ok,
+             %{
+               success: true,
+               topic: topic,
+               content: content
+             }}
+
+          {:error, reason} ->
+            {:error, "Failed to read guide: #{inspect(reason)}"}
+        end
+    end
+  end
 
   # =============================================================================
   # Room Tools

@@ -26,8 +26,46 @@ Ensures World Builder code follows the layered architecture and avoids common mi
 │ Layer 3: Specialized Managers (When Needed)                 │
 │   RoomManager, TemplateManager, BatchOperations             │
 │   → Only for complex UI requirements                        │
+├─────────────────────────────────────────────────────────────┤
+│ Layer 4: LLM Integration                                    │
+│   MCP Server → Claude Desktop (no API cost)                 │
+│   Anthropic Client → LiveView Chat (API per token)          │
+│   → Both use same ToolExecutor                              │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+## LLM Integration Architecture
+
+Two paths for AI-assisted world building:
+
+### MCP Server (Recommended Long-Term)
+```
+Claude Desktop ──MCP──▶ /world_builder_mcp ──▶ ToolExecutor
+```
+- Uses your Claude subscription (no API cost)
+- 30+ tools exposed via Model Context Protocol
+- Files: `lib/loka/world_builder/mcp/`
+
+### LiveView Chat (Transitional)
+```
+Browser ──LiveView──▶ AnthropicClient ──▶ ToolExecutor
+```
+- Server-side Anthropic API calls
+- Streaming responses to LiveView
+- Requires `ANTHROPIC_API_KEY`
+- Files: `lib/loka/world_builder/anthropic_client.ex`, `chat.ex`
+
+### Tool Executor (Shared)
+Both paths use the same `ToolExecutor.execute/3`:
+```elixir
+# MCP tool callback
+callback: fn args -> ToolExecutor.execute("create_room", args) end
+
+# LiveView chat
+ToolExecutor.execute(tool_name, input, project_key: project_key)
+```
+
+**See also:** `.claude/skills/phoenix-mcp-server-pattern.md` and `.claude/skills/liveview-external-api-streaming.md`
 
 ## Key Rules
 

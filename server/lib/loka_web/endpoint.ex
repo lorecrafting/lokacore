@@ -44,6 +44,18 @@ defmodule LokaWeb.Endpoint do
     plug Tidewave
   end
 
+  # World Builder MCP server for Claude Desktop integration
+  # Forward before Plug.Parsers so the MCP router can handle its own JSON parsing
+  plug :world_builder_mcp_router
+
+  defp world_builder_mcp_router(%Plug.Conn{path_info: ["world_builder_mcp" | rest]} = conn, _opts) do
+    conn
+    |> Plug.forward(rest, Loka.WorldBuilder.MCP.Router, [])
+    |> Plug.Conn.halt()
+  end
+
+  defp world_builder_mcp_router(conn, _opts), do: conn
+
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
   if code_reloading? do

@@ -34,6 +34,19 @@ import { undoManager } from "./world_builder/UndoManager.js"
 
 // Custom hooks for ebook-style game client
 const Hooks = {
+  // Auto-scroll to bottom on content updates (for chat panels)
+  ScrollBottom: {
+    mounted() {
+      this.scrollToBottom()
+    },
+    updated() {
+      this.scrollToBottom()
+    },
+    scrollToBottom() {
+      this.el.scrollTop = this.el.scrollHeight
+    }
+  },
+
   // Room scroll behavior - scrolls room description away as events grow
   // Also handles room transition animations when navigating
   RoomScroll: {

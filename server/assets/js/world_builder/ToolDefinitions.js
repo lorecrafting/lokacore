@@ -323,6 +323,232 @@ export const allTools = [
   batchCreateRooms
 ]
 
+// ============================================================================
+// Project Management Tools
+// ============================================================================
+
+/**
+ * Create a new project
+ */
+export const createProject = {
+  name: 'create_project',
+  description: 'Create a new world-building project. Use this when starting work on a new game world.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      key: {
+        type: 'string',
+        description: 'Unique identifier for the project (lowercase, dashes/underscores allowed). Example: "seedship-forest"'
+      },
+      name: {
+        type: 'string',
+        description: 'Display name for the project. Example: "Seedship Forest"'
+      },
+      description: {
+        type: 'string',
+        description: 'Brief description of the world concept'
+      }
+    },
+    required: ['key', 'name']
+  }
+}
+
+/**
+ * Load an existing project
+ */
+export const loadProject = {
+  name: 'load_project',
+  description: 'Load an existing project to continue working on it. Returns project overview with all documents.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      key: {
+        type: 'string',
+        description: 'Project key to load'
+      }
+    },
+    required: ['key']
+  }
+}
+
+/**
+ * List all projects
+ */
+export const listProjects = {
+  name: 'list_projects',
+  description: 'List all available world-building projects.',
+  input_schema: {
+    type: 'object',
+    properties: {},
+    required: []
+  }
+}
+
+/**
+ * Delete a project
+ */
+export const deleteProject = {
+  name: 'delete_project',
+  description: 'Delete a project and all its documents. Warning: This is permanent.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      key: {
+        type: 'string',
+        description: 'Project key to delete'
+      }
+    },
+    required: ['key']
+  }
+}
+
+// ============================================================================
+// Document Tools
+// ============================================================================
+
+/**
+ * Write/update a document
+ */
+export const writeDoc = {
+  name: 'write_doc',
+  description: 'Create or update a document in the current project. Use for design docs (WORLD-CONCEPT.md, CHARACTERS.md), planning (BUILD-STATUS.md), or notes.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      filename: {
+        type: 'string',
+        description: 'Document filename with extension. Example: "WORLD-CONCEPT.md", "CHARACTERS.md", "BUILD-STATUS.md"'
+      },
+      content: {
+        type: 'string',
+        description: 'Markdown content for the document'
+      },
+      doc_type: {
+        type: 'string',
+        enum: ['design', 'planning', 'notes'],
+        description: 'Type of document. "design" for world design, "planning" for build tracking, "notes" for freeform'
+      }
+    },
+    required: ['filename', 'content']
+  }
+}
+
+/**
+ * Read a document
+ */
+export const readDoc = {
+  name: 'read_doc',
+  description: 'Read a document from the current project.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      filename: {
+        type: 'string',
+        description: 'Document filename to read'
+      }
+    },
+    required: ['filename']
+  }
+}
+
+/**
+ * List documents in a project
+ */
+export const listDocs = {
+  name: 'list_docs',
+  description: 'List all documents in the current project.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      doc_type: {
+        type: 'string',
+        enum: ['design', 'planning', 'notes'],
+        description: 'Optional filter by document type'
+      }
+    },
+    required: []
+  }
+}
+
+/**
+ * Delete a document
+ */
+export const deleteDoc = {
+  name: 'delete_doc',
+  description: 'Delete a document from the current project.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      filename: {
+        type: 'string',
+        description: 'Document filename to delete'
+      }
+    },
+    required: ['filename']
+  }
+}
+
+// ============================================================================
+// Guidance Tools
+// ============================================================================
+
+/**
+ * Read framework guidance
+ */
+export const readGuide = {
+  name: 'read_guide',
+  description: 'Read framework guidance documentation on a specific topic.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      topic: {
+        type: 'string',
+        enum: [
+          'world_design_process',
+          'narrative_style',
+          'story_structure',
+          'weaving_patterns',
+          'entity_patterns',
+          'dialogue_patterns',
+          'quest_patterns',
+          'npc_behaviors'
+        ],
+        description: 'Topic to get guidance on'
+      }
+    },
+    required: ['topic']
+  }
+}
+
+/**
+ * All available tools
+ */
+export const allTools = [
+  // Project management
+  createProject,
+  loadProject,
+  listProjects,
+  deleteProject,
+  // Documents
+  writeDoc,
+  readDoc,
+  listDocs,
+  deleteDoc,
+  // Guidance
+  readGuide,
+  // World building (existing)
+  createRoom,
+  updateRoom,
+  createExit,
+  removeExit,
+  deleteRoom,
+  createNPC,
+  createItem,
+  getRoomInfo,
+  listRooms,
+  batchCreateRooms
+]
+
 /**
  * Get a subset of tools by name
  * @param {string[]} names - Tool names to include
@@ -358,12 +584,40 @@ export function getEntityTools() {
   ])
 }
 
+/**
+ * Get project management tools
+ */
+export function getProjectTools() {
+  return getTools([
+    'create_project',
+    'load_project',
+    'list_projects',
+    'delete_project',
+    'write_doc',
+    'read_doc',
+    'list_docs',
+    'delete_doc',
+    'read_guide'
+  ])
+}
+
 export default {
   allTools,
   getTools,
   getWorldBuildingTools,
   getEntityTools,
-  // Individual tools
+  getProjectTools,
+  // Project tools
+  createProject,
+  loadProject,
+  listProjects,
+  deleteProject,
+  writeDoc,
+  readDoc,
+  listDocs,
+  deleteDoc,
+  readGuide,
+  // World building tools
   createRoom,
   updateRoom,
   createExit,

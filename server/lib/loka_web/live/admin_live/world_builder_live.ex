@@ -30,7 +30,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     ScriptManager,
     ScriptTemplates,
     GitManager,
-    NPCPathExtractor
+    NPCPathExtractor,
+    Projects
   }
 
   alias Loka.Content.Zone
@@ -53,7 +54,9 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     DialogueEventHandler,
     EntityEventHandler,
     KeyboardHelpModal,
-    QuestFlowModal
+    QuestFlowModal,
+    ProjectsPanel,
+    DocumentViewer
   }
 
   alias Loka.Admin.Audit
@@ -166,14 +169,31 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
        hierarchy: false,
        inspector: false,
        console: false,
-       chat: false
+       chat: false,
+       projects: false
      })
      |> assign(:panel_sizes, %{
        hierarchy: 200,
        inspector: 260,
        chat: 320,
-       console: 150
+       console: 150,
+       projects: 220
      })
+     # Projects panel state
+     |> assign(:projects, Projects.list_projects())
+     |> assign(:current_project, nil)
+     |> assign(:project_docs, %{})
+     |> assign(:expanded_projects, %{})
+     |> assign(:selected_document, nil)
+     |> assign(:document_content, nil)
+     |> assign(:document_loading, false)
+     |> assign(:document_error, nil)
+     # Chat panel state
+     |> assign(:chat_messages, [])
+     |> assign(:chat_streaming, false)
+     |> assign(:chat_current_response, "")
+     |> assign(:chat_error, nil)
+     |> assign(:pending_tool_results, [])
      |> assign(:camera_view, "perspective")
      |> assign(:undo_state, %{can_undo: false, can_redo: false, undo_count: 0, redo_count: 0})
      # Confirmation modal state (replaces browser-native confirm dialogs)
@@ -201,13 +221,29 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
         show_npc_paths={@show_npc_paths}
       />
       
-    <!-- Main 4-panel layout with resize handles -->
+    <!-- Main panel layout with resize handles -->
       <div
         id="world-builder-panels"
         class={panel_container_classes(@collapsed_panels)}
         phx-hook="PanelResize"
         style={panel_sizes_style(@panel_sizes)}
       >
+        <ProjectsPanel.projects_panel
+          projects={@projects}
+          current_project={@current_project}
+          project_docs={@project_docs}
+          expanded_projects={@expanded_projects}
+          selected_document={@selected_document}
+          collapsed={@collapsed_panels.projects}
+        />
+
+        <div
+          class="panel-resize-handle"
+          data-resize="projects"
+          style={if @collapsed_panels.projects, do: "display: none;", else: ""}
+        >
+        </div>
+
         <HierarchyPanel.hierarchy_panel
           rooms={@rooms}
           npcs={@npcs}
@@ -271,9 +307,11 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
         </div>
 
         <ChatPanel.chat_panel
-          rooms={@rooms}
-          selected_room={@selected_room}
-          validation={@validation}
+          messages={@chat_messages}
+          streaming={@chat_streaming}
+          current_response={@chat_current_response}
+          current_project={@current_project}
+          error={@chat_error}
           collapsed={@collapsed_panels.chat}
         />
       </div>
@@ -616,6 +654,18 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
       <%!-- Validation Panel --%>
       <%= if @show_validation_panel do %>
         <ValidationPanel.validation_panel validation_results={@validation} />
+      <% end %>
+
+      <%!-- Document Viewer Modal --%>
+      <%= if @selected_document do %>
+        <div class="document-viewer-modal">
+          <DocumentViewer.document_viewer
+            document={@selected_document}
+            content={@document_content}
+            loading={@document_loading}
+            error={@document_error}
+          />
+        </div>
       <% end %>
 
       <%!-- Confirmation Modal (replaces browser-native confirm dialogs) --%>
@@ -2166,9 +2216,15 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     {:noreply, log_console(socket, :info, "Tool #{tool} finished")}
   end
 
-  def handle_event("execute_tool", %{"name" => tool_name, "input" => input}, socket) do
-    # Execute tool via ToolExecutor
-    result = ToolExecutor.execute(tool_name, input)
+  def handle_event("execute_tool", params, socket) do
+    tool_name = params["name"]
+    input = params["input"]
+    project_key = params["project_key"]
+    conversation_id = params["conversation_id"]
+
+    # Execute tool via ToolExecutor with project context
+    opts = [project_key: project_key, conversation_id: conversation_id]
+    result = ToolExecutor.execute(tool_name, input, opts)
     formatted = ToolExecutor.format_result(result)
 
     # Log to console
@@ -2216,6 +2272,174 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
        tool: tool_name,
        result: formatted
      })}
+  end
+
+  # =============================================================================
+  # Project Management Events
+  # =============================================================================
+
+  # Chat panel events (for React ChatPanel)
+  def handle_event("fetch_projects", _params, socket) do
+    projects = Projects.list_projects()
+    {:reply, %{projects: projects}, socket}
+  end
+
+  def handle_event("fetch_project_docs", %{"project_key" => project_key}, socket) do
+    docs = Projects.list_docs(project_key)
+
+    doc_list =
+      Enum.map(docs, fn doc ->
+        %{
+          filename: doc.filename,
+          doc_type: doc.doc_type,
+          version: doc.version
+        }
+      end)
+
+    {:reply, %{documents: doc_list}, socket}
+  end
+
+  def handle_event("fetch_document_content", params, socket) do
+    project_key = params["project_key"]
+    filename = params["filename"]
+
+    case Projects.get_doc(project_key, filename) do
+      {:ok, doc} ->
+        {:reply, %{content: doc.content}, socket}
+
+      {:error, :not_found} ->
+        {:reply, %{error: "Document not found"}, socket}
+    end
+  end
+
+  def handle_event("create_project_ui", %{"key" => key, "name" => name}, socket) do
+    case Projects.create_project(key, name, "") do
+      {:ok, _doc} ->
+        {:reply, %{success: true}, socket}
+
+      {:error, changeset} ->
+        {:reply, %{success: false, error: inspect(changeset.errors)}, socket}
+    end
+  end
+
+  # Projects Panel UI events (for LiveView ProjectsPanel)
+  def handle_event("refresh_projects", _params, socket) do
+    {:noreply, assign(socket, :projects, Projects.list_projects())}
+  end
+
+  def handle_event("new_project_modal", _params, socket) do
+    # For now, use a simple prompt - can enhance with modal later
+    {:noreply, socket}
+  end
+
+  def handle_event("select_project", %{"key" => project_key}, socket) do
+    # Toggle expansion
+    expanded = socket.assigns.expanded_projects
+    is_expanded = Map.get(expanded, project_key, false)
+
+    socket =
+      socket
+      |> assign(:current_project, %{key: project_key})
+      |> assign(:expanded_projects, Map.put(expanded, project_key, !is_expanded))
+
+    # Load docs if expanding and not already loaded
+    socket =
+      if !is_expanded && !Map.has_key?(socket.assigns.project_docs, project_key) do
+        docs = Projects.list_docs(project_key)
+
+        doc_list =
+          Enum.map(docs, fn doc ->
+            %{
+              filename: doc.filename,
+              doc_type: doc.doc_type,
+              version: doc.version
+            }
+          end)
+
+        assign(socket, :project_docs, Map.put(socket.assigns.project_docs, project_key, doc_list))
+      else
+        socket
+      end
+
+    {:noreply, socket}
+  end
+
+  def handle_event("select_document", %{"project" => project_key, "filename" => filename}, socket) do
+    socket =
+      socket
+      |> assign(:selected_document, %{project_key: project_key, filename: filename})
+      |> assign(:document_loading, true)
+      |> assign(:document_error, nil)
+
+    case Projects.get_doc(project_key, filename) do
+      {:ok, doc} ->
+        {:noreply,
+         socket
+         |> assign(:selected_document, %{
+           project_key: project_key,
+           filename: doc.filename,
+           doc_type: doc.doc_type,
+           version: doc.version
+         })
+         |> assign(:document_content, doc.content)
+         |> assign(:document_loading, false)}
+
+      {:error, :not_found} ->
+        {:noreply,
+         socket
+         |> assign(:document_error, "Document not found")
+         |> assign(:document_loading, false)}
+    end
+  end
+
+  def handle_event("refresh_document", _params, socket) do
+    case socket.assigns.selected_document do
+      %{project_key: project_key, filename: filename} ->
+        handle_event(
+          "select_document",
+          %{"project" => project_key, "filename" => filename},
+          socket
+        )
+
+      _ ->
+        {:noreply, socket}
+    end
+  end
+
+  def handle_event("close_document", _params, socket) do
+    {:noreply,
+     socket
+     |> assign(:selected_document, nil)
+     |> assign(:document_content, nil)
+     |> assign(:document_error, nil)}
+  end
+
+  # =============================================================================
+  # Chat Panel Events
+  # =============================================================================
+
+  def handle_event("send_message", %{"message" => message}, socket) do
+    message = String.trim(message)
+
+    if message != "" do
+      {:noreply, Loka.WorldBuilder.Chat.send_message(socket, message)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_event("textarea_keydown", %{"key" => "Enter", "ctrlKey" => true}, socket) do
+    # Ctrl+Enter submits - this would need JS to capture the textarea value
+    # For now, we rely on the form submit
+    {:noreply, socket}
+  end
+
+  def handle_event("textarea_keydown", _params, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_event("clear_chat", _params, socket) do
+    {:noreply, Loka.WorldBuilder.Chat.clear_chat(socket)}
   end
 
   # =============================================================================
@@ -2478,6 +2702,34 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     room_entities ++ npc_entities ++ item_entities
   end
 
+  # =============================================================================
+  # Handle Info - Anthropic Streaming Events
+  # =============================================================================
+
+  @impl true
+  def handle_info({:anthropic_text_delta, text}, socket) do
+    {:noreply, Loka.WorldBuilder.Chat.handle_text_delta(socket, text)}
+  end
+
+  @impl true
+  def handle_info({:anthropic_tool_use, tool_name, tool_id, input}, socket) do
+    {:noreply, Loka.WorldBuilder.Chat.handle_tool_use(socket, tool_name, tool_id, input)}
+  end
+
+  @impl true
+  def handle_info({:anthropic_done, response}, socket) do
+    {:noreply, Loka.WorldBuilder.Chat.handle_done(socket, response)}
+  end
+
+  @impl true
+  def handle_info({:anthropic_error, error}, socket) do
+    {:noreply, Loka.WorldBuilder.Chat.handle_error(socket, error)}
+  end
+
+  # =============================================================================
+  # Private Helper Functions
+  # =============================================================================
+
   # Safely parse algorithm string to atom, preventing atom exhaustion attacks
   defp parse_algorithm(str) when is_binary(str) do
     try do
@@ -2500,6 +2752,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
     classes =
       [
+        collapsed_panels[:projects] && "projects-collapsed",
         collapsed_panels.hierarchy && "hierarchy-collapsed",
         collapsed_panels.inspector && "inspector-collapsed",
         collapsed_panels.console && "console-collapsed",
@@ -2513,7 +2766,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
   # Build CSS custom properties for panel sizes
   defp panel_sizes_style(panel_sizes) do
-    "--hierarchy-width: #{panel_sizes.hierarchy}px; " <>
+    "--projects-width: #{panel_sizes[:projects] || 220}px; " <>
+      "--hierarchy-width: #{panel_sizes.hierarchy}px; " <>
       "--inspector-width: #{panel_sizes.inspector}px; " <>
       "--chat-width: #{panel_sizes.chat}px; " <>
       "--console-height: #{panel_sizes.console}px;"
