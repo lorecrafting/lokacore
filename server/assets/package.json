@@ -8,14 +8,9 @@
     "test": "echo 'No tests yet'"
   },
   "dependencies": {
-    "@monaco-editor/react": "^4.7.0",
-    "@react-three/drei": "^9.92.0",
-    "@react-three/fiber": "^8.15.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "reactflow": "^11.10.4",
-    "three": "^0.160.0",
-    "zustand": "^4.4.7"
+    "@codemirror/language": "^6.12.1",
+    "@codemirror/theme-one-dark": "^6.1.3",
+    "codemirror": "^6.0.2"
   },
   "engines": {
     "node": ">=18.0.0"

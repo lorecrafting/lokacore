@@ -1,16 +1,17 @@
 defmodule LokaWeb.AdminLive.WorldBuilderLive do
   @moduledoc """
-  World Builder LiveView - Unity-style 3D world editor
+  World Builder LiveView - Unity-style world editor
 
-  Provides a hybrid LiveView + React Three Fiber architecture for building game worlds:
-  - LiveView shell handles auth, real-time updates, and validation
-  - React Three Fiber handles 3D visualization in the viewport
+  Pure LiveView architecture for building game worlds:
+  - LiveView handles auth, real-time updates, validation, and all editors
+  - Canvas2DViewport (JS hook) handles 2D map visualization
+  - CodeMirror 6 (bundled JS) handles script code editing
   - Unity-style 4-panel docking layout (Hierarchy | Viewport | Inspector | Console)
 
   ## Architecture
 
-  - LiveView: Auth, persistence, validation, real-time sync
-  - React: 3D rendering, camera controls, scene manipulation
+  - LiveView: Auth, persistence, validation, real-time sync, all editors
+  - JS Hooks: Canvas2DViewport (map), CodeMirrorEditor (scripts)
   - TypedObject: Universal data layer for rooms, NPCs, items, etc.
 
   See docs/architecture/world-builder-master-plan.md for full design.
@@ -45,8 +46,6 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     ChatPanel,
     InputValidator,
     SettingsModal,
-    DialogueEditor,
-    ScriptEditor,
     ScriptTemplatePicker,
     ScriptTemplateConfig,
     CommitModal,
@@ -56,7 +55,6 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     EntityEventHandler,
     KeyboardHelpModal,
     QuestFlowModal,
-    ProjectsPanel,
     DocumentViewer,
     AuditLogPanel
   }
@@ -78,6 +76,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     items = EntityManager.list_entities(:item)
     quests = QuestManager.list_quests()
     cutscenes = CutsceneManager.list_cutscenes()
+    scripts = ScriptManager.list_scripts()
 
     # Load zones and build room -> spawns mapping
     zones = Zone.all()
@@ -107,6 +106,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:selected_entity, nil)
      |> assign(:quests, quests)
      |> assign(:cutscenes, cutscenes)
+     |> assign(:scripts, scripts)
      |> assign(:zones, zones)
      |> assign(:zone_colors, zone_colors)
      |> assign(:room_zone_map, room_zone_map)
@@ -116,8 +116,11 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:room_spawns, room_spawns)
      |> assign(:show_npc_editor, false)
      |> assign(:show_item_editor, false)
+     |> assign(:editing_mode, :map)
      |> assign(:show_quest_editor, false)
      |> assign(:show_cutscene_editor, false)
+     |> assign(:quest_data, default_quest_data())
+     |> assign(:cutscene_data, default_cutscene_data())
      |> assign(:show_dialogue_editor, false)
      |> assign(:show_script_editor, false)
      |> assign(:editing_script, nil)
@@ -146,7 +149,9 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
        items: [],
        flags: []
      })
-     |> assign(:console_messages, [])
+     |> assign(:console_messages, [
+       %{timestamp: DateTime.utc_now(), level: :info, text: "World Builder ready"}
+     ])
      |> assign(:console_filter, "")
      |> assign(:level_filter, "all")
      |> assign(:show_create_modal, false)
@@ -171,15 +176,13 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
        hierarchy: false,
        inspector: false,
        console: false,
-       chat: false,
-       projects: false
+       chat: false
      })
      |> assign(:panel_sizes, %{
-       hierarchy: 200,
+       hierarchy: 240,
        inspector: 260,
        chat: 320,
-       console: 150,
-       projects: 220
+       console: 150
      })
      # Projects panel state
      |> assign(:projects, Projects.list_projects())
@@ -239,27 +242,13 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
         phx-hook="PanelResize"
         style={panel_sizes_style(@panel_sizes)}
       >
-        <ProjectsPanel.projects_panel
-          projects={@projects}
-          current_project={@current_project}
-          project_docs={@project_docs}
-          expanded_projects={@expanded_projects}
-          selected_document={@selected_document}
-          collapsed={@collapsed_panels.projects}
-        />
-
-        <div
-          class="panel-resize-handle"
-          data-resize="projects"
-          style={if @collapsed_panels.projects, do: "display: none;", else: ""}
-        >
-        </div>
-
         <HierarchyPanel.hierarchy_panel
           rooms={@rooms}
           npcs={@npcs}
           items={@items}
           templates={@templates}
+          scripts={@scripts}
+          cutscenes={@cutscenes}
           zones={@zones}
           selected_room={@selected_room}
           selected_entity={@selected_entity}
@@ -287,6 +276,17 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
           level_filter={@level_filter}
           console_collapsed={@collapsed_panels.console}
           console_height={@panel_sizes.console}
+          editing_mode={@editing_mode}
+          editing_script={@editing_script}
+          editing_dialogue_tree={@editing_dialogue_tree}
+          editing_dialogue_npc={@editing_dialogue_npc}
+          dialogue_selected_node={@dialogue_selected_node}
+          dialogue_preview_mode={@dialogue_preview_mode}
+          dialogue_mock_state={@dialogue_mock_state}
+          npcs={@npcs}
+          entities_for_editor={build_entity_list(@rooms, @npcs, @items)}
+          quest_data={@quest_data}
+          cutscene_data={@cutscene_data}
         />
 
         <div
@@ -319,6 +319,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
           streaming={@chat_streaming}
           current_response={@chat_current_response}
           current_project={@current_project}
+          projects={@projects}
           error={@chat_error}
           collapsed={@collapsed_panels.chat}
           queued_messages={@chat_queued_messages}
@@ -514,107 +515,9 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
         </div>
       <% end %>
 
-      <%!-- Quest Editor Modal --%>
-      <%= if @show_quest_editor do %>
-        <div class="modal-overlay">
-          <div
-            class="modal-content modal-fullscreen"
-            phx-click-away="close_quest_editor"
-            style="width: 95vw; height: 90vh; max-width: none;"
-          >
-            <div class="modal-header">
-              <h3>Quest Editor</h3>
-              <button phx-click="close_quest_editor" class="modal-close">&times;</button>
-            </div>
-            <div
-              id="quest-editor-root"
-              phx-hook="QuestEditor"
-              phx-update="ignore"
-              style="flex: 1; overflow: hidden;"
-              data-on-save="create_quest"
-              data-on-cancel="close_quest_editor"
-            >
-            </div>
-          </div>
-        </div>
-      <% end %>
+      <%!-- Quest/Cutscene editors now render inline in viewport_container --%>
 
-      <%!-- Cutscene Editor Modal --%>
-      <%= if @show_cutscene_editor do %>
-        <div class="modal-overlay">
-          <div
-            class="modal-content modal-fullscreen"
-            phx-click-away="close_cutscene_editor"
-            style="width: 95vw; height: 90vh; max-width: none;"
-          >
-            <div class="modal-header">
-              <h3>Cutscene Timeline Editor</h3>
-              <button phx-click="close_cutscene_editor" class="modal-close">&times;</button>
-            </div>
-            <div
-              id="cutscene-editor-root"
-              phx-hook="CutsceneEditor"
-              phx-update="ignore"
-              style="flex: 1; overflow: hidden;"
-              data-on-save="create_cutscene"
-              data-on-cancel="close_cutscene_editor"
-            >
-            </div>
-          </div>
-        </div>
-      <% end %>
-
-      <%!-- Dialogue Editor Modal --%>
-      <%= if @show_dialogue_editor do %>
-        <div class="modal-overlay">
-          <div
-            class="modal-content modal-fullscreen"
-            phx-click-away="close_dialogue_editor"
-            style="width: 95vw; height: 90vh; max-width: none;"
-          >
-            <div class="modal-header">
-              <h3>Dialogue Tree Editor</h3>
-              <div
-                class="dialogue-entity-selector"
-                style="display: flex; align-items: center; gap: 0.5rem; margin-left: 1rem;"
-              >
-                <label style="color: #909090; font-size: 0.875rem;">Entity:</label>
-                <select
-                  phx-change="dialogue_update_entity"
-                  name="npc_key"
-                  class="input"
-                  style="width: 200px; padding: 0.25rem 0.5rem; font-size: 0.875rem;"
-                >
-                  <option value="">None (standalone)</option>
-                  <%= for npc <- @npcs do %>
-                    <option value={npc.key} selected={@editing_dialogue_npc == npc.key}>
-                      {npc[:name] || npc[:short_desc] || npc.key} ({npc.key})
-                    </option>
-                  <% end %>
-                </select>
-              </div>
-              <button phx-click="close_dialogue_editor" class="modal-close">&times;</button>
-            </div>
-            <div style="flex: 1; overflow: hidden;">
-              <DialogueEditor.dialogue_editor
-                dialogue_tree={@editing_dialogue_tree}
-                npc_key={@editing_dialogue_npc}
-                selected_node={@dialogue_selected_node}
-                show_preview={@dialogue_preview_mode}
-                mock_state={@dialogue_mock_state}
-              />
-            </div>
-          </div>
-        </div>
-      <% end %>
-
-      <%!-- Script Editor Modal --%>
-      <%= if @show_script_editor do %>
-        <ScriptEditor.script_editor
-          script={@editing_script}
-          entities={build_entity_list(@rooms, @npcs, @items)}
-        />
-      <% end %>
+      <%!-- Dialogue/Script editors now render inline in viewport_container --%>
 
       <%!-- Template Picker Modal --%>
       <%= if @show_template_picker do %>
@@ -822,7 +725,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   def handle_event("toggle_panel", %{"panel" => panel}, socket) do
     panel_atom = String.to_existing_atom(panel)
 
-    if panel_atom in [:hierarchy, :inspector, :console, :chat] do
+    if panel_atom in [:projects, :hierarchy, :inspector, :console, :chat] do
       collapsed = socket.assigns.collapsed_panels
       new_collapsed = Map.update!(collapsed, panel_atom, &(!&1))
 
@@ -990,6 +893,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
         "npcs" -> :npcs
         "items" -> :items
         "templates" -> :templates
+        "scripts" -> :scripts
+        "cutscenes" -> :cutscenes
         _ -> :rooms
       end
 
@@ -1447,15 +1352,25 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
   def handle_event(
         "show_script_editor_for_entity",
-        %{"entity_type" => type, "entity_key" => key},
+        %{"entity_type" => _type, "entity_key" => key} = params,
         socket
       ) do
     # Open script editor with entity pre-selected
     {:noreply,
      socket
      |> assign(:show_script_editor, true)
-     |> assign(:editing_script, %{entity_key: key, entity_type: type})
-     |> log_console(:info, "Opening script editor for #{type}: #{key}")}
+     |> assign(:editing_script, %{
+       key: "",
+       name: "",
+       description: "",
+       hook: "on_talk",
+       source: "",
+       tags: [],
+       entity_key: key,
+       entity_type: params["entity_type"]
+     })
+     |> assign(:editing_mode, :script)
+     |> log_console(:info, "Opening script editor for #{params["entity_type"]}: #{key}")}
   end
 
   def handle_event("show_dialogue_editor_for_entity", %{"entity_key" => key}, socket) do
@@ -1475,6 +1390,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:show_dialogue_editor, true)
      |> assign(:editing_dialogue_npc, key)
      |> assign(:editing_dialogue_tree, existing_tree)
+     |> assign(:editing_mode, :dialogue)
      |> log_console(:info, "Opening dialogue editor for NPC: #{key}")}
   end
 
@@ -1541,11 +1457,18 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   end
 
   def handle_event("show_quest_editor", _params, socket) do
-    {:noreply, assign(socket, :show_quest_editor, true)}
+    {:noreply,
+     socket
+     |> assign(:show_quest_editor, true)
+     |> assign(:quest_data, default_quest_data())
+     |> assign(:editing_mode, :quest)}
   end
 
   def handle_event("close_quest_editor", _params, socket) do
-    {:noreply, assign(socket, :show_quest_editor, false)}
+    {:noreply,
+     socket
+     |> assign(:show_quest_editor, false)
+     |> assign(:editing_mode, :map)}
   end
 
   def handle_event("create_cutscene", params, socket) do
@@ -1565,6 +1488,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
              socket
              |> assign(:cutscenes, CutsceneManager.list_cutscenes())
              |> assign(:show_cutscene_editor, false)
+             |> assign(:editing_mode, :map)
              |> log_console(:info, "Created cutscene: #{cutscene["id"]}")}
 
           {:error, reason} ->
@@ -1596,11 +1520,18 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   end
 
   def handle_event("show_cutscene_editor", _params, socket) do
-    {:noreply, assign(socket, :show_cutscene_editor, true)}
+    {:noreply,
+     socket
+     |> assign(:show_cutscene_editor, true)
+     |> assign(:cutscene_data, default_cutscene_data())
+     |> assign(:editing_mode, :cutscene)}
   end
 
   def handle_event("close_cutscene_editor", _params, socket) do
-    {:noreply, assign(socket, :show_cutscene_editor, false)}
+    {:noreply,
+     socket
+     |> assign(:show_cutscene_editor, false)
+     |> assign(:editing_mode, :map)}
   end
 
   # =============================================================================
@@ -1620,44 +1551,63 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
                 description: script.description,
                 hook: Loka.Content.Script.hook(script),
                 source: Loka.Content.Script.source(script),
-                tags: script.tags || []
+                tags: script.tags || [],
+                _editing: true
               }
 
             {:error, _} ->
-              nil
+              %{key: "", name: "", description: "", hook: "on_talk", source: "", tags: []}
           end
 
         _ ->
-          nil
+          %{key: "", name: "", description: "", hook: "on_talk", source: "", tags: []}
       end
 
     {:noreply,
      socket
      |> assign(:show_script_editor, true)
-     |> assign(:editing_script, editing_script)}
+     |> assign(:editing_script, editing_script)
+     |> assign(:editing_mode, :script)}
   end
 
   def handle_event("close_script_editor", _params, socket) do
     {:noreply,
      socket
      |> assign(:show_script_editor, false)
-     |> assign(:editing_script, nil)}
+     |> assign(:editing_script, nil)
+     |> assign(:editing_mode, :map)}
   end
 
-  def handle_event("save_script", params, socket) do
-    # Validate and filter allowed fields
+  def handle_event("save_script", _params, socket) do
+    script = socket.assigns.editing_script || %{}
+
+    tags =
+      case script[:tags] do
+        t when is_binary(t) ->
+          t |> String.split(",") |> Enum.map(&String.trim/1) |> Enum.reject(&(&1 == ""))
+
+        t when is_list(t) ->
+          t
+
+        _ ->
+          []
+      end
+
     attrs = %{
-      key: params["key"],
-      name: params["name"],
-      description: params["description"] || "",
-      hook: params["hook"],
-      source: params["source"],
-      tags: params["tags"] || [],
-      entity_key: params["entity_key"]
+      key: script[:key] || "",
+      name: script[:name] || script[:key] || "",
+      description: script[:description] || "",
+      hook: script[:hook] || "on_talk",
+      source: script[:source] || "",
+      tags: tags,
+      entity_key: script[:entity_key]
     }
 
+    # Determine if editing existing or creating new
+    is_editing = script[:key] && script[:key] != "" && script[:_editing]
+
     result =
-      if socket.assigns.editing_script do
+      if is_editing do
         ScriptManager.update_script(attrs.key, attrs)
       else
         ScriptManager.create_script(attrs)
@@ -1669,6 +1619,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
          socket
          |> assign(:show_script_editor, false)
          |> assign(:editing_script, nil)
+         |> assign(:editing_mode, :map)
          |> log_console(:info, "Saved script: #{script.key}")}
 
       {:error, errors} when is_list(errors) ->
@@ -1678,6 +1629,245 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
       {:error, reason} ->
         {:noreply, log_console(socket, :error, "Failed to save script: #{inspect(reason)}")}
     end
+  end
+
+  # =============================================================================
+  # Quest Editor LiveView Event Handlers
+  # =============================================================================
+
+  def handle_event("quest_update_field", %{"field" => field, "value" => value}, socket) do
+    quest_data = Map.put(socket.assigns.quest_data, String.to_existing_atom(field), value)
+    {:noreply, assign(socket, :quest_data, quest_data)}
+  end
+
+  def handle_event("quest_add_objective", _params, socket) do
+    objectives =
+      socket.assigns.quest_data.objectives ++
+        [%{type: "kill", target: "", count: 1, description: ""}]
+
+    quest_data = %{socket.assigns.quest_data | objectives: objectives}
+    {:noreply, assign(socket, :quest_data, quest_data)}
+  end
+
+  def handle_event("quest_remove_objective", %{"idx" => idx}, socket) do
+    idx = String.to_integer(idx)
+    objectives = List.delete_at(socket.assigns.quest_data.objectives, idx)
+    quest_data = %{socket.assigns.quest_data | objectives: objectives}
+    {:noreply, assign(socket, :quest_data, quest_data)}
+  end
+
+  def handle_event(
+        "quest_update_objective",
+        %{"idx" => idx, "field" => field, "value" => value},
+        socket
+      ) do
+    idx = String.to_integer(idx)
+
+    objectives =
+      List.update_at(socket.assigns.quest_data.objectives, idx, fn obj ->
+        Map.put(obj, String.to_existing_atom(field), value)
+      end)
+
+    quest_data = %{socket.assigns.quest_data | objectives: objectives}
+    {:noreply, assign(socket, :quest_data, quest_data)}
+  end
+
+  def handle_event("quest_add_prerequisite", _params, socket) do
+    prerequisites =
+      socket.assigns.quest_data.prerequisites ++ [%{type: "quest", value: ""}]
+
+    quest_data = %{socket.assigns.quest_data | prerequisites: prerequisites}
+    {:noreply, assign(socket, :quest_data, quest_data)}
+  end
+
+  def handle_event("quest_remove_prerequisite", %{"idx" => idx}, socket) do
+    idx = String.to_integer(idx)
+    prerequisites = List.delete_at(socket.assigns.quest_data.prerequisites, idx)
+    quest_data = %{socket.assigns.quest_data | prerequisites: prerequisites}
+    {:noreply, assign(socket, :quest_data, quest_data)}
+  end
+
+  def handle_event(
+        "quest_update_prerequisite",
+        %{"idx" => idx, "field" => field, "value" => value},
+        socket
+      ) do
+    idx = String.to_integer(idx)
+
+    prerequisites =
+      List.update_at(socket.assigns.quest_data.prerequisites, idx, fn prereq ->
+        Map.put(prereq, String.to_existing_atom(field), value)
+      end)
+
+    quest_data = %{socket.assigns.quest_data | prerequisites: prerequisites}
+    {:noreply, assign(socket, :quest_data, quest_data)}
+  end
+
+  def handle_event("quest_save", _params, socket) do
+    data = socket.assigns.quest_data
+
+    quest_params = %{
+      "key" => data.key,
+      "name" => data.name,
+      "quest_type" => data.quest_type,
+      "giver_key" => data.giver_key,
+      "objectives" => Enum.map(data.objectives, &Map.new(&1, fn {k, v} -> {to_string(k), v} end)),
+      "rewards" => %{
+        "xp" => data.xp,
+        "gold" => data.gold,
+        "items" =>
+          data.reward_items
+          |> String.split(",")
+          |> Enum.map(&String.trim/1)
+          |> Enum.reject(&(&1 == ""))
+      }
+    }
+
+    handle_event("create_quest", quest_params, socket)
+  end
+
+  # =============================================================================
+  # Cutscene Editor LiveView Event Handlers
+  # =============================================================================
+
+  def handle_event("cutscene_update_field", %{"field" => field, "value" => value}, socket) do
+    cutscene_data = Map.put(socket.assigns.cutscene_data, String.to_existing_atom(field), value)
+    {:noreply, assign(socket, :cutscene_data, cutscene_data)}
+  end
+
+  def handle_event("cutscene_update_trigger", %{"field" => field, "value" => value}, socket) do
+    trigger = Map.put(socket.assigns.cutscene_data.trigger, String.to_existing_atom(field), value)
+    cutscene_data = %{socket.assigns.cutscene_data | trigger: trigger}
+    {:noreply, assign(socket, :cutscene_data, cutscene_data)}
+  end
+
+  def handle_event("cutscene_add_step", %{"step_type" => ""}, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_event("cutscene_add_step", %{"step_type" => step_type}, socket) do
+    new_step = %{type: step_type, text: "", speaker: "", duration: 1.0}
+    sequence = socket.assigns.cutscene_data.sequence ++ [new_step]
+    cutscene_data = %{socket.assigns.cutscene_data | sequence: sequence}
+    {:noreply, assign(socket, :cutscene_data, cutscene_data)}
+  end
+
+  def handle_event("cutscene_remove_step", %{"idx" => idx}, socket) do
+    idx = String.to_integer(idx)
+    sequence = List.delete_at(socket.assigns.cutscene_data.sequence, idx)
+    cutscene_data = %{socket.assigns.cutscene_data | sequence: sequence}
+    {:noreply, assign(socket, :cutscene_data, cutscene_data)}
+  end
+
+  def handle_event(
+        "cutscene_update_step",
+        %{"idx" => idx, "field" => field, "value" => value},
+        socket
+      ) do
+    idx = String.to_integer(idx)
+
+    sequence =
+      List.update_at(socket.assigns.cutscene_data.sequence, idx, fn step ->
+        Map.put(step, String.to_existing_atom(field), value)
+      end)
+
+    cutscene_data = %{socket.assigns.cutscene_data | sequence: sequence}
+    {:noreply, assign(socket, :cutscene_data, cutscene_data)}
+  end
+
+  def handle_event("cutscene_move_step_up", %{"idx" => idx}, socket) do
+    idx = String.to_integer(idx)
+    sequence = socket.assigns.cutscene_data.sequence
+
+    if idx > 0 do
+      sequence = swap_list(sequence, idx, idx - 1)
+      cutscene_data = %{socket.assigns.cutscene_data | sequence: sequence}
+      {:noreply, assign(socket, :cutscene_data, cutscene_data)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_event("cutscene_move_step_down", %{"idx" => idx}, socket) do
+    idx = String.to_integer(idx)
+    sequence = socket.assigns.cutscene_data.sequence
+
+    if idx < length(sequence) - 1 do
+      sequence = swap_list(sequence, idx, idx + 1)
+      cutscene_data = %{socket.assigns.cutscene_data | sequence: sequence}
+      {:noreply, assign(socket, :cutscene_data, cutscene_data)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_event("cutscene_add_effect", _params, socket) do
+    effects = socket.assigns.cutscene_data.effects ++ [%{type: "set_flag", flag: ""}]
+    cutscene_data = %{socket.assigns.cutscene_data | effects: effects}
+    {:noreply, assign(socket, :cutscene_data, cutscene_data)}
+  end
+
+  def handle_event("cutscene_remove_effect", %{"idx" => idx}, socket) do
+    idx = String.to_integer(idx)
+    effects = List.delete_at(socket.assigns.cutscene_data.effects, idx)
+    cutscene_data = %{socket.assigns.cutscene_data | effects: effects}
+    {:noreply, assign(socket, :cutscene_data, cutscene_data)}
+  end
+
+  def handle_event(
+        "cutscene_update_effect",
+        %{"idx" => idx, "field" => field, "value" => value},
+        socket
+      ) do
+    idx = String.to_integer(idx)
+
+    effects =
+      List.update_at(socket.assigns.cutscene_data.effects, idx, fn effect ->
+        Map.put(effect, String.to_existing_atom(field), value)
+      end)
+
+    cutscene_data = %{socket.assigns.cutscene_data | effects: effects}
+    {:noreply, assign(socket, :cutscene_data, cutscene_data)}
+  end
+
+  def handle_event("cutscene_save", _params, socket) do
+    data = socket.assigns.cutscene_data
+
+    cutscene_params = %{
+      "id" => data.id,
+      "name" => data.name,
+      "trigger" => %{
+        "type" => data.trigger.type,
+        "location" => data.trigger.location,
+        "condition" => data.trigger.condition
+      },
+      "sequence" =>
+        Enum.map(data.sequence, fn step ->
+          Map.new(step, fn {k, v} -> {to_string(k), v} end)
+        end),
+      "effects" =>
+        Enum.map(data.effects, fn effect ->
+          Map.new(effect, fn {k, v} -> {to_string(k), v} end)
+        end)
+    }
+
+    handle_event("create_cutscene", cutscene_params, socket)
+  end
+
+  # =============================================================================
+  # Script Editor LiveView Event Handlers
+  # =============================================================================
+
+  def handle_event("script_update_field", %{"field" => field, "value" => value}, socket) do
+    editing_script = socket.assigns.editing_script || %{}
+    editing_script = Map.put(editing_script, String.to_existing_atom(field), value)
+    {:noreply, assign(socket, :editing_script, editing_script)}
+  end
+
+  def handle_event("script_source_changed", %{"source" => source}, socket) do
+    editing_script = socket.assigns.editing_script || %{}
+    editing_script = Map.put(editing_script, :source, source)
+    {:noreply, assign(socket, :editing_script, editing_script)}
   end
 
   # =============================================================================
@@ -1998,7 +2188,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:editing_dialogue_npc, nil)
      |> assign(:editing_dialogue_tree, %{})
      |> assign(:dialogue_selected_node, nil)
-     |> assign(:dialogue_preview_mode, false)}
+     |> assign(:dialogue_preview_mode, false)
+     |> assign(:editing_mode, :dialogue)}
   end
 
   def handle_event("close_dialogue_editor", _params, socket) do
@@ -2008,7 +2199,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:editing_dialogue_npc, nil)
      |> assign(:editing_dialogue_tree, %{})
      |> assign(:dialogue_selected_node, nil)
-     |> assign(:dialogue_preview_mode, false)}
+     |> assign(:dialogue_preview_mode, false)
+     |> assign(:editing_mode, :map)}
   end
 
   # =============================================================================
@@ -2775,8 +2967,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   end
 
   defp log_console(socket, level, text) do
-    timestamp = DateTime.utc_now() |> DateTime.to_time() |> Time.to_string()
-    message = %{timestamp: timestamp, level: level, text: text}
+    message = %{timestamp: DateTime.utc_now(), level: level, text: text}
 
     assign(socket, :console_messages, socket.assigns.console_messages ++ [message])
   end
@@ -2791,7 +2982,13 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
     entries =
       Enum.map_join(messages, "\n", fn msg ->
-        "[#{msg.timestamp}] [#{String.upcase(to_string(msg.level))}] #{msg.text}"
+        ts =
+          case msg.timestamp do
+            %DateTime{} = dt -> dt |> DateTime.to_time() |> Time.to_string() |> String.slice(0, 8)
+            other -> to_string(other)
+          end
+
+        "[#{ts}] [#{String.upcase(to_string(msg.level))}] #{msg[:text] || msg[:message]}"
       end)
 
     header <> entries
@@ -2921,7 +3118,6 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
     classes =
       [
-        collapsed_panels[:projects] && "projects-collapsed",
         collapsed_panels.hierarchy && "hierarchy-collapsed",
         collapsed_panels.inspector && "inspector-collapsed",
         collapsed_panels.console && "console-collapsed",
@@ -2935,8 +3131,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
   # Build CSS custom properties for panel sizes
   defp panel_sizes_style(panel_sizes) do
-    "--projects-width: #{panel_sizes[:projects] || 220}px; " <>
-      "--hierarchy-width: #{panel_sizes.hierarchy}px; " <>
+    "--hierarchy-width: #{panel_sizes.hierarchy}px; " <>
       "--inspector-width: #{panel_sizes.inspector}px; " <>
       "--chat-width: #{panel_sizes.chat}px; " <>
       "--console-height: #{panel_sizes.console}px;"
@@ -3067,6 +3262,42 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
       Enum.map(rooms, fn room_key -> {room_key, zone.key} end)
     end)
     |> Map.new()
+  end
+
+  defp default_quest_data do
+    %{
+      key: "",
+      name: "",
+      quest_type: "side",
+      giver_key: "",
+      description: "",
+      level_min: 1,
+      level_max: 99,
+      objectives: [],
+      prerequisites: [],
+      xp: 0,
+      gold: 0,
+      reward_items: ""
+    }
+  end
+
+  defp default_cutscene_data do
+    %{
+      id: "",
+      name: "",
+      trigger: %{type: "enter_room", location: "", condition: ""},
+      sequence: [],
+      effects: []
+    }
+  end
+
+  defp swap_list(list, idx1, idx2) do
+    a = Enum.at(list, idx1)
+    b = Enum.at(list, idx2)
+
+    list
+    |> List.replace_at(idx1, b)
+    |> List.replace_at(idx2, a)
   end
 
   # Toggle panel collapsed state (used by keyboard shortcuts)

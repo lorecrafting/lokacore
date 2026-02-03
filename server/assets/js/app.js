@@ -21,16 +21,14 @@ import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/loka"
 import topbar from "../vendor/topbar"
 
-// React and World Builder
-import React from "react"
-import { createRoot } from "react-dom/client"
-// Note: WorldBuilderApp replaced with Canvas2DViewport for 2D rendering
+// World Builder
 import Canvas2DViewport from "./world_builder/Canvas2DViewport.js"
-import QuestEditor from "./world_builder/editors/QuestEditor.jsx"
-import CutsceneTimeline from "./world_builder/editors/CutsceneTimeline.jsx"
-import ScriptEditor from "./world_builder/editors/ScriptEditor.jsx"
-import ChatPanel from "./world_builder/ChatPanel.jsx"
 import { undoManager } from "./world_builder/UndoManager.js"
+
+// CodeMirror 6 for script editor
+import { EditorView, basicSetup } from "codemirror"
+import { StreamLanguage } from "@codemirror/language"
+import { oneDark } from "@codemirror/theme-one-dark"
 
 // Custom hooks for ebook-style game client
 const Hooks = {
@@ -966,63 +964,21 @@ const Hooks = {
     }
   },
 
-  // =============================================================================
-  // Chat Panel - React-based LLM chat interface
-  // =============================================================================
-  ChatPanel: {
+  // Chat textarea with Ctrl+Enter submit support
+  ChatTextarea: {
     mounted() {
-      const roomsData = JSON.parse(this.el.dataset.rooms || '[]')
-      const selectedRoom = JSON.parse(this.el.dataset.selectedRoom || 'null')
-      const validation = JSON.parse(this.el.dataset.validation || '{}')
-
-      this.root = createRoot(this.el)
-      this.rooms = roomsData
-      this.selectedRoom = selectedRoom
-      this.validation = validation
-
-      this.render()
-
-      // Listen for data updates from LiveView
-      this.handleEvent('chat_data_updated', ({ rooms, selectedRoom, validation }) => {
-        this.rooms = rooms || this.rooms
-        this.selectedRoom = selectedRoom !== undefined ? selectedRoom : this.selectedRoom
-        this.validation = validation || this.validation
-        this.render()
-      })
-    },
-
-    updated() {
-      // Re-parse data when LiveView updates
-      const roomsData = JSON.parse(this.el.dataset.rooms || '[]')
-      const selectedRoom = JSON.parse(this.el.dataset.selectedRoom || 'null')
-      const validation = JSON.parse(this.el.dataset.validation || '{}')
-
-      this.rooms = roomsData
-      this.selectedRoom = selectedRoom
-      this.validation = validation
-      this.render()
-    },
-
-    destroyed() {
-      if (this.root) {
-        this.root.unmount()
-      }
-    },
-
-    render() {
-      this.root.render(
-        React.createElement(ChatPanel, {
-          rooms: this.rooms,
-          selectedRoom: this.selectedRoom,
-          validation: this.validation,
-          onToolResult: (toolName, input, result) => {
-            this.pushEvent('tool_result', { tool: toolName, input, result })
-          },
-          pushEvent: (event, payload) => {
-            this.pushEvent(event, payload)
+      this.el.addEventListener('keydown', (e) => {
+        // Ctrl+Enter or Cmd+Enter to submit
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+          e.preventDefault()
+          const form = this.el.closest('form')
+          if (form && this.el.value.trim()) {
+            // Trigger LiveView form submit
+            this.pushEvent('send_message', { message: this.el.value })
+            this.el.value = ''
           }
-        })
-      )
+        }
+      })
     }
   },
 
@@ -1407,126 +1363,88 @@ const Hooks = {
   },
 
   // =============================================================================
-  // Quest Editor - ReactFlow node-based quest builder
+  // CodeMirror 6 - Elixir script editor (bundled, no CDN)
   // =============================================================================
-  QuestEditor: {
+  CodeMirrorEditor: {
     mounted() {
-      // Create React root and mount QuestEditor component
-      this.root = createRoot(this.el)
+      // Define Elixir-like tokenizer via StreamLanguage
+      const elixirLang = StreamLanguage.define({
+        startState() { return { inString: false, stringChar: null } },
+        token(stream, state) {
+          if (stream.eatSpace()) return null
 
-      const onSave = (questData) => {
-        this.pushEvent('create_quest', questData)
-      }
+          // Comments
+          if (stream.match('#')) { stream.skipToEnd(); return 'comment' }
 
-      const onCancel = () => {
-        this.pushEvent('close_quest_editor', {})
-      }
+          // Strings
+          if (stream.match('"""') || stream.match("'''")) {
+            stream.skipTo(stream.current()) || stream.skipToEnd()
+            return 'string'
+          }
+          if (stream.match(/"[^"]*"/) || stream.match(/'[^']*'/)) return 'string'
+          if (stream.match('"') || stream.match("'")) {
+            const ch = stream.current()
+            while (!stream.eol()) {
+              const next = stream.next()
+              if (next === ch) break
+            }
+            return 'string'
+          }
 
-      this.root.render(
-        React.createElement(QuestEditor, {
-          onSave,
-          onCancel,
-          initialData: null
-        })
-      )
+          // Atoms
+          if (stream.match(/:[a-zA-Z_][a-zA-Z0-9_]*/)) return 'atom'
+
+          // Module attributes
+          if (stream.match(/@[a-z_][a-z0-9_]*/)) return 'meta'
+
+          // Numbers
+          if (stream.match(/0x[0-9a-fA-F]+/) || stream.match(/0b[01]+/) || stream.match(/\d+(\.\d+)?/)) return 'number'
+
+          // Keywords
+          if (stream.match(/\b(def|defp|defmodule|defmacro|defstruct|defprotocol|defimpl|do|end|if|else|unless|case|cond|when|and|or|not|in|fn|with|for|raise|try|catch|rescue|after|receive|send|import|alias|require|use|true|false|nil)\b/)) return 'keyword'
+
+          // Identifiers with ! or ?
+          if (stream.match(/[a-z_][a-z0-9_]*[!?]?/)) return 'variableName'
+
+          // Module names (capitalized)
+          if (stream.match(/[A-Z][a-zA-Z0-9_]*/)) return 'typeName'
+
+          // Operators
+          if (stream.match(/->|<-|\|>|=>|::|&&|\|\||==|!=|<=|>=|=~|\+\+|--|\.\./)) return 'operator'
+
+          stream.next()
+          return null
+        }
+      })
+
+      const initialValue = this.el.dataset.value || ''
+
+      this.view = new EditorView({
+        doc: initialValue,
+        extensions: [
+          basicSetup,
+          elixirLang,
+          oneDark,
+          EditorView.lineWrapping,
+          EditorView.updateListener.of((update) => {
+            if (update.docChanged) {
+              this.pushEvent('script_source_changed', {
+                source: update.state.doc.toString()
+              })
+            }
+          }),
+          EditorView.theme({
+            '&': { height: '100%', fontSize: '13px' },
+            '.cm-scroller': { overflow: 'auto' },
+            '.cm-content': { fontFamily: 'ui-monospace, monospace' },
+          }),
+        ],
+        parent: this.el,
+      })
     },
 
     destroyed() {
-      if (this.root) {
-        this.root.unmount()
-      }
-    }
-  },
-
-  // =============================================================================
-  // Cutscene Editor - Timeline-based cutscene builder
-  // =============================================================================
-  CutsceneEditor: {
-    mounted() {
-      // Create React root and mount CutsceneTimeline component
-      this.root = createRoot(this.el)
-
-      const onSave = (cutsceneData) => {
-        this.pushEvent('create_cutscene', cutsceneData)
-      }
-
-      const onCancel = () => {
-        this.pushEvent('close_cutscene_editor', {})
-      }
-
-      this.root.render(
-        React.createElement(CutsceneTimeline, {
-          onSave,
-          onCancel,
-          initialData: null
-        })
-      )
-    },
-
-    destroyed() {
-      if (this.root) {
-        this.root.unmount()
-      }
-    }
-  },
-
-  // =============================================================================
-  // Script Editor - Monaco-based Elixir script editor
-  // =============================================================================
-  ScriptEditor: {
-    mounted() {
-      // Parse initial script data from data attribute
-      const scriptData = JSON.parse(this.el.dataset.script || 'null')
-      const entities = JSON.parse(this.el.dataset.entities || '[]')
-
-      // Create React root and mount ScriptEditor component
-      this.root = createRoot(this.el)
-
-      const onSave = (scriptData) => {
-        this.pushEvent('save_script', scriptData)
-      }
-
-      const onCancel = () => {
-        this.pushEvent('close_script_editor', {})
-      }
-
-      this.root.render(
-        React.createElement(ScriptEditor, {
-          onSave,
-          onCancel,
-          initialData: scriptData,
-          entities: entities
-        })
-      )
-    },
-
-    updated() {
-      // Re-parse script data when LiveView updates
-      const scriptData = JSON.parse(this.el.dataset.script || 'null')
-      const entities = JSON.parse(this.el.dataset.entities || '[]')
-
-      const onSave = (scriptData) => {
-        this.pushEvent('save_script', scriptData)
-      }
-
-      const onCancel = () => {
-        this.pushEvent('close_script_editor', {})
-      }
-
-      this.root.render(
-        React.createElement(ScriptEditor, {
-          onSave,
-          onCancel,
-          initialData: scriptData,
-          entities: entities
-        })
-      )
-    },
-
-    destroyed() {
-      if (this.root) {
-        this.root.unmount()
-      }
+      if (this.view) this.view.destroy()
     }
   },
 

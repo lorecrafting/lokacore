@@ -471,7 +471,7 @@ Intensive World Builder development:
 - **Template System UI**: Week 7-8 Phase 2
 - **EntityManager**: Unified NPC & Item builder
 - **QuestManager/CutsceneManager**: Week 11-12 backends
-- **Quest/Cutscene Editors**: ReactFlow integration
+- **Quest/Cutscene Editors**: Pure LiveView editors (ReactFlow removed)
 - **Auto-Layout Algorithms**: Week 13-14
 - **Zone Management**: Week 15-16 coordinate utils
 - **Live Validation**: Week 17-18 system

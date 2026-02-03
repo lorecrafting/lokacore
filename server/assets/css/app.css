@@ -2694,18 +2694,15 @@ body:has(.ebook-page) {
   margin: 0 0.2rem;
 }
 
-/* Main container - 4 column layout with resizable panels */
+/* Main container - 4 panel layout with resizable panels (hierarchy + viewport + inspector + chat) */
 .world-builder-container {
   display: grid;
-  /* Use CSS custom properties for resizable widths */
   grid-template-columns:
-    var(--hierarchy-width, 200px)
-    4px
-    1fr
-    4px
-    var(--inspector-width, 260px)
-    4px
+    var(--hierarchy-width, 240px) 4px
+    1fr 4px
+    var(--inspector-width, 260px) 4px
     var(--chat-width, 320px);
+  grid-template-areas: "hierarchy hier-resize viewport insp-resize inspector chat-resize chat";
   grid-template-rows: 1fr;
   width: 100%;
   height: calc(100% - 2.5rem);
@@ -2755,32 +2752,85 @@ body:has(.ebook-page) {
 }
 
 .world-builder-hierarchy {
-  grid-column: 1;
-  grid-row: 1;
+  grid-area: hierarchy;
   background: #1e1e24;
   min-width: 150px;
 }
 
 .world-builder-viewport {
-  grid-column: 3;
-  grid-row: 1;
+  grid-area: viewport;
   background: #20202a;
   position: relative; /* For console overlay positioning */
   min-width: 300px;
 }
 
+/* Inline editor view (replaces canvas when editing) */
+.viewport-editor {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.viewport-editor-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  background: linear-gradient(180deg, #1e1e30, #1a1a2e);
+  border-bottom: 1px solid #3d3d3d;
+  flex-shrink: 0;
+}
+
+.viewport-editor-header .btn-ghost {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: none;
+  border: 1px solid #3d3d3d;
+  border-radius: 4px;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.viewport-editor-header .btn-ghost:hover {
+  background: #2a2a3e;
+  border-color: #4a9eff;
+  color: #4a9eff;
+}
+
+.viewport-editor-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: #e0e0e0;
+}
+
+.viewport-editor-body {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.viewport-dialogue-editor {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
 .world-builder-inspector {
-  grid-column: 5;
-  grid-row: 1;
+  grid-area: inspector;
   background: #1e1e24;
   min-width: 200px;
 }
 
 .world-builder-chat {
-  grid-column: 7;
-  grid-row: 1;
-  min-width: 200px;
+  grid-area: chat;
   background: #1a1a22;
+  min-width: 200px;
 }
 
 /* Console is now an overlay inside the viewport with resizable height */
@@ -2813,7 +2863,7 @@ body:has(.ebook-page) {
   background: linear-gradient(90deg, #4a6cf7, #6366f1);
 }
 
-/* Panel collapse states - 7 column layout with resize handles */
+/* Panel collapse states */
 .world-builder-container.hierarchy-collapsed {
   grid-template-columns: 40px 0px 1fr 4px var(--inspector-width, 260px) 4px var(--chat-width, 320px);
 }
@@ -3026,10 +3076,10 @@ body:has(.ebook-page) {
 /* Hierarchy/Outliner Panel */
 .hierarchy-search {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  background: #1e1e1e;
+  flex-direction: column;
+  gap: 0;
+  padding: 0.4rem 0.5rem;
+  background: #1e1e24;
   border-bottom: 1px solid #0d0d0d;
 }
 
@@ -3055,13 +3105,19 @@ body:has(.ebook-page) {
   padding: 0.25rem;
 }
 
+.hierarchy-list-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px 4px 2px;
+}
+
 .hierarchy-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.4rem 0.5rem;
+  gap: 0.4rem;
+  padding: 0.35rem 0.5rem;
   cursor: pointer;
-  border-radius: 2px;
+  border-radius: 3px;
   transition: background 0.1s;
   font-size: 0.8rem;
   color: #c9c9c9;
@@ -3653,6 +3709,7 @@ body:has(.ebook-page) {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .btn-icon-small:hover {
@@ -3676,57 +3733,34 @@ body:has(.ebook-page) {
 }
 
 /* Template Library Styles */
-.hierarchy-tabs {
-  display: flex;
-  border-bottom: 1px solid #3d3d3d;
-  margin-bottom: 0.5rem;
-}
-
-.hierarchy-tab {
-  flex: 1;
+.hierarchy-type-selector {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.15rem;
-  padding: 0.4rem 0.25rem;
-  background: transparent;
-  border: none;
-  color: #909090;
+  gap: 4px;
+  padding: 4px 6px;
+  border-bottom: 1px solid #3d3d3d;
+  flex-shrink: 0;
+}
+
+.hierarchy-type-dropdown {
+  flex: 1;
+  padding: 4px 6px;
+  font-size: 12px;
+  background: #1a1a2e;
+  border: 1px solid #3d3d3d;
+  border-radius: 4px;
+  color: #ccc;
   cursor: pointer;
-  font-size: 0.85rem;
-  transition: all 0.1s;
-  border-bottom: 2px solid transparent;
+  appearance: auto;
 }
 
-.hierarchy-tab:hover {
-  color: #c9c9c9;
-  background: #2a2a2a;
+.hierarchy-type-dropdown:hover {
+  border-color: #4a9eff;
 }
 
-.hierarchy-tab.active {
-  color: #4a9eff;
-  border-bottom-color: #4a9eff;
-}
-
-.hierarchy-tab .tab-label {
-  font-size: 0.7rem;
-  font-weight: 500;
-  margin-left: 0.15rem;
-}
-
-.hierarchy-tab .tab-count {
-  font-size: 0.65rem;
-  background: #3a3a3a;
-  padding: 0.1rem 0.3rem;
-  border-radius: 8px;
-  margin-left: 0.15rem;
-  min-width: 1.2rem;
-  text-align: center;
-}
-
-.hierarchy-tab.active .tab-count {
-  background: #1d4ed8;
-  color: white;
+.hierarchy-type-dropdown:focus {
+  outline: none;
+  border-color: #4a9eff;
 }
 
 .template-library {
@@ -3738,12 +3772,12 @@ body:has(.ebook-page) {
 
 .template-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
-  padding: 0.75rem;
-  background: #2a2a2a;
-  border: 1px solid #3d3d3d;
-  border-radius: 3px;
+  padding: 0.6rem 0.5rem;
+  background: #2a2a30;
+  border: 1px solid #33333a;
+  border-radius: 4px;
   transition: all 0.1s;
 }
 
@@ -3755,6 +3789,12 @@ body:has(.ebook-page) {
 .template-icon {
   color: #7eb3ff;
   flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
 }
 
 .template-info {
@@ -3779,8 +3819,8 @@ body:has(.ebook-page) {
 }
 
 .template-tag {
-  font-size: 0.7rem;
-  padding: 0.125rem 0.375rem;
+  font-size: 0.65rem;
+  padding: 0.1rem 0.3rem;
   background: #3d3d3d;
   color: #909090;
   border-radius: 2px;
@@ -4006,6 +4046,319 @@ body:has(.ebook-page) {
 
 .quest-validation-panel .validation-warning {
   color: #fbbf24;
+}
+
+/* ==========================================================================
+   LiveView Editors (Quest, Cutscene, Script) - Shared Styles
+   ========================================================================== */
+
+.quest-editor-lv,
+.cutscene-editor-lv {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: #1a1a2e;
+  color: #ccc;
+}
+
+.quest-editor-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 12px;
+}
+
+.quest-validation-banner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #3b1d1d;
+  color: #f87171;
+  font-size: 0.8rem;
+  border-bottom: 1px solid #3d3d3d;
+  flex-shrink: 0;
+}
+
+.quest-validation-banner.valid {
+  background: #1d2d1d;
+  color: #4ade80;
+}
+
+.quest-section {
+  margin-bottom: 12px;
+  border: 1px solid #2a2a3e;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.quest-section-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: #222238;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #909090;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.quest-form-grid {
+  padding: 8px 10px;
+}
+
+.quest-form-row {
+  margin-bottom: 6px;
+}
+
+.quest-form-row label {
+  display: block;
+  font-size: 0.75rem;
+  color: #777;
+  margin-bottom: 2px;
+}
+
+.quest-form-row-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.quest-form-row-triple {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.quest-input {
+  width: 100%;
+  padding: 5px 8px;
+  font-size: 0.8rem;
+  background: #0d0d1a;
+  border: 1px solid #333;
+  border-radius: 4px;
+  color: #ccc;
+  box-sizing: border-box;
+}
+
+.quest-input:focus {
+  border-color: #4a9eff;
+  outline: none;
+}
+
+.quest-input-sm {
+  padding: 3px 6px;
+  font-size: 0.78rem;
+  background: #0d0d1a;
+  border: 1px solid #333;
+  border-radius: 3px;
+  color: #ccc;
+  box-sizing: border-box;
+}
+
+.quest-input-sm:focus {
+  border-color: #4a9eff;
+  outline: none;
+}
+
+textarea.quest-input,
+textarea.quest-input-sm {
+  resize: vertical;
+  font-family: inherit;
+}
+
+.quest-list-item {
+  border-bottom: 1px solid #2a2a3e;
+  padding: 6px 10px;
+}
+
+.quest-list-item:last-child {
+  border-bottom: none;
+}
+
+.quest-list-item-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.quest-list-item-num {
+  font-size: 0.7rem;
+  font-weight: bold;
+  color: #666;
+  background: #222;
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.quest-list-item-body {
+  padding-left: 24px;
+}
+
+.quest-list-item-compact {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-bottom: 1px solid #2a2a3e;
+}
+
+.quest-list-item-compact:last-child {
+  border-bottom: none;
+}
+
+.quest-form-row-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+
+.quest-form-row-inline label {
+  font-size: 0.72rem;
+  color: #777;
+  white-space: nowrap;
+  min-width: 45px;
+}
+
+.quest-form-row-inline input,
+.quest-form-row-inline textarea {
+  flex: 1;
+}
+
+.quest-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  font-size: 0.72rem;
+  background: #1d3b1d;
+  color: #4ade80;
+  border: 1px solid #2d4d2d;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.quest-add-btn:hover {
+  background: #2d4d2d;
+}
+
+.quest-remove-btn {
+  display: flex;
+  align-items: center;
+  padding: 2px 4px;
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.quest-remove-btn:hover {
+  color: #f87171;
+  background: #3b1d1d;
+}
+
+.quest-remove-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.quest-empty {
+  padding: 12px 10px;
+  color: #555;
+  font-size: 0.78rem;
+  font-style: italic;
+}
+
+.quest-validation-error {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  color: #f87171;
+  font-size: 0.78rem;
+}
+
+.quest-validation-warning {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  color: #fbbf24;
+  font-size: 0.78rem;
+}
+
+.quest-editor-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 8px 12px;
+  border-top: 1px solid #3d3d3d;
+  flex-shrink: 0;
+}
+
+/* Script Editor LiveView Styles */
+
+.script-editor-lv {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: #1a1a2e;
+  color: #ccc;
+}
+
+.script-editor-header-lv {
+  padding: 8px 12px;
+  border-bottom: 1px solid #3d3d3d;
+  flex-shrink: 0;
+}
+
+.script-editor-content-lv {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.script-editor-main {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.script-editor-sidebar {
+  width: 220px;
+  border-left: 1px solid #3d3d3d;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.api-reference-list {
+  padding: 4px 0;
+}
+
+.api-ref-item {
+  display: flex;
+  flex-direction: column;
+  padding: 3px 10px;
+  border-bottom: 1px solid #1a1a2e;
+}
+
+.api-ref-sig {
+  font-size: 0.72rem;
+  color: #4a9eff;
+}
+
+.api-ref-desc {
+  font-size: 0.68rem;
+  color: #666;
 }
 
 /* Quest Details Panel */
@@ -5059,20 +5412,14 @@ body:has(.ebook-page) {
 }
 
 /* Chat Panel - LiveView Version */
-.chat-project-context {
+.chat-project-selector {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: linear-gradient(90deg, #1e2a1e 0%, #252525 100%);
-  border-bottom: 1px solid #2a3a2a;
-  font-size: 0.78rem;
-  color: #90c090;
-}
-
-.chat-project-context .hero-icon,
-.chat-project-context [class*="hero-"] {
-  color: #66b066;
+  gap: 6px;
+  padding: 6px 10px;
+  background: #1a1a22;
+  border-bottom: 1px solid #2a2a35;
+  flex-shrink: 0;
 }
 
 .chat-input-form {
@@ -6856,10 +7203,13 @@ body:has(.ebook-page) {
 }
 
 .template-name {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: #c9c9c9;
   margin: 0 0 4px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .template-description {
@@ -7660,39 +8010,7 @@ body:has(.ebook-page) {
   color: #f0e68c;
 }
 
-/* ========================================================================
-   WORLD BUILDER - PROJECTS PANEL GRID INTEGRATION
-   ======================================================================== */
-
-.world-builder-projects {
-  grid-area: projects;
-  min-width: 180px;
-  max-width: 280px;
-}
-
-.world-builder-container {
-  /* Update grid to include projects panel */
-  grid-template-columns: var(--projects-width, 220px) 4px var(--hierarchy-width, 200px) 4px 1fr 4px var(--inspector-width, 260px) 4px var(--chat-width, 320px);
-  grid-template-areas: "projects proj-resize hierarchy hier-resize viewport insp-resize inspector chat-resize chat";
-}
-
-.world-builder-container.projects-collapsed {
-  grid-template-columns: 40px 4px var(--hierarchy-width, 200px) 4px 1fr 4px var(--inspector-width, 260px) 4px var(--chat-width, 320px);
-}
-
-.world-builder-projects.panel-collapsed {
-  min-width: 40px;
-  max-width: 40px;
-}
-
-/* Projects header */
-.projects-header {
-  display: flex;
-  gap: 4px;
-  padding: 8px;
-  border-bottom: 1px solid #3d3d3d;
-}
-
+/* Projects styles (used in chat panel project selector) */
 .projects-list {
   padding: 8px;
   display: flex;

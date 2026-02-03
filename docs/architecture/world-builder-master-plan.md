@@ -31,7 +31,7 @@ A Unity-style visual world builder for Loka MUD that transforms content creation
 
 **Integration Points**:
 ```
-World Builder (LiveView + React)
+World Builder (Pure LiveView + JS Hooks)
     ↓ creates/edits
 TypedObject (universal foundation)
     ↓ validates via
