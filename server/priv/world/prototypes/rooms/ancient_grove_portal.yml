@@ -1,0 +1,25 @@
+key: ancient_grove_portal
+parent: base_room
+type: room
+short_desc: "Ancient Grove Portal"
+long_desc: |
+  Moonlight filters through ancient oak branches, casting silver patterns
+  across a circular clearing. At the grove's heart stands a weathered stone
+  archway, its surface carved with spiraling runes that pulse with soft blue
+  light. The air within the arch shimmers like heat-haze, though the evening
+  is cool.
+
+  A low harmonic hum emanates from the archway, barely audible beneath the
+  whisper of wind through leaves. The very air tastes of ozone and wild honey.
+keywords: []
+exits:
+  east: terraced_fields
+  down: crystal_sanctum_portal
+tags: [portal, exploration]
+spawns:
+  - prototype: veilkeeper
+  - prototype: grove_portal_arch
+attributes:
+  x: 0
+  y: 0
+  z: 0

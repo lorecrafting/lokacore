@@ -31,7 +31,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     ScriptTemplates,
     GitManager,
     NPCPathExtractor,
-    Projects
+    Projects,
+    AuditLog
   }
 
   alias Loka.Content.Zone
@@ -56,7 +57,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     KeyboardHelpModal,
     QuestFlowModal,
     ProjectsPanel,
-    DocumentViewer
+    DocumentViewer,
+    AuditLogPanel
   }
 
   alias Loka.Admin.Audit
@@ -194,6 +196,15 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:chat_current_response, "")
      |> assign(:chat_error, nil)
      |> assign(:pending_tool_results, [])
+     |> assign(:chat_queued_messages, [])
+     |> assign(:chat_current_tool, nil)
+     |> assign(:chat_tool_step, 0)
+     |> assign(:chat_total_steps, 0)
+     # Audit log state
+     |> assign(:show_audit_log, false)
+     |> assign(:audit_entries, [])
+     |> assign(:audit_loading, false)
+     |> assign(:audit_filter, "all")
      |> assign(:camera_view, "perspective")
      |> assign(:undo_state, %{can_undo: false, can_redo: false, undo_count: 0, redo_count: 0})
      # Confirmation modal state (replaces browser-native confirm dialogs)
@@ -269,9 +280,6 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
         <ViewportContainer.viewport_container
           rooms={@rooms}
           selected_room={@selected_room}
-          zones={@zones}
-          zone_colors={@zone_colors}
-          show_zone_colors={@show_zone_colors}
           npc_paths={@npc_paths}
           show_npc_paths={@show_npc_paths}
           console_messages={@console_messages}
@@ -313,12 +321,16 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
           current_project={@current_project}
           error={@chat_error}
           collapsed={@collapsed_panels.chat}
+          queued_messages={@chat_queued_messages}
+          current_tool={@chat_current_tool}
+          tool_step={@chat_tool_step}
+          total_steps={@chat_total_steps}
         />
       </div>
 
       <%= if @show_create_modal do %>
-        <div class="modal-overlay" phx-click="close_create_modal">
-          <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-overlay">
+          <div class="modal-content" phx-click-away="close_create_modal">
             <div class="modal-header">
               <h3>Create New Room</h3>
               <button phx-click="close_create_modal" class="modal-close">&times;</button>
@@ -380,8 +392,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
       <%!-- NPC Editor Modal --%>
       <%= if @show_npc_editor do %>
-        <div class="modal-overlay" phx-click="close_npc_editor">
-          <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-overlay">
+          <div class="modal-content" phx-click-away="close_npc_editor">
             <div class="modal-header">
               <h3>Create New NPC</h3>
               <button phx-click="close_npc_editor" class="modal-close">&times;</button>
@@ -439,8 +451,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
       <%!-- Item Editor Modal --%>
       <%= if @show_item_editor do %>
-        <div class="modal-overlay" phx-click="close_item_editor">
-          <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-overlay">
+          <div class="modal-content" phx-click-away="close_item_editor">
             <div class="modal-header">
               <h3>Create New Item</h3>
               <button phx-click="close_item_editor" class="modal-close">&times;</button>
@@ -504,10 +516,10 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
       <%!-- Quest Editor Modal --%>
       <%= if @show_quest_editor do %>
-        <div class="modal-overlay" phx-click="close_quest_editor">
+        <div class="modal-overlay">
           <div
             class="modal-content modal-fullscreen"
-            onclick="event.stopPropagation()"
+            phx-click-away="close_quest_editor"
             style="width: 95vw; height: 90vh; max-width: none;"
           >
             <div class="modal-header">
@@ -529,10 +541,10 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
       <%!-- Cutscene Editor Modal --%>
       <%= if @show_cutscene_editor do %>
-        <div class="modal-overlay" phx-click="close_cutscene_editor">
+        <div class="modal-overlay">
           <div
             class="modal-content modal-fullscreen"
-            onclick="event.stopPropagation()"
+            phx-click-away="close_cutscene_editor"
             style="width: 95vw; height: 90vh; max-width: none;"
           >
             <div class="modal-header">
@@ -554,10 +566,10 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
       <%!-- Dialogue Editor Modal --%>
       <%= if @show_dialogue_editor do %>
-        <div class="modal-overlay" phx-click="close_dialogue_editor">
+        <div class="modal-overlay">
           <div
             class="modal-content modal-fullscreen"
-            onclick="event.stopPropagation()"
+            phx-click-away="close_dialogue_editor"
             style="width: 95vw; height: 90vh; max-width: none;"
           >
             <div class="modal-header">
@@ -642,6 +654,14 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
       <%!-- Keyboard Help Modal --%>
       <KeyboardHelpModal.keyboard_help_modal show={@show_keyboard_help} />
+
+      <%!-- Audit Log Panel --%>
+      <AuditLogPanel.audit_log_panel
+        show={@show_audit_log}
+        entries={@audit_entries}
+        loading={@audit_loading}
+        filter={@audit_filter}
+      />
 
       <%!-- Quest Flow Modal --%>
       <QuestFlowModal.quest_flow_modal
@@ -871,27 +891,39 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   # Keyboard shortcuts for panel toggle (1, 2, 3, 4)
   @impl true
   def handle_event("keyboard_shortcut", %{"key" => key}, socket) do
-    # Only handle 1, 2, 3, 4 keys for panel toggle
-    # Ignore if user is in an input field (handled by JS)
-    panel =
-      case key do
-        "1" -> :hierarchy
-        "2" -> :inspector
-        "3" -> :console
-        "4" -> :chat
-        _ -> nil
-      end
+    # Global keyboard shortcuts
+    case key do
+      # Panel toggles
+      "1" ->
+        toggle_panel(socket, :hierarchy)
 
-    if panel do
-      collapsed = socket.assigns.collapsed_panels
-      new_collapsed = Map.update!(collapsed, panel, &(!&1))
+      "2" ->
+        toggle_panel(socket, :inspector)
 
-      {:noreply,
-       socket
-       |> assign(:collapsed_panels, new_collapsed)
-       |> push_event("panel_collapsed", %{panels: new_collapsed})}
-    else
-      {:noreply, socket}
+      "3" ->
+        toggle_panel(socket, :console)
+
+      "4" ->
+        toggle_panel(socket, :chat)
+
+      # Escape cancels streaming or closes modals
+      "Escape" ->
+        cond do
+          socket.assigns.chat_streaming ->
+            {:noreply, Loka.WorldBuilder.Chat.cancel_streaming(socket)}
+
+          socket.assigns.show_audit_log ->
+            {:noreply, assign(socket, :show_audit_log, false)}
+
+          socket.assigns.show_keyboard_help ->
+            {:noreply, assign(socket, :show_keyboard_help, false)}
+
+          true ->
+            {:noreply, socket}
+        end
+
+      _ ->
+        {:noreply, socket}
     end
   end
 
@@ -2415,6 +2447,46 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   end
 
   # =============================================================================
+  # Audit Log Events
+  # =============================================================================
+
+  def handle_event("show_audit_log", _params, socket) do
+    project_key = get_in(socket.assigns, [:current_project, :key])
+
+    socket =
+      socket
+      |> assign(:show_audit_log, true)
+      |> assign(:audit_loading, true)
+
+    # Load entries in background
+    send(self(), {:load_audit_entries, project_key})
+
+    {:noreply, socket}
+  end
+
+  def handle_event("close_audit_log", _params, socket) do
+    {:noreply, assign(socket, :show_audit_log, false)}
+  end
+
+  def handle_event("refresh_audit_log", _params, socket) do
+    project_key = get_in(socket.assigns, [:current_project, :key])
+    send(self(), {:load_audit_entries, project_key})
+    {:noreply, assign(socket, :audit_loading, true)}
+  end
+
+  def handle_event("audit_filter_changed", %{"filter" => filter}, socket) do
+    project_key = get_in(socket.assigns, [:current_project, :key])
+
+    socket =
+      socket
+      |> assign(:audit_filter, filter)
+      |> assign(:audit_loading, true)
+
+    send(self(), {:load_audit_entries, project_key})
+    {:noreply, socket}
+  end
+
+  # =============================================================================
   # Chat Panel Events
   # =============================================================================
 
@@ -2423,6 +2495,45 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
     if message != "" do
       {:noreply, Loka.WorldBuilder.Chat.send_message(socket, message)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  # Unified handler: sends if not streaming, queues if streaming
+  def handle_event("send_or_queue_message", %{"message" => message}, socket) do
+    message = String.trim(message)
+
+    if message != "" do
+      if socket.assigns.chat_streaming do
+        {:noreply, Loka.WorldBuilder.Chat.queue_message(socket, message)}
+      else
+        {:noreply, Loka.WorldBuilder.Chat.send_message(socket, message)}
+      end
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_event("queue_message", %{"message" => message}, socket) do
+    message = String.trim(message)
+
+    if message != "" do
+      {:noreply, Loka.WorldBuilder.Chat.queue_message(socket, message)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_event("clear_queue", _params, socket) do
+    {:noreply, Loka.WorldBuilder.Chat.clear_queue(socket)}
+  end
+
+  def handle_event("quick_chat", %{"prompt" => prompt}, socket) do
+    prompt = String.trim(prompt)
+
+    if prompt != "" do
+      {:noreply, Loka.WorldBuilder.Chat.send_message(socket, prompt)}
     else
       {:noreply, socket}
     end
@@ -2440,6 +2551,10 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
   def handle_event("clear_chat", _params, socket) do
     {:noreply, Loka.WorldBuilder.Chat.clear_chat(socket)}
+  end
+
+  def handle_event("cancel_streaming", _params, socket) do
+    {:noreply, Loka.WorldBuilder.Chat.cancel_streaming(socket)}
   end
 
   # =============================================================================
@@ -2713,7 +2828,17 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
   @impl true
   def handle_info({:anthropic_tool_use, tool_name, tool_id, input}, socket) do
-    {:noreply, Loka.WorldBuilder.Chat.handle_tool_use(socket, tool_name, tool_id, input)}
+    socket = Loka.WorldBuilder.Chat.handle_tool_use(socket, tool_name, tool_id, input)
+
+    # Refresh rooms/map when room-related tools execute
+    socket =
+      if room_tool?(tool_name) do
+        refresh_rooms_with_validation(socket)
+      else
+        socket
+      end
+
+    {:noreply, socket}
   end
 
   @impl true
@@ -2726,9 +2851,53 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     {:noreply, Loka.WorldBuilder.Chat.handle_error(socket, error)}
   end
 
+  @impl true
+  def handle_info({:load_audit_entries, project_key}, socket) do
+    entries =
+      case socket.assigns.audit_filter do
+        "error" ->
+          AuditLog.list_errors(project_key: project_key, limit: 100)
+
+        "success" ->
+          if project_key do
+            AuditLog.list_by_project(project_key, limit: 100)
+            |> Enum.filter(&(&1.result_status == "success"))
+          else
+            AuditLog.list_recent(100)
+            |> Enum.filter(&(&1.result_status == "success"))
+          end
+
+        _ ->
+          if project_key do
+            AuditLog.list_by_project(project_key, limit: 100)
+          else
+            AuditLog.list_recent(100)
+          end
+      end
+
+    {:noreply,
+     socket
+     |> assign(:audit_entries, entries)
+     |> assign(:audit_loading, false)}
+  end
+
   # =============================================================================
   # Private Helper Functions
   # =============================================================================
+
+  # Check if tool name is room-related (needs map refresh)
+  defp room_tool?(name) do
+    normalized = String.replace_prefix(name, "wb_", "")
+
+    normalized in [
+      "create_room",
+      "update_room",
+      "delete_room",
+      "create_exit",
+      "remove_exit",
+      "batch_create_rooms"
+    ]
+  end
 
   # Safely parse algorithm string to atom, preventing atom exhaustion attacks
   defp parse_algorithm(str) when is_binary(str) do
@@ -2898,5 +3067,16 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
       Enum.map(rooms, fn room_key -> {room_key, zone.key} end)
     end)
     |> Map.new()
+  end
+
+  # Toggle panel collapsed state (used by keyboard shortcuts)
+  defp toggle_panel(socket, panel) do
+    collapsed = socket.assigns.collapsed_panels
+    new_collapsed = Map.update!(collapsed, panel, &(!&1))
+
+    {:noreply,
+     socket
+     |> assign(:collapsed_panels, new_collapsed)
+     |> push_event("panel_collapsed", %{panels: new_collapsed})}
   end
 end

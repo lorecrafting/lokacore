@@ -9,6 +9,7 @@ keywords: []
 exits:
   east: village
   north: herb_garden
+  west: ancient_grove_portal
 spawns:
   - prototype: working_farmer
   - prototype: herb_patch_goji        # Goji berries (Gou Qi Zi)

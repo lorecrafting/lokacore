@@ -1,0 +1,14 @@
+key: sanctum_portal_ring
+type: item
+parent: base_item
+short_desc: "floating crystal portal ring"
+long_desc: "A mesmerizing ring of seven floating crystal shards hovers above the obsidian platform, each shard the size of your forearm and glowing with inner fire. The crystals rotate in a slow, hypnotic dance, their movement creating a swirling vortex of prismatic energy at the ring's center. Through the shimmering portal, you catch glimpses of moonlit groves and ancient oak trees. The magical resonance is so strong you can taste copper on your tongue, and the air itself seems to sing with barely contained power."
+extra_desc: |
+    A mesmerizing ring of seven floating crystal shards hovers above the obsidian platform, each shard the size of your forearm and glowing with inner fire. The crystals rotate in a slow, hypnotic dance, their movement creating a swirling vortex of prismatic energy at the ring's center. Through the shimmering portal, you catch glimpses of moonlit groves and ancient oak trees. The magical resonance is so strong you can taste copper on your tongue, and the air itself seems to sing with barely contained power.
+keywords: [sanctum_portal_ring]
+primary_keyword: sanctum_portal_ring
+tags:
+  - no_get
+components:
+  item:
+    item_type: "misc"

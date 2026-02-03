@@ -1,0 +1,17 @@
+key: portal_attunement_token
+type: item
+parent: base_item
+short_desc: "portal attunement sigil"
+long_desc: |
+    A palm-sized disc of crystallized light, neither fully solid nor entirely ethereal. Three interlocking triangles are etched into its surface, each one glowing with a different shade of blue—past, present, and possible. When you hold it, you can feel the faintest hum of the portal network resonating through your bones, a constant reminder that you carry the song of the Resonance within you.
+extra_desc: |
+    The sigil pulses gently in rhythm with your heartbeat, its glow brightening when you face toward a portal node and dimming when you turn away. Occasionally, fleeting images of distant places flicker across its surface—crystal caverns, moonlit gardens, impossible architectures—glimpses of the destinations that now lie within your reach.
+keywords: [sigil, attunement, portal, token]
+primary_keyword: sigil
+tags: [quest_reward, portal, unique]
+components:
+  item:
+    item_type: "quest"
+    flags:
+      no_drop: true
+      unique: true

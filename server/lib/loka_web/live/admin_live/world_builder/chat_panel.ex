@@ -33,6 +33,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
   attr :current_project, :map, default: nil
   attr :error, :string, default: nil
   attr :collapsed, :boolean, default: false
+  attr :queued_messages, :list, default: []
+  attr :current_tool, :string, default: nil
+  attr :tool_step, :integer, default: 0
+  attr :total_steps, :integer, default: 0
   attr :class, :string, default: ""
 
   def chat_panel(assigns) do
@@ -49,6 +53,14 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
         </button>
         <div style="flex: 1;"></div>
         <button
+          :if={!@collapsed}
+          class="panel-header-btn"
+          phx-click="show_audit_log"
+          title="View audit log"
+        >
+          <.icon name="hero-clock" class="size-4" />
+        </button>
+        <button
           class="panel-collapse-btn"
           phx-click="toggle_panel"
           phx-value-panel="chat"
@@ -64,12 +76,91 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
       <div class="panel-content" style={if @collapsed, do: "display: none;"}>
         <%= if @current_project do %>
           <div class="chat-project-context">
-            <.icon name="hero-folder" class="size-4 text-yellow-500" />
+            <.icon name="hero-folder-open" class="size-4" />
             <span>{@current_project.key}</span>
           </div>
         <% end %>
 
         <div class="chat-messages" id="chat-messages" phx-hook="ScrollBottom">
+          <%= if @messages == [] and !@streaming do %>
+            <div class="chat-welcome">
+              <div class="chat-welcome-icon">
+                <.icon name="hero-sparkles" class="size-6 hero-icon" />
+              </div>
+              <div class="chat-welcome-title">World Builder AI</div>
+              <div class="chat-welcome-subtitle">
+                Your creative partner for building immersive worlds. Describe what you want to create.
+              </div>
+              <div class="chat-quick-actions">
+                <button
+                  type="button"
+                  class="chat-quick-action"
+                  phx-click="quick_chat"
+                  phx-value-prompt="Create a tavern district with 5 interconnected rooms: a main hall, kitchen, cellar, upstairs rooms, and a back alley"
+                >
+                  <div class="chat-quick-action-icon rooms">
+                    <.icon name="hero-home" class="size-4" />
+                  </div>
+                  <div class="chat-quick-action-text">
+                    <span class="chat-quick-action-label">Build rooms</span>
+                    <span class="chat-quick-action-desc">
+                      Generate connected rooms with descriptions
+                    </span>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  class="chat-quick-action"
+                  phx-click="quick_chat"
+                  phx-value-prompt="Design a mysterious merchant NPC with a branching dialogue tree, backstory, and a hidden quest hook"
+                >
+                  <div class="chat-quick-action-icon npcs">
+                    <.icon name="hero-user" class="size-4" />
+                  </div>
+                  <div class="chat-quick-action-text">
+                    <span class="chat-quick-action-label">Design an NPC</span>
+                    <span class="chat-quick-action-desc">
+                      Create NPCs with personality and dialogue
+                    </span>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  class="chat-quick-action"
+                  phx-click="quick_chat"
+                  phx-value-prompt="Design a multi-part quest where the player investigates a series of disappearances in a village, with branching outcomes"
+                >
+                  <div class="chat-quick-action-icon quests">
+                    <.icon name="hero-map" class="size-4" />
+                  </div>
+                  <div class="chat-quick-action-text">
+                    <span class="chat-quick-action-label">Write a quest</span>
+                    <span class="chat-quick-action-desc">
+                      Craft quests with objectives and rewards
+                    </span>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  class="chat-quick-action"
+                  phx-click="quick_chat"
+                  phx-value-prompt="Help me brainstorm a world design concept. I want to create a world that feels unique and memorable. What themes and aesthetics should I explore?"
+                >
+                  <div class="chat-quick-action-icon design">
+                    <.icon name="hero-light-bulb" class="size-4" />
+                  </div>
+                  <div class="chat-quick-action-text">
+                    <span class="chat-quick-action-label">Brainstorm</span>
+                    <span class="chat-quick-action-desc">Explore ideas and creative direction</span>
+                  </div>
+                </button>
+              </div>
+              <div class="chat-hints">
+                <kbd>Ctrl+Enter</kbd> to send &middot; <kbd>Esc</kbd> to cancel
+              </div>
+            </div>
+          <% end %>
+
           <%= for message <- @messages do %>
             <.chat_message message={message} />
           <% end %>
@@ -77,6 +168,15 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
           <%= if @streaming do %>
             <div class="chat-message assistant streaming">
               <div class="message-content">
+                <%= if @current_tool do %>
+                  <div class="current-tool-indicator">
+                    <.icon name="hero-wrench-screwdriver" class="size-4 animate-pulse" />
+                    <span>{format_tool_name(@current_tool)}</span>
+                    <%= if @total_steps > 0 do %>
+                      <span class="tool-progress">Step {@tool_step}/{@total_steps}</span>
+                    <% end %>
+                  </div>
+                <% end %>
                 <div class="message-text">
                   {Phoenix.HTML.raw(format_markdown(@current_response))}
                   <span class="typing-indicator">▊</span>
@@ -93,25 +193,52 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
           <% end %>
         </div>
 
-        <form class="chat-input-form" phx-submit="send_message">
+        <%!-- Queued messages indicator --%>
+        <%= if @queued_messages != [] do %>
+          <div class="chat-queue-indicator">
+            <.icon name="hero-queue-list" class="size-4" />
+            <span>{length(@queued_messages)} queued</span>
+            <button
+              type="button"
+              class="btn btn-xs btn-ghost"
+              phx-click="clear_queue"
+              title="Clear queue"
+            >
+              <.icon name="hero-x-mark" class="size-3" />
+            </button>
+          </div>
+        <% end %>
+
+        <form class="chat-input-form" phx-submit="send_or_queue_message" id="chat-input-form">
           <textarea
+            id="chat-textarea"
             name="message"
-            placeholder={
-              if @current_project,
-                do: "Ask about #{@current_project.key}...",
-                else: "Start by creating or loading a project..."
-            }
+            placeholder={chat_placeholder(@current_project, @streaming, @queued_messages)}
             rows="3"
-            disabled={@streaming}
-            phx-keydown="textarea_keydown"
+            phx-hook="ChatTextarea"
+            data-streaming={@streaming}
           ></textarea>
-          <button type="submit" class="btn btn-primary" disabled={@streaming}>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            title={if @streaming, do: "Queue message", else: "Send"}
+          >
             <%= if @streaming do %>
-              <.icon name="hero-arrow-path" class="size-4 animate-spin" />
+              <.icon name="hero-queue-list" class="size-4" />
             <% else %>
               <.icon name="hero-paper-airplane" class="size-4" />
             <% end %>
           </button>
+          <%= if @streaming do %>
+            <button
+              type="button"
+              class="btn btn-danger"
+              phx-click="cancel_streaming"
+              title="Cancel (Esc)"
+            >
+              <.icon name="hero-stop" class="size-4" />
+            </button>
+          <% end %>
         </form>
       </div>
     </div>
@@ -167,6 +294,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
   attr :result, :map, required: true
 
   defp tool_result_display(assigns) do
+    content = assigns.result.content
+    is_long = is_binary(content) and String.length(content) > 200
+    assigns = assign(assigns, :is_long, is_long)
+
     ~H"""
     <div class={["tool-result", @result[:is_error] && "error"]}>
       <div class="tool-result-header">
@@ -177,14 +308,36 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
         <% end %>
         <span>{format_tool_name(@result.tool_name)}</span>
       </div>
-      <div class="tool-result-content">
-        <code>{truncate_result(@result.content)}</code>
-      </div>
+      <%= if @is_long do %>
+        <details class="tool-result-details">
+          <summary class="tool-result-summary">
+            <code>{truncate_result(@result.content, 100)}</code>
+            <span class="show-more-hint">Show more</span>
+          </summary>
+          <div class="tool-result-content">
+            <code>{@result.content}</code>
+          </div>
+        </details>
+      <% else %>
+        <div class="tool-result-content">
+          <code>{@result.content}</code>
+        </div>
+      <% end %>
     </div>
     """
   end
 
   # Helpers
+
+  defp chat_placeholder(nil, _streaming, _queued), do: "Start by creating or loading a project..."
+
+  defp chat_placeholder(_project, true, queued) when length(queued) > 0,
+    do: "Type to queue another message... (#{length(queued)} waiting)"
+
+  defp chat_placeholder(project, true, _queued),
+    do: "Type to queue a follow-up for #{project.key}..."
+
+  defp chat_placeholder(project, false, _queued), do: "Ask about #{project.key}..."
 
   defp format_tool_name(name) do
     name
@@ -195,15 +348,15 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
     |> Enum.join(" ")
   end
 
-  defp truncate_result(content) when is_binary(content) do
-    if String.length(content) > 500 do
-      String.slice(content, 0, 500) <> "..."
+  defp truncate_result(content, max_length) when is_binary(content) do
+    if String.length(content) > max_length do
+      String.slice(content, 0, max_length) <> "..."
     else
       content
     end
   end
 
-  defp truncate_result(content), do: inspect(content, limit: 10)
+  defp truncate_result(content, _max_length), do: inspect(content, limit: 10)
 
   defp format_markdown(nil), do: ""
 

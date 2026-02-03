@@ -18,6 +18,8 @@ rooms:
   - guest_hall
   - herb_garden
   - terraced_fields
+  - ancient_grove_portal
+  - crystal_sanctum_portal
 
 # Reset every 30 minutes
 lifespan_minutes: 30

@@ -1,0 +1,27 @@
+key: crystal_sanctum_portal
+parent: base_room
+type: room
+short_desc: "Crystal Sanctum Portal"
+long_desc: |
+  Massive crystals jut from the stone walls of this underground chamber, their
+  faceted surfaces catching and refracting the ethereal light that emanates from
+  a ring of floating crystal shards in the room's center. The portal ring hovers
+  three feet above a platform of polished obsidian, its crystals rotating slowly
+  in a hypnotic dance.
+
+  The crystals emit a resonant chord that seems to vibrate in your bones, while
+  the air crackles with barely contained magical energy. Ancient symbols glow
+  faintly on the obsidian platform, their meaning lost to time.
+keywords: []
+exits:
+  up: ancient_grove_portal
+tags: [portal, exploration]
+spawns:
+  - prototype: sanctum_portal_ring
+  - prototype: resonance_crystal
+  - prototype: resonance_crystal
+  - prototype: resonance_crystal
+attributes:
+  x: 10
+  y: 0
+  z: 0
