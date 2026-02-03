@@ -10,8 +10,21 @@ defmodule Loka.WorldBuilder.AnthropicClient do
 
   @api_url "https://api.anthropic.com/v1/messages"
   @api_version "2023-06-01"
-  @default_model "claude-sonnet-4-20250514"
-  @default_max_tokens 4096
+
+  # Configurable via application config:
+  # config :loka, Loka.WorldBuilder.AnthropicClient,
+  #   default_model: "claude-sonnet-4-20250514",
+  #   default_max_tokens: 4096,
+  #   timeout: 120_000
+
+  defp config(key, default) do
+    Application.get_env(:loka, __MODULE__, [])
+    |> Keyword.get(key, default)
+  end
+
+  defp default_model, do: config(:default_model, "claude-sonnet-4-20250514")
+  defp default_max_tokens, do: config(:default_max_tokens, 4096)
+  defp default_timeout, do: config(:timeout, 120_000)
 
   @doc """
   Send a message to Claude and stream the response.
@@ -80,8 +93,8 @@ defmodule Loka.WorldBuilder.AnthropicClient do
   end
 
   defp do_chat(messages, tools, opts, api_key) do
-    model = Keyword.get(opts, :model, @default_model)
-    max_tokens = Keyword.get(opts, :max_tokens, @default_max_tokens)
+    model = Keyword.get(opts, :model, default_model())
+    max_tokens = Keyword.get(opts, :max_tokens, default_max_tokens())
     system = Keyword.get(opts, :system)
 
     body =
@@ -142,70 +155,64 @@ defmodule Loka.WorldBuilder.AnthropicClient do
   end
 
   defp stream_request(url, headers, body, opts) do
-    # Use Req for streaming HTTP
+    # Use Req for streaming HTTP with callback function
+    on_text = opts[:on_text]
+    on_tool_use = opts[:on_tool_use]
+    on_done = opts[:on_done]
+
+    # Accumulate response state
+    initial_state = %{
+      text: "",
+      tool_uses: [],
+      current_tool: nil,
+      stop_reason: nil,
+      buffer: ""
+    }
+
+    # Use into: with a callback function for proper Req 0.5.x streaming
+    stream_fn = fn {:data, data}, {req, resp} ->
+      # Process SSE data and update state
+      state = Process.get(:anthropic_stream_state, initial_state)
+      new_state = process_sse_data(data, state, on_text, on_tool_use)
+      Process.put(:anthropic_stream_state, new_state)
+      {:cont, {req, resp}}
+    end
+
+    # Initialize state in process dictionary
+    Process.put(:anthropic_stream_state, initial_state)
+
     request =
       Req.new(
         url: url,
         method: :post,
         headers: headers,
         json: body,
-        receive_timeout: 120_000,
-        into: :self
+        receive_timeout: default_timeout(),
+        into: stream_fn
       )
 
     case Req.request(request) do
-      {:ok, %Req.Response{status: 200} = response} ->
-        process_stream(response, opts)
+      {:ok, %Req.Response{status: 200}} ->
+        # Get final state and clean up
+        final_state = Process.get(:anthropic_stream_state, initial_state)
+        Process.delete(:anthropic_stream_state)
+
+        response = %{
+          text: final_state.text,
+          tool_uses: final_state.tool_uses,
+          stop_reason: final_state.stop_reason
+        }
+
+        if on_done, do: on_done.(response)
+        {:ok, response}
 
       {:ok, %Req.Response{status: status, body: body}} ->
+        Process.delete(:anthropic_stream_state)
         {:error, "API error: #{status} - #{inspect(body)}"}
 
       {:error, reason} ->
+        Process.delete(:anthropic_stream_state)
         {:error, "Request failed: #{inspect(reason)}"}
-    end
-  end
-
-  defp process_stream(response, opts) do
-    on_text = opts[:on_text]
-    on_tool_use = opts[:on_tool_use]
-    on_done = opts[:on_done]
-
-    # Accumulate response
-    state = %{
-      text: "",
-      tool_uses: [],
-      current_tool: nil,
-      stop_reason: nil
-    }
-
-    final_state = stream_events(response, state, on_text, on_tool_use)
-
-    response = %{
-      text: final_state.text,
-      tool_uses: final_state.tool_uses,
-      stop_reason: final_state.stop_reason
-    }
-
-    if on_done, do: on_done.(response)
-    {:ok, response}
-  end
-
-  defp stream_events(response, state, on_text, on_tool_use) do
-    receive do
-      {_, ^response, {:data, data}} ->
-        new_state = process_sse_data(data, state, on_text, on_tool_use)
-        stream_events(response, new_state, on_text, on_tool_use)
-
-      {_, ^response, :done} ->
-        state
-
-      {_, ^response, {:error, reason}} ->
-        Logger.error("[AnthropicClient] Stream error: #{inspect(reason)}")
-        state
-    after
-      120_000 ->
-        Logger.error("[AnthropicClient] Stream timeout")
-        state
     end
   end
 
