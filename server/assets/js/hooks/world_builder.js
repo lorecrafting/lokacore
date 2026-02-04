@@ -1,5 +1,6 @@
 import Canvas2DViewport from "../world_builder/Canvas2DViewport.js"
 import { undoManager } from "../world_builder/UndoManager.js"
+import { keyboardManager } from "../world_builder/KeyboardManager.js"
 
 // World Builder - 2D Canvas viewport (replaced React Three Fiber 3D)
 const WorldBuilder = {
@@ -183,27 +184,162 @@ const WorldBuilder = {
     // Send initial undo state
     this.pushEvent('undo_state_changed', undoManager.getState())
 
-    // Setup keyboard shortcuts
-    this.keydownHandler = this.handleKeydown.bind(this)
-    document.addEventListener('keydown', this.keydownHandler)
+    // Register keyboard shortcuts via KeyboardManager (single document listener)
+    this.registerKeyboardShortcuts()
 
-    // Setup Z-level tab click handlers
-    this.setupZLevelTabs()
-  },
-
-  setupZLevelTabs() {
-    // Find Z-level tab container and setup click handlers
+    // Setup Z-level tab click handlers (stored for cleanup)
+    this.zLevelClickHandler = (e) => {
+      const btn = e.target.closest('[data-z-level]')
+      if (btn) {
+        const level = parseInt(btn.dataset.zLevel)
+        this.viewport.setZLevel(level)
+        this.updateZLevelTabs()
+      }
+    }
     const tabContainer = document.querySelector('.z-level-tabs')
     if (tabContainer) {
-      tabContainer.addEventListener('click', (e) => {
-        const btn = e.target.closest('[data-z-level]')
-        if (btn) {
-          const level = parseInt(btn.dataset.zLevel)
-          this.viewport.setZLevel(level)
-          this.updateZLevelTabs()
-        }
-      })
+      tabContainer.addEventListener('click', this.zLevelClickHandler)
     }
+  },
+
+  registerKeyboardShortcuts() {
+    // Undo/Redo
+    keyboardManager.register('wb-undo', { key: 'z', mod: true, shift: false }, () => {
+      undoManager.undo()
+    })
+    keyboardManager.register('wb-redo-z', { key: 'z', mod: true, shift: true }, () => {
+      undoManager.redo()
+    })
+    keyboardManager.register('wb-redo-y', { key: 'y', mod: true }, () => {
+      undoManager.redo()
+    })
+
+    // Save (validate)
+    keyboardManager.register('wb-save', { key: 's', mod: true }, () => {
+      this.pushEvent('validate_all', {})
+    })
+
+    // Delete selected
+    keyboardManager.register('wb-delete', { key: 'delete', mod: false }, () => {
+      if (this.selectedRoom) {
+        this.pushEvent('delete_room', { id: this.selectedRoom })
+      } else if (this.selectedKeys && this.selectedKeys.length > 0) {
+        this.pushEvent('batch_delete', {})
+      }
+    }, { skipInputs: true })
+    keyboardManager.register('wb-backspace', { key: 'backspace', mod: false }, () => {
+      if (this.selectedRoom) {
+        this.pushEvent('delete_room', { id: this.selectedRoom })
+      } else if (this.selectedKeys && this.selectedKeys.length > 0) {
+        this.pushEvent('batch_delete', {})
+      }
+    }, { skipInputs: true })
+
+    // Duplicate
+    keyboardManager.register('wb-duplicate', { key: 'd', mod: true }, () => {
+      if (this.selectedEntity && this.selectedEntity.type && this.selectedEntity.key) {
+        this.pushEvent('duplicate_entity', {
+          type: this.selectedEntity.type,
+          key: this.selectedEntity.key
+        })
+      } else if (this.selectedRoom && (!this.selectedKeys || this.selectedKeys.length <= 1)) {
+        this.pushEvent('duplicate_room', { key: this.selectedRoom })
+      } else if (this.selectedKeys && this.selectedKeys.length > 0) {
+        this.pushEvent('batch_clone', { dx: 5, dy: 5, dz: 0 })
+      }
+    })
+
+    // Select all
+    keyboardManager.register('wb-select-all', { key: 'a', mod: true }, () => {
+      const allKeys = this.rooms.map(r => r.key)
+      this.selectedKeys = allKeys
+      this.viewport.setSelectedKeys(allKeys)
+      this.pushEvent('batch_select', { keys: allKeys })
+    })
+
+    // Escape: deselect (allowed in modals to close them)
+    keyboardManager.register('wb-escape', { key: 'escape' }, () => {
+      this.selectedRoom = null
+      this.selectedEntity = null
+      this.selectedKeys = []
+      this.viewport.setSelectedRoom(null)
+      this.viewport.setSelectedKeys([])
+      this.pushEvent('batch_select', { keys: [] })
+      this.pushEvent('select_room', { key: null })
+      this.pushEvent('select_entity', { type: null, key: null })
+    }, { skipInputs: false, skipModals: false })
+
+    // Panel toggles (1-4)
+    const panels = ['hierarchy', 'inspector', 'console', 'chat']
+    panels.forEach((panel, i) => {
+      keyboardManager.register(`wb-panel-${i + 1}`, { key: `${i + 1}` }, () => {
+        this.pushEvent('toggle_panel', { panel })
+      })
+    })
+
+    // Backtick: toggle console
+    keyboardManager.register('wb-console', { key: '`' }, () => {
+      this.pushEvent('toggle_panel', { panel: 'console' })
+    })
+
+    // N: new room
+    keyboardManager.register('wb-new-room', { key: 'n' }, () => {
+      this.pushEvent('create_room', {})
+    })
+
+    // /: focus search
+    keyboardManager.register('wb-search', { key: '/' }, (e) => {
+      const searchInput = document.querySelector('.hierarchy-search input')
+      if (searchInput) searchInput.focus()
+    })
+
+    // Ctrl+G: git commit
+    keyboardManager.register('wb-git', { key: 'g', mod: true }, () => {
+      this.pushEvent('show_commit_modal', {})
+    })
+
+    // F: fit to rooms
+    keyboardManager.register('wb-fit', { key: 'f' }, () => {
+      this.viewport.fitToRooms()
+    })
+
+    // R: reset camera
+    keyboardManager.register('wb-reset', { key: 'r' }, () => {
+      this.viewport.resetCamera()
+    })
+
+    // Ctrl+Arrow: change Z-level
+    keyboardManager.register('wb-zlevel-up', { key: 'arrowup', mod: true }, () => {
+      const zLevels = this.viewport.getZLevels()
+      const currentIdx = zLevels.indexOf(this.viewport.currentZLevel)
+      if (currentIdx < zLevels.length - 1) {
+        this.viewport.setZLevel(zLevels[currentIdx + 1])
+        this.updateZLevelTabs()
+      }
+    })
+    keyboardManager.register('wb-zlevel-down', { key: 'arrowdown', mod: true }, () => {
+      const zLevels = this.viewport.getZLevels()
+      const currentIdx = zLevels.indexOf(this.viewport.currentZLevel)
+      if (currentIdx > 0) {
+        this.viewport.setZLevel(zLevels[currentIdx - 1])
+        this.updateZLevelTabs()
+      }
+    })
+
+    // Z: toggle zone colors
+    keyboardManager.register('wb-zones', { key: 'z' }, () => {
+      this.pushEvent('toggle_zone_colors', {})
+    })
+
+    // P: toggle NPC paths
+    keyboardManager.register('wb-paths', { key: 'p' }, () => {
+      this.pushEvent('toggle_npc_paths', {})
+    })
+
+    // ?: keyboard help
+    keyboardManager.register('wb-help', { key: '?' }, () => {
+      this.pushEvent('show_keyboard_help', {})
+    })
   },
 
   updateZLevelTabs() {
@@ -222,186 +358,6 @@ const WorldBuilder = {
     tabContainer.innerHTML = html
   },
 
-  handleKeydown(e) {
-    // Skip if typing in an input/textarea or select
-    const target = e.target
-    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable) {
-      if (e.key === 'Escape') target.blur()
-      return
-    }
-
-    // Skip most shortcuts if a modal is open (except Escape to close it)
-    const modalOpen = document.querySelector('.modal-overlay')
-    if (modalOpen && e.key !== 'Escape') {
-      // Only allow Escape key when modal is open
-      return
-    }
-
-    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0
-    const modKey = isMac ? e.metaKey : e.ctrlKey
-
-    // Ctrl+Z / Cmd+Z: Undo
-    if (modKey && !e.shiftKey && e.key.toLowerCase() === 'z') {
-      e.preventDefault()
-      undoManager.undo()
-      return
-    }
-
-    // Ctrl+Shift+Z / Cmd+Shift+Z or Ctrl+Y / Cmd+Y: Redo
-    if ((modKey && e.shiftKey && e.key.toLowerCase() === 'z') ||
-        (modKey && e.key.toLowerCase() === 'y')) {
-      e.preventDefault()
-      undoManager.redo()
-      return
-    }
-
-    // Ctrl+S / Cmd+S: Save (trigger validation)
-    if (modKey && e.key.toLowerCase() === 's') {
-      e.preventDefault()
-      this.pushEvent('validate_all', {})
-      return
-    }
-
-    // Delete / Backspace: Delete selected
-    if (e.key === 'Delete' || e.key === 'Backspace') {
-      if (this.selectedRoom) {
-        e.preventDefault()
-        this.pushEvent('delete_room', { id: this.selectedRoom })
-      } else if (this.selectedKeys && this.selectedKeys.length > 0) {
-        e.preventDefault()
-        this.pushEvent('batch_delete', {})
-      }
-      return
-    }
-
-    // Ctrl+D / Cmd+D: Duplicate selected
-    if (modKey && e.key.toLowerCase() === 'd') {
-      e.preventDefault()
-      // Check for selected entity (NPC/Item) first
-      if (this.selectedEntity && this.selectedEntity.type && this.selectedEntity.key) {
-        this.pushEvent('duplicate_entity', {
-          type: this.selectedEntity.type,
-          key: this.selectedEntity.key
-        })
-      }
-      // Then check for single selected room
-      else if (this.selectedRoom && (!this.selectedKeys || this.selectedKeys.length <= 1)) {
-        this.pushEvent('duplicate_room', { key: this.selectedRoom })
-      }
-      // Finally check for batch selection
-      else if (this.selectedKeys && this.selectedKeys.length > 0) {
-        this.pushEvent('batch_clone', { dx: 5, dy: 5, dz: 0 })
-      }
-      return
-    }
-
-    // Ctrl+A / Cmd+A: Select all in viewport
-    if (modKey && e.key.toLowerCase() === 'a') {
-      e.preventDefault()
-      const allKeys = this.rooms.map(r => r.key)
-      this.selectedKeys = allKeys
-      this.viewport.setSelectedKeys(allKeys)
-      this.pushEvent('batch_select', { keys: allKeys })
-      return
-    }
-
-    // Escape: Deselect all
-    if (e.key === 'Escape') {
-      this.selectedRoom = null
-      this.selectedEntity = null
-      this.selectedKeys = []
-      this.viewport.setSelectedRoom(null)
-      this.viewport.setSelectedKeys([])
-      this.pushEvent('batch_select', { keys: [] })
-      this.pushEvent('select_room', { key: null })
-      this.pushEvent('select_entity', { type: null, key: null })
-      return
-    }
-
-    // Number keys 1-4: Toggle panels
-    if (!modKey && !e.shiftKey && ['1', '2', '3', '4'].includes(e.key)) {
-      const panels = ['hierarchy', 'inspector', 'console', 'chat']
-      const panel = panels[parseInt(e.key) - 1]
-      if (panel) this.pushEvent('toggle_panel', { panel })
-      return
-    }
-
-    // ~ (backtick): Toggle console
-    if (e.key === '`' || e.key === '~') {
-      this.pushEvent('toggle_panel', { panel: 'console' })
-      return
-    }
-
-    // N: Create new room
-    if (e.key.toLowerCase() === 'n' && !modKey) {
-      this.pushEvent('create_room', {})
-      return
-    }
-
-    // /: Focus search
-    if (e.key === '/') {
-      e.preventDefault()
-      const searchInput = document.querySelector('.hierarchy-search input')
-      if (searchInput) searchInput.focus()
-      return
-    }
-
-    // Ctrl+G / Cmd+G: Open git commit modal
-    if (modKey && e.key.toLowerCase() === 'g') {
-      e.preventDefault()
-      this.pushEvent('show_commit_modal', {})
-      return
-    }
-
-    // F: Fit viewport to rooms
-    if (e.key.toLowerCase() === 'f' && !modKey) {
-      this.viewport.fitToRooms()
-      return
-    }
-
-    // R: Reset camera
-    if (e.key.toLowerCase() === 'r' && !modKey) {
-      this.viewport.resetCamera()
-      return
-    }
-
-    // Arrow keys with Ctrl: Change Z-level
-    if (modKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
-      e.preventDefault()
-      const zLevels = this.viewport.getZLevels()
-      const currentIdx = zLevels.indexOf(this.viewport.currentZLevel)
-      if (e.key === 'ArrowUp' && currentIdx < zLevels.length - 1) {
-        this.viewport.setZLevel(zLevels[currentIdx + 1])
-        this.updateZLevelTabs()
-      } else if (e.key === 'ArrowDown' && currentIdx > 0) {
-        this.viewport.setZLevel(zLevels[currentIdx - 1])
-        this.updateZLevelTabs()
-      }
-      return
-    }
-
-    // Z: Toggle zone colors
-    if (e.key.toLowerCase() === 'z' && !modKey) {
-      e.preventDefault()
-      this.pushEvent('toggle_zone_colors', {})
-      return
-    }
-
-    // P: Toggle NPC paths
-    if (e.key.toLowerCase() === 'p' && !modKey) {
-      e.preventDefault()
-      this.pushEvent('toggle_npc_paths', {})
-      return
-    }
-
-    // ?: Show keyboard shortcuts help
-    if (e.key === '?' || (e.shiftKey && e.key === '/')) {
-      e.preventDefault()
-      this.pushEvent('show_keyboard_help', {})
-      return
-    }
-  },
-
   updated() {
     // With phx-update="ignore", this should rarely be called
   },
@@ -411,10 +367,15 @@ const WorldBuilder = {
     if (this.viewport) {
       this.viewport.destroy()
     }
-    // Cleanup keyboard listener
-    if (this.keydownHandler) {
-      document.removeEventListener('keydown', this.keydownHandler)
+    // Unregister all keyboard shortcuts (prefix-based cleanup)
+    keyboardManager.unregisterAll('wb-')
+    // Cleanup z-level tab click handler
+    if (this.zLevelClickHandler) {
+      const tabContainer = document.querySelector('.z-level-tabs')
+      if (tabContainer) tabContainer.removeEventListener('click', this.zLevelClickHandler)
     }
+    // Cleanup undo manager
+    undoManager.destroy()
   }
 }
 

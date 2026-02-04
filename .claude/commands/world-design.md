@@ -61,7 +61,7 @@ The Seedship Forest design document demonstrates all patterns:
 - **Woven Threads**: 6 hidden stories, artifacts, echoing phrases, mirror moments
 - **Conflict Map**: 7 major conflicts with full escalation/resolution
 
-See: `docs/game-design/SEEDSHIP-FOREST-WORLD-DESIGN.md`
+See: `docs/game-design/SEEDSHIP-FOREST-WORLD-DESIGN-ARCHIVE.md` and `docs/game-design/seedship-forest-world/`
 
 ## Key Principles
 
@@ -109,5 +109,5 @@ This command uses:
 ## Files
 
 - **Template**: `docs/templates/WORLD-DESIGN-TEMPLATE.md`
-- **Example**: `docs/game-design/SEEDSHIP-FOREST-WORLD-DESIGN.md`
+- **Example**: `docs/game-design/SEEDSHIP-FOREST-WORLD-DESIGN-ARCHIVE.md`
 - **Skill**: `.claude/skills/world-design.md`

@@ -79,7 +79,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptEditor do
 
     if assigns.inline do
       ~H"""
-      <div class="script-editor-lv">
+      <div class="flex flex-col h-full overflow-hidden bg-wb-panel text-wb-text">
         <.script_form
           script_data={@script_data}
           entities_data={@entities_data}
@@ -90,14 +90,20 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptEditor do
       """
     else
       ~H"""
-      <div class="modal-overlay" phx-click="close_script_editor">
+      <div
+        class="modal-overlay"
+        phx-click="close_script_editor"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="script-editor-title"
+      >
         <div
           class="modal-content modal-fullscreen"
           phx-click-away="close_script_editor"
           style="width: 95%; max-width: 1400px; height: 90vh;"
         >
           <div class="modal-header">
-            <h3>{if @script, do: "Edit Script", else: "Create Script"}</h3>
+            <h3 id="script-editor-title">{if @script, do: "Edit Script", else: "Create Script"}</h3>
             <button phx-click="close_script_editor" class="modal-close">&times;</button>
           </div>
           <div style="flex: 1; min-height: 0; overflow: hidden;">
@@ -122,7 +128,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptEditor do
   defp script_form(assigns) do
     ~H"""
     <%!-- Header with form fields --%>
-    <div class="script-editor-header-lv">
+    <div class="px-3 py-2 border-b border-wb-border shrink-0">
       <div class="quest-form-row-pair">
         <div class="quest-form-row">
           <label>Key</label>
@@ -200,9 +206,9 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptEditor do
     </div>
 
     <%!-- Editor content area --%>
-    <div class="script-editor-content-lv">
+    <div class="flex flex-1 min-h-0 overflow-hidden">
       <%!-- Code editor --%>
-      <div class="script-editor-main">
+      <div class="flex-1 min-w-0 overflow-hidden">
         <div
           id="codemirror-editor-container"
           phx-hook="CodeMirrorEditor"
@@ -211,22 +217,25 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptEditor do
           data-language="elixir"
           style="width: 100%; height: 100%;"
         >
+          <div class="flex items-center justify-center h-full text-wb-text-muted text-wb-sm">
+            Loading editor...
+          </div>
         </div>
       </div>
 
       <%!-- Sidebar --%>
-      <div class="script-editor-sidebar">
+      <div class="w-[220px] border-l border-wb-border overflow-y-auto shrink-0">
         <%!-- API Reference --%>
         <div class="quest-section" style="max-height: 100%; overflow-y: auto;">
           <div class="quest-section-header">
             <.icon name="hero-book-open" class="size-4" />
             <span>API Reference</span>
           </div>
-          <div class="api-reference-list">
+          <div class="py-1">
             <%= for {sig, desc} <- @api_functions do %>
-              <div class="api-ref-item">
-                <code class="api-ref-sig">{sig}</code>
-                <span class="api-ref-desc">{desc}</span>
+              <div class="flex flex-col px-2.5 py-1 border-b border-wb-panel">
+                <code class="text-[0.72rem] text-wb-accent">{sig}</code>
+                <span class="text-[0.68rem] text-wb-text-muted">{desc}</span>
               </div>
             <% end %>
           </div>

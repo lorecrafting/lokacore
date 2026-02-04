@@ -8,6 +8,9 @@ const ScrollBottom = {
   },
   scrollToBottom() {
     this.el.scrollTop = this.el.scrollHeight
+  },
+  destroyed() {
+    // No resources to clean up (LiveView manages handleEvent bindings)
   }
 }
 

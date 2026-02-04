@@ -48,7 +48,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
       @class
     ]}>
       <div class="panel-tabs">
-        <button class="panel-tab active">
+        <button class="panel-tab active" aria-label="AI Assistant">
           <.icon name="hero-chat-bubble-left-right" class="size-4" />
           <span :if={!@collapsed}>AI Assistant</span>
         </button>
@@ -77,10 +77,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
       <div class="panel-content" style={if @collapsed, do: "display: none;"}>
         <div class="chat-project-selector">
           <form phx-change="select_project" style="display: contents;">
-            <.icon name="hero-folder" class="size-3" style="color: #e8a838; flex-shrink: 0;" />
+            <.icon name="hero-folder" class="size-3 text-wb-warning flex-shrink-0" />
             <select
               name="project_key"
-              style="flex: 1; padding: 3px 6px; font-size: 11px; background: #1a1a2e; border: 1px solid #333; border-radius: 3px; color: #ccc; cursor: pointer;"
+              class="flex-1 px-1.5 py-0.5 text-[11px] bg-wb-panel border border-wb-border rounded cursor-pointer text-wb-text"
             >
               <option value="" selected={@current_project == nil}>No project</option>
               <%= for project_key <- @projects do %>
@@ -105,132 +105,122 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
         </div>
 
         <div class="chat-messages" id="chat-messages" phx-hook="ScrollBottom">
-          <%= if @messages == [] and !@streaming do %>
-            <div class="chat-welcome">
-              <div class="chat-welcome-icon">
-                <.icon name="hero-sparkles" class="size-6 hero-icon" />
-              </div>
-              <div class="chat-welcome-title">World Builder AI</div>
-              <div class="chat-welcome-subtitle">
-                Your creative partner for building immersive worlds. Describe what you want to create.
-              </div>
-              <div class="chat-quick-actions">
-                <button
-                  type="button"
-                  class="chat-quick-action"
-                  phx-click="quick_chat"
-                  phx-value-prompt="Create a tavern district with 5 interconnected rooms: a main hall, kitchen, cellar, upstairs rooms, and a back alley"
-                >
-                  <div class="chat-quick-action-icon rooms">
-                    <.icon name="hero-home" class="size-4" />
-                  </div>
-                  <div class="chat-quick-action-text">
-                    <span class="chat-quick-action-label">Build rooms</span>
-                    <span class="chat-quick-action-desc">
-                      Generate connected rooms with descriptions
-                    </span>
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  class="chat-quick-action"
-                  phx-click="quick_chat"
-                  phx-value-prompt="Design a mysterious merchant NPC with a branching dialogue tree, backstory, and a hidden quest hook"
-                >
-                  <div class="chat-quick-action-icon npcs">
-                    <.icon name="hero-user" class="size-4" />
-                  </div>
-                  <div class="chat-quick-action-text">
-                    <span class="chat-quick-action-label">Design an NPC</span>
-                    <span class="chat-quick-action-desc">
-                      Create NPCs with personality and dialogue
-                    </span>
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  class="chat-quick-action"
-                  phx-click="quick_chat"
-                  phx-value-prompt="Design a multi-part quest where the player investigates a series of disappearances in a village, with branching outcomes"
-                >
-                  <div class="chat-quick-action-icon quests">
-                    <.icon name="hero-map" class="size-4" />
-                  </div>
-                  <div class="chat-quick-action-text">
-                    <span class="chat-quick-action-label">Write a quest</span>
-                    <span class="chat-quick-action-desc">
-                      Craft quests with objectives and rewards
-                    </span>
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  class="chat-quick-action"
-                  phx-click="quick_chat"
-                  phx-value-prompt="Help me brainstorm a world design concept. I want to create a world that feels unique and memorable. What themes and aesthetics should I explore?"
-                >
-                  <div class="chat-quick-action-icon design">
-                    <.icon name="hero-light-bulb" class="size-4" />
-                  </div>
-                  <div class="chat-quick-action-text">
-                    <span class="chat-quick-action-label">Brainstorm</span>
-                    <span class="chat-quick-action-desc">Explore ideas and creative direction</span>
-                  </div>
-                </button>
-              </div>
-              <div class="chat-hints">
-                <kbd>Ctrl+Enter</kbd> to send &middot; <kbd>Esc</kbd> to cancel
-              </div>
+          <div :if={@messages == [] and !@streaming} class="chat-welcome">
+            <div class="chat-welcome-icon">
+              <.icon name="hero-sparkles" class="size-6 hero-icon" />
             </div>
-          <% end %>
+            <div class="chat-welcome-title">World Builder AI</div>
+            <div class="chat-welcome-subtitle">
+              Your creative partner for building immersive worlds. Describe what you want to create.
+            </div>
+            <div class="chat-quick-actions">
+              <button
+                type="button"
+                class="chat-quick-action"
+                phx-click="quick_chat"
+                phx-value-prompt="Create a tavern district with 5 interconnected rooms: a main hall, kitchen, cellar, upstairs rooms, and a back alley"
+              >
+                <div class="chat-quick-action-icon rooms">
+                  <.icon name="hero-home" class="size-4" />
+                </div>
+                <div class="chat-quick-action-text">
+                  <span class="chat-quick-action-label">Build rooms</span>
+                  <span class="chat-quick-action-desc">
+                    Generate connected rooms with descriptions
+                  </span>
+                </div>
+              </button>
+              <button
+                type="button"
+                class="chat-quick-action"
+                phx-click="quick_chat"
+                phx-value-prompt="Design a mysterious merchant NPC with a branching dialogue tree, backstory, and a hidden quest hook"
+              >
+                <div class="chat-quick-action-icon npcs">
+                  <.icon name="hero-user" class="size-4" />
+                </div>
+                <div class="chat-quick-action-text">
+                  <span class="chat-quick-action-label">Design an NPC</span>
+                  <span class="chat-quick-action-desc">
+                    Create NPCs with personality and dialogue
+                  </span>
+                </div>
+              </button>
+              <button
+                type="button"
+                class="chat-quick-action"
+                phx-click="quick_chat"
+                phx-value-prompt="Design a multi-part quest where the player investigates a series of disappearances in a village, with branching outcomes"
+              >
+                <div class="chat-quick-action-icon quests">
+                  <.icon name="hero-map" class="size-4" />
+                </div>
+                <div class="chat-quick-action-text">
+                  <span class="chat-quick-action-label">Write a quest</span>
+                  <span class="chat-quick-action-desc">
+                    Craft quests with objectives and rewards
+                  </span>
+                </div>
+              </button>
+              <button
+                type="button"
+                class="chat-quick-action"
+                phx-click="quick_chat"
+                phx-value-prompt="Help me brainstorm a world design concept. I want to create a world that feels unique and memorable. What themes and aesthetics should I explore?"
+              >
+                <div class="chat-quick-action-icon design">
+                  <.icon name="hero-light-bulb" class="size-4" />
+                </div>
+                <div class="chat-quick-action-text">
+                  <span class="chat-quick-action-label">Brainstorm</span>
+                  <span class="chat-quick-action-desc">Explore ideas and creative direction</span>
+                </div>
+              </button>
+            </div>
+            <div class="chat-hints">
+              <kbd>Ctrl+Enter</kbd> to send &middot; <kbd>Esc</kbd> to cancel
+            </div>
+          </div>
 
           <%= for message <- @messages do %>
             <.chat_message message={message} />
           <% end %>
 
-          <%= if @streaming do %>
-            <div class="chat-message assistant streaming">
-              <div class="message-content">
-                <%= if @current_tool do %>
-                  <div class="current-tool-indicator">
-                    <.icon name="hero-wrench-screwdriver" class="size-4 animate-pulse" />
-                    <span>{format_tool_name(@current_tool)}</span>
-                    <%= if @total_steps > 0 do %>
-                      <span class="tool-progress">Step {@tool_step}/{@total_steps}</span>
-                    <% end %>
-                  </div>
-                <% end %>
-                <div class="message-text">
-                  {Phoenix.HTML.raw(format_markdown(@current_response))}
-                  <span class="typing-indicator">▊</span>
-                </div>
+          <div :if={@streaming} class="chat-message assistant streaming">
+            <div class="message-content">
+              <div :if={@current_tool} class="current-tool-indicator">
+                <.icon name="hero-wrench-screwdriver" class="size-4 animate-pulse" />
+                <span>{format_tool_name(@current_tool)}</span>
+                <span :if={@total_steps > 0} class="tool-progress">
+                  Step {@tool_step}/{@total_steps}
+                </span>
+              </div>
+              <div class="message-text">
+                {Phoenix.HTML.raw(format_markdown(@current_response))}
+                <span class="typing-indicator">▊</span>
               </div>
             </div>
-          <% end %>
+          </div>
 
-          <%= if @error do %>
-            <div class="chat-error">
-              <.icon name="hero-exclamation-triangle" class="size-4" />
-              <span>{@error}</span>
-            </div>
-          <% end %>
+          <div :if={@error} class="chat-error">
+            <.icon name="hero-exclamation-triangle" class="size-4" />
+            <span>{@error}</span>
+          </div>
         </div>
 
         <%!-- Queued messages indicator --%>
-        <%= if @queued_messages != [] do %>
-          <div class="chat-queue-indicator">
-            <.icon name="hero-queue-list" class="size-4" />
-            <span>{length(@queued_messages)} queued</span>
-            <button
-              type="button"
-              class="btn btn-xs btn-ghost"
-              phx-click="clear_queue"
-              title="Clear queue"
-            >
-              <.icon name="hero-x-mark" class="size-3" />
-            </button>
-          </div>
-        <% end %>
+        <div :if={@queued_messages != []} class="chat-queue-indicator">
+          <.icon name="hero-queue-list" class="size-4" />
+          <span>{length(@queued_messages)} queued</span>
+          <button
+            type="button"
+            class="btn btn-xs btn-ghost"
+            phx-click="clear_queue"
+            title="Clear queue"
+          >
+            <.icon name="hero-x-mark" class="size-3" />
+          </button>
+        </div>
 
         <form class="chat-input-form" phx-submit="send_or_queue_message" id="chat-input-form">
           <textarea
@@ -246,22 +236,18 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
             class="btn btn-primary"
             title={if @streaming, do: "Queue message", else: "Send"}
           >
-            <%= if @streaming do %>
-              <.icon name="hero-queue-list" class="size-4" />
-            <% else %>
-              <.icon name="hero-paper-airplane" class="size-4" />
-            <% end %>
+            <.icon :if={@streaming} name="hero-queue-list" class="size-4" />
+            <.icon :if={!@streaming} name="hero-paper-airplane" class="size-4" />
           </button>
-          <%= if @streaming do %>
-            <button
-              type="button"
-              class="btn btn-danger"
-              phx-click="cancel_streaming"
-              title="Cancel (Esc)"
-            >
-              <.icon name="hero-stop" class="size-4" />
-            </button>
-          <% end %>
+          <button
+            :if={@streaming}
+            type="button"
+            class="btn btn-danger"
+            phx-click="cancel_streaming"
+            title="Cancel (Esc)"
+          >
+            <.icon name="hero-stop" class="size-4" />
+          </button>
         </form>
       </div>
     </div>
@@ -281,13 +267,11 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
             <div class="message-text">
               {Phoenix.HTML.raw(format_markdown(@message.content))}
             </div>
-            <%= if @message[:tool_uses] && @message.tool_uses != [] do %>
-              <div class="message-tools">
-                <%= for tool <- @message.tool_uses do %>
-                  <.tool_use_display tool={tool} />
-                <% end %>
-              </div>
-            <% end %>
+            <div :if={@message[:tool_uses] && @message.tool_uses != []} class="message-tools">
+              <%= for tool <- @message.tool_uses do %>
+                <.tool_use_display tool={tool} />
+              <% end %>
+            </div>
           <% "tool_result" -> %>
             <.tool_result_display result={@message} />
           <% _ -> %>
@@ -324,28 +308,22 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
     ~H"""
     <div class={["tool-result", @result[:is_error] && "error"]}>
       <div class="tool-result-header">
-        <%= if @result[:is_error] do %>
-          <.icon name="hero-x-circle" class="size-4 text-red-500" />
-        <% else %>
-          <.icon name="hero-check-circle" class="size-4 text-green-500" />
-        <% end %>
+        <.icon :if={@result[:is_error]} name="hero-x-circle" class="size-4 text-red-500" />
+        <.icon :if={!@result[:is_error]} name="hero-check-circle" class="size-4 text-green-500" />
         <span>{format_tool_name(@result.tool_name)}</span>
       </div>
-      <%= if @is_long do %>
-        <details class="tool-result-details">
-          <summary class="tool-result-summary">
-            <code>{truncate_result(@result.content, 100)}</code>
-            <span class="show-more-hint">Show more</span>
-          </summary>
-          <div class="tool-result-content">
-            <code>{@result.content}</code>
-          </div>
-        </details>
-      <% else %>
+      <details :if={@is_long} class="tool-result-details">
+        <summary class="tool-result-summary">
+          <code>{truncate_result(@result.content, 100)}</code>
+          <span class="show-more-hint">Show more</span>
+        </summary>
         <div class="tool-result-content">
           <code>{@result.content}</code>
         </div>
-      <% end %>
+      </details>
+      <div :if={!@is_long} class="tool-result-content">
+        <code>{@result.content}</code>
+      </div>
     </div>
     """
   end

@@ -20,9 +20,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.AuditLogPanel do
         <div class="audit-log-title">
           <.icon name="hero-document-magnifying-glass" class="size-5" />
           <span>Audit Log</span>
-          <%= if @project_key do %>
-            <span class="audit-log-project">({@project_key})</span>
-          <% end %>
+          <span :if={@project_key} class="audit-log-project">({@project_key})</span>
         </div>
         <div class="audit-log-actions">
           <select
@@ -52,28 +50,22 @@ defmodule LokaWeb.AdminLive.WorldBuilder.AuditLogPanel do
       </div>
 
       <div class="audit-log-content">
-        <%= if @loading do %>
-          <div class="audit-log-loading">
-            <.icon name="hero-arrow-path" class="size-6 animate-spin text-gray-500" />
-            <span class="text-gray-500 mt-2">Loading...</span>
-          </div>
-        <% else %>
-          <%= if @entries == [] do %>
-            <div class="audit-log-empty">
-              <.icon name="hero-inbox" class="size-8 text-gray-600 mb-2" />
-              <p class="text-gray-500">No audit entries found</p>
-              <p class="text-gray-600 text-sm mt-1">
-                Tool calls will appear here when the AI uses tools
-              </p>
-            </div>
-          <% else %>
-            <div class="audit-entries">
-              <%= for entry <- @entries do %>
-                <.audit_entry entry={entry} />
-              <% end %>
-            </div>
+        <div :if={@loading} class="audit-log-loading">
+          <.icon name="hero-arrow-path" class="size-6 animate-spin text-gray-500" />
+          <span class="text-gray-500 mt-2">Loading...</span>
+        </div>
+        <div :if={!@loading && @entries == []} class="audit-log-empty">
+          <.icon name="hero-inbox" class="size-8 text-gray-600 mb-2" />
+          <p class="text-gray-500">No audit entries found</p>
+          <p class="text-gray-600 text-sm mt-1">
+            Tool calls will appear here when the AI uses tools
+          </p>
+        </div>
+        <div :if={!@loading && @entries != []} class="audit-entries">
+          <%= for entry <- @entries do %>
+            <.audit_entry entry={entry} />
           <% end %>
-        <% end %>
+        </div>
       </div>
     </div>
     """
@@ -86,11 +78,16 @@ defmodule LokaWeb.AdminLive.WorldBuilder.AuditLogPanel do
     <div class={["audit-entry", @entry.result_status]}>
       <div class="audit-entry-header">
         <div class="audit-entry-status">
-          <%= if @entry.result_status == "success" do %>
-            <.icon name="hero-check-circle" class="size-4 text-green-500" />
-          <% else %>
-            <.icon name="hero-x-circle" class="size-4 text-red-500" />
-          <% end %>
+          <.icon
+            :if={@entry.result_status == "success"}
+            name="hero-check-circle"
+            class="size-4 text-green-500"
+          />
+          <.icon
+            :if={@entry.result_status != "success"}
+            name="hero-x-circle"
+            class="size-4 text-red-500"
+          />
         </div>
         <div class="audit-entry-tool">{format_tool_name(@entry.tool_name)}</div>
         <div class="audit-entry-time">{format_time(@entry.inserted_at)}</div>
@@ -100,12 +97,13 @@ defmodule LokaWeb.AdminLive.WorldBuilder.AuditLogPanel do
           <span class="audit-label">Args:</span>
           <code>{truncate_args(@entry.tool_args)}</code>
         </div>
-        <%= if @entry.result_detail do %>
-          <div class={["audit-entry-result", @entry.result_status == "error" && "error"]}>
-            <span class="audit-label">Result:</span>
-            <code>{truncate_result(@entry.result_detail)}</code>
-          </div>
-        <% end %>
+        <div
+          :if={@entry.result_detail}
+          class={["audit-entry-result", @entry.result_status == "error" && "error"]}
+        >
+          <span class="audit-label">Result:</span>
+          <code>{truncate_result(@entry.result_detail)}</code>
+        </div>
       </div>
     </div>
     """

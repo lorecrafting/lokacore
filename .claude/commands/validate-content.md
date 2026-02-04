@@ -125,3 +125,10 @@ mix loka.test.validate --quick
 - Zero critical errors
 - All storylines completable
 - All rooms reachable from starting room
+
+## When to Run
+
+- After modifying YAML content in `priv/world/`
+- Before creating PRs with content changes
+- After scaffolding new content with `mix loka.new`
+- When debugging quest/dialogue issues

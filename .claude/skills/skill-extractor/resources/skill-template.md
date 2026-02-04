@@ -80,7 +80,7 @@ What pain point does this solve? Why is it non-obvious?]
 
 ---
 
-<!-- 
+<!--
 Extraction Checklist (remove before saving):
 - [ ] Name is descriptive and uses kebab-case
 - [ ] Description includes specific error messages/symptoms
@@ -92,4 +92,7 @@ Extraction Checklist (remove before saving):
 - [ ] Example is concrete and realistic
 - [ ] Notes cover edge cases and caveats
 - [ ] No sensitive information (credentials, internal URLs)
+- [ ] REGISTERED in the appropriate .claude/rules/*.md "Related Skills" section
+      (engine.md, framework.md, builder.md, frontend.md, godot.md, testing.md,
+       content.md, scripting.md, or narrative.md)
 -->

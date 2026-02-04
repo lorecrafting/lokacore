@@ -143,9 +143,12 @@ mix test test/loka_web/live/admin_live/
 mix test test/loka_web/
 ```
 
+## Related Skills
+
+- `.claude/skills/entity-data-structure-differences.md` - EntityManager data structure patterns
+
 ## Documentation
 
 - `docs/architecture/world-builder-master-plan.md`
 - `docs/architecture/world-builder-api.md`
 - `docs/api/channel-contract.md`
-- AGENTS.md - Phoenix 1.8 patterns

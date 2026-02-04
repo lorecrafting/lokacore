@@ -177,11 +177,45 @@ description: |
 
 Save new skills to the appropriate location:
 
-- **Project-specific skills**: `.claude/skills/[skill-name]/SKILL.md`
+- **Project-specific skills**: `.claude/skills/[skill-name].md` (simple) or `.claude/skills/[skill-name]/SKILL.md` (with scripts)
 - **User-wide skills**: `~/.claude/skills/[skill-name]/SKILL.md`
 
-Include any supporting scripts in a `scripts/` subdirectory if the skill benefits from 
-executable helpers.
+### Step 6: Register the Skill (CRITICAL - Prevents Orphans)
+
+**A skill that isn't registered is invisible.** Individual `.md` files in `.claude/skills/` are
+NOT automatically discovered by Claude. You MUST register each new skill by adding it to the
+"Related Skills" section of the most relevant rule file in `.claude/rules/`.
+
+**Registration process:**
+1. Identify which rule file covers the skill's domain (see table below)
+2. Find or create the "## Related Skills" section in that rule file
+3. Add a bullet point: `- \`.claude/skills/[skill-name].md\` - [one-line description]`
+
+**Rule file mapping:**
+
+| Skill Domain | Rule File | Path Scope |
+|-------------|-----------|------------|
+| Elixir engine internals | `.claude/rules/engine.md` | `lib/loka/engine/**` |
+| Framework subsystems | `.claude/rules/framework.md` | `lib/loka/framework/**` |
+| World Builder UI | `.claude/rules/builder.md` | `lib/loka_web/live/admin_live/**` |
+| Frontend (CSS/JS) | `.claude/rules/frontend.md` | `assets/**` |
+| Godot client | `.claude/rules/godot.md` | `godot-client/**` |
+| Testing patterns | `.claude/rules/testing.md` | `test/**` |
+| YAML/content creation | `.claude/rules/content.md` | `priv/world/**` |
+| Scripting system | `.claude/rules/scripting.md` | `lib/loka/**/script*/**` |
+| Narrative writing | `.claude/rules/narrative.md` | (global) |
+
+**Why this matters:** Rules auto-load when Claude works on matching files. When the rule
+loads, Claude sees the "Related Skills" references and can read those skill files when
+relevant. Without registration, the skill is never surfaced.
+
+**Example registration:**
+```markdown
+## Related Skills
+
+- `.claude/skills/genserver-test-isolation.md` - Supervised process test isolation
+- `.claude/skills/my-new-skill.md` - Description of what this skill helps with
+```
 
 ## Retrospective Mode
 
@@ -228,6 +262,7 @@ Before finalizing a skill, verify:
 - [ ] Web research conducted when appropriate (for technology-specific topics)
 - [ ] References section included if web sources were consulted
 - [ ] Current best practices (post-2025) incorporated when relevant
+- [ ] **Skill registered in the appropriate `.claude/rules/*.md` file** (Step 6)
 
 ## Anti-Patterns to Avoid
 

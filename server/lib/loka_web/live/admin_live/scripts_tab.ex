@@ -22,9 +22,9 @@ defmodule LokaWeb.AdminLive.ScriptsTab do
   @impl true
   def render(%{viewing_script: nil} = assigns) do
     ~H"""
-    <div class="admin-section">
-      <div class="admin-section-header">
-        <h2 class="admin-section-title">Scripts ({length(@scripts || [])})</h2>
+    <div class="flex flex-col gap-6">
+      <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-bold">Scripts ({length(@scripts || [])})</h2>
       </div>
 
       <div class="alert alert-info mb-4">
@@ -40,7 +40,7 @@ defmodule LokaWeb.AdminLive.ScriptsTab do
         </div>
       </div>
 
-      <div :if={@scripts && length(@scripts) > 0} class="admin-table-wrapper">
+      <div :if={@scripts && length(@scripts) > 0} class="overflow-x-auto">
         <table class="table table-zebra w-full">
           <thead>
             <tr>
@@ -63,7 +63,7 @@ defmodule LokaWeb.AdminLive.ScriptsTab do
                   {tag}
                 </span>
               </td>
-              <td class="admin-table-actions">
+              <td class="flex gap-2">
                 <button
                   phx-click="view_script"
                   phx-value-key={script.key}
@@ -79,10 +79,10 @@ defmodule LokaWeb.AdminLive.ScriptsTab do
 
       <div :if={@scripts == [] or @scripts == nil} class="card bg-base-200">
         <div class="card-body">
-          <p class="admin-empty-text mb-4">
+          <p class="opacity-70 mb-4">
             No scripts found. Create YAML files in <code>priv/world/scripts/</code> to add scripts.
           </p>
-          <pre class="admin-code bg-base-300"><code>{example_yaml_script()}</code></pre>
+          <pre class="p-4 rounded-lg text-sm font-mono bg-base-300"><code>{example_yaml_script()}</code></pre>
         </div>
       </div>
     </div>
@@ -91,9 +91,9 @@ defmodule LokaWeb.AdminLive.ScriptsTab do
 
   def render(assigns) do
     ~H"""
-    <div class="admin-section">
-      <div class="admin-section-header">
-        <h2 class="admin-section-title">Script: {@viewing_script.key}</h2>
+    <div class="flex flex-col gap-6">
+      <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-bold">Script: {@viewing_script.key}</h2>
         <button phx-click="close_script_view" class="btn btn-ghost btn-sm">
           <.icon name="hero-x-mark" class="size-4" /> Close
         </button>
@@ -124,7 +124,7 @@ defmodule LokaWeb.AdminLive.ScriptsTab do
 
           <div class="divider">Source Code (Read-Only)</div>
 
-          <pre class="admin-code bg-base-300 p-4 rounded-lg overflow-x-auto"><code class="text-sm">{get_source(@viewing_script)}</code></pre>
+          <pre class="p-4 rounded-lg text-sm font-mono bg-base-300 overflow-x-auto"><code class="text-sm">{get_source(@viewing_script)}</code></pre>
 
           <div class="mt-4 text-sm opacity-70">
             <.icon name="hero-pencil" class="size-4 inline" /> To edit, modify

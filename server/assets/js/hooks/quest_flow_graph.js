@@ -1,7 +1,26 @@
 // Quest Flow Graph - draws edges between quest nodes with bezier curves
 const QuestFlowGraph = {
   mounted() {
+    // Read edge colors from CSS custom properties
+    const styles = getComputedStyle(document.documentElement)
+    this.edgeColor = styles.getPropertyValue('--wb-quest-edge').trim() || '#666666'
+    this.edgePrereqColor = styles.getPropertyValue('--wb-quest-edge-prereq').trim() || '#f59e0b'
+    this.edgeUnlockColor = styles.getPropertyValue('--wb-quest-edge-unlock').trim() || '#22c55e'
+    console.log('[QuestFlowGraph] Edge colors loaded from CSS variables')
+
     this.drawEdges()
+    // Event delegation for SVG path hover effects (avoids per-path listener leaks)
+    const svg = this.el.querySelector('.quest-graph-edges')
+    if (svg) {
+      this.svgEnterHandler = (e) => {
+        if (e.target.tagName === 'path') e.target.setAttribute('stroke-width', '3')
+      }
+      this.svgLeaveHandler = (e) => {
+        if (e.target.tagName === 'path') e.target.setAttribute('stroke-width', '2')
+      }
+      svg.addEventListener('mouseenter', this.svgEnterHandler, true)
+      svg.addEventListener('mouseleave', this.svgLeaveHandler, true)
+    }
   },
 
   updated() {
@@ -42,15 +61,15 @@ const QuestFlowGraph = {
       defs.innerHTML = `
         <marker id="arrowhead" markerWidth="10" markerHeight="7"
                 refX="9" refY="3.5" orient="auto">
-          <polygon points="0 0, 10 3.5, 0 7" fill="#666" />
+          <polygon points="0 0, 10 3.5, 0 7" fill="${this.edgeColor}" />
         </marker>
         <marker id="arrowhead-prereq" markerWidth="10" markerHeight="7"
                 refX="9" refY="3.5" orient="auto">
-          <polygon points="0 0, 10 3.5, 0 7" fill="#f59e0b" />
+          <polygon points="0 0, 10 3.5, 0 7" fill="${this.edgePrereqColor}" />
         </marker>
         <marker id="arrowhead-unlock" markerWidth="10" markerHeight="7"
                 refX="9" refY="3.5" orient="auto">
-          <polygon points="0 0, 10 3.5, 0 7" fill="#22c55e" />
+          <polygon points="0 0, 10 3.5, 0 7" fill="${this.edgeUnlockColor}" />
         </marker>
       `
       svg.appendChild(defs)
@@ -74,8 +93,8 @@ const QuestFlowGraph = {
         path.setAttribute('fill', 'none')
 
         // Color based on edge type
-        const edgeColor = edge.type === 'prerequisite' ? '#f59e0b' :
-                         edge.type === 'unlocks' ? '#22c55e' : '#666'
+        const edgeColor = edge.type === 'prerequisite' ? this.edgePrereqColor :
+                         edge.type === 'unlocks' ? this.edgeUnlockColor : this.edgeColor
         const markerId = edge.type === 'prerequisite' ? 'arrowhead-prereq' :
                         edge.type === 'unlocks' ? 'arrowhead-unlock' : 'arrowhead'
 
@@ -83,10 +102,8 @@ const QuestFlowGraph = {
         path.setAttribute('stroke-width', '2')
         path.setAttribute('marker-end', `url(#${markerId})`)
 
-        // Add subtle animation on hover
+        // Hover effects handled by delegated SVG listeners (mounted)
         path.style.transition = 'stroke-width 0.2s ease'
-        path.addEventListener('mouseenter', () => path.setAttribute('stroke-width', '3'))
-        path.addEventListener('mouseleave', () => path.setAttribute('stroke-width', '2'))
 
         svg.appendChild(path)
       })
@@ -224,6 +241,15 @@ const QuestFlowGraph = {
 
     // Default: slight curve based on start/end relationship for visual consistency
     return isVertical ? (start.x < end.x ? 1 : -1) : (start.y < end.y ? 1 : -1)
+  },
+
+  destroyed() {
+    const svg = this.el.querySelector('.quest-graph-edges')
+    if (svg) {
+      if (this.svgEnterHandler) svg.removeEventListener('mouseenter', this.svgEnterHandler, true)
+      if (this.svgLeaveHandler) svg.removeEventListener('mouseleave', this.svgLeaveHandler, true)
+      svg.innerHTML = ''
+    }
   }
 }
 

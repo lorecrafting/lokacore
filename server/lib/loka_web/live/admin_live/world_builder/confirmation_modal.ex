@@ -31,45 +31,51 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ConfirmationModal do
 
   def confirmation_modal(assigns) do
     ~H"""
-    <%= if @modal do %>
-      <div class="modal-overlay" phx-click={@on_cancel}>
-        <div
-          class="modal-content"
-          style="max-width: 400px;"
-          phx-click-away={@on_cancel}
-        >
-          <div class="modal-header">
-            <h3>{@modal.title}</h3>
-            <button phx-click={@on_cancel} class="modal-close">&times;</button>
-          </div>
-          <div style="padding: 1rem;">
-            <p style="margin: 0 0 1rem 0; color: #ccc;">{@modal.message}</p>
-            <%= if @modal[:warning] do %>
-              <p style="margin: 0 0 1rem 0; color: #f59e0b; font-size: 0.85rem;">
-                <.icon
-                  name="hero-exclamation-triangle"
-                  class="size-4"
-                  style="display: inline; vertical-align: middle;"
-                />
-                {@modal.warning}
-              </p>
-            <% end %>
-          </div>
-          <div class="modal-footer">
-            <button type="button" phx-click={@on_cancel} class="btn btn-secondary">
-              Cancel
-            </button>
-            <button
-              type="button"
-              phx-click={@on_confirm}
-              class={["btn", (@modal[:danger] && "btn-danger") || "btn-primary"]}
-            >
-              {@modal[:confirm_text] || "Confirm"}
-            </button>
-          </div>
+    <div
+      :if={@modal}
+      class="modal-overlay"
+      phx-click={@on_cancel}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="confirmation-title"
+    >
+      <div
+        class="modal-content"
+        style="max-width: 400px;"
+        phx-click-away={@on_cancel}
+      >
+        <div class="modal-header">
+          <h3 id="confirmation-title">{@modal.title}</h3>
+          <button phx-click={@on_cancel} class="modal-close">&times;</button>
+        </div>
+        <div style="padding: 1rem;">
+          <p style="margin: 0 0 1rem 0; color: var(--wb-text);">{@modal.message}</p>
+          <p
+            :if={@modal[:warning]}
+            style="margin: 0 0 1rem 0; color: var(--wb-warning); font-size: 0.85rem;"
+          >
+            <.icon
+              name="hero-exclamation-triangle"
+              class="size-4"
+              style="display: inline; vertical-align: middle;"
+            />
+            {@modal.warning}
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" phx-click={@on_cancel} class="btn btn-secondary">
+            Cancel
+          </button>
+          <button
+            type="button"
+            phx-click={@on_confirm}
+            class={["btn", (@modal[:danger] && "btn-danger") || "btn-primary"]}
+          >
+            {@modal[:confirm_text] || "Confirm"}
+          </button>
         </div>
       </div>
-    <% end %>
+    </div>
     """
   end
 end

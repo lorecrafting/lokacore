@@ -96,6 +96,9 @@ export default class Canvas2DViewport {
     // Tooltip element
     this.tooltip = null
 
+    // Text truncation memoization cache (cleared on zoom changes)
+    this._truncateCache = new Map()
+
     // Callbacks
     this.onSelectRoom = options.onSelectRoom || (() => {})
     this.onBatchSelect = options.onBatchSelect || (() => {})
@@ -126,13 +129,20 @@ export default class Canvas2DViewport {
   }
 
   setupEventListeners() {
-    // Mouse events
-    this.canvas.addEventListener('mousedown', this.handleMouseDown.bind(this))
-    this.canvas.addEventListener('mousemove', this.handleMouseMove.bind(this))
-    this.canvas.addEventListener('mouseup', this.handleMouseUp.bind(this))
-    this.canvas.addEventListener('mouseleave', this.handleMouseLeave.bind(this))
-    this.canvas.addEventListener('wheel', this.handleWheel.bind(this), { passive: false })
-    this.canvas.addEventListener('contextmenu', (e) => e.preventDefault())
+    // Mouse events - store bound references for proper cleanup in destroy()
+    this.boundMouseDown = this.handleMouseDown.bind(this)
+    this.boundMouseMove = this.handleMouseMove.bind(this)
+    this.boundMouseUp = this.handleMouseUp.bind(this)
+    this.boundMouseLeave = this.handleMouseLeave.bind(this)
+    this.boundWheel = this.handleWheel.bind(this)
+    this.boundContextMenu = (e) => e.preventDefault()
+
+    this.canvas.addEventListener('mousedown', this.boundMouseDown)
+    this.canvas.addEventListener('mousemove', this.boundMouseMove)
+    this.canvas.addEventListener('mouseup', this.boundMouseUp)
+    this.canvas.addEventListener('mouseleave', this.boundMouseLeave)
+    this.canvas.addEventListener('wheel', this.boundWheel, { passive: false })
+    this.canvas.addEventListener('contextmenu', this.boundContextMenu)
 
     // Resize handling
     this.resizeObserver = new ResizeObserver(() => {
@@ -156,17 +166,17 @@ export default class Canvas2DViewport {
     this.tooltip.className = 'viewport-tooltip'
     this.tooltip.style.cssText = `
       position: absolute;
-      background: rgba(26, 26, 46, 0.95);
-      border: 1px solid #444;
-      border-radius: 6px;
+      background: var(--wb-panel);
+      border: 1px solid var(--wb-border);
+      border-radius: var(--wb-radius-lg);
       padding: 8px 12px;
       font-size: 12px;
-      color: #ccc;
+      color: var(--wb-text);
       pointer-events: none;
       z-index: 1000;
       display: none;
       max-width: 250px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      box-shadow: var(--wb-shadow-md);
     `
     this.canvas.parentElement.appendChild(this.tooltip)
   }
@@ -181,9 +191,9 @@ export default class Canvas2DViewport {
     const exitCount = Object.keys(exits).length
 
     let html = `
-      <div style="font-weight: bold; color: #fff; margin-bottom: 4px;">${room.name || room.key}</div>
-      <div style="font-size: 10px; color: #888; margin-bottom: 6px;">${room.key}</div>
-      <div style="font-size: 11px; color: #aaa;">
+      <div style="font-weight: bold; color: var(--wb-text-bright); margin-bottom: 4px;">${room.name || room.key}</div>
+      <div style="font-size: 10px; color: var(--wb-text-muted); margin-bottom: 6px;">${room.key}</div>
+      <div style="font-size: 11px; color: var(--wb-text);">
         <div>📍 (${room.x || 0}, ${room.y || 0}, Z:${room.z || 0})</div>
         ${exitCount > 0 ? `<div>🚪 ${exitCount} exit${exitCount > 1 ? 's' : ''}</div>` : ''}
         ${npcs.length > 0 ? `<div>👤 ${npcs.length} NPC${npcs.length > 1 ? 's' : ''}: ${npcs.slice(0, 3).join(', ')}${npcs.length > 3 ? '...' : ''}</div>` : ''}
@@ -221,6 +231,34 @@ export default class Canvas2DViewport {
   handleMouseLeave(e) {
     this.hideTooltip()
     this.hoveredRoom = null
+
+    // Cancel in-progress room drag and restore original position
+    if (this.isDraggingRoom && this.draggedRoom) {
+      this.draggedRoom.x = this.dragRoomStartPos.x
+      this.draggedRoom.y = this.dragRoomStartPos.y
+      this.isDragging = false
+      this.isDraggingRoom = false
+      this.draggedRoom = null
+      this.snapIndicator = null
+      this.canvas.style.cursor = 'grab'
+      this.render()
+    } else if (this.isDragging) {
+      // Cancel pan drag
+      this.isDragging = false
+      this.canvas.style.cursor = 'grab'
+    }
+  }
+
+  // Batch multiple data updates into a single render frame
+  scheduleRender() {
+    if (!this._renderPending) {
+      this._renderPending = true
+      this._renderRAF = requestAnimationFrame(() => {
+        this._renderPending = false
+        this._renderRAF = null
+        this.render()
+      })
+    }
   }
 
   startRenderLoop() {
@@ -229,8 +267,28 @@ export default class Canvas2DViewport {
   }
 
   destroy() {
+    // Cancel pending render
+    if (this._renderRAF) {
+      cancelAnimationFrame(this._renderRAF)
+      this._renderRAF = null
+    }
+
+    // Remove canvas event listeners
+    if (this.canvas) {
+      this.canvas.removeEventListener('mousedown', this.boundMouseDown)
+      this.canvas.removeEventListener('mousemove', this.boundMouseMove)
+      this.canvas.removeEventListener('mouseup', this.boundMouseUp)
+      this.canvas.removeEventListener('mouseleave', this.boundMouseLeave)
+      this.canvas.removeEventListener('wheel', this.boundWheel)
+      this.canvas.removeEventListener('contextmenu', this.boundContextMenu)
+    }
+
     if (this.resizeObserver) {
       this.resizeObserver.disconnect()
+    }
+    if (this.tooltip && this.tooltip.parentElement) {
+      this.tooltip.parentElement.removeChild(this.tooltip)
+      this.tooltip = null
     }
     document.removeEventListener('keydown', this.handleKeyDown)
     document.removeEventListener('keyup', this.handleKeyUp)
@@ -289,52 +347,52 @@ export default class Canvas2DViewport {
       this.currentZLevel = this.zLevels[0]
     }
 
-    this.render()
+    this.scheduleRender()
   }
 
   setValidation(validation) {
     this.validation = validation || {}
-    this.render()
+    this.scheduleRender()
   }
 
   setSelectedRoom(key) {
     this.selectedRoom = key
-    this.render()
+    this.scheduleRender()
   }
 
   setSelectedKeys(keys) {
     this.selectedKeys = new Set(keys || [])
-    this.render()
+    this.scheduleRender()
   }
 
   setZLevel(level) {
     this.currentZLevel = level
-    this.render()
+    this.scheduleRender()
   }
 
   setZoneColors(colors) {
     this.zoneColors = colors || {}
-    this.render()
+    this.scheduleRender()
   }
 
   setRoomZoneMap(map) {
     this.roomZoneMap = map || {}
-    this.render()
+    this.scheduleRender()
   }
 
   setShowZoneColors(show) {
     this.showZoneColors = show
-    this.render()
+    this.scheduleRender()
   }
 
   setNPCPaths(paths) {
     this.npcPaths = paths || {}
-    this.render()
+    this.scheduleRender()
   }
 
   setShowNPCPaths(show) {
     this.showNPCPaths = show
-    this.render()
+    this.scheduleRender()
   }
 
   // ============================================================================
@@ -515,7 +573,13 @@ export default class Canvas2DViewport {
 
     // Apply zoom
     const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1
+    const oldZoom = this.camera.zoom
     this.camera.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.camera.zoom * zoomFactor))
+
+    // Clear truncation cache when zoom changes (fontSize depends on zoom)
+    if (this.camera.zoom !== oldZoom) {
+      this._truncateCache.clear()
+    }
 
     // Get world position after zoom
     const worldAfter = this.screenToWorld(mouseX, mouseY)
@@ -580,18 +644,9 @@ export default class Canvas2DViewport {
 
   setShowGrid(show) {
     this.showGrid = show
-    this.render()
+    this.scheduleRender()
   }
 
-  toggleGrid() {
-    this.showGrid = !this.showGrid
-    this.render()
-    return this.showGrid
-  }
-
-  setSnapSize(size) {
-    this.snapSize = size
-  }
 
   drawNPCPaths(ctx) {
     const pathColors = [
@@ -882,12 +937,17 @@ export default class Canvas2DViewport {
     ctx.globalAlpha = 1
   }
 
-  // Truncate text to fit within maxWidth
+  // Truncate text to fit within maxWidth (memoized to avoid repeated measureText calls)
   truncateText(text, maxWidth, ctx, fontSize) {
     if (!text) return ''
+
+    const cacheKey = `${text}|${fontSize}|${maxWidth}`
+    if (this._truncateCache.has(cacheKey)) return this._truncateCache.get(cacheKey)
+
     ctx.font = `${fontSize}px sans-serif`
 
     if (ctx.measureText(text).width <= maxWidth) {
+      this._truncateCache.set(cacheKey, text)
       return text
     }
 
@@ -895,7 +955,14 @@ export default class Canvas2DViewport {
     while (truncated.length > 0 && ctx.measureText(truncated + '…').width > maxWidth) {
       truncated = truncated.slice(0, -1)
     }
-    return truncated + '…'
+    const result = truncated + '…'
+
+    // Evict cache if it grows too large
+    if (this._truncateCache.size > 500) {
+      this._truncateCache.clear()
+    }
+    this._truncateCache.set(cacheKey, result)
+    return result
   }
 
   drawEntityIndicators(ctx, room, x, y, halfSize) {
@@ -1077,12 +1144,14 @@ export default class Canvas2DViewport {
       1.5
     )
     this.camera.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.camera.zoom))
+    this._truncateCache.clear()
 
     this.render()
   }
 
   resetCamera() {
     this.camera = { x: 0, y: 0, zoom: 1 }
+    this._truncateCache.clear()
     this.render()
   }
 

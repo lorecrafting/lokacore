@@ -11,6 +11,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
   """
   use Phoenix.Component
   import LokaWeb.CoreComponents
+  import LokaWeb.AdminLive.Components, only: [inspector_section: 1, entity_header: 1]
 
   attr :rooms, :list, required: true
   attr :npcs, :list, default: []
@@ -36,6 +37,8 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
           phx-click="toggle_panel"
           phx-value-panel="inspector"
           title={if @collapsed, do: "Expand (2)", else: "Collapse (2)"}
+          aria-label={if @collapsed, do: "Expand inspector panel", else: "Collapse inspector panel"}
+          aria-expanded={to_string(!@collapsed)}
         >
           <.icon
             name={if @collapsed, do: "hero-chevron-left", else: "hero-chevron-right"}
@@ -45,25 +48,18 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
       </div>
 
       <div class="panel-content" style={if @collapsed, do: "display: none;", else: "padding: 0;"}>
-        <%= if @selected_room do %>
+        <div :if={@selected_room}>
           <% room = get_room_data(@rooms, @selected_room) %>
-          <!-- Inspector header with room icon and key -->
-          <div class="inspector-header">
-            <.icon name="hero-cube" class="size-5" style="color: #909090;" />
-            <span class="inspector-title">{room.name || room.key}</span>
-          </div>
+          <.entity_header icon="hero-cube" name={room.name || room.key} />
           
     <!-- Inspector sections - ordered by typical editing workflow -->
           <form phx-change="update_room_field">
             <input type="hidden" name="room_id" value={room.id || room.key} />
             
     <!-- 1. Name & Description - Most commonly edited -->
-            <div class="inspector-section">
-              <div class="inspector-section-header">
-                <span class="inspector-section-title">Identity</span>
-                <.icon name="hero-chevron-down" class="size-3" />
-              </div>
-              <div class="inspector-section-content">
+            <div class="border-b border-wb-panel">
+              <.inspector_section title="Identity" />
+              <div class="p-3 bg-wb-panel-header">
                 <div class="form-group">
                   <label>Name</label>
                   <input
@@ -85,28 +81,24 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                     phx-debounce="500"
                   ><%= room.description %></textarea>
                 </div>
-                <div class="form-group" style="margin-top: 0.5rem;">
-                  <label style="font-size: 0.75rem; color: #666;">Key (ID)</label>
+                <div class="form-group mt-2">
+                  <label class="text-wb-xs text-wb-text-dim">Key (ID)</label>
                   <input
                     type="text"
-                    class="input"
+                    class="input text-wb-base bg-wb-border-dark text-wb-text-dim"
                     value={room.key}
                     readonly
-                    style="font-size: 0.85rem; background: #1a1a1a; color: #666;"
                   />
                 </div>
               </div>
             </div>
             
     <!-- 2. Position - Where it goes on the map -->
-            <div class="inspector-section">
-              <div class="inspector-section-header">
-                <span class="inspector-section-title">Position</span>
-                <.icon name="hero-chevron-down" class="size-3" />
-              </div>
-              <div class="inspector-section-content">
+            <div class="border-b border-wb-panel">
+              <.inspector_section title="Position" />
+              <div class="p-3 bg-wb-panel-header">
                 <div class="form-group">
-                  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.25rem;">
+                  <div class="grid grid-cols-3 gap-1">
                     <div>
                       <small>X</small>
                       <input
@@ -143,51 +135,42 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
             </div>
             
     <!-- 3. Exits - Connections to other rooms -->
-            <div class="inspector-section">
-              <div class="inspector-section-header">
-                <span class="inspector-section-title">
-                  Exits
-                  <span style="color: #666; font-weight: normal; margin-left: 0.25rem;">
-                    ({map_size(room.exits || %{})})
-                  </span>
-                </span>
-                <.icon name="hero-chevron-down" class="size-3" />
-              </div>
-              <div class="inspector-section-content">
-                <%= if map_size(room.exits || %{}) > 0 do %>
-                  <div class="exits-list">
-                    <%= for {direction, dest_key} <- room.exits do %>
-                      <div class="exit-item">
-                        <div class="exit-info">
-                          <span class="exit-direction">{direction}</span>
-                          <span class="exit-arrow">→</span>
-                          <span class="exit-dest">{dest_key}</span>
-                        </div>
-                        <button
-                          type="button"
-                          phx-click="remove_exit"
-                          phx-value-from={room.key}
-                          phx-value-direction={direction}
-                          class="btn-icon-small"
-                          title="Remove exit"
-                        >
-                          <.icon name="hero-x-mark" class="size-3" />
-                        </button>
+            <div class="border-b border-wb-panel">
+              <.inspector_section title="Exits" count={map_size(room.exits || %{})} />
+              <div class="p-3 bg-wb-panel-header">
+                <div :if={map_size(room.exits || %{}) > 0} class="exits-list">
+                  <%= for {direction, dest_key} <- room.exits do %>
+                    <div class="exit-item">
+                      <div class="exit-info">
+                        <span class="exit-direction">{direction}</span>
+                        <span class="exit-arrow">→</span>
+                        <span class="exit-dest">{dest_key}</span>
                       </div>
-                    <% end %>
-                  </div>
-                <% else %>
-                  <p class="text-muted" style="margin: 0; font-size: 0.85rem;">No exits defined</p>
-                <% end %>
+                      <button
+                        type="button"
+                        phx-click="remove_exit"
+                        phx-value-from={room.key}
+                        phx-value-direction={direction}
+                        class="btn-icon-small"
+                        title="Remove exit"
+                      >
+                        <.icon name="hero-x-mark" class="size-3" />
+                      </button>
+                    </div>
+                  <% end %>
+                </div>
+                <p :if={map_size(room.exits || %{}) == 0} class="text-muted m-0 text-wb-base">
+                  No exits defined
+                </p>
                 
     <!-- Add Exit Form -->
                 <form
                   phx-submit="add_exit"
-                  style="margin-top: 0.75rem; display: flex; gap: 0.5rem; flex-direction: column;"
+                  class="mt-3 flex flex-col gap-2"
                 >
                   <input type="hidden" name="from" value={room.key} />
-                  <div style="display: flex; gap: 0.5rem;">
-                    <select name="direction" class="input" style="flex: 1;" required>
+                  <div class="flex gap-2">
+                    <select name="direction" class="input flex-1" required>
                       <option value="">Direction...</option>
                       <option value="north">North</option>
                       <option value="south">South</option>
@@ -203,13 +186,12 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                     <input
                       type="text"
                       name="to"
-                      class="input"
-                      style="flex: 2;"
+                      class="input flex-[2]"
                       placeholder="Destination key..."
                       required
                     />
                   </div>
-                  <button type="submit" class="btn btn-sm" style="width: 100%;">
+                  <button type="submit" class="btn btn-sm w-full">
                     <.icon name="hero-plus" class="size-3" />
                     <span>Add Exit</span>
                   </button>
@@ -221,99 +203,74 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
             <% spawns = Map.get(@room_spawns, room.key, []) %>
             <% mob_spawns = Enum.filter(spawns, fn s -> s.type == :mob end) %>
             <% item_spawns = Enum.filter(spawns, fn s -> s.type == :item end) %>
-            <div class="inspector-section">
-              <div class="inspector-section-header">
-                <span class="inspector-section-title">
-                  Spawns
-                  <span style="color: #666; font-weight: normal; margin-left: 0.25rem;">
-                    ({length(spawns)})
-                  </span>
-                </span>
-                <.icon name="hero-chevron-down" class="size-3" />
-              </div>
-              <div class="inspector-section-content">
-                <%= if length(mob_spawns) > 0 do %>
-                  <div class="contents-category">
-                    <small style="color: #666; font-weight: 500;">NPCs</small>
-                    <div class="contents-list">
-                      <%= for spawn <- mob_spawns do %>
-                        <div
-                          class="contents-item"
-                          phx-click="select_entity"
-                          phx-value-type="npc"
-                          phx-value-key={spawn.prototype}
-                          style="cursor: pointer;"
-                          title={"From zone: #{spawn.zone}"}
-                        >
-                          <.icon name="hero-user" class="size-3" style="color: #10b981;" />
-                          <span>{spawn.prototype}</span>
-                          <%= if spawn.max > 1 do %>
-                            <span style="color: #666; font-size: 0.75rem; margin-left: auto;">
-                              ×{spawn.max}
-                            </span>
-                          <% end %>
-                        </div>
-                      <% end %>
-                    </div>
+            <div class="border-b border-wb-panel">
+              <.inspector_section title="Spawns" count={length(spawns)} />
+              <div class="p-3 bg-wb-panel-header">
+                <div :if={length(mob_spawns) > 0} class="contents-category">
+                  <small class="text-wb-text-dim font-medium">NPCs</small>
+                  <div class="contents-list">
+                    <%= for spawn <- mob_spawns do %>
+                      <div
+                        class="contents-item cursor-pointer"
+                        phx-click="select_entity"
+                        phx-value-type="npc"
+                        phx-value-key={spawn.prototype}
+                        title={"From zone: #{spawn.zone}"}
+                      >
+                        <.icon name="hero-user" class="size-3 text-emerald-500" />
+                        <span>{spawn.prototype}</span>
+                        <span :if={spawn.max > 1} class="text-wb-text-dim text-xs ml-auto">
+                          ×{spawn.max}
+                        </span>
+                      </div>
+                    <% end %>
                   </div>
-                <% end %>
-                <%= if length(item_spawns) > 0 do %>
-                  <div
-                    class="contents-category"
-                    style={if length(mob_spawns) > 0, do: "margin-top: 0.5rem;", else: ""}
-                  >
-                    <small style="color: #666; font-weight: 500;">Items</small>
-                    <div class="contents-list">
-                      <%= for spawn <- item_spawns do %>
-                        <div
-                          class="contents-item"
-                          phx-click="select_entity"
-                          phx-value-type="item"
-                          phx-value-key={spawn.prototype}
-                          style="cursor: pointer;"
-                          title={"From zone: #{spawn.zone}"}
-                        >
-                          <.icon name="hero-cube-transparent" class="size-3" style="color: #f59e0b;" />
-                          <span>{spawn.prototype}</span>
-                          <%= if spawn.max > 1 do %>
-                            <span style="color: #666; font-size: 0.75rem; margin-left: auto;">
-                              ×{spawn.max}
-                            </span>
-                          <% end %>
-                        </div>
-                      <% end %>
-                    </div>
+                </div>
+                <div
+                  :if={length(item_spawns) > 0}
+                  class={["contents-category", length(mob_spawns) > 0 && "mt-2"]}
+                >
+                  <small class="text-wb-text-dim font-medium">Items</small>
+                  <div class="contents-list">
+                    <%= for spawn <- item_spawns do %>
+                      <div
+                        class="contents-item cursor-pointer"
+                        phx-click="select_entity"
+                        phx-value-type="item"
+                        phx-value-key={spawn.prototype}
+                        title={"From zone: #{spawn.zone}"}
+                      >
+                        <.icon name="hero-cube-transparent" class="size-3 text-amber-500" />
+                        <span>{spawn.prototype}</span>
+                        <span :if={spawn.max > 1} class="text-wb-text-dim text-xs ml-auto">
+                          ×{spawn.max}
+                        </span>
+                      </div>
+                    <% end %>
                   </div>
-                <% end %>
-                <%= if length(spawns) == 0 do %>
-                  <p class="text-muted" style="margin: 0; font-size: 0.85rem;">
+                </div>
+                <div :if={length(spawns) == 0}>
+                  <p class="text-muted m-0 text-wb-base">
                     No spawns defined for this room
                   </p>
-                  <p class="text-muted" style="margin: 0.5rem 0 0 0; font-size: 0.75rem; color: #555;">
+                  <p class="text-muted mt-2 mb-0 text-xs text-wb-text-faint">
                     Add spawns in zone files (priv/world/zones/)
                   </p>
-                <% end %>
+                </div>
               </div>
             </div>
             
     <!-- 5. Actions - Less frequently used -->
-            <div class="inspector-section">
-              <div class="inspector-section-header">
-                <span class="inspector-section-title">Actions</span>
-                <.icon name="hero-chevron-down" class="size-3" />
-              </div>
-              <div
-                class="inspector-section-content"
-                style="display: flex; flex-direction: column; gap: 0.5rem;"
-              >
+            <div class="border-b border-wb-panel">
+              <.inspector_section title="Actions" />
+              <div class="p-3 bg-wb-panel-header flex flex-col gap-2">
                 <button
                   type="button"
                   phx-click="save_as_template"
                   phx-value-room_id={room.id || room.key}
                   phx-value-template_key={room.key}
                   phx-value-template_name={room.name}
-                  class="btn btn-sm"
-                  style="width: 100%;"
+                  class="btn btn-sm w-full"
                 >
                   <.icon name="hero-document-duplicate" class="size-3" />
                   <span>Save as Template</span>
@@ -331,26 +288,20 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
               </div>
             </div>
           </form>
-        <% end %>
+        </div>
 
         <%!-- NPC Inspector --%>
-        <%= if @selected_entity && @selected_entity.type == :npc do %>
+        <div :if={@selected_entity && @selected_entity.type == :npc}>
           <% npc = get_npc_data(@npcs, @selected_entity.key) %>
-          <div class="inspector-header">
-            <.icon name="hero-user" class="size-5" style="color: #909090;" />
-            <span class="inspector-title">{npc[:name] || npc.key}</span>
-          </div>
+          <.entity_header icon="hero-user" name={npc[:name] || npc.key} />
 
           <form phx-change="update_npc_field">
             <input type="hidden" name="npc_key" value={npc.key} />
             
     <!-- 1. Identity - Name & Description first -->
-            <div class="inspector-section">
-              <div class="inspector-section-header">
-                <span class="inspector-section-title">Identity</span>
-                <.icon name="hero-chevron-down" class="size-3" />
-              </div>
-              <div class="inspector-section-content">
+            <div class="border-b border-wb-panel">
+              <.inspector_section title="Identity" />
+              <div class="p-3 bg-wb-panel-header">
                 <div class="form-group">
                   <label>Name</label>
                   <input
@@ -372,26 +323,22 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                     phx-debounce="500"
                   ><%= npc[:description] || npc[:short_desc] || "" %></textarea>
                 </div>
-                <div class="form-group" style="margin-top: 0.5rem;">
-                  <label style="font-size: 0.75rem; color: #666;">Key (ID)</label>
+                <div class="form-group mt-2">
+                  <label class="text-wb-xs text-wb-text-dim">Key (ID)</label>
                   <input
                     type="text"
-                    class="input"
+                    class="input text-wb-base bg-wb-border-dark text-wb-text-dim"
                     value={npc.key}
                     readonly
-                    style="font-size: 0.85rem; background: #1a1a1a; color: #666;"
                   />
                 </div>
               </div>
             </div>
             
     <!-- 2. Attributes - Level and stats -->
-            <div class="inspector-section">
-              <div class="inspector-section-header">
-                <span class="inspector-section-title">Attributes</span>
-                <.icon name="hero-chevron-down" class="size-3" />
-              </div>
-              <div class="inspector-section-content">
+            <div class="border-b border-wb-panel">
+              <.inspector_section title="Attributes" />
+              <div class="p-3 bg-wb-panel-header">
                 <div class="form-group">
                   <label>Level</label>
                   <input
@@ -407,22 +354,15 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
             </div>
             
     <!-- 3. Behavior - Scripts & Dialogues -->
-            <div class="inspector-section">
-              <div class="inspector-section-header">
-                <span class="inspector-section-title">Behavior</span>
-                <.icon name="hero-chevron-down" class="size-3" />
-              </div>
-              <div
-                class="inspector-section-content"
-                style="display: flex; flex-direction: column; gap: 0.5rem;"
-              >
+            <div class="border-b border-wb-panel">
+              <.inspector_section title="Behavior" />
+              <div class="p-3 bg-wb-panel-header flex flex-col gap-2">
                 <button
                   type="button"
                   phx-click="show_script_editor_for_entity"
                   phx-value-entity_type="npc"
                   phx-value-entity_key={npc.key}
-                  class="btn btn-sm"
-                  style="width: 100%;"
+                  class="btn btn-sm w-full"
                 >
                   <.icon name="hero-code-bracket" class="size-3" />
                   <span>Edit Scripts</span>
@@ -431,8 +371,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                   type="button"
                   phx-click="show_dialogue_editor_for_entity"
                   phx-value-entity_key={npc.key}
-                  class="btn btn-sm"
-                  style="width: 100%;"
+                  class="btn btn-sm w-full"
                 >
                   <.icon name="hero-chat-bubble-left-right" class="size-3" />
                   <span>Edit Dialogues</span>
@@ -441,15 +380,9 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
             </div>
             
     <!-- 4. Actions -->
-            <div class="inspector-section">
-              <div class="inspector-section-header">
-                <span class="inspector-section-title">Actions</span>
-                <.icon name="hero-chevron-down" class="size-3" />
-              </div>
-              <div
-                class="inspector-section-content"
-                style="display: flex; flex-direction: column; gap: 0.5rem;"
-              >
+            <div class="border-b border-wb-panel">
+              <.inspector_section title="Actions" />
+              <div class="p-3 bg-wb-panel-header flex flex-col gap-2">
                 <button
                   type="button"
                   phx-click="delete_npc"
@@ -462,26 +395,20 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
               </div>
             </div>
           </form>
-        <% end %>
+        </div>
 
         <%!-- Item Inspector --%>
-        <%= if @selected_entity && @selected_entity.type == :item do %>
+        <div :if={@selected_entity && @selected_entity.type == :item}>
           <% item = get_item_data(@items, @selected_entity.key) %>
-          <div class="inspector-header">
-            <.icon name="hero-cube-transparent" class="size-5" style="color: #909090;" />
-            <span class="inspector-title">{item[:name] || item.key}</span>
-          </div>
+          <.entity_header icon="hero-cube-transparent" name={item[:name] || item.key} />
 
           <form phx-change="update_item_field">
             <input type="hidden" name="item_key" value={item.key} />
             
     <!-- 1. Identity - Name & Description first -->
-            <div class="inspector-section">
-              <div class="inspector-section-header">
-                <span class="inspector-section-title">Identity</span>
-                <.icon name="hero-chevron-down" class="size-3" />
-              </div>
-              <div class="inspector-section-content">
+            <div class="border-b border-wb-panel">
+              <.inspector_section title="Identity" />
+              <div class="p-3 bg-wb-panel-header">
                 <div class="form-group">
                   <label>Name</label>
                   <input
@@ -503,26 +430,22 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                     phx-debounce="500"
                   ><%= item[:description] || item[:short_desc] || "" %></textarea>
                 </div>
-                <div class="form-group" style="margin-top: 0.5rem;">
-                  <label style="font-size: 0.75rem; color: #666;">Key (ID)</label>
+                <div class="form-group mt-2">
+                  <label class="text-wb-xs text-wb-text-dim">Key (ID)</label>
                   <input
                     type="text"
-                    class="input"
+                    class="input text-wb-base bg-wb-border-dark text-wb-text-dim"
                     value={item.key}
                     readonly
-                    style="font-size: 0.85rem; background: #1a1a1a; color: #666;"
                   />
                 </div>
               </div>
             </div>
             
     <!-- 2. Attributes - Item Type -->
-            <div class="inspector-section">
-              <div class="inspector-section-header">
-                <span class="inspector-section-title">Attributes</span>
-                <.icon name="hero-chevron-down" class="size-3" />
-              </div>
-              <div class="inspector-section-content">
+            <div class="border-b border-wb-panel">
+              <.inspector_section title="Attributes" />
+              <div class="p-3 bg-wb-panel-header">
                 <div class="form-group">
                   <label>Item Type</label>
                   <select name="item_type" class="input" phx-debounce="500">
@@ -541,19 +464,15 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
             </div>
             
     <!-- 3. Behavior - Scripts -->
-            <div class="inspector-section">
-              <div class="inspector-section-header">
-                <span class="inspector-section-title">Behavior</span>
-                <.icon name="hero-chevron-down" class="size-3" />
-              </div>
-              <div class="inspector-section-content">
+            <div class="border-b border-wb-panel">
+              <.inspector_section title="Behavior" />
+              <div class="p-3 bg-wb-panel-header">
                 <button
                   type="button"
                   phx-click="show_script_editor_for_entity"
                   phx-value-entity_type="item"
                   phx-value-entity_key={item.key}
-                  class="btn btn-sm"
-                  style="width: 100%;"
+                  class="btn btn-sm w-full"
                 >
                   <.icon name="hero-code-bracket" class="size-3" />
                   <span>Edit Scripts</span>
@@ -562,15 +481,9 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
             </div>
             
     <!-- 4. Actions -->
-            <div class="inspector-section">
-              <div class="inspector-section-header">
-                <span class="inspector-section-title">Actions</span>
-                <.icon name="hero-chevron-down" class="size-3" />
-              </div>
-              <div
-                class="inspector-section-content"
-                style="display: flex; flex-direction: column; gap: 0.5rem;"
-              >
+            <div class="border-b border-wb-panel">
+              <.inspector_section title="Actions" />
+              <div class="p-3 bg-wb-panel-header flex flex-col gap-2">
                 <button
                   type="button"
                   phx-click="delete_item"
@@ -583,25 +496,22 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
               </div>
             </div>
           </form>
-        <% end %>
+        </div>
 
-        <%= if @selected_keys != [] do %>
-          <div class="inspector-header">
-            <.icon name="hero-squares-2x2" class="size-5" style="color: #909090;" />
-            <span class="inspector-title">Batch Operations ({length(@selected_keys)} rooms)</span>
-          </div>
+        <div :if={@selected_keys != []}>
+          <.entity_header
+            icon="hero-squares-2x2"
+            name={"Batch Operations (#{length(@selected_keys)} rooms)"}
+          />
           
     <!-- Batch Move Section -->
-          <div class="inspector-section">
-            <div class="inspector-section-header">
-              <span class="inspector-section-title">Move Selected</span>
-              <.icon name="hero-chevron-down" class="size-3" />
-            </div>
-            <div class="inspector-section-content">
+          <div class="border-b border-wb-panel">
+            <.inspector_section title="Move Selected" />
+            <div class="p-3 bg-wb-panel-header">
               <form phx-submit="batch_move">
                 <div class="form-group">
                   <label>Offset</label>
-                  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.25rem;">
+                  <div class="grid grid-cols-3 gap-1">
                     <div>
                       <small>ΔX</small>
                       <input type="number" name="dx" class="input" value="0" />
@@ -616,7 +526,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                     </div>
                   </div>
                 </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                <button type="submit" class="btn btn-primary w-full">
                   <.icon name="hero-arrows-right-left" class="size-4" />
                   <span>Move All</span>
                 </button>
@@ -625,16 +535,13 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
           </div>
           
     <!-- Batch Clone Section -->
-          <div class="inspector-section">
-            <div class="inspector-section-header">
-              <span class="inspector-section-title">Clone Selected</span>
-              <.icon name="hero-chevron-down" class="size-3" />
-            </div>
-            <div class="inspector-section-content">
+          <div class="border-b border-wb-panel">
+            <.inspector_section title="Clone Selected" />
+            <div class="p-3 bg-wb-panel-header">
               <form phx-submit="batch_clone">
                 <div class="form-group">
                   <label>Clone Offset</label>
-                  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.25rem;">
+                  <div class="grid grid-cols-3 gap-1">
                     <div>
                       <small>ΔX</small>
                       <input type="number" name="dx" class="input" value="5" />
@@ -650,7 +557,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                   </div>
                   <small>Clones will be created with new keys and copied tags</small>
                 </div>
-                <button type="submit" class="btn btn-sm" style="width: 100%;">
+                <button type="submit" class="btn btn-sm w-full">
                   <.icon name="hero-document-duplicate" class="size-3" />
                   <span>Clone All</span>
                 </button>
@@ -659,12 +566,9 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
           </div>
           
     <!-- Batch Delete Section -->
-          <div class="inspector-section">
-            <div class="inspector-section-header">
-              <span class="inspector-section-title">Danger Zone</span>
-              <.icon name="hero-chevron-down" class="size-3" />
-            </div>
-            <div class="inspector-section-content">
+          <div class="border-b border-wb-panel">
+            <.inspector_section title="Danger Zone" />
+            <div class="p-3 bg-wb-panel-header">
               <button
                 type="button"
                 phx-click="batch_delete"
@@ -675,16 +579,17 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
               </button>
             </div>
           </div>
-        <% end %>
+        </div>
 
-        <%= if @selected_room == nil && @selected_entity == nil && @selected_keys == [] do %>
-          <div class="inspector-empty">
-            <p>Select an object to view details</p>
-            <p style="font-size: 0.8rem; color: #666; margin-top: 0.5rem;">
-              Hold Shift to select multiple
-            </p>
-          </div>
-        <% end %>
+        <div
+          :if={@selected_room == nil && @selected_entity == nil && @selected_keys == []}
+          class="flex items-center justify-center h-full text-wb-text-faint text-[0.8rem]"
+        >
+          <p>Select an object to view details</p>
+          <p class="text-wb-sm text-wb-text-dim mt-2">
+            Hold Shift to select multiple
+          </p>
+        </div>
       </div>
     </div>
     """

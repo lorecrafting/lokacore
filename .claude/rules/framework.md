@@ -128,6 +128,12 @@ Conditions.Evaluator.evaluate(condition, context)
    - Keep modules focused on single responsibility
    - Split large modules into sub-modules
 
+## Related Skills
+
+- `.claude/skills/elixir-query-function-signatures.md` - Ecto query patterns
+- `.claude/skills/elixir-resilient-content-loader.md` - Content loading robustness
+- `.claude/skills/balance-config-pattern.md` - Game balance config patterns
+
 ## Documentation
 
 - `docs/framework/README.md` - All subsystems

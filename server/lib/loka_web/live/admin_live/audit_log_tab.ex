@@ -121,9 +121,9 @@ defmodule LokaWeb.AdminLive.AuditLogTab do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="admin-section">
-      <div class="admin-section-header">
-        <h2 class="admin-section-title">Audit Log</h2>
+    <div class="flex flex-col gap-6">
+      <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-bold">Audit Log</h2>
         <button phx-click="refresh" phx-target={@myself} class="btn btn-sm btn-outline">
           <.icon name="hero-arrow-path" class="size-4" /> Refresh
         </button>
@@ -177,88 +177,84 @@ defmodule LokaWeb.AdminLive.AuditLogTab do
         </div>
       </div>
 
-      <%= if @loading do %>
-        <div class="flex justify-center py-8">
-          <span class="loading loading-spinner loading-lg" />
+      <div :if={@loading} class="flex justify-center py-8">
+        <span class="loading loading-spinner loading-lg" />
+      </div>
+
+      <div :if={!@loading && @logs == []} class="card bg-base-200">
+        <div class="card-body items-center text-center py-12">
+          <.icon name="hero-clipboard-document-list" class="size-12 text-base-content/30 mb-2" />
+          <h3 class="text-lg font-medium text-base-content/70">No audit logs yet</h3>
+          <p class="text-sm text-base-content/50">
+            Admin actions will appear here as they occur.
+          </p>
         </div>
-      <% else %>
-        <%= if @logs == [] do %>
-          <div class="card bg-base-200">
-            <div class="card-body items-center text-center py-12">
-              <.icon name="hero-clipboard-document-list" class="size-12 text-base-content/30 mb-2" />
-              <h3 class="text-lg font-medium text-base-content/70">No audit logs yet</h3>
-              <p class="text-sm text-base-content/50">
-                Admin actions will appear here as they occur.
-              </p>
-            </div>
-          </div>
-        <% else %>
-          <div class="admin-table-wrapper">
-            <table class="table table-sm">
-              <thead>
-                <tr>
-                  <th>Time</th>
-                  <th>Admin</th>
-                  <th>Action</th>
-                  <th>Entity</th>
-                  <th>Key</th>
-                  <th>Details</th>
-                </tr>
-              </thead>
-              <tbody>
-                <%= for log <- @logs do %>
-                  <tr class="hover">
-                    <td class="text-xs text-base-content/70 whitespace-nowrap">
-                      {format_timestamp(log.inserted_at)}
-                    </td>
-                    <td class="text-sm">
-                      {if log.player, do: log.player.email || log.player.name, else: "System"}
-                    </td>
-                    <td>
-                      <span class={"badge badge-sm #{action_badge_class(log.action)}"}>
-                        {format_action(log.action)}
-                      </span>
-                    </td>
-                    <td class="text-sm">{String.capitalize(log.entity_type)}</td>
-                    <td class="font-mono text-xs">{log.entity_key || "-"}</td>
-                    <td class="text-xs">
-                      <%= if log.metadata && map_size(log.metadata) > 0 do %>
-                        <span class="tooltip" data-tip={inspect(log.metadata)}>
-                          <.icon name="hero-information-circle" class="size-4 text-base-content/50" />
-                        </span>
-                      <% end %>
-                    </td>
-                  </tr>
-                <% end %>
-              </tbody>
-            </table>
-          </div>
+      </div>
 
-          <div class="flex justify-between items-center mt-4">
-            <button
-              phx-click="prev_page"
-              phx-target={@myself}
-              class="btn btn-sm btn-outline"
-              disabled={@page <= 1}
-            >
-              <.icon name="hero-chevron-left" class="size-4" /> Previous
-            </button>
+      <div :if={!@loading && @logs != []} class="overflow-x-auto">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Admin</th>
+              <th>Action</th>
+              <th>Entity</th>
+              <th>Key</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr :for={log <- @logs} class="hover">
+              <td class="text-xs text-base-content/70 whitespace-nowrap">
+                {format_timestamp(log.inserted_at)}
+              </td>
+              <td class="text-sm">
+                {if log.player, do: log.player.email || log.player.name, else: "System"}
+              </td>
+              <td>
+                <span class={"badge badge-sm #{action_badge_class(log.action)}"}>
+                  {format_action(log.action)}
+                </span>
+              </td>
+              <td class="text-sm">{String.capitalize(log.entity_type)}</td>
+              <td class="font-mono text-xs">{log.entity_key || "-"}</td>
+              <td class="text-xs">
+                <span
+                  :if={log.metadata && map_size(log.metadata) > 0}
+                  class="tooltip"
+                  data-tip={inspect(log.metadata)}
+                >
+                  <.icon name="hero-information-circle" class="size-4 text-base-content/50" />
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-            <span class="text-sm text-base-content/60">
-              Page {@page} of {max(1, ceil(@total_count / @per_page))}
-            </span>
+      <div :if={!@loading && @logs != []} class="flex justify-between items-center mt-4">
+        <button
+          phx-click="prev_page"
+          phx-target={@myself}
+          class="btn btn-sm btn-outline"
+          disabled={@page <= 1}
+        >
+          <.icon name="hero-chevron-left" class="size-4" /> Previous
+        </button>
 
-            <button
-              phx-click="next_page"
-              phx-target={@myself}
-              class="btn btn-sm btn-outline"
-              disabled={@page >= ceil(@total_count / @per_page)}
-            >
-              Next <.icon name="hero-chevron-right" class="size-4" />
-            </button>
-          </div>
-        <% end %>
-      <% end %>
+        <span class="text-sm text-base-content/60">
+          Page {@page} of {max(1, ceil(@total_count / @per_page))}
+        </span>
+
+        <button
+          phx-click="next_page"
+          phx-target={@myself}
+          class="btn btn-sm btn-outline"
+          disabled={@page >= ceil(@total_count / @per_page)}
+        >
+          Next <.icon name="hero-chevron-right" class="size-4" />
+        </button>
+      </div>
     </div>
     """
   end

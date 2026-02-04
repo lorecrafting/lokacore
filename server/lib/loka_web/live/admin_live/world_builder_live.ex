@@ -104,11 +104,11 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:active_tab, :templates)
      |> assign(:npcs, npcs)
      |> assign(:items, items)
+     |> assign(:entity_list, build_entity_list(rooms, npcs, items))
      |> assign(:selected_entity, nil)
      |> assign(:quests, quests)
      |> assign(:cutscenes, cutscenes)
      |> assign(:scripts, scripts)
-     |> assign(:zones, zones)
      |> assign(:zone_colors, zone_colors)
      |> assign(:room_zone_map, room_zone_map)
      |> assign(:show_zone_colors, true)
@@ -265,12 +265,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
           collapsed={@collapsed_panels.hierarchy}
         />
 
-        <div
-          class="panel-resize-handle"
-          data-resize="hierarchy"
-          style={if @collapsed_panels.hierarchy, do: "display: none;", else: ""}
-        >
-        </div>
+        <div class="panel-resize-handle" data-resize="hierarchy"></div>
 
         <ViewportContainer.viewport_container
           rooms={@rooms}
@@ -290,17 +285,12 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
           dialogue_preview_mode={@dialogue_preview_mode}
           dialogue_mock_state={@dialogue_mock_state}
           npcs={@npcs}
-          entities_for_editor={build_entity_list(@rooms, @npcs, @items)}
+          entities_for_editor={@entity_list}
           quest_data={@quest_data}
           cutscene_data={@cutscene_data}
         />
 
-        <div
-          class="panel-resize-handle"
-          data-resize="inspector"
-          style={if @collapsed_panels.inspector, do: "display: none;", else: ""}
-        >
-        </div>
+        <div class="panel-resize-handle" data-resize="inspector"></div>
 
         <InspectorPanel.inspector_panel
           rooms={@rooms}
@@ -313,27 +303,14 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
           collapsed={@collapsed_panels.inspector}
         />
 
-        <%= unless @collapsed_panels.terminal do %>
-          <div
-            class="panel-resize-handle"
-            data-resize="terminal"
-          >
-          </div>
-        <% end %>
+        <div class="panel-resize-handle" data-resize="terminal"></div>
 
-        <%= unless @collapsed_panels.terminal do %>
-          <TerminalPanel.terminal_panel
-            token={@terminal_token}
-            collapsed={@collapsed_panels.terminal}
-          />
-        <% end %>
+        <TerminalPanel.terminal_panel
+          token={@terminal_token}
+          collapsed={@collapsed_panels.terminal}
+        />
 
-        <div
-          class="panel-resize-handle"
-          data-resize="chat"
-          style={if @collapsed_panels.chat, do: "display: none;", else: ""}
-        >
-        </div>
+        <div class="panel-resize-handle" data-resize="chat"></div>
 
         <ChatPanel.chat_panel
           messages={@chat_messages}
@@ -350,213 +327,211 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
         />
       </div>
 
-      <%= if @show_create_modal do %>
-        <div class="modal-overlay">
-          <div class="modal-content" phx-click-away="close_create_modal">
-            <div class="modal-header">
-              <h3>Create New Room</h3>
-              <button phx-click="close_create_modal" class="modal-close">&times;</button>
-            </div>
-            <form phx-submit="submit_create_room">
-              <div class="form-group">
-                <label>Room Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  class="input"
-                  placeholder="e.g., Main Tavern"
-                  required
-                />
-              </div>
-
-              <div class="form-group">
-                <label>Description</label>
-                <textarea
-                  name="description"
-                  class="textarea"
-                  rows="3"
-                  placeholder="What the player sees when entering..."
-                ></textarea>
-              </div>
-
-              <div class="form-group">
-                <label>Position</label>
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
-                  <input type="number" name="x" class="input" placeholder="X" value="0" />
-                  <input type="number" name="y" class="input" placeholder="Y" value="0" />
-                  <input type="number" name="z" class="input" placeholder="Z" value="0" />
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label>
-                  Room Key <span style="color: #666; font-weight: normal;">(optional)</span>
-                </label>
-                <input
-                  type="text"
-                  name="key"
-                  class="input"
-                  placeholder="Auto-generated from name if empty"
-                />
-                <small style="color: #666;">Unique identifier - leave blank to auto-generate</small>
-              </div>
-
-              <div class="modal-footer">
-                <button type="button" phx-click="close_create_modal" class="btn btn-secondary">
-                  Cancel
-                </button>
-                <button type="submit" class="btn btn-primary">Create Room</button>
-              </div>
-            </form>
+      <div :if={@show_create_modal} class="modal-overlay">
+        <div class="modal-content" phx-click-away="close_create_modal">
+          <div class="modal-header">
+            <h3>Create New Room</h3>
+            <button phx-click="close_create_modal" class="modal-close">&times;</button>
           </div>
+          <form phx-submit="submit_create_room">
+            <div class="form-group">
+              <label>Room Name</label>
+              <input
+                type="text"
+                name="name"
+                class="input"
+                placeholder="e.g., Main Tavern"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Description</label>
+              <textarea
+                name="description"
+                class="textarea"
+                rows="3"
+                placeholder="What the player sees when entering..."
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Position</label>
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
+                <input type="number" name="x" class="input" placeholder="X" value="0" />
+                <input type="number" name="y" class="input" placeholder="Y" value="0" />
+                <input type="number" name="z" class="input" placeholder="Z" value="0" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>
+                Room Key <span class="text-base-content/50 font-normal">(optional)</span>
+              </label>
+              <input
+                type="text"
+                name="key"
+                class="input"
+                placeholder="Auto-generated from name if empty"
+              />
+              <small class="text-base-content/50">
+                Unique identifier - leave blank to auto-generate
+              </small>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" phx-click="close_create_modal" class="btn btn-secondary">
+                Cancel
+              </button>
+              <button type="submit" class="btn btn-primary">Create Room</button>
+            </div>
+          </form>
         </div>
-      <% end %>
+      </div>
 
       <%!-- NPC Editor Modal --%>
-      <%= if @show_npc_editor do %>
-        <div class="modal-overlay">
-          <div class="modal-content" phx-click-away="close_npc_editor">
-            <div class="modal-header">
-              <h3>Create New NPC</h3>
-              <button phx-click="close_npc_editor" class="modal-close">&times;</button>
-            </div>
-            <form phx-submit="create_npc">
-              <div class="form-group">
-                <label>NPC Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  class="input"
-                  placeholder="e.g., Captain Reeves"
-                  required
-                />
-              </div>
-
-              <div class="form-group">
-                <label>Description</label>
-                <textarea
-                  name="description"
-                  class="textarea"
-                  rows="3"
-                  placeholder="What the player sees when looking..."
-                ></textarea>
-              </div>
-
-              <div class="form-group">
-                <label>Level</label>
-                <input type="number" name="level" class="input" value="1" min="1" />
-              </div>
-
-              <div class="form-group">
-                <label>
-                  NPC Key <span style="color: #666; font-weight: normal;">(optional)</span>
-                </label>
-                <input
-                  type="text"
-                  name="key"
-                  class="input"
-                  placeholder="Auto-generated from name if empty"
-                />
-                <small style="color: #666;">Unique identifier - leave blank to auto-generate</small>
-              </div>
-
-              <div class="modal-footer">
-                <button type="button" phx-click="close_npc_editor" class="btn btn-secondary">
-                  Cancel
-                </button>
-                <button type="submit" class="btn btn-primary">Create NPC</button>
-              </div>
-            </form>
+      <div :if={@show_npc_editor} class="modal-overlay">
+        <div class="modal-content" phx-click-away="close_npc_editor">
+          <div class="modal-header">
+            <h3>Create New NPC</h3>
+            <button phx-click="close_npc_editor" class="modal-close">&times;</button>
           </div>
+          <form phx-submit="create_npc">
+            <div class="form-group">
+              <label>NPC Name</label>
+              <input
+                type="text"
+                name="name"
+                class="input"
+                placeholder="e.g., Captain Reeves"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Description</label>
+              <textarea
+                name="description"
+                class="textarea"
+                rows="3"
+                placeholder="What the player sees when looking..."
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Level</label>
+              <input type="number" name="level" class="input" value="1" min="1" />
+            </div>
+
+            <div class="form-group">
+              <label>
+                NPC Key <span class="text-base-content/50 font-normal">(optional)</span>
+              </label>
+              <input
+                type="text"
+                name="key"
+                class="input"
+                placeholder="Auto-generated from name if empty"
+              />
+              <small class="text-base-content/50">
+                Unique identifier - leave blank to auto-generate
+              </small>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" phx-click="close_npc_editor" class="btn btn-secondary">
+                Cancel
+              </button>
+              <button type="submit" class="btn btn-primary">Create NPC</button>
+            </div>
+          </form>
         </div>
-      <% end %>
+      </div>
 
       <%!-- Item Editor Modal --%>
-      <%= if @show_item_editor do %>
-        <div class="modal-overlay">
-          <div class="modal-content" phx-click-away="close_item_editor">
-            <div class="modal-header">
-              <h3>Create New Item</h3>
-              <button phx-click="close_item_editor" class="modal-close">&times;</button>
-            </div>
-            <form phx-submit="create_item">
-              <div class="form-group">
-                <label>Item Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  class="input"
-                  placeholder="e.g., Iron Sword"
-                  required
-                />
-              </div>
-
-              <div class="form-group">
-                <label>Item Type</label>
-                <select name="item_type" class="input">
-                  <option value="misc">Miscellaneous</option>
-                  <option value="weapon">Weapon</option>
-                  <option value="armor">Armor</option>
-                  <option value="consumable">Consumable</option>
-                  <option value="quest_item">Quest Item</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label>Description</label>
-                <textarea
-                  name="description"
-                  class="textarea"
-                  rows="3"
-                  placeholder="What the player sees when examining..."
-                ></textarea>
-              </div>
-
-              <div class="form-group">
-                <label>
-                  Item Key <span style="color: #666; font-weight: normal;">(optional)</span>
-                </label>
-                <input
-                  type="text"
-                  name="key"
-                  class="input"
-                  placeholder="Auto-generated from name if empty"
-                />
-                <small style="color: #666;">Unique identifier - leave blank to auto-generate</small>
-              </div>
-
-              <div class="modal-footer">
-                <button type="button" phx-click="close_item_editor" class="btn btn-secondary">
-                  Cancel
-                </button>
-                <button type="submit" class="btn btn-primary">Create Item</button>
-              </div>
-            </form>
+      <div :if={@show_item_editor} class="modal-overlay">
+        <div class="modal-content" phx-click-away="close_item_editor">
+          <div class="modal-header">
+            <h3>Create New Item</h3>
+            <button phx-click="close_item_editor" class="modal-close">&times;</button>
           </div>
+          <form phx-submit="create_item">
+            <div class="form-group">
+              <label>Item Name</label>
+              <input
+                type="text"
+                name="name"
+                class="input"
+                placeholder="e.g., Iron Sword"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Item Type</label>
+              <select name="item_type" class="input">
+                <option value="misc">Miscellaneous</option>
+                <option value="weapon">Weapon</option>
+                <option value="armor">Armor</option>
+                <option value="consumable">Consumable</option>
+                <option value="quest_item">Quest Item</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Description</label>
+              <textarea
+                name="description"
+                class="textarea"
+                rows="3"
+                placeholder="What the player sees when examining..."
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>
+                Item Key <span class="text-base-content/50 font-normal">(optional)</span>
+              </label>
+              <input
+                type="text"
+                name="key"
+                class="input"
+                placeholder="Auto-generated from name if empty"
+              />
+              <small class="text-base-content/50">
+                Unique identifier - leave blank to auto-generate
+              </small>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" phx-click="close_item_editor" class="btn btn-secondary">
+                Cancel
+              </button>
+              <button type="submit" class="btn btn-primary">Create Item</button>
+            </div>
+          </form>
         </div>
-      <% end %>
+      </div>
 
       <%!-- Quest/Cutscene editors now render inline in viewport_container --%>
 
       <%!-- Dialogue/Script editors now render inline in viewport_container --%>
 
       <%!-- Template Picker Modal --%>
-      <%= if @show_template_picker do %>
-        <ScriptTemplatePicker.script_template_picker
-          search={@template_search}
-          selected_category={@template_category}
-        />
-      <% end %>
+      <ScriptTemplatePicker.script_template_picker
+        :if={@show_template_picker}
+        search={@template_search}
+        selected_category={@template_category}
+      />
 
       <%!-- Template Config Modal --%>
-      <%= if @show_template_config && @selected_template do %>
-        <ScriptTemplateConfig.script_template_config
-          template={@selected_template}
-          config={@template_config}
-          preview_code={@template_preview_code}
-          validation_errors={@template_validation_errors}
-        />
-      <% end %>
+      <ScriptTemplateConfig.script_template_config
+        :if={@show_template_config && @selected_template}
+        template={@selected_template}
+        config={@template_config}
+        preview_code={@template_preview_code}
+        validation_errors={@template_validation_errors}
+      />
 
       <%!-- Git Commit Modal --%>
       <CommitModal.commit_modal
@@ -596,21 +571,17 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
       />
 
       <%!-- Validation Panel --%>
-      <%= if @show_validation_panel do %>
-        <ValidationPanel.validation_panel validation_results={@validation} />
-      <% end %>
+      <ValidationPanel.validation_panel :if={@show_validation_panel} validation_results={@validation} />
 
       <%!-- Document Viewer Modal --%>
-      <%= if @selected_document do %>
-        <div class="document-viewer-modal">
-          <DocumentViewer.document_viewer
-            document={@selected_document}
-            content={@document_content}
-            loading={@document_loading}
-            error={@document_error}
-          />
-        </div>
-      <% end %>
+      <div :if={@selected_document} class="document-viewer-modal">
+        <DocumentViewer.document_viewer
+          document={@selected_document}
+          content={@document_content}
+          loading={@document_loading}
+          error={@document_error}
+        />
+      </div>
 
       <%!-- Confirmation Modal (replaces browser-native confirm dialogs) --%>
       <ConfirmationModal.confirmation_modal
@@ -759,7 +730,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     end
   end
 
-  # Panel resize handler
+  # Panel resize handler (called once on mouseup, not during drag)
   @impl true
   def handle_event("resize_panel", %{"panel" => panel, "size" => size}, socket) do
     panel_atom = String.to_existing_atom(panel)
@@ -771,6 +742,25 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     else
       {:noreply, socket}
     end
+  end
+
+  # Batched restore of all panel sizes from localStorage (single event on mount)
+  @impl true
+  def handle_event("restore_panel_sizes", %{"sizes" => sizes}, socket) do
+    valid_panels = [:hierarchy, :inspector, :chat, :console, :terminal]
+
+    new_sizes =
+      Enum.reduce(sizes, socket.assigns.panel_sizes, fn {panel, size}, acc ->
+        panel_atom = String.to_existing_atom(panel)
+
+        if panel_atom in valid_panels do
+          Map.put(acc, panel_atom, size)
+        else
+          acc
+        end
+      end)
+
+    {:noreply, assign(socket, :panel_sizes, new_sizes)}
   end
 
   # Zone visualization toggle
@@ -1225,6 +1215,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
         {:noreply,
          socket
          |> assign(:rooms, RoomManager.list_rooms())
+         |> update_entity_list()
          |> assign(:selected_room, new_room.key)
          |> log_console(:info, "Duplicated room: #{key} -> #{new_room.key}")
          |> push_event("room_created", %{room: new_room})}
@@ -1250,6 +1241,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
         {:noreply,
          socket
+         |> update_entity_list()
          |> assign(:selected_entity, %{type: type_atom, key: new_entity.key})
          |> log_console(:info, "Duplicated #{type}: #{key} -> #{new_entity.key}")}
 
@@ -2504,10 +2496,14 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     socket =
       case tool_name do
         "create_npc" ->
-          assign(socket, :npcs, EntityManager.list_entities(:npc))
+          socket
+          |> assign(:npcs, EntityManager.list_entities(:npc))
+          |> update_entity_list()
 
         "create_item" ->
-          assign(socket, :items, EntityManager.list_entities(:item))
+          socket
+          |> assign(:items, EntityManager.list_entities(:item))
+          |> update_entity_list()
 
         _ ->
           socket
@@ -3018,6 +3014,15 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     header <> entries
   end
 
+  # Recalculate cached entity list from current assigns
+  defp update_entity_list(socket) do
+    assign(
+      socket,
+      :entity_list,
+      build_entity_list(socket.assigns.rooms, socket.assigns.npcs, socket.assigns.items)
+    )
+  end
+
   # Build a combined list of entities (rooms, NPCs, items) for script attachment
   defp build_entity_list(rooms, npcs, items) do
     room_entities =
@@ -3145,6 +3150,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
         collapsed_panels.hierarchy && "hierarchy-collapsed",
         collapsed_panels.inspector && "inspector-collapsed",
         collapsed_panels.console && "console-collapsed",
+        collapsed_panels.terminal && "terminal-collapsed",
         collapsed_panels.chat && "chat-collapsed"
       ]
       |> Enum.filter(& &1)
@@ -3162,10 +3168,10 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     c_col = if collapsed_panels.chat, do: "40px", else: "#{panel_sizes.chat}px"
     c_resize = if collapsed_panels.chat, do: "0px", else: "4px"
 
-    # Terminal columns are 0px when collapsed (panel not rendered)
+    # Terminal columns mirror other panels: 40px when collapsed
     {t_resize, t_col} =
       if collapsed_panels.terminal,
-        do: {"0px", "0px"},
+        do: {"0px", "40px"},
         else: {"4px", "#{panel_sizes.terminal}px"}
 
     "--grid-columns: #{h_col} #{h_resize} 1fr #{i_resize} #{i_col} #{t_resize} #{t_col} #{c_resize} #{c_col}; " <>
@@ -3180,6 +3186,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     socket
     |> assign(:rooms, rooms)
     |> assign(:validation, validation)
+    |> update_entity_list()
     |> push_event("rooms_updated", %{rooms: rooms, validation: validation.results})
   end
 

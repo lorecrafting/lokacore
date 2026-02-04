@@ -5,12 +5,14 @@ defmodule LokaWeb.AdminLive.PrototypesTab do
   """
   use LokaWeb, :live_component
 
+  import LokaWeb.AdminLive.Components, only: [entity_type_badge_class: 1]
+
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="admin-section">
-      <div class="admin-section-header">
-        <h2 class="admin-section-title">Prototypes ({length(@prototypes || [])})</h2>
+    <div class="flex flex-col gap-6">
+      <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-bold">Prototypes ({length(@prototypes || [])})</h2>
         <div class="flex gap-2">
           <select
             phx-change="filter_prototypes"
@@ -36,7 +38,7 @@ defmodule LokaWeb.AdminLive.PrototypesTab do
         </div>
       </div>
 
-      <div :if={@prototypes && length(@prototypes) > 0} class="admin-table-wrapper">
+      <div :if={@prototypes && length(@prototypes) > 0} class="overflow-x-auto">
         <table class="table table-zebra w-full">
           <thead>
             <tr>
@@ -50,14 +52,14 @@ defmodule LokaWeb.AdminLive.PrototypesTab do
           </thead>
           <tbody>
             <tr :for={proto <- @prototypes} class="hover">
-              <td class="admin-table-cell-mono">{proto.key}</td>
+              <td class="font-mono text-sm">{proto.key}</td>
               <td>
-                <span class={["badge", prototype_type_badge(proto.type)]}>
+                <span class={["badge", entity_type_badge_class(proto.type)]}>
                   {proto.type}
                 </span>
               </td>
               <td>{proto.name || "(unnamed)"}</td>
-              <td class="admin-table-cell-mono-xs">{proto.parent || "(none)"}</td>
+              <td class="font-mono text-xs">{proto.parent || "(none)"}</td>
               <td>
                 <div class="flex flex-wrap gap-1">
                   <span :for={tag <- proto.tags || []} class="badge badge-outline badge-xs">
@@ -65,7 +67,7 @@ defmodule LokaWeb.AdminLive.PrototypesTab do
                   </span>
                 </div>
               </td>
-              <td class="admin-table-actions">
+              <td class="flex gap-2">
                 <button
                   phx-click="view_prototype"
                   phx-value-key={proto.key}
@@ -89,15 +91,13 @@ defmodule LokaWeb.AdminLive.PrototypesTab do
 
       <div :if={@prototypes == [] or @prototypes == nil} class="card bg-base-200">
         <div class="card-body">
-          <p class="admin-empty-text">
+          <p class="opacity-70">
             No prototypes found. Prototypes are defined in priv/world/prototypes/.
           </p>
         </div>
       </div>
 
-      <%= if @viewing do %>
-        <.prototype_detail_modal prototype={@viewing} myself={@myself} />
-      <% end %>
+      <.prototype_detail_modal :if={@viewing} prototype={@viewing} myself={@myself} />
     </div>
     """
   end
@@ -112,7 +112,7 @@ defmodule LokaWeb.AdminLive.PrototypesTab do
           <div class="grid grid-cols-2 gap-4">
             <div>
               <span class="text-sm opacity-70">Type:</span>
-              <span class={["badge ml-2", prototype_type_badge(@prototype.type)]}>
+              <span class={["badge ml-2", entity_type_badge_class(@prototype.type)]}>
                 {@prototype.type}
               </span>
             </div>
@@ -200,10 +200,4 @@ defmodule LokaWeb.AdminLive.PrototypesTab do
   def handle_event("close_prototype_modal", _, socket) do
     {:noreply, assign(socket, :viewing, nil)}
   end
-
-  defp prototype_type_badge(:room), do: "badge-info"
-  defp prototype_type_badge(:npc), do: "badge-primary"
-  defp prototype_type_badge(:item), do: "badge-secondary"
-  defp prototype_type_badge(:exit), do: "badge-accent"
-  defp prototype_type_badge(_), do: "badge-ghost"
 end

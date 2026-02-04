@@ -17,7 +17,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DocumentViewer do
   def document_viewer(assigns) do
     ~H"""
     <div class={["document-viewer", @class]}>
-      <%= if @document do %>
+      <div :if={@document} style="display: contents;">
         <div class="document-header">
           <div class="document-info">
             <span class="document-name">{@document.filename}</span>
@@ -45,35 +45,28 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DocumentViewer do
         </div>
 
         <div class="document-content">
-          <%= if @loading do %>
-            <div class="document-loading">
-              <.icon name="hero-arrow-path" class="size-6 animate-spin text-gray-500" />
-              <span class="text-gray-500 mt-2">Loading...</span>
-            </div>
-          <% end %>
+          <div :if={@loading} class="document-loading">
+            <.icon name="hero-arrow-path" class="size-6 animate-spin text-gray-500" />
+            <span class="text-gray-500 mt-2">Loading...</span>
+          </div>
 
-          <%= if @error do %>
-            <div class="document-error">
-              <.icon name="hero-exclamation-triangle" class="size-6 text-red-500" />
-              <p class="text-red-400 mt-2">{@error}</p>
-            </div>
-          <% end %>
+          <div :if={@error} class="document-error">
+            <.icon name="hero-exclamation-triangle" class="size-6 text-red-500" />
+            <p class="text-red-400 mt-2">{@error}</p>
+          </div>
 
-          <%= if @content && !@loading && !@error do %>
-            <div class="markdown-content">
-              {render_markdown(@content)}
-            </div>
-          <% end %>
+          <div :if={@content && !@loading && !@error} class="markdown-content">
+            {render_markdown(@content)}
+          </div>
         </div>
-      <% else %>
-        <div class="empty-state">
-          <.icon name="hero-document-text" class="size-12 text-gray-600 mb-4" />
-          <p class="text-gray-500">Select a document to view</p>
-          <p class="text-gray-600 text-sm mt-2">
-            Or ask the AI to create design documents for your project
-          </p>
-        </div>
-      <% end %>
+      </div>
+      <div :if={!@document} class="empty-state">
+        <.icon name="hero-document-text" class="size-12 text-gray-600 mb-4" />
+        <p class="text-gray-500">Select a document to view</p>
+        <p class="text-gray-600 text-sm mt-2">
+          Or ask the AI to create design documents for your project
+        </p>
+      </div>
     </div>
     """
   end

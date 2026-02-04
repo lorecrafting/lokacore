@@ -1,10 +1,32 @@
-import { EditorView, basicSetup } from "codemirror"
-import { StreamLanguage } from "@codemirror/language"
-import { oneDark } from "@codemirror/theme-one-dark"
+const DEBOUNCE_MS = 300
 
-// CodeMirror 6 - Elixir script editor (bundled, no CDN)
+// CodeMirror 6 - Elixir script editor
+// Uses dynamic import() so CodeMirror is code-split into a separate chunk
+// and only loaded when the script editor is actually opened.
 const CodeMirrorEditor = {
-  mounted() {
+  async mounted() {
+    // Show loading state while CodeMirror loads
+    this.el.style.opacity = '0.5'
+
+    const [
+      { EditorView, lineNumbers, highlightActiveLine, highlightSpecialChars, drawSelection, dropCursor, keymap },
+      { history, defaultKeymap, historyKeymap },
+      { syntaxHighlighting, defaultHighlightStyle, bracketMatching, indentOnInput, StreamLanguage },
+      { closeBrackets, closeBracketsKeymap },
+      { highlightSelectionMatches },
+      { oneDark }
+    ] = await Promise.all([
+      import("@codemirror/view"),
+      import("@codemirror/commands"),
+      import("@codemirror/language"),
+      import("@codemirror/autocomplete"),
+      import("@codemirror/search"),
+      import("@codemirror/theme-one-dark")
+    ])
+
+    // Bail if destroyed while loading
+    if (this._destroyed) return
+
     // Define Elixir-like tokenizer via StreamLanguage
     const elixirLang = StreamLanguage.define({
       startState() { return { inString: false, stringChar: null } },
@@ -56,19 +78,34 @@ const CodeMirrorEditor = {
     })
 
     const initialValue = this.el.dataset.value || ''
+    this._debounceTimer = null
 
     this.view = new EditorView({
       doc: initialValue,
       extensions: [
-        basicSetup,
+        lineNumbers(),
+        highlightActiveLine(),
+        highlightSpecialChars(),
+        history(),
+        drawSelection(),
+        dropCursor(),
+        indentOnInput(),
+        bracketMatching(),
+        closeBrackets(),
+        highlightSelectionMatches(),
+        syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+        keymap.of([...closeBracketsKeymap, ...defaultKeymap, ...historyKeymap]),
         elixirLang,
         oneDark,
         EditorView.lineWrapping,
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
-            this.pushEvent('script_source_changed', {
-              source: update.state.doc.toString()
-            })
+            clearTimeout(this._debounceTimer)
+            this._debounceTimer = setTimeout(() => {
+              this.pushEvent('script_source_changed', {
+                source: update.state.doc.toString()
+              })
+            }, DEBOUNCE_MS)
           }
         }),
         EditorView.theme({
@@ -79,9 +116,14 @@ const CodeMirrorEditor = {
       ],
       parent: this.el,
     })
+
+    // Remove loading state
+    this.el.style.opacity = ''
   },
 
   destroyed() {
+    this._destroyed = true
+    clearTimeout(this._debounceTimer)
     if (this.view) this.view.destroy()
   }
 }

@@ -1,7 +1,7 @@
 // Chat textarea with Ctrl+Enter submit support
 const ChatTextarea = {
   mounted() {
-    this.el.addEventListener('keydown', (e) => {
+    this.keydownHandler = (e) => {
       // Ctrl+Enter or Cmd+Enter to submit
       if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault()
@@ -12,7 +12,14 @@ const ChatTextarea = {
           this.el.value = ''
         }
       }
-    })
+    }
+    this.el.addEventListener('keydown', this.keydownHandler)
+  },
+
+  destroyed() {
+    if (this.keydownHandler) {
+      this.el.removeEventListener('keydown', this.keydownHandler)
+    }
   }
 }
 

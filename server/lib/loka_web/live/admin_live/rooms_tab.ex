@@ -5,6 +5,8 @@ defmodule LokaWeb.AdminLive.RoomsTab do
   """
   use LokaWeb, :live_component
 
+  import LokaWeb.AdminLive.Components, only: [entity_type_badge_class: 1]
+
   alias Loka.Engine.Entities
 
   @impl true
@@ -22,15 +24,15 @@ defmodule LokaWeb.AdminLive.RoomsTab do
   @impl true
   def render(%{form: nil, viewing_room: nil, connecting_exit: nil} = assigns) do
     ~H"""
-    <div class="admin-section">
-      <div class="admin-section-header">
-        <h2 class="admin-section-title">Rooms ({length(@rooms || [])})</h2>
+    <div class="flex flex-col gap-6">
+      <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-bold">Rooms ({length(@rooms || [])})</h2>
         <button phx-click="new_room" class="btn btn-primary btn-sm">
           <.icon name="hero-plus" class="size-4" /> Create Room
         </button>
       </div>
 
-      <div :if={@rooms && length(@rooms) > 0} class="admin-table-wrapper">
+      <div :if={@rooms && length(@rooms) > 0} class="overflow-x-auto">
         <table class="table table-zebra w-full">
           <thead>
             <tr>
@@ -42,12 +44,12 @@ defmodule LokaWeb.AdminLive.RoomsTab do
           </thead>
           <tbody>
             <tr :for={room <- @rooms} class="hover">
-              <td class="admin-table-cell-mono">{room.key}</td>
+              <td class="font-mono text-sm">{room.key}</td>
               <td>{room.short_desc || "(unnamed)"}</td>
               <td>
                 <span class="badge badge-ghost badge-sm">{count_contents(room.id)} entities</span>
               </td>
-              <td class="admin-table-actions">
+              <td class="flex gap-2">
                 <button
                   phx-click="view_room"
                   phx-value-id={room.id}
@@ -91,7 +93,7 @@ defmodule LokaWeb.AdminLive.RoomsTab do
 
       <div :if={@rooms == [] or @rooms == nil} class="card bg-base-200">
         <div class="card-body">
-          <p class="admin-empty-text">
+          <p class="opacity-70">
             No rooms created yet. Click "Create Room" to add your first location.
           </p>
         </div>
@@ -103,9 +105,9 @@ defmodule LokaWeb.AdminLive.RoomsTab do
   # Room detail view
   def render(%{viewing_room: room} = assigns) when not is_nil(room) do
     ~H"""
-    <div class="admin-section">
-      <div class="admin-section-header">
-        <h2 class="admin-section-title">Room: {@viewing_room.short_desc || @viewing_room.key}</h2>
+    <div class="flex flex-col gap-6">
+      <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-bold">Room: {@viewing_room.short_desc || @viewing_room.key}</h2>
         <button phx-click="close_view" phx-target={@myself} class="btn btn-ghost btn-sm">
           <.icon name="hero-x-mark" class="size-4" /> Close
         </button>
@@ -190,7 +192,9 @@ defmodule LokaWeb.AdminLive.RoomsTab do
                 <tbody>
                   <tr :for={entity <- @room_contents}>
                     <td>
-                      <span class={["badge badge-xs", entity_badge(entity.type)]}>{entity.type}</span>
+                      <span class={["badge badge-xs", entity_type_badge_class(entity.type)]}>
+                        {entity.type}
+                      </span>
                     </td>
                     <td class="font-mono text-xs">{entity.key}</td>
                     <td>{entity.short_desc || "(unnamed)"}</td>
@@ -208,9 +212,9 @@ defmodule LokaWeb.AdminLive.RoomsTab do
   # Exit connection form
   def render(%{connecting_exit: room} = assigns) when not is_nil(room) do
     ~H"""
-    <div class="admin-section">
-      <div class="admin-section-header">
-        <h2 class="admin-section-title">
+    <div class="flex flex-col gap-6">
+      <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-bold">
           Connect Exit from: {@connecting_exit.short_desc || @connecting_exit.key}
         </h2>
         <button phx-click="cancel_connect" phx-target={@myself} class="btn btn-ghost btn-sm">
@@ -286,9 +290,9 @@ defmodule LokaWeb.AdminLive.RoomsTab do
   # Edit/Create form
   def render(assigns) do
     ~H"""
-    <div class="admin-section">
-      <div class="admin-section-header">
-        <h2 class="admin-section-title">{if @editing, do: "Edit Room", else: "Create Room"}</h2>
+    <div class="flex flex-col gap-6">
+      <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-bold">{if @editing, do: "Edit Room", else: "Create Room"}</h2>
         <button phx-click="cancel_form" class="btn btn-ghost btn-sm">
           <.icon name="hero-x-mark" class="size-4" /> Cancel
         </button>
@@ -296,11 +300,11 @@ defmodule LokaWeb.AdminLive.RoomsTab do
 
       <div class="card bg-base-200">
         <div class="card-body">
-          <.form for={@form} phx-submit="save_room" class="admin-form">
+          <.form for={@form} phx-submit="save_room" class="flex flex-col gap-4">
             <.input field={@form[:key]} type="text" label="Key (unique identifier)" required />
             <.input field={@form[:short_desc]} type="text" label="Name" />
             <.input field={@form[:extra_desc]} type="textarea" label="Description" rows="4" />
-            <div class="admin-form-actions">
+            <div class="flex justify-end gap-2 mt-6">
               <button type="button" phx-click="cancel_form" class="btn btn-ghost">Cancel</button>
               <button type="submit" class="btn btn-primary">
                 {if @editing, do: "Update Room", else: "Create Room"}
@@ -434,9 +438,4 @@ defmodule LokaWeb.AdminLive.RoomsTab do
   defp reverse_direction("up"), do: "down"
   defp reverse_direction("down"), do: "up"
   defp reverse_direction(dir), do: "back_from_#{dir}"
-
-  defp entity_badge(:npc), do: "badge-primary"
-  defp entity_badge(:item), do: "badge-secondary"
-  defp entity_badge(:exit), do: "badge-accent"
-  defp entity_badge(_), do: "badge-ghost"
 end

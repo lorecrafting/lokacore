@@ -12,6 +12,9 @@ const ConsoleOutput = {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
     })
+  },
+  destroyed() {
+    // No resources to clean up (LiveView manages handleEvent bindings)
   }
 }
 

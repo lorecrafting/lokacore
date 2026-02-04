@@ -152,8 +152,15 @@ IO.inspect(result, label: "Result")
 Logger.debug("State: #{inspect(state)}")
 ```
 
+## Related Skills
+
+- `.claude/skills/test-patterns/` - Testing conventions
+- `.claude/skills/genserver-test-isolation.md` - Supervised process test isolation
+- `.claude/skills/liveview-helper-testing.md` - LiveView component tests
+- `.claude/skills/liveview-socket-testing.md` - Socket/channel test setup
+- `.claude/skills/test-file-cleanup-pattern.md` - YAML test file cleanup
+
 ## Documentation
 
 - `docs/architecture/testing.md`
 - `docs/testing/bot-migration-guide.md`
-- `.claude/skills/test-patterns/`

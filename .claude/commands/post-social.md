@@ -20,7 +20,7 @@ Where `<platform>` is one of:
 
 Read the latest content from `docs/devlog/BLOG_POSTS.md`:
 - Find the "READY TO POST" section for pre-written content
-- Or generate fresh content based on recent work using `/devlog-today`
+- Or generate fresh content based on recent git log and changes
 
 ### 2. Platform-Specific Workflow
 

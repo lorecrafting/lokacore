@@ -8,12 +8,12 @@ defmodule LokaWeb.AdminLive.PlayersTab do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="admin-section">
-      <div class="admin-section-header">
-        <h2 class="admin-section-title">Players ({length(@players || [])})</h2>
+    <div class="flex flex-col gap-6">
+      <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-bold">Players ({length(@players || [])})</h2>
       </div>
 
-      <div :if={@players && length(@players) > 0} class="admin-table-wrapper">
+      <div :if={@players && length(@players) > 0} class="overflow-x-auto">
         <table class="table table-zebra w-full">
           <thead>
             <tr>
@@ -44,7 +44,7 @@ defmodule LokaWeb.AdminLive.PlayersTab do
                 </span>
               </td>
               <td>{Calendar.strftime(player.inserted_at, "%Y-%m-%d")}</td>
-              <td class="admin-table-actions">
+              <td class="flex gap-2">
                 <button
                   phx-click="toggle_admin"
                   phx-value-id={player.id}
@@ -74,7 +74,7 @@ defmodule LokaWeb.AdminLive.PlayersTab do
 
       <div :if={@players == [] or @players == nil} class="card bg-base-200">
         <div class="card-body">
-          <p class="admin-empty-text">No players registered yet.</p>
+          <p class="opacity-70">No players registered yet.</p>
         </div>
       </div>
     </div>

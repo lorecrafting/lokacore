@@ -37,11 +37,11 @@ defmodule LokaWeb.AdminLive.QuestsTab do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="admin-section">
-      <h2 class="admin-section-title">Quest Debugging</h2>
+    <div class="flex flex-col gap-6">
+      <h2 class="text-2xl font-bold">Quest Debugging</h2>
 
       <div class="flex justify-between items-center mb-4">
-        <div class="admin-grid-stats flex-1">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 flex-1">
           <.stat_card
             title="Registered Quests"
             value={length(@all_quests)}
@@ -76,9 +76,7 @@ defmodule LokaWeb.AdminLive.QuestsTab do
         </button>
       </div>
 
-      <%= if @show_metrics && @metrics do %>
-        <.metrics_panel metrics={@metrics} />
-      <% end %>
+      <.metrics_panel :if={@show_metrics && @metrics} metrics={@metrics} />
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="card bg-base-200">
@@ -101,39 +99,37 @@ defmodule LokaWeb.AdminLive.QuestsTab do
         </div>
       </div>
 
-      <%= if @selected_player && @player_quest_state do %>
-        <div class="card bg-base-200 mt-6">
-          <div class="card-body">
-            <div class="flex justify-between items-center">
-              <h3 class="card-title">Quest State Details</h3>
-              <div class="flex gap-2">
-                <button
-                  phx-click="toggle_events"
-                  phx-target={@myself}
-                  class="btn btn-ghost btn-sm"
-                >
-                  {if @show_events, do: "Hide Events", else: "Show Events"}
-                </button>
-                <button
-                  phx-click="reset_all_quests"
-                  phx-target={@myself}
-                  data-confirm="Reset ALL quests for this player? This cannot be undone."
-                  class="btn btn-error btn-sm"
-                >
-                  Reset All
-                </button>
-              </div>
+      <div :if={@selected_player && @player_quest_state} class="card bg-base-200 mt-6">
+        <div class="card-body">
+          <div class="flex justify-between items-center">
+            <h3 class="card-title">Quest State Details</h3>
+            <div class="flex gap-2">
+              <button
+                phx-click="toggle_events"
+                phx-target={@myself}
+                class="btn btn-ghost btn-sm"
+              >
+                {if @show_events, do: "Hide Events", else: "Show Events"}
+              </button>
+              <button
+                phx-click="reset_all_quests"
+                phx-target={@myself}
+                data-confirm="Reset ALL quests for this player? This cannot be undone."
+                class="btn btn-error btn-sm"
+              >
+                Reset All
+              </button>
             </div>
-
-            <.quest_state_details
-              state={@player_quest_state}
-              show_events={@show_events}
-              quest_events={@quest_events}
-              myself={@myself}
-            />
           </div>
+
+          <.quest_state_details
+            state={@player_quest_state}
+            show_events={@show_events}
+            quest_events={@quest_events}
+            myself={@myself}
+          />
         </div>
-      <% end %>
+      </div>
     </div>
     """
   end
@@ -149,47 +145,44 @@ defmodule LokaWeb.AdminLive.QuestsTab do
   defp player_list(assigns) do
     ~H"""
     <div class="overflow-y-auto max-h-80">
-      <%= if @players && length(@players) > 0 do %>
-        <table class="table table-zebra w-full table-sm">
-          <thead>
-            <tr>
-              <th>Email</th>
-              <th>Active</th>
-              <th>Done</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              :for={player <- @players}
-              class={["hover cursor-pointer", if(@selected == player.player_id, do: "bg-primary/20")]}
-              phx-click="select_player"
-              phx-value-player-id={player.player_id}
-              phx-target={@myself}
-            >
-              <td class="truncate max-w-32">{player.email}</td>
-              <td>
-                <span class={[
-                  "badge badge-sm",
-                  if(player.active_count > 0, do: "badge-primary", else: "badge-ghost")
-                ]}>
-                  {player.active_count}
-                </span>
-              </td>
-              <td>
-                <span class="badge badge-sm badge-success">{player.completed_count}</span>
-              </td>
-              <td>
-                <span :if={not player.has_game_state} class="badge badge-sm badge-warning">
-                  No State
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      <% else %>
-        <p class="admin-empty-text">No players found.</p>
-      <% end %>
+      <table :if={@players && length(@players) > 0} class="table table-zebra w-full table-sm">
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Active</th>
+            <th>Done</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            :for={player <- @players}
+            class={["hover cursor-pointer", if(@selected == player.player_id, do: "bg-primary/20")]}
+            phx-click="select_player"
+            phx-value-player-id={player.player_id}
+            phx-target={@myself}
+          >
+            <td class="truncate max-w-32">{player.email}</td>
+            <td>
+              <span class={[
+                "badge badge-sm",
+                if(player.active_count > 0, do: "badge-primary", else: "badge-ghost")
+              ]}>
+                {player.active_count}
+              </span>
+            </td>
+            <td>
+              <span class="badge badge-sm badge-success">{player.completed_count}</span>
+            </td>
+            <td>
+              <span :if={not player.has_game_state} class="badge badge-sm badge-warning">
+                No State
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p :if={!@players || length(@players) == 0} class="opacity-70">No players found.</p>
     </div>
     """
   end
@@ -206,7 +199,7 @@ defmodule LokaWeb.AdminLive.QuestsTab do
   defp quest_actions(assigns) do
     ~H"""
     <div class="space-y-4">
-      <%= if @selected_player do %>
+      <div :if={@selected_player}>
         <div class="form-control">
           <label class="label">
             <span class="label-text">Grant Quest</span>
@@ -233,7 +226,7 @@ defmodule LokaWeb.AdminLive.QuestsTab do
           </div>
         </div>
 
-        <%= if @player_quest_state && length(@player_quest_state.active_quests) > 0 do %>
+        <div :if={@player_quest_state && length(@player_quest_state.active_quests) > 0}>
           <div class="divider">Active Quest Actions</div>
 
           <div :for={quest <- @player_quest_state.active_quests} class="mb-4">
@@ -292,12 +285,15 @@ defmodule LokaWeb.AdminLive.QuestsTab do
               </div>
             </div>
           </div>
-        <% else %>
-          <p class="admin-empty-text">No active quests for this player.</p>
-        <% end %>
-      <% else %>
-        <p class="admin-empty-text">Select a player to manage their quests.</p>
-      <% end %>
+        </div>
+        <p
+          :if={!@player_quest_state || length(@player_quest_state.active_quests) == 0}
+          class="opacity-70"
+        >
+          No active quests for this player.
+        </p>
+      </div>
+      <p :if={!@selected_player} class="opacity-70">Select a player to manage their quests.</p>
     </div>
     """
   end
@@ -316,43 +312,40 @@ defmodule LokaWeb.AdminLive.QuestsTab do
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
       <div>
         <h4 class="font-semibold mb-2">Completed Quests ({length(@state.completed_quests)})</h4>
-        <%= if length(@state.completed_quests) > 0 do %>
-          <ul class="list-disc list-inside text-sm space-y-1">
-            <li :for={quest_id <- @state.completed_quests}>{quest_id}</li>
-          </ul>
-        <% else %>
-          <p class="text-sm opacity-50">No completed quests.</p>
-        <% end %>
+        <ul :if={length(@state.completed_quests) > 0} class="list-disc list-inside text-sm space-y-1">
+          <li :for={quest_id <- @state.completed_quests}>{quest_id}</li>
+        </ul>
+        <p :if={length(@state.completed_quests) == 0} class="text-sm opacity-50">
+          No completed quests.
+        </p>
       </div>
 
-      <%= if @show_events do %>
-        <div>
-          <div class="flex justify-between items-center mb-2">
-            <h4 class="font-semibold">Recent Events</h4>
-            <button
-              phx-click="clear_events"
-              phx-target={@myself}
-              class="btn btn-xs btn-ghost"
-            >
-              Clear
-            </button>
-          </div>
-          <%= if length(@quest_events) > 0 do %>
-            <div class="overflow-y-auto max-h-60 text-xs font-mono bg-base-300 p-2 rounded">
-              <div :for={event <- Enum.take(@quest_events, 20)} class="mb-1">
-                <span class="opacity-50">{format_event_time(event)}</span>
-                <span class={event_type_class(event.event_type)}>{event.event_type}</span>
-                <span>: {inspect(event.data)}</span>
-              </div>
-              <div :if={length(@quest_events) > 20} class="opacity-50">
-                ...and {length(@quest_events) - 20} more
-              </div>
-            </div>
-          <% else %>
-            <p class="text-sm opacity-50">No events recorded.</p>
-          <% end %>
+      <div :if={@show_events}>
+        <div class="flex justify-between items-center mb-2">
+          <h4 class="font-semibold">Recent Events</h4>
+          <button
+            phx-click="clear_events"
+            phx-target={@myself}
+            class="btn btn-xs btn-ghost"
+          >
+            Clear
+          </button>
         </div>
-      <% end %>
+        <div
+          :if={length(@quest_events) > 0}
+          class="overflow-y-auto max-h-60 text-xs font-mono bg-base-300 p-2 rounded"
+        >
+          <div :for={event <- Enum.take(@quest_events, 20)} class="mb-1">
+            <span class="opacity-50">{format_event_time(event)}</span>
+            <span class={event_type_class(event.event_type)}>{event.event_type}</span>
+            <span>: {inspect(event.data)}</span>
+          </div>
+          <div :if={length(@quest_events) > 20} class="opacity-50">
+            ...and {length(@quest_events) - 20} more
+          </div>
+        </div>
+        <p :if={length(@quest_events) == 0} class="text-sm opacity-50">No events recorded.</p>
+      </div>
     </div>
     """
   end

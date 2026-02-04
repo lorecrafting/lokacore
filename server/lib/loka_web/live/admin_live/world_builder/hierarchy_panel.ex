@@ -119,7 +119,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
       @class
     ]}>
       <div class="panel-header">
-        <h3 class="panel-title" style={if @collapsed, do: "display: none;", else: ""}>Library</h3>
+        <h3 :if={!@collapsed} class="panel-title">Library</h3>
         <button
           class="panel-collapse-btn"
           phx-click="toggle_panel"
@@ -132,66 +132,66 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
           />
         </button>
       </div>
+      
+    <!-- Collapsed view: icons only (Templates first for discovery) -->
+      <div :if={@collapsed} class="panel-collapsed-content">
+        <button
+          class={["collapsed-icon-btn", @active_tab == :templates && "active"]}
+          phx-click="switch_hierarchy_tab"
+          phx-value-tab="templates"
+          title="Templates ({length(@templates)})"
+        >
+          <.icon name="hero-document-duplicate" class="size-5" />
+        </button>
+        <button
+          class={["collapsed-icon-btn", @active_tab == :rooms && "active"]}
+          phx-click="switch_hierarchy_tab"
+          phx-value-tab="rooms"
+          title="Rooms ({length(@rooms)})"
+        >
+          <.icon name="hero-cube" class="size-5" />
+        </button>
+        <button
+          class={["collapsed-icon-btn", @active_tab == :npcs && "active"]}
+          phx-click="switch_hierarchy_tab"
+          phx-value-tab="npcs"
+          title="NPCs ({length(@npcs)})"
+        >
+          <.icon name="hero-user" class="size-5" />
+        </button>
+        <button
+          class={["collapsed-icon-btn", @active_tab == :items && "active"]}
+          phx-click="switch_hierarchy_tab"
+          phx-value-tab="items"
+          title="Items ({length(@items)})"
+        >
+          <.icon name="hero-cube-transparent" class="size-5" />
+        </button>
+        <button
+          class={["collapsed-icon-btn", @active_tab == :scripts && "active"]}
+          phx-click="switch_hierarchy_tab"
+          phx-value-tab="scripts"
+          title="Scripts ({length(@scripts)})"
+        >
+          <.icon name="hero-code-bracket" class="size-5" />
+        </button>
+        <button
+          class={["collapsed-icon-btn", @active_tab == :cutscenes && "active"]}
+          phx-click="switch_hierarchy_tab"
+          phx-value-tab="cutscenes"
+          title="Cutscenes ({length(@cutscenes)})"
+        >
+          <.icon name="hero-film" class="size-5" />
+        </button>
+      </div>
 
-      <%= if @collapsed do %>
-        <!-- Collapsed view: icons only (Templates first for discovery) -->
-        <div class="panel-collapsed-content">
-          <button
-            class={["collapsed-icon-btn", @active_tab == :templates && "active"]}
-            phx-click="switch_hierarchy_tab"
-            phx-value-tab="templates"
-            title="Templates ({length(@templates)})"
-          >
-            <.icon name="hero-document-duplicate" class="size-5" />
-          </button>
-          <button
-            class={["collapsed-icon-btn", @active_tab == :rooms && "active"]}
-            phx-click="switch_hierarchy_tab"
-            phx-value-tab="rooms"
-            title="Rooms ({length(@rooms)})"
-          >
-            <.icon name="hero-cube" class="size-5" />
-          </button>
-          <button
-            class={["collapsed-icon-btn", @active_tab == :npcs && "active"]}
-            phx-click="switch_hierarchy_tab"
-            phx-value-tab="npcs"
-            title="NPCs ({length(@npcs)})"
-          >
-            <.icon name="hero-user" class="size-5" />
-          </button>
-          <button
-            class={["collapsed-icon-btn", @active_tab == :items && "active"]}
-            phx-click="switch_hierarchy_tab"
-            phx-value-tab="items"
-            title="Items ({length(@items)})"
-          >
-            <.icon name="hero-cube-transparent" class="size-5" />
-          </button>
-          <button
-            class={["collapsed-icon-btn", @active_tab == :scripts && "active"]}
-            phx-click="switch_hierarchy_tab"
-            phx-value-tab="scripts"
-            title="Scripts ({length(@scripts)})"
-          >
-            <.icon name="hero-code-bracket" class="size-5" />
-          </button>
-          <button
-            class={["collapsed-icon-btn", @active_tab == :cutscenes && "active"]}
-            phx-click="switch_hierarchy_tab"
-            phx-value-tab="cutscenes"
-            title="Cutscenes ({length(@cutscenes)})"
-          >
-            <.icon name="hero-film" class="size-5" />
-          </button>
-        </div>
-      <% else %>
+      <div :if={!@collapsed} style="display: contents;">
         <!-- Expanded view: full content -->
-        <div class="hierarchy-type-selector">
+        <div class="flex items-center gap-1 px-1.5 py-1 border-b border-wb-border shrink-0">
           <form phx-change="switch_hierarchy_tab" style="display: contents;">
             <select
               name="tab"
-              class="hierarchy-type-dropdown"
+              class="flex-1 py-1 px-1.5 text-xs bg-wb-surface border border-wb-border rounded-wb-md text-wb-text cursor-pointer appearance-auto hover:border-wb-accent focus:outline-none focus:border-wb-accent"
             >
               <option value="templates" selected={@active_tab == :templates}>
                 Templates ({length(@templates)})
@@ -221,10 +221,13 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
             <.icon name="hero-plus" class="size-3" />
           </button>
         </div>
-        
-    <!-- Search bar -->
-        <form phx-change="search_entities" class="hierarchy-search">
-          <div class="search-row" style="display: flex; gap: 4px; align-items: center;">
+
+        <%!-- Search bar --%>
+        <form
+          phx-change="search_entities"
+          class="flex flex-col px-2 py-1.5 bg-wb-panel border-b border-wb-bg"
+        >
+          <div class="flex gap-1 items-center">
             <.icon name="hero-magnifying-glass" class="size-3" />
             <input
               type="text"
@@ -232,198 +235,188 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
               phx-debounce="100"
               name="query"
               value={@template_search}
-              style="flex: 1;"
+              class="flex-1 bg-wb-panel-alt border border-wb-border text-wb-text py-1 px-2 text-xs rounded-wb-sm focus:outline-none focus:border-wb-accent-hover"
             />
           </div>
 
-          <%= if @active_tab == :rooms and length(@zones) > 0 do %>
-            <div class="filter-row" style="margin-top: 4px;">
-              <select
-                name="zone_filter"
-                style="width: 100%; padding: 4px 8px; font-size: 11px; background: #1a1a2e; border: 1px solid #333; border-radius: 4px; color: #ccc;"
-              >
-                <option value="" selected={@zone_filter == nil or @zone_filter == ""}>
-                  All Zones
+          <div :if={@active_tab == :rooms and length(@zones) > 0} class="mt-1">
+            <select
+              name="zone_filter"
+              class="w-full py-1 px-2 text-[11px] bg-wb-surface border border-wb-border rounded text-wb-text"
+            >
+              <option value="" selected={@zone_filter == nil or @zone_filter == ""}>
+                All Zones
+              </option>
+              <%= for zone <- @zones do %>
+                <option value={zone.key} selected={@zone_filter == zone.key}>
+                  {zone.name || zone.key}
                 </option>
-                <%= for zone <- @zones do %>
-                  <option value={zone.key} selected={@zone_filter == zone.key}>
-                    {zone.name || zone.key}
-                  </option>
-                <% end %>
-              </select>
-            </div>
-          <% end %>
+              <% end %>
+            </select>
+          </div>
 
-          <%= if @active_tab in [:rooms, :templates] do %>
-            <div class="filter-row" style="margin-top: 4px;">
-              <input
-                type="text"
-                name="tag_filter"
-                placeholder="Filter by tags..."
-                phx-debounce="300"
-                value={@tag_filter || ""}
-                style="width: 100%; padding: 4px 8px; font-size: 11px; background: #1a1a2e; border: 1px solid #333; border-radius: 4px; color: #ccc;"
-              />
-            </div>
-          <% end %>
+          <div :if={@active_tab in [:rooms, :templates]} class="mt-1">
+            <input
+              type="text"
+              name="tag_filter"
+              placeholder="Filter by tags..."
+              phx-debounce="300"
+              value={@tag_filter || ""}
+              class="w-full py-1 px-2 text-[11px] bg-wb-surface border border-wb-border rounded text-wb-text"
+            />
+          </div>
         </form>
 
         <div class="panel-content">
-          <!-- Room Hierarchy -->
-          <div class="hierarchy-tree" style={if @active_tab != :rooms, do: "display: none;", else: ""}>
-            <%= if @filtered_rooms == [] do %>
-              <.empty_state
-                icon="hero-map"
-                title={if @template_search != "", do: "No matching rooms", else: "No rooms yet"}
-                description={if @template_search == "", do: "Click + Room in toolbar to create one"}
-                class="py-6"
-              />
-            <% else %>
-              <%= for room <- @filtered_rooms do %>
-                <div
-                  class={[
-                    "hierarchy-item",
-                    @selected_room == room.key && "hierarchy-item-selected"
-                  ]}
-                  phx-click="select_room"
-                  phx-value-key={room.key}
-                >
-                  <.icon name="hero-cube" class="hierarchy-icon" />
-                  <span>{room.name}</span>
-                </div>
-              <% end %>
-            <% end %>
-          </div>
-          
-    <!-- NPC List -->
-          <div class="hierarchy-tree" style={if @active_tab != :npcs, do: "display: none;", else: ""}>
-            <%= if @filtered_npcs == [] do %>
-              <.empty_state
-                icon="hero-user-group"
-                title={if @template_search != "", do: "No matching NPCs", else: "No NPCs yet"}
-                description={if @template_search == "", do: "Click + NPC in toolbar to create one"}
-                class="py-6"
-              />
-            <% else %>
-              <%= for npc <- @filtered_npcs do %>
-                <div
-                  class={[
-                    "hierarchy-item",
-                    @selected_entity && @selected_entity.type == :npc &&
-                      @selected_entity.key == npc.key && "hierarchy-item-selected"
-                  ]}
-                  phx-click="select_entity"
-                  phx-value-type="npc"
-                  phx-value-key={npc.key}
-                >
-                  <.icon name="hero-user" class="hierarchy-icon" />
-                  <span>{npc[:name] || npc[:short_desc] || npc.key}</span>
-                </div>
-              <% end %>
-            <% end %>
-          </div>
-          
-    <!-- Item List -->
-          <div class="hierarchy-tree" style={if @active_tab != :items, do: "display: none;", else: ""}>
-            <%= if @filtered_items == [] do %>
-              <.empty_state
-                icon="hero-cube-transparent"
-                title={if @template_search != "", do: "No matching items", else: "No items yet"}
-                description={if @template_search == "", do: "Click + Item in toolbar to create one"}
-                class="py-6"
-              />
-            <% else %>
-              <%= for item <- @filtered_items do %>
-                <div
-                  class={[
-                    "hierarchy-item",
-                    @selected_entity && @selected_entity.type == :item &&
-                      @selected_entity.key == item.key && "hierarchy-item-selected"
-                  ]}
-                  phx-click="select_entity"
-                  phx-value-type="item"
-                  phx-value-key={item.key}
-                >
-                  <.icon name="hero-cube-transparent" class="hierarchy-icon" />
-                  <span>{item[:name] || item[:short_desc] || item.key}</span>
-                </div>
-              <% end %>
-            <% end %>
-          </div>
-          
-    <!-- Script List -->
+          <%!-- Room Hierarchy --%>
           <div
-            class="hierarchy-tree"
-            style={if @active_tab != :scripts, do: "display: none;", else: ""}
+            :if={@active_tab == :rooms}
+            class="flex flex-col gap-px p-1"
           >
-            <%= if @filtered_scripts == [] do %>
-              <.empty_state
-                icon="hero-code-bracket"
-                title={if @template_search != "", do: "No matching scripts", else: "No scripts yet"}
-                description="Click + to create one"
-                class="py-6"
-              />
-            <% else %>
-              <%= for script <- @filtered_scripts do %>
-                <div
-                  class={[
-                    "hierarchy-item",
-                    @selected_entity && @selected_entity.type == :script &&
-                      @selected_entity.key == script.key && "hierarchy-item-selected"
-                  ]}
-                  phx-click="show_script_editor"
-                  phx-value-key={script.key}
-                >
-                  <.icon name="hero-code-bracket" class="hierarchy-icon" />
-                  <span>{Map.get(script, :name) || script.key}</span>
-                </div>
-              <% end %>
+            <.empty_state
+              :if={@filtered_rooms == []}
+              icon="hero-map"
+              title={if @template_search != "", do: "No matching rooms", else: "No rooms yet"}
+              description={if @template_search == "", do: "Click + Room in toolbar to create one"}
+              class="py-6"
+            />
+            <%= for room <- @filtered_rooms do %>
+              <div
+                class={hierarchy_item(@selected_room == room.key)}
+                phx-click="select_room"
+                phx-value-key={room.key}
+              >
+                <.icon name="hero-cube" class={hierarchy_icon(@selected_room == room.key)} />
+                <span>{room.name}</span>
+              </div>
             <% end %>
           </div>
-          
-    <!-- Cutscene List -->
+
+          <%!-- NPC List --%>
           <div
-            class="hierarchy-tree"
-            style={if @active_tab != :cutscenes, do: "display: none;", else: ""}
+            :if={@active_tab == :npcs}
+            class="flex flex-col gap-px p-1"
           >
-            <%= if @filtered_cutscenes == [] do %>
-              <.empty_state
-                icon="hero-film"
-                title={
-                  if @template_search != "", do: "No matching cutscenes", else: "No cutscenes yet"
-                }
-                description="Click + to create one"
-                class="py-6"
-              />
-            <% else %>
-              <%= for cutscene <- @filtered_cutscenes do %>
-                <div
-                  class="hierarchy-item"
-                  phx-click="show_cutscene_editor"
-                  phx-value-id={cutscene["id"]}
-                >
-                  <.icon name="hero-film" class="hierarchy-icon" />
-                  <span>{cutscene["id"]}</span>
-                </div>
-              <% end %>
+            <.empty_state
+              :if={@filtered_npcs == []}
+              icon="hero-user-group"
+              title={if @template_search != "", do: "No matching NPCs", else: "No NPCs yet"}
+              description={if @template_search == "", do: "Click + NPC in toolbar to create one"}
+              class="py-6"
+            />
+            <%= for npc <- @filtered_npcs do %>
+              <% selected =
+                @selected_entity && @selected_entity.type == :npc && @selected_entity.key == npc.key %>
+              <div
+                class={hierarchy_item(selected)}
+                phx-click="select_entity"
+                phx-value-type="npc"
+                phx-value-key={npc.key}
+              >
+                <.icon name="hero-user" class={hierarchy_icon(selected)} />
+                <span>{npc[:name] || npc[:short_desc] || npc.key}</span>
+              </div>
             <% end %>
           </div>
-          
-    <!-- Template Library -->
+
+          <%!-- Item List --%>
           <div
-            class="template-library"
-            style={if @active_tab != :templates, do: "display: none;", else: ""}
+            :if={@active_tab == :items}
+            class="flex flex-col gap-px p-1"
+          >
+            <.empty_state
+              :if={@filtered_items == []}
+              icon="hero-cube-transparent"
+              title={if @template_search != "", do: "No matching items", else: "No items yet"}
+              description={if @template_search == "", do: "Click + Item in toolbar to create one"}
+              class="py-6"
+            />
+            <%= for item <- @filtered_items do %>
+              <% selected =
+                @selected_entity && @selected_entity.type == :item &&
+                  @selected_entity.key == item.key %>
+              <div
+                class={hierarchy_item(selected)}
+                phx-click="select_entity"
+                phx-value-type="item"
+                phx-value-key={item.key}
+              >
+                <.icon name="hero-cube-transparent" class={hierarchy_icon(selected)} />
+                <span>{item[:name] || item[:short_desc] || item.key}</span>
+              </div>
+            <% end %>
+          </div>
+
+          <%!-- Script List --%>
+          <div
+            :if={@active_tab == :scripts}
+            class="flex flex-col gap-px p-1"
+          >
+            <.empty_state
+              :if={@filtered_scripts == []}
+              icon="hero-code-bracket"
+              title={if @template_search != "", do: "No matching scripts", else: "No scripts yet"}
+              description="Click + to create one"
+              class="py-6"
+            />
+            <%= for script <- @filtered_scripts do %>
+              <% selected =
+                @selected_entity && @selected_entity.type == :script &&
+                  @selected_entity.key == script.key %>
+              <div
+                class={hierarchy_item(selected)}
+                phx-click="show_script_editor"
+                phx-value-key={script.key}
+              >
+                <.icon name="hero-code-bracket" class={hierarchy_icon(selected)} />
+                <span>{Map.get(script, :name) || script.key}</span>
+              </div>
+            <% end %>
+          </div>
+
+          <%!-- Cutscene List --%>
+          <div
+            :if={@active_tab == :cutscenes}
+            class="flex flex-col gap-px p-1"
+          >
+            <.empty_state
+              :if={@filtered_cutscenes == []}
+              icon="hero-film"
+              title={if @template_search != "", do: "No matching cutscenes", else: "No cutscenes yet"}
+              description="Click + to create one"
+              class="py-6"
+            />
+            <%= for cutscene <- @filtered_cutscenes do %>
+              <div
+                class={hierarchy_item(false)}
+                phx-click="show_cutscene_editor"
+                phx-value-id={cutscene["id"]}
+              >
+                <.icon name="hero-film" class={hierarchy_icon(false)} />
+                <span>{cutscene["id"]}</span>
+              </div>
+            <% end %>
+          </div>
+
+          <%!-- Template Library --%>
+          <div
+            :if={@active_tab == :templates}
+            class="flex flex-col gap-2 p-2"
           >
             <%= for template <- @filtered_templates do %>
-              <div class="template-item">
-                <div class="template-icon">
+              <div class="flex items-start gap-2 px-2 py-2.5 bg-wb-input border border-wb-border rounded-wb-md transition-all duration-100 hover:bg-wb-hover hover:border-wb-border-light">
+                <div class="text-wb-accent shrink-0 w-5 h-5 flex items-center justify-center mt-px">
                   <.icon name="hero-document-duplicate" class="size-4" />
                 </div>
-                <div class="template-info">
-                  <div class="template-name">{template.name}</div>
-                  <div class="template-tags">
+                <div class="flex-1 min-w-0">
+                  <div class="text-wb-base font-semibold text-wb-text mb-1 whitespace-nowrap overflow-hidden text-ellipsis">
+                    {template.name}
+                  </div>
+                  <div class="flex flex-wrap gap-1">
                     <%= for tag <- template.tags do %>
-                      <span class="template-tag">{tag}</span>
+                      <span class="text-[0.65rem] px-1 py-0.5 bg-wb-border text-wb-text-muted rounded-sm">
+                        {tag}
+                      </span>
                     <% end %>
                   </div>
                 </div>
@@ -442,9 +435,21 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
             <% end %>
           </div>
         </div>
-      <% end %>
+      </div>
     </div>
     """
+  end
+
+  @hierarchy_item_base "flex items-center gap-[0.4rem] py-1 px-2 cursor-pointer rounded-wb-sm transition-[background] duration-100 text-[0.8rem]"
+  @hierarchy_item_default "#{@hierarchy_item_base} text-wb-text hover:bg-wb-border"
+  @hierarchy_item_selected "#{@hierarchy_item_base} !bg-wb-accent-hover text-white"
+
+  defp hierarchy_item(selected) do
+    if selected, do: @hierarchy_item_selected, else: @hierarchy_item_default
+  end
+
+  defp hierarchy_icon(selected) do
+    if selected, do: "size-4 opacity-100", else: "size-4 opacity-70"
   end
 
   defp create_action(:rooms), do: "create_room"

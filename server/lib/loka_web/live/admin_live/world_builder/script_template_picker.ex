@@ -73,38 +73,35 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptTemplatePicker do
           </div>
 
           <div class="template-grid">
-            <%= if Enum.empty?(@filtered_templates) do %>
-              <div class="template-empty">
-                <p>No templates match your search.</p>
-              </div>
-            <% else %>
-              <%= for {category, templates} <- @grouped_templates do %>
-                <div class="template-category-section">
-                  <h4 class="category-header">{format_category(category)}</h4>
-                  <div class="template-cards">
-                    <%= for template <- templates do %>
-                      <div
-                        class="template-card"
-                        phx-click="select_template"
-                        phx-value-id={template.id}
-                        style={"border-left-color: #{category_color(category)}"}
-                      >
-                        <div class="template-card-header">
-                          <span class="template-id">{template.id}</span>
-                          <span
-                            class="template-hook"
-                            style={"background-color: #{category_color(category)}"}
-                          >
-                            {format_hook(template.hook)}
-                          </span>
-                        </div>
-                        <h5 class="template-name">{template.name}</h5>
-                        <p class="template-description">{template.description}</p>
+            <div :if={Enum.empty?(@filtered_templates)} class="template-empty">
+              <p>No templates match your search.</p>
+            </div>
+            <%= for {category, templates} <- @grouped_templates do %>
+              <div class="template-category-section">
+                <h4 class="category-header">{format_category(category)}</h4>
+                <div class="template-cards">
+                  <%= for template <- templates do %>
+                    <div
+                      class="template-card"
+                      phx-click="select_template"
+                      phx-value-id={template.id}
+                      style={"border-left-color: #{category_color(category)}"}
+                    >
+                      <div class="template-card-header">
+                        <span class="template-id">{template.id}</span>
+                        <span
+                          class="template-hook"
+                          style={"background-color: #{category_color(category)}"}
+                        >
+                          {format_hook(template.hook)}
+                        </span>
                       </div>
-                    <% end %>
-                  </div>
+                      <h5 class="template-name">{template.name}</h5>
+                      <p class="template-description">{template.description}</p>
+                    </div>
+                  <% end %>
                 </div>
-              <% end %>
+              </div>
             <% end %>
           </div>
         </div>
@@ -149,15 +146,15 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptTemplatePicker do
 
   defp format_hook(hook), do: hook
 
-  defp category_color(:messages), do: "#4a9eff"
-  defp category_color(:navigation), do: "#4aff9e"
-  defp category_color(:spawning), do: "#ff9e4a"
-  defp category_color(:rewards), do: "#ffd24a"
-  defp category_color(:dialogue), do: "#ff4a9e"
-  defp category_color(:traps), do: "#ff4a4a"
-  defp category_color(:atmosphere), do: "#9e4aff"
-  defp category_color(:quests), do: "#4affff"
-  defp category_color(:npcs), do: "#ffcc00"
-  defp category_color(:death), do: "#808080"
-  defp category_color(_), do: "#4a9eff"
+  defp category_color(:messages), do: "var(--wb-accent)"
+  defp category_color(:navigation), do: "var(--wb-quest-pass)"
+  defp category_color(:spawning), do: "var(--wb-quest-pass-alt)"
+  defp category_color(:rewards), do: "var(--wb-quest-objective)"
+  defp category_color(:dialogue), do: "var(--wb-quest-fail)"
+  defp category_color(:traps), do: "var(--wb-error)"
+  defp category_color(:atmosphere), do: "var(--wb-quest-special)"
+  defp category_color(:quests), do: "var(--wb-info)"
+  defp category_color(:npcs), do: "var(--wb-warning)"
+  defp category_color(:death), do: "var(--wb-text-muted)"
+  defp category_color(_), do: "var(--wb-accent)"
 end

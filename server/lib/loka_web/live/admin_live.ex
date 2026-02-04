@@ -55,116 +55,10 @@ defmodule LokaWeb.AdminLive do
   def render(assigns) do
     ~H"""
     <Layouts.admin flash={@flash}>
-      <div class={["admin-layout", @sidebar_collapsed && "sidebar-collapsed"]}>
-        <aside class="admin-sidebar">
-          <div class="admin-sidebar-header">
-            <span class="admin-logo">{if @sidebar_collapsed, do: "L", else: "Loka"}</span>
-            <button
-              type="button"
-              phx-click="toggle_sidebar"
-              class="admin-sidebar-toggle"
-              title={if @sidebar_collapsed, do: "Expand sidebar", else: "Collapse sidebar"}
-            >
-              <.icon
-                name={if @sidebar_collapsed, do: "hero-chevron-right", else: "hero-chevron-left"}
-                class="size-4"
-              />
-            </button>
-          </div>
+      <div class="flex min-h-screen">
+        <.sidebar active_tab={@active_tab} collapsed={@sidebar_collapsed} />
 
-          <nav class="admin-nav">
-            <.nav_item
-              tab={:dashboard}
-              active={@active_tab}
-              icon="hero-chart-bar"
-              label="Dashboard"
-              collapsed={@sidebar_collapsed}
-            />
-            <.nav_item
-              tab={:players}
-              active={@active_tab}
-              icon="hero-users"
-              label="Players"
-              collapsed={@sidebar_collapsed}
-            />
-
-            <div :if={not @sidebar_collapsed} class="admin-nav-divider">Content</div>
-            <.nav_item
-              tab={:rooms}
-              active={@active_tab}
-              icon="hero-map"
-              label="Rooms"
-              collapsed={@sidebar_collapsed}
-            />
-            <.nav_item
-              tab={:entities}
-              active={@active_tab}
-              icon="hero-cube"
-              label="Entities"
-              collapsed={@sidebar_collapsed}
-            />
-            <.nav_item
-              tab={:prototypes}
-              active={@active_tab}
-              icon="hero-document-duplicate"
-              label="Prototypes"
-              collapsed={@sidebar_collapsed}
-            />
-            <.nav_item
-              tab={:quests}
-              active={@active_tab}
-              icon="hero-book-open"
-              label="Quests"
-              collapsed={@sidebar_collapsed}
-            />
-
-            <div :if={not @sidebar_collapsed} class="admin-nav-divider">Tools</div>
-            <a
-              href={~p"/admin/world-builder"}
-              class={["admin-nav-link", @sidebar_collapsed && "collapsed"]}
-              title={if @sidebar_collapsed, do: "World Builder", else: nil}
-            >
-              <.icon name="hero-globe-alt" class="size-4" />
-              <span :if={not @sidebar_collapsed}>World Builder</span>
-            </a>
-            <.nav_item
-              tab={:scripts}
-              active={@active_tab}
-              icon="hero-code-bracket"
-              label="Scripts"
-              collapsed={@sidebar_collapsed}
-            />
-            <.nav_item
-              tab={:testing}
-              active={@active_tab}
-              icon="hero-beaker"
-              label="Testing"
-              collapsed={@sidebar_collapsed}
-            />
-            <.nav_item
-              tab={:system}
-              active={@active_tab}
-              icon="hero-cog-6-tooth"
-              label="System"
-              collapsed={@sidebar_collapsed}
-            />
-            <.nav_item
-              tab={:audit_log}
-              active={@active_tab}
-              icon="hero-clipboard-document-list"
-              label="Audit Log"
-              collapsed={@sidebar_collapsed}
-            />
-          </nav>
-
-          <div class="admin-sidebar-footer">
-            <div class="admin-theme-toggle">
-              <Layouts.theme_toggle />
-            </div>
-          </div>
-        </aside>
-
-        <main class="admin-main">
+        <main class="flex-1 px-8 py-6 overflow-x-hidden min-w-0">
           <.tab_content
             tab={@active_tab}
             stats={assigns[:stats]}
@@ -187,6 +81,150 @@ defmodule LokaWeb.AdminLive do
     """
   end
 
+  # Sidebar navigation component
+  defp sidebar(assigns) do
+    ~H"""
+    <aside class={[
+      "shrink-0 bg-base-100 border-r border-base-content/10 flex flex-col sticky top-0 h-screen transition-[width] duration-200 ease-in-out",
+      if(@collapsed, do: "w-14", else: "w-56")
+    ]}>
+      <div class={[
+        "border-b border-base-content/10 flex items-center gap-2",
+        if(@collapsed, do: "px-3 py-4 justify-center", else: "px-5 py-4 justify-between")
+      ]}>
+        <span class="text-xl font-bold text-primary whitespace-nowrap overflow-hidden transition-all duration-200">
+          {if @collapsed, do: "L", else: "Loka"}
+        </span>
+        <button
+          type="button"
+          phx-click="toggle_sidebar"
+          class={[
+            "flex items-center justify-center w-6 h-6 rounded bg-transparent border-none text-base-content/50 cursor-pointer transition-all duration-150 shrink-0 hover:bg-base-content/10 hover:text-base-content",
+            @collapsed &&
+              "absolute -right-3 top-4 bg-base-100 border border-base-content/10 shadow-sm"
+          ]}
+          title={if @collapsed, do: "Expand sidebar", else: "Collapse sidebar"}
+        >
+          <.icon
+            name={if @collapsed, do: "hero-chevron-right", else: "hero-chevron-left"}
+            class="size-4"
+          />
+        </button>
+      </div>
+
+      <nav class={[
+        "flex-1 overflow-y-auto flex flex-col gap-0.5",
+        if(@collapsed, do: "p-2 items-center", else: "p-3")
+      ]}>
+        <.nav_item
+          tab={:dashboard}
+          active={@active_tab}
+          icon="hero-chart-bar"
+          label="Dashboard"
+          collapsed={@collapsed}
+        />
+        <.nav_item
+          tab={:players}
+          active={@active_tab}
+          icon="hero-users"
+          label="Players"
+          collapsed={@collapsed}
+        />
+
+        <div
+          :if={not @collapsed}
+          class="text-[0.675rem] font-semibold uppercase tracking-wider text-base-content/50 px-3 pt-3 pb-1.5 mt-1"
+        >
+          Content
+        </div>
+        <.nav_item
+          tab={:rooms}
+          active={@active_tab}
+          icon="hero-map"
+          label="Rooms"
+          collapsed={@collapsed}
+        />
+        <.nav_item
+          tab={:entities}
+          active={@active_tab}
+          icon="hero-cube"
+          label="Entities"
+          collapsed={@collapsed}
+        />
+        <.nav_item
+          tab={:prototypes}
+          active={@active_tab}
+          icon="hero-document-duplicate"
+          label="Prototypes"
+          collapsed={@collapsed}
+        />
+        <.nav_item
+          tab={:quests}
+          active={@active_tab}
+          icon="hero-book-open"
+          label="Quests"
+          collapsed={@collapsed}
+        />
+
+        <div
+          :if={not @collapsed}
+          class="text-[0.675rem] font-semibold uppercase tracking-wider text-base-content/50 px-3 pt-3 pb-1.5 mt-1"
+        >
+          Tools
+        </div>
+        <a
+          href={~p"/admin/world-builder"}
+          class={[
+            "flex items-center gap-2.5 rounded-md text-sm text-base-content/80 transition-all duration-150 no-underline border-none bg-transparent w-full text-left cursor-pointer hover:bg-base-content/5 hover:text-base-content focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2",
+            if(@collapsed, do: "justify-center p-2.5 w-9 h-9", else: "px-3 py-2")
+          ]}
+          title={if @collapsed, do: "World Builder", else: nil}
+        >
+          <.icon name="hero-globe-alt" class="size-4" />
+          <span :if={not @collapsed}>World Builder</span>
+        </a>
+        <.nav_item
+          tab={:scripts}
+          active={@active_tab}
+          icon="hero-code-bracket"
+          label="Scripts"
+          collapsed={@collapsed}
+        />
+        <.nav_item
+          tab={:testing}
+          active={@active_tab}
+          icon="hero-beaker"
+          label="Testing"
+          collapsed={@collapsed}
+        />
+        <.nav_item
+          tab={:system}
+          active={@active_tab}
+          icon="hero-cog-6-tooth"
+          label="System"
+          collapsed={@collapsed}
+        />
+        <.nav_item
+          tab={:audit_log}
+          active={@active_tab}
+          icon="hero-clipboard-document-list"
+          label="Audit Log"
+          collapsed={@collapsed}
+        />
+      </nav>
+
+      <div class={[
+        "border-t border-base-content/10 flex flex-col gap-2",
+        if(@collapsed, do: "p-2 items-center", else: "p-3")
+      ]}>
+        <div class="flex justify-center pt-1">
+          <Layouts.theme_toggle />
+        </div>
+      </div>
+    </aside>
+    """
+  end
+
   # Navigation item component
   attr :tab, :atom, required: true
   attr :active, :atom, required: true
@@ -199,7 +237,14 @@ defmodule LokaWeb.AdminLive do
     <button
       phx-click="switch_tab"
       phx-value-tab={@tab}
-      class={["admin-nav-link", @active == @tab && "active", @collapsed && "collapsed"]}
+      class={[
+        "flex items-center gap-2.5 rounded-md text-sm transition-all duration-150 no-underline border-none bg-transparent w-full text-left cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2",
+        if(@active == @tab,
+          do: "bg-primary/10 text-primary font-medium",
+          else: "text-base-content/80 hover:bg-base-content/5 hover:text-base-content"
+        ),
+        if(@collapsed, do: "justify-center p-2.5 w-9 h-9", else: "px-3 py-2")
+      ]}
       title={if @collapsed, do: @label, else: nil}
     >
       <.icon name={@icon} class="size-4" />

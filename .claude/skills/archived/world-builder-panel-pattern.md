@@ -73,13 +73,17 @@ defp execute_builder_command(cmd, params, socket) do
 end
 ```
 
+### 5. Panel resize performance (local CSS during drag)
+
+Panel resize applies CSS locally during drag and syncs to server on mouseup only. See `liveview-local-interaction-pattern.md` for the full pattern. Key: never `pushEvent` in mousemove handlers.
+
 ## Files Reference
 
 - Panel component pattern: `lib/loka_web/live/admin_live/world_builder/terminal_panel.ex`
 - External channel module: `lib/loka_web/channels/builder_commands.ex`
 - Command parser: `lib/loka_web/channels/command_parser.ex`
 - Grid layout: `panel_sizes_style/2` in `world_builder_live.ex`
-- PanelResize hook: `assets/js/app.js` (search `PanelResize:`)
+- PanelResize hook: `assets/js/hooks/panel_resize.js`
 
 ## Checklist for adding a new panel
 

@@ -1,5 +1,7 @@
 import {Socket} from "phoenix"
 
+const MAX_TERMINAL_LINES = 1000
+
 // MUD Terminal hook - connects to GameChannel for in-editor MUD testing
 const MudTerminal = {
   mounted() {
@@ -207,6 +209,12 @@ const MudTerminal = {
       div.textContent = line
       this.outputEl.appendChild(div)
     })
+
+    // Prune oldest lines to prevent unbounded DOM growth
+    while (this.outputEl.children.length > MAX_TERMINAL_LINES) {
+      this.outputEl.removeChild(this.outputEl.firstChild)
+    }
+
     this.outputEl.scrollTop = this.outputEl.scrollHeight
   },
 
@@ -277,6 +285,16 @@ const MudTerminal = {
   updateExits(exits) {
     const dirs = (exits || []).filter(e => e.destination_id).map(e => e.direction)
     if (this.exitsEl) this.exitsEl.textContent = `Exits: ${dirs.length ? dirs.join(', ') : 'none'}`
+  },
+
+  updated() {
+    // Refresh DOM references that may have been replaced by LiveView patches
+    this.inputEl = document.getElementById('terminal-command-input')
+    this.hpEl = document.getElementById('term-hp')
+    this.maEl = document.getElementById('term-ma')
+    this.mvEl = document.getElementById('term-mv')
+    this.exitsEl = document.getElementById('term-exits')
+    this.statusDot = document.getElementById('term-connection-dot')
   },
 
   destroyed() {

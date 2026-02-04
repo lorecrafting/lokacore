@@ -2,13 +2,15 @@
 
 > Complete Reference for UI Design LLM
 
+> **Note (2026-01):** References to "React Native (mobile)" below are historical. The mobile client was migrated to **Godot 4.6**. See `docs/decisions/2026-01-26-godot-client-migration.md`. The Living Ebook design philosophy still applies to the web (LiveView) interface.
+
 ---
 
 ## EXECUTIVE SUMMARY
 
 **Loka** is a web-based text MUD (Multi-User Dungeon) / RPG with a **"Living Ebook"** design aesthetic. The goal is to make players feel like they're reading an interactive novel that responds to their presence—not navigating a traditional game UI.
 
-**Platforms:** Phoenix LiveView (web) + React Native (mobile)
+**Platforms:** Phoenix LiveView (web) + Godot 4.6 (mobile)
 **Connection:** Unified WebSocket channel for both platforms
 **Setting:** Buddhist monastery in the Himalayas with spiritual/philosophical themes
 

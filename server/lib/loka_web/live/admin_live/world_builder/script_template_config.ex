@@ -83,16 +83,14 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptTemplateConfig do
               <% end %>
             </div>
 
-            <%= if length(@validation_errors) > 0 do %>
-              <div class="config-validation-errors">
-                <h4>Validation Errors</h4>
-                <ul>
-                  <%= for error <- @validation_errors do %>
-                    <li>{error}</li>
-                  <% end %>
-                </ul>
-              </div>
-            <% end %>
+            <div :if={@validation_errors != []} class="config-validation-errors">
+              <h4>Validation Errors</h4>
+              <ul>
+                <%= for error <- @validation_errors do %>
+                  <li>{error}</li>
+                <% end %>
+              </ul>
+            </div>
           </div>
 
           <div class="template-config-preview">
@@ -140,9 +138,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptTemplateConfig do
     <div class="form-group">
       <label>
         {@field.name |> Atom.to_string() |> format_label()}
-        <%= if @field[:required] do %>
-          <span class="required">*</span>
-        <% end %>
+        <span :if={@field[:required]} class="required">*</span>
       </label>
       <textarea
         name={@field.name}
@@ -162,9 +158,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptTemplateConfig do
     <div class="form-group">
       <label>
         {@field.name |> Atom.to_string() |> format_label()}
-        <%= if @field[:required] do %>
-          <span class="required">*</span>
-        <% end %>
+        <span :if={@field[:required]} class="required">*</span>
       </label>
       <textarea
         name={@field.name}
@@ -185,9 +179,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptTemplateConfig do
     <div class="form-group">
       <label>
         {@field.name |> Atom.to_string() |> format_label()}
-        <%= if @field[:required] do %>
-          <span class="required">*</span>
-        <% end %>
+        <span :if={@field[:required]} class="required">*</span>
       </label>
       <input
         type="text"
@@ -208,9 +200,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptTemplateConfig do
     <div class="form-group">
       <label>
         {@field.name |> Atom.to_string() |> format_label()}
-        <%= if @field[:required] do %>
-          <span class="required">*</span>
-        <% end %>
+        <span :if={@field[:required]} class="required">*</span>
       </label>
       <input
         type="number"
@@ -230,9 +220,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptTemplateConfig do
     <div class="form-group">
       <label>
         {@field.name |> Atom.to_string() |> format_label()}
-        <%= if @field[:required] do %>
-          <span class="required">*</span>
-        <% end %>
+        <span :if={@field[:required]} class="required">*</span>
       </label>
       <input
         type="number"
@@ -278,9 +266,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptTemplateConfig do
     <div class="form-group">
       <label>
         {@field.name |> Atom.to_string() |> format_label()}
-        <%= if @field[:required] do %>
-          <span class="required">*</span>
-        <% end %>
+        <span :if={@field[:required]} class="required">*</span>
       </label>
       <select
         name={@field.name}
@@ -324,9 +310,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptTemplateConfig do
     <div class="form-group">
       <label>
         {@field.name |> Atom.to_string() |> format_label()}
-        <%= if @field[:required] do %>
-          <span class="required">*</span>
-        <% end %>
+        <span :if={@field[:required]} class="required">*</span>
       </label>
       <select
         name={@field.name}

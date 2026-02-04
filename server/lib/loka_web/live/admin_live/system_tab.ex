@@ -8,32 +8,32 @@ defmodule LokaWeb.AdminLive.SystemTab do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="admin-section">
-      <h2 class="admin-section-title">System</h2>
+    <div class="flex flex-col gap-6">
+      <h2 class="text-2xl font-bold">System</h2>
 
-      <div class="admin-grid-system">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="card bg-base-200">
           <div class="card-body">
             <h3 class="card-title">Server Info</h3>
-            <dl class="admin-dl">
-              <div class="admin-dl-row">
-                <dt class="admin-dl-term">Elixir Version</dt>
+            <dl class="flex flex-col gap-2 text-sm">
+              <div class="flex justify-between">
+                <dt class="opacity-70">Elixir Version</dt>
                 <dd>{@system_info.elixir_version}</dd>
               </div>
-              <div class="admin-dl-row">
-                <dt class="admin-dl-term">OTP Version</dt>
+              <div class="flex justify-between">
+                <dt class="opacity-70">OTP Version</dt>
                 <dd>{@system_info.otp_version}</dd>
               </div>
-              <div class="admin-dl-row">
-                <dt class="admin-dl-term">Phoenix Version</dt>
+              <div class="flex justify-between">
+                <dt class="opacity-70">Phoenix Version</dt>
                 <dd>{@system_info.phoenix_version}</dd>
               </div>
-              <div class="admin-dl-row">
-                <dt class="admin-dl-term">Memory Usage</dt>
+              <div class="flex justify-between">
+                <dt class="opacity-70">Memory Usage</dt>
                 <dd>{format_bytes(@system_info.memory_usage)}</dd>
               </div>
-              <div class="admin-dl-row">
-                <dt class="admin-dl-term">Process Count</dt>
+              <div class="flex justify-between">
+                <dt class="opacity-70">Process Count</dt>
                 <dd>{@system_info.process_count}</dd>
               </div>
             </dl>

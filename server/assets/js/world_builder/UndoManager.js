@@ -5,7 +5,9 @@
  * - 50-action stack limit
  * - Composite operations (batch actions)
  * - Session storage persistence
- * - Keyboard shortcuts (Ctrl+Z / Ctrl+Y)
+ *
+ * Note: Keyboard shortcuts are handled by KeyboardManager (registered in
+ * the WorldBuilder hook). UndoManager only manages the undo/redo stack.
  */
 
 const MAX_STACK_SIZE = 50
@@ -22,9 +24,6 @@ class UndoManager {
 
     // Restore from session storage
     this.restore()
-
-    // Setup keyboard shortcuts
-    this.setupKeyboardShortcuts()
   }
 
   /**
@@ -81,15 +80,42 @@ class UndoManager {
    * Start a composite operation (for batch actions)
    */
   beginComposite(label = 'batch') {
+    if (this._compositeTimeout) clearTimeout(this._compositeTimeout)
     this.isComposing = true
     this.compositeOperations = []
     this.compositeLabel = label
+    this._compositeTimeout = setTimeout(() => {
+      if (this.isComposing) {
+        console.warn('[UndoManager] Composite auto-cancelled after 30s timeout')
+        this.cancelComposite()
+      }
+    }, 30000)
+  }
+
+  /**
+   * Cancel a composite operation without committing
+   */
+  cancelComposite() {
+    if (this.isComposing) {
+      console.warn('[UndoManager] Composite operation cancelled')
+      this.isComposing = false
+      this.compositeOperations = []
+      if (this._compositeTimeout) {
+        clearTimeout(this._compositeTimeout)
+        this._compositeTimeout = null
+      }
+    }
   }
 
   /**
    * End composite operation and add to stack
    */
   endComposite() {
+    if (this._compositeTimeout) {
+      clearTimeout(this._compositeTimeout)
+      this._compositeTimeout = null
+    }
+
     if (this.isComposing && this.compositeOperations.length > 0) {
       this.undoStack.push({
         type: 'composite',
@@ -110,14 +136,6 @@ class UndoManager {
       this.notifyStateChange()
     }
 
-    this.isComposing = false
-    this.compositeOperations = []
-  }
-
-  /**
-   * Cancel composite operation without adding to stack
-   */
-  cancelComposite() {
     this.isComposing = false
     this.compositeOperations = []
   }
@@ -243,6 +261,10 @@ class UndoManager {
     this.redoStack = []
     this.isComposing = false
     this.compositeOperations = []
+    if (this._compositeTimeout) {
+      clearTimeout(this._compositeTimeout)
+      this._compositeTimeout = null
+    }
     this.save()
     this.notifyStateChange()
   }
@@ -287,30 +309,14 @@ class UndoManager {
   }
 
   /**
-   * Setup keyboard shortcuts
+   * Clean up (no-op, retained for API compatibility)
    */
-  setupKeyboardShortcuts() {
-    document.addEventListener('keydown', (e) => {
-      // Check if we're in an input field
-      const isInputField = e.target.tagName === 'INPUT' ||
-                          e.target.tagName === 'TEXTAREA' ||
-                          e.target.isContentEditable
-
-      // Only handle shortcuts outside input fields
-      if (!isInputField) {
-        // Ctrl+Z / Cmd+Z - Undo
-        if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
-          e.preventDefault()
-          this.undo()
-        }
-
-        // Ctrl+Y / Cmd+Y or Ctrl+Shift+Z / Cmd+Shift+Z - Redo
-        if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
-          e.preventDefault()
-          this.redo()
-        }
-      }
-    })
+  destroy() {
+    if (this._compositeTimeout) {
+      clearTimeout(this._compositeTimeout)
+      this._compositeTimeout = null
+    }
+    // Keyboard shortcuts are managed by KeyboardManager, not UndoManager
   }
 }
 

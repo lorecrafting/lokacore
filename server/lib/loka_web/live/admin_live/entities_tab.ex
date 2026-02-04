@@ -5,18 +5,20 @@ defmodule LokaWeb.AdminLive.EntitiesTab do
   """
   use LokaWeb, :live_component
 
+  import LokaWeb.AdminLive.Components, only: [entity_type_badge_class: 1]
+
   @impl true
   def render(%{form: nil} = assigns) do
     ~H"""
-    <div class="admin-section">
-      <div class="admin-section-header">
-        <h2 class="admin-section-title">Entities ({length(@entities || [])})</h2>
+    <div class="flex flex-col gap-6">
+      <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-bold">Entities ({length(@entities || [])})</h2>
         <button phx-click="new_entity" class="btn btn-primary btn-sm">
           <.icon name="hero-plus" class="size-4" /> Create Entity
         </button>
       </div>
 
-      <div :if={@entities && length(@entities) > 0} class="admin-table-wrapper">
+      <div :if={@entities && length(@entities) > 0} class="overflow-x-auto">
         <table class="table table-zebra w-full">
           <thead>
             <tr>
@@ -30,14 +32,14 @@ defmodule LokaWeb.AdminLive.EntitiesTab do
           <tbody>
             <tr :for={entity <- @entities} class="hover">
               <td>
-                <span class={["badge", entity_type_badge(entity.type)]}>
+                <span class={["badge", entity_type_badge_class(entity.type)]}>
                   {entity.type}
                 </span>
               </td>
-              <td class="admin-table-cell-mono">{entity.key}</td>
+              <td class="font-mono text-sm">{entity.key}</td>
               <td>{entity.short_desc || "(unnamed)"}</td>
-              <td class="admin-table-cell-mono-xs">{entity.location_id || "(none)"}</td>
-              <td class="admin-table-actions">
+              <td class="font-mono text-xs">{entity.location_id || "(none)"}</td>
+              <td class="flex gap-2">
                 <button phx-click="edit_entity" phx-value-id={entity.id} class="btn btn-ghost btn-xs">
                   Edit
                 </button>
@@ -57,7 +59,7 @@ defmodule LokaWeb.AdminLive.EntitiesTab do
 
       <div :if={@entities == [] or @entities == nil} class="card bg-base-200">
         <div class="card-body">
-          <p class="admin-empty-text">
+          <p class="opacity-70">
             No entities created yet. Entities include NPCs, items, and other game objects.
           </p>
         </div>
@@ -68,9 +70,9 @@ defmodule LokaWeb.AdminLive.EntitiesTab do
 
   def render(assigns) do
     ~H"""
-    <div class="admin-section">
-      <div class="admin-section-header">
-        <h2 class="admin-section-title">{if @editing, do: "Edit Entity", else: "Create Entity"}</h2>
+    <div class="flex flex-col gap-6">
+      <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-bold">{if @editing, do: "Edit Entity", else: "Create Entity"}</h2>
         <button phx-click="cancel_form" class="btn btn-ghost btn-sm">
           <.icon name="hero-x-mark" class="size-4" /> Cancel
         </button>
@@ -78,7 +80,7 @@ defmodule LokaWeb.AdminLive.EntitiesTab do
 
       <div class="card bg-base-200">
         <div class="card-body">
-          <.form for={@form} phx-submit="save_entity" class="admin-form">
+          <.form for={@form} phx-submit="save_entity" class="flex flex-col gap-4">
             <.input
               field={@form[:type]}
               type="select"
@@ -90,7 +92,7 @@ defmodule LokaWeb.AdminLive.EntitiesTab do
             <.input field={@form[:name]} type="text" label="Name" />
             <.input field={@form[:description]} type="textarea" label="Description" rows="3" />
             <.input field={@form[:location_id]} type="text" label="Location ID (room UUID)" />
-            <div class="admin-form-actions">
+            <div class="flex justify-end gap-2 mt-6">
               <button type="button" phx-click="cancel_form" class="btn btn-ghost">Cancel</button>
               <button type="submit" class="btn btn-primary">
                 {if @editing, do: "Update Entity", else: "Create Entity"}
@@ -102,9 +104,4 @@ defmodule LokaWeb.AdminLive.EntitiesTab do
     </div>
     """
   end
-
-  defp entity_type_badge(:npc), do: "badge-primary"
-  defp entity_type_badge(:item), do: "badge-secondary"
-  defp entity_type_badge(:exit), do: "badge-accent"
-  defp entity_type_badge(_), do: "badge-ghost"
 end

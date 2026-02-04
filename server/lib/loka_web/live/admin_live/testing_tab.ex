@@ -10,10 +10,10 @@ defmodule LokaWeb.AdminLive.TestingTab do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="admin-section">
-      <h2 class="admin-section-title">Testing Framework</h2>
+    <div class="flex flex-col gap-6">
+      <h2 class="text-2xl font-bold">Testing Framework</h2>
 
-      <div class="admin-grid-stats mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <.stat_card
           title="Validation Status"
           value={validation_status_text(@testing_data)}
@@ -55,13 +55,10 @@ defmodule LokaWeb.AdminLive.TestingTab do
               </button>
             </div>
 
-            <%= if @testing_data.validation do %>
-              <.validation_results validation={@testing_data.validation} />
-            <% else %>
-              <p class="admin-empty-text">
-                No validation results yet. Click "Run Validators" to check content.
-              </p>
-            <% end %>
+            <.validation_results :if={@testing_data.validation} validation={@testing_data.validation} />
+            <p :if={!@testing_data.validation} class="opacity-70">
+              No validation results yet. Click "Run Validators" to check content.
+            </p>
           </div>
         </div>
 
@@ -79,13 +76,10 @@ defmodule LokaWeb.AdminLive.TestingTab do
               </button>
             </div>
 
-            <%= if @testing_data.balance do %>
-              <.balance_results balance={@testing_data.balance} />
-            <% else %>
-              <p class="admin-empty-text">
-                No balance analysis yet. Click "Run Analysis" to simulate combat.
-              </p>
-            <% end %>
+            <.balance_results :if={@testing_data.balance} balance={@testing_data.balance} />
+            <p :if={!@testing_data.balance} class="opacity-70">
+              No balance analysis yet. Click "Run Analysis" to simulate combat.
+            </p>
           </div>
         </div>
       </div>
@@ -94,17 +88,13 @@ defmodule LokaWeb.AdminLive.TestingTab do
         <div class="card-body">
           <h3 class="card-title mb-4">Detailed Issues</h3>
 
-          <%= if has_issues?(@testing_data) do %>
-            <.issues_list testing_data={@testing_data} />
-          <% else %>
-            <p class="admin-empty-text">
-              <%= if @testing_data.validation do %>
-                No issues found. All validations passed.
-              <% else %>
-                Run validators to check for issues.
-              <% end %>
-            </p>
-          <% end %>
+          <.issues_list :if={has_issues?(@testing_data)} testing_data={@testing_data} />
+          <p :if={!has_issues?(@testing_data) && @testing_data.validation} class="opacity-70">
+            No issues found. All validations passed.
+          </p>
+          <p :if={!has_issues?(@testing_data) && !@testing_data.validation} class="opacity-70">
+            Run validators to check for issues.
+          </p>
         </div>
       </div>
     </div>
@@ -200,45 +190,43 @@ defmodule LokaWeb.AdminLive.TestingTab do
 
   defp issues_list(assigns) do
     ~H"""
-    <div class="space-y-4">
-      <%= if @testing_data.validation do %>
-        <.issue_section
-          :if={length(@testing_data.validation.world.error_list) > 0}
-          title="World Connectivity Errors"
-          issues={@testing_data.validation.world.error_list}
-          type={:error}
-        />
-        <.issue_section
-          :if={length(@testing_data.validation.world.warning_list) > 0}
-          title="World Connectivity Warnings"
-          issues={@testing_data.validation.world.warning_list}
-          type={:warning}
-        />
-        <.issue_section
-          :if={length(@testing_data.validation.quest.error_list) > 0}
-          title="Quest Errors"
-          issues={@testing_data.validation.quest.error_list}
-          type={:error}
-        />
-        <.issue_section
-          :if={length(@testing_data.validation.quest.warning_list) > 0}
-          title="Quest Warnings"
-          issues={@testing_data.validation.quest.warning_list}
-          type={:warning}
-        />
-        <.issue_section
-          :if={length(@testing_data.validation.prototype.error_list) > 0}
-          title="Prototype Errors"
-          issues={@testing_data.validation.prototype.error_list}
-          type={:error}
-        />
-        <.issue_section
-          :if={length(@testing_data.validation.prototype.warning_list) > 0}
-          title="Prototype Warnings"
-          issues={@testing_data.validation.prototype.warning_list}
-          type={:warning}
-        />
-      <% end %>
+    <div :if={@testing_data.validation} class="space-y-4">
+      <.issue_section
+        :if={length(@testing_data.validation.world.error_list) > 0}
+        title="World Connectivity Errors"
+        issues={@testing_data.validation.world.error_list}
+        type={:error}
+      />
+      <.issue_section
+        :if={length(@testing_data.validation.world.warning_list) > 0}
+        title="World Connectivity Warnings"
+        issues={@testing_data.validation.world.warning_list}
+        type={:warning}
+      />
+      <.issue_section
+        :if={length(@testing_data.validation.quest.error_list) > 0}
+        title="Quest Errors"
+        issues={@testing_data.validation.quest.error_list}
+        type={:error}
+      />
+      <.issue_section
+        :if={length(@testing_data.validation.quest.warning_list) > 0}
+        title="Quest Warnings"
+        issues={@testing_data.validation.quest.warning_list}
+        type={:warning}
+      />
+      <.issue_section
+        :if={length(@testing_data.validation.prototype.error_list) > 0}
+        title="Prototype Errors"
+        issues={@testing_data.validation.prototype.error_list}
+        type={:error}
+      />
+      <.issue_section
+        :if={length(@testing_data.validation.prototype.warning_list) > 0}
+        title="Prototype Warnings"
+        issues={@testing_data.validation.prototype.warning_list}
+        type={:warning}
+      />
     </div>
     """
   end

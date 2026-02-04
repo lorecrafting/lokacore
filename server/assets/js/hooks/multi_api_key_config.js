@@ -1,7 +1,7 @@
 // Multi-Provider API Key Configuration - BYOK for multiple AI providers
 const MultiAPIKeyConfig = {
   mounted() {
-    console.log('MultiAPIKeyConfig mounted')
+    this.abortController = new AbortController()
     const providers = ['anthropic', 'openai', 'deepseek', 'gemini', 'glm', 'minimax']
 
     // Check stored keys for all providers on mount
@@ -9,37 +9,34 @@ const MultiAPIKeyConfig = {
       try {
         this.validateStoredKey(provider)
       } catch (e) {
-        console.error('Error validating stored key for', provider, e)
+        console.error('[MultiAPIKeyConfig] Error validating stored key for', provider, e)
+        this.pushEvent('api_key_status', { provider: provider, status: 'error' })
       }
     })
 
     // Use event delegation to handle clicks on buttons,
     // which survives DOM updates from LiveView
-    this.el.addEventListener('click', (e) => {
+    this.handleClick = (e) => {
       const saveBtn = e.target.closest('.api-key-save')
       const clearBtn = e.target.closest('.api-key-clear')
 
       if (saveBtn) {
         const provider = saveBtn.dataset.provider
-        console.log('Save clicked for', provider)
         const input = this.el.querySelector(`#api-key-input-${provider}`)
         const key = input?.value?.trim()
 
         if (key) {
-          console.log('Key present, saving...')
           this.saveAndValidateKey(provider, key)
-        } else {
-          console.log('No key entered')
         }
       } else if (clearBtn) {
         const provider = clearBtn.dataset.provider
-        console.log('Clear clicked for', provider)
         this.clearKey(provider)
       }
-    })
+    }
+    this.el.addEventListener('click', this.handleClick)
 
     // Handle enter key in inputs
-    this.el.addEventListener('keypress', (e) => {
+    this.handleKeypress = (e) => {
       if (e.key === 'Enter' && e.target.classList.contains('api-key-input')) {
         const provider = e.target.dataset.provider
         const key = e.target.value.trim()
@@ -47,7 +44,8 @@ const MultiAPIKeyConfig = {
           this.saveAndValidateKey(provider, key)
         }
       }
-    })
+    }
+    this.el.addEventListener('keypress', this.handleKeypress)
   },
 
   async saveAndValidateKey(provider, key) {
@@ -57,11 +55,14 @@ const MultiAPIKeyConfig = {
     try {
       const isValid = await this.validateKey(provider, key)
 
-      // Store encrypted in localStorage regardless of validation status
+      // Store encoded in localStorage regardless of validation status
       // so the user can at least attempt to use it.
-      // Use unicode-safe encoding
-      const encrypted = btoa(unescape(encodeURIComponent('loka_wb_' + key)))
-      localStorage.setItem(`${provider}_api_key_encrypted`, encrypted)
+      const encoded = btoa('loka_wb_' + key)
+      try {
+        localStorage.setItem(`${provider}_api_key_encoded`, encoded)
+      } catch (e) {
+        console.warn('[MultiAPIKeyConfig] localStorage unavailable:', e.message)
+      }
 
       if (isValid) {
         this.pushEvent('api_key_validated', { provider, status: 'valid' })
@@ -72,15 +73,18 @@ const MultiAPIKeyConfig = {
       } else {
         // Still mark as configured but invalid status
         this.pushEvent('api_key_validated', { provider, status: 'invalid' })
-        console.warn(`API key for ${provider} was saved but validation failed. Check your key.`)
+        console.warn(`[MultiAPIKeyConfig] API key for ${provider} was saved but validation failed. Check your key.`)
       }
     } catch (error) {
-      console.error(`API key validation failed for ${provider}:`, error)
+      console.error(`[MultiAPIKeyConfig] API key validation failed for ${provider}:`, error)
 
       // Even on network error, try to save the key
-      // Use unicode-safe encoding
-      const encrypted = btoa(unescape(encodeURIComponent('loka_wb_' + key)))
-      localStorage.setItem(`${provider}_api_key_encrypted`, encrypted)
+      const encoded = btoa('loka_wb_' + key)
+      try {
+        localStorage.setItem(`${provider}_api_key_encoded`, encoded)
+      } catch (e) {
+        console.warn('[MultiAPIKeyConfig] localStorage unavailable:', e.message)
+      }
 
       this.pushEvent('api_key_validated', { provider, status: 'invalid' })
     }
@@ -107,53 +111,71 @@ const MultiAPIKeyConfig = {
   },
 
   async validateAnthropicKey(key) {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-3-5-haiku-20241022',
-        max_tokens: 10,
-        messages: [{ role: 'user', content: 'Hi' }]
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        signal: this.abortController.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': key,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-3-5-haiku-20241022',
+          max_tokens: 10,
+          messages: [{ role: 'user', content: 'Hi' }]
+        })
       })
-    })
-    return response.ok
+      return response.ok
+    } catch (error) {
+      console.error('[MultiAPIKeyConfig] Anthropic validation error:', error)
+      return false
+    }
   },
 
   async validateOpenAIKey(key) {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${key}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        max_tokens: 10,
-        messages: [{ role: 'user', content: 'Hi' }]
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        signal: this.abortController.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${key}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          max_tokens: 10,
+          messages: [{ role: 'user', content: 'Hi' }]
+        })
       })
-    })
-    return response.ok
+      return response.ok
+    } catch (error) {
+      console.error('[MultiAPIKeyConfig] OpenAI validation error:', error)
+      return false
+    }
   },
 
   async validateDeepSeekKey(key) {
-    const response = await fetch('https://api.deepseek.com/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${key}`
-      },
-      body: JSON.stringify({
-        model: 'deepseek-chat',
-        max_tokens: 10,
-        messages: [{ role: 'user', content: 'Hi' }]
+    try {
+      const response = await fetch('https://api.deepseek.com/chat/completions', {
+        method: 'POST',
+        signal: this.abortController.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${key}`
+        },
+        body: JSON.stringify({
+          model: 'deepseek-chat',
+          max_tokens: 10,
+          messages: [{ role: 'user', content: 'Hi' }]
+        })
       })
-    })
-    return response.ok
+      return response.ok
+    } catch (error) {
+      console.error('[MultiAPIKeyConfig] DeepSeek validation error:', error)
+      return false
+    }
   },
 
   async validateGeminiKey(key) {
@@ -162,6 +184,7 @@ const MultiAPIKeyConfig = {
     try {
       const response = await fetch(url, {
         method: 'POST',
+        signal: this.abortController.signal,
         headers: {
           'Content-Type': 'application/json'
         },
@@ -173,59 +196,71 @@ const MultiAPIKeyConfig = {
 
       if (!response.ok) {
         const errorText = await response.text()
-        console.error('Gemini validation failed:', response.status, errorText)
+        console.error('[MultiAPIKeyConfig] Gemini validation failed:', response.status, errorText)
       }
 
       return response.ok
     } catch (error) {
-      console.error('Gemini validation network error:', error)
+      console.error('[MultiAPIKeyConfig] Gemini validation error:', error)
       return false
     }
   },
 
   async validateGLMKey(key) {
     // GLM (Zhipu AI) uses OpenAI-compatible API
-    const response = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${key}`
-      },
-      body: JSON.stringify({
-        model: 'glm-4-flash',
-        max_tokens: 10,
-        messages: [{ role: 'user', content: 'Hi' }]
+    try {
+      const response = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
+        method: 'POST',
+        signal: this.abortController.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${key}`
+        },
+        body: JSON.stringify({
+          model: 'glm-4-flash',
+          max_tokens: 10,
+          messages: [{ role: 'user', content: 'Hi' }]
+        })
       })
-    })
-    return response.ok
+      return response.ok
+    } catch (error) {
+      console.error('[MultiAPIKeyConfig] GLM validation error:', error)
+      return false
+    }
   },
 
   async validateMinimaxKey(key) {
     // Minimax uses OpenAI-compatible API
-    const response = await fetch('https://api.minimax.chat/v1/text/chatcompletion_v2', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${key}`
-      },
-      body: JSON.stringify({
-        model: 'MiniMax-Text-01',
-        max_tokens: 10,
-        messages: [{ role: 'user', content: 'Hi' }]
+    try {
+      const response = await fetch('https://api.minimax.chat/v1/text/chatcompletion_v2', {
+        method: 'POST',
+        signal: this.abortController.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${key}`
+        },
+        body: JSON.stringify({
+          model: 'MiniMax-Text-01',
+          max_tokens: 10,
+          messages: [{ role: 'user', content: 'Hi' }]
+        })
       })
-    })
-    return response.ok
+      return response.ok
+    } catch (error) {
+      console.error('[MultiAPIKeyConfig] Minimax validation error:', error)
+      return false
+    }
   },
 
   async validateStoredKey(provider) {
-    const encrypted = localStorage.getItem(`${provider}_api_key_encrypted`)
-    if (!encrypted) {
+    const encoded = localStorage.getItem(`${provider}_api_key_encoded`)
+    if (!encoded) {
       this.pushEvent('api_key_validated', { provider, status: 'unconfigured' })
       return
     }
 
     try {
-      const key = atob(encrypted).replace('loka_wb_', '')
+      const key = atob(encoded).replace('loka_wb_', '')
       this.pushEvent('api_key_validated', { provider, status: 'validating' })
 
       const isValid = await this.validateKey(provider, key)
@@ -234,17 +269,21 @@ const MultiAPIKeyConfig = {
         this.pushEvent('api_key_validated', { provider, status: 'valid' })
       } else {
         // Key is invalid - remove it
-        localStorage.removeItem(`${provider}_api_key_encrypted`)
+        localStorage.removeItem(`${provider}_api_key_encoded`)
         this.pushEvent('api_key_validated', { provider, status: 'invalid' })
       }
     } catch (error) {
-      console.error(`Stored key validation failed for ${provider}:`, error)
+      console.error(`[MultiAPIKeyConfig] Stored key validation failed for ${provider}:`, error)
       this.pushEvent('api_key_validated', { provider, status: 'unconfigured' })
     }
   },
 
   clearKey(provider) {
-    localStorage.removeItem(`${provider}_api_key_encrypted`)
+    try {
+      localStorage.removeItem(`${provider}_api_key_encoded`)
+    } catch (e) {
+      console.warn('[MultiAPIKeyConfig] localStorage unavailable:', e.message)
+    }
     this.pushEvent('api_key_validated', { provider, status: 'unconfigured' })
     // Clear the input field
     const input = this.el.querySelector(`#api-key-input-${provider}`)
@@ -252,7 +291,9 @@ const MultiAPIKeyConfig = {
   },
 
   destroyed() {
-    // Cleanup if needed
+    this.abortController.abort()
+    this.el.removeEventListener('click', this.handleClick)
+    this.el.removeEventListener('keypress', this.handleKeypress)
   }
 }
 

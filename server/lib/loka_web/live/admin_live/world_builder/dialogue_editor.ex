@@ -46,18 +46,16 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
         <div class="dialogue-editor-title">
           <.icon name="hero-chat-bubble-left-right" class="size-5" />
           <span>Dialogue Editor</span>
-          <%= if @npc_key do %>
-            <span class="dialogue-npc-name">- {@npc_key}</span>
-          <% end %>
+          <span :if={@npc_key} class="dialogue-npc-name">- {@npc_key}</span>
         </div>
         <div class="dialogue-editor-stats">
           <span class="stat-badge">{@node_count} nodes</span>
-          <%= if @validation.errors != [] do %>
-            <span class="stat-badge stat-error">{length(@validation.errors)} errors</span>
-          <% end %>
-          <%= if @validation.warnings != [] do %>
-            <span class="stat-badge stat-warning">{length(@validation.warnings)} warnings</span>
-          <% end %>
+          <span :if={@validation.errors != []} class="stat-badge stat-error">
+            {length(@validation.errors)} errors
+          </span>
+          <span :if={@validation.warnings != []} class="stat-badge stat-warning">
+            {length(@validation.warnings)} warnings
+          </span>
         </div>
         <div class="dialogue-editor-actions">
           <button
@@ -86,7 +84,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
             <span>Nodes</span>
           </div>
           <div class="dialogue-tree">
-            <%= if @node_count > 0 do %>
+            <div :if={@node_count > 0} style="display: contents;">
               <%= for {node_key, node} <- @dialogue_tree || %{} do %>
                 <.tree_node
                   node_key={node_key}
@@ -96,64 +94,60 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
                   has_error={has_node_error?(@validation, node_key)}
                 />
               <% end %>
-            <% else %>
-              <div class="dialogue-tree-empty">
-                <p>No dialogue nodes yet.</p>
-                <button
-                  type="button"
-                  class="btn btn-sm btn-primary"
-                  phx-click="dialogue_add_node"
-                  phx-value-key="start"
-                >
-                  <.icon name="hero-plus" class="size-4" /> Create Start Node
-                </button>
-              </div>
-            <% end %>
+            </div>
+            <div :if={@node_count == 0} class="dialogue-tree-empty">
+              <p>No dialogue nodes yet.</p>
+              <button
+                type="button"
+                class="btn btn-sm btn-primary"
+                phx-click="dialogue_add_node"
+                phx-value-key="start"
+              >
+                <.icon name="hero-plus" class="size-4" /> Create Start Node
+              </button>
+            </div>
           </div>
         </div>
         
     <!-- Right: Node Editor or Preview -->
         <div class="dialogue-node-panel">
-          <%= if @show_preview do %>
-            <.dialogue_preview
-              dialogue_tree={@dialogue_tree}
-              current_node={@selected_node || "start"}
-              mock_state={@mock_state}
-            />
-          <% else %>
-            <%= if @selected_node && @dialogue_tree[@selected_node] do %>
-              <.node_editor
-                node_key={@selected_node}
-                node={@dialogue_tree[@selected_node]}
-                all_nodes={@dialogue_tree}
-              />
-            <% else %>
-              <div class="dialogue-node-empty">
-                <.icon name="hero-cursor-arrow-rays" class="size-10" />
-                <p>Select a node to edit</p>
-              </div>
-            <% end %>
-          <% end %>
+          <.dialogue_preview
+            :if={@show_preview}
+            dialogue_tree={@dialogue_tree}
+            current_node={@selected_node || "start"}
+            mock_state={@mock_state}
+          />
+          <.node_editor
+            :if={!@show_preview && @selected_node && @dialogue_tree[@selected_node]}
+            node_key={@selected_node}
+            node={@dialogue_tree[@selected_node]}
+            all_nodes={@dialogue_tree}
+          />
+          <div
+            :if={!@show_preview && !(@selected_node && @dialogue_tree[@selected_node])}
+            class="dialogue-node-empty"
+          >
+            <.icon name="hero-cursor-arrow-rays" class="size-10" />
+            <p>Select a node to edit</p>
+          </div>
         </div>
       </div>
       
     <!-- Validation Errors -->
-      <%= if @validation.errors != [] do %>
-        <div class="dialogue-validation-errors">
-          <div class="validation-header">
-            <.icon name="hero-exclamation-triangle" class="size-4" />
-            <span>Validation Issues</span>
-          </div>
-          <ul class="validation-list">
-            <%= for error <- @validation.errors do %>
-              <li class="validation-error">{error}</li>
-            <% end %>
-            <%= for warning <- @validation.warnings do %>
-              <li class="validation-warning">{warning}</li>
-            <% end %>
-          </ul>
+      <div :if={@validation.errors != []} class="dialogue-validation-errors">
+        <div class="validation-header">
+          <.icon name="hero-exclamation-triangle" class="size-4" />
+          <span>Validation Issues</span>
         </div>
-      <% end %>
+        <ul class="validation-list">
+          <%= for error <- @validation.errors do %>
+            <li class="validation-error">{error}</li>
+          <% end %>
+          <%= for warning <- @validation.warnings do %>
+            <li class="validation-warning">{warning}</li>
+          <% end %>
+        </ul>
+      </div>
     </div>
     """
   end
@@ -182,20 +176,17 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
       phx-value-key={@node_key}
     >
       <div class="node-icon">
-        <%= if @is_entry do %>
-          <.icon name="hero-play-circle" class="size-4" />
-        <% else %>
-          <.icon name="hero-chat-bubble-left" class="size-4" />
-        <% end %>
+        <.icon :if={@is_entry} name="hero-play-circle" class="size-4" />
+        <.icon :if={!@is_entry} name="hero-chat-bubble-left" class="size-4" />
       </div>
       <div class="node-info">
         <span class="node-key">{@node_key}</span>
         <span class="node-text">{truncate_text(@node["text"] || "No text", 40)}</span>
       </div>
       <div class="node-meta">
-        <%= if @choice_count > 0 do %>
-          <span class="choice-count" title="{@choice_count} choices">{@choice_count}</span>
-        <% end %>
+        <span :if={@choice_count > 0} class="choice-count" title="{@choice_count} choices">
+          {@choice_count}
+        </span>
       </div>
     </div>
     """
@@ -274,22 +265,19 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
             </button>
           </div>
 
-          <%= if @choices == [] do %>
-            <div class="no-choices">
-              <p>No choices - dialogue ends here.</p>
-            </div>
-          <% else %>
-            <div class="choices-list">
-              <%= for {choice, index} <- Enum.with_index(@choices) do %>
-                <.choice_editor
-                  choice={choice}
-                  index={index}
-                  node_key={@node_key}
-                  all_nodes={@all_nodes}
-                />
-              <% end %>
-            </div>
-          <% end %>
+          <div :if={@choices == []} class="no-choices">
+            <p>No choices - dialogue ends here.</p>
+          </div>
+          <div :if={@choices != []} class="choices-list">
+            <%= for {choice, index} <- Enum.with_index(@choices) do %>
+              <.choice_editor
+                choice={choice}
+                index={index}
+                node_key={@node_key}
+                all_nodes={@all_nodes}
+              />
+            <% end %>
+          </div>
         </div>
       </form>
     </div>
@@ -636,7 +624,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
               value={Map.get(@mock_state, :level, 1)}
               phx-change="dialogue_mock_set_level"
               name="level"
-              style="width: 100%; padding: 4px 6px; background: #1a1a2e; border: 1px solid #444; border-radius: 4px; color: #ccc;"
+              style="width: 100%; padding: 4px 6px; background: var(--wb-surface); border: 1px solid var(--wb-border); border-radius: 4px; color: var(--wb-text);"
             />
           </div>
           <div style="flex: 1;">
@@ -644,7 +632,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
             <select
               phx-change="dialogue_mock_set_phase"
               name="phase"
-              style="width: 100%; padding: 4px 6px; background: #1a1a2e; border: 1px solid #444; border-radius: 4px; color: #ccc;"
+              style="width: 100%; padding: 4px 6px; background: var(--wb-surface); border: 1px solid var(--wb-border); border-radius: 4px; color: var(--wb-text);"
             >
               <option value="day" selected={Map.get(@mock_state, :phase, "day") == "day"}>
                 Day
@@ -677,54 +665,52 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
           </button>
         </div>
 
-        <%= if @node do %>
-          <div class="preview-content">
-            <div class="preview-speaker">
-              {@node["speaker"] || "NPC"}
-            </div>
-            <div class="preview-text">
-              {@node["text"] || "..."}
-            </div>
+        <div :if={@node} class="preview-content">
+          <div class="preview-speaker">
+            {@node["speaker"] || "NPC"}
+          </div>
+          <div class="preview-text">
+            {@node["text"] || "..."}
+          </div>
 
-            <div class="preview-choices">
-              <%= for {choice, index} <- @visible_choices do %>
-                <button
-                  type="button"
-                  class="preview-choice"
-                  phx-click="dialogue_preview_choice"
-                  phx-value-index={index}
-                  phx-value-next={choice["next"]}
+          <div class="preview-choices">
+            <%= for {choice, index} <- @visible_choices do %>
+              <button
+                type="button"
+                class="preview-choice"
+                phx-click="dialogue_preview_choice"
+                phx-value-index={index}
+                phx-value-next={choice["next"]}
+              >
+                {choice["text"] || "Continue"}
+                <span
+                  :if={has_condition?(choice)}
+                  class="choice-condition-badge"
+                  title="Has condition"
                 >
-                  {choice["text"] || "Continue"}
-                  <%= if has_condition?(choice) do %>
-                    <span class="choice-condition-badge" title="Has condition">
-                      <.icon name="hero-funnel" class="size-3" />
-                    </span>
-                  <% end %>
-                </button>
-              <% end %>
+                  <.icon name="hero-funnel" class="size-3" />
+                </span>
+              </button>
+            <% end %>
 
-              <%= if @visible_choices == [] and (@node["choices"] || []) != [] do %>
-                <div class="preview-filtered">
-                  <.icon name="hero-funnel" class="size-4" />
-                  <em>
-                    All {length(@node["choices"])} choices hidden by conditions
-                  </em>
-                </div>
-              <% end %>
+            <div
+              :if={@visible_choices == [] and (@node["choices"] || []) != []}
+              class="preview-filtered"
+            >
+              <.icon name="hero-funnel" class="size-4" />
+              <em>
+                All {length(@node["choices"])} choices hidden by conditions
+              </em>
+            </div>
 
-              <%= if (@node["choices"] || []) == [] do %>
-                <div class="preview-end">
-                  <em>End of dialogue</em>
-                </div>
-              <% end %>
+            <div :if={(@node["choices"] || []) == []} class="preview-end">
+              <em>End of dialogue</em>
             </div>
           </div>
-        <% else %>
-          <div class="preview-error">
-            <p>Node "{@current_node}" not found</p>
-          </div>
-        <% end %>
+        </div>
+        <div :if={!@node} class="preview-error">
+          <p>Node "{@current_node}" not found</p>
+        </div>
       </div>
     </div>
     """

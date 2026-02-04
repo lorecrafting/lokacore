@@ -116,6 +116,7 @@ Skill(skill-extractor) with prompt:
 **Create/Update Skills**:
 - Add to `.claude/skills/` for Loka-specific patterns
 - Update existing skills if new edge cases discovered
+- **CRITICAL: Register every new skill** in the appropriate `.claude/rules/*.md` file's "Related Skills" section. Unregistered skills are invisible and become orphans. See skill-extractor Step 6 for the rule mapping table.
 
 ### Step 4: Verification
 

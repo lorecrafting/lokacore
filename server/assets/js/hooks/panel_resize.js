@@ -1,4 +1,23 @@
 // Panel Resize - Handles draggable panel dividers
+// Performance: applies CSS locally during drag, syncs to server on mouseup/touchend only
+
+const PANEL_CONFIG = {
+  console:   { selector: '.world-builder-console',   dimension: 'offsetHeight', defaultSize: 150, min: 80,  max: 400, direction: 'vertical' },
+  hierarchy: { selector: '.world-builder-hierarchy',  dimension: 'offsetWidth',  defaultSize: 200, min: 150, max: 400, direction: 'horizontal-right' },
+  inspector: { selector: '.world-builder-inspector',  dimension: 'offsetWidth',  defaultSize: 260, min: 200, max: 500, direction: 'horizontal-left' },
+  terminal:  { selector: '.world-builder-terminal',   dimension: 'offsetWidth',  defaultSize: 320, min: 200, max: 500, direction: 'horizontal-left' },
+  chat:      { selector: '.world-builder-chat',       dimension: 'offsetWidth',  defaultSize: 320, min: 200, max: 500, direction: 'horizontal-left' },
+}
+
+// Grid column indices for each panel in --grid-columns
+// Layout: hierarchy(0) h_resize(1) viewport(2) i_resize(3) inspector(4) t_resize(5) terminal(6) c_resize(7) chat(8)
+const GRID_COLUMN_INDEX = {
+  hierarchy: 0,
+  inspector: 4,
+  terminal: 6,
+  chat: 8,
+}
+
 const PanelResize = {
   mounted() {
     this.container = this.el
@@ -8,23 +27,55 @@ const PanelResize = {
     this.startX = 0
     this.startY = 0
     this.startSize = 0
+    this.rafId = null
 
-    // Load saved sizes from localStorage
+    // Track current sizes locally for grid rebuilds during drag
+    this.localSizes = this.parseCurrentSizes()
+
+    // Load saved sizes from localStorage (batched single event)
     this.loadSavedSizes()
 
     // Bind drag handlers
     this.handleMouseDown = this.handleMouseDown.bind(this)
     this.handleMouseMove = this.handleMouseMove.bind(this)
     this.handleMouseUp = this.handleMouseUp.bind(this)
+    this.handleTouchStart = this.handleTouchStart.bind(this)
+    this.handleTouchMove = this.handleTouchMove.bind(this)
+    this.handleTouchEnd = this.handleTouchEnd.bind(this)
 
     // Attach listeners to all resize handles
     this.handles.forEach(handle => {
       handle.addEventListener('mousedown', this.handleMouseDown)
+      handle.addEventListener('touchstart', this.handleTouchStart)
+      handle.style.touchAction = 'none'
     })
 
-    // Global mouse events for dragging
+    // Global mouse/touch events for dragging
     document.addEventListener('mousemove', this.handleMouseMove)
     document.addEventListener('mouseup', this.handleMouseUp)
+    document.addEventListener('touchmove', this.handleTouchMove, { passive: false })
+    document.addEventListener('touchend', this.handleTouchEnd)
+  },
+
+  getPointerPosition(e) {
+    if (e.touches) return { x: e.touches[0].clientX, y: e.touches[0].clientY }
+    return { x: e.clientX, y: e.clientY }
+  },
+
+  parseCurrentSizes() {
+    const sizes = {}
+    for (const [panel, config] of Object.entries(PANEL_CONFIG)) {
+      const el = this.container.querySelector(config.selector)
+      sizes[panel] = el ? el[config.dimension] : config.defaultSize
+    }
+    return sizes
+  },
+
+  getPanelSize(panel) {
+    const config = PANEL_CONFIG[panel]
+    if (!config) return 0
+    const el = this.container.querySelector(config.selector)
+    return el ? el[config.dimension] : config.defaultSize
   },
 
   loadSavedSizes() {
@@ -32,13 +83,11 @@ const PanelResize = {
       const saved = localStorage.getItem('world-builder-panel-sizes')
       if (saved) {
         const sizes = JSON.parse(saved)
-        // Apply saved sizes via LiveView event
-        Object.entries(sizes).forEach(([panel, size]) => {
-          this.pushEvent('resize_panel', { panel, size })
-        })
+        // Send all sizes in a single batched event
+        this.pushEvent('restore_panel_sizes', { sizes })
       }
     } catch (e) {
-      console.warn('Failed to load saved panel sizes:', e)
+      console.warn('[PanelResize] Failed to load saved sizes:', e)
     }
   },
 
@@ -49,100 +98,94 @@ const PanelResize = {
       sizes[panel] = size
       localStorage.setItem('world-builder-panel-sizes', JSON.stringify(sizes))
     } catch (e) {
-      console.warn('Failed to save panel sizes:', e)
+      console.warn('[PanelResize] Failed to save sizes:', e)
     }
   },
 
-  handleMouseDown(e) {
-    e.preventDefault()
-    this.isDragging = true
-    this.currentHandle = e.target
-    this.currentHandle.classList.add('dragging')
-    this.startX = e.clientX
-    this.startY = e.clientY
-
-    const panel = this.currentHandle.dataset.resize
+  // Apply --grid-columns directly to the DOM (no server roundtrip)
+  applyLocalGridColumns(panel, size) {
+    this.localSizes[panel] = size
 
     if (panel === 'console') {
-      // Get current console height
-      const consoleEl = this.container.querySelector('.world-builder-console')
-      this.startSize = consoleEl ? consoleEl.offsetHeight : 150
-    } else if (panel === 'hierarchy') {
-      const hierarchyEl = this.container.querySelector('.world-builder-hierarchy')
-      this.startSize = hierarchyEl ? hierarchyEl.offsetWidth : 200
-    } else if (panel === 'inspector') {
-      const inspectorEl = this.container.querySelector('.world-builder-inspector')
-      this.startSize = inspectorEl ? inspectorEl.offsetWidth : 260
-    } else if (panel === 'terminal') {
-      const terminalEl = this.container.querySelector('.world-builder-terminal')
-      this.startSize = terminalEl ? terminalEl.offsetWidth : 320
-    } else if (panel === 'chat') {
-      const chatEl = this.container.querySelector('.world-builder-chat')
-      this.startSize = chatEl ? chatEl.offsetWidth : 320
+      this.container.style.setProperty('--console-height', `${size}px`)
+      return
     }
 
-    // Add no-select class to prevent text selection during drag
-    document.body.style.userSelect = 'none'
-    document.body.style.cursor = panel === 'console' ? 'row-resize' : 'col-resize'
+    // Read current grid-template-columns and update the relevant column
+    const style = getComputedStyle(this.container)
+    const currentColumns = style.getPropertyValue('--grid-columns').trim()
+    if (!currentColumns) return
+
+    const cols = currentColumns.split(/\s+/)
+    const colIndex = GRID_COLUMN_INDEX[panel]
+    if (colIndex !== undefined && colIndex < cols.length) {
+      cols[colIndex] = `${size}px`
+      this.container.style.setProperty('--grid-columns', cols.join(' '))
+    }
   },
 
-  handleMouseMove(e) {
+  startDrag(e, handle) {
+    this.isDragging = true
+    this.currentHandle = handle
+    this.currentHandle.classList.add('dragging')
+
+    const pos = this.getPointerPosition(e)
+    this.startX = pos.x
+    this.startY = pos.y
+
+    const panel = this.currentHandle.dataset.resize
+    this.startSize = this.getPanelSize(panel)
+
+    // Snapshot current sizes at drag start for accurate grid rebuilds
+    this.localSizes = this.parseCurrentSizes()
+
+    const config = PANEL_CONFIG[panel]
+    document.body.style.userSelect = 'none'
+    document.body.style.cursor = config && config.direction === 'vertical' ? 'row-resize' : 'col-resize'
+  },
+
+  moveDrag(e) {
     if (!this.isDragging || !this.currentHandle) return
 
     const panel = this.currentHandle.dataset.resize
-    let newSize
+    const config = PANEL_CONFIG[panel]
+    if (!config) return
 
-    if (panel === 'console') {
-      // Console resizes vertically (drag up = bigger)
-      const delta = this.startY - e.clientY
-      newSize = Math.max(80, Math.min(400, this.startSize + delta))
-    } else if (panel === 'hierarchy') {
-      // Hierarchy resizes from right edge
-      const delta = e.clientX - this.startX
-      newSize = Math.max(150, Math.min(400, this.startSize + delta))
-    } else if (panel === 'inspector') {
-      // Inspector resizes from left edge (drag left = bigger)
-      const delta = this.startX - e.clientX
-      newSize = Math.max(200, Math.min(500, this.startSize + delta))
-    } else if (panel === 'terminal') {
-      // Terminal resizes from left edge (drag left = bigger)
-      const delta = this.startX - e.clientX
-      newSize = Math.max(200, Math.min(500, this.startSize + delta))
-    } else if (panel === 'chat') {
-      // Chat resizes from left edge (drag left = bigger)
-      const delta = this.startX - e.clientX
-      newSize = Math.max(200, Math.min(500, this.startSize + delta))
+    const pos = this.getPointerPosition(e)
+
+    let newSize
+    if (config.direction === 'vertical') {
+      const delta = this.startY - pos.y
+      newSize = Math.max(config.min, Math.min(config.max, this.startSize + delta))
+    } else if (config.direction === 'horizontal-right') {
+      const delta = pos.x - this.startX
+      newSize = Math.max(config.min, Math.min(config.max, this.startSize + delta))
+    } else {
+      // horizontal-left (drag left = bigger)
+      const delta = this.startX - pos.x
+      newSize = Math.max(config.min, Math.min(config.max, this.startSize + delta))
     }
 
-    // Update via LiveView
-    this.pushEvent('resize_panel', { panel, size: Math.round(newSize) })
+    // Apply CSS locally via requestAnimationFrame (no server roundtrip)
+    const size = Math.round(newSize)
+    if (this.rafId) cancelAnimationFrame(this.rafId)
+    this.rafId = requestAnimationFrame(() => {
+      this.applyLocalGridColumns(panel, size)
+    })
   },
 
-  handleMouseUp() {
+  endDrag() {
     if (this.isDragging && this.currentHandle) {
       this.currentHandle.classList.remove('dragging')
       const panel = this.currentHandle.dataset.resize
+      if (this.rafId) cancelAnimationFrame(this.rafId)
 
-      // Get final size and save
-      let finalSize
-      if (panel === 'console') {
-        const el = this.container.querySelector('.world-builder-console')
-        finalSize = el ? el.offsetHeight : 150
-      } else if (panel === 'hierarchy') {
-        const el = this.container.querySelector('.world-builder-hierarchy')
-        finalSize = el ? el.offsetWidth : 200
-      } else if (panel === 'inspector') {
-        const el = this.container.querySelector('.world-builder-inspector')
-        finalSize = el ? el.offsetWidth : 260
-      } else if (panel === 'terminal') {
-        const el = this.container.querySelector('.world-builder-terminal')
-        finalSize = el ? el.offsetWidth : 320
-      } else if (panel === 'chat') {
-        const el = this.container.querySelector('.world-builder-chat')
-        finalSize = el ? el.offsetWidth : 320
-      }
-
+      // Read the actual rendered size for accuracy
+      const finalSize = this.getPanelSize(panel)
       this.saveSizes(panel, finalSize)
+
+      // Sync final size to server (single event on drag end)
+      this.pushEvent('resize_panel', { panel, size: finalSize })
     }
 
     this.isDragging = false
@@ -151,12 +194,61 @@ const PanelResize = {
     document.body.style.cursor = ''
   },
 
+  handleMouseDown(e) {
+    e.preventDefault()
+    this.startDrag(e, e.target)
+  },
+
+  handleMouseMove(e) {
+    this.moveDrag(e)
+  },
+
+  handleMouseUp() {
+    this.endDrag()
+  },
+
+  handleTouchStart(e) {
+    e.preventDefault()
+    this.startDrag(e, e.target)
+  },
+
+  handleTouchMove(e) {
+    e.preventDefault()
+    this.moveDrag(e)
+  },
+
+  handleTouchEnd(e) {
+    e.preventDefault()
+    this.endDrag()
+  },
+
+  updated() {
+    // Re-attach listeners to handles that may have been replaced by LiveView patches
+    const newHandles = this.el.querySelectorAll('.panel-resize-handle, .console-resize-handle')
+    // Remove old listeners
+    this.handles.forEach(handle => {
+      handle.removeEventListener('mousedown', this.handleMouseDown)
+      handle.removeEventListener('touchstart', this.handleTouchStart)
+    })
+    // Attach to new handles
+    this.handles = newHandles
+    this.handles.forEach(handle => {
+      handle.addEventListener('mousedown', this.handleMouseDown)
+      handle.addEventListener('touchstart', this.handleTouchStart)
+      handle.style.touchAction = 'none'
+    })
+  },
+
   destroyed() {
     this.handles.forEach(handle => {
       handle.removeEventListener('mousedown', this.handleMouseDown)
+      handle.removeEventListener('touchstart', this.handleTouchStart)
     })
     document.removeEventListener('mousemove', this.handleMouseMove)
     document.removeEventListener('mouseup', this.handleMouseUp)
+    document.removeEventListener('touchmove', this.handleTouchMove)
+    document.removeEventListener('touchend', this.handleTouchEnd)
+    if (this.rafId) cancelAnimationFrame(this.rafId)
   }
 }
 

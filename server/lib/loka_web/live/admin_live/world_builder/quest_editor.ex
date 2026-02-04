@@ -27,13 +27,14 @@ defmodule LokaWeb.AdminLive.WorldBuilder.QuestEditor do
         "quest-validation-banner",
         @validation.errors == [] && "valid"
       ]}>
-        <%= if @validation.errors == [] do %>
+        <div :if={@validation.errors == []} style="display: contents;">
           <.icon name="hero-check-circle" class="size-4" />
           <span>Valid quest</span>
-        <% else %>
+        </div>
+        <div :if={@validation.errors != []} style="display: contents;">
           <.icon name="hero-exclamation-triangle" class="size-4" />
           <span>{length(@validation.errors)} error(s)</span>
-        <% end %>
+        </div>
       </div>
 
       <div class="quest-editor-scroll">
@@ -157,88 +158,85 @@ defmodule LokaWeb.AdminLive.WorldBuilder.QuestEditor do
               <.icon name="hero-plus" class="size-3" /> Add
             </button>
           </div>
-          <%= if @quest_data.objectives == [] do %>
-            <div class="quest-empty">No objectives yet. Add one to get started.</div>
-          <% else %>
-            <%= for {obj, idx} <- Enum.with_index(@quest_data.objectives) do %>
-              <div class="quest-list-item">
-                <div class="quest-list-item-header">
-                  <span class="quest-list-item-num">{idx + 1}</span>
-                  <select
-                    phx-change="quest_update_objective"
+          <div :if={@quest_data.objectives == []} class="quest-empty">
+            No objectives yet. Add one to get started.
+          </div>
+          <%= for {obj, idx} <- Enum.with_index(@quest_data.objectives) do %>
+            <div class="quest-list-item">
+              <div class="quest-list-item-header">
+                <span class="quest-list-item-num">{idx + 1}</span>
+                <select
+                  phx-change="quest_update_objective"
+                  phx-value-idx={idx}
+                  phx-value-field="type"
+                  name="value"
+                  class="quest-input-sm"
+                >
+                  <option value="kill" selected={obj.type == "kill"}>Kill</option>
+                  <option value="collect" selected={obj.type == "collect"}>Collect</option>
+                  <option value="talk_to" selected={obj.type == "talk_to"}>Talk to</option>
+                  <option value="reach_room" selected={obj.type == "reach_room"}>
+                    Reach Location
+                  </option>
+                  <option value="use_item" selected={obj.type == "use_item"}>Use Item</option>
+                  <option value="explore" selected={obj.type == "explore"}>Explore</option>
+                </select>
+                <div style="flex: 1;"></div>
+                <button
+                  class="quest-remove-btn"
+                  phx-click="quest_remove_objective"
+                  phx-value-idx={idx}
+                  title="Remove"
+                >
+                  <.icon name="hero-x-mark" class="size-3" />
+                </button>
+              </div>
+              <div class="quest-list-item-body">
+                <div class="quest-form-row-inline">
+                  <label>Target</label>
+                  <input
+                    type="text"
+                    value={obj.target}
+                    phx-blur="quest_update_objective"
                     phx-value-idx={idx}
-                    phx-value-field="type"
+                    phx-value-field="target"
                     name="value"
+                    placeholder="entity_key"
                     class="quest-input-sm"
-                  >
-                    <option value="kill" selected={obj.type == "kill"}>Kill</option>
-                    <option value="collect" selected={obj.type == "collect"}>Collect</option>
-                    <option value="talk_to" selected={obj.type == "talk_to"}>Talk to</option>
-                    <option value="reach_room" selected={obj.type == "reach_room"}>
-                      Reach Location
-                    </option>
-                    <option value="use_item" selected={obj.type == "use_item"}>Use Item</option>
-                    <option value="explore" selected={obj.type == "explore"}>Explore</option>
-                  </select>
-                  <div style="flex: 1;"></div>
-                  <button
-                    class="quest-remove-btn"
-                    phx-click="quest_remove_objective"
-                    phx-value-idx={idx}
-                    title="Remove"
-                  >
-                    <.icon name="hero-x-mark" class="size-3" />
-                  </button>
+                    phx-debounce="300"
+                  />
                 </div>
-                <div class="quest-list-item-body">
-                  <div class="quest-form-row-inline">
-                    <label>Target</label>
-                    <input
-                      type="text"
-                      value={obj.target}
-                      phx-blur="quest_update_objective"
-                      phx-value-idx={idx}
-                      phx-value-field="target"
-                      name="value"
-                      placeholder="entity_key"
-                      class="quest-input-sm"
-                      phx-debounce="300"
-                    />
-                  </div>
-                  <%= if obj.type in ["kill", "collect"] do %>
-                    <div class="quest-form-row-inline">
-                      <label>Count</label>
-                      <input
-                        type="number"
-                        value={obj.count}
-                        phx-blur="quest_update_objective"
-                        phx-value-idx={idx}
-                        phx-value-field="count"
-                        name="value"
-                        min="1"
-                        class="quest-input-sm"
-                        style="width: 60px;"
-                        phx-debounce="300"
-                      />
-                    </div>
-                  <% end %>
-                  <div class="quest-form-row-inline">
-                    <label>Desc</label>
-                    <input
-                      type="text"
-                      value={obj.description}
-                      phx-blur="quest_update_objective"
-                      phx-value-idx={idx}
-                      phx-value-field="description"
-                      name="value"
-                      placeholder="Player-facing description"
-                      class="quest-input-sm"
-                      phx-debounce="300"
-                    />
-                  </div>
+                <div :if={obj.type in ["kill", "collect"]} class="quest-form-row-inline">
+                  <label>Count</label>
+                  <input
+                    type="number"
+                    value={obj.count}
+                    phx-blur="quest_update_objective"
+                    phx-value-idx={idx}
+                    phx-value-field="count"
+                    name="value"
+                    min="1"
+                    class="quest-input-sm"
+                    style="width: 60px;"
+                    phx-debounce="300"
+                  />
+                </div>
+                <div class="quest-form-row-inline">
+                  <label>Desc</label>
+                  <input
+                    type="text"
+                    value={obj.description}
+                    phx-blur="quest_update_objective"
+                    phx-value-idx={idx}
+                    phx-value-field="description"
+                    name="value"
+                    placeholder="Player-facing description"
+                    class="quest-input-sm"
+                    phx-debounce="300"
+                  />
                 </div>
               </div>
-            <% end %>
+            </div>
           <% end %>
         </div>
 
@@ -307,67 +305,67 @@ defmodule LokaWeb.AdminLive.WorldBuilder.QuestEditor do
               <.icon name="hero-plus" class="size-3" /> Add
             </button>
           </div>
-          <%= if @quest_data.prerequisites == [] do %>
-            <div class="quest-empty">No prerequisites. Quest available to all players.</div>
-          <% else %>
-            <%= for {prereq, idx} <- Enum.with_index(@quest_data.prerequisites) do %>
-              <div class="quest-list-item-compact">
-                <select
-                  phx-change="quest_update_prerequisite"
-                  phx-value-idx={idx}
-                  phx-value-field="type"
-                  name="value"
-                  class="quest-input-sm"
-                >
-                  <option value="quest" selected={prereq.type == "quest"}>Complete Quest</option>
-                  <option value="level" selected={prereq.type == "level"}>Min Level</option>
-                  <option value="item" selected={prereq.type == "item"}>Has Item</option>
-                  <option value="flag" selected={prereq.type == "flag"}>Has Flag</option>
-                </select>
-                <input
-                  type={if prereq.type == "level", do: "number", else: "text"}
-                  value={prereq.value}
-                  phx-blur="quest_update_prerequisite"
-                  phx-value-idx={idx}
-                  phx-value-field="value"
-                  name="value"
-                  placeholder={if prereq.type == "level", do: "1", else: "key"}
-                  class="quest-input-sm"
-                  style="flex: 1;"
-                  phx-debounce="300"
-                />
-                <button
-                  class="quest-remove-btn"
-                  phx-click="quest_remove_prerequisite"
-                  phx-value-idx={idx}
-                  title="Remove"
-                >
-                  <.icon name="hero-x-mark" class="size-3" />
-                </button>
-              </div>
-            <% end %>
+          <div :if={@quest_data.prerequisites == []} class="quest-empty">
+            No prerequisites. Quest available to all players.
+          </div>
+          <%= for {prereq, idx} <- Enum.with_index(@quest_data.prerequisites) do %>
+            <div class="quest-list-item-compact">
+              <select
+                phx-change="quest_update_prerequisite"
+                phx-value-idx={idx}
+                phx-value-field="type"
+                name="value"
+                class="quest-input-sm"
+              >
+                <option value="quest" selected={prereq.type == "quest"}>Complete Quest</option>
+                <option value="level" selected={prereq.type == "level"}>Min Level</option>
+                <option value="item" selected={prereq.type == "item"}>Has Item</option>
+                <option value="flag" selected={prereq.type == "flag"}>Has Flag</option>
+              </select>
+              <input
+                type={if prereq.type == "level", do: "number", else: "text"}
+                value={prereq.value}
+                phx-blur="quest_update_prerequisite"
+                phx-value-idx={idx}
+                phx-value-field="value"
+                name="value"
+                placeholder={if prereq.type == "level", do: "1", else: "key"}
+                class="quest-input-sm"
+                style="flex: 1;"
+                phx-debounce="300"
+              />
+              <button
+                class="quest-remove-btn"
+                phx-click="quest_remove_prerequisite"
+                phx-value-idx={idx}
+                title="Remove"
+              >
+                <.icon name="hero-x-mark" class="size-3" />
+              </button>
+            </div>
           <% end %>
         </div>
 
         <%!-- Validation Details --%>
-        <%= if @validation.errors != [] or @validation.warnings != [] do %>
-          <div class="quest-section">
-            <div class="quest-section-header">
-              <.icon name="hero-shield-check" class="size-4" />
-              <span>Validation</span>
-            </div>
-            <%= for err <- @validation.errors do %>
-              <div class="quest-validation-error">
-                <.icon name="hero-x-circle" class="size-3" /> {err}
-              </div>
-            <% end %>
-            <%= for warn <- @validation.warnings do %>
-              <div class="quest-validation-warning">
-                <.icon name="hero-exclamation-triangle" class="size-3" /> {warn}
-              </div>
-            <% end %>
+        <div
+          :if={@validation.errors != [] or @validation.warnings != []}
+          class="quest-section"
+        >
+          <div class="quest-section-header">
+            <.icon name="hero-shield-check" class="size-4" />
+            <span>Validation</span>
           </div>
-        <% end %>
+          <%= for err <- @validation.errors do %>
+            <div class="quest-validation-error">
+              <.icon name="hero-x-circle" class="size-3" /> {err}
+            </div>
+          <% end %>
+          <%= for warn <- @validation.warnings do %>
+            <div class="quest-validation-warning">
+              <.icon name="hero-exclamation-triangle" class="size-3" /> {warn}
+            </div>
+          <% end %>
+        </div>
       </div>
 
       <%!-- Footer with save/cancel --%>

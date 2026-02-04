@@ -161,7 +161,7 @@ defmodule LokaWeb.Layouts do
 
   def admin(assigns) do
     ~H"""
-    <div class="admin-root">
+    <div class="min-h-screen bg-base-200">
       {render_slot(@inner_block)}
     </div>
     <.flash_group flash={@flash} />

@@ -102,6 +102,10 @@ end
 | `hooks.ex` | Lifecycle events |
 | `locks.ex` | Access control |
 
+## Related Skills
+
+- `.claude/skills/typed-object-field-storage.md` - TypedObject internals and field storage
+
 ## Documentation
 
 - `docs/architecture/entity-system.md`

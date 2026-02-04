@@ -62,4 +62,132 @@
   --wb-radius-sm: 3px;
   --wb-radius-md: 5px;
   --wb-radius-lg: 8px;
+
+  /* === Shadows === */
+  --wb-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --wb-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --wb-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+
+  /* === Transitions === */
+  --wb-transition-fast: 0.15s ease;
+  --wb-transition-normal: 0.2s ease;
+
+  /* === Z-Index Hierarchy === */
+  --wb-z-toolbar: 10;
+  --wb-z-panel: 20;
+  --wb-z-dropdown: 50;
+  --wb-z-modal: 100;
+  --wb-z-overlay: 1000;
+
+  /* === Terminal === */
+  --wb-term-status-bg: #0f0f0f;
+  --wb-term-input-bg: #0a0a0a;
+  --wb-term-border: #333333;
+  --wb-term-prompt: #88ffaa;
+  --wb-term-text: #c0c0c0;
+  --wb-term-placeholder: #555555;
+
+  /* === Quest Flow Node Colors === */
+  --wb-quest-start: #4aff9a;
+  --wb-quest-start-hover: #3aef8a;
+  --wb-quest-objective: #ffd24a;
+  --wb-quest-fail: #ff4a9e;
+  --wb-quest-special: #9a4aff;
+  --wb-quest-pass: #4aff9e;
+  --wb-quest-pass-alt: #ff9e4a;
+
+  /* === Quest Flow Edge Colors === */
+  --wb-quest-edge: #666666;
+  --wb-quest-edge-prereq: #f59e0b;
+  --wb-quest-edge-unlock: #22c55e;
+
+  /* === Log Level Colors === */
+  --wb-log-error: #ff6666;
+  --wb-log-info: #66ccff;
+  --wb-log-warn: #ffcc66;
+  --wb-log-success: #88ffaa;
+
+  /* === Danger State Surfaces === */
+  --wb-danger-surface: #3b1d1d;
+  --wb-danger-surface-hover: #5a2828;
+  --wb-danger-text: #ff8080;
+  --wb-danger-border: #5a3030;
+
+  /* === Success State Surfaces === */
+  --wb-success-surface: #1d3b1d;
+  --wb-success-border: #2d4d2d;
+
+  /* === Chat Panel === */
+  --wb-chat-surface: #1a1a24;
+  --wb-chat-border: #353545;
+  --wb-chat-text-dim: #707080;
+  --wb-chat-text-faint: #505060;
+  --wb-chat-text-bright: #e8e8f0;
+  --wb-chat-msg-gradient-from: #1a1a1e;
+  --wb-chat-msg-gradient-to: #1e1e22;
+  --wb-chat-welcome-gradient-from: #1e3a5f;
+  --wb-chat-welcome-gradient-to: #2d1b4e;
+  --wb-chat-welcome-icon: #a0b4ff;
+  --wb-chat-user-bg-from: #1e3a5f;
+  --wb-chat-user-bg-to: #1e3050;
+  --wb-chat-user-border: #2a4a6f;
+  --wb-chat-user-text: #d0e0f0;
+  --wb-chat-user-bg: #2d4a6f;
+  --wb-chat-code: #c9a0dc;
+  --wb-chat-icon-npcs: #c084fc;
+  --wb-chat-icon-quests: #facc15;
+
+  /* === Indigo Accent (streaming/generation UI) === */
+  --wb-indigo: #6366f1;
+  --wb-indigo-text: #818cf8;
+  --wb-indigo-text-bright: #a5b4fc;
+
+  /* === Tool Execution UI === */
+  --wb-tool-bg-from: #1e1e3a;
+  --wb-tool-bg-to: #252540;
+  --wb-tool-border: #3a3a6a;
+  --wb-tool-text: #b0b0e0;
+  --wb-tool-border-pulse: #5050a0;
+  --wb-tool-icon: #8080d0;
+  --wb-tool-use-bg: #1e1e2a;
+  --wb-tool-use-border: #30304a;
+  --wb-tool-use-border-hover: #40405a;
+  --wb-tool-header: #9090c0;
+  --wb-tool-header-icon: #7070a0;
+  --wb-tool-name: #b0b0d0;
+  --wb-tool-code-bg: #14141c;
+  --wb-tool-code-text: #808898;
+  --wb-tool-code-border: #252535;
+  --wb-tool-queue-bg: #28282e;
+  --wb-tool-queue-border: #38384a;
+  --wb-tool-queue-text: #9090a0;
+
+  /* === Panel Gradient Backgrounds === */
+  --wb-panel-gradient-from: #262630;
+  --wb-panel-gradient-to: #222228;
+  --wb-editor-gradient-from: #1e1e30;
+  --wb-editor-gradient-to: #1a1a2e;
+
+  /* === Accent Hover Gradient === */
+  --wb-accent-hover-gradient-from: #5a7cf7;
+  --wb-accent-hover-gradient-to: #7376f1;
+
+  /* === Quest Node === */
+  --wb-quest-node-border: #4a4a4a;
+
+  /* === Skip Link (Accessibility) === */
+  --wb-skip-bg: #FAFAFA;
+  --wb-skip-text: #222222;
+
+  /* === Warning State Surfaces === */
+  --wb-warning-surface: #7d6c2c;
+
+  /* === Mock State Tags === */
+  --wb-mock-tag-active: #3d5a80;
+  --wb-mock-tag-completed: #4a7c59;
+  --wb-mock-tag-item: #8b6914;
+  --wb-mock-tag-flag: #6b4a8c;
+
+  /* === Template UI === */
+  --wb-template-selected: #2d3a4a;
 }

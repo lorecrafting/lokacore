@@ -39,100 +39,102 @@ window.addEventListener("phx:focus_search", () => {
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
 
-// =============================================================================
-// LiveView Event Debug Logger
-// =============================================================================
-// Enable with: window.enableEventDebug() or in console: enableEventDebug()
-// Disable with: window.disableEventDebug() or: disableEventDebug()
-// Toggle with: window.toggleEventDebug() or: toggleEventDebug()
-//
-// This logs all LiveView events (phx-click, phx-submit, etc.) to the console
-// with their event names and payload data for debugging.
-// =============================================================================
+if (process.env.NODE_ENV !== 'production') {
+  // ===========================================================================
+  // LiveView Event Debug Logger
+  // ===========================================================================
+  // Enable with: window.enableEventDebug() or in console: enableEventDebug()
+  // Disable with: window.disableEventDebug() or: disableEventDebug()
+  // Toggle with: window.toggleEventDebug() or: toggleEventDebug()
+  //
+  // This logs all LiveView events (phx-click, phx-submit, etc.) to the console
+  // with their event names and payload data for debugging.
+  // ===========================================================================
 
-window._eventDebugEnabled = false
-
-window.enableEventDebug = function() {
-  window._eventDebugEnabled = true
-  console.log('%c[EventDebug] Enabled - All LiveView events will be logged', 'color: #22c55e; font-weight: bold')
-  console.log('%c[EventDebug] Use disableEventDebug() to turn off', 'color: #6b7280')
-}
-
-window.disableEventDebug = function() {
   window._eventDebugEnabled = false
-  console.log('%c[EventDebug] Disabled', 'color: #ef4444; font-weight: bold')
-}
 
-window.toggleEventDebug = function() {
-  if (window._eventDebugEnabled) {
-    window.disableEventDebug()
-  } else {
-    window.enableEventDebug()
+  window.enableEventDebug = function() {
+    window._eventDebugEnabled = true
+    console.log('%c[EventDebug] Enabled - All LiveView events will be logged', 'color: #22c55e; font-weight: bold')
+    console.log('%c[EventDebug] Use disableEventDebug() to turn off', 'color: #6b7280')
   }
-}
 
-// Intercept all click events with phx-click
-document.addEventListener('click', function(e) {
-  if (!window._eventDebugEnabled) return
+  window.disableEventDebug = function() {
+    window._eventDebugEnabled = false
+    console.log('%c[EventDebug] Disabled', 'color: #ef4444; font-weight: bold')
+  }
 
-  const target = e.target.closest('[phx-click]')
-  if (target) {
-    const eventName = target.getAttribute('phx-click')
-    const values = {}
+  window.toggleEventDebug = function() {
+    if (window._eventDebugEnabled) {
+      window.disableEventDebug()
+    } else {
+      window.enableEventDebug()
+    }
+  }
 
-    // Collect all phx-value-* attributes
-    for (const attr of target.attributes) {
-      if (attr.name.startsWith('phx-value-')) {
-        const key = attr.name.replace('phx-value-', '')
-        values[key] = attr.value
+  // Intercept all click events with phx-click
+  document.addEventListener('click', function(e) {
+    if (!window._eventDebugEnabled) return
+
+    const target = e.target.closest('[phx-click]')
+    if (target) {
+      const eventName = target.getAttribute('phx-click')
+      const values = {}
+
+      // Collect all phx-value-* attributes
+      for (const attr of target.attributes) {
+        if (attr.name.startsWith('phx-value-')) {
+          const key = attr.name.replace('phx-value-', '')
+          values[key] = attr.value
+        }
       }
+
+      console.group(`%c[Event] ${eventName}`, 'color: #3b82f6; font-weight: bold')
+      console.log('Type:', 'click')
+      console.log('Values:', Object.keys(values).length > 0 ? values : '(none)')
+      console.log('Target:', target)
+      console.groupEnd()
     }
+  }, true)
 
-    console.group(`%c[Event] ${eventName}`, 'color: #3b82f6; font-weight: bold')
-    console.log('Type:', 'click')
-    console.log('Values:', Object.keys(values).length > 0 ? values : '(none)')
-    console.log('Target:', target)
-    console.groupEnd()
-  }
-}, true)
+  // Intercept form submissions with phx-submit
+  document.addEventListener('submit', function(e) {
+    if (!window._eventDebugEnabled) return
 
-// Intercept form submissions with phx-submit
-document.addEventListener('submit', function(e) {
-  if (!window._eventDebugEnabled) return
+    const form = e.target.closest('[phx-submit]')
+    if (form) {
+      const eventName = form.getAttribute('phx-submit')
+      const formData = new FormData(form)
+      const values = {}
 
-  const form = e.target.closest('[phx-submit]')
-  if (form) {
-    const eventName = form.getAttribute('phx-submit')
-    const formData = new FormData(form)
-    const values = {}
+      for (const [key, value] of formData.entries()) {
+        values[key] = value
+      }
 
-    for (const [key, value] of formData.entries()) {
-      values[key] = value
+      console.group(`%c[Event] ${eventName}`, 'color: #8b5cf6; font-weight: bold')
+      console.log('Type:', 'submit')
+      console.log('Form Data:', values)
+      console.log('Target:', form)
+      console.groupEnd()
     }
+  }, true)
 
-    console.group(`%c[Event] ${eventName}`, 'color: #8b5cf6; font-weight: bold')
-    console.log('Type:', 'submit')
-    console.log('Form Data:', values)
-    console.log('Target:', form)
-    console.groupEnd()
-  }
-}, true)
+  // Intercept change events with phx-change
+  document.addEventListener('change', function(e) {
+    if (!window._eventDebugEnabled) return
 
-// Intercept change events with phx-change
-document.addEventListener('change', function(e) {
-  if (!window._eventDebugEnabled) return
+    const target = e.target.closest('[phx-change]')
+    if (target) {
+      const eventName = target.getAttribute('phx-change')
 
-  const target = e.target.closest('[phx-change]')
-  if (target) {
-    const eventName = target.getAttribute('phx-change')
-
-    console.group(`%c[Event] ${eventName}`, 'color: #f59e0b; font-weight: bold')
-    console.log('Type:', 'change')
-    console.log('Value:', e.target.value)
-    console.log('Target:', e.target)
-    console.groupEnd()
-  }
-}, true)
+      console.group(`%c[Event] ${eventName}`, 'color: #f59e0b; font-weight: bold')
+      console.log('Type:', 'change')
+      console.log('Value:', e.target.value)
+      console.log('Target:', e.target)
+      console.groupEnd()
+    }
+  }, true)
+}
 
 // The lines below enable quality of life phoenix_live_reload
 // development features:

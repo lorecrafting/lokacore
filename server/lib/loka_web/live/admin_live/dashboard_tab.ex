@@ -22,10 +22,10 @@ defmodule LokaWeb.AdminLive.DashboardTab do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="admin-section">
-      <h2 class="admin-section-title">Dashboard</h2>
+    <div class="flex flex-col gap-6">
+      <h2 class="text-2xl font-bold">Dashboard</h2>
 
-      <div class="admin-grid-stats">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <.stat_card title="Total Players" value={@stats.total_players} icon="hero-users" />
         <.stat_card title="Total Rooms" value={@stats.total_rooms} icon="hero-map" />
         <.stat_card title="Total Entities" value={@stats.total_entities} icon="hero-cube" />
@@ -66,10 +66,10 @@ defmodule LokaWeb.AdminLive.DashboardTab do
         <div class="card bg-base-200">
           <div class="card-body">
             <h3 class="card-title">Quick Start</h3>
-            <p class="admin-empty-text mb-4">
+            <p class="opacity-70 mb-4">
               Welcome to the Loka Admin Dashboard. Use the sidebar to navigate between sections.
             </p>
-            <ul class="admin-quickstart-list">
+            <ul class="list-disc list-inside flex flex-col gap-1 text-sm">
               <li><strong>Rooms</strong> - Create and manage game locations</li>
               <li><strong>Entities</strong> - Create NPCs, items, and other objects</li>
               <li><strong>Scripts</strong> - Write Lua scripts for custom behavior</li>
