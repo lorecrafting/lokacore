@@ -118,9 +118,6 @@ defmodule LokaWeb.Router do
 
     live "/", AdminLive, :index
     live "/world-builder", AdminLive.WorldBuilderLive, :index
-
-    # Text-based MUD client for admin testing
-    get "/play", PlayController, :index
   end
 
   # Prometheus metrics endpoint for monitoring

@@ -114,6 +114,8 @@ defmodule LokaWeb.GameChannel do
   alias LokaWeb.Channels.GameChannel.ActionBridge
   alias LokaWeb.Channels.VersionCompatibility
   alias LokaWeb.Channels.ChannelRateLimiter
+  alias LokaWeb.Channels.CommandParser
+  alias LokaWeb.Channels.BuilderCommands
 
   # =============================================================================
   # Configuration Constants
@@ -716,6 +718,208 @@ defmodule LokaWeb.GameChannel do
     end
   end
 
+  # =============================================================================
+  # Text Command Handler (MUD-style text input)
+  # =============================================================================
+
+  def handle_in("command", %{"input" => text}, socket) do
+    case CommandParser.parse(text) do
+      # Builder admin commands - gated by is_admin
+      {:builder_goto, params} ->
+        execute_builder_command(:goto, params, socket)
+
+      {:builder_spawn, params} ->
+        execute_builder_command(:spawn, params, socket)
+
+      {:builder_give, params} ->
+        execute_builder_command(:give, params, socket)
+
+      {:builder_info, params} ->
+        execute_builder_command(:info, params, socket)
+
+      {:builder_setflag, params} ->
+        execute_builder_command(:setflag, params, socket)
+
+      {:builder_clearflag, params} ->
+        execute_builder_command(:clearflag, params, socket)
+
+      {:builder_startquest, params} ->
+        execute_builder_command(:startquest, params, socket)
+
+      {:builder_completequest, params} ->
+        execute_builder_command(:completequest, params, socket)
+
+      {:builder_resetquest, params} ->
+        execute_builder_command(:resetquest, params, socket)
+
+      {:builder_settime, params} ->
+        execute_builder_command(:settime, params, socket)
+
+      {:builder_list, params} ->
+        execute_builder_command(:list, params, socket)
+
+      {:builder_find, params} ->
+        execute_builder_command(:find, params, socket)
+
+      {:builder_rooms, params} ->
+        execute_builder_command(:rooms, params, socket)
+
+      {:builder_where, params} ->
+        execute_builder_command(:where, params, socket)
+
+      {:builder_purge, params} ->
+        execute_builder_command(:purge, params, socket)
+
+      {:builder_flags, params} ->
+        execute_builder_command(:flags, params, socket)
+
+      {:builder_quests, params} ->
+        execute_builder_command(:quests, params, socket)
+
+      {:builder_reload, params} ->
+        execute_builder_command(:reload, params, socket)
+
+      {:builder_validate, params} ->
+        execute_builder_command(:validate, params, socket)
+
+      {:builder_godmode, params} ->
+        execute_builder_command(:godmode, params, socket)
+
+      # Navigation
+      {:navigate, %{direction: direction}} ->
+        case ActionBridge.execute(socket, :navigate, %{direction: direction}) do
+          {:ok, socket} -> {:reply, :ok, socket}
+          {:error, _reason, socket} -> {:reply, :ok, socket}
+        end
+
+      # Look (re-push current room)
+      {:look, %{target: target}} ->
+        case ActionBridge.execute(socket, :click_entity, %{entity_id: target, entity_type: "auto"}) do
+          {:ok, socket} -> {:reply, :ok, socket}
+          {:error, _reason, socket} -> {:reply, :ok, socket}
+        end
+
+      {:look, %{}} ->
+        push_current_room(socket)
+        {:reply, :ok, socket}
+
+      # Talk
+      {:talk, %{target: target}} ->
+        case find_entity_by_keyword(socket, target) do
+          {:ok, entity_id} ->
+            case ActionBridge.execute(socket, :talk, %{entity_id: entity_id}) do
+              {:ok, socket} -> {:reply, :ok, socket}
+              {:error, _reason, socket} -> {:reply, :ok, socket}
+            end
+
+          :error ->
+            push(socket, "output", %{text: "You don't see '#{target}' here."})
+            {:reply, :ok, socket}
+        end
+
+      # Inventory
+      {:inventory, %{}} ->
+        push_inventory(socket)
+        {:reply, :ok, socket}
+
+      # Get item
+      {:get_item, %{target: target}} ->
+        case find_entity_by_keyword(socket, target) do
+          {:ok, entity_id} ->
+            case ActionBridge.execute(socket, :get_item, %{entity_id: entity_id}) do
+              {:ok, socket} -> {:reply, :ok, socket}
+              {:error, _reason, socket} -> {:reply, :ok, socket}
+            end
+
+          :error ->
+            push(socket, "output", %{text: "You don't see '#{target}' here."})
+            {:reply, :ok, socket}
+        end
+
+      # Drop item
+      {:drop_item, %{target: target}} ->
+        case find_inventory_item_by_keyword(socket, target) do
+          {:ok, item_id} ->
+            case ActionBridge.execute(socket, :drop_item, %{item_id: item_id}) do
+              {:ok, socket} -> {:reply, :ok, socket}
+              {:error, _reason, socket} -> {:reply, :ok, socket}
+            end
+
+          :error ->
+            push(socket, "output", %{text: "You don't have '#{target}'."})
+            {:reply, :ok, socket}
+        end
+
+      # Say
+      {:say, %{message: message}} ->
+        case ActionBridge.execute(socket, :chat, %{mode: :say, message: message}) do
+          {:ok, socket} -> {:reply, :ok, socket}
+          {:error, _reason, socket} -> {:reply, :ok, socket}
+        end
+
+      # Combat
+      {:attack, %{target: target}} ->
+        case find_entity_by_keyword(socket, target) do
+          {:ok, entity_id} ->
+            game_state = socket.assigns.game_state
+            {room, _} = RoomHelpers.load_player_room(game_state)
+
+            entity =
+              Enum.find(room.entities || [], fn e -> to_string(e.id) == to_string(entity_id) end)
+
+            case ActionBridge.execute(socket, :attack, %{entity_id: entity_id, entity: entity}) do
+              {:ok, socket} -> {:reply, :ok, socket}
+              {:error, _reason, socket} -> {:reply, :ok, socket}
+            end
+
+          :error ->
+            push(socket, "output", %{text: "You don't see '#{target}' here."})
+            {:reply, :ok, socket}
+        end
+
+      {:flee, %{}} ->
+        case ActionBridge.execute(socket, :flee, %{}) do
+          {:ok, socket} -> {:reply, :ok, socket}
+          {:error, _reason, socket} -> {:reply, :ok, socket}
+        end
+
+      # Equip/Unequip
+      {:equip, %{target: target}} ->
+        case find_inventory_item_by_keyword(socket, target) do
+          {:ok, item_id} ->
+            case ActionBridge.execute(socket, :equip_item, %{item_id: item_id}) do
+              {:ok, socket} -> {:reply, :ok, socket}
+              {:error, _reason, socket} -> {:reply, :ok, socket}
+            end
+
+          :error ->
+            push(socket, "output", %{text: "You don't have '#{target}'."})
+            {:reply, :ok, socket}
+        end
+
+      {:unequip, %{target: target}} ->
+        case ActionBridge.execute(socket, :unequip_item, %{slot: target}) do
+          {:ok, socket} -> {:reply, :ok, socket}
+          {:error, _reason, socket} -> {:reply, :ok, socket}
+        end
+
+      # Who
+      {:who, %{}} ->
+        push_who(socket)
+        {:reply, :ok, socket}
+
+      # Help
+      {:help, %{}} ->
+        push_help(socket)
+        {:reply, :ok, socket}
+
+      # Unknown
+      {:unknown, _} ->
+        push(socket, "output", %{text: "Unknown command. Type 'help' for commands."})
+        {:reply, :ok, socket}
+    end
+  end
+
   # Catch-all for unhandled events - log instead of crashing
   def handle_in(event, payload, socket) do
     Logger.warning(
@@ -723,6 +927,134 @@ defmodule LokaWeb.GameChannel do
     )
 
     {:reply, {:error, %{reason: "unknown_event", event: event}}, socket}
+  end
+
+  # Silent rejection for non-admin players - identical to unknown command
+  defp execute_builder_command(cmd, params, socket) do
+    if socket.assigns.player.is_admin do
+      BuilderCommands.execute(cmd, params, socket)
+    else
+      push(socket, "output", %{text: "Unknown command. Type 'help' for commands."})
+      {:reply, :ok, socket}
+    end
+  end
+
+  defp push_current_room(socket) do
+    game_state = socket.assigns.game_state
+    {room, _state} = RoomHelpers.load_player_room(game_state)
+    atmosphere = Atmosphere.describe_for_room(room)
+
+    push(socket, "room_update", %{
+      room: Serializers.serialize_room(room),
+      atmosphere: atmosphere
+    })
+  end
+
+  defp push_inventory(socket) do
+    game_state = socket.assigns.game_state
+    items = Inventory.list_items(game_state)
+
+    if items == [] do
+      push(socket, "output", %{text: "You are carrying nothing."})
+    else
+      lines =
+        Enum.map(items, fn item ->
+          name = Map.get(item, :name, Map.get(item, "name", "unknown"))
+          "  #{name}"
+        end)
+        |> Enum.join("\n")
+
+      push(socket, "output", %{text: "Inventory:\n#{lines}"})
+    end
+  end
+
+  defp push_who(socket) do
+    player = socket.assigns.player
+    game_state = socket.assigns.game_state
+    room_id = game_state.current_room_id
+
+    players = RoomHelpers.load_other_players(room_id, player.id)
+
+    if players == [] do
+      push(socket, "output", %{text: "You are alone here."})
+    else
+      names = Enum.map(players, fn p -> "  #{p.name}" end) |> Enum.join("\n")
+      push(socket, "output", %{text: "Players here:\n#{names}"})
+    end
+  end
+
+  defp push_help(socket) do
+    base_help = """
+    Available Commands:
+      Movement:   north, south, east, west, up, down (or n,s,e,w,u,d)
+      Look:       look, look <target>
+      Talk:       talk <npc>
+      Inventory:  inventory (or i), get <item>, drop <item>, equip, unequip
+      Chat:       say <message>
+      Combat:     attack <target>, flee
+      Other:      who, help\
+    """
+
+    text =
+      if socket.assigns.player.is_admin do
+        base_help <>
+          """
+
+          \nBuilder Commands:
+            Navigation: goto <room_key>, rooms, where, find <search>
+            Inspect:    info <entity>, list npcs|items|quests
+            Spawn:      spawn <npc_key>, purge, give <item_key>
+            Flags:      setflag <flag>, clearflag <flag>, flags
+            Quests:     startquest <key>, completequest <key>, resetquest <key>, quests
+            World:      settime dawn|noon|dusk|midnight, reload, validate
+            Mode:       godmode\
+          """
+      else
+        base_help
+      end
+
+    push(socket, "output", %{text: text})
+  end
+
+  defp find_entity_by_keyword(socket, keyword) do
+    game_state = socket.assigns.game_state
+    {room, _state} = RoomHelpers.load_player_room(game_state)
+
+    keyword_lower = String.downcase(keyword)
+
+    entity =
+      (room.entities ++ (room.items || []))
+      |> Enum.find(fn e ->
+        name = Map.get(e, :name, "") |> to_string() |> String.downcase()
+        key = Map.get(e, :key, "") |> to_string() |> String.downcase()
+        pk = Map.get(e, :primary_keyword, "") |> to_string() |> String.downcase()
+
+        name == keyword_lower || key == keyword_lower || pk == keyword_lower ||
+          String.contains?(name, keyword_lower)
+      end)
+
+    case entity do
+      nil -> :error
+      e -> {:ok, e.id}
+    end
+  end
+
+  defp find_inventory_item_by_keyword(socket, keyword) do
+    game_state = socket.assigns.game_state
+    items = Inventory.list_items(game_state)
+    keyword_lower = String.downcase(keyword)
+
+    item =
+      Enum.find(items, fn item ->
+        name = Map.get(item, :name, "") |> to_string() |> String.downcase()
+        key = Map.get(item, :key, "") |> to_string() |> String.downcase()
+        name == keyword_lower || key == keyword_lower || String.contains?(name, keyword_lower)
+      end)
+
+    case item do
+      nil -> :error
+      i -> {:ok, i.id}
+    end
   end
 
   # =============================================================================

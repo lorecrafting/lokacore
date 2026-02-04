@@ -20,7 +20,7 @@ defmodule LokaWeb.CharacterCreationLive do
 
     # If character already created, redirect (admins to /admin/play, others to login)
     if PlayerGameState.character_created?(game_state) do
-      redirect_path = if player.is_admin, do: ~p"/admin/play", else: ~p"/players/log-in"
+      redirect_path = if player.is_admin, do: ~p"/admin/world-builder", else: ~p"/players/log-in"
       {:ok, push_navigate(socket, to: redirect_path)}
     else
       changeset = PlayerGameState.character_creation_changeset(game_state, %{})
@@ -235,14 +235,19 @@ defmodule LokaWeb.CharacterCreationLive do
           # Create the Spark for this player
           case Spark.create_for_player(player.id, selected_traits) do
             {:ok, _spark} ->
-              redirect_path = if player.is_admin, do: ~p"/admin/play", else: ~p"/players/log-in"
+              redirect_path =
+                if player.is_admin, do: ~p"/admin/world-builder", else: ~p"/players/log-in"
+
               {:noreply, push_navigate(socket, to: redirect_path)}
 
             {:error, _spark_changeset} ->
               # Log but don't block - Spark can be created later if needed
               require Logger
               Logger.warning("Failed to create Spark for player #{player.id}")
-              redirect_path = if player.is_admin, do: ~p"/admin/play", else: ~p"/players/log-in"
+
+              redirect_path =
+                if player.is_admin, do: ~p"/admin/world-builder", else: ~p"/players/log-in"
+
               {:noreply, push_navigate(socket, to: redirect_path)}
           end
 

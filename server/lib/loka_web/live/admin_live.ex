@@ -158,10 +158,6 @@ defmodule LokaWeb.AdminLive do
           </nav>
 
           <div class="admin-sidebar-footer">
-            <a href={~p"/admin/play"} class="admin-nav-link" title="Play Game">
-              <.icon name="hero-play" class="size-4" />
-              <span :if={not @sidebar_collapsed}>Play Game</span>
-            </a>
             <div class="admin-theme-toggle">
               <Layouts.theme_toggle />
             </div>

@@ -379,8 +379,7 @@ git commit --no-verify -m "wip"
 |------|-------------|------|
 | `/` | Landing page | No |
 | `/admin` | Admin dashboard | Admin |
-| `/admin/play` | Text-based MUD client (admin testing) | Admin |
-| `/admin/world-builder` | World Builder UI | Admin |
+| `/admin/world-builder` | World Builder UI (includes MUD terminal) | Admin |
 | `/character/create` | Character creation | Yes |
 
 > **Note:** The main game client is the Godot app (`godot-client/`), connecting via Phoenix Channels.

@@ -10,6 +10,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.Toolbar do
   attr :class, :string, default: ""
   attr :show_zone_colors, :boolean, default: true
   attr :show_npc_paths, :boolean, default: true
+  attr :terminal_active, :boolean, default: false
 
   attr :undo_state, :map,
     default: %{can_undo: false, can_redo: false, undo_count: 0, redo_count: 0}
@@ -101,6 +102,15 @@ defmodule LokaWeb.AdminLive.WorldBuilder.Toolbar do
       </div>
 
       <div class="toolbar-section toolbar-right">
+        <button
+          class={"toolbar-btn #{if @terminal_active, do: "active"}"}
+          phx-click="toggle_panel"
+          phx-value-panel="terminal"
+          title="Terminal (5)"
+        >
+          <.icon name="hero-command-line" class="size-4" />
+          <span style="font-size: 0.75rem; margin-left: 4px;">Terminal</span>
+        </button>
         <button
           class="toolbar-btn"
           phx-click="show_keyboard_help"

@@ -44,6 +44,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     ViewportContainer,
     InspectorPanel,
     ChatPanel,
+    TerminalPanel,
     InputValidator,
     SettingsModal,
     ScriptTemplatePicker,
@@ -176,14 +177,18 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
        hierarchy: false,
        inspector: false,
        console: false,
-       chat: false
+       chat: false,
+       terminal: true
      })
      |> assign(:panel_sizes, %{
        hierarchy: 240,
        inspector: 260,
        chat: 320,
-       console: 150
+       console: 150,
+       terminal: 320
      })
+     # Terminal panel token (JWT for GameChannel connection)
+     |> assign(:terminal_token, generate_terminal_token(socket))
      # Projects panel state
      |> assign(:projects, Projects.list_projects())
      |> assign(:current_project, nil)
@@ -233,6 +238,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
         undo_state={@undo_state}
         show_zone_colors={@show_zone_colors}
         show_npc_paths={@show_npc_paths}
+        terminal_active={not @collapsed_panels.terminal}
       />
       
     <!-- Main panel layout with resize handles -->
@@ -240,7 +246,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
         id="world-builder-panels"
         class={panel_container_classes(@collapsed_panels)}
         phx-hook="PanelResize"
-        style={panel_sizes_style(@panel_sizes)}
+        style={panel_sizes_style(@panel_sizes, @collapsed_panels)}
       >
         <HierarchyPanel.hierarchy_panel
           rooms={@rooms}
@@ -306,6 +312,21 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
           selected_keys={@selected_keys}
           collapsed={@collapsed_panels.inspector}
         />
+
+        <%= unless @collapsed_panels.terminal do %>
+          <div
+            class="panel-resize-handle"
+            data-resize="terminal"
+          >
+          </div>
+        <% end %>
+
+        <%= unless @collapsed_panels.terminal do %>
+          <TerminalPanel.terminal_panel
+            token={@terminal_token}
+            collapsed={@collapsed_panels.terminal}
+          />
+        <% end %>
 
         <div
           class="panel-resize-handle"
@@ -725,7 +746,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   def handle_event("toggle_panel", %{"panel" => panel}, socket) do
     panel_atom = String.to_existing_atom(panel)
 
-    if panel_atom in [:projects, :hierarchy, :inspector, :console, :chat] do
+    if panel_atom in [:projects, :hierarchy, :inspector, :console, :chat, :terminal] do
       collapsed = socket.assigns.collapsed_panels
       new_collapsed = Map.update!(collapsed, panel_atom, &(!&1))
 
@@ -743,7 +764,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   def handle_event("resize_panel", %{"panel" => panel, "size" => size}, socket) do
     panel_atom = String.to_existing_atom(panel)
 
-    if panel_atom in [:hierarchy, :inspector, :chat, :console] do
+    if panel_atom in [:hierarchy, :inspector, :chat, :console, :terminal] do
       sizes = socket.assigns.panel_sizes
       new_sizes = Map.put(sizes, panel_atom, size)
       {:noreply, assign(socket, :panel_sizes, new_sizes)}
@@ -808,6 +829,9 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
       "4" ->
         toggle_panel(socket, :chat)
+
+      "5" ->
+        toggle_panel(socket, :terminal)
 
       # Escape cancels streaming or closes modals
       "Escape" ->
@@ -3129,11 +3153,22 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     if classes == "", do: base, else: "#{base} #{classes}"
   end
 
-  # Build CSS custom properties for panel sizes
-  defp panel_sizes_style(panel_sizes) do
-    "--hierarchy-width: #{panel_sizes.hierarchy}px; " <>
-      "--inspector-width: #{panel_sizes.inspector}px; " <>
-      "--chat-width: #{panel_sizes.chat}px; " <>
+  # Build CSS custom properties for panel sizes and grid-template-columns
+  defp panel_sizes_style(panel_sizes, collapsed_panels) do
+    h_col = if collapsed_panels.hierarchy, do: "40px", else: "#{panel_sizes.hierarchy}px"
+    h_resize = if collapsed_panels.hierarchy, do: "0px", else: "4px"
+    i_col = if collapsed_panels.inspector, do: "40px", else: "#{panel_sizes.inspector}px"
+    i_resize = if collapsed_panels.inspector, do: "0px", else: "4px"
+    c_col = if collapsed_panels.chat, do: "40px", else: "#{panel_sizes.chat}px"
+    c_resize = if collapsed_panels.chat, do: "0px", else: "4px"
+
+    # Terminal columns are 0px when collapsed (panel not rendered)
+    {t_resize, t_col} =
+      if collapsed_panels.terminal,
+        do: {"0px", "0px"},
+        else: {"4px", "#{panel_sizes.terminal}px"}
+
+    "--grid-columns: #{h_col} #{h_resize} 1fr #{i_resize} #{i_col} #{t_resize} #{t_col} #{c_resize} #{c_col}; " <>
       "--console-height: #{panel_sizes.console}px;"
   end
 
@@ -3309,5 +3344,19 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      socket
      |> assign(:collapsed_panels, new_collapsed)
      |> push_event("panel_collapsed", %{panels: new_collapsed})}
+  end
+
+  # Generate JWT token for the terminal panel's GameChannel connection
+  defp generate_terminal_token(socket) do
+    player = socket.assigns[:current_scope] && socket.assigns.current_scope.player
+
+    if player do
+      case Loka.Auth.Guardian.encode_and_sign(player, %{}, token_type: "access") do
+        {:ok, token, _claims} -> token
+        {:error, _reason} -> ""
+      end
+    else
+      ""
+    end
   end
 end

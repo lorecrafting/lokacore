@@ -237,7 +237,7 @@ defmodule LokaWeb.PlayerAuth do
   end
 
   # Main client is mobile - web login redirects to login page (shows "check your email")
-  # Admins can navigate to /admin/play manually
+  # Admins use the World Builder terminal panel for MUD testing
   defp signed_in_path(_conn), do: ~p"/players/log-in"
 
   @doc """
