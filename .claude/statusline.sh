@@ -106,6 +106,4 @@ if [ -n "$GIT_BRANCH" ]; then
     STATUS="$STATUS ${DIM}|${RESET} ${DIM}Branch:${RESET} ${MAGENTA}${GIT_BRANCH}${RESET}"
 fi
 
-STATUS="$STATUS ${DIM}|${RESET} ${DIM}Modes:${RESET} ${DIM}/engine /content /builder /testing${RESET}"
-
 echo -e "$STATUS"

@@ -5,13 +5,11 @@ on:
     branches: [main]
     paths:
       - "server/**"
-      - "mobile/src/types/channel.generated.ts"
       - ".github/workflows/server-ci.yml"
   pull_request:
     branches: [main]
     paths:
       - "server/**"
-      - "mobile/src/types/channel.generated.ts"
       - ".github/workflows/server-ci.yml"
 
 defaults:
@@ -59,18 +57,6 @@ jobs:
 
       - name: Run tests
         run: mix test
-
-      - name: Check channel types in sync
-        run: |
-          mix loka.gen.channel_types
-          cd ../mobile
-          if ! git diff --exit-code src/types/channel.generated.ts; then
-            echo "ERROR: channel.generated.ts is out of sync!"
-            echo "Run 'cd server && mix loka.gen.channel_types' and commit the changes."
-            exit 1
-          fi
-        env:
-          MIX_ENV: dev
 
       - name: Validate content
         # Skip reachability check - items without sources is a content gap, not a code error

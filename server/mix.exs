@@ -167,7 +167,10 @@ defmodule Loka.MixProject do
 
       # Architecture boundary enforcement (available but not in compiler chain)
       # Use `mix boundary.visualize` for layer analysis
-      {:boundary, "~> 0.10", runtime: false, only: [:dev]}
+      {:boundary, "~> 0.10", runtime: false, only: [:dev]},
+
+      # Static code analysis
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false}
     ]
   end
 

@@ -2042,7 +2042,7 @@ Keep mobile app types in sync:
 
 ```bash
 # Generate TypeScript from channel schema
-mix loka.generate.channel_types --output ../mobile/src/types/channel.ts
+mix loka.gen.channel_types  # Generates TypeScript types for channel events
 ```
 
 **Generated Types:**
@@ -2406,7 +2406,7 @@ mix loka.export_test_data
 
 # Generate TypeScript types from channel schema
 mix loka.generate.channel_types
-mix loka.generate.channel_types --output ../mobile/src/types/channel.ts
+mix loka.gen.channel_types  # Generates TypeScript types for channel events
 ```
 
 ### Task Workflow Examples
@@ -2751,147 +2751,93 @@ Spark appears in the MenuPanel with:
 
 ---
 
-## 29. Mobile App Architecture
+## 29. Game Client Architecture (Godot)
 
-**Location:** `mobile/`
+**Location:** `godot-client/`
 
-A full-stack React Native app with TypeScript, running on Expo for web, iOS, and Android.
+A 3D "magic book" client built with Godot 4.6, targeting mobile (iOS/Android) and web platforms.
+
+> **Note**: The previous React Native client was archived 2026-01-26. See `docs/decisions/2026-01-26-godot-client-migration.md` for migration rationale.
 
 ### Tech Stack
 
 | Layer | Technology |
 |-------|------------|
-| Framework | React Native 0.81.5 + Expo 54 |
-| Navigation | Expo Router 6.0.21 (file-based) |
-| State | React Context + hooks |
-| Styling | React Native StyleSheet |
-| WebSocket | Phoenix client library |
-| Testing | Playwright + Maestro |
+| Engine | Godot 4.6 |
+| Language | GDScript |
+| 3D Rendering | Page curl shader + SubViewport text |
+| Networking | WebSocket (Phoenix Channels) |
+| Platforms | iOS, Android, Web |
 
 ### Directory Structure
 
 ```
-mobile/
-├── app/                           # Expo Router pages
-│   ├── _layout.tsx               # Navigation root
-│   ├── index.tsx                 # Login/auth
-│   └── game.tsx                  # Main game screen
-├── src/
-│   ├── components/               # 28 UI components
-│   │   ├── RoomView.tsx          # Game display
-│   │   ├── BottomBar.tsx         # Action menu
-│   │   ├── MenuPanel.tsx         # Main menu (includes Spark)
-│   │   ├── CombatOverlay.tsx     # Combat UI
-│   │   └── ...
-│   ├── hooks/
-│   │   ├── useAuth.ts            # Auth management
-│   │   └── usePhoenix.ts         # WebSocket connection
-│   ├── types/                    # TypeScript interfaces
-│   ├── audio/                    # Sound effects
-│   └── theme.ts                  # Design system
-└── e2e/                          # E2E tests
+godot-client/
+├── scenes/              # Godot scenes (.tscn)
+├── scripts/             # GDScript (.gd)
+│   ├── main.gd          # Main controller, input handling
+│   ├── book_page.gd     # 3D page mesh, curl, text rendering
+│   ├── game_state.gd    # Room state, navigation (autoload)
+│   └── mock_world.gd    # Test world data (autoload)
+├── shaders/             # GLSL shaders (.gdshader)
+│   └── page_curl.gdshader  # GPU page curl + effects
+├── build/               # Export artifacts (gitignored)
+└── project.godot        # Project configuration
 ```
 
-### Key Components
+### Architecture
 
-| Component | Purpose | Size |
-|-----------|---------|------|
-| `game.tsx` | Main game orchestration | 22KB |
-| `MenuPanel.tsx` | Navigation hub (quests, inventory, Spark) | 32KB |
-| `RoomView.tsx` | Location display | ~8KB |
-| `BottomBar.tsx` | Action shortcuts | 8KB |
-| `usePhoenix.ts` | WebSocket management | ~12KB |
-
-### WebSocket Connection
-
-The `usePhoenix` hook manages real-time communication:
-
-```typescript
-const {
-  connected,
-  gameState,
-  events,
-  dialogueState,
-  combatState,
-  sparkUpdates,
-  navigate,
-  say,
-  clickEntity,
-  performAction,
-  sparkAsk,
-  sparkGetUpdates,
-} = usePhoenix({ token, onDisconnect });
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Godot Client (stateless visual layer)                       │
+├─────────────────────────────────────────────────────────────┤
+│ - 3D book page with curl animation                         │
+│ - Text rendered via SubViewport → page texture              │
+│ - Navigation via compass directions                         │
+│ - All game state comes from server                          │
+└─────────────────────────────────────────────────────────────┘
+                           │ WebSocket
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Phoenix Server (source of truth)                            │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-**Channel Events:**
-- Outgoing: `move`, `talk`, `dialogue_choice`, `action`, `spark:ask_question`
-- Incoming: `room_update`, `game_state`, `combat_start`, `dialogue_start`, `spark_status`
+### Key Files
 
-### TypeScript Game Types
+| File | Purpose |
+|------|---------|
+| `game_state.gd` | Autoload singleton for room state, navigation |
+| `book_page.gd` | 3D page mesh, dual SubViewport text, curl animation |
+| `main.gd` | Camera setup, input routing, login flow |
+| `page_curl.gdshader` | GPU page curl + AAA text effects |
 
-```typescript
-// src/types/game.ts
-interface GameState {
-  room: Room;
-  player: Player;
-  inventory: InventoryItem[];
-  quests: Quest[];
-  health: { current: number; max: number };
-  spark?: SparkState;
-  combat?: CombatState;
-  // ...
-}
+### Development Workflow
 
-interface SparkState {
-  bond_level: SparkBondLevel;
-  bond_progress: number;
-  awakening_stage: SparkAwakeningStage;
-  personality_traits: SparkTrait[];
-  visual_form: SparkVisualForm;
-  name: string | null;
-  pending_updates: number;
-}
+```bash
+# Recommended: Dev server with hot reload
+cd godot-client
+./dev.sh                      # Watches files, auto-rebuilds
+
+# Validate scripts (catches errors headlessly)
+./check.sh
+
+# Build for web
+./build_web.sh --fast         # Quick debug build (~30s)
+./build_web.sh                # Full release build (~45s)
+
+# Run tests
+./run_tests.sh
 ```
-
-### Server Connection
-
-The app auto-detects the appropriate server URL:
-
-| Platform | URL |
-|----------|-----|
-| iOS Simulator | `localhost:4000` |
-| Android Emulator | `10.0.2.2:4000` |
-| Physical Device | LAN IP (auto-detected) |
-| Web | `localhost:4000` |
-| Production | `https://loka.fly.dev` |
 
 ### UI Design Pattern: Living Ebook
 
-The mobile app follows a "Living Ebook" aesthetic:
-- Sepia/parchment backgrounds
+The client follows a "Living Ebook" aesthetic:
+- 3D book with page curl animations
+- Sepia/parchment textures
 - Serif fonts for narrative text
-- Minimal chrome, story-focused
 - Phase-aware theming (dawn, day, dusk, night)
-- Subtle particle effects for atmosphere
-
-### Running the Mobile App
-
-```bash
-cd mobile
-npm install
-
-# Start both Phoenix server and Expo
-cd ../server
-mix loka.dev
-
-# Or start Expo only
-npx expo start
-
-# Run on specific platform
-npm run ios      # iOS simulator
-npm run android  # Android emulator
-npm run web      # Web browser
-```
+- Shader-based visual effects (burn, ice, glow, fade)
 
 ---
 

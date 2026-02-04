@@ -23,24 +23,34 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ProjectsPanel do
       @collapsed && "panel-collapsed",
       @class
     ]}>
-      <div class="panel-tabs">
-        <button class="panel-tab active">
-          <.icon name="hero-folder" class="size-4" />
-          <span :if={!@collapsed}>Projects</span>
-        </button>
-        <div style="flex: 1;"></div>
-        <button
-          class="panel-collapse-btn"
-          phx-click="toggle_panel"
-          phx-value-panel="projects"
-          title={if @collapsed, do: "Expand", else: "Collapse"}
-        >
-          <.icon
-            name={if @collapsed, do: "hero-chevron-right", else: "hero-chevron-left"}
-            class="size-4"
-          />
-        </button>
-      </div>
+      <%= if @collapsed do %>
+        <div class="panel-collapsed-content">
+          <button
+            class="collapsed-icon-btn"
+            phx-click="toggle_panel"
+            phx-value-panel="projects"
+            title="Expand Projects"
+          >
+            <.icon name="hero-folder" class="size-5" />
+          </button>
+        </div>
+      <% else %>
+        <div class="panel-tabs">
+          <button class="panel-tab active">
+            <.icon name="hero-folder" class="size-4" />
+            <span>Projects</span>
+          </button>
+          <div style="flex: 1;"></div>
+          <button
+            class="panel-collapse-btn"
+            phx-click="toggle_panel"
+            phx-value-panel="projects"
+            title="Collapse"
+          >
+            <.icon name="hero-chevron-left" class="size-4" />
+          </button>
+        </div>
+      <% end %>
 
       <div class="panel-content" style={if @collapsed, do: "display: none;"}>
         <div class="projects-header">

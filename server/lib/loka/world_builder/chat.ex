@@ -17,7 +17,11 @@ defmodule Loka.WorldBuilder.Chat do
       chat_streaming: false,
       chat_current_response: "",
       chat_error: nil,
-      pending_tool_results: []
+      pending_tool_results: [],
+      chat_queued_messages: [],
+      chat_current_tool: nil,
+      chat_tool_step: 0,
+      chat_total_steps: 0
     )
   end
 
@@ -74,7 +78,20 @@ defmodule Loka.WorldBuilder.Chat do
   Handle tool use from streaming response.
   Executes the tool and stores the result for continuation.
   """
-  def handle_tool_use(socket, tool_name, tool_id, input) do
+  def handle_tool_use(socket, tool_name, tool_id, input, opts \\ []) do
+    # Track tool step progress
+    total_steps = opts[:total_steps] || socket.assigns[:chat_total_steps] || 0
+    current_step = (socket.assigns[:chat_tool_step] || 0) + 1
+
+    # Show current tool to user
+    tool_summary = format_tool_summary(tool_name, input)
+
+    socket =
+      socket
+      |> Phoenix.Component.assign(:chat_current_tool, tool_summary)
+      |> Phoenix.Component.assign(:chat_tool_step, current_step)
+      |> Phoenix.Component.assign(:chat_total_steps, max(total_steps, current_step))
+
     # Execute the tool
     project_key = get_in(socket.assigns, [:current_project, :key])
 
@@ -94,7 +111,65 @@ defmodule Loka.WorldBuilder.Chat do
       result: result
     }
 
-    Phoenix.Component.assign(socket, :pending_tool_results, tool_results ++ [tool_result])
+    socket
+    |> Phoenix.Component.assign(:pending_tool_results, tool_results ++ [tool_result])
+    |> Phoenix.Component.assign(:chat_current_tool, nil)
+  end
+
+  # Format tool name and input into a user-friendly summary
+  defp format_tool_summary(tool_name, input) do
+    case tool_name do
+      "wb_create_room" ->
+        "Creating room: #{input["name"] || input["key"]}"
+
+      "wb_update_room" ->
+        "Updating room: #{input["key"]}"
+
+      "wb_create_npc" ->
+        "Creating NPC: #{input["name"] || input["key"]}"
+
+      "wb_update_npc" ->
+        "Updating NPC: #{input["key"]}"
+
+      "wb_create_item" ->
+        "Creating item: #{input["name"] || input["key"]}"
+
+      "wb_update_item" ->
+        "Updating item: #{input["key"]}"
+
+      "wb_create_exit" ->
+        "Creating exit: #{input["from"]} → #{input["direction"]} → #{input["to"]}"
+
+      "wb_list_rooms" ->
+        "Listing rooms..."
+
+      "wb_list_npcs" ->
+        "Listing NPCs..."
+
+      "wb_list_items" ->
+        "Listing items..."
+
+      "wb_get_room" ->
+        "Reading room: #{input["key"]}"
+
+      "wb_get_npc" ->
+        "Reading NPC: #{input["key"]}"
+
+      "wb_get_item" ->
+        "Reading item: #{input["key"]}"
+
+      "wb_delete_room" ->
+        "Deleting room: #{input["key"]}"
+
+      "wb_delete_npc" ->
+        "Deleting NPC: #{input["key"]}"
+
+      "wb_delete_item" ->
+        "Deleting item: #{input["key"]}"
+
+      _ ->
+        "Running: #{tool_name}"
+    end
   end
 
   @doc """
@@ -120,12 +195,18 @@ defmodule Loka.WorldBuilder.Chat do
       |> Phoenix.Component.assign(:chat_streaming, false)
       |> Phoenix.Component.assign(:chat_current_response, "")
       |> Phoenix.Component.assign(:pending_tool_results, [])
+      |> Phoenix.Component.assign(:chat_tool_step, 0)
+      |> Phoenix.Component.assign(:chat_total_steps, 0)
 
     # If there were tool uses, continue the conversation with results
     if pending_results != [] do
       continue_with_tool_results(socket, pending_results)
     else
-      socket
+      # No more tool results - check for queued messages
+      case process_queue(socket) do
+        {:continue, socket} -> socket
+        {:done, socket} -> socket
+      end
     end
   end
 
@@ -148,8 +229,85 @@ defmodule Loka.WorldBuilder.Chat do
       chat_streaming: false,
       chat_current_response: "",
       chat_error: nil,
-      pending_tool_results: []
+      pending_tool_results: [],
+      chat_queued_messages: []
     )
+  end
+
+  @doc """
+  Cancel an in-progress streaming response.
+  """
+  def cancel_streaming(socket) do
+    if socket.assigns.chat_streaming do
+      # Add current partial response as a message if any content
+      current = socket.assigns.chat_current_response
+
+      messages =
+        if String.trim(current) != "" do
+          socket.assigns.chat_messages ++
+            [%{role: "assistant", content: current <> "\n\n_(cancelled)_"}]
+        else
+          socket.assigns.chat_messages
+        end
+
+      Phoenix.Component.assign(socket,
+        chat_messages: messages,
+        chat_streaming: false,
+        chat_current_response: "",
+        pending_tool_results: []
+      )
+    else
+      socket
+    end
+  end
+
+  @doc """
+  Queue a message to be sent after the current response completes.
+  """
+  def queue_message(socket, message) when is_binary(message) and message != "" do
+    queued = socket.assigns[:chat_queued_messages] || []
+    Phoenix.Component.assign(socket, :chat_queued_messages, queued ++ [message])
+  end
+
+  def queue_message(socket, _), do: socket
+
+  @doc """
+  Intercede: cancel current streaming and immediately send a new message.
+  """
+  def intercede(socket, message) when is_binary(message) and message != "" do
+    socket
+    |> cancel_streaming()
+    |> send_message(message)
+  end
+
+  def intercede(socket, _), do: socket
+
+  @doc """
+  Clear the message queue.
+  """
+  def clear_queue(socket) do
+    Phoenix.Component.assign(socket, :chat_queued_messages, [])
+  end
+
+  @doc """
+  Process the next queued message. Called after a response completes.
+  Returns {:continue, socket} if a message was processed, {:done, socket} if queue is empty.
+  """
+  def process_queue(socket) do
+    queued = socket.assigns[:chat_queued_messages] || []
+
+    case queued do
+      [next | rest] ->
+        socket =
+          socket
+          |> Phoenix.Component.assign(:chat_queued_messages, rest)
+          |> send_message(next)
+
+        {:continue, socket}
+
+      [] ->
+        {:done, socket}
+    end
   end
 
   # Private helpers

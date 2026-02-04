@@ -6,7 +6,7 @@
 - [Quick Commands](#quick-commands) | [Routes](#routes) | [Key Design Decisions](#key-design-decisions)
 - [Scripts vs Framework Code](#scripts-vs-framework-code) | [Scripting System](#scripting-system-development)
 - [World Builder Architecture](#world-builder-architecture) | [Testing Strategy](#testing-strategy)
-- [Documentation Organization](#documentation-organization) | [API Endpoints](#api-endpoints)
+- [Narrative Writing Style](#narrative-writing-style) | [Documentation Organization](#documentation-organization) | [API Endpoints](#api-endpoints)
 
 ---
 
@@ -336,6 +336,11 @@ open -a Godot project.godot       # Open in Godot Editor (macOS)
 mix loka.test                     # All tests (unit + content + balance)
 mix loka.test --quick             # Skip slow balance simulations
 mix loka.test.validate            # Validate prototypes, quests, dialogues
+mix loka.validate.yaml            # Quick YAML syntax check (used by pre-commit)
+
+# Static Analysis
+mix credo                         # Code quality suggestions
+mix credo --strict                # All suggestions including style
 
 # Recommended: ChannelBot storyline test (95% production parity)
 mix test test/integration/storyline_channel_test.exs
@@ -347,6 +352,25 @@ mix loka.new room <name>          # Generate room YAML scaffold
 
 # Deployment
 fly deploy
+```
+
+## Pre-Commit Hooks
+
+Git hooks are configured in `.git/hooks/` to run automatically on commit/push:
+
+**Pre-commit (runs on `git commit`):**
+- Elixir formatting check (`mix format --check-formatted`)
+- Elixir compile with warnings-as-errors
+- YAML syntax validation (`mix loka.validate.yaml`)
+- GDScript validation (`godot-client/check.sh`)
+- Secrets scan (blocks API keys like `sk-...`, `AKIA...`, `ghp_...`)
+
+**Pre-push (runs on `git push`):**
+- Content validation (`mix loka.test.validate --quick`)
+
+```bash
+# Skip hooks if needed (use sparingly)
+git commit --no-verify -m "wip"
 ```
 
 ## Routes
@@ -685,6 +709,7 @@ NPCManager.create_npc(...)  # Use EntityManager instead!
 - Auto-save dirty entities every 60s via EntityServer
 - LiveViews in `lib/loka_web/live/`, JS hooks in `assets/js/app.js`
 - **Timers**: Use `Loka.Timers` for persistent timers (crafting, offline progression). Timers survive restarts and continue while players are offline.
+- **Function Clause Grouping**: Keep all clauses of the same function together. Don't place private helpers between `handle_event/3` or `handle_info/2` clauses - move them to end of module.
 
 ## Post-Implementation Verification
 
@@ -744,6 +769,48 @@ See `.claude/skills/test-file-cleanup-pattern.md` for the full pattern. The `Tes
 ## Issue Tracking
 
 See `docs/BACKLOG.md` for planned work and issues. Active work is tracked using Claude Code's native task tools during development sessions.
+
+## Narrative Writing Style
+
+When writing game content (room descriptions, dialogue, cutscenes, emotes, design documents):
+
+### Formatting Rules
+
+| Rule | Example |
+|------|---------|
+| **No hyphens for pauses** | Use `...` or em dash `—` instead of `-` |
+| **No hyphenated compounds in prose** | Write "gut wrenching" not "gut-wrenching" |
+| **Em dashes for interruption** | "I was going to—" she stopped. |
+| **Ellipsis for trailing off** | "I thought maybe..." |
+
+### Voice Guidelines
+
+- **Show, don't tell**: Describe behavior and environment, not emotional states
+- **Sensory grounding**: Include specific textures, sounds, smells
+- **Subtext in dialogue**: Characters rarely say exactly what they mean
+- **Action beats**: Interrupt dialogue with physical actions, not said-bookisms
+
+### MUD Content Formats
+
+| Format | Purpose | When to Use |
+|--------|---------|-------------|
+| **Dialogue tree** | Primary interaction mode | Default. Player choices drive the scene. |
+| **Room description** | Sets sensory baseline | On room entry. First paragraph: what you see. Second: atmosphere. |
+| **Emote** | NPC periodic behavior | Ambient life. Fire every 30-60 seconds. |
+| **Cutscene** | Narrative sequence (player cannot act) | **Rare.** Only for: major reveals, transitions, climactic moments. |
+
+### Cutscene Philosophy
+
+Cutscenes break the player out of the game to focus on a single narrative thread. Use sparingly:
+
+| Use Cutscene For | Use Dialogue For |
+|------------------|------------------|
+| Major plot reveals (learning the ship truth) | Character conversations, even emotional ones |
+| Transitions (time passing, location shifts) | Building relationships |
+| Climactic moments (the sacrifice itself) | Exposition and backstory |
+| Moments requiring precise pacing | Player choices that matter |
+
+**Rule of thumb**: If the player could reasonably respond or make a choice, use dialogue. If the moment must unfold exactly as written, use cutscene.
 
 ## Documentation Organization
 

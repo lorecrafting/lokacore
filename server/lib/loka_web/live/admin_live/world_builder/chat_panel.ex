@@ -31,6 +31,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
   attr :streaming, :boolean, default: false
   attr :current_response, :string, default: ""
   attr :current_project, :map, default: nil
+  attr :projects, :list, default: []
   attr :error, :string, default: nil
   attr :collapsed, :boolean, default: false
   attr :queued_messages, :list, default: []
@@ -74,12 +75,34 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
       </div>
 
       <div class="panel-content" style={if @collapsed, do: "display: none;"}>
-        <%= if @current_project do %>
-          <div class="chat-project-context">
-            <.icon name="hero-folder-open" class="size-4" />
-            <span>{@current_project.key}</span>
-          </div>
-        <% end %>
+        <div class="chat-project-selector">
+          <form phx-change="select_project" style="display: contents;">
+            <.icon name="hero-folder" class="size-3" style="color: #e8a838; flex-shrink: 0;" />
+            <select
+              name="project_key"
+              style="flex: 1; padding: 3px 6px; font-size: 11px; background: #1a1a2e; border: 1px solid #333; border-radius: 3px; color: #ccc; cursor: pointer;"
+            >
+              <option value="" selected={@current_project == nil}>No project</option>
+              <%= for project_key <- @projects do %>
+                <option
+                  value={project_key}
+                  selected={@current_project && @current_project.key == project_key}
+                >
+                  {project_key}
+                </option>
+              <% end %>
+            </select>
+          </form>
+          <button
+            type="button"
+            class="btn-icon-small"
+            phx-click="create_project_ui"
+            title="New project"
+            style="flex-shrink: 0;"
+          >
+            <.icon name="hero-plus" class="size-3" />
+          </button>
+        </div>
 
         <div class="chat-messages" id="chat-messages" phx-hook="ScrollBottom">
           <%= if @messages == [] and !@streaming do %>

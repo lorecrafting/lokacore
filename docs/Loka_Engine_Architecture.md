@@ -4836,9 +4836,11 @@ end
 
 ---
 
-## Appendix A: React Native Mobile Client
+## Appendix A: React Native Mobile Client (ARCHIVED)
 
-### A.1 Project Structure
+> **⚠️ ARCHIVED**: This appendix documents the deprecated React Native client. The mobile client was migrated to **Godot 4.6** in January 2026. See `docs/decisions/2026-01-26-godot-client-migration.md` for the migration rationale and `godot-client/` for the current implementation.
+
+### A.1 Project Structure (Historical)
 
 ```
 loka-mobile/

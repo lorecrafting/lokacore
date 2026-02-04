@@ -93,11 +93,6 @@ export default class Canvas2DViewport {
     this.isSnapping = false // Whether shift is held for grid snapping
     this.snapIndicator = null // { x, y } position of snap indicator
 
-    // Minimap state
-    this.showMinimap = true
-    this.minimapSize = 150
-    this.minimapPadding = 10
-
     // Tooltip element
     this.tooltip = null
 
@@ -581,87 +576,6 @@ export default class Canvas2DViewport {
     // Restore context
     ctx.restore()
 
-    // Draw minimap (after restoring context, uses screen coordinates)
-    if (this.showMinimap && this.rooms.length > 0) {
-      this.drawMinimap(ctx)
-    }
-  }
-
-  drawMinimap(ctx) {
-    const padding = this.minimapPadding
-    const size = this.minimapSize
-    const x = this.width - size - padding
-    const y = this.height - size - padding - 160 // Account for console
-
-    // Get bounding box of all rooms at current Z-level
-    const currentRooms = this.rooms.filter(r => (r.z || 0) === this.currentZLevel)
-    if (currentRooms.length === 0) return
-
-    let minX = Infinity, maxX = -Infinity
-    let minY = Infinity, maxY = -Infinity
-    for (const room of currentRooms) {
-      minX = Math.min(minX, room.x || 0)
-      maxX = Math.max(maxX, room.x || 0)
-      minY = Math.min(minY, room.y || 0)
-      maxY = Math.max(maxY, room.y || 0)
-    }
-
-    const worldWidth = maxX - minX + 2
-    const worldHeight = maxY - minY + 2
-    const scale = Math.min(size / worldWidth, size / worldHeight) * 0.9
-
-    // Draw minimap background
-    ctx.fillStyle = 'rgba(26, 26, 46, 0.85)'
-    ctx.strokeStyle = '#444'
-    ctx.lineWidth = 1
-    ctx.beginPath()
-    ctx.roundRect(x - 4, y - 4, size + 8, size + 8, 6)
-    ctx.fill()
-    ctx.stroke()
-
-    // Draw rooms as dots
-    ctx.fillStyle = '#7eb3ff'
-    for (const room of currentRooms) {
-      const rx = x + ((room.x || 0) - minX + 1) * scale
-      const ry = y + ((room.y || 0) - minY + 1) * scale
-
-      // Highlight selected room
-      if (room.key === this.selectedRoom) {
-        ctx.fillStyle = '#4a9eff'
-        ctx.beginPath()
-        ctx.arc(rx, ry, 4, 0, Math.PI * 2)
-        ctx.fill()
-        ctx.fillStyle = '#7eb3ff'
-      } else {
-        ctx.beginPath()
-        ctx.arc(rx, ry, 2, 0, Math.PI * 2)
-        ctx.fill()
-      }
-    }
-
-    // Draw viewport rectangle
-    const topLeft = this.screenToWorld(0, 0)
-    const bottomRight = this.screenToWorld(this.width, this.height)
-
-    const viewX = x + (topLeft.x - minX + 1) * scale
-    const viewY = y + (topLeft.y - minY + 1) * scale
-    const viewW = (bottomRight.x - topLeft.x) * scale
-    const viewH = (bottomRight.y - topLeft.y) * scale
-
-    ctx.strokeStyle = '#ff6b6b'
-    ctx.lineWidth = 1.5
-    ctx.strokeRect(viewX, viewY, viewW, viewH)
-
-    // Draw minimap label
-    ctx.fillStyle = '#666'
-    ctx.font = '10px sans-serif'
-    ctx.textAlign = 'right'
-    ctx.fillText('Minimap', x + size, y - 8)
-  }
-
-  setShowMinimap(show) {
-    this.showMinimap = show
-    this.render()
   }
 
   setShowGrid(show) {

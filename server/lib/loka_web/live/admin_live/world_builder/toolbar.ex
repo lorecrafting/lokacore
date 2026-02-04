@@ -18,21 +18,6 @@ defmodule LokaWeb.AdminLive.WorldBuilder.Toolbar do
     ~H"""
     <div class={"world-builder-toolbar #{@class}"}>
       <div class="toolbar-section">
-        <button class="toolbar-btn active" title="Select Mode">
-          <.icon name="hero-cursor-arrow-rays" class="size-4" />
-        </button>
-        <button class="toolbar-btn" title="Move Tool">
-          <.icon name="hero-arrows-up-down" class="size-4" />
-        </button>
-        <button class="toolbar-btn" title="Rotate Tool">
-          <.icon name="hero-arrow-path" class="size-4" />
-        </button>
-        <button class="toolbar-btn" title="Scale Tool">
-          <.icon name="hero-arrows-pointing-out" class="size-4" />
-        </button>
-      </div>
-
-      <div class="toolbar-section">
         <button
           class={"toolbar-btn #{unless @undo_state.can_undo, do: "disabled"}"}
           phx-click="trigger_undo"
@@ -73,26 +58,6 @@ defmodule LokaWeb.AdminLive.WorldBuilder.Toolbar do
         <button class="toolbar-btn" phx-click="show_item_editor" title="Create Item">
           <.icon name="hero-cube-transparent" class="size-4" />
           <span style="font-size: 0.75rem; margin-left: 4px;">Item</span>
-        </button>
-      </div>
-      
-    <!-- Content Creation: Behavior and story elements -->
-      <div class="toolbar-section">
-        <button class="toolbar-btn" phx-click="show_script_editor" title="Create Script">
-          <.icon name="hero-code-bracket" class="size-4" />
-          <span style="font-size: 0.75rem; margin-left: 4px;">Script</span>
-        </button>
-        <button class="toolbar-btn" phx-click="show_dialogue_editor" title="Create Dialogue">
-          <.icon name="hero-chat-bubble-left-right" class="size-4" />
-          <span style="font-size: 0.75rem; margin-left: 4px;">Dialogue</span>
-        </button>
-        <button class="toolbar-btn" phx-click="show_quest_editor" title="Create Quest">
-          <.icon name="hero-flag" class="size-4" />
-          <span style="font-size: 0.75rem; margin-left: 4px;">Quest</span>
-        </button>
-        <button class="toolbar-btn" phx-click="show_cutscene_editor" title="Create Cutscene">
-          <.icon name="hero-film" class="size-4" />
-          <span style="font-size: 0.75rem; margin-left: 4px;">Cutscene</span>
         </button>
       </div>
 

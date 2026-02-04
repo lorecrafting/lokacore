@@ -34,8 +34,6 @@ defmodule Loka.WorldBuilder.LLM.ObservabilityLogger do
   use GenServer
   require Logger
 
-  @log_dir "priv/llm_logs"
-
   # =============================================================================
   # Public API
   # =============================================================================

@@ -34,26 +34,28 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ConsolePanel do
       <div class="console-tabs" style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
         <span style="font-size: 12px; color: #888; padding-right: 8px;">Console</span>
 
-        <input
-          type="text"
-          placeholder="Filter..."
-          value={@console_filter}
-          phx-change="filter_console"
-          phx-debounce="100"
-          name="filter"
-          style="width: 120px; padding: 4px 8px; font-size: 11px; background: #1a1a2e; border: 1px solid #333; border-radius: 4px; color: #ccc;"
-        />
+        <form phx-change="filter_console" style="display: contents;">
+          <input
+            type="text"
+            placeholder="Filter..."
+            value={@console_filter}
+            phx-debounce="100"
+            name="filter"
+            style="width: 120px; padding: 4px 8px; font-size: 11px; background: #1a1a2e; border: 1px solid #333; border-radius: 4px; color: #ccc;"
+          />
+        </form>
 
-        <select
-          name="level"
-          phx-change="filter_console_level"
-          style="padding: 4px 8px; font-size: 11px; background: #1a1a2e; border: 1px solid #333; border-radius: 4px; color: #ccc;"
-        >
-          <option value="all" selected={@level_filter == "all"}>All</option>
-          <option value="info" selected={@level_filter == "info"}>Info</option>
-          <option value="warning" selected={@level_filter == "warning"}>Warning</option>
-          <option value="error" selected={@level_filter == "error"}>Error</option>
-        </select>
+        <form phx-change="filter_console_level" style="display: contents;">
+          <select
+            name="level"
+            style="padding: 4px 8px; font-size: 11px; background: #1a1a2e; border: 1px solid #333; border-radius: 4px; color: #ccc;"
+          >
+            <option value="all" selected={@level_filter == "all"}>All</option>
+            <option value="info" selected={@level_filter == "info"}>Info</option>
+            <option value="warning" selected={@level_filter == "warning"}>Warning</option>
+            <option value="error" selected={@level_filter == "error"}>Error</option>
+          </select>
+        </form>
 
         <span style="color: #666; font-size: 11px;">
           ({length(@filtered_messages)}/{length(@console_messages)})

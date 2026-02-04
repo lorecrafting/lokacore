@@ -20,17 +20,6 @@ erl_crash.dump
 /server/tmp/
 /server/data/
 
-# React Native/Expo
-.expo/
-dist/
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-*.orig.*
-web-build/
-
 # IDE
 .idea/
 *.swp
@@ -52,8 +41,7 @@ Thumbs.db
 /server/cover/
 /server/playwright-report/
 /server/test-results/
-/mobile/playwright-report/
-/mobile/test-results/
+test/tmp/
 
 # Debug logs
 /server/priv/debug_logs/
@@ -61,12 +49,10 @@ Thumbs.db
 # Debug and test screenshots
 /server/priv/debug_screenshots/
 /server/smoke_*.png
-/mobile/*.png
-!/mobile/assets/**/*.png
 
-# Compiled TUI binaries
-/server/priv/tui/
-/tui/
+# Godot client build artifacts
+/godot-client/build/
+/godot-client/.godot/
 
 # Audio assets are tracked via Git LFS (see .gitattributes)
 

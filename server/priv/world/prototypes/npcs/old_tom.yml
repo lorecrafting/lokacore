@@ -1,0 +1,16 @@
+key: old_tom
+type: npc
+parent: base_npc
+short_desc: "Old Tom"
+long_desc: "Years of tavern work have carved deep lines around Tom's eyes, but they crinkle with genuine warmth when he smiles. His sleeves are rolled to weathered forearms, and a stained apron hangs from his broad frame. Silver stubble catches the firelight as he polishes glasses with practiced efficiency, each movement speaking of decades behind this very bar."
+extra_desc: |
+    Years of tavern work have carved deep lines around Tom's eyes, but they crinkle with genuine warmth when he smiles. His sleeves are rolled to weathered forearms, and a stained apron hangs from his broad frame. Silver stubble catches the firelight as he polishes glasses with practiced efficiency, each movement speaking of decades behind this very bar.
+keywords: [old_tom]
+primary_keyword: old_tom
+mood: neutral
+tags: []
+components:
+  combatant:
+    level: 1
+  npc_data:
+    level: 1

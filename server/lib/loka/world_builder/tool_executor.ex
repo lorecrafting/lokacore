@@ -34,8 +34,11 @@ defmodule Loka.WorldBuilder.ToolExecutor do
     # Get project context from opts
     project_key = opts[:project_key]
 
+    # Normalize tool name - strip wb_ prefix if present for backwards compatibility
+    normalized_name = String.replace_prefix(tool_name, "wb_", "")
+
     result =
-      case tool_name do
+      case normalized_name do
         # Project tools
         "create_project" -> execute_create_project(input)
         "load_project" -> execute_load_project(input)
