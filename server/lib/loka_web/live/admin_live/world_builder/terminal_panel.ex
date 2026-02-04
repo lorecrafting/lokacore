@@ -22,6 +22,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.TerminalPanel do
     ]}>
       <div class="panel-tabs">
         <button class="panel-tab active">
+          <span id="term-connection-dot" class="term-connection-dot connecting"></span>
           <.icon name="hero-command-line" class="size-4" />
           <span :if={!@collapsed}>Terminal</span>
         </button>

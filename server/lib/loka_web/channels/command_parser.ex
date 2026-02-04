@@ -59,6 +59,7 @@ defmodule LokaWeb.Channels.CommandParser do
   defp do_parse(["godmode"]), do: {:builder_godmode, %{}}
 
   # Normal MUD commands
+  defp do_parse(["clear"]), do: {:clear, %{}}
   defp do_parse(["look"]), do: {:look, %{}}
   defp do_parse(["look", target]), do: {:look, %{target: target}}
   defp do_parse(["l"]), do: {:look, %{}}

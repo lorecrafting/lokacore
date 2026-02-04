@@ -1,0 +1,65 @@
+/* ========================================
+   World Builder Design Variables
+   All design tokens for the World Builder UI
+   ======================================== */
+
+:root {
+  /* === Backgrounds (darkest to lightest) === */
+  --wb-bg: #0d0d0d;
+  --wb-surface: #1a1a22;
+  --wb-panel: #1e1e1e;
+  --wb-panel-alt: #252525;
+  --wb-panel-header: #2d2d2d;
+  --wb-input: #2a2a2a;
+  --wb-hover: #2d2d38;
+
+  /* === Toolbar === */
+  --wb-toolbar: #222228;
+  --wb-toolbar-border: #151518;
+
+  /* === Borders === */
+  --wb-border: #3d3d3d;
+  --wb-border-light: #4d4d5a;
+  --wb-border-dark: #1a1a1a;
+
+  /* === Text === */
+  --wb-text: #c9c9c9;
+  --wb-text-bright: #e0e0e0;
+  --wb-text-muted: #909090;
+  --wb-text-dim: #707070;
+  --wb-text-faint: #606060;
+
+  /* === Accent / Interactive === */
+  --wb-accent: #4a9eff;
+  --wb-accent-hover: #0e7ad8;
+  --wb-accent-gradient-from: #4a6cf7;
+  --wb-accent-gradient-to: #6366f1;
+
+  /* === Status === */
+  --wb-success: #4ade80;
+  --wb-error: #f87171;
+  --wb-warning: #fbbf24;
+  --wb-info: #60a5fa;
+
+  /* === Resize Handle === */
+  --wb-resize: #131318;
+
+  /* === Typography === */
+  --wb-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --wb-font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
+  --wb-font-size-xs: 0.7rem;
+  --wb-font-size-sm: 0.78rem;
+  --wb-font-size-base: 0.85rem;
+  --wb-font-size-lg: 0.95rem;
+
+  /* === Spacing === */
+  --wb-space-xs: 4px;
+  --wb-space-sm: 8px;
+  --wb-space-md: 12px;
+  --wb-space-lg: 16px;
+
+  /* === Border Radius === */
+  --wb-radius-sm: 3px;
+  --wb-radius-md: 5px;
+  --wb-radius-lg: 8px;
+}

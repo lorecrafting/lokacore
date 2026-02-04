@@ -785,6 +785,11 @@ defmodule LokaWeb.GameChannel do
       {:builder_godmode, params} ->
         execute_builder_command(:godmode, params, socket)
 
+      # Clear terminal (client-side operation)
+      {:clear, %{}} ->
+        push(socket, "clear_terminal", %{})
+        {:reply, :ok, socket}
+
       # Navigation
       {:navigate, %{direction: direction}} ->
         case ActionBridge.execute(socket, :navigate, %{direction: direction}) do
@@ -992,7 +997,7 @@ defmodule LokaWeb.GameChannel do
       Inventory:  inventory (or i), get <item>, drop <item>, equip, unequip
       Chat:       say <message>
       Combat:     attack <target>, flee
-      Other:      who, help\
+      Other:      who, help, clear\
     """
 
     text =

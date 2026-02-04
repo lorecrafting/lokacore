@@ -5,7 +5,7 @@
 - [Project Structure](#project-structure) | [Godot Client Development](#godot-client-development)
 - [Quick Commands](#quick-commands) | [Routes](#routes) | [Key Design Decisions](#key-design-decisions)
 - [Scripts vs Framework Code](#scripts-vs-framework-code) | [Scripting System](#scripting-system-development)
-- [World Builder Architecture](#world-builder-architecture) | [Testing Strategy](#testing-strategy)
+- [World Builder Architecture](#world-builder-architecture) | [Frontend Conventions](#frontend-conventions) | [Testing Strategy](#testing-strategy)
 - [Narrative Writing Style](#narrative-writing-style) | [Documentation Organization](#documentation-organization) | [API Endpoints](#api-endpoints)
 
 ---
@@ -740,9 +740,29 @@ NPCManager.create_npc(...)  # Use EntityManager instead!
 - PubSub topics: `room:{id}`, `player:{id}`, `entity:{id}`
 - Actions return `{:ok, Result.t()}` with events - never mutate directly
 - Auto-save dirty entities every 60s via EntityServer
-- LiveViews in `lib/loka_web/live/`, JS hooks in `assets/js/app.js`
+- LiveViews in `lib/loka_web/live/`, JS hooks in `assets/js/hooks/` (one file per hook)
 - **Timers**: Use `Loka.Timers` for persistent timers (crafting, offline progression). Timers survive restarts and continue while players are offline.
 - **Function Clause Grouping**: Keep all clauses of the same function together. Don't place private helpers between `handle_event/3` or `handle_info/2` clauses - move them to end of module.
+
+## Frontend Conventions
+
+### File Organization
+
+| Category | Location | Purpose |
+|----------|----------|---------|
+| CSS variables | `assets/css/variables.css` | World Builder design tokens |
+| Auth CSS | `assets/css/ebook-auth.css` | Login, register, character create |
+| Main CSS | `assets/css/app.css` | Tailwind config, admin, World Builder |
+| JS hooks | `assets/js/hooks/*.js` | One file per LiveView hook |
+| Hook index | `assets/js/hooks/index.js` | Re-exports all hooks |
+| Entry point | `assets/js/app.js` | Imports hooks, LiveSocket setup |
+
+### Rules
+
+- **New hooks**: Create `assets/js/hooks/my_hook.js`, add to `index.js`. Never add hooks inline in `app.js`.
+- **WB colors**: Use CSS variables from `variables.css` (e.g., `var(--wb-text-muted)`), not hardcoded hex values.
+- **Tailwind WB classes**: Use `@theme` classes like `bg-wb-panel`, `text-wb-text-muted`, `border-wb-border`.
+- **No @apply with daisyUI**: daisyUI classes must be used directly in templates, not with `@apply`.
 
 ## Post-Implementation Verification
 
