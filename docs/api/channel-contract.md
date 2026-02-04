@@ -131,6 +131,15 @@ Sent when player moves or room contents change.
 }
 ```
 
+#### `output`
+Text output for MUD clients (room descriptions, command responses, builder output).
+
+```typescript
+{
+  text: string  // May be prefixed with "[BUILDER]" for admin command output
+}
+```
+
 #### `event`
 Generic game event (chat, combat feedback, notifications).
 
@@ -138,6 +147,16 @@ Generic game event (chat, combat feedback, notifications).
 {
   text: string,
   type?: "normal" | "combat" | "quest" | "system"
+}
+```
+
+#### `broadcast`
+System-wide announcements and event messages.
+
+```typescript
+{
+  text: string,
+  type: "announcement" | "event" | "emergency"
 }
 ```
 
@@ -483,6 +502,32 @@ Generic action on entity.
 ```typescript
 {
   action: "reincarnate"
+}
+```
+
+### Text Commands
+
+#### `command`
+Raw text input for MUD-style interaction. Parsed by `CommandParser` into structured actions.
+
+```typescript
+{
+  input: string  // e.g., "north", "look monk", "goto tavern"
+}
+```
+
+**Player commands**: `north`, `look`, `talk <npc>`, `inventory`, `get <item>`, `drop <item>`, `say <msg>`, `attack <target>`, `flee`, `equip <item>`, `unequip <slot>`, `who`, `help`
+
+**Builder commands** (admin-only, silently rejected for non-admins):
+`goto <room>`, `rooms`, `where`, `find <search>`, `info <entity>`, `list npcs|items|quests`, `spawn <npc>`, `purge`, `give <item>`, `setflag <flag>`, `clearflag <flag>`, `flags`, `startquest <key>`, `completequest <key>`, `resetquest <key>`, `quests`, `settime dawn|noon|dusk|midnight`, `reload`, `validate`, `godmode`
+
+### Spark Companion
+
+#### `spark`
+```typescript
+{
+  action: "status" | "updates" | "dismiss" | "ask",
+  question?: string  // Required for "ask"
 }
 ```
 

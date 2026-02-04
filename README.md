@@ -113,8 +113,7 @@ mix loka.test
 |------|-------------|
 | `/` | Landing page |
 | `/admin` | Admin dashboard (requires auth) |
-| `/admin/play` | Text-based MUD client (admin testing) |
-| `/admin/world-builder` | World Builder UI |
+| `/admin/world-builder` | World Builder UI (includes MUD terminal) |
 
 > **Note:** The main game client is the Godot app, which connects via Phoenix Channels (WebSocket).
 

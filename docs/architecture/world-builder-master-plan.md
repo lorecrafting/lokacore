@@ -1,8 +1,8 @@
 # Loka World Builder - Master Design Document
 
-**Status**: Planning
-**Version**: 2.0
-**Last Updated**: 2026-01-15
+**Status**: Implemented (Tier 1-3 complete)
+**Version**: 3.0
+**Last Updated**: 2026-02-03
 
 ---
 
@@ -47,12 +47,13 @@ Git (auto-commit)
 | Layer | Technology | Why |
 |-------|------------|-----|
 | **Admin Shell** | Phoenix LiveView | Real-time, server-rendered, auth built-in |
-| **3D Viewport** | React Three Fiber | Best-in-class 3D in React, declarative |
-| **UI Components** | DaisyUI | Matches existing admin UI |
-| **State Bridge** | LiveView PubSub | Sync LiveView ↔ React |
-| **Layout** | D3-force-3d | Auto-layout algorithms |
-| **LLM** | Claude Code OAuth (primary) / API Key (secondary) | Content generation (streaming) |
-| **Storage** | YAML + SQLite | Your existing system |
+| **2D Viewport** | Canvas2DViewport (JS Hook) | 2D map visualization, pan/zoom |
+| **Script Editor** | CodeMirror 6 | Syntax highlighting, bundled JS |
+| **UI Components** | DaisyUI + Custom CSS | Dark theme, resizable panels |
+| **Layout** | CSS Grid with server-computed columns | Avoids combinatorial explosion |
+| **LLM** | Multi-provider (Anthropic, OpenAI, etc.) | Streaming chat for content generation |
+| **MUD Terminal** | MudTerminal JS Hook + GameChannel | Embedded text client for content testing |
+| **Storage** | YAML + SQLite | Existing system |
 | **Validation** | Existing validators | quest_validator.ex, etc. |
 
 ### File Structure
@@ -62,22 +63,25 @@ server/
 ├── lib/loka_web/live/admin_live/
 │   ├── world_builder_live.ex         # Main LiveView
 │   ├── world_builder/
-│   │   ├── toolbar.ex                # Mode buttons (Edit, View, Test)
+│   │   ├── toolbar.ex                # Tool buttons, view toggles, terminal toggle
 │   │   ├── hierarchy_panel.ex        # Tree view (zones, rooms, NPCs, quests)
-│   │   ├── viewport_container.ex     # React 3D viewport bridge
+│   │   ├── viewport_container.ex     # Canvas2D viewport bridge
 │   │   ├── inspector_panel.ex        # Property editor
-│   │   ├── chat_panel.ex             # Claude chat interface
+│   │   ├── chat_panel.ex             # LLM chat interface
+│   │   ├── terminal_panel.ex         # MUD terminal for content testing
 │   │   ├── console_panel.ex          # Validation output (collapsible inline)
 │   │   └── input_validator.ex        # Form validation
 │
-├── assets/js/world_builder/
-│   ├── WorldBuilderApp.jsx           # React root
-│   ├── Scene3D.jsx                   # Three.js scene
-│   ├── components/
-│   │   ├── RoomNode3D.jsx            # 3D room cube
-│   │   ├── ExitLine.jsx              # Connection line
-│   │   ├── NPCMarker.jsx             # NPC icon in room
-│   │   ├── ItemLabel.jsx             # Floating text
+├── lib/loka_web/channels/
+│   ├── game_channel.ex               # Phoenix Channel (game transport)
+│   ├── command_parser.ex             # Text → tagged action tuples
+│   ├── builder_commands.ex           # Admin command implementations
+│   └── room_helpers.ex               # Room loading helpers
+│
+├── assets/js/
+│   ├── app.js                        # Hooks: MudTerminal, PanelResize, etc.
+│   └── world_builder/
+│       └── Canvas2DViewport.js       # 2D map canvas
 │   │   └── QuestFlow.jsx             # Quest visualization
 │   ├── hooks/
 │   │   ├── useLiveViewSync.js        # Sync with LiveView

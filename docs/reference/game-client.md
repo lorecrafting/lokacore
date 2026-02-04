@@ -2,17 +2,32 @@
 
 ## Overview
 
-Loka uses `LokaWeb.GameChannel` as the unified transport for all game clients
-(mobile and web). Clients connect via WebSocket and exchange structured events.
+Loka uses `LokaWeb.GameChannel` as the unified transport for all game clients.
+Clients connect via WebSocket and exchange structured events.
+
+## Client Types
+
+| Client | Connection | Purpose |
+|--------|-----------|---------|
+| **Godot** (`godot-client/`) | Phoenix Channel via WebSocket | Primary mobile/web game client |
+| **World Builder Terminal** | Phoenix Channel via JS hook | Admin content testing (embedded in World Builder) |
 
 ## GameChannel Architecture
 
 ```
 game_channel.ex
 ├── join/3 → Authentication, game state initialization
-├── handle_in/3 → Client commands (navigate, action, chat, etc.)
+├── handle_in/3 → Client commands (navigate, action, chat, command, etc.)
 ├── handle_info/2 → PubSub events, timers (combat, bardo)
 └── push/3 → Server-to-client events
+
+command_parser.ex
+├── parse/1 → Raw text → tagged action tuples
+└── Builder commands get :builder_* prefix for security gating
+
+builder_commands.ex
+├── execute/3 → Admin command dispatch
+└── goto, spawn, give, flags, quests, reload, validate, etc.
 
 room_helpers.ex
 ├── load_player_room/1 → Load player's current room
@@ -47,18 +62,56 @@ channel.join()
 - `social` - Set mood/pose
 - `gather` - Gather from resource node
 - `craft` - Craft item from recipe
+- `command` - Raw text input (MUD-style commands, parsed by CommandParser)
 
 **Server → Client:**
 - `game_state` - Full game state on join
 - `room_update` - Room changed
+- `output` - Text output for MUD clients (room descriptions, builder output)
 - `event` - Game event text
 - `combat_start/update/end` - Combat lifecycle
 - `dialogue_start/update/end` - NPC dialogue
 - `bardo_enter/message/can_reincarnate/exit` - Death sequence
 - `shop_open/close` - Merchant interaction
 - `container_open/update/close` - Container interaction
+- `broadcast` - System announcements
 
 See `LokaWeb.GameChannel` moduledoc for complete API documentation.
+
+## Text Command System
+
+The `command` event accepts raw text input and parses it via `CommandParser`:
+
+### Player Commands
+```
+Movement:   north, south, east, west, up, down (or n,s,e,w,u,d)
+Look:       look, look <target>
+Talk:       talk <npc>
+Inventory:  inventory (or i), get <item>, drop <item>, equip, unequip
+Chat:       say <message>
+Combat:     attack <target>, flee
+Other:      who, help
+```
+
+### Builder Commands (admin-only)
+Builder commands are silently rejected for non-admins (identical "Unknown command" response, zero information leakage).
+
+```
+Navigation: goto <room_key>, rooms, where, find <search>
+Inspect:    info <entity>, list npcs|items|quests
+Spawn:      spawn <npc_key>, purge, give <item_key>
+Flags:      setflag <flag>, clearflag <flag>, flags
+Quests:     startquest <key>, completequest <key>, resetquest <key>, quests
+World:      settime dawn|noon|dusk|midnight, reload, validate
+Mode:       godmode
+```
+
+### Security Design
+
+1. `CommandParser` tags builder commands with `:builder_*` prefix at parse time
+2. `GameChannel.execute_builder_command/3` checks `socket.assigns.player.is_admin`
+3. Non-admins receive identical "Unknown command" response (no hint commands exist)
+4. `push_help/1` is context-aware: only admins see builder command documentation
 
 ## Godot Client
 
@@ -69,6 +122,20 @@ The Godot 4.6 client (`godot-client/`) connects via GameChannel:
 - `scripts/book_page.gd` - 3D book page UI with text rendering
 
 See `CLAUDE.md` for detailed Godot client documentation.
+
+## World Builder Terminal
+
+The MUD terminal panel is embedded in the World Builder UI as a resizable column panel.
+It connects to `GameChannel` via a JS hook (`MudTerminal`) with a JWT token generated
+by `WorldBuilderLive`.
+
+Key files:
+- `lib/loka_web/live/admin_live/world_builder/terminal_panel.ex` - Phoenix component
+- `lib/loka_web/channels/command_parser.ex` - Text command parser
+- `lib/loka_web/channels/builder_commands.ex` - Admin command implementations
+- `assets/js/app.js` (MudTerminal hook) - Socket connection, output rendering, command history
+
+Toggle with keyboard shortcut `5` or the Terminal toolbar button.
 
 ## UI Style
 

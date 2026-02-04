@@ -136,8 +136,8 @@ lokacore/
 │   │   ├── timers/           # Persistent timers (crafting, offline progression)
 │   │   └── session/          # Client messaging layer
 │   ├── lib/loka_web/
-│   │   ├── channels/         # Phoenix Channels (game_channel.ex)
-│   │   └── live/admin_live/  # Admin dashboard + World Builder
+│   │   ├── channels/         # Phoenix Channels (game_channel, command_parser, builder_commands)
+│   │   └── live/admin_live/  # Admin dashboard + World Builder (incl. terminal panel)
 │   └── priv/world/           # YAML game content
 │       ├── prototypes/       # Entity prototypes
 │       ├── quests/           # Quest definitions
@@ -648,6 +648,40 @@ See `docs/architecture/elixir-scripts-design.md` for full API reference.
 ## World Builder Architecture
 
 The World Builder UI follows a layered architecture to avoid code duplication:
+
+### Panel Layout
+
+Unity-style resizable panel layout with CSS Grid (columns computed server-side):
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│ Toolbar (Room, NPC, Item, Validate, Flow, Commit, Terminal, ...) │
+├──────────┬─────────────────┬───────────┬──────────┬──────────────┤
+│          │                 │           │          │              │
+│Hierarchy │    Viewport     │ Inspector │ Terminal │    Chat      │
+│ (rooms,  │   (2D canvas    │ (property │  (MUD    │   (LLM      │
+│  npcs,   │    map editor)  │  editor)  │  client) │   assistant) │
+│  items,  │                 │           │          │              │
+│  etc.)   │  ┌───────────┐  │           │          │              │
+│          │  │  Console   │  │           │          │              │
+│          │  └───────────┘  │           │          │              │
+├──────────┴─────────────────┴───────────┴──────────┴──────────────┤
+│ Keyboard: 1=Hierarchy 2=Inspector 3=Console 4=Chat 5=Terminal    │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+### Terminal Panel (MUD Client)
+
+Embedded text-based MUD client for rapid content testing. Connects to `GameChannel` via JS hook with a JWT token.
+
+| File | Purpose |
+|------|---------|
+| `world_builder/terminal_panel.ex` | Phoenix component (output, input, vitals) |
+| `channels/command_parser.ex` | Text input → tagged action tuples |
+| `channels/builder_commands.ex` | Admin command implementations |
+| `assets/js/app.js` (MudTerminal) | Socket connection, command history, output rendering |
+
+**Security**: Builder commands get `:builder_*` prefix at parse time. `GameChannel` checks `is_admin` and gives non-admins identical "Unknown command" response (zero information leakage).
 
 ### Layer 1: Content Modules (Reusable)
 Domain-specific APIs used by BOTH game code AND World Builder UI:

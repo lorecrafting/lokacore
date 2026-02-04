@@ -13,9 +13,10 @@
 ```
 +----------------------------------+
 |          CLIENTS                 |
-|  Phoenix LiveView (Web)          |
-|  - Game Client (/game)           |
+|  Godot 4.6 (Mobile/Web)          |
+|  Phoenix LiveView (Admin)        |
 |  - Admin Dashboard (/admin)      |
+|  - World Builder (/admin/world-builder) |
 +----------------+-----------------+
                  |
             WebSocket
