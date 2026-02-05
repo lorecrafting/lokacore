@@ -30,7 +30,7 @@ function createMockContext() {
     textAlign: 'left',
     textBaseline: 'alphabetic',
     globalAlpha: 1,
-    font: ''
+    font: '',
   }
 }
 
@@ -46,13 +46,13 @@ function createMockCanvas() {
     }),
     removeEventListener: vi.fn(),
     parentElement: {
-      appendChild: vi.fn()
+      appendChild: vi.fn(),
     },
     width: 800,
     height: 600,
     style: {},
     _ctx: ctx,
-    _listeners: listeners
+    _listeners: listeners,
   }
 }
 
@@ -70,28 +70,43 @@ function setupGlobals() {
       style: { cssText: '' },
       innerHTML: '',
       parentElement: null,
-      getBoundingClientRect: vi.fn(() => ({ width: 200, height: 100 }))
+      getBoundingClientRect: vi.fn(() => ({ width: 200, height: 100 })),
     })),
-    _listeners: docListeners
+    _listeners: docListeners,
   })
 
   vi.stubGlobal('window', {
     devicePixelRatio: 1,
-    requestAnimationFrame: vi.fn((cb) => { cb(); return 1 }),
-    cancelAnimationFrame: vi.fn()
+    requestAnimationFrame: vi.fn((cb) => {
+      cb()
+      return 1
+    }),
+    cancelAnimationFrame: vi.fn(),
   })
 
-  vi.stubGlobal('requestAnimationFrame', vi.fn((cb) => { cb(); return 1 }))
+  vi.stubGlobal(
+    'requestAnimationFrame',
+    vi.fn((cb) => {
+      cb()
+      return 1
+    })
+  )
   vi.stubGlobal('cancelAnimationFrame', vi.fn())
 
-  vi.stubGlobal('getComputedStyle', vi.fn(() => ({
-    getPropertyValue: vi.fn(() => '')
-  })))
+  vi.stubGlobal(
+    'getComputedStyle',
+    vi.fn(() => ({
+      getPropertyValue: vi.fn(() => ''),
+    }))
+  )
 
-  vi.stubGlobal('ResizeObserver', vi.fn(() => ({
-    observe: vi.fn(),
-    disconnect: vi.fn()
-  })))
+  vi.stubGlobal(
+    'ResizeObserver',
+    vi.fn(() => ({
+      observe: vi.fn(),
+      disconnect: vi.fn(),
+    }))
+  )
 }
 
 function createViewport(options = {}) {
@@ -103,11 +118,43 @@ function createViewport(options = {}) {
 // Sample room data
 function sampleRooms() {
   return [
-    { key: 'town_square', name: 'Town Square', x: 0, y: 0, z: 0, exits: { north: 'market', east: 'tavern' }, spawns: {} },
-    { key: 'market', name: 'Market', x: 0, y: -1, z: 0, exits: { south: 'town_square' }, spawns: { npcs: ['merchant'] } },
-    { key: 'tavern', name: 'Tavern', x: 1, y: 0, z: 0, exits: { west: 'town_square' }, spawns: { items: ['ale'] } },
+    {
+      key: 'town_square',
+      name: 'Town Square',
+      x: 0,
+      y: 0,
+      z: 0,
+      exits: { north: 'market', east: 'tavern' },
+      spawns: {},
+    },
+    {
+      key: 'market',
+      name: 'Market',
+      x: 0,
+      y: -1,
+      z: 0,
+      exits: { south: 'town_square' },
+      spawns: { npcs: ['merchant'] },
+    },
+    {
+      key: 'tavern',
+      name: 'Tavern',
+      x: 1,
+      y: 0,
+      z: 0,
+      exits: { west: 'town_square' },
+      spawns: { items: ['ale'] },
+    },
     { key: 'cellar', name: 'Cellar', x: 1, y: 0, z: -1, exits: { up: 'tavern' }, spawns: {} },
-    { key: 'tower_top', name: 'Tower Top', x: 0, y: -1, z: 1, exits: { down: 'market' }, spawns: {} }
+    {
+      key: 'tower_top',
+      name: 'Tower Top',
+      x: 0,
+      y: -1,
+      z: 1,
+      exits: { down: 'market' },
+      spawns: {},
+    },
   ]
 }
 
@@ -348,7 +395,7 @@ describe('Canvas2DViewport', () => {
       viewport.setRooms(sampleRooms())
 
       // Click slightly off-center but still within room bounds
-      const halfSize = (viewport.roomSize / 2) / viewport.gridSize
+      const halfSize = viewport.roomSize / 2 / viewport.gridSize
       // Market is at (0, -1). Try clicking at edge of room
       const edgePoint = viewport.worldToScreen(halfSize * 0.9, -1)
       const room = viewport.getRoomAtPoint(edgePoint.x, edgePoint.y)
@@ -462,14 +509,20 @@ describe('Canvas2DViewport', () => {
       const { viewport } = createViewport()
       viewport.camera.zoom = 0.1 // Below minZoom of 0.2
       // Simulate zoom clamp (same logic as handleWheel)
-      viewport.camera.zoom = Math.max(viewport.minZoom, Math.min(viewport.maxZoom, viewport.camera.zoom))
+      viewport.camera.zoom = Math.max(
+        viewport.minZoom,
+        Math.min(viewport.maxZoom, viewport.camera.zoom)
+      )
       expect(viewport.camera.zoom).toBe(0.2)
     })
 
     it('does not zoom above maxZoom', () => {
       const { viewport } = createViewport()
       viewport.camera.zoom = 5 // Above maxZoom of 3
-      viewport.camera.zoom = Math.max(viewport.minZoom, Math.min(viewport.maxZoom, viewport.camera.zoom))
+      viewport.camera.zoom = Math.max(
+        viewport.minZoom,
+        Math.min(viewport.maxZoom, viewport.camera.zoom)
+      )
       expect(viewport.camera.zoom).toBe(3)
     })
   })

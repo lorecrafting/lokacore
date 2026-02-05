@@ -11,22 +11,22 @@
 }
 
 .cutscene-timeline-header {
-  padding: 12px;
+  padding: var(--wb-space-md);
   background: var(--wb-input);
   border-bottom: 1px solid var(--wb-border);
 }
 
 .header-row {
   display: flex;
-  gap: 16px;
+  gap: var(--wb-space-lg);
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: var(--wb-space-md);
 }
 
 .form-group-inline {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--wb-space-sm);
 }
 
 .form-group-inline label {
@@ -38,7 +38,7 @@
 
 .header-actions {
   display: flex;
-  gap: 8px;
+  gap: var(--wb-space-sm);
   justify-content: flex-end;
 }
 
@@ -52,14 +52,14 @@
   width: 160px;
   background: var(--wb-input);
   border-right: 1px solid var(--wb-border);
-  padding: 12px;
+  padding: var(--wb-space-md);
   overflow-y: auto;
 }
 
 .timeline-controls h4 {
-  font-size: 0.85rem;
+  font-size: var(--wb-font-size-base);
   color: var(--wb-text-muted);
-  margin-bottom: 8px;
+  margin-bottom: var(--wb-space-sm);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -104,7 +104,7 @@
 
 .timeline-track-label {
   width: 100px;
-  padding: 8px;
+  padding: var(--wb-space-sm);
   background: var(--wb-input);
   border-right: 1px solid var(--wb-border);
   font-size: 0.8rem;
@@ -122,9 +122,9 @@
 
 .timeline-keyframe {
   position: absolute;
-  padding: 4px 8px;
+  padding: var(--wb-space-xs) var(--wb-space-sm);
   border-radius: var(--wb-radius-md);
-  font-size: 0.7rem;
+  font-size: var(--wb-font-size-xs);
   font-weight: 600;
   color: white;
   white-space: nowrap;
@@ -150,28 +150,28 @@
   width: 280px;
   background: var(--wb-input);
   border-left: 1px solid var(--wb-border);
-  padding: 16px;
+  padding: var(--wb-space-lg);
   overflow-y: auto;
 }
 
 .keyframe-properties-empty {
   color: var(--wb-text-dim);
   text-align: center;
-  padding: 32px 16px;
-  font-size: 0.85rem;
+  padding: 32px var(--wb-space-lg);
+  font-size: var(--wb-font-size-base);
 }
 
 .keyframe-properties {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--wb-space-md);
 }
 
 .properties-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: var(--wb-space-sm);
 }
 
 .properties-header h4 {
@@ -182,16 +182,16 @@
 
 /* Effects Panel (Cutscene Editor) */
 .effects-panel {
-  margin-top: 16px;
+  margin-top: var(--wb-space-lg);
   border-top: 1px solid var(--wb-border);
-  padding-top: 12px;
+  padding-top: var(--wb-space-md);
 }
 
 .effects-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: var(--wb-space-sm);
 }
 
 .effects-header h4 {
@@ -206,7 +206,7 @@
   color: var(--wb-text-faint);
   font-size: 0.8rem;
   text-align: center;
-  padding: 8px;
+  padding: var(--wb-space-sm);
 }
 
 .effects-list {
@@ -217,7 +217,7 @@
 
 .effect-item {
   display: flex;
-  gap: 4px;
+  gap: var(--wb-space-xs);
   align-items: center;
   flex-wrap: wrap;
 }
@@ -232,14 +232,14 @@
 .validation-display {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  font-size: 0.75rem;
+  gap: var(--wb-space-xs);
+  font-size: var(--wb-font-size-xs);
 }
 
 .validation-display.valid {
   flex-direction: row;
   align-items: center;
-  gap: 4px;
+  gap: var(--wb-space-xs);
   color: var(--wb-success);
 }
 
@@ -264,16 +264,16 @@
 
 /* Preview Panel (Cutscene Editor) */
 .preview-panel {
-  margin-top: 12px;
+  margin-top: var(--wb-space-md);
   border-top: 1px solid var(--wb-border);
-  padding-top: 12px;
+  padding-top: var(--wb-space-md);
 }
 
 .preview-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: var(--wb-space-sm);
 }
 
 .preview-header h4 {
@@ -284,29 +284,29 @@
 
 .preview-controls {
   display: flex;
-  gap: 4px;
+  gap: var(--wb-space-xs);
 }
 
 .preview-empty {
   color: var(--wb-text-faint);
   font-size: 0.8rem;
   text-align: center;
-  padding: 16px;
+  padding: var(--wb-space-lg);
 }
 
 .preview-steps {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--wb-space-xs);
   max-height: 200px;
   overflow-y: auto;
 }
 
 .preview-step {
   display: flex;
-  gap: 8px;
+  gap: var(--wb-space-sm);
   align-items: center;
-  padding: 6px 8px;
+  padding: 6px var(--wb-space-sm);
   background: var(--wb-panel);
   border-radius: var(--wb-radius-md);
   cursor: pointer;
@@ -356,8 +356,8 @@
   cursor: pointer;
   color: var(--wb-text-muted);
   font-size: 0.8rem;
-  padding: 4px 8px;
-  margin-top: 8px;
+  padding: var(--wb-space-xs) var(--wb-space-sm);
+  margin-top: var(--wb-space-sm);
 }
 
 .more-types:hover {

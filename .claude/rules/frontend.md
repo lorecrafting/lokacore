@@ -66,6 +66,18 @@ const MyHook = {
 | `updated()` | Refresh DOM refs that may have changed after LiveView patch. Do NOT re-add listeners (HookHelper handles this) |
 | `destroyed()` | Call `this.helper.destroy()`. Clean up any non-HookHelper resources (channels, etc.) |
 
+```
+    mounted()                    updated()                  destroyed()
+        │                            │                           │
+        ▼                            ▼                           ▼
+┌───────────────────┐      ┌───────────────────┐      ┌───────────────────┐
+│ new HookHelper()  │      │ Refresh DOM refs  │      │ helper.destroy()  │
+│ Bind listeners    │      │ (listeners persist│      │ Remove listeners  │
+│ Initialize state  │      │  across patches)  │      │ Disconnect obs    │
+│ Setup observers   │      │                   │      │ Clear intervals   │
+└───────────────────┘      └───────────────────┘      └───────────────────┘
+```
+
 ### Hook Rules
 
 - **Console logging:** Use `[HookName]` prefix (e.g., `console.log('[MudTerminal] connected')`). No bare `console.log()`.
@@ -93,10 +105,19 @@ const MyHook = {
 3. **Use** in HEEx templates as Tailwind classes: `bg-wb-panel`, `text-wb-text-muted`, `border-wb-border`
 4. **Use** in `app.css` custom CSS as: `var(--wb-panel)`, `var(--wb-text-muted)`
 
+```
+┌─────────────────────┐    ┌──────────────────────┐    ┌─────────────────┐
+│    variables.css    │───▶│  tailwind-config.css │───▶│   HEEx / CSS    │
+│  --wb-panel: #1a1a  │    │  @theme {             │    │  bg-wb-panel    │
+│  --wb-text: #e5e5   │    │    --color-wb-panel   │    │  var(--wb-panel)│
+└─────────────────────┘    └──────────────────────┘    └─────────────────┘
+     Define tokens          Export to Tailwind          Use in templates
+```
+
 ### Color Rules
 
 - **NEVER hardcode hex colors.** Always use `--wb-*` variables or `wb-*` Tailwind classes.
-- **Transparency:** ALWAYS use `color-mix(in srgb, var(--wb-color) N%, transparent)`. NEVER use `rgba()` with CSS variables (it doesn't work).
+- **Transparency:** ALWAYS use `color-mix(in srgb, var(--wb-color) N%, transparent)`. NEVER use `rgba()` with CSS variables (it doesn't work). **Exception:** Shadow definitions in `variables.css` use `rgba()` because `box-shadow` requires actual color values.
 - **Adding new colors:** First check if an existing variable fits. If not, add to `variables.css` with `--wb-` prefix AND a corresponding `--color-wb-*` entry in the `app.css` `@theme` block.
 - **No @apply with daisyUI** - use daisyUI classes directly in templates.
 
@@ -259,6 +280,16 @@ The World Builder uses CSS Grid with `--grid-columns` custom property controllin
 `hierarchy | h_resize | viewport | i_resize | inspector | t_resize | terminal | c_resize | chat`
 
 Grid column indices: hierarchy=0, inspector=4, terminal=6, chat=8.
+
+```
+Grid columns: 0      1        2         3        4          5        6         7       8
+              │      │        │         │        │          │        │         │       │
+              ▼      ▼        ▼         ▼        ▼          ▼        ▼         ▼       ▼
+         ┌────────┬──────┬──────────┬──────┬──────────┬──────┬─────────┬──────┬────────┐
+         │Hierarch│resize│ Viewport │resize│ Inspector│resize│ Terminal│resize│  Chat  │
+         │  240px │ 4px  │   flex   │ 4px  │   280px  │ 4px  │  200px  │ 4px  │ 320px  │
+         └────────┴──────┴──────────┴──────┴──────────┴──────┴─────────┴──────┴────────┘
+```
 
 ### Panel Configuration
 
@@ -458,6 +489,28 @@ Most commonly used design tokens:
 | `Canvas2DViewport` | `@/world_builder/Canvas2DViewport.js` | 2D canvas viewport orchestrator |
 | `Canvas2DRenderer` | `@/world_builder/Canvas2DRenderer.js` | Canvas drawing operations |
 | `Canvas2DInteraction` | `@/world_builder/Canvas2DInteraction.js` | Mouse/keyboard interaction |
+
+### Canvas2D System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         Canvas2DViewport                                 │
+│  Orchestrator: manages canvas, coordinates renderer + interaction        │
+│  - Reads CSS vars for colors                                            │
+│  - Handles room/entity data from LiveView                               │
+└────────────────────────────┬────────────────────────────────────────────┘
+                             │ delegates to
+         ┌───────────────────┴───────────────────┐
+         ▼                                       ▼
+┌─────────────────────┐               ┌─────────────────────┐
+│  Canvas2DRenderer   │               │ Canvas2DInteraction │
+│  Drawing operations │               │  Mouse/keyboard     │
+│  - drawRoom()       │               │  - Pan/zoom         │
+│  - drawExit()       │               │  - Selection        │
+│  - drawGrid()       │               │  - Drag operations  │
+└─────────────────────┘               └─────────────────────┘
+```
+
 | `constants` | `@/world_builder/constants.js` | Shared fallback values for canvas/testing |
 
 ## Error Handling in Hooks
@@ -482,6 +535,59 @@ if (!this.inputEl) {
   console.warn('[HookName] Required element .input not found')
   return
 }
+```
+
+## Common Mistakes (Anti-Patterns)
+
+These are the most frequent errors. Check this list before submitting code.
+
+| Mistake | Why It's Wrong | Correct Approach |
+|---------|----------------|------------------|
+| Using `rgba()` with CSS variables | CSS variables can't be interpolated into `rgba()` | Use `color-mix(in srgb, var(--color) N%, transparent)` |
+| Using `rgba()` for shadows | **Exception:** Shadows are the one place `rgba()` is OK (see `variables.css` comment) | Keep using `rgba()` for `--wb-shadow-*` |
+| Adding listeners in `updated()` | Creates duplicates on every LiveView patch | Use HookHelper in `mounted()` only |
+| Hardcoding localStorage keys | Typos cause silent bugs, refactoring is painful | Import from `storageKeys.js` |
+| Using `document.querySelector` globally | Finds wrong elements when multiple instances exist | Scope to `this.el.querySelector()` |
+| Creating hook without try/catch | Errors crash silently, hard to debug | Wrap `mounted()` in try/catch |
+| Using `<%= if %>` in HEEx | ERB syntax, not HEEx | Use `:if` directive |
+| Multiple `class=` attributes | Only the last one applies in HEEx | Merge into single `class={[...]}` |
+| Raw pixel values in CSS | Inconsistent spacing, hard to maintain | Use `var(--wb-space-*)` tokens |
+| Hex colors in CSS | Breaks theming, inconsistent | Use `var(--wb-*)` tokens |
+
+## Build System Diagram
+
+```
+mix phx.server
+    │
+    ├── esbuild (js/app.js → priv/static/assets/js/)
+    │   ├── Target: ES2022 modules
+    │   ├── Code splitting enabled (--splitting --format=esm)
+    │   ├── Import alias: @/ → assets/js/
+    │   └── Output: chunk hashing for cache busting
+    │
+    └── tailwindcss (css/app.css → priv/static/assets/css/)
+        ├── @source scans: css/, js/, lib/loka_web/
+        ├── @plugin: heroicons, daisyui
+        └── @theme: exports CSS vars as Tailwind classes
+```
+
+## Adding New CSS - Decision Tree
+
+```
+Is it for World Builder?
+    │
+    ├── YES → Does the target domain file exist?
+    │           ├── YES → Add to world-builder/{domain}.css
+    │           └── NO → Create new file, add @import to app.css
+    │
+    └── NO → Is it for admin pages?
+              ├── YES → Use inline Tailwind in templates only
+              └── NO → Add to appropriate css/ file
+
+Before adding ANY CSS:
+1. grep -r "selector-name" assets/css/  # Check if it exists
+2. Check if existing file >350 lines    # Split if needed
+3. Verify using design tokens only      # No hex, no raw px
 ```
 
 ## Related Skills

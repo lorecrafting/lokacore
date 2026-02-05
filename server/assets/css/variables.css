@@ -59,13 +59,18 @@
   --wb-space-sm: 8px;
   --wb-space-md: 12px;
   --wb-space-lg: 16px;
+  --wb-space-xl: 24px;
 
   /* === Border Radius === */
   --wb-radius-sm: 3px;
   --wb-radius-md: 5px;
   --wb-radius-lg: 8px;
 
-  /* === Shadows === */
+  /* === Shadows ===
+     NOTE: Shadows use rgba() instead of color-mix() because box-shadow
+     requires actual color values, not CSS variable references. This is
+     the ONE exception to the "use color-mix() for transparency" rule.
+     These are intentionally hardcoded black/accent colors for shadows. */
   --wb-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
   --wb-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
   --wb-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);

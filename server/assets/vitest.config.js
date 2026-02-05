@@ -9,9 +9,9 @@ export default defineConfig({
       exclude: ['js/world_builder/__tests__/**'],
       reporter: ['text', 'text-summary'],
       thresholds: {
-        lines: 60,
-        functions: 60,
-        branches: 50
+        lines: 70,
+        functions: 65,
+        branches: 55
       }
     }
   }

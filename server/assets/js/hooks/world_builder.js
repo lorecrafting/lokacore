@@ -21,6 +21,7 @@ import { undoManager } from '../world_builder/UndoManager.js'
 import { keyboardManager } from '../world_builder/KeyboardManager.js'
 import { registerWorldBuilderShortcuts } from '../world_builder/KeyboardShortcuts.js'
 import { HookHelper } from '../world_builder/HookHelper.js'
+import { STORAGE_KEYS } from '../world_builder/storageKeys.js'
 
 const WorldBuilder = {
   mounted() {
@@ -169,7 +170,7 @@ const WorldBuilder = {
       // Listen for panel collapsed events (for localStorage sync)
       this.handleEvent('panel_collapsed', ({ panels }) => {
         try {
-          localStorage.setItem('world_builder_collapsed_panels', JSON.stringify(panels))
+          localStorage.setItem(STORAGE_KEYS.COLLAPSED_PANELS, JSON.stringify(panels))
         } catch (err) {
           console.warn('[WorldBuilder] Failed to save panel state:', err)
         }
@@ -177,7 +178,7 @@ const WorldBuilder = {
 
       // Restore collapsed state from localStorage on mount
       try {
-        const savedPanels = localStorage.getItem('world_builder_collapsed_panels')
+        const savedPanels = localStorage.getItem(STORAGE_KEYS.COLLAPSED_PANELS)
         if (savedPanels) {
           const panels = JSON.parse(savedPanels)
           if (panels.hierarchy) this.pushEvent('toggle_panel', { panel: 'hierarchy' })
@@ -186,7 +187,7 @@ const WorldBuilder = {
         }
       } catch (err) {
         console.warn('[WorldBuilder] Failed to restore panel state:', err)
-        localStorage.removeItem('world_builder_collapsed_panels')
+        localStorage.removeItem(STORAGE_KEYS.COLLAPSED_PANELS)
       }
 
       // Setup undo/redo manager

@@ -1,43 +1,85 @@
 /**
- * Canvas2DInteraction - User interaction handler for the 2D World Builder Viewport
- *
- * Handles all user input: mouse events (click, drag, pan, zoom),
- * keyboard events (shift-snap), touch events, resize observation,
- * and tooltip management.
- * Extracted from Canvas2DViewport for separation of concerns.
+ * @file Canvas2DInteraction - User interaction handler for the 2D World Builder Viewport
+ * @context
+ *   - Handles all user input: mouse events (click, drag, pan, zoom),
+ *     keyboard events (shift-snap), resize observation, and tooltip management
+ *   - Extracted from Canvas2DViewport for separation of concerns
+ *   - Delegates rendering to viewport, maintains interaction state locally
+ * @related
+ *   - assets/js/world_builder/Canvas2DViewport.js (orchestrator, owns state)
+ *   - assets/js/world_builder/Canvas2DRenderer.js (drawing operations)
+ */
+
+/**
+ * @typedef {import('./Canvas2DViewport.js').default} Canvas2DViewport
+ * @typedef {import('./Canvas2DViewport.js').Room} Room
+ * @typedef {import('./Canvas2DViewport.js').Point} Point
+ */
+
+/**
+ * Interaction state for drag operations.
+ * @typedef {Object} DragState
+ * @property {boolean} isDragging - Whether any drag is in progress
+ * @property {boolean} isDraggingRoom - Whether dragging a room (vs panning)
+ * @property {Room|null} draggedRoom - The room being dragged, if any
+ * @property {Point} dragRoomStartPos - Original position of dragged room
+ * @property {Point} dragStart - Screen position where drag started
+ * @property {Point} lastMousePos - Last known mouse position
  */
 
 export class Canvas2DInteraction {
   /**
-   * @param {HTMLCanvasElement} canvas - The canvas element
+   * Creates a new Canvas2DInteraction instance.
+   * @param {HTMLCanvasElement} canvas - The canvas element to attach handlers to
    * @param {Canvas2DViewport} viewport - The parent viewport orchestrator
    */
   constructor(canvas, viewport) {
+    /** @type {HTMLCanvasElement} */
     this.canvas = canvas
+    /** @type {Canvas2DViewport} */
     this.viewport = viewport
 
     // Interaction state
+    /** @type {boolean} Whether any drag is in progress */
     this.isDragging = false
+    /** @type {boolean} Whether dragging a room (vs panning camera) */
     this.isDraggingRoom = false
+    /** @type {Room|null} The room currently being dragged */
     this.draggedRoom = null
+    /** @type {Point} Original position of the dragged room */
     this.dragRoomStartPos = { x: 0, y: 0 }
+    /** @type {Point} Screen position where drag started */
     this.dragStart = { x: 0, y: 0 }
+    /** @type {Point} Last known mouse position */
     this.lastMousePos = { x: 0, y: 0 }
+    /** @type {Room|null} Currently hovered room for tooltip */
     this.hoveredRoom = null
+    /** @type {boolean} Whether shift key is held for grid snapping */
     this.isSnapping = false
+    /** @type {Point|null} Current snap indicator position in world coords */
     this.snapIndicator = null
 
-    // Tooltip element
+    /** @type {HTMLDivElement|null} Tooltip DOM element */
     this.tooltip = null
+    /** @type {ResizeObserver|null} Canvas resize observer */
+    this.resizeObserver = null
 
     // Bound handlers for cleanup
+    /** @private @type {function(MouseEvent): void} */
     this.boundMouseDown = this.handleMouseDown.bind(this)
+    /** @private @type {function(MouseEvent): void} */
     this.boundMouseMove = this.handleMouseMove.bind(this)
+    /** @private @type {function(MouseEvent): void} */
     this.boundMouseUp = this.handleMouseUp.bind(this)
+    /** @private @type {function(MouseEvent): void} */
     this.boundMouseLeave = this.handleMouseLeave.bind(this)
+    /** @private @type {function(WheelEvent): void} */
     this.boundWheel = this.handleWheel.bind(this)
+    /** @private @type {function(Event): void} */
     this.boundContextMenu = (e) => e.preventDefault()
+    /** @private @type {function(KeyboardEvent): void} */
     this.boundKeyDown = this.handleKeyDown.bind(this)
+    /** @private @type {function(KeyboardEvent): void} */
     this.boundKeyUp = this.handleKeyUp.bind(this)
   }
 
@@ -45,6 +87,11 @@ export class Canvas2DInteraction {
   // Setup / Teardown
   // ============================================================================
 
+  /**
+   * Attach all event listeners and observers to the canvas.
+   * Should be called once during viewport initialization.
+   * @returns {void}
+   */
   attach() {
     // Mouse events
     this.canvas.addEventListener('mousedown', this.boundMouseDown)
@@ -69,6 +116,11 @@ export class Canvas2DInteraction {
     this.createTooltip()
   }
 
+  /**
+   * Detach all event listeners and observers.
+   * Should be called when the viewport is destroyed.
+   * @returns {void}
+   */
   detach() {
     // Remove canvas event listeners
     if (this.canvas) {
@@ -94,6 +146,10 @@ export class Canvas2DInteraction {
   // Tooltip
   // ============================================================================
 
+  /**
+   * Create the tooltip DOM element and append to canvas parent.
+   * @returns {void}
+   */
   createTooltip() {
     this.tooltip = document.createElement('div')
     this.tooltip.className = 'viewport-tooltip'
@@ -114,6 +170,14 @@ export class Canvas2DInteraction {
     this.canvas.parentElement.appendChild(this.tooltip)
   }
 
+  /**
+   * Show the tooltip with room information at the given screen position.
+   * Displays room name, key, coordinates, exits, NPCs, and items.
+   * @param {Room} room - Room to show information for
+   * @param {number} screenX - Screen X position in pixels
+   * @param {number} screenY - Screen Y position in pixels
+   * @returns {void}
+   */
   showTooltip(room, screenX, screenY) {
     if (!this.tooltip || !room) return
 
@@ -123,7 +187,7 @@ export class Canvas2DInteraction {
     const exits = room.exits || {}
     const exitCount = Object.keys(exits).length
 
-    let html = `
+    const html = `
       <div style="font-weight: bold; color: var(--wb-text-bright); margin-bottom: 4px;">${room.name || room.key}</div>
       <div style="font-size: 10px; color: var(--wb-text-muted); margin-bottom: 6px;">${room.key}</div>
       <div style="font-size: 11px; color: var(--wb-text);">
@@ -155,12 +219,20 @@ export class Canvas2DInteraction {
     this.tooltip.style.top = `${y}px`
   }
 
+  /**
+   * Hide the tooltip element.
+   * @returns {void}
+   */
   hideTooltip() {
     if (this.tooltip) {
       this.tooltip.style.display = 'none'
     }
   }
 
+  /**
+   * Remove the tooltip element from the DOM.
+   * @returns {void}
+   */
   destroyTooltip() {
     if (this.tooltip && this.tooltip.parentElement) {
       this.tooltip.parentElement.removeChild(this.tooltip)
@@ -172,6 +244,11 @@ export class Canvas2DInteraction {
   // Keyboard Event Handlers
   // ============================================================================
 
+  /**
+   * Handle keydown events for shift-snap tracking.
+   * @param {KeyboardEvent} e - Keyboard event
+   * @returns {void}
+   */
   handleKeyDown(e) {
     if (e.key === 'Shift') {
       this.isSnapping = true
@@ -181,6 +258,11 @@ export class Canvas2DInteraction {
     }
   }
 
+  /**
+   * Handle keyup events for shift-snap tracking.
+   * @param {KeyboardEvent} e - Keyboard event
+   * @returns {void}
+   */
   handleKeyUp(e) {
     if (e.key === 'Shift') {
       this.isSnapping = false
@@ -195,6 +277,13 @@ export class Canvas2DInteraction {
   // Mouse Event Handlers
   // ============================================================================
 
+  /**
+   * Handle mousedown events - start room drag or camera pan.
+   * Clicking on a room starts room drag and selects it.
+   * Clicking on empty space starts camera pan.
+   * @param {MouseEvent} e - Mouse event
+   * @returns {void}
+   */
   handleMouseDown(e) {
     const rect = this.canvas.getBoundingClientRect()
     const x = e.clientX - rect.left
@@ -229,6 +318,14 @@ export class Canvas2DInteraction {
     }
   }
 
+  /**
+   * Handle mousemove events - update drag position or hover state.
+   * During room drag: updates room position, applies grid snap if shift held.
+   * During pan: updates camera position.
+   * Otherwise: updates cursor and shows/hides tooltip on hover.
+   * @param {MouseEvent} e - Mouse event
+   * @returns {void}
+   */
   handleMouseMove(e) {
     const rect = this.canvas.getBoundingClientRect()
     const x = e.clientX - rect.left
@@ -289,6 +386,12 @@ export class Canvas2DInteraction {
     this.lastMousePos = { x, y }
   }
 
+  /**
+   * Handle mouseup events - finalize room drag or pan.
+   * Fires onMoveRoom callback if room position changed.
+   * @param {MouseEvent} e - Mouse event
+   * @returns {void}
+   */
   handleMouseUp(e) {
     // If we were dragging a room, notify the callback
     if (this.isDraggingRoom && this.draggedRoom) {
@@ -309,6 +412,12 @@ export class Canvas2DInteraction {
     this.viewport.render()
   }
 
+  /**
+   * Handle mouseleave events - cancel drag and restore original position.
+   * Room drags are cancelled and restored; pan drags are just stopped.
+   * @param {MouseEvent} e - Mouse event
+   * @returns {void}
+   */
   handleMouseLeave(e) {
     this.hideTooltip()
     this.hoveredRoom = null
@@ -330,6 +439,12 @@ export class Canvas2DInteraction {
     }
   }
 
+  /**
+   * Handle wheel events - zoom in/out centered on mouse position.
+   * Clears truncation cache when zoom changes.
+   * @param {WheelEvent} e - Wheel event
+   * @returns {void}
+   */
   handleWheel(e) {
     e.preventDefault()
 

@@ -53,7 +53,9 @@ export default [
         'warn',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }
       ],
-      'no-console': ['warn', { allow: ['error', 'warn'] }],
+      // Allow console methods for hooks (prefixed logging like '[HookName] message')
+      // and for the event debug logger (console.group/groupEnd)
+      'no-console': ['warn', { allow: ['log', 'error', 'warn', 'group', 'groupEnd'] }],
       'no-debugger': 'error',
       'no-duplicate-imports': 'error',
       eqeqeq: 'error',

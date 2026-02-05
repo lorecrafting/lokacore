@@ -29,8 +29,18 @@ export const SHORTCUT_DEFINITIONS = [
   { id: 'wb-save', combo: { key: 's', mod: true }, action: 'save' },
 
   // Delete selected
-  { id: 'wb-delete', combo: { key: 'delete', mod: false }, action: 'deleteSelected', options: { skipInputs: true } },
-  { id: 'wb-backspace', combo: { key: 'backspace', mod: false }, action: 'deleteSelected', options: { skipInputs: true } },
+  {
+    id: 'wb-delete',
+    combo: { key: 'delete', mod: false },
+    action: 'deleteSelected',
+    options: { skipInputs: true },
+  },
+  {
+    id: 'wb-backspace',
+    combo: { key: 'backspace', mod: false },
+    action: 'deleteSelected',
+    options: { skipInputs: true },
+  },
 
   // Duplicate
   { id: 'wb-duplicate', combo: { key: 'd', mod: true }, action: 'duplicate' },
@@ -39,7 +49,12 @@ export const SHORTCUT_DEFINITIONS = [
   { id: 'wb-select-all', combo: { key: 'a', mod: true }, action: 'selectAll' },
 
   // Escape: deselect
-  { id: 'wb-escape', combo: { key: 'escape' }, action: 'escape', options: { skipInputs: false, skipModals: false } },
+  {
+    id: 'wb-escape',
+    combo: { key: 'escape' },
+    action: 'escape',
+    options: { skipInputs: false, skipModals: false },
+  },
 
   // Panel toggles (1-4)
   { id: 'wb-panel-1', combo: { key: '1' }, action: 'togglePanel_hierarchy' },

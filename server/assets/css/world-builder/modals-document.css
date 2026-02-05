@@ -1,0 +1,196 @@
+/* =============================================================================
+   World Builder Modals Document - Document Viewer Modal, Markdown Content
+   ============================================================================= */
+
+.document-viewer-modal {
+  position: fixed;
+  top: 60px;
+  right: 340px;
+  bottom: 20px;
+  width: 500px;
+  z-index: 100;
+  background: var(--wb-panel);
+  border: 1px solid var(--wb-border);
+  border-radius: var(--wb-radius-lg);
+  box-shadow: var(--wb-shadow-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.document-viewer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--wb-panel);
+  border: 1px solid var(--wb-border);
+  border-radius: var(--wb-radius-lg);
+  overflow: hidden;
+}
+
+.document-viewer.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--wb-text-faint);
+}
+
+.empty-state p {
+  margin: var(--wb-space-sm) 0;
+}
+
+.document-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--wb-space-md) var(--wb-space-lg);
+  background: var(--wb-panel-alt);
+  border-bottom: 1px solid var(--wb-border);
+}
+
+.document-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.document-name {
+  font-weight: 600;
+  color: var(--wb-text-bright);
+  font-size: 0.9rem;
+}
+
+.document-meta {
+  color: var(--wb-text-dim);
+  font-size: 0.75rem;
+}
+
+.document-actions {
+  display: flex;
+  gap: var(--wb-space-xs);
+}
+
+.document-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--wb-space-xl);
+}
+
+.document-loading,
+.document-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px;
+  color: var(--wb-text-dim);
+}
+
+.document-error {
+  color: var(--wb-error);
+}
+
+.document-viewer .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 40px;
+}
+
+/* Markdown content styles */
+.markdown-content {
+  color: var(--wb-text);
+  line-height: 1.6;
+}
+
+.markdown-content h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--wb-text-bright);
+  margin: 0 0 var(--wb-space-lg) 0;
+  padding-bottom: var(--wb-space-sm);
+  border-bottom: 1px solid var(--wb-border);
+}
+
+.markdown-content h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--wb-text-bright);
+  margin: var(--wb-space-xl) 0 var(--wb-space-md) 0;
+}
+
+.markdown-content h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--wb-term-text);
+  margin: 20px 0 10px 0;
+}
+
+.markdown-content h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--wb-text-muted);
+  margin: var(--wb-space-lg) 0 var(--wb-space-sm) 0;
+}
+
+.markdown-content p {
+  margin: 0 0 var(--wb-space-md) 0;
+}
+
+.markdown-content li {
+  margin: var(--wb-space-xs) 0;
+  padding-left: var(--wb-space-sm);
+  position: relative;
+}
+
+.markdown-content li::before {
+  content: "\2022";
+  position: absolute;
+  left: -12px;
+  color: var(--wb-text-faint);
+}
+
+.markdown-content li.numbered::before {
+  content: "";
+}
+
+.markdown-content hr {
+  border: none;
+  border-top: 1px solid var(--wb-border);
+  margin: var(--wb-space-xl) 0;
+}
+
+.markdown-content .inline-code {
+  background: var(--wb-input);
+  padding: 2px 6px;
+  border-radius: var(--wb-radius-md);
+  font-family: "SF Mono", Monaco, Consolas, monospace;
+  font-size: 0.85em;
+  color: var(--wb-danger-text);
+}
+
+.markdown-content strong {
+  font-weight: 600;
+  color: var(--wb-text-bright);
+}
+
+.markdown-content em {
+  font-style: italic;
+  color: var(--wb-text-bright);
+}
+
+.markdown-content a {
+  color: var(--wb-accent);
+  text-decoration: none;
+}
+
+.markdown-content a:hover {
+  text-decoration: underline;
+}

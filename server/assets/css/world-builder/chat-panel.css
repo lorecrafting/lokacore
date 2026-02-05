@@ -1,0 +1,97 @@
+/* =============================================================================
+   World Builder Chat Panel - Panel Structure, Tabs, Header
+   ============================================================================= */
+
+/* Chat panel extends .world-builder-chat defined above in grid layout */
+
+.chat-panel-tabs {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--wb-space-sm);
+  background: var(--wb-input);
+  border-bottom: 1px solid var(--wb-border);
+  height: 32px;
+}
+
+.chat-panel-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chat-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--wb-panel);
+}
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--wb-space-sm) var(--wb-space-md);
+  background: var(--wb-input);
+  border-bottom: 1px solid var(--wb-border);
+}
+
+.chat-header-left,
+.chat-header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--wb-space-sm);
+}
+
+.chat-unconfigured {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: var(--wb-space-xl);
+  text-align: center;
+  color: var(--wb-text-muted);
+  gap: var(--wb-space-sm);
+}
+
+.chat-unconfigured p {
+  margin: 0;
+}
+
+.chat-unconfigured-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--wb-text-bright);
+}
+
+.chat-unconfigured-desc {
+  font-size: 0.85rem;
+  color: var(--wb-text-muted);
+  margin-bottom: 4px !important;
+}
+
+.context-summary {
+  padding: var(--wb-space-sm) var(--wb-space-md);
+  background: var(--wb-panel-alt);
+  border-bottom: 1px solid var(--wb-border);
+}
+
+.context-header {
+  font-size: var(--wb-font-size-xs);
+  color: var(--wb-text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--wb-space-xs);
+}
+
+/* Chat Panel - LiveView Version */
+.chat-project-selector {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px var(--wb-space-md);
+  background: var(--wb-surface);
+  border-bottom: 1px solid var(--wb-border);
+  flex-shrink: 0;
+}

@@ -139,7 +139,7 @@ class UndoManager {
       beforeState,
       afterState,
       metadata,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     }
 
     if (this.isComposing) {
@@ -217,7 +217,7 @@ class UndoManager {
         type: 'composite',
         operations: this.compositeOperations,
         label: this.compositeLabel,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       })
 
       // Clear redo stack
@@ -310,7 +310,7 @@ class UndoManager {
     this.pushEvent('undo_operation', {
       type: operation.type,
       state: operation.beforeState,
-      metadata: operation.metadata
+      metadata: operation.metadata,
     })
   }
 
@@ -330,7 +330,7 @@ class UndoManager {
     this.pushEvent('redo_operation', {
       type: operation.type,
       state: operation.afterState,
-      metadata: operation.metadata
+      metadata: operation.metadata,
     })
   }
 
@@ -360,7 +360,7 @@ class UndoManager {
       redoCount: this.redoStack.length,
       canUndo: this.canUndo(),
       canRedo: this.canRedo(),
-      lastOperation: this.undoStack[this.undoStack.length - 1] || null
+      lastOperation: this.undoStack[this.undoStack.length - 1] || null,
     }
   }
 
@@ -390,10 +390,13 @@ class UndoManager {
    */
   save() {
     try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
-        undoStack: this.undoStack,
-        redoStack: this.redoStack
-      }))
+      sessionStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          undoStack: this.undoStack,
+          redoStack: this.redoStack,
+        })
+      )
     } catch (e) {
       console.warn('[UndoManager] Failed to save to session storage', e)
     }

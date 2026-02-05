@@ -190,7 +190,7 @@ export default class Canvas2DViewport {
     this.camera = {
       x: 0,
       y: 0,
-      zoom: 1
+      zoom: 1,
     }
 
     // Grid settings
@@ -394,7 +394,7 @@ export default class Canvas2DViewport {
   setRooms(rooms) {
     this.rooms = rooms || []
     this.roomsByKey.clear()
-    this.rooms.forEach(room => {
+    this.rooms.forEach((room) => {
       this.roomsByKey.set(room.key, room)
       if (room.id) {
         this.roomsByKey.set(room.id, room)
@@ -402,7 +402,7 @@ export default class Canvas2DViewport {
     })
 
     // Auto-detect Z-levels
-    this.zLevels = [...new Set(this.rooms.map(r => r.z || 0))].sort((a, b) => a - b)
+    this.zLevels = [...new Set(this.rooms.map((r) => r.z || 0))].sort((a, b) => a - b)
     if (this.zLevels.length > 0 && !this.zLevels.includes(this.currentZLevel)) {
       this.currentZLevel = this.zLevels[0]
     }
@@ -560,13 +560,15 @@ export default class Canvas2DViewport {
    */
   getRoomAtPoint(screenX, screenY) {
     const world = this.screenToWorld(screenX, screenY)
-    const halfSize = (this.roomSize / 2) / this.gridSize
+    const halfSize = this.roomSize / 2 / this.gridSize
 
     // Check rooms at current Z level first, then adjacent levels
     const levelsToCheck = [this.currentZLevel]
     if (this.showGhostLayers) {
-      if (this.zLevels && this.zLevels.includes(this.currentZLevel - 1)) levelsToCheck.push(this.currentZLevel - 1)
-      if (this.zLevels && this.zLevels.includes(this.currentZLevel + 1)) levelsToCheck.push(this.currentZLevel + 1)
+      if (this.zLevels && this.zLevels.includes(this.currentZLevel - 1))
+        levelsToCheck.push(this.currentZLevel - 1)
+      if (this.zLevels && this.zLevels.includes(this.currentZLevel + 1))
+        levelsToCheck.push(this.currentZLevel + 1)
     }
 
     for (const zLevel of levelsToCheck) {
@@ -576,8 +578,12 @@ export default class Canvas2DViewport {
         const rx = room.x || 0
         const ry = room.y || 0
 
-        if (world.x >= rx - halfSize && world.x <= rx + halfSize &&
-            world.y >= ry - halfSize && world.y <= ry + halfSize) {
+        if (
+          world.x >= rx - halfSize &&
+          world.x <= rx + halfSize &&
+          world.y >= ry - halfSize &&
+          world.y <= ry + halfSize
+        ) {
           return room
         }
       }
@@ -614,12 +620,14 @@ export default class Canvas2DViewport {
   fitToRooms() {
     if (this.rooms.length === 0) return
 
-    const currentRooms = this.rooms.filter(r => (r.z || 0) === this.currentZLevel)
+    const currentRooms = this.rooms.filter((r) => (r.z || 0) === this.currentZLevel)
     if (currentRooms.length === 0) return
 
     // Find bounding box
-    let minX = Infinity, maxX = -Infinity
-    let minY = Infinity, maxY = -Infinity
+    let minX = Infinity,
+      maxX = -Infinity
+    let minY = Infinity,
+      maxY = -Infinity
 
     for (const room of currentRooms) {
       const x = room.x || 0
@@ -638,11 +646,7 @@ export default class Canvas2DViewport {
 
     this.camera.x = -centerX * this.gridSize
     this.camera.y = -centerY * this.gridSize
-    this.camera.zoom = Math.min(
-      this.width / rangeX,
-      this.height / rangeY,
-      1.5
-    )
+    this.camera.zoom = Math.min(this.width / rangeX, this.height / rangeY, 1.5)
     this.camera.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.camera.zoom))
     this.renderer.clearTruncateCache()
 

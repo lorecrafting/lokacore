@@ -19,7 +19,7 @@ function createMockDocument() {
       for (const handler of listeners[type] || []) {
         handler(event)
       }
-    }
+    },
   }
 }
 
@@ -30,7 +30,7 @@ function createKeyEvent(key, opts = {}) {
     ctrlKey: opts.ctrlKey || false,
     shiftKey: opts.shiftKey || false,
     target: opts.target || { tagName: 'DIV', isContentEditable: false },
-    preventDefault: vi.fn()
+    preventDefault: vi.fn(),
   }
 }
 
@@ -190,7 +190,7 @@ describe('KeyboardManager', () => {
       km.register('test', { key: 'a' }, handler)
 
       const event = createKeyEvent('a', {
-        target: { tagName: 'INPUT', isContentEditable: false }
+        target: { tagName: 'INPUT', isContentEditable: false },
       })
       mockDoc._dispatch('keydown', event)
 
@@ -202,7 +202,7 @@ describe('KeyboardManager', () => {
       km.register('test', { key: 'a' }, handler)
 
       const event = createKeyEvent('a', {
-        target: { tagName: 'TEXTAREA', isContentEditable: false }
+        target: { tagName: 'TEXTAREA', isContentEditable: false },
       })
       mockDoc._dispatch('keydown', event)
 
@@ -214,7 +214,7 @@ describe('KeyboardManager', () => {
       km.register('test', { key: 'a' }, handler)
 
       const event = createKeyEvent('a', {
-        target: { tagName: 'SELECT', isContentEditable: false }
+        target: { tagName: 'SELECT', isContentEditable: false },
       })
       mockDoc._dispatch('keydown', event)
 
@@ -226,7 +226,7 @@ describe('KeyboardManager', () => {
       km.register('test', { key: 'a' }, handler)
 
       const event = createKeyEvent('a', {
-        target: { tagName: 'DIV', isContentEditable: true }
+        target: { tagName: 'DIV', isContentEditable: true },
       })
       mockDoc._dispatch('keydown', event)
 
@@ -238,7 +238,7 @@ describe('KeyboardManager', () => {
       km.register('close', { key: 'escape' }, handler)
 
       const event = createKeyEvent('Escape', {
-        target: { tagName: 'INPUT', isContentEditable: false }
+        target: { tagName: 'INPUT', isContentEditable: false },
       })
       mockDoc._dispatch('keydown', event)
 
@@ -250,7 +250,7 @@ describe('KeyboardManager', () => {
       km.register('test', { key: 'a' }, handler, { skipInputs: false })
 
       const event = createKeyEvent('a', {
-        target: { tagName: 'INPUT', isContentEditable: false }
+        target: { tagName: 'INPUT', isContentEditable: false },
       })
       mockDoc._dispatch('keydown', event)
 

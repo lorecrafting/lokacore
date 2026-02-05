@@ -166,6 +166,13 @@
   --shadow-wb-overlay: var(--wb-shadow-overlay);
   --shadow-wb-indigo-glow: var(--wb-shadow-indigo-glow);
   --shadow-wb-focus-ring: var(--wb-shadow-focus-ring);
+
+  /* Spacing -> space-wb-xs, space-wb-sm, space-wb-md, space-wb-lg, space-wb-xl */
+  --spacing-wb-xs: var(--wb-space-xs);
+  --spacing-wb-sm: var(--wb-space-sm);
+  --spacing-wb-md: var(--wb-space-md);
+  --spacing-wb-lg: var(--wb-space-lg);
+  --spacing-wb-xl: var(--wb-space-xl);
 }
 
 /* Add variants based on LiveView classes */

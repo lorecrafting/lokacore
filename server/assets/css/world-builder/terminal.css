@@ -39,16 +39,16 @@
 /* Connection state indicator dot - applied by JS */
 .term-connection-dot {
   display: inline-block;
-  width: 8px;
-  height: 8px;
+  width: var(--wb-space-sm);
+  height: var(--wb-space-sm);
   border-radius: 50%;
-  margin-right: 4px;
+  margin-right: var(--wb-space-xs);
   flex-shrink: 0;
 }
 
 .term-connection-dot.connected {
   background: var(--wb-success);
-  box-shadow: 0 0 4px var(--wb-success);
+  box-shadow: 0 0 var(--wb-space-xs) var(--wb-success);
 }
 
 .term-connection-dot.connecting {
@@ -83,7 +83,7 @@
 
 /* Console resize handle (horizontal, at top of console) */
 .console-resize-handle {
-  height: 4px;
+  height: var(--wb-space-xs);
   background: var(--wb-toolbar-border);
   cursor: row-resize;
   transition: background 0.15s;
@@ -108,19 +108,19 @@
    ============================================================================= */
 
 .broadcast-system {
-  background: rgba(128, 128, 128, 0.15);
+  background: color-mix(in srgb, var(--wb-text-muted) 15%, transparent);
   border-left: 3px solid var(--wb-text-muted);
   color: var(--wb-text-muted);
 }
 
 .broadcast-event {
-  background: rgba(218, 165, 32, 0.15);
-  border-left: 3px solid goldenrod;
+  background: color-mix(in srgb, var(--wb-warning) 15%, transparent);
+  border-left: 3px solid var(--wb-warning);
   color: var(--wb-text);
 }
 
 .broadcast-emergency {
-  background: rgba(220, 53, 69, 0.2);
+  background: color-mix(in srgb, var(--wb-error) 20%, transparent);
   border-left: 3px solid var(--wb-error);
   color: var(--wb-error);
   font-weight: 600;

@@ -121,8 +121,8 @@
   content: '';
   position: absolute;
   bottom: -1px;
-  left: 8px;
-  right: 8px;
+  left: var(--wb-space-sm);
+  right: var(--wb-space-sm);
   height: 2px;
   background: linear-gradient(90deg, var(--wb-accent-gradient-from), var(--wb-accent-gradient-to));
   border-radius: 2px 2px 0 0;

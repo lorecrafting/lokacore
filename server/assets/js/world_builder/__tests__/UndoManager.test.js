@@ -5,8 +5,12 @@ import { UndoManager } from '../UndoManager.js'
 const mockStorage = {}
 global.sessionStorage = {
   getItem: vi.fn((key) => mockStorage[key] || null),
-  setItem: vi.fn((key, value) => { mockStorage[key] = value }),
-  removeItem: vi.fn((key) => { delete mockStorage[key] })
+  setItem: vi.fn((key, value) => {
+    mockStorage[key] = value
+  }),
+  removeItem: vi.fn((key) => {
+    delete mockStorage[key]
+  }),
 }
 
 describe('UndoManager', () => {
@@ -74,7 +78,7 @@ describe('UndoManager', () => {
       expect(pushEvent).toHaveBeenCalledWith('undo_operation', {
         type: 'update_room',
         state: { v: 1 },
-        metadata: { key: 'r1' }
+        metadata: { key: 'r1' },
       })
     })
 
@@ -110,7 +114,7 @@ describe('UndoManager', () => {
       expect(pushEvent).toHaveBeenCalledWith('redo_operation', {
         type: 'update_room',
         state: { v: 2 },
-        metadata: { key: 'r1' }
+        metadata: { key: 'r1' },
       })
     })
 
@@ -176,12 +180,12 @@ describe('UndoManager', () => {
       expect(pushEvent).toHaveBeenNthCalledWith(1, 'undo_operation', {
         type: 'update_room',
         state: { v: 'c' },
-        metadata: { key: '2' }
+        metadata: { key: '2' },
       })
       expect(pushEvent).toHaveBeenNthCalledWith(2, 'undo_operation', {
         type: 'update_room',
         state: { v: 'a' },
-        metadata: { key: '1' }
+        metadata: { key: '1' },
       })
     })
 
@@ -203,12 +207,12 @@ describe('UndoManager', () => {
       expect(pushEvent).toHaveBeenNthCalledWith(1, 'redo_operation', {
         type: 'update_room',
         state: { v: 'b' },
-        metadata: { key: '1' }
+        metadata: { key: '1' },
       })
       expect(pushEvent).toHaveBeenNthCalledWith(2, 'redo_operation', {
         type: 'update_room',
         state: { v: 'd' },
-        metadata: { key: '2' }
+        metadata: { key: '2' },
       })
     })
 
@@ -238,7 +242,7 @@ describe('UndoManager', () => {
         redoCount: 0,
         canUndo: false,
         canRedo: false,
-        lastOperation: null
+        lastOperation: null,
       })
     })
 
@@ -334,7 +338,7 @@ describe('UndoManager', () => {
     it('restores from sessionStorage on construction', () => {
       const data = JSON.stringify({
         undoStack: [{ type: 'update_room', beforeState: { v: 1 }, afterState: { v: 2 } }],
-        redoStack: []
+        redoStack: [],
       })
       mockStorage['world_builder_undo_stack'] = data
 

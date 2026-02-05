@@ -146,14 +146,16 @@ class KeyboardManager {
    */
   _dispatch(e) {
     const target = e.target
-    const isInput = target.tagName === 'INPUT' ||
-                    target.tagName === 'TEXTAREA' ||
-                    target.tagName === 'SELECT' ||
-                    target.isContentEditable
+    const isInput =
+      target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
+      target.tagName === 'SELECT' ||
+      target.isContentEditable
 
-    const isMac = navigator.userAgentData?.platform === 'macOS'
-      || navigator.platform?.toUpperCase().includes('MAC')
-      || false
+    const isMac =
+      navigator.userAgentData?.platform === 'macOS' ||
+      navigator.platform?.toUpperCase().includes('MAC') ||
+      false
     const modKey = isMac ? e.metaKey : e.ctrlKey
     const modalOpen = !!document.querySelector('.modal-overlay')
     const pressedKey = e.key.toLowerCase()

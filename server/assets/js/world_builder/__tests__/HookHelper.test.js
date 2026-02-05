@@ -38,11 +38,7 @@ describe('HookHelper', () => {
 
       helper.on(target, 'click', handler)
 
-      expect(target.addEventListener).toHaveBeenCalledWith(
-        'click',
-        handler,
-        undefined
-      )
+      expect(target.addEventListener).toHaveBeenCalledWith('click', handler, undefined)
     })
 
     it('tracks the listener for cleanup', () => {
@@ -56,7 +52,7 @@ describe('HookHelper', () => {
         target,
         event: 'click',
         handler,
-        options: undefined
+        options: undefined,
       })
     })
 
@@ -67,11 +63,7 @@ describe('HookHelper', () => {
 
       helper.on(target, 'keydown', handler, options)
 
-      expect(target.addEventListener).toHaveBeenCalledWith(
-        'keydown',
-        handler,
-        options
-      )
+      expect(target.addEventListener).toHaveBeenCalledWith('keydown', handler, options)
       expect(helper._listeners[0].options).toEqual({ capture: true })
     })
 
@@ -192,16 +184,8 @@ describe('HookHelper', () => {
 
       helper.destroy()
 
-      expect(target1.removeEventListener).toHaveBeenCalledWith(
-        'click',
-        handler1,
-        undefined
-      )
-      expect(target2.removeEventListener).toHaveBeenCalledWith(
-        'keydown',
-        handler2,
-        options
-      )
+      expect(target1.removeEventListener).toHaveBeenCalledWith('click', handler1, undefined)
+      expect(target2.removeEventListener).toHaveBeenCalledWith('keydown', handler2, options)
       expect(helper._listeners).toEqual([])
     })
 
@@ -283,11 +267,7 @@ describe('HookHelper', () => {
       helper.on(newTarget, 'resize', newHandler)
 
       expect(helper._listeners).toHaveLength(1)
-      expect(newTarget.addEventListener).toHaveBeenCalledWith(
-        'resize',
-        newHandler,
-        undefined
-      )
+      expect(newTarget.addEventListener).toHaveBeenCalledWith('resize', newHandler, undefined)
     })
   })
 })

@@ -1,0 +1,82 @@
+/* =============================================================================
+   World Builder Modals Base - Overlay, Animations, Modal Content
+   ============================================================================= */
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: color-mix(in srgb, black 70%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Modal Content */
+.modal-content {
+  background: var(--wb-panel-header);
+  border: 1px solid var(--wb-border);
+  border-radius: var(--wb-radius-md);
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow: auto;
+  animation: slideIn 0.2s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlideIn {
+  from {
+    transform: translate(-50%, -50%) translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, -50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Modal/form/button/exit/contents styles are inlined to Tailwind in components.
+   Use daisyUI button classes (btn, btn-sm, btn-primary, btn-success, btn-error) instead of custom styles. */
+
+/* Fullscreen modal for quest and cutscene editors */
+.modal-fullscreen {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-fullscreen .modal-header {
+  flex-shrink: 0;
+}
+
+.modal-fullscreen #quest-editor-root,
+.modal-fullscreen #cutscene-editor-root {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}

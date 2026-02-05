@@ -11,12 +11,19 @@
    └── world-builder/
        ├── layout.css             → Grid, panels, resize handles, collapsed states
        ├── terminal.css           → Terminal panel, connection indicators
-       ├── chat.css               → Chat panel, messages, streaming UI
+       ├── chat-panel.css          → Chat panel structure, tabs, header
+       ├── chat-messages.css       → Message display, scrolling, role styling
+       ├── chat-input.css          → Input form, textarea, send button
        ├── quest-editor.css       → Quest editor forms, sections, validation
        ├── cutscene-editor.css    → Cutscene timeline, keyframes, preview
-       ├── dialogue-editor.css    → Dialogue tree, node editor, mock state
+       ├── dialogue-tree.css      → Dialogue tree, container, mock state, quest flow
+       ├── dialogue-nodes.css     → Node editor, choices, preview, validation
        ├── template-picker.css    → Template picker modal, config forms
-       ├── modals.css             → Modal overlay, settings, audit log, git commit
+       ├── modals-base.css        → Modal overlay, animations, base modal-content
+       ├── modals-settings.css    → Settings modal, API keys, privacy
+       ├── modals-audit.css       → Audit log panel
+       ├── modals-commit.css      → Git commit modal
+       ├── modals-document.css    → Document viewer modal, markdown content
        └── tools.css              → Tool execution UI, progress indicators
 
    RULES:
@@ -34,12 +41,19 @@
 @import "./tailwind-config.css";
 @import "./world-builder/layout.css";
 @import "./world-builder/terminal.css";
-@import "./world-builder/chat.css";
+@import "./world-builder/chat-panel.css";
+@import "./world-builder/chat-messages.css";
+@import "./world-builder/chat-input.css";
 @import "./world-builder/quest-editor.css";
 @import "./world-builder/cutscene-editor.css";
-@import "./world-builder/dialogue-editor.css";
+@import "./world-builder/dialogue-tree.css";
+@import "./world-builder/dialogue-nodes.css";
 @import "./world-builder/template-picker.css";
-@import "./world-builder/modals.css";
+@import "./world-builder/modals-base.css";
+@import "./world-builder/modals-settings.css";
+@import "./world-builder/modals-audit.css";
+@import "./world-builder/modals-commit.css";
+@import "./world-builder/modals-document.css";
 @import "./world-builder/tools.css";
 
 @source "../css";

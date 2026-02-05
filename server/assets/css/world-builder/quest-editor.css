@@ -10,20 +10,20 @@
   background: var(--wb-input);
   border: 2px solid var(--wb-quest-node-border);
   border-radius: var(--wb-radius-md);
-  padding: 8px;
+  padding: var(--wb-space-sm);
   min-width: 180px;
   max-width: 240px;
-  font-size: 0.85rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  font-size: var(--wb-font-size-base);
+  box-shadow: 0 2px var(--wb-space-sm) color-mix(in srgb, black 30%, transparent);
 }
 
 .quest-node-header {
   font-weight: 700;
-  font-size: 0.75rem;
+  font-size: var(--wb-font-size-xs);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--wb-text-muted);
-  margin-bottom: 8px;
+  margin-bottom: var(--wb-space-sm);
   padding-bottom: 6px;
   border-bottom: 1px solid var(--wb-border);
 }
@@ -67,8 +67,8 @@
 }
 
 .input-sm {
-  padding: 4px 6px;
-  font-size: 0.75rem;
+  padding: var(--wb-space-xs) 6px;
+  font-size: var(--wb-font-size-xs);
   background: var(--wb-panel);
   border: 1px solid var(--wb-border);
   border-radius: var(--wb-radius-sm);
@@ -105,14 +105,14 @@
 .quest-editor-scroll {
   flex: 1;
   overflow-y: auto;
-  padding: 8px 12px;
+  padding: var(--wb-space-sm) var(--wb-space-md);
 }
 
 .quest-validation-banner {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 6px var(--wb-space-md);
   background: var(--wb-danger-surface);
   color: var(--wb-error);
   font-size: 0.8rem;
@@ -126,7 +126,7 @@
 }
 
 .quest-section {
-  margin-bottom: 12px;
+  margin-bottom: var(--wb-space-md);
   border: 1px solid var(--wb-border);
   border-radius: var(--wb-radius-md);
   overflow: hidden;
@@ -136,7 +136,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 10px;
+  padding: var(--wb-space-sm) var(--wb-space-md);
   background: var(--wb-surface);
   font-size: 0.8rem;
   font-weight: 600;
@@ -146,7 +146,7 @@
 }
 
 .quest-form-grid {
-  padding: 8px 10px;
+  padding: var(--wb-space-sm) var(--wb-space-md);
 }
 
 .quest-form-row {
@@ -163,20 +163,20 @@
 .quest-form-row-pair {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: var(--wb-space-sm);
   margin-bottom: 6px;
 }
 
 .quest-form-row-triple {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 8px;
+  gap: var(--wb-space-sm);
   margin-bottom: 6px;
 }
 
 .quest-input {
   width: 100%;
-  padding: 5px 8px;
+  padding: 5px var(--wb-space-sm);
   font-size: 0.8rem;
   background: var(--wb-bg);
   border: 1px solid var(--wb-border);
@@ -213,7 +213,7 @@ textarea.quest-input-sm {
 
 .quest-list-item {
   border-bottom: 1px solid var(--wb-border);
-  padding: 6px 10px;
+  padding: 6px var(--wb-space-md);
 }
 
 .quest-list-item:last-child {
@@ -224,7 +224,7 @@ textarea.quest-input-sm {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 4px;
+  margin-bottom: var(--wb-space-xs);
 }
 
 .quest-list-item-num {
@@ -237,14 +237,14 @@ textarea.quest-input-sm {
 }
 
 .quest-list-item-body {
-  padding-left: 24px;
+  padding-left: var(--wb-space-xl);
 }
 
 .quest-list-item-compact {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
+  padding: var(--wb-space-xs) var(--wb-space-md);
   border-bottom: 1px solid var(--wb-border);
 }
 
@@ -275,7 +275,7 @@ textarea.quest-input-sm {
   display: flex;
   align-items: center;
   gap: 3px;
-  padding: 2px 8px;
+  padding: 2px var(--wb-space-sm);
   font-size: 0.72rem;
   background: var(--wb-success-surface);
   color: var(--wb-success);
@@ -310,35 +310,35 @@ textarea.quest-input-sm {
 }
 
 .quest-empty {
-  padding: 12px 10px;
+  padding: var(--wb-space-md) var(--wb-space-md);
   color: var(--wb-text-faint);
-  font-size: 0.78rem;
+  font-size: var(--wb-font-size-sm);
   font-style: italic;
 }
 
 .quest-validation-error {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 10px;
+  gap: var(--wb-space-xs);
+  padding: 3px var(--wb-space-md);
   color: var(--wb-error);
-  font-size: 0.78rem;
+  font-size: var(--wb-font-size-sm);
 }
 
 .quest-validation-warning {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 10px;
+  gap: var(--wb-space-xs);
+  padding: 3px var(--wb-space-md);
   color: var(--wb-warning);
-  font-size: 0.78rem;
+  font-size: var(--wb-font-size-sm);
 }
 
 .quest-editor-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: var(--wb-space-sm);
+  padding: var(--wb-space-sm) var(--wb-space-md);
   border-top: 1px solid var(--wb-border);
   flex-shrink: 0;
 }
@@ -347,14 +347,14 @@ textarea.quest-input-sm {
 
 /* Quest Details Panel */
 .quest-details-panel {
-  padding: 12px;
+  padding: var(--wb-space-md);
   border-bottom: 1px solid var(--wb-border);
 }
 
 .quest-details-panel h4 {
-  font-size: 0.85rem;
+  font-size: var(--wb-font-size-base);
   color: var(--wb-text-muted);
-  margin: 0 0 12px 0;
+  margin: 0 0 var(--wb-space-md) 0;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -362,7 +362,7 @@ textarea.quest-input-sm {
 .level-range-inputs {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--wb-space-sm);
 }
 
 .level-range-inputs span {
@@ -376,14 +376,14 @@ textarea.quest-input-sm {
 
 /* Quest Prerequisites Panel */
 .quest-prerequisites-panel {
-  padding: 12px;
+  padding: var(--wb-space-md);
 }
 
 .quest-prerequisites-panel .panel-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: var(--wb-space-md);
 }
 
 .quest-prerequisites-panel h4 {
@@ -398,18 +398,18 @@ textarea.quest-input-sm {
   color: var(--wb-text-faint);
   font-size: 0.8rem;
   text-align: center;
-  padding: 12px;
+  padding: var(--wb-space-md);
 }
 
 .prerequisites-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--wb-space-sm);
 }
 
 .prerequisite-item {
   display: flex;
-  gap: 4px;
+  gap: var(--wb-space-xs);
   align-items: center;
 }
 
@@ -423,6 +423,6 @@ textarea.quest-input-sm {
 }
 
 .prerequisite-item .btn-sm {
-  padding: 4px 8px;
+  padding: var(--wb-space-xs) var(--wb-space-sm);
   flex-shrink: 0;
 }

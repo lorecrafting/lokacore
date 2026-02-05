@@ -18,13 +18,13 @@
 }
 
 .template-picker-filters {
-  padding: 12px 16px;
+  padding: var(--wb-space-md) var(--wb-space-lg);
   background: var(--wb-input);
   border-bottom: 1px solid var(--wb-border);
 }
 
 .template-picker-filters .search-box {
-  margin-bottom: 12px;
+  margin-bottom: var(--wb-space-md);
 }
 
 .template-picker-filters .search-box .input {
@@ -61,7 +61,7 @@
 .template-grid {
   flex: 1;
   overflow-y: auto;
-  padding: 16px;
+  padding: var(--wb-space-lg);
 }
 
 .template-empty {
@@ -71,23 +71,23 @@
 }
 
 .template-category-section {
-  margin-bottom: 24px;
+  margin-bottom: var(--wb-space-xl);
 }
 
 .category-header {
-  font-size: 0.85rem;
+  font-size: var(--wb-font-size-base);
   color: var(--wb-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin: 0 0 12px 0;
-  padding-bottom: 8px;
+  margin: 0 0 var(--wb-space-md) 0;
+  padding-bottom: var(--wb-space-sm);
   border-bottom: 1px solid var(--wb-border);
 }
 
 .template-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 12px;
+  gap: var(--wb-space-md);
 }
 
 .template-card {
@@ -95,7 +95,7 @@
   border: 1px solid var(--wb-border);
   border-left: 4px solid var(--wb-accent);
   border-radius: var(--wb-radius-md);
-  padding: 12px;
+  padding: var(--wb-space-md);
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -115,7 +115,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: var(--wb-space-sm);
 }
 
 .template-id {
@@ -184,21 +184,21 @@
 
 .template-config-form {
   flex: 1;
-  padding: 16px;
+  padding: var(--wb-space-lg);
   overflow-y: auto;
 }
 
 .config-section {
-  margin-bottom: 24px;
+  margin-bottom: var(--wb-space-xl);
 }
 
 .config-section h4 {
-  font-size: 0.85rem;
+  font-size: var(--wb-font-size-base);
   color: var(--wb-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin: 0 0 12px 0;
-  padding-bottom: 8px;
+  margin: 0 0 var(--wb-space-md) 0;
+  padding-bottom: var(--wb-space-sm);
   border-bottom: 1px solid var(--wb-border);
 }
 
@@ -206,21 +206,21 @@
   background: var(--wb-danger-surface);
   border: 1px solid var(--wb-danger-border);
   border-radius: var(--wb-radius-md);
-  padding: 12px;
-  margin-top: 16px;
+  padding: var(--wb-space-md);
+  margin-top: var(--wb-space-lg);
 }
 
 .config-validation-errors h4 {
   color: var(--wb-error);
-  font-size: 0.85rem;
-  margin: 0 0 8px 0;
+  font-size: var(--wb-font-size-base);
+  margin: 0 0 var(--wb-space-sm) 0;
   border: none;
   padding: 0;
 }
 
 .config-validation-errors ul {
   margin: 0;
-  padding-left: 16px;
+  padding-left: var(--wb-space-lg);
   color: var(--wb-error);
   font-size: 0.8rem;
 }
@@ -232,13 +232,13 @@
 .checkbox-label {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--wb-space-sm);
   cursor: pointer;
 }
 
 .checkbox-label input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
+  width: var(--wb-space-lg);
+  height: var(--wb-space-lg);
   cursor: pointer;
 }
 
@@ -264,7 +264,7 @@
 .preview-code {
   flex: 1;
   overflow: auto;
-  padding: 12px;
+  padding: var(--wb-space-md);
 }
 
 .preview-code pre {

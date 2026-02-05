@@ -1,9 +1,56 @@
 /**
- * Canvas2DRenderer - Rendering engine for the 2D World Builder Viewport
- *
- * Handles all drawing/rendering: grid, rooms, exits, NPC paths,
- * ghost layers, snap indicators, entity indicators, and text truncation.
- * Extracted from Canvas2DViewport for separation of concerns.
+ * @file Canvas2DRenderer - Rendering engine for the 2D World Builder Viewport
+ * @context
+ *   - Handles all drawing/rendering: grid, rooms, exits, NPC paths, ghost layers,
+ *     snap indicators, entity indicators, and text truncation
+ *   - Extracted from Canvas2DViewport for separation of concerns
+ *   - Receives state via getState() callback to avoid circular dependencies
+ *   - Uses memoized text truncation to optimize measureText calls
+ * @related
+ *   - assets/js/world_builder/Canvas2DViewport.js (orchestrator, owns state)
+ *   - assets/js/world_builder/Canvas2DInteraction.js (mouse/keyboard handling)
+ *   - assets/css/variables.css (CSS variable definitions for colors)
+ */
+
+/**
+ * @typedef {import('./Canvas2DViewport.js').Room} Room
+ * @typedef {import('./Canvas2DViewport.js').Point} Point
+ * @typedef {import('./Canvas2DViewport.js').CameraState} CameraState
+ * @typedef {import('./Canvas2DViewport.js').ExitColors} ExitColors
+ * @typedef {import('./Canvas2DViewport.js').RoomColors} RoomColors
+ * @typedef {import('./Canvas2DViewport.js').ViewportColors} ViewportColors
+ */
+
+/**
+ * State object provided by the viewport via getState() callback.
+ * @typedef {Object} RendererState
+ * @property {CameraState} camera - Current camera position and zoom
+ * @property {Room[]} rooms - All rooms in the world
+ * @property {Map<string, Room>} roomsByKey - Room lookup by key or id
+ * @property {string|null} selectedRoom - Currently selected room key
+ * @property {Set<string>} selectedKeys - Multi-selected room keys
+ * @property {Object<string, {status?: string, errors?: string[], warnings?: string[]}>} validation - Validation results by room key
+ * @property {Object<string, string>} zoneColors - Zone colors by zone key
+ * @property {Object<string, string>} roomZoneMap - Room to zone mapping
+ * @property {boolean} showZoneColors - Whether to show zone colors
+ * @property {Object<string, {patrol?: {route: string[], loop?: boolean}}>} npcPaths - NPC paths by NPC key
+ * @property {boolean} showNPCPaths - Whether to show NPC paths
+ * @property {Point|null} snapIndicator - Current snap indicator position
+ * @property {boolean} isDraggingRoom - Whether a room is being dragged
+ * @property {boolean} showGrid - Whether to show the grid
+ * @property {boolean} showGhostLayers - Whether to show ghost layers
+ * @property {number} currentZLevel - Current Z level being viewed
+ * @property {number} gridSize - Grid cell size in pixels
+ * @property {number} roomSize - Room visual size in pixels
+ * @property {number} width - Canvas width in CSS pixels
+ * @property {number} height - Canvas height in CSS pixels
+ * @property {number} minZoom - Minimum zoom level
+ * @property {number} maxZoom - Maximum zoom level
+ * @property {ExitColors} exitColors - Exit direction colors
+ * @property {RoomColors} roomColors - Room state colors
+ * @property {ViewportColors} viewportColors - Viewport element colors
+ * @property {function(number, number): Point} worldToScreen - Convert world to screen coords
+ * @property {function(number, number): Point} screenToWorld - Convert screen to world coords
  */
 
 // Direction offsets for exit arrow positioning
@@ -17,7 +64,7 @@ const DIRECTION_OFFSETS = {
   southeast: { dx: 1, dy: 1 },
   southwest: { dx: -1, dy: 1 },
   up: { dx: 0, dy: 0 },
-  down: { dx: 0, dy: 0 }
+  down: { dx: 0, dy: 0 },
 }
 
 // Rendering constants
@@ -45,7 +92,7 @@ const RENDERING = {
 
   // Entity indicator offset
   ENTITY_INDICATOR_TOP: 5,
-  ENTITY_INDICATOR_SPACING: 2
+  ENTITY_INDICATOR_SPACING: 2,
 }
 
 // Colors used in rendering (not from CSS theme - internal to canvas)
@@ -55,34 +102,50 @@ const RENDER_COLORS = {
   ITEM_INDICATOR: '#EAB308',
   // NPC path palette (distinct colors for different paths)
   PATH_PALETTE: [
-    '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4',
-    '#ffeaa7', '#dfe6e9', '#fd79a8', '#a29bfe'
-  ]
+    '#ff6b6b',
+    '#4ecdc4',
+    '#45b7d1',
+    '#96ceb4',
+    '#ffeaa7',
+    '#dfe6e9',
+    '#fd79a8',
+    '#a29bfe',
+  ],
 }
 
 export class Canvas2DRenderer {
   /**
+   * Creates a new Canvas2DRenderer instance.
    * @param {CanvasRenderingContext2D} ctx - Canvas 2D rendering context
-   * @param {Function} getState - Returns current viewport state object:
-   *   { camera, rooms, roomsByKey, selectedRoom, selectedKeys, zoneColors,
-   *     roomZoneMap, showZoneColors, npcPaths, showNPCPaths, snapIndicator,
-   *     isDraggingRoom, showGrid, showGhostLayers, currentZLevel, validation,
-   *     gridSize, roomSize, width, height, minZoom, maxZoom,
-   *     exitColors, roomColors, viewportColors,
-   *     worldToScreen, screenToWorld }
+   * @param {function(): RendererState} getState - Callback that returns current viewport state
    */
   constructor(ctx, getState) {
+    /** @type {CanvasRenderingContext2D} */
     this.ctx = ctx
+    /** @type {function(): RendererState} */
     this.getState = getState
 
-    // Text truncation memoization cache (cleared on zoom changes)
+    /**
+     * Text truncation memoization cache (cleared on zoom changes).
+     * @type {Map<string, string>}
+     * @private
+     */
     this._truncateCache = new Map()
   }
 
+  /**
+   * Clear the text truncation cache.
+   * Should be called when zoom changes to recalculate truncated text.
+   * @returns {void}
+   */
   clearTruncateCache() {
     this._truncateCache.clear()
   }
 
+  /**
+   * Get the current size of the truncation cache (for testing/debugging).
+   * @type {number}
+   */
   get truncateCacheSize() {
     return this._truncateCache.size
   }
@@ -91,6 +154,11 @@ export class Canvas2DRenderer {
   // Main Render
   // ============================================================================
 
+  /**
+   * Render the complete viewport.
+   * Draws background, grid, ghost layers, NPC paths, exits, rooms, and snap indicator.
+   * @returns {void}
+   */
   render() {
     const ctx = this.ctx
     const state = this.getState()
@@ -142,6 +210,12 @@ export class Canvas2DRenderer {
   // Grid
   // ============================================================================
 
+  /**
+   * Draw the background grid with origin crosshair.
+   * @param {CanvasRenderingContext2D} ctx - Canvas context
+   * @param {RendererState} state - Current viewport state
+   * @returns {void}
+   */
   drawGrid(ctx, state) {
     ctx.strokeStyle = state.viewportColors.grid
     ctx.lineWidth = 1 / state.camera.zoom
@@ -188,6 +262,13 @@ export class Canvas2DRenderer {
   // NPC Paths
   // ============================================================================
 
+  /**
+   * Draw NPC patrol paths as dashed lines between rooms.
+   * Each NPC gets a distinct color from the palette.
+   * @param {CanvasRenderingContext2D} ctx - Canvas context
+   * @param {RendererState} state - Current viewport state
+   * @returns {void}
+   */
   drawNPCPaths(ctx, state) {
     let colorIndex = 0
 
@@ -250,6 +331,14 @@ export class Canvas2DRenderer {
     }
   }
 
+  /**
+   * Draw directional arrows along an NPC patrol path.
+   * @param {CanvasRenderingContext2D} ctx - Canvas context
+   * @param {RendererState} state - Current viewport state
+   * @param {string[]} route - Array of room keys in patrol order
+   * @param {string} color - Arrow fill color
+   * @returns {void}
+   */
   drawPathArrows(ctx, state, route, color) {
     ctx.fillStyle = color
     ctx.globalAlpha = 0.8
@@ -292,8 +381,15 @@ export class Canvas2DRenderer {
   // Exits
   // ============================================================================
 
+  /**
+   * Draw exit connections between rooms at the current Z level.
+   * Skips up/down exits (shown as indicators instead).
+   * @param {CanvasRenderingContext2D} ctx - Canvas context
+   * @param {RendererState} state - Current viewport state
+   * @returns {void}
+   */
   drawExits(ctx, state) {
-    const currentRooms = state.rooms.filter(r => (r.z || 0) === state.currentZLevel)
+    const currentRooms = state.rooms.filter((r) => (r.z || 0) === state.currentZLevel)
 
     for (const room of currentRooms) {
       const exits = room.exits || {}
@@ -313,6 +409,15 @@ export class Canvas2DRenderer {
     }
   }
 
+  /**
+   * Draw a single exit connection line between two rooms.
+   * @param {CanvasRenderingContext2D} ctx - Canvas context
+   * @param {RendererState} state - Current viewport state
+   * @param {Room} fromRoom - Source room
+   * @param {Room} toRoom - Destination room
+   * @param {string} direction - Exit direction (north, south, east, west, etc.)
+   * @returns {void}
+   */
   drawExitArrow(ctx, state, fromRoom, toRoom, direction) {
     const fromX = (fromRoom.x || 0) * state.gridSize
     const fromY = (fromRoom.y || 0) * state.gridSize
@@ -355,14 +460,32 @@ export class Canvas2DRenderer {
   // Rooms
   // ============================================================================
 
+  /**
+   * Draw all rooms at a specific Z level with given opacity.
+   * Used for both current level (opacity=1) and ghost layers (opacity=0.2).
+   * @param {CanvasRenderingContext2D} ctx - Canvas context
+   * @param {RendererState} state - Current viewport state
+   * @param {number} zLevel - Z level to draw
+   * @param {number} opacity - Opacity value (0-1)
+   * @returns {void}
+   */
   drawRoomsAtZLevel(ctx, state, zLevel, opacity) {
-    const roomsAtLevel = state.rooms.filter(r => (r.z || 0) === zLevel)
+    const roomsAtLevel = state.rooms.filter((r) => (r.z || 0) === zLevel)
 
     for (const room of roomsAtLevel) {
       this.drawRoom(ctx, state, room, opacity)
     }
   }
 
+  /**
+   * Draw a single room with name, key, entity indicators, and exit indicators.
+   * Color is determined by selection state, validation status, or zone.
+   * @param {CanvasRenderingContext2D} ctx - Canvas context
+   * @param {RendererState} state - Current viewport state
+   * @param {Room} room - Room to draw
+   * @param {number} [opacity=1] - Opacity value (0-1)
+   * @returns {void}
+   */
   drawRoom(ctx, state, room, opacity = 1) {
     const x = (room.x || 0) * state.gridSize
     const y = (room.y || 0) * state.gridSize
@@ -446,6 +569,17 @@ export class Canvas2DRenderer {
     ctx.globalAlpha = 1
   }
 
+  /**
+   * Draw NPC and item indicators inside a room.
+   * Shows emoji icons with count when more than 3.
+   * @param {CanvasRenderingContext2D} ctx - Canvas context
+   * @param {RendererState} state - Current viewport state
+   * @param {Room} room - Room containing entities
+   * @param {number} x - Room center X in world pixels
+   * @param {number} y - Room center Y in world pixels
+   * @param {number} halfSize - Half the room visual size
+   * @returns {void}
+   */
   drawEntityIndicators(ctx, state, room, x, y, halfSize) {
     const spawns = room.spawns || {}
     const npcs = spawns.npcs || []
@@ -463,7 +597,8 @@ export class Canvas2DRenderer {
     // NPC indicators
     if (npcs.length > 0) {
       ctx.fillStyle = RENDER_COLORS.NPC_INDICATOR
-      const npcText = npcs.length <= 3 ? '\u{1F464}'.repeat(npcs.length) : `\u{1F464}\u00D7${npcs.length}`
+      const npcText =
+        npcs.length <= 3 ? '\u{1F464}'.repeat(npcs.length) : `\u{1F464}\u00D7${npcs.length}`
       ctx.fillText(npcText, x, offsetY)
       offsetY += fontSize + RENDERING.ENTITY_INDICATOR_SPACING
     }
@@ -471,11 +606,23 @@ export class Canvas2DRenderer {
     // Item indicators
     if (items.length > 0) {
       ctx.fillStyle = RENDER_COLORS.ITEM_INDICATOR
-      const itemText = items.length <= 3 ? '\u{1F4E6}'.repeat(items.length) : `\u{1F4E6}\u00D7${items.length}`
+      const itemText =
+        items.length <= 3 ? '\u{1F4E6}'.repeat(items.length) : `\u{1F4E6}\u00D7${items.length}`
       ctx.fillText(itemText, x, offsetY)
     }
   }
 
+  /**
+   * Draw up/down exit indicators at the bottom of a room.
+   * Shows arrows pointing up or down based on available exits.
+   * @param {CanvasRenderingContext2D} ctx - Canvas context
+   * @param {RendererState} state - Current viewport state
+   * @param {Room} room - Room with potential vertical exits
+   * @param {number} x - Room center X in world pixels
+   * @param {number} y - Room center Y in world pixels
+   * @param {number} halfSize - Half the room visual size
+   * @returns {void}
+   */
   drawVerticalExitIndicators(ctx, state, room, x, y, halfSize) {
     const exits = room.exits || {}
     const hasUp = 'up' in exits
@@ -508,6 +655,13 @@ export class Canvas2DRenderer {
   // Snap Indicator
   // ============================================================================
 
+  /**
+   * Draw the snap indicator showing where a dragged room will snap to.
+   * Shows crosshairs and highlighted grid lines at the snap position.
+   * @param {CanvasRenderingContext2D} ctx - Canvas context
+   * @param {RendererState} state - Current viewport state
+   * @returns {void}
+   */
   drawSnapIndicator(ctx, state) {
     if (!state.snapIndicator) return
 
@@ -566,6 +720,16 @@ export class Canvas2DRenderer {
   // Helpers
   // ============================================================================
 
+  /**
+   * Draw a rounded rectangle path (does not fill or stroke).
+   * @param {CanvasRenderingContext2D} ctx - Canvas context
+   * @param {number} x - Top-left X coordinate
+   * @param {number} y - Top-left Y coordinate
+   * @param {number} width - Rectangle width
+   * @param {number} height - Rectangle height
+   * @param {number} radius - Corner radius
+   * @returns {void}
+   */
   roundRect(ctx, x, y, width, height, radius) {
     ctx.beginPath()
     ctx.moveTo(x + radius, y)
@@ -580,7 +744,15 @@ export class Canvas2DRenderer {
     ctx.closePath()
   }
 
-  // Truncate text to fit within maxWidth (memoized to avoid repeated measureText calls)
+  /**
+   * Truncate text to fit within maxWidth, adding ellipsis if needed.
+   * Results are memoized to avoid repeated measureText calls.
+   * @param {string} text - Text to truncate
+   * @param {number} maxWidth - Maximum width in pixels
+   * @param {CanvasRenderingContext2D} ctx - Canvas context for measuring
+   * @param {number} fontSize - Font size in pixels
+   * @returns {string} Truncated text with ellipsis if needed
+   */
   truncateText(text, maxWidth, ctx, fontSize) {
     if (!text) return ''
 
