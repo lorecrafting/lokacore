@@ -1,5 +1,26 @@
 /* =============================================================================
-   World Builder Modals Document - Document Viewer Modal, Markdown Content
+   World Builder Modals Document
+   Document viewer modal for displaying markdown documentation.
+
+   Key Selectors:
+   - .document-viewer-modal - Fixed positioned modal (right side of screen)
+   - .document-viewer - Main container with header and content areas
+   - .document-viewer.empty - Empty state variant
+   - .empty-state - Centered empty placeholder
+   - .document-header - Header with name, meta, and action buttons
+   - .document-info - Title and metadata container
+   - .document-name - Document title
+   - .document-meta - File size, date info
+   - .document-actions - Action button row
+   - .document-content - Scrollable content area
+   - .document-loading/error - Loading and error states
+   - .markdown-content - Rendered markdown container
+   - .markdown-content h1/h2/h3/h4 - Heading styles
+   - .markdown-content p/li - Body text styles
+   - .markdown-content .inline-code - Inline code styling
+   - .markdown-content a - Link styling
+
+   Used by: DocumentViewer component
    ============================================================================= */
 
 .document-viewer-modal {
@@ -55,7 +76,7 @@
 .document-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--wb-space-xs);
 }
 
 .document-name {
@@ -87,7 +108,7 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 40px;
+  padding: var(--wb-space-3xl);
   color: var(--wb-text-dim);
 }
 
@@ -101,7 +122,7 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  padding: 40px;
+  padding: var(--wb-space-3xl);
 }
 
 /* Markdown content styles */
@@ -130,7 +151,7 @@
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--wb-term-text);
-  margin: 20px 0 10px 0;
+  margin: var(--wb-space-xl) 0 var(--wb-space-md) 0;
 }
 
 .markdown-content h4 {
@@ -169,7 +190,7 @@
 
 .markdown-content .inline-code {
   background: var(--wb-input);
-  padding: 2px 6px;
+  padding: var(--wb-space-xs) var(--wb-space-sm);
   border-radius: var(--wb-radius-md);
   font-family: "SF Mono", Monaco, Consolas, monospace;
   font-size: 0.85em;

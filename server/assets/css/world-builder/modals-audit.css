@@ -1,5 +1,22 @@
 /* =============================================================================
-   World Builder Modals Audit - Audit Log Panel
+   World Builder Modals Audit
+   Audit log modal for viewing AI tool execution history with filtering.
+
+   Key Selectors:
+   - .audit-log-panel - Fixed center modal with shadow
+   - .audit-log-header - Header with title, project name, and filter dropdown
+   - .audit-log-title - Title with icon
+   - .audit-log-project - Project name display
+   - .audit-filter-select - Tool type filter dropdown
+   - .audit-log-content - Scrollable log entries area
+   - .audit-log-loading/empty - Loading and empty state displays
+   - .audit-entries - Entry list container
+   - .audit-entry - Individual log entry card
+   - .audit-entry.error - Error state styling
+   - .audit-entry-header - Entry header with status, tool name, time
+   - .audit-entry-args/result - Code blocks for input/output display
+
+   Used by: AuditLogModal component
    ============================================================================= */
 
 .audit-log-panel {
@@ -128,7 +145,7 @@
 
 .audit-entry-args,
 .audit-entry-result {
-  margin-top: 6px;
+  margin-top: var(--wb-space-sm);
 }
 
 .audit-label {
@@ -140,7 +157,7 @@
 .audit-entry-result code {
   display: block;
   background: var(--wb-border-dark);
-  padding: 6px var(--wb-space-sm);
+  padding: var(--wb-space-sm) var(--wb-space-sm);
   border-radius: var(--wb-radius-md);
   margin-top: var(--wb-space-xs);
   font-size: var(--wb-font-size-xs);

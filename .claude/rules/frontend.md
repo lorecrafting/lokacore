@@ -143,7 +143,7 @@ const MyHook = {
 
 **Font sizes:** `--wb-font-size-xs` (0.7rem) / `-sm` (0.78rem) / `-md` (0.8rem) / `-base` (0.85rem) / `-lg` (0.95rem) / `-xl` (1.05rem). Tailwind: `text-wb-xs` through `text-wb-xl`.
 
-**Spacing:** `--wb-space-xs` (4px) / `-sm` (8px) / `-md` (12px) / `-lg` (16px). In HEEx, use Tailwind classes (`p-1`=4px, `p-2`=8px, `p-3`=12px, `p-4`=16px). In `app.css` custom CSS, use `var(--wb-space-*)`. Never introduce oddball pixel values (5px, 6px, 10px) -- snap to the nearest token.
+**Spacing:** `--wb-space-xs` (4px) / `-sm` (8px) / `-md` (12px) / `-lg` (16px) / `-xl` (24px) / `-2xl` (32px) / `-3xl` (40px). In HEEx, use Tailwind classes (`p-1`=4px, `p-2`=8px, `p-3`=12px, `p-4`=16px, `p-6`=24px, `p-8`=32px, `p-10`=40px). In `app.css` custom CSS, use `var(--wb-space-*)`. Never introduce oddball pixel values (5px, 6px, 10px) -- snap to the nearest token.
 
 ### Spacing in CSS Files
 
@@ -155,6 +155,9 @@ const MyHook = {
 | 8px | `var(--wb-space-sm)` | `p-2`, `gap-2`, `m-2` |
 | 12px | `var(--wb-space-md)` | `p-3`, `gap-3`, `m-3` |
 | 16px | `var(--wb-space-lg)` | `p-4`, `gap-4`, `m-4` |
+| 24px | `var(--wb-space-xl)` | `p-6`, `gap-6`, `m-6` |
+| 32px | `var(--wb-space-2xl)` | `p-8`, `gap-8`, `m-8` |
+| 40px | `var(--wb-space-3xl)` | `p-10`, `gap-10`, `m-10` |
 
 ```css
 /* BAD - raw pixel values */
@@ -303,6 +306,70 @@ Panel collapse is tracked in both:
 
 Toggle via `phx-click="toggle_panel"` with `phx-value-panel="panelname"`.
 
+## World Builder Component Architecture
+
+### Component Hierarchy
+
+```
+WorldBuilderLive (world_builder_live.ex - 3000+ lines)
+│
+├── Toolbar
+│   ├── Zone selector, view toggles
+│   └── Action buttons (save, commit, settings)
+│
+├── HierarchyPanel (hierarchy_panel.ex)
+│   └── Entity tree view with drag-drop
+│
+├── ViewportPanel (viewport_panel.ex)
+│   └── WorldBuilder Hook → Canvas2D System
+│       ├── Canvas2DViewport.js (orchestrator)
+│       ├── Canvas2DRenderer.js (drawing)
+│       └── Canvas2DInteraction.js (mouse/keyboard)
+│
+├── InspectorPanel (inspector_panel.ex)
+│   ├── RoomInspector - Room properties, exits
+│   ├── NPCInspector - NPC stats, behaviors
+│   ├── QuestEditor (quest_editor.ex) - Quest objectives, rewards
+│   ├── DialogueEditor (dialogue_editor.ex) - Dialogue trees
+│   └── CutsceneEditor (cutscene_editor.ex) - Timeline, keyframes
+│
+├── TerminalPanel (terminal_panel.ex)
+│   └── MudTerminal Hook → Phoenix Channel (game_channel)
+│
+├── ChatPanel (chat_panel.ex)
+│   └── ChatTextarea Hook - Auto-resize, submit
+│
+└── Modals
+    ├── GitCommitModal (git_commit_modal.ex)
+    ├── SettingsModal (settings_modal.ex)
+    ├── AuditLogModal (audit_log_modal.ex)
+    ├── TemplatePicker (template_picker.ex)
+    └── DocumentViewer (document_viewer.ex)
+```
+
+### Event Handler Modules
+
+Large editors extract event handlers to separate modules:
+
+| Parent Component | Event Handler Module | Handles |
+|-----------------|---------------------|---------|
+| WorldBuilderLive | git_event_handler.ex | Git commit modal events |
+| WorldBuilderLive | script_template_event_handler.ex | Template picker events |
+| DialogueEditor | dialogue_event_handler.ex | Dialogue tree events |
+| CutsceneEditor | cutscene_event_handler.ex | Cutscene timeline events |
+
+### Data Flow
+
+```
+LiveView assigns ──pushEvent──► JS Hook ──handleEvent──► LiveView
+       │                            │
+       │                            ├── Canvas renders room data
+       │                            ├── Terminal shows game output
+       │                            └── Chat displays AI responses
+       │
+       └── Server-side state (rooms, entities, selection)
+```
+
 ## Build System
 
 ### esbuild
@@ -347,9 +414,11 @@ localStorage.getItem(STORAGE_KEYS.PANEL_SIZES)
 ```
 
 **localStorage:**
+- `STORAGE_KEYS.PANEL_SIZES` = `'world_builder_panel_sizes'` (panel_resize.js)
 - `STORAGE_KEYS.COLLAPSED_PANELS` = `'world_builder_collapsed_panels'` (world_builder.js)
-- `STORAGE_KEYS.PANEL_SIZES` = `'world-builder-panel-sizes'` (panel_resize.js)
 - `{provider}${STORAGE_KEYS.API_KEY_SUFFIX}` = `'{provider}_api_key_encoded'` (multi_api_key_config.js)
+
+All storage keys use snake_case for consistency (e.g., `world_builder_panel_sizes`).
 
 **sessionStorage:**
 - `STORAGE_KEYS.UNDO_STACK` = `'world_builder_undo_stack'` (UndoManager.js)

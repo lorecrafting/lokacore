@@ -22,7 +22,7 @@ export const STORAGE_KEYS = {
    * @used_by panel_resize.js
    * @storage localStorage
    */
-  PANEL_SIZES: 'world-builder-panel-sizes',
+  PANEL_SIZES: 'world_builder_panel_sizes',
 
   /**
    * Collapsed state for World Builder panels.

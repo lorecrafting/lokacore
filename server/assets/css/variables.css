@@ -60,6 +60,8 @@
   --wb-space-md: 12px;
   --wb-space-lg: 16px;
   --wb-space-xl: 24px;
+  --wb-space-2xl: 32px;
+  --wb-space-3xl: 40px;
 
   /* === Border Radius === */
   --wb-radius-sm: 3px;

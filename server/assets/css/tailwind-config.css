@@ -167,12 +167,14 @@
   --shadow-wb-indigo-glow: var(--wb-shadow-indigo-glow);
   --shadow-wb-focus-ring: var(--wb-shadow-focus-ring);
 
-  /* Spacing -> space-wb-xs, space-wb-sm, space-wb-md, space-wb-lg, space-wb-xl */
+  /* Spacing -> space-wb-xs, space-wb-sm, space-wb-md, space-wb-lg, space-wb-xl, space-wb-2xl, space-wb-3xl */
   --spacing-wb-xs: var(--wb-space-xs);
   --spacing-wb-sm: var(--wb-space-sm);
   --spacing-wb-md: var(--wb-space-md);
   --spacing-wb-lg: var(--wb-space-lg);
   --spacing-wb-xl: var(--wb-space-xl);
+  --spacing-wb-2xl: var(--wb-space-2xl);
+  --spacing-wb-3xl: var(--wb-space-3xl);
 }
 
 /* Add variants based on LiveView classes */

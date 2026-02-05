@@ -1,5 +1,22 @@
 /* =============================================================================
-   World Builder Modals Settings - Settings Modal, API Keys, Privacy
+   World Builder Modals Settings
+   Settings modal layout, API key configuration, privacy info, and keyboard shortcuts.
+
+   Key Selectors:
+   - .settings-modal - Modal container with max-width and scroll
+   - .settings-modal-wide - Wider variant for multi-provider layout
+   - .settings-section - Collapsible section with border separator
+   - .api-key-input-group - Input + button row for API keys
+   - .api-key-input - Monospace input field for API keys
+   - .api-key-providers - Multi-provider layout container
+   - .api-key-provider - Individual provider card (Anthropic, OpenAI, etc.)
+   - .provider-header - Provider name and status badge
+   - .status-badge - Success/error status indicator
+   - .privacy-list - Privacy info bullet list
+   - .shortcut-list - Keyboard shortcuts display
+   - .animate-spin - Loading spinner animation
+
+   Used by: SettingsModal component, MultiAPIKeyConfig hook
    ============================================================================= */
 
 .settings-modal {

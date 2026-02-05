@@ -1,5 +1,30 @@
 /* =============================================================================
-   World Builder Tools - Tool Execution UI, Tool Blocks, Progress Indicators
+   World Builder Tools
+   AI tool execution UI including current tool indicator, queue, and result blocks.
+
+   Key Selectors:
+   Current Tool Indicator:
+   - .current-tool-indicator - Active tool execution banner with pulse animation
+   - @keyframes toolPulse - Border glow animation
+
+   Queue Indicator:
+   - .chat-queue-indicator - Pending tool queue display
+
+   Tool Use Blocks:
+   - .tool-use - Tool invocation container
+   - .tool-header - Tool name and icon row
+   - .tool-name - Tool name text
+   - .tool-input code - Tool input JSON display
+   - .tool-result-content code - Tool output display
+   - .tool-result-header - Result header with status
+   - .tool-progress - Progress indicator badge
+
+   Collapsible Results:
+   - .tool-result-details - Expandable result container (details/summary)
+   - .tool-result-summary - Collapsed preview
+   - .show-more-hint - "Show more" link
+
+   Used by: ChatPanel component (tool execution display)
    ============================================================================= */
 
 /* ---- Tool Execution Indicator ---- */
@@ -7,7 +32,7 @@
   display: flex;
   align-items: center;
   gap: var(--wb-space-md);
-  padding: var(--wb-space-md) 14px;
+  padding: var(--wb-space-md) var(--wb-space-lg);
   background: linear-gradient(135deg, var(--wb-tool-bg-from) 0%, var(--wb-tool-bg-to) 100%);
   border: 1px solid var(--wb-tool-border);
   border-radius: var(--wb-radius-lg);
@@ -34,7 +59,7 @@
   display: flex;
   align-items: center;
   gap: var(--wb-space-sm);
-  padding: 6px 14px;
+  padding: var(--wb-space-sm) var(--wb-space-lg);
   background: var(--wb-tool-queue-bg);
   border: 1px solid var(--wb-tool-queue-border);
   border-radius: var(--wb-radius-lg);
@@ -44,7 +69,7 @@
 }
 
 .chat-queue-indicator .btn {
-  padding: 2px 6px;
+  padding: var(--wb-space-xs) var(--wb-space-sm);
   min-height: unset;
   border-radius: var(--wb-radius-md);
 }
@@ -95,13 +120,13 @@
   white-space: pre-wrap;
   word-break: break-word;
   border: 1px solid var(--wb-tool-code-border);
-  margin-top: 6px;
+  margin-top: var(--wb-space-sm);
 }
 
 .tool-result-header {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--wb-space-sm);
   font-size: var(--wb-font-size-xs);
   margin-bottom: var(--wb-space-xs);
   font-weight: 500;
@@ -110,7 +135,7 @@
 /* Tool progress indicator */
 .tool-progress {
   margin-left: auto;
-  padding: 2px var(--wb-space-md);
+  padding: var(--wb-space-xs) var(--wb-space-md);
   background: color-mix(in srgb, var(--wb-indigo) 15%, transparent);
   border-radius: var(--wb-radius-lg);
   font-size: var(--wb-font-size-xs);
@@ -121,7 +146,7 @@
 
 /* Collapsible tool results */
 .tool-result-details {
-  margin-top: 6px;
+  margin-top: var(--wb-space-sm);
 }
 
 .tool-result-details summary {
@@ -158,7 +183,7 @@
   font-size: var(--wb-font-size-xs);
   color: var(--wb-indigo-text);
   cursor: pointer;
-  padding: 2px 0;
+  padding: var(--wb-space-xs) 0;
   font-weight: 500;
 }
 

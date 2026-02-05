@@ -1,5 +1,16 @@
 /* =============================================================================
-   World Builder Modals Base - Overlay, Animations, Modal Content
+   World Builder Modals Base
+   Modal overlay, base animations, modal content container, and fullscreen variant.
+
+   Key Selectors:
+   - .modal-overlay - Fixed fullscreen backdrop with fadeIn animation
+   - .modal-content - Centered modal container with slideIn animation
+   - .modal-fullscreen - Full viewport modal for editors (quest, cutscene)
+   - @keyframes fadeIn - Overlay fade animation
+   - @keyframes slideIn - Modal slide-up animation
+   - @keyframes modalSlideIn - Centered modal slide animation (used by settings, audit)
+
+   Used by: All modal components (SettingsModal, AuditLogModal, CommitModal, etc.)
    ============================================================================= */
 
 /* Modal Overlay */

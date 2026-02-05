@@ -1,5 +1,52 @@
 /* =============================================================================
-   Dialogue Tree - Layout, Container, Tree Panel, Mock State, Quest Flow Graph
+   World Builder Dialogue Tree
+   Dialogue editor layout, tree panel, mock state testing, and quest flow graph.
+
+   Key Selectors:
+   Dialogue Editor Layout:
+   - .dialogue-editor - Main editor container
+   - .dialogue-editor-header - Top header with title and stats
+   - .dialogue-editor-title - Title with NPC name
+   - .dialogue-editor-stats - Stat badges (nodes, choices, errors)
+   - .stat-badge - Individual stat display
+   - .dialogue-editor-actions - Header action buttons
+   - .dialogue-editor-body - Two-column grid layout
+
+   Tree Panel (Left):
+   - .dialogue-tree-panel - Left sidebar container
+   - .dialogue-tree - Scrollable node list
+   - .dialogue-tree-empty - Empty state placeholder
+   - .dialogue-tree-node - Individual node row (clickable)
+   - .dialogue-tree-node.selected - Selected node state
+   - .dialogue-tree-node.entry-node - Entry point indicator
+   - .dialogue-tree-node.has-error - Error indicator
+   - .node-icon/info/key/text/meta - Node content elements
+   - .choice-count - Number of choices badge
+
+   Mock State Panel (Testing):
+   - .dialogue-preview-container - Preview + mock state layout
+   - .mock-state-panel - Right sidebar for test state
+   - .mock-state-section - State category section
+   - .mock-tags - Tag pills container
+   - .mock-tag - Individual state tag
+   - .mock-tag-completed/item/flag - Tag type variants
+   - .mock-add-row - Add new tag input row
+   - .preview-filtered - Filtered choice indicator
+   - .choice-condition-badge - Condition display on choices
+
+   Quest Flow Modal:
+   - .quest-flow-modal - Quest dependency graph modal
+   - .quest-flow-body - Graph container
+   - .quest-graph-container - Scrollable graph area
+   - .quest-graph-legend - Color legend overlay
+   - .legend-item/color/arrow - Legend elements
+   - .quest-graph-edges - SVG edge layer
+   - .quest-graph-nodes - Node container
+   - .quest-node - Individual quest node
+   - .quest-type-main/side/tutorial - Quest type variants
+   - .quest-node-act/name/id - Node content elements
+
+   Used by: DialogueEditor component, QuestFlowGraph hook
    ============================================================================= */
 
 /* Dialogue Editor Container */
@@ -100,7 +147,7 @@
   padding: 0.5rem;
   border-radius: var(--wb-radius-sm);
   cursor: pointer;
-  margin-bottom: 2px;
+  margin-bottom: var(--wb-space-xs);
   transition: background 0.15s;
 }
 
@@ -201,24 +248,24 @@
   font-size: 10px;
   text-transform: uppercase;
   color: var(--wb-text-muted);
-  margin-bottom: 6px;
+  margin-bottom: var(--wb-space-sm);
 }
 
 .mock-tags {
   display: flex;
   flex-wrap: wrap;
   gap: var(--wb-space-xs);
-  margin-bottom: 6px;
+  margin-bottom: var(--wb-space-sm);
   min-height: 22px;
 }
 
 .mock-tag {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: var(--wb-space-xs);
   background: var(--wb-mock-tag-active);
   color: var(--wb-text-bright);
-  padding: 2px 6px;
+  padding: var(--wb-space-xs) var(--wb-space-sm);
   border-radius: var(--wb-radius-sm);
   font-size: 11px;
 }
@@ -256,7 +303,7 @@
 
 .mock-add-row input {
   flex: 1;
-  padding: var(--wb-space-xs) 6px;
+  padding: var(--wb-space-xs) var(--wb-space-sm);
   background: var(--wb-border-dark);
   border: 1px solid var(--wb-border);
   border-radius: var(--wb-radius-sm);
@@ -337,7 +384,7 @@
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--wb-space-sm);
 }
 
 .legend-color {
@@ -432,14 +479,14 @@
   font-size: 9px;
   text-transform: uppercase;
   color: var(--wb-text-muted);
-  margin-bottom: 2px;
+  margin-bottom: var(--wb-space-xs);
 }
 
 .quest-node-name {
   font-weight: 600;
   color: var(--wb-text-bright);
   font-size: 12px;
-  margin-bottom: 2px;
+  margin-bottom: var(--wb-space-xs);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

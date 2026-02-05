@@ -1,5 +1,41 @@
 /* =============================================================================
-   Dialogue Nodes - Node Editor, Choices, Preview, Validation
+   World Builder Dialogue Nodes
+   Dialogue node editor panel, choice editing, preview, and validation display.
+
+   Key Selectors:
+   Node Panel:
+   - .dialogue-node-panel - Right panel for node editing
+   - .dialogue-node-empty - Empty state (no node selected)
+   - .node-editor - Node editing form container
+   - .panel-section-header - Section header bar
+
+   Choices Section:
+   - .choices-section - Choices list container
+   - .choices-section .section-header - Choices section title
+   - .no-choices - Empty choices placeholder
+   - .choices-list - List of choice editors
+   - .choice-editor - Individual choice form
+   - .choice-header - Choice header with number and delete
+   - .choice-number - Choice index badge
+   - .choice-fields - Choice form fields
+   - .condition-row/action-row - Condition and action input rows
+
+   Preview Panel:
+   - .dialogue-preview - Preview container
+   - .preview-content - Preview content area
+   - .preview-speaker - Speaker name display
+   - .preview-text - Dialogue text bubble
+   - .preview-choices - Choice button list
+   - .preview-choice - Individual choice button
+   - .preview-end - End of dialogue indicator
+   - .preview-error - Error state display
+
+   Validation:
+   - .dialogue-validation-errors - Validation error container
+   - .validation-header - Error section header
+   - .validation-list - List of error messages
+
+   Used by: DialogueEditor component (node panel)
    ============================================================================= */
 
 /* Node Panel */

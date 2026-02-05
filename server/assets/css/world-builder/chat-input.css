@@ -1,5 +1,20 @@
 /* =============================================================================
-   World Builder Chat Input - Input Form, Textarea, Send Button
+   World Builder Chat Input
+   Chat input form, textarea, send button, streaming indicator, and error display.
+
+   Key Selectors:
+   - .chat-input-container - Legacy input container
+   - .chat-input - Legacy textarea input
+   - .chat-send-btn - Legacy send button
+   - .btn-icon - Icon-only button (attachment, settings)
+   - .chat-input-form - Primary input form container
+   - .chat-input-form textarea - Auto-resize textarea with focus ring
+   - .chat-input-form .btn-primary - Gradient send button
+   - .chat-input-form .btn-danger - Cancel/stop button
+   - .streaming-indicator - Pulsing animation during streaming
+   - .chat-error - Error message display with icon
+
+   Used by: ChatPanel component, ChatTextarea hook
    ============================================================================= */
 
 /* ---- Input Area ---- */
@@ -74,14 +89,14 @@
 .chat-input-form {
   display: flex;
   gap: var(--wb-space-sm);
-  padding: var(--wb-space-md) 14px;
+  padding: var(--wb-space-md) var(--wb-space-lg);
   background: var(--wb-toolbar);
   border-top: 1px solid var(--wb-chat-border);
 }
 
 .chat-input-form textarea {
   flex: 1;
-  padding: var(--wb-space-md) 14px;
+  padding: var(--wb-space-md) var(--wb-space-lg);
   background: var(--wb-surface);
   border: 1px solid var(--wb-chat-border);
   border-radius: var(--wb-radius-lg);
@@ -104,7 +119,7 @@
 }
 
 .chat-input-form .btn {
-  padding: var(--wb-space-sm) 14px;
+  padding: var(--wb-space-sm) var(--wb-space-lg);
   border: none;
   border-radius: var(--wb-radius-lg);
   cursor: pointer;
@@ -160,7 +175,7 @@
   display: flex;
   align-items: flex-start;
   gap: var(--wb-space-md);
-  padding: var(--wb-space-md) 14px;
+  padding: var(--wb-space-md) var(--wb-space-lg);
   background: linear-gradient(135deg, var(--wb-danger-surface) 0%, var(--wb-danger-surface) 100%);
   border: 1px solid var(--wb-danger-surface-hover);
   border-radius: var(--wb-radius-lg);
@@ -173,5 +188,5 @@
 .chat-error .hero-icon,
 .chat-error [class*="hero-"] {
   flex-shrink: 0;
-  margin-top: 2px;
+  margin-top: var(--wb-space-xs);
 }

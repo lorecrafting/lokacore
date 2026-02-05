@@ -1,5 +1,21 @@
 /* =============================================================================
-   World Builder Layout - Grid, Panels, Resize Handles
+   World Builder Layout
+   Main grid layout, panel containers, resize handles, and collapsed states.
+
+   Key Selectors:
+   - .world-builder - Root container, fixed fullscreen positioning
+   - .world-builder-container - CSS Grid layout with 9 columns (panels + resize handles)
+   - .panel-resize-handle - Draggable column resize handles between panels
+   - .world-builder-panel - Base panel styling (hierarchy, viewport, inspector, etc.)
+   - .world-builder-hierarchy - Left sidebar for entity tree
+   - .world-builder-viewport - Center canvas area
+   - .world-builder-inspector - Right sidebar for properties
+   - .world-builder-chat - Far right chat panel
+   - .panel-collapsed - Collapsed panel state (40px width)
+   - .panel-tab.active::after - Active tab indicator (pseudo-element)
+   - .panel-content - Scrollable panel body with custom scrollbar
+
+   Used by: WorldBuilderLive, HierarchyPanel, ViewportContainer, InspectorPanel, ChatPanel
    ============================================================================= */
 
 /* World Builder - Unreal Engine-style 3D editor */

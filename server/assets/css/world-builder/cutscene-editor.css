@@ -1,6 +1,49 @@
-/* ============================================================================
-   Cutscene Timeline Styles
-   ============================================================================ */
+/* =============================================================================
+   World Builder Cutscene Editor
+   Cutscene timeline editor with tracks, keyframes, properties panel, and preview.
+
+   Key Selectors:
+   Timeline Container:
+   - .cutscene-timeline-container - Main editor container
+   - .cutscene-timeline-header - Top header with title and controls
+   - .header-row - Header layout row
+   - .form-group-inline - Inline form field (duration, skip button)
+   - .header-actions - Action buttons row
+
+   Timeline Layout:
+   - .cutscene-timeline-content - Three-column layout
+   - .timeline-sidebar - Left sidebar with add buttons
+   - .timeline-controls - Add keyframe buttons
+   - .timeline-main - Center timeline canvas
+   - .timeline-ruler - Time markers at top
+   - .timeline-marker - Individual time marker
+   - .timeline-track - Horizontal track row
+   - .timeline-track-label - Track name (text, camera, etc.)
+   - .timeline-track-content - Keyframe drop zone
+   - .timeline-keyframe - Draggable keyframe element
+   - .timeline-keyframe.selected - Selected keyframe state
+
+   Properties Panel:
+   - .timeline-properties-panel - Right sidebar
+   - .keyframe-properties-empty - No selection placeholder
+   - .keyframe-properties - Selected keyframe form
+   - .properties-header - Section header
+
+   Effects & Validation:
+   - .effects-panel - Effects list for keyframe
+   - .effects-list - Effect items container
+   - .effect-item - Individual effect row
+   - .validation-display - Validation status
+   - .validation-error/warning - Error/warning messages
+
+   Preview Panel:
+   - .preview-panel - Cutscene preview section
+   - .preview-steps - Step list
+   - .preview-step - Individual step (clickable)
+   - .step-number/type/text - Step content elements
+
+   Used by: CutsceneEditor component
+   ============================================================================= */
 
 .cutscene-timeline-container {
   display: flex;
@@ -66,7 +109,7 @@
 
 .btn-block {
   width: 100%;
-  margin-bottom: 6px;
+  margin-bottom: var(--wb-space-sm);
   text-align: left;
 }
 
@@ -89,7 +132,7 @@
   top: 0;
   height: 100%;
   border-left: 1px solid var(--wb-border);
-  padding-left: 4px;
+  padding-left: var(--wb-space-xs);
 }
 
 .timeline-marker span {
@@ -157,7 +200,7 @@
 .keyframe-properties-empty {
   color: var(--wb-text-dim);
   text-align: center;
-  padding: 32px var(--wb-space-lg);
+  padding: var(--wb-space-2xl) var(--wb-space-lg);
   font-size: var(--wb-font-size-base);
 }
 
@@ -212,7 +255,7 @@
 .effects-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--wb-space-sm);
 }
 
 .effect-item {
@@ -251,7 +294,7 @@
 .validation-warnings {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--wb-space-xs);
 }
 
 .validation-error {
@@ -306,7 +349,7 @@
   display: flex;
   gap: var(--wb-space-sm);
   align-items: center;
-  padding: 6px var(--wb-space-sm);
+  padding: var(--wb-space-sm) var(--wb-space-sm);
   background: var(--wb-panel);
   border-radius: var(--wb-radius-md);
   cursor: pointer;

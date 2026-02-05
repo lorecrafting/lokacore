@@ -4,7 +4,7 @@
  *   - Handles mouse/touch drag events for resizing panels
  *   - Applies CSS grid changes locally via requestAnimationFrame (no server roundtrip during drag)
  *   - Syncs final size to server only on mouseup/touchend via pushEvent('resize_panel')
- *   - Persists panel sizes to localStorage ('world-builder-panel-sizes')
+ *   - Persists panel sizes to localStorage ('world_builder_panel_sizes')
  *   - Restores sizes from localStorage on mount via pushEvent('restore_panel_sizes')
  *   - Handle-level listeners are manually managed (not HookHelper) for LiveView patch re-attachment
  *   - Grid columns controlled via --grid-columns CSS custom property
@@ -14,6 +14,7 @@
  */
 
 import { HookHelper } from '../world_builder/HookHelper.js'
+import { STORAGE_KEYS } from '../world_builder/storageKeys.js'
 
 const PANEL_CONFIG = {
   console: {
@@ -70,6 +71,15 @@ const GRID_COLUMN_INDEX = {
 const PanelResize = {
   mounted() {
     try {
+      // One-time migration from old key name
+      const oldKey = 'world-builder-panel-sizes'
+      const oldValue = localStorage.getItem(oldKey)
+      if (oldValue && !localStorage.getItem(STORAGE_KEYS.PANEL_SIZES)) {
+        localStorage.setItem(STORAGE_KEYS.PANEL_SIZES, oldValue)
+        localStorage.removeItem(oldKey)
+        console.log('[PanelResize] Migrated storage key from kebab-case to snake_case')
+      }
+
       this.helper = new HookHelper(this)
       this.container = this.el
       if (!this.container) {
@@ -139,7 +149,7 @@ const PanelResize = {
 
   loadSavedSizes() {
     try {
-      const saved = localStorage.getItem('world-builder-panel-sizes')
+      const saved = localStorage.getItem(STORAGE_KEYS.PANEL_SIZES)
       if (saved) {
         const sizes = JSON.parse(saved)
         // Send all sizes in a single batched event
@@ -152,10 +162,10 @@ const PanelResize = {
 
   saveSizes(panel, size) {
     try {
-      const saved = localStorage.getItem('world-builder-panel-sizes')
+      const saved = localStorage.getItem(STORAGE_KEYS.PANEL_SIZES)
       const sizes = saved ? JSON.parse(saved) : {}
       sizes[panel] = size
-      localStorage.setItem('world-builder-panel-sizes', JSON.stringify(sizes))
+      localStorage.setItem(STORAGE_KEYS.PANEL_SIZES, JSON.stringify(sizes))
     } catch (e) {
       console.warn('[PanelResize] Failed to save sizes:', e)
     }

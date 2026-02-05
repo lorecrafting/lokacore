@@ -1,10 +1,26 @@
 /* =============================================================================
-   World Builder Terminal - Console Overlay & Terminal Styles
+   World Builder Terminal
+   MUD terminal output lines, connection status indicators, and console overlay.
+
+   Key Selectors:
+   - .terminal-line - Base terminal output line with pre-wrap
+   - .terminal-line.room-title - Bold room name display
+   - .terminal-line.system - Italicized system messages
+   - .terminal-line.error - Red error messages
+   - .terminal-line.chat - Blue chat messages
+   - .terminal-line.emote - Yellow emote messages
+   - .terminal-line.builder - Green builder command output
+   - .term-connection-dot - Connection status indicator (connected/connecting/disconnected)
+   - .world-builder-console - Resizable console overlay at bottom of viewport
+   - .console-resize-handle - Horizontal resize handle for console height
+   - .broadcast-system/event/emergency - Broadcast message styling
+
+   Used by: MudTerminal hook, TerminalPanel, ViewportContainer (console overlay)
    ============================================================================= */
 
 /* Terminal panel: layout inlined to template, keep JS-applied classes */
 .terminal-line {
-  margin-bottom: 2px;
+  margin-bottom: var(--wb-space-xs);
   white-space: pre-wrap;
   word-wrap: break-word;
   color: var(--wb-term-text);
@@ -100,7 +116,7 @@
 /* Console styles are inlined to Tailwind in viewport_container.ex
    Console collapse state kept for JS interaction */
 .world-builder-console.console-collapsed {
-  max-height: 32px;
+  max-height: var(--wb-space-2xl);
 }
 
 /* =============================================================================

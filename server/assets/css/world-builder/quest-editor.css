@@ -1,10 +1,36 @@
 /* =============================================================================
-   World Builder Editors - Quest Editor Styles
-   ============================================================================= */
+   World Builder Quest Editor
+   Quest editor forms, sections, validation, and flow graph node styles.
 
-/* ============================================================================
-   Quest Editor Styles
-   ============================================================================ */
+   Key Selectors:
+   Quest Flow Graph Nodes:
+   - .quest-node - Base node styling for flow graph
+   - .quest-node-header/body - Node internal structure
+   - .quest-node-start/objective/choice/reward/end - Node type variants
+
+   LiveView Quest Editor:
+   - .quest-editor-lv - Main editor container (also used by cutscene)
+   - .quest-editor-scroll - Scrollable form area
+   - .quest-validation-banner - Top validation status bar
+   - .quest-section - Collapsible form section
+   - .quest-section-header - Section title bar
+   - .quest-form-grid - Form field container
+   - .quest-form-row - Single field row
+   - .quest-form-row-pair/triple - Multi-column field layouts
+   - .quest-input/quest-input-sm - Form input fields
+   - .quest-list-item - List item in objectives/rewards
+   - .quest-add-btn/remove-btn - Add/remove item buttons
+   - .quest-validation-error/warning - Inline validation messages
+   - .quest-editor-footer - Bottom action buttons
+
+   Quest Details & Prerequisites:
+   - .quest-details-panel - Quest metadata section
+   - .quest-prerequisites-panel - Prerequisites editor
+   - .prerequisites-list - List of prerequisite conditions
+   - .prerequisite-item - Individual prerequisite row
+
+   Used by: QuestEditor component, QuestFlowGraph hook
+   ============================================================================= */
 
 .quest-node {
   background: var(--wb-input);
@@ -24,14 +50,14 @@
   letter-spacing: 0.5px;
   color: var(--wb-text-muted);
   margin-bottom: var(--wb-space-sm);
-  padding-bottom: 6px;
+  padding-bottom: var(--wb-space-sm);
   border-bottom: 1px solid var(--wb-border);
 }
 
 .quest-node-body {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--wb-space-sm);
 }
 
 .quest-node-start {
@@ -57,7 +83,7 @@
 .form-group-sm {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: var(--wb-space-xs);
 }
 
 .form-group-sm label {
@@ -67,7 +93,7 @@
 }
 
 .input-sm {
-  padding: var(--wb-space-xs) 6px;
+  padding: var(--wb-space-xs) var(--wb-space-sm);
   font-size: var(--wb-font-size-xs);
   background: var(--wb-panel);
   border: 1px solid var(--wb-border);
@@ -84,7 +110,7 @@
   text-align: center;
   color: var(--wb-quest-special);
   font-weight: 700;
-  padding: 6px;
+  padding: var(--wb-space-sm);
 }
 
 
@@ -111,8 +137,8 @@
 .quest-validation-banner {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px var(--wb-space-md);
+  gap: var(--wb-space-sm);
+  padding: var(--wb-space-sm) var(--wb-space-md);
   background: var(--wb-danger-surface);
   color: var(--wb-error);
   font-size: 0.8rem;
@@ -135,7 +161,7 @@
 .quest-section-header {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--wb-space-sm);
   padding: var(--wb-space-sm) var(--wb-space-md);
   background: var(--wb-surface);
   font-size: 0.8rem;
@@ -150,33 +176,33 @@
 }
 
 .quest-form-row {
-  margin-bottom: 6px;
+  margin-bottom: var(--wb-space-sm);
 }
 
 .quest-form-row label {
   display: block;
   font-size: 0.75rem;
   color: var(--wb-text-dim);
-  margin-bottom: 2px;
+  margin-bottom: var(--wb-space-xs);
 }
 
 .quest-form-row-pair {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--wb-space-sm);
-  margin-bottom: 6px;
+  margin-bottom: var(--wb-space-sm);
 }
 
 .quest-form-row-triple {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: var(--wb-space-sm);
-  margin-bottom: 6px;
+  margin-bottom: var(--wb-space-sm);
 }
 
 .quest-input {
   width: 100%;
-  padding: 5px var(--wb-space-sm);
+  padding: var(--wb-space-sm) var(--wb-space-sm);
   font-size: 0.8rem;
   background: var(--wb-bg);
   border: 1px solid var(--wb-border);
@@ -191,7 +217,7 @@
 }
 
 .quest-input-sm {
-  padding: 3px 6px;
+  padding: var(--wb-space-xs) var(--wb-space-sm);
   font-size: 0.78rem;
   background: var(--wb-bg);
   border: 1px solid var(--wb-border);
@@ -213,7 +239,7 @@ textarea.quest-input-sm {
 
 .quest-list-item {
   border-bottom: 1px solid var(--wb-border);
-  padding: 6px var(--wb-space-md);
+  padding: var(--wb-space-sm) var(--wb-space-md);
 }
 
 .quest-list-item:last-child {
@@ -223,7 +249,7 @@ textarea.quest-input-sm {
 .quest-list-item-header {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--wb-space-sm);
   margin-bottom: var(--wb-space-xs);
 }
 
@@ -232,7 +258,7 @@ textarea.quest-input-sm {
   font-weight: bold;
   color: var(--wb-text-faint);
   background: var(--wb-surface);
-  padding: 1px 5px;
+  padding: 1px var(--wb-space-sm);
   border-radius: var(--wb-radius-sm);
 }
 
@@ -243,7 +269,7 @@ textarea.quest-input-sm {
 .quest-list-item-compact {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--wb-space-sm);
   padding: var(--wb-space-xs) var(--wb-space-md);
   border-bottom: 1px solid var(--wb-border);
 }
@@ -255,8 +281,8 @@ textarea.quest-input-sm {
 .quest-form-row-inline {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 3px;
+  gap: var(--wb-space-sm);
+  margin-bottom: var(--wb-space-xs);
 }
 
 .quest-form-row-inline label {
@@ -274,8 +300,8 @@ textarea.quest-input-sm {
 .quest-add-btn {
   display: flex;
   align-items: center;
-  gap: 3px;
-  padding: 2px var(--wb-space-sm);
+  gap: var(--wb-space-xs);
+  padding: var(--wb-space-xs) var(--wb-space-sm);
   font-size: 0.72rem;
   background: var(--wb-success-surface);
   color: var(--wb-success);
@@ -291,7 +317,7 @@ textarea.quest-input-sm {
 .quest-remove-btn {
   display: flex;
   align-items: center;
-  padding: 2px 4px;
+  padding: var(--wb-space-xs) var(--wb-space-xs);
   background: none;
   border: none;
   color: var(--wb-text-faint);
@@ -320,7 +346,7 @@ textarea.quest-input-sm {
   display: flex;
   align-items: center;
   gap: var(--wb-space-xs);
-  padding: 3px var(--wb-space-md);
+  padding: var(--wb-space-xs) var(--wb-space-md);
   color: var(--wb-error);
   font-size: var(--wb-font-size-sm);
 }
@@ -329,7 +355,7 @@ textarea.quest-input-sm {
   display: flex;
   align-items: center;
   gap: var(--wb-space-xs);
-  padding: 3px var(--wb-space-md);
+  padding: var(--wb-space-xs) var(--wb-space-md);
   color: var(--wb-warning);
   font-size: var(--wb-font-size-sm);
 }

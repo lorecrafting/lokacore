@@ -1,6 +1,32 @@
-/* ============================================================================
-   Template Picker Styles
-   ============================================================================ */
+/* =============================================================================
+   World Builder Template Picker
+   Template picker modal for selecting and configuring script templates.
+
+   Key Selectors:
+   - .template-picker-modal - Main modal container (900px wide)
+   - .template-picker-content - Scrollable content area
+   - .template-picker-filters - Search box and category filter buttons
+   - .category-filters - Category button row
+   - .category-btn - Individual category filter button
+   - .template-grid - Scrollable template list area
+   - .template-category-section - Group of templates by category
+   - .category-header - Category section title
+   - .template-cards - Grid of template cards
+   - .template-card - Individual template card (selectable)
+   - .template-card.selected - Selected state
+   - .template-id/hook/name/description - Card content elements
+
+   Template Config Modal:
+   - .template-config-modal - Configuration form modal
+   - .template-config-content - Two-column layout (form + preview)
+   - .template-config-form - Left column with form fields
+   - .config-section - Grouped form fields
+   - .config-validation-errors - Validation error display
+   - .template-config-preview - Right column with YAML preview
+   - .preview-code - Monospace YAML output
+
+   Used by: TemplatePicker component
+   ============================================================================= */
 
 .template-picker-modal {
   width: 900px;
@@ -34,11 +60,11 @@
 .category-filters {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--wb-space-sm);
 }
 
 .category-btn {
-  padding: 4px 10px;
+  padding: var(--wb-space-xs) var(--wb-space-md);
   font-size: 0.75rem;
   background: var(--wb-border);
   border: none;
@@ -67,7 +93,7 @@
 .template-empty {
   text-align: center;
   color: var(--wb-text-dim);
-  padding: 32px;
+  padding: var(--wb-space-2xl);
 }
 
 .template-category-section {
@@ -126,7 +152,7 @@
 
 .template-hook {
   font-size: 0.65rem;
-  padding: 2px 6px;
+  padding: var(--wb-space-xs) var(--wb-space-sm);
   border-radius: var(--wb-radius-lg);
   color: white;
   font-weight: 600;
@@ -137,7 +163,7 @@
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--wb-text);
-  margin: 0 0 4px 0;
+  margin: 0 0 var(--wb-space-xs) 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -163,7 +189,7 @@
 .template-config-title {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--wb-space-md);
 }
 
 .template-config-title .template-id {
@@ -244,7 +270,7 @@
 
 .required {
   color: var(--wb-error);
-  margin-left: 2px;
+  margin-left: var(--wb-space-xs);
 }
 
 .template-config-preview {
