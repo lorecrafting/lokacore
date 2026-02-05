@@ -3,7 +3,7 @@
 
 @import "tailwindcss" source(none);
 @import "./variables.css";
-@import "./ebook-auth.css";
+@import "./admin-auth.css";
 @source "../css";
 @source "../js";
 @source "../../lib/loka_web";
@@ -278,7 +278,7 @@
 
 /* This file is for your main application CSS */
 
-/* Auth page styles (login, register, character create) are in ebook-auth.css */
+/* Admin auth page styles are in admin-auth.css */
 /* ========================================
    ADMIN DASHBOARD STYLES
    ========================================
@@ -3820,13 +3820,13 @@ textarea.quest-input-sm {
 .broadcast-system {
   background: rgba(128, 128, 128, 0.15);
   border-left: 3px solid var(--wb-text-muted);
-  color: var(--ebook-text-muted);
+  color: var(--wb-text-muted);
 }
 
 .broadcast-event {
   background: rgba(218, 165, 32, 0.15);
   border-left: 3px solid goldenrod;
-  color: var(--ebook-text);
+  color: var(--wb-text);
 }
 
 .broadcast-emergency {

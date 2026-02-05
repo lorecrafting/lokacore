@@ -1,30 +1,30 @@
-<div class="ebook-page">
-  <div class="ebook-auth">
-    <h1 class="ebook-auth-title">Enter the World</h1>
+<div class="admin-page">
+  <div class="admin-auth">
+    <h1 class="admin-auth-title">Enter the World</h1>
 
-    <div :if={Phoenix.Flash.get(@flash, :error)} class="ebook-flash ebook-flash--error">
+    <div :if={Phoenix.Flash.get(@flash, :error)} class="admin-flash admin-flash--error">
       {Phoenix.Flash.get(@flash, :error)}
     </div>
 
-    <div :if={local_mail_adapter?()} class="ebook-dev-notice">
-      <p>Development mode: <a href="/dev/mailbox" class="ebook-link">view sent emails</a></p>
+    <div :if={local_mail_adapter?()} class="admin-dev-notice">
+      <p>Development mode: <a href="/dev/mailbox" class="admin-link">view sent emails</a></p>
     </div>
 
-    <div :if={Mix.env() == :dev} class="ebook-dev-notice ebook-dev-notice--spaced">
+    <div :if={Mix.env() == :dev} class="admin-dev-notice admin-dev-notice--spaced">
       <p><strong>Admin credentials:</strong> admin@loka.local / adminadmin12</p>
-      <p class="ebook-prose--small">
+      <p class="admin-prose--small">
         Use password login below for quick access
       </p>
     </div>
 
-    <.form :let={f} for={@form} as={:player} action={~p"/players/log-in"} class="ebook-auth-form">
-      <div class="ebook-form-group">
-        <label class="ebook-label">Your email address</label>
+    <.form :let={f} for={@form} as={:player} action={~p"/players/log-in"} class="admin-auth-form">
+      <div class="admin-form-group">
+        <label class="admin-label">Your email address</label>
         <input
           type="email"
           name={f[:email].name}
           value={if Mix.env() == :dev, do: "admin@loka.local", else: f[:email].value}
-          class="ebook-input"
+          class="admin-input"
           autocomplete="email"
           required
           phx-mounted={JS.focus()}
@@ -32,23 +32,23 @@
         />
       </div>
 
-      <div class="ebook-form-group">
-        <label class="ebook-label">Password (optional - leave blank for magic link)</label>
+      <div class="admin-form-group">
+        <label class="admin-label">Password (optional - leave blank for magic link)</label>
         <input
           type="password"
           name={f[:password].name}
           value={if Mix.env() == :dev, do: "adminadmin12", else: f[:password].value}
-          class="ebook-input"
+          class="admin-input"
           autocomplete="current-password"
         />
       </div>
 
-      <button type="submit" class="ebook-submit ebook-submit--center">
+      <button type="submit" class="admin-submit admin-submit--center">
         Log in
       </button>
     </.form>
 
-    <div :if={@current_scope} class="ebook-auth-footer">
+    <div :if={@current_scope} class="admin-auth-footer">
       <p>You need to reauthenticate to perform sensitive actions.</p>
     </div>
   </div>

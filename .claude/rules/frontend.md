@@ -11,7 +11,7 @@ This context auto-loads when working in `assets/`.
 | Category | Location |
 |----------|----------|
 | CSS variables | `assets/css/variables.css` (WB design tokens) |
-| Auth CSS | `assets/css/ebook-auth.css` |
+| Auth CSS | `assets/css/admin-auth.css` |
 | Main CSS | `assets/css/app.css` (Tailwind + WB custom CSS) |
 | JS hooks | `assets/js/hooks/*.js` (one per hook, re-exported in `index.js`) |
 | JS utilities | `assets/js/world_builder/*.js` (HookHelper, KeyboardManager) |
@@ -82,7 +82,7 @@ const MyHook = {
 | Theme | Scope | Prefix | Style |
 |-------|-------|--------|-------|
 | World Builder | `/admin/world-builder` | `--wb-*` | Dark (223+ variables) |
-| eBook Auth | `/client/auth/*` | `--ebook-*` | Light |
+| Admin Auth | `/players/log-in` | `--admin-*` | Light |
 
 ### Design Token Pipeline
 

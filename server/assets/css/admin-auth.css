@@ -1,0 +1,233 @@
+/* ========================================
+   ADMIN AUTH STYLES
+   Used by: admin login page
+   ======================================== */
+
+:root {
+  /* Admin Auth Color Palette - Grayscale only */
+  --admin-bg: #FAFAFA;
+  --admin-text: #222222;
+  --admin-text-muted: #767676;
+  --admin-text-faint: #999999;
+  --admin-border: #E5E5E5;
+
+  /* Typography */
+  --admin-font: 'Crimson Text', Georgia, 'Times New Roman', serif;
+
+  /* Spacing */
+  --admin-max-width: 42rem;
+  --admin-padding: 1.5rem;
+
+  /* Transitions */
+  --admin-transition: 150ms ease;
+}
+
+/* Loading animation for submit buttons */
+@keyframes admin-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.3; }
+}
+
+/* Admin Page Container */
+.admin-page {
+  font-family: var(--admin-font);
+  background-color: var(--admin-bg);
+  color: var(--admin-text);
+  max-width: var(--admin-max-width);
+  margin: 0 auto;
+  padding: var(--admin-padding);
+  min-height: 100vh;
+  min-height: 100dvh;
+  line-height: 1.5;
+  font-size: 1.125rem;
+}
+
+/* Prose/Body Text */
+.admin-prose {
+  font-family: var(--admin-font);
+  font-size: 1.125rem;
+  line-height: 1.5;
+  color: var(--admin-text);
+  text-indent: 1.5rem;
+}
+
+.admin-prose:first-of-type {
+  text-indent: 0;
+}
+
+.admin-prose--small {
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+/* Interactive Links */
+.admin-link {
+  color: var(--admin-text);
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color var(--admin-transition);
+}
+
+.admin-link:hover {
+  color: #000000;
+}
+
+.admin-link:focus-visible {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
+}
+
+/* Form Input */
+.admin-input {
+  font-family: var(--admin-font);
+  font-size: 1.125rem;
+  color: var(--admin-text);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--admin-text);
+  padding: 0.5rem 0;
+  width: 100%;
+  outline: none;
+  transition: border-color var(--admin-transition);
+}
+
+.admin-input:focus {
+  border-bottom-color: #000000;
+}
+
+.admin-input:focus-visible {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
+}
+
+.admin-input::placeholder {
+  color: var(--admin-text-muted);
+}
+
+/* Form Label */
+.admin-label {
+  font-family: var(--admin-font);
+  font-size: 1rem;
+  color: var(--admin-text-muted);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+/* Submit Action */
+.admin-submit {
+  font-family: var(--admin-font);
+  font-size: 1.125rem;
+  color: var(--admin-text);
+  background: transparent;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 1.5rem;
+  display: inline-block;
+  transition: color var(--admin-transition);
+}
+
+.admin-submit:hover {
+  color: #000000;
+}
+
+.admin-submit:disabled {
+  color: var(--admin-text-muted);
+  cursor: not-allowed;
+}
+
+.admin-submit:focus-visible {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
+}
+
+.admin-submit.phx-submit-loading,
+.admin-submit.phx-click-loading {
+  animation: admin-pulse 1.5s ease-in-out infinite;
+  cursor: wait;
+  pointer-events: none;
+}
+
+.admin-submit--center {
+  display: block;
+  margin: 2rem auto 0;
+  text-align: center;
+}
+
+/* Auth Page Centered Layout */
+.admin-auth {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  text-align: center;
+  width: 100%;
+}
+
+.admin-auth-title {
+  font-family: var(--admin-font);
+  font-size: 1.75rem;
+  font-weight: 400;
+  color: var(--admin-text);
+  margin-bottom: 2rem;
+}
+
+.admin-auth-form {
+  width: 100%;
+  max-width: 20rem;
+}
+
+.admin-auth-footer {
+  margin-top: 2rem;
+  font-family: var(--admin-font);
+  font-size: 1rem;
+  color: var(--admin-text-muted);
+}
+
+.admin-auth-footer a,
+.admin-auth-footer .admin-link {
+  color: var(--admin-text);
+}
+
+/* Flash messages */
+.admin-flash {
+  font-family: var(--admin-font);
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  padding: 0.5rem 1rem;
+}
+
+.admin-flash--error {
+  color: #8B0000;
+}
+
+/* Auth form groups */
+.admin-form-group {
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+/* Dev mode notice */
+.admin-dev-notice {
+  margin-bottom: 1.5rem;
+  color: var(--admin-text-muted);
+  font-size: 0.875rem;
+}
+
+.admin-dev-notice--spaced {
+  margin-bottom: 2rem;
+}
+
+/* Utility: Hide navbar on admin auth pages */
+.admin-page ~ .menu,
+body:has(.admin-page) > .menu {
+  display: none;
+}
+
+/* Override body background for admin auth pages */
+body:has(.admin-page) {
+  background-color: var(--admin-bg);
+}
