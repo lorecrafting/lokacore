@@ -60,7 +60,13 @@ export default [
       'no-duplicate-imports': 'error',
       eqeqeq: 'error',
       'no-var': 'error',
-      'prefer-const': 'error'
+      'prefer-const': 'error',
+      // LLM code quality rules
+      'no-implicit-globals': 'error', // LLMs sometimes create globals
+      'prefer-template': 'warn', // Cleaner string concatenation
+      'no-nested-ternary': 'warn', // LLMs love nested ternaries
+      'max-depth': ['warn', 4], // Prevent deep nesting
+      'max-params': ['warn', 4] // Flag functions with too many params
     }
   },
   {

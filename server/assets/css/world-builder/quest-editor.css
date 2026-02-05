@@ -1,6 +1,6 @@
 /* =============================================================================
    World Builder Quest Editor
-   Quest editor forms, sections, validation, and flow graph node styles.
+   Quest editor forms, sections, and flow graph node styles.
 
    Key Selectors:
    Quest Flow Graph Nodes:
@@ -11,7 +11,6 @@
    LiveView Quest Editor:
    - .quest-editor-lv - Main editor container (also used by cutscene)
    - .quest-editor-scroll - Scrollable form area
-   - .quest-validation-banner - Top validation status bar
    - .quest-section - Collapsible form section
    - .quest-section-header - Section title bar
    - .quest-form-grid - Form field container
@@ -19,18 +18,14 @@
    - .quest-form-row-pair/triple - Multi-column field layouts
    - .quest-input/quest-input-sm - Form input fields
    - .quest-list-item - List item in objectives/rewards
-   - .quest-add-btn/remove-btn - Add/remove item buttons
-   - .quest-validation-error/warning - Inline validation messages
-   - .quest-editor-footer - Bottom action buttons
-
-   Quest Details & Prerequisites:
-   - .quest-details-panel - Quest metadata section
-   - .quest-prerequisites-panel - Prerequisites editor
-   - .prerequisites-list - List of prerequisite conditions
-   - .prerequisite-item - Individual prerequisite row
 
    Used by: QuestEditor component, QuestFlowGraph hook
+   See also: quest-validation.css for validation states and action buttons
    ============================================================================= */
+
+/* ==========================================================================
+   Quest Flow Graph Nodes
+   ========================================================================== */
 
 .quest-node {
   background: var(--wb-input);
@@ -80,6 +75,10 @@
   border-color: var(--wb-quest-special);
 }
 
+/* ==========================================================================
+   Node Form Elements
+   ========================================================================== */
+
 .form-group-sm {
   display: flex;
   flex-direction: column;
@@ -106,14 +105,6 @@
   border-color: var(--wb-accent);
 }
 
-.quest-complete-badge {
-  text-align: center;
-  color: var(--wb-quest-special);
-  font-weight: 700;
-  padding: var(--wb-space-sm);
-}
-
-
 /* ==========================================================================
    LiveView Editors (Quest, Cutscene, Script) - Shared Styles
    ========================================================================== */
@@ -134,22 +125,9 @@
   padding: var(--wb-space-sm) var(--wb-space-md);
 }
 
-.quest-validation-banner {
-  display: flex;
-  align-items: center;
-  gap: var(--wb-space-sm);
-  padding: var(--wb-space-sm) var(--wb-space-md);
-  background: var(--wb-danger-surface);
-  color: var(--wb-error);
-  font-size: 0.8rem;
-  border-bottom: 1px solid var(--wb-border);
-  flex-shrink: 0;
-}
-
-.quest-validation-banner.valid {
-  background: var(--wb-success-surface);
-  color: var(--wb-success);
-}
+/* ==========================================================================
+   Form Sections
+   ========================================================================== */
 
 .quest-section {
   margin-bottom: var(--wb-space-md);
@@ -175,6 +153,10 @@
   padding: var(--wb-space-sm) var(--wb-space-md);
 }
 
+/* ==========================================================================
+   Form Rows & Layouts
+   ========================================================================== */
+
 .quest-form-row {
   margin-bottom: var(--wb-space-sm);
 }
@@ -199,6 +181,29 @@
   gap: var(--wb-space-sm);
   margin-bottom: var(--wb-space-sm);
 }
+
+.quest-form-row-inline {
+  display: flex;
+  align-items: center;
+  gap: var(--wb-space-sm);
+  margin-bottom: var(--wb-space-xs);
+}
+
+.quest-form-row-inline label {
+  font-size: 0.72rem;
+  color: var(--wb-text-dim);
+  white-space: nowrap;
+  min-width: 45px;
+}
+
+.quest-form-row-inline input,
+.quest-form-row-inline textarea {
+  flex: 1;
+}
+
+/* ==========================================================================
+   Form Inputs
+   ========================================================================== */
 
 .quest-input {
   width: 100%;
@@ -236,6 +241,10 @@ textarea.quest-input-sm {
   resize: vertical;
   font-family: inherit;
 }
+
+/* ==========================================================================
+   List Items
+   ========================================================================== */
 
 .quest-list-item {
   border-bottom: 1px solid var(--wb-border);
@@ -278,177 +287,4 @@ textarea.quest-input-sm {
   border-bottom: none;
 }
 
-.quest-form-row-inline {
-  display: flex;
-  align-items: center;
-  gap: var(--wb-space-sm);
-  margin-bottom: var(--wb-space-xs);
-}
-
-.quest-form-row-inline label {
-  font-size: 0.72rem;
-  color: var(--wb-text-dim);
-  white-space: nowrap;
-  min-width: 45px;
-}
-
-.quest-form-row-inline input,
-.quest-form-row-inline textarea {
-  flex: 1;
-}
-
-.quest-add-btn {
-  display: flex;
-  align-items: center;
-  gap: var(--wb-space-xs);
-  padding: var(--wb-space-xs) var(--wb-space-sm);
-  font-size: 0.72rem;
-  background: var(--wb-success-surface);
-  color: var(--wb-success);
-  border: 1px solid var(--wb-success-border);
-  border-radius: var(--wb-radius-sm);
-  cursor: pointer;
-}
-
-.quest-add-btn:hover {
-  background: var(--wb-success-border);
-}
-
-.quest-remove-btn {
-  display: flex;
-  align-items: center;
-  padding: var(--wb-space-xs) var(--wb-space-xs);
-  background: none;
-  border: none;
-  color: var(--wb-text-faint);
-  cursor: pointer;
-  border-radius: var(--wb-radius-sm);
-}
-
-.quest-remove-btn:hover {
-  color: var(--wb-error);
-  background: var(--wb-danger-surface);
-}
-
-.quest-remove-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.quest-empty {
-  padding: var(--wb-space-md) var(--wb-space-md);
-  color: var(--wb-text-faint);
-  font-size: var(--wb-font-size-sm);
-  font-style: italic;
-}
-
-.quest-validation-error {
-  display: flex;
-  align-items: center;
-  gap: var(--wb-space-xs);
-  padding: var(--wb-space-xs) var(--wb-space-md);
-  color: var(--wb-error);
-  font-size: var(--wb-font-size-sm);
-}
-
-.quest-validation-warning {
-  display: flex;
-  align-items: center;
-  gap: var(--wb-space-xs);
-  padding: var(--wb-space-xs) var(--wb-space-md);
-  color: var(--wb-warning);
-  font-size: var(--wb-font-size-sm);
-}
-
-.quest-editor-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--wb-space-sm);
-  padding: var(--wb-space-sm) var(--wb-space-md);
-  border-top: 1px solid var(--wb-border);
-  flex-shrink: 0;
-}
-
 /* Script editor LiveView styles are inlined to Tailwind in script_editor.ex */
-
-/* Quest Details Panel */
-.quest-details-panel {
-  padding: var(--wb-space-md);
-  border-bottom: 1px solid var(--wb-border);
-}
-
-.quest-details-panel h4 {
-  font-size: var(--wb-font-size-base);
-  color: var(--wb-text-muted);
-  margin: 0 0 var(--wb-space-md) 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.level-range-inputs {
-  display: flex;
-  align-items: center;
-  gap: var(--wb-space-sm);
-}
-
-.level-range-inputs span {
-  color: var(--wb-text-dim);
-  font-size: 0.8rem;
-}
-
-.level-range-inputs .input-sm {
-  width: 60px;
-}
-
-/* Quest Prerequisites Panel */
-.quest-prerequisites-panel {
-  padding: var(--wb-space-md);
-}
-
-.quest-prerequisites-panel .panel-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--wb-space-md);
-}
-
-.quest-prerequisites-panel h4 {
-  font-size: 0.85rem;
-  color: var(--wb-text-muted);
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.prerequisites-empty {
-  color: var(--wb-text-faint);
-  font-size: 0.8rem;
-  text-align: center;
-  padding: var(--wb-space-md);
-}
-
-.prerequisites-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--wb-space-sm);
-}
-
-.prerequisite-item {
-  display: flex;
-  gap: var(--wb-space-xs);
-  align-items: center;
-}
-
-.prerequisite-item select {
-  width: 110px;
-}
-
-.prerequisite-item input {
-  flex: 1;
-  min-width: 0;
-}
-
-.prerequisite-item .btn-sm {
-  padding: var(--wb-space-xs) var(--wb-space-sm);
-  flex-shrink: 0;
-}

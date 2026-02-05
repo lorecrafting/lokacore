@@ -1,16 +1,43 @@
 /**
- * @file MudTerminal - Phoenix Channel connection for in-editor MUD testing
- * @context
- *   - Connects to GameChannel via WebSocket (Phoenix Channels, not LiveView events)
- *   - Handles game state, combat, dialogue, inventory, and broadcast events
- *   - Scopes all DOM queries to .world-builder-terminal container (not document)
- *   - Implements command history with up/down arrow navigation
- *   - Client-side "clear" command (no server roundtrip)
- *   - Connection state indicator (green/yellow/red dot)
+ * @file mud_terminal.js - Phoenix Channel connection for in-editor MUD testing
+ *
+ * LLM CONTEXT:
+ * - Uses Phoenix Channels (WebSocket), NOT LiveView pushEvent/handleEvent
+ * - Token for auth is read from this.el.dataset.token (set by LiveView template)
+ * - DOM queries are scoped to terminalContainer, NOT document (supports multiple instances)
+ * - Command history is JS-local, not persisted (commandHistory array, historyIndex counter)
+ * - "clear" command is handled client-side (no server roundtrip)
+ * - MAX_TERMINAL_LINES (1000) limits DOM growth -- oldest lines are pruned
+ * - Connection state shown via CSS class on statusDot element (connecting/connected/disconnected)
+ * - e.stopPropagation() on input keydown prevents WorldBuilder shortcuts from firing
+ *
+ * DO NOT:
+ * - Use pushEvent/handleEvent -- this hook uses Phoenix Channels
+ * - Query DOM globally with document.querySelector (scope to terminalContainer)
+ * - Forget to leave channel and disconnect socket in destroyed()
+ * - Append to terminal without pruning (will cause memory issues)
+ *
+ * CHANNEL EVENTS (Phoenix Channel, NOT LiveView):
+ * channel.push (JS -> Server):
+ *   - 'command' { input } -- user entered a command
+ *
+ * channel.on (Server -> JS):
+ *   - game_state -- initial state on join (room, health, resources)
+ *   - room_update -- navigation, look command results
+ *   - output -- text responses from commands
+ *   - event -- game events (chat messages, etc.)
+ *   - resources_update -- mana/mv changes
+ *   - broadcast -- server announcements
+ *   - combat_start, combat_update, combat_end -- combat system
+ *   - dialogue_start, dialogue_update, dialogue_end -- NPC conversations
+ *   - inventory_update -- item changes
+ *   - clear_terminal -- server-initiated clear
+ *
  * @related
  *   - lib/loka_web/channels/game_channel.ex (server-side channel)
  *   - assets/css/world-builder/terminal.css (styling)
  *   - lib/loka_web/live/admin_live/world_builder/terminal_panel.ex (LiveView component)
+ * @used_by WorldBuilderLive terminal panel
  */
 
 import { Socket } from 'phoenix'

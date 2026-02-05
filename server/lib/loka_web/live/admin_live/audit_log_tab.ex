@@ -132,10 +132,8 @@ defmodule LokaWeb.AdminLive.AuditLogTab do
       <div class="card bg-base-200 mb-4">
         <div class="card-body py-3">
           <div class="flex gap-4 items-center flex-wrap">
-            <div class="form-control">
-              <label class="label py-0">
-                <span class="label-text text-xs">Entity Type</span>
-              </label>
+            <fieldset class="fieldset">
+              <label class="label py-0 text-xs">Entity Type</label>
               <select
                 class="select select-bordered select-sm w-40"
                 phx-change="filter_changed"
@@ -149,12 +147,10 @@ defmodule LokaWeb.AdminLive.AuditLogTab do
                   </option>
                 <% end %>
               </select>
-            </div>
+            </fieldset>
 
-            <div class="form-control">
-              <label class="label py-0">
-                <span class="label-text text-xs">Action</span>
-              </label>
+            <fieldset class="fieldset">
+              <label class="label py-0 text-xs">Action</label>
               <select
                 class="select select-bordered select-sm w-40"
                 phx-change="filter_changed"
@@ -168,7 +164,7 @@ defmodule LokaWeb.AdminLive.AuditLogTab do
                   </option>
                 <% end %>
               </select>
-            </div>
+            </fieldset>
 
             <div class="text-sm text-base-content/60 ml-auto">
               {if @total_count > 0, do: "#{@total_count} total entries", else: "No entries"}

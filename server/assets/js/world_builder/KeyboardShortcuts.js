@@ -1,23 +1,74 @@
 /**
- * KeyboardShortcuts - World Builder shortcut definitions and registration.
+ * @file KeyboardShortcuts - World Builder shortcut definitions and registration
  *
- * Extracted from world_builder.js to separate shortcut data from hook logic.
- * Each shortcut has an id, key combo, action name, and optional registration options.
+ * LLM CONTEXT:
+ * - This file is DATA ONLY - no UI logic, just shortcut definitions
+ * - All shortcuts use 'wb-' prefix for cleanup via `km.unregisterAll('wb-')`
+ * - `mod: true` means Cmd on Mac, Ctrl on Windows/Linux (handled by KeyboardManager)
+ * - `skipInputs: true` prevents shortcuts firing when user is typing in inputs
+ * - Actions are string keys mapped to handlers at registration time
  *
- * Usage:
- *   import { registerWorldBuilderShortcuts } from '../world_builder/KeyboardShortcuts.js'
+ * WHEN TO MODIFY:
+ * - Adding a new World Builder keyboard shortcut
+ * - Changing key bindings (combo field)
+ * - Adding new action types (requires handler in WorldBuilder hook)
  *
- *   const actions = { undo: () => undoManager.undo(), ... }
- *   registerWorldBuilderShortcuts(keyboardManager, actions)
+ * @related
+ *   - assets/js/world_builder/KeyboardManager.js (processes these definitions)
+ *   - assets/js/hooks/world_builder.js (provides action handlers)
+ *
+ * @example
+ * import { registerWorldBuilderShortcuts } from '../world_builder/KeyboardShortcuts.js'
+ *
+ * const actions = { undo: () => undoManager.undo(), ... }
+ * registerWorldBuilderShortcuts(keyboardManager, actions)
+ */
+
+/**
+ * Key combination for KeyboardManager registration.
+ * @typedef {Object} KeyCombo
+ * @property {string} key - The key to listen for (lowercase, e.g., 'z', 'delete', 'arrowup')
+ * @property {boolean} [mod] - Whether the platform modifier (Cmd/Ctrl) is required
+ * @property {boolean} [shift] - Whether Shift is required
+ */
+
+/**
+ * Options for keyboard shortcut registration.
+ * @typedef {Object} ShortcutOptions
+ * @property {boolean} [skipInputs=false] - If true, shortcut won't fire when focus is in input/textarea
+ * @property {boolean} [skipModals=true] - If true, shortcut won't fire when a modal is open
+ */
+
+/**
+ * A single keyboard shortcut definition.
+ * @typedef {Object} ShortcutDefinition
+ * @property {string} id - Unique registration ID (prefixed with 'wb-')
+ * @property {KeyCombo} combo - Key combination that triggers this shortcut
+ * @property {string} action - Action name to look up in the actions map
+ * @property {ShortcutOptions} [options] - Optional registration options
+ */
+
+/**
+ * Map of action names to handler functions.
+ * @typedef {Object<string, function(): void>} ActionHandlers
+ */
+
+/**
+ * KeyboardManager interface (minimal type for this file's usage).
+ * @typedef {Object} KeyboardManager
+ * @property {function(string, KeyCombo, function, ShortcutOptions=): void} register - Register a shortcut
+ * @property {function(string): void} unregisterAll - Unregister all shortcuts with given prefix
  */
 
 /**
  * All World Builder keyboard shortcuts.
+ * @type {ShortcutDefinition[]}
+ * @description
  * Each entry defines:
- *   id      - Unique registration ID (prefixed with 'wb-')
- *   combo   - Key combination object for KeyboardManager
- *   action  - Action name mapped to a handler in the actions object
- *   options - Optional KeyboardManager registration options
+ * - id: Unique registration ID (prefixed with 'wb-')
+ * - combo: Key combination object for KeyboardManager
+ * - action: Action name mapped to a handler in the actions object
+ * - options: Optional KeyboardManager registration options
  */
 export const SHORTCUT_DEFINITIONS = [
   // Undo/Redo
@@ -100,9 +151,26 @@ export const SHORTCUT_DEFINITIONS = [
 /**
  * Register all World Builder shortcuts on a KeyboardManager instance.
  *
+ * Iterates through SHORTCUT_DEFINITIONS and registers each with the provided
+ * KeyboardManager. Missing handlers are logged as warnings but don't throw.
+ *
  * @param {KeyboardManager} km - The keyboard manager instance
- * @param {Object} actions - Map of action names to handler functions
+ * @param {ActionHandlers} actions - Map of action names to handler functions
  * @param {string} [prefix='wb-'] - ID prefix for cleanup via km.unregisterAll(prefix)
+ * @returns {void}
+ *
+ * @example
+ * // In WorldBuilder hook mounted():
+ * const actions = {
+ *   undo: () => this.undoManager.undo(),
+ *   redo: () => this.undoManager.redo(),
+ *   save: () => this.pushEvent('validate_all', {}),
+ *   // ... other action handlers
+ * }
+ * registerWorldBuilderShortcuts(keyboardManager, actions)
+ *
+ * // In WorldBuilder hook destroyed():
+ * keyboardManager.unregisterAll('wb-')
  */
 export function registerWorldBuilderShortcuts(km, actions, prefix = 'wb-') {
   for (const shortcut of SHORTCUT_DEFINITIONS) {

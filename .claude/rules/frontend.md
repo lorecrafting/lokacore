@@ -2,9 +2,20 @@
 paths: ["assets/**"]
 ---
 
+<!--
+  Last Updated: 2026-02-04
+  Version: 1.1
+
+  This is the comprehensive frontend development guide for LLMs.
+  For quick patterns, see: server/assets/PATTERNS.md
+  For quick commands, see: server/assets/README.md
+-->
+
 # Frontend Development Context
 
 This context auto-loads when working in `assets/`.
+
+> **Quick Reference:** For common patterns, see `server/assets/PATTERNS.md`
 
 ## File Organization
 

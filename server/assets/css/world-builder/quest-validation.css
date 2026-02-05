@@ -1,0 +1,218 @@
+/* =============================================================================
+   World Builder Quest Editor - Validation & State Styles
+   Validation states, error messages, status indicators, and action buttons.
+
+   Key Selectors:
+   - .quest-validation-banner - Top validation status bar (valid/invalid)
+   - .quest-validation-error/warning - Inline validation messages
+   - .quest-complete-badge - Quest completion indicator
+   - .quest-add-btn/remove-btn - Add/remove item action buttons
+   - .quest-empty - Empty state placeholder text
+   - .quest-editor-footer - Bottom action buttons
+
+   Used by: QuestEditor component
+   ============================================================================= */
+
+/* ==========================================================================
+   Validation Banner & Messages
+   ========================================================================== */
+
+.quest-validation-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--wb-space-sm);
+  padding: var(--wb-space-sm) var(--wb-space-md);
+  background: var(--wb-danger-surface);
+  color: var(--wb-error);
+  font-size: 0.8rem;
+  border-bottom: 1px solid var(--wb-border);
+  flex-shrink: 0;
+}
+
+.quest-validation-banner.valid {
+  background: var(--wb-success-surface);
+  color: var(--wb-success);
+}
+
+.quest-validation-error {
+  display: flex;
+  align-items: center;
+  gap: var(--wb-space-xs);
+  padding: var(--wb-space-xs) var(--wb-space-md);
+  color: var(--wb-error);
+  font-size: var(--wb-font-size-sm);
+}
+
+.quest-validation-warning {
+  display: flex;
+  align-items: center;
+  gap: var(--wb-space-xs);
+  padding: var(--wb-space-xs) var(--wb-space-md);
+  color: var(--wb-warning);
+  font-size: var(--wb-font-size-sm);
+}
+
+/* ==========================================================================
+   Status Indicators & Badges
+   ========================================================================== */
+
+.quest-complete-badge {
+  text-align: center;
+  color: var(--wb-quest-special);
+  font-weight: 700;
+  padding: var(--wb-space-sm);
+}
+
+/* ==========================================================================
+   Action Buttons
+   ========================================================================== */
+
+.quest-add-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--wb-space-xs);
+  padding: var(--wb-space-xs) var(--wb-space-sm);
+  font-size: 0.72rem;
+  background: var(--wb-success-surface);
+  color: var(--wb-success);
+  border: 1px solid var(--wb-success-border);
+  border-radius: var(--wb-radius-sm);
+  cursor: pointer;
+}
+
+.quest-add-btn:hover {
+  background: var(--wb-success-border);
+}
+
+.quest-remove-btn {
+  display: flex;
+  align-items: center;
+  padding: var(--wb-space-xs) var(--wb-space-xs);
+  background: none;
+  border: none;
+  color: var(--wb-text-faint);
+  cursor: pointer;
+  border-radius: var(--wb-radius-sm);
+}
+
+.quest-remove-btn:hover {
+  color: var(--wb-error);
+  background: var(--wb-danger-surface);
+}
+
+.quest-remove-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   Empty State
+   ========================================================================== */
+
+.quest-empty {
+  padding: var(--wb-space-md) var(--wb-space-md);
+  color: var(--wb-text-faint);
+  font-size: var(--wb-font-size-sm);
+  font-style: italic;
+}
+
+/* ==========================================================================
+   Editor Footer
+   ========================================================================== */
+
+.quest-editor-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--wb-space-sm);
+  padding: var(--wb-space-sm) var(--wb-space-md);
+  border-top: 1px solid var(--wb-border);
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   Quest Details Panel
+   ========================================================================== */
+
+.quest-details-panel {
+  padding: var(--wb-space-md);
+  border-bottom: 1px solid var(--wb-border);
+}
+
+.quest-details-panel h4 {
+  font-size: var(--wb-font-size-base);
+  color: var(--wb-text-muted);
+  margin: 0 0 var(--wb-space-md) 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.level-range-inputs {
+  display: flex;
+  align-items: center;
+  gap: var(--wb-space-sm);
+}
+
+.level-range-inputs span {
+  color: var(--wb-text-dim);
+  font-size: 0.8rem;
+}
+
+.level-range-inputs .input-sm {
+  width: 60px;
+}
+
+/* ==========================================================================
+   Quest Prerequisites Panel
+   ========================================================================== */
+
+.quest-prerequisites-panel {
+  padding: var(--wb-space-md);
+}
+
+.quest-prerequisites-panel .panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--wb-space-md);
+}
+
+.quest-prerequisites-panel h4 {
+  font-size: 0.85rem;
+  color: var(--wb-text-muted);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.prerequisites-empty {
+  color: var(--wb-text-faint);
+  font-size: 0.8rem;
+  text-align: center;
+  padding: var(--wb-space-md);
+}
+
+.prerequisites-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wb-space-sm);
+}
+
+.prerequisite-item {
+  display: flex;
+  gap: var(--wb-space-xs);
+  align-items: center;
+}
+
+.prerequisite-item select {
+  width: 110px;
+}
+
+.prerequisite-item input {
+  flex: 1;
+  min-width: 0;
+}
+
+.prerequisite-item .btn-sm {
+  padding: var(--wb-space-xs) var(--wb-space-sm);
+  flex-shrink: 0;
+}

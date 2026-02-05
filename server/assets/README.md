@@ -75,3 +75,56 @@ Build is handled by `mix assets.build` (esbuild + Tailwind).
 | Accent | `var(--wb-accent)` | `text-wb-accent` |
 
 See `variables.css` for full token list.
+
+## Build Pipeline
+
+```
+mix phx.server
+    │
+    ├── esbuild: js/app.js → priv/static/assets/js/
+    │   ├── Target: ES2022 modules
+    │   ├── Code splitting enabled (--splitting --format=esm)
+    │   ├── Import alias: @/ → assets/js/
+    │   └── Output: chunks with hash-based names
+    │
+    └── tailwind: css/app.css → priv/static/assets/css/
+        ├── Scans: css/, js/, lib/loka_web/ for classes
+        └── Plugins: heroicons, daisyUI
+```
+
+## Test Coverage
+
+Run `npm run test:coverage` to generate coverage report.
+
+| Metric | Target | Current |
+|--------|--------|---------|
+| Lines | 70% | Check with coverage report |
+| Functions | 65% | Check with coverage report |
+| Branches | 55% | Check with coverage report |
+
+### Running Tests
+
+```bash
+npm test              # Run once
+npm run test:watch    # Watch mode
+npm run test:coverage # With coverage report
+```
+
+### Test Location
+
+Tests are in `js/world_builder/__tests__/`:
+- `HookHelper.test.js` - Lifecycle management
+- `KeyboardManager.test.js` - Keyboard shortcuts
+- `Canvas2DViewport.test.js` - Canvas orchestrator
+- `UndoManager.test.js` - Undo/redo stack
+- `Canvas2DRenderer.test.js` - Canvas drawing
+
+## Validation
+
+Run full validation before committing:
+
+```bash
+npm run validate  # lint + format check + tests
+```
+
+This is equivalent to `npm run check`.

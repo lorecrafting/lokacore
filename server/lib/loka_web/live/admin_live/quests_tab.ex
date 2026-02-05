@@ -200,10 +200,8 @@ defmodule LokaWeb.AdminLive.QuestsTab do
     ~H"""
     <div class="space-y-4">
       <div :if={@selected_player}>
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">Grant Quest</span>
-          </label>
+        <fieldset class="fieldset">
+          <label class="label">Grant Quest</label>
           <div class="flex gap-2">
             <select
               id="quest-select"
@@ -224,7 +222,7 @@ defmodule LokaWeb.AdminLive.QuestsTab do
               Grant
             </button>
           </div>
-        </div>
+        </fieldset>
 
         <div :if={@player_quest_state && length(@player_quest_state.active_quests) > 0}>
           <div class="divider">Active Quest Actions</div>

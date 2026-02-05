@@ -1,16 +1,36 @@
 /**
- * @file PanelResize - Draggable panel dividers for World Builder layout
- * @context
- *   - Handles mouse/touch drag events for resizing panels
- *   - Applies CSS grid changes locally via requestAnimationFrame (no server roundtrip during drag)
- *   - Syncs final size to server only on mouseup/touchend via pushEvent('resize_panel')
- *   - Persists panel sizes to localStorage ('world_builder_panel_sizes')
- *   - Restores sizes from localStorage on mount via pushEvent('restore_panel_sizes')
- *   - Handle-level listeners are manually managed (not HookHelper) for LiveView patch re-attachment
- *   - Grid columns controlled via --grid-columns CSS custom property
+ * @file panel_resize.js - Draggable panel dividers for World Builder layout
+ *
+ * LLM CONTEXT:
+ * - This hook uses HYBRID listener management: HookHelper for document-level
+ *   listeners, but MANUAL management for handle-level listeners because
+ *   updated() must re-attach listeners to new DOM handles after LiveView patches
+ * - Apply CSS changes locally during drag via requestAnimationFrame
+ * - Only pushEvent on mouseup/touchend to sync final state to server
+ * - Panel config (min/max/default) is in PANEL_CONFIG constant
+ * - Grid layout uses --grid-columns CSS custom property with specific column indices
+ *   (hierarchy=0, inspector=4, terminal=6, chat=8)
+ * - Console panel uses --console-height instead of grid columns (vertical resize)
+ * - localSizes tracks sizes during drag for accurate grid rebuilds
+ *
+ * DO NOT:
+ * - Use HookHelper for handle-level listeners (they need updated() re-attachment)
+ * - Call pushEvent in mousemove/touchmove handlers (causes lag)
+ * - Hardcode panel sizes -- use PANEL_CONFIG
+ * - Forget to cancel rafId in destroyed() or drag end
+ *
+ * EVENTS:
+ * pushEvent (JS -> Server):
+ *   - resize_panel { panel, size } -- on drag end
+ *   - restore_panel_sizes { sizes } -- on mount from localStorage
+ *
+ * handleEvent (Server -> JS):
+ *   - (none)
+ *
  * @related
  *   - assets/css/world-builder/layout.css (.panel-resize-handle styles)
  *   - lib/loka_web/live/admin_live/world_builder_live.ex (handle_event handlers)
+ * @used_by WorldBuilderLive
  */
 
 import { HookHelper } from '../world_builder/HookHelper.js'

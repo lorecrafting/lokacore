@@ -1,10 +1,27 @@
 /* ========================================
    World Builder Design Variables
    All design tokens for the World Builder UI
+
+   SECTIONS:
+   1. Core Foundations (backgrounds, text, borders)
+   2. Interactive States (accent, hover, status)
+   3. Typography & Spacing
+   4. Shadows & Effects
+   5. Domain-Specific (terminal, chat, quest, tools)
+
+   LLM USAGE:
+   - ALWAYS use these variables, never hardcode hex colors
+   - For transparency: use color-mix(in srgb, var(--wb-color) N%, transparent)
+   - Exception: shadows use rgba() because box-shadow needs actual colors
    ======================================== */
 
 :root {
-  /* === Backgrounds (darkest to lightest) === */
+  /* ===========================================
+     SECTION 1: CORE FOUNDATIONS
+     Background, surface, and text hierarchy
+     =========================================== */
+
+  /* --- Backgrounds (darkest to lightest) --- */
   --wb-bg: #0d0d0d;
   --wb-surface: #1a1a22;
   --wb-panel: #1e1e1e;
@@ -13,38 +30,68 @@
   --wb-input: #2a2a2a;
   --wb-hover: #2d2d38;
 
-  /* === Toolbar === */
+  /* --- Toolbar --- */
   --wb-toolbar: #222228;
   --wb-toolbar-border: #151518;
 
-  /* === Borders === */
-  --wb-border: #3d3d3d;
-  --wb-border-light: #4d4d5a;
-  --wb-border-dark: #1a1a1a;
+  /* --- Resize Handle --- */
+  --wb-resize: #131318;
 
-  /* === Text === */
-  --wb-text: #c9c9c9;
+  /* --- Text Hierarchy (brightest to faintest) --- */
   --wb-text-bright: #e0e0e0;
+  --wb-text: #c9c9c9;
   --wb-text-muted: #909090;
   --wb-text-dim: #707070;
   --wb-text-faint: #606060;
 
-  /* === Accent / Interactive === */
+  /* --- Borders --- */
+  --wb-border: #3d3d3d;
+  --wb-border-light: #4d4d5a;
+  --wb-border-dark: #1a1a1a;
+
+  /* ===========================================
+     SECTION 2: INTERACTIVE STATES
+     Accent colors, status indicators, state surfaces
+     =========================================== */
+
+  /* --- Accent / Primary Interactive --- */
   --wb-accent: #4a9eff;
   --wb-accent-hover: #0e7ad8;
   --wb-accent-gradient-from: #4a6cf7;
   --wb-accent-gradient-to: #6366f1;
+  --wb-accent-hover-gradient-from: #5a7cf7;
+  --wb-accent-hover-gradient-to: #7376f1;
 
-  /* === Status === */
+  /* --- Indigo Accent (streaming/generation UI) --- */
+  --wb-indigo: #6366f1;
+  --wb-indigo-text: #818cf8;
+  --wb-indigo-text-bright: #a5b4fc;
+
+  /* --- Status Colors --- */
   --wb-success: #4ade80;
   --wb-error: #f87171;
   --wb-warning: #fbbf24;
   --wb-info: #60a5fa;
 
-  /* === Resize Handle === */
-  --wb-resize: #131318;
+  /* --- Danger State Surfaces --- */
+  --wb-danger-surface: #3b1d1d;
+  --wb-danger-surface-hover: #5a2828;
+  --wb-danger-text: #ff8080;
+  --wb-danger-border: #5a3030;
 
-  /* === Typography === */
+  /* --- Success State Surfaces --- */
+  --wb-success-surface: #1d3b1d;
+  --wb-success-border: #2d4d2d;
+
+  /* --- Warning State Surfaces --- */
+  --wb-warning-surface: #7d6c2c;
+
+  /* ===========================================
+     SECTION 3: TYPOGRAPHY & SPACING
+     Font families, sizes, spacing scale, radii
+     =========================================== */
+
+  /* --- Typography --- */
   /* Font size scale: xs (smallest) → sm → base (normal) → lg → xl (largest) */
   --wb-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --wb-font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
@@ -54,7 +101,7 @@
   --wb-font-size-lg: 0.95rem;
   --wb-font-size-xl: 1.05rem;
 
-  /* === Spacing === */
+  /* --- Spacing --- */
   --wb-space-xs: 4px;
   --wb-space-sm: 8px;
   --wb-space-md: 12px;
@@ -63,16 +110,22 @@
   --wb-space-2xl: 32px;
   --wb-space-3xl: 40px;
 
-  /* === Border Radius === */
+  /* --- Border Radius --- */
   --wb-radius-sm: 3px;
   --wb-radius-md: 5px;
   --wb-radius-lg: 8px;
 
-  /* === Shadows ===
+  /* ===========================================
+     SECTION 4: SHADOWS & EFFECTS
+     Box shadows, transitions, z-index hierarchy
+
      NOTE: Shadows use rgba() instead of color-mix() because box-shadow
      requires actual color values, not CSS variable references. This is
      the ONE exception to the "use color-mix() for transparency" rule.
-     These are intentionally hardcoded black/accent colors for shadows. */
+     These are intentionally hardcoded black/accent colors for shadows.
+     =========================================== */
+
+  /* --- Shadows --- */
   --wb-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
   --wb-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
   --wb-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
@@ -82,18 +135,23 @@
   --wb-shadow-indigo-glow: 0 4px 12px rgba(78, 84, 200, 0.2);
   --wb-shadow-focus-ring: 0 0 0 2px rgba(85, 112, 204, 0.15);
 
-  /* === Transitions === */
+  /* --- Transitions --- */
   --wb-transition-fast: 0.15s ease;
   --wb-transition-normal: 0.2s ease;
 
-  /* === Z-Index Hierarchy === */
+  /* --- Z-Index Hierarchy --- */
   --wb-z-toolbar: 10;
   --wb-z-panel: 20;
   --wb-z-dropdown: 50;
   --wb-z-modal: 100;
   --wb-z-overlay: 1000;
 
-  /* === Terminal === */
+  /* ===========================================
+     SECTION 5: DOMAIN-SPECIFIC TOKENS
+     Terminal, chat, quest, tools, and other UI
+     =========================================== */
+
+  /* --- Terminal Panel --- */
   --wb-term-status-bg: #0f0f0f;
   --wb-term-input-bg: #0a0a0a;
   --wb-term-border: #333333;
@@ -101,37 +159,13 @@
   --wb-term-text: #c0c0c0;
   --wb-term-placeholder: #555555;
 
-  /* === Quest Flow Node Colors === */
-  --wb-quest-start: #4aff9a;
-  --wb-quest-start-hover: #3aef8a;
-  --wb-quest-objective: #ffd24a;
-  --wb-quest-fail: #ff4a9e;
-  --wb-quest-special: #9a4aff;
-  --wb-quest-pass: #4aff9e;
-  --wb-quest-pass-alt: #ff9e4a;
-
-  /* === Quest Flow Edge Colors === */
-  --wb-quest-edge: #666666;
-  --wb-quest-edge-prereq: #f59e0b;
-  --wb-quest-edge-unlock: #22c55e;
-
-  /* === Log Level Colors === */
+  /* --- Log Level Colors --- */
   --wb-log-error: #ff6666;
   --wb-log-info: #66ccff;
   --wb-log-warn: #ffcc66;
   --wb-log-success: #88ffaa;
 
-  /* === Danger State Surfaces === */
-  --wb-danger-surface: #3b1d1d;
-  --wb-danger-surface-hover: #5a2828;
-  --wb-danger-text: #ff8080;
-  --wb-danger-border: #5a3030;
-
-  /* === Success State Surfaces === */
-  --wb-success-surface: #1d3b1d;
-  --wb-success-border: #2d4d2d;
-
-  /* === Chat Panel === */
+  /* --- Chat Panel --- */
   --wb-chat-surface: #1a1a24;
   --wb-chat-border: #353545;
   --wb-chat-text-dim: #707080;
@@ -151,12 +185,22 @@
   --wb-chat-icon-npcs: #c084fc;
   --wb-chat-icon-quests: #facc15;
 
-  /* === Indigo Accent (streaming/generation UI) === */
-  --wb-indigo: #6366f1;
-  --wb-indigo-text: #818cf8;
-  --wb-indigo-text-bright: #a5b4fc;
+  /* --- Quest Flow Node Colors --- */
+  --wb-quest-start: #4aff9a;
+  --wb-quest-start-hover: #3aef8a;
+  --wb-quest-objective: #ffd24a;
+  --wb-quest-fail: #ff4a9e;
+  --wb-quest-special: #9a4aff;
+  --wb-quest-pass: #4aff9e;
+  --wb-quest-pass-alt: #ff9e4a;
+  --wb-quest-node-border: #4a4a4a;
 
-  /* === Tool Execution UI === */
+  /* --- Quest Flow Edge Colors --- */
+  --wb-quest-edge: #666666;
+  --wb-quest-edge-prereq: #f59e0b;
+  --wb-quest-edge-unlock: #22c55e;
+
+  /* --- Tool Execution UI --- */
   --wb-tool-bg-from: #1e1e3a;
   --wb-tool-bg-to: #252540;
   --wb-tool-border: #3a3a6a;
@@ -176,32 +220,22 @@
   --wb-tool-queue-border: #38384a;
   --wb-tool-queue-text: #9090a0;
 
-  /* === Panel Gradient Backgrounds === */
+  /* --- Panel Gradient Backgrounds --- */
   --wb-panel-gradient-from: #262630;
   --wb-panel-gradient-to: #222228;
   --wb-editor-gradient-from: #1e1e30;
   --wb-editor-gradient-to: #1a1a2e;
 
-  /* === Accent Hover Gradient === */
-  --wb-accent-hover-gradient-from: #5a7cf7;
-  --wb-accent-hover-gradient-to: #7376f1;
-
-  /* === Quest Node === */
-  --wb-quest-node-border: #4a4a4a;
-
-  /* === Skip Link (Accessibility) === */
-  --wb-skip-bg: #FAFAFA;
-  --wb-skip-text: #222222;
-
-  /* === Warning State Surfaces === */
-  --wb-warning-surface: #7d6c2c;
-
-  /* === Mock State Tags === */
+  /* --- Mock State Tags --- */
   --wb-mock-tag-active: #3d5a80;
   --wb-mock-tag-completed: #4a7c59;
   --wb-mock-tag-item: #8b6914;
   --wb-mock-tag-flag: #6b4a8c;
 
-  /* === Template UI === */
+  /* --- Template UI --- */
   --wb-template-selected: #2d3a4a;
+
+  /* --- Skip Link (Accessibility) --- */
+  --wb-skip-bg: #FAFAFA;
+  --wb-skip-text: #222222;
 }

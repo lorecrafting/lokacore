@@ -1,3 +1,38 @@
+/**
+ * @file multi_api_key_config.js - BYOK (Bring Your Own Key) management for AI providers
+ *
+ * LLM CONTEXT:
+ * - Keys are stored in localStorage with base64 encoding (NOT encryption, just obfuscation)
+ * - Storage key format: `{provider}_api_key_encoded` (e.g., 'anthropic_api_key_encoded')
+ * - Keys are validated by making a real API call with minimal tokens (max_tokens: 10)
+ * - PROVIDER_CONFIG defines auth patterns for each provider:
+ *   - openai-compatible: Bearer auth, chat/completions format (OpenAI, DeepSeek, GLM, MiniMax)
+ *   - anthropic: x-api-key header, anthropic-version header
+ *   - gemini: query-string API key, different request body format
+ * - Uses event delegation for button clicks (survives LiveView DOM updates)
+ * - AbortController cancels in-flight validations on destroy (prevents memory leaks)
+ * - VALIDATION_TIMEOUT_MS (10s) prevents hung requests
+ *
+ * DO NOT:
+ * - Store keys unencoded (always use btoa('loka_wb_' + key) pattern)
+ * - Make validation requests without timeout/abort handling
+ * - Assume localStorage is available (wrap in try/catch)
+ * - Add new providers without updating PROVIDER_CONFIG
+ *
+ * EVENTS:
+ * pushEvent (JS -> Server):
+ *   - api_key_status { provider, status } -- error during initial validation
+ *   - api_key_validated { provider, status } -- validation result
+ *     status: 'validating' | 'valid' | 'invalid' | 'unconfigured'
+ *
+ * handleEvent (Server -> JS):
+ *   - (none)
+ *
+ * @related
+ *   - lib/loka_web/live/admin_live/world_builder/settings_modal.ex (UI component)
+ * @used_by WorldBuilderLive settings modal
+ */
+
 import { HookHelper } from '../world_builder/HookHelper.js'
 
 // Provider configuration for API key validation

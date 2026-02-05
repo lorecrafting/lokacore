@@ -1,6 +1,6 @@
 /* =============================================================================
    World Builder Chat Messages
-   Message bubbles, welcome state, quick actions, role styling, and streaming UI.
+   Message bubbles, welcome state, quick actions, and role styling.
 
    Key Selectors:
    - .chat-messages - Scrollable message container with gradient background
@@ -13,9 +13,7 @@
    - .chat-message.user - Right-aligned user message (indigo gradient)
    - .chat-message.assistant - Left-aligned assistant message
    - .chat-message.tool_result - Tool result display with success/error states
-   - .chat-message.streaming - Active streaming state with glow
    - .message-content - Markdown-rendered message body (h1-h3, p, li, code)
-   - .tool-calls/.tool-call - Tool invocation blocks with status indicators
    - .cost-tracker - Token cost display
 
    Used by: ChatPanel component, ChatMessages component
@@ -193,11 +191,6 @@
   animation: messageIn 0.2s ease-out;
 }
 
-@keyframes messageIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 .user-message {
   background: var(--wb-chat-user-bg);
   margin-left: 20%;
@@ -304,68 +297,7 @@
   content: '';
 }
 
-.tool-calls {
-  margin-top: var(--wb-space-sm);
-  display: flex;
-  flex-direction: column;
-  gap: var(--wb-space-sm);
-}
-
-.tool-call {
-  padding: var(--wb-space-sm);
-  background: var(--wb-panel);
-  border-radius: var(--wb-radius-md);
-  border-left: 3px solid var(--wb-text-faint);
-}
-
-.tool-call.success {
-  border-left-color: var(--wb-success);
-}
-
-.tool-call.error {
-  border-left-color: var(--wb-error);
-}
-
-.tool-call.pending {
-  border-left-color: var(--wb-warning);
-}
-
-.tool-header {
-  display: flex;
-  align-items: center;
-  gap: var(--wb-space-sm);
-  margin-bottom: var(--wb-space-xs);
-}
-
-.tool-icon {
-  font-size: 0.9rem;
-}
-
-.tool-name {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--wb-text-muted);
-  font-family: monospace;
-}
-
-.tool-input,
-.tool-result {
-  font-size: var(--wb-font-size-xs);
-  margin-top: var(--wb-space-xs);
-}
-
-.tool-input pre,
-.tool-result pre {
-  background: var(--wb-bg);
-  padding: var(--wb-space-sm);
-  border-radius: var(--wb-radius-sm);
-  overflow-x: auto;
-  color: var(--wb-text-dim);
-  font-family: var(--wb-font-mono);
-  font-size: var(--wb-font-size-xs);
-  margin: 0;
-}
-
+/* ---- Cost Tracker ---- */
 .cost-tracker {
   display: flex;
   align-items: center;
@@ -416,39 +348,8 @@
   white-space: normal;
 }
 
-/* Fix: Collapse whitespace in tool containers */
-.message-tools {
-  white-space: normal;
-  margin-top: var(--wb-space-sm);
-}
-
-.tool-use {
-  white-space: normal;
-}
-
-.tool-result {
-  white-space: normal;
-}
-
 .chat-message.tool_result.error {
   background: var(--wb-danger-surface);
   border-color: var(--wb-danger-border);
   border-left-color: var(--wb-error);
-}
-
-/* ---- Streaming & Typing ---- */
-.chat-message.streaming {
-  border-color: var(--wb-indigo);
-  box-shadow: 0 0 var(--wb-space-md) color-mix(in srgb, var(--wb-indigo) 10%, transparent);
-}
-
-.chat-message.streaming .typing-indicator {
-  animation: blink 0.8s step-end infinite;
-  color: var(--wb-indigo);
-  font-weight: 700;
-}
-
-@keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
 }

@@ -1,19 +1,44 @@
 /**
- * @file WorldBuilder - Main hook for 2D canvas viewport and editor orchestration
- * @context
- *   - Manages Canvas2DViewport for 2D room map visualization
- *   - Handles room/entity selection, multi-select, and keyboard shortcuts
- *   - Coordinates with UndoManager for undo/redo operations
- *   - Registers keyboard shortcuts via KeyboardManager (mod+z, mod+s, Delete, etc.)
- *   - Listens for LiveView events: init_world_builder, rooms_updated, room_created, etc.
- *   - Pushes events to server: select_room, batch_select, delete_room, validate_all, etc.
- *   - Persists panel collapsed state to localStorage ('world_builder_collapsed_panels')
- *   - Z-level tabs for multi-floor navigation
+ * @file world_builder.js - Main hook for 2D canvas viewport and editor orchestration
+ *
+ * LLM CONTEXT:
+ * - Manages Canvas2DViewport for 2D room map visualization with pan/zoom
+ * - Selection state (selectedRoom, selectedEntity, selectedKeys) is tracked BOTH
+ *   locally in JS AND on the server -- always sync both via pushEvent
+ * - UndoManager gets its pushEvent callback set here (undoManager.setPushEvent)
+ * - KeyboardManager shortcuts are registered with 'wb-' prefix for grouped cleanup
+ * - Panel collapsed state persists to localStorage AND syncs to server assigns
+ * - Z-level tabs are dynamically generated from viewport.getZLevels()
+ *
+ * DO NOT:
+ * - Access undoManager without checking if pushEvent callback is set
+ * - Register keyboard shortcuts without the 'wb-' prefix
+ * - Update selection state without also calling pushEvent to sync server
+ * - Query DOM globally -- use this.el.querySelector or document.querySelector
+ *   only for known singleton elements like .z-level-tabs
+ *
+ * EVENTS:
+ * pushEvent (JS -> Server):
+ *   - select_room, batch_select, delete_room, batch_delete
+ *   - duplicate_room, duplicate_entity, batch_clone
+ *   - validate_all, toggle_panel, create_room, show_commit_modal
+ *   - toggle_zone_colors, toggle_npc_paths, show_keyboard_help
+ *   - undo_state_changed, select_entity
+ *
+ * handleEvent (Server -> JS):
+ *   - init_world_builder (rooms, validation, zone_colors, npc_paths)
+ *   - rooms_updated, room_created, room_updated, room_deleted
+ *   - select_room, select_entity, set_z_level
+ *   - zone_colors_changed, npc_paths_changed, panel_collapsed
+ *   - record_operation, begin_composite, end_composite
+ *   - trigger_undo, trigger_redo
+ *
  * @related
  *   - assets/js/world_builder/Canvas2DViewport.js (2D rendering)
  *   - assets/js/world_builder/KeyboardShortcuts.js (shortcut definitions)
  *   - assets/js/world_builder/UndoManager.js (undo/redo stack)
  *   - lib/loka_web/live/admin_live/world_builder_live.ex (server-side LiveView)
+ * @used_by WorldBuilderLive
  */
 
 import Canvas2DViewport from '../world_builder/Canvas2DViewport.js'

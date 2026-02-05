@@ -39,7 +39,7 @@ defmodule LokaWeb.AdminLive.DashboardTab do
               Send a message to all online players
             </p>
             <form phx-submit="send_broadcast" phx-target={@myself}>
-              <div class="form-control mb-3">
+              <fieldset class="fieldset mb-3">
                 <textarea
                   name="message"
                   class="textarea textarea-bordered w-full"
@@ -47,7 +47,7 @@ defmodule LokaWeb.AdminLive.DashboardTab do
                   rows="2"
                   required
                 ></textarea>
-              </div>
+              </fieldset>
               <div class="flex gap-2">
                 <select name="type" class="select select-bordered select-sm">
                   <option value="system">System</option>

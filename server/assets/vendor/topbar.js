@@ -126,13 +126,14 @@
       },
     };
 
-  if (typeof module === "object" && typeof module.exports === "object") {
-    module.exports = topbar;
-  } else if (typeof define === "function" && define.amd) {
-    define(function () {
-      return topbar;
-    });
-  } else {
-    this.topbar = topbar;
+  // ESM export for Tailwind v4 / esbuild compatibility
+  if (typeof window !== "undefined") {
+    window.topbar = topbar;
   }
-}.call(this, window, document));
+}.call(typeof globalThis !== "undefined" ? globalThis : this,
+  typeof window !== "undefined" ? window : {},
+  typeof document !== "undefined" ? document : {}));
+
+// ESM default export
+var topbar = typeof window !== "undefined" ? window.topbar : {};
+export default topbar;
