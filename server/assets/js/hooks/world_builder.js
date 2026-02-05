@@ -1,10 +1,27 @@
+/**
+ * @file WorldBuilder - Main hook for 2D canvas viewport and editor orchestration
+ * @context
+ *   - Manages Canvas2DViewport for 2D room map visualization
+ *   - Handles room/entity selection, multi-select, and keyboard shortcuts
+ *   - Coordinates with UndoManager for undo/redo operations
+ *   - Registers keyboard shortcuts via KeyboardManager (mod+z, mod+s, Delete, etc.)
+ *   - Listens for LiveView events: init_world_builder, rooms_updated, room_created, etc.
+ *   - Pushes events to server: select_room, batch_select, delete_room, validate_all, etc.
+ *   - Persists panel collapsed state to localStorage ('world_builder_collapsed_panels')
+ *   - Z-level tabs for multi-floor navigation
+ * @related
+ *   - assets/js/world_builder/Canvas2DViewport.js (2D rendering)
+ *   - assets/js/world_builder/KeyboardShortcuts.js (shortcut definitions)
+ *   - assets/js/world_builder/UndoManager.js (undo/redo stack)
+ *   - lib/loka_web/live/admin_live/world_builder_live.ex (server-side LiveView)
+ */
+
 import Canvas2DViewport from '../world_builder/Canvas2DViewport.js'
 import { undoManager } from '../world_builder/UndoManager.js'
 import { keyboardManager } from '../world_builder/KeyboardManager.js'
 import { registerWorldBuilderShortcuts } from '../world_builder/KeyboardShortcuts.js'
 import { HookHelper } from '../world_builder/HookHelper.js'
 
-// World Builder - 2D Canvas viewport (replaced React Three Fiber 3D)
 const WorldBuilder = {
   mounted() {
     try {

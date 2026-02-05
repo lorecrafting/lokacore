@@ -61,7 +61,7 @@
 
 .panel-resize-handle:hover::after {
   opacity: 1;
-  background: rgba(255, 255, 255, 0.3);
+  background: color-mix(in srgb, white 30%, transparent);
 }
 
 .world-builder-panel {
@@ -133,9 +133,6 @@
   overflow: auto;
   padding: 0.5rem;
   background: var(--wb-panel-alt);
-}
-
-.panel-content {
   scrollbar-width: thin;
   scrollbar-color: var(--wb-border) transparent;
 }

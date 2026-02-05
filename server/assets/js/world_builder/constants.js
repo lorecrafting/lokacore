@@ -70,13 +70,13 @@ export const SPACING = {
 }
 
 /**
- * Font sizes matching CSS tokens.
+ * Font sizes matching CSS tokens (--wb-font-size-*).
+ * Scale: xs (smallest) → sm → base (normal) → lg → xl (largest)
  * @type {Record<string, string>}
  */
 export const FONT_SIZES = {
   xs: '0.7rem',
   sm: '0.78rem',
-  md: '0.8rem',
   base: '0.85rem',
   lg: '0.95rem',
   xl: '1.05rem',

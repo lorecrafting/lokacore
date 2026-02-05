@@ -141,11 +141,12 @@
   /* Template UI */
   --color-wb-template-selected: var(--wb-template-selected);
 
-  /* Font sizes -> text-wb-xs, text-wb-sm, text-wb-base, text-wb-lg */
+  /* Font sizes -> text-wb-xs, text-wb-sm, text-wb-base, text-wb-lg, text-wb-xl */
   --text-wb-xs: var(--wb-font-size-xs);
   --text-wb-sm: var(--wb-font-size-sm);
   --text-wb-base: var(--wb-font-size-base);
   --text-wb-lg: var(--wb-font-size-lg);
+  --text-wb-xl: var(--wb-font-size-xl);
 
   /* Font families -> font-wb, font-wb-mono */
   --font-wb: var(--wb-font);
@@ -156,10 +157,15 @@
   --radius-wb-md: var(--wb-radius-md);
   --radius-wb-lg: var(--wb-radius-lg);
 
-  /* Shadows -> shadow-wb-sm, shadow-wb-md, shadow-wb-lg */
+  /* Shadows -> shadow-wb-sm, shadow-wb-md, shadow-wb-lg, shadow-wb-accent, etc. */
   --shadow-wb-sm: var(--wb-shadow-sm);
   --shadow-wb-md: var(--wb-shadow-md);
   --shadow-wb-lg: var(--wb-shadow-lg);
+  --shadow-wb-accent: var(--wb-shadow-accent);
+  --shadow-wb-accent-hover: var(--wb-shadow-accent-hover);
+  --shadow-wb-overlay: var(--wb-shadow-overlay);
+  --shadow-wb-indigo-glow: var(--wb-shadow-indigo-glow);
+  --shadow-wb-focus-ring: var(--wb-shadow-focus-ring);
 }
 
 /* Add variants based on LiveView classes */

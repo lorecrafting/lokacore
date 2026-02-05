@@ -1,9 +1,23 @@
+/**
+ * @file MudTerminal - Phoenix Channel connection for in-editor MUD testing
+ * @context
+ *   - Connects to GameChannel via WebSocket (Phoenix Channels, not LiveView events)
+ *   - Handles game state, combat, dialogue, inventory, and broadcast events
+ *   - Scopes all DOM queries to .world-builder-terminal container (not document)
+ *   - Implements command history with up/down arrow navigation
+ *   - Client-side "clear" command (no server roundtrip)
+ *   - Connection state indicator (green/yellow/red dot)
+ * @related
+ *   - lib/loka_web/channels/game_channel.ex (server-side channel)
+ *   - assets/css/world-builder/terminal.css (styling)
+ *   - lib/loka_web/live/admin_live/world_builder/terminal_panel.ex (LiveView component)
+ */
+
 import { Socket } from 'phoenix'
 import { HookHelper } from '../world_builder/HookHelper.js'
 
 const MAX_TERMINAL_LINES = 1000
 
-// MUD Terminal hook - connects to GameChannel for in-editor MUD testing
 const MudTerminal = {
   mounted() {
     try {

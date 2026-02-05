@@ -1,7 +1,19 @@
-import { HookHelper } from '../world_builder/HookHelper.js'
+/**
+ * @file PanelResize - Draggable panel dividers for World Builder layout
+ * @context
+ *   - Handles mouse/touch drag events for resizing panels
+ *   - Applies CSS grid changes locally via requestAnimationFrame (no server roundtrip during drag)
+ *   - Syncs final size to server only on mouseup/touchend via pushEvent('resize_panel')
+ *   - Persists panel sizes to localStorage ('world-builder-panel-sizes')
+ *   - Restores sizes from localStorage on mount via pushEvent('restore_panel_sizes')
+ *   - Handle-level listeners are manually managed (not HookHelper) for LiveView patch re-attachment
+ *   - Grid columns controlled via --grid-columns CSS custom property
+ * @related
+ *   - assets/css/world-builder/layout.css (.panel-resize-handle styles)
+ *   - lib/loka_web/live/admin_live/world_builder_live.ex (handle_event handlers)
+ */
 
-// Panel Resize - Handles draggable panel dividers
-// Performance: applies CSS locally during drag, syncs to server on mouseup/touchend only
+import { HookHelper } from '../world_builder/HookHelper.js'
 
 const PANEL_CONFIG = {
   console: {

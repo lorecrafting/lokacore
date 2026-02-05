@@ -1,4 +1,19 @@
 /**
+ * @file Canvas2DViewport - 2D World Builder viewport orchestrator
+ * @context
+ *   - Public API for the 2D room map canvas (replaces prior 3D Three.js viewport)
+ *   - Manages camera state (pan, zoom), room data, selection, and validation display
+ *   - Delegates rendering to Canvas2DRenderer, interaction to Canvas2DInteraction
+ *   - Reads colors from CSS variables (--wb-viewport-*) with hardcoded fallbacks
+ *   - Fallback colors defined in assets/js/world_builder/constants.js
+ *   - Zone colors and NPC path visualization support
+ *   - Multi-Z-level support with ghost layer rendering
+ * @related
+ *   - assets/js/world_builder/Canvas2DRenderer.js (drawing operations)
+ *   - assets/js/world_builder/Canvas2DInteraction.js (mouse/keyboard handling)
+ *   - assets/js/world_builder/constants.js (fallback colors)
+ *   - assets/css/variables.css (CSS variable definitions)
+ *
  * Canvas2DViewport - 2D World Builder Viewport (Orchestrator)
  *
  * Public API for the viewport. Manages state, coordinate transforms,

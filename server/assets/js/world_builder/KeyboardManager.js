@@ -1,4 +1,17 @@
 /**
+ * @file KeyboardManager - Centralized keyboard shortcut handling singleton
+ * @context
+ *   - Single document-level keydown listener to prevent duplicate handlers
+ *   - Cross-platform modifier key support: "mod" = Cmd on Mac, Ctrl on Windows/Linux
+ *   - Shortcuts registered with unique IDs, unregistered by ID or prefix
+ *   - First-match-wins dispatch (order of registration matters)
+ *   - Auto-skips shortcuts when typing in INPUT/TEXTAREA (except Escape)
+ *   - Auto-skips shortcuts when modal is open (except Escape)
+ *   - Use `keyboardManager` singleton for app, `KeyboardManager` class for tests
+ * @related
+ *   - assets/js/world_builder/KeyboardShortcuts.js (World Builder shortcut definitions)
+ *   - assets/js/hooks/world_builder.js (registers shortcuts in mounted())
+ *
  * KeyboardManager - Centralized keyboard shortcut handling.
  *
  * Provides a single document-level keydown listener with a registration API.

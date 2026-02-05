@@ -146,7 +146,7 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 16px;
-  box-shadow: 0 4px 12px rgba(78, 84, 200, 0.2);
+  box-shadow: var(--wb-shadow-indigo-glow);
 }
 
 .chat-welcome-icon .hero-icon {
@@ -195,7 +195,7 @@
   background: var(--wb-input);
   border-color: var(--wb-border-light);
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--wb-shadow-overlay);
 }
 
 .chat-quick-action-icon {
@@ -565,7 +565,7 @@
 .chat-input-form textarea:focus {
   outline: none;
   border-color: var(--wb-accent);
-  box-shadow: 0 0 0 2px rgba(85, 112, 204, 0.15);
+  box-shadow: var(--wb-shadow-focus-ring);
 }
 
 .chat-input-form textarea::placeholder {
@@ -586,12 +586,12 @@
 .chat-input-form .btn-primary {
   background: linear-gradient(135deg, var(--wb-accent-gradient-from) 0%, var(--wb-accent-gradient-to) 100%);
   color: white;
-  box-shadow: 0 2px 6px rgba(74, 108, 247, 0.25);
+  box-shadow: var(--wb-shadow-accent);
 }
 
 .chat-input-form .btn-primary:hover:not(:disabled) {
   background: linear-gradient(135deg, var(--wb-accent-hover-gradient-from) 0%, var(--wb-accent-hover-gradient-to) 100%);
-  box-shadow: 0 3px 10px rgba(74, 108, 247, 0.35);
+  box-shadow: var(--wb-shadow-accent-hover);
   transform: translateY(-1px);
 }
 
