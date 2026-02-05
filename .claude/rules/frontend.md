@@ -124,6 +124,29 @@ const MyHook = {
 
 **Spacing:** `--wb-space-xs` (4px) / `-sm` (8px) / `-md` (12px) / `-lg` (16px). In HEEx, use Tailwind classes (`p-1`=4px, `p-2`=8px, `p-3`=12px, `p-4`=16px). In `app.css` custom CSS, use `var(--wb-space-*)`. Never introduce oddball pixel values (5px, 6px, 10px) -- snap to the nearest token.
 
+### Spacing in CSS Files
+
+**ALWAYS use spacing tokens in custom CSS. Never use raw pixel values.**
+
+| Pixels | CSS Variable | Tailwind Class |
+|--------|--------------|----------------|
+| 4px | `var(--wb-space-xs)` | `p-1`, `gap-1`, `m-1` |
+| 8px | `var(--wb-space-sm)` | `p-2`, `gap-2`, `m-2` |
+| 12px | `var(--wb-space-md)` | `p-3`, `gap-3`, `m-3` |
+| 16px | `var(--wb-space-lg)` | `p-4`, `gap-4`, `m-4` |
+
+```css
+/* BAD - raw pixel values */
+padding: 8px;
+gap: 4px;
+margin: 12px;
+
+/* GOOD - design tokens */
+padding: var(--wb-space-sm);
+gap: var(--wb-space-xs);
+margin: var(--wb-space-md);
+```
+
 **Border radius:** `--wb-radius-sm` (3px) / `-md` (5px) / `-lg` (8px). Tailwind: `rounded-wb-sm/md/lg`.
 
 **Fonts:** `--wb-font` (system sans-serif) / `--wb-font-mono` (SF Mono stack). Tailwind: `font-wb`, `font-wb-mono`.
@@ -136,7 +159,7 @@ const MyHook = {
 
 ### CSS File Organization
 
-CSS is split into domain-specific modules for LLM digestibility (each file <300 lines ideal):
+CSS is split into domain-specific modules for LLM digestibility (each file <400 lines ideal):
 
 | File | Purpose |
 |------|---------|
@@ -145,18 +168,44 @@ CSS is split into domain-specific modules for LLM digestibility (each file <300 
 | `world-builder/layout.css` | Grid, panels, resize handles, collapsed states |
 | `world-builder/terminal.css` | Terminal/console styles, connection indicators |
 | `world-builder/chat.css` | Chat panel, messages, streaming, welcome state |
-| `world-builder/editors.css` | Quest/cutscene/dialogue/script editor styles |
+| `world-builder/quest-editor.css` | Quest editor forms, sections, validation |
+| `world-builder/cutscene-editor.css` | Cutscene timeline, keyframes, preview |
+| `world-builder/dialogue-editor.css` | Dialogue tree, node editor, mock state |
+| `world-builder/template-picker.css` | Template picker modal, config forms |
 | `world-builder/modals.css` | Modal overlay, animations, settings, audit log |
 | `world-builder/tools.css` | Tool execution UI, tool blocks, progress indicators |
+
+### CSS File Size Limit
+
+**Keep individual CSS files under 400 lines.** When a file exceeds this:
+1. Identify logical sections (usually marked by comment headers like `/* === Section === */`)
+2. Extract each section to a new file: `world-builder/{feature}.css`
+3. Update imports in `app.css`
+4. Delete the original combined file
 
 ### CSS Placement Rules
 
 - **Admin dashboard:** Inline Tailwind + daisyUI only. No custom CSS classes.
 - **World Builder:** Custom CSS in `world-builder/*.css` files for complex UI (pseudo-elements, gradients, scrollbars). Simple leaf components use inline Tailwind.
-- **New CSS:** Add to the appropriate domain file. If >300 lines, consider splitting further.
+- **New CSS:** Add to the appropriate domain file. If >400 lines, split the file.
 - **CSS that MUST stay in CSS files:** pseudo-elements, animations/keyframes, scrollbar styles, JS-applied classes, CSS var grid layout, media queries.
 - Don't duplicate CSS definitions. Search existing files first with `grep -r "selector-name" assets/css/`.
 - **Never use duplicate `class` attributes** on the same element. In HEEx, only the last `class=` is applied -- others are silently dropped. Merge into a single `class={[...]}` list.
+
+### Custom CSS vs Tailwind Decision
+
+| Use Case | Where | Why |
+|----------|-------|-----|
+| Layout, spacing, colors | **Tailwind in HEEx** | Fast iteration, co-located with markup |
+| Single pseudo-class (`:hover`, `:focus`) | **Tailwind in HEEx** | `hover:bg-wb-hover` is sufficient |
+| Responsive utilities | **Tailwind in HEEx** | `md:flex`, `lg:hidden` |
+| Pseudo-elements (`::before`, `::after`) | **CSS file** | Tailwind can't set `content` |
+| Animations/keyframes | **CSS file** | `@keyframes` not expressible in Tailwind |
+| Scrollbar styling | **CSS file** | `::-webkit-scrollbar` vendor prefixes |
+| Multi-property transitions | **CSS file** | Complex state changes |
+| CSS Grid with custom properties | **CSS file** | `--grid-columns` pattern |
+
+**Rule of thumb:** If it can be a single Tailwind class, use Tailwind. If it needs `::`, `@keyframes`, or `var(--custom)`, use CSS.
 
 ## LiveView Component Pattern
 
@@ -259,13 +308,20 @@ Third-party libraries go in `assets/vendor/`, NOT npm. Currently: heroicons, dai
 
 ## Storage Keys
 
+All storage keys are defined in `assets/js/world_builder/storageKeys.js` for single source of truth:
+
+```javascript
+import { STORAGE_KEYS } from '@/world_builder/storageKeys.js'
+localStorage.getItem(STORAGE_KEYS.PANEL_SIZES)
+```
+
 **localStorage:**
-- `world_builder_collapsed_panels` (world_builder.js)
-- `world-builder-panel-sizes` (panel_resize.js)
-- `{provider}_api_key_encoded` (multi_api_key_config.js)
+- `STORAGE_KEYS.COLLAPSED_PANELS` = `'world_builder_collapsed_panels'` (world_builder.js)
+- `STORAGE_KEYS.PANEL_SIZES` = `'world-builder-panel-sizes'` (panel_resize.js)
+- `{provider}${STORAGE_KEYS.API_KEY_SUFFIX}` = `'{provider}_api_key_encoded'` (multi_api_key_config.js)
 
 **sessionStorage:**
-- `world_builder_undo_stack` (UndoManager.js)
+- `STORAGE_KEYS.UNDO_STACK` = `'world_builder_undo_stack'` (UndoManager.js)
 
 ## Import Aliases
 
@@ -309,7 +365,10 @@ Styles are now split into domain-specific files. Here's where to find/add styles
 | `world-builder/layout.css` | Grid layout, panel structure, resize handles, collapsed states, scrollbars |
 | `world-builder/terminal.css` | Terminal lines, connection dots, console overlay |
 | `world-builder/chat.css` | Chat messages, welcome state, quick actions, input area, streaming UI |
-| `world-builder/editors.css` | Quest/cutscene/dialogue/script editors, timeline, template picker |
+| `world-builder/quest-editor.css` | Quest editor forms, sections, list items, validation |
+| `world-builder/cutscene-editor.css` | Cutscene timeline, tracks, keyframes, preview panel |
+| `world-builder/dialogue-editor.css` | Dialogue tree, node editor, choices, mock state panel |
+| `world-builder/template-picker.css` | Template picker modal, cards, config form, preview |
 | `world-builder/modals.css` | Modal overlay, settings, audit log, git commit, document viewer |
 | `world-builder/tools.css` | Tool execution indicator, tool blocks, queue indicator |
 
@@ -321,7 +380,17 @@ Styles are now split into domain-specific files. Here's where to find/add styles
 4. Add a `PANEL_CONFIG` entry in `assets/js/hooks/panel_resize.js` with `min`, `max`, `default`, and `gridColumnIndex`
 5. Add `handle_event("toggle_panel", ...)` clause or reuse existing toggle logic
 6. If JS interactivity is needed: create a hook in `assets/js/hooks/`, register in `hooks/index.js`
-7. Add any new CSS variables to `variables.css` with `--wb-` prefix, and corresponding `@theme` token in `app.css`
+7. Add any new CSS variables to `variables.css` with `--wb-` prefix, and corresponding `@theme` token in `tailwind-config.css`
+
+### New Panel Checklist
+
+Before submitting a new panel, verify:
+- [ ] Panel CSS uses design tokens only (no hex colors, no raw pixel values)
+- [ ] Panel has collapse/expand button with `phx-click="toggle_panel"` and `phx-value-panel="name"`
+- [ ] Panel has `aria-label` and `aria-expanded` attributes for accessibility
+- [ ] Hook (if any) uses HookHelper and calls `this.helper.destroy()` in `destroyed()`
+- [ ] Hook has try/catch in `mounted()` and null checks for DOM queries
+- [ ] New CSS file is under 400 lines
 
 ## Hook Decision Guide
 
@@ -385,6 +454,7 @@ Most commonly used design tokens:
 | `HookHelper` | `@/world_builder/HookHelper.js` | Auto-cleanup for listeners/observers/timers |
 | `KeyboardManager` | `@/world_builder/KeyboardManager.js` | Centralized keyboard shortcuts |
 | `UndoManager` | `@/world_builder/UndoManager.js` | Undo/redo stack with persistence |
+| `STORAGE_KEYS` | `@/world_builder/storageKeys.js` | Centralized localStorage/sessionStorage keys |
 | `Canvas2DViewport` | `@/world_builder/Canvas2DViewport.js` | 2D canvas viewport orchestrator |
 | `Canvas2DRenderer` | `@/world_builder/Canvas2DRenderer.js` | Canvas drawing operations |
 | `Canvas2DInteraction` | `@/world_builder/Canvas2DInteraction.js` | Mouse/keyboard interaction |

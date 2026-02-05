@@ -1,0 +1,365 @@
+/* ============================================================================
+   Cutscene Timeline Styles
+   ============================================================================ */
+
+.cutscene-timeline-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--wb-panel);
+  color: var(--wb-text);
+}
+
+.cutscene-timeline-header {
+  padding: 12px;
+  background: var(--wb-input);
+  border-bottom: 1px solid var(--wb-border);
+}
+
+.header-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.form-group-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-group-inline label {
+  font-size: 0.8rem;
+  color: var(--wb-text-muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.cutscene-timeline-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.timeline-sidebar {
+  width: 160px;
+  background: var(--wb-input);
+  border-right: 1px solid var(--wb-border);
+  padding: 12px;
+  overflow-y: auto;
+}
+
+.timeline-controls h4 {
+  font-size: 0.85rem;
+  color: var(--wb-text-muted);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-block {
+  width: 100%;
+  margin-bottom: 6px;
+  text-align: left;
+}
+
+.timeline-main {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+  background: var(--wb-border-dark);
+}
+
+.timeline-ruler {
+  height: 30px;
+  border-bottom: 1px solid var(--wb-border);
+  position: relative;
+  background: var(--wb-panel-alt);
+}
+
+.timeline-marker {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-left: 1px solid var(--wb-border);
+  padding-left: 4px;
+}
+
+.timeline-marker span {
+  font-size: 0.7rem;
+  color: var(--wb-text-dim);
+}
+
+.timeline-track {
+  display: flex;
+  border-bottom: 1px solid var(--wb-input);
+}
+
+.timeline-track-label {
+  width: 100px;
+  padding: 8px;
+  background: var(--wb-input);
+  border-right: 1px solid var(--wb-border);
+  font-size: 0.8rem;
+  color: var(--wb-text-muted);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.timeline-track-content {
+  flex: 1;
+  position: relative;
+  background: var(--wb-panel);
+}
+
+.timeline-keyframe {
+  position: absolute;
+  padding: 4px 8px;
+  border-radius: var(--wb-radius-md);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: white;
+  white-space: nowrap;
+  cursor: grab;
+  user-select: none;
+  transition: transform 0.1s;
+}
+
+.timeline-keyframe:hover {
+  transform: scale(1.05);
+}
+
+.timeline-keyframe.selected {
+  box-shadow: 0 0 0 2px white, 0 0 0 3px var(--wb-accent);
+  z-index: 10;
+}
+
+.keyframe-label {
+  font-size: 0.7rem;
+}
+
+.timeline-properties-panel {
+  width: 280px;
+  background: var(--wb-input);
+  border-left: 1px solid var(--wb-border);
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.keyframe-properties-empty {
+  color: var(--wb-text-dim);
+  text-align: center;
+  padding: 32px 16px;
+  font-size: 0.85rem;
+}
+
+.keyframe-properties {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.properties-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.properties-header h4 {
+  font-size: 0.9rem;
+  color: var(--wb-text);
+  margin: 0;
+}
+
+/* Effects Panel (Cutscene Editor) */
+.effects-panel {
+  margin-top: 16px;
+  border-top: 1px solid var(--wb-border);
+  padding-top: 12px;
+}
+
+.effects-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.effects-header h4 {
+  font-size: 0.85rem;
+  color: var(--wb-text-muted);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.effects-empty {
+  color: var(--wb-text-faint);
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 8px;
+}
+
+.effects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.effect-item {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.effect-item select,
+.effect-item input {
+  flex: 1;
+  min-width: 60px;
+}
+
+/* Validation Display (Cutscene Editor) */
+.validation-display {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.75rem;
+}
+
+.validation-display.valid {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  color: var(--wb-success);
+}
+
+.validation-icon {
+  font-weight: bold;
+}
+
+.validation-errors,
+.validation-warnings {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.validation-error {
+  color: var(--wb-error);
+}
+
+.validation-warning {
+  color: var(--wb-warning);
+}
+
+/* Preview Panel (Cutscene Editor) */
+.preview-panel {
+  margin-top: 12px;
+  border-top: 1px solid var(--wb-border);
+  padding-top: 12px;
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.preview-header h4 {
+  font-size: 0.85rem;
+  color: var(--wb-text-muted);
+  margin: 0;
+}
+
+.preview-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.preview-empty {
+  color: var(--wb-text-faint);
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 16px;
+}
+
+.preview-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.preview-step {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  background: var(--wb-panel);
+  border-radius: var(--wb-radius-md);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.preview-step:hover {
+  background: var(--wb-panel-alt);
+}
+
+.preview-step.active {
+  background: var(--wb-border);
+  box-shadow: 0 0 0 1px var(--wb-accent);
+}
+
+.step-number {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--wb-accent);
+  color: white;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.step-type {
+  color: var(--wb-text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.step-text {
+  color: var(--wb-text);
+  font-size: 0.8rem;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.more-types {
+  cursor: pointer;
+  color: var(--wb-text-muted);
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  margin-top: 8px;
+}
+
+.more-types:hover {
+  color: var(--wb-text);
+}

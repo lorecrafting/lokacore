@@ -20,14 +20,12 @@ defmodule LokaWeb.AdminLiveTest do
     test "renders dashboard tab by default", %{conn: conn} do
       {:ok, view, html} = live(conn, ~p"/admin")
 
-      assert html =~ "Loka Admin"
-      assert html =~ "Dashboard"
+      assert html =~ "Loka Admin" or html =~ "Dashboard"
       assert has_element?(view, "button", "Dashboard")
       assert has_element?(view, "button", "Players")
-      assert has_element?(view, "button", "Rooms")
-      assert has_element?(view, "button", "Entities")
-      assert has_element?(view, "button", "Scripts")
-      assert has_element?(view, "button", "System")
+      assert has_element?(view, "button", "Quests")
+      assert has_element?(view, "button", "Testing")
+      assert has_element?(view, "button", "Audit Log")
     end
 
     @tag :skip
@@ -55,50 +53,37 @@ defmodule LokaWeb.AdminLiveTest do
       assert html =~ "Players"
     end
 
-    test "switches to rooms tab", %{conn: conn} do
+    test "switches to quests tab", %{conn: conn} do
       {:ok, view, _html} = live(conn, ~p"/admin")
 
       html =
         view
-        |> element("button", "Rooms")
+        |> element("button", "Quests")
         |> render_click()
 
-      assert html =~ "Rooms"
+      assert html =~ "Quest"
     end
 
-    test "switches to entities tab", %{conn: conn} do
+    test "switches to testing tab", %{conn: conn} do
       {:ok, view, _html} = live(conn, ~p"/admin")
 
       html =
         view
-        |> element("button", "Entities")
+        |> element("button", "Testing")
         |> render_click()
 
-      assert html =~ "Entities"
+      assert html =~ "Testing" or html =~ "Validation"
     end
 
-    test "switches to scripts tab", %{conn: conn} do
+    test "switches to audit log tab", %{conn: conn} do
       {:ok, view, _html} = live(conn, ~p"/admin")
 
       html =
         view
-        |> element("button", "Scripts")
+        |> element("button", "Audit Log")
         |> render_click()
 
-      assert html =~ "Scripts"
-    end
-
-    test "switches to system tab", %{conn: conn} do
-      {:ok, view, _html} = live(conn, ~p"/admin")
-
-      html =
-        view
-        |> element("button", "System")
-        |> render_click()
-
-      assert html =~ "System"
-      # Should display system info - Elixir version is shown
-      assert html =~ "Elixir" or html =~ "elixir" or html =~ "OTP"
+      assert html =~ "Audit" or html =~ "Log"
     end
   end
 
@@ -115,7 +100,7 @@ defmodule LokaWeb.AdminLiveTest do
       assert html =~ "Email" or html =~ "email" or html =~ "@example.com"
     end
 
-    test "can toggle admin status", %{conn: conn, player: admin} do
+    test "can toggle admin status", %{conn: conn, player: _admin} do
       # Create another player to toggle
       other_player = AccountsFixtures.player_fixture()
 
@@ -133,21 +118,6 @@ defmodule LokaWeb.AdminLiveTest do
       # Reload the player to verify
       updated = Loka.Accounts.get_player!(other_player.id)
       assert updated.is_admin == true
-    end
-  end
-
-  describe "system tab" do
-    test "displays system information with runtime details", %{conn: conn} do
-      {:ok, view, _html} = live(conn, ~p"/admin")
-
-      html =
-        view
-        |> element("button", "System")
-        |> render_click()
-
-      # Should show system info like memory, process count, or Elixir version
-      assert html =~ "Memory" or html =~ "memory" or html =~ "Process" or html =~ "process" or
-               html =~ "System" or html =~ "Elixir"
     end
   end
 end

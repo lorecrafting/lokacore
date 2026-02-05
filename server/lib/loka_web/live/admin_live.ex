@@ -4,27 +4,19 @@ defmodule LokaWeb.AdminLive do
 
   Provides tools for game administrators to manage:
   - Players and accounts
-  - Rooms and world building
-  - NPCs and entities
-  - Scripts and behaviors
-  - System monitoring
+  - Quest debugging and state management
+  - Content validation and balance testing
+  - Audit logs and compliance
+
+  Content creation (rooms, entities, scripts) is handled by WorldBuilderLive.
   """
   use LokaWeb, :live_view
 
   alias Loka.Accounts
-  alias Loka.Engine.{Entities, Scripts}
-  alias Loka.Engine.Schema.EntitySchema
-
-  alias Loka.Engine.{PrototypeLoader, Spawner}
 
   alias LokaWeb.AdminLive.{
     DashboardTab,
     PlayersTab,
-    RoomsTab,
-    EntitiesTab,
-    ScriptsTab,
-    SystemTab,
-    PrototypesTab,
     TestingTab,
     QuestsTab,
     AuditLogTab
@@ -44,10 +36,7 @@ defmodule LokaWeb.AdminLive do
      socket
      |> assign(:active_tab, :dashboard)
      |> assign(:sidebar_collapsed, false)
-     |> assign(:form, nil)
-     |> assign(:editing, nil)
      |> assign(:running, nil)
-     |> assign(:viewing_script, nil)
      |> load_tab_data(:dashboard)}
   end
 
@@ -63,16 +52,8 @@ defmodule LokaWeb.AdminLive do
             tab={@active_tab}
             stats={assigns[:stats]}
             players={assigns[:players]}
-            rooms={assigns[:rooms]}
-            entities={assigns[:entities]}
-            scripts={assigns[:scripts]}
-            viewing_script={assigns[:viewing_script]}
-            prototypes={assigns[:prototypes]}
             quests_data={assigns[:quests_data]}
             testing_data={assigns[:testing_data]}
-            system_info={assigns[:system_info]}
-            form={@form}
-            editing={@editing}
             running={@running}
           />
         </main>
@@ -135,41 +116,6 @@ defmodule LokaWeb.AdminLive do
           :if={not @collapsed}
           class="text-[0.675rem] font-semibold uppercase tracking-wider text-base-content/50 px-3 pt-3 pb-1.5 mt-1"
         >
-          Content
-        </div>
-        <.nav_item
-          tab={:rooms}
-          active={@active_tab}
-          icon="hero-map"
-          label="Rooms"
-          collapsed={@collapsed}
-        />
-        <.nav_item
-          tab={:entities}
-          active={@active_tab}
-          icon="hero-cube"
-          label="Entities"
-          collapsed={@collapsed}
-        />
-        <.nav_item
-          tab={:prototypes}
-          active={@active_tab}
-          icon="hero-document-duplicate"
-          label="Prototypes"
-          collapsed={@collapsed}
-        />
-        <.nav_item
-          tab={:quests}
-          active={@active_tab}
-          icon="hero-book-open"
-          label="Quests"
-          collapsed={@collapsed}
-        />
-
-        <div
-          :if={not @collapsed}
-          class="text-[0.675rem] font-semibold uppercase tracking-wider text-base-content/50 px-3 pt-3 pb-1.5 mt-1"
-        >
           Tools
         </div>
         <a
@@ -184,10 +130,10 @@ defmodule LokaWeb.AdminLive do
           <span :if={not @collapsed}>World Builder</span>
         </a>
         <.nav_item
-          tab={:scripts}
+          tab={:quests}
           active={@active_tab}
-          icon="hero-code-bracket"
-          label="Scripts"
+          icon="hero-book-open"
+          label="Quests"
           collapsed={@collapsed}
         />
         <.nav_item
@@ -195,13 +141,6 @@ defmodule LokaWeb.AdminLive do
           active={@active_tab}
           icon="hero-beaker"
           label="Testing"
-          collapsed={@collapsed}
-        />
-        <.nav_item
-          tab={:system}
-          active={@active_tab}
-          icon="hero-cog-6-tooth"
-          label="System"
           collapsed={@collapsed}
         />
         <.nav_item
@@ -260,16 +199,8 @@ defmodule LokaWeb.AdminLive do
   attr :tab, :atom, required: true
   attr :stats, :map, default: nil
   attr :players, :list, default: nil
-  attr :rooms, :list, default: nil
-  attr :entities, :list, default: nil
-  attr :scripts, :list, default: nil
-  attr :viewing_script, :any, default: nil
-  attr :prototypes, :list, default: nil
   attr :quests_data, :list, default: nil
   attr :testing_data, :map, default: nil
-  attr :system_info, :map, default: nil
-  attr :form, :any, default: nil
-  attr :editing, :any, default: nil
   attr :running, :atom, default: nil
 
   defp tab_content(%{tab: :dashboard} = assigns) do
@@ -281,41 +212,6 @@ defmodule LokaWeb.AdminLive do
   defp tab_content(%{tab: :players} = assigns) do
     ~H"""
     <.live_component module={PlayersTab} id="players-tab" players={@players} />
-    """
-  end
-
-  defp tab_content(%{tab: :rooms} = assigns) do
-    ~H"""
-    <.live_component module={RoomsTab} id="rooms-tab" rooms={@rooms} form={@form} editing={@editing} />
-    """
-  end
-
-  defp tab_content(%{tab: :entities} = assigns) do
-    ~H"""
-    <.live_component
-      module={EntitiesTab}
-      id="entities-tab"
-      entities={@entities}
-      form={@form}
-      editing={@editing}
-    />
-    """
-  end
-
-  defp tab_content(%{tab: :scripts} = assigns) do
-    ~H"""
-    <.live_component
-      module={ScriptsTab}
-      id="scripts-tab"
-      scripts={@scripts}
-      viewing_script={@viewing_script}
-    />
-    """
-  end
-
-  defp tab_content(%{tab: :prototypes} = assigns) do
-    ~H"""
-    <.live_component module={PrototypesTab} id="prototypes-tab" prototypes={@prototypes} />
     """
   end
 
@@ -333,12 +229,6 @@ defmodule LokaWeb.AdminLive do
       testing_data={@testing_data}
       running={@running}
     />
-    """
-  end
-
-  defp tab_content(%{tab: :system} = assigns) do
-    ~H"""
-    <.live_component module={SystemTab} id="system-tab" system_info={@system_info} />
     """
   end
 
@@ -364,13 +254,8 @@ defmodule LokaWeb.AdminLive do
   @admin_tabs %{
     "dashboard" => :dashboard,
     "players" => :players,
-    "rooms" => :rooms,
-    "entities" => :entities,
-    "scripts" => :scripts,
-    "prototypes" => :prototypes,
     "quests" => :quests,
     "testing" => :testing,
-    "system" => :system,
     "audit_log" => :audit_log
   }
 
@@ -385,16 +270,7 @@ defmodule LokaWeb.AdminLive do
     {:noreply,
      socket
      |> assign(:active_tab, tab)
-     |> assign(:form, nil)
-     |> assign(:editing, nil)
      |> load_tab_data(tab)}
-  end
-
-  def handle_event("cancel_form", _, socket) do
-    {:noreply,
-     socket
-     |> assign(:form, nil)
-     |> assign(:editing, nil)}
   end
 
   # Player events
@@ -412,219 +288,6 @@ defmodule LokaWeb.AdminLive do
      socket
      |> put_flash(:info, "Player deleted successfully")
      |> load_tab_data(:players)}
-  end
-
-  # Room events
-  def handle_event("new_room", _, socket) do
-    changeset = Entities.change_entity(%EntitySchema{type: :room})
-
-    {:noreply,
-     socket
-     |> assign(:form, to_form(changeset))
-     |> assign(:editing, nil)}
-  end
-
-  def handle_event("edit_room", %{"id" => id}, socket) do
-    entity = Entities.get_entity!(id)
-    changeset = Entities.change_entity(entity)
-
-    {:noreply,
-     socket
-     |> assign(:form, to_form(changeset))
-     |> assign(:editing, entity)}
-  end
-
-  def handle_event("save_room", %{"entity_schema" => params}, socket) do
-    params = Map.put(params, "type", :room)
-
-    result =
-      case socket.assigns.editing do
-        nil -> Entities.create_entity(params)
-        entity -> Entities.update_entity(entity, params)
-      end
-
-    case result do
-      {:ok, _saved_entity} ->
-        {:noreply,
-         socket
-         |> put_flash(:info, "Room saved successfully")
-         |> assign(:form, nil)
-         |> assign(:editing, nil)
-         |> load_tab_data(:rooms)}
-
-      {:error, changeset} ->
-        {:noreply, assign(socket, :form, to_form(changeset))}
-    end
-  end
-
-  def handle_event("delete_room", %{"id" => id}, socket) do
-    entity = Entities.get_entity!(id)
-    {:ok, _} = Entities.delete_entity(entity)
-
-    {:noreply,
-     socket
-     |> put_flash(:info, "Room deleted successfully")
-     |> load_tab_data(:rooms)}
-  end
-
-  # Entity events
-  def handle_event("new_entity", _, socket) do
-    changeset = Entities.change_entity(%EntitySchema{type: :npc})
-
-    {:noreply,
-     socket
-     |> assign(:form, to_form(changeset))
-     |> assign(:editing, nil)}
-  end
-
-  def handle_event("edit_entity", %{"id" => id}, socket) do
-    entity = Entities.get_entity!(id)
-    changeset = Entities.change_entity(entity)
-
-    {:noreply,
-     socket
-     |> assign(:form, to_form(changeset))
-     |> assign(:editing, entity)}
-  end
-
-  def handle_event("save_entity", %{"entity_schema" => params}, socket) do
-    result =
-      case socket.assigns.editing do
-        nil -> Entities.create_entity(params)
-        entity -> Entities.update_entity(entity, params)
-      end
-
-    case result do
-      {:ok, _saved_entity} ->
-        {:noreply,
-         socket
-         |> put_flash(:info, "Entity saved successfully")
-         |> assign(:form, nil)
-         |> assign(:editing, nil)
-         |> load_tab_data(:entities)}
-
-      {:error, changeset} ->
-        {:noreply, assign(socket, :form, to_form(changeset))}
-    end
-  end
-
-  def handle_event("delete_entity", %{"id" => id}, socket) do
-    entity = Entities.get_entity!(id)
-    {:ok, _} = Entities.delete_entity(entity)
-
-    {:noreply,
-     socket
-     |> put_flash(:info, "Entity deleted successfully")
-     |> load_tab_data(:entities)}
-  end
-
-  # Script events (YAML-only - read-only viewer)
-  def handle_event("view_script", %{"key" => key}, socket) do
-    alias Loka.Content.Script
-
-    case Script.get(key) do
-      {:ok, script} ->
-        {:noreply, assign(socket, :viewing_script, script)}
-
-      {:error, :not_found} ->
-        {:noreply, put_flash(socket, :error, "Script '#{key}' not found")}
-    end
-  end
-
-  def handle_event("close_script_view", _, socket) do
-    {:noreply, assign(socket, :viewing_script, nil)}
-  end
-
-  # Legacy DB script handlers (kept for future non-technical builder support)
-  # These will be used when DB-based script editing is enabled for builders
-  # who cannot edit YAML files directly.
-
-  def handle_event("new_script", _, socket) do
-    {:noreply,
-     put_flash(
-       socket,
-       :info,
-       "Scripts are now YAML-only. Create files in priv/world/scripts/"
-     )}
-  end
-
-  def handle_event("edit_script", %{"id" => _id}, socket) do
-    {:noreply,
-     put_flash(
-       socket,
-       :info,
-       "Scripts are now YAML-only. Edit files in priv/world/scripts/"
-     )}
-  end
-
-  def handle_event("save_script", _params, socket) do
-    {:noreply,
-     put_flash(
-       socket,
-       :info,
-       "Scripts are now YAML-only. Edit files in priv/world/scripts/"
-     )}
-  end
-
-  def handle_event("toggle_script", %{"id" => _id}, socket) do
-    {:noreply, put_flash(socket, :info, "Toggle disabled - scripts are YAML-only")}
-  end
-
-  def handle_event("test_script", %{"id" => _id}, socket) do
-    {:noreply,
-     put_flash(socket, :info, "Script testing via UI not yet available for YAML scripts")}
-  end
-
-  def handle_event("delete_script", %{"id" => _id}, socket) do
-    {:noreply,
-     put_flash(
-       socket,
-       :info,
-       "Scripts are now YAML-only. Delete files in priv/world/scripts/"
-     )}
-  end
-
-  # Prototype events
-  def handle_event("spawn_prototype", %{"key" => key}, socket) do
-    case PrototypeLoader.get(key) do
-      {:ok, prototype} ->
-        case Spawner.spawn(prototype) do
-          {:ok, entity} ->
-            {:noreply,
-             socket
-             |> put_flash(:info, "Spawned entity '#{entity.short_desc}' from prototype '#{key}'")}
-
-          {:error, reason} ->
-            {:noreply, put_flash(socket, :error, "Failed to spawn: #{inspect(reason)}")}
-        end
-
-      {:error, :not_found} ->
-        {:noreply, put_flash(socket, :error, "Prototype '#{key}' not found")}
-    end
-  end
-
-  # System events
-  def handle_event("reload_scripts", _, socket) do
-    count = Scripts.count_enabled_scripts()
-    {:noreply, put_flash(socket, :info, "Reloaded #{count} scripts")}
-  end
-
-  def handle_event("export_world", _, socket) do
-    data = %{
-      entities: Entities.list_entities(),
-      scripts: Scripts.list_scripts(),
-      exported_at: DateTime.utc_now()
-    }
-
-    json = Jason.encode!(data, pretty: true)
-
-    {:noreply,
-     socket
-     |> push_event("download", %{
-       filename: "loka_world_#{Date.utc_today()}.json",
-       content: json,
-       content_type: "application/json"
-     })}
   end
 
   # =============================================================================
@@ -708,38 +371,17 @@ defmodule LokaWeb.AdminLive do
   # =============================================================================
 
   defp load_tab_data(socket, :dashboard) do
+    alias Loka.Engine.Entities
+
     assign(socket, :stats, %{
       total_players: Accounts.count_players(),
       total_rooms: Entities.count_by_type(:room),
-      total_entities: Entities.count_all(),
-      scripts_loaded: length(ScriptsTab.load_scripts())
+      total_entities: Entities.count_all()
     })
   end
 
   defp load_tab_data(socket, :players) do
     assign(socket, :players, Accounts.list_players())
-  end
-
-  defp load_tab_data(socket, :rooms) do
-    assign(socket, :rooms, Entities.list_entities(type: :room))
-  end
-
-  defp load_tab_data(socket, :entities) do
-    assign(socket, :entities, Entities.list_entities(type: [:npc, :item, :exit]))
-  end
-
-  defp load_tab_data(socket, :scripts) do
-    socket
-    |> assign(:scripts, ScriptsTab.load_scripts())
-    |> assign(:viewing_script, nil)
-  end
-
-  defp load_tab_data(socket, :prototypes) do
-    prototypes =
-      PrototypeLoader.all()
-      |> Enum.sort_by(& &1.key)
-
-    assign(socket, :prototypes, prototypes)
   end
 
   defp load_tab_data(socket, :quests) do
@@ -758,16 +400,6 @@ defmodule LokaWeb.AdminLive do
         }
 
     assign(socket, :testing_data, testing_data)
-  end
-
-  defp load_tab_data(socket, :system) do
-    assign(socket, :system_info, %{
-      elixir_version: System.version(),
-      otp_version: to_string(:erlang.system_info(:otp_release)),
-      phoenix_version: to_string(Application.spec(:phoenix, :vsn)),
-      memory_usage: :erlang.memory(:total),
-      process_count: :erlang.system_info(:process_count)
-    })
   end
 
   # Audit log tab loads data via LiveComponent

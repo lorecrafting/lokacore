@@ -1,0 +1,659 @@
+/* =============================================================================
+   Dialogue Editor
+   ============================================================================= */
+
+.dialogue-editor {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--wb-panel);
+}
+
+.dialogue-editor-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--wb-panel-alt);
+  border-bottom: 1px solid var(--wb-bg);
+}
+
+.dialogue-editor-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--wb-text);
+}
+
+.dialogue-npc-name {
+  color: var(--wb-text-dim);
+  font-weight: 400;
+}
+
+.dialogue-editor-stats {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.stat-badge {
+  padding: 0.2rem 0.5rem;
+  background: var(--wb-border);
+  border-radius: var(--wb-radius-sm);
+  font-size: 0.7rem;
+  color: var(--wb-text-muted);
+}
+
+.stat-badge.stat-error {
+  background: var(--wb-danger-surface-hover);
+  color: var(--wb-danger-text);
+}
+
+.stat-badge.stat-warning {
+  background: var(--wb-warning-surface);
+  color: var(--wb-warning);
+}
+
+.dialogue-editor-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.dialogue-editor-body {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Tree Panel */
+.dialogue-tree-panel {
+  background: var(--wb-panel-header);
+  border-right: 1px solid var(--wb-bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dialogue-tree {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.dialogue-tree-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: var(--wb-text-dim);
+  text-align: center;
+}
+
+.dialogue-tree-node {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: var(--wb-radius-sm);
+  cursor: pointer;
+  margin-bottom: 2px;
+  transition: background 0.15s;
+}
+
+.dialogue-tree-node:hover {
+  background: var(--wb-border);
+}
+
+.dialogue-tree-node.selected {
+  background: var(--wb-accent-hover);
+  color: var(--wb-text-bright);
+}
+
+.dialogue-tree-node.entry-node .node-icon {
+  color: var(--wb-success);
+}
+
+.dialogue-tree-node.has-error {
+  border-left: 2px solid var(--wb-danger-text);
+}
+
+.dialogue-tree-node .node-icon {
+  flex-shrink: 0;
+  color: var(--wb-text-dim);
+}
+
+.dialogue-tree-node .node-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dialogue-tree-node .node-key {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: inherit;
+}
+
+.dialogue-tree-node .node-text {
+  font-size: 0.7rem;
+  color: var(--wb-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dialogue-tree-node.selected .node-text {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.dialogue-tree-node .node-meta {
+  flex-shrink: 0;
+}
+
+.dialogue-tree-node .choice-count {
+  padding: 0.1rem 0.4rem;
+  background: var(--wb-border);
+  border-radius: 10px;
+  font-size: 0.65rem;
+  color: var(--wb-text-muted);
+}
+
+.dialogue-tree-node.selected .choice-count {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--wb-text-bright);
+}
+
+/* Node Panel */
+.dialogue-node-panel {
+  background: var(--wb-panel);
+  overflow-y: auto;
+}
+
+.dialogue-node-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--wb-text-faint);
+  text-align: center;
+}
+
+.dialogue-node-empty .size-10 {
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.3;
+}
+
+/* Node Editor */
+.node-editor {
+  padding: 1rem;
+}
+
+.panel-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background: var(--wb-panel-alt);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--wb-text-muted);
+  border-bottom: 1px solid var(--wb-bg);
+}
+
+.node-editor .panel-section-header {
+  margin: -1rem -1rem 1rem -1rem;
+}
+
+/* Choices Section */
+.choices-section {
+  margin-top: 1.5rem;
+  border: 1px solid var(--wb-border);
+  border-radius: var(--wb-radius-md);
+  overflow: hidden;
+}
+
+.choices-section .section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background: var(--wb-panel-alt);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--wb-text-muted);
+}
+
+.no-choices {
+  padding: 1rem;
+  text-align: center;
+  color: var(--wb-text-dim);
+  font-size: 0.8rem;
+}
+
+.choices-list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Choice Editor */
+.choice-editor {
+  border-bottom: 1px solid var(--wb-border);
+  padding: 0.75rem;
+}
+
+.choice-editor:last-child {
+  border-bottom: none;
+}
+
+.choice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.choice-number {
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--wb-accent-hover);
+  color: var(--wb-text-bright);
+  border-radius: 50%;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.choice-fields .form-group {
+  margin-bottom: 0.5rem;
+}
+
+.choice-fields .form-group:last-child {
+  margin-bottom: 0;
+}
+
+.condition-row,
+.action-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Dialogue Preview */
+.dialogue-preview {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-content {
+  flex: 1;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-speaker {
+  font-weight: 600;
+  color: var(--wb-success);
+  margin-bottom: 0.5rem;
+}
+
+.preview-text {
+  background: var(--wb-panel-alt);
+  padding: 1rem;
+  border-radius: var(--wb-radius-md);
+  margin-bottom: 1rem;
+  line-height: 1.5;
+  border-left: 3px solid var(--wb-success);
+}
+
+.preview-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: auto;
+}
+
+.preview-choice {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  background: var(--wb-panel-header);
+  border: 1px solid var(--wb-border);
+  color: var(--wb-text);
+  border-radius: var(--wb-radius-md);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.preview-choice:hover {
+  background: var(--wb-accent-hover);
+  border-color: var(--wb-accent-hover);
+  color: var(--wb-text-bright);
+}
+
+.preview-end {
+  text-align: center;
+  color: var(--wb-text-dim);
+  padding: 1rem;
+}
+
+.preview-error {
+  padding: 2rem;
+  text-align: center;
+  color: var(--wb-danger-text);
+}
+
+/* Validation Errors */
+.dialogue-validation-errors {
+  background: var(--wb-danger-surface);
+  border-top: 1px solid var(--wb-danger-border);
+  padding: 0.75rem;
+}
+
+.validation-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--wb-danger-text);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.validation-list {
+  margin: 0;
+  padding-left: 1.5rem;
+  font-size: 0.8rem;
+}
+
+/* Mock State Panel for Dialogue Testing */
+.dialogue-preview-container {
+  display: flex;
+  height: 100%;
+  gap: 1rem;
+}
+
+.mock-state-panel {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--wb-panel-alt);
+  border-radius: var(--wb-radius-md);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.mock-state-panel .panel-section-header {
+  background: var(--wb-panel-header);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--wb-border);
+}
+
+.mock-state-section {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--wb-border);
+}
+
+.mock-state-section label {
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--wb-text-muted);
+  margin-bottom: 6px;
+}
+
+.mock-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+  min-height: 22px;
+}
+
+.mock-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: var(--wb-mock-tag-active);
+  color: var(--wb-text-bright);
+  padding: 2px 6px;
+  border-radius: var(--wb-radius-sm);
+  font-size: 11px;
+}
+
+.mock-tag button {
+  background: none;
+  border: none;
+  color: var(--wb-text-muted);
+  cursor: pointer;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.mock-tag button:hover {
+  color: var(--wb-danger-text);
+}
+
+.mock-tag-completed {
+  background: var(--wb-mock-tag-completed);
+}
+
+.mock-tag-item {
+  background: var(--wb-mock-tag-item);
+}
+
+.mock-tag-flag {
+  background: var(--wb-mock-tag-flag);
+}
+
+.mock-add-row {
+  display: flex;
+  gap: 4px;
+}
+
+.mock-add-row input {
+  flex: 1;
+  padding: 4px 6px;
+  background: var(--wb-border-dark);
+  border: 1px solid var(--wb-border);
+  border-radius: var(--wb-radius-sm);
+  color: var(--wb-text);
+  font-size: 11px;
+}
+
+.mock-add-row button {
+  padding: 4px 8px;
+  background: var(--wb-border);
+  border: none;
+  border-radius: var(--wb-radius-sm);
+  color: var(--wb-text);
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.mock-add-row button:hover {
+  background: var(--wb-border-light);
+}
+
+.preview-filtered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--wb-text-muted);
+  padding: 1rem;
+  background: var(--wb-panel-alt);
+  border-radius: var(--wb-radius-md);
+  border: 1px dashed var(--wb-border);
+}
+
+.choice-condition-badge {
+  margin-left: auto;
+  color: var(--wb-text-muted);
+}
+
+.dialogue-preview-container .dialogue-preview {
+  flex: 1;
+}
+
+/* Quest Flow Modal */
+.quest-flow-modal {
+  background: var(--wb-panel);
+  border: 1px solid var(--wb-border);
+  border-radius: var(--wb-radius-lg);
+}
+
+.quest-flow-body {
+  position: relative;
+  background: var(--wb-panel-alt);
+}
+
+.quest-graph-container {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  overflow: auto;
+}
+
+.quest-graph-legend {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(30, 30, 30, 0.95);
+  padding: 8px 12px;
+  border-radius: var(--wb-radius-md);
+  border: 1px solid var(--wb-border);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--wb-text-muted);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.legend-arrow {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--wb-border);
+}
+
+.quest-graph-edges {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.quest-graph-nodes {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.quest-node {
+  position: absolute;
+  width: 160px;
+  background: var(--wb-panel-header);
+  border: 2px solid var(--wb-border);
+  border-radius: var(--wb-radius-md);
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.quest-node:hover {
+  transform: scale(1.05);
+  z-index: 5;
+}
+
+.quest-type-main {
+  border-color: var(--wb-accent);
+}
+
+.quest-type-main::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--wb-accent);
+  border-radius: var(--wb-radius-md) var(--wb-radius-md) 0 0;
+}
+
+.quest-type-side {
+  border-color: var(--wb-quest-pass);
+}
+
+.quest-type-side::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--wb-quest-pass);
+  border-radius: var(--wb-radius-md) var(--wb-radius-md) 0 0;
+}
+
+.quest-type-tutorial {
+  border-color: var(--wb-quest-pass-alt);
+}
+
+.quest-type-tutorial::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--wb-quest-pass-alt);
+  border-radius: var(--wb-radius-md) var(--wb-radius-md) 0 0;
+}
+
+.quest-node-act {
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--wb-text-muted);
+  margin-bottom: 2px;
+}
+
+.quest-node-name {
+  font-weight: 600;
+  color: var(--wb-text-bright);
+  font-size: 12px;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quest-node-id {
+  font-size: 10px;
+  color: var(--wb-text-faint);
+  font-family: monospace;
+}

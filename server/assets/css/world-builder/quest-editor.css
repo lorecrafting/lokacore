@@ -1,0 +1,428 @@
+/* =============================================================================
+   World Builder Editors - Quest Editor Styles
+   ============================================================================= */
+
+/* ============================================================================
+   Quest Editor Styles
+   ============================================================================ */
+
+.quest-node {
+  background: var(--wb-input);
+  border: 2px solid var(--wb-quest-node-border);
+  border-radius: var(--wb-radius-md);
+  padding: 8px;
+  min-width: 180px;
+  max-width: 240px;
+  font-size: 0.85rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.quest-node-header {
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--wb-text-muted);
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--wb-border);
+}
+
+.quest-node-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.quest-node-start {
+  border-color: var(--wb-quest-start);
+}
+
+.quest-node-objective {
+  border-color: var(--wb-accent);
+}
+
+.quest-node-choice {
+  border-color: var(--wb-quest-objective);
+}
+
+.quest-node-reward {
+  border-color: var(--wb-quest-fail);
+}
+
+.quest-node-end {
+  border-color: var(--wb-quest-special);
+}
+
+.form-group-sm {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.form-group-sm label {
+  font-size: 0.7rem;
+  color: var(--wb-text-muted);
+  font-weight: 600;
+}
+
+.input-sm {
+  padding: 4px 6px;
+  font-size: 0.75rem;
+  background: var(--wb-panel);
+  border: 1px solid var(--wb-border);
+  border-radius: var(--wb-radius-sm);
+  color: var(--wb-text);
+}
+
+.input-sm:focus {
+  outline: none;
+  border-color: var(--wb-accent);
+}
+
+.quest-complete-badge {
+  text-align: center;
+  color: var(--wb-quest-special);
+  font-weight: 700;
+  padding: 6px;
+}
+
+
+/* ==========================================================================
+   LiveView Editors (Quest, Cutscene, Script) - Shared Styles
+   ========================================================================== */
+
+.quest-editor-lv,
+.cutscene-editor-lv {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: var(--wb-surface);
+  color: var(--wb-text);
+}
+
+.quest-editor-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 12px;
+}
+
+.quest-validation-banner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--wb-danger-surface);
+  color: var(--wb-error);
+  font-size: 0.8rem;
+  border-bottom: 1px solid var(--wb-border);
+  flex-shrink: 0;
+}
+
+.quest-validation-banner.valid {
+  background: var(--wb-success-surface);
+  color: var(--wb-success);
+}
+
+.quest-section {
+  margin-bottom: 12px;
+  border: 1px solid var(--wb-border);
+  border-radius: var(--wb-radius-md);
+  overflow: hidden;
+}
+
+.quest-section-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: var(--wb-surface);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--wb-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.quest-form-grid {
+  padding: 8px 10px;
+}
+
+.quest-form-row {
+  margin-bottom: 6px;
+}
+
+.quest-form-row label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--wb-text-dim);
+  margin-bottom: 2px;
+}
+
+.quest-form-row-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.quest-form-row-triple {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.quest-input {
+  width: 100%;
+  padding: 5px 8px;
+  font-size: 0.8rem;
+  background: var(--wb-bg);
+  border: 1px solid var(--wb-border);
+  border-radius: var(--wb-radius-md);
+  color: var(--wb-text);
+  box-sizing: border-box;
+}
+
+.quest-input:focus {
+  border-color: var(--wb-accent);
+  outline: none;
+}
+
+.quest-input-sm {
+  padding: 3px 6px;
+  font-size: 0.78rem;
+  background: var(--wb-bg);
+  border: 1px solid var(--wb-border);
+  border-radius: var(--wb-radius-sm);
+  color: var(--wb-text);
+  box-sizing: border-box;
+}
+
+.quest-input-sm:focus {
+  border-color: var(--wb-accent);
+  outline: none;
+}
+
+textarea.quest-input,
+textarea.quest-input-sm {
+  resize: vertical;
+  font-family: inherit;
+}
+
+.quest-list-item {
+  border-bottom: 1px solid var(--wb-border);
+  padding: 6px 10px;
+}
+
+.quest-list-item:last-child {
+  border-bottom: none;
+}
+
+.quest-list-item-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.quest-list-item-num {
+  font-size: 0.7rem;
+  font-weight: bold;
+  color: var(--wb-text-faint);
+  background: var(--wb-surface);
+  padding: 1px 5px;
+  border-radius: var(--wb-radius-sm);
+}
+
+.quest-list-item-body {
+  padding-left: 24px;
+}
+
+.quest-list-item-compact {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-bottom: 1px solid var(--wb-border);
+}
+
+.quest-list-item-compact:last-child {
+  border-bottom: none;
+}
+
+.quest-form-row-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+
+.quest-form-row-inline label {
+  font-size: 0.72rem;
+  color: var(--wb-text-dim);
+  white-space: nowrap;
+  min-width: 45px;
+}
+
+.quest-form-row-inline input,
+.quest-form-row-inline textarea {
+  flex: 1;
+}
+
+.quest-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  font-size: 0.72rem;
+  background: var(--wb-success-surface);
+  color: var(--wb-success);
+  border: 1px solid var(--wb-success-border);
+  border-radius: var(--wb-radius-sm);
+  cursor: pointer;
+}
+
+.quest-add-btn:hover {
+  background: var(--wb-success-border);
+}
+
+.quest-remove-btn {
+  display: flex;
+  align-items: center;
+  padding: 2px 4px;
+  background: none;
+  border: none;
+  color: var(--wb-text-faint);
+  cursor: pointer;
+  border-radius: var(--wb-radius-sm);
+}
+
+.quest-remove-btn:hover {
+  color: var(--wb-error);
+  background: var(--wb-danger-surface);
+}
+
+.quest-remove-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.quest-empty {
+  padding: 12px 10px;
+  color: var(--wb-text-faint);
+  font-size: 0.78rem;
+  font-style: italic;
+}
+
+.quest-validation-error {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  color: var(--wb-error);
+  font-size: 0.78rem;
+}
+
+.quest-validation-warning {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  color: var(--wb-warning);
+  font-size: 0.78rem;
+}
+
+.quest-editor-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--wb-border);
+  flex-shrink: 0;
+}
+
+/* Script editor LiveView styles are inlined to Tailwind in script_editor.ex */
+
+/* Quest Details Panel */
+.quest-details-panel {
+  padding: 12px;
+  border-bottom: 1px solid var(--wb-border);
+}
+
+.quest-details-panel h4 {
+  font-size: 0.85rem;
+  color: var(--wb-text-muted);
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.level-range-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.level-range-inputs span {
+  color: var(--wb-text-dim);
+  font-size: 0.8rem;
+}
+
+.level-range-inputs .input-sm {
+  width: 60px;
+}
+
+/* Quest Prerequisites Panel */
+.quest-prerequisites-panel {
+  padding: 12px;
+}
+
+.quest-prerequisites-panel .panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.quest-prerequisites-panel h4 {
+  font-size: 0.85rem;
+  color: var(--wb-text-muted);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.prerequisites-empty {
+  color: var(--wb-text-faint);
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 12px;
+}
+
+.prerequisites-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.prerequisite-item {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.prerequisite-item select {
+  width: 110px;
+}
+
+.prerequisite-item input {
+  flex: 1;
+  min-width: 0;
+}
+
+.prerequisite-item .btn-sm {
+  padding: 4px 8px;
+  flex-shrink: 0;
+}

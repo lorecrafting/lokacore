@@ -25,11 +25,10 @@ defmodule LokaWeb.AdminLive.DashboardTab do
     <div class="flex flex-col gap-6">
       <h2 class="text-2xl font-bold">Dashboard</h2>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <.stat_card title="Total Players" value={@stats.total_players} icon="hero-users" />
         <.stat_card title="Total Rooms" value={@stats.total_rooms} icon="hero-map" />
         <.stat_card title="Total Entities" value={@stats.total_entities} icon="hero-cube" />
-        <.stat_card title="Scripts Loaded" value={@stats.scripts_loaded} icon="hero-code-bracket" />
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -70,10 +69,10 @@ defmodule LokaWeb.AdminLive.DashboardTab do
               Welcome to the Loka Admin Dashboard. Use the sidebar to navigate between sections.
             </p>
             <ul class="list-disc list-inside flex flex-col gap-1 text-sm">
-              <li><strong>Rooms</strong> - Create and manage game locations</li>
-              <li><strong>Entities</strong> - Create NPCs, items, and other objects</li>
-              <li><strong>Scripts</strong> - Write Lua scripts for custom behavior</li>
-              <li><strong>System</strong> - Export/import world data</li>
+              <li><strong>World Builder</strong> - Create rooms, entities, quests, and dialogues</li>
+              <li><strong>Quests</strong> - Debug player quest states and force completions</li>
+              <li><strong>Testing</strong> - Run content validation and balance analysis</li>
+              <li><strong>Audit Log</strong> - View admin action history</li>
             </ul>
           </div>
         </div>

@@ -4,14 +4,25 @@
    This file imports all CSS modules. The actual styles are organized into
    domain-specific files for better maintainability.
 
-   Structure:
-   - tailwind-config.css: @theme block, custom variants, LiveView loading states
-   - world-builder/layout.css: Grid, panels, resize handles
-   - world-builder/terminal.css: Terminal/console styles
-   - world-builder/chat.css: Chat panel, messages, streaming
-   - world-builder/editors.css: Quest/cutscene/dialogue/script editors
-   - world-builder/modals.css: Modal overlay, animations, settings
-   - world-builder/tools.css: Tool execution UI
+   FILE MAP - Where to add new styles:
+   ├── variables.css              → New design tokens (--wb-*)
+   ├── tailwind-config.css        → @theme exports, variants, LiveView states
+   ├── admin-auth.css             → Login/auth pages (light theme)
+   └── world-builder/
+       ├── layout.css             → Grid, panels, resize handles, collapsed states
+       ├── terminal.css           → Terminal panel, connection indicators
+       ├── chat.css               → Chat panel, messages, streaming UI
+       ├── quest-editor.css       → Quest editor forms, sections, validation
+       ├── cutscene-editor.css    → Cutscene timeline, keyframes, preview
+       ├── dialogue-editor.css    → Dialogue tree, node editor, mock state
+       ├── template-picker.css    → Template picker modal, config forms
+       ├── modals.css             → Modal overlay, settings, audit log, git commit
+       └── tools.css              → Tool execution UI, progress indicators
+
+   RULES:
+   - Keep files under 400 lines; split if larger
+   - Use design tokens only (no hex colors, no raw pixel values)
+   - Search existing files before adding new styles: grep -r "selector" assets/css/
    ============================================================================= */
 
 /* See the Tailwind configuration guide for advanced usage
@@ -24,7 +35,10 @@
 @import "./world-builder/layout.css";
 @import "./world-builder/terminal.css";
 @import "./world-builder/chat.css";
-@import "./world-builder/editors.css";
+@import "./world-builder/quest-editor.css";
+@import "./world-builder/cutscene-editor.css";
+@import "./world-builder/dialogue-editor.css";
+@import "./world-builder/template-picker.css";
 @import "./world-builder/modals.css";
 @import "./world-builder/tools.css";
 
