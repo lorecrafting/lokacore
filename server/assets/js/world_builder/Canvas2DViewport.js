@@ -4,20 +4,134 @@
  * Public API for the viewport. Manages state, coordinate transforms,
  * camera controls, and delegates rendering and interaction to
  * Canvas2DRenderer and Canvas2DInteraction respectively.
+ *
+ * Reads colors from CSS variables at construction time with hardcoded fallbacks.
+ * Uses `this.exitColors`, `this.roomColors`, `this.viewportColors` instance properties.
+ *
+ * @example
+ * ```js
+ * const viewport = new Canvas2DViewport(canvasElement, {
+ *   onSelectRoom: (key) => console.log('Selected:', key),
+ *   onMoveRoom: (key, x, y) => pushEvent('move_room', { key, x, y }),
+ *   onBatchSelect: (keys) => console.log('Batch selected:', keys)
+ * })
+ *
+ * // Update data
+ * viewport.setRooms(roomsArray)
+ * viewport.setSelectedRoom('room_key')
+ *
+ * // Camera controls
+ * viewport.centerOnRoom('room_key')
+ * viewport.fitToRooms()
+ *
+ * // Cleanup
+ * viewport.destroy()
+ * ```
+ */
+
+/**
+ * Camera state for viewport positioning and zoom.
+ * @typedef {Object} CameraState
+ * @property {number} x - Camera X offset in world units
+ * @property {number} y - Camera Y offset in world units
+ * @property {number} zoom - Zoom level (1.0 = 100%)
+ */
+
+/**
+ * A room object with position and metadata.
+ * @typedef {Object} Room
+ * @property {string} key - Unique room identifier
+ * @property {string} [id] - Optional alternative identifier
+ * @property {number} [x=0] - X position in world grid units
+ * @property {number} [y=0] - Y position in world grid units
+ * @property {number} [z=0] - Z level (floor/layer)
+ * @property {string} [name] - Display name
+ * @property {Object} [exits] - Exit connections to other rooms
+ */
+
+/**
+ * Screen/world coordinate pair.
+ * @typedef {Object} Point
+ * @property {number} x - X coordinate
+ * @property {number} y - Y coordinate
+ */
+
+/**
+ * Color configuration for exit directions.
+ * @typedef {Object} ExitColors
+ * @property {string} north - North exit color
+ * @property {string} south - South exit color
+ * @property {string} east - East exit color
+ * @property {string} west - West exit color
+ * @property {string} up - Up exit color
+ * @property {string} down - Down exit color
+ * @property {string} northeast - Northeast exit color
+ * @property {string} northwest - Northwest exit color
+ * @property {string} southeast - Southeast exit color
+ * @property {string} southwest - Southwest exit color
+ * @property {string} default - Default exit color for unknown directions
+ */
+
+/**
+ * Color configuration for room states.
+ * @typedef {Object} RoomColors
+ * @property {string} default - Default room fill color
+ * @property {string} selected - Selected room fill color
+ * @property {string} multiSelected - Multi-selected room fill color
+ * @property {string} error - Room with error fill color
+ * @property {string} warning - Room with warning fill color
+ */
+
+/**
+ * Color configuration for viewport elements.
+ * @typedef {Object} ViewportColors
+ * @property {string} bg - Background color
+ * @property {string} grid - Grid line color
+ * @property {string} gridMajor - Major grid line color
+ * @property {string} snap - Snap indicator color
+ * @property {string} snapDim - Dimmed snap indicator color
+ * @property {string} roomBorder - Default room border color
+ * @property {string} roomBorderMulti - Multi-selected room border color
+ * @property {string} roomBorderError - Error room border color
+ * @property {string} roomBorderWarning - Warning room border color
+ * @property {string} roomText - Room label text color
+ * @property {string} roomKeyText - Room key text color
+ */
+
+/**
+ * Viewport constructor options.
+ * @typedef {Object} ViewportOptions
+ * @property {function(string): void} [onSelectRoom] - Called when a room is selected
+ * @property {function(Set<string>): void} [onBatchSelect] - Called when multiple rooms are selected
+ * @property {function(string, number, number): void} [onMoveRoom] - Called when a room is moved (key, x, y)
  */
 
 import { Canvas2DRenderer } from './Canvas2DRenderer.js'
 import { Canvas2DInteraction } from './Canvas2DInteraction.js'
 
 export default class Canvas2DViewport {
+  /**
+   * Creates a new Canvas2DViewport instance.
+   * @param {HTMLCanvasElement} canvas - The canvas element to render to
+   * @param {ViewportOptions} [options={}] - Viewport configuration options
+   */
   constructor(canvas, options = {}) {
+    /** @type {HTMLCanvasElement} */
     this.canvas = canvas
+    /** @type {CanvasRenderingContext2D} */
     this.ctx = canvas.getContext('2d')
 
     // Read colors from CSS variables (with hardcoded fallbacks for canvas rendering)
     const styles = getComputedStyle(document.documentElement)
+    /**
+     * Helper to read CSS variable with fallback.
+     * @param {string} name - CSS variable name
+     * @param {string} fallback - Fallback value if not defined
+     * @returns {string} The CSS variable value or fallback
+     */
     const v = (name, fallback) => styles.getPropertyValue(name).trim() || fallback
 
+    /** @type {ExitColors} */
     this.exitColors = {
       north: v('--wb-viewport-exit-north', '#4a9eff'),
       south: v('--wb-viewport-exit-south', '#ff4a9e'),
@@ -32,6 +146,7 @@ export default class Canvas2DViewport {
       default: v('--wb-viewport-exit-default', '#888888'),
     }
 
+    /** @type {RoomColors} */
     this.roomColors = {
       default: v('--wb-viewport-room-default', '#7eb3ff'),
       selected: v('--wb-viewport-room-selected', '#4a9eff'),
@@ -40,6 +155,7 @@ export default class Canvas2DViewport {
       warning: v('--wb-viewport-room-warning', '#ffd93d'),
     }
 
+    /** @type {ViewportColors} */
     this.viewportColors = {
       bg: v('--wb-viewport-bg', '#1a1a2e'),
       grid: v('--wb-viewport-grid', '#333344'),
@@ -55,6 +171,7 @@ export default class Canvas2DViewport {
     }
 
     // Camera state
+    /** @type {CameraState} */
     this.camera = {
       x: 0,
       y: 0,
@@ -62,41 +179,76 @@ export default class Canvas2DViewport {
     }
 
     // Grid settings
+    /** @type {number} Grid cell size in pixels */
     this.gridSize = 60
+    /** @type {number} Room visual size in pixels */
     this.roomSize = 48
+    /** @type {number} Minimum zoom level */
     this.minZoom = 0.2
+    /** @type {number} Maximum zoom level */
     this.maxZoom = 3
+    /** @type {boolean} Whether to show the grid */
     this.showGrid = true
+    /** @type {number} Snap grid size for room placement */
     this.snapSize = 60
 
     // Data
+    /** @type {Room[]} */
     this.rooms = []
+    /** @type {Map<string, Room>} Room lookup by key or id */
     this.roomsByKey = new Map()
+    /** @type {Object<string, {errors?: string[], warnings?: string[]}>} Validation results by room key */
     this.validation = {}
+    /** @type {string|null} Currently selected room key */
     this.selectedRoom = null
+    /** @type {Set<string>} Set of multi-selected room keys */
     this.selectedKeys = new Set()
+    /** @type {number} Current Z level being viewed */
     this.currentZLevel = 0
+    /** @type {boolean} Whether to show ghost layers (adjacent Z levels) */
     this.showGhostLayers = true
 
     // Zone visualization
+    /** @type {Object<string, string>} Zone colors by zone key */
     this.zoneColors = {}
+    /** @type {Object<string, string>} Room to zone mapping */
     this.roomZoneMap = {}
+    /** @type {boolean} Whether to show zone colors on rooms */
     this.showZoneColors = true
 
     // NPC path visualization
+    /** @type {Object<string, {rooms: string[], color: string}>} NPC paths by NPC key */
     this.npcPaths = {}
+    /** @type {boolean} Whether to show NPC paths */
     this.showNPCPaths = true
 
     // Callbacks
+    /** @type {function(string): void} */
     this.onSelectRoom = options.onSelectRoom || (() => {})
+    /** @type {function(Set<string>): void} */
     this.onBatchSelect = options.onBatchSelect || (() => {})
+    /** @type {function(string, number, number): void} */
     this.onMoveRoom = options.onMoveRoom || (() => {})
 
     // Create renderer with a state accessor
+    /** @type {Canvas2DRenderer} */
     this.renderer = new Canvas2DRenderer(this.ctx, () => this._getRendererState())
 
     // Create interaction handler
+    /** @type {Canvas2DInteraction} */
     this.interaction = new Canvas2DInteraction(canvas, this)
+
+    // Internal state
+    /** @type {boolean} */
+    this._renderPending = false
+    /** @type {number|null} */
+    this._renderRAF = null
+    /** @type {number} Canvas width in CSS pixels */
+    this.width = 0
+    /** @type {number} Canvas height in CSS pixels */
+    this.height = 0
+    /** @type {number[]} Available Z levels */
+    this.zLevels = [0]
 
     // Setup
     this.setupCanvas()
@@ -108,6 +260,11 @@ export default class Canvas2DViewport {
   // State accessor for renderer
   // ============================================================================
 
+  /**
+   * Creates a state snapshot for the renderer.
+   * @private
+   * @returns {Object} State object containing all data needed for rendering
+   */
   _getRendererState() {
     return {
       camera: this.camera,
@@ -144,6 +301,11 @@ export default class Canvas2DViewport {
   // Setup
   // ============================================================================
 
+  /**
+   * Initialize canvas dimensions accounting for device pixel ratio.
+   * Should be called on mount and when canvas is resized.
+   * @returns {void}
+   */
   setupCanvas() {
     const dpr = window.devicePixelRatio || 1
     const rect = this.canvas.getBoundingClientRect()
@@ -156,7 +318,11 @@ export default class Canvas2DViewport {
     this.height = rect.height
   }
 
-  // Batch multiple data updates into a single render frame
+  /**
+   * Batch multiple data updates into a single render frame.
+   * Uses requestAnimationFrame to coalesce rapid updates.
+   * @returns {void}
+   */
   scheduleRender() {
     if (!this._renderPending) {
       this._renderPending = true
@@ -168,14 +334,27 @@ export default class Canvas2DViewport {
     }
   }
 
+  /**
+   * Start the initial render.
+   * @returns {void}
+   */
   startRenderLoop() {
     this.render()
   }
 
+  /**
+   * Render the viewport immediately.
+   * @returns {void}
+   */
   render() {
     this.renderer.render()
   }
 
+  /**
+   * Clean up resources and detach event handlers.
+   * Should be called when the viewport is being destroyed.
+   * @returns {void}
+   */
   destroy() {
     // Cancel pending render
     if (this._renderRAF) {
@@ -191,6 +370,12 @@ export default class Canvas2DViewport {
   // Data Updates
   // ============================================================================
 
+  /**
+   * Update the rooms data and rebuild lookup maps.
+   * Auto-detects Z-levels from room data.
+   * @param {Room[]} rooms - Array of room objects
+   * @returns {void}
+   */
   setRooms(rooms) {
     this.rooms = rooms || []
     this.roomsByKey.clear()
@@ -210,56 +395,110 @@ export default class Canvas2DViewport {
     this.scheduleRender()
   }
 
+  /**
+   * Update validation results for rooms.
+   * @param {Object<string, {errors?: string[], warnings?: string[]}>} validation - Validation results by room key
+   * @returns {void}
+   */
   setValidation(validation) {
     this.validation = validation || {}
     this.scheduleRender()
   }
 
+  /**
+   * Set the currently selected room.
+   * @param {string|null} key - Room key to select, or null to deselect
+   * @returns {void}
+   */
   setSelectedRoom(key) {
     this.selectedRoom = key
     this.scheduleRender()
   }
 
+  /**
+   * Set the multi-selected room keys.
+   * @param {string[]|null} keys - Array of room keys, or null/empty to clear
+   * @returns {void}
+   */
   setSelectedKeys(keys) {
     this.selectedKeys = new Set(keys || [])
     this.scheduleRender()
   }
 
+  /**
+   * Set the current Z level (floor/layer) to display.
+   * @param {number} level - Z level to display
+   * @returns {void}
+   */
   setZLevel(level) {
     this.currentZLevel = level
     this.scheduleRender()
   }
 
+  /**
+   * Set zone colors for zone visualization.
+   * @param {Object<string, string>} colors - Zone colors by zone key
+   * @returns {void}
+   */
   setZoneColors(colors) {
     this.zoneColors = colors || {}
     this.scheduleRender()
   }
 
+  /**
+   * Set the room-to-zone mapping.
+   * @param {Object<string, string>} map - Room key to zone key mapping
+   * @returns {void}
+   */
   setRoomZoneMap(map) {
     this.roomZoneMap = map || {}
     this.scheduleRender()
   }
 
+  /**
+   * Toggle zone color visualization.
+   * @param {boolean} show - Whether to show zone colors
+   * @returns {void}
+   */
   setShowZoneColors(show) {
     this.showZoneColors = show
     this.scheduleRender()
   }
 
+  /**
+   * Set NPC paths for visualization.
+   * @param {Object<string, {rooms: string[], color: string}>} paths - NPC paths by NPC key
+   * @returns {void}
+   */
   setNPCPaths(paths) {
     this.npcPaths = paths || {}
     this.scheduleRender()
   }
 
+  /**
+   * Toggle NPC path visualization.
+   * @param {boolean} show - Whether to show NPC paths
+   * @returns {void}
+   */
   setShowNPCPaths(show) {
     this.showNPCPaths = show
     this.scheduleRender()
   }
 
+  /**
+   * Set grid visibility.
+   * @param {boolean} show - Whether to show the grid
+   * @returns {void}
+   */
   setShowGrid(show) {
     this.showGrid = show
     this.scheduleRender()
   }
 
+  /**
+   * Toggle grid visibility and immediately render.
+   * @returns {void}
+   */
   toggleGrid() {
     this.showGrid = !this.showGrid
     this.render()
@@ -269,12 +508,24 @@ export default class Canvas2DViewport {
   // Coordinate Transforms
   // ============================================================================
 
+  /**
+   * Convert world grid coordinates to screen pixel coordinates.
+   * @param {number} worldX - X position in world grid units
+   * @param {number} worldY - Y position in world grid units
+   * @returns {Point} Screen coordinates in pixels
+   */
   worldToScreen(worldX, worldY) {
     const screenX = (worldX * this.gridSize + this.camera.x) * this.camera.zoom + this.width / 2
     const screenY = (worldY * this.gridSize + this.camera.y) * this.camera.zoom + this.height / 2
     return { x: screenX, y: screenY }
   }
 
+  /**
+   * Convert screen pixel coordinates to world grid coordinates.
+   * @param {number} screenX - X position in screen pixels
+   * @param {number} screenY - Y position in screen pixels
+   * @returns {Point} World coordinates in grid units
+   */
   screenToWorld(screenX, screenY) {
     const worldX = ((screenX - this.width / 2) / this.camera.zoom - this.camera.x) / this.gridSize
     const worldY = ((screenY - this.height / 2) / this.camera.zoom - this.camera.y) / this.gridSize
@@ -285,6 +536,13 @@ export default class Canvas2DViewport {
   // Hit Testing
   // ============================================================================
 
+  /**
+   * Find the room at the given screen coordinates.
+   * Checks current Z level first, then adjacent levels if ghost layers are enabled.
+   * @param {number} screenX - X position in screen pixels
+   * @param {number} screenY - Y position in screen pixels
+   * @returns {Room|null} The room at the point, or null if none found
+   */
   getRoomAtPoint(screenX, screenY) {
     const world = this.screenToWorld(screenX, screenY)
     const halfSize = (this.roomSize / 2) / this.gridSize
@@ -317,6 +575,12 @@ export default class Canvas2DViewport {
   // Camera Controls
   // ============================================================================
 
+  /**
+   * Center the camera on a specific room.
+   * Also switches to the room's Z level.
+   * @param {string} roomKey - The key of the room to center on
+   * @returns {void}
+   */
   centerOnRoom(roomKey) {
     const room = this.roomsByKey.get(roomKey)
     if (!room) return
@@ -327,6 +591,11 @@ export default class Canvas2DViewport {
     this.render()
   }
 
+  /**
+   * Fit the camera to show all rooms at the current Z level.
+   * Calculates bounding box and adjusts zoom to fit.
+   * @returns {void}
+   */
   fitToRooms() {
     if (this.rooms.length === 0) return
 
@@ -365,12 +634,20 @@ export default class Canvas2DViewport {
     this.render()
   }
 
+  /**
+   * Reset camera to origin with default zoom.
+   * @returns {void}
+   */
   resetCamera() {
     this.camera = { x: 0, y: 0, zoom: 1 }
     this.renderer.clearTruncateCache()
     this.render()
   }
 
+  /**
+   * Get all available Z levels from the room data.
+   * @returns {number[]} Sorted array of Z levels
+   */
   getZLevels() {
     return this.zLevels || [0]
   }
@@ -379,10 +656,18 @@ export default class Canvas2DViewport {
   // Backward compatibility - expose internal state for tests
   // ============================================================================
 
+  /**
+   * Access renderer's truncate cache (for testing).
+   * @type {Map<string, string>}
+   */
   get _truncateCache() {
     return this.renderer._truncateCache
   }
 
+  /**
+   * Access interaction handler's resize observer (for testing).
+   * @type {ResizeObserver}
+   */
   get resizeObserver() {
     return this.interaction.resizeObserver
   }

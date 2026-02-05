@@ -3,25 +3,44 @@ import { HookHelper } from '../world_builder/HookHelper.js'
 // Quest Flow Graph - draws edges between quest nodes with bezier curves
 const QuestFlowGraph = {
   mounted() {
-    this.helper = new HookHelper(this)
+    try {
+      this.helper = new HookHelper(this)
 
-    // Read edge colors from CSS custom properties
-    const styles = getComputedStyle(document.documentElement)
-    this.edgeColor = styles.getPropertyValue('--wb-quest-edge').trim() || '#666666'
-    this.edgePrereqColor = styles.getPropertyValue('--wb-quest-edge-prereq').trim() || '#f59e0b'
-    this.edgeUnlockColor = styles.getPropertyValue('--wb-quest-edge-unlock').trim() || '#22c55e'
-    console.log('[QuestFlowGraph] Edge colors loaded from CSS variables')
+      if (!this.el) {
+        console.warn('[QuestFlowGraph] Element not found')
+        return
+      }
 
-    this.drawEdges()
-    // Event delegation for SVG path hover effects (avoids per-path listener leaks)
-    const svg = this.el.querySelector('.quest-graph-edges')
-    if (svg) {
-      this.helper.on(svg, 'mouseenter', (e) => {
-        if (e.target.tagName === 'path') e.target.setAttribute('stroke-width', '3')
-      }, true)
-      this.helper.on(svg, 'mouseleave', (e) => {
-        if (e.target.tagName === 'path') e.target.setAttribute('stroke-width', '2')
-      }, true)
+      // Read edge colors from CSS custom properties
+      const styles = getComputedStyle(document.documentElement)
+      this.edgeColor = styles.getPropertyValue('--wb-quest-edge').trim() || '#666666'
+      this.edgePrereqColor = styles.getPropertyValue('--wb-quest-edge-prereq').trim() || '#f59e0b'
+      this.edgeUnlockColor = styles.getPropertyValue('--wb-quest-edge-unlock').trim() || '#22c55e'
+      console.log('[QuestFlowGraph] Edge colors loaded from CSS variables')
+
+      this.drawEdges()
+      // Event delegation for SVG path hover effects (avoids per-path listener leaks)
+      const svg = this.el.querySelector('.quest-graph-edges')
+      if (svg) {
+        this.helper.on(
+          svg,
+          'mouseenter',
+          (e) => {
+            if (e.target.tagName === 'path') e.target.setAttribute('stroke-width', '3')
+          },
+          true
+        )
+        this.helper.on(
+          svg,
+          'mouseleave',
+          (e) => {
+            if (e.target.tagName === 'path') e.target.setAttribute('stroke-width', '2')
+          },
+          true
+        )
+      }
+    } catch (err) {
+      console.error('[QuestFlowGraph] Failed to initialize:', err)
     }
   },
 
@@ -45,16 +64,16 @@ const QuestFlowGraph = {
       const nodeWidth = 160
       const nodeHeight = 60
 
-      nodes.forEach(node => {
+      nodes.forEach((node) => {
         nodePositions[node.id] = {
-          x: node.x + nodeWidth / 2,  // Center of node
-          y: node.y + nodeHeight / 2   // Center of node
+          x: node.x + nodeWidth / 2, // Center of node
+          y: node.y + nodeHeight / 2, // Center of node
         }
         nodeBounds[node.id] = {
           left: node.x,
           right: node.x + nodeWidth,
           top: node.y,
-          bottom: node.y + nodeHeight
+          bottom: node.y + nodeHeight,
         }
       })
 
@@ -77,16 +96,28 @@ const QuestFlowGraph = {
       svg.appendChild(defs)
 
       // Draw edges as bezier curves
-      edges.forEach(edge => {
+      edges.forEach((edge) => {
         const from = nodePositions[edge.from]
         const to = nodePositions[edge.to]
         if (!from || !to) return
 
         // Calculate connection points on node edges
-        const { startPoint, endPoint } = this.getConnectionPoints(from, to, nodeBounds[edge.from], nodeBounds[edge.to])
+        const { startPoint, endPoint } = this.getConnectionPoints(
+          from,
+          to,
+          nodeBounds[edge.from],
+          nodeBounds[edge.to]
+        )
 
         // Calculate control points for bezier curve
-        const controlPoints = this.calculateControlPoints(startPoint, endPoint, nodes, nodeBounds, edge.from, edge.to)
+        const controlPoints = this.calculateControlPoints(
+          startPoint,
+          endPoint,
+          nodes,
+          nodeBounds,
+          edge.from,
+          edge.to
+        )
 
         // Create bezier path
         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
@@ -95,10 +126,18 @@ const QuestFlowGraph = {
         path.setAttribute('fill', 'none')
 
         // Color based on edge type
-        const edgeColor = edge.type === 'prerequisite' ? this.edgePrereqColor :
-                         edge.type === 'unlocks' ? this.edgeUnlockColor : this.edgeColor
-        const markerId = edge.type === 'prerequisite' ? 'arrowhead-prereq' :
-                        edge.type === 'unlocks' ? 'arrowhead-unlock' : 'arrowhead'
+        const edgeColor =
+          edge.type === 'prerequisite'
+            ? this.edgePrereqColor
+            : edge.type === 'unlocks'
+              ? this.edgeUnlockColor
+              : this.edgeColor
+        const markerId =
+          edge.type === 'prerequisite'
+            ? 'arrowhead-prereq'
+            : edge.type === 'unlocks'
+              ? 'arrowhead-unlock'
+              : 'arrowhead'
 
         path.setAttribute('stroke', edgeColor)
         path.setAttribute('stroke-width', '2')
@@ -109,7 +148,6 @@ const QuestFlowGraph = {
 
         svg.appendChild(path)
       })
-
     } catch (e) {
       console.error('[QuestFlowGraph] Error drawing edges:', e)
     }
@@ -161,27 +199,42 @@ const QuestFlowGraph = {
 
     if (Math.abs(dx) > Math.abs(dy)) {
       // Horizontal flow - curve vertically to avoid nodes
-      const curveDirection = this.findBestCurveDirection(start, end, nodes, nodeBounds, fromId, toId)
+      const curveDirection = this.findBestCurveDirection(
+        start,
+        end,
+        nodes,
+        nodeBounds,
+        fromId,
+        toId
+      )
 
       cp1 = {
         x: start.x + dx * 0.3,
-        y: start.y + curveDirection * tension * 0.5
+        y: start.y + curveDirection * tension * 0.5,
       }
       cp2 = {
         x: end.x - dx * 0.3,
-        y: end.y + curveDirection * tension * 0.5
+        y: end.y + curveDirection * tension * 0.5,
       }
     } else {
       // Vertical flow - curve horizontally to avoid nodes
-      const curveDirection = this.findBestCurveDirection(start, end, nodes, nodeBounds, fromId, toId, true)
+      const curveDirection = this.findBestCurveDirection(
+        start,
+        end,
+        nodes,
+        nodeBounds,
+        fromId,
+        toId,
+        true
+      )
 
       cp1 = {
         x: start.x + curveDirection * tension * 0.5,
-        y: start.y + dy * 0.3
+        y: start.y + dy * 0.3,
       }
       cp2 = {
         x: end.x + curveDirection * tension * 0.5,
-        y: end.y - dy * 0.3
+        y: end.y - dy * 0.3,
       }
     }
 
@@ -194,8 +247,8 @@ const QuestFlowGraph = {
     const midX = (start.x + end.x) / 2
     const midY = (start.y + end.y) / 2
 
-    let positiveScore = 0  // Score for curving in positive direction
-    let negativeScore = 0  // Score for curving in negative direction
+    let positiveScore = 0 // Score for curving in positive direction
+    let negativeScore = 0 // Score for curving in negative direction
 
     for (const node of nodes) {
       if (node.id === fromId || node.id === toId) continue
@@ -206,29 +259,29 @@ const QuestFlowGraph = {
       // Check if node is roughly in the path
       const nodeCenter = {
         x: (bounds.left + bounds.right) / 2,
-        y: (bounds.top + bounds.bottom) / 2
+        y: (bounds.top + bounds.bottom) / 2,
       }
 
       // Simple proximity check
       const distToMid = Math.sqrt(
-        Math.pow(nodeCenter.x - midX, 2) +
-        Math.pow(nodeCenter.y - midY, 2)
+        Math.pow(nodeCenter.x - midX, 2) + Math.pow(nodeCenter.y - midY, 2)
       )
 
-      if (distToMid < 150) {  // Node is nearby
+      if (distToMid < 150) {
+        // Node is nearby
         if (isVertical) {
           // For vertical flow, check horizontal position
           if (nodeCenter.x > midX) {
-            negativeScore += 1  // Curve left to avoid
+            negativeScore += 1 // Curve left to avoid
           } else {
-            positiveScore += 1  // Curve right to avoid
+            positiveScore += 1 // Curve right to avoid
           }
         } else {
           // For horizontal flow, check vertical position
           if (nodeCenter.y > midY) {
-            negativeScore += 1  // Curve up to avoid
+            negativeScore += 1 // Curve up to avoid
           } else {
-            positiveScore += 1  // Curve down to avoid
+            positiveScore += 1 // Curve down to avoid
           }
         }
       }
@@ -242,14 +295,14 @@ const QuestFlowGraph = {
     }
 
     // Default: slight curve based on start/end relationship for visual consistency
-    return isVertical ? (start.x < end.x ? 1 : -1) : (start.y < end.y ? 1 : -1)
+    return isVertical ? (start.x < end.x ? 1 : -1) : start.y < end.y ? 1 : -1
   },
 
   destroyed() {
     this.helper.destroy()
     const svg = this.el.querySelector('.quest-graph-edges')
     if (svg) svg.innerHTML = ''
-  }
+  },
 }
 
 export default QuestFlowGraph

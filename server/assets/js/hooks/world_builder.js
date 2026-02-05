@@ -1,211 +1,224 @@
-import Canvas2DViewport from "../world_builder/Canvas2DViewport.js"
-import { undoManager } from "../world_builder/UndoManager.js"
-import { keyboardManager } from "../world_builder/KeyboardManager.js"
-import { registerWorldBuilderShortcuts } from "../world_builder/KeyboardShortcuts.js"
-import { HookHelper } from "../world_builder/HookHelper.js"
+import Canvas2DViewport from '../world_builder/Canvas2DViewport.js'
+import { undoManager } from '../world_builder/UndoManager.js'
+import { keyboardManager } from '../world_builder/KeyboardManager.js'
+import { registerWorldBuilderShortcuts } from '../world_builder/KeyboardShortcuts.js'
+import { HookHelper } from '../world_builder/HookHelper.js'
 
 // World Builder - 2D Canvas viewport (replaced React Three Fiber 3D)
 const WorldBuilder = {
   mounted() {
-    this.helper = new HookHelper(this)
-    console.log('[WorldBuilder] Mounting 2D Canvas viewport')
-
-    // Get the canvas element (should be created by LiveView template)
-    this.canvas = this.el.querySelector('canvas')
-    if (!this.canvas) {
-      // Create canvas if not present
-      this.canvas = document.createElement('canvas')
-      this.canvas.style.width = '100%'
-      this.canvas.style.height = '100%'
-      this.el.appendChild(this.canvas)
-    }
-
-    // Initialize state
-    this.rooms = []
-    this.selectedRoom = null
-    this.selectedEntity = null
-    this.selectedKeys = []
-    this.validation = {}
-
-    // Create 2D viewport
-    this.viewport = new Canvas2DViewport(this.canvas, {
-      onSelectRoom: (key, shiftKey) => {
-        this.selectedRoom = key
-        this.pushEvent('select_room', { key })
-      },
-      onBatchSelect: (keys) => {
-        this.selectedKeys = keys
-        this.pushEvent('batch_select', { keys })
-      }
-    })
-
-    // Listen for room selection events from LiveView
-    this.handleEvent('select_room', ({ key }) => {
-      this.selectedRoom = key
-      this.selectedEntity = null  // Clear entity selection when room selected
-      this.viewport.setSelectedRoom(key)
-    })
-
-    // Listen for entity selection events (NPC/Item)
-    this.handleEvent('select_entity', ({ type, key }) => {
-      this.selectedEntity = { type, key }
-      this.selectedRoom = null  // Clear room selection when entity selected
-      this.viewport.setSelectedRoom(null)
-    })
-
-    // Listen for Z-level changes
-    this.handleEvent('set_z_level', ({ level }) => {
-      this.viewport.setZLevel(level)
-    })
-
-    // Listen for init event with rooms and validation data
-    this.handleEvent('init_world_builder', ({ rooms, validation, zone_colors, room_zone_map, show_zone_colors, npc_paths, show_npc_paths }) => {
-      console.log('[WorldBuilder] init_world_builder received:', rooms?.length, 'rooms')
-      this.rooms = rooms
-      this.validation = validation || {}
-      this.viewport.setRooms(rooms)
-      this.viewport.setValidation(validation)
-      // Set zone visualization data
-      if (zone_colors) {
-        this.viewport.setZoneColors(zone_colors)
-      }
-      if (room_zone_map) {
-        this.viewport.setRoomZoneMap(room_zone_map)
-      }
-      this.viewport.setShowZoneColors(show_zone_colors !== false)
-      // Set NPC paths visualization data
-      if (npc_paths) {
-        this.viewport.setNPCPaths(npc_paths)
-      }
-      this.viewport.setShowNPCPaths(show_npc_paths !== false)
-      // Auto-fit to show all rooms on init
-      this.viewport.fitToRooms()
-      // Update Z-level tabs
-      this.updateZLevelTabs()
-    })
-
-    // Listen for zone colors toggle
-    this.handleEvent('zone_colors_changed', ({ enabled, zone_colors, room_zone_map }) => {
-      this.viewport.setShowZoneColors(enabled)
-      if (zone_colors) {
-        this.viewport.setZoneColors(zone_colors)
-      }
-      if (room_zone_map) {
-        this.viewport.setRoomZoneMap(room_zone_map)
-      }
-    })
-
-    // Listen for NPC paths toggle
-    this.handleEvent('npc_paths_changed', ({ enabled, npc_paths }) => {
-      this.viewport.setShowNPCPaths(enabled)
-      if (npc_paths) {
-        this.viewport.setNPCPaths(npc_paths)
-      }
-    })
-
-    // Listen for rooms updated event (includes validation)
-    this.handleEvent('rooms_updated', ({ rooms, validation }) => {
-      this.rooms = rooms
-      this.validation = validation || {}
-      this.viewport.setRooms(rooms)
-      this.viewport.setValidation(validation)
-      this.updateZLevelTabs()
-    })
-
-    // Listen for room created event
-    this.handleEvent('room_created', ({ room }) => {
-      this.rooms = [...this.rooms, room]
-      this.selectedRoom = room.key
-      this.viewport.setRooms(this.rooms)
-      this.viewport.setSelectedRoom(room.key)
-      this.viewport.centerOnRoom(room.key)
-      this.updateZLevelTabs()
-    })
-
-    // Listen for room updated event (single room)
-    this.handleEvent('room_updated', ({ room }) => {
-      this.rooms = this.rooms.map(r =>
-        (r.id === room.id || r.key === room.key) ? room : r
-      )
-      this.viewport.setRooms(this.rooms)
-    })
-
-    // Listen for room deleted event
-    this.handleEvent('room_deleted', ({ id }) => {
-      this.rooms = this.rooms.filter(r => r.id !== id && r.key !== id)
-      this.selectedRoom = null
-      this.viewport.setRooms(this.rooms)
-      this.viewport.setSelectedRoom(null)
-      this.updateZLevelTabs()
-    })
-
-    // Listen for panel collapsed events (for localStorage sync)
-    this.handleEvent('panel_collapsed', ({ panels }) => {
-      try {
-        localStorage.setItem('world_builder_collapsed_panels', JSON.stringify(panels))
-      } catch (err) {
-        console.warn('[WorldBuilder] Failed to save panel state:', err)
-      }
-    })
-
-    // Restore collapsed state from localStorage on mount
     try {
-      const savedPanels = localStorage.getItem('world_builder_collapsed_panels')
-      if (savedPanels) {
-        const panels = JSON.parse(savedPanels)
-        if (panels.hierarchy) this.pushEvent('toggle_panel', { panel: 'hierarchy' })
-        if (panels.inspector) this.pushEvent('toggle_panel', { panel: 'inspector' })
-        if (panels.console) this.pushEvent('toggle_panel', { panel: 'console' })
+      this.helper = new HookHelper(this)
+      console.log('[WorldBuilder] Mounting 2D Canvas viewport')
+
+      // Get the canvas element (should be created by LiveView template)
+      this.canvas = this.el.querySelector('canvas')
+      if (!this.canvas) {
+        // Create canvas if not present
+        this.canvas = document.createElement('canvas')
+        this.canvas.style.width = '100%'
+        this.canvas.style.height = '100%'
+        this.el.appendChild(this.canvas)
       }
-    } catch (err) {
-      console.warn('[WorldBuilder] Failed to restore panel state:', err)
-      localStorage.removeItem('world_builder_collapsed_panels')
-    }
 
-    // Setup undo/redo manager
-    undoManager.setPushEvent((event, payload) => this.pushEvent(event, payload))
-    undoManager.setOnStateChange((state) => {
-      this.pushEvent('undo_state_changed', state)
-    })
+      // Initialize state
+      this.rooms = []
+      this.selectedRoom = null
+      this.selectedEntity = null
+      this.selectedKeys = []
+      this.validation = {}
 
-    // Listen for operation recording events from LiveView
-    this.handleEvent('record_operation', ({ type, beforeState, afterState, metadata }) => {
-      undoManager.record(type, beforeState, afterState, metadata)
-    })
+      // Create 2D viewport
+      this.viewport = new Canvas2DViewport(this.canvas, {
+        onSelectRoom: (key, shiftKey) => {
+          this.selectedRoom = key
+          this.pushEvent('select_room', { key })
+        },
+        onBatchSelect: (keys) => {
+          this.selectedKeys = keys
+          this.pushEvent('batch_select', { keys })
+        },
+      })
 
-    this.handleEvent('begin_composite', ({ label }) => {
-      undoManager.beginComposite(label)
-    })
+      // Listen for room selection events from LiveView
+      this.handleEvent('select_room', ({ key }) => {
+        this.selectedRoom = key
+        this.selectedEntity = null // Clear entity selection when room selected
+        this.viewport.setSelectedRoom(key)
+      })
 
-    this.handleEvent('end_composite', () => {
-      undoManager.endComposite()
-    })
+      // Listen for entity selection events (NPC/Item)
+      this.handleEvent('select_entity', ({ type, key }) => {
+        this.selectedEntity = { type, key }
+        this.selectedRoom = null // Clear room selection when entity selected
+        this.viewport.setSelectedRoom(null)
+      })
 
-    this.handleEvent('trigger_undo', () => {
-      undoManager.undo()
-    })
+      // Listen for Z-level changes
+      this.handleEvent('set_z_level', ({ level }) => {
+        this.viewport.setZLevel(level)
+      })
 
-    this.handleEvent('trigger_redo', () => {
-      undoManager.redo()
-    })
-
-    // Send initial undo state
-    this.pushEvent('undo_state_changed', undoManager.getState())
-
-    // Register keyboard shortcuts via KeyboardManager (single document listener)
-    this.registerKeyboardShortcuts()
-
-    // Setup Z-level tab click handlers
-    const tabContainer = document.querySelector('.z-level-tabs')
-    if (tabContainer) {
-      this.helper.on(tabContainer, 'click', (e) => {
-        const btn = e.target.closest('[data-z-level]')
-        if (btn) {
-          const level = parseInt(btn.dataset.zLevel)
-          this.viewport.setZLevel(level)
+      // Listen for init event with rooms and validation data
+      this.handleEvent(
+        'init_world_builder',
+        ({
+          rooms,
+          validation,
+          zone_colors,
+          room_zone_map,
+          show_zone_colors,
+          npc_paths,
+          show_npc_paths,
+        }) => {
+          console.log('[WorldBuilder] init_world_builder received:', rooms?.length, 'rooms')
+          this.rooms = rooms
+          this.validation = validation || {}
+          this.viewport.setRooms(rooms)
+          this.viewport.setValidation(validation)
+          // Set zone visualization data
+          if (zone_colors) {
+            this.viewport.setZoneColors(zone_colors)
+          }
+          if (room_zone_map) {
+            this.viewport.setRoomZoneMap(room_zone_map)
+          }
+          this.viewport.setShowZoneColors(show_zone_colors !== false)
+          // Set NPC paths visualization data
+          if (npc_paths) {
+            this.viewport.setNPCPaths(npc_paths)
+          }
+          this.viewport.setShowNPCPaths(show_npc_paths !== false)
+          // Auto-fit to show all rooms on init
+          this.viewport.fitToRooms()
+          // Update Z-level tabs
           this.updateZLevelTabs()
         }
+      )
+
+      // Listen for zone colors toggle
+      this.handleEvent('zone_colors_changed', ({ enabled, zone_colors, room_zone_map }) => {
+        this.viewport.setShowZoneColors(enabled)
+        if (zone_colors) {
+          this.viewport.setZoneColors(zone_colors)
+        }
+        if (room_zone_map) {
+          this.viewport.setRoomZoneMap(room_zone_map)
+        }
       })
+
+      // Listen for NPC paths toggle
+      this.handleEvent('npc_paths_changed', ({ enabled, npc_paths }) => {
+        this.viewport.setShowNPCPaths(enabled)
+        if (npc_paths) {
+          this.viewport.setNPCPaths(npc_paths)
+        }
+      })
+
+      // Listen for rooms updated event (includes validation)
+      this.handleEvent('rooms_updated', ({ rooms, validation }) => {
+        this.rooms = rooms
+        this.validation = validation || {}
+        this.viewport.setRooms(rooms)
+        this.viewport.setValidation(validation)
+        this.updateZLevelTabs()
+      })
+
+      // Listen for room created event
+      this.handleEvent('room_created', ({ room }) => {
+        this.rooms = [...this.rooms, room]
+        this.selectedRoom = room.key
+        this.viewport.setRooms(this.rooms)
+        this.viewport.setSelectedRoom(room.key)
+        this.viewport.centerOnRoom(room.key)
+        this.updateZLevelTabs()
+      })
+
+      // Listen for room updated event (single room)
+      this.handleEvent('room_updated', ({ room }) => {
+        this.rooms = this.rooms.map((r) => (r.id === room.id || r.key === room.key ? room : r))
+        this.viewport.setRooms(this.rooms)
+      })
+
+      // Listen for room deleted event
+      this.handleEvent('room_deleted', ({ id }) => {
+        this.rooms = this.rooms.filter((r) => r.id !== id && r.key !== id)
+        this.selectedRoom = null
+        this.viewport.setRooms(this.rooms)
+        this.viewport.setSelectedRoom(null)
+        this.updateZLevelTabs()
+      })
+
+      // Listen for panel collapsed events (for localStorage sync)
+      this.handleEvent('panel_collapsed', ({ panels }) => {
+        try {
+          localStorage.setItem('world_builder_collapsed_panels', JSON.stringify(panels))
+        } catch (err) {
+          console.warn('[WorldBuilder] Failed to save panel state:', err)
+        }
+      })
+
+      // Restore collapsed state from localStorage on mount
+      try {
+        const savedPanels = localStorage.getItem('world_builder_collapsed_panels')
+        if (savedPanels) {
+          const panels = JSON.parse(savedPanels)
+          if (panels.hierarchy) this.pushEvent('toggle_panel', { panel: 'hierarchy' })
+          if (panels.inspector) this.pushEvent('toggle_panel', { panel: 'inspector' })
+          if (panels.console) this.pushEvent('toggle_panel', { panel: 'console' })
+        }
+      } catch (err) {
+        console.warn('[WorldBuilder] Failed to restore panel state:', err)
+        localStorage.removeItem('world_builder_collapsed_panels')
+      }
+
+      // Setup undo/redo manager
+      undoManager.setPushEvent((event, payload) => this.pushEvent(event, payload))
+      undoManager.setOnStateChange((state) => {
+        this.pushEvent('undo_state_changed', state)
+      })
+
+      // Listen for operation recording events from LiveView
+      this.handleEvent('record_operation', ({ type, beforeState, afterState, metadata }) => {
+        undoManager.record(type, beforeState, afterState, metadata)
+      })
+
+      this.handleEvent('begin_composite', ({ label }) => {
+        undoManager.beginComposite(label)
+      })
+
+      this.handleEvent('end_composite', () => {
+        undoManager.endComposite()
+      })
+
+      this.handleEvent('trigger_undo', () => {
+        undoManager.undo()
+      })
+
+      this.handleEvent('trigger_redo', () => {
+        undoManager.redo()
+      })
+
+      // Send initial undo state
+      this.pushEvent('undo_state_changed', undoManager.getState())
+
+      // Register keyboard shortcuts via KeyboardManager (single document listener)
+      this.registerKeyboardShortcuts()
+
+      // Setup Z-level tab click handlers
+      const tabContainer = document.querySelector('.z-level-tabs')
+      if (tabContainer) {
+        this.helper.on(tabContainer, 'click', (e) => {
+          const btn = e.target.closest('[data-z-level]')
+          if (btn) {
+            const level = parseInt(btn.dataset.zLevel)
+            this.viewport.setZLevel(level)
+            this.updateZLevelTabs()
+          }
+        })
+      }
+    } catch (err) {
+      console.error('[WorldBuilder] Failed to initialize:', err)
     }
   },
 
@@ -225,7 +238,7 @@ const WorldBuilder = {
         if (this.selectedEntity && this.selectedEntity.type && this.selectedEntity.key) {
           this.pushEvent('duplicate_entity', {
             type: this.selectedEntity.type,
-            key: this.selectedEntity.key
+            key: this.selectedEntity.key,
           })
         } else if (this.selectedRoom && (!this.selectedKeys || this.selectedKeys.length <= 1)) {
           this.pushEvent('duplicate_room', { key: this.selectedRoom })
@@ -234,7 +247,7 @@ const WorldBuilder = {
         }
       },
       selectAll: () => {
-        const allKeys = this.rooms.map(r => r.key)
+        const allKeys = this.rooms.map((r) => r.key)
         this.selectedKeys = allKeys
         this.viewport.setSelectedKeys(allKeys)
         this.pushEvent('batch_select', { keys: allKeys })
@@ -317,7 +330,7 @@ const WorldBuilder = {
     this.helper.destroy()
     // Cleanup undo manager
     undoManager.destroy()
-  }
+  },
 }
 
 export default WorldBuilder

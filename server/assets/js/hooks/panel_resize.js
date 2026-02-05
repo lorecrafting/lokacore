@@ -4,11 +4,46 @@ import { HookHelper } from '../world_builder/HookHelper.js'
 // Performance: applies CSS locally during drag, syncs to server on mouseup/touchend only
 
 const PANEL_CONFIG = {
-  console:   { selector: '.world-builder-console',   dimension: 'offsetHeight', defaultSize: 150, min: 80,  max: 400, direction: 'vertical' },
-  hierarchy: { selector: '.world-builder-hierarchy',  dimension: 'offsetWidth',  defaultSize: 200, min: 150, max: 400, direction: 'horizontal-right' },
-  inspector: { selector: '.world-builder-inspector',  dimension: 'offsetWidth',  defaultSize: 260, min: 200, max: 500, direction: 'horizontal-left' },
-  terminal:  { selector: '.world-builder-terminal',   dimension: 'offsetWidth',  defaultSize: 320, min: 200, max: 500, direction: 'horizontal-left' },
-  chat:      { selector: '.world-builder-chat',       dimension: 'offsetWidth',  defaultSize: 320, min: 200, max: 500, direction: 'horizontal-left' },
+  console: {
+    selector: '.world-builder-console',
+    dimension: 'offsetHeight',
+    defaultSize: 150,
+    min: 80,
+    max: 400,
+    direction: 'vertical',
+  },
+  hierarchy: {
+    selector: '.world-builder-hierarchy',
+    dimension: 'offsetWidth',
+    defaultSize: 200,
+    min: 150,
+    max: 400,
+    direction: 'horizontal-right',
+  },
+  inspector: {
+    selector: '.world-builder-inspector',
+    dimension: 'offsetWidth',
+    defaultSize: 260,
+    min: 200,
+    max: 500,
+    direction: 'horizontal-left',
+  },
+  terminal: {
+    selector: '.world-builder-terminal',
+    dimension: 'offsetWidth',
+    defaultSize: 320,
+    min: 200,
+    max: 500,
+    direction: 'horizontal-left',
+  },
+  chat: {
+    selector: '.world-builder-chat',
+    dimension: 'offsetWidth',
+    defaultSize: 320,
+    min: 200,
+    max: 500,
+    direction: 'horizontal-left',
+  },
 }
 
 // Grid column indices for each panel in --grid-columns
@@ -22,38 +57,51 @@ const GRID_COLUMN_INDEX = {
 
 const PanelResize = {
   mounted() {
-    this.helper = new HookHelper(this)
-    this.container = this.el
-    this.handles = this.el.querySelectorAll('.panel-resize-handle, .console-resize-handle')
-    this.isDragging = false
-    this.currentHandle = null
-    this.startX = 0
-    this.startY = 0
-    this.startSize = 0
-    this.rafId = null
+    try {
+      this.helper = new HookHelper(this)
+      this.container = this.el
+      if (!this.container) {
+        console.warn('[PanelResize] Container element not found')
+        return
+      }
 
-    // Track current sizes locally for grid rebuilds during drag
-    this.localSizes = this.parseCurrentSizes()
+      this.handles = this.el.querySelectorAll('.panel-resize-handle, .console-resize-handle')
+      if (!this.handles || this.handles.length === 0) {
+        console.warn('[PanelResize] No resize handles found')
+      }
 
-    // Load saved sizes from localStorage (batched single event)
-    this.loadSavedSizes()
+      this.isDragging = false
+      this.currentHandle = null
+      this.startX = 0
+      this.startY = 0
+      this.startSize = 0
+      this.rafId = null
 
-    // Bind drag handlers (handle-level listeners are managed manually for updated() re-attachment)
-    this.handleMouseDown = this.handleMouseDown.bind(this)
-    this.handleTouchStart = this.handleTouchStart.bind(this)
+      // Track current sizes locally for grid rebuilds during drag
+      this.localSizes = this.parseCurrentSizes()
 
-    // Attach listeners to all resize handles
-    this.handles.forEach(handle => {
-      handle.addEventListener('mousedown', this.handleMouseDown)
-      handle.addEventListener('touchstart', this.handleTouchStart)
-      handle.style.touchAction = 'none'
-    })
+      // Load saved sizes from localStorage (batched single event)
+      this.loadSavedSizes()
 
-    // Global mouse/touch events for dragging (auto-cleaned by HookHelper)
-    this.helper.on(document, 'mousemove', this.handleMouseMove.bind(this))
-    this.helper.on(document, 'mouseup', this.handleMouseUp.bind(this))
-    this.helper.on(document, 'touchmove', this.handleTouchMove.bind(this), { passive: false })
-    this.helper.on(document, 'touchend', this.handleTouchEnd.bind(this))
+      // Bind drag handlers (handle-level listeners are managed manually for updated() re-attachment)
+      this.handleMouseDown = this.handleMouseDown.bind(this)
+      this.handleTouchStart = this.handleTouchStart.bind(this)
+
+      // Attach listeners to all resize handles
+      this.handles.forEach((handle) => {
+        handle.addEventListener('mousedown', this.handleMouseDown)
+        handle.addEventListener('touchstart', this.handleTouchStart)
+        handle.style.touchAction = 'none'
+      })
+
+      // Global mouse/touch events for dragging (auto-cleaned by HookHelper)
+      this.helper.on(document, 'mousemove', this.handleMouseMove.bind(this))
+      this.helper.on(document, 'mouseup', this.handleMouseUp.bind(this))
+      this.helper.on(document, 'touchmove', this.handleTouchMove.bind(this), { passive: false })
+      this.helper.on(document, 'touchend', this.handleTouchEnd.bind(this))
+    } catch (err) {
+      console.error('[PanelResize] Failed to initialize:', err)
+    }
   },
 
   getPointerPosition(e) {
@@ -140,7 +188,8 @@ const PanelResize = {
 
     const config = PANEL_CONFIG[panel]
     document.body.style.userSelect = 'none'
-    document.body.style.cursor = config && config.direction === 'vertical' ? 'row-resize' : 'col-resize'
+    document.body.style.cursor =
+      config && config.direction === 'vertical' ? 'row-resize' : 'col-resize'
   },
 
   moveDrag(e) {
@@ -225,13 +274,13 @@ const PanelResize = {
     // Re-attach listeners to handles that may have been replaced by LiveView patches
     const newHandles = this.el.querySelectorAll('.panel-resize-handle, .console-resize-handle')
     // Remove old listeners
-    this.handles.forEach(handle => {
+    this.handles.forEach((handle) => {
       handle.removeEventListener('mousedown', this.handleMouseDown)
       handle.removeEventListener('touchstart', this.handleTouchStart)
     })
     // Attach to new handles
     this.handles = newHandles
-    this.handles.forEach(handle => {
+    this.handles.forEach((handle) => {
       handle.addEventListener('mousedown', this.handleMouseDown)
       handle.addEventListener('touchstart', this.handleTouchStart)
       handle.style.touchAction = 'none'
@@ -239,14 +288,14 @@ const PanelResize = {
   },
 
   destroyed() {
-    this.handles.forEach(handle => {
+    this.handles.forEach((handle) => {
       handle.removeEventListener('mousedown', this.handleMouseDown)
       handle.removeEventListener('touchstart', this.handleTouchStart)
     })
     // Document-level listeners cleaned by HookHelper
     this.helper.destroy()
     if (this.rafId) cancelAnimationFrame(this.rafId)
-  }
+  },
 }
 
 export default PanelResize

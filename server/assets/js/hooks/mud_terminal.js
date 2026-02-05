@@ -1,4 +1,4 @@
-import {Socket} from "phoenix"
+import { Socket } from 'phoenix'
 import { HookHelper } from '../world_builder/HookHelper.js'
 
 const MAX_TERMINAL_LINES = 1000
@@ -6,77 +6,86 @@ const MAX_TERMINAL_LINES = 1000
 // MUD Terminal hook - connects to GameChannel for in-editor MUD testing
 const MudTerminal = {
   mounted() {
-    this.helper = new HookHelper(this)
-    this.token = this.el.dataset.token
-    this.commandHistory = []
-    this.historyIndex = -1
-    this._lastCommandTime = 0
-    this.socket = null
-    this.channel = null
+    try {
+      this.helper = new HookHelper(this)
+      this.token = this.el.dataset.token
+      this.commandHistory = []
+      this.historyIndex = -1
+      this._lastCommandTime = 0
+      this.socket = null
+      this.channel = null
 
-    // Scope DOM queries to terminal container instead of global document
-    this.terminalContainer = this.el.closest('.world-builder-terminal') || this.el.parentElement
-    this.outputEl = this.el
-    this.inputEl = this.terminalContainer.querySelector('#terminal-command-input')
-    this.hpEl = this.terminalContainer.querySelector('#term-hp')
-    this.maEl = this.terminalContainer.querySelector('#term-ma')
-    this.mvEl = this.terminalContainer.querySelector('#term-mv')
-    this.exitsEl = this.terminalContainer.querySelector('#term-exits')
-    this.statusDot = this.terminalContainer.querySelector('#term-connection-dot')
+      // Scope DOM queries to terminal container instead of global document
+      this.terminalContainer = this.el.closest('.world-builder-terminal') || this.el.parentElement
+      if (!this.terminalContainer) {
+        console.warn('[MudTerminal] Terminal container not found')
+        return
+      }
 
-    this.setConnectionState('connecting')
+      this.outputEl = this.el
+      this.inputEl = this.terminalContainer.querySelector('#terminal-command-input')
+      this.hpEl = this.terminalContainer.querySelector('#term-hp')
+      this.maEl = this.terminalContainer.querySelector('#term-ma')
+      this.mvEl = this.terminalContainer.querySelector('#term-mv')
+      this.exitsEl = this.terminalContainer.querySelector('#term-exits')
+      this.statusDot = this.terminalContainer.querySelector('#term-connection-dot')
 
-    if (!this.token) {
-      this.appendOutput('No auth token available.', 'error')
-      this.setConnectionState('disconnected')
-      return
-    }
+      this.setConnectionState('connecting')
 
-    this.connect()
+      if (!this.token) {
+        this.appendOutput('No auth token available.', 'error')
+        this.setConnectionState('disconnected')
+        return
+      }
 
-    // Input handling
-    if (this.inputEl) {
-      this.helper.on(this.inputEl, 'keydown', (e) => {
-        // Prevent World Builder keyboard shortcuts from firing when typing
-        e.stopPropagation()
+      this.connect()
 
-        if (e.key === 'Enter') {
-          const input = this.inputEl.value.trim()
-          if (input) {
-            // Handle clear client-side (no server round-trip needed)
-            if (input.toLowerCase() === 'clear') {
+      // Input handling
+      if (this.inputEl) {
+        this.helper.on(this.inputEl, 'keydown', (e) => {
+          // Prevent World Builder keyboard shortcuts from firing when typing
+          e.stopPropagation()
+
+          if (e.key === 'Enter') {
+            const input = this.inputEl.value.trim()
+            if (input) {
+              // Handle clear client-side (no server round-trip needed)
+              if (input.toLowerCase() === 'clear') {
+                this.commandHistory.push(input)
+                this.historyIndex = this.commandHistory.length
+                this.clearOutput()
+                this.inputEl.value = ''
+                return
+              }
+              const now = Date.now()
+              if (now - this._lastCommandTime < 200) return
+              this._lastCommandTime = now
+              this.appendOutput(`> ${input}`, 'system')
               this.commandHistory.push(input)
               this.historyIndex = this.commandHistory.length
-              this.clearOutput()
+              this.channel.push('command', { input })
               this.inputEl.value = ''
-              return
             }
-            const now = Date.now()
-            if (now - this._lastCommandTime < 200) return
-            this._lastCommandTime = now
-            this.appendOutput(`> ${input}`, 'system')
-            this.commandHistory.push(input)
-            this.historyIndex = this.commandHistory.length
-            this.channel.push('command', { input })
-            this.inputEl.value = ''
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault()
+            if (this.historyIndex > 0) {
+              this.historyIndex--
+              this.inputEl.value = this.commandHistory[this.historyIndex]
+            }
+          } else if (e.key === 'ArrowDown') {
+            e.preventDefault()
+            if (this.historyIndex < this.commandHistory.length - 1) {
+              this.historyIndex++
+              this.inputEl.value = this.commandHistory[this.historyIndex]
+            } else {
+              this.historyIndex = this.commandHistory.length
+              this.inputEl.value = ''
+            }
           }
-        } else if (e.key === 'ArrowUp') {
-          e.preventDefault()
-          if (this.historyIndex > 0) {
-            this.historyIndex--
-            this.inputEl.value = this.commandHistory[this.historyIndex]
-          }
-        } else if (e.key === 'ArrowDown') {
-          e.preventDefault()
-          if (this.historyIndex < this.commandHistory.length - 1) {
-            this.historyIndex++
-            this.inputEl.value = this.commandHistory[this.historyIndex]
-          } else {
-            this.historyIndex = this.commandHistory.length
-            this.inputEl.value = ''
-          }
-        }
-      })
+        })
+      }
+    } catch (err) {
+      console.error('[MudTerminal] Failed to initialize:', err)
     }
   },
 
@@ -105,7 +114,8 @@ const MudTerminal = {
 
     this.channel = this.socket.channel('game:lobby', {})
 
-    this.channel.join()
+    this.channel
+      .join()
       .receive('ok', () => {
         this.setConnectionState('connected')
         this.appendOutput('Connected to Loka.', 'system')
@@ -162,8 +172,7 @@ const MudTerminal = {
 
     // Broadcast messages
     this.channel.on('broadcast', (data) => {
-      const cls = data.type === 'emergency' ? 'error' :
-                  data.type === 'event' ? 'chat' : 'system'
+      const cls = data.type === 'emergency' ? 'error' : data.type === 'event' ? 'chat' : 'system'
       if (data.text) this.appendOutput(data.text, cls)
     })
 
@@ -209,7 +218,7 @@ const MudTerminal = {
 
   appendOutput(text, className = '') {
     const lines = text.split('\n')
-    lines.forEach(line => {
+    lines.forEach((line) => {
       const div = document.createElement('div')
       div.className = 'terminal-line' + (className ? ` ${className}` : '')
       div.textContent = line
@@ -237,18 +246,18 @@ const MudTerminal = {
 
     // Entities
     const entities = room.entities || []
-    entities.forEach(e => {
+    entities.forEach((e) => {
       this.appendOutput(`${e.name} is here.`)
     })
 
     // Items
     const items = room.items || []
-    items.forEach(i => {
+    items.forEach((i) => {
       this.appendOutput(`${i.name} lies on the ground.`)
     })
 
     // Exits
-    const exits = (room.exits || []).filter(e => e.destination_id).map(e => e.direction)
+    const exits = (room.exits || []).filter((e) => e.destination_id).map((e) => e.direction)
     this.appendOutput('')
     this.appendOutput(`Exits: ${exits.length ? exits.join(', ') : 'none'}`)
   },
@@ -289,7 +298,7 @@ const MudTerminal = {
   },
 
   updateExits(exits) {
-    const dirs = (exits || []).filter(e => e.destination_id).map(e => e.direction)
+    const dirs = (exits || []).filter((e) => e.destination_id).map((e) => e.direction)
     if (this.exitsEl) this.exitsEl.textContent = `Exits: ${dirs.length ? dirs.join(', ') : 'none'}`
   },
 
@@ -313,7 +322,7 @@ const MudTerminal = {
       this.socket = null
     }
     this.helper.destroy()
-  }
+  },
 }
 
 export default MudTerminal

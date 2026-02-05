@@ -1,0 +1,175 @@
+/* =============================================================================
+   World Builder Tools - Tool Execution UI, Tool Blocks, Progress Indicators
+   ============================================================================= */
+
+/* ---- Tool Execution Indicator ---- */
+.current-tool-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, var(--wb-tool-bg-from) 0%, var(--wb-tool-bg-to) 100%);
+  border: 1px solid var(--wb-tool-border);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  color: var(--wb-tool-text);
+  font-size: 0.83rem;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  animation: toolPulse 2s ease-in-out infinite;
+}
+
+@keyframes toolPulse {
+  0%, 100% { border-color: var(--wb-tool-border); box-shadow: 0 0 0 rgba(99, 102, 241, 0); }
+  50% { border-color: var(--wb-tool-border-pulse); box-shadow: 0 0 12px rgba(99, 102, 241, 0.1); }
+}
+
+.current-tool-indicator .hero-icon,
+.current-tool-indicator [class*="hero-"] {
+  color: var(--wb-tool-icon);
+  animation: spin 2s linear infinite;
+}
+
+/* ---- Queue Indicator ---- */
+.chat-queue-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: var(--wb-tool-queue-bg);
+  border: 1px solid var(--wb-tool-queue-border);
+  border-radius: var(--wb-radius-lg);
+  margin: 0 0 8px 0;
+  color: var(--wb-tool-queue-text);
+  font-size: 0.78rem;
+}
+
+.chat-queue-indicator .btn {
+  padding: 2px 6px;
+  min-height: unset;
+  border-radius: var(--wb-radius-md);
+}
+
+/* ---- Tool Use Blocks ---- */
+.tool-use {
+  background: var(--wb-tool-use-bg);
+  border: 1px solid var(--wb-tool-use-border);
+  border-radius: var(--wb-radius-lg);
+  padding: 10px 12px;
+  margin-top: 8px;
+  transition: border-color 0.15s;
+}
+
+.tool-use:hover {
+  border-color: var(--wb-tool-use-border-hover);
+}
+
+.tool-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--wb-tool-header);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.tool-header .hero-icon,
+.tool-header [class*="hero-"] {
+  color: var(--wb-tool-header-icon);
+}
+
+.tool-name {
+  color: var(--wb-tool-name);
+  font-weight: 600;
+}
+
+.tool-input code,
+.tool-result-content code {
+  display: block;
+  background: var(--wb-tool-code-bg);
+  padding: 8px 10px;
+  border-radius: var(--wb-radius-md);
+  overflow-x: auto;
+  color: var(--wb-tool-code-text);
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 0.7rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  border: 1px solid var(--wb-tool-code-border);
+  margin-top: 6px;
+}
+
+.tool-result-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+/* Tool progress indicator */
+.tool-progress {
+  margin-left: auto;
+  padding: 2px 10px;
+  background: rgba(99, 102, 241, 0.15);
+  border-radius: 10px;
+  font-size: 0.68rem;
+  color: var(--wb-indigo-text);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* Collapsible tool results */
+.tool-result-details {
+  margin-top: 6px;
+}
+
+.tool-result-details summary {
+  cursor: pointer;
+  list-style: none;
+  position: relative;
+}
+
+.tool-result-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.tool-result-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tool-result-summary code {
+  display: block;
+  background: var(--wb-tool-code-bg);
+  padding: 8px 10px;
+  border-radius: var(--wb-radius-md);
+  overflow: hidden;
+  color: var(--wb-tool-code-text);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  border: 1px solid var(--wb-tool-code-border);
+}
+
+.show-more-hint {
+  font-size: 0.68rem;
+  color: var(--wb-indigo-text);
+  cursor: pointer;
+  padding: 2px 0;
+  font-weight: 500;
+}
+
+.show-more-hint:hover {
+  color: var(--wb-indigo-text-bright);
+}
+
+.tool-result-details[open] .show-more-hint {
+  display: none;
+}
+
+.tool-result-details[open] .tool-result-summary code {
+  display: none;
+}

@@ -5,24 +5,41 @@ const DEBOUNCE_MS = 300
 // and only loaded when the script editor is actually opened.
 const CodeMirrorEditor = {
   async mounted() {
-    // Show loading state while CodeMirror loads
-    this.el.style.opacity = '0.5'
-
     try {
+      // Show loading state while CodeMirror loads
+      if (!this.el) {
+        console.warn('[CodeMirrorEditor] Element not found')
+        return
+      }
+      this.el.style.opacity = '0.5'
       const [
-        { EditorView, lineNumbers, highlightActiveLine, highlightSpecialChars, drawSelection, dropCursor, keymap },
+        {
+          EditorView,
+          lineNumbers,
+          highlightActiveLine,
+          highlightSpecialChars,
+          drawSelection,
+          dropCursor,
+          keymap,
+        },
         { history, defaultKeymap, historyKeymap },
-        { syntaxHighlighting, defaultHighlightStyle, bracketMatching, indentOnInput, StreamLanguage },
+        {
+          syntaxHighlighting,
+          defaultHighlightStyle,
+          bracketMatching,
+          indentOnInput,
+          StreamLanguage,
+        },
         { closeBrackets, closeBracketsKeymap },
         { highlightSelectionMatches },
-        { oneDark }
+        { oneDark },
       ] = await Promise.all([
-        import("@codemirror/view"),
-        import("@codemirror/commands"),
-        import("@codemirror/language"),
-        import("@codemirror/autocomplete"),
-        import("@codemirror/search"),
-        import("@codemirror/theme-one-dark")
+        import('@codemirror/view'),
+        import('@codemirror/commands'),
+        import('@codemirror/language'),
+        import('@codemirror/autocomplete'),
+        import('@codemirror/search'),
+        import('@codemirror/theme-one-dark'),
       ])
 
       // Bail if destroyed while loading
@@ -30,12 +47,17 @@ const CodeMirrorEditor = {
 
       // Define Elixir-like tokenizer via StreamLanguage
       const elixirLang = StreamLanguage.define({
-        startState() { return { inString: false, stringChar: null } },
+        startState() {
+          return { inString: false, stringChar: null }
+        },
         token(stream, state) {
           if (stream.eatSpace()) return null
 
           // Comments
-          if (stream.match('#')) { stream.skipToEnd(); return 'comment' }
+          if (stream.match('#')) {
+            stream.skipToEnd()
+            return 'comment'
+          }
 
           // Strings
           if (stream.match('"""') || stream.match("'''")) {
@@ -59,10 +81,20 @@ const CodeMirrorEditor = {
           if (stream.match(/@[a-z_][a-z0-9_]*/)) return 'meta'
 
           // Numbers
-          if (stream.match(/0x[0-9a-fA-F]+/) || stream.match(/0b[01]+/) || stream.match(/\d+(\.\d+)?/)) return 'number'
+          if (
+            stream.match(/0x[0-9a-fA-F]+/) ||
+            stream.match(/0b[01]+/) ||
+            stream.match(/\d+(\.\d+)?/)
+          )
+            return 'number'
 
           // Keywords
-          if (stream.match(/\b(def|defp|defmodule|defmacro|defstruct|defprotocol|defimpl|do|end|if|else|unless|case|cond|when|and|or|not|in|fn|with|for|raise|try|catch|rescue|after|receive|send|import|alias|require|use|true|false|nil)\b/)) return 'keyword'
+          if (
+            stream.match(
+              /\b(def|defp|defmodule|defmacro|defstruct|defprotocol|defimpl|do|end|if|else|unless|case|cond|when|and|or|not|in|fn|with|for|raise|try|catch|rescue|after|receive|send|import|alias|require|use|true|false|nil)\b/
+            )
+          )
+            return 'keyword'
 
           // Identifiers with ! or ?
           if (stream.match(/[a-z_][a-z0-9_]*[!?]?/)) return 'variableName'
@@ -75,7 +107,7 @@ const CodeMirrorEditor = {
 
           stream.next()
           return null
-        }
+        },
       })
 
       const initialValue = this.el.dataset.value || ''
@@ -104,7 +136,7 @@ const CodeMirrorEditor = {
               clearTimeout(this._debounceTimer)
               this._debounceTimer = setTimeout(() => {
                 this.pushEvent('script_source_changed', {
-                  source: update.state.doc.toString()
+                  source: update.state.doc.toString(),
                 })
               }, DEBOUNCE_MS)
             }
@@ -121,9 +153,12 @@ const CodeMirrorEditor = {
       // Remove loading state
       this.el.style.opacity = ''
     } catch (err) {
-      console.error('[CodeMirror] Failed to load editor:', err)
-      this.el.style.opacity = '1'
-      this.el.innerHTML = '<div class="p-4 text-red-400">Failed to load code editor. Try refreshing.</div>'
+      console.error('[CodeMirrorEditor] Failed to initialize:', err)
+      if (this.el) {
+        this.el.style.opacity = '1'
+        this.el.innerHTML =
+          '<div class="p-4 text-red-400">Failed to load code editor. Try refreshing.</div>'
+      }
     }
   },
 
@@ -131,7 +166,7 @@ const CodeMirrorEditor = {
     this._destroyed = true
     clearTimeout(this._debounceTimer)
     if (this.view) this.view.destroy()
-  }
+  },
 }
 
 export default CodeMirrorEditor

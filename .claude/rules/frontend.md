@@ -10,14 +10,16 @@ This context auto-loads when working in `assets/`.
 
 | Category | Location |
 |----------|----------|
-| CSS variables | `assets/css/variables.css` (WB design tokens) |
+| CSS entry | `assets/css/app.css` (imports + daisyUI theme config) |
+| CSS tokens | `assets/css/variables.css` (WB design tokens) |
+| CSS config | `assets/css/tailwind-config.css` (@theme block, variants) |
+| CSS WB | `assets/css/world-builder/*.css` (domain-specific styles) |
 | Auth CSS | `assets/css/admin-auth.css` |
-| Main CSS | `assets/css/app.css` (Tailwind + WB custom CSS) |
 | JS hooks | `assets/js/hooks/*.js` (one per hook, re-exported in `index.js`) |
-| JS utilities | `assets/js/world_builder/*.js` (HookHelper, KeyboardManager) |
+| JS utilities | `assets/js/world_builder/*.js` (HookHelper, KeyboardManager, constants) |
 | Entry point | `assets/js/app.js` |
 | Tests | `assets/js/world_builder/__tests__/*.test.js` |
-| Vendor libs | `assets/vendor/` (heroicons, daisyui, topbar) |
+| Vendor libs | `assets/vendor/` (heroicons, daisyui, topbar - versions in `versions.json`) |
 
 ## Hook Architecture
 
@@ -132,12 +134,28 @@ const MyHook = {
 
 **Transitions:** `--wb-transition-fast` (0.15s ease) / `-normal` (0.2s ease).
 
+### CSS File Organization
+
+CSS is split into domain-specific modules for LLM digestibility (each file <300 lines ideal):
+
+| File | Purpose |
+|------|---------|
+| `app.css` | Entry point with @import statements + daisyUI theme config |
+| `tailwind-config.css` | @theme block, custom variants, LiveView loading states |
+| `world-builder/layout.css` | Grid, panels, resize handles, collapsed states |
+| `world-builder/terminal.css` | Terminal/console styles, connection indicators |
+| `world-builder/chat.css` | Chat panel, messages, streaming, welcome state |
+| `world-builder/editors.css` | Quest/cutscene/dialogue/script editor styles |
+| `world-builder/modals.css` | Modal overlay, animations, settings, audit log |
+| `world-builder/tools.css` | Tool execution UI, tool blocks, progress indicators |
+
 ### CSS Placement Rules
 
 - **Admin dashboard:** Inline Tailwind + daisyUI only. No custom CSS classes.
-- **World Builder:** Custom CSS in `app.css` for complex UI (pseudo-elements, gradients, scrollbars). Simple leaf components use inline Tailwind.
-- **CSS inlining:** `app.css` is being reduced by inlining simple classes into HEEx templates as Tailwind utilities. CSS that MUST stay: pseudo-elements, animations/keyframes, scrollbar styles, JS-applied classes, CSS var grid layout, media queries.
-- Don't duplicate CSS definitions. Search for existing selectors first.
+- **World Builder:** Custom CSS in `world-builder/*.css` files for complex UI (pseudo-elements, gradients, scrollbars). Simple leaf components use inline Tailwind.
+- **New CSS:** Add to the appropriate domain file. If >300 lines, consider splitting further.
+- **CSS that MUST stay in CSS files:** pseudo-elements, animations/keyframes, scrollbar styles, JS-applied classes, CSS var grid layout, media queries.
+- Don't duplicate CSS definitions. Search existing files first with `grep -r "selector-name" assets/css/`.
 - **Never use duplicate `class` attributes** on the same element. In HEEx, only the last `class=` is applied -- others are silently dropped. Merge into a single `class={[...]}` list.
 
 ## LiveView Component Pattern
@@ -281,25 +299,19 @@ keyboardManager.register('wb-save', 'mod+s', () => save(), { skipInputs: true })
 | **ConsoleOutput** | -- | `download_text` |
 | **ScrollBottom** | -- | -- |
 
-## app.css Section Map
+## CSS File Map
 
-| Lines | Section |
-|-------|---------|
-| 1-65 | Section map comment, Tailwind config, plugins, daisyUI dark/light themes |
-| ~67-150 | daisyUI theme plugins (dark + light color definitions) |
-| ~152-310 | `@theme` -- WB design token exports to Tailwind (colors, fonts, radius, shadows) |
-| ~312-320 | LiveView custom variants (phx-loading, dark mode) |
-| ~322-340 | LiveView wrapper display fix, loading states |
-| ~342-375 | Admin dashboard notes, reduced motion, skip-link (a11y) |
-| ~376-525 | World Builder main container, grid, resize handles, panels, viewport |
-| ~527-695 | Terminal panel, console overlay, collapsed states |
-| ~697-762 | Panel tabs, scrollbar styles, collapsed console |
-| ~764-1018 | Modal overlay/content, animations (fadeIn, slideIn), quest/cutscene editors |
-| ~1021-1160 | Chat scrollbar, message bubble animation, typography, streaming |
-| ~1162-1238 | Tool execution indicator, code blocks, collapsible results |
-| ~1240-1286 | Quest flow graph type badges (::before pseudo-elements) |
-| ~1288-1310 | Connection status, broadcast messages |
-| ~1313-1403 | Markdown content styles (headings, lists, code, links) |
+Styles are now split into domain-specific files. Here's where to find/add styles:
+
+| File | What to add here |
+|------|------------------|
+| `tailwind-config.css` | @theme tokens, custom variants, LiveView loading states, a11y (skip-link) |
+| `world-builder/layout.css` | Grid layout, panel structure, resize handles, collapsed states, scrollbars |
+| `world-builder/terminal.css` | Terminal lines, connection dots, console overlay |
+| `world-builder/chat.css` | Chat messages, welcome state, quick actions, input area, streaming UI |
+| `world-builder/editors.css` | Quest/cutscene/dialogue/script editors, timeline, template picker |
+| `world-builder/modals.css` | Modal overlay, settings, audit log, git commit, document viewer |
+| `world-builder/tools.css` | Tool execution indicator, tool blocks, queue indicator |
 
 ## Adding a New World Builder Panel
 
@@ -310,6 +322,97 @@ keyboardManager.register('wb-save', 'mod+s', () => save(), { skipInputs: true })
 5. Add `handle_event("toggle_panel", ...)` clause or reuse existing toggle logic
 6. If JS interactivity is needed: create a hook in `assets/js/hooks/`, register in `hooks/index.js`
 7. Add any new CSS variables to `variables.css` with `--wb-` prefix, and corresponding `@theme` token in `app.css`
+
+## Hook Decision Guide
+
+When to create a new JS hook vs using built-in LiveView features:
+
+| Scenario | Use Hook? | Alternative / Pattern |
+|----------|-----------|----------------------|
+| Auto-scroll to bottom | Yes | `ScrollBottom` pattern |
+| Auto-resize textarea | Yes | `ChatTextarea` pattern |
+| Complex canvas rendering | Yes | `Canvas2D*` pattern |
+| Third-party library (CodeMirror, etc.) | Yes | `CodeMirrorEditor` pattern |
+| Phoenix Channel connection | Yes | `MudTerminal` pattern |
+| Panel resize drag | Yes | `PanelResize` pattern |
+| Simple click handler | No | `phx-click` |
+| Form submission | No | `phx-submit` |
+| State sync with server | No | `pushEvent` / `handleEvent` |
+| Loading states | No | `phx-disable-with`, loading classes |
+| Keyboard shortcuts (simple) | No | `phx-key` |
+| Keyboard shortcuts (complex) | Yes | `KeyboardManager` singleton |
+
+## CSS Class Naming Convention
+
+| Prefix | Scope | Examples |
+|--------|-------|----------|
+| `world-builder-*` | Top-level WB containers | `world-builder-container`, `world-builder-panel` |
+| `panel-*` | Panel system | `panel-resize-handle`, `panel-collapsed`, `panel-content` |
+| `chat-*` | Chat panel | `chat-message`, `chat-input-form`, `chat-welcome` |
+| `quest-*` | Quest editor | `quest-node`, `quest-section`, `quest-input` |
+| `cutscene-*` | Cutscene editor | `cutscene-timeline-*`, `cutscene-editor-lv` |
+| `terminal-*` | MUD terminal | `terminal-line`, `term-connection-dot` |
+| `tool-*` | Tool execution UI | `tool-use`, `tool-header`, `tool-result` |
+| `modal-*` | Modal dialogs | `modal-overlay`, `modal-content`, `modal-fullscreen` |
+| `validation-*` | Validation display | `validation-error`, `validation-warning` |
+
+## Quick Color Reference
+
+Most commonly used design tokens:
+
+| Use Case | CSS Variable | Tailwind Class |
+|----------|--------------|----------------|
+| Panel background | `var(--wb-panel)` | `bg-wb-panel` |
+| Darker panel background | `var(--wb-panel-alt)` | `bg-wb-panel-alt` |
+| Input background | `var(--wb-input)` | `bg-wb-input` |
+| Main text | `var(--wb-text)` | `text-wb-text` |
+| Bright text (headings) | `var(--wb-text-bright)` | `text-wb-text-bright` |
+| Muted text (labels) | `var(--wb-text-muted)` | `text-wb-text-muted` |
+| Dim text (secondary) | `var(--wb-text-dim)` | `text-wb-text-dim` |
+| Faint text (hints) | `var(--wb-text-faint)` | `text-wb-text-faint` |
+| Default border | `var(--wb-border)` | `border-wb-border` |
+| Light border | `var(--wb-border-light)` | `border-wb-border-light` |
+| Accent/interactive | `var(--wb-accent)` | `text-wb-accent` / `bg-wb-accent` |
+| Success state | `var(--wb-success)` | `text-wb-success` |
+| Error state | `var(--wb-error)` | `text-wb-error` |
+| Warning state | `var(--wb-warning)` | `text-wb-warning` |
+| Info state | `var(--wb-info)` | `text-wb-info` |
+
+## JS Utilities Quick Reference
+
+| Utility | Import | Purpose |
+|---------|--------|---------|
+| `HookHelper` | `@/world_builder/HookHelper.js` | Auto-cleanup for listeners/observers/timers |
+| `KeyboardManager` | `@/world_builder/KeyboardManager.js` | Centralized keyboard shortcuts |
+| `UndoManager` | `@/world_builder/UndoManager.js` | Undo/redo stack with persistence |
+| `Canvas2DViewport` | `@/world_builder/Canvas2DViewport.js` | 2D canvas viewport orchestrator |
+| `Canvas2DRenderer` | `@/world_builder/Canvas2DRenderer.js` | Canvas drawing operations |
+| `Canvas2DInteraction` | `@/world_builder/Canvas2DInteraction.js` | Mouse/keyboard interaction |
+| `constants` | `@/world_builder/constants.js` | Shared fallback values for canvas/testing |
+
+## Error Handling in Hooks
+
+All hooks should wrap `mounted()` in a try-catch for defensive error handling:
+
+```javascript
+mounted() {
+  try {
+    this.helper = new HookHelper(this)
+    // ... rest of initialization
+  } catch (err) {
+    console.error('[HookName] Failed to initialize:', err)
+  }
+}
+```
+
+Add null checks for DOM queries:
+```javascript
+this.inputEl = this.el.querySelector('.input')
+if (!this.inputEl) {
+  console.warn('[HookName] Required element .input not found')
+  return
+}
+```
 
 ## Related Skills
 

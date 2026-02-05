@@ -1,0 +1,26 @@
+{
+  "daisyui": {
+    "version": "5.0.0",
+    "updated": "2026-02-04",
+    "source": "https://github.com/saadeghi/daisyui/releases/latest/download/daisyui.js",
+    "update_command": "curl -sLO https://github.com/saadeghi/daisyui/releases/latest/download/daisyui.js"
+  },
+  "daisyui-theme": {
+    "version": "5.0.0",
+    "updated": "2026-02-04",
+    "source": "https://github.com/saadeghi/daisyui/releases/latest/download/daisyui-theme.js",
+    "update_command": "curl -sLO https://github.com/saadeghi/daisyui/releases/latest/download/daisyui-theme.js"
+  },
+  "topbar": {
+    "version": "3.0.0",
+    "updated": "2026-02-04",
+    "source": "https://github.com/buunguyen/topbar",
+    "notes": "Bundled JS progress bar, no npm install needed"
+  },
+  "heroicons": {
+    "version": "2.2.0",
+    "updated": "2026-02-04",
+    "source": "Managed by mix.exs heroicons dependency",
+    "notes": "Tailwind plugin generated from Elixir hex package"
+  }
+}

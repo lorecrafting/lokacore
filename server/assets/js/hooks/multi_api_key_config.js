@@ -7,34 +7,34 @@ const PROVIDER_CONFIG = {
   anthropic: {
     type: 'anthropic',
     endpoint: 'https://api.anthropic.com/v1/messages',
-    model: 'claude-3-5-haiku-20241022'
+    model: 'claude-3-5-haiku-20241022',
   },
   openai: {
     type: 'openai-compatible',
     endpoint: 'https://api.openai.com/v1/chat/completions',
-    model: 'gpt-4o-mini'
+    model: 'gpt-4o-mini',
   },
   deepseek: {
     type: 'openai-compatible',
     endpoint: 'https://api.deepseek.com/chat/completions',
-    model: 'deepseek-chat'
+    model: 'deepseek-chat',
   },
   gemini: {
     type: 'gemini',
     endpoint:
       'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent',
-    model: 'gemini-1.5-pro'
+    model: 'gemini-1.5-pro',
   },
   glm: {
     type: 'openai-compatible',
     endpoint: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
-    model: 'glm-4-flash'
+    model: 'glm-4-flash',
   },
   minimax: {
     type: 'openai-compatible',
     endpoint: 'https://api.minimax.chat/v1/text/chatcompletion_v2',
-    model: 'MiniMax-Text-01'
-  }
+    model: 'MiniMax-Text-01',
+  },
 }
 
 const VALIDATION_TIMEOUT_MS = 10000
@@ -42,50 +42,59 @@ const VALIDATION_TIMEOUT_MS = 10000
 // Multi-Provider API Key Configuration - BYOK for multiple AI providers
 const MultiAPIKeyConfig = {
   mounted() {
-    this.helper = new HookHelper(this)
-    this.abortController = new AbortController()
-    const providers = Object.keys(PROVIDER_CONFIG)
+    try {
+      this.helper = new HookHelper(this)
+      this.abortController = new AbortController()
+      const providers = Object.keys(PROVIDER_CONFIG)
 
-    // Check stored keys for all providers on mount
-    providers.forEach((provider) => {
-      try {
-        this.validateStoredKey(provider)
-      } catch (e) {
-        console.error('[MultiAPIKeyConfig] Error validating stored key for', provider, e)
-        this.pushEvent('api_key_status', { provider: provider, status: 'error' })
+      if (!this.el) {
+        console.warn('[MultiAPIKeyConfig] Element not found')
+        return
       }
-    })
 
-    // Use event delegation to handle clicks on buttons,
-    // which survives DOM updates from LiveView
-    this.helper.on(this.el, 'click', (e) => {
-      const saveBtn = e.target.closest('.api-key-save')
-      const clearBtn = e.target.closest('.api-key-clear')
-
-      if (saveBtn) {
-        const provider = saveBtn.dataset.provider
-        const input = this.el.querySelector(`#api-key-input-${provider}`)
-        const key = input?.value?.trim()
-
-        if (key) {
-          this.saveAndValidateKey(provider, key)
+      // Check stored keys for all providers on mount
+      providers.forEach((provider) => {
+        try {
+          this.validateStoredKey(provider)
+        } catch (e) {
+          console.error('[MultiAPIKeyConfig] Error validating stored key for', provider, e)
+          this.pushEvent('api_key_status', { provider: provider, status: 'error' })
         }
-      } else if (clearBtn) {
-        const provider = clearBtn.dataset.provider
-        this.clearKey(provider)
-      }
-    })
+      })
 
-    // Handle enter key in inputs
-    this.helper.on(this.el, 'keypress', (e) => {
-      if (e.key === 'Enter' && e.target.classList.contains('api-key-input')) {
-        const provider = e.target.dataset.provider
-        const key = e.target.value.trim()
-        if (key) {
-          this.saveAndValidateKey(provider, key)
+      // Use event delegation to handle clicks on buttons,
+      // which survives DOM updates from LiveView
+      this.helper.on(this.el, 'click', (e) => {
+        const saveBtn = e.target.closest('.api-key-save')
+        const clearBtn = e.target.closest('.api-key-clear')
+
+        if (saveBtn) {
+          const provider = saveBtn.dataset.provider
+          const input = this.el.querySelector(`#api-key-input-${provider}`)
+          const key = input?.value?.trim()
+
+          if (key) {
+            this.saveAndValidateKey(provider, key)
+          }
+        } else if (clearBtn) {
+          const provider = clearBtn.dataset.provider
+          this.clearKey(provider)
         }
-      }
-    })
+      })
+
+      // Handle enter key in inputs
+      this.helper.on(this.el, 'keypress', (e) => {
+        if (e.key === 'Enter' && e.target.classList.contains('api-key-input')) {
+          const provider = e.target.dataset.provider
+          const key = e.target.value.trim()
+          if (key) {
+            this.saveAndValidateKey(provider, key)
+          }
+        }
+      })
+    } catch (err) {
+      console.error('[MultiAPIKeyConfig] Failed to initialize:', err)
+    }
   },
 
   async saveAndValidateKey(provider, key) {
@@ -179,13 +188,13 @@ const MultiAPIKeyConfig = {
         signal,
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${key}`
+          Authorization: `Bearer ${key}`,
         },
         body: JSON.stringify({
           model,
           max_tokens: 10,
-          messages: [{ role: 'user', content: 'Hi' }]
-        })
+          messages: [{ role: 'user', content: 'Hi' }],
+        }),
       })
       return response.ok
     } catch (error) {
@@ -204,13 +213,13 @@ const MultiAPIKeyConfig = {
           'Content-Type': 'application/json',
           'x-api-key': key,
           'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true'
+          'anthropic-dangerous-direct-browser-access': 'true',
         },
         body: JSON.stringify({
           model,
           max_tokens: 10,
-          messages: [{ role: 'user', content: 'Hi' }]
-        })
+          messages: [{ role: 'user', content: 'Hi' }],
+        }),
       })
       return response.ok
     } catch (error) {
@@ -227,12 +236,12 @@ const MultiAPIKeyConfig = {
         method: 'POST',
         signal,
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           contents: [{ parts: [{ text: 'Hi' }] }],
-          generationConfig: { maxOutputTokens: 10 }
-        })
+          generationConfig: { maxOutputTokens: 10 },
+        }),
       })
 
       if (!response.ok) {
@@ -288,7 +297,7 @@ const MultiAPIKeyConfig = {
   destroyed() {
     this.abortController.abort()
     this.helper.destroy()
-  }
+  },
 }
 
 export default MultiAPIKeyConfig

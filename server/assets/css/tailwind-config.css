@@ -1,0 +1,253 @@
+/* =============================================================================
+   Tailwind Configuration - Theme Exports & LiveView Variants
+   ============================================================================= */
+
+/* Extend Tailwind with World Builder design tokens
+   Usage: bg-wb-panel, text-wb-text-muted, border-wb-border, text-wb-sm, rounded-wb-md, font-wb-mono
+   Spacing: Use standard Tailwind (p-1=4px, p-2=8px, p-3=12px, p-4=16px) */
+@theme {
+  /* Colors -> bg-wb-*, text-wb-*, border-wb-* */
+  --color-wb-bg: var(--wb-bg);
+  --color-wb-surface: var(--wb-surface);
+  --color-wb-panel: var(--wb-panel);
+  --color-wb-panel-alt: var(--wb-panel-alt);
+  --color-wb-panel-header: var(--wb-panel-header);
+  --color-wb-input: var(--wb-input);
+  --color-wb-hover: var(--wb-hover);
+  --color-wb-toolbar: var(--wb-toolbar);
+  --color-wb-toolbar-border: var(--wb-toolbar-border);
+  --color-wb-border: var(--wb-border);
+  --color-wb-border-light: var(--wb-border-light);
+  --color-wb-border-dark: var(--wb-border-dark);
+  --color-wb-text: var(--wb-text);
+  --color-wb-text-bright: var(--wb-text-bright);
+  --color-wb-text-muted: var(--wb-text-muted);
+  --color-wb-text-dim: var(--wb-text-dim);
+  --color-wb-text-faint: var(--wb-text-faint);
+  --color-wb-accent: var(--wb-accent);
+  --color-wb-accent-hover: var(--wb-accent-hover);
+  --color-wb-accent-gradient-from: var(--wb-accent-gradient-from);
+  --color-wb-accent-gradient-to: var(--wb-accent-gradient-to);
+  --color-wb-success: var(--wb-success);
+  --color-wb-error: var(--wb-error);
+  --color-wb-warning: var(--wb-warning);
+  --color-wb-info: var(--wb-info);
+  --color-wb-resize: var(--wb-resize);
+
+  /* Terminal colors -> bg-wb-term-*, text-wb-term-*, border-wb-term-* */
+  --color-wb-term-status: var(--wb-term-status-bg);
+  --color-wb-term-input: var(--wb-term-input-bg);
+  --color-wb-term-border: var(--wb-term-border);
+  --color-wb-term-prompt: var(--wb-term-prompt);
+  --color-wb-term-text: var(--wb-term-text);
+  --color-wb-term-placeholder: var(--wb-term-placeholder);
+
+  /* Quest flow node colors -> bg-wb-quest-*, text-wb-quest-*, border-wb-quest-* */
+  --color-wb-quest-start: var(--wb-quest-start);
+  --color-wb-quest-start-hover: var(--wb-quest-start-hover);
+  --color-wb-quest-objective: var(--wb-quest-objective);
+  --color-wb-quest-fail: var(--wb-quest-fail);
+  --color-wb-quest-special: var(--wb-quest-special);
+  --color-wb-quest-pass: var(--wb-quest-pass);
+  --color-wb-quest-pass-alt: var(--wb-quest-pass-alt);
+
+  /* Log level colors -> text-wb-log-* */
+  --color-wb-log-error: var(--wb-log-error);
+  --color-wb-log-info: var(--wb-log-info);
+  --color-wb-log-warn: var(--wb-log-warn);
+  --color-wb-log-success: var(--wb-log-success);
+
+  /* Danger state -> bg-wb-danger-*, text-wb-danger-*, border-wb-danger-* */
+  --color-wb-danger-surface: var(--wb-danger-surface);
+  --color-wb-danger-surface-hover: var(--wb-danger-surface-hover);
+  --color-wb-danger-text: var(--wb-danger-text);
+  --color-wb-danger-border: var(--wb-danger-border);
+
+  /* Success state -> bg-wb-success-*, border-wb-success-* */
+  --color-wb-success-surface: var(--wb-success-surface);
+  --color-wb-success-border: var(--wb-success-border);
+
+  /* Chat panel -> bg-wb-chat-*, text-wb-chat-*, border-wb-chat-* */
+  --color-wb-chat-surface: var(--wb-chat-surface);
+  --color-wb-chat-border: var(--wb-chat-border);
+  --color-wb-chat-text-dim: var(--wb-chat-text-dim);
+  --color-wb-chat-text-faint: var(--wb-chat-text-faint);
+  --color-wb-chat-text-bright: var(--wb-chat-text-bright);
+  --color-wb-chat-msg-gradient-from: var(--wb-chat-msg-gradient-from);
+  --color-wb-chat-msg-gradient-to: var(--wb-chat-msg-gradient-to);
+  --color-wb-chat-welcome-gradient-from: var(--wb-chat-welcome-gradient-from);
+  --color-wb-chat-welcome-gradient-to: var(--wb-chat-welcome-gradient-to);
+  --color-wb-chat-welcome-icon: var(--wb-chat-welcome-icon);
+  --color-wb-chat-user-bg-from: var(--wb-chat-user-bg-from);
+  --color-wb-chat-user-bg-to: var(--wb-chat-user-bg-to);
+  --color-wb-chat-user-border: var(--wb-chat-user-border);
+  --color-wb-chat-user-text: var(--wb-chat-user-text);
+  --color-wb-chat-user-bg: var(--wb-chat-user-bg);
+  --color-wb-chat-code: var(--wb-chat-code);
+  --color-wb-chat-icon-npcs: var(--wb-chat-icon-npcs);
+  --color-wb-chat-icon-quests: var(--wb-chat-icon-quests);
+
+  /* Indigo accent -> text-wb-indigo-*, border-wb-indigo-* */
+  --color-wb-indigo: var(--wb-indigo);
+  --color-wb-indigo-text: var(--wb-indigo-text);
+  --color-wb-indigo-text-bright: var(--wb-indigo-text-bright);
+
+  /* Tool execution UI -> bg-wb-tool-*, text-wb-tool-*, border-wb-tool-* */
+  --color-wb-tool-bg-from: var(--wb-tool-bg-from);
+  --color-wb-tool-bg-to: var(--wb-tool-bg-to);
+  --color-wb-tool-border: var(--wb-tool-border);
+  --color-wb-tool-text: var(--wb-tool-text);
+  --color-wb-tool-border-pulse: var(--wb-tool-border-pulse);
+  --color-wb-tool-icon: var(--wb-tool-icon);
+  --color-wb-tool-use-bg: var(--wb-tool-use-bg);
+  --color-wb-tool-use-border: var(--wb-tool-use-border);
+  --color-wb-tool-use-border-hover: var(--wb-tool-use-border-hover);
+  --color-wb-tool-header: var(--wb-tool-header);
+  --color-wb-tool-header-icon: var(--wb-tool-header-icon);
+  --color-wb-tool-name: var(--wb-tool-name);
+  --color-wb-tool-code-bg: var(--wb-tool-code-bg);
+  --color-wb-tool-code-text: var(--wb-tool-code-text);
+  --color-wb-tool-code-border: var(--wb-tool-code-border);
+  --color-wb-tool-queue-bg: var(--wb-tool-queue-bg);
+  --color-wb-tool-queue-border: var(--wb-tool-queue-border);
+  --color-wb-tool-queue-text: var(--wb-tool-queue-text);
+
+  /* Panel gradient backgrounds */
+  --color-wb-panel-gradient-from: var(--wb-panel-gradient-from);
+  --color-wb-panel-gradient-to: var(--wb-panel-gradient-to);
+  --color-wb-editor-gradient-from: var(--wb-editor-gradient-from);
+  --color-wb-editor-gradient-to: var(--wb-editor-gradient-to);
+
+  /* Accent hover gradient */
+  --color-wb-accent-hover-gradient-from: var(--wb-accent-hover-gradient-from);
+  --color-wb-accent-hover-gradient-to: var(--wb-accent-hover-gradient-to);
+
+  /* Quest node */
+  --color-wb-quest-node-border: var(--wb-quest-node-border);
+
+  /* Skip link (accessibility) */
+  --color-wb-skip-bg: var(--wb-skip-bg);
+  --color-wb-skip-text: var(--wb-skip-text);
+
+  /* Warning state surfaces */
+  --color-wb-warning-surface: var(--wb-warning-surface);
+
+  /* Mock state tags */
+  --color-wb-mock-tag-active: var(--wb-mock-tag-active);
+  --color-wb-mock-tag-completed: var(--wb-mock-tag-completed);
+  --color-wb-mock-tag-item: var(--wb-mock-tag-item);
+  --color-wb-mock-tag-flag: var(--wb-mock-tag-flag);
+
+  /* Template UI */
+  --color-wb-template-selected: var(--wb-template-selected);
+
+  /* Font sizes -> text-wb-xs, text-wb-sm, text-wb-base, text-wb-lg */
+  --text-wb-xs: var(--wb-font-size-xs);
+  --text-wb-sm: var(--wb-font-size-sm);
+  --text-wb-base: var(--wb-font-size-base);
+  --text-wb-lg: var(--wb-font-size-lg);
+
+  /* Font families -> font-wb, font-wb-mono */
+  --font-wb: var(--wb-font);
+  --font-wb-mono: var(--wb-font-mono);
+
+  /* Border radius -> rounded-wb-sm, rounded-wb-md, rounded-wb-lg */
+  --radius-wb-sm: var(--wb-radius-sm);
+  --radius-wb-md: var(--wb-radius-md);
+  --radius-wb-lg: var(--wb-radius-lg);
+
+  /* Shadows -> shadow-wb-sm, shadow-wb-md, shadow-wb-lg */
+  --shadow-wb-sm: var(--wb-shadow-sm);
+  --shadow-wb-md: var(--wb-shadow-md);
+  --shadow-wb-lg: var(--wb-shadow-lg);
+}
+
+/* Add variants based on LiveView classes */
+@custom-variant phx-click-loading (.phx-click-loading&, .phx-click-loading &);
+@custom-variant phx-submit-loading (.phx-submit-loading&, .phx-submit-loading &);
+@custom-variant phx-change-loading (.phx-change-loading&, .phx-change-loading &);
+
+/* Use the data attribute for dark mode  */
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+/* Make LiveView wrapper divs transparent for layout */
+[data-phx-session], [data-phx-teleported-src] { display: contents }
+
+/* Loading state styles for async operations */
+.phx-click-loading {
+  opacity: 0.6;
+  pointer-events: none;
+  cursor: wait;
+}
+
+.phx-submit-loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Admin auth page styles are in admin-auth.css */
+/* ========================================
+   ADMIN DASHBOARD STYLES
+   ========================================
+
+   IMPORTANT: Tailwind v4 + daisyUI Compatibility
+   ----------------------------------------------
+   DO NOT use @apply with daisyUI component classes!
+
+   daisyUI component classes (badge, btn, card, table, alert,
+   toggle, menu, navbar, etc.) CANNOT be used with @apply.
+   They must be used directly in HTML templates.
+
+   @apply is ONLY for Tailwind utility classes like:
+   - Layout: flex, grid, block, hidden
+   - Spacing: p-4, m-2, gap-4
+   - Typography: text-sm, font-bold
+   - Colors: text-red-500, bg-base-200
+
+   BAD:  .my-button { @apply btn btn-primary; }
+   GOOD: <button class="btn btn-primary">
+
+   ======================================== */
+
+/* Admin CSS has been inlined to Tailwind utilities in templates */
+
+
+/* ========================================
+   REDUCED MOTION SUPPORT (Accessibility)
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ========================================
+   SKIP NAVIGATION LINK (Accessibility)
+   ======================================== */
+
+.skip-link {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.skip-link:focus {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: auto;
+  height: auto;
+  padding: 0.5rem 1rem;
+  background: var(--wb-skip-bg);
+  color: var(--wb-skip-text);
+  z-index: 9999;
+  text-decoration: underline;
+}
+
+/* .sr-only: Use Tailwind's built-in sr-only utility class */
