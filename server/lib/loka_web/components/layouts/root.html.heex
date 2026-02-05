@@ -45,15 +45,9 @@
           {@current_scope.player.email}
         </li>
         <li>
-          <.link href={~p"/players/settings"}>Settings</.link>
-        </li>
-        <li>
           <.link href={~p"/players/log-out"} method="delete">Log out</.link>
         </li>
       <% else %>
-        <li>
-          <.link href={~p"/players/register"}>Register</.link>
-        </li>
         <li>
           <.link href={~p"/players/log-in"}>Log in</.link>
         </li>

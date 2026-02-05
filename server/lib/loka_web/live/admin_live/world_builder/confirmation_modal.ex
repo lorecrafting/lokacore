@@ -40,36 +40,49 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ConfirmationModal do
       aria-labelledby="confirmation-title"
     >
       <div
-        class="modal-content"
-        style="max-width: 400px;"
+        class="modal-content max-w-[400px]"
         phx-click-away={@on_cancel}
       >
-        <div class="modal-header">
-          <h3 id="confirmation-title">{@modal.title}</h3>
-          <button phx-click={@on_cancel} class="modal-close">&times;</button>
+        <div class="flex items-center justify-between p-4 border-b border-wb-border">
+          <h3 id="confirmation-title" class="m-0 text-wb-text-bright text-base font-semibold">
+            {@modal.title}
+          </h3>
+          <button
+            phx-click={@on_cancel}
+            class="bg-transparent border-0 text-wb-text-muted text-2xl cursor-pointer p-0 w-8 h-8 flex items-center justify-center rounded-wb-sm transition-all hover:bg-wb-border hover:text-wb-text-bright"
+          >
+            &times;
+          </button>
         </div>
-        <div style="padding: 1rem;">
-          <p style="margin: 0 0 1rem 0; color: var(--wb-text);">{@modal.message}</p>
+        <div class="p-4">
+          <p class="m-0 mb-4 text-wb-text">{@modal.message}</p>
           <p
             :if={@modal[:warning]}
-            style="margin: 0 0 1rem 0; color: var(--wb-warning); font-size: 0.85rem;"
+            class="m-0 mb-4 text-wb-warning text-[0.85rem]"
           >
             <.icon
               name="hero-exclamation-triangle"
-              class="size-4"
-              style="display: inline; vertical-align: middle;"
+              class="size-4 inline align-middle"
             />
             {@modal.warning}
           </p>
         </div>
-        <div class="modal-footer">
-          <button type="button" phx-click={@on_cancel} class="btn btn-secondary">
+        <div class="flex gap-2 justify-end pt-4 border-t border-wb-border mt-4">
+          <button
+            type="button"
+            phx-click={@on_cancel}
+            class="px-4 py-2 border-none rounded-wb-sm text-wb-base cursor-pointer transition-all duration-100 bg-wb-border text-wb-text hover:bg-wb-border-light hover:text-wb-text-bright"
+          >
             Cancel
           </button>
           <button
             type="button"
             phx-click={@on_confirm}
-            class={["btn", (@modal[:danger] && "btn-danger") || "btn-primary"]}
+            class={[
+              "px-4 py-2 border-none rounded-wb-sm text-wb-base cursor-pointer transition-all duration-100",
+              (@modal[:danger] && "bg-wb-error text-white hover:bg-wb-error") ||
+                "bg-wb-accent text-white hover:bg-wb-accent-hover"
+            ]}
           >
             {@modal[:confirm_text] || "Confirm"}
           </button>

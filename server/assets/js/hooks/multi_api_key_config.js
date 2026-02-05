@@ -1,11 +1,53 @@
+import { HookHelper } from '../world_builder/HookHelper.js'
+
+// Provider configuration for API key validation
+// Each entry defines the endpoint, model, and validation type.
+// 'openai-compatible' providers share the same Bearer-auth chat/completions format.
+const PROVIDER_CONFIG = {
+  anthropic: {
+    type: 'anthropic',
+    endpoint: 'https://api.anthropic.com/v1/messages',
+    model: 'claude-3-5-haiku-20241022'
+  },
+  openai: {
+    type: 'openai-compatible',
+    endpoint: 'https://api.openai.com/v1/chat/completions',
+    model: 'gpt-4o-mini'
+  },
+  deepseek: {
+    type: 'openai-compatible',
+    endpoint: 'https://api.deepseek.com/chat/completions',
+    model: 'deepseek-chat'
+  },
+  gemini: {
+    type: 'gemini',
+    endpoint:
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent',
+    model: 'gemini-1.5-pro'
+  },
+  glm: {
+    type: 'openai-compatible',
+    endpoint: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
+    model: 'glm-4-flash'
+  },
+  minimax: {
+    type: 'openai-compatible',
+    endpoint: 'https://api.minimax.chat/v1/text/chatcompletion_v2',
+    model: 'MiniMax-Text-01'
+  }
+}
+
+const VALIDATION_TIMEOUT_MS = 10000
+
 // Multi-Provider API Key Configuration - BYOK for multiple AI providers
 const MultiAPIKeyConfig = {
   mounted() {
+    this.helper = new HookHelper(this)
     this.abortController = new AbortController()
-    const providers = ['anthropic', 'openai', 'deepseek', 'gemini', 'glm', 'minimax']
+    const providers = Object.keys(PROVIDER_CONFIG)
 
     // Check stored keys for all providers on mount
-    providers.forEach(provider => {
+    providers.forEach((provider) => {
       try {
         this.validateStoredKey(provider)
       } catch (e) {
@@ -16,7 +58,7 @@ const MultiAPIKeyConfig = {
 
     // Use event delegation to handle clicks on buttons,
     // which survives DOM updates from LiveView
-    this.handleClick = (e) => {
+    this.helper.on(this.el, 'click', (e) => {
       const saveBtn = e.target.closest('.api-key-save')
       const clearBtn = e.target.closest('.api-key-clear')
 
@@ -32,11 +74,10 @@ const MultiAPIKeyConfig = {
         const provider = clearBtn.dataset.provider
         this.clearKey(provider)
       }
-    }
-    this.el.addEventListener('click', this.handleClick)
+    })
 
     // Handle enter key in inputs
-    this.handleKeypress = (e) => {
+    this.helper.on(this.el, 'keypress', (e) => {
       if (e.key === 'Enter' && e.target.classList.contains('api-key-input')) {
         const provider = e.target.dataset.provider
         const key = e.target.value.trim()
@@ -44,8 +85,7 @@ const MultiAPIKeyConfig = {
           this.saveAndValidateKey(provider, key)
         }
       }
-    }
-    this.el.addEventListener('keypress', this.handleKeypress)
+    })
   },
 
   async saveAndValidateKey(provider, key) {
@@ -73,7 +113,9 @@ const MultiAPIKeyConfig = {
       } else {
         // Still mark as configured but invalid status
         this.pushEvent('api_key_validated', { provider, status: 'invalid' })
-        console.warn(`[MultiAPIKeyConfig] API key for ${provider} was saved but validation failed. Check your key.`)
+        console.warn(
+          `[MultiAPIKeyConfig] API key for ${provider} was saved but validation failed. Check your key.`
+        )
       }
     } catch (error) {
       console.error(`[MultiAPIKeyConfig] API key validation failed for ${provider}:`, error)
@@ -91,30 +133,73 @@ const MultiAPIKeyConfig = {
   },
 
   async validateKey(provider, key) {
-    // Provider-specific validation
-    switch (provider) {
-      case 'anthropic':
-        return this.validateAnthropicKey(key)
-      case 'openai':
-        return this.validateOpenAIKey(key)
-      case 'deepseek':
-        return this.validateDeepSeekKey(key)
-      case 'gemini':
-        return this.validateGeminiKey(key)
-      case 'glm':
-        return this.validateGLMKey(key)
-      case 'minimax':
-        return this.validateMinimaxKey(key)
-      default:
-        return false
+    const config = PROVIDER_CONFIG[provider]
+    if (!config) return false
+
+    // Per-call timeout: abort after VALIDATION_TIMEOUT_MS
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), VALIDATION_TIMEOUT_MS)
+
+    // Also abort if the hook-level controller fires (e.g. on destroy)
+    const onHookAbort = () => controller.abort()
+    this.abortController.signal.addEventListener('abort', onHookAbort)
+
+    try {
+      switch (config.type) {
+        case 'openai-compatible':
+          return await this._validateOpenAICompatible(
+            key,
+            config.endpoint,
+            config.model,
+            controller.signal
+          )
+        case 'anthropic':
+          return await this._validateAnthropic(
+            key,
+            config.endpoint,
+            config.model,
+            controller.signal
+          )
+        case 'gemini':
+          return await this._validateGemini(key, config.endpoint, controller.signal)
+        default:
+          return false
+      }
+    } finally {
+      clearTimeout(timeout)
+      this.abortController.signal.removeEventListener('abort', onHookAbort)
     }
   },
 
-  async validateAnthropicKey(key) {
+  // Shared validation for OpenAI-compatible APIs (Bearer auth + chat/completions format)
+  async _validateOpenAICompatible(key, endpoint, model, signal) {
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      const response = await fetch(endpoint, {
         method: 'POST',
-        signal: this.abortController.signal,
+        signal,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${key}`
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: 10,
+          messages: [{ role: 'user', content: 'Hi' }]
+        })
+      })
+      return response.ok
+    } catch (error) {
+      console.error('[MultiAPIKeyConfig] OpenAI-compatible validation error:', error)
+      return false
+    }
+  },
+
+  // Anthropic uses x-api-key header and custom anthropic-version header
+  async _validateAnthropic(key, endpoint, model, signal) {
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        signal,
         headers: {
           'Content-Type': 'application/json',
           'x-api-key': key,
@@ -122,7 +207,7 @@ const MultiAPIKeyConfig = {
           'anthropic-dangerous-direct-browser-access': 'true'
         },
         body: JSON.stringify({
-          model: 'claude-3-5-haiku-20241022',
+          model,
           max_tokens: 10,
           messages: [{ role: 'user', content: 'Hi' }]
         })
@@ -134,57 +219,13 @@ const MultiAPIKeyConfig = {
     }
   },
 
-  async validateOpenAIKey(key) {
-    try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        signal: this.abortController.signal,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${key}`
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          max_tokens: 10,
-          messages: [{ role: 'user', content: 'Hi' }]
-        })
-      })
-      return response.ok
-    } catch (error) {
-      console.error('[MultiAPIKeyConfig] OpenAI validation error:', error)
-      return false
-    }
-  },
-
-  async validateDeepSeekKey(key) {
-    try {
-      const response = await fetch('https://api.deepseek.com/chat/completions', {
-        method: 'POST',
-        signal: this.abortController.signal,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${key}`
-        },
-        body: JSON.stringify({
-          model: 'deepseek-chat',
-          max_tokens: 10,
-          messages: [{ role: 'user', content: 'Hi' }]
-        })
-      })
-      return response.ok
-    } catch (error) {
-      console.error('[MultiAPIKeyConfig] DeepSeek validation error:', error)
-      return false
-    }
-  },
-
-  async validateGeminiKey(key) {
-    // Use gemini-1.5-pro for validation as requested/more stable
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${key}`
+  // Gemini uses query-string API key and a different request body format
+  async _validateGemini(key, endpoint, signal) {
+    const url = `${endpoint}?key=${key}`
     try {
       const response = await fetch(url, {
         method: 'POST',
-        signal: this.abortController.signal,
+        signal,
         headers: {
           'Content-Type': 'application/json'
         },
@@ -202,52 +243,6 @@ const MultiAPIKeyConfig = {
       return response.ok
     } catch (error) {
       console.error('[MultiAPIKeyConfig] Gemini validation error:', error)
-      return false
-    }
-  },
-
-  async validateGLMKey(key) {
-    // GLM (Zhipu AI) uses OpenAI-compatible API
-    try {
-      const response = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
-        method: 'POST',
-        signal: this.abortController.signal,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${key}`
-        },
-        body: JSON.stringify({
-          model: 'glm-4-flash',
-          max_tokens: 10,
-          messages: [{ role: 'user', content: 'Hi' }]
-        })
-      })
-      return response.ok
-    } catch (error) {
-      console.error('[MultiAPIKeyConfig] GLM validation error:', error)
-      return false
-    }
-  },
-
-  async validateMinimaxKey(key) {
-    // Minimax uses OpenAI-compatible API
-    try {
-      const response = await fetch('https://api.minimax.chat/v1/text/chatcompletion_v2', {
-        method: 'POST',
-        signal: this.abortController.signal,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${key}`
-        },
-        body: JSON.stringify({
-          model: 'MiniMax-Text-01',
-          max_tokens: 10,
-          messages: [{ role: 'user', content: 'Hi' }]
-        })
-      })
-      return response.ok
-    } catch (error) {
-      console.error('[MultiAPIKeyConfig] Minimax validation error:', error)
       return false
     }
   },
@@ -292,8 +287,7 @@ const MultiAPIKeyConfig = {
 
   destroyed() {
     this.abortController.abort()
-    this.el.removeEventListener('click', this.handleClick)
-    this.el.removeEventListener('keypress', this.handleKeypress)
+    this.helper.destroy()
   }
 }
 

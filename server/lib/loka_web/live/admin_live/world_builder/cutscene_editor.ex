@@ -73,11 +73,11 @@ defmodule LokaWeb.AdminLive.WorldBuilder.CutsceneEditor do
         "quest-validation-banner",
         @validation.errors == [] && "valid"
       ]}>
-        <span :if={@validation.errors == []} style="display: contents;">
+        <span :if={@validation.errors == []} class="contents">
           <.icon name="hero-check-circle" class="size-4" />
           <span>Valid cutscene</span>
         </span>
-        <span :if={@validation.errors != []} style="display: contents;">
+        <span :if={@validation.errors != []} class="contents">
           <.icon name="hero-exclamation-triangle" class="size-4" />
           <span>{length(@validation.errors)} error(s)</span>
         </span>
@@ -178,13 +178,12 @@ defmodule LokaWeb.AdminLive.WorldBuilder.CutsceneEditor do
           <div class="quest-section-header">
             <.icon name="hero-queue-list" class="size-4" />
             <span>Sequence</span>
-            <div style="flex: 1;"></div>
+            <div class="flex-1"></div>
             <select
               id="cutscene-step-type-select"
               phx-change="cutscene_add_step"
               name="step_type"
-              class="quest-input-sm"
-              style="width: auto;"
+              class="quest-input-sm w-auto"
             >
               <option value="">+ Add Step</option>
               <%= for {val, label, color} <- @step_types do %>
@@ -213,7 +212,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.CutsceneEditor do
                     <option value={val} selected={step.type == val}>{label}</option>
                   <% end %>
                 </select>
-                <div style="flex: 1;"></div>
+                <div class="flex-1"></div>
                 <button
                   class="quest-remove-btn"
                   phx-click="cutscene_move_step_up"
@@ -281,8 +280,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.CutsceneEditor do
                     name="value"
                     min="0.1"
                     step="0.1"
-                    class="quest-input-sm"
-                    style="width: 80px;"
+                    class="quest-input-sm w-[80px]"
                     phx-debounce="300"
                   />
                 </div>
@@ -332,7 +330,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.CutsceneEditor do
                   />
                 </div>
 
-                <div :if={step.type == "apply_status"} style="display: contents;">
+                <div :if={step.type == "apply_status"} class="contents">
                   <div class="quest-form-row-inline">
                     <label>Status</label>
                     <input
@@ -357,8 +355,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.CutsceneEditor do
                       phx-value-field="duration"
                       name="value"
                       min="1"
-                      class="quest-input-sm"
-                      style="width: 80px;"
+                      class="quest-input-sm w-[80px]"
                       phx-debounce="300"
                     />
                   </div>
@@ -388,7 +385,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.CutsceneEditor do
           <div class="quest-section-header">
             <.icon name="hero-sparkles" class="size-4" />
             <span>Effects (Applied on Complete)</span>
-            <div style="flex: 1;"></div>
+            <div class="flex-1"></div>
             <button class="quest-add-btn" phx-click="cutscene_add_effect" title="Add effect">
               <.icon name="hero-plus" class="size-3" /> Add
             </button>
@@ -419,8 +416,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.CutsceneEditor do
                 phx-value-field="flag"
                 name="value"
                 placeholder="flag_name"
-                class="quest-input-sm"
-                style="flex: 1;"
+                class="quest-input-sm flex-1"
                 phx-debounce="300"
               />
 
@@ -433,8 +429,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.CutsceneEditor do
                 phx-value-field="item"
                 name="value"
                 placeholder="item_key"
-                class="quest-input-sm"
-                style="flex: 1;"
+                class="quest-input-sm flex-1"
                 phx-debounce="300"
               />
 
@@ -447,8 +442,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.CutsceneEditor do
                 phx-value-field="amount"
                 name="value"
                 placeholder="amount"
-                class="quest-input-sm"
-                style="width: 80px;"
+                class="quest-input-sm w-[80px]"
                 phx-debounce="300"
               />
 
@@ -461,8 +455,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.CutsceneEditor do
                 phx-value-field="location"
                 name="value"
                 placeholder="room_key"
-                class="quest-input-sm"
-                style="flex: 1;"
+                class="quest-input-sm flex-1"
                 phx-debounce="300"
               />
 
@@ -475,8 +468,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.CutsceneEditor do
                 phx-value-field="quest_key"
                 name="value"
                 placeholder="quest_key"
-                class="quest-input-sm"
-                style="flex: 1;"
+                class="quest-input-sm flex-1"
                 phx-debounce="300"
               />
 
@@ -489,8 +481,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.CutsceneEditor do
                 phx-value-field="status"
                 name="value"
                 placeholder="status_key"
-                class="quest-input-sm"
-                style="flex: 1;"
+                class="quest-input-sm flex-1"
                 phx-debounce="300"
               />
 
@@ -503,8 +494,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.CutsceneEditor do
                 phx-value-field="enemy"
                 name="value"
                 placeholder="enemy_key"
-                class="quest-input-sm"
-                style="flex: 1;"
+                class="quest-input-sm flex-1"
                 phx-debounce="300"
               />
 
@@ -541,9 +531,14 @@ defmodule LokaWeb.AdminLive.WorldBuilder.CutsceneEditor do
 
       <%!-- Footer with save/cancel --%>
       <div class="quest-editor-footer">
-        <button class="btn btn-sm btn-secondary" phx-click="close_cutscene_editor">Cancel</button>
         <button
-          class="btn btn-sm btn-primary"
+          class="px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px bg-wb-border text-wb-text hover:bg-wb-border-light hover:text-wb-text-bright"
+          phx-click="close_cutscene_editor"
+        >
+          Cancel
+        </button>
+        <button
+          class="px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px bg-wb-accent text-white hover:bg-wb-accent-hover"
           phx-click="cutscene_save"
           disabled={@validation.errors != []}
         >

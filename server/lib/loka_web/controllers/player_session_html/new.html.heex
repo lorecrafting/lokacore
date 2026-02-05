@@ -10,9 +10,9 @@
       <p>Development mode: <a href="/dev/mailbox" class="ebook-link">view sent emails</a></p>
     </div>
 
-    <div :if={Mix.env() == :dev} class="ebook-dev-notice" style="margin-top: 1rem;">
+    <div :if={Mix.env() == :dev} class="ebook-dev-notice ebook-dev-notice--spaced">
       <p><strong>Admin credentials:</strong> admin@loka.local / adminadmin12</p>
-      <p style="font-size: 0.9em; margin-top: 0.5rem;">
+      <p class="ebook-prose--small">
         Use password login below for quick access
       </p>
     </div>
@@ -48,15 +48,8 @@
       </button>
     </.form>
 
-    <div class="ebook-auth-footer">
-      <%= if @current_scope do %>
-        <p>You need to reauthenticate to perform sensitive actions.</p>
-      <% else %>
-        <p>
-          New to this realm?
-          <.link navigate={~p"/players/register"} class="ebook-link">Create an account</.link>
-        </p>
-      <% end %>
+    <div :if={@current_scope} class="ebook-auth-footer">
+      <p>You need to reauthenticate to perform sensitive actions.</p>
     </div>
   </div>
 </div>

@@ -41,7 +41,6 @@ defmodule LokaWeb.PlayerSessionControllerTest do
       conn = get(conn, ~p"/players/log-in")
       response = html_response(conn, 200)
       assert response =~ "Enter the World"
-      assert response =~ ~p"/players/register"
       assert response =~ "Log in"
     end
 
@@ -64,7 +63,6 @@ defmodule LokaWeb.PlayerSessionControllerTest do
       conn = get(conn, ~p"/players/log-in")
       response = html_response(conn, 200)
       assert response =~ "Enter the World"
-      assert response =~ ~p"/players/register"
       assert response =~ "Log in"
     end
   end

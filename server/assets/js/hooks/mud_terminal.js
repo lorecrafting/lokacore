@@ -1,24 +1,28 @@
 import {Socket} from "phoenix"
+import { HookHelper } from '../world_builder/HookHelper.js'
 
 const MAX_TERMINAL_LINES = 1000
 
 // MUD Terminal hook - connects to GameChannel for in-editor MUD testing
 const MudTerminal = {
   mounted() {
+    this.helper = new HookHelper(this)
     this.token = this.el.dataset.token
     this.commandHistory = []
     this.historyIndex = -1
+    this._lastCommandTime = 0
     this.socket = null
     this.channel = null
 
-    // DOM elements
+    // Scope DOM queries to terminal container instead of global document
+    this.terminalContainer = this.el.closest('.world-builder-terminal') || this.el.parentElement
     this.outputEl = this.el
-    this.inputEl = document.getElementById('terminal-command-input')
-    this.hpEl = document.getElementById('term-hp')
-    this.maEl = document.getElementById('term-ma')
-    this.mvEl = document.getElementById('term-mv')
-    this.exitsEl = document.getElementById('term-exits')
-    this.statusDot = document.getElementById('term-connection-dot')
+    this.inputEl = this.terminalContainer.querySelector('#terminal-command-input')
+    this.hpEl = this.terminalContainer.querySelector('#term-hp')
+    this.maEl = this.terminalContainer.querySelector('#term-ma')
+    this.mvEl = this.terminalContainer.querySelector('#term-mv')
+    this.exitsEl = this.terminalContainer.querySelector('#term-exits')
+    this.statusDot = this.terminalContainer.querySelector('#term-connection-dot')
 
     this.setConnectionState('connecting')
 
@@ -32,7 +36,7 @@ const MudTerminal = {
 
     // Input handling
     if (this.inputEl) {
-      this.inputHandler = (e) => {
+      this.helper.on(this.inputEl, 'keydown', (e) => {
         // Prevent World Builder keyboard shortcuts from firing when typing
         e.stopPropagation()
 
@@ -47,6 +51,9 @@ const MudTerminal = {
               this.inputEl.value = ''
               return
             }
+            const now = Date.now()
+            if (now - this._lastCommandTime < 200) return
+            this._lastCommandTime = now
             this.appendOutput(`> ${input}`, 'system')
             this.commandHistory.push(input)
             this.historyIndex = this.commandHistory.length
@@ -69,8 +76,7 @@ const MudTerminal = {
             this.inputEl.value = ''
           }
         }
-      }
-      this.inputEl.addEventListener('keydown', this.inputHandler)
+      })
     }
   },
 
@@ -289,12 +295,12 @@ const MudTerminal = {
 
   updated() {
     // Refresh DOM references that may have been replaced by LiveView patches
-    this.inputEl = document.getElementById('terminal-command-input')
-    this.hpEl = document.getElementById('term-hp')
-    this.maEl = document.getElementById('term-ma')
-    this.mvEl = document.getElementById('term-mv')
-    this.exitsEl = document.getElementById('term-exits')
-    this.statusDot = document.getElementById('term-connection-dot')
+    this.inputEl = this.terminalContainer.querySelector('#terminal-command-input')
+    this.hpEl = this.terminalContainer.querySelector('#term-hp')
+    this.maEl = this.terminalContainer.querySelector('#term-ma')
+    this.mvEl = this.terminalContainer.querySelector('#term-mv')
+    this.exitsEl = this.terminalContainer.querySelector('#term-exits')
+    this.statusDot = this.terminalContainer.querySelector('#term-connection-dot')
   },
 
   destroyed() {
@@ -306,9 +312,7 @@ const MudTerminal = {
       this.socket.disconnect()
       this.socket = null
     }
-    if (this.inputEl && this.inputHandler) {
-      this.inputEl.removeEventListener('keydown', this.inputHandler)
-    }
+    this.helper.destroy()
   }
 }
 

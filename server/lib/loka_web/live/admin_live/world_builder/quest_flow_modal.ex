@@ -40,118 +40,123 @@ defmodule LokaWeb.AdminLive.WorldBuilder.QuestFlowModal do
       aria-labelledby="quest-flow-title"
     >
       <div
-        class="modal-content quest-flow-modal"
+        class="modal-content bg-wb-panel border border-wb-border rounded-wb-lg flex flex-col overflow-hidden max-w-[900px] max-h-[85vh]"
         phx-click-away="close_quest_flow"
-        style="max-width: 900px; max-height: 85vh; overflow: hidden; display: flex; flex-direction: column;"
       >
-        <div
-          class="modal-header"
-          style="border-bottom: 1px solid var(--wb-border); padding: 12px 16px;"
-        >
-          <h3 id="quest-flow-title" style="display: flex; align-items: center; gap: 8px; margin: 0;">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-wb-border">
+          <h3
+            id="quest-flow-title"
+            class="m-0 text-wb-text-bright text-base font-semibold flex items-center gap-2"
+          >
             <.icon name="hero-arrow-trending-up" class="size-5" /> Quest Flow
           </h3>
           
     <!-- Filter buttons -->
-          <div style="display: flex; gap: 4px; margin-left: 16px;">
+          <div class="flex gap-1 ml-4">
             <button
               phx-click="quest_flow_filter"
               phx-value-type="all"
-              class={"quest-filter-btn #{if @filter_type == "all", do: "active", else: ""}"}
-              style={"padding: 4px 8px; font-size: 11px; border-radius: 4px; border: 1px solid var(--wb-border); cursor: pointer; #{if @filter_type == "all", do: "background: var(--wb-accent); color: white;", else: "background: var(--wb-surface); color: var(--wb-text-muted);"}"}
+              class={["quest-filter-btn", @filter_type == "all" && "active"]}
             >
               All
             </button>
             <button
               phx-click="quest_flow_filter"
               phx-value-type="main"
-              class={"quest-filter-btn #{if @filter_type == "main", do: "active", else: ""}"}
-              style={"padding: 4px 8px; font-size: 11px; border-radius: 4px; border: 1px solid var(--wb-border); cursor: pointer; #{if @filter_type == "main", do: "background: var(--wb-accent); color: white;", else: "background: var(--wb-surface); color: var(--wb-text-muted);"}"}
+              class={["quest-filter-btn", @filter_type == "main" && "active"]}
             >
               Main
             </button>
             <button
               phx-click="quest_flow_filter"
               phx-value-type="side"
-              class={"quest-filter-btn #{if @filter_type == "side", do: "active", else: ""}"}
-              style={"padding: 4px 8px; font-size: 11px; border-radius: 4px; border: 1px solid var(--wb-border); cursor: pointer; #{if @filter_type == "side", do: "background: var(--wb-quest-pass); color: var(--wb-panel);", else: "background: var(--wb-surface); color: var(--wb-text-muted);"}"}
+              class={["quest-filter-btn", @filter_type == "side" && "active"]}
+              data-type="side"
             >
               Side
             </button>
             <button
               phx-click="quest_flow_filter"
               phx-value-type="tutorial"
-              class={"quest-filter-btn #{if @filter_type == "tutorial", do: "active", else: ""}"}
-              style={"padding: 4px 8px; font-size: 11px; border-radius: 4px; border: 1px solid var(--wb-border); cursor: pointer; #{if @filter_type == "tutorial", do: "background: var(--wb-quest-pass-alt); color: var(--wb-panel);", else: "background: var(--wb-surface); color: var(--wb-text-muted);"}"}
+              class={["quest-filter-btn", @filter_type == "tutorial" && "active"]}
+              data-type="tutorial"
             >
               Tutorial
             </button>
           </div>
 
-          <span style="color: var(--wb-text-muted); font-size: 12px; margin-left: auto;">
+          <span class="text-wb-text-muted text-xs ml-auto">
             {length(@quests)} quests
           </span>
           <button
             phx-click="close_quest_flow"
-            class="modal-close"
-            style="position: absolute; right: 16px; top: 12px; background: none; border: none; color: var(--wb-text-muted); font-size: 24px; cursor: pointer;"
+            class="bg-transparent border-0 text-wb-text-muted text-2xl cursor-pointer p-0 w-8 h-8 flex items-center justify-center rounded-wb-sm transition-all hover:bg-wb-border hover:text-wb-text-bright absolute right-4 top-3"
           >
             &times;
           </button>
         </div>
 
-        <div class="modal-body quest-flow-body" style="flex: 1; overflow: auto; padding: 0;">
+        <div class="modal-body relative bg-wb-panel-alt flex-1 overflow-auto p-0">
           <div
             :if={@graph.nodes == []}
-            style="padding: 40px; text-align: center; color: var(--wb-text-muted);"
+            class="p-10 text-center text-wb-text-muted"
           >
             <.icon name="hero-map" class="size-12" />
             <p>No quests found</p>
           </div>
           <div
             :if={@graph.nodes != []}
-            class="quest-graph-container"
+            class="quest-graph-container relative w-full overflow-auto"
             id="quest-graph"
             phx-hook="QuestFlowGraph"
             phx-update="ignore"
             data-nodes={Jason.encode!(@graph.nodes)}
             data-edges={Jason.encode!(@graph.edges)}
+            class="h-[500px]"
           >
             <!-- Quest Graph Legend -->
-            <div class="quest-graph-legend">
-              <div class="legend-item">
-                <span class="legend-color" style="background: var(--wb-accent);"></span> Main Quest
+            <div class="absolute flex flex-col gap-1 text-[11px] text-wb-text-muted rounded-wb-md border border-wb-border z-10 top-2.5 right-2.5 bg-[rgba(30,30,30,0.95)] px-3 py-2">
+              <div class="flex items-center gap-1.5">
+                <span class="w-3 h-3 rounded-sm bg-wb-accent"></span> Main Quest
               </div>
-              <div class="legend-item">
-                <span class="legend-color" style="background: var(--wb-quest-pass);"></span>
-                Side Quest
+              <div class="flex items-center gap-1.5">
+                <span class="w-3 h-3 rounded-sm bg-wb-quest-pass"></span> Side Quest
               </div>
-              <div class="legend-item">
-                <span class="legend-color" style="background: var(--wb-quest-pass-alt);"></span>
-                Tutorial
+              <div class="flex items-center gap-1.5">
+                <span class="w-3 h-3 rounded-sm bg-wb-quest-pass-alt"></span> Tutorial
               </div>
-              <div class="legend-arrow">→ Requires/Unlocks</div>
+              <div class="mt-1 pt-1 border-t border-wb-border">→ Requires/Unlocks</div>
             </div>
             
     <!-- SVG for edges -->
-            <svg class="quest-graph-edges"></svg>
+            <svg class="quest-graph-edges absolute top-0 left-0 w-full h-full pointer-events-none">
+            </svg>
             
     <!-- Quest nodes -->
-            <div class="quest-graph-nodes">
+            <div class="quest-graph-nodes relative w-full h-full">
               <%= for node <- @graph.nodes do %>
                 <% hidden = @filter_type != "all" and node.type != @filter_type %>
                 <div
-                  class={"quest-node quest-type-#{node.type} #{if @selected_quest == node.id, do: "selected", else: ""} #{if hidden, do: "filtered-out", else: ""}"}
+                  class={[
+                    "absolute w-[160px] p-2 bg-wb-panel-header border-2 border-wb-border rounded-wb-md cursor-pointer transition-all hover:scale-105 hover:z-[5]",
+                    "quest-type-#{node.type}",
+                    @selected_quest == node.id && "selected",
+                    hidden && "filtered-out"
+                  ]}
                   id={"quest-node-#{node.id}"}
                   data-node-id={node.id}
                   phx-click="quest_flow_select"
                   phx-value-key={node.id}
-                  style={"left: #{node.x}px; top: #{node.y}px; #{if hidden, do: "opacity: 0.2; pointer-events: none;", else: ""}"}
+                  style={"left: #{node.x}px; top: #{node.y}px;"}
                   title={node.name}
                 >
-                  <div class="quest-node-act">Act {node.act || "?"}</div>
-                  <div class="quest-node-name">{node.name}</div>
-                  <div class="quest-node-id">{node.id}</div>
+                  <div class="text-[9px] uppercase text-wb-text-muted mb-0.5">
+                    Act {node.act || "?"}
+                  </div>
+                  <div class="font-semibold text-wb-text-bright text-[12px] mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis">
+                    {node.name}
+                  </div>
+                  <div class="text-[10px] text-wb-text-faint font-wb-mono">{node.id}</div>
                 </div>
               <% end %>
             </div>
@@ -161,14 +166,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.QuestFlowModal do
           </div>
         </div>
 
-        <div
-          class="modal-footer"
-          style="border-top: 1px solid var(--wb-border); padding: 12px 16px; display: flex; justify-content: flex-end;"
-        >
+        <div class="flex gap-2 justify-end px-4 py-3 border-t border-wb-border">
           <button
             phx-click="close_quest_flow"
-            class="btn btn-primary"
-            style="background: var(--wb-accent); color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer;"
+            class="px-5 py-2 border-none rounded cursor-pointer transition-all duration-100 bg-wb-accent text-white hover:bg-wb-accent-hover"
           >
             Close
           </button>
@@ -289,25 +290,22 @@ defmodule LokaWeb.AdminLive.WorldBuilder.QuestFlowModal do
       |> assign(:reward_gold, reward_gold)
 
     ~H"""
-    <div
-      class="quest-details-panel"
-      style="position: absolute; right: 16px; top: 60px; width: 280px; background: var(--wb-surface); border: 1px solid var(--wb-border); border-radius: 8px; padding: 12px; box-shadow: var(--wb-shadow-md);"
-    >
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <h4 style="margin: 0; color: var(--wb-text-bright); font-size: 14px;">
+    <div class="absolute bg-wb-surface border border-wb-border rounded-wb-lg p-3 right-4 top-[60px] w-[280px] shadow-wb-md">
+      <div class="flex justify-between items-center mb-2">
+        <h4 class="m-0 text-wb-text-bright text-sm">
           {@quest.name || @quest.key}
         </h4>
         <button
           phx-click="quest_flow_select"
           phx-value-key=""
-          style="background: none; border: none; color: var(--wb-text-muted); cursor: pointer; font-size: 16px;"
+          class="bg-transparent border-none text-wb-text-muted cursor-pointer text-base"
         >
           &times;
         </button>
       </div>
 
-      <div style="font-size: 11px; color: var(--wb-text-muted); margin-bottom: 12px;">
-        <span style="background: var(--wb-border); padding: 2px 6px; border-radius: 3px;">
+      <div class="text-[11px] text-wb-text-muted mb-3">
+        <span class="bg-wb-border py-0.5 px-1.5 rounded-wb-sm">
           {@quest.key}
         </span>
       </div>
@@ -315,19 +313,19 @@ defmodule LokaWeb.AdminLive.WorldBuilder.QuestFlowModal do
     <!-- Description -->
       <div
         :if={@description}
-        style="color: var(--wb-text); font-size: 12px; margin-bottom: 12px; line-height: 1.4;"
+        class="text-wb-text text-xs mb-3 leading-snug"
       >
         {@description}
       </div>
       
     <!-- Giver -->
-      <div style="margin-bottom: 8px;">
-        <span style="color: var(--wb-text-muted); font-size: 11px;">Quest Giver:</span>
-        <span style="color: var(--wb-quest-pass); font-size: 12px; margin-left: 4px;">{@giver}</span>
+      <div class="mb-2">
+        <span class="text-wb-text-muted text-[11px]">Quest Giver:</span>
+        <span class="text-wb-quest-pass text-xs ml-1">{@giver}</span>
         <button
           phx-click="quest_flow_edit_dialogue"
           phx-value-npc={@giver}
-          style="background: var(--wb-border); border: none; color: var(--wb-accent); font-size: 10px; padding: 2px 6px; border-radius: 3px; margin-left: 8px; cursor: pointer;"
+          class="bg-wb-border border-none text-wb-accent text-[10px] py-0.5 px-1.5 rounded-wb-sm ml-2 cursor-pointer"
           title="Edit NPC dialogue"
         >
           Edit Dialogue
@@ -335,46 +333,46 @@ defmodule LokaWeb.AdminLive.WorldBuilder.QuestFlowModal do
       </div>
       
     <!-- Requirements -->
-      <div :if={@requires} style="margin-bottom: 8px;">
-        <span style="color: var(--wb-text-muted); font-size: 11px;">Requires:</span>
-        <span style="color: var(--wb-quest-pass-alt); font-size: 12px; margin-left: 4px;">
+      <div :if={@requires} class="mb-2">
+        <span class="text-wb-text-muted text-[11px]">Requires:</span>
+        <span class="text-wb-quest-pass-alt text-xs ml-1">
           {@requires}
         </span>
       </div>
       
     <!-- Objectives -->
-      <div :if={@objectives != []} style="margin-bottom: 12px;">
-        <div style="color: var(--wb-text-muted); font-size: 11px; margin-bottom: 4px;">
+      <div :if={@objectives != []} class="mb-3">
+        <div class="text-wb-text-muted text-[11px] mb-1">
           Objectives ({length(@objectives)}):
         </div>
-        <ul style="margin: 0; padding-left: 16px; color: var(--wb-text); font-size: 11px;">
+        <ul class="m-0 pl-4 text-wb-text text-[11px]">
           <%= for obj <- @objectives do %>
-            <li style="margin-bottom: 2px;">
+            <li class="mb-0.5">
               {obj["description"] || obj["type"]}
-              <span style="color: var(--wb-text-muted);">({obj["type"]})</span>
+              <span class="text-wb-text-muted">({obj["type"]})</span>
             </li>
           <% end %>
         </ul>
       </div>
       
     <!-- Rewards -->
-      <div :if={map_size(@rewards) > 0} style="margin-bottom: 8px;">
-        <div style="color: var(--wb-text-muted); font-size: 11px; margin-bottom: 4px;">Rewards:</div>
-        <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+      <div :if={map_size(@rewards) > 0} class="mb-2">
+        <div class="text-wb-text-muted text-[11px] mb-1">Rewards:</div>
+        <div class="flex flex-wrap gap-1">
           <span
             :if={@reward_xp}
-            style="background: #2a3a4e; color: var(--wb-quest-pass); padding: 2px 6px; border-radius: 3px; font-size: 10px;"
+            class="bg-[#2a3a4e] text-wb-quest-pass py-0.5 px-1.5 rounded-wb-sm text-[10px]"
           >
             +{@reward_xp} XP
           </span>
           <span
             :if={@reward_gold}
-            style="background: #4a3a2e; color: var(--wb-warning); padding: 2px 6px; border-radius: 3px; font-size: 10px;"
+            class="bg-[#4a3a2e] text-wb-warning py-0.5 px-1.5 rounded-wb-sm text-[10px]"
           >
             +{@reward_gold} Gold
           </span>
           <%= for item <- (@rewards["items"] || @rewards[:items] || []) do %>
-            <span style="background: #3a2a4e; color: var(--wb-indigo-text); padding: 2px 6px; border-radius: 3px; font-size: 10px;">
+            <span class="bg-[#3a2a4e] text-wb-indigo-text py-0.5 px-1.5 rounded-wb-sm text-[10px]">
               {item}
             </span>
           <% end %>

@@ -1,6 +1,10 @@
+import { HookHelper } from '../world_builder/HookHelper.js'
+
 // Quest Flow Graph - draws edges between quest nodes with bezier curves
 const QuestFlowGraph = {
   mounted() {
+    this.helper = new HookHelper(this)
+
     // Read edge colors from CSS custom properties
     const styles = getComputedStyle(document.documentElement)
     this.edgeColor = styles.getPropertyValue('--wb-quest-edge').trim() || '#666666'
@@ -12,14 +16,12 @@ const QuestFlowGraph = {
     // Event delegation for SVG path hover effects (avoids per-path listener leaks)
     const svg = this.el.querySelector('.quest-graph-edges')
     if (svg) {
-      this.svgEnterHandler = (e) => {
+      this.helper.on(svg, 'mouseenter', (e) => {
         if (e.target.tagName === 'path') e.target.setAttribute('stroke-width', '3')
-      }
-      this.svgLeaveHandler = (e) => {
+      }, true)
+      this.helper.on(svg, 'mouseleave', (e) => {
         if (e.target.tagName === 'path') e.target.setAttribute('stroke-width', '2')
-      }
-      svg.addEventListener('mouseenter', this.svgEnterHandler, true)
-      svg.addEventListener('mouseleave', this.svgLeaveHandler, true)
+      }, true)
     }
   },
 
@@ -244,12 +246,9 @@ const QuestFlowGraph = {
   },
 
   destroyed() {
+    this.helper.destroy()
     const svg = this.el.querySelector('.quest-graph-edges')
-    if (svg) {
-      if (this.svgEnterHandler) svg.removeEventListener('mouseenter', this.svgEnterHandler, true)
-      if (this.svgLeaveHandler) svg.removeEventListener('mouseleave', this.svgLeaveHandler, true)
-      svg.innerHTML = ''
-    }
+    if (svg) svg.innerHTML = ''
   }
 }
 

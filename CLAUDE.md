@@ -99,7 +99,7 @@ fly deploy
 | `/` | Landing page | No |
 | `/admin` | Admin dashboard | Admin |
 | `/admin/world-builder` | World Builder UI (includes MUD terminal) | Admin |
-| `/character/create` | Character creation | Yes |
+| `/client/auth/login` | Game client auth (magic link → JWT deep link) | No |
 
 Main game client is the Godot app connecting via Phoenix Channels.
 

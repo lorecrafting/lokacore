@@ -1,7 +1,11 @@
+import { HookHelper } from '../world_builder/HookHelper.js'
+
 // Chat textarea with Ctrl+Enter submit support
 const ChatTextarea = {
   mounted() {
-    this.keydownHandler = (e) => {
+    this.helper = new HookHelper(this)
+
+    this.helper.on(this.el, 'keydown', (e) => {
       // Ctrl+Enter or Cmd+Enter to submit
       if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault()
@@ -12,14 +16,11 @@ const ChatTextarea = {
           this.el.value = ''
         }
       }
-    }
-    this.el.addEventListener('keydown', this.keydownHandler)
+    })
   },
 
   destroyed() {
-    if (this.keydownHandler) {
-      this.el.removeEventListener('keydown', this.keydownHandler)
-    }
+    this.helper.destroy()
   }
 }
 

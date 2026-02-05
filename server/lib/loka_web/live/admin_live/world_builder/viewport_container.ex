@@ -66,7 +66,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ViewportContainer do
 
     ~H"""
     <div id="viewport-panel" class={"world-builder-panel world-builder-viewport #{@class}"}>
-      <div id="viewport-content" class="panel-content" style="padding: 0;">
+      <div
+        id="viewport-content"
+        class="panel-content flex-1 overflow-auto bg-wb-panel-alt !p-0"
+      >
         <.editor_view
           :if={@editing_mode != :map}
           editing_mode={@editing_mode}
@@ -118,20 +121,20 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ViewportContainer do
 
   defp editor_view(assigns) do
     ~H"""
-    <div class="viewport-editor">
-      <div class="viewport-editor-header">
+    <div class="flex flex-col w-full h-full">
+      <div class="flex items-center gap-2.5 py-1.5 px-2.5 bg-gradient-to-b from-wb-editor-gradient-from to-wb-editor-gradient-to border-b border-wb-border shrink-0">
         <button
-          class="btn btn-sm btn-ghost"
+          class="flex items-center gap-1 py-1 px-2 bg-transparent border border-wb-border rounded-wb-md text-wb-text cursor-pointer text-xs hover:bg-wb-input hover:border-wb-accent hover:text-wb-accent"
           phx-click={close_event(@editing_mode)}
           title="Back to Map (Esc)"
         >
           <.icon name="hero-arrow-left" class="size-4" />
           <span>Map</span>
         </button>
-        <span class="viewport-editor-title">{editor_title(@editing_mode)}</span>
-        <div style="flex: 1;"></div>
+        <span class="text-[13px] font-medium text-wb-text-bright">{editor_title(@editing_mode)}</span>
+        <div class="flex-1"></div>
       </div>
-      <div class="viewport-editor-body">
+      <div class="flex-1 overflow-hidden flex flex-col">
         <%= case @editing_mode do %>
           <% :script -> %>
             <ScriptEditor.script_editor
@@ -140,16 +143,13 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ViewportContainer do
               inline={true}
             />
           <% :dialogue -> %>
-            <div class="viewport-dialogue-editor">
-              <div
-                class="dialogue-entity-selector"
-                style="display: flex; align-items: center; gap: 0.5rem; padding: 8px 12px; border-bottom: 1px solid var(--wb-border); flex-shrink: 0;"
-              >
-                <label style="color: var(--wb-text-muted); font-size: 0.8rem;">NPC:</label>
+            <div class="flex flex-col w-full h-full">
+              <div class="dialogue-entity-selector flex items-center gap-2 px-3 py-2 border-b border-wb-border shrink-0">
+                <label class="text-wb-text-muted text-[0.8rem]">NPC:</label>
                 <select
                   phx-change="dialogue_update_entity"
                   name="npc_key"
-                  style="flex: 1; padding: 4px 8px; font-size: 0.8rem; background: var(--wb-surface); border: 1px solid var(--wb-border); border-radius: 4px; color: var(--wb-text);"
+                  class="flex-1 py-1 px-2 text-[0.8rem] bg-wb-surface border border-wb-border rounded text-wb-text"
                 >
                   <option value="">None (standalone)</option>
                   <%= for npc <- @npcs do %>
@@ -159,7 +159,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ViewportContainer do
                   <% end %>
                 </select>
               </div>
-              <div style="flex: 1; overflow: hidden;">
+              <div class="flex-1 overflow-hidden">
                 <DialogueEditor.dialogue_editor
                   dialogue_tree={@editing_dialogue_tree}
                   npc_key={@editing_dialogue_npc}
@@ -177,7 +177,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ViewportContainer do
           <% :cutscene -> %>
             <CutsceneEditor.cutscene_editor cutscene_data={@cutscene_data} />
           <% _ -> %>
-            <div style="padding: 2rem; color: var(--wb-text-muted);">Unknown editor mode</div>
+            <div class="p-8 text-wb-text-muted">Unknown editor mode</div>
         <% end %>
       </div>
     </div>
@@ -210,7 +210,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ViewportContainer do
       class="w-full h-full bg-wb-border-dark relative"
       aria-label="World map viewport"
     >
-      <canvas style="width: 100%; height: 100%; display: block;"></canvas>
+      <canvas class="w-full h-full block"></canvas>
     </div>
 
     <!-- Viewport overlay controls -->
@@ -236,29 +236,24 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ViewportContainer do
       </div>
 
       <div :if={@show_npc_paths and map_size(@npc_paths) > 0} class="npc-paths-legend">
-        <div
-          class="text-[10px] font-semibold text-wb-text-muted uppercase tracking-[0.5px] mb-1.5 pb-1 border-b border-wb-border"
-          style="display: flex; justify-content: space-between; align-items: center;"
-        >
+        <div class="text-[10px] font-semibold text-wb-text-muted uppercase tracking-[0.5px] mb-1.5 pb-1 border-b border-wb-border flex justify-between items-center">
           <span>NPC Paths</span>
-          <span style="font-size: 10px; color: var(--wb-text-muted);">{map_size(@npc_paths)}</span>
+          <span class="text-[10px] text-wb-text-muted">{map_size(@npc_paths)}</span>
         </div>
         <% path_colors = @path_colors %>
         <%= for {{npc_key, path_info}, idx} <- Enum.with_index(@npc_paths) do %>
           <% color = Enum.at(path_colors, rem(idx, length(path_colors))) %>
           <div
-            class="npc-path-legend-item"
+            class="npc-path-legend-item flex items-center gap-1.5 py-0.5 px-1 cursor-pointer rounded-wb-sm"
             phx-click="highlight_npc_path"
             phx-value-npc={npc_key}
-            style="display: flex; align-items: center; gap: 6px; padding: 2px 4px; cursor: pointer; border-radius: 3px;"
             title={"Click to highlight #{path_info[:name] || npc_key}'s patrol route"}
           >
-            <span style={"width: 12px; height: 3px; background: #{color}; border-radius: 2px; display: inline-block;"}>
-            </span>
-            <span style="font-size: 11px; color: var(--wb-text); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            <span class="inline-block w-3 h-[3px] rounded-sm" style={"background: #{color}"}></span>
+            <span class="text-[11px] text-wb-text flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
               {path_info[:name] || npc_key}
             </span>
-            <span :if={path_info[:patrol]} style="font-size: 9px; color: var(--wb-text-muted);">
+            <span :if={path_info[:patrol]} class="text-[9px] text-wb-text-muted">
               {length(path_info[:patrol][:route] || [])} rooms
             </span>
           </div>
@@ -277,27 +272,24 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ViewportContainer do
         style={if @console_collapsed, do: "display: none;", else: ""}
       >
       </div>
-      <div
-        class="flex gap-1 px-2 py-1 bg-wb-border-dark border-b border-wb-bg"
-        style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap;"
-      >
-        <span style="font-size: 12px; color: var(--wb-text-muted); padding-right: 8px;">Console</span>
+      <div class="flex gap-1 px-2 py-1 bg-wb-border-dark border-b border-wb-bg items-center flex-wrap">
+        <span class="text-xs text-wb-text-muted pr-2">Console</span>
 
-        <form phx-change="filter_console" style="display: contents;">
+        <form phx-change="filter_console" class="contents">
           <input
             type="text"
             placeholder="Filter..."
             value={@console_filter}
             phx-debounce="100"
             name="filter"
-            style="width: 100px; padding: 3px 6px; font-size: 11px; background: var(--wb-surface); border: 1px solid var(--wb-border); border-radius: 3px; color: var(--wb-text);"
+            class="w-[100px] py-0.5 px-1.5 text-[11px] bg-wb-surface border border-wb-border rounded-wb-sm text-wb-text"
           />
         </form>
 
-        <form phx-change="filter_console_level" style="display: contents;">
+        <form phx-change="filter_console_level" class="contents">
           <select
             name="level"
-            style="padding: 3px 6px; font-size: 11px; background: var(--wb-surface); border: 1px solid var(--wb-border); border-radius: 3px; color: var(--wb-text);"
+            class="py-0.5 px-1.5 text-[11px] bg-wb-surface border border-wb-border rounded-wb-sm text-wb-text"
           >
             <option value="all" selected={@level_filter == "all"}>All</option>
             <option value="info" selected={@level_filter == "info"}>Info</option>
@@ -306,32 +298,31 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ViewportContainer do
           </select>
         </form>
 
-        <span style="color: var(--wb-text-faint); font-size: 10px;">
+        <span class="text-wb-text-faint text-[10px]">
           {length(@filtered_messages)}/{length(@console_messages)}
         </span>
 
-        <div style="flex: 1;"></div>
+        <div class="flex-1"></div>
 
         <button
           phx-click="export_console"
           title="Export to file"
-          style="background: none; border: none; padding: 2px 4px; cursor: pointer; color: var(--wb-text-muted);"
+          class="bg-transparent border-none py-0.5 px-1 cursor-pointer text-wb-text-muted"
         >
           <.icon name="hero-arrow-down-tray" class="size-3" />
         </button>
         <button
           phx-click="clear_console"
           title="Clear console"
-          style="background: none; border: none; padding: 2px 4px; cursor: pointer; color: var(--wb-text-muted);"
+          class="bg-transparent border-none py-0.5 px-1 cursor-pointer text-wb-text-muted"
         >
           <.icon name="hero-trash" class="size-3" />
         </button>
         <button
-          class="panel-collapse-btn"
+          class="flex items-center justify-center w-6 h-6 bg-transparent border-none text-wb-text-dim cursor-pointer rounded-wb-sm transition-all duration-150 hover:bg-wb-border hover:text-wb-text py-0.5 px-1"
           phx-click="toggle_panel"
           phx-value-panel="console"
           title={if @console_collapsed, do: "Expand (~)", else: "Collapse (~)"}
-          style="background: none; border: none; padding: 2px 4px; cursor: pointer; color: var(--wb-text-muted);"
         >
           <.icon
             name={if @console_collapsed, do: "hero-chevron-up", else: "hero-chevron-down"}
@@ -341,8 +332,8 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ViewportContainer do
       </div>
 
       <div
-        class="panel-content"
-        style={if @console_collapsed, do: "display: none;", else: "padding: 0;"}
+        class="panel-content flex-1 overflow-auto bg-wb-panel-alt !p-0"
+        style={if @console_collapsed, do: "display: none;"}
       >
         <div
           class="font-mono text-[0.7rem] leading-relaxed p-2"

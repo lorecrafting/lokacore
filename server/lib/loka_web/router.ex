@@ -91,25 +91,21 @@ defmodule LokaWeb.Router do
   scope "/", LokaWeb do
     pipe_through :browser
 
-    # Redirect root to game client
+    # Redirect root to login
     get "/", PageController, :home
   end
 
-  # Game clients (requires authentication via magic link)
+  # Game client auth (Godot deep link flow via magic link → JWT)
   scope "/", LokaWeb do
     pipe_through [:browser, :require_authenticated_player]
 
-    live "/character/create", CharacterCreationLive, :new
-
-    # Mobile auth callback - generates JWT for app deep link
-    get "/mobile/auth/callback", MobileAuthController, :callback
+    get "/client/auth/callback", ClientAuthController, :callback
   end
 
-  # Mobile auth login entry point (public, redirects to login)
-  scope "/mobile", LokaWeb do
+  scope "/client", LokaWeb do
     pipe_through [:browser]
 
-    get "/auth/login", MobileAuthController, :login
+    get "/auth/login", ClientAuthController, :login
   end
 
   # Admin panel (authentication required)
@@ -238,22 +234,6 @@ defmodule LokaWeb.Router do
   end
 
   ## Authentication routes
-
-  # Registration with rate limiting
-  scope "/", LokaWeb do
-    pipe_through [:browser, :redirect_if_player_is_authenticated, :rate_limit_register]
-
-    get "/players/register", PlayerRegistrationController, :new
-    post "/players/register", PlayerRegistrationController, :create
-  end
-
-  scope "/", LokaWeb do
-    pipe_through [:browser, :require_authenticated_player]
-
-    get "/players/settings", PlayerSettingsController, :edit
-    put "/players/settings", PlayerSettingsController, :update
-    get "/players/settings/confirm-email/:token", PlayerSettingsController, :confirm_email
-  end
 
   # Login with rate limiting (except logout and token confirmation)
   scope "/", LokaWeb do

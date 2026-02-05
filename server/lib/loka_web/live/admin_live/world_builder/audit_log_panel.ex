@@ -15,17 +15,22 @@ defmodule LokaWeb.AdminLive.WorldBuilder.AuditLogPanel do
 
   def audit_log_panel(assigns) do
     ~H"""
-    <div class={["audit-log-panel", !@show && "hidden"]}>
-      <div class="audit-log-header">
-        <div class="audit-log-title">
+    <div class={[
+      "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-wb-panel-header border border-wb-border rounded-wb-lg w-[600px] max-w-[90vw] max-h-[80vh] flex flex-col z-[1001] shadow-[0_20px_60px_rgba(0,0,0,0.5)] animate-[modalSlideIn_0.2s_ease-out]",
+      !@show && "hidden"
+    ]}>
+      <div class="flex items-center justify-between py-3 px-4 border-b border-wb-border bg-wb-panel-alt rounded-t-wb-lg">
+        <div class="flex items-center gap-2 font-semibold text-wb-text-bright">
           <.icon name="hero-document-magnifying-glass" class="size-5" />
           <span>Audit Log</span>
-          <span :if={@project_key} class="audit-log-project">({@project_key})</span>
+          <span :if={@project_key} class="font-normal text-wb-text-muted text-[0.85rem]">
+            ({@project_key})
+          </span>
         </div>
-        <div class="audit-log-actions">
+        <div class="flex items-center gap-2">
           <select
             name="filter"
-            class="audit-filter-select"
+            class="bg-wb-panel border border-wb-border rounded-wb-md text-wb-text py-1 px-2 text-[0.8rem]"
             phx-change="audit_filter_changed"
           >
             <option value="all" selected={@filter == "all"}>All</option>
@@ -49,19 +54,25 @@ defmodule LokaWeb.AdminLive.WorldBuilder.AuditLogPanel do
         </div>
       </div>
 
-      <div class="audit-log-content">
-        <div :if={@loading} class="audit-log-loading">
+      <div class="flex-1 overflow-y-auto p-3 min-h-[200px] max-h-[60vh]">
+        <div
+          :if={@loading}
+          class="flex flex-col items-center justify-center h-[200px] text-wb-text-dim"
+        >
           <.icon name="hero-arrow-path" class="size-6 animate-spin text-gray-500" />
           <span class="text-gray-500 mt-2">Loading...</span>
         </div>
-        <div :if={!@loading && @entries == []} class="audit-log-empty">
+        <div
+          :if={!@loading && @entries == []}
+          class="flex flex-col items-center justify-center h-[200px] text-wb-text-dim"
+        >
           <.icon name="hero-inbox" class="size-8 text-gray-600 mb-2" />
           <p class="text-gray-500">No audit entries found</p>
           <p class="text-gray-600 text-sm mt-1">
             Tool calls will appear here when the AI uses tools
           </p>
         </div>
-        <div :if={!@loading && @entries != []} class="audit-entries">
+        <div :if={!@loading && @entries != []} class="flex flex-col gap-2">
           <%= for entry <- @entries do %>
             <.audit_entry entry={entry} />
           <% end %>
@@ -75,9 +86,12 @@ defmodule LokaWeb.AdminLive.WorldBuilder.AuditLogPanel do
 
   defp audit_entry(assigns) do
     ~H"""
-    <div class={["audit-entry", @entry.result_status]}>
-      <div class="audit-entry-header">
-        <div class="audit-entry-status">
+    <div class={[
+      "bg-wb-panel-alt border border-wb-border rounded-wb-md py-2.5 px-3",
+      @entry.result_status == "error" && "!border-wb-danger-border !bg-wb-danger-surface"
+    ]}>
+      <div class="flex items-center gap-2 mb-2">
+        <div class="shrink-0">
           <.icon
             :if={@entry.result_status == "success"}
             name="hero-check-circle"
@@ -89,20 +103,29 @@ defmodule LokaWeb.AdminLive.WorldBuilder.AuditLogPanel do
             class="size-4 text-red-500"
           />
         </div>
-        <div class="audit-entry-tool">{format_tool_name(@entry.tool_name)}</div>
-        <div class="audit-entry-time">{format_time(@entry.inserted_at)}</div>
+        <div class="font-semibold text-wb-text text-[0.9rem]">
+          {format_tool_name(@entry.tool_name)}
+        </div>
+        <div class="ml-auto text-[0.75rem] text-wb-text-dim">{format_time(@entry.inserted_at)}</div>
       </div>
-      <div class="audit-entry-details">
-        <div class="audit-entry-args">
-          <span class="audit-label">Args:</span>
-          <code>{truncate_args(@entry.tool_args)}</code>
+      <div class="text-[0.8rem]">
+        <div class="mt-1.5">
+          <span class="text-wb-text-dim font-medium">Args:</span>
+          <code class="block bg-wb-border-dark py-1.5 px-2 rounded-wb-md mt-1 text-[0.75rem] text-wb-text-muted overflow-x-auto max-h-[100px] whitespace-pre-wrap break-words">
+            {truncate_args(@entry.tool_args)}
+          </code>
         </div>
         <div
           :if={@entry.result_detail}
-          class={["audit-entry-result", @entry.result_status == "error" && "error"]}
+          class="mt-1.5"
         >
-          <span class="audit-label">Result:</span>
-          <code>{truncate_result(@entry.result_detail)}</code>
+          <span class="text-wb-text-dim font-medium">Result:</span>
+          <code class={[
+            "block bg-wb-border-dark py-1.5 px-2 rounded-wb-md mt-1 text-[0.75rem] text-wb-text-muted overflow-x-auto max-h-[100px] whitespace-pre-wrap break-words",
+            @entry.result_status == "error" && "!text-wb-danger-text"
+          ]}>
+            {truncate_result(@entry.result_detail)}
+          </code>
         </div>
       </div>
     </div>

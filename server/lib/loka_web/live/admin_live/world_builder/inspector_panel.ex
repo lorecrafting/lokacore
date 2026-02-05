@@ -30,10 +30,15 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
       @collapsed && "panel-collapsed",
       @class
     ]}>
-      <div class="panel-header">
-        <h3 class="panel-title" style={if @collapsed, do: "display: none;", else: ""}>Details</h3>
+      <div class="flex justify-between items-center py-[0.4rem] px-3 bg-wb-surface border-b border-wb-toolbar-border min-h-8">
+        <h3
+          class="text-wb-xs font-semibold text-wb-text-muted tracking-[0.02em] m-0"
+          style={if @collapsed, do: "display: none;", else: ""}
+        >
+          Details
+        </h3>
         <button
-          class="panel-collapse-btn"
+          class="flex items-center justify-center w-6 h-6 bg-transparent border-none text-wb-text-dim cursor-pointer rounded-wb-sm transition-all duration-150 hover:bg-wb-border hover:text-wb-text"
           phx-click="toggle_panel"
           phx-value-panel="inspector"
           title={if @collapsed, do: "Expand (2)", else: "Collapse (2)"}
@@ -47,7 +52,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
         </button>
       </div>
 
-      <div class="panel-content" style={if @collapsed, do: "display: none;", else: "padding: 0;"}>
+      <div
+        class="panel-content flex-1 overflow-auto bg-wb-panel-alt !p-0"
+        style={if @collapsed, do: "display: none;"}
+      >
         <div :if={@selected_room}>
           <% room = get_room_data(@rooms, @selected_room) %>
           <.entity_header icon="hero-cube" name={room.name || room.key} />
@@ -60,32 +68,32 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
             <div class="border-b border-wb-panel">
               <.inspector_section title="Identity" />
               <div class="p-3 bg-wb-panel-header">
-                <div class="form-group">
+                <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
                   <label>Name</label>
                   <input
                     type="text"
                     name="name"
-                    class="input"
+                    class="w-full bg-wb-panel border border-wb-border text-wb-text px-2 py-[0.35rem] text-wb-xs rounded-[2px] transition-[border-color] duration-150 focus:outline-none focus:border-wb-accent-hover focus:bg-wb-panel-alt"
                     value={room.name}
                     placeholder="Room display name..."
                     phx-debounce="500"
                   />
                 </div>
-                <div class="form-group">
+                <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
                   <label>Description</label>
                   <textarea
                     name="description"
-                    class="textarea"
+                    class="w-full bg-wb-panel border border-wb-border text-wb-text px-2 py-[0.35rem] text-wb-xs rounded-[2px] transition-[border-color] duration-150 focus:outline-none focus:border-wb-accent-hover focus:bg-wb-panel-alt col-span-full mt-1"
                     rows="4"
                     placeholder="What the player sees when entering..."
                     phx-debounce="500"
                   ><%= room.description %></textarea>
                 </div>
-                <div class="form-group mt-2">
+                <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2 mt-2">
                   <label class="text-wb-xs text-wb-text-dim">Key (ID)</label>
                   <input
                     type="text"
-                    class="input text-wb-base bg-wb-border-dark text-wb-text-dim"
+                    class="w-full bg-wb-border-dark border border-wb-border text-wb-text-dim px-2 py-[0.35rem] text-wb-base rounded-[2px] transition-[border-color] duration-150 focus:outline-none focus:border-wb-accent-hover focus:bg-wb-panel-alt"
                     value={room.key}
                     readonly
                   />
@@ -97,14 +105,14 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
             <div class="border-b border-wb-panel">
               <.inspector_section title="Position" />
               <div class="p-3 bg-wb-panel-header">
-                <div class="form-group">
+                <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
                   <div class="grid grid-cols-3 gap-1">
                     <div>
                       <small>X</small>
                       <input
                         type="number"
                         name="x"
-                        class="input"
+                        class="w-full bg-wb-panel border border-wb-border text-wb-text px-2 py-[0.35rem] text-wb-xs rounded-[2px] transition-[border-color] duration-150 focus:outline-none focus:border-wb-accent-hover focus:bg-wb-panel-alt"
                         value={room.x}
                         phx-debounce="500"
                       />
@@ -114,7 +122,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                       <input
                         type="number"
                         name="y"
-                        class="input"
+                        class="w-full bg-wb-panel border border-wb-border text-wb-text px-2 py-[0.35rem] text-wb-xs rounded-[2px] transition-[border-color] duration-150 focus:outline-none focus:border-wb-accent-hover focus:bg-wb-panel-alt"
                         value={room.y}
                         phx-debounce="500"
                       />
@@ -124,7 +132,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                       <input
                         type="number"
                         name="z"
-                        class="input"
+                        class="w-full bg-wb-panel border border-wb-border text-wb-text px-2 py-[0.35rem] text-wb-xs rounded-[2px] transition-[border-color] duration-150 focus:outline-none focus:border-wb-accent-hover focus:bg-wb-panel-alt"
                         value={room.z}
                         phx-debounce="500"
                       />
@@ -138,20 +146,22 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
             <div class="border-b border-wb-panel">
               <.inspector_section title="Exits" count={map_size(room.exits || %{})} />
               <div class="p-3 bg-wb-panel-header">
-                <div :if={map_size(room.exits || %{}) > 0} class="exits-list">
+                <div :if={map_size(room.exits || %{}) > 0} class="flex flex-col gap-2">
                   <%= for {direction, dest_key} <- room.exits do %>
-                    <div class="exit-item">
-                      <div class="exit-info">
-                        <span class="exit-direction">{direction}</span>
-                        <span class="exit-arrow">→</span>
-                        <span class="exit-dest">{dest_key}</span>
+                    <div class="flex items-center justify-between p-2 bg-wb-input border border-wb-border rounded-wb-sm gap-2">
+                      <div class="flex items-center gap-2 flex-1 text-wb-base">
+                        <span class="font-semibold text-wb-accent uppercase text-wb-xs min-w-16">
+                          {direction}
+                        </span>
+                        <span class="text-wb-text-faint">→</span>
+                        <span class="text-wb-text font-wb-mono">{dest_key}</span>
                       </div>
                       <button
                         type="button"
                         phx-click="remove_exit"
                         phx-value-from={room.key}
                         phx-value-direction={direction}
-                        class="btn-icon-small"
+                        class="bg-transparent border-0 text-wb-text-muted cursor-pointer p-1 rounded-wb-sm transition-all flex items-center justify-center shrink-0 hover:bg-wb-border hover:text-wb-error"
                         title="Remove exit"
                       >
                         <.icon name="hero-x-mark" class="size-3" />
@@ -159,7 +169,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                     </div>
                   <% end %>
                 </div>
-                <p :if={map_size(room.exits || %{}) == 0} class="text-muted m-0 text-wb-base">
+                <p
+                  :if={map_size(room.exits || %{}) == 0}
+                  class="text-wb-text-faint text-sm italic m-0 text-wb-base"
+                >
                   No exits defined
                 </p>
                 
@@ -170,7 +183,11 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                 >
                   <input type="hidden" name="from" value={room.key} />
                   <div class="flex gap-2">
-                    <select name="direction" class="input flex-1" required>
+                    <select
+                      name="direction"
+                      class="w-full bg-wb-panel border border-wb-border text-wb-text px-2 py-[0.35rem] text-wb-xs rounded-[2px] transition-[border-color] duration-150 focus:outline-none focus:border-wb-accent-hover focus:bg-wb-panel-alt flex-1"
+                      required
+                    >
                       <option value="">Direction...</option>
                       <option value="north">North</option>
                       <option value="south">South</option>
@@ -186,12 +203,15 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                     <input
                       type="text"
                       name="to"
-                      class="input flex-[2]"
+                      class="w-full bg-wb-panel border border-wb-border text-wb-text px-2 py-[0.35rem] text-wb-xs rounded-[2px] transition-[border-color] duration-150 focus:outline-none focus:border-wb-accent-hover focus:bg-wb-panel-alt flex-[2]"
                       placeholder="Destination key..."
                       required
                     />
                   </div>
-                  <button type="submit" class="btn btn-sm w-full">
+                  <button
+                    type="submit"
+                    class="px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px w-full"
+                  >
                     <.icon name="hero-plus" class="size-3" />
                     <span>Add Exit</span>
                   </button>
@@ -206,12 +226,12 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
             <div class="border-b border-wb-panel">
               <.inspector_section title="Spawns" count={length(spawns)} />
               <div class="p-3 bg-wb-panel-header">
-                <div :if={length(mob_spawns) > 0} class="contents-category">
+                <div :if={length(mob_spawns) > 0} class="mb-1">
                   <small class="text-wb-text-dim font-medium">NPCs</small>
-                  <div class="contents-list">
+                  <div class="flex flex-col gap-1 mt-1">
                     <%= for spawn <- mob_spawns do %>
                       <div
-                        class="contents-item cursor-pointer"
+                        class="flex items-center gap-2 px-2 py-[0.35rem] bg-wb-panel-alt border border-wb-border rounded-wb-sm text-wb-base text-wb-text transition-all duration-100 hover:bg-wb-panel-header hover:border-wb-accent cursor-pointer"
                         phx-click="select_entity"
                         phx-value-type="npc"
                         phx-value-key={spawn.prototype}
@@ -228,13 +248,13 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                 </div>
                 <div
                   :if={length(item_spawns) > 0}
-                  class={["contents-category", length(mob_spawns) > 0 && "mt-2"]}
+                  class={["mb-1", length(mob_spawns) > 0 && "mt-2"]}
                 >
                   <small class="text-wb-text-dim font-medium">Items</small>
-                  <div class="contents-list">
+                  <div class="flex flex-col gap-1 mt-1">
                     <%= for spawn <- item_spawns do %>
                       <div
-                        class="contents-item cursor-pointer"
+                        class="flex items-center gap-2 px-2 py-[0.35rem] bg-wb-panel-alt border border-wb-border rounded-wb-sm text-wb-base text-wb-text transition-all duration-100 hover:bg-wb-panel-header hover:border-wb-accent cursor-pointer"
                         phx-click="select_entity"
                         phx-value-type="item"
                         phx-value-key={spawn.prototype}
@@ -250,10 +270,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                   </div>
                 </div>
                 <div :if={length(spawns) == 0}>
-                  <p class="text-muted m-0 text-wb-base">
+                  <p class="text-wb-text-faint text-sm italic m-0 text-wb-base">
                     No spawns defined for this room
                   </p>
-                  <p class="text-muted mt-2 mb-0 text-xs text-wb-text-faint">
+                  <p class="italic mt-2 mb-0 text-xs text-wb-text-faint">
                     Add spawns in zone files (priv/world/zones/)
                   </p>
                 </div>
@@ -270,7 +290,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                   phx-value-room_id={room.id || room.key}
                   phx-value-template_key={room.key}
                   phx-value-template_name={room.name}
-                  class="btn btn-sm w-full"
+                  class="px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px w-full"
                 >
                   <.icon name="hero-document-duplicate" class="size-3" />
                   <span>Save as Template</span>
@@ -280,7 +300,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                   type="button"
                   phx-click="delete_room"
                   phx-value-id={room.id || room.key}
-                  class="btn btn-danger btn-sm"
+                  class="px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px bg-wb-error text-white"
                 >
                   <.icon name="hero-trash" class="size-3" />
                   <span>Delete Room</span>
@@ -302,32 +322,32 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
             <div class="border-b border-wb-panel">
               <.inspector_section title="Identity" />
               <div class="p-3 bg-wb-panel-header">
-                <div class="form-group">
+                <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
                   <label>Name</label>
                   <input
                     type="text"
                     name="name"
-                    class="input"
+                    class="w-full bg-wb-panel border border-wb-border text-wb-text px-2 py-[0.35rem] text-wb-xs rounded-[2px] transition-[border-color] duration-150 focus:outline-none focus:border-wb-accent-hover focus:bg-wb-panel-alt"
                     value={npc[:name] || ""}
                     placeholder="NPC display name..."
                     phx-debounce="500"
                   />
                 </div>
-                <div class="form-group">
+                <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
                   <label>Description</label>
                   <textarea
                     name="description"
-                    class="textarea"
+                    class="w-full bg-wb-panel border border-wb-border text-wb-text px-2 py-[0.35rem] text-wb-xs rounded-[2px] transition-[border-color] duration-150 focus:outline-none focus:border-wb-accent-hover focus:bg-wb-panel-alt col-span-full mt-1"
                     rows="3"
                     placeholder="What the player sees when looking..."
                     phx-debounce="500"
                   ><%= npc[:description] || npc[:short_desc] || "" %></textarea>
                 </div>
-                <div class="form-group mt-2">
+                <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2 mt-2">
                   <label class="text-wb-xs text-wb-text-dim">Key (ID)</label>
                   <input
                     type="text"
-                    class="input text-wb-base bg-wb-border-dark text-wb-text-dim"
+                    class="w-full bg-wb-border-dark border border-wb-border text-wb-text-dim px-2 py-[0.35rem] text-wb-base rounded-[2px] transition-[border-color] duration-150 focus:outline-none focus:border-wb-accent-hover focus:bg-wb-panel-alt"
                     value={npc.key}
                     readonly
                   />
@@ -339,12 +359,12 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
             <div class="border-b border-wb-panel">
               <.inspector_section title="Attributes" />
               <div class="p-3 bg-wb-panel-header">
-                <div class="form-group">
+                <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
                   <label>Level</label>
                   <input
                     type="number"
                     name="level"
-                    class="input"
+                    class="w-full bg-wb-panel border border-wb-border text-wb-text px-2 py-[0.35rem] text-wb-xs rounded-[2px] transition-[border-color] duration-150 focus:outline-none focus:border-wb-accent-hover focus:bg-wb-panel-alt"
                     value={npc[:level] || 1}
                     min="1"
                     phx-debounce="500"
@@ -362,7 +382,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                   phx-click="show_script_editor_for_entity"
                   phx-value-entity_type="npc"
                   phx-value-entity_key={npc.key}
-                  class="btn btn-sm w-full"
+                  class="px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px w-full"
                 >
                   <.icon name="hero-code-bracket" class="size-3" />
                   <span>Edit Scripts</span>
@@ -371,7 +391,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                   type="button"
                   phx-click="show_dialogue_editor_for_entity"
                   phx-value-entity_key={npc.key}
-                  class="btn btn-sm w-full"
+                  class="px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px w-full"
                 >
                   <.icon name="hero-chat-bubble-left-right" class="size-3" />
                   <span>Edit Dialogues</span>
@@ -387,7 +407,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                   type="button"
                   phx-click="delete_npc"
                   phx-value-key={npc.key}
-                  class="btn btn-danger btn-sm"
+                  class="px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px bg-wb-error text-white"
                 >
                   <.icon name="hero-trash" class="size-3" />
                   <span>Delete NPC</span>
@@ -409,32 +429,32 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
             <div class="border-b border-wb-panel">
               <.inspector_section title="Identity" />
               <div class="p-3 bg-wb-panel-header">
-                <div class="form-group">
+                <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
                   <label>Name</label>
                   <input
                     type="text"
                     name="name"
-                    class="input"
+                    class="w-full bg-wb-panel border border-wb-border text-wb-text px-2 py-[0.35rem] text-wb-xs rounded-[2px] transition-[border-color] duration-150 focus:outline-none focus:border-wb-accent-hover focus:bg-wb-panel-alt"
                     value={item[:name] || ""}
                     placeholder="Item display name..."
                     phx-debounce="500"
                   />
                 </div>
-                <div class="form-group">
+                <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
                   <label>Description</label>
                   <textarea
                     name="description"
-                    class="textarea"
+                    class="w-full bg-wb-panel border border-wb-border text-wb-text px-2 py-[0.35rem] text-wb-xs rounded-[2px] transition-[border-color] duration-150 focus:outline-none focus:border-wb-accent-hover focus:bg-wb-panel-alt col-span-full mt-1"
                     rows="3"
                     placeholder="What the player sees when examining..."
                     phx-debounce="500"
                   ><%= item[:description] || item[:short_desc] || "" %></textarea>
                 </div>
-                <div class="form-group mt-2">
+                <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2 mt-2">
                   <label class="text-wb-xs text-wb-text-dim">Key (ID)</label>
                   <input
                     type="text"
-                    class="input text-wb-base bg-wb-border-dark text-wb-text-dim"
+                    class="w-full bg-wb-border-dark border border-wb-border text-wb-text-dim px-2 py-[0.35rem] text-wb-base rounded-[2px] transition-[border-color] duration-150 focus:outline-none focus:border-wb-accent-hover focus:bg-wb-panel-alt"
                     value={item.key}
                     readonly
                   />
@@ -446,9 +466,13 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
             <div class="border-b border-wb-panel">
               <.inspector_section title="Attributes" />
               <div class="p-3 bg-wb-panel-header">
-                <div class="form-group">
+                <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
                   <label>Item Type</label>
-                  <select name="item_type" class="input" phx-debounce="500">
+                  <select
+                    name="item_type"
+                    class="w-full bg-wb-panel border border-wb-border text-wb-text px-2 py-[0.35rem] text-wb-xs rounded-[2px] transition-[border-color] duration-150 focus:outline-none focus:border-wb-accent-hover focus:bg-wb-panel-alt"
+                    phx-debounce="500"
+                  >
                     <option value="misc" selected={item[:item_type] == "misc"}>Miscellaneous</option>
                     <option value="weapon" selected={item[:item_type] == "weapon"}>Weapon</option>
                     <option value="armor" selected={item[:item_type] == "armor"}>Armor</option>
@@ -472,7 +496,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                   phx-click="show_script_editor_for_entity"
                   phx-value-entity_type="item"
                   phx-value-entity_key={item.key}
-                  class="btn btn-sm w-full"
+                  class="px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px w-full"
                 >
                   <.icon name="hero-code-bracket" class="size-3" />
                   <span>Edit Scripts</span>
@@ -488,7 +512,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                   type="button"
                   phx-click="delete_item"
                   phx-value-key={item.key}
-                  class="btn btn-danger btn-sm"
+                  class="px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px bg-wb-error text-white"
                 >
                   <.icon name="hero-trash" class="size-3" />
                   <span>Delete Item</span>
@@ -509,24 +533,42 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
             <.inspector_section title="Move Selected" />
             <div class="p-3 bg-wb-panel-header">
               <form phx-submit="batch_move">
-                <div class="form-group">
+                <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
                   <label>Offset</label>
                   <div class="grid grid-cols-3 gap-1">
                     <div>
                       <small>ΔX</small>
-                      <input type="number" name="dx" class="input" value="0" />
+                      <input
+                        type="number"
+                        name="dx"
+                        class="w-full bg-wb-panel border border-wb-border text-wb-text px-2 py-[0.35rem] text-wb-xs rounded-[2px] transition-[border-color] duration-150 focus:outline-none focus:border-wb-accent-hover focus:bg-wb-panel-alt"
+                        value="0"
+                      />
                     </div>
                     <div>
                       <small>ΔY</small>
-                      <input type="number" name="dy" class="input" value="0" />
+                      <input
+                        type="number"
+                        name="dy"
+                        class="w-full bg-wb-panel border border-wb-border text-wb-text px-2 py-[0.35rem] text-wb-xs rounded-[2px] transition-[border-color] duration-150 focus:outline-none focus:border-wb-accent-hover focus:bg-wb-panel-alt"
+                        value="0"
+                      />
                     </div>
                     <div>
                       <small>ΔZ</small>
-                      <input type="number" name="dz" class="input" value="0" />
+                      <input
+                        type="number"
+                        name="dz"
+                        class="w-full bg-wb-panel border border-wb-border text-wb-text px-2 py-[0.35rem] text-wb-xs rounded-[2px] transition-[border-color] duration-150 focus:outline-none focus:border-wb-accent-hover focus:bg-wb-panel-alt"
+                        value="0"
+                      />
                     </div>
                   </div>
                 </div>
-                <button type="submit" class="btn btn-primary w-full">
+                <button
+                  type="submit"
+                  class="px-4 py-2 border-none rounded-wb-sm text-wb-base cursor-pointer transition-all duration-100 bg-wb-accent text-white hover:bg-wb-accent-hover w-full"
+                >
                   <.icon name="hero-arrows-right-left" class="size-4" />
                   <span>Move All</span>
                 </button>
@@ -539,25 +581,43 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
             <.inspector_section title="Clone Selected" />
             <div class="p-3 bg-wb-panel-header">
               <form phx-submit="batch_clone">
-                <div class="form-group">
+                <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
                   <label>Clone Offset</label>
                   <div class="grid grid-cols-3 gap-1">
                     <div>
                       <small>ΔX</small>
-                      <input type="number" name="dx" class="input" value="5" />
+                      <input
+                        type="number"
+                        name="dx"
+                        class="w-full bg-wb-panel border border-wb-border text-wb-text px-2 py-[0.35rem] text-wb-xs rounded-[2px] transition-[border-color] duration-150 focus:outline-none focus:border-wb-accent-hover focus:bg-wb-panel-alt"
+                        value="5"
+                      />
                     </div>
                     <div>
                       <small>ΔY</small>
-                      <input type="number" name="dy" class="input" value="5" />
+                      <input
+                        type="number"
+                        name="dy"
+                        class="w-full bg-wb-panel border border-wb-border text-wb-text px-2 py-[0.35rem] text-wb-xs rounded-[2px] transition-[border-color] duration-150 focus:outline-none focus:border-wb-accent-hover focus:bg-wb-panel-alt"
+                        value="5"
+                      />
                     </div>
                     <div>
                       <small>ΔZ</small>
-                      <input type="number" name="dz" class="input" value="0" />
+                      <input
+                        type="number"
+                        name="dz"
+                        class="w-full bg-wb-panel border border-wb-border text-wb-text px-2 py-[0.35rem] text-wb-xs rounded-[2px] transition-[border-color] duration-150 focus:outline-none focus:border-wb-accent-hover focus:bg-wb-panel-alt"
+                        value="0"
+                      />
                     </div>
                   </div>
                   <small>Clones will be created with new keys and copied tags</small>
                 </div>
-                <button type="submit" class="btn btn-sm w-full">
+                <button
+                  type="submit"
+                  class="px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px w-full"
+                >
                   <.icon name="hero-document-duplicate" class="size-3" />
                   <span>Clone All</span>
                 </button>
@@ -572,7 +632,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
               <button
                 type="button"
                 phx-click="batch_delete"
-                class="btn btn-danger"
+                class="px-4 py-2 border-none rounded-wb-sm text-wb-base cursor-pointer transition-all duration-100 bg-wb-error text-white hover:bg-wb-error"
               >
                 <.icon name="hero-trash" class="size-4" />
                 <span>Delete All ({length(@selected_keys)})</span>

@@ -40,27 +40,35 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
       end)
 
     ~H"""
-    <div class="dialogue-editor">
+    <div class="flex flex-col h-full bg-wb-panel">
       <!-- Header -->
-      <div class="dialogue-editor-header">
-        <div class="dialogue-editor-title">
+      <div class="flex items-center gap-4 py-3 px-4 bg-wb-panel-alt border-b border-wb-bg">
+        <div class="flex items-center gap-2 font-semibold text-wb-text">
           <.icon name="hero-chat-bubble-left-right" class="size-5" />
           <span>Dialogue Editor</span>
-          <span :if={@npc_key} class="dialogue-npc-name">- {@npc_key}</span>
+          <span :if={@npc_key} class="text-wb-text-dim font-normal">- {@npc_key}</span>
         </div>
-        <div class="dialogue-editor-stats">
-          <span class="stat-badge">{@node_count} nodes</span>
-          <span :if={@validation.errors != []} class="stat-badge stat-error">
+        <div class="flex gap-2">
+          <span class="py-[0.2rem] px-2 bg-wb-border rounded-wb-sm text-[0.7rem] text-wb-text-muted">
+            {@node_count} nodes
+          </span>
+          <span
+            :if={@validation.errors != []}
+            class="py-[0.2rem] px-2 bg-wb-danger-surface-hover rounded-wb-sm text-[0.7rem] text-wb-danger-text"
+          >
             {length(@validation.errors)} errors
           </span>
-          <span :if={@validation.warnings != []} class="stat-badge stat-warning">
+          <span
+            :if={@validation.warnings != []}
+            class="py-[0.2rem] px-2 bg-wb-warning-surface rounded-wb-sm text-[0.7rem] text-wb-warning"
+          >
             {length(@validation.warnings)} warnings
           </span>
         </div>
-        <div class="dialogue-editor-actions">
+        <div class="ml-auto flex gap-2">
           <button
             type="button"
-            class="btn btn-sm"
+            class="px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px"
             phx-click="dialogue_add_node"
             title="Add Node"
           >
@@ -68,7 +76,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
           </button>
           <button
             type="button"
-            class={["btn btn-sm", @show_preview && "active"]}
+            class={[
+              "px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px",
+              @show_preview && "active"
+            ]}
             phx-click="dialogue_toggle_preview"
             title="Preview"
           >
@@ -77,14 +88,14 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
         </div>
       </div>
 
-      <div class="dialogue-editor-body">
+      <div class="grid grid-cols-[250px_1fr] flex-1 overflow-hidden">
         <!-- Left: Tree View -->
-        <div class="dialogue-tree-panel">
-          <div class="panel-section-header">
+        <div class="bg-wb-panel-header border-r border-wb-bg flex flex-col overflow-hidden">
+          <div class="flex justify-between items-center py-2 px-3 bg-wb-panel-alt text-wb-xs font-semibold text-wb-text-muted border-b border-wb-bg">
             <span>Nodes</span>
           </div>
-          <div class="dialogue-tree">
-            <div :if={@node_count > 0} style="display: contents;">
+          <div class="flex-1 overflow-y-auto p-2">
+            <div :if={@node_count > 0} class="contents">
               <%= for {node_key, node} <- @dialogue_tree || %{} do %>
                 <.tree_node
                   node_key={node_key}
@@ -95,11 +106,14 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
                 />
               <% end %>
             </div>
-            <div :if={@node_count == 0} class="dialogue-tree-empty">
+            <div
+              :if={@node_count == 0}
+              class="flex flex-col items-center justify-center p-8 text-wb-text-dim text-center"
+            >
               <p>No dialogue nodes yet.</p>
               <button
                 type="button"
-                class="btn btn-sm btn-primary"
+                class="px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px bg-wb-accent text-white hover:bg-wb-accent-hover"
                 phx-click="dialogue_add_node"
                 phx-value-key="start"
               >
@@ -110,7 +124,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
         </div>
         
     <!-- Right: Node Editor or Preview -->
-        <div class="dialogue-node-panel">
+        <div class="bg-wb-panel overflow-y-auto">
           <.dialogue_preview
             :if={@show_preview}
             dialogue_tree={@dialogue_tree}
@@ -125,26 +139,29 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
           />
           <div
             :if={!@show_preview && !(@selected_node && @dialogue_tree[@selected_node])}
-            class="dialogue-node-empty"
+            class="flex flex-col items-center justify-center h-full text-wb-text-faint text-center"
           >
-            <.icon name="hero-cursor-arrow-rays" class="size-10" />
+            <.icon name="hero-cursor-arrow-rays" class="size-12 mb-4 opacity-30" />
             <p>Select a node to edit</p>
           </div>
         </div>
       </div>
       
     <!-- Validation Errors -->
-      <div :if={@validation.errors != []} class="dialogue-validation-errors">
-        <div class="validation-header">
+      <div
+        :if={@validation.errors != []}
+        class="bg-wb-danger-surface border-t border-wb-danger-border p-3"
+      >
+        <div class="flex items-center gap-2 text-wb-danger-text font-semibold mb-2">
           <.icon name="hero-exclamation-triangle" class="size-4" />
           <span>Validation Issues</span>
         </div>
-        <ul class="validation-list">
+        <ul class="m-0 pl-6 text-[0.8rem]">
           <%= for error <- @validation.errors do %>
-            <li class="validation-error">{error}</li>
+            <li class="text-wb-danger-text mb-1">{error}</li>
           <% end %>
           <%= for warning <- @validation.warnings do %>
-            <li class="validation-warning">{warning}</li>
+            <li class="text-wb-warning mb-1">{warning}</li>
           <% end %>
         </ul>
       </div>
@@ -167,24 +184,37 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
     ~H"""
     <div
       class={[
-        "dialogue-tree-node",
-        @selected && "selected",
-        @is_entry && "entry-node",
-        @has_error && "has-error"
+        "flex items-center gap-2 p-2 rounded-wb-sm cursor-pointer mb-[2px] transition-[background] duration-150 hover:bg-wb-border",
+        @selected && "bg-wb-accent-hover text-wb-text-bright",
+        @has_error && "border-l-2 border-wb-danger-text"
       ]}
       phx-click="dialogue_select_node"
       phx-value-key={@node_key}
     >
-      <div class="node-icon">
+      <div class={["shrink-0", @is_entry && "text-wb-success", !@is_entry && "text-wb-text-dim"]}>
         <.icon :if={@is_entry} name="hero-play-circle" class="size-4" />
         <.icon :if={!@is_entry} name="hero-chat-bubble-left" class="size-4" />
       </div>
-      <div class="node-info">
-        <span class="node-key">{@node_key}</span>
-        <span class="node-text">{truncate_text(@node["text"] || "No text", 40)}</span>
+      <div class="flex-1 min-w-0 flex flex-col">
+        <span class="text-[0.75rem] font-semibold">{@node_key}</span>
+        <span class={[
+          "text-[0.7rem] whitespace-nowrap overflow-hidden text-ellipsis",
+          @selected && "text-white/70",
+          !@selected && "text-wb-text-muted"
+        ]}>
+          {truncate_text(@node["text"] || "No text", 40)}
+        </span>
       </div>
-      <div class="node-meta">
-        <span :if={@choice_count > 0} class="choice-count" title="{@choice_count} choices">
+      <div class="shrink-0">
+        <span
+          :if={@choice_count > 0}
+          class={[
+            "py-[0.1rem] px-[0.4rem] rounded-[10px] text-[0.65rem]",
+            @selected && "bg-white/20 text-wb-text-bright",
+            !@selected && "bg-wb-border text-wb-text-muted"
+          ]}
+          title="{@choice_count} choices"
+        >
           {@choice_count}
         </span>
       </div>
@@ -202,12 +232,12 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
     assigns = assign(assigns, :choices, choices)
 
     ~H"""
-    <div class="node-editor">
-      <div class="panel-section-header">
+    <div class="p-4">
+      <div class="flex justify-between items-center py-2 px-3 bg-wb-panel-alt text-wb-xs font-semibold text-wb-text-muted border-b border-wb-bg -mx-4 -mt-4 mb-4">
         <span>Edit Node: {@node_key}</span>
         <button
           type="button"
-          class="btn-icon-small btn-danger"
+          class="bg-transparent border-0 text-wb-text-muted cursor-pointer p-1 rounded-wb-sm transition-all flex items-center justify-center shrink-0 hover:bg-wb-border hover:text-wb-error"
           phx-click="dialogue_delete_node"
           phx-value-key={@node_key}
           title="Delete Node"
@@ -220,19 +250,24 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
         <input type="hidden" name="node_key" value={@node_key} />
         
     <!-- Node Key (read-only for now) -->
-        <div class="form-group">
+        <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
           <label>Node Key</label>
-          <input type="text" class="input" value={@node_key} readonly />
+          <input
+            type="text"
+            class="w-full bg-wb-panel border border-wb-border rounded-wb-sm p-2 text-wb-text-bright text-wb-base font-[inherit] focus:outline-none focus:border-wb-accent focus:bg-wb-panel-alt"
+            value={@node_key}
+            readonly
+          />
           <small>Unique identifier for this node</small>
         </div>
         
     <!-- Speaker (optional) -->
-        <div class="form-group">
+        <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
           <label>Speaker (optional)</label>
           <input
             type="text"
             name="speaker"
-            class="input"
+            class="w-full bg-wb-panel border border-wb-border rounded-wb-sm p-2 text-wb-text-bright text-wb-base font-[inherit] focus:outline-none focus:border-wb-accent focus:bg-wb-panel-alt"
             value={@node["speaker"] || ""}
             placeholder="Leave empty for NPC name"
             phx-debounce="500"
@@ -240,11 +275,11 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
         </div>
         
     <!-- Node Text -->
-        <div class="form-group">
+        <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
           <label>Text</label>
           <textarea
             name="text"
-            class="textarea"
+            class="w-full bg-wb-panel border border-wb-border rounded-wb-sm p-2 text-wb-text-bright text-wb-base font-[inherit] resize-y min-h-16 focus:outline-none focus:border-wb-accent focus:bg-wb-panel-alt"
             rows="3"
             placeholder="What the NPC says..."
             phx-debounce="500"
@@ -252,12 +287,12 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
         </div>
         
     <!-- Choices Section -->
-        <div class="choices-section">
-          <div class="section-header">
+        <div class="mt-6 border border-wb-border rounded-wb-md overflow-hidden">
+          <div class="flex justify-between items-center py-2 px-3 bg-wb-panel-alt text-wb-xs font-semibold text-wb-text-muted">
             <span>Choices ({length(@choices)})</span>
             <button
               type="button"
-              class="btn btn-sm"
+              class="px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px"
               phx-click="dialogue_add_choice"
               phx-value-node_key={@node_key}
             >
@@ -265,10 +300,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
             </button>
           </div>
 
-          <div :if={@choices == []} class="no-choices">
+          <div :if={@choices == []} class="p-4 text-center text-wb-text-dim text-[0.8rem]">
             <p>No choices - dialogue ends here.</p>
           </div>
-          <div :if={@choices != []} class="choices-list">
+          <div :if={@choices != []} class="flex flex-col">
             <%= for {choice, index} <- Enum.with_index(@choices) do %>
               <.choice_editor
                 choice={choice}
@@ -292,12 +327,14 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
 
   defp choice_editor(assigns) do
     ~H"""
-    <div class="choice-editor">
-      <div class="choice-header">
-        <span class="choice-number">{@index + 1}</span>
+    <div class="border-b border-wb-border p-3 last:border-b-0">
+      <div class="flex justify-between items-center mb-2">
+        <span class="w-6 h-6 flex items-center justify-center bg-wb-accent-hover text-wb-text-bright rounded-full text-[0.7rem] font-semibold">
+          {@index + 1}
+        </span>
         <button
           type="button"
-          class="btn-icon-small"
+          class="bg-transparent border-0 text-wb-text-muted cursor-pointer p-1 rounded-wb-sm transition-all flex items-center justify-center shrink-0 hover:bg-wb-border hover:text-wb-error"
           phx-click="dialogue_delete_choice"
           phx-value-node_key={@node_key}
           phx-value-index={@index}
@@ -307,14 +344,14 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
         </button>
       </div>
 
-      <div class="choice-fields">
+      <div class="[&_.form-group]:mb-2 [&_.form-group:last-child]:mb-0">
         <!-- Choice Text -->
-        <div class="form-group">
+        <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
           <label>Response Text</label>
           <input
             type="text"
             name={"choice_#{@index}_text"}
-            class="input"
+            class="w-full bg-wb-panel border border-wb-border rounded-wb-sm p-2 text-wb-text-bright text-wb-base font-[inherit] focus:outline-none focus:border-wb-accent focus:bg-wb-panel-alt"
             value={@choice["text"] || ""}
             placeholder="Player's response..."
             phx-debounce="500"
@@ -322,9 +359,12 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
         </div>
         
     <!-- Next Node -->
-        <div class="form-group">
+        <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
           <label>Next Node</label>
-          <select name={"choice_#{@index}_next"} class="input">
+          <select
+            name={"choice_#{@index}_next"}
+            class="w-full bg-wb-panel border border-wb-border rounded-wb-sm p-2 text-wb-text-bright text-wb-base font-[inherit] focus:outline-none focus:border-wb-accent focus:bg-wb-panel-alt"
+          >
             <option value="">End Dialogue</option>
             <%= for {key, _} <- @all_nodes do %>
               <option value={key} selected={@choice["next"] == key}>{key}</option>
@@ -333,10 +373,13 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
         </div>
         
     <!-- Condition (expanded) -->
-        <div class="form-group">
+        <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
           <label>Show If (optional)</label>
-          <div class="condition-row">
-            <select name={"choice_#{@index}_condition_type"} class="input" style="flex: 1;">
+          <div class="flex gap-2">
+            <select
+              name={"choice_#{@index}_condition_type"}
+              class="w-full bg-wb-panel border border-wb-border rounded-wb-sm p-2 text-wb-text-bright text-wb-base font-[inherit] focus:outline-none focus:border-wb-accent focus:bg-wb-panel-alt flex-1"
+            >
               <option value="">Always show</option>
               <optgroup label="Quests">
                 <option value="quest_active" selected={condition_type(@choice) == "quest_active"}>
@@ -386,8 +429,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
             <input
               type="text"
               name={"choice_#{@index}_condition_value"}
-              class="input"
-              style="flex: 1;"
+              class="w-full bg-wb-panel border border-wb-border rounded-wb-sm p-2 text-wb-text-bright text-wb-base font-[inherit] focus:outline-none focus:border-wb-accent focus:bg-wb-panel-alt flex-1"
               placeholder={condition_placeholder(condition_type(@choice))}
               value={condition_value(@choice)}
             />
@@ -395,10 +437,13 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
         </div>
         
     <!-- Action (simplified) -->
-        <div class="form-group">
+        <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
           <label>Action (optional)</label>
-          <div class="action-row">
-            <select name={"choice_#{@index}_action_type"} class="input" style="flex: 1;">
+          <div class="flex gap-2">
+            <select
+              name={"choice_#{@index}_action_type"}
+              class="w-full bg-wb-panel border border-wb-border rounded-wb-sm p-2 text-wb-text-bright text-wb-base font-[inherit] focus:outline-none focus:border-wb-accent focus:bg-wb-panel-alt flex-1"
+            >
               <option value="">No action</option>
               <option value="offer_quest" selected={action_type(@choice) == "offer_quest"}>
                 Offer Quest
@@ -427,8 +472,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
             <input
               type="text"
               name={"choice_#{@index}_action_value"}
-              class="input"
-              style="flex: 1;"
+              class="w-full bg-wb-panel border border-wb-border rounded-wb-sm p-2 text-wb-text-bright text-wb-base font-[inherit] focus:outline-none focus:border-wb-accent focus:bg-wb-panel-alt flex-1"
               placeholder="quest_id, item_key, or amount"
               value={action_value(@choice)}
             />
@@ -466,14 +510,14 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
       |> assign(:visible_choices, visible_choices)
 
     ~H"""
-    <div class="dialogue-preview-container">
+    <div class="flex h-full gap-4">
       <!-- Mock State Panel -->
-      <div class="mock-state-panel">
-        <div class="panel-section-header">
+      <div class="w-[220px] shrink-0 bg-wb-panel-alt rounded-wb-md flex flex-col overflow-hidden">
+        <div class="flex justify-between items-center py-2 px-3 bg-wb-panel-header border-b border-wb-border text-wb-xs font-semibold text-wb-text-muted">
           <span>Test State</span>
           <button
             type="button"
-            class="btn btn-sm"
+            class="px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px"
             phx-click="dialogue_mock_reset"
             title="Clear all mock state"
           >
@@ -481,14 +525,17 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
           </button>
         </div>
 
-        <div class="mock-state-section">
-          <label>Active Quests</label>
-          <div class="mock-tags">
+        <div class="py-2 px-[10px] border-b border-wb-border">
+          <label class="block text-[10px] uppercase text-wb-text-muted mb-[6px]">
+            Active Quests
+          </label>
+          <div class="flex flex-wrap gap-1 mb-[6px] min-h-[22px]">
             <%= for quest <- Map.get(@mock_state, :active_quests, []) do %>
-              <span class="mock-tag">
+              <span class="inline-flex items-center gap-[3px] bg-wb-mock-tag-active text-wb-text-bright py-[2px] px-[6px] rounded-wb-sm text-[11px]">
                 {quest}
                 <button
                   type="button"
+                  class="bg-none border-none text-wb-text-muted cursor-pointer p-0 text-[14px] leading-none hover:text-wb-danger-text"
                   phx-click="dialogue_mock_remove"
                   phx-value-type="active_quests"
                   phx-value-value={quest}
@@ -498,16 +545,18 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
               </span>
             <% end %>
           </div>
-          <div class="mock-add-row">
+          <div class="flex gap-1">
             <input
               type="text"
               placeholder="quest_key"
               id="mock-active-quest"
+              class="flex-1 py-1 px-[6px] bg-wb-border-dark border border-wb-border rounded-wb-sm text-wb-text text-[11px]"
               phx-keydown="dialogue_mock_add_keydown"
               phx-value-type="active_quests"
             />
             <button
               type="button"
+              class="py-1 px-2 bg-wb-border border-none rounded-wb-sm text-wb-text cursor-pointer text-[11px] hover:bg-wb-border-light"
               phx-click="dialogue_mock_add"
               phx-value-type="active_quests"
             >
@@ -516,14 +565,17 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
           </div>
         </div>
 
-        <div class="mock-state-section">
-          <label>Completed Quests</label>
-          <div class="mock-tags">
+        <div class="py-2 px-[10px] border-b border-wb-border">
+          <label class="block text-[10px] uppercase text-wb-text-muted mb-[6px]">
+            Completed Quests
+          </label>
+          <div class="flex flex-wrap gap-1 mb-[6px] min-h-[22px]">
             <%= for quest <- Map.get(@mock_state, :completed_quests, []) do %>
-              <span class="mock-tag mock-tag-completed">
+              <span class="inline-flex items-center gap-[3px] bg-wb-mock-tag-completed text-wb-text-bright py-[2px] px-[6px] rounded-wb-sm text-[11px]">
                 {quest}
                 <button
                   type="button"
+                  class="bg-none border-none text-wb-text-muted cursor-pointer p-0 text-[14px] leading-none hover:text-wb-danger-text"
                   phx-click="dialogue_mock_remove"
                   phx-value-type="completed_quests"
                   phx-value-value={quest}
@@ -533,16 +585,18 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
               </span>
             <% end %>
           </div>
-          <div class="mock-add-row">
+          <div class="flex gap-1">
             <input
               type="text"
               placeholder="quest_key"
               id="mock-completed-quest"
+              class="flex-1 py-1 px-[6px] bg-wb-border-dark border border-wb-border rounded-wb-sm text-wb-text text-[11px]"
               phx-keydown="dialogue_mock_add_keydown"
               phx-value-type="completed_quests"
             />
             <button
               type="button"
+              class="py-1 px-2 bg-wb-border border-none rounded-wb-sm text-wb-text cursor-pointer text-[11px] hover:bg-wb-border-light"
               phx-click="dialogue_mock_add"
               phx-value-type="completed_quests"
             >
@@ -551,14 +605,17 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
           </div>
         </div>
 
-        <div class="mock-state-section">
-          <label>Inventory Items</label>
-          <div class="mock-tags">
+        <div class="py-2 px-[10px] border-b border-wb-border">
+          <label class="block text-[10px] uppercase text-wb-text-muted mb-[6px]">
+            Inventory Items
+          </label>
+          <div class="flex flex-wrap gap-1 mb-[6px] min-h-[22px]">
             <%= for item <- Map.get(@mock_state, :items, []) do %>
-              <span class="mock-tag mock-tag-item">
+              <span class="inline-flex items-center gap-[3px] bg-wb-mock-tag-item text-wb-text-bright py-[2px] px-[6px] rounded-wb-sm text-[11px]">
                 {item}
                 <button
                   type="button"
+                  class="bg-none border-none text-wb-text-muted cursor-pointer p-0 text-[14px] leading-none hover:text-wb-danger-text"
                   phx-click="dialogue_mock_remove"
                   phx-value-type="items"
                   phx-value-value={item}
@@ -568,28 +625,35 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
               </span>
             <% end %>
           </div>
-          <div class="mock-add-row">
+          <div class="flex gap-1">
             <input
               type="text"
               placeholder="item_key"
               id="mock-item"
+              class="flex-1 py-1 px-[6px] bg-wb-border-dark border border-wb-border rounded-wb-sm text-wb-text text-[11px]"
               phx-keydown="dialogue_mock_add_keydown"
               phx-value-type="items"
             />
-            <button type="button" phx-click="dialogue_mock_add" phx-value-type="items">
+            <button
+              type="button"
+              class="py-1 px-2 bg-wb-border border-none rounded-wb-sm text-wb-text cursor-pointer text-[11px] hover:bg-wb-border-light"
+              phx-click="dialogue_mock_add"
+              phx-value-type="items"
+            >
               Add
             </button>
           </div>
         </div>
 
-        <div class="mock-state-section">
-          <label>Flags</label>
-          <div class="mock-tags">
+        <div class="py-2 px-[10px] border-b border-wb-border">
+          <label class="block text-[10px] uppercase text-wb-text-muted mb-[6px]">Flags</label>
+          <div class="flex flex-wrap gap-1 mb-[6px] min-h-[22px]">
             <%= for flag <- Map.get(@mock_state, :flags, []) do %>
-              <span class="mock-tag mock-tag-flag">
+              <span class="inline-flex items-center gap-[3px] bg-wb-mock-tag-flag text-wb-text-bright py-[2px] px-[6px] rounded-wb-sm text-[11px]">
                 {flag}
                 <button
                   type="button"
+                  class="bg-none border-none text-wb-text-muted cursor-pointer p-0 text-[14px] leading-none hover:text-wb-danger-text"
                   phx-click="dialogue_mock_remove"
                   phx-value-type="flags"
                   phx-value-value={flag}
@@ -599,24 +663,30 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
               </span>
             <% end %>
           </div>
-          <div class="mock-add-row">
+          <div class="flex gap-1">
             <input
               type="text"
               placeholder="flag_name"
               id="mock-flag"
+              class="flex-1 py-1 px-[6px] bg-wb-border-dark border border-wb-border rounded-wb-sm text-wb-text text-[11px]"
               phx-keydown="dialogue_mock_add_keydown"
               phx-value-type="flags"
             />
-            <button type="button" phx-click="dialogue_mock_add" phx-value-type="flags">
+            <button
+              type="button"
+              class="py-1 px-2 bg-wb-border border-none rounded-wb-sm text-wb-text cursor-pointer text-[11px] hover:bg-wb-border-light"
+              phx-click="dialogue_mock_add"
+              phx-value-type="flags"
+            >
               Add
             </button>
           </div>
         </div>
         
     <!-- Level and Phase (compact row) -->
-        <div class="mock-state-section" style="display: flex; gap: 12px;">
-          <div style="flex: 1;">
-            <label>Level</label>
+        <div class="py-2 px-[10px] border-b border-wb-border flex gap-3">
+          <div class="flex-1">
+            <label class="block text-[10px] uppercase text-wb-text-muted mb-[6px]">Level</label>
             <input
               type="number"
               min="1"
@@ -624,15 +694,17 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
               value={Map.get(@mock_state, :level, 1)}
               phx-change="dialogue_mock_set_level"
               name="level"
-              style="width: 100%; padding: 4px 6px; background: var(--wb-surface); border: 1px solid var(--wb-border); border-radius: 4px; color: var(--wb-text);"
+              class="w-full py-1 px-[6px] bg-wb-surface border border-wb-border rounded text-wb-text"
             />
           </div>
-          <div style="flex: 1;">
-            <label>Time of Day</label>
+          <div class="flex-1">
+            <label class="block text-[10px] uppercase text-wb-text-muted mb-[6px]">
+              Time of Day
+            </label>
             <select
               phx-change="dialogue_mock_set_phase"
               name="phase"
-              style="width: 100%; padding: 4px 6px; background: var(--wb-surface); border: 1px solid var(--wb-border); border-radius: 4px; color: var(--wb-text);"
+              class="w-full py-1 px-[6px] bg-wb-surface border border-wb-border rounded text-wb-text"
             >
               <option value="day" selected={Map.get(@mock_state, :phase, "day") == "day"}>
                 Day
@@ -652,12 +724,12 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
       </div>
       
     <!-- Preview -->
-      <div class="dialogue-preview">
-        <div class="panel-section-header">
+      <div class="h-full flex flex-col flex-1">
+        <div class="flex justify-between items-center py-2 px-3 bg-wb-panel-alt text-wb-xs font-semibold text-wb-text-muted border-b border-wb-bg">
           <span>Preview</span>
           <button
             type="button"
-            class="btn btn-sm"
+            class="px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px"
             phx-click="dialogue_preview_reset"
             title="Reset to start"
           >
@@ -665,19 +737,19 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
           </button>
         </div>
 
-        <div :if={@node} class="preview-content">
-          <div class="preview-speaker">
+        <div :if={@node} class="flex-1 p-6 flex flex-col">
+          <div class="font-semibold text-wb-success mb-2">
             {@node["speaker"] || "NPC"}
           </div>
-          <div class="preview-text">
+          <div class="bg-wb-panel-alt p-4 rounded-wb-md mb-4 leading-relaxed border-l-[3px] border-wb-success">
             {@node["text"] || "..."}
           </div>
 
-          <div class="preview-choices">
+          <div class="flex flex-col gap-2 mt-auto">
             <%= for {choice, index} <- @visible_choices do %>
               <button
                 type="button"
-                class="preview-choice"
+                class="block w-full text-left py-3 px-4 bg-wb-panel-header border border-wb-border text-wb-text rounded-wb-md cursor-pointer transition-all duration-150 hover:bg-wb-accent-hover hover:border-wb-accent-hover hover:text-wb-text-bright"
                 phx-click="dialogue_preview_choice"
                 phx-value-index={index}
                 phx-value-next={choice["next"]}
@@ -685,7 +757,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
                 {choice["text"] || "Continue"}
                 <span
                   :if={has_condition?(choice)}
-                  class="choice-condition-badge"
+                  class="ml-auto text-wb-text-muted"
                   title="Has condition"
                 >
                   <.icon name="hero-funnel" class="size-3" />
@@ -695,7 +767,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
 
             <div
               :if={@visible_choices == [] and (@node["choices"] || []) != []}
-              class="preview-filtered"
+              class="flex items-center justify-center gap-2 text-wb-text-muted p-4 bg-wb-panel-alt rounded-wb-md border border-dashed border-wb-border"
             >
               <.icon name="hero-funnel" class="size-4" />
               <em>
@@ -703,12 +775,12 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DialogueEditor do
               </em>
             </div>
 
-            <div :if={(@node["choices"] || []) == []} class="preview-end">
+            <div :if={(@node["choices"] || []) == []} class="text-center text-wb-text-dim p-4">
               <em>End of dialogue</em>
             </div>
           </div>
         </div>
-        <div :if={!@node} class="preview-error">
+        <div :if={!@node} class="p-8 text-center text-wb-danger-text">
           <p>Node "{@current_node}" not found</p>
         </div>
       </div>

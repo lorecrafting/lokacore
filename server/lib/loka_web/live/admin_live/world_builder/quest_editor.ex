@@ -27,11 +27,11 @@ defmodule LokaWeb.AdminLive.WorldBuilder.QuestEditor do
         "quest-validation-banner",
         @validation.errors == [] && "valid"
       ]}>
-        <div :if={@validation.errors == []} style="display: contents;">
+        <div :if={@validation.errors == []} class="contents">
           <.icon name="hero-check-circle" class="size-4" />
           <span>Valid quest</span>
         </div>
-        <div :if={@validation.errors != []} style="display: contents;">
+        <div :if={@validation.errors != []} class="contents">
           <.icon name="hero-exclamation-triangle" class="size-4" />
           <span>{length(@validation.errors)} error(s)</span>
         </div>
@@ -153,7 +153,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.QuestEditor do
           <div class="quest-section-header">
             <.icon name="hero-clipboard-document-check" class="size-4" />
             <span>Objectives</span>
-            <div style="flex: 1;"></div>
+            <div class="flex-1"></div>
             <button class="quest-add-btn" phx-click="quest_add_objective" title="Add objective">
               <.icon name="hero-plus" class="size-3" /> Add
             </button>
@@ -181,7 +181,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.QuestEditor do
                   <option value="use_item" selected={obj.type == "use_item"}>Use Item</option>
                   <option value="explore" selected={obj.type == "explore"}>Explore</option>
                 </select>
-                <div style="flex: 1;"></div>
+                <div class="flex-1"></div>
                 <button
                   class="quest-remove-btn"
                   phx-click="quest_remove_objective"
@@ -216,8 +216,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.QuestEditor do
                     phx-value-field="count"
                     name="value"
                     min="1"
-                    class="quest-input-sm"
-                    style="width: 60px;"
+                    class="quest-input-sm w-[60px]"
                     phx-debounce="300"
                   />
                 </div>
@@ -296,7 +295,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.QuestEditor do
           <div class="quest-section-header">
             <.icon name="hero-lock-closed" class="size-4" />
             <span>Prerequisites</span>
-            <div style="flex: 1;"></div>
+            <div class="flex-1"></div>
             <button
               class="quest-add-btn"
               phx-click="quest_add_prerequisite"
@@ -330,8 +329,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.QuestEditor do
                 phx-value-field="value"
                 name="value"
                 placeholder={if prereq.type == "level", do: "1", else: "key"}
-                class="quest-input-sm"
-                style="flex: 1;"
+                class="quest-input-sm flex-1"
                 phx-debounce="300"
               />
               <button
@@ -370,9 +368,14 @@ defmodule LokaWeb.AdminLive.WorldBuilder.QuestEditor do
 
       <%!-- Footer with save/cancel --%>
       <div class="quest-editor-footer">
-        <button class="btn btn-sm btn-secondary" phx-click="close_quest_editor">Cancel</button>
         <button
-          class="btn btn-sm btn-primary"
+          class="px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px bg-wb-border text-wb-text hover:bg-wb-border-light hover:text-wb-text-bright"
+          phx-click="close_quest_editor"
+        >
+          Cancel
+        </button>
+        <button
+          class="px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px bg-wb-accent text-white hover:bg-wb-accent-hover"
           phx-click="quest_save"
           disabled={@validation.errors != []}
         >

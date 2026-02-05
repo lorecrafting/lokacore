@@ -16,16 +16,16 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DocumentViewer do
 
   def document_viewer(assigns) do
     ~H"""
-    <div class={["document-viewer", @class]}>
-      <div :if={@document} style="display: contents;">
-        <div class="document-header">
-          <div class="document-info">
-            <span class="document-name">{@document.filename}</span>
-            <span class="document-meta">
+    <div class={["flex flex-col h-full", @class]}>
+      <div :if={@document} class="contents">
+        <div class="flex items-center justify-between px-4 py-3 bg-wb-panel-alt border-b border-wb-border">
+          <div class="flex flex-col gap-0.5">
+            <span class="font-semibold text-wb-text-bright text-[0.9rem]">{@document.filename}</span>
+            <span class="text-wb-text-dim text-[0.75rem]">
               {@document.doc_type} • v{@document.version}
             </span>
           </div>
-          <div class="document-actions">
+          <div class="flex gap-1">
             <button
               class="btn btn-sm btn-ghost"
               phx-click="refresh_document"
@@ -44,13 +44,13 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DocumentViewer do
           </div>
         </div>
 
-        <div class="document-content">
-          <div :if={@loading} class="document-loading">
+        <div class="flex-1 overflow-y-auto p-5">
+          <div :if={@loading} class="flex flex-col items-center justify-center p-10 text-wb-text-dim">
             <.icon name="hero-arrow-path" class="size-6 animate-spin text-gray-500" />
             <span class="text-gray-500 mt-2">Loading...</span>
           </div>
 
-          <div :if={@error} class="document-error">
+          <div :if={@error} class="flex flex-col items-center justify-center p-10 text-wb-error">
             <.icon name="hero-exclamation-triangle" class="size-6 text-red-500" />
             <p class="text-red-400 mt-2">{@error}</p>
           </div>
@@ -60,7 +60,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.DocumentViewer do
           </div>
         </div>
       </div>
-      <div :if={!@document} class="empty-state">
+      <div
+        :if={!@document}
+        class="flex flex-col items-center justify-center h-full p-10 text-center text-wb-text-faint"
+      >
         <.icon name="hero-document-text" class="size-12 text-gray-600 mb-4" />
         <p class="text-gray-500">Select a document to view</p>
         <p class="text-gray-600 text-sm mt-2">

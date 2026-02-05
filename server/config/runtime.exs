@@ -129,7 +129,7 @@ if config_env() == :prod do
 
   config :loka, :cors_origins, cors_origins
 
-  # Guardian JWT secret for mobile auth
+  # Guardian JWT secret for game client auth
   guardian_secret =
     System.get_env("GUARDIAN_SECRET_KEY") ||
       raise """

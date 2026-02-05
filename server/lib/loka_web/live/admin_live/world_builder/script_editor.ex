@@ -98,15 +98,22 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptEditor do
         aria-labelledby="script-editor-title"
       >
         <div
-          class="modal-content modal-fullscreen"
+          class="modal-content flex flex-col"
           phx-click-away="close_script_editor"
-          style="width: 95%; max-width: 1400px; height: 90vh;"
+          class="w-[95%] max-w-[1400px] h-[90vh]"
         >
-          <div class="modal-header">
-            <h3 id="script-editor-title">{if @script, do: "Edit Script", else: "Create Script"}</h3>
-            <button phx-click="close_script_editor" class="modal-close">&times;</button>
+          <div class="flex items-center justify-between p-4 border-b border-wb-border">
+            <h3 id="script-editor-title" class="m-0 text-wb-text-bright text-base font-semibold">
+              {if @script, do: "Edit Script", else: "Create Script"}
+            </h3>
+            <button
+              phx-click="close_script_editor"
+              class="bg-transparent border-0 text-wb-text-muted text-2xl cursor-pointer p-0 w-8 h-8 flex items-center justify-center rounded-wb-sm transition-all hover:bg-wb-border hover:text-wb-text-bright"
+            >
+              &times;
+            </button>
           </div>
-          <div style="flex: 1; min-height: 0; overflow: hidden;">
+          <div class="flex-1 min-h-0 overflow-hidden">
             <.script_form
               script_data={@script_data}
               entities_data={@entities_data}
@@ -129,9 +136,9 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptEditor do
     ~H"""
     <%!-- Header with form fields --%>
     <div class="px-3 py-2 border-b border-wb-border shrink-0">
-      <div class="quest-form-row-pair">
-        <div class="quest-form-row">
-          <label>Key</label>
+      <div class="grid grid-cols-2 gap-2 mb-1.5">
+        <div class="mb-1.5">
+          <label class="block text-[0.75rem] text-wb-text-dim mb-0.5">Key</label>
           <input
             type="text"
             value={@script_data[:key] || ""}
@@ -139,12 +146,12 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptEditor do
             phx-value-field="key"
             name="value"
             placeholder="my_script_name"
-            class="quest-input"
+            class="w-full text-[0.8rem] bg-wb-bg border border-wb-border rounded-wb-md text-wb-text focus:border-wb-accent focus:outline-none px-2 py-[5px]"
             phx-debounce="300"
           />
         </div>
-        <div class="quest-form-row">
-          <label>Name</label>
+        <div class="mb-1.5">
+          <label class="block text-[0.75rem] text-wb-text-dim mb-0.5">Name</label>
           <input
             type="text"
             value={@script_data[:name] || ""}
@@ -152,19 +159,19 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptEditor do
             phx-value-field="name"
             name="value"
             placeholder="Display Name"
-            class="quest-input"
+            class="w-full text-[0.8rem] bg-wb-bg border border-wb-border rounded-wb-md text-wb-text focus:border-wb-accent focus:outline-none px-2 py-[5px]"
             phx-debounce="300"
           />
         </div>
       </div>
-      <div class="quest-form-row-pair">
-        <div class="quest-form-row">
-          <label>Hook</label>
+      <div class="grid grid-cols-2 gap-2 mb-1.5">
+        <div class="mb-1.5">
+          <label class="block text-[0.75rem] text-wb-text-dim mb-0.5">Hook</label>
           <select
             phx-change="script_update_field"
             phx-value-field="hook"
             name="value"
-            class="quest-input"
+            class="w-full text-[0.8rem] bg-wb-bg border border-wb-border rounded-wb-md text-wb-text focus:border-wb-accent focus:outline-none px-2 py-[5px]"
           >
             <%= for {val, label, _desc} <- @hooks do %>
               <option value={val} selected={(@script_data[:hook] || "on_talk") == val}>
@@ -173,13 +180,13 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptEditor do
             <% end %>
           </select>
         </div>
-        <div class="quest-form-row">
-          <label>Entity</label>
+        <div class="mb-1.5">
+          <label class="block text-[0.75rem] text-wb-text-dim mb-0.5">Entity</label>
           <select
             phx-change="script_update_field"
             phx-value-field="entity_key"
             name="value"
-            class="quest-input"
+            class="w-full text-[0.8rem] bg-wb-bg border border-wb-border rounded-wb-md text-wb-text focus:border-wb-accent focus:outline-none px-2 py-[5px]"
           >
             <option value="">None (standalone)</option>
             <%= for e <- @entities_data do %>
@@ -190,8 +197,8 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptEditor do
           </select>
         </div>
       </div>
-      <div class="quest-form-row">
-        <label>Tags (comma-separated)</label>
+      <div class="mb-1.5">
+        <label class="block text-[0.75rem] text-wb-text-dim mb-0.5">Tags (comma-separated)</label>
         <input
           type="text"
           value={format_tags(@script_data[:tags])}
@@ -199,7 +206,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptEditor do
           phx-value-field="tags"
           name="value"
           placeholder="npc, combat, greeting"
-          class="quest-input"
+          class="w-full text-[0.8rem] bg-wb-bg border border-wb-border rounded-wb-md text-wb-text focus:border-wb-accent focus:outline-none px-2 py-[5px]"
           phx-debounce="300"
         />
       </div>
@@ -215,7 +222,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptEditor do
           phx-update="ignore"
           data-value={@script_data[:source] || default_source()}
           data-language="elixir"
-          style="width: 100%; height: 100%;"
+          class="w-full h-full"
         >
           <div class="flex items-center justify-center h-full text-wb-text-muted text-wb-sm">
             Loading editor...
@@ -226,8 +233,8 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptEditor do
       <%!-- Sidebar --%>
       <div class="w-[220px] border-l border-wb-border overflow-y-auto shrink-0">
         <%!-- API Reference --%>
-        <div class="quest-section" style="max-height: 100%; overflow-y: auto;">
-          <div class="quest-section-header">
+        <div class="mb-3 border border-wb-border rounded-wb-md overflow-hidden max-h-full overflow-y-auto">
+          <div class="flex items-center gap-1.5 text-[0.8rem] font-semibold text-wb-text-muted uppercase px-2.5 py-2 tracking-wide">
             <.icon name="hero-book-open" class="size-4" />
             <span>API Reference</span>
           </div>
@@ -244,9 +251,19 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptEditor do
     </div>
 
     <%!-- Footer --%>
-    <div class="quest-editor-footer">
-      <button class="btn btn-sm btn-secondary" phx-click="close_script_editor">Cancel</button>
-      <button class="btn btn-sm btn-primary" phx-click="save_script">Save Script</button>
+    <div class="flex justify-end gap-2 shrink-0 border-t border-wb-border px-3 py-2">
+      <button
+        class="px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px bg-wb-border text-wb-text hover:bg-wb-border-light hover:text-wb-text-bright"
+        phx-click="close_script_editor"
+      >
+        Cancel
+      </button>
+      <button
+        class="px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px bg-wb-accent text-white hover:bg-wb-accent-hover"
+        phx-click="save_script"
+      >
+        Save Script
+      </button>
     </div>
     """
   end

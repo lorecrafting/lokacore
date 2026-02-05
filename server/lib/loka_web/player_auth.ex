@@ -63,16 +63,16 @@ defmodule LokaWeb.PlayerAuth do
   Redirects to the session's `:player_return_to` path
   or falls back to the `signed_in_path/1`.
 
-  If `mobile_auth_callback` is set in session, redirects to mobile callback
-  to generate JWT for the mobile app deep link.
+  If `client_auth_callback` is set in session, redirects to client callback
+  to generate JWT for the game client deep link.
   """
   def log_in_player(conn, player, params \\ %{}) do
-    mobile_callback = get_session(conn, :mobile_auth_callback)
+    client_callback = get_session(conn, :client_auth_callback)
     player_return_to = get_session(conn, :player_return_to)
 
     redirect_to =
       cond do
-        mobile_callback -> ~p"/mobile/auth/callback"
+        client_callback -> ~p"/client/auth/callback"
         player_return_to -> player_return_to
         true -> signed_in_path(conn)
       end

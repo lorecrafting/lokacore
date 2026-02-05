@@ -54,56 +54,44 @@ defmodule LokaWeb.AdminLive.WorldBuilder.KeyboardHelpModal do
     ~H"""
     <div
       :if={@show}
-      class="modal-overlay"
+      class="modal-overlay z-[1000]"
       phx-click="close_keyboard_help"
-      style="z-index: 1000;"
       role="dialog"
       aria-modal="true"
       aria-labelledby="keyboard-help-title"
     >
       <div
-        class="modal-content"
+        class="modal-content max-w-[650px] max-h-[80vh] overflow-hidden flex flex-col"
         phx-click-away="close_keyboard_help"
-        style="max-width: 650px; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;"
       >
-        <div
-          class="modal-header"
-          style="border-bottom: 1px solid var(--wb-border); padding-bottom: 12px;"
-        >
+        <div class="flex items-center justify-between p-4 pb-3 border-b border-wb-border">
           <h3
             id="keyboard-help-title"
-            style="display: flex; align-items: center; gap: 8px; margin: 0;"
+            class="m-0 text-wb-text-bright text-base font-semibold flex items-center gap-2"
           >
             <.icon name="hero-command-line" class="size-5" /> Keyboard Shortcuts
           </h3>
           <button
             phx-click="close_keyboard_help"
-            class="modal-close"
-            style="position: absolute; right: 16px; top: 16px; background: none; border: none; color: var(--wb-text-muted); font-size: 24px; cursor: pointer;"
+            class="bg-transparent border-0 text-wb-text-muted text-2xl cursor-pointer p-0 w-8 h-8 flex items-center justify-center rounded-wb-sm transition-all hover:bg-wb-border hover:text-wb-text-bright absolute right-4 top-4"
           >
             &times;
           </button>
         </div>
 
-        <div
-          class="modal-body"
-          style="flex: 1; overflow-y: auto; padding: 16px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;"
-        >
+        <div class="modal-body flex-1 overflow-y-auto py-4 grid grid-cols-2 gap-5">
           <%= for {category, shortcuts} <- @shortcuts do %>
-            <div class="shortcut-category" style="margin-bottom: 8px;">
-              <h4 style="color: var(--wb-accent); font-size: 13px; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+            <div class="shortcut-category mb-2">
+              <h4 class="text-wb-accent text-[13px] font-semibold mb-2 uppercase tracking-wide">
                 {category}
               </h4>
-              <div class="shortcut-list" style="display: flex; flex-direction: column; gap: 6px;">
+              <div class="shortcut-list flex flex-col gap-1.5">
                 <%= for {key, description} <- shortcuts do %>
-                  <div
-                    class="shortcut-row"
-                    style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0;"
-                  >
-                    <kbd style="background: var(--wb-surface); border: 1px solid var(--wb-border); border-radius: 4px; padding: 2px 8px; font-family: monospace; font-size: 12px; color: var(--wb-text-bright); min-width: 80px; text-align: center;">
+                  <div class="shortcut-row flex justify-between items-center py-1">
+                    <kbd class="bg-wb-surface border border-wb-border rounded py-0.5 px-2 font-mono text-xs text-wb-text-bright min-w-[80px] text-center">
                       {key}
                     </kbd>
-                    <span style="color: var(--wb-text); font-size: 13px; flex: 1; text-align: right;">
+                    <span class="text-wb-text text-[13px] flex-1 text-right">
                       {description}
                     </span>
                   </div>
@@ -113,14 +101,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.KeyboardHelpModal do
           <% end %>
         </div>
 
-        <div
-          class="modal-footer"
-          style="border-top: 1px solid var(--wb-border); padding-top: 12px; display: flex; justify-content: flex-end;"
-        >
+        <div class="flex gap-2 justify-end pt-3 border-t border-wb-border mt-4">
           <button
             phx-click="close_keyboard_help"
-            class="btn btn-primary"
-            style="background: var(--wb-accent); color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer;"
+            class="px-5 py-2 border-none rounded cursor-pointer transition-all duration-100 bg-wb-accent text-white hover:bg-wb-accent-hover"
           >
             Got it!
           </button>

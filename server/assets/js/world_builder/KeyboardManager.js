@@ -130,6 +130,7 @@ class KeyboardManager {
   }
 }
 
-// Singleton - one global keyboard handler for the entire app
+// Export class for testing and singleton instance for app use
+export { KeyboardManager }
 export const keyboardManager = new KeyboardManager()
 export default keyboardManager

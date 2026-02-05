@@ -1,3 +1,5 @@
+import { HookHelper } from '../world_builder/HookHelper.js'
+
 // Panel Resize - Handles draggable panel dividers
 // Performance: applies CSS locally during drag, syncs to server on mouseup/touchend only
 
@@ -20,6 +22,7 @@ const GRID_COLUMN_INDEX = {
 
 const PanelResize = {
   mounted() {
+    this.helper = new HookHelper(this)
     this.container = this.el
     this.handles = this.el.querySelectorAll('.panel-resize-handle, .console-resize-handle')
     this.isDragging = false
@@ -35,13 +38,9 @@ const PanelResize = {
     // Load saved sizes from localStorage (batched single event)
     this.loadSavedSizes()
 
-    // Bind drag handlers
+    // Bind drag handlers (handle-level listeners are managed manually for updated() re-attachment)
     this.handleMouseDown = this.handleMouseDown.bind(this)
-    this.handleMouseMove = this.handleMouseMove.bind(this)
-    this.handleMouseUp = this.handleMouseUp.bind(this)
     this.handleTouchStart = this.handleTouchStart.bind(this)
-    this.handleTouchMove = this.handleTouchMove.bind(this)
-    this.handleTouchEnd = this.handleTouchEnd.bind(this)
 
     // Attach listeners to all resize handles
     this.handles.forEach(handle => {
@@ -50,11 +49,11 @@ const PanelResize = {
       handle.style.touchAction = 'none'
     })
 
-    // Global mouse/touch events for dragging
-    document.addEventListener('mousemove', this.handleMouseMove)
-    document.addEventListener('mouseup', this.handleMouseUp)
-    document.addEventListener('touchmove', this.handleTouchMove, { passive: false })
-    document.addEventListener('touchend', this.handleTouchEnd)
+    // Global mouse/touch events for dragging (auto-cleaned by HookHelper)
+    this.helper.on(document, 'mousemove', this.handleMouseMove.bind(this))
+    this.helper.on(document, 'mouseup', this.handleMouseUp.bind(this))
+    this.helper.on(document, 'touchmove', this.handleTouchMove.bind(this), { passive: false })
+    this.helper.on(document, 'touchend', this.handleTouchEnd.bind(this))
   },
 
   getPointerPosition(e) {
@@ -244,10 +243,8 @@ const PanelResize = {
       handle.removeEventListener('mousedown', this.handleMouseDown)
       handle.removeEventListener('touchstart', this.handleTouchStart)
     })
-    document.removeEventListener('mousemove', this.handleMouseMove)
-    document.removeEventListener('mouseup', this.handleMouseUp)
-    document.removeEventListener('touchmove', this.handleTouchMove)
-    document.removeEventListener('touchend', this.handleTouchEnd)
+    // Document-level listeners cleaned by HookHelper
+    this.helper.destroy()
     if (this.rafId) cancelAnimationFrame(this.rafId)
   }
 }

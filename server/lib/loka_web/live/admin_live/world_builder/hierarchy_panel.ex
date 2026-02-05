@@ -118,10 +118,15 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
       @collapsed && "panel-collapsed",
       @class
     ]}>
-      <div class="panel-header">
-        <h3 :if={!@collapsed} class="panel-title">Library</h3>
+      <div class="flex justify-between items-center py-[0.4rem] px-3 bg-wb-surface border-b border-wb-toolbar-border min-h-8">
+        <h3
+          :if={!@collapsed}
+          class="text-wb-xs font-semibold text-wb-text-muted tracking-[0.02em] m-0"
+        >
+          Library
+        </h3>
         <button
-          class="panel-collapse-btn"
+          class="flex items-center justify-center w-6 h-6 bg-transparent border-none text-wb-text-dim cursor-pointer rounded-wb-sm transition-all duration-150 hover:bg-wb-border hover:text-wb-text"
           phx-click="toggle_panel"
           phx-value-panel="hierarchy"
           title={if @collapsed, do: "Expand (1)", else: "Collapse (1)"}
@@ -134,9 +139,12 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
       </div>
       
     <!-- Collapsed view: icons only (Templates first for discovery) -->
-      <div :if={@collapsed} class="panel-collapsed-content">
+      <div :if={@collapsed} class="flex flex-col items-center py-2 gap-1">
         <button
-          class={["collapsed-icon-btn", @active_tab == :templates && "active"]}
+          class={[
+            "flex items-center justify-center w-8 h-8 bg-transparent border-none text-wb-text-dim cursor-pointer rounded-wb-sm transition-all duration-150 hover:bg-wb-border hover:text-wb-text",
+            @active_tab == :templates && "!bg-wb-accent-hover !text-wb-text-bright"
+          ]}
           phx-click="switch_hierarchy_tab"
           phx-value-tab="templates"
           title="Templates ({length(@templates)})"
@@ -144,7 +152,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
           <.icon name="hero-document-duplicate" class="size-5" />
         </button>
         <button
-          class={["collapsed-icon-btn", @active_tab == :rooms && "active"]}
+          class={[
+            "flex items-center justify-center w-8 h-8 bg-transparent border-none text-wb-text-dim cursor-pointer rounded-wb-sm transition-all duration-150 hover:bg-wb-border hover:text-wb-text",
+            @active_tab == :rooms && "!bg-wb-accent-hover !text-wb-text-bright"
+          ]}
           phx-click="switch_hierarchy_tab"
           phx-value-tab="rooms"
           title="Rooms ({length(@rooms)})"
@@ -152,7 +163,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
           <.icon name="hero-cube" class="size-5" />
         </button>
         <button
-          class={["collapsed-icon-btn", @active_tab == :npcs && "active"]}
+          class={[
+            "flex items-center justify-center w-8 h-8 bg-transparent border-none text-wb-text-dim cursor-pointer rounded-wb-sm transition-all duration-150 hover:bg-wb-border hover:text-wb-text",
+            @active_tab == :npcs && "!bg-wb-accent-hover !text-wb-text-bright"
+          ]}
           phx-click="switch_hierarchy_tab"
           phx-value-tab="npcs"
           title="NPCs ({length(@npcs)})"
@@ -160,7 +174,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
           <.icon name="hero-user" class="size-5" />
         </button>
         <button
-          class={["collapsed-icon-btn", @active_tab == :items && "active"]}
+          class={[
+            "flex items-center justify-center w-8 h-8 bg-transparent border-none text-wb-text-dim cursor-pointer rounded-wb-sm transition-all duration-150 hover:bg-wb-border hover:text-wb-text",
+            @active_tab == :items && "!bg-wb-accent-hover !text-wb-text-bright"
+          ]}
           phx-click="switch_hierarchy_tab"
           phx-value-tab="items"
           title="Items ({length(@items)})"
@@ -168,7 +185,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
           <.icon name="hero-cube-transparent" class="size-5" />
         </button>
         <button
-          class={["collapsed-icon-btn", @active_tab == :scripts && "active"]}
+          class={[
+            "flex items-center justify-center w-8 h-8 bg-transparent border-none text-wb-text-dim cursor-pointer rounded-wb-sm transition-all duration-150 hover:bg-wb-border hover:text-wb-text",
+            @active_tab == :scripts && "!bg-wb-accent-hover !text-wb-text-bright"
+          ]}
           phx-click="switch_hierarchy_tab"
           phx-value-tab="scripts"
           title="Scripts ({length(@scripts)})"
@@ -176,7 +196,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
           <.icon name="hero-code-bracket" class="size-5" />
         </button>
         <button
-          class={["collapsed-icon-btn", @active_tab == :cutscenes && "active"]}
+          class={[
+            "flex items-center justify-center w-8 h-8 bg-transparent border-none text-wb-text-dim cursor-pointer rounded-wb-sm transition-all duration-150 hover:bg-wb-border hover:text-wb-text",
+            @active_tab == :cutscenes && "!bg-wb-accent-hover !text-wb-text-bright"
+          ]}
           phx-click="switch_hierarchy_tab"
           phx-value-tab="cutscenes"
           title="Cutscenes ({length(@cutscenes)})"
@@ -185,10 +208,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
         </button>
       </div>
 
-      <div :if={!@collapsed} style="display: contents;">
+      <div :if={!@collapsed} class="contents">
         <!-- Expanded view: full content -->
         <div class="flex items-center gap-1 px-1.5 py-1 border-b border-wb-border shrink-0">
-          <form phx-change="switch_hierarchy_tab" style="display: contents;">
+          <form phx-change="switch_hierarchy_tab" class="contents">
             <select
               name="tab"
               class="flex-1 py-1 px-1.5 text-xs bg-wb-surface border border-wb-border rounded-wb-md text-wb-text cursor-pointer appearance-auto hover:border-wb-accent focus:outline-none focus:border-wb-accent"
@@ -214,7 +237,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
             </select>
           </form>
           <button
-            class="btn-icon-small"
+            class="bg-transparent border-0 text-wb-text-muted cursor-pointer p-1 rounded-wb-sm transition-all flex items-center justify-center shrink-0 hover:bg-wb-border hover:text-wb-error"
             phx-click={create_action(@active_tab)}
             title={"New #{tab_label(@active_tab)}"}
           >
@@ -267,7 +290,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
           </div>
         </form>
 
-        <div class="panel-content">
+        <div class="panel-content flex-1 overflow-auto p-2 bg-wb-panel-alt">
           <%!-- Room Hierarchy --%>
           <div
             :if={@active_tab == :rooms}
@@ -421,7 +444,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
                   </div>
                 </div>
                 <button
-                  class="btn-icon-small"
+                  class="bg-transparent border-0 text-wb-text-muted cursor-pointer p-1 rounded-wb-sm transition-all flex items-center justify-center shrink-0 hover:bg-wb-border hover:text-wb-error"
                   phx-click="create_from_template"
                   phx-value-template_key={template.template_key}
                   phx-value-x="0"

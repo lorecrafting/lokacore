@@ -12,6 +12,7 @@
 
 const MAX_STACK_SIZE = 50
 const STORAGE_KEY = 'world_builder_undo_stack'
+const COMPOSITE_TIMEOUT_MS = 30000
 
 class UndoManager {
   constructor() {
@@ -89,7 +90,7 @@ class UndoManager {
         console.warn('[UndoManager] Composite auto-cancelled after 30s timeout')
         this.cancelComposite()
       }
-    }, 30000)
+    }, COMPOSITE_TIMEOUT_MS)
   }
 
   /**
@@ -145,7 +146,7 @@ class UndoManager {
    */
   undo() {
     if (this.undoStack.length === 0) {
-      console.log('Nothing to undo')
+      console.log('[UndoManager] Nothing to undo')
       return false
     }
 
@@ -171,7 +172,7 @@ class UndoManager {
    */
   redo() {
     if (this.redoStack.length === 0) {
-      console.log('Nothing to redo')
+      console.log('[UndoManager] Nothing to redo')
       return false
     }
 
@@ -197,7 +198,7 @@ class UndoManager {
    */
   executeUndo(operation) {
     if (!this.pushEvent) {
-      console.error('UndoManager: pushEvent not set')
+      console.error('[UndoManager] pushEvent not set')
       return
     }
 
@@ -214,7 +215,7 @@ class UndoManager {
    */
   executeRedo(operation) {
     if (!this.pushEvent) {
-      console.error('UndoManager: pushEvent not set')
+      console.error('[UndoManager] pushEvent not set')
       return
     }
 
@@ -279,7 +280,7 @@ class UndoManager {
         redoStack: this.redoStack
       }))
     } catch (e) {
-      console.warn('UndoManager: Failed to save to session storage', e)
+      console.warn('[UndoManager] Failed to save to session storage', e)
     }
   }
 
@@ -295,7 +296,7 @@ class UndoManager {
         this.redoStack = redoStack || []
       }
     } catch (e) {
-      console.warn('UndoManager: Failed to restore from session storage', e)
+      console.warn('[UndoManager] Failed to restore from session storage', e)
     }
   }
 
@@ -320,6 +321,7 @@ class UndoManager {
   }
 }
 
-// Export singleton instance
+// Export class for testing and singleton instance for app use
+export { UndoManager }
 export const undoManager = new UndoManager()
 export default undoManager

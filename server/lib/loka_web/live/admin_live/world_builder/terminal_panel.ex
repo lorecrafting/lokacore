@@ -20,15 +20,18 @@ defmodule LokaWeb.AdminLive.WorldBuilder.TerminalPanel do
       @collapsed && "panel-collapsed",
       @class
     ]}>
-      <div class="panel-tabs">
-        <button class="panel-tab active" aria-label="Terminal">
+      <div class="flex items-center px-2.5 bg-linear-to-b from-wb-panel-gradient-from to-wb-panel-gradient-to border-b border-wb-border-dark min-h-[34px] gap-0.5">
+        <button
+          class="panel-tab active flex items-center gap-1.5 px-2.5 py-[5px] bg-white/[0.05] border-none text-wb-text-bright cursor-pointer text-wb-sm font-medium rounded-t-wb-md transition-all duration-150 relative"
+          aria-label="Terminal"
+        >
           <span id="term-connection-dot" class="term-connection-dot connecting"></span>
           <.icon name="hero-command-line" class="size-4" />
           <span :if={!@collapsed}>Terminal</span>
         </button>
-        <div style="flex: 1;"></div>
+        <div class="flex-1"></div>
         <button
-          class="panel-collapse-btn"
+          class="flex items-center justify-center w-6 h-6 bg-transparent border-none text-wb-text-dim cursor-pointer rounded-wb-sm transition-all duration-150 hover:bg-wb-border hover:text-wb-text"
           phx-click="toggle_panel"
           phx-value-panel="terminal"
           title={if @collapsed, do: "Expand", else: "Collapse"}
@@ -42,7 +45,10 @@ defmodule LokaWeb.AdminLive.WorldBuilder.TerminalPanel do
         </button>
       </div>
 
-      <div class="panel-content flex flex-col !p-0" style={if @collapsed, do: "display: none;"}>
+      <div
+        class="panel-content flex-1 overflow-auto bg-wb-panel-alt flex flex-col !p-0"
+        style={if @collapsed, do: "display: none;"}
+      >
         <div
           class="flex-1 overflow-y-auto px-3 py-2 leading-relaxed"
           id="terminal-output"

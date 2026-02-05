@@ -1,53 +1,58 @@
 /**
- * Canvas2DViewport - 2D World Builder Viewport
+ * Canvas2DViewport - 2D World Builder Viewport (Orchestrator)
  *
- * Renders rooms, exits, and grid on a 2D canvas.
- * Handles pan, zoom, and selection interactions.
- * Supports Z-level filtering for up/down room connections.
+ * Public API for the viewport. Manages state, coordinate transforms,
+ * camera controls, and delegates rendering and interaction to
+ * Canvas2DRenderer and Canvas2DInteraction respectively.
  */
 
-// Exit direction colors (preserved from 3D version)
-const EXIT_COLORS = {
-  north: '#4a9eff',
-  south: '#ff4a9e',
-  east: '#4aff9e',
-  west: '#ff9e4a',
-  up: '#9e4aff',
-  down: '#ffff4a',
-  northeast: '#4affff',
-  northwest: '#ff4aff',
-  southeast: '#4affaa',
-  southwest: '#ffaa4a',
-  default: '#888888'
-}
-
-// Room colors
-const ROOM_COLORS = {
-  default: '#7eb3ff',
-  selected: '#4a9eff',
-  multiSelected: '#ffaa00',
-  error: '#ff6b6b',
-  warning: '#ffd93d'
-}
-
-// Direction offsets for exit arrow positioning
-const DIRECTION_OFFSETS = {
-  north: { dx: 0, dy: -1 },
-  south: { dx: 0, dy: 1 },
-  east: { dx: 1, dy: 0 },
-  west: { dx: -1, dy: 0 },
-  northeast: { dx: 1, dy: -1 },
-  northwest: { dx: -1, dy: -1 },
-  southeast: { dx: 1, dy: 1 },
-  southwest: { dx: -1, dy: 1 },
-  up: { dx: 0, dy: 0 },
-  down: { dx: 0, dy: 0 }
-}
+import { Canvas2DRenderer } from './Canvas2DRenderer.js'
+import { Canvas2DInteraction } from './Canvas2DInteraction.js'
 
 export default class Canvas2DViewport {
   constructor(canvas, options = {}) {
     this.canvas = canvas
     this.ctx = canvas.getContext('2d')
+
+    // Read colors from CSS variables (with hardcoded fallbacks for canvas rendering)
+    const styles = getComputedStyle(document.documentElement)
+    const v = (name, fallback) => styles.getPropertyValue(name).trim() || fallback
+
+    this.exitColors = {
+      north: v('--wb-viewport-exit-north', '#4a9eff'),
+      south: v('--wb-viewport-exit-south', '#ff4a9e'),
+      east: v('--wb-viewport-exit-east', '#4aff9e'),
+      west: v('--wb-viewport-exit-west', '#ff9e4a'),
+      up: v('--wb-viewport-exit-up', '#9e4aff'),
+      down: v('--wb-viewport-exit-down', '#ffff4a'),
+      northeast: v('--wb-viewport-exit-ne', '#4affff'),
+      northwest: v('--wb-viewport-exit-nw', '#ff4aff'),
+      southeast: v('--wb-viewport-exit-se', '#4affaa'),
+      southwest: v('--wb-viewport-exit-sw', '#ffaa4a'),
+      default: v('--wb-viewport-exit-default', '#888888'),
+    }
+
+    this.roomColors = {
+      default: v('--wb-viewport-room-default', '#7eb3ff'),
+      selected: v('--wb-viewport-room-selected', '#4a9eff'),
+      multiSelected: v('--wb-viewport-room-multi', '#ffaa00'),
+      error: v('--wb-viewport-room-error', '#ff6b6b'),
+      warning: v('--wb-viewport-room-warning', '#ffd93d'),
+    }
+
+    this.viewportColors = {
+      bg: v('--wb-viewport-bg', '#1a1a2e'),
+      grid: v('--wb-viewport-grid', '#333344'),
+      gridMajor: v('--wb-viewport-grid-major', '#555566'),
+      snap: v('--wb-viewport-snap', '#00ff88'),
+      snapDim: v('--wb-viewport-snap-dim', '#00ff8844'),
+      roomBorder: v('--wb-viewport-room-border', '#ffffff'),
+      roomBorderMulti: v('--wb-viewport-room-border-multi', '#ff8800'),
+      roomBorderError: v('--wb-viewport-room-border-error', '#ff0000'),
+      roomBorderWarning: v('--wb-viewport-room-border-warning', '#ffaa00'),
+      roomText: v('--wb-viewport-room-text', '#ffffff'),
+      roomKeyText: v('--wb-viewport-room-key-text', '#888888'),
+    }
 
     // Camera state
     this.camera = {
@@ -57,12 +62,12 @@ export default class Canvas2DViewport {
     }
 
     // Grid settings
-    this.gridSize = 60 // Pixels per world unit
-    this.roomSize = 48 // Room rectangle size in pixels (balanced for readability and connection visibility)
+    this.gridSize = 60
+    this.roomSize = 48
     this.minZoom = 0.2
     this.maxZoom = 3
-    this.showGrid = true // Grid visibility toggle
-    this.snapSize = 60 // Snap grid size in pixels (default = gridSize = 1 world unit)
+    this.showGrid = true
+    this.snapSize = 60
 
     // Data
     this.rooms = []
@@ -82,32 +87,57 @@ export default class Canvas2DViewport {
     this.npcPaths = {}
     this.showNPCPaths = true
 
-    // Interaction state
-    this.isDragging = false
-    this.isDraggingRoom = false // Whether we're dragging a room vs panning
-    this.draggedRoom = null // The room being dragged
-    this.dragRoomStartPos = { x: 0, y: 0 } // Original room position when drag started
-    this.dragStart = { x: 0, y: 0 }
-    this.lastMousePos = { x: 0, y: 0 }
-    this.hoveredRoom = null
-    this.isSnapping = false // Whether shift is held for grid snapping
-    this.snapIndicator = null // { x, y } position of snap indicator
-
-    // Tooltip element
-    this.tooltip = null
-
-    // Text truncation memoization cache (cleared on zoom changes)
-    this._truncateCache = new Map()
-
     // Callbacks
     this.onSelectRoom = options.onSelectRoom || (() => {})
     this.onBatchSelect = options.onBatchSelect || (() => {})
-    this.onMoveRoom = options.onMoveRoom || (() => {}) // Called when room is moved via drag
+    this.onMoveRoom = options.onMoveRoom || (() => {})
+
+    // Create renderer with a state accessor
+    this.renderer = new Canvas2DRenderer(this.ctx, () => this._getRendererState())
+
+    // Create interaction handler
+    this.interaction = new Canvas2DInteraction(canvas, this)
 
     // Setup
     this.setupCanvas()
-    this.setupEventListeners()
+    this.interaction.attach()
     this.startRenderLoop()
+  }
+
+  // ============================================================================
+  // State accessor for renderer
+  // ============================================================================
+
+  _getRendererState() {
+    return {
+      camera: this.camera,
+      rooms: this.rooms,
+      roomsByKey: this.roomsByKey,
+      selectedRoom: this.selectedRoom,
+      selectedKeys: this.selectedKeys,
+      validation: this.validation,
+      zoneColors: this.zoneColors,
+      roomZoneMap: this.roomZoneMap,
+      showZoneColors: this.showZoneColors,
+      npcPaths: this.npcPaths,
+      showNPCPaths: this.showNPCPaths,
+      snapIndicator: this.interaction.snapIndicator,
+      isDraggingRoom: this.interaction.isDraggingRoom,
+      showGrid: this.showGrid,
+      showGhostLayers: this.showGhostLayers,
+      currentZLevel: this.currentZLevel,
+      gridSize: this.gridSize,
+      roomSize: this.roomSize,
+      width: this.width,
+      height: this.height,
+      minZoom: this.minZoom,
+      maxZoom: this.maxZoom,
+      exitColors: this.exitColors,
+      roomColors: this.roomColors,
+      viewportColors: this.viewportColors,
+      worldToScreen: this.worldToScreen.bind(this),
+      screenToWorld: this.screenToWorld.bind(this),
+    }
   }
 
   // ============================================================================
@@ -115,7 +145,6 @@ export default class Canvas2DViewport {
   // ============================================================================
 
   setupCanvas() {
-    // Handle high DPI displays
     const dpr = window.devicePixelRatio || 1
     const rect = this.canvas.getBoundingClientRect()
 
@@ -123,130 +152,8 @@ export default class Canvas2DViewport {
     this.canvas.height = rect.height * dpr
     this.ctx.scale(dpr, dpr)
 
-    // Store display dimensions
     this.width = rect.width
     this.height = rect.height
-  }
-
-  setupEventListeners() {
-    // Mouse events - store bound references for proper cleanup in destroy()
-    this.boundMouseDown = this.handleMouseDown.bind(this)
-    this.boundMouseMove = this.handleMouseMove.bind(this)
-    this.boundMouseUp = this.handleMouseUp.bind(this)
-    this.boundMouseLeave = this.handleMouseLeave.bind(this)
-    this.boundWheel = this.handleWheel.bind(this)
-    this.boundContextMenu = (e) => e.preventDefault()
-
-    this.canvas.addEventListener('mousedown', this.boundMouseDown)
-    this.canvas.addEventListener('mousemove', this.boundMouseMove)
-    this.canvas.addEventListener('mouseup', this.boundMouseUp)
-    this.canvas.addEventListener('mouseleave', this.boundMouseLeave)
-    this.canvas.addEventListener('wheel', this.boundWheel, { passive: false })
-    this.canvas.addEventListener('contextmenu', this.boundContextMenu)
-
-    // Resize handling
-    this.resizeObserver = new ResizeObserver(() => {
-      this.setupCanvas()
-      this.render()
-    })
-    this.resizeObserver.observe(this.canvas)
-
-    // Keyboard events for grid toggle
-    this.handleKeyDown = this.handleKeyDown.bind(this)
-    this.handleKeyUp = this.handleKeyUp.bind(this)
-    document.addEventListener('keydown', this.handleKeyDown)
-    document.addEventListener('keyup', this.handleKeyUp)
-
-    // Create tooltip element
-    this.createTooltip()
-  }
-
-  createTooltip() {
-    this.tooltip = document.createElement('div')
-    this.tooltip.className = 'viewport-tooltip'
-    this.tooltip.style.cssText = `
-      position: absolute;
-      background: var(--wb-panel);
-      border: 1px solid var(--wb-border);
-      border-radius: var(--wb-radius-lg);
-      padding: 8px 12px;
-      font-size: 12px;
-      color: var(--wb-text);
-      pointer-events: none;
-      z-index: 1000;
-      display: none;
-      max-width: 250px;
-      box-shadow: var(--wb-shadow-md);
-    `
-    this.canvas.parentElement.appendChild(this.tooltip)
-  }
-
-  showTooltip(room, screenX, screenY) {
-    if (!this.tooltip || !room) return
-
-    const spawns = room.spawns || {}
-    const npcs = spawns.npcs || []
-    const items = spawns.items || []
-    const exits = room.exits || {}
-    const exitCount = Object.keys(exits).length
-
-    let html = `
-      <div style="font-weight: bold; color: var(--wb-text-bright); margin-bottom: 4px;">${room.name || room.key}</div>
-      <div style="font-size: 10px; color: var(--wb-text-muted); margin-bottom: 6px;">${room.key}</div>
-      <div style="font-size: 11px; color: var(--wb-text);">
-        <div>📍 (${room.x || 0}, ${room.y || 0}, Z:${room.z || 0})</div>
-        ${exitCount > 0 ? `<div>🚪 ${exitCount} exit${exitCount > 1 ? 's' : ''}</div>` : ''}
-        ${npcs.length > 0 ? `<div>👤 ${npcs.length} NPC${npcs.length > 1 ? 's' : ''}: ${npcs.slice(0, 3).join(', ')}${npcs.length > 3 ? '...' : ''}</div>` : ''}
-        ${items.length > 0 ? `<div>📦 ${items.length} item${items.length > 1 ? 's' : ''}</div>` : ''}
-      </div>
-    `
-
-    this.tooltip.innerHTML = html
-    this.tooltip.style.display = 'block'
-
-    // Position tooltip near mouse but within bounds
-    const rect = this.canvas.getBoundingClientRect()
-    let x = screenX + 15
-    let y = screenY + 15
-
-    // Keep tooltip within canvas bounds
-    const tooltipRect = this.tooltip.getBoundingClientRect()
-    if (x + tooltipRect.width > rect.width) {
-      x = screenX - tooltipRect.width - 15
-    }
-    if (y + tooltipRect.height > rect.height) {
-      y = screenY - tooltipRect.height - 15
-    }
-
-    this.tooltip.style.left = `${x}px`
-    this.tooltip.style.top = `${y}px`
-  }
-
-  hideTooltip() {
-    if (this.tooltip) {
-      this.tooltip.style.display = 'none'
-    }
-  }
-
-  handleMouseLeave(e) {
-    this.hideTooltip()
-    this.hoveredRoom = null
-
-    // Cancel in-progress room drag and restore original position
-    if (this.isDraggingRoom && this.draggedRoom) {
-      this.draggedRoom.x = this.dragRoomStartPos.x
-      this.draggedRoom.y = this.dragRoomStartPos.y
-      this.isDragging = false
-      this.isDraggingRoom = false
-      this.draggedRoom = null
-      this.snapIndicator = null
-      this.canvas.style.cursor = 'grab'
-      this.render()
-    } else if (this.isDragging) {
-      // Cancel pan drag
-      this.isDragging = false
-      this.canvas.style.cursor = 'grab'
-    }
   }
 
   // Batch multiple data updates into a single render frame
@@ -262,8 +169,11 @@ export default class Canvas2DViewport {
   }
 
   startRenderLoop() {
-    // Initial render
     this.render()
+  }
+
+  render() {
+    this.renderer.render()
   }
 
   destroy() {
@@ -273,58 +183,8 @@ export default class Canvas2DViewport {
       this._renderRAF = null
     }
 
-    // Remove canvas event listeners
-    if (this.canvas) {
-      this.canvas.removeEventListener('mousedown', this.boundMouseDown)
-      this.canvas.removeEventListener('mousemove', this.boundMouseMove)
-      this.canvas.removeEventListener('mouseup', this.boundMouseUp)
-      this.canvas.removeEventListener('mouseleave', this.boundMouseLeave)
-      this.canvas.removeEventListener('wheel', this.boundWheel)
-      this.canvas.removeEventListener('contextmenu', this.boundContextMenu)
-    }
-
-    if (this.resizeObserver) {
-      this.resizeObserver.disconnect()
-    }
-    if (this.tooltip && this.tooltip.parentElement) {
-      this.tooltip.parentElement.removeChild(this.tooltip)
-      this.tooltip = null
-    }
-    document.removeEventListener('keydown', this.handleKeyDown)
-    document.removeEventListener('keyup', this.handleKeyUp)
-  }
-
-  // ============================================================================
-  // Keyboard Event Handlers
-  // ============================================================================
-
-  handleKeyDown(e) {
-    // Toggle grid visibility with 'G' key
-    if (e.key === 'g' || e.key === 'G') {
-      // Don't toggle if user is typing in an input field
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
-      this.showGrid = !this.showGrid
-      this.render()
-    }
-
-    // Track shift key for snapping
-    if (e.key === 'Shift') {
-      this.isSnapping = true
-      if (this.isDraggingRoom) {
-        this.render()
-      }
-    }
-  }
-
-  handleKeyUp(e) {
-    // Track shift key release
-    if (e.key === 'Shift') {
-      this.isSnapping = false
-      this.snapIndicator = null
-      if (this.isDraggingRoom) {
-        this.render()
-      }
-    }
+    // Detach interaction handlers
+    this.interaction.detach()
   }
 
   // ============================================================================
@@ -395,6 +255,16 @@ export default class Canvas2DViewport {
     this.scheduleRender()
   }
 
+  setShowGrid(show) {
+    this.showGrid = show
+    this.scheduleRender()
+  }
+
+  toggleGrid() {
+    this.showGrid = !this.showGrid
+    this.render()
+  }
+
   // ============================================================================
   // Coordinate Transforms
   // ============================================================================
@@ -422,8 +292,8 @@ export default class Canvas2DViewport {
     // Check rooms at current Z level first, then adjacent levels
     const levelsToCheck = [this.currentZLevel]
     if (this.showGhostLayers) {
-      if (this.zLevels.includes(this.currentZLevel - 1)) levelsToCheck.push(this.currentZLevel - 1)
-      if (this.zLevels.includes(this.currentZLevel + 1)) levelsToCheck.push(this.currentZLevel + 1)
+      if (this.zLevels && this.zLevels.includes(this.currentZLevel - 1)) levelsToCheck.push(this.currentZLevel - 1)
+      if (this.zLevels && this.zLevels.includes(this.currentZLevel + 1)) levelsToCheck.push(this.currentZLevel + 1)
     }
 
     for (const zLevel of levelsToCheck) {
@@ -441,660 +311,6 @@ export default class Canvas2DViewport {
     }
 
     return null
-  }
-
-  // ============================================================================
-  // Mouse Event Handlers
-  // ============================================================================
-
-  handleMouseDown(e) {
-    const rect = this.canvas.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-
-    this.lastMousePos = { x, y }
-    this.dragStart = { x, y }
-
-    // Check if clicking on a room
-    const room = this.getRoomAtPoint(x, y)
-
-    if (room) {
-      // Room click - start dragging the room
-      this.isDragging = true
-      this.isDraggingRoom = true
-      this.draggedRoom = room
-      this.dragRoomStartPos = { x: room.x || 0, y: room.y || 0 }
-      this.canvas.style.cursor = 'move'
-
-      // Also select the room if not already selected
-      if (!this.selectedKeys.has(room.key)) {
-        this.selectedKeys.clear()
-        this.onSelectRoom(room.key, false)
-      }
-      this.render()
-    } else {
-      // Empty space click - start panning
-      this.isDragging = true
-      this.isDraggingRoom = false
-      this.draggedRoom = null
-      this.canvas.style.cursor = 'grabbing'
-    }
-  }
-
-  handleMouseMove(e) {
-    const rect = this.canvas.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-
-    // Track snapping state from shift key
-    this.isSnapping = e.shiftKey
-
-    if (this.isDragging) {
-      if (this.isDraggingRoom && this.draggedRoom) {
-        // Drag the room
-        const worldPos = this.screenToWorld(x, y)
-        let newX = worldPos.x
-        let newY = worldPos.y
-
-        // Apply grid snapping if shift is held
-        if (this.isSnapping) {
-          const snapWorld = this.snapSize / this.gridSize // Snap size in world units
-          newX = Math.round(newX / snapWorld) * snapWorld
-          newY = Math.round(newY / snapWorld) * snapWorld
-          this.snapIndicator = { x: newX, y: newY }
-        } else {
-          this.snapIndicator = null
-        }
-
-        // Update room position (temporary - will be saved on mouse up)
-        this.draggedRoom.x = newX
-        this.draggedRoom.y = newY
-
-        this.hideTooltip()
-        this.render()
-      } else {
-        // Pan the camera
-        const dx = (x - this.lastMousePos.x) / this.camera.zoom
-        const dy = (y - this.lastMousePos.y) / this.camera.zoom
-        this.camera.x += dx
-        this.camera.y += dy
-        this.hideTooltip()
-        this.render()
-      }
-    } else {
-      // Update cursor and tooltip based on what's under mouse
-      const room = this.getRoomAtPoint(x, y)
-      this.canvas.style.cursor = room ? 'pointer' : 'grab'
-
-      if (room && room !== this.hoveredRoom) {
-        this.hoveredRoom = room
-        this.showTooltip(room, x, y)
-      } else if (!room && this.hoveredRoom) {
-        this.hoveredRoom = null
-        this.hideTooltip()
-      } else if (room && this.tooltip) {
-        // Update tooltip position
-        this.showTooltip(room, x, y)
-      }
-    }
-
-    this.lastMousePos = { x, y }
-  }
-
-  handleMouseUp(e) {
-    // If we were dragging a room, notify the callback
-    if (this.isDraggingRoom && this.draggedRoom) {
-      const newX = this.draggedRoom.x
-      const newY = this.draggedRoom.y
-
-      // Only fire callback if position actually changed
-      if (newX !== this.dragRoomStartPos.x || newY !== this.dragRoomStartPos.y) {
-        this.onMoveRoom(this.draggedRoom.key, newX, newY)
-      }
-    }
-
-    this.isDragging = false
-    this.isDraggingRoom = false
-    this.draggedRoom = null
-    this.snapIndicator = null
-    this.canvas.style.cursor = 'grab'
-    this.render()
-  }
-
-  handleWheel(e) {
-    e.preventDefault()
-
-    const rect = this.canvas.getBoundingClientRect()
-    const mouseX = e.clientX - rect.left
-    const mouseY = e.clientY - rect.top
-
-    // Get world position before zoom
-    const worldBefore = this.screenToWorld(mouseX, mouseY)
-
-    // Apply zoom
-    const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1
-    const oldZoom = this.camera.zoom
-    this.camera.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.camera.zoom * zoomFactor))
-
-    // Clear truncation cache when zoom changes (fontSize depends on zoom)
-    if (this.camera.zoom !== oldZoom) {
-      this._truncateCache.clear()
-    }
-
-    // Get world position after zoom
-    const worldAfter = this.screenToWorld(mouseX, mouseY)
-
-    // Adjust camera to keep mouse position stable
-    this.camera.x += (worldAfter.x - worldBefore.x) * this.gridSize
-    this.camera.y += (worldAfter.y - worldBefore.y) * this.gridSize
-
-    this.render()
-  }
-
-  // ============================================================================
-  // Rendering
-  // ============================================================================
-
-  render() {
-    const ctx = this.ctx
-
-    // Clear canvas
-    ctx.fillStyle = '#1a1a2e'
-    ctx.fillRect(0, 0, this.width, this.height)
-
-    // Save context for camera transform
-    ctx.save()
-
-    // Apply camera transform
-    ctx.translate(this.width / 2, this.height / 2)
-    ctx.scale(this.camera.zoom, this.camera.zoom)
-    ctx.translate(this.camera.x, this.camera.y)
-
-    // Draw grid (if visible)
-    if (this.showGrid) {
-      this.drawGrid(ctx)
-    }
-
-    // Draw ghost rooms (adjacent Z-levels)
-    if (this.showGhostLayers) {
-      this.drawRoomsAtZLevel(ctx, this.currentZLevel - 1, 0.2)
-      this.drawRoomsAtZLevel(ctx, this.currentZLevel + 1, 0.2)
-    }
-
-    // Draw NPC patrol paths (before rooms so they're under)
-    if (this.showNPCPaths) {
-      this.drawNPCPaths(ctx)
-    }
-
-    // Draw exits for current Z-level
-    this.drawExits(ctx)
-
-    // Draw rooms at current Z-level
-    this.drawRoomsAtZLevel(ctx, this.currentZLevel, 1.0)
-
-    // Draw snap indicator if snapping
-    if (this.snapIndicator && this.isDraggingRoom) {
-      this.drawSnapIndicator(ctx)
-    }
-
-    // Restore context
-    ctx.restore()
-
-  }
-
-  setShowGrid(show) {
-    this.showGrid = show
-    this.scheduleRender()
-  }
-
-
-  drawNPCPaths(ctx) {
-    const pathColors = [
-      '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4',
-      '#ffeaa7', '#dfe6e9', '#fd79a8', '#a29bfe'
-    ]
-    let colorIndex = 0
-
-    for (const [npcKey, pathInfo] of Object.entries(this.npcPaths)) {
-      if (!pathInfo.patrol || !pathInfo.patrol.route) continue
-
-      const route = pathInfo.patrol.route
-      if (route.length < 2) continue
-
-      // Get color for this NPC's path
-      const color = pathColors[colorIndex % pathColors.length]
-      colorIndex++
-
-      // Draw the patrol path as a curved line connecting rooms
-      ctx.save()
-      ctx.strokeStyle = color
-      ctx.lineWidth = 3 / this.camera.zoom
-      ctx.setLineDash([8 / this.camera.zoom, 4 / this.camera.zoom])
-      ctx.globalAlpha = 0.7
-
-      // Build path through rooms
-      ctx.beginPath()
-      let started = false
-
-      for (let i = 0; i < route.length; i++) {
-        const roomKey = route[i]
-        const room = this.roomsByKey.get(roomKey)
-        if (!room) continue
-
-        // Only draw rooms at current Z-level
-        if ((room.z || 0) !== this.currentZLevel) continue
-
-        const x = (room.x || 0) * this.gridSize
-        const y = (room.y || 0) * this.gridSize
-
-        if (!started) {
-          ctx.moveTo(x, y)
-          started = true
-        } else {
-          ctx.lineTo(x, y)
-        }
-      }
-
-      // If loop mode, connect back to start
-      if (pathInfo.patrol.loop !== false && route.length >= 2) {
-        const startRoom = this.roomsByKey.get(route[0])
-        if (startRoom && (startRoom.z || 0) === this.currentZLevel) {
-          const x = (startRoom.x || 0) * this.gridSize
-          const y = (startRoom.y || 0) * this.gridSize
-          ctx.lineTo(x, y)
-        }
-      }
-
-      ctx.stroke()
-
-      // Draw direction arrows
-      this.drawPathArrows(ctx, route, color)
-
-      ctx.restore()
-    }
-  }
-
-  drawPathArrows(ctx, route, color) {
-    ctx.fillStyle = color
-    ctx.globalAlpha = 0.8
-
-    for (let i = 0; i < route.length - 1; i++) {
-      const fromRoom = this.roomsByKey.get(route[i])
-      const toRoom = this.roomsByKey.get(route[i + 1])
-
-      if (!fromRoom || !toRoom) continue
-      if ((fromRoom.z || 0) !== this.currentZLevel) continue
-      if ((toRoom.z || 0) !== this.currentZLevel) continue
-
-      const fromX = (fromRoom.x || 0) * this.gridSize
-      const fromY = (fromRoom.y || 0) * this.gridSize
-      const toX = (toRoom.x || 0) * this.gridSize
-      const toY = (toRoom.y || 0) * this.gridSize
-
-      // Draw arrow at midpoint
-      const midX = (fromX + toX) / 2
-      const midY = (fromY + toY) / 2
-      const angle = Math.atan2(toY - fromY, toX - fromX)
-      const arrowSize = 8 / this.camera.zoom
-
-      ctx.save()
-      ctx.translate(midX, midY)
-      ctx.rotate(angle)
-
-      ctx.beginPath()
-      ctx.moveTo(arrowSize, 0)
-      ctx.lineTo(-arrowSize / 2, -arrowSize / 2)
-      ctx.lineTo(-arrowSize / 2, arrowSize / 2)
-      ctx.closePath()
-      ctx.fill()
-
-      ctx.restore()
-    }
-  }
-
-  drawGrid(ctx) {
-    ctx.strokeStyle = '#333344'
-    ctx.lineWidth = 1 / this.camera.zoom
-
-    // Calculate visible area in world coordinates
-    const topLeft = this.screenToWorld(0, 0)
-    const bottomRight = this.screenToWorld(this.width, this.height)
-
-    const startX = Math.floor(topLeft.x) - 1
-    const endX = Math.ceil(bottomRight.x) + 1
-    const startY = Math.floor(topLeft.y) - 1
-    const endY = Math.ceil(bottomRight.y) + 1
-
-    ctx.beginPath()
-
-    // Vertical lines
-    for (let x = startX; x <= endX; x++) {
-      const screenX = x * this.gridSize
-      ctx.moveTo(screenX, startY * this.gridSize)
-      ctx.lineTo(screenX, endY * this.gridSize)
-    }
-
-    // Horizontal lines
-    for (let y = startY; y <= endY; y++) {
-      const screenY = y * this.gridSize
-      ctx.moveTo(startX * this.gridSize, screenY)
-      ctx.lineTo(endX * this.gridSize, screenY)
-    }
-
-    ctx.stroke()
-
-    // Draw origin marker
-    ctx.strokeStyle = '#555566'
-    ctx.lineWidth = 2 / this.camera.zoom
-    ctx.beginPath()
-    ctx.moveTo(-10, 0)
-    ctx.lineTo(10, 0)
-    ctx.moveTo(0, -10)
-    ctx.lineTo(0, 10)
-    ctx.stroke()
-  }
-
-  drawSnapIndicator(ctx) {
-    if (!this.snapIndicator) return
-
-    const x = this.snapIndicator.x * this.gridSize
-    const y = this.snapIndicator.y * this.gridSize
-
-    // Draw crosshairs at snap position
-    const crosshairLength = 20 / this.camera.zoom
-    const lineWidth = 2 / this.camera.zoom
-
-    ctx.save()
-    ctx.strokeStyle = '#00ff88'
-    ctx.lineWidth = lineWidth
-    ctx.globalAlpha = 0.8
-
-    // Horizontal crosshair
-    ctx.beginPath()
-    ctx.moveTo(x - crosshairLength, y)
-    ctx.lineTo(x + crosshairLength, y)
-    ctx.stroke()
-
-    // Vertical crosshair
-    ctx.beginPath()
-    ctx.moveTo(x, y - crosshairLength)
-    ctx.lineTo(x, y + crosshairLength)
-    ctx.stroke()
-
-    // Draw snap point circle
-    ctx.beginPath()
-    ctx.arc(x, y, 6 / this.camera.zoom, 0, Math.PI * 2)
-    ctx.stroke()
-
-    // Highlight the grid lines near snap point
-    ctx.strokeStyle = '#00ff8844'
-    ctx.lineWidth = 3 / this.camera.zoom
-    ctx.globalAlpha = 0.5
-
-    // Vertical grid line at snap X
-    const topLeft = this.screenToWorld(0, 0)
-    const bottomRight = this.screenToWorld(this.width, this.height)
-    ctx.beginPath()
-    ctx.moveTo(x, topLeft.y * this.gridSize)
-    ctx.lineTo(x, bottomRight.y * this.gridSize)
-    ctx.stroke()
-
-    // Horizontal grid line at snap Y
-    ctx.beginPath()
-    ctx.moveTo(topLeft.x * this.gridSize, y)
-    ctx.lineTo(bottomRight.x * this.gridSize, y)
-    ctx.stroke()
-
-    ctx.restore()
-  }
-
-  drawRoomsAtZLevel(ctx, zLevel, opacity) {
-    const roomsAtLevel = this.rooms.filter(r => (r.z || 0) === zLevel)
-
-    for (const room of roomsAtLevel) {
-      this.drawRoom(ctx, room, opacity)
-    }
-  }
-
-  drawRoom(ctx, room, opacity = 1) {
-    const x = (room.x || 0) * this.gridSize
-    const y = (room.y || 0) * this.gridSize
-    const size = this.roomSize
-    const halfSize = size / 2
-
-    // Determine room color
-    let fillColor = ROOM_COLORS.default
-    let borderColor = '#ffffff'
-    let borderWidth = 1
-
-    const isSelected = this.selectedRoom === room.key
-    const isMultiSelected = this.selectedKeys.has(room.key)
-    const validationStatus = this.validation[room.key]?.status
-
-    if (isSelected) {
-      fillColor = ROOM_COLORS.selected
-      borderColor = '#ffffff'
-      borderWidth = 3
-    } else if (isMultiSelected) {
-      fillColor = ROOM_COLORS.multiSelected
-      borderColor = '#ff8800'
-      borderWidth = 3
-    } else if (validationStatus === 'error') {
-      fillColor = ROOM_COLORS.error
-      borderColor = '#ff0000'
-      borderWidth = 2
-    } else if (validationStatus === 'warning') {
-      fillColor = ROOM_COLORS.warning
-      borderColor = '#ffaa00'
-      borderWidth = 2
-    } else if (this.showZoneColors) {
-      // Use zone color if available
-      const zoneKey = this.roomZoneMap[room.key]
-      if (zoneKey && this.zoneColors[zoneKey]) {
-        fillColor = this.zoneColors[zoneKey]
-      }
-    }
-
-    ctx.globalAlpha = opacity
-
-    // Draw room rectangle with rounded corners
-    ctx.fillStyle = fillColor
-    ctx.strokeStyle = borderColor
-    ctx.lineWidth = borderWidth / this.camera.zoom
-
-    this.roundRect(ctx, x - halfSize, y - halfSize, size, size, 6)
-    ctx.fill()
-    ctx.stroke()
-
-    // Only show labels when zoomed in enough (avoid clutter when zoomed out)
-    const showLabels = this.camera.zoom >= 0.5
-    const showDetailedLabels = this.camera.zoom >= 0.8
-
-    if (showLabels) {
-      // Draw room name inside the room (truncated to fit)
-      const displayName = this.truncateText(room.name || room.key, size - 4, ctx, 11 / this.camera.zoom)
-      ctx.fillStyle = '#ffffff'
-      ctx.font = `bold ${11 / this.camera.zoom}px sans-serif`
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'top'
-      ctx.fillText(displayName, x, y - halfSize + 5)
-
-      // Draw room key only when zoomed in more (smaller, below name)
-      if (showDetailedLabels) {
-        const displayKey = this.truncateText(room.key, size - 4, ctx, 9 / this.camera.zoom)
-        ctx.fillStyle = '#888888'
-        ctx.font = `${9 / this.camera.zoom}px monospace`
-        ctx.fillText(displayKey, x, y - halfSize + 18)
-      }
-
-      // Draw entity indicators
-      this.drawEntityIndicators(ctx, room, x, y, halfSize)
-
-      // Draw up/down indicators
-      this.drawVerticalExitIndicators(ctx, room, x, y, halfSize)
-    }
-
-    ctx.globalAlpha = 1
-  }
-
-  // Truncate text to fit within maxWidth (memoized to avoid repeated measureText calls)
-  truncateText(text, maxWidth, ctx, fontSize) {
-    if (!text) return ''
-
-    const cacheKey = `${text}|${fontSize}|${maxWidth}`
-    if (this._truncateCache.has(cacheKey)) return this._truncateCache.get(cacheKey)
-
-    ctx.font = `${fontSize}px sans-serif`
-
-    if (ctx.measureText(text).width <= maxWidth) {
-      this._truncateCache.set(cacheKey, text)
-      return text
-    }
-
-    let truncated = text
-    while (truncated.length > 0 && ctx.measureText(truncated + '…').width > maxWidth) {
-      truncated = truncated.slice(0, -1)
-    }
-    const result = truncated + '…'
-
-    // Evict cache if it grows too large
-    if (this._truncateCache.size > 500) {
-      this._truncateCache.clear()
-    }
-    this._truncateCache.set(cacheKey, result)
-    return result
-  }
-
-  drawEntityIndicators(ctx, room, x, y, halfSize) {
-    const spawns = room.spawns || {}
-    const npcs = spawns.npcs || []
-    const items = spawns.items || []
-
-    if (npcs.length === 0 && items.length === 0) return
-
-    const fontSize = 10 / this.camera.zoom
-    ctx.font = `${fontSize}px sans-serif`
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'middle'
-
-    let offsetY = y + 5
-
-    // NPC indicators
-    if (npcs.length > 0) {
-      ctx.fillStyle = '#8B5CF6'
-      const npcText = npcs.length <= 3 ? '👤'.repeat(npcs.length) : `👤×${npcs.length}`
-      ctx.fillText(npcText, x, offsetY)
-      offsetY += fontSize + 2
-    }
-
-    // Item indicators
-    if (items.length > 0) {
-      ctx.fillStyle = '#EAB308'
-      const itemText = items.length <= 3 ? '📦'.repeat(items.length) : `📦×${items.length}`
-      ctx.fillText(itemText, x, offsetY)
-    }
-  }
-
-  drawVerticalExitIndicators(ctx, room, x, y, halfSize) {
-    const exits = room.exits || {}
-    const hasUp = 'up' in exits
-    const hasDown = 'down' in exits
-
-    if (!hasUp && !hasDown) return
-
-    ctx.font = `bold ${10 / this.camera.zoom}px sans-serif`
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'middle'
-
-    // Position at bottom of room
-    const indicatorY = y + halfSize - 8
-
-    if (hasUp && hasDown) {
-      ctx.fillStyle = EXIT_COLORS.up
-      ctx.fillText('↑', x - 6, indicatorY)
-      ctx.fillStyle = EXIT_COLORS.down
-      ctx.fillText('↓', x + 6, indicatorY)
-    } else if (hasUp) {
-      ctx.fillStyle = EXIT_COLORS.up
-      ctx.fillText('↑', x, indicatorY)
-    } else if (hasDown) {
-      ctx.fillStyle = EXIT_COLORS.down
-      ctx.fillText('↓', x, indicatorY)
-    }
-  }
-
-  drawExits(ctx) {
-    const currentRooms = this.rooms.filter(r => (r.z || 0) === this.currentZLevel)
-
-    for (const room of currentRooms) {
-      const exits = room.exits || {}
-
-      for (const [direction, destKey] of Object.entries(exits)) {
-        // Skip up/down - shown as indicators instead
-        if (direction === 'up' || direction === 'down') continue
-
-        const destRoom = this.roomsByKey.get(destKey)
-        if (!destRoom) continue
-
-        // Only draw exits to rooms on same Z-level
-        if ((destRoom.z || 0) !== this.currentZLevel) continue
-
-        this.drawExitArrow(ctx, room, destRoom, direction)
-      }
-    }
-  }
-
-  drawExitArrow(ctx, fromRoom, toRoom, direction) {
-    const fromX = (fromRoom.x || 0) * this.gridSize
-    const fromY = (fromRoom.y || 0) * this.gridSize
-    const toX = (toRoom.x || 0) * this.gridSize
-    const toY = (toRoom.y || 0) * this.gridSize
-
-    // Use a single consistent color for all connections
-    const color = '#666677'
-
-    // Calculate start and end points (offset from room edges)
-    const offset = this.roomSize / 2 + 2
-
-    // Calculate direction to destination
-    const dx = toX - fromX
-    const dy = toY - fromY
-    const dist = Math.sqrt(dx * dx + dy * dy)
-
-    if (dist < 1) return // Rooms at same position
-
-    // Normalize direction
-    const ndx = dx / dist
-    const ndy = dy / dist
-
-    // Start from edge of source room, end at edge of dest room
-    const startX = fromX + ndx * offset
-    const startY = fromY + ndy * offset
-    const endX = toX - ndx * offset
-    const endY = toY - ndy * offset
-
-    // Draw simple bar/line connecting rooms
-    ctx.strokeStyle = color
-    ctx.lineWidth = 3 / this.camera.zoom
-    ctx.lineCap = 'round'
-    ctx.beginPath()
-    ctx.moveTo(startX, startY)
-    ctx.lineTo(endX, endY)
-    ctx.stroke()
-  }
-
-  roundRect(ctx, x, y, width, height, radius) {
-    ctx.beginPath()
-    ctx.moveTo(x + radius, y)
-    ctx.lineTo(x + width - radius, y)
-    ctx.quadraticCurveTo(x + width, y, x + width, y + radius)
-    ctx.lineTo(x + width, y + height - radius)
-    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height)
-    ctx.lineTo(x + radius, y + height)
-    ctx.quadraticCurveTo(x, y + height, x, y + height - radius)
-    ctx.lineTo(x, y + radius)
-    ctx.quadraticCurveTo(x, y, x + radius, y)
-    ctx.closePath()
   }
 
   // ============================================================================
@@ -1144,18 +360,30 @@ export default class Canvas2DViewport {
       1.5
     )
     this.camera.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.camera.zoom))
-    this._truncateCache.clear()
+    this.renderer.clearTruncateCache()
 
     this.render()
   }
 
   resetCamera() {
     this.camera = { x: 0, y: 0, zoom: 1 }
-    this._truncateCache.clear()
+    this.renderer.clearTruncateCache()
     this.render()
   }
 
   getZLevels() {
     return this.zLevels || [0]
+  }
+
+  // ============================================================================
+  // Backward compatibility - expose internal state for tests
+  // ============================================================================
+
+  get _truncateCache() {
+    return this.renderer._truncateCache
+  }
+
+  get resizeObserver() {
+    return this.interaction.resizeObserver
   }
 }

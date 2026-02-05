@@ -29,8 +29,6 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     ValidationManager,
     ToolExecutor,
     ScriptManager,
-    ScriptTemplates,
-    GitManager,
     NPCPathExtractor,
     Projects,
     AuditLog
@@ -52,8 +50,11 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     CommitModal,
     ValidationPanel,
     ConfirmationModal,
+    CutsceneEventHandler,
     DialogueEventHandler,
     EntityEventHandler,
+    GitEventHandler,
+    ScriptTemplateEventHandler,
     KeyboardHelpModal,
     QuestFlowModal,
     DocumentViewer,
@@ -329,49 +330,72 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
       <div :if={@show_create_modal} class="modal-overlay">
         <div class="modal-content" phx-click-away="close_create_modal">
-          <div class="modal-header">
-            <h3>Create New Room</h3>
-            <button phx-click="close_create_modal" class="modal-close">&times;</button>
+          <div class="flex items-center justify-between p-4 border-b border-wb-border">
+            <h3 class="m-0 text-wb-text-bright text-base font-semibold">Create New Room</h3>
+            <button
+              phx-click="close_create_modal"
+              class="bg-transparent border-0 text-wb-text-muted text-2xl cursor-pointer p-0 w-8 h-8 flex items-center justify-center rounded-wb-sm transition-all hover:bg-wb-border hover:text-wb-text-bright"
+            >
+              &times;
+            </button>
           </div>
           <form phx-submit="submit_create_room">
-            <div class="form-group">
+            <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
               <label>Room Name</label>
               <input
                 type="text"
                 name="name"
-                class="input"
+                class="w-full bg-wb-panel border border-wb-border rounded-wb-sm p-2 text-wb-text-bright text-wb-base font-[inherit] focus:outline-none focus:border-wb-accent focus:bg-wb-panel-alt"
                 placeholder="e.g., Main Tavern"
                 required
               />
             </div>
 
-            <div class="form-group">
+            <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
               <label>Description</label>
               <textarea
                 name="description"
-                class="textarea"
+                class="w-full bg-wb-panel border border-wb-border rounded-wb-sm p-2 text-wb-text-bright text-wb-base font-[inherit] resize-y min-h-16 focus:outline-none focus:border-wb-accent focus:bg-wb-panel-alt"
                 rows="3"
                 placeholder="What the player sees when entering..."
               ></textarea>
             </div>
 
-            <div class="form-group">
+            <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
               <label>Position</label>
-              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
-                <input type="number" name="x" class="input" placeholder="X" value="0" />
-                <input type="number" name="y" class="input" placeholder="Y" value="0" />
-                <input type="number" name="z" class="input" placeholder="Z" value="0" />
+              <div class="grid grid-cols-3 gap-2">
+                <input
+                  type="number"
+                  name="x"
+                  class="w-full bg-wb-panel border border-wb-border rounded-wb-sm p-2 text-wb-text-bright text-wb-base font-[inherit] focus:outline-none focus:border-wb-accent focus:bg-wb-panel-alt"
+                  placeholder="X"
+                  value="0"
+                />
+                <input
+                  type="number"
+                  name="y"
+                  class="w-full bg-wb-panel border border-wb-border rounded-wb-sm p-2 text-wb-text-bright text-wb-base font-[inherit] focus:outline-none focus:border-wb-accent focus:bg-wb-panel-alt"
+                  placeholder="Y"
+                  value="0"
+                />
+                <input
+                  type="number"
+                  name="z"
+                  class="w-full bg-wb-panel border border-wb-border rounded-wb-sm p-2 text-wb-text-bright text-wb-base font-[inherit] focus:outline-none focus:border-wb-accent focus:bg-wb-panel-alt"
+                  placeholder="Z"
+                  value="0"
+                />
               </div>
             </div>
 
-            <div class="form-group">
+            <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
               <label>
                 Room Key <span class="text-base-content/50 font-normal">(optional)</span>
               </label>
               <input
                 type="text"
                 name="key"
-                class="input"
+                class="w-full bg-wb-panel border border-wb-border rounded-wb-sm p-2 text-wb-text-bright text-wb-base font-[inherit] focus:outline-none focus:border-wb-accent focus:bg-wb-panel-alt"
                 placeholder="Auto-generated from name if empty"
               />
               <small class="text-base-content/50">
@@ -379,11 +403,20 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
               </small>
             </div>
 
-            <div class="modal-footer">
-              <button type="button" phx-click="close_create_modal" class="btn btn-secondary">
+            <div class="flex gap-2 justify-end pt-4 border-t border-wb-border mt-4">
+              <button
+                type="button"
+                phx-click="close_create_modal"
+                class="px-4 py-2 border-none rounded-wb-sm text-wb-base cursor-pointer transition-all duration-100 bg-wb-border text-wb-text hover:bg-wb-border-light hover:text-wb-text-bright"
+              >
                 Cancel
               </button>
-              <button type="submit" class="btn btn-primary">Create Room</button>
+              <button
+                type="submit"
+                class="px-4 py-2 border-none rounded-wb-sm text-wb-base cursor-pointer transition-all duration-100 bg-wb-accent text-white hover:bg-wb-accent-hover"
+              >
+                Create Room
+              </button>
             </div>
           </form>
         </div>
@@ -392,45 +425,56 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
       <%!-- NPC Editor Modal --%>
       <div :if={@show_npc_editor} class="modal-overlay">
         <div class="modal-content" phx-click-away="close_npc_editor">
-          <div class="modal-header">
-            <h3>Create New NPC</h3>
-            <button phx-click="close_npc_editor" class="modal-close">&times;</button>
+          <div class="flex items-center justify-between p-4 border-b border-wb-border">
+            <h3 class="m-0 text-wb-text-bright text-base font-semibold">Create New NPC</h3>
+            <button
+              phx-click="close_npc_editor"
+              class="bg-transparent border-0 text-wb-text-muted text-2xl cursor-pointer p-0 w-8 h-8 flex items-center justify-center rounded-wb-sm transition-all hover:bg-wb-border hover:text-wb-text-bright"
+            >
+              &times;
+            </button>
           </div>
           <form phx-submit="create_npc">
-            <div class="form-group">
+            <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
               <label>NPC Name</label>
               <input
                 type="text"
                 name="name"
-                class="input"
+                class="w-full bg-wb-panel border border-wb-border rounded-wb-sm p-2 text-wb-text-bright text-wb-base font-[inherit] focus:outline-none focus:border-wb-accent focus:bg-wb-panel-alt"
                 placeholder="e.g., Captain Reeves"
                 required
               />
             </div>
 
-            <div class="form-group">
+            <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
               <label>Description</label>
               <textarea
                 name="description"
-                class="textarea"
+                class="w-full bg-wb-panel border border-wb-border rounded-wb-sm p-2 text-wb-text-bright text-wb-base font-[inherit] resize-y min-h-16 focus:outline-none focus:border-wb-accent focus:bg-wb-panel-alt"
                 rows="3"
                 placeholder="What the player sees when looking..."
               ></textarea>
             </div>
 
-            <div class="form-group">
+            <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
               <label>Level</label>
-              <input type="number" name="level" class="input" value="1" min="1" />
+              <input
+                type="number"
+                name="level"
+                class="w-full bg-wb-panel border border-wb-border rounded-wb-sm p-2 text-wb-text-bright text-wb-base font-[inherit] focus:outline-none focus:border-wb-accent focus:bg-wb-panel-alt"
+                value="1"
+                min="1"
+              />
             </div>
 
-            <div class="form-group">
+            <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
               <label>
                 NPC Key <span class="text-base-content/50 font-normal">(optional)</span>
               </label>
               <input
                 type="text"
                 name="key"
-                class="input"
+                class="w-full bg-wb-panel border border-wb-border rounded-wb-sm p-2 text-wb-text-bright text-wb-base font-[inherit] focus:outline-none focus:border-wb-accent focus:bg-wb-panel-alt"
                 placeholder="Auto-generated from name if empty"
               />
               <small class="text-base-content/50">
@@ -438,11 +482,20 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
               </small>
             </div>
 
-            <div class="modal-footer">
-              <button type="button" phx-click="close_npc_editor" class="btn btn-secondary">
+            <div class="flex gap-2 justify-end pt-4 border-t border-wb-border mt-4">
+              <button
+                type="button"
+                phx-click="close_npc_editor"
+                class="px-4 py-2 border-none rounded-wb-sm text-wb-base cursor-pointer transition-all duration-100 bg-wb-border text-wb-text hover:bg-wb-border-light hover:text-wb-text-bright"
+              >
                 Cancel
               </button>
-              <button type="submit" class="btn btn-primary">Create NPC</button>
+              <button
+                type="submit"
+                class="px-4 py-2 border-none rounded-wb-sm text-wb-base cursor-pointer transition-all duration-100 bg-wb-accent text-white hover:bg-wb-accent-hover"
+              >
+                Create NPC
+              </button>
             </div>
           </form>
         </div>
@@ -451,25 +504,33 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
       <%!-- Item Editor Modal --%>
       <div :if={@show_item_editor} class="modal-overlay">
         <div class="modal-content" phx-click-away="close_item_editor">
-          <div class="modal-header">
-            <h3>Create New Item</h3>
-            <button phx-click="close_item_editor" class="modal-close">&times;</button>
+          <div class="flex items-center justify-between p-4 border-b border-wb-border">
+            <h3 class="m-0 text-wb-text-bright text-base font-semibold">Create New Item</h3>
+            <button
+              phx-click="close_item_editor"
+              class="bg-transparent border-0 text-wb-text-muted text-2xl cursor-pointer p-0 w-8 h-8 flex items-center justify-center rounded-wb-sm transition-all hover:bg-wb-border hover:text-wb-text-bright"
+            >
+              &times;
+            </button>
           </div>
           <form phx-submit="create_item">
-            <div class="form-group">
+            <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
               <label>Item Name</label>
               <input
                 type="text"
                 name="name"
-                class="input"
+                class="w-full bg-wb-panel border border-wb-border rounded-wb-sm p-2 text-wb-text-bright text-wb-base font-[inherit] focus:outline-none focus:border-wb-accent focus:bg-wb-panel-alt"
                 placeholder="e.g., Iron Sword"
                 required
               />
             </div>
 
-            <div class="form-group">
+            <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
               <label>Item Type</label>
-              <select name="item_type" class="input">
+              <select
+                name="item_type"
+                class="w-full bg-wb-panel border border-wb-border rounded-wb-sm p-2 text-wb-text-bright text-wb-base font-[inherit] focus:outline-none focus:border-wb-accent focus:bg-wb-panel-alt"
+              >
                 <option value="misc">Miscellaneous</option>
                 <option value="weapon">Weapon</option>
                 <option value="armor">Armor</option>
@@ -478,24 +539,24 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
               </select>
             </div>
 
-            <div class="form-group">
+            <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
               <label>Description</label>
               <textarea
                 name="description"
-                class="textarea"
+                class="w-full bg-wb-panel border border-wb-border rounded-wb-sm p-2 text-wb-text-bright text-wb-base font-[inherit] resize-y min-h-16 focus:outline-none focus:border-wb-accent focus:bg-wb-panel-alt"
                 rows="3"
                 placeholder="What the player sees when examining..."
               ></textarea>
             </div>
 
-            <div class="form-group">
+            <div class="grid grid-cols-[40%_1fr] items-center gap-2 mb-2">
               <label>
                 Item Key <span class="text-base-content/50 font-normal">(optional)</span>
               </label>
               <input
                 type="text"
                 name="key"
-                class="input"
+                class="w-full bg-wb-panel border border-wb-border rounded-wb-sm p-2 text-wb-text-bright text-wb-base font-[inherit] focus:outline-none focus:border-wb-accent focus:bg-wb-panel-alt"
                 placeholder="Auto-generated from name if empty"
               />
               <small class="text-base-content/50">
@@ -503,11 +564,20 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
               </small>
             </div>
 
-            <div class="modal-footer">
-              <button type="button" phx-click="close_item_editor" class="btn btn-secondary">
+            <div class="flex gap-2 justify-end pt-4 border-t border-wb-border mt-4">
+              <button
+                type="button"
+                phx-click="close_item_editor"
+                class="px-4 py-2 border-none rounded-wb-sm text-wb-base cursor-pointer transition-all duration-100 bg-wb-border text-wb-text hover:bg-wb-border-light hover:text-wb-text-bright"
+              >
                 Cancel
               </button>
-              <button type="submit" class="btn btn-primary">Create Item</button>
+              <button
+                type="submit"
+                class="px-4 py-2 border-none rounded-wb-sm text-wb-base cursor-pointer transition-all duration-100 bg-wb-accent text-white hover:bg-wb-accent-hover"
+              >
+                Create Item
+              </button>
             </div>
           </form>
         </div>
@@ -574,7 +644,10 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
       <ValidationPanel.validation_panel :if={@show_validation_panel} validation_results={@validation} />
 
       <%!-- Document Viewer Modal --%>
-      <div :if={@selected_document} class="document-viewer-modal">
+      <div
+        :if={@selected_document}
+        class="fixed top-[60px] right-[340px] bottom-5 w-[500px] z-[100] bg-wb-panel border border-wb-border rounded-wb-lg shadow-lg flex flex-col overflow-hidden"
+      >
         <DocumentViewer.document_viewer
           document={@selected_document}
           content={@document_content}
@@ -1746,129 +1819,37 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   # Cutscene Editor LiveView Event Handlers
   # =============================================================================
 
-  def handle_event("cutscene_update_field", %{"field" => field, "value" => value}, socket) do
-    cutscene_data = Map.put(socket.assigns.cutscene_data, String.to_existing_atom(field), value)
-    {:noreply, assign(socket, :cutscene_data, cutscene_data)}
-  end
+  # Cutscene editing events (delegated to CutsceneEventHandler)
+  def handle_event("cutscene_update_field" = e, p, s),
+    do: CutsceneEventHandler.handle_event(e, p, s)
 
-  def handle_event("cutscene_update_trigger", %{"field" => field, "value" => value}, socket) do
-    trigger = Map.put(socket.assigns.cutscene_data.trigger, String.to_existing_atom(field), value)
-    cutscene_data = %{socket.assigns.cutscene_data | trigger: trigger}
-    {:noreply, assign(socket, :cutscene_data, cutscene_data)}
-  end
+  def handle_event("cutscene_update_trigger" = e, p, s),
+    do: CutsceneEventHandler.handle_event(e, p, s)
 
-  def handle_event("cutscene_add_step", %{"step_type" => ""}, socket) do
-    {:noreply, socket}
-  end
+  def handle_event("cutscene_add_step" = e, p, s), do: CutsceneEventHandler.handle_event(e, p, s)
 
-  def handle_event("cutscene_add_step", %{"step_type" => step_type}, socket) do
-    new_step = %{type: step_type, text: "", speaker: "", duration: 1.0}
-    sequence = socket.assigns.cutscene_data.sequence ++ [new_step]
-    cutscene_data = %{socket.assigns.cutscene_data | sequence: sequence}
-    {:noreply, assign(socket, :cutscene_data, cutscene_data)}
-  end
+  def handle_event("cutscene_remove_step" = e, p, s),
+    do: CutsceneEventHandler.handle_event(e, p, s)
 
-  def handle_event("cutscene_remove_step", %{"idx" => idx}, socket) do
-    idx = String.to_integer(idx)
-    sequence = List.delete_at(socket.assigns.cutscene_data.sequence, idx)
-    cutscene_data = %{socket.assigns.cutscene_data | sequence: sequence}
-    {:noreply, assign(socket, :cutscene_data, cutscene_data)}
-  end
+  def handle_event("cutscene_update_step" = e, p, s),
+    do: CutsceneEventHandler.handle_event(e, p, s)
 
-  def handle_event(
-        "cutscene_update_step",
-        %{"idx" => idx, "field" => field, "value" => value},
-        socket
-      ) do
-    idx = String.to_integer(idx)
+  def handle_event("cutscene_move_step_up" = e, p, s),
+    do: CutsceneEventHandler.handle_event(e, p, s)
 
-    sequence =
-      List.update_at(socket.assigns.cutscene_data.sequence, idx, fn step ->
-        Map.put(step, String.to_existing_atom(field), value)
-      end)
+  def handle_event("cutscene_move_step_down" = e, p, s),
+    do: CutsceneEventHandler.handle_event(e, p, s)
 
-    cutscene_data = %{socket.assigns.cutscene_data | sequence: sequence}
-    {:noreply, assign(socket, :cutscene_data, cutscene_data)}
-  end
+  def handle_event("cutscene_add_effect" = e, p, s),
+    do: CutsceneEventHandler.handle_event(e, p, s)
 
-  def handle_event("cutscene_move_step_up", %{"idx" => idx}, socket) do
-    idx = String.to_integer(idx)
-    sequence = socket.assigns.cutscene_data.sequence
+  def handle_event("cutscene_remove_effect" = e, p, s),
+    do: CutsceneEventHandler.handle_event(e, p, s)
 
-    if idx > 0 do
-      sequence = swap_list(sequence, idx, idx - 1)
-      cutscene_data = %{socket.assigns.cutscene_data | sequence: sequence}
-      {:noreply, assign(socket, :cutscene_data, cutscene_data)}
-    else
-      {:noreply, socket}
-    end
-  end
+  def handle_event("cutscene_update_effect" = e, p, s),
+    do: CutsceneEventHandler.handle_event(e, p, s)
 
-  def handle_event("cutscene_move_step_down", %{"idx" => idx}, socket) do
-    idx = String.to_integer(idx)
-    sequence = socket.assigns.cutscene_data.sequence
-
-    if idx < length(sequence) - 1 do
-      sequence = swap_list(sequence, idx, idx + 1)
-      cutscene_data = %{socket.assigns.cutscene_data | sequence: sequence}
-      {:noreply, assign(socket, :cutscene_data, cutscene_data)}
-    else
-      {:noreply, socket}
-    end
-  end
-
-  def handle_event("cutscene_add_effect", _params, socket) do
-    effects = socket.assigns.cutscene_data.effects ++ [%{type: "set_flag", flag: ""}]
-    cutscene_data = %{socket.assigns.cutscene_data | effects: effects}
-    {:noreply, assign(socket, :cutscene_data, cutscene_data)}
-  end
-
-  def handle_event("cutscene_remove_effect", %{"idx" => idx}, socket) do
-    idx = String.to_integer(idx)
-    effects = List.delete_at(socket.assigns.cutscene_data.effects, idx)
-    cutscene_data = %{socket.assigns.cutscene_data | effects: effects}
-    {:noreply, assign(socket, :cutscene_data, cutscene_data)}
-  end
-
-  def handle_event(
-        "cutscene_update_effect",
-        %{"idx" => idx, "field" => field, "value" => value},
-        socket
-      ) do
-    idx = String.to_integer(idx)
-
-    effects =
-      List.update_at(socket.assigns.cutscene_data.effects, idx, fn effect ->
-        Map.put(effect, String.to_existing_atom(field), value)
-      end)
-
-    cutscene_data = %{socket.assigns.cutscene_data | effects: effects}
-    {:noreply, assign(socket, :cutscene_data, cutscene_data)}
-  end
-
-  def handle_event("cutscene_save", _params, socket) do
-    data = socket.assigns.cutscene_data
-
-    cutscene_params = %{
-      "id" => data.id,
-      "name" => data.name,
-      "trigger" => %{
-        "type" => data.trigger.type,
-        "location" => data.trigger.location,
-        "condition" => data.trigger.condition
-      },
-      "sequence" =>
-        Enum.map(data.sequence, fn step ->
-          Map.new(step, fn {k, v} -> {to_string(k), v} end)
-        end),
-      "effects" =>
-        Enum.map(data.effects, fn effect ->
-          Map.new(effect, fn {k, v} -> {to_string(k), v} end)
-        end)
-    }
-
-    handle_event("create_cutscene", cutscene_params, socket)
-  end
+  def handle_event("cutscene_save" = e, p, s), do: CutsceneEventHandler.handle_event(e, p, s)
 
   # =============================================================================
   # Script Editor LiveView Event Handlers
@@ -1887,310 +1868,54 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   end
 
   # =============================================================================
-  # Template Picker Event Handlers
+  # Template Picker Event Handlers (delegated to ScriptTemplateEventHandler)
   # =============================================================================
 
-  def handle_event("show_template_picker", _params, socket) do
-    {:noreply,
-     socket
-     |> assign(:show_template_picker, true)
-     |> assign(:template_search, "")
-     |> assign(:template_category, nil)}
-  end
+  def handle_event("show_template_picker" = e, p, s),
+    do: ScriptTemplateEventHandler.handle_event(e, p, s)
 
-  def handle_event("close_template_picker", _params, socket) do
-    {:noreply,
-     socket
-     |> assign(:show_template_picker, false)
-     |> assign(:template_search, "")
-     |> assign(:template_category, nil)}
-  end
+  def handle_event("close_template_picker" = e, p, s),
+    do: ScriptTemplateEventHandler.handle_event(e, p, s)
 
-  def handle_event("template_search", %{"value" => search}, socket) do
-    {:noreply, assign(socket, :template_search, search)}
-  end
+  def handle_event("template_search" = e, p, s),
+    do: ScriptTemplateEventHandler.handle_event(e, p, s)
 
-  def handle_event("filter_category", %{"category" => ""}, socket) do
-    {:noreply, assign(socket, :template_category, nil)}
-  end
+  def handle_event("filter_category" = e, p, s),
+    do: ScriptTemplateEventHandler.handle_event(e, p, s)
 
-  def handle_event("filter_category", %{"category" => category}, socket) do
-    category_atom = String.to_existing_atom(category)
-    {:noreply, assign(socket, :template_category, category_atom)}
-  rescue
-    ArgumentError -> {:noreply, socket}
-  end
+  def handle_event("select_template" = e, p, s),
+    do: ScriptTemplateEventHandler.handle_event(e, p, s)
 
-  def handle_event("select_template", %{"id" => template_id}, socket) do
-    case ScriptTemplates.get_template(template_id) do
-      {:ok, template} ->
-        # Initialize config with defaults from schema
-        initial_config =
-          template.config_schema
-          |> Enum.map(fn field ->
-            {Atom.to_string(field.name), Map.get(field, :default)}
-          end)
-          |> Map.new()
+  def handle_event("close_template_config" = e, p, s),
+    do: ScriptTemplateEventHandler.handle_event(e, p, s)
 
-        # Generate initial preview
-        preview_code =
-          case ScriptTemplates.generate_code(template_id, initial_config) do
-            {:ok, code} -> code
-            {:error, _} -> "# Configure required fields to see preview"
-          end
+  def handle_event("back_to_picker" = e, p, s),
+    do: ScriptTemplateEventHandler.handle_event(e, p, s)
 
-        {:noreply,
-         socket
-         |> assign(:show_template_picker, false)
-         |> assign(:show_template_config, true)
-         |> assign(:selected_template, template)
-         |> assign(:template_config, initial_config)
-         |> assign(:template_preview_code, preview_code)
-         |> assign(:template_validation_errors, [])}
+  def handle_event("update_template_config" = e, p, s),
+    do: ScriptTemplateEventHandler.handle_event(e, p, s)
 
-      {:error, _} ->
-        {:noreply, log_console(socket, :error, "Template not found: #{template_id}")}
-    end
-  end
+  def handle_event("update_template_config_bool" = e, p, s),
+    do: ScriptTemplateEventHandler.handle_event(e, p, s)
 
-  def handle_event("close_template_config", _params, socket) do
-    {:noreply,
-     socket
-     |> assign(:show_template_config, false)
-     |> assign(:selected_template, nil)
-     |> assign(:template_config, %{})
-     |> assign(:template_preview_code, "")
-     |> assign(:template_validation_errors, [])}
-  end
+  def handle_event("update_template_config_select" = e, p, s),
+    do: ScriptTemplateEventHandler.handle_event(e, p, s)
 
-  def handle_event("back_to_picker", _params, socket) do
-    {:noreply,
-     socket
-     |> assign(:show_template_config, false)
-     |> assign(:show_template_picker, true)
-     |> assign(:selected_template, nil)
-     |> assign(:template_config, %{})
-     |> assign(:template_preview_code, "")
-     |> assign(:template_validation_errors, [])}
-  end
-
-  def handle_event("update_template_config", %{"field" => field, "value" => value}, socket) do
-    update_template_config(socket, field, value)
-  end
-
-  def handle_event("update_template_config_bool", %{"field" => field, "value" => value}, socket) do
-    bool_value = value == "true"
-    update_template_config(socket, field, bool_value)
-  end
-
-  def handle_event("update_template_config_select", %{"field" => field, "value" => value}, socket) do
-    update_template_config(socket, field, value)
-  end
-
-  def handle_event("create_script_from_template", _params, socket) do
-    template = socket.assigns.selected_template
-    config = socket.assigns.template_config
-
-    script_key = config["script_key"]
-    script_name = config["script_name"] || script_key
-    entity_key = config["entity_key"]
-
-    case ScriptTemplates.generate_code(template.id, config) do
-      {:ok, source_code} ->
-        attrs = %{
-          key: script_key,
-          name: script_name,
-          description: "Generated from template #{template.id}: #{template.name}",
-          hook: template.hook,
-          source: source_code,
-          tags: [Atom.to_string(template.category), "template:#{template.id}"],
-          entity_key: entity_key
-        }
-
-        case ScriptManager.create_script(attrs) do
-          {:ok, script} ->
-            {:noreply,
-             socket
-             |> assign(:show_template_config, false)
-             |> assign(:selected_template, nil)
-             |> assign(:template_config, %{})
-             |> assign(:template_preview_code, "")
-             |> assign(:template_validation_errors, [])
-             |> log_console(:info, "Created script '#{script.key}' from template #{template.id}")}
-
-          {:error, :already_exists} ->
-            {:noreply,
-             assign(socket, :template_validation_errors, [
-               "Script key '#{script_key}' already exists"
-             ])}
-
-          {:error, errors} when is_list(errors) ->
-            {:noreply, assign(socket, :template_validation_errors, errors)}
-
-          {:error, reason} ->
-            {:noreply,
-             assign(socket, :template_validation_errors, [
-               "Failed to create script: #{inspect(reason)}"
-             ])}
-        end
-
-      {:error, {:validation_failed, errors}} ->
-        {:noreply, assign(socket, :template_validation_errors, errors)}
-
-      {:error, reason} ->
-        {:noreply,
-         assign(socket, :template_validation_errors, [
-           "Failed to generate code: #{inspect(reason)}"
-         ])}
-    end
-  end
+  def handle_event("create_script_from_template" = e, p, s),
+    do: ScriptTemplateEventHandler.handle_event(e, p, s)
 
   # =============================================================================
-  # Git Commit Modal Event Handlers
+  # Git Commit Modal Event Handlers (delegated to GitEventHandler)
   # =============================================================================
 
-  def handle_event("show_commit_modal", _params, socket) do
-    # Fetch git status and generate commit message
-    {status, commit_msg} =
-      case GitManager.status() do
-        {:ok, status} ->
-          msg = GitManager.generate_commit_message()
-          {status, msg}
-
-        {:error, _} ->
-          {%{modified: [], added: [], deleted: []}, ""}
-      end
-
-    {:noreply,
-     socket
-     |> assign(:show_commit_modal, true)
-     |> assign(:git_status, status)
-     |> assign(:git_diff, "")
-     |> assign(:commit_message, commit_msg)
-     |> assign(:commit_result, nil)}
-  end
-
-  def handle_event("close_commit_modal", _params, socket) do
-    {:noreply,
-     socket
-     |> assign(:show_commit_modal, false)
-     |> assign(:git_status, %{modified: [], added: [], deleted: []})
-     |> assign(:git_diff, "")
-     |> assign(:commit_message, "")
-     |> assign(:is_committing, false)
-     |> assign(:is_pushing, false)
-     |> assign(:commit_result, nil)}
-  end
-
-  def handle_event("refresh_git_status", _params, socket) do
-    {status, commit_msg} =
-      case GitManager.status() do
-        {:ok, status} ->
-          msg = GitManager.generate_commit_message()
-          {status, msg}
-
-        {:error, _} ->
-          {%{modified: [], added: [], deleted: []}, ""}
-      end
-
-    {:noreply,
-     socket
-     |> assign(:git_status, status)
-     |> assign(:commit_message, commit_msg)
-     |> log_console(:info, "Git status refreshed")}
-  end
-
-  def handle_event("show_file_diff", %{"file" => file_path}, socket) do
-    diff =
-      case GitManager.diff(file_path) do
-        {:ok, diff_output} -> diff_output
-        {:error, _} -> "Failed to load diff"
-      end
-
-    {:noreply, assign(socket, :git_diff, diff)}
-  end
-
-  def handle_event("update_commit_message", %{"value" => message}, socket) do
-    {:noreply, assign(socket, :commit_message, message)}
-  end
-
-  def handle_event("stage_and_commit", _params, socket) do
-    message = socket.assigns.commit_message
-
-    socket = assign(socket, :is_committing, true)
-
-    result =
-      with :ok <- GitManager.stage(:all),
-           {:ok, hash} <- GitManager.commit(message) do
-        {:ok, hash}
-      end
-
-    socket =
-      case result do
-        {:ok, hash} ->
-          # Refresh status after successful commit
-          {new_status, new_msg} =
-            case GitManager.status() do
-              {:ok, s} -> {s, GitManager.generate_commit_message()}
-              {:error, _} -> {%{modified: [], added: [], deleted: []}, ""}
-            end
-
-          socket
-          |> assign(:is_committing, false)
-          |> assign(:git_status, new_status)
-          |> assign(:commit_message, new_msg)
-          |> assign(:git_diff, "")
-          |> assign(:commit_result, %{status: "success", message: "Committed: #{hash}"})
-          |> log_console(:info, "Committed changes: #{hash}")
-
-        {:error, reason} ->
-          socket
-          |> assign(:is_committing, false)
-          |> assign(:commit_result, %{status: "error", message: "#{reason}"})
-          |> log_console(:error, "Commit failed: #{reason}")
-      end
-
-    {:noreply, socket}
-  end
-
-  def handle_event("push_commits", _params, socket) do
-    socket = assign(socket, :is_pushing, true)
-
-    socket =
-      case GitManager.push() do
-        :ok ->
-          socket
-          |> assign(:is_pushing, false)
-          |> assign(:commit_result, %{status: "success", message: "Pushed to remote"})
-          |> log_console(:info, "Pushed commits to remote")
-
-        {:error, reason} ->
-          socket
-          |> assign(:is_pushing, false)
-          |> assign(:commit_result, %{status: "error", message: "Push failed: #{reason}"})
-          |> log_console(:error, "Push failed: #{reason}")
-      end
-
-    {:noreply, socket}
-  end
-
-  def handle_event("export_world_zip", _params, socket) do
-    case GitManager.export_zip() do
-      {:ok, zip_path} ->
-        # Return the path to the frontend for download
-        {:noreply,
-         socket
-         |> assign(:commit_result, %{status: "success", message: "Exported: #{zip_path}"})
-         |> log_console(:info, "Exported world content to #{zip_path}")
-         |> push_event("download_file", %{path: zip_path})}
-
-      {:error, reason} ->
-        {:noreply,
-         socket
-         |> assign(:commit_result, %{status: "error", message: "Export failed: #{reason}"})
-         |> log_console(:error, "Export failed: #{reason}")}
-    end
-  end
+  def handle_event("show_commit_modal" = e, p, s), do: GitEventHandler.handle_event(e, p, s)
+  def handle_event("close_commit_modal" = e, p, s), do: GitEventHandler.handle_event(e, p, s)
+  def handle_event("refresh_git_status" = e, p, s), do: GitEventHandler.handle_event(e, p, s)
+  def handle_event("show_file_diff" = e, p, s), do: GitEventHandler.handle_event(e, p, s)
+  def handle_event("update_commit_message" = e, p, s), do: GitEventHandler.handle_event(e, p, s)
+  def handle_event("stage_and_commit" = e, p, s), do: GitEventHandler.handle_event(e, p, s)
+  def handle_event("push_commits" = e, p, s), do: GitEventHandler.handle_event(e, p, s)
+  def handle_event("export_world_zip" = e, p, s), do: GitEventHandler.handle_event(e, p, s)
 
   # =============================================================================
   # Dialogue Editor Event Handlers
@@ -2878,30 +2603,6 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     {:noreply, log_console(socket, :error, "Unknown confirmation action")}
   end
 
-  defp update_template_config(socket, field, value) do
-    template = socket.assigns.selected_template
-    config = Map.put(socket.assigns.template_config, field, value)
-
-    # Regenerate preview
-    {preview_code, validation_errors} =
-      case ScriptTemplates.generate_code(template.id, config) do
-        {:ok, code} ->
-          {code, []}
-
-        {:error, {:validation_failed, errors}} ->
-          {"# Fix validation errors to see preview", errors}
-
-        {:error, _} ->
-          {"# Configure required fields to see preview", []}
-      end
-
-    {:noreply,
-     socket
-     |> assign(:template_config, config)
-     |> assign(:template_preview_code, preview_code)
-     |> assign(:template_validation_errors, validation_errors)}
-  end
-
   # Restore state based on operation type
   defp restore_state("create_room", nil, %{"key" => key}, socket) do
     # Undo create = delete
@@ -3331,15 +3032,6 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
       sequence: [],
       effects: []
     }
-  end
-
-  defp swap_list(list, idx1, idx2) do
-    a = Enum.at(list, idx1)
-    b = Enum.at(list, idx2)
-
-    list
-    |> List.replace_at(idx1, b)
-    |> List.replace_at(idx2, a)
   end
 
   # Toggle panel collapsed state (used by keyboard shortcuts)

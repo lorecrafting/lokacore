@@ -82,20 +82,41 @@ socket = stream(socket, :entities, EntityManager.list_entities(:npc))
 socket = stream(socket, :entities, new_list, reset: true)
 ```
 
-### Manager Pattern
-Complex LiveViews use coordinator + managers:
-```elixir
-# In LiveView
-def handle_event("entity_action", params, socket) do
-  EntityManager.handle_event(params, socket)
-end
+### Event Handler Extraction Pattern
+Large LiveViews delegate `handle_event` to extracted handler modules to stay under ~2,500 lines. Five handlers are already extracted:
 
-# Manager returns socket
-def handle_event(params, socket) do
-  # ... logic ...
-  {:noreply, socket}
+| Handler Module | Domain | Events |
+|---|---|---|
+| `EntityEventHandler` | NPC/Item CRUD | `create_npc`, `delete_item`, etc. |
+| `DialogueEventHandler` | Dialogue tree editing | `dialogue_*` events |
+| `GitEventHandler` | Git commit modal | `show_commit_modal`, `stage_and_commit`, etc. |
+| `CutsceneEventHandler` | Cutscene editing | `cutscene_*` events |
+| `ScriptTemplateEventHandler` | Script template picker | `show_template_picker`, `create_script_from_template`, etc. |
+
+**Delegation pattern** (one-line in `world_builder_live.ex`):
+```elixir
+def handle_event("show_commit_modal" = e, p, s), do: GitEventHandler.handle_event(e, p, s)
+```
+
+**Handler module structure:**
+```elixir
+defmodule LokaWeb.AdminLive.WorldBuilder.MyEventHandler do
+  import Phoenix.Component, only: [assign: 3]
+  # import Phoenix.LiveView, only: [push_event: 3]  # if needed
+
+  def handle_event("my_event", params, socket) do
+    {:noreply, assign(socket, :field, value)}
+  end
+
+  # Private helper for console logging (duplicated per handler — acceptable for ≤5 copies)
+  defp log_console(socket, level, text) do
+    message = %{timestamp: DateTime.utc_now(), level: level, text: text}
+    assign(socket, :console_messages, socket.assigns.console_messages ++ [message])
+  end
 end
 ```
+
+**When to extract:** Group of 50+ lines of related `handle_event` clauses with a clear domain boundary.
 
 ### Push Events to JS
 ```elixir
@@ -127,11 +148,12 @@ socket = assign(socket, form: to_form(changeset))
 
 | File | Purpose |
 |------|---------|
-| `world_builder_live.ex` | Main coordinator |
+| `world_builder_live.ex` | Main coordinator (~3,060 lines) |
+| `world_builder/*_event_handler.ex` | Extracted event handler modules (5 total) |
 | `entity_manager.ex` | Generic entity CRUD |
 | `room_manager.ex` | Room-specific logic |
 | `hierarchy_panel.ex` | Tree navigation |
-| `console_panel.ex` | Command console |
+| `terminal_panel.ex` | MUD terminal |
 
 ## Validation
 

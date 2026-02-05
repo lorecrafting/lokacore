@@ -22,82 +22,74 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ValidationPanel do
       <div
         class="modal-content"
         phx-click-away="close_validation_panel"
-        style="width: 600px; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;"
+        class="w-[600px] max-h-[80vh] overflow-hidden flex flex-col"
       >
-        <div class="modal-header">
-          <h3 id="validation-title">Validation Results</h3>
-          <button phx-click="close_validation_panel" class="modal-close">&times;</button>
+        <div class="flex items-center justify-between p-4 border-b border-wb-border">
+          <h3 id="validation-title" class="m-0 text-wb-text-bright text-base font-semibold">
+            Validation Results
+          </h3>
+          <button
+            phx-click="close_validation_panel"
+            class="bg-transparent border-0 text-wb-text-muted text-2xl cursor-pointer p-0 w-8 h-8 flex items-center justify-center rounded-wb-sm transition-all hover:bg-wb-border hover:text-wb-text-bright"
+          >
+            &times;
+          </button>
         </div>
 
-        <div style="padding: 1rem; overflow-y: auto; flex: 1;">
+        <div class="p-4 overflow-y-auto flex-1">
           <!-- Summary -->
-          <div class="validation-summary" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-            <div
-              class={[
-                "validation-stat",
-                @validation_results.error_count > 0 && "stat-error"
-              ]}
-              style="flex: 1; padding: 0.75rem; background: var(--wb-panel); border-radius: 4px; text-align: center;"
-            >
-              <div style="font-size: 1.5rem; font-weight: bold; color: var(--wb-error);">
+          <div class="validation-summary flex gap-4 mb-4">
+            <div class={[
+              "validation-stat flex-1 p-3 bg-wb-panel rounded text-center",
+              @validation_results.error_count > 0 && "stat-error"
+            ]}>
+              <div class="text-2xl font-bold text-wb-error">
                 {@validation_results.error_count}
               </div>
-              <div style="font-size: 0.75rem; color: var(--wb-text-muted);">Errors</div>
+              <div class="text-xs text-wb-text-muted">Errors</div>
             </div>
-            <div
-              class={[
-                "validation-stat",
-                @validation_results.warning_count > 0 && "stat-warning"
-              ]}
-              style="flex: 1; padding: 0.75rem; background: var(--wb-panel); border-radius: 4px; text-align: center;"
-            >
-              <div style="font-size: 1.5rem; font-weight: bold; color: var(--wb-warning);">
+            <div class={[
+              "validation-stat flex-1 p-3 bg-wb-panel rounded text-center",
+              @validation_results.warning_count > 0 && "stat-warning"
+            ]}>
+              <div class="text-2xl font-bold text-wb-warning">
                 {@validation_results.warning_count}
               </div>
-              <div style="font-size: 0.75rem; color: var(--wb-text-muted);">Warnings</div>
+              <div class="text-xs text-wb-text-muted">Warnings</div>
             </div>
-            <div
-              class="validation-stat"
-              style="flex: 1; padding: 0.75rem; background: var(--wb-panel); border-radius: 4px; text-align: center;"
-            >
-              <div style="font-size: 1.5rem; font-weight: bold; color: var(--wb-success);">
+            <div class="validation-stat flex-1 p-3 bg-wb-panel rounded text-center">
+              <div class="text-2xl font-bold text-wb-success">
                 {@validation_results.valid_count}
               </div>
-              <div style="font-size: 0.75rem; color: var(--wb-text-muted);">Valid</div>
+              <div class="text-xs text-wb-text-muted">Valid</div>
             </div>
           </div>
 
           <div
             :if={@validation_results.error_count == 0 && @validation_results.warning_count == 0}
-            style="text-align: center; padding: 2rem; color: var(--wb-success);"
+            class="text-center p-8 text-wb-success"
           >
-            <.icon name="hero-check-circle" class="size-12" style="margin-bottom: 0.5rem;" />
-            <p style="font-size: 1.1rem;">All content is valid!</p>
+            <.icon name="hero-check-circle" class="size-12 mb-2" />
+            <p class="text-lg">All content is valid!</p>
           </div>
           <!-- Errors Section -->
           <div
             :if={length(@validation_results.errors) > 0}
-            class="validation-section"
-            style="margin-bottom: 1rem;"
+            class="validation-section mb-4"
           >
-            <h4 style="color: var(--wb-error); margin-bottom: 0.5rem; font-size: 0.875rem;">
+            <h4 class="text-wb-error mb-2 text-sm">
               <.icon name="hero-x-circle" class="size-4" /> Errors
             </h4>
-            <div
-              class="validation-list"
-              style="display: flex; flex-direction: column; gap: 0.25rem;"
-            >
+            <div class="validation-list flex flex-col gap-1">
               <%= for error <- @validation_results.errors do %>
                 <div
-                  class="validation-item validation-error"
-                  style="padding: 0.5rem; background: rgba(239, 68, 68, 0.1); border-radius: 4px; font-size: 0.85rem; cursor: pointer;"
+                  class="validation-item validation-error p-2 bg-[color-mix(in_srgb,var(--wb-error)_10%,transparent)] rounded text-[0.85rem] cursor-pointer"
                   phx-click="validation_jump_to"
                   phx-value-message={error}
                 >
                   <.icon
                     name="hero-exclamation-triangle"
-                    class="size-3"
-                    style="color: var(--wb-error); margin-right: 0.25rem;"
+                    class="size-3 text-wb-error mr-1"
                   />
                   {error}
                 </div>
@@ -109,24 +101,19 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ValidationPanel do
             :if={length(@validation_results.warnings) > 0}
             class="validation-section"
           >
-            <h4 style="color: var(--wb-warning); margin-bottom: 0.5rem; font-size: 0.875rem;">
+            <h4 class="text-wb-warning mb-2 text-sm">
               <.icon name="hero-exclamation-triangle" class="size-4" /> Warnings
             </h4>
-            <div
-              class="validation-list"
-              style="display: flex; flex-direction: column; gap: 0.25rem;"
-            >
+            <div class="validation-list flex flex-col gap-1">
               <%= for warning <- @validation_results.warnings do %>
                 <div
-                  class="validation-item validation-warning"
-                  style="padding: 0.5rem; background: rgba(245, 158, 11, 0.1); border-radius: 4px; font-size: 0.85rem; cursor: pointer;"
+                  class="validation-item validation-warning p-2 bg-[color-mix(in_srgb,var(--wb-warning)_10%,transparent)] rounded text-[0.85rem] cursor-pointer"
                   phx-click="validation_jump_to"
                   phx-value-message={warning}
                 >
                   <.icon
                     name="hero-exclamation-circle"
-                    class="size-3"
-                    style="color: var(--wb-warning); margin-right: 0.25rem;"
+                    class="size-3 text-wb-warning mr-1"
                   />
                   {warning}
                 </div>
@@ -135,12 +122,17 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ValidationPanel do
           </div>
         </div>
 
-        <div
-          class="modal-footer"
-          style="padding: 0.75rem 1rem; border-top: 1px solid var(--wb-border); display: flex; justify-content: flex-end; gap: 0.5rem;"
-        >
-          <button phx-click="close_validation_panel" class="btn btn-secondary">Close</button>
-          <button phx-click="validate_all" class="btn btn-primary">
+        <div class="flex gap-2 justify-end px-4 py-3 border-t border-wb-border">
+          <button
+            phx-click="close_validation_panel"
+            class="px-4 py-2 border-none rounded-wb-sm text-wb-base cursor-pointer transition-all duration-100 bg-wb-border text-wb-text hover:bg-wb-border-light hover:text-wb-text-bright"
+          >
+            Close
+          </button>
+          <button
+            phx-click="validate_all"
+            class="px-4 py-2 border-none rounded-wb-sm text-wb-base cursor-pointer transition-all duration-100 bg-wb-accent text-white hover:bg-wb-accent-hover"
+          >
             <.icon name="hero-arrow-path" class="size-4" />
             <span>Re-validate</span>
           </button>
