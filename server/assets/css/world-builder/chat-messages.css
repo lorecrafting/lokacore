@@ -219,16 +219,15 @@
 .message-content {
   font-size: 0.85rem;
   color: var(--wb-text-bright);
-  line-height: 1.6;
-  white-space: pre-wrap;
+  line-height: 1.4;
 }
 
 .message-content h1 {
   font-size: 1.05rem;
   font-weight: 700;
   color: var(--wb-chat-text-bright);
-  margin: var(--wb-space-md) 0 var(--wb-space-sm) 0;
-  padding-bottom: var(--wb-space-xs);
+  margin: var(--wb-space-sm) 0 2px 0;
+  padding-bottom: 2px;
   border-bottom: 1px solid var(--wb-chat-border);
 }
 
@@ -236,18 +235,18 @@
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--wb-text-bright);
-  margin: var(--wb-space-md) 0 var(--wb-space-xs) 0;
+  margin: var(--wb-space-sm) 0 2px 0;
 }
 
 .message-content h3 {
   font-size: 0.88rem;
   font-weight: 600;
   color: var(--wb-text-bright);
-  margin: var(--wb-space-sm) 0 var(--wb-space-xs) 0;
+  margin: var(--wb-space-xs) 0 2px 0;
 }
 
 .message-content p {
-  margin: 0 0 var(--wb-space-sm) 0;
+  margin: 0 0 var(--wb-space-xs) 0;
 }
 
 .message-content p:last-child {
@@ -255,7 +254,7 @@
 }
 
 .message-content li {
-  margin: var(--wb-space-xs) 0;
+  margin: 1px 0;
   padding-left: var(--wb-space-sm);
   position: relative;
 }
@@ -293,7 +292,7 @@
 
 .message-content br {
   display: block;
-  margin: var(--wb-space-xs) 0;
+  margin: 0;
   content: '';
 }
 

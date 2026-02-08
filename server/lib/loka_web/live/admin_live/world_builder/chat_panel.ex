@@ -193,7 +193,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
             :if={@streaming}
             class="chat-message assistant streaming mb-1.5 py-1.5 px-3 rounded-lg relative bg-wb-panel-alt mr-[4%] border border-wb-chat-border"
           >
-            <div class="message-content text-[0.85rem] text-wb-text-bright leading-relaxed whitespace-pre-wrap">
+            <div class="message-content text-[0.85rem] text-wb-text-bright leading-snug whitespace-normal">
               <div
                 :if={@current_tool}
                 class="current-tool-indicator flex items-center gap-2 py-1.5 px-3 rounded-lg mb-1.5 text-wb-tool-text text-[0.83rem] font-wb-mono bg-linear-to-br from-wb-tool-bg-from to-wb-tool-bg-to border border-wb-tool-border"
@@ -293,9 +293,9 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
         "bg-wb-danger-surface !border-wb-danger-border !border-l-wb-error"
     ]}>
       <div class={[
-        "message-content text-[0.85rem] text-wb-text-bright leading-relaxed whitespace-pre-wrap",
-        @message.role == "user" && "!text-wb-chat-user-text",
-        @message.role == "tool_result" && "!whitespace-normal"
+        "message-content text-[0.85rem] text-wb-text-bright leading-snug",
+        @message.role == "user" && "!text-wb-chat-user-text whitespace-pre-wrap",
+        @message.role != "user" && "whitespace-normal"
       ]}>
         <%= case @message.role do %>
           <% "user" -> %>
