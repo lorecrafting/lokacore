@@ -175,13 +175,13 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
             </div>
             <div class="text-[0.7rem] text-wb-chat-text-faint mt-4 leading-relaxed">
               <kbd class="inline-block px-1.5 py-px bg-wb-input border border-wb-border rounded-wb-sm text-[0.65rem] text-wb-text-muted font-[inherit]">
-                Ctrl+Enter
+                Enter
               </kbd>
               to send &middot;
               <kbd class="inline-block px-1.5 py-px bg-wb-input border border-wb-border rounded-wb-sm text-[0.65rem] text-wb-text-muted font-[inherit]">
-                Esc
+                Shift+Enter
               </kbd>
-              to cancel
+              for new line
             </div>
           </div>
 
@@ -250,7 +250,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
             name="message"
             class="flex-1 py-2.5 px-3.5 bg-wb-surface border border-wb-chat-border rounded-[10px] text-wb-text-bright text-[0.85rem] font-[inherit] resize-none transition-all duration-200 leading-normal focus:outline-none focus:border-wb-accent focus:shadow-[0_0_0_2px_rgba(85,112,204,0.15)] placeholder:text-wb-text-faint"
             placeholder={chat_placeholder(@current_project, @streaming, @queued_messages)}
-            rows="3"
+            rows="1"
             phx-hook="ChatTextarea"
             data-streaming={@streaming}
           ></textarea>
