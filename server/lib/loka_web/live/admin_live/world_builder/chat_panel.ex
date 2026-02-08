@@ -287,10 +287,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
       @message.role == "user" &&
         "bg-linear-to-br from-wb-chat-user-bg-from to-wb-chat-user-bg-to ml-[12%] border border-wb-chat-user-border shadow-[0_1px_4px_rgba(0,0,0,0.2)]",
       @message.role == "assistant" && "bg-wb-panel-alt mr-[4%] border border-wb-chat-border",
-      @message.role == "tool_result" &&
-        "bg-wb-success-surface mx-2 mr-6 py-2 px-2.5 rounded-wb-lg text-[0.8rem] border border-wb-success-border border-l-[3px] border-l-wb-success",
-      @message.role == "tool_result" && @message[:is_error] &&
-        "bg-wb-danger-surface !border-wb-danger-border !border-l-wb-error"
+      @message.role == "tool_result" && "!bg-transparent !border-none !p-0 ml-2"
     ]}>
       <div class={[
         "message-content text-[0.85rem] text-wb-text-bright leading-snug",
@@ -325,16 +322,23 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
   attr :tool, :map, required: true
 
   defp tool_use_display(assigns) do
+    input_json = Jason.encode!(assigns.tool.input)
+    has_input = input_json != "{}"
+    assigns = assign(assigns, :input_json, input_json) |> assign(:has_input, has_input)
+
     ~H"""
-    <div class="tool-use whitespace-normal bg-wb-tool-use-bg border border-wb-tool-use-border rounded-wb-lg py-1.5 px-2.5 mt-1.5 transition-colors duration-150 hover:border-wb-tool-use-border-hover">
-      <div class="tool-header flex items-center gap-2 text-wb-tool-header text-[0.78rem] font-medium">
-        <.icon name="hero-wrench-screwdriver" class="size-4 text-wb-tool-header-icon" />
-        <span class="tool-name text-wb-tool-name font-semibold">{format_tool_name(@tool.name)}</span>
-      </div>
-      <div class="tool-input text-[0.7rem] mt-1">
-        <code>{Jason.encode!(@tool.input, pretty: true)}</code>
-      </div>
-    </div>
+    <details class="tool-use whitespace-normal mt-0.5 group">
+      <summary class="flex items-center gap-1.5 text-[0.75rem] text-wb-text-muted cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+        <.icon name="hero-wrench-screwdriver" class="size-3 text-wb-tool-header-icon shrink-0" />
+        <span class="font-medium text-wb-tool-name">{format_tool_name(@tool.name)}</span>
+        <span :if={@has_input} class="text-wb-text-faint text-[0.7rem] truncate max-w-[200px]">
+          {@input_json}
+        </span>
+        <span class="text-[0.65rem] text-wb-text-faint ml-auto group-open:hidden">Show</span>
+        <span class="text-[0.65rem] text-wb-text-faint ml-auto hidden group-open:inline">Hide</span>
+      </summary>
+      <pre class="text-[0.68rem] text-wb-text-muted mt-1 ml-[18px] p-1.5 bg-wb-surface rounded overflow-x-auto"><code>{Jason.encode!(@tool.input, pretty: true)}</code></pre>
+    </details>
     """
   end
 
@@ -342,31 +346,43 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
 
   defp tool_result_display(assigns) do
     content = assigns.result.content
-    is_long = is_binary(content) and String.length(content) > 200
-    assigns = assign(assigns, :is_long, is_long)
+    summary = extract_result_summary(content)
+    has_detail = is_binary(content) and String.length(content) > String.length(summary)
+    assigns = assign(assigns, summary: summary, has_detail: has_detail)
 
     ~H"""
-    <div class={["tool-result whitespace-normal", @result[:is_error] && "error"]}>
-      <div class="tool-result-header flex items-center gap-1.5 text-[0.75rem] mb-1 font-medium">
-        <.icon :if={@result[:is_error]} name="hero-x-circle" class="size-4 text-red-500" />
-        <.icon :if={!@result[:is_error]} name="hero-check-circle" class="size-4 text-green-500" />
-        <span>{format_tool_name(@result.tool_name)}</span>
-      </div>
-      <details :if={@is_long} class="tool-result-details mt-1.5">
-        <summary class="tool-result-summary cursor-pointer flex flex-col gap-1">
-          <code>{truncate_result(@result.content, 100)}</code>
-          <span class="show-more-hint text-[0.68rem] text-wb-indigo-text cursor-pointer py-0.5 font-medium hover:text-wb-indigo-text-bright">
-            Show more
-          </span>
-        </summary>
-        <div class="tool-result-content">
-          <code>{@result.content}</code>
-        </div>
-      </details>
-      <div :if={!@is_long} class="tool-result-content">
-        <code>{@result.content}</code>
-      </div>
-    </div>
+    <details class={["tool-result whitespace-normal group", @result[:is_error] && "error"]}>
+      <summary class="flex items-center gap-1.5 text-[0.75rem] cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+        <.icon
+          :if={@result[:is_error]}
+          name="hero-x-circle-mini"
+          class="size-3 text-red-400 shrink-0"
+        />
+        <.icon
+          :if={!@result[:is_error]}
+          name="hero-check-circle-mini"
+          class="size-3 text-green-400 shrink-0"
+        />
+        <span class="font-medium">{format_tool_name(@result.tool_name)}</span>
+        <span class="text-wb-text-muted text-[0.7rem] truncate">{@summary}</span>
+        <span
+          :if={@has_detail}
+          class="text-[0.65rem] text-wb-text-faint ml-auto shrink-0 group-open:hidden"
+        >
+          Show
+        </span>
+        <span
+          :if={@has_detail}
+          class="text-[0.65rem] text-wb-text-faint ml-auto shrink-0 hidden group-open:inline"
+        >
+          Hide
+        </span>
+      </summary>
+      <pre
+        :if={@has_detail}
+        class="text-[0.68rem] text-wb-text-muted mt-1 ml-[18px] p-1.5 bg-wb-surface rounded overflow-x-auto max-h-[300px] overflow-y-auto"
+      ><code>{@result.content}</code></pre>
+    </details>
     """
   end
 
@@ -391,15 +407,15 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
     |> Enum.join(" ")
   end
 
-  defp truncate_result(content, max_length) when is_binary(content) do
-    if String.length(content) > max_length do
-      String.slice(content, 0, max_length) <> "..."
-    else
-      content
+  defp extract_result_summary(content) when is_binary(content) do
+    case Jason.decode(content) do
+      {:ok, %{"message" => msg}} when is_binary(msg) -> msg
+      {:ok, %{"error" => err}} when is_binary(err) -> err
+      _ -> String.slice(content, 0, 80)
     end
   end
 
-  defp truncate_result(content, _max_length), do: inspect(content, limit: 10)
+  defp extract_result_summary(content), do: inspect(content, limit: 5)
 
   defp format_markdown(nil), do: ""
 

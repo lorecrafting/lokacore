@@ -333,22 +333,13 @@
 }
 
 .chat-message.tool_result {
-  background: var(--wb-success-surface);
-  margin: var(--wb-space-xs) var(--wb-space-xl) var(--wb-space-xs) var(--wb-space-sm);
-  padding: var(--wb-space-sm) var(--wb-space-md);
-  border-radius: var(--wb-radius-lg);
+  background: transparent;
+  margin: 0 0 0 var(--wb-space-sm);
+  padding: 1px 0;
+  border: none;
   font-size: 0.8rem;
-  border: 1px solid var(--wb-success-border);
-  border-left: 3px solid var(--wb-success);
 }
 
-/* Fix: Reset white-space to collapse template whitespace */
 .chat-message.tool_result .message-content {
   white-space: normal;
-}
-
-.chat-message.tool_result.error {
-  background: var(--wb-danger-surface);
-  border-color: var(--wb-danger-border);
-  border-left-color: var(--wb-error);
 }
