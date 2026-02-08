@@ -53,6 +53,7 @@ defmodule Mix.Tasks.Loka.Test.Storyline do
   """
 
   use Mix.Task
+  use Boundary, classify_to: Loka
 
   alias Loka.Framework.Storyline.{Storyline, StorylineRegistry}
   alias Loka.Framework.Quest

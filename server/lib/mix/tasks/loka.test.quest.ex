@@ -33,6 +33,7 @@ defmodule Mix.Tasks.Loka.Test.Quest do
   """
 
   use Mix.Task
+  use Boundary, classify_to: Loka
 
   alias Loka.Testing.Quest.QuestTester
   alias Loka.Framework.Quest.QuestRegistry

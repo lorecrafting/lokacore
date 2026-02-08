@@ -16,6 +16,7 @@ defmodule Mix.Tasks.Loka.Validate.Yaml do
   """
 
   use Mix.Task
+  use Boundary, classify_to: Loka
 
   @shortdoc "Validates YAML syntax in priv/world/"
 

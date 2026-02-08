@@ -10,6 +10,7 @@ defmodule Mix.Tasks.Loka.Admin.GrantAll do
   """
 
   use Mix.Task
+  use Boundary, classify_to: Loka
   alias Loka.Accounts
 
   @shortdoc "Grant admin status to all players"

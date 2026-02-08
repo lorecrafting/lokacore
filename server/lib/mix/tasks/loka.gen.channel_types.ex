@@ -21,6 +21,7 @@ defmodule Mix.Tasks.Loka.Gen.ChannelTypes do
   """
 
   use Mix.Task
+  use Boundary, classify_to: Loka
 
   @output_path "../mobile/src/types/channel.generated.ts"
 

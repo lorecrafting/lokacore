@@ -41,6 +41,7 @@ defmodule Mix.Tasks.Loka.New do
   """
 
   use Mix.Task
+  use Boundary, classify_to: Loka
 
   @shortdoc "Generate scaffold YAML files for game content"
 

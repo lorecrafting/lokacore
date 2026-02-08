@@ -25,6 +25,7 @@ defmodule Mix.Tasks.Loka.Test.Bot do
   """
 
   use Mix.Task
+  use Boundary, classify_to: Loka
 
   @shortdoc "Run bot integration tests"
 

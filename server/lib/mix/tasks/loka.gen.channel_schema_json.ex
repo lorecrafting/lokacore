@@ -20,6 +20,7 @@ defmodule Mix.Tasks.Loka.Gen.ChannelSchemaJson do
   """
 
   use Mix.Task
+  use Boundary, classify_to: Loka
 
   @output_path "../godot-client/data/channel_schema.json"
 

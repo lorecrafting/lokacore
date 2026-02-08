@@ -50,6 +50,7 @@ defmodule Mix.Tasks.Loka.Test.Validate do
   """
 
   use Mix.Task
+  use Boundary, classify_to: Loka
 
   alias Loka.Testing.Content.{WorldValidator, QuestValidator, PrototypeLinter}
   alias Loka.Testing.Content.{DialogueValidator, ReachabilityAnalyzer}

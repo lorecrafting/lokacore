@@ -17,6 +17,7 @@ defmodule Mix.Tasks.Loka.Dev do
   """
 
   use Mix.Task
+  use Boundary, classify_to: Loka
 
   @shortdoc "Start Phoenix development server"
 

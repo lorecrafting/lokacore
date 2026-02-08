@@ -33,6 +33,7 @@ defmodule Mix.Tasks.Loka.Generate.ChannelTypes do
   """
 
   use Mix.Task
+  use Boundary, classify_to: Loka
 
   alias LokaWeb.Channels.ChannelSchema
 

@@ -14,6 +14,7 @@ defmodule Mix.Tasks.Loka.SyncDescriptions do
   """
 
   use Mix.Task
+  use Boundary, classify_to: Loka
 
   alias Loka.Engine.Entities
   alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader

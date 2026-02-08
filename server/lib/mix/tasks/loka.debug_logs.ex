@@ -25,6 +25,7 @@ defmodule Mix.Tasks.Loka.DebugLogs do
   player info, and full context.
   """
   use Mix.Task
+  use Boundary, classify_to: Loka
 
   @log_dir "priv/debug_logs"
   @log_file "priv/debug_logs/mobile_debug.log"

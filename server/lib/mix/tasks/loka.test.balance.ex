@@ -34,6 +34,7 @@ defmodule Mix.Tasks.Loka.Test.Balance do
   """
 
   use Mix.Task
+  use Boundary, classify_to: Loka
 
   alias Loka.Testing.Balance.{CombatSimulator, ProgressionSimulator, ReportGenerator}
 

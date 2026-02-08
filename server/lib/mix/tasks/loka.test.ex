@@ -43,6 +43,7 @@ defmodule Mix.Tasks.Loka.Test do
   """
 
   use Mix.Task
+  use Boundary, classify_to: Loka
 
   @shortdoc "Run all Loka tests and validations"
 

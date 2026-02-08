@@ -18,6 +18,7 @@ defmodule Mix.Tasks.Loka.ExportTestData do
   """
 
   use Mix.Task
+  use Boundary, classify_to: Loka
 
   @shortdoc "Export test data (world graph, quests) to JSON for E2E tests"
 

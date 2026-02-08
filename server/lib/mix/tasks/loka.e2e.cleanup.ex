@@ -14,6 +14,7 @@ defmodule Mix.Tasks.Loka.E2e.Cleanup do
 
   """
   use Mix.Task
+  use Boundary, classify_to: Loka
 
   require Logger
 
