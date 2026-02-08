@@ -184,8 +184,8 @@
 
 /* ---- Message Bubbles ---- */
 .chat-message {
-  margin-bottom: var(--wb-space-xs);
-  padding: var(--wb-space-xs) var(--wb-space-md);
+  margin-bottom: 0;
+  padding: 0;
   border-radius: var(--wb-radius-lg);
   position: relative;
   animation: messageIn 0.2s ease-out;

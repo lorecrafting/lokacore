@@ -191,7 +191,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
 
           <div
             :if={@streaming}
-            class="chat-message assistant streaming mb-1.5 py-1.5 px-3 rounded-lg relative bg-wb-panel-alt mr-[4%] border border-wb-chat-border"
+            class="chat-message assistant streaming mb-1 py-1 px-2.5 rounded-lg relative bg-wb-panel-alt mr-[4%] border border-wb-chat-border"
           >
             <div class="message-content text-[0.85rem] text-wb-text-bright leading-snug whitespace-normal">
               <div
@@ -282,7 +282,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
   defp chat_message(assigns) do
     ~H"""
     <div class={[
-      "chat-message mb-1.5 py-1.5 px-3 rounded-lg relative",
+      "chat-message mb-1 py-1 px-2.5 rounded-lg relative",
       @message.role,
       @message.role == "user" &&
         "bg-linear-to-br from-wb-chat-user-bg-from to-wb-chat-user-bg-to ml-[12%] border border-wb-chat-user-border shadow-[0_1px_4px_rgba(0,0,0,0.2)]",
@@ -296,7 +296,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
       ]}>
         <%= case @message.role do %>
           <% "user" -> %>
-            <div class="message-text">{@message.content}</div>
+            <div class="message-text">{String.trim(@message.content)}</div>
           <% "assistant" -> %>
             <div class="message-text">
               {Phoenix.HTML.raw(format_markdown(@message.content))}
