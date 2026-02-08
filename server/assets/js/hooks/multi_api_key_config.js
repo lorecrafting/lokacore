@@ -141,7 +141,7 @@ const MultiAPIKeyConfig = {
 
       // Store encoded in localStorage regardless of validation status
       // so the user can at least attempt to use it.
-      const encoded = btoa('loka_wb_' + key)
+      const encoded = btoa(`loka_wb_${key}`)
       try {
         localStorage.setItem(`${provider}_api_key_encoded`, encoded)
       } catch (e) {
@@ -165,7 +165,7 @@ const MultiAPIKeyConfig = {
       console.error(`[MultiAPIKeyConfig] API key validation failed for ${provider}:`, error)
 
       // Even on network error, try to save the key
-      const encoded = btoa('loka_wb_' + key)
+      const encoded = btoa(`loka_wb_${key}`)
       try {
         localStorage.setItem(`${provider}_api_key_encoded`, encoded)
       } catch (e) {
@@ -330,8 +330,8 @@ const MultiAPIKeyConfig = {
   },
 
   destroyed() {
-    this.abortController.abort()
-    this.helper.destroy()
+    if (this.abortController) this.abortController.abort()
+    if (this.helper) this.helper.destroy()
   },
 }
 

@@ -101,10 +101,9 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
           </form>
           <button
             type="button"
-            class="bg-transparent border-0 text-wb-text-muted cursor-pointer p-1 rounded-wb-sm transition-all flex items-center justify-center shrink-0 hover:bg-wb-border hover:text-wb-error"
+            class="bg-transparent border-0 text-wb-text-muted cursor-pointer p-1 rounded-wb-sm transition-all flex items-center justify-center shrink-0 hover:bg-wb-border hover:text-wb-accent"
             phx-click="create_project_ui"
             title="New project"
-            class="shrink-0"
           >
             <.icon name="hero-plus" class="size-3" />
           </button>

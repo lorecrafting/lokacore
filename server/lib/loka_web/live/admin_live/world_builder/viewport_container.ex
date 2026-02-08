@@ -121,7 +121,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ViewportContainer do
 
   defp editor_view(assigns) do
     ~H"""
-    <div class="flex flex-col w-full h-full">
+    <div id="editor-viewport" class="flex flex-col w-full h-full">
       <div class="flex items-center gap-2.5 py-1.5 px-2.5 bg-gradient-to-b from-wb-editor-gradient-from to-wb-editor-gradient-to border-b border-wb-border shrink-0">
         <button
           class="flex items-center gap-1 py-1 px-2 bg-transparent border border-wb-border rounded-wb-md text-wb-text cursor-pointer text-xs hover:bg-wb-input hover:border-wb-accent hover:text-wb-accent"
@@ -204,7 +204,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ViewportContainer do
     ~H"""
     <!-- 2D Canvas viewport - managed by WorldBuilder hook -->
     <div
-      id="w-full h-full bg-wb-border-dark relative"
+      id="canvas-viewport"
       phx-hook="WorldBuilder"
       phx-update="ignore"
       class="w-full h-full bg-wb-border-dark relative"

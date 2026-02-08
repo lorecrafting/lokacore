@@ -51,7 +51,7 @@ defmodule Loka.WorldBuilder.EntityManager do
 
   require Logger
 
-  alias Loka.Engine.{TypedObject, PrototypeLoader}
+  alias Loka.Engine.TypedObject
   alias Loka.Engine.TypedObject.Registry
   alias Loka.Engine.TypedObject.Loader
 
@@ -271,6 +271,10 @@ defmodule Loka.WorldBuilder.EntityManager do
     # Extract level from components.combatant.level for NPCs
     level = get_in(components, ["combatant", "level"]) || get_in(components, [:combatant, :level])
 
+    # Extract item_type from components.item.item_type for items
+    item_type =
+      get_in(components, ["item", "item_type"]) || get_in(components, [:item, :item_type])
+
     %{
       id: entity.id || entity.key,
       key: entity.key,
@@ -282,7 +286,8 @@ defmodule Loka.WorldBuilder.EntityManager do
       attributes: entity.attributes || %{},
       components: components,
       data: entity.data || %{},
-      level: level
+      level: level,
+      item_type: item_type
     }
   end
 
@@ -367,8 +372,7 @@ defmodule Loka.WorldBuilder.EntityManager do
 
       case File.write(file_path, yaml_content) do
         :ok ->
-          # Reload both loaders to update registries
-          PrototypeLoader.reload()
+          # Reload loader to update registries
           Loader.reload()
           :ok
 
@@ -386,7 +390,6 @@ defmodule Loka.WorldBuilder.EntityManager do
 
     case File.rm(file_path) do
       :ok ->
-        PrototypeLoader.reload()
         Loader.reload()
         :ok
 

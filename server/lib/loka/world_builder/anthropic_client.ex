@@ -87,8 +87,16 @@ defmodule Loka.WorldBuilder.AnthropicClient do
       end)
 
     # Run in a separate process to not block LiveView
+    on_error = Keyword.get(opts, :on_error)
+
     Task.start(fn ->
-      chat(messages, tools, opts)
+      case chat(messages, tools, opts) do
+        {:error, reason} when is_function(on_error) ->
+          on_error.(reason)
+
+        _ ->
+          :ok
+      end
     end)
   end
 

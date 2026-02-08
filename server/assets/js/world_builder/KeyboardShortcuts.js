@@ -172,7 +172,7 @@ export const SHORTCUT_DEFINITIONS = [
  * // In WorldBuilder hook destroyed():
  * keyboardManager.unregisterAll('wb-')
  */
-export function registerWorldBuilderShortcuts(km, actions, prefix = 'wb-') {
+export function registerWorldBuilderShortcuts(km, actions, _prefix = 'wb-') {
   for (const shortcut of SHORTCUT_DEFINITIONS) {
     const handler = actions[shortcut.action]
     if (!handler) {

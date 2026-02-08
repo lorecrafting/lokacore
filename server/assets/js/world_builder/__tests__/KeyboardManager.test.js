@@ -297,7 +297,7 @@ describe('KeyboardManager', () => {
       // Re-attach so we can dispatch
       km._attached = false
       km._attach()
-      const handler = vi.fn()
+      const _handler = vi.fn()
       // The old handler should be gone
       mockDoc._dispatch('keydown', createKeyEvent('a'))
       // Nothing registered, so nothing should fire

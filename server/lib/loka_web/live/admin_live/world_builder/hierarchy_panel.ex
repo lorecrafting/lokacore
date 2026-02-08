@@ -19,6 +19,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
   attr :templates, :list, required: true
   attr :scripts, :list, default: []
   attr :cutscenes, :list, default: []
+  attr :quests, :list, default: []
   attr :zones, :list, default: []
   attr :selected_room, :string, default: nil
   attr :selected_entity, :map, default: nil
@@ -103,6 +104,18 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
         end)
       end
 
+    filtered_quests =
+      if search == "" do
+        assigns.quests
+      else
+        Enum.filter(assigns.quests, fn quest ->
+          name = quest[:name] || quest.key || ""
+
+          String.contains?(String.downcase(name), search) ||
+            String.contains?(String.downcase(quest.key || ""), search)
+        end)
+      end
+
     assigns =
       assigns
       |> assign(:filtered_rooms, filtered_rooms)
@@ -111,6 +124,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
       |> assign(:filtered_templates, filtered_templates)
       |> assign(:filtered_scripts, filtered_scripts)
       |> assign(:filtered_cutscenes, filtered_cutscenes)
+      |> assign(:filtered_quests, filtered_quests)
 
     ~H"""
     <div class={[
@@ -206,6 +220,17 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
         >
           <.icon name="hero-film" class="size-5" />
         </button>
+        <button
+          class={[
+            "flex items-center justify-center w-8 h-8 bg-transparent border-none text-wb-text-dim cursor-pointer rounded-wb-sm transition-all duration-150 hover:bg-wb-border hover:text-wb-text",
+            @active_tab == :quests && "!bg-wb-accent-hover !text-wb-text-bright"
+          ]}
+          phx-click="switch_hierarchy_tab"
+          phx-value-tab="quests"
+          title="Quests ({length(@quests)})"
+        >
+          <.icon name="hero-flag" class="size-5" />
+        </button>
       </div>
 
       <div :if={!@collapsed} class="contents">
@@ -233,6 +258,9 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
               </option>
               <option value="cutscenes" selected={@active_tab == :cutscenes}>
                 Cutscenes ({length(@cutscenes)})
+              </option>
+              <option value="quests" selected={@active_tab == :quests}>
+                Quests ({length(@quests)})
               </option>
             </select>
           </form>
@@ -421,6 +449,30 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
             <% end %>
           </div>
 
+          <%!-- Quest List --%>
+          <div
+            :if={@active_tab == :quests}
+            class="flex flex-col gap-px p-1"
+          >
+            <.empty_state
+              :if={@filtered_quests == []}
+              icon="hero-flag"
+              title={if @template_search != "", do: "No matching quests", else: "No quests yet"}
+              description="Click + to create one"
+              class="py-6"
+            />
+            <%= for quest <- @filtered_quests do %>
+              <div
+                class={hierarchy_item(false)}
+                phx-click="show_quest_editor"
+                phx-value-key={quest.key}
+              >
+                <.icon name="hero-flag" class={hierarchy_icon(false)} />
+                <span>{quest[:name] || quest.key}</span>
+              </div>
+            <% end %>
+          </div>
+
           <%!-- Template Library --%>
           <div
             :if={@active_tab == :templates}
@@ -481,6 +533,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
   defp create_action(:templates), do: "create_from_template"
   defp create_action(:scripts), do: "show_script_editor"
   defp create_action(:cutscenes), do: "show_cutscene_editor"
+  defp create_action(:quests), do: "show_quest_editor"
   defp create_action(_), do: "create_room"
 
   defp tab_label(:rooms), do: "Room"
@@ -489,6 +542,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
   defp tab_label(:templates), do: "Template"
   defp tab_label(:scripts), do: "Script"
   defp tab_label(:cutscenes), do: "Cutscene"
+  defp tab_label(:quests), do: "Quest"
   defp tab_label(_), do: "Entity"
 
   defp search_placeholder(:rooms), do: "Search rooms..."
@@ -497,6 +551,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.HierarchyPanel do
   defp search_placeholder(:templates), do: "Search templates..."
   defp search_placeholder(:scripts), do: "Search scripts..."
   defp search_placeholder(:cutscenes), do: "Search cutscenes..."
+  defp search_placeholder(:quests), do: "Search quests..."
   defp search_placeholder(_), do: "Search..."
 
   # Filter helpers

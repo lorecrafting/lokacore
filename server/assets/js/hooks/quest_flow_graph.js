@@ -126,18 +126,15 @@ const QuestFlowGraph = {
         path.setAttribute('fill', 'none')
 
         // Color based on edge type
-        const edgeColor =
-          edge.type === 'prerequisite'
-            ? this.edgePrereqColor
-            : edge.type === 'unlocks'
-              ? this.edgeUnlockColor
-              : this.edgeColor
-        const markerId =
-          edge.type === 'prerequisite'
-            ? 'arrowhead-prereq'
-            : edge.type === 'unlocks'
-              ? 'arrowhead-unlock'
-              : 'arrowhead'
+        let edgeColor = this.edgeColor
+        let markerId = 'arrowhead'
+        if (edge.type === 'prerequisite') {
+          edgeColor = this.edgePrereqColor
+          markerId = 'arrowhead-prereq'
+        } else if (edge.type === 'unlocks') {
+          edgeColor = this.edgeUnlockColor
+          markerId = 'arrowhead-unlock'
+        }
 
         path.setAttribute('stroke', edgeColor)
         path.setAttribute('stroke-width', '2')
@@ -295,11 +292,14 @@ const QuestFlowGraph = {
     }
 
     // Default: slight curve based on start/end relationship for visual consistency
-    return isVertical ? (start.x < end.x ? 1 : -1) : start.y < end.y ? 1 : -1
+    if (isVertical) {
+      return start.x < end.x ? 1 : -1
+    }
+    return start.y < end.y ? 1 : -1
   },
 
   destroyed() {
-    this.helper.destroy()
+    if (this.helper) this.helper.destroy()
     const svg = this.el.querySelector('.quest-graph-edges')
     if (svg) svg.innerHTML = ''
   },

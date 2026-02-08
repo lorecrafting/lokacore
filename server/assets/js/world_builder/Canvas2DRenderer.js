@@ -54,7 +54,7 @@
  */
 
 // Direction offsets for exit arrow positioning
-const DIRECTION_OFFSETS = {
+const _DIRECTION_OFFSETS = {
   north: { dx: 0, dy: -1 },
   south: { dx: 0, dy: 1 },
   east: { dx: 1, dy: 0 },
@@ -272,7 +272,7 @@ export class Canvas2DRenderer {
   drawNPCPaths(ctx, state) {
     let colorIndex = 0
 
-    for (const [npcKey, pathInfo] of Object.entries(state.npcPaths)) {
+    for (const [_npcKey, pathInfo] of Object.entries(state.npcPaths)) {
       if (!pathInfo.patrol || !pathInfo.patrol.route) continue
 
       const route = pathInfo.patrol.route
@@ -418,7 +418,7 @@ export class Canvas2DRenderer {
    * @param {string} direction - Exit direction (north, south, east, west, etc.)
    * @returns {void}
    */
-  drawExitArrow(ctx, state, fromRoom, toRoom, direction) {
+  drawExitArrow(ctx, state, fromRoom, toRoom, _direction) {
     const fromX = (fromRoom.x || 0) * state.gridSize
     const fromY = (fromRoom.y || 0) * state.gridSize
     const toX = (toRoom.x || 0) * state.gridSize
@@ -580,7 +580,7 @@ export class Canvas2DRenderer {
    * @param {number} halfSize - Half the room visual size
    * @returns {void}
    */
-  drawEntityIndicators(ctx, state, room, x, y, halfSize) {
+  drawEntityIndicators(ctx, state, room, x, y, _halfSize) {
     const spawns = room.spawns || {}
     const npcs = spawns.npcs || []
     const items = spawns.items || []
@@ -767,10 +767,10 @@ export class Canvas2DRenderer {
     }
 
     let truncated = text
-    while (truncated.length > 0 && ctx.measureText(truncated + '\u2026').width > maxWidth) {
+    while (truncated.length > 0 && ctx.measureText(`${truncated}\u2026`).width > maxWidth) {
       truncated = truncated.slice(0, -1)
     }
-    const result = truncated + '\u2026'
+    const result = `${truncated}\u2026`
 
     // Evict cache if it grows too large
     if (this._truncateCache.size > RENDERING.TRUNCATE_CACHE_MAX) {

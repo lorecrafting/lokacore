@@ -6,11 +6,17 @@ const DEBOUNCE_MS = 300
 const CodeMirrorEditor = {
   async mounted() {
     try {
-      // Show loading state while CodeMirror loads
       if (!this.el) {
         console.warn('[CodeMirrorEditor] Element not found')
         return
       }
+
+      // Guard against double-mount (LiveView reconnections)
+      if (this.view) {
+        this.view.destroy()
+        this.view = null
+      }
+
       this.el.style.opacity = '0.5'
       const [
         {
@@ -50,7 +56,7 @@ const CodeMirrorEditor = {
         startState() {
           return { inString: false, stringChar: null }
         },
-        token(stream, state) {
+        token(stream, _state) {
           if (stream.eatSpace()) return null
 
           // Comments
@@ -112,6 +118,9 @@ const CodeMirrorEditor = {
 
       const initialValue = this.el.dataset.value || ''
       this._debounceTimer = null
+
+      // Clear loading placeholder before creating editor
+      this.el.innerHTML = ''
 
       this.view = new EditorView({
         doc: initialValue,

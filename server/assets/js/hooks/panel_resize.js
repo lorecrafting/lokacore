@@ -314,6 +314,7 @@ const PanelResize = {
 
   updated() {
     // Re-attach listeners to handles that may have been replaced by LiveView patches
+    if (!this.handles) return
     const newHandles = this.el.querySelectorAll('.panel-resize-handle, .console-resize-handle')
     // Remove old listeners
     this.handles.forEach((handle) => {
@@ -330,12 +331,14 @@ const PanelResize = {
   },
 
   destroyed() {
-    this.handles.forEach((handle) => {
-      handle.removeEventListener('mousedown', this.handleMouseDown)
-      handle.removeEventListener('touchstart', this.handleTouchStart)
-    })
+    if (this.handles) {
+      this.handles.forEach((handle) => {
+        handle.removeEventListener('mousedown', this.handleMouseDown)
+        handle.removeEventListener('touchstart', this.handleTouchStart)
+      })
+    }
     // Document-level listeners cleaned by HookHelper
-    this.helper.destroy()
+    if (this.helper) this.helper.destroy()
     if (this.rafId) cancelAnimationFrame(this.rafId)
   },
 }

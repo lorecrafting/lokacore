@@ -258,6 +258,13 @@ export default class Canvas2DViewport {
     this._renderPending = false
     /** @type {number|null} */
     this._renderRAF = null
+    /**
+     * Dirty flag for render optimization. When false, render() is a no-op.
+     * Set to true by markDirty() whenever visual state changes.
+     * Reset to false after each render.
+     * @type {boolean}
+     */
+    this._dirty = true
     /** @type {number} Canvas width in CSS pixels */
     this.width = 0
     /** @type {number} Canvas height in CSS pixels */
@@ -325,12 +332,29 @@ export default class Canvas2DViewport {
     const dpr = window.devicePixelRatio || 1
     const rect = this.canvas.getBoundingClientRect()
 
+    // Skip if dimensions are zero (layout not ready yet)
+    if (rect.width === 0 || rect.height === 0) return
+
     this.canvas.width = rect.width * dpr
     this.canvas.height = rect.height * dpr
+
+    // Re-acquire context after canvas reset to ensure clean state
+    this.ctx = this.canvas.getContext('2d')
+    this.renderer.ctx = this.ctx
     this.ctx.scale(dpr, dpr)
 
     this.width = rect.width
     this.height = rect.height
+  }
+
+  /**
+   * Mark the viewport as needing a redraw.
+   * Call this whenever visual state changes (rooms, selection, camera, etc.).
+   * The actual redraw happens on the next render() call.
+   * @returns {void}
+   */
+  markDirty() {
+    this._dirty = true
   }
 
   /**
@@ -339,6 +363,7 @@ export default class Canvas2DViewport {
    * @returns {void}
    */
   scheduleRender() {
+    this._dirty = true
     if (!this._renderPending) {
       this._renderPending = true
       this._renderRAF = requestAnimationFrame(() => {
@@ -359,9 +384,12 @@ export default class Canvas2DViewport {
 
   /**
    * Render the viewport immediately.
+   * Skips the draw if nothing has changed since the last render (dirty flag is false).
    * @returns {void}
    */
   render() {
+    if (!this._dirty) return
+    this._dirty = false
     this.renderer.render()
   }
 
@@ -516,6 +544,7 @@ export default class Canvas2DViewport {
    */
   toggleGrid() {
     this.showGrid = !this.showGrid
+    this.markDirty()
     this.render()
   }
 
@@ -609,6 +638,7 @@ export default class Canvas2DViewport {
     this.camera.x = -(room.x || 0) * this.gridSize
     this.camera.y = -(room.y || 0) * this.gridSize
     this.currentZLevel = room.z || 0
+    this.markDirty()
     this.render()
   }
 
@@ -650,6 +680,7 @@ export default class Canvas2DViewport {
     this.camera.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.camera.zoom))
     this.renderer.clearTruncateCache()
 
+    this.markDirty()
     this.render()
   }
 
@@ -660,6 +691,7 @@ export default class Canvas2DViewport {
   resetCamera() {
     this.camera = { x: 0, y: 0, zoom: 1 }
     this.renderer.clearTruncateCache()
+    this.markDirty()
     this.render()
   }
 

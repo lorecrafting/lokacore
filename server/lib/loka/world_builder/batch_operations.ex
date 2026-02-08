@@ -207,7 +207,7 @@ defmodule Loka.WorldBuilder.BatchOperations do
         y: room.y + dy,
         z: room.z + dz,
         tags: room.tags,
-        zone: room.zone
+        zone: Map.get(room, :zone)
       }
 
       RoomManager.create_room(attrs)

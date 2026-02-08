@@ -141,173 +141,173 @@ defmodule LokaWeb.AdminLive.WorldBuilder.InspectorPanel do
                 </div>
               </div>
             </div>
-            
-    <!-- 3. Exits - Connections to other rooms -->
-            <div class="border-b border-wb-panel">
-              <.inspector_section title="Exits" count={map_size(room.exits || %{})} />
-              <div class="p-3 bg-wb-panel-header">
-                <div :if={map_size(room.exits || %{}) > 0} class="flex flex-col gap-2">
-                  <%= for {direction, dest_key} <- room.exits do %>
-                    <div class="flex items-center justify-between p-2 bg-wb-input border border-wb-border rounded-wb-sm gap-2">
-                      <div class="flex items-center gap-2 flex-1 text-wb-base">
-                        <span class="font-semibold text-wb-accent uppercase text-wb-xs min-w-16">
-                          {direction}
-                        </span>
-                        <span class="text-wb-text-faint">→</span>
-                        <span class="text-wb-text font-wb-mono">{dest_key}</span>
-                      </div>
-                      <button
-                        type="button"
-                        phx-click="remove_exit"
-                        phx-value-from={room.key}
-                        phx-value-direction={direction}
-                        class="bg-transparent border-0 text-wb-text-muted cursor-pointer p-1 rounded-wb-sm transition-all flex items-center justify-center shrink-0 hover:bg-wb-border hover:text-wb-error"
-                        title="Remove exit"
-                      >
-                        <.icon name="hero-x-mark" class="size-3" />
-                      </button>
+          </form>
+          
+    <!-- 3. Exits - Connections to other rooms (outside form to allow nested Add Exit form) -->
+          <div class="border-b border-wb-panel">
+            <.inspector_section title="Exits" count={map_size(room.exits || %{})} />
+            <div class="p-3 bg-wb-panel-header">
+              <div :if={map_size(room.exits || %{}) > 0} class="flex flex-col gap-2">
+                <%= for {direction, dest_key} <- room.exits do %>
+                  <div class="flex items-center justify-between p-2 bg-wb-input border border-wb-border rounded-wb-sm gap-2">
+                    <div class="flex items-center gap-2 flex-1 text-wb-base">
+                      <span class="font-semibold text-wb-accent uppercase text-wb-xs min-w-16">
+                        {direction}
+                      </span>
+                      <span class="text-wb-text-faint">→</span>
+                      <span class="text-wb-text font-wb-mono">{dest_key}</span>
+                    </div>
+                    <button
+                      type="button"
+                      phx-click="remove_exit"
+                      phx-value-from={room.key}
+                      phx-value-direction={direction}
+                      class="bg-transparent border-0 text-wb-text-muted cursor-pointer p-1 rounded-wb-sm transition-all flex items-center justify-center shrink-0 hover:bg-wb-border hover:text-wb-error"
+                      title="Remove exit"
+                    >
+                      <.icon name="hero-x-mark" class="size-3" />
+                    </button>
+                  </div>
+                <% end %>
+              </div>
+              <p
+                :if={map_size(room.exits || %{}) == 0}
+                class="text-wb-text-faint text-sm italic m-0 text-wb-base"
+              >
+                No exits defined
+              </p>
+              
+    <!-- Add Exit Form -->
+              <form
+                phx-submit="add_exit"
+                class="mt-3 flex flex-col gap-2"
+              >
+                <input type="hidden" name="from" value={room.key} />
+                <div class="flex gap-2">
+                  <select
+                    name="direction"
+                    class="w-full bg-wb-panel border border-wb-border text-wb-text px-2 py-[0.35rem] text-wb-xs rounded-[2px] transition-[border-color] duration-150 focus:outline-none focus:border-wb-accent-hover focus:bg-wb-panel-alt flex-1"
+                    required
+                  >
+                    <option value="">Direction...</option>
+                    <option value="north">North</option>
+                    <option value="south">South</option>
+                    <option value="east">East</option>
+                    <option value="west">West</option>
+                    <option value="northeast">Northeast</option>
+                    <option value="northwest">Northwest</option>
+                    <option value="southeast">Southeast</option>
+                    <option value="southwest">Southwest</option>
+                    <option value="up">Up</option>
+                    <option value="down">Down</option>
+                  </select>
+                  <input
+                    type="text"
+                    name="to"
+                    class="w-full bg-wb-panel border border-wb-border text-wb-text px-2 py-[0.35rem] text-wb-xs rounded-[2px] transition-[border-color] duration-150 focus:outline-none focus:border-wb-accent-hover focus:bg-wb-panel-alt flex-[2]"
+                    placeholder="Destination key..."
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  class="px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px w-full"
+                >
+                  <.icon name="hero-plus" class="size-3" />
+                  <span>Add Exit</span>
+                </button>
+              </form>
+            </div>
+          </div>
+          
+    <!-- 4. Spawns - What spawns in this room (from zone resets) -->
+          <% spawns = Map.get(@room_spawns, room.key, []) %>
+          <% mob_spawns = Enum.filter(spawns, fn s -> s.type == :mob end) %>
+          <% item_spawns = Enum.filter(spawns, fn s -> s.type == :item end) %>
+          <div class="border-b border-wb-panel">
+            <.inspector_section title="Spawns" count={length(spawns)} />
+            <div class="p-3 bg-wb-panel-header">
+              <div :if={length(mob_spawns) > 0} class="mb-1">
+                <small class="text-wb-text-dim font-medium">NPCs</small>
+                <div class="flex flex-col gap-1 mt-1">
+                  <%= for spawn <- mob_spawns do %>
+                    <div
+                      class="flex items-center gap-2 px-2 py-[0.35rem] bg-wb-panel-alt border border-wb-border rounded-wb-sm text-wb-base text-wb-text transition-all duration-100 hover:bg-wb-panel-header hover:border-wb-accent cursor-pointer"
+                      phx-click="select_entity"
+                      phx-value-type="npc"
+                      phx-value-key={spawn.prototype}
+                      title={"From zone: #{spawn.zone}"}
+                    >
+                      <.icon name="hero-user" class="size-3 text-emerald-500" />
+                      <span>{spawn.prototype}</span>
+                      <span :if={spawn.max > 1} class="text-wb-text-dim text-xs ml-auto">
+                        ×{spawn.max}
+                      </span>
                     </div>
                   <% end %>
                 </div>
-                <p
-                  :if={map_size(room.exits || %{}) == 0}
-                  class="text-wb-text-faint text-sm italic m-0 text-wb-base"
-                >
-                  No exits defined
-                </p>
-                
-    <!-- Add Exit Form -->
-                <form
-                  phx-submit="add_exit"
-                  class="mt-3 flex flex-col gap-2"
-                >
-                  <input type="hidden" name="from" value={room.key} />
-                  <div class="flex gap-2">
-                    <select
-                      name="direction"
-                      class="w-full bg-wb-panel border border-wb-border text-wb-text px-2 py-[0.35rem] text-wb-xs rounded-[2px] transition-[border-color] duration-150 focus:outline-none focus:border-wb-accent-hover focus:bg-wb-panel-alt flex-1"
-                      required
+              </div>
+              <div
+                :if={length(item_spawns) > 0}
+                class={["mb-1", length(mob_spawns) > 0 && "mt-2"]}
+              >
+                <small class="text-wb-text-dim font-medium">Items</small>
+                <div class="flex flex-col gap-1 mt-1">
+                  <%= for spawn <- item_spawns do %>
+                    <div
+                      class="flex items-center gap-2 px-2 py-[0.35rem] bg-wb-panel-alt border border-wb-border rounded-wb-sm text-wb-base text-wb-text transition-all duration-100 hover:bg-wb-panel-header hover:border-wb-accent cursor-pointer"
+                      phx-click="select_entity"
+                      phx-value-type="item"
+                      phx-value-key={spawn.prototype}
+                      title={"From zone: #{spawn.zone}"}
                     >
-                      <option value="">Direction...</option>
-                      <option value="north">North</option>
-                      <option value="south">South</option>
-                      <option value="east">East</option>
-                      <option value="west">West</option>
-                      <option value="northeast">Northeast</option>
-                      <option value="northwest">Northwest</option>
-                      <option value="southeast">Southeast</option>
-                      <option value="southwest">Southwest</option>
-                      <option value="up">Up</option>
-                      <option value="down">Down</option>
-                    </select>
-                    <input
-                      type="text"
-                      name="to"
-                      class="w-full bg-wb-panel border border-wb-border text-wb-text px-2 py-[0.35rem] text-wb-xs rounded-[2px] transition-[border-color] duration-150 focus:outline-none focus:border-wb-accent-hover focus:bg-wb-panel-alt flex-[2]"
-                      placeholder="Destination key..."
-                      required
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    class="px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px w-full"
-                  >
-                    <.icon name="hero-plus" class="size-3" />
-                    <span>Add Exit</span>
-                  </button>
-                </form>
-              </div>
-            </div>
-            
-    <!-- 4. Spawns - What spawns in this room (from zone resets) -->
-            <% spawns = Map.get(@room_spawns, room.key, []) %>
-            <% mob_spawns = Enum.filter(spawns, fn s -> s.type == :mob end) %>
-            <% item_spawns = Enum.filter(spawns, fn s -> s.type == :item end) %>
-            <div class="border-b border-wb-panel">
-              <.inspector_section title="Spawns" count={length(spawns)} />
-              <div class="p-3 bg-wb-panel-header">
-                <div :if={length(mob_spawns) > 0} class="mb-1">
-                  <small class="text-wb-text-dim font-medium">NPCs</small>
-                  <div class="flex flex-col gap-1 mt-1">
-                    <%= for spawn <- mob_spawns do %>
-                      <div
-                        class="flex items-center gap-2 px-2 py-[0.35rem] bg-wb-panel-alt border border-wb-border rounded-wb-sm text-wb-base text-wb-text transition-all duration-100 hover:bg-wb-panel-header hover:border-wb-accent cursor-pointer"
-                        phx-click="select_entity"
-                        phx-value-type="npc"
-                        phx-value-key={spawn.prototype}
-                        title={"From zone: #{spawn.zone}"}
-                      >
-                        <.icon name="hero-user" class="size-3 text-emerald-500" />
-                        <span>{spawn.prototype}</span>
-                        <span :if={spawn.max > 1} class="text-wb-text-dim text-xs ml-auto">
-                          ×{spawn.max}
-                        </span>
-                      </div>
-                    <% end %>
-                  </div>
-                </div>
-                <div
-                  :if={length(item_spawns) > 0}
-                  class={["mb-1", length(mob_spawns) > 0 && "mt-2"]}
-                >
-                  <small class="text-wb-text-dim font-medium">Items</small>
-                  <div class="flex flex-col gap-1 mt-1">
-                    <%= for spawn <- item_spawns do %>
-                      <div
-                        class="flex items-center gap-2 px-2 py-[0.35rem] bg-wb-panel-alt border border-wb-border rounded-wb-sm text-wb-base text-wb-text transition-all duration-100 hover:bg-wb-panel-header hover:border-wb-accent cursor-pointer"
-                        phx-click="select_entity"
-                        phx-value-type="item"
-                        phx-value-key={spawn.prototype}
-                        title={"From zone: #{spawn.zone}"}
-                      >
-                        <.icon name="hero-cube-transparent" class="size-3 text-amber-500" />
-                        <span>{spawn.prototype}</span>
-                        <span :if={spawn.max > 1} class="text-wb-text-dim text-xs ml-auto">
-                          ×{spawn.max}
-                        </span>
-                      </div>
-                    <% end %>
-                  </div>
-                </div>
-                <div :if={length(spawns) == 0}>
-                  <p class="text-wb-text-faint text-sm italic m-0 text-wb-base">
-                    No spawns defined for this room
-                  </p>
-                  <p class="italic mt-2 mb-0 text-xs text-wb-text-faint">
-                    Add spawns in zone files (priv/world/zones/)
-                  </p>
+                      <.icon name="hero-cube-transparent" class="size-3 text-amber-500" />
+                      <span>{spawn.prototype}</span>
+                      <span :if={spawn.max > 1} class="text-wb-text-dim text-xs ml-auto">
+                        ×{spawn.max}
+                      </span>
+                    </div>
+                  <% end %>
                 </div>
               </div>
+              <div :if={length(spawns) == 0}>
+                <p class="text-wb-text-faint text-sm italic m-0 text-wb-base">
+                  No spawns defined for this room
+                </p>
+                <p class="italic mt-2 mb-0 text-xs text-wb-text-faint">
+                  Add spawns in zone files (priv/world/zones/)
+                </p>
+              </div>
             </div>
-            
+          </div>
+          
     <!-- 5. Actions - Less frequently used -->
-            <div class="border-b border-wb-panel">
-              <.inspector_section title="Actions" />
-              <div class="p-3 bg-wb-panel-header flex flex-col gap-2">
-                <button
-                  type="button"
-                  phx-click="save_as_template"
-                  phx-value-room_id={room.id || room.key}
-                  phx-value-template_key={room.key}
-                  phx-value-template_name={room.name}
-                  class="px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px w-full"
-                >
-                  <.icon name="hero-document-duplicate" class="size-3" />
-                  <span>Save as Template</span>
-                </button>
+          <div class="border-b border-wb-panel">
+            <.inspector_section title="Actions" />
+            <div class="p-3 bg-wb-panel-header flex flex-col gap-2">
+              <button
+                type="button"
+                phx-click="save_as_template"
+                phx-value-room_id={room.id || room.key}
+                phx-value-template_key={room.key}
+                phx-value-template_name={room.name}
+                class="px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px w-full"
+              >
+                <.icon name="hero-document-duplicate" class="size-3" />
+                <span>Save as Template</span>
+              </button>
 
-                <button
-                  type="button"
-                  phx-click="delete_room"
-                  phx-value-id={room.id || room.key}
-                  class="px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px bg-wb-error text-white"
-                >
-                  <.icon name="hero-trash" class="size-3" />
-                  <span>Delete Room</span>
-                </button>
-              </div>
+              <button
+                type="button"
+                phx-click="delete_room"
+                phx-value-id={room.id || room.key}
+                class="px-3 py-1.5 text-wb-sm border-none rounded-wb-md cursor-pointer font-medium flex items-center justify-center gap-[0.35rem] transition-all duration-150 hover:-translate-y-px bg-wb-error text-white"
+              >
+                <.icon name="hero-trash" class="size-3" />
+                <span>Delete Room</span>
+              </button>
             </div>
-          </form>
+          </div>
         </div>
 
         <%!-- NPC Inspector --%>

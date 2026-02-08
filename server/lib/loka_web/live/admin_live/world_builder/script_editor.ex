@@ -98,9 +98,8 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ScriptEditor do
         aria-labelledby="script-editor-title"
       >
         <div
-          class="modal-content flex flex-col"
+          class="modal-content flex flex-col w-[95%] max-w-[1400px] h-[90vh]"
           phx-click-away="close_script_editor"
-          class="w-[95%] max-w-[1400px] h-[90vh]"
         >
           <div class="flex items-center justify-between p-4 border-b border-wb-border">
             <h3 id="script-editor-title" class="m-0 text-wb-text-bright text-base font-semibold">

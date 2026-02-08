@@ -1,4 +1,7 @@
 defmodule LokaWeb do
+  use Boundary,
+    deps: [Loka.Engine, Loka.Framework, Loka.Content, Loka.Session]
+
   @moduledoc """
   The entrypoint for defining your web interface, such
   as controllers, components, channels, and so on.

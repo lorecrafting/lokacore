@@ -370,7 +370,9 @@ describe('Canvas2DRenderer', () => {
       // Track strokeStyle values when they're set
       const strokeStyles = []
       Object.defineProperty(mockCtx, 'strokeStyle', {
-        set: (v) => strokeStyles.push(v),
+        set: (v) => {
+          strokeStyles.push(v)
+        },
         get: () => strokeStyles[strokeStyles.length - 1],
       })
 
@@ -383,7 +385,9 @@ describe('Canvas2DRenderer', () => {
     it('scales line width based on zoom', () => {
       const lineWidths = []
       Object.defineProperty(mockCtx, 'lineWidth', {
-        set: (v) => lineWidths.push(v),
+        set: (v) => {
+          lineWidths.push(v)
+        },
         get: () => lineWidths[lineWidths.length - 1],
       })
 
@@ -501,7 +505,9 @@ describe('Canvas2DRenderer', () => {
       // Track stroke styles to verify different colors are used
       const strokeStyles = []
       Object.defineProperty(mockCtx, 'strokeStyle', {
-        set: (v) => strokeStyles.push(v),
+        set: (v) => {
+          strokeStyles.push(v)
+        },
         get: () => strokeStyles[strokeStyles.length - 1],
       })
 
@@ -739,7 +745,9 @@ describe('Canvas2DRenderer', () => {
       // Track fill styles
       const fillStyles = []
       Object.defineProperty(mockCtx, 'fillStyle', {
-        set: (v) => fillStyles.push(v),
+        set: (v) => {
+          fillStyles.push(v)
+        },
         get: () => fillStyles[fillStyles.length - 1],
       })
 
@@ -755,7 +763,9 @@ describe('Canvas2DRenderer', () => {
 
       const fillStyles = []
       Object.defineProperty(mockCtx, 'fillStyle', {
-        set: (v) => fillStyles.push(v),
+        set: (v) => {
+          fillStyles.push(v)
+        },
         get: () => fillStyles[fillStyles.length - 1],
       })
 
@@ -773,7 +783,9 @@ describe('Canvas2DRenderer', () => {
 
       const fillStyles = []
       Object.defineProperty(mockCtx, 'fillStyle', {
-        set: (v) => fillStyles.push(v),
+        set: (v) => {
+          fillStyles.push(v)
+        },
         get: () => fillStyles[fillStyles.length - 1],
       })
 
@@ -790,7 +802,9 @@ describe('Canvas2DRenderer', () => {
 
       const fillStyles = []
       Object.defineProperty(mockCtx, 'fillStyle', {
-        set: (v) => fillStyles.push(v),
+        set: (v) => {
+          fillStyles.push(v)
+        },
         get: () => fillStyles[fillStyles.length - 1],
       })
 
@@ -807,7 +821,9 @@ describe('Canvas2DRenderer', () => {
 
       const fillStyles = []
       Object.defineProperty(mockCtx, 'fillStyle', {
-        set: (v) => fillStyles.push(v),
+        set: (v) => {
+          fillStyles.push(v)
+        },
         get: () => fillStyles[fillStyles.length - 1],
       })
 
@@ -826,7 +842,9 @@ describe('Canvas2DRenderer', () => {
 
       const fillStyles = []
       Object.defineProperty(mockCtx, 'fillStyle', {
-        set: (v) => fillStyles.push(v),
+        set: (v) => {
+          fillStyles.push(v)
+        },
         get: () => fillStyles[fillStyles.length - 1],
       })
 
@@ -841,7 +859,9 @@ describe('Canvas2DRenderer', () => {
 
       const alphas = []
       Object.defineProperty(mockCtx, 'globalAlpha', {
-        set: (v) => alphas.push(v),
+        set: (v) => {
+          alphas.push(v)
+        },
         get: () => alphas[alphas.length - 1],
       })
 
@@ -978,9 +998,21 @@ describe('Canvas2DRenderer', () => {
 
     it('draws both arrows for room with both up and down exits', () => {
       const state = createMockState({
-        rooms: [{ key: 'stairwell', name: 'Stairwell', x: 0, y: 0, z: 0, exits: { up: 'a', down: 'b' } }],
+        rooms: [
+          { key: 'stairwell', name: 'Stairwell', x: 0, y: 0, z: 0, exits: { up: 'a', down: 'b' } },
+        ],
         roomsByKey: new Map([
-          ['stairwell', { key: 'stairwell', name: 'Stairwell', x: 0, y: 0, z: 0, exits: { up: 'a', down: 'b' } }],
+          [
+            'stairwell',
+            {
+              key: 'stairwell',
+              name: 'Stairwell',
+              x: 0,
+              y: 0,
+              z: 0,
+              exits: { up: 'a', down: 'b' },
+            },
+          ],
         ]),
       })
       const room = state.rooms[0]
@@ -1031,7 +1063,9 @@ describe('Canvas2DRenderer', () => {
 
       const strokeStyles = []
       Object.defineProperty(mockCtx, 'strokeStyle', {
-        set: (v) => strokeStyles.push(v),
+        set: (v) => {
+          strokeStyles.push(v)
+        },
         get: () => strokeStyles[strokeStyles.length - 1],
       })
 

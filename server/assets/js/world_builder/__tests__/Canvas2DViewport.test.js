@@ -40,7 +40,7 @@ function createMockCanvas() {
   return {
     getContext: vi.fn(() => ctx),
     getBoundingClientRect: vi.fn(() => ({ width: 800, height: 600, left: 0, top: 0 })),
-    addEventListener: vi.fn((type, handler, opts) => {
+    addEventListener: vi.fn((type, handler, _opts) => {
       listeners[type] = listeners[type] || []
       listeners[type].push(handler)
     }),
@@ -102,10 +102,10 @@ function setupGlobals() {
 
   vi.stubGlobal(
     'ResizeObserver',
-    vi.fn(() => ({
-      observe: vi.fn(),
-      disconnect: vi.fn(),
-    }))
+    vi.fn(function () {
+      this.observe = vi.fn()
+      this.disconnect = vi.fn()
+    })
   )
 }
 

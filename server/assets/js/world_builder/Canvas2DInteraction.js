@@ -101,10 +101,16 @@ export class Canvas2DInteraction {
     this.canvas.addEventListener('wheel', this.boundWheel, { passive: false })
     this.canvas.addEventListener('contextmenu', this.boundContextMenu)
 
-    // Resize handling
+    // Resize handling (debounced to avoid rapid-fire resets during window resize)
+    this._resizeRAF = null
     this.resizeObserver = new ResizeObserver(() => {
-      this.viewport.setupCanvas()
-      this.viewport.render()
+      if (this._resizeRAF) cancelAnimationFrame(this._resizeRAF)
+      this._resizeRAF = requestAnimationFrame(() => {
+        this._resizeRAF = null
+        this.viewport.setupCanvas()
+        this.viewport.markDirty()
+        this.viewport.render()
+      })
     })
     this.resizeObserver.observe(this.canvas)
 
@@ -132,6 +138,10 @@ export class Canvas2DInteraction {
       this.canvas.removeEventListener('contextmenu', this.boundContextMenu)
     }
 
+    if (this._resizeRAF) {
+      cancelAnimationFrame(this._resizeRAF)
+      this._resizeRAF = null
+    }
     if (this.resizeObserver) {
       this.resizeObserver.disconnect()
     }
@@ -253,6 +263,7 @@ export class Canvas2DInteraction {
     if (e.key === 'Shift') {
       this.isSnapping = true
       if (this.isDraggingRoom) {
+        this.viewport.markDirty()
         this.viewport.render()
       }
     }
@@ -268,6 +279,7 @@ export class Canvas2DInteraction {
       this.isSnapping = false
       this.snapIndicator = null
       if (this.isDraggingRoom) {
+        this.viewport.markDirty()
         this.viewport.render()
       }
     }
@@ -296,7 +308,22 @@ export class Canvas2DInteraction {
     const room = this.viewport.getRoomAtPoint(x, y)
 
     if (room) {
-      // Room click - start dragging the room
+      const isMultiSelect = e.shiftKey || e.metaKey
+
+      if (isMultiSelect) {
+        // Shift/Cmd+click: toggle room in multi-selection
+        if (this.viewport.selectedKeys.has(room.key)) {
+          this.viewport.selectedKeys.delete(room.key)
+        } else {
+          this.viewport.selectedKeys.add(room.key)
+        }
+        this.viewport.onBatchSelect(Array.from(this.viewport.selectedKeys))
+        this.viewport.markDirty()
+        this.viewport.render()
+        return
+      }
+
+      // Regular click - start dragging the room
       this.isDragging = true
       this.isDraggingRoom = true
       this.draggedRoom = room
@@ -308,6 +335,7 @@ export class Canvas2DInteraction {
         this.viewport.selectedKeys.clear()
         this.viewport.onSelectRoom(room.key, false)
       }
+      this.viewport.markDirty()
       this.viewport.render()
     } else {
       // Empty space click - start panning
@@ -356,6 +384,7 @@ export class Canvas2DInteraction {
         this.draggedRoom.y = newY
 
         this.hideTooltip()
+        this.viewport.markDirty()
         this.viewport.render()
       } else {
         // Pan the camera
@@ -364,6 +393,7 @@ export class Canvas2DInteraction {
         this.viewport.camera.x += dx
         this.viewport.camera.y += dy
         this.hideTooltip()
+        this.viewport.markDirty()
         this.viewport.render()
       }
     } else {
@@ -392,7 +422,7 @@ export class Canvas2DInteraction {
    * @param {MouseEvent} e - Mouse event
    * @returns {void}
    */
-  handleMouseUp(e) {
+  handleMouseUp(_e) {
     // If we were dragging a room, notify the callback
     if (this.isDraggingRoom && this.draggedRoom) {
       const newX = this.draggedRoom.x
@@ -409,6 +439,7 @@ export class Canvas2DInteraction {
     this.draggedRoom = null
     this.snapIndicator = null
     this.canvas.style.cursor = 'grab'
+    this.viewport.markDirty()
     this.viewport.render()
   }
 
@@ -418,7 +449,7 @@ export class Canvas2DInteraction {
    * @param {MouseEvent} e - Mouse event
    * @returns {void}
    */
-  handleMouseLeave(e) {
+  handleMouseLeave(_e) {
     this.hideTooltip()
     this.hoveredRoom = null
 
@@ -431,6 +462,7 @@ export class Canvas2DInteraction {
       this.draggedRoom = null
       this.snapIndicator = null
       this.canvas.style.cursor = 'grab'
+      this.viewport.markDirty()
       this.viewport.render()
     } else if (this.isDragging) {
       // Cancel pan drag
@@ -475,6 +507,7 @@ export class Canvas2DInteraction {
     this.viewport.camera.x += (worldAfter.x - worldBefore.x) * this.viewport.gridSize
     this.viewport.camera.y += (worldAfter.y - worldBefore.y) * this.viewport.gridSize
 
+    this.viewport.markDirty()
     this.viewport.render()
   }
 }

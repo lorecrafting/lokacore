@@ -23,7 +23,7 @@
  *   - duplicate_room, duplicate_entity, batch_clone
  *   - validate_all, toggle_panel, create_room, show_commit_modal
  *   - toggle_zone_colors, toggle_npc_paths, show_keyboard_help
- *   - undo_state_changed, select_entity
+ *   - undo_state_changed, select_entity, move_room
  *
  * handleEvent (Server -> JS):
  *   - init_world_builder (rooms, validation, zone_colors, npc_paths)
@@ -73,13 +73,16 @@ const WorldBuilder = {
 
       // Create 2D viewport
       this.viewport = new Canvas2DViewport(this.canvas, {
-        onSelectRoom: (key, shiftKey) => {
+        onSelectRoom: (key, _shiftKey) => {
           this.selectedRoom = key
           this.pushEvent('select_room', { key })
         },
         onBatchSelect: (keys) => {
           this.selectedKeys = keys
           this.pushEvent('batch_select', { keys })
+        },
+        onMoveRoom: (key, x, y) => {
+          this.pushEvent('move_room', { key, x: Math.round(x), y: Math.round(y) })
         },
       })
 
@@ -271,10 +274,10 @@ const WorldBuilder = {
       redo: () => undoManager.redo(),
       save: () => this.pushEvent('validate_all', {}),
       deleteSelected: () => {
-        if (this.selectedRoom) {
-          this.pushEvent('delete_room', { id: this.selectedRoom })
-        } else if (this.selectedKeys && this.selectedKeys.length > 0) {
+        if (this.selectedKeys && this.selectedKeys.length > 1) {
           this.pushEvent('batch_delete', {})
+        } else if (this.selectedRoom) {
+          this.pushEvent('delete_room', { id: this.selectedRoom })
         }
       },
       duplicate: () => {
@@ -370,7 +373,7 @@ const WorldBuilder = {
     // Unregister all keyboard shortcuts (prefix-based cleanup)
     keyboardManager.unregisterAll('wb-')
     // Cleanup listeners (z-level tabs, etc.)
-    this.helper.destroy()
+    if (this.helper) this.helper.destroy()
     // Cleanup undo manager
     undoManager.destroy()
   },

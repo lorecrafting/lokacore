@@ -9,6 +9,18 @@ import topbar from '../vendor/topbar'
 // Hooks (one file per hook in hooks/ directory)
 import Hooks from './hooks/index.js'
 
+// Filter out duplicate ID errors caused by browser extensions (e.g., 1Password injects
+// multiple elements with id="1p-live-region"). LiveView's debug mode auto-enables on
+// localhost and runs detectDuplicateIds() on every DOM patch, flooding the console.
+const _origConsoleError = console.error
+const EXTENSION_ID_PATTERN = /^Multiple IDs detected: (1p-|lastpass-|bitwarden-|dashlane-)/
+console.error = function (...args) {
+  if (typeof args[0] === 'string' && EXTENSION_ID_PATTERN.test(args[0])) {
+    return
+  }
+  _origConsoleError.apply(console, args)
+}
+
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute('content')
 const liveSocket = new LiveSocket('/live', Socket, {
   longPollFallbackMs: 2500,

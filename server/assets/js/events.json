@@ -1,0 +1,105 @@
+{
+  "_description": "Hook to LiveView event contract. pushEvents = JS->Server, handleEvents = Server->JS",
+  "_usage": "Reference this file to understand what events a hook sends/receives",
+
+  "WorldBuilder": {
+    "pushEvents": [
+      "select_room",
+      "batch_select",
+      "delete_room",
+      "batch_delete",
+      "duplicate_room",
+      "duplicate_entity",
+      "batch_clone",
+      "validate_all",
+      "toggle_panel",
+      "create_room",
+      "show_commit_modal",
+      "toggle_zone_colors",
+      "toggle_npc_paths",
+      "show_keyboard_help",
+      "undo_state_changed",
+      "select_entity"
+    ],
+    "handleEvents": [
+      "init_world_builder",
+      "rooms_updated",
+      "room_created",
+      "room_updated",
+      "room_deleted",
+      "select_room",
+      "select_entity",
+      "set_z_level",
+      "zone_colors_changed",
+      "npc_paths_changed",
+      "panel_collapsed",
+      "record_operation",
+      "begin_composite",
+      "end_composite",
+      "trigger_undo",
+      "trigger_redo"
+    ]
+  },
+
+  "PanelResize": {
+    "pushEvents": [
+      "restore_panel_sizes",
+      "resize_panel"
+    ],
+    "handleEvents": []
+  },
+
+  "MudTerminal": {
+    "_note": "Uses Phoenix Channels, NOT LiveView pushEvent/handleEvent",
+    "channelPush": ["command"],
+    "channelOn": [
+      "game_state",
+      "room_update",
+      "output",
+      "event",
+      "resources_update",
+      "broadcast",
+      "combat_start",
+      "combat_update",
+      "combat_end",
+      "dialogue_start",
+      "dialogue_update",
+      "dialogue_end",
+      "inventory_update",
+      "clear_terminal"
+    ]
+  },
+
+  "ChatTextarea": {
+    "pushEvents": ["send_message"],
+    "handleEvents": []
+  },
+
+  "CodeMirrorEditor": {
+    "pushEvents": ["script_source_changed"],
+    "handleEvents": []
+  },
+
+  "MultiAPIKeyConfig": {
+    "pushEvents": [
+      "api_key_status",
+      "api_key_validated"
+    ],
+    "handleEvents": []
+  },
+
+  "QuestFlowGraph": {
+    "pushEvents": [],
+    "handleEvents": []
+  },
+
+  "ConsoleOutput": {
+    "pushEvents": [],
+    "handleEvents": ["download_text"]
+  },
+
+  "ScrollBottom": {
+    "pushEvents": [],
+    "handleEvents": []
+  }
+}

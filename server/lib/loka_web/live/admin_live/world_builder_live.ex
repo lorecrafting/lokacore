@@ -256,6 +256,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
           templates={@templates}
           scripts={@scripts}
           cutscenes={@cutscenes}
+          quests={@quests}
           zones={@zones}
           selected_room={@selected_room}
           selected_entity={@selected_entity}
@@ -982,6 +983,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
         "templates" -> :templates
         "scripts" -> :scripts
         "cutscenes" -> :cutscenes
+        "quests" -> :quests
         _ -> :rooms
       end
 
@@ -1105,6 +1107,40 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
       {:error, msg} ->
         {:noreply, log_console(socket, :error, "Validation failed: #{msg}")}
+    end
+  end
+
+  def handle_event("move_room", %{"key" => key, "x" => x, "y" => y}, socket) do
+    new_x = parse_integer(x, 0)
+    new_y = parse_integer(y, 0)
+
+    # Get current room state for undo recording
+    before_state =
+      case RoomManager.get_room(key) do
+        {:ok, room} -> %{x: room.x, y: room.y}
+        _ -> nil
+      end
+
+    case RoomManager.update_room(key, %{"x" => new_x, "y" => new_y}) do
+      {:ok, room} ->
+        {:noreply,
+         socket
+         |> assign(:rooms, RoomManager.list_rooms())
+         |> push_event("room_updated", %{room: room})
+         |> push_event("record_operation", %{
+           type: "move_room",
+           beforeState: before_state,
+           afterState: %{x: new_x, y: new_y},
+           metadata: %{key: key, entity_type: :room}
+         })}
+
+      {:error, reason} ->
+        {:noreply,
+         log_console(
+           socket,
+           :error,
+           "Move failed: #{sanitize_error(reason, "move_room")}"
+         )}
     end
   end
 
@@ -1545,11 +1581,23 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     end
   end
 
-  def handle_event("show_quest_editor", _params, socket) do
+  def handle_event("show_quest_editor", params, socket) do
+    quest_data =
+      case params do
+        %{"key" => key} when key != "" ->
+          case Enum.find(socket.assigns.quests, &(&1.key == key)) do
+            nil -> default_quest_data()
+            quest -> quest_to_editor_format(quest)
+          end
+
+        _ ->
+          default_quest_data()
+      end
+
     {:noreply,
      socket
      |> assign(:show_quest_editor, true)
-     |> assign(:quest_data, default_quest_data())
+     |> assign(:quest_data, quest_data)
      |> assign(:editing_mode, :quest)}
   end
 
@@ -2284,10 +2332,34 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   def handle_event("create_project_ui", %{"key" => key, "name" => name}, socket) do
     case Projects.create_project(key, name, "") do
       {:ok, _doc} ->
-        {:reply, %{success: true}, socket}
+        socket =
+          socket
+          |> assign(:projects, Projects.list_projects())
+          |> assign(:current_project, %{key: key})
+
+        {:noreply, socket}
 
       {:error, changeset} ->
-        {:reply, %{success: false, error: inspect(changeset.errors)}, socket}
+        {:noreply,
+         assign(socket, :chat_error, "Failed to create project: #{inspect(changeset.errors)}")}
+    end
+  end
+
+  def handle_event("create_project_ui", _params, socket) do
+    key = "project_#{:rand.uniform(9999)}"
+    name = "New Project"
+
+    case Projects.create_project(key, name, "") do
+      {:ok, _doc} ->
+        socket =
+          socket
+          |> assign(:projects, Projects.list_projects())
+          |> assign(:current_project, %{key: key})
+
+        {:noreply, socket}
+
+      {:error, _changeset} ->
+        {:noreply, socket}
     end
   end
 
@@ -2301,7 +2373,7 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
     {:noreply, socket}
   end
 
-  def handle_event("select_project", %{"key" => project_key}, socket) do
+  def handle_event("select_project", %{"project_key" => project_key}, socket) do
     # Toggle expansion
     expanded = socket.assigns.expanded_projects
     is_expanded = Map.get(expanded, project_key, false)
@@ -2655,6 +2727,22 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
   defp restore_state("update_room", state, %{"key" => key}, socket) when is_map(state) do
     # Restore room to previous state
     case RoomManager.update_room(key, atomize_keys(state)) do
+      {:ok, room} ->
+        {:ok,
+         socket
+         |> assign(:rooms, RoomManager.list_rooms())
+         |> push_event("room_updated", %{room: room})}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  defp restore_state("move_room", state, %{"key" => key}, socket) when is_map(state) do
+    x = state["x"] || state[:x]
+    y = state["y"] || state[:y]
+
+    case RoomManager.update_room(key, %{"x" => x, "y" => y}) do
       {:ok, room} ->
         {:ok,
          socket
@@ -3022,6 +3110,49 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
       gold: 0,
       reward_items: ""
     }
+  end
+
+  # Convert enriched quest (from QuestManager) to the flat format the editor expects
+  defp quest_to_editor_format(quest) do
+    rewards = quest[:rewards] || %{}
+    {level_min, level_max} = quest[:level_range] || {1, 99}
+
+    reward_items =
+      case flex_get(rewards, :items) do
+        items when is_list(items) -> Enum.join(items, ", ")
+        _ -> ""
+      end
+
+    objectives =
+      (quest[:objectives] || [])
+      |> Enum.map(fn obj ->
+        %{
+          type: to_string(flex_get(obj, :type, "kill")),
+          target: to_string(flex_get(obj, :target_id) || flex_get(obj, :target, "")),
+          count: flex_get(obj, :target_count) || flex_get(obj, :count, 1),
+          description: to_string(flex_get(obj, :description, ""))
+        }
+      end)
+
+    %{
+      key: quest.key,
+      name: quest.name || "",
+      quest_type: to_string(quest[:quest_type] || "side"),
+      giver_key: to_string(quest[:giver_key] || ""),
+      description: quest[:description] || "",
+      level_min: level_min || 1,
+      level_max: level_max || 99,
+      objectives: objectives,
+      prerequisites: quest[:prerequisites] || [],
+      xp: flex_get(rewards, :xp, 0),
+      gold: flex_get(rewards, :gold, 0),
+      reward_items: reward_items
+    }
+  end
+
+  # Get a value from a map that may have string or atom keys
+  defp flex_get(map, key, default \\ nil) when is_atom(key) do
+    Map.get(map, key) || Map.get(map, to_string(key)) || default
   end
 
   defp default_cutscene_data do

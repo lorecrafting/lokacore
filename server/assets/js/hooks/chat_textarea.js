@@ -29,7 +29,7 @@ const ChatTextarea = {
   },
 
   destroyed() {
-    this.helper.destroy()
+    if (this.helper) this.helper.destroy()
   },
 }
 

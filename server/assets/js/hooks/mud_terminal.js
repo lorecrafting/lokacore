@@ -133,7 +133,7 @@ const MudTerminal = {
   setConnectionState(state) {
     // state: 'connecting', 'connected', 'disconnected'
     if (this.statusDot) {
-      this.statusDot.className = 'term-connection-dot ' + state
+      this.statusDot.className = `term-connection-dot ${state}`
       this.statusDot.title = state.charAt(0).toUpperCase() + state.slice(1)
     }
   },
@@ -213,7 +213,12 @@ const MudTerminal = {
 
     // Broadcast messages
     this.channel.on('broadcast', (data) => {
-      const cls = data.type === 'emergency' ? 'error' : data.type === 'event' ? 'chat' : 'system'
+      let cls = 'system'
+      if (data.type === 'emergency') {
+        cls = 'error'
+      } else if (data.type === 'event') {
+        cls = 'chat'
+      }
       if (data.text) this.appendOutput(data.text, cls)
     })
 
@@ -261,7 +266,7 @@ const MudTerminal = {
     const lines = text.split('\n')
     lines.forEach((line) => {
       const div = document.createElement('div')
-      div.className = 'terminal-line' + (className ? ` ${className}` : '')
+      div.className = `terminal-line${className ? ` ${className}` : ''}`
       div.textContent = line
       this.outputEl.appendChild(div)
     })
@@ -345,6 +350,7 @@ const MudTerminal = {
 
   updated() {
     // Refresh DOM references that may have been replaced by LiveView patches
+    if (!this.terminalContainer) return
     this.inputEl = this.terminalContainer.querySelector('#terminal-command-input')
     this.hpEl = this.terminalContainer.querySelector('#term-hp')
     this.maEl = this.terminalContainer.querySelector('#term-ma')
@@ -362,7 +368,7 @@ const MudTerminal = {
       this.socket.disconnect()
       this.socket = null
     }
-    this.helper.destroy()
+    if (this.helper) this.helper.destroy()
   },
 }
 
