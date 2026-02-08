@@ -1,5 +1,5 @@
 defmodule Loka.Admin.AuditLogTest do
-  use Loka.DataCase, async: true
+  use Loka.DataCase, async: false
 
   alias Loka.Admin.AuditLog
   alias Loka.Repo

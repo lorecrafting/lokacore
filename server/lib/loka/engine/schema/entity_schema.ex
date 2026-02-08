@@ -113,10 +113,6 @@ defmodule Loka.Engine.Schema.EntitySchema do
 
   @doc """
   Converts the schema to an Entity struct for in-memory use.
-
-  Provides bidirectional mapping between TypedObject field names
-  (name, description, extra_description) and legacy names
-  (short_desc, long_desc, extra_desc).
   """
   def to_entity(%__MODULE__{} = schema) do
     %Entity{
@@ -127,11 +123,6 @@ defmodule Loka.Engine.Schema.EntitySchema do
       parent_key: schema.parent_key,
       prototype_key: schema.prototype_key,
       is_prototype: schema.is_prototype || false,
-      # TypedObject-compatible display fields (mirror from legacy)
-      name: schema.short_desc,
-      description: schema.long_desc,
-      extra_description: schema.extra_desc,
-      # Legacy display fields
       short_desc: schema.short_desc,
       long_desc: schema.long_desc,
       extra_desc: schema.extra_desc,
@@ -161,21 +152,17 @@ defmodule Loka.Engine.Schema.EntitySchema do
   @doc """
   Converts an Entity struct to changeset attrs for persistence.
 
-  Handles both TypedObject field names and legacy field names.
   """
   def from_entity(%Entity{} = entity) do
     %{
       type: entity.type,
       key: entity.key,
-      # TypedObject inheritance fields
       parent_key: entity.parent_key,
       prototype_key: entity.prototype_key,
       is_prototype: entity.is_prototype,
-      # Store using legacy field names (canonical in DB)
-      # Prefer legacy names if set, fall back to TypedObject names
-      short_desc: entity.short_desc || entity.name,
-      long_desc: entity.long_desc || entity.description,
-      extra_desc: entity.extra_desc || entity.extra_description,
+      short_desc: entity.short_desc,
+      long_desc: entity.long_desc,
+      extra_desc: entity.extra_desc,
       keywords: entity.keywords,
       primary_keyword: entity.primary_keyword,
       mood: entity.mood,

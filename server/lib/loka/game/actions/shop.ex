@@ -17,7 +17,8 @@ defmodule Loka.Game.Actions.Shop do
   alias Loka.Game.Actions.{Context, Result}
   alias Loka.Framework.Player.GameState, as: PlayerGameState
   alias Loka.Framework.Economy
-  alias Loka.Engine.{Entities, PrototypeLoader, Spawner}
+  alias Loka.Engine.{Entities, Spawner}
+  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
 
   @doc """
   Open a shop with an NPC merchant.
@@ -40,7 +41,7 @@ defmodule Loka.Game.Actions.Shop do
             {:shop_open,
              %{
                npc_id: entity_id,
-               npc_name: entity.name || entity.short_desc || "Merchant",
+               npc_name: Map.get(entity, :name) || Map.get(entity, :short_desc) || "Merchant",
                items: shop_data.items,
                buys: shop_data.buys
              }}
@@ -209,14 +210,14 @@ defmodule Loka.Game.Actions.Shop do
   end
 
   defp load_shop_item(item_key) when is_binary(item_key) do
-    case PrototypeLoader.get(item_key) do
+    case TypedObjectLoader.get(item_key) do
       {:ok, prototype} ->
         price = get_item_price(prototype)
 
         %{
           key: item_key,
-          name: prototype.name || prototype.short_desc || item_key,
-          description: prototype.long_desc || prototype.description || "",
+          name: prototype.name || item_key,
+          description: prototype.description || "",
           price: price
         }
 

@@ -166,7 +166,7 @@ defmodule Loka.Framework.Combat.CombatRound do
 
     %{
       id: id,
-      name: npc.short_desc || npc.name || "Enemy",
+      name: Map.get(npc, :short_desc) || Map.get(npc, :name) || "Enemy",
       stats: %{
         str: get_stat(stats, :str, 10),
         dex: get_stat(stats, :dex, 10),

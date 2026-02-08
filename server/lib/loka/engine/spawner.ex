@@ -32,7 +32,8 @@ defmodule Loka.Engine.Spawner do
       {:ok, room} = Spawner.create_room(name: "Dark Cave", x: 5, y: 3)
   """
 
-  alias Loka.Engine.{Prototype, PrototypeLoader, Entities, Entity, Hooks}
+  alias Loka.Engine.{TypedObject, Entities, Entity, Hooks}
+  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
   alias Loka.Engine.Schema.EntitySchema
   alias Loka.Utils.MapHelpers
 
@@ -70,9 +71,9 @@ defmodule Loka.Engine.Spawner do
   """
   @spec spawn(String.t(), keyword()) :: {:ok, Entity.t()} | {:error, term()}
   def spawn(prototype_key, opts \\ []) do
-    with {:ok, prototype} <- PrototypeLoader.get(prototype_key) do
-      overrides = build_overrides(prototype, opts)
-      entity = Prototype.to_entity(prototype, overrides)
+    with {:ok, typed_object} <- TypedObjectLoader.get(prototype_key) do
+      overrides = build_overrides(typed_object, opts)
+      entity = typed_object_to_entity(typed_object, overrides)
 
       # Entity key = prototype key (UUID provides instance uniqueness)
       # No suffix needed - multiple instances share the same key
@@ -142,17 +143,17 @@ defmodule Loka.Engine.Spawner do
   """
   @spec spawn_room(String.t(), keyword()) :: {:ok, Entity.t(), [Entity.t()]} | {:error, term()}
   def spawn_room(room_prototype_key, opts \\ []) do
-    with {:ok, prototype} <- PrototypeLoader.get(room_prototype_key),
-         :ok <- validate_room_prototype(prototype) do
-      overrides = build_overrides(prototype, opts)
-      room_entity = Prototype.to_entity(prototype, overrides)
+    with {:ok, typed_object} <- TypedObjectLoader.get(room_prototype_key),
+         :ok <- validate_room_prototype(typed_object) do
+      overrides = build_overrides(typed_object, opts)
+      room_entity = typed_object_to_entity(typed_object, overrides)
       # Rooms keep their prototype key (unique per room type)
       # Don't call ensure_unique_key for rooms
 
       case Entities.save_entity(room_entity) do
         {:ok, room_schema} ->
           room = Entities.to_entity(room_schema)
-          spawned = spawn_room_contents(room, prototype, opts)
+          spawned = spawn_room_contents(room, typed_object, opts)
           Logger.info("Spawned room #{room.id} (#{room.key}) with #{length(spawned)} entities")
           {:ok, room, spawned}
 
@@ -198,7 +199,49 @@ defmodule Loka.Engine.Spawner do
   # Private Functions
   # =============================================================================
 
-  defp build_overrides(prototype, opts) do
+  # Convert a TypedObject to an Entity struct, applying overrides.
+  # Uses Entity.from_typed_object!/1 for the base conversion,
+  # then applies spawn-time overrides (name, location, components, etc.)
+  defp typed_object_to_entity(typed_object, overrides) do
+    base_entity = Entity.from_typed_object!(typed_object)
+
+    now = DateTime.utc_now()
+
+    entity = %{
+      base_entity
+      | id: UUID.uuid4(),
+        is_prototype: false,
+        prototype_key: typed_object.key,
+        metadata:
+          Map.merge(base_entity.metadata, %{
+            created_at: now,
+            updated_at: now,
+            prototype_key: typed_object.key
+          })
+    }
+
+    # Apply overrides
+    entity
+    |> maybe_apply_override(:short_desc, overrides)
+    |> maybe_apply_override(:long_desc, overrides)
+    |> maybe_apply_override(:extra_desc, overrides)
+    |> maybe_apply_override(:keywords, overrides)
+    |> maybe_apply_override(:mood, overrides)
+    |> maybe_apply_override(:location_id, overrides)
+    |> maybe_apply_override(:components, overrides)
+    |> maybe_apply_override(:attributes, overrides)
+    |> maybe_apply_override(:tags, overrides)
+    |> maybe_apply_override(:locks, overrides)
+  end
+
+  defp maybe_apply_override(entity, field, overrides) do
+    case Map.get(overrides, field) do
+      nil -> entity
+      value -> Map.put(entity, field, value)
+    end
+  end
+
+  defp build_overrides(typed_object, opts) do
     overrides =
       opts
       |> Keyword.take([
@@ -215,10 +258,10 @@ defmodule Loka.Engine.Spawner do
       ])
       |> Map.new()
 
-    # Deep merge components and attributes with prototype values
+    # Deep merge components and attributes with TypedObject values
     overrides
-    |> maybe_deep_merge(:components, prototype.components, Map.get(overrides, :components))
-    |> maybe_deep_merge(:attributes, prototype.attributes, Map.get(overrides, :attributes))
+    |> maybe_deep_merge(:components, typed_object.components, Map.get(overrides, :components))
+    |> maybe_deep_merge(:attributes, typed_object.attributes, Map.get(overrides, :attributes))
   end
 
   defp maybe_deep_merge(overrides, _field, _base, nil), do: overrides
@@ -230,16 +273,30 @@ defmodule Loka.Engine.Spawner do
 
   defp maybe_deep_merge(overrides, _field, _base, _additions), do: overrides
 
-  defp validate_room_prototype(%Prototype{type: :room}), do: :ok
+  defp validate_room_prototype(%TypedObject{subtype: :room}), do: :ok
 
-  defp validate_room_prototype(%Prototype{type: type}) do
-    {:error, {:invalid_type, "spawn_room requires a room prototype, got: #{type}"}}
+  defp validate_room_prototype(%TypedObject{subtype: subtype}) do
+    {:error, {:invalid_type, "spawn_room requires a room prototype, got: #{subtype}"}}
   end
 
-  defp spawn_room_contents(room, prototype, opts) do
-    exits = spawn_exits(room, prototype.exits, opts)
-    spawns = spawn_entities(room, prototype.spawns, opts)
-    exits ++ spawns
+  defp spawn_room_contents(room, typed_object, opts) do
+    # data keys may be atoms or strings depending on atom table state
+    exits = get_data_field(typed_object, "exits")
+    spawns = get_data_field(typed_object, "spawns")
+    spawn_exits(room, exits, opts) ++ spawn_entities(room, spawns, opts)
+  end
+
+  # Helper to get a field from TypedObject.data that may be stored
+  # as either an atom or string key
+  defp get_data_field(%TypedObject{data: data}, field) when is_binary(field) do
+    atom_key =
+      try do
+        String.to_existing_atom(field)
+      rescue
+        ArgumentError -> nil
+      end
+
+    Map.get(data, atom_key) || Map.get(data, field)
   end
 
   defp spawn_exits(_room, exits, _opts) when exits == %{} or is_nil(exits), do: []

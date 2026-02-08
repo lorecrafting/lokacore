@@ -236,7 +236,7 @@ defmodule Loka.Engine.Script.ActionQueue do
     event =
       Event.new(:say, %{
         source: entity.id,
-        source_name: entity.short_desc || entity.name || "Someone",
+        source_name: entity.short_desc || "Someone",
         payload: %{text: message}
       })
 
@@ -248,7 +248,7 @@ defmodule Loka.Engine.Script.ActionQueue do
     event =
       Event.new(:emote, %{
         source: entity.id,
-        source_name: entity.short_desc || entity.name || "Someone",
+        source_name: entity.short_desc || "Someone",
         payload: %{action: action}
       })
 
@@ -520,7 +520,7 @@ defmodule Loka.Engine.Script.ActionQueue do
       emote_event =
         Event.new(:say, %{
           source: entity[:id],
-          source_name: entity[:short_desc] || entity[:name] || "Someone",
+          source_name: entity[:short_desc] || "Someone",
           payload: %{text: emote_text}
         })
 

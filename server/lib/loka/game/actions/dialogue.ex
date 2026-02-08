@@ -313,7 +313,7 @@ defmodule Loka.Game.Actions.Dialogue do
         # Add the spawned entity to inventory
         case Inventory.add_item(game_state, entity.id) do
           {:ok, new_game_state} ->
-            item_name = entity.short_desc || entity.name || item_key
+            item_name = entity.short_desc || item_key
 
             events = [
               {:event, "You received #{item_name}."},

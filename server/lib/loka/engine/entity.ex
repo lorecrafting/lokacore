@@ -6,22 +6,13 @@ defmodule Loka.Engine.Entity do
   locations, contents, and runtime state. This follows a composition-based
   Entity-Component-Behavior model that maps naturally to Elixir's functional paradigm.
 
-  ## TypedObject Compatibility
-
-  Entity extends TypedObject with runtime concerns. The following field mappings
-  provide compatibility with the TypedObject system:
-
-  - `name` → `short_desc` (action/speech identifier)
-  - `description` → `long_desc` (room display sentence)
-  - `extra_description` → `extra_desc` (detailed examination text)
-
   ## Description Fields (LegendMUD Style)
 
-  - `short_desc` / `name` - Action/speech identifier, used when entity performs actions
+  - `short_desc` - Action/speech identifier, used when entity performs actions
     (e.g., "Novice Pema says..." or "a young monk attacks...")
-  - `long_desc` / `description` - Room display sentence with verb, shown in room listings
+  - `long_desc` - Room display sentence with verb, shown in room listings
     (e.g., "A young monk with earnest eyes waits anxiously here.")
-  - `extra_desc` / `extra_description` - Detailed prose shown when entity is examined/inspected
+  - `extra_desc` - Detailed prose shown when entity is examined/inspected
   - `keywords` - Words that can be used to target/reference the entity
     (e.g., ["monk", "young", "pema", "novice"])
   - `primary_keyword` - Single keyword for touch/click interfaces (e.g., "monk")
@@ -39,10 +30,7 @@ defmodule Loka.Engine.Entity do
           parent_key: String.t() | nil,
           is_prototype: boolean(),
           prototype_key: String.t() | nil,
-          # Display (TypedObject-compatible names + legacy names)
-          name: String.t() | nil,
-          description: String.t() | nil,
-          extra_description: String.t() | nil,
+          # Display
           short_desc: String.t() | nil,
           long_desc: String.t() | nil,
           extra_desc: String.t() | nil,
@@ -71,11 +59,6 @@ defmodule Loka.Engine.Entity do
     :key,
     :parent_key,
     :prototype_key,
-    # TypedObject-compatible display fields
-    :name,
-    :description,
-    :extra_description,
-    # Legacy display fields (mapped from TypedObject)
     :short_desc,
     :long_desc,
     :extra_desc,
@@ -98,8 +81,8 @@ defmodule Loka.Engine.Entity do
   @doc """
   Creates a new entity with a generated UUID.
 
-  Supports both TypedObject field names (name, description, extra_description)
-  and legacy field names (short_desc, long_desc, extra_desc).
+  Accepts `short_desc`, `long_desc`, and `extra_desc` for display fields.
+  Also accepts `name`, `description`, `extra_description` as aliases.
   """
   def new(type, attrs \\ %{}) do
     now = DateTime.utc_now()
@@ -112,11 +95,6 @@ defmodule Loka.Engine.Entity do
       parent_key: Map.get(attrs, :parent_key),
       prototype_key: Map.get(attrs, :prototype_key),
       is_prototype: Map.get(attrs, :is_prototype, false),
-      # TypedObject-compatible display fields
-      name: Map.get(attrs, :name) || Map.get(attrs, :short_desc),
-      description: Map.get(attrs, :description) || Map.get(attrs, :long_desc),
-      extra_description: Map.get(attrs, :extra_description) || Map.get(attrs, :extra_desc),
-      # Legacy display fields (mirror TypedObject fields)
       short_desc: Map.get(attrs, :short_desc) || Map.get(attrs, :name),
       long_desc: Map.get(attrs, :long_desc) || Map.get(attrs, :description),
       extra_desc: Map.get(attrs, :extra_desc) || Map.get(attrs, :extra_description),
@@ -248,9 +226,9 @@ defmodule Loka.Engine.Entity do
       parent_key: entity.parent_key,
       is_prototype: entity.is_prototype,
       prototype_key: entity.prototype_key,
-      name: entity.name || entity.short_desc,
-      description: entity.description || entity.long_desc,
-      extra_description: entity.extra_description || entity.extra_desc,
+      name: entity.short_desc,
+      description: entity.long_desc,
+      extra_description: entity.extra_desc,
       keywords: entity.keywords,
       attributes: entity.attributes,
       tags: entity.tags,
@@ -283,11 +261,6 @@ defmodule Loka.Engine.Entity do
       parent_key: typed_object.parent_key,
       is_prototype: typed_object.is_prototype,
       prototype_key: typed_object.prototype_key,
-      # TypedObject display fields
-      name: typed_object.name,
-      description: typed_object.description,
-      extra_description: typed_object.extra_description,
-      # Legacy display fields (mirror)
       short_desc: typed_object.name,
       long_desc: typed_object.description,
       extra_desc: typed_object.extra_description,
