@@ -1,0 +1,30 @@
+key: luminous_moss
+type: item
+parent: base_item
+
+short_desc: "Luminous Moss"
+long_desc: "A clump of softly glowing blue-green moss."
+extra_desc: |
+  This bioluminescent moss grows only in the deepest parts of the
+  cavern system, fed by mineral-rich water seeping through the stone.
+  It gives off a steady blue-green glow that intensifies when touched.
+  The monks use it as a meditation aid, watching its slow pulse.
+keywords:
+  - moss
+  - luminous
+  - glowing
+  - blue
+primary_keyword: moss
+
+tags:
+  - item
+  - herb
+  - whispering_caverns
+
+components:
+  physical:
+    weight: 0.1
+    stackable: true
+    max_stack: 10
+  valuable:
+    base_price: 8

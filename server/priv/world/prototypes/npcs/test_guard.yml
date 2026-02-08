@@ -1,0 +1,16 @@
+key: test_guard
+type: npc
+parent: base_npc
+short_desc: "Test Guard"
+long_desc: "A stern guard watching the entrance."
+extra_desc: |
+    A stern guard watching the entrance.
+keywords: [test_guard]
+primary_keyword: test_guard
+mood: neutral
+tags: []
+components:
+  combatant:
+    level: 1
+  npc_data:
+    level: 1

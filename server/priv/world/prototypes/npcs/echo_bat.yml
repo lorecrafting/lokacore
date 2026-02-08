@@ -1,0 +1,43 @@
+key: echo_bat
+type: npc
+parent: base_npc
+
+short_desc: "Echo Bat"
+long_desc: "A small bat with oversized ears hangs from a stalactite, its wings folded like a tiny cloak."
+extra_desc: |
+  The echo bat's fur is deep blue, almost black, and impossibly
+  soft. Its calls are pitched beyond human hearing, but you can
+  feel them in your teeth. The monks believe these bats carry
+  whispered prayers to the mountain spirits.
+keywords:
+  - bat
+  - echo
+primary_keyword: bat
+mood: skittish
+
+tags:
+  - neutral
+  - whispering_caverns
+  - creature
+
+emotes:
+  spotted_player: "*unfurls its wings briefly, then settles*"
+
+components:
+  ambient_actions:
+    messages:
+      - "The echo bat shifts on its perch, wrapping its wings tighter."
+      - "A soft chirp echoes through the grotto, answered by another in the darkness."
+      - "The bat drops from its stalactite, swoops once around the chamber, and returns."
+    interval_min: 45
+    interval_max: 90
+    chance: 0.3
+  combatant:
+    health:
+      current: 10
+      max: 10
+    stats:
+      str: 2
+      dex: 16
+      sta: 4
+    level: 1

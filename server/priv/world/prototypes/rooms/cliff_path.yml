@@ -10,6 +10,7 @@ exits:
   north: monastery_gate
   south: hermits_cave
   east: waterfall_shrine
+  west: cavern_entrance
   up: mountain_peak
   down: village
 spawns:

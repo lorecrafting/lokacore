@@ -1,0 +1,63 @@
+# Whispering Caverns Zone - Underground cave system beneath the monastery
+#
+# A network of natural caves known for their crystal formations
+# and acoustic properties. The monks use the deepest chamber for
+# meditation, believing the crystals store ancient prayers.
+
+key: whispering_caverns
+name: "The Whispering Caverns"
+
+rooms_with_tag: whispering_caverns
+
+rooms:
+  - cavern_entrance
+  - cavern_pool
+  - crystal_gallery
+  - deep_grotto
+
+lifespan_minutes: 45
+reset_mode: empty
+
+resets:
+  # Cave Guide Yeshi at the entrance
+  - type: mob
+    prototype: cave_guide_yeshi
+    room: cavern_entrance
+    max: 1
+
+  # Cave spiders in the Crystal Gallery
+  - type: mob
+    prototype: cave_spider
+    room: crystal_gallery
+    max: 2
+
+  # Echo bats in the Deep Grotto
+  - type: mob
+    prototype: echo_bat
+    room: deep_grotto
+    max: 3
+
+  # Items
+  - type: object
+    prototype: whispering_crystal
+    room: crystal_gallery
+    max: 2
+
+  - type: object
+    prototype: luminous_moss
+    room: cavern_pool
+    max: 3
+
+  - type: object
+    prototype: worn_lantern
+    room: cavern_entrance
+    max: 1
+
+  # Cleanup
+  - type: remove
+    prototype: corpse
+    room: crystal_gallery
+
+  - type: remove
+    prototype: corpse
+    room: deep_grotto

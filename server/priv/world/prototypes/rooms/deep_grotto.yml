@@ -1,0 +1,38 @@
+key: deep_grotto
+parent: base_room
+type: room
+short_desc: "Deep Grotto"
+long_desc: "The passage opens into a vast grotto where stalactites hang like stone teeth above a floor of smooth flowstone."
+extra_desc: |
+  This is the deepest chamber, where the mountain's heartbeat
+  can be felt through the soles of your feet. A faint warmth
+  rises from below, carrying the scent of mineral springs. The
+  walls bear faded paintings in ochre and charcoal, figures in
+  meditation surrounded by spiraling patterns. A flat stone
+  in the center has been worn concave by generations of sitting.
+keywords: []
+exits:
+  up: cavern_pool
+spawns:
+  - prototype: echo_bat
+tags:
+  - underground
+  - cavern
+  - whispering_caverns
+  - sacred
+  - meditation
+  - room
+attributes:
+  x: 5
+  y: 1
+  z: -2
+components:
+  ambient_messages:
+    dawn:
+      - "A faint vibration passes through the stone, like a giant's slow breath."
+    day:
+      - "Water trickles somewhere in the walls, a steady quiet rhythm."
+      - "The ancient paintings seem to shift in the flickering light."
+    night:
+      - "The darkness here feels alive, watchful but not hostile."
+      - "A low hum reverberates through the grotto, resonating in your chest."

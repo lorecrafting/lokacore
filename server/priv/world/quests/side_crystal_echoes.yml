@@ -1,0 +1,39 @@
+id: side_crystal_echoes
+name: "Echoes in Crystal"
+description: |
+  Cave Guide Yeshi asks you to retrieve a whispering crystal from
+  the Crystal Gallery deep within the Whispering Caverns. The crystals
+  are said to hold the prayers of monks who meditated here centuries ago.
+giver: cave_guide_yeshi
+type: side
+paramita: wisdom
+level_requirement: 2
+
+objectives:
+  - id: talk_yeshi
+    type: talk
+    target_id: cave_guide_yeshi
+    description: "Speak with Cave Guide Yeshi"
+  - id: find_crystal
+    type: get_item
+    target_id: whispering_crystal
+    target_count: 1
+    description: "Retrieve a whispering crystal from the Crystal Gallery"
+    location_hint: crystal_gallery
+  - id: return_crystal
+    type: talk
+    target_id: cave_guide_yeshi
+    description: "Return the crystal to Yeshi"
+
+rewards:
+  xp: 75
+  gold: 20
+  items:
+    - luminous_moss
+    - luminous_moss
+    - luminous_moss
+
+journal_entries:
+  accepted: "Yeshi has asked me to bring back a whispering crystal from the Crystal Gallery. He says to listen for the ones that hum."
+  gathering: "The Crystal Gallery lies east through the underground pool. Cave spiders guard the formations there."
+  completed: "Yeshi accepted the crystal with reverence. He says it will be placed in the meditation chamber, where its stored prayers may guide future seekers."

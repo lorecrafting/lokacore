@@ -1,0 +1,29 @@
+key: whispering_crystal
+type: item
+parent: base_item
+
+short_desc: "Whispering Crystal"
+long_desc: "A translucent quartz crystal hums with a faint inner resonance."
+extra_desc: |
+  The crystal is cool to the touch and vibrates almost imperceptibly.
+  When held close to your ear, you can hear faint murmuring, fragments
+  of words spoken long ago by those who meditated in these caves. The
+  monks believe each crystal stores the essence of a single truth.
+keywords:
+  - crystal
+  - quartz
+  - whispering
+  - glowing
+primary_keyword: crystal
+
+tags:
+  - item
+  - quest_item
+  - whispering_caverns
+
+components:
+  physical:
+    weight: 0.3
+    stackable: false
+  valuable:
+    base_price: 25

@@ -1,0 +1,21 @@
+key: cavern_echo_on_enter
+type: script
+name: "Cavern Echo Effect"
+description: "Plays atmospheric echo effects when entering cavern rooms tagged with whispering_caverns"
+tags: [room, cavern, atmosphere]
+data:
+  hook: at_enter_room
+  source: |
+    # Show echo effects in whispering cavern rooms
+    if "whispering_caverns" in (context.room.tags || []) do
+      messages = [
+        "Your footsteps echo strangely, returning a half-second late.",
+        "A faint whisper follows you into the chamber, just below hearing.",
+        "The air here is cool and still, carrying the scent of wet stone.",
+        "Somewhere deep in the rock, water drips in a steady rhythm."
+      ]
+
+      message(Enum.random(messages))
+    end
+
+    continue()

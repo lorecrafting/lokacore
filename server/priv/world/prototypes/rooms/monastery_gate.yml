@@ -4,7 +4,7 @@ type: room
 short_desc: "Monastery Gate"
 long_desc: "Ancient stone pillars mark the entrance where prayer flags snap in the mountain wind."
 extra_desc: |
-  Ancient stone pillars frame the entrance, their surfaces worn smooth by centuries. Faded prayer flags snap overhead, scattering mantras to the wind as juniper incense drifts from the monastery beyond.
+    Ancient stone pillars mark the entrance where prayer flags snap in the mountain wind.
 keywords: []
 exits:
   north: main_courtyard
@@ -20,15 +20,11 @@ tags:
   - starting_room
   - monastery
   - safe_zone
-components:
-  ambient_messages:
-    dawn:
-      - "Spring meltwater cascades down the distant slopes in silver ribbons."
-    day:
-      - "A crow lands on the ancient stone pillar, regarding you with curious eyes."
-      - "A pilgrim trudges up the path, their robes dusty from the long journey."
-      - "The scent of juniper incense wafts from beyond the gate."
-    dusk:
-      - "The first autumn frost glitters on the ancient stone pillars."
-    night:
-      - "The ancient gate stands silent beneath a canopy of stars."
+  - room
+attributes:
+  x: 0
+  y: 0
+  z: 0
+  x: 0
+  y: 0
+  z: 0

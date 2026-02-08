@@ -1,0 +1,28 @@
+key: crystal_gallery
+parent: base_room
+type: room
+short_desc: "Crystal Gallery"
+long_desc: "Thousands of quartz formations jut from every surface, splitting the dim light into prismatic shards."
+extra_desc: |
+  The crystals here have grown undisturbed for millennia. Some are
+  thin as needles, others thick as pillars. When you speak, the
+  formations hum in sympathetic resonance, carrying your words
+  forward and backward through time. The monks say this place
+  remembers every prayer ever whispered here.
+keywords: []
+exits:
+  west: cavern_pool
+spawns:
+  - prototype: whispering_crystal
+  - prototype: cave_spider
+tags:
+  - underground
+  - cavern
+  - whispering_caverns
+  - sacred
+  - offering_shrine
+  - room
+attributes:
+  x: 6
+  y: 1
+  z: -1

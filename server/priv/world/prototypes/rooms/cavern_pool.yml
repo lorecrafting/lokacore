@@ -1,0 +1,28 @@
+key: cavern_pool
+parent: base_room
+type: room
+short_desc: "Underground Pool"
+long_desc: "A still pool of dark water fills a natural basin, its surface reflecting bioluminescent moss on the ceiling."
+extra_desc: |
+  The pool water is cold and impossibly clear. Strange blind fish
+  drift below the surface, pale as bone. Bioluminescent moss
+  paints the ceiling in soft blue and green, casting the chamber
+  in ghostly light. Whispers seem to rise from the water itself.
+keywords: []
+exits:
+  south: cavern_entrance
+  east: crystal_gallery
+  down: deep_grotto
+spawns:
+  - prototype: cave_fish
+  - prototype: luminous_moss
+tags:
+  - underground
+  - cavern
+  - whispering_caverns
+  - water
+  - room
+attributes:
+  x: 5
+  y: 1
+  z: -1
