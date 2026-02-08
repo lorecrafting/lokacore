@@ -50,6 +50,10 @@ defmodule Loka.Framework.Player.GameState do
     auto_combat: false
   }
 
+  # Current schema version. Increment when JSON field structure changes.
+  # See migrate_to_version/2 for migration logic.
+  @current_schema_version 1
+
   schema "player_game_states" do
     field :player_id, :id
     # Character identity fields
@@ -67,6 +71,7 @@ defmodule Loka.Framework.Player.GameState do
     field :skills, Loka.Ecto.Json, default: @default_skills
     field :settings, Loka.Ecto.Json, default: @default_settings
     field :current_room_id, :binary_id
+    field :schema_version, :integer, default: 0
 
     timestamps(type: :utc_datetime)
   end
@@ -90,7 +95,8 @@ defmodule Loka.Framework.Player.GameState do
       :resources,
       :skills,
       :settings,
-      :current_room_id
+      :current_room_id,
+      :schema_version
     ])
     |> validate_required([:player_id])
     |> unique_constraint(:player_id)
@@ -245,50 +251,68 @@ defmodule Loka.Framework.Player.GameState do
   def character_created?(_), do: false
 
   @doc """
-  Normalizes a game state to ensure health is in resources.
+  Migrates a game state to the current schema version.
 
-  This migrates old states that have a separate `health` field to the
-  unified resources system where health is `resources.health`.
+  Runs incremental migrations from the state's current version up to
+  `@current_schema_version`. If the state was upgraded, it is persisted
+  to the database so migrations only run once per record.
 
-  ## Migration Logic
+  ## Version History
 
-  - If `resources.health` exists, use it (new format)
-  - If `health` exists but `resources.health` doesn't, copy health to resources
-  - Updates both atom and string key formats
-
-  ## Examples
-
-      # Old format
-      %GameState{health: %{current: 80, max: 100}, resources: %{mana: ...}}
-
-      # After normalization
-      %GameState{health: %{current: 80, max: 100}, resources: %{health: %{current: 80, max: 100}, mana: ...}}
+  - **0 → 1**: Migrate `health` field into `resources.health` (unified resources)
   """
   def normalize_state(nil), do: nil
 
   def normalize_state(%GameState{} = state) do
+    version = state.schema_version || 0
+
+    if version >= @current_schema_version do
+      state
+    else
+      migrated = migrate_to_current(state, version)
+
+      # Persist the migration so it doesn't run again
+      case update_state(migrated, %{
+             schema_version: @current_schema_version,
+             resources: migrated.resources
+           }) do
+        {:ok, saved} -> saved
+        {:error, _} -> migrated
+      end
+    end
+  end
+
+  defp migrate_to_current(state, version) when version >= @current_schema_version, do: state
+
+  defp migrate_to_current(state, version) do
+    state
+    |> migrate_to_version(version + 1)
+    |> Map.put(:schema_version, version + 1)
+    |> migrate_to_current(version + 1)
+  end
+
+  # Version 0 → 1: Copy health into resources.health
+  defp migrate_to_version(state, 1) do
     current_resources = state.resources || @default_resources
     current_health = state.health || @default_health
 
-    # Check if resources already has health (new format)
     has_health_in_resources =
       Map.has_key?(current_resources, :health) or Map.has_key?(current_resources, "health")
 
     if has_health_in_resources do
-      # Already normalized, just return
       state
     else
-      # Migrate: copy health into resources
-      # Normalize health to atom keys for consistency
       normalized_health = %{
         current: current_health["current"] || current_health[:current] || 100,
         max: current_health["max"] || current_health[:max] || 100
       }
 
-      new_resources = Map.put(current_resources, :health, normalized_health)
-      %{state | resources: new_resources}
+      %{state | resources: Map.put(current_resources, :health, normalized_health)}
     end
   end
+
+  # Catch-all for unknown versions (defensive)
+  defp migrate_to_version(state, _version), do: state
 
   @doc """
   Gets health from the unified resources system.

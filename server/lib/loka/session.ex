@@ -1,4 +1,6 @@
 defmodule Loka.Session do
+  use Boundary, top_level?: true, deps: [Loka.Engine], exports: :all
+
   @moduledoc """
   Unified session management for Loka players.
 

@@ -39,7 +39,7 @@ defmodule Loka.Framework.Quest.Validator do
 
   require Logger
 
-  alias Loka.Engine.PrototypeLoader
+  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
   alias Loka.Framework.Quest.{QuestRegistry, ObjectiveRegistry, ChainRegistry}
   alias Loka.Framework.Storyline.StorylineRegistry
 
@@ -307,9 +307,9 @@ defmodule Loka.Framework.Quest.Validator do
   end
 
   defp validate_room_exists(quest_id, room_key) do
-    case PrototypeLoader.get(room_key) do
+    case TypedObjectLoader.get(room_key) do
       {:ok, proto} ->
-        if proto.type == :room do
+        if proto.subtype == :room do
           []
         else
           [{:missing_target, quest_id, :go_to, room_key}]
@@ -321,7 +321,7 @@ defmodule Loka.Framework.Quest.Validator do
   end
 
   defp validate_npc_exists(quest_id, npc_key, obj_type) do
-    case PrototypeLoader.get(npc_key) do
+    case TypedObjectLoader.get(npc_key) do
       {:ok, _proto} ->
         []
 
@@ -331,7 +331,7 @@ defmodule Loka.Framework.Quest.Validator do
   end
 
   defp validate_item_exists(quest_id, item_key) do
-    case PrototypeLoader.get(item_key) do
+    case TypedObjectLoader.get(item_key) do
       {:ok, _proto} ->
         []
 
@@ -371,7 +371,7 @@ defmodule Loka.Framework.Quest.Validator do
     topic = Map.get(obj, :dialogue_topic) || Map.get(obj, "dialogue_topic")
 
     if obj_type == :talk and not is_nil(topic) and topic != "" do
-      case PrototypeLoader.get(target_id) do
+      case TypedObjectLoader.get(target_id) do
         {:ok, proto} ->
           dialogue_tree = get_dialogue_tree(proto)
 
@@ -420,7 +420,7 @@ defmodule Loka.Framework.Quest.Validator do
   defp validate_quest_giver(_quest_id, "system", _requires), do: {[], []}
 
   defp validate_quest_giver(quest_id, giver_key, requires_quest) do
-    case PrototypeLoader.get(giver_key) do
+    case TypedObjectLoader.get(giver_key) do
       {:error, :not_found} ->
         {[{:missing_quest_giver, quest_id, giver_key}], []}
 
@@ -616,7 +616,7 @@ defmodule Loka.Framework.Quest.Validator do
     item_keys = extract_item_keys(items)
 
     Enum.flat_map(item_keys, fn item_key ->
-      case PrototypeLoader.get(item_key) do
+      case TypedObjectLoader.get(item_key) do
         {:error, :not_found} ->
           [{:reward_item_not_found, quest_id, item_key}]
 

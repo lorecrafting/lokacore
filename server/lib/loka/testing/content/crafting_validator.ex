@@ -29,7 +29,7 @@ defmodule Loka.Testing.Content.CraftingValidator do
 
   require Logger
 
-  alias Loka.Engine.PrototypeLoader
+  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
 
   @type validation_result :: %{
           recipes_checked: non_neg_integer(),
@@ -264,9 +264,9 @@ defmodule Loka.Testing.Content.CraftingValidator do
         item = ingredient["item"]
 
         if item do
-          case PrototypeLoader.get(item) do
+          case TypedObjectLoader.get(item) do
             {:ok, proto} ->
-              if proto.type == :item,
+              if proto.subtype == :item,
                 do: acc,
                 else: [{:missing_ingredient, recipe_key, item} | acc]
 
@@ -287,9 +287,11 @@ defmodule Loka.Testing.Content.CraftingValidator do
         item = out["item"]
 
         if item do
-          case PrototypeLoader.get(item) do
+          case TypedObjectLoader.get(item) do
             {:ok, proto} ->
-              if proto.type == :item, do: acc, else: [{:missing_output, recipe_key, item} | acc]
+              if proto.subtype == :item,
+                do: acc,
+                else: [{:missing_output, recipe_key, item} | acc]
 
             {:error, :not_found} ->
               [{:missing_output, recipe_key, item} | acc]
@@ -305,9 +307,9 @@ defmodule Loka.Testing.Content.CraftingValidator do
   defp validate_tools(recipe_key, tools) do
     errors =
       Enum.reduce(tools, [], fn tool, acc ->
-        case PrototypeLoader.get(tool) do
+        case TypedObjectLoader.get(tool) do
           {:ok, proto} ->
-            if proto.type == :item, do: acc, else: [{:missing_tool, recipe_key, tool} | acc]
+            if proto.subtype == :item, do: acc, else: [{:missing_tool, recipe_key, tool} | acc]
 
           {:error, :not_found} ->
             [{:missing_tool, recipe_key, tool} | acc]
@@ -323,9 +325,9 @@ defmodule Loka.Testing.Content.CraftingValidator do
         item = out["item"]
 
         if item do
-          case PrototypeLoader.get(item) do
+          case TypedObjectLoader.get(item) do
             {:ok, proto} ->
-              if proto.type == :item,
+              if proto.subtype == :item,
                 do: acc,
                 else: [{:missing_failure_output, recipe_key, item} | acc]
 

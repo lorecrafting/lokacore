@@ -448,8 +448,8 @@ defmodule Loka.Framework.Quest.Progress do
         nil
 
       giver_key ->
-        case Loka.Engine.PrototypeLoader.get(giver_key) do
-          {:ok, proto} -> proto.short_desc || proto.name || humanize_key(giver_key)
+        case Loka.Engine.TypedObject.Loader.get(giver_key) do
+          {:ok, proto} -> proto.name || humanize_key(giver_key)
           _ -> humanize_key(giver_key)
         end
     end

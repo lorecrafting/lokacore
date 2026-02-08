@@ -21,7 +21,7 @@ defmodule Loka.Testing.Content.DialogueQuestChainValidator do
   alias Loka.Framework.Quest
   alias Loka.Framework.Quest.Definitions
   alias Loka.Framework.Storyline.{Storyline, StorylineRegistry}
-  alias Loka.Engine.PrototypeLoader
+  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
   alias Loka.Content
 
   @doc """
@@ -57,7 +57,7 @@ defmodule Loka.Testing.Content.DialogueQuestChainValidator do
   Validates quest chains for a specific NPC.
   """
   def validate_npc(npc_key) when is_binary(npc_key) do
-    with {:ok, npc} <- PrototypeLoader.get(npc_key) do
+    with {:ok, npc} <- TypedObjectLoader.get(npc_key) do
       dialogue = get_dialogue_tree(npc)
 
       if dialogue do
@@ -113,7 +113,7 @@ defmodule Loka.Testing.Content.DialogueQuestChainValidator do
   end
 
   defp validate_quest_giver_dialogue(quest_id, giver_key, quest_order) do
-    case PrototypeLoader.get(giver_key) do
+    case TypedObjectLoader.get(giver_key) do
       {:ok, npc} ->
         dialogue = get_dialogue_tree(npc)
 

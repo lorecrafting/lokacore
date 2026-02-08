@@ -35,7 +35,7 @@ defmodule Loka.Testing.Content.DialogueValidator do
 
   require Logger
 
-  alias Loka.Engine.PrototypeLoader
+  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
   alias Loka.Framework.Quest.QuestRegistry
 
   @type validation_result :: %{
@@ -105,13 +105,13 @@ defmodule Loka.Testing.Content.DialogueValidator do
   def validate do
     # Get all NPC prototypes with dialogue
     npcs_with_dialogue =
-      PrototypeLoader.list_by_type(:npc)
+      TypedObjectLoader.list_by_type(:entity, :npc)
       |> Enum.filter(&has_dialogue?/1)
 
     # Also check non-NPC prototypes that might have dialogue (shops, etc)
     other_with_dialogue =
-      PrototypeLoader.all()
-      |> Enum.reject(fn p -> p.type == :npc end)
+      TypedObjectLoader.all()
+      |> Enum.reject(fn p -> p.subtype == :npc end)
       |> Enum.filter(&has_dialogue?/1)
 
     all_with_dialogue = npcs_with_dialogue ++ other_with_dialogue
@@ -150,7 +150,7 @@ defmodule Loka.Testing.Content.DialogueValidator do
   """
   @spec validate_npc(String.t()) :: {:ok, {[error()], [warning()]}} | {:error, atom()}
   def validate_npc(npc_key) do
-    case PrototypeLoader.get(npc_key) do
+    case TypedObjectLoader.get(npc_key) do
       {:error, :not_found} ->
         {:error, :not_found}
 
@@ -393,14 +393,14 @@ defmodule Loka.Testing.Content.DialogueValidator do
   end
 
   defp validate_action_args(npc_key, node_id, "give_item", [item_id | _], _quest_ids) do
-    case PrototypeLoader.get(item_id) do
+    case TypedObjectLoader.get(item_id) do
       {:ok, _} -> {[], []}
       {:error, :not_found} -> {[{:missing_item, npc_key, node_id, item_id}], []}
     end
   end
 
   defp validate_action_args(npc_key, node_id, "take_item", [item_id | _], _quest_ids) do
-    case PrototypeLoader.get(item_id) do
+    case TypedObjectLoader.get(item_id) do
       {:ok, _} -> {[], []}
       {:error, :not_found} -> {[{:missing_item, npc_key, node_id, item_id}], []}
     end
@@ -442,7 +442,7 @@ defmodule Loka.Testing.Content.DialogueValidator do
           end
 
         "has_item" ->
-          case PrototypeLoader.get(value) do
+          case TypedObjectLoader.get(value) do
             {:ok, _} -> {[], []}
             {:error, :not_found} -> {[{:missing_item, npc_key, node_id, value}], []}
           end

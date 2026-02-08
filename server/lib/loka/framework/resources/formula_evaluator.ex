@@ -48,17 +48,19 @@ defmodule Loka.Framework.Resources.FormulaEvaluator do
   Returns `{:ok, result}` or `{:error, reason}`.
   """
   def evaluate(formula, bindings) when is_binary(formula) and is_map(bindings) do
-    # Normalize bindings to atom keys
+    # Normalize bindings to atom keys (outside error handling so invalid
+    # bindings raise naturally, matching previous behavior)
     normalized_bindings = normalize_bindings(bindings)
 
-    try do
-      tokens = tokenize(formula)
-      {result, []} = parse_expression(tokens, normalized_bindings)
+    with {:ok, tokens} <- tokenize(formula),
+         {:ok, result, []} <- parse_expression(tokens, normalized_bindings) do
       {:ok, trunc(result)}
-    rescue
-      e -> {:error, {:evaluation_error, Exception.message(e)}}
-    catch
-      :throw, {:parse_error, reason} -> {:error, {:parse_error, reason}}
+    else
+      {:ok, _result, _remaining} ->
+        {:error, {:parse_error, "unexpected tokens after expression"}}
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 
@@ -85,11 +87,19 @@ defmodule Loka.Framework.Resources.FormulaEvaluator do
     |> String.trim()
     |> String.graphemes()
     |> tokenize_chars([])
-    |> Enum.reverse()
-    |> Enum.reject(&(&1 == :whitespace))
+    |> case do
+      {:ok, tokens} ->
+        {:ok,
+         tokens
+         |> Enum.reverse()
+         |> Enum.reject(&(&1 == :whitespace))}
+
+      {:error, _} = error ->
+        error
+    end
   end
 
-  defp tokenize_chars([], tokens), do: tokens
+  defp tokenize_chars([], tokens), do: {:ok, tokens}
 
   defp tokenize_chars([" " | rest], tokens) do
     tokenize_chars(rest, [:whitespace | tokens])
@@ -134,7 +144,7 @@ defmodule Loka.Framework.Resources.FormulaEvaluator do
         tokenize_chars(remaining, [{:var, var} | tokens])
 
       true ->
-        throw({:parse_error, "unexpected character: #{c}"})
+        {:error, {:parse_error, "unexpected character: #{c}"}}
     end
   end
 
@@ -166,44 +176,50 @@ defmodule Loka.Framework.Resources.FormulaEvaluator do
 
   # Expression: Term (('+' | '-') Term)*
   defp parse_expression(tokens, bindings) do
-    {left, rest} = parse_term(tokens, bindings)
-    parse_expression_rest(left, rest, bindings)
+    with {:ok, left, rest} <- parse_term(tokens, bindings) do
+      parse_expression_rest(left, rest, bindings)
+    end
   end
 
   defp parse_expression_rest(left, [{:op, :+} | rest], bindings) do
-    {right, remaining} = parse_term(rest, bindings)
-    parse_expression_rest(left + right, remaining, bindings)
+    with {:ok, right, remaining} <- parse_term(rest, bindings) do
+      parse_expression_rest(left + right, remaining, bindings)
+    end
   end
 
   defp parse_expression_rest(left, [{:op, :-} | rest], bindings) do
-    {right, remaining} = parse_term(rest, bindings)
-    parse_expression_rest(left - right, remaining, bindings)
+    with {:ok, right, remaining} <- parse_term(rest, bindings) do
+      parse_expression_rest(left - right, remaining, bindings)
+    end
   end
 
-  defp parse_expression_rest(left, rest, _bindings), do: {left, rest}
+  defp parse_expression_rest(left, rest, _bindings), do: {:ok, left, rest}
 
   # Term: Factor (('*' | '/') Factor)*
   defp parse_term(tokens, bindings) do
-    {left, rest} = parse_factor(tokens, bindings)
-    parse_term_rest(left, rest, bindings)
+    with {:ok, left, rest} <- parse_factor(tokens, bindings) do
+      parse_term_rest(left, rest, bindings)
+    end
   end
 
   defp parse_term_rest(left, [{:op, :*} | rest], bindings) do
-    {right, remaining} = parse_factor(rest, bindings)
-    parse_term_rest(left * right, remaining, bindings)
+    with {:ok, right, remaining} <- parse_factor(rest, bindings) do
+      parse_term_rest(left * right, remaining, bindings)
+    end
   end
 
   defp parse_term_rest(left, [{:op, :/} | rest], bindings) do
-    {right, remaining} = parse_factor(rest, bindings)
-    # Avoid division by zero
-    divisor = if right == 0, do: 1, else: right
-    parse_term_rest(left / divisor, remaining, bindings)
+    with {:ok, right, remaining} <- parse_factor(rest, bindings) do
+      # Avoid division by zero
+      divisor = if right == 0, do: 1, else: right
+      parse_term_rest(left / divisor, remaining, bindings)
+    end
   end
 
-  defp parse_term_rest(left, rest, _bindings), do: {left, rest}
+  defp parse_term_rest(left, rest, _bindings), do: {:ok, left, rest}
 
-  # Factor: Number | Variable | '(' Expression ')'
-  defp parse_factor([{:number, n} | rest], _bindings), do: {n, rest}
+  # Factor: Number | Variable | '(' Expression ')' | '-' Factor
+  defp parse_factor([{:number, n} | rest], _bindings), do: {:ok, n, rest}
 
   defp parse_factor([{:var, name} | rest], bindings) do
     # Look up variable using safe atom conversion, default to 0 if not found
@@ -213,30 +229,31 @@ defmodule Loka.Framework.Resources.FormulaEvaluator do
         key -> Map.get(bindings, key, 0)
       end
 
-    {value, rest}
+    {:ok, value, rest}
   end
 
   defp parse_factor([:lparen | rest], bindings) do
-    {value, remaining} = parse_expression(rest, bindings)
-
-    case remaining do
-      [:rparen | after_paren] -> {value, after_paren}
-      _ -> throw({:parse_error, "expected closing parenthesis"})
+    with {:ok, value, remaining} <- parse_expression(rest, bindings) do
+      case remaining do
+        [:rparen | after_paren] -> {:ok, value, after_paren}
+        _ -> {:error, {:parse_error, "expected closing parenthesis"}}
+      end
     end
   end
 
   # Handle unary minus
   defp parse_factor([{:op, :-} | rest], bindings) do
-    {value, remaining} = parse_factor(rest, bindings)
-    {-value, remaining}
+    with {:ok, value, remaining} <- parse_factor(rest, bindings) do
+      {:ok, -value, remaining}
+    end
   end
 
   defp parse_factor([], _bindings) do
-    throw({:parse_error, "unexpected end of expression"})
+    {:error, {:parse_error, "unexpected end of expression"}}
   end
 
   defp parse_factor([token | _], _bindings) do
-    throw({:parse_error, "unexpected token: #{inspect(token)}"})
+    {:error, {:parse_error, "unexpected token: #{inspect(token)}"}}
   end
 
   # =============================================================================

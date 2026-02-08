@@ -1,17 +1,11 @@
 defmodule Loka.Engine.WorldLoaderTest do
   use Loka.DataCase, async: false
 
-  alias Loka.Engine.{WorldLoader, PrototypeLoader, Entities}
-
-  @default_prototypes_path "priv/world/prototypes"
+  alias Loka.Engine.{WorldLoader, Entities}
 
   setup do
     # Clear any existing entities
     Entities.delete_all()
-
-    # Explicitly load from default path to avoid test contamination
-    # (other tests may have called load_from with test fixture paths)
-    PrototypeLoader.load_from(@default_prototypes_path)
 
     :ok
   end

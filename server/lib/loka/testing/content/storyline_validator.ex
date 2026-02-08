@@ -29,7 +29,7 @@ defmodule Loka.Testing.Content.StorylineValidator do
 
   require Logger
 
-  alias Loka.Engine.PrototypeLoader
+  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
   alias Loka.Framework.Quest.QuestRegistry
 
   @type validation_result :: %{
@@ -219,9 +219,9 @@ defmodule Loka.Testing.Content.StorylineValidator do
   end
 
   defp validate_starting_room(storyline_key, room_key) do
-    case PrototypeLoader.get(room_key) do
+    case TypedObjectLoader.get(room_key) do
       {:ok, proto} ->
-        if proto.type == :room do
+        if proto.subtype == :room do
           {[], []}
         else
           {[{:missing_starting_room, storyline_key, room_key}], []}

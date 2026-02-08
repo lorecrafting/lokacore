@@ -31,7 +31,7 @@ defmodule Loka.Testing.Content.UIValidator do
 
   require Logger
 
-  alias Loka.Engine.PrototypeLoader
+  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
   alias Loka.Framework.Quest.QuestRegistry
 
   @type validation_result :: %{
@@ -59,10 +59,10 @@ defmodule Loka.Testing.Content.UIValidator do
   """
   @spec validate() :: {:ok, validation_result()}
   def validate do
-    prototypes = PrototypeLoader.all()
+    prototypes = TypedObjectLoader.all()
 
-    npcs = Enum.filter(prototypes, fn p -> p.type == "npc" or p.type == :npc end)
-    items = Enum.filter(prototypes, fn p -> p.type == "item" or p.type == :item end)
+    npcs = Enum.filter(prototypes, fn p -> p.subtype == "npc" or p.subtype == :npc end)
+    items = Enum.filter(prototypes, fn p -> p.subtype == "item" or p.subtype == :item end)
 
     npc_results = Enum.flat_map(npcs, &validate_npc/1)
     item_results = Enum.flat_map(items, &validate_item/1)
@@ -119,7 +119,7 @@ defmodule Loka.Testing.Content.UIValidator do
         invalid_sells =
           sells
           |> Enum.reject(fn item_key ->
-            case PrototypeLoader.get(item_key) do
+            case TypedObjectLoader.get(item_key) do
               {:ok, _} -> true
               _ -> false
             end
@@ -134,7 +134,7 @@ defmodule Loka.Testing.Content.UIValidator do
         invalid_buys =
           buys
           |> Enum.reject(fn item_key ->
-            case PrototypeLoader.get(item_key) do
+            case TypedObjectLoader.get(item_key) do
               {:ok, _} -> true
               _ -> false
             end

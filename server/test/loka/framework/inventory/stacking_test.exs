@@ -2,6 +2,13 @@ defmodule Loka.Framework.Inventory.StackingTest do
   use Loka.DataCase
 
   alias Loka.Framework.Inventory.Stacking
+  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
+
+  setup do
+    # Ensure production prototypes are loaded (other tests may reload during parallel execution)
+    TypedObjectLoader.reload()
+    :ok
+  end
 
   # =============================================================================
   # group_items/1 Tests

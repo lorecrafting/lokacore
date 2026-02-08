@@ -7,11 +7,11 @@
 
 alias Loka.Engine.Entity
 alias Loka.Engine.Entities
-alias Loka.Engine.PrototypeLoader
+alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
 alias Loka.Engine.Spawner
 
 # Ensure prototypes are loaded
-PrototypeLoader.load_all()
+TypedObjectLoader.reload()
 
 IO.puts("\n=== Entity System Benchmarks ===\n")
 

@@ -34,7 +34,7 @@ defmodule Loka.Testing.Content.PrototypeLinter do
 
   require Logger
 
-  alias Loka.Engine.PrototypeLoader
+  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
 
   @type lint_result :: %{
           files_checked: non_neg_integer(),
@@ -127,7 +127,7 @@ defmodule Loka.Testing.Content.PrototypeLinter do
   """
   @spec lint() :: {:ok, lint_result()}
   def lint do
-    all_prototypes = PrototypeLoader.all()
+    all_prototypes = TypedObjectLoader.list_by_type(:entity)
 
     {errors, warnings} =
       Enum.reduce(all_prototypes, {[], []}, fn proto, {errs, warns} ->
@@ -156,7 +156,7 @@ defmodule Loka.Testing.Content.PrototypeLinter do
   """
   @spec lint_prototype(String.t()) :: {:ok, {[error()], [warning()]}} | {:error, :not_found}
   def lint_prototype(key) do
-    case PrototypeLoader.get(key) do
+    case TypedObjectLoader.get(key) do
       {:error, :not_found} ->
         {:error, :not_found}
 
@@ -247,11 +247,15 @@ defmodule Loka.Testing.Content.PrototypeLinter do
 
   defp check_type(key, proto, errors, warnings) do
     cond do
-      is_nil(proto.type) ->
+      # Base prototypes in _base/ directory have nil subtype by design
+      is_nil(proto.subtype) and String.starts_with?(proto.key || "", "base_") ->
+        {errors, warnings}
+
+      is_nil(proto.subtype) ->
         {[{:missing_type, key, proto.key || "unknown"} | errors], warnings}
 
-      proto.type not in @valid_types ->
-        {[{:invalid_type, key, proto.key || "unknown", proto.type} | errors], warnings}
+      proto.subtype not in @valid_types ->
+        {[{:invalid_type, key, proto.key || "unknown", proto.subtype} | errors], warnings}
 
       true ->
         {errors, warnings}
@@ -259,10 +263,10 @@ defmodule Loka.Testing.Content.PrototypeLinter do
   end
 
   defp check_parent(key, proto, errors, warnings) do
-    if proto.parent do
-      case PrototypeLoader.get(proto.parent) do
+    if proto.parent_key do
+      case TypedObjectLoader.get(proto.parent_key) do
         {:error, :not_found} ->
-          {[{:invalid_parent, key, proto.parent} | errors], warnings}
+          {[{:invalid_parent, key, proto.parent_key} | errors], warnings}
 
         {:ok, _} ->
           {errors, warnings}
@@ -307,7 +311,7 @@ defmodule Loka.Testing.Content.PrototypeLinter do
   end
 
   defp check_description(key, proto, errors, warnings) do
-    if is_nil(proto.extra_desc) or proto.extra_desc == "" do
+    if is_nil(proto.extra_description) or proto.extra_description == "" do
       # Only warn for non-base prototypes
       if not String.starts_with?(proto.key || "", "base_") do
         {errors, [{:empty_description, key, proto.key || "unknown"} | warnings]}
@@ -325,17 +329,20 @@ defmodule Loka.Testing.Content.PrototypeLinter do
     # Only check for types that are displayed in rooms
     displayable_types = [:npc, :item]
 
+    primary_keyword =
+      Map.get(proto.data, "primary_keyword") || Map.get(proto.data, :primary_keyword)
+
     cond do
       # Skip if not a displayable type
-      proto.type not in displayable_types ->
+      proto.subtype not in displayable_types ->
         {errors, warnings}
 
       # Skip if no primary_keyword
-      is_nil(proto.primary_keyword) or proto.primary_keyword == "" ->
+      is_nil(primary_keyword) or primary_keyword == "" ->
         {errors, warnings}
 
       # Skip if no long_desc
-      is_nil(proto.long_desc) or proto.long_desc == "" ->
+      is_nil(proto.description) or proto.description == "" ->
         {errors, warnings}
 
       # Skip base prototypes
@@ -344,15 +351,15 @@ defmodule Loka.Testing.Content.PrototypeLinter do
 
       # Check if primary_keyword appears in long_desc (case insensitive)
       true ->
-        long_desc_lower = String.downcase(proto.long_desc)
-        keyword_lower = String.downcase(proto.primary_keyword)
+        long_desc_lower = String.downcase(proto.description)
+        keyword_lower = String.downcase(primary_keyword)
 
         if String.contains?(long_desc_lower, keyword_lower) do
           {errors, warnings}
         else
           warning =
-            {:primary_keyword_not_in_long_desc, key, proto.key || "unknown",
-             proto.primary_keyword, proto.long_desc}
+            {:primary_keyword_not_in_long_desc, key, proto.key || "unknown", primary_keyword,
+             proto.description}
 
           {errors, [warning | warnings]}
         end

@@ -16,7 +16,7 @@ defmodule Mix.Tasks.Loka.SyncDescriptions do
   use Mix.Task
 
   alias Loka.Engine.Entities
-  alias Loka.Engine.PrototypeLoader
+  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
 
   @shortdoc "Sync description fields from prototypes to entities"
 
@@ -24,7 +24,7 @@ defmodule Mix.Tasks.Loka.SyncDescriptions do
   def run(args) do
     dry_run = "--dry-run" in args
 
-    # Start the application to get access to Repo and PrototypeLoader
+    # Start the application to get access to Repo and TypedObjectLoader
     Mix.Task.run("app.start")
 
     if dry_run do
@@ -32,7 +32,7 @@ defmodule Mix.Tasks.Loka.SyncDescriptions do
     end
 
     # Get all prototypes
-    prototypes = PrototypeLoader.all()
+    prototypes = TypedObjectLoader.all()
 
     Mix.shell().info("Found #{length(prototypes)} prototypes\n")
 
@@ -95,8 +95,8 @@ defmodule Mix.Tasks.Loka.SyncDescriptions do
     changes = %{}
 
     changes =
-      if proto.long_desc && proto.long_desc != "" && entity.long_desc != proto.long_desc do
-        Map.put(changes, :long_desc, {entity.long_desc, proto.long_desc})
+      if proto.description && proto.description != "" && entity.long_desc != proto.description do
+        Map.put(changes, :long_desc, {entity.long_desc, proto.description})
       else
         changes
       end

@@ -20,7 +20,7 @@ defmodule Loka.Engine.PluginLoader do
      a. Start children via PluginSupervisor
      b. Add validators to ContentValidator config
      c. Add scripting extensions to Scripting config
-     d. Load prototype paths into PrototypeLoader
+     d. Load prototype paths into TypedObject.Loader
      e. Merge balance config
   5. After all plugins loaded, register hooks and call init/0 on each
 
@@ -40,7 +40,8 @@ defmodule Loka.Engine.PluginLoader do
   use GenServer
   require Logger
 
-  alias Loka.Engine.{Hooks, PrototypeLoader, PluginSupervisor}
+  alias Loka.Engine.{Hooks, PluginSupervisor}
+  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
   alias Loka.Config.Balance
 
   @default_ets_table :loka_plugins
@@ -509,7 +510,7 @@ defmodule Loka.Engine.PluginLoader do
     paths = safe_call(plugin_module, :prototype_paths, [])
 
     Enum.each(paths, fn path ->
-      case PrototypeLoader.load_from(path) do
+      case TypedObjectLoader.load_from(path) do
         :ok ->
           :ok
 

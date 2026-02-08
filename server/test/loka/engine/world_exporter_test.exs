@@ -1,14 +1,13 @@
 defmodule Loka.Engine.WorldExporterTest do
   use Loka.DataCase, async: false
 
-  alias Loka.Engine.{WorldExporter, WorldLoader, PrototypeLoader, Entities, Entity}
+  alias Loka.Engine.{WorldExporter, WorldLoader, Entities, Entity}
 
   setup do
     # Clear any existing entities
     Entities.delete_all()
 
-    # Reload prototypes and spawn a world using production starting room
-    PrototypeLoader.reload()
+    # Spawn a world using production starting room
     WorldLoader.spawn_world(starting_room: "monastery_gate")
 
     # Create a temp directory for exports

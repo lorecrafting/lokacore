@@ -317,7 +317,7 @@ defmodule Loka.Engine.ZoneLoader do
 
   defp do_validate_all(zones) do
     # Validate that rooms and prototypes referenced in zones exist
-    # This requires access to PrototypeLoader, which we'll check at reset time
+    # This requires access to TypedObject.Loader, which we'll check at reset time
     # For now, just validate the zone structs themselves
     zones
     |> Map.values()

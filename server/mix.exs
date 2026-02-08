@@ -10,7 +10,7 @@ defmodule Loka.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
-      compilers: [:phoenix_live_view] ++ Mix.compilers(),
+      compilers: [:boundary, :phoenix_live_view] ++ Mix.compilers(),
       listeners: [Phoenix.CodeReloader],
 
       # ExDoc configuration
@@ -35,8 +35,7 @@ defmodule Loka.MixProject do
         # Engine Core
         "Engine - Core":
           ~r/^Loka\.Engine\.(Entity|Entities|EntityServer|EntityRegistry|EntitySupervisor)$/,
-        "Engine - Prototypes":
-          ~r/^Loka\.Engine\.(Prototype|PrototypeLoader|Spawner|WorldLoader|WorldExporter)$/,
+        "Engine - Prototypes": ~r/^Loka\.Engine\.(Spawner|WorldLoader|WorldExporter)$/,
         "Engine - Systems":
           ~r/^Loka\.Engine\.(Event|EventBus|Command|Behavior|Hooks|Locks|Scripting|Scripts)$/,
         "Engine - Schema": ~r/^Loka\.Engine\.Schema/,
@@ -165,9 +164,9 @@ defmodule Loka.MixProject do
       # Performance benchmarking
       {:benchee, "~> 1.3", only: [:dev, :test]},
 
-      # Architecture boundary enforcement (available but not in compiler chain)
-      # Use `mix boundary.visualize` for layer analysis
-      {:boundary, "~> 0.10", runtime: false, only: [:dev]},
+      # Architecture boundary enforcement (compile-time layer checking)
+      # See Loka module and Loka.Engine/Framework/Content/Session for boundary defs
+      {:boundary, "~> 0.10", runtime: false},
 
       # Static code analysis
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false}

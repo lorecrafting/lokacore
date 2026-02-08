@@ -62,7 +62,7 @@ defmodule Loka.Testing.Quest.QuestTester do
   alias Loka.Admin.GameLog
   alias Loka.Framework.Player.GameState
   alias Loka.Framework.Storyline.StorylineRegistry
-  alias Loka.Engine.PrototypeLoader
+  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
 
   @default_max_steps 500
 
@@ -390,7 +390,7 @@ defmodule Loka.Testing.Quest.QuestTester do
       quest_def.objectives
       |> Enum.filter(&(&1.type in [:go_to, :kill, :get_item]))
       |> Enum.reduce([], fn obj, acc ->
-        case PrototypeLoader.get(obj.target_id) do
+        case TypedObjectLoader.get(obj.target_id) do
           {:ok, _proto} ->
             acc
 
@@ -408,12 +408,14 @@ defmodule Loka.Testing.Quest.QuestTester do
 
   defp validate_giver_dialogue(quest_def) do
     if quest_def.giver do
-      case PrototypeLoader.get(quest_def.giver) do
+      case TypedObjectLoader.get(quest_def.giver) do
         {:error, :not_found} ->
           {:error, {:giver_not_found, quest_def.giver}}
 
         {:ok, proto} ->
-          if Map.get(proto, "dialogue_tree") || Map.get(proto, :dialogue_tree) do
+          components = proto.components || %{}
+
+          if Map.get(components, "dialogue_tree") || Map.get(components, :dialogue_tree) do
             :ok
           else
             {:error, {:giver_no_dialogue, quest_def.giver}}
@@ -526,7 +528,7 @@ defmodule Loka.Testing.Quest.QuestTester do
     # Check if target exists
     issues =
       if obj_def.type in [:kill, :get_item, :go_to] do
-        case PrototypeLoader.get(obj_def.target_id) do
+        case TypedObjectLoader.get(obj_def.target_id) do
           {:ok, _proto} ->
             issues
 

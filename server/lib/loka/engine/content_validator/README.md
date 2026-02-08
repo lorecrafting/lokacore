@@ -55,7 +55,7 @@ Contains domain-specific validators that understand game semantics:
 The Framework layer provides:
 1. **Domain knowledge** - Understanding of quests, dialogue, NPCs, etc.
 2. **Cross-system validation** - Checking that quests reference valid NPCs, etc.
-3. **Depends on Framework systems** - Needs QuestRegistry, PrototypeLoader, etc.
+3. **Depends on Framework systems** - Needs QuestRegistry, TypedObject.Loader, etc.
 
 ## Layer Dependency Rules
 

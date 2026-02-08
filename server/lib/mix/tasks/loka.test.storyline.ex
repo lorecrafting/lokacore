@@ -56,7 +56,8 @@ defmodule Mix.Tasks.Loka.Test.Storyline do
 
   alias Loka.Framework.Storyline.{Storyline, StorylineRegistry}
   alias Loka.Framework.Quest
-  alias Loka.Engine.{PrototypeLoader, WorldLoader}
+  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
+  alias Loka.Engine.WorldLoader
   alias Loka.Testing.Bot.BotSupervisor
   alias Loka.Testing.Bot.Strategies.StorylineRunner
 
@@ -303,7 +304,7 @@ defmodule Mix.Tasks.Loka.Test.Storyline do
 
     if storyline.starting_room do
       # Check if prototype exists
-      case PrototypeLoader.get(storyline.starting_room) do
+      case TypedObjectLoader.get(storyline.starting_room) do
         {:error, :not_found} ->
           %{
             results

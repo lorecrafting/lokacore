@@ -116,7 +116,12 @@ defmodule Loka.Engine.TypedObject.Registry do
 
     @type_index
     |> :ets.lookup(type_key)
-    |> Enum.map(fn {_, key} -> get!(key) end)
+    |> Enum.flat_map(fn {_, key} ->
+      case get(key) do
+        {:ok, obj} -> [obj]
+        {:error, :not_found} -> []
+      end
+    end)
   end
 
   @doc """
@@ -126,7 +131,12 @@ defmodule Loka.Engine.TypedObject.Registry do
   def list_by_tag(tag) when is_binary(tag) do
     @tag_index
     |> :ets.lookup(tag)
-    |> Enum.map(fn {_, key} -> get!(key) end)
+    |> Enum.flat_map(fn {_, key} ->
+      case get(key) do
+        {:ok, obj} -> [obj]
+        {:error, :not_found} -> []
+      end
+    end)
   end
 
   @doc """
@@ -187,6 +197,14 @@ defmodule Loka.Engine.TypedObject.Registry do
   @spec exists?(String.t()) :: boolean()
   def exists?(key) when is_binary(key) do
     :ets.member(@table, key)
+  end
+
+  @doc """
+  Returns all keys in the registry.
+  """
+  @spec all_keys() :: [String.t()]
+  def all_keys do
+    :ets.select(@table, [{{:"$1", :_}, [], [:"$1"]}])
   end
 
   @doc """

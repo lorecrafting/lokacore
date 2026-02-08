@@ -2,7 +2,7 @@ defmodule Loka.Engine.TypedObject.Loader do
   @moduledoc """
   Unified loader for all TypedObject types.
 
-  Replaces PrototypeLoader with support for all content types:
+  Unified loader for all content types:
   - Entities (npcs, rooms, items, exits)
   - Content types (quests, dialogues, scripts, zones)
 
@@ -133,11 +133,21 @@ defmodule Loka.Engine.TypedObject.Loader do
   end
 
   @doc """
-  Loads TypedObjects from a specific path.
+  Loads TypedObjects from a specific path (replaces all existing content).
   """
   @spec load_from(String.t()) :: :ok | {:error, term()}
   def load_from(path, server \\ __MODULE__) when is_binary(path) do
     GenServer.call(server, {:load_from, path})
+  end
+
+  @doc """
+  Merges TypedObjects from a specific path into existing content.
+  Unlike `load_from/1`, this does NOT clear the registry first.
+  Useful for tests that need to add test fixtures on top of production content.
+  """
+  @spec merge_from(String.t()) :: :ok | {:error, term()}
+  def merge_from(path, server \\ __MODULE__) when is_binary(path) do
+    GenServer.call(server, {:merge_from, path})
   end
 
   @doc """
@@ -205,6 +215,18 @@ defmodule Loka.Engine.TypedObject.Loader do
   end
 
   @impl true
+  def handle_call({:merge_from, path}, _from, state) do
+    case do_merge_path(path) do
+      {:ok, count} ->
+        Logger.info("TypedObject.Loader merged #{count} objects from #{path}")
+        {:reply, :ok, state}
+
+      {:error, errors} ->
+        {:reply, {:error, errors}, state}
+    end
+  end
+
+  @impl true
   def handle_call(:validate_all, _from, state) do
     errors = do_validate_all(state.raw_objects)
     result = if Enum.empty?(errors), do: :ok, else: {:error, errors}
@@ -214,6 +236,27 @@ defmodule Loka.Engine.TypedObject.Loader do
   # =============================================================================
   # Private Implementation
   # =============================================================================
+
+  defp do_merge_path(path) do
+    full_path = resolve_path(path)
+
+    unless File.exists?(full_path) do
+      {:error, [{full_path, ["path does not exist"]}]}
+    else
+      yaml_files = find_yaml_files(full_path)
+      {raw_objects, _parse_errors} = parse_yaml_files(yaml_files)
+
+      case resolve_all_parents(raw_objects) do
+        {:ok, resolved} ->
+          # Merge into existing registry without clearing
+          Registry.put_all(resolved)
+          {:ok, map_size(resolved)}
+
+        {:error, errors} ->
+          {:error, errors}
+      end
+    end
+  end
 
   defp do_load_all_paths(state, paths) do
     # Collect YAML files from all paths
@@ -237,7 +280,7 @@ defmodule Loka.Engine.TypedObject.Loader do
       # Parse all files into raw TypedObjects
       {raw_objects, parse_errors} = parse_yaml_files(yaml_files)
 
-      # Log parse errors but continue loading valid files (like PrototypeLoader)
+      # Log parse errors but continue loading valid files
       if Enum.any?(parse_errors) do
         Logger.warning(
           "TypedObject.Loader: #{length(parse_errors)} files had errors: #{inspect(parse_errors)}"
@@ -247,9 +290,15 @@ defmodule Loka.Engine.TypedObject.Loader do
       # Resolve parent inheritance
       case resolve_all_parents(raw_objects) do
         {:ok, resolved} ->
-          # Clear and update registry
-          Registry.clear()
+          # Atomic swap: put all new entries first, then remove stale ones.
+          # This avoids a window where the registry is empty during reload.
+          old_keys = MapSet.new(Registry.all_keys())
           Registry.put_all(resolved)
+          new_keys = MapSet.new(Map.keys(resolved))
+
+          old_keys
+          |> MapSet.difference(new_keys)
+          |> Enum.each(&Registry.delete/1)
 
           Logger.info("TypedObject.Loader loaded #{map_size(resolved)} objects")
           {:ok, %{state | raw_objects: raw_objects, load_errors: parse_errors}}

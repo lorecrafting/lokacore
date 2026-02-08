@@ -1,47 +1,27 @@
 defmodule Loka.Engine.SpawnerTest do
   use Loka.DataCase, async: false
 
-  alias Loka.Engine.{Spawner, PrototypeLoader, Entities, Entity}
+  alias Loka.Engine.{Spawner, Entities, Entity}
+  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
 
   @test_fixtures_path "test/support/fixtures/prototypes"
 
-  @default_prototypes_path "priv/world/prototypes"
-
   setup do
-    # Start a fresh loader for each test with a unique name
-    loader_name = :"spawner_loader_#{System.unique_integer([:positive])}"
-
-    {:ok, loader_pid} =
-      PrototypeLoader.start_link(
-        name: loader_name,
-        path: @test_fixtures_path,
-        load_on_start: true
-      )
-
-    # Replace the default PrototypeLoader with our test one
-    # We need to start the default one for the Spawner to use
-    if Process.whereis(PrototypeLoader) == nil do
+    # Merge test fixtures into the existing loader without clearing production content.
+    # Using merge_from instead of load_from avoids clearing the registry,
+    # which would cause flaky failures in concurrent async tests.
+    if Process.whereis(TypedObjectLoader) do
+      TypedObjectLoader.merge_from(@test_fixtures_path)
+    else
       {:ok, _} =
-        PrototypeLoader.start_link(
-          name: PrototypeLoader,
-          path: @test_fixtures_path,
+        TypedObjectLoader.start_link(
+          name: TypedObjectLoader,
+          paths: [@test_fixtures_path],
           load_on_start: true
         )
-    else
-      # Reload the test fixtures
-      PrototypeLoader.load_from(@test_fixtures_path)
     end
 
-    on_exit(fn ->
-      if Process.alive?(loader_pid), do: GenServer.stop(loader_pid)
-      # Restore the default PrototypeLoader to use production prototypes
-      # so other tests don't get test fixtures instead
-      if Process.whereis(PrototypeLoader) do
-        PrototypeLoader.load_from(@default_prototypes_path)
-      end
-    end)
-
-    {:ok, loader: loader_name}
+    :ok
   end
 
   describe "spawn/2" do
@@ -88,7 +68,7 @@ defmodule Loka.Engine.SpawnerTest do
           components: %{"combatant" => %{"level" => 10}}
         )
 
-      # Components are deep-merged via Prototype.to_entity
+      # Components are deep-merged from prototype
       assert entity.components["combatant"]["level"] == 10
     end
 
@@ -105,7 +85,7 @@ defmodule Loka.Engine.SpawnerTest do
     test "spawns entity with tag override" do
       {:ok, entity} = Spawner.spawn("goblin", tags: ["elite"])
 
-      # Tags are appended via Prototype.to_entity
+      # Tags are appended from prototype
       assert "elite" in entity.tags
     end
 

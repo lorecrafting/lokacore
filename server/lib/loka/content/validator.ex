@@ -111,6 +111,8 @@ defmodule Loka.Content.Validator do
           warnings: [validation_message]
         }
 
+  alias Loka.Engine.TypedObject
+
   @type content_type :: :quest | :npc | :room | :storyline
 
   @doc """
@@ -304,23 +306,23 @@ defmodule Loka.Content.Validator do
     if is_nil(target_id) or target_id == "" do
       {[], []}
     else
-      case {obj_type, Loka.Engine.PrototypeLoader.get(target_id)} do
-        {_, nil} ->
+      case {obj_type, TypedObject.Loader.get(target_id)} do
+        {_, {:error, :not_found}} ->
           {[
              {"#{prefix}.target_id", "Target '#{target_id}' not found",
               "Create the prototype first or fix the target_id"}
            ], []}
 
-        {"go_to", proto} ->
+        {"go_to", {:ok, proto}} ->
           validate_go_to_target(proto, target_id, prefix)
 
-        {"talk", proto} ->
+        {"talk", {:ok, proto}} ->
           validate_talk_target(proto, target_id, prefix)
 
-        {"kill", proto} ->
+        {"kill", {:ok, proto}} ->
           validate_kill_target(proto, target_id, prefix)
 
-        {"get_item", proto} ->
+        {"get_item", {:ok, proto}} ->
           validate_get_item_target(proto, target_id, prefix)
 
         _ ->
@@ -330,7 +332,7 @@ defmodule Loka.Content.Validator do
   end
 
   defp validate_go_to_target(proto, target_id, prefix) do
-    if proto.type == :room do
+    if proto.subtype == :room do
       # Check if room is reachable (warning)
       warnings =
         if room_is_reachable?(target_id) do
@@ -345,14 +347,14 @@ defmodule Loka.Content.Validator do
       {[], warnings}
     else
       {[
-         {"#{prefix}.target_id", "'#{target_id}' is not a room (type: #{proto.type})",
+         {"#{prefix}.target_id", "'#{target_id}' is not a room (type: #{proto.subtype})",
           "go_to objectives require a room target"}
        ], []}
     end
   end
 
   defp validate_talk_target(proto, target_id, prefix) do
-    if proto.type == :npc do
+    if proto.subtype == :npc do
       errors =
         if has_dialogue_tree?(proto) do
           []
@@ -377,14 +379,14 @@ defmodule Loka.Content.Validator do
       {errors, warnings}
     else
       {[
-         {"#{prefix}.target_id", "'#{target_id}' is not an NPC (type: #{proto.type})",
+         {"#{prefix}.target_id", "'#{target_id}' is not an NPC (type: #{proto.subtype})",
           "talk objectives require an NPC target"}
        ], []}
     end
   end
 
   defp validate_kill_target(proto, target_id, prefix) do
-    if proto.type == :npc do
+    if proto.subtype == :npc do
       # Check NPC has combatant component (error)
       errors =
         if has_combatant_component?(proto) do
@@ -425,14 +427,14 @@ defmodule Loka.Content.Validator do
       {errors, warnings}
     else
       {[
-         {"#{prefix}.target_id", "'#{target_id}' is not an NPC (type: #{proto.type})",
+         {"#{prefix}.target_id", "'#{target_id}' is not an NPC (type: #{proto.subtype})",
           "kill objectives require an NPC target"}
        ], []}
     end
   end
 
   defp validate_get_item_target(proto, target_id, prefix) do
-    if proto.type == :item do
+    if proto.subtype == :item do
       # Check if item is obtainable (warning)
       warnings =
         if item_is_obtainable?(target_id) do
@@ -447,7 +449,7 @@ defmodule Loka.Content.Validator do
       {[], warnings}
     else
       {[
-         {"#{prefix}.target_id", "'#{target_id}' is not an item (type: #{proto.type})",
+         {"#{prefix}.target_id", "'#{target_id}' is not an item (type: #{proto.subtype})",
           "get_item objectives require an item target"}
        ], []}
     end
@@ -460,12 +462,12 @@ defmodule Loka.Content.Validator do
     topic = obj["dialogue_topic"]
 
     if obj_type == "talk" and not is_nil(topic) and topic != "" do
-      case Loka.Engine.PrototypeLoader.get(target_id) do
-        nil ->
+      case TypedObject.Loader.get(target_id) do
+        {:error, :not_found} ->
           # Target doesn't exist - already caught by validate_objective_target
           errors
 
-        proto ->
+        {:ok, proto} ->
           dialogue_tree = get_prototype_dialogue_tree(proto)
 
           if has_dialogue_node?(dialogue_tree, topic) do
@@ -510,10 +512,9 @@ defmodule Loka.Content.Validator do
   # Check if NPC spawns in any room
   defp npc_spawns_somewhere?(npc_key) do
     # Get all room prototypes and check their spawns
-    Loka.Engine.PrototypeLoader.all()
-    |> Enum.filter(fn proto -> proto.type == :room end)
+    TypedObject.Loader.list_by_type(:entity, :room)
     |> Enum.any?(fn room ->
-      spawns = room.spawns || []
+      spawns = room.data["spawns"] || []
 
       Enum.any?(spawns, fn spawn ->
         spawn_key =
@@ -556,8 +557,7 @@ defmodule Loka.Content.Validator do
 
   # Check if item drops from any NPC
   defp item_from_loot?(item_key) do
-    Loka.Engine.PrototypeLoader.all()
-    |> Enum.filter(fn proto -> proto.type == :npc end)
+    TypedObject.Loader.list_by_type(:entity, :npc)
     |> Enum.any?(fn npc ->
       loot =
         get_in(npc.components || %{}, [:loot, :drops]) ||
@@ -572,8 +572,7 @@ defmodule Loka.Content.Validator do
 
   # Check if item is sold in any shop
   defp item_from_shop?(item_key) do
-    Loka.Engine.PrototypeLoader.all()
-    |> Enum.filter(fn proto -> proto.type == :npc end)
+    TypedObject.Loader.list_by_type(:entity, :npc)
     |> Enum.any?(fn npc ->
       components = npc.components || %{}
 
@@ -644,8 +643,7 @@ defmodule Loka.Content.Validator do
 
   # Check if item is given via dialogue action
   defp item_from_dialogue?(item_key) do
-    Loka.Engine.PrototypeLoader.all()
-    |> Enum.filter(fn proto -> proto.type == :npc end)
+    TypedObject.Loader.list_by_type(:entity, :npc)
     |> Enum.any?(fn npc ->
       dialogue_tree = get_prototype_dialogue_tree(npc)
       dialogue_gives_item?(dialogue_tree, item_key)
@@ -672,10 +670,9 @@ defmodule Loka.Content.Validator do
 
   # Check if item spawns in any room
   defp item_from_room_spawns?(item_key) do
-    Loka.Engine.PrototypeLoader.all()
-    |> Enum.filter(fn proto -> proto.type == :room end)
+    TypedObject.Loader.list_by_type(:entity, :room)
     |> Enum.any?(fn room ->
-      spawns = room.spawns || []
+      spawns = room.data["spawns"] || []
 
       Enum.any?(spawns, fn spawn ->
         spawn_proto = Map.get(spawn, "prototype") || Map.get(spawn, :prototype)
@@ -722,17 +719,17 @@ defmodule Loka.Content.Validator do
   defp validate_quest_giver("", quest_id), do: validate_quest_giver(nil, quest_id)
 
   defp validate_quest_giver(giver_key, quest_id) do
-    case Loka.Engine.PrototypeLoader.get(giver_key) do
-      nil ->
+    case TypedObject.Loader.get(giver_key) do
+      {:error, :not_found} ->
         {[
            {"giver", "NPC '#{giver_key}' not found",
             "Create the NPC prototype first or fix the giver key"}
          ], []}
 
-      proto ->
-        if proto.type != :npc do
+      {:ok, proto} ->
+        if proto.subtype != :npc do
           {[
-             {"giver", "'#{giver_key}' is not an NPC (type: #{proto.type})",
+             {"giver", "'#{giver_key}' is not an NPC (type: #{proto.subtype})",
               "Quest givers must be NPC prototypes"}
            ], []}
         else
@@ -1229,18 +1226,18 @@ defmodule Loka.Content.Validator do
   end
 
   defp check_prototype_exists(key) do
-    case Loka.Engine.PrototypeLoader.get(key) do
-      nil -> :not_found
-      _ -> :ok
+    case TypedObject.Loader.get(key) do
+      {:error, :not_found} -> :not_found
+      {:ok, _} -> :ok
     end
   end
 
   defp check_item_exists(key), do: check_prototype_exists(key)
 
   defp check_room_exists(key) do
-    case Loka.Engine.PrototypeLoader.get(key) do
-      nil -> :not_found
-      proto -> if proto.type == :room, do: :ok, else: :not_found
+    case TypedObject.Loader.get(key) do
+      {:error, :not_found} -> :not_found
+      {:ok, proto} -> if proto.subtype == :room, do: :ok, else: :not_found
     end
   end
 

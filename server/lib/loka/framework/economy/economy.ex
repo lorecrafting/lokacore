@@ -28,7 +28,7 @@ defmodule Loka.Framework.Economy do
       # Now all gold gains from selling are +10%
   """
 
-  alias Loka.Engine.PrototypeLoader
+  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
   alias Loka.Framework.Economy.Shop
   alias Loka.Framework.Player.GameState
   alias Loka.Primitives.Value
@@ -232,7 +232,7 @@ defmodule Loka.Framework.Economy do
 
   defp get_base_price(item_key) do
     # Look up item prototype for its base_price from the valuable component
-    case PrototypeLoader.get(item_key) do
+    case TypedObjectLoader.get(item_key) do
       {:ok, prototype} ->
         # Get base_price from components.valuable.base_price
         valuable = MapHelpers.get_flexible(prototype.components, :valuable, %{})

@@ -7,20 +7,19 @@ defmodule Loka.Plugins.Guilds.Validators.GuildValidator do
 
   @behaviour Loka.Engine.ContentValidator.Plugin
 
-  alias Loka.Engine.PrototypeLoader
+  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
 
   @impl true
   def name, do: :guild_validator
 
   @impl true
   def ready? do
-    # Check if PrototypeLoader is available
-    Process.whereis(PrototypeLoader) != nil
+    Process.whereis(Loka.Engine.TypedObject.Loader) != nil
   end
 
   @impl true
   def validate do
-    prototypes = PrototypeLoader.all()
+    prototypes = TypedObjectLoader.all()
 
     guild_halls =
       prototypes
@@ -39,12 +38,13 @@ defmodule Loka.Plugins.Guilds.Validators.GuildValidator do
   # Validation Helpers
   # =============================================================================
 
-  defp is_guild_hall?({_id, proto}) do
-    Map.get(proto, :type) == "guild_hall" or
-      Map.get(proto, :tags, []) |> Enum.member?("guild_hall")
+  defp is_guild_hall?(proto) do
+    "guild_hall" in (proto.tags || [])
   end
 
-  defp validate_guild_hall({id, proto}) do
+  defp validate_guild_hall(proto) do
+    id = proto.key
+
     []
     |> validate_required_fields(id, proto)
     |> validate_capacity(id, proto)

@@ -40,7 +40,7 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
 
   require Logger
 
-  alias Loka.Engine.PrototypeLoader
+  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
   alias Loka.Framework.Quest.QuestRegistry
   alias Loka.Framework.Crafting.CraftingRegistry
 
@@ -174,13 +174,13 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
 
   defp find_reachable_rooms do
     all_rooms =
-      PrototypeLoader.list_by_type(:room)
+      TypedObjectLoader.list_by_type(:entity, :room)
       |> Enum.reject(&is_template?/1)
 
     all_room_keys = MapSet.new(Enum.map(all_rooms, & &1.key))
 
     # BFS from starting room
-    case PrototypeLoader.get(@starting_room) do
+    case TypedObjectLoader.get(@starting_room) do
       {:error, :not_found} ->
         MapSet.new()
 
@@ -200,7 +200,7 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
         if MapSet.member?(visited, room_key) do
           bfs_rooms(queue, visited, valid_rooms)
         else
-          case PrototypeLoader.get(room_key) do
+          case TypedObjectLoader.get(room_key) do
             {:error, :not_found} ->
               bfs_rooms(queue, MapSet.put(visited, room_key), valid_rooms)
 
@@ -229,7 +229,7 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
 
   defp analyze_npc_reachability(reachable_rooms) do
     npcs =
-      PrototypeLoader.list_by_type(:npc)
+      TypedObjectLoader.list_by_type(:entity, :npc)
       |> Enum.reject(&is_template?/1)
 
     # Build map of NPC -> rooms where they spawn
@@ -284,7 +284,7 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
 
   defp build_npc_location_map do
     # Find all rooms and their spawned NPCs
-    rooms = PrototypeLoader.list_by_type(:room)
+    rooms = TypedObjectLoader.list_by_type(:entity, :room)
 
     Enum.reduce(rooms, %{}, fn room, acc ->
       npcs_in_room = get_npcs_in_room(room)
@@ -297,7 +297,7 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
 
   defp get_npcs_in_room(room) do
     # Check spawns list in room prototype (rooms use `spawns` not `entities`)
-    spawns = Map.get(room, :spawns) || []
+    spawns = get_in(room, [Access.key(:data, %{}), "spawns"]) || []
 
     spawns
     |> Enum.filter(fn spawn ->
@@ -324,8 +324,8 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
   end
 
   defp npc_key?(key) do
-    case PrototypeLoader.get(key) do
-      {:ok, proto} -> proto.type == :npc
+    case TypedObjectLoader.get(key) do
+      {:ok, proto} -> proto.subtype == :npc
       _ -> false
     end
   end
@@ -349,7 +349,7 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
 
   defp analyze_item_obtainability(reachable_rooms) do
     items =
-      PrototypeLoader.list_by_type(:item)
+      TypedObjectLoader.list_by_type(:entity, :item)
       |> Enum.reject(&is_template?/1)
 
     # Build sources for each item
@@ -488,7 +488,7 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
   end
 
   defp add_drop_sources(sources) do
-    npcs = PrototypeLoader.list_by_type(:npc)
+    npcs = TypedObjectLoader.list_by_type(:entity, :npc)
 
     Enum.reduce(npcs, sources, fn npc, acc ->
       components = npc.components || %{}
@@ -521,7 +521,7 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
 
   defp add_world_spawn_sources(sources, reachable_rooms) do
     rooms =
-      PrototypeLoader.list_by_type(:room)
+      TypedObjectLoader.list_by_type(:entity, :room)
       |> Enum.filter(&MapSet.member?(reachable_rooms, &1.key))
 
     Enum.reduce(rooms, sources, fn room, acc ->
@@ -535,7 +535,7 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
 
   defp get_items_in_room(room) do
     # Check spawns list in room prototype
-    spawns = Map.get(room, :spawns) || []
+    spawns = get_in(room, [Access.key(:data, %{}), "spawns"]) || []
 
     spawns
     |> Enum.filter(fn spawn ->
@@ -562,14 +562,14 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
   end
 
   defp item_key?(key) do
-    case PrototypeLoader.get(key) do
-      {:ok, proto} -> proto.type == :item
+    case TypedObjectLoader.get(key) do
+      {:ok, proto} -> proto.subtype == :item
       _ -> false
     end
   end
 
   defp add_shop_sources(sources, reachable_rooms) do
-    npcs = PrototypeLoader.list_by_type(:npc)
+    npcs = TypedObjectLoader.list_by_type(:entity, :npc)
 
     # Only consider NPCs in reachable rooms
     npc_locations = build_npc_location_map()
@@ -609,7 +609,7 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
   end
 
   defp add_dialogue_sources(sources) do
-    npcs = PrototypeLoader.list_by_type(:npc)
+    npcs = TypedObjectLoader.list_by_type(:entity, :npc)
 
     Enum.reduce(npcs, sources, fn npc, acc ->
       components = npc.components || %{}
@@ -669,7 +669,7 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
 
   defp add_time_locked_sources(sources, reachable_rooms) do
     rooms =
-      PrototypeLoader.list_by_type(:room)
+      TypedObjectLoader.list_by_type(:entity, :room)
       |> Enum.filter(&MapSet.member?(reachable_rooms, &1.key))
 
     Enum.reduce(rooms, sources, fn room, acc ->
@@ -708,7 +708,7 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
 
     # Build a map of room -> gathering_nodes for reachable rooms
     rooms =
-      PrototypeLoader.list_by_type(:room)
+      TypedObjectLoader.list_by_type(:entity, :room)
       |> Enum.filter(&MapSet.member?(reachable_rooms, &1.key))
 
     room_nodes =
@@ -768,7 +768,7 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
   end
 
   defp add_npc_gives_items_sources(sources, reachable_rooms) do
-    npcs = PrototypeLoader.list_by_type(:npc)
+    npcs = TypedObjectLoader.list_by_type(:entity, :npc)
     npc_locations = build_npc_location_map()
 
     Enum.reduce(npcs, sources, fn npc, acc ->
@@ -780,8 +780,7 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
         components = npc.components || %{}
 
         gives_items =
-          Map.get(npc, :gives_items) ||
-            Map.get(npc, "gives_items") ||
+          get_in(npc.data || %{}, ["gives_items"]) ||
             Map.get(components, "gives_items") ||
             Map.get(components, :gives_items) ||
             []
@@ -852,7 +851,7 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
 
   defp analyze_gathering_accessibility(reachable_rooms) do
     rooms =
-      PrototypeLoader.list_by_type(:room)
+      TypedObjectLoader.list_by_type(:entity, :room)
       |> Enum.reject(&is_template?/1)
 
     errors = []
@@ -862,7 +861,7 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
     {errors, total_nodes, accessible_nodes} =
       Enum.reduce(rooms, {errors, total_nodes, accessible_nodes}, fn room, {errs, total, acc} ->
         gathering_node =
-          Map.get(room, :gathering_node) ||
+          get_in(room.data || %{}, ["gathering_node"]) ||
             get_in(room.components || %{}, ["gathering_node"]) ||
             get_in(room.components || %{}, [:gathering_node])
 
@@ -901,7 +900,7 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
   # Private - Helpers
   # =============================================================================
 
-  defp get_exits(%{exits: exits}) when is_map(exits) do
+  defp get_exits(%{data: %{"exits" => exits}}) when is_map(exits) do
     Enum.map(exits, fn
       {dir, dest} when is_binary(dest) -> {to_string(dir), dest}
       {dir, %{"destination" => dest}} -> {to_string(dir), dest}
@@ -914,7 +913,10 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
   defp get_exits(_), do: []
 
   defp is_template?(proto) do
-    proto.is_template == true or String.starts_with?(proto.key || "", "base_")
+    is_tmpl =
+      Map.get(proto.data, :is_template) || Map.get(proto.data, "is_template")
+
+    is_tmpl == true or String.starts_with?(proto.key || "", "base_")
   end
 
   # =============================================================================

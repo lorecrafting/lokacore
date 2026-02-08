@@ -116,14 +116,14 @@ defmodule Loka.Testing.TestData do
   Uses prototype definitions (YAML files) as the source of truth for exits.
   """
   def build_world_graph do
-    alias Loka.Engine.PrototypeLoader
+    alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
 
     # Get all room prototypes
-    room_prototypes = PrototypeLoader.list_by_type(:room)
+    room_prototypes = TypedObjectLoader.list_by_type(:entity, :room)
 
     Enum.reduce(room_prototypes, %{}, fn proto, acc ->
-      # Exits are stored directly on the prototype struct, not in components
-      exits = proto.exits || %{}
+      # Exits are stored in the data map on TypedObject structs
+      exits = proto.data["exits"] || %{}
 
       # Only include rooms with exits
       if map_size(exits) > 0 do
@@ -225,24 +225,24 @@ defmodule Loka.Testing.TestData do
   The primary_keyword is what's displayed as clickable text in the UI.
   """
   def build_npc_locations do
-    alias Loka.Engine.PrototypeLoader
+    alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
 
     # Get all room prototypes and extract spawns
-    room_prototypes = PrototypeLoader.list_by_type(:room)
+    room_prototypes = TypedObjectLoader.list_by_type(:entity, :room)
 
     Enum.reduce(room_prototypes, %{}, fn proto, acc ->
-      spawns = proto.spawns || []
+      spawns = proto.data["spawns"] || []
 
       Enum.reduce(spawns, acc, fn spawn_def, inner_acc ->
         npc_key = spawn_def["prototype"] || spawn_def[:prototype]
 
         if npc_key do
           # Check if this is an NPC type
-          case PrototypeLoader.get(npc_key) do
-            {:ok, %{type: :npc} = npc_proto} ->
+          case TypedObjectLoader.get(npc_key) do
+            {:ok, %{subtype: :npc} = npc_proto} ->
               Map.put(inner_acc, npc_key, %{
                 room: proto.key,
-                primary_keyword: npc_proto.primary_keyword
+                primary_keyword: get_in(npc_proto.data, ["primary_keyword"])
               })
 
             _ ->
@@ -283,27 +283,27 @@ defmodule Loka.Testing.TestData do
   The primary_keyword is what's displayed as clickable text in the UI.
   """
   def build_item_locations do
-    alias Loka.Engine.PrototypeLoader
+    alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
 
     # Get all room prototypes and extract item spawns
-    room_prototypes = PrototypeLoader.list_by_type(:room)
+    room_prototypes = TypedObjectLoader.list_by_type(:entity, :room)
 
     Enum.reduce(room_prototypes, %{}, fn proto, acc ->
-      spawns = proto.spawns || []
+      spawns = proto.data["spawns"] || []
 
       Enum.reduce(spawns, acc, fn spawn_def, inner_acc ->
         item_key = spawn_def["prototype"] || spawn_def[:prototype]
 
         if item_key do
           # Check if this is an item type
-          case PrototypeLoader.get(item_key) do
-            {:ok, %{type: :item} = item_proto} ->
+          case TypedObjectLoader.get(item_key) do
+            {:ok, %{subtype: :item} = item_proto} ->
               existing = Map.get(inner_acc, item_key, %{rooms: [], primary_keyword: nil})
               rooms = [proto.key | existing.rooms] |> Enum.uniq()
 
               Map.put(inner_acc, item_key, %{
                 rooms: rooms,
-                primary_keyword: item_proto.primary_keyword
+                primary_keyword: get_in(item_proto.data, ["primary_keyword"])
               })
 
             _ ->

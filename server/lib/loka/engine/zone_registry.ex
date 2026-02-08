@@ -244,17 +244,17 @@ defmodule Loka.Engine.ZoneRegistry do
   end
 
   defp get_zone_rooms(%Zone{rooms: rooms, rooms_with_tag: tag}) do
-    # Get rooms by tag from PrototypeLoader
+    # Get rooms by tag from TypedObject.Loader
     # Note: This requires prototypes to be loaded first
     tagged_rooms = get_rooms_by_tag(tag)
     Enum.uniq(rooms ++ tagged_rooms)
   end
 
   defp get_rooms_by_tag(tag) do
-    alias Loka.Engine.PrototypeLoader
+    alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
 
     try do
-      PrototypeLoader.list_by_type(:room)
+      TypedObjectLoader.list_by_type(:entity, :room)
       |> Enum.filter(fn proto -> tag in proto.tags end)
       |> Enum.map(& &1.key)
     rescue

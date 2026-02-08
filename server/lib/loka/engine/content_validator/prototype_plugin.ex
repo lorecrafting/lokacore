@@ -12,12 +12,12 @@ defmodule Loka.Engine.ContentValidator.PrototypePlugin do
 
   @impl true
   def ready? do
-    Process.whereis(Loka.Engine.PrototypeLoader) != nil
+    Process.whereis(Loka.Engine.TypedObject.Loader) != nil
   end
 
   @impl true
   def validate do
-    case Loka.Engine.PrototypeLoader.validate_all() do
+    case Loka.Engine.TypedObject.Loader.validate_all() do
       :ok ->
         %{critical: [], warnings: []}
 

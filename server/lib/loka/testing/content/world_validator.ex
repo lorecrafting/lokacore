@@ -35,7 +35,8 @@ defmodule Loka.Testing.Content.WorldValidator do
 
   require Logger
 
-  alias Loka.Engine.{Directions, PrototypeLoader, Entities}
+  alias Loka.Engine.{Directions, Entities}
+  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
 
   @type validation_result :: %{
           rooms_checked: non_neg_integer(),
@@ -77,7 +78,7 @@ defmodule Loka.Testing.Content.WorldValidator do
 
     # Get all room prototypes (excluding templates)
     all_rooms =
-      PrototypeLoader.list_by_type(:room)
+      TypedObjectLoader.list_by_type(:entity, :room)
       |> Enum.reject(&is_template?/1)
 
     all_room_keys = MapSet.new(Enum.map(all_rooms, & &1.key))
@@ -189,7 +190,7 @@ defmodule Loka.Testing.Content.WorldValidator do
   # =============================================================================
 
   defp bfs_rooms(starting_key, valid_rooms) do
-    case PrototypeLoader.get(starting_key) do
+    case TypedObjectLoader.get(starting_key) do
       {:error, :not_found} ->
         {MapSet.new(), [{:broken_exit, "starting_point", "start", starting_key}]}
 
@@ -211,7 +212,7 @@ defmodule Loka.Testing.Content.WorldValidator do
         if MapSet.member?(visited, room_key) do
           do_bfs(queue, visited, errors, valid_rooms)
         else
-          case PrototypeLoader.get(room_key) do
+          case TypedObjectLoader.get(room_key) do
             {:error, :not_found} ->
               # This shouldn't happen if we're only queuing valid rooms
               do_bfs(queue, MapSet.put(visited, room_key), errors, valid_rooms)
@@ -257,7 +258,7 @@ defmodule Loka.Testing.Content.WorldValidator do
       exits = get_exits(room)
 
       Enum.flat_map(exits, fn {direction, dest_key} ->
-        case PrototypeLoader.get(dest_key) do
+        case TypedObjectLoader.get(dest_key) do
           {:error, :not_found} ->
             []
 
@@ -316,7 +317,7 @@ defmodule Loka.Testing.Content.WorldValidator do
   # Private - Helpers
   # =============================================================================
 
-  defp get_exits(%{exits: exits}) when is_map(exits) do
+  defp get_exits(%{data: %{"exits" => exits}}) when is_map(exits) do
     Enum.map(exits, fn
       {dir, dest} when is_binary(dest) -> {to_string(dir), dest}
       {dir, %{"destination" => dest}} -> {to_string(dir), dest}
@@ -330,7 +331,8 @@ defmodule Loka.Testing.Content.WorldValidator do
 
   # Check if a prototype is a template (should be excluded from validation)
   defp is_template?(proto) do
-    proto.is_template == true or String.starts_with?(proto.key || "", "base_")
+    is_template = Map.get(proto.data, :is_template) || Map.get(proto.data, "is_template")
+    is_template == true or String.starts_with?(proto.key || "", "base_")
   end
 
   # Check if a prototype has a specific tag
@@ -392,12 +394,12 @@ defmodule Loka.Testing.Content.WorldValidator do
   def validate_wander_behaviors(opts \\ []) do
     # Get all NPC prototypes
     all_npcs =
-      PrototypeLoader.list_by_type(:npc)
+      TypedObjectLoader.list_by_type(:entity, :npc)
       |> Enum.reject(&is_template?/1)
 
     # Get all room prototypes for validation
     all_room_keys =
-      PrototypeLoader.list_by_type(:room)
+      TypedObjectLoader.list_by_type(:entity, :room)
       |> Enum.reject(&is_template?/1)
       |> Enum.map(& &1.key)
       |> MapSet.new()
@@ -495,7 +497,7 @@ defmodule Loka.Testing.Content.WorldValidator do
   # Build adjacency map of room connections
   defp build_room_graph(room_keys) do
     Enum.reduce(room_keys, %{}, fn room_key, graph ->
-      case PrototypeLoader.get(room_key) do
+      case TypedObjectLoader.get(room_key) do
         {:ok, proto} ->
           exits = get_exits(proto)
           neighbors = Enum.map(exits, fn {_dir, dest} -> dest end)
@@ -669,7 +671,7 @@ defmodule Loka.Testing.Content.WorldValidator do
     # Get the prototype for this entity (using the entity's key)
     prototype_key = get_prototype_key(entity)
 
-    case PrototypeLoader.get(prototype_key) do
+    case TypedObjectLoader.get(prototype_key) do
       {:error, :not_found} ->
         # Prototype doesn't exist - that's a different kind of error
         {errors, warnings}

@@ -22,7 +22,8 @@ defmodule Loka.Engine.WorldLoader do
 
   require Logger
 
-  alias Loka.Engine.{PrototypeLoader, Spawner, Entities, WorldGraph}
+  alias Loka.Engine.{Spawner, Entities, WorldGraph}
+  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
 
   @starting_room "monastery_gate"
 
@@ -61,7 +62,7 @@ defmodule Loka.Engine.WorldLoader do
     Logger.info("WorldLoader: Starting world spawn from #{starting_room}")
 
     # Ensure prototypes are loaded
-    PrototypeLoader.reload()
+    TypedObjectLoader.reload()
 
     # Spawn rooms in connected order (BFS from starting room)
     case spawn_room_chain(starting_room, opts) do
@@ -116,7 +117,7 @@ defmodule Loka.Engine.WorldLoader do
     max_rooms = Keyword.get(opts, :max_rooms, 100)
 
     # Get the starting prototype
-    case PrototypeLoader.get(starting_room_key) do
+    case TypedObjectLoader.get(starting_room_key) do
       {:error, :not_found} ->
         {:error, {:prototype_not_found, starting_room_key}}
 
@@ -149,7 +150,7 @@ defmodule Loka.Engine.WorldLoader do
           spawn_rooms_bfs(queue, queued, visited, results, max_remaining)
         else
           # Get prototype
-          case PrototypeLoader.get(room_key) do
+          case TypedObjectLoader.get(room_key) do
             {:error, :not_found} ->
               Logger.warning("WorldLoader: Room prototype not found: #{room_key}")
 
@@ -221,7 +222,7 @@ defmodule Loka.Engine.WorldLoader do
     end
   end
 
-  defp get_exits_from_prototype(%{exits: exits}) when is_map(exits), do: exits
+  defp get_exits_from_prototype(%{data: %{"exits" => exits}}) when is_map(exits), do: exits
   defp get_exits_from_prototype(_), do: %{}
 
   defp calculate_stats(room_results) do
@@ -256,14 +257,14 @@ defmodule Loka.Engine.WorldLoader do
     issues = []
 
     # Check all room prototypes for valid exit destinations
-    rooms = PrototypeLoader.list_by_type(:room)
+    rooms = TypedObjectLoader.list_by_type(:entity, :room)
 
     exit_issues =
       Enum.flat_map(rooms, fn proto ->
         exits = get_exits_from_prototype(proto)
 
         Enum.flat_map(exits, fn {dir, dest_key} ->
-          case PrototypeLoader.get(dest_key) do
+          case TypedObjectLoader.get(dest_key) do
             {:error, :not_found} -> [{:broken_exit, proto.key, dir, dest_key}]
             {:ok, _} -> []
           end
@@ -273,11 +274,11 @@ defmodule Loka.Engine.WorldLoader do
     # Check for spawns references
     spawn_issues =
       Enum.flat_map(rooms, fn proto ->
-        spawns = Map.get(proto, :spawns, [])
+        spawns = Map.get(proto.data, "spawns", [])
 
         Enum.flat_map(spawns, fn
           spawn_entry when is_binary(spawn_entry) ->
-            case PrototypeLoader.get(spawn_entry) do
+            case TypedObjectLoader.get(spawn_entry) do
               {:error, :not_found} -> [{:broken_spawn, proto.key, spawn_entry}]
               {:ok, _} -> []
             end
@@ -286,7 +287,7 @@ defmodule Loka.Engine.WorldLoader do
             spawn_key = spawn_entry["prototype"] || spawn_entry[:prototype]
 
             if spawn_key do
-              case PrototypeLoader.get(spawn_key) do
+              case TypedObjectLoader.get(spawn_key) do
                 {:error, :not_found} -> [{:broken_spawn, proto.key, spawn_key}]
                 {:ok, _} -> []
               end
