@@ -16,70 +16,69 @@ defmodule Loka.WorldBuilder.LLM.PreviewManagerTest do
   end
 
   setup do
-    # PreviewManager is started by Application.
-    # Clear state for all users used in tests to ensure isolation.
-    users = ["user", "test_user", "new_user", "user1", "user2", "heavy_user"]
-    Enum.each(users, &PreviewManager.clear_previews/1)
-    :ok
+    # Generate a unique user ID per test to guarantee isolation from
+    # background tasks (e.g., BulkGenerator async tasks that may add
+    # previews for shared user IDs like "user" at any time).
+    unique_user = "pm_test_user_#{:erlang.unique_integer([:positive])}"
+    {:ok, user: unique_user}
   end
 
   describe "add_preview/3" do
-    test "adds a room preview" do
-      user_id = "test_user"
-
+    test "adds a room preview", %{user: user} do
       room_data = %{
         key: "preview_room",
         name: "Preview Room",
         description: "A preview room"
       }
 
-      assert {:ok, preview_id} = PreviewManager.add_preview(user_id, :room, room_data)
+      assert {:ok, preview_id} = PreviewManager.add_preview(user, :room, room_data)
       assert is_binary(preview_id)
     end
 
-    test "adds an NPC preview" do
+    test "adds an NPC preview", %{user: user} do
       npc_data = %{key: "preview_npc", name: "Preview NPC"}
-      assert {:ok, _id} = PreviewManager.add_preview("user", :npc, npc_data)
+      assert {:ok, _id} = PreviewManager.add_preview(user, :npc, npc_data)
     end
 
-    test "adds an exit preview" do
+    test "adds an exit preview", %{user: user} do
       exit_data = %{from: "room1", direction: "north", to: "room2"}
-      assert {:ok, _id} = PreviewManager.add_preview("user", :exit, exit_data)
+      assert {:ok, _id} = PreviewManager.add_preview(user, :exit, exit_data)
     end
   end
 
   describe "get_previews/1" do
-    test "returns empty list for user with no previews" do
-      assert [] = PreviewManager.get_previews("new_user")
+    test "returns empty list for user with no previews", %{user: user} do
+      assert [] = PreviewManager.get_previews(user)
     end
 
-    test "returns previews for specific user" do
-      PreviewManager.add_preview("user1", :room, %{key: "r1"})
-      PreviewManager.add_preview("user2", :room, %{key: "r2"})
+    test "returns previews for specific user", %{user: user} do
+      other_user = "other_#{user}"
+      PreviewManager.add_preview(user, :room, %{key: "r1"})
+      PreviewManager.add_preview(other_user, :room, %{key: "r2"})
 
-      user1_previews = PreviewManager.get_previews("user1")
-      assert length(user1_previews) == 1
-      assert hd(user1_previews).user_id == "user1"
+      user_previews = PreviewManager.get_previews(user)
+      assert length(user_previews) == 1
+      assert hd(user_previews).user_id == user
     end
 
-    test "returns only pending previews" do
-      {:ok, id1} = PreviewManager.add_preview("user", :room, %{key: "r1"})
-      {:ok, _id2} = PreviewManager.add_preview("user", :room, %{key: "r2"})
+    test "returns only pending previews", %{user: user} do
+      {:ok, id1} = PreviewManager.add_preview(user, :room, %{key: "r1"})
+      {:ok, _id2} = PreviewManager.add_preview(user, :room, %{key: "r2"})
 
       # Accept one preview
       PreviewManager.accept_preview(id1)
 
       # Should only return pending preview
-      previews = PreviewManager.get_previews("user")
+      previews = PreviewManager.get_previews(user)
       assert length(previews) == 1
       assert previews |> hd() |> Map.get(:status) == :pending
     end
   end
 
   describe "accept_preview/1" do
-    test "accepts and commits a room preview" do
+    test "accepts and commits a room preview", %{user: user} do
       room_data = %{key: "accept_room_#{:rand.uniform(10000)}", name: "Accept Room"}
-      {:ok, preview_id} = PreviewManager.add_preview("user", :room, room_data)
+      {:ok, preview_id} = PreviewManager.add_preview(user, :room, room_data)
 
       # Accept should attempt to create the room
       result = PreviewManager.accept_preview(preview_id)
@@ -87,8 +86,7 @@ defmodule Loka.WorldBuilder.LLM.PreviewManagerTest do
       refute is_nil(result)
     end
 
-    test "accepts and commits an NPC preview" do
-      user_id = "test_user"
+    test "accepts and commits an NPC preview", %{user: user} do
       # Use random key to avoid collisions
       npc_key = "test_npc_#{:erlang.unique_integer([:positive])}"
 
@@ -99,7 +97,7 @@ defmodule Loka.WorldBuilder.LLM.PreviewManagerTest do
         level: 5
       }
 
-      {:ok, preview_id} = PreviewManager.add_preview(user_id, :npc, npc_data)
+      {:ok, preview_id} = PreviewManager.add_preview(user, :npc, npc_data)
 
       # Should succeed now that it's implemented
       assert {:ok, entity} = PreviewManager.accept_preview(preview_id)
@@ -117,22 +115,22 @@ defmodule Loka.WorldBuilder.LLM.PreviewManagerTest do
       assert {:error, :not_found} = PreviewManager.accept_preview("nonexistent")
     end
 
-    test "marks preview as accepted" do
-      {:ok, preview_id} = PreviewManager.add_preview("user", :room, %{key: "mark_test"})
+    test "marks preview as accepted", %{user: user} do
+      {:ok, preview_id} = PreviewManager.add_preview(user, :room, %{key: "mark_test"})
       PreviewManager.accept_preview(preview_id)
 
       # Preview should no longer appear in pending list
-      previews = PreviewManager.get_previews("user")
+      previews = PreviewManager.get_previews(user)
       assert Enum.all?(previews, fn p -> p.id != preview_id end)
     end
   end
 
   describe "reject_preview/1" do
-    test "rejects and removes a preview" do
-      {:ok, preview_id} = PreviewManager.add_preview("user", :room, %{key: "reject_test"})
+    test "rejects and removes a preview", %{user: user} do
+      {:ok, preview_id} = PreviewManager.add_preview(user, :room, %{key: "reject_test"})
       assert :ok = PreviewManager.reject_preview(preview_id)
 
-      previews = PreviewManager.get_previews("user")
+      previews = PreviewManager.get_previews(user)
       assert Enum.all?(previews, fn p -> p.id != preview_id end)
     end
 
@@ -142,23 +140,24 @@ defmodule Loka.WorldBuilder.LLM.PreviewManagerTest do
   end
 
   describe "clear_previews/1" do
-    test "clears all previews for a user" do
-      PreviewManager.add_preview("user", :room, %{key: "r1"})
-      PreviewManager.add_preview("user", :room, %{key: "r2"})
-      PreviewManager.add_preview("user", :room, %{key: "r3"})
+    test "clears all previews for a user", %{user: user} do
+      PreviewManager.add_preview(user, :room, %{key: "r1"})
+      PreviewManager.add_preview(user, :room, %{key: "r2"})
+      PreviewManager.add_preview(user, :room, %{key: "r3"})
 
-      assert :ok = PreviewManager.clear_previews("user")
-      assert [] = PreviewManager.get_previews("user")
+      assert :ok = PreviewManager.clear_previews(user)
+      assert [] = PreviewManager.get_previews(user)
     end
 
-    test "does not affect other users' previews" do
-      PreviewManager.add_preview("user1", :room, %{key: "u1r1"})
-      PreviewManager.add_preview("user2", :room, %{key: "u2r1"})
+    test "does not affect other users' previews", %{user: user} do
+      other_user = "other_#{user}"
+      PreviewManager.add_preview(user, :room, %{key: "u1r1"})
+      PreviewManager.add_preview(other_user, :room, %{key: "u2r1"})
 
-      PreviewManager.clear_previews("user1")
+      PreviewManager.clear_previews(user)
 
-      assert [] = PreviewManager.get_previews("user1")
-      assert length(PreviewManager.get_previews("user2")) == 1
+      assert [] = PreviewManager.get_previews(user)
+      assert length(PreviewManager.get_previews(other_user)) == 1
     end
   end
 
@@ -169,10 +168,8 @@ defmodule Loka.WorldBuilder.LLM.PreviewManagerTest do
       assert function_exported?(PreviewManager, :handle_info, 2)
     end
 
-    test "respects max previews per user limit" do
+    test "respects max previews per user limit", %{user: user} do
       # Add many previews for one user
-      user = "heavy_user"
-
       for i <- 1..60 do
         PreviewManager.add_preview(user, :room, %{key: "room_#{i}"})
       end
