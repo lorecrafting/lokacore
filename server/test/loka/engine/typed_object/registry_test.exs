@@ -5,10 +5,7 @@ defmodule Loka.Engine.TypedObject.RegistryTest do
   alias Loka.Engine.TypedObject.Registry
 
   setup do
-    # Ensure tables are initialized
-    Registry.init()
-    # Clear any existing data
-    Registry.clear()
+    Loka.TypedObjectSandbox.checkout()
     :ok
   end
 

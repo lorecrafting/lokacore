@@ -8,11 +8,18 @@ defmodule Loka.Framework.Skills.SkillManagerTest do
 
   setup do
     # Start the SkillRegistry for tests (if not already started by app)
-    _registry =
+    registry =
       case start_supervised({SkillRegistry, [load_on_start: false]}) do
         {:ok, pid} -> pid
         {:error, {:already_started, pid}} -> pid
       end
+
+    # Restore production state on exit by reloading from disk
+    on_exit(fn ->
+      if Process.alive?(registry) do
+        SkillRegistry.reload()
+      end
+    end)
 
     # Register test skills
     register_test_skills()

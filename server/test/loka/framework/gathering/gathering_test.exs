@@ -21,6 +21,13 @@ defmodule Loka.Framework.GatheringTest do
         {:error, {:already_started, pid}} -> pid
       end
 
+    # Restore production state on exit by reloading from disk
+    on_exit(fn ->
+      if Process.alive?(registry_pid) do
+        GatheringRegistry.reload()
+      end
+    end)
+
     # Create test node definitions
     herb_node = %GatheringNode{
       key: "herb_patch",

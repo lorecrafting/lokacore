@@ -613,7 +613,7 @@ defmodule Loka.WorldBuilder.RoomManager do
     short_desc: "#{escape_yaml_string(name)}"
     long_desc: "#{escape_yaml_string(description)}"
     extra_desc: |
-      #{indent_multiline(description, 2)}
+    #{indent_multiline(description, 2)}
     keywords: []
     """
 
@@ -758,8 +758,12 @@ defmodule Loka.WorldBuilder.RoomManager do
     prefix = String.duplicate(" ", spaces)
 
     text
+    |> String.trim()
     |> String.split("\n")
-    |> Enum.map(&"#{prefix}#{&1}")
+    |> Enum.map(fn line ->
+      trimmed = String.trim(line)
+      if trimmed == "", do: "", else: "#{prefix}#{trimmed}"
+    end)
     |> Enum.join("\n")
     |> String.trim_trailing()
   end

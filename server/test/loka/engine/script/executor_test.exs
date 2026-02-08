@@ -31,9 +31,7 @@ defmodule Loka.Engine.Script.ExecutorTest do
   }
 
   setup do
-    # Initialize the TypedObject Registry for script lookups
-    Registry.init()
-    Registry.clear()
+    Loka.TypedObjectSandbox.checkout()
     :ok
   end
 

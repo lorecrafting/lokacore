@@ -130,11 +130,13 @@ defmodule Loka.Framework.FactionTest do
   setup do
     create_test_faction_files()
 
-    pid =
-      case start_supervised({Faction, [path: @test_faction_path, load_on_start: true]}) do
-        {:ok, p} -> p
-        {:error, {:already_started, p}} -> p
-      end
+    # Use a unique name to avoid conflicts with the production Faction server
+    server_name = :"test_faction_#{System.unique_integer([:positive])}"
+
+    {:ok, pid} =
+      start_supervised(
+        {Faction, [name: server_name, path: @test_faction_path, load_on_start: true]}
+      )
 
     on_exit(fn ->
       cleanup_test_faction_files()

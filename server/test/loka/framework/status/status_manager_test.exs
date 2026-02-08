@@ -120,11 +120,24 @@ defmodule Loka.Framework.Status.StatusManagerTest do
 
   setup %{temp_dir: temp_dir} do
     # Start fresh managers for each test (if not already started by app)
-    _registry_pid =
+    registry_pid =
       case start_supervised({StatusRegistry, name: StatusRegistry, path: temp_dir}) do
         {:ok, p} -> p
         {:error, {:already_started, p}} -> p
       end
+
+    # If reusing production registry, save state and load test data
+    saved_statuses =
+      if :ets.whereis(:loka_statuses) != :undefined do
+        :ets.tab2list(:loka_statuses)
+      else
+        []
+      end
+
+    # Load test data into the registry if it was already running
+    if saved_statuses != [] do
+      StatusRegistry.load_from(temp_dir)
+    end
 
     _manager_pid =
       case start_supervised({StatusManager, name: StatusManager}) do
@@ -138,6 +151,11 @@ defmodule Loka.Framework.Status.StatusManagerTest do
         :ets.delete_all_objects(:loka_active_statuses)
       rescue
         _ -> :ok
+      end
+
+      # Restore production StatusRegistry state
+      if Process.alive?(registry_pid) and saved_statuses != [] do
+        StatusRegistry.reload()
       end
     end)
 

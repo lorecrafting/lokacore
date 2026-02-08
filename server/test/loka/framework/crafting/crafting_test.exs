@@ -20,6 +20,13 @@ defmodule Loka.Framework.CraftingTest do
         {:error, {:already_started, pid}} -> pid
       end
 
+    # Restore production state on exit by reloading from disk
+    on_exit(fn ->
+      if Process.alive?(registry) do
+        CraftingRegistry.reload()
+      end
+    end)
+
     # Create test recipes
     simple_recipe = %Recipe{
       key: "recipe_simple_item",

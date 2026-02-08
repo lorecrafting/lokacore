@@ -7,16 +7,10 @@ defmodule Loka.Engine.SpawnSmokeTest do
   use Loka.DataCase, async: false
 
   alias Loka.Engine.{Spawner, Entities}
-  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
 
   @moduletag :smoke
 
   setup do
-    # Ensure production prototypes are loaded
-    if Process.whereis(TypedObjectLoader) do
-      TypedObjectLoader.reload()
-    end
-
     :ok
   end
 

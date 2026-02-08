@@ -6,8 +6,7 @@ defmodule Loka.Content.DialogueTest do
   alias Loka.Engine.TypedObject.Registry
 
   setup do
-    Registry.init()
-    Registry.clear()
+    Loka.TypedObjectSandbox.checkout()
     :ok
   end
 

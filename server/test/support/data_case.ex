@@ -44,6 +44,12 @@ defmodule Loka.DataCase do
     if layout_pid = Process.whereis(Loka.Engine.WorldGraph.LayoutManager) do
       Ecto.Adapters.SQL.Sandbox.allow(Loka.Repo, self(), layout_pid)
     end
+
+    # Allow Timers.Server to use the test's sandbox connection
+    # Prevents DBConnection.OwnershipError when timers fire during tests
+    if timers_pid = Process.whereis(Loka.Timers.Server) do
+      Ecto.Adapters.SQL.Sandbox.allow(Loka.Repo, self(), timers_pid)
+    end
   end
 
   @doc """

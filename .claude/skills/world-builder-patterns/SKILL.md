@@ -158,6 +158,80 @@ def handle_event("show_picker", _, socket) do
 end
 ```
 
+## YAML Template Building
+
+### Heredoc Indentation with `indent_multiline/2`
+
+When building YAML strings with Elixir heredocs (`~S"""`), the dedent strips leading whitespace. Interpolated multiline values must account for this:
+
+```elixir
+# BAD - 6 spaces before interpolation, dedent removes 4 → first line gets 2 extra spaces
+~s"""
+    extra_desc: |
+      #{indent_multiline(description, 2)}
+"""
+
+# GOOD - 4 spaces = 0 after dedent, indent_multiline handles all indentation
+~s"""
+    extra_desc: |
+    #{indent_multiline(description, 2)}
+"""
+```
+
+**Key rule**: Count the spaces in your heredoc template, subtract the dedent amount, and ensure the interpolation starts at exactly the right column.
+
+### `indent_multiline/2` Implementation
+
+Must handle edge cases:
+- **Trim input** first (trailing newlines from heredocs)
+- **Skip empty lines** (don't add whitespace-only lines)
+- **First line unindented** (it inherits position from the template)
+
+```elixir
+defp indent_multiline(text, indent_level) do
+  padding = String.duplicate("  ", indent_level)
+  text
+  |> String.trim()
+  |> String.split("\n")
+  |> Enum.with_index()
+  |> Enum.map_join("\n", fn
+    {line, 0} -> line
+    {"", _} -> ""
+    {line, _} -> padding <> line
+  end)
+end
+```
+
+### Tool Execution Resilience
+
+Always wrap `ToolExecutor.execute/3` in `try/rescue` when called from LiveView handlers. An unhandled crash in tool execution (e.g., missing DB table, YAML parse error) kills the LiveView process and the user's chat session:
+
+```elixir
+# GOOD - Catch tool crashes
+result =
+  try do
+    ToolExecutor.execute(tool_name, input, opts)
+  rescue
+    e ->
+      Logger.error("[Chat] Tool #{tool_name} crashed: #{Exception.message(e)}")
+      %{"error" => "Tool execution failed: #{Exception.message(e)}"}
+  end
+```
+
+### Refreshing LiveView Assigns After Tool Calls
+
+When AI tool calls create/modify/delete data (projects, rooms, entities), LiveView assigns must be manually updated. LiveView doesn't detect DB changes automatically:
+
+```elixir
+# After a create_project / load_project / delete_project tool call:
+defp maybe_update_project_assigns(socket, tool_name, _result)
+     when tool_name in ["wb_create_project", "wb_load_project", "wb_delete_project"] do
+  projects = Projects.list_projects()
+  assign(socket, :projects, projects)
+end
+defp maybe_update_project_assigns(socket, _, _), do: socket
+```
+
 ## Common Bug Patterns
 
 ### Pattern 1: Property Access on Wrong Level
