@@ -19,7 +19,8 @@ defmodule Loka.WorldBuilder.MCP.Tools do
       entity_tools() ++
       quest_tools() ++
       dialogue_tools() ++
-      query_tools()
+      query_tools() ++
+      analysis_tools()
   end
 
   @doc """
@@ -599,6 +600,49 @@ defmodule Loka.WorldBuilder.MCP.Tools do
           }
         },
         callback: fn args -> dispatch("get_dialogue", args) end
+      }
+    ]
+  end
+
+  # Analysis tools
+  defp analysis_tools do
+    [
+      %{
+        name: "wb_validate_world",
+        description: """
+        Run full world validation. Returns all errors and warnings for rooms, quests,
+        cutscenes, and content references. Use this to check the health of the world
+        or to find issues after creating content.
+        """,
+        inputSchema: %{
+          type: "object",
+          properties: %{}
+        },
+        callback: fn _args -> dispatch("validate_world", %{}) end
+      },
+      %{
+        name: "wb_search_content",
+        description: """
+        Search across all game content (rooms, NPCs, items, quests, dialogues) by text.
+        Returns matching entity keys with context snippets. Use this to find content
+        by name, description text, zone, or any other field.
+        """,
+        inputSchema: %{
+          type: "object",
+          required: ["query"],
+          properties: %{
+            query: %{
+              type: "string",
+              description: "Text to search for (case-insensitive)"
+            },
+            type: %{
+              type: "string",
+              description: "Optional filter by content type",
+              enum: ["room", "npc", "item", "quest", "dialogue"]
+            }
+          }
+        },
+        callback: fn args -> dispatch("search_content", args) end
       }
     ]
   end

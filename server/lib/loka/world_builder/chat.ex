@@ -6,7 +6,13 @@ defmodule Loka.WorldBuilder.Chat do
   send messages to Anthropic, and process streaming responses.
   """
 
-  alias Loka.WorldBuilder.{AnthropicClient, ToolExecutor}
+  alias Loka.WorldBuilder.{
+    AnthropicClient,
+    ContextBuilder,
+    Projects,
+    ToolExecutor,
+    ValidationManager
+  }
 
   @doc """
   Initialize chat assigns for a LiveView socket.
@@ -44,8 +50,8 @@ defmodule Loka.WorldBuilder.Chat do
     # Get project context
     project_key = get_in(socket.assigns, [:current_project, :key])
 
-    # Get system prompt
-    system = get_system_prompt(project_key)
+    # Get system prompt with selection context
+    system = get_system_prompt(project_key, socket.assigns)
 
     # Get tools
     tools = AnthropicClient.get_tools()
@@ -74,6 +80,11 @@ defmodule Loka.WorldBuilder.Chat do
     Phoenix.Component.assign(socket, :chat_current_response, current <> text)
   end
 
+  # Tools that mutate content and should trigger validation
+  @content_tools ~w(wb_create_room wb_update_room wb_delete_room wb_create_npc wb_create_item
+                     wb_create_quest wb_update_quest wb_create_dialogue
+                     wb_create_exit wb_remove_exit wb_batch_create_rooms)
+
   @doc """
   Handle tool use from streaming response.
   Executes the tool and stores the result for continuation.
@@ -96,9 +107,13 @@ defmodule Loka.WorldBuilder.Chat do
     project_key = get_in(socket.assigns, [:current_project, :key])
 
     result =
-      case ToolExecutor.execute(tool_name, input, project_key: project_key) do
-        {:ok, data} -> %{success: true, data: data}
-        {:error, reason} -> %{success: false, error: reason}
+      try do
+        case ToolExecutor.execute(tool_name, input, project_key: project_key) do
+          {:ok, data} -> %{success: true, data: data}
+          {:error, reason} -> %{success: false, error: reason}
+        end
+      rescue
+        e -> %{success: false, error: "Tool crashed: #{Exception.message(e)}"}
       end
 
     # Store pending tool result
@@ -111,10 +126,41 @@ defmodule Loka.WorldBuilder.Chat do
       result: result
     }
 
-    socket
-    |> Phoenix.Component.assign(:pending_tool_results, tool_results ++ [tool_result])
-    |> Phoenix.Component.assign(:chat_current_tool, nil)
+    socket =
+      socket
+      |> Phoenix.Component.assign(:pending_tool_results, tool_results ++ [tool_result])
+      |> Phoenix.Component.assign(:chat_current_tool, nil)
+      |> maybe_update_project_assigns(tool_name, input, result)
+
+    # Track whether any content tools ran (validation happens once in continue_with_tool_results)
+    had_content_tool = Map.get(socket.assigns, :had_content_tool, false)
+
+    if tool_name in @content_tools and result.success do
+      Phoenix.Component.assign(socket, :had_content_tool, true)
+    else
+      Phoenix.Component.assign(socket, :had_content_tool, had_content_tool)
+    end
   end
+
+  # After project creation/deletion, refresh the projects list and auto-select
+  defp maybe_update_project_assigns(socket, "wb_create_project", input, %{success: true}) do
+    socket
+    |> Phoenix.Component.assign(:projects, Projects.list_projects())
+    |> Phoenix.Component.assign(:current_project, %{key: input["key"]})
+  end
+
+  defp maybe_update_project_assigns(socket, "wb_load_project", input, %{success: true}) do
+    socket
+    |> Phoenix.Component.assign(:current_project, %{key: input["key"]})
+  end
+
+  defp maybe_update_project_assigns(socket, "wb_delete_project", _input, %{success: true}) do
+    socket
+    |> Phoenix.Component.assign(:projects, Projects.list_projects())
+    |> Phoenix.Component.assign(:current_project, nil)
+  end
+
+  defp maybe_update_project_assigns(socket, _tool_name, _input, _result), do: socket
 
   # Format tool name and input into a user-friendly summary
   defp format_tool_summary(tool_name, input) do
@@ -340,11 +386,24 @@ defmodule Loka.WorldBuilder.Chat do
       |> Phoenix.Component.assign(:chat_streaming, true)
       |> Phoenix.Component.assign(:chat_current_response, "")
 
+    # Run validation once after all tools in this batch complete (not per-tool)
+    socket =
+      if Map.get(socket.assigns, :had_content_tool, false) do
+        socket
+        |> maybe_store_validation()
+        |> Phoenix.Component.assign(:had_content_tool, false)
+      else
+        socket
+      end
+
     # Get project context
     project_key = get_in(socket.assigns, [:current_project, :key])
 
-    # Get system prompt
-    system = get_system_prompt(project_key)
+    # Get system prompt with selection context (includes pending validation if any)
+    system = get_system_prompt(project_key, socket.assigns)
+
+    # Clear pending validation after it's been injected into the prompt
+    socket = Phoenix.Component.assign(socket, :pending_validation, nil)
 
     # Get tools
     tools = AnthropicClient.get_tools()
@@ -420,7 +479,64 @@ defmodule Loka.WorldBuilder.Chat do
   defp format_error(error) when is_binary(error), do: error
   defp format_error(error), do: inspect(error)
 
-  defp get_system_prompt(project_key) do
+  defp maybe_store_validation(socket) do
+    try do
+      results = ValidationManager.validate_all()
+
+      if results.total_errors > 0 or results.total_warnings > 0 do
+        feedback = format_validation_feedback(results)
+        Phoenix.Component.assign(socket, :pending_validation, feedback)
+      else
+        socket
+      end
+    rescue
+      _ -> socket
+    end
+  end
+
+  defp format_validation_feedback(results) do
+    parts = []
+
+    parts =
+      if results.total_errors > 0 do
+        error_msgs = collect_validation_messages(results, :errors)
+        parts ++ ["Errors (#{results.total_errors}): #{Enum.join(error_msgs, "; ")}"]
+      else
+        parts
+      end
+
+    parts =
+      if results.total_warnings > 0 do
+        warning_msgs = collect_validation_messages(results, :warnings)
+        parts ++ ["Warnings (#{results.total_warnings}): #{Enum.join(warning_msgs, "; ")}"]
+      else
+        parts
+      end
+
+    "[Validation after your last action] " <> Enum.join(parts, " | ")
+  end
+
+  defp collect_validation_messages(results, field) do
+    quest_msgs = Map.get(results.quests, field, []) |> Enum.map(&format_validation_msg/1)
+    cutscene_msgs = Map.get(results.cutscenes, field, []) |> Enum.map(&format_validation_msg/1)
+
+    room_msgs =
+      case field do
+        :errors ->
+          results.rooms.errors |> Enum.flat_map(fn r -> r.errors end) |> Enum.take(5)
+
+        :warnings ->
+          results.rooms.warnings |> Enum.flat_map(fn r -> r.warnings end) |> Enum.take(5)
+      end
+
+    (quest_msgs ++ cutscene_msgs ++ room_msgs) |> Enum.take(10)
+  end
+
+  # Quest/cutscene validators return tuples like {:missing_speaker, "quest_key", "npc_key"}
+  defp format_validation_msg(msg) when is_binary(msg), do: msg
+  defp format_validation_msg(msg) when is_tuple(msg), do: inspect(msg)
+
+  defp get_system_prompt(project_key, assigns) do
     base_prompt = load_system_prompt()
 
     project_context =
@@ -450,7 +566,18 @@ defmodule Loka.WorldBuilder.Chat do
         """
       end
 
-    base_prompt <> project_context
+    selection_context =
+      assigns
+      |> ContextBuilder.build()
+      |> ContextBuilder.format_for_system_prompt()
+
+    validation_context =
+      case Map.get(assigns, :pending_validation) do
+        nil -> ""
+        feedback -> "\n\n## Validation Feedback\n\n#{feedback}"
+      end
+
+    base_prompt <> project_context <> selection_context <> validation_context
   end
 
   defp load_system_prompt do

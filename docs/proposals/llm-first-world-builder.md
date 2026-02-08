@@ -13,7 +13,7 @@ The World Builder becomes an **LLM-first authoring environment** where the chat 
 **Current model:** Two parallel paths (manual forms + LLM chat) that both produce YAML content.
 **Proposed model:** LLM is the primary authoring path. Visual panels are reactive viewers with inline editing for tweaks.
 
-The manual creation path remains fully functional but is deprioritized in the UX flow. Power users can still hand-craft every dialogue node, but the default experience assumes you're talking to the AI.
+The manual creation path remains fully functional. Critically, the system supports a **spectrum of LLM involvement** — from fully AI-generated content to fully handcrafted content where the LLM only handles structural plumbing. The MUD community values handcrafted content; this architecture respects that while making the mechanical work painless.
 
 ---
 
@@ -292,7 +292,6 @@ The inspector's role shifts from "primary editor" to "quick-fix tool."
 
 Key behaviors:
 - Editing a field in the inspector writes directly (no preview cycle needed for single-field changes).
-- Inspector shows a "Source: LLM" or "Source: Manual" indicator per field, so you know what was AI-generated vs. hand-edited.
 - After manual edits, the chat context updates so the LLM knows about your changes.
 
 ### 4.5 Validation Feedback Loop
@@ -338,7 +337,94 @@ wb_validate_preview()  # Validates buffered preview changes
 wb_validate_world()    # Full world validation
 ```
 
-### 4.6 Batch Undo for LLM Operations
+### 4.6 Handcraft-First Workflow (Assist Mode)
+
+Many MUD builders want to write every word themselves. LLM-generated prose feels off, and community credibility depends on the content being genuinely human-crafted. The World Builder must support this as a **first-class workflow**, not an afterthought you get by ignoring the chat panel.
+
+#### Philosophy: LLM as Toolbelt, Not Author
+
+In Assist mode, the LLM is a structural engineer and librarian. It handles the tedious mechanical work — YAML plumbing, exit wiring, validation, reference lookups, spatial layout — so the builder can focus entirely on the creative work: writing descriptions, crafting dialogue, designing encounters.
+
+The LLM **never writes prose** in this mode. Not descriptions, not dialogue, not emotes, not quest journal entries. It generates skeletons with clearly marked placeholders that the human fills in.
+
+#### What the LLM Does in Assist Mode
+
+| Task | Example |
+|------|---------|
+| **Scaffold structure** | "Create 5 rooms in an L-shape for a cave system" → generates keys, exits, coordinates, zone assignment. All descriptions are `[TODO]` placeholders. |
+| **Wire connections** | "Connect the blacksmith to the market square" → creates bidirectional exits, handles YAML formatting |
+| **Validate content** | "Check this zone for problems" → runs validators, reports orphan rooms, broken references, missing fields |
+| **Reference lookup** | "What fields does a merchant NPC need?" → shows schema, examples from existing content |
+| **Format conversion** | "Turn these notes into quest YAML" → structures your prose into proper YAML format without rewriting it |
+| **Spatial layout** | "Arrange these rooms on the map" → assigns coordinates, avoids overlaps |
+| **Bulk operations** | "Add a spawns section to all 12 rooms in this zone" → mechanical edits across files |
+| **Analysis** | "Which NPCs in this zone don't have dialogue?" → audits without generating |
+
+#### What the LLM Never Does in Assist Mode
+
+- Write room descriptions or atmospheric text
+- Author dialogue lines or NPC speech
+- Generate quest narrative or journal entries
+- Create emotes, ambient messages, or flavor text
+- Rewrite or "improve" human-written prose (unless explicitly switched to Design mode)
+
+#### Placeholder System
+
+When the LLM scaffolds content in Assist mode, creative fields use clear markers:
+
+```yaml
+key: cave_entrance
+type: room
+data:
+  name: "[NAME: cave entrance room]"
+  description: "[DESCRIBE: first room of cave system, connects to forest]"
+  zone: whispering_caverns
+  exits:
+    north:
+      target: cave_tunnel_1
+  spawns: []
+  ambient_messages:
+    - "[AMBIENT: cave atmosphere, sound/smell/sight]"
+    - "[AMBIENT: environmental detail]"
+```
+
+Placeholders follow the format `[VERB: context hint]` so the builder knows what to write and has spatial/structural context without the LLM putting words in their mouth.
+
+The World Builder UI highlights `[TODO]` and `[DESCRIBE]` placeholders visually — unfilled fields glow or show a badge count — so builders can see at a glance what still needs their attention.
+
+#### Assist Mode Quick Actions
+
+When Assist mode is active, quick actions change to reflect the non-generative workflow:
+
+**No selection:**
+- "Scaffold a new area" (empty rooms with placeholders)
+- "Check world for issues" (validation)
+- "Show unfilled placeholders" (audit)
+- "Import my notes as YAML" (formatting)
+
+**Room selected:**
+- "Add exits to nearby rooms" (wiring)
+- "Show this room's connections" (analysis)
+- "Add placeholder fields" (scaffold spawns, ambient, etc.)
+- "Validate this room" (check for issues)
+
+**NPC selected:**
+- "Create empty dialogue tree" (scaffold nodes, no prose)
+- "Wire to quest" (mechanical connection)
+- "Show required fields" (what's missing)
+- "Add behavior scaffold" (script skeleton)
+
+#### Switching Between Modes
+
+Builders can work in Assist mode by default and temporarily switch to Design mode when they want the LLM to draft something — for instance, generating a first pass at ambient messages that they'll heavily rewrite. The switch is always intentional.
+
+The mode toggle is explicit (button or keyboard shortcut), not auto-detected. Assist mode builders shouldn't be surprised by the LLM suddenly generating prose.
+
+#### Future Consideration: Content Provenance
+
+If community demand materializes for verifiable tracking of human vs. AI authorship, a lightweight per-entity tag (e.g., `_created_with: assist` in the YAML) would cover most use cases without the complexity of per-field tracking. Per-field provenance is tempting but problematic: it's easily gamed (copy-paste from chat), adds a metadata tax to every future feature, and tries to solve a social problem (trust) with technology. The real proof of handcrafted content is in how it reads, not in metadata. Assist mode's existence and workflow is the statement — not a report.
+
+### 4.7 Batch Undo for LLM Operations
 
 All changes from a single LLM interaction should be undoable as one operation.
 
@@ -500,12 +586,13 @@ Different interaction styles for different workflows:
 
 | Mode | Behavior | Use Case |
 |------|----------|----------|
-| **Design** | Conversational, preview-first, suggests options | Building new content from scratch |
+| **Design** | Conversational, preview-first, suggests options | Building new content from scratch (LLM generates) |
+| **Assist** | Structural only, never writes prose, placeholders for creative fields | Handcrafted content with LLM doing mechanical work |
 | **Edit** | Direct, executes immediately on selected entity | Quick tweaks to existing content |
 | **Review** | Read-only analysis, suggestions only | Auditing content quality |
 | **Script** | Code-focused, shows sandbox output | Writing Elixir behaviors |
 
-Mode is auto-detected from the message or manually toggled.
+Mode is toggled explicitly via button or keyboard shortcut. **Assist mode** is the recommended default for builders who want full creative control — it can be set as the project default in settings.
 
 ---
 
@@ -544,11 +631,10 @@ Want me to generate this? I can adjust anything first."
 User: "Looks great, but make it 4 buildings - skip the blacksmith.
        And the quest should involve a missing goat instead."
 
-Claude updates plan, generates preview.
-Preview cards appear inline.
-Viewport shows ghost rooms in spatial layout.
-User reviews, clicks [Apply All].
-All 4 rooms, 3 NPCs, quest, dialogues created as one batch.
+Claude updates plan, then creates the content.
+All 4 rooms, 3 NPCs, quest, dialogues created.
+Map refreshes. Builder reviews in viewport and inspector.
+Validation auto-runs, Claude reports any issues.
 ```
 
 ### 7.2 Refining Existing Content
@@ -559,15 +645,16 @@ User selects "novice_pema" in hierarchy.
 User: "Her dialogue feels flat. Make her more nervous and add
        fidgeting emotes."
 
-Claude reads current NPC data via context awareness.
-Shows diff card:
+Claude reads current NPC data via context awareness (knows
+novice_pema is selected without being told).
+
+Claude updates the NPC:
   ~ dialogue.greeting.text: "Hello, traveler" →
     "Oh! You startled me. I... yes, hello."
   + emote.idle_fidget: "fidgets with the hem of her robe"
   + emote.nervous_glance: "glances toward the monastery gates"
 
-User: "Perfect, apply it."
-Changes committed. Inspector updates. Viewport unchanged (NPC edit).
+Inspector updates with new data. Builder reviews the changes.
 ```
 
 ### 7.3 Quest Chain Design
@@ -589,12 +676,60 @@ Claude proposes:
   dialogue branches for 3 existing NPCs, 3 quest YAMLs,
   1 cutscene for Act 2 climax.
 
-Preview renders all entities.
-User can click into any preview card to view/edit YAML.
-User tweaks Quest 2's reward, then applies all.
+Claude creates all entities. Validation auto-runs.
+Builder reviews in inspector, tweaks Quest 2's reward.
 ```
 
-### 7.4 Script Authoring
+### 7.4 Handcrafted Zone (Assist Mode)
+
+```
+Builder has Assist mode active (project default).
+
+Builder: "I need a 6-room cave system. L-shaped layout,
+         zone name whispering_caverns, entrance from the
+         forest_path room."
+
+Claude: "I'll scaffold 6 rooms in an L-shape:
+
+  [entrance] ── [tunnel_1] ── [tunnel_2]
+                                  |
+               [pool] ── [fork] ── [dead_end]
+
+  All rooms have placeholder descriptions and names.
+  Entrance is connected to forest_path via south exit.
+  Want me to generate this scaffold?"
+
+Builder: "Move the pool to branch off tunnel_1 instead."
+
+Claude adjusts layout, creates the 6 rooms.
+All rooms have [DESCRIBE: ...] placeholders instead of
+AI-generated prose (because Assist mode is active).
+Map refreshes showing the new layout.
+
+Builder opens cave_entrance in the Inspector.
+Types the description by hand:
+
+  "Water drips from somewhere above, each drop
+   echoing off stone worn smooth by centuries of
+   passage. The air tastes of mineral and old earth.
+   Ahead, the tunnel narrows into darkness."
+
+Builder: "Which rooms still need descriptions?"
+
+Claude: "4 of 6 rooms have unfilled placeholders:
+  - tunnel_1: [DESCRIBE], [NAME]
+  - tunnel_2: [DESCRIBE], [NAME]
+  - fork: [DESCRIBE], [NAME], [AMBIENT x2]
+  - dead_end: [DESCRIBE], [NAME]
+
+  pool and entrance are complete."
+
+Builder works through each room, writing every word.
+The LLM never wrote a single line of prose.
+Content is verifiably handcrafted.
+```
+
+### 7.5 Script Authoring
 
 ```
 User: "I need a behavior script where an NPC wanders between
@@ -627,122 +762,89 @@ the day and stay put at night. Want me to apply it?"
 
 ## 8. Implementation Phases
 
-### Phase 1: Foundation (Preview System + Context Awareness)
+> **Note (Feb 2026 review):** Phases reprioritized after gap analysis. Preview system deferred — the current flow (Claude proposes plan → builder approves → tools execute → review in inspector) is sufficient. YAML files are cheap to create/delete. The highest-value improvements are context awareness, system prompt upgrades, and validation feedback.
 
-**Goal:** LLM generates previews, user reviews before committing.
+### Phase 1: Context Awareness + System Prompt
 
-**Changes:**
-
-1. **Preview buffer system**
-   - New assigns: `pending_changes`, `preview_mode`, `preview_ghost_rooms`
-   - New tools: `wb_preview_changes`, `wb_commit_changes`, `wb_discard_changes`
-   - ToolExecutor routes to preview buffer instead of immediate execution
-   - System prompt updated to use preview-first flow
-
-2. **Context injection**
-   - `Chat.build_context/1` reads selected room, entity, editor state
-   - Context injected as system message prefix on each request
-   - Selected room/entity auto-included in tool calls
-
-3. **Preview rendering in chat**
-   - Preview cards component for chat messages
-   - Expand/collapse per-entity YAML view
-   - [Apply All] / [Cancel] buttons
-   - Ghost room rendering on Canvas2DViewport
-
-4. **Batch undo**
-   - Server-side undo groups wrapping preview commits
-   - Single Ctrl+Z reverts entire LLM generation
-
-**Estimated scope:** ~800-1200 lines of Elixir, ~200 lines JS
-
-### Phase 2: UI Layout + Rich Messages
-
-**Goal:** Chat becomes the primary panel. Rich message types.
+**Goal:** Chat knows what you're looking at. Modes shape LLM behavior.
 
 **Changes:**
 
-1. **Layout modes**
-   - Design mode (chat-primary) and Review mode (visual-primary)
-   - Toggle keybinding (e.g., `Ctrl+Shift+L`)
-   - Panel sizes adjust automatically per mode
-   - Contextual panel visibility (viewport appears when rooms discussed)
+1. **Context injection into chat**
+   - `Chat.build_context/1` reads `selected_room`, `selected_entity`, `editing_mode` from socket assigns
+   - Context injected as system message prefix on each API request
+   - Enables "add an NPC here" / "improve this room's description" without naming targets
 
-2. **Rich message components**
-   - Preview cards with inline YAML
-   - Diff cards for modifications
-   - Validation cards with auto-fix buttons
-   - Mini map snippets (ASCII or small canvas)
+2. **System prompt overhaul**
+   - Add Assist mode instructions (never write prose, scaffold with placeholders)
+   - Add context awareness rules (how to interpret selection context)
+   - Add validation awareness (check your own output)
+   - Keep existing Design/Build workflow and narrative voice rules
+
+3. **Chat mode toggle (Design / Assist)**
+   - New `chat_mode` assign (`:design` or `:assist`)
+   - Toggle button in chat panel header
+   - Mode appended to system prompt, changes LLM behavior
+   - Assist mode: placeholder generation, no prose, structural work only
+
+**Estimated scope:** ~200-300 lines of Elixir, ~20 lines JS/CSS
+
+### Phase 2: Validation Feedback + Contextual Quick Actions
+
+**Goal:** LLM catches its own mistakes. Quick actions adapt to selection.
+
+**Changes:**
+
+1. **Auto-validation after tool execution**
+   - After room/NPC/quest creation tools, run `ValidationManager.validate_all/0`
+   - Inject validation warnings/errors as system message so Claude self-corrects
+   - New tools: `wb_validate_world`, `wb_validate_zone`
+
+2. **Analysis tools**
+   - `wb_search_content` — full-text search across all YAML content
+   - `wb_analyze_connectivity` — find orphan rooms, dead ends, unreachable areas
 
 3. **Contextual quick actions**
-   - Quick action buttons change based on selection
-   - No selection → high-level creation actions
-   - Room selected → room-specific actions
-   - NPC selected → NPC-specific actions
+   - Quick action buttons change based on `selected_room` / `selected_entity`
+   - No selection → "Design a new area", "Create a quest", "Audit the world"
+   - Room selected → "Describe this room", "Add NPCs here", "Add exits"
+   - NPC selected → "Write dialogue", "Create a quest for this NPC"
 
-4. **Chat modes**
-   - Design / Edit / Review / Script mode indicators
-   - Auto-detection from message content
-   - Mode affects system prompt and tool availability
+**Estimated scope:** ~400-500 lines of Elixir, ~50 lines JS/CSS
 
-**Estimated scope:** ~600-800 lines Elixir (components), ~300 lines JS/CSS
+### Phase 3: Polish + Assist Mode Refinement
 
-### Phase 3: Advanced Tools + Validation Loop
-
-**Goal:** LLM can analyze, validate, and self-correct.
+**Goal:** Assist mode fully realized. UI polish.
 
 **Changes:**
 
-1. **Analysis tools**
-   - `wb_analyze_connectivity`, `wb_analyze_quest_completability`
-   - `wb_search_content`, `wb_get_entity_relationships`
-   - `wb_analyze_zone_balance`
+1. **Placeholder system for Assist mode**
+   - Tools check `chat_mode` and use `[TODO]` / `[DESCRIBE]` placeholders when `:assist`
+   - Inspector highlights unfilled placeholder fields visually
+   - "Show unfilled placeholders" quick action
 
-2. **Batch generation tools**
-   - `wb_generate_zone`, `wb_generate_quest_chain`
-   - `wb_generate_npc_full`, `wb_populate_room`
+2. **Chat mode expansion (Edit / Review)**
+   - Edit mode: direct, minimal conversation, executes on selected entity
+   - Review mode: read-only analysis, suggestions only, no modifications
 
-3. **Auto-validation feedback**
-   - Run validators after preview generation
-   - Inject validation results into chat as system message
-   - LLM self-corrects before user reviews
-   - [Auto-Fix] button on validation cards
+3. **Layout mode toggle (optional)**
+   - Design mode (chat-primary) and Review mode (visual-primary)
+   - If builder demand justifies it
 
-4. **Refinement tools**
-   - `wb_rewrite_descriptions`, `wb_add_ambient_detail`
-   - `wb_suggest_improvements`
-   - Style consistency checks across a zone
+**Estimated scope:** ~300-500 lines Elixir, ~100 lines JS/CSS
 
-**Estimated scope:** ~1000-1500 lines Elixir (tools + validation)
+### Deferred / Revisit Later
 
-### Phase 4: Polish + Workflows
-
-**Goal:** Streamlined end-to-end workflows.
-
-**Changes:**
-
-1. **Workflow templates**
-   - "New Zone" workflow: guided multi-step generation
-   - "New Storyline" workflow: act structure → quests → content
-   - "Content Audit" workflow: analyze + suggest + fix
-   - Workflows are just pre-written system prompts + tool sequences
-
-2. **History and branching**
-   - Chat history persisted per project
-   - "Continue where we left off" across sessions
-   - Branch conversations for exploring alternatives
-
-3. **Collaborative review**
-   - Share preview links (read-only view of proposed changes)
-   - Comments on preview cards
-   - Approval flow for team environments
-
-4. **Metrics and feedback**
-   - Track what gets accepted vs. rejected vs. modified
-   - Use rejection patterns to improve system prompts
-   - Content quality scoring
-
-**Estimated scope:** ~500-800 lines Elixir
+| Feature | Why Deferred |
+|---------|-------------|
+| **Preview buffer system** | Current flow (plan → approve → execute → review in inspector) is sufficient. YAML files are cheap to create/delete. PreviewManager exists if needed later. |
+| **Batch undo** | Less urgent without preview system. Per-operation undo covers most cases. |
+| **Rich message types** (diff cards, map snippets) | Functional without them. Chat already renders tool results. |
+| **Layout mode switching** | Builders can manually resize panels today. |
+| **Batch generation wrapper tools** | Claude already chains individual tool calls effectively. |
+| **Refinement tools** | Premature — let usage patterns reveal what's needed. |
+| **Chat history/branching** | Over-engineered for current stage. |
+| **Collaborative review** | Single-builder use case for now. |
 
 ---
 
@@ -759,7 +861,6 @@ Loaded from `priv/world_builder/system_prompt.md`. General-purpose assistant wit
 BASE PROMPT
 ├── Role definition (World Builder AI, not generic assistant)
 ├── Content standards (Loka narrative voice, MUD conventions)
-├── Preview protocol (always preview, never execute directly)
 ├── Context awareness rules (how to use selection context)
 │
 ├── MODE: Design
@@ -767,6 +868,13 @@ BASE PROMPT
 │   ├── Propose plans before generating
 │   ├── Ask clarifying questions
 │   └── Generate complete entity sets
+│
+├── MODE: Assist
+│   ├── NEVER write prose (descriptions, dialogue, emotes, journal text)
+│   ├── Scaffold structure with [TODO] placeholders
+│   ├── Wire connections, assign coordinates, format YAML
+│   ├── Validate, analyze, and reference lookup only
+│   └── When asked to "write" or "describe", remind builder to switch to Design mode
 │
 ├── MODE: Edit
 │   ├── Direct, minimal conversation
@@ -811,50 +919,25 @@ User Input → Chat → AnthropicClient → Tool Call → ToolExecutor
   → LiveView refreshes
 ```
 
-### Proposed Flow
+### Proposed Flow (Context-Aware)
 
 ```
-User Input → Chat (with context) → AnthropicClient → Tool Call
-  → ToolExecutor (preview mode)
-  → Preview Buffer (socket assigns)
-  → Preview Cards rendered in chat
-  → Ghost rendering on viewport
-  → User reviews
-
-  [Apply]  → Batch executor → Managers → YAML → Refresh → Undo group
-  [Edit]   → Modify buffer → Re-render previews
-  [Cancel] → Clear buffer
+User Input → Chat (with selection context) → AnthropicClient → Tool Call
+  → ToolExecutor (immediate write, same as today)
+  → YAML file written → LiveView refreshes
+  → Auto-validation runs
+  → Validation results injected as system message
+  → Claude self-corrects if issues found
+  → Builder reviews in Inspector / Viewport
 ```
 
-### Key Interfaces
+### Key Interface
 
 ```elixir
-# Preview buffer
-defmodule Loka.WorldBuilder.PreviewBuffer do
-  @type change :: %{
-    id: String.t(),
-    type: :room | :npc | :item | :quest | :dialogue | :script | :zone,
-    action: :create | :update | :delete,
-    data: map(),
-    yaml_preview: String.t(),
-    validation: %{errors: list(), warnings: list()}
-  }
-
-  def add(socket, change)
-  def remove(socket, change_id)
-  def update(socket, change_id, new_data)
-  def commit_all(socket)
-  def discard_all(socket)
-  def validate_all(socket)
-end
-```
-
-```elixir
-# Context builder
+# Context builder — reads LiveView assigns, formats for system prompt
 defmodule Loka.WorldBuilder.ContextBuilder do
   def build(socket) :: map()
   def format_for_system_prompt(context) :: String.t()
-  def selection_summary(socket) :: String.t()
 end
 ```
 
@@ -875,18 +958,17 @@ This is **not** a rewrite. It's a progressive enhancement.
 - Keyboard shortcuts
 
 ### What Changes
-- Chat panel position and sizing
-- Tool execution routing (preview buffer layer)
-- System prompt structure
-- Quick action buttons (contextual)
-- New message rendering components
-- New socket assigns for preview state
+- System prompt structure (modes, context awareness, validation feedback)
+- Chat module gains context injection
+- Quick action buttons become contextual
+- New `chat_mode` assign for Design/Assist toggle
+- New validation tools for Claude
+- New analysis tools (search, connectivity)
 
 ### Backward Compatibility
-- Direct execution mode remains available (Edit mode skips preview for small changes)
 - All manual editing paths still work
 - Users who prefer form-based editing are unaffected
-- Preview system is additive, not a replacement
+- Tools execute the same way — context and modes are additive
 
 ---
 
@@ -894,13 +976,13 @@ This is **not** a rewrite. It's a progressive enhancement.
 
 | Risk | Mitigation |
 |------|------------|
-| LLM latency makes workflow feel slow | Streaming previews, show plan immediately, generate in background |
-| Preview buffer gets stale if world changes | Validate against current state at commit time, warn on conflicts |
-| Context window limits for large worlds | Selective context (only nearby rooms, relevant entities), summarize |
-| Users confused by two modes | Default to Design mode, auto-switch based on action |
-| Generated content quality varies | Validation feedback loop, style guide in prompt, human review step |
-| Cost of LLM calls increases | Cache common queries, batch tool results, use smaller models for analysis |
-| Undo complexity with batch operations | Group undo is well-understood pattern, test thoroughly |
+| LLM latency makes workflow feel slow | Streaming already implemented; keep tool calls fast |
+| Context window limits for large worlds | Selective context (only selected room/entity, not entire world) |
+| Users confused by Design vs Assist mode | Default to Design, clear toggle with label, mode indicator in chat |
+| Generated content quality varies | Validation feedback loop, style guide in prompt, review in inspector |
+| Cost of LLM calls increases | Cache common queries, use smaller models for analysis tools |
+| Assist mode placeholders feel clunky | Clear `[VERB: hint]` format, visual highlighting in inspector |
+| Context injection sends stale data | Re-read assigns on each message send, not cached |
 
 ---
 
@@ -918,9 +1000,7 @@ This is **not** a rewrite. It's a progressive enhancement.
 
 ## 14. Open Questions
 
-1. **Should preview buffer persist across sessions?** If the user closes the tab with pending previews, should they be there when they come back?
-
-2. **Multi-model support for different tasks?** Use a smaller/faster model for analysis tools and the full model for generation? The multi-provider support already exists.
+1. **Multi-model support for different tasks?** Use a smaller/faster model for analysis tools and the full model for generation? The multi-provider support already exists.
 
 3. **Should the LLM have access to the terminal?** Could it play-test its own quest by issuing commands in the MUD terminal and checking outcomes?
 
@@ -929,3 +1009,5 @@ This is **not** a rewrite. It's a progressive enhancement.
 5. **Template library:** Should there be a curated set of generation templates (village template, dungeon template, quest chain template) that the LLM uses as starting points?
 
 6. **Collaboration:** If multiple builders are working simultaneously, how do previews and commits interact?
+
+7. **Content provenance (deferred):** If demand arises for tracking human vs. AI authorship, what's the minimum viable approach? A per-entity `_created_with: assist` tag in YAML is likely sufficient. Per-field tracking adds significant complexity for marginal value.

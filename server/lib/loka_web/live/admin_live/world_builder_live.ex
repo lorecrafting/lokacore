@@ -209,6 +209,8 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
      |> assign(:chat_current_tool, nil)
      |> assign(:chat_tool_step, 0)
      |> assign(:chat_total_steps, 0)
+     |> assign(:chat_mode, :design)
+     |> assign(:pending_validation, nil)
      # Audit log state
      |> assign(:show_audit_log, false)
      |> assign(:audit_entries, [])
@@ -326,6 +328,9 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
           current_tool={@chat_current_tool}
           tool_step={@chat_tool_step}
           total_steps={@chat_total_steps}
+          chat_mode={@chat_mode}
+          selected_room={@selected_room}
+          selected_entity={@selected_entity}
         />
       </div>
 
@@ -2564,6 +2569,11 @@ defmodule LokaWeb.AdminLive.WorldBuilderLive do
 
   def handle_event("cancel_streaming", _params, socket) do
     {:noreply, Loka.WorldBuilder.Chat.cancel_streaming(socket)}
+  end
+
+  def handle_event("toggle_chat_mode", _params, socket) do
+    new_mode = if socket.assigns.chat_mode == :design, do: :assist, else: :design
+    {:noreply, assign(socket, :chat_mode, new_mode)}
   end
 
   # =============================================================================

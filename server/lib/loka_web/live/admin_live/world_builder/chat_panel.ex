@@ -38,6 +38,9 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
   attr :current_tool, :string, default: nil
   attr :tool_step, :integer, default: 0
   attr :total_steps, :integer, default: 0
+  attr :chat_mode, :atom, default: :design
+  attr :selected_room, :any, default: nil
+  attr :selected_entity, :any, default: nil
   attr :class, :string, default: ""
 
   def chat_panel(assigns) do
@@ -56,6 +59,29 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
           <span :if={!@collapsed}>AI Assistant</span>
         </button>
         <div class="flex-1"></div>
+        <button
+          :if={!@collapsed}
+          class={[
+            "flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium border rounded-wb-sm cursor-pointer transition-all duration-150 mr-1",
+            if(@chat_mode == :assist,
+              do: "bg-wb-warning/15 border-wb-warning/30 text-wb-warning hover:bg-wb-warning/25",
+              else:
+                "bg-transparent border-wb-border text-wb-text-dim hover:bg-wb-border hover:text-wb-text"
+            )
+          ]}
+          phx-click="toggle_chat_mode"
+          title={
+            if @chat_mode == :design,
+              do: "Switch to Assist mode (structural only, no prose)",
+              else: "Switch to Design mode (full creative generation)"
+          }
+        >
+          <.icon
+            name={if @chat_mode == :assist, do: "hero-wrench-screwdriver", else: "hero-paint-brush"}
+            class="size-3"
+          />
+          <span>{if @chat_mode == :design, do: "Design", else: "Assist"}</span>
+        </button>
         <button
           :if={!@collapsed}
           class="flex items-center justify-center w-6 h-6 bg-transparent border-none text-wb-text-dim cursor-pointer rounded-wb-sm mr-1 hover:bg-wb-border hover:text-wb-text"
@@ -126,74 +152,26 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
               Your creative partner for building immersive worlds. Describe what you want to create.
             </div>
             <div class="flex flex-col gap-1.5 w-full max-w-[280px]">
-              <button
-                type="button"
-                class="flex items-center gap-2.5 py-2.5 px-3.5 bg-wb-panel-alt border border-wb-chat-border rounded-wb-lg cursor-pointer transition-all duration-150 text-left text-wb-text text-[0.8rem] hover:bg-wb-input hover:border-wb-border-light hover:-translate-y-px hover:shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
-                phx-click="quick_chat"
-                phx-value-prompt="Create a tavern district with 5 interconnected rooms: a main hall, kitchen, cellar, upstairs rooms, and a back alley"
-              >
-                <div class="shrink-0 w-7 h-7 rounded-wb-md flex items-center justify-center text-[0.75rem] bg-[rgba(59,130,246,0.15)] text-wb-info">
-                  <.icon name="hero-home" class="size-4" />
-                </div>
-                <div class="flex-1 leading-tight">
-                  <span class="font-medium text-wb-text-bright block text-[0.8rem]">Build rooms</span>
-                  <span class="text-wb-chat-text-dim text-[0.7rem] block mt-px">
-                    Generate connected rooms with descriptions
-                  </span>
-                </div>
-              </button>
-              <button
-                type="button"
-                class="flex items-center gap-2.5 py-2.5 px-3.5 bg-wb-panel-alt border border-wb-chat-border rounded-wb-lg cursor-pointer transition-all duration-150 text-left text-wb-text text-[0.8rem] hover:bg-wb-input hover:border-wb-border-light hover:-translate-y-px hover:shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
-                phx-click="quick_chat"
-                phx-value-prompt="Design a mysterious merchant NPC with a branching dialogue tree, backstory, and a hidden quest hook"
-              >
-                <div class="shrink-0 w-7 h-7 rounded-wb-md flex items-center justify-center text-[0.75rem] bg-[rgba(168,85,247,0.15)] text-wb-chat-icon-npcs">
-                  <.icon name="hero-user" class="size-4" />
-                </div>
-                <div class="flex-1 leading-tight">
-                  <span class="font-medium text-wb-text-bright block text-[0.8rem]">
-                    Design an NPC
-                  </span>
-                  <span class="text-wb-chat-text-dim text-[0.7rem] block mt-px">
-                    Create NPCs with personality and dialogue
-                  </span>
-                </div>
-              </button>
-              <button
-                type="button"
-                class="flex items-center gap-2.5 py-2.5 px-3.5 bg-wb-panel-alt border border-wb-chat-border rounded-wb-lg cursor-pointer transition-all duration-150 text-left text-wb-text text-[0.8rem] hover:bg-wb-input hover:border-wb-border-light hover:-translate-y-px hover:shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
-                phx-click="quick_chat"
-                phx-value-prompt="Design a multi-part quest where the player investigates a series of disappearances in a village, with branching outcomes"
-              >
-                <div class="shrink-0 w-7 h-7 rounded-wb-md flex items-center justify-center text-[0.75rem] bg-[rgba(234,179,8,0.15)] text-wb-chat-icon-quests">
-                  <.icon name="hero-map" class="size-4" />
-                </div>
-                <div class="flex-1 leading-tight">
-                  <span class="font-medium text-wb-text-bright block text-[0.8rem]">
-                    Write a quest
-                  </span>
-                  <span class="text-wb-chat-text-dim text-[0.7rem] block mt-px">
-                    Craft quests with objectives and rewards
-                  </span>
-                </div>
-              </button>
-              <button
-                type="button"
-                class="flex items-center gap-2.5 py-2.5 px-3.5 bg-wb-panel-alt border border-wb-chat-border rounded-wb-lg cursor-pointer transition-all duration-150 text-left text-wb-text text-[0.8rem] hover:bg-wb-input hover:border-wb-border-light hover:-translate-y-px hover:shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
-                phx-click="quick_chat"
-                phx-value-prompt="Help me brainstorm a world design concept. I want to create a world that feels unique and memorable. What themes and aesthetics should I explore?"
-              >
-                <div class="shrink-0 w-7 h-7 rounded-wb-md flex items-center justify-center text-[0.75rem] bg-[rgba(34,197,94,0.15)] text-wb-success">
-                  <.icon name="hero-light-bulb" class="size-4" />
-                </div>
-                <div class="flex-1 leading-tight">
-                  <span class="font-medium text-wb-text-bright block text-[0.8rem]">Brainstorm</span>
-                  <span class="text-wb-chat-text-dim text-[0.7rem] block mt-px">
-                    Explore ideas and creative direction
-                  </span>
-                </div>
-              </button>
+              <%= for action <- quick_actions(assigns) do %>
+                <button
+                  type="button"
+                  class="flex items-center gap-2.5 py-2.5 px-3.5 bg-wb-panel-alt border border-wb-chat-border rounded-wb-lg cursor-pointer transition-all duration-150 text-left text-wb-text text-[0.8rem] hover:bg-wb-input hover:border-wb-border-light hover:-translate-y-px hover:shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
+                  phx-click="quick_chat"
+                  phx-value-prompt={action.prompt}
+                >
+                  <div class={"shrink-0 w-7 h-7 rounded-wb-md flex items-center justify-center text-[0.75rem] #{action.bg_class}"}>
+                    <.icon name={action.icon} class="size-4" />
+                  </div>
+                  <div class="flex-1 leading-tight">
+                    <span class="font-medium text-wb-text-bright block text-[0.8rem]">
+                      {action.title}
+                    </span>
+                    <span class="text-wb-chat-text-dim text-[0.7rem] block mt-px">
+                      {action.description}
+                    </span>
+                  </div>
+                </button>
+              <% end %>
             </div>
             <div class="text-[0.7rem] text-wb-chat-text-faint mt-4 leading-relaxed">
               <kbd class="inline-block px-1.5 py-px bg-wb-input border border-wb-border rounded-wb-sm text-[0.65rem] text-wb-text-muted font-[inherit]">
@@ -452,5 +430,225 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
     text
     |> Phoenix.HTML.html_escape()
     |> Phoenix.HTML.safe_to_string()
+  end
+
+  defp quick_actions(assigns) do
+    cond do
+      assigns[:selected_room] ->
+        room_actions(assigns[:chat_mode])
+
+      assigns[:selected_entity] ->
+        entity_actions(assigns[:selected_entity], assigns[:chat_mode])
+
+      true ->
+        default_actions(assigns[:chat_mode])
+    end
+  end
+
+  defp room_actions(:assist) do
+    [
+      %{
+        title: "Add exits",
+        description: "Connect this room to nearby rooms",
+        prompt: "Add exits connecting this room to nearby rooms",
+        icon: "hero-arrows-right-left",
+        bg_class: "bg-[rgba(59,130,246,0.15)] text-wb-info"
+      },
+      %{
+        title: "Add NPC spawns",
+        description: "Scaffold NPC placeholders here",
+        prompt: "Scaffold NPC spawns for this room with placeholder details",
+        icon: "hero-user-plus",
+        bg_class: "bg-[rgba(168,85,247,0.15)] text-wb-chat-icon-npcs"
+      },
+      %{
+        title: "Add placeholder fields",
+        description: "Scaffold ambient, spawns, tags",
+        prompt: "Add placeholder fields to this room (ambient messages, spawns, tags)",
+        icon: "hero-document-plus",
+        bg_class: "bg-[rgba(234,179,8,0.15)] text-wb-chat-icon-quests"
+      },
+      %{
+        title: "Validate this room",
+        description: "Check for issues",
+        prompt: "Validate this room and report any issues",
+        icon: "hero-check-circle",
+        bg_class: "bg-[rgba(34,197,94,0.15)] text-wb-success"
+      }
+    ]
+  end
+
+  defp room_actions(_design) do
+    [
+      %{
+        title: "Describe this room",
+        description: "Write a vivid description",
+        prompt: "Write a vivid, sensory description for this room",
+        icon: "hero-pencil",
+        bg_class: "bg-[rgba(59,130,246,0.15)] text-wb-info"
+      },
+      %{
+        title: "Add NPCs here",
+        description: "Create NPCs for this room",
+        prompt: "Create interesting NPCs for this room with dialogue",
+        icon: "hero-user-plus",
+        bg_class: "bg-[rgba(168,85,247,0.15)] text-wb-chat-icon-npcs"
+      },
+      %{
+        title: "Add exits",
+        description: "Connect to nearby rooms",
+        prompt: "Connect this room to nearby rooms with exits",
+        icon: "hero-arrows-right-left",
+        bg_class: "bg-[rgba(234,179,8,0.15)] text-wb-chat-icon-quests"
+      },
+      %{
+        title: "Add ambience",
+        description: "Ambient messages and detail",
+        prompt: "Add ambient messages and sensory details to this room",
+        icon: "hero-sparkles",
+        bg_class: "bg-[rgba(34,197,94,0.15)] text-wb-success"
+      }
+    ]
+  end
+
+  defp entity_actions(entity, :assist) do
+    type_label = entity.type |> to_string() |> String.capitalize()
+
+    [
+      %{
+        title: "Create dialogue scaffold",
+        description: "Empty dialogue tree",
+        prompt:
+          "Create an empty dialogue tree scaffold for this #{type_label} with placeholder nodes",
+        icon: "hero-chat-bubble-left-right",
+        bg_class: "bg-[rgba(59,130,246,0.15)] text-wb-info"
+      },
+      %{
+        title: "Wire to quest",
+        description: "Connect to a quest",
+        prompt:
+          "Connect this #{type_label} to an existing quest or scaffold a new quest structure",
+        icon: "hero-link",
+        bg_class: "bg-[rgba(168,85,247,0.15)] text-wb-chat-icon-npcs"
+      },
+      %{
+        title: "Show required fields",
+        description: "What's missing",
+        prompt: "What fields does this #{type_label} need? Show me what's missing or incomplete",
+        icon: "hero-clipboard-document-list",
+        bg_class: "bg-[rgba(234,179,8,0.15)] text-wb-chat-icon-quests"
+      },
+      %{
+        title: "Add behavior scaffold",
+        description: "Script skeleton",
+        prompt: "Scaffold a behavior script for this #{type_label} with placeholder logic",
+        icon: "hero-code-bracket",
+        bg_class: "bg-[rgba(34,197,94,0.15)] text-wb-success"
+      }
+    ]
+  end
+
+  defp entity_actions(entity, _design) do
+    type_label = entity.type |> to_string() |> String.capitalize()
+
+    [
+      %{
+        title: "Write dialogue",
+        description: "Create a dialogue tree",
+        prompt: "Create a dialogue tree for this #{type_label} with branching conversations",
+        icon: "hero-chat-bubble-left-right",
+        bg_class: "bg-[rgba(59,130,246,0.15)] text-wb-info"
+      },
+      %{
+        title: "Add behaviors",
+        description: "Scripts, emotes, schedules",
+        prompt: "Add behavior scripts and emotes to this #{type_label}",
+        icon: "hero-code-bracket",
+        bg_class: "bg-[rgba(168,85,247,0.15)] text-wb-chat-icon-npcs"
+      },
+      %{
+        title: "Create a quest",
+        description: "Quest involving this #{type_label}",
+        prompt: "Design a quest involving this #{type_label}",
+        icon: "hero-map",
+        bg_class: "bg-[rgba(234,179,8,0.15)] text-wb-chat-icon-quests"
+      },
+      %{
+        title: "Flesh out details",
+        description: "Add depth and backstory",
+        prompt: "Add more detail, backstory, and depth to this #{type_label}",
+        icon: "hero-sparkles",
+        bg_class: "bg-[rgba(34,197,94,0.15)] text-wb-success"
+      }
+    ]
+  end
+
+  defp default_actions(:assist) do
+    [
+      %{
+        title: "Scaffold an area",
+        description: "Empty rooms with placeholders",
+        prompt:
+          "Scaffold a new area with interconnected rooms and placeholder descriptions for me to fill in",
+        icon: "hero-home",
+        bg_class: "bg-[rgba(59,130,246,0.15)] text-wb-info"
+      },
+      %{
+        title: "Check for issues",
+        description: "Validate world content",
+        prompt: "Run validation on the world and report any issues",
+        icon: "hero-check-circle",
+        bg_class: "bg-[rgba(234,179,8,0.15)] text-wb-chat-icon-quests"
+      },
+      %{
+        title: "Show placeholders",
+        description: "Find unfilled content",
+        prompt: "Search for any rooms or entities that still have [TODO] or empty descriptions",
+        icon: "hero-magnifying-glass",
+        bg_class: "bg-[rgba(168,85,247,0.15)] text-wb-chat-icon-npcs"
+      },
+      %{
+        title: "Format my notes",
+        description: "Convert notes to YAML",
+        prompt: "Help me convert my design notes into proper YAML format for the game engine",
+        icon: "hero-document-text",
+        bg_class: "bg-[rgba(34,197,94,0.15)] text-wb-success"
+      }
+    ]
+  end
+
+  defp default_actions(_design) do
+    [
+      %{
+        title: "Design a new area",
+        description: "Rooms, NPCs, and quests",
+        prompt: "I want to create a new area with rooms, NPCs, and quests. Help me design it.",
+        icon: "hero-home",
+        bg_class: "bg-[rgba(59,130,246,0.15)] text-wb-info"
+      },
+      %{
+        title: "Design an NPC",
+        description: "Character with personality",
+        prompt:
+          "Design a memorable NPC with a branching dialogue tree, backstory, and quest hooks",
+        icon: "hero-user",
+        bg_class: "bg-[rgba(168,85,247,0.15)] text-wb-chat-icon-npcs"
+      },
+      %{
+        title: "Write a quest",
+        description: "Objectives and rewards",
+        prompt: "Design a multi-part quest with branching objectives and meaningful rewards",
+        icon: "hero-map",
+        bg_class: "bg-[rgba(234,179,8,0.15)] text-wb-chat-icon-quests"
+      },
+      %{
+        title: "Audit the world",
+        description: "Find issues and gaps",
+        prompt:
+          "Run validation on the world and analyze the content for issues, gaps, or improvements",
+        icon: "hero-magnifying-glass",
+        bg_class: "bg-[rgba(34,197,94,0.15)] text-wb-success"
+      }
+    ]
   end
 end
