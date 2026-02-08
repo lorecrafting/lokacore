@@ -26,10 +26,10 @@
       "Bash(find:*)",
       "WebFetch(domain:dev.to)",
       "WebFetch(domain:ndreynolds.com)",
-      "Bash(MIX_ENV=dev mix exmud.test.validate:*)",
+      "Bash(MIX_ENV=dev mix loka.test.validate:*)",
       "Bash(echo:*)",
       "Bash(git push:*)",
-      "Bash(MIX_ENV=dev mix exmud.test.balance:*)",
+      "Bash(MIX_ENV=dev mix loka.test.balance:*)",
       "Bash(mix deps.get:*)",
       "Bash(mix sobelow:*)",
       "Bash(claude-mem install:*)"
