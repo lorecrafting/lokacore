@@ -336,6 +336,8 @@ defmodule Loka.WorldBuilder.EntityManager do
     "#{slug}_#{short_id}"
   end
 
+  defp generate_unique_key(_), do: generate_unique_key("entity")
+
   defp build_components(:npc, attrs) do
     level = Map.get(attrs, :level, 1)
 

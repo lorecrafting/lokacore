@@ -191,12 +191,12 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
 
           <div
             :if={@streaming}
-            class="chat-message assistant streaming mb-3 py-2.5 px-3.5 rounded-[10px] relative bg-wb-panel-alt mr-[4%] border border-wb-chat-border"
+            class="chat-message assistant streaming mb-1.5 py-1.5 px-3 rounded-lg relative bg-wb-panel-alt mr-[4%] border border-wb-chat-border"
           >
             <div class="message-content text-[0.85rem] text-wb-text-bright leading-relaxed whitespace-pre-wrap">
               <div
                 :if={@current_tool}
-                class="current-tool-indicator flex items-center gap-2.5 py-2.5 px-3.5 rounded-[10px] mb-2.5 text-wb-tool-text text-[0.83rem] font-wb-mono bg-linear-to-br from-wb-tool-bg-from to-wb-tool-bg-to border border-wb-tool-border"
+                class="current-tool-indicator flex items-center gap-2 py-1.5 px-3 rounded-lg mb-1.5 text-wb-tool-text text-[0.83rem] font-wb-mono bg-linear-to-br from-wb-tool-bg-from to-wb-tool-bg-to border border-wb-tool-border"
               >
                 <.icon name="hero-wrench-screwdriver" class="size-4 animate-pulse" />
                 <span>{format_tool_name(@current_tool)}</span>
@@ -282,7 +282,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
   defp chat_message(assigns) do
     ~H"""
     <div class={[
-      "chat-message mb-3 py-2.5 px-3.5 rounded-[10px] relative",
+      "chat-message mb-1.5 py-1.5 px-3 rounded-lg relative",
       @message.role,
       @message.role == "user" &&
         "bg-linear-to-br from-wb-chat-user-bg-from to-wb-chat-user-bg-to ml-[12%] border border-wb-chat-user-border shadow-[0_1px_4px_rgba(0,0,0,0.2)]",
@@ -326,7 +326,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
 
   defp tool_use_display(assigns) do
     ~H"""
-    <div class="tool-use whitespace-normal bg-wb-tool-use-bg border border-wb-tool-use-border rounded-wb-lg py-2.5 px-3 mt-2 transition-colors duration-150 hover:border-wb-tool-use-border-hover">
+    <div class="tool-use whitespace-normal bg-wb-tool-use-bg border border-wb-tool-use-border rounded-wb-lg py-1.5 px-2.5 mt-1.5 transition-colors duration-150 hover:border-wb-tool-use-border-hover">
       <div class="tool-header flex items-center gap-2 text-wb-tool-header text-[0.78rem] font-medium">
         <.icon name="hero-wrench-screwdriver" class="size-4 text-wb-tool-header-icon" />
         <span class="tool-name text-wb-tool-name font-semibold">{format_tool_name(@tool.name)}</span>

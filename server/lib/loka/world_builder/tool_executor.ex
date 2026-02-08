@@ -767,10 +767,21 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
   defp execute_create_dialogue(input) do
     key = input["key"]
-    entity_key = input["entity_key"]
+    entity_key = input["npc"] || input["entity_key"]
     trigger = input["trigger"] || "on_talk"
-    entry_node = input["entry_node"]
-    nodes = input["nodes"] || %{}
+    raw_nodes = input["nodes"] || []
+
+    # Convert array format from schema [{id, text, choices}] to map format {id => {text, choices}}
+    nodes =
+      if is_list(raw_nodes) do
+        Map.new(raw_nodes, fn node -> {node["id"], Map.drop(node, ["id"])} end)
+      else
+        raw_nodes
+      end
+
+    entry_node =
+      input["entry_node"] ||
+        if is_list(raw_nodes) and raw_nodes != [], do: hd(raw_nodes)["id"], else: "start"
 
     with :ok <- validate_safe_key(key) do
       ensure_dialogues_dir()
