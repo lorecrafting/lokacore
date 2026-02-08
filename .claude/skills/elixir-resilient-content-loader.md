@@ -60,7 +60,7 @@ end
 1. **Log warnings, don't fail** - Invalid files should be visible but not blocking
 2. **Track errors in state** - Store `load_errors` for later inspection/reporting
 3. **Log success count** - Makes it obvious when loading works vs. fails silently
-4. **Match PrototypeLoader behavior** - Consistency across content systems
+4. **Match TypedObject.Loader behavior** - Consistency across content systems
 
 ## When This Pattern Applies
 

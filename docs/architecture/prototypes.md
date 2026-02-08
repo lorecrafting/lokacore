@@ -139,22 +139,22 @@ tags:
 
 ## Prototype API
 
-### PrototypeLoader
+### TypedObject.Loader
 
 ```elixir
 # Loads all YAML files into ETS (called on startup)
-PrototypeLoader.reload()
+TypedObject.Loader.reload()
 
 # Get prototype by key (with inheritance resolved)
-PrototypeLoader.get("goblin")
-# => %Prototype{key: "goblin", parent: "base_npc", ...}
+TypedObject.Loader.get("goblin")
+# => %TypedObject{key: "goblin", parent_key: "base_npc", ...}
 
 # List prototypes by type
-PrototypeLoader.list_by_type(:npc)
-# => [%Prototype{key: "goblin", ...}, %Prototype{key: "merchant", ...}]
+TypedObject.Loader.list_by_type(:entity, :npc)
+# => [%TypedObject{key: "goblin", ...}, %TypedObject{key: "merchant", ...}]
 
 # Validate all prototypes (check for broken references, cycles)
-PrototypeLoader.validate_all()
+TypedObject.Loader.validate_all()
 # => {:ok, stats} | {:error, errors}
 ```
 
@@ -232,27 +232,33 @@ yaml = WorldExporter.entity_to_yaml(entity)
 proto_map = WorldExporter.entity_to_prototype(entity)
 ```
 
-## Prototype Struct
+## TypedObject Struct
 
 ```elixir
-defmodule Loka.Engine.Prototype do
+defmodule Loka.Engine.TypedObject do
   defstruct [
-    :key,           # Unique identifier (required)
-    :type,          # :room | :npc | :item | :exit | :character (required)
-    :parent,        # Parent prototype key (optional)
-    :name,
-    :description,
-    :components,    # Map of component_type => data
-    :behaviors,     # List of behavior module names
-    :attributes,    # Flexible key-value storage
-    :tags,          # List of categorization tags
-    :scripts,       # Map of hook => script_name
-    :locks,         # Map of action => lock_string
-    :exits,         # (rooms only) Map of direction => room_key
-    :spawns,        # (rooms only) List of spawn definitions
+    :key,                # Unique identifier (required)
+    :type,               # :entity | :quest | :dialogue | :script | :zone (required)
+    :subtype,            # :npc | :room | :item | :exit (entities only)
+    :parent_key,         # Parent prototype key (optional)
+    :name,               # Display name
+    :description,        # Full description
+    :extra_description,  # Detailed examination text
+    :keywords,           # List of targeting keywords
+    :components,         # Map of component_type => data
+    :behaviors,          # List of behavior configs
+    :attributes,         # Flexible key-value storage
+    :tags,               # List of categorization tags
+    :scripts,            # Map of hook => script_name
+    :locks,              # Map of action => lock_string
+    :data,               # Type-specific fields (exits, spawns, etc.)
+    :metadata,           # System metadata
   ]
 end
 ```
+
+**Note**: YAML files still use legacy field names (`short_desc`, `long_desc`, `extra_desc`, `parent`, `type: npc`).
+The Loader automatically maps these to the new struct fields during loading.
 
 ## Hot Reload
 
@@ -260,7 +266,7 @@ Prototypes can be reloaded without restarting:
 
 ```elixir
 # Via code
-PrototypeLoader.reload()
+TypedObject.Loader.reload()
 
 # Via admin dashboard (System tab)
 # Click "Reload Prototypes" button

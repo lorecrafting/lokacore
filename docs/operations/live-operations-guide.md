@@ -26,7 +26,7 @@ This document provides a comprehensive analysis of Loka's capabilities for runni
 ### ✅ Strong Foundations
 
 **Content Hot-Reload:**
-- `PrototypeLoader.reload()` - YAML prototypes update without restart
+- `TypedObject.Loader.reload()` - YAML prototypes update without restart
 - 15+ content registries with reload support:
   - QuestRegistry, ZoneLoader, SocialLoader
   - ResourceRegistry, GatheringRegistry, CraftingRegistry
@@ -56,7 +56,7 @@ This document provides a comprehensive analysis of Loka's capabilities for runni
 
 ### Prototype Hot-Reload (YAML Content)
 
-**File:** `lib/loka/engine/prototype_loader.ex`
+**File:** `lib/loka/engine/typed_object/loader.ex`
 
 **Status:** ✅ FULLY SUPPORTED
 
@@ -69,7 +69,7 @@ def reload(server \\ __MODULE__)
 ```
 
 **How it works:**
-1. `PrototypeLoader.reload()` re-reads all YAML files from `priv/world/prototypes/`
+1. `TypedObject.Loader.reload()` re-reads all YAML files from `priv/world/prototypes/`
 2. Parses and validates prototypes
 3. Resolves parent inheritance chains
 4. Updates ETS table atomically (lines 404-420)
@@ -140,7 +140,7 @@ git push  # Triggers GitHub Actions deploy
 # 5. Hot-reload on live server (via IEx or admin API)
 iex> Session.broadcast_all("[System] Content update in 30 seconds...")
 iex> :timer.sleep(30_000)
-iex> PrototypeLoader.reload()
+iex> TypedObject.Loader.reload()
 iex> QuestRegistry.reload()
 iex> Session.broadcast_all("[System] New content loaded!")
 ```
@@ -452,7 +452,7 @@ git log --oneline priv/world/prototypes/
 git revert <commit>
 git push
 # Then reload on server:
-iex> PrototypeLoader.reload()
+iex> TypedObject.Loader.reload()
 ```
 
 ### Current LLM Integration Points
@@ -628,7 +628,7 @@ end
 
 1. **Add "Reload Content" button to Admin Dashboard**
    - Location: `lib/loka_web/live/admin_live/system_tab.ex`
-   - Action: Call `PrototypeLoader.reload()` + all registry reloads
+   - Action: Call `TypedObject.Loader.reload()` + all registry reloads
    - Effort: 30 minutes
 
 2. **Create pre-shutdown announcement task**
@@ -733,7 +733,7 @@ end
 ## References
 
 **Key Files Analyzed:**
-- `lib/loka/engine/prototype_loader.ex` - Prototype hot-reload
+- `lib/loka/engine/typed_object/loader.ex` - TypedObject hot-reload
 - `lib/loka/engine/entity_server.ex` - Entity lifecycle
 - `lib/loka/session/server.ex` - Session management
 - `lib/loka/framework/combat/combat_server.ex` - Combat state

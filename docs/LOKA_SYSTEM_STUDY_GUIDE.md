@@ -152,7 +152,7 @@ Loka.Supervisor (strategy: :one_for_one)
 ├── Engine Core (order critical!)
 │   ├── Hooks.TaskSupervisor
 │   ├── Loka.Engine.Hooks
-│   ├── Loka.Engine.PrototypeLoader
+│   ├── Loka.Engine.TypedObject.Loader
 │   ├── Loka.Engine.SocialLoader
 │   ├── Loka.Engine.EntityRegistry
 │   ├── Loka.Engine.CommandRegistry
@@ -245,8 +245,8 @@ The Engine Core provides foundational primitives that the Framework layer builds
 | **EventBus** | PubSub routing to subscribers |
 | **Command** | Command behavior protocol |
 | **CommandRegistry** | Command dispatch & aliases |
-| **Prototype** | YAML template structure |
-| **PrototypeLoader** | Loads & resolves prototype inheritance |
+| **TypedObject** | Unified content template structure |
+| **TypedObject.Loader** | Loads & resolves content inheritance |
 | **Spawner** | Instantiates entities from prototypes |
 | **Hooks** | Lifecycle callback system |
 | **Locks** | Access control expressions |
@@ -256,7 +256,7 @@ The Engine Core provides foundational primitives that the Framework layer builds
 ### Module Interaction Diagram
 
 ```
-Prototype (YAML) ──→ PrototypeLoader ──→ Spawner ──→ Entity
+YAML Content ──→ TypedObject.Loader ──→ Spawner ──→ Entity
                                               │
                                               ↓
                                         EntityServer
@@ -2538,7 +2538,7 @@ The World Builder is a comprehensive UI-driven content creation system (~7,600 L
 ├─────────────────────────────────────────────────────────────┤
 │ Content Modules (Content.Quest, Content.Dialogue, etc.)     │
 ├─────────────────────────────────────────────────────────────┤
-│ TypedObject.Loader + PrototypeLoader                        │
+│ TypedObject.Loader                                           │
 ├─────────────────────────────────────────────────────────────┤
 │ YAML Files (priv/world/prototypes/, quests/, etc.)          │
 └─────────────────────────────────────────────────────────────┘
@@ -2588,7 +2588,7 @@ npcs = EntityManager.list_entities(:npc)
 
 **Key Features:**
 - Merges default components with user-provided components
-- Reloads both `PrototypeLoader` and `TypedObject.Loader` on save
+- Reloads `TypedObject.Loader` on save
 - Serializes nested maps (including dialogue trees) to proper YAML format
 - Validates safe key names (no path traversal)
 
@@ -2990,7 +2990,7 @@ tags: [weapon, quest_reward]
 - `Entity`, `EntityServer`, `EntityRegistry`, `EntitySupervisor`, `Entities`
 - `Event`, `EventBus`
 - `Command`, `CommandRegistry`
-- `Prototype`, `PrototypeLoader`
+- `TypedObject`, `TypedObject.Loader`
 - `Spawner`, `Spawner.Editor`, `Spawner.Templates`
 - `Hooks`, `Locks`, `Scripting`, `ScriptingExtension`, `Scripts`
 - `Behavior`

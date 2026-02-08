@@ -71,7 +71,7 @@ This documentation covers the core engine architecture for Loka - an Elixir MUD 
                               │
       ┌─────────────┬─────────┼─────────┬─────────────┐
       │             │         │         │             │
-   Hooks     PrototypeLoader  │   EntityRegistry   Combat.RespawnManager
+   Hooks   TypedObject.Loader  │   EntityRegistry   Combat.RespawnManager
                               │
                     ┌─────────┴─────────┐
                     │                   │
@@ -84,7 +84,7 @@ This documentation covers the core engine architecture for Loka - an Elixir MUD 
 ```
 
 - **Hooks**: Registers lifecycle callbacks
-- **PrototypeLoader**: Loads YAML prototypes into ETS
+- **TypedObject.Loader**: Loads YAML content into ETS
 - **LayoutManager**: Auto-maintains room coordinates based on exits
 - **EntitySupervisor**: DynamicSupervisor for EntityServer processes
 - **EntityRegistry**: Process lookup + room-based broadcasting

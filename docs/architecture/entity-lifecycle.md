@@ -220,7 +220,7 @@ EntityServer.handle_event(pid, %Event{
 Loka.Application
        │
        ├── Loka.Engine.Hooks
-       ├── Loka.Engine.PrototypeLoader
+       ├── Loka.Engine.TypedObject.Loader
        ├── Loka.Engine.EntitySupervisor (DynamicSupervisor)
        │         │
        │         ├── EntityServer (room:abc123)

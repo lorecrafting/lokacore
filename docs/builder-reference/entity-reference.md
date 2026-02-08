@@ -363,7 +363,7 @@ mix loka.test.validate --only prototype,quest,dialogue
 
 # Check a specific prototype
 # In IEx:
-PrototypeLoader.get("npc_key")
+TypedObject.Loader.get("npc_key")
 ```
 
 ---

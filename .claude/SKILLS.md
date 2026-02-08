@@ -102,6 +102,38 @@ description: Knowledge for creating game content (quests, NPCs, items, rooms, di
 
 ---
 
+### world-builder-patterns
+
+```yaml
+name: world-builder-patterns
+description: Ensures World Builder code follows correct architecture patterns (EntityManager, RoomManager, LiveView components, entity data access).
+```
+
+**Activates when**: Working with World Builder code (LiveView, hooks, canvas)
+
+**Knows about**:
+- 3-layer architecture (LiveView, EntityManager, RoomManager)
+- Entity data access patterns
+- LiveView event handlers and assigns
+
+---
+
+### LiveView Pattern Skills (5 skills)
+
+These are detailed procedure skills for specific LiveView patterns:
+
+| Skill | File | When to Use |
+|-------|------|-------------|
+| Local Interaction | `liveview-local-interaction-pattern.md` | Drag/resize without server roundtrips |
+| Modal Events | `liveview-modal-event-pattern.md` | Modal close buttons not responding |
+| Nested Forms | `liveview-nested-forms-antipattern.md` | Forms inside forms (submission fails) |
+| Socket Testing | `liveview-socket-testing.md` | `KeyError: :__changed__` in tests |
+| Helper Testing | `liveview-helper-testing.md` | Testing modules that use `assign/3` |
+
+**Referenced from**: `frontend-hooks.md` rules, `frontend.md` rules, `testing.md` rules
+
+---
+
 ### llm-native-doc-audit
 
 ```yaml

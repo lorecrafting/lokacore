@@ -243,11 +243,11 @@ priv/world/prototypes/
 └── exits/          # Exit prototypes
 ```
 
-**Flow**: YAML → PrototypeLoader (ETS) → Spawner → EntitySchema (SQLite)
+**Flow**: YAML → TypedObject.Loader (ETS) → Spawner → EntitySchema (SQLite)
 
 ```elixir
 # Load prototypes on startup
-PrototypeLoader.reload()
+TypedObject.Loader.reload()
 
 # Spawn entity from prototype
 Spawner.spawn("goblin", location_id: room_id)

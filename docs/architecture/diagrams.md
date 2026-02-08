@@ -16,7 +16,7 @@ graph TD
         subgraph Engine["Engine Processes"]
             Hooks["Hooks GenServer"]
             HooksTaskSup["Hooks.TaskSupervisor"]
-            PrototypeLoader["PrototypeLoader"]
+            TypedObjectLoader["TypedObject.Loader"]
             EntityRegistry["EntityRegistry"]
             LayoutManager["LayoutManager"]
 
@@ -41,7 +41,7 @@ graph TD
 
     Engine --> Hooks
     Engine --> HooksTaskSup
-    Engine --> PrototypeLoader
+    Engine --> TypedObjectLoader
     Engine --> EntityRegistry
     Engine --> LayoutManager
     Engine --> EntitySup

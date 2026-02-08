@@ -75,7 +75,7 @@ Player can talk to NPC but can't accept quest.
 ### Diagnosis
 Check NPC dialogue for accept_quest action:
 ```elixir
-PrototypeLoader.get("npc_key")
+TypedObject.Loader.get("npc_key")
 # Look at components.dialogue_tree for accept_quest action
 ```
 
