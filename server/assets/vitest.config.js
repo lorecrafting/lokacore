@@ -5,8 +5,8 @@ export default defineConfig({
     environment: 'node',
     coverage: {
       provider: 'v8',
-      include: ['js/world_builder/**/*.js'],
-      exclude: ['js/world_builder/__tests__/**'],
+      include: ['js/hooks/**/*.js'],
+      exclude: ['js/hooks/__tests__/**'],
       reporter: ['text', 'text-summary'],
       thresholds: {
         lines: 70,

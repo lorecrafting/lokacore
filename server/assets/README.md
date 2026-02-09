@@ -11,11 +11,21 @@ assets/
 │   ├── variables.css        # Design tokens (--wb-*)
 │   ├── tailwind-config.css  # @theme exports, variants
 │   ├── admin-auth.css       # Login page styles
-│   └── world-builder/       # Domain-specific styles
+│   ├── builder.css          # Builder layout styles
+│   └── builder/             # Domain-specific styles
+│       └── terminal.css     # MUD terminal styles
 ├── js/
 │   ├── app.js               # Entry point
-│   ├── hooks/               # LiveView hooks (one per file)
-│   └── world_builder/       # Utilities (HookHelper, KeyboardManager, etc.)
+│   └── hooks/               # LiveView hooks + HookHelper utility
+│       ├── index.js         # Hook registration
+│       ├── HookHelper.js    # Automatic listener cleanup
+│       ├── scroll_bottom.js
+│       ├── chat_textarea.js
+│       ├── multi_api_key_config.js
+│       ├── mud_terminal.js
+│       ├── console_output.js
+│       ├── terminalMarkup.js  # Terminal markup parser
+│       └── __tests__/       # Vitest tests
 ├── vendor/                  # Third-party (heroicons, daisyUI, topbar)
 ├── .prettierrc              # Prettier config
 ├── .nvmrc                   # Node version (18)
@@ -27,10 +37,10 @@ assets/
 
 | Type | Convention | Example |
 |------|------------|---------|
-| Hooks | `snake_case.js` | `world_builder.js`, `panel_resize.js` |
-| Utilities | `PascalCase.js` | `HookHelper.js`, `Canvas2DViewport.js` |
-| Tests | `*.test.js` | `HookHelper.test.js` |
-| CSS | `kebab-case.css` | `chat-panel.css`, `quest-editor.css` |
+| Hooks | `snake_case.js` | `mud_terminal.js`, `scroll_bottom.js` |
+| Utilities | `PascalCase.js` | `HookHelper.js`, `terminalMarkup.js` |
+| Tests | `*.test.js` | `mud_terminal_parseMarkup.test.js` |
+| CSS | `kebab-case.css` | `terminal.css`, `builder.css` |
 
 ## Quick Commands
 
@@ -48,21 +58,18 @@ Build is handled by `mix assets.build` (esbuild + Tailwind).
 
 - **Hooks**: Use `HookHelper` for automatic listener cleanup
 - **CSS**: Use `--wb-*` design tokens only (no hex colors)
-- **Storage**: Import keys from `storageKeys.js`
-- **Keyboard**: Use `KeyboardManager` singleton
 
 ## Adding New Code
 
 | Type | Location | Registration |
 |------|----------|--------------|
 | Hook | `js/hooks/{name}.js` | Add to `hooks/index.js` |
-| CSS | `css/world-builder/{domain}.css` | Add import in `app.css` |
-| Utility | `js/world_builder/{Name}.js` | Import where needed |
+| CSS | `css/builder/{domain}.css` | Add import in `app.css` |
 
 ## Testing
 
 - Framework: Vitest
-- Location: `js/world_builder/__tests__/`
+- Location: `js/hooks/__tests__/`
 - Pattern: Mock browser globals with `vi.stubGlobal()`
 
 ## Design Tokens
@@ -112,12 +119,8 @@ npm run test:coverage # With coverage report
 
 ### Test Location
 
-Tests are in `js/world_builder/__tests__/`:
-- `HookHelper.test.js` - Lifecycle management
-- `KeyboardManager.test.js` - Keyboard shortcuts
-- `Canvas2DViewport.test.js` - Canvas orchestrator
-- `UndoManager.test.js` - Undo/redo stack
-- `Canvas2DRenderer.test.js` - Canvas drawing
+Tests are in `js/hooks/__tests__/`:
+- `mud_terminal_parseMarkup.test.js` - Terminal markup parsing
 
 ## Validation
 

@@ -42,7 +42,24 @@ defmodule LokaWeb.Channels.BuilderCommands.Help do
 
       Content:    create quest <key> <name>, edit quest <key> [field] [value]
                   quest info <key>, create dialogue <npc_key>
-                  dialogue info <key>
+                  dialogue info <key>, delete dialogue <key>
+                  list quests|dialogues [filter]
+
+      Zones:      create zone <key> <name>, edit zone <key> [field] [value]
+                  zone info <key>, delete zone <key>, list zones
+
+      Cutscenes:  create cutscene <key> <name>, cutscene info <key>
+                  delete cutscene <key>, list cutscenes
+
+      Storylines: create storyline <key> <name>, storyline info <key>
+                  delete storyline <key>, list storylines
+
+      Scripts:    script create <key> [hook], script info <key>
+                  script list [hook], script delete <key>
+                  script validate <key>, script test <key>
+                  script templates, script from-template <key> <tpl>
+                  script attach <script> <entity>
+                  script detach <script> <entity>
 
       Projects:   project new <key> <name>, project load <key>
                   project list, project delete <key>
@@ -56,8 +73,10 @@ defmodule LokaWeb.Channels.BuilderCommands.Help do
                   exit             - Leave chat mode
                   /ai clear        - Clear AI history
 
+    Abbreviations: dl=dialogue, sc=script, cs=cutscene, sl=storyline
+
     Type 'help <category>' for details. Categories: rooms, entities,
-    quests, projects, ai\
+    quests, dialogues, zones, cutscenes, storylines, scripts, projects, ai\
     """
   end
 
@@ -153,7 +172,98 @@ defmodule LokaWeb.Channels.BuilderCommands.Help do
     """
   end
 
+  defp help_for_topic("dialogues") do
+    """
+    Dialogue Commands:
+      create dialogue <npc_key>       - Create NPC dialogue
+      dialogue info <key>             - Show dialogue structure
+      delete dialogue <key>           - Delete dialogue
+      list dialogues [filter]         - List all dialogues
+
+    Abbreviation: dl = dialogue (e.g. 'dl info novice_pema')
+
+    Examples:
+      create dialogue merchant_bob
+      dialogue info novice_pema
+      dl info novice_pema
+    """
+  end
+
+  defp help_for_topic("zones") do
+    """
+    Zone Commands:
+      create zone <key> <name>         - Create empty zone
+      edit zone <key>                  - Show zone details
+      edit zone <key> <field> <value>  - Update zone field
+      zone info <key>                  - Show zone details
+      delete zone <key>               - Delete zone
+      list zones                      - List all zones
+
+    Examples:
+      create zone dark_forest The Dark Forest
+      edit zone dark_forest reset_mode manual
+      zone info dark_forest
+    """
+  end
+
+  defp help_for_topic("cutscenes") do
+    """
+    Cutscene Commands:
+      create cutscene <key> <name>   - Create cutscene skeleton
+      cutscene info <key>            - Show cutscene details
+      delete cutscene <key>          - Delete cutscene
+      list cutscenes                 - List all cutscenes
+
+    Abbreviation: cs = cutscene (e.g. 'cs info intro_scene')
+
+    Examples:
+      create cutscene intro_vision The Opening Vision
+      cutscene info intro_vision
+    """
+  end
+
+  defp help_for_topic("storylines") do
+    """
+    Storyline Commands:
+      create storyline <key> <name>  - Create storyline
+      storyline info <key>           - Show storyline details
+      delete storyline <key>         - Delete storyline
+      list storylines                - List all storylines
+
+    Abbreviation: sl = storyline (e.g. 'sl info main_arc')
+
+    Examples:
+      create storyline main_arc The Main Quest Line
+      storyline info main_arc
+    """
+  end
+
+  defp help_for_topic("scripts") do
+    """
+    Script Commands:
+      script create <key> [hook]           - Create script (default hook: on_enter)
+      script info <key>                    - Show script details
+      script list [hook]                   - List all scripts (optionally by hook)
+      script delete <key>                  - Delete script
+      script validate <key>               - Validate script syntax
+      script test <key>                    - Dry-run test
+      script templates                    - List available templates
+      script template <name>             - Show template details
+      script from-template <key> <tpl> [config] - Create from template
+      script attach <script> <entity>    - Attach script to entity
+      script detach <script> <entity>    - Detach script from entity
+
+    Abbreviation: sc = script (e.g. 'sc list', 'sc info patrol_guard')
+
+    Examples:
+      script create guard_check at_exit_room
+      script from-template forest_patrol patrol route=room1,room2 interval=120
+      script attach guard_check north_gate
+    """
+  end
+
   defp help_for_topic(_) do
-    "Unknown help topic. Try: help rooms, help entities, help quests, help projects, help ai"
+    "Unknown help topic. Try: help rooms, help entities, help quests, help dialogues, " <>
+      "help zones, help cutscenes, help storylines, help scripts, help projects, help ai"
   end
 end

@@ -110,6 +110,74 @@ defmodule LokaWeb.Channels.BuilderCommands.FormatterTest do
     end
   end
 
+  describe "display_length/1" do
+    test "returns length of plain text" do
+      assert Formatter.display_length("hello") == 5
+    end
+
+    test "strips cmd markup from length calculation" do
+      assert Formatter.display_length("{{cmd:goto tavern}}tavern{{/cmd}}") == 6
+    end
+
+    test "handles multiple markup spans" do
+      text = "{{cmd:info a}}a{{/cmd}} - {{cmd:look b}}b{{/cmd}}"
+      # visible: "a - b" = 5
+      assert Formatter.display_length(text) == 5
+    end
+
+    test "handles text with no markup" do
+      assert Formatter.display_length("no markup here") == 14
+    end
+
+    test "handles empty string" do
+      assert Formatter.display_length("") == 0
+    end
+  end
+
+  describe "table/3 with markup" do
+    test "aligns columns correctly despite cmd markup in cells" do
+      rows = [
+        ["{{cmd:goto tavern}}tavern{{/cmd}}", "The Tavern"],
+        ["{{cmd:goto market_square}}market_square{{/cmd}}", "Market Square"]
+      ]
+
+      result = Formatter.table(["Key", "Name"], rows)
+      lines = String.split(result, "\n")
+
+      # The separator should be based on display length, not raw length
+      # "market_square" is the longest key (13 chars)
+      [header, separator | data_lines] = lines
+
+      # Header "Key" is padded to display width of longest key column
+      assert String.starts_with?(header, "Key")
+
+      # Data lines: the visible text should align
+      # Despite markup, padding should make columns line up visually
+      Enum.each(data_lines, fn line ->
+        # Strip markup to check visual alignment
+        visible = String.replace(line, ~r/\{\{cmd:[^}]+\}\}/, "")
+        visible = String.replace(visible, "{{/cmd}}", "")
+        # All visible lines should have consistent structure
+        assert visible =~ ~r/\S/
+      end)
+
+      # Separator dashes should match display widths
+      [sep_key, _sep_name] = String.split(separator, ~r/\s{2,}/, parts: 2)
+      assert String.length(sep_key) == 13
+    end
+  end
+
+  describe "box/1 with markup" do
+    test "box width based on display length not raw length" do
+      text = "{{cmd:goto tavern}}tavern{{/cmd}}"
+      result = Formatter.box(text)
+
+      # Display length of "tavern" is 6, so box inner width = 6
+      assert result =~ "┌────────┐"
+      assert result =~ "└────────┘"
+    end
+  end
+
   describe "count_label/3" do
     test "singular for count of 1" do
       assert Formatter.count_label(1, "room") == "1 room"

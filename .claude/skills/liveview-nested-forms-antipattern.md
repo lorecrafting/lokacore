@@ -125,7 +125,6 @@ When a form isn't working:
 
 ## Related Files
 
-- `server/lib/loka_web/live/admin_live/world_builder/inspector_panel.ex` - Fixed example
 - `server/assets/js/hooks/` - Alternative JS-based approach
 
 ## References

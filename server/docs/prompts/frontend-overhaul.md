@@ -535,7 +535,7 @@ mix test
 mix phx.server  # Verify visually: login page, World Builder
 ```
 
-Check the World Builder at http://localhost:4000/admin/world-builder - all panels, modals, editors should look identical.
+Check the Builder at http://localhost:4000/admin/builder - terminal should render correctly.
 
 ## Expected Results
 

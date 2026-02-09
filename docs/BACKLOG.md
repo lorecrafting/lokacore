@@ -66,6 +66,7 @@ Tasks are tracked here with categories and priorities. We use Claude Code's nati
 ### Recent Completions
 
 - **WorldBuilderLive Component Extraction Phase 2** (2026-01-30)
+  - *Note: The WorldBuilderLive GUI was archived in Feb 2026 and replaced with the terminal builder at `/admin/builder`.*
   - Reduced WorldBuilderLive from ~2,700 to ~2,336 lines (406 lines extracted)
   - Extracted `DialogueEventHandler` - all dialogue_* event handlers (11 handlers)
   - Extracted `EntityEventHandler` - NPC/Item CRUD operations (8 handlers)
@@ -74,6 +75,7 @@ Tasks are tracked here with categories and priorities. We use Claude Code's nati
   - Clean separation of concerns: handlers, helpers, main LiveView
 
 - **World Builder UX & Audit Logging** (2026-01-30)
+  - *Note: The WorldBuilderLive GUI was archived in Feb 2026 and replaced with the terminal builder at `/admin/builder`.*
   - Added admin audit logging system:
     - `audit_logs` table with player, action, entity_type, before/after state
     - `Loka.Admin.AuditLog` schema with query helpers (by_player, by_entity, recent)

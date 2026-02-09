@@ -66,8 +66,7 @@ while (el) {
 ```
 
 ## Related Files
-- Modal components: `lib/loka_web/live/admin_live/world_builder/*.ex`
-- Example fix: `world_builder_live.ex` lines 330-390 (Room modal)
+- General pattern applicable to any LiveView modal component
 
 ## Version
 - Phoenix LiveView 1.1.19

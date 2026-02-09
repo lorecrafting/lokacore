@@ -23,10 +23,6 @@ Quick verification before committing frontend changes.
 - [ ] Console logs prefixed with `[HookName]`
 - [ ] Registered in `hooks/index.js` if new hook
 
-## Storage Keys
-
-- [ ] Imported from `storageKeys.js` (no hardcoded keys)
-
 ## HEEx Templates
 
 - [ ] Uses `:if` directive (not `<%= if %>`)

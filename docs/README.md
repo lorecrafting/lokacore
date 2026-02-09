@@ -94,10 +94,7 @@ docs/
 │   ├── prototypes.md                    # Prototype system
 │   ├── storylines.md                    # Storyline system
 │   ├── testing.md                       # Testing architecture
-│   ├── world-builder-api.md             # World Builder API
-│   ├── world-builder-comprehensive-plan.md
-│   ├── world-builder-master-plan.md     # World Builder design
-│   ├── world-builder-projects-design.md
+│   ├── terminal-builder.md              # Terminal Builder architecture
 │   ├── world-design-schema.md           # World design data schema
 │   └── world-management.md              # World management system
 │

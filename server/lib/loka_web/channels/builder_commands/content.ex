@@ -1,7 +1,7 @@
 defmodule LokaWeb.Channels.BuilderCommands.Content do
   @moduledoc """
-  Quest and dialogue commands: create quest, edit quest, quest info,
-  create dialogue, dialogue info.
+  Quest and dialogue commands: create/edit/delete quest, quest info,
+  create/delete dialogue, dialogue info.
   """
 
   alias Loka.Engine.TypedObject.Loader
@@ -47,6 +47,14 @@ defmodule LokaWeb.Channels.BuilderCommands.Content do
     end
   end
 
+  def execute(:delete_quest, %{key: key}, socket) do
+    case QuestManager.delete_quest(key) do
+      :ok -> {:ok, "Quest '#{key}' deleted.", socket}
+      {:error, :not_found} -> {:error, "Quest '#{key}' not found.", socket}
+      {:error, reason} -> {:error, "Failed to delete quest: #{inspect(reason)}", socket}
+    end
+  end
+
   def execute(:create_dialogue, %{npc_key: npc_key}, socket) do
     case Dialogue.get(npc_key) do
       {:ok, _} ->
@@ -71,17 +79,23 @@ defmodule LokaWeb.Channels.BuilderCommands.Content do
     case Dialogue.get(key) do
       {:ok, dialogue} ->
         data = Map.get(dialogue, :data, %{})
-        nodes = data["nodes"] || []
-        node_count = length(nodes)
+        nodes = data["nodes"] || %{}
+        node_count = if is_map(nodes), do: map_size(nodes), else: length(nodes)
 
         lines =
           nodes
           |> Enum.take(10)
-          |> Enum.map(fn node ->
-            id = node["id"] || "?"
-            text = node["text"] || ""
-            choices = node["choices"] || []
-            "  [#{id}] #{String.slice(text, 0, 60)}... (#{length(choices)} choices)"
+          |> Enum.map(fn
+            {id, node} when is_map(node) ->
+              text = node["text"] || ""
+              choices = node["choices"] || []
+              "  [#{id}] #{String.slice(text, 0, 60)}... (#{length(choices)} choices)"
+
+            node when is_map(node) ->
+              id = node["id"] || "?"
+              text = node["text"] || ""
+              choices = node["choices"] || []
+              "  [#{id}] #{String.slice(text, 0, 60)}... (#{length(choices)} choices)"
           end)
           |> Enum.join("\n")
 
@@ -91,6 +105,14 @@ defmodule LokaWeb.Channels.BuilderCommands.Content do
 
       {:error, _} ->
         {:error, "Dialogue '#{key}' not found.", socket}
+    end
+  end
+
+  def execute(:delete_dialogue, %{key: key}, socket) do
+    case DialogueManager.delete_dialogue(key) do
+      :ok -> {:ok, "Dialogue '#{key}' deleted.", socket}
+      {:error, :not_found} -> {:error, "Dialogue '#{key}' not found.", socket}
+      {:error, reason} -> {:error, "Failed to delete dialogue: #{inspect(reason)}", socket}
     end
   end
 end

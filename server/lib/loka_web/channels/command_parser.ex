@@ -47,7 +47,14 @@ defmodule LokaWeb.Channels.CommandParser do
   defp do_parse(["completequest", key]), do: {:builder_completequest, %{key: key}}
   defp do_parse(["resetquest", key]), do: {:builder_resetquest, %{key: key}}
   defp do_parse(["settime", time]), do: {:builder_settime, %{time: time}}
-  defp do_parse(["list", type]), do: {:builder_list, %{type: type}}
+
+  defp do_parse(["list", type_and_rest]) do
+    case String.split(type_and_rest, " ", parts: 2) do
+      [type] -> {:builder_list, %{type: type}}
+      [type, filter] -> {:builder_list, %{type: type, filter: filter}}
+    end
+  end
+
   defp do_parse(["find", search]), do: {:builder_find, %{search: search}}
   defp do_parse(["rooms"]), do: {:builder_rooms, %{}}
   defp do_parse(["where"]), do: {:builder_where, %{}}
@@ -121,6 +128,33 @@ defmodule LokaWeb.Channels.CommandParser do
       ["dialogue", npc_key] ->
         {:builder_create_dialogue, %{npc_key: String.trim(npc_key)}}
 
+      ["zone", key_and_name] ->
+        case String.split(key_and_name, " ", parts: 2) do
+          [key, name] -> {:builder_create_zone, %{key: key, name: name}}
+          [key] -> {:builder_create_zone, %{key: key, name: key}}
+        end
+
+      ["zone"] ->
+        {:unknown, %{text: "create zone"}}
+
+      ["cutscene", key_and_name] ->
+        case String.split(key_and_name, " ", parts: 2) do
+          [key, name] -> {:builder_create_cutscene, %{key: key, name: name}}
+          [key] -> {:builder_create_cutscene, %{key: key, name: key}}
+        end
+
+      ["cutscene"] ->
+        {:unknown, %{text: "create cutscene"}}
+
+      ["storyline", key_and_name] ->
+        case String.split(key_and_name, " ", parts: 2) do
+          [key, name] -> {:builder_create_storyline, %{key: key, name: name}}
+          [key] -> {:builder_create_storyline, %{key: key, name: key}}
+        end
+
+      ["storyline"] ->
+        {:unknown, %{text: "create storyline"}}
+
       _ ->
         {:unknown, %{text: "create"}}
     end
@@ -155,6 +189,21 @@ defmodule LokaWeb.Channels.CommandParser do
             {:builder_edit_quest, %{key: key, field: nil, value: nil}}
         end
 
+      ["zone", key_and_field] ->
+        case String.split(key_and_field, " ", parts: 2) do
+          [key, field_value] ->
+            case String.split(field_value, " ", parts: 2) do
+              [field, value] ->
+                {:builder_edit_zone, %{key: key, field: field, value: value}}
+
+              [field] ->
+                {:builder_edit_zone, %{key: key, field: field, value: ""}}
+            end
+
+          [key] ->
+            {:builder_edit_zone, %{key: key, field: nil, value: nil}}
+        end
+
       _ ->
         {:unknown, %{text: "edit"}}
     end
@@ -165,9 +214,21 @@ defmodule LokaWeb.Channels.CommandParser do
       ["room", key] -> {:builder_delete_room, %{key: String.trim(key)}}
       ["npc", key] -> {:builder_delete_npc, %{key: String.trim(key)}}
       ["item", key] -> {:builder_delete_item, %{key: String.trim(key)}}
+      ["quest", key] -> {:builder_delete_quest, %{key: String.trim(key)}}
+      ["dialogue", key] -> {:builder_delete_dialogue, %{key: String.trim(key)}}
+      ["zone", key] -> {:builder_delete_zone, %{key: String.trim(key)}}
+      ["cutscene", key] -> {:builder_delete_cutscene, %{key: String.trim(key)}}
+      ["storyline", key] -> {:builder_delete_storyline, %{key: String.trim(key)}}
+      ["script", key] -> {:builder_delete_script, %{key: String.trim(key)}}
       _ -> {:unknown, %{text: "delete"}}
     end
   end
+
+  # Abbreviations: dl=dialogue, sc=script, cs=cutscene, sl=storyline
+  defp do_parse(["dl", rest]), do: do_parse(["dialogue", rest])
+  defp do_parse(["sc", rest]), do: do_parse(["script", rest])
+  defp do_parse(["cs", rest]), do: do_parse(["cutscene", rest])
+  defp do_parse(["sl", rest]), do: do_parse(["storyline", rest])
 
   # Quest/dialogue inspection
   defp do_parse(["quest", rest]) do
@@ -181,6 +242,104 @@ defmodule LokaWeb.Channels.CommandParser do
     case String.split(rest, " ", parts: 2) do
       ["info", key] -> {:builder_dialogue_info, %{key: String.trim(key)}}
       _ -> {:unknown, %{text: "dialogue"}}
+    end
+  end
+
+  # Zone inspection
+  defp do_parse(["zone", rest]) do
+    case String.split(rest, " ", parts: 2) do
+      ["info", key] -> {:builder_zone_info, %{key: String.trim(key)}}
+      _ -> {:unknown, %{text: "zone"}}
+    end
+  end
+
+  # Cutscene inspection
+  defp do_parse(["cutscene", rest]) do
+    case String.split(rest, " ", parts: 2) do
+      ["info", key] -> {:builder_cutscene_info, %{key: String.trim(key)}}
+      _ -> {:unknown, %{text: "cutscene"}}
+    end
+  end
+
+  # Storyline inspection
+  defp do_parse(["storyline", rest]) do
+    case String.split(rest, " ", parts: 2) do
+      ["info", key] -> {:builder_storyline_info, %{key: String.trim(key)}}
+      _ -> {:unknown, %{text: "storyline"}}
+    end
+  end
+
+  # Script commands
+  defp do_parse(["script", rest]) do
+    case String.split(rest, " ", parts: 3) do
+      ["info", key] ->
+        {:builder_script_info, %{key: String.trim(key)}}
+
+      ["validate", key] ->
+        {:builder_script_validate, %{key: String.trim(key)}}
+
+      ["test", key] ->
+        {:builder_script_test, %{key: String.trim(key)}}
+
+      ["templates"] ->
+        {:builder_script_templates, %{}}
+
+      ["template", tpl] ->
+        {:builder_script_template_info, %{template: String.trim(tpl)}}
+
+      ["attach", rest2] ->
+        case String.split(rest2, " ", parts: 2) do
+          [script_key, entity_key] ->
+            {:builder_script_attach,
+             %{script_key: String.trim(script_key), entity_key: String.trim(entity_key)}}
+
+          _ ->
+            {:unknown, %{text: "script attach"}}
+        end
+
+      ["detach", rest2] ->
+        case String.split(rest2, " ", parts: 2) do
+          [script_key, entity_key] ->
+            {:builder_script_detach,
+             %{script_key: String.trim(script_key), entity_key: String.trim(entity_key)}}
+
+          _ ->
+            {:unknown, %{text: "script detach"}}
+        end
+
+      ["from-template", rest2] ->
+        case String.split(rest2, " ", parts: 2) do
+          [key, tpl_and_config] ->
+            case String.split(tpl_and_config, " ", parts: 2) do
+              [tpl, config] ->
+                {:builder_script_from_template, %{key: key, template: tpl, config: config}}
+
+              [tpl] ->
+                {:builder_script_from_template, %{key: key, template: tpl, config: ""}}
+            end
+
+          [_key] ->
+            {:unknown, %{text: "script from-template"}}
+        end
+
+      ["create", rest2] ->
+        case String.split(rest2, " ", parts: 2) do
+          [key, hook] ->
+            {:builder_script_create, %{key: key, hook: String.trim(hook)}}
+
+          [key] ->
+            {:builder_script_create, %{key: key, hook: "on_enter"}}
+        end
+
+      ["delete", key] ->
+        {:builder_delete_script, %{key: String.trim(key)}}
+
+      ["list" | rest_args] ->
+        hook = if rest_args != [], do: hd(rest_args) |> String.trim(), else: nil
+        {:builder_script_list, %{hook: hook}}
+
+      _ ->
+        {:unknown, %{text: "script"}}
     end
   end
 

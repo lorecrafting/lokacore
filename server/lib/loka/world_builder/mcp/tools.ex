@@ -19,6 +19,10 @@ defmodule Loka.WorldBuilder.MCP.Tools do
       entity_tools() ++
       quest_tools() ++
       dialogue_tools() ++
+      zone_tools() ++
+      cutscene_tools() ++
+      storyline_tools() ++
+      script_tools() ++
       query_tools() ++
       analysis_tools()
   end
@@ -459,6 +463,70 @@ defmodule Loka.WorldBuilder.MCP.Tools do
           }
         },
         callback: fn args -> dispatch("list_items", args) end
+      },
+      %{
+        name: "wb_update_npc",
+        description: """
+        Update an existing NPC's properties (name, description, level, etc.).
+        """,
+        inputSchema: %{
+          type: "object",
+          required: ["key"],
+          properties: %{
+            key: %{type: "string", description: "NPC key to update"},
+            name: %{type: "string", description: "New NPC name"},
+            description: %{type: "string", description: "New description"},
+            level: %{type: "integer", description: "New level"},
+            room: %{type: "string", description: "New room key"}
+          }
+        },
+        callback: fn args -> dispatch("update_npc", args) end
+      },
+      %{
+        name: "wb_update_item",
+        description: """
+        Update an existing item's properties (name, description, type, etc.).
+        """,
+        inputSchema: %{
+          type: "object",
+          required: ["key"],
+          properties: %{
+            key: %{type: "string", description: "Item key to update"},
+            name: %{type: "string", description: "New item name"},
+            description: %{type: "string", description: "New description"},
+            item_type: %{type: "string", description: "New item type"},
+            value: %{type: "integer", description: "New base gold value"}
+          }
+        },
+        callback: fn args -> dispatch("update_item", args) end
+      },
+      %{
+        name: "wb_delete_npc",
+        description: """
+        Delete an NPC from the world.
+        """,
+        inputSchema: %{
+          type: "object",
+          required: ["key"],
+          properties: %{
+            key: %{type: "string", description: "NPC key to delete"}
+          }
+        },
+        callback: fn args -> dispatch("delete_npc", args) end
+      },
+      %{
+        name: "wb_delete_item",
+        description: """
+        Delete an item from the world.
+        """,
+        inputSchema: %{
+          type: "object",
+          required: ["key"],
+          properties: %{
+            key: %{type: "string", description: "Item key to delete"}
+          }
+        },
+        callback: fn args -> dispatch("delete_item", args) end
       }
     ]
   end
@@ -541,6 +609,20 @@ defmodule Loka.WorldBuilder.MCP.Tools do
           }
         },
         callback: fn args -> dispatch("list_quests", args) end
+      },
+      %{
+        name: "wb_delete_quest",
+        description: """
+        Delete a quest from the world.
+        """,
+        inputSchema: %{
+          type: "object",
+          required: ["key"],
+          properties: %{
+            key: %{type: "string", description: "Quest key to delete"}
+          }
+        },
+        callback: fn args -> dispatch("delete_quest", args) end
       }
     ]
   end
@@ -600,6 +682,346 @@ defmodule Loka.WorldBuilder.MCP.Tools do
           }
         },
         callback: fn args -> dispatch("get_dialogue", args) end
+      },
+      %{
+        name: "wb_update_dialogue",
+        description: """
+        Update an existing dialogue tree's nodes.
+        """,
+        inputSchema: %{
+          type: "object",
+          required: ["key", "nodes"],
+          properties: %{
+            key: %{type: "string", description: "Dialogue key to update"},
+            nodes: %{
+              type: "array",
+              items: %{type: "object"},
+              description: "Updated dialogue nodes"
+            }
+          }
+        },
+        callback: fn args -> dispatch("update_dialogue", args) end
+      },
+      %{
+        name: "wb_delete_dialogue",
+        description: """
+        Delete a dialogue tree.
+        """,
+        inputSchema: %{
+          type: "object",
+          required: ["key"],
+          properties: %{
+            key: %{type: "string", description: "Dialogue key to delete"}
+          }
+        },
+        callback: fn args -> dispatch("delete_dialogue", args) end
+      },
+      %{
+        name: "wb_list_dialogues",
+        description: """
+        List all dialogue trees, optionally filtered by NPC.
+        """,
+        inputSchema: %{
+          type: "object",
+          properties: %{
+            npc: %{type: "string", description: "Filter by NPC entity key"}
+          }
+        },
+        callback: fn args -> dispatch("list_dialogues", args) end
+      }
+    ]
+  end
+
+  # Zone management tools
+  defp zone_tools do
+    [
+      %{
+        name: "wb_create_zone",
+        description: "Create a new zone to group rooms together.",
+        inputSchema: %{
+          type: "object",
+          required: ["key", "name"],
+          properties: %{
+            key: %{type: "string", description: "Unique zone key"},
+            name: %{type: "string", description: "Zone display name"},
+            rooms: %{
+              type: "array",
+              items: %{type: "string"},
+              description: "Room keys in this zone"
+            },
+            level_range: %{type: "object", description: "Level range {min, max}"},
+            reset_mode: %{type: "string", enum: ["empty", "always", "manual"]}
+          }
+        },
+        callback: fn args -> dispatch("create_zone", args) end
+      },
+      %{
+        name: "wb_update_zone",
+        description: "Update an existing zone's properties.",
+        inputSchema: %{
+          type: "object",
+          required: ["key"],
+          properties: %{
+            key: %{type: "string", description: "Zone key to update"},
+            name: %{type: "string"},
+            rooms: %{type: "array", items: %{type: "string"}},
+            reset_mode: %{type: "string"}
+          }
+        },
+        callback: fn args -> dispatch("update_zone", args) end
+      },
+      %{
+        name: "wb_delete_zone",
+        description: "Delete a zone.",
+        inputSchema: %{
+          type: "object",
+          required: ["key"],
+          properties: %{key: %{type: "string", description: "Zone key to delete"}}
+        },
+        callback: fn args -> dispatch("delete_zone", args) end
+      }
+    ]
+  end
+
+  # Cutscene management tools
+  defp cutscene_tools do
+    [
+      %{
+        name: "wb_create_cutscene",
+        description: "Create a new cutscene with scenes (narration, dialogue, action).",
+        inputSchema: %{
+          type: "object",
+          required: ["key", "name"],
+          properties: %{
+            key: %{type: "string", description: "Unique cutscene key"},
+            name: %{type: "string", description: "Cutscene name"},
+            trigger: %{type: "string", description: "Trigger type (manual, on_enter, on_quest)"},
+            scenes: %{type: "array", items: %{type: "object"}, description: "Scene definitions"}
+          }
+        },
+        callback: fn args -> dispatch("create_cutscene", args) end
+      },
+      %{
+        name: "wb_update_cutscene",
+        description: "Update an existing cutscene.",
+        inputSchema: %{
+          type: "object",
+          required: ["key"],
+          properties: %{
+            key: %{type: "string", description: "Cutscene key to update"},
+            name: %{type: "string"},
+            scenes: %{type: "array", items: %{type: "object"}}
+          }
+        },
+        callback: fn args -> dispatch("update_cutscene", args) end
+      },
+      %{
+        name: "wb_delete_cutscene",
+        description: "Delete a cutscene.",
+        inputSchema: %{
+          type: "object",
+          required: ["key"],
+          properties: %{key: %{type: "string", description: "Cutscene key to delete"}}
+        },
+        callback: fn args -> dispatch("delete_cutscene", args) end
+      },
+      %{
+        name: "wb_get_cutscene",
+        description: "Get cutscene details.",
+        inputSchema: %{
+          type: "object",
+          required: ["key"],
+          properties: %{key: %{type: "string", description: "Cutscene key"}}
+        },
+        callback: fn args -> dispatch("get_cutscene", args) end
+      },
+      %{
+        name: "wb_list_cutscenes",
+        description: "List all cutscenes.",
+        inputSchema: %{type: "object", properties: %{}},
+        callback: fn _args -> dispatch("list_cutscenes", %{}) end
+      }
+    ]
+  end
+
+  # Storyline management tools
+  defp storyline_tools do
+    [
+      %{
+        name: "wb_create_storyline",
+        description: "Create a new storyline grouping quests into a narrative arc.",
+        inputSchema: %{
+          type: "object",
+          required: ["key", "name"],
+          properties: %{
+            key: %{type: "string", description: "Unique storyline key"},
+            name: %{type: "string", description: "Storyline name"},
+            main_quests: %{
+              type: "array",
+              items: %{type: "string"},
+              description: "Main quest keys in order"
+            },
+            side_quests: %{
+              type: "array",
+              items: %{type: "string"},
+              description: "Side quest keys"
+            }
+          }
+        },
+        callback: fn args -> dispatch("create_storyline", args) end
+      },
+      %{
+        name: "wb_update_storyline",
+        description: "Update an existing storyline.",
+        inputSchema: %{
+          type: "object",
+          required: ["key"],
+          properties: %{
+            key: %{type: "string", description: "Storyline key to update"},
+            name: %{type: "string"},
+            main_quests: %{type: "array", items: %{type: "string"}},
+            side_quests: %{type: "array", items: %{type: "string"}}
+          }
+        },
+        callback: fn args -> dispatch("update_storyline", args) end
+      },
+      %{
+        name: "wb_delete_storyline",
+        description: "Delete a storyline.",
+        inputSchema: %{
+          type: "object",
+          required: ["key"],
+          properties: %{key: %{type: "string", description: "Storyline key to delete"}}
+        },
+        callback: fn args -> dispatch("delete_storyline", args) end
+      },
+      %{
+        name: "wb_list_storylines",
+        description: "List all storylines.",
+        inputSchema: %{type: "object", properties: %{}},
+        callback: fn _args -> dispatch("list_storylines", %{}) end
+      }
+    ]
+  end
+
+  # Script management tools
+  defp script_tools do
+    [
+      %{
+        name: "wb_create_script",
+        description: "Create a new script with Elixir source code for entity hooks.",
+        inputSchema: %{
+          type: "object",
+          required: ["key", "hook", "source"],
+          properties: %{
+            key: %{type: "string", description: "Unique script key"},
+            hook: %{
+              type: "string",
+              description: "Hook type (at_enter_room, at_damage, at_death, etc.)"
+            },
+            source: %{type: "string", description: "Elixir source code"},
+            name: %{type: "string", description: "Script display name"},
+            description: %{type: "string", description: "Script description"}
+          }
+        },
+        callback: fn args -> dispatch("create_script", args) end
+      },
+      %{
+        name: "wb_update_script",
+        description: "Update an existing script's source or properties.",
+        inputSchema: %{
+          type: "object",
+          required: ["key"],
+          properties: %{
+            key: %{type: "string", description: "Script key to update"},
+            source: %{type: "string", description: "New source code"},
+            hook: %{type: "string", description: "New hook type"},
+            name: %{type: "string", description: "New name"}
+          }
+        },
+        callback: fn args -> dispatch("update_script", args) end
+      },
+      %{
+        name: "wb_delete_script",
+        description: "Delete a script.",
+        inputSchema: %{
+          type: "object",
+          required: ["key"],
+          properties: %{key: %{type: "string", description: "Script key to delete"}}
+        },
+        callback: fn args -> dispatch("delete_script", args) end
+      },
+      %{
+        name: "wb_get_script",
+        description: "Get script details including source code.",
+        inputSchema: %{
+          type: "object",
+          required: ["key"],
+          properties: %{key: %{type: "string", description: "Script key"}}
+        },
+        callback: fn args -> dispatch("get_script", args) end
+      },
+      %{
+        name: "wb_list_scripts",
+        description: "List all scripts, optionally filtered by hook type.",
+        inputSchema: %{
+          type: "object",
+          properties: %{hook: %{type: "string", description: "Filter by hook type"}}
+        },
+        callback: fn args -> dispatch("list_scripts", args) end
+      },
+      %{
+        name: "wb_validate_script",
+        description: "Validate script syntax and sandbox rules.",
+        inputSchema: %{
+          type: "object",
+          required: ["key"],
+          properties: %{key: %{type: "string", description: "Script key to validate"}}
+        },
+        callback: fn args -> dispatch("validate_script", args) end
+      },
+      %{
+        name: "wb_create_script_from_template",
+        description: "Create a script from a template with config parameters.",
+        inputSchema: %{
+          type: "object",
+          required: ["key", "template_id"],
+          properties: %{
+            key: %{type: "string", description: "Unique script key"},
+            template_id: %{
+              type: "string",
+              description: "Template ID (patrol, greeting, guard, etc.)"
+            },
+            config: %{type: "object", description: "Template config parameters"}
+          }
+        },
+        callback: fn args -> dispatch("create_script_from_template", args) end
+      },
+      %{
+        name: "wb_attach_script",
+        description: "Attach a script to an entity.",
+        inputSchema: %{
+          type: "object",
+          required: ["script_key", "entity_key"],
+          properties: %{
+            script_key: %{type: "string", description: "Script key to attach"},
+            entity_key: %{type: "string", description: "Entity key to attach to"}
+          }
+        },
+        callback: fn args -> dispatch("attach_script", args) end
+      },
+      %{
+        name: "wb_detach_script",
+        description: "Detach a script from an entity.",
+        inputSchema: %{
+          type: "object",
+          required: ["script_key", "entity_key"],
+          properties: %{
+            script_key: %{type: "string", description: "Script key to detach"},
+            entity_key: %{type: "string", description: "Entity key to detach from"}
+          }
+        },
+        callback: fn args -> dispatch("detach_script", args) end
       }
     ]
   end

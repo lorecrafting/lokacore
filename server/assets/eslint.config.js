@@ -70,7 +70,7 @@ export default [
     }
   },
   {
-    files: ['js/world_builder/__tests__/**/*.js'],
+    files: ['js/hooks/__tests__/**/*.js'],
     languageOptions: {
       globals: {
         describe: 'readonly',

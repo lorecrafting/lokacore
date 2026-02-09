@@ -12,9 +12,7 @@ The admin dashboard provides world-building tools and system management for Loka
 | Path | Description |
 |------|-------------|
 | `/admin` | Main dashboard with tabs (Dashboard, Players, Rooms, Entities, Scripts, System) |
-| `/admin/world-builder` | World Builder UI with visual map editor, LLM chat, and MUD terminal |
-
-> **Note**: The standalone `/admin/play` MUD client was removed. Use the World Builder's built-in Terminal panel instead (toggle with keyboard shortcut `5` or the Terminal toolbar button).
+| `/admin/builder` | Terminal Builder - AI-powered MUD terminal for content creation |
 
 ## Tabs Overview
 

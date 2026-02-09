@@ -45,7 +45,6 @@ This document provides a comprehensive analysis of Loka's capabilities for runni
 - Comprehensive validation suite (`mix loka.test.validate`)
 
 **LLM Development Tooling:**
-- `Loka.WorldBuilder.Analysis.DependencyGraph` - Content impact analysis
 - Content validators (`Loka.Testing.Content.*`) - Validation with detailed errors
 - `/project:check-work` - Post-implementation verification checklist
 - API validation endpoints (`POST /api/test/validate`)
@@ -127,17 +126,12 @@ edit priv/world/prototypes/npcs/merchant.yml
 # 2. Validate changes
 mix loka.test.validate --only dialogue,quest,reachability
 
-# 3. Use dependency analysis tools
-iex> alias Loka.WorldBuilder.Analysis.DependencyGraph
-iex> {:ok, graph} = DependencyGraph.build()
-iex> DependencyGraph.dependencies_for(graph, "quest:monastery_arc")
-
-# 4. Deploy to production
+# 3. Deploy to production
 git add priv/world/prototypes
 git commit -m "Update merchant dialogue"
 git push  # Triggers GitHub Actions deploy
 
-# 5. Hot-reload on live server (via IEx or admin API)
+# 4. Hot-reload on live server (via IEx or admin API)
 iex> Session.broadcast_all("[System] Content update in 30 seconds...")
 iex> :timer.sleep(30_000)
 iex> TypedObject.Loader.reload()
@@ -391,15 +385,7 @@ end
 # 1. Validate syntax and schema
 mix loka.test.validate
 
-# 2. Check for broken references
-iex> alias Loka.WorldBuilder.Analysis.DependencyGraph
-iex> {:ok, graph} = DependencyGraph.build()
-iex> DependencyGraph.find_broken_references(graph)
-
-# 3. Analyze change impact
-iex> DependencyGraph.dependencies_for(graph, "quest:monastery_arc")
-
-# 4. Run automated tests
+# 2. Run automated tests
 mix test
 mix loka.test.balance --quick
 ```
@@ -415,21 +401,6 @@ mix loka.test.balance --quick
 3. **Quest dependency analysis** - `lib/loka/testing/content/quest_validator.ex`
 4. **Dialogue tree validation** - `lib/loka/testing/content/dialogue_validator.ex`
 5. **World reachability check** - BFS traversal ensures no orphaned rooms
-
-**LLM-Friendly Dependency Analysis:**
-
-**File:** `lib/loka/world_builder/analysis/dependency_graph.ex`
-
-```elixir
-iex> alias Loka.WorldBuilder.Analysis.DependencyGraph
-iex> {:ok, graph} = DependencyGraph.build()
-iex> DependencyGraph.find_broken_references(graph)
-# Returns list of broken references:
-[
-  %{from: "quest:monastery_arc", to: "npc:abbot_missing", type: :giver},
-  %{from: "room:temple_hall", to: "room:missing_room", type: :exit}
-]
-```
 
 ### Rollback Capabilities (Implemented)
 
@@ -737,7 +708,6 @@ end
 - `lib/loka/engine/entity_server.ex` - Entity lifecycle
 - `lib/loka/session/server.ex` - Session management
 - `lib/loka/framework/combat/combat_server.ex` - Combat state
-- `lib/loka/world_builder/analysis/dependency_graph.ex` - Content dependency analysis
 - `fly.toml` - Deployment configuration
 
 **Related Documentation:**

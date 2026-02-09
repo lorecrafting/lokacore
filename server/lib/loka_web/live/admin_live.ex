@@ -8,7 +8,7 @@ defmodule LokaWeb.AdminLive do
   - Content validation and balance testing
   - Audit logs and compliance
 
-  Content creation (rooms, entities, scripts) is handled by WorldBuilderLive.
+  Content creation (rooms, entities, scripts) is handled by BuilderLive (MUD terminal).
   """
   use LokaWeb, :live_view
 
@@ -128,17 +128,6 @@ defmodule LokaWeb.AdminLive do
         >
           <.icon name="hero-command-line" class="size-4" />
           <span :if={not @collapsed}>Builder</span>
-        </a>
-        <a
-          href={~p"/admin/world-builder"}
-          class={[
-            "flex items-center gap-2.5 rounded-md text-sm text-base-content/80 transition-all duration-150 no-underline border-none bg-transparent w-full text-left cursor-pointer hover:bg-base-content/5 hover:text-base-content focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2",
-            if(@collapsed, do: "justify-center p-2.5 w-9 h-9", else: "px-3 py-2")
-          ]}
-          title={if @collapsed, do: "World Builder (Legacy)", else: nil}
-        >
-          <.icon name="hero-globe-alt" class="size-4" />
-          <span :if={not @collapsed}>World Builder</span>
         </a>
         <.nav_item
           tab={:quests}

@@ -10,7 +10,7 @@ Auto-loads when working in `assets/css/`.
 
 | Theme | Scope | Prefix | Style |
 |-------|-------|--------|-------|
-| World Builder | `/admin/world-builder` | `--wb-*` | Dark (223+ variables) |
+| Builder | `/admin/builder` | `--wb-*` | Dark (223+ variables) |
 | Admin Auth | `/players/log-in` | `--admin-*` | Light |
 
 ## Design Token Pipeline
@@ -47,12 +47,7 @@ Auto-loads when working in `assets/css/`.
 | `--wb-success/error/warning/info` | Status colors |
 | `--wb-danger-*` / `--wb-success-*` | State surfaces with bg/border/text |
 | `--wb-term-*` | Terminal panel |
-| `--wb-chat-*` | Chat panel |
-| `--wb-quest-*` | Quest flow graph nodes/edges |
 | `--wb-log-*` | Console log levels |
-| `--wb-indigo*` | Streaming/generation UI |
-| `--wb-tool-*` | Tool execution UI |
-| `--wb-viewport-*` | Canvas viewport (room/exit/grid colors) |
 
 ## Token Scales
 
@@ -98,22 +93,14 @@ CSS is split into domain-specific modules (each file <400 lines):
 |------|---------|
 | `app.css` | Entry point with @import statements + daisyUI theme config |
 | `tailwind-config.css` | @theme block, custom variants, LiveView loading states |
-| `world-builder/layout.css` | Grid, panels, resize handles, collapsed states |
-| `world-builder/terminal.css` | Terminal/console styles, connection indicators |
-| `world-builder/chat.css` | Chat panel, messages, streaming, welcome state |
-| `world-builder/quest-editor.css` | Quest editor forms, sections, validation |
-| `world-builder/cutscene-editor.css` | Cutscene timeline, keyframes, preview |
-| `world-builder/dialogue-editor.css` | Dialogue tree, node editor, mock state |
-| `world-builder/template-picker.css` | Template picker modal, config forms |
-| `world-builder/modals.css` | Modal overlay, animations, settings, audit log |
-| `world-builder/tools.css` | Tool execution UI, tool blocks, progress indicators |
+| `builder/terminal.css` | Terminal/console styles, connection indicators |
 
 **File size limit:** Keep individual CSS files under 400 lines. When exceeded, extract logical sections to new files and update imports in `app.css`.
 
 ## Placement Rules
 
 - **Admin dashboard:** Inline Tailwind + daisyUI only. No custom CSS classes.
-- **World Builder:** Custom CSS in `world-builder/*.css` for complex UI (pseudo-elements, gradients, scrollbars). Simple leaf components use inline Tailwind.
+- **Builder:** Custom CSS in `builder/*.css` for complex UI (pseudo-elements, gradients, scrollbars). Simple leaf components use inline Tailwind.
 - **CSS that MUST stay in CSS files:** pseudo-elements, animations/keyframes, scrollbar styles, JS-applied classes, CSS var grid layout, media queries.
 - Don't duplicate CSS definitions. Search existing files first with `grep -r "selector-name" assets/css/`.
 - **Never use duplicate `class` attributes** on the same element. In HEEx, only the last `class=` is applied.
@@ -160,10 +147,10 @@ CSS is split into domain-specific modules (each file <400 lines):
 ## Adding New CSS - Decision Tree
 
 ```
-Is it for World Builder?
+Is it for the Builder?
     |
     +-- YES -> Does the target domain file exist?
-    |           +-- YES -> Add to world-builder/{domain}.css
+    |           +-- YES -> Add to builder/{domain}.css
     |           +-- NO  -> Create new file, add @import to app.css
     |
     +-- NO  -> Is it for admin pages?

@@ -17,7 +17,7 @@ Every hook MUST use HookHelper for automatic listener/observer/timer cleanup. Th
 - `destroy()` - removes all tracked listeners, disconnects observers, clears intervals
 
 ```javascript
-import { HookHelper } from '@/world_builder/HookHelper.js'
+import { HookHelper } from './HookHelper.js'
 
 const MyHook = {
   mounted() {
@@ -31,13 +31,11 @@ const MyHook = {
 }
 ```
 
-**Exception:** `panel_resize` keeps handle-level listeners manual because `updated()` re-attaches them to new DOM handles after LiveView patches.
-
 ## Hook File Conventions
 
 - **File naming:** `assets/js/hooks/{snake_case}.js` (e.g., `mud_terminal.js`, `panel_resize.js`)
 - **Class naming:** CamelCase matching `phx-hook="HookName"` (e.g., `MudTerminal`, `PanelResize`)
-- **Utility classes:** `assets/js/world_builder/{CamelCase}.js` (e.g., `HookHelper.js`, `KeyboardManager.js`)
+- **Utilities:** `assets/js/hooks/HookHelper.js` (lifecycle management)
 - **Registration:** Every hook must be imported and added to the `Hooks` object in `assets/js/hooks/index.js`
 - **Never** add hooks inline in `app.js`
 
@@ -92,9 +90,9 @@ if (!this.inputEl) {
 }
 ```
 
-## Current Hooks (9 total)
+## Current Hooks (5 total)
 
-`ScrollBottom`, `WorldBuilder`, `PanelResize`, `ChatTextarea`, `MultiAPIKeyConfig`, `CodeMirrorEditor`, `MudTerminal`, `ConsoleOutput`, `QuestFlowGraph`
+`ScrollBottom`, `ChatTextarea`, `MultiAPIKeyConfig`, `MudTerminal`, `ConsoleOutput`
 
 ## Hook Decision Guide
 
@@ -102,25 +100,17 @@ if (!this.inputEl) {
 |----------|-----------|---------|
 | Auto-scroll to bottom | Yes | `ScrollBottom` |
 | Auto-resize textarea | Yes | `ChatTextarea` |
-| Complex canvas rendering | Yes | `Canvas2D*` |
-| Third-party library (CodeMirror) | Yes | `CodeMirrorEditor` |
 | Phoenix Channel connection | Yes | `MudTerminal` |
-| Panel resize drag | Yes | `PanelResize` |
 | Simple click handler | No | `phx-click` |
 | Form submission | No | `phx-submit` |
 | Loading states | No | `phx-disable-with` |
-| Keyboard shortcuts (complex) | Yes | `KeyboardManager` singleton |
 
 ## Hook <> LiveView Event Contract
 
 | Hook | pushEvent (JS -> Server) | handleEvent (Server -> JS) |
 |------|------------------------|--------------------------|
-| **WorldBuilder** | `select_room`, `batch_select`, `validate_all`, `delete_room`, `batch_delete`, `duplicate_room`, `duplicate_entity`, `batch_clone`, `toggle_panel`, `create_room`, `show_commit_modal`, `toggle_zone_colors`, `toggle_npc_paths`, `show_keyboard_help`, `undo_state_changed` | `select_room`, `select_entity`, `set_z_level`, `init_world_builder`, `zone_colors_changed`, `npc_paths_changed`, `rooms_updated`, `room_created`, `room_updated`, `room_deleted`, `panel_collapsed`, `record_operation`, `begin_composite`, `end_composite`, `trigger_undo`, `trigger_redo` |
-| **PanelResize** | `restore_panel_sizes`, `resize_panel` | -- |
 | **MudTerminal** | _(Phoenix Channel)_ | -- |
 | **ChatTextarea** | `send_message` | -- |
-| **CodeMirrorEditor** | `script_source_changed` | -- |
 | **MultiAPIKeyConfig** | `api_key_status`, `api_key_validated` | -- |
-| **QuestFlowGraph** | -- | -- |
 | **ConsoleOutput** | -- | `download_text` |
 | **ScrollBottom** | -- | -- |

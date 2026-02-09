@@ -113,7 +113,6 @@ defmodule LokaWeb.Router do
     pipe_through [:browser, :require_authenticated_player, :require_admin, :rate_limit_admin]
 
     live "/", AdminLive, :index
-    live "/world-builder", AdminLive.WorldBuilderLive, :index
     live "/builder", AdminLive.BuilderLive, :index
   end
 

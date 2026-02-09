@@ -5,27 +5,17 @@
 | File | Purpose |
 |------|---------|
 | `app.css` | Entry point - imports all CSS modules, configures Tailwind plugins |
-| `variables.css` | Design tokens (`--wb-*` for World Builder, `--admin-*` for auth) |
+| `variables.css` | Design tokens (`--wb-*` for Builder, `--admin-*` for auth) |
 | `tailwind-config.css` | `@theme` block exporting tokens to Tailwind, custom variants |
 | `admin-auth.css` | Login/auth pages (light theme, serif typography) |
-| `world-builder/*.css` | Domain-specific World Builder styles (dark theme) |
-
-### World Builder CSS Modules
-
-| File | What goes here |
-|------|----------------|
-| `layout.css` | Grid layout, panel structure, resize handles, collapsed states |
-| `terminal.css` | Terminal lines, connection indicator, console overlay |
-| `chat.css` | Chat messages, welcome state, quick actions, streaming UI |
-| `editors.css` | Quest/cutscene/dialogue/script editor styles |
-| `modals.css` | Modal overlay, settings, audit log, git commit |
-| `tools.css` | Tool execution indicator, tool blocks, queue display |
+| `builder.css` | Builder page layout (MUD terminal) |
+| `builder/terminal.css` | Terminal lines, connection indicator, console overlay |
 
 ## Two Independent Themes
 
 | Theme | Scope | Prefix | Style |
 |-------|-------|--------|-------|
-| World Builder | `/admin/world-builder` | `--wb-*` | Dark, 220+ tokens |
+| Builder | `/admin/builder` | `--wb-*` | Dark, 220+ tokens |
 | Admin Auth | `/players/log-in` | `--admin-*` | Light, serif |
 
 ## Adding a New Color
@@ -79,9 +69,6 @@ background: color-mix(in srgb, var(--wb-accent) 50%, transparent);
 | `--wb-success/error/warning/info` | Status colors |
 | `--wb-shadow-*` | Box shadows (sm/md/lg/accent/overlay) |
 | `--wb-term-*` | Terminal panel |
-| `--wb-chat-*` | Chat panel |
-| `--wb-quest-*` | Quest flow graph |
-| `--wb-tool-*` | Tool execution UI |
 
 ## Font Size Scale
 
@@ -114,4 +101,3 @@ Use t-shirt sizes: `xs` < `sm` < `base` (normal) < `lg` < `xl`
 - Full frontend conventions: `.claude/rules/frontend.md`
 - Design tokens source: `assets/css/variables.css`
 - Tailwind config: `assets/css/tailwind-config.css`
-- Constants fallbacks: `assets/js/world_builder/constants.js`

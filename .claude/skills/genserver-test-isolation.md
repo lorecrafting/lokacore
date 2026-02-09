@@ -62,8 +62,6 @@ end
 
 ## Files Affected in Loka
 
-- `test/loka/world_builder/llm/bulk_generator_test.exs`
-- `test/loka/world_builder/llm/conversation_manager_test.exs`
 - Any test for GenServers listed in `lib/loka/application.ex`
 
 ## Related

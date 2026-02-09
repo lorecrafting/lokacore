@@ -56,7 +56,8 @@ defmodule LokaWeb.Channels.BuilderCommands.Navigation do
       |> Enum.sort_by(& &1.key)
       |> Enum.map(fn room ->
         coords = "(#{room[:x] || 0}, #{room[:y] || 0})"
-        "  #{room.key} - #{room.name} #{coords}"
+        key_link = "{{cmd:goto #{room.key}}}#{room.key}{{/cmd}}"
+        "  #{key_link} - #{room.name} #{coords}"
       end)
       |> Enum.join("\n")
 

@@ -23,7 +23,7 @@ Quick-reference patterns for common frontend operations. For comprehensive docum
 
 1. Create `js/hooks/{snake_case}.js`:
    ```javascript
-   import { HookHelper } from '@/world_builder/HookHelper.js'
+   import { HookHelper } from './HookHelper.js'
 
    const MyHook = {
      mounted() {
@@ -55,11 +55,11 @@ Quick-reference patterns for common frontend operations. For comprehensive docum
 
 ## Adding a New CSS File
 
-1. Create `css/world-builder/{domain}.css`
+1. Create `css/builder/{domain}.css`
 2. Add file header comment explaining purpose and key selectors
 3. Add import to `css/app.css`:
    ```css
-   @import "./world-builder/{domain}.css";
+   @import "./builder/{domain}.css";
    ```
 4. Keep file under 400 lines
 
@@ -75,17 +75,6 @@ this.el.style.setProperty('--grid-columns', newValue)
 this.pushEvent('resize_panel', { panel, size })
 ```
 
-## Storage Key Pattern
-
-Always use centralized keys from `storageKeys.js`:
-
-```javascript
-import { STORAGE_KEYS } from '@/world_builder/storageKeys.js'
-
-localStorage.setItem(STORAGE_KEYS.PANEL_SIZES, JSON.stringify(sizes))
-const sizes = JSON.parse(localStorage.getItem(STORAGE_KEYS.PANEL_SIZES) || '{}')
-```
-
 ## Console Logging Pattern
 
 Always prefix with hook/class name:
@@ -94,20 +83,6 @@ Always prefix with hook/class name:
 console.log('[MyHook] Connected')
 console.error('[MyHook] Failed:', error)
 console.warn('[MyHook] Deprecated usage')
-```
-
-## Keyboard Shortcut Pattern
-
-Use KeyboardManager singleton:
-
-```javascript
-import { keyboardManager } from '@/world_builder/KeyboardManager.js'
-
-// In mounted()
-keyboardManager.register('my-feature-save', 'mod+s', () => this.save(), { skipInputs: true })
-
-// In destroyed()
-keyboardManager.unregisterAll('my-feature-')
 ```
 
 ## CSS Transparency Pattern
@@ -150,7 +125,6 @@ mounted() {
 |---------|-----------|---------|
 | `rgba()` with CSS vars | Doesn't work | `color-mix()` |
 | Listeners in `updated()` | Creates duplicates | HookHelper in `mounted()` |
-| Hardcoded storage keys | Typos, maintenance | Import from `storageKeys.js` |
 | Global `document.querySelector` | Wrong element in multi-instance | `this.el.querySelector()` |
 | Raw pixel values in CSS | Inconsistent | `var(--wb-space-*)` tokens |
 | Multiple `class=` attrs in HEEx | Only last applies | Single `class={[...]}` |

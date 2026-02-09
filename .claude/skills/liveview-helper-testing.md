@@ -70,31 +70,5 @@ You MUST also add the assign in mount:
 
 **Fix:** Add the assign to both mount AND the component call.
 
-## Example: Chat Module Tests
-
-```elixir
-defmodule Loka.WorldBuilder.ChatTest do
-  use LokaWeb.ConnCase, async: true
-
-  alias Loka.WorldBuilder.Chat
-
-  defp live_socket(assigns \\ %{}) do
-    %Phoenix.LiveView.Socket{
-      assigns: Map.merge(%{__changed__: %{}}, assigns),
-      endpoint: LokaWeb.Endpoint,
-      view: LokaWeb.AdminLive.WorldBuilderLive,
-      router: LokaWeb.Router
-    }
-  end
-
-  test "queue_message adds to queue" do
-    socket = live_socket(%{chat_queued_messages: []})
-    result = Chat.queue_message(socket, "Hello")
-    assert result.assigns.chat_queued_messages == ["Hello"]
-  end
-end
-```
-
 ## References
-- `test/loka/world_builder/chat_test.exs` - Full example
 - Phoenix.Component.assign source: checks `is_socket/1` guard

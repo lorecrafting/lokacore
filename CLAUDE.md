@@ -56,7 +56,7 @@ lokacore/
 │   │   └── session/          # Client messaging layer
 │   ├── lib/loka_web/
 │   │   ├── channels/         # Phoenix Channels (game_channel, command_parser, builder_commands)
-│   │   └── live/admin_live/  # Admin dashboard + World Builder
+│   │   └── live/admin_live/  # Admin dashboard + Builder (MUD terminal)
 │   └── priv/world/           # YAML game content (prototypes, quests, zones, scripts)
 ├── docs/                     # Architecture documentation
 ├── godot-client/             # Godot 4.6 mobile client (3D "magic book")
@@ -98,7 +98,7 @@ fly deploy
 |------|-------------|------|
 | `/` | Landing page | No |
 | `/admin` | Admin dashboard | Admin |
-| `/admin/world-builder` | World Builder UI (includes MUD terminal) | Admin |
+| `/admin/builder` | MUD terminal builder (content creation) | Admin |
 | `/client/auth/login` | Game client auth (magic link → JWT deep link) | No |
 
 Main game client is the Godot app connecting via Phoenix Channels.

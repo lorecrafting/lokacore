@@ -863,6 +863,79 @@ defmodule LokaWeb.GameChannel do
       {:builder_dialogue_info, params} ->
         execute_builder_command(:dialogue_info, params, socket)
 
+      {:builder_delete_quest, params} ->
+        execute_builder_command(:delete_quest, params, socket)
+
+      {:builder_delete_dialogue, params} ->
+        execute_builder_command(:delete_dialogue, params, socket)
+
+      # Zones
+      {:builder_create_zone, params} ->
+        execute_builder_command(:create_zone, params, socket)
+
+      {:builder_edit_zone, params} ->
+        execute_builder_command(:edit_zone, params, socket)
+
+      {:builder_delete_zone, params} ->
+        execute_builder_command(:delete_zone, params, socket)
+
+      {:builder_zone_info, params} ->
+        execute_builder_command(:zone_info, params, socket)
+
+      # Cutscenes
+      {:builder_create_cutscene, params} ->
+        execute_builder_command(:create_cutscene, params, socket)
+
+      {:builder_delete_cutscene, params} ->
+        execute_builder_command(:delete_cutscene, params, socket)
+
+      {:builder_cutscene_info, params} ->
+        execute_builder_command(:cutscene_info, params, socket)
+
+      # Storylines
+      {:builder_create_storyline, params} ->
+        execute_builder_command(:create_storyline, params, socket)
+
+      {:builder_delete_storyline, params} ->
+        execute_builder_command(:delete_storyline, params, socket)
+
+      {:builder_storyline_info, params} ->
+        execute_builder_command(:storyline_info, params, socket)
+
+      # Scripts
+      {:builder_script_create, params} ->
+        execute_builder_command(:script_create, params, socket)
+
+      {:builder_delete_script, params} ->
+        execute_builder_command(:delete_script, params, socket)
+
+      {:builder_script_info, params} ->
+        execute_builder_command(:script_info, params, socket)
+
+      {:builder_script_list, params} ->
+        execute_builder_command(:script_list, params, socket)
+
+      {:builder_script_validate, params} ->
+        execute_builder_command(:script_validate, params, socket)
+
+      {:builder_script_test, params} ->
+        execute_builder_command(:script_test, params, socket)
+
+      {:builder_script_templates, params} ->
+        execute_builder_command(:script_templates, params, socket)
+
+      {:builder_script_template_info, params} ->
+        execute_builder_command(:script_template_info, params, socket)
+
+      {:builder_script_from_template, params} ->
+        execute_builder_command(:script_from_template, params, socket)
+
+      {:builder_script_attach, params} ->
+        execute_builder_command(:script_attach, params, socket)
+
+      {:builder_script_detach, params} ->
+        execute_builder_command(:script_detach, params, socket)
+
       # Projects
       {:builder_project_new, params} ->
         execute_builder_command(:project_new, params, socket)

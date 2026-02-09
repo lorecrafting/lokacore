@@ -5,7 +5,7 @@ All hooks follow the **HookHelper pattern** for automatic lifecycle management o
 ## Quick Start
 
 ```javascript
-import { HookHelper } from '@/world_builder/HookHelper.js'
+import { HookHelper } from './HookHelper.js'
 
 const MyHook = {
   mounted() {
@@ -49,17 +49,13 @@ export default MyHook
 
 ## Existing Hooks
 
-| Hook | Purpose | Test Coverage |
-|------|---------|---------------|
-| `ScrollBottom` | Auto-scroll container to bottom on updates | - |
-| `WorldBuilder` | 2D Canvas viewport for room/entity editing | - |
-| `PanelResize` | Draggable panel resize handles with localStorage | - |
-| `ChatTextarea` | Auto-expanding textarea for chat input | - |
-| `MultiAPIKeyConfig` | API key management UI with validation | - |
-| `CodeMirrorEditor` | Code editor for Elixir scripts | - |
-| `MudTerminal` | Phoenix Channel connection for game terminal | - |
-| `ConsoleOutput` | Console log output display with download | - |
-| `QuestFlowGraph` | Canvas visualization of quest node flow | - |
+| Hook | Purpose |
+|------|---------|
+| `ScrollBottom` | Auto-scroll container to bottom on updates |
+| `ChatTextarea` | Auto-expanding textarea for chat input |
+| `MultiAPIKeyConfig` | API key management UI with validation |
+| `MudTerminal` | Phoenix Channel connection for game terminal |
+| `ConsoleOutput` | Console log output display with download |
 
 ## HookHelper API
 
@@ -77,12 +73,8 @@ const id = this.helper.interval(fn, ms)
 this.helper.destroy()
 ```
 
-## Exception: Manual Listener Management
-
-`PanelResize` manages handle-level listeners manually because LiveView patches replace DOM handles, requiring re-attachment in `updated()`. Global document listeners still use HookHelper.
-
 ## Related Documentation
 
 - Full frontend conventions: `.claude/rules/frontend.md`
-- HookHelper source: `assets/js/world_builder/HookHelper.js`
-- Hook tests: `assets/js/world_builder/__tests__/HookHelper.test.js`
+- HookHelper source: `assets/js/hooks/HookHelper.js`
+- Hook tests: `assets/js/hooks/__tests__/`

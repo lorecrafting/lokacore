@@ -9,7 +9,11 @@ defmodule LokaWeb.Channels.BuilderCommands do
   - World: settime, reload, validate
   - Rooms: dig, @desc, @name, create/delete room, link, unlink
   - Entities: create/edit/delete npc/item
-  - Content: create/edit quest, quest info, create/info dialogue
+  - Content: create/edit/delete quest, create/delete/info dialogue
+  - Zones: create/edit/delete zone, zone info
+  - Cutscenes: create/delete cutscene, cutscene info
+  - Storylines: create/delete storyline, storyline info
+  - Scripts: create/delete/info/list/validate/test/templates/attach/detach
   - Projects: project new/load/list/delete, doc write/read/list/delete, guide
   - Help: help, help <topic>
 
@@ -29,6 +33,10 @@ defmodule LokaWeb.Channels.BuilderCommands do
     Rooms,
     Entities,
     Content,
+    Zones,
+    Cutscenes,
+    Storylines,
+    Scripts,
     Projects,
     Help,
     Helpers
@@ -54,7 +62,23 @@ defmodule LokaWeb.Channels.BuilderCommands do
   @entity_commands ~w(create_npc create_item edit_entity delete_npc delete_item)a
 
   # Content commands
-  @content_commands ~w(create_quest edit_quest quest_info create_dialogue dialogue_info)a
+  @content_commands ~w(create_quest edit_quest quest_info delete_quest
+                       create_dialogue dialogue_info delete_dialogue)a
+
+  # Zone commands
+  @zone_commands ~w(create_zone edit_zone delete_zone zone_info)a
+
+  # Cutscene commands
+  @cutscene_commands ~w(create_cutscene delete_cutscene cutscene_info)a
+
+  # Storyline commands
+  @storyline_commands ~w(create_storyline delete_storyline storyline_info)a
+
+  # Script commands
+  @script_commands ~w(script_create delete_script script_info script_list
+                      script_validate script_test script_templates
+                      script_template_info script_from_template
+                      script_attach script_detach)a
 
   # Project/doc commands
   @project_commands ~w(project_new project_load project_list project_delete
@@ -110,6 +134,22 @@ defmodule LokaWeb.Channels.BuilderCommands do
 
   defp dispatch(cmd, params, socket) when cmd in @content_commands do
     Content.execute(cmd, params, socket)
+  end
+
+  defp dispatch(cmd, params, socket) when cmd in @zone_commands do
+    Zones.execute(cmd, params, socket)
+  end
+
+  defp dispatch(cmd, params, socket) when cmd in @cutscene_commands do
+    Cutscenes.execute(cmd, params, socket)
+  end
+
+  defp dispatch(cmd, params, socket) when cmd in @storyline_commands do
+    Storylines.execute(cmd, params, socket)
+  end
+
+  defp dispatch(cmd, params, socket) when cmd in @script_commands do
+    Scripts.execute(cmd, params, socket)
   end
 
   defp dispatch(cmd, params, socket) when cmd in @project_commands do

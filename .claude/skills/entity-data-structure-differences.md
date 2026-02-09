@@ -114,6 +114,4 @@ IO.puts("Attributes: #{inspect(entity[:attributes])}")
 ```
 
 ## Related Files
-- `lib/loka/world_builder/entity_manager.ex` - Returns entity maps
 - `lib/loka/engine/typed_object.ex` - TypedObject struct definition
-- `lib/loka/world_builder/npc_path_extractor.ex` - Example handling both

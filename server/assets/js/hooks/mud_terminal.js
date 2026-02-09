@@ -20,6 +20,7 @@
  * CHANNEL EVENTS (Phoenix Channel, NOT LiveView):
  * channel.push (JS -> Server):
  *   - 'command' { input } -- user entered a command
+ *   - 'click_entity' { entity_id } -- interact with entity (reuses game client flow)
  *
  * channel.on (Server -> JS):
  *   - game_state -- initial state on join (room, health, resources)
@@ -31,19 +32,38 @@
  *   - combat_start, combat_update, combat_end -- combat system
  *   - dialogue_start, dialogue_update, dialogue_end -- NPC conversations
  *   - inventory_update -- item changes
+ *   - entity_context -- entity click response (name, description, actions)
  *   - clear_terminal -- server-initiated clear
  *
  * @related
  *   - lib/loka_web/channels/game_channel.ex (server-side channel)
- *   - assets/css/world-builder/terminal.css (styling)
- *   - lib/loka_web/live/admin_live/world_builder/terminal_panel.ex (LiveView component)
- * @used_by WorldBuilderLive terminal panel
+ *   - assets/css/builder/terminal.css (styling)
+ *   - lib/loka_web/live/admin_live/builder_live.ex (LiveView page)
+ * @used_by BuilderLive terminal panel
  */
 
 import { Socket } from 'phoenix'
-import { HookHelper } from '../world_builder/HookHelper.js'
+import { HookHelper } from './HookHelper.js'
+import { parseMarkupSegments } from './terminalMarkup.js'
 
 const MAX_TERMINAL_LINES = 1000
+
+/** Converts parseMarkupSegments output into a DocumentFragment with clickable spans. */
+function segmentsToFragment(segments) {
+  const frag = document.createDocumentFragment()
+  for (const seg of segments) {
+    if (seg.type === 'text') {
+      frag.appendChild(document.createTextNode(seg.value))
+    } else {
+      const span = document.createElement('span')
+      span.className = 'term-link'
+      span.dataset.cmd = seg.cmd
+      span.textContent = seg.text
+      frag.appendChild(span)
+    }
+  }
+  return frag
+}
 
 const MudTerminal = {
   mounted() {
@@ -83,6 +103,30 @@ const MudTerminal = {
 
       this.connect()
 
+      // Delegated click handler for .term-link elements in terminal output
+      this.helper.on(this.outputEl, 'click', (e) => {
+        const link = e.target.closest('.term-link')
+        if (!link) return
+
+        const entityId = link.dataset.entityId
+        if (entityId) {
+          this.channel.push('click_entity', { entity_id: entityId })
+          return
+        }
+
+        const choiceIndex = link.dataset.choiceIndex
+        if (choiceIndex != null) {
+          this.appendOutput(`> [${link.textContent.trim()}]`, 'system')
+          this.channel.push('dialogue_select', { choice_index: parseInt(choiceIndex, 10) })
+          return
+        }
+
+        const cmd = link.dataset.cmd
+        if (cmd) {
+          this.sendCommand(cmd)
+        }
+      })
+
       // Input handling
       if (this.inputEl) {
         this.helper.on(this.inputEl, 'keydown', (e) => {
@@ -100,13 +144,7 @@ const MudTerminal = {
                 this.inputEl.value = ''
                 return
               }
-              const now = Date.now()
-              if (now - this._lastCommandTime < 200) return
-              this._lastCommandTime = now
-              this.appendOutput(`> ${input}`, 'system')
-              this.commandHistory.push(input)
-              this.historyIndex = this.commandHistory.length
-              this.channel.push('command', { input })
+              this.sendCommand(input)
               this.inputEl.value = ''
             }
           } else if (e.key === 'ArrowUp') {
@@ -142,6 +180,20 @@ const MudTerminal = {
 
   clearOutput() {
     this.outputEl.innerHTML = ''
+  },
+
+  sendCommand(input) {
+    const now = Date.now()
+    if (now - this._lastCommandTime < 200) return
+    this._lastCommandTime = now
+    this.appendOutput(`> ${input}`, 'system')
+    this.commandHistory.push(input)
+    this.historyIndex = this.commandHistory.length
+    this.channel.push('command', { input })
+  },
+
+  parseMarkup(text) {
+    return segmentsToFragment(parseMarkupSegments(text))
   },
 
   connect() {
@@ -253,6 +305,36 @@ const MudTerminal = {
       this.appendOutput('(Conversation ended)', 'system')
     })
 
+    // Entity context (response to click_entity - shows description + action menu)
+    this.channel.on('entity_context', (data) => {
+      const entity = data.entity
+      if (!entity) return
+
+      this.appendOutput('')
+      this.appendOutput(entity.name, 'room-title')
+      if (entity.long_desc || entity.description) {
+        this.appendOutput(`  ${entity.long_desc || entity.description}`)
+      }
+
+      const actions = entity.actions || []
+      if (actions.length > 0) {
+        const keyword = entity.primary_keyword || entity.name?.toLowerCase()
+        const div = document.createElement('div')
+        div.className = 'terminal-line term-actions'
+        div.appendChild(document.createTextNode('  '))
+        actions.forEach((action, idx) => {
+          if (idx > 0) div.appendChild(document.createTextNode('  '))
+          const link = document.createElement('span')
+          link.className = 'term-link'
+          link.dataset.cmd = `${action.key} ${keyword}`
+          link.textContent = `[${action.label}]`
+          div.appendChild(link)
+        })
+        this.outputEl.appendChild(div)
+        this.pruneAndScroll()
+      }
+    })
+
     // Inventory updates
     this.channel.on('inventory_update', (data) => {
       if (data.text) this.appendOutput(data.text, 'system')
@@ -318,7 +400,11 @@ const MudTerminal = {
     lines.forEach((line) => {
       const div = document.createElement('div')
       div.className = `terminal-line${className ? ` ${className}` : ''}`
-      div.textContent = line
+      if (line.includes('{{cmd:')) {
+        div.appendChild(this.parseMarkup(line))
+      } else {
+        div.textContent = line
+      }
       this.outputEl.appendChild(div)
     })
 
@@ -341,22 +427,63 @@ const MudTerminal = {
     this.appendOutput(room.description || '')
     this.appendOutput('')
 
-    // Entities
+    // Entities - clickable names that send click_entity
     const entities = room.entities || []
     entities.forEach((e) => {
-      this.appendOutput(`${e.name} is here.`)
+      const div = document.createElement('div')
+      div.className = 'terminal-line'
+      const link = document.createElement('span')
+      link.className = 'term-link'
+      link.dataset.entityId = e.id
+      link.textContent = e.name
+      div.appendChild(link)
+      div.appendChild(document.createTextNode(' is here.'))
+      this.outputEl.appendChild(div)
     })
 
-    // Items
+    // Items - clickable names that send click_entity
     const items = room.items || []
     items.forEach((i) => {
-      this.appendOutput(`${i.name} lies on the ground.`)
+      const div = document.createElement('div')
+      div.className = 'terminal-line'
+      const link = document.createElement('span')
+      link.className = 'term-link'
+      link.dataset.entityId = i.id
+      link.textContent = i.name
+      div.appendChild(link)
+      div.appendChild(document.createTextNode(' lies on the ground.'))
+      this.outputEl.appendChild(div)
     })
 
-    // Exits
-    const exits = (room.exits || []).filter((e) => e.destination_id).map((e) => e.direction)
+    // Exits - clickable directions that navigate
+    const exits = (room.exits || []).filter((e) => e.destination_id)
     this.appendOutput('')
-    this.appendOutput(`Exits: ${exits.length ? exits.join(', ') : 'none'}`)
+    if (exits.length) {
+      const div = document.createElement('div')
+      div.className = 'terminal-line'
+      div.appendChild(document.createTextNode('Exits: '))
+      exits.forEach((exit, idx) => {
+        if (idx > 0) div.appendChild(document.createTextNode(', '))
+        const link = document.createElement('span')
+        link.className = 'term-link'
+        link.dataset.cmd = exit.direction
+        link.textContent = exit.direction
+        div.appendChild(link)
+      })
+      this.outputEl.appendChild(div)
+    } else {
+      this.appendOutput('Exits: none')
+    }
+
+    this.pruneAndScroll()
+  },
+
+  /** Prune old lines and scroll to bottom. Called after manual DOM appends. */
+  pruneAndScroll() {
+    while (this.outputEl.children.length > MAX_TERMINAL_LINES) {
+      this.outputEl.removeChild(this.outputEl.firstChild)
+    }
+    this.outputEl.scrollTop = this.outputEl.scrollHeight
   },
 
   renderDialogue(data) {
@@ -369,9 +496,18 @@ const MudTerminal = {
     if (data.choices && data.choices.length > 0) {
       this.appendOutput('')
       data.choices.forEach((choice, i) => {
-        this.appendOutput(`  [${i + 1}] ${choice.text || choice}`, 'system')
+        const text = choice.text || choice
+        const div = document.createElement('div')
+        div.className = 'terminal-line system'
+        const link = document.createElement('span')
+        link.className = 'term-link'
+        link.dataset.choiceIndex = i
+        link.textContent = `  [${i + 1}] ${text}`
+        div.appendChild(link)
+        this.outputEl.appendChild(div)
       })
-      this.appendOutput('(Type a number to choose)', 'system')
+      this.appendOutput('(Type a number or click to choose)', 'system')
+      this.pruneAndScroll()
     }
   },
 

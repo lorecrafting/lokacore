@@ -104,9 +104,6 @@ defmodule Loka.Application do
 
       # World Builder - LLM services
       Loka.WorldBuilder.LLM.ObservabilityLogger,
-      Loka.WorldBuilder.LLM.PreviewManager,
-      Loka.WorldBuilder.LLM.ConversationManager,
-      Loka.WorldBuilder.LLM.BulkGenerator,
 
       # Start to serve requests, typically the last entry
       LokaWeb.Endpoint

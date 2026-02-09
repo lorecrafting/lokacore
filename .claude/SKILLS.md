@@ -21,7 +21,7 @@ All Claude Code skills, commands, agents, and rules for the Loka project.
 | `quest-validation` | Editing content in `priv/world/` | 14 content validators, quest YAML fields, dialogue trees. Files: `STRUCTURE.md` |
 | `test-patterns` | Writing tests | ChannelBot (95% parity), setup-execute-assert, factories, async safety. Files: `PATTERNS.md` |
 | `content-creation` | Scaffolding new game content | `mix loka.new`, YAML formats, quest/dialogue patterns |
-| `world-builder-patterns` | Working with World Builder code | 3-layer architecture, EntityManager, RoomManager, LiveView |
+| `world-builder-patterns` | Working with Builder code | 4-layer architecture, EntityManager, RoomManager, BuilderCommands |
 | `api-verification` | Calling external libraries | Function existence checks, return value handling |
 | `yaml-data-handling` | Loading/accessing YAML data | String vs atom keys, format conversion |
 | `llm-native-doc-audit` | Documentation review | Token budgets, skill activation, audit checklists |
@@ -137,15 +137,13 @@ Invoke with `/command-name` in the chat.
 
 | Rule | Paths | Context |
 |------|-------|---------|
-| `builder` | `lib/loka_web/live/admin_live/**`, `lib/loka/world_builder/**` | World Builder UI patterns |
+| `builder` | `lib/loka_web/channels/builder_commands/**`, `lib/loka/world_builder/**` | Terminal builder patterns |
 | `framework` | `lib/loka/framework/**` | 31 subsystems, layer boundaries |
 | `engine` | `lib/loka/engine/**` | Engine invariants, TypedObject, hooks |
 | `content` | `priv/world/**` | YAML content creation patterns |
 | `testing` | `test/**`, `lib/loka/testing/**` | ChannelBot, test structure, async safety |
 | `frontend` | `assets/**` | Frontend architecture index |
-| `frontend-canvas` | `assets/js/world_builder/` | Canvas interaction patterns |
 | `frontend-hooks` | `assets/js/hooks/` | JS hook patterns, HookHelper |
-| `frontend-liveview` | World Builder LiveView files | LiveView component patterns |
 | `frontend-css` | `assets/css/` | Design tokens, `--wb-*` variables |
 | `godot` | `godot-client/**` | Godot 4.6 client development |
 | `scripting` | Elixir sandboxed scripts | Script sandbox patterns |

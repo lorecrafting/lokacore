@@ -106,6 +106,4 @@ this.pushEvent('restore_panel_sizes', { sizes })
 
 ## Files Reference
 
-- Panel resize implementation: `assets/js/hooks/panel_resize.js`
-- Server handler: `world_builder_live.ex` (`handle_event("resize_panel", ...)`)
-- Grid layout: `panel_sizes_style/2` in `world_builder_live.ex`
+- General pattern applicable to any LiveView with drag/resize interactions

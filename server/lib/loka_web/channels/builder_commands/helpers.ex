@@ -20,7 +20,11 @@ defmodule LokaWeb.Channels.BuilderCommands.Helpers do
     lines =
       entities
       |> Enum.sort_by(& &1.key)
-      |> Enum.map(fn e -> "  #{e.key} - #{e.name}" end)
+      |> Enum.map(fn e ->
+        key_link = "{{cmd:info #{e.key}}}#{e.key}{{/cmd}}"
+        name_link = "{{cmd:look #{e.key}}}#{e.name}{{/cmd}}"
+        "  #{key_link} - #{name_link}"
+      end)
       |> Enum.join("\n")
 
     {:ok, "#{label} (#{length(entities)}):\n#{lines}", socket}

@@ -13,13 +13,38 @@ defmodule Loka.WorldBuilder.ToolExecutor do
     RoomManager,
     EntityManager,
     QuestManager,
+    DialogueManager,
     Projects,
     AuditLog,
-    ValidationManager
+    ValidationManager,
+    YamlBuilder
   }
 
   alias Loka.WorldBuilder.LLM.ObservabilityLogger
   alias Loka.Content.{Zone, Dialogue}
+
+  @doc """
+  Execute a function with deferred TypedObject reloads.
+
+  All `Loader.reload()` calls within the function are skipped; a single reload
+  happens after the function completes. Use this when executing multiple tool
+  calls in sequence (e.g., AI conversation turns).
+  """
+  def with_deferred_reload(fun) do
+    Process.put(:loka_defer_reload, true)
+
+    try do
+      result = fun.()
+      Loka.Engine.TypedObject.Loader.reload()
+      result
+    after
+      Process.delete(:loka_defer_reload)
+    end
+  end
+
+  defp maybe_reload do
+    unless Process.get(:loka_defer_reload), do: Loka.Engine.TypedObject.Loader.reload()
+  end
 
   @doc """
   Execute a tool call and return the result.
@@ -69,15 +94,48 @@ defmodule Loka.WorldBuilder.ToolExecutor do
         # Entity tools
         "create_npc" -> execute_create_npc(input)
         "create_item" -> execute_create_item(input)
+        "update_npc" -> execute_update_entity(:npc, input)
+        "update_item" -> execute_update_entity(:item, input)
+        "delete_npc" -> execute_delete_entity(:npc, input)
+        "delete_item" -> execute_delete_entity(:item, input)
         "list_npcs" -> execute_list_npcs(input)
         "list_items" -> execute_list_items(input)
         # Quest tools
         "create_quest" -> execute_create_quest(input)
         "update_quest" -> execute_update_quest(input)
+        "delete_quest" -> execute_delete_quest(input)
         "list_quests" -> execute_list_quests(input)
         # Dialogue tools
         "create_dialogue" -> execute_create_dialogue(input)
         "get_dialogue" -> execute_get_dialogue(input)
+        "update_dialogue" -> execute_update_dialogue(input)
+        "delete_dialogue" -> execute_delete_dialogue(input)
+        "list_dialogues" -> execute_list_dialogues(input)
+        # Zone tools
+        "create_zone" -> execute_create_zone_tool(input)
+        "update_zone" -> execute_update_zone(input)
+        "delete_zone" -> execute_delete_zone_tool(input)
+        # Cutscene tools
+        "create_cutscene" -> execute_create_cutscene(input)
+        "update_cutscene" -> execute_update_cutscene(input)
+        "delete_cutscene" -> execute_delete_cutscene(input)
+        "get_cutscene" -> execute_get_cutscene(input)
+        "list_cutscenes" -> execute_list_cutscenes(input)
+        # Storyline tools
+        "create_storyline" -> execute_create_storyline(input)
+        "update_storyline" -> execute_update_storyline(input)
+        "delete_storyline" -> execute_delete_storyline(input)
+        "list_storylines" -> execute_list_storylines(input)
+        # Script tools
+        "create_script" -> execute_create_script(input)
+        "update_script" -> execute_update_script(input)
+        "delete_script" -> execute_delete_script(input)
+        "get_script" -> execute_get_script(input)
+        "list_scripts" -> execute_list_scripts(input)
+        "validate_script" -> execute_validate_script(input)
+        "create_script_from_template" -> execute_create_script_from_template(input)
+        "attach_script" -> execute_attach_script(input)
+        "detach_script" -> execute_detach_script(input)
         # Query tools
         "get_room_info" -> execute_get_room_info(input)
         "list_rooms" -> execute_list_rooms(input)
@@ -636,6 +694,63 @@ defmodule Loka.WorldBuilder.ToolExecutor do
      }}
   end
 
+  defp execute_update_entity(subtype, input) do
+    key = input["key"]
+
+    updates =
+      input
+      |> Map.drop(["key"])
+      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Map.new()
+
+    entities = EntityManager.list_entities(subtype)
+
+    case Enum.find(entities, fn e -> get_safe_field(e, :key) == key end) do
+      nil ->
+        {:error, "#{subtype} '#{key}' not found"}
+
+      entity ->
+        case EntityManager.update_entity(entity.id, updates) do
+          {:ok, updated} ->
+            {:ok,
+             %{
+               success: true,
+               message: "Updated #{subtype} '#{key}'",
+               entity: %{
+                 key: get_safe_field(updated, :key),
+                 name: get_safe_field(updated, :name)
+               }
+             }}
+
+          {:error, reason} ->
+            {:error, "Failed to update #{subtype}: #{inspect(reason)}"}
+        end
+    end
+  end
+
+  defp execute_delete_entity(subtype, input) do
+    key = input["key"]
+    entities = EntityManager.list_entities(subtype)
+
+    case Enum.find(entities, fn e -> get_safe_field(e, :key) == key end) do
+      nil ->
+        {:error, "#{subtype} '#{key}' not found"}
+
+      entity ->
+        case EntityManager.delete_entity(entity.id) do
+          :ok ->
+            {:ok,
+             %{
+               success: true,
+               message: "Deleted #{subtype} '#{key}'"
+             }}
+
+          {:error, reason} ->
+            {:error, "Failed to delete #{subtype}: #{inspect(reason)}"}
+        end
+    end
+  end
+
   # Safe field accessor that works with both maps and structs
   defp get_safe_field(data, key) when is_map(data) do
     Map.get(data, key) || Map.get(data, to_string(key))
@@ -747,6 +862,21 @@ defmodule Loka.WorldBuilder.ToolExecutor do
      }}
   end
 
+  defp execute_delete_quest(input) do
+    key = input["key"]
+
+    case QuestManager.delete_quest(key) do
+      :ok ->
+        {:ok, %{success: true, message: "Deleted quest '#{key}'"}}
+
+      {:error, :not_found} ->
+        {:error, "Quest not found: #{key}"}
+
+      {:error, reason} ->
+        {:error, "Failed to delete quest: #{inspect(reason)}"}
+    end
+  end
+
   defp get_quest_type(quest) do
     quest[:quest_type] ||
       quest.quest_type ||
@@ -792,7 +922,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
       case File.write(yaml_path, yaml_content) do
         :ok ->
           # Reload the registry
-          Loka.Engine.TypedObject.Loader.reload()
+          maybe_reload()
 
           {:ok,
            %{
@@ -853,7 +983,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
       """
           #{node_id}:
-            text: "#{escape_yaml_string(text)}"
+            text: "#{YamlBuilder.escape_yaml(text)}"
             choices:
       #{choices_yaml}
       """
@@ -870,7 +1000,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
       next_node = choice["next"] || "end"
 
       """
-              - text: "#{escape_yaml_string(text)}"
+              - text: "#{YamlBuilder.escape_yaml(text)}"
                 next: #{next_node}
       """
     end)
@@ -878,15 +1008,6 @@ defmodule Loka.WorldBuilder.ToolExecutor do
   end
 
   defp build_choices_yaml(_), do: ""
-
-  defp escape_yaml_string(str) when is_binary(str) do
-    str
-    |> String.replace("\\", "\\\\")
-    |> String.replace("\"", "\\\"")
-    |> String.replace("\n", "\\n")
-  end
-
-  defp escape_yaml_string(_), do: ""
 
   defp execute_get_dialogue(input) do
     dialogue_key = input["dialogue_key"]
@@ -908,6 +1029,104 @@ defmodule Loka.WorldBuilder.ToolExecutor do
       {:error, :not_found} ->
         {:error, "Dialogue not found: #{dialogue_key}"}
     end
+  end
+
+  defp execute_update_dialogue(input) do
+    key = input["key"]
+    raw_nodes = input["nodes"] || []
+
+    case Dialogue.get(key) do
+      {:ok, existing} ->
+        nodes =
+          if is_list(raw_nodes) do
+            Map.new(raw_nodes, fn node -> {node["id"], Map.drop(node, ["id"])} end)
+          else
+            raw_nodes
+          end
+
+        updated_data = Map.put(existing.data, "nodes", nodes)
+
+        updated_attrs =
+          existing
+          |> Map.from_struct()
+          |> Map.put(:data, updated_data)
+
+        case Loka.Engine.TypedObject.new(updated_attrs) do
+          {:ok, _typed_object} ->
+            ensure_dialogues_dir()
+            yaml_path = dialogue_yaml_path(key)
+            entity_key = get_in(existing.data, ["entity_key"])
+            trigger = get_in(existing.data, ["trigger"]) || "on_talk"
+            entry_node = get_in(existing.data, ["entry_node"]) || "greeting"
+
+            yaml_content = build_dialogue_yaml(key, entity_key, trigger, entry_node, nodes)
+
+            case File.write(yaml_path, yaml_content) do
+              :ok ->
+                maybe_reload()
+
+                {:ok,
+                 %{
+                   success: true,
+                   message: "Updated dialogue '#{key}' (#{map_size(nodes)} nodes)",
+                   dialogue: %{key: key, node_count: map_size(nodes)}
+                 }}
+
+              {:error, reason} ->
+                {:error, "Failed to save dialogue: #{inspect(reason)}"}
+            end
+
+          {:error, errors} ->
+            {:error, "Invalid dialogue: #{inspect(errors)}"}
+        end
+
+      {:error, :not_found} ->
+        {:error, "Dialogue not found: #{key}"}
+    end
+  end
+
+  defp execute_delete_dialogue(input) do
+    key = input["key"]
+
+    case DialogueManager.delete_dialogue(key) do
+      :ok ->
+        {:ok, %{success: true, message: "Deleted dialogue '#{key}'"}}
+
+      {:error, :not_found} ->
+        {:error, "Dialogue not found: #{key}"}
+
+      {:error, reason} ->
+        {:error, "Failed to delete dialogue: #{inspect(reason)}"}
+    end
+  end
+
+  defp execute_list_dialogues(input) do
+    dialogues = Dialogue.all()
+
+    filtered =
+      if npc = input["npc"] do
+        Enum.filter(dialogues, fn d ->
+          (get_in(d.data, ["entity_key"]) || "") == npc
+        end)
+      else
+        dialogues
+      end
+
+    list =
+      Enum.map(filtered, fn d ->
+        %{
+          key: d.key,
+          entity_key: get_in(d.data, ["entity_key"]),
+          node_count: map_size(get_in(d.data, ["nodes"]) || %{})
+        }
+      end)
+
+    {:ok,
+     %{
+       success: true,
+       message: "Found #{length(list)} dialogues",
+       dialogues: list
+     }}
   end
 
   defp dialogue_yaml_path(key) do
@@ -970,6 +1189,534 @@ defmodule Loka.WorldBuilder.ToolExecutor do
       is_map(data) && Map.has_key?(data, "rooms") -> data["rooms"] || []
       is_map(data) && Map.has_key?(data, :rooms) -> data[:rooms] || []
       true -> []
+    end
+  end
+
+  # =============================================================================
+  # Zone CRUD Tools
+  # =============================================================================
+
+  @zones_dir Path.join([:code.priv_dir(:loka), "world", "zones"])
+  @cutscenes_dir Path.join([:code.priv_dir(:loka), "world", "cutscenes"])
+  @scripts_dir Path.join([:code.priv_dir(:loka), "world", "scripts"])
+
+  defp execute_create_zone_tool(input) do
+    key = input["key"]
+    name = input["name"]
+    rooms = input["rooms"] || []
+    reset_mode = input["reset_mode"] || "empty"
+
+    yaml_content = YamlBuilder.build_zone_yaml(key, name, rooms: rooms, reset_mode: reset_mode)
+
+    File.mkdir_p!(@zones_dir)
+
+    case File.write(Path.join(@zones_dir, "#{key}.yml"), yaml_content) do
+      :ok ->
+        maybe_reload()
+
+        {:ok, warnings} = YamlBuilder.validate_references(:zone, %{rooms: rooms})
+        message = "Created zone '#{name}' (#{key})"
+
+        message =
+          if warnings != [],
+            do: message <> "\nWarnings: " <> Enum.join(warnings, "; "),
+            else: message
+
+        {:ok,
+         %{
+           success: true,
+           message: message,
+           zone: %{key: key, name: name}
+         }}
+
+      {:error, reason} ->
+        {:error, "Failed to create zone: #{inspect(reason)}"}
+    end
+  end
+
+  defp execute_update_zone(input) do
+    key = input["key"]
+
+    case Zone.get(key) do
+      {:ok, zone} ->
+        updates = Map.drop(input, ["key"])
+        updated_data = Enum.reduce(updates, zone.data, fn {k, v}, acc -> Map.put(acc, k, v) end)
+
+        name = updates["name"] || zone.name || key
+
+        yaml_content =
+          YamlBuilder.build_zone_yaml(key, name,
+            rooms: updated_data["rooms"] || [],
+            lifespan_minutes: updated_data["lifespan_minutes"] || 0,
+            reset_mode: updated_data["reset_mode"] || "empty"
+          )
+
+        File.mkdir_p!(@zones_dir)
+
+        case File.write(Path.join(@zones_dir, "#{key}.yml"), yaml_content) do
+          :ok ->
+            maybe_reload()
+            {:ok, %{success: true, message: "Updated zone '#{key}'"}}
+
+          {:error, reason} ->
+            {:error, "Failed to update zone: #{inspect(reason)}"}
+        end
+
+      {:error, :not_found} ->
+        {:error, "Zone not found: #{key}"}
+    end
+  end
+
+  defp execute_delete_zone_tool(input) do
+    key = input["key"]
+    file_path = Path.join(@zones_dir, "#{key}.yml")
+
+    if File.exists?(file_path) do
+      case File.rm(file_path) do
+        :ok ->
+          maybe_reload()
+          {:ok, %{success: true, message: "Deleted zone '#{key}'"}}
+
+        {:error, reason} ->
+          {:error, "Failed to delete zone: #{inspect(reason)}"}
+      end
+    else
+      {:error, "Zone not found: #{key}"}
+    end
+  end
+
+  # =============================================================================
+  # Cutscene CRUD Tools
+  # =============================================================================
+
+  defp execute_create_cutscene(input) do
+    key = input["key"]
+    name = input["name"]
+    trigger = input["trigger"] || "manual"
+
+    scenes =
+      input["scenes"] ||
+        [%{"type" => "narration", "text" => "A new scene begins...", "delay" => 2000}]
+
+    yaml_content = YamlBuilder.build_cutscene_yaml(key, name, trigger, scenes)
+    File.mkdir_p!(@cutscenes_dir)
+
+    case File.write(Path.join(@cutscenes_dir, "#{key}.yml"), yaml_content) do
+      :ok ->
+        maybe_reload()
+
+        {:ok, warnings} = YamlBuilder.validate_references(:cutscene, %{scenes: scenes})
+        message = "Created cutscene '#{name}' (#{key})"
+
+        message =
+          if warnings != [],
+            do: message <> "\nWarnings: " <> Enum.join(warnings, "; "),
+            else: message
+
+        {:ok, %{success: true, message: message}}
+
+      {:error, reason} ->
+        {:error, "Failed to create cutscene: #{inspect(reason)}"}
+    end
+  end
+
+  defp execute_update_cutscene(input) do
+    key = input["key"]
+
+    case Loka.Engine.TypedObject.Loader.get(key) do
+      {:ok, %{type: :cutscene} = cs} ->
+        name = input["name"] || cs.name || key
+        trigger = input["trigger"] || get_in(cs.data, ["trigger"]) || "manual"
+        scenes = input["scenes"] || get_in(cs.data, ["scenes"]) || []
+
+        yaml_content = YamlBuilder.build_cutscene_yaml(key, name, trigger, scenes)
+
+        case File.write(Path.join(@cutscenes_dir, "#{key}.yml"), yaml_content) do
+          :ok ->
+            maybe_reload()
+            {:ok, %{success: true, message: "Updated cutscene '#{key}'"}}
+
+          {:error, reason} ->
+            {:error, "Failed to update cutscene: #{inspect(reason)}"}
+        end
+
+      _ ->
+        {:error, "Cutscene not found: #{key}"}
+    end
+  end
+
+  defp execute_delete_cutscene(input) do
+    key = input["key"]
+    file_path = Path.join(@cutscenes_dir, "#{key}.yml")
+
+    if File.exists?(file_path) do
+      case File.rm(file_path) do
+        :ok ->
+          maybe_reload()
+          {:ok, %{success: true, message: "Deleted cutscene '#{key}'"}}
+
+        {:error, reason} ->
+          {:error, "Failed to delete cutscene: #{inspect(reason)}"}
+      end
+    else
+      {:error, "Cutscene not found: #{key}"}
+    end
+  end
+
+  defp execute_get_cutscene(input) do
+    key = input["key"]
+
+    case Loka.Engine.TypedObject.Loader.get(key) do
+      {:ok, %{type: :cutscene} = cs} ->
+        {:ok,
+         %{
+           success: true,
+           cutscene: %{
+             key: cs.key,
+             name: cs.name,
+             trigger: get_in(cs.data, ["trigger"]),
+             scenes: get_in(cs.data, ["scenes"]) || []
+           }
+         }}
+
+      _ ->
+        {:error, "Cutscene not found: #{key}"}
+    end
+  end
+
+  defp execute_list_cutscenes(_input) do
+    cutscenes = Loka.Engine.TypedObject.Loader.list_by_type(:cutscene)
+
+    list =
+      Enum.map(cutscenes, fn c ->
+        scenes = get_in(c.data, ["scenes"]) || []
+        %{key: c.key, name: c.name || c.key, scene_count: length(scenes)}
+      end)
+
+    {:ok, %{success: true, message: "Found #{length(list)} cutscenes", cutscenes: list}}
+  end
+
+  # =============================================================================
+  # Storyline CRUD Tools
+  # =============================================================================
+
+  defp execute_create_storyline(input) do
+    key = input["key"]
+    name = input["name"]
+    main_quests = input["main_quests"] || []
+    side_quests = input["side_quests"] || []
+
+    yaml_content = YamlBuilder.build_storyline_yaml(key, name, main_quests, side_quests)
+    File.mkdir_p!(@zones_dir)
+
+    case File.write(Path.join(@zones_dir, "#{key}.yml"), yaml_content) do
+      :ok ->
+        maybe_reload()
+
+        {:ok, warnings} =
+          YamlBuilder.validate_references(:storyline, %{
+            main_quests: main_quests,
+            side_quests: side_quests
+          })
+
+        message = "Created storyline '#{name}' (#{key})"
+
+        message =
+          if warnings != [],
+            do: message <> "\nWarnings: " <> Enum.join(warnings, "; "),
+            else: message
+
+        {:ok, %{success: true, message: message}}
+
+      {:error, reason} ->
+        {:error, "Failed to create storyline: #{inspect(reason)}"}
+    end
+  end
+
+  defp execute_update_storyline(input) do
+    key = input["key"]
+
+    case Loka.Engine.TypedObject.Loader.get(key) do
+      {:ok, %{type: :storyline} = sl} ->
+        name = input["name"] || sl.name || key
+        main_quests = input["main_quests"] || get_in(sl.data, ["main_quests"]) || []
+        side_quests = input["side_quests"] || get_in(sl.data, ["side_quests"]) || []
+
+        yaml_content = YamlBuilder.build_storyline_yaml(key, name, main_quests, side_quests)
+
+        case File.write(Path.join(@zones_dir, "#{key}.yml"), yaml_content) do
+          :ok ->
+            maybe_reload()
+            {:ok, %{success: true, message: "Updated storyline '#{key}'"}}
+
+          {:error, reason} ->
+            {:error, "Failed to update storyline: #{inspect(reason)}"}
+        end
+
+      _ ->
+        {:error, "Storyline not found: #{key}"}
+    end
+  end
+
+  defp execute_delete_storyline(input) do
+    key = input["key"]
+    file_path = Path.join(@zones_dir, "#{key}.yml")
+
+    if File.exists?(file_path) do
+      case File.rm(file_path) do
+        :ok ->
+          maybe_reload()
+          {:ok, %{success: true, message: "Deleted storyline '#{key}'"}}
+
+        {:error, reason} ->
+          {:error, "Failed to delete storyline: #{inspect(reason)}"}
+      end
+    else
+      {:error, "Storyline not found: #{key}"}
+    end
+  end
+
+  defp execute_list_storylines(_input) do
+    storylines = Loka.Engine.TypedObject.Loader.list_by_type(:storyline)
+
+    list =
+      Enum.map(storylines, fn s ->
+        main = get_in(s.data, ["main_quests"]) || []
+        side = get_in(s.data, ["side_quests"]) || []
+
+        %{
+          key: s.key,
+          name: s.name || s.key,
+          main_quest_count: length(main),
+          side_quest_count: length(side)
+        }
+      end)
+
+    {:ok, %{success: true, message: "Found #{length(list)} storylines", storylines: list}}
+  end
+
+  # =============================================================================
+  # Script CRUD Tools
+  # =============================================================================
+
+  alias Loka.Content.Script
+
+  defp execute_create_script(input) do
+    key = input["key"]
+    hook = input["hook"]
+    source = input["source"]
+    name = input["name"] || "Script: #{key}"
+
+    yaml_content = YamlBuilder.build_script_yaml(key, name, hook, source)
+
+    File.mkdir_p!(@scripts_dir)
+
+    case File.write(Path.join(@scripts_dir, "#{key}.yml"), yaml_content) do
+      :ok ->
+        maybe_reload()
+        {:ok, %{success: true, message: "Created script '#{key}' (hook: #{hook})"}}
+
+      {:error, reason} ->
+        {:error, "Failed to create script: #{inspect(reason)}"}
+    end
+  end
+
+  defp execute_update_script(input) do
+    key = input["key"]
+
+    case Script.get(key) do
+      {:ok, script} ->
+        hook = input["hook"] || Script.hook(script) || "on_enter"
+        source = input["source"] || Script.source(script) || "continue()"
+        name = input["name"] || script.name || "Script: #{key}"
+
+        yaml_content =
+          YamlBuilder.build_script_yaml(key, name, hook, source,
+            timeout_ms: Script.timeout_ms(script)
+          )
+
+        case File.write(Path.join(@scripts_dir, "#{key}.yml"), yaml_content) do
+          :ok ->
+            maybe_reload()
+            {:ok, %{success: true, message: "Updated script '#{key}'"}}
+
+          {:error, reason} ->
+            {:error, "Failed to update script: #{inspect(reason)}"}
+        end
+
+      {:error, :not_found} ->
+        {:error, "Script not found: #{key}"}
+    end
+  end
+
+  defp execute_delete_script(input) do
+    key = input["key"]
+    file_path = Path.join(@scripts_dir, "#{key}.yml")
+
+    if File.exists?(file_path) do
+      case File.rm(file_path) do
+        :ok ->
+          maybe_reload()
+          {:ok, %{success: true, message: "Deleted script '#{key}'"}}
+
+        {:error, reason} ->
+          {:error, "Failed to delete script: #{inspect(reason)}"}
+      end
+    else
+      {:error, "Script not found: #{key}"}
+    end
+  end
+
+  defp execute_get_script(input) do
+    key = input["key"]
+
+    case Script.get(key) do
+      {:ok, script} ->
+        {:ok,
+         %{
+           success: true,
+           script: %{
+             key: script.key,
+             name: script.name,
+             hook: Script.hook(script),
+             source: Script.source(script),
+             timeout_ms: Script.timeout_ms(script)
+           }
+         }}
+
+      {:error, :not_found} ->
+        {:error, "Script not found: #{key}"}
+    end
+  end
+
+  defp execute_list_scripts(input) do
+    scripts =
+      if hook = input["hook"] do
+        hook_atom =
+          try do
+            String.to_existing_atom(hook)
+          rescue
+            _ -> hook
+          end
+
+        Script.for_hook(hook_atom)
+      else
+        Script.all()
+      end
+
+    list =
+      Enum.map(scripts, fn s ->
+        %{key: s.key, name: s.name || s.key, hook: to_string(Script.hook(s) || "")}
+      end)
+
+    {:ok, %{success: true, message: "Found #{length(list)} scripts", scripts: list}}
+  end
+
+  defp execute_validate_script(input) do
+    key = input["key"]
+
+    case Script.get(key) do
+      {:ok, script} ->
+        case Script.validate(script) do
+          :ok ->
+            {:ok, %{success: true, message: "Script '#{key}' is valid"}}
+
+          {:error, errors} ->
+            {:ok, %{success: false, message: "Validation errors", errors: errors}}
+        end
+
+      {:error, :not_found} ->
+        {:error, "Script not found: #{key}"}
+    end
+  end
+
+  defp execute_create_script_from_template(input) do
+    key = input["key"]
+    template_id = input["template_id"]
+    config = input["config"] || %{}
+
+    # Delegate to Scripts builder command module for template logic
+    config_str =
+      config
+      |> Enum.map(fn {k, v} -> "#{k}=#{v}" end)
+      |> Enum.join(" ")
+
+    case LokaWeb.Channels.BuilderCommands.Scripts.generate_from_template_public(
+           key,
+           template_id,
+           config_str
+         ) do
+      {:ok, yaml_content} ->
+        File.mkdir_p!(@scripts_dir)
+
+        case File.write(Path.join(@scripts_dir, "#{key}.yml"), yaml_content) do
+          :ok ->
+            maybe_reload()
+
+            {:ok,
+             %{success: true, message: "Created script '#{key}' from template '#{template_id}'"}}
+
+          {:error, reason} ->
+            {:error, "Failed to create script: #{inspect(reason)}"}
+        end
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  defp execute_attach_script(input) do
+    script_key = input["script_key"]
+    entity_key = input["entity_key"]
+
+    case Script.get(script_key) do
+      {:ok, _} ->
+        case Loka.Engine.TypedObject.Loader.get(entity_key) do
+          {:ok, entity} ->
+            data = entity.data || %{}
+            scripts = data["scripts"] || []
+
+            if script_key in scripts do
+              {:ok, %{success: true, message: "Script already attached"}}
+            else
+              updated_data = Map.put(data, "scripts", scripts ++ [script_key])
+              YamlBuilder.save_entity_with_data(entity, updated_data)
+              maybe_reload()
+
+              {:ok,
+               %{success: true, message: "Attached script '#{script_key}' to '#{entity_key}'"}}
+            end
+
+          _ ->
+            {:error, "Entity not found: #{entity_key}"}
+        end
+
+      {:error, :not_found} ->
+        {:error, "Script not found: #{script_key}"}
+    end
+  end
+
+  defp execute_detach_script(input) do
+    script_key = input["script_key"]
+    entity_key = input["entity_key"]
+
+    case Loka.Engine.TypedObject.Loader.get(entity_key) do
+      {:ok, entity} ->
+        data = entity.data || %{}
+        scripts = data["scripts"] || []
+
+        if script_key in scripts do
+          updated_data = Map.put(data, "scripts", List.delete(scripts, script_key))
+          YamlBuilder.save_entity_with_data(entity, updated_data)
+          maybe_reload()
+
+          {:ok, %{success: true, message: "Detached script '#{script_key}' from '#{entity_key}'"}}
+        else
+          {:error, "Script '#{script_key}' not attached to '#{entity_key}'"}
+        end
+
+      _ ->
+        {:error, "Entity not found: #{entity_key}"}
     end
   end
 

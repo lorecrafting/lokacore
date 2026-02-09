@@ -1,176 +1,130 @@
 ---
-paths: ["lib/loka_web/live/admin_live/**", "lib/loka/world_builder/**"]
+paths: ["lib/loka_web/channels/builder_commands/**", "lib/loka_web/channels/command_parser.ex", "lib/loka_web/channels/game_channel.ex", "lib/loka/world_builder/**"]
 ---
 
-# World Builder UI Context
+# Terminal Builder Context
 
-This context auto-loads when working in World Builder code.
+This context auto-loads when working on the MUD terminal builder.
 
 ## Architecture Overview
 
-The World Builder follows a three-layer architecture:
-
 ```
-Layer 3: Specialized Managers (RoomManager, TemplateManager)
-    ↑ Only when EntityManager insufficient
-Layer 2: EntityManager (Generic CRUD for UI)
-    ↑ Use for simple entities
-Layer 1: Content Modules (Quest, Dialogue, Script, Zone)
-    ↑ Shared with game code
-```
-
-## When to Use Each Layer
-
-### Layer 1: Content Modules
-Use when game code also needs access:
-```elixir
-Content.Quest.get("quest_id")
-Content.Dialogue.for_entity("npc_key")
+Browser (MudTerminal hook)
+  ↕ Phoenix Channel (WebSocket)
+GameChannel
+  → CommandParser.parse/1          → {:builder_goto, %{room_key: "tavern"}}
+  → execute_builder_command/3      → checks player.is_admin
+  → BuilderCommands.execute/3      → dispatches to sub-module
+  → BuilderCommands.Rooms.execute  → calls RoomManager, pushes output
 ```
 
-### Layer 2: EntityManager (Default Choice)
-Use for World Builder CRUD operations:
-```elixir
-# Creating entities
-EntityManager.create_entity(:npc, %{name: "Guard", level: 5})
-EntityManager.create_entity(:item, %{name: "Sword", item_type: "weapon"})
+### Command Flow
 
-# Listing entities
-EntityManager.list_entities(:npc)
-EntityManager.search_entities(:item, "sword")
-```
+1. User types in terminal → `MudTerminal` hook pushes `"command"` event via Channel
+2. `GameChannel.handle_in("command")` → `CommandParser.parse(input)`
+3. Parser returns `{:builder_*atom, %{params}}` for builder commands
+4. `execute_builder_command/3` gates on `player.is_admin`
+5. `BuilderCommands.execute/3` dispatches to the correct sub-module
+6. Sub-module returns `{:ok, text, socket}` | `{:ok, socket}` | `{:error, text, socket}`
 
-### Layer 3: Specialized Managers
-Only create when EntityManager can't handle requirements:
-```elixir
-# RoomManager - has coordinate/exit complexity
-RoomManager.create_room(%{key: "tavern", x: 5, y: 10})
-RoomManager.add_exit("tavern", "north", "street")
+### Module Map
 
-# TemplateManager - has template instantiation
-TemplateManager.save_as_template(entity, "guard_template")
-TemplateManager.instantiate("guard_template", overrides)
-```
+| Module | Purpose |
+|--------|---------|
+| `CommandParser` | Splits input, pattern matches to `{:builder_*, params}` tuples |
+| `BuilderCommands` | Thin dispatcher routing to 16 sub-modules |
+| `BuilderCommands.Rooms` | Room CRUD: dig, link, @desc, @name |
+| `BuilderCommands.Entities` | NPC/Item CRUD |
+| `BuilderCommands.Content` | Quest/Dialogue CRUD |
+| `BuilderCommands.Scripts` | Script CRUD, templates, attach/detach |
+| `BuilderCommands.Zones` | Zone CRUD |
+| `BuilderCommands.Cutscenes` | Cutscene CRUD |
+| `BuilderCommands.Storylines` | Storyline CRUD |
+| `BuilderCommands.Navigation` | goto, rooms, where |
+| `BuilderCommands.Inspection` | info, list, find |
+| `BuilderCommands.Testing` | spawn, purge, give, flags, godmode |
+| `BuilderCommands.World` | reload, validate, settime |
+| `BuilderCommands.Projects` | Project/document management |
+| `BuilderCommands.AI` | `/ai` commands, chat mode, streaming |
+| `BuilderCommands.Help` | Categorized help system |
+| `BuilderCommands.Formatter` | Tables, sections, key_value, box formatting |
+| `BuilderCommands.Helpers` | push_builder, find_room_by_key, format utilities |
 
-## DO and DON'T
-
-**DO:**
-- Use `EntityManager` for NPCs, Items, simple entities
-- Use `Content.*` modules for game-wide types
-- Create specialized managers only for complex UI needs
-
-**DON'T:**
-- Create `NPCManager`, `ItemManager` (use EntityManager)
-- Duplicate CRUD logic across managers
-- Put UI-specific code in Content modules
-
-## LiveView Patterns
-
-### Streams for Collections
-```elixir
-# Mount
-socket = stream(socket, :entities, EntityManager.list_entities(:npc))
-
-# Template
-<div id="entities" phx-update="stream">
-  <div :for={{id, entity} <- @streams.entities} id={id}>
-    {entity.name}
-  </div>
-</div>
-
-# Update (must reset stream)
-socket = stream(socket, :entities, new_list, reset: true)
-```
-
-### Event Handler Extraction Pattern
-Large LiveViews delegate `handle_event` to extracted handler modules to stay under ~2,500 lines. Five handlers are already extracted:
-
-| Handler Module | Domain | Events |
-|---|---|---|
-| `EntityEventHandler` | NPC/Item CRUD | `create_npc`, `delete_item`, etc. |
-| `DialogueEventHandler` | Dialogue tree editing | `dialogue_*` events |
-| `GitEventHandler` | Git commit modal | `show_commit_modal`, `stage_and_commit`, etc. |
-| `CutsceneEventHandler` | Cutscene editing | `cutscene_*` events |
-| `ScriptTemplateEventHandler` | Script template picker | `show_template_picker`, `create_script_from_template`, etc. |
-
-**Delegation pattern** (one-line in `world_builder_live.ex`):
-```elixir
-def handle_event("show_commit_modal" = e, p, s), do: GitEventHandler.handle_event(e, p, s)
-```
-
-**Handler module structure:**
-```elixir
-defmodule LokaWeb.AdminLive.WorldBuilder.MyEventHandler do
-  import Phoenix.Component, only: [assign: 3]
-  # import Phoenix.LiveView, only: [push_event: 3]  # if needed
-
-  def handle_event("my_event", params, socket) do
-    {:noreply, assign(socket, :field, value)}
-  end
-
-  # Private helper for console logging (duplicated per handler — acceptable for ≤5 copies)
-  defp log_console(socket, level, text) do
-    message = %{timestamp: DateTime.utc_now(), level: level, text: text}
-    assign(socket, :console_messages, socket.assigns.console_messages ++ [message])
-  end
-end
-```
-
-**When to extract:** Group of 50+ lines of related `handle_event` clauses with a clear domain boundary.
-
-### Push Events to JS
-```elixir
-socket = push_event(socket, "highlight_room", %{room_id: room.id})
-```
-
-## Phoenix 1.8 Patterns
-
-### Forms
-```elixir
-# Always use to_form
-socket = assign(socket, form: to_form(changeset))
-
-# Template
-<.form for={@form} phx-submit="save">
-  <.input field={@form[:name]} type="text" />
-</.form>
-```
-
-### Layouts
-```elixir
-# Always wrap with Layouts.app
-<Layouts.app flash={@flash} current_scope={@current_scope}>
-  <!-- content -->
-</Layouts.app>
-```
-
-## Key Files
+### Backend Managers (in `lib/loka/world_builder/`)
 
 | File | Purpose |
 |------|---------|
-| `world_builder_live.ex` | Main coordinator (~3,060 lines) |
-| `world_builder/*_event_handler.ex` | Extracted event handler modules (5 total) |
-| `entity_manager.ex` | Generic entity CRUD |
-| `room_manager.ex` | Room-specific logic |
-| `hierarchy_panel.ex` | Tree navigation |
-| `terminal_panel.ex` | MUD terminal |
+| `room_manager.ex` | Room YAML CRUD |
+| `entity_manager.ex` | NPC/Item prototype CRUD |
+| `quest_manager.ex` | Quest YAML CRUD |
+| `dialogue_manager.ex` | Dialogue YAML CRUD |
+| `validation_manager.ex` | Content validation |
+| `tool_executor.ex` | Executes MCP/AI tool calls |
+| `yaml_builder.ex` | YAML generation utilities |
+| `anthropic_client.ex` | Claude API client (streaming SSE) |
+| `script_templates.ex` | 15 built-in script templates |
+| `projects.ex` | Project workspaces |
+| `audit_log.ex` | Builder action logging |
+| `mcp/` | MCP server (tools.ex, router.ex, server.ex) |
+
+## Key Rules
+
+### 1. Command Parser Conventions
+
+- Builder commands return atoms prefixed with `:builder_*`
+- Support abbreviations: `n`→north, `dl`→dialogue, `sc`→script, `cs`→cutscene, `sl`→storyline
+- Multi-word commands: `create <type> <args>`, `edit <type> <args>`
+- All output uses `Helpers.push_builder/2` (prefixes with `[BUILDER]`)
+
+### 2. Sub-Module Return Values
+
+```elixir
+# Standard returns from sub-module execute/3:
+{:ok, text, socket}    # Success with output text
+{:ok, socket}          # Success, output already pushed
+{:error, text, socket} # Error with message
+{:ok_text, text}       # Raw text (no [BUILDER] prefix)
+```
+
+### 3. Terminal Markup
+
+Clickable commands use `{{cmd:COMMAND}}text{{/cmd}}` markup:
+```elixir
+"Type {{cmd:help rooms}}help rooms{{/cmd}} for room commands."
+```
+The `Formatter.display_length/1` strips markup tags when calculating column widths for tables.
+
+### 4. YAML Operations
+
+All content CRUD goes through managers that read/write YAML in `priv/world/`. After mutations, call `TypedObject.Loader.reload()` to refresh ETS caches.
+
+### 5. AI Integration
+
+- `BuilderCommands.AI` handles `/ai` prompts and chat mode toggle
+- Uses `Loka.AI.Conversation` for streaming (NOT the old `chat.ex`)
+- Tool calls go through `ToolExecutor.execute/3`
+- MCP server exposes same tools for Claude Desktop
 
 ## Validation
 
 ```bash
-# Run World Builder tests
-mix test test/loka_web/live/admin_live/
+# Parser tests
+mix test test/loka_web/channels/command_parser_test.exs
 
-# Run all web tests
-mix test test/loka_web/
+# Formatter tests
+mix test test/loka_web/channels/builder_commands/formatter_test.exs
+
+# Security tests (admin gating)
+mix test test/loka_web/channels/builder_command_security_test.exs
+
+# CRUD integration tests
+mix test test/loka_web/channels/builder_crud_test.exs
+
+# YAML builder tests
+mix test test/loka/world_builder/yaml_builder_test.exs
 ```
-
-## Related Skills
-
-- `.claude/skills/entity-data-structure-differences.md` - EntityManager data structure patterns
 
 ## Documentation
 
-- `docs/architecture/world-builder-master-plan.md`
-- `docs/architecture/world-builder-api.md`
+- `docs/architecture/terminal-builder.md`
 - `docs/api/channel-contract.md`

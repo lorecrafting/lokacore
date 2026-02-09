@@ -16,7 +16,7 @@
 |  Godot 4.6 (Mobile/Web)          |
 |  Phoenix LiveView (Admin)        |
 |  - Admin Dashboard (/admin)      |
-|  - World Builder (/admin/world-builder) |
+|  - Terminal Builder (/admin/builder)    |
 +----------------+-----------------+
                  |
             WebSocket

@@ -4,7 +4,28 @@ defmodule LokaWeb.Channels.BuilderCommands.Formatter do
   """
 
   @doc """
+  Returns the display length of a string, stripping `{{cmd:...}}` and `{{/cmd}}` markers.
+
+  These markers are invisible to the user (parsed client-side into clickable links),
+  so column alignment must use display length, not raw string length.
+
+      iex> display_length("{{cmd:goto tavern}}tavern{{/cmd}}")
+      6
+      iex> display_length("plain text")
+      10
+  """
+  def display_length(str) do
+    str
+    |> to_string()
+    |> String.replace(~r/\{\{cmd:[^}]+\}\}/, "")
+    |> String.replace("{{/cmd}}", "")
+    |> String.length()
+  end
+
+  @doc """
   Formats a list of rows into aligned columns.
+  Uses `display_length/1` for width calculation so `{{cmd:...}}` markup doesn't
+  break column alignment.
 
       iex> table(["Name", "Key"], [["Bob", "bob"], ["Alice", "alice"]])
       "Name   Key\\n─────  ─────\\nBob    bob\\nAlice  alice"
@@ -17,14 +38,18 @@ defmodule LokaWeb.Channels.BuilderCommands.Formatter do
     widths =
       Enum.map(0..(col_count - 1), fn i ->
         all
-        |> Enum.map(fn row -> row |> Enum.at(i, "") |> to_string() |> String.length() end)
+        |> Enum.map(fn row -> row |> Enum.at(i, "") |> to_string() |> display_length() end)
         |> Enum.max()
       end)
 
     format_row = fn row ->
       row
       |> Enum.zip(widths)
-      |> Enum.map(fn {cell, width} -> String.pad_trailing(to_string(cell), width) end)
+      |> Enum.map(fn {cell, width} ->
+        cell_str = to_string(cell)
+        pad = width - display_length(cell_str)
+        cell_str <> String.duplicate(" ", max(pad, 0))
+      end)
       |> Enum.join(String.duplicate(" ", padding))
       |> String.trim_trailing()
     end
@@ -78,14 +103,15 @@ defmodule LokaWeb.Channels.BuilderCommands.Formatter do
   """
   def box(text) do
     lines = String.split(text, "\n")
-    max_width = lines |> Enum.map(&String.length/1) |> Enum.max(fn -> 0 end)
+    max_width = lines |> Enum.map(&display_length/1) |> Enum.max(fn -> 0 end)
 
     top = "┌─#{String.duplicate("─", max_width)}─┐"
     bottom = "└─#{String.duplicate("─", max_width)}─┘"
 
     middle =
       Enum.map(lines, fn line ->
-        "│ #{String.pad_trailing(line, max_width)} │"
+        pad = max_width - display_length(line)
+        "│ #{line}#{String.duplicate(" ", max(pad, 0))} │"
       end)
 
     Enum.join([top | middle] ++ [bottom], "\n")

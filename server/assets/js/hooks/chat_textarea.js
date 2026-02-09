@@ -1,4 +1,4 @@
-import { HookHelper } from '../world_builder/HookHelper.js'
+import { HookHelper } from './HookHelper.js'
 
 // Chat textarea with Enter submit, Shift+Enter for newline
 const ChatTextarea = {

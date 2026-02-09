@@ -29,11 +29,11 @@
  *   - (none)
  *
  * @related
- *   - lib/loka_web/live/admin_live/world_builder/settings_modal.ex (UI component)
- * @used_by WorldBuilderLive settings modal
+ *   - lib/loka_web/live/admin_live/builder_live.ex (settings UI)
+ * @used_by BuilderLive settings
  */
 
-import { HookHelper } from '../world_builder/HookHelper.js'
+import { HookHelper } from './HookHelper.js'
 
 // Provider configuration for API key validation
 // Each entry defines the endpoint, model, and validation type.

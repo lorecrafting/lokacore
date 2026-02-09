@@ -156,7 +156,7 @@ Loka.Supervisor (strategy: :one_for_one)
 │   ├── Loka.Engine.SocialLoader
 │   ├── Loka.Engine.EntityRegistry
 │   ├── Loka.Engine.CommandRegistry
-│   └── Loka.Engine.WorldGraph.LayoutManager
+│   └── Loka.Engine.EntitySupervisor
 │
 ├── Plugin System
 │   ├── Loka.Engine.PluginSupervisor
@@ -2526,15 +2526,19 @@ def hooks, do: [
 
 **Location:** `lib/loka/world_builder/`
 
-The World Builder is a comprehensive UI-driven content creation system (~7,600 LOC) that allows non-technical builders to create and edit game content through the admin dashboard.
+The World Builder is an AI-powered terminal-based content creation system at `/admin/builder`. It uses MUD-style text commands and MCP tool integration for creating and editing game content.
+
+> *Note: The original `WorldBuilderLive` GUI was archived in Feb 2026 and replaced with this terminal builder.*
 
 ### Architecture Pattern
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ World Builder UI (lib/loka_web/live/admin_live/)            │
+│ Terminal UI (MudTerminal JS hook)                            │
 ├─────────────────────────────────────────────────────────────┤
-│ Manager Classes (EntityManager, RoomManager, etc.)          │
+│ GameChannel + CommandParser + BuilderCommands                │
+├─────────────────────────────────────────────────────────────┤
+│ MCP Tools + ToolExecutor + YamlBuilder                      │
 ├─────────────────────────────────────────────────────────────┤
 │ Content Modules (Content.Quest, Content.Dialogue, etc.)     │
 ├─────────────────────────────────────────────────────────────┤
@@ -2544,96 +2548,66 @@ The World Builder is a comprehensive UI-driven content creation system (~7,600 L
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Core Managers
+### Core Modules
 
-| Manager | Purpose | Key Methods |
-|---------|---------|-------------|
-| **EntityManager** | Generic CRUD for NPCs, items, etc. | `create_entity/2`, `update_entity/2`, `list_entities/1` |
-| **RoomManager** | Room CRUD with exits and coordinates | `create_room/1`, `add_exit/3`, `update_exits/2` |
-| **QuestManager** | Quest definition management | `create_quest/1`, `update_quest/2`, `delete_quest/1` |
-| **ScriptManager** | Script YAML management | `create_script/1`, `list_scripts/0` |
-| **TemplateManager** | Room template system | `save_as_template/3`, `create_from_template/2` |
-| **CutsceneManager** | Timeline-based cutscenes | `create_cutscene/1`, `update_cutscene/2` |
+| Module | Purpose | Key Methods |
+|--------|---------|-------------|
+| **BuilderCommands** | Terminal command dispatch | `execute/3` - routes builder commands |
+| **CommandParser** | Text input parsing | `parse/1` - raw text to tagged action tuples |
+| **ToolExecutor** | MCP tool execution | `execute/2` - runs AI tool calls |
+| **YamlBuilder** | YAML content generation | `build_room/1`, `build_npc/1`, `build_quest/1` |
 
-### EntityManager Details
+### YamlBuilder Details
 
-`EntityManager` is the unified CRUD layer for all entity types in the World Builder:
+`YamlBuilder` generates YAML content files for the terminal builder's MCP tools:
 
 ```elixir
-# Create an NPC with dialogue
-EntityManager.create_entity(:npc, %{
+# Build an NPC YAML file
+YamlBuilder.build_npc(%{
   key: "village_elder",
   name: "Elder Dawa",
   description: "A wise elder",
-  components: %{
-    "dialogue_tree" => %{
-      "start" => %{
-        "text" => "Greetings, traveler!",
-        "choices" => [
-          %{"text" => "Hello", "next" => nil}
-        ]
-      }
-    }
-  }
+  zone: "monastery"
 })
 
-# Update entity
-EntityManager.update_entity("village_elder", %{
-  components: %{dialogue_tree: updated_tree}
+# Build a room YAML file
+YamlBuilder.build_room(%{
+  key: "town_square",
+  name: "Town Square",
+  description: "A bustling plaza",
+  zone: "monastery"
 })
-
-# List all NPCs
-npcs = EntityManager.list_entities(:npc)
 ```
 
 **Key Features:**
-- Merges default components with user-provided components
-- Reloads `TypedObject.Loader` on save
-- Serializes nested maps (including dialogue trees) to proper YAML format
+- Generates properly formatted YAML from tool parameters
+- Reloads `TypedObject.Loader` after writing files
 - Validates safe key names (no path traversal)
+- Handles heredoc indentation for multiline descriptions
 
-### YAML Serialization
+### Builder Commands
 
-The EntityManager handles complex nested structures like dialogue trees:
+The terminal supports admin commands for content testing and inspection:
 
-```yaml
-# Generated YAML for NPC with dialogue
-key: village_elder
-type: npc
-parent: base_npc
-components:
-  dialogue_tree:
-    start:
-      text: "Greetings, traveler!"
-      choices:
-        - next: "more_info"
-          text: "Tell me more"
-        - next: null
-          text: "Goodbye"
 ```
-
-### Supporting Systems
-
-| Module | Purpose |
-|--------|---------|
-| `BatchOperations` | Cross-cutting operations for multiple entities |
-| `GitManager` | Git integration for version control |
-| `ValidationManager` | Content integrity checking |
-| `ToolExecutor` | Executes World Builder tools |
-| `LayoutManager` | Room layout and coordinate management |
-| `CoordinateUtils` | Spatial math helpers |
+Navigation: goto <room_key>, rooms, where, find <search>
+Inspect:    info <entity>, list npcs|items|quests
+Content:    create zone|storyline|cutscene|script (via AI tools)
+Flags:      setflag <flag>, clearflag <flag>, flags
+Quests:     startquest <key>, completequest <key>, resetquest <key>
+World:      reload, validate
+```
 
 ### Usage Guidelines
 
 **DO:**
-- Use `EntityManager` for simple entity CRUD (NPCs, items)
-- Use specialized managers for complex needs (RoomManager for exits)
+- Use builder commands for navigation and inspection
+- Use AI chat (`/ai <prompt>`) for content creation via MCP tools
 - Use Content modules when game logic needs entity data
 
 **DON'T:**
-- Create redundant managers like `NPCManager` (use EntityManager)
 - Put UI-specific code in Content modules
-- Duplicate CRUD logic across managers
+- Bypass YamlBuilder for direct file writes
 
 ---
 

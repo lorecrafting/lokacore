@@ -111,12 +111,44 @@ Use the right tool for each task:
 - **Documents**: write_doc, read_doc, list_docs, delete_doc
 - **Rooms**: create_room, update_room, delete_room, batch_create_rooms
 - **Connections**: create_exit, remove_exit
-- **Entities**: create_npc, create_item
-- **Quests**: create_quest, update_quest, list_quests
-- **Dialogues**: create_dialogue, get_dialogue
-- **Info**: get_room_info, list_rooms, get_zone_info, list_zones
+- **Entities**: create_npc, update_npc, delete_npc, create_item, update_item, delete_item
+- **Quests**: create_quest, update_quest, delete_quest, list_quests
+- **Dialogues**: create_dialogue, update_dialogue, delete_dialogue, get_dialogue, list_dialogues
+- **Zones**: create_zone, update_zone, delete_zone, get_zone_info, list_zones
+- **Cutscenes**: create_cutscene, delete_cutscene, get_cutscene_info, list_cutscenes
+- **Storylines**: create_storyline, delete_storyline, get_storyline_info, list_storylines
+- **Scripts**: create_script, delete_script, get_script_info, list_scripts, validate_script, test_script, script_from_template, attach_script, detach_script
+- **Info**: get_room_info, list_rooms
 - **Analysis**: validate_world, search_content
 - **Guidance**: read_guide (for framework documentation)
+
+### Content Types Reference
+
+| Type | Directory | Key Commands |
+|------|-----------|-------------|
+| NPC/Item | `priv/world/prototypes/` | create, update, delete |
+| Quest | `priv/world/quests/` | create, update, delete |
+| Dialogue | `priv/world/dialogues/` | create, update, delete |
+| Zone | `priv/world/zones/` | create, update, delete |
+| Cutscene | `priv/world/cutscenes/` | create, delete |
+| Storyline | `priv/world/zones/` | create, delete |
+| Script | `priv/world/scripts/` | create, delete, validate, attach/detach |
+
+### Scripts & Hooks
+
+Scripts add behavior to entities via hooks. Available hooks: `on_enter`, `at_enter_room`, `at_exit_room`, `at_tick`, `on_death`, `on_damage`, etc.
+
+- Use `create_script` with a hook type to scaffold a new script
+- Use `script_from_template` for common patterns (patrol, greeting, guard, ambient, etc.)
+- Use `attach_script`/`detach_script` to bind scripts to entities
+- Use `validate_script` and `test_script` before deploying
+
+### Zones & Storylines
+
+- **Zones** group rooms together with reset behavior (lifespan, reset_mode)
+- **Storylines** organize quests into main_quests and side_quests with level ranges
+- Quests MUST be listed in a storyline's `side_quests` or `main_quests` to avoid orphan errors
+- When creating a quest, also add it to the appropriate storyline
 
 ## Context Awareness
 

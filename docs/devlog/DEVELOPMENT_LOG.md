@@ -458,6 +458,8 @@ Comprehensive validation and learning resources:
 ### January 8, 2026 (Day 24) - World Builder Implementation
 **Commits**: ~50 | **Focus**: Massive World Builder buildout
 
+> *Note: The WorldBuilderLive GUI built during this period was archived in Feb 2026 and replaced with the terminal builder at `/admin/builder`.*
+
 Intensive World Builder development:
 
 - **Admin Auth Skip**: Test during development

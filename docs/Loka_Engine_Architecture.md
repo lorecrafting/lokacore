@@ -1273,57 +1273,7 @@ end
 
 ### 10.1 World Builder Interface
 
-```elixir
-defmodule LokaWeb.Admin.WorldBuilderLive do
-  use LokaWeb, :live_view
-  
-  @impl true
-  def mount(_params, session, socket) do
-    {:ok, assign(socket,
-      selected_room: nil,
-      rooms: [],
-      mode: :view
-    )}
-  end
-  
-  @impl true
-  def render(assigns) do
-    ~H"""
-    <div class="world-builder">
-      <.sidebar>
-        <.room_tree rooms={@rooms} selected={@selected_room} />
-      </.sidebar>
-      
-      <.main_panel>
-        <%= case @mode do %>
-          <% :view -> %>
-            <.room_viewer room={@selected_room} />
-          <% :edit -> %>
-            <.room_editor room={@selected_room} on_save="save_room" />
-          <% :script -> %>
-            <.script_editor entity={@selected_room} />
-        <% end %>
-      </.main_panel>
-      
-      <.properties_panel>
-        <.entity_properties entity={@selected_room} />
-      </.properties_panel>
-    </div>
-    """
-  end
-  
-  @impl true
-  def handle_event("create_room", params, socket) do
-    room = Loka.Builder.create_room(params)
-    {:noreply, update(socket, :rooms, &[room | &1])}
-  end
-  
-  def handle_event("connect_rooms", %{"from" => from, "to" => to, "direction" => dir}, socket) do
-    Loka.Builder.connect_rooms(from, to, dir)
-    {:noreply, socket}
-  end
-end
-```
+> *Note: The original `WorldBuilderLive` GUI was archived in Feb 2026 and replaced with an AI-powered terminal builder at `/admin/builder`. The terminal builder uses `GameChannel` with builder commands (see `builder_commands.ex`) and MCP tool integration for content creation. See `docs/architecture/terminal-builder.md` for the current architecture.*
 
 ### 11.2 Script Editor with Validation
 

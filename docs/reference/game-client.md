@@ -125,17 +125,14 @@ See `CLAUDE.md` for detailed Godot client documentation.
 
 ## World Builder Terminal
 
-The MUD terminal panel is embedded in the World Builder UI as a resizable column panel.
+The Terminal Builder at `/admin/builder` is a standalone MUD terminal for content creation.
 It connects to `GameChannel` via a JS hook (`MudTerminal`) with a JWT token generated
-by `WorldBuilderLive`.
+by `AdminLive`.
 
 Key files:
-- `lib/loka_web/live/admin_live/world_builder/terminal_panel.ex` - Phoenix component
 - `lib/loka_web/channels/command_parser.ex` - Text command parser
 - `lib/loka_web/channels/builder_commands.ex` - Admin command implementations
-- `assets/js/app.js` (MudTerminal hook) - Socket connection, output rendering, command history
-
-Toggle with keyboard shortcut `5` or the Terminal toolbar button.
+- `assets/js/hooks/mud_terminal.js` - Socket connection, output rendering, command history
 
 ## UI Style
 

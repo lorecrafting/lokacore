@@ -3,79 +3,64 @@ description: Start World Builder UI development session
 allowed-tools: Read, Edit, Write, Bash, Grep, Glob, Task
 ---
 
-# World Builder UI Session
+# Terminal Builder Session
 
-You are now in **World Builder Mode**, focused on the admin UI in `lib/loka_web/live/admin_live/` and `lib/loka/world_builder/`.
+You are now in **Builder Mode**, focused on the MUD terminal builder in `lib/loka_web/channels/builder_commands/` and `lib/loka/world_builder/`.
 
 ## Session Setup
 
 Before diving in, clarify:
-1. **What UI feature** are you implementing or modifying?
-2. **Which panel/component** is affected?
-3. **What user interaction** should trigger what behavior?
+1. **What command/feature** are you implementing or modifying?
+2. **Which command module** is affected (Rooms, Entities, Content, Scripts, etc.)?
+3. **What user input** should trigger what behavior?
 
 ## Architecture Reminder
 
 ```
-Layer 3: Specialized Managers (only when needed)
-    ↑
-Layer 2: EntityManager (default for CRUD)
-    ↑
-Layer 1: Content Modules (shared with game code)
+Browser (MudTerminal hook)
+  ↕ Phoenix Channel (WebSocket)
+GameChannel → CommandParser.parse/1 → {:builder_*, params}
+  → execute_builder_command/3 (admin gate)
+  → BuilderCommands.execute/3 → dispatches to sub-module
+  → Sub-module → calls Manager → pushes output
 ```
-
-**Rule**: Use EntityManager for simple entities. Only create specialized managers when EntityManager can't handle the UI requirements.
 
 ## Key Files
 
 | File | Purpose |
 |------|---------|
-| `world_builder_live.ex` | Main LiveView coordinator |
+| `command_parser.ex` | Input → `{:builder_*, params}` tuples |
+| `builder_commands.ex` | Dispatcher to 16 sub-modules |
+| `builder_commands/*.ex` | 16 command modules |
 | `entity_manager.ex` | Generic entity CRUD |
-| `room_manager.ex` | Room-specific (exits, coords) |
-| `hierarchy_panel.ex` | Tree navigation |
-| `console_panel.ex` | Command interface |
+| `room_manager.ex` | Room-specific (exits, YAML) |
+| `tool_executor.ex` | AI tool execution |
 
-## LiveView Patterns
+## Command Module Pattern
 
-### Streams (Required for Collections)
 ```elixir
-# Setup
-socket = stream(socket, :entities, list)
+defmodule LokaWeb.Channels.BuilderCommands.MyCategory do
+  alias LokaWeb.Channels.BuilderCommands.Helpers
 
-# Template
-<div id="entities" phx-update="stream">
-  <div :for={{id, e} <- @streams.entities} id={id}>{e.name}</div>
-</div>
-
-# Update (must reset)
-socket = stream(socket, :entities, new_list, reset: true)
+  def execute(:builder_my_command, %{param: value}, socket) do
+    case do_work(value) do
+      {:ok, result} -> {:ok, format_result(result), socket}
+      {:error, reason} -> {:error, "Failed: #{reason}", socket}
+    end
+  end
+end
 ```
 
-### Forms (Phoenix 1.8)
-```elixir
-# Always use to_form
-socket = assign(socket, form: to_form(changeset))
-
-# Never use changeset directly in template
-<.form for={@form} phx-submit="save">
-  <.input field={@form[:name]} />
-</.form>
-```
-
-### Push Events to JS
-```elixir
-socket = push_event(socket, "event_name", %{data: value})
-```
+Return values: `{:ok, text, socket}` | `{:ok, socket}` | `{:error, text, socket}` | `{:ok_text, text}`
 
 ## Development Workflow
 
 ```
-1. Identify component/panel to modify
-2. Check existing patterns in similar components
-3. Implement using streams + to_form
-4. Test in browser at /admin
-5. Run mix test test/loka_web/
+1. Add command atom to CommandParser
+2. Add atom to category list in BuilderCommands
+3. Implement execute/3 in sub-module
+4. Test: mix test test/loka_web/channels/
+5. Manual test in browser at /admin/builder
 ```
 
 ## Quick Commands
@@ -84,40 +69,33 @@ socket = push_event(socket, "event_name", %{data: value})
 # Start server
 mix phx.server
 
-# Run UI tests
-mix test test/loka_web/live/admin_live/
+# Parser tests
+mix test test/loka_web/channels/command_parser_test.exs
 
-# All web tests
-mix test test/loka_web/
+# All channel tests
+mix test test/loka_web/channels/
+
+# Backend tests
+mix test test/loka/world_builder/
 ```
 
 ## Key Documentation
 
 | Topic | Location |
 |-------|----------|
-| World Builder Plan | `docs/architecture/world-builder-master-plan.md` |
-| API Reference | `docs/architecture/world-builder-api.md` |
+| Terminal Builder | `docs/architecture/terminal-builder.md` |
 | Channel Contract | `docs/api/channel-contract.md` |
-| Phoenix 1.8 | `server/AGENTS.md` |
-
-## Phoenix 1.8 Reminders
-
-- Wrap content with `<Layouts.app flash={@flash} current_scope={@current_scope}>`
-- Use `<.icon name="hero-x-mark" />` for icons
-- Use `<.input>` component for form inputs
-- `<.flash_group>` only in layouts module
 
 ## What NOT To Do
 
-- Don't create `NPCManager`, `ItemManager` (use EntityManager)
-- Don't use `@changeset` in templates (use `@form`)
-- Don't forget to pass `current_scope` to layouts
-- Don't skip streams for collections (causes memory issues)
+- Don't create redundant managers (use EntityManager for NPCs/Items)
+- Don't forget to add command atom to both parser AND dispatcher
+- Don't forget `try/rescue` around ToolExecutor calls
+- Don't use `{{cmd:}}` markup without accounting for it in display_length
 
 ## End of Session
 
 Before finishing:
-1. Test in browser at `localhost:4000/admin`
-2. Run `mix test test/loka_web/`
-3. Use `/save` if you found a useful pattern
-4. Commit: `git add . && git commit -m "ui: ..."`
+1. Test in browser at `localhost:4000/admin/builder`
+2. Run `mix test test/loka_web/channels/`
+3. Commit: `git add . && git commit -m "builder: ..."`

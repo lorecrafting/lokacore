@@ -47,6 +47,7 @@ This documentation covers the core engine architecture for Loka - an Elixir MUD 
 ### Web & API
 - [REST API Reference](../api/README.md) - JWT authentication, health endpoints
 - [Admin Dashboard](../admin/dashboard.md) - Admin interface guide
+- [Terminal Builder](./terminal-builder.md) - AI-powered MUD terminal for content creation
 - [UI Style Guide](../ui/living-ebook-style-guide.md) - Living Ebook aesthetic
 
 ### Other Resources
@@ -73,9 +74,7 @@ This documentation covers the core engine architecture for Loka - an Elixir MUD 
       │             │         │         │             │
    Hooks   TypedObject.Loader  │   EntityRegistry   Combat.RespawnManager
                               │
-                    ┌─────────┴─────────┐
-                    │                   │
-             LayoutManager       EntitySupervisor
+                       EntitySupervisor
                                         │
                               ┌─────────┼─────────┐
                               │         │         │
@@ -85,7 +84,6 @@ This documentation covers the core engine architecture for Loka - an Elixir MUD 
 
 - **Hooks**: Registers lifecycle callbacks
 - **TypedObject.Loader**: Loads YAML content into ETS
-- **LayoutManager**: Auto-maintains room coordinates based on exits
 - **EntitySupervisor**: DynamicSupervisor for EntityServer processes
 - **EntityRegistry**: Process lookup + room-based broadcasting
 - **EntityServer**: GenServer for individual active entities

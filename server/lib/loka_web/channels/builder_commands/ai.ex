@@ -133,6 +133,8 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
   end
 
   def handle_ai_event({:ai_done}, socket) do
+    # Reload TypedObject registry once after all tool calls in this turn
+    Loka.Engine.TypedObject.Loader.reload()
     push(socket, "ai_stream_done", %{})
     {:noreply, socket}
   end
@@ -159,6 +161,8 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
         tools: AnthropicClient.get_tools(),
         system_prompt_fn: &build_system_prompt/1,
         tool_executor_fn: fn name, input, _opts ->
+          # Defer reloads — a single reload happens when the conversation turn ends
+          Process.put(:loka_defer_reload, true)
           project_key = get_in(socket.assigns, [:current_project, :key])
           ToolExecutor.execute(name, input, project_key: project_key)
         end,
