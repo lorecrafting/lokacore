@@ -182,11 +182,10 @@
   font-family: inherit;
 }
 
-/* ---- Message Bubbles ---- */
+/* ---- Messages (terminal-style, no bubbles) ---- */
 .chat-message {
   margin-bottom: 0;
   padding: 0;
-  border-radius: var(--wb-radius-lg);
   position: relative;
   animation: messageIn 0.2s ease-out;
 }
@@ -316,20 +315,14 @@
 
 /* ---- User & Assistant Message Styles ---- */
 .chat-message.user {
-  background: linear-gradient(135deg, var(--wb-chat-user-bg-from) 0%, var(--wb-chat-user-bg-to) 100%);
-  margin-left: 12%;
-  border: 1px solid var(--wb-chat-user-border);
-  box-shadow: 0 1px var(--wb-space-xs) color-mix(in srgb, black 20%, transparent);
-}
-
-.chat-message.user .message-content {
-  color: var(--wb-chat-user-text);
+  background: none;
+  border: none;
+  box-shadow: none;
 }
 
 .chat-message.assistant {
-  background: var(--wb-panel-alt);
-  margin-right: 4%;
-  border: 1px solid var(--wb-chat-border);
+  background: none;
+  border: none;
 }
 
 .chat-message.tool_result {

@@ -55,6 +55,7 @@ const MudTerminal = {
       this._lastCommandTime = 0
       this.socket = null
       this.channel = null
+      this._aiStreamBuffer = ''
 
       // Scope DOM queries to terminal container instead of global document
       this.terminalContainer = this.el.closest('.world-builder-terminal') || this.el.parentElement
@@ -70,6 +71,7 @@ const MudTerminal = {
       this.mvEl = this.terminalContainer.querySelector('#term-mv')
       this.exitsEl = this.terminalContainer.querySelector('#term-exits')
       this.statusDot = this.terminalContainer.querySelector('#term-connection-dot')
+      this.modeEl = this.terminalContainer.querySelector('#term-mode')
 
       this.setConnectionState('connecting')
 
@@ -260,6 +262,55 @@ const MudTerminal = {
     this.channel.on('clear_terminal', () => {
       this.clearOutput()
     })
+
+    // =========================================================================
+    // AI Streaming Events (Builder AI + Spark)
+    // =========================================================================
+
+    // AI text streaming - accumulate into current line, flush on newlines
+    this.channel.on('ai_stream_delta', (data) => {
+      if (!data.text) return
+      this._aiStreamBuffer += data.text
+
+      // Flush complete lines
+      const lines = this._aiStreamBuffer.split('\n')
+      if (lines.length > 1) {
+        // Output all complete lines (all but the last)
+        for (let i = 0; i < lines.length - 1; i++) {
+          this.appendOutput(lines[i], 'ai')
+        }
+        // Keep the incomplete last line in buffer
+        this._aiStreamBuffer = lines[lines.length - 1]
+      }
+    })
+
+    // AI tool execution (verbose mode - shows tool calls inline)
+    this.channel.on('ai_stream_tool', (data) => {
+      const name = data.name || 'unknown'
+      const summary = data.summary || name
+      this.appendOutput(`  [tool] ${summary}`, 'ai-tool')
+    })
+
+    // AI stream complete - flush remaining buffer
+    this.channel.on('ai_stream_done', () => {
+      if (this._aiStreamBuffer) {
+        this.appendOutput(this._aiStreamBuffer, 'ai')
+        this._aiStreamBuffer = ''
+      }
+    })
+
+    // AI stream error
+    this.channel.on('ai_stream_error', (data) => {
+      this._aiStreamBuffer = ''
+      const msg = data.error || 'AI request failed'
+      this.appendOutput(`[AI Error] ${msg}`, 'error')
+    })
+
+    // Chat mode toggle (NORMAL ↔ CHAT)
+    this.channel.on('chat_mode_changed', (data) => {
+      const mode = data.mode || 'normal'
+      this.setMode(mode)
+    })
   },
 
   appendOutput(text, className = '') {
@@ -348,6 +399,14 @@ const MudTerminal = {
     if (this.exitsEl) this.exitsEl.textContent = `Exits: ${dirs.length ? dirs.join(', ') : 'none'}`
   },
 
+  setMode(mode) {
+    if (this.modeEl) {
+      const label = mode === 'chat' ? 'CHAT' : 'NORMAL'
+      this.modeEl.textContent = label
+      this.modeEl.className = mode === 'chat' ? 'text-warning font-medium' : 'text-primary font-medium'
+    }
+  },
+
   updated() {
     // Refresh DOM references that may have been replaced by LiveView patches
     if (!this.terminalContainer) return
@@ -357,6 +416,7 @@ const MudTerminal = {
     this.mvEl = this.terminalContainer.querySelector('#term-mv')
     this.exitsEl = this.terminalContainer.querySelector('#term-exits')
     this.statusDot = this.terminalContainer.querySelector('#term-connection-dot')
+    this.modeEl = this.terminalContainer.querySelector('#term-mode')
   },
 
   destroyed() {

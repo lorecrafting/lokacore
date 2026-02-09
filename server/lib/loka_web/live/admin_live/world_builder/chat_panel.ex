@@ -104,7 +104,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
       </div>
 
       <div
-        class="panel-content flex-1 overflow-auto p-2 bg-wb-panel-alt"
+        class="panel-content flex-1 flex flex-col min-h-0 overflow-hidden p-2 bg-wb-panel-alt"
         style={if @collapsed, do: "display: none;"}
       >
         <div class="flex items-center gap-1.5 px-2.5 py-1.5 bg-wb-surface border-b border-wb-border shrink-0">
@@ -191,7 +191,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
 
           <div
             :if={@streaming}
-            class="chat-message assistant streaming mb-1 py-1 px-2.5 rounded-lg relative bg-wb-panel-alt mr-[4%] border border-wb-chat-border"
+            class="chat-message assistant streaming mb-1 relative"
           >
             <div class="message-content text-[0.85rem] text-wb-text-bright leading-snug whitespace-normal">
               <div
@@ -249,7 +249,7 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
             id="chat-textarea"
             name="message"
             class="flex-1 py-2.5 px-3.5 bg-wb-surface border border-wb-chat-border rounded-[10px] text-wb-text-bright text-[0.85rem] font-[inherit] resize-none transition-all duration-200 leading-normal focus:outline-none focus:border-wb-accent focus:shadow-[0_0_0_2px_rgba(85,112,204,0.15)] placeholder:text-wb-text-faint"
-            placeholder={chat_placeholder(@current_project, @streaming, @queued_messages)}
+            placeholder=""
             rows="1"
             phx-hook="ChatTextarea"
             data-streaming={@streaming}
@@ -282,17 +282,16 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
   defp chat_message(assigns) do
     ~H"""
     <div class={[
-      "chat-message mb-1 py-1 px-2.5 rounded-lg relative",
+      "chat-message mb-1 relative",
       @message.role,
-      @message.role == "user" &&
-        "bg-linear-to-br from-wb-chat-user-bg-from to-wb-chat-user-bg-to ml-[12%] border border-wb-chat-user-border shadow-[0_1px_4px_rgba(0,0,0,0.2)]",
-      @message.role == "assistant" && "bg-wb-panel-alt mr-[4%] border border-wb-chat-border",
-      @message.role == "tool_result" && "!bg-transparent !border-none !p-0 ml-2"
+      @message.role == "user" && "pl-3 border-l-2 border-indigo-400/50",
+      @message.role == "tool_result" && "ml-2"
     ]}>
       <div class={[
-        "message-content text-[0.85rem] text-wb-text-bright leading-snug",
-        @message.role == "user" && "!text-wb-chat-user-text whitespace-pre-wrap",
-        @message.role != "user" && "whitespace-normal"
+        "message-content text-[0.85rem] leading-snug",
+        @message.role == "user" && "text-wb-text whitespace-pre-wrap",
+        @message.role == "assistant" && "text-wb-text-bright whitespace-normal",
+        @message.role not in ["user", "assistant"] && "whitespace-normal"
       ]}>
         <%= case @message.role do %>
           <% "user" -> %>
@@ -387,16 +386,6 @@ defmodule LokaWeb.AdminLive.WorldBuilder.ChatPanel do
   end
 
   # Helpers
-
-  defp chat_placeholder(nil, _streaming, _queued), do: "Start by creating or loading a project..."
-
-  defp chat_placeholder(_project, true, queued) when length(queued) > 0,
-    do: "Type to queue another message... (#{length(queued)} waiting)"
-
-  defp chat_placeholder(project, true, _queued),
-    do: "Type to queue a follow-up for #{project.key}..."
-
-  defp chat_placeholder(project, false, _queued), do: "Ask about #{project.key}..."
 
   defp format_tool_name(name) do
     name

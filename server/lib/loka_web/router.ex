@@ -114,6 +114,7 @@ defmodule LokaWeb.Router do
 
     live "/", AdminLive, :index
     live "/world-builder", AdminLive.WorldBuilderLive, :index
+    live "/builder", AdminLive.BuilderLive, :index
   end
 
   # Prometheus metrics endpoint for monitoring

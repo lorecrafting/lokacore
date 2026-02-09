@@ -52,6 +52,26 @@
   color: var(--wb-log-success);
 }
 
+/* AI response text */
+.terminal-line.ai {
+  color: var(--wb-text, oklch(0.85 0.01 264));
+}
+
+/* AI tool execution indicator */
+.terminal-line.ai-tool {
+  color: var(--wb-text-dim, oklch(0.55 0.01 264));
+  font-style: italic;
+}
+
+/* Success/warning inline messages */
+.terminal-line.success {
+  color: var(--wb-log-success, oklch(0.7 0.15 150));
+}
+
+.terminal-line.warning {
+  color: var(--wb-log-warn, oklch(0.75 0.15 85));
+}
+
 /* Connection state indicator dot - applied by JS */
 .term-connection-dot {
   display: inline-block;

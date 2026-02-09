@@ -63,6 +63,7 @@
 @import "./world-builder/modals-commit.css";
 @import "./world-builder/modals-document.css";
 @import "./world-builder/tools.css";
+@import "./builder.css";
 
 @source "../css";
 @source "../js";

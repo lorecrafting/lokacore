@@ -116,6 +116,7 @@ defmodule LokaWeb.GameChannel do
   alias LokaWeb.Channels.ChannelRateLimiter
   alias LokaWeb.Channels.CommandParser
   alias LokaWeb.Channels.BuilderCommands
+  alias LokaWeb.Channels.BuilderCommands.AI, as: BuilderAI
 
   # =============================================================================
   # Configuration Constants
@@ -723,7 +724,31 @@ defmodule LokaWeb.GameChannel do
   # =============================================================================
 
   def handle_in("command", %{"input" => text}, socket) do
-    case CommandParser.parse(text) do
+    # In chat mode, route all input to AI (except exit commands)
+    if socket.assigns[:chat_mode] && not command_prefix?(text) do
+      execute_ai_command(:chat_input, text, socket)
+    else
+      dispatch_parsed_command(CommandParser.parse(text), socket)
+    end
+  end
+
+  # Catch-all for unhandled events - log instead of crashing
+  def handle_in(event, payload, socket) do
+    Logger.warning(
+      "Unhandled channel event: #{event} with payload: #{inspect(payload, limit: 200)}"
+    )
+
+    {:reply, {:error, %{reason: "unknown_event", event: event}}, socket}
+  end
+
+  # Check if text starts with a command prefix (/, or known commands)
+  defp command_prefix?(text) do
+    trimmed = String.trim(text)
+    String.starts_with?(trimmed, "/") || trimmed in ~w(exit clear help look who)
+  end
+
+  defp dispatch_parsed_command(parsed, socket) do
+    case parsed do
       # Builder admin commands - gated by is_admin
       {:builder_goto, params} ->
         execute_builder_command(:goto, params, socket)
@@ -785,6 +810,112 @@ defmodule LokaWeb.GameChannel do
       {:builder_godmode, params} ->
         execute_builder_command(:godmode, params, socket)
 
+      # Room CRUD
+      {:builder_dig, params} ->
+        execute_builder_command(:dig, params, socket)
+
+      {:builder_set_desc, params} ->
+        execute_builder_command(:set_desc, params, socket)
+
+      {:builder_set_name, params} ->
+        execute_builder_command(:set_name, params, socket)
+
+      {:builder_create_room, params} ->
+        execute_builder_command(:create_room, params, socket)
+
+      {:builder_link, params} ->
+        execute_builder_command(:link, params, socket)
+
+      {:builder_unlink, params} ->
+        execute_builder_command(:unlink, params, socket)
+
+      {:builder_delete_room, params} ->
+        execute_builder_command(:delete_room, params, socket)
+
+      # Entity CRUD
+      {:builder_create_npc, params} ->
+        execute_builder_command(:create_npc, params, socket)
+
+      {:builder_create_item, params} ->
+        execute_builder_command(:create_item, params, socket)
+
+      {:builder_edit_entity, params} ->
+        execute_builder_command(:edit_entity, params, socket)
+
+      {:builder_delete_npc, params} ->
+        execute_builder_command(:delete_npc, params, socket)
+
+      {:builder_delete_item, params} ->
+        execute_builder_command(:delete_item, params, socket)
+
+      # Quest/Dialogue
+      {:builder_create_quest, params} ->
+        execute_builder_command(:create_quest, params, socket)
+
+      {:builder_edit_quest, params} ->
+        execute_builder_command(:edit_quest, params, socket)
+
+      {:builder_quest_info, params} ->
+        execute_builder_command(:quest_info, params, socket)
+
+      {:builder_create_dialogue, params} ->
+        execute_builder_command(:create_dialogue, params, socket)
+
+      {:builder_dialogue_info, params} ->
+        execute_builder_command(:dialogue_info, params, socket)
+
+      # Projects
+      {:builder_project_new, params} ->
+        execute_builder_command(:project_new, params, socket)
+
+      {:builder_project_load, params} ->
+        execute_builder_command(:project_load, params, socket)
+
+      {:builder_project_list, params} ->
+        execute_builder_command(:project_list, params, socket)
+
+      {:builder_project_delete, params} ->
+        execute_builder_command(:project_delete, params, socket)
+
+      # Documents
+      {:builder_doc_write, params} ->
+        execute_builder_command(:doc_write, params, socket)
+
+      {:builder_doc_read, params} ->
+        execute_builder_command(:doc_read, params, socket)
+
+      {:builder_doc_list, params} ->
+        execute_builder_command(:doc_list, params, socket)
+
+      {:builder_doc_delete, params} ->
+        execute_builder_command(:doc_delete, params, socket)
+
+      {:builder_guide, params} ->
+        execute_builder_command(:guide, params, socket)
+
+      # AI commands (admin-gated)
+      {:builder_ai, params} ->
+        execute_ai_command(:ai, params, socket)
+
+      {:builder_ai_clear, params} ->
+        execute_ai_command(:ai_clear, params, socket)
+
+      {:builder_chat_mode, params} ->
+        execute_ai_command(:chat_mode, params, socket)
+
+      {:builder_exit_chat, params} ->
+        execute_ai_command(:exit_chat, params, socket)
+
+      # Spark (available to all players)
+      {:spark, _params} ->
+        push(socket, "output", %{text: "Spark companion coming soon."})
+        {:reply, :ok, socket}
+
+      # Help with topic
+      {:help, %{topic: _topic}} ->
+        push_help(socket)
+        {:reply, :ok, socket}
+
       # Clear terminal (client-side operation)
       {:clear, %{}} ->
         push(socket, "clear_terminal", %{})
@@ -799,7 +930,10 @@ defmodule LokaWeb.GameChannel do
 
       # Look (re-push current room)
       {:look, %{target: target}} ->
-        case ActionBridge.execute(socket, :click_entity, %{entity_id: target, entity_type: "auto"}) do
+        case ActionBridge.execute(socket, :click_entity, %{
+               entity_id: target,
+               entity_type: "auto"
+             }) do
           {:ok, socket} -> {:reply, :ok, socket}
           {:error, _reason, socket} -> {:reply, :ok, socket}
         end
@@ -870,9 +1004,14 @@ defmodule LokaWeb.GameChannel do
             {room, _} = RoomHelpers.load_player_room(game_state)
 
             entity =
-              Enum.find(room.entities || [], fn e -> to_string(e.id) == to_string(entity_id) end)
+              Enum.find(room.entities || [], fn e ->
+                to_string(e.id) == to_string(entity_id)
+              end)
 
-            case ActionBridge.execute(socket, :attack, %{entity_id: entity_id, entity: entity}) do
+            case ActionBridge.execute(socket, :attack, %{
+                   entity_id: entity_id,
+                   entity: entity
+                 }) do
               {:ok, socket} -> {:reply, :ok, socket}
               {:error, _reason, socket} -> {:reply, :ok, socket}
             end
@@ -925,19 +1064,31 @@ defmodule LokaWeb.GameChannel do
     end
   end
 
-  # Catch-all for unhandled events - log instead of crashing
-  def handle_in(event, payload, socket) do
-    Logger.warning(
-      "Unhandled channel event: #{event} with payload: #{inspect(payload, limit: 200)}"
-    )
-
-    {:reply, {:error, %{reason: "unknown_event", event: event}}, socket}
-  end
-
   # Silent rejection for non-admin players - identical to unknown command
   defp execute_builder_command(cmd, params, socket) do
     if socket.assigns.player.is_admin do
       BuilderCommands.execute(cmd, params, socket)
+    else
+      push(socket, "output", %{text: "Unknown command. Type 'help' for commands."})
+      {:reply, :ok, socket}
+    end
+  end
+
+  # AI command execution (admin-gated, except chat_input which checks internally)
+  defp execute_ai_command(:chat_input, text, socket) do
+    if socket.assigns.player.is_admin do
+      {:ok, socket} = BuilderAI.handle_chat_input(text, socket)
+      {:reply, :ok, socket}
+    else
+      push(socket, "output", %{text: "Unknown command. Type 'help' for commands."})
+      {:reply, :ok, socket}
+    end
+  end
+
+  defp execute_ai_command(cmd, params, socket) do
+    if socket.assigns.player.is_admin do
+      {:ok, socket} = BuilderAI.execute(cmd, params, socket)
+      {:reply, :ok, socket}
     else
       push(socket, "output", %{text: "Unknown command. Type 'help' for commands."})
       {:reply, :ok, socket}
@@ -989,33 +1140,22 @@ defmodule LokaWeb.GameChannel do
   end
 
   defp push_help(socket) do
-    base_help = """
-    Available Commands:
-      Movement:   north, south, east, west, up, down (or n,s,e,w,u,d)
-      Look:       look, look <target>
-      Talk:       talk <npc>
-      Inventory:  inventory (or i), get <item>, drop <item>, equip, unequip
-      Chat:       say <message>
-      Combat:     attack <target>, flee
-      Other:      who, help, clear\
-    """
+    alias LokaWeb.Channels.BuilderCommands.Help
 
     text =
       if socket.assigns.player.is_admin do
-        base_help <>
-          """
-
-          \nBuilder Commands:
-            Navigation: goto <room_key>, rooms, where, find <search>
-            Inspect:    info <entity>, list npcs|items|quests
-            Spawn:      spawn <npc_key>, purge, give <item_key>
-            Flags:      setflag <flag>, clearflag <flag>, flags
-            Quests:     startquest <key>, completequest <key>, resetquest <key>, quests
-            World:      settime dawn|noon|dusk|midnight, reload, validate
-            Mode:       godmode\
-          """
+        Help.full_help()
       else
-        base_help
+        """
+        Available Commands:
+          Movement:   north, south, east, west, up, down (or n,s,e,w,u,d)
+          Look:       look, look <target>
+          Talk:       talk <npc>
+          Inventory:  inventory (or i), get <item>, drop <item>, equip, unequip
+          Chat:       say <message>
+          Combat:     attack <target>, flee
+          Other:      who, help, clear\
+        """
       end
 
     push(socket, "output", %{text: text})
@@ -1336,6 +1476,34 @@ defmodule LokaWeb.GameChannel do
     Logger.info("[Screenshot] Pushing capture_screenshot event to client")
     push(socket, "capture_screenshot", %{})
     {:noreply, socket}
+  end
+
+  # =============================================================================
+  # AI Streaming Events (from Loka.AI.Conversation engine)
+  # =============================================================================
+
+  def handle_info({:ai_text_delta, _text} = event, socket) do
+    BuilderAI.handle_ai_event(event, socket)
+  end
+
+  def handle_info({:ai_tool_use_raw, _name, _id, _input} = event, socket) do
+    BuilderAI.handle_ai_event(event, socket)
+  end
+
+  def handle_info({:ai_done_raw, _response} = event, socket) do
+    BuilderAI.handle_ai_event(event, socket)
+  end
+
+  def handle_info({:ai_done} = event, socket) do
+    BuilderAI.handle_ai_event(event, socket)
+  end
+
+  def handle_info({:ai_error, _reason} = event, socket) do
+    BuilderAI.handle_ai_event(event, socket)
+  end
+
+  def handle_info({:ai_tool_use, _name, _id, _input, _result} = event, socket) do
+    BuilderAI.handle_ai_event(event, socket)
   end
 
   # Catch-all for unhandled messages
