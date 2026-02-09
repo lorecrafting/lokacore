@@ -163,7 +163,10 @@ defmodule Loka.MixProject do
       {:boundary, "~> 0.10", runtime: false},
 
       # Static code analysis
-      {:credo, "~> 1.7", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+
+      # Required by Phoenix LiveView tests
+      {:lazy_html, "~> 0.1.10", only: :test}
     ]
   end
 
