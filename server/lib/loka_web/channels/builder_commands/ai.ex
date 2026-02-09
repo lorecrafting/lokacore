@@ -14,6 +14,14 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
   alias Loka.AI.Conversation
   alias Loka.WorldBuilder.{AnthropicClient, ToolExecutor}
 
+  # Cache system prompt at compile time to avoid reading from disk on every AI call
+  @system_prompt_path Path.join(:code.priv_dir(:loka), "world_builder/system_prompt.md")
+  @external_resource @system_prompt_path
+  @cached_system_prompt (case File.read(@system_prompt_path) do
+                           {:ok, content} -> content
+                           {:error, _} -> nil
+                         end)
+
   @doc """
   Handle `/ai <prompt>` — send a one-shot prompt to the AI.
   """
@@ -217,25 +225,17 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
   end
 
   defp load_system_prompt do
-    path = Application.app_dir(:loka, "priv/world_builder/system_prompt.md")
+    @cached_system_prompt ||
+      """
+      # World Builder Assistant
 
-    case File.read(path) do
-      {:ok, content} -> content
-      {:error, _} -> default_system_prompt()
-    end
-  end
+      You are a creative writing and game design assistant specialized in building
+      MUD (Multi-User Dungeon) worlds. You help create rich, interconnected game
+      worlds with compelling narratives, memorable characters, and engaging quests.
 
-  defp default_system_prompt do
-    """
-    # World Builder Assistant
-
-    You are a creative writing and game design assistant specialized in building
-    MUD (Multi-User Dungeon) worlds. You help create rich, interconnected game
-    worlds with compelling narratives, memorable characters, and engaging quests.
-
-    You have access to tools for managing rooms, NPCs, items, quests, dialogues,
-    scripts, zones, and design documents.
-    """
+      You have access to tools for managing rooms, NPCs, items, quests, dialogues,
+      scripts, zones, and design documents.
+      """
   end
 
   defp format_tool_summary(name, input) do

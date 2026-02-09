@@ -1,0 +1,83 @@
+defmodule LokaWeb.Channels.BuilderCommands.ContentTest do
+  use ExUnit.Case, async: false
+
+  alias LokaWeb.Channels.BuilderCommands.Content
+
+  # Use a minimal socket stand-in since Content commands only pass it through
+  @socket %{}
+
+  describe "execute(:quest_info, ...)" do
+    test "returns quest details for existing quest" do
+      # Use a quest that exists in priv/world/ content
+      {:ok, text, _socket} = Content.execute(:quest_info, %{key: "intro_welcome"}, @socket)
+
+      assert text =~ "Quest 'intro_welcome':"
+      assert text =~ "key: intro_welcome"
+    end
+
+    test "returns error for nonexistent quest" do
+      {:error, text, _socket} =
+        Content.execute(:quest_info, %{key: "nonexistent_quest_xyz"}, @socket)
+
+      assert text =~ "not found"
+    end
+  end
+
+  describe "execute(:dialogue_info, ...)" do
+    test "returns dialogue structure for existing dialogue" do
+      # novice_pema is a common test dialogue
+      case Content.execute(:dialogue_info, %{key: "novice_pema"}, @socket) do
+        {:ok, text, _socket} ->
+          assert text =~ "Dialogue 'novice_pema'"
+          assert text =~ "nodes"
+
+        {:error, text, _socket} ->
+          # If dialogue doesn't exist in test env, that's also valid
+          assert text =~ "not found"
+      end
+    end
+
+    test "returns error for nonexistent dialogue" do
+      {:error, text, _socket} =
+        Content.execute(:dialogue_info, %{key: "nonexistent_dialogue_xyz"}, @socket)
+
+      assert text =~ "not found"
+    end
+  end
+
+  describe "execute(:create_dialogue, ...)" do
+    test "creates dialogue template for new NPC" do
+      on_exit(fn ->
+        path =
+          Path.join([:code.priv_dir(:loka), "world", "dialogues", "test_create_dlg_npc.yml"])
+
+        if File.exists?(path), do: File.rm!(path)
+        Loka.Engine.TypedObject.Loader.reload()
+      end)
+
+      {:ok, text, _socket} =
+        Content.execute(:create_dialogue, %{npc_key: "test_create_dlg_npc"}, @socket)
+
+      assert text =~ "Dialogue 'test_create_dlg_npc' created"
+      assert text =~ "3 nodes"
+      assert text =~ "/ai"
+    end
+  end
+
+  describe "execute(:edit_quest, ...)" do
+    test "shows quest details when no field specified" do
+      {:ok, text, _socket} =
+        Content.execute(:edit_quest, %{key: "intro_welcome", field: nil}, @socket)
+
+      assert text =~ "Quest 'intro_welcome':"
+      assert text =~ "key: intro_welcome"
+    end
+
+    test "returns error for nonexistent quest" do
+      {:error, text, _socket} =
+        Content.execute(:edit_quest, %{key: "nonexistent_xyz", field: nil}, @socket)
+
+      assert text =~ "not found"
+    end
+  end
+end

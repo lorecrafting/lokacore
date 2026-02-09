@@ -5,7 +5,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Content do
   """
 
   alias Loka.Engine.TypedObject.Loader
-  alias Loka.WorldBuilder.QuestManager
+  alias Loka.WorldBuilder.{QuestManager, DialogueManager}
   alias Loka.Content.Dialogue
   alias LokaWeb.Channels.BuilderCommands.Helpers
 
@@ -53,10 +53,17 @@ defmodule LokaWeb.Channels.BuilderCommands.Content do
         {:error, "Dialogue for '#{npc_key}' already exists.", socket}
 
       {:error, _} ->
-        # Dialogue creation is handled by ToolExecutor (YAML generation)
-        {:ok,
-         "Use /ai to create a dialogue for '#{npc_key}'. Example:\n  /ai create a dialogue tree for #{npc_key}",
-         socket}
+        params = %{"key" => npc_key, "npc_key" => npc_key}
+
+        case DialogueManager.create_dialogue(params) do
+          {:ok, info} ->
+            {:ok,
+             "Dialogue '#{npc_key}' created (#{info.node_count} nodes).\n" <>
+               "  Use /ai to expand it: /ai flesh out the dialogue for #{npc_key}", socket}
+
+          {:error, reason} ->
+            {:error, "Failed to create dialogue: #{inspect(reason)}", socket}
+        end
     end
   end
 
