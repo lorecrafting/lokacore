@@ -11,11 +11,7 @@
    - .terminal-line.emote - Yellow emote messages
    - .terminal-line.builder - Green builder command output
    - .term-connection-dot - Connection status indicator (connected/connecting/disconnected)
-   - .world-builder-console - Resizable console overlay at bottom of viewport
-   - .console-resize-handle - Horizontal resize handle for console height
-   - .broadcast-system/event/emergency - Broadcast message styling
-
-   Used by: MudTerminal hook, TerminalPanel, ViewportContainer (console overlay)
+   Used by: MudTerminal hook, TerminalPanel
    ============================================================================= */
 
 /* Clickable interactive elements in terminal output */
@@ -113,63 +109,3 @@
   50% { opacity: 0.3; }
 }
 
-/* Console is now an overlay inside the viewport with resizable height */
-.world-builder-console {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: var(--console-height, 150px);
-  max-height: 50%;
-  min-height: 80px;
-  background: var(--wb-surface);
-  border-top: none;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Console resize handle (horizontal, at top of console) */
-.console-resize-handle {
-  height: var(--wb-space-xs);
-  background: var(--wb-toolbar-border);
-  cursor: row-resize;
-  transition: background 0.15s;
-  flex-shrink: 0;
-}
-
-.console-resize-handle:hover,
-.console-resize-handle.dragging {
-  background: linear-gradient(90deg, var(--wb-accent-gradient-from), var(--wb-accent-gradient-to));
-}
-
-/* Console collapse handled by .console-collapsed class on the console element itself */
-
-/* Console styles are inlined to Tailwind in viewport_container.ex
-   Console collapse state kept for JS interaction */
-.world-builder-console.console-collapsed {
-  max-height: var(--wb-space-2xl);
-}
-
-/* =============================================================================
-   Connection Status & Broadcast Messages
-   ============================================================================= */
-
-.broadcast-system {
-  background: color-mix(in srgb, var(--wb-text-muted) 15%, transparent);
-  border-left: 3px solid var(--wb-text-muted);
-  color: var(--wb-text-muted);
-}
-
-.broadcast-event {
-  background: color-mix(in srgb, var(--wb-warning) 15%, transparent);
-  border-left: 3px solid var(--wb-warning);
-  color: var(--wb-text);
-}
-
-.broadcast-emergency {
-  background: color-mix(in srgb, var(--wb-error) 20%, transparent);
-  border-left: 3px solid var(--wb-error);
-  color: var(--wb-error);
-  font-weight: 600;
-}

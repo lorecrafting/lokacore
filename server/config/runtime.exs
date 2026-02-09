@@ -192,11 +192,4 @@ if config_env() == :prod do
   config :loka, :mailer_from,
     name: System.get_env("MAILER_FROM_NAME") || "Loka",
     email: System.get_env("MAILER_FROM_EMAIL") || "noreply@example.com"
-
-  # Posthog analytics (optional - only enable if API key is set)
-  if posthog_key = System.get_env("POSTHOG_API_KEY") do
-    config :posthog,
-      api_url: System.get_env("POSTHOG_API_URL") || "https://us.i.posthog.com",
-      api_key: posthog_key
-  end
 end

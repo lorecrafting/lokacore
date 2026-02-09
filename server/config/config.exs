@@ -139,11 +139,6 @@ config :loka, Loka.PromEx,
   grafana: :disabled,
   metrics_server: :disabled
 
-# Posthog analytics - disabled by default, enable via POSTHOG_API_KEY
-config :posthog,
-  api_url: "https://us.i.posthog.com",
-  api_key: nil
-
 # Channel rate limiting - prevents WebSocket message spam
 config :loka, LokaWeb.Channels.ChannelRateLimiter,
   enabled: true,

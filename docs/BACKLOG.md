@@ -82,13 +82,9 @@ Tasks are tracked here with categories and priorities. We use Claude Code's nati
     - `Loka.Admin.Audit` context module with async logging via Task.Supervisor
     - `AuditLogTab` LiveComponent with filters and pagination
     - Integrated audit logging in WorldBuilderLive (room/npc/item create/delete)
-  - Added loading/error/empty state components:
-    - `LoadingComponents` module: spinner, loading_overlay, progress_bar, empty_state, loading_button
-    - Updated HierarchyPanel with empty states (icons for rooms, NPCs, items)
-  - Extracted UI components from WorldBuilderLive:
+  - Extracted UI components from WorldBuilderLive (since removed with old GUI):
     - `ConfirmationModal` - reusable confirm dialog
     - `CreateEntityModal` - generic create form for room/npc/item
-  - Files created: 8 new files, 5 modified
 
 - **Fix room coordinate persistence** (2026-01-30)
   - Room x/y/z coordinates now persist on create and update

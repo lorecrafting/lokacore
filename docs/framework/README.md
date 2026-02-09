@@ -18,7 +18,7 @@ Loka's framework layer provides 31 game subsystems that build on the engine core
 │   Abilities, Skills, Status, Resources, Appearance         │
 ├─────────────────────────────────────────────────────────────┤
 │ World Systems                                               │
-│   World, Economy, Faction, Hometown, Housing               │
+│   World, Economy, Housing                                  │
 ├─────────────────────────────────────────────────────────────┤
 │ Crafting Systems                                            │
 │   Crafting, Gathering, Farming, Magic                      │
@@ -414,58 +414,6 @@ components:
 
 ---
 
-#### Faction (`lib/loka/framework/faction/`)
-
-**Purpose**: Reputation and faction relationships.
-
-**Key Module**: `Loka.Framework.Faction`
-
-**Features**:
-- Tier-based standing (hated → exalted)
-- Shop price modifiers
-- Area access restrictions
-- Allied/enemy faction relationships
-
-**YAML Format**:
-```yaml
-key: monastery
-name: "The Monastery"
-tiers:
-  - min: -100, max: -50, name: "Hostile"
-  - min: -50, max: 0, name: "Unfriendly"
-  - min: 0, max: 50, name: "Neutral"
-  - min: 50, max: 100, name: "Friendly"
-allies: [villagers]
-enemies: [bandits]
-```
-
----
-
-#### Hometown (`lib/loka/framework/hometown/`)
-
-**Purpose**: Character origin/background system (LegendMUD-style).
-
-**Key Module**: `Loka.Framework.Hometown`
-
-**Features**:
-- Starting stat/skill bonuses
-- Initial equipment
-- Faction standings
-- Cultural traits
-
-**YAML Format**:
-```yaml
-key: mountain_village
-name: "Mountain Village"
-axiom: "Eastern"
-bonuses:
-  stats: {sta: 2}
-  skills: [herbalism]
-starting_items: [traveler_pack, wooden_staff]
-```
-
----
-
 #### Housing (`lib/loka/framework/housing/`)
 
 **Purpose**: Player housing system.
@@ -602,8 +550,8 @@ Many subsystems use GenServer registries for configuration:
 # Get a skill definition
 {:ok, skill} = SkillRegistry.get("sword_mastery")
 
-# List all factions
-factions = FactionRegistry.all()
+# List all skills
+skills = SkillRegistry.all()
 ```
 
 ### Component Pattern
@@ -640,10 +588,8 @@ Most subsystems read/update the player's GameState:
 | `crafting/` | Crafting | crafting.ex, crafting_registry.ex |
 | `dialogue/` | Dialogue | dialogue.ex |
 | `economy/` | Economy | economy.ex, shop.ex |
-| `faction/` | Faction | faction.ex, faction_registry.ex |
 | `farming/` | Farming | farming.ex, crop.ex |
 | `gathering/` | Gathering | gathering.ex, gathering_registry.ex |
-| `hometown/` | Hometown | hometown.ex |
 | `housing/` | Housing | housing.ex |
 | `inventory/` | Inventory | inventory.ex |
 | `magic/` | Magic | spell_words.ex |

@@ -1098,8 +1098,6 @@ The Framework layer contains 33 reusable game subsystems built on Engine primiti
 |-----------|---------|
 | **World** | Room loading, atmosphere |
 | **Economy** | Gold, shops, trading |
-| **Faction** | Reputation and allegiance |
-| **Hometown** | Starting location |
 | **Housing** | Player housing |
 
 #### Crafting Systems
@@ -2061,45 +2059,13 @@ export interface ActionPayload {
 
 ---
 
-## 22. Analytics & Observability
+## 22. Observability
 
-**Location:** `lib/loka/` (posthog.ex, prom_ex/)
+**Location:** `lib/loka/` (prom_ex/)
 
 ### Why This Design?
 
-Production games need visibility into player behavior and system health. Loka integrates PostHog for product analytics and Prometheus for operational metrics, with circuit breakers to prevent cascading failures.
-
-### PostHog Analytics
-
-**Purpose:** Track player behavior, feature usage, conversion funnels.
-
-```elixir
-# Track events
-Posthog.capture(player_id, "quest_completed", %{
-  quest_id: "main_sleeping_master",
-  time_to_complete_minutes: 45
-})
-
-# Identify users
-Posthog.identify(player_id, %{
-  level: 10,
-  background: "scholar",
-  created_at: ~U[2025-01-01 00:00:00Z]
-})
-```
-
-**Circuit Breaker:**
-- Opens after 5 failures in 60 seconds
-- Prevents analytics from affecting gameplay
-- Auto-recovers after cooldown
-
-**Configuration:**
-```elixir
-# config/runtime.exs
-config :loka, :posthog,
-  api_key: System.get_env("POSTHOG_API_KEY"),
-  api_url: "https://us.i.posthog.com"
-```
+Production games need visibility into system health. Loka integrates Prometheus for operational metrics.
 
 ### Prometheus Metrics (PromEx)
 

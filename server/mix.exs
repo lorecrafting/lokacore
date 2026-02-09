@@ -56,8 +56,7 @@ defmodule Loka.MixProject do
         "Framework - World": ~r/^Loka\.Framework\.World/,
         "Framework - Dialogue": ~r/^Loka\.Framework\.Dialogue/,
         "Framework - Player": ~r/^Loka\.Framework\.Player/,
-        "Framework - Other":
-          ~r/^Loka\.Framework\.(Companion|Appearance|Messaging|Faction|Hometown|Housing|Magic)/,
+        "Framework - Other": ~r/^Loka\.Framework\.(Companion|Appearance|Messaging|Housing|Magic)/,
 
         # Web Layer
         "Web - Controllers": ~r/^LokaWeb\..*Controller$/,
@@ -107,7 +106,6 @@ defmodule Loka.MixProject do
       {:phoenix_html, "~> 4.1"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 1.1.0"},
-      {:lazy_html, ">= 0.1.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.3"},
       {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.3", runtime: Mix.env() == :dev},
@@ -150,13 +148,9 @@ defmodule Loka.MixProject do
 
       # Production monitoring
       {:prom_ex, "~> 1.11"},
-      {:posthog, "~> 0.3"},
 
       # Structured JSON logging for production
       {:logger_json, "~> 6.2"},
-
-      # Circuit breaker for external services
-      {:fuse, "~> 2.5"},
 
       # Property-based testing
       {:stream_data, "~> 1.1", only: [:dev, :test]},

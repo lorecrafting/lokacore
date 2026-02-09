@@ -256,50 +256,6 @@ scrape_configs:
     metrics_path: '/metrics'
 ```
 
-## Posthog Analytics
-
-Loka integrates with [Posthog](https://posthog.com) for product analytics and feature flags.
-
-### Setup
-
-1. Create a Posthog account at https://posthog.com
-2. Get your Project API key from Settings
-3. Set environment variable:
-
-```bash
-fly secrets set POSTHOG_API_KEY=phc_your_api_key
-```
-
-Optional: Set custom API URL for self-hosted:
-
-```bash
-fly secrets set POSTHOG_API_URL=https://your-posthog-instance.com
-```
-
-### Usage
-
-```elixir
-# Track events
-Loka.Posthog.capture("player_123", "quest_completed", %{quest: "tutorial"})
-
-# Identify users
-Loka.Posthog.identify("player_123", %{email: "player@example.com"})
-
-# Game-specific helpers
-Loka.Posthog.track_login(player_id)
-Loka.Posthog.track_command(player_id, :look)
-Loka.Posthog.track_combat(player_id, :started, %{npc: "goblin"})
-```
-
-### Feature Flags
-
-```elixir
-# Check if feature is enabled
-if Posthog.feature_flag_enabled?("new-combat-ui", player_id) do
-  # Use new UI
-end
-```
-
 ## Alerting
 
 ### Built-in Alerts
