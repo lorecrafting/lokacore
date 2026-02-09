@@ -791,6 +791,9 @@ defmodule LokaWeb.GameChannel do
       {:builder_where, params} ->
         execute_builder_command(:where, params, socket)
 
+      {:builder_map, params} ->
+        execute_builder_command(:map, params, socket)
+
       {:builder_purge, params} ->
         execute_builder_command(:purge, params, socket)
 

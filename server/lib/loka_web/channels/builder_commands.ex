@@ -38,12 +38,16 @@ defmodule LokaWeb.Channels.BuilderCommands do
     Storylines,
     Scripts,
     Projects,
+    Map,
     Help,
     Helpers
   }
 
   # Navigation commands
   @navigation_commands ~w(goto rooms where)a
+
+  # Map commands
+  @map_commands ~w(map)a
 
   # Inspection commands
   @inspection_commands ~w(info list find)a
@@ -110,6 +114,10 @@ defmodule LokaWeb.Channels.BuilderCommands do
 
   defp dispatch(cmd, params, socket) when cmd in @navigation_commands do
     Navigation.execute(cmd, params, socket)
+  end
+
+  defp dispatch(cmd, params, socket) when cmd in @map_commands do
+    Map.execute(cmd, params, socket)
   end
 
   defp dispatch(cmd, params, socket) when cmd in @inspection_commands do

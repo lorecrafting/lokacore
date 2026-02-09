@@ -24,7 +24,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Help do
       Other:      who, help, clear
 
     Builder Commands:
-      Navigation: goto <room_key>, rooms, where, find <search>
+      Navigation: goto <room_key>, rooms, where, find <search>, map [zone]
       Inspect:    info <entity>, list npcs|items|quests
       Spawn:      spawn <npc_key>, purge, give <item_key>
       Flags:      setflag <flag>, clearflag <flag>, flags

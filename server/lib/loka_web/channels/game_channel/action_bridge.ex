@@ -188,7 +188,8 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
       atmosphere: data.atmosphere,
       visual_state: visual_state,
       sound_state: sound_state,
-      other_players: Serializers.serialize_players(other_players)
+      other_players: Serializers.serialize_players(other_players),
+      minimap: build_minimap(socket)
     })
 
     socket
@@ -437,6 +438,16 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
 
   defp format_error_reason(reason) do
     inspect(reason)
+  end
+
+  # Build minimap text for current room (returns nil if no exits)
+  defp build_minimap(socket) do
+    room = socket.assigns[:room]
+    room_key = room && Map.get(room, :key)
+
+    if room_key do
+      LokaWeb.Channels.BuilderCommands.Map.minimap_text(room_key)
+    end
   end
 
   # Validated push - validates payload before sending in dev/test

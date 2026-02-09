@@ -243,7 +243,7 @@ const MudTerminal = {
     this.channel.on('room_update', (data) => {
       if (data.room) {
         this.updateExits(data.room.exits)
-        this.appendRoomDescription(data.room, data.atmosphere)
+        this.appendRoomDescription(data.room, data.atmosphere, data.minimap)
       }
     })
 
@@ -416,7 +416,7 @@ const MudTerminal = {
     this.outputEl.scrollTop = this.outputEl.scrollHeight
   },
 
-  appendRoomDescription(room, atmosphere) {
+  appendRoomDescription(room, atmosphere, minimap) {
     this.appendOutput('')
     this.appendOutput(room.title || room.name, 'room-title')
     this.appendOutput('-'.repeat((room.title || room.name || '').length))
@@ -473,6 +473,12 @@ const MudTerminal = {
       this.outputEl.appendChild(div)
     } else {
       this.appendOutput('Exits: none')
+    }
+
+    // Minimap - compact spatial map after exits
+    if (minimap) {
+      this.appendOutput('')
+      this.appendOutput(minimap)
     }
 
     this.pruneAndScroll()

@@ -56,6 +56,8 @@ defmodule LokaWeb.Channels.CommandParser do
   end
 
   defp do_parse(["find", search]), do: {:builder_find, %{search: search}}
+  defp do_parse(["map"]), do: {:builder_map, %{}}
+  defp do_parse(["map", zone_key]), do: {:builder_map, %{zone_key: zone_key}}
   defp do_parse(["rooms"]), do: {:builder_rooms, %{}}
   defp do_parse(["where"]), do: {:builder_where, %{}}
   defp do_parse(["purge"]), do: {:builder_purge, %{}}
