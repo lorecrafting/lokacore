@@ -225,8 +225,7 @@ defmodule Loka.Framework.World.NpcAmbient do
   defp get_location_id(_), do: nil
 
   defp format_message(message) do
-    # Wrap in italics for ambient flavor
-    "<em class=\"ambient\">#{message}</em>"
+    message
   end
 end
 

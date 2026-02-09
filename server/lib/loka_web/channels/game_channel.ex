@@ -1435,7 +1435,7 @@ defmodule LokaWeb.GameChannel do
       # Already seen this message in current room, skip it
       {:noreply, socket}
     else
-      push(socket, "event", %{text: text})
+      push(socket, "event", %{text: text, type: "ambient"})
       {:noreply, assign(socket, :seen_ambient, MapSet.put(seen, text))}
     end
   end

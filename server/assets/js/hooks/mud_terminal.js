@@ -257,7 +257,10 @@ const MudTerminal = {
 
     // Game events
     this.channel.on('event', (data) => {
-      if (data.text) this.appendOutput(data.text, 'chat')
+      if (data.text) {
+        const cls = data.type === 'ambient' ? 'ambient' : 'chat'
+        this.appendOutput(data.text, cls)
+      }
     })
 
     // Resource updates
@@ -427,7 +430,7 @@ const MudTerminal = {
     this.appendOutput(room.description || '')
     this.appendOutput('')
 
-    // Entities - clickable names that send click_entity
+    // Entities - clickable long_desc (room-presence description)
     const entities = room.entities || []
     entities.forEach((e) => {
       const div = document.createElement('div')
@@ -435,9 +438,8 @@ const MudTerminal = {
       const link = document.createElement('span')
       link.className = 'term-link'
       link.dataset.entityId = e.id
-      link.textContent = e.name
+      link.textContent = e.long_desc || `${e.name} is here.`
       div.appendChild(link)
-      div.appendChild(document.createTextNode(' is here.'))
       this.outputEl.appendChild(div)
     })
 

@@ -56,6 +56,11 @@
   color: var(--wb-log-warn);
 }
 
+.terminal-line.ambient {
+  color: var(--wb-text-dim);
+  font-style: italic;
+}
+
 .terminal-line.builder {
   color: var(--wb-log-success);
 }
