@@ -216,19 +216,18 @@ defmodule LokaWeb.GameChannel do
   # In dev mode: directly set character name (skip validation for quick testing)
   # In prod mode: use proper validation
   defp auto_create_character_if_guest(player, game_state) do
-    if player.name && player.name != "" do
-      character_name = sanitize_character_name(player.name)
-
-      if Application.get_env(:loka, :env) == :dev do
-        # DEV MODE: Directly update character_name, bypassing uniqueness check
-        # This allows quick dev testing without worrying about name conflicts
-        dev_create_character(game_state, character_name)
-      else
-        # PROD MODE: Use proper validation
-        prod_create_character(game_state, character_name)
-      end
+    if Application.get_env(:loka, :env) == :dev do
+      # DEV MODE: Auto-create with player name or email-derived fallback
+      base_name = player.name || player.email |> String.split("@") |> hd()
+      character_name = sanitize_character_name(base_name)
+      dev_create_character(game_state, character_name)
     else
-      {:error, :no_name}
+      if player.name && player.name != "" do
+        character_name = sanitize_character_name(player.name)
+        prod_create_character(game_state, character_name)
+      else
+        {:error, :no_name}
+      end
     end
   end
 

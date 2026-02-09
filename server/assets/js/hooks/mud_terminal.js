@@ -169,7 +169,7 @@ const MudTerminal = {
         this.setConnectionState('disconnected')
         if (resp.reason === 'character_not_created') {
           this.appendOutput('You need to create a character first.', 'error')
-          this.appendOutput('Visit /character/create to create your character.', 'system')
+          this.appendOutput('Please set up a character through the game client.', 'system')
         } else {
           this.appendOutput(`Connection failed: ${resp.reason || 'unknown'}`, 'error')
         }
