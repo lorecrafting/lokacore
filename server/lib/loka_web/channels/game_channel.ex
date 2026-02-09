@@ -939,32 +939,6 @@ defmodule LokaWeb.GameChannel do
       {:builder_script_detach, params} ->
         execute_builder_command(:script_detach, params, socket)
 
-      # Projects
-      {:builder_project_new, params} ->
-        execute_builder_command(:project_new, params, socket)
-
-      {:builder_project_load, params} ->
-        execute_builder_command(:project_load, params, socket)
-
-      {:builder_project_list, params} ->
-        execute_builder_command(:project_list, params, socket)
-
-      {:builder_project_delete, params} ->
-        execute_builder_command(:project_delete, params, socket)
-
-      # Documents
-      {:builder_doc_write, params} ->
-        execute_builder_command(:doc_write, params, socket)
-
-      {:builder_doc_read, params} ->
-        execute_builder_command(:doc_read, params, socket)
-
-      {:builder_doc_list, params} ->
-        execute_builder_command(:doc_list, params, socket)
-
-      {:builder_doc_delete, params} ->
-        execute_builder_command(:doc_delete, params, socket)
-
       {:builder_guide, params} ->
         execute_builder_command(:guide, params, socket)
 

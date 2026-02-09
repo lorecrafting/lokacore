@@ -1,5 +1,5 @@
 defmodule Loka.WorldBuilder.MCP.ToolsTest do
-  use ExUnit.Case, async: true
+  use Loka.DataCase, async: true
 
   alias Loka.WorldBuilder.MCP.Tools
 
@@ -43,26 +43,6 @@ defmodule Loka.WorldBuilder.MCP.ToolsTest do
   end
 
   describe "tool categories" do
-    test "includes project tools" do
-      tools = Tools.tools()
-      names = Enum.map(tools, & &1.name)
-
-      assert "wb_create_project" in names
-      assert "wb_load_project" in names
-      assert "wb_list_projects" in names
-      assert "wb_delete_project" in names
-    end
-
-    test "includes document tools" do
-      tools = Tools.tools()
-      names = Enum.map(tools, & &1.name)
-
-      assert "wb_write_doc" in names
-      assert "wb_read_doc" in names
-      assert "wb_list_docs" in names
-      assert "wb_delete_doc" in names
-    end
-
     test "includes guidance tools" do
       tools = Tools.tools()
       names = Enum.map(tools, & &1.name)
@@ -136,15 +116,6 @@ defmodule Loka.WorldBuilder.MCP.ToolsTest do
   end
 
   describe "tool input schemas" do
-    test "wb_create_project has required fields" do
-      tool = Enum.find(Tools.tools(), &(&1.name == "wb_create_project"))
-
-      assert "key" in tool.inputSchema.required
-      assert "name" in tool.inputSchema.required
-      assert Map.has_key?(tool.inputSchema.properties, :key)
-      assert Map.has_key?(tool.inputSchema.properties, :name)
-    end
-
     test "wb_create_room has required fields" do
       tool = Enum.find(Tools.tools(), &(&1.name == "wb_create_room"))
 

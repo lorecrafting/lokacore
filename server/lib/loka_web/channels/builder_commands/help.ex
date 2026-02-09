@@ -61,12 +61,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Help do
                   script attach <script> <entity>
                   script detach <script> <entity>
 
-      Projects:   project new <key> <name>, project load <key>
-                  project list, project delete <key>
-
-      Documents:  doc write <filename> <content>, doc read <filename>
-                  doc list, doc delete <filename>
-                  guide <topic>
+      Guides:     guide <topic>
 
       AI:         /ai <prompt>     - One-shot AI prompt
                   chat             - Enter chat mode (freeform AI)
@@ -76,7 +71,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Help do
     Abbreviations: dl=dialogue, sc=script, cs=cutscene, sl=storyline
 
     Type 'help <category>' for details. Categories: rooms, entities,
-    quests, dialogues, zones, cutscenes, storylines, scripts, projects, ai\
+    quests, dialogues, zones, cutscenes, storylines, scripts, guides, ai\
     """
   end
 
@@ -131,23 +126,15 @@ defmodule LokaWeb.Channels.BuilderCommands.Help do
     """
   end
 
-  defp help_for_topic("projects") do
+  defp help_for_topic("guides") do
     """
-    Project & Document Commands:
-      project new <key> <name>     - Create project
-      project load <key>           - Switch to project
-      project list                 - List all projects
-      project delete <key>         - Delete project
-      doc write <file> <content>   - Save document
-      doc read <file>              - Read document
-      doc list                     - List documents
-      doc delete <file>            - Delete document
+    Guide Commands:
       guide <topic>                - Read builder guide
 
     Examples:
-      project new demo Demo World
-      doc write design.md Initial world concept
       guide rooms
+      guide quests
+      guide dialogues
     """
   end
 
@@ -264,6 +251,6 @@ defmodule LokaWeb.Channels.BuilderCommands.Help do
 
   defp help_for_topic(_) do
     "Unknown help topic. Try: help rooms, help entities, help quests, help dialogues, " <>
-      "help zones, help cutscenes, help storylines, help scripts, help projects, help ai"
+      "help zones, help cutscenes, help storylines, help scripts, help guides, help ai"
   end
 end

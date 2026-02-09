@@ -133,25 +133,6 @@ defmodule Loka.WorldBuilder.MCP.ServerTest do
   end
 
   describe "handle_message/2 - tools/call" do
-    test "calls wb_list_projects tool" do
-      message = %{
-        "jsonrpc" => "2.0",
-        "id" => 1,
-        "method" => "tools/call",
-        "params" => %{
-          "name" => "wb_list_projects",
-          "arguments" => %{}
-        }
-      }
-
-      {:ok, response} = Server.handle_message(message)
-
-      assert response.jsonrpc == "2.0"
-      assert response.id == 1
-      assert is_list(response.result.content)
-      assert hd(response.result.content).type == "text"
-    end
-
     test "calls wb_list_zones tool" do
       message = %{
         "jsonrpc" => "2.0",

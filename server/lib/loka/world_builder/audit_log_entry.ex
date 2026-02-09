@@ -10,7 +10,6 @@ defmodule Loka.WorldBuilder.AuditLogEntry do
   @valid_statuses ~w(success error pending)
 
   schema "world_builder_audit_log" do
-    field :project_key, :string
     field :conversation_id, :string
     field :tool_name, :string
     field :tool_args, :string
@@ -28,7 +27,6 @@ defmodule Loka.WorldBuilder.AuditLogEntry do
   def changeset(entry, attrs) do
     entry
     |> cast(attrs, [
-      :project_key,
       :conversation_id,
       :user_id,
       :tool_name,

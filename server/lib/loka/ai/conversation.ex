@@ -30,7 +30,7 @@ defmodule Loka.AI.Conversation do
       }
 
       state = Conversation.new(config)
-      state = Conversation.send_message(state, "Create a tavern room", %{project_key: "demo"})
+      state = Conversation.send_message(state, "Create a tavern room", %{})
   """
 
   require Logger

@@ -14,7 +14,7 @@ defmodule LokaWeb.Channels.BuilderCommands do
   - Cutscenes: create/delete cutscene, cutscene info
   - Storylines: create/delete storyline, storyline info
   - Scripts: create/delete/info/list/validate/test/templates/attach/detach
-  - Projects: project new/load/list/delete, doc write/read/list/delete, guide
+  - Guides: guide <topic>
   - Help: help, help <topic>
 
   All commands are gated by `socket.assigns.player.is_admin` at the
@@ -37,7 +37,7 @@ defmodule LokaWeb.Channels.BuilderCommands do
     Cutscenes,
     Storylines,
     Scripts,
-    Projects,
+    Guides,
     Map,
     Help,
     Helpers
@@ -84,9 +84,8 @@ defmodule LokaWeb.Channels.BuilderCommands do
                       script_template_info script_from_template
                       script_attach script_detach)a
 
-  # Project/doc commands
-  @project_commands ~w(project_new project_load project_list project_delete
-                       doc_write doc_read doc_list doc_delete guide)a
+  # Guide commands
+  @guide_commands ~w(guide)a
 
   @doc """
   Execute a builder command. Returns `{:reply, :ok, socket}`.
@@ -160,8 +159,8 @@ defmodule LokaWeb.Channels.BuilderCommands do
     Scripts.execute(cmd, params, socket)
   end
 
-  defp dispatch(cmd, params, socket) when cmd in @project_commands do
-    Projects.execute(cmd, params, socket)
+  defp dispatch(cmd, params, socket) when cmd in @guide_commands do
+    Guides.execute(cmd, params, socket)
   end
 
   defp dispatch(:help, params, _socket) do

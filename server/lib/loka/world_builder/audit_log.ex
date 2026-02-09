@@ -21,9 +21,8 @@ defmodule Loka.WorldBuilder.AuditLog do
   @doc """
   Log a successful tool call.
   """
-  def log_success(project_key, conversation_id, tool_name, tool_args, result_detail \\ nil) do
+  def log_success(conversation_id, tool_name, tool_args, result_detail \\ nil) do
     log_tool_call(%{
-      project_key: project_key,
       conversation_id: conversation_id,
       tool_name: tool_name,
       tool_args: encode_args(tool_args),
@@ -35,28 +34,14 @@ defmodule Loka.WorldBuilder.AuditLog do
   @doc """
   Log a failed tool call.
   """
-  def log_error(project_key, conversation_id, tool_name, tool_args, error_message) do
+  def log_error(conversation_id, tool_name, tool_args, error_message) do
     log_tool_call(%{
-      project_key: project_key,
       conversation_id: conversation_id,
       tool_name: tool_name,
       tool_args: encode_args(tool_args),
       result_status: "error",
       result_detail: error_message
     })
-  end
-
-  @doc """
-  Get all log entries for a project.
-  """
-  def list_by_project(project_key, opts \\ []) do
-    limit = Keyword.get(opts, :limit, 100)
-
-    AuditLogEntry
-    |> where([e], e.project_key == ^project_key)
-    |> order_by([e], desc: e.inserted_at)
-    |> limit(^limit)
-    |> Repo.all()
   end
 
   @doc """
@@ -70,7 +55,7 @@ defmodule Loka.WorldBuilder.AuditLog do
   end
 
   @doc """
-  Get recent log entries across all projects.
+  Get recent log entries.
   """
   def list_recent(limit \\ 50) do
     AuditLogEntry
@@ -84,22 +69,12 @@ defmodule Loka.WorldBuilder.AuditLog do
   """
   def list_errors(opts \\ []) do
     limit = Keyword.get(opts, :limit, 50)
-    project_key = Keyword.get(opts, :project_key)
 
-    query =
-      AuditLogEntry
-      |> where([e], e.result_status == "error")
-      |> order_by([e], desc: e.inserted_at)
-      |> limit(^limit)
-
-    query =
-      if project_key do
-        where(query, [e], e.project_key == ^project_key)
-      else
-        query
-      end
-
-    Repo.all(query)
+    AuditLogEntry
+    |> where([e], e.result_status == "error")
+    |> order_by([e], desc: e.inserted_at)
+    |> limit(^limit)
+    |> Repo.all()
   end
 
   @doc """

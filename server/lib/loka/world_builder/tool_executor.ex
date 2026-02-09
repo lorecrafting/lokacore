@@ -14,7 +14,6 @@ defmodule Loka.WorldBuilder.ToolExecutor do
     EntityManager,
     QuestManager,
     DialogueManager,
-    Projects,
     AuditLog,
     ValidationManager,
     YamlBuilder
@@ -64,24 +63,11 @@ defmodule Loka.WorldBuilder.ToolExecutor do
     session_id = opts[:session_id] || "unknown"
     start_time = System.monotonic_time(:millisecond)
 
-    # Get project context from opts
-    project_key = opts[:project_key]
-
     # Normalize tool name - strip wb_ prefix if present for backwards compatibility
     normalized_name = String.replace_prefix(tool_name, "wb_", "")
 
     result =
       case normalized_name do
-        # Project tools
-        "create_project" -> execute_create_project(input)
-        "load_project" -> execute_load_project(input)
-        "list_projects" -> execute_list_projects(input)
-        "delete_project" -> execute_delete_project(input)
-        # Document tools
-        "write_doc" -> execute_write_doc(input, project_key)
-        "read_doc" -> execute_read_doc(input, project_key)
-        "list_docs" -> execute_list_docs(input, project_key)
-        "delete_doc" -> execute_delete_doc(input, project_key)
         # Guidance tools
         "read_guide" -> execute_read_guide(input)
         # Room tools
@@ -147,27 +133,13 @@ defmodule Loka.WorldBuilder.ToolExecutor do
         _ -> {:error, "Unknown tool: #{tool_name}"}
       end
 
-    # Log to audit log if project context exists
-    if project_key do
-      case result do
-        {:ok, _} ->
-          AuditLog.log_success(
-            project_key,
-            opts[:conversation_id],
-            tool_name,
-            input,
-            nil
-          )
+    # Log to audit log
+    case result do
+      {:ok, _} ->
+        AuditLog.log_success(opts[:conversation_id], tool_name, input)
 
-        {:error, reason} ->
-          AuditLog.log_error(
-            project_key,
-            opts[:conversation_id],
-            tool_name,
-            input,
-            inspect(reason)
-          )
-      end
+      {:error, reason} ->
+        AuditLog.log_error(opts[:conversation_id], tool_name, input, inspect(reason))
     end
 
     # Log the tool call with timing
@@ -193,199 +165,6 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
   defp result_preview({:error, reason}), do: inspect(reason)
   defp result_preview(_), do: "unknown"
-
-  # =============================================================================
-  # Project Tools
-  # =============================================================================
-
-  defp execute_create_project(input) do
-    key = input["key"]
-    name = input["name"]
-    description = input["description"] || ""
-
-    case Projects.create_project(key, name, description) do
-      {:ok, _doc} ->
-        {:ok,
-         %{
-           success: true,
-           message: "Created project '#{name}' (#{key})",
-           project: %{
-             key: key,
-             name: name
-           }
-         }}
-
-      {:error, changeset} ->
-        {:error, "Failed to create project: #{inspect(changeset.errors)}"}
-    end
-  end
-
-  defp execute_load_project(input) do
-    key = input["key"]
-
-    case Projects.get_project(key) do
-      {:ok, project} ->
-        doc_summaries =
-          Enum.map(project.documents, fn doc ->
-            %{
-              filename: doc.filename,
-              doc_type: doc.doc_type,
-              version: doc.version,
-              preview: String.slice(doc.content, 0, 200)
-            }
-          end)
-
-        {:ok,
-         %{
-           success: true,
-           message: "Loaded project '#{key}'",
-           project: %{
-             key: project.key,
-             stats: project.stats,
-             documents: doc_summaries
-           }
-         }}
-
-      {:error, :not_found} ->
-        {:error, "Project not found: #{key}"}
-    end
-  end
-
-  defp execute_list_projects(_input) do
-    projects = Projects.list_projects()
-
-    {:ok,
-     %{
-       success: true,
-       message: "Found #{length(projects)} projects",
-       projects: projects
-     }}
-  end
-
-  defp execute_delete_project(input) do
-    key = input["key"]
-
-    case Projects.delete_project(key) do
-      {:ok, count} ->
-        {:ok,
-         %{
-           success: true,
-           message: "Deleted project '#{key}' (#{count} documents removed)"
-         }}
-
-      {:error, :not_found} ->
-        {:error, "Project not found: #{key}"}
-    end
-  end
-
-  # =============================================================================
-  # Document Tools
-  # =============================================================================
-
-  defp execute_write_doc(input, project_key) do
-    project_key = input["project_key"] || project_key
-
-    if is_nil(project_key) do
-      {:error, "No project loaded. Use create_project or load_project first."}
-    else
-      filename = input["filename"]
-      content = input["content"]
-      doc_type = input["doc_type"] || "design"
-
-      case Projects.write_doc(project_key, filename, content, doc_type) do
-        {:ok, doc} ->
-          {:ok,
-           %{
-             success: true,
-             message: "Saved document '#{filename}' (v#{doc.version})",
-             document: %{
-               filename: doc.filename,
-               doc_type: doc.doc_type,
-               version: doc.version
-             }
-           }}
-
-        {:error, changeset} ->
-          {:error, "Failed to save document: #{inspect(changeset.errors)}"}
-      end
-    end
-  end
-
-  defp execute_read_doc(input, project_key) do
-    project_key = input["project_key"] || project_key
-
-    if is_nil(project_key) do
-      {:error, "No project loaded. Use create_project or load_project first."}
-    else
-      filename = input["filename"]
-
-      case Projects.get_doc(project_key, filename) do
-        {:ok, doc} ->
-          {:ok,
-           %{
-             success: true,
-             document: %{
-               filename: doc.filename,
-               content: doc.content,
-               doc_type: doc.doc_type,
-               version: doc.version
-             }
-           }}
-
-        {:error, :not_found} ->
-          {:error, "Document not found: #{filename}"}
-      end
-    end
-  end
-
-  defp execute_list_docs(input, project_key) do
-    project_key = input["project_key"] || project_key
-
-    if is_nil(project_key) do
-      {:error, "No project loaded. Use create_project or load_project first."}
-    else
-      doc_type = input["doc_type"]
-      docs = Projects.list_docs(project_key, doc_type)
-
-      doc_list =
-        Enum.map(docs, fn doc ->
-          %{
-            filename: doc.filename,
-            doc_type: doc.doc_type,
-            version: doc.version
-          }
-        end)
-
-      {:ok,
-       %{
-         success: true,
-         message: "Found #{length(doc_list)} documents",
-         documents: doc_list
-       }}
-    end
-  end
-
-  defp execute_delete_doc(input, project_key) do
-    project_key = input["project_key"] || project_key
-
-    if is_nil(project_key) do
-      {:error, "No project loaded. Use create_project or load_project first."}
-    else
-      filename = input["filename"]
-
-      case Projects.delete_doc(project_key, filename) do
-        {:ok, _doc} ->
-          {:ok,
-           %{
-             success: true,
-             message: "Deleted document '#{filename}'"
-           }}
-
-        {:error, :not_found} ->
-          {:error, "Document not found: #{filename}"}
-      end
-    end
-  end
 
   # =============================================================================
   # Guidance Tools

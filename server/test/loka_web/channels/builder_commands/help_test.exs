@@ -36,10 +36,10 @@ defmodule LokaWeb.Channels.BuilderCommands.HelpTest do
       assert text =~ "Quest & Dialogue Commands:"
     end
 
-    test "returns projects help" do
-      {:ok_text, text} = Help.execute(:help, %{topic: "projects"}, nil)
+    test "returns guides help" do
+      {:ok_text, text} = Help.execute(:help, %{topic: "guides"}, nil)
 
-      assert text =~ "Project & Document Commands:"
+      assert text =~ "Guide Commands:"
     end
 
     test "returns ai help" do
@@ -68,7 +68,7 @@ defmodule LokaWeb.Channels.BuilderCommands.HelpTest do
     test "includes builder command categories" do
       text = Help.full_help()
 
-      for category <- ~w(Navigation Inspect Spawn Entity Content Projects Documents AI) do
+      for category <- ~w(Navigation Inspect Spawn Entity Content Guides AI) do
         assert text =~ "#{category}:", "Missing builder category: #{category}"
       end
 

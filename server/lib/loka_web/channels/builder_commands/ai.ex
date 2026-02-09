@@ -163,8 +163,7 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
         tool_executor_fn: fn name, input, _opts ->
           # Defer reloads — a single reload happens when the conversation turn ends
           Process.put(:loka_defer_reload, true)
-          project_key = get_in(socket.assigns, [:current_project, :key])
-          ToolExecutor.execute(name, input, project_key: project_key)
+          ToolExecutor.execute(name, input)
         end,
         verbosity: :verbose,
         caller_pid: self(),
@@ -178,7 +177,6 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
 
   defp build_context(socket) do
     %{
-      project_key: get_in(socket.assigns, [:current_project, :key]),
       room_key: get_current_room_key(socket)
     }
   end
@@ -198,15 +196,6 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
   defp build_system_prompt(context) do
     base = load_system_prompt()
 
-    project_context =
-      case context[:project_key] do
-        nil ->
-          "\n\nNo project loaded. Use `wb_list_projects` or `wb_create_project` to start."
-
-        key ->
-          "\n\nCurrent project: **#{key}**. Pass `project_key: \"#{key}\"` to document tools."
-      end
-
     room_context =
       case context[:room_key] do
         nil -> ""
@@ -225,7 +214,7 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
     - Indent with 2 spaces for hierarchy
     """
 
-    base <> project_context <> room_context <> terminal_context
+    base <> room_context <> terminal_context
   end
 
   defp load_system_prompt do

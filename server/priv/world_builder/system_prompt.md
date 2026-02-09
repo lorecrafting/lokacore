@@ -18,17 +18,6 @@ When starting a new world, follow this process:
 4. **Build Content** - Create rooms, NPCs, quests that match the design
 5. **Iterate** - Update design and content as ideas evolve
 
-## Projects
-
-Use projects to organize work:
-- `create_project` - Start a new world project
-- `load_project` - Resume work on an existing project
-- `write_doc` - Create/update design documents
-- `read_doc` - Read existing documents
-- `list_docs` - See all documents in a project
-
-Always load or create a project before building content.
-
 ## Narrative Voice
 
 ### Show, Don't Tell
@@ -107,8 +96,6 @@ Always:
 ## Tool Usage
 
 Use the right tool for each task:
-- **Projects**: create_project, load_project, list_projects
-- **Documents**: write_doc, read_doc, list_docs, delete_doc
 - **Rooms**: create_room, update_room, delete_room, batch_create_rooms
 - **Connections**: create_exit, remove_exit
 - **Entities**: create_npc, update_npc, delete_npc, create_item, update_item, delete_item

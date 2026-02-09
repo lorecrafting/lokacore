@@ -345,52 +345,6 @@ defmodule LokaWeb.Channels.CommandParser do
     end
   end
 
-  # Project commands
-  defp do_parse(["project", rest]) do
-    case String.split(rest, " ", parts: 3) do
-      ["new", key_and_name] ->
-        case String.split(key_and_name, " ", parts: 2) do
-          [key, name] -> {:builder_project_new, %{key: key, name: name}}
-          [key] -> {:builder_project_new, %{key: key, name: key}}
-        end
-
-      ["load", key] ->
-        {:builder_project_load, %{key: String.trim(key)}}
-
-      ["list"] ->
-        {:builder_project_list, %{}}
-
-      ["delete", key] ->
-        {:builder_project_delete, %{key: String.trim(key)}}
-
-      _ ->
-        {:unknown, %{text: "project"}}
-    end
-  end
-
-  # Document commands
-  defp do_parse(["doc", rest]) do
-    case String.split(rest, " ", parts: 3) do
-      ["write", filename_and_content] ->
-        case String.split(filename_and_content, " ", parts: 2) do
-          [filename, content] -> {:builder_doc_write, %{filename: filename, content: content}}
-          [filename] -> {:builder_doc_write, %{filename: filename, content: ""}}
-        end
-
-      ["read", filename] ->
-        {:builder_doc_read, %{filename: String.trim(filename)}}
-
-      ["list"] ->
-        {:builder_doc_list, %{}}
-
-      ["delete", filename] ->
-        {:builder_doc_delete, %{filename: String.trim(filename)}}
-
-      _ ->
-        {:unknown, %{text: "doc"}}
-    end
-  end
-
   defp do_parse(["guide", topic]), do: {:builder_guide, %{topic: topic}}
 
   # AI commands

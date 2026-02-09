@@ -307,50 +307,6 @@ defmodule LokaWeb.Channels.CommandParserTest do
     end
   end
 
-  describe "project commands" do
-    test "project new with key only defaults name" do
-      assert CommandParser.parse("project new myproj") ==
-               {:builder_project_new, %{key: "myproj", name: "myproj"}}
-    end
-
-    test "project load" do
-      assert CommandParser.parse("project load myproj") ==
-               {:builder_project_load, %{key: "myproj"}}
-    end
-
-    test "project list" do
-      assert CommandParser.parse("project list") ==
-               {:builder_project_list, %{}}
-    end
-
-    test "project delete" do
-      assert CommandParser.parse("project delete myproj") ==
-               {:builder_project_delete, %{key: "myproj"}}
-    end
-  end
-
-  describe "doc commands" do
-    test "doc write with filename only" do
-      assert CommandParser.parse("doc write notes.md") ==
-               {:builder_doc_write, %{filename: "notes.md", content: ""}}
-    end
-
-    test "doc read" do
-      assert CommandParser.parse("doc read notes.md") ==
-               {:builder_doc_read, %{filename: "notes.md"}}
-    end
-
-    test "doc list" do
-      assert CommandParser.parse("doc list") ==
-               {:builder_doc_list, %{}}
-    end
-
-    test "doc delete" do
-      assert CommandParser.parse("doc delete notes.md") ==
-               {:builder_doc_delete, %{filename: "notes.md"}}
-    end
-  end
-
   describe "guide command" do
     test "guide with topic" do
       assert CommandParser.parse("guide quest_patterns") ==

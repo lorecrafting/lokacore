@@ -3,28 +3,14 @@ defmodule LokaWeb.AdminLive.BuilderLive do
   Terminal-first World Builder LiveView.
 
   Full-screen MUD terminal with builder commands and AI integration.
-  Replaces the GUI-based WorldBuilderLive with a terminal-native workflow.
   """
   use LokaWeb, :live_view
 
-  alias Loka.WorldBuilder.Projects
-
   @impl true
   def mount(_params, _session, socket) do
-    projects = Projects.list_projects()
     token = generate_terminal_token(socket)
 
-    current_project =
-      case projects do
-        [first | _] -> first
-        [] -> nil
-      end
-
-    {:ok,
-     socket
-     |> assign(:token, token)
-     |> assign(:projects, projects)
-     |> assign(:current_project, current_project)}
+    {:ok, assign(socket, :token, token)}
   end
 
   @impl true
@@ -41,23 +27,6 @@ defmodule LokaWeb.AdminLive.BuilderLive do
               <.icon name="hero-arrow-left" class="size-4" />
             </a>
             <span class="text-sm font-semibold text-base-content">Builder</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <label class="text-xs text-base-content/50">Project:</label>
-            <select
-              name="project"
-              class="select select-xs select-bordered bg-base-100 text-base-content min-w-[160px]"
-              phx-change="select_project"
-            >
-              <option :if={@projects == []} value="">No projects</option>
-              <option
-                :for={project_key <- @projects}
-                value={project_key}
-                selected={@current_project == project_key}
-              >
-                {project_key}
-              </option>
-            </select>
           </div>
         </header>
 
@@ -107,11 +76,6 @@ defmodule LokaWeb.AdminLive.BuilderLive do
       </div>
     </Layouts.admin>
     """
-  end
-
-  @impl true
-  def handle_event("select_project", %{"project" => key}, socket) do
-    {:noreply, assign(socket, :current_project, key)}
   end
 
   # Generate JWT token for the terminal panel's GameChannel connection
