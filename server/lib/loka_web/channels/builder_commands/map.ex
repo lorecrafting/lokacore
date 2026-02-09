@@ -69,15 +69,16 @@ defmodule LokaWeb.Channels.BuilderCommands.Map do
   @doc """
   Generate compact minimap text for inline display after room changes.
 
+  Uses lazy room lookups (only fetches rooms discovered by BFS) to avoid
+  loading all rooms on every navigation.
+
   Returns `nil` if the room has no exits (nothing to show).
   """
   @spec minimap_text(String.t()) :: String.t() | nil
   def minimap_text(room_key) do
-    rooms_index = build_rooms_index()
-
-    case Map.get(rooms_index, room_key) do
+    case fetch_room(room_key) do
       nil -> nil
-      _room -> render_minimap(room_key, rooms_index)
+      room -> render_minimap_lazy(room_key, %{room_key => room})
     end
   end
 
@@ -85,6 +86,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Map do
   # Room Index
   # ============================================================================
 
+  # Full index — used by `map` command (admin-only, infrequent)
   defp build_rooms_index do
     RoomManager.list_rooms()
     |> Enum.reduce(%{}, fn room, acc ->
@@ -98,6 +100,25 @@ defmodule LokaWeb.Channels.BuilderCommands.Map do
         z: room[:z] || 0
       })
     end)
+  end
+
+  # Single room lookup — used by minimap (every navigation, must be fast)
+  defp fetch_room(key) do
+    case RoomManager.get_room(key) do
+      {:ok, room} ->
+        %{
+          key: room.key,
+          name: room.name,
+          id: room[:id],
+          exits: room.exits || %{},
+          x: room[:x] || 0,
+          y: room[:y] || 0,
+          z: room[:z] || 0
+        }
+
+      {:error, _} ->
+        nil
+    end
   end
 
   defp find_room_key_by_id(rooms_index, room_id) do
@@ -417,13 +438,81 @@ defmodule LokaWeb.Channels.BuilderCommands.Map do
   # Minimap Rendering
   # ============================================================================
 
-  defp render_minimap(room_key, rooms_index) do
-    grid = layout_bfs(room_key, rooms_index, nil, 2)
+  # Lazy minimap: fetches rooms on-demand during BFS (avoids loading all rooms)
+  defp render_minimap_lazy(room_key, cache) do
+    {grid, cache} = layout_bfs_lazy(room_key, cache, 2)
 
     if map_size(grid) <= 1 do
       nil
     else
-      render_minimap_grid(grid, rooms_index, room_key)
+      render_minimap_grid(grid, cache, room_key)
+    end
+  end
+
+  defp layout_bfs_lazy(start_key, cache, max_depth) do
+    initial_state = %{
+      grid: %{{0, 0} => start_key},
+      placed: %{start_key => {0, 0}},
+      queue: :queue.from_list([{start_key, 0}]),
+      cache: cache
+    }
+
+    state = do_bfs_lazy(initial_state, max_depth)
+    {state.grid, state.cache}
+  end
+
+  defp do_bfs_lazy(state, max_depth) do
+    case :queue.out(state.queue) do
+      {:empty, _} ->
+        state
+
+      {{:value, {current_key, depth}}, rest_queue} ->
+        state = %{state | queue: rest_queue}
+
+        if depth >= max_depth do
+          do_bfs_lazy(state, max_depth)
+        else
+          room = Map.get(state.cache, current_key, %{exits: %{}})
+          {cx, cy} = Map.get(state.placed, current_key, {0, 0})
+
+          state =
+            Enum.reduce(room.exits, state, fn {dir, dest_key}, acc ->
+              already_placed = Map.has_key?(acc.placed, dest_key)
+
+              if already_placed do
+                acc
+              else
+                # Lazy fetch: only load room data when we first encounter it
+                acc = ensure_cached(acc, dest_key)
+
+                case place_neighbor(acc.grid, cx, cy, dir) do
+                  nil ->
+                    acc
+
+                  {nx, ny} ->
+                    %{
+                      acc
+                      | grid: Map.put(acc.grid, {nx, ny}, dest_key),
+                        placed: Map.put(acc.placed, dest_key, {nx, ny}),
+                        queue: :queue.in({dest_key, depth + 1}, acc.queue)
+                    }
+                end
+              end
+            end)
+
+          do_bfs_lazy(state, max_depth)
+        end
+    end
+  end
+
+  defp ensure_cached(state, key) do
+    if Map.has_key?(state.cache, key) do
+      state
+    else
+      case fetch_room(key) do
+        nil -> state
+        room -> %{state | cache: Map.put(state.cache, key, room)}
+      end
     end
   end
 
