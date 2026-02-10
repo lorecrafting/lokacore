@@ -187,22 +187,22 @@ When tests depend on services that may not be running:
 ```elixir
 # BAD - Test just skipped with no path forward
 @tag :skip
-test "uses CropRegistry" do
+test "uses QuestRegistry" do
   ...
 end
 
 # GOOD - Skip with clear reason and setup instructions
 @tag :skip
-@tag :requires_crop_registry
-test "uses CropRegistry - requires CropRegistry GenServer running" do
-  # To enable: start_supervised({CropRegistry, []}) in setup
+@tag :requires_quest_registry
+test "uses QuestRegistry - requires QuestRegistry GenServer running" do
+  # To enable: start_supervised({QuestRegistry, []}) in setup
   ...
 end
 
 # BEST - Mock the dependency
 setup do
   # Start a test-specific registry
-  {:ok, _} = start_supervised({CropRegistry, name: :test_crop_registry})
+  {:ok, _} = start_supervised({QuestRegistry, name: :test_quest_registry})
   :ok
 end
 ```

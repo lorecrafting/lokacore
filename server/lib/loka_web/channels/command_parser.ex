@@ -173,7 +173,7 @@ defmodule LokaWeb.Channels.CommandParser do
             {:builder_edit_entity, %{type: type, key: key, field: field, value: ""}}
         end
 
-      [type, key] when type in ~w(npc item room) ->
+      [type, key] when type in ~w(npc item) ->
         {:builder_edit_entity, %{type: type, key: key, field: nil, value: nil}}
 
       ["quest", key_and_field] ->

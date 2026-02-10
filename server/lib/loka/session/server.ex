@@ -434,24 +434,7 @@ defmodule Loka.Session.Server do
     {:via, Registry, {Loka.Session.PlayerRegistry, player_id}}
   end
 
-  defp send_to_client(:liveview, pid, message) do
-    send(pid, {:session_message, message})
-  end
-
-  defp send_to_client(:ssh, pid, message) do
-    send(pid, {:session_message, message})
-  end
-
-  defp send_to_client(:mobile, pid, message) do
-    send(pid, {:session_message, message})
-  end
-
-  defp send_to_client(:discord, pid, message) do
-    send(pid, {:session_message, message})
-  end
-
-  defp send_to_client(client_type, pid, message) do
-    Logger.warning("[Session.Server] Unknown client type: #{client_type}")
+  defp send_to_client(_client_type, pid, message) do
     send(pid, {:session_message, message})
   end
 

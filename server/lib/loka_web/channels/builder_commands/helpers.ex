@@ -3,9 +3,14 @@ defmodule LokaWeb.Channels.BuilderCommands.Helpers do
   Shared helpers for builder command modules.
   """
 
+  import Phoenix.Socket, only: [assign: 3]
   import Phoenix.Channel, only: [push: 3]
 
+  alias Loka.Framework.Player.GameState, as: PlayerGameState
+  alias Loka.Framework.World.Atmosphere
   alias Loka.WorldBuilder.RoomManager
+  alias LokaWeb.Channels.RoomHelpers
+  alias LokaWeb.Channels.GameChannel.Serializers
 
   def push_builder(socket, text) do
     push(socket, "output", %{text: "[BUILDER] #{text}"})
@@ -15,6 +20,64 @@ defmodule LokaWeb.Channels.BuilderCommands.Helpers do
     rooms = RoomManager.list_rooms()
     Enum.find(rooms, fn r -> r.key == key end)
   end
+
+  @doc """
+  Teleport the builder to a room by its DB record. Handles PubSub,
+  game state update, session update, and room_update push.
+  Returns `{:ok, socket}` or `{:error, reason}`.
+  """
+  def teleport_to_room(room, socket, _opts \\ []) do
+    player = socket.assigns.player
+    game_state = socket.assigns.game_state
+    old_room_id = game_state.current_room_id
+
+    if old_room_id do
+      Phoenix.PubSub.unsubscribe(Loka.PubSub, "room:#{old_room_id}")
+    end
+
+    {:ok, updated_state} =
+      PlayerGameState.update_state(game_state, %{current_room_id: room.id})
+
+    Phoenix.PubSub.subscribe(Loka.PubSub, "room:#{room.id}")
+    Loka.Session.update_room(player.id, room.id)
+
+    {loaded_room, final_state} = RoomHelpers.load_player_room(updated_state)
+    atmosphere = Atmosphere.describe_for_room(loaded_room)
+
+    socket = assign(socket, :game_state, final_state)
+
+    push(socket, "room_update", %{
+      room: Serializers.serialize_room(loaded_room),
+      atmosphere: atmosphere
+    })
+
+    {:ok, socket}
+  end
+
+  @direction_abbreviations %{
+    "n" => "north",
+    "s" => "south",
+    "e" => "east",
+    "w" => "west",
+    "u" => "up",
+    "d" => "down",
+    "ne" => "northeast",
+    "nw" => "northwest",
+    "se" => "southeast",
+    "sw" => "southwest"
+  }
+
+  @doc """
+  Normalize a direction abbreviation to its full form.
+  """
+  def normalize_direction(dir) do
+    Map.get(@direction_abbreviations, dir, dir)
+  end
+
+  @doc """
+  Ensure a directory exists (creates parents if needed).
+  """
+  def ensure_dir(path), do: File.mkdir_p!(path)
 
   def format_entity_list(label, entities, socket) do
     lines =

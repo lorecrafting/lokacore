@@ -137,11 +137,10 @@ defmodule Loka.MixProject do
 
       # Documentation generation
       {:ex_doc, "~> 0.34", only: :dev, runtime: false},
-      {:nimble_publisher, "~> 1.1"},
-      {:makeup_elixir, ">= 0.0.0"},
-      {:makeup_js, ">= 0.0.0"},
-      {:makeup_html, ">= 0.0.0"},
-      {:makeup_eex, ">= 0.0.0"},
+      {:makeup_elixir, ">= 0.0.0", only: :dev, runtime: false},
+      {:makeup_js, ">= 0.0.0", only: :dev, runtime: false},
+      {:makeup_html, ">= 0.0.0", only: :dev, runtime: false},
+      {:makeup_eex, ">= 0.0.0", only: :dev, runtime: false},
 
       # Tidewave MCP server for AI coding assistance
       {:tidewave, "~> 0.5", only: :dev},

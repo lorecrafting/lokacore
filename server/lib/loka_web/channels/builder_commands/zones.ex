@@ -18,7 +18,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Zones do
       {:error, :not_found} ->
         yaml_content = YamlBuilder.build_zone_yaml(key, name, resets: [])
 
-        ensure_dir()
+        Helpers.ensure_dir(@zones_dir)
 
         case File.write(Path.join(@zones_dir, "#{key}.yml"), yaml_content) do
           :ok ->
@@ -79,14 +79,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Zones do
   end
 
   def execute(:zone_info, %{key: key}, socket) do
-    case Zone.get(key) do
-      {:ok, zone} ->
-        yaml_text = Helpers.format_typed_object(zone)
-        {:ok, "Zone '#{key}':\n#{yaml_text}", socket}
-
-      {:error, :not_found} ->
-        {:error, "Zone '#{key}' not found.", socket}
-    end
+    execute(:edit_zone, %{key: key, field: nil}, socket)
   end
 
   defp save_zone_yaml(key, data, name) do
@@ -101,9 +94,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Zones do
         reset_mode: reset_mode
       )
 
-    ensure_dir()
+    Helpers.ensure_dir(@zones_dir)
     File.write(Path.join(@zones_dir, "#{key}.yml"), yaml_content)
   end
-
-  defp ensure_dir, do: File.mkdir_p!(@zones_dir)
 end

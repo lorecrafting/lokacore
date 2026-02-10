@@ -178,7 +178,7 @@ mix loka.test.validate
 
 # Run specific tests
 mix test test/loka/framework/status/status_manager_test.exs
-mix test test/loka/framework/hometown/hometown_test.exs
+mix test test/loka/framework/quest/
 ```
 
 ## Supporting Files

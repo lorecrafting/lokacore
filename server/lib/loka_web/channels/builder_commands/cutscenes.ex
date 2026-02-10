@@ -21,7 +21,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Cutscenes do
 
         yaml_content = YamlBuilder.build_cutscene_yaml(key, name, "manual", default_scenes)
 
-        ensure_dir()
+        Helpers.ensure_dir(@cutscenes_dir)
 
         case File.write(Path.join(@cutscenes_dir, "#{key}.yml"), yaml_content) do
           :ok ->
@@ -61,6 +61,4 @@ defmodule LokaWeb.Channels.BuilderCommands.Cutscenes do
         {:error, "Cutscene '#{key}' not found.", socket}
     end
   end
-
-  defp ensure_dir, do: File.mkdir_p!(@cutscenes_dir)
 end

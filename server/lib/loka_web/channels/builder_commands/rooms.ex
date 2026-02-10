@@ -3,10 +3,8 @@ defmodule LokaWeb.Channels.BuilderCommands.Rooms do
   Room CRUD commands: dig, @desc, @name, create room, link, unlink, delete room.
   """
 
-  import Phoenix.Socket, only: [assign: 3]
   import Phoenix.Channel, only: [push: 3]
 
-  alias Loka.Framework.Player.GameState, as: PlayerGameState
   alias Loka.Framework.World.Atmosphere
   alias Loka.WorldBuilder.RoomManager
   alias LokaWeb.Channels.RoomHelpers
@@ -16,7 +14,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Rooms do
   @valid_directions ~w(north south east west up down)
 
   def execute(:dig, %{direction: dir, key: key, name: name}, socket) do
-    direction = normalize_direction(dir)
+    direction = Helpers.normalize_direction(dir)
 
     unless direction in @valid_directions do
       {:error, "Invalid direction '#{dir}'. Use: #{Enum.join(@valid_directions, ", ")}", socket}
@@ -24,7 +22,6 @@ defmodule LokaWeb.Channels.BuilderCommands.Rooms do
       game_state = socket.assigns.game_state
       {current_room, _} = RoomHelpers.load_player_room(game_state)
 
-      # Create the new room
       room_params = %{
         "key" => key,
         "name" => name,
@@ -34,40 +31,17 @@ defmodule LokaWeb.Channels.BuilderCommands.Rooms do
 
       case RoomManager.create_room(room_params) do
         {:ok, _new_room} ->
-          # Create forward exit
           reverse = reverse_direction(direction)
 
           RoomManager.add_exit(current_room.key, direction, key)
           RoomManager.add_exit(key, reverse, current_room.key)
 
-          # Teleport builder to new room
           case Helpers.find_room_by_key(key) do
             nil ->
               {:ok, "Room '#{key}' created with exits, but could not teleport.", socket}
 
             room ->
-              old_room_id = game_state.current_room_id
-
-              if old_room_id do
-                Phoenix.PubSub.unsubscribe(Loka.PubSub, "room:#{old_room_id}")
-              end
-
-              {:ok, updated_state} =
-                PlayerGameState.update_state(game_state, %{current_room_id: room.id})
-
-              Phoenix.PubSub.subscribe(Loka.PubSub, "room:#{room.id}")
-              Loka.Session.update_room(socket.assigns.player.id, room.id)
-
-              {loaded_room, final_state} = RoomHelpers.load_player_room(updated_state)
-              atmosphere = Atmosphere.describe_for_room(loaded_room)
-
-              socket = assign(socket, :game_state, final_state)
-
-              push(socket, "room_update", %{
-                room: Serializers.serialize_room(loaded_room),
-                atmosphere: atmosphere
-              })
-
+              {:ok, socket} = Helpers.teleport_to_room(room, socket)
               {:ok, "Dug #{direction}: created '#{key}' with bidirectional exits.", socket}
           end
 
@@ -119,7 +93,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Rooms do
   end
 
   def execute(:link, %{direction: dir, key: key}, socket) do
-    direction = normalize_direction(dir)
+    direction = Helpers.normalize_direction(dir)
     game_state = socket.assigns.game_state
     {room, _} = RoomHelpers.load_player_room(game_state)
 
@@ -134,7 +108,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Rooms do
   end
 
   def execute(:unlink, %{direction: dir}, socket) do
-    direction = normalize_direction(dir)
+    direction = Helpers.normalize_direction(dir)
     game_state = socket.assigns.game_state
     {room, _} = RoomHelpers.load_player_room(game_state)
 
@@ -169,19 +143,15 @@ defmodule LokaWeb.Channels.BuilderCommands.Rooms do
     })
   end
 
-  defp normalize_direction("n"), do: "north"
-  defp normalize_direction("s"), do: "south"
-  defp normalize_direction("e"), do: "east"
-  defp normalize_direction("w"), do: "west"
-  defp normalize_direction("u"), do: "up"
-  defp normalize_direction("d"), do: "down"
-  defp normalize_direction(dir), do: dir
-
   defp reverse_direction("north"), do: "south"
   defp reverse_direction("south"), do: "north"
   defp reverse_direction("east"), do: "west"
   defp reverse_direction("west"), do: "east"
   defp reverse_direction("up"), do: "down"
   defp reverse_direction("down"), do: "up"
+  defp reverse_direction("northeast"), do: "southwest"
+  defp reverse_direction("northwest"), do: "southeast"
+  defp reverse_direction("southeast"), do: "northwest"
+  defp reverse_direction("southwest"), do: "northeast"
   defp reverse_direction(dir), do: dir
 end

@@ -115,16 +115,6 @@ The terminal builder is Loka's content creation tool. It uses a MUD-style comman
 | `validate` | Run content validation |
 | `settime <hour>` | Set time of day |
 
-### Projects & Documents
-| Command | Description |
-|---------|-------------|
-| `project new <name>` | Create project |
-| `project load <name>` | Load project |
-| `project list` | List projects |
-| `doc write <title>` | Create document |
-| `doc read <title>` | Read document |
-| `guide` | Show getting started guide |
-
 ### AI
 | Command | Description |
 |---------|-------------|
@@ -196,7 +186,6 @@ The `terminalMarkup.js` module parses this on the client side, and `Formatter.di
 | `lib/loka/world_builder/yaml_builder.ex` | YAML generation |
 | `lib/loka/world_builder/anthropic_client.ex` | Claude API (streaming SSE) |
 | `lib/loka/world_builder/script_templates.ex` | 15 script templates |
-| `lib/loka/world_builder/projects.ex` | Project workspaces |
 | `lib/loka/world_builder/audit_log.ex` | Action logging |
 | `lib/loka/world_builder/mcp/*.ex` | MCP server (3 files) |
 

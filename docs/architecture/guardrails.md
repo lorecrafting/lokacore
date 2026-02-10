@@ -47,7 +47,6 @@ These schemas are used by content validators in `mix loka.test.validate`.
 ### Location
 - Schema: `priv/schemas/channel_events.json`
 - Elixir: `LokaWeb.Channels.ChannelSchema`
-- Validator: `LokaWeb.Channels.ChannelValidator`
 
 ### Workflow for Adding New Events
 
@@ -90,20 +89,9 @@ These schemas are used by content validators in `mix loka.test.validate`.
 
 ### Runtime Validation
 
-Enable in config:
-```elixir
-# config/dev.exs
-config :loka, LokaWeb.Channels.ChannelValidator,
-  enabled: true,   # Enable validation
-  strict: false,   # Log warnings but don't reject
-  log_level: :warning
-
-# config/test.exs - stricter
-config :loka, LokaWeb.Channels.ChannelValidator,
-  enabled: true,
-  strict: true,    # Reject invalid payloads
-  log_level: :error
-```
+> **Note:** `ChannelValidator` was designed but never wired into the pipeline (removed Feb 2026).
+> Channel events are validated by pattern matching in `GameChannel.handle_in/3`.
+> Runtime validation can be re-implemented if needed using the schema definitions above.
 
 ## Content Validation
 

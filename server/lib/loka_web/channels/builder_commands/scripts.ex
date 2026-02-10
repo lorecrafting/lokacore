@@ -30,7 +30,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
           timeout_ms: 5000
         """
 
-        ensure_dir()
+        Helpers.ensure_dir(@scripts_dir)
 
         case File.write(Path.join(@scripts_dir, "#{key}.yml"), yaml_content) do
           :ok ->
@@ -194,7 +194,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
       {:error, :not_found} ->
         case generate_from_template(key, tpl, config_str) do
           {:ok, yaml_content} ->
-            ensure_dir()
+            Helpers.ensure_dir(@scripts_dir)
 
             case File.write(Path.join(@scripts_dir, "#{key}.yml"), yaml_content) do
               :ok ->
@@ -390,6 +390,4 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
       end
     end)
   end
-
-  defp ensure_dir, do: File.mkdir_p!(@scripts_dir)
 end

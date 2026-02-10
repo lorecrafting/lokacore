@@ -1,17 +1,17 @@
 # Plugin Migration Analysis
 
 > **For Developers**: Evaluation of framework systems for migration to plugins
+>
+> **Status (Feb 2026):** All three systems analyzed below (Farming, Housing, Companion) were **deleted** as dead code. They had zero content usage and no integration points. If these features are needed in the future, they should be re-implemented as plugins from the start using the migration template below.
 
 ---
 
 ## Overview
 
 Three framework systems were evaluated as plugin candidates:
-- `Loka.Framework.Farming`
-- `Loka.Framework.Housing`
-- `Loka.Framework.Companion`
-
-**Recommendation:** All three are good plugin candidates but **defer migration** until they're actively used.
+- `Loka.Framework.Farming` — **Deleted** (Feb 2026, no content using it)
+- `Loka.Framework.Housing` — **Deleted** (Feb 2026, no content using it)
+- `Loka.Framework.Companion` — **Deleted** (Feb 2026, superseded by Spark)
 
 ---
 

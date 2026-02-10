@@ -37,14 +37,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Content do
   end
 
   def execute(:quest_info, %{key: key}, socket) do
-    case Loader.get(key) do
-      {:ok, obj} ->
-        yaml_text = Helpers.format_typed_object(obj)
-        {:ok, "Quest '#{key}':\n#{yaml_text}", socket}
-
-      _ ->
-        {:error, "Quest '#{key}' not found.", socket}
-    end
+    execute(:edit_quest, %{key: key, field: nil}, socket)
   end
 
   def execute(:delete_quest, %{key: key}, socket) do

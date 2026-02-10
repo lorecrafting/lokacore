@@ -7,7 +7,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Storylines do
   alias Loka.WorldBuilder.YamlBuilder
   alias LokaWeb.Channels.BuilderCommands.Helpers
 
-  @storylines_dir Path.join([:code.priv_dir(:loka), "world", "zones"])
+  @storylines_dir Path.join([:code.priv_dir(:loka), "world", "storylines"])
 
   def execute(:create_storyline, %{key: key, name: name}, socket) do
     case Loader.get(key) do
@@ -17,7 +17,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Storylines do
       _ ->
         yaml_content = YamlBuilder.build_storyline_yaml(key, name, [], [])
 
-        ensure_dir()
+        Helpers.ensure_dir(@storylines_dir)
 
         case File.write(Path.join(@storylines_dir, "#{key}.yml"), yaml_content) do
           :ok ->
@@ -57,6 +57,4 @@ defmodule LokaWeb.Channels.BuilderCommands.Storylines do
         {:error, "Storyline '#{key}' not found.", socket}
     end
   end
-
-  defp ensure_dir, do: File.mkdir_p!(@storylines_dir)
 end

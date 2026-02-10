@@ -23,8 +23,8 @@ GameChannel
 1. User types in terminal → `MudTerminal` hook pushes `"command"` event via Channel
 2. `GameChannel.handle_in("command")` → `CommandParser.parse(input)`
 3. Parser returns `{:builder_*atom, %{params}}` for builder commands
-4. `execute_builder_command/3` gates on `player.is_admin`
-5. `BuilderCommands.execute/3` dispatches to the correct sub-module
+4. `strip_builder_prefix/1` dynamically removes prefix → `execute_builder_command/3` gates on `player.is_admin`
+5. `BuilderCommands.execute/3` dispatches to the correct sub-module via attribute-based guard clauses
 6. Sub-module returns `{:ok, text, socket}` | `{:ok, socket}` | `{:error, text, socket}`
 
 ### Module Map
@@ -32,7 +32,7 @@ GameChannel
 | Module | Purpose |
 |--------|---------|
 | `CommandParser` | Splits input, pattern matches to `{:builder_*, params}` tuples |
-| `BuilderCommands` | Thin dispatcher routing to 16 sub-modules |
+| `BuilderCommands` | Thin dispatcher routing to sub-modules via attribute guards |
 | `BuilderCommands.Rooms` | Room CRUD: dig, link, @desc, @name |
 | `BuilderCommands.Entities` | NPC/Item CRUD |
 | `BuilderCommands.Content` | Quest/Dialogue CRUD |
@@ -44,11 +44,12 @@ GameChannel
 | `BuilderCommands.Inspection` | info, list, find |
 | `BuilderCommands.Testing` | spawn, purge, give, flags, godmode |
 | `BuilderCommands.World` | reload, validate, settime |
-| `BuilderCommands.Projects` | Project/document management |
+| `BuilderCommands.Map` | Zone layout and inline minimap |
 | `BuilderCommands.AI` | `/ai` commands, chat mode, streaming |
 | `BuilderCommands.Help` | Categorized help system |
-| `BuilderCommands.Formatter` | Tables, sections, key_value, box formatting |
-| `BuilderCommands.Helpers` | push_builder, find_room_by_key, format utilities |
+| `BuilderCommands.Guides` | Markdown guide reader |
+| `BuilderCommands.Formatter` | Tables, sections, display_length, count_label |
+| `BuilderCommands.Helpers` | teleport_to_room, normalize_direction, ensure_dir, push_builder |
 
 ### Backend Managers (in `lib/loka/world_builder/`)
 
@@ -63,7 +64,6 @@ GameChannel
 | `yaml_builder.ex` | YAML generation utilities |
 | `anthropic_client.ex` | Claude API client (streaming SSE) |
 | `script_templates.ex` | 15 built-in script templates |
-| `projects.ex` | Project workspaces |
 | `audit_log.ex` | Builder action logging |
 | `mcp/` | MCP server (tools.ex, router.ex, server.ex) |
 

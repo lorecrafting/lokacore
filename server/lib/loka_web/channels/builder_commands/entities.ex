@@ -38,7 +38,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Entities do
 
         {:ok, "#{type} '#{key}':\n#{lines}", socket}
 
-      :error ->
+      {:error, :not_found} ->
         {:error, "#{type} '#{key}' not found.", socket}
     end
   end
@@ -53,7 +53,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Entities do
           {:error, reason} -> {:error, "Failed to update: #{inspect(reason)}", socket}
         end
 
-      :error ->
+      {:error, :not_found} ->
         {:error, "#{type} '#{key}' not found.", socket}
     end
   end
@@ -66,7 +66,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Entities do
           {:error, reason} -> {:error, "Failed to delete NPC: #{inspect(reason)}", socket}
         end
 
-      :error ->
+      {:error, :not_found} ->
         {:error, "NPC '#{key}' not found.", socket}
     end
   end
@@ -79,7 +79,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Entities do
           {:error, reason} -> {:error, "Failed to delete item: #{inspect(reason)}", socket}
         end
 
-      :error ->
+      {:error, :not_found} ->
         {:error, "Item '#{key}' not found.", socket}
     end
   end
@@ -88,15 +88,13 @@ defmodule LokaWeb.Channels.BuilderCommands.Entities do
     entities = EntityManager.list_entities(subtype)
 
     case Enum.find(entities, fn e -> e.key == key end) do
-      nil -> :error
+      nil -> {:error, :not_found}
       entity -> {:ok, entity}
     end
   end
 
   defp type_to_atom("npc"), do: :npc
   defp type_to_atom("item"), do: :item
-  defp type_to_atom("room"), do: :room
-  defp type_to_atom(_), do: :npc
 
   defp format_value(v) when is_binary(v), do: String.slice(v, 0, 80)
   defp format_value(v) when is_map(v), do: "{...}"

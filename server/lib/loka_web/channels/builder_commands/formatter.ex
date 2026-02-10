@@ -76,48 +76,6 @@ defmodule LokaWeb.Channels.BuilderCommands.Formatter do
   end
 
   @doc """
-  Formats key-value pairs into aligned output.
-
-      iex> key_value([{"Name", "Bob"}, {"Key", "bob"}])
-      "  Name: Bob\\n  Key:  bob"
-  """
-  def key_value(pairs) do
-    max_key =
-      pairs
-      |> Enum.map(fn {k, _} -> String.length(to_string(k)) end)
-      |> Enum.max(fn -> 0 end)
-
-    pairs
-    |> Enum.map(fn {k, v} ->
-      key_str = String.pad_trailing(to_string(k), max_key)
-      "  #{key_str}: #{v}"
-    end)
-    |> Enum.join("\n")
-  end
-
-  @doc """
-  Wraps text in a simple box.
-
-      iex> box("Hello")
-      "┌───────┐\\n│ Hello │\\n└───────┘"
-  """
-  def box(text) do
-    lines = String.split(text, "\n")
-    max_width = lines |> Enum.map(&display_length/1) |> Enum.max(fn -> 0 end)
-
-    top = "┌─#{String.duplicate("─", max_width)}─┐"
-    bottom = "└─#{String.duplicate("─", max_width)}─┘"
-
-    middle =
-      Enum.map(lines, fn line ->
-        pad = max_width - display_length(line)
-        "│ #{line}#{String.duplicate(" ", max(pad, 0))} │"
-      end)
-
-    Enum.join([top | middle] ++ [bottom], "\n")
-  end
-
-  @doc """
   Formats a count with label, e.g. "3 rooms" or "1 room".
   """
   def count_label(n, singular, plural \\ nil) do

@@ -121,11 +121,7 @@ CSS is split into domain-specific modules (each file <400 lines):
 
 | Prefix | Scope | Examples |
 |--------|-------|----------|
-| `world-builder-*` | Top-level WB containers | `world-builder-container`, `world-builder-panel` |
-| `panel-*` | Panel system | `panel-resize-handle`, `panel-collapsed` |
-| `chat-*` | Chat panel | `chat-message`, `chat-input-form` |
-| `quest-*` | Quest editor | `quest-node`, `quest-section` |
-| `cutscene-*` | Cutscene editor | `cutscene-timeline-*` |
+| `builder-*` | Builder containers | `builder-terminal-container` |
 | `terminal-*` | MUD terminal | `terminal-line`, `term-connection-dot` |
 | `tool-*` | Tool execution UI | `tool-use`, `tool-header` |
 | `modal-*` | Modal dialogs | `modal-overlay`, `modal-content` |

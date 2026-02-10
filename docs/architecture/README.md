@@ -42,7 +42,7 @@ This documentation covers the core engine architecture for Loka - an Elixir MUD 
 - [Testing Framework](./testing.md) - Bots, balance analysis, content validation
 
 ### Framework Subsystems
-- [Framework Overview](../framework/README.md) - All 31 game subsystems reference
+- [Framework Overview](../framework/README.md) - All game subsystems reference
 
 ### Web & API
 - [REST API Reference](../api/README.md) - JWT authentication, health endpoints

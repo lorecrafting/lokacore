@@ -1,6 +1,6 @@
 # Framework Subsystems
 
-Loka's framework layer provides 31 game subsystems that build on the engine core. Each subsystem is designed to be optional and composable, allowing game developers to enable only what they need.
+Loka's framework layer provides ~25 game subsystems that build on the engine core. Each subsystem is designed to be optional and composable, allowing game developers to enable only what they need.
 
 > **Documentation Pattern:** This doc provides YAML configuration examples for content creators.
 > For Elixir API details, see each module's `@moduledoc`.
@@ -15,16 +15,16 @@ Loka's framework layer provides 31 game subsystems that build on the engine core
 │   Player, Inventory, Progression, Combat, Quest, Dialogue  │
 ├─────────────────────────────────────────────────────────────┤
 │ Character Systems                                           │
-│   Abilities, Skills, Status, Resources, Appearance         │
+│   Skills, Status, Resources, Progression                   │
 ├─────────────────────────────────────────────────────────────┤
 │ World Systems                                               │
-│   World, Economy, Housing                                  │
+│   World, Economy                                           │
 ├─────────────────────────────────────────────────────────────┤
 │ Crafting Systems                                            │
-│   Crafting, Gathering, Farming, Magic                      │
+│   Crafting, Gathering                                      │
 ├─────────────────────────────────────────────────────────────┤
-│ Social Systems                                              │
-│   Companion, Messaging                                      │
+│ Social & Content                                            │
+│   Social, Storyline, Scripting, Spark                      │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -207,33 +207,6 @@ components:
 
 ### Character Systems
 
-#### Abilities (`lib/loka/framework/abilities/`)
-
-**Purpose**: Skills and special actions characters can perform.
-
-**Key Module**: `Loka.Framework.Abilities.Ability`
-
-**Features**:
-- Cooldowns and resource costs
-- Requirement checking (level, skill)
-- Effect application (damage, heal, buff)
-- Types: offensive, defensive, utility, passive
-
-**YAML Format**:
-```yaml
-key: fireball
-name: "Fireball"
-type: offensive
-cost: {mana: 20}
-cooldown: 3
-damage: {base: 25, scaling: {int: 0.5}}
-requirements:
-  level: 5
-  skill: fire_magic
-```
-
----
-
 #### Skills (`lib/loka/framework/skills/`)
 
 **Purpose**: Learnable character skills (LegendMUD-style).
@@ -310,31 +283,6 @@ regen_condition: out_of_combat
 
 ---
 
-#### Appearance (`lib/loka/framework/appearance/`)
-
-**Purpose**: Character appearance and clothing.
-
-**Key Module**: `Loka.Framework.Appearance.Clothing`
-
-**Features**:
-- Layer-based clothing slots
-- Social bonuses
-- Warmth values
-- Dyeing system
-- Faction disguises
-
-**YAML Component**:
-```yaml
-components:
-  wearable:
-    slot: body
-    layer: 2
-    warmth: 3
-    appearance: "wearing elegant robes"
-```
-
----
-
 ### World Systems
 
 #### World (`lib/loka/framework/world/`)
@@ -347,9 +295,6 @@ components:
 - `Loka.Framework.World.Weather` - Dynamic weather system
 - `Loka.Framework.World.DayNight` - Day/night cycle
 - `Loka.Framework.World.Atmosphere` - Weather + time descriptions
-- `Loka.Framework.World.RoomElements` - Environmental gameplay modifiers
-- `Loka.Framework.World.ExtendedDescriptions` - Context-aware room descriptions
-
 **Features**:
 - Load rooms for display with NPCs, items, exits
 - Atmospheric room entry messages (for special rooms)
@@ -357,8 +302,6 @@ components:
 - Room ambient messages (environmental sounds)
 - Weather effects with gameplay modifiers
 - Day/night cycles with phases (dawn, day, dusk, night)
-- Extended descriptions based on time, weather, skills
-- Room elements (water, darkness, terrain) affecting gameplay
 
 **Room Loading**:
 ```elixir
@@ -411,20 +354,6 @@ components:
       - item: health_potion
         stock: 10
 ```
-
----
-
-#### Housing (`lib/loka/framework/housing/`)
-
-**Purpose**: Player housing system.
-
-**Key Module**: `Loka.Framework.Housing`
-
-**Features**:
-- Purchase or rent
-- Furniture placement
-- Secure storage
-- Home recall ability
 
 ---
 
@@ -482,63 +411,7 @@ components:
 
 ---
 
-#### Farming (`lib/loka/framework/farming/`)
-
-**Purpose**: Crop planting and harvesting.
-
-**Key Module**: `Loka.Framework.Farming`
-
-**Features**:
-- Plant, water, harvest cycle
-- Growth stages
-- Crop withering
-- Farm plots
-
----
-
-#### Magic (`lib/loka/framework/magic/`)
-
-**Purpose**: Discovery-based spell system.
-
-**Key Module**: `Loka.Framework.Magic.SpellWords`
-
-**Features**:
-- Learnable spell words
-- Word combinations create spells
-- Unknown combinations can fizzle
-- Random effects for failed casts
-
----
-
 ### Social Systems
-
-#### Companion (`lib/loka/framework/companion/`)
-
-**Purpose**: NPC followers/pets.
-
-**Key Module**: `Loka.Framework.Companion`
-
-**Features**:
-- Loyalty, hunger, happiness tracking
-- Commands: follow, stay, guard, attack
-- Combat assistance
-- Item carrying
-
----
-
-#### Messaging (`lib/loka/framework/messaging/`)
-
-**Purpose**: In-game mail system.
-
-**Key Module**: `Loka.Framework.Messaging.Mail`
-
-**Features**:
-- Inbox, sent, archive folders
-- Item attachments
-- Expiry dates
-- System mail from NPCs/quests
-
----
 
 ## Common Patterns
 
@@ -581,25 +454,23 @@ Most subsystems read/update the player's GameState:
 
 | Directory | Subsystem | Key Files |
 |-----------|-----------|-----------|
-| `abilities/` | Abilities | ability.ex, ability_registry.ex |
-| `appearance/` | Appearance | clothing.ex |
-| `combat/` | Combat | combat.ex, respawn_manager.ex |
-| `companion/` | Companion | companion.ex |
+| `combat/` | Combat | combat.ex, respawn_manager.ex, damage_types.ex |
+| `conditions/` | Conditions | evaluator.ex |
 | `crafting/` | Crafting | crafting.ex, crafting_registry.ex |
 | `dialogue/` | Dialogue | dialogue.ex |
 | `economy/` | Economy | economy.ex, shop.ex |
-| `farming/` | Farming | farming.ex, crop.ex |
 | `gathering/` | Gathering | gathering.ex, gathering_registry.ex |
-| `housing/` | Housing | housing.ex |
-| `inventory/` | Inventory | inventory.ex |
-| `magic/` | Magic | spell_words.ex |
-| `messaging/` | Messaging | mail.ex |
+| `inventory/` | Inventory | inventory.ex, container.ex |
 | `player/` | Player | game_state.ex |
 | `progression/` | Progression | progression.ex |
 | `quest/` | Quest | quest.ex, definitions.ex, progress.ex |
 | `resources/` | Resources | resource.ex, resource_registry.ex |
+| `scripting/` | Scripting | behavior_registry.ex, world_event_handler.ex |
 | `skills/` | Skills | skill.ex, skill_registry.ex |
+| `social/` | Social | broadcast.ex, channel_manager.ex |
+| `spark/` | Spark | spark.ex |
 | `status/` | Status | status_manager.ex, status_registry.ex |
+| `storyline/` | Storyline | storyline_registry.ex |
 | `world/` | World | room.ex, ambient.ex, weather.ex, day_night.ex, atmosphere.ex |
 
 ## Related

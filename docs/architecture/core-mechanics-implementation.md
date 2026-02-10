@@ -25,14 +25,10 @@ The implementation follows Loka's layered architecture:
 │ FRAMEWORK LAYER (lib/loka/framework/)                       │
 │ Game systems using mechanics                                │
 │ - skills/binary_skill*.ex                                   │
-│ - magic/sanskrit_word.ex, mantra.ex, spellbook.ex           │
-│ - combat/combat_round.ex                                    │
-│ - movement/mv_system.ex                                     │
 ├─────────────────────────────────────────────────────────────┤
 │ CONTENT LAYER (priv/world/)                                 │
 │ YAML definitions loaded by framework                        │
 │ - skills/*.yml (skill definitions)                          │
-│ - magic/words.yml (custom Sanskrit words)                   │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -56,11 +52,6 @@ The implementation follows Loka's layered architecture:
 | `Loka.Framework.Skills.BinarySkill` | `skills/binary_skill.ex` | Skill struct definition |
 | `Loka.Framework.Skills.BinarySkillManager` | `skills/binary_skill_manager.ex` | Learn/forget skills |
 | `Loka.Framework.Skills.BinarySkillRegistry` | `skills/binary_skill_registry.ex` | YAML loading |
-| `Loka.Framework.Magic.SanskritWord` | `magic/sanskrit_word.ex` | 26 magic words |
-| `Loka.Framework.Magic.Mantra` | `magic/mantra.ex` | Word combination |
-| `Loka.Framework.Magic.Spellbook` | `magic/spellbook.ex` | Player's learned words |
-| `Loka.Framework.Combat.CombatRound` | `combat/combat_round.ex` | Round-based combat |
-| `Loka.Framework.Movement.MVSystem` | `movement/mv_system.ex` | Movement point costs |
 
 ---
 
@@ -155,89 +146,6 @@ combat_stats:
   mana_cost_stat_divisor: 200
 ```
 
-### Magic System
-
-```yaml
-magic:
-  stratum:
-    first: 30
-    second: 50
-    third: 70
-  guna_multipliers:
-    maha: 1.5
-    laghu: 0.5
-    dvaya: 2.0
-    sthira: 1.0
-    shighra: 1.0
-    bheda: 1.0
-  guna_cost_multipliers:
-    maha: 1.5
-    laghu: 0.5
-    dvaya: 2.0
-    sthira: 1.3
-    shighra: 1.3
-    bheda: 1.4
-  quick_slots: 5
-```
-
-### Movement
-
-```yaml
-movement:
-  terrain_costs:
-    road: 5
-    normal: 10
-    forest: 12
-    rough: 15
-    # ... more terrain types
-  default_cost: 10
-  flee_cost: 30
-  sprint_multiplier: 2
-```
-
----
-
-## Sanskrit Magic System
-
-### Word Types
-
-| Type | Sanskrit | Purpose | Count |
-|------|----------|---------|-------|
-| RUPA | Form | How spell manifests | 8 words |
-| TATTVA | Element | What spell does | 12 words |
-| GUNA | Modifier | Power/special effect | 6 words |
-
-### Strata (INT-gated)
-
-| Stratum | INT Required | Words Available |
-|---------|--------------|-----------------|
-| First | 30 | 12 basic words |
-| Second | 50 | +9 intermediate words |
-| Third | 70 | +5 advanced words |
-
-### Mantra Construction
-
-```
-MANTRA = [GUNA] + TATTVA + RUPA
-         optional  required  required
-
-Example: MAHA AGNI ASTRA = "Great Fire Arrow"
-```
-
-### Mana Cost Formula
-
-```
-Base = TATTVA.mana_cost + RUPA.mana_cost
-Final = Base × GUNA.cost_multiplier × (1 - INT/200)
-```
-
-### Spell Power Formula
-
-```
-Damage = TATTVA.base_power × (1 + INT/100) × GUNA.power_multiplier
-Healing = TATTVA.base_power × (1 + SPI/100) × GUNA.power_multiplier
-```
-
 ---
 
 ## Binary Skills System
@@ -271,48 +179,7 @@ Healing = TATTVA.base_power × (1 + SPI/100) × GUNA.power_multiplier
 
 ---
 
-## Combat Round System
-
-### Round Flow (~3 seconds)
-
-1. **AUTO-ATTACKS** - Both combatants attack
-2. **QUEUED SKILLS** - Execute if not lagged
-3. **EFFECTS TICK** - DoT, buffs decrement
-4. **LAG DECREMENT** - Recovery timers tick down
-
-### Lag System
-
-- Skills cause lag (rounds of recovery)
-- Cannot use other skills while lagged
-- Cannot flee while lagged
-- Auto-attacks continue during lag
-
-### Skill Queue
-
-- One skill can be queued while lagged
-- Executes immediately when lag clears
-
----
-
-## Integration Points
-
-### With Existing Combat (`lib/loka/framework/combat/combat.ex`)
-
-The new `CombatRound` module can work alongside or replace the existing combat:
-
-```elixir
-# New way (round-based)
-alias Loka.Framework.Combat.CombatRound
-
-state = CombatRound.new(player_combatant, enemy_combatant)
-state = CombatRound.execute_round(state)
-
-# Old way (still works)
-alias Loka.Framework.Combat
-{:ok, state, damage} = Combat.execute_combat_tick(combat_state, game_state)
-```
-
-### With Game State
+## Integration with Game State
 
 Stats are stored in `game_state.stats`:
 
@@ -321,11 +188,7 @@ Stats are stored in `game_state.stats`:
   str: 60, dex: 40, con: 50, int: 70, per: 40, spi: 40,
   level: 25,
   hp: 250, mana: 180, mv: 200,
-  learned_skills: MapSet.new(["kick", "bash", "parry"]),
-  spellbook: %{
-    words: MapSet.new([:agni, :hima, :astra, :sparsha]),
-    quick_slots: [%{words: [:agni, :astra]}, nil, nil, nil, nil]
-  }
+  learned_skills: MapSet.new(["kick", "bash", "parry"])
 }
 ```
 
@@ -338,14 +201,12 @@ Stats are stored in `game_state.stats`:
 - [ ] Create YAML skill definitions in `priv/world/skills/`
 - [ ] Add `BinarySkillRegistry` to supervision tree
 - [ ] Define skill trainers (NPCs)
-- [ ] Define magic word trainers (NPCs by stratum)
 
 ### Phase 3: UI Integration
 
 - [ ] Character creation UI (stat allocation)
 - [ ] Level up UI (stat + skill point allocation)
-- [ ] Spell book UI (word combination, quick slots)
-- [ ] Combat UI (quick slots, targeting)
+- [ ] Combat UI (targeting)
 
 ### Phase 4: Testing
 
@@ -369,8 +230,4 @@ RESOURCES: HP (CON), Mana (INT+SPI), MV (CON+DEX)
 
 SKILLS: Binary, 1 point/level, 50 total
         Cost 1-3 points each
-
-MAGIC: Sanskrit word combination
-       [GUNA] + TATTVA + RUPA = Mantra
-       Three Strata gated by INT (30/50/70)
 ```

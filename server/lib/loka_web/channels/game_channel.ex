@@ -748,201 +748,7 @@ defmodule LokaWeb.GameChannel do
 
   defp dispatch_parsed_command(parsed, socket) do
     case parsed do
-      # Builder admin commands - gated by is_admin
-      {:builder_goto, params} ->
-        execute_builder_command(:goto, params, socket)
-
-      {:builder_spawn, params} ->
-        execute_builder_command(:spawn, params, socket)
-
-      {:builder_give, params} ->
-        execute_builder_command(:give, params, socket)
-
-      {:builder_info, params} ->
-        execute_builder_command(:info, params, socket)
-
-      {:builder_setflag, params} ->
-        execute_builder_command(:setflag, params, socket)
-
-      {:builder_clearflag, params} ->
-        execute_builder_command(:clearflag, params, socket)
-
-      {:builder_startquest, params} ->
-        execute_builder_command(:startquest, params, socket)
-
-      {:builder_completequest, params} ->
-        execute_builder_command(:completequest, params, socket)
-
-      {:builder_resetquest, params} ->
-        execute_builder_command(:resetquest, params, socket)
-
-      {:builder_settime, params} ->
-        execute_builder_command(:settime, params, socket)
-
-      {:builder_list, params} ->
-        execute_builder_command(:list, params, socket)
-
-      {:builder_find, params} ->
-        execute_builder_command(:find, params, socket)
-
-      {:builder_rooms, params} ->
-        execute_builder_command(:rooms, params, socket)
-
-      {:builder_where, params} ->
-        execute_builder_command(:where, params, socket)
-
-      {:builder_map, params} ->
-        execute_builder_command(:map, params, socket)
-
-      {:builder_purge, params} ->
-        execute_builder_command(:purge, params, socket)
-
-      {:builder_flags, params} ->
-        execute_builder_command(:flags, params, socket)
-
-      {:builder_quests, params} ->
-        execute_builder_command(:quests, params, socket)
-
-      {:builder_reload, params} ->
-        execute_builder_command(:reload, params, socket)
-
-      {:builder_validate, params} ->
-        execute_builder_command(:validate, params, socket)
-
-      {:builder_godmode, params} ->
-        execute_builder_command(:godmode, params, socket)
-
-      # Room CRUD
-      {:builder_dig, params} ->
-        execute_builder_command(:dig, params, socket)
-
-      {:builder_set_desc, params} ->
-        execute_builder_command(:set_desc, params, socket)
-
-      {:builder_set_name, params} ->
-        execute_builder_command(:set_name, params, socket)
-
-      {:builder_create_room, params} ->
-        execute_builder_command(:create_room, params, socket)
-
-      {:builder_link, params} ->
-        execute_builder_command(:link, params, socket)
-
-      {:builder_unlink, params} ->
-        execute_builder_command(:unlink, params, socket)
-
-      {:builder_delete_room, params} ->
-        execute_builder_command(:delete_room, params, socket)
-
-      # Entity CRUD
-      {:builder_create_npc, params} ->
-        execute_builder_command(:create_npc, params, socket)
-
-      {:builder_create_item, params} ->
-        execute_builder_command(:create_item, params, socket)
-
-      {:builder_edit_entity, params} ->
-        execute_builder_command(:edit_entity, params, socket)
-
-      {:builder_delete_npc, params} ->
-        execute_builder_command(:delete_npc, params, socket)
-
-      {:builder_delete_item, params} ->
-        execute_builder_command(:delete_item, params, socket)
-
-      # Quest/Dialogue
-      {:builder_create_quest, params} ->
-        execute_builder_command(:create_quest, params, socket)
-
-      {:builder_edit_quest, params} ->
-        execute_builder_command(:edit_quest, params, socket)
-
-      {:builder_quest_info, params} ->
-        execute_builder_command(:quest_info, params, socket)
-
-      {:builder_create_dialogue, params} ->
-        execute_builder_command(:create_dialogue, params, socket)
-
-      {:builder_dialogue_info, params} ->
-        execute_builder_command(:dialogue_info, params, socket)
-
-      {:builder_delete_quest, params} ->
-        execute_builder_command(:delete_quest, params, socket)
-
-      {:builder_delete_dialogue, params} ->
-        execute_builder_command(:delete_dialogue, params, socket)
-
-      # Zones
-      {:builder_create_zone, params} ->
-        execute_builder_command(:create_zone, params, socket)
-
-      {:builder_edit_zone, params} ->
-        execute_builder_command(:edit_zone, params, socket)
-
-      {:builder_delete_zone, params} ->
-        execute_builder_command(:delete_zone, params, socket)
-
-      {:builder_zone_info, params} ->
-        execute_builder_command(:zone_info, params, socket)
-
-      # Cutscenes
-      {:builder_create_cutscene, params} ->
-        execute_builder_command(:create_cutscene, params, socket)
-
-      {:builder_delete_cutscene, params} ->
-        execute_builder_command(:delete_cutscene, params, socket)
-
-      {:builder_cutscene_info, params} ->
-        execute_builder_command(:cutscene_info, params, socket)
-
-      # Storylines
-      {:builder_create_storyline, params} ->
-        execute_builder_command(:create_storyline, params, socket)
-
-      {:builder_delete_storyline, params} ->
-        execute_builder_command(:delete_storyline, params, socket)
-
-      {:builder_storyline_info, params} ->
-        execute_builder_command(:storyline_info, params, socket)
-
-      # Scripts
-      {:builder_script_create, params} ->
-        execute_builder_command(:script_create, params, socket)
-
-      {:builder_delete_script, params} ->
-        execute_builder_command(:delete_script, params, socket)
-
-      {:builder_script_info, params} ->
-        execute_builder_command(:script_info, params, socket)
-
-      {:builder_script_list, params} ->
-        execute_builder_command(:script_list, params, socket)
-
-      {:builder_script_validate, params} ->
-        execute_builder_command(:script_validate, params, socket)
-
-      {:builder_script_test, params} ->
-        execute_builder_command(:script_test, params, socket)
-
-      {:builder_script_templates, params} ->
-        execute_builder_command(:script_templates, params, socket)
-
-      {:builder_script_template_info, params} ->
-        execute_builder_command(:script_template_info, params, socket)
-
-      {:builder_script_from_template, params} ->
-        execute_builder_command(:script_from_template, params, socket)
-
-      {:builder_script_attach, params} ->
-        execute_builder_command(:script_attach, params, socket)
-
-      {:builder_script_detach, params} ->
-        execute_builder_command(:script_detach, params, socket)
-
-      {:builder_guide, params} ->
-        execute_builder_command(:guide, params, socket)
-
-      # AI commands (admin-gated)
+      # AI commands (admin-gated, separate from builder dispatch)
       {:builder_ai, params} ->
         execute_ai_command(:ai, params, socket)
 
@@ -961,9 +767,8 @@ defmodule LokaWeb.GameChannel do
         {:reply, :ok, socket}
 
       # Help with topic
-      {:help, %{topic: _topic}} ->
-        push_help(socket)
-        {:reply, :ok, socket}
+      {:help, %{topic: topic}} ->
+        execute_builder_command(:help, %{topic: topic}, socket)
 
       # Clear terminal (client-side operation)
       {:clear, %{}} ->
@@ -1106,11 +911,31 @@ defmodule LokaWeb.GameChannel do
         push_help(socket)
         {:reply, :ok, socket}
 
-      # Unknown
-      {:unknown, _} ->
-        push(socket, "output", %{text: "Unknown command. Type 'help' for commands."})
-        {:reply, :ok, socket}
+      # Builder admin commands - dynamic dispatch strips :builder_ prefix
+      {cmd, params} when is_atom(cmd) ->
+        case strip_builder_prefix(cmd) do
+          {:ok, builder_cmd} ->
+            execute_builder_command(builder_cmd, params, socket)
+
+          :not_builder ->
+            push(socket, "output", %{text: "Unknown command. Type 'help' for commands."})
+            {:reply, :ok, socket}
+        end
     end
+  end
+
+  @builder_prefix "builder_"
+
+  defp strip_builder_prefix(cmd) do
+    str = Atom.to_string(cmd)
+
+    if String.starts_with?(str, @builder_prefix) do
+      {:ok, str |> String.replace_prefix(@builder_prefix, "") |> String.to_existing_atom()}
+    else
+      :not_builder
+    end
+  rescue
+    ArgumentError -> :not_builder
   end
 
   # Silent rejection for non-admin players - identical to unknown command

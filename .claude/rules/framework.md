@@ -8,7 +8,7 @@ This context auto-loads when working in `lib/loka/framework/`.
 
 ## What is the Framework Layer?
 
-The framework contains 31 game subsystems that implement game mechanics on top of the engine. Framework code should:
+The framework contains ~25 game subsystems that implement game mechanics on top of the engine. Framework code should:
 - Use engine primitives (Entity, Events, Hooks)
 - Never call web layer directly
 - Return data/events, let web layer handle presentation
@@ -52,17 +52,17 @@ defmodule Loka.Framework.MySubsystem.MyRegistry do
 end
 ```
 
-## Existing Subsystems (31)
+## Existing Subsystems (~25)
 
 | Category | Subsystems |
 |----------|------------|
 | **Core Mechanics** | Quest, Dialogue, Combat, Inventory |
-| **Resources** | Resources, Skills, Abilities, Progression |
+| **Resources** | Resources, Skills, Progression |
 | **World** | World (day/night, weather), Gathering, Crafting |
-| **Social** | Social (channels, parties), Messaging, Faction |
+| **Social** | Social (channels, parties), Faction |
 | **Content** | Storyline, Scripting, Conditions |
-| **Economy** | Economy (barter), Housing, Farming |
-| **Other** | Appearance, Companion, Hometown, Status |
+| **Economy** | Economy (shops) |
+| **Other** | Status, Spark |
 
 ## Common Patterns
 

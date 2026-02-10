@@ -35,31 +35,7 @@ config :loka, :world_weather_module, Loka.Framework.World.Weather
 config :loka, :world_event_handler_module, Loka.Framework.Scripting.WorldEventHandler
 
 # Scripting extensions - modules implementing ScriptingExtension behaviour
-# These provide game-specific Lua API functions (quest, player, etc.)
-config :loka, :scripting_extensions, [
-  Loka.Framework.Scripting.GameScriptAPI
-]
-
-# Command modules - Framework layer commands registered with Engine.CommandRegistry
-# Engine only has LookCommand and HelpCommand built-in
-config :loka, :command_modules, [
-  Loka.Framework.Commands.NavigateCommand,
-  Loka.Framework.Commands.GetCommand,
-  Loka.Framework.Commands.SayCommand,
-  Loka.Framework.Commands.ShoutCommand,
-  Loka.Framework.Commands.YellCommand,
-  Loka.Framework.Commands.WhisperCommand,
-  Loka.Framework.Commands.TellCommand,
-  Loka.Framework.Commands.ReplyCommand,
-  Loka.Framework.Commands.RetellCommand,
-  Loka.Framework.Commands.MoodCommand,
-  Loka.Framework.Commands.PoseCommand,
-  Loka.Framework.Commands.ChannelCommand,
-  Loka.Framework.Commands.PartyCommand,
-  Loka.Framework.Commands.FriendCommand,
-  Loka.Framework.Commands.BlockCommand,
-  Loka.Framework.Commands.UnblockCommand
-]
+config :loka, :scripting_extensions, []
 
 # ContentValidator plugins - loaded via config to avoid Engine→Framework layer violation
 # Engine only has PrototypePlugin built-in, others are Framework layer

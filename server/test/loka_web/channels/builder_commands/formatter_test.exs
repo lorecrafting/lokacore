@@ -62,54 +62,6 @@ defmodule LokaWeb.Channels.BuilderCommands.FormatterTest do
     end
   end
 
-  describe "key_value/1" do
-    test "formats key-value pairs with alignment" do
-      result = Formatter.key_value([{"Name", "Bob"}, {"Key", "bob"}])
-
-      # Keys are padded to max key length, colon follows padded key
-      assert result == "  Name: Bob\n  Key : bob"
-    end
-
-    test "aligns to longest key" do
-      result = Formatter.key_value([{"ID", "1"}, {"Description", "A thing"}])
-
-      assert result =~ "  ID         : 1"
-      assert result =~ "  Description: A thing"
-    end
-
-    test "handles single pair" do
-      result = Formatter.key_value([{"Name", "Alice"}])
-
-      assert result == "  Name: Alice"
-    end
-  end
-
-  describe "box/1" do
-    test "wraps text in a box" do
-      result = Formatter.box("Hello")
-
-      assert result == "┌───────┐\n│ Hello │\n└───────┘"
-    end
-
-    test "handles multiline text" do
-      result = Formatter.box("Line 1\nLine 2")
-
-      assert result =~ "┌────────┐"
-      assert result =~ "│ Line 1 │"
-      assert result =~ "│ Line 2 │"
-      assert result =~ "└────────┘"
-    end
-
-    test "pads shorter lines to max width" do
-      result = Formatter.box("Short\nA longer line")
-
-      lines = String.split(result, "\n")
-      # All lines should be same length
-      lengths = Enum.map(lines, &String.length/1)
-      assert length(Enum.uniq(lengths)) == 1
-    end
-  end
-
   describe "display_length/1" do
     test "returns length of plain text" do
       assert Formatter.display_length("hello") == 5
@@ -164,17 +116,6 @@ defmodule LokaWeb.Channels.BuilderCommands.FormatterTest do
       # Separator dashes should match display widths
       [sep_key, _sep_name] = String.split(separator, ~r/\s{2,}/, parts: 2)
       assert String.length(sep_key) == 13
-    end
-  end
-
-  describe "box/1 with markup" do
-    test "box width based on display length not raw length" do
-      text = "{{cmd:goto tavern}}tavern{{/cmd}}"
-      result = Formatter.box(text)
-
-      # Display length of "tavern" is 6, so box inner width = 6
-      assert result =~ "┌────────┐"
-      assert result =~ "└────────┘"
     end
   end
 

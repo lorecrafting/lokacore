@@ -138,7 +138,7 @@ Invoke with `/command-name` in the chat.
 | Rule | Paths | Context |
 |------|-------|---------|
 | `builder` | `lib/loka_web/channels/builder_commands/**`, `lib/loka/world_builder/**` | Terminal builder patterns |
-| `framework` | `lib/loka/framework/**` | 31 subsystems, layer boundaries |
+| `framework` | `lib/loka/framework/**` | ~25 subsystems, layer boundaries |
 | `engine` | `lib/loka/engine/**` | Engine invariants, TypedObject, hooks |
 | `content` | `priv/world/**` | YAML content creation patterns |
 | `testing` | `test/**`, `lib/loka/testing/**` | ChannelBot, test structure, async safety |

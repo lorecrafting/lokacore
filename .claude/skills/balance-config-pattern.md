@@ -209,7 +209,7 @@ end
 | Layer | Config Appropriate? | Example |
 |-------|---------------------|---------|
 | Mechanics | ✅ Yes - formulas, caps, multipliers | `combat_stats:`, `character_resources:` |
-| Framework | ✅ Yes - system parameters | `skills:`, `magic:`, `combat_round:` |
+| Framework | ✅ Yes - system parameters | `skills:`, `combat:` |
 | Content | ❌ No - use YAML prototypes | NPC stats, item values |
 | Engine | ⚠️ Rarely - only infrastructure | Tick intervals, cache TTL |
 

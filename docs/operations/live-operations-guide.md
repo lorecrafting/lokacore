@@ -31,7 +31,7 @@ This document provides a comprehensive analysis of Loka's capabilities for runni
   - QuestRegistry, ZoneLoader, SocialLoader
   - ResourceRegistry, GatheringRegistry, CraftingRegistry
   - WeatherRegistry, FactionRegistry, StatusRegistry
-  - SpellWords, DamageTypes, Elements, Tactical
+  - DamageTypes, Tactical
 - ETS with `read_concurrency: true` for fast concurrent lookups
 
 **Session Resilience:**
