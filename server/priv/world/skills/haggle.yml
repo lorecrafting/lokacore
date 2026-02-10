@@ -1,0 +1,23 @@
+key: haggle
+name: Haggle
+category: social
+cost: 1
+stat: per
+prerequisites: []
+trainers:
+  - merchant
+  - monastery_quartermaster
+lag: 0
+cooldown: 0
+mv_cost: 0
+mana_cost: 0
+description: >
+  Negotiate better prices with merchants.
+effect:
+  type: passive
+  modifier:
+    shop_buy_discount: 10  # 10% off purchases
+    shop_sell_bonus: 5     # 5% more when selling
+  check:
+    stat: per
+    vs: merchant_will  # Merchant's resistance

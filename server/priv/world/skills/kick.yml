@@ -1,0 +1,23 @@
+key: kick
+name: Kick
+category: combat_melee
+cost: 1
+stat: str
+prerequisites: []
+trainers:
+  - combat_trainer
+  - monastery_martial_master
+lag: 2
+cooldown: 0
+mv_cost: 10
+mana_cost: 0
+description: >
+  A basic kick attack. Deals bludgeoning damage based on STR.
+effect:
+  type: damage
+  damage_type: bludgeoning
+  base: 5
+  stat_bonus: str
+  message_self: "You kick $target hard!"
+  message_target: "$actor kicks you hard!"
+  message_room: "$actor kicks $target hard!"

@@ -52,14 +52,14 @@ defmodule Loka.WorldBuilder.ValidationManagerTest do
       room = %{key: "incomplete", description: "A room"}
       result = ValidationManager.validate_room(room)
       assert result.status == :warning
-      assert length(result.warnings) > 0
+      assert result.warnings != []
     end
 
     test "returns warnings for missing description" do
       room = %{key: "incomplete", name: "A Room"}
       result = ValidationManager.validate_room(room)
       assert result.status == :warning
-      assert length(result.warnings) > 0
+      assert result.warnings != []
     end
 
     test "validates room exits point to valid destinations" do
@@ -73,7 +73,7 @@ defmodule Loka.WorldBuilder.ValidationManagerTest do
       result = ValidationManager.validate_room(room)
       # Should return error for invalid exit
       assert result.status == :error
-      assert length(result.errors) > 0
+      assert result.errors != []
     end
 
     test "returns valid for room with valid exit" do

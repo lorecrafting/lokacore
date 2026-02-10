@@ -13,7 +13,7 @@ defmodule LokaWeb.AdminLive.PlayersTab do
         <h2 class="text-2xl font-bold">Players ({length(@players || [])})</h2>
       </div>
 
-      <div :if={@players && length(@players) > 0} class="overflow-x-auto">
+      <div :if={@players && @players != []} class="overflow-x-auto">
         <table class="table table-zebra w-full">
           <thead>
             <tr>

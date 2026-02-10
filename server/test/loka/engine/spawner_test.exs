@@ -182,7 +182,7 @@ defmodule Loka.Engine.SpawnerTest do
 
       assert %Entity{} = room
       assert is_list(spawned)
-      assert length(spawned) > 0
+      assert spawned != []
     end
 
     test "returns error for non-room prototype" do

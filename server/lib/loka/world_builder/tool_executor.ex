@@ -21,6 +21,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
   alias Loka.WorldBuilder.LLM.ObservabilityLogger
   alias Loka.Content.{Zone, Dialogue}
+  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
 
   @doc """
   Execute a function with deferred TypedObject reloads.
@@ -40,12 +41,12 @@ defmodule Loka.WorldBuilder.ToolExecutor do
       # Process accumulated removals
       Process.get(:loka_deferred_removals, [])
       |> Enum.uniq()
-      |> Enum.each(&Loka.Engine.TypedObject.Loader.remove/1)
+      |> Enum.each(&TypedObjectLoader.remove/1)
 
       # Reload all accumulated file paths
       Process.get(:loka_deferred_paths, [])
       |> Enum.uniq()
-      |> Enum.each(&Loka.Engine.TypedObject.Loader.reload_file/1)
+      |> Enum.each(&TypedObjectLoader.reload_file/1)
 
       result
     after
@@ -57,7 +58,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
   defp maybe_reload_file(file_path) do
     unless Process.get(:loka_defer_reload) do
-      Loka.Engine.TypedObject.Loader.reload_file(file_path)
+      TypedObjectLoader.reload_file(file_path)
     else
       paths = Process.get(:loka_deferred_paths, [])
       Process.put(:loka_deferred_paths, [file_path | paths])
@@ -66,7 +67,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
   defp maybe_remove(key) do
     unless Process.get(:loka_defer_reload) do
-      Loka.Engine.TypedObject.Loader.remove(key)
+      TypedObjectLoader.remove(key)
     else
       removals = Process.get(:loka_deferred_removals, [])
       Process.put(:loka_deferred_removals, [key | removals])
@@ -75,7 +76,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
   # Fallback for operations where we can't easily determine the file path
   defp maybe_reload_all do
-    unless Process.get(:loka_defer_reload), do: Loka.Engine.TypedObject.Loader.reload()
+    unless Process.get(:loka_defer_reload), do: TypedObjectLoader.reload()
   end
 
   @doc """
@@ -1135,7 +1136,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
   defp execute_update_cutscene(input) do
     key = input["key"]
 
-    case Loka.Engine.TypedObject.Loader.get(key) do
+    case TypedObjectLoader.get(key) do
       {:ok, %{type: :cutscene} = cs} ->
         name = input["name"] || cs.name || key
         trigger = input["trigger"] || get_in(cs.data, ["trigger"]) || "manual"
@@ -1178,7 +1179,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
   defp execute_get_cutscene(input) do
     key = input["key"]
 
-    case Loka.Engine.TypedObject.Loader.get(key) do
+    case TypedObjectLoader.get(key) do
       {:ok, %{type: :cutscene} = cs} ->
         {:ok,
          %{
@@ -1197,7 +1198,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
   end
 
   defp execute_list_cutscenes(_input) do
-    cutscenes = Loka.Engine.TypedObject.Loader.list_by_type(:cutscene)
+    cutscenes = TypedObjectLoader.list_by_type(:cutscene)
 
     list =
       Enum.map(cutscenes, fn c ->
@@ -1248,7 +1249,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
   defp execute_update_storyline(input) do
     key = input["key"]
 
-    case Loka.Engine.TypedObject.Loader.get(key) do
+    case TypedObjectLoader.get(key) do
       {:ok, %{type: :storyline} = sl} ->
         name = input["name"] || sl.name || key
         main_quests = input["main_quests"] || get_in(sl.data, ["main_quests"]) || []
@@ -1289,7 +1290,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
   end
 
   defp execute_list_storylines(_input) do
-    storylines = Loka.Engine.TypedObject.Loader.list_by_type(:storyline)
+    storylines = TypedObjectLoader.list_by_type(:storyline)
 
     list =
       Enum.map(storylines, fn s ->
@@ -1483,7 +1484,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
     case Script.get(script_key) do
       {:ok, _} ->
-        case Loka.Engine.TypedObject.Loader.get(entity_key) do
+        case TypedObjectLoader.get(entity_key) do
           {:ok, entity} ->
             data = entity.data || %{}
             scripts = data["scripts"] || []
@@ -1512,7 +1513,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
     script_key = input["script_key"]
     entity_key = input["entity_key"]
 
-    case Loka.Engine.TypedObject.Loader.get(entity_key) do
+    case TypedObjectLoader.get(entity_key) do
       {:ok, entity} ->
         data = entity.data || %{}
         scripts = data["scripts"] || []

@@ -1,0 +1,26 @@
+key: first_aid
+name: First Aid
+category: survival
+cost: 2
+stat: int
+prerequisites: []
+trainers:
+  - healer
+  - monastery_infirmary_keeper
+lag: 4
+cooldown: 60
+mv_cost: 0
+mana_cost: 0
+description: >
+  Treat wounds using bandages. Restores HP outside of combat.
+effect:
+  type: heal
+  requires:
+    item: bandage
+    consume: true
+  base_heal: 20
+  stat_bonus: int
+  combat_restriction: out_of_combat
+  message_self: "You carefully bandage your wounds."
+  message_other: "You carefully bandage $target's wounds."
+  message_room: "$actor tends to $target's wounds."

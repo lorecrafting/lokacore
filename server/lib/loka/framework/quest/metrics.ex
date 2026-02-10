@@ -219,7 +219,7 @@ defmodule Loka.Framework.Quest.Metrics do
     Enum.count(player_states, fn state ->
       active = get_in(state.quests, ["active"]) || %{}
       completed = get_in(state.quests, ["completed"]) || []
-      map_size(active) > 0 or length(completed) > 0
+      map_size(active) > 0 or completed != []
     end)
   end
 

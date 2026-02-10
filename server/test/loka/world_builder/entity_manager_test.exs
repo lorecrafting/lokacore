@@ -50,7 +50,7 @@ defmodule Loka.WorldBuilder.EntityManagerTest do
       # This test depends on having entities in the system
       entities = EntityManager.list_entities(:npc)
 
-      if length(entities) > 0 do
+      if entities != [] do
         entity = hd(entities)
         assert {:ok, fetched} = EntityManager.get_entity(entity.id)
         assert fetched.id == entity.id
@@ -60,7 +60,7 @@ defmodule Loka.WorldBuilder.EntityManagerTest do
     test "returns entity by key" do
       entities = EntityManager.list_entities(:npc)
 
-      if length(entities) > 0 do
+      if entities != [] do
         entity = hd(entities)
 
         if entity.key do

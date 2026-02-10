@@ -4,7 +4,7 @@ parent: base_item
 short_desc: "Prayer Beads"
 long_desc: ""
 extra_desc: |
-  
+
 keywords: [prayer_beads]
 primary_keyword: prayer_beads
 tags: []

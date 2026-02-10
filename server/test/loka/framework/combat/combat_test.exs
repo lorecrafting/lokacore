@@ -81,7 +81,7 @@ defmodule Loka.Framework.CombatTest do
       assert combat_state.turn_count == 1
       assert combat_state.player_defending == false
       assert combat_state.enemy_defending == false
-      assert length(combat_state.log) == 0
+      assert combat_state.log == []
     end
 
     test "returns error for non-existent entity" do

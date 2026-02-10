@@ -651,7 +651,7 @@ defmodule Loka.Testing.QuestStrategy do
         state = %{state | phase: :interact}
         {:idle, state}
 
-      length(state.path) > 0 ->
+      state.path != [] ->
         [next_direction | rest] = state.path
         state = %{state | path: rest}
         {{:navigate, next_direction}, state}

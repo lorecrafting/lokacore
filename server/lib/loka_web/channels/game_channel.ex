@@ -1476,7 +1476,7 @@ defmodule LokaWeb.GameChannel do
   defp deliver_offline_timers(socket, player_id) do
     completed_timers = Loka.Timers.get_completed_undelivered(player_id)
 
-    if length(completed_timers) > 0 do
+    if completed_timers != [] do
       Enum.each(completed_timers, fn timer ->
         push(socket, "timer_completed", %{
           timer_id: timer.id,

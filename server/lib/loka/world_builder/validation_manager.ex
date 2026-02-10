@@ -78,7 +78,7 @@ defmodule Loka.WorldBuilder.ValidationManager do
           end)
           |> Enum.map(fn {direction, dest_key} -> {direction, dest_key} end)
 
-        if length(invalid_exits) > 0 do
+        if invalid_exits != [] do
           exit_messages =
             Enum.map(invalid_exits, fn {dir, dest} ->
               "Exit '#{dir}' points to non-existent room '#{dest}'"
@@ -95,8 +95,8 @@ defmodule Loka.WorldBuilder.ValidationManager do
     # Determine overall status
     status =
       cond do
-        length(errors) > 0 -> :error
-        length(warnings) > 0 -> :warning
+        errors != [] -> :error
+        warnings != [] -> :warning
         true -> :valid
       end
 

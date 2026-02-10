@@ -632,7 +632,7 @@ defmodule Loka.WorldBuilder.RoomManager do
 
     # Add spawns if any
     yaml =
-      if length(spawns) > 0 do
+      if spawns != [] do
         spawns_yaml =
           spawns
           |> Enum.map(fn spawn ->
@@ -648,7 +648,7 @@ defmodule Loka.WorldBuilder.RoomManager do
 
     # Add tags
     yaml =
-      if length(tags) > 0 do
+      if tags != [] do
         tags_yaml = tags |> Enum.map(&"  - #{&1}") |> Enum.join("\n")
         yaml <> "tags:\n" <> tags_yaml <> "\n"
       else

@@ -56,7 +56,7 @@ defmodule Mix.Tasks.Loka.SyncDescriptions do
         map_size(changes) > 0
       end)
 
-    if length(updates) == 0 do
+    if updates == [] do
       Mix.shell().info("No entities need updating.")
     else
       Mix.shell().info("Found #{length(updates)} entities to update:\n")

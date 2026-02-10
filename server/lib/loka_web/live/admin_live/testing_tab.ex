@@ -192,37 +192,37 @@ defmodule LokaWeb.AdminLive.TestingTab do
     ~H"""
     <div :if={@testing_data.validation} class="space-y-4">
       <.issue_section
-        :if={length(@testing_data.validation.world.error_list) > 0}
+        :if={@testing_data.validation.world.error_list != []}
         title="World Connectivity Errors"
         issues={@testing_data.validation.world.error_list}
         type={:error}
       />
       <.issue_section
-        :if={length(@testing_data.validation.world.warning_list) > 0}
+        :if={@testing_data.validation.world.warning_list != []}
         title="World Connectivity Warnings"
         issues={@testing_data.validation.world.warning_list}
         type={:warning}
       />
       <.issue_section
-        :if={length(@testing_data.validation.quest.error_list) > 0}
+        :if={@testing_data.validation.quest.error_list != []}
         title="Quest Errors"
         issues={@testing_data.validation.quest.error_list}
         type={:error}
       />
       <.issue_section
-        :if={length(@testing_data.validation.quest.warning_list) > 0}
+        :if={@testing_data.validation.quest.warning_list != []}
         title="Quest Warnings"
         issues={@testing_data.validation.quest.warning_list}
         type={:warning}
       />
       <.issue_section
-        :if={length(@testing_data.validation.prototype.error_list) > 0}
+        :if={@testing_data.validation.prototype.error_list != []}
         title="Prototype Errors"
         issues={@testing_data.validation.prototype.error_list}
         type={:error}
       />
       <.issue_section
-        :if={length(@testing_data.validation.prototype.warning_list) > 0}
+        :if={@testing_data.validation.prototype.warning_list != []}
         title="Prototype Warnings"
         issues={@testing_data.validation.prototype.warning_list}
         type={:warning}

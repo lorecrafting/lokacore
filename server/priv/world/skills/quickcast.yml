@@ -1,0 +1,26 @@
+key: quickcast
+name: Quickcast
+category: magic_utility
+cost: 3
+stat: int
+prerequisites:
+  - focus
+trainers:
+  - monastery_elder
+  - archmage
+lag: 0
+cooldown: 30
+mv_cost: 0
+mana_cost: 15
+description: >
+  Your next mantra is cast instantly with no lag.
+effect:
+  type: buff
+  applies:
+    effect: quickcasting
+    duration: 1  # Next spell only
+    modifier:
+      spell_lag: 0
+    consumed_on: spell_cast
+  message_self: "You prepare to cast with lightning speed!"
+  message_room: "Magical energy crackles around $actor's hands."

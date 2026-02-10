@@ -588,7 +588,7 @@ Continued content development and polish:
 ## Key Systems Built
 
 - **Engine Layer**: Entity-Component-Behavior, TypedObject, Script sandbox
-- **Framework Layer**: 21 subsystems (Combat, Quests, Economy, Social, etc.)
+- **Framework Layer**: ~25 subsystems (Combat, Quests, Economy, Social, etc.)
 - **Session Layer**: Multi-client messaging, WebSocket channels
 - **Admin Tools**: World Builder with LLM integration
 - **Testing**: ChannelBot, content validators, E2E infrastructure

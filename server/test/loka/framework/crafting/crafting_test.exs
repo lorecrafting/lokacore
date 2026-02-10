@@ -624,7 +624,7 @@ defmodule Loka.Framework.CraftingTest do
       {:ok, updated_state} = Crafting.consume_ingredients(state, "recipe_simple_item")
 
       # All ingredients consumed
-      assert length(updated_state.inventory) == 0
+      assert updated_state.inventory == []
     end
   end
 

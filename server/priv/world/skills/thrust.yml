@@ -1,0 +1,23 @@
+key: thrust
+name: Thrust
+category: combat_melee
+cost: 1
+stat: dex
+prerequisites: []
+trainers:
+  - combat_trainer
+  - monastery_martial_master
+lag: 2
+cooldown: 0
+mv_cost: 8
+mana_cost: 0
+description: >
+  A quick piercing attack. Deals piercing damage based on DEX.
+effect:
+  type: damage
+  damage_type: piercing
+  base: 4
+  stat_bonus: dex
+  message_self: "You thrust at $target!"
+  message_target: "$actor thrusts at you!"
+  message_room: "$actor thrusts at $target!"

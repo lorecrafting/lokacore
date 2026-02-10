@@ -1,0 +1,28 @@
+key: dispel
+name: Dispel
+category: magic_defense
+cost: 2
+stat: int
+prerequisites:
+  - ward
+trainers:
+  - monastery_elder
+  - magic_trainer
+lag: 2
+cooldown: 20
+mv_cost: 0
+mana_cost: 25
+description: >
+  Attempt to remove magical effects from a target.
+effect:
+  type: special
+  action: dispel
+  check:
+    stat: int
+    vs: caster_int  # Original caster's INT
+  removes:
+    - buffs  # All magical buffs
+    - debuffs  # All magical debuffs
+  message_success: "You dispel the magical effects on $target!"
+  message_fail: "The magical effects resist your dispelling attempt."
+  message_target: "$actor's dispelling magic washes over you!"

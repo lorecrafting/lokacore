@@ -76,7 +76,7 @@ Loka is an Elixir-based MUD (Multi-User Dungeon) engine framework. It leverages 
 ├─────────────────────────────────────────────────────────────┤
 │ GAME CONTENT - priv/world/prototypes/ (YAML)               │
 ├─────────────────────────────────────────────────────────────┤
-│ GAME FRAMEWORK - lib/loka/framework/ (21 subsystems)       │
+│ GAME FRAMEWORK - lib/loka/framework/ (~25 subsystems)      │
 ├─────────────────────────────────────────────────────────────┤
 │ ENGINE CORE - lib/loka/engine/ (entities, events, commands)│
 ├─────────────────────────────────────────────────────────────┤
@@ -2813,7 +2813,7 @@ fly deploy
 | Layer | Count |
 |-------|-------|
 | Engine Core | 43 modules |
-| Framework | 100+ modules (21 subsystems) |
+| Framework | 100+ modules (~25 subsystems) |
 | World Builder | 12 modules |
 | Session/Auth | 8 modules |
 | Game Actions | 10 modules |
@@ -2937,7 +2937,7 @@ tags: [weapon, quest_reward]
 - `Plugin`, `PluginLoader`, `PluginSupervisor`
 - Schema modules: `EntitySchema`, `EntityAttribute`, `ScriptSchema`
 
-### Framework (85+ modules across 21 subsystems)
+### Framework (85+ modules across ~25 subsystems)
 - Player, Inventory (7), Combat (10), Quest (19)
 - Skills (3), Resources (5), Status (3)
 - Social (7), Dialogue, Crafting (4), Gathering (3), Farming (4)

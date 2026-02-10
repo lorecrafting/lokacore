@@ -375,7 +375,7 @@ defmodule Loka.Framework.Crafting.CraftingRegistryTest do
 
       assert {:error, errors} = result
       assert is_list(errors)
-      assert length(errors) > 0
+      assert errors != []
 
       GenServer.stop(pid)
     end
@@ -483,7 +483,7 @@ defmodule Loka.Framework.Crafting.CraftingRegistryTest do
       result = CraftingRegistry.load_from(test_dir, name)
       assert {:error, errors} = result
       assert is_list(errors)
-      assert length(errors) > 0
+      assert errors != []
 
       GenServer.stop(pid)
       File.rm_rf!(test_dir)

@@ -374,7 +374,7 @@ defmodule Loka.Framework.Quest.Chain do
     end)
     |> Enum.filter(fn progress ->
       # Only include chains player has started
-      progress.completed_quests > 0 || length(progress.active_quests) > 0
+      progress.completed_quests > 0 || progress.active_quests != []
     end)
   end
 
@@ -410,7 +410,7 @@ defmodule Loka.Framework.Quest.Chain do
     tags = Keyword.get(opts, :tags, [])
 
     nodes = Enum.map(quests, &parse_quest_spec/1)
-    start_quest = if length(nodes) > 0, do: hd(nodes).quest_id
+    start_quest = if nodes != [], do: hd(nodes).quest_id
 
     %Chain{
       id: chain_id,

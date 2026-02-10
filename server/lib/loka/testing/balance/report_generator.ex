@@ -351,7 +351,7 @@ defmodule Loka.Testing.Balance.ReportGenerator do
       end
 
     recommendations =
-      if length(progression_data.bottlenecks) > 0 do
+      if progression_data.bottlenecks != [] do
         ["Review XP curve at bottleneck levels" | recommendations]
       else
         recommendations

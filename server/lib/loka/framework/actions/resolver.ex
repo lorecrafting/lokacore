@@ -333,7 +333,7 @@ defmodule Loka.Framework.Actions.Resolver do
   defp apply_room_intersect(actions, restrictions) do
     intersect_keys = Map.get(restrictions, "intersect") || Map.get(restrictions, :intersect)
 
-    if intersect_keys && length(intersect_keys) > 0 do
+    if intersect_keys && intersect_keys != [] do
       allowed_set = MapSet.new(intersect_keys)
       Enum.filter(actions, fn action -> action.key in allowed_set end)
     else

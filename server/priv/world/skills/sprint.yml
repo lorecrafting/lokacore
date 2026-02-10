@@ -1,0 +1,23 @@
+key: sprint
+name: Sprint
+category: movement
+cost: 1
+stat: con
+prerequisites: []
+trainers:
+  - combat_trainer
+  - monastery_martial_master
+lag: 0
+cooldown: 10
+mv_cost: 0  # Uses MV faster while active
+mana_cost: 0
+description: >
+  Move at double speed for a short time. Drains MV quickly.
+effect:
+  type: toggle
+  duration: 5  # Max 5 rooms
+  while_active:
+    mv_cost_multiplier: 2.0
+    movement_speed: 2.0
+  message_on: "You break into a sprint!"
+  message_off: "You slow to a normal pace, breathing heavily."

@@ -105,7 +105,7 @@ defmodule LokaWeb.Channels.VersionCompatibilityTest do
       features = VersionCompatibility.features_for_version("99.0.0")
       assert is_list(features)
       # Should have at least the base features
-      assert length(features) > 0
+      assert features != []
     end
   end
 

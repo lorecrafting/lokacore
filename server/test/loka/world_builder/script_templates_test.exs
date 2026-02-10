@@ -98,7 +98,7 @@ defmodule Loka.WorldBuilder.ScriptTemplatesTest do
     test "returns all unique categories" do
       categories = ScriptTemplates.categories()
       assert is_list(categories)
-      assert length(categories) > 0
+      assert categories != []
       assert Enum.all?(categories, &is_atom/1)
     end
 

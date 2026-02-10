@@ -48,7 +48,6 @@ docs/
 │   ├── familiar-companion-system.md     # Companion system design
 │   ├── cooperative-town-builder-vision.md
 │   ├── cosmic-lore-vision.md
-│   ├── WORLD-BUILDER-IMPROVEMENT-PLAN.md
 │   ├── SEEDSHIP-FOREST-WORLD-DESIGN-ARCHIVE.md
 │   └── seedship-forest-world/           # Detailed world design
 │       ├── README.md
@@ -195,10 +194,6 @@ docs/
 │   ├── DEVELOPMENT_LOG.md               # Internal dev log
 │   ├── BLOG_POSTS.md                    # Blog content
 │   └── PUBLIC_DEVLOG.md                 # Public updates
-│
-├── audits/
-│   ├── world-builder-audit-2026-01-08.md
-│   └── world-builder-action-items.md
 │
 │ ═══ COMPREHENSIVE REFERENCES ═══
 │

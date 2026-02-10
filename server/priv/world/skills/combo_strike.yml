@@ -1,0 +1,31 @@
+key: combo_strike
+name: Combo Strike
+category: combat_melee
+cost: 3
+stat: str
+prerequisites:
+  - kick
+  - bash
+trainers:
+  - monastery_martial_master
+  - weapon_master
+lag: 4
+cooldown: 6
+mv_cost: 25
+mana_cost: 0
+description: >
+  A devastating combination of strikes. High damage but leaves you vulnerable.
+effect:
+  type: damage
+  damage_type: bludgeoning
+  base: 15
+  stat_bonus: str
+  multiplier: 1.5
+  self_debuff:
+    effect: winded
+    duration: 2
+    modifier:
+      dodge_penalty: 10
+  message_self: "You unleash a devastating combo on $target!"
+  message_target: "$actor unleashes a devastating combo on you!"
+  message_room: "$actor unleashes a devastating combo on $target!"

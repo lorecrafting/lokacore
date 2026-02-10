@@ -1,0 +1,30 @@
+key: ward
+name: Ward
+category: magic_defense
+cost: 2
+stat: spi
+prerequisites:
+  - meditate
+trainers:
+  - monastery_elder
+  - temple_priest
+lag: 2
+cooldown: 15
+mv_cost: 0
+mana_cost: 20
+description: >
+  Create a magical ward that absorbs incoming spell damage.
+effect:
+  type: buff
+  applies:
+    effect: warded
+    duration: 5
+    absorb:
+      damage_types:
+        - magic
+        - fire
+        - ice
+        - lightning
+      amount: 30  # Absorbs 30 damage
+  message_self: "You weave a protective ward around yourself."
+  message_room: "A shimmering barrier forms around $actor."

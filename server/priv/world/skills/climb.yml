@@ -1,0 +1,24 @@
+key: climb
+name: Climb
+category: movement
+cost: 1
+stat: dex
+prerequisites: []
+trainers:
+  - scout_trainer
+  - monastery_shadow_monk
+lag: 2
+cooldown: 0
+mv_cost: 20
+mana_cost: 0
+description: >
+  Allows climbing difficult terrain. Required for some exits.
+effect:
+  type: passive
+  enables:
+    - climb_exits
+  check:
+    stat: dex
+    difficulty_from: exit  # Exit defines difficulty
+  message_success: "You climb $direction skillfully."
+  message_fail: "You fail to find purchase and cannot climb."

@@ -16,7 +16,7 @@ defmodule Loka.WorldBuilder.MCP.ServerTest do
       {tools, dispatch} = Server.tools_and_dispatch()
 
       assert is_list(tools)
-      assert length(tools) > 0
+      assert tools != []
       assert is_map(dispatch)
     end
 
@@ -62,7 +62,7 @@ defmodule Loka.WorldBuilder.MCP.ServerTest do
       assert response.result.protocolVersion == "2025-03-26"
       assert response.result.serverInfo.name == "Loka World Builder MCP Server"
       assert is_list(response.result.tools)
-      assert length(response.result.tools) > 0
+      assert response.result.tools != []
     end
 
     test "rejects old protocol versions" do

@@ -1,0 +1,24 @@
+key: forage
+name: Forage
+category: survival
+cost: 1
+stat: per
+prerequisites: []
+trainers:
+  - herbalist
+  - monastery_garden_keeper
+lag: 3
+cooldown: 30
+mv_cost: 10
+mana_cost: 0
+description: >
+  Search the area for edible plants, herbs, or useful materials.
+effect:
+  type: gather
+  resource_type: forage
+  check:
+    stat: per
+    base_success: 60
+  loot_table: forage_common
+  message_success: "You find $item while foraging."
+  message_fail: "You search but find nothing useful."

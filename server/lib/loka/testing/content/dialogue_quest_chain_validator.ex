@@ -307,7 +307,7 @@ defmodule Loka.Testing.Content.DialogueQuestChainValidator do
   defp quest_has_objectives?(quest_id) do
     case Quest.get_quest_definition(quest_id) do
       nil -> false
-      quest_def -> length(quest_def.objectives || []) > 0
+      quest_def -> (quest_def.objectives || []) != []
     end
   end
 

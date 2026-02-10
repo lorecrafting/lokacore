@@ -1,0 +1,24 @@
+key: parry
+name: Parry
+category: combat_defense
+cost: 1
+stat: dex
+prerequisites: []
+trainers:
+  - combat_trainer
+  - monastery_martial_master
+lag: 1
+cooldown: 3
+mv_cost: 5
+mana_cost: 0
+description: >
+  Attempt to parry the next incoming attack, reducing damage.
+effect:
+  type: buff
+  applies:
+    effect: parrying
+    duration: 1  # Until next attack or 1 round
+    modifier:
+      damage_reduction: 50  # Reduce next hit by 50%
+  message_self: "You ready yourself to parry!"
+  message_room: "$actor readies a defensive stance."

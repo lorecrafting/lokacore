@@ -59,6 +59,7 @@ defmodule Mix.Tasks.Loka.Test.Storyline do
   alias Loka.Framework.Quest
   alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
   alias Loka.Engine.WorldLoader
+  alias Loka.Engine.Schema.EntitySchema
   alias Loka.Testing.Bot.BotSupervisor
   alias Loka.Testing.Bot.Strategies.StorylineRunner
 
@@ -390,7 +391,7 @@ defmodule Mix.Tasks.Loka.Test.Storyline do
 
     # Clean up any existing entities from previous runs
     Mix.shell().info("▶ Preparing isolated test world...")
-    {deleted, _} = Loka.Repo.delete_all(Loka.Engine.Schema.EntitySchema)
+    {deleted, _} = Loka.Repo.delete_all(EntitySchema)
 
     if deleted > 0 do
       Mix.shell().info("  Cleaned #{deleted} entities from previous runs")
@@ -402,7 +403,7 @@ defmodule Mix.Tasks.Loka.Test.Storyline do
       # Clean up test entities
       Mix.shell().info("")
       Mix.shell().info("▶ Cleaning up test world...")
-      {cleaned, _} = Loka.Repo.delete_all(Loka.Engine.Schema.EntitySchema)
+      {cleaned, _} = Loka.Repo.delete_all(EntitySchema)
       Mix.shell().info("  Removed #{cleaned} test entities")
     end
   end

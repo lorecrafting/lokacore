@@ -226,7 +226,7 @@ defmodule Loka.Engine.Zone do
 
   defp validate_rooms(errors, rooms, rooms_with_tag) do
     cond do
-      is_list(rooms) and length(rooms) > 0 ->
+      is_list(rooms) and rooms != [] ->
         errors
 
       is_binary(rooms_with_tag) and byte_size(rooms_with_tag) > 0 ->

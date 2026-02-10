@@ -447,7 +447,7 @@ defmodule Loka.WorldBuilder.EntityManager do
 
     # Add tags
     yaml =
-      if length(tags) > 0 do
+      if tags != [] do
         tags_yaml = tags |> Enum.map(&"  - #{&1}") |> Enum.join("\n")
         yaml <> "tags:\n" <> tags_yaml <> "\n"
       else

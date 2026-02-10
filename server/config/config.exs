@@ -102,7 +102,17 @@ config :tailwind,
 # session_id and player_id are set by Session.Server and GameLive for correlation
 config :logger, :default_formatter,
   format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id, :session_id, :player_id]
+  metadata: [
+    :request_id,
+    :session_id,
+    :player_id,
+    :error,
+    :payload,
+    :quest_id,
+    :bot_id,
+    :missing_quest_ids,
+    :reason
+  ]
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason

@@ -1,0 +1,28 @@
+key: intimidate
+name: Intimidate
+category: social
+cost: 1
+stat: str
+prerequisites: []
+trainers:
+  - combat_trainer
+  - monastery_martial_master
+lag: 2
+cooldown: 30
+mv_cost: 0
+mana_cost: 0
+description: >
+  Attempt to frighten an NPC into compliance or fleeing.
+effect:
+  type: social_check
+  check:
+    stat: str
+    vs: target_con
+  on_success:
+    applies:
+      effect: frightened
+      duration: 3
+    flee_chance: 30
+  message_success: "$target cowers before your intimidating presence!"
+  message_fail: "$target seems unimpressed by your threats."
+  message_room: "$actor attempts to intimidate $target."

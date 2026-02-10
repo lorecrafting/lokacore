@@ -6,6 +6,7 @@ id: side_alchemist_lesson
 name: "The Alchemist's Lesson"
 description: "Teacher Lobsang offers to teach you the art of preparing meditation incense."
 giver: teacher_lobsang
+type: side
 
 objectives:
   - id: learn_incense

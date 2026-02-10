@@ -1,0 +1,25 @@
+key: dodge_skill
+name: Evasive Maneuver
+category: combat_defense
+cost: 2
+stat: dex
+prerequisites:
+  - parry
+trainers:
+  - combat_trainer
+  - monastery_martial_master
+lag: 2
+cooldown: 4
+mv_cost: 20
+mana_cost: 0
+description: >
+  A quick evasive maneuver that greatly increases dodge chance.
+effect:
+  type: buff
+  applies:
+    effect: evading
+    duration: 2
+    modifier:
+      dodge_bonus: 30  # +30% dodge for 2 rounds
+  message_self: "You begin weaving and dodging!"
+  message_room: "$actor begins moving evasively."

@@ -22,6 +22,8 @@ defmodule Mix.Tasks.Loka.E2e.Setup do
 
   require Logger
 
+  alias Loka.Engine.TypedObject
+
   @shortdoc "Setup E2E test fixtures for mobile testing"
 
   @impl Mix.Task
@@ -65,7 +67,7 @@ defmodule Mix.Tasks.Loka.E2e.Setup do
     test_npcs = ["novice_pema", "teacher_lobsang", "abbot_jampa"]
 
     Enum.each(test_npcs, fn npc_key ->
-      case Loka.Engine.TypedObject.get(npc_key) do
+      case TypedObject.get(npc_key) do
         {:ok, _proto} ->
           Logger.info("  ✓ NPC prototype '#{npc_key}' exists")
 
@@ -78,7 +80,7 @@ defmodule Mix.Tasks.Loka.E2e.Setup do
     test_items = ["prayer_beads", "meditation_cushion"]
 
     Enum.each(test_items, fn item_key ->
-      case Loka.Engine.TypedObject.get(item_key) do
+      case TypedObject.get(item_key) do
         {:ok, _proto} ->
           Logger.info("  ✓ Item prototype '#{item_key}' exists")
 

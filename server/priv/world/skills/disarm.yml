@@ -1,0 +1,26 @@
+key: disarm
+name: Disarm
+category: combat_melee
+cost: 2
+stat: dex
+prerequisites:
+  - parry
+  - thrust
+trainers:
+  - monastery_martial_master
+  - weapon_master
+lag: 3
+cooldown: 5
+mv_cost: 15
+mana_cost: 0
+description: >
+  Attempt to disarm your opponent, causing them to drop their weapon.
+effect:
+  type: special
+  action: disarm
+  base_chance: 40
+  stat_bonus: dex  # +1% per DEX point
+  message_success: "You knock $target's weapon from their grasp!"
+  message_fail: "You fail to disarm $target."
+  message_target_success: "$actor knocks your weapon away!"
+  message_room_success: "$actor disarms $target!"

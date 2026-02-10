@@ -1,0 +1,27 @@
+key: bash
+name: Bash
+category: combat_melee
+cost: 1
+stat: str
+prerequisites: []
+trainers:
+  - combat_trainer
+  - monastery_martial_master
+lag: 3
+cooldown: 2
+mv_cost: 15
+mana_cost: 0
+description: >
+  A powerful bash that can stun the target briefly.
+effect:
+  type: damage_and_effect
+  damage_type: bludgeoning
+  base: 8
+  stat_bonus: str
+  applies:
+    effect: stunned
+    duration: 1
+    chance: 30  # 30% base chance
+  message_self: "You bash $target with all your might!"
+  message_target: "$actor bashes into you!"
+  message_room: "$actor bashes $target!"

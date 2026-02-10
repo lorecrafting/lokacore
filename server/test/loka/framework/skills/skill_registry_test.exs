@@ -307,7 +307,7 @@ defmodule Loka.Framework.Skills.SkillRegistryTest do
 
       assert {:error, errors} = result
       assert is_list(errors)
-      assert length(errors) > 0
+      assert errors != []
 
       GenServer.stop(pid)
     end

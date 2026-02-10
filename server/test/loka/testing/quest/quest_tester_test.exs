@@ -18,7 +18,7 @@ defmodule Loka.Testing.Quest.QuestTesterTest do
       {:ok, results} = QuestTester.test_quest("nonexistent_quest_xyz")
 
       assert results.success == false
-      assert length(results.errors) > 0
+      assert results.errors != []
       assert {:quest_not_found, "nonexistent_quest_xyz"} in results.errors
     end
 

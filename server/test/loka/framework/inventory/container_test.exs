@@ -658,7 +658,7 @@ defmodule Loka.Framework.Inventory.ContainerTest do
       result = Container.generate_initial_contents(container)
 
       # Should have generated items
-      assert length(result) > 0
+      assert result != []
       # All should be "gold"
       assert Enum.all?(result, &(&1 == "gold"))
       # Should not exceed capacity

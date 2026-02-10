@@ -43,7 +43,7 @@ defmodule Loka.WorldBuilder.QuestManagerTest do
     test "quests have enriched UI fields" do
       quests = QuestManager.list_quests()
 
-      if length(quests) > 0 do
+      if quests != [] do
         quest = hd(quests)
         assert Map.has_key?(quest, :key)
         assert Map.has_key?(quest, :name)
@@ -63,7 +63,7 @@ defmodule Loka.WorldBuilder.QuestManagerTest do
     test "returns {:ok, quest} for existing quest" do
       quests = QuestManager.list_quests()
 
-      if length(quests) > 0 do
+      if quests != [] do
         quest = hd(quests)
         assert {:ok, fetched} = QuestManager.get_quest(quest.key)
         assert fetched.key == quest.key
@@ -73,7 +73,7 @@ defmodule Loka.WorldBuilder.QuestManagerTest do
     test "returned quest has enriched fields" do
       quests = QuestManager.list_quests()
 
-      if length(quests) > 0 do
+      if quests != [] do
         quest = hd(quests)
         {:ok, fetched} = QuestManager.get_quest(quest.key)
 
@@ -437,7 +437,7 @@ defmodule Loka.WorldBuilder.QuestManagerTest do
     test "finds quests by name" do
       quests = QuestManager.list_quests()
 
-      if length(quests) > 0 do
+      if quests != [] do
         quest = hd(quests)
         # Search for part of the name
         query = String.slice(quest.name, 0, 3)
@@ -454,7 +454,7 @@ defmodule Loka.WorldBuilder.QuestManagerTest do
     test "search is case insensitive" do
       quests = QuestManager.list_quests()
 
-      if length(quests) > 0 do
+      if quests != [] do
         quest = hd(quests)
         upper_query = String.upcase(quest.name)
         results = QuestManager.search_quests(upper_query)

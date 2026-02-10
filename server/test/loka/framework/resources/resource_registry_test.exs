@@ -352,7 +352,7 @@ defmodule Loka.Framework.Resources.ResourceRegistryTest do
       result = ResourceRegistry.load_from(test_dir, registry)
       assert {:error, errors} = result
       assert is_list(errors)
-      assert length(errors) > 0
+      assert errors != []
 
       File.rm_rf!(test_dir)
     end

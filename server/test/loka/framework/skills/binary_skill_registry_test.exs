@@ -14,7 +14,7 @@ defmodule Loka.Framework.Skills.BinarySkillRegistryTest do
     test "all returns list of skills" do
       skills = BinarySkillRegistry.all()
       assert is_list(skills)
-      assert length(skills) > 0
+      assert skills != []
       assert Enum.all?(skills, fn s -> is_struct(s, BinarySkill) end)
     end
 
@@ -47,24 +47,24 @@ defmodule Loka.Framework.Skills.BinarySkillRegistryTest do
   describe "query functions" do
     test "by_category returns skills in category" do
       melee_skills = BinarySkillRegistry.by_category(:combat_melee)
-      assert length(melee_skills) > 0
+      assert melee_skills != []
       assert Enum.all?(melee_skills, fn s -> s.category == :combat_melee end)
     end
 
     test "by_category with string works" do
       melee_skills = BinarySkillRegistry.by_category("combat_melee")
-      assert length(melee_skills) > 0
+      assert melee_skills != []
     end
 
     test "by_stat returns skills with governing stat" do
       str_skills = BinarySkillRegistry.by_stat(:str)
-      assert length(str_skills) > 0
+      assert str_skills != []
       assert Enum.all?(str_skills, fn s -> s.stat == :str end)
     end
 
     test "by_trainer returns skills taught by trainer" do
       trainer_skills = BinarySkillRegistry.by_trainer("monastery_martial_master")
-      assert length(trainer_skills) > 0
+      assert trainer_skills != []
       assert Enum.all?(trainer_skills, fn s -> "monastery_martial_master" in s.trainers end)
     end
   end

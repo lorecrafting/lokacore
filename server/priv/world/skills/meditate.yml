@@ -1,0 +1,26 @@
+key: meditate
+name: Meditate
+category: magic_utility
+cost: 1
+stat: spi
+prerequisites: []
+trainers:
+  - monastery_elder
+  - magic_trainer
+lag: 0
+cooldown: 0
+mv_cost: 0
+mana_cost: 0
+description: >
+  Enter a meditative state to recover mana faster. Cannot be used in combat.
+effect:
+  type: channel
+  duration: 30  # seconds
+  combat_restriction: out_of_combat
+  while_channeling:
+    mana_regen_multiplier: 3.0
+    cannot_move: true
+    interrupted_by: damage
+  message_start: "You close your eyes and begin to meditate."
+  message_end: "You emerge from your meditation, refreshed."
+  message_interrupt: "Your meditation is broken!"

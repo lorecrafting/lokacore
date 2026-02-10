@@ -1,0 +1,29 @@
+key: mana_shield
+name: Mana Shield
+category: magic_defense
+cost: 3
+stat: int
+prerequisites:
+  - ward
+  - meditate
+trainers:
+  - archmage
+  - monastery_elder
+lag: 2
+cooldown: 60
+mv_cost: 0
+mana_cost: 30
+description: >
+  Convert incoming damage to mana drain instead of HP loss.
+effect:
+  type: buff
+  applies:
+    effect: mana_shielded
+    duration: 10
+    while_active:
+      damage_to_mana: true
+      conversion_rate: 2  # 2 mana per 1 damage
+      breaks_when: mana_depleted
+  message_self: "A barrier of pure mana surrounds you!"
+  message_room: "A swirling shield of magical energy envelops $actor."
+  message_break: "Your mana shield shatters!"

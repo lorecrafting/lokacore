@@ -113,7 +113,7 @@ defmodule Loka.Framework.Inventory.ContainerRespawnTest do
       entity = Entities.to_entity(schema)
       container = Container.get_container(entity)
 
-      assert length(container.contents) > 0
+      assert container.contents != []
       assert Enum.all?(container.contents, &(&1 == "sheng_jiang"))
     end
   end

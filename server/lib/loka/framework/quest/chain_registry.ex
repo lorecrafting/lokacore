@@ -325,7 +325,7 @@ defmodule Loka.Framework.Quest.ChainRegistry do
 
       start_quest =
         data["start_quest"] || data[:start_quest] ||
-          if(length(nodes) > 0, do: hd(nodes).quest_id)
+          if(nodes != [], do: hd(nodes).quest_id)
 
       chain = %Chain{
         id: id,

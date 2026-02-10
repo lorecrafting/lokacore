@@ -1,0 +1,26 @@
+key: sneak
+name: Sneak
+category: stealth
+cost: 1
+stat: dex
+prerequisites: []
+trainers:
+  - shadow_trainer
+  - monastery_shadow_monk
+lag: 0
+cooldown: 0
+mv_cost: 0  # Toggle, costs extra MV while active
+mana_cost: 0
+description: >
+  Move quietly, avoiding detection. Costs 50% more MV while active.
+effect:
+  type: toggle
+  while_active:
+    mv_cost_multiplier: 1.5
+    hidden: true
+    detection_check:
+      stat: per
+      difficulty: dex  # Attacker's PER vs your DEX
+  message_on: "You begin moving quietly."
+  message_off: "You stop sneaking."
+  message_detected: "$actor notices you lurking in the shadows!"

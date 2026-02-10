@@ -431,7 +431,7 @@ defmodule Loka.Admin.GameLog do
     failed_events = Enum.filter(events, fn e -> e.event_type == :objective_failed end)
 
     issues =
-      if length(failed_events) > 0 do
+      if failed_events != [] do
         ["#{length(failed_events)} failed attempt(s) recorded" | issues]
       else
         issues

@@ -247,7 +247,7 @@ defmodule Loka.Framework.Quest.Definitions do
 
   defp get_prerequisite(data) do
     prereqs = Map.get(data, "prerequisites") || Map.get(data, :prerequisites, [])
-    if is_list(prereqs) && length(prereqs) > 0, do: List.first(prereqs), else: nil
+    if is_list(prereqs) && prereqs != [], do: List.first(prereqs), else: nil
   end
 
   defp get_level_requirement(data) do

@@ -382,7 +382,7 @@ defmodule Loka.Framework.GatheringTest do
       {:ok, result} = Gathering.gather(game_state, room, "herb_patch")
 
       # herb_patch has 100% chance on first yield
-      if length(result.items) > 0 do
+      if result.items != [] do
         assert result.xp != nil
         assert result.xp.skill == "herbalism"
         assert result.xp.amount == 5
@@ -721,7 +721,7 @@ defmodule Loka.Framework.GatheringTest do
       {:ok, result} = Gathering.gather(game_state, room, "herb_patch")
 
       # herb_patch yields have range {1, 3}
-      if length(result.items) > 0 do
+      if result.items != [] do
         healing_herb = Enum.find(result.items, &(&1.item == "herb_healing"))
 
         if healing_herb do

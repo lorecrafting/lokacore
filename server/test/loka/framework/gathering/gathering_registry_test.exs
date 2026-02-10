@@ -403,7 +403,7 @@ defmodule Loka.Framework.Gathering.GatheringRegistryTest do
 
       assert {:error, errors} = result
       assert is_list(errors)
-      assert length(errors) > 0
+      assert errors != []
 
       GenServer.stop(pid)
     end

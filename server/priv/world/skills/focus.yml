@@ -1,0 +1,26 @@
+key: focus
+name: Focus
+category: magic_offense
+cost: 2
+stat: int
+prerequisites:
+  - meditate
+trainers:
+  - monastery_elder
+  - magic_trainer
+lag: 1
+cooldown: 10
+mv_cost: 0
+mana_cost: 10
+description: >
+  Focus your mind, increasing spell power for the next mantra.
+effect:
+  type: buff
+  applies:
+    effect: focused
+    duration: 1  # Next spell only
+    modifier:
+      spell_power_bonus: 25  # +25% spell damage/healing
+    consumed_on: spell_cast
+  message_self: "You focus your mind, gathering magical energy."
+  message_room: "$actor's eyes glow briefly with concentration."

@@ -145,7 +145,7 @@ defmodule LokaWeb.AdminLive.QuestsTab do
   defp player_list(assigns) do
     ~H"""
     <div class="overflow-y-auto max-h-80">
-      <table :if={@players && length(@players) > 0} class="table table-zebra w-full table-sm">
+      <table :if={@players && @players != []} class="table table-zebra w-full table-sm">
         <thead>
           <tr>
             <th>Email</th>
@@ -182,7 +182,7 @@ defmodule LokaWeb.AdminLive.QuestsTab do
           </tr>
         </tbody>
       </table>
-      <p :if={!@players || length(@players) == 0} class="opacity-70">No players found.</p>
+      <p :if={!@players || @players == []} class="opacity-70">No players found.</p>
     </div>
     """
   end
@@ -224,7 +224,7 @@ defmodule LokaWeb.AdminLive.QuestsTab do
           </div>
         </fieldset>
 
-        <div :if={@player_quest_state && length(@player_quest_state.active_quests) > 0}>
+        <div :if={@player_quest_state && @player_quest_state.active_quests != []}>
           <div class="divider">Active Quest Actions</div>
 
           <div :for={quest <- @player_quest_state.active_quests} class="mb-4">
@@ -285,7 +285,7 @@ defmodule LokaWeb.AdminLive.QuestsTab do
           </div>
         </div>
         <p
-          :if={!@player_quest_state || length(@player_quest_state.active_quests) == 0}
+          :if={!@player_quest_state || @player_quest_state.active_quests == []}
           class="opacity-70"
         >
           No active quests for this player.
@@ -310,10 +310,10 @@ defmodule LokaWeb.AdminLive.QuestsTab do
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
       <div>
         <h4 class="font-semibold mb-2">Completed Quests ({length(@state.completed_quests)})</h4>
-        <ul :if={length(@state.completed_quests) > 0} class="list-disc list-inside text-sm space-y-1">
+        <ul :if={@state.completed_quests != []} class="list-disc list-inside text-sm space-y-1">
           <li :for={quest_id <- @state.completed_quests}>{quest_id}</li>
         </ul>
-        <p :if={length(@state.completed_quests) == 0} class="text-sm opacity-50">
+        <p :if={@state.completed_quests == []} class="text-sm opacity-50">
           No completed quests.
         </p>
       </div>
@@ -330,7 +330,7 @@ defmodule LokaWeb.AdminLive.QuestsTab do
           </button>
         </div>
         <div
-          :if={length(@quest_events) > 0}
+          :if={@quest_events != []}
           class="overflow-y-auto max-h-60 text-xs font-mono bg-base-300 p-2 rounded"
         >
           <div :for={event <- Enum.take(@quest_events, 20)} class="mb-1">
@@ -342,7 +342,7 @@ defmodule LokaWeb.AdminLive.QuestsTab do
             ...and {length(@quest_events) - 20} more
           </div>
         </div>
-        <p :if={length(@quest_events) == 0} class="text-sm opacity-50">No events recorded.</p>
+        <p :if={@quest_events == []} class="text-sm opacity-50">No events recorded.</p>
       </div>
     </div>
     """
