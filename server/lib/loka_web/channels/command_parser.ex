@@ -67,6 +67,13 @@ defmodule LokaWeb.Channels.CommandParser do
   defp do_parse(["validate"]), do: {:builder_validate, %{}}
   defp do_parse(["godmode"]), do: {:builder_godmode, %{}}
 
+  defp do_parse(["respawn", rest]) do
+    case String.split(rest, " ", parts: 2) do
+      ["zone", key] -> {:builder_respawn, %{key: String.trim(key), type: "zone"}}
+      [key] -> {:builder_respawn, %{key: String.trim(key), type: nil}}
+    end
+  end
+
   # Room CRUD commands
   defp do_parse(["dig", rest]) do
     case String.split(rest, " ", parts: 3) do

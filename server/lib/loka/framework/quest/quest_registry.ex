@@ -213,6 +213,9 @@ defmodule Loka.Framework.Quest.QuestRegistry do
 
     state = %{table: table, path: path, quests: %{}}
 
+    # Subscribe to content change notifications for hot-reload
+    Phoenix.PubSub.subscribe(Loka.PubSub, "content:changed")
+
     if load_on_start do
       case do_load_all(state, path) do
         {:ok, new_state} ->
@@ -271,6 +274,43 @@ defmodule Loka.Framework.Quest.QuestRegistry do
       {:error, errors} ->
         {:reply, {:error, errors}, state}
     end
+  end
+
+  # =============================================================================
+  # PubSub Handlers
+  # =============================================================================
+
+  @impl true
+  def handle_info({:content_changed, _key, :quest, _subtype}, state) do
+    # Full quest reload - quest files are few and have inheritance resolution
+    case do_load_all(state, state.path) do
+      {:ok, new_state} ->
+        Logger.debug("QuestRegistry reloaded after quest content change")
+        {:noreply, new_state}
+
+      {:error, _} ->
+        {:noreply, state}
+    end
+  end
+
+  @impl true
+  def handle_info({:content_changed, _key, _type, _subtype}, state) do
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_info({:content_deleted, key}, state) do
+    if Map.has_key?(state.quests, key) do
+      :ets.delete(state.table, key)
+      {:noreply, %{state | quests: Map.delete(state.quests, key)}}
+    else
+      {:noreply, state}
+    end
+  end
+
+  @impl true
+  def handle_info(_msg, state) do
+    {:noreply, state}
   end
 
   # =============================================================================

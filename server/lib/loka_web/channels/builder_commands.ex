@@ -63,7 +63,7 @@ defmodule LokaWeb.Channels.BuilderCommands do
   @room_commands ~w(dig set_desc set_name create_room link unlink delete_room)a
 
   # Entity CRUD commands
-  @entity_commands ~w(create_npc create_item edit_entity delete_npc delete_item)a
+  @entity_commands ~w(create_npc create_item edit_entity delete_npc delete_item respawn)a
 
   # Content commands
   @content_commands ~w(create_quest edit_quest quest_info delete_quest

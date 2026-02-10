@@ -19,9 +19,11 @@ defmodule LokaWeb.Channels.BuilderCommands.Storylines do
 
         Helpers.ensure_dir(@storylines_dir)
 
-        case File.write(Path.join(@storylines_dir, "#{key}.yml"), yaml_content) do
+        file_path = Path.join(@storylines_dir, "#{key}.yml")
+
+        case File.write(file_path, yaml_content) do
           :ok ->
-            Loader.reload()
+            Loader.reload_file(file_path)
             {:ok, "Storyline '#{key}' (#{name}) created.", socket}
 
           {:error, reason} ->
@@ -36,7 +38,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Storylines do
     if File.exists?(file_path) do
       case File.rm(file_path) do
         :ok ->
-          Loader.reload()
+          Loader.remove(key)
           {:ok, "Storyline '#{key}' deleted.", socket}
 
         {:error, reason} ->

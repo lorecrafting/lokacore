@@ -119,12 +119,10 @@ defmodule Loka.Utils.YamlLoader do
   """
   @spec update_ets(:ets.table(), map()) :: :ok
   def update_ets(table, items) do
-    :ets.delete_all_objects(table)
-
-    Enum.each(items, fn {key, item} ->
-      :ets.insert(table, {key, item})
-    end)
-
+    old_keys = :ets.select(table, [{{:"$1", :_}, [], [:"$1"]}]) |> MapSet.new()
+    Enum.each(items, fn {key, item} -> :ets.insert(table, {key, item}) end)
+    new_keys = Map.keys(items) |> MapSet.new()
+    old_keys |> MapSet.difference(new_keys) |> Enum.each(&:ets.delete(table, &1))
     :ok
   end
 

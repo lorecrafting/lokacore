@@ -53,7 +53,8 @@ defmodule Loka.Framework.Gathering.GatheringRegistry do
     path: "priv/world/nodes",
     item_module: Loka.Framework.Gathering.GatheringNode,
     item_name: "gathering node",
-    state_key: :nodes
+    state_key: :nodes,
+    content_types: [{:gathering_node, nil}]
 
   @doc """
   Lists all nodes requiring a specific skill.

@@ -25,23 +25,56 @@ defmodule Loka.WorldBuilder.ToolExecutor do
   @doc """
   Execute a function with deferred TypedObject reloads.
 
-  All `Loader.reload()` calls within the function are skipped; a single reload
-  happens after the function completes. Use this when executing multiple tool
-  calls in sequence (e.g., AI conversation turns).
+  All `Loader.reload_file/1` and `Loader.remove/1` calls within the function
+  are accumulated; they execute after the function completes. Use this when
+  executing multiple tool calls in sequence (e.g., AI conversation turns).
   """
   def with_deferred_reload(fun) do
     Process.put(:loka_defer_reload, true)
+    Process.put(:loka_deferred_paths, [])
+    Process.put(:loka_deferred_removals, [])
 
     try do
       result = fun.()
-      Loka.Engine.TypedObject.Loader.reload()
+
+      # Process accumulated removals
+      Process.get(:loka_deferred_removals, [])
+      |> Enum.uniq()
+      |> Enum.each(&Loka.Engine.TypedObject.Loader.remove/1)
+
+      # Reload all accumulated file paths
+      Process.get(:loka_deferred_paths, [])
+      |> Enum.uniq()
+      |> Enum.each(&Loka.Engine.TypedObject.Loader.reload_file/1)
+
       result
     after
       Process.delete(:loka_defer_reload)
+      Process.delete(:loka_deferred_paths)
+      Process.delete(:loka_deferred_removals)
     end
   end
 
-  defp maybe_reload do
+  defp maybe_reload_file(file_path) do
+    unless Process.get(:loka_defer_reload) do
+      Loka.Engine.TypedObject.Loader.reload_file(file_path)
+    else
+      paths = Process.get(:loka_deferred_paths, [])
+      Process.put(:loka_deferred_paths, [file_path | paths])
+    end
+  end
+
+  defp maybe_remove(key) do
+    unless Process.get(:loka_defer_reload) do
+      Loka.Engine.TypedObject.Loader.remove(key)
+    else
+      removals = Process.get(:loka_deferred_removals, [])
+      Process.put(:loka_deferred_removals, [key | removals])
+    end
+  end
+
+  # Fallback for operations where we can't easily determine the file path
+  defp maybe_reload_all do
     unless Process.get(:loka_defer_reload), do: Loka.Engine.TypedObject.Loader.reload()
   end
 
@@ -701,7 +734,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
       case File.write(yaml_path, yaml_content) do
         :ok ->
           # Reload the registry
-          maybe_reload()
+          maybe_reload_file(yaml_path)
 
           {:ok,
            %{
@@ -842,7 +875,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
             case File.write(yaml_path, yaml_content) do
               :ok ->
-                maybe_reload()
+                maybe_reload_file(yaml_path)
 
                 {:ok,
                  %{
@@ -991,7 +1024,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
     case File.write(Path.join(@zones_dir, "#{key}.yml"), yaml_content) do
       :ok ->
-        maybe_reload()
+        maybe_reload_file(Path.join(@zones_dir, "#{key}.yml"))
 
         {:ok, warnings} = YamlBuilder.validate_references(:zone, %{rooms: rooms})
         message = "Created zone '#{name}' (#{key})"
@@ -1034,7 +1067,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
         case File.write(Path.join(@zones_dir, "#{key}.yml"), yaml_content) do
           :ok ->
-            maybe_reload()
+            maybe_reload_file(Path.join(@zones_dir, "#{key}.yml"))
             {:ok, %{success: true, message: "Updated zone '#{key}'"}}
 
           {:error, reason} ->
@@ -1053,7 +1086,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
     if File.exists?(file_path) do
       case File.rm(file_path) do
         :ok ->
-          maybe_reload()
+          maybe_remove(key)
           {:ok, %{success: true, message: "Deleted zone '#{key}'"}}
 
         {:error, reason} ->
@@ -1082,7 +1115,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
     case File.write(Path.join(@cutscenes_dir, "#{key}.yml"), yaml_content) do
       :ok ->
-        maybe_reload()
+        maybe_reload_file(Path.join(@cutscenes_dir, "#{key}.yml"))
 
         {:ok, warnings} = YamlBuilder.validate_references(:cutscene, %{scenes: scenes})
         message = "Created cutscene '#{name}' (#{key})"
@@ -1112,7 +1145,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
         case File.write(Path.join(@cutscenes_dir, "#{key}.yml"), yaml_content) do
           :ok ->
-            maybe_reload()
+            maybe_reload_file(Path.join(@cutscenes_dir, "#{key}.yml"))
             {:ok, %{success: true, message: "Updated cutscene '#{key}'"}}
 
           {:error, reason} ->
@@ -1131,7 +1164,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
     if File.exists?(file_path) do
       case File.rm(file_path) do
         :ok ->
-          maybe_reload()
+          maybe_remove(key)
           {:ok, %{success: true, message: "Deleted cutscene '#{key}'"}}
 
         {:error, reason} ->
@@ -1190,7 +1223,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
     case File.write(Path.join(@zones_dir, "#{key}.yml"), yaml_content) do
       :ok ->
-        maybe_reload()
+        maybe_reload_file(Path.join(@zones_dir, "#{key}.yml"))
 
         {:ok, warnings} =
           YamlBuilder.validate_references(:storyline, %{
@@ -1225,7 +1258,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
         case File.write(Path.join(@zones_dir, "#{key}.yml"), yaml_content) do
           :ok ->
-            maybe_reload()
+            maybe_reload_file(Path.join(@zones_dir, "#{key}.yml"))
             {:ok, %{success: true, message: "Updated storyline '#{key}'"}}
 
           {:error, reason} ->
@@ -1244,7 +1277,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
     if File.exists?(file_path) do
       case File.rm(file_path) do
         :ok ->
-          maybe_reload()
+          maybe_remove(key)
           {:ok, %{success: true, message: "Deleted storyline '#{key}'"}}
 
         {:error, reason} ->
@@ -1292,7 +1325,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
     case File.write(Path.join(@scripts_dir, "#{key}.yml"), yaml_content) do
       :ok ->
-        maybe_reload()
+        maybe_reload_file(Path.join(@scripts_dir, "#{key}.yml"))
         {:ok, %{success: true, message: "Created script '#{key}' (hook: #{hook})"}}
 
       {:error, reason} ->
@@ -1316,7 +1349,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
         case File.write(Path.join(@scripts_dir, "#{key}.yml"), yaml_content) do
           :ok ->
-            maybe_reload()
+            maybe_reload_file(Path.join(@scripts_dir, "#{key}.yml"))
             {:ok, %{success: true, message: "Updated script '#{key}'"}}
 
           {:error, reason} ->
@@ -1335,7 +1368,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
     if File.exists?(file_path) do
       case File.rm(file_path) do
         :ok ->
-          maybe_reload()
+          maybe_remove(key)
           {:ok, %{success: true, message: "Deleted script '#{key}'"}}
 
         {:error, reason} ->
@@ -1430,7 +1463,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
         case File.write(Path.join(@scripts_dir, "#{key}.yml"), yaml_content) do
           :ok ->
-            maybe_reload()
+            maybe_reload_file(Path.join(@scripts_dir, "#{key}.yml"))
 
             {:ok,
              %{success: true, message: "Created script '#{key}' from template '#{template_id}'"}}
@@ -1460,7 +1493,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
             else
               updated_data = Map.put(data, "scripts", scripts ++ [script_key])
               YamlBuilder.save_entity_with_data(entity, updated_data)
-              maybe_reload()
+              maybe_reload_all()
 
               {:ok,
                %{success: true, message: "Attached script '#{script_key}' to '#{entity_key}'"}}
@@ -1487,7 +1520,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
         if script_key in scripts do
           updated_data = Map.put(data, "scripts", List.delete(scripts, script_key))
           YamlBuilder.save_entity_with_data(entity, updated_data)
-          maybe_reload()
+          maybe_reload_all()
 
           {:ok, %{success: true, message: "Detached script '#{script_key}' from '#{entity_key}'"}}
         else

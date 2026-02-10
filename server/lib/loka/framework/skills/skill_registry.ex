@@ -28,7 +28,8 @@ defmodule Loka.Framework.Skills.SkillRegistry do
     path: "priv/world/skills",
     item_module: Loka.Framework.Skills.Skill,
     item_name: "skill",
-    state_key: :skills
+    state_key: :skills,
+    content_types: [{:skill, nil}]
 
   @doc """
   Lists all skills in a specific category.

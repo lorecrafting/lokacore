@@ -4,6 +4,27 @@ defmodule LokaWeb.Channels.BuilderCommands.Entities do
   """
 
   alias Loka.WorldBuilder.EntityManager
+  alias Loka.WorldBuilder.Respawner
+
+  def execute(:respawn, %{key: key, type: "zone"}, socket) do
+    case Respawner.respawn_zone(key) do
+      {:ok, count} ->
+        {:ok, "Respawned #{count} entities in zone '#{key}'.", socket}
+
+      {:error, reason} ->
+        {:error, reason, socket}
+    end
+  end
+
+  def execute(:respawn, %{key: key}, socket) do
+    case Respawner.respawn_by_prototype(key) do
+      {:ok, count} ->
+        {:ok, "Respawned #{count} entities for '#{key}'.", socket}
+
+      {:error, reason} ->
+        {:error, reason, socket}
+    end
+  end
 
   def execute(:create_npc, %{key: key, name: name}, socket) do
     params = %{"key" => key, "name" => name}

@@ -57,7 +57,8 @@ defmodule Loka.Framework.Crafting.CraftingRegistry do
     path: "priv/world/recipes",
     item_module: Loka.Framework.Crafting.Recipe,
     item_name: "recipe",
-    state_key: :recipes
+    state_key: :recipes,
+    content_types: [{:recipe, nil}]
 
   alias Loka.Framework.Crafting.Recipe
 

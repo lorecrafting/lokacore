@@ -11,7 +11,7 @@ defmodule Loka.Engine.TypedObject.Loader do
   - Loads from multiple YAML directories
   - Resolves parent inheritance chains
   - Caches in ETS for fast concurrent access
-  - Supports hot reload
+  - Supports hot reload (full and single-file)
 
   ## Directory Structure
 
@@ -38,6 +38,9 @@ defmodule Loka.Engine.TypedObject.Loader do
 
       # Hot-reload all content
       :ok = Loader.reload()
+
+      # Hot-reload a single file (~1ms instead of ~300ms)
+      {:ok, key} = Loader.reload_file("priv/world/quests/intro.yml")
   """
 
   use GenServer
@@ -133,6 +136,38 @@ defmodule Loka.Engine.TypedObject.Loader do
   end
 
   @doc """
+  Reloads a single TypedObject from its YAML file.
+  Only updates that one entry in the registry. ~1ms instead of ~300ms.
+  """
+  @spec reload_file(String.t(), GenServer.server()) :: {:ok, String.t()} | {:error, term()}
+  def reload_file(file_path, server \\ __MODULE__) do
+    GenServer.call(server, {:reload_file, file_path})
+  end
+
+  @doc """
+  Removes a TypedObject by key from the registry.
+  Used when a YAML file is deleted.
+  """
+  @spec remove(String.t(), GenServer.server()) :: :ok
+  def remove(key, server \\ __MODULE__) do
+    GenServer.call(server, {:remove, key})
+  end
+
+  @doc """
+  Writes YAML content to a file atomically (write to tmp, then rename).
+  Prevents partial writes on crash.
+  """
+  @spec atomic_write(String.t(), String.t()) :: :ok | {:error, term()}
+  def atomic_write(path, content) do
+    tmp_path = path <> ".tmp"
+
+    with :ok <- File.mkdir_p(Path.dirname(path)),
+         :ok <- File.write(tmp_path, content) do
+      File.rename(tmp_path, path)
+    end
+  end
+
+  @doc """
   Loads TypedObjects from a specific path (replaces all existing content).
   """
   @spec load_from(String.t()) :: :ok | {:error, term()}
@@ -189,6 +224,26 @@ defmodule Loka.Engine.TypedObject.Loader do
     else
       {:ok, state}
     end
+  end
+
+  @impl true
+  def handle_call({:reload_file, file_path}, _from, state) do
+    case do_reload_file(file_path, state) do
+      {:ok, key, new_state} ->
+        broadcast_content_changed(key)
+        {:reply, {:ok, key}, new_state}
+
+      {:error, reason} ->
+        {:reply, {:error, reason}, state}
+    end
+  end
+
+  @impl true
+  def handle_call({:remove, key}, _from, state) do
+    Registry.delete(key)
+    new_raw = Map.delete(state.raw_objects, key)
+    broadcast_content_deleted(key)
+    {:reply, :ok, %{state | raw_objects: new_raw}}
   end
 
   @impl true
@@ -503,5 +558,62 @@ defmodule Loka.Engine.TypedObject.Loader do
       end)
 
     errors ++ broken_refs
+  end
+
+  # =============================================================================
+  # Single-File Reload
+  # =============================================================================
+
+  defp do_reload_file(file_path, state) do
+    full_path =
+      if Path.type(file_path) == :absolute, do: file_path, else: resolve_path(file_path)
+
+    with {:ok, content} <- File.read(full_path),
+         {:ok, data} <- YamlElixir.read_from_string(content),
+         {:ok, typed_object} <- create_typed_object(data, full_path) do
+      resolved = resolve_parent_from_registry(typed_object)
+      Registry.put(resolved.key, resolved)
+      new_raw = Map.put(state.raw_objects, resolved.key, typed_object)
+      {:ok, resolved.key, %{state | raw_objects: new_raw}}
+    end
+  end
+
+  defp resolve_parent_from_registry(%TypedObject{parent_key: nil} = obj), do: obj
+
+  defp resolve_parent_from_registry(%TypedObject{parent_key: parent_key} = obj) do
+    case Registry.get(parent_key) do
+      {:ok, parent} ->
+        TypedObject.merge_parent(obj, parent)
+
+      {:error, :not_found} ->
+        Logger.warning("Parent not found in registry: #{parent_key}")
+        obj
+    end
+  end
+
+  # =============================================================================
+  # Content Change Broadcasting
+  # =============================================================================
+
+  defp broadcast_content_changed(key) do
+    case Registry.get(key) do
+      {:ok, obj} ->
+        Phoenix.PubSub.broadcast(
+          Loka.PubSub,
+          "content:changed",
+          {:content_changed, key, obj.type, obj.subtype}
+        )
+
+      {:error, :not_found} ->
+        :ok
+    end
+  end
+
+  defp broadcast_content_deleted(key) do
+    Phoenix.PubSub.broadcast(
+      Loka.PubSub,
+      "content:changed",
+      {:content_deleted, key}
+    )
   end
 end

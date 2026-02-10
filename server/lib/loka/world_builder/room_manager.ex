@@ -240,14 +240,14 @@ defmodule Loka.WorldBuilder.RoomManager do
 
         case {file_result, despawn_result} do
           {:ok, :ok} ->
-            # Reload registry to reflect deletion
-            Loader.reload()
+            # Remove from registry to reflect deletion
+            Loader.remove(entity.key)
             Logger.info("[RoomManager] Deleted room (registry + YAML): #{room_id}")
             {:ok, room_map}
 
           {:ok, {:error, :not_found}} ->
             # Room wasn't spawned but YAML was deleted
-            Loader.reload()
+            Loader.remove(entity.key)
             Logger.info("[RoomManager] Deleted room (YAML only): #{room_id}")
             {:ok, room_map}
 
@@ -584,7 +584,7 @@ defmodule Loka.WorldBuilder.RoomManager do
       case File.write(file_path, yaml_content) do
         :ok ->
           # Reload to update registry
-          Loader.reload()
+          Loader.reload_file(file_path)
           :ok
 
         {:error, reason} ->

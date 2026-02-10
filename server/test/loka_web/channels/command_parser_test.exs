@@ -366,6 +366,18 @@ defmodule LokaWeb.Channels.CommandParserTest do
     end
   end
 
+  describe "respawn commands" do
+    test "parses respawn with entity key" do
+      assert CommandParser.parse("respawn monk_tenzin") ==
+               {:builder_respawn, %{key: "monk_tenzin", type: nil}}
+    end
+
+    test "parses respawn zone" do
+      assert CommandParser.parse("respawn zone monastery") ==
+               {:builder_respawn, %{key: "monastery", type: "zone"}}
+    end
+  end
+
   describe "edge cases" do
     test "handles empty input" do
       assert CommandParser.parse("") == {:unknown, %{text: ""}}

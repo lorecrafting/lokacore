@@ -23,9 +23,11 @@ defmodule LokaWeb.Channels.BuilderCommands.Cutscenes do
 
         Helpers.ensure_dir(@cutscenes_dir)
 
-        case File.write(Path.join(@cutscenes_dir, "#{key}.yml"), yaml_content) do
+        file_path = Path.join(@cutscenes_dir, "#{key}.yml")
+
+        case File.write(file_path, yaml_content) do
           :ok ->
-            Loader.reload()
+            Loader.reload_file(file_path)
             {:ok, "Cutscene '#{key}' (#{name}) created.", socket}
 
           {:error, reason} ->
@@ -40,7 +42,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Cutscenes do
     if File.exists?(file_path) do
       case File.rm(file_path) do
         :ok ->
-          Loader.reload()
+          Loader.remove(key)
           {:ok, "Cutscene '#{key}' deleted.", socket}
 
         {:error, reason} ->

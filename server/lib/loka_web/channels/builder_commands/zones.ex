@@ -20,9 +20,11 @@ defmodule LokaWeb.Channels.BuilderCommands.Zones do
 
         Helpers.ensure_dir(@zones_dir)
 
-        case File.write(Path.join(@zones_dir, "#{key}.yml"), yaml_content) do
+        file_path = Path.join(@zones_dir, "#{key}.yml")
+
+        case File.write(file_path, yaml_content) do
           :ok ->
-            Loader.reload()
+            Loader.reload_file(file_path)
             {:ok, "Zone '#{key}' (#{name}) created.", socket}
 
           {:error, reason} ->
@@ -49,7 +51,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Zones do
 
         case save_zone_yaml(key, updated_data, zone.name) do
           :ok ->
-            Loader.reload()
+            Loader.reload_file(Path.join(@zones_dir, "#{key}.yml"))
             {:ok, "Updated zone '#{key}': #{field} = #{value}", socket}
 
           {:error, reason} ->
@@ -67,7 +69,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Zones do
     if File.exists?(file_path) do
       case File.rm(file_path) do
         :ok ->
-          Loader.reload()
+          Loader.remove(key)
           {:ok, "Zone '#{key}' deleted.", socket}
 
         {:error, reason} ->

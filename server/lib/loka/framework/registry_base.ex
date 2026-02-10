@@ -36,6 +36,7 @@ defmodule Loka.Framework.RegistryBase do
   - `:item_module` - Module with `from_map/1` function (required)
   - `:item_name` - Human-readable name for logging (required)
   - `:state_key` - Key in state map for items (required)
+  - `:content_types` - List of `{type, subtype}` tuples to subscribe to for PubSub reload (optional)
 
   ## Generated Functions
 
@@ -60,6 +61,7 @@ defmodule Loka.Framework.RegistryBase do
     item_module = Keyword.fetch!(opts, :item_module)
     item_name = Keyword.fetch!(opts, :item_name)
     state_key = Keyword.fetch!(opts, :state_key)
+    content_types = Keyword.get(opts, :content_types, [])
 
     quote do
       use GenServer
@@ -72,6 +74,7 @@ defmodule Loka.Framework.RegistryBase do
       @item_module unquote(item_module)
       @item_name unquote(item_name)
       @state_key unquote(state_key)
+      @content_types unquote(content_types)
 
       # =============================================================================
       # Client API
@@ -220,6 +223,9 @@ defmodule Loka.Framework.RegistryBase do
           %{table: table, path: path}
           |> Map.put(@state_key, %{})
 
+        # Subscribe to content change notifications for hot-reload
+        Phoenix.PubSub.subscribe(Loka.PubSub, "content:changed")
+
         if load_on_start do
           case do_load_all(state, path) do
             {:ok, new_state} ->
@@ -315,6 +321,43 @@ defmodule Loka.Framework.RegistryBase do
       end
 
       # =============================================================================
+      # PubSub Handlers
+      # =============================================================================
+
+      @impl true
+      def handle_info({:content_changed, _key, type, subtype}, state) do
+        if @content_types != [] and {type, subtype} in @content_types do
+          case do_load_all(state, state.path) do
+            {:ok, new_state} ->
+              Logger.debug("#{inspect(__MODULE__)} reloaded after content change")
+              {:noreply, new_state}
+
+            {:error, _errors} ->
+              {:noreply, state}
+          end
+        else
+          {:noreply, state}
+        end
+      end
+
+      @impl true
+      def handle_info({:content_deleted, key}, state) do
+        items = Map.get(state, @state_key)
+
+        if Map.has_key?(items, key) do
+          :ets.delete(state.table, key)
+          {:noreply, Map.put(state, @state_key, Map.delete(items, key))}
+        else
+          {:noreply, state}
+        end
+      end
+
+      @impl true
+      def handle_info(_msg, state) do
+        {:noreply, state}
+      end
+
+      # =============================================================================
       # Private Implementation
       # =============================================================================
 
@@ -340,7 +383,7 @@ defmodule Loka.Framework.RegistryBase do
       end
 
       # Allow modules to override
-      defoverridable init: 1, handle_call: 3, handle_custom_call: 3
+      defoverridable init: 1, handle_call: 3, handle_custom_call: 3, handle_info: 2
     end
   end
 end

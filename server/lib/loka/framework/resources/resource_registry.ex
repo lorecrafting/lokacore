@@ -36,7 +36,8 @@ defmodule Loka.Framework.Resources.ResourceRegistry do
     path: "priv/world/resources",
     item_module: Loka.Framework.Resources.Resource,
     item_name: "resource",
-    state_key: :resources
+    state_key: :resources,
+    content_types: [{:resource, nil}]
 
   alias Loka.Framework.Resources.Resource
 

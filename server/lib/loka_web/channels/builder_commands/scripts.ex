@@ -32,9 +32,11 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
 
         Helpers.ensure_dir(@scripts_dir)
 
-        case File.write(Path.join(@scripts_dir, "#{key}.yml"), yaml_content) do
+        file_path = Path.join(@scripts_dir, "#{key}.yml")
+
+        case File.write(file_path, yaml_content) do
           :ok ->
-            Loader.reload()
+            Loader.reload_file(file_path)
 
             {:ok,
              "Script '#{key}' created (hook: #{hook}).\n" <>
@@ -52,7 +54,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
     if File.exists?(file_path) do
       case File.rm(file_path) do
         :ok ->
-          Loader.reload()
+          Loader.remove(key)
           {:ok, "Script '#{key}' deleted.", socket}
 
         {:error, reason} ->
@@ -196,9 +198,11 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
           {:ok, yaml_content} ->
             Helpers.ensure_dir(@scripts_dir)
 
-            case File.write(Path.join(@scripts_dir, "#{key}.yml"), yaml_content) do
+            file_path = Path.join(@scripts_dir, "#{key}.yml")
+
+            case File.write(file_path, yaml_content) do
               :ok ->
-                Loader.reload()
+                Loader.reload_file(file_path)
                 {:ok, "Script '#{key}' created from template '#{tpl}'.", socket}
 
               {:error, reason} ->
@@ -224,6 +228,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
             else
               updated_data = Map.put(data, "scripts", scripts ++ [script_key])
               YamlBuilder.save_entity_with_data(entity, updated_data)
+              # Full reload: save_entity_with_data path not easily determined
               Loader.reload()
               {:ok, "Attached script '#{script_key}' to '#{entity_key}'.", socket}
             end
@@ -246,6 +251,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
         if script_key in scripts do
           updated_data = Map.put(data, "scripts", List.delete(scripts, script_key))
           YamlBuilder.save_entity_with_data(entity, updated_data)
+          # Full reload: save_entity_with_data path not easily determined
           Loader.reload()
           {:ok, "Detached script '#{script_key}' from '#{entity_key}'.", socket}
         else

@@ -58,7 +58,8 @@ defmodule Loka.Framework.Storyline.StorylineRegistry do
     path: "priv/world/storylines",
     item_module: Loka.Framework.Storyline.Storyline,
     item_name: "storyline",
-    state_key: :storylines
+    state_key: :storylines,
+    content_types: [{:storyline, nil}]
 
   @doc """
   Lists all storylines with a specific tag.

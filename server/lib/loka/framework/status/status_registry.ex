@@ -29,7 +29,8 @@ defmodule Loka.Framework.Status.StatusRegistry do
     path: "priv/world/statuses",
     item_module: Loka.Framework.Status.StatusEffect,
     item_name: "status effect",
-    state_key: :statuses
+    state_key: :statuses,
+    content_types: [{:status, nil}]
 
   @doc """
   Lists all status effects of a specific type.
