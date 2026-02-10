@@ -187,61 +187,6 @@ defmodule Loka.Framework.World.SoundEnvironment do
     |> Enum.sort()
   end
 
-  @doc """
-  Reloads config from file (for runtime updates).
-  Returns the new config but doesn't update the compiled module attribute.
-  """
-  @spec reload_config() :: map()
-  def reload_config do
-    path = Path.join(:code.priv_dir(:loka), "world/config/sound_mappings.yml")
-
-    if File.exists?(path) do
-      config = YamlElixir.read_from_file!(path)
-
-      # Parse tag_sounds: tag -> phase -> [sounds]
-      tag_sounds =
-        (config["tag_sounds"] || %{})
-        |> Enum.map(fn {tag, phases} ->
-          parsed_phases =
-            (phases || %{})
-            |> Enum.map(fn {phase, sounds} ->
-              {String.to_atom(phase), List.wrap(sounds)}
-            end)
-            |> Map.new()
-
-          {tag, parsed_phases}
-        end)
-        |> Map.new()
-
-      # Parse simple sound maps
-      parse_simple = fn sounds_map ->
-        (sounds_map || %{})
-        |> Enum.map(fn {key, value} ->
-          {String.to_atom(key), List.wrap(value || [])}
-        end)
-        |> Map.new()
-      end
-
-      # Parse indoor modifier
-      modifier = config["indoor_modifier"] || %{}
-
-      indoor_modifier = %{
-        volume_reduction: modifier["volume_reduction"] || 0.3,
-        exclude_weather: modifier["exclude_weather"] != false
-      }
-
-      %{
-        tag_sounds: tag_sounds,
-        weather_sounds: parse_simple.(config["weather_sounds"]),
-        light_sounds: parse_simple.(config["light_sounds"]),
-        transition_sounds: parse_simple.(config["transition_sounds"]),
-        indoor_modifier: indoor_modifier
-      }
-    else
-      @sound_config
-    end
-  end
-
   # =============================================================================
   # Private Helpers
   # =============================================================================

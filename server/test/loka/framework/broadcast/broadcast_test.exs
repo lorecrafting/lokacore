@@ -2,7 +2,6 @@ defmodule Loka.Framework.BroadcastTest do
   use Loka.DataCase, async: false
 
   alias Loka.Framework.Broadcast
-  alias Loka.Session
 
   describe "format_message/2" do
     test "formats system messages with [System] prefix" do
@@ -18,14 +17,6 @@ defmodule Loka.Framework.BroadcastTest do
     test "formats emergency messages with urgent prefix" do
       assert Broadcast.format_message("Server shutting down", :emergency) ==
                "[!!! EMERGENCY !!!] Server shutting down"
-    end
-  end
-
-  describe "css_class/1" do
-    test "returns correct CSS class for each message type" do
-      assert Broadcast.css_class(:system) == "broadcast-system"
-      assert Broadcast.css_class(:event) == "broadcast-event"
-      assert Broadcast.css_class(:emergency) == "broadcast-emergency"
     end
   end
 

@@ -32,22 +32,6 @@ defmodule Loka.Channel.Validator do
   # ===========================================================================
 
   @doc """
-  Validate a server → client event payload.
-  """
-  @spec validate_server_event(String.t(), map()) :: validation_result()
-  def validate_server_event(event_name, payload) do
-    validate_event(:server, event_name, payload)
-  end
-
-  @doc """
-  Validate a client → server event payload.
-  """
-  @spec validate_client_event(String.t(), map()) :: validation_result()
-  def validate_client_event(event_name, payload) do
-    validate_event(:client, event_name, payload)
-  end
-
-  @doc """
   Validate an event and log errors with context.
   Stores validation errors for later analysis.
   """
@@ -61,30 +45,6 @@ defmodule Loka.Channel.Validator do
         log_validation_error(direction, event_name, reason, payload, context)
         error
     end
-  end
-
-  @doc """
-  Get recent validation errors (for admin dashboard).
-  Returns the last N errors stored in ETS.
-  """
-  @spec get_recent_errors(integer()) :: [map()]
-  def get_recent_errors(limit \\ 100) do
-    ensure_ets_table()
-
-    :ets.tab2list(:channel_validation_errors)
-    |> Enum.sort_by(fn {timestamp, _} -> timestamp end, :desc)
-    |> Enum.take(limit)
-    |> Enum.map(fn {_timestamp, error} -> error end)
-  end
-
-  @doc """
-  Clear all stored validation errors.
-  """
-  @spec clear_errors() :: :ok
-  def clear_errors do
-    ensure_ets_table()
-    :ets.delete_all_objects(:channel_validation_errors)
-    :ok
   end
 
   # ===========================================================================

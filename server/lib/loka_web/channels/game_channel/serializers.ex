@@ -47,37 +47,6 @@ defmodule LokaWeb.Channels.GameChannel.Serializers do
   end
 
   @doc """
-  Serializes basic entity context (without resolved actions).
-
-  NOTE: Prefer using `Loka.Game.Actions.serialize_entity_context/3` which
-  resolves actions based on player state, room context, and equipment.
-
-  This function is kept for backwards compatibility but does not include
-  the server-resolved actions.
-  """
-  @deprecated "Use serialize_entity_context/3 from Loka.Game.Actions instead"
-  def serialize_entity_context(entity) do
-    components = Map.get(entity, :components) || %{}
-
-    component_keys =
-      components
-      |> Map.keys()
-      |> Enum.map(&to_string/1)
-
-    %{
-      id: entity.id,
-      name: entity.name,
-      type: Map.get(entity, :type, :npc),
-      long_desc: Map.get(entity, :long_desc) || "",
-      description: entity.description || Map.get(entity, :extra_desc),
-      primary_keyword: Map.get(entity, :primary_keyword),
-      components: component_keys,
-      tags: Map.get(entity, :tags) || [],
-      actions: []
-    }
-  end
-
-  @doc """
   Serializes an item for room display.
   """
   def serialize_item(item) do

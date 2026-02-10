@@ -168,16 +168,20 @@ defmodule Loka.Framework.Combat.DamageMessageTest do
     end
   end
 
-  describe "critical_message/3" do
+  describe "critical hits via generate/4" do
     test "generates melee critical message" do
-      messages = DamageMessage.critical_message(%{name: "Alice"}, %{name: "goblin"})
+      messages =
+        DamageMessage.generate(20, %{name: "Alice"}, %{name: "goblin"}, critical: true)
 
       assert messages.to_attacker =~ ~r/CRITICAL/i
     end
 
     test "generates backstab critical message" do
       messages =
-        DamageMessage.critical_message(%{name: "Alice"}, %{name: "goblin"}, type: :backstab)
+        DamageMessage.generate(20, %{name: "Alice"}, %{name: "goblin"},
+          critical: true,
+          type: :backstab
+        )
 
       assert messages.to_attacker =~ ~r/backstab|back/i
     end
@@ -208,22 +212,6 @@ defmodule Loka.Framework.Combat.DamageMessageTest do
       messages = DamageMessage.flee(:fail, %{name: "Alice"}, %{name: "goblin"})
 
       assert messages.to_attacker =~ ~r/flee|escape|block|fail|thwart/i
-    end
-  end
-
-  describe "get_tier_verb/1" do
-    test "returns correct verb for damage range" do
-      assert DamageMessage.get_tier_verb(0) == "miss"
-      assert DamageMessage.get_tier_verb(1) == "tickle"
-      assert DamageMessage.get_tier_verb(5) == "barely scratch"
-      assert DamageMessage.get_tier_verb(10) == "scratch"
-      assert DamageMessage.get_tier_verb(15) == "graze"
-      assert DamageMessage.get_tier_verb(18) == "hit"
-      assert DamageMessage.get_tier_verb(25) == "injure"
-      assert DamageMessage.get_tier_verb(40) == "wound"
-      assert DamageMessage.get_tier_verb(55) == "maul"
-      assert DamageMessage.get_tier_verb(75) == "devastate"
-      assert DamageMessage.get_tier_verb(100) == "OBLITERATE"
     end
   end
 

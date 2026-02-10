@@ -11,11 +11,9 @@ defmodule Loka.MixProject do
       aliases: aliases(),
       deps: deps(),
       compilers: [:boundary, :phoenix_live_view] ++ Mix.compilers(),
-      listeners: [Phoenix.CodeReloader],
-
       # ExDoc configuration
       name: "Loka",
-      source_url: "https://github.com/yourusername/lokacore",
+      source_url: "https://github.com/lorecrafting/lokacore",
       docs: docs()
     ]
   end

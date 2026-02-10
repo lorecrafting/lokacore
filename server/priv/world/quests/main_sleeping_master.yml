@@ -38,7 +38,6 @@ rewards:
     - cave_entrance_key
   unlocks:
     - main_three_trials
-  companion_available: novice_pema
 journal_entries:
   accepted:
     lua: |

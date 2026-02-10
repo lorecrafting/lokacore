@@ -138,12 +138,4 @@ defmodule Loka.Framework.Broadcast do
       :emergency -> "[!!! EMERGENCY !!!] #{message}"
     end
   end
-
-  @doc """
-  Returns the CSS class for a message type (for frontend styling).
-  """
-  @spec css_class(message_type()) :: String.t()
-  def css_class(:system), do: "broadcast-system"
-  def css_class(:event), do: "broadcast-event"
-  def css_class(:emergency), do: "broadcast-emergency"
 end

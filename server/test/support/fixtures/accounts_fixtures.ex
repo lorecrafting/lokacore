@@ -7,7 +7,6 @@ defmodule Loka.AccountsFixtures do
   import Ecto.Query
 
   alias Loka.Accounts
-  alias Loka.Accounts.Scope
 
   def unique_player_email, do: "player#{System.unique_integer()}@example.com"
   def valid_player_password, do: "hello world!"
@@ -39,15 +38,6 @@ defmodule Loka.AccountsFixtures do
       Accounts.login_player_by_magic_link(token)
 
     player
-  end
-
-  def player_scope_fixture do
-    player = player_fixture()
-    player_scope_fixture(player)
-  end
-
-  def player_scope_fixture(player) do
-    Scope.for_player(player)
   end
 
   def set_password(player) do

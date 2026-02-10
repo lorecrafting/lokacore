@@ -6,8 +6,8 @@
 set -e
 
 # Configuration
-DB_PATH="${DATABASE_PATH:-/mnt/loka_data/loka.db}"
-BACKUP_DIR="${BACKUP_DIR:-/mnt/loka_data/backups}"
+DB_PATH="${DATABASE_PATH:-/mnt/lokacore_data/lokacore.db}"
+BACKUP_DIR="${BACKUP_DIR:-/mnt/lokacore_data/backups}"
 
 if [ -z "$1" ]; then
     echo "=== Loka Database Restore ==="
@@ -88,4 +88,4 @@ fi
 
 echo ""
 echo "=== Restore complete ==="
-echo "Please restart the application: fly apps restart loka"
+echo "Please restart the application: fly apps restart lokacore"

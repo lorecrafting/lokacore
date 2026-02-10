@@ -242,7 +242,7 @@ classDiagram
 
 ## Framework Subsystem Relationships
 
-How the 27 framework subsystems interact.
+How the 21 framework subsystems interact.
 
 ```mermaid
 flowchart TB
@@ -253,7 +253,6 @@ flowchart TB
     end
 
     subgraph Character["Character Systems"]
-        Abilities["Abilities"]
         Skills["Skills"]
         Status["Status Effects"]
         Resources["Resources\n(Mana/Stamina)"]
@@ -262,7 +261,6 @@ flowchart TB
     subgraph World["World Systems"]
         WorldSys["World\n(Rooms)"]
         Economy["Economy\n(Shops)"]
-        Faction["Factions"]
     end
 
     subgraph Gameplay["Gameplay Systems"]
@@ -274,7 +272,6 @@ flowchart TB
     subgraph Crafting["Crafting Systems"]
         CraftSys["Crafting"]
         Gathering["Gathering"]
-        Magic["Magic"]
     end
 
     Player --> Inventory
@@ -283,9 +280,7 @@ flowchart TB
     Player --> Resources
 
     Progression --> Skills
-    Skills --> Abilities
-    Abilities --> Combat
-    Abilities --> Magic
+    Skills --> Combat
 
     Combat --> Status
     Combat --> Resources
@@ -296,7 +291,6 @@ flowchart TB
     Quest --> Inventory
 
     Economy --> Inventory
-    Economy --> Faction
 
     Gathering --> Inventory
     Gathering --> Skills

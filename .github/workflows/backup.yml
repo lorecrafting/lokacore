@@ -18,14 +18,14 @@ jobs:
 
       - name: Run backup script
         run: |
-          flyctl ssh console -a loka -C "/app/scripts/backup_db.sh"
+          flyctl ssh console -a lokacore -C "/app/scripts/backup_db.sh"
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
       - name: Verify backup
         run: |
           echo "Listing backups..."
-          flyctl ssh console -a loka -C "ls -lh /mnt/loka_data/backups/"
+          flyctl ssh console -a lokacore -C "ls -lh /mnt/lokacore_data/backups/"
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 

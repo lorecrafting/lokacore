@@ -100,5 +100,5 @@ Review monitoring, logging, error tracking, and debugging infrastructure.
 - Quest completion events are metrics
 - Combat round timing is measured
 - Session connect/disconnect rates tracked
-- Lua script execution time monitored
+- Elixir script execution time monitored
 - Zone reset events logged

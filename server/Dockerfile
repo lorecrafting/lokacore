@@ -14,30 +14,16 @@
 ARG ELIXIR_VERSION=1.19.4
 ARG OTP_VERSION=28.3
 ARG DEBIAN_VERSION=trixie-20251208-slim
-ARG GO_VERSION=1.24.4
 
 ARG BUILDER_IMAGE="docker.io/hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
 ARG RUNNER_IMAGE="docker.io/debian:${DEBIAN_VERSION}"
 
 FROM ${BUILDER_IMAGE} AS builder
 
-ARG GO_VERSION
-
-# install build dependencies and Go
+# install build dependencies
 RUN apt-get update \
   && apt-get install -y --no-install-recommends build-essential git curl \
   && rm -rf /var/lib/apt/lists/*
-
-# Install Go (detect architecture)
-RUN ARCH=$(dpkg --print-architecture) && \
-    if [ "$ARCH" = "amd64" ]; then GOARCH="amd64"; \
-    elif [ "$ARCH" = "arm64" ]; then GOARCH="arm64"; \
-    else echo "Unsupported architecture: $ARCH" && exit 1; fi && \
-    curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-${GOARCH}.tar.gz" -o /tmp/go.tar.gz && \
-    tar -C /usr/local -xzf /tmp/go.tar.gz && \
-    rm /tmp/go.tar.gz
-
-ENV PATH="/usr/local/go/bin:${PATH}"
 
 # prepare build dir
 WORKDIR /app

@@ -44,7 +44,7 @@ Loka is an **engine framework** (not a game) built on Elixir/Phoenix/LiveView, d
 - Command parsing and routing
 - Event bus and pub/sub
 - Persistence and state management
-- Scripting sandbox (Lua via Luerl)
+- Scripting sandbox (Elixir, sandboxed)
 - Session and connection management
 - Encrypted messaging infrastructure
 
@@ -61,7 +61,7 @@ Loka is an **engine framework** (not a game) built on Elixir/Phoenix/LiveView, d
 - World geography (rooms, areas, regions)
 - Entities (NPCs, items, objects)
 - Narrative (quests, dialogue, cutscenes)
-- Custom behaviors (via Lua scripts)
+- Custom behaviors (via Elixir scripts)
 - Visual presentation (LiveView components)
 - Game rules and balance
 
@@ -92,7 +92,7 @@ defmodule Loka.Entity do
     :behaviors,             # List of behavior modules
     :attributes,            # Flexible key-value storage (EAV pattern)
     :tags,                  # Categorization tags
-    :scripts,               # Attached Lua scripts
+    :scripts,               # Attached Elixir scripts
     :locks,                 # Access control rules
     :metadata,              # System metadata (timestamps, versions)
   ]
@@ -154,7 +154,7 @@ defmodule Loka.Components do
     defstruct [
       :tick_interval,     # How often to process
       :last_tick,         # Timestamp of last tick
-      :tick_script,       # Lua script to run on tick
+      :tick_script,       # Elixir script to run on tick
     ]
   end
   
@@ -220,7 +220,7 @@ defmodule Loka.Behaviors.NPC do
   
   @impl true
   def handle_event(entity, %Event{type: :tick}, _context) do
-    # Run Lua AI script if present
+    # Run Elixir AI script if present
     case entity.scripts[:on_tick] do
       nil -> {:ok, entity}
       script -> 
@@ -661,7 +661,7 @@ end
 ```elixir
 defmodule Loka.EventHooks do
   @moduledoc """
-  Predefined hook points that Lua scripts can attach to.
+  Predefined hook points that Elixir scripts can attach to.
   """
   
   @hooks %{
@@ -701,167 +701,19 @@ end
 
 ---
 
-## Part 6: Scripting System (Lua Integration)
+## Part 6: Scripting System (Elixir Sandbox)
 
-### 6.1 Sandboxed Lua Execution
+Loka uses sandboxed Elixir for game scripting instead of an external language. Scripts are written in a restricted subset of Elixir and executed within a controlled environment that prevents access to the file system, network, and dangerous modules.
 
-```elixir
-defmodule Loka.Scripting do
-  @moduledoc """
-  Lua scripting integration using Luerl.
-  
-  Scripts are executed in a sandboxed environment with:
-  - No file system access
-  - No network access
-  - CPU/memory limits
-  - Controlled API exposure
-  """
-  
-  alias Lua, as: LuaVM
-  
-  @max_reductions 10_000  # CPU limit
-  @max_memory_kb 1024     # Memory limit
-  
-  def execute(script, entity, context \\ %{}) do
-    lua = init_sandbox()
-    |> inject_entity(entity)
-    |> inject_context(context)
-    |> inject_api()
-    
-    case LuaVM.eval(lua, script, max_reductions: @max_reductions) do
-      {:ok, result, new_lua} ->
-        {:ok, extract_changes(new_lua, entity)}
-      {:error, reason} ->
-        {:error, {:script_error, reason}}
-    end
-  end
-  
-  defp init_sandbox do
-    LuaVM.init()  # Sandbox mode by default
-  end
-  
-  defp inject_api(lua) do
-    lua
-    |> LuaVM.set!([:game, :message], &api_message/2)
-    |> LuaVM.set!([:game, :move_entity], &api_move_entity/2)
-    |> LuaVM.set!([:game, :spawn_entity], &api_spawn_entity/2)
-    |> LuaVM.set!([:game, :set_flag], &api_set_flag/2)
-    |> LuaVM.set!([:game, :get_flag], &api_get_flag/2)
-    |> LuaVM.set!([:game, :start_quest], &api_start_quest/2)
-    |> LuaVM.set!([:game, :gain_xp], &api_gain_xp/2)
-    |> LuaVM.set!([:game, :emit_event], &api_emit_event/2)
-    |> LuaVM.set!([:game, :delay], &api_delay/2)
-    |> LuaVM.set!([:game, :random], &api_random/2)
-  end
-  
-  # Example API function exposed to Lua
-  defp api_message(lua, args) do
-    [target_id, message] = args
-    event = %Event{
-      type: :message,
-      target: target_id,
-      payload: message
-    }
-    Loka.EventBus.emit(event)
-    {[], lua}
-  end
-end
-```
+Key features of the scripting sandbox:
+- **Native Elixir**: Scripts use familiar Elixir syntax, no separate language runtime
+- **Module restrictions**: Only whitelisted modules/functions are available
+- **Resource limits**: CPU and memory bounded execution
+- **Game API exposure**: Scripts interact with entities, events, and game state through a controlled API
 
-### 6.2 Script Examples
+Scripts are defined in YAML content files under `priv/world/scripts/` and attached to entities via hooks (22 lifecycle event types).
 
-```lua
--- NPC greeting script (attached to at_player_enter hook)
-function on_player_enter(player)
-  if player.level < 5 then
-    game.message(player.id, "Welcome, young adventurer! I am the village elder.")
-    game.message(player.id, "Would you like me to explain how things work here?")
-  else
-    game.message(player.id, "Greetings, " .. player.name .. ". How may I assist you?")
-  end
-end
-
--- Shop keeper behavior (attached to at_greet hook)
-function on_greet(player)
-  local relationship = entity.get_relationship(player.id)
-  
-  if relationship < 0 then
-    game.message(player.id, "I don't do business with troublemakers.")
-    return false  -- Cancel interaction
-  end
-  
-  if relationship > 50 then
-    game.message(player.id, "Ah, my favorite customer! Let me show you the good stuff.")
-    entity.set_flag("show_rare_items", true)
-  else
-    game.message(player.id, "Welcome to my shop. Browse at your leisure.")
-  end
-  
-  return true
-end
-
--- Combat AI for boss monster (attached to at_tick hook)
-function on_tick()
-  local health_percent = entity.health.current / entity.health.max
-  
-  if health_percent < 0.25 and not entity.get_flag("enraged") then
-    entity.set_flag("enraged", true)
-    game.message_room(entity.location, entity.name .. " becomes enraged!")
-    entity.stats.strength = entity.stats.strength * 1.5
-  end
-  
-  -- Random ability usage
-  if entity.in_combat and game.random() < 0.3 then
-    local abilities = {"fireball", "tail_sweep", "roar"}
-    local ability = abilities[game.random(1, #abilities)]
-    game.use_ability(entity.id, ability, entity.combat_target)
-  end
-end
-```
-
-### 6.3 Script Security Model
-
-```elixir
-defmodule Loka.Scripting.Security do
-  @moduledoc """
-  Security policies for Lua scripts.
-  """
-  
-  @blocked_globals [
-    "os", "io", "file", "require", "dofile", "loadfile",
-    "debug", "package", "rawget", "rawset", "rawequal"
-  ]
-  
-  @allowed_math [
-    "abs", "ceil", "floor", "max", "min", "random", "sqrt"
-  ]
-  
-  @allowed_string [
-    "byte", "char", "find", "format", "gsub", "len", 
-    "lower", "match", "rep", "sub", "upper"
-  ]
-  
-  @allowed_table [
-    "concat", "insert", "remove", "sort", "unpack"
-  ]
-  
-  def validate_script(source) do
-    # Static analysis for dangerous patterns
-    checks = [
-      &check_blocked_globals/1,
-      &check_infinite_loops/1,
-      &check_memory_abuse/1,
-    ]
-    
-    Enum.reduce_while(checks, :ok, fn check, _acc ->
-      case check.(source) do
-        :ok -> {:cont, :ok}
-        error -> {:halt, error}
-      end
-    end)
-  end
-end
-```
+For the detailed scripting system design, see `docs/architecture/elixir-scripts-design.md`.
 
 ---
 
@@ -1212,7 +1064,7 @@ defmodule Loka.Schema.Script do
   schema "scripts" do
     field :entity_id, :binary_id
     field :hook, :string  # e.g., "at_player_enter"
-    field :source, :text  # Lua source code
+    field :source, :text  # Elixir source code
     field :compiled, :binary  # Pre-compiled chunk
     field :enabled, :boolean, default: true
     
@@ -4699,7 +4551,7 @@ end
 | **Entity-Component-Behavior over Typeclasses** | Better composition, easier to reason about, works naturally with Elixir's functional paradigm |
 | **GenServer per active entity** | Natural isolation, crash resilience, easy state management |
 | **ETS for caching** | Blazing fast reads without GenServer bottleneck, concurrent access |
-| **Lua for scripting (via Luerl)** | Runs on BEAM (no external process), sandboxable, familiar to game devs |
+| **Elixir for scripting (sandboxed)** | Runs on BEAM (no external process), sandboxed, native to the stack |
 | **SQLite on same machine** | Zero network latency, ~$5/month total, simple backups, upgrade to PostgreSQL later if needed |
 | **Custom Phoenix Auth (phx.gen.auth + Guardian)** | Single auth system, no external dependencies, full control |
 | **Phoenix PubSub for events** | Built-in, scales to clusters, LiveView integration |
@@ -4716,7 +4568,7 @@ end
 +-------------------------------------------------------------------------+
 |                          CLIENT APPLICATIONS                             |
 +-------------------------------------+-----------------------------------+
-|        React Native App             |            Web Clients             |
+|        Godot 4.6 App               |            Web Clients             |
 |       (iOS + Android)               |    (LiveView - Player/Creator/Admin|
 |                                     |                                    |
 |   Phoenix Channels (WebSocket)      |   LiveView (WebSocket under hood)  |
@@ -4741,7 +4593,7 @@ end
        |  |  +---------------------------------------------+    |  |
        |  |  |              Loka Game Engine               |    |  |
        |  |  |  * Entity GenServers  * Command Pipeline    |    |  |
-       |  |  |  * Lua Scripting      * Event Bus (PubSub)  |    |  |
+       |  |  |  * Elixir Scripting   * Event Bus (PubSub)  |    |  |
        |  |  +---------------------------------------------+    |  |
        |  |                         |                           |  |
        |  |                         | Ecto (ecto_sqlite3)       |  |
@@ -6500,7 +6352,7 @@ alias loka-logs="flyctl logs -a loka"
 - [ ] Set up OTA updates with EAS Update
 
 ### Phase 4: Scripting System (Weeks 13-16)
-- [ ] Lua integration via Luerl
+- [ ] Elixir scripting sandbox
 - [ ] Security sandbox implementation
 - [ ] Script editor UI in creator tools
 - [ ] Script testing and validation
@@ -6569,7 +6421,7 @@ mix phx.new . --app loka --database sqlite --live
 # Add to mix.exs deps:
 # {:ecto_sqlite3, "~> 0.15"},       # SQLite adapter
 # {:guardian, "~> 2.3"},            # JWT for mobile auth
-# {:luerl, "~> 1.0"},               # Lua scripting
+# Elixir scripting is native — no external dependency needed
 # {:phoenix_live_dashboard, "~> 0.8"}, # Already included
 # {:argon2_elixir, "~> 4.0"},       # Secure password hashing
 

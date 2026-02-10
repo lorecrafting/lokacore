@@ -153,15 +153,7 @@ defmodule Loka.Framework.Combat.DamageMessage do
     }
   end
 
-  @doc """
-  Generate a critical hit message.
-
-  ## Options
-
-  - `:type` - Critical type (`:melee`, `:backstab`). Default: `:melee`
-  """
-  @spec critical_message(entity(), entity(), keyword()) :: messages()
-  def critical_message(attacker, defender, opts \\ []) do
+  defp critical_message(attacker, defender, opts) do
     crit_type = Keyword.get(opts, :type, :melee)
     crit_config = get_in(@config, ["critical", to_string(crit_type)]) || %{}
 
@@ -215,29 +207,6 @@ defmodule Loka.Framework.Combat.DamageMessage do
       to_attacker: select_and_substitute(config["to_attacker"], attacker, defender),
       to_room: select_and_substitute(config["to_room"], attacker, defender)
     }
-  end
-
-  @doc """
-  Reload the damage message configuration from disk.
-
-  Useful for hot-reloading during development.
-  """
-  @spec reload_config() :: :ok | {:error, term()}
-  def reload_config do
-    # This requires runtime loading since @config is compile-time
-    # For now, restart is needed. Future: use Agent or ETS for runtime config.
-    :ok
-  end
-
-  @doc """
-  Get the verb for a damage tier.
-
-  Useful for weapon override lookups.
-  """
-  @spec get_tier_verb(integer()) :: String.t()
-  def get_tier_verb(damage) do
-    tier = find_tier(damage, get_in(@config, ["melee", "tiers"]) || [])
-    tier["verb"] || "hit"
   end
 
   # Private functions

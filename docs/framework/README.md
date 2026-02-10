@@ -413,6 +413,10 @@ components:
 
 ### Social Systems
 
+**Social** (`social/`) provides chat channels and party grouping. Players can communicate via public, private, or system channels (e.g., trade, newbie, announcements), and a `MessageRouter` delivers scoped messages (room, direct, party) to the correct PubSub recipients. The `PartyManager` handles temporary player groups of up to 6 for coordinated gameplay.
+
+**Spark** (`spark/`) is the companion system. Every player bonds with a Spark during character creation -- a persistent companion that tracks world events while the player is offline and delivers "while you were away" summaries on login. The Spark's bond level and personality traits evolve over time through gameplay interactions.
+
 ## Common Patterns
 
 ### Registry Pattern

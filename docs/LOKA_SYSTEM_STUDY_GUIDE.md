@@ -24,7 +24,7 @@
 9. [YAML Prototypes & Validation](#9-yaml-prototypes--validation)
 10. [Session & Transport Layer](#10-session--transport-layer)
 11. [Timer System](#11-timer-system)
-12. [Framework Subsystems (31)](#12-framework-subsystems)
+12. [Framework Subsystems (21)](#12-framework-subsystems)
 13. [Game Actions Coordinator](#13-game-actions-coordinator)
 14. [Game Mechanics Layer](#14-game-mechanics-layer)
 15. [NPC Behaviors System](#15-npc-behaviors-system)
@@ -70,13 +70,13 @@ Loka is an Elixir-based MUD (Multi-User Dungeon) engine framework. It leverages 
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ CLIENTS - Mobile (React Native) + Web (LiveView)           │
+│ CLIENTS - Mobile (Godot 4.6) + Web (LiveView)              │
 ├─────────────────────────────────────────────────────────────┤
 │ WORLD BUILDER - lib/loka/world_builder/ (content creation) │
 ├─────────────────────────────────────────────────────────────┤
 │ GAME CONTENT - priv/world/prototypes/ (YAML)               │
 ├─────────────────────────────────────────────────────────────┤
-│ GAME FRAMEWORK - lib/loka/framework/ (33 subsystems)       │
+│ GAME FRAMEWORK - lib/loka/framework/ (21 subsystems)       │
 ├─────────────────────────────────────────────────────────────┤
 │ ENGINE CORE - lib/loka/engine/ (entities, events, commands)│
 ├─────────────────────────────────────────────────────────────┤
@@ -1070,7 +1070,7 @@ Timers continue while players are offline:
 
 **Location:** `lib/loka/framework/`
 
-The Framework layer contains 33 reusable game subsystems built on Engine primitives.
+The Framework layer contains 21 reusable game subsystems built on Engine primitives.
 
 ### Subsystem Categories
 
@@ -1079,6 +1079,7 @@ The Framework layer contains 33 reusable game subsystems built on Engine primiti
 |-----------|---------|
 | **Player** | GameState struct, character data |
 | **Inventory** | Item management, equipment, containers |
+| **Equipment** | Equipable items with slot/bonus system |
 | **Progression** | XP, leveling, skill points |
 | **Combat** | Turn-based PvE/PvP with auto-combat |
 | **Quest** | Quest/mission system with objectives |
@@ -1087,35 +1088,30 @@ The Framework layer contains 33 reusable game subsystems built on Engine primiti
 #### Character Systems
 | Subsystem | Purpose |
 |-----------|---------|
-| **Abilities** | Special powers and actions |
 | **Skills** | LegendMUD-style 100-point skills |
 | **Status** | Buffs, debuffs, conditions |
 | **Resources** | Health, mana, stamina pools |
-| **Appearance** | Clothing and cosmetics |
 
 #### World Systems
 | Subsystem | Purpose |
 |-----------|---------|
-| **World** | Room loading, atmosphere |
+| **World** | Room loading, atmosphere, ambient |
 | **Economy** | Gold, shops, trading |
-| **Housing** | Player housing |
 
 #### Crafting Systems
 | Subsystem | Purpose |
 |-----------|---------|
 | **Crafting** | Recipe-based item creation |
 | **Gathering** | Resource harvesting |
-| **Farming** | Crop growth and harvesting |
-| **Magic** | Spell system |
 
 #### Social Systems
 | Subsystem | Purpose |
 |-----------|---------|
-| **Social** | Channels, parties, relationships |
-| **Companion** | Pet/follower system with loyalty, hunger, happiness |
-| **Messaging** | In-game mail |
+| **Social** | Channels, parties |
 | **Broadcast** | Global announcements (system, event, emergency) |
 | **Spark** | AI companion with bond progression and hints |
+| **Emotes** | Player emote/social actions |
+| **Cutscenes** | Scripted narrative sequences |
 
 ### Player.GameState
 
@@ -2817,7 +2813,7 @@ fly deploy
 | Layer | Count |
 |-------|-------|
 | Engine Core | 43 modules |
-| Framework | 100+ modules (33 subsystems) |
+| Framework | 100+ modules (21 subsystems) |
 | World Builder | 12 modules |
 | Session/Auth | 8 modules |
 | Game Actions | 10 modules |
@@ -2941,7 +2937,7 @@ tags: [weapon, quest_reward]
 - `Plugin`, `PluginLoader`, `PluginSupervisor`
 - Schema modules: `EntitySchema`, `EntityAttribute`, `ScriptSchema`
 
-### Framework (85+ modules across 31 subsystems)
+### Framework (85+ modules across 21 subsystems)
 - Player, Inventory (7), Combat (10), Quest (19)
 - Skills (3), Resources (5), Status (3)
 - Social (7), Dialogue, Crafting (4), Gathering (3), Farming (4)

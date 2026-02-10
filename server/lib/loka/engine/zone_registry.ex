@@ -13,7 +13,7 @@ defmodule Loka.Engine.ZoneRegistry do
   use GenServer
   require Logger
 
-  alias Loka.Engine.{Zone, ZoneLoader, EntityRegistry, TypedObject}
+  alias Loka.Engine.{Zone, ZoneLoader, EntityRegistry, EntityServer, TypedObject}
   alias Loka.Content
 
   @registry_table :loka_zone_registry
@@ -263,11 +263,19 @@ defmodule Loka.Engine.ZoneRegistry do
   end
 
   defp room_has_players?(room_key) do
-    # Use EntityRegistry to check for player entities in the room
-    # get_room_occupants returns list of {entity_id, entity_type} tuples
+    # get_room_occupants returns a flat list of entity_id strings
     try do
-      occupants = EntityRegistry.get_room_occupants(room_key)
-      Enum.any?(occupants, fn {_id, type} -> type == :character end)
+      EntityRegistry.get_room_occupants(room_key)
+      |> Enum.any?(fn entity_id ->
+        case EntityRegistry.lookup(entity_id) do
+          {:ok, pid} ->
+            entity = EntityServer.get_entity(pid)
+            entity && entity.type == :character
+
+          :not_found ->
+            false
+        end
+      end)
     rescue
       _ -> false
     end
@@ -276,8 +284,16 @@ defmodule Loka.Engine.ZoneRegistry do
   defp get_players_in_room(room_key) do
     try do
       EntityRegistry.get_room_occupants(room_key)
-      |> Enum.filter(fn {_id, type} -> type == :character end)
-      |> Enum.map(fn {id, _type} -> id end)
+      |> Enum.filter(fn entity_id ->
+        case EntityRegistry.lookup(entity_id) do
+          {:ok, pid} ->
+            entity = EntityServer.get_entity(pid)
+            entity && entity.type == :character
+
+          :not_found ->
+            false
+        end
+      end)
     rescue
       _ -> []
     end

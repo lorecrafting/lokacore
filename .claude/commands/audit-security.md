@@ -17,7 +17,7 @@ Comprehensive security review of the Loka codebase.
 - User input sanitization in LiveView events
 - Command parsing safety
 - YAML prototype injection vectors
-- Lua script sandboxing effectiveness (verify CPU/memory limits, check for sandbox escape)
+- Elixir script sandboxing effectiveness (verify CPU/memory limits, check for sandbox escape)
 - SQL injection prevention (Ecto parameterization)
 - Dynamic atom creation from user input (String.to_atom safety)
 

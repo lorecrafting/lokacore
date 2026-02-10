@@ -5,7 +5,6 @@ defmodule Loka.Framework.EquipmentTest do
   alias Loka.Framework.Inventory
   alias Loka.Framework.Player.GameState
 
-  import Loka.EngineFixtures
   import Loka.AccountsFixtures
 
   # Helper to create an equipable item

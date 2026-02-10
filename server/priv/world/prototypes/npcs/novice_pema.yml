@@ -19,7 +19,6 @@ mood: anxious
 
 tags:
   - friendly
-  - companion
   - monastery
 
 # Behaviors - Pema stays by Tenzin's side but reacts to time
@@ -208,10 +207,3 @@ components:
       choices:
         - text: "Thank you."
           next: null
-  companion:
-    can_join: true
-    combat_style: support
-    growth_arc: courage
-    abilities:
-      - minor_heal
-      - encourage

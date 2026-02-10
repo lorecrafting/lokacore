@@ -322,9 +322,8 @@ func _on_character_created(character_data: Dictionary) -> void:
 		if phoenix:
 			phoenix.create_character(character_data)
 	else:
-		# For offline/mock mode, update MockWorld with the stats
-		var stats: Dictionary = character_data.get("stats", {})
-		MockWorld.update_player_stats(stats)
+		# Offline/mock mode - stats are stored in GameState, not MockWorld
+		pass
 
 	_show_game_screen()
 

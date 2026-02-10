@@ -16,19 +16,6 @@ jobs:
         elixir: ['1.19.4']
         otp: ['28.3']
 
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_PASSWORD: postgres
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-
     env:
       MIX_ENV: test
 
