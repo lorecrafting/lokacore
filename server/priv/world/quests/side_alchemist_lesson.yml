@@ -17,7 +17,7 @@ objectives:
 
   - id: craft_incense
     type: craft
-    target_id: recipe_meditation_incense
+    target_id: meditation_incense
     description: "Prepare meditation incense"
     target_count: 1
 

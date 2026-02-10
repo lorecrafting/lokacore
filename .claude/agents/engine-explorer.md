@@ -13,7 +13,7 @@ You are analyzing Loka's engine layer. Your job is **exploration and analysis on
 ## Focus Areas
 
 - `lib/loka/engine/` - Core entity system
-- `lib/loka/framework/` - 27 game subsystems
+- `lib/loka/framework/` - ~21 game subsystems
 - `docs/architecture/` - Design documentation
 
 ## Tasks You Handle

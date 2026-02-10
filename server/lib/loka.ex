@@ -37,10 +37,9 @@ defmodule Loka do
 
   ## Known Violations (suppressed via check: [out: false])
 
-  Engine outbound violations (14):
+  Engine outbound violations (13):
   - `Engine.EntityRegistry` -> `Session.Registry` (2 refs)
   - `Engine.Script.Executor` -> `Content.Script` (5 refs)
-  - `Engine.WorldImporter` -> `LokaWeb.Channels.RoomHelpers` (1 ref)
   - `Engine.ZoneRegistry` -> `Content.Zone` (6 refs)
 
   Framework outbound violations (14):

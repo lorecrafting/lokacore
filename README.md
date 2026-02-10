@@ -13,16 +13,6 @@ Loka is a MUD (Multi-User Dungeon) engine framework for building text-based RPGs
 - **Sandboxed scripting** - Elixir-based scripting for game customization
 - **Quest and dialogue systems** - Built-in support for narrative content
 
-## Tech Stack
-
-| Layer | Technology |
-|-------|------------|
-| Backend | Elixir 1.19 / Phoenix 1.8 |
-| Real-time | Phoenix Channels |
-| Database | SQLite (via Ecto) |
-| Mobile Client | Godot 4.6 |
-| Auth | Guardian JWT |
-
 ## Project Structure
 
 ```
@@ -87,10 +77,9 @@ cd godot-client
 ./build_web.sh --fast
 ```
 
-See `CLAUDE.md` for detailed Godot development workflows.
-
-
 ## Development
+
+See `CLAUDE.md` for the comprehensive development guide, including architecture details, all routes and API endpoints, test commands, deployment, and coding conventions.
 
 ### Running Tests
 
@@ -107,63 +96,6 @@ mix loka.test.validate
 mix loka.test
 ```
 
-### Key Routes
-
-| Path | Description |
-|------|-------------|
-| `/` | Landing page |
-| `/admin` | Admin dashboard (requires auth) |
-| `/admin/builder` | Terminal Builder (MUD-style content creation) |
-
-> **Note:** The main game client is the Godot app, which connects via Phoenix Channels (WebSocket).
-
-### API Endpoints
-
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/api/v1/auth/register` | Register new account |
-| POST | `/api/v1/auth/login` | Login, returns JWT |
-| POST | `/api/v1/auth/refresh` | Refresh access token |
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│ GAME CONTENT - priv/world/ (YAML)                           │
-│   Rooms, NPCs, Items, Quests, Dialogues                     │
-├─────────────────────────────────────────────────────────────┤
-│ GAME FRAMEWORK - lib/loka/framework/                        │
-│   Combat, Quests, Inventory, Dialogue, Progression          │
-├─────────────────────────────────────────────────────────────┤
-│ ENGINE CORE - lib/loka/engine/                              │
-│   Entities, Prototypes, Events, Commands, Hooks, Scripting  │
-├─────────────────────────────────────────────────────────────┤
-│ PLATFORM - Phoenix 1.8, Channels, Ecto + SQLite             │
-└─────────────────────────────────────────────────────────────┘
-```
-
-**Key concepts:**
-- **Entities** are GenServer processes with components (data) and behaviors (logic)
-- **Prototypes** are YAML templates with inheritance - define content without code
-- **Hooks** provide 22 lifecycle extension points for game logic
-- **Locks** offer string-based access control (`"perm(admin) OR has_item(key)"`)
-
-See [Architecture Documentation](docs/architecture/README.md) for the full deep-dive.
-
-## AI-Assisted Development
-
-Loka is designed for AI-assisted development. The codebase includes context files that help LLMs understand the architecture:
-
-| File | Purpose |
-|------|---------|
-| `CLAUDE.md` | Primary context - architecture, patterns, commands |
-| `docs/README.md` | Documentation index organized by role |
-
-**Getting started with an AI assistant:**
-1. Point it at `CLAUDE.md` for project context
-2. Use `docs/builder-reference/*.md` for content creation (quests, dialogues, entities)
-3. Run `mix loka.test.validate` to verify content changes
-
 ## Documentation
 
 Organized by [traditional MUD roles](docs/README.md):
@@ -173,18 +105,6 @@ Organized by [traditional MUD roles](docs/README.md):
 | **Builder** | [docs/builder-reference/](docs/builder-reference/) | YAML specs (quests, dialogues, entities) |
 | **Developer** | [docs/architecture/](docs/architecture/), [docs/framework/](docs/framework/) | Elixir code, system design |
 | **Admin** | [docs/admin/](docs/admin/), [docs/operations/](docs/operations/) | Dashboard, live ops, security |
-| **Game** | [docs/game/](docs/game/) | Game-specific lore (Monastery Arc) |
-
-### Key References
-
-| Topic | Location |
-|-------|----------|
-| **Documentation Index** | [docs/README.md](docs/README.md) |
-| Architecture Overview | [docs/architecture/README.md](docs/architecture/README.md) |
-| Quest/Dialogue/Entity YAML | [docs/builder-reference/](docs/builder-reference/) |
-| Scripting API | [docs/architecture/elixir-scripts-design.md](docs/architecture/elixir-scripts-design.md) |
-| Channel API | [docs/api/channel-contract.md](docs/api/channel-contract.md) |
-| Full Specification | [docs/Loka_Engine_Architecture.md](docs/Loka_Engine_Architecture.md) |
 
 ## Deployment
 
@@ -196,7 +116,7 @@ fly deploy
 
 ## Acknowledgments
 
-Special thanks to the [Evennia](https://github.com/evennia/evennia) project and community. Evennia's pioneering work in Python MUD development—particularly its elegant approaches to typeclasses, lock strings, and in-game scripting—provided invaluable inspiration and learning. If you're building a MUD in Python, Evennia is an excellent choice.
+Special thanks to the [Evennia](https://github.com/evennia/evennia) project and community. Evennia's pioneering work in Python MUD development provided invaluable inspiration and learning. If you're building a MUD in Python, Evennia is an excellent choice.
 
 ## License
 

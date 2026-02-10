@@ -165,18 +165,6 @@ defmodule Loka.Framework.Resources.ResourceTest do
     end
   end
 
-  describe "valid_conditions/0" do
-    test "returns list of valid conditions" do
-      conditions = Resource.valid_conditions()
-      assert :always in conditions
-      assert :out_of_combat in conditions
-      assert :resting in conditions
-      assert :never in conditions
-      assert :in_combat in conditions
-      assert length(conditions) == 5
-    end
-  end
-
   describe "regenerates?/1" do
     test "returns false when regen_condition is :never" do
       resource = %Resource{regen_condition: :never, regen_rate: 5}

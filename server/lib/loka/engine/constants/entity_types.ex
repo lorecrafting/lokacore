@@ -40,16 +40,4 @@ defmodule Loka.Engine.Constants.EntityTypes do
   @doc "Returns true if the given type is valid."
   @spec valid?(atom()) :: boolean()
   def valid?(type), do: type in @types
-
-  @doc "Returns spawnable entity types (can be instanced in game world)."
-  @spec spawnable() :: [entity_type()]
-  def spawnable, do: [:npc, :item]
-
-  @doc "Returns location entity types (can contain other entities)."
-  @spec containers() :: [entity_type()]
-  def containers, do: [:room, :npc, :item, :character]
-
-  @doc "Returns actor entity types (can perform actions)."
-  @spec actors() :: [entity_type()]
-  def actors, do: [:character, :npc]
 end

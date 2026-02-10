@@ -1,12 +1,13 @@
 # Loka Server
 
-An Elixir MUD (Multi-User Dungeon) engine framework for building text-based RPGs. Leverages Elixir's strengths: OTP concurrency, fault tolerance, and real-time LiveView.
+The Elixir/Phoenix backend for Loka, a MUD engine framework for building text-based RPGs.
 
-## Quick Start
+## Setup
 
 ```bash
 # Install dependencies
 mix deps.get
+npm install --prefix assets
 
 # Setup database
 mix ecto.create && mix ecto.migrate
@@ -22,27 +23,11 @@ Visit [`localhost:4000`](http://localhost:4000) to see the landing page.
 | Path | Description | Auth Required |
 |------|-------------|---------------|
 | `/` | Landing page | No |
-| `/game` | Game client (Living Ebook UI) | Yes |
 | `/admin` | Admin dashboard | Yes (admin) |
-| `/players/register` | Create account | No |
-| `/players/log-in` | Login | No |
+| `/admin/builder` | MUD terminal builder (content creation) | Yes (admin) |
+| `/client/auth/login` | Game client auth (magic link to JWT deep link) | No |
 
-## Project Structure
-
-```
-lib/
-├── loka/
-│   ├── accounts/      # Player auth (phx.gen.auth + magic link)
-│   ├── auth/          # Guardian JWT for API
-│   ├── engine/        # Core: entities, behaviors, commands, hooks
-│   └── framework/     # Game systems: combat, quests, inventory, etc.
-├── loka_web/
-│   ├── controllers/   # REST API
-│   └── live/          # LiveView clients (game, admin)
-priv/
-└── world/
-    └── prototypes/    # YAML entity templates (rooms, NPCs, items)
-```
+The main game client is the Godot 4.6 app, which connects via Phoenix Channels (WebSocket).
 
 ## Key Commands
 
@@ -52,40 +37,34 @@ mix phx.server           # Start server
 mix test                 # Run tests
 mix format               # Format code
 
+# Content validation
+mix loka.test.validate   # Validate prototypes, quests, dialogues
+mix loka.validate.yaml   # Quick YAML syntax check
+
 # Database
 mix ecto.migrate         # Run migrations
 mix ecto.reset           # Reset database
-
-# Deployment (Fly.io)
-fly deploy               # Deploy to production
-fly logs                 # View logs
 ```
 
-## Architecture
+## Project Structure
 
-- **Entity-Component-Behavior**: Composition over inheritance
-- **Prototype System**: YAML templates with inheritance for game content
-- **GenServer per Entity**: Active entities are supervised processes
-- **Event Bus**: Phoenix.PubSub for entity communication
-- **Hooks**: 22 lifecycle event types for extensibility
-
-See `CLAUDE.md` in the project root for comprehensive development documentation.
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|------------|
-| Backend | Elixir 1.19 / Phoenix 1.8 |
-| Real-time | Phoenix LiveView |
-| Database | SQLite (via ecto_sqlite3) |
-| Auth | phx.gen.auth + Guardian JWT |
-| Scripting | Lua (via Luerl) |
-| Deployment | Fly.io |
-
-## Tests
-
-```bash
-mix test                    # Run all tests
-mix test --cover            # With coverage
-mix test path/to/test.exs   # Specific file
 ```
+lib/
+├── loka/
+│   ├── accounts/      # Player auth (phx.gen.auth + magic link)
+│   ├── auth/          # Guardian JWT for API
+│   ├── engine/        # Core: entities, behaviors, commands, hooks
+│   ├── content/       # Content modules (Quest, Dialogue, Script, Zone)
+│   └── framework/     # Game systems: combat, quests, inventory, etc.
+├── loka_web/
+│   ├── channels/      # Phoenix Channels (game, builder)
+│   ├── controllers/   # REST API
+│   └── live/          # LiveView (admin dashboard, builder terminal)
+priv/
+└── world/
+    └── ...            # YAML game content (prototypes, quests, zones, dialogues, scripts)
+```
+
+## Documentation
+
+See `CLAUDE.md` in the project root for the comprehensive development guide covering architecture, patterns, commands, and deployment.

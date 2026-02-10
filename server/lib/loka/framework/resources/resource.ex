@@ -124,11 +124,6 @@ defmodule Loka.Framework.Resources.Resource do
   # =============================================================================
 
   @doc """
-  Returns the list of valid regen conditions.
-  """
-  def valid_conditions, do: @valid_conditions
-
-  @doc """
   Checks if a resource regenerates automatically.
   """
   def regenerates?(%__MODULE__{regen_condition: :never}), do: false

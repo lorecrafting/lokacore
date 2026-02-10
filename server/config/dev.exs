@@ -98,7 +98,5 @@ config :swoosh, :api_client, false
 config :loka, Loka.Auth.Guardian,
   secret_key: "dev_only_guardian_secret_key_not_for_production_use"
 
-config :loka, :allow_guest_websocket, true
-
 # CORS: Allow all origins in development for mobile app testing
 config :loka, :cors_origins, :all

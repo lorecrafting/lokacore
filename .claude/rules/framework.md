@@ -8,7 +8,7 @@ This context auto-loads when working in `lib/loka/framework/`.
 
 ## What is the Framework Layer?
 
-The framework contains ~25 game subsystems that implement game mechanics on top of the engine. Framework code should:
+The framework contains 21 game subsystems that implement game mechanics on top of the engine. Framework code should:
 - Use engine primitives (Entity, Events, Hooks)
 - Never call web layer directly
 - Return data/events, let web layer handle presentation
@@ -52,17 +52,17 @@ defmodule Loka.Framework.MySubsystem.MyRegistry do
 end
 ```
 
-## Existing Subsystems (~25)
+## Existing Subsystems (21)
 
 | Category | Subsystems |
 |----------|------------|
-| **Core Mechanics** | Quest, Dialogue, Combat, Inventory |
-| **Resources** | Resources, Skills, Progression |
-| **World** | World (day/night, weather), Gathering, Crafting |
-| **Social** | Social (channels, parties), Faction |
-| **Content** | Storyline, Scripting, Conditions |
-| **Economy** | Economy (shops) |
-| **Other** | Status, Spark |
+| **Core Mechanics** | Quest (progress, chains, definitions), Dialogue (conversation trees), Combat (server, damage types), Inventory (equipment, containers) |
+| **Player** | Player (game state), Progression (leveling), Skills (binary + leveled skill systems), Status (status effects) |
+| **Resources** | Resources (pools, formulas, tickers), Gathering (nodes, registry), Crafting (recipes, stations) |
+| **World** | World (day/night, weather, ambient), Storyline (story arcs, registry) |
+| **Social** | Social (channels, parties, messaging), Economy (shops) |
+| **Content** | Scripting (behaviors, world events), Conditions (evaluator), Content Validator (quest, dialogue, world plugins) |
+| **Infrastructure** | Actions (resolver), Broadcast (event dispatch), Spark (engagement events) |
 
 ## Common Patterns
 

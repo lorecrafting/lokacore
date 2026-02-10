@@ -14,7 +14,7 @@ Do a full audit of the codebase to optimize architecture for maintainability (LL
 - Entity lifecycle consistency (spawn/load/save/despawn pattern)
 
 ## 2. Framework Subsystems (lib/loka/framework/)
-- Pattern consistency across 22 subsystems
+- Pattern consistency across 21 subsystems
 - RegistryBase usage (target: 100% adoption)
 - Code duplication
 - Stub detection (TODO/FIXME in production code)

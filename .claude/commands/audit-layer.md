@@ -9,10 +9,10 @@ Audit the three-layer architecture (Engine → Framework → World Data) for pro
 ```
 ┌─────────────────────────────────────────┐
 │ WORLD DATA (priv/world/)                │  ← Game content (YAML)
-│   prototypes/, config/, combat/, magic/ │
+│   prototypes/, config/, combat/         │
 ├─────────────────────────────────────────┤
 │ FRAMEWORK (lib/loka/framework/)         │  ← Game-specific logic
-│   22 subsystems: Combat, Quest, etc.    │
+│   21 subsystems: Combat, Quest, etc.    │
 ├─────────────────────────────────────────┤
 │ ENGINE (lib/loka/engine/)               │  ← Game-agnostic core
 │   Entities, Hooks, Events, Commands     │
@@ -48,9 +48,6 @@ Search for hardcoded game data that should be in YAML:
 
 **Check these modules for @module attributes with game data**:
 - `combat/damage_types.ex` - damage/armor type definitions
-- `combat/elements.ex` - elemental system definitions
-- `combat/weapon_armor_types.ex` - effectiveness matrix
-- `magic/spell_words.ex` - spell word definitions
 - `world/day_night.ex` - time phase definitions
 - `world/weather.ex` - weather type definitions
 

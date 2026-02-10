@@ -43,20 +43,17 @@ defmodule Loka.MixProject do
         # Framework Systems
         "Framework - Combat": ~r/^Loka\.Framework\.Combat/,
         "Framework - Inventory": ~r/^Loka\.Framework\.Inventory/,
-        "Framework - Abilities": ~r/^Loka\.Framework\.Abilities/,
         "Framework - Status": ~r/^Loka\.Framework\.Status/,
         "Framework - Progression": ~r/^Loka\.Framework\.Progression/,
         "Framework - Skills": ~r/^Loka\.Framework\.Skills/,
         "Framework - Quest": ~r/^Loka\.Framework\.Quest/,
         "Framework - Resources": ~r/^Loka\.Framework\.Resources/,
         "Framework - Crafting": ~r/^Loka\.Framework\.Crafting/,
-        "Framework - Farming": ~r/^Loka\.Framework\.Farming/,
         "Framework - Gathering": ~r/^Loka\.Framework\.Gathering/,
         "Framework - Economy": ~r/^Loka\.Framework\.Economy/,
         "Framework - World": ~r/^Loka\.Framework\.World/,
         "Framework - Dialogue": ~r/^Loka\.Framework\.Dialogue/,
         "Framework - Player": ~r/^Loka\.Framework\.Player/,
-        "Framework - Other": ~r/^Loka\.Framework\.(Companion|Appearance|Messaging|Housing|Magic)/,
 
         # Web Layer
         "Web - Controllers": ~r/^LokaWeb\..*Controller$/,
