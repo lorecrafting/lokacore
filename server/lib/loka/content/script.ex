@@ -101,6 +101,14 @@ defmodule Loka.Content.Script do
   end
 
   @doc """
+  Lists all published script definitions (excludes drafts).
+  """
+  @spec all_published() :: [TypedObject.t()]
+  def all_published do
+    Registry.list_by_type_published(:script)
+  end
+
+  @doc """
   Lists scripts for a specific hook type.
   """
   @spec for_hook(atom()) :: [TypedObject.t()]

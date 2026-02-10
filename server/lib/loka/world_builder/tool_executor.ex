@@ -766,7 +766,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
   defp validate_safe_key(_), do: {:error, "Key must be a string"}
 
   defp ensure_dialogues_dir do
-    dir = Path.join([:code.priv_dir(:loka), "world", "dialogues"])
+    dir = Path.join([:code.priv_dir(:loka), "world", "drafts", "dialogues"])
     File.mkdir_p!(dir)
   end
 
@@ -942,7 +942,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
   end
 
   defp dialogue_yaml_path(key) do
-    Path.join([:code.priv_dir(:loka), "world", "dialogues", "#{key}.yml"])
+    Path.join([:code.priv_dir(:loka), "world", "drafts", "dialogues", "#{key}.yml"])
   end
 
   # =============================================================================
@@ -1008,9 +1008,9 @@ defmodule Loka.WorldBuilder.ToolExecutor do
   # Zone CRUD Tools
   # =============================================================================
 
-  @zones_dir Path.join([:code.priv_dir(:loka), "world", "zones"])
-  @cutscenes_dir Path.join([:code.priv_dir(:loka), "world", "cutscenes"])
-  @scripts_dir Path.join([:code.priv_dir(:loka), "world", "scripts"])
+  @zones_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "zones"])
+  @cutscenes_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "cutscenes"])
+  @scripts_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "scripts"])
 
   defp execute_create_zone_tool(input) do
     key = input["key"]

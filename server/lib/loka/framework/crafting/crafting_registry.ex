@@ -52,9 +52,11 @@ defmodule Loka.Framework.Crafting.CraftingRegistry do
       :ok = CraftingRegistry.reload()
   """
 
+  alias Loka.Engine.Constants.WorldPaths
+
   use Loka.Framework.RegistryBase,
     table: :loka_recipes,
-    path: "priv/world/recipes",
+    path: WorldPaths.recipes_dir(),
     item_module: Loka.Framework.Crafting.Recipe,
     item_name: "recipe",
     state_key: :recipes,

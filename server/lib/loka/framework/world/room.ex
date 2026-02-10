@@ -290,10 +290,13 @@ defmodule Loka.Framework.World.Room do
     # Extract gathering node from room components
     gathering_node = format_gathering_node(room.components)
 
+    title = room.short_desc || "Unknown Room"
+    title = if draft_entity?(room), do: "[DRAFT] " <> title, else: title
+
     %{
       id: room.id,
       key: room.key,
-      title: room.short_desc || "Unknown Room",
+      title: title,
       description: room.extra_desc || "An empty room.",
       tags: room.tags || [],
       components: room.components || %{},
@@ -347,14 +350,22 @@ defmodule Loka.Framework.World.Room do
     Map.get(components, "despawned", false)
   end
 
+  defp draft_entity?(%{metadata: metadata}) when is_map(metadata) do
+    Map.get(metadata, "draft") == true
+  end
+
+  defp draft_entity?(_), do: false
+
   defp format_npc(npc) do
     components = npc.components || %{}
+    name = npc.short_desc || "someone"
+    name = if draft_entity?(npc), do: "[DRAFT] " <> name, else: name
 
     %{
       id: npc.id,
       key: npc.key,
       type: npc.type || :npc,
-      name: npc.short_desc || "someone",
+      name: name,
       long_desc: npc.long_desc || "",
       suffix: components["suffix"],
       description: npc.extra_desc || "A mysterious figure.",
@@ -368,12 +379,14 @@ defmodule Loka.Framework.World.Room do
 
   defp format_item(item) do
     components = item.components || %{}
+    name = item.short_desc || "something"
+    name = if draft_entity?(item), do: "[DRAFT] " <> name, else: name
 
     %{
       id: item.id,
       key: item.key,
       type: item.type || :item,
-      name: item.short_desc || "something",
+      name: name,
       long_desc: item.long_desc || "",
       suffix: components["suffix"],
       description: item.extra_desc || "An ordinary item.",

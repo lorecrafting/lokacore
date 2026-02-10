@@ -55,7 +55,7 @@ defmodule Loka.WorldBuilder.EntityManager do
   alias Loka.Engine.TypedObject.Registry
   alias Loka.Engine.TypedObject.Loader
 
-  @prototypes_dir Path.join([:code.priv_dir(:loka), "world", "prototypes"])
+  @prototypes_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "prototypes"])
 
   @doc """
   Create a new entity of any subtype.

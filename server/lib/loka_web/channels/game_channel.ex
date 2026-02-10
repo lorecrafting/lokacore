@@ -930,12 +930,13 @@ defmodule LokaWeb.GameChannel do
     str = Atom.to_string(cmd)
 
     if String.starts_with?(str, @builder_prefix) do
-      {:ok, str |> String.replace_prefix(@builder_prefix, "") |> String.to_existing_atom()}
+      # Use String.to_atom/1 because BuilderCommands may not be loaded yet
+      # (lazy module loading), so atoms from its @command lists may not exist.
+      # Safety: cmd already comes from CommandParser atoms, not user input.
+      {:ok, str |> String.replace_prefix(@builder_prefix, "") |> String.to_atom()}
     else
       :not_builder
     end
-  rescue
-    ArgumentError -> :not_builder
   end
 
   # Silent rejection for non-admin players - identical to unknown command

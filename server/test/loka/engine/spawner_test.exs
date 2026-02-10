@@ -1,8 +1,9 @@
 defmodule Loka.Engine.SpawnerTest do
   use Loka.DataCase, async: false
 
-  alias Loka.Engine.{Spawner, Entities, Entity}
-  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
+  alias Loka.Engine.{Spawner, Entities, Entity, TypedObject}
+  alias Loka.Engine.TypedObject.{Loader, Registry}
+  alias Loader, as: TypedObjectLoader
 
   @test_fixtures_path "test/support/fixtures/prototypes"
 
@@ -299,6 +300,53 @@ defmodule Loka.Engine.SpawnerTest do
       assert schema = Entities.get_entity(room.id)
       # Schema stores type as atom
       assert schema.type == :room
+    end
+  end
+
+  describe "draft flag propagation" do
+    test "spawned entity carries draft flag when prototype is a draft" do
+      # Register a draft NPC prototype directly in the registry
+      {:ok, draft_proto} =
+        TypedObject.new(
+          key: "draft_goblin",
+          type: :entity,
+          subtype: :npc,
+          name: "Draft Goblin",
+          metadata: %{"draft" => true},
+          tags: ["hostile"]
+        )
+
+      Registry.put("draft_goblin", draft_proto)
+
+      {:ok, entity} = Spawner.spawn("draft_goblin")
+
+      assert Entity.draft?(entity)
+      assert entity.metadata["draft"] == true
+    end
+
+    test "spawned entity does NOT carry draft flag when prototype is published" do
+      {:ok, entity} = Spawner.spawn("goblin")
+
+      refute Entity.draft?(entity)
+      refute entity.metadata["draft"]
+    end
+
+    test "spawn_room propagates draft flag from draft room prototype" do
+      {:ok, draft_room} =
+        TypedObject.new(
+          key: "draft_room",
+          type: :entity,
+          subtype: :room,
+          name: "Draft Room",
+          metadata: %{"draft" => true}
+        )
+
+      Registry.put("draft_room", draft_room)
+
+      {:ok, room, _spawned} = Spawner.spawn_room("draft_room")
+
+      assert Entity.draft?(room)
+      assert room.metadata["draft"] == true
     end
   end
 

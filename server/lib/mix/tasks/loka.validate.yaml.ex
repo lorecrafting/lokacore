@@ -20,14 +20,9 @@ defmodule Mix.Tasks.Loka.Validate.Yaml do
 
   @shortdoc "Validates YAML syntax in priv/world/"
 
-  @yaml_directories [
-    "priv/world/prototypes",
-    "priv/world/quests",
-    "priv/world/zones",
-    "priv/world/dialogues",
-    "priv/world/scripts",
-    "priv/world/cutscenes"
-  ]
+  alias Loka.Engine.Constants.WorldPaths
+
+  @yaml_directories WorldPaths.validation_dirs()
 
   @impl Mix.Task
   def run(_args) do

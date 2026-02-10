@@ -24,9 +24,11 @@ defmodule Loka.Framework.Status.StatusRegistry do
       :ok = StatusRegistry.reload()
   """
 
+  alias Loka.Engine.Constants.WorldPaths
+
   use Loka.Framework.RegistryBase,
     table: :loka_statuses,
-    path: "priv/world/statuses",
+    path: WorldPaths.statuses_dir(),
     item_module: Loka.Framework.Status.StatusEffect,
     item_name: "status effect",
     state_key: :statuses,

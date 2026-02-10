@@ -32,10 +32,11 @@ defmodule Loka.Framework.Skills.BinarySkillRegistry do
   use GenServer
   require Logger
 
+  alias Loka.Engine.Constants.WorldPaths
   alias Loka.Framework.Skills.BinarySkill
   alias Loka.Utils.YamlLoader
 
-  @default_path "priv/world/skills"
+  @default_path WorldPaths.skills_dir()
 
   # =============================================================================
   # Client API

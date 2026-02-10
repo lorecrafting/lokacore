@@ -46,16 +46,11 @@ defmodule Loka.Engine.TypedObject.Loader do
   use GenServer
   require Logger
 
+  alias Loka.Engine.Constants.WorldPaths
   alias Loka.Engine.TypedObject
   alias Loka.Engine.TypedObject.Registry
 
-  @default_paths [
-    "priv/world/prototypes",
-    "priv/world/quests",
-    "priv/world/zones",
-    "priv/world/dialogues",
-    "priv/world/scripts"
-  ]
+  @default_paths WorldPaths.all_loader_paths()
 
   # =============================================================================
   # Client API
@@ -402,7 +397,22 @@ defmodule Loka.Engine.TypedObject.Loader do
     # Infer type from directory structure if not specified
     data = infer_type_from_path(data, file)
 
+    # Mark as draft if file is in a drafts/ directory
+    data =
+      if draft_path?(file) do
+        metadata = Map.get(data, "metadata") || Map.get(data, :metadata, %{})
+        Map.put(data, "metadata", Map.put(metadata, "draft", true))
+      else
+        data
+      end
+
     TypedObject.new(data)
+  end
+
+  defp draft_path?(file_path) do
+    file_path
+    |> Path.split()
+    |> Enum.any?(&(&1 == "drafts"))
   end
 
   defp infer_type_from_path(data, file) do
@@ -413,7 +423,21 @@ defmodule Loka.Engine.TypedObject.Loader do
 
     # Check if type is already set to a valid TypedObject type
     current_type = Map.get(data, "type") || Map.get(data, :type)
-    valid_types = ["entity", "quest", "dialogue", "script", "zone"]
+
+    valid_types = [
+      "entity",
+      "quest",
+      "dialogue",
+      "script",
+      "zone",
+      "storyline",
+      "cutscene",
+      "skill",
+      "status",
+      "resource",
+      "recipe",
+      "gathering_node"
+    ]
 
     if current_type in valid_types do
       data
@@ -446,6 +470,27 @@ defmodule Loka.Engine.TypedObject.Loader do
 
         "zones" in path_parts ->
           Map.put(data, "type", "zone")
+
+        "storylines" in path_parts ->
+          Map.put(data, "type", "storyline")
+
+        "cutscenes" in path_parts ->
+          Map.put(data, "type", "cutscene")
+
+        "skills" in path_parts ->
+          Map.put(data, "type", "skill")
+
+        "statuses" in path_parts ->
+          Map.put(data, "type", "status")
+
+        "resources" in path_parts ->
+          Map.put(data, "type", "resource")
+
+        "recipes" in path_parts ->
+          Map.put(data, "type", "recipe")
+
+        "nodes" in path_parts ->
+          Map.put(data, "type", "gathering_node")
 
         true ->
           # Default to entity if in _base or entities

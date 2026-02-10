@@ -10,7 +10,12 @@ defmodule LokaWeb.Channels.BuilderCommands.Helpers do
   alias Loka.Framework.World.Atmosphere
   alias Loka.WorldBuilder.RoomManager
   alias LokaWeb.Channels.RoomHelpers
+  alias Loka.Engine.TypedObject
   alias LokaWeb.Channels.GameChannel.Serializers
+
+  def draft_tag(obj) do
+    if TypedObject.draft?(obj), do: " [DRAFT]", else: ""
+  end
 
   def push_builder(socket, text) do
     push(socket, "output", %{text: "[BUILDER] #{text}"})

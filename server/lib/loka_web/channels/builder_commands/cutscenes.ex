@@ -7,7 +7,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Cutscenes do
   alias Loka.WorldBuilder.YamlBuilder
   alias LokaWeb.Channels.BuilderCommands.Helpers
 
-  @cutscenes_dir Path.join([:code.priv_dir(:loka), "world", "cutscenes"])
+  @cutscenes_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "cutscenes"])
 
   def execute(:create_cutscene, %{key: key, name: name}, socket) do
     case Loader.get(key) do
@@ -57,7 +57,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Cutscenes do
     case Loader.get(key) do
       {:ok, %{type: :cutscene} = obj} ->
         yaml_text = Helpers.format_typed_object(obj)
-        {:ok, "Cutscene '#{key}':\n#{yaml_text}", socket}
+        {:ok, "Cutscene '#{key}'#{Helpers.draft_tag(obj)}:\n#{yaml_text}", socket}
 
       _ ->
         {:error, "Cutscene '#{key}' not found.", socket}

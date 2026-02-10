@@ -7,7 +7,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Storylines do
   alias Loka.WorldBuilder.YamlBuilder
   alias LokaWeb.Channels.BuilderCommands.Helpers
 
-  @storylines_dir Path.join([:code.priv_dir(:loka), "world", "storylines"])
+  @storylines_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "storylines"])
 
   def execute(:create_storyline, %{key: key, name: name}, socket) do
     case Loader.get(key) do
@@ -53,7 +53,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Storylines do
     case Loader.get(key) do
       {:ok, %{type: :storyline} = obj} ->
         yaml_text = Helpers.format_typed_object(obj)
-        {:ok, "Storyline '#{key}':\n#{yaml_text}", socket}
+        {:ok, "Storyline '#{key}'#{Helpers.draft_tag(obj)}:\n#{yaml_text}", socket}
 
       _ ->
         {:error, "Storyline '#{key}' not found.", socket}

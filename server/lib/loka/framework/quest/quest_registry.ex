@@ -125,11 +125,12 @@ defmodule Loka.Framework.Quest.QuestRegistry do
   require Logger
 
   # Use Definitions structs - they're now defined before this module is referenced
+  alias Loka.Engine.Constants.WorldPaths
   alias Loka.Framework.Quest.Definitions.Quest
   alias Loka.Framework.Quest.Definitions.Objective
 
   @table :loka_quests
-  @default_path "priv/world/quests"
+  @default_path WorldPaths.quests_dir()
 
   # =============================================================================
   # Client API
@@ -281,15 +282,22 @@ defmodule Loka.Framework.Quest.QuestRegistry do
   # =============================================================================
 
   @impl true
-  def handle_info({:content_changed, _key, :quest, _subtype}, state) do
-    # Full quest reload - quest files are few and have inheritance resolution
-    case do_load_all(state, state.path) do
-      {:ok, new_state} ->
-        Logger.debug("QuestRegistry reloaded after quest content change")
-        {:noreply, new_state}
-
-      {:error, _} ->
+  def handle_info({:content_changed, key, :quest, _subtype}, state) do
+    # Skip reload for draft content - QuestRegistry only serves published quests
+    case Loka.Engine.TypedObject.Registry.get(key) do
+      {:ok, obj} when obj.metadata == %{"draft" => true} ->
         {:noreply, state}
+
+      _ ->
+        # Full quest reload - quest files are few and have inheritance resolution
+        case do_load_all(state, state.path) do
+          {:ok, new_state} ->
+            Logger.debug("QuestRegistry reloaded after quest content change")
+            {:noreply, new_state}
+
+          {:error, _} ->
+            {:noreply, state}
+        end
     end
   end
 

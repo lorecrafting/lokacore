@@ -87,11 +87,30 @@ defmodule Loka.Content.Dialogue do
   end
 
   @doc """
+  Lists all published dialogue definitions (excludes drafts).
+  """
+  @spec all_published() :: [TypedObject.t()]
+  def all_published do
+    Registry.list_by_type_published(:dialogue)
+  end
+
+  @doc """
   Lists dialogues for a specific entity.
   """
   @spec for_entity(String.t()) :: [TypedObject.t()]
   def for_entity(entity_key) when is_binary(entity_key) do
     all()
+    |> Enum.filter(fn dialogue ->
+      entity_key(dialogue) == entity_key
+    end)
+  end
+
+  @doc """
+  Lists published dialogues for a specific entity.
+  """
+  @spec for_entity_published(String.t()) :: [TypedObject.t()]
+  def for_entity_published(entity_key) when is_binary(entity_key) do
+    all_published()
     |> Enum.filter(fn dialogue ->
       entity_key(dialogue) == entity_key
     end)

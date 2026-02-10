@@ -51,7 +51,7 @@ defmodule Loka.WorldBuilder.QuestManager do
   alias Loka.Engine.TypedObject.Loader
   alias Loka.Content.Quest
 
-  @quests_dir Path.join([:code.priv_dir(:loka), "world", "quests"])
+  @quests_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "quests"])
 
   @doc """
   Create a new quest definition.

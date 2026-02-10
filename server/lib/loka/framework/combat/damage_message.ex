@@ -40,7 +40,9 @@ defmodule Loka.Framework.Combat.DamageMessage do
   - `to_room` - What observers see ("Alice slashes the goblin...")
   """
 
-  @config_path "priv/world/config/damage_messages.yml"
+  alias Loka.Engine.Constants.WorldPaths
+
+  @config_path WorldPaths.damage_messages_file()
 
   # Load config at compile time for performance
   @external_resource @config_path

@@ -167,6 +167,19 @@ defmodule Loka.Engine.Entity do
   end
 
   @doc """
+  Checks if an entity was spawned from a draft prototype.
+
+  Draft entities carry `"draft" => true` in their metadata, propagated from
+  the source TypedObject at spawn time.
+  """
+  @spec draft?(t()) :: boolean()
+  def draft?(%__MODULE__{metadata: metadata}) when is_map(metadata) do
+    Map.get(metadata, "draft") == true
+  end
+
+  def draft?(_), do: false
+
+  @doc """
   Adds a tag to an entity.
   """
   def add_tag(%__MODULE__{} = entity, tag) when is_binary(tag) do

@@ -22,7 +22,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Content do
     case Loader.get(key) do
       {:ok, obj} ->
         yaml_text = Helpers.format_typed_object(obj)
-        {:ok, "Quest '#{key}':\n#{yaml_text}", socket}
+        {:ok, "Quest '#{key}'#{Helpers.draft_tag(obj)}:\n#{yaml_text}", socket}
 
       _ ->
         {:error, "Quest '#{key}' not found.", socket}
@@ -94,7 +94,9 @@ defmodule LokaWeb.Channels.BuilderCommands.Content do
 
         more = if node_count > 10, do: "\n  ... and #{node_count - 10} more nodes", else: ""
 
-        {:ok, "Dialogue '#{key}' (#{node_count} nodes):\n#{lines}#{more}", socket}
+        {:ok,
+         "Dialogue '#{key}'#{Helpers.draft_tag(dialogue)} (#{node_count} nodes):\n#{lines}#{more}",
+         socket}
 
       {:error, _} ->
         {:error, "Dialogue '#{key}' not found.", socket}

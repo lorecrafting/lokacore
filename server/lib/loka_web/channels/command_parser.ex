@@ -352,6 +352,35 @@ defmodule LokaWeb.Channels.CommandParser do
     end
   end
 
+  # Preview command
+  defp do_parse(["preview", rest]) do
+    case String.split(rest, " ", parts: 2) do
+      [type, key] -> {:builder_preview, %{type: String.trim(type), key: String.trim(key)}}
+      _ -> {:unknown, %{text: "preview"}}
+    end
+  end
+
+  # Publish/unpublish commands
+  defp do_parse(["publish", rest]) do
+    case String.split(rest, " ", parts: 3) do
+      ["--force", type, key] ->
+        {:builder_publish, %{type: String.trim(type), key: String.trim(key), force: true}}
+
+      [type, key] ->
+        {:builder_publish, %{type: String.trim(type), key: String.trim(key), force: false}}
+
+      _ ->
+        {:unknown, %{text: "publish"}}
+    end
+  end
+
+  defp do_parse(["unpublish", rest]) do
+    case String.split(rest, " ", parts: 2) do
+      [type, key] -> {:builder_unpublish, %{type: String.trim(type), key: String.trim(key)}}
+      _ -> {:unknown, %{text: "unpublish"}}
+    end
+  end
+
   defp do_parse(["guide", topic]), do: {:builder_guide, %{topic: topic}}
 
   # AI commands

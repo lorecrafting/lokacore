@@ -704,7 +704,8 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
 
   defp add_gathering_node_sources(sources, reachable_rooms) do
     # Load gathering nodes from YAML files in priv/world/nodes/
-    node_files = Path.wildcard("priv/world/nodes/**/*.yml")
+    node_files =
+      Path.wildcard(Path.join(Loka.Engine.Constants.WorldPaths.gathering_nodes_dir(), "**/*.yml"))
 
     # Build a map of room -> gathering_nodes for reachable rooms
     rooms =

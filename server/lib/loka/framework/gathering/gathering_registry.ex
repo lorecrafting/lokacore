@@ -48,9 +48,11 @@ defmodule Loka.Framework.Gathering.GatheringRegistry do
       :ok = GatheringRegistry.reload()
   """
 
+  alias Loka.Engine.Constants.WorldPaths
+
   use Loka.Framework.RegistryBase,
     table: :loka_gathering_nodes,
-    path: "priv/world/nodes",
+    path: WorldPaths.gathering_nodes_dir(),
     item_module: Loka.Framework.Gathering.GatheringNode,
     item_name: "gathering node",
     state_key: :nodes,

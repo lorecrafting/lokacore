@@ -1,18 +1,14 @@
 defmodule Loka.WorldBuilder.DialogueManagerTest do
   use ExUnit.Case, async: false
 
+  alias Loka.TestCleanup
   alias Loka.WorldBuilder.DialogueManager
 
-  @dialogues_dir Path.join([:code.priv_dir(:loka), "world", "dialogues"])
+  @dialogues_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "dialogues"])
 
   setup do
-    # Clean up any test dialogues after each test
     on_exit(fn ->
-      for key <- ["test_dlg_npc", "test_dlg_other"] do
-        path = Path.join(@dialogues_dir, "#{key}.yml")
-        if File.exists?(path), do: File.rm!(path)
-      end
-
+      TestCleanup.cleanup_dialogue_test_files()
       Loka.Engine.TypedObject.Loader.reload()
     end)
 

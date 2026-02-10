@@ -56,8 +56,10 @@ defmodule Loka.Framework.World.RoomAmbient do
 
   require Logger
 
+  alias Loka.Engine.Constants.WorldPaths
+
   # Load tag-based config at compile time
-  @config_path "priv/world/config/ambient_messages.yml"
+  @config_path WorldPaths.ambient_messages_file()
   @external_resource @config_path
 
   @tag_messages (

@@ -8,7 +8,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Zones do
   alias Loka.WorldBuilder.YamlBuilder
   alias LokaWeb.Channels.BuilderCommands.Helpers
 
-  @zones_dir Path.join([:code.priv_dir(:loka), "world", "zones"])
+  @zones_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "zones"])
 
   def execute(:create_zone, %{key: key, name: name}, socket) do
     case Zone.get(key) do
@@ -37,7 +37,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Zones do
     case Zone.get(key) do
       {:ok, zone} ->
         yaml_text = Helpers.format_typed_object(zone)
-        {:ok, "Zone '#{key}':\n#{yaml_text}", socket}
+        {:ok, "Zone '#{key}'#{Helpers.draft_tag(zone)}:\n#{yaml_text}", socket}
 
       {:error, :not_found} ->
         {:error, "Zone '#{key}' not found.", socket}

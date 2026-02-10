@@ -35,6 +35,8 @@ defmodule Loka.Testing.TestData do
   - `items.json` - Item keys and spawn locations
   """
 
+  alias Loka.Engine.Constants.WorldPaths
+
   @data_dir "test/e2e/data"
 
   # =============================================================================
@@ -162,7 +164,7 @@ defmodule Loka.Testing.TestData do
   Returns a list of maps with quest data.
   """
   def load_all_quests do
-    quest_dir = "priv/world/quests"
+    quest_dir = WorldPaths.quests_dir()
 
     if File.dir?(quest_dir) do
       quest_dir
@@ -189,7 +191,7 @@ defmodule Loka.Testing.TestData do
   Loads a storyline definition.
   """
   def load_storyline(storyline_id) do
-    path = "priv/world/storylines/#{storyline_id}.yml"
+    path = Path.join(WorldPaths.storylines_dir(), "#{storyline_id}.yml")
 
     if File.exists?(path) do
       {:ok, content} = YamlElixir.read_from_file(path)

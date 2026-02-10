@@ -35,10 +35,11 @@ defmodule Loka.Engine.SocialLoader do
   use GenServer
   require Logger
 
+  alias Loka.Engine.Constants.WorldPaths
   alias Loka.Engine.Social
 
   @table :loka_socials
-  @default_path "priv/world/socials.yml"
+  @default_path WorldPaths.socials_file()
 
   # =============================================================================
   # Client API

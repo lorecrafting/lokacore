@@ -68,7 +68,9 @@ defmodule Loka.Framework.World.DayNight do
   use GenServer
   require Logger
 
-  @yaml_path "priv/world/config/day_night.yml"
+  alias Loka.Engine.Constants.WorldPaths
+
+  @yaml_path WorldPaths.day_night_file()
 
   # Load config at compile time for performance
   # Defaults are inlined to avoid unused variable warnings when YAML exists

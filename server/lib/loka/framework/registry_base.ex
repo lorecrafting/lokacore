@@ -300,7 +300,8 @@ defmodule Loka.Framework.RegistryBase do
 
       @impl true
       def handle_call({:load_from, path}, _from, state) do
-        case do_load_all(state, path) do
+        # load_from always uses YAML path (for tests that load from temp dirs)
+        case do_load_from_yaml(state, path) do
           {:ok, new_state} ->
             {:reply, :ok, %{new_state | path: path}}
 
@@ -325,15 +326,22 @@ defmodule Loka.Framework.RegistryBase do
       # =============================================================================
 
       @impl true
-      def handle_info({:content_changed, _key, type, subtype}, state) do
+      def handle_info({:content_changed, key, type, subtype}, state) do
         if @content_types != [] and {type, subtype} in @content_types do
-          case do_load_all(state, state.path) do
-            {:ok, new_state} ->
-              Logger.debug("#{inspect(__MODULE__)} reloaded after content change")
-              {:noreply, new_state}
-
-            {:error, _errors} ->
+          # Skip reload for draft content - framework registries only serve published content
+          case Loka.Engine.TypedObject.Registry.get(key) do
+            {:ok, obj} when obj.metadata == %{"draft" => true} ->
               {:noreply, state}
+
+            _ ->
+              case do_load_all(state, state.path) do
+                {:ok, new_state} ->
+                  Logger.debug("#{inspect(__MODULE__)} reloaded after content change")
+                  {:noreply, new_state}
+
+                {:error, _errors} ->
+                  {:noreply, state}
+              end
           end
         else
           {:noreply, state}
@@ -362,6 +370,54 @@ defmodule Loka.Framework.RegistryBase do
       # =============================================================================
 
       defp do_load_all(state, path) do
+        if @content_types != [] and path == @default_path do
+          # Read from TypedObject registry (already loaded by Loader)
+          do_load_from_typed_objects(state)
+        else
+          # YAML loading path (legacy or custom path for tests)
+          do_load_from_yaml(state, path)
+        end
+      end
+
+      defp do_load_from_typed_objects(state) do
+        alias Loka.Engine.TypedObject
+        alias Loka.Engine.TypedObject.Registry, as: TORegistry
+
+        items =
+          @content_types
+          |> Enum.flat_map(fn {type, subtype} ->
+            TORegistry.list_by_type(type, subtype)
+          end)
+          |> Enum.reject(&TypedObject.draft?/1)
+          |> Enum.reduce(%{}, fn obj, acc ->
+            case typed_object_to_item(obj) do
+              nil -> acc
+              item -> Map.put(acc, item.key, item)
+            end
+          end)
+
+        YamlLoader.update_ets(state.table, items)
+        {:ok, Map.put(state, @state_key, items)}
+      end
+
+      defp typed_object_to_item(%Loka.Engine.TypedObject{} = obj) do
+        # Reconstruct the raw map that from_map/1 expects
+        raw =
+          Map.merge(obj.data || %{}, %{
+            "key" => obj.key,
+            "id" => obj.key,
+            "name" => obj.name,
+            "description" => obj.description,
+            "tags" => obj.tags || []
+          })
+
+        case @item_module.from_map(raw) do
+          {:ok, item} -> item
+          {:error, _} -> nil
+        end
+      end
+
+      defp do_load_from_yaml(state, path) do
         full_path = YamlLoader.resolve_path(path)
 
         if YamlLoader.path_exists?(full_path) do

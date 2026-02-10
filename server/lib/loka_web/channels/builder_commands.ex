@@ -37,6 +37,7 @@ defmodule LokaWeb.Channels.BuilderCommands do
     Cutscenes,
     Storylines,
     Scripts,
+    Publishing,
     Guides,
     Map,
     Help,
@@ -50,7 +51,7 @@ defmodule LokaWeb.Channels.BuilderCommands do
   @map_commands ~w(map)a
 
   # Inspection commands
-  @inspection_commands ~w(info list find)a
+  @inspection_commands ~w(info list find preview)a
 
   # Testing commands
   @testing_commands ~w(spawn purge give setflag clearflag flags
@@ -83,6 +84,9 @@ defmodule LokaWeb.Channels.BuilderCommands do
                       script_validate script_test script_templates
                       script_template_info script_from_template
                       script_attach script_detach)a
+
+  # Publishing commands
+  @publishing_commands ~w(publish unpublish)a
 
   # Guide commands
   @guide_commands ~w(guide)a
@@ -157,6 +161,10 @@ defmodule LokaWeb.Channels.BuilderCommands do
 
   defp dispatch(cmd, params, socket) when cmd in @script_commands do
     Scripts.execute(cmd, params, socket)
+  end
+
+  defp dispatch(cmd, params, socket) when cmd in @publishing_commands do
+    Publishing.execute(cmd, params, socket)
   end
 
   defp dispatch(cmd, params, socket) when cmd in @guide_commands do

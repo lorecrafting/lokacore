@@ -68,3 +68,7 @@ priv/llm_logs/*.jsonl
 
 # Test temp files
 test/tmp/
+
+# Draft content (created by builder, tests write here too)
+/priv/world/drafts/**/*.yml
+!/priv/world/drafts/**/.gitkeep

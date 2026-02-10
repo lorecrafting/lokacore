@@ -53,9 +53,11 @@ defmodule Loka.Framework.Storyline.StorylineRegistry do
       {:ok, storyline} = StorylineRegistry.storyline_for_quest("main_sleeping_master")
   """
 
+  alias Loka.Engine.Constants.WorldPaths
+
   use Loka.Framework.RegistryBase,
     table: :loka_storylines,
-    path: "priv/world/storylines",
+    path: WorldPaths.storylines_dir(),
     item_module: Loka.Framework.Storyline.Storyline,
     item_name: "storyline",
     state_key: :storylines,

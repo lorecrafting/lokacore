@@ -29,10 +29,11 @@ defmodule Loka.Engine.ZoneLoader do
   use GenServer
   require Logger
 
+  alias Loka.Engine.Constants.WorldPaths
   alias Loka.Engine.Zone
 
   @zone_table :loka_zones
-  @default_path "priv/world/zones"
+  @default_path WorldPaths.zones_dir()
 
   # =============================================================================
   # Client API

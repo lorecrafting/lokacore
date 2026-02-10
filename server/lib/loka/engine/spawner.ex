@@ -207,17 +207,29 @@ defmodule Loka.Engine.Spawner do
 
     now = DateTime.utc_now()
 
+    # Build metadata, preserving draft flag from prototype if present
+    base_metadata =
+      Map.merge(base_entity.metadata, %{
+        created_at: now,
+        updated_at: now,
+        prototype_key: typed_object.key
+      })
+
+    # Explicitly tag entities spawned from draft prototypes so the
+    # display layer can show [DRAFT] indicators
+    metadata =
+      if TypedObject.draft?(typed_object) do
+        Map.put(base_metadata, "draft", true)
+      else
+        base_metadata
+      end
+
     entity = %{
       base_entity
       | id: UUID.uuid4(),
         is_prototype: false,
         prototype_key: typed_object.key,
-        metadata:
-          Map.merge(base_entity.metadata, %{
-            created_at: now,
-            updated_at: now,
-            prototype_key: typed_object.key
-          })
+        metadata: metadata
     }
 
     # Apply overrides

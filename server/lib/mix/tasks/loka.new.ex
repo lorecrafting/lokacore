@@ -43,6 +43,8 @@ defmodule Mix.Tasks.Loka.New do
   use Mix.Task
   use Boundary, classify_to: Loka
 
+  alias Loka.Engine.Constants.WorldPaths
+
   @shortdoc "Generate scaffold YAML files for game content"
 
   @switches [
@@ -100,12 +102,13 @@ defmodule Mix.Tasks.Loka.New do
       completed: "TODO: Journal entry when quest is completed"
     """
 
-    write_file("priv/world/quests/#{name}.yml", content, opts)
-    Mix.shell().info("Created quest: priv/world/quests/#{name}.yml")
+    quest_path = Path.join(WorldPaths.quests_dir(), "#{name}.yml")
+    write_file(quest_path, content, opts)
+    Mix.shell().info("Created quest: #{quest_path}")
     Mix.shell().info("")
     Mix.shell().info("Next steps:")
     Mix.shell().info("  1. Update TODO fields with real content")
-    Mix.shell().info("  2. Add this quest to a storyline in priv/world/storylines/")
+    Mix.shell().info("  2. Add this quest to a storyline in #{WorldPaths.storylines_dir()}/")
     Mix.shell().info("  3. Run `mix loka.test.validate --only quest` to verify")
   end
 
@@ -165,8 +168,9 @@ defmodule Mix.Tasks.Loka.New do
     end}
     """
 
-    write_file("priv/world/prototypes/npcs/#{name}.yml", content, opts)
-    Mix.shell().info("Created NPC: priv/world/prototypes/npcs/#{name}.yml")
+    npc_path = Path.join(WorldPaths.npcs_dir(), "#{name}.yml")
+    write_file(npc_path, content, opts)
+    Mix.shell().info("Created NPC: #{npc_path}")
     Mix.shell().info("")
     Mix.shell().info("Next steps:")
     Mix.shell().info("  1. Update TODO fields with real content")
@@ -213,8 +217,9 @@ defmodule Mix.Tasks.Loka.New do
       - outdoor
     """
 
-    write_file("priv/world/prototypes/rooms/#{name}.yml", content, opts)
-    Mix.shell().info("Created room: priv/world/prototypes/rooms/#{name}.yml")
+    room_path = Path.join(WorldPaths.rooms_dir(), "#{name}.yml")
+    write_file(room_path, content, opts)
+    Mix.shell().info("Created room: #{room_path}")
     Mix.shell().info("")
     Mix.shell().info("Next steps:")
     Mix.shell().info("  1. Update TODO fields with real descriptions")
@@ -252,8 +257,9 @@ defmodule Mix.Tasks.Loka.New do
       # - optional_quest_id
     """
 
-    write_file("priv/world/storylines/#{name}.yml", content, opts)
-    Mix.shell().info("Created storyline: priv/world/storylines/#{name}.yml")
+    storyline_path = Path.join(WorldPaths.storylines_dir(), "#{name}.yml")
+    write_file(storyline_path, content, opts)
+    Mix.shell().info("Created storyline: #{storyline_path}")
     Mix.shell().info("")
     Mix.shell().info("Next steps:")
     Mix.shell().info("  1. Update TODO fields with real content")

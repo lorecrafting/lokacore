@@ -39,10 +39,11 @@ defmodule Loka.Framework.Quest.ChainRegistry do
   use GenServer
   require Logger
 
+  alias Loka.Engine.Constants.WorldPaths
   alias Loka.Framework.Quest.Chain.{Chain, ChainNode, Branch}
 
   @table :loka_quest_chains
-  @default_path "priv/world/quests/_chains"
+  @default_path WorldPaths.quest_chains_dir()
 
   # =============================================================================
   # Client API

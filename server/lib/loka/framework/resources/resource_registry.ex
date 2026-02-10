@@ -31,9 +31,11 @@ defmodule Loka.Framework.Resources.ResourceRegistry do
       :ok = ResourceRegistry.reload()
   """
 
+  alias Loka.Engine.Constants.WorldPaths
+
   use Loka.Framework.RegistryBase,
     table: :loka_resources,
-    path: "priv/world/resources",
+    path: WorldPaths.resources_dir(),
     item_module: Loka.Framework.Resources.Resource,
     item_name: "resource",
     state_key: :resources,

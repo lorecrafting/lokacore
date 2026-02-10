@@ -23,9 +23,11 @@ defmodule Loka.Framework.Skills.SkillRegistry do
       xp_per_level: 100
   """
 
+  alias Loka.Engine.Constants.WorldPaths
+
   use Loka.Framework.RegistryBase,
     table: :loka_skills,
-    path: "priv/world/skills",
+    path: WorldPaths.skills_dir(),
     item_module: Loka.Framework.Skills.Skill,
     item_name: "skill",
     state_key: :skills,

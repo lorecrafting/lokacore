@@ -61,6 +61,12 @@ defmodule LokaWeb.Channels.BuilderCommands.Help do
                   script attach <script> <entity>
                   script detach <script> <entity>
 
+      Preview:    preview <type> <key>
+
+      Publishing: publish <type> <key>, unpublish <type> <key>
+                  publish zone_all <zone_key>
+                  list drafts [type], list published [type]
+
       Guides:     guide <topic>
 
       AI:         /ai <prompt>     - One-shot AI prompt
@@ -71,7 +77,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Help do
     Abbreviations: dl=dialogue, sc=script, cs=cutscene, sl=storyline
 
     Type 'help <category>' for details. Categories: rooms, entities,
-    quests, dialogues, zones, cutscenes, storylines, scripts, guides, ai\
+    quests, dialogues, zones, cutscenes, storylines, scripts, publishing, guides, ai\
     """
   end
 
@@ -249,8 +255,31 @@ defmodule LokaWeb.Channels.BuilderCommands.Help do
     """
   end
 
+  defp help_for_topic("publishing") do
+    """
+    Publishing Commands:
+      preview <type> <key>           - Preview content with metadata and fields
+      publish <type> <key>           - Publish draft content to live game
+      unpublish <type> <key>         - Move published content back to drafts
+      publish zone_all <zone_key>    - Publish a zone and all associated rooms
+      list drafts [type]             - Show only draft content
+      list published [type]          - Show only published content
+
+    Supported types: quest, dialogue, zone, cutscene, storyline, script,
+                     npc, item, room
+
+    Examples:
+      preview quest fetch_herbs
+      publish quest fetch_herbs
+      unpublish dialogue merchant_bob
+      publish zone_all dark_forest
+      list drafts quest
+      list published
+    """
+  end
+
   defp help_for_topic(_) do
     "Unknown help topic. Try: help rooms, help entities, help quests, help dialogues, " <>
-      "help zones, help cutscenes, help storylines, help scripts, help guides, help ai"
+      "help zones, help cutscenes, help storylines, help scripts, help publishing, help guides, help ai"
   end
 end

@@ -53,8 +53,10 @@ defmodule Loka.Framework.World.SoundEnvironment do
 
   require Logger
 
+  alias Loka.Engine.Constants.WorldPaths
+
   # Load config at compile time (same pattern as RoomAmbient)
-  @config_path "priv/world/config/sound_mappings.yml"
+  @config_path WorldPaths.sound_mappings_file()
   @external_resource @config_path
 
   @sound_config (

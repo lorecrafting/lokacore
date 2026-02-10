@@ -12,19 +12,26 @@ defmodule Loka.WorldBuilder.QuestManagerTest do
 
   use Loka.DataCase, async: false
 
+  alias Loka.TestCleanup
   alias Loka.WorldBuilder.QuestManager
 
-  @quests_dir Path.join([:code.priv_dir(:loka), "world", "quests"])
+  # Clean up all test quest files after all tests (runs even if tests fail)
+  setup_all do
+    on_exit(fn ->
+      TestCleanup.cleanup_quest_test_files()
+    end)
+
+    :ok
+  end
 
   # Helper to generate unique quest keys
   defp unique_quest_key(prefix \\ "test_quest") do
     "#{prefix}_#{System.os_time(:millisecond)}_#{:rand.uniform(1000)}"
   end
 
-  # Helper to clean up test quests
+  # Helper to clean up test quests (best-effort per-test cleanup)
   defp cleanup_quest(key) do
-    file_path = Path.join(@quests_dir, "#{key}.yml")
-    File.rm(file_path)
+    TestCleanup.cleanup_file(:quest, key)
   end
 
   describe "list_quests/0" do

@@ -140,6 +140,24 @@ defmodule Loka.Engine.TypedObject.Registry do
   end
 
   @doc """
+  Lists all published (non-draft) TypedObjects of a specific type and subtype.
+  """
+  @spec list_by_type_published(atom(), atom() | nil) :: [TypedObject.t()]
+  def list_by_type_published(type, subtype \\ nil) when is_atom(type) do
+    list_by_type(type, subtype)
+    |> Enum.reject(&TypedObject.draft?/1)
+  end
+
+  @doc """
+  Lists all published (non-draft) TypedObjects with a specific tag.
+  """
+  @spec list_by_tag_published(String.t()) :: [TypedObject.t()]
+  def list_by_tag_published(tag) when is_binary(tag) do
+    list_by_tag(tag)
+    |> Enum.reject(&TypedObject.draft?/1)
+  end
+
+  @doc """
   Returns all keys in the registry.
   """
   @spec keys() :: [String.t()]

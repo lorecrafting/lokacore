@@ -1,10 +1,19 @@
 defmodule LokaWeb.Channels.BuilderCommands.ContentTest do
   use ExUnit.Case, async: false
 
+  alias Loka.TestCleanup
   alias LokaWeb.Channels.BuilderCommands.Content
 
   # Use a minimal socket stand-in since Content commands only pass it through
   @socket %{}
+
+  setup_all do
+    on_exit(fn ->
+      TestCleanup.cleanup_dialogue_test_files()
+    end)
+
+    :ok
+  end
 
   describe "execute(:quest_info, ...)" do
     test "returns quest details for existing quest" do
@@ -48,10 +57,7 @@ defmodule LokaWeb.Channels.BuilderCommands.ContentTest do
   describe "execute(:create_dialogue, ...)" do
     test "creates dialogue template for new NPC" do
       on_exit(fn ->
-        path =
-          Path.join([:code.priv_dir(:loka), "world", "dialogues", "test_create_dlg_npc.yml"])
-
-        if File.exists?(path), do: File.rm!(path)
+        TestCleanup.cleanup_dialogue_test_files()
         Loka.Engine.TypedObject.Loader.reload()
       end)
 

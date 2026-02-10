@@ -87,11 +87,28 @@ defmodule Loka.Content.Zone do
   end
 
   @doc """
+  Lists all published zone definitions (excludes drafts).
+  """
+  @spec all_published() :: [TypedObject.t()]
+  def all_published do
+    Registry.list_by_type_published(:zone)
+  end
+
+  @doc """
   Lists zones with a specific tag.
   """
   @spec list_by_tag(String.t()) :: [TypedObject.t()]
   def list_by_tag(tag) when is_binary(tag) do
     Registry.list_by_tag(tag)
+    |> Enum.filter(&(&1.type == :zone))
+  end
+
+  @doc """
+  Lists published zones with a specific tag.
+  """
+  @spec list_by_tag_published(String.t()) :: [TypedObject.t()]
+  def list_by_tag_published(tag) when is_binary(tag) do
+    Registry.list_by_tag_published(tag)
     |> Enum.filter(&(&1.type == :zone))
   end
 

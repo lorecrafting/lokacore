@@ -62,6 +62,7 @@ defmodule Loka.Framework.World.Weather do
   use GenServer
   require Logger
 
+  alias Loka.Engine.Constants.WorldPaths
   alias Loka.Utils.MapHelpers
 
   @weather_table :loka_weather
@@ -193,7 +194,7 @@ defmodule Loka.Framework.World.Weather do
   @impl true
   def init(opts) do
     auto_tick = Keyword.get(opts, :auto_tick, true)
-    path = Keyword.get(opts, :path, "priv/world/config/weather.yml")
+    path = Keyword.get(opts, :path, WorldPaths.weather_file())
 
     table = :ets.new(@weather_table, [:set, :protected, read_concurrency: true])
 

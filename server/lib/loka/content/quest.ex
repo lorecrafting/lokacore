@@ -90,11 +90,28 @@ defmodule Loka.Content.Quest do
   end
 
   @doc """
+  Lists all published quest definitions (excludes drafts).
+  """
+  @spec all_published() :: [TypedObject.t()]
+  def all_published do
+    Registry.list_by_type_published(:quest)
+  end
+
+  @doc """
   Lists quests with a specific tag.
   """
   @spec list_by_tag(String.t()) :: [TypedObject.t()]
   def list_by_tag(tag) when is_binary(tag) do
     Registry.list_by_tag(tag)
+    |> Enum.filter(&(&1.type == :quest))
+  end
+
+  @doc """
+  Lists published quests with a specific tag.
+  """
+  @spec list_by_tag_published(String.t()) :: [TypedObject.t()]
+  def list_by_tag_published(tag) when is_binary(tag) do
+    Registry.list_by_tag_published(tag)
     |> Enum.filter(&(&1.type == :quest))
   end
 

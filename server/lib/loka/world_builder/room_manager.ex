@@ -13,7 +13,7 @@ defmodule Loka.WorldBuilder.RoomManager do
   alias Loka.Engine.TypedObject.Registry
   alias Loka.Engine.TypedObject.Loader
 
-  @rooms_dir Path.join([:code.priv_dir(:loka), "world", "prototypes", "rooms"])
+  @rooms_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "prototypes", "rooms"])
 
   @doc """
   Lists all rooms in the world.

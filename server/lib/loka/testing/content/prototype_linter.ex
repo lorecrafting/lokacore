@@ -114,7 +114,7 @@ defmodule Loka.Testing.Content.PrototypeLinter do
     "usable"
   ]
 
-  @prototype_dir "priv/world/prototypes"
+  @prototype_dir Loka.Engine.Constants.WorldPaths.prototypes_dir()
 
   # =============================================================================
   # Public API

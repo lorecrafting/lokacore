@@ -21,7 +21,7 @@ defmodule Loka.WorldBuilder.DialogueManager do
   alias Loka.Engine.TypedObject.Loader
   alias Loka.Content.Dialogue
 
-  @dialogues_dir Path.join([:code.priv_dir(:loka), "world", "dialogues"])
+  @dialogues_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "dialogues"])
 
   @doc """
   Create a new dialogue definition with a starter template.

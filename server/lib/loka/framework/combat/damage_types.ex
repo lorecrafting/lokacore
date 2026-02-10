@@ -61,6 +61,7 @@ defmodule Loka.Framework.Combat.DamageTypes do
   use GenServer
   require Logger
 
+  alias Loka.Engine.Constants.WorldPaths
   alias Loka.Utils.MapHelpers
 
   @damage_types_table :loka_damage_types
@@ -271,7 +272,7 @@ defmodule Loka.Framework.Combat.DamageTypes do
 
   @impl true
   def init(opts) do
-    path = Keyword.get(opts, :path, "priv/world/combat/damage_types.yml")
+    path = Keyword.get(opts, :path, WorldPaths.damage_types_file())
 
     # Create ETS tables
     damage_table = :ets.new(@damage_types_table, [:set, :protected, read_concurrency: true])

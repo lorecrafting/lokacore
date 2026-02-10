@@ -22,7 +22,7 @@ defmodule Loka.Engine.WorldLoader do
 
   require Logger
 
-  alias Loka.Engine.{Spawner, Entities, WorldGraph}
+  alias Loka.Engine.{TypedObject, Spawner, Entities, WorldGraph}
   alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
 
   @starting_room "monastery_gate"
@@ -163,59 +163,72 @@ defmodule Loka.Engine.WorldLoader do
               )
 
             {:ok, prototype} ->
-              # Spawn this room
-              case Spawner.spawn_room(room_key) do
-                {:ok, room, spawned} ->
-                  room_result = %{
-                    room: room,
-                    spawned: spawned,
-                    exits: get_exits_from_prototype(prototype)
-                  }
+              if TypedObject.draft?(prototype) do
+                # Skip draft prototypes during world spawn
+                Logger.debug("WorldLoader: Skipping draft prototype: #{room_key}")
 
-                  # Add connected rooms to queue (with cycle detection)
-                  exits = get_exits_from_prototype(prototype)
+                spawn_rooms_bfs(
+                  queue,
+                  queued,
+                  MapSet.put(visited, room_key),
+                  results,
+                  max_remaining
+                )
+              else
+                # Spawn this room
+                case Spawner.spawn_room(room_key) do
+                  {:ok, room, spawned} ->
+                    room_result = %{
+                      room: room,
+                      spawned: spawned,
+                      exits: get_exits_from_prototype(prototype)
+                    }
 
-                  {new_queue, new_queued} =
-                    Enum.reduce(exits, {queue, queued}, fn {dir, dest_key}, {q, qd} ->
-                      cond do
-                        MapSet.member?(visited, dest_key) ->
-                          # Already spawned - cycle detected, skip silently
-                          {q, qd}
+                    # Add connected rooms to queue (with cycle detection)
+                    exits = get_exits_from_prototype(prototype)
 
-                        MapSet.member?(qd, dest_key) ->
-                          # Already queued but not spawned - cycle detected
-                          Logger.debug(
-                            "WorldLoader: Cycle detected: #{room_key} -> #{dir} -> #{dest_key} (already queued)"
-                          )
+                    {new_queue, new_queued} =
+                      Enum.reduce(exits, {queue, queued}, fn {dir, dest_key}, {q, qd} ->
+                        cond do
+                          MapSet.member?(visited, dest_key) ->
+                            # Already spawned - cycle detected, skip silently
+                            {q, qd}
 
-                          {q, qd}
+                          MapSet.member?(qd, dest_key) ->
+                            # Already queued but not spawned - cycle detected
+                            Logger.debug(
+                              "WorldLoader: Cycle detected: #{room_key} -> #{dir} -> #{dest_key} (already queued)"
+                            )
 
-                        true ->
-                          # New room, add to queue
-                          {:queue.in(dest_key, q), MapSet.put(qd, dest_key)}
-                      end
-                    end)
+                            {q, qd}
 
-                  spawn_rooms_bfs(
-                    new_queue,
-                    new_queued,
-                    MapSet.put(visited, room_key),
-                    [room_result | results],
-                    max_remaining - 1
-                  )
+                          true ->
+                            # New room, add to queue
+                            {:queue.in(dest_key, q), MapSet.put(qd, dest_key)}
+                        end
+                      end)
 
-                {:error, reason} ->
-                  Logger.warning(
-                    "WorldLoader: Failed to spawn room #{room_key}: #{inspect(reason)}"
-                  )
+                    spawn_rooms_bfs(
+                      new_queue,
+                      new_queued,
+                      MapSet.put(visited, room_key),
+                      [room_result | results],
+                      max_remaining - 1
+                    )
 
-                  spawn_rooms_bfs(
-                    queue,
-                    queued,
-                    MapSet.put(visited, room_key),
-                    results,
-                    max_remaining
-                  )
+                  {:error, reason} ->
+                    Logger.warning(
+                      "WorldLoader: Failed to spawn room #{room_key}: #{inspect(reason)}"
+                    )
+
+                    spawn_rooms_bfs(
+                      queue,
+                      queued,
+                      MapSet.put(visited, room_key),
+                      results,
+                      max_remaining
+                    )
+                end
               end
           end
         end

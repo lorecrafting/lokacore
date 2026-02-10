@@ -9,7 +9,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
   alias Loka.WorldBuilder.YamlBuilder
   alias LokaWeb.Channels.BuilderCommands.{Helpers, Formatter}
 
-  @scripts_dir Path.join([:code.priv_dir(:loka), "world", "scripts"])
+  @scripts_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "scripts"])
 
   def execute(:script_create, %{key: key, hook: hook}, socket) do
     case Script.get(key) do
@@ -69,7 +69,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
     case Script.get(key) do
       {:ok, script} ->
         yaml_text = Helpers.format_typed_object(script)
-        {:ok, "Script '#{key}':\n#{yaml_text}", socket}
+        {:ok, "Script '#{key}'#{Helpers.draft_tag(script)}:\n#{yaml_text}", socket}
 
       {:error, :not_found} ->
         {:error, "Script '#{key}' not found.", socket}

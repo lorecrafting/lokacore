@@ -35,11 +35,35 @@ defmodule Loka.Engine.TypedObject do
   - `metadata` - System metadata (created_at, etc.)
   """
 
+  alias Loka.Engine.Constants.WorldPaths
   alias Loka.Engine.TypedObject.Loader
 
-  @type object_type :: :entity | :quest | :dialogue | :script | :zone
+  @type object_type ::
+          :entity
+          | :quest
+          | :dialogue
+          | :script
+          | :zone
+          | :storyline
+          | :cutscene
+          | :skill
+          | :status
+          | :resource
+          | :recipe
+          | :gathering_node
   @type entity_subtype :: :npc | :room | :item | :exit | :character
-  @type content_type :: :quest | :dialogue | :script | :zone
+  @type content_type ::
+          :quest
+          | :dialogue
+          | :script
+          | :zone
+          | :storyline
+          | :cutscene
+          | :skill
+          | :status
+          | :resource
+          | :recipe
+          | :gathering_node
 
   @type behavior_config :: %{script: String.t(), config: map()}
   @type emotes_map :: %{atom() => String.t()}
@@ -96,7 +120,20 @@ defmodule Loka.Engine.TypedObject do
     scripts: %{}
   ]
 
-  @valid_types [:entity, :quest, :dialogue, :script, :zone]
+  @valid_types [
+    :entity,
+    :quest,
+    :dialogue,
+    :script,
+    :zone,
+    :storyline,
+    :cutscene,
+    :skill,
+    :status,
+    :resource,
+    :recipe,
+    :gathering_node
+  ]
   @valid_entity_subtypes [:npc, :room, :item, :exit, :character]
 
   # =============================================================================
@@ -231,8 +268,37 @@ defmodule Loka.Engine.TypedObject do
   Checks if a TypedObject is a content type (OOC).
   """
   @spec content?(t()) :: boolean()
-  def content?(%__MODULE__{type: type}) when type in [:quest, :dialogue, :script, :zone], do: true
+  @content_types [
+    :quest,
+    :dialogue,
+    :script,
+    :zone,
+    :storyline,
+    :cutscene,
+    :skill,
+    :status,
+    :resource,
+    :recipe,
+    :gathering_node
+  ]
+  def content?(%__MODULE__{type: type}) when type in @content_types, do: true
   def content?(_), do: false
+
+  @doc """
+  Checks if a TypedObject is a draft (not yet published).
+
+  Drafts are content stored in `priv/world/drafts/` directories.
+  They are loaded into the registry but excluded from player-facing queries.
+  """
+  @spec draft?(t()) :: boolean()
+  def draft?(%__MODULE__{metadata: %{"draft" => true}}), do: true
+  def draft?(_), do: false
+
+  @doc """
+  Checks if a TypedObject is published (not a draft).
+  """
+  @spec published?(t()) :: boolean()
+  def published?(%__MODULE__{} = obj), do: not draft?(obj)
 
   @doc """
   Returns a display reference for logging.
@@ -279,6 +345,96 @@ defmodule Loka.Engine.TypedObject do
   """
   @spec valid_entity_subtypes() :: [entity_subtype()]
   def valid_entity_subtypes, do: @valid_entity_subtypes
+
+  @doc """
+  Returns all content types (non-entity types).
+
+  These are OOC (out-of-character) types that are definitions only,
+  loaded once and referenced by the game engine.
+  """
+  @spec content_types() :: [content_type()]
+  def content_types, do: @content_types
+
+  # Entity subtypes that support the publish/unpublish workflow.
+  # Excludes :exit (generated, not authored) and :character (player-owned).
+  @publishable_entity_subtypes [:room, :npc, :item]
+
+  @doc """
+  Returns entity subtypes that support the publish/unpublish workflow.
+  """
+  @spec publishable_entity_subtypes() :: [entity_subtype()]
+  def publishable_entity_subtypes, do: @publishable_entity_subtypes
+
+  # Content types that support the publish/unpublish workflow.
+  # New types (skill, status, resource, recipe, gathering_node) will be
+  # added here as their builder workflows are implemented.
+  @publishable_content_types [:quest, :dialogue, :script, :zone, :cutscene, :storyline]
+
+  @doc """
+  Returns content types that support the publish/unpublish workflow.
+  """
+  @spec publishable_content_types() :: [content_type()]
+  def publishable_content_types, do: @publishable_content_types
+
+  @doc """
+  Returns all types (content + entity subtypes) that support the publish/unpublish workflow.
+
+  Returns string representations since publishing operates on file paths
+  and user-facing commands use strings.
+  """
+  @spec publishable_type_strings() :: [String.t()]
+  def publishable_type_strings do
+    content = Enum.map(@publishable_content_types, &Atom.to_string/1)
+    entities = Enum.map(@publishable_entity_subtypes, &Atom.to_string/1)
+    content ++ entities
+  end
+
+  # Maps content type atom to its YAML directory name (relative to world_dir).
+  # Derived from WorldPaths to maintain a single source of truth.
+  @content_type_to_dir %{
+    quest: WorldPaths.quests_dir() |> Path.relative_to(WorldPaths.world_dir()),
+    dialogue: WorldPaths.dialogues_dir() |> Path.relative_to(WorldPaths.world_dir()),
+    script: WorldPaths.scripts_dir() |> Path.relative_to(WorldPaths.world_dir()),
+    zone: WorldPaths.zones_dir() |> Path.relative_to(WorldPaths.world_dir()),
+    cutscene: WorldPaths.cutscenes_dir() |> Path.relative_to(WorldPaths.world_dir()),
+    storyline: WorldPaths.storylines_dir() |> Path.relative_to(WorldPaths.world_dir())
+  }
+
+  @doc """
+  Returns the YAML directory name for a content type atom (relative to world_dir).
+
+  ## Examples
+
+      iex> TypedObject.content_dir(:quest)
+      "quests"
+
+      iex> TypedObject.content_dir(:zone)
+      "zones"
+  """
+  @spec content_dir(content_type()) :: String.t() | nil
+  def content_dir(type) when is_atom(type), do: @content_type_to_dir[type]
+
+  # Maps entity subtype atom to its prototype subdirectory (relative to world_dir).
+  # Derived from WorldPaths to maintain a single source of truth.
+  @entity_subtype_to_dir %{
+    room: WorldPaths.rooms_dir() |> Path.relative_to(WorldPaths.world_dir()),
+    npc: WorldPaths.npcs_dir() |> Path.relative_to(WorldPaths.world_dir()),
+    item: WorldPaths.items_dir() |> Path.relative_to(WorldPaths.world_dir())
+  }
+
+  @doc """
+  Returns the prototype subdirectory for an entity subtype atom (relative to world_dir).
+
+  ## Examples
+
+      iex> TypedObject.entity_dir(:room)
+      "prototypes/rooms"
+
+      iex> TypedObject.entity_dir(:npc)
+      "prototypes/npcs"
+  """
+  @spec entity_dir(entity_subtype()) :: String.t() | nil
+  def entity_dir(subtype) when is_atom(subtype), do: @entity_subtype_to_dir[subtype]
 
   # =============================================================================
   # Inheritance
@@ -373,6 +529,13 @@ defmodule Loka.Engine.TypedObject do
       "dialogue" -> :dialogue
       "script" -> :script
       "zone" -> :zone
+      "storyline" -> :storyline
+      "cutscene" -> :cutscene
+      "skill" -> :skill
+      "status" -> :status
+      "resource" -> :resource
+      "recipe" -> :recipe
+      "gathering_node" -> :gathering_node
       # Legacy support: map old entity types to entity + subtype
       "npc" -> :entity
       "room" -> :entity
