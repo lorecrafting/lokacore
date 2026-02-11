@@ -59,7 +59,7 @@ defmodule Loka.Engine.Script.Bindings do
 
     base_bindings() ++
       context_bindings(entity, player, context) ++
-      query_bindings(player, game_state) ++
+      query_bindings(entity, player, game_state) ++
       action_bindings(entity, player) ++
       utility_bindings() ++
       control_bindings() ++
@@ -113,7 +113,7 @@ defmodule Loka.Engine.Script.Bindings do
   end
 
   # Query bindings - read-only state checks
-  defp query_bindings(player, game_state) do
+  defp query_bindings(entity, player, game_state) do
     [
       # Quest state queries
       quest_active?: fn quest_id -> quest_active?(game_state, quest_id) end,
@@ -142,7 +142,17 @@ defmodule Loka.Engine.Script.Bindings do
       current_hour: fn -> current_hour() end,
       current_weather: fn -> current_weather(player) end,
       is_outdoor?: fn -> is_outdoor?(player) end,
-      is_dark?: fn -> is_dark?(player) end
+      is_dark?: fn -> is_dark?(player) end,
+
+      # Cooldown queries
+      on_cooldown?: fn key ->
+        entity_id = Map.get(entity, :id) || (player && player.id)
+        if entity_id, do: not Loka.Engine.Cooldowns.ready?(entity_id, key), else: false
+      end,
+      cooldown_remaining: fn key ->
+        entity_id = Map.get(entity, :id) || (player && player.id)
+        if entity_id, do: Loka.Engine.Cooldowns.remaining(entity_id, key), else: 0
+      end
     ]
   end
 
@@ -189,8 +199,30 @@ defmodule Loka.Engine.Script.Bindings do
       lock_exit: fn direction -> queue_lock_exit(entity, direction) end,
       unlock_exit: fn direction -> queue_unlock_exit(entity, direction) end,
 
+      # Dynamic room creation
+      # create_room(%{name: "A dark tunnel", description: "...", tags: ["underground"],
+      #   exit_to: %{direction: "south", room_id: current_room_id}})
+      create_room: fn attrs -> queue_create_room(entity, attrs) end,
+
       # Scheduling (capture entity for later execution)
       after: fn delay, script_key -> queue_schedule(entity, delay, script_key, %{}) end,
+
+      # Cooldown actions
+      set_cooldown: fn key, seconds ->
+        entity_id = Map.get(entity, :id) || (player && player[:id])
+
+        if entity_id do
+          ActionQueue.queue({:set_cooldown, %{entity_id: entity_id, key: key, duration: seconds}})
+        end
+
+        :ok
+      end,
+
+      # Targeted entity signals (entity-to-entity communication)
+      # send_to(door_id, "activate", %{triggered_by: player.name})
+      send_to: fn target_id, signal_name, data ->
+        queue_signal(entity, target_id, signal_name, data)
+      end,
 
       # Events (captures entity for emotes lookup)
       # emit(:waking_up) or emit(:patrol_arrive, %{location: "market"})
@@ -282,7 +314,17 @@ defmodule Loka.Engine.Script.Bindings do
   end
 
   defp safe_context_map(context) when is_map(context) do
-    Map.take(context, [:trigger, :message, :target, :room, :time, :args])
+    Map.take(context, [
+      :trigger,
+      :message,
+      :target,
+      :room,
+      :time,
+      :args,
+      :signal_name,
+      :signal_data,
+      :source_id
+    ])
   end
 
   defp safe_context_map(_), do: %{}
@@ -683,6 +725,39 @@ defmodule Loka.Engine.Script.Bindings do
       )
     else
       Logger.warning("[Bindings] Cannot schedule script without entity id")
+    end
+
+    :ok
+  end
+
+  defp queue_create_room(entity, attrs) when is_map(attrs) do
+    source_room_id = Map.get(entity, :location_id)
+
+    ActionQueue.queue(
+      {:create_room,
+       %{
+         attrs: attrs,
+         source_room_id: source_room_id,
+         creator_id: Map.get(entity, :id)
+       }}
+    )
+
+    :ok
+  end
+
+  defp queue_signal(entity, target_id, signal_name, data) do
+    source_id = Map.get(entity, :id)
+
+    if target_id do
+      ActionQueue.queue(
+        {:signal,
+         %{
+           source_id: source_id,
+           target_id: target_id,
+           signal_name: signal_name,
+           data: data || %{}
+         }}
+      )
     end
 
     :ok

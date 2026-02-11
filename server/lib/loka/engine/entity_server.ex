@@ -33,7 +33,7 @@ defmodule Loka.Engine.EntityServer do
   use GenServer
   require Logger
 
-  alias Loka.Engine.{Behavior, Entities, Entity, EventBus}
+  alias Loka.Engine.{Behavior, Entities, Entity, EventBus, Event}
 
   # Configuration - can be overridden via opts
   # 2 minutes
@@ -243,6 +243,10 @@ defmodule Loka.Engine.EntityServer do
         # Broadcast any events emitted by behaviors
         Enum.each(emitted_events, &EventBus.emit/1)
         new_state = %{state | entity: updated_entity} |> mark_dirty()
+
+        # For signal events, also run on_signal scripts
+        maybe_run_signal_script(updated_entity, event)
+
         {:noreply, new_state}
 
       {:error, reason} ->
@@ -423,6 +427,33 @@ defmodule Loka.Engine.EntityServer do
 
     :ok
   end
+
+  defp maybe_run_signal_script(%Entity{scripts: scripts} = entity, %Event{type: :signal} = event) do
+    script_key = Map.get(scripts, "on_signal") || Map.get(scripts, :on_signal)
+
+    if script_key do
+      Task.start(fn ->
+        alias Loka.Engine.Script.Executor
+
+        context = %{
+          trigger: :signal,
+          signal_name: event.payload[:signal_name],
+          signal_data: event.payload[:data] || %{},
+          source_id: event.source
+        }
+
+        case Executor.run_by_key(script_key, entity, context) do
+          {:ok, _} ->
+            :ok
+
+          {:error, reason} ->
+            Logger.warning("[EntityServer] Signal script failed: #{inspect(reason)}")
+        end
+      end)
+    end
+  end
+
+  defp maybe_run_signal_script(_, _), do: :ok
 
   defp process_behaviors(%Entity{behaviors: []} = entity, _event) do
     # No behaviors attached, entity unchanged

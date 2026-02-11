@@ -58,6 +58,9 @@ defmodule Loka.Engine.Script.ActionQueue do
           | :schedule
           | :emit_event
           | :set_behavior_state
+          | :set_cooldown
+          | :signal
+          | :create_room
 
   @type action :: {action_type(), term()}
 
@@ -70,7 +73,9 @@ defmodule Loka.Engine.Script.ActionQueue do
     teleports: 5,
     room_changes: 10,
     effects: 20,
-    schedules: 5
+    schedules: 5,
+    signals: 10,
+    room_creates: 3
   }
 
   @doc """
@@ -209,6 +214,8 @@ defmodule Loka.Engine.Script.ActionQueue do
   defp action_category({:apply_effect, _}), do: :effects
   defp action_category({:remove_effect, _}), do: :effects
   defp action_category({:schedule, _}), do: :schedules
+  defp action_category({:signal, _}), do: :signals
+  defp action_category({:create_room, _}), do: :room_creates
   defp action_category(_), do: :other
 
   defp get_count(category) do
@@ -573,10 +580,122 @@ defmodule Loka.Engine.Script.ActionQueue do
     :ok
   end
 
+  defp execute_action(
+         {:set_cooldown, %{entity_id: entity_id, key: key, duration: duration}},
+         _context
+       ) do
+    Loka.Engine.Cooldowns.set(entity_id, to_string(key), duration)
+    :ok
+  end
+
+  defp execute_action(
+         {:create_room, %{attrs: attrs, source_room_id: source_room_id, creator_id: creator_id}},
+         _context
+       ) do
+    alias Loka.Engine.Spawner
+
+    name = Map.get(attrs, "name") || Map.get(attrs, :name)
+    description = Map.get(attrs, "description") || Map.get(attrs, :description, "")
+    user_tags = Map.get(attrs, "tags") || Map.get(attrs, :tags, [])
+    exit_to = Map.get(attrs, "exit_to") || Map.get(attrs, :exit_to)
+    tags = ["script_created", "dynamic"] ++ user_tags
+
+    room_attrs = [
+      short_desc: name,
+      long_desc: description,
+      tags: tags,
+      components: %{
+        "metadata" => %{"created_by_script" => true, "creator_id" => creator_id}
+      }
+    ]
+
+    case Spawner.create_room(room_attrs) do
+      {:ok, room} ->
+        # Create bidirectional exits if exit_to specified
+        maybe_create_exits(room, exit_to, source_room_id)
+        {:ok, room.id}
+
+      {:error, reason} ->
+        Logger.warning("[ActionQueue] create_room failed: #{inspect(reason)}")
+        {:error, reason}
+    end
+  end
+
+  defp execute_action(
+         {:signal, %{source_id: source_id, target_id: target_id, signal_name: name, data: data}},
+         _context
+       ) do
+    event =
+      Event.new(:signal, %{
+        source: source_id,
+        target: target_id,
+        payload: %{signal_name: name, data: data}
+      })
+
+    EventBus.emit(event)
+    :ok
+  end
+
   defp execute_action(action, _context) do
     Logger.warning("[ActionQueue] Unknown action: #{inspect(action)}")
     {:error, :unknown_action}
   end
+
+  # =============================================================================
+  # Room Creation Helpers
+  # =============================================================================
+
+  defp maybe_create_exits(room, exit_to, source_room_id) when is_map(exit_to) do
+    alias Loka.Engine.Spawner
+
+    direction = Map.get(exit_to, "direction") || Map.get(exit_to, :direction)
+    connect_room_id = Map.get(exit_to, "room_id") || Map.get(exit_to, :room_id) || source_room_id
+
+    if direction && connect_room_id do
+      reverse = reverse_direction(direction)
+
+      # Create exit from connected room to new room
+      Spawner.create_exit(
+        direction: direction,
+        source_id: connect_room_id,
+        destination_id: room.id
+      )
+
+      # Create reverse exit from new room back to connected room (bidirectional)
+      if reverse do
+        Spawner.create_exit(
+          direction: reverse,
+          source_id: room.id,
+          destination_id: connect_room_id
+        )
+      end
+    end
+  end
+
+  defp maybe_create_exits(_, _, _), do: :ok
+
+  @direction_opposites %{
+    "north" => "south",
+    "south" => "north",
+    "east" => "west",
+    "west" => "east",
+    "up" => "down",
+    "down" => "up",
+    "northeast" => "southwest",
+    "northwest" => "southeast",
+    "southeast" => "northwest",
+    "southwest" => "northeast"
+  }
+
+  defp reverse_direction(dir) when is_binary(dir) do
+    Map.get(@direction_opposites, String.downcase(dir))
+  end
+
+  defp reverse_direction(dir) when is_atom(dir) do
+    reverse_direction(Atom.to_string(dir))
+  end
+
+  defp reverse_direction(_), do: nil
 
   # =============================================================================
   # Emit Event Helpers

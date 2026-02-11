@@ -901,6 +901,36 @@ defmodule LokaWeb.GameChannel do
           {:error, _reason, socket} -> {:reply, :ok, socket}
         end
 
+      # Use item (on self or on target)
+      {:use_item, %{item: item_keyword} = params} ->
+        case find_inventory_item_by_keyword(socket, item_keyword) do
+          {:ok, item_id} ->
+            target_context =
+              case Map.get(params, :target) do
+                nil ->
+                  %{}
+
+                target_keyword ->
+                  case find_entity_by_keyword(socket, target_keyword) do
+                    {:ok, target_id} -> %{target_id: target_id}
+                    :error -> %{target_keyword: target_keyword}
+                  end
+              end
+
+            case ActionBridge.execute(
+                   socket,
+                   :use_item,
+                   Map.merge(%{item_id: item_id}, target_context)
+                 ) do
+              {:ok, socket} -> {:reply, :ok, socket}
+              {:error, _reason, socket} -> {:reply, :ok, socket}
+            end
+
+          :error ->
+            push(socket, "output", %{text: "You don't have '#{item_keyword}'."})
+            {:reply, :ok, socket}
+        end
+
       # Who
       {:who, %{}} ->
         push_who(socket)

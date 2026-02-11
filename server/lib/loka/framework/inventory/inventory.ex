@@ -200,13 +200,140 @@ defmodule Loka.Framework.Inventory do
       heal_amount = Map.get(consumable, "heal") ->
         apply_healing(state, item.id, heal_amount)
 
-      # Other consumable effects can be added here
-      # buff = Map.get(consumable, :buff) -> apply_buff(state, item.id, buff)
+      # Script-based item effect (on_use script)
+      script_key = get_use_script(item) ->
+        apply_script_effect(state, item, script_key)
 
-      # Not a consumable
+      # Declarative use_effect in data
+      use_effect = get_in(item.data, ["use_effect"]) ->
+        apply_declarative_effect(state, item, use_effect)
+
+      # Not usable
       true ->
-        {:error, :not_consumable}
+        {:error, :not_usable}
     end
+  end
+
+  # Look up on_use script from entity's scripts or data
+  defp get_use_script(item) do
+    # Check scripts map first (attached scripts)
+    scripts = Map.get(item, :scripts, %{}) || %{}
+    builder_scripts = Map.get(item, :builder_scripts, %{}) || %{}
+
+    Map.get(scripts, "on_use") ||
+      Map.get(scripts, :on_use) ||
+      Map.get(builder_scripts, "on_use") ||
+      Map.get(builder_scripts, :on_use) ||
+      get_in(item.data, ["use_script"])
+  end
+
+  # Execute a script attached to the item
+  defp apply_script_effect(state, item, script_key) do
+    alias Loka.Engine.Script.Executor
+
+    context = %{
+      player: %{id: state.player_id},
+      game_state: state,
+      trigger: :use,
+      item: %{
+        id: item.id,
+        key: item.key,
+        name: item.short_desc,
+        tags: item.tags || [],
+        data: item.data || %{},
+        components: item.components || %{}
+      }
+    }
+
+    case Executor.run_by_key(script_key, item, context) do
+      {:ok, _result} ->
+        # Check if item should be consumed after use
+        if consumable_on_use?(item) do
+          with {:ok, updated_state} <- remove_item(state, item.id) do
+            {:ok, updated_state, %{script: script_key, consumed: true}}
+          end
+        else
+          {:ok, state, %{script: script_key, consumed: false}}
+        end
+
+      {:error, reason} ->
+        Logger.warning(
+          "[INVENTORY] Use script failed: script=#{script_key}, reason=#{inspect(reason)}"
+        )
+
+        {:error, :script_failed}
+    end
+  end
+
+  # Apply a declarative effect from item data (no script needed)
+  defp apply_declarative_effect(state, item, effect) when is_map(effect) do
+    result =
+      case Map.get(effect, "type") do
+        "heal" ->
+          amount = Map.get(effect, "amount", 0)
+          apply_healing(state, item.id, amount)
+
+        "apply_status" ->
+          status_key = Map.get(effect, "status")
+          # Status effects are applied via the action queue / event bus
+          # For now, emit the event and consume the item
+          alias Loka.Engine.{Event, EventBus}
+
+          event =
+            Event.new(:apply_effect, %{
+              target: state.player_id,
+              payload: %{
+                effect_key: status_key,
+                duration: Map.get(effect, "duration")
+              }
+            })
+
+          EventBus.emit(event)
+
+          with {:ok, updated_state} <- remove_item(state, item.id) do
+            {:ok, updated_state, %{effect_type: "apply_status", status: status_key}}
+          end
+
+        "teleport" ->
+          room_key = Map.get(effect, "room")
+
+          alias Loka.Engine.{Event, EventBus}
+
+          event =
+            Event.new(:teleport, %{
+              target: state.player_id,
+              payload: %{room_id: room_key, instant: true}
+            })
+
+          EventBus.emit(event)
+
+          if consumable_on_use?(item) do
+            with {:ok, updated_state} <- remove_item(state, item.id) do
+              {:ok, updated_state, %{effect_type: "teleport", room: room_key}}
+            end
+          else
+            {:ok, state, %{effect_type: "teleport", room: room_key}}
+          end
+
+        unknown ->
+          Logger.warning("[INVENTORY] Unknown use_effect type: #{inspect(unknown)}")
+          {:error, :unknown_effect}
+      end
+
+    result
+  end
+
+  defp apply_declarative_effect(_state, _item, _effect), do: {:error, :invalid_effect}
+
+  # Check if item should be consumed on use
+  defp consumable_on_use?(item) do
+    consumable = Map.get(item.components, "consumable", %{})
+    data = item.data || %{}
+
+    # Consumed if: consumable component exists, or data.consumable is true
+    map_size(consumable) > 0 ||
+      Map.get(data, "consumable") == true ||
+      Map.get(data, "consumed_on_use") == true
   end
 
   defp apply_healing(state, item_id, amount) do

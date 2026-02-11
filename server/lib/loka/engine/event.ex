@@ -103,7 +103,9 @@ defmodule Loka.Engine.Event do
     # Economy
     :currency_changed,
     :item_purchased,
-    :item_sold
+    :item_sold,
+    # Signals (entity-to-entity scripted events)
+    :signal
   ]
 
   # Payload schemas per event type
@@ -127,7 +129,8 @@ defmodule Loka.Engine.Event do
     currency_changed: %{required: [:currency, :amount, :new_total], optional: [:reason]},
     quest_started: %{required: [:quest_id], optional: [:quest_title]},
     quest_completed: %{required: [:quest_id], optional: [:quest_title, :rewards]},
-    objective_progress: %{required: [:quest_id, :objective_id], optional: [:current, :target]}
+    objective_progress: %{required: [:quest_id, :objective_id], optional: [:current, :target]},
+    signal: %{required: [:signal_name], optional: [:data]}
   }
 
   @type event_type ::
@@ -173,6 +176,7 @@ defmodule Loka.Engine.Event do
           | :currency_changed
           | :item_purchased
           | :item_sold
+          | :signal
 
   defstruct [
     :id,

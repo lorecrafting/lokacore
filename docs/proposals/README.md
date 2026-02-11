@@ -15,6 +15,9 @@ All documents here describe future state, not current system behavior. Check the
 
 | Proposal | Issue | Summary |
 |----------|-------|---------|
+| **[Core: Player Housing](core-player-housing.md)** | - | **Entity ownership, plots, construction, permissions (Tier 1)** |
+| **[Core: Economy & Trading](core-economy-and-trading.md)** | - | **Player trading, item quality, marketplace, dynamic pricing (Tier 2)** |
+| **[Core: Living World](core-living-world.md)** | - | **Zone state, population dynamics, factions, instances, audit (Tier 3)** |
 | [Operations TUI Tool](ops-tui-tool.md) | - | Terminal UI for production operations over SSH |
 | [Decentralized Autonomous Worlds](decentralized-autonomous-worlds.md) | - | IPFS-based always-on worlds with smart contract patterns |
 | [Builder Content Layer](builder-content-layer.md) | `lokacore-12r` | DB storage for non-technical builder content |

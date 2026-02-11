@@ -409,6 +409,14 @@ defmodule LokaWeb.Channels.CommandParser do
   defp do_parse(["attack", target]), do: {:attack, %{target: target}}
   defp do_parse(["flee"]), do: {:flee, %{}}
   defp do_parse(["who"]), do: {:who, %{}}
+
+  defp do_parse(["use", rest]) do
+    case String.split(rest, ~r/\s+on\s+/i, parts: 2) do
+      [item, target] -> {:use_item, %{item: String.trim(item), target: String.trim(target)}}
+      [item] -> {:use_item, %{item: String.trim(item)}}
+    end
+  end
+
   defp do_parse(["equip", target]), do: {:equip, %{target: target}}
   defp do_parse(["unequip", target]), do: {:unequip, %{target: target}}
   defp do_parse(["help"]), do: {:help, %{}}

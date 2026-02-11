@@ -307,6 +307,58 @@ defmodule Loka.Game.Actions do
   end
 
   # =============================================================================
+  # Use Item Actions
+  # =============================================================================
+
+  defp do_action(:use_item, %{item_id: item_id} = params, ctx) do
+    game_state = ctx.game_state
+
+    case Inventory.use_item(game_state, item_id) do
+      {:ok, new_game_state, effect} ->
+        item_entity = Entities.get_entity(item_id)
+        item_name = if item_entity, do: item_entity.short_desc || item_entity.key, else: "item"
+
+        effect_text =
+          cond do
+            Map.has_key?(effect, :healed) -> "You use #{item_name}. Healed #{effect.healed} HP."
+            Map.has_key?(effect, :script) -> "You use #{item_name}."
+            Map.has_key?(effect, :effect_type) -> "You use #{item_name}."
+            true -> "You use #{item_name}."
+          end
+
+        # If there was a target, mention it
+        effect_text =
+          case Map.get(params, :target_id) do
+            nil -> effect_text
+            _target_id -> String.replace(effect_text, "You use", "You use")
+          end
+
+        result =
+          Result.new(
+            state: %{game_state: new_game_state},
+            events: [{:output, %{text: effect_text}}]
+          )
+
+        {:ok, result}
+
+      {:error, :not_in_inventory} ->
+        {:error, "You don't have that item."}
+
+      {:error, :item_not_found} ->
+        {:error, "That item no longer exists."}
+
+      {:error, :not_usable} ->
+        {:error, "You can't use that."}
+
+      {:error, :script_failed} ->
+        {:error, "Nothing happens."}
+
+      {:error, reason} ->
+        {:error, "You can't use that: #{inspect(reason)}"}
+    end
+  end
+
+  # =============================================================================
   # Equipment Actions
   # =============================================================================
 

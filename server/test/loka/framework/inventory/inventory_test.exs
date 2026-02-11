@@ -276,14 +276,14 @@ defmodule Loka.Framework.InventoryTest do
       assert {:error, :not_in_inventory} = Inventory.use_item(state, potion.id)
     end
 
-    test "returns error for non-consumable item" do
+    test "returns error for non-usable item" do
       player = player_fixture()
       item = create_item(%{name: "Regular Item", components: %{}})
       state = game_state_fixture(player.id)
 
       {:ok, state} = Inventory.add_item(state, item.id)
 
-      assert {:error, :not_consumable} = Inventory.use_item(state, item.id)
+      assert {:error, :not_usable} = Inventory.use_item(state, item.id)
     end
 
     test "returns error for non-existent item in inventory" do

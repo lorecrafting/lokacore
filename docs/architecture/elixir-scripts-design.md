@@ -1311,3 +1311,122 @@ schedule/recurring                   # Max 3 active per entity
 - Puzzles and traps
 - Admin UI improvements
 - Documentation and examples
+
+---
+
+## Implementation Status (Feb 2026)
+
+The following features have been implemented in `lib/loka/engine/script/`:
+
+### Implemented Bindings (`bindings.ex`)
+
+| Category | Binding | Description |
+|----------|---------|-------------|
+| **Context** | `entity`, `player`, `context`, `config`, `room()` | Read-only data |
+| **Context** | `get_behavior_state/2`, `set_behavior_state/2` | Per-behavior persistent state |
+| **Queries** | `quest_active?/1`, `quest_complete?/1`, `quest_objective_done?/2` | Quest state |
+| **Queries** | `has_item?/1`, `has_flag?/1`, `get_flag/1`, `get_stat/1`, `get_skill/1`, `get_attribute/1` | Player state |
+| **Queries** | `entities_in_room/0`, `players_in_room/0`, `entity_present?/1`, `find_entity/1`, `find_entities_by_tag/1` | Entity queries |
+| **Queries** | `time_of_day/0`, `current_hour/0`, `current_weather/0`, `is_outdoor?/0`, `is_dark?/0` | World state |
+| **Queries** | `on_cooldown?/1`, `cooldown_remaining/1` | Cooldown state |
+| **Actions** | `say/1`, `emote/1`, `message/1`, `announce_room/1` | Communication |
+| **Actions** | `set_flag/2`, `complete_objective/2`, `start_quest/1` | Quest/flag changes |
+| **Actions** | `give_item/1`, `remove_item/1` | Inventory |
+| **Actions** | `spawn_at/2`, `spawn_npc/1`, `spawn_item/1`, `despawn/1` | Entity spawning |
+| **Actions** | `move_entity/2`, `teleport/2` | Movement |
+| **Actions** | `damage/2`, `heal/2` | Combat |
+| **Actions** | `apply_effect/2`, `remove_effect/2` | Effects |
+| **Actions** | `set_room_attr/2`, `lock_exit/1`, `unlock_exit/1` | Room manipulation |
+| **Actions** | `set_cooldown/2` | Cooldown management |
+| **Actions** | `send_to/3` | Targeted entity signals (entity-to-entity) |
+| **Actions** | `create_room/1` | Dynamic room creation |
+| **Actions** | `emit/1` | Custom event emission |
+| **Actions** | `after/2` | Scheduled script execution |
+| **Control** | `deny/0`, `default/0`, `handled/0`, `continue/0`, `allow/0` | Flow control |
+| **Utility** | `chance?/1`, `roll/1`, `random/2`, `pick/1` | Randomness |
+| **Utility** | `contains?/2`, `downcase/1`, `upcase/1` | Strings |
+| **Utility** | `any?/2`, `all?/2`, `find/2`, `count/1`, `first/1`, `last/1` | Lists |
+| **Utility** | `log/1` | Debugging |
+
+### Rate Limits (`action_queue.ex`)
+
+| Category | Limit | Actions |
+|----------|-------|---------|
+| `spawns` | 10 | `spawn_entity` |
+| `despawns` | 20 | `despawn_entity` |
+| `messages` | 50 | `say`, `emote`, `message`, `announce_room` |
+| `damage_total` | 1000 | `damage`, `heal` (cumulative amount) |
+| `teleports` | 5 | `teleport`, `move_entity` |
+| `room_changes` | 10 | `set_room_attr`, `lock_exit`, `unlock_exit` |
+| `effects` | 20 | `apply_effect`, `remove_effect` |
+| `schedules` | 5 | `schedule` |
+| `signals` | 10 | `signal` (entity-to-entity) |
+| `room_creates` | 3 | `create_room` (strict — expensive) |
+
+### Signal System (Entity-to-Entity Communication)
+
+Scripts can send targeted events to specific entities using `send_to/3`:
+
+```elixir
+# Pressure plate script sends signal to door entity
+door = find_entity("iron_door")
+send_to(door.id, "activate", %{triggered_by: player.name})
+```
+
+The signal flows through the EventBus to the target entity's `entity:{id}` topic. The target EntityServer:
+1. Processes the signal through its behaviors (any behavior can react to `:signal` events)
+2. Checks for an `on_signal` script key and runs it with context:
+   - `context.signal_name` — the signal name (e.g., "activate")
+   - `context.signal_data` — arbitrary data map
+   - `context.source_id` — entity that sent the signal
+
+### Dynamic Room Creation
+
+Scripts can create rooms at runtime using `create_room/1`:
+
+```elixir
+# Create a room connected to the current room
+create_room(%{
+  name: "A dark tunnel",
+  description: "Rough-hewn stone walls stretch into darkness.",
+  tags: ["underground", "dungeon"],
+  exit_to: %{direction: "north", room_id: entity.location}
+})
+```
+
+- Rooms are auto-tagged with `["script_created", "dynamic"]` plus user tags
+- When `exit_to` is specified, bidirectional exits are created automatically
+- Rate limited to 3 rooms per script execution
+- Foundation for procedural dungeons and player housing
+
+### Cooldown System
+
+ETS-backed cooldowns available as both query and action bindings:
+
+```elixir
+# Check cooldown
+if on_cooldown?("special_attack") do
+  message("You must wait #{cooldown_remaining("special_attack")}s.")
+else
+  damage(target.id, 50)
+  set_cooldown("special_attack", 30)
+end
+```
+
+### Item Use Effects
+
+Items with `on_use` scripts trigger via the `use` command:
+
+```yaml
+# priv/world/prototypes/items/healing_herb.yml
+key: healing_herb
+type: item
+data:
+  usable: true
+  on_use: |
+    heal(player.id, 20)
+    message("You feel better!")
+    remove_item("healing_herb")
+```
+
+Command parsing: `use <item>`, `use <item> on <target>`

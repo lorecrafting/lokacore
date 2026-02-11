@@ -29,6 +29,7 @@ defmodule Loka.Application do
       # Task supervisor for async hook execution
       {Task.Supervisor, name: Loka.Engine.Hooks.TaskSupervisor},
       Loka.Engine.Hooks,
+      Loka.Engine.Cooldowns,
       # TypedObject Loader - unified loading for all content types
       Loka.Engine.TypedObject.Loader,
       Loka.Engine.SocialLoader,
