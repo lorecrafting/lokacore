@@ -32,6 +32,11 @@ log_level =
 
 config :logger, level: log_level
 
+# Anthropic API key for builder AI (all environments)
+if anthropic_key = System.get_env("ANTHROPIC_API_KEY") do
+  config :loka, :anthropic_api_key, anthropic_key
+end
+
 # Enable JSON logging in production for better log aggregation and querying
 if config_env() == :prod do
   config :logger, :default_handler,

@@ -99,6 +99,8 @@ defmodule LokaWeb.Channels.BuilderCommands.Rooms do
 
     case RoomManager.add_exit(room.key, direction, key) do
       {:ok, _} ->
+        # Reload room into socket assigns so navigation picks up new exits
+        socket = reload_room_assign(socket, game_state)
         push_room_update(socket, game_state)
         {:ok, "Linked #{direction} -> #{key}.", socket}
 
@@ -114,6 +116,8 @@ defmodule LokaWeb.Channels.BuilderCommands.Rooms do
 
     case RoomManager.remove_exit(room.key, direction) do
       {:ok, _} ->
+        # Reload room into socket assigns so navigation picks up removed exit
+        socket = reload_room_assign(socket, game_state)
         push_room_update(socket, game_state)
         {:ok, "Unlinked #{direction} from '#{room.key}'.", socket}
 
@@ -132,6 +136,11 @@ defmodule LokaWeb.Channels.BuilderCommands.Rooms do
   # ---------------------------------------------------------------------------
   # Private
   # ---------------------------------------------------------------------------
+
+  defp reload_room_assign(socket, game_state) do
+    {room, _} = RoomHelpers.load_player_room(game_state)
+    Phoenix.Socket.assign(socket, :room, room)
+  end
 
   defp push_room_update(socket, game_state) do
     {room, _} = RoomHelpers.load_player_room(game_state)

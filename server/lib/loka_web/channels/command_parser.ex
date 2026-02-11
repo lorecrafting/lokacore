@@ -97,7 +97,7 @@ defmodule LokaWeb.Channels.CommandParser do
 
   # Multi-word builder commands (create/edit/delete + type + args)
   defp do_parse(["create", rest]) do
-    case String.split(rest, " ", parts: 3) do
+    case String.split(rest, " ", parts: 2) do
       ["room", key_and_name] ->
         case String.split(key_and_name, " ", parts: 2) do
           [key, name] -> {:builder_create_room, %{key: key, name: name}}
@@ -280,7 +280,7 @@ defmodule LokaWeb.Channels.CommandParser do
 
   # Script commands
   defp do_parse(["script", rest]) do
-    case String.split(rest, " ", parts: 3) do
+    case String.split(rest, " ", parts: 2) do
       ["info", key] ->
         {:builder_script_info, %{key: String.trim(key)}}
 

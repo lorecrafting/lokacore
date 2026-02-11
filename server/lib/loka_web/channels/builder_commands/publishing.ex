@@ -8,6 +8,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Publishing do
 
   require Logger
 
+  alias Loka.Engine.Entities
   alias Loka.Engine.TypedObject
   alias Loka.Engine.TypedObject.Loader
 
@@ -61,7 +62,10 @@ defmodule LokaWeb.Channels.BuilderCommands.Publishing do
     draft_path = Path.join([@world_dir, "drafts", subdir, "#{key}.yml"])
     published_path = Path.join([@world_dir, subdir, "#{key}.yml"])
 
-    move_and_reload(draft_path, published_path, key, "Published")
+    with {:ok, message} <- move_and_reload(draft_path, published_path, key, "Published") do
+      sync_entity_draft_flag(key, false)
+      {:ok, message}
+    end
   end
 
   defp do_publish("zone_all", zone_key) do
@@ -138,12 +142,40 @@ defmodule LokaWeb.Channels.BuilderCommands.Publishing do
     published_path = Path.join([@world_dir, subdir, "#{key}.yml"])
     draft_path = Path.join([@world_dir, "drafts", subdir, "#{key}.yml"])
 
-    move_and_reload(published_path, draft_path, key, "Unpublished")
+    with {:ok, message} <- move_and_reload(published_path, draft_path, key, "Unpublished") do
+      sync_entity_draft_flag(key, true)
+      {:ok, message}
+    end
   end
 
   defp do_unpublish(type, _key) do
     {:error,
      "Unknown content type: #{type}. Valid types: #{Enum.join(@valid_types ++ @entity_types, ", ")}"}
+  end
+
+  # Sync the draft flag on a spawned entity after publish/unpublish.
+  # The YAML registry is updated by reload_file, but the live DB entity
+  # retains its original metadata until explicitly updated.
+  # Best-effort: if no entity exists (e.g. content-only types), this is a no-op.
+  defp sync_entity_draft_flag(key, is_draft) do
+    try do
+      case Entities.get_entity_by_key(key) do
+        %{metadata: metadata} = entity ->
+          updated_metadata =
+            if is_draft,
+              do: Map.put(metadata || %{}, "draft", true),
+              else: Map.delete(metadata || %{}, "draft")
+
+          Entities.update_entity(entity, %{metadata: updated_metadata})
+
+        nil ->
+          :ok
+      end
+    rescue
+      e ->
+        Logger.warning("[Publishing] sync_entity_draft_flag failed for '#{key}': #{inspect(e)}")
+        :ok
+    end
   end
 
   defp move_and_reload(source, destination, key, action_label) do
