@@ -30,8 +30,10 @@ defmodule Loka.Application do
       {Task.Supervisor, name: Loka.Engine.Hooks.TaskSupervisor},
       Loka.Engine.Hooks,
       Loka.Engine.Cooldowns,
-      # TypedObject Loader - unified loading for all content types
+      # TypedObject Loader - unified loading for all content types (V1, will be removed in Phase 6)
       Loka.Engine.TypedObject.Loader,
+      # EntitySeeder - populates DB from YAML (V2)
+      Loka.Engine.EntitySeeder,
       Loka.Engine.SocialLoader,
       {Registry, keys: :unique, name: Loka.Engine.EntityRegistry.Registry},
       {Loka.Engine.EntitySupervisor, name: Loka.Engine.EntitySupervisor},
