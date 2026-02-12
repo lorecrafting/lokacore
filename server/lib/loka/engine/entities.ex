@@ -1,9 +1,40 @@
 defmodule Loka.Engine.Entities do
   @moduledoc """
-  Context for managing entities in the database.
+  Unified API for entity persistence (V2).
 
-  Provides CRUD operations for entities and their attributes, using
-  serialized complex data and EAV attributes for flexible storage.
+  All game objects are entities stored in a single `entities` table.
+  Tags are in the `entity_tags` join table.
+
+  ## V2 API
+
+      # Single-result reads
+      find_one(uuid_string)
+      find_one(key: k, type: t)
+      find_one(account_id: id)
+
+      # Multi-result reads
+      find_all(type: :npc)
+      find_all(location_id: room_id)
+      find_all(location_id: id, type: :npc)
+      find_all(tags: ["hostile"])
+
+      # Convenience
+      find(id_or_opts)
+
+      # Batch
+      find_many(ids)
+      find_many(keys, type)
+
+      # Writes
+      save(entity)
+      save_batch(entities)
+      delete(id)
+      update(id, changes_map)
+
+      # Tags
+      add_tag(entity_id, tag)
+      remove_tag(entity_id, tag)
+      get_tags(entity_id)
   """
 
   require Logger
@@ -11,20 +42,255 @@ defmodule Loka.Engine.Entities do
   import Ecto.Query
   alias Loka.Repo
   alias Loka.Engine.Entity
-  alias Loka.Engine.Schema.{EntitySchema, EntityAttribute}
+  alias Loka.Engine.Schema.{EntitySchema, EntityTagSchema}
 
   # =============================================================================
-  # Entity CRUD
+  # V2 Read API
   # =============================================================================
 
   @doc """
-  Lists all entities, with optional filtering.
+  Finds a single entity. Returns `{:ok, entity}` or `{:error, :not_found}`.
 
-  ## Options
-    - `:type` - Filter by entity type (atom or list of atoms)
-    - `:location_id` - Filter by location
-    - `:preload` - Preload associations (default: [])
+  ## Examples
+
+      find_one("uuid-string")
+      find_one(key: "goblin", type: :npc)
+      find_one(account_id: 42)
   """
+  def find_one(id) when is_binary(id) do
+    # Validate UUID format
+    case Ecto.UUID.cast(id) do
+      {:ok, _} ->
+        case Repo.get(EntitySchema, id) |> maybe_preload_tags() do
+          nil -> {:error, :not_found}
+          schema -> {:ok, EntitySchema.to_entity(schema)}
+        end
+
+      :error ->
+        raise ArgumentError, "find_one/1 with string requires a valid UUID, got: #{inspect(id)}"
+    end
+  end
+
+  def find_one(opts) when is_list(opts) do
+    cond do
+      opts[:key] && opts[:type] ->
+        EntitySchema
+        |> where([e], e.key == ^opts[:key] and e.type == ^opts[:type])
+        |> limit(1)
+        |> Repo.one()
+        |> maybe_preload_tags()
+        |> case do
+          nil -> {:error, :not_found}
+          schema -> {:ok, EntitySchema.to_entity(schema)}
+        end
+
+      opts[:account_id] ->
+        EntitySchema
+        |> where([e], e.account_id == ^opts[:account_id])
+        |> limit(1)
+        |> Repo.one()
+        |> maybe_preload_tags()
+        |> case do
+          nil -> {:error, :not_found}
+          schema -> {:ok, EntitySchema.to_entity(schema)}
+        end
+
+      opts[:key] ->
+        raise ArgumentError, "find_one with :key requires :type (keys are unique per type)"
+
+      true ->
+        raise ArgumentError, "find_one/1 requires UUID string, or key+type, or account_id"
+    end
+  end
+
+  @doc """
+  Finds multiple entities. Returns a list (may be empty).
+
+  ## Examples
+
+      find_all(type: :npc)
+      find_all(location_id: room_id)
+      find_all(location_id: room_id, type: :npc)
+      find_all(tags: ["hostile"])
+      find_all(is_prototype: true, type: :npc)
+  """
+  def find_all(opts) when is_list(opts) do
+    EntitySchema
+    |> apply_filters(opts)
+    |> Repo.all()
+    |> Repo.preload(:tags)
+    |> Enum.map(&EntitySchema.to_entity/1)
+  end
+
+  @doc """
+  Convenience dispatcher — routes to `find_one` or `find_all`.
+
+  - String arg → `find_one(id)`
+  - Keyword with `:key` + `:type` → `find_one(key: k, type: t)`
+  - Keyword with `:type` only → `find_all(type: t)`
+  - Keyword with `:location_id` → `find_all(location_id: id)`
+  """
+  def find(id) when is_binary(id), do: find_one(id)
+
+  def find(opts) when is_list(opts) do
+    cond do
+      opts[:key] && opts[:type] -> find_one(opts)
+      opts[:account_id] -> find_one(opts)
+      true -> find_all(opts)
+    end
+  end
+
+  @doc """
+  Batch-fetches entities by IDs.
+
+      find_many(["uuid1", "uuid2"])
+  """
+  def find_many(ids) when is_list(ids) do
+    EntitySchema
+    |> where([e], e.id in ^ids)
+    |> Repo.all()
+    |> Repo.preload(:tags)
+    |> Enum.map(&EntitySchema.to_entity/1)
+  end
+
+  @doc """
+  Batch-fetches entities by keys and type.
+
+      find_many(["goblin", "orc"], :npc)
+  """
+  def find_many(keys, type) when is_list(keys) and is_atom(type) do
+    EntitySchema
+    |> where([e], e.key in ^keys and e.type == ^type)
+    |> Repo.all()
+    |> Repo.preload(:tags)
+    |> Enum.map(&EntitySchema.to_entity/1)
+  end
+
+  # =============================================================================
+  # V2 Write API
+  # =============================================================================
+
+  @doc """
+  Saves an entity (insert or update with optimistic locking via version).
+
+  Returns `{:ok, entity}` or `{:error, reason}`.
+  """
+  def save(%Entity{} = entity) do
+    case Repo.get(EntitySchema, entity.id) do
+      nil ->
+        # Insert
+        attrs = EntitySchema.from_entity(entity) |> Map.put(:id, entity.id)
+
+        case %EntitySchema{} |> EntitySchema.changeset(attrs) |> Repo.insert() do
+          {:ok, schema} ->
+            schema = Repo.preload(schema, :tags)
+            {:ok, EntitySchema.to_entity(schema)}
+
+          {:error, changeset} ->
+            {:error, changeset}
+        end
+
+      existing ->
+        # Optimistic lock check
+        if existing.version != entity.version do
+          {:error, :version_conflict}
+        else
+          attrs = EntitySchema.from_entity(entity) |> Map.put(:version, entity.version + 1)
+
+          case existing |> EntitySchema.changeset(attrs) |> Repo.update() do
+            {:ok, schema} ->
+              schema = Repo.preload(schema, :tags)
+              {:ok, EntitySchema.to_entity(schema)}
+
+            {:error, changeset} ->
+              {:error, changeset}
+          end
+        end
+    end
+  end
+
+  @doc """
+  Bulk-inserts entities. For seeding and batch operations only.
+  """
+  def save_batch(entities) when is_list(entities) do
+    now = DateTime.utc_now() |> DateTime.truncate(:second)
+
+    entries =
+      Enum.map(entities, fn entity ->
+        EntitySchema.from_entity(entity)
+        |> Map.put(:id, entity.id)
+        |> Map.put(:inserted_at, now)
+        |> Map.put(:updated_at, now)
+      end)
+
+    Repo.insert_all(EntitySchema, entries)
+  end
+
+  @doc """
+  Deletes an entity by ID.
+  """
+  def delete(id) when is_binary(id) do
+    case Repo.get(EntitySchema, id) do
+      nil -> {:error, :not_found}
+      schema -> Repo.delete(schema)
+    end
+  end
+
+  def delete(%Entity{id: id}), do: delete(id)
+
+  @doc """
+  Partial update — applies a changes map to an existing entity.
+  """
+  def update(id, changes) when is_binary(id) and is_map(changes) do
+    case Repo.get(EntitySchema, id) do
+      nil ->
+        {:error, :not_found}
+
+      schema ->
+        case schema |> EntitySchema.changeset(changes) |> Repo.update() do
+          {:ok, schema} ->
+            schema = Repo.preload(schema, :tags)
+            {:ok, EntitySchema.to_entity(schema)}
+
+          {:error, changeset} ->
+            {:error, changeset}
+        end
+    end
+  end
+
+  # =============================================================================
+  # Tag Operations
+  # =============================================================================
+
+  @doc "Adds a tag to an entity. No-op if already present."
+  def add_tag(entity_id, tag) when is_binary(entity_id) and is_binary(tag) do
+    %EntityTagSchema{}
+    |> EntityTagSchema.changeset(%{entity_id: entity_id, tag: tag})
+    |> Repo.insert(on_conflict: :nothing)
+  end
+
+  @doc "Removes a tag from an entity."
+  def remove_tag(entity_id, tag) when is_binary(entity_id) and is_binary(tag) do
+    EntityTagSchema
+    |> where([t], t.entity_id == ^entity_id and t.tag == ^tag)
+    |> Repo.delete_all()
+
+    :ok
+  end
+
+  @doc "Gets all tags for an entity."
+  def get_tags(entity_id) when is_binary(entity_id) do
+    EntityTagSchema
+    |> where([t], t.entity_id == ^entity_id)
+    |> select([t], t.tag)
+    |> Repo.all()
+  end
+
+  # =============================================================================
+  # V1 Backward Compatibility (used by ~44 files, will be migrated in Phases 4-6)
+  # =============================================================================
+
+  @doc "V1 compat — lists entities with optional type/location filters."
   def list_entities(opts \\ []) do
     EntitySchema
     |> filter_by_type(opts[:type])
@@ -33,348 +299,76 @@ defmodule Loka.Engine.Entities do
     |> Repo.all()
   end
 
-  @doc """
-  Gets a single entity by ID.
-  """
-  def get_entity(id) when is_binary(id) do
-    Repo.get(EntitySchema, id)
-  end
-
+  @doc "V1 compat — gets entity schema by ID."
+  def get_entity(id) when is_binary(id), do: Repo.get(EntitySchema, id)
   def get_entity(_), do: nil
 
-  @doc """
-  Gets a single entity by ID, raises if not found.
-  """
-  def get_entity!(id) do
-    Repo.get!(EntitySchema, id)
-  end
+  @doc "V1 compat — gets entity schema by ID, raises if not found."
+  def get_entity!(id), do: Repo.get!(EntitySchema, id)
 
-  @doc """
-  Gets a single entity by key.
+  @doc "V1 compat — gets entity schema by key (first match)."
+  def get_entity_by_key(key) when is_binary(key), do: Repo.get_by(EntitySchema, key: key)
 
-  Note: Since keys are now prototype keys (not unique), this returns the first match.
-  Use `get_all_by_key/1` when you need all instances of a prototype.
-  """
-  def get_entity_by_key(key) when is_binary(key) do
-    Repo.get_by(EntitySchema, key: key)
-  end
-
-  @doc """
-  Gets all entities with the given key (prototype key).
-
-  Since entity keys now match prototype keys and are not unique,
-  multiple entities may share the same key. This returns all of them.
-
-  ## Examples
-
-      # Get all goblins in the world
-      goblins = Entities.get_all_by_key("goblin_warrior")
-
-      # Get all instances of a specific item type
-      swords = Entities.get_all_by_key("iron_sword")
-  """
+  @doc "V1 compat — gets all entity schemas with the given key."
   def get_all_by_key(key) when is_binary(key) do
-    EntitySchema
-    |> where([e], e.key == ^key)
-    |> Repo.all()
+    EntitySchema |> where([e], e.key == ^key) |> Repo.all()
   end
 
-  @doc """
-  Creates a new entity.
-  """
+  @doc "V1 compat — creates entity from attrs map."
   def create_entity(attrs) do
-    Logger.debug("[ENTITIES] Creating entity: type=#{inspect(attrs[:type])} key=#{attrs[:key]}")
-
-    case %EntitySchema{}
-         |> EntitySchema.changeset(normalize_attrs(attrs))
-         |> Repo.insert() do
-      {:ok, entity} = result ->
-        Logger.info("[ENTITIES] Created: id=#{entity.id} type=#{entity.type} key=#{entity.key}")
-        result
-
-      {:error, changeset} = error ->
-        Logger.warning("[ENTITIES] Create failed: #{inspect(changeset.errors)}")
-        error
-    end
+    %EntitySchema{}
+    |> EntitySchema.changeset(normalize_attrs(attrs))
+    |> Repo.insert()
   end
 
-  @doc """
-  Updates an existing entity.
-  Accepts either an EntitySchema struct or an entity ID string.
-  """
+  @doc "V1 compat — updates entity schema."
   def update_entity(%EntitySchema{} = entity, attrs) do
-    Logger.debug("[ENTITIES] Updating: id=#{entity.id} attrs=#{inspect(Map.keys(attrs))}")
-
-    case entity
-         |> EntitySchema.changeset(normalize_attrs(attrs))
-         |> Repo.update() do
-      {:ok, updated} = result ->
-        Logger.debug("[ENTITIES] Updated: id=#{updated.id}")
-        result
-
-      {:error, changeset} = error ->
-        Logger.warning(
-          "[ENTITIES] Update failed: id=#{entity.id} errors=#{inspect(changeset.errors)}"
-        )
-
-        error
-    end
+    entity
+    |> EntitySchema.changeset(normalize_attrs(attrs))
+    |> Repo.update()
   end
 
   def update_entity(entity_id, attrs) when is_binary(entity_id) do
     case get_entity(entity_id) do
-      nil ->
-        Logger.debug("[ENTITIES] Update failed - not found: id=#{entity_id}")
-        {:error, :not_found}
-
-      entity ->
-        update_entity(entity, attrs)
+      nil -> {:error, :not_found}
+      entity -> update_entity(entity, attrs)
     end
   end
 
-  @doc """
-  Deletes an entity.
-  """
-  def delete_entity(%EntitySchema{} = entity) do
-    Logger.debug("[ENTITIES] Deleting: id=#{entity.id} type=#{entity.type} key=#{entity.key}")
+  @doc "V1 compat — deletes entity schema."
+  def delete_entity(%EntitySchema{} = entity), do: Repo.delete(entity)
 
-    case Repo.delete(entity) do
-      {:ok, deleted} = result ->
-        Logger.info(
-          "[ENTITIES] Deleted: id=#{deleted.id} type=#{deleted.type} key=#{deleted.key}"
-        )
-
-        result
-
-      {:error, changeset} = error ->
-        Logger.warning(
-          "[ENTITIES] Delete failed: id=#{entity.id} errors=#{inspect(changeset.errors)}"
-        )
-
-        error
-    end
-  end
-
-  @doc """
-  Returns a changeset for tracking entity changes.
-  """
+  @doc "V1 compat — returns changeset."
   def change_entity(%EntitySchema{} = entity, attrs \\ %{}) do
     EntitySchema.changeset(entity, normalize_attrs(attrs))
   end
 
-  # =============================================================================
-  # Attribute Operations (EAV Pattern)
-  # =============================================================================
-
-  @doc """
-  Gets an attribute value for an entity.
-
-  ## Examples
-
-      iex> get_attribute("entity-uuid", "health")
-      %{current: 100, max: 100}
-
-      iex> get_attribute("entity-uuid", "strength", "stats")
-      18
-  """
-  def get_attribute(entity_id, key, category \\ "default") do
-    EntityAttribute
-    |> where([a], a.entity_id == ^entity_id and a.key == ^key and a.category == ^category)
-    |> Repo.one()
-    |> case do
-      nil -> nil
-      attr -> attr.value
-    end
-  end
-
-  @doc """
-  Gets all attributes for an entity, optionally filtered by category.
-  """
-  def get_attributes(entity_id, category \\ nil) do
-    EntityAttribute
-    |> where([a], a.entity_id == ^entity_id)
-    |> filter_by_category(category)
-    |> Repo.all()
-    |> Map.new(fn attr -> {attr.key, attr.value} end)
-  end
-
-  @doc """
-  Sets an attribute on an entity. Creates or updates as needed.
-  """
-  def set_attribute(entity_id, key, value, category \\ "default") do
-    attrs = %{entity_id: entity_id, key: key, value: value, category: category}
-
-    case Repo.get_by(EntityAttribute, entity_id: entity_id, key: key, category: category) do
-      nil ->
-        %EntityAttribute{}
-        |> EntityAttribute.changeset(attrs)
-        |> Repo.insert()
-
-      existing ->
-        existing
-        |> EntityAttribute.changeset(attrs)
-        |> Repo.update()
-    end
-  end
-
-  @doc """
-  Deletes an attribute from an entity.
-  """
-  def delete_attribute(entity_id, key, category \\ "default") do
-    EntityAttribute
-    |> where([a], a.entity_id == ^entity_id and a.key == ^key and a.category == ^category)
-    |> Repo.delete_all()
-  end
-
-  @doc """
-  Deletes all attributes for an entity.
-  """
-  def clear_attributes(entity_id) do
-    EntityAttribute
-    |> where([a], a.entity_id == ^entity_id)
-    |> Repo.delete_all()
-  end
-
-  # =============================================================================
-  # Entity Conversion
-  # =============================================================================
-
-  @doc """
-  Converts an EntitySchema to an Entity struct for in-memory use.
-  """
-  def to_entity(%EntitySchema{} = schema) do
-    EntitySchema.to_entity(schema)
-  end
-
+  @doc "V1 compat — converts schema to Entity struct."
+  def to_entity(%EntitySchema{} = schema), do: EntitySchema.to_entity(schema)
   def to_entity(nil), do: nil
 
-  @doc """
-  Saves an Entity struct to the database.
-  """
+  @doc "V1 compat — saves Entity struct to DB."
   def save_entity(%Entity{id: nil} = entity) do
-    entity
-    |> EntitySchema.from_entity()
-    |> create_entity()
+    entity |> EntitySchema.from_entity() |> create_entity()
   end
 
   def save_entity(%Entity{id: id} = entity) do
     case get_entity(id) do
       nil ->
-        entity
-        |> EntitySchema.from_entity()
-        |> Map.put(:id, id)
-        |> create_entity()
+        entity |> EntitySchema.from_entity() |> Map.put(:id, id) |> create_entity()
 
       schema ->
         update_entity(schema, EntitySchema.from_entity(entity))
     end
   end
 
-  # =============================================================================
-  # Statistics
-  # =============================================================================
+  @doc "V1 compat — lists entities by type."
+  def list_by_type(type), do: list_entities(type: type)
 
-  @doc """
-  Counts entities by type.
-  """
-  def count_by_type(type) do
-    EntitySchema
-    |> where([e], e.type == ^type)
-    |> Repo.aggregate(:count)
-  end
+  @doc "V1 compat — lists rooms."
+  def list_rooms, do: list_entities(type: :room, preload: [:contents])
 
-  @doc """
-  Counts entities by key (prototype key).
-
-  Used by the zone reset system to enforce max spawn counts.
-
-  ## Examples
-
-      # Check how many goblins exist in the world
-      count = Entities.count_by_key("goblin_warrior")
-  """
-  def count_by_key(key) when is_binary(key) do
-    EntitySchema
-    |> where([e], e.key == ^key)
-    |> Repo.aggregate(:count)
-  end
-
-  @doc """
-  Counts entities in a specific location.
-
-  Uses SQL COUNT aggregate for efficiency instead of loading all entities.
-
-  ## Examples
-
-      # Count entities in a room
-      count = Entities.count_by_location("room-uuid")
-  """
-  def count_by_location(location_id) when is_binary(location_id) do
-    EntitySchema
-    |> where([e], e.location_id == ^location_id)
-    |> Repo.aggregate(:count)
-  end
-
-  def count_by_location(nil), do: 0
-
-  @doc """
-  Gets multiple entities by their IDs in a single query.
-
-  ## Examples
-
-      # Batch fetch entities
-      entities = Entities.get_all_by_ids(["uuid1", "uuid2", "uuid3"])
-  """
-  def get_all_by_ids([]), do: []
-
-  def get_all_by_ids(ids) when is_list(ids) do
-    EntitySchema
-    |> where([e], e.id in ^ids)
-    |> Repo.all()
-  end
-
-  @doc """
-  Counts entities by key in a specific room.
-
-  ## Examples
-
-      # Check how many goblins are in a specific room
-      count = Entities.count_by_key_in_room("goblin_warrior", room_id)
-  """
-  def count_by_key_in_room(key, room_id) when is_binary(key) and is_binary(room_id) do
-    EntitySchema
-    |> where([e], e.key == ^key and e.location_id == ^room_id)
-    |> Repo.aggregate(:count)
-  end
-
-  @doc """
-  Counts all entities.
-  """
-  def count_all do
-    Repo.aggregate(EntitySchema, :count)
-  end
-
-  # =============================================================================
-  # Query Helpers
-  # =============================================================================
-
-  @doc """
-  Lists all entities of a given type.
-  """
-  def list_by_type(type) do
-    list_entities(type: type)
-  end
-
-  @doc """
-  Lists rooms with their contents preloaded.
-  """
-  def list_rooms do
-    list_entities(type: :room, preload: [:contents])
-  end
-
-  @doc """
-  Gets a room with its exits and contents.
-  """
+  @doc "V1 compat — gets room with contents."
   def get_room(id) do
     EntitySchema
     |> where([e], e.id == ^id and e.type == :room)
@@ -382,26 +376,12 @@ defmodule Loka.Engine.Entities do
     |> Repo.one()
   end
 
-  @doc """
-  Gets entities at a specific location.
-  """
+  @doc "V1 compat — gets entities at a location."
   def get_contents(location_id) do
-    EntitySchema
-    |> where([e], e.location_id == ^location_id)
-    |> Repo.all()
+    EntitySchema |> where([e], e.location_id == ^location_id) |> Repo.all()
   end
 
-  @doc """
-  Gets entities at multiple locations in a single query.
-
-  Returns a map of location_id => list of entities.
-
-  ## Examples
-
-      # Batch fetch contents for multiple rooms
-      contents_by_room = Entities.get_contents_batch(["room1", "room2", "room3"])
-      # => %{"room1" => [entity1, entity2], "room2" => [entity3], "room3" => []}
-  """
+  @doc "V1 compat — gets entities at multiple locations."
   def get_contents_batch([]), do: %{}
 
   def get_contents_batch(location_ids) when is_list(location_ids) do
@@ -410,29 +390,53 @@ defmodule Loka.Engine.Entities do
     |> Repo.all()
     |> Enum.group_by(& &1.location_id)
     |> then(fn grouped ->
-      # Ensure all requested location_ids have entries (even if empty)
-      Enum.reduce(location_ids, grouped, fn id, acc ->
-        Map.put_new(acc, id, [])
-      end)
+      Enum.reduce(location_ids, grouped, fn id, acc -> Map.put_new(acc, id, []) end)
     end)
   end
 
-  @doc """
-  Finds an entity by its prototype key in metadata.
-  """
-  def find_by_prototype_key(prototype_key) do
-    # Search in metadata JSONB field for prototype_key
+  @doc "V1 compat — batch fetch by IDs."
+  def get_all_by_ids([]), do: []
+
+  def get_all_by_ids(ids) when is_list(ids) do
+    EntitySchema |> where([e], e.id in ^ids) |> Repo.all()
+  end
+
+  @doc "V1 compat — count by type."
+  def count_by_type(type) do
+    EntitySchema |> where([e], e.type == ^type) |> Repo.aggregate(:count)
+  end
+
+  @doc "V1 compat — count by key."
+  def count_by_key(key) when is_binary(key) do
+    EntitySchema |> where([e], e.key == ^key) |> Repo.aggregate(:count)
+  end
+
+  @doc "V1 compat — count at location."
+  def count_by_location(location_id) when is_binary(location_id) do
+    EntitySchema |> where([e], e.location_id == ^location_id) |> Repo.aggregate(:count)
+  end
+
+  def count_by_location(nil), do: 0
+
+  @doc "V1 compat — count by key in room."
+  def count_by_key_in_room(key, room_id) when is_binary(key) and is_binary(room_id) do
     EntitySchema
-    |> where([e], fragment("json_extract(?, '$.prototype_key') = ?", e.metadata, ^prototype_key))
+    |> where([e], e.key == ^key and e.location_id == ^room_id)
+    |> Repo.aggregate(:count)
+  end
+
+  @doc "V1 compat — count all."
+  def count_all, do: Repo.aggregate(EntitySchema, :count)
+
+  @doc "V1 compat — find by prototype_key in column."
+  def find_by_prototype_key(prototype_key) do
+    EntitySchema
+    |> where([e], e.prototype_key == ^prototype_key)
     |> limit(1)
     |> Repo.one()
   end
 
-  @doc """
-  Deletes all entities in the database.
-
-  Returns the count of deleted entities.
-  """
+  @doc "V1 compat — delete all entities."
   def delete_all do
     {count, _} = Repo.delete_all(EntitySchema)
     count
@@ -442,33 +446,45 @@ defmodule Loka.Engine.Entities do
   # Private Helpers
   # =============================================================================
 
+  defp apply_filters(query, opts) do
+    query
+    |> filter_by_type(opts[:type])
+    |> filter_by_location(opts[:location_id])
+    |> filter_by_prototype(opts[:is_prototype])
+    |> filter_by_prototype_key(opts[:prototype_key])
+    |> filter_by_tags(opts[:tags])
+  end
+
   defp filter_by_type(query, nil), do: query
-
-  defp filter_by_type(query, types) when is_list(types) do
-    where(query, [e], e.type in ^types)
-  end
-
-  defp filter_by_type(query, type) do
-    where(query, [e], e.type == ^type)
-  end
+  defp filter_by_type(query, types) when is_list(types), do: where(query, [e], e.type in ^types)
+  defp filter_by_type(query, type), do: where(query, [e], e.type == ^type)
 
   defp filter_by_location(query, nil), do: query
+  defp filter_by_location(query, id), do: where(query, [e], e.location_id == ^id)
 
-  defp filter_by_location(query, location_id) do
-    where(query, [e], e.location_id == ^location_id)
-  end
+  defp filter_by_prototype(query, nil), do: query
+  defp filter_by_prototype(query, val), do: where(query, [e], e.is_prototype == ^val)
 
-  defp filter_by_category(query, nil), do: query
+  defp filter_by_prototype_key(query, nil), do: query
+  defp filter_by_prototype_key(query, key), do: where(query, [e], e.prototype_key == ^key)
 
-  defp filter_by_category(query, category) do
-    where(query, [a], a.category == ^category)
+  defp filter_by_tags(query, nil), do: query
+
+  defp filter_by_tags(query, tags) when is_list(tags) do
+    Enum.reduce(tags, query, fn tag, q ->
+      where(
+        q,
+        [e],
+        fragment("EXISTS (SELECT 1 FROM entity_tags WHERE entity_id = ? AND tag = ?)", e.id, ^tag)
+      )
+    end)
   end
 
   defp preload_associations(query, []), do: query
+  defp preload_associations(query, assocs), do: preload(query, ^assocs)
 
-  defp preload_associations(query, associations) do
-    preload(query, ^associations)
-  end
+  defp maybe_preload_tags(nil), do: nil
+  defp maybe_preload_tags(schema), do: Repo.preload(schema, :tags)
 
   defp normalize_attrs(attrs) when is_map(attrs) do
     attrs
