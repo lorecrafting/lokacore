@@ -219,17 +219,31 @@ defmodule Loka.Engine.Entity do
 
   alias Loka.Engine.TypedObject
 
+  # World entity types map to TypedObject type: :entity with a subtype
+  @world_entity_types [:npc, :room, :item, :exit, :character]
+
   @doc """
   Converts an Entity to a TypedObject struct.
   V1 compatibility — will be removed when TypedObject is deleted.
+
+  World entity types (npc, room, item, exit, character) map to
+  `type: :entity, subtype: X`. Content types (quest, dialogue, etc.)
+  map directly to `type: :quest`, etc. with no subtype.
   """
   @spec to_typed_object(t()) :: {:ok, TypedObject.t()} | {:error, [String.t()]}
   def to_typed_object(%__MODULE__{} = entity) do
+    {to_type, to_subtype} =
+      if entity.type in @world_entity_types do
+        {:entity, entity.type}
+      else
+        {entity.type, nil}
+      end
+
     TypedObject.new(%{
       id: entity.id,
       key: entity.key,
-      type: :entity,
-      subtype: entity.type,
+      type: to_type,
+      subtype: to_subtype,
       parent_key: entity.metadata["parent_key"],
       is_prototype: entity.is_prototype,
       prototype_key: entity.prototype_key,
@@ -259,10 +273,19 @@ defmodule Loka.Engine.Entity do
   V1 compatibility — will be removed when TypedObject is deleted.
   """
   @spec from_typed_object(TypedObject.t()) :: {:ok, t()} | {:error, String.t()}
-  def from_typed_object(%TypedObject{type: :entity} = typed_object) do
+  def from_typed_object(%TypedObject{} = typed_object) do
+    # World entity types: type = :entity, use subtype for entity.type
+    # Content types: type IS the entity type (quest, dialogue, etc.)
+    entity_type =
+      if typed_object.type == :entity do
+        typed_object.subtype || :npc
+      else
+        typed_object.type
+      end
+
     entity = %__MODULE__{
       id: typed_object.id || Ecto.UUID.generate(),
-      type: typed_object.subtype || :npc,
+      type: entity_type,
       key: typed_object.key,
       prototype_key: typed_object.prototype_key,
       is_prototype: typed_object.is_prototype,
@@ -296,20 +319,14 @@ defmodule Loka.Engine.Entity do
     {:ok, entity}
   end
 
-  def from_typed_object(%TypedObject{type: type}) do
-    {:error, "Expected TypedObject of type :entity, got #{inspect(type)}"}
-  end
-
   @doc """
   Creates an Entity from a TypedObject, raises on error.
   V1 compatibility — will be removed when TypedObject is deleted.
   """
   @spec from_typed_object!(TypedObject.t()) :: t()
   def from_typed_object!(typed_object) do
-    case from_typed_object(typed_object) do
-      {:ok, entity} -> entity
-      {:error, reason} -> raise ArgumentError, reason
-    end
+    {:ok, entity} = from_typed_object(typed_object)
+    entity
   end
 
   @doc """

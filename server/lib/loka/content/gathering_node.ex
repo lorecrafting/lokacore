@@ -6,15 +6,19 @@ defmodule Loka.Content.GatheringNode do
   with skill requirements and yield tables.
   """
 
-  alias Loka.Engine.TypedObject
-  alias Loka.Engine.TypedObject.{Loader, Registry}
+  alias Loka.Engine.{Entity, Entities, TypedObject}
 
   @spec get(String.t()) :: {:ok, TypedObject.t()} | {:error, :not_found}
   def get(key) when is_binary(key) do
-    case Loader.get(key) do
-      {:ok, %TypedObject{type: :gathering_node} = node} -> {:ok, node}
-      {:ok, _} -> {:error, :not_found}
-      error -> error
+    case Entities.find_one(key: key, type: :gathering_node) do
+      {:ok, entity} ->
+        case Entity.to_typed_object(entity) do
+          {:ok, %TypedObject{type: :gathering_node} = node} -> {:ok, node}
+          _ -> {:error, :not_found}
+        end
+
+      error ->
+        error
     end
   end
 
@@ -27,10 +31,17 @@ defmodule Loka.Content.GatheringNode do
   end
 
   @spec all() :: [TypedObject.t()]
-  def all, do: Registry.list_by_type(:gathering_node)
+  def all do
+    Entities.find_all(type: :gathering_node, is_prototype: true)
+    |> to_typed_objects()
+  end
 
   @spec all_published() :: [TypedObject.t()]
-  def all_published, do: Registry.list_by_type_published(:gathering_node)
+  def all_published do
+    Entities.find_all(type: :gathering_node, is_prototype: true)
+    |> Enum.reject(&Entity.draft?/1)
+    |> to_typed_objects()
+  end
 
   @spec by_skill(String.t()) :: [TypedObject.t()]
   def by_skill(skill_key) when is_binary(skill_key) do
@@ -48,4 +59,15 @@ defmodule Loka.Content.GatheringNode do
 
   def respawn_time(%TypedObject{type: :gathering_node} = node),
     do: TypedObject.get_data(node, "respawn_time", 300)
+
+  defp to_typed_objects(entities) do
+    entities
+    |> Enum.map(fn entity ->
+      case Entity.to_typed_object(entity) do
+        {:ok, to} -> to
+        _ -> nil
+      end
+    end)
+    |> Enum.reject(&is_nil/1)
+  end
 end

@@ -38,8 +38,7 @@ defmodule Loka.Content.Dialogue do
                 next: farewell
   """
 
-  alias Loka.Engine.TypedObject
-  alias Loka.Engine.TypedObject.{Loader, Registry}
+  alias Loka.Engine.{Entity, Entities, TypedObject}
 
   @type dialogue_node :: %{
           text: String.t(),
@@ -60,9 +59,8 @@ defmodule Loka.Content.Dialogue do
   """
   @spec get(String.t()) :: {:ok, TypedObject.t()} | {:error, :not_found}
   def get(key) when is_binary(key) do
-    case Loader.get(key) do
-      {:ok, %TypedObject{type: :dialogue} = dialogue} -> {:ok, dialogue}
-      {:ok, _} -> {:error, :not_found}
+    case Entities.find_one(key: key, type: :dialogue) do
+      {:ok, entity} -> Entity.to_typed_object(entity)
       error -> error
     end
   end
@@ -83,7 +81,8 @@ defmodule Loka.Content.Dialogue do
   """
   @spec all() :: [TypedObject.t()]
   def all do
-    Registry.list_by_type(:dialogue)
+    Entities.find_all(type: :dialogue, is_prototype: true)
+    |> to_typed_objects()
   end
 
   @doc """
@@ -91,7 +90,9 @@ defmodule Loka.Content.Dialogue do
   """
   @spec all_published() :: [TypedObject.t()]
   def all_published do
-    Registry.list_by_type_published(:dialogue)
+    Entities.find_all(type: :dialogue, is_prototype: true)
+    |> Enum.reject(&Entity.draft?/1)
+    |> to_typed_objects()
   end
 
   @doc """
@@ -251,5 +252,15 @@ defmodule Loka.Content.Dialogue do
     else
       ["broken node references: #{inspect(broken_links)}" | errors]
     end
+  end
+
+  defp to_typed_objects(entities) do
+    entities
+    |> Enum.flat_map(fn entity ->
+      case Entity.to_typed_object(entity) do
+        {:ok, typed_object} -> [typed_object]
+        {:error, _} -> []
+      end
+    end)
   end
 end

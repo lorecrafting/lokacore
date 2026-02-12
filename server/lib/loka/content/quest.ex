@@ -41,8 +41,7 @@ defmodule Loka.Content.Quest do
           xp: 5000
   """
 
-  alias Loka.Engine.TypedObject
-  alias Loka.Engine.TypedObject.{Loader, Registry}
+  alias Loka.Engine.{Entity, Entities, TypedObject}
 
   @type objective :: %{
           id: String.t(),
@@ -63,9 +62,8 @@ defmodule Loka.Content.Quest do
   """
   @spec get(String.t()) :: {:ok, TypedObject.t()} | {:error, :not_found}
   def get(key) when is_binary(key) do
-    case Loader.get(key) do
-      {:ok, %TypedObject{type: :quest} = quest} -> {:ok, quest}
-      {:ok, _} -> {:error, :not_found}
+    case Entities.find_one(key: key, type: :quest) do
+      {:ok, entity} -> Entity.to_typed_object(entity)
       error -> error
     end
   end
@@ -86,7 +84,8 @@ defmodule Loka.Content.Quest do
   """
   @spec all() :: [TypedObject.t()]
   def all do
-    Registry.list_by_type(:quest)
+    Entities.find_all(type: :quest, is_prototype: true)
+    |> to_typed_objects()
   end
 
   @doc """
@@ -94,7 +93,9 @@ defmodule Loka.Content.Quest do
   """
   @spec all_published() :: [TypedObject.t()]
   def all_published do
-    Registry.list_by_type_published(:quest)
+    Entities.find_all(type: :quest, is_prototype: true)
+    |> Enum.reject(&Entity.draft?/1)
+    |> to_typed_objects()
   end
 
   @doc """
@@ -102,8 +103,8 @@ defmodule Loka.Content.Quest do
   """
   @spec list_by_tag(String.t()) :: [TypedObject.t()]
   def list_by_tag(tag) when is_binary(tag) do
-    Registry.list_by_tag(tag)
-    |> Enum.filter(&(&1.type == :quest))
+    Entities.find_all(type: :quest, tags: [tag], is_prototype: true)
+    |> to_typed_objects()
   end
 
   @doc """
@@ -111,8 +112,9 @@ defmodule Loka.Content.Quest do
   """
   @spec list_by_tag_published(String.t()) :: [TypedObject.t()]
   def list_by_tag_published(tag) when is_binary(tag) do
-    Registry.list_by_tag_published(tag)
-    |> Enum.filter(&(&1.type == :quest))
+    Entities.find_all(type: :quest, tags: [tag], is_prototype: true)
+    |> Enum.reject(&Entity.draft?/1)
+    |> to_typed_objects()
   end
 
   @doc """
@@ -223,5 +225,14 @@ defmodule Loka.Content.Quest do
     else
       errors
     end
+  end
+
+  defp to_typed_objects(entities) do
+    Enum.flat_map(entities, fn entity ->
+      case Entity.to_typed_object(entity) do
+        {:ok, typed_object} -> [typed_object]
+        _ -> []
+      end
+    end)
   end
 end

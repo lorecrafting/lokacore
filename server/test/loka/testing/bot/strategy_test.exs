@@ -46,11 +46,11 @@ defmodule Loka.Testing.Bot.StrategyTest do
       assert Strategy.get_available_exits(nil) == []
     end
 
-    test "returns exits from room attributes" do
+    test "returns exits from room components" do
       room = %Entity{
         id: "room-1",
         type: :room,
-        attributes: %{
+        components: %{
           "exits" => %{
             "north" => %{"destination_id" => "room-2"},
             "south" => %{"destination_id" => "room-3"}
@@ -68,7 +68,7 @@ defmodule Loka.Testing.Bot.StrategyTest do
       room = %Entity{
         id: "room-1",
         type: :room,
-        attributes: %{}
+        components: %{}
       }
 
       assert Strategy.get_available_exits(room) == []

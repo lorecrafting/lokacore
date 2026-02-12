@@ -40,8 +40,7 @@ defmodule Loka.Content.Script do
   - Memory limits prevent resource exhaustion
   """
 
-  alias Loka.Engine.TypedObject
-  alias Loka.Engine.TypedObject.{Loader, Registry}
+  alias Loka.Engine.{Entity, Entities, TypedObject}
 
   @default_timeout_ms 5000
 
@@ -74,9 +73,8 @@ defmodule Loka.Content.Script do
   """
   @spec get(String.t()) :: {:ok, TypedObject.t()} | {:error, :not_found}
   def get(key) when is_binary(key) do
-    case Loader.get(key) do
-      {:ok, %TypedObject{type: :script} = script} -> {:ok, script}
-      {:ok, _} -> {:error, :not_found}
+    case Entities.find_one(key: key, type: :script) do
+      {:ok, entity} -> Entity.to_typed_object(entity)
       error -> error
     end
   end
@@ -97,7 +95,8 @@ defmodule Loka.Content.Script do
   """
   @spec all() :: [TypedObject.t()]
   def all do
-    Registry.list_by_type(:script)
+    Entities.find_all(type: :script, is_prototype: true)
+    |> to_typed_objects()
   end
 
   @doc """
@@ -105,7 +104,9 @@ defmodule Loka.Content.Script do
   """
   @spec all_published() :: [TypedObject.t()]
   def all_published do
-    Registry.list_by_type_published(:script)
+    Entities.find_all(type: :script, is_prototype: true)
+    |> Enum.reject(&Entity.draft?/1)
+    |> to_typed_objects()
   end
 
   @doc """
@@ -243,5 +244,15 @@ defmodule Loka.Content.Script do
           {:error, {_line, msg, _}} -> ["syntax error: #{msg}" | errors]
         end
     end
+  end
+
+  defp to_typed_objects(entities) do
+    entities
+    |> Enum.flat_map(fn entity ->
+      case Entity.to_typed_object(entity) do
+        {:ok, typed_object} -> [typed_object]
+        {:error, _} -> []
+      end
+    end)
   end
 end

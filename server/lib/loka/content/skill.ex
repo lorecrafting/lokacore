@@ -6,14 +6,12 @@ defmodule Loka.Content.Skill do
   prerequisites, and experience formulas.
   """
 
-  alias Loka.Engine.TypedObject
-  alias Loka.Engine.TypedObject.{Loader, Registry}
+  alias Loka.Engine.{Entity, Entities, TypedObject}
 
   @spec get(String.t()) :: {:ok, TypedObject.t()} | {:error, :not_found}
   def get(key) when is_binary(key) do
-    case Loader.get(key) do
-      {:ok, %TypedObject{type: :skill} = skill} -> {:ok, skill}
-      {:ok, _} -> {:error, :not_found}
+    case Entities.find_one(key: key, type: :skill) do
+      {:ok, entity} -> Entity.to_typed_object(entity)
       error -> error
     end
   end
@@ -27,10 +25,17 @@ defmodule Loka.Content.Skill do
   end
 
   @spec all() :: [TypedObject.t()]
-  def all, do: Registry.list_by_type(:skill)
+  def all do
+    Entities.find_all(type: :skill, is_prototype: true)
+    |> to_typed_objects()
+  end
 
   @spec all_published() :: [TypedObject.t()]
-  def all_published, do: Registry.list_by_type_published(:skill)
+  def all_published do
+    Entities.find_all(type: :skill, is_prototype: true)
+    |> Enum.reject(&Entity.draft?/1)
+    |> to_typed_objects()
+  end
 
   @spec by_category(String.t()) :: [TypedObject.t()]
   def by_category(category) when is_binary(category) do
@@ -43,8 +48,9 @@ defmodule Loka.Content.Skill do
 
   @spec by_tag(String.t()) :: [TypedObject.t()]
   def by_tag(tag) when is_binary(tag) do
-    Registry.list_by_tag_published(tag)
-    |> Enum.filter(&(&1.type == :skill))
+    Entities.find_all(type: :skill, tags: [tag], is_prototype: true)
+    |> Enum.reject(&Entity.draft?/1)
+    |> to_typed_objects()
   end
 
   def category(%TypedObject{type: :skill} = skill),
@@ -55,4 +61,14 @@ defmodule Loka.Content.Skill do
 
   def prerequisites(%TypedObject{type: :skill} = skill),
     do: TypedObject.get_data(skill, "prerequisites", [])
+
+  defp to_typed_objects(entities) do
+    entities
+    |> Enum.flat_map(fn entity ->
+      case Entity.to_typed_object(entity) do
+        {:ok, typed_object} -> [typed_object]
+        {:error, _} -> []
+      end
+    end)
+  end
 end

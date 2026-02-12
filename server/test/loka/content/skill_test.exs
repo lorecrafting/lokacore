@@ -1,38 +1,48 @@
 defmodule Loka.Content.SkillTest do
-  use ExUnit.Case, async: false
+  use Loka.DataCase, async: false
 
   alias Loka.Content.Skill
-  alias Loka.Engine.TypedObject
-  alias Loka.Engine.TypedObject.Registry
+  alias Loka.Engine.{Entity, Entities}
 
-  setup do
-    Loka.TypedObjectSandbox.checkout()
-    :ok
+  defp create_skill(key, data, opts \\ []) do
+    entity =
+      Entity.new(
+        type: :skill,
+        key: key,
+        short_desc: opts[:name] || key,
+        is_prototype: true,
+        components: %{"data" => data}
+      )
+
+    {:ok, saved} = Entities.save(entity)
+    saved
   end
 
   describe "get/1" do
     test "returns skill by key" do
-      {:ok, skill} =
-        TypedObject.new(
-          key: "test_skill",
-          type: :skill,
-          name: "Mining",
-          data: %{
-            "category" => "gathering",
-            "max_level" => 50,
-            "prerequisites" => []
-          }
-        )
-
-      Registry.put("test_skill", skill)
+      create_skill(
+        "test_skill",
+        %{
+          "category" => "gathering",
+          "max_level" => 50,
+          "prerequisites" => []
+        }, name: "Mining")
 
       assert {:ok, fetched} = Skill.get("test_skill")
       assert fetched.key == "test_skill"
     end
 
     test "returns error for non-skill" do
-      {:ok, entity} = TypedObject.new(key: "not_skill", type: :entity)
-      Registry.put("not_skill", entity)
+      entity =
+        Entity.new(
+          type: :npc,
+          key: "not_skill",
+          short_desc: "Not a skill",
+          is_prototype: true,
+          components: %{}
+        )
+
+      {:ok, _} = Entities.save(entity)
 
       assert {:error, :not_found} = Skill.get("not_skill")
     end
@@ -44,23 +54,15 @@ defmodule Loka.Content.SkillTest do
 
   describe "max_level/1" do
     test "returns configured max level" do
-      {:ok, skill} =
-        TypedObject.new(
-          key: "capped_skill",
-          type: :skill,
-          data: %{"max_level" => 75}
-        )
+      entity = create_skill("capped_skill", %{"max_level" => 75})
+      {:ok, skill} = Entity.to_typed_object(entity)
 
       assert Skill.max_level(skill) == 75
     end
 
     test "defaults to 100" do
-      {:ok, skill} =
-        TypedObject.new(
-          key: "default_level",
-          type: :skill,
-          data: %{}
-        )
+      entity = create_skill("default_level", %{})
+      {:ok, skill} = Entity.to_typed_object(entity)
 
       assert Skill.max_level(skill) == 100
     end
@@ -73,23 +75,15 @@ defmodule Loka.Content.SkillTest do
         %{"skill" => "strength", "level" => 5}
       ]
 
-      {:ok, skill} =
-        TypedObject.new(
-          key: "advanced_skill",
-          type: :skill,
-          data: %{"prerequisites" => prereqs}
-        )
+      entity = create_skill("advanced_skill", %{"prerequisites" => prereqs})
+      {:ok, skill} = Entity.to_typed_object(entity)
 
       assert Skill.prerequisites(skill) == prereqs
     end
 
     test "returns empty list when no prerequisites" do
-      {:ok, skill} =
-        TypedObject.new(
-          key: "basic_skill",
-          type: :skill,
-          data: %{}
-        )
+      entity = create_skill("basic_skill", %{})
+      {:ok, skill} = Entity.to_typed_object(entity)
 
       assert Skill.prerequisites(skill) == []
     end
@@ -97,23 +91,15 @@ defmodule Loka.Content.SkillTest do
 
   describe "category/1" do
     test "returns category" do
-      {:ok, skill} =
-        TypedObject.new(
-          key: "categorized_skill",
-          type: :skill,
-          data: %{"category" => "combat"}
-        )
+      entity = create_skill("categorized_skill", %{"category" => "combat"})
+      {:ok, skill} = Entity.to_typed_object(entity)
 
       assert Skill.category(skill) == "combat"
     end
 
     test "defaults to general" do
-      {:ok, skill} =
-        TypedObject.new(
-          key: "no_category",
-          type: :skill,
-          data: %{}
-        )
+      entity = create_skill("no_category", %{})
+      {:ok, skill} = Entity.to_typed_object(entity)
 
       assert Skill.category(skill) == "general"
     end

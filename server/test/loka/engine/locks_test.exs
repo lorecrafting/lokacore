@@ -122,21 +122,33 @@ defmodule Loka.Engine.LocksTest do
 
   describe "check/3" do
     test "returns :ok when no lock defined" do
-      entity = %Entity{id: "1", type: :item, key: "chest", locks: %{}}
+      entity = %Entity{id: "1", type: :item, key: "chest", components: %{"locks" => %{}}}
       accessor = %Entity{id: "2", type: :character, key: "player"}
 
       assert :ok = Locks.check(entity, accessor, "get")
     end
 
     test "returns :ok when lock passes" do
-      entity = %Entity{id: "1", type: :item, key: "chest", locks: %{"get" => "all()"}}
+      entity = %Entity{
+        id: "1",
+        type: :item,
+        key: "chest",
+        components: %{"locks" => %{"get" => "all()"}}
+      }
+
       accessor = %Entity{id: "2", type: :character, key: "player"}
 
       assert :ok = Locks.check(entity, accessor, "get")
     end
 
     test "returns {:denied, _} when lock fails" do
-      entity = %Entity{id: "1", type: :item, key: "chest", locks: %{"get" => "none()"}}
+      entity = %Entity{
+        id: "1",
+        type: :item,
+        key: "chest",
+        components: %{"locks" => %{"get" => "none()"}}
+      }
+
       accessor = %Entity{id: "2", type: :character, key: "player"}
 
       assert {:denied, _} = Locks.check(entity, accessor, "get")
@@ -148,7 +160,7 @@ defmodule Loka.Engine.LocksTest do
         type: :item,
         key: "chest",
         tags: ["container"],
-        locks: %{"get" => "tag(locked) AND perm(admin)"}
+        components: %{"locks" => %{"get" => "tag(locked) AND perm(admin)"}}
       }
 
       # Use maps for accessor since Entity doesn't have permissions field
@@ -251,21 +263,26 @@ defmodule Loka.Engine.LocksTest do
 
   describe "set_lock/3 and get_lock/2" do
     test "sets and gets lock on entity" do
-      entity = %Entity{id: "1", type: :item, key: "test", locks: %{}}
+      entity = %Entity{id: "1", type: :item, key: "test", components: %{}}
 
       entity = Locks.set_lock(entity, "get", "perm(admin)")
       assert "perm(admin)" = Locks.get_lock(entity, "get")
     end
 
     test "overwrites existing lock" do
-      entity = %Entity{id: "1", type: :item, key: "test", locks: %{"get" => "all()"}}
+      entity = %Entity{
+        id: "1",
+        type: :item,
+        key: "test",
+        components: %{"locks" => %{"get" => "all()"}}
+      }
 
       entity = Locks.set_lock(entity, "get", "none()")
       assert "none()" = Locks.get_lock(entity, "get")
     end
 
     test "get_lock returns nil for undefined lock" do
-      entity = %Entity{id: "1", type: :item, key: "test", locks: %{}}
+      entity = %Entity{id: "1", type: :item, key: "test", components: %{}}
 
       assert nil == Locks.get_lock(entity, "nonexistent")
     end
@@ -301,8 +318,8 @@ defmodule Loka.Engine.LocksTest do
         type: :item,
         key: "golden_chest",
         tags: ["container", "valuable"],
-        locks: %{
-          "get" => "perm(admin) OR has_item(gold_key)"
+        components: %{
+          "locks" => %{"get" => "perm(admin) OR has_item(gold_key)"}
         }
       }
 
@@ -338,8 +355,8 @@ defmodule Loka.Engine.LocksTest do
         id: "door1",
         type: :exit,
         key: "castle_door",
-        locks: %{
-          "traverse" => "has_key(castle_key) OR perm(royalty)"
+        components: %{
+          "locks" => %{"traverse" => "has_key(castle_key) OR perm(royalty)"}
         }
       }
 

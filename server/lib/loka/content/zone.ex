@@ -44,8 +44,7 @@ defmodule Loka.Content.Zone do
             max: 3
   """
 
-  alias Loka.Engine.TypedObject
-  alias Loka.Engine.TypedObject.{Loader, Registry}
+  alias Loka.Engine.{Entity, Entities, TypedObject}
 
   @type reset_rule :: %{
           type: :mob | :item | :container,
@@ -60,9 +59,8 @@ defmodule Loka.Content.Zone do
   """
   @spec get(String.t()) :: {:ok, TypedObject.t()} | {:error, :not_found}
   def get(key) when is_binary(key) do
-    case Loader.get(key) do
-      {:ok, %TypedObject{type: :zone} = zone} -> {:ok, zone}
-      {:ok, _} -> {:error, :not_found}
+    case Entities.find_one(key: key, type: :zone) do
+      {:ok, entity} -> Entity.to_typed_object(entity)
       error -> error
     end
   end
@@ -83,7 +81,8 @@ defmodule Loka.Content.Zone do
   """
   @spec all() :: [TypedObject.t()]
   def all do
-    Registry.list_by_type(:zone)
+    Entities.find_all(type: :zone, is_prototype: true)
+    |> to_typed_objects()
   end
 
   @doc """
@@ -91,7 +90,9 @@ defmodule Loka.Content.Zone do
   """
   @spec all_published() :: [TypedObject.t()]
   def all_published do
-    Registry.list_by_type_published(:zone)
+    Entities.find_all(type: :zone, is_prototype: true)
+    |> Enum.reject(&Entity.draft?/1)
+    |> to_typed_objects()
   end
 
   @doc """
@@ -99,8 +100,8 @@ defmodule Loka.Content.Zone do
   """
   @spec list_by_tag(String.t()) :: [TypedObject.t()]
   def list_by_tag(tag) when is_binary(tag) do
-    Registry.list_by_tag(tag)
-    |> Enum.filter(&(&1.type == :zone))
+    Entities.find_all(type: :zone, tags: [tag], is_prototype: true)
+    |> to_typed_objects()
   end
 
   @doc """
@@ -108,8 +109,9 @@ defmodule Loka.Content.Zone do
   """
   @spec list_by_tag_published(String.t()) :: [TypedObject.t()]
   def list_by_tag_published(tag) when is_binary(tag) do
-    Registry.list_by_tag_published(tag)
-    |> Enum.filter(&(&1.type == :zone))
+    Entities.find_all(type: :zone, tags: [tag], is_prototype: true)
+    |> Enum.reject(&Entity.draft?/1)
+    |> to_typed_objects()
   end
 
   @doc """
@@ -233,5 +235,15 @@ defmodule Loka.Content.Zone do
     else
       ["reset rules must have prototype field" | errors]
     end
+  end
+
+  defp to_typed_objects(entities) do
+    entities
+    |> Enum.flat_map(fn entity ->
+      case Entity.to_typed_object(entity) do
+        {:ok, typed_object} -> [typed_object]
+        {:error, _} -> []
+      end
+    end)
   end
 end

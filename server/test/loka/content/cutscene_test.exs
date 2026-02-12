@@ -1,37 +1,47 @@
 defmodule Loka.Content.CutsceneTest do
-  use ExUnit.Case, async: false
+  use Loka.DataCase, async: false
 
   alias Loka.Content.Cutscene
-  alias Loka.Engine.TypedObject
-  alias Loka.Engine.TypedObject.Registry
+  alias Loka.Engine.{Entity, Entities}
 
-  setup do
-    Loka.TypedObjectSandbox.checkout()
-    :ok
+  defp create_cutscene(key, data, opts \\ []) do
+    entity =
+      Entity.new(
+        type: :cutscene,
+        key: key,
+        short_desc: opts[:name] || key,
+        is_prototype: true,
+        components: %{"data" => data}
+      )
+
+    {:ok, saved} = Entities.save(entity)
+    saved
   end
 
   describe "get/1" do
     test "returns cutscene by key" do
-      {:ok, cutscene} =
-        TypedObject.new(
-          key: "test_cutscene",
-          type: :cutscene,
-          name: "Test Cutscene",
-          data: %{
-            "scenes" => [%{"id" => "scene_1", "text" => "A dark room..."}],
-            "speakers" => ["narrator"]
-          }
-        )
-
-      Registry.put("test_cutscene", cutscene)
+      create_cutscene(
+        "test_cutscene",
+        %{
+          "scenes" => [%{"id" => "scene_1", "text" => "A dark room..."}],
+          "speakers" => ["narrator"]
+        }, name: "Test Cutscene")
 
       assert {:ok, fetched} = Cutscene.get("test_cutscene")
       assert fetched.key == "test_cutscene"
     end
 
     test "returns error for non-cutscene" do
-      {:ok, entity} = TypedObject.new(key: "not_cutscene", type: :entity)
-      Registry.put("not_cutscene", entity)
+      entity =
+        Entity.new(
+          type: :npc,
+          key: "not_cutscene",
+          short_desc: "Not a cutscene",
+          is_prototype: true,
+          components: %{}
+        )
+
+      {:ok, _} = Entities.save(entity)
 
       assert {:error, :not_found} = Cutscene.get("not_cutscene")
     end
@@ -49,23 +59,15 @@ defmodule Loka.Content.CutsceneTest do
         %{"id" => "scene_3", "text" => "Silence falls."}
       ]
 
-      {:ok, cutscene} =
-        TypedObject.new(
-          key: "multi_scene",
-          type: :cutscene,
-          data: %{"scenes" => scenes}
-        )
+      entity = create_cutscene("multi_scene", %{"scenes" => scenes})
+      {:ok, cutscene} = Entity.to_typed_object(entity)
 
       assert Cutscene.scenes(cutscene) == scenes
     end
 
     test "returns empty list when no scenes" do
-      {:ok, cutscene} =
-        TypedObject.new(
-          key: "no_scenes",
-          type: :cutscene,
-          data: %{}
-        )
+      entity = create_cutscene("no_scenes", %{})
+      {:ok, cutscene} = Entity.to_typed_object(entity)
 
       assert Cutscene.scenes(cutscene) == []
     end
@@ -73,23 +75,19 @@ defmodule Loka.Content.CutsceneTest do
 
   describe "speakers/1" do
     test "returns speakers list" do
-      {:ok, cutscene} =
-        TypedObject.new(
-          key: "speakers_cutscene",
-          type: :cutscene,
-          data: %{"speakers" => ["elder_pema", "narrator", "mysterious_voice"]}
-        )
+      entity =
+        create_cutscene("speakers_cutscene", %{
+          "speakers" => ["elder_pema", "narrator", "mysterious_voice"]
+        })
+
+      {:ok, cutscene} = Entity.to_typed_object(entity)
 
       assert Cutscene.speakers(cutscene) == ["elder_pema", "narrator", "mysterious_voice"]
     end
 
     test "returns empty list when no speakers" do
-      {:ok, cutscene} =
-        TypedObject.new(
-          key: "no_speakers",
-          type: :cutscene,
-          data: %{}
-        )
+      entity = create_cutscene("no_speakers", %{})
+      {:ok, cutscene} = Entity.to_typed_object(entity)
 
       assert Cutscene.speakers(cutscene) == []
     end

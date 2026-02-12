@@ -6,15 +6,19 @@ defmodule Loka.Content.Resource do
   with max formulas and regeneration rules.
   """
 
-  alias Loka.Engine.TypedObject
-  alias Loka.Engine.TypedObject.{Loader, Registry}
+  alias Loka.Engine.{Entity, Entities, TypedObject}
 
   @spec get(String.t()) :: {:ok, TypedObject.t()} | {:error, :not_found}
   def get(key) when is_binary(key) do
-    case Loader.get(key) do
-      {:ok, %TypedObject{type: :resource} = resource} -> {:ok, resource}
-      {:ok, _} -> {:error, :not_found}
-      error -> error
+    case Entities.find_one(key: key, type: :resource) do
+      {:ok, entity} ->
+        case Entity.to_typed_object(entity) do
+          {:ok, %TypedObject{type: :resource} = resource} -> {:ok, resource}
+          _ -> {:error, :not_found}
+        end
+
+      error ->
+        error
     end
   end
 
@@ -27,10 +31,17 @@ defmodule Loka.Content.Resource do
   end
 
   @spec all() :: [TypedObject.t()]
-  def all, do: Registry.list_by_type(:resource)
+  def all do
+    Entities.find_all(type: :resource, is_prototype: true)
+    |> to_typed_objects()
+  end
 
   @spec all_published() :: [TypedObject.t()]
-  def all_published, do: Registry.list_by_type_published(:resource)
+  def all_published do
+    Entities.find_all(type: :resource, is_prototype: true)
+    |> Enum.reject(&Entity.draft?/1)
+    |> to_typed_objects()
+  end
 
   @spec regenerating() :: [TypedObject.t()]
   def regenerating do
@@ -50,4 +61,15 @@ defmodule Loka.Content.Resource do
 
   def regen_condition(%TypedObject{type: :resource} = resource),
     do: TypedObject.get_data(resource, "regen_condition", "never")
+
+  defp to_typed_objects(entities) do
+    entities
+    |> Enum.map(fn entity ->
+      case Entity.to_typed_object(entity) do
+        {:ok, to} -> to
+        _ -> nil
+      end
+    end)
+    |> Enum.reject(&is_nil/1)
+  end
 end

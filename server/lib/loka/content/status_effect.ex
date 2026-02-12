@@ -6,15 +6,19 @@ defmodule Loka.Content.StatusEffect do
   that can be applied to entities.
   """
 
-  alias Loka.Engine.TypedObject
-  alias Loka.Engine.TypedObject.{Loader, Registry}
+  alias Loka.Engine.{Entity, Entities, TypedObject}
 
   @spec get(String.t()) :: {:ok, TypedObject.t()} | {:error, :not_found}
   def get(key) when is_binary(key) do
-    case Loader.get(key) do
-      {:ok, %TypedObject{type: :status} = status} -> {:ok, status}
-      {:ok, _} -> {:error, :not_found}
-      error -> error
+    case Entities.find_one(key: key, type: :status) do
+      {:ok, entity} ->
+        case Entity.to_typed_object(entity) do
+          {:ok, %TypedObject{type: :status} = status} -> {:ok, status}
+          _ -> {:error, :not_found}
+        end
+
+      error ->
+        error
     end
   end
 
@@ -27,10 +31,17 @@ defmodule Loka.Content.StatusEffect do
   end
 
   @spec all() :: [TypedObject.t()]
-  def all, do: Registry.list_by_type(:status)
+  def all do
+    Entities.find_all(type: :status, is_prototype: true)
+    |> to_typed_objects()
+  end
 
   @spec all_published() :: [TypedObject.t()]
-  def all_published, do: Registry.list_by_type_published(:status)
+  def all_published do
+    Entities.find_all(type: :status, is_prototype: true)
+    |> Enum.reject(&Entity.draft?/1)
+    |> to_typed_objects()
+  end
 
   @spec by_type(String.t()) :: [TypedObject.t()]
   def by_type(type) when is_binary(type) do
@@ -51,4 +62,15 @@ defmodule Loka.Content.StatusEffect do
 
   def effects(%TypedObject{type: :status} = status),
     do: TypedObject.get_data(status, "effects", [])
+
+  defp to_typed_objects(entities) do
+    entities
+    |> Enum.map(fn entity ->
+      case Entity.to_typed_object(entity) do
+        {:ok, to} -> to
+        _ -> nil
+      end
+    end)
+    |> Enum.reject(&is_nil/1)
+  end
 end

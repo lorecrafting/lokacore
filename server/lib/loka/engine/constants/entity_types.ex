@@ -19,11 +19,13 @@ defmodule Loka.Engine.Constants.EntityTypes do
   - `:dialogue` - Dialogue trees
   - `:zone` - Zone definitions
   - `:storyline` - Storyline containers
+  - `:cutscene` - Cutscene definitions
   - `:skill` - Skill definitions
   - `:recipe` - Crafting recipes
   - `:resource` - Gatherable resource definitions
   - `:status` - Status effect definitions
   - `:script` - Reusable script definitions
+  - `:gathering_node` - Gathering node definitions
   - `:social` - Social command definitions
 
   ### System entities (no location, background processes)
@@ -57,11 +59,13 @@ defmodule Loka.Engine.Constants.EntityTypes do
     :dialogue,
     :zone,
     :storyline,
+    :cutscene,
     :skill,
     :recipe,
     :resource,
     :status,
     :script,
+    :gathering_node,
     :social,
     # System entities
     :system
@@ -77,12 +81,14 @@ defmodule Loka.Engine.Constants.EntityTypes do
           | :dialogue
           | :zone
           | :storyline
+          | :cutscene
           | :skill
           | :recipe
           | :resource
           | :status
           | :system
           | :script
+          | :gathering_node
           | :social
 
   @doc "Returns all valid entity types."

@@ -96,7 +96,15 @@ defmodule Loka.Engine.Entities do
         end
 
       opts[:key] ->
-        raise ArgumentError, "find_one with :key requires :type (keys are unique per type)"
+        EntitySchema
+        |> where([e], e.key == ^opts[:key])
+        |> limit(1)
+        |> Repo.one()
+        |> maybe_preload_tags()
+        |> case do
+          nil -> {:error, :not_found}
+          schema -> {:ok, EntitySchema.to_entity(schema)}
+        end
 
       true ->
         raise ArgumentError, "find_one/1 requires UUID string, or key+type, or account_id"

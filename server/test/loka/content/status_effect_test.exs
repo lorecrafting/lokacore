@@ -1,38 +1,48 @@
 defmodule Loka.Content.StatusEffectTest do
-  use ExUnit.Case, async: false
+  use Loka.DataCase, async: false
 
   alias Loka.Content.StatusEffect
-  alias Loka.Engine.TypedObject
-  alias Loka.Engine.TypedObject.Registry
+  alias Loka.Engine.{Entity, Entities}
 
-  setup do
-    Loka.TypedObjectSandbox.checkout()
-    :ok
+  defp create_status(key, data, opts \\ []) do
+    entity =
+      Entity.new(
+        type: :status,
+        key: key,
+        short_desc: opts[:name] || key,
+        is_prototype: true,
+        components: %{"data" => data}
+      )
+
+    {:ok, saved} = Entities.save(entity)
+    saved
   end
 
   describe "get/1" do
     test "returns status effect by key" do
-      {:ok, status} =
-        TypedObject.new(
-          key: "test_status",
-          type: :status,
-          name: "Poison",
-          data: %{
-            "type" => "debuff",
-            "stackable" => true,
-            "effects" => [%{"stat" => "hp", "modifier" => -5}]
-          }
-        )
-
-      Registry.put("test_status", status)
+      create_status(
+        "test_status",
+        %{
+          "type" => "debuff",
+          "stackable" => true,
+          "effects" => [%{"stat" => "hp", "modifier" => -5}]
+        }, name: "Poison")
 
       assert {:ok, fetched} = StatusEffect.get("test_status")
       assert fetched.key == "test_status"
     end
 
     test "returns error for non-status" do
-      {:ok, entity} = TypedObject.new(key: "not_status", type: :entity)
-      Registry.put("not_status", entity)
+      entity =
+        Entity.new(
+          type: :npc,
+          key: "not_status",
+          short_desc: "Not a status",
+          is_prototype: true,
+          components: %{}
+        )
+
+      {:ok, _} = Entities.save(entity)
 
       assert {:error, :not_found} = StatusEffect.get("not_status")
     end
@@ -44,23 +54,15 @@ defmodule Loka.Content.StatusEffectTest do
 
   describe "effect_type/1" do
     test "returns effect type" do
-      {:ok, status} =
-        TypedObject.new(
-          key: "buff_status",
-          type: :status,
-          data: %{"type" => "buff"}
-        )
+      entity = create_status("buff_status", %{"type" => "buff"})
+      {:ok, status} = Entity.to_typed_object(entity)
 
       assert StatusEffect.effect_type(status) == "buff"
     end
 
     test "defaults to neutral" do
-      {:ok, status} =
-        TypedObject.new(
-          key: "no_type_status",
-          type: :status,
-          data: %{}
-        )
+      entity = create_status("no_type_status", %{})
+      {:ok, status} = Entity.to_typed_object(entity)
 
       assert StatusEffect.effect_type(status) == "neutral"
     end
@@ -68,34 +70,22 @@ defmodule Loka.Content.StatusEffectTest do
 
   describe "stackable?/1" do
     test "returns true when stackable" do
-      {:ok, status} =
-        TypedObject.new(
-          key: "stackable_status",
-          type: :status,
-          data: %{"stackable" => true}
-        )
+      entity = create_status("stackable_status", %{"stackable" => true})
+      {:ok, status} = Entity.to_typed_object(entity)
 
       assert StatusEffect.stackable?(status) == true
     end
 
     test "returns false when not stackable" do
-      {:ok, status} =
-        TypedObject.new(
-          key: "not_stackable",
-          type: :status,
-          data: %{"stackable" => false}
-        )
+      entity = create_status("not_stackable", %{"stackable" => false})
+      {:ok, status} = Entity.to_typed_object(entity)
 
       assert StatusEffect.stackable?(status) == false
     end
 
     test "defaults to false" do
-      {:ok, status} =
-        TypedObject.new(
-          key: "default_stack",
-          type: :status,
-          data: %{}
-        )
+      entity = create_status("default_stack", %{})
+      {:ok, status} = Entity.to_typed_object(entity)
 
       assert StatusEffect.stackable?(status) == false
     end
@@ -108,23 +98,15 @@ defmodule Loka.Content.StatusEffectTest do
         %{"stat" => "defense", "modifier" => 5}
       ]
 
-      {:ok, status} =
-        TypedObject.new(
-          key: "multi_effect",
-          type: :status,
-          data: %{"effects" => effects}
-        )
+      entity = create_status("multi_effect", %{"effects" => effects})
+      {:ok, status} = Entity.to_typed_object(entity)
 
       assert StatusEffect.effects(status) == effects
     end
 
     test "returns empty list when no effects" do
-      {:ok, status} =
-        TypedObject.new(
-          key: "no_effects",
-          type: :status,
-          data: %{}
-        )
+      entity = create_status("no_effects", %{})
+      {:ok, status} = Entity.to_typed_object(entity)
 
       assert StatusEffect.effects(status) == []
     end
@@ -132,23 +114,15 @@ defmodule Loka.Content.StatusEffectTest do
 
   describe "duration/1" do
     test "returns duration" do
-      {:ok, status} =
-        TypedObject.new(
-          key: "timed_status",
-          type: :status,
-          data: %{"duration" => 60}
-        )
+      entity = create_status("timed_status", %{"duration" => 60})
+      {:ok, status} = Entity.to_typed_object(entity)
 
       assert StatusEffect.duration(status) == 60
     end
 
     test "returns nil when no duration" do
-      {:ok, status} =
-        TypedObject.new(
-          key: "permanent_status",
-          type: :status,
-          data: %{}
-        )
+      entity = create_status("permanent_status", %{})
+      {:ok, status} = Entity.to_typed_object(entity)
 
       assert StatusEffect.duration(status) == nil
     end

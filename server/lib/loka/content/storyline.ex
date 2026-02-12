@@ -5,14 +5,12 @@ defmodule Loka.Content.Storyline do
   Storylines organize quests into acts with progression tracking.
   """
 
-  alias Loka.Engine.TypedObject
-  alias Loka.Engine.TypedObject.{Loader, Registry}
+  alias Loka.Engine.{Entity, Entities, TypedObject}
 
   @spec get(String.t()) :: {:ok, TypedObject.t()} | {:error, :not_found}
   def get(key) when is_binary(key) do
-    case Loader.get(key) do
-      {:ok, %TypedObject{type: :storyline} = storyline} -> {:ok, storyline}
-      {:ok, _} -> {:error, :not_found}
+    case Entities.find_one(key: key, type: :storyline) do
+      {:ok, entity} -> Entity.to_typed_object(entity)
       error -> error
     end
   end
@@ -26,15 +24,23 @@ defmodule Loka.Content.Storyline do
   end
 
   @spec all() :: [TypedObject.t()]
-  def all, do: Registry.list_by_type(:storyline)
+  def all do
+    Entities.find_all(type: :storyline, is_prototype: true)
+    |> to_typed_objects()
+  end
 
   @spec all_published() :: [TypedObject.t()]
-  def all_published, do: Registry.list_by_type_published(:storyline)
+  def all_published do
+    Entities.find_all(type: :storyline, is_prototype: true)
+    |> Enum.reject(&Entity.draft?/1)
+    |> to_typed_objects()
+  end
 
   @spec by_tag(String.t()) :: [TypedObject.t()]
   def by_tag(tag) when is_binary(tag) do
-    Registry.list_by_tag_published(tag)
-    |> Enum.filter(&(&1.type == :storyline))
+    Entities.find_all(type: :storyline, tags: [tag], is_prototype: true)
+    |> Enum.reject(&Entity.draft?/1)
+    |> to_typed_objects()
   end
 
   def acts(%TypedObject{type: :storyline} = storyline),
@@ -45,4 +51,14 @@ defmodule Loka.Content.Storyline do
 
   def main_quests(%TypedObject{type: :storyline} = storyline),
     do: TypedObject.get_data(storyline, "main_quests", [])
+
+  defp to_typed_objects(entities) do
+    entities
+    |> Enum.flat_map(fn entity ->
+      case Entity.to_typed_object(entity) do
+        {:ok, typed_object} -> [typed_object]
+        {:error, _} -> []
+      end
+    end)
+  end
 end

@@ -38,7 +38,7 @@ defmodule Loka.Engine.EntitySeeder do
   ))
 
   # Types that don't have a location_id (seeded in Phase 1)
-  @non_located_types ~w(skill quest dialogue zone storyline recipe resource status script system social)
+  @non_located_types ~w(skill quest dialogue zone storyline cutscene recipe resource status script gathering_node system social)
 
   @reverse_directions %{
     "north" => "south",

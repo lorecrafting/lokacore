@@ -1,37 +1,47 @@
 defmodule Loka.Content.StorylineTest do
-  use ExUnit.Case, async: false
+  use Loka.DataCase, async: false
 
   alias Loka.Content.Storyline
-  alias Loka.Engine.TypedObject
-  alias Loka.Engine.TypedObject.Registry
+  alias Loka.Engine.{Entity, Entities}
 
-  setup do
-    Loka.TypedObjectSandbox.checkout()
-    :ok
+  defp create_storyline(key, data, opts \\ []) do
+    entity =
+      Entity.new(
+        type: :storyline,
+        key: key,
+        short_desc: opts[:name] || key,
+        is_prototype: true,
+        components: %{"data" => data}
+      )
+
+    {:ok, saved} = Entities.save(entity)
+    saved
   end
 
   describe "get/1" do
     test "returns storyline by key" do
-      {:ok, storyline} =
-        TypedObject.new(
-          key: "test_storyline",
-          type: :storyline,
-          name: "Test Storyline",
-          data: %{
-            "main_quests" => ["quest_a", "quest_b"],
-            "side_quests" => ["sq_1"]
-          }
-        )
-
-      Registry.put("test_storyline", storyline)
+      create_storyline(
+        "test_storyline",
+        %{
+          "main_quests" => ["quest_a", "quest_b"],
+          "side_quests" => ["sq_1"]
+        }, name: "Test Storyline")
 
       assert {:ok, fetched} = Storyline.get("test_storyline")
       assert fetched.key == "test_storyline"
     end
 
     test "returns error for non-storyline" do
-      {:ok, entity} = TypedObject.new(key: "not_storyline", type: :entity)
-      Registry.put("not_storyline", entity)
+      entity =
+        Entity.new(
+          type: :npc,
+          key: "not_storyline",
+          short_desc: "Not a storyline",
+          is_prototype: true,
+          components: %{}
+        )
+
+      {:ok, _} = Entities.save(entity)
 
       assert {:error, :not_found} = Storyline.get("not_storyline")
     end
@@ -48,23 +58,15 @@ defmodule Loka.Content.StorylineTest do
         %{"id" => "act_2", "name" => "The Middle", "quests" => ["q3"]}
       ]
 
-      {:ok, storyline} =
-        TypedObject.new(
-          key: "acts_storyline",
-          type: :storyline,
-          data: %{"acts" => acts}
-        )
+      entity = create_storyline("acts_storyline", %{"acts" => acts})
+      {:ok, storyline} = Entity.to_typed_object(entity)
 
       assert Storyline.acts(storyline) == acts
     end
 
     test "returns empty list when no acts" do
-      {:ok, storyline} =
-        TypedObject.new(
-          key: "no_acts",
-          type: :storyline,
-          data: %{}
-        )
+      entity = create_storyline("no_acts", %{})
+      {:ok, storyline} = Entity.to_typed_object(entity)
 
       assert Storyline.acts(storyline) == []
     end
@@ -72,23 +74,15 @@ defmodule Loka.Content.StorylineTest do
 
   describe "side_quests/1" do
     test "returns side quests list" do
-      {:ok, storyline} =
-        TypedObject.new(
-          key: "side_storyline",
-          type: :storyline,
-          data: %{"side_quests" => ["sq_1", "sq_2", "sq_3"]}
-        )
+      entity = create_storyline("side_storyline", %{"side_quests" => ["sq_1", "sq_2", "sq_3"]})
+      {:ok, storyline} = Entity.to_typed_object(entity)
 
       assert Storyline.side_quests(storyline) == ["sq_1", "sq_2", "sq_3"]
     end
 
     test "returns empty list when no side quests" do
-      {:ok, storyline} =
-        TypedObject.new(
-          key: "no_side",
-          type: :storyline,
-          data: %{}
-        )
+      entity = create_storyline("no_side", %{})
+      {:ok, storyline} = Entity.to_typed_object(entity)
 
       assert Storyline.side_quests(storyline) == []
     end
@@ -96,23 +90,15 @@ defmodule Loka.Content.StorylineTest do
 
   describe "main_quests/1" do
     test "returns main quests list" do
-      {:ok, storyline} =
-        TypedObject.new(
-          key: "main_storyline",
-          type: :storyline,
-          data: %{"main_quests" => ["mq_1", "mq_2"]}
-        )
+      entity = create_storyline("main_storyline", %{"main_quests" => ["mq_1", "mq_2"]})
+      {:ok, storyline} = Entity.to_typed_object(entity)
 
       assert Storyline.main_quests(storyline) == ["mq_1", "mq_2"]
     end
 
     test "returns empty list when no main quests" do
-      {:ok, storyline} =
-        TypedObject.new(
-          key: "no_main",
-          type: :storyline,
-          data: %{}
-        )
+      entity = create_storyline("no_main", %{})
+      {:ok, storyline} = Entity.to_typed_object(entity)
 
       assert Storyline.main_quests(storyline) == []
     end
