@@ -32,7 +32,7 @@ defmodule Loka.Timers.Timer do
 
   @primary_key {:id, :binary_id, autogenerate: true}
   schema "timers" do
-    field :player_id, :integer
+    field :player_id, :binary_id
     field :timer_type, Ecto.Enum, values: [:crafting, :gathering, :quest, :cooldown]
     field :duration_ms, :integer
     field :scheduled_at, :utc_datetime_usec

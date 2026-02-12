@@ -39,7 +39,7 @@ defmodule Loka.Admin.AuditLog do
   import Ecto.Query
 
   @primary_key {:id, :binary_id, autogenerate: true}
-  @foreign_key_type :id
+  @foreign_key_type :binary_id
 
   @actions ~w(create update delete batch_create batch_update batch_delete)
   @entity_types ~w(room npc item quest dialogue script cutscene template zone)

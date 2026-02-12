@@ -55,7 +55,7 @@ defmodule Loka.Framework.Player.GameState do
   @current_schema_version 1
 
   schema "player_game_states" do
-    field :player_id, :id
+    field :player_id, :binary_id
     # Character identity fields
     field :character_name, :string
     field :gender, :string
