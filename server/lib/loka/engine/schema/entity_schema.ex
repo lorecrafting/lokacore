@@ -46,7 +46,7 @@ defmodule Loka.Engine.Schema.EntitySchema do
     field :mood, :string
 
     field :location_id, :binary_id
-    field :account_id, :integer
+    field :account_id, :binary_id
 
     # Serialized complex data (stored as JSON)
     field :components, Loka.Ecto.Json, default: %{}

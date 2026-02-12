@@ -52,7 +52,7 @@ defmodule Loka.Engine.Entity do
           mood: String.t() | nil,
           # Relationships
           location_id: String.t() | nil,
-          account_id: integer() | nil,
+          account_id: String.t() | nil,
           # Game data
           components: map(),
           behaviors: [module()],
