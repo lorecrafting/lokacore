@@ -444,7 +444,7 @@ defmodule Loka.Framework.World.Room do
   defp broadcast_entry_event(player_id, message) do
     Phoenix.PubSub.broadcast(
       Loka.PubSub,
-      "player:#{player_id}",
+      "entity:#{player_id}",
       {:room_entry_event, message}
     )
   end

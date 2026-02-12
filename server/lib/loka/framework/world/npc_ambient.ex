@@ -208,7 +208,7 @@ defmodule Loka.Framework.World.NpcAmbient do
 
       Phoenix.PubSub.broadcast(
         Loka.PubSub,
-        "room:#{room_id}",
+        "location:#{room_id}",
         {:ambient_message, formatted}
       )
 

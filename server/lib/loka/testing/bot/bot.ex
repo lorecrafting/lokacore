@@ -195,7 +195,7 @@ defmodule Loka.Testing.Bot do
 
     # Subscribe to room events
     if room do
-      EventBus.subscribe("room:#{room.id}")
+      EventBus.subscribe("location:#{room.id}")
     end
 
     # Initialize metrics
@@ -312,7 +312,7 @@ defmodule Loka.Testing.Bot do
 
     # Unsubscribe from room
     if state.room do
-      EventBus.unsubscribe("room:#{state.room.id}")
+      EventBus.unsubscribe("location:#{state.room.id}")
     end
 
     # Call strategy terminate if defined
@@ -501,12 +501,12 @@ defmodule Loka.Testing.Bot do
     if old_id != new_id do
       # Unsubscribe from old room
       if old_id do
-        EventBus.unsubscribe("room:#{old_id}")
+        EventBus.unsubscribe("location:#{old_id}")
       end
 
       # Subscribe to new room
       if new_id do
-        EventBus.subscribe("room:#{new_id}")
+        EventBus.subscribe("location:#{new_id}")
       end
     end
 

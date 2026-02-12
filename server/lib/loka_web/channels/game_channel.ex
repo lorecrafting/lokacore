@@ -654,7 +654,7 @@ defmodule LokaWeb.GameChannel do
       # Broadcast to room
       Phoenix.PubSub.broadcast(
         Loka.PubSub,
-        "room:#{room.id}",
+        "location:#{room.id}",
         {:player_says, player.id, player_name, message}
       )
 
@@ -674,7 +674,7 @@ defmodule LokaWeb.GameChannel do
       # Broadcast to current room and adjacent rooms
       Phoenix.PubSub.broadcast(
         Loka.PubSub,
-        "room:#{room.id}",
+        "location:#{room.id}",
         {:player_shouts, player.id, player_name, message}
       )
 
@@ -1120,8 +1120,8 @@ defmodule LokaWeb.GameChannel do
     {room, game_state} = RoomHelpers.load_player_room(game_state)
 
     # Subscribe to PubSub topics
-    Phoenix.PubSub.subscribe(Loka.PubSub, "room:#{room.id}")
-    Phoenix.PubSub.subscribe(Loka.PubSub, "player:#{player.id}")
+    Phoenix.PubSub.subscribe(Loka.PubSub, "location:#{room.id}")
+    Phoenix.PubSub.subscribe(Loka.PubSub, "entity:#{player.id}")
     Phoenix.PubSub.subscribe(Loka.PubSub, "world:atmosphere")
     Phoenix.PubSub.subscribe(Loka.PubSub, "debug:screenshot")
 
@@ -1137,7 +1137,7 @@ defmodule LokaWeb.GameChannel do
     # Broadcast player entered
     Phoenix.PubSub.broadcast(
       Loka.PubSub,
-      "room:#{room.id}",
+      "location:#{room.id}",
       {:player_entered, player.id, player_display_name(player)}
     )
 
@@ -1428,7 +1428,7 @@ defmodule LokaWeb.GameChannel do
     if player && room && room.id do
       Phoenix.PubSub.broadcast(
         Loka.PubSub,
-        "room:#{room.id}",
+        "location:#{room.id}",
         {:player_left, player.id, player_display_name(player), "away"}
       )
 

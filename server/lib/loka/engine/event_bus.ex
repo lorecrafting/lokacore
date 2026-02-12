@@ -213,7 +213,7 @@ defmodule Loka.Engine.EventBus do
   defp maybe_add_location_topic(topics, %Event{location: nil}), do: topics
 
   defp maybe_add_location_topic(topics, %Event{location: location}) do
-    ["room:#{location}" | topics]
+    ["location:#{location}" | topics]
   end
 
   # Adds the target entity topic if the event has a target

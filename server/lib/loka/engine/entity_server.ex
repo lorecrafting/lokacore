@@ -56,6 +56,7 @@ defmodule Loka.Engine.EntityServer do
     :last_activity,
     :save_timer,
     :idle_timer,
+    :tick_timer,
     :idle_timeout_ms,
     :save_interval_ms,
     :hibernate_after_ms
@@ -193,6 +194,9 @@ defmodule Loka.Engine.EntityServer do
           Loka.Engine.EntityRegistry.register_in_room(entity_id, entity.location_id)
         end
 
+        # Schedule tick if entity has tick interval configured
+        tick_timer = maybe_schedule_tick(entity)
+
         state = %__MODULE__{
           entity_id: entity_id,
           entity: entity,
@@ -200,6 +204,7 @@ defmodule Loka.Engine.EntityServer do
           last_activity: now,
           save_timer: save_timer,
           idle_timer: idle_timer,
+          tick_timer: tick_timer,
           idle_timeout_ms: idle_timeout_ms,
           save_interval_ms: save_interval_ms,
           hibernate_after_ms: hibernate_after_ms
@@ -361,6 +366,49 @@ defmodule Loka.Engine.EntityServer do
     {:noreply, touch_state(state)}
   end
 
+  # Tick handler — dispatches to behaviors but does NOT reset idle timer (Decision 13)
+  @impl true
+  def handle_info(:tick, state) do
+    entity = state.entity
+
+    # Initialize Volatile state for behaviors
+    Process.put(:entity_volatile, Map.get(state, :volatile, %{}))
+
+    # Dispatch on_tick to all behaviors that implement it
+    updated_entity =
+      (entity.behaviors || [])
+      |> Enum.reduce(entity, fn behavior_mod, ent ->
+        if function_exported?(behavior_mod, :on_tick, 1) do
+          try do
+            case behavior_mod.on_tick(ent) do
+              {:ok, updated} -> updated
+              _ -> ent
+            end
+          rescue
+            e ->
+              Logger.warning(
+                "[#{entity.key}] behavior #{behavior_mod} crashed on tick: #{inspect(e)}"
+              )
+
+              ent
+          end
+        else
+          ent
+        end
+      end)
+
+    # Recover volatile state from process dictionary
+    updated_volatile = Process.get(:entity_volatile, %{})
+
+    new_state =
+      %{state | entity: updated_entity, dirty: true}
+      |> Map.put(:volatile, updated_volatile)
+
+    # Reschedule tick — do NOT touch idle timer
+    tick_timer = maybe_schedule_tick(updated_entity)
+    {:noreply, %{new_state | tick_timer: tick_timer}}
+  end
+
   # Catch-all for unknown messages to prevent crashes
   @impl true
   def handle_info(msg, state) do
@@ -512,13 +560,25 @@ defmodule Loka.Engine.EntityServer do
     Process.send_after(self(), :check_idle, interval)
   end
 
+  defp maybe_schedule_tick(%Entity{components: components}) do
+    case get_in(components || %{}, ["tick", "interval"]) do
+      interval when is_integer(interval) and interval > 0 ->
+        # Add jitter to prevent thundering herd (±10%)
+        jitter = trunc(interval * 0.1 * (:rand.uniform() - 0.5))
+        Process.send_after(self(), :tick, interval + jitter)
+
+      _ ->
+        nil
+    end
+  end
+
   defp subscribe_to_topics(%Entity{} = entity) do
     # Subscribe to entity-specific topic
     EventBus.subscribe("entity:#{entity.id}")
 
     # If it's a room, also subscribe to room topic
     if entity.type == :room do
-      EventBus.subscribe("room:#{entity.id}")
+      EventBus.subscribe("location:#{entity.id}")
     end
 
     :ok

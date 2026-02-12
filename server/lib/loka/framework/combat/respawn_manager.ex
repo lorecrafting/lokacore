@@ -168,7 +168,7 @@ defmodule Loka.Framework.Combat.RespawnManager do
         if despawn_info.location_id do
           Phoenix.PubSub.broadcast(
             Loka.PubSub,
-            "room:#{despawn_info.location_id}",
+            "location:#{despawn_info.location_id}",
             {:mob_respawned, entity_id, entity.short_desc}
           )
         end

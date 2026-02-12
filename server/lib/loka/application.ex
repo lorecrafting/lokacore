@@ -38,6 +38,7 @@ defmodule Loka.Application do
       {Registry, keys: :unique, name: Loka.Engine.EntityRegistry.Registry},
       {Loka.Engine.EntitySupervisor, name: Loka.Engine.EntitySupervisor},
       Loka.Engine.EntityRegistry,
+      Loka.Engine.SystemSupervisor,
       Loka.Engine.WorldGraph.LayoutManager,
 
       # Plugin System - must come after Engine core, before Framework layer
@@ -144,6 +145,11 @@ defmodule Loka.Application do
         # Skip in test mode to avoid polluting the sandbox-isolated test database
         unless Application.get_env(:loka, :env) == :test do
           Loka.Engine.WorldLoader.spawn_world()
+        end
+
+        # Boot system entities (auto_start tagged) after world is spawned
+        unless Application.get_env(:loka, :env) == :test do
+          Loka.Engine.SystemSupervisor.boot_system_entities()
         end
 
       _ ->

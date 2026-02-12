@@ -240,7 +240,7 @@ defmodule Loka.Framework.Inventory.ContainerRespawn do
 
       Phoenix.PubSub.broadcast(
         Loka.PubSub,
-        "room:#{room_id}",
+        "location:#{room_id}",
         {:ambient_message, message}
       )
     end

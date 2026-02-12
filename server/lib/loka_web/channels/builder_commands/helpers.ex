@@ -37,13 +37,13 @@ defmodule LokaWeb.Channels.BuilderCommands.Helpers do
     old_room_id = game_state.current_room_id
 
     if old_room_id do
-      Phoenix.PubSub.unsubscribe(Loka.PubSub, "room:#{old_room_id}")
+      Phoenix.PubSub.unsubscribe(Loka.PubSub, "location:#{old_room_id}")
     end
 
     {:ok, updated_state} =
       PlayerGameState.update_state(game_state, %{current_room_id: room.id})
 
-    Phoenix.PubSub.subscribe(Loka.PubSub, "room:#{room.id}")
+    Phoenix.PubSub.subscribe(Loka.PubSub, "location:#{room.id}")
     Loka.Session.update_room(player.id, room.id)
 
     {loaded_room, final_state} = RoomHelpers.load_player_room(updated_state)

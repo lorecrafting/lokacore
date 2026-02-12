@@ -155,7 +155,7 @@ defmodule Loka.Framework.World.RoomAmbient do
   def broadcast(room_id, message) do
     Phoenix.PubSub.broadcast(
       Loka.PubSub,
-      "room:#{room_id}",
+      "location:#{room_id}",
       {:ambient_message, message}
     )
 

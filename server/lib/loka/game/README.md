@@ -135,7 +135,7 @@ defp dispatch_events(socket, events) do
       push(socket, "room_update", data)
 
     {:broadcast_room, room_id, msg} ->
-      Phoenix.PubSub.broadcast(Loka.PubSub, "room:#{room_id}", msg)
+      Phoenix.PubSub.broadcast(Loka.PubSub, "location:#{room_id}", msg)
 
     {:schedule_timer, name, ms} ->
       Process.send_after(self(), name, ms)

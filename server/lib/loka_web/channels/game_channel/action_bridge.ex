@@ -149,10 +149,10 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
 
     # Unsubscribe from old room, subscribe to new
     if old_room do
-      Phoenix.PubSub.unsubscribe(Loka.PubSub, "room:#{old_room.id}")
+      Phoenix.PubSub.unsubscribe(Loka.PubSub, "location:#{old_room.id}")
     end
 
-    Phoenix.PubSub.subscribe(Loka.PubSub, "room:#{new_room.id}")
+    Phoenix.PubSub.subscribe(Loka.PubSub, "location:#{new_room.id}")
 
     # Update session
     Session.update_room(player_id, new_room.id)
@@ -337,12 +337,12 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
   end
 
   defp dispatch_event({:bardo_subscribe_room, room_id}, socket) do
-    Phoenix.PubSub.subscribe(Loka.PubSub, "room:#{room_id}")
+    Phoenix.PubSub.subscribe(Loka.PubSub, "location:#{room_id}")
     socket
   end
 
   defp dispatch_event({:bardo_unsubscribe_room, room_id}, socket) do
-    Phoenix.PubSub.unsubscribe(Loka.PubSub, "room:#{room_id}")
+    Phoenix.PubSub.unsubscribe(Loka.PubSub, "location:#{room_id}")
     socket
   end
 
@@ -365,12 +365,12 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
 
   # PubSub broadcasts
   defp dispatch_event({:broadcast_room, room_id, message}, socket) do
-    Phoenix.PubSub.broadcast(Loka.PubSub, "room:#{room_id}", message)
+    Phoenix.PubSub.broadcast(Loka.PubSub, "location:#{room_id}", message)
     socket
   end
 
   defp dispatch_event({:broadcast_player, player_id, message}, socket) do
-    Phoenix.PubSub.broadcast(Loka.PubSub, "player:#{player_id}", message)
+    Phoenix.PubSub.broadcast(Loka.PubSub, "entity:#{player_id}", message)
     socket
   end
 

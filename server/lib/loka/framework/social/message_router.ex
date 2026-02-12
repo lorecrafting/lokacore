@@ -87,7 +87,7 @@ defmodule Loka.Framework.Social.MessageRouter do
       perspective: :observer
     }
 
-    broadcast_to_topic("room:#{msg.location}", {:social_message, payload}, excluded)
+    broadcast_to_topic("location:#{msg.location}", {:social_message, payload}, excluded)
   end
 
   # =============================================================================
@@ -113,7 +113,7 @@ defmodule Loka.Framework.Social.MessageRouter do
         perspective: :distant
       }
 
-      broadcast_to_topic("room:#{room_id}", {:social_message, payload}, [])
+      broadcast_to_topic("location:#{room_id}", {:social_message, payload}, [])
     end)
   end
 
@@ -272,7 +272,7 @@ defmodule Loka.Framework.Social.MessageRouter do
       perspective: perspective
     }
 
-    Phoenix.PubSub.broadcast(@pubsub, "player:#{player_id}", {:social_message, payload})
+    Phoenix.PubSub.broadcast(@pubsub, "entity:#{player_id}", {:social_message, payload})
   end
 
   defp broadcast_to_topic(topic, message, _excluded) do

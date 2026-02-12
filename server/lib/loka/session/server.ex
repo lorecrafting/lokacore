@@ -258,7 +258,7 @@ defmodule Loka.Session.Server do
     # Subscribe to player-specific events via PubSub
     # This unifies EventBus and Session messaging - events sent to "player:{id}"
     # are automatically delivered to this session
-    Phoenix.PubSub.subscribe(Loka.PubSub, "player:#{player.id}")
+    Phoenix.PubSub.subscribe(Loka.PubSub, "entity:#{player.id}")
 
     Logger.info(
       "[Session.Server] Started for player #{player.id} (#{LogSanitizer.mask_email(player.email)})"

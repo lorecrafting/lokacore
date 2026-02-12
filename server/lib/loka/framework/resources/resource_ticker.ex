@@ -57,7 +57,7 @@ defmodule Loka.Framework.Resources.ResourceTicker do
         if pools != previous_pools do
           Phoenix.PubSub.broadcast(
             Loka.PubSub,
-            "player:#{entity_id}",
+            "entity:#{entity_id}",
             {:resources_updated, pools}
           )
 

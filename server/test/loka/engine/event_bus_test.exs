@@ -37,7 +37,7 @@ defmodule Loka.Engine.EventBusTest do
     end
 
     test "subscriber receives events on room topic", %{pubsub: pubsub} do
-      EventBus.subscribe("room:lobby", pubsub: pubsub)
+      EventBus.subscribe("location:lobby", pubsub: pubsub)
 
       event = Event.new(:say, %{location: "lobby", payload: %{text: "Hello"}})
       EventBus.emit(event, pubsub: pubsub)
@@ -57,7 +57,7 @@ defmodule Loka.Engine.EventBusTest do
     end
 
     test "subscriber does not receive events from unsubscribed topics", %{pubsub: pubsub} do
-      EventBus.subscribe("room:lobby", pubsub: pubsub)
+      EventBus.subscribe("location:lobby", pubsub: pubsub)
 
       # Event in a different room
       event = Event.new(:say, %{location: "tavern", payload: %{text: "Hello"}})
@@ -127,7 +127,7 @@ defmodule Loka.Engine.EventBusTest do
 
       assert "events:global" in topics
       assert "events:say" in topics
-      assert "room:room_123" in topics
+      assert "location:room_123" in topics
     end
 
     test "includes entity topic when target is set" do
@@ -147,7 +147,7 @@ defmodule Loka.Engine.EventBusTest do
 
       assert "events:global" in topics
       assert "events:attack" in topics
-      assert "room:room_1" in topics
+      assert "location:room_1" in topics
       assert "entity:npc_2" in topics
     end
 
@@ -156,7 +156,7 @@ defmodule Loka.Engine.EventBusTest do
 
       topics = EventBus.build_topics(event)
 
-      refute Enum.any?(topics, &String.starts_with?(&1, "room:"))
+      refute Enum.any?(topics, &String.starts_with?(&1, "location:"))
     end
 
     test "does not include entity topic when target is nil" do
