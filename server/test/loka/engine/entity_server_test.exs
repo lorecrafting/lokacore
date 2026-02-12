@@ -99,16 +99,16 @@ defmodule Loka.Engine.EntityServerTest do
       EntityServer.stop(pid)
     end
 
-    test "sets entity attributes" do
+    test "sets component data" do
       schema = entity_fixture()
       {:ok, pid} = EntityServer.start_link(schema.id, @test_opts)
 
       EntityServer.update(pid, fn entity ->
-        Entity.set_attribute(entity, "health", 50)
+        Entity.add_component(entity, "health", %{"current" => 50, "max" => 100})
       end)
 
       entity = EntityServer.get_entity(pid)
-      assert Entity.get_attribute(entity, "health") == 50
+      assert Entity.get_component(entity, "health") == %{"current" => 50, "max" => 100}
 
       EntityServer.stop(pid)
     end
@@ -249,6 +249,188 @@ defmodule Loka.Engine.EntityServerTest do
       # Verify state was saved
       reloaded = Entities.get_entity(schema.id)
       assert reloaded.short_desc == "Stopped State"
+    end
+  end
+
+  describe "update/3 with force_save" do
+    test "immediately persists when force_save: true" do
+      schema = entity_fixture(%{short_desc: "Original"})
+      {:ok, pid} = EntityServer.start_link(schema.id, @test_opts)
+
+      EntityServer.update(
+        pid,
+        fn entity -> %{entity | short_desc: "Force Saved"} end,
+        force_save: true
+      )
+
+      # Should not be dirty — was force-saved
+      refute EntityServer.dirty?(pid)
+
+      # Verify in database immediately
+      {:ok, reloaded} = Loka.Engine.Entities.find_one(schema.id)
+      assert reloaded.short_desc == "Force Saved"
+
+      EntityServer.stop(pid)
+    end
+
+    test "defaults to lazy save when force_save not set" do
+      schema = entity_fixture(%{short_desc: "Original"})
+      {:ok, pid} = EntityServer.start_link(schema.id, @test_opts)
+
+      EntityServer.update(pid, fn entity -> %{entity | short_desc: "Lazy"} end)
+
+      assert EntityServer.dirty?(pid)
+      EntityServer.stop(pid)
+    end
+  end
+
+  describe "reload/1" do
+    test "reloads entity from database" do
+      schema = entity_fixture(%{short_desc: "DB State"})
+      {:ok, pid} = EntityServer.start_link(schema.id, @test_opts)
+
+      # Modify in-memory without saving
+      EntityServer.update(pid, fn entity -> %{entity | short_desc: "Memory Only"} end)
+      assert EntityServer.get_entity(pid).short_desc == "Memory Only"
+
+      # Reload discards in-memory changes
+      assert :ok = EntityServer.reload(pid)
+      assert EntityServer.get_entity(pid).short_desc == "DB State"
+      refute EntityServer.dirty?(pid)
+
+      EntityServer.stop(pid)
+    end
+
+    test "returns error for deleted entity" do
+      schema = entity_fixture()
+      {:ok, pid} = EntityServer.start_link(schema.id, @test_opts)
+
+      # Delete the entity from DB
+      Loka.Engine.Entities.delete(schema.id)
+
+      assert {:error, :not_found} = EntityServer.reload(pid)
+
+      EntityServer.stop(pid)
+    end
+  end
+
+  describe "dispatch_event/3" do
+    test "returns {:ok, entity} with no behaviors" do
+      entity = %Entity{
+        id: Ecto.UUID.generate(),
+        type: :npc,
+        key: "test",
+        behaviors: [],
+        components: %{},
+        tags: [],
+        scripts: %{},
+        metadata: %{},
+        keywords: []
+      }
+
+      assert {:ok, ^entity} = EntityServer.dispatch_event(entity, :test_event, %{})
+    end
+
+    test "skips behaviors without on_event/3" do
+      defmodule NoEventBehavior do
+        def on_init(_entity), do: :ok
+      end
+
+      entity = %Entity{
+        id: Ecto.UUID.generate(),
+        type: :npc,
+        key: "test",
+        behaviors: [NoEventBehavior],
+        components: %{},
+        tags: [],
+        scripts: %{},
+        metadata: %{},
+        keywords: []
+      }
+
+      assert {:ok, ^entity} = EntityServer.dispatch_event(entity, :test_event, %{})
+    end
+
+    test "calls on_event/3 and returns updated entity" do
+      defmodule TestBehavior do
+        def on_event(entity, :damage, %{amount: amount}) do
+          health = entity.components["health"] || 100
+          {:ok, Entity.add_component(entity, "health", health - amount)}
+        end
+
+        def on_event(entity, _event, _payload), do: {:ok, entity}
+      end
+
+      entity = %Entity{
+        id: Ecto.UUID.generate(),
+        type: :npc,
+        key: "test",
+        behaviors: [TestBehavior],
+        components: %{"health" => 100},
+        tags: [],
+        scripts: %{},
+        metadata: %{},
+        keywords: []
+      }
+
+      assert {:ok, updated} = EntityServer.dispatch_event(entity, :damage, %{amount: 25})
+      assert updated.components["health"] == 75
+    end
+
+    test "halts chain when behavior returns {:halt, entity}" do
+      defmodule HaltBehavior do
+        def on_event(entity, :blocked, _payload), do: {:halt, entity}
+        def on_event(entity, _event, _payload), do: {:ok, entity}
+      end
+
+      defmodule AfterHaltBehavior do
+        def on_event(_entity, _event, _payload) do
+          raise "should not be called"
+        end
+      end
+
+      entity = %Entity{
+        id: Ecto.UUID.generate(),
+        type: :npc,
+        key: "test",
+        behaviors: [HaltBehavior, AfterHaltBehavior],
+        components: %{},
+        tags: [],
+        scripts: %{},
+        metadata: %{},
+        keywords: []
+      }
+
+      assert {:halted, ^entity} = EntityServer.dispatch_event(entity, :blocked, %{})
+    end
+
+    test "skips crashing behavior and continues chain" do
+      defmodule CrashBehavior do
+        def on_event(_entity, _event, _payload), do: raise("boom")
+      end
+
+      defmodule SafeBehavior do
+        def on_event(entity, :safe, _payload) do
+          {:ok, Entity.add_component(entity, "processed", true)}
+        end
+
+        def on_event(entity, _event, _payload), do: {:ok, entity}
+      end
+
+      entity = %Entity{
+        id: Ecto.UUID.generate(),
+        type: :npc,
+        key: "test",
+        behaviors: [CrashBehavior, SafeBehavior],
+        components: %{},
+        tags: [],
+        scripts: %{},
+        metadata: %{},
+        keywords: []
+      }
+
+      assert {:ok, updated} = EntityServer.dispatch_event(entity, :safe, %{})
+      assert updated.components["processed"] == true
     end
   end
 

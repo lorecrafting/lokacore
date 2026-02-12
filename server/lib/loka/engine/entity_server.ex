@@ -7,11 +7,17 @@ defmodule Loka.Engine.EntityServer do
 
   ## Lifecycle
 
-  1. Start: Load entity from DB into process state
+  1. Start: Load entity from DB into process state (with tags)
   2. Active: Handle events, update state, mark dirty
   3. Save: Periodic save of dirty state to DB
   4. Idle: After timeout with no activity, hibernate or stop
   5. Stop: Final save to DB
+
+  ## V2 Event Dispatch
+
+  `dispatch_event/3` is the central event processing function. It runs the
+  behavior chain with snapshot rollback — if a catastrophic failure occurs,
+  the entity reverts to the pre-event state.
 
   ## Usage
 
@@ -21,13 +27,13 @@ defmodule Loka.Engine.EntityServer do
       # Get the current entity state
       entity = EntityServer.get_entity(pid)
 
-      # Update the entity
+      # Update the entity (with optional force_save)
       EntityServer.update(pid, fn entity ->
-        %{entity | name: "New Name"}
-      end)
+        %{entity | short_desc: "New Name"}
+      end, force_save: true)
 
-      # Force save
-      EntityServer.save_now(pid)
+      # Reload from DB
+      EntityServer.reload(pid)
   """
 
   use GenServer
@@ -65,9 +71,9 @@ defmodule Loka.Engine.EntityServer do
   ## Options
 
   - `:name` - Optional name for the process
-  - `:idle_timeout_ms` - Time before stopping idle process (default: 5 min)
+  - `:idle_timeout_ms` - Time before stopping idle process (default: 2 min)
   - `:save_interval_ms` - Time between auto-saves (default: 1 min)
-  - `:hibernate_after_ms` - Time before hibernating (default: 2 min)
+  - `:hibernate_after_ms` - Time before hibernating (default: 30s)
   """
   def start_link(entity_id, opts \\ []) do
     name = Keyword.get(opts, :name)
@@ -96,14 +102,20 @@ defmodule Loka.Engine.EntityServer do
   The function receives the current entity and should return the updated entity.
   Marks the state as dirty for auto-save.
 
+  ## Options
+
+  - `:force_save` - If true, immediately persists to DB (default: false).
+    Use for critical operations: room changes, item pickup/drop, quest
+    completion, XP/level, gold, equipment, death penalties, builder edits.
+
   ## Examples
 
       EntityServer.update(pid, fn entity ->
-        Entity.set_attribute(entity, "health", 50)
-      end)
+        %{entity | short_desc: "New Name"}
+      end, force_save: true)
   """
-  def update(server, fun) when is_function(fun, 1) do
-    GenServer.call(server, {:update, fun})
+  def update(server, fun, opts \\ []) when is_function(fun, 1) do
+    GenServer.call(server, {:update, fun, opts})
   end
 
   @doc """
@@ -141,6 +153,13 @@ defmodule Loka.Engine.EntityServer do
     GenServer.call(server, :dirty?)
   end
 
+  @doc """
+  Reloads the entity from the database, discarding in-memory changes.
+  """
+  def reload(server) do
+    GenServer.call(server, :reload)
+  end
+
   # =============================================================================
   # GenServer Callbacks
   # =============================================================================
@@ -149,13 +168,12 @@ defmodule Loka.Engine.EntityServer do
   def init({entity_id, opts}) do
     start_time = System.monotonic_time()
 
-    # Load entity from database
-    case Entities.get_entity(entity_id) do
-      nil ->
+    # Load entity from database using V2 API (includes tag preloading)
+    case Entities.find_one(entity_id) do
+      {:error, :not_found} ->
         {:stop, {:error, :entity_not_found}}
 
-      schema ->
-        entity = Entities.to_entity(schema)
+      {:ok, entity} ->
         now = DateTime.utc_now()
 
         # Get configuration from opts or use defaults
@@ -210,10 +228,24 @@ defmodule Loka.Engine.EntityServer do
   end
 
   @impl true
-  def handle_call({:update, fun}, _from, state) do
+  def handle_call({:update, fun, opts}, _from, state) do
     updated_entity = fun.(state.entity)
     new_state = %{state | entity: updated_entity} |> mark_dirty()
+
+    new_state =
+      if Keyword.get(opts, :force_save, false) do
+        do_save(new_state)
+      else
+        new_state
+      end
+
     {:reply, {:ok, updated_entity}, new_state}
+  end
+
+  # V1 compat: handle {:update, fun} without opts
+  @impl true
+  def handle_call({:update, fun}, from, state) do
+    handle_call({:update, fun, []}, from, state)
   end
 
   @impl true
@@ -234,10 +266,21 @@ defmodule Loka.Engine.EntityServer do
   end
 
   @impl true
+  def handle_call(:reload, _from, state) do
+    case Entities.find_one(state.entity_id) do
+      {:ok, fresh} ->
+        {:reply, :ok, %{state | entity: fresh, dirty: false}}
+
+      {:error, :not_found} ->
+        {:reply, {:error, :not_found}, state}
+    end
+  end
+
+  @impl true
   def handle_cast({:event, event}, state) do
     Logger.debug("EntityServer #{state.entity_id} received event: #{inspect(event.type)}")
 
-    # Process event through entity's behaviors
+    # Process event through entity's behaviors (V1 path)
     case process_behaviors(state.entity, event) do
       {:ok, updated_entity, emitted_events} ->
         # Broadcast any events emitted by behaviors
@@ -364,6 +407,58 @@ defmodule Loka.Engine.EntityServer do
   defp terminate_reason(_), do: :error
 
   # =============================================================================
+  # V2 Event Dispatch
+  # =============================================================================
+
+  @doc """
+  Dispatches an event through the entity's behavior chain with snapshot rollback.
+
+  Each behavior's `on_event/3` is called in order. If a behavior crashes, it is
+  skipped and the chain continues. If a catastrophic failure occurs, the entity
+  reverts to the pre-event snapshot.
+
+  Returns:
+  - `{:ok, updated_entity}` — normal completion
+  - `{:halted, updated_entity}` — a behavior halted the chain
+  - `{:error, snapshot}` — catastrophic failure, reverted to snapshot
+  """
+  def dispatch_event(entity, event_name, payload) do
+    snapshot = Entity.snapshot(entity)
+
+    try do
+      result =
+        entity.behaviors
+        |> Enum.reduce_while({:ok, entity, payload}, fn behavior_mod, {:ok, ent, pl} ->
+          if function_exported?(behavior_mod, :on_event, 3) do
+            try do
+              case behavior_mod.on_event(ent, event_name, pl) do
+                {:ok, updated} -> {:cont, {:ok, updated, pl}}
+                {:ok, updated, new_pl} -> {:cont, {:ok, updated, new_pl}}
+                {:halt, updated} -> {:halt, {:halt, updated}}
+              end
+            rescue
+              e ->
+                Logger.warning(
+                  "[#{entity.key}] behavior #{inspect(behavior_mod)} crashed on #{event_name}: #{inspect(e)}"
+                )
+
+                {:cont, {:ok, ent, pl}}
+            end
+          else
+            {:cont, {:ok, ent, pl}}
+          end
+        end)
+
+      case result do
+        {:ok, final_entity, _payload} -> {:ok, final_entity}
+        {:halt, final_entity} -> {:halted, final_entity}
+      end
+    rescue
+      _ -> {:error, snapshot}
+    end
+  end
+
+  # =============================================================================
   # Private Helpers
   # =============================================================================
 
@@ -376,11 +471,12 @@ defmodule Loka.Engine.EntityServer do
   end
 
   defp save_if_dirty(%{dirty: false} = state), do: state
+  defp save_if_dirty(%{dirty: true} = state), do: do_save(state)
 
-  defp save_if_dirty(%{dirty: true} = state) do
+  defp do_save(state) do
     start_time = System.monotonic_time()
 
-    result = Entities.save_entity(state.entity)
+    result = Entities.save(state.entity)
 
     # Emit telemetry for entity save
     :telemetry.execute(
@@ -394,9 +490,9 @@ defmodule Loka.Engine.EntityServer do
     )
 
     case result do
-      {:ok, _} ->
+      {:ok, saved} ->
         Logger.debug("EntityServer #{state.entity_id} saved to database")
-        %{state | dirty: false}
+        %{state | entity: saved, dirty: false}
 
       {:error, reason} ->
         Logger.error("EntityServer #{state.entity_id} failed to save: #{inspect(reason)}")
@@ -461,7 +557,7 @@ defmodule Loka.Engine.EntityServer do
   end
 
   defp process_behaviors(%Entity{} = entity, event) do
-    # Process event through all behaviors
+    # Process event through all behaviors (V1 path)
     Behavior.process_event(entity, event, %{})
   end
 end
