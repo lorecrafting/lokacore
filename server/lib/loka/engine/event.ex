@@ -82,10 +82,16 @@ defmodule Loka.Engine.Event do
     :equip,
     :unequip,
     :use,
+    :pick_up_item,
+    :item_dropped,
+    :destroy_item,
     # World
     :tick,
     :weather_change,
     :time_change,
+    # NPC behavior events
+    :patrol_move,
+    :wander_move,
     # System
     :connect,
     :disconnect,
@@ -95,6 +101,7 @@ defmodule Loka.Engine.Event do
     :display,
     :message,
     :notify_room,
+    :room_message,
     # Quest
     :quest_started,
     :quest_completed,

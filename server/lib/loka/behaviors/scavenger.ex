@@ -2,104 +2,56 @@ defmodule Loka.Behaviors.Scavenger do
   @moduledoc """
   Makes an NPC pick up valuable items from the ground.
 
-  Scavengers automatically collect items that meet their criteria,
-  prioritizing certain types and respecting carry limits. Classic
-  DikuMUD behavior for creatures like crows, goblins, or thieves.
+  ## Configuration (in behavior_config.scavenger)
 
-  ## Supported Types
-  - `:npc`
-
-  ## Configuration
-
-  | Option | Type | Required | Default | Description |
-  |--------|------|----------|---------|-------------|
-  | min_value | integer | no | 0 | Only pick up items worth this much |
-  | prefer_types | list | no | [] | Priority item types to pick up |
-  | pick_up_tags | list | no | [] | Pick up items with these tags |
-  | ignore_tags | list | no | [] | Never pick up items with these tags |
-  | carry_limit | integer | no | 10 | Max items to carry |
-
-  ## Example
-
-      key: greedy_goblin
-      behaviors:
-        - Loka.Behaviors.Scavenger
-      attributes:
-        behavior_config:
-          scavenger:
-            min_value: 10
-            prefer_types:
-              - weapon
-              - armor
-              - gold
-            ignore_tags:
-              - quest_item
-              - no_pick
-            carry_limit: 5
-
-  ## Events Handled
-
-  - `:item_dropped` - Check if item should be picked up
-  - `:tick` - Scan room for items to pick up
+  - `min_value` - Only pick up items worth this much (default: 0)
+  - `prefer_types` - Priority item types to pick up
+  - `pick_up_tags` - Pick up items with these tags
+  - `ignore_tags` - Never pick up items with these tags
+  - `carry_limit` - Max items to carry (default: 10)
   """
 
-  use Loka.Behaviors.Base
+  @behaviour Loka.Engine.EntityBehavior
 
-  require Logger
-
-  @impl true
-  def supported_types, do: [:npc]
+  alias Loka.Engine.{Entity, EventBus, Event, Entities}
+  alias Loka.Behaviors.Runner
 
   @impl true
-  def handle_event(entity, %Event{type: :item_dropped} = event, state) do
-    config = get_config(entity, __MODULE__)
-    item = event.payload[:item]
+  def on_event(entity, :item_dropped, %{item: item}) when not is_nil(item) do
+    config = Runner.get_config(entity, __MODULE__)
 
-    # Check if item was dropped in our room
-    if item && item.location_id == entity.location_id && should_pick_up?(config, item, entity) do
-      pickup_event =
+    if item.location_id == entity.location_id && should_pick_up?(config, item, entity) do
+      EventBus.emit(
         Event.new(:pick_up_item, %{
-          payload: %{
-            picker_id: entity.id,
-            item_id: item.id,
-            reason: "scavenger"
-          }
+          payload: %{picker_id: entity.id, item_id: item.id, reason: "scavenger"}
         })
+      )
 
-      Logger.debug("Scavenger #{entity.id} picking up #{item.id}")
-      {:handled, state, [pickup_event]}
+      {:halt, entity}
     else
-      {:ok, state}
+      {:ok, entity}
     end
   end
 
-  def handle_event(entity, %Event{type: :tick}, state) do
-    config = get_config(entity, __MODULE__)
+  def on_event(entity, _event, _payload), do: {:ok, entity}
 
-    # Scan room for items to pick up
+  @impl true
+  def on_tick(entity) do
+    config = Runner.get_config(entity, __MODULE__)
+
     case scan_for_items(entity, config) do
       [] ->
-        {:ok, state}
+        :ok
 
-      items ->
-        # Pick up the first suitable item
-        item = hd(items)
-
-        pickup_event =
+      [item | _] ->
+        EventBus.emit(
           Event.new(:pick_up_item, %{
-            payload: %{
-              picker_id: entity.id,
-              item_id: item.id,
-              reason: "scavenger"
-            }
+            payload: %{picker_id: entity.id, item_id: item.id, reason: "scavenger"}
           })
-
-        {:ok, state, [pickup_event]}
+        )
     end
-  end
 
-  def handle_event(_entity, _event, state) do
-    {:ok, state}
+    {:ok, entity}
   end
 
   # Private helpers
@@ -113,75 +65,46 @@ defmodule Loka.Behaviors.Scavenger do
 
   defp at_carry_limit?(config, entity) do
     limit = config[:carry_limit] || 10
-    current_count = count_carried_items(entity)
+    current_count = Entities.list_by_type(:item) |> Enum.count(&(&1.location_id == entity.id))
     current_count >= limit
-  end
-
-  defp count_carried_items(entity) do
-    # Count items carried by this entity (contents derived from DB)
-    Entities.list_entities(type: :item, location_id: entity.id) |> length()
   end
 
   defp has_ignored_tag?(config, item) do
     ignore_tags = config[:ignore_tags] || []
-
-    if ignore_tags == [] do
-      false
-    else
-      has_any_tag?(item, ignore_tags)
-    end
+    ignore_tags != [] && Runner.has_any_tag?(item, ignore_tags)
   end
 
   defp meets_value_threshold?(config, item) do
     min_value = config[:min_value] || 0
-
-    if min_value == 0 do
-      true
-    else
-      value = get_item_value(item)
-      value >= min_value
-    end
+    min_value == 0 || get_item_value(item) >= min_value
   end
 
   defp get_item_value(item) do
     economy = Entity.get_component(item, "economy") || %{}
-    economy["value"] || economy[:value] || 0
+    economy["value"] || 0
   end
 
   defp preferred_type?(config, item) do
     prefer_types = config[:prefer_types] || []
-
-    if prefer_types == [] do
-      true
-    else
-      item_type = get_item_type(item)
-      item_type in prefer_types
-    end
+    prefer_types == [] || get_item_type(item) in prefer_types
   end
 
   defp has_pick_up_tag?(config, item) do
     pick_up_tags = config[:pick_up_tags] || []
-
-    if pick_up_tags == [] do
-      false
-    else
-      has_any_tag?(item, pick_up_tags)
-    end
+    pick_up_tags != [] && Runner.has_any_tag?(item, pick_up_tags)
   end
 
   defp get_item_type(item) do
-    # Get item subtype from components
     item_component = Entity.get_component(item, "item") || %{}
-    item_component["type"] || item_component[:type] || "misc"
+    item_component["type"] || "misc"
   end
 
   defp scan_for_items(entity, config) do
-    # Get items in the room
     room_id = entity.location_id
 
     if room_id do
-      Entities.list_entities(type: :item, location_id: room_id)
-      |> Enum.filter(&should_pick_up?(config, &1, entity))
+      Entities.list_by_type(:item)
+      |> Enum.filter(&(&1.location_id == room_id && should_pick_up?(config, &1, entity)))
       |> Enum.sort_by(&(-get_item_value(&1)))
     else
       []

@@ -1,124 +1,70 @@
 defmodule Loka.Behaviors.Runner do
   @moduledoc """
-  Processes events through an entity's behavior chain.
+  Helper functions for V2 behaviors.
 
-  The Runner executes behaviors in order, managing state and
-  handling the different return types from behaviors.
+  Provides config access, state management, and common utilities
+  used across behavior modules.
 
-  ## Return Value Semantics
+  ## V2 Changes
 
-  - `{:ok, state}` - Continue to next behavior
-  - `{:ok, state, events}` - Continue, collect events
-  - `{:handled, state}` - Stop processing, event was handled
-  - `{:handled, state, events}` - Stop processing, emit events
-  - `{:halt, reason}` - Block the action (for before_* events)
-
-  ## Usage
-
-      # Process an event through entity's behaviors
-      case Runner.process_event(entity, event) do
-        {:ok, events} ->
-          # All behaviors passed, emit collected events
-          Enum.each(events, &EventBus.emit/1)
-
-        {:handled, events} ->
-          # A behavior handled it, emit its events
-          Enum.each(events, &EventBus.emit/1)
-
-        {:halt, reason} ->
-          # Action was blocked
-          send_to_player(player, reason)
-      end
-
-  ## State Management
-
-  Behavior states are stored in entity components under the key
-  `behavior_state:{ModuleName}`. The Runner loads and saves these
-  automatically.
+  In V1, Runner orchestrated event dispatch through behaviors.
+  In V2, `EntityServer.dispatch_event/3` handles dispatch.
+  Runner is now a helper/utility module only.
   """
 
-  alias Loka.Engine.{Entity, Event}
-  alias Loka.Behaviors.Base
+  alias Loka.Engine.Entity
 
-  require Logger
-
-  @type process_result ::
-          {:ok, [Event.t()]}
-          | {:handled, [Event.t()]}
-          | {:halt, String.t()}
+  # =============================================================================
+  # Config Access
+  # =============================================================================
 
   @doc """
-  Processes an event through all behaviors attached to an entity.
+  Gets the behavior config from an entity's components.
 
-  Returns collected events or a halt reason.
+  Looks up `entity.components["behavior_config"]["behavior_name"]`.
   """
-  @spec process_event(Entity.t(), Event.t()) :: process_result()
-  def process_event(%Entity{behaviors: behaviors} = entity, %Event{} = event) do
-    behaviors = behaviors || []
+  @spec get_config(Entity.t(), module()) :: map()
+  def get_config(entity, behavior_module) do
+    config_key = behavior_key(behavior_module)
+    behavior_config = (entity.components || %{})["behavior_config"] || %{}
 
-    # Filter to behaviors that use the new Base pattern
-    base_behaviors = Enum.filter(behaviors, &uses_base?/1)
-
-    if base_behaviors == [] do
-      {:ok, []}
-    else
-      do_process(entity, event, base_behaviors, [])
-    end
+    config = behavior_config[config_key] || %{}
+    normalize_config(config)
   end
 
   @doc """
-  Initializes behavior states for an entity.
-
-  Called when an entity is first loaded or behaviors are changed.
+  Gets a specific value from behavior config.
   """
-  @spec init_behaviors(Entity.t()) :: Entity.t()
-  def init_behaviors(%Entity{behaviors: behaviors} = entity) do
-    behaviors = behaviors || []
-
-    Enum.reduce(behaviors, entity, fn behavior, ent ->
-      if uses_base?(behavior) && function_exported?(behavior, :init, 2) do
-        config = Base.get_config(ent, behavior)
-
-        case behavior.init(ent, config) do
-          {:ok, state} ->
-            save_behavior_state(ent, behavior, state)
-
-          _ ->
-            ent
-        end
-      else
-        ent
-      end
-    end)
+  @spec get_config(Entity.t(), module(), atom(), term()) :: term()
+  def get_config(entity, behavior_module, key, default \\ nil) do
+    config = get_config(entity, behavior_module)
+    Map.get(config, key, default)
   end
 
   @doc """
-  Gets the current state for a behavior on an entity.
+  Extracts the behavior key from a module name.
+
+  ## Examples
+
+      iex> Runner.behavior_key(Loka.Behaviors.Guard)
+      "guard"
+  """
+  @spec behavior_key(module()) :: String.t()
+  def behavior_key(module) do
+    module |> Module.split() |> List.last() |> Macro.underscore()
+  end
+
+  # =============================================================================
+  # State Helpers
+  # =============================================================================
+
+  @doc """
+  Gets the persisted behavior state from entity components.
   """
   @spec get_behavior_state(Entity.t(), module()) :: map()
   def get_behavior_state(entity, behavior_module) do
-    key = behavior_state_key(behavior_module)
-    components = entity.components || %{}
-
-    cond do
-      is_map(components[key]) ->
-        components[key]
-
-      is_map(components[key_as_atom(key)]) ->
-        components[key_as_atom(key)]
-
-      true ->
-        %{}
-    end
-  end
-
-  # Safely convert key to atom if it already exists (behavior keys are derived from
-  # module names which are always existing atoms). Using to_existing_atom avoids
-  # the DOS.StringToAtom security warning from Sobelow.
-  defp key_as_atom(key) do
-    String.to_existing_atom(key)
-  rescue
-    ArgumentError -> nil
+    key = "behavior_state:#{behavior_key(behavior_module)}"
+    (entity.components || %{})[key] || %{}
   end
 
   @doc """
@@ -126,60 +72,50 @@ defmodule Loka.Behaviors.Runner do
   """
   @spec save_behavior_state(Entity.t(), module(), map()) :: Entity.t()
   def save_behavior_state(entity, behavior_module, state) do
-    key = behavior_state_key(behavior_module)
-    components = entity.components || %{}
-    updated_components = Map.put(components, key, state)
-    %{entity | components: updated_components}
+    key = "behavior_state:#{behavior_key(behavior_module)}"
+    %{entity | components: Map.put(entity.components || %{}, key, state)}
   end
 
-  # Private implementation
+  # =============================================================================
+  # Common Utilities
+  # =============================================================================
 
-  defp do_process(_entity, _event, [], collected_events) do
-    {:ok, collected_events}
+  @doc "Checks if an entity has any of the specified tags."
+  @spec has_any_tag?(Entity.t(), [String.t()]) :: boolean()
+  def has_any_tag?(%Entity{tags: tags}, check_tags) when is_list(tags) and is_list(check_tags) do
+    Enum.any?(check_tags, &(&1 in tags))
   end
 
-  defp do_process(entity, event, [behavior | rest], collected_events) do
-    state = get_behavior_state(entity, behavior)
+  def has_any_tag?(_, _), do: false
 
-    case behavior.handle_event(entity, event, state) do
-      {:ok, new_state} ->
-        entity = save_behavior_state(entity, behavior, new_state)
-        do_process(entity, event, rest, collected_events)
-
-      {:ok, new_state, events} when is_list(events) ->
-        entity = save_behavior_state(entity, behavior, new_state)
-        do_process(entity, event, rest, collected_events ++ events)
-
-      {:handled, new_state} ->
-        _entity = save_behavior_state(entity, behavior, new_state)
-        {:handled, collected_events}
-
-      {:handled, new_state, events} when is_list(events) ->
-        _entity = save_behavior_state(entity, behavior, new_state)
-        {:handled, collected_events ++ events}
-
-      {:halt, reason} when is_binary(reason) ->
-        {:halt, reason}
-
-      other ->
-        Logger.warning("Behavior #{inspect(behavior)} returned unexpected: #{inspect(other)}")
-        do_process(entity, event, rest, collected_events)
-    end
+  @doc "Gets the health percentage of an entity (0-100)."
+  @spec health_percent(Entity.t()) :: number()
+  def health_percent(entity) do
+    combatant = Entity.get_component(entity, "combatant") || %{}
+    health = combatant["health"] || %{}
+    current = health["current"] || 0
+    max = health["max"] || 1
+    if max > 0, do: current / max * 100, else: 0
   end
 
-  defp uses_base?(module) when is_atom(module) do
-    # Check if the module uses Loka.Behaviors.Base
-    try do
-      behaviors = module.__info__(:attributes)[:behaviour] || []
-      Loka.Behaviors.Base in behaviors
-    rescue
-      _ -> false
-    end
+  # Private
+
+  defp normalize_config(config) when is_map(config) do
+    Map.new(config, fn
+      {k, v} when is_binary(k) ->
+        atom_key =
+          try do
+            String.to_existing_atom(k)
+          rescue
+            ArgumentError -> String.to_atom(k)
+          end
+
+        {atom_key, v}
+
+      {k, v} ->
+        {k, v}
+    end)
   end
 
-  defp uses_base?(_), do: false
-
-  defp behavior_state_key(module) do
-    "behavior_state:#{Base.behavior_key(module)}"
-  end
+  defp normalize_config(_), do: %{}
 end

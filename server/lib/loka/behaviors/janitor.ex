@@ -2,117 +2,79 @@ defmodule Loka.Behaviors.Janitor do
   @moduledoc """
   Makes an NPC pick up and dispose of trash and corpses.
 
-  Janitors keep areas clean by collecting and destroying debris.
-  Classic DikuMUD behavior for cleaning up after combat and
-  preventing item accumulation.
+  ## Configuration (in behavior_config.janitor)
 
-  ## Supported Types
-  - `:npc`
-
-  ## Configuration
-
-  | Option | Type | Required | Default | Description |
-  |--------|------|----------|---------|-------------|
-  | picks_up | list | no | ["trash", "corpse", "junk"] | Tags to pick up |
-  | dispose_after_seconds | integer | no | 60 | Seconds before disposal |
-  | dispose_message | string | no | nil | Message when disposing |
-  | pick_up_message | string | no | nil | Message when picking up |
-
-  ## Example
-
-      key: town_sweeper
-      behaviors:
-        - Loka.Behaviors.Janitor
-      attributes:
-        behavior_config:
-          janitor:
-            picks_up:
-              - trash
-              - corpse
-              - debris
-              - junk
-            dispose_after_seconds: 30
-            dispose_message: "The sweeper disposes of some garbage."
-            pick_up_message: "The sweeper collects some debris."
-
-  ## Events Handled
-
-  - `:tick` - Scan room and inventory, pick up trash, dispose old items
-  - `:item_dropped` - Check if dropped item is trash to pick up
-
-  ## State
-
-  Tracks picked up items with timestamps:
-  - `held_items` - Map of item_id => pickup_timestamp
+  - `picks_up` - Tags to pick up (default: ["trash", "corpse", "junk", "debris"])
+  - `dispose_after_seconds` - Seconds before disposal (default: 60)
+  - `dispose_message` - Message when disposing
+  - `pick_up_message` - Message when picking up
   """
 
-  use Loka.Behaviors.Base
+  @behaviour Loka.Engine.EntityBehavior
 
-  require Logger
+  alias Loka.Engine.{EventBus, Event, Entities}
+  alias Loka.Engine.EntityServer.Volatile
+  alias Loka.Behaviors.Runner
 
   @default_tags ["trash", "corpse", "junk", "debris"]
 
   @impl true
-  def supported_types, do: [:npc]
-
-  @impl true
-  def init(_entity, _config) do
-    {:ok, %{held_items: %{}}}
+  def on_init(entity) do
+    Volatile.set(:held_items, %{})
+    {:ok, entity}
   end
 
   @impl true
-  def handle_event(entity, %Event{type: :tick}, state) do
-    config = get_config(entity, __MODULE__)
+  def on_tick(entity) do
+    config = Runner.get_config(entity, __MODULE__)
+    held_items = Volatile.get(:held_items, %{})
 
-    # First, dispose of old items
-    {events, new_held} = dispose_old_items(entity, config, state.held_items)
+    # Dispose old items
+    {held_items, disposed_any?} = dispose_old_items(entity, config, held_items)
 
-    # Then, scan for new trash to pick up
-    {pickup_events, updated_held} = scan_and_pickup(entity, config, new_held)
+    if disposed_any? do
+      emit_message(entity, config[:dispose_message])
+    end
 
-    new_state = %{state | held_items: updated_held}
-    {:ok, new_state, events ++ pickup_events}
+    # Scan for new trash to pick up
+    held_items = scan_and_pickup(entity, config, held_items)
+
+    Volatile.set(:held_items, held_items)
+    {:ok, entity}
   end
 
-  def handle_event(entity, %Event{type: :item_dropped} = event, state) do
-    config = get_config(entity, __MODULE__)
-    item = event.payload[:item]
+  @impl true
+  def on_event(entity, :item_dropped, %{item: item}) when not is_nil(item) do
+    config = Runner.get_config(entity, __MODULE__)
 
-    # Check if item was dropped in our room and is trash
-    if item && item.location_id == entity.location_id && is_trash?(config, item) do
-      pickup_event =
+    if item.location_id == entity.location_id && is_trash?(config, item) do
+      held_items = Volatile.get(:held_items, %{})
+
+      EventBus.emit(
         Event.new(:pick_up_item, %{
-          payload: %{
-            picker_id: entity.id,
-            item_id: item.id,
-            reason: "janitor"
-          }
+          payload: %{picker_id: entity.id, item_id: item.id, reason: "janitor"}
         })
+      )
 
-      # Track the item
-      new_held = Map.put(state.held_items, item.id, DateTime.utc_now())
+      emit_message(entity, config[:pick_up_message])
+      Volatile.set(:held_items, Map.put(held_items, item.id, DateTime.utc_now()))
 
-      events = maybe_pick_up_message(entity, config, [pickup_event])
-
-      Logger.debug("Janitor #{entity.id} picking up trash #{item.id}")
-      {:handled, %{state | held_items: new_held}, events}
+      {:halt, entity}
     else
-      {:ok, state}
+      {:ok, entity}
     end
   end
 
-  def handle_event(_entity, _event, state) do
-    {:ok, state}
-  end
+  def on_event(entity, _event, _payload), do: {:ok, entity}
 
   # Private helpers
 
   defp is_trash?(config, item) do
     trash_tags = config[:picks_up] || @default_tags
-    has_any_tag?(item, trash_tags)
+    Runner.has_any_tag?(item, trash_tags)
   end
 
-  defp dispose_old_items(entity, config, held_items) do
+  defp dispose_old_items(_entity, config, held_items) do
     dispose_after = config[:dispose_after_seconds] || 60
     now = DateTime.utc_now()
 
@@ -121,96 +83,49 @@ defmodule Loka.Behaviors.Janitor do
         DateTime.diff(now, timestamp, :second) >= dispose_after
       end)
 
-    # Generate dispose events
-    events =
-      Enum.flat_map(to_dispose, fn {item_id, _timestamp} ->
-        dispose_event =
-          Event.new(:destroy_item, %{
-            payload: %{
-              item_id: item_id,
-              reason: "janitor_disposal"
-            }
-          })
+    for {item_id, _} <- to_dispose do
+      EventBus.emit(
+        Event.new(:destroy_item, %{
+          payload: %{item_id: item_id, reason: "janitor_disposal"}
+        })
+      )
+    end
 
-        Logger.debug("Janitor #{entity.id} disposing of #{item_id}")
-        [dispose_event]
-      end)
-
-    # Add dispose message if any items disposed
-    events =
-      if events != [] do
-        maybe_dispose_message(entity, config, events)
-      else
-        events
-      end
-
-    {events, Map.new(to_keep)}
+    {Map.new(to_keep), to_dispose != []}
   end
 
   defp scan_and_pickup(entity, config, held_items) do
     room_id = entity.location_id
 
     if room_id do
-      trash_items =
-        Entities.list_entities(type: :item, location_id: room_id)
-        |> Enum.filter(&is_trash?(config, &1))
-        |> Enum.take(3)
-
-      # Pick up trash
-      Enum.reduce(trash_items, {[], held_items}, fn item, {events, held} ->
+      Entities.list_by_type(:item)
+      |> Enum.filter(&(&1.location_id == room_id && is_trash?(config, &1)))
+      |> Enum.take(3)
+      |> Enum.reduce(held_items, fn item, held ->
         if Map.has_key?(held, item.id) do
-          # Already tracking this item
-          {events, held}
+          held
         else
-          pickup_event =
+          EventBus.emit(
             Event.new(:pick_up_item, %{
-              payload: %{
-                picker_id: entity.id,
-                item_id: item.id,
-                reason: "janitor"
-              }
+              payload: %{picker_id: entity.id, item_id: item.id, reason: "janitor"}
             })
+          )
 
-          new_held = Map.put(held, item.id, DateTime.utc_now())
-          {[pickup_event | events], new_held}
+          Map.put(held, item.id, DateTime.utc_now())
         end
       end)
     else
-      {[], held_items}
+      held_items
     end
   end
 
-  defp maybe_pick_up_message(entity, config, events) do
-    if message = config[:pick_up_message] do
-      msg_event =
-        Event.new(:room_message, %{
-          payload: %{
-            room_id: entity.location_id,
-            text: message,
-            source_id: entity.id
-          }
-        })
+  defp emit_message(_entity, nil), do: :ok
 
-      [msg_event | events]
-    else
-      events
-    end
-  end
-
-  defp maybe_dispose_message(entity, config, events) do
-    if message = config[:dispose_message] do
-      msg_event =
-        Event.new(:room_message, %{
-          payload: %{
-            room_id: entity.location_id,
-            text: message,
-            source_id: entity.id
-          }
-        })
-
-      [msg_event | events]
-    else
-      events
-    end
+  defp emit_message(entity, message) do
+    EventBus.emit(
+      Event.new(:room_message, %{
+        payload: %{room_id: entity.location_id, text: message, source_id: entity.id}
+      })
+    )
   end
 end

@@ -2,208 +2,178 @@ defmodule Loka.Behaviors.RunnerTest do
   use ExUnit.Case, async: true
 
   alias Loka.Behaviors.Runner
-  alias Loka.Engine.{Entity, Event}
+  alias Loka.Engine.Entity
 
-  # Test behavior that passes through
-  defmodule PassBehavior do
-    use Loka.Behaviors.Base
-
-    @impl true
-    def supported_types, do: [:npc]
-
-    @impl true
-    def handle_event(_entity, _event, state) do
-      {:ok, Map.update(state, :pass_count, 1, &(&1 + 1))}
+  describe "behavior_key/1" do
+    test "extracts key from module name" do
+      assert Runner.behavior_key(Loka.Behaviors.Guard) == "guard"
+      assert Runner.behavior_key(Loka.Behaviors.TownCrier) == "town_crier"
+      assert Runner.behavior_key(Loka.Behaviors.Aggressive) == "aggressive"
     end
   end
 
-  # Test behavior that handles events
-  defmodule HandleBehavior do
-    use Loka.Behaviors.Base
+  describe "get_config/2" do
+    test "returns config from entity components" do
+      entity = %Entity{
+        id: "test",
+        type: :npc,
+        key: "test_npc",
+        components: %{
+          "behavior_config" => %{
+            "guard" => %{
+              "attack_tags" => ["criminal"],
+              "shout_on_attack" => "Stop!"
+            }
+          }
+        }
+      }
 
-    @impl true
-    def supported_types, do: [:npc]
+      config = Runner.get_config(entity, Loka.Behaviors.Guard)
 
-    @impl true
-    def handle_event(_entity, %Event{type: :special}, state) do
-      {:handled, state}
+      assert config[:attack_tags] == ["criminal"]
+      assert config[:shout_on_attack] == "Stop!"
     end
 
-    def handle_event(_entity, _event, state) do
-      {:ok, state}
+    test "returns empty map for missing config" do
+      entity = %Entity{
+        id: "test",
+        type: :npc,
+        key: "test_npc",
+        components: %{}
+      }
+
+      assert Runner.get_config(entity, Loka.Behaviors.Guard) == %{}
+    end
+
+    test "returns empty map for nil components" do
+      entity = %Entity{
+        id: "test",
+        type: :npc,
+        key: "test_npc",
+        components: nil
+      }
+
+      assert Runner.get_config(entity, Loka.Behaviors.Guard) == %{}
     end
   end
 
-  # Test behavior that emits events
-  defmodule EmitBehavior do
-    use Loka.Behaviors.Base
+  describe "get_config/4" do
+    test "returns specific key with default" do
+      entity = %Entity{
+        id: "test",
+        type: :npc,
+        key: "test_npc",
+        components: %{
+          "behavior_config" => %{
+            "guard" => %{"wimpy_threshold" => 20}
+          }
+        }
+      }
 
-    @impl true
-    def supported_types, do: [:npc]
-
-    @impl true
-    def handle_event(_entity, _event, state) do
-      new_event = Event.new_unchecked(:emitted_event, %{payload: %{from: "emit_behavior"}})
-      {:ok, state, [new_event]}
+      assert Runner.get_config(entity, Loka.Behaviors.Guard, :wimpy_threshold) == 20
+      assert Runner.get_config(entity, Loka.Behaviors.Guard, :missing, 42) == 42
     end
   end
 
-  # Test behavior that halts
-  defmodule HaltBehavior do
-    use Loka.Behaviors.Base
+  describe "has_any_tag?/2" do
+    test "returns true when entity has any of the tags" do
+      entity = %Entity{id: "test", type: :npc, key: "test", tags: ["criminal"]}
 
-    @impl true
-    def supported_types, do: [:npc]
-
-    @impl true
-    def handle_event(_entity, %Event{type: :blocked}, _state) do
-      {:halt, "Action blocked by behavior"}
+      assert Runner.has_any_tag?(entity, ["criminal", "murderer"])
     end
 
-    def handle_event(_entity, _event, state) do
-      {:ok, state}
-    end
-  end
+    test "returns false when entity has none of the tags" do
+      entity = %Entity{id: "test", type: :npc, key: "test", tags: ["friendly"]}
 
-  describe "process_event/2" do
-    test "returns {:ok, []} for entity with no behaviors" do
-      entity = %Entity{id: "test", type: :npc, key: "test", behaviors: nil}
-      event = Event.new(:tick, %{})
-
-      assert {:ok, []} = Runner.process_event(entity, event)
+      refute Runner.has_any_tag?(entity, ["criminal", "murderer"])
     end
 
-    test "returns {:ok, []} for entity with empty behaviors list" do
-      entity = %Entity{id: "test", type: :npc, key: "test", behaviors: []}
-      event = Event.new(:tick, %{})
+    test "returns false for nil tags" do
+      entity = %Entity{id: "test", type: :npc, key: "test", tags: nil}
 
-      assert {:ok, []} = Runner.process_event(entity, event)
-    end
-
-    test "processes event through single behavior" do
-      entity = %Entity{
-        id: "test",
-        type: :npc,
-        key: "test",
-        behaviors: [PassBehavior]
-      }
-
-      event = Event.new(:tick, %{})
-
-      assert {:ok, []} = Runner.process_event(entity, event)
-    end
-
-    test "stops processing when behavior returns :handled" do
-      entity = %Entity{
-        id: "test",
-        type: :npc,
-        key: "test",
-        behaviors: [HandleBehavior, PassBehavior]
-      }
-
-      event = Event.new_unchecked(:special, %{})
-
-      assert {:handled, []} = Runner.process_event(entity, event)
-    end
-
-    test "collects events from behaviors" do
-      entity = %Entity{
-        id: "test",
-        type: :npc,
-        key: "test",
-        behaviors: [EmitBehavior]
-      }
-
-      event = Event.new(:tick, %{})
-
-      assert {:ok, events} = Runner.process_event(entity, event)
-      assert length(events) == 1
-      assert hd(events).type == :emitted_event
-    end
-
-    test "returns :halt when behavior blocks action" do
-      entity = %Entity{
-        id: "test",
-        type: :npc,
-        key: "test",
-        behaviors: [HaltBehavior]
-      }
-
-      event = Event.new_unchecked(:blocked, %{})
-
-      assert {:halt, "Action blocked by behavior"} = Runner.process_event(entity, event)
-    end
-
-    test "processes multiple behaviors in order" do
-      entity = %Entity{
-        id: "test",
-        type: :npc,
-        key: "test",
-        behaviors: [EmitBehavior, EmitBehavior]
-      }
-
-      event = Event.new(:tick, %{})
-
-      assert {:ok, events} = Runner.process_event(entity, event)
-      # Each EmitBehavior adds one event
-      assert length(events) == 2
+      refute Runner.has_any_tag?(entity, ["anything"])
     end
   end
 
-  describe "init_behaviors/1" do
-    test "initializes behaviors with init callback" do
+  describe "health_percent/1" do
+    test "calculates health percentage" do
       entity = %Entity{
         id: "test",
         type: :npc,
         key: "test",
-        behaviors: [PassBehavior],
-        attributes: %{}
+        components: %{
+          "combatant" => %{
+            "health" => %{"current" => 50, "max" => 100}
+          }
+        }
       }
 
-      updated = Runner.init_behaviors(entity)
-
-      # Should have behavior state saved
-      state = Runner.get_behavior_state(updated, PassBehavior)
-      assert is_map(state)
+      assert Runner.health_percent(entity) == 50.0
     end
 
-    test "handles entity with no behaviors" do
-      entity = %Entity{id: "test", type: :npc, key: "test", behaviors: nil}
+    test "returns 0 for entity without health" do
+      entity = %Entity{id: "test", type: :npc, key: "test", components: %{}}
 
-      # Should not crash
-      assert %Entity{} = Runner.init_behaviors(entity)
+      assert Runner.health_percent(entity) == 0
+    end
+
+    test "handles zero max health" do
+      entity = %Entity{
+        id: "test",
+        type: :npc,
+        key: "test",
+        components: %{
+          "combatant" => %{"health" => %{"current" => 0, "max" => 0}}
+        }
+      }
+
+      assert Runner.health_percent(entity) == 0
     end
   end
 
   describe "get_behavior_state/2" do
     test "returns empty map for missing state" do
-      entity = %Entity{id: "test", type: :npc, key: "test", attributes: %{}}
+      entity = %Entity{id: "test", type: :npc, key: "test", components: %{}}
 
-      assert Runner.get_behavior_state(entity, PassBehavior) == %{}
+      assert Runner.get_behavior_state(entity, Loka.Behaviors.Guard) == %{}
     end
 
-    test "returns stored state" do
+    test "returns stored state from components" do
       entity = %Entity{
         id: "test",
         type: :npc,
         key: "test",
-        attributes: %{
-          "behavior_state:pass_behavior" => %{counter: 5}
+        components: %{
+          "behavior_state:guard" => %{"counter" => 5}
         }
       }
 
-      state = Runner.get_behavior_state(entity, PassBehavior)
-      assert state[:counter] == 5
+      state = Runner.get_behavior_state(entity, Loka.Behaviors.Guard)
+      assert state["counter"] == 5
     end
   end
 
   describe "save_behavior_state/3" do
-    test "saves state to entity attributes" do
-      entity = %Entity{id: "test", type: :npc, key: "test", attributes: %{}}
+    test "saves state to entity components" do
+      entity = %Entity{id: "test", type: :npc, key: "test", components: %{}}
 
-      updated = Runner.save_behavior_state(entity, PassBehavior, %{counter: 10})
+      updated = Runner.save_behavior_state(entity, Loka.Behaviors.Guard, %{counter: 10})
 
-      assert updated.attributes["behavior_state:pass_behavior"] == %{counter: 10}
+      assert updated.components["behavior_state:guard"] == %{counter: 10}
+    end
+
+    test "preserves other components" do
+      entity = %Entity{
+        id: "test",
+        type: :npc,
+        key: "test",
+        components: %{"other" => "data"}
+      }
+
+      updated = Runner.save_behavior_state(entity, Loka.Behaviors.Guard, %{x: 1})
+
+      assert updated.components["other"] == "data"
+      assert updated.components["behavior_state:guard"] == %{x: 1}
     end
   end
 end

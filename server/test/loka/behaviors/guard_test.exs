@@ -2,188 +2,87 @@ defmodule Loka.Behaviors.GuardTest do
   use ExUnit.Case, async: true
 
   alias Loka.Behaviors.Guard
-  alias Loka.Engine.{Entity, Event}
+  alias Loka.Engine.Entity
 
-  describe "supported_types/0" do
-    test "supports npc type" do
-      assert :npc in Guard.supported_types()
-    end
+  defp make_guard(config_overrides \\ %{}) do
+    config = Map.merge(%{"attack_tags" => ["criminal"]}, config_overrides)
+
+    %Entity{
+      id: "guard1",
+      type: :npc,
+      key: "town_guard",
+      short_desc: "a town guard",
+      location_id: "room1",
+      components: %{
+        "behavior_config" => %{"guard" => config}
+      }
+    }
   end
 
-  describe "handle_event/3 with :entity_entered" do
+  describe "on_event/3 with :entity_entered" do
     test "attacks entity with matching tags" do
-      guard = %Entity{
-        id: "guard1",
-        type: :npc,
-        key: "town_guard",
-        short_desc: "a town guard",
-        location_id: "room1",
-        attributes: %{
-          "behavior_config" => %{
-            "guard" => %{
-              "attack_tags" => ["criminal", "hostile"]
-            }
-          }
-        }
-      }
+      guard = make_guard()
+      criminal = %Entity{id: "p1", type: :character, key: "player", tags: ["criminal"]}
 
-      criminal = %Entity{
-        id: "player1",
-        type: :player,
-        key: "player",
-        tags: ["criminal"]
-      }
-
-      event = Event.new(:entity_entered, %{payload: %{entity: criminal}})
-
-      assert {:handled, _state, events} = Guard.handle_event(guard, event, %{})
-
-      # Should emit initiate_combat event
-      combat_event = Enum.find(events, &(&1.type == :initiate_combat))
-      assert combat_event
-      assert combat_event.payload[:attacker_id] == "guard1"
-      assert combat_event.payload[:target_id] == "player1"
-    end
-
-    test "shouts before attacking when configured" do
-      guard = %Entity{
-        id: "guard1",
-        type: :npc,
-        key: "town_guard",
-        short_desc: "a town guard",
-        location_id: "room1",
-        attributes: %{
-          "behavior_config" => %{
-            "guard" => %{
-              "attack_tags" => ["criminal"],
-              "shout_on_attack" => "Stop criminal!"
-            }
-          }
-        }
-      }
-
-      criminal = %Entity{id: "player1", type: :player, key: "player", tags: ["criminal"]}
-      event = Event.new(:entity_entered, %{payload: %{entity: criminal}})
-
-      assert {:handled, _state, events} = Guard.handle_event(guard, event, %{})
-
-      say_event = Enum.find(events, &(&1.type == :say))
-      assert say_event
-      assert say_event.payload[:text] == "Stop criminal!"
+      assert {:halt, returned} = Guard.on_event(guard, :entity_entered, %{entity: criminal})
+      assert returned.id == "guard1"
     end
 
     test "ignores entity without matching tags" do
-      guard = %Entity{
-        id: "guard1",
-        type: :npc,
-        key: "town_guard",
-        attributes: %{
-          "behavior_config" => %{
-            "guard" => %{"attack_tags" => ["criminal"]}
-          }
-        }
-      }
+      guard = make_guard()
+      friendly = %Entity{id: "p1", type: :character, key: "player", tags: ["friendly"]}
 
-      friendly = %Entity{id: "player1", type: :player, key: "player", tags: ["friendly"]}
-      event = Event.new(:entity_entered, %{payload: %{entity: friendly}})
-
-      assert {:ok, _state} = Guard.handle_event(guard, event, %{})
+      assert {:ok, _} = Guard.on_event(guard, :entity_entered, %{entity: friendly})
     end
 
     test "ignores when no attack_tags configured" do
-      guard = %Entity{
-        id: "guard1",
-        type: :npc,
-        key: "town_guard",
-        attributes: %{"behavior_config" => %{"guard" => %{}}}
-      }
+      guard = make_guard(%{"attack_tags" => []})
+      criminal = %Entity{id: "p1", type: :character, key: "player", tags: ["criminal"]}
 
-      criminal = %Entity{id: "player1", type: :player, key: "player", tags: ["criminal"]}
-      event = Event.new(:entity_entered, %{payload: %{entity: criminal}})
+      assert {:ok, _} = Guard.on_event(guard, :entity_entered, %{entity: criminal})
+    end
 
-      assert {:ok, _state} = Guard.handle_event(guard, event, %{})
+    test "ignores nil entered entity" do
+      guard = make_guard()
+
+      assert {:ok, _} = Guard.on_event(guard, :entity_entered, %{entity: nil})
     end
   end
 
-  describe "handle_event/3 with :before_move" do
+  describe "on_event/3 with :before_move" do
     test "blocks movement in restricted direction" do
-      guard = %Entity{
-        id: "guard1",
-        type: :npc,
-        key: "town_guard",
-        attributes: %{
-          "behavior_config" => %{
-            "guard" => %{
-              "block_directions" => ["north", "east"],
-              "block_message" => "The guard bars your path."
-            }
-          }
-        }
-      }
+      guard = make_guard(%{"block_directions" => ["north"], "block_message" => "No passage."})
 
-      event = Event.new(:before_move, %{payload: %{direction: "north"}})
-
-      assert {:halt, "The guard bars your path."} = Guard.handle_event(guard, event, %{})
+      assert {:halt, _, %{blocked: true, message: "No passage."}} =
+               Guard.on_event(guard, :before_move, %{direction: "north"})
     end
 
     test "allows movement in non-restricted direction" do
-      guard = %Entity{
-        id: "guard1",
-        type: :npc,
-        key: "town_guard",
-        attributes: %{
-          "behavior_config" => %{
-            "guard" => %{"block_directions" => ["north"]}
-          }
-        }
-      }
+      guard = make_guard(%{"block_directions" => ["north"]})
 
-      event = Event.new(:before_move, %{payload: %{direction: "south"}})
-
-      assert {:ok, _state} = Guard.handle_event(guard, event, %{})
+      assert {:ok, _} = Guard.on_event(guard, :before_move, %{direction: "south"})
     end
 
     test "uses default block message" do
-      guard = %Entity{
-        id: "guard1",
-        type: :npc,
-        key: "town_guard",
-        attributes: %{
-          "behavior_config" => %{
-            "guard" => %{"block_directions" => ["north"]}
-          }
-        }
-      }
+      guard = make_guard(%{"block_directions" => ["north"]})
 
-      event = Event.new(:before_move, %{payload: %{direction: "north"}})
-
-      assert {:halt, "The guard blocks your way."} = Guard.handle_event(guard, event, %{})
+      assert {:halt, _, %{message: "The guard blocks your way."}} =
+               Guard.on_event(guard, :before_move, %{direction: "north"})
     end
   end
 
-  describe "handle_event/3 with :damage_taken" do
+  describe "on_event/3 with :damage_taken" do
     test "flees when health below wimpy threshold" do
-      guard = %Entity{
-        id: "guard1",
-        type: :npc,
-        key: "town_guard",
-        components: %{
-          "combatant" => %{"health" => %{"current" => 10, "max" => 100}}
-        },
-        attributes: %{
-          "behavior_config" => %{
-            "guard" => %{"wimpy_threshold" => 20}
-          }
-        }
-      }
+      guard =
+        make_guard(%{"wimpy_threshold" => 20})
+        |> Map.put(
+          :components,
+          Map.merge(make_guard(%{"wimpy_threshold" => 20}).components, %{
+            "combatant" => %{"health" => %{"current" => 10, "max" => 100}}
+          })
+        )
 
-      event = Event.new(:damage_taken, %{payload: %{damage: 5}})
-
-      assert {:handled, _state, events} = Guard.handle_event(guard, event, %{})
-
-      flee_event = Enum.find(events, &(&1.type == :flee))
-      assert flee_event
-      assert flee_event.payload[:entity_id] == "guard1"
+      assert {:halt, _} = Guard.on_event(guard, :damage_taken, %{})
     end
 
     test "does not flee when health above wimpy threshold" do
@@ -192,18 +91,12 @@ defmodule Loka.Behaviors.GuardTest do
         type: :npc,
         key: "town_guard",
         components: %{
-          "combatant" => %{"health" => %{"current" => 80, "max" => 100}}
-        },
-        attributes: %{
-          "behavior_config" => %{
-            "guard" => %{"wimpy_threshold" => 20}
-          }
+          "combatant" => %{"health" => %{"current" => 80, "max" => 100}},
+          "behavior_config" => %{"guard" => %{"wimpy_threshold" => 20}}
         }
       }
 
-      event = Event.new(:damage_taken, %{payload: %{damage: 5}})
-
-      assert {:ok, _state} = Guard.handle_event(guard, event, %{})
+      assert {:ok, _} = Guard.on_event(guard, :damage_taken, %{})
     end
 
     test "does not flee when wimpy_threshold is 0" do
@@ -212,25 +105,20 @@ defmodule Loka.Behaviors.GuardTest do
         type: :npc,
         key: "town_guard",
         components: %{
-          "combatant" => %{"health" => %{"current" => 5, "max" => 100}}
-        },
-        attributes: %{
+          "combatant" => %{"health" => %{"current" => 5, "max" => 100}},
           "behavior_config" => %{"guard" => %{}}
         }
       }
 
-      event = Event.new(:damage_taken, %{payload: %{damage: 5}})
-
-      assert {:ok, _state} = Guard.handle_event(guard, event, %{})
+      assert {:ok, _} = Guard.on_event(guard, :damage_taken, %{})
     end
   end
 
-  describe "handle_event/3 with other events" do
+  describe "on_event/3 with other events" do
     test "passes through unhandled events" do
-      guard = %Entity{id: "guard1", type: :npc, key: "guard", attributes: %{}}
-      event = Event.new_unchecked(:unknown_event, %{})
+      guard = make_guard()
 
-      assert {:ok, _state} = Guard.handle_event(guard, event, %{})
+      assert {:ok, _} = Guard.on_event(guard, :unknown_event, %{})
     end
   end
 end
