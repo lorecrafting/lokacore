@@ -101,6 +101,9 @@ defmodule Loka.Engine.Schema.EntitySchema do
     |> validate_length(:long_desc, max: @max_long_desc_length)
     |> validate_length(:extra_desc, max: @max_extra_desc_length)
     |> foreign_key_constraint(:location_id)
+    |> foreign_key_constraint(:account_id)
+    |> unique_constraint([:key, :type], name: :entities_prototype_unique)
+    |> unique_constraint([:key, :type], name: :entities_key_type_index)
   end
 
   @doc """

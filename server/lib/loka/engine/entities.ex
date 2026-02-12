@@ -178,10 +178,10 @@ defmodule Loka.Engine.Entities do
   def save(%Entity{} = entity) do
     case Repo.get(EntitySchema, entity.id) do
       nil ->
-        # Insert
-        attrs = EntitySchema.from_entity(entity) |> Map.put(:id, entity.id)
+        # Insert — set id on struct directly (not through changeset)
+        attrs = EntitySchema.from_entity(entity)
 
-        case %EntitySchema{} |> EntitySchema.changeset(attrs) |> Repo.insert() do
+        case %EntitySchema{id: entity.id} |> EntitySchema.changeset(attrs) |> Repo.insert() do
           {:ok, schema} ->
             schema = Repo.preload(schema, :tags)
             {:ok, EntitySchema.to_entity(schema)}
