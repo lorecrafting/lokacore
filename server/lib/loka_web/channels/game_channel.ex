@@ -108,6 +108,7 @@ defmodule LokaWeb.GameChannel do
   alias Loka.Framework.{Inventory, Equipment, Quest, Spark}
   alias Loka.Framework.World.{Atmosphere, Calendar}
   alias Loka.Framework.Resources.ResourcePool
+  alias Loka.Engine.{Entities, Entity, EntityRegistry}
   alias Loka.Session
   alias LokaWeb.Channels.RoomHelpers
   alias LokaWeb.Channels.GameChannel.Serializers
@@ -150,59 +151,42 @@ defmodule LokaWeb.GameChannel do
           assign(socket, :client_version, nil)
       end
 
-    # Get or create player game state
-    case PlayerGameState.get_or_create_state(player.id) do
-      {:ok, game_state} ->
-        if PlayerGameState.character_created?(game_state) do
-          send(self(), :after_join)
-          {:ok, assign(socket, :game_state, game_state)}
-        else
-          # Auto-create character for mobile guests who have a name
-          case auto_create_character_if_guest(player, game_state) do
-            {:ok, updated_state} ->
-              send(self(), :after_join)
-              {:ok, assign(socket, :game_state, updated_state)}
+    # V2: Look up character entity by account_id
+    case find_or_create_character(player) do
+      {:ok, character} ->
+        # Start character's EntityServer
+        EntityRegistry.get_or_start(character.id)
+        Entities.add_tag(character.id, "online")
 
-            {:error, :no_name} ->
-              Logger.warning(
-                "Character creation failed: player has no name (player_id=#{player.id})"
-              )
+        # Keep game_state for backward compat (removed in Task 4.3)
+        game_state = get_or_create_game_state_compat(player.id)
 
-              {:error, %{reason: "character_not_created", detail: "no_name"}}
+        send(self(), :after_join)
 
-            {:error, :name_taken} ->
-              Logger.warning(
-                "Character creation failed: name already taken (player_id=#{player.id})"
-              )
+        {:ok,
+         socket
+         |> assign(:character, character)
+         |> assign(:game_state, game_state)}
 
-              {:error,
-               %{
-                 reason: "character_not_created",
-                 detail: "name_taken",
-                 message: "That character name is already taken. Please choose a different name."
-               }}
+      {:error, :no_name} ->
+        Logger.warning("Character creation failed: player has no name (player_id=#{player.id})")
 
-            {:error, %Ecto.Changeset{} = changeset} ->
-              errors = Ecto.Changeset.traverse_errors(changeset, fn {msg, _} -> msg end)
+        {:error, %{reason: "character_not_created", detail: "no_name"}}
 
-              Logger.warning(
-                "Character creation failed: #{inspect(errors)} (player_id=#{player.id})"
-              )
+      {:error, :name_taken} ->
+        Logger.warning("Character creation failed: name already taken (player_id=#{player.id})")
 
-              {:error,
-               %{reason: "character_not_created", detail: "validation_failed", errors: errors}}
-
-            {:error, reason} ->
-              Logger.warning(
-                "Character creation failed: #{inspect(reason)} (player_id=#{player.id})"
-              )
-
-              {:error, %{reason: "character_not_created", detail: inspect(reason)}}
-          end
-        end
+        {:error,
+         %{
+           reason: "character_not_created",
+           detail: "name_taken",
+           message: "That character name is already taken. Please choose a different name."
+         }}
 
       {:error, reason} ->
-        {:error, %{reason: inspect(reason)}}
+        Logger.warning("Character creation failed: #{inspect(reason)} (player_id=#{player.id})")
+
+        {:error, %{reason: "character_not_created", detail: inspect(reason)}}
     end
   catch
     {:error, error_map} -> {:error, error_map}
@@ -315,6 +299,89 @@ defmodule LokaWeb.GameChannel do
     |> case do
       "" -> "Traveler"
       sanitized -> sanitized
+    end
+  end
+
+  # =============================================================================
+  # V2 Character Entity Helpers
+  # =============================================================================
+
+  # Find existing character entity or create one from GameState/auto-create
+  defp find_or_create_character(player) do
+    case Entities.find_one(account_id: player.id) do
+      {:ok, character} ->
+        {:ok, character}
+
+      {:error, :not_found} ->
+        # No character entity yet — try to create from GameState or auto-create
+        case PlayerGameState.get_or_create_state(player.id) do
+          {:ok, game_state} ->
+            if PlayerGameState.character_created?(game_state) do
+              # Has GameState with character — create entity from it
+              create_character_entity_from_game_state(player, game_state)
+            else
+              # No character yet — auto-create
+              case auto_create_character_if_guest(player, game_state) do
+                {:ok, updated_state} ->
+                  create_character_entity_from_game_state(player, updated_state)
+
+                error ->
+                  error
+              end
+            end
+
+          {:error, reason} ->
+            {:error, reason}
+        end
+    end
+  end
+
+  # Create a character entity from a GameState record
+  defp create_character_entity_from_game_state(player, game_state) do
+    entity =
+      Entity.new(
+        type: :character,
+        key: "player_#{String.downcase(game_state.character_name)}",
+        short_desc: game_state.character_name,
+        account_id: player.id,
+        location_id: game_state.current_room_id,
+        components: %{
+          "player" => %{
+            "settings" => game_state.settings || %{},
+            "gender" => game_state.gender,
+            "background" => game_state.background
+          },
+          "combatant" => %{
+            "health" => get_in(game_state.resources || %{}, [:health, :current]) || 100,
+            "max_health" => get_in(game_state.resources || %{}, [:health, :max]) || 100
+          },
+          "stats" => game_state.stats || %{},
+          "quest_progress" => game_state.quests || %{},
+          "resources" => game_state.resources || %{},
+          "skills" => game_state.skills || %{},
+          "equipment" => game_state.equipment || %{},
+          "inventory" => game_state.inventory || [],
+          "flags" => game_state.flags || %{}
+        },
+        tags: ["playable"],
+        keywords: [String.downcase(game_state.character_name)]
+      )
+
+    case Entities.save(entity) do
+      {:ok, saved} ->
+        Entities.add_tag(saved.id, "playable")
+        {:ok, %{saved | tags: ["playable"]}}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  # Backward compat: get GameState for socket.assigns.game_state (removed in Task 4.3)
+  defp get_or_create_game_state_compat(player_id) do
+    case PlayerGameState.get_or_create_state(player_id) do
+      {:ok, gs} -> gs
+      _ -> nil
     end
   end
 
@@ -854,8 +921,9 @@ defmodule LokaWeb.GameChannel do
       {:attack, %{target: target}} ->
         case find_entity_by_keyword(socket, target) do
           {:ok, entity_id} ->
+            character = socket.assigns.character
             game_state = socket.assigns.game_state
-            {room, _} = RoomHelpers.load_player_room(game_state)
+            {room, _, _} = RoomHelpers.load_player_room(character, game_state)
 
             entity =
               Enum.find(room.entities || [], fn e ->
@@ -1001,8 +1069,9 @@ defmodule LokaWeb.GameChannel do
   end
 
   defp push_current_room(socket) do
+    character = socket.assigns.character
     game_state = socket.assigns.game_state
-    {room, _state} = RoomHelpers.load_player_room(game_state)
+    {room, _, _} = RoomHelpers.load_player_room(character, game_state)
     atmosphere = Atmosphere.describe_for_room(room)
 
     push(socket, "room_update", %{
@@ -1067,8 +1136,9 @@ defmodule LokaWeb.GameChannel do
   end
 
   defp find_entity_by_keyword(socket, keyword) do
+    character = socket.assigns.character
     game_state = socket.assigns.game_state
-    {room, _state} = RoomHelpers.load_player_room(game_state)
+    {room, _, _} = RoomHelpers.load_player_room(character, game_state)
 
     keyword_lower = String.downcase(keyword)
 
@@ -1114,10 +1184,11 @@ defmodule LokaWeb.GameChannel do
   @impl true
   def handle_info(:after_join, socket) do
     player = socket.assigns.player
+    character = socket.assigns.character
     game_state = socket.assigns.game_state
 
-    # Load room
-    {room, game_state} = RoomHelpers.load_player_room(game_state)
+    # V2: Load room using character entity's location_id
+    {room, game_state, character} = RoomHelpers.load_player_room(character, game_state)
 
     # Subscribe to PubSub topics
     Phoenix.PubSub.subscribe(Loka.PubSub, "location:#{room.id}")
@@ -1193,6 +1264,7 @@ defmodule LokaWeb.GameChannel do
 
     socket =
       socket
+      |> assign(:character, character)
       |> assign(:game_state, game_state)
       |> assign(:room, room)
       |> assign(:seen_ambient, MapSet.new())
@@ -1423,7 +1495,13 @@ defmodule LokaWeb.GameChannel do
   @impl true
   def terminate(_reason, socket) do
     player = socket.assigns[:player]
+    character = socket.assigns[:character]
     room = socket.assigns[:room]
+
+    # V2: Remove "online" tag from character entity
+    if character do
+      Entities.remove_tag(character.id, "online")
+    end
 
     if player && room && room.id do
       Phoenix.PubSub.broadcast(
@@ -1469,9 +1547,16 @@ defmodule LokaWeb.GameChannel do
   defp find_entity(_room, _id, _type), do: nil
 
   defp player_display_name(player) do
-    case PlayerGameState.get_state(player.id) do
-      %PlayerGameState{character_name: name} when not is_nil(name) -> name
-      _ -> player.name || player.email || "Unknown"
+    # V2: Try character entity first, fall back to GameState then player fields
+    case Entities.find_one(account_id: player.id) do
+      {:ok, character} when character.short_desc != nil ->
+        character.short_desc
+
+      _ ->
+        case PlayerGameState.get_state(player.id) do
+          %PlayerGameState{character_name: name} when not is_nil(name) -> name
+          _ -> player.name || player.email || "Unknown"
+        end
     end
   end
 
