@@ -37,6 +37,6 @@ data:
 
     # Schedule next emission attempt
     interval = config.interval || 300
-    after(interval, "ambient_emitter")
+    set_timer("ambient_emitter", interval, "ambient_emitter")
 
     continue()

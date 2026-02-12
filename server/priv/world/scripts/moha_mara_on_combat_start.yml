@@ -11,10 +11,10 @@ data:
     if enemy.key == "moha_mara" do
       # Create 4 illusion copies
       # Note: create_illusion would need framework support
-      # spawn_npc("moha_illusion", context.room, %{is_real: false})
-      # spawn_npc("moha_illusion", context.room, %{is_real: false})
-      # spawn_npc("moha_illusion", context.room, %{is_real: false})
-      # spawn_npc("moha_illusion", context.room, %{is_real: false})
+      # spawn_entity("moha_illusion", context.room, %{is_real: false}, location: self().location_id)
+      # spawn_entity("moha_illusion", context.room, %{is_real: false}, location: self().location_id)
+      # spawn_entity("moha_illusion", context.room, %{is_real: false}, location: self().location_id)
+      # spawn_entity("moha_illusion", context.room, %{is_real: false}, location: self().location_id)
 
       message("Moha Mara splits into multiple forms!")
     end

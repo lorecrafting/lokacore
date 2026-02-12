@@ -39,12 +39,12 @@ data:
         # Move to active room if configured
         active_room = config.active_room
         if active_room do
-          teleport(entity.id, active_room)
+          teleport(self().id, active_room)
           emit(:emerged)
         end
 
         set_flag("active", true)
-        set_behavior_state(:active, true)
+        set_state(:active, true)
         handled()
 
       # Go dormant during day
@@ -54,12 +54,12 @@ data:
         # Move to hide room if configured
         hide_room = config.hide_room
         if hide_room do
-          teleport(entity.id, hide_room)
+          teleport(self().id, hide_room)
           emit(:hidden)
         end
 
         set_flag("active", false)
-        set_behavior_state(:active, false)
+        set_state(:active, false)
         handled()
 
       true ->

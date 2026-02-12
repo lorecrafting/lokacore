@@ -13,7 +13,7 @@ data:
       damage = context.damage
 
       # Get player's insight level (would need framework support)
-      insight = get_stat("insight") || 0
+      insight = get_component(self(), "stats", "insight") || 0
       weakness = insight * 10  # 10% per insight point
 
       # Apply insight bonus

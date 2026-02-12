@@ -9,8 +9,8 @@ data:
     # This script is called after a stagger delay to emit the pending emote
     # The emote event name is stored in behavior state by day_night_schedule
 
-    emote_event = get_behavior_state(:pending_emote)
-    emote_chance = get_behavior_state(:pending_emote_chance) || 0.85
+    emote_event = get_state(:pending_emote)
+    emote_chance = get_state(:pending_emote_chance) || 0.85
 
     if emote_event do
       # Roll for emote probability
@@ -19,8 +19,8 @@ data:
       end
 
       # Clear the pending emote
-      set_behavior_state(:pending_emote, nil)
-      set_behavior_state(:pending_emote_chance, nil)
+      set_state(:pending_emote, nil)
+      set_state(:pending_emote_chance, nil)
     end
 
     continue()

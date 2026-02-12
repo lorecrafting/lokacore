@@ -25,12 +25,12 @@ data:
     route = config.route || []
 
     if route == [] do
-      log("Patrol: No route defined for #{entity.key}")
+      log("Patrol: No route defined for #{self().key}")
       continue()
     else
       # Get current state
-      index = get_behavior_state(:patrol_index) || 0
-      direction = get_behavior_state(:patrol_direction) || 1
+      index = get_state(:patrol_index) || 0
+      direction = get_state(:patrol_direction) || 1
       loop_mode = config.loop != false
 
       # Get target room
@@ -38,12 +38,12 @@ data:
 
       if target_room do
         # Move to target room
-        current_room = room()
+        current_room = get_location(self())
         current_room_key = if current_room, do: current_room.key, else: nil
 
         if current_room_key != target_room do
           # Find and teleport to the target room
-          teleport(entity.id, target_room)
+          teleport(self().id, target_room)
         end
 
         # Emit patrol_arrive event for emotes
@@ -74,13 +74,13 @@ data:
           end
 
         # Save state for next iteration
-        set_behavior_state(:patrol_index, new_index)
-        set_behavior_state(:patrol_direction, new_direction)
+        set_state(:patrol_index, new_index)
+        set_state(:patrol_direction, new_direction)
       end
 
       # Schedule next patrol move
       interval = config.interval || 300
-      after(interval, "patrol")
+      set_timer("patrol", interval, "patrol")
 
       continue()
     end

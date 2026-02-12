@@ -16,7 +16,7 @@ data:
     teleport(respawn_room)
 
     # Restore 50% health
-    # heal(player, div(get_stat("max_health"), 2))
+    # heal(player, div(get_component(self(), "stats", "max_health"), 2))
 
     message("You awaken, as if from a dream within a dream...")
 
