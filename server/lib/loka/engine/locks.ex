@@ -28,12 +28,14 @@ defmodule Loka.Engine.Locks do
         {:denied, reason} -> deny_with_message(reason)
       end
 
-      # Entity locks are stored in the locks field
+      # Entity locks are stored in components["locks"]
       entity = %Entity{
-        locks: %{
-          "get" => "perm(builder) OR attr_gt(strength, 50)",
-          "edit" => "perm(admin)",
-          "delete" => "id(owner123)"
+        components: %{
+          "locks" => %{
+            "get" => "perm(builder) OR attr_gt(strength, 50)",
+            "edit" => "perm(admin)",
+            "delete" => "id(owner123)"
+          }
         }
       }
 
@@ -166,6 +168,16 @@ defmodule Loka.Engine.Locks do
   Gets the lock string for an access type from an entity.
   """
   @spec get_lock(Entity.t() | map(), String.t()) :: String.t() | nil
+  def get_lock(%{components: components}, access_type) when is_map(components) do
+    locks = Map.get(components, "locks", %{})
+
+    if is_map(locks) do
+      Map.get(locks, access_type) || Map.get(locks, to_string(access_type))
+    else
+      nil
+    end
+  end
+
   def get_lock(%{locks: locks}, access_type) when is_map(locks) do
     Map.get(locks, access_type) || Map.get(locks, to_string(access_type))
   end
@@ -176,8 +188,10 @@ defmodule Loka.Engine.Locks do
   Sets a lock on an entity. Returns the updated entity.
   """
   @spec set_lock(Entity.t(), String.t(), String.t()) :: Entity.t()
-  def set_lock(%Entity{locks: locks} = entity, access_type, lock_string) do
-    %{entity | locks: Map.put(locks || %{}, access_type, lock_string)}
+  def set_lock(%Entity{components: components} = entity, access_type, lock_string) do
+    locks = Map.get(components, "locks", %{})
+    updated_locks = Map.put(locks, access_type, lock_string)
+    %{entity | components: Map.put(components, "locks", updated_locks)}
   end
 
   @doc """

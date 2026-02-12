@@ -232,7 +232,8 @@ defmodule Loka.Framework.Inventory.ContainerRespawn do
 
   defp broadcast_respawn(entity, new_contents) when length(new_contents) > 0 do
     # If the entity has a room_id, broadcast that the container has respawned
-    room_id = Map.get(entity, :location_id) || Map.get(entity.attributes, :room_id)
+    room_id =
+      Map.get(entity, :location_id) || get_in(entity, [Access.key(:components, %{}), "room_id"])
 
     if room_id do
       message = "Fresh growth appears in the #{entity.short_desc || "container"}."

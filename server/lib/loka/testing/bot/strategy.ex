@@ -215,7 +215,7 @@ defmodule Loka.Testing.Bot.Strategy do
 
   def get_available_exits(%Entity{} = room) do
     # Get exit entities in the room's contents or from room attributes
-    exits = Map.get(room.attributes || %{}, "exits", %{})
+    exits = Map.get(room.components || %{}, "exits", %{})
 
     exits
     |> Map.keys()

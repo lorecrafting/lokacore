@@ -71,13 +71,10 @@ defmodule Loka.Engine.Spawner.Editor do
         long_desc: long_desc,
         extra_desc: extra_desc,
         location_id: nil,
-        contents: [],
         components: components,
         behaviors: [],
-        attributes: %{},
         tags: tags,
         scripts: %{},
-        locks: %{},
         metadata: %{
           created_at: DateTime.utc_now(),
           updated_at: DateTime.utc_now(),
@@ -176,7 +173,6 @@ defmodule Loka.Engine.Spawner.Editor do
       extra_desc: Keyword.get(attrs, :extra_desc, "An exit leading #{direction}."),
       keywords: [direction],
       location_id: source_id,
-      contents: [],
       components: %{
         "exit" => %{
           "direction" => direction,
@@ -185,10 +181,8 @@ defmodule Loka.Engine.Spawner.Editor do
         }
       },
       behaviors: [],
-      attributes: %{},
       tags: ["exit"],
       scripts: %{},
-      locks: Keyword.get(attrs, :locks, %{}),
       metadata: %{
         created_at: DateTime.utc_now(),
         updated_at: DateTime.utc_now(),

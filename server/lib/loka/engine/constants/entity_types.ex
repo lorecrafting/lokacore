@@ -7,11 +7,27 @@ defmodule Loka.Engine.Constants.EntityTypes do
 
   ## Entity Types
 
+  ### World entities (have location, exist in-game)
   - `:room` - Physical locations in the game world
   - `:character` - Player characters
   - `:npc` - Non-player characters (NPCs, mobs)
   - `:item` - Objects that can be picked up/used
   - `:exit` - Connections between rooms
+
+  ### Content entities (prototypes/definitions, no location)
+  - `:quest` - Quest definitions
+  - `:dialogue` - Dialogue trees
+  - `:zone` - Zone definitions
+  - `:storyline` - Storyline containers
+  - `:skill` - Skill definitions
+  - `:recipe` - Crafting recipes
+  - `:resource` - Gatherable resource definitions
+  - `:status` - Status effect definitions
+  - `:script` - Reusable script definitions
+  - `:social` - Social command definitions
+
+  ### System entities (no location, background processes)
+  - `:system` - System-level entities (weather, day/night, etc.)
 
   ## Usage
 
@@ -29,9 +45,45 @@ defmodule Loka.Engine.Constants.EntityTypes do
       field :type, Ecto.Enum, values: @entity_types
   """
 
-  @types [:room, :character, :npc, :item, :exit]
+  @types [
+    # World entities
+    :room,
+    :character,
+    :npc,
+    :item,
+    :exit,
+    # Content entities
+    :quest,
+    :dialogue,
+    :zone,
+    :storyline,
+    :skill,
+    :recipe,
+    :resource,
+    :status,
+    :script,
+    :social,
+    # System entities
+    :system
+  ]
 
-  @type entity_type :: :room | :character | :npc | :item | :exit
+  @type entity_type ::
+          :room
+          | :character
+          | :npc
+          | :item
+          | :exit
+          | :quest
+          | :dialogue
+          | :zone
+          | :storyline
+          | :skill
+          | :recipe
+          | :resource
+          | :status
+          | :system
+          | :script
+          | :social
 
   @doc "Returns all valid entity types."
   @spec all() :: [entity_type()]

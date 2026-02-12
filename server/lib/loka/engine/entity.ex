@@ -1,10 +1,10 @@
 defmodule Loka.Engine.Entity do
   @moduledoc """
-  Core entity structure for the Loka engine.
+  Core entity structure for the Loka engine (V2).
 
-  Entities are IC (In-Character) TypedObjects - they exist in the game world with
-  locations, contents, and runtime state. This follows a composition-based
-  Entity-Component-Behavior model that maps naturally to Elixir's functional paradigm.
+  In V2, everything is an entity — rooms, NPCs, items, quests, skills, etc.
+  All game data lives in `components` (a JSON map). The database is the single
+  source of truth; there is no separate ETS registry.
 
   ## Description Fields (LegendMUD Style)
 
@@ -16,20 +16,33 @@ defmodule Loka.Engine.Entity do
   - `keywords` - Words that can be used to target/reference the entity
     (e.g., ["monk", "young", "pema", "novice"])
   - `primary_keyword` - Single keyword for touch/click interfaces (e.g., "monk")
-    Falls back to first keyword if not set. Used to avoid redundant underlines.
+    Falls back to first keyword if not set. Used to avoid redundant underline.
   - `mood` - Current mood affecting display (e.g., "anxious", "cheerful")
+
+  ## V2 Changes (from V1)
+
+  Removed fields: `data`, `attributes`, `contents`, `locks`, `parent_key`.
+  - `data` → merged into `components`
+  - `attributes` → merged into `components`
+  - `contents` → derived from `Entities.find_all(location_id: id)`
+  - `locks` → `components["locks"]`
+  - `parent_key` → `metadata["parent_key"]`
+
+  Added fields: `version`, `account_id`.
   """
 
-  alias Loka.Engine.TypedObject
+  alias Loka.Engine.Constants.EntityTypes
+
+  @type entity_type :: EntityTypes.entity_type()
 
   @type t :: %__MODULE__{
           # Identity
           id: String.t(),
           type: entity_type(),
           key: String.t(),
-          parent_key: String.t() | nil,
-          is_prototype: boolean(),
           prototype_key: String.t() | nil,
+          is_prototype: boolean(),
+          version: integer(),
           # Display
           short_desc: String.t() | nil,
           long_desc: String.t() | nil,
@@ -37,27 +50,21 @@ defmodule Loka.Engine.Entity do
           keywords: [String.t()],
           primary_keyword: String.t() | nil,
           mood: String.t() | nil,
-          # Location and contents
+          # Relationships
           location_id: String.t() | nil,
-          contents: [String.t()],
-          # Flexible storage
+          account_id: integer() | nil,
+          # Game data
           components: map(),
           behaviors: [module()],
-          attributes: map(),
           tags: [String.t()],
           scripts: map(),
-          locks: map(),
-          data: map(),
           metadata: map()
         }
-
-  @type entity_type :: :character | :room | :item | :npc | :exit
 
   defstruct [
     :id,
     :type,
     :key,
-    :parent_key,
     :prototype_key,
     :short_desc,
     :long_desc,
@@ -65,64 +72,68 @@ defmodule Loka.Engine.Entity do
     :primary_keyword,
     :mood,
     :location_id,
+    :account_id,
     is_prototype: false,
+    version: 1,
     keywords: [],
-    contents: [],
     components: %{},
     behaviors: [],
-    attributes: %{},
     tags: [],
     scripts: %{},
-    locks: %{},
-    data: %{},
     metadata: %{}
   ]
 
   @doc """
-  Creates a new entity with a generated UUID.
+  Creates a new entity from a keyword list or map of attributes.
 
-  Accepts `short_desc`, `long_desc`, and `extra_desc` for display fields.
-  Also accepts `name`, `description`, `extra_description` as aliases.
+  Requires `:type`. Generates a UUID if `:id` is not provided.
+
+  ## Examples
+
+      Entity.new(type: :npc, key: "goblin", short_desc: "a goblin")
+      Entity.new(%{type: :room, key: "town_square"})
   """
-  def new(type, attrs \\ %{}) do
-    now = DateTime.utc_now()
-    attrs = normalize_attrs(attrs)
+  def new(attrs) when is_list(attrs), do: new(Map.new(attrs))
 
+  def new(attrs) when is_map(attrs) do
     %__MODULE__{
-      id: Map.get(attrs, :id) || UUID.uuid4(),
-      type: type,
-      key: Map.get(attrs, :key),
-      parent_key: Map.get(attrs, :parent_key),
-      prototype_key: Map.get(attrs, :prototype_key),
-      is_prototype: Map.get(attrs, :is_prototype, false),
-      short_desc: Map.get(attrs, :short_desc) || Map.get(attrs, :name),
-      long_desc: Map.get(attrs, :long_desc) || Map.get(attrs, :description),
-      extra_desc: Map.get(attrs, :extra_desc) || Map.get(attrs, :extra_description),
-      keywords: Map.get(attrs, :keywords, []),
-      primary_keyword: Map.get(attrs, :primary_keyword),
-      mood: Map.get(attrs, :mood),
-      location_id: Map.get(attrs, :location_id),
-      contents: Map.get(attrs, :contents, []),
-      components: Map.get(attrs, :components, %{}),
-      behaviors: Map.get(attrs, :behaviors, []),
-      attributes: Map.get(attrs, :attributes, %{}),
-      tags: Map.get(attrs, :tags, []),
-      scripts: Map.get(attrs, :scripts, %{}),
-      locks: Map.get(attrs, :locks, %{}),
-      data: Map.get(attrs, :data, %{}),
-      metadata:
-        Map.merge(
-          %{created_at: now, updated_at: now},
-          Map.get(attrs, :metadata, %{})
-        )
+      id: attrs[:id] || Ecto.UUID.generate(),
+      type: attrs[:type] || raise(ArgumentError, "type required"),
+      version: 1,
+      is_prototype: attrs[:is_prototype] || false,
+      components: attrs[:components] || %{},
+      tags: attrs[:tags] || [],
+      metadata: attrs[:metadata] || %{}
     }
+    |> struct!(
+      Map.drop(attrs, [:id, :type, :is_prototype, :components, :tags, :metadata, :version])
+    )
   end
+
+  @doc """
+  Creates a new entity of the given type.
+
+  Backward-compatible constructor — delegates to `new/1`.
+
+  ## Examples
+
+      Entity.new(:npc, %{key: "goblin", short_desc: "a goblin"})
+  """
+  def new(type, attrs) when is_atom(type) do
+    attrs = normalize_attrs(attrs)
+    new(Map.put(attrs, :type, type))
+  end
+
+  @doc """
+  Returns a snapshot of the entity for rollback purposes.
+
+  Currently returns the entity as-is. Will be extended to deep-copy
+  volatile state when EntityServer rollback is implemented.
+  """
+  def snapshot(%__MODULE__{} = entity), do: entity
 
   defp normalize_attrs(attrs) when is_map(attrs), do: attrs
-
-  defp normalize_attrs(attrs) when is_list(attrs) do
-    Map.new(attrs)
-  end
+  defp normalize_attrs(attrs) when is_list(attrs), do: Map.new(attrs)
 
   @doc """
   Adds a component to an entity.
@@ -150,20 +161,6 @@ defmodule Loka.Engine.Entity do
   """
   def add_behavior(%__MODULE__{} = entity, behavior_module) when is_atom(behavior_module) do
     %{entity | behaviors: [behavior_module | entity.behaviors] |> Enum.uniq()}
-  end
-
-  @doc """
-  Sets an attribute on an entity.
-  """
-  def set_attribute(%__MODULE__{} = entity, key, value) do
-    %{entity | attributes: Map.put(entity.attributes, key, value)}
-  end
-
-  @doc """
-  Gets an attribute from an entity.
-  """
-  def get_attribute(%__MODULE__{} = entity, key, default \\ nil) do
-    Map.get(entity.attributes, key, default)
   end
 
   @doc """
@@ -198,9 +195,6 @@ defmodule Loka.Engine.Entity do
 
   Format: "key#short_uuid" (e.g., "hungry_ghost#44a2b1")
 
-  This provides traceability when multiple instances of the same
-  prototype exist, while keeping logs readable.
-
   ## Examples
 
       iex> display_ref(%Entity{key: "goblin", id: "44a2b1c3-d4e5-..."})
@@ -220,14 +214,14 @@ defmodule Loka.Engine.Entity do
   end
 
   # =============================================================================
-  # TypedObject Conversion
+  # TypedObject Conversion (V1 compat — will be removed in Phase 6)
   # =============================================================================
+
+  alias Loka.Engine.TypedObject
 
   @doc """
   Converts an Entity to a TypedObject struct.
-
-  This allows Entity instances to be stored and queried through
-  the unified TypedObject system.
+  V1 compatibility — will be removed when TypedObject is deleted.
   """
   @spec to_typed_object(t()) :: {:ok, TypedObject.t()} | {:error, [String.t()]}
   def to_typed_object(%__MODULE__{} = entity) do
@@ -236,24 +230,24 @@ defmodule Loka.Engine.Entity do
       key: entity.key,
       type: :entity,
       subtype: entity.type,
-      parent_key: entity.parent_key,
+      parent_key: entity.metadata["parent_key"],
       is_prototype: entity.is_prototype,
       prototype_key: entity.prototype_key,
       name: entity.short_desc,
       description: entity.long_desc,
       extra_description: entity.extra_desc,
       keywords: entity.keywords,
-      attributes: entity.attributes,
+      attributes: %{},
       tags: entity.tags,
-      locks: entity.locks,
+      locks: entity.components["locks"] || %{},
       data:
-        Map.merge(entity.data, %{
+        Map.merge(entity.components["data"] || %{}, %{
           "primary_keyword" => entity.primary_keyword,
           "mood" => entity.mood
         }),
       metadata: entity.metadata,
       location_id: entity.location_id,
-      contents: entity.contents,
+      contents: [],
       components: entity.components,
       behaviors: entity.behaviors,
       scripts: entity.scripts
@@ -262,18 +256,16 @@ defmodule Loka.Engine.Entity do
 
   @doc """
   Creates an Entity from a TypedObject struct.
-
-  The TypedObject must be of type :entity.
+  V1 compatibility — will be removed when TypedObject is deleted.
   """
   @spec from_typed_object(TypedObject.t()) :: {:ok, t()} | {:error, String.t()}
   def from_typed_object(%TypedObject{type: :entity} = typed_object) do
     entity = %__MODULE__{
-      id: typed_object.id || UUID.uuid4(),
+      id: typed_object.id || Ecto.UUID.generate(),
       type: typed_object.subtype || :npc,
       key: typed_object.key,
-      parent_key: typed_object.parent_key,
-      is_prototype: typed_object.is_prototype,
       prototype_key: typed_object.prototype_key,
+      is_prototype: typed_object.is_prototype,
       short_desc: typed_object.name,
       long_desc: typed_object.description,
       extra_desc: typed_object.extra_description,
@@ -281,15 +273,24 @@ defmodule Loka.Engine.Entity do
       primary_keyword: get_in(typed_object.data, ["primary_keyword"]),
       mood: get_in(typed_object.data, ["mood"]),
       location_id: typed_object.location_id,
-      contents: typed_object.contents,
-      components: typed_object.components,
+      components:
+        Map.merge(typed_object.components, %{
+          "locks" => typed_object.locks
+        })
+        |> then(fn comps ->
+          if typed_object.data != %{} do
+            Map.put(comps, "data", Map.drop(typed_object.data, ["primary_keyword", "mood"]))
+          else
+            comps
+          end
+        end),
       behaviors: typed_object.behaviors,
-      attributes: typed_object.attributes,
       tags: typed_object.tags,
       scripts: typed_object.scripts,
-      locks: typed_object.locks,
-      data: Map.drop(typed_object.data, ["primary_keyword", "mood"]),
-      metadata: typed_object.metadata
+      metadata:
+        Map.merge(typed_object.metadata, %{
+          "parent_key" => typed_object.parent_key
+        })
     }
 
     {:ok, entity}
@@ -301,6 +302,7 @@ defmodule Loka.Engine.Entity do
 
   @doc """
   Creates an Entity from a TypedObject, raises on error.
+  V1 compatibility — will be removed when TypedObject is deleted.
   """
   @spec from_typed_object!(TypedObject.t()) :: t()
   def from_typed_object!(typed_object) do
@@ -312,15 +314,17 @@ defmodule Loka.Engine.Entity do
 
   @doc """
   Checks if an entity type is valid.
+  Delegates to `EntityTypes.valid?/1`.
   """
   @spec valid_type?(atom()) :: boolean()
-  def valid_type?(type), do: type in [:character, :room, :item, :npc, :exit]
+  def valid_type?(type), do: EntityTypes.valid?(type)
 
   @doc """
   Returns all valid entity types.
+  Delegates to `EntityTypes.all/0`.
   """
   @spec valid_types() :: [entity_type()]
-  def valid_types, do: [:character, :room, :item, :npc, :exit]
+  def valid_types, do: EntityTypes.all()
 
   # =============================================================================
   # Access Behavior

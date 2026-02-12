@@ -60,7 +60,6 @@ defmodule Loka.Engine.Spawner do
   - `:keywords` - Override the prototype's keywords
   - `:mood` - Override the prototype's mood
   - `:components` - Deep-merge with prototype components
-  - `:attributes` - Deep-merge with prototype attributes
   - `:tags` - Append to prototype tags
 
   ## Examples
@@ -80,10 +79,6 @@ defmodule Loka.Engine.Spawner do
 
       case Entities.save_entity(entity) do
         {:ok, schema} ->
-          # Persist prototype attributes to the entity_attributes table
-          # (attributes use EAV pattern and are stored separately)
-          persist_attributes(schema.id, entity.attributes)
-
           saved_entity = Entities.to_entity(schema)
 
           # Run creation hook - Framework modules can register handlers
@@ -241,9 +236,7 @@ defmodule Loka.Engine.Spawner do
     |> maybe_apply_override(:mood, overrides)
     |> maybe_apply_override(:location_id, overrides)
     |> maybe_apply_override(:components, overrides)
-    |> maybe_apply_override(:attributes, overrides)
     |> maybe_apply_override(:tags, overrides)
-    |> maybe_apply_override(:locks, overrides)
   end
 
   defp maybe_apply_override(entity, field, overrides) do
@@ -264,16 +257,13 @@ defmodule Loka.Engine.Spawner do
         :mood,
         :location_id,
         :components,
-        :attributes,
-        :tags,
-        :locks
+        :tags
       ])
       |> Map.new()
 
-    # Deep merge components and attributes with TypedObject values
+    # Deep merge components with TypedObject values
     overrides
     |> maybe_deep_merge(:components, typed_object.components, Map.get(overrides, :components))
-    |> maybe_deep_merge(:attributes, typed_object.attributes, Map.get(overrides, :attributes))
   end
 
   defp maybe_deep_merge(overrides, _field, _base, nil), do: overrides
@@ -349,10 +339,8 @@ defmodule Loka.Engine.Spawner do
         }
       },
       behaviors: [],
-      attributes: %{},
       tags: ["exit"],
       scripts: %{},
-      locks: %{},
       metadata: %{
         created_at: DateTime.utc_now(),
         updated_at: DateTime.utc_now()
@@ -386,6 +374,16 @@ defmodule Loka.Engine.Spawner do
 
     components = MapHelpers.deep_merge(base_components, Map.get(exit_config, "components", %{}))
 
+    # Merge locks from config into components
+    exit_locks = Map.get(exit_config, "locks", %{})
+
+    components =
+      if exit_locks != %{} do
+        Map.put(components, "locks", exit_locks)
+      else
+        components
+      end
+
     exit_entity = %Entity{
       id: UUID.uuid4(),
       type: :exit,
@@ -397,10 +395,8 @@ defmodule Loka.Engine.Spawner do
       location_id: room.id,
       components: components,
       behaviors: [],
-      attributes: %{},
       tags: ["exit"] ++ Map.get(exit_config, "tags", []),
       scripts: %{},
-      locks: Map.get(exit_config, "locks", %{}),
       metadata: %{
         created_at: DateTime.utc_now(),
         updated_at: DateTime.utc_now()
@@ -449,7 +445,6 @@ defmodule Loka.Engine.Spawner do
         {"mood", v} -> {:mood, v}
         {"location_id", v} -> {:location_id, v}
         {"components", v} -> {:components, v}
-        {"attributes", v} -> {:attributes, v}
         {"tags", v} -> {:tags, v}
         {k, v} -> {k, v}
       end)
@@ -465,20 +460,5 @@ defmodule Loka.Engine.Spawner do
 
   defp spawn_entity_from_config(_room, config) do
     {:error, {:invalid_spawn_config, "spawn config must have a 'prototype' key", config}}
-  end
-
-  # Persist attributes from Entity struct to entity_attributes table
-  # Attributes use EAV (Entity-Attribute-Value) pattern and are stored separately
-  defp persist_attributes(_entity_id, nil), do: :ok
-  defp persist_attributes(_entity_id, attrs) when map_size(attrs) == 0, do: :ok
-
-  defp persist_attributes(entity_id, attributes) when is_map(attributes) do
-    Enum.each(attributes, fn {key, value} ->
-      # Convert key to string if needed
-      key_str = if is_atom(key), do: Atom.to_string(key), else: key
-      Entities.set_attribute(entity_id, key_str, value)
-    end)
-
-    :ok
   end
 end

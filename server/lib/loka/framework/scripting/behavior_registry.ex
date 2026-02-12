@@ -167,11 +167,11 @@ defmodule Loka.Framework.Scripting.BehaviorRegistry do
       is_list(entity.behaviors) and Enum.any?(entity.behaviors) ->
         entity.behaviors
 
-      is_map(entity.data) and is_list(Map.get(entity.data, :behaviors)) ->
-        Map.get(entity.data, :behaviors)
+      is_map(entity.components) and is_list(Map.get(entity.components, :behaviors)) ->
+        Map.get(entity.components, :behaviors)
 
-      is_map(entity.data) and is_list(Map.get(entity.data, "behaviors")) ->
-        Map.get(entity.data, "behaviors")
+      is_map(entity.components) and is_list(Map.get(entity.components, "behaviors")) ->
+        Map.get(entity.components, "behaviors")
 
       true ->
         []

@@ -91,7 +91,7 @@ defmodule Loka.Framework.World.NpcAmbient do
 
   # Check behavior_config for ambient_messages (patrol, wander, etc.)
   defp get_behavior_config(entity) do
-    # Try to get behavior_config from attributes (Entity struct) or direct field (EntitySchema)
+    # Try to get behavior_config from components (Entity struct) or direct field (EntitySchema)
     behavior_config = get_behavior_config_map(entity)
 
     if behavior_config do
@@ -117,8 +117,8 @@ defmodule Loka.Framework.World.NpcAmbient do
     end
   end
 
-  defp get_behavior_config_map(%{attributes: attrs}) when is_map(attrs) do
-    Map.get(attrs, :behavior_config) || Map.get(attrs, "behavior_config")
+  defp get_behavior_config_map(%{components: components}) when is_map(components) do
+    Map.get(components, :behavior_config) || Map.get(components, "behavior_config")
   end
 
   defp get_behavior_config_map(_), do: nil
@@ -221,7 +221,7 @@ defmodule Loka.Framework.World.NpcAmbient do
   defp emit_message(_, _), do: :ok
 
   defp get_location_id(%{location_id: location_id}) when is_binary(location_id), do: location_id
-  defp get_location_id(%Entity{} = entity), do: Entity.get_attribute(entity, :location)
+  defp get_location_id(%Entity{} = entity), do: Map.get(entity.components, "location")
   defp get_location_id(_), do: nil
 
   defp format_message(message) do

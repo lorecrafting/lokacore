@@ -182,7 +182,7 @@ defmodule Loka.Testing.Bot.BotActions do
   # sobelow_skip ["DOS.StringToAtom"] - direction from internal bot logic with known values
   defp find_exit(%Entity{} = room, direction) do
     # Check room's exits attribute
-    exits = Map.get(room.attributes || %{}, "exits", %{})
+    exits = Map.get(room.components || %{}, "exits", %{})
     exit_data = Map.get(exits, direction) || Map.get(exits, String.to_atom(direction))
 
     if exit_data do

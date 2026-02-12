@@ -118,8 +118,8 @@ defmodule Loka.Behaviors.Scavenger do
   end
 
   defp count_carried_items(entity) do
-    # Count items in entity's contents
-    length(entity.contents || [])
+    # Count items carried by this entity (contents derived from DB)
+    Entities.list_entities(type: :item, location_id: entity.id) |> length()
   end
 
   defp has_ignored_tag?(config, item) do

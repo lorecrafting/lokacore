@@ -204,8 +204,8 @@ defmodule Loka.Framework.Inventory do
       script_key = get_use_script(item) ->
         apply_script_effect(state, item, script_key)
 
-      # Declarative use_effect in data
-      use_effect = get_in(item.data, ["use_effect"]) ->
+      # Declarative use_effect in components
+      use_effect = get_in(item.components, ["use_effect"]) ->
         apply_declarative_effect(state, item, use_effect)
 
       # Not usable
@@ -224,7 +224,7 @@ defmodule Loka.Framework.Inventory do
       Map.get(scripts, :on_use) ||
       Map.get(builder_scripts, "on_use") ||
       Map.get(builder_scripts, :on_use) ||
-      get_in(item.data, ["use_script"])
+      get_in(item.components, ["use_script"])
   end
 
   # Execute a script attached to the item
@@ -240,7 +240,6 @@ defmodule Loka.Framework.Inventory do
         key: item.key,
         name: item.short_desc,
         tags: item.tags || [],
-        data: item.data || %{},
         components: item.components || %{}
       }
     }
@@ -328,12 +327,12 @@ defmodule Loka.Framework.Inventory do
   # Check if item should be consumed on use
   defp consumable_on_use?(item) do
     consumable = Map.get(item.components, "consumable", %{})
-    data = item.data || %{}
+    components = item.components || %{}
 
-    # Consumed if: consumable component exists, or data.consumable is true
+    # Consumed if: consumable component exists, or components.consumable is true
     map_size(consumable) > 0 ||
-      Map.get(data, "consumable") == true ||
-      Map.get(data, "consumed_on_use") == true
+      Map.get(components, "consumable") == true ||
+      Map.get(components, "consumed_on_use") == true
   end
 
   defp apply_healing(state, item_id, amount) do

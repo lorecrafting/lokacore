@@ -32,7 +32,7 @@ defmodule Loka.Behaviors.Runner do
 
   ## State Management
 
-  Behavior states are stored in entity attributes under the key
+  Behavior states are stored in entity components under the key
   `behavior_state:{ModuleName}`. The Runner loads and saves these
   automatically.
   """
@@ -98,14 +98,14 @@ defmodule Loka.Behaviors.Runner do
   @spec get_behavior_state(Entity.t(), module()) :: map()
   def get_behavior_state(entity, behavior_module) do
     key = behavior_state_key(behavior_module)
-    attrs = entity.attributes || %{}
+    components = entity.components || %{}
 
     cond do
-      is_map(attrs[key]) ->
-        attrs[key]
+      is_map(components[key]) ->
+        components[key]
 
-      is_map(attrs[key_as_atom(key)]) ->
-        attrs[key_as_atom(key)]
+      is_map(components[key_as_atom(key)]) ->
+        components[key_as_atom(key)]
 
       true ->
         %{}
@@ -122,14 +122,14 @@ defmodule Loka.Behaviors.Runner do
   end
 
   @doc """
-  Saves behavior state to entity attributes.
+  Saves behavior state to entity components.
   """
   @spec save_behavior_state(Entity.t(), module(), map()) :: Entity.t()
   def save_behavior_state(entity, behavior_module, state) do
     key = behavior_state_key(behavior_module)
-    attrs = entity.attributes || %{}
-    updated_attrs = Map.put(attrs, key, state)
-    %{entity | attributes: updated_attrs}
+    components = entity.components || %{}
+    updated_components = Map.put(components, key, state)
+    %{entity | components: updated_components}
   end
 
   # Private implementation

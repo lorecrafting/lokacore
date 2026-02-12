@@ -26,7 +26,7 @@ defmodule Loka.Behaviors.Base do
   Behaviors read their configuration from the entity's `behavior_config`
   attribute. For example, a Guard behavior would read from:
 
-      entity.attributes["behavior_config"]["guard"]
+      entity.components["behavior_config"]["guard"]
 
   This allows YAML-based configuration:
 
@@ -119,7 +119,7 @@ defmodule Loka.Behaviors.Base do
   ## Examples
 
       config = get_config(entity, Loka.Behaviors.Guard)
-      # Returns the map from entity.attributes["behavior_config"]["guard"]
+      # Returns the map from entity.components["behavior_config"]["guard"]
   """
   @spec get_config(Entity.t(), module()) :: map()
   def get_config(entity, behavior_module) do
@@ -212,11 +212,11 @@ defmodule Loka.Behaviors.Base do
   # Private helpers
 
   defp get_behavior_config(entity) do
-    attrs = entity.attributes || %{}
+    components = entity.components || %{}
 
     cond do
-      is_map(attrs["behavior_config"]) -> attrs["behavior_config"]
-      is_map(attrs[:behavior_config]) -> attrs[:behavior_config]
+      is_map(components["behavior_config"]) -> components["behavior_config"]
+      is_map(components[:behavior_config]) -> components[:behavior_config]
       true -> %{}
     end
   end
