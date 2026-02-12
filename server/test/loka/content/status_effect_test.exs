@@ -26,7 +26,9 @@ defmodule Loka.Content.StatusEffectTest do
           "type" => "debuff",
           "stackable" => true,
           "effects" => [%{"stat" => "hp", "modifier" => -5}]
-        }, name: "Poison")
+        },
+        name: "Poison"
+      )
 
       assert {:ok, fetched} = StatusEffect.get("test_status")
       assert fetched.key == "test_status"

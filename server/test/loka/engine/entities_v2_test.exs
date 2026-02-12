@@ -159,7 +159,7 @@ defmodule Loka.Engine.EntitiesV2Test do
     end
 
     test "returns error for nonexistent account_id" do
-      assert {:error, :not_found} = Entities.find_one(account_id: 99999)
+      assert {:error, :not_found} = Entities.find_one(account_id: Ecto.UUID.generate())
     end
   end
 

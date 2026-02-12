@@ -165,79 +165,8 @@ defmodule Loka.Engine.EntitiesTest do
     end
   end
 
-  describe "attributes" do
-    test "set_attribute/3 creates new attribute" do
-      entity = entity_fixture()
-      assert {:ok, attr} = Entities.set_attribute(entity.id, "health", 100)
-      assert attr.key == "health"
-      assert attr.value == 100
-    end
-
-    test "set_attribute/3 updates existing attribute" do
-      entity = entity_fixture()
-      {:ok, _} = Entities.set_attribute(entity.id, "health", 100)
-      {:ok, attr} = Entities.set_attribute(entity.id, "health", 50)
-      assert attr.value == 50
-    end
-
-    test "set_attribute/4 with category" do
-      entity = entity_fixture()
-      {:ok, attr} = Entities.set_attribute(entity.id, "strength", 10, "stats")
-      assert attr.category == "stats"
-    end
-
-    test "get_attribute/2 returns attribute value" do
-      entity = entity_fixture()
-      {:ok, _} = Entities.set_attribute(entity.id, "health", 100)
-      assert Entities.get_attribute(entity.id, "health") == 100
-    end
-
-    test "get_attribute/2 returns nil for non-existent attribute" do
-      entity = entity_fixture()
-      assert is_nil(Entities.get_attribute(entity.id, "nonexistent"))
-    end
-
-    test "get_attributes/1 returns map of attributes for entity" do
-      entity = entity_fixture()
-      {:ok, _} = Entities.set_attribute(entity.id, "health", 100)
-      {:ok, _} = Entities.set_attribute(entity.id, "mana", 50)
-
-      attrs = Entities.get_attributes(entity.id)
-      assert is_map(attrs)
-      assert attrs["health"] == 100
-      assert attrs["mana"] == 50
-    end
-
-    test "get_attributes/2 filters by category" do
-      entity = entity_fixture()
-      {:ok, _} = Entities.set_attribute(entity.id, "strength", 10, "stats")
-      {:ok, _} = Entities.set_attribute(entity.id, "dexterity", 15, "stats")
-      {:ok, _} = Entities.set_attribute(entity.id, "quest_progress", %{step: 1}, "quests")
-
-      stats = Entities.get_attributes(entity.id, "stats")
-      assert Map.keys(stats) |> Enum.sort() == ["dexterity", "strength"]
-
-      quests = Entities.get_attributes(entity.id, "quests")
-      assert Map.keys(quests) == ["quest_progress"]
-    end
-
-    test "delete_attribute/2 removes attribute" do
-      entity = entity_fixture()
-      {:ok, _} = Entities.set_attribute(entity.id, "health", 100)
-      {1, nil} = Entities.delete_attribute(entity.id, "health")
-      assert is_nil(Entities.get_attribute(entity.id, "health"))
-    end
-
-    test "clear_attributes/1 removes all attributes" do
-      entity = entity_fixture()
-      {:ok, _} = Entities.set_attribute(entity.id, "health", 100)
-      {:ok, _} = Entities.set_attribute(entity.id, "mana", 50)
-
-      {count, nil} = Entities.clear_attributes(entity.id)
-      assert count == 2
-      assert Entities.get_attributes(entity.id) == %{}
-    end
-  end
+  # NOTE: V1 entity_attributes (EAV) tests removed in V2.
+  # Attributes are now stored in entity.components (JSON column).
 
   describe "get_entity_by_key/1" do
     test "returns entity with given key" do

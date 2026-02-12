@@ -26,7 +26,9 @@ defmodule Loka.Content.GatheringNodeTest do
           "skill_required" => "mining",
           "yields" => [%{"item" => "iron_ore", "chance" => 0.8}],
           "respawn_time" => 120
-        }, name: "Iron Vein")
+        },
+        name: "Iron Vein"
+      )
 
       assert {:ok, fetched} = GatheringNode.get("test_node")
       assert fetched.key == "test_node"

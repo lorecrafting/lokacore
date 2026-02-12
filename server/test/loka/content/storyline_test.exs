@@ -25,7 +25,9 @@ defmodule Loka.Content.StorylineTest do
         %{
           "main_quests" => ["quest_a", "quest_b"],
           "side_quests" => ["sq_1"]
-        }, name: "Test Storyline")
+        },
+        name: "Test Storyline"
+      )
 
       assert {:ok, fetched} = Storyline.get("test_storyline")
       assert fetched.key == "test_storyline"

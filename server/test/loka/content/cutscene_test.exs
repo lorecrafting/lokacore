@@ -25,7 +25,9 @@ defmodule Loka.Content.CutsceneTest do
         %{
           "scenes" => [%{"id" => "scene_1", "text" => "A dark room..."}],
           "speakers" => ["narrator"]
-        }, name: "Test Cutscene")
+        },
+        name: "Test Cutscene"
+      )
 
       assert {:ok, fetched} = Cutscene.get("test_cutscene")
       assert fetched.key == "test_cutscene"

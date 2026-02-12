@@ -26,7 +26,9 @@ defmodule Loka.Content.ResourceTest do
           "max_formula" => "base_hp + (level * 10)",
           "regen_rate" => 5,
           "regen_condition" => "out_of_combat"
-        }, name: "Health")
+        },
+        name: "Health"
+      )
 
       assert {:ok, fetched} = Resource.get("test_resource")
       assert fetched.key == "test_resource"

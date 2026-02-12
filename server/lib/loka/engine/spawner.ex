@@ -81,6 +81,13 @@ defmodule Loka.Engine.Spawner do
         {:ok, schema} ->
           saved_entity = Entities.to_entity(schema)
 
+          # Persist tags to entity_tags table
+          for tag <- entity.tags || [] do
+            Entities.add_tag(saved_entity.id, tag)
+          end
+
+          saved_entity = %{saved_entity | tags: entity.tags || []}
+
           # Run creation hook - Framework modules can register handlers
           # (e.g., container initialization, combat stats setup)
           Hooks.run(:at_entity_creation, [saved_entity, %{created_by: "spawner"}])

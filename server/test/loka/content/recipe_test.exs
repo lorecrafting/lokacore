@@ -27,7 +27,9 @@ defmodule Loka.Content.RecipeTest do
           "skill_required" => "blacksmithing",
           "station_type" => "forge",
           "output" => [%{"item" => "iron_sword", "quantity" => 1}]
-        }, name: "Iron Sword")
+        },
+        name: "Iron Sword"
+      )
 
       assert {:ok, fetched} = Recipe.get("test_recipe")
       assert fetched.key == "test_recipe"

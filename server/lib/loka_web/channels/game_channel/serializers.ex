@@ -290,7 +290,7 @@ defmodule LokaWeb.Channels.GameChannel.Serializers do
   defp room_is_indoor?(nil), do: false
 
   defp room_is_indoor?(room) do
-    tags = Map.get(room, :tags, [])
+    tags = safe_tags(room)
     "indoor" in tags or "cave" in tags or "building" in tags
   end
 
@@ -298,7 +298,7 @@ defmodule LokaWeb.Channels.GameChannel.Serializers do
   defp get_room_biome(nil), do: :default
 
   defp get_room_biome(room) do
-    tags = Map.get(room, :tags, [])
+    tags = safe_tags(room)
 
     biome_tags = [
       :forest,
@@ -354,5 +354,14 @@ defmodule LokaWeb.Channels.GameChannel.Serializers do
       is_indoor: sounds.is_indoor,
       phase: DayNight.get_phase()
     }
+  end
+
+  # Safely extract tags, handling Ecto.Association.NotLoaded or missing key
+  defp safe_tags(entity) do
+    case Map.get(entity, :tags, []) do
+      %Ecto.Association.NotLoaded{} -> []
+      tags when is_list(tags) -> tags
+      _ -> []
+    end
   end
 end

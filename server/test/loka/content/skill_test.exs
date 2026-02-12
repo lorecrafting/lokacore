@@ -26,7 +26,9 @@ defmodule Loka.Content.SkillTest do
           "category" => "gathering",
           "max_level" => 50,
           "prerequisites" => []
-        }, name: "Mining")
+        },
+        name: "Mining"
+      )
 
       assert {:ok, fetched} = Skill.get("test_skill")
       assert fetched.key == "test_skill"

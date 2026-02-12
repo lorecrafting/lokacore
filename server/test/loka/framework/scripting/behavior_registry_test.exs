@@ -8,7 +8,7 @@ defmodule Loka.Framework.Scripting.BehaviorRegistryTest do
       entity = %{
         id: "test-entity-1",
         behaviors: [],
-        data: %{}
+        components: %{}
       }
 
       assert :ok = BehaviorRegistry.on_entity_created(entity, %{})
@@ -21,19 +21,19 @@ defmodule Loka.Framework.Scripting.BehaviorRegistryTest do
           %{script: "patrol", config: %{route: ["a", "b", "c"]}},
           %{script: "day_night_schedule", config: %{wake_at: :dawn}}
         ],
-        data: %{}
+        components: %{}
       }
 
       # Should not raise - registers behaviors
       assert :ok = BehaviorRegistry.on_entity_created(entity, %{})
     end
 
-    test "handles entity with behaviors in data map" do
+    test "handles entity with behaviors in components map" do
       entity = %{
         id: "test-entity-3",
         behaviors: [],
-        data: %{
-          behaviors: [
+        components: %{
+          "behaviors" => [
             %{script: "wander", config: %{range: 5}}
           ]
         }
@@ -46,7 +46,7 @@ defmodule Loka.Framework.Scripting.BehaviorRegistryTest do
       entity = %{
         id: "test-entity-4",
         behaviors: nil,
-        data: %{}
+        components: %{}
       }
 
       # Should not crash, just return :ok
