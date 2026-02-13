@@ -1,161 +1,118 @@
 defmodule Loka.Framework.Status.StatusManagerTest do
-  use ExUnit.Case, async: false
+  use Loka.DataCase, async: false
 
-  alias Loka.Framework.Status.{StatusManager, StatusRegistry, StatusEffect}
+  alias Loka.Framework.Status.StatusManager
 
-  # Create test YAML files for loading
-  setup_all do
-    # Create temporary directory with test status YAML files
-    temp_dir = System.tmp_dir!() <> "/status_test_#{System.unique_integer([:positive])}"
-    File.mkdir_p!(temp_dir)
+  import Loka.EngineFixtures
 
-    # Create test status YAML files
-    poison_yaml = """
-    key: poisoned
-    name: Poisoned
-    type: debuff
-    duration: 5
-    stackable: true
-    max_stacks: 3
-    effects:
-      - trigger: on_turn_start
-        effect: damage
-        amount: 5
-        damage_type: poison
-      - trigger: on_apply
-        effect: damage
-        amount: 2
-        damage_type: poison
-    cure_items:
-      - antidote
-    cure_abilities:
-      - cure_poison
-    tags:
-      - poison
-      - dot
-    """
+  @active_status_table :loka_active_statuses
 
-    blessed_yaml = """
-    key: blessed
-    name: Blessed
-    type: buff
-    duration: 10
-    stackable: false
-    max_stacks: 1
-    effects:
-      - trigger: passive
-        effect: stat_modify
-        stat: str
-        modifier: 5
-      - trigger: passive
-        effect: stat_modify
-        stat: dex
-        modifier: 3
-    exclusive_with:
-      - cursed
-    tags:
-      - holy
-    """
-
-    cursed_yaml = """
-    key: cursed
-    name: Cursed
-    type: debuff
-    duration: null
-    stackable: false
-    max_stacks: 1
-    effects:
-      - trigger: passive
-        effect: stat_modify
-        stat: str
-        modifier: -5
-    exclusive_with:
-      - blessed
-    tags:
-      - curse
-    """
-
-    stun_yaml = """
-    key: stunned
-    name: Stunned
-    type: debuff
-    duration: 2
-    stackable: false
-    max_stacks: 1
-    effects:
-      - trigger: passive
-        effect: prevent_action
-        action_type: all
-    tags:
-      - control
-    """
-
-    regen_yaml = """
-    key: regenerating
-    name: Regenerating
-    type: buff
-    duration: 8
-    stackable: true
-    max_stacks: 5
-    effects:
-      - trigger: on_turn_start
-        effect: heal
-        amount: 3
-    tags:
-      - heal
-    """
-
-    File.write!(Path.join(temp_dir, "poisoned.yml"), poison_yaml)
-    File.write!(Path.join(temp_dir, "blessed.yml"), blessed_yaml)
-    File.write!(Path.join(temp_dir, "cursed.yml"), cursed_yaml)
-    File.write!(Path.join(temp_dir, "stunned.yml"), stun_yaml)
-    File.write!(Path.join(temp_dir, "regenerating.yml"), regen_yaml)
-
-    on_exit(fn ->
-      File.rm_rf!(temp_dir)
-    end)
-
-    {:ok, temp_dir: temp_dir}
-  end
-
-  setup %{temp_dir: temp_dir} do
-    # Start fresh managers for each test (if not already started by app)
-    registry_pid =
-      case start_supervised({StatusRegistry, name: StatusRegistry, path: temp_dir}) do
-        {:ok, p} -> p
-        {:error, {:already_started, p}} -> p
-      end
-
-    # If reusing production registry, save state and load test data
-    saved_statuses =
-      if :ets.whereis(:loka_statuses) != :undefined do
-        :ets.tab2list(:loka_statuses)
-      else
-        []
-      end
-
-    # Load test data into the registry if it was already running
-    if saved_statuses != [] do
-      StatusRegistry.load_from(temp_dir)
-    end
-
+  # Create test status effect entities in DB
+  setup do
+    # Start StatusManager GenServer (manages active statuses in ETS)
     _manager_pid =
       case start_supervised({StatusManager, name: StatusManager}) do
         {:ok, p} -> p
         {:error, {:already_started, p}} -> p
       end
 
+    # Create status effect entities in DB
+    status_effect_fixture(%{
+      key: "poisoned",
+      name: "Poisoned",
+      data: %{
+        "type" => "debuff",
+        "duration" => 5,
+        "stackable" => true,
+        "max_stacks" => 3,
+        "effects" => [
+          %{
+            "trigger" => "on_turn_start",
+            "effect" => "damage",
+            "amount" => 5,
+            "damage_type" => "poison"
+          },
+          %{
+            "trigger" => "on_apply",
+            "effect" => "damage",
+            "amount" => 2,
+            "damage_type" => "poison"
+          }
+        ],
+        "cure_items" => ["antidote"],
+        "cure_abilities" => ["cure_poison"],
+        "tags" => ["poison", "dot"]
+      }
+    })
+
+    status_effect_fixture(%{
+      key: "blessed",
+      name: "Blessed",
+      data: %{
+        "type" => "buff",
+        "duration" => 10,
+        "stackable" => false,
+        "max_stacks" => 1,
+        "effects" => [
+          %{"trigger" => "passive", "effect" => "stat_modify", "stat" => "str", "modifier" => 5},
+          %{"trigger" => "passive", "effect" => "stat_modify", "stat" => "dex", "modifier" => 3}
+        ],
+        "exclusive_with" => ["cursed"],
+        "tags" => ["holy"]
+      }
+    })
+
+    status_effect_fixture(%{
+      key: "cursed",
+      name: "Cursed",
+      data: %{
+        "type" => "debuff",
+        "duration" => nil,
+        "stackable" => false,
+        "max_stacks" => 1,
+        "effects" => [
+          %{"trigger" => "passive", "effect" => "stat_modify", "stat" => "str", "modifier" => -5}
+        ],
+        "exclusive_with" => ["blessed"],
+        "tags" => ["curse"]
+      }
+    })
+
+    status_effect_fixture(%{
+      key: "stunned",
+      name: "Stunned",
+      data: %{
+        "type" => "debuff",
+        "duration" => 2,
+        "stackable" => false,
+        "max_stacks" => 1,
+        "effects" => [
+          %{"trigger" => "passive", "effect" => "prevent_action", "action_type" => "all"}
+        ],
+        "tags" => ["control"]
+      }
+    })
+
+    status_effect_fixture(%{
+      key: "regenerating",
+      name: "Regenerating",
+      data: %{
+        "type" => "buff",
+        "duration" => 8,
+        "stackable" => true,
+        "max_stacks" => 5,
+        "effects" => [
+          %{"trigger" => "on_turn_start", "effect" => "heal", "amount" => 3}
+        ],
+        "tags" => ["heal"]
+      }
+    })
+
     on_exit(fn ->
-      # Clean up active statuses table
       try do
-        :ets.delete_all_objects(:loka_active_statuses)
+        :ets.delete_all_objects(@active_status_table)
       rescue
         _ -> :ok
-      end
-
-      # Restore production StatusRegistry state
-      if Process.alive?(registry_pid) and saved_statuses != [] do
-        StatusRegistry.reload()
       end
     end)
 
@@ -226,7 +183,7 @@ defmodule Loka.Framework.Status.StatusManagerTest do
       # Manually modify duration to simulate time passing
       statuses = StatusManager.get_active(entity_id)
       modified = Enum.map(statuses, &%{&1 | remaining_duration: 5})
-      :ets.insert(:loka_active_statuses, {entity_id, modified})
+      :ets.insert(@active_status_table, {entity_id, modified})
 
       {:ok, refreshed} = StatusManager.apply_status(entity_id, "blessed", source_id)
 
@@ -356,7 +313,6 @@ defmodule Loka.Framework.Status.StatusManagerTest do
       assert length(results) == 1
       result = List.first(results)
       assert result.action == :damage
-      # Fixed: now correctly reads amount from YAML string keys
       assert result.amount == 5
       assert result.damage_type == :poison
       assert result.status_key == "poisoned"
@@ -372,7 +328,6 @@ defmodule Loka.Framework.Status.StatusManagerTest do
       results = StatusManager.tick(entity_id, :on_turn_start)
 
       result = List.first(results)
-      # Fixed: correctly calculates 5 * 3 stacks = 15
       assert result.amount == 15
     end
 

@@ -1,38 +1,15 @@
 defmodule Loka.Framework.Skills.SkillManagerTest do
   use Loka.DataCase, async: false
 
-  alias Loka.Framework.Skills.{Skill, SkillManager, SkillRegistry}
+  alias Loka.Framework.Skills.SkillManager
   alias Loka.Framework.Player.GameState
 
   import Loka.AccountsFixtures
+  import Loka.EngineFixtures
 
   setup do
-    # Start the SkillRegistry for tests (if not already started by app)
-    registry =
-      case start_supervised({SkillRegistry, [load_on_start: false]}) do
-        {:ok, pid} -> pid
-        {:error, {:already_started, pid}} -> pid
-      end
-
-    # Restore production state on exit by reloading from disk
-    on_exit(fn ->
-      if Process.alive?(registry) do
-        SkillRegistry.reload()
-      end
-    end)
-
-    # Register test skills
-    register_test_skills()
-
-    player = player_fixture()
-    {:ok, state} = GameState.create_state(player.id)
-
-    {:ok, player: player, state: state}
-  end
-
-  defp register_test_skills do
-    # Define test skills directly in GenServer state
-    basic_combat = %Skill{
+    # Create skill entities in the DB (replaces old SkillRegistry setup)
+    skill_fixture(%{
       key: "basic_combat",
       name: "Basic Combat",
       category: "combat",
@@ -40,20 +17,20 @@ defmodule Loka.Framework.Skills.SkillManagerTest do
       xp_per_use: 1,
       xp_per_level: 100,
       point_cost_formula: "level"
-    }
+    })
 
-    swordsmanship = %Skill{
+    skill_fixture(%{
       key: "swordsmanship",
       name: "Swordsmanship",
       category: "combat",
       max_level: 100,
-      prerequisites: [%{skill: "basic_combat", level: 10}],
+      prerequisites: [%{"skill" => "basic_combat", "level" => 10}],
       xp_per_use: 2,
       xp_per_level: 150,
       point_cost_formula: "level"
-    }
+    })
 
-    expensive_skill = %Skill{
+    skill_fixture(%{
       key: "expensive_skill",
       name: "Expensive Skill",
       category: "combat",
@@ -61,9 +38,9 @@ defmodule Loka.Framework.Skills.SkillManagerTest do
       xp_per_use: 1,
       xp_per_level: 100,
       point_cost_formula: "level_squared"
-    }
+    })
 
-    capped_skill = %Skill{
+    skill_fixture(%{
       key: "capped_skill",
       name: "Capped Skill",
       category: "general",
@@ -71,13 +48,12 @@ defmodule Loka.Framework.Skills.SkillManagerTest do
       xp_per_use: 1,
       xp_per_level: 50,
       point_cost_formula: "level"
-    }
+    })
 
-    # Add skills to the registry's state
-    GenServer.call(
-      SkillRegistry,
-      {:put_test_skills, [basic_combat, swordsmanship, expensive_skill, capped_skill]}
-    )
+    player = player_fixture()
+    {:ok, state} = GameState.create_state(player.id)
+
+    {:ok, player: player, state: state}
   end
 
   # Helper to set player skills

@@ -57,4 +57,197 @@ defmodule Loka.EngineFixtures do
 
     script
   end
+
+  # =============================================================================
+  # Content Entity Fixtures (V2 — entities in DB instead of registries)
+  # =============================================================================
+
+  @doc """
+  Creates a recipe entity in the DB. Returns the EntitySchema.
+
+  ## Example
+      recipe = recipe_fixture(%{
+        key: "recipe_health_potion",
+        name: "Health Potion",
+        ingredients: [%{"item" => "herb", "quantity" => 2}],
+        output: [%{"item" => "health_potion", "quantity" => 1, "chance" => 1.0}]
+      })
+  """
+  def recipe_fixture(attrs \\ %{}) do
+    key = attrs[:key] || "recipe_#{System.unique_integer([:positive])}"
+
+    data =
+      %{
+        "ingredients" => attrs[:ingredients] || [],
+        "tools" => attrs[:tools] || [],
+        "output" => attrs[:output] || [],
+        "skill_required" => attrs[:skill_required],
+        "skill_level" => attrs[:skill_level] || 0,
+        "failure_chance" => attrs[:failure_chance] || 0.0,
+        "failure_output" => attrs[:failure_output] || [],
+        "station_type" => attrs[:station_type],
+        "xp_reward" => attrs[:xp_reward],
+        "resource_costs" => attrs[:resource_costs] || %{},
+        "success_message" => attrs[:success_message] || "Success!",
+        "failure_message" => attrs[:failure_message] || "Failed!"
+      }
+      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Map.new()
+
+    {:ok, entity} =
+      Entities.create_entity(%{
+        type: "recipe",
+        key: key,
+        short_desc: attrs[:name] || "Test Recipe",
+        is_prototype: true,
+        components: %{"data" => data}
+      })
+
+    entity
+  end
+
+  @doc """
+  Creates a skill entity in the DB. Returns the EntitySchema.
+  """
+  def skill_fixture(attrs \\ %{}) do
+    key = attrs[:key] || "skill_#{System.unique_integer([:positive])}"
+
+    data =
+      %{
+        "category" => attrs[:category] || "general",
+        "max_level" => attrs[:max_level] || 100,
+        "xp_per_use" => attrs[:xp_per_use] || 1,
+        "xp_per_level" => attrs[:xp_per_level] || 100,
+        "point_cost_formula" => attrs[:point_cost_formula] || "level",
+        "prerequisites" => attrs[:prerequisites] || [],
+        "cost" => attrs[:cost],
+        "stat" => attrs[:stat],
+        "lag" => attrs[:lag],
+        "cooldown" => attrs[:cooldown],
+        "mv_cost" => attrs[:mv_cost],
+        "mana_cost" => attrs[:mana_cost],
+        "effect" => attrs[:effect],
+        "trainers" => attrs[:trainers] || []
+      }
+      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Map.new()
+
+    {:ok, entity} =
+      Entities.create_entity(%{
+        type: "skill",
+        key: key,
+        short_desc: attrs[:name] || "Test Skill",
+        is_prototype: true,
+        components: %{"data" => data}
+      })
+
+    entity
+  end
+
+  @doc """
+  Creates a status effect entity in the DB. Returns the EntitySchema.
+  """
+  def status_effect_fixture(attrs \\ %{}) do
+    key = attrs[:key] || "status_#{System.unique_integer([:positive])}"
+
+    data =
+      Enum.reject(attrs[:data] || %{}, fn {_k, v} -> is_nil(v) end)
+      |> Map.new()
+
+    {:ok, entity} =
+      Entities.create_entity(%{
+        type: "status",
+        key: key,
+        short_desc: attrs[:name] || "Test Status",
+        is_prototype: true,
+        components: %{"data" => data}
+      })
+
+    entity
+  end
+
+  @doc """
+  Creates a resource entity in the DB. Returns the EntitySchema.
+  """
+  def resource_fixture(attrs \\ %{}) do
+    key = attrs[:key] || "resource_#{System.unique_integer([:positive])}"
+
+    data =
+      Enum.reject(attrs[:data] || %{}, fn {_k, v} -> is_nil(v) end)
+      |> Map.new()
+
+    {:ok, entity} =
+      Entities.create_entity(%{
+        type: "resource",
+        key: key,
+        short_desc: attrs[:name] || "Test Resource",
+        is_prototype: true,
+        components: %{"data" => data}
+      })
+
+    entity
+  end
+
+  @doc """
+  Creates a quest entity in the DB. Returns the EntitySchema.
+
+  ## Example
+      quest = quest_fixture(%{
+        key: "escape_quest",
+        name: "Escape the Dungeon",
+        objectives: [%{"id" => "reach_exit", "type" => "go_to", "target_id" => "dungeon_exit", "time_limit" => 300}],
+        quest_type: "main"
+      })
+  """
+  def quest_fixture(attrs \\ %{}) do
+    key = attrs[:key] || "quest_#{System.unique_integer([:positive])}"
+
+    data =
+      %{
+        "objectives" => attrs[:objectives] || [],
+        "quest_type" => attrs[:quest_type],
+        "giver" => attrs[:giver],
+        "giver_key" => attrs[:giver_key],
+        "turn_in_npc" => attrs[:turn_in_npc],
+        "rewards" => attrs[:rewards] || %{},
+        "description" => attrs[:description],
+        "prerequisites" => attrs[:prerequisites] || [],
+        "journal_entries" => attrs[:journal_entries] || %{}
+      }
+      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Map.new()
+
+    {:ok, entity} =
+      Entities.create_entity(%{
+        type: "quest",
+        key: key,
+        short_desc: attrs[:name] || "Test Quest",
+        is_prototype: true,
+        components: %{"data" => data}
+      })
+
+    entity
+  end
+
+  @doc """
+  Creates a gathering node entity in the DB. Returns the EntitySchema.
+  """
+  def gathering_node_fixture(attrs \\ %{}) do
+    key = attrs[:key] || "node_#{System.unique_integer([:positive])}"
+
+    data =
+      Enum.reject(attrs[:data] || %{}, fn {_k, v} -> is_nil(v) end)
+      |> Map.new()
+
+    {:ok, entity} =
+      Entities.create_entity(%{
+        type: "gathering_node",
+        key: key,
+        short_desc: attrs[:name] || "Test Node",
+        is_prototype: true,
+        components: %{"data" => data}
+      })
+
+    entity
+  end
 end

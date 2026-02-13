@@ -29,8 +29,6 @@ defmodule Loka.Engine.ZoneReset do
 
   alias Loka.Engine.{
     Zone,
-    ZoneLoader,
-    ZoneRegistry,
     Spawner,
     Entities,
     EntityRegistry,
@@ -40,6 +38,7 @@ defmodule Loka.Engine.ZoneReset do
   }
 
   alias Loka.Engine.Schema.EntitySchema
+  alias Loka.Content
 
   @check_interval_ms 60_000
 
@@ -99,7 +98,7 @@ defmodule Loka.Engine.ZoneReset do
   @doc """
   Reloads zones and rebuilds timers.
 
-  Called after ZoneLoader.reload() to pick up new zone definitions.
+  Called after zone reload to pick up new zone definitions.
   """
   @spec reload(GenServer.server()) :: :ok
   def reload(server \\ __MODULE__) do
@@ -125,8 +124,9 @@ defmodule Loka.Engine.ZoneReset do
 
   @impl true
   def handle_call({:reset, zone_key}, _from, state) do
-    case ZoneLoader.get(zone_key) do
-      {:ok, zone} ->
+    case Content.Zone.get(zone_key) do
+      {:ok, typed_object} ->
+        zone = Content.Zone.to_zone_struct(typed_object)
         result = execute_reset(zone)
         {:reply, result, state}
 
@@ -137,9 +137,10 @@ defmodule Loka.Engine.ZoneReset do
 
   @impl true
   def handle_call({:status, zone_key}, _from, state) do
-    case ZoneLoader.get(zone_key) do
-      {:ok, zone} ->
-        players_present = ZoneRegistry.players_in_zone?(zone_key)
+    case Content.Zone.get(zone_key) do
+      {:ok, typed_object} ->
+        zone = Content.Zone.to_zone_struct(typed_object)
+        players_present = Content.Zone.players_in_zone?(zone_key)
 
         status = %{
           zone: zone,
@@ -157,11 +158,13 @@ defmodule Loka.Engine.ZoneReset do
 
   @impl true
   def handle_call(:all_status, _from, state) do
-    zones = ZoneLoader.all()
+    zones =
+      Content.Zone.all()
+      |> Enum.map(&Content.Zone.to_zone_struct/1)
 
     statuses =
       Enum.map(zones, fn zone ->
-        players_present = ZoneRegistry.players_in_zone?(zone.key)
+        players_present = Content.Zone.players_in_zone?(zone.key)
 
         %{
           zone: zone,
@@ -176,26 +179,29 @@ defmodule Loka.Engine.ZoneReset do
 
   @impl true
   def handle_call({:set_enabled, zone_key, enabled}, _from, state) do
-    result = ZoneLoader.set_enabled(zone_key, enabled)
+    result = Content.Zone.set_enabled(zone_key, enabled)
     {:reply, result, state}
   end
 
   @impl true
   def handle_call(:reload, _from, state) do
-    # Rebuild zone registry mappings
-    ZoneRegistry.rebuild()
+    # No-op in V2 — zone-room mappings are derived from entity data
+    Content.Zone.rebuild()
     {:reply, :ok, state}
   end
 
   @impl true
   def handle_info(:check_resets, state) do
     now = DateTime.utc_now()
-    zones = ZoneLoader.enabled()
+
+    zones =
+      Content.Zone.enabled()
+      |> Enum.map(&Content.Zone.to_zone_struct/1)
 
     # Check each zone for reset
     Enum.each(zones, fn zone ->
       if should_reset_now?(zone, now) do
-        players_present = ZoneRegistry.players_in_zone?(zone.key)
+        players_present = Content.Zone.players_in_zone?(zone.key)
 
         if Zone.should_reset?(zone, players_present) do
           Task.start(fn -> execute_reset(zone) end)
@@ -245,7 +251,7 @@ defmodule Loka.Engine.ZoneReset do
       end)
 
     # Update last reset time
-    ZoneLoader.update_last_reset(zone.key, DateTime.utc_now())
+    Content.Zone.update_last_reset(zone.key, DateTime.utc_now())
 
     EventBus.broadcast(
       "events:zone",

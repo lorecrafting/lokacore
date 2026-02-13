@@ -2,47 +2,15 @@ defmodule Loka.Framework.Quest.ChainRegistry do
   @moduledoc """
   Registry for quest chain definitions.
 
-  Loads chains from YAML files and stores programmatically-defined chains.
-  Provides lookup by chain ID or by quest ID.
-
-  ## YAML Format
-
-      # priv/world/quests/_chains/main_story.yml
-      id: main_story_chain
-      name: "The Main Story"
-      description: |
-        The epic journey through the monastery.
-      start_quest: intro_quest
-      nodes:
-        - quest_id: intro_quest
-          next: [choice_quest]
-          auto_start: true
-        - quest_id: choice_quest
-          branches:
-            - condition:
-                type: flag
-                flag: chose_good
-              next: good_path_quest
-            - condition:
-                type: flag
-                flag: chose_evil
-              next: evil_path_quest
-            - condition:
-                type: default
-              next: neutral_path_quest
-        - quest_id: good_path_quest
-        - quest_id: evil_path_quest
-        - quest_id: neutral_path_quest
-      tags: [main, story]
+  In V2 this is a simple module that loads chains from YAML on demand
+  (no GenServer needed). Results are cached in a persistent term for fast lookup.
   """
 
-  use GenServer
   require Logger
 
   alias Loka.Engine.Constants.WorldPaths
   alias Loka.Framework.Quest.Chain.{Chain, ChainNode, Branch}
 
-  @table :loka_quest_chains
   @default_path WorldPaths.quest_chains_dir()
 
   # =============================================================================
@@ -50,237 +18,108 @@ defmodule Loka.Framework.Quest.ChainRegistry do
   # =============================================================================
 
   @doc """
-  Starts the chain registry.
-  """
-  def start_link(opts \\ []) do
-    name = Keyword.get(opts, :name, __MODULE__)
-    GenServer.start_link(__MODULE__, opts, name: name)
-  end
-
-  @doc """
   Gets a chain by ID.
-
-  Returns `{:ok, chain}` or `{:error, :not_found}`.
   """
-  def get(chain_id, server \\ __MODULE__) when is_binary(chain_id) do
-    GenServer.call(server, {:get, chain_id})
+  def get(chain_id, _server \\ nil) when is_binary(chain_id) do
+    chains = load_chains()
+
+    case Map.get(chains, chain_id) do
+      nil -> {:error, :not_found}
+      chain -> {:ok, chain}
+    end
   end
 
   @doc """
   Returns all loaded chains.
   """
-  def all(server \\ __MODULE__) do
-    GenServer.call(server, :all)
+  def all(_server \\ nil) do
+    load_chains() |> Map.values()
   end
 
   @doc """
   Gets the chain that contains a specific quest.
-
-  Returns `{:ok, chain}` or `{:error, :not_found}`.
   """
-  def get_chain_for_quest(quest_id, server \\ __MODULE__) when is_binary(quest_id) do
-    GenServer.call(server, {:get_chain_for_quest, quest_id})
+  def get_chain_for_quest(quest_id, _server \\ nil) when is_binary(quest_id) do
+    chains = load_chains()
+
+    result =
+      Enum.find_value(chains, fn {_id, chain} ->
+        if Enum.any?(chain.nodes, &(&1.quest_id == quest_id)) do
+          chain
+        end
+      end)
+
+    case result do
+      nil -> {:error, :not_found}
+      chain -> {:ok, chain}
+    end
   end
 
   @doc """
-  Registers a programmatically-defined chain.
+  Registers a programmatically-defined chain (stores in persistent term cache).
   """
-  def register(%Chain{} = chain, server \\ __MODULE__) do
-    GenServer.call(server, {:register, chain})
-  end
-
-  @doc """
-  Unregisters a chain by ID.
-  """
-  def unregister(chain_id, server \\ __MODULE__) when is_binary(chain_id) do
-    GenServer.call(server, {:unregister, chain_id})
+  def register(%Chain{} = chain, _server \\ nil) do
+    chains = load_chains()
+    updated = Map.put(chains, chain.id, chain)
+    :persistent_term.put({__MODULE__, :chains}, updated)
+    :ok
   end
 
   @doc """
   Returns chains with a specific tag.
   """
-  def by_tag(tag, server \\ __MODULE__) when is_binary(tag) do
-    GenServer.call(server, {:by_tag, tag})
+  def by_tag(tag, _server \\ nil) when is_binary(tag) do
+    all() |> Enum.filter(&(tag in &1.tags))
   end
 
   @doc """
   Returns the count of loaded chains.
   """
-  def count(server \\ __MODULE__) do
-    GenServer.call(server, :count)
-  end
+  def count(_server \\ nil), do: load_chains() |> map_size()
 
   @doc """
-  Reloads all chains from disk.
+  Reloads all chains from disk (clears cache).
   """
-  def reload(server \\ __MODULE__) do
-    GenServer.call(server, :reload)
+  def reload(_server \\ nil) do
+    :persistent_term.erase({__MODULE__, :chains})
+    load_chains()
+    :ok
   end
+
+  # No-op for backwards compat
+  def start_link(_opts \\ []), do: :ignore
 
   # =============================================================================
-  # GenServer Callbacks
+  # Loading
   # =============================================================================
 
-  @impl true
-  def init(opts) do
-    path = Keyword.get(opts, :path, @default_path)
-    load_on_start = Keyword.get(opts, :load_on_start, true)
-
-    table = :ets.new(@table, [:set, :protected, read_concurrency: true])
-
-    state = %{
-      table: table,
-      path: path,
-      chains: %{},
-      quest_to_chain: %{}
-    }
-
-    if load_on_start do
-      case do_load_all(state, path) do
-        {:ok, new_state} ->
-          count = map_size(new_state.chains)
-          Logger.info("#{__MODULE__} loaded #{count} chains")
-          {:ok, new_state}
-
-        {:error, errors} ->
-          Logger.warning("#{__MODULE__} started with errors: #{inspect(errors)}")
-          {:ok, state}
-      end
-    else
-      Logger.info("#{__MODULE__} started (load_on_start: false)")
-      {:ok, state}
-    end
-  end
-
-  @impl true
-  def handle_call({:get, chain_id}, _from, state) do
-    result =
-      case Map.get(state.chains, chain_id) do
-        nil -> {:error, :not_found}
-        chain -> {:ok, chain}
-      end
-
-    {:reply, result, state}
-  end
-
-  @impl true
-  def handle_call(:all, _from, state) do
-    {:reply, Map.values(state.chains), state}
-  end
-
-  @impl true
-  def handle_call({:get_chain_for_quest, quest_id}, _from, state) do
-    result =
-      case Map.get(state.quest_to_chain, quest_id) do
-        nil ->
-          {:error, :not_found}
-
-        chain_id ->
-          case Map.get(state.chains, chain_id) do
-            nil -> {:error, :not_found}
-            chain -> {:ok, chain}
-          end
-      end
-
-    {:reply, result, state}
-  end
-
-  @impl true
-  def handle_call({:register, chain}, _from, state) do
-    new_chains = Map.put(state.chains, chain.id, chain)
-
-    # Update quest-to-chain index
-    new_quest_to_chain =
-      Enum.reduce(chain.nodes, state.quest_to_chain, fn node, acc ->
-        Map.put(acc, node.quest_id, chain.id)
-      end)
-
-    :ets.insert(state.table, {chain.id, chain})
-
-    Logger.debug("[ChainRegistry] Registered chain: #{chain.id}")
-
-    {:reply, :ok, %{state | chains: new_chains, quest_to_chain: new_quest_to_chain}}
-  end
-
-  @impl true
-  def handle_call({:unregister, chain_id}, _from, state) do
-    case Map.get(state.chains, chain_id) do
+  defp load_chains do
+    case :persistent_term.get({__MODULE__, :chains}, nil) do
       nil ->
-        {:reply, {:error, :not_found}, state}
+        chains = do_load_all(@default_path)
+        :persistent_term.put({__MODULE__, :chains}, chains)
+        chains
 
-      chain ->
-        new_chains = Map.delete(state.chains, chain_id)
-
-        # Remove from quest-to-chain index
-        quest_ids = Enum.map(chain.nodes, & &1.quest_id)
-
-        new_quest_to_chain =
-          Enum.reduce(quest_ids, state.quest_to_chain, fn quest_id, acc ->
-            Map.delete(acc, quest_id)
-          end)
-
-        :ets.delete(state.table, chain_id)
-
-        {:reply, :ok, %{state | chains: new_chains, quest_to_chain: new_quest_to_chain}}
+      chains ->
+        chains
     end
   end
 
-  @impl true
-  def handle_call({:by_tag, tag}, _from, state) do
-    chains =
-      state.chains
-      |> Map.values()
-      |> Enum.filter(&(tag in &1.tags))
-
-    {:reply, chains, state}
-  end
-
-  @impl true
-  def handle_call(:count, _from, state) do
-    {:reply, map_size(state.chains), state}
-  end
-
-  @impl true
-  def handle_call(:reload, _from, state) do
-    case do_load_all(state, state.path) do
-      {:ok, new_state} ->
-        count = map_size(new_state.chains)
-        Logger.info("#{__MODULE__} reloaded #{count} chains")
-        {:reply, :ok, new_state}
-
-      {:error, errors} ->
-        {:reply, {:error, errors}, state}
-    end
-  end
-
-  # =============================================================================
-  # Private - Loading
-  # =============================================================================
-
-  defp do_load_all(state, path) do
+  defp do_load_all(path) do
     full_path = resolve_path(path)
 
     if File.exists?(full_path) do
       yaml_files = Path.wildcard(Path.join([full_path, "**", "*.{yml,yaml}"]))
-      {chains, parse_errors} = parse_yaml_files(yaml_files)
+      {chains, _errors} = parse_yaml_files(yaml_files)
+      count = map_size(chains)
 
-      if Enum.any?(parse_errors) do
-        {:error, parse_errors}
-      else
-        # Build quest-to-chain index
-        quest_to_chain =
-          Enum.reduce(chains, %{}, fn {_id, chain}, acc ->
-            Enum.reduce(chain.nodes, acc, fn node, inner_acc ->
-              Map.put(inner_acc, node.quest_id, chain.id)
-            end)
-          end)
-
-        update_ets(state.table, chains)
-        {:ok, %{state | chains: chains, quest_to_chain: quest_to_chain}}
+      if count > 0 do
+        Logger.info("#{__MODULE__} loaded #{count} chains")
       end
+
+      chains
     else
-      Logger.debug("#{__MODULE__}: path #{full_path} does not exist, starting empty")
-      {:ok, %{state | chains: %{}, quest_to_chain: %{}}}
+      %{}
     end
   end
 
@@ -378,41 +217,19 @@ defmodule Loka.Framework.Quest.ChainRegistry do
   defp parse_condition(%{"type" => "default"}), do: :default
   defp parse_condition(%{type: "default"}), do: :default
   defp parse_condition(%{"type" => "default", "flag" => _}), do: :default
-
   defp parse_condition(%{"type" => "flag", "flag" => flag}), do: {:flag, flag}
   defp parse_condition(%{type: "flag", flag: flag}), do: {:flag, flag}
 
-  defp parse_condition(%{"type" => "quest_completed", "quest_id" => quest_id}) do
-    {:quest_completed, quest_id}
-  end
+  defp parse_condition(%{"type" => "quest_completed", "quest_id" => quest_id}),
+    do: {:quest_completed, quest_id}
 
-  defp parse_condition(%{type: "quest_completed", quest_id: quest_id}) do
-    {:quest_completed, quest_id}
-  end
+  defp parse_condition(%{type: "quest_completed", quest_id: quest_id}),
+    do: {:quest_completed, quest_id}
 
-  defp parse_condition(%{"type" => "level_gte", "level" => level}) do
-    {:level_gte, level}
-  end
+  defp parse_condition(%{"type" => "level_gte", "level" => level}), do: {:level_gte, level}
+  defp parse_condition(%{type: "level_gte", level: level}), do: {:level_gte, level}
 
-  defp parse_condition(%{type: "level_gte", level: level}) do
-    {:level_gte, level}
-  end
-
-  defp parse_condition(%{"type" => "item_has", "item_id" => item_id}) do
-    {:item_has, item_id}
-  end
-
-  defp parse_condition(%{type: "item_has", item_id: item_id}) do
-    {:item_has, item_id}
-  end
-
+  defp parse_condition(%{"type" => "item_has", "item_id" => item_id}), do: {:item_has, item_id}
+  defp parse_condition(%{type: "item_has", item_id: item_id}), do: {:item_has, item_id}
   defp parse_condition(_), do: :default
-
-  defp update_ets(table, chains) do
-    :ets.delete_all_objects(table)
-
-    Enum.each(chains, fn {id, chain} ->
-      :ets.insert(table, {id, chain})
-    end)
-  end
 end

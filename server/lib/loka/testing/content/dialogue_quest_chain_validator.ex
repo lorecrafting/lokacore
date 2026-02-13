@@ -20,7 +20,7 @@ defmodule Loka.Testing.Content.DialogueQuestChainValidator do
 
   alias Loka.Framework.Quest
   alias Loka.Framework.Quest.Definitions
-  alias Loka.Framework.Storyline.{Storyline, StorylineRegistry}
+  alias Loka.Framework.Storyline.Storyline
   alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
   alias Loka.Content
 
@@ -30,7 +30,7 @@ defmodule Loka.Testing.Content.DialogueQuestChainValidator do
   Returns `{:ok, results}` with validation results.
   """
   def validate_all do
-    case StorylineRegistry.all() do
+    case Content.Storyline.all_structs() do
       [] ->
         {:error, :no_storylines}
 

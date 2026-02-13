@@ -55,7 +55,8 @@ defmodule Mix.Tasks.Loka.Test.Storyline do
   use Mix.Task
   use Boundary, classify_to: Loka
 
-  alias Loka.Framework.Storyline.{Storyline, StorylineRegistry}
+  alias Loka.Framework.Storyline.Storyline
+  alias Loka.Content
   alias Loka.Framework.Quest
   alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
   alias Loka.Engine.WorldLoader
@@ -96,7 +97,7 @@ defmodule Mix.Tasks.Loka.Test.Storyline do
   end
 
   defp list_storylines do
-    storylines = StorylineRegistry.all()
+    storylines = Content.Storyline.all_structs()
 
     if Enum.empty?(storylines) do
       Mix.shell().info("No storylines found in priv/world/storylines/")
@@ -130,7 +131,7 @@ defmodule Mix.Tasks.Loka.Test.Storyline do
     Mix.shell().info("╚════════════════════════════════════════════╝")
     Mix.shell().info("")
 
-    case StorylineRegistry.get(storyline_id) do
+    case Content.Storyline.get_struct(storyline_id) do
       {:error, :not_found} ->
         Mix.shell().error("Storyline '#{storyline_id}' not found")
         Mix.shell().info("Use --list to see available storylines")

@@ -435,9 +435,9 @@ defmodule Loka.Framework.Quest.Listeners do
   # Returns all quest definitions with giver: "system".
   # These quests are auto-granted to players when they first spawn/enter a room.
   defp get_system_quests do
-    alias Loka.Framework.Quest.QuestRegistry
+    alias Loka.Framework.Quest.Definitions
 
-    QuestRegistry.all()
+    Definitions.all_quest_definitions()
     |> Enum.filter(fn quest ->
       quest.giver == "system" or quest.giver == :system
     end)

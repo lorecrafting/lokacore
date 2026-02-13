@@ -30,6 +30,7 @@ defmodule Loka.Framework.Actions.Resolver do
       # Returns list of %Action{} structs that are available
   """
 
+  alias Loka.Content.StatusEffect, as: ContentStatusEffect
   alias Loka.Framework.Actions.Action
   alias Loka.Framework.Conditions.Evaluator
   alias Loka.Framework.Status.StatusManager
@@ -273,11 +274,9 @@ defmodule Loka.Framework.Actions.Resolver do
   end
 
   defp get_status_blocked_actions(active_status) do
-    case Loka.Framework.Status.StatusRegistry.get(active_status.status_key) do
+    case ContentStatusEffect.get(active_status.status_key) do
       {:ok, status_def} ->
-        Map.get(status_def, :removes_actions) ||
-          Map.get(status_def, "removes_actions") ||
-          []
+        ContentStatusEffect.removes_actions(status_def)
 
       _ ->
         []
@@ -352,16 +351,10 @@ defmodule Loka.Framework.Actions.Resolver do
     # Find any status that replaces all actions
     replacement =
       Enum.find_value(active_statuses, fn active_status ->
-        case Loka.Framework.Status.StatusRegistry.get(active_status.status_key) do
+        case ContentStatusEffect.get(active_status.status_key) do
           {:ok, status_def} ->
-            if Map.get(status_def, :replaces_all_actions) ||
-                 Map.get(status_def, "replaces_all_actions") do
-              grants =
-                Map.get(status_def, :grants_actions) ||
-                  Map.get(status_def, "grants_actions") ||
-                  []
-
-              grants
+            if ContentStatusEffect.replaces_all_actions?(status_def) do
+              ContentStatusEffect.grants_actions(status_def)
               |> List.wrap()
               |> Enum.map(&Action.from_map/1)
               |> Enum.reject(&is_nil/1)

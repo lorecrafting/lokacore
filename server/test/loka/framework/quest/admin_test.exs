@@ -3,9 +3,10 @@ defmodule Loka.Framework.Quest.AdminTest do
 
   alias Loka.Framework.Quest.Admin
   alias Loka.Framework.Player.GameState
-  alias Loka.Framework.Quest.QuestRegistry
+  alias Loka.Framework.Quest.Definitions
 
   import Loka.AccountsFixtures
+  import Loka.EngineFixtures
 
   setup do
     # Create a test player using the fixture
@@ -13,6 +14,43 @@ defmodule Loka.Framework.Quest.AdminTest do
 
     # Create a game state for the test player
     {:ok, state} = GameState.get_or_create_state(player.id)
+
+    # Create test quest entities in DB (replaces QuestRegistry)
+    quest_fixture(%{
+      key: "admin_test_quest_a",
+      name: "Admin Test Quest A",
+      quest_type: "side",
+      objectives: [
+        %{
+          "id" => "obj_1",
+          "type" => "go_to",
+          "target_id" => "room_1",
+          "description" => "Go to room 1"
+        },
+        %{
+          "id" => "obj_2",
+          "type" => "kill",
+          "target_id" => "goblin",
+          "count" => 3,
+          "description" => "Kill 3 goblins"
+        }
+      ],
+      rewards: %{"xp" => 100}
+    })
+
+    quest_fixture(%{
+      key: "admin_test_quest_b",
+      name: "Admin Test Quest B",
+      quest_type: "side",
+      objectives: [
+        %{
+          "id" => "obj_1",
+          "type" => "talk",
+          "target_id" => "npc_1",
+          "description" => "Talk to NPC"
+        }
+      ]
+    })
 
     {:ok, state: state, player_id: player.id}
   end
@@ -40,8 +78,7 @@ defmodule Loka.Framework.Quest.AdminTest do
     end
 
     test "grants existing quest to player", %{player_id: player_id} do
-      # Get a real quest from the registry
-      quests = QuestRegistry.all()
+      quests = Definitions.all_quest_definitions()
 
       if quests != [] do
         quest = hd(quests)
@@ -62,7 +99,7 @@ defmodule Loka.Framework.Quest.AdminTest do
 
   describe "reset_quest/2" do
     test "removes quest from active and completed lists", %{player_id: player_id} do
-      quests = QuestRegistry.all()
+      quests = Definitions.all_quest_definitions()
 
       if quests != [] do
         quest = hd(quests)
@@ -84,7 +121,7 @@ defmodule Loka.Framework.Quest.AdminTest do
   describe "reset_all_quests/1" do
     test "clears all quests for player", %{player_id: player_id} do
       # Grant some quests first
-      quests = QuestRegistry.all() |> Enum.take(2)
+      quests = Definitions.all_quest_definitions() |> Enum.take(2)
 
       for quest <- quests do
         Admin.force_grant_quest(player_id, quest.id)
@@ -107,7 +144,7 @@ defmodule Loka.Framework.Quest.AdminTest do
     end
 
     test "returns error for nonexistent objective", %{player_id: player_id} do
-      quests = QuestRegistry.all()
+      quests = Definitions.all_quest_definitions()
 
       if quests != [] do
         quest = hd(quests)
@@ -119,7 +156,7 @@ defmodule Loka.Framework.Quest.AdminTest do
     end
 
     test "returns diagnosis for valid objective", %{player_id: player_id} do
-      quests = QuestRegistry.all()
+      quests = Definitions.all_quest_definitions()
 
       if quests != [] do
         quest = hd(quests)

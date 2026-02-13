@@ -6,102 +6,69 @@ defmodule Loka.Framework.Quest.TimedObjectivesTest do
   """
   use Loka.DataCase, async: false
 
-  alias Loka.Framework.Player.GameState
   alias Loka.Framework.Quest.TimerManager
+  alias Loka.Framework.Quest.Definitions
   alias Loka.Framework.Quest.Definitions.Objective
-  alias Loka.Framework.Quest.QuestRegistry
 
-  @test_quests_path "test/fixtures/timed_quests"
+  import Loka.EngineFixtures
 
   setup do
-    # Create test quests with timed objectives
-    File.mkdir_p!(@test_quests_path)
-
-    File.write!(Path.join(@test_quests_path, "escape_quest.yml"), """
-    id: escape_quest
-    name: "Escape the Dungeon"
-    description: "Escape before the dungeon collapses!"
-    objectives:
-      - id: reach_exit
-        type: go_to
-        target_id: dungeon_exit
-        time_limit: 300
-        description: "Reach the exit in 5 minutes"
-    """)
-
-    File.write!(Path.join(@test_quests_path, "mixed_quest.yml"), """
-    id: mixed_quest
-    name: "Mixed Objectives"
-    description: "Some timed, some not"
-    objectives:
-      - id: timed_obj
-        type: go_to
-        target_id: location1
-        time_limit: 60
-        description: "Timed objective"
-      - id: normal_obj
-        type: go_to
-        target_id: location2
-        description: "Normal objective"
-    """)
-
-    # Start a fresh registry for testing
-    {:ok, registry} =
-      QuestRegistry.start_link(path: @test_quests_path, name: nil, load_on_start: false)
-
-    :ok = QuestRegistry.reload(registry)
-
     player_id = Ecto.UUID.generate()
 
-    game_state = %GameState{
-      player_id: player_id,
-      quests: %{"active" => %{}, "completed" => []}
-    }
+    # Create quest entities in the DB (replaces YAML + QuestRegistry)
+    quest_fixture(%{
+      key: "escape_quest",
+      name: "Escape the Dungeon",
+      description: "Escape before the dungeon collapses!",
+      objectives: [
+        %{
+          "id" => "reach_exit",
+          "type" => "go_to",
+          "target_id" => "dungeon_exit",
+          "time_limit" => 300,
+          "description" => "Reach the exit in 5 minutes"
+        }
+      ]
+    })
+
+    quest_fixture(%{
+      key: "mixed_quest",
+      name: "Mixed Objectives",
+      description: "Some timed, some not",
+      objectives: [
+        %{
+          "id" => "timed_obj",
+          "type" => "go_to",
+          "target_id" => "location1",
+          "time_limit" => 60,
+          "description" => "Timed objective"
+        },
+        %{
+          "id" => "normal_obj",
+          "type" => "go_to",
+          "target_id" => "location2",
+          "description" => "Normal objective"
+        }
+      ]
+    })
 
     on_exit(fn ->
-      File.rm_rf!(@test_quests_path)
       TimerManager.clear_player_timers(player_id)
     end)
 
-    {:ok, registry: registry, game_state: game_state, player_id: player_id}
+    {:ok, player_id: player_id}
   end
 
   describe "accepting quests with timed objectives" do
-    test "starts timer when accepting quest with timed objective", %{
-      registry: registry,
-      game_state: state,
-      player_id: player_id
-    } do
-      # Get quest definition from registry
-      {:ok, quest} = QuestRegistry.get("escape_quest", registry)
+    test "starts timer when accepting quest with timed objective", %{player_id: player_id} do
+      # Get quest definition from DB via Definitions
+      quest = Definitions.get_quest_definition("escape_quest")
+      assert quest != nil
       assert quest.id == "escape_quest"
 
-      # Mock the Definitions module to return our quest
-      # Accept the quest using a simpler approach - directly construct state
+      # Start the timer manually (simulating what Progress.accept_quest does)
       accepted_at = DateTime.utc_now()
 
-      objectives = %{
-        "reach_exit" => %{
-          "completed" => false,
-          "progress" => 0,
-          "started_at" => DateTime.to_iso8601(accepted_at)
-        }
-      }
-
-      new_state = %{
-        state
-        | quests: %{
-            "active" => %{
-              "escape_quest" => %{
-                "objectives" => objectives,
-                "accepted_at" => accepted_at
-              }
-            },
-            "completed" => []
-          }
-      }
-
-      # Start the timer manually (simulating what Progress.accept_quest does)
       {:ok, expires_at} =
         TimerManager.start_objective_timer(
           player_id,
@@ -121,15 +88,11 @@ defmodule Loka.Framework.Quest.TimedObjectivesTest do
       assert length(timers) == 1
       assert hd(timers).quest_id == "escape_quest"
       assert hd(timers).objective_id == "reach_exit"
-
-      assert new_state.quests["active"]["escape_quest"] != nil
     end
 
-    test "only timed objectives get timers", %{
-      registry: registry,
-      player_id: player_id
-    } do
-      {:ok, quest} = QuestRegistry.get("mixed_quest", registry)
+    test "only timed objectives get timers", %{player_id: player_id} do
+      quest = Definitions.get_quest_definition("mixed_quest")
+      assert quest != nil
 
       # Find timed and normal objectives
       timed_obj = Enum.find(quest.objectives, &(&1.id == "timed_obj"))

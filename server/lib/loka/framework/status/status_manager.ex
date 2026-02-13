@@ -41,7 +41,7 @@ defmodule Loka.Framework.Status.StatusManager do
   use GenServer
   require Logger
 
-  alias Loka.Framework.Status.{StatusEffect, StatusRegistry}
+  alias Loka.Content.StatusEffect, as: ContentStatusEffect
   alias Loka.Mechanics.{Damage, Heal}
   alias Loka.Primitives.ResourcePool
 
@@ -156,9 +156,9 @@ defmodule Loka.Framework.Status.StatusManager do
     active_statuses = get_active(entity_id)
 
     Enum.reduce(active_statuses, 0, fn active, acc ->
-      case StatusRegistry.get(active.status_key) do
+      case ContentStatusEffect.get(active.status_key) do
         {:ok, status} ->
-          modifiers = StatusEffect.get_stat_modifiers(status)
+          modifiers = ContentStatusEffect.get_stat_modifiers(status)
 
           modifier_sum =
             modifiers
@@ -203,32 +203,36 @@ defmodule Loka.Framework.Status.StatusManager do
   @impl true
   def handle_call({:apply_status, entity_id, status_key, source_id, opts}, _from, state) do
     result =
-      case StatusRegistry.get(status_key) do
+      case ContentStatusEffect.get(status_key) do
         {:error, _} ->
           {:error, :status_not_found}
 
         {:ok, status} ->
           active_statuses = get_active(entity_id)
+          exclusive = ContentStatusEffect.exclusive_with(status)
 
           # Check for exclusive statuses
           conflicting =
             Enum.find(active_statuses, fn active ->
-              active.status_key in status.exclusive_with
+              active.status_key in exclusive
             end)
 
           if conflicting do
             {:error, {:exclusive_conflict, conflicting.status_key}}
           else
             new_stacks = Keyword.get(opts, :stacks, 1)
-            duration = Keyword.get(opts, :duration, status.duration)
+            status_duration = ContentStatusEffect.duration(status)
+            duration = Keyword.get(opts, :duration, status_duration)
+            stackable = ContentStatusEffect.stackable?(status)
+            max_stacks = ContentStatusEffect.max_stacks(status)
 
             # Check if already has this status
             existing = Enum.find(active_statuses, &(&1.status_key == status_key))
 
             new_active =
-              if existing && status.stackable do
+              if existing && stackable do
                 # Add stacks up to max
-                new_stack_count = min(existing.stacks + new_stacks, status.max_stacks)
+                new_stack_count = min(existing.stacks + new_stacks, max_stacks)
                 %{existing | stacks: new_stack_count, remaining_duration: duration}
               else
                 if existing do
@@ -238,7 +242,7 @@ defmodule Loka.Framework.Status.StatusManager do
                   # New status
                   %{
                     status_key: status_key,
-                    stacks: min(new_stacks, status.max_stacks),
+                    stacks: min(new_stacks, max_stacks),
                     remaining_duration: duration,
                     source_id: source_id,
                     applied_at: DateTime.utc_now()
@@ -278,7 +282,7 @@ defmodule Loka.Framework.Status.StatusManager do
 
     results =
       Enum.flat_map(active_statuses, fn active ->
-        case StatusRegistry.get(active.status_key) do
+        case ContentStatusEffect.get(active.status_key) do
           {:ok, status} ->
             process_trigger(entity_id, status, active, trigger)
 
@@ -314,7 +318,7 @@ defmodule Loka.Framework.Status.StatusManager do
 
     # Process on_remove for expired
     Enum.each(expired, fn active ->
-      case StatusRegistry.get(active.status_key) do
+      case ContentStatusEffect.get(active.status_key) do
         {:ok, status} -> process_trigger(entity_id, status, active, :on_remove)
         _ -> nil
       end
@@ -328,15 +332,15 @@ defmodule Loka.Framework.Status.StatusManager do
   @impl true
   def handle_call({:try_cure, entity_id, status_key, cure_source, cure_type}, _from, state) do
     result =
-      case StatusRegistry.get(status_key) do
+      case ContentStatusEffect.get(status_key) do
         {:error, _} ->
           {:error, :status_not_found}
 
         {:ok, status} ->
           can_cure =
             case cure_type do
-              :item -> StatusEffect.curable_by_item?(status, cure_source)
-              :ability -> StatusEffect.curable_by_ability?(status, cure_source)
+              :item -> ContentStatusEffect.curable_by_item?(status, cure_source)
+              :ability -> ContentStatusEffect.curable_by_ability?(status, cure_source)
               _ -> false
             end
 
@@ -360,9 +364,13 @@ defmodule Loka.Framework.Status.StatusManager do
         active_statuses
       else
         Enum.filter(active_statuses, fn active ->
-          case StatusRegistry.get(active.status_key) do
-            {:ok, status} -> status.type == type_or_all
-            _ -> false
+          case ContentStatusEffect.get(active.status_key) do
+            {:ok, status} ->
+              effect_type = ContentStatusEffect.effect_type(status)
+              to_string(effect_type) == to_string(type_or_all)
+
+            _ ->
+              false
           end
         end)
       end
@@ -378,7 +386,7 @@ defmodule Loka.Framework.Status.StatusManager do
 
     # Process on_remove for dispelled
     Enum.each(to_dispel, fn active ->
-      case StatusRegistry.get(active.status_key) do
+      case ContentStatusEffect.get(active.status_key) do
         {:ok, status} -> process_trigger(entity_id, status, active, :on_remove)
         _ -> nil
       end
@@ -408,7 +416,7 @@ defmodule Loka.Framework.Status.StatusManager do
 
     if existing do
       # Process on_remove effects
-      case StatusRegistry.get(status_key) do
+      case ContentStatusEffect.get(status_key) do
         {:ok, status} -> process_trigger(entity_id, status, existing, :on_remove)
         _ -> nil
       end
@@ -422,7 +430,7 @@ defmodule Loka.Framework.Status.StatusManager do
   end
 
   defp process_trigger(_entity_id, status, active, trigger) do
-    effects = StatusEffect.get_effects_for_trigger(status, trigger)
+    effects = ContentStatusEffect.get_effects_for_trigger(status, trigger)
 
     Enum.map(effects, fn effect ->
       process_effect(effect, active)

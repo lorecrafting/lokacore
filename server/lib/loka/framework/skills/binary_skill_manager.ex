@@ -33,7 +33,8 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
       BinarySkillManager.learned_skills(game_state)
   """
 
-  alias Loka.Framework.Skills.{BinarySkill, BinarySkillRegistry}
+  alias Loka.Content.Skill, as: ContentSkill
+  alias Loka.Engine.TypedObject
   alias Loka.Framework.Player.GameState
   alias Loka.Config.Balance
   alias Loka.Utils.MapHelpers
@@ -76,11 +77,11 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
   @doc """
   Returns learned skills with their definitions.
   """
-  @spec learned_skills_with_info(GameState.t()) :: [BinarySkill.t()]
+  @spec learned_skills_with_info(GameState.t()) :: [TypedObject.t()]
   def learned_skills_with_info(%GameState{} = game_state) do
     game_state
     |> get_learned_skills()
-    |> Enum.map(&BinarySkillRegistry.get/1)
+    |> Enum.map(&ContentSkill.get/1)
     |> Enum.filter(&match?({:ok, _}, &1))
     |> Enum.map(fn {:ok, skill} -> skill end)
   end
@@ -88,11 +89,11 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
   @doc """
   Returns learned skills grouped by category.
   """
-  @spec learned_skills_by_category(GameState.t()) :: %{atom() => [BinarySkill.t()]}
+  @spec learned_skills_by_category(GameState.t()) :: %{String.t() => [TypedObject.t()]}
   def learned_skills_by_category(%GameState{} = game_state) do
     game_state
     |> learned_skills_with_info()
-    |> Enum.group_by(& &1.category)
+    |> Enum.group_by(&ContentSkill.category/1)
   end
 
   # =============================================================================
@@ -118,8 +119,8 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
     game_state
     |> get_learned_skills()
     |> Enum.reduce(0, fn skill_key, acc ->
-      case BinarySkillRegistry.get(skill_key) do
-        {:ok, skill} -> acc + skill.cost
+      case ContentSkill.get(skill_key) do
+        {:ok, skill} -> acc + ContentSkill.cost(skill)
         _ -> acc
       end
     end)
@@ -155,7 +156,7 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
   def learn(%GameState{} = game_state, skill_key, opts \\ []) do
     free = Keyword.get(opts, :free, false)
 
-    with {:ok, skill} <- BinarySkillRegistry.get(skill_key),
+    with {:ok, skill} <- ContentSkill.get(skill_key),
          :ok <- check_not_already_learned(game_state, skill_key),
          :ok <- check_prerequisites(game_state, skill),
          :ok <- check_can_afford(game_state, skill, free) do
@@ -166,7 +167,7 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
       audit = %{
         operation: :learn_skill,
         skill_key: skill_key,
-        cost: if(free, do: 0, else: skill.cost),
+        cost: if(free, do: 0, else: ContentSkill.cost(skill)),
         free: free,
         points_after: points_remaining(new_state),
         timestamp: System.system_time(:millisecond)
@@ -184,7 +185,7 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
   """
   @spec forget(GameState.t(), String.t()) :: {:ok, GameState.t(), map()} | {:error, term()}
   def forget(%GameState{} = game_state, skill_key) do
-    with {:ok, skill} <- BinarySkillRegistry.get(skill_key),
+    with {:ok, skill} <- ContentSkill.get(skill_key),
          :ok <- check_is_learned(game_state, skill_key),
          :ok <- check_no_dependents(game_state, skill_key) do
       learned = get_learned_skills(game_state)
@@ -194,7 +195,7 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
       audit = %{
         operation: :forget_skill,
         skill_key: skill_key,
-        refunded: skill.cost,
+        refunded: ContentSkill.cost(skill),
         points_after: points_remaining(new_state),
         timestamp: System.system_time(:millisecond)
       }
@@ -210,9 +211,9 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
   @doc """
   Checks if a player can use a skill (knows it and has resources).
   """
-  @spec can_use?(GameState.t(), String.t(), map()) :: {:ok, BinarySkill.t()} | {:error, term()}
+  @spec can_use?(GameState.t(), String.t(), map()) :: {:ok, TypedObject.t()} | {:error, term()}
   def can_use?(%GameState{} = game_state, skill_key, resources \\ %{}) do
-    with {:ok, skill} <- BinarySkillRegistry.get(skill_key),
+    with {:ok, skill} <- ContentSkill.get(skill_key),
          :ok <- check_is_learned(game_state, skill_key),
          :ok <- check_has_resources(skill, resources) do
       {:ok, skill}
@@ -226,10 +227,10 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
   """
   @spec effectiveness(GameState.t(), String.t()) :: {:ok, float()} | {:error, term()}
   def effectiveness(%GameState{} = game_state, skill_key) do
-    with {:ok, skill} <- BinarySkillRegistry.get(skill_key),
+    with {:ok, skill} <- ContentSkill.get(skill_key),
          :ok <- check_is_learned(game_state, skill_key) do
       stats = get_player_stats(game_state)
-      {:ok, BinarySkill.effectiveness(skill, stats)}
+      {:ok, ContentSkill.effectiveness(skill, stats)}
     end
   end
 
@@ -238,10 +239,10 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
   """
   @spec stat_bonus(GameState.t(), String.t()) :: {:ok, non_neg_integer()} | {:error, term()}
   def stat_bonus(%GameState{} = game_state, skill_key) do
-    with {:ok, skill} <- BinarySkillRegistry.get(skill_key),
+    with {:ok, skill} <- ContentSkill.get(skill_key),
          :ok <- check_is_learned(game_state, skill_key) do
       stats = get_player_stats(game_state)
-      {:ok, BinarySkill.stat_bonus(skill, stats)}
+      {:ok, ContentSkill.stat_bonus(skill, stats)}
     end
   end
 
@@ -257,31 +258,31 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
   - Prerequisites met
   - Can afford (unless include_unaffordable: true)
   """
-  @spec learnable_skills(GameState.t(), keyword()) :: [BinarySkill.t()]
+  @spec learnable_skills(GameState.t(), keyword()) :: [TypedObject.t()]
   def learnable_skills(%GameState{} = game_state, opts \\ []) do
     include_unaffordable = Keyword.get(opts, :include_unaffordable, false)
     learned = get_learned_skills(game_state)
     remaining = points_remaining(game_state)
 
-    BinarySkillRegistry.all()
+    ContentSkill.all_binary()
     |> Enum.filter(fn skill ->
       not MapSet.member?(learned, skill.key) and
-        BinarySkill.prerequisites_met?(skill, learned) and
-        (include_unaffordable or skill.cost <= remaining)
+        ContentSkill.binary_prerequisites_met?(skill, learned) and
+        (include_unaffordable or ContentSkill.cost(skill) <= remaining)
     end)
   end
 
   @doc """
   Returns skills available from a specific trainer.
   """
-  @spec skills_from_trainer(GameState.t(), String.t()) :: [BinarySkill.t()]
+  @spec skills_from_trainer(GameState.t(), String.t()) :: [TypedObject.t()]
   def skills_from_trainer(%GameState{} = game_state, trainer_key) do
     learned = get_learned_skills(game_state)
 
-    BinarySkillRegistry.by_trainer(trainer_key)
+    ContentSkill.by_trainer(trainer_key)
     |> Enum.filter(fn skill ->
       not MapSet.member?(learned, skill.key) and
-        BinarySkill.prerequisites_met?(skill, learned)
+        ContentSkill.binary_prerequisites_met?(skill, learned)
     end)
   end
 
@@ -305,19 +306,20 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
     end
   end
 
-  defp check_prerequisites(%GameState{} = game_state, %BinarySkill{} = skill) do
+  defp check_prerequisites(%GameState{} = game_state, %TypedObject{} = skill) do
     learned = get_learned_skills(game_state)
 
-    if BinarySkill.prerequisites_met?(skill, learned) do
+    if ContentSkill.binary_prerequisites_met?(skill, learned) do
       :ok
     else
-      {:error, {:prerequisites_not_met, skill.prerequisites}}
+      {:error, {:prerequisites_not_met, ContentSkill.prerequisites(skill)}}
     end
   end
 
-  defp check_can_afford(%GameState{}, %BinarySkill{}, true = _free), do: :ok
+  defp check_can_afford(%GameState{}, %TypedObject{}, true = _free), do: :ok
 
-  defp check_can_afford(%GameState{} = game_state, %BinarySkill{cost: cost}, _free) do
+  defp check_can_afford(%GameState{} = game_state, %TypedObject{} = skill, _free) do
+    cost = ContentSkill.cost(skill)
     remaining = points_remaining(game_state)
 
     if remaining >= cost do
@@ -327,16 +329,16 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
     end
   end
 
-  defp check_has_resources(%BinarySkill{} = skill, resources) do
+  defp check_has_resources(%TypedObject{} = skill, resources) do
     mv = Map.get(resources, :mv, 999_999)
     mana = Map.get(resources, :mana, 999_999)
 
     cond do
-      not BinarySkill.has_mv?(skill, mv) ->
-        {:error, {:insufficient_mv, skill.mv_cost, mv}}
+      not ContentSkill.has_mv?(skill, mv) ->
+        {:error, {:insufficient_mv, ContentSkill.mv_cost(skill), mv}}
 
-      not BinarySkill.has_mana?(skill, mana) ->
-        {:error, {:insufficient_mana, skill.mana_cost, mana}}
+      not ContentSkill.has_mana?(skill, mana) ->
+        {:error, {:insufficient_mana, ContentSkill.mana_cost(skill), mana}}
 
       true ->
         :ok
@@ -350,8 +352,8 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
     dependents =
       learned
       |> Enum.filter(fn key ->
-        case BinarySkillRegistry.get(key) do
-          {:ok, skill} -> skill_key in skill.prerequisites
+        case ContentSkill.get(key) do
+          {:ok, skill} -> skill_key in ContentSkill.prerequisites(skill)
           _ -> false
         end
       end)

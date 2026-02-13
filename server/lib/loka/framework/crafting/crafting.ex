@@ -8,7 +8,6 @@ defmodule Loka.Framework.Crafting do
   ## Usage
 
       alias Loka.Framework.Crafting
-      alias Loka.Framework.Crafting.CraftingRegistry
 
       # Check if player can craft a recipe
       case Crafting.can_craft?(game_state, "recipe_health_potion") do
@@ -28,7 +27,9 @@ defmodule Loka.Framework.Crafting do
 
   require Logger
 
-  alias Loka.Framework.Crafting.{Recipe, CraftingRegistry, CraftingStation}
+  alias Loka.Content.Recipe, as: ContentRecipe
+  alias Loka.Engine.TypedObject
+  alias Loka.Framework.Crafting.CraftingStation
   alias Loka.Framework.Player.GameState
   alias Loka.Mechanics.Cost
   alias Loka.Primitives.ResourcePool
@@ -51,7 +52,7 @@ defmodule Loka.Framework.Crafting do
   Filters based on skill levels and available ingredients.
   """
   def list_available_recipes(%GameState{} = game_state) do
-    CraftingRegistry.available_for(game_state)
+    ContentRecipe.available_for(game_state)
   end
 
   @doc """
@@ -60,7 +61,7 @@ defmodule Loka.Framework.Crafting do
   def list_station_recipes(room_entity) do
     case CraftingStation.get_station(room_entity) do
       nil -> []
-      station -> CraftingRegistry.by_station(station.type)
+      station -> ContentRecipe.by_station(station.type)
     end
   end
 
@@ -120,7 +121,8 @@ defmodule Loka.Framework.Crafting do
 
     with {:ok, recipe} <- get_recipe(recipe_key),
          :ok <- can_craft?(game_state, recipe_key, opts),
-         {:ok, state_after_consume} <- do_consume_ingredients(game_state, recipe.ingredients),
+         {:ok, state_after_consume} <-
+           do_consume_ingredients(game_state, ContentRecipe.ingredients(recipe)),
          {:ok, state_after_costs} <- do_pay_resource_costs(state_after_consume, recipe) do
       # Determine success/failure
       success? = determine_success(recipe, station_bonus)
@@ -156,7 +158,7 @@ defmodule Loka.Framework.Crafting do
         )
       else
         Logger.info(
-          "[CRAFTING] Craft failed: recipe=#{recipe_key} failure_chance=#{recipe.failure_chance}"
+          "[CRAFTING] Craft failed: recipe=#{recipe_key} failure_chance=#{ContentRecipe.failure_chance(recipe)}"
         )
       end
 
@@ -180,7 +182,9 @@ defmodule Loka.Framework.Crafting do
   def get_missing_ingredients(%GameState{} = game_state, recipe_key) do
     case get_recipe(recipe_key) do
       {:ok, recipe} ->
-        Enum.map(recipe.ingredients, fn %{item: item_key, quantity: required} ->
+        ContentRecipe.ingredients(recipe)
+        |> normalize_ingredients()
+        |> Enum.map(fn %{item: item_key, quantity: required} ->
           have = count_item(game_state, item_key)
           missing = max(0, required - have)
 
@@ -204,7 +208,8 @@ defmodule Loka.Framework.Crafting do
   def get_missing_tools(%GameState{} = game_state, recipe_key) do
     case get_recipe(recipe_key) do
       {:ok, recipe} ->
-        Enum.reject(recipe.tools, fn tool_key ->
+        ContentRecipe.tools(recipe)
+        |> Enum.reject(fn tool_key ->
           has_item?(game_state, tool_key)
         end)
 
@@ -221,7 +226,7 @@ defmodule Loka.Framework.Crafting do
   def consume_ingredients(%GameState{} = game_state, recipe_key) do
     case get_recipe(recipe_key) do
       {:ok, recipe} ->
-        do_consume_ingredients(game_state, recipe.ingredients)
+        do_consume_ingredients(game_state, ContentRecipe.ingredients(recipe))
 
       {:error, reason} ->
         {:error, reason}
@@ -233,25 +238,29 @@ defmodule Loka.Framework.Crafting do
   # =============================================================================
 
   defp get_recipe(recipe_key) do
-    CraftingRegistry.get(recipe_key)
+    ContentRecipe.get(recipe_key)
   end
 
-  defp check_skill_requirements(%GameState{} = game_state, %Recipe{} = recipe) do
-    if Recipe.requires_skill?(recipe) do
+  defp check_skill_requirements(%GameState{} = game_state, %TypedObject{type: :recipe} = recipe) do
+    if ContentRecipe.requires_skill?(recipe) do
       skills = get_skills(game_state)
-      player_level = Map.get(skills, recipe.skill_required, 0)
+      skill = ContentRecipe.skill_required(recipe)
+      level = ContentRecipe.skill_level(recipe)
+      player_level = Map.get(skills, skill, 0)
 
-      if player_level >= recipe.skill_level do
+      if player_level >= level do
         :ok
       else
-        {:error, {:skill_required, recipe.skill_required, recipe.skill_level, player_level}}
+        {:error, {:skill_required, skill, level, player_level}}
       end
     else
       :ok
     end
   end
 
-  defp check_ingredients(%GameState{} = game_state, %Recipe{ingredients: ingredients}) do
+  defp check_ingredients(%GameState{} = game_state, %TypedObject{type: :recipe} = recipe) do
+    ingredients = ContentRecipe.ingredients(recipe) |> normalize_ingredients()
+
     missing =
       Enum.filter(ingredients, fn %{item: item_key, quantity: required} ->
         count_item(game_state, item_key) < required
@@ -264,7 +273,8 @@ defmodule Loka.Framework.Crafting do
     end
   end
 
-  defp check_tools(%GameState{} = game_state, %Recipe{tools: tools}) do
+  defp check_tools(%GameState{} = game_state, %TypedObject{type: :recipe} = recipe) do
+    tools = ContentRecipe.tools(recipe)
     missing = Enum.reject(tools, &has_item?(game_state, &1))
 
     if Enum.empty?(missing) do
@@ -274,13 +284,18 @@ defmodule Loka.Framework.Crafting do
     end
   end
 
-  defp check_station(_room_entity, %Recipe{station_type: nil}), do: :ok
+  defp check_station(room_entity, %TypedObject{type: :recipe} = recipe) do
+    station_type = ContentRecipe.station_type(recipe)
+    do_check_station(room_entity, station_type)
+  end
 
-  defp check_station(nil, %Recipe{station_type: station_type}) do
+  defp do_check_station(_room_entity, nil), do: :ok
+
+  defp do_check_station(nil, station_type) do
     {:error, {:station_required, station_type}}
   end
 
-  defp check_station(room_entity, %Recipe{station_type: station_type}) do
+  defp do_check_station(room_entity, station_type) do
     case CraftingStation.get_station(room_entity) do
       nil ->
         {:error, {:station_required, station_type}}
@@ -294,42 +309,44 @@ defmodule Loka.Framework.Crafting do
     end
   end
 
-  defp check_resource_costs(%GameState{} = _game_state, %Recipe{resource_costs: costs})
-       when map_size(costs) == 0 do
-    :ok
-  end
+  defp check_resource_costs(%GameState{} = game_state, %TypedObject{type: :recipe} = recipe) do
+    costs = ContentRecipe.resource_costs(recipe)
 
-  defp check_resource_costs(%GameState{} = game_state, %Recipe{resource_costs: costs}) do
-    # Build resource pools from game_state.resources
-    resource_pools = build_resource_pools(game_state)
-
-    # Use Cost.can_afford_all? to check
-    if Cost.can_afford_all?(resource_pools, costs) do
+    if map_size(costs) == 0 do
       :ok
     else
-      missing = Cost.missing_resources(resource_pools, costs)
-      {:error, {:insufficient_resources, missing}}
+      # Build resource pools from game_state.resources
+      resource_pools = build_resource_pools(game_state)
+
+      # Use Cost.can_afford_all? to check
+      if Cost.can_afford_all?(resource_pools, costs) do
+        :ok
+      else
+        missing = Cost.missing_resources(resource_pools, costs)
+        {:error, {:insufficient_resources, missing}}
+      end
     end
   end
 
-  defp do_pay_resource_costs(%GameState{} = game_state, %Recipe{resource_costs: costs})
-       when map_size(costs) == 0 do
-    {:ok, game_state}
-  end
+  defp do_pay_resource_costs(%GameState{} = game_state, %TypedObject{type: :recipe} = recipe) do
+    costs = ContentRecipe.resource_costs(recipe)
 
-  defp do_pay_resource_costs(%GameState{} = game_state, %Recipe{resource_costs: costs}) do
-    # Build resource pools from game_state.resources
-    resource_pools = build_resource_pools(game_state)
+    if map_size(costs) == 0 do
+      {:ok, game_state}
+    else
+      # Build resource pools from game_state.resources
+      resource_pools = build_resource_pools(game_state)
 
-    # Use Cost.pay_all to pay costs atomically
-    case Cost.pay_all(resource_pools, costs) do
-      {:ok, new_pools, _audit} ->
-        # Update game_state with new resource values
-        new_resources = pools_to_resources(new_pools, game_state.resources || %{})
-        {:ok, %{game_state | resources: new_resources}}
+      # Use Cost.pay_all to pay costs atomically
+      case Cost.pay_all(resource_pools, costs) do
+        {:ok, new_pools, _audit} ->
+          # Update game_state with new resource values
+          new_resources = pools_to_resources(new_pools, game_state.resources || %{})
+          {:ok, %{game_state | resources: new_resources}}
 
-      {:error, {:insufficient, missing}} ->
-        {:error, {:insufficient_resources, missing}}
+        {:error, {:insufficient, missing}} ->
+          {:error, {:insufficient_resources, missing}}
+      end
     end
   end
 
@@ -390,7 +407,8 @@ defmodule Loka.Framework.Crafting do
   # Crafting Execution
   # =============================================================================
 
-  defp determine_success(%Recipe{failure_chance: chance}, station_bonus) do
+  defp determine_success(%TypedObject{type: :recipe} = recipe, station_bonus) do
+    chance = ContentRecipe.failure_chance(recipe)
     adjusted_chance = max(0, chance - station_bonus)
     :rand.uniform() > adjusted_chance
   end
@@ -404,39 +422,40 @@ defmodule Loka.Framework.Crafting do
     end
   end
 
-  defp build_success_result(%Recipe{} = recipe) do
-    items = generate_output_items(recipe.output)
+  defp build_success_result(%TypedObject{type: :recipe} = recipe) do
+    items = generate_output_items(ContentRecipe.output(recipe))
 
     %{
       success: true,
       items: items,
-      message: recipe.success_message,
-      xp: recipe.xp_reward,
-      consumed: recipe.ingredients
+      message: ContentRecipe.success_message(recipe),
+      xp: ContentRecipe.xp_reward(recipe),
+      consumed: ContentRecipe.ingredients(recipe)
     }
   end
 
-  defp build_failure_result(%Recipe{} = recipe) do
-    items = generate_output_items(recipe.failure_output)
+  defp build_failure_result(%TypedObject{type: :recipe} = recipe) do
+    items = generate_output_items(ContentRecipe.failure_output(recipe))
 
     %{
       success: false,
       items: items,
-      message: recipe.failure_message,
+      message: ContentRecipe.failure_message(recipe),
       xp: nil,
-      consumed: recipe.ingredients
+      consumed: ContentRecipe.ingredients(recipe)
     }
   end
 
   defp generate_output_items(output_list) do
     output_list
+    |> normalize_output()
     |> Enum.filter(fn %{chance: chance} ->
       :rand.uniform() <= chance
     end)
     |> Enum.map(fn %{item: item, quantity: quantity} ->
       %{
         item: item,
-        quantity: Recipe.calculate_quantity(quantity)
+        quantity: ContentRecipe.calculate_quantity(quantity)
       }
     end)
   end
@@ -483,12 +502,46 @@ defmodule Loka.Framework.Crafting do
   end
 
   defp do_consume_ingredients(game_state, ingredients) do
-    Enum.reduce_while(ingredients, {:ok, game_state}, fn %{item: item_key, quantity: qty},
-                                                         {:ok, state} ->
+    ingredients
+    |> normalize_ingredients()
+    |> Enum.reduce_while({:ok, game_state}, fn %{item: item_key, quantity: qty}, {:ok, state} ->
       case remove_items(state, item_key, qty) do
         {:ok, new_state} -> {:cont, {:ok, new_state}}
         {:error, reason} -> {:halt, {:error, reason}}
       end
+    end)
+  end
+
+  # Normalize ingredient maps from YAML string keys to atom keys
+  defp normalize_ingredients(ingredients) do
+    Enum.map(ingredients, fn
+      %{item: _, quantity: _} = ing -> ing
+      %{"item" => item, "quantity" => qty} -> %{item: item, quantity: qty}
+      %{"item" => item} -> %{item: item, quantity: 1}
+      other -> other
+    end)
+  end
+
+  # Normalize output maps from YAML string keys to atom keys
+  defp normalize_output(output_list) do
+    Enum.map(output_list, fn
+      %{item: _, quantity: _, chance: _} = out ->
+        out
+
+      %{"item" => item, "quantity" => qty, "chance" => chance} ->
+        %{item: item, quantity: qty, chance: chance}
+
+      %{"item" => item, "quantity" => qty} ->
+        %{item: item, quantity: qty, chance: 1.0}
+
+      %{"item" => item} ->
+        %{item: item, quantity: 1, chance: 1.0}
+
+      %{item: item, quantity: qty} ->
+        %{item: item, quantity: qty, chance: 1.0}
+
+      other ->
+        other
     end)
   end
 

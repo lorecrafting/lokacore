@@ -51,7 +51,7 @@ defmodule Loka.Framework.Quest.Progress do
   alias Loka.Framework.Quest.{Definitions, StateHelper, TimerManager, QuestItemSpawner}
   alias Loka.Framework.Quest.Progress.{Rewards, Tracking}
   alias Loka.Admin.GameLog
-  alias Loka.Framework.Storyline.StorylineRegistry
+  alias Loka.Content
 
   # =============================================================================
   # Quest Acceptance
@@ -161,14 +161,10 @@ defmodule Loka.Framework.Quest.Progress do
 
   # Checks storyline-based prerequisites (acts)
   defp check_storyline_prerequisites(quest_id, completed_quests) do
-    if Process.whereis(StorylineRegistry) do
-      case StorylineRegistry.check_prerequisites(quest_id, completed_quests) do
-        {:ok, :available} -> :ok
-        {:error, {:missing_prerequisites, missing}} -> {:error, {:missing_prerequisites, missing}}
-        _ -> :ok
-      end
-    else
-      :ok
+    case Content.Storyline.check_prerequisites(quest_id, completed_quests) do
+      {:ok, :available} -> :ok
+      {:error, {:missing_prerequisites, missing}} -> {:error, {:missing_prerequisites, missing}}
+      _ -> :ok
     end
   end
 
@@ -369,25 +365,21 @@ defmodule Loka.Framework.Quest.Progress do
   defp trigger_chain_progression(state, completed_quest_id) do
     alias Loka.Framework.Quest.Chain
 
-    if Process.whereis(Loka.Framework.Quest.ChainRegistry) do
-      case Chain.on_quest_completed(state, completed_quest_id) do
-        {:ok, updated_state, auto_started} when auto_started != [] ->
-          GameLog.Quest.log_chain_progression(
-            state.player_id,
-            completed_quest_id,
-            auto_started
-          )
+    case Chain.on_quest_completed(state, completed_quest_id) do
+      {:ok, updated_state, auto_started} when auto_started != [] ->
+        GameLog.Quest.log_chain_progression(
+          state.player_id,
+          completed_quest_id,
+          auto_started
+        )
 
-          updated_state
+        updated_state
 
-        {:ok, state, []} ->
-          state
+      {:ok, state, []} ->
+        state
 
-        {:error, _reason} ->
-          state
-      end
-    else
-      state
+      {:error, _reason} ->
+        state
     end
   end
 

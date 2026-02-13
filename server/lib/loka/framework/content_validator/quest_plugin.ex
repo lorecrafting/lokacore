@@ -20,7 +20,8 @@ defmodule Loka.Framework.ContentValidator.QuestPlugin do
 
   @impl true
   def ready? do
-    Process.whereis(Loka.Framework.Quest.QuestRegistry) != nil
+    # DB-backed Content.Quest is always available
+    true
   end
 
   @impl true

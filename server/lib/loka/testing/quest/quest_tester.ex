@@ -61,7 +61,7 @@ defmodule Loka.Testing.Quest.QuestTester do
   alias Loka.Framework.Quest.{Definitions, Progress}
   alias Loka.Admin.GameLog
   alias Loka.Framework.Player.GameState
-  alias Loka.Framework.Storyline.StorylineRegistry
+  alias Loka.Content
   alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
 
   @default_max_steps 500
@@ -115,7 +115,7 @@ defmodule Loka.Testing.Quest.QuestTester do
   Returns `{:ok, results}` with results for each quest.
   """
   def test_storyline(storyline_id, opts \\ []) do
-    case StorylineRegistry.get(storyline_id) do
+    case Content.Storyline.get_struct(storyline_id) do
       {:ok, storyline} ->
         quest_ids = storyline.acts |> Enum.flat_map(& &1.quests)
 

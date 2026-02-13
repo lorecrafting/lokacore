@@ -30,7 +30,7 @@ defmodule Loka.Testing.Content.StorylineValidator do
   require Logger
 
   alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
-  alias Loka.Framework.Quest.QuestRegistry
+  alias Loka.Framework.Quest.Definitions
 
   @type validation_result :: %{
           storylines_checked: non_neg_integer(),
@@ -290,19 +290,16 @@ defmodule Loka.Testing.Content.StorylineValidator do
   defp validate_quest_references(storyline_key, quest_ids) do
     errors =
       Enum.reduce(quest_ids, [], fn quest_id, acc ->
-        case QuestRegistry.get(quest_id) do
-          {:ok, _} ->
-            acc
-
-          {:error, :not_found} ->
+        case Definitions.get_quest_definition(quest_id) do
+          nil ->
             [{:missing_quest, storyline_key, quest_id} | acc]
+
+          _quest ->
+            acc
         end
       end)
 
     {errors, []}
-  rescue
-    # Registry not running
-    _ -> {[], []}
   end
 
   defp check_circular_dependencies(storyline_key, acts) do

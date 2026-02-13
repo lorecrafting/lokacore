@@ -2,27 +2,13 @@ defmodule Loka.Framework.Resources.ResourcePoolTest do
   # async: false to avoid timing issues with global tick timer
   use Loka.DataCase, async: false
 
-  alias Loka.Framework.Resources.{ResourcePool, ResourceRegistry}
+  alias Loka.Framework.Resources.ResourcePool
+
+  import Loka.EngineFixtures
 
   @moduletag :capture_log
 
   setup do
-    # The ResourceRegistry and ResourcePool are started globally by the application.
-    # We use the existing processes rather than trying to start new ones.
-    # The ResourcePool uses a hardcoded global ETS table, so we just clear it between tests.
-
-    _registry_pid =
-      case Process.whereis(ResourceRegistry) do
-        nil ->
-          {:ok, pid} =
-            start_supervised({ResourceRegistry, name: ResourceRegistry, load_on_start: false})
-
-          pid
-
-        pid ->
-          pid
-      end
-
     # Use the existing global ResourcePool if it's running, otherwise start one
     pool_name =
       case Process.whereis(ResourcePool) do
@@ -40,65 +26,60 @@ defmodule Loka.Framework.Resources.ResourcePoolTest do
           ResourcePool
       end
 
-    # Setup test resources
+    # Setup test resources as entities in the DB
     setup_test_resources()
 
     %{pool: pool_name}
   end
 
   defp setup_test_resources do
-    test_dir = "test/tmp/resources_#{:erlang.unique_integer([:positive])}"
-    File.mkdir_p!(test_dir)
+    resource_fixture(%{
+      key: "health",
+      name: "Health",
+      data: %{
+        "max_formula" => "100",
+        "regen_rate" => 2,
+        "regen_condition" => "out_of_combat",
+        "starts_full" => true,
+        "min_value" => 0
+      }
+    })
 
-    # Health resource
-    File.write!(Path.join(test_dir, "health.yml"), """
-    key: health
-    name: Health
-    max_formula: "100"
-    regen_rate: 2
-    regen_condition: out_of_combat
-    starts_full: true
-    min_value: 0
-    """)
+    resource_fixture(%{
+      key: "mana",
+      name: "Mana",
+      data: %{
+        "max_formula" => "level * 10 + sta * 2",
+        "regen_rate" => 5,
+        "regen_condition" => "resting",
+        "starts_full" => true,
+        "min_value" => 0
+      }
+    })
 
-    # Mana resource
-    File.write!(Path.join(test_dir, "mana.yml"), """
-    key: mana
-    name: Mana
-    max_formula: "level * 10 + sta * 2"
-    regen_rate: 5
-    regen_condition: resting
-    starts_full: true
-    min_value: 0
-    """)
+    resource_fixture(%{
+      key: "energy",
+      name: "Energy",
+      data: %{
+        "max_formula" => "50",
+        "regen_rate" => 1,
+        "regen_condition" => "always",
+        "starts_full" => false,
+        "min_value" => 0
+      }
+    })
 
-    # Energy resource (doesn't start full)
-    File.write!(Path.join(test_dir, "energy.yml"), """
-    key: energy
-    name: Energy
-    max_formula: "50"
-    regen_rate: 1
-    regen_condition: always
-    starts_full: false
-    min_value: 0
-    """)
-
-    # Action points (no regen)
-    File.write!(Path.join(test_dir, "action.yml"), """
-    key: action
-    name: Action Points
-    max_formula: "5"
-    regen_rate: 0
-    regen_condition: never
-    starts_full: true
-    min_value: 0
-    """)
-
-    ResourceRegistry.load_from(test_dir)
-
-    on_exit(fn -> File.rm_rf!(test_dir) end)
-
-    test_dir
+    resource_fixture(%{
+      key: "action",
+      name: "Action Points",
+      data: %{
+        "max_formula" => "5",
+        "regen_rate" => 0,
+        "regen_condition" => "never",
+        "starts_full" => true,
+        "min_value" => 0
+      }
+    })
   end
 
   describe "init_pools/2" do

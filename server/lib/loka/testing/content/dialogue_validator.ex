@@ -36,7 +36,7 @@ defmodule Loka.Testing.Content.DialogueValidator do
   require Logger
 
   alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
-  alias Loka.Framework.Quest.QuestRegistry
+  alias Loka.Framework.Quest.Definitions
 
   @type validation_result :: %{
           npcs_checked: non_neg_integer(),
@@ -539,13 +539,9 @@ defmodule Loka.Testing.Content.DialogueValidator do
   end
 
   defp get_quest_ids do
-    if Process.whereis(QuestRegistry) do
-      QuestRegistry.all()
-      |> Enum.map(& &1.id)
-      |> MapSet.new()
-    else
-      MapSet.new()
-    end
+    Definitions.all_quest_definitions()
+    |> Enum.map(& &1.id)
+    |> MapSet.new()
   end
 
   # =============================================================================

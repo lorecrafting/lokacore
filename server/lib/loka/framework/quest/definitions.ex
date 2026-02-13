@@ -136,25 +136,13 @@ defmodule Loka.Framework.Quest.Definitions do
   alias Loka.Engine.Entities
   alias Loka.Engine.TypedObject
   alias Loka.Content
-  # NOTE: QuestRegistry is NOT aliased to avoid compile-time circular dependency
-  # Use full module path Loka.Framework.Quest.QuestRegistry at runtime
   alias Loka.Framework.Quest.ObjectiveRegistry
 
-  # Legacy hardcoded types for when ObjectiveRegistry is not running
-  @legacy_objective_types [:talk, :kill, :get_item, :go_to]
-
   @doc """
-  Returns the list of valid objective types.
-
-  When the ObjectiveRegistry is running, returns types from registered handlers.
-  Otherwise, returns the legacy hardcoded types.
+  Returns the list of valid objective types from registered handlers.
   """
   def objective_types do
-    if Process.whereis(ObjectiveRegistry) do
-      ObjectiveRegistry.list_types()
-    else
-      @legacy_objective_types
-    end
+    ObjectiveRegistry.list_types()
   end
 
   @doc """
@@ -163,30 +151,33 @@ defmodule Loka.Framework.Quest.Definitions do
   Returns `:ok` if valid, or `{:error, reason}` if invalid.
   """
   def validate_objective(objective) do
-    if Process.whereis(ObjectiveRegistry) do
-      ObjectiveRegistry.validate_objective(objective)
-    else
-      # Legacy validation
-      type = Map.get(objective, :type) || Map.get(objective, "type")
-      type_atom = if is_binary(type), do: String.to_existing_atom(type), else: type
-
-      if type_atom in @legacy_objective_types do
-        :ok
-      else
-        {:error, "Unknown objective type: #{type}"}
-      end
-    end
-  rescue
-    ArgumentError -> {:error, "Unknown objective type"}
+    ObjectiveRegistry.validate_objective(objective)
   end
+
+  @doc """
+  Returns all quest definitions as Quest structs.
+
+  Loads from Content.Quest (database-backed entities) and converts
+  each TypedObject to a Quest struct.
+  """
+  def all_quest_definitions do
+    Content.Quest.all()
+    |> Enum.reject(&template?/1)
+    |> Enum.map(&quest_from_typed_object/1)
+  end
+
+  defp template?(%TypedObject{data: data}) do
+    data["is_template"] == true
+  end
+
+  defp template?(_), do: false
 
   @doc """
   Loads a quest definition from multiple sources.
 
   Resolution order:
   1. Content.Quest (TypedObject) - newest canonical source
-  2. QuestRegistry (YAML-loaded quests) - legacy YAML
-  3. Entity lookup (database) - legacy DB
+  2. Entity lookup (database) - legacy DB
 
   ## Examples
 
@@ -203,20 +194,8 @@ defmodule Loka.Framework.Quest.Definitions do
         quest_from_typed_object(typed_object)
 
       {:error, :not_found} ->
-        # 2. Check QuestRegistry (YAML-loaded quests)
-        if Process.whereis(Loka.Framework.Quest.QuestRegistry) do
-          case Loka.Framework.Quest.QuestRegistry.get(quest_id) do
-            {:ok, quest} ->
-              quest
-
-            {:error, :not_found} ->
-              # 3. Fall back to entity lookup (legacy DB-based quests)
-              get_quest_from_entity(quest_id)
-          end
-        else
-          # Registry not running, use entity lookup
-          get_quest_from_entity(quest_id)
-        end
+        # 2. Fall back to entity lookup (legacy DB-based quests)
+        get_quest_from_entity(quest_id)
     end
   end
 

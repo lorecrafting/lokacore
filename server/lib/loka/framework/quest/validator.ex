@@ -2,7 +2,7 @@ defmodule Loka.Framework.Quest.Validator do
   @moduledoc """
   Comprehensive validation for YAML-based quest definitions.
 
-  Validates quests loaded from `priv/world/quests/` via the QuestRegistry:
+  Validates quest definitions loaded from the database:
   - Objective handlers are registered and validate successfully
   - Target IDs exist (rooms, NPCs, items as prototypes)
   - Dialogue topics exist in NPC dialogue trees
@@ -40,8 +40,8 @@ defmodule Loka.Framework.Quest.Validator do
   require Logger
 
   alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
-  alias Loka.Framework.Quest.{QuestRegistry, ObjectiveRegistry, ChainRegistry}
-  alias Loka.Framework.Storyline.StorylineRegistry
+  alias Loka.Framework.Quest.{Definitions, ObjectiveRegistry, ChainRegistry}
+  alias Loka.Content
 
   @type validation_result :: %{
           quests_checked: non_neg_integer(),
@@ -72,13 +72,13 @@ defmodule Loka.Framework.Quest.Validator do
   # =============================================================================
 
   @doc """
-  Validates all quests from the QuestRegistry.
+  Validates all quest definitions.
 
   Returns `{:ok, results}` with validation results.
   """
   @spec validate() :: {:ok, validation_result()}
   def validate do
-    quests = QuestRegistry.all()
+    quests = Definitions.all_quest_definitions()
 
     # Build lookup maps
     all_quest_ids = MapSet.new(Enum.map(quests, & &1.id))
@@ -121,11 +121,11 @@ defmodule Loka.Framework.Quest.Validator do
   """
   @spec validate_quest(String.t()) :: {:ok, {[error()], [warning()]}} | {:error, :not_found}
   def validate_quest(quest_id) do
-    case QuestRegistry.get(quest_id) do
-      {:error, :not_found} ->
+    case Definitions.get_quest_definition(quest_id) do
+      nil ->
         {:error, :not_found}
 
-      {:ok, quest} ->
+      quest ->
         all_quest_ids = MapSet.new([quest_id])
         storyline_quests = get_storyline_quest_ids()
         {:ok, validate_single_quest(quest, all_quest_ids, storyline_quests)}
@@ -247,13 +247,9 @@ defmodule Loka.Framework.Quest.Validator do
 
     # First, validate using ObjectiveRegistry
     handler_errors =
-      if Process.whereis(ObjectiveRegistry) do
-        case ObjectiveRegistry.validate_objective(obj) do
-          :ok -> []
-          {:error, reason} -> [{:invalid_objective, quest_id, obj_id, reason}]
-        end
-      else
-        []
+      case ObjectiveRegistry.validate_objective(obj) do
+        :ok -> []
+        {:error, reason} -> [{:invalid_objective, quest_id, obj_id, reason}]
       end
 
     # Then validate target exists
@@ -529,15 +525,11 @@ defmodule Loka.Framework.Quest.Validator do
   # =============================================================================
 
   defp check_circular_chains do
-    if Process.whereis(ChainRegistry) do
-      chains = ChainRegistry.all()
+    chains = ChainRegistry.all()
 
-      Enum.flat_map(chains, fn chain ->
-        check_chain_for_cycles(chain)
-      end)
-    else
-      []
-    end
+    Enum.flat_map(chains, fn chain ->
+      check_chain_for_cycles(chain)
+    end)
   end
 
   defp check_chain_for_cycles(chain) do
@@ -650,26 +642,22 @@ defmodule Loka.Framework.Quest.Validator do
   # =============================================================================
 
   defp get_storyline_quest_ids do
-    if Process.whereis(StorylineRegistry) do
-      StorylineRegistry.all()
-      |> Enum.flat_map(fn storyline ->
-        # Collect quests from acts
-        acts = Map.get(storyline, :acts) || []
+    Content.Storyline.all_structs()
+    |> Enum.flat_map(fn storyline ->
+      # Collect quests from acts
+      acts = Map.get(storyline, :acts) || []
 
-        act_quests =
-          Enum.flat_map(acts, fn act ->
-            Map.get(act, :quests) || []
-          end)
+      act_quests =
+        Enum.flat_map(acts, fn act ->
+          Map.get(act, :quests) || []
+        end)
 
-        # Also include side_quests
-        side_quests = Map.get(storyline, :side_quests) || []
+      # Also include side_quests
+      side_quests = Map.get(storyline, :side_quests) || []
 
-        act_quests ++ side_quests
-      end)
-      |> MapSet.new()
-    else
-      MapSet.new()
-    end
+      act_quests ++ side_quests
+    end)
+    |> MapSet.new()
   end
 
   # =============================================================================

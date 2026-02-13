@@ -36,7 +36,7 @@ defmodule Mix.Tasks.Loka.Test.Quest do
   use Boundary, classify_to: Loka
 
   alias Loka.Testing.Quest.QuestTester
-  alias Loka.Framework.Quest.QuestRegistry
+  alias Loka.Framework.Quest.Definitions
 
   @shortdoc "Test quest completability"
 
@@ -81,7 +81,7 @@ defmodule Mix.Tasks.Loka.Test.Quest do
   end
 
   defp list_quests(opts) do
-    quests = QuestRegistry.all()
+    quests = Definitions.all_quest_definitions()
 
     unless opts[:quiet] do
       Mix.shell().info("")
@@ -134,7 +134,7 @@ defmodule Mix.Tasks.Loka.Test.Quest do
   end
 
   defp validate_all_quests(opts) do
-    quests = QuestRegistry.all()
+    quests = Definitions.all_quest_definitions()
     quest_ids = Enum.map(quests, & &1.id)
     validate_quests(quest_ids, opts)
   end
@@ -222,7 +222,7 @@ defmodule Mix.Tasks.Loka.Test.Quest do
   end
 
   defp test_all_quests(opts) do
-    quests = QuestRegistry.all()
+    quests = Definitions.all_quest_definitions()
     quest_ids = Enum.map(quests, & &1.id)
 
     unless opts[:quiet] do

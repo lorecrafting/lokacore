@@ -43,7 +43,7 @@ defmodule Loka.Framework.Crafting.CraftingStation do
       bonus = CraftingStation.get_bonus(room_entity)
   """
 
-  alias Loka.Framework.Crafting.CraftingRegistry
+  alias Loka.Content.Recipe, as: ContentRecipe
   alias Loka.Utils.MapHelpers
 
   @type t :: %__MODULE__{
@@ -121,11 +121,11 @@ defmodule Loka.Framework.Crafting.CraftingStation do
         []
 
       %__MODULE__{recipes_enabled: :all, type: type} ->
-        CraftingRegistry.by_station(type)
+        ContentRecipe.by_station(type)
 
       %__MODULE__{recipes_enabled: recipe_keys} when is_list(recipe_keys) ->
         recipe_keys
-        |> Enum.map(&CraftingRegistry.get/1)
+        |> Enum.map(&ContentRecipe.get/1)
         |> Enum.filter(&match?({:ok, _}, &1))
         |> Enum.map(fn {:ok, recipe} -> recipe end)
     end
@@ -162,9 +162,13 @@ defmodule Loka.Framework.Crafting.CraftingStation do
         false
 
       %__MODULE__{recipes_enabled: :all, type: type} ->
-        case CraftingRegistry.get(recipe_key) do
-          {:ok, recipe} -> recipe.station_type == type or recipe.station_type == nil
-          {:error, _} -> false
+        case ContentRecipe.get(recipe_key) do
+          {:ok, recipe} ->
+            station = ContentRecipe.station_type(recipe)
+            station == type or station == nil
+
+          {:error, _} ->
+            false
         end
 
       %__MODULE__{recipes_enabled: recipe_keys} ->

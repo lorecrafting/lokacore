@@ -65,7 +65,7 @@ defmodule Loka.Testing.Bot.Strategies.StorylineRunner do
 
   alias Loka.Testing.Bot.BotHelpers
   alias Loka.Testing.QuestStrategy
-  alias Loka.Framework.Storyline.StorylineRegistry
+  alias Loka.Content
 
   # Bot-specific phases (combat, wait are not in QuestStrategy)
   @phase_combat :combat
@@ -108,7 +108,7 @@ defmodule Loka.Testing.Bot.Strategies.StorylineRunner do
   def init(opts) do
     storyline_id = Keyword.fetch!(opts, :storyline_id)
 
-    case StorylineRegistry.get(storyline_id) do
+    case Content.Storyline.get_struct(storyline_id) do
       {:ok, storyline} ->
         state = %__MODULE__{
           storyline_id: storyline_id,

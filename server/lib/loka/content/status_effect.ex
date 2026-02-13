@@ -63,6 +63,90 @@ defmodule Loka.Content.StatusEffect do
   def effects(%TypedObject{type: :status} = status),
     do: TypedObject.get_data(status, "effects", [])
 
+  def max_stacks(%TypedObject{type: :status} = status),
+    do: TypedObject.get_data(status, "max_stacks", 1)
+
+  def exclusive_with(%TypedObject{type: :status} = status),
+    do: TypedObject.get_data(status, "exclusive_with", [])
+
+  def removes_actions(%TypedObject{type: :status} = status),
+    do: TypedObject.get_data(status, "removes_actions", [])
+
+  def grants_actions(%TypedObject{type: :status} = status),
+    do: TypedObject.get_data(status, "grants_actions", [])
+
+  def replaces_all_actions?(%TypedObject{type: :status} = status),
+    do: TypedObject.get_data(status, "replaces_all_actions", false)
+
+  @doc """
+  Gets effects for a specific trigger.
+  """
+  def get_effects_for_trigger(%TypedObject{type: :status} = status, trigger) do
+    effects(status)
+    |> Enum.filter(fn effect ->
+      trigger_val = Map.get(effect, "trigger") || Map.get(effect, :trigger)
+      normalize_trigger(trigger_val) == trigger
+    end)
+  end
+
+  @doc """
+  Gets all passive stat modifiers from this status.
+  Returns a list of `{stat, modifier}` tuples.
+  """
+  def get_stat_modifiers(%TypedObject{type: :status} = status) do
+    effects(status)
+    |> Enum.filter(fn effect ->
+      trigger_val = Map.get(effect, "trigger") || Map.get(effect, :trigger)
+
+      action_val =
+        Map.get(effect, "effect") || Map.get(effect, :effect) || Map.get(effect, "action") ||
+          Map.get(effect, :action)
+
+      normalize_trigger(trigger_val) == :passive and normalize_action(action_val) == :stat_modify
+    end)
+    |> Enum.map(fn effect ->
+      stat = Map.get(effect, "stat") || Map.get(effect, :stat)
+      modifier = Map.get(effect, "modifier") || Map.get(effect, :modifier) || 0
+      {stat, modifier}
+    end)
+  end
+
+  @doc """
+  Checks if status can be cured by an item.
+  """
+  def curable_by_item?(%TypedObject{type: :status} = status, item_key) do
+    cure_items = TypedObject.get_data(status, "cure_items", [])
+    item_key in cure_items
+  end
+
+  @doc """
+  Checks if status can be cured by an ability.
+  """
+  def curable_by_ability?(%TypedObject{type: :status} = status, ability_key) do
+    cure_abilities = TypedObject.get_data(status, "cure_abilities", [])
+    ability_key in cure_abilities
+  end
+
+  defp normalize_trigger(val) when is_atom(val), do: val
+
+  defp normalize_trigger(val) when is_binary(val) do
+    String.to_existing_atom(val)
+  rescue
+    ArgumentError -> :unknown
+  end
+
+  defp normalize_trigger(_), do: :unknown
+
+  defp normalize_action(val) when is_atom(val), do: val
+
+  defp normalize_action(val) when is_binary(val) do
+    String.to_existing_atom(val)
+  rescue
+    ArgumentError -> :unknown
+  end
+
+  defp normalize_action(_), do: :unknown
+
   defp to_typed_objects(entities) do
     entities
     |> Enum.map(fn entity ->

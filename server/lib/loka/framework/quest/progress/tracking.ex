@@ -104,19 +104,15 @@ defmodule Loka.Framework.Quest.Progress.Tracking do
   @spec check_objective(map(), map(), non_neg_integer()) ::
           {:ok, non_neg_integer(), boolean()} | :no_match
   def check_objective(obj_def, event, current_progress) do
-    if Process.whereis(ObjectiveRegistry) do
-      case ObjectiveRegistry.check_event(obj_def, event, current_progress) do
-        {:ok, _handler, new_progress, is_complete} ->
-          {:ok, new_progress, is_complete}
+    case ObjectiveRegistry.check_event(obj_def, event, current_progress) do
+      {:ok, _handler, new_progress, is_complete} ->
+        {:ok, new_progress, is_complete}
 
-        :no_match ->
-          :no_match
+      :no_match ->
+        :no_match
 
-        {:error, :unknown_type} ->
-          legacy_check(obj_def, event, current_progress)
-      end
-    else
-      legacy_check(obj_def, event, current_progress)
+      {:error, :unknown_type} ->
+        legacy_check(obj_def, event, current_progress)
     end
   end
 

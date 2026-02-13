@@ -4,12 +4,11 @@ defmodule Loka.Framework.Quest.ChainTest do
   """
   use Loka.DataCase, async: false
 
-  alias Loka.Framework.Player.GameState
   alias Loka.Framework.Quest.ChainRegistry
-  alias Loka.Framework.Quest.QuestRegistry
 
   # Use fully qualified module name for Chain functions
   alias Loka.Framework.Quest.Chain, as: ChainModule
+  alias Loka.Framework.Quest.Chain.{Chain, ChainNode, Branch}
 
   @test_chains_path "test/fixtures/chains"
   @test_quests_path "test/fixtures/chain_quests"
@@ -123,74 +122,79 @@ defmodule Loka.Framework.Quest.ChainTest do
     tags: [test, branching]
     """)
 
-    # Start registries
-    {:ok, quest_registry} =
-      QuestRegistry.start_link(path: @test_quests_path, name: nil, load_on_start: false)
+    # Load chains into persistent_term cache (V2 — no GenServer)
+    # Save previous cache to restore on exit
+    prev_chains = :persistent_term.get({ChainRegistry, :chains}, nil)
 
-    :ok = QuestRegistry.reload(quest_registry)
+    # Parse and register our test chains
+    {:ok, linear} =
+      YamlElixir.read_from_string(File.read!(Path.join(@test_chains_path, "linear_chain.yml")))
 
-    {:ok, chain_registry} =
-      ChainRegistry.start_link(path: @test_chains_path, name: nil, load_on_start: false)
+    {:ok, branching} =
+      YamlElixir.read_from_string(File.read!(Path.join(@test_chains_path, "branching_chain.yml")))
 
-    :ok = ChainRegistry.reload(chain_registry)
+    linear_chain = build_chain(linear)
+    branching_chain = build_chain(branching)
 
-    player_id = Ecto.UUID.generate()
-
-    game_state = %GameState{
-      player_id: player_id,
-      quests: %{"active" => %{}, "completed" => []},
-      flags: %{}
+    chains = %{
+      linear_chain.id => linear_chain,
+      branching_chain.id => branching_chain
     }
+
+    :persistent_term.put({ChainRegistry, :chains}, chains)
 
     on_exit(fn ->
       File.rm_rf!(@test_chains_path)
       File.rm_rf!(@test_quests_path)
+
+      # Restore previous chains cache
+      if prev_chains do
+        :persistent_term.put({ChainRegistry, :chains}, prev_chains)
+      else
+        :persistent_term.erase({ChainRegistry, :chains})
+      end
     end)
 
-    {:ok,
-     quest_registry: quest_registry,
-     chain_registry: chain_registry,
-     game_state: game_state,
-     player_id: player_id}
+    :ok
   end
 
   describe "ChainRegistry" do
-    test "loads chains from YAML", %{chain_registry: registry} do
-      {:ok, chain} = ChainRegistry.get("linear_chain", registry)
+    test "loads chains from YAML" do
+      {:ok, chain} = ChainRegistry.get("linear_chain")
       assert chain.id == "linear_chain"
       assert chain.name == "Linear Chain"
       assert length(chain.nodes) == 3
     end
 
-    test "finds chain by quest ID", %{chain_registry: registry} do
-      {:ok, chain} = ChainRegistry.get_chain_for_quest("quest_a", registry)
+    test "finds chain by quest ID" do
+      {:ok, chain} = ChainRegistry.get_chain_for_quest("quest_a")
       assert chain.id in ["linear_chain", "branching_chain"]
     end
 
-    test "returns all chains", %{chain_registry: registry} do
-      chains = ChainRegistry.all(registry)
+    test "returns all chains" do
+      chains = ChainRegistry.all()
       assert length(chains) == 2
     end
 
-    test "filters chains by tag", %{chain_registry: registry} do
-      chains = ChainRegistry.by_tag("branching", registry)
+    test "filters chains by tag" do
+      chains = ChainRegistry.by_tag("branching")
       assert length(chains) == 1
       assert hd(chains).id == "branching_chain"
     end
   end
 
   describe "ChainModule.get_next_quests/2" do
-    test "returns next quests for linear chain", %{game_state: state, chain_registry: registry} do
+    test "returns next quests for linear chain" do
       # Get chain and check next quests
-      {:ok, chain} = ChainRegistry.get("linear_chain", registry)
+      {:ok, chain} = ChainRegistry.get("linear_chain")
       node = Enum.find(chain.nodes, &(&1.quest_id == "quest_a"))
 
       # Node should have quest_b as next
       assert "quest_b" in node.next
     end
 
-    test "terminal quest has no next", %{chain_registry: registry} do
-      {:ok, chain} = ChainRegistry.get("linear_chain", registry)
+    test "terminal quest has no next" do
+      {:ok, chain} = ChainRegistry.get("linear_chain")
       node = Enum.find(chain.nodes, &(&1.quest_id == "quest_c"))
 
       assert node.next == []
@@ -198,8 +202,8 @@ defmodule Loka.Framework.Quest.ChainTest do
   end
 
   describe "Chain branching" do
-    test "branching chain has conditional branches", %{chain_registry: registry} do
-      {:ok, chain} = ChainRegistry.get("branching_chain", registry)
+    test "branching chain has conditional branches" do
+      {:ok, chain} = ChainRegistry.get("branching_chain")
       node = Enum.find(chain.nodes, &(&1.quest_id == "quest_a"))
 
       # Should have branches for good, evil, and default
@@ -211,8 +215,8 @@ defmodule Loka.Framework.Quest.ChainTest do
       assert :default in conditions
     end
 
-    test "branches point to correct next quests", %{chain_registry: registry} do
-      {:ok, chain} = ChainRegistry.get("branching_chain", registry)
+    test "branches point to correct next quests" do
+      {:ok, chain} = ChainRegistry.get("branching_chain")
       node = Enum.find(chain.nodes, &(&1.quest_id == "quest_a"))
 
       good_branch = Enum.find(node.branches, &(&1.condition == {:flag, "chose_good"}))
@@ -226,8 +230,8 @@ defmodule Loka.Framework.Quest.ChainTest do
   end
 
   describe "Chain progress calculation" do
-    test "chain nodes track quest relationships", %{chain_registry: registry} do
-      {:ok, chain} = ChainRegistry.get("linear_chain", registry)
+    test "chain nodes track quest relationships" do
+      {:ok, chain} = ChainRegistry.get("linear_chain")
 
       # Chain has correct structure
       assert chain.start_quest == "quest_a"
@@ -278,4 +282,58 @@ defmodule Loka.Framework.Quest.ChainTest do
       assert length(start_node.branches) == 2
     end
   end
+
+  # ===========================================================================
+  # Private Helpers
+  # ===========================================================================
+
+  # Builds a Chain struct from a parsed YAML map (mirrors ChainRegistry's private chain_from_map)
+  defp build_chain(data) when is_map(data) do
+    nodes_data = data["nodes"] || []
+    nodes = Enum.map(nodes_data, &build_node/1)
+
+    start_quest = data["start_quest"] || if(nodes != [], do: hd(nodes).quest_id)
+
+    %Chain{
+      id: data["id"],
+      name: data["name"] || data["id"],
+      description: data["description"],
+      nodes: nodes,
+      start_quest: start_quest,
+      tags: data["tags"] || []
+    }
+  end
+
+  defp build_node(data) when is_map(data) do
+    next = data["next"] || []
+    branches_data = data["branches"] || []
+    branches = Enum.map(branches_data, &build_branch/1)
+    auto_start = if is_nil(data["auto_start"]), do: true, else: data["auto_start"]
+
+    %ChainNode{
+      quest_id: data["quest_id"],
+      next: List.wrap(next),
+      branches: branches,
+      optional: data["optional"] || false,
+      auto_start: auto_start
+    }
+  end
+
+  defp build_branch(data) when is_map(data) do
+    condition_data = data["condition"] || %{}
+    condition = parse_condition(condition_data)
+
+    %Branch{
+      condition: condition,
+      next: data["next"]
+    }
+  end
+
+  defp parse_condition(%{"type" => "default"}), do: :default
+  defp parse_condition(%{"type" => "flag", "flag" => flag}), do: {:flag, flag}
+
+  defp parse_condition(%{"type" => "quest_completed", "quest_id" => qid}),
+    do: {:quest_completed, qid}
+
+  defp parse_condition(_), do: :default
 end

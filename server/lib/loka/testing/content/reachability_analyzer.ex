@@ -40,9 +40,9 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
 
   require Logger
 
+  alias Loka.Content.Recipe, as: ContentRecipe
   alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
-  alias Loka.Framework.Quest.QuestRegistry
-  alias Loka.Framework.Crafting.CraftingRegistry
+  alias Loka.Framework.Quest.Definitions
 
   @type analysis_result :: %{
           analysis_complete: boolean(),
@@ -436,19 +436,15 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
   end
 
   defp add_quest_reward_sources(sources) do
-    if Process.whereis(QuestRegistry) do
-      quests = QuestRegistry.all()
+    quests = Definitions.all_quest_definitions()
 
-      Enum.reduce(quests, sources, fn quest, acc ->
-        reward_items = get_quest_reward_items(quest)
+    Enum.reduce(quests, sources, fn quest, acc ->
+      reward_items = get_quest_reward_items(quest)
 
-        Enum.reduce(reward_items, acc, fn item_key, inner_acc ->
-          Map.update(inner_acc, item_key, [{:quest, quest.id}], &[{:quest, quest.id} | &1])
-        end)
+      Enum.reduce(reward_items, acc, fn item_key, inner_acc ->
+        Map.update(inner_acc, item_key, [{:quest, quest.id}], &[{:quest, quest.id} | &1])
       end)
-    else
-      sources
-    end
+    end)
   end
 
   defp get_quest_reward_items(quest) do
@@ -458,33 +454,29 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
   end
 
   defp add_crafting_sources(sources) do
-    if Process.whereis(CraftingRegistry) do
-      recipes = CraftingRegistry.all()
+    recipes = ContentRecipe.all_published()
 
-      Enum.reduce(recipes, sources, fn recipe, acc ->
-        # Recipe output can be a list of items with chances
-        outputs = recipe.output || recipe.result || []
+    Enum.reduce(recipes, sources, fn recipe, acc ->
+      # Recipe output can be a list of items with chances
+      outputs = ContentRecipe.output(recipe)
 
-        Enum.reduce(List.wrap(outputs), acc, fn output_entry, inner_acc ->
-          item_key =
-            case output_entry do
-              %{item: key} -> key
-              %{"item" => key} -> key
-              key when is_binary(key) -> key
-              _ -> nil
-            end
-
-          if item_key do
-            recipe_key = recipe.key || recipe.id || "unknown_recipe"
-            Map.update(inner_acc, item_key, [{:craft, recipe_key}], &[{:craft, recipe_key} | &1])
-          else
-            inner_acc
+      Enum.reduce(List.wrap(outputs), acc, fn output_entry, inner_acc ->
+        item_key =
+          case output_entry do
+            %{item: key} -> key
+            %{"item" => key} -> key
+            key when is_binary(key) -> key
+            _ -> nil
           end
-        end)
+
+        if item_key do
+          recipe_key = recipe.key || "unknown_recipe"
+          Map.update(inner_acc, item_key, [{:craft, recipe_key}], &[{:craft, recipe_key} | &1])
+        else
+          inner_acc
+        end
       end)
-    else
-      sources
-    end
+    end)
   end
 
   defp add_drop_sources(sources) do
@@ -801,12 +793,7 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
   # =============================================================================
 
   defp analyze_quest_giver_accessibility(reachable_rooms) do
-    quests =
-      if Process.whereis(QuestRegistry) do
-        QuestRegistry.all()
-      else
-        []
-      end
+    quests = Definitions.all_quest_definitions()
 
     npc_locations = build_npc_location_map()
 

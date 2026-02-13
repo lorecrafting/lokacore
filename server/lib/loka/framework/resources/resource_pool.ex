@@ -37,7 +37,9 @@ defmodule Loka.Framework.Resources.ResourcePool do
   use GenServer
   require Logger
 
-  alias Loka.Framework.Resources.{Resource, ResourceRegistry, FormulaEvaluator}
+  alias Loka.Content.Resource, as: ContentResource
+  alias Loka.Engine.TypedObject
+  alias Loka.Framework.Resources.FormulaEvaluator
 
   @pool_table :loka_resource_pools
 
@@ -195,7 +197,7 @@ defmodule Loka.Framework.Resources.ResourcePool do
 
   @impl true
   def handle_call({:init_pools, entity_id, stats}, _from, state) do
-    resources = ResourceRegistry.all()
+    resources = ContentResource.all()
 
     pools =
       resources
@@ -203,10 +205,10 @@ defmodule Loka.Framework.Resources.ResourcePool do
         max_value = calculate_max(resource, stats)
 
         current_value =
-          if resource.starts_full do
+          if ContentResource.starts_full(resource) do
             max_value
           else
-            resource.min_value
+            ContentResource.min_value(resource)
           end
 
         {resource.key, %{current: current_value, max: max_value}}
@@ -273,8 +275,8 @@ defmodule Loka.Framework.Resources.ResourcePool do
         %{max: max} = pool ->
           # Get resource min_value
           min_val =
-            case ResourceRegistry.get(resource_key) do
-              {:ok, resource} -> resource.min_value
+            case ContentResource.get(resource_key) do
+              {:ok, resource} -> ContentResource.min_value(resource)
               _ -> 0
             end
 
@@ -293,7 +295,7 @@ defmodule Loka.Framework.Resources.ResourcePool do
     pools = get(entity_id)
 
     result =
-      case {Map.get(pools, resource_key), ResourceRegistry.get(resource_key)} do
+      case {Map.get(pools, resource_key), ContentResource.get(resource_key)} do
         {nil, _} ->
           {:error, :pool_not_found}
 
@@ -319,7 +321,7 @@ defmodule Loka.Framework.Resources.ResourcePool do
 
     new_pools =
       Enum.reduce(pools, pools, fn {resource_key, pool}, acc ->
-        case ResourceRegistry.get(resource_key) do
+        case ContentResource.get(resource_key) do
           {:ok, resource} ->
             new_max = calculate_max(resource, stats)
             new_current = min(pool.current, new_max)
@@ -347,10 +349,11 @@ defmodule Loka.Framework.Resources.ResourcePool do
 
     new_pools =
       Enum.reduce(pools, pools, fn {resource_key, pool}, acc ->
-        case ResourceRegistry.get(resource_key) do
+        case ContentResource.get(resource_key) do
           {:ok, resource} ->
-            if Resource.should_regen?(resource, context) do
-              new_current = min(pool.current + resource.regen_rate, pool.max)
+            if ContentResource.should_regen?(resource, context) do
+              regen_rate = ContentResource.regen_rate(resource)
+              new_current = min(pool.current + regen_rate, pool.max)
               new_pool = Map.put(pool, :current, new_current)
               Map.put(acc, resource_key, new_pool)
             else
@@ -373,10 +376,11 @@ defmodule Loka.Framework.Resources.ResourcePool do
     Enum.each(all_entries, fn {entity_id, pools} ->
       new_pools =
         Enum.reduce(pools, pools, fn {resource_key, pool}, acc ->
-          case ResourceRegistry.get(resource_key) do
+          case ContentResource.get(resource_key) do
             {:ok, resource} ->
-              if Resource.should_regen?(resource, context) do
-                new_current = min(pool.current + resource.regen_rate, pool.max)
+              if ContentResource.should_regen?(resource, context) do
+                regen_rate = ContentResource.regen_rate(resource)
+                new_current = min(pool.current + regen_rate, pool.max)
                 new_pool = Map.put(pool, :current, new_current)
                 Map.put(acc, resource_key, new_pool)
               else
@@ -404,7 +408,8 @@ defmodule Loka.Framework.Resources.ResourcePool do
   # Helpers
   # =============================================================================
 
-  defp calculate_max(%Resource{max_formula: formula}, stats) do
+  defp calculate_max(%TypedObject{} = resource, stats) do
+    formula = ContentResource.max_formula(resource)
     FormulaEvaluator.evaluate!(formula, stats, 100)
   end
 end

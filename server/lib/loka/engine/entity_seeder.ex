@@ -208,6 +208,7 @@ defmodule Loka.Engine.EntitySeeder do
           "recipes" in path_parts -> "recipe"
           "nodes" in path_parts -> "resource"
           "_base" in path_parts -> nil
+          "_templates" in path_parts -> nil
           true -> nil
         end
 
@@ -539,7 +540,10 @@ defmodule Loka.Engine.EntitySeeder do
       |> Map.reject(fn {_k, v} -> is_nil(v) end)
 
     if map_size(extra_fields) > 0 do
-      Map.merge(components, extra_fields)
+      # Content-specific fields go into components["data"] so that
+      # Entity.to_typed_object can find them in the data map.
+      existing_data = components["data"] || %{}
+      Map.put(components, "data", Map.merge(existing_data, extra_fields))
     else
       components
     end

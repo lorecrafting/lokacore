@@ -2,112 +2,70 @@ defmodule Loka.Framework.CraftingTest do
   use Loka.DataCase
 
   alias Loka.Framework.Crafting
-  alias Loka.Framework.Crafting.{Recipe, CraftingRegistry}
   alias Loka.Framework.Player.GameState
   alias Loka.Engine.Entities
 
   import Loka.AccountsFixtures
+  import Loka.EngineFixtures
 
   # =============================================================================
   # Setup & Fixtures
   # =============================================================================
 
   setup do
-    # Start CraftingRegistry for each test (if not already started by app)
-    registry =
-      case start_supervised({CraftingRegistry, [load_on_start: false]}) do
-        {:ok, pid} -> pid
-        {:error, {:already_started, pid}} -> pid
-      end
+    # Create test recipes as entities in the DB
+    simple_recipe =
+      recipe_fixture(%{
+        key: "recipe_simple_item",
+        name: "Simple Item",
+        ingredients: [
+          %{"item" => "ingredient_a", "quantity" => 2},
+          %{"item" => "ingredient_b", "quantity" => 1}
+        ],
+        tools: [],
+        output: [%{"item" => "simple_item", "quantity" => 1, "chance" => 1.0}],
+        xp_reward: %{"skill" => "crafting", "amount" => 10},
+        failure_chance: 0.0,
+        station_type: nil,
+        success_message: "Success!",
+        failure_message: "Failed!"
+      })
 
-    # Restore production state on exit by reloading from disk
-    on_exit(fn ->
-      if Process.alive?(registry) do
-        CraftingRegistry.reload()
-      end
-    end)
+    skilled_recipe =
+      recipe_fixture(%{
+        key: "recipe_advanced_item",
+        name: "Advanced Item",
+        skill_required: "blacksmithing",
+        skill_level: 5,
+        ingredients: [%{"item" => "iron_bar", "quantity" => 3}],
+        tools: ["hammer"],
+        output: [%{"item" => "iron_sword", "quantity" => 1, "chance" => 1.0}],
+        xp_reward: %{"skill" => "blacksmithing", "amount" => 50},
+        failure_chance: 0.2,
+        failure_output: [%{"item" => "scrap_metal", "quantity" => 1, "chance" => 1.0}],
+        station_type: "forge",
+        success_message: "Forged!",
+        failure_message: "The metal breaks!"
+      })
 
-    # Create test recipes
-    simple_recipe = %Recipe{
-      key: "recipe_simple_item",
-      name: "Simple Item",
-      skill_required: nil,
-      skill_level: 0,
-      ingredients: [
-        %{item: "ingredient_a", quantity: 2},
-        %{item: "ingredient_b", quantity: 1}
-      ],
-      tools: [],
-      output: [%{item: "simple_item", quantity: 1, chance: 1.0}],
-      xp_reward: %{skill: "crafting", amount: 10},
-      failure_chance: 0.0,
-      failure_output: [],
-      time_required: 0,
-      station_type: nil,
-      description: "A simple item",
-      craft_message: "You craft a simple item...",
-      success_message: "Success!",
-      failure_message: "Failed!",
-      tags: []
-    }
-
-    skilled_recipe = %Recipe{
-      key: "recipe_advanced_item",
-      name: "Advanced Item",
-      skill_required: "blacksmithing",
-      skill_level: 5,
-      ingredients: [%{item: "iron_bar", quantity: 3}],
-      tools: ["hammer"],
-      output: [%{item: "iron_sword", quantity: 1, chance: 1.0}],
-      xp_reward: %{skill: "blacksmithing", amount: 50},
-      failure_chance: 0.2,
-      failure_output: [%{item: "scrap_metal", quantity: 1, chance: 1.0}],
-      time_required: 60,
-      station_type: "forge",
-      description: "An advanced item requiring skill",
-      craft_message: "You work the forge...",
-      success_message: "Forged!",
-      failure_message: "The metal breaks!",
-      tags: ["advanced"]
-    }
-
-    tool_recipe = %Recipe{
-      key: "recipe_with_tools",
-      name: "Tool Recipe",
-      skill_required: nil,
-      skill_level: 0,
-      ingredients: [%{item: "wood", quantity: 1}],
-      tools: ["saw", "hammer"],
-      output: [%{item: "wooden_box", quantity: 1, chance: 1.0}],
-      xp_reward: nil,
-      failure_chance: 0.0,
-      failure_output: [],
-      time_required: 0,
-      station_type: nil,
-      description: "Requires tools",
-      craft_message: "Crafting...",
-      success_message: "Done!",
-      failure_message: "Failed!",
-      tags: []
-    }
-
-    # Register recipes in the test registry using internal state manipulation
-    register_test_recipe(registry, simple_recipe)
-    register_test_recipe(registry, skilled_recipe)
-    register_test_recipe(registry, tool_recipe)
+    tool_recipe =
+      recipe_fixture(%{
+        key: "recipe_with_tools",
+        name: "Tool Recipe",
+        ingredients: [%{"item" => "wood", "quantity" => 1}],
+        tools: ["saw", "hammer"],
+        output: [%{"item" => "wooden_box", "quantity" => 1, "chance" => 1.0}],
+        failure_chance: 0.0,
+        station_type: nil,
+        success_message: "Done!",
+        failure_message: "Failed!"
+      })
 
     %{
-      registry: registry,
       simple_recipe: simple_recipe,
       skilled_recipe: skilled_recipe,
       tool_recipe: tool_recipe
     }
-  end
-
-  # Helper to register recipes for testing via the registry API
-  defp register_test_recipe(_registry, recipe) do
-    # Use the registry's register function which updates both state and ETS
-    CraftingRegistry.register(recipe)
   end
 
   # Helper to create a game state for testing
@@ -346,8 +304,8 @@ defmodule Loka.Framework.CraftingTest do
       assert result.success == true
       assert result.items == [%{item: "simple_item", quantity: 1}]
       assert result.message == "Success!"
-      assert result.xp == %{skill: "crafting", amount: 10}
-      assert result.consumed == simple_recipe.ingredients
+      assert result.xp == %{"skill" => "crafting", "amount" => 10}
+      assert length(result.consumed) == 2
 
       # Verify ingredients were consumed atomically
       assert updated_state.inventory == []
@@ -425,10 +383,18 @@ defmodule Loka.Framework.CraftingTest do
 
       {:ok, updated_state, result} = Crafting.craft(state, "recipe_simple_item")
 
-      # Check result has consumed ingredients
+      # Check result has consumed ingredients (string-key maps from DB)
       assert length(result.consumed) == 2
-      assert Enum.any?(result.consumed, &(&1.item == "ingredient_a" and &1.quantity == 2))
-      assert Enum.any?(result.consumed, &(&1.item == "ingredient_b" and &1.quantity == 1))
+
+      assert Enum.any?(
+               result.consumed,
+               &(&1["item"] == "ingredient_a" and &1["quantity"] == 2)
+             )
+
+      assert Enum.any?(
+               result.consumed,
+               &(&1["item"] == "ingredient_b" and &1["quantity"] == 1)
+             )
 
       # Verify state was actually updated
       assert length(updated_state.inventory) == 1
@@ -667,27 +633,17 @@ defmodule Loka.Framework.CraftingTest do
 
     test "station bonus cannot reduce failure chance below 0" do
       # Create recipe with 0.1 failure chance
-      recipe = %Recipe{
+      recipe_fixture(%{
         key: "recipe_low_fail",
         name: "Low Fail Item",
-        skill_required: nil,
-        skill_level: 0,
-        ingredients: [%{item: "item_x", quantity: 1}],
+        ingredients: [%{"item" => "item_x", "quantity" => 1}],
         tools: [],
-        output: [%{item: "result", quantity: 1, chance: 1.0}],
-        xp_reward: nil,
+        output: [%{"item" => "result", "quantity" => 1, "chance" => 1.0}],
         failure_chance: 0.1,
-        failure_output: [],
-        time_required: 0,
         station_type: "forge",
-        description: "Test",
-        craft_message: "Crafting...",
         success_message: "Success!",
-        failure_message: "Failed!",
-        tags: []
-      }
-
-      register_test_recipe(CraftingRegistry, recipe)
+        failure_message: "Failed!"
+      })
 
       player = player_fixture()
       state = game_state_fixture(player.id, %{inventory: ["item_x"]})
@@ -730,7 +686,7 @@ defmodule Loka.Framework.CraftingTest do
       assert {:ok, final_state, craft_result} = Crafting.craft(state, recipe_key)
       assert craft_result.success == true
       assert craft_result.items == [%{item: "simple_item", quantity: 1}]
-      assert craft_result.xp == %{skill: "crafting", amount: 10}
+      assert craft_result.xp == %{"skill" => "crafting", "amount" => 10}
 
       # Ingredients are now consumed as part of craft/3
       assert final_state.inventory == []

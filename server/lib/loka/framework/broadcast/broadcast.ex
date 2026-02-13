@@ -27,7 +27,7 @@ defmodule Loka.Framework.Broadcast do
   """
 
   alias Loka.Session
-  alias Loka.Engine.ZoneRegistry
+  alias Loka.Content
 
   @type message_type :: :system | :event | :emergency
   @type player_id :: String.t()
@@ -74,7 +74,7 @@ defmodule Loka.Framework.Broadcast do
     formatted = format_message(message, type)
 
     zone_key
-    |> ZoneRegistry.players_in_zone()
+    |> Content.Zone.players_in_zone()
     |> Enum.each(fn player_id ->
       Session.send_to_player(player_id, {:broadcast_message, formatted, type})
     end)

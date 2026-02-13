@@ -14,7 +14,7 @@ defmodule Loka.Integration.StorylineChannelTest do
 
   alias Loka.Testing.Bot.ChannelBot
   alias Loka.Testing.Bot.Strategies.StorylineRunner
-  alias Loka.Framework.Storyline.StorylineRegistry
+  alias Loka.Content.Storyline, as: StorylineContent
   alias Loka.Engine.WorldLoader
 
   @moduletag :integration
@@ -30,7 +30,7 @@ defmodule Loka.Integration.StorylineChannelTest do
       end
 
       # Load storyline to get starting room
-      {:ok, storyline} = StorylineRegistry.get("monastery_arc")
+      {:ok, storyline} = StorylineContent.get_struct("monastery_arc")
 
       # Spawn world
       IO.puts("▶ Spawning world from #{storyline.starting_room}...")

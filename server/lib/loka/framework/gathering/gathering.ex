@@ -37,7 +37,7 @@ defmodule Loka.Framework.Gathering do
             respawn_at: nil  # timestamp when fully respawned
   """
 
-  alias Loka.Framework.Gathering.{GatheringNode, GatheringRegistry}
+  alias Loka.Content.GatheringNode, as: ContentGatheringNode
   alias Loka.Framework.Player.GameState
   alias Loka.Utils.MapHelpers
 
@@ -61,7 +61,7 @@ defmodule Loka.Framework.Gathering do
     room_nodes = get_room_nodes(room_entity)
 
     Enum.flat_map(room_nodes, fn {node_key, node_state} ->
-      case GatheringRegistry.get(node_key) do
+      case ContentGatheringNode.get(node_key) do
         {:ok, node_def} -> [{node_key, node_def, node_state}]
         {:error, _} -> []
       end
@@ -118,23 +118,26 @@ defmodule Loka.Framework.Gathering do
          {:ok, node_state} <- get_node_state(room_entity, node_key),
          :ok <- can_gather?(game_state, room_entity, node_key) do
       # Roll for yields
-      items = GatheringNode.roll_yields(node_def)
+      items = ContentGatheringNode.roll_yields(node_def)
 
       # Decrement uses
-      uses_remaining = Map.get(node_state, :uses_remaining, node_def.uses_per_respawn)
+      uses_per = ContentGatheringNode.uses_per_respawn(node_def)
+      uses_remaining = Map.get(node_state, :uses_remaining, uses_per)
       new_uses = max(0, uses_remaining - 1)
       exhausted = new_uses == 0
 
       # Build result
-      message =
-        if Enum.empty?(items), do: node_def.failure_message, else: node_def.success_message
+      fail_msg = ContentGatheringNode.failure_message(node_def)
+      success_msg = ContentGatheringNode.success_message(node_def)
+      exhaust_msg = ContentGatheringNode.exhausted_message(node_def)
 
-      message = if exhausted, do: "#{message} #{node_def.exhausted_message}", else: message
+      message = if Enum.empty?(items), do: fail_msg, else: success_msg
+      message = if exhausted, do: "#{message} #{exhaust_msg}", else: message
 
       result = %{
         items: items,
         message: message,
-        xp: if(Enum.any?(items), do: node_def.xp_reward, else: nil),
+        xp: if(Enum.any?(items), do: ContentGatheringNode.xp_reward(node_def), else: nil),
         node_exhausted: exhausted,
         new_uses_remaining: new_uses,
         node_key: node_key
@@ -150,9 +153,13 @@ defmodule Loka.Framework.Gathering do
   def get_remaining_uses(room_entity, node_key) do
     case get_node_state(room_entity, node_key) do
       {:ok, state} ->
-        case GatheringRegistry.get(node_key) do
-          {:ok, node_def} -> Map.get(state, :uses_remaining, node_def.uses_per_respawn)
-          {:error, _} -> 0
+        case ContentGatheringNode.get(node_key) do
+          {:ok, node_def} ->
+            uses_per = ContentGatheringNode.uses_per_respawn(node_def)
+            Map.get(state, :uses_remaining, uses_per)
+
+          {:error, _} ->
+            0
         end
 
       {:error, _} ->
@@ -177,7 +184,7 @@ defmodule Loka.Framework.Gathering do
     room_nodes = get_room_nodes(room_entity)
 
     Enum.map(room_nodes, fn {node_key, node_state} ->
-      case GatheringRegistry.get(node_key) do
+      case ContentGatheringNode.get(node_key) do
         {:ok, node_def} ->
           updated_state = process_respawn(node_key, node_state, node_def, current_time)
           {node_key, updated_state}
@@ -193,9 +200,10 @@ defmodule Loka.Framework.Gathering do
   Manually resets a node to full uses.
   """
   def reset_node(node_key) do
-    case GatheringRegistry.get(node_key) do
+    case ContentGatheringNode.get(node_key) do
       {:ok, node_def} ->
-        {:ok, %{uses_remaining: node_def.uses_per_respawn, respawn_at: nil}}
+        uses_per = ContentGatheringNode.uses_per_respawn(node_def)
+        {:ok, %{uses_remaining: uses_per, respawn_at: nil}}
 
       {:error, reason} ->
         {:error, reason}
@@ -207,7 +215,7 @@ defmodule Loka.Framework.Gathering do
   # =============================================================================
 
   defp get_node_definition(node_key) do
-    GatheringRegistry.get(node_key)
+    ContentGatheringNode.get(node_key)
   end
 
   defp get_node_state(room_entity, node_key) do
@@ -220,7 +228,8 @@ defmodule Loka.Framework.Gathering do
   end
 
   defp check_not_exhausted(node_state, node_def) do
-    uses = Map.get(node_state, :uses_remaining, node_def.uses_per_respawn)
+    uses_per = ContentGatheringNode.uses_per_respawn(node_def)
+    uses = Map.get(node_state, :uses_remaining, uses_per)
 
     if uses > 0 do
       :ok
@@ -229,27 +238,31 @@ defmodule Loka.Framework.Gathering do
     end
   end
 
-  defp check_skill_requirements(%GameState{} = game_state, %GatheringNode{} = node_def) do
-    if GatheringNode.requires_skill?(node_def) do
+  defp check_skill_requirements(%GameState{} = game_state, node_def) do
+    if ContentGatheringNode.requires_skill?(node_def) do
       skills = get_skills(game_state)
-      player_level = Map.get(skills, node_def.skill_required, 0)
+      skill_req = ContentGatheringNode.skill_required(node_def)
+      skill_lvl = ContentGatheringNode.skill_level(node_def)
+      player_level = Map.get(skills, skill_req, 0)
 
-      if player_level >= node_def.skill_level do
+      if player_level >= skill_lvl do
         :ok
       else
-        {:error, {:skill_required, node_def.skill_required, node_def.skill_level, player_level}}
+        {:error, {:skill_required, skill_req, skill_lvl, player_level}}
       end
     else
       :ok
     end
   end
 
-  defp check_tool(%GameState{} = game_state, %GatheringNode{} = node_def) do
-    if GatheringNode.requires_tool?(node_def) do
-      if has_item?(game_state, node_def.tool_required) do
+  defp check_tool(%GameState{} = game_state, node_def) do
+    if ContentGatheringNode.requires_tool?(node_def) do
+      tool_req = ContentGatheringNode.tool_required(node_def)
+
+      if has_item?(game_state, tool_req) do
         :ok
       else
-        {:error, {:tool_required, node_def.tool_required}}
+        {:error, {:tool_required, tool_req}}
       end
     else
       :ok
@@ -299,22 +312,24 @@ defmodule Loka.Framework.Gathering do
   end
 
   defp process_respawn(node_key, node_state, node_def, current_time) do
-    uses = Map.get(node_state, :uses_remaining, node_def.uses_per_respawn)
+    uses_per = ContentGatheringNode.uses_per_respawn(node_def)
+    respawn_time = ContentGatheringNode.respawn_time(node_def)
+    uses = Map.get(node_state, :uses_remaining, uses_per)
     respawn_at = Map.get(node_state, :respawn_at)
 
     cond do
       # Already at full uses
-      uses >= node_def.uses_per_respawn ->
+      uses >= uses_per ->
         node_state
 
       # No respawn timer set, start one
-      is_nil(respawn_at) and uses < node_def.uses_per_respawn ->
-        %{node_state | respawn_at: current_time + node_def.respawn_time}
+      is_nil(respawn_at) and uses < uses_per ->
+        %{node_state | respawn_at: current_time + respawn_time}
 
       # Respawn timer has elapsed
       not is_nil(respawn_at) and current_time >= respawn_at ->
         Logger.debug("Node #{node_key} respawned")
-        %{uses_remaining: node_def.uses_per_respawn, respawn_at: nil}
+        %{uses_remaining: uses_per, respawn_at: nil}
 
       # Still waiting
       true ->

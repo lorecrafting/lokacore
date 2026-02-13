@@ -2,7 +2,6 @@ defmodule Loka.Framework.GatheringTest do
   use Loka.DataCase
 
   alias Loka.Framework.Gathering
-  alias Loka.Framework.Gathering.{GatheringNode, GatheringRegistry}
   alias Loka.Framework.Player.GameState
 
   import Loka.EngineFixtures
@@ -13,91 +12,68 @@ defmodule Loka.Framework.GatheringTest do
   # =============================================================================
 
   setup do
-    # Start the GatheringRegistry GenServer for tests (if not already started by app)
-    # Use the default name since Gathering module calls GatheringRegistry without server param
-    registry_pid =
-      case start_supervised({GatheringRegistry, [load_on_start: false]}) do
-        {:ok, pid} -> pid
-        {:error, {:already_started, pid}} -> pid
-      end
-
-    # Restore production state on exit by reloading from disk
-    on_exit(fn ->
-      if Process.alive?(registry_pid) do
-        GatheringRegistry.reload()
-      end
-    end)
-
-    # Create test node definitions
-    herb_node = %GatheringNode{
+    # Create gathering node entities in DB
+    gathering_node_fixture(%{
       key: "herb_patch",
       name: "Herb Patch",
-      skill_required: "herbalism",
-      skill_level: 1,
-      yields: [
-        %{item: "herb_healing", chance: 1.0, quantity: {1, 3}},
-        %{item: "herb_rare", chance: 0.3, quantity: 1}
-      ],
-      respawn_time: 300,
-      uses_per_respawn: 3,
-      tool_required: "gathering_knife",
-      xp_reward: %{skill: "herbalism", amount: 5},
-      gather_message: "You carefully harvest from the herb patch.",
-      success_message: "You find some useful herbs!",
-      failure_message: "You find nothing of value.",
-      exhausted_message: "The herb patch has been picked clean.",
-      tags: ["herbalism", "outdoor"]
-    }
+      data: %{
+        "skill_required" => "herbalism",
+        "skill_level" => 1,
+        "yields" => [
+          %{"item" => "herb_healing", "chance" => 1.0, "quantity" => [1, 3]},
+          %{"item" => "herb_rare", "chance" => 0.3, "quantity" => 1}
+        ],
+        "respawn_time" => 300,
+        "uses_per_respawn" => 3,
+        "tool_required" => "gathering_knife",
+        "xp_reward" => %{"skill" => "herbalism", "amount" => 5},
+        "gather_message" => "You carefully harvest from the herb patch.",
+        "success_message" => "You find some useful herbs!",
+        "failure_message" => "You find nothing of value.",
+        "exhausted_message" => "The herb patch has been picked clean.",
+        "tags" => ["herbalism", "outdoor"]
+      }
+    })
 
-    ore_node = %GatheringNode{
+    gathering_node_fixture(%{
       key: "iron_vein",
       name: "Iron Vein",
-      skill_required: "mining",
-      skill_level: 2,
-      yields: [
-        %{item: "iron_ore", chance: 0.8, quantity: 2}
-      ],
-      respawn_time: 600,
-      uses_per_respawn: 5,
-      tool_required: "pickaxe",
-      xp_reward: %{skill: "mining", amount: 10},
-      gather_message: "You swing your pickaxe at the vein.",
-      success_message: "You extract some iron ore!",
-      failure_message: "You fail to extract any ore.",
-      exhausted_message: "The vein has been depleted.",
-      tags: ["mining", "underground"]
-    }
+      data: %{
+        "skill_required" => "mining",
+        "skill_level" => 2,
+        "yields" => [
+          %{"item" => "iron_ore", "chance" => 0.8, "quantity" => 2}
+        ],
+        "respawn_time" => 600,
+        "uses_per_respawn" => 5,
+        "tool_required" => "pickaxe",
+        "xp_reward" => %{"skill" => "mining", "amount" => 10},
+        "gather_message" => "You swing your pickaxe at the vein.",
+        "success_message" => "You extract some iron ore!",
+        "failure_message" => "You fail to extract any ore.",
+        "exhausted_message" => "The vein has been depleted.",
+        "tags" => ["mining", "underground"]
+      }
+    })
 
-    simple_node = %GatheringNode{
+    gathering_node_fixture(%{
       key: "berry_bush",
       name: "Berry Bush",
-      skill_required: nil,
-      skill_level: 0,
-      yields: [
-        %{item: "berries", chance: 1.0, quantity: 3}
-      ],
-      respawn_time: 120,
-      uses_per_respawn: 2,
-      tool_required: nil,
-      xp_reward: nil,
-      gather_message: "You pick berries from the bush.",
-      success_message: "You gather some fresh berries!",
-      failure_message: "No berries are ripe.",
-      exhausted_message: "All the berries have been picked.",
-      tags: ["foraging"]
-    }
+      data: %{
+        "yields" => [
+          %{"item" => "berries", "chance" => 1.0, "quantity" => 3}
+        ],
+        "respawn_time" => 120,
+        "uses_per_respawn" => 2,
+        "gather_message" => "You pick berries from the bush.",
+        "success_message" => "You gather some fresh berries!",
+        "failure_message" => "No berries are ripe.",
+        "exhausted_message" => "All the berries have been picked.",
+        "tags" => ["foraging"]
+      }
+    })
 
-    # Register nodes manually in the registry
-    GenServer.call(GatheringRegistry, {:register_test_node, herb_node})
-    GenServer.call(GatheringRegistry, {:register_test_node, ore_node})
-    GenServer.call(GatheringRegistry, {:register_test_node, simple_node})
-
-    %{
-      registry_pid: registry_pid,
-      herb_node: herb_node,
-      ore_node: ore_node,
-      simple_node: simple_node
-    }
+    :ok
   end
 
   # Helper to create a room with gathering nodes
@@ -146,20 +122,19 @@ defmodule Loka.Framework.GatheringTest do
   # =============================================================================
 
   describe "list_nodes/1" do
-    test "lists all nodes in a room", %{herb_node: herb_node, simple_node: simple_node} do
+    test "lists all nodes in a room" do
       room = room_with_nodes_fixture(["herb_patch", "berry_bush"])
 
       nodes = Gathering.list_nodes(room)
 
       assert length(nodes) == 2
 
-      # Check that we get tuples of {key, definition, state}
-      assert Enum.any?(nodes, fn {key, def, _state} ->
-               key == "herb_patch" && def.name == herb_node.name
+      assert Enum.any?(nodes, fn {key, _def, _state} ->
+               key == "herb_patch"
              end)
 
-      assert Enum.any?(nodes, fn {key, def, _state} ->
-               key == "berry_bush" && def.name == simple_node.name
+      assert Enum.any?(nodes, fn {key, _def, _state} ->
+               key == "berry_bush"
              end)
     end
 
@@ -384,33 +359,30 @@ defmodule Loka.Framework.GatheringTest do
       # herb_patch has 100% chance on first yield
       if result.items != [] do
         assert result.xp != nil
-        assert result.xp.skill == "herbalism"
-        assert result.xp.amount == 5
+        assert result.xp["skill"] == "herbalism"
+        assert result.xp["amount"] == 5
       end
     end
 
     test "returns nil XP when no items gathered" do
       # Create a node with 0% chance yields
-      zero_yield_node = %GatheringNode{
+      gathering_node_fixture(%{
         key: "empty_node",
         name: "Empty Node",
-        skill_required: nil,
-        skill_level: 0,
-        yields: [
-          %{item: "nothing", chance: 0.0, quantity: 1}
-        ],
-        respawn_time: 60,
-        uses_per_respawn: 1,
-        tool_required: nil,
-        xp_reward: %{skill: "test", amount: 5},
-        gather_message: "You try to gather.",
-        success_message: "Success!",
-        failure_message: "Nothing found.",
-        exhausted_message: "Empty.",
-        tags: []
-      }
-
-      GenServer.call(GatheringRegistry, {:register_test_node, zero_yield_node})
+        data: %{
+          "yields" => [
+            %{"item" => "nothing", "chance" => 0.0, "quantity" => 1}
+          ],
+          "respawn_time" => 60,
+          "uses_per_respawn" => 1,
+          "xp_reward" => %{"skill" => "test", "amount" => 5},
+          "gather_message" => "You try to gather.",
+          "success_message" => "Success!",
+          "failure_message" => "Nothing found.",
+          "exhausted_message" => "Empty.",
+          "tags" => []
+        }
+      })
 
       components = %{
         "gathering_nodes" => %{
@@ -426,8 +398,6 @@ defmodule Loka.Framework.GatheringTest do
       assert result.items == []
       assert result.xp == nil
 
-      # When node is exhausted (uses_per_respawn is 1, so it becomes exhausted after first gather),
-      # the exhausted message gets appended
       assert result.message == "Nothing found. Empty."
       assert result.node_exhausted == true
     end
@@ -466,7 +436,7 @@ defmodule Loka.Framework.GatheringTest do
       assert uses == 5
     end
 
-    test "returns default uses when state not set", %{simple_node: simple_node} do
+    test "returns default uses when state not set" do
       components = %{
         "gathering_nodes" => %{
           "berry_bush" => %{respawn_at: nil}
@@ -477,8 +447,8 @@ defmodule Loka.Framework.GatheringTest do
 
       uses = Gathering.get_remaining_uses(room, "berry_bush")
 
-      # Should use default from node definition
-      assert uses == simple_node.uses_per_respawn
+      # Should use default from node definition (uses_per_respawn = 2)
+      assert uses == 2
     end
 
     test "returns 0 for non-existent node" do
@@ -549,11 +519,11 @@ defmodule Loka.Framework.GatheringTest do
       assert berry_state.respawn_at == current_time + 120
     end
 
-    test "does not change state when node has full uses", %{simple_node: simple_node} do
+    test "does not change state when node has full uses" do
       components = %{
         "gathering_nodes" => %{
           "berry_bush" => %{
-            uses_remaining: simple_node.uses_per_respawn,
+            uses_remaining: 2,
             respawn_at: nil
           }
         }
@@ -565,11 +535,11 @@ defmodule Loka.Framework.GatheringTest do
       updated_nodes = Gathering.tick_respawn(room, current_time)
 
       berry_state = updated_nodes["berry_bush"]
-      assert berry_state.uses_remaining == simple_node.uses_per_respawn
+      assert berry_state.uses_remaining == 2
       assert berry_state.respawn_at == nil
     end
 
-    test "respawns node when timer elapses", %{simple_node: simple_node} do
+    test "respawns node when timer elapses" do
       respawn_time = 1000
 
       components = %{
@@ -585,7 +555,8 @@ defmodule Loka.Framework.GatheringTest do
       updated_nodes = Gathering.tick_respawn(room, current_time)
 
       berry_state = updated_nodes["berry_bush"]
-      assert berry_state.uses_remaining == simple_node.uses_per_respawn
+      # berry_bush uses_per_respawn = 2
+      assert berry_state.uses_remaining == 2
       assert berry_state.respawn_at == nil
     end
 
@@ -624,7 +595,7 @@ defmodule Loka.Framework.GatheringTest do
       assert berry_state.respawn_at != nil
     end
 
-    test "handles multiple nodes", %{herb_node: herb_node} do
+    test "handles multiple nodes" do
       components = %{
         "gathering_nodes" => %{
           "berry_bush" => %{uses_remaining: 0, respawn_at: nil},
@@ -643,7 +614,7 @@ defmodule Loka.Framework.GatheringTest do
       # Partial node with uses < max gets respawn timer too
       assert updated_nodes["herb_patch"].uses_remaining == 1
       # herb_patch has uses_per_respawn of 3, so with 1 use it should get a timer
-      assert updated_nodes["herb_patch"].respawn_at == current_time + herb_node.respawn_time
+      assert updated_nodes["herb_patch"].respawn_at == current_time + 300
     end
   end
 
@@ -652,10 +623,11 @@ defmodule Loka.Framework.GatheringTest do
   # =============================================================================
 
   describe "reset_node/1" do
-    test "resets node to full uses", %{simple_node: simple_node} do
+    test "resets node to full uses" do
       assert {:ok, state} = Gathering.reset_node("berry_bush")
 
-      assert state.uses_remaining == simple_node.uses_per_respawn
+      # berry_bush uses_per_respawn = 2
+      assert state.uses_remaining == 2
       assert state.respawn_at == nil
     end
 
@@ -720,7 +692,7 @@ defmodule Loka.Framework.GatheringTest do
 
       {:ok, result} = Gathering.gather(game_state, room, "herb_patch")
 
-      # herb_patch yields have range {1, 3}
+      # herb_patch yields have range [1, 3]
       if result.items != [] do
         healing_herb = Enum.find(result.items, &(&1.item == "herb_healing"))
 

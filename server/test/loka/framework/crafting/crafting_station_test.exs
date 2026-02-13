@@ -1,73 +1,45 @@
 defmodule Loka.Framework.Crafting.CraftingStationTest do
-  use ExUnit.Case, async: false
+  use Loka.DataCase
 
   alias Loka.Framework.Crafting.CraftingStation
-  alias Loka.Framework.Crafting.CraftingRegistry
-  alias Loka.Framework.Crafting.Recipe
+
+  import Loka.EngineFixtures
 
   setup do
-    # The CraftingRegistry is started globally by the application.
-    # We use the existing process rather than trying to start a new one.
-    # If for some reason it's not running (e.g., in isolated test), start it.
-    _pid =
-      case Process.whereis(CraftingRegistry) do
-        nil ->
-          {:ok, pid} =
-            start_supervised({CraftingRegistry, name: CraftingRegistry, load_on_start: false})
-
-          pid
-
-        pid ->
-          pid
-      end
-
-    # Create sample recipes for testing
-    recipe1 = %Recipe{
+    # Create sample recipes in the DB via entity fixtures
+    recipe_fixture(%{
       key: "recipe_iron_sword",
       name: "Iron Sword",
       station_type: "forge",
       skill_required: "blacksmithing",
       skill_level: 1
-    }
+    })
 
-    recipe2 = %Recipe{
+    recipe_fixture(%{
       key: "recipe_steel_sword",
       name: "Steel Sword",
       station_type: "forge",
       skill_required: "blacksmithing",
       skill_level: 3
-    }
+    })
 
-    recipe3 = %Recipe{
+    recipe_fixture(%{
       key: "recipe_health_potion",
       name: "Health Potion",
       station_type: "alchemy_bench",
       skill_required: "alchemy",
       skill_level: 2
-    }
+    })
 
-    recipe4 = %Recipe{
+    recipe_fixture(%{
       key: "recipe_general_craft",
       name: "General Craft",
       station_type: nil,
       skill_required: nil,
       skill_level: 0
-    }
+    })
 
-    # Add recipes to registry using the proper API
-    recipes = %{
-      "recipe_iron_sword" => recipe1,
-      "recipe_steel_sword" => recipe2,
-      "recipe_health_potion" => recipe3,
-      "recipe_general_craft" => recipe4
-    }
-
-    # Register each recipe using the registry's API (updates both state and ETS)
-    Enum.each(recipes, fn {_key, recipe} ->
-      CraftingRegistry.register(recipe)
-    end)
-
-    {:ok, recipes: recipes}
+    :ok
   end
 
   describe "get_station/1" do
@@ -526,7 +498,7 @@ defmodule Loka.Framework.Crafting.CraftingStationTest do
         }
       }
 
-      # Recipe is in the list, but doesn't exist in registry
+      # Recipe is in the list, but doesn't exist in DB
       # The function checks if key is in list, so it returns true
       assert CraftingStation.can_craft_recipe?(entity, "non_existent_recipe") == true
     end

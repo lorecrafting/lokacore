@@ -13,7 +13,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Map do
   """
 
   alias Loka.WorldBuilder.RoomManager
-  alias Loka.Engine.ZoneRegistry
+  alias Loka.Content
 
   @direction_offsets %{
     "north" => {0, -1},
@@ -55,7 +55,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Map do
         {:ok, text, socket}
 
       zone_key ->
-        zone_rooms = ZoneRegistry.rooms_in_zone(zone_key)
+        zone_rooms = Content.Zone.rooms_in_zone(zone_key)
 
         if zone_rooms == [] do
           {:error, "Zone '#{zone_key}' not found or has no rooms.", socket}
@@ -131,7 +131,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Map do
   defp zone_for_room(nil), do: nil
 
   defp zone_for_room(room_key) do
-    case ZoneRegistry.zone_for_room(room_key) do
+    case Content.Zone.zone_for_room(room_key) do
       {:ok, zone_key} -> zone_key
       {:error, :not_found} -> nil
     end

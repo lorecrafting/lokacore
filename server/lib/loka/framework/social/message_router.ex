@@ -314,7 +314,7 @@ defmodule Loka.Framework.Social.MessageRouter do
   end
 
   defp get_zone_id(room_id) do
-    case Loka.Engine.ZoneRegistry.zone_for_room(room_id) do
+    case Loka.Content.Zone.zone_for_room(room_id) do
       {:ok, zone_key} -> zone_key
       {:error, :not_found} -> nil
     end

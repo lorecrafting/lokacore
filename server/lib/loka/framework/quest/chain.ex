@@ -154,11 +154,7 @@ defmodule Loka.Framework.Quest.Chain do
   Returns `{:ok, chain}` or `{:error, :not_found}`.
   """
   def get_chain_for_quest(quest_id) do
-    if Process.whereis(ChainRegistry) do
-      ChainRegistry.get_chain_for_quest(quest_id)
-    else
-      {:error, :registry_not_running}
-    end
+    ChainRegistry.get_chain_for_quest(quest_id)
   end
 
   @doc """
@@ -167,22 +163,14 @@ defmodule Loka.Framework.Quest.Chain do
   Returns `{:ok, chain}` or `{:error, :not_found}`.
   """
   def get_chain(chain_id) do
-    if Process.whereis(ChainRegistry) do
-      ChainRegistry.get(chain_id)
-    else
-      {:error, :registry_not_running}
-    end
+    ChainRegistry.get(chain_id)
   end
 
   @doc """
   Lists all defined quest chains.
   """
   def list_chains do
-    if Process.whereis(ChainRegistry) do
-      ChainRegistry.all()
-    else
-      []
-    end
+    ChainRegistry.all()
   end
 
   # =============================================================================
@@ -428,11 +416,7 @@ defmodule Loka.Framework.Quest.Chain do
   Returns `:ok` or `{:error, reason}`.
   """
   def register_chain(%Chain{} = chain) do
-    if Process.whereis(ChainRegistry) do
-      ChainRegistry.register(chain)
-    else
-      {:error, :registry_not_running}
-    end
+    ChainRegistry.register(chain)
   end
 
   # =============================================================================

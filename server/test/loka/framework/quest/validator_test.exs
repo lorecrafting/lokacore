@@ -1,5 +1,5 @@
 defmodule Loka.Framework.Quest.ValidatorTest do
-  use ExUnit.Case, async: false
+  use Loka.DataCase, async: false
 
   alias Loka.Framework.Quest.Validator
 

@@ -57,29 +57,18 @@ defmodule Loka.Application do
       {Task.Supervisor, name: Loka.Admin.Audit.TaskSupervisor},
 
       # Framework layer - Quest System
-      # ObjectiveRegistry must start before QuestRegistry for validation
-      Loka.Framework.Quest.ObjectiveRegistry,
-      Loka.Framework.Quest.QuestRegistry,
       Loka.Framework.Quest.TimerManager,
-      Loka.Framework.Quest.ChainRegistry,
-      Loka.Framework.Storyline.StorylineRegistry,
       # Combat system - Registry for lookups, Supervisor for combat processes
       {Registry, keys: :unique, name: Loka.CombatRegistry},
       Loka.Framework.Combat.CombatSupervisor,
       Loka.Framework.Combat.RespawnManager,
 
-      # Crafting and Gathering systems
-      Loka.Framework.Gathering.GatheringRegistry,
-      Loka.Framework.Crafting.CraftingRegistry,
-
-      # Binary Skill system (new mechanics)
-      Loka.Framework.Skills.BinarySkillRegistry,
+      # Crafting and Gathering systems (registries removed in V2 — use Content modules)
 
       # Inventory systems
       Loka.Framework.Inventory.ContainerRespawn,
 
       # Resource system (mana, mv, stamina, etc.)
-      Loka.Framework.Resources.ResourceRegistry,
       Loka.Framework.Resources.ResourcePool,
       Loka.Framework.Resources.ResourceTicker,
 
@@ -95,10 +84,7 @@ defmodule Loka.Application do
       # Scripting - World event handler (subscribes to time/weather events)
       Loka.Framework.Scripting.WorldEventHandler,
 
-      # Zone system - periodic mob/item respawning
-      # Order: Loader → Registry → Reset (Reset needs both Loader and Registry)
-      Loka.Engine.ZoneLoader,
-      Loka.Engine.ZoneRegistry,
+      # Zone system - periodic mob/item respawning (V2: zones are entities)
       Loka.Engine.ZoneReset,
 
       # Content Validation - runs after all content is loaded

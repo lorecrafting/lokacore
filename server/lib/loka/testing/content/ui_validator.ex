@@ -32,7 +32,7 @@ defmodule Loka.Testing.Content.UIValidator do
   require Logger
 
   alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
-  alias Loka.Framework.Quest.QuestRegistry
+  alias Loka.Framework.Quest.Definitions
 
   @type validation_result :: %{
           entities_checked: non_neg_integer(),
@@ -154,7 +154,7 @@ defmodule Loka.Testing.Content.UIValidator do
     results =
       if "quest_giver" in tags do
         # Check if any quest references this NPC as giver
-        quests = QuestRegistry.all()
+        quests = Definitions.all_quest_definitions()
 
         has_quest =
           Enum.any?(quests, fn quest ->
@@ -236,12 +236,12 @@ defmodule Loka.Testing.Content.UIValidator do
           get_in_flex(crafting_tool, ["recipes_enabled"]) ||
             get_in_flex(crafting_tool, [:recipes_enabled]) || []
 
-        alias Loka.Framework.Crafting.CraftingRegistry
+        alias Loka.Content.Recipe, as: ContentRecipe
 
         invalid_recipes =
           recipes
           |> Enum.reject(fn recipe_key ->
-            case CraftingRegistry.get(recipe_key) do
+            case ContentRecipe.get(recipe_key) do
               {:ok, _} -> true
               _ -> false
             end

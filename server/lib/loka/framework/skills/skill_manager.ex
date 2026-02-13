@@ -25,7 +25,8 @@ defmodule Loka.Framework.Skills.SkillManager do
       remaining = SkillManager.points_remaining(game_state)
   """
 
-  alias Loka.Framework.Skills.{Skill, SkillRegistry}
+  alias Loka.Content.Skill, as: ContentSkill
+  alias Loka.Engine.TypedObject
   alias Loka.Framework.Player.GameState
   alias Loka.Utils.MapHelpers
 
@@ -81,8 +82,8 @@ defmodule Loka.Framework.Skills.SkillManager do
       level = Map.get(data, :level, 0)
 
       if level > 0 do
-        case SkillRegistry.get(skill_key) do
-          {:ok, skill_def} -> acc + Skill.total_points_spent(skill_def, level)
+        case ContentSkill.get(skill_key) do
+          {:ok, skill_def} -> acc + ContentSkill.total_points_spent(skill_def, level)
           _ -> acc + level
         end
       else
@@ -116,7 +117,7 @@ defmodule Loka.Framework.Skills.SkillManager do
   Returns `{:ok, updated_state}` or `{:error, reason}`.
   """
   def train(%GameState{} = game_state, skill_key) do
-    with {:ok, skill_def} <- SkillRegistry.get(skill_key),
+    with {:ok, skill_def} <- ContentSkill.get(skill_key),
          :ok <- check_prerequisites(game_state, skill_def),
          current_level <- get_level(game_state, skill_key),
          :ok <- check_not_maxed(skill_def, current_level),
@@ -160,17 +161,17 @@ defmodule Loka.Framework.Skills.SkillManager do
   Automatically levels up if enough XP accumulated.
   """
   def practice(%GameState{} = game_state, skill_key, xp_amount \\ nil) do
-    case SkillRegistry.get(skill_key) do
+    case ContentSkill.get(skill_key) do
       {:ok, skill_def} ->
-        xp_gain = xp_amount || skill_def.xp_per_use
+        xp_gain = xp_amount || ContentSkill.xp_per_use(skill_def)
         current_level = get_level(game_state, skill_key)
         current_xp = get_xp(game_state, skill_key)
 
-        if current_level >= skill_def.max_level do
+        if current_level >= ContentSkill.max_level(skill_def) do
           {:ok, game_state}
         else
           new_xp = current_xp + xp_gain
-          xp_needed = Skill.xp_for_level(skill_def, current_level + 1)
+          xp_needed = ContentSkill.xp_for_level(skill_def, current_level + 1)
 
           {final_level, final_xp} =
             if new_xp >= xp_needed and
@@ -196,20 +197,22 @@ defmodule Loka.Framework.Skills.SkillManager do
   # Validation
   # =============================================================================
 
-  defp check_prerequisites(%GameState{} = game_state, %Skill{} = skill_def) do
+  defp check_prerequisites(%GameState{} = game_state, %TypedObject{} = skill_def) do
     player_skills =
       get_player_skills(game_state)
       |> Enum.map(fn {key, data} -> {key, Map.get(data, :level, 0)} end)
       |> Enum.into(%{})
 
-    if Skill.prerequisites_met?(skill_def, player_skills) do
+    if ContentSkill.prerequisites_met?(skill_def, player_skills) do
       :ok
     else
-      {:error, {:prerequisites_not_met, skill_def.prerequisites}}
+      {:error, {:prerequisites_not_met, ContentSkill.prerequisites(skill_def)}}
     end
   end
 
-  defp check_not_maxed(%Skill{max_level: max}, current_level) do
+  defp check_not_maxed(%TypedObject{} = skill_def, current_level) do
+    max = ContentSkill.max_level(skill_def)
+
     if current_level < max do
       :ok
     else
@@ -217,8 +220,8 @@ defmodule Loka.Framework.Skills.SkillManager do
     end
   end
 
-  defp check_can_afford_point(%GameState{} = game_state, %Skill{} = skill_def, target_level) do
-    cost = Skill.point_cost(skill_def, target_level)
+  defp check_can_afford_point(%GameState{} = game_state, %TypedObject{} = skill_def, target_level) do
+    cost = ContentSkill.point_cost(skill_def, target_level)
     remaining = points_remaining(game_state)
 
     if remaining >= cost do
@@ -228,8 +231,12 @@ defmodule Loka.Framework.Skills.SkillManager do
     end
   end
 
-  defp can_afford_next_level?(%GameState{} = game_state, %Skill{} = skill_def, current_level) do
-    cost = Skill.point_cost(skill_def, current_level + 1)
+  defp can_afford_next_level?(
+         %GameState{} = game_state,
+         %TypedObject{} = skill_def,
+         current_level
+       ) do
+    cost = ContentSkill.point_cost(skill_def, current_level + 1)
     points_remaining(game_state) >= cost
   end
 

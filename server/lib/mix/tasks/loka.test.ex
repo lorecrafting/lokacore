@@ -210,9 +210,9 @@ defmodule Mix.Tasks.Loka.Test do
     ensure_app_started()
 
     # Get all storylines and validate each
-    alias Loka.Framework.Storyline.StorylineRegistry
+    alias Loka.Content
 
-    storylines = StorylineRegistry.all()
+    storylines = Content.Storyline.all_structs()
 
     if Enum.empty?(storylines) do
       unless quiet, do: Mix.shell().info("  No storylines found, skipping...")

@@ -16,7 +16,7 @@ defmodule Loka.Framework.Quest.Admin do
   require Logger
 
   alias Loka.Framework.Player.GameState
-  alias Loka.Framework.Quest.{Progress, Definitions, QuestRegistry}
+  alias Loka.Framework.Quest.{Progress, Definitions}
   alias Loka.Admin.GameLog
   alias Loka.Accounts
 
@@ -559,7 +559,7 @@ defmodule Loka.Framework.Quest.Admin do
   Lists all registered quests.
   """
   def list_all_quests do
-    QuestRegistry.all()
+    Definitions.all_quest_definitions()
     |> Enum.map(fn quest ->
       %{
         id: quest.id,

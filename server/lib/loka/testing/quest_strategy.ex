@@ -61,7 +61,8 @@ defmodule Loka.Testing.QuestStrategy do
 
   @behaviour Loka.Testing.Bot.Strategy
 
-  alias Loka.Framework.Storyline.{Storyline, StorylineRegistry}
+  alias Loka.Framework.Storyline.Storyline
+  alias Loka.Content
   alias Loka.Framework.Quest
   alias Loka.Engine.Entities
   alias Loka.Testing.Bot.BotHelpers
@@ -270,7 +271,7 @@ defmodule Loka.Testing.QuestStrategy do
 
   # Initialize: Determine the first quest to work on
   defp init_phase(context, state) do
-    case StorylineRegistry.get(state.storyline_id) do
+    case Content.Storyline.get_struct(state.storyline_id) do
       {:error, :not_found} ->
         state = %{state | phase: :failed, failure_reason: :storyline_not_found}
         {{:stuck, :storyline_not_found}, state}
@@ -1405,12 +1406,12 @@ defmodule Loka.Testing.QuestStrategy do
 
   # Find a room with a crafting station that can craft the given recipe
   defp find_room_with_station_for_recipe(recipe_key) do
-    alias Loka.Framework.Crafting.CraftingRegistry
+    alias Loka.Content.Recipe, as: ContentRecipe
 
     # Get the recipe to find what station type it needs
-    case CraftingRegistry.get(recipe_key) do
+    case ContentRecipe.get(recipe_key) do
       {:ok, recipe} ->
-        station_type = recipe.station_type
+        station_type = ContentRecipe.station_type(recipe)
 
         # If no station required, any room works (return nil to stay in current room)
         if is_nil(station_type) do
@@ -1618,7 +1619,7 @@ defmodule Loka.Testing.QuestStrategy do
   """
   @spec get_quest_order(String.t()) :: {:ok, list(String.t())} | {:error, :not_found}
   def get_quest_order(storyline_id) do
-    case StorylineRegistry.get(storyline_id) do
+    case Content.Storyline.get_struct(storyline_id) do
       {:ok, storyline} -> {:ok, Storyline.quest_order(storyline)}
       error -> error
     end

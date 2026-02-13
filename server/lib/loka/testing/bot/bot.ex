@@ -419,11 +419,11 @@ defmodule Loka.Testing.Bot do
   # Grant all system quests to the bot (in-memory only, no DB persistence)
   # System quests are quests with `giver: "system"` that auto-activate for real players
   defp grant_system_quests(game_state) do
-    alias Loka.Framework.Quest.{Definitions, QuestRegistry}
+    alias Loka.Framework.Quest.Definitions
 
     # Get all system quests
     system_quests =
-      QuestRegistry.all()
+      Definitions.all_quest_definitions()
       |> Enum.filter(fn quest ->
         quest.giver == "system" or quest.giver == :system
       end)
