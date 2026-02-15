@@ -3,11 +3,8 @@ defmodule LokaWeb.Channels.BuilderCommands.Cutscenes do
   Cutscene CRUD commands: create cutscene, delete cutscene, cutscene info.
   """
 
-  alias Loka.Engine.Entities
-  alias Loka.WorldBuilder.YamlBuilder
+  alias Loka.Engine.{Entity, Entities}
   alias LokaWeb.Channels.BuilderCommands.Helpers
-
-  @cutscenes_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "cutscenes"])
 
   def execute(:create_cutscene, %{key: key, name: name}, socket) do
     case Entities.find_one(key: key, type: :cutscene) do
@@ -19,14 +16,23 @@ defmodule LokaWeb.Channels.BuilderCommands.Cutscenes do
           %{"type" => "narration", "text" => "A new scene begins...", "delay" => 2000}
         ]
 
-        yaml_content = YamlBuilder.build_cutscene_yaml(key, name, "manual", default_scenes)
+        entity =
+          Entity.new(
+            type: :cutscene,
+            key: key,
+            short_desc: name,
+            is_prototype: true,
+            metadata: %{"draft" => true},
+            components: %{
+              "data" => %{
+                "trigger" => "manual",
+                "scenes" => default_scenes
+              }
+            }
+          )
 
-        Helpers.ensure_dir(@cutscenes_dir)
-
-        file_path = Path.join(@cutscenes_dir, "#{key}.yml")
-
-        case File.write(file_path, yaml_content) do
-          :ok ->
+        case Entities.save(entity) do
+          {:ok, _} ->
             {:ok, "Cutscene '#{key}' (#{name}) created.", socket}
 
           {:error, reason} ->
@@ -36,18 +42,18 @@ defmodule LokaWeb.Channels.BuilderCommands.Cutscenes do
   end
 
   def execute(:delete_cutscene, %{key: key}, socket) do
-    file_path = Path.join(@cutscenes_dir, "#{key}.yml")
+    case Entities.find_one(key: key, type: :cutscene) do
+      {:ok, cutscene} ->
+        case Entities.delete(cutscene.id) do
+          {:ok, _} ->
+            {:ok, "Cutscene '#{key}' deleted.", socket}
 
-    if File.exists?(file_path) do
-      case File.rm(file_path) do
-        :ok ->
-          {:ok, "Cutscene '#{key}' deleted.", socket}
+          {:error, reason} ->
+            {:error, "Failed to delete cutscene: #{inspect(reason)}", socket}
+        end
 
-        {:error, reason} ->
-          {:error, "Failed to delete cutscene: #{inspect(reason)}", socket}
-      end
-    else
-      {:error, "Cutscene '#{key}' not found.", socket}
+      {:error, :not_found} ->
+        {:error, "Cutscene '#{key}' not found.", socket}
     end
   end
 

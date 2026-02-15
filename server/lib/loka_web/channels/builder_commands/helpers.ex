@@ -21,8 +21,10 @@ defmodule LokaWeb.Channels.BuilderCommands.Helpers do
   end
 
   def find_room_by_key(key) do
-    rooms = RoomManager.list_rooms()
-    Enum.find(rooms, fn r -> r.key == key end)
+    case RoomManager.get_room(key) do
+      {:ok, room} -> room
+      {:error, _} -> nil
+    end
   end
 
   @doc """
@@ -80,11 +82,6 @@ defmodule LokaWeb.Channels.BuilderCommands.Helpers do
   def normalize_direction(dir) do
     Map.get(@direction_abbreviations, dir, dir)
   end
-
-  @doc """
-  Ensure a directory exists (creates parents if needed).
-  """
-  def ensure_dir(path), do: File.mkdir_p!(path)
 
   def format_entity_list(label, entities, socket) do
     lines =

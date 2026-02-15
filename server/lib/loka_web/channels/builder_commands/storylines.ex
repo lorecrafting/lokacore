@@ -3,11 +3,8 @@ defmodule LokaWeb.Channels.BuilderCommands.Storylines do
   Storyline CRUD commands: create storyline, delete storyline, storyline info.
   """
 
-  alias Loka.Engine.Entities
-  alias Loka.WorldBuilder.YamlBuilder
+  alias Loka.Engine.{Entity, Entities}
   alias LokaWeb.Channels.BuilderCommands.Helpers
-
-  @storylines_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "storylines"])
 
   def execute(:create_storyline, %{key: key, name: name}, socket) do
     case Entities.find_one(key: key, type: :storyline) do
@@ -15,14 +12,23 @@ defmodule LokaWeb.Channels.BuilderCommands.Storylines do
         {:error, "Storyline '#{key}' already exists.", socket}
 
       {:error, :not_found} ->
-        yaml_content = YamlBuilder.build_storyline_yaml(key, name, [], [])
+        entity =
+          Entity.new(
+            type: :storyline,
+            key: key,
+            short_desc: name,
+            is_prototype: true,
+            metadata: %{"draft" => true},
+            components: %{
+              "data" => %{
+                "main_quests" => [],
+                "side_quests" => []
+              }
+            }
+          )
 
-        Helpers.ensure_dir(@storylines_dir)
-
-        file_path = Path.join(@storylines_dir, "#{key}.yml")
-
-        case File.write(file_path, yaml_content) do
-          :ok ->
+        case Entities.save(entity) do
+          {:ok, _} ->
             {:ok, "Storyline '#{key}' (#{name}) created.", socket}
 
           {:error, reason} ->
@@ -32,18 +38,18 @@ defmodule LokaWeb.Channels.BuilderCommands.Storylines do
   end
 
   def execute(:delete_storyline, %{key: key}, socket) do
-    file_path = Path.join(@storylines_dir, "#{key}.yml")
+    case Entities.find_one(key: key, type: :storyline) do
+      {:ok, storyline} ->
+        case Entities.delete(storyline.id) do
+          {:ok, _} ->
+            {:ok, "Storyline '#{key}' deleted.", socket}
 
-    if File.exists?(file_path) do
-      case File.rm(file_path) do
-        :ok ->
-          {:ok, "Storyline '#{key}' deleted.", socket}
+          {:error, reason} ->
+            {:error, "Failed to delete storyline: #{inspect(reason)}", socket}
+        end
 
-        {:error, reason} ->
-          {:error, "Failed to delete storyline: #{inspect(reason)}", socket}
-      end
-    else
-      {:error, "Storyline '#{key}' not found.", socket}
+      {:error, :not_found} ->
+        {:error, "Storyline '#{key}' not found.", socket}
     end
   end
 

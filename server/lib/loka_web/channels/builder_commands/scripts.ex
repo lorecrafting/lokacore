@@ -4,12 +4,9 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
   templates, from-template, attach, detach.
   """
 
-  alias Loka.Engine.Entities
+  alias Loka.Engine.{Entity, Entities}
   alias Loka.Content.Script
-  alias Loka.WorldBuilder.YamlBuilder
   alias LokaWeb.Channels.BuilderCommands.{Helpers, Formatter}
-
-  @scripts_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "scripts"])
 
   def execute(:script_create, %{key: key, hook: hook}, socket) do
     case Script.get(key) do
@@ -17,27 +14,24 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
         {:error, "Script '#{key}' already exists.", socket}
 
       {:error, :not_found} ->
-        yaml_content = """
-        key: #{key}
-        type: script
-        name: "Script: #{key}"
-        data:
-          hook: #{hook}
-          source: |
-            # Script: #{key}
-            # Hook: #{hook}
-            continue()
-          timeout_ms: 5000
-        """
+        entity =
+          Entity.new(
+            type: :script,
+            key: key,
+            short_desc: "Script: #{key}",
+            is_prototype: true,
+            components: %{
+              "data" => %{
+                "hook" => hook,
+                "source" => "# Script: #{key}\n# Hook: #{hook}\ncontinue()",
+                "timeout_ms" => 5000
+              }
+            },
+            metadata: %{"draft" => true}
+          )
 
-        Helpers.ensure_dir(@scripts_dir)
-
-        file_path = Path.join(@scripts_dir, "#{key}.yml")
-
-        case File.write(file_path, yaml_content) do
-          :ok ->
-            # No ETS reload needed in V2
-
+        case Entities.save(entity) do
+          {:ok, _} ->
             {:ok,
              "Script '#{key}' created (hook: #{hook}).\n" <>
                "  Use /ai to add logic: /ai add patrol behavior to #{key}", socket}
@@ -49,19 +43,18 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
   end
 
   def execute(:delete_script, %{key: key}, socket) do
-    file_path = Path.join(@scripts_dir, "#{key}.yml")
+    case Entities.get_entity_by_key(key) do
+      %{type: :script} = schema ->
+        case Entities.delete_entity(schema) do
+          {:ok, _} ->
+            {:ok, "Script '#{key}' deleted.", socket}
 
-    if File.exists?(file_path) do
-      case File.rm(file_path) do
-        :ok ->
-          # No ETS removal needed in V2
-          {:ok, "Script '#{key}' deleted.", socket}
+          {:error, reason} ->
+            {:error, "Failed to delete script: #{inspect(reason)}", socket}
+        end
 
-        {:error, reason} ->
-          {:error, "Failed to delete script: #{inspect(reason)}", socket}
-      end
-    else
-      {:error, "Script '#{key}' not found.", socket}
+      _ ->
+        {:error, "Script '#{key}' not found.", socket}
     end
   end
 
@@ -194,15 +187,26 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
         {:error, "Script '#{key}' already exists.", socket}
 
       {:error, :not_found} ->
-        case generate_from_template(key, tpl, config_str) do
-          {:ok, yaml_content} ->
-            Helpers.ensure_dir(@scripts_dir)
+        case generate_template_data(key, tpl, config_str) do
+          {:ok, name, hook, source} ->
+            entity =
+              Entity.new(
+                type: :script,
+                key: key,
+                short_desc: name,
+                is_prototype: true,
+                components: %{
+                  "data" => %{
+                    "hook" => hook,
+                    "source" => source,
+                    "timeout_ms" => 5000
+                  }
+                },
+                metadata: %{"draft" => true}
+              )
 
-            file_path = Path.join(@scripts_dir, "#{key}.yml")
-
-            case File.write(file_path, yaml_content) do
-              :ok ->
-                # No ETS reload needed in V2
+            case Entities.save(entity) do
+              {:ok, _} ->
                 {:ok, "Script '#{key}' created from template '#{tpl}'.", socket}
 
               {:error, reason} ->
@@ -227,7 +231,8 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
               {:error, "Script '#{script_key}' already attached to '#{entity_key}'.", socket}
             else
               updated_data = Map.put(data, "scripts", scripts ++ [script_key])
-              YamlBuilder.save_entity_with_data(entity, updated_data)
+              updated_components = Map.put(entity.components || %{}, "data", updated_data)
+              Entities.update(entity.id, %{components: updated_components})
               {:ok, "Attached script '#{script_key}' to '#{entity_key}'.", socket}
             end
 
@@ -248,7 +253,8 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
 
         if script_key in scripts do
           updated_data = Map.put(data, "scripts", List.delete(scripts, script_key))
-          YamlBuilder.save_entity_with_data(entity, updated_data)
+          updated_components = Map.put(entity.components || %{}, "data", updated_data)
+          Entities.update(entity.id, %{components: updated_components})
           {:ok, "Detached script '#{script_key}' from '#{entity_key}'.", socket}
         else
           {:error, "Script '#{script_key}' not attached to '#{entity_key}'.", socket}
@@ -287,11 +293,12 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
     end
   end
 
-  # Public for use by ToolExecutor
-  def generate_from_template_public(key, tpl, config_str),
-    do: generate_from_template(key, tpl, config_str)
-
-  defp generate_from_template(key, tpl, config_str) do
+  @doc """
+  Generates structured template data for a script.
+  Returns {:ok, name, hook, source} or {:error, reason}.
+  Public for use by ToolExecutor.
+  """
+  def generate_template_data(key, tpl, config_str) do
     config = parse_config(config_str)
 
     case tpl do
@@ -299,86 +306,64 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
         route = config["route"] || "room1,room2"
         interval = config["interval"] || "300"
 
-        {:ok,
-         """
-         key: #{key}
-         type: script
-         name: "Patrol: #{key}"
-         data:
-           hook: at_tick
-           source: |
-             route = #{inspect(String.split(route, ","))}
-             interval = #{interval}
-             current = get_flag(entity, "patrol_index") || 0
-             next = rem(current + 1, length(route))
-             target_room = Enum.at(route, next)
-             move_entity(entity, target_room)
-             set_flag(entity, "patrol_index", next)
-             continue()
-           timeout_ms: 5000
-         """}
+        source = """
+        route = #{inspect(String.split(route, ","))}
+        interval = #{interval}
+        current = get_flag(entity, "patrol_index") || 0
+        next = rem(current + 1, length(route))
+        target_room = Enum.at(route, next)
+        move_entity(entity, target_room)
+        set_flag(entity, "patrol_index", next)
+        continue()
+        """
+
+        {:ok, "Patrol: #{key}", "at_tick", String.trim(source)}
 
       "greeting" ->
         message = config["message"] || "Welcome, traveler!"
 
-        {:ok,
-         """
-         key: #{key}
-         type: script
-         name: "Greeting: #{key}"
-         data:
-           hook: at_enter_room
-           source: |
-             message(player, "#{YamlBuilder.escape_yaml(message)}")
-             continue()
-           timeout_ms: 5000
-         """}
+        source = """
+        message(player, "#{escape_yaml_string(message)}")
+        continue()
+        """
+
+        {:ok, "Greeting: #{key}", "at_enter_room", String.trim(source)}
 
       "guard" ->
         flag = config["flag"] || "has_pass"
         direction = config["direction"] || "north"
 
-        {:ok,
-         """
-         key: #{key}
-         type: script
-         name: "Guard: #{key}"
-         data:
-           hook: at_exit_room
-           source: |
-             if context.direction == "#{direction}" and not has_flag?(player, "#{flag}") do
-               message(player, "The guard blocks your path.")
-               deny()
-             else
-               continue()
-             end
-           timeout_ms: 5000
-         """}
+        source = """
+        if context.direction == "#{direction}" and not has_flag?(player, "#{flag}") do
+          message(player, "The guard blocks your path.")
+          deny()
+        else
+          continue()
+        end
+        """
+
+        {:ok, "Guard: #{key}", "at_exit_room", String.trim(source)}
 
       "ambient" ->
         messages = config["messages"] || "Wind whispers,Leaves rustle"
         interval = config["interval"] || "60"
 
-        {:ok,
-         """
-         key: #{key}
-         type: script
-         name: "Ambient: #{key}"
-         data:
-           hook: at_tick
-           source: |
-             messages = #{inspect(String.split(messages, ","))}
-             if chance?(1, #{interval}) do
-               announce_room(room, pick(messages))
-             end
-             continue()
-           timeout_ms: 5000
-         """}
+        source = """
+        messages = #{inspect(String.split(messages, ","))}
+        if chance?(1, #{interval}) do
+          announce_room(room, pick(messages))
+        end
+        continue()
+        """
+
+        {:ok, "Ambient: #{key}", "at_tick", String.trim(source)}
 
       _ ->
         {:error, "Unknown template '#{tpl}'. Use 'script templates' to see available."}
     end
   end
+
+  defp escape_yaml_string(str), do: String.replace(str, "\"", "\\\"")
 
   defp parse_config(""), do: %{}
 

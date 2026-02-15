@@ -2,55 +2,14 @@ defmodule Loka.WorldBuilder.QuestManager do
   @moduledoc """
   Quest management for World Builder UI.
 
-  Provides CRUD operations for quest definitions, supporting the visual
-  quest builder with node-based flow diagrams.
-
-  ## Quest Structure
-
-  Quests are stored as Entities with type :quest and contain:
-  - Quest metadata (name, description, tags)
-  - Quest type (main, side, daily, repeatable)
-  - Giver NPC key
-  - Objectives (id, type, target, count)
-  - Rewards (xp, gold, items)
-  - Prerequisites (quest keys)
-  - Level range (min, max)
-
-  ## Usage
-
-      # Create a new quest
-      QuestManager.create_quest(%{
-        key: "dragon_hunt",
-        name: "The Dragon Awakens",
-        quest_type: "main",
-        giver_key: "village_elder",
-        objectives: [
-          %{id: "find_lair", type: "reach_room", target: "dragon_lair"}
-        ],
-        rewards: %{xp: 5000}
-      })
-
-      # List all quests
-      quests = QuestManager.list_quests()
-
-      # Get quest by key
-      {:ok, quest} = QuestManager.get_quest("dragon_hunt")
-
-      # Update quest
-      QuestManager.update_quest("dragon_hunt", %{
-        objectives: [%{id: "kill_dragon", type: "kill", target: "dragon", count: 1}]
-      })
-
-      # Delete quest
-      QuestManager.delete_quest("dragon_hunt")
+  Provides CRUD operations for quest definitions. All operations persist
+  to the entity database (V2 single source of truth).
   """
 
   require Logger
 
-  alias Loka.Engine.Entity
+  alias Loka.Engine.{Entity, Entities}
   alias Loka.Content.Quest
-
-  @quests_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "quests"])
 
   @doc """
   Create a new quest definition.
@@ -70,17 +29,16 @@ defmodule Loka.WorldBuilder.QuestManager do
 
     entity = Entity.new(attrs)
 
-    # Validate quest structure
     case Quest.validate(entity) do
       :ok ->
-        # Save to YAML
-        case save_quest_yaml(entity) do
-          :ok ->
-            Logger.info("[QuestManager] Created quest: #{entity.key}")
-            {:ok, enrich_for_ui(entity)}
+        case Entities.save(entity) do
+          {:ok, schema} ->
+            saved = Entities.to_entity(schema)
+            Logger.info("[QuestManager] Created quest: #{saved.key}")
+            {:ok, enrich_for_ui(saved)}
 
           {:error, reason} ->
-            Logger.error("[QuestManager] Failed to save quest YAML: #{inspect(reason)}")
+            Logger.error("[QuestManager] Failed to save quest: #{inspect(reason)}")
             {:error, "Failed to save quest: #{inspect(reason)}"}
         end
 
@@ -131,7 +89,21 @@ defmodule Loka.WorldBuilder.QuestManager do
 
       updated_components = Map.put(existing_quest.components, "data", updated_data)
 
-      user_attrs = remap_builder_fields(ensure_atom_keys(attrs))
+      quest_data_fields = [
+        :quest_type,
+        :giver_key,
+        :objectives,
+        :rewards,
+        :prerequisites,
+        :level_range,
+        :journal_entries
+      ]
+
+      user_attrs =
+        attrs
+        |> ensure_atom_keys()
+        |> Map.drop(quest_data_fields)
+        |> remap_builder_fields()
 
       updated_attrs =
         existing_quest
@@ -143,13 +115,33 @@ defmodule Loka.WorldBuilder.QuestManager do
 
       case Quest.validate(entity) do
         :ok ->
-          case save_quest_yaml(entity) do
-            :ok ->
-              Logger.info("[QuestManager] Updated quest: #{key}")
-              {:ok, enrich_for_ui(entity)}
+          case Entities.get_entity_by_key(key) do
+            %{} = schema ->
+              db_updates = %{
+                components: updated_components
+              }
 
-            {:error, reason} ->
-              {:error, "Failed to save quest: #{inspect(reason)}"}
+              db_updates =
+                if Map.has_key?(user_attrs, :short_desc),
+                  do: Map.put(db_updates, :short_desc, user_attrs[:short_desc]),
+                  else: db_updates
+
+              db_updates =
+                if Map.has_key?(user_attrs, :extra_desc),
+                  do: Map.put(db_updates, :extra_desc, user_attrs[:extra_desc]),
+                  else: db_updates
+
+              case Entities.update_entity(schema, db_updates) do
+                {:ok, _} ->
+                  Logger.info("[QuestManager] Updated quest: #{key}")
+                  {:ok, enrich_for_ui(entity)}
+
+                {:error, reason} ->
+                  {:error, "Failed to save quest: #{inspect(reason)}"}
+              end
+
+            nil ->
+              {:error, "Quest not found in DB"}
           end
 
         {:error, errors} ->
@@ -164,24 +156,14 @@ defmodule Loka.WorldBuilder.QuestManager do
   Returns :ok or {:error, reason}
   """
   def delete_quest(key) when is_binary(key) do
-    with :ok <- validate_safe_key(key) do
-      file_path = Path.join(@quests_dir, "#{key}.yml")
+    case Entities.get_entity_by_key(key) do
+      %{type: :quest} = schema ->
+        Entities.delete_entity(schema)
+        Logger.info("[QuestManager] Deleted quest: #{key}")
+        :ok
 
-      if File.exists?(file_path) do
-        case File.rm(file_path) do
-          :ok ->
-            Logger.info("[QuestManager] Deleted quest: #{key}")
-            :ok
-
-          {:error, reason} ->
-            Logger.error("[QuestManager] Failed to delete quest file: #{inspect(reason)}")
-            {:error, reason}
-        end
-      else
+      _ ->
         {:error, :not_found}
-      end
-    else
-      {:error, reason} -> {:error, reason}
     end
   end
 
@@ -226,7 +208,6 @@ defmodule Loka.WorldBuilder.QuestManager do
   end
 
   defp apply_quest_defaults(attrs) do
-    # Map builder field names to Entity struct fields
     attrs
     |> Map.put_new(:name, "New Quest")
     |> Map.put_new(:description, "A quest")
@@ -240,7 +221,6 @@ defmodule Loka.WorldBuilder.QuestManager do
   end
 
   defp build_quest_data(attrs) do
-    # Extract quest-specific fields into data map
     quest_fields = [
       :quest_type,
       :giver_key,
@@ -255,7 +235,7 @@ defmodule Loka.WorldBuilder.QuestManager do
       quest_fields
       |> Enum.reduce(%{}, fn field, acc ->
         if Map.has_key?(attrs, field) do
-          Map.put(acc, field, Map.get(attrs, field))
+          Map.put(acc, Atom.to_string(field), Map.get(attrs, field))
         else
           acc
         end
@@ -280,107 +260,9 @@ defmodule Loka.WorldBuilder.QuestManager do
     attrs
     |> ensure_atom_keys()
     |> Enum.filter(fn {k, _v} -> k in quest_fields end)
-    |> Map.new()
+    |> Map.new(fn {k, v} -> {Atom.to_string(k), v} end)
   end
 
-  defp save_quest_yaml(quest) do
-    with :ok <- validate_safe_key(quest.key) do
-      ensure_quests_dir()
-
-      file_path = Path.join(@quests_dir, "#{quest.key}.yml")
-
-      yaml_content = build_yaml_content(quest)
-
-      case File.write(file_path, yaml_content) do
-        :ok ->
-          :ok
-
-        {:error, reason} ->
-          {:error, reason}
-      end
-    else
-      {:error, reason} -> {:error, reason}
-    end
-  end
-
-  defp build_yaml_content(quest) do
-    tags_yaml = format_yaml_list(quest.tags || [])
-
-    # Build data section
-    data = (quest.components || %{})["data"] || %{}
-    data_yaml = build_data_yaml(data)
-
-    """
-    key: #{quest.key}
-    type: quest
-    name: "#{escape_yaml_string(quest.short_desc || "")}"
-    description: "#{escape_yaml_string(quest.extra_desc || "")}"
-    tags: #{tags_yaml}
-    data:
-    #{data_yaml}
-    """
-  end
-
-  defp build_data_yaml(data) when is_map(data) do
-    data
-    |> Enum.map(fn {k, v} ->
-      key = if is_atom(k), do: Atom.to_string(k), else: k
-      "  #{key}: #{format_yaml_value(v)}"
-    end)
-    |> Enum.join("\n")
-  end
-
-  defp format_yaml_value(value) when is_binary(value), do: "\"#{escape_yaml_string(value)}\""
-  defp format_yaml_value(value) when is_integer(value), do: Integer.to_string(value)
-  defp format_yaml_value(value) when is_float(value), do: Float.to_string(value)
-  defp format_yaml_value(value) when is_boolean(value), do: Atom.to_string(value)
-  defp format_yaml_value(value) when is_nil(value), do: "null"
-  defp format_yaml_value(value) when is_list(value), do: format_yaml_list(value)
-
-  defp format_yaml_value(value) when is_map(value) do
-    # For nested maps, use flow style
-    inner =
-      value
-      |> Enum.map(fn {k, v} ->
-        key = if is_atom(k), do: Atom.to_string(k), else: k
-        "#{key}: #{format_yaml_value(v)}"
-      end)
-      |> Enum.join(", ")
-
-    "{#{inner}}"
-  end
-
-  defp format_yaml_value(value), do: inspect(value)
-
-  defp format_yaml_list([]), do: "[]"
-
-  defp format_yaml_list(items) when is_list(items) do
-    inner =
-      items
-      |> Enum.map(&format_yaml_value/1)
-      |> Enum.join(", ")
-
-    "[#{inner}]"
-  end
-
-  defp escape_yaml_string(str) when is_binary(str) do
-    str
-    |> String.replace("\\", "\\\\")
-    |> String.replace("\"", "\\\"")
-    |> String.replace("\n", "\\n")
-  end
-
-  defp escape_yaml_string(_), do: ""
-
-  defp ensure_quests_dir do
-    unless File.exists?(@quests_dir) do
-      File.mkdir_p!(@quests_dir)
-    end
-
-    @quests_dir
-  end
-
-  # Maps builder field names (:name, :description) to Entity struct fields
   defp remap_builder_fields(attrs) when is_map(attrs) do
     attrs
     |> then(fn a ->
@@ -424,26 +306,4 @@ defmodule Loka.WorldBuilder.QuestManager do
   end
 
   defp deep_merge(_left, right), do: right
-
-  # Validates that a key is safe for file operations - prevents path traversal attacks
-  defp validate_safe_key(key) when is_binary(key) do
-    cond do
-      String.contains?(key, "..") ->
-        {:error, "Key cannot contain parent directory references"}
-
-      String.contains?(key, "/") or String.contains?(key, "\\") ->
-        {:error, "Key cannot contain path separators"}
-
-      not String.match?(key, ~r/^[a-z0-9_-]+$/) ->
-        {:error, "Key must contain only lowercase letters, numbers, hyphens, and underscores"}
-
-      String.length(key) > 64 ->
-        {:error, "Key must be 64 characters or less"}
-
-      true ->
-        :ok
-    end
-  end
-
-  defp validate_safe_key(_), do: {:error, "Key must be a string"}
 end

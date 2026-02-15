@@ -200,7 +200,7 @@
   - Verify: `mix test` (full suite — 0 failures, ~24s)
   - Commit: `"chore(v2): delete TypedObject, Plugin system, old loaders, ~25 framework modules"`
 
-- [ ] **6.2** Simplify builder + world_builder managers
+- [x] **6.2** Simplify builder + world_builder managers
   - Modifies: 16 `builder_commands/*.ex` sub-modules
   - Modifies: 16 `world_builder/*.ex` manager modules
   - Changes: Remove all dual-store sync. Single write path: EntityServer.update → done
@@ -264,7 +264,7 @@
 | 3: EntityServer | 3.1-3.4 | **Complete** |
 | 4: Player | 4.0-4.3 | **Complete** |
 | 5: Content+Actions | 5.1-5.4 | **Complete** |
-| 6: Cleanup | 6.1-6.4 | **6.1 complete** |
+| 6: Cleanup | 6.1-6.4 | **6.1-6.2 complete** |
 | 7: Polish | 7.1-7.4 | Not started |
 | **Total** | **23 tasks** | |
 

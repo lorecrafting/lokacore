@@ -4,7 +4,6 @@ defmodule LokaWeb.Channels.BuilderCommands.Inspection do
   """
 
   alias Loka.Engine.{Entity, Entities}
-  alias Loka.Engine.Constants.WorldPaths
   alias Loka.Content.{Dialogue, Zone, Script}
   alias Loka.WorldBuilder.{RoomManager, EntityManager}
   alias LokaWeb.Channels.BuilderCommands.{Helpers, Formatter}
@@ -236,28 +235,12 @@ defmodule LokaWeb.Channels.BuilderCommands.Inspection do
 
   # --- Preview command ---
 
-  # Directory mappings for publishable content types
-  @type_to_dir %{
-    "quest" => WorldPaths.quests_dir() |> Path.relative_to(WorldPaths.world_dir()),
-    "dialogue" => WorldPaths.dialogues_dir() |> Path.relative_to(WorldPaths.world_dir()),
-    "script" => WorldPaths.scripts_dir() |> Path.relative_to(WorldPaths.world_dir()),
-    "zone" => WorldPaths.zones_dir() |> Path.relative_to(WorldPaths.world_dir()),
-    "cutscene" => WorldPaths.cutscenes_dir() |> Path.relative_to(WorldPaths.world_dir()),
-    "storyline" => WorldPaths.storylines_dir() |> Path.relative_to(WorldPaths.world_dir())
-  }
-
-  @entity_to_subdir %{
-    "room" => WorldPaths.rooms_dir() |> Path.relative_to(WorldPaths.world_dir()),
-    "npc" => WorldPaths.npcs_dir() |> Path.relative_to(WorldPaths.world_dir()),
-    "item" => WorldPaths.items_dir() |> Path.relative_to(WorldPaths.world_dir())
-  }
-
-  @preview_types Map.keys(@type_to_dir) ++ Map.keys(@entity_to_subdir)
+  @preview_types ~w(quest dialogue script zone cutscene storyline room npc item)
 
   def execute(:preview, %{type: type, key: key}, socket) when type in @preview_types do
     case Entities.find_one(key: key) do
       {:ok, obj} ->
-        text = format_preview(obj, type, key)
+        text = format_preview(obj, key)
         {:ok, text, socket}
 
       {:error, :not_found} ->
@@ -271,19 +254,9 @@ defmodule LokaWeb.Channels.BuilderCommands.Inspection do
     {:error, "Unknown type '#{type}'. Valid types: #{valid}", socket}
   end
 
-  defp format_preview(obj, type, key) do
-    world_dir = :code.priv_dir(:loka) |> Path.join("world")
+  defp format_preview(obj, key) do
     is_draft = Entity.draft?(obj)
     status = if is_draft, do: "DRAFT", else: "PUBLISHED"
-
-    file_path = infer_file_path(type, key, is_draft, world_dir)
-
-    file_display =
-      if File.exists?(file_path) do
-        Path.relative_to_cwd(file_path)
-      else
-        "(computed) #{Path.relative_to_cwd(file_path)}"
-      end
 
     parent_key = (obj.metadata || %{})["parent_key"]
 
@@ -292,7 +265,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Inspection do
       "  Key:    #{key}",
       "  Type:   #{obj.type}",
       "  Status: #{status}",
-      "  File:   #{file_display}"
+      "  ID:     #{obj.id}"
     ]
 
     meta_lines =
@@ -307,30 +280,9 @@ defmodule LokaWeb.Channels.BuilderCommands.Inspection do
     data = obj.components["data"] || %{}
     content_lines = format_data_fields(data)
 
-    # Check for published version if this is a draft
-    comparison_note =
-      if is_draft do
-        published_path = infer_file_path(type, key, false, world_dir)
-
-        if File.exists?(published_path) do
-          "\n  Note: A published version also exists at #{Path.relative_to_cwd(published_path)}"
-        else
-          ""
-        end
-      else
-        draft_path = infer_file_path(type, key, true, world_dir)
-
-        if File.exists?(draft_path) do
-          "\n  Note: A draft version also exists at #{Path.relative_to_cwd(draft_path)}"
-        else
-          ""
-        end
-      end
-
     # Assemble the output
     sections = [
       Formatter.section("Preview: #{key} [#{status}]", Enum.join(meta_lines, "\n")),
-      comparison_note,
       "\n" <> Formatter.section("Content Fields", content_lines)
     ]
 
@@ -343,20 +295,6 @@ defmodule LokaWeb.Channels.BuilderCommands.Inspection do
       end
 
     Enum.join(sections)
-  end
-
-  defp infer_file_path(type, key, is_draft, world_dir) do
-    subdir =
-      case Map.get(@entity_to_subdir, type) do
-        nil -> Map.get(@type_to_dir, type, type)
-        entity_subdir -> entity_subdir
-      end
-
-    if is_draft do
-      Path.join([world_dir, "drafts", subdir, "#{key}.yml"])
-    else
-      Path.join([world_dir, subdir, "#{key}.yml"])
-    end
   end
 
   defp format_data_fields(data) when data == %{}, do: "  (no data fields)"

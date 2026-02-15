@@ -6,19 +6,6 @@ defmodule LokaWeb.Channels.BuilderCommands.PreviewTest do
   alias LokaWeb.Channels.CommandParser
 
   @socket %{}
-  @world_dir :code.priv_dir(:loka) |> Path.join("world")
-
-  setup do
-    on_exit(fn ->
-      # Clean up test draft files
-      for dir <- ["drafts/quests", "quests"] do
-        path = Path.join(@world_dir, "#{dir}/preview_test_quest.yml")
-        if File.exists?(path), do: File.rm!(path)
-      end
-    end)
-
-    :ok
-  end
 
   describe "command parser" do
     test "parses preview command with type and key" do
@@ -46,27 +33,6 @@ defmodule LokaWeb.Channels.BuilderCommands.PreviewTest do
 
   describe "preview draft content" do
     test "shows formatted preview of a draft quest" do
-      # Create a draft quest file
-      draft_dir = Path.join(@world_dir, "drafts/quests")
-      File.mkdir_p!(draft_dir)
-      draft_path = Path.join(draft_dir, "preview_test_quest.yml")
-
-      File.write!(draft_path, """
-      key: preview_test_quest
-      name: "Preview Test Quest"
-      type: quest
-      description: "A quest for testing the preview command."
-      objectives:
-        - id: test_obj
-          type: talk
-          target_id: test_npc
-          description: "Talk to the test NPC"
-      rewards:
-        experience: 100
-        gold: 50
-      """)
-
-      # Create corresponding entity in DB (V2: DB is truth)
       create_test_entity("preview_test_quest", :quest,
         draft: true,
         short_desc: "Preview Test Quest",
@@ -100,8 +66,7 @@ defmodule LokaWeb.Channels.BuilderCommands.PreviewTest do
       assert text =~ "Key:    preview_test_quest"
       assert text =~ "Type:   quest"
       assert text =~ "Status: DRAFT"
-      assert text =~ "File:"
-      assert text =~ "drafts/quests/preview_test_quest.yml"
+      assert text =~ "ID:"
 
       # Verify name is shown in metadata
       assert text =~ "Name:   Preview Test Quest"
@@ -112,21 +77,6 @@ defmodule LokaWeb.Channels.BuilderCommands.PreviewTest do
     end
 
     test "shows formatted preview of published content" do
-      # Create a published quest file
-      published_path = Path.join(@world_dir, "quests/preview_test_quest.yml")
-
-      File.write!(published_path, """
-      key: preview_test_quest
-      name: "Published Preview Quest"
-      type: quest
-      objectives:
-        - id: test_obj
-          type: talk
-          target_id: test_npc
-          description: "Talk to the NPC"
-      """)
-
-      # Create corresponding entity in DB (published = no draft flag)
       create_test_entity("preview_test_quest", :quest,
         components: %{
           "data" => %{
@@ -151,58 +101,6 @@ defmodule LokaWeb.Channels.BuilderCommands.PreviewTest do
 
       assert text =~ "Preview: preview_test_quest [PUBLISHED]"
       assert text =~ "Status: PUBLISHED"
-    end
-
-    test "shows comparison note when both draft and published versions exist" do
-      # Create published version first
-      published_path = Path.join(@world_dir, "quests/preview_test_quest.yml")
-
-      File.write!(published_path, """
-      key: preview_test_quest
-      name: "Published Version"
-      type: quest
-      objectives:
-        - id: obj1
-          type: talk
-          target_id: npc
-          description: "Talk"
-      """)
-
-      # Create draft version
-      draft_dir = Path.join(@world_dir, "drafts/quests")
-      File.mkdir_p!(draft_dir)
-      draft_path = Path.join(draft_dir, "preview_test_quest.yml")
-
-      File.write!(draft_path, """
-      key: preview_test_quest
-      name: "Draft Version"
-      type: quest
-      objectives:
-        - id: obj1
-          type: talk
-          target_id: npc
-          description: "Talk"
-      """)
-
-      # Create entity as draft (draft takes priority in V2)
-      create_test_entity("preview_test_quest", :quest,
-        draft: true,
-        components: %{
-          "data" => %{
-            "name" => "Draft Version",
-            "objectives" => [
-              %{"id" => "obj1", "type" => "talk", "target_id" => "npc", "description" => "Talk"}
-            ]
-          }
-        }
-      )
-
-      {:ok, text, _socket} =
-        Inspection.execute(:preview, %{type: "quest", key: "preview_test_quest"}, @socket)
-
-      # Should show draft status and note about published version
-      assert text =~ "DRAFT"
-      assert text =~ "Note: A published version also exists"
     end
   end
 

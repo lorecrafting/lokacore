@@ -1,18 +1,17 @@
 defmodule Loka.WorldBuilder.DialogueManagerTest do
-  use ExUnit.Case, async: false
+  use Loka.DataCase, async: false
 
   alias Loka.WorldBuilder.DialogueManager
-
-  @dialogues_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "dialogues"])
+  alias Loka.Engine.Entities
 
   setup do
     on_exit(fn ->
-      # Clean up any test dialogue files
-      if File.dir?(@dialogues_dir) do
-        @dialogues_dir
-        |> File.ls!()
-        |> Enum.filter(&String.starts_with?(&1, "test_dlg_"))
-        |> Enum.each(fn file -> File.rm(Path.join(@dialogues_dir, file)) end)
+      # Clean up test dialogue entities
+      for key <- ["test_dlg_npc", "test_dlg_other"] do
+        case Entities.get_entity_by_key(key) do
+          %{} = schema -> Entities.delete_entity(schema)
+          nil -> :ok
+        end
       end
     end)
 
@@ -31,21 +30,24 @@ defmodule Loka.WorldBuilder.DialogueManagerTest do
       assert info.node_count == 3
     end
 
-    test "creates YAML file on disk" do
+    test "persists dialogue to entity DB" do
       {:ok, _} =
         DialogueManager.create_dialogue(%{
           "key" => "test_dlg_other",
           "npc_key" => "test_dlg_other"
         })
 
-      path = Path.join(@dialogues_dir, "test_dlg_other.yml")
-      assert File.exists?(path)
+      schema = Entities.get_entity_by_key("test_dlg_other")
+      assert schema != nil
+      assert schema.type == :dialogue
 
-      content = File.read!(path)
-      assert content =~ "key: test_dlg_other"
-      assert content =~ "type: dialogue"
-      assert content =~ "entity_key: test_dlg_other"
-      assert content =~ "greeting:"
+      entity = Entities.to_entity(schema)
+      assert entity.key == "test_dlg_other"
+      data = entity.components["data"]
+      assert data["entity_key"] == "test_dlg_other"
+      assert data["trigger"] == "on_talk"
+      assert data["entry_node"] == "greeting"
+      assert is_map(data["nodes"])
     end
 
     test "rejects unsafe keys" do
@@ -70,17 +72,11 @@ defmodule Loka.WorldBuilder.DialogueManagerTest do
 
       assert :ok = DialogueManager.delete_dialogue("test_dlg_npc")
 
-      path = Path.join(@dialogues_dir, "test_dlg_npc.yml")
-      refute File.exists?(path)
+      assert Entities.get_entity_by_key("test_dlg_npc") == nil
     end
 
     test "returns error for nonexistent dialogue" do
       {:error, :not_found} = DialogueManager.delete_dialogue("nonexistent_xyz")
-    end
-
-    test "rejects unsafe keys" do
-      {:error, reason} = DialogueManager.delete_dialogue("../../etc/passwd")
-      assert reason =~ "parent directory"
     end
   end
 end

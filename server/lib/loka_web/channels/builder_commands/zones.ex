@@ -3,26 +3,33 @@ defmodule LokaWeb.Channels.BuilderCommands.Zones do
   Zone CRUD commands: create zone, edit zone, delete zone, zone info.
   """
 
-  alias Loka.Content.Zone
-  alias Loka.WorldBuilder.YamlBuilder
+  alias Loka.Engine.{Entity, Entities}
   alias LokaWeb.Channels.BuilderCommands.Helpers
 
-  @zones_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "zones"])
-
   def execute(:create_zone, %{key: key, name: name}, socket) do
-    case Zone.get(key) do
+    case Entities.find_one(key: key, type: :zone) do
       {:ok, _} ->
         {:error, "Zone '#{key}' already exists.", socket}
 
       {:error, :not_found} ->
-        yaml_content = YamlBuilder.build_zone_yaml(key, name, resets: [])
+        entity =
+          Entity.new(
+            type: :zone,
+            key: key,
+            short_desc: name,
+            is_prototype: true,
+            metadata: %{"draft" => true},
+            components: %{
+              "data" => %{
+                "lifespan_minutes" => 0,
+                "reset_mode" => "empty",
+                "rooms" => []
+              }
+            }
+          )
 
-        Helpers.ensure_dir(@zones_dir)
-
-        file_path = Path.join(@zones_dir, "#{key}.yml")
-
-        case File.write(file_path, yaml_content) do
-          :ok ->
+        case Entities.save(entity) do
+          {:ok, _} ->
             {:ok, "Zone '#{key}' (#{name}) created.", socket}
 
           {:error, reason} ->
@@ -32,7 +39,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Zones do
   end
 
   def execute(:edit_zone, %{key: key, field: nil}, socket) do
-    case Zone.get(key) do
+    case Entities.find_one(key: key, type: :zone) do
       {:ok, zone} ->
         yaml_text = Helpers.format_entity(zone)
         {:ok, "Zone '#{key}'#{Helpers.draft_tag(zone)}:\n#{yaml_text}", socket}
@@ -43,13 +50,14 @@ defmodule LokaWeb.Channels.BuilderCommands.Zones do
   end
 
   def execute(:edit_zone, %{key: key, field: field, value: value}, socket) do
-    case Zone.get(key) do
+    case Entities.find_one(key: key, type: :zone) do
       {:ok, zone} ->
-        zone_data = (zone.components || %{})["data"] || %{}
-        updated_data = Map.put(zone_data, field, value)
+        data = (zone.components || %{})["data"] || %{}
+        updated_data = Map.put(data, field, value)
+        updated_components = Map.put(zone.components || %{}, "data", updated_data)
 
-        case save_zone_yaml(key, updated_data, zone.short_desc) do
-          :ok ->
+        case Entities.update_entity(zone.id, %{components: updated_components}) do
+          {:ok, _} ->
             {:ok, "Updated zone '#{key}': #{field} = #{value}", socket}
 
           {:error, reason} ->
@@ -62,38 +70,22 @@ defmodule LokaWeb.Channels.BuilderCommands.Zones do
   end
 
   def execute(:delete_zone, %{key: key}, socket) do
-    file_path = Path.join(@zones_dir, "#{key}.yml")
+    case Entities.find_one(key: key, type: :zone) do
+      {:ok, zone} ->
+        case Entities.delete(zone.id) do
+          {:ok, _} ->
+            {:ok, "Zone '#{key}' deleted.", socket}
 
-    if File.exists?(file_path) do
-      case File.rm(file_path) do
-        :ok ->
-          {:ok, "Zone '#{key}' deleted.", socket}
+          {:error, reason} ->
+            {:error, "Failed to delete zone: #{inspect(reason)}", socket}
+        end
 
-        {:error, reason} ->
-          {:error, "Failed to delete zone: #{inspect(reason)}", socket}
-      end
-    else
-      {:error, "Zone '#{key}' not found.", socket}
+      {:error, :not_found} ->
+        {:error, "Zone '#{key}' not found.", socket}
     end
   end
 
   def execute(:zone_info, %{key: key}, socket) do
     execute(:edit_zone, %{key: key, field: nil}, socket)
-  end
-
-  defp save_zone_yaml(key, data, name) do
-    rooms = data["rooms"] || data[:rooms] || []
-    lifespan = data["lifespan_minutes"] || data[:lifespan_minutes] || 0
-    reset_mode = data["reset_mode"] || data[:reset_mode] || "empty"
-
-    yaml_content =
-      YamlBuilder.build_zone_yaml(key, name || key,
-        rooms: rooms,
-        lifespan_minutes: lifespan,
-        reset_mode: reset_mode
-      )
-
-    Helpers.ensure_dir(@zones_dir)
-    File.write(Path.join(@zones_dir, "#{key}.yml"), yaml_content)
   end
 end

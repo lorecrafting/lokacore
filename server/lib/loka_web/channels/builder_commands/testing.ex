@@ -6,8 +6,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Testing do
   import Phoenix.Socket, only: [assign: 3]
   import Phoenix.Channel, only: [push: 3]
 
-  alias Loka.Engine.Spawner
-  alias Loka.Framework.Player.GameState, as: PlayerGameState
+  alias Loka.Engine.{Entities, Spawner}
   alias Loka.Framework.Inventory
   alias Loka.Framework.Quest
   alias Loka.Framework.World.Atmosphere
@@ -15,14 +14,14 @@ defmodule LokaWeb.Channels.BuilderCommands.Testing do
   alias LokaWeb.Channels.GameChannel.Serializers
 
   def execute(:spawn, %{npc_key: npc_key}, socket) do
-    game_state = socket.assigns.game_state
-    room_id = game_state.current_room_id
+    character = socket.assigns.character
+    room_id = character.location_id
 
     case Spawner.spawn(npc_key, location_id: room_id) do
       {:ok, entity} ->
         name = Map.get(entity, :name, npc_key)
 
-        {room, _state} = RoomHelpers.load_player_room(game_state)
+        {room, _character} = RoomHelpers.load_room_for_character(character)
         atmosphere = Atmosphere.describe_for_room(room)
 
         push(socket, "room_update", %{
@@ -38,9 +37,9 @@ defmodule LokaWeb.Channels.BuilderCommands.Testing do
   end
 
   def execute(:purge, _params, socket) do
-    game_state = socket.assigns.game_state
+    character = socket.assigns.character
 
-    {room, _state} = RoomHelpers.load_player_room(game_state)
+    {room, _character} = RoomHelpers.load_room_for_character(character)
     entities = Map.get(room, :entities, [])
 
     count =
@@ -51,7 +50,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Testing do
         end
       end)
 
-    {updated_room, _state} = RoomHelpers.load_player_room(game_state)
+    {updated_room, _character} = RoomHelpers.load_room_for_character(character)
     atmosphere = Atmosphere.describe_for_room(updated_room)
 
     push(socket, "room_update", %{
@@ -63,15 +62,15 @@ defmodule LokaWeb.Channels.BuilderCommands.Testing do
   end
 
   def execute(:give, %{item_key: item_key}, socket) do
-    game_state = socket.assigns.game_state
+    character = socket.assigns.character
 
     case Spawner.spawn(item_key) do
       {:ok, item_entity} ->
-        case Inventory.add_item(game_state, item_entity.id) do
-          {:ok, updated_state} ->
-            socket = assign(socket, :game_state, updated_state)
+        case Inventory.add_item(character, item_entity.id) do
+          {:ok, updated_character} ->
+            socket = assign(socket, :character, updated_character)
 
-            items = Inventory.list_items(updated_state)
+            items = Inventory.list_items(updated_character)
 
             push(socket, "inventory_update", %{
               items: Serializers.serialize_inventory(items)
@@ -90,22 +89,26 @@ defmodule LokaWeb.Channels.BuilderCommands.Testing do
   end
 
   def execute(:setflag, %{flag: flag}, socket) do
-    game_state = socket.assigns.game_state
-    flags = Map.get(game_state, :flags, %{}) || %{}
+    character = socket.assigns.character
+    flags = get_in(character.components, ["flags"]) || %{}
     updated_flags = Map.put(flags, flag, true)
 
-    {:ok, updated_state} = PlayerGameState.update_state(game_state, %{flags: updated_flags})
-    socket = assign(socket, :game_state, updated_state)
+    updated_components = Map.put(character.components, "flags", updated_flags)
+    {:ok, updated_character} = Entities.update(character.id, %{components: updated_components})
+
+    socket = assign(socket, :character, updated_character)
     {:ok, "Flag '#{flag}' set to true.", socket}
   end
 
   def execute(:clearflag, %{flag: flag}, socket) do
-    game_state = socket.assigns.game_state
-    flags = Map.get(game_state, :flags, %{}) || %{}
+    character = socket.assigns.character
+    flags = get_in(character.components, ["flags"]) || %{}
     updated_flags = Map.delete(flags, flag)
 
-    {:ok, updated_state} = PlayerGameState.update_state(game_state, %{flags: updated_flags})
-    socket = assign(socket, :game_state, updated_state)
+    updated_components = Map.put(character.components, "flags", updated_flags)
+    {:ok, updated_character} = Entities.update(character.id, %{components: updated_components})
+
+    socket = assign(socket, :character, updated_character)
     {:ok, "Flag '#{flag}' cleared.", socket}
   end
 
@@ -127,11 +130,11 @@ defmodule LokaWeb.Channels.BuilderCommands.Testing do
   end
 
   def execute(:startquest, %{key: key}, socket) do
-    game_state = socket.assigns.game_state
+    character = socket.assigns.character
 
-    case Quest.Progress.accept_quest(game_state, key) do
-      {:ok, updated_state} ->
-        socket = assign(socket, :game_state, updated_state)
+    case Quest.Progress.accept_quest(character, key) do
+      {:ok, updated_character} ->
+        socket = assign(socket, :character, updated_character)
         {:ok, "Quest '#{key}' started.", socket}
 
       {:error, reason} ->
@@ -140,11 +143,11 @@ defmodule LokaWeb.Channels.BuilderCommands.Testing do
   end
 
   def execute(:completequest, %{key: key}, socket) do
-    game_state = socket.assigns.game_state
+    character = socket.assigns.character
 
-    case Quest.Progress.turn_in_quest(game_state, key) do
-      {:ok, updated_state, _rewards} ->
-        socket = assign(socket, :game_state, updated_state)
+    case Quest.Progress.turn_in_quest(character, key) do
+      {:ok, updated_character, _rewards} ->
+        socket = assign(socket, :character, updated_character)
         {:ok, "Quest '#{key}' completed.", socket}
 
       {:error, reason} ->
@@ -153,23 +156,24 @@ defmodule LokaWeb.Channels.BuilderCommands.Testing do
   end
 
   def execute(:resetquest, %{key: key}, socket) do
-    game_state = socket.assigns.game_state
-    quests = Map.get(game_state, :quests, %{}) || %{}
+    character = socket.assigns.character
+    quests = get_in(character.components, ["quests"]) || %{}
 
     active = Map.get(quests, "active", %{}) |> Map.delete(key)
     completed = Map.get(quests, "completed", []) |> List.delete(key)
 
     updated_quests = %{quests | "active" => active, "completed" => completed}
+    updated_components = Map.put(character.components, "quests", updated_quests)
 
-    {:ok, updated_state} = PlayerGameState.update_state(game_state, %{quests: updated_quests})
-    socket = assign(socket, :game_state, updated_state)
+    {:ok, updated_character} = Entities.update(character.id, %{components: updated_components})
+    socket = assign(socket, :character, updated_character)
     {:ok, "Quest '#{key}' reset.", socket}
   end
 
   def execute(:quests, _params, socket) do
-    game_state = socket.assigns.game_state
-    active = Quest.Progress.get_active_quests(game_state)
-    completed = Quest.Progress.get_completed_quests(game_state)
+    character = socket.assigns.character
+    active = Quest.Progress.get_active_quests(character)
+    completed = Quest.Progress.get_completed_quests(character)
 
     active_lines =
       case active do

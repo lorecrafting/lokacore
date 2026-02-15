@@ -116,47 +116,6 @@ defmodule Loka.WorldBuilder.YamlBuilder do
   end
 
   @doc """
-  Save an entity's YAML file with updated data (primarily for script attach/detach).
-
-  Finds the entity's YAML file in `prototypes/` or `zones/` and updates the
-  `scripts` field in the `data:` section.
-  """
-  def save_entity_with_data(entity, updated_data) do
-    possible_dirs = ["prototypes", "zones"]
-
-    Enum.find_value(possible_dirs, fn dir ->
-      path = Path.join([:code.priv_dir(:loka), "world", dir, "#{entity.key}.yml"])
-
-      if File.exists?(path) do
-        case File.read(path) do
-          {:ok, content} ->
-            scripts_list = updated_data["scripts"] || []
-
-            scripts_yaml =
-              if scripts_list == [] do
-                "scripts: []"
-              else
-                "scripts:\n" <>
-                  Enum.map_join(scripts_list, "\n", fn s -> "      - #{s}" end)
-              end
-
-            updated =
-              if String.contains?(content, "scripts:") do
-                String.replace(content, ~r/scripts:.*(\n\s+-.*)*/, scripts_yaml)
-              else
-                String.replace(content, "data:\n", "data:\n    #{scripts_yaml}\n")
-              end
-
-            File.write(path, updated)
-
-          _ ->
-            nil
-        end
-      end
-    end)
-  end
-
-  @doc """
   Format a list of strings as a YAML list. Returns `"[]"` for empty lists.
   """
   def format_yaml_string_list([]), do: "[]"

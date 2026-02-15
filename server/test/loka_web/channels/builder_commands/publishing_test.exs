@@ -5,35 +5,6 @@ defmodule LokaWeb.Channels.BuilderCommands.PublishingTest do
   alias LokaWeb.Channels.BuilderCommands.Publishing
 
   @socket %{}
-  @world_dir :code.priv_dir(:loka) |> Path.join("world")
-
-  setup do
-    on_exit(fn ->
-      # Clean up test YAML files
-      for dir <- [
-            "drafts/quests",
-            "quests",
-            "drafts/zones",
-            "zones",
-            "drafts/prototypes/rooms",
-            "prototypes/rooms"
-          ] do
-        full_dir = Path.join(@world_dir, dir)
-
-        if File.dir?(full_dir) do
-          full_dir
-          |> File.ls!()
-          |> Enum.filter(fn f ->
-            String.starts_with?(f, "pub_test") or
-              String.starts_with?(f, "test_cascade")
-          end)
-          |> Enum.each(fn f -> File.rm(Path.join(full_dir, f)) end)
-        end
-      end
-    end)
-
-    :ok
-  end
 
   describe "publish" do
     test "without --force returns confirmation prompt" do
@@ -44,24 +15,7 @@ defmodule LokaWeb.Channels.BuilderCommands.PublishingTest do
       assert message =~ "publish --force quest pub_test"
     end
 
-    test "with --force moves file from drafts to published directory" do
-      # Create a draft quest file
-      draft_dir = Path.join(@world_dir, "drafts/quests")
-      File.mkdir_p!(draft_dir)
-      draft_path = Path.join(draft_dir, "pub_test.yml")
-
-      File.write!(draft_path, """
-      key: pub_test
-      name: "Publish Test Quest"
-      type: quest
-      objectives:
-        - id: test
-          type: talk
-          target_id: npc
-          description: "Test"
-      """)
-
-      # Create corresponding entity in DB (V2: DB is truth, YAML is export)
+    test "with --force removes draft flag from entity" do
       create_test_entity("pub_test", :quest, draft: true)
 
       # Verify it's a draft
@@ -74,13 +28,12 @@ defmodule LokaWeb.Channels.BuilderCommands.PublishingTest do
 
       assert message =~ "Published"
 
-      # Verify file moved
-      refute File.exists?(draft_path)
-      published_path = Path.join(@world_dir, "quests/pub_test.yml")
-      assert File.exists?(published_path)
+      # Verify draft flag removed
+      {:ok, obj} = Entities.find_one(key: "pub_test")
+      refute Entity.draft?(obj)
     end
 
-    test "returns error when source file does not exist" do
+    test "returns error when entity does not exist" do
       {:error, message, _socket} =
         Publishing.execute(
           :publish,
@@ -98,70 +51,25 @@ defmodule LokaWeb.Channels.BuilderCommands.PublishingTest do
       assert message =~ "Unknown content type"
     end
 
-    test "publishing malformed YAML still moves file (V2: no reload validation)" do
-      # In V2, publishing just moves files — no TypedObject reload/validation step.
-      # Malformed YAML will be caught by content validators, not the publish command.
-      draft_dir = Path.join(@world_dir, "drafts/quests")
-      File.mkdir_p!(draft_dir)
-      draft_path = Path.join(draft_dir, "pub_test_bad.yml")
+    test "publishing already-published entity is idempotent" do
+      create_test_entity("pub_test", :quest)
 
-      File.write!(draft_path, """
-      name: "Bad Quest"
-      description: "This quest has no key field"
-      """)
+      {:ok, obj} = Entities.find_one(key: "pub_test")
+      refute Entity.draft?(obj)
 
-      published_path = Path.join(@world_dir, "quests/pub_test_bad.yml")
-
-      # In V2, publish just moves the file — succeeds even with bad YAML
+      # Publishing again succeeds
       {:ok, message, _socket} =
-        Publishing.execute(:publish, %{type: "quest", key: "pub_test_bad", force: true}, @socket)
+        Publishing.execute(:publish, %{type: "quest", key: "pub_test", force: true}, @socket)
 
       assert message =~ "Published"
-      assert File.exists?(published_path)
-      refute File.exists?(draft_path)
+
+      {:ok, obj} = Entities.find_one(key: "pub_test")
+      refute Entity.draft?(obj)
     end
   end
 
   describe "publish zone_all" do
     test "publishes zone and all associated rooms" do
-      # Create draft zone YAML referencing two rooms
-      draft_zone_dir = Path.join(@world_dir, "drafts/zones")
-      File.mkdir_p!(draft_zone_dir)
-      draft_zone_path = Path.join(draft_zone_dir, "test_cascade_zone.yml")
-
-      File.write!(draft_zone_path, """
-      key: test_cascade_zone
-      name: "Cascade Test Zone"
-      rooms:
-        - test_cascade_room_a
-        - test_cascade_room_b
-      """)
-
-      # Create draft room YAML files
-      draft_room_dir = Path.join(@world_dir, "drafts/prototypes/rooms")
-      File.mkdir_p!(draft_room_dir)
-
-      draft_room_a_path = Path.join(draft_room_dir, "test_cascade_room_a.yml")
-
-      File.write!(draft_room_a_path, """
-      key: test_cascade_room_a
-      parent: base_room
-      type: room
-      short_desc: "Cascade Room A"
-      long_desc: "A test room for cascade publishing."
-      """)
-
-      draft_room_b_path = Path.join(draft_room_dir, "test_cascade_room_b.yml")
-
-      File.write!(draft_room_b_path, """
-      key: test_cascade_room_b
-      parent: base_room
-      type: room
-      short_desc: "Cascade Room B"
-      long_desc: "Another test room for cascade publishing."
-      """)
-
-      # Create corresponding entities in DB
       create_test_entity("test_cascade_zone", :zone,
         draft: true,
         components: %{
@@ -192,21 +100,17 @@ defmodule LokaWeb.Channels.BuilderCommands.PublishingTest do
         )
 
       assert message =~ "Published zone 'test_cascade_zone'"
-      assert message =~ "2 associated files"
+      assert message =~ "2 associated rooms"
 
-      # Verify zone file moved from drafts to published
-      refute File.exists?(draft_zone_path)
-      published_zone_path = Path.join(@world_dir, "zones/test_cascade_zone.yml")
-      assert File.exists?(published_zone_path)
+      # Verify all draft flags removed
+      {:ok, zone_obj} = Entities.find_one(key: "test_cascade_zone")
+      refute Entity.draft?(zone_obj)
 
-      # Verify room files moved from drafts to published
-      refute File.exists?(draft_room_a_path)
-      refute File.exists?(draft_room_b_path)
+      {:ok, room_a} = Entities.find_one(key: "test_cascade_room_a")
+      refute Entity.draft?(room_a)
 
-      published_room_a = Path.join(@world_dir, "prototypes/rooms/test_cascade_room_a.yml")
-      published_room_b = Path.join(@world_dir, "prototypes/rooms/test_cascade_room_b.yml")
-      assert File.exists?(published_room_a)
-      assert File.exists?(published_room_b)
+      {:ok, room_b} = Entities.find_one(key: "test_cascade_room_b")
+      refute Entity.draft?(room_b)
     end
 
     test "returns error for nonexistent zone" do
@@ -221,7 +125,6 @@ defmodule LokaWeb.Channels.BuilderCommands.PublishingTest do
     end
 
     test "returns error when key exists but is not a zone type" do
-      # Create a quest entity (not a zone) to test the "not a zone" error path
       create_test_entity("pub_test", :quest)
 
       {:error, message, _socket} =
@@ -233,26 +136,37 @@ defmodule LokaWeb.Channels.BuilderCommands.PublishingTest do
 
       assert message =~ "is not a zone"
     end
+
+    test "rolls back on failure when a room is not found" do
+      create_test_entity("test_rollback_zone", :zone,
+        draft: true,
+        components: %{
+          "data" => %{"rooms" => ["test_rollback_room_a", "nonexistent_room_xyz"]}
+        }
+      )
+
+      create_test_entity("test_rollback_room_a", :room, draft: true)
+
+      {:error, message, _socket} =
+        Publishing.execute(
+          :publish,
+          %{type: "zone_all", key: "test_rollback_zone", force: true},
+          @socket
+        )
+
+      assert message =~ "rolled back"
+
+      # Verify zone and room_a are still drafts (rolled back)
+      {:ok, zone} = Entities.find_one(key: "test_rollback_zone")
+      assert Entity.draft?(zone)
+
+      {:ok, room_a} = Entities.find_one(key: "test_rollback_room_a")
+      assert Entity.draft?(room_a)
+    end
   end
 
   describe "unpublish" do
-    test "moves file from published to drafts directory" do
-      # Create a published quest file
-      published_dir = Path.join(@world_dir, "quests")
-      published_path = Path.join(published_dir, "pub_test.yml")
-
-      File.write!(published_path, """
-      key: pub_test
-      name: "Unpublish Test Quest"
-      type: quest
-      objectives:
-        - id: test
-          type: talk
-          target_id: npc
-          description: "Test"
-      """)
-
-      # Create corresponding entity in DB (published = no draft flag)
+    test "adds draft flag to entity" do
       create_test_entity("pub_test", :quest)
 
       # Verify it's published
@@ -264,11 +178,6 @@ defmodule LokaWeb.Channels.BuilderCommands.PublishingTest do
         Publishing.execute(:unpublish, %{type: "quest", key: "pub_test"}, @socket)
 
       assert message =~ "Unpublished"
-
-      # Verify file moved
-      refute File.exists?(published_path)
-      draft_path = Path.join(@world_dir, "drafts/quests/pub_test.yml")
-      assert File.exists?(draft_path)
 
       # Verify it's now a draft
       {:ok, obj} = Entities.find_one(key: "pub_test")

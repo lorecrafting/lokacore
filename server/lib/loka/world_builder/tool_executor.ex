@@ -21,32 +21,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
   alias Loka.WorldBuilder.LLM.ObservabilityLogger
   alias Loka.Content.{Zone, Dialogue}
-  alias Loka.Engine.Entities
-
-  @doc """
-  Execute a function with deferred processing.
-
-  In V2, there's no ETS registry to reload. This wrapper is kept for API
-  compatibility with AI conversation turns.
-  """
-  def with_deferred_reload(fun) do
-    Process.put(:loka_defer_reload, true)
-
-    try do
-      fun.()
-    after
-      Process.delete(:loka_defer_reload)
-    end
-  end
-
-  # No-op in V2 (no ETS registry to reload)
-  defp maybe_reload_file(_file_path), do: :ok
-
-  # No-op in V2
-  defp maybe_remove(_key), do: :ok
-
-  # No-op in V2
-  defp maybe_reload_all, do: :ok
+  alias Loka.Engine.{Entity, Entities}
 
   @doc """
   Execute a tool call and return the result.
@@ -696,16 +671,25 @@ defmodule Loka.WorldBuilder.ToolExecutor do
         if is_list(raw_nodes) and raw_nodes != [], do: hd(raw_nodes)["id"], else: "start"
 
     with :ok <- validate_safe_key(key) do
-      ensure_dialogues_dir()
-      yaml_path = dialogue_yaml_path(key)
+      data = %{
+        "entity_key" => entity_key,
+        "trigger" => trigger,
+        "entry_node" => entry_node,
+        "nodes" => nodes
+      }
 
-      yaml_content = build_dialogue_yaml(key, entity_key, trigger, entry_node, nodes)
+      entity =
+        Entity.new(
+          type: :dialogue,
+          key: key,
+          short_desc: "Dialogue: #{entity_key}",
+          is_prototype: true,
+          components: %{"data" => data},
+          metadata: %{"draft" => true}
+        )
 
-      case File.write(yaml_path, yaml_content) do
-        :ok ->
-          # Reload the registry
-          maybe_reload_file(yaml_path)
-
+      case Entities.save(entity) do
+        {:ok, _} ->
           {:ok,
            %{
              success: true,
@@ -734,62 +718,6 @@ defmodule Loka.WorldBuilder.ToolExecutor do
   end
 
   defp validate_safe_key(_), do: {:error, "Key must be a string"}
-
-  defp ensure_dialogues_dir do
-    dir = Path.join([:code.priv_dir(:loka), "world", "drafts", "dialogues"])
-    File.mkdir_p!(dir)
-  end
-
-  defp build_dialogue_yaml(key, entity_key, trigger, entry_node, nodes) do
-    nodes_yaml = build_nodes_yaml(nodes)
-
-    """
-    key: #{key}
-    type: dialogue
-    name: "Dialogue: #{entity_key}"
-    data:
-      entity_key: #{entity_key}
-      trigger: #{trigger}
-      entry_node: #{entry_node}
-      nodes:
-    #{nodes_yaml}
-    """
-  end
-
-  defp build_nodes_yaml(nodes) when is_map(nodes) do
-    nodes
-    |> Enum.map(fn {node_id, node_data} ->
-      text = node_data["text"] || ""
-      choices = node_data["choices"] || []
-      choices_yaml = build_choices_yaml(choices)
-
-      """
-          #{node_id}:
-            text: "#{YamlBuilder.escape_yaml(text)}"
-            choices:
-      #{choices_yaml}
-      """
-    end)
-    |> Enum.join("")
-  end
-
-  defp build_nodes_yaml(_), do: ""
-
-  defp build_choices_yaml(choices) when is_list(choices) do
-    choices
-    |> Enum.map(fn choice ->
-      text = choice["text"] || ""
-      next_node = choice["next"] || "end"
-
-      """
-              - text: "#{YamlBuilder.escape_yaml(text)}"
-                next: #{next_node}
-      """
-    end)
-    |> Enum.join("")
-  end
-
-  defp build_choices_yaml(_), do: ""
 
   defp execute_get_dialogue(input) do
     dialogue_key = input["dialogue_key"]
@@ -832,25 +760,10 @@ defmodule Loka.WorldBuilder.ToolExecutor do
         updated_data = Map.put(existing_data, "nodes", nodes)
         updated_components = Map.put(existing.components || %{}, "data", updated_data)
 
-        updated_attrs =
-          existing
-          |> Map.from_struct()
-          |> Map.put(:components, updated_components)
-
-        case Loka.Engine.Entity.new(updated_attrs) do
-          {:ok, _entity} ->
-            ensure_dialogues_dir()
-            yaml_path = dialogue_yaml_path(key)
-            entity_key = existing_data["entity_key"]
-            trigger = existing_data["trigger"] || "on_talk"
-            entry_node = existing_data["entry_node"] || "greeting"
-
-            yaml_content = build_dialogue_yaml(key, entity_key, trigger, entry_node, nodes)
-
-            case File.write(yaml_path, yaml_content) do
-              :ok ->
-                maybe_reload_file(yaml_path)
-
+        case Entities.get_entity_by_key(key) do
+          %{} = schema ->
+            case Entities.update_entity(schema, %{components: updated_components}) do
+              {:ok, _} ->
                 {:ok,
                  %{
                    success: true,
@@ -862,8 +775,8 @@ defmodule Loka.WorldBuilder.ToolExecutor do
                 {:error, "Failed to save dialogue: #{inspect(reason)}"}
             end
 
-          {:error, errors} ->
-            {:error, "Invalid dialogue: #{inspect(errors)}"}
+          nil ->
+            {:error, "Dialogue not found in DB: #{key}"}
         end
 
       {:error, :not_found} ->
@@ -916,10 +829,6 @@ defmodule Loka.WorldBuilder.ToolExecutor do
        message: "Found #{length(list)} dialogues",
        dialogues: list
      }}
-  end
-
-  defp dialogue_yaml_path(key) do
-    Path.join([:code.priv_dir(:loka), "world", "drafts", "dialogues", "#{key}.yml"])
   end
 
   # =============================================================================
@@ -982,24 +891,30 @@ defmodule Loka.WorldBuilder.ToolExecutor do
   # Zone CRUD Tools
   # =============================================================================
 
-  @zones_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "zones"])
-  @cutscenes_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "cutscenes"])
-  @scripts_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "scripts"])
-
   defp execute_create_zone_tool(input) do
     key = input["key"]
     name = input["name"]
     rooms = input["rooms"] || []
     reset_mode = input["reset_mode"] || "empty"
 
-    yaml_content = YamlBuilder.build_zone_yaml(key, name, rooms: rooms, reset_mode: reset_mode)
+    entity =
+      Entity.new(
+        type: :zone,
+        key: key,
+        short_desc: name,
+        is_prototype: true,
+        components: %{
+          "data" => %{
+            "rooms" => rooms,
+            "reset_mode" => reset_mode,
+            "lifespan_minutes" => 0
+          }
+        },
+        metadata: %{"draft" => true}
+      )
 
-    File.mkdir_p!(@zones_dir)
-
-    case File.write(Path.join(@zones_dir, "#{key}.yml"), yaml_content) do
-      :ok ->
-        maybe_reload_file(Path.join(@zones_dir, "#{key}.yml"))
-
+    case Entities.save(entity) do
+      {:ok, _} ->
         {:ok, warnings} = YamlBuilder.validate_references(:zone, %{rooms: rooms})
         message = "Created zone '#{name}' (#{key})"
 
@@ -1030,23 +945,23 @@ defmodule Loka.WorldBuilder.ToolExecutor do
         updated_data = Enum.reduce(updates, zone_data, fn {k, v}, acc -> Map.put(acc, k, v) end)
 
         name = updates["name"] || zone.short_desc || key
+        updated_components = Map.put(zone.components || %{}, "data", updated_data)
 
-        yaml_content =
-          YamlBuilder.build_zone_yaml(key, name,
-            rooms: updated_data["rooms"] || [],
-            lifespan_minutes: updated_data["lifespan_minutes"] || 0,
-            reset_mode: updated_data["reset_mode"] || "empty"
-          )
+        case Entities.get_entity_by_key(key) do
+          %{} = schema ->
+            case Entities.update_entity(schema, %{
+                   short_desc: name,
+                   components: updated_components
+                 }) do
+              {:ok, _} ->
+                {:ok, %{success: true, message: "Updated zone '#{key}'"}}
 
-        File.mkdir_p!(@zones_dir)
+              {:error, reason} ->
+                {:error, "Failed to update zone: #{inspect(reason)}"}
+            end
 
-        case File.write(Path.join(@zones_dir, "#{key}.yml"), yaml_content) do
-          :ok ->
-            maybe_reload_file(Path.join(@zones_dir, "#{key}.yml"))
-            {:ok, %{success: true, message: "Updated zone '#{key}'"}}
-
-          {:error, reason} ->
-            {:error, "Failed to update zone: #{inspect(reason)}"}
+          nil ->
+            {:error, "Zone not found in DB: #{key}"}
         end
 
       {:error, :not_found} ->
@@ -1056,19 +971,14 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
   defp execute_delete_zone_tool(input) do
     key = input["key"]
-    file_path = Path.join(@zones_dir, "#{key}.yml")
 
-    if File.exists?(file_path) do
-      case File.rm(file_path) do
-        :ok ->
-          maybe_remove(key)
-          {:ok, %{success: true, message: "Deleted zone '#{key}'"}}
+    case Entities.get_entity_by_key(key) do
+      %{type: :zone} = schema ->
+        Entities.delete_entity(schema)
+        {:ok, %{success: true, message: "Deleted zone '#{key}'"}}
 
-        {:error, reason} ->
-          {:error, "Failed to delete zone: #{inspect(reason)}"}
-      end
-    else
-      {:error, "Zone not found: #{key}"}
+      _ ->
+        {:error, "Zone not found: #{key}"}
     end
   end
 
@@ -1085,13 +995,18 @@ defmodule Loka.WorldBuilder.ToolExecutor do
       input["scenes"] ||
         [%{"type" => "narration", "text" => "A new scene begins...", "delay" => 2000}]
 
-    yaml_content = YamlBuilder.build_cutscene_yaml(key, name, trigger, scenes)
-    File.mkdir_p!(@cutscenes_dir)
+    entity =
+      Entity.new(
+        type: :cutscene,
+        key: key,
+        short_desc: name,
+        is_prototype: true,
+        components: %{"data" => %{"trigger" => trigger, "scenes" => scenes}},
+        metadata: %{"draft" => true}
+      )
 
-    case File.write(Path.join(@cutscenes_dir, "#{key}.yml"), yaml_content) do
-      :ok ->
-        maybe_reload_file(Path.join(@cutscenes_dir, "#{key}.yml"))
-
+    case Entities.save(entity) do
+      {:ok, _} ->
         {:ok, warnings} = YamlBuilder.validate_references(:cutscene, %{scenes: scenes})
         message = "Created cutscene '#{name}' (#{key})"
 
@@ -1117,15 +1032,27 @@ defmodule Loka.WorldBuilder.ToolExecutor do
         trigger = input["trigger"] || cs_data["trigger"] || "manual"
         scenes = input["scenes"] || cs_data["scenes"] || []
 
-        yaml_content = YamlBuilder.build_cutscene_yaml(key, name, trigger, scenes)
+        updated_components =
+          Map.put(cs.components || %{}, "data", %{
+            "trigger" => trigger,
+            "scenes" => scenes
+          })
 
-        case File.write(Path.join(@cutscenes_dir, "#{key}.yml"), yaml_content) do
-          :ok ->
-            maybe_reload_file(Path.join(@cutscenes_dir, "#{key}.yml"))
-            {:ok, %{success: true, message: "Updated cutscene '#{key}'"}}
+        case Entities.get_entity_by_key(key) do
+          %{} = schema ->
+            case Entities.update_entity(schema, %{
+                   short_desc: name,
+                   components: updated_components
+                 }) do
+              {:ok, _} ->
+                {:ok, %{success: true, message: "Updated cutscene '#{key}'"}}
 
-          {:error, reason} ->
-            {:error, "Failed to update cutscene: #{inspect(reason)}"}
+              {:error, reason} ->
+                {:error, "Failed to update cutscene: #{inspect(reason)}"}
+            end
+
+          nil ->
+            {:error, "Cutscene not found in DB: #{key}"}
         end
 
       _ ->
@@ -1135,19 +1062,14 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
   defp execute_delete_cutscene(input) do
     key = input["key"]
-    file_path = Path.join(@cutscenes_dir, "#{key}.yml")
 
-    if File.exists?(file_path) do
-      case File.rm(file_path) do
-        :ok ->
-          maybe_remove(key)
-          {:ok, %{success: true, message: "Deleted cutscene '#{key}'"}}
+    case Entities.get_entity_by_key(key) do
+      %{type: :cutscene} = schema ->
+        Entities.delete_entity(schema)
+        {:ok, %{success: true, message: "Deleted cutscene '#{key}'"}}
 
-        {:error, reason} ->
-          {:error, "Failed to delete cutscene: #{inspect(reason)}"}
-      end
-    else
-      {:error, "Cutscene not found: #{key}"}
+      _ ->
+        {:error, "Cutscene not found: #{key}"}
     end
   end
 
@@ -1197,13 +1119,23 @@ defmodule Loka.WorldBuilder.ToolExecutor do
     main_quests = input["main_quests"] || []
     side_quests = input["side_quests"] || []
 
-    yaml_content = YamlBuilder.build_storyline_yaml(key, name, main_quests, side_quests)
-    File.mkdir_p!(@zones_dir)
+    entity =
+      Entity.new(
+        type: :storyline,
+        key: key,
+        short_desc: name,
+        is_prototype: true,
+        components: %{
+          "data" => %{
+            "main_quests" => main_quests,
+            "side_quests" => side_quests
+          }
+        },
+        metadata: %{"draft" => true}
+      )
 
-    case File.write(Path.join(@zones_dir, "#{key}.yml"), yaml_content) do
-      :ok ->
-        maybe_reload_file(Path.join(@zones_dir, "#{key}.yml"))
-
+    case Entities.save(entity) do
+      {:ok, _} ->
         {:ok, warnings} =
           YamlBuilder.validate_references(:storyline, %{
             main_quests: main_quests,
@@ -1234,15 +1166,27 @@ defmodule Loka.WorldBuilder.ToolExecutor do
         main_quests = input["main_quests"] || sl_data["main_quests"] || []
         side_quests = input["side_quests"] || sl_data["side_quests"] || []
 
-        yaml_content = YamlBuilder.build_storyline_yaml(key, name, main_quests, side_quests)
+        updated_components =
+          Map.put(sl.components || %{}, "data", %{
+            "main_quests" => main_quests,
+            "side_quests" => side_quests
+          })
 
-        case File.write(Path.join(@zones_dir, "#{key}.yml"), yaml_content) do
-          :ok ->
-            maybe_reload_file(Path.join(@zones_dir, "#{key}.yml"))
-            {:ok, %{success: true, message: "Updated storyline '#{key}'"}}
+        case Entities.get_entity_by_key(key) do
+          %{} = schema ->
+            case Entities.update_entity(schema, %{
+                   short_desc: name,
+                   components: updated_components
+                 }) do
+              {:ok, _} ->
+                {:ok, %{success: true, message: "Updated storyline '#{key}'"}}
 
-          {:error, reason} ->
-            {:error, "Failed to update storyline: #{inspect(reason)}"}
+              {:error, reason} ->
+                {:error, "Failed to update storyline: #{inspect(reason)}"}
+            end
+
+          nil ->
+            {:error, "Storyline not found in DB: #{key}"}
         end
 
       _ ->
@@ -1252,19 +1196,14 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
   defp execute_delete_storyline(input) do
     key = input["key"]
-    file_path = Path.join(@zones_dir, "#{key}.yml")
 
-    if File.exists?(file_path) do
-      case File.rm(file_path) do
-        :ok ->
-          maybe_remove(key)
-          {:ok, %{success: true, message: "Deleted storyline '#{key}'"}}
+    case Entities.get_entity_by_key(key) do
+      %{type: :storyline} = schema ->
+        Entities.delete_entity(schema)
+        {:ok, %{success: true, message: "Deleted storyline '#{key}'"}}
 
-        {:error, reason} ->
-          {:error, "Failed to delete storyline: #{inspect(reason)}"}
-      end
-    else
-      {:error, "Storyline not found: #{key}"}
+      _ ->
+        {:error, "Storyline not found: #{key}"}
     end
   end
 
@@ -1300,13 +1239,24 @@ defmodule Loka.WorldBuilder.ToolExecutor do
     source = input["source"]
     name = input["name"] || "Script: #{key}"
 
-    yaml_content = YamlBuilder.build_script_yaml(key, name, hook, source)
+    entity =
+      Entity.new(
+        type: :script,
+        key: key,
+        short_desc: name,
+        is_prototype: true,
+        components: %{
+          "data" => %{
+            "hook" => hook,
+            "source" => source,
+            "timeout_ms" => 5000
+          }
+        },
+        metadata: %{"draft" => true}
+      )
 
-    File.mkdir_p!(@scripts_dir)
-
-    case File.write(Path.join(@scripts_dir, "#{key}.yml"), yaml_content) do
-      :ok ->
-        maybe_reload_file(Path.join(@scripts_dir, "#{key}.yml"))
+    case Entities.save(entity) do
+      {:ok, _} ->
         {:ok, %{success: true, message: "Created script '#{key}' (hook: #{hook})"}}
 
       {:error, reason} ->
@@ -1323,18 +1273,29 @@ defmodule Loka.WorldBuilder.ToolExecutor do
         source = input["source"] || Script.source(script) || "continue()"
         name = input["name"] || script.short_desc || "Script: #{key}"
 
-        yaml_content =
-          YamlBuilder.build_script_yaml(key, name, hook, source,
-            timeout_ms: Script.timeout_ms(script)
-          )
+        updated_data = %{
+          "hook" => hook,
+          "source" => source,
+          "timeout_ms" => Script.timeout_ms(script) || 5000
+        }
 
-        case File.write(Path.join(@scripts_dir, "#{key}.yml"), yaml_content) do
-          :ok ->
-            maybe_reload_file(Path.join(@scripts_dir, "#{key}.yml"))
-            {:ok, %{success: true, message: "Updated script '#{key}'"}}
+        updated_components = Map.put(script.components || %{}, "data", updated_data)
 
-          {:error, reason} ->
-            {:error, "Failed to update script: #{inspect(reason)}"}
+        case Entities.get_entity_by_key(key) do
+          %{} = schema ->
+            case Entities.update_entity(schema, %{
+                   short_desc: name,
+                   components: updated_components
+                 }) do
+              {:ok, _} ->
+                {:ok, %{success: true, message: "Updated script '#{key}'"}}
+
+              {:error, reason} ->
+                {:error, "Failed to update script: #{inspect(reason)}"}
+            end
+
+          nil ->
+            {:error, "Script not found in DB: #{key}"}
         end
 
       {:error, :not_found} ->
@@ -1344,19 +1305,14 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
   defp execute_delete_script(input) do
     key = input["key"]
-    file_path = Path.join(@scripts_dir, "#{key}.yml")
 
-    if File.exists?(file_path) do
-      case File.rm(file_path) do
-        :ok ->
-          maybe_remove(key)
-          {:ok, %{success: true, message: "Deleted script '#{key}'"}}
+    case Entities.get_entity_by_key(key) do
+      %{type: :script} = schema ->
+        Entities.delete_entity(schema)
+        {:ok, %{success: true, message: "Deleted script '#{key}'"}}
 
-        {:error, reason} ->
-          {:error, "Failed to delete script: #{inspect(reason)}"}
-      end
-    else
-      {:error, "Script not found: #{key}"}
+      _ ->
+        {:error, "Script not found: #{key}"}
     end
   end
 
@@ -1428,24 +1384,36 @@ defmodule Loka.WorldBuilder.ToolExecutor do
     template_id = input["template_id"]
     config = input["config"] || %{}
 
-    # Delegate to Scripts builder command module for template logic
     config_str =
       config
       |> Enum.map(fn {k, v} -> "#{k}=#{v}" end)
       |> Enum.join(" ")
 
-    case LokaWeb.Channels.BuilderCommands.Scripts.generate_from_template_public(
+    case LokaWeb.Channels.BuilderCommands.Scripts.generate_template_data(
            key,
            template_id,
            config_str
          ) do
-      {:ok, yaml_content} ->
-        File.mkdir_p!(@scripts_dir)
+      {:ok, name, hook, source} ->
+        entity =
+          Entity.new(
+            type: :script,
+            key: key,
+            short_desc: name,
+            is_prototype: true,
+            components: %{
+              "data" => %{
+                "hook" => hook,
+                "source" => source,
+                "timeout_ms" => 5000,
+                "template_id" => template_id
+              }
+            },
+            metadata: %{"draft" => true}
+          )
 
-        case File.write(Path.join(@scripts_dir, "#{key}.yml"), yaml_content) do
-          :ok ->
-            maybe_reload_file(Path.join(@scripts_dir, "#{key}.yml"))
-
+        case Entities.save(entity) do
+          {:ok, _} ->
             {:ok,
              %{success: true, message: "Created script '#{key}' from template '#{template_id}'"}}
 
@@ -1473,11 +1441,21 @@ defmodule Loka.WorldBuilder.ToolExecutor do
               {:ok, %{success: true, message: "Script already attached"}}
             else
               updated_data = Map.put(data, "scripts", scripts ++ [script_key])
-              YamlBuilder.save_entity_with_data(entity, updated_data)
-              maybe_reload_all()
+              updated_components = Map.put(entity.components || %{}, "data", updated_data)
 
-              {:ok,
-               %{success: true, message: "Attached script '#{script_key}' to '#{entity_key}'"}}
+              case Entities.get_entity_by_key(entity_key) do
+                %{} = schema ->
+                  Entities.update_entity(schema, %{components: updated_components})
+
+                  {:ok,
+                   %{
+                     success: true,
+                     message: "Attached script '#{script_key}' to '#{entity_key}'"
+                   }}
+
+                nil ->
+                  {:error, "Entity not found in DB: #{entity_key}"}
+              end
             end
 
           _ ->
@@ -1500,10 +1478,21 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
         if script_key in scripts do
           updated_data = Map.put(data, "scripts", List.delete(scripts, script_key))
-          YamlBuilder.save_entity_with_data(entity, updated_data)
-          maybe_reload_all()
+          updated_components = Map.put(entity.components || %{}, "data", updated_data)
 
-          {:ok, %{success: true, message: "Detached script '#{script_key}' from '#{entity_key}'"}}
+          case Entities.get_entity_by_key(entity_key) do
+            %{} = schema ->
+              Entities.update_entity(schema, %{components: updated_components})
+
+              {:ok,
+               %{
+                 success: true,
+                 message: "Detached script '#{script_key}' from '#{entity_key}'"
+               }}
+
+            nil ->
+              {:error, "Entity not found in DB: #{entity_key}"}
+          end
         else
           {:error, "Script '#{script_key}' not attached to '#{entity_key}'"}
         end

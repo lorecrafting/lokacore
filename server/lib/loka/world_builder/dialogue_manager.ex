@@ -2,25 +2,14 @@ defmodule Loka.WorldBuilder.DialogueManager do
   @moduledoc """
   Dialogue management for World Builder UI.
 
-  Provides create/delete operations for dialogue definitions, following
-  the same pattern as QuestManager.
-
-  ## Usage
-
-      DialogueManager.create_dialogue(%{
-        "key" => "merchant_greeting",
-        "npc_key" => "merchant_bob"
-      })
-
-      DialogueManager.delete_dialogue("merchant_greeting")
+  Provides create/delete operations for dialogue definitions.
+  All operations persist to the entity database (V2 single source of truth).
   """
 
   require Logger
 
-  alias Loka.Engine.Entity
+  alias Loka.Engine.{Entity, Entities}
   alias Loka.Content.Dialogue
-
-  @dialogues_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "dialogues"])
 
   @doc """
   Create a new dialogue definition with a starter template.
@@ -39,21 +28,26 @@ defmodule Loka.WorldBuilder.DialogueManager do
       |> apply_dialogue_defaults()
       |> build_dialogue_data()
 
-    entity = Entity.new(attrs)
+    key = attrs[:key]
 
-    case Dialogue.validate(entity) do
-      :ok ->
-        case save_dialogue_yaml(entity) do
-          :ok ->
-            Logger.info("[DialogueManager] Created dialogue: #{entity.key}")
-            {:ok, enrich_for_ui(entity)}
+    with :ok <- validate_key(key) do
+      entity = Entity.new(attrs)
 
-          {:error, reason} ->
-            {:error, "Failed to save dialogue: #{inspect(reason)}"}
-        end
+      case Dialogue.validate(entity) do
+        :ok ->
+          case Entities.save(entity) do
+            {:ok, schema} ->
+              saved = Entities.to_entity(schema)
+              Logger.info("[DialogueManager] Created dialogue: #{saved.key}")
+              {:ok, enrich_for_ui(saved)}
 
-      {:error, errors} ->
-        {:error, Enum.join(errors, ", ")}
+            {:error, reason} ->
+              {:error, "Failed to save dialogue: #{inspect(reason)}"}
+          end
+
+        {:error, errors} ->
+          {:error, Enum.join(errors, ", ")}
+      end
     end
   end
 
@@ -63,21 +57,14 @@ defmodule Loka.WorldBuilder.DialogueManager do
   Returns `:ok` or `{:error, reason}`
   """
   def delete_dialogue(key) when is_binary(key) do
-    with :ok <- validate_safe_key(key) do
-      file_path = Path.join(@dialogues_dir, "#{key}.yml")
+    case Entities.get_entity_by_key(key) do
+      %{type: :dialogue} = schema ->
+        Entities.delete_entity(schema)
+        Logger.info("[DialogueManager] Deleted dialogue: #{key}")
+        :ok
 
-      if File.exists?(file_path) do
-        case File.rm(file_path) do
-          :ok ->
-            Logger.info("[DialogueManager] Deleted dialogue: #{key}")
-            :ok
-
-          {:error, reason} ->
-            {:error, reason}
-        end
-      else
+      _ ->
         {:error, :not_found}
-      end
     end
   end
 
@@ -135,109 +122,20 @@ defmodule Loka.WorldBuilder.DialogueManager do
     |> Map.put(:components, %{"data" => data})
   end
 
-  defp save_dialogue_yaml(dialogue) do
-    with :ok <- validate_safe_key(dialogue.key) do
-      ensure_dialogues_dir()
-      file_path = Path.join(@dialogues_dir, "#{dialogue.key}.yml")
-      yaml_content = build_yaml_content(dialogue)
+  defp validate_key(nil), do: {:error, "Key is required"}
 
-      case File.write(file_path, yaml_content) do
-        :ok ->
-          :ok
-
-        {:error, reason} ->
-          {:error, reason}
-      end
-    end
-  end
-
-  defp build_yaml_content(dialogue) do
-    data = (dialogue.components || %{})["data"] || %{}
-    entity_key = data["entity_key"] || "unknown_npc"
-    trigger = data["trigger"] || "on_talk"
-    entry_node = data["entry_node"] || "greeting"
-    nodes = data["nodes"] || %{}
-
-    nodes_yaml =
-      nodes
-      |> Enum.sort_by(fn {k, _} -> k end)
-      |> Enum.map(fn {node_key, node} -> format_node(node_key, node) end)
-      |> Enum.join("\n")
-
-    """
-    key: #{dialogue.key}
-    type: dialogue
-    data:
-      entity_key: #{entity_key}
-      trigger: #{trigger}
-      entry_node: #{entry_node}
-      nodes:
-    #{nodes_yaml}
-    """
-  end
-
-  defp format_node(key, node) do
-    text = node["text"] || ""
-    choices = node["choices"] || []
-
-    choices_yaml =
-      if choices == [] do
-        ""
-      else
-        choice_lines =
-          Enum.map(choices, fn choice ->
-            choice_text = choice["text"] || ""
-            next = choice["next"]
-
-            if next do
-              "        - text: \"#{escape_yaml(choice_text)}\"\n          next: #{next}"
-            else
-              "        - text: \"#{escape_yaml(choice_text)}\""
-            end
-          end)
-          |> Enum.join("\n")
-
-        "\n      choices:\n#{choice_lines}"
-      end
-
-    "    #{key}:\n      text: \"#{escape_yaml(text)}\"#{choices_yaml}"
-  end
-
-  defp escape_yaml(str) when is_binary(str) do
-    str
-    |> String.replace("\\", "\\\\")
-    |> String.replace("\"", "\\\"")
-    |> String.replace("\n", "\\n")
-  end
-
-  defp escape_yaml(_), do: ""
-
-  defp ensure_dialogues_dir do
-    unless File.exists?(@dialogues_dir) do
-      File.mkdir_p!(@dialogues_dir)
-    end
-  end
-
-  defp validate_safe_key(key) when is_binary(key) do
+  defp validate_key(key) when is_binary(key) do
     cond do
       String.contains?(key, "..") ->
-        {:error, "Key cannot contain parent directory references"}
+        {:error, "Key must not contain parent directory traversal (..)"}
 
-      String.contains?(key, "/") or String.contains?(key, "\\") ->
-        {:error, "Key cannot contain path separators"}
-
-      not String.match?(key, ~r/^[a-z0-9_-]+$/) ->
-        {:error, "Key must contain only lowercase letters, numbers, hyphens, and underscores"}
-
-      String.length(key) > 64 ->
-        {:error, "Key must be 64 characters or less"}
+      not Regex.match?(~r/^[a-z0-9_]+$/, key) ->
+        {:error, "Key must contain only lowercase letters, digits, and underscores"}
 
       true ->
         :ok
     end
   end
-
-  defp validate_safe_key(_), do: {:error, "Key must be a string"}
 
   defp ensure_atom_keys(map) when is_map(map) do
     Map.new(map, fn
