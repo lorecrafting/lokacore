@@ -62,8 +62,17 @@ defmodule Loka.Content.Zone do
   @spec get(String.t()) :: {:ok, TypedObject.t()} | {:error, :not_found}
   def get(key) when is_binary(key) do
     case Entities.find_one(key: key, type: :zone) do
-      {:ok, entity} -> Entity.to_typed_object(entity)
-      error -> error
+      {:ok, entity} ->
+        Entity.to_typed_object(entity)
+
+      {:error, :not_found} ->
+        # Zones are YAML-only (not in DB), so fall back to TypedObject registry
+        alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
+
+        case TypedObjectLoader.get(key) do
+          {:ok, %TypedObject{type: :zone} = zone} -> {:ok, zone}
+          _ -> {:error, :not_found}
+        end
     end
   end
 

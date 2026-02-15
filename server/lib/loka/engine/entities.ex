@@ -226,6 +226,7 @@ defmodule Loka.Engine.Entities do
     entries =
       Enum.map(entities, fn entity ->
         EntitySchema.from_entity(entity)
+        |> Map.drop([:tags])
         |> Map.put(:id, entity.id)
         |> Map.put(:inserted_at, now)
         |> Map.put(:updated_at, now)
@@ -305,6 +306,7 @@ defmodule Loka.Engine.Entities do
     |> filter_by_location(opts[:location_id])
     |> preload_associations(opts[:preload] || [])
     |> Repo.all()
+    |> Repo.preload(:tags)
   end
 
   @doc "V1 compat — gets entity schema by ID."

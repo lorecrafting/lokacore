@@ -3,30 +3,24 @@ defmodule Loka.Game.Actions.CombatTest do
 
   alias Loka.Game.Actions.Combat, as: CombatActions
   alias Loka.Game.Actions.Context
-  alias Loka.Framework.Player.GameState
 
   import Loka.AccountsFixtures
+  import Loka.EngineFixtures
 
   describe "attack/3" do
     setup do
       player = player_fixture()
-      {:ok, game_state} = GameState.get_or_create_state(player.id)
-
-      {:ok, game_state} =
-        GameState.update_state(game_state, %{
-          character_name: "TestPlayer",
-          character_created: true
-        })
+      character = character_fixture(%{player: player, character_name: "TestPlayer"})
 
       ctx = %Context{
         player_id: player.id,
         player_name: "TestPlayer",
-        game_state: game_state,
+        game_state: character,
         room: %{id: "test_room", entities: []},
         combat: nil
       }
 
-      %{ctx: ctx, game_state: game_state}
+      %{ctx: ctx}
     end
 
     test "returns error for non-combatant entity", %{ctx: ctx} do
@@ -50,18 +44,12 @@ defmodule Loka.Game.Actions.CombatTest do
   describe "flee/1" do
     setup do
       player = player_fixture()
-      {:ok, game_state} = GameState.get_or_create_state(player.id)
-
-      {:ok, game_state} =
-        GameState.update_state(game_state, %{
-          character_name: "TestPlayer",
-          character_created: true
-        })
+      character = character_fixture(%{player: player, character_name: "TestPlayer"})
 
       ctx = %Context{
         player_id: player.id,
         player_name: "TestPlayer",
-        game_state: game_state,
+        game_state: character,
         room: %{id: "test_room", entities: []},
         combat: nil
       }
@@ -77,18 +65,12 @@ defmodule Loka.Game.Actions.CombatTest do
   describe "process_tick/1" do
     setup do
       player = player_fixture()
-      {:ok, game_state} = GameState.get_or_create_state(player.id)
-
-      {:ok, game_state} =
-        GameState.update_state(game_state, %{
-          character_name: "TestPlayer",
-          character_created: true
-        })
+      character = character_fixture(%{player: player, character_name: "TestPlayer"})
 
       ctx = %Context{
         player_id: player.id,
         player_name: "TestPlayer",
-        game_state: game_state,
+        game_state: character,
         room: %{id: "test_room", entities: []},
         combat: nil
       }

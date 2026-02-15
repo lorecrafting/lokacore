@@ -163,7 +163,10 @@ defmodule Loka.Engine.Schema.EntitySchema do
       components: entity.components,
       behaviors: entity.behaviors,
       scripts: entity.scripts,
-      metadata: entity.metadata
+      metadata: entity.metadata,
+      # Tags are stored in entity_tags join table, not a column.
+      # Including here so create_entity/1 can extract and persist them.
+      tags: entity.tags
     }
   end
 

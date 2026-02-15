@@ -42,6 +42,7 @@ defmodule Loka.Content.Quest do
   """
 
   alias Loka.Engine.{Entity, Entities, TypedObject}
+  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
 
   @type objective :: %{
           id: String.t(),
@@ -63,8 +64,15 @@ defmodule Loka.Content.Quest do
   @spec get(String.t()) :: {:ok, TypedObject.t()} | {:error, :not_found}
   def get(key) when is_binary(key) do
     case Entities.find_one(key: key, type: :quest) do
-      {:ok, entity} -> Entity.to_typed_object(entity)
-      error -> error
+      {:ok, entity} ->
+        Entity.to_typed_object(entity)
+
+      {:error, :not_found} ->
+        # Quests are YAML-only (not in DB), so fall back to TypedObject registry
+        case TypedObjectLoader.get(key) do
+          {:ok, %TypedObject{type: :quest} = quest} -> {:ok, quest}
+          _ -> {:error, :not_found}
+        end
     end
   end
 
@@ -84,8 +92,16 @@ defmodule Loka.Content.Quest do
   """
   @spec all() :: [TypedObject.t()]
   def all do
-    Entities.find_all(type: :quest, is_prototype: true)
-    |> to_typed_objects()
+    db_quests =
+      Entities.find_all(type: :quest, is_prototype: true)
+      |> to_typed_objects()
+
+    if Enum.empty?(db_quests) do
+      # Quests are YAML-only (not in DB), fall back to TypedObject registry
+      TypedObjectLoader.list_by_type(:quest)
+    else
+      db_quests
+    end
   end
 
   @doc """

@@ -54,12 +54,14 @@ defmodule Loka.Testing.Bot.DirectSocketAdapter do
 
   alias Loka.Game.Actions
   alias Loka.Game.Actions.{Context, Result}
+  alias Loka.Engine.{Entity, Entities}
   alias Loka.Framework.Player.GameState
   alias Loka.Framework.World.RoomLoader
 
   defstruct [
     :player,
     :game_state,
+    :character,
     :room,
     :combat,
     :dialogue,
@@ -128,10 +130,11 @@ defmodule Loka.Testing.Bot.DirectSocketAdapter do
   @impl true
   def handle_call(:join, _from, state) do
     case initialize_game(state.player) do
-      {:ok, game_state, room} ->
+      {:ok, game_state, character, room} ->
         new_state = %{
           state
           | game_state: game_state,
+            character: character,
             room: room
         }
 
@@ -202,18 +205,44 @@ defmodule Loka.Testing.Bot.DirectSocketAdapter do
             end
           end
 
-        # Grant system quests if this is the first time (no active or completed quests)
-        # This ensures bots get system quests just like real players would through the hook system
-        game_state = grant_system_quests_if_first_time(game_state)
+        # Find the character entity for quest operations (V2 uses Entity, not GameState)
+        character = find_or_create_character_entity(player, game_state)
+
+        # Grant system quests using the character entity
+        character = grant_system_quests_if_first_time(character)
 
         # Load the current room
         case RoomLoader.load_room_for_display(game_state.current_room_id) do
-          {:ok, room} -> {:ok, game_state, room}
+          {:ok, room} -> {:ok, game_state, character, room}
           error -> error
         end
 
       error ->
         error
+    end
+  end
+
+  defp find_or_create_character_entity(player, game_state) do
+    case Entities.find_one(account_id: player.id) do
+      {:ok, entity} ->
+        entity
+
+      {:error, :not_found} ->
+        # Create a minimal character entity for quest tracking
+        {:ok, schema} =
+          Entities.create_entity(%{
+            type: "character",
+            key: "player_#{player.id}",
+            short_desc: game_state.character_name || player.name || "Bot",
+            account_id: player.id,
+            components: %{
+              "quest_progress" => %{},
+              "stats" => game_state.stats || %{},
+              "resources" => game_state.health || %{"current" => 100, "max" => 100}
+            }
+          })
+
+        Entities.to_entity(schema)
     end
   end
 
@@ -243,11 +272,11 @@ defmodule Loka.Testing.Bot.DirectSocketAdapter do
 
   # Grant system quests if this is the bot's first time (no quests yet)
   # This replicates what the Quest.Listeners.grant_system_quests_once hook does for real players
-  defp grant_system_quests_if_first_time(game_state) do
+  defp grant_system_quests_if_first_time(%Entity{} = character) do
     alias Loka.Framework.Quest.{Progress, Definitions}
 
-    active_quests = Progress.get_active_quests(game_state)
-    completed_quests = Progress.get_completed_quests(game_state)
+    active_quests = Progress.get_active_quests(character)
+    completed_quests = Progress.get_completed_quests(character)
 
     if Enum.empty?(active_quests) and Enum.empty?(completed_quests) do
       # Get all system quests
@@ -259,42 +288,45 @@ defmodule Loka.Testing.Bot.DirectSocketAdapter do
 
       if Enum.any?(system_quests) do
         Logger.info("[Bot] Granting #{length(system_quests)} system quests",
-          player_id: game_state.player_id
+          account_id: character.account_id
         )
 
         # Grant each system quest
-        Enum.reduce(system_quests, game_state, fn quest, state ->
-          case Progress.accept_quest(state, quest.id) do
-            {:ok, new_state} ->
+        Enum.reduce(system_quests, character, fn quest, entity ->
+          case Progress.accept_quest(entity, quest.id) do
+            {:ok, updated_entity} ->
               Logger.debug("[Bot] Granted system quest #{quest.id}",
-                player_id: state.player_id,
+                account_id: entity.account_id,
                 quest_id: quest.id
               )
 
-              new_state
+              updated_entity
 
             {:error, reason} ->
               Logger.error(
                 "[Bot] Failed to grant system quest #{quest.id}: #{inspect(reason)}",
-                player_id: state.player_id,
+                account_id: entity.account_id,
                 quest_id: quest.id,
                 reason: reason
               )
 
-              state
+              entity
           end
         end)
       else
-        game_state
+        character
       end
     else
-      game_state
+      character
     end
   end
 
   defp build_initial_state(state) do
     # Hardening: Validate that bot has system quests (fail-fast on initialization issues)
-    validate_system_quests_granted(state.game_state)
+    validate_system_quests_granted(state.character)
+
+    # Read quest data from character entity (V2 stores quests in components)
+    quest_progress = Entity.get_component(state.character, "quest_progress") || %{}
 
     %{
       room: state.room,
@@ -302,14 +334,14 @@ defmodule Loka.Testing.Bot.DirectSocketAdapter do
       equipped: state.game_state.equipment || %{},
       stats: state.game_state.stats || %{},
       health: state.game_state.health || %{current: 100, max: 100},
-      quests: state.game_state.quests || %{active: [], completed: []},
+      quests: quest_progress,
       game_state: state.game_state
     }
   end
 
   # Hardening: Validate that system quests were granted successfully
   # Logs a warning if system quests exist but weren't granted to the bot
-  defp validate_system_quests_granted(game_state) do
+  defp validate_system_quests_granted(%Entity{} = character) do
     alias Loka.Framework.Quest.{Progress, Definitions}
 
     system_quests =
@@ -319,7 +351,7 @@ defmodule Loka.Testing.Bot.DirectSocketAdapter do
       end)
 
     if Enum.any?(system_quests) do
-      active_quest_ids = Progress.get_active_quests(game_state) |> Enum.map(& &1.id)
+      active_quest_ids = Progress.get_active_quests(character) |> Enum.map(& &1.id)
 
       missing_quests =
         system_quests
@@ -328,7 +360,7 @@ defmodule Loka.Testing.Bot.DirectSocketAdapter do
       if Enum.any?(missing_quests) do
         Logger.warning(
           "[Bot] System quest validation failed! Bot missing system quests: #{inspect(Enum.map(missing_quests, & &1.id))}",
-          player_id: game_state.player_id,
+          account_id: character.account_id,
           missing_quest_ids: Enum.map(missing_quests, & &1.id)
         )
       end
