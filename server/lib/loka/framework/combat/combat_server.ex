@@ -15,7 +15,7 @@ defmodule Loka.Framework.Combat.CombatServer do
   ## Usage
 
       # Start combat (creates GenServer)
-      {:ok, combat_state} = CombatServer.start_combat(player_id, entity_id, game_state)
+      {:ok, combat_state} = CombatServer.start_combat(player_id, entity_id, character)
 
       # Get existing combat state (for reconnection)
       combat_state = CombatServer.get_state(player_id)
@@ -34,7 +34,7 @@ defmodule Loka.Framework.Combat.CombatServer do
   require Logger
 
   alias Loka.Framework.Combat
-  alias Loka.Framework.Player.GameState
+  alias Loka.Engine.Entity
 
   @registry Loka.CombatRegistry
   # 10 minutes idle timeout
@@ -50,14 +50,14 @@ defmodule Loka.Framework.Combat.CombatServer do
   Creates a GenServer process to track combat state.
   Returns the initial combat state.
   """
-  def start_combat(player_id, entity_id, %GameState{} = game_state) do
+  def start_combat(player_id, entity_id, %Entity{} = character) do
     # First check if already in combat
     if in_combat?(player_id) do
       {:error, :already_in_combat}
     else
       case DynamicSupervisor.start_child(
              Loka.CombatSupervisor,
-             {__MODULE__, {player_id, entity_id, game_state, :pve}}
+             {__MODULE__, {player_id, entity_id, character, :pve}}
            ) do
         {:ok, _pid} ->
           # Return the initial combat state
@@ -75,13 +75,13 @@ defmodule Loka.Framework.Combat.CombatServer do
   @doc """
   Starts a PvP combat session.
   """
-  def start_pvp_combat(player_id, target_player_id, target_name, %GameState{} = game_state) do
+  def start_pvp_combat(player_id, target_player_id, target_name, %Entity{} = character) do
     if in_combat?(player_id) do
       {:error, :already_in_combat}
     else
       case DynamicSupervisor.start_child(
              Loka.CombatSupervisor,
-             {__MODULE__, {player_id, target_player_id, target_name, game_state, :pvp}}
+             {__MODULE__, {player_id, target_player_id, target_name, character, :pvp}}
            ) do
         {:ok, _pid} ->
           {:ok, get_state(player_id)}
@@ -143,9 +143,6 @@ defmodule Loka.Framework.Combat.CombatServer do
     end
   end
 
-  # NOTE: enemy_turn/1 was removed - LegendMUD-style auto-combat handles
-  # enemy attacks automatically in execute_combat_tick/2
-
   @doc """
   Ends combat for a player (normal end or forced).
   """
@@ -161,14 +158,14 @@ defmodule Loka.Framework.Combat.CombatServer do
   end
 
   @doc """
-  Updates the game_state reference for a player's combat.
+  Updates the character reference for a player's combat.
 
-  Called when game_state changes (e.g., health updated).
+  Called when character entity changes (e.g., health updated).
   """
-  def update_game_state(player_id, %GameState{} = game_state) do
+  def update_character(player_id, %Entity{} = character) do
     case Registry.lookup(@registry, player_id) do
       [{pid, _}] ->
-        GenServer.cast(pid, {:update_game_state, game_state})
+        GenServer.cast(pid, {:update_character, character})
         :ok
 
       [] ->
@@ -180,28 +177,28 @@ defmodule Loka.Framework.Combat.CombatServer do
   # GenServer Implementation
   # =============================================================================
 
-  def start_link({player_id, entity_id, game_state, :pve}) do
-    GenServer.start_link(__MODULE__, {:pve, player_id, entity_id, game_state},
+  def start_link({player_id, entity_id, character, :pve}) do
+    GenServer.start_link(__MODULE__, {:pve, player_id, entity_id, character},
       name: {:via, Registry, {@registry, player_id}}
     )
   end
 
-  def start_link({player_id, target_player_id, target_name, game_state, :pvp}) do
-    GenServer.start_link(__MODULE__, {:pvp, player_id, target_player_id, target_name, game_state},
+  def start_link({player_id, target_player_id, target_name, character, :pvp}) do
+    GenServer.start_link(__MODULE__, {:pvp, player_id, target_player_id, target_name, character},
       name: {:via, Registry, {@registry, player_id}}
     )
   end
 
   @impl true
-  def init({:pve, player_id, entity_id, game_state}) do
-    case Combat.start_combat(entity_id, game_state) do
+  def init({:pve, player_id, entity_id, character}) do
+    case Combat.start_combat(entity_id, character) do
       {:ok, combat_state} ->
         Logger.debug("[CombatServer] Started PvE combat for player #{player_id}")
 
         state = %{
           player_id: player_id,
           combat: combat_state,
-          game_state: game_state,
+          character: character,
           last_action: System.monotonic_time(:millisecond)
         }
 
@@ -214,15 +211,15 @@ defmodule Loka.Framework.Combat.CombatServer do
   end
 
   @impl true
-  def init({:pvp, player_id, target_player_id, target_name, game_state}) do
-    case Combat.start_pvp_combat(target_player_id, target_name, game_state) do
+  def init({:pvp, player_id, target_player_id, target_name, character}) do
+    case Combat.start_pvp_combat(target_player_id, target_name, character) do
       {:ok, combat_state} ->
         Logger.debug("[CombatServer] Started PvP combat for player #{player_id}")
 
         state = %{
           player_id: player_id,
           combat: combat_state,
-          game_state: game_state,
+          character: character,
           last_action: System.monotonic_time(:millisecond)
         }
 
@@ -241,7 +238,7 @@ defmodule Loka.Framework.Combat.CombatServer do
 
   @impl true
   def handle_call({:player_action, action}, _from, state) do
-    case Combat.player_action(state.combat, action, state.game_state) do
+    case Combat.player_action(state.combat, action, state.character) do
       {:ok, new_combat, result} ->
         new_state = %{
           state
@@ -256,12 +253,9 @@ defmodule Loka.Framework.Combat.CombatServer do
     end
   end
 
-  # NOTE: handle_call(:enemy_turn, ...) was removed - LegendMUD-style auto-combat
-  # handles enemy attacks automatically in execute_combat_tick/2
-
   @impl true
-  def handle_cast({:update_game_state, game_state}, state) do
-    {:noreply, %{state | game_state: game_state}}
+  def handle_cast({:update_character, character}, state) do
+    {:noreply, %{state | character: character}}
   end
 
   @impl true

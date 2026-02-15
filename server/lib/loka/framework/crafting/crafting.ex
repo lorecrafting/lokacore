@@ -30,7 +30,7 @@ defmodule Loka.Framework.Crafting do
   alias Loka.Content.Recipe, as: ContentRecipe
   alias Loka.Engine.TypedObject
   alias Loka.Framework.Crafting.CraftingStation
-  alias Loka.Framework.Player.GameState
+  alias Loka.Engine.Entity
   alias Loka.Mechanics.Cost
   alias Loka.Primitives.ResourcePool
   alias Loka.Utils.MapHelpers
@@ -51,7 +51,7 @@ defmodule Loka.Framework.Crafting do
 
   Filters based on skill levels and available ingredients.
   """
-  def list_available_recipes(%GameState{} = game_state) do
+  def list_available_recipes(%Entity{} = game_state) do
     ContentRecipe.available_for(game_state)
   end
 
@@ -78,7 +78,7 @@ defmodule Loka.Framework.Crafting do
   4. Required tools in inventory
   5. At correct crafting station (if required)
   """
-  def can_craft?(%GameState{} = game_state, recipe_key, opts \\ []) do
+  def can_craft?(%Entity{} = game_state, recipe_key, opts \\ []) do
     room_entity = Keyword.get(opts, :room, nil)
 
     Logger.debug("[CRAFTING] Checking can_craft: recipe=#{recipe_key}")
@@ -113,7 +113,7 @@ defmodule Loka.Framework.Crafting do
   Ingredients are consumed atomically - all or nothing.
   State mutations are in-memory; caller handles persistence.
   """
-  def craft(%GameState{} = game_state, recipe_key, opts \\ []) do
+  def craft(%Entity{} = game_state, recipe_key, opts \\ []) do
     room_entity = Keyword.get(opts, :room, nil)
     station_bonus = get_station_bonus(room_entity)
 
@@ -179,7 +179,7 @@ defmodule Loka.Framework.Crafting do
   - `:have` - Amount in inventory
   - `:missing` - Amount still needed
   """
-  def get_missing_ingredients(%GameState{} = game_state, recipe_key) do
+  def get_missing_ingredients(%Entity{} = game_state, recipe_key) do
     case get_recipe(recipe_key) do
       {:ok, recipe} ->
         ContentRecipe.ingredients(recipe)
@@ -205,7 +205,7 @@ defmodule Loka.Framework.Crafting do
   @doc """
   Returns a list of missing tools for a recipe.
   """
-  def get_missing_tools(%GameState{} = game_state, recipe_key) do
+  def get_missing_tools(%Entity{} = game_state, recipe_key) do
     case get_recipe(recipe_key) do
       {:ok, recipe} ->
         ContentRecipe.tools(recipe)
@@ -223,7 +223,7 @@ defmodule Loka.Framework.Crafting do
 
   Returns `{:ok, updated_state}` or `{:error, reason}`.
   """
-  def consume_ingredients(%GameState{} = game_state, recipe_key) do
+  def consume_ingredients(%Entity{} = game_state, recipe_key) do
     case get_recipe(recipe_key) do
       {:ok, recipe} ->
         do_consume_ingredients(game_state, ContentRecipe.ingredients(recipe))
@@ -241,7 +241,7 @@ defmodule Loka.Framework.Crafting do
     ContentRecipe.get(recipe_key)
   end
 
-  defp check_skill_requirements(%GameState{} = game_state, %TypedObject{type: :recipe} = recipe) do
+  defp check_skill_requirements(%Entity{} = game_state, %TypedObject{type: :recipe} = recipe) do
     if ContentRecipe.requires_skill?(recipe) do
       skills = get_skills(game_state)
       skill = ContentRecipe.skill_required(recipe)
@@ -258,7 +258,7 @@ defmodule Loka.Framework.Crafting do
     end
   end
 
-  defp check_ingredients(%GameState{} = game_state, %TypedObject{type: :recipe} = recipe) do
+  defp check_ingredients(%Entity{} = game_state, %TypedObject{type: :recipe} = recipe) do
     ingredients = ContentRecipe.ingredients(recipe) |> normalize_ingredients()
 
     missing =
@@ -273,7 +273,7 @@ defmodule Loka.Framework.Crafting do
     end
   end
 
-  defp check_tools(%GameState{} = game_state, %TypedObject{type: :recipe} = recipe) do
+  defp check_tools(%Entity{} = game_state, %TypedObject{type: :recipe} = recipe) do
     tools = ContentRecipe.tools(recipe)
     missing = Enum.reject(tools, &has_item?(game_state, &1))
 
@@ -309,7 +309,7 @@ defmodule Loka.Framework.Crafting do
     end
   end
 
-  defp check_resource_costs(%GameState{} = game_state, %TypedObject{type: :recipe} = recipe) do
+  defp check_resource_costs(%Entity{} = game_state, %TypedObject{type: :recipe} = recipe) do
     costs = ContentRecipe.resource_costs(recipe)
 
     if map_size(costs) == 0 do
@@ -328,7 +328,7 @@ defmodule Loka.Framework.Crafting do
     end
   end
 
-  defp do_pay_resource_costs(%GameState{} = game_state, %TypedObject{type: :recipe} = recipe) do
+  defp do_pay_resource_costs(%Entity{} = game_state, %TypedObject{type: :recipe} = recipe) do
     costs = ContentRecipe.resource_costs(recipe)
 
     if map_size(costs) == 0 do
@@ -341,8 +341,9 @@ defmodule Loka.Framework.Crafting do
       case Cost.pay_all(resource_pools, costs) do
         {:ok, new_pools, _audit} ->
           # Update game_state with new resource values
-          new_resources = pools_to_resources(new_pools, game_state.resources || %{})
-          {:ok, %{game_state | resources: new_resources}}
+          current_resources = Entity.get_component(game_state, "resources") || %{}
+          new_resources = pools_to_resources(new_pools, current_resources)
+          {:ok, Entity.add_component(game_state, "resources", new_resources)}
 
         {:error, {:insufficient, missing}} ->
           {:error, {:insufficient_resources, missing}}
@@ -350,28 +351,32 @@ defmodule Loka.Framework.Crafting do
     end
   end
 
-  defp build_resource_pools(%GameState{resources: nil}), do: %{}
+  defp build_resource_pools(%Entity{} = game_state) do
+    resources = Entity.get_component(game_state, "resources") || %{}
 
-  defp build_resource_pools(%GameState{resources: resources}) do
-    Map.new(resources, fn {key, value} ->
-      atom_key = normalize_resource_key(key)
+    if map_size(resources) == 0 do
+      %{}
+    else
+      Map.new(resources, fn {key, value} ->
+        atom_key = normalize_resource_key(key)
 
-      pool =
-        cond do
-          is_map(value) ->
-            current = Map.get(value, :current) || Map.get(value, "current") || 0
-            max = Map.get(value, :max) || Map.get(value, "max") || current
-            ResourcePool.new(current: current, max: max)
+        pool =
+          cond do
+            is_map(value) ->
+              current = Map.get(value, :current) || Map.get(value, "current") || 0
+              max = Map.get(value, :max) || Map.get(value, "max") || current
+              ResourcePool.new(current: current, max: max)
 
-          is_number(value) ->
-            ResourcePool.new(current: value, max: value)
+            is_number(value) ->
+              ResourcePool.new(current: value, max: value)
 
-          true ->
-            ResourcePool.new(current: 0, max: 0)
-        end
+            true ->
+              ResourcePool.new(current: 0, max: 0)
+          end
 
-      {atom_key, pool}
-    end)
+        {atom_key, pool}
+      end)
+    end
   end
 
   defp pools_to_resources(pools, original_resources) do
@@ -464,12 +469,15 @@ defmodule Loka.Framework.Crafting do
   # Inventory Helpers
   # =============================================================================
 
-  defp get_skills(%GameState{stats: stats}) do
+  defp get_skills(%Entity{} = game_state) do
+    stats = Entity.get_component(game_state, "stats") || %{}
     MapHelpers.get_flexible(stats, :skills, %{})
   end
 
-  defp count_item(%GameState{inventory: inventory}, item_key) do
+  defp count_item(%Entity{} = game_state, item_key) do
     alias Loka.Engine.Entities
+
+    inventory = Entity.get_component(game_state, "inventory") || []
 
     # Count occurrences of items with matching prototype key
     # Supports both entity IDs (real gameplay) and prototype keys (tests/simple items)
@@ -485,8 +493,10 @@ defmodule Loka.Framework.Crafting do
     end)
   end
 
-  defp has_item?(%GameState{inventory: inventory}, item_key) do
+  defp has_item?(%Entity{} = game_state, item_key) do
     alias Loka.Engine.Entities
+
+    inventory = Entity.get_component(game_state, "inventory") || []
 
     # Supports both entity IDs (real gameplay) and prototype keys (tests/simple items)
     Enum.any?(inventory, fn item_id ->
@@ -548,10 +558,12 @@ defmodule Loka.Framework.Crafting do
   defp remove_items(game_state, item_key, quantity) do
     alias Loka.Engine.Entities
 
+    inventory = Entity.get_component(game_state, "inventory") || []
+
     # Find item IDs that match the prototype key
     # Supports both entity IDs (real gameplay) and prototype keys (tests/simple items)
     {to_remove, remaining} =
-      game_state.inventory
+      inventory
       |> Enum.split_with(fn item_id ->
         case Entities.get_entity(item_id) do
           nil ->
@@ -567,7 +579,7 @@ defmodule Loka.Framework.Crafting do
       {_removed, kept} = Enum.split(to_remove, quantity)
       new_inventory = kept ++ remaining
       # Return updated struct directly (caller handles persistence)
-      {:ok, %{game_state | inventory: new_inventory}}
+      {:ok, Entity.add_component(game_state, "inventory", new_inventory)}
     else
       {:error, {:insufficient_items, item_key, quantity, length(to_remove)}}
     end

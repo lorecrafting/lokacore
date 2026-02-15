@@ -2,10 +2,9 @@ defmodule Loka.Framework.CraftingTest do
   use Loka.DataCase
 
   alias Loka.Framework.Crafting
-  alias Loka.Framework.Player.GameState
+  alias Loka.Engine.Entity
   alias Loka.Engine.Entities
 
-  import Loka.AccountsFixtures
   import Loka.EngineFixtures
 
   # =============================================================================
@@ -68,18 +67,6 @@ defmodule Loka.Framework.CraftingTest do
     }
   end
 
-  # Helper to create a game state for testing
-  defp game_state_fixture(player_id, attrs \\ %{}) do
-    {:ok, state} = GameState.create_state(player_id)
-
-    if map_size(attrs) > 0 do
-      {:ok, state} = GameState.update_state(state, attrs)
-      state
-    else
-      state
-    end
-  end
-
   # Helper to create a room entity with a crafting station
   defp create_room_with_station(station_type, bonus \\ 0.0) do
     {:ok, room} =
@@ -105,8 +92,7 @@ defmodule Loka.Framework.CraftingTest do
 
   describe "list_available_recipes/1" do
     test "returns recipes with no skill requirements", %{simple_recipe: simple_recipe} do
-      player = player_fixture()
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       recipes = Crafting.list_available_recipes(state)
 
@@ -114,25 +100,20 @@ defmodule Loka.Framework.CraftingTest do
     end
 
     test "filters recipes by skill level", %{skilled_recipe: skilled_recipe} do
-      player = player_fixture()
-
       # Player with insufficient skill
-      state_low = game_state_fixture(player.id, %{stats: %{"skills" => %{"blacksmithing" => 2}}})
+      state_low = character_fixture(stats: %{"skills" => %{"blacksmithing" => 2}})
       recipes_low = Crafting.list_available_recipes(state_low)
       refute Enum.any?(recipes_low, &(&1.key == skilled_recipe.key))
 
       # Player with sufficient skill
-      {:ok, state_high} =
-        GameState.update_state(state_low, %{stats: %{"skills" => %{"blacksmithing" => 5}}})
-
+      state_high = character_fixture(stats: %{"skills" => %{"blacksmithing" => 5}})
       recipes_high = Crafting.list_available_recipes(state_high)
       assert Enum.any?(recipes_high, &(&1.key == skilled_recipe.key))
     end
 
     test "returns only recipes matching player skill levels", %{skilled_recipe: skilled_recipe} do
-      player = player_fixture()
       # Player with no skills - should not see advanced recipes
-      state = game_state_fixture(player.id, %{stats: %{"skills" => %{}}})
+      state = character_fixture(stats: %{"skills" => %{}})
 
       recipes = Crafting.list_available_recipes(state)
 
@@ -180,42 +161,33 @@ defmodule Loka.Framework.CraftingTest do
 
   describe "can_craft?/3" do
     test "returns :ok when all requirements are met", %{simple_recipe: simple_recipe} do
-      player = player_fixture()
-
-      state =
-        game_state_fixture(player.id, %{
-          inventory: ["ingredient_a", "ingredient_a", "ingredient_b"]
-        })
+      state = character_fixture(inventory: ["ingredient_a", "ingredient_a", "ingredient_b"])
 
       assert :ok = Crafting.can_craft?(state, simple_recipe.key)
     end
 
     test "returns error for non-existent recipe" do
-      player = player_fixture()
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       assert {:error, :not_found} = Crafting.can_craft?(state, "nonexistent_recipe")
     end
 
     test "returns error for insufficient skill", %{skilled_recipe: skilled_recipe} do
-      player = player_fixture()
-      state = game_state_fixture(player.id, %{stats: %{"skills" => %{"blacksmithing" => 2}}})
+      state = character_fixture(stats: %{"skills" => %{"blacksmithing" => 2}})
 
       assert {:error, {:skill_required, "blacksmithing", 5, 2}} =
                Crafting.can_craft?(state, skilled_recipe.key)
     end
 
     test "returns error for missing ingredients", %{simple_recipe: simple_recipe} do
-      player = player_fixture()
-      state = game_state_fixture(player.id, %{inventory: ["ingredient_a"]})
+      state = character_fixture(inventory: ["ingredient_a"])
 
       assert {:error, {:missing_ingredients, _missing}} =
                Crafting.can_craft?(state, simple_recipe.key)
     end
 
     test "returns error for missing tools", %{tool_recipe: tool_recipe} do
-      player = player_fixture()
-      state = game_state_fixture(player.id, %{inventory: ["wood"]})
+      state = character_fixture(inventory: ["wood"])
 
       assert {:error, {:missing_tools, missing}} = Crafting.can_craft?(state, tool_recipe.key)
       assert "saw" in missing
@@ -223,33 +195,28 @@ defmodule Loka.Framework.CraftingTest do
     end
 
     test "accepts when all tools are present", %{tool_recipe: tool_recipe} do
-      player = player_fixture()
-      state = game_state_fixture(player.id, %{inventory: ["wood", "saw", "hammer"]})
+      state = character_fixture(inventory: ["wood", "saw", "hammer"])
 
       assert :ok = Crafting.can_craft?(state, tool_recipe.key)
     end
 
     test "returns error for missing station", %{skilled_recipe: skilled_recipe} do
-      player = player_fixture()
-
       state =
-        game_state_fixture(player.id, %{
+        character_fixture(
           stats: %{"skills" => %{"blacksmithing" => 5}},
           inventory: ["iron_bar", "iron_bar", "iron_bar", "hammer"]
-        })
+        )
 
       assert {:error, {:station_required, "forge"}} =
                Crafting.can_craft?(state, skilled_recipe.key)
     end
 
     test "returns error for wrong station type", %{skilled_recipe: skilled_recipe} do
-      player = player_fixture()
-
       state =
-        game_state_fixture(player.id, %{
+        character_fixture(
           stats: %{"skills" => %{"blacksmithing" => 5}},
           inventory: ["iron_bar", "iron_bar", "iron_bar", "hammer"]
-        })
+        )
 
       wrong_room = create_room_with_station("alchemy_bench")
 
@@ -258,13 +225,11 @@ defmodule Loka.Framework.CraftingTest do
     end
 
     test "accepts with correct station", %{skilled_recipe: skilled_recipe} do
-      player = player_fixture()
-
       state =
-        game_state_fixture(player.id, %{
+        character_fixture(
           stats: %{"skills" => %{"blacksmithing" => 5}},
           inventory: ["iron_bar", "iron_bar", "iron_bar", "hammer"]
-        })
+        )
 
       forge_room = create_room_with_station("forge")
 
@@ -272,13 +237,8 @@ defmodule Loka.Framework.CraftingTest do
     end
 
     test "handles partial ingredients correctly", %{simple_recipe: simple_recipe} do
-      player = player_fixture()
-
       # Has 1 of ingredient_a but needs 2
-      state =
-        game_state_fixture(player.id, %{
-          inventory: ["ingredient_a", "ingredient_b"]
-        })
+      state = character_fixture(inventory: ["ingredient_a", "ingredient_b"])
 
       assert {:error, {:missing_ingredients, _}} =
                Crafting.can_craft?(state, simple_recipe.key)
@@ -291,12 +251,8 @@ defmodule Loka.Framework.CraftingTest do
 
   describe "craft/3" do
     test "successfully crafts item with no failure chance", %{simple_recipe: simple_recipe} do
-      player = player_fixture()
-
       state =
-        game_state_fixture(player.id, %{
-          inventory: ["ingredient_a", "ingredient_a", "ingredient_b"]
-        })
+        character_fixture(inventory: ["ingredient_a", "ingredient_a", "ingredient_b"])
 
       assert {:ok, updated_state, result} = Crafting.craft(state, simple_recipe.key)
 
@@ -308,31 +264,27 @@ defmodule Loka.Framework.CraftingTest do
       assert length(result.consumed) == 2
 
       # Verify ingredients were consumed atomically
-      assert updated_state.inventory == []
+      assert (Entity.get_component(updated_state, "inventory") || []) == []
     end
 
     test "returns error when requirements not met", %{simple_recipe: simple_recipe} do
-      player = player_fixture()
-      state = game_state_fixture(player.id, %{inventory: []})
+      state = character_fixture(inventory: [])
 
       assert {:error, {:missing_ingredients, _}} = Crafting.craft(state, simple_recipe.key)
     end
 
     test "returns error for non-existent recipe" do
-      player = player_fixture()
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       assert {:error, :not_found} = Crafting.craft(state, "nonexistent")
     end
 
     test "handles failure with failure_output", %{skilled_recipe: skilled_recipe} do
-      player = player_fixture()
-
       state =
-        game_state_fixture(player.id, %{
+        character_fixture(
           stats: %{"skills" => %{"blacksmithing" => 5}},
           inventory: ["iron_bar", "iron_bar", "iron_bar", "hammer"]
-        })
+        )
 
       forge = create_room_with_station("forge")
 
@@ -352,13 +304,11 @@ defmodule Loka.Framework.CraftingTest do
     end
 
     test "applies station bonus to reduce failure chance", %{skilled_recipe: skilled_recipe} do
-      player = player_fixture()
-
       state =
-        game_state_fixture(player.id, %{
+        character_fixture(
           stats: %{"skills" => %{"blacksmithing" => 5}},
           inventory: ["iron_bar", "iron_bar", "iron_bar", "hammer"]
-        })
+        )
 
       # Forge with high bonus (reduces failure_chance by 0.2)
       forge_with_bonus = create_room_with_station("forge", 0.2)
@@ -369,17 +319,16 @@ defmodule Loka.Framework.CraftingTest do
       # With bonus, failure chance is 0.2 - 0.2 = 0.0, so always succeeds
       assert result.success == true
       # Verify ingredients consumed (3 iron_bar consumed, hammer is a tool - not consumed)
-      assert length(updated_state.inventory) == 1
-      assert "hammer" in updated_state.inventory
+      inventory = Entity.get_component(updated_state, "inventory") || []
+      assert length(inventory) == 1
+      assert "hammer" in inventory
     end
 
     test "includes consumed ingredients in result and updates state" do
-      player = player_fixture()
-
       state =
-        game_state_fixture(player.id, %{
+        character_fixture(
           inventory: ["ingredient_a", "ingredient_a", "ingredient_b", "extra_item"]
-        })
+        )
 
       {:ok, updated_state, result} = Crafting.craft(state, "recipe_simple_item")
 
@@ -397,8 +346,9 @@ defmodule Loka.Framework.CraftingTest do
              )
 
       # Verify state was actually updated
-      assert length(updated_state.inventory) == 1
-      assert "extra_item" in updated_state.inventory
+      inventory = Entity.get_component(updated_state, "inventory") || []
+      assert length(inventory) == 1
+      assert "extra_item" in inventory
     end
   end
 
@@ -408,8 +358,7 @@ defmodule Loka.Framework.CraftingTest do
 
   describe "get_missing_ingredients/2" do
     test "returns missing ingredients with details", %{simple_recipe: simple_recipe} do
-      player = player_fixture()
-      state = game_state_fixture(player.id, %{inventory: ["ingredient_a"]})
+      state = character_fixture(inventory: ["ingredient_a"])
 
       missing = Crafting.get_missing_ingredients(state, simple_recipe.key)
 
@@ -427,12 +376,8 @@ defmodule Loka.Framework.CraftingTest do
     end
 
     test "returns empty list when all ingredients present", %{simple_recipe: simple_recipe} do
-      player = player_fixture()
-
       state =
-        game_state_fixture(player.id, %{
-          inventory: ["ingredient_a", "ingredient_a", "ingredient_b"]
-        })
+        character_fixture(inventory: ["ingredient_a", "ingredient_a", "ingredient_b"])
 
       missing = Crafting.get_missing_ingredients(state, simple_recipe.key)
 
@@ -440,8 +385,7 @@ defmodule Loka.Framework.CraftingTest do
     end
 
     test "returns empty list for non-existent recipe" do
-      player = player_fixture()
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       missing = Crafting.get_missing_ingredients(state, "nonexistent")
 
@@ -449,10 +393,8 @@ defmodule Loka.Framework.CraftingTest do
     end
 
     test "handles excess ingredients correctly", %{simple_recipe: simple_recipe} do
-      player = player_fixture()
-
       state =
-        game_state_fixture(player.id, %{
+        character_fixture(
           inventory: [
             "ingredient_a",
             "ingredient_a",
@@ -460,7 +402,7 @@ defmodule Loka.Framework.CraftingTest do
             "ingredient_b",
             "ingredient_b"
           ]
-        })
+        )
 
       missing = Crafting.get_missing_ingredients(state, simple_recipe.key)
 
@@ -474,8 +416,7 @@ defmodule Loka.Framework.CraftingTest do
 
   describe "get_missing_tools/2" do
     test "returns list of missing tools", %{tool_recipe: tool_recipe} do
-      player = player_fixture()
-      state = game_state_fixture(player.id, %{inventory: ["wood"]})
+      state = character_fixture(inventory: ["wood"])
 
       missing = Crafting.get_missing_tools(state, tool_recipe.key)
 
@@ -485,8 +426,7 @@ defmodule Loka.Framework.CraftingTest do
     end
 
     test "returns partial list when some tools present", %{tool_recipe: tool_recipe} do
-      player = player_fixture()
-      state = game_state_fixture(player.id, %{inventory: ["wood", "saw"]})
+      state = character_fixture(inventory: ["wood", "saw"])
 
       missing = Crafting.get_missing_tools(state, tool_recipe.key)
 
@@ -495,8 +435,7 @@ defmodule Loka.Framework.CraftingTest do
     end
 
     test "returns empty list when all tools present", %{tool_recipe: tool_recipe} do
-      player = player_fixture()
-      state = game_state_fixture(player.id, %{inventory: ["wood", "saw", "hammer"]})
+      state = character_fixture(inventory: ["wood", "saw", "hammer"])
 
       missing = Crafting.get_missing_tools(state, tool_recipe.key)
 
@@ -504,8 +443,7 @@ defmodule Loka.Framework.CraftingTest do
     end
 
     test "returns empty list for recipe with no tools", %{simple_recipe: simple_recipe} do
-      player = player_fixture()
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       missing = Crafting.get_missing_tools(state, simple_recipe.key)
 
@@ -513,8 +451,7 @@ defmodule Loka.Framework.CraftingTest do
     end
 
     test "returns empty list for non-existent recipe" do
-      player = player_fixture()
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       missing = Crafting.get_missing_tools(state, "nonexistent")
 
@@ -528,40 +465,35 @@ defmodule Loka.Framework.CraftingTest do
 
   describe "consume_ingredients/2" do
     test "consumes ingredients from inventory", %{simple_recipe: simple_recipe} do
-      player = player_fixture()
-
       state =
-        game_state_fixture(player.id, %{
+        character_fixture(
           inventory: ["ingredient_a", "ingredient_a", "ingredient_b", "extra_item"]
-        })
+        )
 
       assert {:ok, updated_state} = Crafting.consume_ingredients(state, simple_recipe.key)
 
       # Should have consumed 2x ingredient_a and 1x ingredient_b
-      assert length(updated_state.inventory) == 1
-      assert "extra_item" in updated_state.inventory
+      inventory = Entity.get_component(updated_state, "inventory") || []
+      assert length(inventory) == 1
+      assert "extra_item" in inventory
     end
 
     test "returns error for insufficient ingredients", %{simple_recipe: simple_recipe} do
-      player = player_fixture()
-      state = game_state_fixture(player.id, %{inventory: ["ingredient_a"]})
+      state = character_fixture(inventory: ["ingredient_a"])
 
       assert {:error, {:insufficient_items, _, _, _}} =
                Crafting.consume_ingredients(state, simple_recipe.key)
     end
 
     test "returns error for non-existent recipe" do
-      player = player_fixture()
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       assert {:error, :not_found} = Crafting.consume_ingredients(state, "nonexistent")
     end
 
     test "consumes exact quantities", %{simple_recipe: simple_recipe} do
-      player = player_fixture()
-
       state =
-        game_state_fixture(player.id, %{
+        character_fixture(
           inventory: [
             "ingredient_a",
             "ingredient_a",
@@ -569,28 +501,25 @@ defmodule Loka.Framework.CraftingTest do
             "ingredient_b",
             "ingredient_b"
           ]
-        })
+        )
 
       {:ok, updated_state} = Crafting.consume_ingredients(state, simple_recipe.key)
 
       # Should have 1 ingredient_a and 1 ingredient_b remaining
-      assert length(updated_state.inventory) == 2
-      assert Enum.count(updated_state.inventory, &(&1 == "ingredient_a")) == 1
-      assert Enum.count(updated_state.inventory, &(&1 == "ingredient_b")) == 1
+      inventory = Entity.get_component(updated_state, "inventory") || []
+      assert length(inventory) == 2
+      assert Enum.count(inventory, &(&1 == "ingredient_a")) == 1
+      assert Enum.count(inventory, &(&1 == "ingredient_b")) == 1
     end
 
     test "handles multiple ingredients of same type" do
-      player = player_fixture()
-
       state =
-        game_state_fixture(player.id, %{
-          inventory: ["ingredient_a", "ingredient_a", "ingredient_b"]
-        })
+        character_fixture(inventory: ["ingredient_a", "ingredient_a", "ingredient_b"])
 
       {:ok, updated_state} = Crafting.consume_ingredients(state, "recipe_simple_item")
 
       # All ingredients consumed
-      assert updated_state.inventory == []
+      assert (Entity.get_component(updated_state, "inventory") || []) == []
     end
   end
 
@@ -600,29 +529,23 @@ defmodule Loka.Framework.CraftingTest do
 
   describe "edge cases" do
     test "handles empty inventory gracefully" do
-      player = player_fixture()
-      state = game_state_fixture(player.id, %{inventory: []})
+      state = character_fixture(inventory: [])
 
       assert {:error, {:missing_ingredients, _}} =
                Crafting.can_craft?(state, "recipe_simple_item")
     end
 
     test "handles state with no skills field" do
-      player = player_fixture()
-      state = game_state_fixture(player.id, %{stats: %{}})
+      state = character_fixture(stats: %{})
 
       assert {:error, {:skill_required, _, _, _}} =
                Crafting.can_craft?(state, "recipe_advanced_item")
     end
 
     test "requires exact item key match" do
-      player = player_fixture()
-
       # Items with similar prefixes should NOT match exact requirements
       state =
-        game_state_fixture(player.id, %{
-          inventory: ["ingredient_a_1", "ingredient_a_2", "ingredient_b_1"]
-        })
+        character_fixture(inventory: ["ingredient_a_1", "ingredient_a_2", "ingredient_b_1"])
 
       missing = Crafting.get_missing_ingredients(state, "recipe_simple_item")
 
@@ -645,8 +568,7 @@ defmodule Loka.Framework.CraftingTest do
         failure_message: "Failed!"
       })
 
-      player = player_fixture()
-      state = game_state_fixture(player.id, %{inventory: ["item_x"]})
+      state = character_fixture(inventory: ["item_x"])
 
       # Station with bonus > failure_chance
       forge = create_room_with_station("forge", 0.5)
@@ -656,19 +578,17 @@ defmodule Loka.Framework.CraftingTest do
       # Should always succeed (failure_chance - bonus = -0.4, clamped to 0)
       assert result.success == true
       # Verify ingredient consumed
-      assert updated_state.inventory == []
+      assert (Entity.get_component(updated_state, "inventory") || []) == []
     end
   end
 
   describe "full crafting workflow integration" do
     test "complete crafting workflow from check to craft with atomic consumption" do
-      player = player_fixture()
-
       state =
-        game_state_fixture(player.id, %{
+        character_fixture(
           inventory: ["ingredient_a", "ingredient_a", "ingredient_b"],
           stats: %{"xp" => 0}
-        })
+        )
 
       recipe_key = "recipe_simple_item"
 
@@ -689,16 +609,11 @@ defmodule Loka.Framework.CraftingTest do
       assert craft_result.xp == %{"skill" => "crafting", "amount" => 10}
 
       # Ingredients are now consumed as part of craft/3
-      assert final_state.inventory == []
+      assert (Entity.get_component(final_state, "inventory") || []) == []
     end
 
     test "craft/3 does not modify state on validation failure" do
-      player = player_fixture()
-
-      state =
-        game_state_fixture(player.id, %{
-          inventory: ["ingredient_a"]
-        })
+      state = character_fixture(inventory: ["ingredient_a"])
 
       recipe_key = "recipe_simple_item"
 
@@ -706,7 +621,7 @@ defmodule Loka.Framework.CraftingTest do
       assert {:error, {:missing_ingredients, _}} = Crafting.craft(state, recipe_key)
 
       # Original state should be unchanged
-      assert state.inventory == ["ingredient_a"]
+      assert (Entity.get_component(state, "inventory") || []) == ["ingredient_a"]
     end
   end
 end

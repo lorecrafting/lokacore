@@ -15,7 +15,7 @@ defmodule Loka.Framework.Quest.Admin do
 
   require Logger
 
-  alias Loka.Framework.Player.GameState
+  alias Loka.Engine.{Entity, Entities}
   alias Loka.Framework.Quest.{Progress, Definitions}
   alias Loka.Admin.GameLog
   alias Loka.Accounts
@@ -32,8 +32,10 @@ defmodule Loka.Framework.Quest.Admin do
   def list_players_with_quests do
     Accounts.list_players()
     |> Enum.map(fn player ->
-      state = GameState.get_state(player.id)
-      quests = if state, do: state.quests, else: %{}
+      character = get_character(player.id)
+
+      quests =
+        if character, do: Entity.get_component(character, "quest_progress") || %{}, else: %{}
 
       active_quests = get_in(quests, ["active"]) || %{}
       completed_quests = get_in(quests, ["completed"]) || []
@@ -43,7 +45,7 @@ defmodule Loka.Framework.Quest.Admin do
         email: player.email,
         active_count: map_size(active_quests),
         completed_count: length(completed_quests),
-        has_game_state: state != nil
+        has_character: character != nil
       }
     end)
   end
@@ -52,12 +54,12 @@ defmodule Loka.Framework.Quest.Admin do
   Gets detailed quest state for a specific player.
   """
   def get_player_quest_state(player_id) do
-    case GameState.get_state(player_id) do
+    case get_character(player_id) do
       nil ->
-        {:error, :no_game_state}
+        {:error, :no_character}
 
-      state ->
-        quests = state.quests || %{}
+      character ->
+        quests = Entity.get_component(character, "quest_progress") || %{}
         active_quests = get_in(quests, ["active"]) || %{}
         completed_quests = get_in(quests, ["completed"]) || []
 
@@ -125,28 +127,30 @@ defmodule Loka.Framework.Quest.Admin do
   Force grants a quest to a player, bypassing prerequisites.
   """
   def force_grant_quest(player_id, quest_id) do
-    case GameState.get_or_create_state(player_id) do
-      {:ok, state} ->
+    case get_character(player_id) do
+      nil ->
+        {:error, :no_character}
+
+      character ->
         case Definitions.get_quest_definition(quest_id) do
           nil ->
             {:error, {:quest_not_found, quest_id}}
 
           _quest_def ->
-            case Progress.accept_quest(state, quest_id) do
-              {:ok, new_state} ->
+            case Progress.accept_quest(character, quest_id) do
+              {:ok, updated_character} ->
+                Entities.save_entity(updated_character)
+
                 Logger.info(
                   "[Quest.Admin] Force granted quest #{quest_id} to player #{player_id}"
                 )
 
-                {:ok, new_state}
+                {:ok, updated_character}
 
               {:error, reason} ->
                 {:error, reason}
             end
         end
-
-      {:error, reason} ->
-        {:error, reason}
     end
   end
 
@@ -154,18 +158,20 @@ defmodule Loka.Framework.Quest.Admin do
   Force completes a specific objective for a player.
   """
   def force_complete_objective(player_id, quest_id, objective_id) do
-    case GameState.get_state(player_id) do
+    case get_character(player_id) do
       nil ->
-        {:error, :no_game_state}
+        {:error, :no_character}
 
-      state ->
-        case Progress.complete_objective(state, quest_id, objective_id) do
-          {:ok, new_state} ->
+      character ->
+        case Progress.complete_objective(character, quest_id, objective_id) do
+          {:ok, updated_character} ->
+            Entities.save_entity(updated_character)
+
             Logger.info(
               "[Quest.Admin] Force completed objective #{objective_id} in quest #{quest_id} for player #{player_id}"
             )
 
-            {:ok, new_state}
+            {:ok, updated_character}
 
           {:error, reason} ->
             {:error, reason}
@@ -177,30 +183,33 @@ defmodule Loka.Framework.Quest.Admin do
   Force completes all objectives for a quest.
   """
   def force_complete_all_objectives(player_id, quest_id) do
-    case GameState.get_state(player_id) do
+    case get_character(player_id) do
       nil ->
-        {:error, :no_game_state}
+        {:error, :no_character}
 
-      state ->
+      character ->
         quest_def = Definitions.get_quest_definition(quest_id)
 
         if quest_def do
           # Complete each objective in sequence
           result =
-            Enum.reduce_while(quest_def.objectives, {:ok, state}, fn obj, {:ok, current_state} ->
-              case Progress.complete_objective(current_state, quest_id, obj.id) do
-                {:ok, new_state} -> {:cont, {:ok, new_state}}
+            Enum.reduce_while(quest_def.objectives, {:ok, character}, fn obj,
+                                                                         {:ok, current_character} ->
+              case Progress.complete_objective(current_character, quest_id, obj.id) do
+                {:ok, updated} -> {:cont, {:ok, updated}}
                 {:error, reason} -> {:halt, {:error, reason}}
               end
             end)
 
           case result do
-            {:ok, final_state} ->
+            {:ok, final_character} ->
+              Entities.save_entity(final_character)
+
               Logger.info(
                 "[Quest.Admin] Force completed all objectives in quest #{quest_id} for player #{player_id}"
               )
 
-              {:ok, final_state}
+              {:ok, final_character}
 
             error ->
               error
@@ -217,30 +226,23 @@ defmodule Loka.Framework.Quest.Admin do
   Note: This modifies the quest state directly.
   """
   def force_turn_in_quest(player_id, quest_id) do
-    case GameState.get_state(player_id) do
-      nil ->
-        {:error, :no_game_state}
+    # First force complete all objectives (also does character lookup)
+    case force_complete_all_objectives(player_id, quest_id) do
+      {:ok, updated_character} ->
+        # Then turn in
+        case Progress.turn_in_quest(updated_character, quest_id) do
+          {:ok, final_character, rewards} ->
+            Entities.save_entity(final_character)
+            Logger.info("[Quest.Admin] Force turned in quest #{quest_id} for player #{player_id}")
 
-      _state ->
-        # First force complete all objectives
-        case force_complete_all_objectives(player_id, quest_id) do
-          {:ok, updated_state} ->
-            # Then turn in
-            case Progress.turn_in_quest(updated_state, quest_id) do
-              {:ok, final_state, rewards} ->
-                Logger.info(
-                  "[Quest.Admin] Force turned in quest #{quest_id} for player #{player_id}"
-                )
-
-                {:ok, final_state, rewards}
-
-              {:error, reason} ->
-                {:error, reason}
-            end
+            {:ok, final_character, rewards}
 
           {:error, reason} ->
             {:error, reason}
         end
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 
@@ -248,12 +250,12 @@ defmodule Loka.Framework.Quest.Admin do
   Resets a quest to initial state (removes from active and completed).
   """
   def reset_quest(player_id, quest_id) do
-    case GameState.get_state(player_id) do
+    case get_character(player_id) do
       nil ->
-        {:error, :no_game_state}
+        {:error, :no_character}
 
-      state ->
-        quests = state.quests || %{}
+      character ->
+        quests = Entity.get_component(character, "quest_progress") || %{}
         active_quests = get_in(quests, ["active"]) || %{}
         completed_quests = get_in(quests, ["completed"]) || []
 
@@ -268,14 +270,10 @@ defmodule Loka.Framework.Quest.Admin do
           "completed" => new_completed
         }
 
-        case GameState.update_state(state, %{quests: new_quests}) do
-          {:ok, new_state} ->
-            Logger.info("[Quest.Admin] Reset quest #{quest_id} for player #{player_id}")
-            {:ok, new_state}
-
-          {:error, reason} ->
-            {:error, reason}
-        end
+        updated_character = Entity.add_component(character, "quest_progress", new_quests)
+        Entities.save_entity(updated_character)
+        Logger.info("[Quest.Admin] Reset quest #{quest_id} for player #{player_id}")
+        {:ok, updated_character}
     end
   end
 
@@ -283,21 +281,16 @@ defmodule Loka.Framework.Quest.Admin do
   Resets all quests for a player (clears entire quest state).
   """
   def reset_all_quests(player_id) do
-    case GameState.get_state(player_id) do
+    case get_character(player_id) do
       nil ->
-        {:error, :no_game_state}
+        {:error, :no_character}
 
-      state ->
+      character ->
         new_quests = %{"active" => %{}, "completed" => []}
-
-        case GameState.update_state(state, %{quests: new_quests}) do
-          {:ok, new_state} ->
-            Logger.info("[Quest.Admin] Reset all quests for player #{player_id}")
-            {:ok, new_state}
-
-          {:error, reason} ->
-            {:error, reason}
-        end
+        updated_character = Entity.add_component(character, "quest_progress", new_quests)
+        Entities.save_entity(updated_character)
+        Logger.info("[Quest.Admin] Reset all quests for player #{player_id}")
+        {:ok, updated_character}
     end
   end
 
@@ -473,11 +466,11 @@ defmodule Loka.Framework.Quest.Admin do
       Quest.Admin.simulate_event(player_id, :get_item, %{target_id: "ancient_sword"})
   """
   def simulate_event(player_id, event_type, params) do
-    case GameState.get_state(player_id) do
+    case get_character(player_id) do
       nil ->
-        {:error, :no_game_state}
+        {:error, :no_character}
 
-      state ->
+      character ->
         event = build_simulation_event(event_type, params)
 
         Logger.info(
@@ -485,22 +478,19 @@ defmodule Loka.Framework.Quest.Admin do
         )
 
         # Run the event through quest progress
-        case Progress.update_progress(state, event) do
-          {:ok, new_state, completed_objectives} ->
-            Logger.info(
-              "[Quest.Admin] Simulation result: #{length(completed_objectives)} objectives updated"
-            )
+        {:ok, updated_character, completed_objectives} =
+          Progress.update_progress(character, event)
 
-            {:ok,
-             %{
-               state_updated: new_state != state,
-               completed_objectives: completed_objectives,
-               new_state: new_state
-             }}
+        Logger.info(
+          "[Quest.Admin] Simulation result: #{length(completed_objectives)} objectives updated"
+        )
 
-          {:error, reason} ->
-            {:error, reason}
-        end
+        {:ok,
+         %{
+           state_updated: updated_character != character,
+           completed_objectives: completed_objectives,
+           new_character: updated_character
+         }}
     end
   end
 
@@ -570,5 +560,13 @@ defmodule Loka.Framework.Quest.Admin do
       }
     end)
     |> Enum.sort_by(& &1.name)
+  end
+
+  # Looks up the character entity for a player by account_id
+  defp get_character(player_id) do
+    case Entities.find_one(account_id: player_id, type: :character) do
+      {:ok, entity} -> entity
+      {:error, :not_found} -> nil
+    end
   end
 end

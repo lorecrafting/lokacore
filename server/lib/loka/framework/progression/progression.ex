@@ -27,7 +27,7 @@ defmodule Loka.Framework.Progression do
   """
 
   alias Loka.Config.Balance
-  alias Loka.Framework.Player.GameState
+  alias Loka.Engine.Entity
 
   # Fallback defaults if Balance config not loaded
   @default_xp_base 100
@@ -79,12 +79,12 @@ defmodule Loka.Framework.Progression do
   @doc """
   Awards XP to a player and handles level ups.
 
-  Returns {:ok, updated_game_state, level_up_info} where level_up_info is:
+  Returns {:ok, updated_entity, level_up_info} where level_up_info is:
   - nil if no level up
   - %{new_level: N, skill_points_gained: M} if leveled up
   """
-  def award_xp(%GameState{} = game_state, xp_amount) do
-    stats = game_state.stats || %{}
+  def award_xp(%Entity{} = entity, xp_amount) do
+    stats = Entity.get_component(entity, "stats") || %{}
 
     current_xp = get_stat(stats, "xp", 0)
     current_level = get_stat(stats, "level", 1)
@@ -111,30 +111,22 @@ defmodule Loka.Framework.Progression do
         |> Map.put("skill_points", current_skill_points + skill_points_gained)
 
       # Also increase max health on level up (from Balance config)
-      # Use unified resources system for health
       hp_per_level = Balance.get(:progression, :hp_per_level, default: @default_hp_per_level)
-      health = GameState.get_health(game_state)
-      max_hp = health[:max] || health["max"] || 100
-      current_hp = health[:current] || health["current"] || max_hp
+      resources = Entity.get_component(entity, "resources") || %{}
+      health = resources["health"] || %{"current" => 100, "max" => 100}
+      max_hp = health["max"] || 100
+      current_hp = health["current"] || max_hp
       new_max_hp = max_hp + levels_gained * hp_per_level
       # Heal on level up
       new_current_hp = current_hp + levels_gained * hp_per_level
 
-      new_health = %{current: new_current_hp, max: new_max_hp}
+      new_health = %{"current" => new_current_hp, "max" => new_max_hp}
+      new_resources = Map.put(resources, "health", new_health)
 
-      # Handle both persisted and in-memory game states
-      updated_state =
-        if is_nil(game_state.inserted_at) do
-          # In-memory state - update directly without DB
-          current_resources = game_state.resources || %{}
-          new_resources = Map.put(current_resources, :health, new_health)
-          %{game_state | stats: new_stats, health: new_health, resources: new_resources}
-        else
-          # Persisted state - update via DB using set_health
-          {:ok, with_stats} = GameState.update_state(game_state, %{stats: new_stats})
-          {:ok, updated} = GameState.set_health(with_stats, new_health)
-          updated
-        end
+      updated_entity =
+        entity
+        |> Entity.add_component("stats", new_stats)
+        |> Entity.add_component("resources", new_resources)
 
       level_up_info = %{
         new_level: new_level,
@@ -142,31 +134,21 @@ defmodule Loka.Framework.Progression do
         old_level: current_level
       }
 
-      {:ok, updated_state, level_up_info}
+      {:ok, updated_entity, level_up_info}
     else
       # No level up, just add XP
       new_stats = Map.put(stats, "xp", new_xp)
+      updated_entity = Entity.add_component(entity, "stats", new_stats)
 
-      # Handle both persisted and in-memory game states
-      updated_state =
-        if is_nil(game_state.inserted_at) do
-          # In-memory state - update directly without DB
-          %{game_state | stats: new_stats}
-        else
-          # Persisted state - update via DB
-          {:ok, updated} = GameState.update_state(game_state, %{stats: new_stats})
-          updated
-        end
-
-      {:ok, updated_state, nil}
+      {:ok, updated_entity, nil}
     end
   end
 
   @doc """
   Gets a player's current progression stats.
   """
-  def get_progression_stats(%GameState{} = game_state) do
-    stats = game_state.stats || %{}
+  def get_progression_stats(%Entity{} = entity) do
+    stats = Entity.get_component(entity, "stats") || %{}
 
     level = get_stat(stats, "level", 1)
     xp = get_stat(stats, "xp", 0)
@@ -193,8 +175,8 @@ defmodule Loka.Framework.Progression do
   @doc """
   Checks if player has enough skill points to learn a skill.
   """
-  def can_learn_skill?(%GameState{} = game_state, skill_cost) do
-    stats = game_state.stats || %{}
+  def can_learn_skill?(%Entity{} = entity, skill_cost) do
+    stats = Entity.get_component(entity, "stats") || %{}
     skill_points = get_stat(stats, "skill_points", 0)
     skill_points >= skill_cost
   end
@@ -204,8 +186,8 @@ defmodule Loka.Framework.Progression do
 
   Returns {:ok, updated_state} or {:error, reason}
   """
-  def learn_skill(%GameState{} = game_state, skill_id, skill_cost) do
-    stats = game_state.stats || %{}
+  def learn_skill(%Entity{} = entity, skill_id, skill_cost) do
+    stats = Entity.get_component(entity, "stats") || %{}
     skill_points = get_stat(stats, "skill_points", 0)
     learned_skills = get_stat(stats, "skills", [])
 
@@ -222,15 +204,15 @@ defmodule Loka.Framework.Progression do
           |> Map.put("skill_points", skill_points - skill_cost)
           |> Map.put("skills", learned_skills ++ [skill_id])
 
-        GameState.update_state(game_state, %{stats: new_stats})
+        {:ok, Entity.add_component(entity, "stats", new_stats)}
     end
   end
 
   @doc """
   Checks if player has learned a specific skill.
   """
-  def has_skill?(%GameState{} = game_state, skill_id) do
-    stats = game_state.stats || %{}
+  def has_skill?(%Entity{} = entity, skill_id) do
+    stats = Entity.get_component(entity, "stats") || %{}
     learned_skills = get_stat(stats, "skills", [])
     skill_id in learned_skills
   end

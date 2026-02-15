@@ -28,9 +28,9 @@ defmodule Loka.Framework.Economy do
       # Now all gold gains from selling are +10%
   """
 
+  alias Loka.Engine.Entity
   alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
   alias Loka.Framework.Economy.Shop
-  alias Loka.Framework.Player.GameState
   alias Loka.Primitives.Value
   alias Loka.Utils.MapHelpers
 
@@ -63,7 +63,7 @@ defmodule Loka.Framework.Economy do
   - Adds the item(s) to player inventory
   - Returns the updated game state
   """
-  def buy(%GameState{} = game_state, npc_entity, item_key, quantity \\ 1) do
+  def buy(%Entity{} = game_state, npc_entity, item_key, quantity \\ 1) do
     with {:ok, shop} <- require_shop(npc_entity),
          :ok <- check_in_stock(shop, item_key, quantity),
          base_price <- get_base_price(item_key),
@@ -96,7 +96,7 @@ defmodule Loka.Framework.Economy do
   - Adds currency to player (with gold-find modifiers applied)
   - Returns the updated game state
   """
-  def sell(%GameState{} = game_state, npc_entity, item_key, quantity \\ 1) do
+  def sell(%Entity{} = game_state, npc_entity, item_key, quantity \\ 1) do
     with {:ok, shop} <- require_shop(npc_entity),
          :ok <- check_has_items(game_state, item_key, quantity),
          base_price <- get_base_price(item_key),
@@ -135,15 +135,16 @@ defmodule Loka.Framework.Economy do
   @doc """
   Gets the player's current currency amount.
   """
-  def get_currency(%GameState{} = game_state, currency_type \\ "gold") do
-    currencies = MapHelpers.get_flexible(game_state.stats, :currencies, %{})
+  def get_currency(%Entity{} = game_state, currency_type \\ "gold") do
+    stats = Entity.get_component(game_state, "stats") || %{}
+    currencies = MapHelpers.get_flexible(stats, :currencies, %{})
     Map.get(currencies, currency_type, 0)
   end
 
   @doc """
   Checks if player can afford a purchase.
   """
-  def can_afford?(%GameState{} = game_state, currency_type, amount) do
+  def can_afford?(%Entity{} = game_state, currency_type, amount) do
     get_currency(game_state, currency_type) >= amount
   end
 
@@ -204,7 +205,7 @@ defmodule Loka.Framework.Economy do
     end
   end
 
-  defp check_can_afford(%GameState{} = game_state, currency, amount) do
+  defp check_can_afford(%Entity{} = game_state, currency, amount) do
     if can_afford?(game_state, currency, amount) do
       :ok
     else
@@ -213,7 +214,9 @@ defmodule Loka.Framework.Economy do
     end
   end
 
-  defp check_has_items(%GameState{inventory: inventory}, item_key, quantity) do
+  defp check_has_items(%Entity{} = state, item_key, quantity) do
+    inventory = Entity.get_component(state, "inventory") || []
+
     count =
       Enum.count(inventory, fn item_id ->
         item_id == item_key or String.starts_with?(to_string(item_id), item_key)
@@ -268,17 +271,15 @@ defmodule Loka.Framework.Economy do
 
   Returns the updated struct directly (caller handles persistence).
   """
-  def deduct_currency(%GameState{} = state, currency_type, amount) do
-    currencies = MapHelpers.get_flexible(state.stats, :currencies, %{})
+  def deduct_currency(%Entity{} = state, currency_type, amount) do
+    stats = Entity.get_component(state, "stats") || %{}
+    currencies = MapHelpers.get_flexible(stats, :currencies, %{})
     current = Map.get(currencies, currency_type, 0)
 
     if current >= amount do
       new_currencies = Map.put(currencies, currency_type, current - amount)
-
-      # Keep consistent key format based on existing keys
-      new_stats = update_currencies_in_stats(state.stats, new_currencies)
-
-      {:ok, %{state | stats: new_stats}}
+      new_stats = update_currencies_in_stats(stats, new_currencies)
+      {:ok, Entity.add_component(state, "stats", new_stats)}
     else
       {:error, {:insufficient_funds, currency_type, current, amount}}
     end
@@ -289,15 +290,13 @@ defmodule Loka.Framework.Economy do
 
   Returns the updated struct directly (caller handles persistence).
   """
-  def add_currency(%GameState{} = state, currency_type, amount) do
-    currencies = MapHelpers.get_flexible(state.stats, :currencies, %{})
+  def add_currency(%Entity{} = state, currency_type, amount) do
+    stats = Entity.get_component(state, "stats") || %{}
+    currencies = MapHelpers.get_flexible(stats, :currencies, %{})
     current = Map.get(currencies, currency_type, 0)
     new_currencies = Map.put(currencies, currency_type, current + amount)
-
-    # Keep consistent key format based on existing keys
-    new_stats = update_currencies_in_stats(state.stats, new_currencies)
-
-    {:ok, %{state | stats: new_stats}}
+    new_stats = update_currencies_in_stats(stats, new_currencies)
+    {:ok, Entity.add_component(state, "stats", new_stats)}
   end
 
   defp update_currencies_in_stats(stats, new_currencies) do
@@ -316,15 +315,14 @@ defmodule Loka.Framework.Economy do
   # =============================================================================
 
   defp add_items_to_inventory(state, item_key, quantity) do
-    # Add items directly to inventory
     new_items = List.duplicate(item_key, quantity)
-    new_inventory = (state.inventory || []) ++ new_items
-    {:ok, %{state | inventory: new_inventory}}
+    inventory = Entity.get_component(state, "inventory") || []
+    new_inventory = inventory ++ new_items
+    {:ok, Entity.add_component(state, "inventory", new_inventory)}
   end
 
   defp remove_items_from_inventory(state, item_key, quantity) do
-    # Remove items matching the key prefix
-    inventory = state.inventory || []
+    inventory = Entity.get_component(state, "inventory") || []
 
     matching_items =
       Enum.filter(inventory, fn item_id ->
@@ -339,7 +337,7 @@ defmodule Loka.Framework.Economy do
           List.delete(inv, item)
         end)
 
-      {:ok, %{state | inventory: new_inventory}}
+      {:ok, Entity.add_component(state, "inventory", new_inventory)}
     else
       {:error, {:insufficient_items, item_key, length(matching_items), quantity}}
     end
@@ -362,7 +360,7 @@ defmodule Loka.Framework.Economy do
       {:ok, state} = Economy.add_gold_modifier(state, "guild_bonus", :flat, 5, "guild")
       # +5 gold from all sources
   """
-  def add_gold_modifier(%GameState{} = game_state, id, type, amount, source \\ nil) do
+  def add_gold_modifier(%Entity{} = game_state, id, type, amount, source \\ nil) do
     gold_value = get_gold_value(game_state)
     {:ok, new_value, _audit} = Value.add_modifier(gold_value, id, type, amount, source)
     {:ok, put_gold_value(game_state, new_value)}
@@ -371,7 +369,7 @@ defmodule Loka.Framework.Economy do
   @doc """
   Removes a gold-find modifier by ID.
   """
-  def remove_gold_modifier(%GameState{} = game_state, id) do
+  def remove_gold_modifier(%Entity{} = game_state, id) do
     gold_value = get_gold_value(game_state)
     {:ok, new_value, _audit} = Value.remove_modifier(gold_value, id)
     {:ok, put_gold_value(game_state, new_value)}
@@ -382,7 +380,7 @@ defmodule Loka.Framework.Economy do
 
   Returns 0 for no bonus, 0.1 for +10%, etc.
   """
-  def get_gold_find_bonus(%GameState{} = game_state) do
+  def get_gold_find_bonus(%Entity{} = game_state) do
     gold_value = get_gold_value(game_state)
     Value.percent_bonus(gold_value)
   end
@@ -390,7 +388,7 @@ defmodule Loka.Framework.Economy do
   @doc """
   Lists all active gold-find modifiers.
   """
-  def list_gold_modifiers(%GameState{} = game_state) do
+  def list_gold_modifiers(%Entity{} = game_state) do
     gold_value = get_gold_value(game_state)
     gold_value.modifiers
   end
@@ -405,19 +403,23 @@ defmodule Loka.Framework.Economy do
       gold_drop = Economy.apply_loot_gold_modifiers(game_state, 50)
       # Returns 55 if player has +10% gold find
   """
-  def apply_loot_gold_modifiers(%GameState{} = game_state, base_amount) do
+  def apply_loot_gold_modifiers(%Entity{} = game_state, base_amount) do
     apply_gold_modifiers(game_state, base_amount)
   end
 
-  defp get_gold_value(%GameState{} = game_state) do
-    case MapHelpers.get_flexible(game_state.stats, @gold_modifiers_key, nil) do
+  defp get_gold_value(%Entity{} = game_state) do
+    stats = Entity.get_component(game_state, "stats") || %{}
+
+    case MapHelpers.get_flexible(stats, @gold_modifiers_key, nil) do
       nil -> Value.new(0)
       %Value{} = value -> value
       map when is_map(map) -> Value.from_map(map)
     end
   end
 
-  defp put_gold_value(%GameState{stats: stats} = game_state, %Value{} = gold_value) do
+  defp put_gold_value(%Entity{} = game_state, %Value{} = gold_value) do
+    stats = Entity.get_component(game_state, "stats") || %{}
+
     new_stats =
       if is_binary(List.first(Map.keys(stats) || [])) do
         Map.put(stats, "gold_modifiers", Value.to_map(gold_value))
@@ -425,10 +427,10 @@ defmodule Loka.Framework.Economy do
         Map.put(stats, @gold_modifiers_key, gold_value)
       end
 
-    %{game_state | stats: new_stats}
+    Entity.add_component(game_state, "stats", new_stats)
   end
 
-  defp apply_gold_modifiers(%GameState{} = game_state, base_amount) do
+  defp apply_gold_modifiers(%Entity{} = game_state, base_amount) do
     gold_value = get_gold_value(game_state)
 
     # Create a temporary Value with the base amount and copy modifiers

@@ -2,10 +2,8 @@ defmodule Loka.Framework.GatheringTest do
   use Loka.DataCase
 
   alias Loka.Framework.Gathering
-  alias Loka.Framework.Player.GameState
 
   import Loka.EngineFixtures
-  import Loka.AccountsFixtures
 
   # =============================================================================
   # Test Setup and Helpers
@@ -94,27 +92,18 @@ defmodule Loka.Framework.GatheringTest do
     })
   end
 
-  # Helper to create a game state
+  # Helper to create a game state (returns Entity struct)
   defp game_state_fixture(attrs \\ %{}) do
-    player = player_fixture()
-
-    {:ok, game_state} = GameState.create_state(player.id)
-
-    stats =
+    stats_override =
       Map.merge(
         %{"str" => 10, "dex" => 10, "sta" => 10, "level" => 1, "xp" => 0, "gold" => 0},
         Map.get(attrs, :stats, %{})
       )
 
-    inventory = Map.get(attrs, :inventory, [])
-
-    {:ok, game_state} =
-      GameState.update_state(game_state, %{
-        stats: stats,
-        inventory: inventory
-      })
-
-    game_state
+    character_fixture(
+      stats: stats_override,
+      inventory: Map.get(attrs, :inventory, [])
+    )
   end
 
   # =============================================================================

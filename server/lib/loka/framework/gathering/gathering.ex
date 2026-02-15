@@ -38,7 +38,7 @@ defmodule Loka.Framework.Gathering do
   """
 
   alias Loka.Content.GatheringNode, as: ContentGatheringNode
-  alias Loka.Framework.Player.GameState
+  alias Loka.Engine.Entity
   alias Loka.Utils.MapHelpers
 
   @type gather_result :: %{
@@ -91,7 +91,7 @@ defmodule Loka.Framework.Gathering do
   3. Skill requirements met
   4. Required tool in inventory
   """
-  def can_gather?(%GameState{} = game_state, room_entity, node_key) do
+  def can_gather?(%Entity{} = game_state, room_entity, node_key) do
     with {:ok, node_def} <- get_node_definition(node_key),
          {:ok, node_state} <- get_node_state(room_entity, node_key),
          :ok <- check_not_exhausted(node_state, node_def),
@@ -113,7 +113,7 @@ defmodule Loka.Framework.Gathering do
   - `:node_exhausted` - Whether the node is now depleted
   - `:new_uses_remaining` - Remaining uses after gathering
   """
-  def gather(%GameState{} = game_state, room_entity, node_key) do
+  def gather(%Entity{} = game_state, room_entity, node_key) do
     with {:ok, node_def} <- get_node_definition(node_key),
          {:ok, node_state} <- get_node_state(room_entity, node_key),
          :ok <- can_gather?(game_state, room_entity, node_key) do
@@ -238,7 +238,7 @@ defmodule Loka.Framework.Gathering do
     end
   end
 
-  defp check_skill_requirements(%GameState{} = game_state, node_def) do
+  defp check_skill_requirements(%Entity{} = game_state, node_def) do
     if ContentGatheringNode.requires_skill?(node_def) do
       skills = get_skills(game_state)
       skill_req = ContentGatheringNode.skill_required(node_def)
@@ -255,7 +255,7 @@ defmodule Loka.Framework.Gathering do
     end
   end
 
-  defp check_tool(%GameState{} = game_state, node_def) do
+  defp check_tool(%Entity{} = game_state, node_def) do
     if ContentGatheringNode.requires_tool?(node_def) do
       tool_req = ContentGatheringNode.tool_required(node_def)
 
@@ -341,11 +341,14 @@ defmodule Loka.Framework.Gathering do
   # Inventory Helpers
   # =============================================================================
 
-  defp get_skills(%GameState{stats: stats}) do
+  defp get_skills(%Entity{} = game_state) do
+    stats = Entity.get_component(game_state, "stats") || %{}
     MapHelpers.get_flexible(stats, :skills, %{})
   end
 
-  defp has_item?(%GameState{inventory: inventory}, item_key) do
+  defp has_item?(%Entity{} = game_state, item_key) do
+    inventory = Entity.get_component(game_state, "inventory") || []
+
     Enum.any?(inventory, fn item_id ->
       item_id == item_key or String.starts_with?(to_string(item_id), item_key)
     end)

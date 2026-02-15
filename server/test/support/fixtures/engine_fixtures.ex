@@ -232,6 +232,56 @@ defmodule Loka.EngineFixtures do
   @doc """
   Creates a gathering node entity in the DB. Returns the EntitySchema.
   """
+  @doc """
+  Creates a character entity in the DB (V2 player data).
+
+  Returns the EntitySchema. Components mirror the old GameState fields:
+  - `quest_progress`, `stats`, `inventory`, `equipment`, `flags`,
+    `resources`, `skills`, `player` (settings).
+
+  ## Example
+      character = character_fixture(%{character_name: "TestChar", quests: %{}})
+  """
+  def character_fixture(attrs \\ %{}) do
+    player = attrs[:player] || Loka.AccountsFixtures.player_fixture()
+
+    schema =
+      entity_fixture(%{
+        type: "character",
+        key: "player_test_#{System.unique_integer([:positive])}",
+        short_desc: attrs[:character_name] || "TestChar",
+        account_id: player.id,
+        components: %{
+          "quest_progress" => attrs[:quests] || %{},
+          "stats" =>
+            attrs[:stats] ||
+              %{
+                "str" => 10,
+                "dex" => 10,
+                "sta" => 10,
+                "level" => 1,
+                "xp" => 0,
+                "skill_points" => 0
+              },
+          "inventory" => attrs[:inventory] || [],
+          "equipment" => attrs[:equipment] || %{},
+          "flags" => attrs[:flags] || %{},
+          "resources" =>
+            attrs[:resources] ||
+              %{
+                "health" => %{"current" => 100, "max" => 100},
+                "mana" => %{"current" => 100, "max" => 100},
+                "mv" => %{"current" => 150, "max" => 150}
+              },
+          "skills" => attrs[:skills] || %{},
+          "player" => %{"settings" => attrs[:settings] || %{}}
+        }
+      })
+
+    # Convert EntitySchema to Entity struct for framework functions
+    Entities.to_entity(schema)
+  end
+
   def gathering_node_fixture(attrs \\ %{}) do
     key = attrs[:key] || "node_#{System.unique_integer([:positive])}"
 

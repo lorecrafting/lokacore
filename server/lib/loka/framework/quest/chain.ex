@@ -74,8 +74,8 @@ defmodule Loka.Framework.Quest.Chain do
       }
   """
 
+  alias Loka.Engine.Entity
   alias Loka.Framework.Conditions.Evaluator
-  alias Loka.Framework.Player.GameState
   alias Loka.Framework.Quest.{ChainRegistry, Progress, Definitions}
 
   defmodule Chain do
@@ -184,7 +184,7 @@ defmodule Loka.Framework.Quest.Chain do
 
   Returns `{:ok, [quest_ids]}` or `{:error, reason}`.
   """
-  def get_next_quests(%GameState{} = state, completed_quest_id) do
+  def get_next_quests(%Entity{} = state, completed_quest_id) do
     case get_chain_for_quest(completed_quest_id) do
       {:ok, chain} ->
         node = find_node(chain, completed_quest_id)
@@ -224,7 +224,7 @@ defmodule Loka.Framework.Quest.Chain do
 
   Returns `{:ok, updated_state, [started_quest_ids]}` or `{:error, reason}`.
   """
-  def trigger_next(%GameState{} = state, completed_quest_id, opts \\ []) do
+  def trigger_next(%Entity{} = state, completed_quest_id, opts \\ []) do
     force = Keyword.get(opts, :force, false)
 
     case get_next_quests(state, completed_quest_id) do
@@ -273,7 +273,7 @@ defmodule Loka.Framework.Quest.Chain do
 
   Returns `{:ok, updated_state, [auto_started_quests]}` or `{:error, reason}`.
   """
-  def on_quest_completed(%GameState{} = state, completed_quest_id) do
+  def on_quest_completed(%Entity{} = state, completed_quest_id) do
     case get_chain_for_quest(completed_quest_id) do
       {:ok, chain} ->
         node = find_node(chain, completed_quest_id)
@@ -308,7 +308,7 @@ defmodule Loka.Framework.Quest.Chain do
   - `:next_quests` - Next available quest IDs
   - `:percent_complete` - Completion percentage
   """
-  def get_chain_progress(%GameState{} = state, chain_id) do
+  def get_chain_progress(%Entity{} = state, chain_id) do
     case get_chain(chain_id) do
       {:ok, chain} ->
         completed = Progress.get_completed_quests(state)
@@ -352,7 +352,7 @@ defmodule Loka.Framework.Quest.Chain do
   @doc """
   Gets progress for all chains the player has interacted with.
   """
-  def get_all_chain_progress(%GameState{} = state) do
+  def get_all_chain_progress(%Entity{} = state) do
     chains = list_chains()
 
     chains
@@ -427,7 +427,7 @@ defmodule Loka.Framework.Quest.Chain do
     Enum.find(nodes, &(&1.quest_id == quest_id))
   end
 
-  defp resolve_next_quests(%GameState{} = state, %ChainNode{} = node) do
+  defp resolve_next_quests(%Entity{} = state, %ChainNode{} = node) do
     if Enum.empty?(node.branches) do
       # No branches, return direct next quests
       node.next
@@ -443,7 +443,7 @@ defmodule Loka.Framework.Quest.Chain do
     end
   end
 
-  defp can_start_quest?(%GameState{} = state, quest_id) do
+  defp can_start_quest?(%Entity{} = state, quest_id) do
     completed = Progress.get_completed_quests(state)
     active = Progress.get_active_quests(state) |> Enum.map(& &1.id)
 

@@ -11,31 +11,30 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
 
   ## State Storage
 
-  Player skills are stored as a MapSet of learned skill keys:
+  Player skills are stored in the character entity's stats component:
 
-      game_state.stats[:learned_skills] = MapSet.new(["kick", "bash", "parry"])
+      entity.components["stats"]["learned_skills"] = MapSet.new(["kick", "bash", "parry"])
 
   ## Usage
 
       alias Loka.Framework.Skills.BinarySkillManager
 
       # Check if skill is learned
-      BinarySkillManager.knows?(game_state, "kick")
+      BinarySkillManager.knows?(entity, "kick")
 
       # Learn a skill
-      {:ok, state} = BinarySkillManager.learn(game_state, "kick")
+      {:ok, entity} = BinarySkillManager.learn(entity, "kick")
 
       # Get points spent/remaining
-      BinarySkillManager.points_spent(game_state)
-      BinarySkillManager.points_remaining(game_state)
+      BinarySkillManager.points_spent(entity)
+      BinarySkillManager.points_remaining(entity)
 
       # List known skills
-      BinarySkillManager.learned_skills(game_state)
+      BinarySkillManager.learned_skills(entity)
   """
 
   alias Loka.Content.Skill, as: ContentSkill
-  alias Loka.Engine.TypedObject
-  alias Loka.Framework.Player.GameState
+  alias Loka.Engine.{Entity, TypedObject}
   alias Loka.Config.Balance
   alias Loka.Utils.MapHelpers
 
@@ -50,26 +49,26 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
   @doc """
   Checks if player knows a skill.
   """
-  @spec knows?(GameState.t(), String.t()) :: boolean()
-  def knows?(%GameState{} = game_state, skill_key) do
-    learned = get_learned_skills(game_state)
+  @spec knows?(Entity.t(), String.t()) :: boolean()
+  def knows?(%Entity{} = entity, skill_key) do
+    learned = get_learned_skills(entity)
     MapSet.member?(learned, skill_key)
   end
 
   @doc """
   Returns all skills the player has learned.
   """
-  @spec learned_skills(GameState.t()) :: MapSet.t(String.t())
-  def learned_skills(%GameState{} = game_state) do
-    get_learned_skills(game_state)
+  @spec learned_skills(Entity.t()) :: MapSet.t(String.t())
+  def learned_skills(%Entity{} = entity) do
+    get_learned_skills(entity)
   end
 
   @doc """
   Returns learned skills as a list.
   """
-  @spec learned_skills_list(GameState.t()) :: [String.t()]
-  def learned_skills_list(%GameState{} = game_state) do
-    game_state
+  @spec learned_skills_list(Entity.t()) :: [String.t()]
+  def learned_skills_list(%Entity{} = entity) do
+    entity
     |> get_learned_skills()
     |> MapSet.to_list()
   end
@@ -77,9 +76,9 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
   @doc """
   Returns learned skills with their definitions.
   """
-  @spec learned_skills_with_info(GameState.t()) :: [TypedObject.t()]
-  def learned_skills_with_info(%GameState{} = game_state) do
-    game_state
+  @spec learned_skills_with_info(Entity.t()) :: [TypedObject.t()]
+  def learned_skills_with_info(%Entity{} = entity) do
+    entity
     |> get_learned_skills()
     |> Enum.map(&ContentSkill.get/1)
     |> Enum.filter(&match?({:ok, _}, &1))
@@ -89,9 +88,9 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
   @doc """
   Returns learned skills grouped by category.
   """
-  @spec learned_skills_by_category(GameState.t()) :: %{String.t() => [TypedObject.t()]}
-  def learned_skills_by_category(%GameState{} = game_state) do
-    game_state
+  @spec learned_skills_by_category(Entity.t()) :: %{String.t() => [TypedObject.t()]}
+  def learned_skills_by_category(%Entity{} = entity) do
+    entity
     |> learned_skills_with_info()
     |> Enum.group_by(&ContentSkill.category/1)
   end
@@ -105,18 +104,18 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
 
   1 point per level, so level 50 = 50 points.
   """
-  @spec total_points(GameState.t()) :: non_neg_integer()
-  def total_points(%GameState{} = game_state) do
-    level = get_player_level(game_state)
+  @spec total_points(Entity.t()) :: non_neg_integer()
+  def total_points(%Entity{} = entity) do
+    level = get_player_level(entity)
     min(level * points_per_level(), max_skill_points())
   end
 
   @doc """
   Returns skill points currently spent.
   """
-  @spec points_spent(GameState.t()) :: non_neg_integer()
-  def points_spent(%GameState{} = game_state) do
-    game_state
+  @spec points_spent(Entity.t()) :: non_neg_integer()
+  def points_spent(%Entity{} = entity) do
+    entity
     |> get_learned_skills()
     |> Enum.reduce(0, fn skill_key, acc ->
       case ContentSkill.get(skill_key) do
@@ -129,9 +128,9 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
   @doc """
   Returns available skill points.
   """
-  @spec points_remaining(GameState.t()) :: non_neg_integer()
-  def points_remaining(%GameState{} = game_state) do
-    max(0, total_points(game_state) - points_spent(game_state))
+  @spec points_remaining(Entity.t()) :: non_neg_integer()
+  def points_remaining(%Entity{} = entity) do
+    max(0, total_points(entity) - points_spent(entity))
   end
 
   # =============================================================================
@@ -151,29 +150,29 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
 
   - `:free` - Learn without spending points (quest reward, scroll, etc.)
   """
-  @spec learn(GameState.t(), String.t(), keyword()) ::
-          {:ok, GameState.t(), map()} | {:error, term()}
-  def learn(%GameState{} = game_state, skill_key, opts \\ []) do
+  @spec learn(Entity.t(), String.t(), keyword()) ::
+          {:ok, Entity.t(), map()} | {:error, term()}
+  def learn(%Entity{} = entity, skill_key, opts \\ []) do
     free = Keyword.get(opts, :free, false)
 
     with {:ok, skill} <- ContentSkill.get(skill_key),
-         :ok <- check_not_already_learned(game_state, skill_key),
-         :ok <- check_prerequisites(game_state, skill),
-         :ok <- check_can_afford(game_state, skill, free) do
-      learned = get_learned_skills(game_state)
+         :ok <- check_not_already_learned(entity, skill_key),
+         :ok <- check_prerequisites(entity, skill),
+         :ok <- check_can_afford(entity, skill, free) do
+      learned = get_learned_skills(entity)
       new_learned = MapSet.put(learned, skill_key)
-      new_state = put_learned_skills(game_state, new_learned)
+      new_entity = put_learned_skills(entity, new_learned)
 
       audit = %{
         operation: :learn_skill,
         skill_key: skill_key,
         cost: if(free, do: 0, else: ContentSkill.cost(skill)),
         free: free,
-        points_after: points_remaining(new_state),
+        points_after: points_remaining(new_entity),
         timestamp: System.system_time(:millisecond)
       }
 
-      {:ok, new_state, audit}
+      {:ok, new_entity, audit}
     end
   end
 
@@ -183,24 +182,24 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
   Note: In some game designs, forgetting skills requires special conditions
   (e.g., visiting a respec NPC). This function allows it freely.
   """
-  @spec forget(GameState.t(), String.t()) :: {:ok, GameState.t(), map()} | {:error, term()}
-  def forget(%GameState{} = game_state, skill_key) do
+  @spec forget(Entity.t(), String.t()) :: {:ok, Entity.t(), map()} | {:error, term()}
+  def forget(%Entity{} = entity, skill_key) do
     with {:ok, skill} <- ContentSkill.get(skill_key),
-         :ok <- check_is_learned(game_state, skill_key),
-         :ok <- check_no_dependents(game_state, skill_key) do
-      learned = get_learned_skills(game_state)
+         :ok <- check_is_learned(entity, skill_key),
+         :ok <- check_no_dependents(entity, skill_key) do
+      learned = get_learned_skills(entity)
       new_learned = MapSet.delete(learned, skill_key)
-      new_state = put_learned_skills(game_state, new_learned)
+      new_entity = put_learned_skills(entity, new_learned)
 
       audit = %{
         operation: :forget_skill,
         skill_key: skill_key,
         refunded: ContentSkill.cost(skill),
-        points_after: points_remaining(new_state),
+        points_after: points_remaining(new_entity),
         timestamp: System.system_time(:millisecond)
       }
 
-      {:ok, new_state, audit}
+      {:ok, new_entity, audit}
     end
   end
 
@@ -211,10 +210,10 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
   @doc """
   Checks if a player can use a skill (knows it and has resources).
   """
-  @spec can_use?(GameState.t(), String.t(), map()) :: {:ok, TypedObject.t()} | {:error, term()}
-  def can_use?(%GameState{} = game_state, skill_key, resources \\ %{}) do
+  @spec can_use?(Entity.t(), String.t(), map()) :: {:ok, TypedObject.t()} | {:error, term()}
+  def can_use?(%Entity{} = entity, skill_key, resources \\ %{}) do
     with {:ok, skill} <- ContentSkill.get(skill_key),
-         :ok <- check_is_learned(game_state, skill_key),
+         :ok <- check_is_learned(entity, skill_key),
          :ok <- check_has_resources(skill, resources) do
       {:ok, skill}
     end
@@ -225,11 +224,11 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
 
   Based on the skill's governing stat.
   """
-  @spec effectiveness(GameState.t(), String.t()) :: {:ok, float()} | {:error, term()}
-  def effectiveness(%GameState{} = game_state, skill_key) do
+  @spec effectiveness(Entity.t(), String.t()) :: {:ok, float()} | {:error, term()}
+  def effectiveness(%Entity{} = entity, skill_key) do
     with {:ok, skill} <- ContentSkill.get(skill_key),
-         :ok <- check_is_learned(game_state, skill_key) do
-      stats = get_player_stats(game_state)
+         :ok <- check_is_learned(entity, skill_key) do
+      stats = get_player_stats(entity)
       {:ok, ContentSkill.effectiveness(skill, stats)}
     end
   end
@@ -237,11 +236,11 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
   @doc """
   Returns the stat bonus for a skill.
   """
-  @spec stat_bonus(GameState.t(), String.t()) :: {:ok, non_neg_integer()} | {:error, term()}
-  def stat_bonus(%GameState{} = game_state, skill_key) do
+  @spec stat_bonus(Entity.t(), String.t()) :: {:ok, non_neg_integer()} | {:error, term()}
+  def stat_bonus(%Entity{} = entity, skill_key) do
     with {:ok, skill} <- ContentSkill.get(skill_key),
-         :ok <- check_is_learned(game_state, skill_key) do
-      stats = get_player_stats(game_state)
+         :ok <- check_is_learned(entity, skill_key) do
+      stats = get_player_stats(entity)
       {:ok, ContentSkill.stat_bonus(skill, stats)}
     end
   end
@@ -258,11 +257,11 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
   - Prerequisites met
   - Can afford (unless include_unaffordable: true)
   """
-  @spec learnable_skills(GameState.t(), keyword()) :: [TypedObject.t()]
-  def learnable_skills(%GameState{} = game_state, opts \\ []) do
+  @spec learnable_skills(Entity.t(), keyword()) :: [TypedObject.t()]
+  def learnable_skills(%Entity{} = entity, opts \\ []) do
     include_unaffordable = Keyword.get(opts, :include_unaffordable, false)
-    learned = get_learned_skills(game_state)
-    remaining = points_remaining(game_state)
+    learned = get_learned_skills(entity)
+    remaining = points_remaining(entity)
 
     ContentSkill.all_binary()
     |> Enum.filter(fn skill ->
@@ -275,9 +274,9 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
   @doc """
   Returns skills available from a specific trainer.
   """
-  @spec skills_from_trainer(GameState.t(), String.t()) :: [TypedObject.t()]
-  def skills_from_trainer(%GameState{} = game_state, trainer_key) do
-    learned = get_learned_skills(game_state)
+  @spec skills_from_trainer(Entity.t(), String.t()) :: [TypedObject.t()]
+  def skills_from_trainer(%Entity{} = entity, trainer_key) do
+    learned = get_learned_skills(entity)
 
     ContentSkill.by_trainer(trainer_key)
     |> Enum.filter(fn skill ->
@@ -290,24 +289,24 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
   # Validation Helpers
   # =============================================================================
 
-  defp check_not_already_learned(%GameState{} = game_state, skill_key) do
-    if knows?(game_state, skill_key) do
+  defp check_not_already_learned(%Entity{} = entity, skill_key) do
+    if knows?(entity, skill_key) do
       {:error, {:already_learned, skill_key}}
     else
       :ok
     end
   end
 
-  defp check_is_learned(%GameState{} = game_state, skill_key) do
-    if knows?(game_state, skill_key) do
+  defp check_is_learned(%Entity{} = entity, skill_key) do
+    if knows?(entity, skill_key) do
       :ok
     else
       {:error, {:not_learned, skill_key}}
     end
   end
 
-  defp check_prerequisites(%GameState{} = game_state, %TypedObject{} = skill) do
-    learned = get_learned_skills(game_state)
+  defp check_prerequisites(%Entity{} = entity, %TypedObject{} = skill) do
+    learned = get_learned_skills(entity)
 
     if ContentSkill.binary_prerequisites_met?(skill, learned) do
       :ok
@@ -316,11 +315,11 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
     end
   end
 
-  defp check_can_afford(%GameState{}, %TypedObject{}, true = _free), do: :ok
+  defp check_can_afford(%Entity{}, %TypedObject{}, true = _free), do: :ok
 
-  defp check_can_afford(%GameState{} = game_state, %TypedObject{} = skill, _free) do
+  defp check_can_afford(%Entity{} = entity, %TypedObject{} = skill, _free) do
     cost = ContentSkill.cost(skill)
-    remaining = points_remaining(game_state)
+    remaining = points_remaining(entity)
 
     if remaining >= cost do
       :ok
@@ -345,8 +344,8 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
     end
   end
 
-  defp check_no_dependents(%GameState{} = game_state, skill_key) do
-    learned = get_learned_skills(game_state)
+  defp check_no_dependents(%Entity{} = entity, skill_key) do
+    learned = get_learned_skills(entity)
 
     # Find any learned skills that require this skill as a prerequisite
     dependents =
@@ -369,7 +368,8 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
   # State Helpers
   # =============================================================================
 
-  defp get_learned_skills(%GameState{stats: stats}) do
+  defp get_learned_skills(%Entity{} = entity) do
+    stats = Entity.get_component(entity, "stats") || %{}
     skills = MapHelpers.get_flexible(stats, :learned_skills, [])
 
     case skills do
@@ -379,16 +379,19 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
     end
   end
 
-  defp put_learned_skills(%GameState{stats: stats} = game_state, learned) do
+  defp put_learned_skills(%Entity{} = entity, learned) do
+    stats = Entity.get_component(entity, "stats") || %{}
     updated_stats = Map.put(stats, :learned_skills, learned)
-    %{game_state | stats: updated_stats}
+    Entity.add_component(entity, "stats", updated_stats)
   end
 
-  defp get_player_level(%GameState{stats: stats}) do
+  defp get_player_level(%Entity{} = entity) do
+    stats = Entity.get_component(entity, "stats") || %{}
     MapHelpers.get_flexible(stats, :level, 1)
   end
 
-  defp get_player_stats(%GameState{stats: stats}) do
+  defp get_player_stats(%Entity{} = entity) do
+    stats = Entity.get_component(entity, "stats") || %{}
     # Extract the 6 primary stats
     %{
       str: MapHelpers.get_flexible(stats, :str, 10),

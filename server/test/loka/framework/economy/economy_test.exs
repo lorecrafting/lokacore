@@ -1,8 +1,8 @@
 defmodule Loka.Framework.EconomyTest do
   use Loka.DataCase
 
+  alias Loka.Engine.Entity
   alias Loka.Framework.Economy
-  alias Loka.Framework.Player.GameState
 
   import Loka.EngineFixtures
 
@@ -43,19 +43,30 @@ defmodule Loka.Framework.EconomyTest do
     )
   end
 
-  # Helper to create a minimal game state for testing
-  defp game_state_fixture(attrs \\ %{}) do
-    %GameState{
-      player_id: Map.get(attrs, :player_id, Ecto.UUID.generate()),
-      health: Map.get(attrs, :health, %{"current" => 100, "max" => 100}),
-      stats:
-        Map.get(attrs, :stats, %{
-          "currencies" => %{"gold" => 1000, "silver" => 500},
-          "str" => 10,
-          "level" => 1
-        }),
-      equipment: Map.get(attrs, :equipment, %{}),
-      inventory: Map.get(attrs, :inventory, [])
+  # Helper to create a minimal entity for testing
+  defp entity_with(attrs \\ %{}) do
+    stats =
+      Map.get(attrs, :stats, %{
+        "currencies" => %{"gold" => 1000, "silver" => 500},
+        "str" => 10,
+        "level" => 1
+      })
+
+    %Entity{
+      id: Ecto.UUID.generate(),
+      type: "character",
+      key: "test_char",
+      short_desc: "Test",
+      components: %{
+        "stats" => stats,
+        "equipment" => Map.get(attrs, :equipment, %{}),
+        "inventory" => Map.get(attrs, :inventory, []),
+        "resources" => Map.get(attrs, :health, %{"current" => 100, "max" => 100})
+      },
+      account_id: 1,
+      tags: [],
+      scripts: %{},
+      metadata: %{}
     }
   end
 
@@ -66,7 +77,7 @@ defmodule Loka.Framework.EconomyTest do
   describe "buy/4" do
     test "successfully buys item from merchant with sufficient funds" do
       merchant = merchant_fixture()
-      game_state = game_state_fixture()
+      game_state = entity_with()
 
       assert {:ok, updated_state, receipt} = Economy.buy(game_state, merchant, "health_potion", 2)
 
@@ -82,13 +93,14 @@ defmodule Loka.Framework.EconomyTest do
 
       # Verify state mutations
       assert Economy.get_currency(updated_state, "gold") == 1000 - 76
-      assert "health_potion" in updated_state.inventory
-      assert length(Enum.filter(updated_state.inventory, &(&1 == "health_potion"))) == 2
+      inventory = Entity.get_component(updated_state, "inventory") || []
+      assert "health_potion" in inventory
+      assert length(Enum.filter(inventory, &(&1 == "health_potion"))) == 2
     end
 
     test "successfully buys single item with default quantity" do
       merchant = merchant_fixture()
-      game_state = game_state_fixture()
+      game_state = entity_with()
 
       assert {:ok, updated_state, receipt} = Economy.buy(game_state, merchant, "health_potion")
 
@@ -98,13 +110,14 @@ defmodule Loka.Framework.EconomyTest do
       # Verify currency deducted
       assert Economy.get_currency(updated_state, "gold") == 1000 - 38
       # Verify item added
-      assert "health_potion" in updated_state.inventory
+      inventory = Entity.get_component(updated_state, "inventory") || []
+      assert "health_potion" in inventory
     end
 
     test "successfully buys from unlimited stock" do
       merchant = merchant_fixture()
       # Ensure enough funds for 100 items (100 * 15 = 1500)
-      game_state = game_state_fixture(%{stats: %{"currencies" => %{"gold" => 2000}}})
+      game_state = entity_with(%{stats: %{"currencies" => %{"gold" => 2000}}})
 
       assert {:ok, updated_state, receipt} = Economy.buy(game_state, merchant, "rope", 100)
 
@@ -112,20 +125,21 @@ defmodule Loka.Framework.EconomyTest do
       assert receipt.item == "rope"
 
       # Verify 100 ropes added and currency deducted
-      assert length(Enum.filter(updated_state.inventory, &(&1 == "rope"))) == 100
+      inventory = Entity.get_component(updated_state, "inventory") || []
+      assert length(Enum.filter(inventory, &(&1 == "rope"))) == 100
       assert Economy.get_currency(updated_state, "gold") == 2000 - 100 * 15
     end
 
     test "returns error when entity is not a merchant" do
       npc = npc_fixture()
-      game_state = game_state_fixture()
+      game_state = entity_with()
 
       assert {:error, :not_a_merchant} = Economy.buy(game_state, npc, "health_potion", 1)
     end
 
     test "returns error when item is not in stock" do
       merchant = merchant_fixture()
-      game_state = game_state_fixture()
+      game_state = entity_with()
 
       assert {:error, {:not_in_stock, "unknown_item"}} =
                Economy.buy(game_state, merchant, "unknown_item", 1)
@@ -133,7 +147,7 @@ defmodule Loka.Framework.EconomyTest do
 
     test "returns error when insufficient stock" do
       merchant = merchant_fixture()
-      game_state = game_state_fixture()
+      game_state = entity_with()
 
       assert {:error, {:insufficient_stock, "health_potion", 10, 20}} =
                Economy.buy(game_state, merchant, "health_potion", 20)
@@ -141,7 +155,7 @@ defmodule Loka.Framework.EconomyTest do
 
     test "returns error when player cannot afford item" do
       merchant = merchant_fixture()
-      game_state = game_state_fixture(%{stats: %{"currencies" => %{"gold" => 10}}})
+      game_state = entity_with(%{stats: %{"currencies" => %{"gold" => 10}}})
 
       # health_potion has base_price = 25, sell_multiplier = 1.5, buy_price = 38
       assert {:error, {:insufficient_funds, "gold", 10, 38}} =
@@ -154,7 +168,7 @@ defmodule Loka.Framework.EconomyTest do
           shop: %{"sell_multiplier" => 2.0}
         })
 
-      game_state = game_state_fixture()
+      game_state = entity_with()
 
       assert {:ok, _updated_state, receipt} =
                Economy.buy(game_state, merchant, "health_potion", 1)
@@ -169,7 +183,7 @@ defmodule Loka.Framework.EconomyTest do
           shop: %{"currency" => "silver"}
         })
 
-      game_state = game_state_fixture()
+      game_state = entity_with()
 
       assert {:ok, _updated_state, receipt} =
                Economy.buy(game_state, merchant, "health_potion", 1)
@@ -179,13 +193,14 @@ defmodule Loka.Framework.EconomyTest do
 
     test "handles buying last item in stock" do
       merchant = merchant_fixture()
-      game_state = game_state_fixture()
+      game_state = entity_with()
 
       assert {:ok, updated_state, receipt} = Economy.buy(game_state, merchant, "sword", 1)
 
       assert receipt.quantity == 1
       assert receipt.item == "sword"
-      assert "sword" in updated_state.inventory
+      inventory = Entity.get_component(updated_state, "inventory") || []
+      assert "sword" in inventory
     end
   end
 
@@ -198,7 +213,7 @@ defmodule Loka.Framework.EconomyTest do
       merchant = merchant_fixture()
 
       game_state =
-        game_state_fixture(%{
+        entity_with(%{
           inventory: ["iron_ore", "iron_ore", "iron_ore", "iron_ore", "iron_ore"]
         })
 
@@ -216,12 +231,13 @@ defmodule Loka.Framework.EconomyTest do
       # Verify state mutations
       assert Economy.get_currency(updated_state, "gold") == 1000 + 15
       # Should have 2 iron_ore left (5 - 3)
-      assert length(Enum.filter(updated_state.inventory, &(&1 == "iron_ore"))) == 2
+      inventory = Entity.get_component(updated_state, "inventory") || []
+      assert length(Enum.filter(inventory, &(&1 == "iron_ore"))) == 2
     end
 
     test "successfully sells single item with default quantity" do
       merchant = merchant_fixture()
-      game_state = game_state_fixture(%{inventory: ["iron_ore"]})
+      game_state = entity_with(%{inventory: ["iron_ore"]})
 
       assert {:ok, updated_state, receipt} = Economy.sell(game_state, merchant, "iron_ore")
 
@@ -229,20 +245,21 @@ defmodule Loka.Framework.EconomyTest do
       assert receipt.total_price == 5
 
       # Verify item removed and currency added
-      refute "iron_ore" in updated_state.inventory
+      inventory = Entity.get_component(updated_state, "inventory") || []
+      refute "iron_ore" in inventory
       assert Economy.get_currency(updated_state, "gold") == 1000 + 5
     end
 
     test "returns error when entity is not a merchant" do
       npc = npc_fixture()
-      game_state = game_state_fixture(%{inventory: ["iron_ore"]})
+      game_state = entity_with(%{inventory: ["iron_ore"]})
 
       assert {:error, :not_a_merchant} = Economy.sell(game_state, npc, "iron_ore", 1)
     end
 
     test "returns error when player doesn't have enough items" do
       merchant = merchant_fixture()
-      game_state = game_state_fixture(%{inventory: ["iron_ore"]})
+      game_state = entity_with(%{inventory: ["iron_ore"]})
 
       assert {:error, {:insufficient_items, "iron_ore", 1, 5}} =
                Economy.sell(game_state, merchant, "iron_ore", 5)
@@ -250,7 +267,7 @@ defmodule Loka.Framework.EconomyTest do
 
     test "returns error when player has no items" do
       merchant = merchant_fixture()
-      game_state = game_state_fixture(%{inventory: []})
+      game_state = entity_with(%{inventory: []})
 
       assert {:error, {:insufficient_items, "iron_ore", 0, 1}} =
                Economy.sell(game_state, merchant, "iron_ore", 1)
@@ -262,7 +279,7 @@ defmodule Loka.Framework.EconomyTest do
           shop: %{"buy_multiplier" => 0.8}
         })
 
-      game_state = game_state_fixture(%{inventory: ["iron_ore"]})
+      game_state = entity_with(%{inventory: ["iron_ore"]})
 
       assert {:ok, _updated_state, receipt} = Economy.sell(game_state, merchant, "iron_ore", 1)
 
@@ -276,7 +293,7 @@ defmodule Loka.Framework.EconomyTest do
           shop: %{"currency" => "silver"}
         })
 
-      game_state = game_state_fixture(%{inventory: ["iron_ore"]})
+      game_state = entity_with(%{inventory: ["iron_ore"]})
 
       assert {:ok, _updated_state, receipt} = Economy.sell(game_state, merchant, "iron_ore", 1)
 
@@ -285,13 +302,14 @@ defmodule Loka.Framework.EconomyTest do
 
     test "handles item matching with string prefix" do
       merchant = merchant_fixture()
-      game_state = game_state_fixture(%{inventory: ["iron_ore_1", "iron_ore_2", "iron_ore_3"]})
+      game_state = entity_with(%{inventory: ["iron_ore_1", "iron_ore_2", "iron_ore_3"]})
 
       assert {:ok, updated_state, receipt} = Economy.sell(game_state, merchant, "iron_ore", 2)
 
       assert receipt.quantity == 2
       # Should have 1 iron_ore_* left
-      assert length(updated_state.inventory) == 1
+      inventory = Entity.get_component(updated_state, "inventory") || []
+      assert length(inventory) == 1
     end
   end
 
@@ -301,38 +319,38 @@ defmodule Loka.Framework.EconomyTest do
 
   describe "get_currency/2" do
     test "gets player's gold currency amount" do
-      game_state = game_state_fixture(%{stats: %{"currencies" => %{"gold" => 500}}})
+      game_state = entity_with(%{stats: %{"currencies" => %{"gold" => 500}}})
 
       assert Economy.get_currency(game_state, "gold") == 500
     end
 
     test "gets player's custom currency amount" do
       game_state =
-        game_state_fixture(%{stats: %{"currencies" => %{"silver" => 1000, "gold" => 500}}})
+        entity_with(%{stats: %{"currencies" => %{"silver" => 1000, "gold" => 500}}})
 
       assert Economy.get_currency(game_state, "silver") == 1000
     end
 
     test "defaults to gold when no currency type specified" do
-      game_state = game_state_fixture(%{stats: %{"currencies" => %{"gold" => 750}}})
+      game_state = entity_with(%{stats: %{"currencies" => %{"gold" => 750}}})
 
       assert Economy.get_currency(game_state) == 750
     end
 
     test "returns 0 when currency type doesn't exist" do
-      game_state = game_state_fixture(%{stats: %{"currencies" => %{"gold" => 500}}})
+      game_state = entity_with(%{stats: %{"currencies" => %{"gold" => 500}}})
 
       assert Economy.get_currency(game_state, "platinum") == 0
     end
 
     test "returns 0 when currencies map doesn't exist" do
-      game_state = game_state_fixture(%{stats: %{"level" => 1}})
+      game_state = entity_with(%{stats: %{"level" => 1}})
 
       assert Economy.get_currency(game_state, "gold") == 0
     end
 
     test "handles atom keys in currencies map" do
-      game_state = game_state_fixture(%{stats: %{currencies: %{gold: 250}}})
+      game_state = entity_with(%{stats: %{currencies: %{gold: 250}}})
 
       # MapHelpers.get_flexible should handle atom/string conversion
       result = Economy.get_currency(game_state, "gold")
@@ -346,38 +364,38 @@ defmodule Loka.Framework.EconomyTest do
 
   describe "can_afford?/3" do
     test "returns true when player has exact amount" do
-      game_state = game_state_fixture(%{stats: %{"currencies" => %{"gold" => 100}}})
+      game_state = entity_with(%{stats: %{"currencies" => %{"gold" => 100}}})
 
       assert Economy.can_afford?(game_state, "gold", 100) == true
     end
 
     test "returns true when player has more than needed" do
-      game_state = game_state_fixture(%{stats: %{"currencies" => %{"gold" => 500}}})
+      game_state = entity_with(%{stats: %{"currencies" => %{"gold" => 500}}})
 
       assert Economy.can_afford?(game_state, "gold", 100) == true
     end
 
     test "returns false when player has less than needed" do
-      game_state = game_state_fixture(%{stats: %{"currencies" => %{"gold" => 50}}})
+      game_state = entity_with(%{stats: %{"currencies" => %{"gold" => 50}}})
 
       assert Economy.can_afford?(game_state, "gold", 100) == false
     end
 
     test "returns false when player has no currency" do
-      game_state = game_state_fixture(%{stats: %{"currencies" => %{"gold" => 0}}})
+      game_state = entity_with(%{stats: %{"currencies" => %{"gold" => 0}}})
 
       assert Economy.can_afford?(game_state, "gold", 1) == false
     end
 
     test "works with custom currency types" do
-      game_state = game_state_fixture(%{stats: %{"currencies" => %{"silver" => 1000}}})
+      game_state = entity_with(%{stats: %{"currencies" => %{"silver" => 1000}}})
 
       assert Economy.can_afford?(game_state, "silver", 500) == true
       assert Economy.can_afford?(game_state, "silver", 2000) == false
     end
 
     test "returns false when currency type doesn't exist" do
-      game_state = game_state_fixture(%{stats: %{"currencies" => %{"gold" => 500}}})
+      game_state = entity_with(%{stats: %{"currencies" => %{"gold" => 500}}})
 
       assert Economy.can_afford?(game_state, "platinum", 1) == false
     end
@@ -390,7 +408,7 @@ defmodule Loka.Framework.EconomyTest do
   describe "get_prices/3" do
     test "gets buy and sell prices for an item with game_state" do
       merchant = merchant_fixture()
-      game_state = game_state_fixture()
+      game_state = entity_with()
 
       assert {:ok, prices} = Economy.get_prices(merchant, "health_potion", game_state)
 
@@ -488,7 +506,7 @@ defmodule Loka.Framework.EconomyTest do
       merchant = merchant_fixture()
 
       # Start with enough gold to buy
-      game_state = game_state_fixture(%{stats: %{"currencies" => %{"gold" => 1000}}})
+      game_state = entity_with(%{stats: %{"currencies" => %{"gold" => 1000}}})
 
       # Buy 3 health potions
       # health_potion buy_price = 38 (base 25 * 1.5 sell_multiplier)
@@ -497,7 +515,8 @@ defmodule Loka.Framework.EconomyTest do
 
       assert buy_receipt.total_price == 114
       assert Economy.get_currency(state_after_buy, "gold") == 1000 - 114
-      assert length(Enum.filter(state_after_buy.inventory, &(&1 == "health_potion"))) == 3
+      inventory = Entity.get_component(state_after_buy, "inventory") || []
+      assert length(Enum.filter(inventory, &(&1 == "health_potion"))) == 3
 
       # Sell 2 health potions back
       # health_potion sell_price = 13 (base 25 * 0.5 buy_multiplier)
@@ -507,7 +526,8 @@ defmodule Loka.Framework.EconomyTest do
       assert sell_receipt.total_price == 26
       # Net: -114 + 26 = -88
       assert Economy.get_currency(state_after_sell, "gold") == 1000 - 114 + 26
-      assert length(Enum.filter(state_after_sell.inventory, &(&1 == "health_potion"))) == 1
+      inventory_after_sell = Entity.get_component(state_after_sell, "inventory") || []
+      assert length(Enum.filter(inventory_after_sell, &(&1 == "health_potion"))) == 1
     end
 
     test "cannot buy with insufficient funds then sell to gain funds" do
@@ -515,7 +535,7 @@ defmodule Loka.Framework.EconomyTest do
 
       # Start with low gold but items to sell
       game_state =
-        game_state_fixture(%{
+        entity_with(%{
           stats: %{"currencies" => %{"gold" => 5}},
           inventory: ["iron_ore", "iron_ore"]
         })
@@ -539,7 +559,7 @@ defmodule Loka.Framework.EconomyTest do
     test "buying reduces stock, unlimited stock never runs out" do
       merchant = merchant_fixture()
       # Ensure enough funds for large purchases
-      game_state = game_state_fixture(%{stats: %{"currencies" => %{"gold" => 20000}}})
+      game_state = entity_with(%{stats: %{"currencies" => %{"gold" => 20000}}})
 
       # Buy limited stock item
       assert {:ok, _state, _receipt} = Economy.buy(game_state, merchant, "sword", 1)
@@ -567,7 +587,7 @@ defmodule Loka.Framework.EconomyTest do
           }
         })
 
-      game_state = game_state_fixture()
+      game_state = entity_with()
 
       assert {:ok, prices} = Economy.get_prices(merchant, "travelers_staff", game_state)
 
@@ -614,7 +634,7 @@ defmodule Loka.Framework.EconomyTest do
           }
         })
 
-      game_state = game_state_fixture()
+      game_state = entity_with()
 
       assert {:ok, updated_state, receipt} =
                Economy.buy(game_state, merchant, "travelers_staff", 2)
@@ -631,7 +651,7 @@ defmodule Loka.Framework.EconomyTest do
       merchant = merchant_fixture()
 
       game_state =
-        game_state_fixture(%{
+        entity_with(%{
           inventory: ["travelers_staff", "travelers_staff", "travelers_staff"]
         })
 
@@ -658,14 +678,14 @@ defmodule Loka.Framework.EconomyTest do
           shop: %{"stock" => []}
         })
 
-      game_state = game_state_fixture()
+      game_state = entity_with()
 
       assert {:error, {:not_in_stock, "health_potion"}} =
                Economy.buy(game_state, merchant, "health_potion", 1)
     end
 
     test "handles game state with nil currencies" do
-      game_state = game_state_fixture(%{stats: %{}})
+      game_state = entity_with(%{stats: %{}})
 
       assert Economy.get_currency(game_state, "gold") == 0
       assert Economy.can_afford?(game_state, "gold", 100) == false
@@ -675,7 +695,7 @@ defmodule Loka.Framework.EconomyTest do
       _merchant = merchant_fixture()
 
       game_state =
-        game_state_fixture(%{
+        entity_with(%{
           stats: %{"currencies" => %{"gold" => 0}},
           inventory: []
         })
@@ -687,7 +707,7 @@ defmodule Loka.Framework.EconomyTest do
 
     test "buy/sell price symmetry check" do
       merchant = merchant_fixture()
-      game_state = game_state_fixture()
+      game_state = entity_with()
 
       assert {:ok, prices} = Economy.get_prices(merchant, "health_potion", game_state)
 
@@ -697,7 +717,7 @@ defmodule Loka.Framework.EconomyTest do
 
     test "handles very large quantities" do
       merchant = merchant_fixture()
-      game_state = game_state_fixture(%{stats: %{"currencies" => %{"gold" => 100_000_000}}})
+      game_state = entity_with(%{stats: %{"currencies" => %{"gold" => 100_000_000}}})
 
       assert {:ok, updated_state, receipt} = Economy.buy(game_state, merchant, "rope", 10_000)
 
@@ -706,7 +726,8 @@ defmodule Loka.Framework.EconomyTest do
       assert is_integer(receipt.total_price)
       assert receipt.total_price == receipt.unit_price * 10_000
       # Verify all items added
-      assert length(updated_state.inventory) == 10_000
+      inventory = Entity.get_component(updated_state, "inventory") || []
+      assert length(inventory) == 10_000
     end
 
     test "handles merchant with 0 multipliers" do
@@ -718,7 +739,7 @@ defmodule Loka.Framework.EconomyTest do
           }
         })
 
-      game_state = game_state_fixture(%{inventory: ["iron_ore"]})
+      game_state = entity_with(%{inventory: ["iron_ore"]})
 
       assert {:ok, prices} = Economy.get_prices(merchant, "health_potion")
 
@@ -728,14 +749,16 @@ defmodule Loka.Framework.EconomyTest do
       # Can buy for free
       assert {:ok, state_after_buy, buy_receipt} = Economy.buy(game_state, merchant, "rope", 1)
       assert buy_receipt.total_price == 0
-      assert "rope" in state_after_buy.inventory
+      buy_inventory = Entity.get_component(state_after_buy, "inventory") || []
+      assert "rope" in buy_inventory
 
       # Can sell but get nothing
       assert {:ok, state_after_sell, sell_receipt} =
                Economy.sell(game_state, merchant, "iron_ore", 1)
 
       assert sell_receipt.total_price == 0
-      refute "iron_ore" in state_after_sell.inventory
+      sell_inventory = Entity.get_component(state_after_sell, "inventory") || []
+      refute "iron_ore" in sell_inventory
     end
   end
 end

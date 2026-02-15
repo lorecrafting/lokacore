@@ -2,9 +2,8 @@ defmodule Loka.Framework.Skills.SkillManagerTest do
   use Loka.DataCase, async: false
 
   alias Loka.Framework.Skills.SkillManager
-  alias Loka.Framework.Player.GameState
+  alias Loka.Engine.Entity
 
-  import Loka.AccountsFixtures
   import Loka.EngineFixtures
 
   setup do
@@ -50,22 +49,23 @@ defmodule Loka.Framework.Skills.SkillManagerTest do
       point_cost_formula: "level"
     })
 
-    player = player_fixture()
-    {:ok, state} = GameState.create_state(player.id)
+    state = character_fixture()
 
-    {:ok, player: player, state: state}
+    {:ok, state: state}
   end
 
   # Helper to set player skills
-  defp set_skills(state, skills) do
-    updated_stats = Map.put(state.stats, :skills, skills)
-    %{state | stats: updated_stats}
+  defp set_skills(entity, skills) do
+    stats = Entity.get_component(entity, "stats") || %{}
+    updated_stats = Map.put(stats, :skills, skills)
+    Entity.add_component(entity, "stats", updated_stats)
   end
 
   # Helper to set max skill points
-  defp set_max_points(state, max) do
-    updated_stats = Map.put(state.stats, :max_skill_points, max)
-    %{state | stats: updated_stats}
+  defp set_max_points(entity, max) do
+    stats = Entity.get_component(entity, "stats") || %{}
+    updated_stats = Map.put(stats, :max_skill_points, max)
+    Entity.add_component(entity, "stats", updated_stats)
   end
 
   describe "get_level/2" do

@@ -71,8 +71,8 @@ defmodule Loka.Framework.Quest.Journal do
 
   require Logger
 
+  alias Loka.Engine.Entity
   alias Loka.Framework.Conditions.Evaluator
-  alias Loka.Framework.Player.GameState
   alias Loka.Framework.Quest.{Definitions, Progress, TimerManager}
 
   @doc """
@@ -80,7 +80,7 @@ defmodule Loka.Framework.Quest.Journal do
 
   Returns a list of rendered entries with their IDs and text.
   """
-  def render_journal(%GameState{} = state, quest_id) do
+  def render_journal(%Entity{} = state, quest_id) do
     case Definitions.get_quest_definition(quest_id) do
       nil ->
         {:error, :quest_not_found}
@@ -112,7 +112,7 @@ defmodule Loka.Framework.Quest.Journal do
 
   Returns `{:ok, text}` or `{:error, reason}`.
   """
-  def render_entry(%GameState{} = state, quest_id, entry_id) do
+  def render_entry(%Entity{} = state, quest_id, entry_id) do
     case Definitions.get_quest_definition(quest_id) do
       nil ->
         {:error, :quest_not_found}
@@ -135,7 +135,7 @@ defmodule Loka.Framework.Quest.Journal do
   @doc """
   Checks if a journal entry is visible based on conditions.
   """
-  def entry_visible?(%GameState{} = state, quest_id, entry_id, progress \\ nil) do
+  def entry_visible?(%Entity{} = state, quest_id, entry_id, progress \\ nil) do
     case Definitions.get_quest_definition(quest_id) do
       nil ->
         false
@@ -157,7 +157,7 @@ defmodule Loka.Framework.Quest.Journal do
 
   Returns a map with current quest state useful for journal rendering.
   """
-  def get_journal_context(%GameState{} = state, quest_id) do
+  def get_journal_context(%Entity{} = state, quest_id) do
     quest_def = Definitions.get_quest_definition(quest_id)
     progress = Progress.get_quest_progress(state, quest_id)
 
@@ -173,7 +173,7 @@ defmodule Loka.Framework.Quest.Journal do
             progress: Map.get(obj_progress, "progress") || 0,
             target: obj.target_count || 1,
             completed: Map.get(obj_progress, "completed") || false,
-            time_remaining: get_time_remaining(state.player_id, quest_id, obj)
+            time_remaining: get_time_remaining(state.account_id, quest_id, obj)
           }
         end)
       else
@@ -243,7 +243,7 @@ defmodule Loka.Framework.Quest.Journal do
     {:error, :invalid_entry_format}
   end
 
-  defp execute_elixir_entry(%GameState{} = state, quest_id, script, progress) do
+  defp execute_elixir_entry(%Entity{} = state, quest_id, script, progress) do
     # Build bindings for journal script execution
     bindings = build_journal_bindings(state, quest_id, progress)
 
@@ -262,33 +262,36 @@ defmodule Loka.Framework.Quest.Journal do
     end
   end
 
-  defp build_journal_bindings(%GameState{} = state, quest_id, progress) do
+  defp build_journal_bindings(%Entity{} = entity, quest_id, progress) do
     quest_def = Definitions.get_quest_definition(quest_id)
+    stats = Entity.get_component(entity, "stats") || %{}
+    flags = Entity.get_component(entity, "flags") || %{}
+    inventory = Entity.get_component(entity, "inventory") || []
 
     [
       # Player state queries
       get_stat: fn stat_name ->
-        Map.get(state.stats, stat_name) ||
-          Map.get(state.stats, to_string(stat_name), 0)
+        Map.get(stats, stat_name) ||
+          Map.get(stats, to_string(stat_name), 0)
       end,
       has_flag?: fn flag_name ->
-        !!Map.get(state.flags, flag_name) ||
-          !!Map.get(state.flags, to_string(flag_name))
+        !!Map.get(flags, flag_name) ||
+          !!Map.get(flags, to_string(flag_name))
       end,
       get_flag: fn flag_name ->
-        Map.get(state.flags, flag_name) ||
-          Map.get(state.flags, to_string(flag_name))
+        Map.get(flags, flag_name) ||
+          Map.get(flags, to_string(flag_name))
       end,
       has_item?: fn item_key ->
-        item_key in (state.inventory || [])
+        item_key in inventory
       end,
 
       # Quest queries
       quest_active?: fn qid ->
-        Progress.get_quest_progress(state, qid || quest_id) != nil
+        Progress.get_quest_progress(entity, qid || quest_id) != nil
       end,
       quest_complete?: fn qid ->
-        Progress.is_complete?(state, qid || quest_id)
+        Progress.is_complete?(entity, qid || quest_id)
       end,
       get_objective_progress: fn obj_id ->
         objectives = (progress || %{})["objectives"] || %{}
@@ -301,7 +304,7 @@ defmodule Loka.Framework.Quest.Journal do
       end,
       get_time_remaining: fn obj_id ->
         obj = quest_def && Enum.find(quest_def.objectives, &(&1.id == obj_id))
-        get_time_remaining(state.player_id, quest_id, obj) || 0
+        get_time_remaining(entity.account_id, quest_id, obj) || 0
       end,
 
       # Utility
@@ -395,25 +398,27 @@ defmodule Loka.Framework.Quest.Journal do
     end)
   end
 
-  defp substitute_stat_vars(text, %GameState{stats: stats}) do
+  defp substitute_stat_vars(text, %Entity{} = entity) do
+    stats = Entity.get_component(entity, "stats") || %{}
+
     Regex.replace(~r/\{\{stat_(\w+)\}\}/, text, fn _match, stat_name ->
       value = Map.get(stats, stat_name) || Map.get(stats, String.to_atom(stat_name), 0)
       to_string(value)
     end)
   end
 
-  defp substitute_flag_vars(text, %GameState{flags: flags}) do
+  defp substitute_flag_vars(text, %Entity{} = entity) do
+    flags = Entity.get_component(entity, "flags") || %{}
+
     Regex.replace(~r/\{\{flag_(\w+)\}\}/, text, fn _match, flag_name ->
       value = Map.get(flags, flag_name) || Map.get(flags, String.to_atom(flag_name), "")
       to_string(value)
     end)
   end
 
-  defp get_player_name(%GameState{player_id: player_id}) do
-    case Loka.Accounts.get_player(player_id) do
-      nil -> "Traveler"
-      player -> player.email |> String.split("@") |> hd()
-    end
+  defp get_player_name(%Entity{} = entity) do
+    # In V2, character name is stored in short_desc
+    entity.short_desc || "Traveler"
   end
 
   defp get_quest_name(quest_id) do

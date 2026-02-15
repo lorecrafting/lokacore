@@ -3,7 +3,7 @@ defmodule Loka.Framework.Equipment do
   Equipment management system for the game framework.
 
   Handles equipping, unequipping, and calculating stat bonuses from equipment.
-  Works with the PlayerGameState and Inventory system.
+  Operates as pure functions on Entity structs.
 
   See `Loka.Engine.Constants.EquipmentSlots` for slot definitions.
 
@@ -17,24 +17,22 @@ defmodule Loka.Framework.Equipment do
   ## Usage
 
       alias Loka.Framework.Equipment
-      alias Loka.Framework.Player.GameState
-
-      {:ok, state} = GameState.get_or_create_state(player_id)
+      alias Loka.Engine.Entity
 
       # Equip an item (moves from inventory to slot)
-      {:ok, state} = Equipment.equip(state, "iron_sword_01")
+      {:ok, entity} = Equipment.equip(entity, "iron_sword_01")
 
       # Get all equipped items
-      equipped = Equipment.get_equipped(state)
+      equipped = Equipment.get_equipped(entity)
 
       # Calculate total bonuses
-      bonuses = Equipment.get_total_bonuses(state)
+      bonuses = Equipment.get_total_bonuses(entity)
 
       # Unequip an item (moves back to inventory)
-      {:ok, state} = Equipment.unequip(state, :wielded)
+      {:ok, entity} = Equipment.unequip(entity, :wielded)
   """
 
-  alias Loka.Framework.Player.GameState
+  alias Loka.Engine.Entity
   alias Loka.Framework.Inventory
   alias Loka.Framework.Inventory.Equipable
   alias Loka.Engine.Constants.EquipmentSlots
@@ -52,17 +50,12 @@ defmodule Loka.Framework.Equipment do
 
   If the slot is already occupied, the existing item is moved back to inventory.
 
-  Returns `{:ok, updated_state}` on success.
+  Returns `{:ok, updated_entity}` on success.
   Returns `{:error, reason}` if the item can't be equipped.
-
-  ## Examples
-
-      iex> equip(state, "iron_sword_01")
-      {:ok, %GameState{equipment: %{weapon: "iron_sword_01", ...}}}
   """
-  def equip(%GameState{} = state, item_id) when is_binary(item_id) do
+  def equip(%Entity{} = entity, item_id) when is_binary(item_id) do
     cond do
-      not Inventory.has_item?(state, item_id) ->
+      not Inventory.has_item?(entity, item_id) ->
         {:error, :not_in_inventory}
 
       true ->
@@ -71,9 +64,9 @@ defmodule Loka.Framework.Equipment do
             {:error, :not_equipable}
 
           equipable ->
-            case check_requirements(state, equipable) do
+            case check_requirements(entity, equipable) do
               :ok ->
-                do_equip(state, item_id, equipable.slot)
+                do_equip(entity, item_id, equipable.slot)
 
               {:error, _} = error ->
                 error
@@ -85,15 +78,11 @@ defmodule Loka.Framework.Equipment do
   @doc """
   Unequips an item from a slot and returns it to inventory.
 
-  Returns `{:ok, updated_state}` on success.
+  Returns `{:ok, updated_entity}` on success.
   Returns `{:error, :slot_empty}` if nothing is equipped in that slot.
-
-  ## Examples
-
-      iex> unequip(state, :weapon)
-      {:ok, %GameState{equipment: %{weapon: nil, ...}}}
   """
-  def unequip(%GameState{equipment: equipment} = state, slot) when slot in @slots do
+  def unequip(%Entity{} = entity, slot) when slot in @slots do
+    equipment = Entity.get_component(entity, "equipment") || %{}
     # Handle both atom and string keys from DB
     item_id = get_equipped_item(equipment, slot)
 
@@ -102,14 +91,17 @@ defmodule Loka.Framework.Equipment do
         {:error, :slot_empty}
 
       item_id ->
+        inventory = Entity.get_component(entity, "inventory") || []
         # Use atom key for in-memory struct, JSON serialization handles key conversion
         new_equipment = Map.put(equipment, slot, nil)
-        new_inventory = state.inventory ++ [item_id]
+        new_inventory = inventory ++ [item_id]
 
-        GameState.update_state(state, %{
-          equipment: new_equipment,
-          inventory: new_inventory
-        })
+        entity =
+          entity
+          |> Entity.add_component("equipment", new_equipment)
+          |> Entity.add_component("inventory", new_inventory)
+
+        {:ok, entity}
     end
   end
 
@@ -124,13 +116,10 @@ defmodule Loka.Framework.Equipment do
   Gets all currently equipped items with their details.
 
   Returns a map of slot => item_details.
-
-  ## Examples
-
-      iex> get_equipped(state)
-      %{weapon: %{id: "sword_01", name: "Iron Sword", ...}, armor: nil, accessory: nil}
   """
-  def get_equipped(%GameState{equipment: equipment}) do
+  def get_equipped(%Entity{} = entity) do
+    equipment = Entity.get_component(entity, "equipment") || %{}
+
     equipment
     |> Enum.map(fn {slot, item_id} ->
       item = if item_id, do: get_item_details(item_id), else: nil
@@ -142,7 +131,8 @@ defmodule Loka.Framework.Equipment do
   @doc """
   Returns the item_id equipped in a specific slot, or nil.
   """
-  def get_equipped_id(%GameState{equipment: equipment}, slot) when slot in @slots do
+  def get_equipped_id(%Entity{} = entity, slot) when slot in @slots do
+    equipment = Entity.get_component(entity, "equipment") || %{}
     get_equipped_item(equipment, slot)
   end
 
@@ -150,13 +140,10 @@ defmodule Loka.Framework.Equipment do
   Calculates the total stat bonuses from all equipped items.
 
   Returns a map of bonus_type => total_value.
-
-  ## Examples
-
-      iex> get_total_bonuses(state)
-      %{attack: 15, defense: 5, crit: 2}
   """
-  def get_total_bonuses(%GameState{equipment: equipment}) do
+  def get_total_bonuses(%Entity{} = entity) do
+    equipment = Entity.get_component(entity, "equipment") || %{}
+
     equipment
     |> Enum.map(fn {_slot, item_id} -> item_id end)
     |> Enum.reject(&is_nil/1)
@@ -176,14 +163,10 @@ defmodule Loka.Framework.Equipment do
   - Attack = (STR * 2) + weapon_attack_bonus
   - Defense = STA + armor_defense_bonus
   - Max Health = STA * 10
-
-  ## Examples
-
-      iex> calculate_combat_stats(state)
-      %{attack: 25, defense: 12, max_health: 100}
   """
-  def calculate_combat_stats(%GameState{stats: stats} = state) do
-    bonuses = get_total_bonuses(state)
+  def calculate_combat_stats(%Entity{} = entity) do
+    stats = Entity.get_component(entity, "stats") || %{}
+    bonuses = get_total_bonuses(entity)
 
     # Stats from DB use string keys, but may use atom keys if from default
     base_str = Map.get(stats, "str") || Map.get(stats, :str, 10)
@@ -203,33 +186,39 @@ defmodule Loka.Framework.Equipment do
   @doc """
   Checks if an item is currently equipped.
   """
-  def equipped?(%GameState{equipment: equipment}, item_id) do
+  def equipped?(%Entity{} = entity, item_id) do
+    equipment = Entity.get_component(entity, "equipment") || %{}
     Enum.any?(equipment, fn {_slot, id} -> id == item_id end)
   end
 
   # Private functions
 
-  defp do_equip(state, item_id, slot) do
+  defp do_equip(entity, item_id, slot) do
+    equipment = Entity.get_component(entity, "equipment") || %{}
+
     # First, unequip any existing item in the slot
-    state =
-      case get_equipped_item(state.equipment, slot) do
+    entity =
+      case get_equipped_item(equipment, slot) do
         nil ->
-          state
+          entity
 
         _existing_id ->
-          {:ok, new_state} = unequip(state, slot)
-          new_state
+          {:ok, new_entity} = unequip(entity, slot)
+          new_entity
       end
 
     # Remove item from inventory and add to equipment
-    # Use atom key for in-memory struct, JSON serialization handles key conversion
-    new_inventory = List.delete(state.inventory, item_id)
-    new_equipment = Map.put(state.equipment, slot, item_id)
+    inventory = Entity.get_component(entity, "inventory") || []
+    equipment = Entity.get_component(entity, "equipment") || %{}
+    new_inventory = List.delete(inventory, item_id)
+    new_equipment = Map.put(equipment, slot, item_id)
 
-    GameState.update_state(state, %{
-      inventory: new_inventory,
-      equipment: new_equipment
-    })
+    entity =
+      entity
+      |> Entity.add_component("inventory", new_inventory)
+      |> Entity.add_component("equipment", new_equipment)
+
+    {:ok, entity}
   end
 
   defp get_item_equipable(item_id) do
@@ -260,15 +249,19 @@ defmodule Loka.Framework.Equipment do
     end
   end
 
-  defp check_requirements(state, %Equipable{requirements: requirements}) do
-    # Stats may have string keys from DB load
-    level = Map.get(state.stats, "level") || Map.get(state.stats, :level, 1)
-    stats = Map.merge(state.stats, %{"level" => level})
+  defp check_requirements(entity, %Equipable{requirements: requirements}) do
+    stats = Entity.get_component(entity, "stats") || %{}
 
+    # Requirements use atom keys (from Equipable.from_map), but entity stats
+    # use string keys from DB. Look up both key forms for each requirement.
     missing =
       requirements
       |> Enum.filter(fn {stat, required} ->
-        Map.get(stats, stat, 0) < required
+        value =
+          Map.get(stats, stat) ||
+            Map.get(stats, Atom.to_string(stat), 0)
+
+        value < required
       end)
       |> Map.new()
 

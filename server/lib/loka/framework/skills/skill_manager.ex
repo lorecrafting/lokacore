@@ -13,21 +13,20 @@ defmodule Loka.Framework.Skills.SkillManager do
       alias Loka.Framework.Skills.SkillManager
 
       # Get player's skill level
-      level = SkillManager.get_level(game_state, "swordsmanship")
+      level = SkillManager.get_level(entity, "swordsmanship")
 
       # Train a skill (spend points)
-      {:ok, state} = SkillManager.train(game_state, "swordsmanship")
+      {:ok, entity} = SkillManager.train(entity, "swordsmanship")
 
       # Practice a skill (gain XP from use)
-      {:ok, state} = SkillManager.practice(game_state, "swordsmanship", 5)
+      {:ok, entity} = SkillManager.practice(entity, "swordsmanship", 5)
 
       # Check points remaining
-      remaining = SkillManager.points_remaining(game_state)
+      remaining = SkillManager.points_remaining(entity)
   """
 
   alias Loka.Content.Skill, as: ContentSkill
-  alias Loka.Engine.TypedObject
-  alias Loka.Framework.Player.GameState
+  alias Loka.Engine.{Entity, TypedObject}
   alias Loka.Utils.MapHelpers
 
   @default_max_points 100
@@ -39,8 +38,8 @@ defmodule Loka.Framework.Skills.SkillManager do
   @doc """
   Gets a player's current level in a skill.
   """
-  def get_level(%GameState{} = game_state, skill_key) do
-    skills = get_player_skills(game_state)
+  def get_level(%Entity{} = entity, skill_key) do
+    skills = get_player_skills(entity)
     skill_data = Map.get(skills, skill_key, %{})
     Map.get(skill_data, :level, 0)
   end
@@ -48,8 +47,8 @@ defmodule Loka.Framework.Skills.SkillManager do
   @doc """
   Gets a player's current XP in a skill.
   """
-  def get_xp(%GameState{} = game_state, skill_key) do
-    skills = get_player_skills(game_state)
+  def get_xp(%Entity{} = entity, skill_key) do
+    skills = get_player_skills(entity)
     skill_data = Map.get(skills, skill_key, %{})
     Map.get(skill_data, :xp, 0)
   end
@@ -57,8 +56,8 @@ defmodule Loka.Framework.Skills.SkillManager do
   @doc """
   Lists all skills a player has trained.
   """
-  def list_trained_skills(%GameState{} = game_state) do
-    get_player_skills(game_state)
+  def list_trained_skills(%Entity{} = entity) do
+    get_player_skills(entity)
     |> Enum.filter(fn {_key, data} -> Map.get(data, :level, 0) > 0 end)
     |> Enum.map(fn {key, data} ->
       %{
@@ -76,8 +75,8 @@ defmodule Loka.Framework.Skills.SkillManager do
   @doc """
   Gets total skill points allocated by player.
   """
-  def points_spent(%GameState{} = game_state) do
-    get_player_skills(game_state)
+  def points_spent(%Entity{} = entity) do
+    get_player_skills(entity)
     |> Enum.reduce(0, fn {skill_key, data}, acc ->
       level = Map.get(data, :level, 0)
 
@@ -95,15 +94,16 @@ defmodule Loka.Framework.Skills.SkillManager do
   @doc """
   Gets remaining skill points available.
   """
-  def points_remaining(%GameState{} = game_state) do
-    max_points = get_max_points(game_state)
-    max_points - points_spent(game_state)
+  def points_remaining(%Entity{} = entity) do
+    max_points = get_max_points(entity)
+    max_points - points_spent(entity)
   end
 
   @doc """
   Gets max skill points for a player.
   """
-  def get_max_points(%GameState{stats: stats}) do
+  def get_max_points(%Entity{} = entity) do
+    stats = Entity.get_component(entity, "stats") || %{}
     MapHelpers.get_flexible(stats, :max_skill_points, @default_max_points)
   end
 
@@ -114,38 +114,38 @@ defmodule Loka.Framework.Skills.SkillManager do
   @doc """
   Trains a skill by spending points (increases level).
 
-  Returns `{:ok, updated_state}` or `{:error, reason}`.
+  Returns `{:ok, updated_entity}` or `{:error, reason}`.
   """
-  def train(%GameState{} = game_state, skill_key) do
+  def train(%Entity{} = entity, skill_key) do
     with {:ok, skill_def} <- ContentSkill.get(skill_key),
-         :ok <- check_prerequisites(game_state, skill_def),
-         current_level <- get_level(game_state, skill_key),
+         :ok <- check_prerequisites(entity, skill_def),
+         current_level <- get_level(entity, skill_key),
          :ok <- check_not_maxed(skill_def, current_level),
-         :ok <- check_can_afford_point(game_state, skill_def, current_level + 1) do
+         :ok <- check_can_afford_point(entity, skill_def, current_level + 1) do
       new_level = current_level + 1
 
-      skills = get_player_skills(game_state)
+      skills = get_player_skills(entity)
       skill_data = Map.get(skills, skill_key, %{level: 0, xp: 0})
       updated_skill = Map.put(skill_data, :level, new_level)
       updated_skills = Map.put(skills, skill_key, updated_skill)
 
-      {:ok, put_player_skills(game_state, updated_skills)}
+      {:ok, put_player_skills(entity, updated_skills)}
     end
   end
 
   @doc """
   Reduces a skill level, refunding points.
   """
-  def untrain(%GameState{} = game_state, skill_key) do
-    current_level = get_level(game_state, skill_key)
+  def untrain(%Entity{} = entity, skill_key) do
+    current_level = get_level(entity, skill_key)
 
     if current_level > 0 do
-      skills = get_player_skills(game_state)
+      skills = get_player_skills(entity)
       skill_data = Map.get(skills, skill_key, %{level: 0, xp: 0})
       updated_skill = Map.put(skill_data, :level, current_level - 1)
       updated_skills = Map.put(skills, skill_key, updated_skill)
 
-      {:ok, put_player_skills(game_state, updated_skills)}
+      {:ok, put_player_skills(entity, updated_skills)}
     else
       {:error, :skill_not_trained}
     end
@@ -160,32 +160,32 @@ defmodule Loka.Framework.Skills.SkillManager do
 
   Automatically levels up if enough XP accumulated.
   """
-  def practice(%GameState{} = game_state, skill_key, xp_amount \\ nil) do
+  def practice(%Entity{} = entity, skill_key, xp_amount \\ nil) do
     case ContentSkill.get(skill_key) do
       {:ok, skill_def} ->
         xp_gain = xp_amount || ContentSkill.xp_per_use(skill_def)
-        current_level = get_level(game_state, skill_key)
-        current_xp = get_xp(game_state, skill_key)
+        current_level = get_level(entity, skill_key)
+        current_xp = get_xp(entity, skill_key)
 
         if current_level >= ContentSkill.max_level(skill_def) do
-          {:ok, game_state}
+          {:ok, entity}
         else
           new_xp = current_xp + xp_gain
           xp_needed = ContentSkill.xp_for_level(skill_def, current_level + 1)
 
           {final_level, final_xp} =
             if new_xp >= xp_needed and
-                 can_afford_next_level?(game_state, skill_def, current_level) do
+                 can_afford_next_level?(entity, skill_def, current_level) do
               {current_level + 1, new_xp - xp_needed}
             else
               {current_level, new_xp}
             end
 
-          skills = get_player_skills(game_state)
+          skills = get_player_skills(entity)
           updated_skill = %{level: final_level, xp: final_xp}
           updated_skills = Map.put(skills, skill_key, updated_skill)
 
-          {:ok, put_player_skills(game_state, updated_skills)}
+          {:ok, put_player_skills(entity, updated_skills)}
         end
 
       {:error, _} ->
@@ -197,9 +197,9 @@ defmodule Loka.Framework.Skills.SkillManager do
   # Validation
   # =============================================================================
 
-  defp check_prerequisites(%GameState{} = game_state, %TypedObject{} = skill_def) do
+  defp check_prerequisites(%Entity{} = entity, %TypedObject{} = skill_def) do
     player_skills =
-      get_player_skills(game_state)
+      get_player_skills(entity)
       |> Enum.map(fn {key, data} -> {key, Map.get(data, :level, 0)} end)
       |> Enum.into(%{})
 
@@ -220,9 +220,9 @@ defmodule Loka.Framework.Skills.SkillManager do
     end
   end
 
-  defp check_can_afford_point(%GameState{} = game_state, %TypedObject{} = skill_def, target_level) do
+  defp check_can_afford_point(%Entity{} = entity, %TypedObject{} = skill_def, target_level) do
     cost = ContentSkill.point_cost(skill_def, target_level)
-    remaining = points_remaining(game_state)
+    remaining = points_remaining(entity)
 
     if remaining >= cost do
       :ok
@@ -232,24 +232,26 @@ defmodule Loka.Framework.Skills.SkillManager do
   end
 
   defp can_afford_next_level?(
-         %GameState{} = game_state,
+         %Entity{} = entity,
          %TypedObject{} = skill_def,
          current_level
        ) do
     cost = ContentSkill.point_cost(skill_def, current_level + 1)
-    points_remaining(game_state) >= cost
+    points_remaining(entity) >= cost
   end
 
   # =============================================================================
   # State Helpers
   # =============================================================================
 
-  defp get_player_skills(%GameState{stats: stats}) do
+  defp get_player_skills(%Entity{} = entity) do
+    stats = Entity.get_component(entity, "stats") || %{}
     MapHelpers.get_flexible(stats, :skills, %{})
   end
 
-  defp put_player_skills(%GameState{stats: stats} = game_state, skills) do
+  defp put_player_skills(%Entity{} = entity, skills) do
+    stats = Entity.get_component(entity, "stats") || %{}
     updated_stats = Map.put(stats, :skills, skills)
-    %{game_state | stats: updated_stats}
+    Entity.add_component(entity, "stats", updated_stats)
   end
 end

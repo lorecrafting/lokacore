@@ -2,20 +2,16 @@ defmodule Loka.Framework.Quest.AdminTest do
   use Loka.DataCase, async: false
 
   alias Loka.Framework.Quest.Admin
-  alias Loka.Framework.Player.GameState
   alias Loka.Framework.Quest.Definitions
 
   import Loka.AccountsFixtures
   import Loka.EngineFixtures
 
   setup do
-    # Create a test player using the fixture
     player = player_fixture()
+    _character = character_fixture(%{player: player})
 
-    # Create a game state for the test player
-    {:ok, state} = GameState.get_or_create_state(player.id)
-
-    # Create test quest entities in DB (replaces QuestRegistry)
+    # Create test quest entities in DB
     quest_fixture(%{
       key: "admin_test_quest_a",
       name: "Admin Test Quest A",
@@ -52,18 +48,16 @@ defmodule Loka.Framework.Quest.AdminTest do
       ]
     })
 
-    {:ok, state: state, player_id: player.id}
+    {:ok, player_id: player.id}
   end
 
   describe "get_player_quest_state/1" do
-    test "returns error for player without game state" do
-      # Create a player but don't create game state
+    test "returns error for player without character" do
       player = player_fixture()
-      GameState.delete_state(player.id)
-      assert {:error, :no_game_state} = Admin.get_player_quest_state(player.id)
+      assert {:error, :no_character} = Admin.get_player_quest_state(player.id)
     end
 
-    test "returns quest state for player with game state", %{player_id: player_id} do
+    test "returns quest state for player with character", %{player_id: player_id} do
       assert {:ok, result} = Admin.get_player_quest_state(player_id)
       assert result.player_id == player_id
       assert is_list(result.active_quests)
@@ -182,12 +176,10 @@ defmodule Loka.Framework.Quest.AdminTest do
   end
 
   describe "simulate_event/3" do
-    test "returns error for player without game state" do
-      # Create a player but don't create game state
+    test "returns error for player without character" do
       player = player_fixture()
-      GameState.delete_state(player.id)
 
-      assert {:error, :no_game_state} =
+      assert {:error, :no_character} =
                Admin.simulate_event(player.id, :kill, %{target_id: "goblin"})
     end
 

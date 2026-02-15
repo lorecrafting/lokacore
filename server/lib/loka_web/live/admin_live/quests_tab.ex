@@ -366,7 +366,7 @@ defmodule LokaWeb.AdminLive.QuestsTab do
          |> assign(:player_quest_state, state)
          |> assign(:quest_events, events)}
 
-      {:error, :no_game_state} ->
+      {:error, :no_character} ->
         {:noreply,
          socket
          |> assign(:selected_player, player_id)

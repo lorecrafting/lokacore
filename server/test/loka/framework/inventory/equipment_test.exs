@@ -1,11 +1,11 @@
 defmodule Loka.Framework.EquipmentTest do
   use Loka.DataCase
 
+  alias Loka.Engine.Entity
   alias Loka.Framework.Equipment
   alias Loka.Framework.Inventory
-  alias Loka.Framework.Player.GameState
 
-  import Loka.AccountsFixtures
+  import Loka.EngineFixtures
 
   # Helper to create an equipable item
   defp equipable_fixture(slot, bonuses \\ %{}, requirements \\ %{}) do
@@ -28,39 +28,6 @@ defmodule Loka.Framework.EquipmentTest do
     entity
   end
 
-  # Helper to create a game state for testing
-  # Uses LegendMUD-style equipment slots
-  defp game_state_fixture(player_id, attrs \\ %{}) do
-    defaults = %{
-      inventory: [],
-      equipment: %{
-        "head" => nil,
-        "neck" => nil,
-        "torso" => nil,
-        "about" => nil,
-        "arms" => nil,
-        "hands" => nil,
-        "waist" => nil,
-        "legs" => nil,
-        "feet" => nil,
-        "held" => nil,
-        "wielded" => nil,
-        "light" => nil,
-        "finger_left" => nil,
-        "finger_right" => nil,
-        "wrist_left" => nil,
-        "wrist_right" => nil
-      },
-      stats: %{"str" => 10, "sta" => 10, "dex" => 10, "level" => 1},
-      health: %{"current" => 100, "max" => 100}
-    }
-
-    merged = Map.merge(defaults, attrs)
-    {:ok, state} = GameState.create_state(player_id)
-    {:ok, state} = GameState.update_state(state, merged)
-    state
-  end
-
   describe "slots/0" do
     test "returns all valid LegendMUD-style equipment slots" do
       slots = Equipment.slots()
@@ -77,30 +44,27 @@ defmodule Loka.Framework.EquipmentTest do
 
   describe "equip/2" do
     test "equips item from inventory to correct slot" do
-      player = player_fixture()
       # :wielded is the LegendMUD-style slot for weapons
       weapon = equipable_fixture(:wielded, %{"attack" => 10})
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       {:ok, state} = Inventory.add_item(state, weapon.id)
       assert {:ok, updated_state} = Equipment.equip(state, weapon.id)
 
-      # Equipment uses string keys in the map
-      assert updated_state.equipment.wielded == weapon.id
-      refute weapon.id in updated_state.inventory
+      equipment = Entity.get_component(updated_state, "equipment") || %{}
+      assert equipment[:wielded] == weapon.id
+      inventory = Entity.get_component(updated_state, "inventory") || []
+      refute weapon.id in inventory
     end
 
     test "returns error when item not in inventory" do
-      player = player_fixture()
       weapon = equipable_fixture(:wielded)
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       assert {:error, :not_in_inventory} = Equipment.equip(state, weapon.id)
     end
 
     test "returns error for non-equipable item" do
-      player = player_fixture()
-
       {:ok, regular_item} =
         Loka.Engine.Entities.create_entity(%{
           key: "regular_item_#{System.unique_integer([:positive])}",
@@ -111,17 +75,16 @@ defmodule Loka.Framework.EquipmentTest do
           tags: []
         })
 
-      state = game_state_fixture(player.id)
+      state = character_fixture()
       {:ok, state} = Inventory.add_item(state, regular_item.id)
 
       assert {:error, :not_equipable} = Equipment.equip(state, regular_item.id)
     end
 
     test "swaps existing equipment to inventory" do
-      player = player_fixture()
       weapon1 = equipable_fixture(:wielded, %{"attack" => 5})
       weapon2 = equipable_fixture(:wielded, %{"attack" => 10})
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       {:ok, state} = Inventory.add_item(state, weapon1.id)
       {:ok, state} = Inventory.add_item(state, weapon2.id)
@@ -129,16 +92,16 @@ defmodule Loka.Framework.EquipmentTest do
       {:ok, state} = Equipment.equip(state, weapon1.id)
       {:ok, state} = Equipment.equip(state, weapon2.id)
 
-      assert state.equipment.wielded == weapon2.id
-      assert weapon1.id in state.inventory
-      refute weapon2.id in state.inventory
+      equipment = Entity.get_component(state, "equipment") || %{}
+      assert equipment[:wielded] == weapon2.id
+      inventory = Entity.get_component(state, "inventory") || []
+      assert weapon1.id in inventory
+      refute weapon2.id in inventory
     end
 
     test "respects level requirements" do
-      player = player_fixture()
       weapon = equipable_fixture(:wielded, %{"attack" => 100}, %{"level" => 10})
-      # Use atom keys for stats since requirements are atomized
-      state = game_state_fixture(player.id, %{stats: %{level: 5, str: 10, sta: 10, dex: 10}})
+      state = character_fixture(stats: %{"level" => 5, "str" => 10, "sta" => 10, "dex" => 10})
 
       {:ok, state} = Inventory.add_item(state, weapon.id)
 
@@ -148,43 +111,41 @@ defmodule Loka.Framework.EquipmentTest do
     end
 
     test "allows equipping when requirements met" do
-      player = player_fixture()
       # Use atom keys for requirements since Equipable.from_map converts them
       weapon = equipable_fixture(:wielded, %{"attack" => 10}, %{"str" => 10, "level" => 5})
-      # Stats must use atom keys to match requirement check (code checks atom keys against stats)
-      state = game_state_fixture(player.id, %{stats: %{str: 15, level: 10, sta: 10, dex: 10}})
+      state = character_fixture(stats: %{"str" => 15, "level" => 10, "sta" => 10, "dex" => 10})
 
       {:ok, state} = Inventory.add_item(state, weapon.id)
 
       assert {:ok, updated_state} = Equipment.equip(state, weapon.id)
-      assert updated_state.equipment.wielded == weapon.id
+      equipment = Entity.get_component(updated_state, "equipment") || %{}
+      assert equipment[:wielded] == weapon.id
     end
   end
 
   describe "unequip/2" do
     test "unequips item and returns it to inventory" do
-      player = player_fixture()
       weapon = equipable_fixture(:wielded)
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       {:ok, state} = Inventory.add_item(state, weapon.id)
       {:ok, state} = Equipment.equip(state, weapon.id)
 
       assert {:ok, updated_state} = Equipment.unequip(state, :wielded)
-      assert updated_state.equipment.wielded == nil
-      assert weapon.id in updated_state.inventory
+      equipment = Entity.get_component(updated_state, "equipment") || %{}
+      assert equipment[:wielded] == nil
+      inventory = Entity.get_component(updated_state, "inventory") || []
+      assert weapon.id in inventory
     end
 
     test "returns error for empty slot" do
-      player = player_fixture()
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       assert {:error, :slot_empty} = Equipment.unequip(state, :wielded)
     end
 
     test "returns error for invalid slot" do
-      player = player_fixture()
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       # :weapon is now an invalid slot (legacy name)
       assert {:error, {:invalid_slot, :weapon}} = Equipment.unequip(state, :weapon)
@@ -193,9 +154,8 @@ defmodule Loka.Framework.EquipmentTest do
 
   describe "get_equipped/1" do
     test "returns map of slot to item details" do
-      player = player_fixture()
       weapon = equipable_fixture(:wielded, %{"attack" => 10})
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       {:ok, state} = Inventory.add_item(state, weapon.id)
       {:ok, state} = Equipment.equip(state, weapon.id)
@@ -216,8 +176,7 @@ defmodule Loka.Framework.EquipmentTest do
     end
 
     test "returns all nil for empty equipment" do
-      player = player_fixture()
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       equipped = Equipment.get_equipped(state)
 
@@ -229,9 +188,8 @@ defmodule Loka.Framework.EquipmentTest do
 
   describe "get_equipped_id/2" do
     test "returns item_id for occupied slot" do
-      player = player_fixture()
       weapon = equipable_fixture(:wielded)
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       {:ok, state} = Inventory.add_item(state, weapon.id)
       {:ok, state} = Equipment.equip(state, weapon.id)
@@ -240,8 +198,7 @@ defmodule Loka.Framework.EquipmentTest do
     end
 
     test "returns nil for empty slot" do
-      player = player_fixture()
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       assert Equipment.get_equipped_id(state, :wielded) == nil
     end
@@ -249,10 +206,9 @@ defmodule Loka.Framework.EquipmentTest do
 
   describe "get_total_bonuses/1" do
     test "sums bonuses from all equipped items" do
-      player = player_fixture()
       weapon = equipable_fixture(:wielded, %{"attack" => 10, "crit" => 5})
       armor = equipable_fixture(:torso, %{"defense" => 8, "crit" => 2})
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       {:ok, state} = Inventory.add_item(state, weapon.id)
       {:ok, state} = Inventory.add_item(state, armor.id)
@@ -267,8 +223,7 @@ defmodule Loka.Framework.EquipmentTest do
     end
 
     test "returns empty map when nothing equipped" do
-      player = player_fixture()
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       assert Equipment.get_total_bonuses(state) == %{}
     end
@@ -276,10 +231,9 @@ defmodule Loka.Framework.EquipmentTest do
 
   describe "calculate_combat_stats/1" do
     test "calculates stats with equipment bonuses" do
-      player = player_fixture()
       weapon = equipable_fixture(:wielded, %{"attack" => 5})
       armor = equipable_fixture(:torso, %{"defense" => 3})
-      state = game_state_fixture(player.id, %{stats: %{"str" => 10, "sta" => 10}})
+      state = character_fixture(stats: %{"str" => 10, "sta" => 10})
 
       {:ok, state} = Inventory.add_item(state, weapon.id)
       {:ok, state} = Inventory.add_item(state, armor.id)
@@ -297,8 +251,7 @@ defmodule Loka.Framework.EquipmentTest do
     end
 
     test "calculates stats without equipment" do
-      player = player_fixture()
-      state = game_state_fixture(player.id, %{stats: %{"str" => 15, "sta" => 12}})
+      state = character_fixture(stats: %{"str" => 15, "sta" => 12})
 
       combat_stats = Equipment.calculate_combat_stats(state)
 
@@ -311,8 +264,7 @@ defmodule Loka.Framework.EquipmentTest do
     end
 
     test "handles string key stats from DB" do
-      player = player_fixture()
-      state = game_state_fixture(player.id, %{stats: %{"str" => 20, "sta" => 15}})
+      state = character_fixture(stats: %{"str" => 20, "sta" => 15})
 
       combat_stats = Equipment.calculate_combat_stats(state)
 
@@ -322,8 +274,7 @@ defmodule Loka.Framework.EquipmentTest do
     end
 
     test "uses default stats when missing" do
-      player = player_fixture()
-      state = game_state_fixture(player.id, %{stats: %{}})
+      state = character_fixture(stats: %{})
 
       combat_stats = Equipment.calculate_combat_stats(state)
 
@@ -336,9 +287,8 @@ defmodule Loka.Framework.EquipmentTest do
 
   describe "equipped?/2" do
     test "returns true when item is equipped" do
-      player = player_fixture()
       weapon = equipable_fixture(:wielded)
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       {:ok, state} = Inventory.add_item(state, weapon.id)
       {:ok, state} = Equipment.equip(state, weapon.id)
@@ -347,9 +297,8 @@ defmodule Loka.Framework.EquipmentTest do
     end
 
     test "returns false when item is not equipped" do
-      player = player_fixture()
       weapon = equipable_fixture(:wielded)
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       {:ok, state} = Inventory.add_item(state, weapon.id)
 
@@ -357,8 +306,7 @@ defmodule Loka.Framework.EquipmentTest do
     end
 
     test "returns false for unknown item" do
-      player = player_fixture()
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       assert Equipment.equipped?(state, "unknown_item") == false
     end

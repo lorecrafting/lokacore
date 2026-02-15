@@ -78,10 +78,10 @@ defmodule Loka.Framework.Quest.Listeners do
   """
   def on_room_entry(player_context, room_info) do
     room_key = extract_room_key(room_info)
-    game_state = get_game_state(player_context)
+    character = get_character(player_context)
 
-    if room_key && game_state do
-      case QuestProgress.update_progress(game_state, %{type: :go_to, target_id: room_key}) do
+    if room_key && character do
+      case QuestProgress.update_progress(character, %{type: :go_to, target_id: room_key}) do
         {:ok, _updated_state, completed} when completed != [] ->
           log_completions(:go_to, room_key, completed)
 
@@ -108,52 +108,46 @@ defmodule Loka.Framework.Quest.Listeners do
 
       {updated_state, events} = Quest.Listeners.check_room_entry(game_state, "temple")
   """
-  def check_room_entry(game_state, room_key) when is_binary(room_key) do
-    case QuestProgress.update_progress(game_state, %{type: :go_to, target_id: room_key}) do
-      {:ok, updated_state, completed_objectives} ->
-        events =
-          Enum.map(completed_objectives, fn {_quest_id, objective_id} ->
-            %{
-              type: :quest,
-              text: "Quest objective completed — #{format_objective_id(objective_id)}",
-              timestamp: DateTime.utc_now()
-            }
-          end)
+  def check_room_entry(character, room_key) when is_binary(room_key) do
+    {:ok, updated_character, completed_objectives} =
+      QuestProgress.update_progress(character, %{type: :go_to, target_id: room_key})
 
-        {updated_state, events}
+    events =
+      Enum.map(completed_objectives, fn {_quest_id, objective_id} ->
+        %{
+          type: :quest,
+          text: "Quest objective completed — #{format_objective_id(objective_id)}",
+          timestamp: DateTime.utc_now()
+        }
+      end)
 
-      {:error, _reason} ->
-        {game_state, []}
-    end
+    {updated_character, events}
   end
 
-  def check_room_entry(game_state, _room_key), do: {game_state, []}
+  def check_room_entry(character, _room_key), do: {character, []}
 
   @doc """
   Checks and updates quest progress for item pickup.
 
   Returns `{updated_game_state, quest_events}`.
   """
-  def check_item_received(game_state, item_key) when is_binary(item_key) do
-    case QuestProgress.update_progress(game_state, %{type: :get_item, target_id: item_key}) do
-      {:ok, updated_state, completed_objectives} ->
-        events =
-          Enum.map(completed_objectives, fn {_quest_id, objective_id} ->
-            %{
-              type: :quest,
-              text: "Quest objective completed — #{format_objective_id(objective_id)}",
-              timestamp: DateTime.utc_now()
-            }
-          end)
+  def check_item_received(character, item_key) when is_binary(item_key) do
+    {:ok, updated_character, completed_objectives} =
+      QuestProgress.update_progress(character, %{type: :get_item, target_id: item_key})
 
-        {updated_state, events}
+    events =
+      Enum.map(completed_objectives, fn {_quest_id, objective_id} ->
+        %{
+          type: :quest,
+          text: "Quest objective completed — #{format_objective_id(objective_id)}",
+          timestamp: DateTime.utc_now()
+        }
+      end)
 
-      {:error, _reason} ->
-        {game_state, []}
-    end
+    {updated_character, events}
   end
 
-  def check_item_received(game_state, _item_key), do: {game_state, []}
+  def check_item_received(character, _item_key), do: {character, []}
 
   @doc """
   Checks and updates quest progress for talking to an NPC.
@@ -166,7 +160,7 @@ defmodule Loka.Framework.Quest.Listeners do
   - `npc_key` - The prototype key of the NPC being talked to
   - `dialogue_topic` - The dialogue node/topic being visited
   """
-  def check_talk(game_state, npc_key, dialogue_topic)
+  def check_talk(character, npc_key, dialogue_topic)
       when is_binary(npc_key) do
     # dialogue_topic can be nil for objectives that just require talking to the NPC
     event = %{type: :talk, target_id: npc_key}
@@ -178,57 +172,51 @@ defmodule Loka.Framework.Quest.Listeners do
         event
       end
 
-    case QuestProgress.update_progress(game_state, event) do
-      {:ok, updated_state, completed_objectives} ->
-        events =
-          Enum.map(completed_objectives, fn {_quest_id, objective_id} ->
-            %{
-              type: :quest,
-              text: "Quest objective completed — #{format_objective_id(objective_id)}",
-              timestamp: DateTime.utc_now()
-            }
-          end)
+    {:ok, updated_character, completed_objectives} =
+      QuestProgress.update_progress(character, event)
 
-        {updated_state, events}
+    events =
+      Enum.map(completed_objectives, fn {_quest_id, objective_id} ->
+        %{
+          type: :quest,
+          text: "Quest objective completed — #{format_objective_id(objective_id)}",
+          timestamp: DateTime.utc_now()
+        }
+      end)
 
-      {:error, _reason} ->
-        {game_state, []}
-    end
+    {updated_character, events}
   end
 
-  def check_talk(game_state, _npc_key, _dialogue_topic), do: {game_state, []}
+  def check_talk(character, _npc_key, _dialogue_topic), do: {character, []}
 
   @doc """
   Checks and updates quest progress for enemy kills.
 
   Returns `{updated_game_state, quest_events}`.
   """
-  def check_entity_death(game_state, entity_key, count \\ 1)
+  def check_entity_death(character, entity_key, count \\ 1)
 
-  def check_entity_death(game_state, entity_key, count) when is_binary(entity_key) do
-    case QuestProgress.update_progress(game_state, %{
-           type: :kill,
-           target_id: entity_key,
-           count: count
-         }) do
-      {:ok, updated_state, completed_objectives} ->
-        events =
-          Enum.map(completed_objectives, fn {_quest_id, objective_id} ->
-            %{
-              type: :quest,
-              text: "Quest objective completed — #{format_objective_id(objective_id)}",
-              timestamp: DateTime.utc_now()
-            }
-          end)
+  def check_entity_death(character, entity_key, count) when is_binary(entity_key) do
+    {:ok, updated_character, completed_objectives} =
+      QuestProgress.update_progress(character, %{
+        type: :kill,
+        target_id: entity_key,
+        count: count
+      })
 
-        {updated_state, events}
+    events =
+      Enum.map(completed_objectives, fn {_quest_id, objective_id} ->
+        %{
+          type: :quest,
+          text: "Quest objective completed — #{format_objective_id(objective_id)}",
+          timestamp: DateTime.utc_now()
+        }
+      end)
 
-      {:error, _reason} ->
-        {game_state, []}
-    end
+    {updated_character, events}
   end
 
-  def check_entity_death(game_state, _entity_key, _count), do: {game_state, []}
+  def check_entity_death(character, _entity_key, _count), do: {character, []}
 
   @doc """
   Checks and updates quest progress for crafting an item.
@@ -240,26 +228,23 @@ defmodule Loka.Framework.Quest.Listeners do
   - `game_state` - The player's current game state
   - `recipe_key` - The key of the recipe that was crafted
   """
-  def check_craft(game_state, recipe_key) when is_binary(recipe_key) do
-    case QuestProgress.update_progress(game_state, %{type: :craft, target_id: recipe_key}) do
-      {:ok, updated_state, completed_objectives} ->
-        events =
-          Enum.map(completed_objectives, fn {_quest_id, objective_id} ->
-            %{
-              type: :quest,
-              text: "Quest objective completed — #{format_objective_id(objective_id)}",
-              timestamp: DateTime.utc_now()
-            }
-          end)
+  def check_craft(character, recipe_key) when is_binary(recipe_key) do
+    {:ok, updated_character, completed_objectives} =
+      QuestProgress.update_progress(character, %{type: :craft, target_id: recipe_key})
 
-        {updated_state, events}
+    events =
+      Enum.map(completed_objectives, fn {_quest_id, objective_id} ->
+        %{
+          type: :quest,
+          text: "Quest objective completed — #{format_objective_id(objective_id)}",
+          timestamp: DateTime.utc_now()
+        }
+      end)
 
-      {:error, _reason} ->
-        {game_state, []}
-    end
+    {updated_character, events}
   end
 
-  def check_craft(game_state, _recipe_key), do: {game_state, []}
+  def check_craft(character, _recipe_key), do: {character, []}
 
   @doc """
   Called when a player receives an item. Triggers get_item quest objectives.
@@ -273,13 +258,13 @@ defmodule Loka.Framework.Quest.Listeners do
     item_key = extract_item_key(item_info)
 
     if item_key do
-      game_state = get_game_state(player_context)
+      character = get_character(player_context)
 
-      if game_state do
-        case QuestProgress.update_progress(game_state, %{type: :get_item, target_id: item_key}) do
-          {:ok, updated_state, completed} when completed != [] ->
+      if character do
+        case QuestProgress.update_progress(character, %{type: :get_item, target_id: item_key}) do
+          {:ok, updated_character, completed} when completed != [] ->
             log_completions(:get_item, item_key, completed)
-            {:quest_update, updated_state, completed}
+            {:quest_update, updated_character, completed}
 
           _ ->
             :ok
@@ -305,17 +290,17 @@ defmodule Loka.Framework.Quest.Listeners do
     entity_key = extract_entity_key(death_info)
 
     if entity_key do
-      game_state = get_game_state(attacker_context)
+      character = get_character(attacker_context)
 
-      if game_state do
-        case QuestProgress.update_progress(game_state, %{
+      if character do
+        case QuestProgress.update_progress(character, %{
                type: :kill,
                target_id: entity_key,
                count: 1
              }) do
-          {:ok, updated_state, completed} when completed != [] ->
+          {:ok, updated_character, completed} when completed != [] ->
             log_completions(:kill, entity_key, completed)
-            {:quest_update, updated_state, completed}
+            {:quest_update, updated_character, completed}
 
           _ ->
             :ok
@@ -330,8 +315,9 @@ defmodule Loka.Framework.Quest.Listeners do
 
   # Private helpers
 
-  defp get_game_state(%{game_state: game_state}), do: game_state
-  defp get_game_state(_), do: nil
+  defp get_character(%{character: character}), do: character
+  defp get_character(%{game_state: game_state}), do: game_state
+  defp get_character(_), do: nil
 
   defp extract_room_key(%{room_key: key}) when is_binary(key), do: key
   defp extract_room_key(%{"room_key" => key}) when is_binary(key), do: key
@@ -381,46 +367,46 @@ defmodule Loka.Framework.Quest.Listeners do
   - `room_info` - Map with room details (unused in this function)
   """
   def grant_system_quests_once(player_context, _room_info) do
-    game_state = get_game_state(player_context)
+    character = get_character(player_context)
 
-    if game_state do
+    if character do
       # Only grant if player has no quests yet (first time)
-      active_quests = QuestProgress.get_active_quests(game_state)
-      completed_quests = QuestProgress.get_completed_quests(game_state)
+      active_quests = QuestProgress.get_active_quests(character)
+      completed_quests = QuestProgress.get_completed_quests(character)
 
       if Enum.empty?(active_quests) and Enum.empty?(completed_quests) do
         system_quests = get_system_quests()
 
         if Enum.any?(system_quests) do
           Logger.info("[Quest] Granting #{length(system_quests)} system quests to player",
-            player_id: game_state.player_id
+            account_id: character.account_id
           )
 
-          updated_state =
-            Enum.reduce(system_quests, game_state, fn quest, state ->
-              case QuestProgress.accept_quest(state, quest.id) do
-                {:ok, new_state} ->
+          updated_character =
+            Enum.reduce(system_quests, character, fn quest, acc ->
+              case QuestProgress.accept_quest(acc, quest.id) do
+                {:ok, new_character} ->
                   Logger.debug("[Quest] Granted system quest #{quest.id}",
-                    player_id: state.player_id,
+                    account_id: acc.account_id,
                     quest_id: quest.id
                   )
 
-                  new_state
+                  new_character
 
                 {:error, reason} ->
                   Logger.error(
                     "[Quest] Failed to grant system quest #{quest.id}: #{inspect(reason)}",
-                    player_id: state.player_id,
+                    account_id: acc.account_id,
                     quest_id: quest.id,
                     reason: reason
                   )
 
-                  state
+                  acc
               end
             end)
 
           # Return updated state through quest_update
-          {:quest_update, updated_state, []}
+          {:quest_update, updated_character, []}
         else
           :ok
         end

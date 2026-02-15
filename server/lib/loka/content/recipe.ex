@@ -128,8 +128,8 @@ defmodule Loka.Content.Recipe do
   """
   @spec available_for(map()) :: [TypedObject.t()]
   def available_for(game_state) do
-    skills =
-      MapHelpers.get_flexible(game_state.stats || %{}, :skills, %{})
+    stats = Entity.get_component(game_state, "stats") || %{}
+    skills = MapHelpers.get_flexible(stats, :skills, %{})
 
     all_published()
     |> Enum.filter(fn recipe -> meets_skill_requirements?(recipe, skills) end)

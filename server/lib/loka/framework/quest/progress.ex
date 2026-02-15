@@ -3,7 +3,7 @@ defmodule Loka.Framework.Quest.Progress do
   Quest progress management for the game framework.
 
   Handles accepting quests, tracking progress, completing objectives,
-  and claiming rewards.
+  and claiming rewards. Operates on character Entity structs.
 
   ## Submodules
 
@@ -12,19 +12,19 @@ defmodule Loka.Framework.Quest.Progress do
 
   ## Player Quest State
 
-  Quests are stored in the player's game state under the `quests` field:
+  Quests are stored in the character entity's components under `quest_progress`:
 
-      %{
-        active: %{
+      entity.components["quest_progress"] = %{
+        "active" => %{
           "quest_id" => %{
-            objectives: %{
-              "obj_1" => %{completed: false, progress: 0},
-              "obj_2" => %{completed: true, progress: 5}
+            "objectives" => %{
+              "obj_1" => %{"completed" => false, "progress" => 0},
+              "obj_2" => %{"completed" => true, "progress" => 5}
             },
-            accepted_at: ~U[2024-01-01 00:00:00Z]
+            "accepted_at" => ~U[2024-01-01 00:00:00Z]
           }
         },
-        completed: ["old_quest_1", "old_quest_2"]
+        "completed" => ["old_quest_1", "old_quest_2"]
       }
 
   ## Usage
@@ -32,22 +32,22 @@ defmodule Loka.Framework.Quest.Progress do
       alias Loka.Framework.Quest.Progress
 
       # Accept a new quest
-      {:ok, state} = Progress.accept_quest(state, "find_sword")
+      {:ok, entity} = Progress.accept_quest(entity, "find_sword")
 
       # Check progress
-      Progress.get_active_quests(state)
+      Progress.get_active_quests(entity)
 
       # Complete an objective manually
-      {:ok, state} = Progress.complete_objective(state, "find_sword", "talk_to_blacksmith")
+      {:ok, entity} = Progress.complete_objective(entity, "find_sword", "talk_to_blacksmith")
 
       # Check if quest is complete
-      Progress.is_complete?(state, "find_sword")
+      Progress.is_complete?(entity, "find_sword")
 
       # Turn in for rewards
-      {:ok, state, rewards} = Progress.turn_in_quest(state, "find_sword")
+      {:ok, entity, rewards} = Progress.turn_in_quest(entity, "find_sword")
   """
 
-  alias Loka.Framework.Player.GameState
+  alias Loka.Engine.Entity
   alias Loka.Framework.Quest.{Definitions, StateHelper, TimerManager, QuestItemSpawner}
   alias Loka.Framework.Quest.Progress.{Rewards, Tracking}
   alias Loka.Admin.GameLog
@@ -62,15 +62,11 @@ defmodule Loka.Framework.Quest.Progress do
 
   Creates a new entry in the player's active quests with fresh objective progress.
 
-  Returns `{:ok, updated_state}` on success.
+  Returns `{:ok, updated_entity}` on success.
   Returns `{:error, reason}` if the quest can't be accepted.
-
-  ## Examples
-
-      iex> accept_quest(state, "find_sword")
-      {:ok, %GameState{quests: %{active: %{"find_sword" => ...}}}}
   """
-  def accept_quest(%GameState{quests: quests} = state, quest_id) do
+  def accept_quest(%Entity{} = entity, quest_id) do
+    quests = Entity.get_component(entity, "quest_progress") || %{}
     active = StateHelper.get_active(quests)
     completed = StateHelper.get_completed(quests)
 
@@ -103,19 +99,19 @@ defmodule Loka.Framework.Quest.Progress do
 
                 new_quests = Map.put(quests, "active", new_active)
 
-                GameLog.Quest.log_accepted(state.player_id, quest_id)
+                GameLog.Quest.log_accepted(entity.account_id, quest_id)
 
                 start_objective_timers(
-                  state.player_id,
+                  entity.account_id,
                   quest_id,
                   quest_def.objectives,
                   accepted_at
                 )
 
                 # Spawn player-instanced quest items for objectives with quest_spawn: true
-                QuestItemSpawner.spawn_quest_items(quest_def, state.player_id)
+                QuestItemSpawner.spawn_quest_items(quest_def, entity.account_id)
 
-                GameState.update_state(state, %{quests: new_quests})
+                {:ok, Entity.add_component(entity, "quest_progress", new_quests)}
             end
         end
     end
@@ -184,9 +180,11 @@ defmodule Loka.Framework.Quest.Progress do
       %{type: :get_item, target_id: "magic_sword"}
       %{type: :go_to, target_id: "dark_forest"}
 
-  Returns `{:ok, updated_state, completed_objectives}`.
+  Returns `{:ok, updated_entity, completed_objectives}`.
   """
-  def update_progress(%GameState{quests: quests, player_id: player_id} = state, event) do
+  def update_progress(%Entity{} = entity, event) do
+    quests = Entity.get_component(entity, "quest_progress") || %{}
+    player_id = entity.account_id
     active = StateHelper.get_active(quests)
 
     {new_active, completed} =
@@ -201,11 +199,8 @@ defmodule Loka.Framework.Quest.Progress do
       end)
 
     new_quests = Map.put(quests, "active", new_active)
-
-    case GameState.update_state(state, %{quests: new_quests}) do
-      {:ok, new_state} -> {:ok, new_state, completed}
-      error -> error
-    end
+    new_entity = Entity.add_component(entity, "quest_progress", new_quests)
+    {:ok, new_entity, completed}
   end
 
   @doc """
@@ -213,9 +208,10 @@ defmodule Loka.Framework.Quest.Progress do
 
   Useful for objectives that can't be auto-tracked.
 
-  Returns `{:ok, updated_state}` on success.
+  Returns `{:ok, updated_entity}` on success.
   """
-  def complete_objective(%GameState{quests: quests} = state, quest_id, objective_id) do
+  def complete_objective(%Entity{} = entity, quest_id, objective_id) do
+    quests = Entity.get_component(entity, "quest_progress") || %{}
     active = StateHelper.get_active(quests)
 
     case Map.get(active, quest_id) do
@@ -235,7 +231,7 @@ defmodule Loka.Framework.Quest.Progress do
             updated_quest_data = Map.put(quest_data, "objectives", updated_objectives)
             new_active = Map.put(active, quest_id, updated_quest_data)
             new_quests = Map.put(quests, "active", new_active)
-            GameState.update_state(state, %{quests: new_quests})
+            {:ok, Entity.add_component(entity, "quest_progress", new_quests)}
         end
     end
   end
@@ -246,13 +242,9 @@ defmodule Loka.Framework.Quest.Progress do
 
   @doc """
   Checks if all objectives for a quest are complete.
-
-  ## Examples
-
-      iex> is_complete?(state, "find_sword")
-      true
   """
-  def is_complete?(%GameState{quests: quests}, quest_id) do
+  def is_complete?(%Entity{} = entity, quest_id) do
+    quests = Entity.get_component(entity, "quest_progress") || %{}
     active = StateHelper.get_active(quests)
 
     case Map.get(active, quest_id) do
@@ -270,7 +262,9 @@ defmodule Loka.Framework.Quest.Progress do
 
   Returns a list of maps with quest info and progress.
   """
-  def get_active_quests(%GameState{quests: quests, player_id: player_id}) do
+  def get_active_quests(%Entity{} = entity) do
+    quests = Entity.get_component(entity, "quest_progress") || %{}
+    player_id = entity.account_id
     active = StateHelper.get_active(quests)
 
     Enum.map(active, fn {quest_id, quest_data} ->
@@ -295,7 +289,8 @@ defmodule Loka.Framework.Quest.Progress do
   @doc """
   Gets the list of completed quest IDs.
   """
-  def get_completed_quests(%GameState{quests: quests}) do
+  def get_completed_quests(%Entity{} = entity) do
+    quests = Entity.get_component(entity, "quest_progress") || %{}
     StateHelper.get_completed(quests)
   end
 
@@ -304,7 +299,8 @@ defmodule Loka.Framework.Quest.Progress do
 
   Returns nil if the quest is not active.
   """
-  def get_quest_progress(%GameState{quests: quests}, quest_id) do
+  def get_quest_progress(%Entity{} = entity, quest_id) do
+    quests = Entity.get_component(entity, "quest_progress") || %{}
     active = StateHelper.get_active(quests)
     Map.get(active, quest_id)
   end
@@ -318,7 +314,7 @@ defmodule Loka.Framework.Quest.Progress do
 
   Moves the quest from active to completed and applies rewards.
 
-  Returns `{:ok, updated_state, rewards}` on success.
+  Returns `{:ok, updated_entity, rewards}` on success.
   Returns `{:error, reason}` if the quest can't be turned in.
 
   ## Reward Types
@@ -327,8 +323,8 @@ defmodule Loka.Framework.Quest.Progress do
   - `:gold` - Gold currency (stored in flags)
   - `:items` - List of item IDs to add to inventory
   """
-  def turn_in_quest(%GameState{quests: quests} = state, quest_id) do
-    if not is_complete?(state, quest_id) do
+  def turn_in_quest(%Entity{} = entity, quest_id) do
+    if not is_complete?(entity, quest_id) do
       {:error, :quest_not_complete}
     else
       case Definitions.get_quest_definition(quest_id) do
@@ -336,6 +332,7 @@ defmodule Loka.Framework.Quest.Progress do
           {:error, :quest_not_found}
 
         quest_def ->
+          quests = Entity.get_component(entity, "quest_progress") || %{}
           active = StateHelper.get_active(quests)
           completed = StateHelper.get_completed(quests)
 
@@ -347,14 +344,15 @@ defmodule Loka.Framework.Quest.Progress do
             |> Map.put("active", new_active)
             |> Map.put("completed", new_completed)
 
-          with {:ok, state} <- GameState.update_state(state, %{quests: new_quests}),
-               {:ok, state} <- Rewards.apply(state, quest_def.rewards) do
-            GameLog.Quest.log_completed(state.player_id, quest_id, quest_def.rewards)
+          entity = Entity.add_component(entity, "quest_progress", new_quests)
+
+          with {:ok, entity} <- Rewards.apply(entity, quest_def.rewards) do
+            GameLog.Quest.log_completed(entity.account_id, quest_id, quest_def.rewards)
 
             # Trigger chain progression (auto-start next quest if in a chain)
-            state = trigger_chain_progression(state, quest_id)
+            entity = trigger_chain_progression(entity, quest_id)
 
-            {:ok, state, quest_def.rewards}
+            {:ok, entity, quest_def.rewards}
           end
       end
     end
@@ -362,24 +360,24 @@ defmodule Loka.Framework.Quest.Progress do
 
   # Triggers chain progression after a quest is completed.
   # Auto-starts the next quest(s) if the completed quest is part of a chain.
-  defp trigger_chain_progression(state, completed_quest_id) do
+  defp trigger_chain_progression(entity, completed_quest_id) do
     alias Loka.Framework.Quest.Chain
 
-    case Chain.on_quest_completed(state, completed_quest_id) do
-      {:ok, updated_state, auto_started} when auto_started != [] ->
+    case Chain.on_quest_completed(entity, completed_quest_id) do
+      {:ok, updated_entity, auto_started} when auto_started != [] ->
         GameLog.Quest.log_chain_progression(
-          state.player_id,
+          entity.account_id,
           completed_quest_id,
           auto_started
         )
 
-        updated_state
+        updated_entity
 
-      {:ok, state, []} ->
-        state
+      {:ok, entity, []} ->
+        entity
 
       {:error, _reason} ->
-        state
+        entity
     end
   end
 

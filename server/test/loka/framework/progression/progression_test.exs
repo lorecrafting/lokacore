@@ -2,22 +2,9 @@ defmodule Loka.Framework.ProgressionTest do
   use Loka.DataCase
 
   alias Loka.Framework.Progression
-  alias Loka.Framework.Player.GameState
+  alias Loka.Engine.Entity
 
-  import Loka.AccountsFixtures
-
-  # Helper to create a game state for testing
-  defp game_state_fixture(player_id, attrs \\ %{}) do
-    defaults = %{
-      stats: %{"xp" => 0, "level" => 1, "skill_points" => 0, "skills" => []},
-      health: %{"current" => 100, "max" => 100}
-    }
-
-    merged = Map.merge(defaults, attrs)
-    {:ok, state} = GameState.create_state(player_id)
-    {:ok, state} = GameState.update_state(state, merged)
-    state
-  end
+  import Loka.EngineFixtures
 
   describe "xp_for_level/1" do
     test "returns 0 for level 1 or less" do
@@ -76,88 +63,87 @@ defmodule Loka.Framework.ProgressionTest do
 
   describe "award_xp/2" do
     test "adds XP without level up" do
-      player = player_fixture()
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       assert {:ok, updated_state, nil} = Progression.award_xp(state, 100)
-      assert updated_state.stats["xp"] == 100
-      assert updated_state.stats["level"] == 1
+      assert Entity.get_component(updated_state, "stats")["xp"] == 100
+      assert Entity.get_component(updated_state, "stats")["level"] == 1
     end
 
     test "triggers level up when XP threshold reached" do
-      player = player_fixture()
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       assert {:ok, updated_state, level_up_info} = Progression.award_xp(state, 400)
 
-      assert updated_state.stats["level"] == 2
-      assert updated_state.stats["xp"] == 400
+      assert Entity.get_component(updated_state, "stats")["level"] == 2
+      assert Entity.get_component(updated_state, "stats")["xp"] == 400
       assert level_up_info.new_level == 2
       assert level_up_info.old_level == 1
       assert level_up_info.skill_points_gained == 3
     end
 
     test "awards skill points on level up (3 per level)" do
-      player = player_fixture()
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       {:ok, updated_state, _} = Progression.award_xp(state, 400)
 
-      assert updated_state.stats["skill_points"] == 3
+      assert Entity.get_component(updated_state, "stats")["skill_points"] == 3
     end
 
     test "handles multiple level ups at once" do
-      player = player_fixture()
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       # Award enough XP to go from level 1 to level 3 (need 722 XP)
       assert {:ok, updated_state, level_up_info} = Progression.award_xp(state, 800)
 
-      assert updated_state.stats["level"] == 3
+      assert Entity.get_component(updated_state, "stats")["level"] == 3
       assert level_up_info.new_level == 3
       # 2 levels gained * 3 skill points = 6
       assert level_up_info.skill_points_gained == 6
-      assert updated_state.stats["skill_points"] == 6
+      assert Entity.get_component(updated_state, "stats")["skill_points"] == 6
     end
 
     test "increases max health on level up (+10 per level)" do
-      player = player_fixture()
-      state = game_state_fixture(player.id, %{health: %{"current" => 100, "max" => 100}})
+      state =
+        character_fixture(
+          resources: %{
+            "health" => %{"current" => 100, "max" => 100},
+            "mana" => %{"current" => 100, "max" => 100},
+            "mv" => %{"current" => 150, "max" => 150}
+          }
+        )
 
       {:ok, updated_state, _} = Progression.award_xp(state, 400)
 
-      # Use unified accessor for health (now in resources.health)
-      health = GameState.get_health(updated_state)
+      health = Entity.get_component(updated_state, "resources")["health"]
       # +10 max health for 1 level gained
-      assert health[:max] == 110
+      assert health["max"] == 110
       # Also heals on level up
-      assert health[:current] == 110
+      assert health["current"] == 110
     end
 
     test "accumulates XP across multiple awards" do
-      player = player_fixture()
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       {:ok, state, nil} = Progression.award_xp(state, 100)
       {:ok, state, nil} = Progression.award_xp(state, 100)
       {:ok, state, nil} = Progression.award_xp(state, 100)
 
-      assert state.stats["xp"] == 300
-      assert state.stats["level"] == 1
+      assert Entity.get_component(state, "stats")["xp"] == 300
+      assert Entity.get_component(state, "stats")["level"] == 1
 
       # Now trigger level up (348 XP needed for level 2)
       {:ok, state, level_up_info} = Progression.award_xp(state, 100)
 
-      assert state.stats["xp"] == 400
-      assert state.stats["level"] == 2
+      assert Entity.get_component(state, "stats")["xp"] == 400
+      assert Entity.get_component(state, "stats")["level"] == 2
       assert level_up_info != nil
     end
   end
 
   describe "get_progression_stats/1" do
     test "returns correct stats for level 1 player" do
-      player = player_fixture()
-      state = game_state_fixture(player.id)
+      state = character_fixture()
 
       stats = Progression.get_progression_stats(state)
 
@@ -171,8 +157,7 @@ defmodule Loka.Framework.ProgressionTest do
     end
 
     test "calculates progress percent correctly" do
-      player = player_fixture()
-      state = game_state_fixture(player.id, %{stats: %{"xp" => 174, "level" => 1}})
+      state = character_fixture(stats: %{"xp" => 174, "level" => 1})
 
       stats = Progression.get_progression_stats(state)
 
@@ -182,12 +167,10 @@ defmodule Loka.Framework.ProgressionTest do
     end
 
     test "shows learned skills" do
-      player = player_fixture()
-
       state =
-        game_state_fixture(player.id, %{
+        character_fixture(
           stats: %{"level" => 5, "xp" => 2500, "skills" => ["power_strike", "heal"]}
-        })
+        )
 
       stats = Progression.get_progression_stats(state)
 
@@ -197,23 +180,20 @@ defmodule Loka.Framework.ProgressionTest do
 
   describe "can_learn_skill?/2" do
     test "returns true when player has enough skill points" do
-      player = player_fixture()
-      state = game_state_fixture(player.id, %{stats: %{"skill_points" => 5}})
+      state = character_fixture(stats: %{"skill_points" => 5})
 
       assert Progression.can_learn_skill?(state, 3) == true
       assert Progression.can_learn_skill?(state, 5) == true
     end
 
     test "returns false when player lacks skill points" do
-      player = player_fixture()
-      state = game_state_fixture(player.id, %{stats: %{"skill_points" => 2}})
+      state = character_fixture(stats: %{"skill_points" => 2})
 
       assert Progression.can_learn_skill?(state, 3) == false
     end
 
     test "returns true for zero cost" do
-      player = player_fixture()
-      state = game_state_fixture(player.id, %{stats: %{"skill_points" => 0}})
+      state = character_fixture(stats: %{"skill_points" => 0})
 
       assert Progression.can_learn_skill?(state, 0) == true
     end
@@ -221,70 +201,60 @@ defmodule Loka.Framework.ProgressionTest do
 
   describe "learn_skill/3" do
     test "learns a skill and deducts skill points" do
-      player = player_fixture()
-      state = game_state_fixture(player.id, %{stats: %{"skill_points" => 5, "skills" => []}})
+      state = character_fixture(stats: %{"skill_points" => 5, "skills" => []})
 
       assert {:ok, updated_state} = Progression.learn_skill(state, "power_strike", 2)
 
-      assert updated_state.stats["skill_points"] == 3
-      assert "power_strike" in updated_state.stats["skills"]
+      assert Entity.get_component(updated_state, "stats")["skill_points"] == 3
+      assert "power_strike" in Entity.get_component(updated_state, "stats")["skills"]
     end
 
     test "returns error when not enough skill points" do
-      player = player_fixture()
-      state = game_state_fixture(player.id, %{stats: %{"skill_points" => 1, "skills" => []}})
+      state = character_fixture(stats: %{"skill_points" => 1, "skills" => []})
 
       assert {:error, :not_enough_skill_points} =
                Progression.learn_skill(state, "power_strike", 2)
     end
 
     test "returns error when skill already learned" do
-      player = player_fixture()
-
       state =
-        game_state_fixture(player.id, %{
-          stats: %{"skill_points" => 5, "skills" => ["power_strike"]}
-        })
+        character_fixture(stats: %{"skill_points" => 5, "skills" => ["power_strike"]})
 
       assert {:error, :already_learned} = Progression.learn_skill(state, "power_strike", 2)
     end
 
     test "can learn multiple skills" do
-      player = player_fixture()
-      state = game_state_fixture(player.id, %{stats: %{"skill_points" => 10, "skills" => []}})
+      state = character_fixture(stats: %{"skill_points" => 10, "skills" => []})
 
       {:ok, state} = Progression.learn_skill(state, "power_strike", 2)
       {:ok, state} = Progression.learn_skill(state, "heal", 2)
       {:ok, state} = Progression.learn_skill(state, "shield_wall", 2)
 
-      assert state.stats["skill_points"] == 4
-      assert "power_strike" in state.stats["skills"]
-      assert "heal" in state.stats["skills"]
-      assert "shield_wall" in state.stats["skills"]
+      stats = Entity.get_component(state, "stats")
+      assert stats["skill_points"] == 4
+      assert "power_strike" in stats["skills"]
+      assert "heal" in stats["skills"]
+      assert "shield_wall" in stats["skills"]
     end
   end
 
   describe "has_skill?/2" do
     test "returns true when skill is learned" do
-      player = player_fixture()
-
       state =
-        game_state_fixture(player.id, %{stats: %{"skills" => ["power_strike", "heal"]}})
+        character_fixture(stats: %{"skills" => ["power_strike", "heal"]})
 
       assert Progression.has_skill?(state, "power_strike") == true
       assert Progression.has_skill?(state, "heal") == true
     end
 
     test "returns false when skill is not learned" do
-      player = player_fixture()
-      state = game_state_fixture(player.id, %{stats: %{"skills" => ["power_strike"]}})
+      state = character_fixture(stats: %{"skills" => ["power_strike"]})
 
       assert Progression.has_skill?(state, "heal") == false
     end
 
     test "returns false for empty skills list" do
-      player = player_fixture()
-      state = game_state_fixture(player.id, %{stats: %{"skills" => []}})
+      state = character_fixture(stats: %{"skills" => []})
 
       assert Progression.has_skill?(state, "power_strike") == false
     end
