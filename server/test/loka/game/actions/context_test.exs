@@ -2,28 +2,38 @@ defmodule Loka.Game.Actions.ContextTest do
   use ExUnit.Case, async: true
 
   alias Loka.Game.Actions.Context
-  alias Loka.Framework.Player.GameState
+  alias Loka.Engine.Entity
 
   describe "struct creation" do
     test "creates context with required fields" do
+      character = %Entity{
+        id: "char_1",
+        type: "character",
+        key: "player_123",
+        short_desc: "Test Player",
+        components: %{}
+      }
+
       ctx = %Context{
         player_id: "player_123",
         player_name: "Test Player",
-        game_state: %GameState{player_id: "player_123"},
+        character: character,
         room: %{id: "room_1", name: "Test Room"}
       }
 
       assert ctx.player_id == "player_123"
       assert ctx.player_name == "Test Player"
-      assert ctx.game_state.player_id == "player_123"
+      assert ctx.character.key == "player_123"
       assert ctx.room.id == "room_1"
     end
 
     test "creates context with optional fields" do
+      character = %Entity{id: "char_1", type: "character", key: "player_123", components: %{}}
+
       ctx = %Context{
         player_id: "player_123",
         player_name: "Test Player",
-        game_state: %GameState{player_id: "player_123"},
+        character: character,
         room: %{id: "room_1"},
         combat: %{active: true, enemy: %{name: "Goblin"}},
         dialogue: %{entity_id: "npc_1", node_id: "start"},
@@ -36,10 +46,12 @@ defmodule Loka.Game.Actions.ContextTest do
     end
 
     test "defaults optional fields to nil" do
+      character = %Entity{id: "char_1", type: "character", key: "player_123", components: %{}}
+
       ctx = %Context{
         player_id: "player_123",
         player_name: "Test Player",
-        game_state: %GameState{player_id: "player_123"},
+        character: character,
         room: %{id: "room_1"}
       }
 
@@ -50,39 +62,56 @@ defmodule Loka.Game.Actions.ContextTest do
   end
 
   describe "apply_state/2" do
-    test "updates game_state" do
+    test "updates character" do
+      character = %Entity{
+        id: "char_1",
+        type: "character",
+        key: "player_123",
+        components: %{"stats" => %{"gold" => 100}}
+      }
+
       ctx = %Context{
         player_id: "player_123",
         player_name: "Test Player",
-        game_state: %{gold: 100},
+        character: character,
         room: %{id: "room_1"}
       }
 
-      updated = Context.apply_state(ctx, %{game_state: %{gold: 200}})
+      new_character = Entity.add_component(character, "stats", %{"gold" => 200})
+      updated = Context.apply_state(ctx, %{character: new_character})
 
-      assert updated.game_state.gold == 200
+      assert Entity.get_component(updated.character, "stats") == %{"gold" => 200}
       assert updated.room.id == "room_1"
     end
 
     test "updates room" do
+      character = %Entity{
+        id: "char_1",
+        type: "character",
+        key: "player_123",
+        components: %{"stats" => %{"gold" => 100}}
+      }
+
       ctx = %Context{
         player_id: "player_123",
         player_name: "Test Player",
-        game_state: %{gold: 100},
+        character: character,
         room: %{id: "room_1"}
       }
 
       updated = Context.apply_state(ctx, %{room: %{id: "room_2"}})
 
       assert updated.room.id == "room_2"
-      assert updated.game_state.gold == 100
+      assert Entity.get_component(updated.character, "stats") == %{"gold" => 100}
     end
 
     test "updates combat state" do
+      character = %Entity{id: "char_1", type: "character", key: "player_123", components: %{}}
+
       ctx = %Context{
         player_id: "player_123",
         player_name: "Test Player",
-        game_state: %{},
+        character: character,
         room: %{id: "room_1"},
         combat: nil
       }
@@ -93,16 +122,23 @@ defmodule Loka.Game.Actions.ContextTest do
     end
 
     test "ignores nil values" do
+      character = %Entity{
+        id: "char_1",
+        type: "character",
+        key: "player_123",
+        components: %{"stats" => %{"gold" => 100}}
+      }
+
       ctx = %Context{
         player_id: "player_123",
         player_name: "Test Player",
-        game_state: %{gold: 100},
+        character: character,
         room: %{id: "room_1"}
       }
 
-      updated = Context.apply_state(ctx, %{game_state: nil, dialogue: nil})
+      updated = Context.apply_state(ctx, %{character: nil, dialogue: nil})
 
-      assert updated.game_state.gold == 100
+      assert Entity.get_component(updated.character, "stats") == %{"gold" => 100}
       assert updated.dialogue == nil
     end
   end

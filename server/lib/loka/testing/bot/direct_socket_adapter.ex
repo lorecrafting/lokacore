@@ -442,7 +442,7 @@ defmodule Loka.Testing.Bot.DirectSocketAdapter do
     %Context{
       player_id: state.player.id,
       player_name: state.player.name || state.player.email,
-      game_state: state.game_state,
+      character: state.character,
       room: state.room,
       combat: state.combat,
       dialogue: state.dialogue,
@@ -455,7 +455,7 @@ defmodule Loka.Testing.Bot.DirectSocketAdapter do
     # Apply state changes
     new_state =
       state
-      |> maybe_update(:game_state, result.state[:game_state])
+      |> maybe_update(:character, result.state[:character])
       |> maybe_update(:room, result.state[:room])
       |> maybe_update(:combat, result.state[:combat])
       |> maybe_update(:dialogue, result.state[:dialogue])

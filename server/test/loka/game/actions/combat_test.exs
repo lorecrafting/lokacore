@@ -15,7 +15,7 @@ defmodule Loka.Game.Actions.CombatTest do
       ctx = %Context{
         player_id: player.id,
         player_name: "TestPlayer",
-        game_state: character,
+        character: character,
         room: %{id: "test_room", entities: []},
         combat: nil
       }
@@ -49,7 +49,7 @@ defmodule Loka.Game.Actions.CombatTest do
       ctx = %Context{
         player_id: player.id,
         player_name: "TestPlayer",
-        game_state: character,
+        character: character,
         room: %{id: "test_room", entities: []},
         combat: nil
       }
@@ -70,7 +70,7 @@ defmodule Loka.Game.Actions.CombatTest do
       ctx = %Context{
         player_id: player.id,
         player_name: "TestPlayer",
-        game_state: character,
+        character: character,
         room: %{id: "test_room", entities: []},
         combat: nil
       }

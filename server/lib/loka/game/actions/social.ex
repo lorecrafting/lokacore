@@ -12,7 +12,7 @@ defmodule Loka.Game.Actions.Social do
   """
 
   alias Loka.Game.Actions.{Context, Result}
-  alias Loka.Framework.Player.GameState, as: PlayerGameState
+  alias Loka.Engine.Entity
   alias Loka.Engine.SocialLoader
   alias Loka.Engine.SocialSubstitution
 
@@ -42,19 +42,19 @@ defmodule Loka.Game.Actions.Social do
   """
   @spec set_mood(Context.t(), String.t()) :: {:ok, Result.t()} | {:error, String.t()}
   def set_mood(ctx, mood_str) do
-    game_state = ctx.game_state
+    character = ctx.character
 
     if mood_str in @valid_moods do
-      social = Map.get(game_state, :social, %{}) || %{}
+      social = Entity.get_component(character, "social") || %{}
       mood_atom = String.to_existing_atom(mood_str)
 
       updated_social =
-        Map.put(social, :mood, %{
-          current: mood_atom,
-          updated_at: DateTime.utc_now()
+        Map.put(social, "mood", %{
+          "current" => Atom.to_string(mood_atom),
+          "updated_at" => DateTime.utc_now() |> DateTime.to_iso8601()
         })
 
-      {:ok, new_game_state} = PlayerGameState.update_state(game_state, %{social: updated_social})
+      new_character = Entity.add_component(character, "social", updated_social)
 
       mood_message =
         if mood_str == "neutral",
@@ -63,7 +63,7 @@ defmodule Loka.Game.Actions.Social do
 
       result =
         Result.new(
-          state: %{game_state: new_game_state},
+          state: %{character: new_character},
           events: [{:event, mood_message}]
         )
 
@@ -78,23 +78,23 @@ defmodule Loka.Game.Actions.Social do
   """
   @spec set_pose(Context.t(), String.t()) :: {:ok, Result.t()}
   def set_pose(ctx, pose_text) do
-    game_state = ctx.game_state
-    social = Map.get(game_state, :social, %{}) || %{}
+    character = ctx.character
+    social = Entity.get_component(character, "social") || %{}
     pose_text = String.trim(pose_text)
 
     updated_social =
-      Map.put(social, :pose, %{
-        text: pose_text,
-        updated_at: DateTime.utc_now()
+      Map.put(social, "pose", %{
+        "text" => pose_text,
+        "updated_at" => DateTime.utc_now() |> DateTime.to_iso8601()
       })
 
-    {:ok, new_game_state} = PlayerGameState.update_state(game_state, %{social: updated_social})
+    new_character = Entity.add_component(character, "social", updated_social)
 
     msg = if pose_text == "", do: "You clear your pose.", else: "Your pose is now: #{pose_text}"
 
     result =
       Result.new(
-        state: %{game_state: new_game_state},
+        state: %{character: new_character},
         events: [{:event, msg}]
       )
 

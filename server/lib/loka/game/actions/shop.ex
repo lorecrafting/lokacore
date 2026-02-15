@@ -15,10 +15,8 @@ defmodule Loka.Game.Actions.Shop do
   require Logger
 
   alias Loka.Game.Actions.{Context, Result}
-  alias Loka.Framework.Player.GameState, as: PlayerGameState
   alias Loka.Framework.Economy
-  alias Loka.Engine.{Entities, Spawner}
-  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
+  alias Loka.Engine.{Entity, Entities, Spawner}
 
   @doc """
   Open a shop with an NPC merchant.
@@ -58,10 +56,10 @@ defmodule Loka.Game.Actions.Shop do
   @spec buy_item(Context.t(), String.t(), String.t(), map()) ::
           {:ok, Result.t()} | {:error, String.t()}
   def buy_item(ctx, npc_id, item_key, npc_entity) do
-    game_state = ctx.game_state
+    character = ctx.character
     shop_data = get_shop_data(npc_entity)
     item_info = Enum.find(shop_data.items, fn i -> i.key == item_key end)
-    player_currency = Economy.get_currency(game_state)
+    player_currency = Economy.get_currency(character)
 
     Logger.debug(
       "[SHOP] Buy attempt: player_id=#{ctx.player_id} item=#{item_key} gold=#{player_currency}"
@@ -85,25 +83,28 @@ defmodule Loka.Game.Actions.Shop do
       true ->
         case Spawner.spawn(item_key) do
           {:ok, item_entity} ->
-            {:ok, state_after_deduct} =
-              Economy.deduct_currency(game_state, "gold", item_info.price)
+            {:ok, character_after_deduct} =
+              Economy.deduct_currency(character, "gold", item_info.price)
 
-            new_inventory = [item_entity.id | state_after_deduct.inventory || []]
+            inventory = Entity.get_component(character_after_deduct, "inventory") || []
+            new_inventory = [item_entity.id | inventory]
 
-            {:ok, new_game_state} =
-              PlayerGameState.update_state(state_after_deduct, %{inventory: new_inventory})
+            new_character =
+              Entity.add_component(character_after_deduct, "inventory", new_inventory)
 
             Logger.info(
-              "[SHOP] Purchase completed: player_id=#{ctx.player_id} item=#{item_key} cost=#{item_info.price} remaining_gold=#{Economy.get_currency(new_game_state)}"
+              "[SHOP] Purchase completed: player_id=#{ctx.player_id} item=#{item_key} cost=#{item_info.price} remaining_gold=#{Economy.get_currency(new_character)}"
             )
+
+            stats = Entity.get_component(new_character, "stats")
 
             result =
               Result.new(
-                state: %{game_state: new_game_state},
+                state: %{character: new_character},
                 events: [
                   {:event, "You purchased #{item_info.name} for #{item_info.price} gold."},
                   {:inventory_update, %{action: "add", item_id: item_entity.id}},
-                  {:stats_update, %{stats: new_game_state.stats}}
+                  {:stats_update, %{stats: stats}}
                 ]
               )
 
@@ -125,9 +126,10 @@ defmodule Loka.Game.Actions.Shop do
   @spec sell_item(Context.t(), String.t(), String.t(), map()) ::
           {:ok, Result.t()} | {:error, String.t()}
   def sell_item(ctx, npc_id, item_id, npc_entity) do
-    game_state = ctx.game_state
+    character = ctx.character
     shop_data = get_shop_data(npc_entity)
     item_entity = Entities.get_entity(item_id)
+    inventory = Entity.get_component(character, "inventory") || []
 
     Logger.debug("[SHOP] Sell attempt: player_id=#{ctx.player_id} item_id=#{item_id}")
 
@@ -139,7 +141,7 @@ defmodule Loka.Game.Actions.Shop do
 
         {:error, "You don't have that item."}
 
-      item_id not in (game_state.inventory || []) ->
+      item_id not in inventory ->
         Logger.debug(
           "[SHOP] Sell failed - not in inventory: player_id=#{ctx.player_id} item_id=#{item_id}"
         )
@@ -155,25 +157,26 @@ defmodule Loka.Game.Actions.Shop do
 
       true ->
         sell_price = get_sell_price(item_entity)
-        {:ok, state_after_add} = Economy.add_currency(game_state, "gold", sell_price)
-        new_inventory = List.delete(state_after_add.inventory || [], item_id)
-
-        {:ok, new_game_state} =
-          PlayerGameState.update_state(state_after_add, %{inventory: new_inventory})
+        {:ok, character_after_add} = Economy.add_currency(character, "gold", sell_price)
+        cur_inventory = Entity.get_component(character_after_add, "inventory") || []
+        new_inventory = List.delete(cur_inventory, item_id)
+        new_character = Entity.add_component(character_after_add, "inventory", new_inventory)
 
         item_name = item_entity.short_desc || item_entity.key
 
         Logger.info(
-          "[SHOP] Sale completed: player_id=#{ctx.player_id} item=#{item_entity.key} price=#{sell_price} new_gold=#{Economy.get_currency(new_game_state)}"
+          "[SHOP] Sale completed: player_id=#{ctx.player_id} item=#{item_entity.key} price=#{sell_price} new_gold=#{Economy.get_currency(new_character)}"
         )
+
+        stats = Entity.get_component(new_character, "stats")
 
         result =
           Result.new(
-            state: %{game_state: new_game_state},
+            state: %{character: new_character},
             events: [
               {:event, "You sold #{item_name} for #{sell_price} gold."},
               {:inventory_update, %{action: "remove", item_id: item_id}},
-              {:stats_update, %{stats: new_game_state.stats}}
+              {:stats_update, %{stats: stats}}
             ]
           )
 
@@ -210,14 +213,14 @@ defmodule Loka.Game.Actions.Shop do
   end
 
   defp load_shop_item(item_key) when is_binary(item_key) do
-    case TypedObjectLoader.get(item_key) do
-      {:ok, prototype} ->
-        price = get_item_price(prototype)
+    case Entities.find_one(key: item_key, type: :item) do
+      {:ok, entity} ->
+        price = get_item_price(entity)
 
         %{
           key: item_key,
-          name: prototype.name || item_key,
-          description: prototype.description || "",
+          name: entity.short_desc || item_key,
+          description: entity.long_desc || "",
           price: price
         }
 
@@ -228,10 +231,10 @@ defmodule Loka.Game.Actions.Shop do
 
   defp load_shop_item(_), do: nil
 
-  defp get_item_price(prototype) do
-    components = prototype.components || %{}
-    valuable = Map.get(components, "valuable") || Map.get(components, :valuable) || %{}
-    Map.get(valuable, "base_price") || Map.get(valuable, :base_price) || 10
+  defp get_item_price(entity) do
+    components = entity.components || %{}
+    valuable = Map.get(components, "valuable") || %{}
+    Map.get(valuable, "base_price") || 10
   end
 
   defp get_sell_price(item_entity) do

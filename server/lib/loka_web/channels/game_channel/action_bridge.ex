@@ -74,12 +74,12 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
   @spec build_context(Socket.t()) :: Context.t()
   def build_context(socket) do
     player = socket.assigns.player
-    game_state = socket.assigns.game_state
+    character = socket.assigns.character
 
     %Context{
       player_id: player.id,
-      player_name: player_display_name(player, game_state),
-      game_state: game_state,
+      player_name: player_display_name(player, character),
+      character: character,
       room: socket.assigns.room,
       combat: socket.assigns[:combat],
       dialogue: socket.assigns[:dialogue_state],
@@ -108,11 +108,11 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
     require Logger
 
     Logger.info(
-      "[ACTION_BRIDGE] apply_state_changes: keys=#{inspect(Map.keys(state))}, has_game_state?=#{Map.has_key?(state, :game_state)}"
+      "[ACTION_BRIDGE] apply_state_changes: keys=#{inspect(Map.keys(state))}, has_character?=#{Map.has_key?(state, :character)}"
     )
 
     socket
-    |> maybe_assign(:game_state, state[:game_state])
+    |> maybe_assign(:character, state[:character])
     |> maybe_assign(:room, state[:room])
     |> maybe_assign(:combat, state[:combat])
     |> maybe_assign(:dialogue_state, state[:dialogue])
@@ -131,10 +131,15 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
 
   defp maybe_assign(socket, _key, nil), do: socket
 
-  defp maybe_assign(socket, :game_state, value) do
-    # Only update the socket assigns - quest events are dispatched via dispatch_event
-    # Do NOT broadcast game_state here as it would overwrite the full client state
-    Phoenix.Socket.assign(socket, :game_state, value)
+  defp maybe_assign(socket, :character, value) do
+    # Update character entity in socket assigns
+    # Also persist to EntityServer for durability
+    if value do
+      alias Loka.Engine.EntityServer
+      EntityServer.update(value.id, fn _old -> value end)
+    end
+
+    Phoenix.Socket.assign(socket, :character, value)
   end
 
   defp maybe_assign(socket, key, value), do: Phoenix.Socket.assign(socket, key, value)
@@ -178,10 +183,10 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
   # Room changed (navigation)
   defp dispatch_event({:room_changed, data}, socket) do
     player_id = socket.assigns.player.id
-    game_state = socket.assigns.game_state
+    character = socket.assigns.character
     other_players = RoomHelpers.load_other_players(data.room.id, player_id)
-    visual_state = Serializers.serialize_visual_state(room: data.room, player: game_state)
-    sound_state = Serializers.serialize_sound_state(room: data.room, player: game_state)
+    visual_state = Serializers.serialize_visual_state(room: data.room, player: character)
+    sound_state = Serializers.serialize_sound_state(room: data.room, player: character)
 
     validated_push(socket, "room_update", %{
       room: data.room,
@@ -198,10 +203,10 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
   # Room update (entities changed in current room)
   defp dispatch_event({:room_update, data}, socket) do
     player_id = socket.assigns.player.id
-    game_state = socket.assigns.game_state
+    character = socket.assigns.character
     other_players = RoomHelpers.load_other_players(data.room.id, player_id)
-    visual_state = Serializers.serialize_visual_state(room: data.room, player: game_state)
-    sound_state = Serializers.serialize_sound_state(room: data.room, player: game_state)
+    visual_state = Serializers.serialize_visual_state(room: data.room, player: character)
+    sound_state = Serializers.serialize_sound_state(room: data.room, player: character)
 
     validated_push(socket, "room_update", %{
       room: data.room,
@@ -397,8 +402,8 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
   # Helpers
   # =============================================================================
 
-  defp player_display_name(player, game_state) do
-    game_state.character_name || player.name || player.email
+  defp player_display_name(player, character) do
+    character.short_desc || player.name || player.email
   end
 
   # Format error reasons to strings for client display

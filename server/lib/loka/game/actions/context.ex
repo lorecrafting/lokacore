@@ -4,25 +4,21 @@ defmodule Loka.Game.Actions.Context do
 
   Contains all the state needed to execute a game action:
   - Player identification
-  - Current game state
+  - Character entity (V2 unified entity)
   - Current room
 
   ## Building Context
 
-  From GameChannel socket:
+  From ActionBridge (preferred):
 
-      ctx = Context.from_socket(socket)
-
-  From LiveView socket:
-
-      ctx = Context.from_liveview(socket)
+      ctx = ActionBridge.build_context(socket)
 
   Manually:
 
       ctx = %Context{
         player_id: player.id,
         player_name: player.name,
-        game_state: game_state,
+        character: character_entity,
         room: room
       }
   """
@@ -30,7 +26,7 @@ defmodule Loka.Game.Actions.Context do
   @type t :: %__MODULE__{
           player_id: String.t(),
           player_name: String.t(),
-          game_state: map(),
+          character: map(),
           room: map(),
           combat: map() | nil,
           dialogue: map() | nil,
@@ -41,7 +37,7 @@ defmodule Loka.Game.Actions.Context do
   defstruct [
     :player_id,
     :player_name,
-    :game_state,
+    :character,
     :room,
     :combat,
     :dialogue,
@@ -57,7 +53,7 @@ defmodule Loka.Game.Actions.Context do
     %__MODULE__{
       player_id: socket.assigns.player.id,
       player_name: socket.assigns.player.name || socket.assigns.player.email,
-      game_state: socket.assigns.game_state,
+      character: socket.assigns.character,
       room: socket.assigns.room,
       combat: socket.assigns[:combat],
       dialogue: socket.assigns[:dialogue],
@@ -76,7 +72,7 @@ defmodule Loka.Game.Actions.Context do
     %__MODULE__{
       player_id: player.id,
       player_name: player.name || player.email,
-      game_state: socket.assigns[:game_state],
+      character: socket.assigns[:character],
       room: socket.assigns[:room],
       combat: socket.assigns[:combat],
       dialogue: socket.assigns[:dialogue],
@@ -91,7 +87,7 @@ defmodule Loka.Game.Actions.Context do
   @spec apply_state(t(), map()) :: t()
   def apply_state(ctx, state_changes) do
     ctx
-    |> maybe_update(:game_state, state_changes[:game_state])
+    |> maybe_update(:character, state_changes[:character])
     |> maybe_update(:room, state_changes[:room])
     |> maybe_update(:combat, state_changes[:combat])
     |> maybe_update(:dialogue, state_changes[:dialogue])

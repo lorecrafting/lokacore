@@ -17,9 +17,8 @@ defmodule Loka.Game.Actions.Combat do
   alias Loka.Game.Actions.{Context, Result}
   alias Loka.Framework.Combat
   alias Loka.Framework.Combat.RespawnManager
-  alias Loka.Framework.Player.GameState, as: PlayerGameState
   alias Loka.Framework.Quest.Listeners, as: QuestListeners
-  alias Loka.Engine.Entities
+  alias Loka.Engine.{Entity, Entities}
   alias Loka.Mechanics.Damage
 
   @doc """
@@ -31,7 +30,7 @@ defmodule Loka.Game.Actions.Combat do
       "[COMBAT] Attack initiated: player_id=#{ctx.player_id} target=#{entity_id} target_name=#{entity.name}"
     )
 
-    case Combat.start_combat(entity_id, ctx.game_state) do
+    case Combat.start_combat(entity_id, ctx.character) do
       {:ok, combat_state} ->
         Logger.info(
           "[COMBAT] Combat started: player_id=#{ctx.player_id} enemy=#{entity.name} enemy_hp=#{inspect(combat_state.enemy.health)}"
@@ -80,7 +79,7 @@ defmodule Loka.Game.Actions.Combat do
     Logger.debug("[COMBAT] Flee attempted: player_id=#{ctx.player_id}")
 
     if combat do
-      case Combat.player_action(combat, :flee, ctx.game_state) do
+      case Combat.player_action(combat, :flee, ctx.character) do
         {:ok, _combat, %{success: true}} ->
           Logger.info(
             "[COMBAT] Flee succeeded: player_id=#{ctx.player_id} enemy=#{combat.enemy.name}"
@@ -141,20 +140,20 @@ defmodule Loka.Game.Actions.Combat do
     Logger.debug("[COMBAT] Processing tick: player_id=#{ctx.player_id}")
 
     if combat do
-      case Combat.execute_combat_tick(combat, ctx.game_state) do
-        {:victory, new_combat, rewards, updated_game_state} ->
+      case Combat.execute_combat_tick(combat, ctx.character) do
+        {:victory, new_combat, rewards, updated_character} ->
           Logger.info(
             "[COMBAT] Victory: player_id=#{ctx.player_id} enemy=#{new_combat.enemy.name} xp=#{rewards.xp} gold=#{rewards.gold}"
           )
 
-          handle_victory(ctx, new_combat, rewards, updated_game_state)
+          handle_victory(ctx, new_combat, rewards, updated_character)
 
-        {:ok, new_combat, player_damage, updated_game_state} ->
+        {:ok, new_combat, player_damage, updated_character} ->
           Logger.debug(
             "[COMBAT] Tick continues: player_id=#{ctx.player_id} player_damage=#{player_damage} enemy_hp=#{inspect(new_combat.enemy.health)}"
           )
 
-          handle_combat_continues(ctx, new_combat, player_damage, updated_game_state)
+          handle_combat_continues(ctx, new_combat, player_damage, updated_character)
       end
     else
       Logger.debug("[COMBAT] Tick skipped - not in combat: player_id=#{ctx.player_id}")
@@ -166,7 +165,7 @@ defmodule Loka.Game.Actions.Combat do
   # Private Helpers
   # =============================================================================
 
-  defp handle_victory(_ctx, combat, rewards, game_state) do
+  defp handle_victory(_ctx, combat, rewards, character) do
     Logger.debug("[COMBAT] Handling victory: enemy_id=#{combat.enemy_id}")
 
     # Despawn the mob
@@ -175,11 +174,11 @@ defmodule Loka.Game.Actions.Combat do
     # Check kill quest objectives
     enemy_entity = Entities.get_entity(combat.enemy_id)
 
-    {new_game_state, quest_events} =
+    {new_character, quest_events} =
       if enemy_entity do
-        QuestListeners.check_entity_death(game_state, enemy_entity.key)
+        QuestListeners.check_entity_death(character, enemy_entity.key)
       else
-        {game_state, []}
+        {character, []}
       end
 
     events = [
@@ -191,38 +190,43 @@ defmodule Loka.Game.Actions.Combat do
 
     events = events ++ Enum.map(quest_events, fn e -> {:event, e.text} end)
 
+    stats = Entity.get_component(new_character, "stats")
+
     events =
-      if new_game_state.stats do
-        events ++ [{:stats_update, %{stats: new_game_state.stats}}]
+      if stats do
+        events ++ [{:stats_update, %{stats: stats}}]
       else
         events
       end
 
     result =
       Result.new(
-        state: %{combat: nil, game_state: new_game_state},
+        state: %{combat: nil, character: new_character},
         events: events
       )
 
     {:ok, result}
   end
 
-  defp handle_combat_continues(ctx, combat, player_damage, game_state) do
-    # Calculate new health using Mechanics.Damage
-    current_health = PlayerGameState.get_health(game_state)
-    max_hp = current_health[:max] || current_health["max"] || 100
+  defp handle_combat_continues(ctx, combat, player_damage, character) do
+    # Get health from resources component
+    resources = Entity.get_component(character, "resources") || %{}
+    current_health = resources["health"] || %{"current" => 100, "max" => 100}
+    max_hp = current_health["max"] || current_health[:max] || 100
 
     {:ok, new_health_map, damage_result} =
       Damage.apply_to_map(current_health, player_damage)
 
-    {:ok, new_game_state} = PlayerGameState.set_health(game_state, new_health_map)
+    # Update health in character's resources component
+    new_resources = Map.put(resources, "health", new_health_map)
+    new_character = Entity.add_component(character, "resources", new_resources)
 
     if damage_result.is_fatal do
       Logger.info(
         "[COMBAT] Defeat: player_id=#{ctx.player_id} enemy=#{combat.enemy.name} fatal_damage=#{player_damage}"
       )
 
-      handle_defeat(ctx, combat, new_game_state)
+      handle_defeat(ctx, combat, new_character)
     else
       new_current = new_health_map[:current] || new_health_map["current"]
 
@@ -232,7 +236,7 @@ defmodule Loka.Game.Actions.Combat do
 
       result =
         Result.new(
-          state: %{combat: combat, game_state: new_game_state},
+          state: %{combat: combat, character: new_character},
           events: [
             {:combat_update,
              %{
@@ -247,10 +251,10 @@ defmodule Loka.Game.Actions.Combat do
     end
   end
 
-  defp handle_defeat(_ctx, combat, game_state) do
+  defp handle_defeat(_ctx, combat, character) do
     result =
       Result.new(
-        state: %{combat: nil, game_state: game_state},
+        state: %{combat: nil, character: character},
         events: [
           {:combat_end, %{reason: "defeat"}},
           {:cancel_timer, :combat_tick},

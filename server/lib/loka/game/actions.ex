@@ -56,11 +56,10 @@ defmodule Loka.Game.Actions do
   """
 
   alias Loka.Game.Actions.{Context, Result}
-  alias Loka.Framework.Player.GameState, as: PlayerGameState
   alias Loka.Framework.World.{RoomLoader, Atmosphere}
   alias Loka.Framework.{Inventory, Equipment, Quest}
   alias Loka.Framework.Actions.Resolver, as: ActionResolver
-  alias Loka.Engine.{Entities, Hooks}
+  alias Loka.Engine.{Entity, Entities, Hooks}
   alias LokaWeb.Channels.GameChannel.Serializers
 
   # =============================================================================
@@ -90,53 +89,24 @@ defmodule Loka.Game.Actions do
   end
 
   @doc """
-  Initialize game state for a player.
-
-  Called when a player first connects. Loads their game state
-  and current room.
-  """
-  @spec init(map()) :: {:ok, Context.t(), Result.t()} | {:error, term()}
-  def init(player) do
-    with {:ok, game_state} <- PlayerGameState.get_or_create_state(player.id),
-         true <- PlayerGameState.character_created?(game_state) do
-      {room, game_state} = load_player_room(game_state)
-
-      ctx = %Context{
-        player_id: player.id,
-        player_name: get_player_name(player, game_state),
-        game_state: game_state,
-        room: room
-      }
-
-      result =
-        Result.new(
-          state: %{game_state: game_state, room: room},
-          events: [{:game_initialized, build_client_state(ctx)}]
-        )
-
-      {:ok, ctx, result}
-    else
-      false -> {:error, :character_not_created}
-      {:error, reason} -> {:error, reason}
-    end
-  end
-
-  @doc """
   Build full client state for sending to transport.
   """
   @spec build_client_state(Context.t()) :: map()
   def build_client_state(ctx) do
-    game_state = ctx.game_state
+    character = ctx.character
     room = ctx.room
+
+    resources = Entity.get_component(character, "resources") || %{}
+    health = resources["health"] || %{"current" => 100, "max" => 100}
 
     %{
       room: serialize_room(room),
       atmosphere: Atmosphere.describe_for_room(room),
-      inventory: Inventory.list_items(game_state),
-      equipped: Equipment.get_equipped(game_state),
-      quests: Quest.get_active_quests(game_state),
-      stats: game_state.stats || %{},
-      health: PlayerGameState.get_health(game_state),
+      inventory: Inventory.list_items(character),
+      equipped: Equipment.get_equipped(character),
+      quests: Quest.get_active_quests(character),
+      stats: Entity.get_component(character, "stats") || %{},
+      health: health,
       player: %{
         id: ctx.player_id,
         name: ctx.player_name
@@ -176,7 +146,6 @@ defmodule Loka.Game.Actions do
         {:error, "You don't see that here."}
 
       entity ->
-        # DEBUG: Trace entity components for action resolution
         components = Map.get(entity, :components) || %{}
 
         IO.puts(
@@ -190,7 +159,7 @@ defmodule Loka.Game.Actions do
         )
 
         # Serialize entity with resolved actions based on player state
-        entity_context = serialize_entity_context(entity, ctx.game_state, ctx.room)
+        entity_context = serialize_entity_context(entity, ctx.character, ctx.room)
         IO.puts("[click_entity] Resolved actions: #{inspect(entity_context[:actions])}")
         result = Result.new(events: [{:entity_context, entity_context}])
         {:ok, result}
@@ -207,11 +176,11 @@ defmodule Loka.Game.Actions do
         # Remove item from room
         {:ok, _} = Entities.update_entity(item_entity, %{location_id: nil})
 
-        case Inventory.add_item(ctx.game_state, entity_id) do
-          {:ok, new_game_state} ->
+        case Inventory.add_item(ctx.character, entity_id) do
+          {:ok, new_character} ->
             # Check quest objectives
-            {new_game_state, quest_events} =
-              check_get_item_quest(new_game_state, item_entity.key)
+            {new_character, quest_events} =
+              check_get_item_quest(new_character, item_entity.key)
 
             # Reload room
             {:ok, new_room} = RoomLoader.load_room_for_display(ctx.room.id)
@@ -219,7 +188,7 @@ defmodule Loka.Game.Actions do
             # Build quest progress event if objectives were updated
             quest_progress_event =
               if Enum.any?(quest_events) do
-                active_quests = Quest.get_active_quests(new_game_state)
+                active_quests = Quest.get_active_quests(new_character)
                 [{:quest_progress, %{quests: Serializers.serialize_quests(active_quests)}}]
               else
                 []
@@ -230,8 +199,7 @@ defmodule Loka.Game.Actions do
                 {:event, "You pick up the #{entity.name}."},
                 {:inventory_update,
                  %{
-                   inventory:
-                     Serializers.serialize_inventory(Inventory.list_items(new_game_state))
+                   inventory: Serializers.serialize_inventory(Inventory.list_items(new_character))
                  }},
                 {:room_update,
                  %{
@@ -242,7 +210,7 @@ defmodule Loka.Game.Actions do
 
             result =
               Result.new(
-                state: %{game_state: new_game_state, room: new_room},
+                state: %{character: new_character, room: new_room},
                 events: events
               )
 
@@ -260,30 +228,31 @@ defmodule Loka.Game.Actions do
   end
 
   defp do_action(:drop_item, %{item_id: item_id}, ctx) do
-    game_state = ctx.game_state
+    character = ctx.character
     room = ctx.room
+    inventory = Entity.get_component(character, "inventory") || []
 
-    if item_id in (game_state.inventory || []) do
+    if item_id in inventory do
       item_entity = Entities.get_entity(item_id)
 
       if item_entity do
         # Move item to room
         {:ok, _} = Entities.update_entity(item_entity, %{location_id: room.id})
 
-        case Inventory.remove_item(game_state, item_id) do
-          {:ok, new_game_state} ->
+        case Inventory.remove_item(character, item_id) do
+          {:ok, new_character} ->
             {:ok, new_room} = RoomLoader.load_room_for_display(room.id)
             item_name = item_entity.short_desc || item_entity.key || "item"
 
             result =
               Result.new(
-                state: %{game_state: new_game_state, room: new_room},
+                state: %{character: new_character, room: new_room},
                 events: [
                   {:event, "You drop the #{item_name}."},
                   {:inventory_update,
                    %{
                      inventory:
-                       Serializers.serialize_inventory(Inventory.list_items(new_game_state))
+                       Serializers.serialize_inventory(Inventory.list_items(new_character))
                    }},
                   {:room_update,
                    %{
@@ -311,10 +280,8 @@ defmodule Loka.Game.Actions do
   # =============================================================================
 
   defp do_action(:use_item, %{item_id: item_id} = params, ctx) do
-    game_state = ctx.game_state
-
-    case Inventory.use_item(game_state, item_id) do
-      {:ok, new_game_state, effect} ->
+    case Inventory.use_item(ctx.character, item_id) do
+      {:ok, new_character, effect} ->
         item_entity = Entities.get_entity(item_id)
         item_name = if item_entity, do: item_entity.short_desc || item_entity.key, else: "item"
 
@@ -335,7 +302,7 @@ defmodule Loka.Game.Actions do
 
         result =
           Result.new(
-            state: %{game_state: new_game_state},
+            state: %{character: new_character},
             events: [{:output, %{text: effect_text}}]
           )
 
@@ -363,17 +330,14 @@ defmodule Loka.Game.Actions do
   # =============================================================================
 
   defp do_action(:equip_item, %{item_id: item_id}, ctx) do
-    case Equipment.equip(ctx.game_state, item_id) do
-      {:ok, new_game_state} ->
-        item_entity = Entities.get_entity(item_id)
-        item_name = if item_entity, do: item_entity.short_desc || item_entity.key, else: "item"
-
+    case Equipment.equip(ctx.character, item_id) do
+      {:ok, new_character} ->
         result =
           Result.new(
-            state: %{game_state: new_game_state},
+            state: %{character: new_character},
             events: [
-              {:event, "You equip the #{item_name}."},
-              {:equipment_update, %{equipped: Equipment.get_equipped(new_game_state)}}
+              {:event, "You equip the item."},
+              {:equipment_update, %{equipped: Equipment.get_equipped(new_character)}}
             ]
           )
 
@@ -393,14 +357,14 @@ defmodule Loka.Game.Actions do
   defp do_action(:unequip_item, %{slot: slot}, ctx) do
     slot_atom = if is_atom(slot), do: slot, else: String.to_existing_atom(slot)
 
-    case Equipment.unequip(ctx.game_state, slot_atom) do
-      {:ok, new_game_state} ->
+    case Equipment.unequip(ctx.character, slot_atom) do
+      {:ok, new_character} ->
         result =
           Result.new(
-            state: %{game_state: new_game_state},
+            state: %{character: new_character},
             events: [
               {:event, "You unequip your #{slot}."},
-              {:equipment_update, %{equipped: Equipment.get_equipped(new_game_state)}}
+              {:equipment_update, %{equipped: Equipment.get_equipped(new_character)}}
             ]
           )
 
@@ -610,31 +574,6 @@ defmodule Loka.Game.Actions do
   # Private Helpers
   # =============================================================================
 
-  defp load_player_room(game_state) do
-    case RoomLoader.load_room_for_display(game_state.current_room_id) do
-      {:ok, room} ->
-        {room, game_state}
-
-      {:error, :not_found} ->
-        starting_room_id = RoomLoader.get_starting_room_id()
-
-        case RoomLoader.load_room_for_display(starting_room_id) do
-          {:ok, room} ->
-            {:ok, new_game_state} =
-              PlayerGameState.update_state(game_state, %{current_room_id: room.id})
-
-            {room, new_game_state}
-
-          {:error, _} ->
-            {RoomLoader.empty_room(), game_state}
-        end
-    end
-  end
-
-  defp get_player_name(player, game_state) do
-    game_state.character_name || player.name || player.email
-  end
-
   defp find_entity(room, id, type) do
     case type do
       "npc" ->
@@ -650,14 +589,14 @@ defmodule Loka.Game.Actions do
     end
   end
 
-  defp check_get_item_quest(game_state, item_key) do
+  defp check_get_item_quest(character, item_key) do
     alias Loka.Framework.Quest.Listeners, as: QuestListeners
-    QuestListeners.check_item_received(game_state, item_key)
+    QuestListeners.check_item_received(character, item_key)
   end
 
-  defp check_room_entry_quest(game_state, room_key) do
+  defp check_room_entry_quest(character, room_key) do
     alias Loka.Framework.Quest.Listeners, as: QuestListeners
-    QuestListeners.check_room_entry(game_state, room_key)
+    QuestListeners.check_room_entry(character, room_key)
   end
 
   defp navigate_to_room(ctx, destination_id, direction) do
@@ -677,24 +616,24 @@ defmodule Loka.Game.Actions do
       :ok ->
         case RoomLoader.load_room_for_display(destination_id) do
           {:ok, new_room} ->
-            {:ok, new_game_state} =
-              PlayerGameState.update_state(ctx.game_state, %{current_room_id: new_room.id})
+            # Update character's location
+            new_character = %{ctx.character | location_id: new_room.id}
 
             # Check quest objectives for room entry (go_to objectives)
             room_key = new_room.key || new_room.id
 
-            {new_game_state, quest_events} =
-              check_room_entry_quest(new_game_state, room_key)
+            {new_character, quest_events} =
+              check_room_entry_quest(new_character, room_key)
 
             # Fire enter_room hook for other listeners
             Hooks.run(:at_enter_room, [
-              Map.put(player_context, :game_state, new_game_state),
+              Map.put(player_context, :character, new_character),
               %{room_id: new_room.id, room_key: room_key}
             ])
 
             result =
               Result.new(
-                state: %{game_state: new_game_state, room: new_room},
+                state: %{character: new_character, room: new_room},
                 events:
                   [
                     {:room_changed,
@@ -753,7 +692,7 @@ defmodule Loka.Game.Actions do
     }
   end
 
-  defp serialize_entity_context(entity, game_state, room) do
+  defp serialize_entity_context(entity, character, room) do
     components = Map.get(entity, :components) || %{}
     component_keys = components |> Map.keys() |> Enum.map(&to_string/1)
 
@@ -767,7 +706,7 @@ defmodule Loka.Game.Actions do
     # Resolve available actions for this entity based on player state
     actions =
       entity_map
-      |> ActionResolver.resolve(game_state, room)
+      |> ActionResolver.resolve(character, room)
       |> ActionResolver.serialize()
 
     %{

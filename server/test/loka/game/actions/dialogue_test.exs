@@ -3,29 +3,23 @@ defmodule Loka.Game.Actions.DialogueTest do
 
   alias Loka.Game.Actions.Dialogue, as: DialogueActions
   alias Loka.Game.Actions.Context
-  alias Loka.Framework.Player.GameState
 
   import Loka.AccountsFixtures
+  import Loka.EngineFixtures
 
   describe "start_conversation/2" do
     setup do
       player = player_fixture()
-      {:ok, game_state} = GameState.get_or_create_state(player.id)
-
-      {:ok, game_state} =
-        GameState.update_state(game_state, %{
-          character_name: "TestPlayer",
-          character_created: true
-        })
+      character = character_fixture(%{player: player, character_name: "TestPlayer"})
 
       ctx = %Context{
         player_id: player.id,
         player_name: "TestPlayer",
-        game_state: game_state,
+        character: character,
         room: %{id: "test_room", entities: []}
       }
 
-      %{ctx: ctx, player: player, game_state: game_state}
+      %{ctx: ctx, player: player, character: character}
     end
 
     test "returns error when entity doesn't exist", %{ctx: ctx} do
@@ -34,15 +28,15 @@ defmodule Loka.Game.Actions.DialogueTest do
       assert is_binary(message)
     end
 
-    test "builds player quest context correctly", %{ctx: ctx, game_state: game_state} do
-      # Update game state with active quest
-      {:ok, updated_state} =
-        GameState.update_state(game_state, %{
-          quests: %{"test_quest" => %{status: :active}},
-          completed_quests: ["old_quest"]
+    test "builds player quest context correctly", %{ctx: ctx, character: character} do
+      # Update character with active quest in components
+      updated_character =
+        character
+        |> Loka.Engine.Entity.add_component("quest_progress", %{
+          "test_quest" => %{"status" => "active"}
         })
 
-      ctx = %{ctx | game_state: updated_state}
+      ctx = %{ctx | character: updated_character}
 
       # Should return an error tuple for nonexistent NPC
       result = DialogueActions.start_conversation(ctx, "nonexistent")
@@ -53,23 +47,17 @@ defmodule Loka.Game.Actions.DialogueTest do
   describe "choose_option/2" do
     setup do
       player = player_fixture()
-      {:ok, game_state} = GameState.get_or_create_state(player.id)
-
-      {:ok, game_state} =
-        GameState.update_state(game_state, %{
-          character_name: "TestPlayer",
-          character_created: true
-        })
+      character = character_fixture(%{player: player, character_name: "TestPlayer"})
 
       ctx = %Context{
         player_id: player.id,
         player_name: "TestPlayer",
-        game_state: game_state,
+        character: character,
         room: %{id: "test_room", entities: []},
         dialogue: nil
       }
 
-      %{ctx: ctx, game_state: game_state}
+      %{ctx: ctx, character: character}
     end
 
     test "returns error when not in dialogue", %{ctx: ctx} do

@@ -13,8 +13,7 @@ defmodule Loka.Game.Actions.Gathering do
   require Logger
 
   alias Loka.Game.Actions.{Context, Result}
-  alias Loka.Framework.Player.GameState, as: PlayerGameState
-  alias Loka.Engine.Spawner
+  alias Loka.Engine.{Entity, Spawner}
 
   @doc """
   Gather resources from a gathering node in the room.
@@ -22,7 +21,7 @@ defmodule Loka.Game.Actions.Gathering do
   @spec gather(Context.t(), String.t()) :: {:ok, Result.t()} | {:error, String.t()}
   def gather(ctx, node_type) do
     room = ctx.room
-    game_state = ctx.game_state
+    character = ctx.character
     gathering_node = room[:gathering_node]
 
     Logger.debug("[GATHERING] Gather attempt: node_type=#{node_type} room=#{room[:key]}")
@@ -61,10 +60,9 @@ defmodule Loka.Game.Actions.Gathering do
         end)
         |> Enum.reject(&is_nil/1)
 
-      new_inventory = spawned_ids ++ (game_state.inventory || [])
-
-      {:ok, new_game_state} =
-        PlayerGameState.update_state(game_state, %{inventory: new_inventory})
+      inventory = Entity.get_component(character, "inventory") || []
+      new_inventory = spawned_ids ++ inventory
+      new_character = Entity.add_component(character, "inventory", new_inventory)
 
       events =
         [{:event, event_text}] ++
@@ -74,7 +72,7 @@ defmodule Loka.Game.Actions.Gathering do
 
       result =
         Result.new(
-          state: %{game_state: new_game_state},
+          state: %{character: new_character},
           events: events
         )
 
@@ -97,12 +95,12 @@ defmodule Loka.Game.Actions.Gathering do
     alias LokaWeb.Channels.GameChannel.Serializers
     alias Loka.Framework.Quest
 
-    game_state = ctx.game_state
+    character = ctx.character
 
     Logger.debug("[GATHERING] Craft action: recipe=#{recipe_key}")
 
-    case Crafting.craft(game_state, recipe_key) do
-      {:ok, state_after_craft, craft_result} ->
+    case Crafting.craft(character, recipe_key) do
+      {:ok, character_after_craft, craft_result} ->
         # Spawn output items and add to inventory
         {spawned_ids, inventory_updates} =
           if craft_result.success do
@@ -126,10 +124,9 @@ defmodule Loka.Game.Actions.Gathering do
           end
 
         # Update inventory with spawned items
-        new_inventory = spawned_ids ++ (state_after_craft.inventory || [])
-
-        {:ok, final_game_state} =
-          PlayerGameState.update_state(state_after_craft, %{inventory: new_inventory})
+        inventory = Entity.get_component(character_after_craft, "inventory") || []
+        new_inventory = spawned_ids ++ inventory
+        final_character = Entity.add_component(character_after_craft, "inventory", new_inventory)
 
         # Build message from result
         craft_message =
@@ -149,7 +146,7 @@ defmodule Loka.Game.Actions.Gathering do
 
         quest_progress_event =
           if Enum.any?(quest_events) do
-            active_quests = Quest.get_active_quests(final_game_state)
+            active_quests = Quest.get_active_quests(final_character)
             [{:quest_progress, %{quests: Serializers.serialize_quests(active_quests)}}]
           else
             []
@@ -163,7 +160,7 @@ defmodule Loka.Game.Actions.Gathering do
 
         result =
           Result.new(
-            state: %{game_state: final_game_state},
+            state: %{character: final_character},
             events: events
           )
 

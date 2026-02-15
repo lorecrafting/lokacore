@@ -21,7 +21,7 @@ defmodule Loka.Game.Actions.Bardo do
   """
 
   alias Loka.Game.Actions.{Context, Result}
-  alias Loka.Framework.Player.GameState, as: PlayerGameState
+  alias Loka.Engine.Entity
   alias Loka.Framework.World.{RoomLoader, Atmosphere}
   alias Loka.Engine.Entities
   alias LokaWeb.Channels.GameChannel.Serializers
@@ -47,9 +47,9 @@ defmodule Loka.Game.Actions.Bardo do
   """
   @spec enter_bardo(Context.t(), String.t()) :: {:ok, Result.t()} | {:error, String.t()}
   def enter_bardo(ctx, enemy_name) do
-    game_state = ctx.game_state
+    character = ctx.character
     old_room = ctx.room
-    bind_point = get_bind_point(game_state)
+    bind_point = get_bind_point(character)
 
     case Entities.get_entity_by_key("bardo_realm") do
       nil ->
@@ -116,7 +116,7 @@ defmodule Loka.Game.Actions.Bardo do
     do: {:error, "You must wait before reincarnating."}
 
   def reincarnate(ctx, bardo) do
-    game_state = ctx.game_state
+    character = ctx.character
     old_room = ctx.room
 
     case Entities.get_entity_by_key(bardo.bind_point) do
@@ -125,16 +125,16 @@ defmodule Loka.Game.Actions.Bardo do
 
       bind_point_room ->
         # Restore HP to max
-        health = PlayerGameState.get_health(game_state)
-        max_hp = health[:max] || health["max"] || 100
-        new_health = %{current: max_hp, max: max_hp}
+        resources = Entity.get_component(character, "resources") || %{}
+        health = resources["health"] || %{}
+        max_hp = health["max"] || 100
+        new_health = %{"current" => max_hp, "max" => max_hp}
 
-        {:ok, game_state_with_health} = PlayerGameState.set_health(game_state, new_health)
+        new_resources = Map.put(resources, "health", new_health)
+        character_with_health = Entity.add_component(character, "resources", new_resources)
 
-        {:ok, new_game_state} =
-          PlayerGameState.update_state(game_state_with_health, %{
-            current_room_id: bind_point_room.id
-          })
+        # Update location to bind point
+        new_character = %{character_with_health | location_id: bind_point_room.id}
 
         {:ok, room} = RoomLoader.load_room_for_display(bind_point_room.id)
 
@@ -155,7 +155,7 @@ defmodule Loka.Game.Actions.Bardo do
           Result.new(
             state: %{
               bardo: nil,
-              game_state: new_game_state,
+              character: new_character,
               room: room
             },
             events: events
@@ -198,8 +198,9 @@ defmodule Loka.Game.Actions.Bardo do
   # Private Helpers
   # =============================================================================
 
-  defp get_bind_point(game_state) do
-    flags = game_state.flags || %{}
-    Map.get(flags, "bind_point") || Map.get(flags, :bind_point) || @default_bind_point
+  defp get_bind_point(character) do
+    player = Entity.get_component(character, "player") || %{}
+    flags = player["flags"] || %{}
+    Map.get(flags, "bind_point") || @default_bind_point
   end
 end

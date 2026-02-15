@@ -5,9 +5,9 @@ defmodule Loka.Game.Actions.ResultTest do
 
   describe "new/1" do
     test "creates result with state changes" do
-      result = Result.new(state: %{game_state: %{gold: 100}})
+      result = Result.new(state: %{character: %{gold: 100}})
 
-      assert result.state.game_state.gold == 100
+      assert result.state.character.gold == 100
       assert result.events == []
     end
 
@@ -72,16 +72,16 @@ defmodule Loka.Game.Actions.ResultTest do
   describe "put_state/3" do
     test "puts a single state key" do
       result = Result.new()
-      updated = Result.put_state(result, :game_state, %{gold: 100})
+      updated = Result.put_state(result, :character, %{gold: 100})
 
-      assert updated.state.game_state.gold == 100
+      assert updated.state.character.gold == 100
     end
 
     test "overwrites existing key" do
-      result = Result.new(state: %{game_state: %{gold: 100}})
-      updated = Result.put_state(result, :game_state, %{gold: 200})
+      result = Result.new(state: %{character: %{gold: 100}})
+      updated = Result.put_state(result, :character, %{gold: 200})
 
-      assert updated.state.game_state.gold == 200
+      assert updated.state.character.gold == 200
     end
   end
 

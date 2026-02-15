@@ -29,7 +29,7 @@ defmodule Loka.Game.Actions.Result do
   ## Usage
 
       result = Result.new(
-        state: %{game_state: new_game_state, room: new_room},
+        state: %{character: updated_character, room: new_room},
         events: [
           {:event, "You pick up the sword."},
           {:inventory_update, %{action: "add", item_id: item_id}}
@@ -82,7 +82,7 @@ defmodule Loka.Game.Actions.Result do
 
       Result.new()
       Result.new(events: [{:event, "Hello"}])
-      Result.new(state: %{game_state: gs}, events: [{:event, "Done"}])
+      Result.new(state: %{character: entity}, events: [{:event, "Done"}])
   """
   @spec new(keyword()) :: t()
   def new(opts \\ []) do

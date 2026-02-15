@@ -175,7 +175,7 @@
   - Verify: `mix test` (full suite after each registry deletion)
   - Commit: `"feat(v2): delete 14 framework registries + RegistryBase, use Entities.find"`
 
-- [ ] **5.3** Update game actions layer (11 modules)
+- [x] **5.3** Update game actions layer (11 modules)
   - Modifies: `lib/loka/game/actions.ex` + `actions/*.ex`
   - Pattern: ~25 `PlayerGameState.update_state` calls → entity component updates
   - Verify: `mix test test/loka/game/`
@@ -251,7 +251,7 @@
 | 2: Seeder | 2.1 | **Complete** |
 | 3: EntityServer | 3.1-3.4 | **Complete** |
 | 4: Player | 4.1-4.3 | 4.0-4.2 complete |
-| 5: Content+Actions | 5.1-5.4 | 5.1 complete |
+| 5: Content+Actions | 5.1-5.4 | 5.1-5.3 complete |
 | 6: Cleanup | 6.1-6.4 | Not started |
 | 7: Polish | 7.1-7.3 | Not started |
 | **Total** | **22 tasks** | |

@@ -14,7 +14,7 @@ defmodule Loka.Game.Actions.Container do
   require Logger
 
   alias Loka.Game.Actions.{Context, Result}
-  alias Loka.Framework.Player.GameState, as: PlayerGameState
+  alias Loka.Engine.Entity
   alias Loka.Framework.Inventory.Container
   alias Loka.Framework.Inventory.ContainerRespawn
   alias Loka.Engine.{Entities, Spawner}
@@ -77,7 +77,7 @@ defmodule Loka.Game.Actions.Container do
   @spec take_from_container(Context.t(), integer()) :: {:ok, Result.t()} | {:error, String.t()}
   def take_from_container(ctx, index) do
     open_container = ctx.container
-    game_state = ctx.game_state
+    character = ctx.character
 
     Logger.debug("[CONTAINER] Take attempt: index=#{index}")
 
@@ -92,10 +92,9 @@ defmodule Loka.Game.Actions.Container do
           case Spawner.spawn(item_key, []) do
             {:ok, item_entity} ->
               # Add to inventory
-              new_inventory = [item_entity.id | game_state.inventory || []]
-
-              {:ok, new_game_state} =
-                PlayerGameState.update_state(game_state, %{inventory: new_inventory})
+              inventory = Entity.get_component(character, "inventory") || []
+              new_inventory = [item_entity.id | inventory]
+              new_character = Entity.add_component(character, "inventory", new_inventory)
 
               # Update container in database
               update_container_component(open_container.entity_id, updated_container)
@@ -119,7 +118,7 @@ defmodule Loka.Game.Actions.Container do
               result =
                 Result.new(
                   state: %{
-                    game_state: new_game_state,
+                    character: new_character,
                     container: %{open_container | container: updated_container}
                   },
                   events: [
