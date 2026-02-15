@@ -77,7 +77,7 @@ defmodule Loka.Framework.Dialogue do
   """
   def start_conversation(npc_id, opts \\ []) when is_binary(npc_id) do
     player_quests = Keyword.get(opts, :player_quests, %{})
-    game_state = Keyword.get(opts, :game_state, nil)
+    character = Keyword.get(opts, :character, nil)
 
     Logger.debug("[DIALOGUE] Starting conversation: npc_id=#{npc_id}")
 
@@ -91,7 +91,7 @@ defmodule Loka.Framework.Dialogue do
 
         if dialogue_tree do
           # Find the best start node based on conditions
-          {node_id, node} = find_start_node(dialogue_tree, player_quests, game_state)
+          {node_id, node} = find_start_node(dialogue_tree, player_quests, character)
 
           case node do
             nil ->
@@ -411,10 +411,10 @@ defmodule Loka.Framework.Dialogue do
   #   - %{"quest_not_active" => "quest_id"}
   #   - %{"quest_complete" => "quest_id"} - Quest is active AND all objectives are done (ready to turn in)
   #   - %{"has_item" => "item_key"} - Player has item in inventory
-  defp evaluate_show_if(condition, player_quests, game_state \\ nil)
-  defp evaluate_show_if(nil, _player_quests, _game_state), do: true
+  defp evaluate_show_if(condition, player_quests, character \\ nil)
+  defp evaluate_show_if(nil, _player_quests, _character), do: true
 
-  defp evaluate_show_if(condition, player_quests, game_state) when is_map(condition) do
+  defp evaluate_show_if(condition, player_quests, character) when is_map(condition) do
     completed = get_completed_quests(player_quests)
     active = get_active_quest_ids(player_quests)
 
@@ -440,7 +440,7 @@ defmodule Loka.Framework.Dialogue do
 
         "has_item" ->
           # Check if player has item in inventory
-          check_has_item(game_state, value)
+          check_has_item(character, value)
 
         "phase" ->
           # Check if current time phase matches
@@ -458,9 +458,9 @@ defmodule Loka.Framework.Dialogue do
   # Check if player has an item (by item key) in their inventory
   defp check_has_item(nil, _item_key), do: false
 
-  defp check_has_item(game_state, item_key) do
+  defp check_has_item(character, item_key) do
     alias Loka.Framework.Conditions.Evaluator
-    Evaluator.evaluate({:has_item, item_key}, game_state)
+    Evaluator.evaluate({:has_item, item_key}, character)
   end
 
   # Check if current time phase matches the expected phase
@@ -528,7 +528,7 @@ defmodule Loka.Framework.Dialogue do
   # 3. Start nodes with show_if: quest_active (quest is active, regardless of objective status)
   # 4. Other start nodes with show_if conditions
   # 5. The default "start" node (fallback)
-  defp find_start_node(dialogue_tree, player_quests, game_state) do
+  defp find_start_node(dialogue_tree, player_quests, character) do
     completed = get_completed_quests(player_quests)
 
     # Get all start nodes (nodes with keys starting with "start") that have conditions
@@ -588,7 +588,7 @@ defmodule Loka.Framework.Dialogue do
 
           # If node has show_if, evaluate it
           show_if != nil ->
-            evaluate_show_if(show_if, player_quests, game_state)
+            evaluate_show_if(show_if, player_quests, character)
 
           # No condition - skip (shouldn't reach here due to filter)
           true ->

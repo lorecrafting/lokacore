@@ -21,7 +21,7 @@ defmodule Loka.Framework.Quest.Metrics do
 
   ## Notes
 
-  This module aggregates data from the GameLog and GameState tables.
+  This module aggregates data from the GameLog and entity tables.
   For performance, consider caching results for frequently-accessed metrics.
   """
 
@@ -29,10 +29,7 @@ defmodule Loka.Framework.Quest.Metrics do
 
   alias Loka.Framework.Quest.Definitions
   alias Loka.Admin.GameLog
-  alias Loka.Framework.Player.GameState
-  alias Loka.Repo
-
-  import Ecto.Query
+  alias Loka.Engine.Entities
 
   # =============================================================================
   # Summary Metrics
@@ -111,12 +108,12 @@ defmodule Loka.Framework.Quest.Metrics do
   Gets quest statistics for a specific player.
   """
   def get_player_stats(player_id) do
-    case GameState.get_state(player_id) do
-      nil ->
-        {:error, :no_game_state}
+    case Entities.find_one(account_id: player_id) do
+      {:error, :not_found} ->
+        {:error, :no_character}
 
-      state ->
-        quests = state.quests || %{}
+      {:ok, character} ->
+        quests = character.components["quest_progress"] || %{}
         active = get_in(quests, ["active"]) || %{}
         completed = get_in(quests, ["completed"]) || []
 
@@ -212,7 +209,10 @@ defmodule Loka.Framework.Quest.Metrics do
   # =============================================================================
 
   defp list_all_player_quest_states do
-    Repo.all(from s in GameState, select: %{quests: s.quests})
+    Entities.find_all(type: :character)
+    |> Enum.map(fn entity ->
+      %{quests: entity.components["quest_progress"] || %{}}
+    end)
   end
 
   defp count_players_with_quests(player_states) do

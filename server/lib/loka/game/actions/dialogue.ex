@@ -28,7 +28,7 @@ defmodule Loka.Game.Actions.Dialogue do
 
     case Dialogue.start_conversation(entity_id,
            player_quests: player_quests,
-           game_state: game_state
+           character: game_state
          ) do
       {:ok, node} ->
         # Track talk objective when conversation starts

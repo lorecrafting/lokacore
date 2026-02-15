@@ -73,7 +73,7 @@ defmodule Loka.Framework.Quest.Listeners do
 
   ## Parameters
 
-  - `player_context` - Map containing player info and game_state
+  - `player_context` - Map containing player info and character entity
   - `room_info` - Map with room details including `:room_key`
   """
   def on_room_entry(player_context, room_info) do
@@ -96,17 +96,17 @@ defmodule Loka.Framework.Quest.Listeners do
   @doc """
   Checks and updates quest progress for room entry.
 
-  Call this directly when you need the updated game_state back.
-  Returns `{updated_game_state, quest_events}`.
+  Call this directly when you need the updated character back.
+  Returns `{updated_character, quest_events}`.
 
   ## Parameters
 
-  - `game_state` - The player's current game state
+  - `character` - The player's character entity
   - `room_key` - The prototype key of the room entered
 
   ## Example
 
-      {updated_state, events} = Quest.Listeners.check_room_entry(game_state, "temple")
+      {updated_character, events} = Quest.Listeners.check_room_entry(character, "temple")
   """
   def check_room_entry(character, room_key) when is_binary(room_key) do
     {:ok, updated_character, completed_objectives} =
@@ -129,7 +129,7 @@ defmodule Loka.Framework.Quest.Listeners do
   @doc """
   Checks and updates quest progress for item pickup.
 
-  Returns `{updated_game_state, quest_events}`.
+  Returns `{updated_character, quest_events}`.
   """
   def check_item_received(character, item_key) when is_binary(item_key) do
     {:ok, updated_character, completed_objectives} =
@@ -152,11 +152,11 @@ defmodule Loka.Framework.Quest.Listeners do
   @doc """
   Checks and updates quest progress for talking to an NPC.
 
-  Returns `{updated_game_state, quest_events}`.
+  Returns `{updated_character, quest_events}`.
 
   ## Parameters
 
-  - `game_state` - The player's current game state
+  - `character` - The player's character entity
   - `npc_key` - The prototype key of the NPC being talked to
   - `dialogue_topic` - The dialogue node/topic being visited
   """
@@ -192,7 +192,7 @@ defmodule Loka.Framework.Quest.Listeners do
   @doc """
   Checks and updates quest progress for enemy kills.
 
-  Returns `{updated_game_state, quest_events}`.
+  Returns `{updated_character, quest_events}`.
   """
   def check_entity_death(character, entity_key, count \\ 1)
 
@@ -221,11 +221,11 @@ defmodule Loka.Framework.Quest.Listeners do
   @doc """
   Checks and updates quest progress for crafting an item.
 
-  Returns `{updated_game_state, quest_events}`.
+  Returns `{updated_character, quest_events}`.
 
   ## Parameters
 
-  - `game_state` - The player's current game state
+  - `character` - The player's character entity
   - `recipe_key` - The key of the recipe that was crafted
   """
   def check_craft(character, recipe_key) when is_binary(recipe_key) do
@@ -251,7 +251,7 @@ defmodule Loka.Framework.Quest.Listeners do
 
   ## Parameters
 
-  - `player_context` - Map containing player info and game_state
+  - `player_context` - Map containing player info and character entity
   - `item_info` - Map with item details including `:item_key`
   """
   def on_item_received(player_context, item_info) do
@@ -282,7 +282,7 @@ defmodule Loka.Framework.Quest.Listeners do
 
   ## Parameters
 
-  - `attacker_context` - Map containing attacker info and game_state
+  - `attacker_context` - Map containing attacker info and character entity
   - `death_info` - Map with death details including `:entity_key` and `:killed_by`
   """
   def on_entity_death(attacker_context, death_info) do
@@ -316,7 +316,6 @@ defmodule Loka.Framework.Quest.Listeners do
   # Private helpers
 
   defp get_character(%{character: character}), do: character
-  defp get_character(%{game_state: game_state}), do: game_state
   defp get_character(_), do: nil
 
   defp extract_room_key(%{room_key: key}) when is_binary(key), do: key
@@ -363,7 +362,7 @@ defmodule Loka.Framework.Quest.Listeners do
 
   ## Parameters
 
-  - `player_context` - Map containing player info and game_state
+  - `player_context` - Map containing player info and character entity
   - `room_info` - Map with room details (unused in this function)
   """
   def grant_system_quests_once(player_context, _room_info) do
