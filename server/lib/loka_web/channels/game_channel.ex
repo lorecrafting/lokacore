@@ -68,7 +68,7 @@ defmodule LokaWeb.GameChannel do
   ## Events Pushed to Client
 
   ### State Updates
-  - `game_state` - Full game state on join
+  - `game_state` - Full game state on join (character entity + room + quests + inventory)
   - `room_update` - Room changed (navigation, entity changes)
   - `inventory_update` - Inventory contents changed
   - `stats_update` - Player stats changed
@@ -104,7 +104,6 @@ defmodule LokaWeb.GameChannel do
 
   require Logger
 
-  alias Loka.Framework.Player.GameState, as: PlayerGameState
   alias Loka.Framework.{Inventory, Equipment, Quest, Spark}
   alias Loka.Framework.World.{Atmosphere, Calendar}
   alias Loka.Framework.Resources.ResourcePool
@@ -158,15 +157,9 @@ defmodule LokaWeb.GameChannel do
         EntityRegistry.get_or_start(character.id)
         Entities.add_tag(character.id, "online")
 
-        # Keep game_state for backward compat (removed in Task 4.3)
-        game_state = get_or_create_game_state_compat(player.id)
-
         send(self(), :after_join)
 
-        {:ok,
-         socket
-         |> assign(:character, character)
-         |> assign(:game_state, game_state)}
+        {:ok, assign(socket, :character, character)}
 
       {:error, :no_name} ->
         Logger.warning("Character creation failed: player has no name (player_id=#{player.id})")
@@ -199,98 +192,6 @@ defmodule LokaWeb.GameChannel do
   # Auto-create a character for mobile guests who have a name but no character
   # In dev mode: directly set character name (skip validation for quick testing)
   # In prod mode: use proper validation
-  defp auto_create_character_if_guest(player, game_state) do
-    if Application.get_env(:loka, :env) == :dev do
-      # DEV MODE: Auto-create with player name or email-derived fallback
-      base_name = player.name || player.email |> String.split("@") |> hd()
-      character_name = sanitize_character_name(base_name)
-      dev_create_character(game_state, character_name)
-    else
-      if player.name && player.name != "" do
-        character_name = sanitize_character_name(player.name)
-        prod_create_character(game_state, character_name)
-      else
-        {:error, :no_name}
-      end
-    end
-  end
-
-  # Dev mode: directly set character, find unique name if needed
-  defp dev_create_character(game_state, base_name) do
-    # Try the base name first, then append numbers if taken
-    name = find_available_dev_name(base_name, 0)
-
-    # Direct update bypassing some validation for dev convenience
-    case game_state
-         |> Ecto.Changeset.change(%{
-           character_name: name,
-           gender: "they/them",
-           background: "pilgrim"
-         })
-         |> Loka.Repo.update() do
-      {:ok, state} ->
-        Logger.info("Dev mode: Created character '#{name}' for player #{game_state.player_id}")
-        {:ok, state}
-
-      {:error, changeset} ->
-        {:error, changeset}
-    end
-  end
-
-  # Find an available name by appending numbers
-  defp find_available_dev_name(base_name, attempt) when attempt > 99 do
-    # Give up after 99 attempts
-    base_name <> Integer.to_string(:rand.uniform(9999))
-  end
-
-  defp find_available_dev_name(base_name, attempt) do
-    import Ecto.Query
-
-    name = if attempt == 0, do: base_name, else: "#{base_name}#{attempt}"
-
-    exists? =
-      Loka.Repo.exists?(
-        from g in PlayerGameState,
-          where: fragment("lower(?)", g.character_name) == ^String.downcase(name)
-      )
-
-    if exists? do
-      find_available_dev_name(base_name, attempt + 1)
-    else
-      name
-    end
-  end
-
-  # Prod mode: proper validation with clear error messages
-  defp prod_create_character(game_state, character_name) do
-    attrs = %{
-      character_name: character_name,
-      gender: "they/them",
-      background: "pilgrim"
-    }
-
-    changeset = PlayerGameState.character_creation_changeset(game_state, attrs)
-
-    case Loka.Repo.update(changeset) do
-      {:ok, state} ->
-        {:ok, state}
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        if name_taken_error?(changeset) do
-          {:error, :name_taken}
-        else
-          {:error, changeset}
-        end
-    end
-  end
-
-  defp name_taken_error?(changeset) do
-    Enum.any?(changeset.errors, fn
-      {:character_name, {msg, _}} -> String.contains?(msg, "taken")
-      _ -> false
-    end)
-  end
-
   # Sanitize name to only allow letters (character name validation)
   defp sanitize_character_name(name) do
     name
@@ -306,70 +207,61 @@ defmodule LokaWeb.GameChannel do
   # V2 Character Entity Helpers
   # =============================================================================
 
-  # Find existing character entity or create one from GameState/auto-create
+  # Find existing character entity or auto-create one
   defp find_or_create_character(player) do
     case Entities.find_one(account_id: player.id) do
       {:ok, character} ->
         {:ok, character}
 
       {:error, :not_found} ->
-        # No character entity yet — try to create from GameState or auto-create
-        case PlayerGameState.get_or_create_state(player.id) do
-          {:ok, game_state} ->
-            if PlayerGameState.character_created?(game_state) do
-              # Has GameState with character — create entity from it
-              create_character_entity_from_game_state(player, game_state)
-            else
-              # No character yet — auto-create
-              case auto_create_character_if_guest(player, game_state) do
-                {:ok, updated_state} ->
-                  create_character_entity_from_game_state(player, updated_state)
-
-                error ->
-                  error
-              end
-            end
-
-          {:error, reason} ->
-            {:error, reason}
-        end
+        auto_create_character_entity(player)
     end
   end
 
-  # Create a character entity from a GameState record
-  defp create_character_entity_from_game_state(player, game_state) do
+  # Auto-create a character entity for a new player
+  defp auto_create_character_entity(player) do
+    base_name =
+      player.name || (player.email && player.email |> String.split("@") |> hd()) || "Traveler"
+
+    character_name = sanitize_character_name(base_name)
+
+    # Find unique name
+    name = find_available_name(character_name, 0)
+
+    starting_room_id =
+      Loka.Framework.World.RoomLoader.get_starting_room_id() ||
+        Loka.Engine.WorldLoader.get_starting_room_id()
+
     entity =
       Entity.new(
         type: :character,
-        key: "player_#{String.downcase(game_state.character_name)}",
-        short_desc: game_state.character_name,
+        key: "player_#{String.downcase(name)}",
+        short_desc: name,
         account_id: player.id,
-        location_id: game_state.current_room_id,
+        location_id: starting_room_id,
         components: %{
           "player" => %{
-            "settings" => game_state.settings || %{},
-            "gender" => game_state.gender,
-            "background" => game_state.background
+            "settings" => %{},
+            "gender" => "they/them",
+            "background" => "pilgrim"
           },
-          "combatant" => %{
-            "health" => get_in(game_state.resources || %{}, [:health, :current]) || 100,
-            "max_health" => get_in(game_state.resources || %{}, [:health, :max]) || 100
-          },
-          "stats" => game_state.stats || %{},
-          "quest_progress" => game_state.quests || %{},
-          "resources" => game_state.resources || %{},
-          "skills" => game_state.skills || %{},
-          "equipment" => game_state.equipment || %{},
-          "inventory" => game_state.inventory || [],
-          "flags" => game_state.flags || %{}
+          "combatant" => %{"health" => 100, "max_health" => 100},
+          "stats" => %{},
+          "quest_progress" => %{},
+          "resources" => %{"health" => %{"current" => 100, "max" => 100}},
+          "skills" => %{},
+          "equipment" => %{},
+          "inventory" => [],
+          "flags" => %{}
         },
         tags: ["playable"],
-        keywords: [String.downcase(game_state.character_name)]
+        keywords: [String.downcase(name)]
       )
 
     case Entities.save(entity) do
       {:ok, saved} ->
         Entities.add_tag(saved.id, "playable")
+        Logger.info("[GameChannel] Auto-created character '#{name}' for player #{player.id}")
         {:ok, %{saved | tags: ["playable"]}}
 
       {:error, reason} ->
@@ -377,11 +269,27 @@ defmodule LokaWeb.GameChannel do
     end
   end
 
-  # Backward compat: get GameState for socket.assigns.game_state (removed in Task 4.3)
-  defp get_or_create_game_state_compat(player_id) do
-    case PlayerGameState.get_or_create_state(player_id) do
-      {:ok, gs} -> gs
-      _ -> nil
+  # Find an available character name by appending numbers if taken
+  defp find_available_name(base_name, attempt) when attempt > 99 do
+    base_name <> Integer.to_string(:rand.uniform(9999))
+  end
+
+  defp find_available_name(base_name, attempt) do
+    import Ecto.Query
+
+    name = if attempt == 0, do: base_name, else: "#{base_name}#{attempt}"
+    key = "player_#{String.downcase(name)}"
+
+    exists? =
+      Loka.Repo.exists?(
+        from e in Loka.Engine.Schema.EntitySchema,
+          where: e.key == ^key and e.type == :character
+      )
+
+    if exists? do
+      find_available_name(base_name, attempt + 1)
+    else
+      name
     end
   end
 
@@ -391,51 +299,54 @@ defmodule LokaWeb.GameChannel do
 
   @impl true
   def handle_in("create_character", params, socket) do
-    game_state = socket.assigns.game_state
+    player = socket.assigns.player
+    character = socket.assigns.character
 
     # Extract character data from params
-    attrs = %{
-      character_name: sanitize_character_name(Map.get(params, "name", game_state.player.name)),
-      gender: Map.get(params, "gender", "they/them"),
-      background: Map.get(params, "background", "pilgrim")
-    }
-
-    # Extract stats allocations if provided
+    character_name = sanitize_character_name(Map.get(params, "name", player.name))
+    gender = Map.get(params, "gender", "they/them")
+    background = Map.get(params, "background", "pilgrim")
     stats = Map.get(params, "stats", %{})
 
-    changeset = PlayerGameState.character_creation_changeset(game_state, attrs)
+    # Update character entity with creation data
+    player_component = Entity.get_component(character, "player") || %{}
 
-    case Loka.Repo.update(changeset) do
-      {:ok, updated_state} ->
-        # Apply initial stat allocations if provided
-        final_state =
-          if map_size(stats) > 0 do
-            apply_initial_stats(updated_state, stats)
-          else
-            updated_state
-          end
+    updated_character =
+      character
+      |> Map.put(:short_desc, character_name)
+      |> Map.put(:key, "player_#{String.downcase(character_name)}")
+      |> Map.put(:keywords, [String.downcase(character_name)])
+      |> Entity.add_component(
+        "player",
+        Map.merge(player_component, %{
+          "gender" => gender,
+          "background" => background
+        })
+      )
 
-        Logger.info("[GameChannel] Character created: #{attrs.character_name}")
+    # Apply stats if provided
+    updated_character =
+      if map_size(stats) > 0 do
+        current_stats = Entity.get_component(updated_character, "stats") || %{}
+        Entity.add_component(updated_character, "stats", Map.merge(current_stats, stats))
+      else
+        updated_character
+      end
 
-        # Update socket and push success response
-        socket = assign(socket, :game_state, final_state)
+    case Entities.save(updated_character) do
+      {:ok, saved} ->
+        Logger.info("[GameChannel] Character created: #{character_name}")
+        socket = assign(socket, :character, saved)
 
         push(socket, "character_created", %{
           success: true,
-          character_name: final_state.character_name
+          character_name: character_name
         })
 
-        {:reply, {:ok, %{character_name: final_state.character_name}}, socket}
+        {:reply, {:ok, %{character_name: character_name}}, socket}
 
-      {:error, changeset} ->
-        error_msg =
-          if name_taken_error?(changeset) do
-            "That name is already taken"
-          else
-            "Failed to create character"
-          end
-
-        {:reply, {:error, %{reason: error_msg}}, socket}
+      {:error, _reason} ->
+        {:reply, {:error, %{reason: "Failed to create character"}}, socket}
     end
   end
 
@@ -922,8 +833,7 @@ defmodule LokaWeb.GameChannel do
         case find_entity_by_keyword(socket, target) do
           {:ok, entity_id} ->
             character = socket.assigns.character
-            game_state = socket.assigns.game_state
-            {room, _, _} = RoomHelpers.load_player_room(character, game_state)
+            {room, _} = RoomHelpers.load_room_for_character(character)
 
             entity =
               Enum.find(room.entities || [], fn e ->
@@ -1070,8 +980,7 @@ defmodule LokaWeb.GameChannel do
 
   defp push_current_room(socket) do
     character = socket.assigns.character
-    game_state = socket.assigns.game_state
-    {room, _, _} = RoomHelpers.load_player_room(character, game_state)
+    {room, _} = RoomHelpers.load_room_for_character(character)
     atmosphere = Atmosphere.describe_for_room(room)
 
     push(socket, "room_update", %{
@@ -1137,8 +1046,7 @@ defmodule LokaWeb.GameChannel do
 
   defp find_entity_by_keyword(socket, keyword) do
     character = socket.assigns.character
-    game_state = socket.assigns.game_state
-    {room, _, _} = RoomHelpers.load_player_room(character, game_state)
+    {room, _} = RoomHelpers.load_room_for_character(character)
 
     keyword_lower = String.downcase(keyword)
 
@@ -1185,10 +1093,9 @@ defmodule LokaWeb.GameChannel do
   def handle_info(:after_join, socket) do
     player = socket.assigns.player
     character = socket.assigns.character
-    game_state = socket.assigns.game_state
 
     # V2: Load room using character entity's location_id
-    {room, game_state, character} = RoomHelpers.load_player_room(character, game_state)
+    {room, character} = RoomHelpers.load_room_for_character(character)
 
     # Subscribe to PubSub topics
     Phoenix.PubSub.subscribe(Loka.PubSub, "location:#{room.id}")
@@ -1266,7 +1173,6 @@ defmodule LokaWeb.GameChannel do
     socket =
       socket
       |> assign(:character, character)
-      |> assign(:game_state, game_state)
       |> assign(:room, room)
       |> assign(:seen_ambient, MapSet.new())
 
@@ -1525,19 +1431,6 @@ defmodule LokaWeb.GameChannel do
   # NOTE: Navigation, inventory, equipment logic moved to Loka.Game.Actions
   # GameChannel now uses ActionBridge.execute/3 for these actions
 
-  # Apply initial stat allocations from character creation
-  defp apply_initial_stats(game_state, stats) do
-    # Stats map: %{"strength" => 2, "agility" => 1, ...}
-    # Apply to game_state.stats
-    current_stats = game_state.stats || %{}
-    updated_stats = Map.merge(current_stats, stats)
-
-    case Ecto.Changeset.change(game_state, %{stats: updated_stats}) |> Loka.Repo.update() do
-      {:ok, state} -> state
-      {:error, _} -> game_state
-    end
-  end
-
   defp find_entity(room, id, "npc") do
     Enum.find(room.entities, fn e -> e.id == id end)
   end
@@ -1559,16 +1452,12 @@ defmodule LokaWeb.GameChannel do
   end
 
   defp player_display_name(player) do
-    # V2: Try character entity first, fall back to GameState then player fields
     case Entities.find_one(account_id: player.id) do
       {:ok, character} when character.short_desc != nil ->
         character.short_desc
 
       _ ->
-        case PlayerGameState.get_state(player.id) do
-          %PlayerGameState{character_name: name} when not is_nil(name) -> name
-          _ -> player.name || player.email || "Unknown"
-        end
+        player.name || player.email || "Unknown"
     end
   end
 

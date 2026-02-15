@@ -109,8 +109,8 @@ defmodule LokaWeb.Channels.BuilderCommands.Testing do
   end
 
   def execute(:flags, _params, socket) do
-    game_state = socket.assigns.game_state
-    flags = Map.get(game_state, :flags, %{}) || %{}
+    character = socket.assigns.character
+    flags = get_in(character.components, ["flags"]) || %{}
 
     if flags == %{} do
       {:ok, "No flags set.", socket}

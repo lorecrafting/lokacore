@@ -8,9 +8,8 @@ defmodule LokaWeb.Channels.RoomHelpers do
   - Building minimap graph for navigation display
   """
 
-  alias Loka.Framework.Player.GameState, as: PlayerGameState
   alias Loka.Framework.World.RoomLoader
-  alias Loka.Engine.{Entities, EntityRegistry, EntityServer, WorldGraph, WorldLoader}
+  alias Loka.Engine.{Entities, Entity, EntityRegistry, EntityServer, WorldGraph, WorldLoader}
 
   # ETS table for minimap cache
   @minimap_cache_table :loka_minimap_cache
@@ -35,12 +34,13 @@ defmodule LokaWeb.Channels.RoomHelpers do
 
   @doc """
   V1 compat: Loads room from game_state.current_room_id.
-  Returns {room, updated_game_state}. Used by builder commands (cleaned up in Phase 6).
+  Returns {room, game_state}. Used by builder commands (cleaned up in Phase 6).
   """
   def load_player_room(game_state) do
-    case try_load_room(game_state.current_room_id) do
+    room_id = Map.get(game_state, :current_room_id) || Map.get(game_state, :location_id)
+
+    case try_load_room(room_id) do
       {:ok, room} ->
-        game_state = ensure_room_assigned(game_state, room.id)
         activate_room_entity(room.id)
         {room, game_state}
 
@@ -49,7 +49,6 @@ defmodule LokaWeb.Channels.RoomHelpers do
 
         case try_load_room(starting_room_id) do
           {:ok, room} ->
-            game_state = force_room_assignment(game_state, room.id)
             activate_room_entity(room.id)
             {room, game_state}
 
@@ -60,43 +59,42 @@ defmodule LokaWeb.Channels.RoomHelpers do
   end
 
   @doc """
-  V2: Loads room from character entity's location_id, syncing game_state for compat.
-  Returns {room, updated_game_state, updated_character}.
+  V2: Loads room from character entity's location_id.
+  Returns {room, updated_character}.
   """
-  def load_player_room(character, game_state) do
-    room_id = character.location_id || game_state.current_room_id
-
-    case try_load_room(room_id) do
+  def load_room_for_character(%Entity{} = character) do
+    case try_load_room(character.location_id) do
       {:ok, room} ->
-        game_state = ensure_room_assigned(game_state, room.id)
         character = ensure_character_location(character, room.id)
         activate_room_entity(room.id)
-        {room, game_state, character}
+        {room, character}
 
       {:error, :not_found} ->
         starting_room_id = RoomLoader.get_starting_room_id() || WorldLoader.get_starting_room_id()
 
         case try_load_room(starting_room_id) do
           {:ok, room} ->
-            game_state = force_room_assignment(game_state, room.id)
             character = force_character_location(character, room.id)
             activate_room_entity(room.id)
-            {room, game_state, character}
+            {room, character}
 
           {:error, :not_found} ->
-            {RoomLoader.empty_room(), game_state, character}
+            {RoomLoader.empty_room(), character}
         end
     end
   end
 
   @doc """
-  Loads other players in a room (excluding the given player).
-  Uses a single JOIN query to avoid N+1 queries.
+  Loads other player characters in a room (excluding the given player).
   """
   def load_other_players(nil, _player_id), do: []
 
   def load_other_players(room_id, player_id) do
-    PlayerGameState.get_players_in_room_with_info(room_id, exclude: player_id)
+    Entities.find_all(type: :character, location_id: room_id)
+    |> Enum.reject(fn char -> char.account_id == player_id end)
+    |> Enum.map(fn char ->
+      %{id: char.id, name: char.short_desc || char.key, account_id: char.account_id}
+    end)
   end
 
   @doc """
@@ -120,25 +118,7 @@ defmodule LokaWeb.Channels.RoomHelpers do
   defp try_load_room(nil), do: {:error, :not_found}
   defp try_load_room(room_id), do: RoomLoader.load_room_for_display(room_id)
 
-  defp force_room_assignment(game_state, room_id) do
-    case PlayerGameState.update_state(game_state, %{current_room_id: room_id}) do
-      {:ok, updated} -> updated
-      _ -> game_state
-    end
-  end
-
-  defp ensure_room_assigned(game_state, room_id) do
-    if is_nil(game_state.current_room_id) and not is_nil(room_id) do
-      case PlayerGameState.update_state(game_state, %{current_room_id: room_id}) do
-        {:ok, updated} -> updated
-        _ -> game_state
-      end
-    else
-      game_state
-    end
-  end
-
-  # V2: Ensure character entity has location set
+  # Ensure character entity has location set
   defp ensure_character_location(character, room_id) do
     if is_nil(character.location_id) and not is_nil(room_id) do
       force_character_location(character, room_id)

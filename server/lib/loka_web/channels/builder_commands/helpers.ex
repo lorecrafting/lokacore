@@ -46,8 +46,8 @@ defmodule LokaWeb.Channels.BuilderCommands.Helpers do
     Phoenix.PubSub.subscribe(Loka.PubSub, "location:#{room.id}")
     Loka.Session.update_room(player.id, room.id)
 
-    {loaded_room, _game_state, final_character} =
-      RoomHelpers.load_player_room(updated_character, socket.assigns[:game_state])
+    {loaded_room, final_character} =
+      RoomHelpers.load_room_for_character(updated_character)
 
     atmosphere = Atmosphere.describe_for_room(loaded_room)
 

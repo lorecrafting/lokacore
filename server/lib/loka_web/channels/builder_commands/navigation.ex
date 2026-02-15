@@ -36,10 +36,10 @@ defmodule LokaWeb.Channels.BuilderCommands.Navigation do
   end
 
   def execute(:where, _params, socket) do
-    game_state = socket.assigns.game_state
-    room_id = game_state.current_room_id
+    character = socket.assigns.character
+    room_id = character.location_id
 
-    {room, _state} = RoomHelpers.load_player_room(game_state)
+    {room, _character} = RoomHelpers.load_room_for_character(character)
     key = Map.get(room, :key, "unknown")
     x = Map.get(room, :x, 0)
     y = Map.get(room, :y, 0)

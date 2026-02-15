@@ -202,19 +202,19 @@ defmodule Loka.Testing.ChannelBotTest do
       {:ok, bot} = ChannelBot.start(player, strategy: IdleStrategy)
       {:ok, bot} = ChannelBot.tick(bot)
 
-      # Use StateInspector to verify server state matches
-      {:ok, server_state} = StateInspector.inspect_game_state(player.id)
+      # Use Entities API to verify server state matches (V2: no more GameState)
+      {:ok, character} = Loka.Engine.Entities.find_one(account_id: player.id, type: :character)
 
-      # Server state should exist
-      assert not is_nil(server_state)
+      # Character entity should exist
+      assert not is_nil(character)
 
-      # Server state is linked to this player
-      assert server_state.player_id == player.id
+      # Character is linked to this player
+      assert character.account_id == player.id
 
       # Room IDs should match between bot (client view) and server
       # Note: bot.room may be nil if initial state push hasn't arrived
       bot_room_id = bot.room && (bot.room[:id] || bot.room["id"] || Map.get(bot.room, :id))
-      server_room_id = server_state.current_room_id
+      server_room_id = character.location_id
 
       # Either both nil or both equal
       assert bot_room_id == server_room_id or is_nil(bot_room_id)
