@@ -104,8 +104,8 @@ defmodule LokaWeb.GameChannel do
 
   require Logger
 
-  alias Loka.Framework.{Inventory, Equipment, Quest, Spark}
-  alias Loka.Framework.World.{Atmosphere, Calendar}
+  alias Loka.Framework.{Inventory, Equipment, Quest}
+  alias Loka.Framework.World.Atmosphere
   alias Loka.Framework.Resources.ResourcePool
   alias Loka.Engine.{Entities, Entity, EntityRegistry}
   alias Loka.Session
@@ -228,9 +228,7 @@ defmodule LokaWeb.GameChannel do
     # Find unique name
     name = find_available_name(character_name, 0)
 
-    starting_room_id =
-      Loka.Framework.World.RoomLoader.get_starting_room_id() ||
-        Loka.Engine.WorldLoader.get_starting_room_id()
+    starting_room_id = Loka.Framework.World.Room.get_starting_room_id()
 
     entity =
       Entity.new(
@@ -1122,12 +1120,11 @@ defmodule LokaWeb.GameChannel do
     # Load game data (V2: use character entity)
     inventory_items = Inventory.list_items(character)
     equipped_items = Equipment.get_equipped(character)
-    active_quests = Quest.get_active_quests(character)
+    active_quests = Quest.Progress.get_active_quests(character)
     other_players = RoomHelpers.load_other_players(room.id, player.id)
     atmosphere = Atmosphere.describe_for_room(room)
     resources = ResourcePool.get(player.id)
     active_timers = Loka.Timers.get_active(player.id)
-    calendar_time = Calendar.get_time()
 
     # Get visual state for environmental effects
     player_compat = %{equipped: Entity.get_component(character, "equipment") || %{}}
@@ -1136,14 +1133,11 @@ defmodule LokaWeb.GameChannel do
     # Get sound state for ambient audio
     sound_state = Serializers.serialize_sound_state(room: room, player: player_compat)
 
-    # Get Spark companion data
-    spark_data = Spark.to_client_format(player.id)
-
     # Send full game state to client (including server capabilities for version negotiation)
     push(socket, "game_state", %{
       room: Serializers.serialize_room(room),
       atmosphere: atmosphere,
-      calendar: Serializers.serialize_calendar(calendar_time),
+      calendar: nil,
       visual_state: visual_state,
       sound_state: sound_state,
       other_players: Serializers.serialize_players(other_players),
@@ -1155,7 +1149,7 @@ defmodule LokaWeb.GameChannel do
       health: get_character_health(character),
       resources: Serializers.serialize_resources(resources),
       timers: Serializers.serialize_timers(active_timers),
-      spark: spark_data,
+      spark: nil,
       player: %{
         id: player.id,
         name: player_display_name(player)
@@ -1166,9 +1160,6 @@ defmodule LokaWeb.GameChannel do
 
     # Deliver any timers that completed while offline
     deliver_offline_timers(socket, player.id)
-
-    # Deliver Spark updates if player has a Spark with pending updates
-    deliver_spark_greeting(socket, player.id)
 
     socket =
       socket
@@ -1222,14 +1213,13 @@ defmodule LokaWeb.GameChannel do
     room = socket.assigns.room
     character = socket.assigns.character
     atmosphere = Atmosphere.describe_for_room(room)
-    calendar_time = Calendar.get_time()
     player_compat = %{equipped: Entity.get_component(character, "equipment") || %{}}
     visual_state = Serializers.serialize_visual_state(room: room, player: player_compat)
     sound_state = Serializers.serialize_sound_state(room: room, player: player_compat)
 
     push(socket, "atmosphere_update", %{
       atmosphere: atmosphere,
-      calendar: Serializers.serialize_calendar(calendar_time),
+      calendar: nil,
       visual_state: visual_state,
       sound_state: sound_state
     })
@@ -1504,35 +1494,6 @@ defmodule LokaWeb.GameChannel do
       end)
 
       Loka.Timers.mark_delivered(completed_timers)
-    end
-  end
-
-  # Deliver Spark greeting on login with pending update count
-  defp deliver_spark_greeting(socket, player_id) do
-    case Spark.get(player_id) do
-      nil ->
-        # No Spark yet - they haven't completed character creation with Spark
-        :ok
-
-      spark ->
-        pending_count = Spark.count_pending_updates(player_id)
-        name = spark.revealed_name || "Your Spark"
-
-        greeting =
-          cond do
-            pending_count > 0 ->
-              "#{name} pulses warmly. *You sense it has #{pending_count} things to share.*"
-
-            true ->
-              "#{name} glows softly in greeting."
-          end
-
-        push(socket, "event", %{text: greeting})
-
-        # If there are pending updates, also push the spark_updates event
-        if pending_count > 0 do
-          push(socket, "spark_has_updates", %{count: pending_count})
-        end
     end
   end
 end

@@ -35,8 +35,8 @@ defmodule Loka.Testing.Content.DialogueValidator do
 
   require Logger
 
-  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
-  alias Loka.Framework.Quest.Definitions
+  alias Loka.Engine.Entities
+  alias Loka.Content
 
   @type validation_result :: %{
           npcs_checked: non_neg_integer(),
@@ -105,13 +105,13 @@ defmodule Loka.Testing.Content.DialogueValidator do
   def validate do
     # Get all NPC prototypes with dialogue
     npcs_with_dialogue =
-      TypedObjectLoader.list_by_type(:entity, :npc)
+      Entities.find_all(type: :npc, is_prototype: true)
       |> Enum.filter(&has_dialogue?/1)
 
     # Also check non-NPC prototypes that might have dialogue (shops, etc)
     other_with_dialogue =
-      TypedObjectLoader.all()
-      |> Enum.reject(fn p -> p.subtype == :npc end)
+      Entities.find_all(is_prototype: true)
+      |> Enum.reject(fn p -> p.type == :npc end)
       |> Enum.filter(&has_dialogue?/1)
 
     all_with_dialogue = npcs_with_dialogue ++ other_with_dialogue
@@ -150,7 +150,7 @@ defmodule Loka.Testing.Content.DialogueValidator do
   """
   @spec validate_npc(String.t()) :: {:ok, {[error()], [warning()]}} | {:error, atom()}
   def validate_npc(npc_key) do
-    case TypedObjectLoader.get(npc_key) do
+    case Entities.find_one(key: npc_key) do
       {:error, :not_found} ->
         {:error, :not_found}
 
@@ -393,14 +393,14 @@ defmodule Loka.Testing.Content.DialogueValidator do
   end
 
   defp validate_action_args(npc_key, node_id, "give_item", [item_id | _], _quest_ids) do
-    case TypedObjectLoader.get(item_id) do
+    case Entities.find_one(key: item_id) do
       {:ok, _} -> {[], []}
       {:error, :not_found} -> {[{:missing_item, npc_key, node_id, item_id}], []}
     end
   end
 
   defp validate_action_args(npc_key, node_id, "take_item", [item_id | _], _quest_ids) do
-    case TypedObjectLoader.get(item_id) do
+    case Entities.find_one(key: item_id) do
       {:ok, _} -> {[], []}
       {:error, :not_found} -> {[{:missing_item, npc_key, node_id, item_id}], []}
     end
@@ -442,7 +442,7 @@ defmodule Loka.Testing.Content.DialogueValidator do
           end
 
         "has_item" ->
-          case TypedObjectLoader.get(value) do
+          case Entities.find_one(key: value) do
             {:ok, _} -> {[], []}
             {:error, :not_found} -> {[{:missing_item, npc_key, node_id, value}], []}
           end
@@ -539,7 +539,7 @@ defmodule Loka.Testing.Content.DialogueValidator do
   end
 
   defp get_quest_ids do
-    Definitions.all_quest_definitions()
+    Content.Quest.all_definitions()
     |> Enum.map(& &1.id)
     |> MapSet.new()
   end

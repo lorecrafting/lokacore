@@ -352,22 +352,24 @@ defmodule Loka.Engine.Script.Bindings do
     if room_id, do: get_room_data(room_id), else: nil
   end
 
-  # Get room data from TypedObject.Registry
+  # Get room data from Entities (V2: TypedObject.Registry removed)
   defp get_room_data(room_id) when is_binary(room_id) do
-    alias Loka.Engine.TypedObject.Registry, as: TypedRegistry
+    alias Loka.Engine.Entities
 
-    case TypedRegistry.get(room_id) do
-      {:ok, room} ->
-        %{
-          id: room.key,
-          name: room.short_desc || room.key,
-          description: room.long_desc,
-          exits: Map.get(room.data, :exits, %{}),
-          tags: room.tags
-        }
-
-      {:error, :not_found} ->
+    case Entities.get_entity(room_id) do
+      nil ->
         %{id: room_id, name: "Unknown", exits: %{}}
+
+      schema ->
+        entity = Entities.to_entity(schema)
+
+        %{
+          id: entity.key || entity.id,
+          name: entity.short_desc || entity.key,
+          description: entity.long_desc,
+          exits: Map.get(entity.components || %{}, "exits", %{}),
+          tags: entity.tags
+        }
     end
   end
 

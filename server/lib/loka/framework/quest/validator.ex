@@ -39,9 +39,9 @@ defmodule Loka.Framework.Quest.Validator do
 
   require Logger
 
-  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
-  alias Loka.Framework.Quest.{Definitions, ObjectiveRegistry, ChainRegistry}
   alias Loka.Content
+  alias Loka.Engine.Entities
+  alias Loka.Framework.Quest.ObjectiveRegistry
 
   @type validation_result :: %{
           quests_checked: non_neg_integer(),
@@ -78,7 +78,7 @@ defmodule Loka.Framework.Quest.Validator do
   """
   @spec validate() :: {:ok, validation_result()}
   def validate do
-    quests = Definitions.all_quest_definitions()
+    quests = Content.Quest.all_definitions()
 
     # Build lookup maps
     all_quest_ids = MapSet.new(Enum.map(quests, & &1.id))
@@ -121,7 +121,7 @@ defmodule Loka.Framework.Quest.Validator do
   """
   @spec validate_quest(String.t()) :: {:ok, {[error()], [warning()]}} | {:error, :not_found}
   def validate_quest(quest_id) do
-    case Definitions.get_quest_definition(quest_id) do
+    case Content.Quest.definition(quest_id) do
       nil ->
         {:error, :not_found}
 
@@ -303,9 +303,9 @@ defmodule Loka.Framework.Quest.Validator do
   end
 
   defp validate_room_exists(quest_id, room_key) do
-    case TypedObjectLoader.get(room_key) do
-      {:ok, proto} ->
-        if proto.subtype == :room do
+    case Entities.find_one(key: room_key) do
+      {:ok, entity} ->
+        if entity.type == :room do
           []
         else
           [{:missing_target, quest_id, :go_to, room_key}]
@@ -317,8 +317,8 @@ defmodule Loka.Framework.Quest.Validator do
   end
 
   defp validate_npc_exists(quest_id, npc_key, obj_type) do
-    case TypedObjectLoader.get(npc_key) do
-      {:ok, _proto} ->
+    case Entities.find_one(key: npc_key) do
+      {:ok, _entity} ->
         []
 
       {:error, :not_found} ->
@@ -327,8 +327,8 @@ defmodule Loka.Framework.Quest.Validator do
   end
 
   defp validate_item_exists(quest_id, item_key) do
-    case TypedObjectLoader.get(item_key) do
-      {:ok, _proto} ->
+    case Entities.find_one(key: item_key) do
+      {:ok, _entity} ->
         []
 
       {:error, :not_found} ->
@@ -367,9 +367,9 @@ defmodule Loka.Framework.Quest.Validator do
     topic = Map.get(obj, :dialogue_topic) || Map.get(obj, "dialogue_topic")
 
     if obj_type == :talk and not is_nil(topic) and topic != "" do
-      case TypedObjectLoader.get(target_id) do
-        {:ok, proto} ->
-          dialogue_tree = get_dialogue_tree(proto)
+      case Entities.find_one(key: target_id) do
+        {:ok, entity} ->
+          dialogue_tree = get_dialogue_tree(entity)
 
           if has_dialogue_topic?(dialogue_tree, topic) do
             []
@@ -416,12 +416,12 @@ defmodule Loka.Framework.Quest.Validator do
   defp validate_quest_giver(_quest_id, "system", _requires), do: {[], []}
 
   defp validate_quest_giver(quest_id, giver_key, requires_quest) do
-    case TypedObjectLoader.get(giver_key) do
+    case Entities.find_one(key: giver_key) do
       {:error, :not_found} ->
         {[{:missing_quest_giver, quest_id, giver_key}], []}
 
-      {:ok, proto} ->
-        dialogue_tree = get_dialogue_tree(proto)
+      {:ok, entity} ->
+        dialogue_tree = get_dialogue_tree(entity)
 
         if map_size(dialogue_tree) == 0 do
           {[{:giver_no_dialogue, quest_id, giver_key}], []}
@@ -520,82 +520,8 @@ defmodule Loka.Framework.Quest.Validator do
     end
   end
 
-  # =============================================================================
-  # Private - Chain Circular Dependency Validation
-  # =============================================================================
-
-  defp check_circular_chains do
-    chains = ChainRegistry.all()
-
-    Enum.flat_map(chains, fn chain ->
-      check_chain_for_cycles(chain)
-    end)
-  end
-
-  defp check_chain_for_cycles(chain) do
-    # Build a graph from quest_id -> [next_quest_ids]
-    # Include both `next` and `branches.next` as edges
-    graph = build_chain_graph(chain.nodes)
-
-    # Check each node for cycles using DFS
-    chain.nodes
-    |> Enum.flat_map(fn node ->
-      case detect_chain_cycle(node.quest_id, graph, [], MapSet.new()) do
-        nil -> []
-        cycle -> [{:circular_chain, chain.id, node.quest_id, Enum.reverse(cycle)}]
-      end
-    end)
-    |> Enum.uniq_by(fn {:circular_chain, _, _, cycle} -> Enum.sort(cycle) end)
-  end
-
-  defp build_chain_graph(nodes) do
-    Enum.reduce(nodes, %{}, fn node, acc ->
-      # Get all next quest IDs from the node
-      next_from_next = node.next || []
-
-      next_from_branches =
-        (node.branches || [])
-        |> Enum.map(& &1.next)
-        |> Enum.reject(&is_nil/1)
-        |> List.flatten()
-
-      all_next = (next_from_next ++ next_from_branches) |> Enum.uniq()
-
-      if Enum.empty?(all_next) do
-        acc
-      else
-        Map.put(acc, node.quest_id, all_next)
-      end
-    end)
-  end
-
-  defp detect_chain_cycle(quest_id, graph, path, visited) do
-    cond do
-      quest_id in path ->
-        # Found a cycle - return the path from the repeated node
-        [quest_id | path]
-
-      MapSet.member?(visited, quest_id) ->
-        # Already checked this node in another path, no cycle from here
-        nil
-
-      true ->
-        case Map.get(graph, quest_id) do
-          nil ->
-            # No outgoing edges, no cycle
-            nil
-
-          next_quests ->
-            # Check each next quest for cycles
-            new_path = [quest_id | path]
-            new_visited = MapSet.put(visited, quest_id)
-
-            Enum.find_value(next_quests, fn next_quest ->
-              detect_chain_cycle(next_quest, graph, new_path, new_visited)
-            end)
-        end
-    end
-  end
+  # Chain validation removed — chains are now entity relationships (V2)
+  defp check_circular_chains, do: []
 
   # =============================================================================
   # Private - Reward Validation
@@ -608,7 +534,7 @@ defmodule Loka.Framework.Quest.Validator do
     item_keys = extract_item_keys(items)
 
     Enum.flat_map(item_keys, fn item_key ->
-      case TypedObjectLoader.get(item_key) do
+      case Entities.find_one(key: item_key) do
         {:error, :not_found} ->
           [{:reward_item_not_found, quest_id, item_key}]
 

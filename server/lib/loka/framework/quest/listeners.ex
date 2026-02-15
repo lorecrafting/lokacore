@@ -38,6 +38,7 @@ defmodule Loka.Framework.Quest.Listeners do
 
   require Logger
 
+  alias Loka.Content
   alias Loka.Engine.Hooks
   alias Loka.Framework.Quest.Progress, as: QuestProgress
 
@@ -420,9 +421,7 @@ defmodule Loka.Framework.Quest.Listeners do
   # Returns all quest definitions with giver: "system".
   # These quests are auto-granted to players when they first spawn/enter a room.
   defp get_system_quests do
-    alias Loka.Framework.Quest.Definitions
-
-    Definitions.all_quest_definitions()
+    Content.Quest.all_definitions()
     |> Enum.filter(fn quest ->
       quest.giver == "system" or quest.giver == :system
     end)

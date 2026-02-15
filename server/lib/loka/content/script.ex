@@ -1,6 +1,6 @@
 defmodule Loka.Content.Script do
   @moduledoc """
-  Script definition - OOC TypedObject.
+  Script definition - OOC Entity.
 
   Scripts define Elixir code that can be attached to entities via hooks.
   They are sandboxed and have access to a limited API.
@@ -40,7 +40,7 @@ defmodule Loka.Content.Script do
   - Memory limits prevent resource exhaustion
   """
 
-  alias Loka.Engine.{Entity, Entities, TypedObject}
+  alias Loka.Engine.{Entity, Entities}
 
   @default_timeout_ms 5000
 
@@ -71,18 +71,15 @@ defmodule Loka.Content.Script do
   @doc """
   Gets a script by key.
   """
-  @spec get(String.t()) :: {:ok, TypedObject.t()} | {:error, :not_found}
+  @spec get(String.t()) :: {:ok, Entity.t()} | {:error, :not_found}
   def get(key) when is_binary(key) do
-    case Entities.find_one(key: key, type: :script) do
-      {:ok, entity} -> Entity.to_typed_object(entity)
-      error -> error
-    end
+    Entities.find_one(key: key, type: :script)
   end
 
   @doc """
   Gets a script by key, raises if not found.
   """
-  @spec get!(String.t()) :: TypedObject.t()
+  @spec get!(String.t()) :: Entity.t()
   def get!(key) when is_binary(key) do
     case get(key) do
       {:ok, script} -> script
@@ -93,26 +90,24 @@ defmodule Loka.Content.Script do
   @doc """
   Lists all script definitions.
   """
-  @spec all() :: [TypedObject.t()]
+  @spec all() :: [Entity.t()]
   def all do
     Entities.find_all(type: :script, is_prototype: true)
-    |> to_typed_objects()
   end
 
   @doc """
   Lists all published script definitions (excludes drafts).
   """
-  @spec all_published() :: [TypedObject.t()]
+  @spec all_published() :: [Entity.t()]
   def all_published do
     Entities.find_all(type: :script, is_prototype: true)
     |> Enum.reject(&Entity.draft?/1)
-    |> to_typed_objects()
   end
 
   @doc """
   Lists scripts for a specific hook type.
   """
-  @spec for_hook(atom()) :: [TypedObject.t()]
+  @spec for_hook(atom()) :: [Entity.t()]
   def for_hook(hook) when is_atom(hook) do
     hook_str = Atom.to_string(hook)
 
@@ -126,16 +121,18 @@ defmodule Loka.Content.Script do
   @doc """
   Gets the hook type this script handles.
   """
-  @spec hook(TypedObject.t()) :: atom() | String.t() | nil
-  def hook(%TypedObject{type: :script, data: data}) do
+  @spec hook(Entity.t()) :: atom() | String.t() | nil
+  def hook(%Entity{type: :script} = entity) do
+    data = entity.components["data"] || %{}
     Map.get(data, "hook") || Map.get(data, :hook)
   end
 
   @doc """
   Gets the script source code.
   """
-  @spec source(TypedObject.t()) :: String.t() | nil
-  def source(%TypedObject{type: :script, data: data}) do
+  @spec source(Entity.t()) :: String.t() | nil
+  def source(%Entity{type: :script} = entity) do
+    data = entity.components["data"] || %{}
     Map.get(data, "source") || Map.get(data, :source)
   end
 
@@ -145,8 +142,9 @@ defmodule Loka.Content.Script do
   Only converts known binding names to atoms to prevent atom table exhaustion.
   Unknown bindings are kept as strings and will cause runtime errors if used.
   """
-  @spec bindings(TypedObject.t()) :: [atom() | String.t()]
-  def bindings(%TypedObject{type: :script, data: data}) do
+  @spec bindings(Entity.t()) :: [atom() | String.t()]
+  def bindings(%Entity{type: :script} = entity) do
+    data = entity.components["data"] || %{}
     bindings = Map.get(data, "bindings") || Map.get(data, :bindings, [])
 
     Enum.map(bindings, fn
@@ -168,8 +166,9 @@ defmodule Loka.Content.Script do
   @doc """
   Gets the execution timeout in milliseconds.
   """
-  @spec timeout_ms(TypedObject.t()) :: non_neg_integer()
-  def timeout_ms(%TypedObject{type: :script, data: data}) do
+  @spec timeout_ms(Entity.t()) :: non_neg_integer()
+  def timeout_ms(%Entity{type: :script} = entity) do
+    data = entity.components["data"] || %{}
     Map.get(data, "timeout_ms") || Map.get(data, :timeout_ms, @default_timeout_ms)
   end
 
@@ -184,16 +183,17 @@ defmodule Loka.Content.Script do
 
   Returns nil if no schema is defined.
   """
-  @spec config_schema(TypedObject.t()) :: map() | nil
-  def config_schema(%TypedObject{type: :script, data: data}) do
+  @spec config_schema(Entity.t()) :: map() | nil
+  def config_schema(%Entity{type: :script} = entity) do
+    data = entity.components["data"] || %{}
     Map.get(data, "config_schema") || Map.get(data, :config_schema)
   end
 
   @doc """
   Checks if the script source is syntactically valid Elixir.
   """
-  @spec valid_syntax?(TypedObject.t()) :: boolean()
-  def valid_syntax?(%TypedObject{} = script) do
+  @spec valid_syntax?(Entity.t()) :: boolean()
+  def valid_syntax?(%Entity{} = script) do
     case source(script) do
       nil -> false
       src -> match?({:ok, _}, Code.string_to_quoted(src))
@@ -203,8 +203,8 @@ defmodule Loka.Content.Script do
   @doc """
   Validates a script definition.
   """
-  @spec validate(TypedObject.t()) :: :ok | {:error, [String.t()]}
-  def validate(%TypedObject{type: :script} = script) do
+  @spec validate(Entity.t()) :: :ok | {:error, [String.t()]}
+  def validate(%Entity{type: :script} = script) do
     errors =
       []
       |> validate_has_source(script)
@@ -214,7 +214,7 @@ defmodule Loka.Content.Script do
     if Enum.empty?(errors), do: :ok, else: {:error, errors}
   end
 
-  def validate(%TypedObject{type: type}) do
+  def validate(%Entity{type: type}) do
     {:error, ["Expected script type, got: #{type}"]}
   end
 
@@ -244,15 +244,5 @@ defmodule Loka.Content.Script do
           {:error, {_line, msg, _}} -> ["syntax error: #{msg}" | errors]
         end
     end
-  end
-
-  defp to_typed_objects(entities) do
-    entities
-    |> Enum.flat_map(fn entity ->
-      case Entity.to_typed_object(entity) do
-        {:ok, typed_object} -> [typed_object]
-        {:error, _} -> []
-      end
-    end)
   end
 end

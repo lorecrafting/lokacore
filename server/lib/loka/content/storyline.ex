@@ -1,23 +1,53 @@
 defmodule Loka.Content.Storyline do
   @moduledoc """
-  Storyline definition - OOC TypedObject.
+  Storyline definition - OOC Entity.
 
   Storylines organize quests into acts with progression tracking.
+
+  ## Storyline Map Format
+
+  The `to_storyline_map/1` function converts an entity to:
+
+      %{
+        key: "main_storyline",
+        name: "The Main Quest",
+        description: "...",
+        starting_room: "town_square",
+        acts: [
+          %{id: "act1", name: "Prologue", quests: [...], requires: []},
+          %{id: "act2", name: "Rising", quests: [...], requires: ["act1"]}
+        ],
+        side_quests: ["side_quest_1"],
+        tags: ["main"]
+      }
   """
 
-  alias Loka.Engine.{Entity, Entities, TypedObject}
-  alias Loka.Framework.Storyline.Storyline
-  alias Loka.Framework.Storyline.Storyline.Act
+  alias Loka.Engine.{Entity, Entities}
 
-  @spec get(String.t()) :: {:ok, TypedObject.t()} | {:error, :not_found}
+  @type storyline_map :: %{
+          key: String.t(),
+          name: String.t() | nil,
+          description: String.t() | nil,
+          starting_room: String.t() | nil,
+          acts: [act_map()],
+          side_quests: [String.t()],
+          tags: [String.t()]
+        }
+
+  @type act_map :: %{
+          id: String.t() | nil,
+          name: String.t() | nil,
+          description: String.t() | nil,
+          quests: [String.t()],
+          requires: [String.t()]
+        }
+
+  @spec get(String.t()) :: {:ok, Entity.t()} | {:error, :not_found}
   def get(key) when is_binary(key) do
-    case Entities.find_one(key: key, type: :storyline) do
-      {:ok, entity} -> Entity.to_typed_object(entity)
-      error -> error
-    end
+    Entities.find_one(key: key, type: :storyline)
   end
 
-  @spec get!(String.t()) :: TypedObject.t()
+  @spec get!(String.t()) :: Entity.t()
   def get!(key) when is_binary(key) do
     case get(key) do
       {:ok, storyline} -> storyline
@@ -26,56 +56,53 @@ defmodule Loka.Content.Storyline do
   end
 
   @doc """
-  Gets a storyline as a Storyline struct.
+  Gets a storyline as a map with structured fields.
 
-  Returns `{:ok, storyline_struct}` or `{:error, :not_found}`.
+  Returns `{:ok, storyline_map}` or `{:error, :not_found}`.
   """
-  @spec get_struct(String.t()) :: {:ok, Storyline.t()} | {:error, :not_found}
+  @spec get_struct(String.t()) :: {:ok, storyline_map()} | {:error, :not_found}
   def get_struct(key) when is_binary(key) do
     case get(key) do
-      {:ok, typed_object} -> {:ok, to_storyline_struct(typed_object)}
+      {:ok, entity} -> {:ok, to_storyline_map(entity)}
       error -> error
     end
   end
 
-  @spec all() :: [TypedObject.t()]
+  @spec all() :: [Entity.t()]
   def all do
     Entities.find_all(type: :storyline, is_prototype: true)
-    |> to_typed_objects()
   end
 
   @doc """
-  Returns all storylines as Storyline structs.
+  Returns all storylines as structured maps.
 
   This is used by callers that expect the old StorylineRegistry format.
   """
-  @spec all_structs() :: [Storyline.t()]
+  @spec all_structs() :: [storyline_map()]
   def all_structs do
-    all() |> Enum.map(&to_storyline_struct/1)
+    all() |> Enum.map(&to_storyline_map/1)
   end
 
-  @spec all_published() :: [TypedObject.t()]
+  @spec all_published() :: [Entity.t()]
   def all_published do
     Entities.find_all(type: :storyline, is_prototype: true)
     |> Enum.reject(&Entity.draft?/1)
-    |> to_typed_objects()
   end
 
-  @spec by_tag(String.t()) :: [TypedObject.t()]
+  @spec by_tag(String.t()) :: [Entity.t()]
   def by_tag(tag) when is_binary(tag) do
     Entities.find_all(type: :storyline, tags: [tag], is_prototype: true)
     |> Enum.reject(&Entity.draft?/1)
-    |> to_typed_objects()
   end
 
-  def acts(%TypedObject{type: :storyline} = storyline),
-    do: TypedObject.get_data(storyline, "acts", [])
+  def acts(%Entity{type: :storyline} = entity),
+    do: get_data(entity, "acts", [])
 
-  def side_quests(%TypedObject{type: :storyline} = storyline),
-    do: TypedObject.get_data(storyline, "side_quests", [])
+  def side_quests(%Entity{type: :storyline} = entity),
+    do: get_data(entity, "side_quests", [])
 
-  def main_quests(%TypedObject{type: :storyline} = storyline),
-    do: TypedObject.get_data(storyline, "main_quests", [])
+  def main_quests(%Entity{type: :storyline} = entity),
+    do: get_data(entity, "main_quests", [])
 
   @doc """
   Checks if a quest can be started based on storyline prerequisites.
@@ -98,22 +125,59 @@ defmodule Loka.Content.Storyline do
     end
   end
 
+  @doc """
+  Returns all quests in a storyline (main acts + side quests).
+  Works with both entity and storyline map formats.
+  """
+  def all_quests(%Entity{type: :storyline} = entity) do
+    entity |> to_storyline_map() |> all_quests()
+  end
+
+  def all_quests(%{acts: acts, side_quests: side_quests}) do
+    main = Enum.flat_map(acts, & &1.quests)
+    main ++ side_quests
+  end
+
+  @doc """
+  Returns the ordered list of main quests (acts in order).
+  Works with both entity and storyline map formats.
+  """
+  def quest_order(%Entity{type: :storyline} = entity) do
+    entity |> to_storyline_map() |> quest_order()
+  end
+
+  def quest_order(%{acts: acts}) do
+    Enum.flat_map(acts, & &1.quests)
+  end
+
+  @doc """
+  Calculates progress through the storyline.
+  Returns `{completed_count, total_count, percentage}`.
+  """
+  def progress(storyline, completed_quests) do
+    all = quest_order(storyline)
+    total = length(all)
+    completed = Enum.count(all, &(&1 in completed_quests))
+    percentage = if total > 0, do: round(completed / total * 100), else: 0
+    {completed, total, percentage}
+  end
+
   # =============================================================================
-  # Struct Conversion
+  # Map Conversion
   # =============================================================================
 
   @doc """
-  Converts a TypedObject storyline to a Storyline struct.
+  Converts an entity storyline to a structured map.
   """
-  @spec to_storyline_struct(TypedObject.t()) :: Storyline.t()
-  def to_storyline_struct(%TypedObject{type: :storyline} = typed_object) do
-    data = typed_object.data || %{}
+  @spec to_storyline_map(Entity.t()) :: storyline_map()
+  def to_storyline_map(%Entity{type: :storyline} = entity) do
+    data = entity.components["data"] || %{}
 
     acts_data = Map.get(data, "acts") || Map.get(data, :acts) || []
 
     acts =
       Enum.map(acts_data, fn act_data ->
-        %Act{
+        %{
           id: act_data["id"] || act_data[:id],
           name: act_data["name"] || act_data[:name],
           description: act_data["description"] || act_data[:description],
@@ -122,15 +186,15 @@ defmodule Loka.Content.Storyline do
         }
       end)
 
-    %Storyline{
-      key: typed_object.key,
-      name: typed_object.name || Map.get(data, "name") || Map.get(data, :name),
+    %{
+      key: entity.key,
+      name: entity.short_desc || Map.get(data, "name") || Map.get(data, :name),
       description:
-        typed_object.description || Map.get(data, "description") || Map.get(data, :description),
+        entity.long_desc || Map.get(data, "description") || Map.get(data, :description),
       starting_room: Map.get(data, "starting_room") || Map.get(data, :starting_room),
       acts: acts,
       side_quests: Map.get(data, "side_quests") || Map.get(data, :side_quests) || [],
-      tags: typed_object.tags || Map.get(data, "tags") || Map.get(data, :tags) || []
+      tags: entity.tags || Map.get(data, "tags") || Map.get(data, :tags) || []
     }
   end
 
@@ -170,13 +234,9 @@ defmodule Loka.Content.Storyline do
   # Private
   # =============================================================================
 
-  defp to_typed_objects(entities) do
-    entities
-    |> Enum.flat_map(fn entity ->
-      case Entity.to_typed_object(entity) do
-        {:ok, typed_object} -> [typed_object]
-        {:error, _} -> []
-      end
-    end)
+  defp get_data(%Entity{} = entity, field, default) do
+    data = entity.components["data"] || %{}
+    val = Map.get(data, field)
+    if is_nil(val), do: default, else: val
   end
 end

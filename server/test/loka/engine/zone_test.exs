@@ -1,5 +1,5 @@
 defmodule Loka.Engine.ZoneTest do
-  use Loka.DataCase, async: true
+  use ExUnit.Case, async: true
 
   alias Loka.Engine.Zone
 

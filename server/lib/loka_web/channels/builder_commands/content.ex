@@ -4,7 +4,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Content do
   create/delete dialogue, dialogue info.
   """
 
-  alias Loka.Engine.TypedObject.Loader
+  alias Loka.Engine.Entities
   alias Loka.WorldBuilder.{QuestManager, DialogueManager}
   alias Loka.Content.Dialogue
   alias LokaWeb.Channels.BuilderCommands.Helpers
@@ -19,12 +19,12 @@ defmodule LokaWeb.Channels.BuilderCommands.Content do
   end
 
   def execute(:edit_quest, %{key: key, field: nil}, socket) do
-    case Loader.get(key) do
+    case Entities.find_one(key: key, type: :quest) do
       {:ok, obj} ->
-        yaml_text = Helpers.format_typed_object(obj)
+        yaml_text = Helpers.format_entity(obj)
         {:ok, "Quest '#{key}'#{Helpers.draft_tag(obj)}:\n#{yaml_text}", socket}
 
-      _ ->
+      {:error, :not_found} ->
         {:error, "Quest '#{key}' not found.", socket}
     end
   end
@@ -71,7 +71,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Content do
   def execute(:dialogue_info, %{key: key}, socket) do
     case Dialogue.get(key) do
       {:ok, dialogue} ->
-        data = Map.get(dialogue, :data, %{})
+        data = (dialogue.components || %{})["data"] || %{}
         nodes = data["nodes"] || %{}
         node_count = if is_map(nodes), do: map_size(nodes), else: length(nodes)
 

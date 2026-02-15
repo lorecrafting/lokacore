@@ -1,6 +1,6 @@
 defmodule Loka.Content.Zone do
   @moduledoc """
-  Zone definition - OOC TypedObject.
+  Zone definition - OOC Entity.
 
   Zones define areas in the game world with:
   - Room membership (explicit list or by tag)
@@ -44,7 +44,7 @@ defmodule Loka.Content.Zone do
             max: 3
   """
 
-  alias Loka.Engine.{Entity, Entities, EntityRegistry, EntityServer, TypedObject, Zone}
+  alias Loka.Engine.{Entity, Entities, EntityRegistry, EntityServer, Zone}
 
   require Logger
 
@@ -59,27 +59,15 @@ defmodule Loka.Content.Zone do
   @doc """
   Gets a zone by key.
   """
-  @spec get(String.t()) :: {:ok, TypedObject.t()} | {:error, :not_found}
+  @spec get(String.t()) :: {:ok, Entity.t()} | {:error, :not_found}
   def get(key) when is_binary(key) do
-    case Entities.find_one(key: key, type: :zone) do
-      {:ok, entity} ->
-        Entity.to_typed_object(entity)
-
-      {:error, :not_found} ->
-        # Zones are YAML-only (not in DB), so fall back to TypedObject registry
-        alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
-
-        case TypedObjectLoader.get(key) do
-          {:ok, %TypedObject{type: :zone} = zone} -> {:ok, zone}
-          _ -> {:error, :not_found}
-        end
-    end
+    Entities.find_one(key: key, type: :zone)
   end
 
   @doc """
   Gets a zone by key, raises if not found.
   """
-  @spec get!(String.t()) :: TypedObject.t()
+  @spec get!(String.t()) :: Entity.t()
   def get!(key) when is_binary(key) do
     case get(key) do
       {:ok, zone} -> zone
@@ -90,70 +78,70 @@ defmodule Loka.Content.Zone do
   @doc """
   Lists all zone definitions.
   """
-  @spec all() :: [TypedObject.t()]
+  @spec all() :: [Entity.t()]
   def all do
     Entities.find_all(type: :zone, is_prototype: true)
-    |> to_typed_objects()
   end
 
   @doc """
   Lists all published zone definitions (excludes drafts).
   """
-  @spec all_published() :: [TypedObject.t()]
+  @spec all_published() :: [Entity.t()]
   def all_published do
     Entities.find_all(type: :zone, is_prototype: true)
     |> Enum.reject(&Entity.draft?/1)
-    |> to_typed_objects()
   end
 
   @doc """
   Lists zones with a specific tag.
   """
-  @spec list_by_tag(String.t()) :: [TypedObject.t()]
+  @spec list_by_tag(String.t()) :: [Entity.t()]
   def list_by_tag(tag) when is_binary(tag) do
     Entities.find_all(type: :zone, tags: [tag], is_prototype: true)
-    |> to_typed_objects()
   end
 
   @doc """
   Lists published zones with a specific tag.
   """
-  @spec list_by_tag_published(String.t()) :: [TypedObject.t()]
+  @spec list_by_tag_published(String.t()) :: [Entity.t()]
   def list_by_tag_published(tag) when is_binary(tag) do
     Entities.find_all(type: :zone, tags: [tag], is_prototype: true)
     |> Enum.reject(&Entity.draft?/1)
-    |> to_typed_objects()
   end
 
   @doc """
   Gets the list of room keys in this zone.
   """
-  @spec rooms(TypedObject.t()) :: [String.t()]
-  def rooms(%TypedObject{type: :zone, data: data}) do
+  @spec rooms(Entity.t()) :: [String.t()]
+  def rooms(%Entity{type: :zone} = entity) do
+    data = entity.components["data"] || %{}
     Map.get(data, "rooms") || Map.get(data, :rooms, [])
   end
 
   @doc """
   Gets the tag used to find rooms (alternative to explicit room list).
   """
-  @spec rooms_with_tag(TypedObject.t()) :: String.t() | nil
-  def rooms_with_tag(%TypedObject{type: :zone, data: data}) do
+  @spec rooms_with_tag(Entity.t()) :: String.t() | nil
+  def rooms_with_tag(%Entity{type: :zone} = entity) do
+    data = entity.components["data"] || %{}
     Map.get(data, "rooms_with_tag") || Map.get(data, :rooms_with_tag)
   end
 
   @doc """
   Gets zone reset rules.
   """
-  @spec resets(TypedObject.t()) :: [map()]
-  def resets(%TypedObject{type: :zone, data: data}) do
+  @spec resets(Entity.t()) :: [map()]
+  def resets(%Entity{type: :zone} = entity) do
+    data = entity.components["data"] || %{}
     Map.get(data, "resets") || Map.get(data, :resets, [])
   end
 
   @doc """
   Gets zone lifespan in minutes.
   """
-  @spec lifespan_minutes(TypedObject.t()) :: non_neg_integer() | nil
-  def lifespan_minutes(%TypedObject{type: :zone, data: data}) do
+  @spec lifespan_minutes(Entity.t()) :: non_neg_integer() | nil
+  def lifespan_minutes(%Entity{type: :zone} = entity) do
+    data = entity.components["data"] || %{}
     Map.get(data, "lifespan_minutes") || Map.get(data, :lifespan_minutes)
   end
 
@@ -164,8 +152,9 @@ defmodule Loka.Content.Zone do
   - `:always` - Reset on timer regardless of players
   - `:manual` - Only reset when explicitly triggered
   """
-  @spec reset_mode(TypedObject.t()) :: atom()
-  def reset_mode(%TypedObject{type: :zone, data: data}) do
+  @spec reset_mode(Entity.t()) :: atom()
+  def reset_mode(%Entity{type: :zone} = entity) do
+    data = entity.components["data"] || %{}
     mode = Map.get(data, "reset_mode") || Map.get(data, :reset_mode, "empty")
 
     case mode do
@@ -179,8 +168,10 @@ defmodule Loka.Content.Zone do
   @doc """
   Gets level range for the zone.
   """
-  @spec level_range(TypedObject.t()) :: {non_neg_integer(), non_neg_integer()} | nil
-  def level_range(%TypedObject{type: :zone, attributes: attrs}) do
+  @spec level_range(Entity.t()) :: {non_neg_integer(), non_neg_integer()} | nil
+  def level_range(%Entity{type: :zone} = entity) do
+    attrs = entity.components["attributes"] || %{}
+
     case Map.get(attrs, "level_range") || Map.get(attrs, :level_range) do
       %{"min" => min, "max" => max} -> {min, max}
       %{min: min, max: max} -> {min, max}
@@ -191,24 +182,25 @@ defmodule Loka.Content.Zone do
   @doc """
   Gets entry lock expression.
   """
-  @spec entry_lock(TypedObject.t()) :: String.t() | nil
-  def entry_lock(%TypedObject{type: :zone, locks: locks}) do
+  @spec entry_lock(Entity.t()) :: String.t() | nil
+  def entry_lock(%Entity{type: :zone} = entity) do
+    locks = entity.components["locks"] || %{}
     Map.get(locks, "enter") || Map.get(locks, :enter)
   end
 
   @doc """
   Checks if zone is an instance (private per-player/party).
   """
-  @spec instance?(TypedObject.t()) :: boolean()
-  def instance?(%TypedObject{} = zone) do
-    TypedObject.has_tag?(zone, "instance")
+  @spec instance?(Entity.t()) :: boolean()
+  def instance?(%Entity{} = entity) do
+    Entity.has_tag?(entity, "instance")
   end
 
   @doc """
   Validates a zone definition.
   """
-  @spec validate(TypedObject.t()) :: :ok | {:error, [String.t()]}
-  def validate(%TypedObject{type: :zone} = zone) do
+  @spec validate(Entity.t()) :: :ok | {:error, [String.t()]}
+  def validate(%Entity{type: :zone} = zone) do
     errors =
       []
       |> validate_has_rooms(zone)
@@ -217,7 +209,7 @@ defmodule Loka.Content.Zone do
     if Enum.empty?(errors), do: :ok, else: {:error, errors}
   end
 
-  def validate(%TypedObject{type: type}) do
+  def validate(%Entity{type: type}) do
     {:error, ["Expected zone type, got: #{type}"]}
   end
 
@@ -257,10 +249,10 @@ defmodule Loka.Content.Zone do
 
   Filters zones where the "enabled" data field is true (default).
   """
-  @spec enabled() :: [TypedObject.t()]
+  @spec enabled() :: [Entity.t()]
   def enabled do
     all()
-    |> Enum.filter(fn zone -> TypedObject.get_data(zone, "enabled", true) end)
+    |> Enum.filter(fn zone -> get_data(zone, "enabled", true) end)
   end
 
   @doc """
@@ -270,9 +262,11 @@ defmodule Loka.Content.Zone do
   def set_enabled(zone_key, enabled_val) when is_binary(zone_key) and is_boolean(enabled_val) do
     case Entities.find_one(key: zone_key, type: :zone) do
       {:ok, entity} ->
-        updated_data = Map.put(entity.data, "enabled", enabled_val)
+        data = entity.components["data"] || %{}
+        updated_data = Map.put(data, "enabled", enabled_val)
+        updated_components = Map.put(entity.components, "data", updated_data)
 
-        case Entities.update_entity(entity.id, %{data: updated_data}) do
+        case Entities.update_entity(entity.id, %{components: updated_components}) do
           {:ok, _} -> :ok
           error -> error
         end
@@ -289,9 +283,11 @@ defmodule Loka.Content.Zone do
   def update_last_reset(zone_key, timestamp) when is_binary(zone_key) do
     case Entities.find_one(key: zone_key, type: :zone) do
       {:ok, entity} ->
-        updated_data = Map.put(entity.data, "last_reset_at", DateTime.to_iso8601(timestamp))
+        data = entity.components["data"] || %{}
+        updated_data = Map.put(data, "last_reset_at", DateTime.to_iso8601(timestamp))
+        updated_components = Map.put(entity.components, "data", updated_data)
 
-        case Entities.update_entity(entity.id, %{data: updated_data}) do
+        case Entities.update_entity(entity.id, %{components: updated_components}) do
           {:ok, _} -> :ok
           error -> error
         end
@@ -383,26 +379,32 @@ defmodule Loka.Content.Zone do
   def rebuild, do: :ok
 
   @doc """
-  Converts a zone TypedObject to a Zone struct for the reset system.
+  Converts a zone entity to a Zone struct for the reset system.
   """
-  @spec to_zone_struct(TypedObject.t()) :: Zone.t()
-  def to_zone_struct(%TypedObject{type: :zone, key: key, name: name} = typed_object) do
+  @spec to_zone_struct(Entity.t()) :: Zone.t()
+  def to_zone_struct(%Entity{type: :zone, key: key} = entity) do
     %Zone{
       key: key,
-      name: name,
-      rooms: rooms(typed_object),
-      rooms_with_tag: rooms_with_tag(typed_object),
-      lifespan_minutes: lifespan_minutes(typed_object) || 30,
-      reset_mode: reset_mode(typed_object),
-      resets: convert_resets(resets(typed_object)),
-      enabled: TypedObject.get_data(typed_object, "enabled", true),
-      last_reset_at: parse_last_reset_at(typed_object)
+      name: entity.short_desc,
+      rooms: rooms(entity),
+      rooms_with_tag: rooms_with_tag(entity),
+      lifespan_minutes: lifespan_minutes(entity) || 30,
+      reset_mode: reset_mode(entity),
+      resets: convert_resets(resets(entity)),
+      enabled: get_data(entity, "enabled", true),
+      last_reset_at: parse_last_reset_at(entity)
     }
   end
 
   # =============================================================================
   # Private Helpers
   # =============================================================================
+
+  defp get_data(%Entity{} = entity, field, default) do
+    data = entity.components["data"] || %{}
+    val = Map.get(data, field)
+    if is_nil(val), do: default, else: val
+  end
 
   defp rooms_by_tag(tag) do
     try do
@@ -497,7 +499,9 @@ defmodule Loka.Content.Zone do
     String.to_atom(state)
   end
 
-  defp parse_last_reset_at(%TypedObject{data: data}) do
+  defp parse_last_reset_at(%Entity{} = entity) do
+    data = entity.components["data"] || %{}
+
     case Map.get(data, "last_reset_at") do
       nil ->
         nil
@@ -514,15 +518,5 @@ defmodule Loka.Content.Zone do
       _ ->
         nil
     end
-  end
-
-  defp to_typed_objects(entities) do
-    entities
-    |> Enum.flat_map(fn entity ->
-      case Entity.to_typed_object(entity) do
-        {:ok, typed_object} -> [typed_object]
-        {:error, _} -> []
-      end
-    end)
   end
 end

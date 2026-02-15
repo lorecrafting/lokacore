@@ -3,16 +3,16 @@ defmodule LokaWeb.Channels.BuilderCommands.Inspection do
   Builder inspection commands: info, list, find.
   """
 
-  alias Loka.Engine.TypedObject
-  alias Loka.Engine.TypedObject.Loader
+  alias Loka.Engine.{Entity, Entities}
+  alias Loka.Engine.Constants.WorldPaths
   alias Loka.Content.{Dialogue, Zone, Script}
   alias Loka.WorldBuilder.{RoomManager, EntityManager}
   alias LokaWeb.Channels.BuilderCommands.{Helpers, Formatter}
 
   def execute(:info, %{target: target}, socket) do
-    case Loader.get(target) do
+    case Entities.find_one(key: target) do
       {:ok, obj} ->
-        yaml_text = Helpers.format_typed_object(obj)
+        yaml_text = Helpers.format_entity(obj)
         {:ok, "Info for '#{target}':\n#{yaml_text}", socket}
 
       _ ->
@@ -39,12 +39,13 @@ defmodule LokaWeb.Channels.BuilderCommands.Inspection do
         Helpers.format_entity_list("Items", entities, socket)
 
       t when t in ["quests", "quest"] ->
-        quests = Loader.list_by_type(:quest)
+        quests = Entities.find_all(type: :quest, is_prototype: true)
 
         rows =
           Enum.map(quests, fn q ->
-            status = if TypedObject.draft?(q), do: "DRAFT", else: ""
-            ["{{cmd:quest info #{q.key}}}#{q.key}{{/cmd}}", status, q.data["name"] || q.key]
+            status = if Entity.draft?(q), do: "DRAFT", else: ""
+            name = get_data_field(q, "name") || q.short_desc || q.key
+            ["{{cmd:quest info #{q.key}}}#{q.key}{{/cmd}}", status, name]
           end)
 
         text =
@@ -60,9 +61,9 @@ defmodule LokaWeb.Channels.BuilderCommands.Inspection do
 
         rows =
           Enum.map(dialogues, fn d ->
-            status = if TypedObject.draft?(d), do: "DRAFT", else: ""
-            entity_key = get_in(d.data, ["entity_key"]) || ""
-            nodes = get_in(d.data, ["nodes"]) || %{}
+            status = if Entity.draft?(d), do: "DRAFT", else: ""
+            entity_key = get_data_field(d, "entity_key") || ""
+            nodes = get_data_field(d, "nodes") || %{}
             node_count = if is_map(nodes), do: map_size(nodes), else: length(nodes)
 
             [
@@ -86,13 +87,13 @@ defmodule LokaWeb.Channels.BuilderCommands.Inspection do
 
         rows =
           Enum.map(zones, fn z ->
-            status = if TypedObject.draft?(z), do: "DRAFT", else: ""
+            status = if Entity.draft?(z), do: "DRAFT", else: ""
             rooms = Zone.rooms(z)
 
             [
               "{{cmd:zone info #{z.key}}}#{z.key}{{/cmd}}",
               status,
-              z.name || z.key,
+              z.short_desc || z.key,
               "#{length(rooms)} rooms"
             ]
           end)
@@ -106,17 +107,17 @@ defmodule LokaWeb.Channels.BuilderCommands.Inspection do
         {:ok, text, socket}
 
       t when t in ["cutscenes", "cutscene"] ->
-        cutscenes = Loader.list_by_type(:cutscene)
+        cutscenes = Entities.find_all(type: :cutscene, is_prototype: true)
 
         rows =
           Enum.map(cutscenes, fn c ->
-            status = if TypedObject.draft?(c), do: "DRAFT", else: ""
-            scenes = get_in(c.data, ["scenes"]) || []
+            status = if Entity.draft?(c), do: "DRAFT", else: ""
+            scenes = get_data_field(c, "scenes") || []
 
             [
               "{{cmd:cutscene info #{c.key}}}#{c.key}{{/cmd}}",
               status,
-              c.name || c.key,
+              c.short_desc || c.key,
               "#{length(scenes)} scenes"
             ]
           end)
@@ -130,18 +131,18 @@ defmodule LokaWeb.Channels.BuilderCommands.Inspection do
         {:ok, text, socket}
 
       t when t in ["storylines", "storyline"] ->
-        storylines = Loader.list_by_type(:storyline)
+        storylines = Entities.find_all(type: :storyline, is_prototype: true)
 
         rows =
           Enum.map(storylines, fn s ->
-            status = if TypedObject.draft?(s), do: "DRAFT", else: ""
-            quests = get_in(s.data, ["main_quests"]) || []
-            side = get_in(s.data, ["side_quests"]) || []
+            status = if Entity.draft?(s), do: "DRAFT", else: ""
+            quests = get_data_field(s, "main_quests") || []
+            side = get_data_field(s, "side_quests") || []
 
             [
               "{{cmd:storyline info #{s.key}}}#{s.key}{{/cmd}}",
               status,
-              s.name || s.key,
+              s.short_desc || s.key,
               "#{length(quests)} main, #{length(side)} side"
             ]
           end)
@@ -160,7 +161,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Inspection do
         scripts =
           if filter = params[:filter] do
             Enum.filter(scripts, fn s ->
-              hook = get_in(s.data, ["hook"]) || ""
+              hook = get_data_field(s, "hook") || ""
               hook == filter
             end)
           else
@@ -169,9 +170,15 @@ defmodule LokaWeb.Channels.BuilderCommands.Inspection do
 
         rows =
           Enum.map(scripts, fn s ->
-            status = if TypedObject.draft?(s), do: "DRAFT", else: ""
-            hook = get_in(s.data, ["hook"]) || ""
-            ["{{cmd:script info #{s.key}}}#{s.key}{{/cmd}}", status, s.name || s.key, hook]
+            status = if Entity.draft?(s), do: "DRAFT", else: ""
+            hook = get_data_field(s, "hook") || ""
+
+            [
+              "{{cmd:script info #{s.key}}}#{s.key}{{/cmd}}",
+              status,
+              s.short_desc || s.key,
+              hook
+            ]
           end)
 
         text =
@@ -199,17 +206,13 @@ defmodule LokaWeb.Channels.BuilderCommands.Inspection do
     find_matches = fn list, type ->
       list
       |> Enum.filter(fn e ->
-        Helpers.matches?(e.key, search_lower) || Helpers.matches?(e.name, search_lower)
+        Helpers.matches?(e.key, search_lower) ||
+          Helpers.matches?(e.short_desc, search_lower)
       end)
       |> Enum.map(fn e ->
-        status =
-          case Loader.get(e.key) do
-            {:ok, obj} -> if TypedObject.draft?(obj), do: "DRAFT", else: ""
-            _ -> ""
-          end
-
+        status = if Entity.draft?(e), do: "DRAFT", else: ""
         cmd = if type == "room", do: "goto #{e.key}", else: "info #{e.key}"
-        [type, "{{cmd:#{cmd}}}#{e.key}{{/cmd}}", status, e.name]
+        [type, "{{cmd:#{cmd}}}#{e.key}{{/cmd}}", status, e.short_desc || e.key]
       end)
     end
 
@@ -233,19 +236,26 @@ defmodule LokaWeb.Channels.BuilderCommands.Inspection do
 
   # --- Preview command ---
 
-  # Derive directory mappings from TypedObject's single source of truth.
-  @type_to_dir Map.new(TypedObject.publishable_content_types(), fn type ->
-                 {Atom.to_string(type), TypedObject.content_dir(type)}
-               end)
+  # Directory mappings for publishable content types
+  @type_to_dir %{
+    "quest" => WorldPaths.quests_dir() |> Path.relative_to(WorldPaths.world_dir()),
+    "dialogue" => WorldPaths.dialogues_dir() |> Path.relative_to(WorldPaths.world_dir()),
+    "script" => WorldPaths.scripts_dir() |> Path.relative_to(WorldPaths.world_dir()),
+    "zone" => WorldPaths.zones_dir() |> Path.relative_to(WorldPaths.world_dir()),
+    "cutscene" => WorldPaths.cutscenes_dir() |> Path.relative_to(WorldPaths.world_dir()),
+    "storyline" => WorldPaths.storylines_dir() |> Path.relative_to(WorldPaths.world_dir())
+  }
 
-  @entity_to_subdir Map.new(TypedObject.publishable_entity_subtypes(), fn subtype ->
-                      {Atom.to_string(subtype), TypedObject.entity_dir(subtype)}
-                    end)
+  @entity_to_subdir %{
+    "room" => WorldPaths.rooms_dir() |> Path.relative_to(WorldPaths.world_dir()),
+    "npc" => WorldPaths.npcs_dir() |> Path.relative_to(WorldPaths.world_dir()),
+    "item" => WorldPaths.items_dir() |> Path.relative_to(WorldPaths.world_dir())
+  }
 
   @preview_types Map.keys(@type_to_dir) ++ Map.keys(@entity_to_subdir)
 
   def execute(:preview, %{type: type, key: key}, socket) when type in @preview_types do
-    case Loader.get(key) do
+    case Entities.find_one(key: key) do
       {:ok, obj} ->
         text = format_preview(obj, type, key)
         {:ok, text, socket}
@@ -263,7 +273,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Inspection do
 
   defp format_preview(obj, type, key) do
     world_dir = :code.priv_dir(:loka) |> Path.join("world")
-    is_draft = TypedObject.draft?(obj)
+    is_draft = Entity.draft?(obj)
     status = if is_draft, do: "DRAFT", else: "PUBLISHED"
 
     file_path = infer_file_path(type, key, is_draft, world_dir)
@@ -275,24 +285,26 @@ defmodule LokaWeb.Channels.BuilderCommands.Inspection do
         "(computed) #{Path.relative_to_cwd(file_path)}"
       end
 
+    parent_key = (obj.metadata || %{})["parent_key"]
+
     # Build metadata section
     meta_lines = [
       "  Key:    #{key}",
-      "  Type:   #{obj.type}#{if obj.subtype, do: " (#{obj.subtype})", else: ""}",
+      "  Type:   #{obj.type}",
       "  Status: #{status}",
       "  File:   #{file_display}"
     ]
 
     meta_lines =
-      if obj.name, do: meta_lines ++ ["  Name:   #{obj.name}"], else: meta_lines
+      if obj.short_desc, do: meta_lines ++ ["  Name:   #{obj.short_desc}"], else: meta_lines
 
     meta_lines =
-      if obj.parent_key,
-        do: meta_lines ++ ["  Parent: #{obj.parent_key}"],
+      if parent_key,
+        do: meta_lines ++ ["  Parent: #{parent_key}"],
         else: meta_lines
 
     # Build content fields section
-    data = obj.data || %{}
+    data = obj.components["data"] || %{}
     content_lines = format_data_fields(data)
 
     # Check for published version if this is a draft
@@ -419,23 +431,23 @@ defmodule LokaWeb.Channels.BuilderCommands.Inspection do
 
   # --- Private helpers for draft/published filtering ---
 
-  # Derive filterable types from TypedObject's single source of truth.
-  # Maps user-facing type name (singular + plural) to {loader_type, loader_subtype, info_command_prefix}.
+  @publishable_entity_subtypes [:room, :npc, :item]
+  @publishable_content_types [:quest, :dialogue, :script, :zone, :cutscene, :storyline]
+
+  # Maps user-facing type name (singular + plural) to {entity_type, info_command_prefix}.
   @filterable_types (
-                      # Entity subtypes: command prefix is "info" (e.g., "info goblin")
                       entity_entries =
-                        for subtype <- TypedObject.publishable_entity_subtypes() do
+                        for subtype <- @publishable_entity_subtypes do
                           name = Atom.to_string(subtype)
-                          spec = {:entity, subtype, "info"}
+                          spec = {subtype, "info"}
                           [{name, spec}, {name <> "s", spec}]
                         end
                         |> List.flatten()
 
-                      # Content types: command prefix is "<type> info" (e.g., "quest info dragon_hunt")
                       content_entries =
-                        for type <- TypedObject.publishable_content_types() do
+                        for type <- @publishable_content_types do
                           name = Atom.to_string(type)
-                          spec = {type, nil, "#{name} info"}
+                          spec = {type, "#{name} info"}
                           [{name, spec}, {name <> "s", spec}]
                         end
                         |> List.flatten()
@@ -444,18 +456,18 @@ defmodule LokaWeb.Channels.BuilderCommands.Inspection do
                     )
 
   # All unique type specs used when listing all types at once.
-  # Format: {loader_type, loader_subtype, type_label, info_command_prefix}
+  # Format: {entity_type, type_label, info_command_prefix}
   @all_type_specs (
                     entity_specs =
-                      for subtype <- TypedObject.publishable_entity_subtypes() do
+                      for subtype <- @publishable_entity_subtypes do
                         name = Atom.to_string(subtype)
-                        {:entity, subtype, name, "info"}
+                        {subtype, name, "info"}
                       end
 
                     content_specs =
-                      for type <- TypedObject.publishable_content_types() do
+                      for type <- @publishable_content_types do
                         name = Atom.to_string(type)
-                        {type, nil, name, "#{name} info"}
+                        {type, name, "#{name} info"}
                       end
 
                     entity_specs ++ content_specs
@@ -469,15 +481,15 @@ defmodule LokaWeb.Channels.BuilderCommands.Inspection do
       nil ->
         # Show all content types
         rows =
-          Enum.flat_map(@all_type_specs, fn {type, subtype, type_label, cmd_prefix} ->
-            objects = Loader.list_by_type(type, subtype)
+          Enum.flat_map(@all_type_specs, fn {type, type_label, cmd_prefix} ->
+            objects = Entities.find_all(type: type, is_prototype: true)
             filtered = Enum.filter(objects, filter_fn)
 
             Enum.map(filtered, fn obj ->
               [
                 type_label,
                 "{{cmd:#{cmd_prefix} #{obj.key}}}#{obj.key}{{/cmd}}",
-                obj.name || obj.key
+                obj.short_desc || obj.key
               ]
             end)
           end)
@@ -496,15 +508,15 @@ defmodule LokaWeb.Channels.BuilderCommands.Inspection do
 
       type_str ->
         case Map.get(@filterable_types, type_str) do
-          {type, subtype, cmd_prefix} ->
-            objects = Loader.list_by_type(type, subtype)
+          {type, cmd_prefix} ->
+            objects = Entities.find_all(type: type, is_prototype: true)
             filtered = Enum.filter(objects, filter_fn)
 
             rows =
               Enum.map(filtered, fn obj ->
                 [
                   "{{cmd:#{cmd_prefix} #{obj.key}}}#{obj.key}{{/cmd}}",
-                  obj.name || obj.key
+                  obj.short_desc || obj.key
                 ]
               end)
 
@@ -530,8 +542,8 @@ defmodule LokaWeb.Channels.BuilderCommands.Inspection do
     end
   end
 
-  defp status_filter_fn(:draft), do: &TypedObject.draft?/1
-  defp status_filter_fn(:published), do: &(not TypedObject.draft?(&1))
+  defp status_filter_fn(:draft), do: &Entity.draft?/1
+  defp status_filter_fn(:published), do: &(not Entity.draft?(&1))
 
   defp normalize_type_label(type_str) do
     case type_str do
@@ -545,5 +557,11 @@ defmodule LokaWeb.Channels.BuilderCommands.Inspection do
       t when t in ["script", "scripts"] -> "scripts"
       other -> other
     end
+  end
+
+  # Helper to access data fields stored in components["data"]
+  defp get_data_field(%Entity{} = entity, field) do
+    data = entity.components["data"] || %{}
+    Map.get(data, field)
   end
 end

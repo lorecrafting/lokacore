@@ -16,7 +16,7 @@ defmodule Loka.WorldBuilder.EntityManager do
 
   2. **EntityManager** (this module)
      - Generic CRUD operations for World Builder UI
-     - UI enrichment (TypedObject → frontend maps)
+     - UI enrichment (Entity → frontend maps)
      - Cross-cutting concerns (listing, filtering, search)
      - Saves to YAML files in priv/world/prototypes/
 
@@ -51,9 +51,7 @@ defmodule Loka.WorldBuilder.EntityManager do
 
   require Logger
 
-  alias Loka.Engine.TypedObject
-  alias Loka.Engine.TypedObject.Registry
-  alias Loka.Engine.TypedObject.Loader
+  alias Loka.Engine.{Entity, Entities}
 
   @prototypes_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "prototypes"])
 
@@ -95,28 +93,28 @@ defmodule Loka.WorldBuilder.EntityManager do
     # Save to YAML file
     case save_entity_yaml(entity_data) do
       :ok ->
-        # Reload to get the entity into the registry
-        case Registry.get(key) do
+        # Try to get the entity from DB
+        case Entities.find_one(key: key) do
           {:ok, entity} ->
             Logger.info("[EntityManager] Created #{subtype}: #{key}")
             {:ok, enrich_for_ui(entity)}
 
           {:error, _} ->
-            # Entity created but not yet in registry - build a response
-            Logger.info("[EntityManager] Created #{subtype}: #{key} (pending reload)")
+            # Entity created but not yet in DB - build a response
+            Logger.info("[EntityManager] Created #{subtype}: #{key} (pending)")
 
             {:ok,
              %{
                id: key,
                key: key,
-               type: :entity,
+               type: subtype,
                subtype: subtype,
                name: name,
                description: description,
                tags: Map.get(attrs, :tags, []),
-               attributes: %{},
                components: merged_components,
-               data: %{}
+               level: nil,
+               item_type: nil
              }}
         end
 
@@ -132,7 +130,7 @@ defmodule Loka.WorldBuilder.EntityManager do
   Returns {:ok, entity_map} or {:error, reason}
   """
   def get_entity(entity_id) when is_binary(entity_id) do
-    case Registry.get(entity_id) do
+    case Entities.find_one(key: entity_id) do
       {:ok, entity} ->
         {:ok, enrich_for_ui(entity)}
 
@@ -147,15 +145,15 @@ defmodule Loka.WorldBuilder.EntityManager do
   Returns {:ok, entity_map} or {:error, reason}
   """
   def update_entity(entity_id, attrs) when is_binary(entity_id) and is_map(attrs) do
-    with {:ok, entity} <- Registry.get(entity_id) do
+    with {:ok, entity} <- Entities.find_one(key: entity_id) do
       attrs = ensure_atom_keys(attrs)
 
       # Build updated entity data from existing + new attrs
       entity_data = %{
         key: entity.key,
-        subtype: entity.subtype,
-        name: Map.get(attrs, :name, entity.name || entity.key),
-        description: Map.get(attrs, :description, entity.description || ""),
+        subtype: entity.type,
+        name: Map.get(attrs, :name, entity.short_desc || entity.key),
+        description: Map.get(attrs, :description, entity.extra_desc || ""),
         tags: Map.get(attrs, :tags, entity.tags || []),
         components: merge_components(entity, attrs),
         keywords: entity.keywords || [entity.key],
@@ -185,11 +183,11 @@ defmodule Loka.WorldBuilder.EntityManager do
   Returns :ok or {:error, reason}
   """
   def delete_entity(entity_id) when is_binary(entity_id) do
-    # Get entity to find its subtype for the correct directory
-    case Registry.get(entity_id) do
+    # Get entity to find its type for the correct directory
+    case Entities.find_one(key: entity_id) do
       {:ok, entity} ->
         # Delete the YAML file
-        case delete_entity_yaml(entity.key, entity.subtype) do
+        case delete_entity_yaml(entity.key, entity.type) do
           :ok ->
             Logger.info("[EntityManager] Deleted entity: #{entity_id}")
             :ok
@@ -210,7 +208,7 @@ defmodule Loka.WorldBuilder.EntityManager do
   Returns list of entity maps.
   """
   def list_entities(subtype) when is_atom(subtype) do
-    Registry.list_by_type(:entity, subtype)
+    Entities.find_all(type: subtype, is_prototype: true)
     |> Enum.map(&enrich_for_ui/1)
   end
 
@@ -263,9 +261,8 @@ defmodule Loka.WorldBuilder.EntityManager do
   # Private Helpers
   # =============================================================================
 
-  defp enrich_for_ui(entity) when is_struct(entity, TypedObject) do
-    # Convert TypedObject to UI-friendly map
-    # Use key as id fallback since YAML-loaded entities may not have id set
+  defp enrich_for_ui(%Entity{} = entity) do
+    # Convert Entity to UI-friendly map
     components = entity.components || %{}
 
     # Extract level from components.combatant.level for NPCs
@@ -279,13 +276,11 @@ defmodule Loka.WorldBuilder.EntityManager do
       id: entity.id || entity.key,
       key: entity.key,
       type: entity.type,
-      subtype: entity.subtype,
-      name: entity.name || entity.key,
-      description: entity.description || "",
+      subtype: entity.type,
+      name: entity.short_desc || entity.key,
+      description: entity.extra_desc || "",
       tags: entity.tags || [],
-      attributes: entity.attributes || %{},
       components: components,
-      data: entity.data || %{},
       level: level,
       item_type: item_type
     }
@@ -374,8 +369,6 @@ defmodule Loka.WorldBuilder.EntityManager do
 
       case File.write(file_path, yaml_content) do
         :ok ->
-          # Reload loader to update registries
-          Loader.reload()
           :ok
 
         {:error, reason} ->
@@ -392,7 +385,6 @@ defmodule Loka.WorldBuilder.EntityManager do
 
     case File.rm(file_path) do
       :ok ->
-        Loader.reload()
         :ok
 
       {:error, :enoent} ->
@@ -647,10 +639,7 @@ defmodule Loka.WorldBuilder.EntityManager do
 
   # Merge components from existing entity with new attrs
   defp merge_components(entity, attrs) do
-    existing =
-      (Map.get(entity.data, "components", %{}) || %{})
-      |> Map.merge(Map.get(entity.data, :components, %{}) || %{})
-      |> Map.merge(entity.components || %{})
+    existing = entity.components || %{}
 
     new_components = Map.get(attrs, :components, %{})
     merged = Map.merge(existing, new_components)
@@ -668,16 +657,14 @@ defmodule Loka.WorldBuilder.EntityManager do
   # Extract level from entity or attrs
   defp get_level(entity, attrs) do
     Map.get(attrs, :level) ||
-      get_in(entity.data, ["components", "combatant", "level"]) ||
-      get_in(entity.data, [:components, :combatant, :level]) ||
+      get_in(entity.components, ["combatant", "level"]) ||
       1
   end
 
   # Extract item_type from entity or attrs
   defp get_item_type(entity, attrs) do
     Map.get(attrs, :item_type) ||
-      get_in(entity.data, ["components", "item", "item_type"]) ||
-      get_in(entity.data, [:components, :item, :item_type]) ||
+      get_in(entity.components, ["item", "item_type"]) ||
       "misc"
   end
 end

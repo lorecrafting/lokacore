@@ -6,7 +6,7 @@ defmodule Loka.WorldBuilder.YamlBuilder do
   to produce consistent, valid YAML files.
   """
 
-  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
+  alias Loka.Engine.Entities
 
   @doc """
   Escape a string for safe inclusion in double-quoted YAML values.
@@ -205,7 +205,7 @@ defmodule Loka.WorldBuilder.YamlBuilder do
     room_warnings =
       rooms
       |> Enum.filter(fn key ->
-        match?({:error, _}, TypedObjectLoader.get(key))
+        match?({:error, _}, Entities.find_one(key: key))
       end)
       |> Enum.map(fn key -> "Room '#{key}' not found (may not be created yet)" end)
 
@@ -219,7 +219,7 @@ defmodule Loka.WorldBuilder.YamlBuilder do
       |> Enum.flat_map(fn scene ->
         speaker = scene["speaker"]
 
-        if speaker && match?({:error, _}, TypedObjectLoader.get(speaker)) do
+        if speaker && match?({:error, _}, Entities.find_one(key: speaker)) do
           ["Speaker '#{speaker}' not found (may not be created yet)"]
         else
           []

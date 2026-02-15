@@ -2,16 +2,14 @@ defmodule Loka.WorldBuilder.RoomManager do
   @moduledoc """
   Room CRUD operations for the World Builder.
 
-  Manages room creation, editing, and deletion using TypedObject as the underlying data structure.
+  Manages room creation, editing, and deletion using Entity as the underlying data structure.
   All operations persist to YAML files in priv/world/prototypes/rooms/ following the YAML-only
   architecture documented in docs/proposals/builder-content-layer.md.
   """
 
   require Logger
 
-  alias Loka.Engine.{TypedObject, Spawner, Entity, Entities}
-  alias Loka.Engine.TypedObject.Registry
-  alias Loka.Engine.TypedObject.Loader
+  alias Loka.Engine.{Entity, Entities}
 
   @rooms_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "prototypes", "rooms"])
 
@@ -22,10 +20,10 @@ defmodule Loka.WorldBuilder.RoomManager do
   Combines YAML-loaded prototypes with database-backed dynamic rooms.
   """
   def list_rooms do
-    # Get rooms from TypedObject registry (YAML prototypes)
+    # Get rooms from entity DB (prototypes)
     prototype_rooms =
-      Registry.list_by_type(:entity, :room)
-      |> Enum.map(&enrich_room_for_frontend/1)
+      Entities.find_all(type: :room, is_prototype: true)
+      |> Enum.map(&enrich_room_for_frontend_from_entity/1)
 
     # Get rooms from database (dynamically created rooms)
     db_room_schemas = Entities.list_rooms()
@@ -51,11 +49,7 @@ defmodule Loka.WorldBuilder.RoomManager do
   """
   def get_room(room_id) when is_binary(room_id) do
     case get_room_entity(room_id) do
-      {:ok, {:registry, entity}} ->
-        {:ok, enrich_room_for_frontend(entity)}
-
-      {:ok, {:db, entity_schema}} ->
-        entity = Entities.to_entity(entity_schema)
+      {:ok, {:db, entity}} ->
         {:ok, enrich_room_for_frontend_from_entity(entity)}
 
       {:error, :not_a_room} ->
@@ -98,38 +92,43 @@ defmodule Loka.WorldBuilder.RoomManager do
       attributes: %{x: x, y: y, z: z}
     }
 
-    # Save to YAML file and spawn as live entity
-    case save_room_yaml(room_data) do
-      :ok ->
-        # Spawn the room entity so it's navigable immediately
-        case Spawner.spawn_room(key) do
-          {:ok, room_entity, _spawned} ->
-            Logger.info("[RoomManager] Created and spawned room: #{key}")
-            {:ok, enrich_room_for_frontend_from_entity(room_entity)}
+    # Save to YAML file for content export
+    save_room_yaml(room_data)
 
-          {:error, reason} ->
-            Logger.warning("[RoomManager] Created room YAML but spawn failed: #{inspect(reason)}")
-            # Fall back to registry data
-            case Registry.get(key) do
-              {:ok, room} ->
-                {:ok, enrich_room_for_frontend(room)}
-
-              {:error, _} ->
-                {:ok,
-                 %{
-                   id: key,
-                   key: key,
-                   name: name,
-                   description: description,
-                   x: x,
-                   y: y,
-                   z: z,
-                   tags: tags,
-                   exits: exits,
-                   spawns: %{npcs: [], items: []}
-                 }}
+    # Create room entity directly in the DB (V2 approach)
+    room_entity =
+      Entity.new(
+        type: :room,
+        key: key,
+        short_desc: name,
+        extra_desc: description,
+        is_prototype: true,
+        tags: tags,
+        components:
+          %{
+            "coordinates" => %{"x" => x, "y" => y, "z" => z}
+          }
+          |> then(fn c ->
+            if exits != %{} do
+              # Normalize exit keys to strings
+              string_exits = Map.new(exits, fn {k, v} -> {to_string(k), v} end)
+              Map.put(c, "exits", string_exits)
+            else
+              c
             end
-        end
+          end),
+        metadata: %{"draft" => true}
+      )
+
+    case Entities.save(room_entity) do
+      {:ok, schema} ->
+        saved = Entities.to_entity(schema)
+        # Persist tags
+        for tag <- tags, do: Entities.add_tag(saved.id, tag)
+        saved = %{saved | tags: tags}
+
+        Logger.info("[RoomManager] Created room: #{key}")
+        {:ok, enrich_room_for_frontend_from_entity(saved)}
 
       {:error, reason} ->
         Logger.error("[RoomManager] Failed to create room: #{inspect(reason)}")
@@ -148,41 +147,34 @@ defmodule Loka.WorldBuilder.RoomManager do
   """
   def update_room(room_id, attrs) when is_binary(room_id) and is_map(attrs) do
     case get_room_entity(room_id) do
-      {:ok, {:registry, entity}} ->
-        # Room is in Registry (YAML prototype) - update YAML file
+      {:ok, {:db, entity}} ->
+        # Room entity - update YAML file
         attrs = ensure_atom_keys(attrs)
 
         # Build updated room data from existing + new attrs
-        existing_exits = get_room_exits(entity)
+        existing_exits = get_exits_from_entity(entity)
         existing_tags = entity.tags || []
 
-        # Get existing coordinates from attributes or data
-        existing_x =
-          TypedObject.get_attribute(entity, :x) || TypedObject.get_data(entity, :x) || 0
+        # Get existing coordinates from components
+        coords = Map.get(entity.components, "coordinates", %{})
+        existing_x = Map.get(coords, "x", 0)
+        existing_y = Map.get(coords, "y", 0)
+        existing_z = Map.get(coords, "z", 0)
 
-        existing_y =
-          TypedObject.get_attribute(entity, :y) || TypedObject.get_data(entity, :y) || 0
-
-        existing_z =
-          TypedObject.get_attribute(entity, :z) || TypedObject.get_data(entity, :z) || 0
-
-        # Merge existing attributes with coordinate updates
-        existing_attrs = entity.attributes || %{}
-
-        updated_attrs =
-          existing_attrs
-          |> Map.put(:x, Map.get(attrs, :x, existing_x))
-          |> Map.put(:y, Map.get(attrs, :y, existing_y))
-          |> Map.put(:z, Map.get(attrs, :z, existing_z))
+        updated_attrs = %{
+          x: Map.get(attrs, :x, existing_x),
+          y: Map.get(attrs, :y, existing_y),
+          z: Map.get(attrs, :z, existing_z)
+        }
 
         room_data = %{
           key: entity.key,
-          name: Map.get(attrs, :name, entity.name || entity.key),
-          description: Map.get(attrs, :description, entity.description || ""),
+          name: Map.get(attrs, :name, entity.short_desc || entity.key),
+          description: Map.get(attrs, :description, entity.extra_desc || ""),
           exits: Map.get(attrs, :exits, existing_exits),
           tags: Map.get(attrs, :tags, existing_tags),
-          spawns: get_spawns_list(entity),
-          components: get_components(entity),
+          spawns: get_spawns_list_from_entity(entity),
+          components: get_components_from_entity(entity),
           attributes: updated_attrs
         }
 
@@ -215,21 +207,6 @@ defmodule Loka.WorldBuilder.RoomManager do
             {:error, "Failed to update room: #{inspect(reason)}"}
         end
 
-      {:ok, {:db, entity_schema}} ->
-        # Room is in DB - use Entities.update_entity directly
-        updates = prepare_db_updates(attrs)
-
-        case Entities.update_entity(entity_schema, updates) do
-          {:ok, updated_schema} ->
-            Logger.info("[RoomManager] Updated room (db): #{room_id}")
-            entity = Entities.to_entity(updated_schema)
-            {:ok, enrich_room_for_frontend_from_entity(entity)}
-
-          {:error, reason} ->
-            Logger.error("[RoomManager] Update failed: #{inspect(reason)}")
-            {:error, "Failed to update room: #{inspect(reason)}"}
-        end
-
       {:error, :not_a_room} ->
         {:error, :not_a_room}
 
@@ -245,9 +222,8 @@ defmodule Loka.WorldBuilder.RoomManager do
   """
   def delete_room(room_id) when is_binary(room_id) do
     case get_room_entity(room_id) do
-      {:ok, {:registry, entity}} ->
-        # Room is in Registry - delete YAML file and despawn any DB entity
-        room_map = enrich_room_for_frontend(entity)
+      {:ok, {:db, entity}} ->
+        room_map = enrich_room_for_frontend_from_entity(entity)
 
         # Delete the YAML file from whichever dir it lives in (draft or published)
         draft_path = Path.join(@rooms_dir, "#{entity.key}.yml")
@@ -257,50 +233,24 @@ defmodule Loka.WorldBuilder.RoomManager do
 
         file_path = if File.exists?(draft_path), do: draft_path, else: published_path
 
-        file_result =
-          if File.exists?(file_path) do
-            File.rm(file_path)
-          else
-            :ok
-          end
+        if File.exists?(file_path) do
+          File.rm(file_path)
+        end
 
         # Clean up exit entities associated with this room
         cleanup_exit_entities(entity.key, room_map)
 
-        # Despawn the DB entity if it was spawned (try by key lookup)
+        # Delete the DB entity
         case Entities.get_entity_by_key(entity.key) do
-          %{type: :room} = schema -> Entities.delete_entity(schema)
-          _ -> :ok
+          %{type: :room} = schema ->
+            Entities.delete_entity(schema)
+
+          _ ->
+            :ok
         end
 
-        # Remove from registry
-        case file_result do
-          :ok ->
-            Loader.remove(entity.key)
-            Logger.info("[RoomManager] Deleted room (registry + YAML + DB): #{room_id}")
-            {:ok, room_map}
-
-          {:error, reason} ->
-            Logger.error("[RoomManager] Delete YAML failed: #{inspect(reason)}")
-            {:error, reason}
-        end
-
-      {:ok, {:db, entity_schema}} ->
-        # Room is in DB - use Entities.delete_entity
-        entity = Entities.to_entity(entity_schema)
-        room_map = enrich_room_for_frontend_from_entity(entity)
-
-        cleanup_exit_entities(entity.key, room_map)
-
-        case Entities.delete_entity(entity_schema) do
-          {:ok, _} ->
-            Logger.info("[RoomManager] Deleted room (db): #{room_id}")
-            {:ok, room_map}
-
-          {:error, reason} ->
-            Logger.error("[RoomManager] Delete failed: #{inspect(reason)}")
-            {:error, reason}
-        end
+        Logger.info("[RoomManager] Deleted room: #{room_id}")
+        {:ok, room_map}
 
       {:error, :not_a_room} ->
         {:error, :not_a_room}
@@ -441,48 +391,12 @@ defmodule Loka.WorldBuilder.RoomManager do
     end)
   end
 
-  defp enrich_room_for_frontend(room) when is_struct(room, TypedObject) do
-    # Extract coordinates from attributes or data (YAML top-level fields go to data)
-    x = TypedObject.get_attribute(room, :x) || TypedObject.get_data(room, :x) || 0
-    y = TypedObject.get_attribute(room, :y) || TypedObject.get_data(room, :y) || 0
-    z = TypedObject.get_attribute(room, :z) || TypedObject.get_data(room, :z) || 0
-
-    # Extract spawns (NPCs and items that spawn in this room)
-    spawns = get_room_spawns(room)
-
-    # Return a map structure optimized for frontend rendering
-    # Use key as id for YAML rooms since they don't have a separate id
-    %{
-      id: room.id || room.key,
-      key: room.key,
-      name: room.name || room.key,
-      description: room.description || "",
-      x: x,
-      y: y,
-      z: z,
-      tags: room.tags || [],
-      exits: get_room_exits(room),
-      spawns: spawns
-    }
-  end
-
-  # Enrich an Entity struct (from Spawner.create_room) for frontend
+  # Enrich an Entity struct for frontend
   defp enrich_room_for_frontend_from_entity(%Entity{} = room) do
-    # Entity attributes are stored in a separate DB table and may not be loaded.
-    # Fall back to the TypedObject registry which always has coordinates from YAML.
-    {x, y, z} =
-      case Loader.get(room.key) do
-        {:ok, typed_obj} ->
-          {
-            TypedObject.get_attribute(typed_obj, :x) || TypedObject.get_data(typed_obj, :x) || 0,
-            TypedObject.get_attribute(typed_obj, :y) || TypedObject.get_data(typed_obj, :y) || 0,
-            TypedObject.get_attribute(typed_obj, :z) || TypedObject.get_data(typed_obj, :z) || 0
-          }
-
-        _ ->
-          coords = Map.get(room.components, "coordinates", %{})
-          {Map.get(coords, "x", 0), Map.get(coords, "y", 0), Map.get(coords, "z", 0)}
-      end
+    coords = Map.get(room.components, "coordinates", %{})
+    x = Map.get(coords, "x", 0)
+    y = Map.get(coords, "y", 0)
+    z = Map.get(coords, "z", 0)
 
     # Extract spawns from components
     spawns = Map.get(room.components, "spawns", [])
@@ -502,43 +416,9 @@ defmodule Loka.WorldBuilder.RoomManager do
     }
   end
 
-  defp get_room_exits(room) when is_struct(room, TypedObject) do
-    # For TypedObject rooms, exits are in room.data (from YAML)
-    # Try both atom and string keys since YAML parsing may vary
-    exits =
-      case {Map.get(room.data, :exits), Map.get(room.data, "exits")} do
-        {nil, nil} -> %{}
-        {nil, exits} -> exits
-        {exits, nil} -> exits
-        {atom_exits, string_exits} -> Map.merge(atom_exits, string_exits)
-      end
-
-    # Normalize keys to strings for frontend
-    for {k, v} <- exits, into: %{}, do: {to_string(k), v}
-  end
-
   defp get_exits_from_entity(%Entity{} = room) do
-    # Get exits from components first
-    component_exits = Map.get(room.components, "exits", %{})
-
-    if map_size(component_exits) > 0 do
-      component_exits
-    else
-      # Fallback: get exits from the TypedObject prototype
-      case Registry.get(room.key) do
-        {:ok, prototype} when is_struct(prototype, TypedObject) ->
-          get_room_exits(prototype)
-
-        _ ->
-          %{}
-      end
-    end
-  end
-
-  # Extract spawns from TypedObject room
-  defp get_room_spawns(room) when is_struct(room, TypedObject) do
-    spawns = Map.get(room.data, "spawns", []) ++ Map.get(room.data, :spawns, [])
-    categorize_spawns(spawns)
+    # Get exits from components
+    Map.get(room.components, "exits", %{})
   end
 
   # Categorize spawns into NPCs and items
@@ -566,11 +446,11 @@ defmodule Loka.WorldBuilder.RoomManager do
 
   # Determine spawn type by looking up the prototype
   defp determine_spawn_type(prototype_key) do
-    case Registry.get(prototype_key) do
-      {:ok, %TypedObject{subtype: :npc}} ->
+    case Entities.find_one(key: prototype_key) do
+      {:ok, %Entity{type: :npc}} ->
         :npc
 
-      {:ok, %TypedObject{subtype: :item}} ->
+      {:ok, %Entity{type: :item}} ->
         :item
 
       _ ->
@@ -616,39 +496,19 @@ defmodule Loka.WorldBuilder.RoomManager do
   end
 
   @doc false
-  # Gets a room entity from either Registry (YAML) or Database.
-  # Returns {:ok, {:registry, TypedObject}} or {:ok, {:db, EntitySchema}} or {:error, reason}
+  # Gets a room entity from the database.
+  # Returns {:ok, {:db, Entity}} or {:error, reason}
   defp get_room_entity(room_id) when is_binary(room_id) do
-    # First try Registry (YAML prototypes)
-    case Registry.get(room_id) do
-      {:ok, entity} when entity.subtype == :room ->
-        {:ok, {:registry, entity}}
-
-      {:ok, _entity} ->
-        {:error, :not_a_room}
+    # Try by key first
+    case Entities.find_one(key: room_id, type: :room) do
+      {:ok, entity} ->
+        {:ok, {:db, entity}}
 
       {:error, :not_found} ->
-        # Not in Registry, try Database
-        get_room_from_db(room_id)
-    end
-  end
-
-  defp get_room_from_db(room_id) do
-    # Try by ID first, then by key
-    case Entities.get_entity(room_id) do
-      %{type: :room} = schema ->
-        # If the room also exists in the registry (YAML-backed), prefer the
-        # registry path so updates sync both YAML and DB consistently.
-        maybe_promote_to_registry(schema)
-
-      %{} ->
-        {:error, :not_a_room}
-
-      nil ->
-        # Try by key
-        case Entities.get_entity_by_key(room_id) do
+        # Try by UUID
+        case Entities.get_entity(room_id) do
           %{type: :room} = schema ->
-            maybe_promote_to_registry(schema)
+            {:ok, {:db, Entities.to_entity(schema)}}
 
           %{} ->
             {:error, :not_a_room}
@@ -656,13 +516,6 @@ defmodule Loka.WorldBuilder.RoomManager do
           nil ->
             {:error, :not_found}
         end
-    end
-  end
-
-  defp maybe_promote_to_registry(%{key: key} = schema) do
-    case Registry.get(key) do
-      {:ok, %{subtype: :room} = typed_obj} -> {:ok, {:registry, typed_obj}}
-      _ -> {:ok, {:db, schema}}
     end
   end
 
@@ -726,8 +579,6 @@ defmodule Loka.WorldBuilder.RoomManager do
 
       case File.write(file_path, yaml_content) do
         :ok ->
-          # Reload to update registry
-          Loader.reload_file(file_path)
           :ok
 
         {:error, reason} ->
@@ -930,19 +781,15 @@ defmodule Loka.WorldBuilder.RoomManager do
     end
   end
 
-  # Extract spawns list from TypedObject
-  defp get_spawns_list(room) when is_struct(room, TypedObject) do
-    Map.get(room.data, "spawns", []) ++ Map.get(room.data, :spawns, [])
+  # Extract spawns list from Entity
+  defp get_spawns_list_from_entity(%Entity{} = entity) do
+    Map.get(entity.components, "spawns", [])
   end
 
-  # Extract components from TypedObject (preserving ambient_messages, etc.)
-  defp get_components(room) when is_struct(room, TypedObject) do
-    # Get from data.components or direct components
-    data_components = Map.get(room.data, "components", %{}) |> ensure_map()
-    atom_components = Map.get(room.data, :components, %{}) |> ensure_map()
-    Map.merge(data_components, atom_components)
+  # Extract components from Entity (preserving ambient_messages, etc.)
+  defp get_components_from_entity(%Entity{} = entity) do
+    # Return components except internal ones
+    entity.components
+    |> Map.drop(["coordinates", "exits", "spawns"])
   end
-
-  defp ensure_map(val) when is_map(val), do: val
-  defp ensure_map(_), do: %{}
 end

@@ -57,12 +57,11 @@ defmodule Loka.Testing.Quest.QuestTester do
 
   require Logger
 
-  alias Loka.Framework.Quest
-  alias Loka.Framework.Quest.{Definitions, Progress}
+  alias Loka.Framework.Quest.Progress
   alias Loka.Admin.GameLog
   alias Loka.Framework.Player.GameState
   alias Loka.Content
-  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
+  alias Loka.Engine.Entities
 
   @default_max_steps 500
 
@@ -217,7 +216,7 @@ defmodule Loka.Testing.Quest.QuestTester do
   # =============================================================================
 
   defp get_quest_definition(quest_id) do
-    case Definitions.get_quest_definition(quest_id) do
+    case Content.Quest.definition(quest_id) do
       nil -> {:error, {:quest_not_found, quest_id}}
       quest_def -> {:ok, quest_def}
     end
@@ -372,7 +371,7 @@ defmodule Loka.Testing.Quest.QuestTester do
   defp validate_objectives(quest_def) do
     errors =
       Enum.reduce(quest_def.objectives, [], fn obj, acc ->
-        case Quest.ObjectiveRegistry.validate_objective(obj) do
+        case Loka.Framework.Quest.ObjectiveRegistry.validate_objective(obj) do
           :ok -> acc
           {:error, reason} -> [{obj.id, reason} | acc]
         end
@@ -390,7 +389,7 @@ defmodule Loka.Testing.Quest.QuestTester do
       quest_def.objectives
       |> Enum.filter(&(&1.type in [:go_to, :kill, :get_item]))
       |> Enum.reduce([], fn obj, acc ->
-        case TypedObjectLoader.get(obj.target_id) do
+        case Entities.find_one(key: obj.target_id) do
           {:ok, _proto} ->
             acc
 
@@ -408,7 +407,7 @@ defmodule Loka.Testing.Quest.QuestTester do
 
   defp validate_giver_dialogue(quest_def) do
     if quest_def.giver do
-      case TypedObjectLoader.get(quest_def.giver) do
+      case Entities.find_one(key: quest_def.giver) do
         {:error, :not_found} ->
           {:error, {:giver_not_found, quest_def.giver}}
 
@@ -528,7 +527,7 @@ defmodule Loka.Testing.Quest.QuestTester do
     # Check if target exists
     issues =
       if obj_def.type in [:kill, :get_item, :go_to] do
-        case TypedObjectLoader.get(obj_def.target_id) do
+        case Entities.find_one(key: obj_def.target_id) do
           {:ok, _proto} ->
             issues
 

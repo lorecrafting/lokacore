@@ -28,7 +28,6 @@ defmodule Loka.Testing.Bot.BotHelpers do
       dialogue = BotHelpers.get_dialogue_state(context)
   """
 
-  alias Loka.Framework.Quest
   alias Loka.Framework.Player.GameState
 
   # ============================================================================
@@ -132,7 +131,7 @@ defmodule Loka.Testing.Bot.BotHelpers do
   """
   @spec get_completed_quests(GameState.t() | map()) :: [String.t()]
   def get_completed_quests(%GameState{} = game_state) do
-    Quest.get_completed_quests(game_state)
+    get_completed_quests(Map.from_struct(game_state))
   end
 
   def get_completed_quests(game_state) when is_map(game_state) do
@@ -165,7 +164,7 @@ defmodule Loka.Testing.Bot.BotHelpers do
   """
   @spec get_active_quest_ids(GameState.t() | map()) :: [String.t()]
   def get_active_quest_ids(%GameState{} = game_state) do
-    Quest.get_active_quests(game_state) |> Enum.map(& &1.id)
+    get_active_quest_ids(Map.from_struct(game_state))
   end
 
   def get_active_quest_ids(game_state) when is_map(game_state) do
@@ -211,7 +210,7 @@ defmodule Loka.Testing.Bot.BotHelpers do
   """
   @spec get_quest_progress(GameState.t() | map(), String.t()) :: map() | nil
   def get_quest_progress(%GameState{} = game_state, quest_id) do
-    Quest.get_quest_progress(game_state, quest_id)
+    get_quest_progress(Map.from_struct(game_state), quest_id)
   end
 
   def get_quest_progress(game_state, quest_id) when is_map(game_state) do

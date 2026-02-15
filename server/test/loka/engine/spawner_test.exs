@@ -1,26 +1,129 @@
 defmodule Loka.Engine.SpawnerTest do
   use Loka.DataCase, async: false
 
-  alias Loka.Engine.{Spawner, Entities, Entity, TypedObject}
-  alias Loka.Engine.TypedObject.{Loader, Registry}
-  alias Loader, as: TypedObjectLoader
+  alias Loka.Engine.{Spawner, Entities, Entity}
 
-  @test_fixtures_path "test/support/fixtures/prototypes"
-
+  # In V2, prototypes are entities in the database.
+  # Create test prototypes in setup.
   setup do
-    # Merge test fixtures into the existing loader without clearing production content.
-    # Using merge_from instead of load_from avoids clearing the registry,
-    # which would cause flaky failures in concurrent async tests.
-    if Process.whereis(TypedObjectLoader) do
-      TypedObjectLoader.merge_from(@test_fixtures_path)
-    else
-      {:ok, _} =
-        TypedObjectLoader.start_link(
-          name: TypedObjectLoader,
-          paths: [@test_fixtures_path],
-          load_on_start: true
-        )
-    end
+    # Base NPC prototype (parent for goblin)
+    base_npc =
+      Entity.new(
+        type: :npc,
+        key: "base_npc",
+        short_desc: "Base NPC",
+        is_prototype: true,
+        tags: ["npc"],
+        components: %{"combatant" => %{"level" => 1, "health" => 50}}
+      )
+
+    {:ok, _} = Entities.save(base_npc)
+    for tag <- base_npc.tags, do: Entities.add_tag(base_npc.id, tag)
+
+    # Goblin prototype (child of base_npc)
+    goblin =
+      Entity.new(
+        type: :npc,
+        key: "goblin",
+        short_desc: "Goblin",
+        extra_desc: "A menacing goblin.",
+        is_prototype: true,
+        tags: ["npc", "hostile"],
+        components: %{
+          "combatant" => %{"level" => 2, "health" => 30},
+          "loot" => %{"table" => "goblin_loot"}
+        },
+        metadata: %{prototype_key: "goblin"}
+      )
+
+    {:ok, _} = Entities.save(goblin)
+    for tag <- goblin.tags, do: Entities.add_tag(goblin.id, tag)
+
+    # Town square room prototype (with exits)
+    town_square =
+      Entity.new(
+        type: :room,
+        key: "town_square",
+        short_desc: "Town Square",
+        extra_desc: "A bustling town square.",
+        is_prototype: true,
+        tags: ["town"],
+        components: %{
+          "coordinates" => %{"x" => 0, "y" => 0, "z" => 0},
+          "exits" => %{
+            "north" => %{"destination_key" => "general_store"},
+            "east" => %{"destination_key" => "tavern"}
+          }
+        }
+      )
+
+    {:ok, _} = Entities.save(town_square)
+    for tag <- town_square.tags, do: Entities.add_tag(town_square.id, tag)
+
+    # General store room prototype
+    general_store =
+      Entity.new(
+        type: :room,
+        key: "general_store",
+        short_desc: "General Store",
+        is_prototype: true,
+        components: %{"coordinates" => %{"x" => 0, "y" => 1, "z" => 0}}
+      )
+
+    {:ok, _} = Entities.save(general_store)
+
+    # Tavern room prototype
+    tavern =
+      Entity.new(
+        type: :room,
+        key: "tavern",
+        short_desc: "Tavern",
+        is_prototype: true,
+        components: %{"coordinates" => %{"x" => 1, "y" => 0, "z" => 0}}
+      )
+
+    {:ok, _} = Entities.save(tavern)
+
+    # Forest clearing room prototype (with spawns)
+    forest_clearing =
+      Entity.new(
+        type: :room,
+        key: "forest_clearing",
+        short_desc: "Forest Clearing",
+        extra_desc: "A sunlit clearing in the forest.",
+        is_prototype: true,
+        tags: ["forest"],
+        components: %{
+          "coordinates" => %{"x" => 5, "y" => 5, "z" => 0},
+          "exits" => %{
+            "south" => %{"destination_key" => "town_square"}
+          },
+          "spawns" => [
+            %{"prototype" => "goblin"},
+            %{"prototype" => "goblin", "short_desc" => "Goblin Scout"}
+          ]
+        }
+      )
+
+    {:ok, _} = Entities.save(forest_clearing)
+    for tag <- forest_clearing.tags, do: Entities.add_tag(forest_clearing.id, tag)
+
+    # Test corridor template prototype
+    test_corridor =
+      Entity.new(
+        type: :room,
+        key: "test_corridor",
+        short_desc: "Test Corridor",
+        is_prototype: true,
+        tags: ["dungeon", "corridor"],
+        components: %{
+          "coordinates" => %{"x" => 0, "y" => 0, "z" => 0}
+        },
+        metadata: %{"is_template" => true}
+      )
+
+    {:ok, _} = Entities.save(test_corridor)
+    for tag <- test_corridor.tags, do: Entities.add_tag(test_corridor.id, tag)
 
     :ok
   end
@@ -76,9 +179,6 @@ defmodule Loka.Engine.SpawnerTest do
     test "spawns entity with attributes from prototype" do
       {:ok, entity} = Spawner.spawn("goblin")
 
-      # Goblin prototype has respawn_time in attributes
-      # Note: Entity.attributes is for in-memory use; EAV storage is separate
-      # The prototype's attributes are merged but may not persist through save/load
       # Check that the entity was created successfully
       assert entity.type == :npc
     end
@@ -93,7 +193,7 @@ defmodule Loka.Engine.SpawnerTest do
     test "inherits from parent prototype" do
       {:ok, entity} = Spawner.spawn("goblin")
 
-      # Should have inherited tags from base_npc
+      # Should have tags from goblin prototype
       assert "npc" in entity.tags
       assert "hostile" in entity.tags
     end
@@ -305,18 +405,18 @@ defmodule Loka.Engine.SpawnerTest do
 
   describe "draft flag propagation" do
     test "spawned entity carries draft flag when prototype is a draft" do
-      # Register a draft NPC prototype directly in the registry
-      {:ok, draft_proto} =
-        TypedObject.new(
+      # Create a draft NPC prototype in the database
+      draft_proto =
+        Entity.new(
+          type: :npc,
           key: "draft_goblin",
-          type: :entity,
-          subtype: :npc,
-          name: "Draft Goblin",
+          short_desc: "Draft Goblin",
+          is_prototype: true,
           metadata: %{"draft" => true},
           tags: ["hostile"]
         )
 
-      Registry.put("draft_goblin", draft_proto)
+      {:ok, _} = Entities.save(draft_proto)
 
       {:ok, entity} = Spawner.spawn("draft_goblin")
 
@@ -332,16 +432,16 @@ defmodule Loka.Engine.SpawnerTest do
     end
 
     test "spawn_room propagates draft flag from draft room prototype" do
-      {:ok, draft_room} =
-        TypedObject.new(
+      draft_room =
+        Entity.new(
+          type: :room,
           key: "draft_room",
-          type: :entity,
-          subtype: :room,
-          name: "Draft Room",
+          short_desc: "Draft Room",
+          is_prototype: true,
           metadata: %{"draft" => true}
         )
 
-      Registry.put("draft_room", draft_room)
+      {:ok, _} = Entities.save(draft_room)
 
       {:ok, room, _spawned} = Spawner.spawn_room("draft_room")
 

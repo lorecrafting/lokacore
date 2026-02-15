@@ -15,7 +15,6 @@ defmodule Loka.Game.Actions.Shop do
   require Logger
 
   alias Loka.Game.Actions.{Context, Result}
-  alias Loka.Framework.Economy
   alias Loka.Engine.{Entity, Entities, Spawner}
 
   @doc """
@@ -59,7 +58,7 @@ defmodule Loka.Game.Actions.Shop do
     character = ctx.character
     shop_data = get_shop_data(npc_entity)
     item_info = Enum.find(shop_data.items, fn i -> i.key == item_key end)
-    player_currency = Economy.get_currency(character)
+    player_currency = get_currency(character)
 
     Logger.debug(
       "[SHOP] Buy attempt: player_id=#{ctx.player_id} item=#{item_key} gold=#{player_currency}"
@@ -83,8 +82,7 @@ defmodule Loka.Game.Actions.Shop do
       true ->
         case Spawner.spawn(item_key) do
           {:ok, item_entity} ->
-            {:ok, character_after_deduct} =
-              Economy.deduct_currency(character, "gold", item_info.price)
+            character_after_deduct = deduct_currency(character, item_info.price)
 
             inventory = Entity.get_component(character_after_deduct, "inventory") || []
             new_inventory = [item_entity.id | inventory]
@@ -93,7 +91,7 @@ defmodule Loka.Game.Actions.Shop do
               Entity.add_component(character_after_deduct, "inventory", new_inventory)
 
             Logger.info(
-              "[SHOP] Purchase completed: player_id=#{ctx.player_id} item=#{item_key} cost=#{item_info.price} remaining_gold=#{Economy.get_currency(new_character)}"
+              "[SHOP] Purchase completed: player_id=#{ctx.player_id} item=#{item_key} cost=#{item_info.price} remaining_gold=#{get_currency(new_character)}"
             )
 
             stats = Entity.get_component(new_character, "stats")
@@ -157,7 +155,7 @@ defmodule Loka.Game.Actions.Shop do
 
       true ->
         sell_price = get_sell_price(item_entity)
-        {:ok, character_after_add} = Economy.add_currency(character, "gold", sell_price)
+        character_after_add = add_currency(character, sell_price)
         cur_inventory = Entity.get_component(character_after_add, "inventory") || []
         new_inventory = List.delete(cur_inventory, item_id)
         new_character = Entity.add_component(character_after_add, "inventory", new_inventory)
@@ -165,7 +163,7 @@ defmodule Loka.Game.Actions.Shop do
         item_name = item_entity.short_desc || item_entity.key
 
         Logger.info(
-          "[SHOP] Sale completed: player_id=#{ctx.player_id} item=#{item_entity.key} price=#{sell_price} new_gold=#{Economy.get_currency(new_character)}"
+          "[SHOP] Sale completed: player_id=#{ctx.player_id} item=#{item_entity.key} price=#{sell_price} new_gold=#{get_currency(new_character)}"
         )
 
         stats = Entity.get_component(new_character, "stats")
@@ -242,5 +240,25 @@ defmodule Loka.Game.Actions.Shop do
     valuable = Map.get(components, "valuable") || Map.get(components, :valuable) || %{}
     base_price = Map.get(valuable, "base_price") || Map.get(valuable, :base_price) || 10
     div(base_price, 2)
+  end
+
+  # Economy helpers (inline replacements for deleted Economy module)
+  defp get_currency(character) do
+    stats = Entity.get_component(character, "stats") || %{}
+    Map.get(stats, "gold") || Map.get(stats, :gold) || 0
+  end
+
+  defp deduct_currency(character, amount) do
+    stats = Entity.get_component(character, "stats") || %{}
+    current = Map.get(stats, "gold") || Map.get(stats, :gold) || 0
+    new_stats = Map.put(stats, "gold", max(0, current - amount))
+    Entity.add_component(character, "stats", new_stats)
+  end
+
+  defp add_currency(character, amount) do
+    stats = Entity.get_component(character, "stats") || %{}
+    current = Map.get(stats, "gold") || Map.get(stats, :gold) || 0
+    new_stats = Map.put(stats, "gold", current + amount)
+    Entity.add_component(character, "stats", new_stats)
   end
 end

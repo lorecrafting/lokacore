@@ -17,8 +17,7 @@ defmodule Loka.WorldBuilder.DialogueManager do
 
   require Logger
 
-  alias Loka.Engine.TypedObject
-  alias Loka.Engine.TypedObject.Loader
+  alias Loka.Engine.Entity
   alias Loka.Content.Dialogue
 
   @dialogues_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "dialogues"])
@@ -40,21 +39,17 @@ defmodule Loka.WorldBuilder.DialogueManager do
       |> apply_dialogue_defaults()
       |> build_dialogue_data()
 
-    case TypedObject.new(attrs) do
-      {:ok, typed_object} ->
-        case Dialogue.validate(typed_object) do
+    entity = Entity.new(attrs)
+
+    case Dialogue.validate(entity) do
+      :ok ->
+        case save_dialogue_yaml(entity) do
           :ok ->
-            case save_dialogue_yaml(typed_object) do
-              :ok ->
-                Logger.info("[DialogueManager] Created dialogue: #{typed_object.key}")
-                {:ok, enrich_for_ui(typed_object)}
+            Logger.info("[DialogueManager] Created dialogue: #{entity.key}")
+            {:ok, enrich_for_ui(entity)}
 
-              {:error, reason} ->
-                {:error, "Failed to save dialogue: #{inspect(reason)}"}
-            end
-
-          {:error, errors} ->
-            {:error, Enum.join(errors, ", ")}
+          {:error, reason} ->
+            {:error, "Failed to save dialogue: #{inspect(reason)}"}
         end
 
       {:error, errors} ->
@@ -75,7 +70,6 @@ defmodule Loka.WorldBuilder.DialogueManager do
         case File.rm(file_path) do
           :ok ->
             Logger.info("[DialogueManager] Deleted dialogue: #{key}")
-            Loader.reload()
             :ok
 
           {:error, reason} ->
@@ -91,7 +85,7 @@ defmodule Loka.WorldBuilder.DialogueManager do
   # Private
   # ---------------------------------------------------------------------------
 
-  defp enrich_for_ui(dialogue) when is_struct(dialogue, TypedObject) do
+  defp enrich_for_ui(%Entity{} = dialogue) do
     %{
       key: dialogue.key,
       entity_key: Dialogue.entity_key(dialogue),
@@ -106,7 +100,7 @@ defmodule Loka.WorldBuilder.DialogueManager do
 
     attrs
     |> Map.put_new(:npc_key, npc_key)
-    |> Map.put_new(:name, "Dialogue for #{npc_key}")
+    |> Map.put_new(:short_desc, "Dialogue for #{npc_key}")
   end
 
   defp build_dialogue_data(attrs) do
@@ -138,7 +132,7 @@ defmodule Loka.WorldBuilder.DialogueManager do
 
     attrs
     |> Map.drop([:npc_key, :entity_key])
-    |> Map.put(:data, data)
+    |> Map.put(:components, %{"data" => data})
   end
 
   defp save_dialogue_yaml(dialogue) do
@@ -149,7 +143,6 @@ defmodule Loka.WorldBuilder.DialogueManager do
 
       case File.write(file_path, yaml_content) do
         :ok ->
-          Loader.reload()
           :ok
 
         {:error, reason} ->
@@ -159,7 +152,7 @@ defmodule Loka.WorldBuilder.DialogueManager do
   end
 
   defp build_yaml_content(dialogue) do
-    data = dialogue.data || %{}
+    data = (dialogue.components || %{})["data"] || %{}
     entity_key = data["entity_key"] || "unknown_npc"
     trigger = data["trigger"] || "on_talk"
     entry_node = data["entry_node"] || "greeting"

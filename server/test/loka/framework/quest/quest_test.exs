@@ -1,7 +1,7 @@
 defmodule Loka.Framework.QuestTest do
   use Loka.DataCase
 
-  alias Loka.Framework.Quest
+  alias Loka.Framework.Quest.Progress
   alias Loka.Engine.Entity
   alias Loka.Engine.Entities
 
@@ -14,47 +14,22 @@ defmodule Loka.Framework.QuestTest do
         key: attrs[:key] || "test_quest_#{System.unique_integer([:positive])}",
         short_desc: attrs[:name] || "Test Quest",
         extra_desc: attrs[:description] || "A test quest",
-        type: "item",
-        components:
-          attrs[:components] ||
-            %{
-              "objectives" => [],
-              "rewards" => %{}
-            },
-        tags: ["quest"]
+        type: "quest",
+        is_prototype: true,
+        components: %{
+          "data" =>
+            Map.merge(
+              %{"objectives" => [], "rewards" => %{}},
+              attrs[:components] || %{}
+            )
+        }
       })
 
     entity
   end
 
-  describe "delegation to Definitions" do
-    test "objective_types/0 is delegated" do
-      types = Quest.objective_types()
-
-      assert is_list(types)
-      assert :talk in types
-      assert :kill in types
-      assert :get_item in types
-      assert :go_to in types
-    end
-
-    test "get_quest_definition/1 is delegated" do
-      create_quest_entity(%{
-        key: "test_quest",
-        name: "Delegated Quest",
-        description: "Testing delegation"
-      })
-
-      quest = Quest.get_quest_definition("test_quest")
-
-      assert quest != nil
-      assert quest.id == "test_quest"
-      assert quest.name == "Delegated Quest"
-    end
-  end
-
-  describe "delegation to Progress" do
-    test "accept_quest/2 is delegated" do
+  describe "Progress API" do
+    test "accept_quest/2 works" do
       entity = character_fixture()
 
       create_quest_entity(%{
@@ -65,12 +40,12 @@ defmodule Loka.Framework.QuestTest do
         }
       })
 
-      assert {:ok, updated_entity} = Quest.accept_quest(entity, "delegated_quest")
+      assert {:ok, updated_entity} = Progress.accept_quest(entity, "delegated_quest")
       quests = Entity.get_component(updated_entity, "quest_progress")
       assert Map.has_key?(quests["active"], "delegated_quest")
     end
 
-    test "update_progress/2 is delegated" do
+    test "update_progress/2 works" do
       entity = character_fixture()
 
       create_quest_entity(%{
@@ -89,10 +64,10 @@ defmodule Loka.Framework.QuestTest do
         }
       })
 
-      {:ok, entity} = Quest.accept_quest(entity, "progress_quest")
+      {:ok, entity} = Progress.accept_quest(entity, "progress_quest")
 
       event = %{type: :talk, target_id: "npc1"}
-      assert {:ok, updated_entity, completed} = Quest.update_progress(entity, event)
+      assert {:ok, updated_entity, completed} = Progress.update_progress(entity, event)
 
       assert is_list(completed)
       assert {_quest_id, _obj_id} = hd(completed)
@@ -121,10 +96,10 @@ defmodule Loka.Framework.QuestTest do
         }
       })
 
-      {:ok, entity} = Quest.accept_quest(entity, "manual_quest")
+      {:ok, entity} = Progress.accept_quest(entity, "manual_quest")
 
       assert {:ok, updated_entity} =
-               Quest.complete_objective(entity, "manual_quest", "manual_obj")
+               Progress.complete_objective(entity, "manual_quest", "manual_obj")
 
       quests = Entity.get_component(updated_entity, "quest_progress")
       objectives = quests["active"]["manual_quest"]["objectives"]
@@ -139,9 +114,9 @@ defmodule Loka.Framework.QuestTest do
         components: %{"objectives" => [], "rewards" => %{}}
       })
 
-      {:ok, entity} = Quest.accept_quest(entity, "complete_check")
+      {:ok, entity} = Progress.accept_quest(entity, "complete_check")
 
-      assert Quest.is_complete?(entity, "complete_check") == true
+      assert Progress.is_complete?(entity, "complete_check") == true
     end
 
     test "turn_in_quest/2 is delegated" do
@@ -160,11 +135,11 @@ defmodule Loka.Framework.QuestTest do
         }
       })
 
-      {:ok, entity} = Quest.accept_quest(entity, "turn_in_quest")
+      {:ok, entity} = Progress.accept_quest(entity, "turn_in_quest")
 
-      assert {:ok, updated_entity, rewards} = Quest.turn_in_quest(entity, "turn_in_quest")
+      assert {:ok, updated_entity, rewards} = Progress.turn_in_quest(entity, "turn_in_quest")
 
-      assert rewards["xp"] == 50
+      assert rewards[:xp] == 50
       stats = Entity.get_component(updated_entity, "stats")
       assert stats["xp"] == 50
       quests = Entity.get_component(updated_entity, "quest_progress")
@@ -180,9 +155,9 @@ defmodule Loka.Framework.QuestTest do
         components: %{"objectives" => [], "rewards" => %{}}
       })
 
-      {:ok, entity} = Quest.accept_quest(entity, "active_quest")
+      {:ok, entity} = Progress.accept_quest(entity, "active_quest")
 
-      quests = Quest.get_active_quests(entity)
+      quests = Progress.get_active_quests(entity)
 
       assert length(quests) == 1
       [quest] = quests
@@ -196,7 +171,7 @@ defmodule Loka.Framework.QuestTest do
           quests: %{"active" => %{}, "completed" => ["quest1", "quest2"]}
         })
 
-      completed = Quest.get_completed_quests(entity)
+      completed = Progress.get_completed_quests(entity)
 
       assert completed == ["quest1", "quest2"]
     end
@@ -209,47 +184,13 @@ defmodule Loka.Framework.QuestTest do
         components: %{"objectives" => [], "rewards" => %{}}
       })
 
-      {:ok, entity} = Quest.accept_quest(entity, "progress_track")
+      {:ok, entity} = Progress.accept_quest(entity, "progress_track")
 
-      progress = Quest.get_quest_progress(entity, "progress_track")
+      progress = Progress.get_quest_progress(entity, "progress_track")
 
       assert progress != nil
       assert is_map(progress)
       assert Map.has_key?(progress, "objectives")
-    end
-  end
-
-  describe "backwards compatibility structs" do
-    test "Quest struct exists with correct fields" do
-      quest = %Quest.Quest{
-        id: "test",
-        name: "Test",
-        description: "Test quest"
-      }
-
-      assert quest.id == "test"
-      assert quest.name == "Test"
-      assert quest.description == "Test quest"
-      assert quest.objectives == []
-      assert quest.rewards == %{}
-      assert quest.status == :available
-    end
-
-    test "Objective struct exists with correct fields" do
-      objective = %Quest.Objective{
-        id: "obj1",
-        type: :talk,
-        description: "Talk to NPC",
-        target_id: "npc1"
-      }
-
-      assert objective.id == "obj1"
-      assert objective.type == :talk
-      assert objective.description == "Talk to NPC"
-      assert objective.target_id == "npc1"
-      assert objective.target_count == 1
-      assert objective.completed == false
-      assert objective.progress == 0
     end
   end
 
@@ -300,40 +241,40 @@ defmodule Loka.Framework.QuestTest do
       })
 
       # Step 1: Accept the quest
-      {:ok, entity} = Quest.accept_quest(entity, "epic_quest")
-      active_quests = Quest.get_active_quests(entity)
+      {:ok, entity} = Progress.accept_quest(entity, "epic_quest")
+      active_quests = Progress.get_active_quests(entity)
       assert length(active_quests) == 1
       assert hd(active_quests).is_complete == false
 
       # Step 2: Complete first objective - talk to elder
       event = %{type: :talk, target_id: "elder"}
-      {:ok, entity, completed} = Quest.update_progress(entity, event)
+      {:ok, entity, completed} = Progress.update_progress(entity, event)
       assert length(completed) == 1
-      assert Quest.is_complete?(entity, "epic_quest") == false
+      assert Progress.is_complete?(entity, "epic_quest") == false
 
       # Step 3: Complete second objective - kill monsters (one by one)
       event = %{type: :kill, target_id: "monster", count: 1}
-      {:ok, entity, _} = Quest.update_progress(entity, event)
-      {:ok, entity, _} = Quest.update_progress(entity, event)
-      {:ok, entity, completed} = Quest.update_progress(entity, event)
+      {:ok, entity, _} = Progress.update_progress(entity, event)
+      {:ok, entity, _} = Progress.update_progress(entity, event)
+      {:ok, entity, completed} = Progress.update_progress(entity, event)
       assert length(completed) == 1
-      assert Quest.is_complete?(entity, "epic_quest") == false
+      assert Progress.is_complete?(entity, "epic_quest") == false
 
       # Step 4: Complete third objective - find artifact
       event = %{type: :get_item, target_id: "artifact"}
-      {:ok, entity, completed} = Quest.update_progress(entity, event)
+      {:ok, entity, completed} = Progress.update_progress(entity, event)
       assert length(completed) == 1
 
       # Check quest is now complete
-      assert Quest.is_complete?(entity, "epic_quest") == true
+      assert Progress.is_complete?(entity, "epic_quest") == true
 
       # Step 5: Turn in the quest
-      {:ok, entity, rewards} = Quest.turn_in_quest(entity, "epic_quest")
+      {:ok, entity, rewards} = Progress.turn_in_quest(entity, "epic_quest")
 
       # Verify rewards
-      assert rewards["xp"] == 500
-      assert rewards["gold"] == 250
-      assert rewards["items"] == ["legendary_sword"]
+      assert rewards[:xp] == 500
+      assert rewards[:gold] == 250
+      assert rewards[:items] == ["legendary_sword"]
 
       # Verify rewards applied
       stats = Entity.get_component(entity, "stats")
@@ -344,11 +285,11 @@ defmodule Loka.Framework.QuestTest do
       assert "legendary_sword" in inventory
 
       # Verify quest moved to completed
-      assert "epic_quest" in Quest.get_completed_quests(entity)
-      assert Quest.get_active_quests(entity) == []
+      assert "epic_quest" in Progress.get_completed_quests(entity)
+      assert Progress.get_active_quests(entity) == []
 
       # Verify cannot accept again
-      assert {:error, :already_completed} = Quest.accept_quest(entity, "epic_quest")
+      assert {:error, :already_completed} = Progress.accept_quest(entity, "epic_quest")
     end
   end
 end

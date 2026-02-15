@@ -8,15 +8,13 @@ defmodule LokaWeb.Channels.BuilderCRUDTest do
   use Loka.ChannelCase, async: false
 
   alias Loka.Auth.Guardian
-  alias Loka.Engine.WorldLoader
-  alias Loka.TestCleanup
 
-  # Longer timeout because Loader.reload() scans all YAML files
   @timeout 2000
 
   setup do
     {_, _} = Loka.Repo.delete_all(Loka.Engine.Schema.EntitySchema)
-    {:ok, _stats} = WorldLoader.spawn_world()
+    # Seed the world from YAML via EntitySeeder
+    Loka.Engine.EntitySeeder.seed()
 
     admin = create_test_player(name: "CRUDTester")
 
@@ -26,12 +24,6 @@ defmodule LokaWeb.Channels.BuilderCRUDTest do
       |> Loka.Repo.update!()
 
     on_exit(fn ->
-      TestCleanup.cleanup_draft_files(:zone)
-      TestCleanup.cleanup_draft_files(:cutscene)
-      TestCleanup.cleanup_draft_files(:storyline)
-      TestCleanup.cleanup_script_test_files()
-
-      Loka.Engine.TypedObject.Loader.reload()
       {_, _} = Loka.Repo.delete_all(Loka.Engine.Schema.EntitySchema)
     end)
 

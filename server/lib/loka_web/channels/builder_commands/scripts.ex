@@ -4,7 +4,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
   templates, from-template, attach, detach.
   """
 
-  alias Loka.Engine.TypedObject.Loader
+  alias Loka.Engine.Entities
   alias Loka.Content.Script
   alias Loka.WorldBuilder.YamlBuilder
   alias LokaWeb.Channels.BuilderCommands.{Helpers, Formatter}
@@ -36,7 +36,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
 
         case File.write(file_path, yaml_content) do
           :ok ->
-            Loader.reload_file(file_path)
+            # No ETS reload needed in V2
 
             {:ok,
              "Script '#{key}' created (hook: #{hook}).\n" <>
@@ -54,7 +54,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
     if File.exists?(file_path) do
       case File.rm(file_path) do
         :ok ->
-          Loader.remove(key)
+          # No ETS removal needed in V2
           {:ok, "Script '#{key}' deleted.", socket}
 
         {:error, reason} ->
@@ -68,7 +68,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
   def execute(:script_info, %{key: key}, socket) do
     case Script.get(key) do
       {:ok, script} ->
-        yaml_text = Helpers.format_typed_object(script)
+        yaml_text = Helpers.format_entity(script)
         {:ok, "Script '#{key}'#{Helpers.draft_tag(script)}:\n#{yaml_text}", socket}
 
       {:error, :not_found} ->
@@ -82,7 +82,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
     rows =
       Enum.map(scripts, fn s ->
         hook = Script.hook(s) || ""
-        [s.key, s.name || s.key, to_string(hook)]
+        [s.key, s.short_desc || s.key, to_string(hook)]
       end)
 
     text =
@@ -106,7 +106,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
 
     rows =
       Enum.map(scripts, fn s ->
-        [s.key, s.name || s.key, to_string(Script.hook(s) || "")]
+        [s.key, s.short_desc || s.key, to_string(Script.hook(s) || "")]
       end)
 
     text =
@@ -202,7 +202,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
 
             case File.write(file_path, yaml_content) do
               :ok ->
-                Loader.reload_file(file_path)
+                # No ETS reload needed in V2
                 {:ok, "Script '#{key}' created from template '#{tpl}'.", socket}
 
               {:error, reason} ->
@@ -218,9 +218,9 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
   def execute(:script_attach, %{script_key: script_key, entity_key: entity_key}, socket) do
     case Script.get(script_key) do
       {:ok, _script} ->
-        case Loader.get(entity_key) do
+        case Entities.find_one(key: entity_key) do
           {:ok, entity} ->
-            data = entity.data || %{}
+            data = (entity.components || %{})["data"] || %{}
             scripts = data["scripts"] || []
 
             if script_key in scripts do
@@ -228,8 +228,6 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
             else
               updated_data = Map.put(data, "scripts", scripts ++ [script_key])
               YamlBuilder.save_entity_with_data(entity, updated_data)
-              # Full reload: save_entity_with_data path not easily determined
-              Loader.reload()
               {:ok, "Attached script '#{script_key}' to '#{entity_key}'.", socket}
             end
 
@@ -243,16 +241,14 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
   end
 
   def execute(:script_detach, %{script_key: script_key, entity_key: entity_key}, socket) do
-    case Loader.get(entity_key) do
+    case Entities.find_one(key: entity_key) do
       {:ok, entity} ->
-        data = entity.data || %{}
+        data = (entity.components || %{})["data"] || %{}
         scripts = data["scripts"] || []
 
         if script_key in scripts do
           updated_data = Map.put(data, "scripts", List.delete(scripts, script_key))
           YamlBuilder.save_entity_with_data(entity, updated_data)
-          # Full reload: save_entity_with_data path not easily determined
-          Loader.reload()
           {:ok, "Detached script '#{script_key}' from '#{entity_key}'.", socket}
         else
           {:error, "Script '#{script_key}' not attached to '#{entity_key}'.", socket}

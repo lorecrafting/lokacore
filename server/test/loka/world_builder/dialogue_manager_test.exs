@@ -1,15 +1,19 @@
 defmodule Loka.WorldBuilder.DialogueManagerTest do
   use ExUnit.Case, async: false
 
-  alias Loka.TestCleanup
   alias Loka.WorldBuilder.DialogueManager
 
   @dialogues_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "dialogues"])
 
   setup do
     on_exit(fn ->
-      TestCleanup.cleanup_dialogue_test_files()
-      Loka.Engine.TypedObject.Loader.reload()
+      # Clean up any test dialogue files
+      if File.dir?(@dialogues_dir) do
+        @dialogues_dir
+        |> File.ls!()
+        |> Enum.filter(&String.starts_with?(&1, "test_dlg_"))
+        |> Enum.each(fn file -> File.rm(Path.join(@dialogues_dir, file)) end)
+      end
     end)
 
     :ok

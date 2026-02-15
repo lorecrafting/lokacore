@@ -35,8 +35,7 @@ defmodule Loka.Framework.Combat do
   """
 
   alias Loka.Engine.{Entity, Entities, Event, EventBus}
-  alias Loka.Framework.Combat.DamageMessage
-  alias Loka.Framework.Progression
+  # DamageMessage was deleted in V2 — inline message generation below
   alias Loka.Mechanics.{Damage, Check}
 
   # =============================================================================
@@ -166,7 +165,7 @@ defmodule Loka.Framework.Combat do
 
     if enemy_hp <= 0 do
       player_msg = format_player_attack_message(player_result, combat_state.enemy.name)
-      status_msg = DamageMessage.health_status(0, 1, combat_state.enemy.name)
+      status_msg = health_status_message(0, 1, combat_state.enemy.name)
 
       log_entries = [
         %{text: player_msg, type: :player_attack, turn: combat_after_player.turn_count},
@@ -195,7 +194,7 @@ defmodule Loka.Framework.Combat do
 
       player_msg = format_player_attack_message(player_result, combat_state.enemy.name)
       enemy_msg = format_enemy_attack_message(enemy_result, combat_state.enemy.name)
-      status_msg = DamageMessage.health_status(enemy_current, enemy_max, combat_state.enemy.name)
+      status_msg = health_status_message(enemy_current, enemy_max, combat_state.enemy.name)
 
       log_entries =
         [
@@ -325,14 +324,14 @@ defmodule Loka.Framework.Combat do
   end
 
   defp format_player_attack_message(%{action: :attack, damage: damage}, enemy_name) do
-    messages = DamageMessage.generate(damage, "You", enemy_name)
+    messages = damage_message(damage, "You", enemy_name)
     messages.to_attacker
   end
 
   defp format_player_attack_message(_, _), do: ""
 
   defp format_enemy_attack_message(%{action: :attack, damage: damage}, enemy_name) do
-    messages = DamageMessage.generate(damage, enemy_name, "you")
+    messages = damage_message(damage, enemy_name, "you")
     messages.to_defender
   end
 
@@ -422,14 +421,12 @@ defmodule Loka.Framework.Combat do
     new_stats = Map.put(stats, "gold", new_gold)
     character = Entity.add_component(character, "stats", new_stats)
 
-    # Award XP (which handles leveling)
-    case Progression.award_xp(character, xp_amount) do
-      {:ok, updated_entity, nil} ->
-        {:ok, updated_entity}
-
-      {:ok, updated_entity, level_up_info} ->
-        {:ok, updated_entity, level_up_info}
-    end
+    # Award XP directly (Progression module removed in V2)
+    stats = Entity.get_component(character, "stats") || %{}
+    current_xp = Map.get(stats, "xp") || Map.get(stats, :xp) || 0
+    new_stats = Map.put(stats, "xp", current_xp + xp_amount)
+    updated_entity = Entity.add_component(character, "stats", new_stats)
+    {:ok, updated_entity}
   end
 
   # =============================================================================
@@ -472,7 +469,7 @@ defmodule Loka.Framework.Combat do
 
     new_enemy = %{combat_state.enemy | health: new_enemy_health}
 
-    messages = DamageMessage.generate(final_damage, "You", combat_state.enemy.name)
+    messages = damage_message(final_damage, "You", combat_state.enemy.name)
 
     log_entry = %{
       text: messages.to_attacker,
@@ -508,7 +505,7 @@ defmodule Loka.Framework.Combat do
   end
 
   defp execute_player_defend(combat_state, _character) do
-    messages = DamageMessage.defense(:enter, "You")
+    messages = defense_message(:enter, "You")
 
     log_entry = %{
       text: messages.to_attacker,
@@ -536,7 +533,7 @@ defmodule Loka.Framework.Combat do
       {:ok, result, _audit} = Check.percent(flee_chance)
 
       if result.success do
-        messages = DamageMessage.flee(:success, "You", combat_state.enemy.name)
+        messages = flee_message(:success, "You", combat_state.enemy.name)
 
         log_entry = %{
           text: messages.to_attacker,
@@ -548,7 +545,7 @@ defmodule Loka.Framework.Combat do
 
         {:ok, new_state, %{action: :flee, success: true}}
       else
-        messages = DamageMessage.flee(:fail, "You", combat_state.enemy.name)
+        messages = flee_message(:fail, "You", combat_state.enemy.name)
 
         log_entry = %{
           text: messages.to_attacker,
@@ -673,5 +670,43 @@ defmodule Loka.Framework.Combat do
 
       {:ok, new_state, %{action: :power_strike, damage: final_damage}}
     end
+  end
+
+  # =============================================================================
+  # Inline Message Generation (V2: replaces deleted DamageMessage module)
+  # =============================================================================
+
+  defp damage_message(damage, attacker, defender) do
+    %{
+      to_attacker: "#{attacker} hit #{defender} for #{damage} damage!",
+      to_defender: "#{defender} was hit by #{attacker} for #{damage} damage!"
+    }
+  end
+
+  defp health_status_message(current, max, name) do
+    pct = if max > 0, do: current / max * 100, else: 0
+
+    status =
+      cond do
+        pct <= 0 -> "has been defeated"
+        pct <= 20 -> "is barely standing"
+        pct <= 50 -> "looks wounded"
+        pct <= 80 -> "has some scratches"
+        true -> "looks healthy"
+      end
+
+    "#{name} #{status}."
+  end
+
+  defp defense_message(:enter, name) do
+    %{to_attacker: "#{name} raises a defensive stance."}
+  end
+
+  defp flee_message(:success, name, enemy) do
+    %{to_attacker: "#{name} successfully flees from #{enemy}!"}
+  end
+
+  defp flee_message(:fail, name, enemy) do
+    %{to_attacker: "#{name} fails to escape from #{enemy}!"}
   end
 end

@@ -29,7 +29,7 @@ defmodule Loka.Testing.Content.CraftingValidator do
 
   require Logger
 
-  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
+  alias Loka.Engine.Entities
 
   @type validation_result :: %{
           recipes_checked: non_neg_integer(),
@@ -264,9 +264,9 @@ defmodule Loka.Testing.Content.CraftingValidator do
         item = ingredient["item"]
 
         if item do
-          case TypedObjectLoader.get(item) do
+          case Entities.find_one(key: item) do
             {:ok, proto} ->
-              if proto.subtype == :item,
+              if proto.type == :item,
                 do: acc,
                 else: [{:missing_ingredient, recipe_key, item} | acc]
 
@@ -287,9 +287,9 @@ defmodule Loka.Testing.Content.CraftingValidator do
         item = out["item"]
 
         if item do
-          case TypedObjectLoader.get(item) do
+          case Entities.find_one(key: item) do
             {:ok, proto} ->
-              if proto.subtype == :item,
+              if proto.type == :item,
                 do: acc,
                 else: [{:missing_output, recipe_key, item} | acc]
 
@@ -307,9 +307,9 @@ defmodule Loka.Testing.Content.CraftingValidator do
   defp validate_tools(recipe_key, tools) do
     errors =
       Enum.reduce(tools, [], fn tool, acc ->
-        case TypedObjectLoader.get(tool) do
+        case Entities.find_one(key: tool) do
           {:ok, proto} ->
-            if proto.subtype == :item, do: acc, else: [{:missing_tool, recipe_key, tool} | acc]
+            if proto.type == :item, do: acc, else: [{:missing_tool, recipe_key, tool} | acc]
 
           {:error, :not_found} ->
             [{:missing_tool, recipe_key, tool} | acc]
@@ -325,9 +325,9 @@ defmodule Loka.Testing.Content.CraftingValidator do
         item = out["item"]
 
         if item do
-          case TypedObjectLoader.get(item) do
+          case Entities.find_one(key: item) do
             {:ok, proto} ->
-              if proto.subtype == :item,
+              if proto.type == :item,
                 do: acc,
                 else: [{:missing_failure_output, recipe_key, item} | acc]
 

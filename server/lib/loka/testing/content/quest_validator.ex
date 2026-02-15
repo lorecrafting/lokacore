@@ -32,7 +32,7 @@ defmodule Loka.Testing.Content.QuestValidator do
 
   require Logger
 
-  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
+  alias Loka.Engine.Entities
 
   @type validation_result :: %{
           quests_checked: non_neg_integer(),
@@ -64,7 +64,7 @@ defmodule Loka.Testing.Content.QuestValidator do
   @spec validate() :: {:ok, validation_result()}
   def validate do
     # Get all prototypes and find quests
-    all_prototypes = TypedObjectLoader.all()
+    all_prototypes = Entities.find_all(is_prototype: true)
 
     quests =
       all_prototypes
@@ -99,7 +99,7 @@ defmodule Loka.Testing.Content.QuestValidator do
   """
   @spec validate_quest(String.t()) :: {:ok, {[error()], [warning()]}} | {:error, :not_found}
   def validate_quest(quest_key) do
-    case TypedObjectLoader.get(quest_key) do
+    case Entities.find_one(key: quest_key) do
       {:error, :not_found} ->
         {:error, :not_found}
 
@@ -218,7 +218,7 @@ defmodule Loka.Testing.Content.QuestValidator do
   defp validate_kill_target(_quest_key, nil), do: {[], []}
 
   defp validate_kill_target(quest_key, target_key) do
-    case TypedObjectLoader.get(target_key) do
+    case Entities.find_one(key: target_key) do
       {:error, :not_found} ->
         {[{:missing_kill_target, quest_key, target_key}], []}
 
@@ -234,7 +234,7 @@ defmodule Loka.Testing.Content.QuestValidator do
   defp validate_talk_target(_quest_key, nil), do: {[], []}
 
   defp validate_talk_target(quest_key, target_key) do
-    case TypedObjectLoader.get(target_key) do
+    case Entities.find_one(key: target_key) do
       {:error, :not_found} ->
         {[{:missing_talk_target, quest_key, target_key}], []}
 
@@ -250,7 +250,7 @@ defmodule Loka.Testing.Content.QuestValidator do
   defp validate_collect_target(_quest_key, nil), do: {[], []}
 
   defp validate_collect_target(quest_key, target_key) do
-    case TypedObjectLoader.get(target_key) do
+    case Entities.find_one(key: target_key) do
       {:error, :not_found} ->
         {[{:missing_collect_item, quest_key, target_key}], []}
 
@@ -262,12 +262,12 @@ defmodule Loka.Testing.Content.QuestValidator do
   defp validate_location_target(_quest_key, nil), do: {[], []}
 
   defp validate_location_target(quest_key, target_key) do
-    case TypedObjectLoader.get(target_key) do
+    case Entities.find_one(key: target_key) do
       {:error, :not_found} ->
         {[{:missing_location, quest_key, target_key}], []}
 
       {:ok, proto} ->
-        if proto.subtype == :room do
+        if proto.type == :room do
           {[], []}
         else
           {[{:missing_location, quest_key, target_key}], []}
@@ -279,7 +279,7 @@ defmodule Loka.Testing.Content.QuestValidator do
     items = Map.get(rewards, "items") || Map.get(rewards, :items) || []
 
     Enum.flat_map(items, fn item_key ->
-      case TypedObjectLoader.get(item_key) do
+      case Entities.find_one(key: item_key) do
         {:error, :not_found} ->
           [{:reward_item_not_found, quest_key, item_key}]
 

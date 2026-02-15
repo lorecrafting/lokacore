@@ -28,7 +28,7 @@ defmodule Loka.Testing.Content.CutsceneValidator do
 
   require Logger
 
-  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
+  alias Loka.Engine.Entities
 
   @type validation_result :: %{
           cutscenes_checked: non_neg_integer(),
@@ -279,9 +279,9 @@ defmodule Loka.Testing.Content.CutsceneValidator do
 
     errors =
       if location do
-        case TypedObjectLoader.get(location) do
+        case Entities.find_one(key: location) do
           {:ok, proto} ->
-            if proto.subtype == :room,
+            if proto.type == :room,
               do: errors,
               else: [{:missing_location, cutscene_id, location} | errors]
 
@@ -357,9 +357,9 @@ defmodule Loka.Testing.Content.CutsceneValidator do
       {[], []}
     else
       # Check if NPC exists
-      case TypedObjectLoader.get(speaker) do
+      case Entities.find_one(key: speaker) do
         {:ok, proto} ->
-          if proto.subtype == :npc,
+          if proto.type == :npc,
             do: {[], []},
             else: {[{:missing_speaker, cutscene_id, speaker}], []}
 

@@ -159,15 +159,21 @@ defmodule Loka.Framework.Player.GameState do
     # Only set the starting quest if the changeset is valid
     # and quest definitions are loaded (they may not be in tests)
     if changeset.valid? do
-      case Loka.Framework.Quest.Definitions.get_quest_definition(@starting_quest_id) do
-        nil ->
+      # V2: Use Content.Quest instead of deleted Quest.Definitions
+      case Loka.Content.Quest.get(@starting_quest_id) do
+        {:error, _} ->
           changeset
 
-        quest_def ->
+        {:ok, quest_typed_obj} ->
+          raw_objectives = Loka.Content.Quest.objectives(quest_typed_obj)
+
           # Initialize objectives with default progress
           objectives =
-            quest_def.objectives
-            |> Enum.map(fn obj -> {obj.id, %{"completed" => false, "progress" => 0}} end)
+            raw_objectives
+            |> Enum.map(fn obj ->
+              obj_id = Map.get(obj, "id") || Map.get(obj, :id, "unknown")
+              {obj_id, %{"completed" => false, "progress" => 0}}
+            end)
             |> Map.new()
 
           # Build the quest progress structure

@@ -23,7 +23,7 @@ defmodule Loka.Framework.Quest.Progress.Tracking do
         Tracking.update_objectives(objectives, event, quest_id, player_id, quest_def)
   """
 
-  alias Loka.Framework.Quest.{Definitions, ObjectiveRegistry, TimerManager}
+  alias Loka.Framework.Quest.{ObjectiveRegistry, TimerManager}
   alias Loka.Admin.GameLog
 
   @doc """
@@ -36,7 +36,7 @@ defmodule Loka.Framework.Quest.Progress.Tracking do
           {map(), [{String.t(), String.t()}]}
   def update_objectives(objectives, event, quest_id, player_id, quest_def \\ nil)
       when is_map(objectives) and is_map(event) do
-    quest_def = quest_def || Definitions.get_quest_definition(quest_id)
+    quest_def = quest_def || Loka.Content.Quest.definition(quest_id)
 
     Enum.reduce(objectives, {%{}, []}, fn {obj_id, obj_data}, {acc_obj, acc_completed} ->
       obj_def = quest_def && Enum.find(quest_def.objectives, &(&1.id == obj_id))

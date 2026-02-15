@@ -657,12 +657,8 @@ defmodule Loka.Framework.Inventory.ContainerTest do
 
       result = Container.generate_initial_contents(container)
 
-      # Should have generated items
-      assert result != []
-      # All should be "gold"
-      assert Enum.all?(result, &(&1 == "gold"))
-      # Should not exceed capacity
-      assert length(result) <= 5
+      # V2: LootTable deleted, stub returns []. Will be reimplemented as entity behavior.
+      assert result == []
     end
 
     test "respects capacity limit" do

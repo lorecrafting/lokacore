@@ -29,8 +29,8 @@ defmodule Loka.Testing.Content.StorylineValidator do
 
   require Logger
 
-  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
-  alias Loka.Framework.Quest.Definitions
+  alias Loka.Engine.Entities
+  alias Loka.Content
 
   @type validation_result :: %{
           storylines_checked: non_neg_integer(),
@@ -219,9 +219,9 @@ defmodule Loka.Testing.Content.StorylineValidator do
   end
 
   defp validate_starting_room(storyline_key, room_key) do
-    case TypedObjectLoader.get(room_key) do
+    case Entities.find_one(key: room_key) do
       {:ok, proto} ->
-        if proto.subtype == :room do
+        if proto.type == :room do
           {[], []}
         else
           {[{:missing_starting_room, storyline_key, room_key}], []}
@@ -290,7 +290,7 @@ defmodule Loka.Testing.Content.StorylineValidator do
   defp validate_quest_references(storyline_key, quest_ids) do
     errors =
       Enum.reduce(quest_ids, [], fn quest_id, acc ->
-        case Definitions.get_quest_definition(quest_id) do
+        case Content.Quest.definition(quest_id) do
           nil ->
             [{:missing_quest, storyline_key, quest_id} | acc]
 

@@ -48,7 +48,7 @@ defmodule Loka.Framework.Quest.Progress do
   """
 
   alias Loka.Engine.Entity
-  alias Loka.Framework.Quest.{Definitions, StateHelper, TimerManager, QuestItemSpawner}
+  alias Loka.Framework.Quest.{StateHelper, TimerManager, QuestItemSpawner}
   alias Loka.Framework.Quest.Progress.{Rewards, Tracking}
   alias Loka.Admin.GameLog
   alias Loka.Content
@@ -83,7 +83,7 @@ defmodule Loka.Framework.Quest.Progress do
             {:error, reason}
 
           :ok ->
-            case Definitions.get_quest_definition(quest_id) do
+            case Content.Quest.definition(quest_id) do
               nil ->
                 {:error, :quest_not_found}
 
@@ -140,7 +140,7 @@ defmodule Loka.Framework.Quest.Progress do
 
   # Checks the quest's direct `requires_quest` field
   defp check_quest_requires_quest(quest_id, completed_quests) do
-    case Definitions.get_quest_definition(quest_id) do
+    case Content.Quest.definition(quest_id) do
       nil ->
         :ok
 
@@ -268,7 +268,7 @@ defmodule Loka.Framework.Quest.Progress do
     active = StateHelper.get_active(quests)
 
     Enum.map(active, fn {quest_id, quest_data} ->
-      quest_def = Definitions.get_quest_definition(quest_id)
+      quest_def = Content.Quest.definition(quest_id)
 
       objectives = StateHelper.get_objectives(quest_data)
       accepted_at = quest_data["accepted_at"] || quest_data[:accepted_at]
@@ -327,7 +327,7 @@ defmodule Loka.Framework.Quest.Progress do
     if not is_complete?(entity, quest_id) do
       {:error, :quest_not_complete}
     else
-      case Definitions.get_quest_definition(quest_id) do
+      case Content.Quest.definition(quest_id) do
         nil ->
           {:error, :quest_not_found}
 
@@ -358,28 +358,9 @@ defmodule Loka.Framework.Quest.Progress do
     end
   end
 
-  # Triggers chain progression after a quest is completed.
-  # Auto-starts the next quest(s) if the completed quest is part of a chain.
-  defp trigger_chain_progression(entity, completed_quest_id) do
-    alias Loka.Framework.Quest.Chain
-
-    case Chain.on_quest_completed(entity, completed_quest_id) do
-      {:ok, updated_entity, auto_started} when auto_started != [] ->
-        GameLog.Quest.log_chain_progression(
-          entity.account_id,
-          completed_quest_id,
-          auto_started
-        )
-
-        updated_entity
-
-      {:ok, entity, []} ->
-        entity
-
-      {:error, _reason} ->
-        entity
-    end
-  end
+  # V2: Chain progression is handled by the storyline system.
+  # This is a no-op stub that returns the entity unchanged.
+  defp trigger_chain_progression(entity, _completed_quest_id), do: entity
 
   # =============================================================================
   # Private - Initialization
@@ -438,8 +419,8 @@ defmodule Loka.Framework.Quest.Progress do
         nil
 
       giver_key ->
-        case Loka.Engine.TypedObject.Loader.get(giver_key) do
-          {:ok, proto} -> proto.name || humanize_key(giver_key)
+        case Loka.Engine.Entities.find_one(key: giver_key) do
+          {:ok, npc} -> npc.short_desc || humanize_key(giver_key)
           _ -> humanize_key(giver_key)
         end
     end

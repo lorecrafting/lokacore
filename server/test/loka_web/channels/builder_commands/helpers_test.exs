@@ -27,7 +27,13 @@ defmodule LokaWeb.Channels.BuilderCommands.HelpersTest do
 
   describe "format_typed_object/1" do
     test "formats basic typed object" do
-      obj = %{key: "test_npc", type: :entity, data: %{"name" => "Test NPC"}}
+      obj = %{
+        key: "test_npc",
+        type: :entity,
+        short_desc: "Test NPC",
+        extra_desc: nil,
+        components: %{}
+      }
 
       result = Helpers.format_typed_object(obj)
 
@@ -40,7 +46,9 @@ defmodule LokaWeb.Channels.BuilderCommands.HelpersTest do
       obj = %{
         key: "npc",
         type: :entity,
-        data: %{"name" => "NPC", "description" => "A friendly NPC"}
+        short_desc: "NPC",
+        extra_desc: "A friendly NPC",
+        components: %{}
       }
 
       result = Helpers.format_typed_object(obj)
@@ -54,7 +62,9 @@ defmodule LokaWeb.Channels.BuilderCommands.HelpersTest do
       obj = %{
         key: "npc",
         type: :entity,
-        data: %{"name" => "NPC", "description" => long_desc}
+        short_desc: "NPC",
+        extra_desc: long_desc,
+        components: %{}
       }
 
       result = Helpers.format_typed_object(obj)
@@ -68,10 +78,9 @@ defmodule LokaWeb.Channels.BuilderCommands.HelpersTest do
       obj = %{
         key: "npc",
         type: :entity,
-        data: %{
-          "name" => "NPC",
-          "components" => %{"combat" => %{}, "dialogue" => %{}}
-        }
+        short_desc: "NPC",
+        extra_desc: nil,
+        components: %{"combat" => %{}, "dialogue" => %{}}
       }
 
       result = Helpers.format_typed_object(obj)
@@ -82,7 +91,7 @@ defmodule LokaWeb.Channels.BuilderCommands.HelpersTest do
     end
 
     test "omits components section when empty" do
-      obj = %{key: "npc", type: :entity, data: %{"name" => "NPC", "components" => %{}}}
+      obj = %{key: "npc", type: :entity, short_desc: "NPC", extra_desc: nil, components: %{}}
 
       result = Helpers.format_typed_object(obj)
 
@@ -90,7 +99,7 @@ defmodule LokaWeb.Channels.BuilderCommands.HelpersTest do
     end
 
     test "uses key as fallback name" do
-      obj = %{key: "my_key", type: :entity, data: %{}}
+      obj = %{key: "my_key", type: :entity, short_desc: nil, extra_desc: nil, components: %{}}
 
       result = Helpers.format_typed_object(obj)
 

@@ -9,7 +9,7 @@ defmodule LokaWeb.Channels.BuilderCommandSecurityTest do
   use Loka.ChannelCase, async: false
 
   alias Loka.Auth.Guardian
-  alias Loka.Engine.WorldLoader
+  alias Loka.Engine.EntitySeeder
 
   @builder_commands [
     "goto monastery_entrance",
@@ -35,7 +35,7 @@ defmodule LokaWeb.Channels.BuilderCommandSecurityTest do
     {_, _} = Loka.Repo.delete_all(Loka.Engine.Schema.EntitySchema)
 
     # Spawn minimal world
-    {:ok, _stats} = WorldLoader.spawn_world()
+    {:ok, _} = EntitySeeder.seed()
 
     # Create admin player
     admin = create_test_player(name: "AdminTester")

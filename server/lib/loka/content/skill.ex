@@ -1,6 +1,6 @@
 defmodule Loka.Content.Skill do
   @moduledoc """
-  Skill definition - OOC TypedObject.
+  Skill definition - OOC Entity.
 
   Skills define character progression paths with categories,
   prerequisites, and experience formulas. Covers both leveled
@@ -8,21 +8,18 @@ defmodule Loka.Content.Skill do
   (with cost, learned or not).
   """
 
-  alias Loka.Engine.{Entity, Entities, TypedObject}
+  alias Loka.Engine.{Entity, Entities}
 
   # =============================================================================
   # Queries
   # =============================================================================
 
-  @spec get(String.t()) :: {:ok, TypedObject.t()} | {:error, :not_found}
+  @spec get(String.t()) :: {:ok, Entity.t()} | {:error, :not_found}
   def get(key) when is_binary(key) do
-    case Entities.find_one(key: key, type: :skill) do
-      {:ok, entity} -> Entity.to_typed_object(entity)
-      error -> error
-    end
+    Entities.find_one(key: key, type: :skill)
   end
 
-  @spec get!(String.t()) :: TypedObject.t()
+  @spec get!(String.t()) :: Entity.t()
   def get!(key) when is_binary(key) do
     case get(key) do
       {:ok, skill} -> skill
@@ -30,48 +27,45 @@ defmodule Loka.Content.Skill do
     end
   end
 
-  @spec all() :: [TypedObject.t()]
+  @spec all() :: [Entity.t()]
   def all do
     Entities.find_all(type: :skill, is_prototype: true)
-    |> to_typed_objects()
   end
 
-  @spec all_published() :: [TypedObject.t()]
+  @spec all_published() :: [Entity.t()]
   def all_published do
     Entities.find_all(type: :skill, is_prototype: true)
     |> Enum.reject(&Entity.draft?/1)
-    |> to_typed_objects()
   end
 
   @doc """
   Returns all binary skills (skills with a "cost" field, no leveling).
   """
-  @spec all_binary() :: [TypedObject.t()]
+  @spec all_binary() :: [Entity.t()]
   def all_binary do
     all_published()
     |> Enum.filter(&binary?/1)
   end
 
-  @spec by_category(String.t()) :: [TypedObject.t()]
+  @spec by_category(String.t()) :: [Entity.t()]
   def by_category(category) when is_binary(category) do
     all_published()
     |> Enum.filter(fn skill ->
-      cat = TypedObject.get_data(skill, "category")
+      cat = get_data(skill, "category")
       cat == category
     end)
   end
 
-  @spec by_tag(String.t()) :: [TypedObject.t()]
+  @spec by_tag(String.t()) :: [Entity.t()]
   def by_tag(tag) when is_binary(tag) do
     Entities.find_all(type: :skill, tags: [tag], is_prototype: true)
     |> Enum.reject(&Entity.draft?/1)
-    |> to_typed_objects()
   end
 
   @doc """
   Returns all binary skills taught by a specific trainer.
   """
-  @spec by_trainer(String.t()) :: [TypedObject.t()]
+  @spec by_trainer(String.t()) :: [Entity.t()]
   def by_trainer(trainer_key) when is_binary(trainer_key) do
     all_binary()
     |> Enum.filter(fn skill ->
@@ -83,33 +77,33 @@ defmodule Loka.Content.Skill do
   # Accessors (shared)
   # =============================================================================
 
-  def category(%TypedObject{type: :skill} = skill),
-    do: TypedObject.get_data(skill, "category", "general")
+  def category(%Entity{type: :skill} = skill),
+    do: get_data(skill, "category", "general")
 
-  def max_level(%TypedObject{type: :skill} = skill),
-    do: TypedObject.get_data(skill, "max_level", 100)
+  def max_level(%Entity{type: :skill} = skill),
+    do: get_data(skill, "max_level", 100)
 
-  def prerequisites(%TypedObject{type: :skill} = skill),
-    do: TypedObject.get_data(skill, "prerequisites", [])
+  def prerequisites(%Entity{type: :skill} = skill),
+    do: get_data(skill, "prerequisites", [])
 
-  def trainers(%TypedObject{type: :skill} = skill),
-    do: TypedObject.get_data(skill, "trainers", [])
+  def trainers(%Entity{type: :skill} = skill),
+    do: get_data(skill, "trainers", [])
 
-  def tags(%TypedObject{type: :skill} = skill),
-    do: TypedObject.get_data(skill, "tags", [])
+  def tags(%Entity{type: :skill} = skill),
+    do: get_data(skill, "tags", [])
 
   # =============================================================================
   # Leveled Skill Accessors
   # =============================================================================
 
-  def xp_per_use(%TypedObject{type: :skill} = skill),
-    do: TypedObject.get_data(skill, "xp_per_use", 1)
+  def xp_per_use(%Entity{type: :skill} = skill),
+    do: get_data(skill, "xp_per_use", 1)
 
-  def xp_per_level(%TypedObject{type: :skill} = skill),
-    do: TypedObject.get_data(skill, "xp_per_level", 100)
+  def xp_per_level(%Entity{type: :skill} = skill),
+    do: get_data(skill, "xp_per_level", 100)
 
-  def point_cost_formula(%TypedObject{type: :skill} = skill),
-    do: TypedObject.get_data(skill, "point_cost_formula", "level")
+  def point_cost_formula(%Entity{type: :skill} = skill),
+    do: get_data(skill, "point_cost_formula", "level")
 
   # =============================================================================
   # Binary Skill Accessors
@@ -118,14 +112,14 @@ defmodule Loka.Content.Skill do
   @doc """
   Returns the point cost to learn a binary skill (1-3).
   """
-  def cost(%TypedObject{type: :skill} = skill),
-    do: TypedObject.get_data(skill, "cost", 1)
+  def cost(%Entity{type: :skill} = skill),
+    do: get_data(skill, "cost", 1)
 
   @doc """
   Returns the governing stat for a binary skill (as atom).
   """
-  def stat(%TypedObject{type: :skill} = skill) do
-    raw = TypedObject.get_data(skill, "stat", "str")
+  def stat(%Entity{type: :skill} = skill) do
+    raw = get_data(skill, "stat", "str")
 
     cond do
       is_atom(raw) -> raw
@@ -134,20 +128,20 @@ defmodule Loka.Content.Skill do
     end
   end
 
-  def lag(%TypedObject{type: :skill} = skill),
-    do: TypedObject.get_data(skill, "lag", 1)
+  def lag(%Entity{type: :skill} = skill),
+    do: get_data(skill, "lag", 1)
 
-  def cooldown(%TypedObject{type: :skill} = skill),
-    do: TypedObject.get_data(skill, "cooldown", 0)
+  def cooldown(%Entity{type: :skill} = skill),
+    do: get_data(skill, "cooldown", 0)
 
-  def mv_cost(%TypedObject{type: :skill} = skill),
-    do: TypedObject.get_data(skill, "mv_cost", 0)
+  def mv_cost(%Entity{type: :skill} = skill),
+    do: get_data(skill, "mv_cost", 0)
 
-  def mana_cost(%TypedObject{type: :skill} = skill),
-    do: TypedObject.get_data(skill, "mana_cost", 0)
+  def mana_cost(%Entity{type: :skill} = skill),
+    do: get_data(skill, "mana_cost", 0)
 
-  def effect(%TypedObject{type: :skill} = skill),
-    do: TypedObject.get_data(skill, "effect", nil)
+  def effect(%Entity{type: :skill} = skill),
+    do: get_data(skill, "effect", nil)
 
   # =============================================================================
   # Classification
@@ -156,9 +150,9 @@ defmodule Loka.Content.Skill do
   @doc """
   Returns true if a skill is binary (has a "cost" field, no leveling).
   """
-  @spec binary?(TypedObject.t()) :: boolean()
-  def binary?(%TypedObject{type: :skill} = skill) do
-    TypedObject.get_data(skill, "cost") != nil
+  @spec binary?(Entity.t()) :: boolean()
+  def binary?(%Entity{type: :skill} = skill) do
+    get_data(skill, "cost") != nil
   end
 
   # =============================================================================
@@ -168,8 +162,8 @@ defmodule Loka.Content.Skill do
   @doc """
   Calculates XP needed for next level (leveled skills).
   """
-  @spec xp_for_level(TypedObject.t(), non_neg_integer()) :: non_neg_integer()
-  def xp_for_level(%TypedObject{type: :skill} = skill, level) do
+  @spec xp_for_level(Entity.t(), non_neg_integer()) :: non_neg_integer()
+  def xp_for_level(%Entity{type: :skill} = skill, level) do
     base = xp_per_level(skill)
     base * level
   end
@@ -177,8 +171,8 @@ defmodule Loka.Content.Skill do
   @doc """
   Calculates skill point cost for a given level (leveled skills).
   """
-  @spec point_cost(TypedObject.t(), non_neg_integer()) :: non_neg_integer()
-  def point_cost(%TypedObject{type: :skill} = skill, level) do
+  @spec point_cost(Entity.t(), non_neg_integer()) :: non_neg_integer()
+  def point_cost(%Entity{type: :skill} = skill, level) do
     formula = point_cost_formula(skill)
 
     case formula do
@@ -191,10 +185,10 @@ defmodule Loka.Content.Skill do
   @doc """
   Calculates total points spent on a leveled skill at a given level.
   """
-  @spec total_points_spent(TypedObject.t(), non_neg_integer()) :: non_neg_integer()
-  def total_points_spent(%TypedObject{type: :skill}, 0), do: 0
+  @spec total_points_spent(Entity.t(), non_neg_integer()) :: non_neg_integer()
+  def total_points_spent(%Entity{type: :skill}, 0), do: 0
 
-  def total_points_spent(%TypedObject{type: :skill} = skill, level) when level > 0 do
+  def total_points_spent(%Entity{type: :skill} = skill, level) when level > 0 do
     Enum.reduce(1..level, 0, fn lvl, acc ->
       acc + point_cost(skill, lvl)
     end)
@@ -205,8 +199,8 @@ defmodule Loka.Content.Skill do
 
   Leveled skill prerequisites are maps with %{"skill" => key, "level" => n}.
   """
-  @spec prerequisites_met?(TypedObject.t(), map()) :: boolean()
-  def prerequisites_met?(%TypedObject{type: :skill} = skill, player_skills)
+  @spec prerequisites_met?(Entity.t(), map()) :: boolean()
+  def prerequisites_met?(%Entity{type: :skill} = skill, player_skills)
       when is_map(player_skills) do
     prereqs = prerequisites(skill)
 
@@ -227,8 +221,8 @@ defmodule Loka.Content.Skill do
 
   Binary skill prerequisites are a list of skill key strings.
   """
-  @spec binary_prerequisites_met?(TypedObject.t(), MapSet.t() | [String.t()]) :: boolean()
-  def binary_prerequisites_met?(%TypedObject{type: :skill} = skill, learned_skills) do
+  @spec binary_prerequisites_met?(Entity.t(), MapSet.t() | [String.t()]) :: boolean()
+  def binary_prerequisites_met?(%Entity{type: :skill} = skill, learned_skills) do
     learned_set =
       case learned_skills do
         %MapSet{} -> learned_skills
@@ -247,8 +241,8 @@ defmodule Loka.Content.Skill do
   Calculates skill effectiveness based on the governing stat.
   Returns a multiplier (1.0 = base at stat 10).
   """
-  @spec effectiveness(TypedObject.t(), map()) :: float()
-  def effectiveness(%TypedObject{type: :skill} = skill, player_stats) do
+  @spec effectiveness(Entity.t(), map()) :: float()
+  def effectiveness(%Entity{type: :skill} = skill, player_stats) do
     stat_key = stat(skill)
     stat_value = Map.get(player_stats, stat_key) || Map.get(player_stats, to_string(stat_key), 10)
     1.0 + (stat_value - 10) / 100.0
@@ -257,8 +251,8 @@ defmodule Loka.Content.Skill do
   @doc """
   Returns the stat bonus for a binary skill (stat / 3).
   """
-  @spec stat_bonus(TypedObject.t(), map()) :: non_neg_integer()
-  def stat_bonus(%TypedObject{type: :skill} = skill, player_stats) do
+  @spec stat_bonus(Entity.t(), map()) :: non_neg_integer()
+  def stat_bonus(%Entity{type: :skill} = skill, player_stats) do
     stat_key = stat(skill)
     stat_value = Map.get(player_stats, stat_key) || Map.get(player_stats, to_string(stat_key), 0)
     div(stat_value, 3)
@@ -267,16 +261,16 @@ defmodule Loka.Content.Skill do
   @doc """
   Checks if player has enough MV to use a binary skill.
   """
-  @spec has_mv?(TypedObject.t(), non_neg_integer()) :: boolean()
-  def has_mv?(%TypedObject{type: :skill} = skill, current_mv) do
+  @spec has_mv?(Entity.t(), non_neg_integer()) :: boolean()
+  def has_mv?(%Entity{type: :skill} = skill, current_mv) do
     current_mv >= mv_cost(skill)
   end
 
   @doc """
   Checks if player has enough Mana to use a binary skill.
   """
-  @spec has_mana?(TypedObject.t(), non_neg_integer()) :: boolean()
-  def has_mana?(%TypedObject{type: :skill} = skill, current_mana) do
+  @spec has_mana?(Entity.t(), non_neg_integer()) :: boolean()
+  def has_mana?(%Entity{type: :skill} = skill, current_mana) do
     current_mana >= mana_cost(skill)
   end
 
@@ -284,13 +278,9 @@ defmodule Loka.Content.Skill do
   # Private Helpers
   # =============================================================================
 
-  defp to_typed_objects(entities) do
-    entities
-    |> Enum.flat_map(fn entity ->
-      case Entity.to_typed_object(entity) do
-        {:ok, typed_object} -> [typed_object]
-        {:error, _} -> []
-      end
-    end)
+  defp get_data(%Entity{} = entity, field, default \\ nil) do
+    data = entity.components["data"] || %{}
+    val = Map.get(data, field)
+    if is_nil(val), do: default, else: val
   end
 end

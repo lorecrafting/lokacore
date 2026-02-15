@@ -111,7 +111,7 @@ defmodule Loka.Content.Validator do
           warnings: [validation_message]
         }
 
-  alias Loka.Engine.{Entity, Entities, TypedObject}
+  alias Loka.Engine.Entities
 
   @type content_type :: :quest | :npc | :room | :storyline
 
@@ -505,7 +505,7 @@ defmodule Loka.Content.Validator do
 
   # Check if NPC is tagged as friendly
   defp is_tagged_friendly?(proto) do
-    tags = Map.get(proto, :tags, []) || []
+    tags = proto.tags || []
     "friendly" in tags or :friendly in tags
   end
 
@@ -513,9 +513,9 @@ defmodule Loka.Content.Validator do
   defp npc_spawns_somewhere?(npc_key) do
     # Get all room prototypes and check their spawns
     Entities.find_all(type: :room, is_prototype: true)
-    |> to_typed_objects_list()
     |> Enum.any?(fn room ->
-      spawns = room.data["spawns"] || []
+      data = room.components["data"] || %{}
+      spawns = data["spawns"] || []
 
       Enum.any?(spawns, fn spawn ->
         spawn_key =
@@ -547,7 +547,6 @@ defmodule Loka.Content.Validator do
 
   # Check if item can be obtained from any source
   defp item_is_obtainable?(item_key) do
-    # Check all sources: loot, shops, crafting, quests, dialogue, room spawns
     item_from_loot?(item_key) or
       item_from_shop?(item_key) or
       item_from_crafting?(item_key) or
@@ -559,11 +558,12 @@ defmodule Loka.Content.Validator do
   # Check if item drops from any NPC
   defp item_from_loot?(item_key) do
     Entities.find_all(type: :npc, is_prototype: true)
-    |> to_typed_objects_list()
     |> Enum.any?(fn npc ->
+      components = npc.components || %{}
+
       loot =
-        get_in(npc.components || %{}, [:loot, :drops]) ||
-          get_in(npc.components || %{}, ["loot", "drops"]) || []
+        get_in(components, [:loot, :drops]) ||
+          get_in(components, ["loot", "drops"]) || []
 
       Enum.any?(loot, fn drop ->
         drop_item = Map.get(drop, "item") || Map.get(drop, :item)
@@ -575,7 +575,6 @@ defmodule Loka.Content.Validator do
   # Check if item is sold in any shop
   defp item_from_shop?(item_key) do
     Entities.find_all(type: :npc, is_prototype: true)
-    |> to_typed_objects_list()
     |> Enum.any?(fn npc ->
       components = npc.components || %{}
 
@@ -600,9 +599,9 @@ defmodule Loka.Content.Validator do
   # Check if item is output of any crafting recipe
   defp item_from_crafting?(item_key) do
     Entities.find_all(type: :recipe, is_prototype: true)
-    |> to_typed_objects_list()
     |> Enum.any?(fn recipe ->
-      outputs = TypedObject.get_data(recipe, "output", [])
+      data = recipe.components["data"] || %{}
+      outputs = data["output"] || []
 
       Enum.any?(outputs, fn out ->
         out_item = Map.get(out, "item") || Map.get(out, :item)
@@ -616,9 +615,9 @@ defmodule Loka.Content.Validator do
   # Check if item is a quest reward
   defp item_from_quest_rewards?(item_key) do
     Entities.find_all(type: :quest, is_prototype: true)
-    |> to_typed_objects_list()
     |> Enum.any?(fn quest ->
-      rewards = TypedObject.get_data(quest, "rewards", %{})
+      data = quest.components["data"] || %{}
+      rewards = data["rewards"] || %{}
       items = Map.get(rewards, "items") || Map.get(rewards, :items) || []
       item_key in items
     end)
@@ -629,7 +628,6 @@ defmodule Loka.Content.Validator do
   # Check if item is given via dialogue action
   defp item_from_dialogue?(item_key) do
     Entities.find_all(type: :npc, is_prototype: true)
-    |> to_typed_objects_list()
     |> Enum.any?(fn npc ->
       dialogue_tree = get_prototype_dialogue_tree(npc)
       dialogue_gives_item?(dialogue_tree, item_key)
@@ -657,9 +655,9 @@ defmodule Loka.Content.Validator do
   # Check if item spawns in any room
   defp item_from_room_spawns?(item_key) do
     Entities.find_all(type: :room, is_prototype: true)
-    |> to_typed_objects_list()
     |> Enum.any?(fn room ->
-      spawns = room.data["spawns"] || []
+      data = room.components["data"] || %{}
+      spawns = data["spawns"] || []
 
       Enum.any?(spawns, fn spawn ->
         spawn_proto = Map.get(spawn, "prototype") || Map.get(spawn, :prototype)
@@ -1245,29 +1243,8 @@ defmodule Loka.Content.Validator do
     end)
   end
 
-  # Look up a prototype by key (any type)
+  # Look up a prototype by key (any type) - returns Entity directly
   defp find_prototype(key) do
-    case Entities.find_one(key: key) do
-      {:ok, entity} ->
-        case Entity.to_typed_object(entity) do
-          {:ok, to} -> {:ok, to}
-          _ -> {:error, :not_found}
-        end
-
-      error ->
-        error
-    end
-  end
-
-  # Convert Entity list to TypedObject list for V1 compat lookups
-  defp to_typed_objects_list(entities) do
-    entities
-    |> Enum.map(fn entity ->
-      case Entity.to_typed_object(entity) do
-        {:ok, to} -> to
-        _ -> nil
-      end
-    end)
-    |> Enum.reject(&is_nil/1)
+    Entities.find_one(key: key)
   end
 end

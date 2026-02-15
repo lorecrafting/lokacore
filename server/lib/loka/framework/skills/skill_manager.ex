@@ -26,7 +26,7 @@ defmodule Loka.Framework.Skills.SkillManager do
   """
 
   alias Loka.Content.Skill, as: ContentSkill
-  alias Loka.Engine.{Entity, TypedObject}
+  alias Loka.Engine.Entity
   alias Loka.Utils.MapHelpers
 
   @default_max_points 100
@@ -197,7 +197,7 @@ defmodule Loka.Framework.Skills.SkillManager do
   # Validation
   # =============================================================================
 
-  defp check_prerequisites(%Entity{} = entity, %TypedObject{} = skill_def) do
+  defp check_prerequisites(%Entity{} = entity, %Entity{} = skill_def) do
     player_skills =
       get_player_skills(entity)
       |> Enum.map(fn {key, data} -> {key, Map.get(data, :level, 0)} end)
@@ -210,7 +210,7 @@ defmodule Loka.Framework.Skills.SkillManager do
     end
   end
 
-  defp check_not_maxed(%TypedObject{} = skill_def, current_level) do
+  defp check_not_maxed(%Entity{} = skill_def, current_level) do
     max = ContentSkill.max_level(skill_def)
 
     if current_level < max do
@@ -220,7 +220,7 @@ defmodule Loka.Framework.Skills.SkillManager do
     end
   end
 
-  defp check_can_afford_point(%Entity{} = entity, %TypedObject{} = skill_def, target_level) do
+  defp check_can_afford_point(%Entity{} = entity, %Entity{} = skill_def, target_level) do
     cost = ContentSkill.point_cost(skill_def, target_level)
     remaining = points_remaining(entity)
 
@@ -233,7 +233,7 @@ defmodule Loka.Framework.Skills.SkillManager do
 
   defp can_afford_next_level?(
          %Entity{} = entity,
-         %TypedObject{} = skill_def,
+         %Entity{} = skill_def,
          current_level
        ) do
     cost = ContentSkill.point_cost(skill_def, current_level + 1)

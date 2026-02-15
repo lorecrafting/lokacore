@@ -55,11 +55,8 @@ defmodule Mix.Tasks.Loka.Test.Storyline do
   use Mix.Task
   use Boundary, classify_to: Loka
 
-  alias Loka.Framework.Storyline.Storyline
   alias Loka.Content
-  alias Loka.Framework.Quest
-  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
-  alias Loka.Engine.WorldLoader
+  alias Loka.Content
   alias Loka.Engine.Schema.EntitySchema
   alias Loka.Testing.Bot.BotSupervisor
   alias Loka.Testing.Bot.Strategies.StorylineRunner
@@ -109,7 +106,7 @@ defmodule Mix.Tasks.Loka.Test.Storyline do
       Mix.shell().info("")
 
       Enum.each(storylines, fn storyline ->
-        quest_count = length(Storyline.all_quests(storyline))
+        quest_count = length(all_storyline_quests(storyline))
         act_count = length(storyline.acts)
 
         Mix.shell().info("• #{storyline.key}")
@@ -230,11 +227,11 @@ defmodule Mix.Tasks.Loka.Test.Storyline do
   defp validate_quests(storyline, results, verbose) do
     if verbose, do: Mix.shell().info("▶ Validating quests...")
 
-    all_quests = Storyline.all_quests(storyline)
+    all_quests = all_storyline_quests(storyline)
 
     quest_results =
       Enum.map(all_quests, fn quest_id ->
-        case Quest.get_quest_definition(quest_id) do
+        case Content.Quest.definition(quest_id) do
           nil ->
             %{
               quest_id: quest_id,
@@ -288,7 +285,9 @@ defmodule Mix.Tasks.Loka.Test.Storyline do
     if verbose, do: Mix.shell().info("▶ Validating quest chain...")
 
     # Check that quest order is valid (no circular dependencies)
-    quest_order = Storyline.quest_order(storyline)
+    quest_order =
+      (storyline.acts || [])
+      |> Enum.flat_map(fn act -> act.quests || [] end)
 
     if verbose do
       Mix.shell().info("  Quest order: #{inspect(quest_order)}")
@@ -307,7 +306,7 @@ defmodule Mix.Tasks.Loka.Test.Storyline do
 
     if storyline.starting_room do
       # Check if prototype exists
-      case TypedObjectLoader.get(storyline.starting_room) do
+      case Loka.Engine.Entities.find_one(key: storyline.starting_room, type: :room) do
         {:error, :not_found} ->
           %{
             results
@@ -334,7 +333,7 @@ defmodule Mix.Tasks.Loka.Test.Storyline do
     Mix.shell().info("")
 
     # Print summary
-    quest_count = length(Storyline.all_quests(results.storyline))
+    quest_count = length(all_storyline_quests(results.storyline))
     act_count = length(results.storyline.acts)
     found_quests = Enum.count(results.quests, & &1.found)
 
@@ -413,7 +412,7 @@ defmodule Mix.Tasks.Loka.Test.Storyline do
     # Spawn world
     Mix.shell().info("▶ Spawning world from #{storyline.starting_room}...")
 
-    case WorldLoader.spawn_world(starting_room: storyline.starting_room) do
+    case Loka.Engine.EntitySeeder.seed() do
       {:ok, stats} ->
         Mix.shell().info(
           "  Spawned #{stats.rooms} rooms, #{stats.npcs} NPCs, #{stats.items} items"
@@ -541,6 +540,13 @@ defmodule Mix.Tasks.Loka.Test.Storyline do
           wait_loop(bot_pid, start_time, timeout, head_mode, last_room)
       end
     end
+  end
+
+  # Derive all quests (main + side) from a storyline struct
+  defp all_storyline_quests(storyline) do
+    main = Enum.flat_map(storyline.acts || [], fn act -> act.quests || [] end)
+    side = storyline.side_quests || []
+    main ++ side
   end
 
   defp exit_code(code) do

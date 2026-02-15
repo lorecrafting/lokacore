@@ -1,19 +1,21 @@
 defmodule LokaWeb.Channels.BuilderCommands.ContentTest do
   use Loka.DataCase, async: false
 
-  alias Loka.TestCleanup
   alias LokaWeb.Channels.BuilderCommands.Content
 
-  # Use a minimal socket stand-in since Content commands only pass it through
-  @socket %{}
+  setup do
+    {:ok, _} = Loka.Engine.EntitySeeder.seed()
 
-  setup_all do
     on_exit(fn ->
-      TestCleanup.cleanup_dialogue_test_files()
+      # Clean up any dialogue files created by tests
+      Loka.TestCleanup.cleanup_dialogue_test_files()
     end)
 
     :ok
   end
+
+  # Use a minimal socket stand-in since Content commands only pass it through
+  @socket %{}
 
   describe "execute(:quest_info, ...)" do
     test "returns quest details for existing quest" do
@@ -56,11 +58,6 @@ defmodule LokaWeb.Channels.BuilderCommands.ContentTest do
 
   describe "execute(:create_dialogue, ...)" do
     test "creates dialogue template for new NPC" do
-      on_exit(fn ->
-        TestCleanup.cleanup_dialogue_test_files()
-        Loka.Engine.TypedObject.Loader.reload()
-      end)
-
       {:ok, text, _socket} =
         Content.execute(:create_dialogue, %{npc_key: "test_create_dlg_npc"}, @socket)
 

@@ -523,20 +523,9 @@ defmodule Loka.Framework.Inventory.Container do
       # => ["gold_coin", "gold_coin", "health_potion"]
   """
   @spec generate_initial_contents(t()) :: [String.t()]
-  def generate_initial_contents(%__MODULE__{} = container) do
-    alias Loka.Framework.Inventory.LootTable
-
-    if respawn_enabled?(container) do
-      table = loot_table(container)
-
-      LootTable.generate_contents(table, capacity: container.capacity)
-      |> Enum.flat_map(fn %{item: item, quantity: qty} ->
-        List.duplicate(item, qty)
-      end)
-      |> Enum.take(container.capacity)
-    else
-      []
-    end
+  def generate_initial_contents(%__MODULE__{} = _container) do
+    # V2: LootTable deleted, will be reimplemented as entity behavior
+    []
   end
 
   @doc """

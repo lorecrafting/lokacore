@@ -16,7 +16,6 @@ defmodule Loka.Game.Actions.Container do
   alias Loka.Game.Actions.{Context, Result}
   alias Loka.Engine.Entity
   alias Loka.Framework.Inventory.Container
-  alias Loka.Framework.Inventory.ContainerRespawn
   alias Loka.Engine.{Entities, Spawner}
 
   @doc """
@@ -99,15 +98,7 @@ defmodule Loka.Game.Actions.Container do
               # Update container in database
               update_container_component(open_container.entity_id, updated_container)
 
-              # Schedule respawn if needed
-              if Container.state(updated_container) == :empty and
-                   Container.respawn_enabled?(updated_container) do
-                Logger.debug(
-                  "[CONTAINER] Scheduling respawn: entity_id=#{open_container.entity_id}"
-                )
-
-                ContainerRespawn.schedule(open_container.entity_id)
-              end
+              # ContainerRespawn removed in V2 — respawn handled by zone reset
 
               item_name = item_entity.short_desc || item_entity.key || "something"
 

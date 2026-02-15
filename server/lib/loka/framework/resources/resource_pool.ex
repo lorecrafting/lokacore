@@ -38,7 +38,7 @@ defmodule Loka.Framework.Resources.ResourcePool do
   require Logger
 
   alias Loka.Content.Resource, as: ContentResource
-  alias Loka.Engine.TypedObject
+  alias Loka.Engine.Entity
   alias Loka.Framework.Resources.FormulaEvaluator
 
   @pool_table :loka_resource_pools
@@ -408,7 +408,7 @@ defmodule Loka.Framework.Resources.ResourcePool do
   # Helpers
   # =============================================================================
 
-  defp calculate_max(%TypedObject{} = resource, stats) do
+  defp calculate_max(%Entity{} = resource, stats) do
     formula = ContentResource.max_formula(resource)
     FormulaEvaluator.evaluate!(formula, stats, 100)
   end

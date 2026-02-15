@@ -13,18 +13,6 @@ defmodule Loka.TestCleanup do
         end)
         :ok
       end
-
-  ## Draft file cleanup
-
-  Builder commands now write to `priv/world/drafts/` subdirectories. Use `cleanup_draft_files/1`
-  to remove test-created draft files, or `cleanup_all_draft_files/0` for a full sweep.
-
-      setup do
-        on_exit(fn ->
-          TestCleanup.cleanup_all_draft_files()
-        end)
-        :ok
-      end
   """
 
   # Published content directories
@@ -50,20 +38,11 @@ defmodule Loka.TestCleanup do
   @doc """
   Cleans up test files matching the given prefixes for a specific entity type.
   Cleans both published and draft directories.
-
-  ## Examples
-
-      # Clean up room files starting with "test_", "tool_", etc.
-      cleanup_test_files(:room, ~w(test_ tool_ update_))
-
-      # Clean up all test NPCs
-      cleanup_test_files(:npc, ~w(test_ tool_ entity))
   """
   def cleanup_test_files(entity_type, prefixes) when is_list(prefixes) do
     dir = dir_for_type(entity_type)
     cleanup_files_in_dir(dir, prefixes)
 
-    # Also clean the draft counterpart
     draft_dir = draft_dir_for_type(entity_type)
     cleanup_files_in_dir(draft_dir, prefixes)
   end
@@ -82,21 +61,12 @@ defmodule Loka.TestCleanup do
 
   @doc """
   Removes all non-.gitkeep files from the given draft directory.
-  Use for draft-only content types (zones, cutscenes, storylines).
-
-  ## Examples
-
-      cleanup_draft_files(:zone)
-      cleanup_draft_files(:cutscene)
   """
   def cleanup_draft_files(draft_type) do
     dir = draft_only_dir(draft_type)
     remove_all_test_files_in_dir(dir)
   end
 
-  @doc """
-  Cleans up room files with common test prefixes used by RoomManager and ToolExecutor tests.
-  """
   def cleanup_room_test_files do
     cleanup_test_files(:room, [
       "test_room_",
@@ -136,7 +106,6 @@ defmodule Loka.TestCleanup do
       "up_room",
       "down_room",
       "west_room",
-      # PreviewManager test prefixes
       "accept_room_",
       "mark_test",
       "reject_test",
@@ -147,16 +116,11 @@ defmodule Loka.TestCleanup do
       "u1r1",
       "u2r1",
       "room_",
-      # E2E test prefixes
       "e2e_test_",
-      # Publishing test prefixes
       "test_cascade_room_"
     ])
   end
 
-  @doc """
-  Cleans up NPC files with common test prefixes.
-  """
   def cleanup_npc_test_files do
     cleanup_test_files(:npc, [
       "test_npc_",
@@ -170,41 +134,24 @@ defmodule Loka.TestCleanup do
       "validate_test",
       "e2e_test_",
       "new_npc_",
-      # PreviewManager test prefixes
       "preview_npc"
     ])
   end
 
-  @doc """
-  Cleans up item files with common test prefixes.
-  """
   def cleanup_item_test_files do
-    cleanup_test_files(:item, [
-      "test_item_",
-      "tool_item_",
-      # E2E test prefixes
-      "e2e_test_"
-    ])
+    cleanup_test_files(:item, ["test_item_", "tool_item_", "e2e_test_"])
   end
 
-  @doc """
-  Cleans up quest files with common test prefixes.
-  """
   def cleanup_quest_test_files do
     cleanup_test_files(:quest, [
       "test_lua_",
       "tool_quest_",
       "minimal_quest_",
-      # QuestManager test prefixes
       "test_quest_",
-      # Publishing test prefixes
       "pub_test"
     ])
   end
 
-  @doc """
-  Cleans up script files with common test prefixes.
-  """
   def cleanup_script_test_files do
     cleanup_test_files(:script, [
       "test_script_",
@@ -215,41 +162,25 @@ defmodule Loka.TestCleanup do
       "update_name_",
       "update_source_",
       "delete_test_",
-      # BuilderCRUD test prefixes
       "test_crud_"
     ])
   end
 
-  @doc """
-  Cleans up dialogue files with common test prefixes.
-  """
   def cleanup_dialogue_test_files do
     cleanup_test_files(:dialogue, [
       "tool_dialogue_",
-      # DialogueManager test prefixes
       "test_dlg_",
-      # Content test prefixes
       "test_create_dlg_"
     ])
   end
 
-  @doc """
-  Cleans up all draft files across all draft-only content types
-  (zones, cutscenes, storylines, invalid_types).
-  """
   def cleanup_all_draft_files do
     cleanup_draft_files(:zone)
     cleanup_draft_files(:cutscene)
     cleanup_draft_files(:storyline)
-
-    # Remove the invalid_types test directory contents
     remove_all_test_files_in_dir(@draft_invalid_types_dir)
   end
 
-  @doc """
-  Cleans up all test files across all entity types (published + draft).
-  This is the most thorough cleanup and should be used as a safety net.
-  """
   def cleanup_all_test_files do
     cleanup_room_test_files()
     cleanup_npc_test_files()
@@ -258,16 +189,9 @@ defmodule Loka.TestCleanup do
     cleanup_script_test_files()
     cleanup_dialogue_test_files()
     cleanup_all_draft_files()
-
-    # Also clean up the invalid_types test directory if it exists (published side)
     File.rm_rf("priv/world/prototypes/invalid_types")
   end
 
-  @doc """
-  Removes ALL non-.gitkeep YAML files from every draft subdirectory.
-  Intended as a global safety net in test_helper.exs to catch any
-  leftover artifacts regardless of which test created them.
-  """
   def sweep_all_draft_directories do
     draft_dirs = [
       @draft_rooms_dir,
@@ -319,11 +243,7 @@ defmodule Loka.TestCleanup do
     case File.ls(dir) do
       {:ok, files} ->
         test_files = Enum.reject(files, &(&1 == ".gitkeep"))
-
-        Enum.each(test_files, fn file ->
-          File.rm(Path.join(dir, file))
-        end)
-
+        Enum.each(test_files, fn file -> File.rm(Path.join(dir, file)) end)
         length(test_files)
 
       {:error, _} ->

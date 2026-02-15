@@ -133,8 +133,7 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
   end
 
   def handle_ai_event({:ai_done}, socket) do
-    # Reload TypedObject registry once after all tool calls in this turn
-    Loka.Engine.TypedObject.Loader.reload()
+    # No ETS registry reload needed in V2
     push(socket, "ai_stream_done", %{})
     {:noreply, socket}
   end

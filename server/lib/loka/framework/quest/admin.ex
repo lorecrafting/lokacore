@@ -16,7 +16,8 @@ defmodule Loka.Framework.Quest.Admin do
   require Logger
 
   alias Loka.Engine.{Entity, Entities}
-  alias Loka.Framework.Quest.{Progress, Definitions}
+  alias Loka.Content
+  alias Loka.Framework.Quest.Progress
   alias Loka.Admin.GameLog
   alias Loka.Accounts
 
@@ -67,7 +68,7 @@ defmodule Loka.Framework.Quest.Admin do
         active =
           active_quests
           |> Enum.map(fn {quest_id, progress} ->
-            quest_def = Definitions.get_quest_definition(quest_id)
+            quest_def = Content.Quest.definition(quest_id)
             objectives_list = format_objectives(quest_def, progress)
 
             %{
@@ -132,7 +133,7 @@ defmodule Loka.Framework.Quest.Admin do
         {:error, :no_character}
 
       character ->
-        case Definitions.get_quest_definition(quest_id) do
+        case Content.Quest.definition(quest_id) do
           nil ->
             {:error, {:quest_not_found, quest_id}}
 
@@ -188,7 +189,7 @@ defmodule Loka.Framework.Quest.Admin do
         {:error, :no_character}
 
       character ->
-        quest_def = Definitions.get_quest_definition(quest_id)
+        quest_def = Content.Quest.definition(quest_id)
 
         if quest_def do
           # Complete each objective in sequence
@@ -549,7 +550,7 @@ defmodule Loka.Framework.Quest.Admin do
   Lists all registered quests.
   """
   def list_all_quests do
-    Definitions.all_quest_definitions()
+    Content.Quest.all_definitions()
     |> Enum.map(fn quest ->
       %{
         id: quest.id,

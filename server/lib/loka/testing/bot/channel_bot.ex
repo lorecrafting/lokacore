@@ -580,8 +580,7 @@ defmodule Loka.Testing.Bot.ChannelBot do
     active = quests[:active] || quests["active"] || %{}
 
     # Get quest definition to build proper objective structure
-    alias Loka.Framework.Quest
-    quest_def = Quest.get_quest_definition(quest_id)
+    quest_def = Loka.Content.Quest.definition(quest_id)
 
     objectives_map =
       if quest_def do

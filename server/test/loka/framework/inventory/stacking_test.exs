@@ -3,10 +3,6 @@ defmodule Loka.Framework.Inventory.StackingTest do
 
   alias Loka.Framework.Inventory.Stacking
 
-  setup do
-    :ok
-  end
-
   # =============================================================================
   # group_items/1 Tests
   # =============================================================================
@@ -170,6 +166,15 @@ defmodule Loka.Framework.Inventory.StackingTest do
   # =============================================================================
 
   describe "get_stack_info/1" do
+    setup do
+      if seeder_pid = Process.whereis(Loka.Engine.EntitySeeder) do
+        Ecto.Adapters.SQL.Sandbox.allow(Loka.Repo, self(), seeder_pid)
+      end
+
+      {:ok, _} = Loka.Engine.EntitySeeder.seed()
+      :ok
+    end
+
     test "returns stack info for existing prototype" do
       # offering_incense has stackable: true, max_stack: 5
       info = Stacking.get_stack_info("offering_incense")
@@ -222,6 +227,15 @@ defmodule Loka.Framework.Inventory.StackingTest do
   # =============================================================================
 
   describe "group_items_with_details/1" do
+    setup do
+      if seeder_pid = Process.whereis(Loka.Engine.EntitySeeder) do
+        Ecto.Adapters.SQL.Sandbox.allow(Loka.Repo, self(), seeder_pid)
+      end
+
+      {:ok, _} = Loka.Engine.EntitySeeder.seed()
+      :ok
+    end
+
     test "returns detailed stack info for known items" do
       inventory = ["travelers_staff", "travelers_staff", "offering_incense"]
 

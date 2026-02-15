@@ -59,7 +59,6 @@ defmodule Loka.Testing.Bot.BotActions do
   alias Loka.Framework.Player.GameState
   alias Loka.Framework.World.RoomLoader
   alias Loka.Framework.Dialogue
-  alias Loka.Utils.MapHelpers
 
   @type bot_state :: %{
           id: String.t(),
@@ -312,23 +311,24 @@ defmodule Loka.Testing.Bot.BotActions do
 
   # Accepts a quest in-memory without DB persist
   defp accept_quest_in_memory(game_state, quest_id) do
-    alias Loka.Framework.Quest.Definitions
-
     quests = game_state.quests || %{}
     active = Map.get(quests, "active", %{})
 
     if Map.has_key?(active, quest_id) do
       {:error, :already_active}
     else
-      case Definitions.get_quest_definition(quest_id) do
-        nil ->
-          {:error, :quest_not_found}
+      # V2: Use Content.Quest to look up quest definition
+      case Loka.Content.Quest.get(quest_id) do
+        {:ok, quest_typed_obj} ->
+          # Initialize objectives from Content.Quest
+          raw_objectives = Loka.Content.Quest.objectives(quest_typed_obj)
 
-        quest_def ->
-          # Initialize objectives
           objectives =
-            quest_def.objectives
-            |> Enum.map(fn obj -> {obj.id, %{"completed" => false, "progress" => 0}} end)
+            raw_objectives
+            |> Enum.map(fn obj ->
+              obj_id = Map.get(obj, "id") || Map.get(obj, :id, "unknown")
+              {obj_id, %{"completed" => false, "progress" => 0}}
+            end)
             |> Map.new()
 
           quest_progress = %{
@@ -340,6 +340,9 @@ defmodule Loka.Testing.Bot.BotActions do
           new_quests = Map.put(quests, "active", new_active)
 
           update_bot_game_state(game_state, %{quests: new_quests})
+
+        {:error, _} ->
+          {:error, :quest_not_found}
       end
     end
   end
@@ -405,26 +408,29 @@ defmodule Loka.Testing.Bot.BotActions do
   # Track talk objective in-memory without DB persist
   # Similar to QuestListeners.check_talk but doesn't persist
   defp check_talk_in_memory(game_state, npc_key, dialogue_topic) when is_binary(npc_key) do
-    alias Loka.Framework.Quest.Definitions
-
     quests = game_state.quests || %{}
     active = Map.get(quests, "active", %{})
 
-    # Find matching talk objectives in active quests
+    # Find matching talk objectives in active quests using Content.Quest
     updated_active =
       Enum.reduce(active, active, fn {quest_id, quest_progress}, acc ->
-        case Definitions.get_quest_definition(quest_id) do
-          nil ->
+        case Loka.Content.Quest.get(quest_id) do
+          {:error, _} ->
             acc
 
-          quest_def ->
+          {:ok, quest_typed_obj} ->
+            raw_objectives = Loka.Content.Quest.objectives(quest_typed_obj)
+
             # Find talk objectives that match this NPC
             matching_objectives =
-              Enum.filter(quest_def.objectives, fn obj ->
-                obj.type == :talk and
-                  obj.target_id == npc_key and
-                  (is_nil(obj.dialogue_topic) or obj.dialogue_topic == "" or
-                     obj.dialogue_topic == dialogue_topic)
+              Enum.filter(raw_objectives, fn obj ->
+                obj_type = Map.get(obj, "type") || Map.get(obj, :type)
+                obj_target = Map.get(obj, "target_id") || Map.get(obj, :target_id)
+                obj_topic = Map.get(obj, "dialogue_topic") || Map.get(obj, :dialogue_topic)
+
+                to_string(obj_type) == "talk" and
+                  obj_target == npc_key and
+                  (is_nil(obj_topic) or obj_topic == "" or obj_topic == dialogue_topic)
               end)
 
             # Update matching objectives
@@ -433,12 +439,13 @@ defmodule Loka.Testing.Bot.BotActions do
 
               updated_objectives =
                 Enum.reduce(matching_objectives, objectives, fn obj, obj_acc ->
-                  obj_data = Map.get(obj_acc, obj.id, %{})
+                  obj_id = Map.get(obj, "id") || Map.get(obj, :id)
+                  obj_data = Map.get(obj_acc, obj_id, %{})
 
                   if Map.get(obj_data, "completed", false) do
                     obj_acc
                   else
-                    Map.put(obj_acc, obj.id, %{
+                    Map.put(obj_acc, obj_id, %{
                       "completed" => true,
                       "progress" => 1
                     })
@@ -937,139 +944,20 @@ defmodule Loka.Testing.Bot.BotActions do
   # Gathering
   # =============================================================================
 
-  defp execute_gather(node_key, bot_state) do
-    game_state = bot_state.game_state
-    room = bot_state.room
-
-    if is_nil(room) do
-      {:error, :no_room}
-    else
-      alias Loka.Framework.Gathering
-
-      case Gathering.gather(game_state, room, node_key) do
-        {:ok, result} ->
-          # Add gathered items to inventory
-          updated_game_state =
-            Enum.reduce(result.items, game_state, fn %{item: item_key, quantity: qty},
-                                                     acc_state ->
-              add_items_to_inventory(acc_state, item_key, qty)
-            end)
-
-          # Apply XP if any
-          updated_game_state =
-            if result.xp do
-              apply_gathering_xp(updated_game_state, result.xp)
-            else
-              updated_game_state
-            end
-
-          Logger.debug(
-            "Bot #{bot_state.id}: Gathered from #{node_key} - #{length(result.items)} items"
-          )
-
-          {:ok, %{bot_state | game_state: updated_game_state}}
-
-        {:error, reason} ->
-          Logger.debug("Bot #{bot_state.id}: Gathering failed - #{inspect(reason)}")
-          {:error, reason}
-      end
-    end
-  end
-
-  defp add_items_to_inventory(game_state, item_key, quantity) do
-    # Spawn items and add to inventory
-    inventory = game_state.inventory || []
-
-    new_items =
-      Enum.reduce(1..quantity, [], fn _, acc ->
-        case Spawner.spawn(item_key) do
-          {:ok, item} -> [item.id | acc]
-          {:error, _} -> acc
-        end
-      end)
-
-    new_inventory = inventory ++ new_items
-
-    case update_bot_game_state(game_state, %{inventory: new_inventory}) do
-      {:ok, updated} -> updated
-      _ -> game_state
-    end
-  end
-
-  defp apply_gathering_xp(game_state, xp_reward) do
-    # xp_reward is a map like %{skill: "herbalism", amount: 10}
-    skill = MapHelpers.get_flexible(xp_reward, :skill, nil)
-    amount = MapHelpers.get_flexible(xp_reward, :amount, 0)
-
-    if skill && amount > 0 do
-      skills = game_state.stats[:skills] || %{}
-      current_xp = Map.get(skills, skill, 0)
-      new_skills = Map.put(skills, skill, current_xp + amount)
-      stats = Map.put(game_state.stats || %{}, :skills, new_skills)
-
-      case update_bot_game_state(game_state, %{stats: stats}) do
-        {:ok, updated} -> updated
-        _ -> game_state
-      end
-    else
-      game_state
-    end
+  defp execute_gather(_node_key, bot_state) do
+    # Gathering module removed in V2 — stub for bot testing
+    Logger.debug("Bot #{bot_state.id}: Gathering not available (removed in V2)")
+    {:error, :not_available}
   end
 
   # =============================================================================
   # Crafting
   # =============================================================================
 
-  defp execute_craft(recipe_key, _tool_id, bot_state) do
-    game_state = bot_state.game_state
-    room = bot_state.room
-
-    alias Loka.Framework.Crafting
-
-    case Crafting.craft(game_state, recipe_key, room: room) do
-      {:ok, state_after_consume, result} ->
-        # Add crafted items to inventory
-        updated_game_state =
-          Enum.reduce(result.items, state_after_consume, fn %{item: item_key, quantity: qty},
-                                                            acc_state ->
-            add_items_to_inventory(acc_state, item_key, qty)
-          end)
-
-        # Apply XP if successful
-        updated_game_state =
-          if result.success && result.xp do
-            apply_crafting_xp(updated_game_state, result.xp)
-          else
-            updated_game_state
-          end
-
-        Logger.debug("Bot #{bot_state.id}: Crafted #{recipe_key} - success: #{result.success}")
-        {:ok, %{bot_state | game_state: updated_game_state}}
-
-      {:error, reason} ->
-        Logger.debug("Bot #{bot_state.id}: Crafting failed - #{inspect(reason)}")
-        {:error, reason}
-    end
-  end
-
-  defp apply_crafting_xp(game_state, xp_reward) do
-    # xp_reward is a map like %{skill: "alchemy", amount: 15}
-    skill = MapHelpers.get_flexible(xp_reward, :skill, nil)
-    amount = MapHelpers.get_flexible(xp_reward, :amount, 0)
-
-    if skill && amount > 0 do
-      skills = game_state.stats[:skills] || %{}
-      current_xp = Map.get(skills, skill, 0)
-      new_skills = Map.put(skills, skill, current_xp + amount)
-      stats = Map.put(game_state.stats || %{}, :skills, new_skills)
-
-      case update_bot_game_state(game_state, %{stats: stats}) do
-        {:ok, updated} -> updated
-        _ -> game_state
-      end
-    else
-      game_state
-    end
+  defp execute_craft(_recipe_key, _tool_id, bot_state) do
+    # V2: Crafting system deleted, will be reimplemented as entity behavior
+    Logger.debug("Bot #{bot_state.id}: Crafting not yet available in V2")
+    {:error, "Crafting is not yet available."}
   end
 
   # =============================================================================

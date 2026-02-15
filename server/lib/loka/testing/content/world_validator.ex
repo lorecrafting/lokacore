@@ -36,7 +36,6 @@ defmodule Loka.Testing.Content.WorldValidator do
   require Logger
 
   alias Loka.Engine.{Directions, Entities}
-  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
 
   @type validation_result :: %{
           rooms_checked: non_neg_integer(),
@@ -78,7 +77,7 @@ defmodule Loka.Testing.Content.WorldValidator do
 
     # Get all room prototypes (excluding templates)
     all_rooms =
-      TypedObjectLoader.list_by_type(:entity, :room)
+      Entities.find_all(type: :room, is_prototype: true)
       |> Enum.reject(&is_template?/1)
 
     all_room_keys = MapSet.new(Enum.map(all_rooms, & &1.key))
@@ -190,7 +189,7 @@ defmodule Loka.Testing.Content.WorldValidator do
   # =============================================================================
 
   defp bfs_rooms(starting_key, valid_rooms) do
-    case TypedObjectLoader.get(starting_key) do
+    case Entities.find_one(key: starting_key) do
       {:error, :not_found} ->
         {MapSet.new(), [{:broken_exit, "starting_point", "start", starting_key}]}
 
@@ -212,7 +211,7 @@ defmodule Loka.Testing.Content.WorldValidator do
         if MapSet.member?(visited, room_key) do
           do_bfs(queue, visited, errors, valid_rooms)
         else
-          case TypedObjectLoader.get(room_key) do
+          case Entities.find_one(key: room_key) do
             {:error, :not_found} ->
               # This shouldn't happen if we're only queuing valid rooms
               do_bfs(queue, MapSet.put(visited, room_key), errors, valid_rooms)
@@ -258,7 +257,7 @@ defmodule Loka.Testing.Content.WorldValidator do
       exits = get_exits(room)
 
       Enum.flat_map(exits, fn {direction, dest_key} ->
-        case TypedObjectLoader.get(dest_key) do
+        case Entities.find_one(key: dest_key) do
           {:error, :not_found} ->
             []
 
@@ -300,7 +299,7 @@ defmodule Loka.Testing.Content.WorldValidator do
 
     # Check that all exit destinations exist
     Enum.flat_map(exits, fn exit ->
-      dest_id = get_in(exit.attributes || %{}, ["destination_id"])
+      dest_id = get_in(exit.components || %{}, ["exit", "destination_id"])
 
       if dest_id do
         case Entities.get_entity(dest_id) do
@@ -317,21 +316,27 @@ defmodule Loka.Testing.Content.WorldValidator do
   # Private - Helpers
   # =============================================================================
 
-  defp get_exits(%{data: %{"exits" => exits}}) when is_map(exits) do
-    Enum.map(exits, fn
-      {dir, dest} when is_binary(dest) -> {to_string(dir), dest}
-      {dir, %{"destination" => dest}} -> {to_string(dir), dest}
-      {dir, %{destination: dest}} -> {to_string(dir), dest}
-      {dir, _} -> {to_string(dir), nil}
-    end)
-    |> Enum.reject(fn {_, dest} -> is_nil(dest) end)
-  end
+  defp get_exits(proto) do
+    components = proto.components || %{}
+    exits = components["exits"] || %{}
 
-  defp get_exits(_), do: []
+    if is_map(exits) do
+      Enum.map(exits, fn
+        {dir, dest} when is_binary(dest) -> {to_string(dir), dest}
+        {dir, %{"destination" => dest}} -> {to_string(dir), dest}
+        {dir, %{destination: dest}} -> {to_string(dir), dest}
+        {dir, _} -> {to_string(dir), nil}
+      end)
+      |> Enum.reject(fn {_, dest} -> is_nil(dest) end)
+    else
+      []
+    end
+  end
 
   # Check if a prototype is a template (should be excluded from validation)
   defp is_template?(proto) do
-    is_template = Map.get(proto.data, :is_template) || Map.get(proto.data, "is_template")
+    components = proto.components || %{}
+    is_template = components["is_template"]
     is_template == true or String.starts_with?(proto.key || "", "base_")
   end
 
@@ -394,12 +399,12 @@ defmodule Loka.Testing.Content.WorldValidator do
   def validate_wander_behaviors(opts \\ []) do
     # Get all NPC prototypes
     all_npcs =
-      TypedObjectLoader.list_by_type(:entity, :npc)
+      Entities.find_all(type: :npc, is_prototype: true)
       |> Enum.reject(&is_template?/1)
 
     # Get all room prototypes for validation
     all_room_keys =
-      TypedObjectLoader.list_by_type(:entity, :room)
+      Entities.find_all(type: :room, is_prototype: true)
       |> Enum.reject(&is_template?/1)
       |> Enum.map(& &1.key)
       |> MapSet.new()
@@ -497,7 +502,7 @@ defmodule Loka.Testing.Content.WorldValidator do
   # Build adjacency map of room connections
   defp build_room_graph(room_keys) do
     Enum.reduce(room_keys, %{}, fn room_key, graph ->
-      case TypedObjectLoader.get(room_key) do
+      case Entities.find_one(key: room_key) do
         {:ok, proto} ->
           exits = get_exits(proto)
           neighbors = Enum.map(exits, fn {_dir, dest} -> dest end)
@@ -528,10 +533,10 @@ defmodule Loka.Testing.Content.WorldValidator do
 
   # Get allowed_rooms from wander config
   defp get_wander_allowed_rooms(npc) do
-    attrs = npc.attributes || %{}
-    behavior_config = attrs["behavior_config"] || attrs[:behavior_config] || %{}
-    wander_config = behavior_config["wander"] || behavior_config[:wander] || %{}
-    wander_config["allowed_rooms"] || wander_config[:allowed_rooms] || []
+    components = npc.components || %{}
+    behavior_config = components["behavior_config"] || %{}
+    wander_config = behavior_config["wander"] || %{}
+    wander_config["allowed_rooms"] || []
   end
 
   # Check if allowed_rooms form a connected subgraph
@@ -671,7 +676,7 @@ defmodule Loka.Testing.Content.WorldValidator do
     # Get the prototype for this entity (using the entity's key)
     prototype_key = get_prototype_key(entity)
 
-    case TypedObjectLoader.get(prototype_key) do
+    case Entities.find_one(key: prototype_key) do
       {:error, :not_found} ->
         # Prototype doesn't exist - that's a different kind of error
         {errors, warnings}

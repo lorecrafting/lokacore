@@ -7,11 +7,9 @@
 
 alias Loka.Engine.Entity
 alias Loka.Engine.Entities
-alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
 alias Loka.Engine.Spawner
 
-# Ensure prototypes are loaded
-TypedObjectLoader.reload()
+# In V2, prototypes are seeded as entities in the database via EntitySeeder
 
 IO.puts("\n=== Entity System Benchmarks ===\n")
 

@@ -7,8 +7,7 @@ defmodule Loka.Framework.Quest.TimedObjectivesTest do
   use Loka.DataCase, async: false
 
   alias Loka.Framework.Quest.TimerManager
-  alias Loka.Framework.Quest.Definitions
-  alias Loka.Framework.Quest.Definitions.Objective
+  alias Loka.Content
 
   import Loka.EngineFixtures
 
@@ -62,7 +61,7 @@ defmodule Loka.Framework.Quest.TimedObjectivesTest do
   describe "accepting quests with timed objectives" do
     test "starts timer when accepting quest with timed objective", %{player_id: player_id} do
       # Get quest definition from DB via Definitions
-      quest = Definitions.get_quest_definition("escape_quest")
+      quest = Content.Quest.definition("escape_quest")
       assert quest != nil
       assert quest.id == "escape_quest"
 
@@ -91,7 +90,7 @@ defmodule Loka.Framework.Quest.TimedObjectivesTest do
     end
 
     test "only timed objectives get timers", %{player_id: player_id} do
-      quest = Definitions.get_quest_definition("mixed_quest")
+      quest = Content.Quest.definition("mixed_quest")
       assert quest != nil
 
       # Find timed and normal objectives
@@ -187,9 +186,9 @@ defmodule Loka.Framework.Quest.TimedObjectivesTest do
     end
   end
 
-  describe "Definitions.Objective struct" do
-    test "objective struct includes time_limit field" do
-      obj = %Objective{
+  describe "objective map structure" do
+    test "objective map includes time_limit field" do
+      obj = %{
         id: "test",
         type: :go_to,
         target_id: "room",
@@ -201,10 +200,11 @@ defmodule Loka.Framework.Quest.TimedObjectivesTest do
     end
 
     test "time_limit defaults to nil" do
-      obj = %Objective{
+      obj = %{
         id: "test",
         type: :go_to,
         target_id: "room",
+        time_limit: nil,
         description: "Test"
       }
 

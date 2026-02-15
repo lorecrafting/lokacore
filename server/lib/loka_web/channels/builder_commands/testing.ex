@@ -8,7 +8,8 @@ defmodule LokaWeb.Channels.BuilderCommands.Testing do
 
   alias Loka.Engine.Spawner
   alias Loka.Framework.Player.GameState, as: PlayerGameState
-  alias Loka.Framework.{Inventory, Quest}
+  alias Loka.Framework.Inventory
+  alias Loka.Framework.Quest
   alias Loka.Framework.World.Atmosphere
   alias LokaWeb.Channels.RoomHelpers
   alias LokaWeb.Channels.GameChannel.Serializers
@@ -167,7 +168,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Testing do
 
   def execute(:quests, _params, socket) do
     game_state = socket.assigns.game_state
-    active = Quest.get_active_quests(game_state)
+    active = Quest.Progress.get_active_quests(game_state)
     completed = Quest.Progress.get_completed_quests(game_state)
 
     active_lines =

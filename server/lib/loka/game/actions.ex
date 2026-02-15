@@ -57,7 +57,8 @@ defmodule Loka.Game.Actions do
 
   alias Loka.Game.Actions.{Context, Result}
   alias Loka.Framework.World.{RoomLoader, Atmosphere}
-  alias Loka.Framework.{Inventory, Equipment, Quest}
+  alias Loka.Framework.{Inventory, Equipment}
+  alias Loka.Framework.Quest.Progress, as: Quest
   alias Loka.Framework.Actions.Resolver, as: ActionResolver
   alias Loka.Engine.{Entity, Entities, Hooks}
   alias LokaWeb.Channels.GameChannel.Serializers

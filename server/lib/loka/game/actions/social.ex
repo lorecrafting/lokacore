@@ -13,8 +13,7 @@ defmodule Loka.Game.Actions.Social do
 
   alias Loka.Game.Actions.{Context, Result}
   alias Loka.Engine.Entity
-  alias Loka.Engine.SocialLoader
-  alias Loka.Engine.SocialSubstitution
+  alias Loka.Engine.{Entities, SocialSubstitution}
 
   @valid_moods ~w(neutral cheerful melancholy fierce distracted formal playful weary)
 
@@ -24,7 +23,7 @@ defmodule Loka.Game.Actions.Social do
   @spec emote(Context.t(), String.t(), String.t() | nil) ::
           {:ok, Result.t()} | {:error, String.t()}
   def emote(ctx, emote_key, target_id) do
-    case SocialLoader.get(emote_key) do
+    case Entities.find_one(key: emote_key, type: :social) do
       {:ok, social} ->
         if target_id do
           emote_with_target(ctx, social, emote_key, target_id)

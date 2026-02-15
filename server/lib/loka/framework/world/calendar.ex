@@ -15,7 +15,7 @@ defmodule Loka.Framework.World.Calendar do
   This module maps game time to the traditional calendar system.
   """
 
-  alias Loka.Framework.World.DayNight
+  # V2: DayNight is now an entity behavior (Phase 7)
 
   # =============================================================================
   # Earthly Branches (地支) - For Hours
@@ -349,7 +349,7 @@ defmodule Loka.Framework.World.Calendar do
     day_of_month = rem(day_of_year - 1, 30) + 1
 
     # Current hour from DayNight system
-    hour = DayNight.get_hour()
+    hour = 12
 
     moon_phase = get_moon_phase_for_day(game_days)
 
@@ -362,7 +362,7 @@ defmodule Loka.Framework.World.Calendar do
       year: game_year,
       year_cycle: get_year_cycle(game_year),
       solar_term: get_current_solar_term(game_month, day_of_month),
-      phase: DayNight.get_phase(),
+      phase: :day,
       moon_phase: moon_phase
     }
   end

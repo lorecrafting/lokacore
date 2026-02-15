@@ -60,13 +60,8 @@ defmodule Loka.Behaviors.Wander do
   end
 
   defp get_current_phase do
-    alias Loka.Framework.World.DayNight
-
-    if Process.whereis(DayNight) do
-      DayNight.get_phase()
-    else
-      :day
-    end
+    # DayNight removed in V2 — always report :day
+    :day
   end
 
   defp roll_move_chance?(config) do

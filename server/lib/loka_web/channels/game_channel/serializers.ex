@@ -214,18 +214,8 @@ defmodule LokaWeb.Channels.GameChannel.Serializers do
   Includes time phase, weather, moon, and room-specific visual info.
   """
   def serialize_visual_state(opts \\ []) do
-    alias Loka.Framework.World.DayNight
-    alias Loka.Framework.World.Weather
-    alias Loka.Framework.World.Calendar
-
     room = Keyword.get(opts, :room)
     player = Keyword.get(opts, :player)
-
-    {hour, minute} = DayNight.get_time()
-    phase = DayNight.get_phase()
-    light_level = DayNight.get_light_level()
-    weather = Weather.get_weather()
-    moon = Calendar.get_moon_phase()
 
     # Get player's light source from equipped items
     player_light_source = get_player_light_source(player)
@@ -237,18 +227,18 @@ defmodule LokaWeb.Channels.GameChannel.Serializers do
     biome = get_room_biome(room)
 
     %{
-      # Time information
-      phase: phase,
-      hour: hour,
-      minute: minute,
-      light_level: light_level,
+      # Time information (defaults — DayNight/Weather removed in V2)
+      phase: :day,
+      hour: 12,
+      minute: 0,
+      light_level: 1.0,
 
       # Moon information
-      moon_phase: moon.key,
-      moon_illumination: moon.illumination,
+      moon_phase: :full,
+      moon_illumination: 100,
 
       # Weather
-      weather: weather,
+      weather: nil,
 
       # Player state
       player_light_source: player_light_source,
@@ -326,33 +316,16 @@ defmodule LokaWeb.Channels.GameChannel.Serializers do
   The server computes which sounds should play; the client handles actual playback.
   """
   def serialize_sound_state(opts \\ []) do
-    alias Loka.Framework.World.SoundEnvironment
-    alias Loka.Framework.World.Weather
-    alias Loka.Framework.World.DayNight
+    _room = Keyword.get(opts, :room)
+    _player = Keyword.get(opts, :player)
 
-    room = Keyword.get(opts, :room)
-    player = Keyword.get(opts, :player)
-
-    # Get current weather
-    weather = Weather.get_weather()
-
-    # Get player's light source
-    light_source = get_player_light_source(player)
-
-    # Get active sounds from SoundEnvironment
-    sounds =
-      if room do
-        SoundEnvironment.get_active_sounds(room, weather, light_source)
-      else
-        %{ambient: [], weather: [], light: [], is_indoor: false}
-      end
-
+    # SoundEnvironment, Weather, DayNight removed in V2 — return defaults
     %{
-      ambient: sounds.ambient,
-      weather: sounds.weather,
-      light: sounds.light,
-      is_indoor: sounds.is_indoor,
-      phase: DayNight.get_phase()
+      ambient: [],
+      weather: [],
+      light: [],
+      is_indoor: false,
+      phase: :day
     }
   end
 

@@ -7,7 +7,7 @@ defmodule Loka.WorldBuilder.QuestManager do
 
   ## Quest Structure
 
-  Quests are stored as TypedObjects with type :quest and contain:
+  Quests are stored as Entities with type :quest and contain:
   - Quest metadata (name, description, tags)
   - Quest type (main, side, daily, repeatable)
   - Giver NPC key
@@ -47,8 +47,7 @@ defmodule Loka.WorldBuilder.QuestManager do
 
   require Logger
 
-  alias Loka.Engine.TypedObject
-  alias Loka.Engine.TypedObject.Loader
+  alias Loka.Engine.Entity
   alias Loka.Content.Quest
 
   @quests_dir Path.join([:code.priv_dir(:loka), "world", "drafts", "quests"])
@@ -69,29 +68,24 @@ defmodule Loka.WorldBuilder.QuestManager do
       |> apply_quest_defaults()
       |> build_quest_data()
 
-    case TypedObject.new(attrs) do
-      {:ok, typed_object} ->
-        # Validate quest structure
-        case Quest.validate(typed_object) do
+    entity = Entity.new(attrs)
+
+    # Validate quest structure
+    case Quest.validate(entity) do
+      :ok ->
+        # Save to YAML
+        case save_quest_yaml(entity) do
           :ok ->
-            # Save to YAML
-            case save_quest_yaml(typed_object) do
-              :ok ->
-                Logger.info("[QuestManager] Created quest: #{typed_object.key}")
-                {:ok, enrich_for_ui(typed_object)}
+            Logger.info("[QuestManager] Created quest: #{entity.key}")
+            {:ok, enrich_for_ui(entity)}
 
-              {:error, reason} ->
-                Logger.error("[QuestManager] Failed to save quest YAML: #{inspect(reason)}")
-                {:error, "Failed to save quest: #{inspect(reason)}"}
-            end
-
-          {:error, errors} ->
-            Logger.warning("[QuestManager] Quest validation failed: #{inspect(errors)}")
-            {:error, Enum.join(errors, ", ")}
+          {:error, reason} ->
+            Logger.error("[QuestManager] Failed to save quest YAML: #{inspect(reason)}")
+            {:error, "Failed to save quest: #{inspect(reason)}"}
         end
 
       {:error, errors} ->
-        Logger.warning("[QuestManager] TypedObject creation failed: #{inspect(errors)}")
+        Logger.warning("[QuestManager] Quest validation failed: #{inspect(errors)}")
         {:error, Enum.join(errors, ", ")}
     end
   end
@@ -129,31 +123,33 @@ defmodule Loka.WorldBuilder.QuestManager do
   def update_quest(key, attrs) when is_binary(key) and is_map(attrs) do
     with {:ok, existing_quest} <- Quest.get(key) do
       # Merge updates into existing quest
+      existing_data = existing_quest.components["data"] || %{}
+
       updated_data =
-        existing_quest.data
+        existing_data
         |> deep_merge(build_data_updates(attrs))
+
+      updated_components = Map.put(existing_quest.components, "data", updated_data)
+
+      user_attrs = remap_builder_fields(ensure_atom_keys(attrs))
 
       updated_attrs =
         existing_quest
         |> Map.from_struct()
-        |> Map.put(:data, updated_data)
-        |> Map.merge(ensure_atom_keys(attrs))
+        |> Map.put(:components, updated_components)
+        |> Map.merge(user_attrs)
 
-      case TypedObject.new(updated_attrs) do
-        {:ok, typed_object} ->
-          case Quest.validate(typed_object) do
+      entity = Entity.new(updated_attrs)
+
+      case Quest.validate(entity) do
+        :ok ->
+          case save_quest_yaml(entity) do
             :ok ->
-              case save_quest_yaml(typed_object) do
-                :ok ->
-                  Logger.info("[QuestManager] Updated quest: #{key}")
-                  {:ok, enrich_for_ui(typed_object)}
+              Logger.info("[QuestManager] Updated quest: #{key}")
+              {:ok, enrich_for_ui(entity)}
 
-                {:error, reason} ->
-                  {:error, "Failed to save quest: #{inspect(reason)}"}
-              end
-
-            {:error, errors} ->
-              {:error, Enum.join(errors, ", ")}
+            {:error, reason} ->
+              {:error, "Failed to save quest: #{inspect(reason)}"}
           end
 
         {:error, errors} ->
@@ -175,8 +171,6 @@ defmodule Loka.WorldBuilder.QuestManager do
         case File.rm(file_path) do
           :ok ->
             Logger.info("[QuestManager] Deleted quest: #{key}")
-            # Reload quests to update registry
-            Loader.reload()
             :ok
 
           {:error, reason} ->
@@ -215,11 +209,11 @@ defmodule Loka.WorldBuilder.QuestManager do
   # Private Helpers
   # =============================================================================
 
-  defp enrich_for_ui(quest) when is_struct(quest, TypedObject) do
+  defp enrich_for_ui(%Entity{} = quest) do
     %{
       key: quest.key,
-      name: quest.name || quest.key,
-      description: quest.description || "",
+      name: quest.short_desc || quest.key,
+      description: quest.extra_desc || "",
       tags: quest.tags || [],
       quest_type: Quest.quest_type(quest),
       giver_key: Quest.giver_key(quest),
@@ -232,10 +226,17 @@ defmodule Loka.WorldBuilder.QuestManager do
   end
 
   defp apply_quest_defaults(attrs) do
+    # Map builder field names to Entity struct fields
     attrs
     |> Map.put_new(:name, "New Quest")
     |> Map.put_new(:description, "A quest")
     |> Map.put_new(:tags, [])
+    |> then(fn a ->
+      a
+      |> Map.put_new(:short_desc, a[:name])
+      |> Map.put_new(:extra_desc, a[:description])
+      |> Map.drop([:name, :description])
+    end)
   end
 
   defp build_quest_data(attrs) do
@@ -262,7 +263,7 @@ defmodule Loka.WorldBuilder.QuestManager do
 
     attrs
     |> Map.drop(quest_fields)
-    |> Map.put(:data, data)
+    |> Map.put(:components, %{"data" => data})
   end
 
   defp build_data_updates(attrs) do
@@ -292,8 +293,6 @@ defmodule Loka.WorldBuilder.QuestManager do
 
       case File.write(file_path, yaml_content) do
         :ok ->
-          # Reload quests to update registry
-          Loader.reload()
           :ok
 
         {:error, reason} ->
@@ -308,13 +307,14 @@ defmodule Loka.WorldBuilder.QuestManager do
     tags_yaml = format_yaml_list(quest.tags || [])
 
     # Build data section
-    data_yaml = build_data_yaml(quest.data || %{})
+    data = (quest.components || %{})["data"] || %{}
+    data_yaml = build_data_yaml(data)
 
     """
     key: #{quest.key}
     type: quest
-    name: "#{escape_yaml_string(quest.name || "")}"
-    description: "#{escape_yaml_string(quest.description || "")}"
+    name: "#{escape_yaml_string(quest.short_desc || "")}"
+    description: "#{escape_yaml_string(quest.extra_desc || "")}"
     tags: #{tags_yaml}
     data:
     #{data_yaml}
@@ -378,6 +378,25 @@ defmodule Loka.WorldBuilder.QuestManager do
     end
 
     @quests_dir
+  end
+
+  # Maps builder field names (:name, :description) to Entity struct fields
+  defp remap_builder_fields(attrs) when is_map(attrs) do
+    attrs
+    |> then(fn a ->
+      if Map.has_key?(a, :name) do
+        a |> Map.put(:short_desc, a[:name]) |> Map.delete(:name)
+      else
+        a
+      end
+    end)
+    |> then(fn a ->
+      if Map.has_key?(a, :description) do
+        a |> Map.put(:extra_desc, a[:description]) |> Map.delete(:description)
+      else
+        a
+      end
+    end)
   end
 
   defp ensure_atom_keys(map) when is_map(map) do

@@ -30,21 +30,13 @@ defmodule Loka.Application do
       {Task.Supervisor, name: Loka.Engine.Hooks.TaskSupervisor},
       Loka.Engine.Hooks,
       Loka.Engine.Cooldowns,
-      # TypedObject Loader - unified loading for all content types (V1, will be removed in Phase 6)
-      Loka.Engine.TypedObject.Loader,
       # EntitySeeder - populates DB from YAML (V2)
       Loka.Engine.EntitySeeder,
-      Loka.Engine.SocialLoader,
       {Registry, keys: :unique, name: Loka.Engine.EntityRegistry.Registry},
       {Loka.Engine.EntitySupervisor, name: Loka.Engine.EntitySupervisor},
       Loka.Engine.EntityRegistry,
       Loka.Engine.SystemSupervisor,
       Loka.Engine.WorldGraph.LayoutManager,
-
-      # Plugin System - must come after Engine core, before Framework layer
-      # Plugins can add hooks, validators, children, prototypes, and balance config
-      {Loka.Engine.PluginSupervisor, []},
-      Loka.Engine.PluginLoader,
 
       # Framework layer - Social Systems
       Loka.Framework.Social.ChannelManager,
@@ -63,26 +55,14 @@ defmodule Loka.Application do
       Loka.Framework.Combat.CombatSupervisor,
       Loka.Framework.Combat.RespawnManager,
 
-      # Crafting and Gathering systems (registries removed in V2 — use Content modules)
-
-      # Inventory systems
-      Loka.Framework.Inventory.ContainerRespawn,
-
       # Resource system (mana, mv, stamina, etc.)
       Loka.Framework.Resources.ResourcePool,
-      Loka.Framework.Resources.ResourceTicker,
 
       # Timer system (crafting queues, offline progression)
       Loka.Timers.Server,
 
-      # World systems (weather, day/night cycle, ambient messages)
-      Loka.Framework.World.DayNight,
-      Loka.Framework.World.Weather,
-      Loka.Framework.World.RoomAmbient.Scheduler,
+      # World systems (NPC ambient messages)
       Loka.Framework.World.NpcAmbient.Scheduler,
-
-      # Scripting - World event handler (subscribes to time/weather events)
-      Loka.Framework.Scripting.WorldEventHandler,
 
       # Zone system - periodic mob/item respawning (V2: zones are entities)
       Loka.Engine.ZoneReset,
@@ -101,9 +81,6 @@ defmodule Loka.Application do
 
     # Initialize lock expression cache
     Loka.Engine.Locks.init_cache()
-
-    # Initialize calendar system (depends on DayNight being started)
-    Loka.Framework.World.Calendar.init()
 
     # Initialize minimap cache ETS table
     LokaWeb.Channels.RoomHelpers.init_minimap_cache()
@@ -125,13 +102,8 @@ defmodule Loka.Application do
         Loka.Framework.Quest.Listeners.register_all()
         Loka.Framework.World.RoomEvents.register_hooks()
         Loka.Framework.Inventory.Container.register_hooks()
-        Loka.Framework.Scripting.BehaviorRegistry.register_hooks()
 
-        # Spawn the world (create room entities from prototypes)
-        # Skip in test mode to avoid polluting the sandbox-isolated test database
-        unless Application.get_env(:loka, :env) == :test do
-          Loka.Engine.WorldLoader.spawn_world()
-        end
+        # V2: EntitySeeder handles world seeding at startup
 
         # Boot system entities (auto_start tagged) after world is spawned
         unless Application.get_env(:loka, :env) == :test do

@@ -35,7 +35,7 @@ defmodule Loka.Framework.Inventory.Stacking do
       {:ok, new_inventory} = Stacking.remove_items(inventory, "health_potion", 2)
   """
 
-  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
+  alias Loka.Engine.Entities
   alias Loka.Utils.MapHelpers
 
   @type stack :: %{
@@ -174,7 +174,7 @@ defmodule Loka.Framework.Inventory.Stacking do
   """
   @spec get_stack_info(String.t()) :: stack_info()
   def get_stack_info(item_key) do
-    case TypedObjectLoader.get(item_key) do
+    case Entities.find_one(key: item_key) do
       {:ok, prototype} ->
         physical = MapHelpers.get_flexible(prototype.components, :physical, %{})
 
@@ -268,11 +268,11 @@ defmodule Loka.Framework.Inventory.Stacking do
   # =============================================================================
 
   defp get_prototype_info(item_key) do
-    case TypedObjectLoader.get(item_key) do
+    case Entities.find_one(key: item_key) do
       {:ok, prototype} ->
         %{
-          name: prototype.name || item_key,
-          description: prototype.extra_description || prototype.description || ""
+          name: prototype.short_desc || item_key,
+          description: prototype.extra_desc || prototype.long_desc || ""
         }
 
       {:error, :not_found} ->

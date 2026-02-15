@@ -18,7 +18,11 @@ config :loka, Loka.Repo,
   pool_size: 1,
   pool: Ecto.Adapters.SQL.Sandbox,
   # SQLite busy_timeout: wait up to 5s for locks
-  busy_timeout: 5000
+  busy_timeout: 5000,
+  # Higher queue targets to prevent timeout errors when many async tests compete
+  # for the single SQLite connection
+  queue_target: 5000,
+  queue_interval: 10_000
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.

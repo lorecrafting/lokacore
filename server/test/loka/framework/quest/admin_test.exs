@@ -2,7 +2,7 @@ defmodule Loka.Framework.Quest.AdminTest do
   use Loka.DataCase, async: false
 
   alias Loka.Framework.Quest.Admin
-  alias Loka.Framework.Quest.Definitions
+  alias Loka.Content
 
   import Loka.AccountsFixtures
   import Loka.EngineFixtures
@@ -72,7 +72,7 @@ defmodule Loka.Framework.Quest.AdminTest do
     end
 
     test "grants existing quest to player", %{player_id: player_id} do
-      quests = Definitions.all_quest_definitions()
+      quests = Content.Quest.all_definitions()
 
       if quests != [] do
         quest = hd(quests)
@@ -93,7 +93,7 @@ defmodule Loka.Framework.Quest.AdminTest do
 
   describe "reset_quest/2" do
     test "removes quest from active and completed lists", %{player_id: player_id} do
-      quests = Definitions.all_quest_definitions()
+      quests = Content.Quest.all_definitions()
 
       if quests != [] do
         quest = hd(quests)
@@ -115,7 +115,7 @@ defmodule Loka.Framework.Quest.AdminTest do
   describe "reset_all_quests/1" do
     test "clears all quests for player", %{player_id: player_id} do
       # Grant some quests first
-      quests = Definitions.all_quest_definitions() |> Enum.take(2)
+      quests = Content.Quest.all_definitions() |> Enum.take(2)
 
       for quest <- quests do
         Admin.force_grant_quest(player_id, quest.id)
@@ -138,7 +138,7 @@ defmodule Loka.Framework.Quest.AdminTest do
     end
 
     test "returns error for nonexistent objective", %{player_id: player_id} do
-      quests = Definitions.all_quest_definitions()
+      quests = Content.Quest.all_definitions()
 
       if quests != [] do
         quest = hd(quests)
@@ -150,7 +150,7 @@ defmodule Loka.Framework.Quest.AdminTest do
     end
 
     test "returns diagnosis for valid objective", %{player_id: player_id} do
-      quests = Definitions.all_quest_definitions()
+      quests = Content.Quest.all_definitions()
 
       if quests != [] do
         quest = hd(quests)

@@ -9,11 +9,11 @@ defmodule LokaWeb.Channels.BuilderCommands.Helpers do
   alias Loka.Framework.World.Atmosphere
   alias Loka.WorldBuilder.RoomManager
   alias LokaWeb.Channels.RoomHelpers
-  alias Loka.Engine.{Entities, TypedObject}
+  alias Loka.Engine.{Entity, Entities}
   alias LokaWeb.Channels.GameChannel.Serializers
 
   def draft_tag(obj) do
-    if TypedObject.draft?(obj), do: " [DRAFT]", else: ""
+    if Entity.draft?(obj), do: " [DRAFT]", else: ""
   end
 
   def push_builder(socket, text) do
@@ -100,23 +100,23 @@ defmodule LokaWeb.Channels.BuilderCommands.Helpers do
     {:ok, "#{label} (#{length(entities)}):\n#{lines}", socket}
   end
 
-  def format_typed_object(obj) do
-    data = Map.get(obj, :data, %{})
+  def format_entity(obj) do
+    components = Map.get(obj, :components, %{})
 
     [
       "  key: #{obj.key}",
       "  type: #{obj.type}",
-      "  name: #{data["name"] || obj.key}"
+      "  name: #{obj.short_desc || obj.key}"
     ]
     |> then(fn lines ->
-      if desc = data["description"],
+      desc = obj.extra_desc
+
+      if desc && desc != "",
         do: lines ++ ["  description: #{String.slice(desc, 0, 120)}..."],
         else: lines
     end)
     |> then(fn lines ->
-      components = data["components"] || %{}
-
-      if components != %{} do
+      if map_size(components) > 0 do
         comp_lines =
           Enum.map(components, fn {k, _v} -> "    - #{k}" end)
 
@@ -127,6 +127,9 @@ defmodule LokaWeb.Channels.BuilderCommands.Helpers do
     end)
     |> Enum.join("\n")
   end
+
+  # Keep backward-compatible alias
+  def format_typed_object(obj), do: format_entity(obj)
 
   def matches?(nil, _search), do: false
 

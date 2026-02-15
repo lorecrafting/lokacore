@@ -18,10 +18,7 @@ defmodule Loka.Testing.Content.DialogueQuestChainValidator do
 
   require Logger
 
-  alias Loka.Framework.Quest
-  alias Loka.Framework.Quest.Definitions
-  alias Loka.Framework.Storyline.Storyline
-  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
+  alias Loka.Engine.Entities
   alias Loka.Content
 
   @doc """
@@ -57,7 +54,7 @@ defmodule Loka.Testing.Content.DialogueQuestChainValidator do
   Validates quest chains for a specific NPC.
   """
   def validate_npc(npc_key) when is_binary(npc_key) do
-    with {:ok, npc} <- TypedObjectLoader.get(npc_key) do
+    with {:ok, npc} <- Entities.find_one(key: npc_key) do
       dialogue = get_dialogue_tree(npc)
 
       if dialogue do
@@ -89,7 +86,10 @@ defmodule Loka.Testing.Content.DialogueQuestChainValidator do
   # ============================================================================
 
   defp validate_storyline(storyline) do
-    quest_order = Storyline.quest_order(storyline)
+    # Derive quest order from acts
+    quest_order =
+      (storyline.acts || [])
+      |> Enum.flat_map(fn act -> act.quests || [] end)
 
     Enum.flat_map(quest_order, fn quest_id ->
       validate_quest_chain(quest_id, quest_order)
@@ -97,7 +97,7 @@ defmodule Loka.Testing.Content.DialogueQuestChainValidator do
   end
 
   defp validate_quest_chain(quest_id, quest_order) do
-    case Quest.get_quest_definition(quest_id) do
+    case Content.Quest.definition(quest_id) do
       nil ->
         [{:error, {:missing_quest_definition, quest_id}}]
 
@@ -113,7 +113,7 @@ defmodule Loka.Testing.Content.DialogueQuestChainValidator do
   end
 
   defp validate_quest_giver_dialogue(quest_id, giver_key, quest_order) do
-    case TypedObjectLoader.get(giver_key) do
+    case Entities.find_one(key: giver_key) do
       {:ok, npc} ->
         dialogue = get_dialogue_tree(npc)
 
@@ -293,11 +293,7 @@ defmodule Loka.Testing.Content.DialogueQuestChainValidator do
   end
 
   defp find_quests_given_by_npc(npc_key) do
-    Content.Quest.all()
-    |> Enum.map(fn typed_object ->
-      # Convert TypedObject to Quest struct
-      Definitions.quest_from_typed_object(typed_object)
-    end)
+    Content.Quest.all_definitions()
     |> Enum.filter(fn quest ->
       quest.giver == npc_key || quest.turn_in_npc == npc_key
     end)
@@ -305,7 +301,7 @@ defmodule Loka.Testing.Content.DialogueQuestChainValidator do
   end
 
   defp quest_has_objectives?(quest_id) do
-    case Quest.get_quest_definition(quest_id) do
+    case Content.Quest.definition(quest_id) do
       nil -> false
       quest_def -> (quest_def.objectives || []) != []
     end

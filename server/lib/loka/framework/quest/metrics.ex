@@ -27,7 +27,7 @@ defmodule Loka.Framework.Quest.Metrics do
 
   require Logger
 
-  alias Loka.Framework.Quest.Definitions
+  alias Loka.Content
   alias Loka.Admin.GameLog
   alias Loka.Engine.Entities
 
@@ -39,7 +39,7 @@ defmodule Loka.Framework.Quest.Metrics do
   Gets overall quest system metrics summary.
   """
   def get_summary do
-    all_quests = Definitions.all_quest_definitions()
+    all_quests = Content.Quest.all_definitions()
     player_states = list_all_player_quest_states()
 
     active_counts = count_active_quests(player_states)
@@ -150,7 +150,7 @@ defmodule Loka.Framework.Quest.Metrics do
       |> Enum.sort_by(fn {_quest_id, count} -> count end, :desc)
       |> Enum.take(limit)
       |> Enum.map(fn {quest_id, count} ->
-        quest = Definitions.get_quest_definition(quest_id)
+        quest = Content.Quest.definition(quest_id)
 
         %{
           quest_id: quest_id,
@@ -170,7 +170,7 @@ defmodule Loka.Framework.Quest.Metrics do
     player_states = list_all_player_quest_states()
     active_counts = count_active_quests(player_states)
     completed_counts = count_completed_quests(player_states)
-    all_quests = Definitions.all_quest_definitions()
+    all_quests = Content.Quest.all_definitions()
 
     problems =
       all_quests
@@ -255,7 +255,7 @@ defmodule Loka.Framework.Quest.Metrics do
     |> Enum.sort_by(fn {_quest_id, count} -> count end, :desc)
     |> Enum.take(limit)
     |> Enum.map(fn {quest_id, count} ->
-      quest = Definitions.get_quest_definition(quest_id)
+      quest = Content.Quest.definition(quest_id)
       %{quest_id: quest_id, name: (quest && quest.name) || quest_id, completions: count}
     end)
   end

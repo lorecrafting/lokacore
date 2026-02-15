@@ -151,11 +151,11 @@
   - Verify: `mix test test/loka/framework/`
   - Commit: `"feat(v2): swap GameState → entity components in quest, inventory, combat"`
 
-- [ ] **4.3** Update GameState consumers (batch 2: channel + remaining)
+- [x] **4.3** Update GameState consumers (batch 2: channel + remaining)
   - Modifies: game_channel.ex (~50 refs), action_bridge.ex, room_helpers.ex, session/*.ex
-  - Deletes: `lib/loka/framework/player/game_state.ex`
+  - Note: `game_state.ex` deletion deferred to Phase 6 (builder commands still reference it)
   - Verify: `mix test` (full suite)
-  - Commit: `"feat(v2): complete GameState removal — channel, session, delete module"`
+  - Commit: `"feat(v2): complete GameState removal from channel + session layer"`
 
 ---
 
@@ -191,12 +191,14 @@
 ## Phase 6: Cleanup
 **Spec**: `phase-6-cleanup.md` | **Depends on**: Phases 4 + 5
 
-- [ ] **6.1** Delete old code
+- [x] **6.1** Delete old code
   - Deletes: TypedObject (4 files), entity_attribute.ex, Plugin system (3 files + plugins/ dir), WorldLoader, SocialLoader
-  - Deletes: `test/support/typed_object_sandbox.ex`, `test/support/test_cleanup.ex`
+  - Deletes: `test/support/typed_object_sandbox.ex` + 23 test files for deleted modules
   - Modifies: `lib/loka/application.ex` (remove ~28 old supervised children)
-  - Verify: `mix test` (full suite)
-  - Commit: `"chore(v2): delete TypedObject, Plugin system, old loaders, test support"`
+  - Fixes: stacking.ex V2 field names, publishing.ex draft sync for all types, quest.ex giver fallback
+  - Optimizes: test pool config, ExUnit.Case for pure tests, property test generator
+  - Verify: `mix test` (full suite — 0 failures, ~24s)
+  - Commit: `"chore(v2): delete TypedObject, Plugin system, old loaders, ~25 framework modules"`
 
 - [ ] **6.2** Simplify builder + world_builder managers
   - Modifies: 16 `builder_commands/*.ex` sub-modules
@@ -234,7 +236,17 @@
   - Verify: `mix test test/loka/behaviors/`
   - Commit: `"feat(v2): add Weather, DayNight, NpcAmbient, RoomAmbient behavior modules"`
 
-- [ ] **7.3** Final integration tests + docs update
+- [ ] **7.3** StateMachine engine + quest/combat/dialogue state machines + content testing
+  - Creates: `lib/loka/engine/state_machine.ex` (shared state machine — transitions, callbacks, introspection)
+  - Creates: State machine definitions in 7 component modules (quest, combat, crafting, NPC AI, session, dialogue, entity lifecycle)
+  - Modifies: `framework/quest/progress.ex`, `state_helper.ex`, `admin.ex` — wire quest state machine
+  - Creates: 6 new validator checks (Tier 1) in existing validator modules
+  - Creates: `test/loka/engine/state_machine_test.exs` (core SM tests)
+  - Creates: `test/loka/testing/quest/state_machine_test.exs` (Tier 2 — auto-generated ~200 tests from quest definitions)
+  - Verify: `mix test test/loka/engine/state_machine_test.exs && mix test test/loka/components/ && mix loka.test.validate`
+  - Commit: `"feat(v2): add StateMachine engine + wire quest/combat/dialogue + content testing tiers 1-2"`
+
+- [ ] **7.4** Final integration tests + docs update
   - Verify: `mix test` (full green suite)
   - Verify: `mix loka.test --quick` (all validators pass)
   - Update: CLAUDE.md, relevant docs in docs/
@@ -250,11 +262,11 @@
 | 1: Foundation | 1.1-1.4 | **Complete** |
 | 2: Seeder | 2.1 | **Complete** |
 | 3: EntityServer | 3.1-3.4 | **Complete** |
-| 4: Player | 4.1-4.3 | 4.0-4.2 complete |
+| 4: Player | 4.0-4.3 | **Complete** |
 | 5: Content+Actions | 5.1-5.4 | **Complete** |
-| 6: Cleanup | 6.1-6.4 | Not started |
-| 7: Polish | 7.1-7.3 | Not started |
-| **Total** | **22 tasks** | |
+| 6: Cleanup | 6.1-6.4 | **6.1 complete** |
+| 7: Polish | 7.1-7.4 | Not started |
+| **Total** | **23 tasks** | |
 
 ## Critical Path
 

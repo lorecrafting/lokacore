@@ -191,7 +191,8 @@ defmodule Loka.Engine.Entities do
 
         case %EntitySchema{id: entity.id} |> EntitySchema.changeset(attrs) |> Repo.insert() do
           {:ok, schema} ->
-            schema = Repo.preload(schema, :tags)
+            sync_tags(schema.id, entity.tags || [])
+            schema = Repo.preload(schema, :tags, force: true)
             {:ok, EntitySchema.to_entity(schema)}
 
           {:error, changeset} ->
@@ -207,7 +208,8 @@ defmodule Loka.Engine.Entities do
 
           case existing |> EntitySchema.changeset(attrs) |> Repo.update() do
             {:ok, schema} ->
-              schema = Repo.preload(schema, :tags)
+              sync_tags(schema.id, entity.tags || [])
+              schema = Repo.preload(schema, :tags, force: true)
               {:ok, EntitySchema.to_entity(schema)}
 
             {:error, changeset} ->
@@ -366,6 +368,7 @@ defmodule Loka.Engine.Entities do
   end
 
   @doc "V1 compat — converts schema to Entity struct."
+  def to_entity(%Entity{} = entity), do: entity
   def to_entity(%EntitySchema{} = schema), do: EntitySchema.to_entity(schema)
   def to_entity(nil), do: nil
 
@@ -507,6 +510,14 @@ defmodule Loka.Engine.Entities do
 
   defp maybe_preload_tags(nil), do: nil
   defp maybe_preload_tags(schema), do: Repo.preload(schema, :tags)
+
+  defp sync_tags(entity_id, tags) when is_list(tags) do
+    for tag <- tags, is_binary(tag) do
+      add_tag(entity_id, tag)
+    end
+  end
+
+  defp sync_tags(_entity_id, _), do: :ok
 
   defp normalize_attrs(attrs) when is_map(attrs) do
     attrs

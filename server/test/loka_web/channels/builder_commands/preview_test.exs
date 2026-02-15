@@ -1,6 +1,7 @@
 defmodule LokaWeb.Channels.BuilderCommands.PreviewTest do
-  use ExUnit.Case, async: false
+  use Loka.DataCase, async: false
 
+  alias Loka.Engine.{Entity, Entities}
   alias LokaWeb.Channels.BuilderCommands.Inspection
   alias LokaWeb.Channels.CommandParser
 
@@ -8,16 +9,12 @@ defmodule LokaWeb.Channels.BuilderCommands.PreviewTest do
   @world_dir :code.priv_dir(:loka) |> Path.join("world")
 
   setup do
-    Loka.TypedObjectSandbox.checkout()
-
     on_exit(fn ->
       # Clean up test draft files
       for dir <- ["drafts/quests", "quests"] do
         path = Path.join(@world_dir, "#{dir}/preview_test_quest.yml")
         if File.exists?(path), do: File.rm!(path)
       end
-
-      Loka.Engine.TypedObject.Loader.reload()
     end)
 
     :ok
@@ -69,12 +66,30 @@ defmodule LokaWeb.Channels.BuilderCommands.PreviewTest do
         gold: 50
       """)
 
-      # Reload to pick up the draft
-      Loka.Engine.TypedObject.Loader.reload_file(draft_path)
+      # Create corresponding entity in DB (V2: DB is truth)
+      create_test_entity("preview_test_quest", :quest,
+        draft: true,
+        short_desc: "Preview Test Quest",
+        components: %{
+          "data" => %{
+            "name" => "Preview Test Quest",
+            "description" => "A quest for testing the preview command.",
+            "objectives" => [
+              %{
+                "id" => "test_obj",
+                "type" => "talk",
+                "target_id" => "test_npc",
+                "description" => "Talk to the test NPC"
+              }
+            ],
+            "rewards" => %{"experience" => 100, "gold" => 50}
+          }
+        }
+      )
 
       # Verify it's loaded as a draft
-      {:ok, obj} = Loka.Engine.TypedObject.Loader.get("preview_test_quest")
-      assert Loka.Engine.TypedObject.draft?(obj)
+      {:ok, obj} = Entities.find_one(key: "preview_test_quest")
+      assert Entity.draft?(obj)
 
       # Execute the preview command
       {:ok, text, _socket} =
@@ -111,10 +126,25 @@ defmodule LokaWeb.Channels.BuilderCommands.PreviewTest do
           description: "Talk to the NPC"
       """)
 
-      Loka.Engine.TypedObject.Loader.reload_file(published_path)
+      # Create corresponding entity in DB (published = no draft flag)
+      create_test_entity("preview_test_quest", :quest,
+        components: %{
+          "data" => %{
+            "name" => "Published Preview Quest",
+            "objectives" => [
+              %{
+                "id" => "test_obj",
+                "type" => "talk",
+                "target_id" => "test_npc",
+                "description" => "Talk to the NPC"
+              }
+            ]
+          }
+        }
+      )
 
-      {:ok, obj} = Loka.Engine.TypedObject.Loader.get("preview_test_quest")
-      refute Loka.Engine.TypedObject.draft?(obj)
+      {:ok, obj} = Entities.find_one(key: "preview_test_quest")
+      refute Entity.draft?(obj)
 
       {:ok, text, _socket} =
         Inspection.execute(:preview, %{type: "quest", key: "preview_test_quest"}, @socket)
@@ -154,8 +184,18 @@ defmodule LokaWeb.Channels.BuilderCommands.PreviewTest do
           description: "Talk"
       """)
 
-      # Load the draft version into the registry (will be marked as draft)
-      Loka.Engine.TypedObject.Loader.reload_file(draft_path)
+      # Create entity as draft (draft takes priority in V2)
+      create_test_entity("preview_test_quest", :quest,
+        draft: true,
+        components: %{
+          "data" => %{
+            "name" => "Draft Version",
+            "objectives" => [
+              %{"id" => "obj1", "type" => "talk", "target_id" => "npc", "description" => "Talk"}
+            ]
+          }
+        }
+      )
 
       {:ok, text, _socket} =
         Inspection.execute(:preview, %{type: "quest", key: "preview_test_quest"}, @socket)
@@ -185,8 +225,8 @@ defmodule LokaWeb.Channels.BuilderCommands.PreviewTest do
 
   describe "preview existing game content" do
     test "can preview a real quest from the world data" do
-      # This test uses a quest that should exist in priv/world/quests/
-      case Loka.Engine.TypedObject.Loader.get("intro_welcome") do
+      # This test uses a quest that should exist in the database
+      case Entities.find_one(key: "intro_welcome") do
         {:ok, _obj} ->
           {:ok, text, _socket} =
             Inspection.execute(:preview, %{type: "quest", key: "intro_welcome"}, @socket)
@@ -200,5 +240,28 @@ defmodule LokaWeb.Channels.BuilderCommands.PreviewTest do
           :ok
       end
     end
+  end
+
+  # Helper to create a test entity in the DB
+  defp create_test_entity(key, type, opts \\ []) do
+    is_draft = Keyword.get(opts, :draft, false)
+    components = Keyword.get(opts, :components, %{})
+    short_desc = Keyword.get(opts, :short_desc, "Test #{type} #{key}")
+
+    metadata =
+      if is_draft,
+        do: %{"draft" => true},
+        else: %{}
+
+    entity =
+      Entity.new(
+        type: type,
+        key: key,
+        short_desc: short_desc,
+        components: components,
+        metadata: metadata
+      )
+
+    {:ok, _} = Entities.save(entity)
   end
 end

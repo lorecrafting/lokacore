@@ -273,7 +273,7 @@ defmodule Loka.Testing.Bot.DirectSocketAdapter do
   # Grant system quests if this is the bot's first time (no quests yet)
   # This replicates what the Quest.Listeners.grant_system_quests_once hook does for real players
   defp grant_system_quests_if_first_time(%Entity{} = character) do
-    alias Loka.Framework.Quest.{Progress, Definitions}
+    alias Loka.Framework.Quest.Progress
 
     active_quests = Progress.get_active_quests(character)
     completed_quests = Progress.get_completed_quests(character)
@@ -281,7 +281,7 @@ defmodule Loka.Testing.Bot.DirectSocketAdapter do
     if Enum.empty?(active_quests) and Enum.empty?(completed_quests) do
       # Get all system quests
       system_quests =
-        Definitions.all_quest_definitions()
+        Loka.Content.Quest.all_definitions()
         |> Enum.filter(fn quest ->
           quest.giver == "system" or quest.giver == :system
         end)
@@ -342,10 +342,10 @@ defmodule Loka.Testing.Bot.DirectSocketAdapter do
   # Hardening: Validate that system quests were granted successfully
   # Logs a warning if system quests exist but weren't granted to the bot
   defp validate_system_quests_granted(%Entity{} = character) do
-    alias Loka.Framework.Quest.{Progress, Definitions}
+    alias Loka.Framework.Quest.Progress
 
     system_quests =
-      Definitions.all_quest_definitions()
+      Loka.Content.Quest.all_definitions()
       |> Enum.filter(fn quest ->
         quest.giver == "system" or quest.giver == :system
       end)

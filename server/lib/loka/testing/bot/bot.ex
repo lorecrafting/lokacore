@@ -87,7 +87,7 @@ defmodule Loka.Testing.Bot do
   alias Loka.Testing.Bot.{BotActions, Strategy}
   alias Loka.Framework.Player.GameState
   alias Loka.Framework.World.RoomLoader
-  alias Loka.Engine.{EventBus, WorldLoader}
+  alias Loka.Engine.EventBus
 
   @default_tick_interval_ms 1000
 
@@ -395,7 +395,7 @@ defmodule Loka.Testing.Bot do
 
   defp create_bot_game_state(bot_id, starting_room_id) do
     room_id =
-      starting_room_id || RoomLoader.get_starting_room_id() || WorldLoader.get_starting_room_id()
+      starting_room_id || RoomLoader.get_starting_room_id()
 
     # Create a virtual game state (not persisted to DB)
     # Bot has high stats to ensure it can complete combat for testing
@@ -419,49 +419,46 @@ defmodule Loka.Testing.Bot do
   # Grant all system quests to the bot (in-memory only, no DB persistence)
   # System quests are quests with `giver: "system"` that auto-activate for real players
   defp grant_system_quests(game_state) do
-    alias Loka.Framework.Quest.Definitions
-
-    # Get all system quests
+    # V2: Use Content.Quest to find system quests
     system_quests =
-      Definitions.all_quest_definitions()
-      |> Enum.filter(fn quest ->
-        quest.giver == "system" or quest.giver == :system
-      end)
+      case Loka.Content.Quest.all() do
+        quests when is_list(quests) ->
+          Enum.filter(quests, fn quest ->
+            giver = Loka.Content.Quest.giver_key(quest)
+            giver == "system" or giver == :system
+          end)
+
+        _ ->
+          []
+      end
 
     if Enum.any?(system_quests) do
       Logger.info("[Bot] Granting #{length(system_quests)} system quests",
         bot_id: game_state.id
       )
 
-      # Grant each system quest IN-MEMORY (bots don't persist to DB)
       Enum.reduce(system_quests, game_state, fn quest, state ->
-        case Definitions.get_quest_definition(quest.id) do
-          nil ->
-            Logger.error("[Bot] Quest definition not found: #{quest.id}", quest_id: quest.id)
-            state
+        quest_id = quest.key
+        raw_objectives = Loka.Content.Quest.objectives(quest)
+        accepted_at = DateTime.utc_now()
+        objectives = initialize_quest_objectives(raw_objectives, accepted_at)
 
-          quest_def ->
-            # Manually add quest to active quests (in-memory, no DB call)
-            accepted_at = DateTime.utc_now()
-            objectives = initialize_quest_objectives(quest_def.objectives, accepted_at)
+        active_quests = Map.get(state.quests, "active", %{})
 
-            active_quests = Map.get(state.quests, "active", %{})
+        new_active =
+          Map.put(active_quests, quest_id, %{
+            "objectives" => objectives,
+            "accepted_at" => accepted_at
+          })
 
-            new_active =
-              Map.put(active_quests, quest.id, %{
-                "objectives" => objectives,
-                "accepted_at" => accepted_at
-              })
+        new_quests = Map.put(state.quests, "active", new_active)
 
-            new_quests = Map.put(state.quests, "active", new_active)
+        Logger.debug("[Bot] Granted system quest #{quest_id}",
+          bot_id: state.id,
+          quest_id: quest_id
+        )
 
-            Logger.debug("[Bot] Granted system quest #{quest.id}",
-              bot_id: state.id,
-              quest_id: quest.id
-            )
-
-            %{state | quests: new_quests}
-        end
+        %{state | quests: new_quests}
       end)
     else
       game_state
@@ -470,9 +467,16 @@ defmodule Loka.Testing.Bot do
 
   # Initialize quest objectives in-memory (mirrors Quest.Progress logic)
   defp initialize_quest_objectives(objectives, _accepted_at) when is_list(objectives) do
-    # Objectives are now a list of Objective structs
+    # V2: Objectives are maps with string or atom keys from Content.Quest
     Map.new(objectives, fn obj ->
-      {obj.id, %{"completed" => false, "progress" => 0}}
+      obj_id =
+        cond do
+          is_map(obj) -> Map.get(obj, "id") || Map.get(obj, :id, "unknown")
+          is_struct(obj) -> obj.id
+          true -> "unknown"
+        end
+
+      {obj_id, %{"completed" => false, "progress" => 0}}
     end)
   end
 

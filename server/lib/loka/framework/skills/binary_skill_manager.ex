@@ -34,7 +34,7 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
   """
 
   alias Loka.Content.Skill, as: ContentSkill
-  alias Loka.Engine.{Entity, TypedObject}
+  alias Loka.Engine.Entity
   alias Loka.Config.Balance
   alias Loka.Utils.MapHelpers
 
@@ -76,7 +76,7 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
   @doc """
   Returns learned skills with their definitions.
   """
-  @spec learned_skills_with_info(Entity.t()) :: [TypedObject.t()]
+  @spec learned_skills_with_info(Entity.t()) :: [Entity.t()]
   def learned_skills_with_info(%Entity{} = entity) do
     entity
     |> get_learned_skills()
@@ -88,7 +88,7 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
   @doc """
   Returns learned skills grouped by category.
   """
-  @spec learned_skills_by_category(Entity.t()) :: %{String.t() => [TypedObject.t()]}
+  @spec learned_skills_by_category(Entity.t()) :: %{String.t() => [Entity.t()]}
   def learned_skills_by_category(%Entity{} = entity) do
     entity
     |> learned_skills_with_info()
@@ -210,7 +210,7 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
   @doc """
   Checks if a player can use a skill (knows it and has resources).
   """
-  @spec can_use?(Entity.t(), String.t(), map()) :: {:ok, TypedObject.t()} | {:error, term()}
+  @spec can_use?(Entity.t(), String.t(), map()) :: {:ok, Entity.t()} | {:error, term()}
   def can_use?(%Entity{} = entity, skill_key, resources \\ %{}) do
     with {:ok, skill} <- ContentSkill.get(skill_key),
          :ok <- check_is_learned(entity, skill_key),
@@ -257,7 +257,7 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
   - Prerequisites met
   - Can afford (unless include_unaffordable: true)
   """
-  @spec learnable_skills(Entity.t(), keyword()) :: [TypedObject.t()]
+  @spec learnable_skills(Entity.t(), keyword()) :: [Entity.t()]
   def learnable_skills(%Entity{} = entity, opts \\ []) do
     include_unaffordable = Keyword.get(opts, :include_unaffordable, false)
     learned = get_learned_skills(entity)
@@ -274,7 +274,7 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
   @doc """
   Returns skills available from a specific trainer.
   """
-  @spec skills_from_trainer(Entity.t(), String.t()) :: [TypedObject.t()]
+  @spec skills_from_trainer(Entity.t(), String.t()) :: [Entity.t()]
   def skills_from_trainer(%Entity{} = entity, trainer_key) do
     learned = get_learned_skills(entity)
 
@@ -305,7 +305,7 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
     end
   end
 
-  defp check_prerequisites(%Entity{} = entity, %TypedObject{} = skill) do
+  defp check_prerequisites(%Entity{} = entity, %Entity{} = skill) do
     learned = get_learned_skills(entity)
 
     if ContentSkill.binary_prerequisites_met?(skill, learned) do
@@ -315,9 +315,9 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
     end
   end
 
-  defp check_can_afford(%Entity{}, %TypedObject{}, true = _free), do: :ok
+  defp check_can_afford(%Entity{}, %Entity{}, true = _free), do: :ok
 
-  defp check_can_afford(%Entity{} = entity, %TypedObject{} = skill, _free) do
+  defp check_can_afford(%Entity{} = entity, %Entity{} = skill, _free) do
     cost = ContentSkill.cost(skill)
     remaining = points_remaining(entity)
 
@@ -328,7 +328,7 @@ defmodule Loka.Framework.Skills.BinarySkillManager do
     end
   end
 
-  defp check_has_resources(%TypedObject{} = skill, resources) do
+  defp check_has_resources(%Entity{} = skill, resources) do
     mv = Map.get(resources, :mv, 999_999)
     mana = Map.get(resources, :mana, 999_999)
 

@@ -1,6 +1,6 @@
 defmodule Loka.Content.Dialogue do
   @moduledoc """
-  Dialogue tree - OOC TypedObject.
+  Dialogue tree - OOC Entity.
 
   Dialogues define conversation trees for NPCs:
   - Nodes with text and choices
@@ -38,7 +38,7 @@ defmodule Loka.Content.Dialogue do
                 next: farewell
   """
 
-  alias Loka.Engine.{Entity, Entities, TypedObject}
+  alias Loka.Engine.{Entity, Entities}
 
   @type dialogue_node :: %{
           text: String.t(),
@@ -57,18 +57,15 @@ defmodule Loka.Content.Dialogue do
   @doc """
   Gets a dialogue by key.
   """
-  @spec get(String.t()) :: {:ok, TypedObject.t()} | {:error, :not_found}
+  @spec get(String.t()) :: {:ok, Entity.t()} | {:error, :not_found}
   def get(key) when is_binary(key) do
-    case Entities.find_one(key: key, type: :dialogue) do
-      {:ok, entity} -> Entity.to_typed_object(entity)
-      error -> error
-    end
+    Entities.find_one(key: key, type: :dialogue)
   end
 
   @doc """
   Gets a dialogue by key, raises if not found.
   """
-  @spec get!(String.t()) :: TypedObject.t()
+  @spec get!(String.t()) :: Entity.t()
   def get!(key) when is_binary(key) do
     case get(key) do
       {:ok, dialogue} -> dialogue
@@ -79,26 +76,24 @@ defmodule Loka.Content.Dialogue do
   @doc """
   Lists all dialogue definitions.
   """
-  @spec all() :: [TypedObject.t()]
+  @spec all() :: [Entity.t()]
   def all do
     Entities.find_all(type: :dialogue, is_prototype: true)
-    |> to_typed_objects()
   end
 
   @doc """
   Lists all published dialogue definitions (excludes drafts).
   """
-  @spec all_published() :: [TypedObject.t()]
+  @spec all_published() :: [Entity.t()]
   def all_published do
     Entities.find_all(type: :dialogue, is_prototype: true)
     |> Enum.reject(&Entity.draft?/1)
-    |> to_typed_objects()
   end
 
   @doc """
   Lists dialogues for a specific entity.
   """
-  @spec for_entity(String.t()) :: [TypedObject.t()]
+  @spec for_entity(String.t()) :: [Entity.t()]
   def for_entity(entity_key) when is_binary(entity_key) do
     all()
     |> Enum.filter(fn dialogue ->
@@ -109,7 +104,7 @@ defmodule Loka.Content.Dialogue do
   @doc """
   Lists published dialogues for a specific entity.
   """
-  @spec for_entity_published(String.t()) :: [TypedObject.t()]
+  @spec for_entity_published(String.t()) :: [Entity.t()]
   def for_entity_published(entity_key) when is_binary(entity_key) do
     all_published()
     |> Enum.filter(fn dialogue ->
@@ -120,40 +115,44 @@ defmodule Loka.Content.Dialogue do
   @doc """
   Gets the entity key this dialogue belongs to.
   """
-  @spec entity_key(TypedObject.t()) :: String.t() | nil
-  def entity_key(%TypedObject{type: :dialogue, data: data}) do
+  @spec entity_key(Entity.t()) :: String.t() | nil
+  def entity_key(%Entity{type: :dialogue} = entity) do
+    data = entity.components["data"] || %{}
     Map.get(data, "entity_key") || Map.get(data, :entity_key)
   end
 
   @doc """
   Gets the trigger type for this dialogue.
   """
-  @spec trigger(TypedObject.t()) :: String.t()
-  def trigger(%TypedObject{type: :dialogue, data: data}) do
+  @spec trigger(Entity.t()) :: String.t()
+  def trigger(%Entity{type: :dialogue} = entity) do
+    data = entity.components["data"] || %{}
     Map.get(data, "trigger") || Map.get(data, :trigger, "on_talk")
   end
 
   @doc """
   Gets the entry node key.
   """
-  @spec entry_node(TypedObject.t()) :: String.t()
-  def entry_node(%TypedObject{type: :dialogue, data: data}) do
+  @spec entry_node(Entity.t()) :: String.t()
+  def entry_node(%Entity{type: :dialogue} = entity) do
+    data = entity.components["data"] || %{}
     Map.get(data, "entry_node") || Map.get(data, :entry_node, "greeting")
   end
 
   @doc """
   Gets all nodes in the dialogue.
   """
-  @spec nodes(TypedObject.t()) :: map()
-  def nodes(%TypedObject{type: :dialogue, data: data}) do
+  @spec nodes(Entity.t()) :: map()
+  def nodes(%Entity{type: :dialogue} = entity) do
+    data = entity.components["data"] || %{}
     Map.get(data, "nodes") || Map.get(data, :nodes, %{})
   end
 
   @doc """
   Gets a specific node by key.
   """
-  @spec get_node(TypedObject.t(), String.t()) :: map() | nil
-  def get_node(%TypedObject{} = dialogue, node_key) when is_binary(node_key) do
+  @spec get_node(Entity.t(), String.t()) :: map() | nil
+  def get_node(%Entity{} = dialogue, node_key) when is_binary(node_key) do
     nodes(dialogue)
     |> Map.get(node_key, Map.get(nodes(dialogue), String.to_atom(node_key)))
   end
@@ -161,16 +160,17 @@ defmodule Loka.Content.Dialogue do
   @doc """
   Gets dialogue conditions (global conditions for the whole dialogue).
   """
-  @spec conditions(TypedObject.t()) :: map()
-  def conditions(%TypedObject{type: :dialogue, data: data}) do
+  @spec conditions(Entity.t()) :: map()
+  def conditions(%Entity{type: :dialogue} = entity) do
+    data = entity.components["data"] || %{}
     Map.get(data, "conditions") || Map.get(data, :conditions, %{})
   end
 
   @doc """
   Lists available choices for a node.
   """
-  @spec choices(TypedObject.t(), String.t()) :: [map()]
-  def choices(%TypedObject{} = dialogue, node_key) when is_binary(node_key) do
+  @spec choices(Entity.t(), String.t()) :: [map()]
+  def choices(%Entity{} = dialogue, node_key) when is_binary(node_key) do
     case get_node(dialogue, node_key) do
       nil -> []
       node -> Map.get(node, "choices") || Map.get(node, :choices, [])
@@ -180,8 +180,8 @@ defmodule Loka.Content.Dialogue do
   @doc """
   Gets text for a node.
   """
-  @spec node_text(TypedObject.t(), String.t()) :: String.t() | nil
-  def node_text(%TypedObject{} = dialogue, node_key) when is_binary(node_key) do
+  @spec node_text(Entity.t(), String.t()) :: String.t() | nil
+  def node_text(%Entity{} = dialogue, node_key) when is_binary(node_key) do
     case get_node(dialogue, node_key) do
       nil -> nil
       node -> Map.get(node, "text") || Map.get(node, :text)
@@ -191,8 +191,8 @@ defmodule Loka.Content.Dialogue do
   @doc """
   Validates a dialogue definition.
   """
-  @spec validate(TypedObject.t()) :: :ok | {:error, [String.t()]}
-  def validate(%TypedObject{type: :dialogue} = dialogue) do
+  @spec validate(Entity.t()) :: :ok | {:error, [String.t()]}
+  def validate(%Entity{type: :dialogue} = dialogue) do
     errors =
       []
       |> validate_has_nodes(dialogue)
@@ -202,7 +202,7 @@ defmodule Loka.Content.Dialogue do
     if Enum.empty?(errors), do: :ok, else: {:error, errors}
   end
 
-  def validate(%TypedObject{type: type}) do
+  def validate(%Entity{type: type}) do
     {:error, ["Expected dialogue type, got: #{type}"]}
   end
 
@@ -252,15 +252,5 @@ defmodule Loka.Content.Dialogue do
     else
       ["broken node references: #{inspect(broken_links)}" | errors]
     end
-  end
-
-  defp to_typed_objects(entities) do
-    entities
-    |> Enum.flat_map(fn entity ->
-      case Entity.to_typed_object(entity) do
-        {:ok, typed_object} -> [typed_object]
-        {:error, _} -> []
-      end
-    end)
   end
 end

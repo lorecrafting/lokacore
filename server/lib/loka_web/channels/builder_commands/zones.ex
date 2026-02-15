@@ -3,7 +3,6 @@ defmodule LokaWeb.Channels.BuilderCommands.Zones do
   Zone CRUD commands: create zone, edit zone, delete zone, zone info.
   """
 
-  alias Loka.Engine.TypedObject.Loader
   alias Loka.Content.Zone
   alias Loka.WorldBuilder.YamlBuilder
   alias LokaWeb.Channels.BuilderCommands.Helpers
@@ -24,7 +23,6 @@ defmodule LokaWeb.Channels.BuilderCommands.Zones do
 
         case File.write(file_path, yaml_content) do
           :ok ->
-            Loader.reload_file(file_path)
             {:ok, "Zone '#{key}' (#{name}) created.", socket}
 
           {:error, reason} ->
@@ -36,7 +34,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Zones do
   def execute(:edit_zone, %{key: key, field: nil}, socket) do
     case Zone.get(key) do
       {:ok, zone} ->
-        yaml_text = Helpers.format_typed_object(zone)
+        yaml_text = Helpers.format_entity(zone)
         {:ok, "Zone '#{key}'#{Helpers.draft_tag(zone)}:\n#{yaml_text}", socket}
 
       {:error, :not_found} ->
@@ -47,11 +45,11 @@ defmodule LokaWeb.Channels.BuilderCommands.Zones do
   def execute(:edit_zone, %{key: key, field: field, value: value}, socket) do
     case Zone.get(key) do
       {:ok, zone} ->
-        updated_data = Map.put(zone.data, field, value)
+        zone_data = (zone.components || %{})["data"] || %{}
+        updated_data = Map.put(zone_data, field, value)
 
-        case save_zone_yaml(key, updated_data, zone.name) do
+        case save_zone_yaml(key, updated_data, zone.short_desc) do
           :ok ->
-            Loader.reload_file(Path.join(@zones_dir, "#{key}.yml"))
             {:ok, "Updated zone '#{key}': #{field} = #{value}", socket}
 
           {:error, reason} ->
@@ -69,7 +67,6 @@ defmodule LokaWeb.Channels.BuilderCommands.Zones do
     if File.exists?(file_path) do
       case File.rm(file_path) do
         :ok ->
-          Loader.remove(key)
           {:ok, "Zone '#{key}' deleted.", socket}
 
         {:error, reason} ->

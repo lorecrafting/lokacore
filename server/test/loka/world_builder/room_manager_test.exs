@@ -2,17 +2,6 @@ defmodule Loka.WorldBuilder.RoomManagerTest do
   use Loka.DataCase, async: false
 
   alias Loka.WorldBuilder.RoomManager
-  alias Loka.Engine.TypedObject.Registry
-  alias Loka.TestCleanup
-
-  # Clean up test files after all tests complete (runs even if tests fail)
-  setup_all do
-    on_exit(fn ->
-      TestCleanup.cleanup_room_test_files()
-    end)
-
-    :ok
-  end
 
   describe "list_rooms/0" do
     test "returns an empty list when no rooms exist" do

@@ -61,9 +61,9 @@ defmodule Loka.Testing.QuestStrategy do
 
   @behaviour Loka.Testing.Bot.Strategy
 
-  alias Loka.Framework.Storyline.Storyline
   alias Loka.Content
-  alias Loka.Framework.Quest
+  alias Loka.Content.Storyline
+  alias Loka.Content
   alias Loka.Engine.Entities
   alias Loka.Testing.Bot.BotHelpers
 
@@ -511,7 +511,7 @@ defmodule Loka.Testing.QuestStrategy do
           all_objectives_complete =
             case state.dialogue_goal do
               {:complete_quest, quest_id} ->
-                case Quest.get_quest_definition(quest_id) do
+                case Content.Quest.definition(quest_id) do
                   nil ->
                     false
 
@@ -770,7 +770,7 @@ defmodule Loka.Testing.QuestStrategy do
   defp work_on_quest(context, state, quest_id) do
     Logger.info("[STRATEGY] work_on_quest: #{quest_id}")
 
-    case Quest.get_quest_definition(quest_id) do
+    case Content.Quest.definition(quest_id) do
       nil ->
         Logger.info("[STRATEGY] quest definition not found: #{quest_id}")
         state = %{state | phase: :failed, failure_reason: {:quest_not_found, quest_id}}
@@ -1444,7 +1444,7 @@ defmodule Loka.Testing.QuestStrategy do
   end
 
   defp find_quest_giver(quest_id) do
-    case Quest.get_quest_definition(quest_id) do
+    case Content.Quest.definition(quest_id) do
       nil ->
         {:error, :not_found}
 

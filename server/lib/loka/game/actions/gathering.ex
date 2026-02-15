@@ -90,85 +90,9 @@ defmodule Loka.Game.Actions.Gathering do
   """
   @spec craft(Context.t(), String.t(), String.t() | nil) ::
           {:ok, Result.t()} | {:error, String.t()}
-  def craft(ctx, recipe_key, _tool_id) do
-    alias Loka.Framework.Crafting
-    alias LokaWeb.Channels.GameChannel.Serializers
-    alias Loka.Framework.Quest
-
-    character = ctx.character
-
-    Logger.debug("[GATHERING] Craft action: recipe=#{recipe_key}")
-
-    case Crafting.craft(character, recipe_key) do
-      {:ok, character_after_craft, craft_result} ->
-        # Spawn output items and add to inventory
-        {spawned_ids, inventory_updates} =
-          if craft_result.success do
-            ids =
-              Enum.flat_map(craft_result.items, fn %{item: item_key, quantity: qty} ->
-                Enum.map(1..qty, fn _ ->
-                  case Spawner.spawn(item_key, []) do
-                    {:ok, entity} -> entity.id
-                    _ -> nil
-                  end
-                end)
-              end)
-              |> Enum.reject(&is_nil/1)
-
-            updates =
-              Enum.map(ids, fn id -> {:inventory_update, %{action: "add", item_id: id}} end)
-
-            {ids, updates}
-          else
-            {[], []}
-          end
-
-        # Update inventory with spawned items
-        inventory = Entity.get_component(character_after_craft, "inventory") || []
-        new_inventory = spawned_ids ++ inventory
-        final_character = Entity.add_component(character_after_craft, "inventory", new_inventory)
-
-        # Build message from result
-        craft_message =
-          if craft_result.success do
-            items_list =
-              craft_result.items
-              |> Enum.map(fn item -> "#{item.quantity}x #{format_item_name(item.item)}" end)
-              |> Enum.join(", ")
-
-            "#{craft_result.message} You created #{items_list}."
-          else
-            craft_result.message
-          end
-
-        # Build quest progress event if there were quest updates
-        quest_events = craft_result[:quest_events] || []
-
-        quest_progress_event =
-          if Enum.any?(quest_events) do
-            active_quests = Quest.get_active_quests(final_character)
-            [{:quest_progress, %{quests: Serializers.serialize_quests(active_quests)}}]
-          else
-            []
-          end
-
-        events =
-          [{:event, craft_message}] ++
-            Enum.map(quest_events, fn e -> {:event, e[:text] || e.text} end) ++
-            quest_progress_event ++
-            inventory_updates
-
-        result =
-          Result.new(
-            state: %{character: final_character},
-            events: events
-          )
-
-        {:ok, result}
-
-      {:error, reason} ->
-        {:error, reason}
-    end
+  def craft(_ctx, _recipe_key, _tool_id) do
+    # V2: Crafting system deleted, will be reimplemented as entity behavior
+    {:error, "Crafting is not yet available."}
   end
 
   # =============================================================================

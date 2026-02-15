@@ -3,31 +3,33 @@ defmodule LokaWeb.Channels.BuilderCommands.Publishing do
   Publish and unpublish commands for draft content.
 
   Moves files between `priv/world/drafts/<type>/` and `priv/world/<type>/`,
-  then reloads the TypedObject registry so the draft flag is updated.
+  then syncs the entity's draft flag in the database.
   """
 
   require Logger
 
-  alias Loka.Engine.Entities
-  alias Loka.Engine.TypedObject
-  alias Loka.Engine.TypedObject.Loader
+  alias Loka.Engine.{Entity, Entities}
+  alias Loka.Engine.Constants.WorldPaths
 
   @world_dir :code.priv_dir(:loka) |> Path.join("world")
 
-  # Derive publishable types from the single source of truth in TypedObject.
-  # These are strings because publishing operates on user-facing commands and file paths.
-  @valid_types TypedObject.publishable_content_types() |> Enum.map(&Atom.to_string/1)
-  @entity_types TypedObject.publishable_entity_subtypes() |> Enum.map(&Atom.to_string/1)
+  @valid_types ~w(quest dialogue script zone cutscene storyline)
+  @entity_types ~w(room npc item)
 
-  # Map content type string to directory name, derived from TypedObject
-  @type_to_dir Map.new(TypedObject.publishable_content_types(), fn type ->
-                 {Atom.to_string(type), TypedObject.content_dir(type)}
-               end)
+  @type_to_dir %{
+    "quest" => WorldPaths.quests_dir() |> Path.relative_to(WorldPaths.world_dir()),
+    "dialogue" => WorldPaths.dialogues_dir() |> Path.relative_to(WorldPaths.world_dir()),
+    "script" => WorldPaths.scripts_dir() |> Path.relative_to(WorldPaths.world_dir()),
+    "zone" => WorldPaths.zones_dir() |> Path.relative_to(WorldPaths.world_dir()),
+    "cutscene" => WorldPaths.cutscenes_dir() |> Path.relative_to(WorldPaths.world_dir()),
+    "storyline" => WorldPaths.storylines_dir() |> Path.relative_to(WorldPaths.world_dir())
+  }
 
-  # Map entity subtype string to prototype subdirectory, derived from TypedObject
-  @entity_to_subdir Map.new(TypedObject.publishable_entity_subtypes(), fn subtype ->
-                      {Atom.to_string(subtype), TypedObject.entity_dir(subtype)}
-                    end)
+  @entity_to_subdir %{
+    "room" => WorldPaths.rooms_dir() |> Path.relative_to(WorldPaths.world_dir()),
+    "npc" => WorldPaths.npcs_dir() |> Path.relative_to(WorldPaths.world_dir()),
+    "item" => WorldPaths.items_dir() |> Path.relative_to(WorldPaths.world_dir())
+  }
 
   def execute(:publish, %{type: type, key: key, force: true}, socket) do
     case do_publish(type, key) do
@@ -54,7 +56,10 @@ defmodule LokaWeb.Channels.BuilderCommands.Publishing do
     draft_path = Path.join([@world_dir, "drafts", dir_name, "#{key}.yml"])
     published_path = Path.join([@world_dir, dir_name, "#{key}.yml"])
 
-    move_and_reload(draft_path, published_path, key, "Published")
+    with {:ok, message} <- move_and_sync(draft_path, published_path, key, "Published") do
+      sync_entity_draft_flag(key, false)
+      {:ok, message}
+    end
   end
 
   defp do_publish(type, key) when type in @entity_types do
@@ -62,7 +67,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Publishing do
     draft_path = Path.join([@world_dir, "drafts", subdir, "#{key}.yml"])
     published_path = Path.join([@world_dir, subdir, "#{key}.yml"])
 
-    with {:ok, message} <- move_and_reload(draft_path, published_path, key, "Published") do
+    with {:ok, message} <- move_and_sync(draft_path, published_path, key, "Published") do
       sync_entity_draft_flag(key, false)
       {:ok, message}
     end
@@ -70,13 +75,14 @@ defmodule LokaWeb.Channels.BuilderCommands.Publishing do
 
   defp do_publish("zone_all", zone_key) do
     # Publish a zone and all its associated content (transactional)
-    case Loader.get(zone_key) do
-      {:ok, %TypedObject{type: :zone} = zone} ->
+    # First look up by key (any type), then verify it's a zone
+    case Entities.find_one(key: zone_key) do
+      {:ok, %Entity{type: :zone} = zone} ->
         # Publish the zone file first
         case do_publish("zone", zone_key) do
           {:ok, _} ->
-            # Track successfully published files for rollback
-            rooms = Map.get(zone.data, "rooms") || Map.get(zone.data, :rooms, [])
+            data = zone.components["data"] || %{}
+            rooms = Map.get(data, "rooms") || []
 
             {published_rooms, failed} =
               Enum.reduce_while(rooms, {[], nil}, fn room_key, {acc, _} ->
@@ -116,7 +122,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Publishing do
             {:error, "Failed to publish zone '#{zone_key}': #{reason}"}
         end
 
-      {:ok, _} ->
+      {:ok, _other} ->
         {:error, "Key '#{zone_key}' is not a zone."}
 
       {:error, :not_found} ->
@@ -134,7 +140,10 @@ defmodule LokaWeb.Channels.BuilderCommands.Publishing do
     published_path = Path.join([@world_dir, dir_name, "#{key}.yml"])
     draft_path = Path.join([@world_dir, "drafts", dir_name, "#{key}.yml"])
 
-    move_and_reload(published_path, draft_path, key, "Unpublished")
+    with {:ok, message} <- move_and_sync(published_path, draft_path, key, "Unpublished") do
+      sync_entity_draft_flag(key, true)
+      {:ok, message}
+    end
   end
 
   defp do_unpublish(type, key) when type in @entity_types do
@@ -142,7 +151,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Publishing do
     published_path = Path.join([@world_dir, subdir, "#{key}.yml"])
     draft_path = Path.join([@world_dir, "drafts", subdir, "#{key}.yml"])
 
-    with {:ok, message} <- move_and_reload(published_path, draft_path, key, "Unpublished") do
+    with {:ok, message} <- move_and_sync(published_path, draft_path, key, "Unpublished") do
       sync_entity_draft_flag(key, true)
       {:ok, message}
     end
@@ -154,8 +163,6 @@ defmodule LokaWeb.Channels.BuilderCommands.Publishing do
   end
 
   # Sync the draft flag on a spawned entity after publish/unpublish.
-  # The YAML registry is updated by reload_file, but the live DB entity
-  # retains its original metadata until explicitly updated.
   # Best-effort: if no entity exists (e.g. content-only types), this is a no-op.
   defp sync_entity_draft_flag(key, is_draft) do
     try do
@@ -178,7 +185,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Publishing do
     end
   end
 
-  defp move_and_reload(source, destination, key, action_label) do
+  defp move_and_sync(source, destination, key, action_label) do
     cond do
       not File.exists?(source) ->
         {:error, "Source file not found: #{Path.relative_to_cwd(source)}"}
@@ -194,25 +201,11 @@ defmodule LokaWeb.Channels.BuilderCommands.Publishing do
 
         case File.rename(source, destination) do
           :ok ->
-            # Reload from new path (replaces registry entry with updated draft flag)
-            case Loader.reload_file(destination) do
-              {:ok, _loaded_key} ->
-                Logger.info(
-                  "#{action_label} content: #{key} (#{Path.relative_to_cwd(source)} -> #{Path.relative_to_cwd(destination)})"
-                )
+            Logger.info(
+              "#{action_label} content: #{key} (#{Path.relative_to_cwd(source)} -> #{Path.relative_to_cwd(destination)})"
+            )
 
-                {:ok, "#{action_label} '#{key}' successfully."}
-
-              {:error, reason} ->
-                # Rollback: move the file back to its original location
-                File.rename(destination, source)
-
-                Logger.warning(
-                  "Rolled back #{String.downcase(action_label)} of '#{key}': reload failed with #{inspect(reason)}"
-                )
-
-                {:error, "Failed to reload after move: #{inspect(reason)}"}
-            end
+            {:ok, "#{action_label} '#{key}' successfully."}
 
           {:error, reason} ->
             {:error, "Failed to move file: #{inspect(reason)}"}

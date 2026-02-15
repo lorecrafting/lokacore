@@ -9,7 +9,7 @@ defmodule LokaWeb.Channels.RoomHelpers do
   """
 
   alias Loka.Framework.World.RoomLoader
-  alias Loka.Engine.{Entities, Entity, EntityRegistry, EntityServer, WorldGraph, WorldLoader}
+  alias Loka.Engine.{Entities, Entity, EntityRegistry, EntityServer, WorldGraph}
 
   # ETS table for minimap cache
   @minimap_cache_table :loka_minimap_cache
@@ -45,7 +45,7 @@ defmodule LokaWeb.Channels.RoomHelpers do
         {room, game_state}
 
       {:error, :not_found} ->
-        starting_room_id = RoomLoader.get_starting_room_id() || WorldLoader.get_starting_room_id()
+        starting_room_id = RoomLoader.get_starting_room_id()
 
         case try_load_room(starting_room_id) do
           {:ok, room} ->
@@ -70,7 +70,7 @@ defmodule LokaWeb.Channels.RoomHelpers do
         {room, character}
 
       {:error, :not_found} ->
-        starting_room_id = RoomLoader.get_starting_room_id() || WorldLoader.get_starting_room_id()
+        starting_room_id = RoomLoader.get_starting_room_id()
 
         case try_load_room(starting_room_id) do
           {:ok, room} ->

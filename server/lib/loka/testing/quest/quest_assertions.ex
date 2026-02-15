@@ -31,7 +31,7 @@ defmodule Loka.Testing.Quest.QuestAssertions do
   All assertions raise `ExUnit.AssertionError` on failure.
   """
 
-  alias Loka.Framework.Quest
+  alias Loka.Framework.Quest.Progress, as: Quest
   alias Loka.Admin.GameLog
 
   @doc """

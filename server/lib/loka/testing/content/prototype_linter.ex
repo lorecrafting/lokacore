@@ -34,7 +34,7 @@ defmodule Loka.Testing.Content.PrototypeLinter do
 
   require Logger
 
-  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
+  alias Loka.Engine.Entities
 
   @type lint_result :: %{
           files_checked: non_neg_integer(),
@@ -56,7 +56,21 @@ defmodule Loka.Testing.Content.PrototypeLinter do
           | {:unknown_component, String.t(), String.t(), String.t()}
           | {:primary_keyword_not_in_long_desc, String.t(), String.t(), String.t(), String.t()}
 
-  @valid_types [:room, :npc, :item, :exit, :player]
+  @valid_types [
+    :room,
+    :npc,
+    :item,
+    :exit,
+    :player,
+    :quest,
+    :recipe,
+    :resource,
+    :script,
+    :skill,
+    :status,
+    :storyline,
+    :zone
+  ]
 
   @known_components [
     # Combat & Stats
@@ -127,7 +141,7 @@ defmodule Loka.Testing.Content.PrototypeLinter do
   """
   @spec lint() :: {:ok, lint_result()}
   def lint do
-    all_prototypes = TypedObjectLoader.list_by_type(:entity)
+    all_prototypes = Entities.find_all(is_prototype: true)
 
     {errors, warnings} =
       Enum.reduce(all_prototypes, {[], []}, fn proto, {errs, warns} ->
@@ -156,7 +170,7 @@ defmodule Loka.Testing.Content.PrototypeLinter do
   """
   @spec lint_prototype(String.t()) :: {:ok, {[error()], [warning()]}} | {:error, :not_found}
   def lint_prototype(key) do
-    case TypedObjectLoader.get(key) do
+    case Entities.find_one(key: key) do
       {:error, :not_found} ->
         {:error, :not_found}
 
@@ -248,14 +262,14 @@ defmodule Loka.Testing.Content.PrototypeLinter do
   defp check_type(key, proto, errors, warnings) do
     cond do
       # Base prototypes in _base/ directory have nil subtype by design
-      is_nil(proto.subtype) and String.starts_with?(proto.key || "", "base_") ->
+      is_nil(proto.type) and String.starts_with?(proto.key || "", "base_") ->
         {errors, warnings}
 
-      is_nil(proto.subtype) ->
+      is_nil(proto.type) ->
         {[{:missing_type, key, proto.key || "unknown"} | errors], warnings}
 
-      proto.subtype not in @valid_types ->
-        {[{:invalid_type, key, proto.key || "unknown", proto.subtype} | errors], warnings}
+      proto.type not in @valid_types ->
+        {[{:invalid_type, key, proto.key || "unknown", proto.type} | errors], warnings}
 
       true ->
         {errors, warnings}
@@ -263,10 +277,12 @@ defmodule Loka.Testing.Content.PrototypeLinter do
   end
 
   defp check_parent(key, proto, errors, warnings) do
-    if proto.parent_key do
-      case TypedObjectLoader.get(proto.parent_key) do
+    parent_key = (proto.metadata || %{})["parent_key"]
+
+    if parent_key do
+      case Entities.find_one(key: parent_key) do
         {:error, :not_found} ->
-          {[{:invalid_parent, key, proto.parent_key} | errors], warnings}
+          {[{:invalid_parent, key, parent_key} | errors], warnings}
 
         {:ok, _} ->
           {errors, warnings}
@@ -311,7 +327,7 @@ defmodule Loka.Testing.Content.PrototypeLinter do
   end
 
   defp check_description(key, proto, errors, warnings) do
-    if is_nil(proto.extra_description) or proto.extra_description == "" do
+    if is_nil(proto.extra_desc) or proto.extra_desc == "" do
       # Only warn for non-base prototypes
       if not String.starts_with?(proto.key || "", "base_") do
         {errors, [{:empty_description, key, proto.key || "unknown"} | warnings]}
@@ -329,12 +345,11 @@ defmodule Loka.Testing.Content.PrototypeLinter do
     # Only check for types that are displayed in rooms
     displayable_types = [:npc, :item]
 
-    primary_keyword =
-      Map.get(proto.data, "primary_keyword") || Map.get(proto.data, :primary_keyword)
+    primary_keyword = proto.primary_keyword
 
     cond do
       # Skip if not a displayable type
-      proto.subtype not in displayable_types ->
+      proto.type not in displayable_types ->
         {errors, warnings}
 
       # Skip if no primary_keyword
@@ -342,7 +357,7 @@ defmodule Loka.Testing.Content.PrototypeLinter do
         {errors, warnings}
 
       # Skip if no long_desc
-      is_nil(proto.description) or proto.description == "" ->
+      is_nil(proto.long_desc) or proto.long_desc == "" ->
         {errors, warnings}
 
       # Skip base prototypes
@@ -351,7 +366,7 @@ defmodule Loka.Testing.Content.PrototypeLinter do
 
       # Check if primary_keyword appears in long_desc (case insensitive)
       true ->
-        long_desc_lower = String.downcase(proto.description)
+        long_desc_lower = String.downcase(proto.long_desc)
         keyword_lower = String.downcase(primary_keyword)
 
         if String.contains?(long_desc_lower, keyword_lower) do
@@ -359,7 +374,7 @@ defmodule Loka.Testing.Content.PrototypeLinter do
         else
           warning =
             {:primary_keyword_not_in_long_desc, key, proto.key || "unknown", primary_keyword,
-             proto.description}
+             proto.long_desc}
 
           {errors, [warning | warnings]}
         end

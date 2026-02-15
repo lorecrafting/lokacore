@@ -63,7 +63,7 @@ defmodule Loka.Framework.Quest.ObjectiveHandler do
   - `:talk` - Talk to NPCs (target_id, dialogue_topic)
   """
 
-  alias Loka.Framework.Quest.Definitions.Objective
+  # Objectives are now plain maps with atom keys (id, type, target_id, etc.)
 
   @doc """
   Returns the objective type this handler manages.
@@ -87,7 +87,7 @@ defmodule Loka.Framework.Quest.ObjectiveHandler do
   - `true` if this event should trigger progress on this objective
   - `false` otherwise
   """
-  @callback matches?(objective_def :: Objective.t() | map(), event :: map()) :: boolean()
+  @callback matches?(objective_def :: map(), event :: map()) :: boolean()
 
   @doc """
   Calculates new progress after an event.
@@ -105,7 +105,7 @@ defmodule Loka.Framework.Quest.ObjectiveHandler do
   The new progress value (integer).
   """
   @callback progress(
-              objective_def :: Objective.t() | map(),
+              objective_def :: map(),
               event :: map(),
               current_progress :: non_neg_integer()
             ) ::
@@ -124,7 +124,7 @@ defmodule Loka.Framework.Quest.ObjectiveHandler do
   - `true` if the objective should be marked complete
   - `false` otherwise
   """
-  @callback is_complete?(objective_def :: Objective.t() | map(), progress :: non_neg_integer()) ::
+  @callback is_complete?(objective_def :: map(), progress :: non_neg_integer()) ::
               boolean()
 
   @doc """
@@ -141,7 +141,7 @@ defmodule Loka.Framework.Quest.ObjectiveHandler do
   - `:ok` if the definition is valid
   - `{:error, reason}` with a descriptive error message
   """
-  @callback validate(objective_def :: Objective.t() | map()) :: :ok | {:error, String.t()}
+  @callback validate(objective_def :: map()) :: :ok | {:error, String.t()}
 
   @doc """
   Generates a human-readable description of the objective with current progress.
@@ -157,7 +157,7 @@ defmodule Loka.Framework.Quest.ObjectiveHandler do
 
   A string describing the objective and its progress.
   """
-  @callback description(objective_def :: Objective.t() | map(), progress :: non_neg_integer()) ::
+  @callback description(objective_def :: map(), progress :: non_neg_integer()) ::
               String.t()
 
   @optional_callbacks [description: 2]

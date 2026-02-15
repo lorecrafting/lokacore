@@ -71,9 +71,10 @@ defmodule Loka.Framework.Quest.Journal do
 
   require Logger
 
+  alias Loka.Content
   alias Loka.Engine.Entity
   alias Loka.Framework.Conditions.Evaluator
-  alias Loka.Framework.Quest.{Definitions, Progress, TimerManager}
+  alias Loka.Framework.Quest.{Progress, TimerManager}
 
   @doc """
   Renders all visible journal entries for a quest.
@@ -81,7 +82,7 @@ defmodule Loka.Framework.Quest.Journal do
   Returns a list of rendered entries with their IDs and text.
   """
   def render_journal(%Entity{} = state, quest_id) do
-    case Definitions.get_quest_definition(quest_id) do
+    case Content.Quest.definition(quest_id) do
       nil ->
         {:error, :quest_not_found}
 
@@ -113,7 +114,7 @@ defmodule Loka.Framework.Quest.Journal do
   Returns `{:ok, text}` or `{:error, reason}`.
   """
   def render_entry(%Entity{} = state, quest_id, entry_id) do
-    case Definitions.get_quest_definition(quest_id) do
+    case Content.Quest.definition(quest_id) do
       nil ->
         {:error, :quest_not_found}
 
@@ -136,7 +137,7 @@ defmodule Loka.Framework.Quest.Journal do
   Checks if a journal entry is visible based on conditions.
   """
   def entry_visible?(%Entity{} = state, quest_id, entry_id, progress \\ nil) do
-    case Definitions.get_quest_definition(quest_id) do
+    case Content.Quest.definition(quest_id) do
       nil ->
         false
 
@@ -158,7 +159,7 @@ defmodule Loka.Framework.Quest.Journal do
   Returns a map with current quest state useful for journal rendering.
   """
   def get_journal_context(%Entity{} = state, quest_id) do
-    quest_def = Definitions.get_quest_definition(quest_id)
+    quest_def = Content.Quest.definition(quest_id)
     progress = Progress.get_quest_progress(state, quest_id)
 
     objectives =
@@ -263,7 +264,7 @@ defmodule Loka.Framework.Quest.Journal do
   end
 
   defp build_journal_bindings(%Entity{} = entity, quest_id, progress) do
-    quest_def = Definitions.get_quest_definition(quest_id)
+    quest_def = Content.Quest.definition(quest_id)
     stats = Entity.get_component(entity, "stats") || %{}
     flags = Entity.get_component(entity, "flags") || %{}
     inventory = Entity.get_component(entity, "inventory") || []
@@ -422,7 +423,7 @@ defmodule Loka.Framework.Quest.Journal do
   end
 
   defp get_quest_name(quest_id) do
-    case Definitions.get_quest_definition(quest_id) do
+    case Content.Quest.definition(quest_id) do
       nil -> quest_id
       quest -> quest.name || quest_id
     end

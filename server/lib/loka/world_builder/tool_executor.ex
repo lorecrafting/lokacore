@@ -21,63 +21,32 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
   alias Loka.WorldBuilder.LLM.ObservabilityLogger
   alias Loka.Content.{Zone, Dialogue}
-  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
+  alias Loka.Engine.Entities
 
   @doc """
-  Execute a function with deferred TypedObject reloads.
+  Execute a function with deferred processing.
 
-  All `Loader.reload_file/1` and `Loader.remove/1` calls within the function
-  are accumulated; they execute after the function completes. Use this when
-  executing multiple tool calls in sequence (e.g., AI conversation turns).
+  In V2, there's no ETS registry to reload. This wrapper is kept for API
+  compatibility with AI conversation turns.
   """
   def with_deferred_reload(fun) do
     Process.put(:loka_defer_reload, true)
-    Process.put(:loka_deferred_paths, [])
-    Process.put(:loka_deferred_removals, [])
 
     try do
-      result = fun.()
-
-      # Process accumulated removals
-      Process.get(:loka_deferred_removals, [])
-      |> Enum.uniq()
-      |> Enum.each(&TypedObjectLoader.remove/1)
-
-      # Reload all accumulated file paths
-      Process.get(:loka_deferred_paths, [])
-      |> Enum.uniq()
-      |> Enum.each(&TypedObjectLoader.reload_file/1)
-
-      result
+      fun.()
     after
       Process.delete(:loka_defer_reload)
-      Process.delete(:loka_deferred_paths)
-      Process.delete(:loka_deferred_removals)
     end
   end
 
-  defp maybe_reload_file(file_path) do
-    unless Process.get(:loka_defer_reload) do
-      TypedObjectLoader.reload_file(file_path)
-    else
-      paths = Process.get(:loka_deferred_paths, [])
-      Process.put(:loka_deferred_paths, [file_path | paths])
-    end
-  end
+  # No-op in V2 (no ETS registry to reload)
+  defp maybe_reload_file(_file_path), do: :ok
 
-  defp maybe_remove(key) do
-    unless Process.get(:loka_defer_reload) do
-      TypedObjectLoader.remove(key)
-    else
-      removals = Process.get(:loka_deferred_removals, [])
-      Process.put(:loka_deferred_removals, [key | removals])
-    end
-  end
+  # No-op in V2
+  defp maybe_remove(_key), do: :ok
 
-  # Fallback for operations where we can't easily determine the file path
-  defp maybe_reload_all do
-    unless Process.get(:loka_defer_reload), do: TypedObjectLoader.reload()
-  end
+  # No-op in V2
+  defp maybe_reload_all, do: :ok
 
   @doc """
   Execute a tool call and return the result.
@@ -827,15 +796,17 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
     case Dialogue.get(dialogue_key) do
       {:ok, dialogue} ->
+        data = (dialogue.components || %{})["data"] || %{}
+
         {:ok,
          %{
            success: true,
            dialogue: %{
              key: dialogue.key,
-             entity_key: get_in(dialogue.data, ["entity_key"]),
-             trigger: get_in(dialogue.data, ["trigger"]),
-             entry_node: get_in(dialogue.data, ["entry_node"]),
-             nodes: get_in(dialogue.data, ["nodes"]) || %{}
+             entity_key: data["entity_key"],
+             trigger: data["trigger"],
+             entry_node: data["entry_node"],
+             nodes: data["nodes"] || %{}
            }
          }}
 
@@ -857,20 +828,22 @@ defmodule Loka.WorldBuilder.ToolExecutor do
             raw_nodes
           end
 
-        updated_data = Map.put(existing.data, "nodes", nodes)
+        existing_data = (existing.components || %{})["data"] || %{}
+        updated_data = Map.put(existing_data, "nodes", nodes)
+        updated_components = Map.put(existing.components || %{}, "data", updated_data)
 
         updated_attrs =
           existing
           |> Map.from_struct()
-          |> Map.put(:data, updated_data)
+          |> Map.put(:components, updated_components)
 
-        case Loka.Engine.TypedObject.new(updated_attrs) do
-          {:ok, _typed_object} ->
+        case Loka.Engine.Entity.new(updated_attrs) do
+          {:ok, _entity} ->
             ensure_dialogues_dir()
             yaml_path = dialogue_yaml_path(key)
-            entity_key = get_in(existing.data, ["entity_key"])
-            trigger = get_in(existing.data, ["trigger"]) || "on_talk"
-            entry_node = get_in(existing.data, ["entry_node"]) || "greeting"
+            entity_key = existing_data["entity_key"]
+            trigger = existing_data["trigger"] || "on_talk"
+            entry_node = existing_data["entry_node"] || "greeting"
 
             yaml_content = build_dialogue_yaml(key, entity_key, trigger, entry_node, nodes)
 
@@ -919,7 +892,8 @@ defmodule Loka.WorldBuilder.ToolExecutor do
     filtered =
       if npc = input["npc"] do
         Enum.filter(dialogues, fn d ->
-          (get_in(d.data, ["entity_key"]) || "") == npc
+          data = (d.components || %{})["data"] || %{}
+          (data["entity_key"] || "") == npc
         end)
       else
         dialogues
@@ -927,10 +901,12 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
     list =
       Enum.map(filtered, fn d ->
+        data = (d.components || %{})["data"] || %{}
+
         %{
           key: d.key,
-          entity_key: get_in(d.data, ["entity_key"]),
-          node_count: map_size(get_in(d.data, ["nodes"]) || %{})
+          entity_key: data["entity_key"],
+          node_count: map_size(data["nodes"] || %{})
         }
       end)
 
@@ -955,15 +931,17 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
     case Zone.get(zone_key) do
       {:ok, zone} ->
+        data = (zone.components || %{})["data"] || %{}
+
         {:ok,
          %{
            success: true,
            zone: %{
              key: zone.key,
-             name: zone.name,
-             description: zone.description,
-             level_range: zone.attributes[:level_range] || zone[:level_range],
-             rooms: get_in(zone.data, ["rooms"]) || [],
+             name: zone.short_desc,
+             description: zone.extra_desc,
+             level_range: data["level_range"],
+             rooms: data["rooms"] || [],
              tags: zone.tags || []
            }
          }}
@@ -981,8 +959,8 @@ defmodule Loka.WorldBuilder.ToolExecutor do
         rooms = get_zone_rooms(zone)
 
         %{
-          key: get_safe_field(zone, :key),
-          name: get_safe_field(zone, :name),
+          key: zone.key,
+          name: zone.short_desc || zone.key,
           room_count: length(rooms)
         }
       end)
@@ -996,13 +974,8 @@ defmodule Loka.WorldBuilder.ToolExecutor do
   end
 
   defp get_zone_rooms(zone) do
-    data = get_safe_field(zone, :data)
-
-    cond do
-      is_map(data) && Map.has_key?(data, "rooms") -> data["rooms"] || []
-      is_map(data) && Map.has_key?(data, :rooms) -> data[:rooms] || []
-      true -> []
-    end
+    data = (get_safe_field(zone, :components) || %{})["data"] || %{}
+    data["rooms"] || []
   end
 
   # =============================================================================
@@ -1053,9 +1026,10 @@ defmodule Loka.WorldBuilder.ToolExecutor do
     case Zone.get(key) do
       {:ok, zone} ->
         updates = Map.drop(input, ["key"])
-        updated_data = Enum.reduce(updates, zone.data, fn {k, v}, acc -> Map.put(acc, k, v) end)
+        zone_data = (zone.components || %{})["data"] || %{}
+        updated_data = Enum.reduce(updates, zone_data, fn {k, v}, acc -> Map.put(acc, k, v) end)
 
-        name = updates["name"] || zone.name || key
+        name = updates["name"] || zone.short_desc || key
 
         yaml_content =
           YamlBuilder.build_zone_yaml(key, name,
@@ -1136,11 +1110,12 @@ defmodule Loka.WorldBuilder.ToolExecutor do
   defp execute_update_cutscene(input) do
     key = input["key"]
 
-    case TypedObjectLoader.get(key) do
-      {:ok, %{type: :cutscene} = cs} ->
-        name = input["name"] || cs.name || key
-        trigger = input["trigger"] || get_in(cs.data, ["trigger"]) || "manual"
-        scenes = input["scenes"] || get_in(cs.data, ["scenes"]) || []
+    case Entities.find_one(key: key, type: :cutscene) do
+      {:ok, cs} ->
+        cs_data = (cs.components || %{})["data"] || %{}
+        name = input["name"] || cs.short_desc || key
+        trigger = input["trigger"] || cs_data["trigger"] || "manual"
+        scenes = input["scenes"] || cs_data["scenes"] || []
 
         yaml_content = YamlBuilder.build_cutscene_yaml(key, name, trigger, scenes)
 
@@ -1179,16 +1154,18 @@ defmodule Loka.WorldBuilder.ToolExecutor do
   defp execute_get_cutscene(input) do
     key = input["key"]
 
-    case TypedObjectLoader.get(key) do
-      {:ok, %{type: :cutscene} = cs} ->
+    case Entities.find_one(key: key, type: :cutscene) do
+      {:ok, cs} ->
+        cs_data = (cs.components || %{})["data"] || %{}
+
         {:ok,
          %{
            success: true,
            cutscene: %{
              key: cs.key,
-             name: cs.name,
-             trigger: get_in(cs.data, ["trigger"]),
-             scenes: get_in(cs.data, ["scenes"]) || []
+             name: cs.short_desc,
+             trigger: cs_data["trigger"],
+             scenes: cs_data["scenes"] || []
            }
          }}
 
@@ -1198,12 +1175,13 @@ defmodule Loka.WorldBuilder.ToolExecutor do
   end
 
   defp execute_list_cutscenes(_input) do
-    cutscenes = TypedObjectLoader.list_by_type(:cutscene)
+    cutscenes = Entities.find_all(type: :cutscene, is_prototype: true)
 
     list =
       Enum.map(cutscenes, fn c ->
-        scenes = get_in(c.data, ["scenes"]) || []
-        %{key: c.key, name: c.name || c.key, scene_count: length(scenes)}
+        c_data = (c.components || %{})["data"] || %{}
+        scenes = c_data["scenes"] || []
+        %{key: c.key, name: c.short_desc || c.key, scene_count: length(scenes)}
       end)
 
     {:ok, %{success: true, message: "Found #{length(list)} cutscenes", cutscenes: list}}
@@ -1249,11 +1227,12 @@ defmodule Loka.WorldBuilder.ToolExecutor do
   defp execute_update_storyline(input) do
     key = input["key"]
 
-    case TypedObjectLoader.get(key) do
-      {:ok, %{type: :storyline} = sl} ->
-        name = input["name"] || sl.name || key
-        main_quests = input["main_quests"] || get_in(sl.data, ["main_quests"]) || []
-        side_quests = input["side_quests"] || get_in(sl.data, ["side_quests"]) || []
+    case Entities.find_one(key: key, type: :storyline) do
+      {:ok, sl} ->
+        sl_data = (sl.components || %{})["data"] || %{}
+        name = input["name"] || sl.short_desc || key
+        main_quests = input["main_quests"] || sl_data["main_quests"] || []
+        side_quests = input["side_quests"] || sl_data["side_quests"] || []
 
         yaml_content = YamlBuilder.build_storyline_yaml(key, name, main_quests, side_quests)
 
@@ -1290,16 +1269,17 @@ defmodule Loka.WorldBuilder.ToolExecutor do
   end
 
   defp execute_list_storylines(_input) do
-    storylines = TypedObjectLoader.list_by_type(:storyline)
+    storylines = Entities.find_all(type: :storyline, is_prototype: true)
 
     list =
       Enum.map(storylines, fn s ->
-        main = get_in(s.data, ["main_quests"]) || []
-        side = get_in(s.data, ["side_quests"]) || []
+        s_data = (s.components || %{})["data"] || %{}
+        main = s_data["main_quests"] || []
+        side = s_data["side_quests"] || []
 
         %{
           key: s.key,
-          name: s.name || s.key,
+          name: s.short_desc || s.key,
           main_quest_count: length(main),
           side_quest_count: length(side)
         }
@@ -1341,7 +1321,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
       {:ok, script} ->
         hook = input["hook"] || Script.hook(script) || "on_enter"
         source = input["source"] || Script.source(script) || "continue()"
-        name = input["name"] || script.name || "Script: #{key}"
+        name = input["name"] || script.short_desc || "Script: #{key}"
 
         yaml_content =
           YamlBuilder.build_script_yaml(key, name, hook, source,
@@ -1390,7 +1370,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
            success: true,
            script: %{
              key: script.key,
-             name: script.name,
+             name: script.short_desc,
              hook: Script.hook(script),
              source: Script.source(script),
              timeout_ms: Script.timeout_ms(script)
@@ -1419,7 +1399,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
     list =
       Enum.map(scripts, fn s ->
-        %{key: s.key, name: s.name || s.key, hook: to_string(Script.hook(s) || "")}
+        %{key: s.key, name: s.short_desc || s.key, hook: to_string(Script.hook(s) || "")}
       end)
 
     {:ok, %{success: true, message: "Found #{length(list)} scripts", scripts: list}}
@@ -1484,9 +1464,9 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
     case Script.get(script_key) do
       {:ok, _} ->
-        case TypedObjectLoader.get(entity_key) do
+        case Entities.find_one(key: entity_key) do
           {:ok, entity} ->
-            data = entity.data || %{}
+            data = (entity.components || %{})["data"] || %{}
             scripts = data["scripts"] || []
 
             if script_key in scripts do
@@ -1513,9 +1493,9 @@ defmodule Loka.WorldBuilder.ToolExecutor do
     script_key = input["script_key"]
     entity_key = input["entity_key"]
 
-    case TypedObjectLoader.get(entity_key) do
+    case Entities.find_one(key: entity_key) do
       {:ok, entity} ->
-        data = entity.data || %{}
+        data = (entity.components || %{})["data"] || %{}
         scripts = data["scripts"] || []
 
         if script_key in scripts do
@@ -1673,7 +1653,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
     else
       query_lower = String.downcase(query)
 
-      all_objects = Loka.Engine.TypedObject.Registry.all()
+      all_objects = Entities.find_all(is_prototype: true)
 
       matches =
         all_objects
@@ -1687,8 +1667,8 @@ defmodule Loka.WorldBuilder.ToolExecutor do
           %{
             key: obj.key,
             type: obj.type,
-            subtype: obj.subtype,
-            name: get_in(obj.data, ["name"]) || obj.key,
+            subtype: obj.type,
+            name: obj.short_desc || obj.key,
             snippet: build_snippet(obj, query_lower)
           }
         end)
@@ -1706,17 +1686,19 @@ defmodule Loka.WorldBuilder.ToolExecutor do
 
   defp maybe_filter_by_type(objects, type_string) do
     type_atom = String.to_existing_atom(type_string)
-    Enum.filter(objects, fn obj -> obj.subtype == type_atom or obj.type == type_atom end)
+    Enum.filter(objects, fn obj -> obj.type == type_atom end)
   rescue
     _ -> objects
   end
 
   defp build_searchable_text(obj) do
+    data = (obj.components || %{})["data"] || %{}
+
     parts = [
       obj.key,
-      get_in(obj.data, ["name"]) || "",
-      get_in(obj.data, ["description"]) || "",
-      get_in(obj.data, ["zone"]) || ""
+      obj.short_desc || "",
+      obj.extra_desc || "",
+      data["zone"] || ""
     ]
 
     Enum.join(parts, " ")

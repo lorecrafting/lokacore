@@ -31,8 +31,8 @@ defmodule Loka.Testing.Content.UIValidator do
 
   require Logger
 
-  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
-  alias Loka.Framework.Quest.Definitions
+  alias Loka.Engine.Entities
+  alias Loka.Content
 
   @type validation_result :: %{
           entities_checked: non_neg_integer(),
@@ -59,10 +59,10 @@ defmodule Loka.Testing.Content.UIValidator do
   """
   @spec validate() :: {:ok, validation_result()}
   def validate do
-    prototypes = TypedObjectLoader.all()
+    prototypes = Entities.find_all(is_prototype: true)
 
-    npcs = Enum.filter(prototypes, fn p -> p.subtype == "npc" or p.subtype == :npc end)
-    items = Enum.filter(prototypes, fn p -> p.subtype == "item" or p.subtype == :item end)
+    npcs = Enum.filter(prototypes, fn p -> p.type == :npc end)
+    items = Enum.filter(prototypes, fn p -> p.type == :item end)
 
     npc_results = Enum.flat_map(npcs, &validate_npc/1)
     item_results = Enum.flat_map(items, &validate_item/1)
@@ -119,7 +119,7 @@ defmodule Loka.Testing.Content.UIValidator do
         invalid_sells =
           sells
           |> Enum.reject(fn item_key ->
-            case TypedObjectLoader.get(item_key) do
+            case Entities.find_one(key: item_key) do
               {:ok, _} -> true
               _ -> false
             end
@@ -134,7 +134,7 @@ defmodule Loka.Testing.Content.UIValidator do
         invalid_buys =
           buys
           |> Enum.reject(fn item_key ->
-            case TypedObjectLoader.get(item_key) do
+            case Entities.find_one(key: item_key) do
               {:ok, _} -> true
               _ -> false
             end
@@ -154,7 +154,7 @@ defmodule Loka.Testing.Content.UIValidator do
     results =
       if "quest_giver" in tags do
         # Check if any quest references this NPC as giver
-        quests = Definitions.all_quest_definitions()
+        quests = Content.Quest.all_definitions()
 
         has_quest =
           Enum.any?(quests, fn quest ->

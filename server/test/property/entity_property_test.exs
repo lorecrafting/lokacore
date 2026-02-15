@@ -198,11 +198,13 @@ defmodule Loka.Engine.EntityPropertyTest do
     property "adding a component preserves other components" do
       check all(
               entity <- entity_gen(),
-              new_key <- entity_key_gen(),
-              new_value <- component_value_gen(),
-              not Map.has_key?(entity.components, new_key)
+              suffix <- StreamData.positive_integer(),
+              new_value <- component_value_gen()
             ) do
+        # Generate a key guaranteed to not be in the entity's components
+        new_key = "__test_component_#{suffix}"
         original_components = entity.components
+
         updated = Entity.add_component(entity, new_key, new_value)
 
         # All original components should still exist

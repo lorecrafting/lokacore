@@ -37,7 +37,6 @@ defmodule Loka.Framework.World.Room do
   require Logger
 
   alias Loka.Engine.{Entities, Hooks}
-  alias Loka.Framework.World.{Weather, DayNight}
 
   # =============================================================================
   # Room Loading
@@ -241,14 +240,8 @@ defmodule Loka.Framework.World.Room do
   Gets a time-appropriate entry message.
   """
   def get_time_entry_message do
-    phase = get_time_phase()
-
-    case phase do
-      :night -> "The darkness makes navigation difficult."
-      :dusk -> "The fading light casts long shadows."
-      :dawn -> "The early morning light reveals the way."
-      _ -> nil
-    end
+    # V2: DayNight system removed, always returns nil until reimplemented as behavior
+    nil
   end
 
   @doc """
@@ -449,21 +442,8 @@ defmodule Loka.Framework.World.Room do
     )
   end
 
-  defp get_current_weather do
-    if Process.whereis(Weather) do
-      Weather.get_weather()
-    else
-      "clear"
-    end
-  end
-
-  defp get_time_phase do
-    if Process.whereis(DayNight) do
-      DayNight.get_phase()
-    else
-      :day
-    end
-  end
+  # V2: Weather and DayNight are now entity behaviors (Phase 7)
+  defp get_current_weather, do: "clear"
 end
 
 # =============================================================================

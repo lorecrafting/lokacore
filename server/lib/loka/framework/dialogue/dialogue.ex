@@ -40,8 +40,7 @@ defmodule Loka.Framework.Dialogue do
 
   require Logger
 
-  alias Loka.Engine.Entities
-  alias Loka.Engine.TypedObject
+  alias Loka.Engine.{Entity, Entities}
   alias Loka.Content
 
   # Whitelist of valid action types to prevent atom exhaustion attacks
@@ -244,7 +243,7 @@ defmodule Loka.Framework.Dialogue do
     end
   end
 
-  # Get dialogue from Content.Dialogue TypedObject system
+  # Get dialogue from Content.Dialogue system
   defp get_dialogue_from_content(npc) do
     entity_key = npc.key || npc.id
 
@@ -263,8 +262,8 @@ defmodule Loka.Framework.Dialogue do
     end
   end
 
-  # Convert TypedObject dialogue to the embedded format
-  defp typed_object_to_dialogue_tree(%TypedObject{type: :dialogue} = dialogue) do
+  # Convert dialogue entity to the embedded format
+  defp typed_object_to_dialogue_tree(%Entity{type: :dialogue} = dialogue) do
     nodes = Content.Dialogue.nodes(dialogue)
     entry_node = Content.Dialogue.entry_node(dialogue)
 
@@ -466,14 +465,8 @@ defmodule Loka.Framework.Dialogue do
   # Check if current time phase matches the expected phase
   # Supports: "day", "night", "dawn", "dusk" (strings or atoms)
   defp check_phase(expected_phase) do
-    alias Loka.Framework.World.DayNight
-
-    current_phase =
-      try do
-        DayNight.get_phase()
-      catch
-        :exit, _ -> :day
-      end
+    # DayNight removed in V2 — always report :day
+    current_phase = :day
 
     expected =
       cond do

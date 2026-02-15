@@ -17,7 +17,6 @@ defmodule Mix.Tasks.Loka.SyncDescriptions do
   use Boundary, classify_to: Loka
 
   alias Loka.Engine.Entities
-  alias Loka.Engine.TypedObject.Loader, as: TypedObjectLoader
 
   @shortdoc "Sync description fields from prototypes to entities"
 
@@ -25,7 +24,7 @@ defmodule Mix.Tasks.Loka.SyncDescriptions do
   def run(args) do
     dry_run = "--dry-run" in args
 
-    # Start the application to get access to Repo and TypedObjectLoader
+    # Start the application to get access to Repo and Entities
     Mix.Task.run("app.start")
 
     if dry_run do
@@ -33,7 +32,7 @@ defmodule Mix.Tasks.Loka.SyncDescriptions do
     end
 
     # Get all prototypes
-    prototypes = TypedObjectLoader.all()
+    prototypes = Entities.find_all(is_prototype: true)
 
     Mix.shell().info("Found #{length(prototypes)} prototypes\n")
 
@@ -96,8 +95,8 @@ defmodule Mix.Tasks.Loka.SyncDescriptions do
     changes = %{}
 
     changes =
-      if proto.description && proto.description != "" && entity.long_desc != proto.description do
-        Map.put(changes, :long_desc, {entity.long_desc, proto.description})
+      if proto.long_desc && proto.long_desc != "" && entity.long_desc != proto.long_desc do
+        Map.put(changes, :long_desc, {entity.long_desc, proto.long_desc})
       else
         changes
       end

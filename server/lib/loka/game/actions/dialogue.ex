@@ -12,8 +12,8 @@ defmodule Loka.Game.Actions.Dialogue do
 
   alias Loka.Game.Actions.{Context, Result}
   alias Loka.Framework.Dialogue
-  alias Loka.Framework.Quest
-  alias Loka.Framework.Quest.StateHelper
+  alias Loka.Content
+  alias Loka.Framework.Quest.{Progress, StateHelper}
   alias Loka.Engine.Entity
   alias LokaWeb.Channels.GameChannel.Serializers
 
@@ -48,24 +48,18 @@ defmodule Loka.Game.Actions.Dialogue do
 
             quest_event = %{type: :talk, target_id: target_key, dialogue_topic: dialogue_topic}
 
-            case Quest.update_progress(character, quest_event) do
-              {:ok, updated_character, completed_objectives} ->
-                Logger.info(
-                  "[DIALOGUE] Quest progress updated successfully, completed=#{inspect(completed_objectives)}"
-                )
+            {:ok, updated_character, completed_objectives} =
+              Progress.update_progress(character, quest_event)
 
-                quests = Entity.get_component(updated_character, "quest_progress") || %{}
+            Logger.info(
+              "[DIALOGUE] Quest progress updated successfully, completed=#{inspect(completed_objectives)}"
+            )
 
-                Logger.info(
-                  "[DIALOGUE] updated quest_progress keys: #{inspect(Map.keys(quests))}"
-                )
+            quests = Entity.get_component(updated_character, "quest_progress") || %{}
 
-                updated_character
+            Logger.info("[DIALOGUE] updated quest_progress keys: #{inspect(Map.keys(quests))}")
 
-              {:error, reason} ->
-                Logger.warning("[DIALOGUE] Failed to update quest progress: #{inspect(reason)}")
-                character
-            end
+            updated_character
           else
             character
           end
@@ -158,21 +152,14 @@ defmodule Loka.Game.Actions.Dialogue do
                   dialogue_topic: dialogue_topic
                 }
 
-                case Quest.update_progress(new_character, quest_event) do
-                  {:ok, updated_character, completed_objectives} ->
-                    Logger.info(
-                      "[DIALOGUE] Quest progress updated successfully, completed=#{inspect(completed_objectives)}"
-                    )
+                {:ok, updated_character, completed_objectives} =
+                  Progress.update_progress(new_character, quest_event)
 
-                    updated_character
+                Logger.info(
+                  "[DIALOGUE] Quest progress updated successfully, completed=#{inspect(completed_objectives)}"
+                )
 
-                  {:error, reason} ->
-                    Logger.warning(
-                      "[DIALOGUE] Failed to update quest progress: #{inspect(reason)}"
-                    )
-
-                    new_character
-                end
+                updated_character
               else
                 new_character
               end
@@ -229,12 +216,12 @@ defmodule Loka.Game.Actions.Dialogue do
   defp handle_dialogue_action(character, nil), do: {character, []}
 
   defp handle_dialogue_action(character, {:accept_quest, quest_id}) do
-    case Quest.accept_quest(character, quest_id) do
+    case Progress.accept_quest(character, quest_id) do
       {:ok, new_character} ->
-        quest_def = Quest.get_quest_definition(quest_id)
+        quest_def = Content.Quest.definition(quest_id)
         quest_name = if quest_def, do: quest_def.name, else: quest_id
 
-        active_quests = Quest.get_active_quests(new_character)
+        active_quests = Progress.get_active_quests(new_character)
         active_quest = Enum.find(active_quests, fn q -> q.id == quest_id end)
 
         serialized_quest =
@@ -259,14 +246,14 @@ defmodule Loka.Game.Actions.Dialogue do
   end
 
   defp handle_dialogue_action(character, {:complete_quest, quest_id}) do
-    case Quest.turn_in_quest(character, quest_id) do
+    case Progress.turn_in_quest(character, quest_id) do
       {:ok, new_character, rewards} ->
         reward_text = format_quest_rewards(rewards)
 
         # Get quest title for the completion event
         quest_title =
-          case Quest.get_quest_definition(quest_id) do
-            {:ok, quest_def} -> quest_def.name
+          case Content.Quest.definition(quest_id) do
+            %{name: name} -> name
             _ -> quest_id
           end
 
@@ -342,7 +329,7 @@ defmodule Loka.Game.Actions.Dialogue do
   end
 
   defp handle_dialogue_action(character, {:offer_quest, quest_id}) do
-    quest_def = Quest.get_quest_definition(quest_id)
+    quest_def = Content.Quest.definition(quest_id)
     quest_name = if quest_def, do: quest_def.name, else: quest_id
 
     events = [{:event, "Quest available: #{quest_name}"}]

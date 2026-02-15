@@ -14,10 +14,8 @@ defmodule Loka.Framework.IntegrationTest do
   alias Loka.Framework.Combat
   alias Loka.Framework.Equipment
   alias Loka.Framework.Inventory
-  alias Loka.Framework.Quest
+  alias Loka.Framework.Quest.Progress
   alias Loka.Framework.Dialogue
-  alias Loka.Framework.Progression
-  alias Loka.Framework.Economy
 
   import Loka.EngineFixtures
 
@@ -381,24 +379,26 @@ defmodule Loka.Framework.IntegrationTest do
           key: "test_quest",
           name: "Test Quest",
           description: "A test quest",
-          type: "item",
+          type: "quest",
           components: %{
-            "objectives" => [
-              %{
-                "id" => "talk_npc",
-                "type" => "talk",
-                "description" => "Talk to the merchant",
-                "target_id" => "merchant",
-                "target_count" => 1
-              }
-            ],
-            "rewards" => %{"xp" => 100}
+            "data" => %{
+              "objectives" => [
+                %{
+                  "id" => "talk_npc",
+                  "type" => "talk",
+                  "description" => "Talk to the merchant",
+                  "target_id" => "merchant",
+                  "target_count" => 1
+                }
+              ],
+              "rewards" => %{"xp" => 100}
+            }
           },
           tags: ["quest"]
         })
 
       # Accept quest
-      {:ok, updated_state} = Quest.accept_quest(game_state, "test_quest")
+      {:ok, updated_state} = Progress.accept_quest(game_state, "test_quest")
 
       quest_progress = Entity.get_component(updated_state, "quest_progress") || %{}
       active = quest_progress["active"] || %{}
@@ -412,104 +412,36 @@ defmodule Loka.Framework.IntegrationTest do
           key: "talk_quest",
           name: "Delivery Quest",
           description: "Talk to the merchant",
-          type: "item",
+          type: "quest",
           components: %{
-            "objectives" => [
-              %{
-                "id" => "talk_merchant",
-                "type" => "talk",
-                "description" => "Talk to the merchant",
-                "target_id" => "merchant",
-                "target_count" => 1
-              }
-            ],
-            "rewards" => %{"xp" => 50}
+            "data" => %{
+              "objectives" => [
+                %{
+                  "id" => "talk_merchant",
+                  "type" => "talk",
+                  "description" => "Talk to the merchant",
+                  "target_id" => "merchant",
+                  "target_count" => 1
+                }
+              ],
+              "rewards" => %{"xp" => 50}
+            }
           },
           tags: ["quest"]
         })
 
       # Accept quest
-      {:ok, game_state} = Quest.accept_quest(game_state, "talk_quest")
+      {:ok, game_state} = Progress.accept_quest(game_state, "talk_quest")
 
       # Complete objective
-      {:ok, game_state} = Quest.complete_objective(game_state, "talk_quest", "talk_merchant")
+      {:ok, game_state} = Progress.complete_objective(game_state, "talk_quest", "talk_merchant")
 
       # Check quest completion
-      assert Quest.is_complete?(game_state, "talk_quest")
+      assert Progress.is_complete?(game_state, "talk_quest")
     end
   end
 
-  # ===========================================================================
-  # Progression Integration
-  # ===========================================================================
-
-  describe "progression integration" do
-    setup do
-      game_state =
-        character_fixture(
-          stats: %{"level" => 1, "xp" => 0, "str" => 10, "sta" => 10, "skill_points" => 0},
-          resources: %{
-            "health" => %{"current" => 100, "max" => 100},
-            "mana" => %{"current" => 100, "max" => 100},
-            "mv" => %{"current" => 150, "max" => 150}
-          }
-        )
-
-      %{game_state: game_state}
-    end
-
-    test "awarding XP can cause level up", %{game_state: game_state} do
-      # Get initial level from stats
-      initial_level = Entity.get_component(game_state, "stats")["level"] || 1
-      assert initial_level == 1
-
-      # Award enough XP to level up (level 2 requires 400 XP)
-      {:ok, game_state, level_up_info} = Progression.award_xp(game_state, 500)
-
-      # level_up_info is a map when leveled up, nil otherwise
-      assert level_up_info != nil
-      assert level_up_info.new_level == 2
-
-      # Verify level in game state
-      new_level = Entity.get_component(game_state, "stats")["level"]
-      assert new_level == 2
-    end
-
-    test "combat XP rewards integrate with progression", %{game_state: game_state} do
-      # Create enemy
-      {:ok, enemy} =
-        Entities.create_entity(%{
-          key: "xp_enemy_#{System.unique_integer([:positive])}",
-          name: "XP Dummy",
-          type: "npc",
-          description: "Gives XP",
-          components: %{
-            "combatant" => %{
-              "health" => %{"current" => 1, "max" => 1},
-              "stats" => %{"attack" => 1, "defense" => 0},
-              "xp_value" => 500,
-              "gold_value" => 0
-            }
-          },
-          tags: []
-        })
-
-      # Fight and win
-      {:ok, combat_state} = Combat.start_combat(enemy.id, game_state)
-      {:ok, combat_state, _} = Combat.player_action(combat_state, :attack, game_state)
-
-      {:victory, rewards} = Combat.check_combat_end(combat_state, game_state)
-      assert rewards.xp == 500
-
-      # Apply XP through progression
-      {:ok, game_state, level_up_info} = Progression.award_xp(game_state, rewards.xp)
-
-      # Should have leveled up (500 XP > 400 XP needed for level 2)
-      assert level_up_info != nil
-      assert level_up_info.new_level == 2
-      assert Entity.get_component(game_state, "stats")["level"] == 2
-    end
-  end
+  # Progression module deleted in V2 — XP/leveling will be handled by scripts
 
   # ===========================================================================
   # Entity Lifecycle Integration (spawn → move → combat → death)
@@ -572,10 +504,6 @@ defmodule Loka.Framework.IntegrationTest do
           # Verify gold was added
           assert Entity.get_component(updated_state, "stats")["gold"] == 150
 
-          # Apply XP for level progression
-          {:ok, final_state, _level_info} = Progression.award_xp(updated_state, rewards.xp)
-          assert Entity.get_component(final_state, "stats")["xp"] >= 100
-
         :ongoing ->
           # Combat ongoing is acceptable if enemy survived the hit
           assert combat_state.enemy.health["current"] >= 0
@@ -636,43 +564,46 @@ defmodule Loka.Framework.IntegrationTest do
           key: "chain_quest_1",
           name: "Gathering Supplies",
           description: "Gather supplies for the village",
-          type: "item",
+          type: "quest",
           components: %{
-            "objectives" => [
-              %{
-                "id" => "gather_herbs",
-                "type" => "get_item",
-                "description" => "Collect herbs",
-                "target_id" => "herbs",
-                "target_count" => 3
-              },
-              %{
-                "id" => "deliver_herbs",
-                "type" => "talk",
-                "description" => "Deliver to healer",
-                "target_id" => "healer",
-                "target_count" => 1
-              }
-            ],
-            "rewards" => %{"xp" => 200, "gold" => 50}
+            "data" => %{
+              "objectives" => [
+                %{
+                  "id" => "gather_herbs",
+                  "type" => "get_item",
+                  "description" => "Collect herbs",
+                  "target_id" => "herbs",
+                  "target_count" => 3
+                },
+                %{
+                  "id" => "deliver_herbs",
+                  "type" => "talk",
+                  "description" => "Deliver to healer",
+                  "target_id" => "healer",
+                  "target_count" => 1
+                }
+              ],
+              "rewards" => %{"xp" => 200, "gold" => 50}
+            }
           },
           tags: ["quest"]
         })
 
       # Accept quest
-      {:ok, game_state} = Quest.accept_quest(game_state, "chain_quest_1")
+      {:ok, game_state} = Progress.accept_quest(game_state, "chain_quest_1")
       quest_progress = Entity.get_component(game_state, "quest_progress") || %{}
       assert Map.has_key?(quest_progress["active"] || %{}, "chain_quest_1")
 
       # Complete first objective
-      {:ok, game_state} = Quest.complete_objective(game_state, "chain_quest_1", "gather_herbs")
-      refute Quest.is_complete?(game_state, "chain_quest_1")
+      {:ok, game_state} = Progress.complete_objective(game_state, "chain_quest_1", "gather_herbs")
+      refute Progress.is_complete?(game_state, "chain_quest_1")
 
       # Complete second objective
-      {:ok, game_state} = Quest.complete_objective(game_state, "chain_quest_1", "deliver_herbs")
+      {:ok, game_state} =
+        Progress.complete_objective(game_state, "chain_quest_1", "deliver_herbs")
 
       # Quest should now be complete
-      assert Quest.is_complete?(game_state, "chain_quest_1")
+      assert Progress.is_complete?(game_state, "chain_quest_1")
     end
 
     test "quest chain progression - completing objectives progresses quests", %{
@@ -684,18 +615,20 @@ defmodule Loka.Framework.IntegrationTest do
           key: "prereq_quest",
           name: "Introduction Quest",
           description: "Learn the basics",
-          type: "item",
+          type: "quest",
           components: %{
-            "objectives" => [
-              %{
-                "id" => "talk_tutorial",
-                "type" => "talk",
-                "description" => "Talk to the trainer",
-                "target_id" => "trainer",
-                "target_count" => 1
-              }
-            ],
-            "rewards" => %{"xp" => 50, "gold" => 10}
+            "data" => %{
+              "objectives" => [
+                %{
+                  "id" => "talk_tutorial",
+                  "type" => "talk",
+                  "description" => "Talk to the trainer",
+                  "target_id" => "trainer",
+                  "target_count" => 1
+                }
+              ],
+              "rewards" => %{"xp" => 50, "gold" => 10}
+            }
           },
           tags: ["quest"]
         })
@@ -706,163 +639,43 @@ defmodule Loka.Framework.IntegrationTest do
           key: "advanced_quest",
           name: "Advanced Training",
           description: "Advanced combat training",
-          type: "item",
+          type: "quest",
           components: %{
-            "objectives" => [
-              %{
-                "id" => "defeat_dummy",
-                "type" => "kill",
-                "description" => "Defeat training dummy",
-                "target_id" => "training_dummy",
-                "target_count" => 1
-              }
-            ],
-            "rewards" => %{"xp" => 100}
+            "data" => %{
+              "objectives" => [
+                %{
+                  "id" => "defeat_dummy",
+                  "type" => "kill",
+                  "description" => "Defeat training dummy",
+                  "target_id" => "training_dummy",
+                  "target_count" => 1
+                }
+              ],
+              "rewards" => %{"xp" => 100}
+            }
           },
           tags: ["quest"]
         })
 
       # Accept first quest
-      {:ok, game_state} = Quest.accept_quest(game_state, "prereq_quest")
+      {:ok, game_state} = Progress.accept_quest(game_state, "prereq_quest")
       quest_progress = Entity.get_component(game_state, "quest_progress") || %{}
       assert Map.has_key?(quest_progress["active"] || %{}, "prereq_quest")
 
       # Complete objective
-      {:ok, game_state} = Quest.complete_objective(game_state, "prereq_quest", "talk_tutorial")
+      {:ok, game_state} = Progress.complete_objective(game_state, "prereq_quest", "talk_tutorial")
 
       # Quest should now be complete (all objectives done)
-      assert Quest.is_complete?(game_state, "prereq_quest")
+      assert Progress.is_complete?(game_state, "prereq_quest")
 
       # Can accept the second quest while first is still active but complete
-      {:ok, game_state} = Quest.accept_quest(game_state, "advanced_quest")
+      {:ok, game_state} = Progress.accept_quest(game_state, "advanced_quest")
       quest_progress = Entity.get_component(game_state, "quest_progress") || %{}
       assert Map.has_key?(quest_progress["active"] || %{}, "advanced_quest")
     end
   end
 
-  # ===========================================================================
-  # Economy Flow Integration (loot → sell → buy → equip)
-  # ===========================================================================
-
-  describe "economy flow integration" do
-    setup do
-      game_state =
-        character_fixture(
-          stats: %{
-            "str" => 10,
-            "sta" => 10,
-            "level" => 5,
-            "gold" => 0,
-            "currencies" => %{"gold" => 0}
-          },
-          resources: %{
-            "health" => %{"current" => 100, "max" => 100},
-            "mana" => %{"current" => 100, "max" => 100},
-            "mv" => %{"current" => 150, "max" => 150}
-          },
-          inventory: []
-        )
-
-      %{game_state: game_state}
-    end
-
-    test "complete economy loop: loot item, sell it, buy equipment", %{game_state: game_state} do
-      # Economy module works with item keys directly in inventory
-      # (not entity IDs - it uses simpler key-based inventory)
-
-      loot_item_key = "valuable_gem"
-
-      # 1. Create shop NPC
-      {:ok, merchant} =
-        Entities.create_entity(%{
-          key: "test_merchant_#{System.unique_integer([:positive])}",
-          name: "Test Merchant",
-          type: "npc",
-          description: "A merchant",
-          components: %{
-            "shop" => %{
-              "shop_type" => "general",
-              "buy_multiplier" => 0.5,
-              "sell_multiplier" => 1.0,
-              "sells" => ["iron_sword"],
-              "buys" => [loot_item_key]
-            }
-          },
-          tags: ["npc", "merchant"]
-        })
-
-      # 2. Player "loots" the gem (add item key to inventory directly)
-      # Economy module expects keys, not entity IDs
-      game_state = Entity.add_component(game_state, "inventory", [loot_item_key])
-      inventory = Entity.get_component(game_state, "inventory") || []
-      assert loot_item_key in inventory
-
-      # 3. Sell gem to merchant (should get 5 gold = 10 * 0.5 default price)
-      {:ok, game_state, sell_receipt} = Economy.sell(game_state, merchant, loot_item_key, 1)
-      # default base price 10 * 0.5
-      assert sell_receipt.total_price == 5
-
-      # Verify gold was added
-      stats = Entity.get_component(game_state, "stats") || %{}
-      currencies = stats["currencies"] || %{}
-      gold = Map.get(currencies, "gold", 0)
-      assert gold == 5
-
-      # 4. Add more gold for purchase (need 10 for iron_sword)
-      {:ok, game_state} = Economy.add_currency(game_state, "gold", 10)
-
-      # 5. Buy sword from merchant (costs 10 gold at default price)
-      {:ok, game_state, buy_receipt} = Economy.buy(game_state, merchant, "iron_sword", 1)
-      # default base price 10 * 1.0
-      assert buy_receipt.total_price == 10
-
-      # Verify gold was deducted (had 15, spent 10)
-      stats = Entity.get_component(game_state, "stats") || %{}
-      currencies = stats["currencies"] || %{}
-      gold = Map.get(currencies, "gold", 0)
-      assert gold == 5
-
-      # 6. Verify sword key is in inventory
-      inventory = Entity.get_component(game_state, "inventory") || []
-      assert "iron_sword" in inventory
-    end
-
-    test "cannot buy item if insufficient funds", %{game_state: game_state} do
-      # Create shop NPC
-      {:ok, merchant} =
-        Entities.create_entity(%{
-          key: "rich_merchant_#{System.unique_integer([:positive])}",
-          name: "Rich Merchant",
-          type: "npc",
-          description: "A merchant with expensive goods",
-          components: %{
-            "shop" => %{
-              "shop_type" => "general",
-              "sell_multiplier" => 1.0,
-              "sells" => ["expensive_item"]
-            }
-          },
-          tags: ["npc", "merchant"]
-        })
-
-      # Create expensive item
-      {:ok, _expensive} =
-        Entities.create_entity(%{
-          key: "expensive_item",
-          name: "Expensive Item",
-          type: "item",
-          description: "Very expensive",
-          components: %{
-            "valuable" => %{"base_price" => 1000}
-          },
-          tags: []
-        })
-
-      # Try to buy - should fail with insufficient funds
-      result = Economy.buy(game_state, merchant, "expensive_item", 1)
-      assert {:error, {:insufficient_funds, _, _, _}} = result
-    end
-  end
+  # Economy module deleted in V2 — shops will be handled by scripts
 
   # ===========================================================================
   # Crafting Flow Integration (gather materials → craft → use/equip)

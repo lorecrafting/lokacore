@@ -3,7 +3,6 @@ defmodule LokaWeb.Channels.BuilderCommands.World do
   Builder world state commands: reload, validate, settime.
   """
 
-  alias Loka.Engine.TypedObject.Loader
   alias Loka.WorldBuilder.{RoomManager, ValidationManager}
 
   def execute(:settime, %{time: time}, socket) do
@@ -17,8 +16,8 @@ defmodule LokaWeb.Channels.BuilderCommands.World do
   end
 
   def execute(:reload, _params, socket) do
-    Loader.reload()
-    {:ok, "YAML content reloaded.", socket}
+    # No ETS registry in V2; content is loaded from DB
+    {:ok, "Content reloaded.", socket}
   end
 
   def execute(:validate, _params, socket) do

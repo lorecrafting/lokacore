@@ -61,7 +61,8 @@ defmodule Loka.Engine.Spawner.Editor do
       extra_components = Keyword.get(attrs, :components, %{})
 
       coordinates = %{"x" => x, "y" => y, "z" => z}
-      components = Map.merge(%{"coordinates" => coordinates}, extra_components)
+      # Merge extra_components first, then override coordinates from explicit x/y/z
+      components = Map.merge(extra_components, %{"coordinates" => coordinates})
 
       room = %Entity{
         id: UUID.uuid4(),

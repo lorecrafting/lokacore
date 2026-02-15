@@ -1,5 +1,5 @@
 defmodule LokaWeb.ErrorJSONTest do
-  use LokaWeb.ConnCase, async: true
+  use ExUnit.Case, async: true
 
   test "renders 404" do
     assert LokaWeb.ErrorJSON.render("404.json", %{}) == %{errors: %{detail: "Not Found"}}

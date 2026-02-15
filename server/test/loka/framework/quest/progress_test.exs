@@ -15,14 +15,15 @@ defmodule Loka.Framework.Quest.ProgressTest do
         key: attrs[:key] || "test_quest_#{System.unique_integer([:positive])}",
         short_desc: attrs[:name] || "Test Quest",
         extra_desc: attrs[:description] || "A test quest",
-        type: "item",
-        components:
-          attrs[:components] ||
-            %{
-              "objectives" => [],
-              "rewards" => %{}
-            },
-        tags: ["quest"]
+        type: "quest",
+        is_prototype: true,
+        components: %{
+          "data" =>
+            Map.merge(
+              %{"objectives" => [], "rewards" => %{}},
+              attrs[:components] || %{}
+            )
+        }
       })
 
     entity
@@ -463,10 +464,10 @@ defmodule Loka.Framework.Quest.ProgressTest do
       refute Map.has_key?(quest_progress["active"], "reward_quest")
       assert "reward_quest" in quest_progress["completed"]
 
-      # Check rewards
-      assert rewards["xp"] == 100
-      assert rewards["gold"] == 50
-      assert rewards["items"] == ["potion"]
+      # Check rewards (atom keys from atomize_map)
+      assert rewards[:xp] == 100
+      assert rewards[:gold] == 50
+      assert rewards[:items] == ["potion"]
 
       # Check rewards applied
       assert Entity.get_component(updated_state, "stats")["xp"] == 100
