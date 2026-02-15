@@ -3,7 +3,7 @@ defmodule Loka.Testing.Quest.QuestTesterTest do
 
   alias Loka.Testing.Quest.QuestTester
   alias Loka.Testing.Quest.QuestAssertions
-  alias Loka.Framework.Player.GameState
+  alias Loka.Engine.Entity
 
   setup do
     # Ecto sandbox setup
@@ -82,48 +82,43 @@ defmodule Loka.Testing.Quest.QuestTesterTest do
   describe "QuestAssertions" do
     import QuestAssertions
 
+    # V2: Use Entity structs with quest_progress component instead of GameState
+    defp make_entity(quest_progress) do
+      %Entity{
+        id: "test-char",
+        type: :character,
+        key: "test_char",
+        components: %{
+          "quest_progress" => quest_progress
+        }
+      }
+    end
+
     test "quest_active?/2 returns correct boolean" do
-      game_state = %GameState{
-        player_id: "test",
-        quests: %{
+      entity =
+        make_entity(%{
           "active" => %{"test_quest" => %{}},
           "completed" => []
-        },
-        stats: %{},
-        flags: %{},
-        inventory: [],
-        equipment: %{},
-        health: %{},
-        current_room_id: nil
-      }
+        })
 
-      assert quest_active?(game_state, "test_quest")
-      refute quest_active?(game_state, "other_quest")
+      assert quest_active?(entity, "test_quest")
+      refute quest_active?(entity, "other_quest")
     end
 
     test "quest_completed?/2 returns correct boolean" do
-      game_state = %GameState{
-        player_id: "test",
-        quests: %{
+      entity =
+        make_entity(%{
           "active" => %{},
           "completed" => ["finished_quest"]
-        },
-        stats: %{},
-        flags: %{},
-        inventory: [],
-        equipment: %{},
-        health: %{},
-        current_room_id: nil
-      }
+        })
 
-      assert quest_completed?(game_state, "finished_quest")
-      refute quest_completed?(game_state, "other_quest")
+      assert quest_completed?(entity, "finished_quest")
+      refute quest_completed?(entity, "other_quest")
     end
 
     test "objective_complete?/3 returns correct boolean" do
-      game_state = %GameState{
-        player_id: "test",
-        quests: %{
+      entity =
+        make_entity(%{
           "active" => %{
             "test_quest" => %{
               "objectives" => %{
@@ -133,23 +128,15 @@ defmodule Loka.Testing.Quest.QuestTesterTest do
             }
           },
           "completed" => []
-        },
-        stats: %{},
-        flags: %{},
-        inventory: [],
-        equipment: %{},
-        health: %{},
-        current_room_id: nil
-      }
+        })
 
-      assert objective_complete?(game_state, "test_quest", "obj1")
-      refute objective_complete?(game_state, "test_quest", "obj2")
+      assert objective_complete?(entity, "test_quest", "obj1")
+      refute objective_complete?(entity, "test_quest", "obj2")
     end
 
     test "objective_progress/3 returns progress count" do
-      game_state = %GameState{
-        player_id: "test",
-        quests: %{
+      entity =
+        make_entity(%{
           "active" => %{
             "test_quest" => %{
               "objectives" => %{
@@ -158,17 +145,9 @@ defmodule Loka.Testing.Quest.QuestTesterTest do
             }
           },
           "completed" => []
-        },
-        stats: %{},
-        flags: %{},
-        inventory: [],
-        equipment: %{},
-        health: %{},
-        current_room_id: nil
-      }
+        })
 
-      assert objective_progress(game_state, "test_quest", "obj1") == 3
-      assert objective_progress(game_state, "test_quest", "obj2") == 0
+      assert objective_progress(entity, "test_quest", "obj1") == 3
     end
   end
 end

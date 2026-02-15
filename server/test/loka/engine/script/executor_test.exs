@@ -2,8 +2,7 @@ defmodule Loka.Engine.Script.ExecutorTest do
   use Loka.DataCase, async: false
 
   alias Loka.Engine.Script.Executor
-  alias Loka.Engine.TypedObject.Registry
-  alias Loka.Engine.TypedObject
+  alias Loka.Engine.Entities
 
   @test_entity %{
     id: "test-npc",
@@ -30,9 +29,15 @@ defmodule Loka.Engine.Script.ExecutorTest do
     trigger: :on_look
   }
 
-  setup do
-    Loka.TypedObjectSandbox.checkout()
-    :ok
+  # Helper to create a script entity in the DB (V2 pattern)
+  defp create_script(key, hook, source) do
+    {:ok, _entity} =
+      Entities.create_entity(%{
+        type: "script",
+        key: key,
+        is_prototype: true,
+        components: %{"data" => %{"hook" => hook, "source" => source}}
+      })
   end
 
   describe "execute_source/4" do
@@ -92,35 +97,13 @@ defmodule Loka.Engine.Script.ExecutorTest do
     end
 
     test "runs script when registered in TypedObject" do
-      # Create a script TypedObject
-      {:ok, script} =
-        TypedObject.new(
-          key: "test_npc_look_script",
-          type: :script,
-          data: %{
-            "hook" => "on_look",
-            "source" => "say.(\"Looking good!\")\n:handled"
-          }
-        )
-
-      Registry.put("test_npc_look_script", script)
+      create_script("test_npc_look_script", "on_look", "say.(\"Looking good!\")\n:handled")
 
       assert {:ok, :handled} = Executor.run_hook(:on_look, @test_entity, @test_context)
     end
 
     test "runs script by convention key" do
-      # Create a script using convention: {entity_key}_{hook}
-      {:ok, script} =
-        TypedObject.new(
-          key: "test_npc_on_enter",
-          type: :script,
-          data: %{
-            "hook" => "on_enter",
-            "source" => ":allow"
-          }
-        )
-
-      Registry.put("test_npc_on_enter", script)
+      create_script("test_npc_on_enter", "on_enter", ":allow")
 
       entity = %{id: "e1", key: "test_npc", type: :npc}
 
@@ -130,17 +113,7 @@ defmodule Loka.Engine.Script.ExecutorTest do
 
   describe "run_by_key/4" do
     test "runs script by explicit key" do
-      {:ok, script} =
-        TypedObject.new(
-          key: "my_custom_script",
-          type: :script,
-          data: %{
-            "hook" => "custom",
-            "source" => "{:append, \"Custom text\"}"
-          }
-        )
-
-      Registry.put("my_custom_script", script)
+      create_script("my_custom_script", "custom", "{:append, \"Custom text\"}")
 
       assert {:ok, {:append, "Custom text"}} =
                Executor.run_by_key(
@@ -162,53 +135,25 @@ defmodule Loka.Engine.Script.ExecutorTest do
 
   describe "result normalization" do
     test "normalizes :default" do
-      {:ok, script} =
-        TypedObject.new(
-          key: "default_script",
-          type: :script,
-          data: %{"hook" => "on_look", "source" => ":default"}
-        )
-
-      Registry.put("default_script", script)
+      create_script("default_script", "on_look", ":default")
 
       assert {:ok, :default} = Executor.run_by_key("default_script", @test_entity, @test_context)
     end
 
     test "normalizes :handled" do
-      {:ok, script} =
-        TypedObject.new(
-          key: "handled_script",
-          type: :script,
-          data: %{"hook" => "on_look", "source" => ":handled"}
-        )
-
-      Registry.put("handled_script", script)
+      create_script("handled_script", "on_look", ":handled")
 
       assert {:ok, :handled} = Executor.run_by_key("handled_script", @test_entity, @test_context)
     end
 
     test "normalizes :deny" do
-      {:ok, script} =
-        TypedObject.new(
-          key: "deny_script",
-          type: :script,
-          data: %{"hook" => "on_enter", "source" => ":deny"}
-        )
-
-      Registry.put("deny_script", script)
+      create_script("deny_script", "on_enter", ":deny")
 
       assert {:ok, :deny} = Executor.run_by_key("deny_script", @test_entity, @test_context)
     end
 
     test "normalizes {:deny, reason}" do
-      {:ok, script} =
-        TypedObject.new(
-          key: "deny_reason_script",
-          type: :script,
-          data: %{"hook" => "on_enter", "source" => "{:deny, \"Too low level\"}"}
-        )
-
-      Registry.put("deny_reason_script", script)
+      create_script("deny_reason_script", "on_enter", "{:deny, \"Too low level\"}")
 
       assert {:ok, {:deny, "Too low level"}} =
                Executor.run_by_key(
@@ -219,14 +164,7 @@ defmodule Loka.Engine.Script.ExecutorTest do
     end
 
     test "normalizes {:append, text}" do
-      {:ok, script} =
-        TypedObject.new(
-          key: "append_script",
-          type: :script,
-          data: %{"hook" => "on_look", "source" => "{:append, \"Extra description\"}"}
-        )
-
-      Registry.put("append_script", script)
+      create_script("append_script", "on_look", "{:append, \"Extra description\"}")
 
       assert {:ok, {:append, "Extra description"}} =
                Executor.run_by_key(
@@ -237,14 +175,7 @@ defmodule Loka.Engine.Script.ExecutorTest do
     end
 
     test "normalizes {:replace, text}" do
-      {:ok, script} =
-        TypedObject.new(
-          key: "replace_script",
-          type: :script,
-          data: %{"hook" => "on_look", "source" => "{:replace, \"Completely new description\"}"}
-        )
-
-      Registry.put("replace_script", script)
+      create_script("replace_script", "on_look", "{:replace, \"Completely new description\"}")
 
       assert {:ok, {:replace, "Completely new description"}} =
                Executor.run_by_key(
@@ -255,53 +186,25 @@ defmodule Loka.Engine.Script.ExecutorTest do
     end
 
     test "normalizes true to :allow" do
-      {:ok, script} =
-        TypedObject.new(
-          key: "true_script",
-          type: :script,
-          data: %{"hook" => "on_enter", "source" => "true"}
-        )
-
-      Registry.put("true_script", script)
+      create_script("true_script", "on_enter", "true")
 
       assert {:ok, :allow} = Executor.run_by_key("true_script", @test_entity, @test_context)
     end
 
     test "normalizes false to :deny" do
-      {:ok, script} =
-        TypedObject.new(
-          key: "false_script",
-          type: :script,
-          data: %{"hook" => "on_enter", "source" => "false"}
-        )
-
-      Registry.put("false_script", script)
+      create_script("false_script", "on_enter", "false")
 
       assert {:ok, :deny} = Executor.run_by_key("false_script", @test_entity, @test_context)
     end
 
     test "normalizes nil to :default" do
-      {:ok, script} =
-        TypedObject.new(
-          key: "nil_script",
-          type: :script,
-          data: %{"hook" => "on_look", "source" => "nil"}
-        )
-
-      Registry.put("nil_script", script)
+      create_script("nil_script", "on_look", "nil")
 
       assert {:ok, :default} = Executor.run_by_key("nil_script", @test_entity, @test_context)
     end
 
     test "normalizes unknown to :continue" do
-      {:ok, script} =
-        TypedObject.new(
-          key: "unknown_script",
-          type: :script,
-          data: %{"hook" => "on_look", "source" => "42"}
-        )
-
-      Registry.put("unknown_script", script)
+      create_script("unknown_script", "on_look", "42")
 
       assert {:ok, :continue} = Executor.run_by_key("unknown_script", @test_entity, @test_context)
     end
@@ -311,23 +214,13 @@ defmodule Loka.Engine.Script.ExecutorTest do
     test "runs conditional script based on quest state" do
       context = put_in(@test_context, [:game_state, :quests, :active], %{"main_quest" => %{}})
 
-      {:ok, script} =
-        TypedObject.new(
-          key: "quest_check_script",
-          type: :script,
-          data: %{
-            "hook" => "on_look",
-            "source" => """
-            if quest_active?.("main_quest") do
-              {:append, "The elder watches you with interest."}
-            else
-              :default
-            end
-            """
-          }
-        )
-
-      Registry.put("quest_check_script", script)
+      create_script("quest_check_script", "on_look", """
+      if quest_active?.("main_quest") do
+        {:append, "The elder watches you with interest."}
+      else
+        :default
+      end
+      """)
 
       assert {:ok, {:append, "The elder watches you with interest."}} =
                Executor.run_by_key(
@@ -338,7 +231,6 @@ defmodule Loka.Engine.Script.ExecutorTest do
     end
 
     test "runs script with multiple actions" do
-      # Run in test mode to capture actions without executing them
       {:ok, :handled, actions} =
         Executor.execute_source(
           """

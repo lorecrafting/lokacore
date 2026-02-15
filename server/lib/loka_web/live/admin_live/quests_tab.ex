@@ -175,8 +175,8 @@ defmodule LokaWeb.AdminLive.QuestsTab do
               <span class="badge badge-sm badge-success">{player.completed_count}</span>
             </td>
             <td>
-              <span :if={not player.has_game_state} class="badge badge-sm badge-warning">
-                No State
+              <span :if={not player.has_character} class="badge badge-sm badge-warning">
+                No Character
               </span>
             </td>
           </tr>

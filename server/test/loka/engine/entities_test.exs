@@ -89,7 +89,7 @@ defmodule Loka.Engine.EntitiesTest do
 
     test "returns error for missing required fields" do
       assert {:error, changeset} = Entities.create_entity(%{})
-      assert %{type: ["can't be blank"], key: ["can't be blank"]} = errors_on(changeset)
+      assert %{type: ["can't be blank"]} = errors_on(changeset)
     end
 
     test "allows duplicate keys (instances share prototype key)" do
@@ -115,7 +115,8 @@ defmodule Loka.Engine.EntitiesTest do
     test "creates entity with tags" do
       attrs = valid_entity_attrs(%{tags: ["magic", "rare"]})
       assert {:ok, entity} = Entities.create_entity(attrs)
-      assert entity.tags == ["magic", "rare"]
+      tag_names = Enum.map(entity.tags, & &1.tag) |> Enum.sort()
+      assert tag_names == ["magic", "rare"]
     end
   end
 

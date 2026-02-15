@@ -324,9 +324,21 @@ defmodule Loka.Engine.Entities do
 
   @doc "V1 compat — creates entity from attrs map."
   def create_entity(attrs) do
-    %EntitySchema{}
-    |> EntitySchema.changeset(normalize_attrs(attrs))
-    |> Repo.insert()
+    tags = attrs[:tags] || attrs["tags"] || []
+
+    result =
+      %EntitySchema{}
+      |> EntitySchema.changeset(normalize_attrs(attrs))
+      |> Repo.insert()
+
+    case result do
+      {:ok, schema} when tags != [] ->
+        for tag <- tags, do: add_tag(schema.id, to_string(tag))
+        {:ok, Repo.preload(schema, :tags, force: true)}
+
+      other ->
+        other
+    end
   end
 
   @doc "V1 compat — updates entity schema."

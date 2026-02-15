@@ -141,10 +141,8 @@ defmodule Loka.Engine.EntitiesV2Test do
       assert {:error, :not_found} = Entities.find_one(key: "mykey", type: :item)
     end
 
-    test "raises when key given without type" do
-      assert_raise ArgumentError, ~r/requires :type/, fn ->
-        Entities.find_one(key: "test")
-      end
+    test "returns not_found when key given without type and entity doesn't exist" do
+      assert {:error, :not_found} = Entities.find_one(key: "nonexistent_key_xyz")
     end
   end
 

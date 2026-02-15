@@ -1081,8 +1081,8 @@ defmodule LokaWeb.GameChannel do
   end
 
   defp push_inventory(socket) do
-    game_state = socket.assigns.game_state
-    items = Inventory.list_items(game_state)
+    character = socket.assigns.character
+    items = Inventory.list_items(character)
 
     if items == [] do
       push(socket, "output", %{text: "You are carrying nothing."})
@@ -1100,8 +1100,8 @@ defmodule LokaWeb.GameChannel do
 
   defp push_who(socket) do
     player = socket.assigns.player
-    game_state = socket.assigns.game_state
-    room_id = game_state.current_room_id
+    character = socket.assigns.character
+    room_id = character.location_id
 
     players = RoomHelpers.load_other_players(room_id, player.id)
 
@@ -1160,8 +1160,8 @@ defmodule LokaWeb.GameChannel do
   end
 
   defp find_inventory_item_by_keyword(socket, keyword) do
-    game_state = socket.assigns.game_state
-    items = Inventory.list_items(game_state)
+    character = socket.assigns.character
+    items = Inventory.list_items(character)
     keyword_lower = String.downcase(keyword)
 
     item =
@@ -1197,7 +1197,7 @@ defmodule LokaWeb.GameChannel do
     Phoenix.PubSub.subscribe(Loka.PubSub, "debug:screenshot")
 
     # Initialize resource pools
-    stats = game_state.stats || %{}
+    stats = Entity.get_component(character, "stats") || %{}
     ResourcePool.init_pools(player.id, stats)
 
     # Register with session system
@@ -1212,10 +1212,10 @@ defmodule LokaWeb.GameChannel do
       {:player_entered, player.id, player_display_name(player)}
     )
 
-    # Load game data
-    inventory_items = Inventory.list_items(game_state)
-    equipped_items = Equipment.get_equipped(game_state)
-    active_quests = Quest.get_active_quests(game_state)
+    # Load game data (V2: use character entity)
+    inventory_items = Inventory.list_items(character)
+    equipped_items = Equipment.get_equipped(character)
+    active_quests = Quest.get_active_quests(character)
     other_players = RoomHelpers.load_other_players(room.id, player.id)
     atmosphere = Atmosphere.describe_for_room(room)
     resources = ResourcePool.get(player.id)
@@ -1223,10 +1223,11 @@ defmodule LokaWeb.GameChannel do
     calendar_time = Calendar.get_time()
 
     # Get visual state for environmental effects
-    visual_state = Serializers.serialize_visual_state(room: room, player: game_state)
+    player_compat = %{equipped: Entity.get_component(character, "equipment") || %{}}
+    visual_state = Serializers.serialize_visual_state(room: room, player: player_compat)
 
     # Get sound state for ambient audio
-    sound_state = Serializers.serialize_sound_state(room: room, player: game_state)
+    sound_state = Serializers.serialize_sound_state(room: room, player: player_compat)
 
     # Get Spark companion data
     spark_data = Spark.to_client_format(player.id)
@@ -1242,9 +1243,9 @@ defmodule LokaWeb.GameChannel do
       inventory: Serializers.serialize_inventory(inventory_items),
       equipped: Serializers.serialize_equipped(equipped_items),
       quests: Serializers.serialize_quests(active_quests),
-      stats: game_state.stats || %{},
-      # Health is now in resources.health - use unified accessor
-      health: PlayerGameState.get_health(game_state),
+      stats: stats,
+      # Health from character entity resources component
+      health: get_character_health(character),
       resources: Serializers.serialize_resources(resources),
       timers: Serializers.serialize_timers(active_timers),
       spark: spark_data,
@@ -1313,11 +1314,12 @@ defmodule LokaWeb.GameChannel do
 
   def handle_info({:atmosphere_changed, _}, socket) do
     room = socket.assigns.room
-    game_state = socket.assigns.game_state
+    character = socket.assigns.character
     atmosphere = Atmosphere.describe_for_room(room)
     calendar_time = Calendar.get_time()
-    visual_state = Serializers.serialize_visual_state(room: room, player: game_state)
-    sound_state = Serializers.serialize_sound_state(room: room, player: game_state)
+    player_compat = %{equipped: Entity.get_component(character, "equipment") || %{}}
+    visual_state = Serializers.serialize_visual_state(room: room, player: player_compat)
+    sound_state = Serializers.serialize_sound_state(room: room, player: player_compat)
 
     push(socket, "atmosphere_update", %{
       atmosphere: atmosphere,
@@ -1545,6 +1547,16 @@ defmodule LokaWeb.GameChannel do
   end
 
   defp find_entity(_room, _id, _type), do: nil
+
+  # V2: Extract health from character entity's resources component
+  defp get_character_health(character) do
+    resources = Entity.get_component(character, "resources") || %{}
+
+    case resources["health"] do
+      %{"current" => current, "max" => max} -> %{"current" => current, "max" => max}
+      _ -> %{"current" => 100, "max" => 100}
+    end
+  end
 
   defp player_display_name(player) do
     # V2: Try character entity first, fall back to GameState then player fields

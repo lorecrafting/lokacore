@@ -6,11 +6,10 @@ defmodule LokaWeb.Channels.BuilderCommands.Helpers do
   import Phoenix.Socket, only: [assign: 3]
   import Phoenix.Channel, only: [push: 3]
 
-  alias Loka.Framework.Player.GameState, as: PlayerGameState
   alias Loka.Framework.World.Atmosphere
   alias Loka.WorldBuilder.RoomManager
   alias LokaWeb.Channels.RoomHelpers
-  alias Loka.Engine.TypedObject
+  alias Loka.Engine.{Entities, TypedObject}
   alias LokaWeb.Channels.GameChannel.Serializers
 
   def draft_tag(obj) do
@@ -33,23 +32,26 @@ defmodule LokaWeb.Channels.BuilderCommands.Helpers do
   """
   def teleport_to_room(room, socket, _opts \\ []) do
     player = socket.assigns.player
-    game_state = socket.assigns.game_state
-    old_room_id = game_state.current_room_id
+    character = socket.assigns.character
+    old_room_id = character.location_id
 
     if old_room_id do
       Phoenix.PubSub.unsubscribe(Loka.PubSub, "location:#{old_room_id}")
     end
 
-    {:ok, updated_state} =
-      PlayerGameState.update_state(game_state, %{current_room_id: room.id})
+    # V2: Update character entity's location
+    updated_character = %{character | location_id: room.id}
+    Entities.save_entity(updated_character)
 
     Phoenix.PubSub.subscribe(Loka.PubSub, "location:#{room.id}")
     Loka.Session.update_room(player.id, room.id)
 
-    {loaded_room, final_state} = RoomHelpers.load_player_room(updated_state)
+    {loaded_room, _game_state, final_character} =
+      RoomHelpers.load_player_room(updated_character, socket.assigns[:game_state])
+
     atmosphere = Atmosphere.describe_for_room(loaded_room)
 
-    socket = assign(socket, :game_state, final_state)
+    socket = assign(socket, :character, final_character)
 
     push(socket, "room_update", %{
       room: Serializers.serialize_room(loaded_room),

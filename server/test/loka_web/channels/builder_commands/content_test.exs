@@ -1,5 +1,5 @@
 defmodule LokaWeb.Channels.BuilderCommands.ContentTest do
-  use ExUnit.Case, async: false
+  use Loka.DataCase, async: false
 
   alias Loka.TestCleanup
   alias LokaWeb.Channels.BuilderCommands.Content

@@ -1,5 +1,5 @@
 defmodule Loka.WorldBuilder.YamlBuilderTest do
-  use ExUnit.Case, async: true
+  use Loka.DataCase, async: false
 
   alias Loka.WorldBuilder.YamlBuilder
 

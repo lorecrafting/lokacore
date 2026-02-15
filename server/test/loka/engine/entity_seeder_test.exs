@@ -171,9 +171,9 @@ defmodule Loka.Engine.EntitySeederTest do
 
       assert entity.short_desc == "A Test Quest"
       assert entity.long_desc == "You must test things."
-      # Quest-specific fields go into components
-      assert entity.components["objectives"] == [%{"id" => "obj1", "type" => "talk"}]
-      assert entity.components["rewards"] == %{"xp" => 10}
+      # Quest-specific fields go into components["data"] for TypedObject compat
+      assert entity.components["data"]["objectives"] == [%{"id" => "obj1", "type" => "talk"}]
+      assert entity.components["data"]["rewards"] == %{"xp" => 10}
     end
 
     test "stores parent_key in metadata" do
@@ -523,10 +523,10 @@ defmodule Loka.Engine.EntitySeederTest do
       assert quest.short_desc == "A Test Quest"
       # YAML block scalar may or may not have trailing newline
       assert String.trim(quest.long_desc) == "You must test things."
-      assert quest.components["objectives"] |> List.first() |> Map.get("id") == "obj1"
-      assert quest.components["rewards"]["xp"] == 50
-      assert quest.components["giver"] == "system"
-      assert quest.components["quest_type"] == "main"
+      assert quest.components["data"]["objectives"] |> List.first() |> Map.get("id") == "obj1"
+      assert quest.components["data"]["rewards"]["xp"] == 50
+      assert quest.components["data"]["giver"] == "system"
+      assert quest.components["data"]["quest_type"] == "main"
     end
   end
 
