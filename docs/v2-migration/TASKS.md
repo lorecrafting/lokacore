@@ -181,7 +181,7 @@
   - Verify: `mix test test/loka/game/`
   - Commit: `"feat(v2): swap GameState → entity components in game actions layer"`
 
-- [ ] **5.4** Update mechanics layer (4 modules)
+- [x] **5.4** Update mechanics layer (4 modules)
   - Modifies: `lib/loka/mechanics/stats.ex`, `character_resources.ex`, `combat_stats.ex`, `check.ex`
   - Verify: `mix test test/loka/mechanics/`
   - Commit: `"feat(v2): swap GameState → entity components in mechanics layer"`
@@ -251,7 +251,7 @@
 | 2: Seeder | 2.1 | **Complete** |
 | 3: EntityServer | 3.1-3.4 | **Complete** |
 | 4: Player | 4.1-4.3 | 4.0-4.2 complete |
-| 5: Content+Actions | 5.1-5.4 | 5.1-5.3 complete |
+| 5: Content+Actions | 5.1-5.4 | **Complete** |
 | 6: Cleanup | 6.1-6.4 | Not started |
 | 7: Polish | 7.1-7.3 | Not started |
 | **Total** | **22 tasks** | |
