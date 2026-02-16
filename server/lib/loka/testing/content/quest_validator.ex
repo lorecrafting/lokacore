@@ -45,6 +45,7 @@ defmodule Loka.Testing.Content.QuestValidator do
           | {:target_not_combatant, String.t(), String.t()}
           | {:missing_talk_target, String.t(), String.t()}
           | {:target_no_dialogue, String.t(), String.t()}
+          | {:missing_dialogue_topic, String.t(), String.t(), String.t()}
           | {:missing_collect_item, String.t(), String.t()}
           | {:missing_location, String.t(), String.t()}
 
@@ -196,18 +197,21 @@ defmodule Loka.Testing.Content.QuestValidator do
   defp validate_objective(quest_key, objective) do
     type = Map.get(objective, "type") || Map.get(objective, :type)
     target = Map.get(objective, "target_id") || Map.get(objective, :target_id)
+    dialogue_topic = Map.get(objective, "dialogue_topic") || Map.get(objective, :dialogue_topic)
 
     case type do
       t when t in ["kill", :kill] ->
         validate_kill_target(quest_key, target)
 
       t when t in ["talk", :talk] ->
-        validate_talk_target(quest_key, target)
+        {errs, warns} = validate_talk_target(quest_key, target)
+        {topic_errs, topic_warns} = validate_dialogue_topic(quest_key, target, dialogue_topic)
+        {errs ++ topic_errs, warns ++ topic_warns}
 
       t when t in ["collect", :collect] ->
         validate_collect_target(quest_key, target)
 
-      t when t in ["visit", :visit, "location", :location] ->
+      t when t in ["visit", :visit, "location", :location, "go_to", :go_to] ->
         validate_location_target(quest_key, target)
 
       _ ->
@@ -275,6 +279,28 @@ defmodule Loka.Testing.Content.QuestValidator do
     end
   end
 
+  defp validate_dialogue_topic(_quest_key, _target_key, nil), do: {[], []}
+
+  defp validate_dialogue_topic(quest_key, target_key, topic) when is_binary(target_key) do
+    case Entities.find_one(key: target_key) do
+      {:ok, proto} ->
+        dialogue_tree =
+          get_in(proto.components || %{}, ["dialogue_tree"]) || %{}
+
+        if Map.has_key?(dialogue_tree, topic) do
+          {[], []}
+        else
+          {[{:missing_dialogue_topic, quest_key, target_key, topic}], []}
+        end
+
+      {:error, :not_found} ->
+        # Already caught by validate_talk_target
+        {[], []}
+    end
+  end
+
+  defp validate_dialogue_topic(_quest_key, _target_key, _topic), do: {[], []}
+
   defp validate_rewards(quest_key, rewards) do
     items = Map.get(rewards, "items") || Map.get(rewards, :items) || []
 
@@ -323,6 +349,10 @@ defmodule Loka.Testing.Content.QuestValidator do
 
   defp format_error({:missing_location, quest, target}) do
     "  - Quest '#{quest}': Location '#{target}' not found or not a room"
+  end
+
+  defp format_error({:missing_dialogue_topic, quest, npc, topic}) do
+    "  - Quest '#{quest}': Talk target '#{npc}' has no dialogue node '#{topic}'"
   end
 
   defp format_warning({:reward_item_not_found, quest, item}) do

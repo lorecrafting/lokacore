@@ -36,6 +36,21 @@ defmodule Loka.Engine.EntityBehavior do
   """
 
   alias Loka.Engine.Entity
+  alias Loka.Engine.StateMachine
+
+  @npc_ai_machine StateMachine.new(%{
+                    initial: "idle",
+                    transitions: %{
+                      "idle" => ["patrolling", "alert"],
+                      "patrolling" => ["alert", "idle"],
+                      "alert" => ["pursuing", "idle"],
+                      "pursuing" => ["attacking", "returning"],
+                      "attacking" => ["pursuing", "returning", "idle"],
+                      "returning" => ["idle", "alert"]
+                    }
+                  })
+
+  def npc_ai_machine, do: @npc_ai_machine
 
   @callback on_init(entity :: Entity.t()) :: {:ok, Entity.t()}
   @callback on_tick(entity :: Entity.t()) :: {:ok, Entity.t()}

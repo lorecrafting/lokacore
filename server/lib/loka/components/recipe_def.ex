@@ -1,7 +1,22 @@
 defmodule Loka.Components.RecipeDef do
   @moduledoc "Typed access to the `recipe` component (ingredients, output)."
 
+  alias Loka.Engine.StateMachine
+
   @component_key "recipe"
+
+  @crafting_machine StateMachine.new(%{
+                      initial: "idle",
+                      transitions: %{
+                        "idle" => ["gathering", "crafting"],
+                        "gathering" => ["crafting", "idle"],
+                        "crafting" => ["complete", "failed"],
+                        "complete" => ["idle"],
+                        "failed" => ["idle"]
+                      }
+                    })
+
+  def crafting_machine, do: @crafting_machine
 
   def get(entity), do: Map.get(entity.components, @component_key)
   def has?(entity), do: Map.has_key?(entity.components, @component_key)

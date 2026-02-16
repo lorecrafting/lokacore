@@ -88,8 +88,22 @@ defmodule Loka.Session.Server do
   use GenServer, restart: :temporary
   require Logger
 
+  alias Loka.Engine.StateMachine
   alias Loka.Session.Registry, as: SessionRegistry
   alias Loka.Utils.LogSanitizer
+
+  @session_machine StateMachine.new(%{
+                     initial: "connecting",
+                     transitions: %{
+                       "connecting" => ["authenticated", "disconnected"],
+                       "authenticated" => ["in_game", "disconnected"],
+                       "in_game" => ["in_bardo", "disconnected"],
+                       "in_bardo" => ["in_game", "disconnected"],
+                       "disconnected" => ["connecting"]
+                     }
+                   })
+
+  def session_machine, do: @session_machine
 
   # Session stays alive 30s after last client disconnects
   # This allows for reconnection without losing session state

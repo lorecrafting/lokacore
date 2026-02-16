@@ -45,6 +45,7 @@ defmodule Loka.Testing.Content.StorylineValidator do
           | {:circular_dependency, String.t(), [String.t()]}
           | {:duplicate_act_id, String.t(), String.t()}
           | {:empty_act, String.t(), String.t()}
+          | {:unachievable_quest_order, String.t(), String.t(), String.t()}
 
   @type warning ::
           {:no_side_quests, String.t()}
@@ -181,6 +182,11 @@ defmodule Loka.Testing.Content.StorylineValidator do
     {act_errors, act_warnings} = validate_acts(storyline_key, acts)
     errors = errors ++ act_errors
     warnings = warnings ++ act_warnings
+
+    # Validate quest order achievability
+    {order_errors, order_warnings} = validate_quest_order(storyline_key, acts)
+    errors = errors ++ order_errors
+    warnings = warnings ++ order_warnings
 
     # Validate side quests
     side_quests = storyline["side_quests"] || []
@@ -351,6 +357,44 @@ defmodule Loka.Testing.Content.StorylineValidator do
   end
 
   # =============================================================================
+  # Private - Quest Order Achievability
+  # =============================================================================
+
+  defp validate_quest_order(storyline_key, acts) do
+    # Build a flat list of quest IDs in act order
+    # For each quest, check that its prerequisites appear earlier in the list
+    quest_order =
+      Enum.flat_map(acts, fn act -> act["quests"] || [] end)
+
+    errors =
+      quest_order
+      |> Enum.with_index()
+      |> Enum.reduce([], fn {quest_id, index}, acc ->
+        case Content.Quest.definition(quest_id) do
+          nil ->
+            acc
+
+          quest_def ->
+            requires = quest_def.requires_quest
+
+            if requires && requires != "" do
+              preceding = Enum.take(quest_order, index)
+
+              if requires in preceding do
+                acc
+              else
+                [{:unachievable_quest_order, storyline_key, quest_id, requires} | acc]
+              end
+            else
+              acc
+            end
+        end
+      end)
+
+    {errors, []}
+  end
+
+  # =============================================================================
   # Private - Formatting
   # =============================================================================
 
@@ -376,6 +420,10 @@ defmodule Loka.Testing.Content.StorylineValidator do
 
   defp format_error({:empty_act, storyline, act_id}) do
     "  - Storyline '#{storyline}': Act '#{act_id}' has no quests"
+  end
+
+  defp format_error({:unachievable_quest_order, storyline, quest, prereq}) do
+    "  - Storyline '#{storyline}': Quest '#{quest}' requires '#{prereq}' but it appears later or is missing"
   end
 
   defp format_warning({:no_side_quests, storyline}) do

@@ -37,4 +37,38 @@ defmodule Loka.Components.QuestProgressTest do
     assert QuestProgress.completed(e) == []
     assert QuestProgress.failed(e) == []
   end
+
+  describe "state machine" do
+    alias Loka.Engine.StateMachine
+
+    test "machine/0 returns a StateMachine struct" do
+      machine = QuestProgress.machine()
+      assert %StateMachine{} = machine
+      assert machine.initial == "available"
+    end
+
+    test "valid quest transitions" do
+      machine = QuestProgress.machine()
+      assert {:ok, "accepted"} = StateMachine.transition(machine, "available", "accepted")
+      assert {:ok, "in_progress"} = StateMachine.transition(machine, "accepted", "in_progress")
+
+      assert {:ok, "objectives_complete"} =
+               StateMachine.transition(machine, "in_progress", "objectives_complete")
+
+      assert {:ok, "turned_in"} =
+               StateMachine.transition(machine, "objectives_complete", "turned_in")
+    end
+
+    test "invalid quest transitions rejected" do
+      machine = QuestProgress.machine()
+      assert {:error, _} = StateMachine.transition(machine, "available", "turned_in")
+      assert {:error, _} = StateMachine.transition(machine, "in_progress", "accepted")
+    end
+
+    test "abandon and re-accept" do
+      machine = QuestProgress.machine()
+      assert {:ok, "abandoned"} = StateMachine.transition(machine, "in_progress", "abandoned")
+      assert {:ok, "accepted"} = StateMachine.transition(machine, "abandoned", "accepted")
+    end
+  end
 end

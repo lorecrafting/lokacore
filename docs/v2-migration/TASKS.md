@@ -236,7 +236,7 @@
   - Verify: `mix test test/loka/behaviors/`
   - Commit: `"feat(v2): add Weather, DayNight, NpcAmbient, RoomAmbient behavior modules"`
 
-- [ ] **7.3** StateMachine engine + quest/combat/dialogue state machines + content testing
+- [x] **7.3** StateMachine engine + quest/combat/dialogue state machines + content testing
   - Creates: `lib/loka/engine/state_machine.ex` (shared state machine — transitions, callbacks, introspection)
   - Creates: State machine definitions in 7 component modules (quest, combat, crafting, NPC AI, session, dialogue, entity lifecycle)
   - Modifies: `framework/quest/progress.ex`, `state_helper.ex`, `admin.ex` — wire quest state machine

@@ -199,10 +199,112 @@ defmodule Loka.Testing.Content.DialogueQuestChainValidator do
   # ============================================================================
 
   defp dialogue_offers_quest?(dialogue, quest_id) do
+    # Check any node (not just BFS from start) since conditional start nodes
+    # may offer quests through completed_variants or show_if conditions
     Enum.any?(dialogue, fn {_node_id, node} ->
-      node_offers_quest?(dialogue, node, quest_id)
+      node_offers_quest_any?(node, quest_id)
     end)
   end
+
+  defp node_offers_quest_any?(node, quest_id) when is_map(node) do
+    action = node["action"] || node[:action]
+    choices = node["choices"] || node[:choices] || []
+
+    action_offers_quest?(action, quest_id) ||
+      Enum.any?(choices, fn choice ->
+        choice_action = choice["action"] || choice[:action]
+        action_offers_quest?(choice_action, quest_id)
+      end)
+  end
+
+  defp node_offers_quest_any?(_, _), do: false
+
+  defp bfs_reachable_quest_action?(dialogue, start_node_id, quest_id, action_type) do
+    queue = :queue.from_list([start_node_id])
+    visited = MapSet.new()
+    bfs_quest_action(dialogue, queue, visited, quest_id, action_type)
+  end
+
+  defp bfs_quest_action(_dialogue, {[], []}, _visited, _quest_id, _action_type), do: false
+
+  defp bfs_quest_action(dialogue, queue, visited, quest_id, action_type) do
+    case :queue.out(queue) do
+      {:empty, _} ->
+        false
+
+      {{:value, node_id}, rest_queue} ->
+        if MapSet.member?(visited, node_id) do
+          bfs_quest_action(dialogue, rest_queue, visited, quest_id, action_type)
+        else
+          node = Map.get(dialogue, node_id) || Map.get(dialogue, to_string(node_id))
+
+          if is_nil(node) do
+            bfs_quest_action(
+              dialogue,
+              rest_queue,
+              MapSet.put(visited, node_id),
+              quest_id,
+              action_type
+            )
+          else
+            if node_has_quest_action?(node, quest_id, action_type) do
+              true
+            else
+              # Add all reachable nodes (next + choice nexts)
+              next_nodes = collect_next_nodes(node)
+              new_queue = Enum.reduce(next_nodes, rest_queue, &:queue.in(&1, &2))
+
+              bfs_quest_action(
+                dialogue,
+                new_queue,
+                MapSet.put(visited, node_id),
+                quest_id,
+                action_type
+              )
+            end
+          end
+        end
+    end
+  end
+
+  defp node_has_quest_action?(node, quest_id, action_type) when is_map(node) do
+    action_str = to_string(action_type)
+    action = node["action"] || node[:action]
+    choices = node["choices"] || node[:choices] || []
+
+    action_match?(action, quest_id, action_str) ||
+      Enum.any?(choices, fn choice ->
+        choice_action = choice["action"] || choice[:action]
+        action_match?(choice_action, quest_id, action_str)
+      end)
+  end
+
+  defp action_match?(action, quest_id, action_str) do
+    case action do
+      [^action_str, ^quest_id] -> true
+      [^action_str, ^quest_id | _] -> true
+      _ -> false
+    end
+  end
+
+  defp collect_next_nodes(node) when is_map(node) do
+    # Direct next
+    next = node["next"] || node[:next]
+    choices = node["choices"] || node[:choices] || []
+
+    choice_nexts =
+      Enum.flat_map(choices, fn choice ->
+        case choice["next"] || choice[:next] do
+          nil -> []
+          n -> [n]
+        end
+      end)
+
+    (List.wrap(next) ++ choice_nexts)
+    |> Enum.reject(&is_nil/1)
+  end
+
+  defp collect_next_nodes(_), do: []
 
   defp node_offers_quest?(dialogue, node_id, quest_id) when is_binary(node_id) do
     case Map.get(dialogue, node_id) || Map.get(dialogue, String.to_atom(node_id)) do
@@ -269,16 +371,24 @@ defmodule Loka.Testing.Content.DialogueQuestChainValidator do
   end
 
   defp dialogue_has_turnin?(dialogue, quest_id) do
-    Enum.any?(dialogue, fn {_node_id, node} ->
-      show_if = node[:show_if] || node["show_if"]
+    # Check if any node gated by quest_complete condition exists and is
+    # either a start-variant or has a complete_quest action reachable via BFS
+    has_turnin_condition =
+      Enum.any?(dialogue, fn {_node_id, node} ->
+        show_if = node[:show_if] || node["show_if"]
 
-      cond do
-        is_nil(show_if) -> false
-        show_if[:quest_complete] == quest_id -> true
-        show_if["quest_complete"] == quest_id -> true
-        true -> false
-      end
-    end)
+        cond do
+          is_nil(show_if) -> false
+          show_if[:quest_complete] == quest_id -> true
+          show_if["quest_complete"] == quest_id -> true
+          true -> false
+        end
+      end)
+
+    has_complete_action =
+      bfs_reachable_quest_action?(dialogue, "start", quest_id, :complete_quest)
+
+    has_turnin_condition || has_complete_action
   end
 
   # ============================================================================

@@ -293,7 +293,11 @@ defmodule Mix.Tasks.Loka.Test.Validate do
   defp format_issue(issue) when is_tuple(issue) do
     issue
     |> Tuple.to_list()
-    |> Enum.map(&to_string/1)
+    |> Enum.map(fn
+      val when is_tuple(val) -> format_issue(val)
+      val when is_list(val) -> Enum.map_join(val, ", ", &to_string/1)
+      val -> to_string(val)
+    end)
     |> Enum.join(": ")
   end
 

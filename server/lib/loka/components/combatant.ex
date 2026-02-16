@@ -1,7 +1,23 @@
 defmodule Loka.Components.Combatant do
   @moduledoc "Typed access to the `combatant` component (health, attack, defense)."
 
+  alias Loka.Engine.StateMachine
+
   @component_key "combatant"
+
+  @machine StateMachine.new(%{
+             initial: "idle",
+             transitions: %{
+               "idle" => ["engaged"],
+               "engaged" => ["defending", "fleeing", "dead", "idle"],
+               "defending" => ["engaged", "fleeing", "dead", "idle"],
+               "fleeing" => ["idle", "dead"],
+               "dead" => ["respawning"],
+               "respawning" => ["idle"]
+             }
+           })
+
+  def machine, do: @machine
 
   def get(entity), do: Map.get(entity.components, @component_key)
   def has?(entity), do: Map.has_key?(entity.components, @component_key)

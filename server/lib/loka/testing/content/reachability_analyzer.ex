@@ -93,10 +93,14 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
     {gathering_errors, gathering_warnings, gathering_stats} =
       analyze_gathering_accessibility(reachable_rooms)
 
+    # Step 6: Check recipe ingredient chains
+    {recipe_errors, recipe_warnings} = analyze_recipe_ingredient_chains(reachable_rooms)
+
     results = %{
       analysis_complete: true,
-      errors: npc_errors ++ item_errors ++ quest_errors ++ gathering_errors,
-      warnings: npc_warnings ++ item_warnings ++ quest_warnings ++ gathering_warnings,
+      errors: npc_errors ++ item_errors ++ quest_errors ++ gathering_errors ++ recipe_errors,
+      warnings:
+        npc_warnings ++ item_warnings ++ quest_warnings ++ gathering_warnings ++ recipe_warnings,
       stats:
         Map.merge(npc_stats, item_stats)
         |> Map.merge(quest_stats)
@@ -884,6 +888,39 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
   end
 
   # =============================================================================
+  # Private - Recipe Ingredient Chains
+  # =============================================================================
+
+  defp analyze_recipe_ingredient_chains(reachable_rooms) do
+    item_sources = build_item_source_map(reachable_rooms)
+    recipes = ContentRecipe.all_published()
+
+    {errors, warnings} =
+      Enum.reduce(recipes, {[], []}, fn recipe, {errs, warns} ->
+        ingredients = ContentRecipe.ingredients(recipe)
+        recipe_key = recipe.key || "unknown_recipe"
+
+        Enum.reduce(List.wrap(ingredients), {errs, warns}, fn ingredient, {e, w} ->
+          item_key =
+            case ingredient do
+              %{"item" => k} -> k
+              %{item: k} -> k
+              k when is_binary(k) -> k
+              _ -> nil
+            end
+
+          if item_key && !Map.has_key?(item_sources, item_key) do
+            {[{:unobtainable_recipe_ingredient, recipe_key, item_key} | e], w}
+          else
+            {e, w}
+          end
+        end)
+      end)
+
+    {errors, warnings}
+  end
+
+  # =============================================================================
   # Private - Helpers
   # =============================================================================
 
@@ -929,6 +966,10 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
 
   defp format_error({:unreachable_gathering_node, node, room}) do
     "  - Gathering node '#{node}' is in unreachable room '#{room}'"
+  end
+
+  defp format_error({:unobtainable_recipe_ingredient, recipe, item}) do
+    "  - Recipe '#{recipe}': Ingredient '#{item}' has no known source"
   end
 
   defp format_warning({:item_only_from_quest, item, quest}) do

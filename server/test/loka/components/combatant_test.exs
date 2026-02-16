@@ -85,4 +85,28 @@ defmodule Loka.Components.CombatantTest do
       assert Combatant.health(Combatant.damage(e, 50)) == 0
     end
   end
+
+  describe "state machine" do
+    alias Loka.Engine.StateMachine
+
+    test "machine/0 returns a StateMachine struct" do
+      machine = Combatant.machine()
+      assert %StateMachine{} = machine
+      assert machine.initial == "idle"
+    end
+
+    test "valid combat transitions" do
+      machine = Combatant.machine()
+      assert {:ok, "engaged"} = StateMachine.transition(machine, "idle", "engaged")
+      assert {:ok, "dead"} = StateMachine.transition(machine, "engaged", "dead")
+      assert {:ok, "respawning"} = StateMachine.transition(machine, "dead", "respawning")
+      assert {:ok, "idle"} = StateMachine.transition(machine, "respawning", "idle")
+    end
+
+    test "invalid combat transitions rejected" do
+      machine = Combatant.machine()
+      assert {:error, _} = StateMachine.transition(machine, "idle", "dead")
+      assert {:error, _} = StateMachine.transition(machine, "dead", "engaged")
+    end
+  end
 end

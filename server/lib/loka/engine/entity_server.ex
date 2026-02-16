@@ -39,7 +39,20 @@ defmodule Loka.Engine.EntityServer do
   use GenServer
   require Logger
 
-  alias Loka.Engine.{Behavior, Entities, Entity, EventBus, Event}
+  alias Loka.Engine.{Behavior, Entities, Entity, EventBus, Event, StateMachine}
+
+  @lifecycle_machine StateMachine.new(%{
+                       initial: "loading",
+                       transitions: %{
+                         "loading" => ["alive", "error"],
+                         "alive" => ["despawning", "error"],
+                         "despawning" => ["saved"],
+                         "saved" => [],
+                         "error" => ["loading"]
+                       }
+                     })
+
+  def lifecycle_machine, do: @lifecycle_machine
 
   # Configuration - can be overridden via opts
   # 2 minutes
