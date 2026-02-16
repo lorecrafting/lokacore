@@ -223,14 +223,14 @@
 ## Phase 7: Polish
 **Spec**: `phase-7-polish.md` | **Can overlap with Phase 6**
 
-- [ ] **7.1** Create component accessor modules (23 modules)
+- [x] **7.1** Create component accessor modules (23 modules)
   - Creates: `lib/loka/components/*.ex` (combatant, player, stats, quest_progress, etc.)
   - Each ~15 lines: `get/1`, `has?/1`, `put/2`, `update/3`, `component_key/0`
   - Creates: `test/loka/components/*_test.exs` (async: true)
   - Verify: `mix test test/loka/components/`
   - Commit: `"feat(v2): add 23 component accessor modules"`
 
-- [ ] **7.2** Create new behavior modules
+- [x] **7.2** Create new behavior modules
   - Creates: `lib/loka/behaviors/weather.ex`, `day_night.ex`, `npc_ambient.ex`, `room_ambient.ex`
   - Creates: `test/loka/behaviors/*_test.exs`
   - Verify: `mix test test/loka/behaviors/`
