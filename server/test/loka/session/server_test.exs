@@ -210,6 +210,73 @@ defmodule Loka.Session.ServerTest do
       assert state.client_types == []
       assert %DateTime{} = state.created_at
     end
+
+    test "includes session_state field" do
+      player = create_test_player()
+      {:ok, _pid} = start_session(player)
+      on_exit(fn -> stop_session(player.id) end)
+
+      state = Server.get_state(player.id)
+      assert state.session_state == "authenticated"
+    end
+  end
+
+  describe "session_state transitions" do
+    test "starts as authenticated after init" do
+      player = create_test_player()
+      {:ok, _pid} = start_session(player)
+      on_exit(fn -> stop_session(player.id) end)
+
+      assert Server.get_state(player.id).session_state == "authenticated"
+    end
+
+    test "transitions to in_game when first client registers" do
+      player = create_test_player()
+      {:ok, _pid} = start_session(player)
+      on_exit(fn -> stop_session(player.id) end)
+
+      Server.register_client(player.id, :liveview, self())
+      assert Server.get_state(player.id).session_state == "in_game"
+    end
+
+    test "transitions to ghost when last client disconnects" do
+      player = create_test_player()
+      {:ok, _pid} = start_session(player)
+      on_exit(fn -> stop_session(player.id) end)
+
+      client = spawn(fn -> Process.sleep(:infinity) end)
+      Server.register_client(player.id, :liveview, client)
+
+      assert Server.get_state(player.id).session_state == "in_game"
+
+      Process.exit(client, :kill)
+      Process.sleep(20)
+
+      assert Server.get_state(player.id).session_state == "ghost"
+    end
+
+    test "transitions back to in_game on reconnect from ghost" do
+      player = create_test_player()
+      {:ok, _pid} = start_session(player)
+      on_exit(fn -> stop_session(player.id) end)
+
+      client = spawn(fn -> Process.sleep(:infinity) end)
+      Server.register_client(player.id, :liveview, client)
+
+      Process.exit(client, :kill)
+      Process.sleep(20)
+
+      assert Server.get_state(player.id).session_state == "ghost"
+
+      Server.register_client(player.id, :liveview, self())
+      assert Server.get_state(player.id).session_state == "in_game"
+    end
+
+    test "session_machine/0 returns valid StateMachine" do
+      machine = Server.session_machine()
+      assert %Loka.Engine.StateMachine{} = machine
+      assert machine.initial == "connecting"
+    end
   end
 
   describe "exists?/1" do

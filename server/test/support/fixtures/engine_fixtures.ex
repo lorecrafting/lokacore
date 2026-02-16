@@ -230,9 +230,6 @@ defmodule Loka.EngineFixtures do
   end
 
   @doc """
-  Creates a gathering node entity in the DB. Returns the EntitySchema.
-  """
-  @doc """
   Creates a character entity in the DB (V2 player data).
 
   Returns the EntitySchema. Components mirror the old GameState fields:

@@ -107,4 +107,34 @@ defmodule Loka.Behaviors.DayNightTest do
       assert {:ok, ^entity} = DayNight.on_event(entity, :tick, %{})
     end
   end
+
+  describe "phase_machine/0" do
+    alias Loka.Engine.StateMachine
+
+    test "returns a valid StateMachine struct" do
+      machine = DayNight.phase_machine()
+      assert %StateMachine{} = machine
+      assert machine.initial == "dawn"
+    end
+
+    test "allows cyclic transitions through all phases" do
+      machine = DayNight.phase_machine()
+      assert {:ok, "day"} = StateMachine.transition(machine, "dawn", "day")
+      assert {:ok, "dusk"} = StateMachine.transition(machine, "day", "dusk")
+      assert {:ok, "night"} = StateMachine.transition(machine, "dusk", "night")
+      assert {:ok, "dawn"} = StateMachine.transition(machine, "night", "dawn")
+    end
+
+    test "rejects non-adjacent phase transitions" do
+      machine = DayNight.phase_machine()
+      assert {:error, _} = StateMachine.transition(machine, "dawn", "night")
+      assert {:error, _} = StateMachine.transition(machine, "day", "dawn")
+      assert {:error, _} = StateMachine.transition(machine, "dusk", "day")
+    end
+
+    test "does not define on_enter callbacks (side effects handled manually)" do
+      machine = DayNight.phase_machine()
+      assert machine.on_enter == %{}
+    end
+  end
 end

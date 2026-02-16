@@ -37,30 +37,36 @@ defmodule LokaWeb.Channels.BuilderCommands.Helpers do
     character = socket.assigns.character
     old_room_id = character.location_id
 
-    if old_room_id do
-      Phoenix.PubSub.unsubscribe(Loka.PubSub, "location:#{old_room_id}")
-    end
-
     # V2: Update character entity's location
     updated_character = %{character | location_id: room.id}
-    Entities.save_entity(updated_character)
 
-    Phoenix.PubSub.subscribe(Loka.PubSub, "location:#{room.id}")
-    Loka.Session.update_room(player.id, room.id)
+    case Entities.save_entity(updated_character) do
+      {:ok, _saved} ->
+        # Only change PubSub subscriptions after successful save
+        if old_room_id do
+          Phoenix.PubSub.unsubscribe(Loka.PubSub, "location:#{old_room_id}")
+        end
 
-    {loaded_room, final_character} =
-      RoomHelpers.load_room_for_character(updated_character)
+        Phoenix.PubSub.subscribe(Loka.PubSub, "location:#{room.id}")
+        Loka.Session.update_room(player.id, room.id)
 
-    atmosphere = Atmosphere.describe_for_room(loaded_room)
+        {loaded_room, final_character} =
+          RoomHelpers.load_room_for_character(updated_character)
 
-    socket = assign(socket, :character, final_character)
+        atmosphere = Atmosphere.describe_for_room(loaded_room)
 
-    push(socket, "room_update", %{
-      room: Serializers.serialize_room(loaded_room),
-      atmosphere: atmosphere
-    })
+        socket = assign(socket, :character, final_character)
 
-    {:ok, socket}
+        push(socket, "room_update", %{
+          room: Serializers.serialize_room(loaded_room),
+          atmosphere: atmosphere
+        })
+
+        {:ok, socket}
+
+      {:error, reason} ->
+        {:error, "Failed to teleport: #{inspect(reason)}", socket}
+    end
   end
 
   @direction_abbreviations %{

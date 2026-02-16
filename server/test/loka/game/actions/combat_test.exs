@@ -25,7 +25,7 @@ defmodule Loka.Game.Actions.CombatTest do
 
     test "returns error for non-combatant entity", %{ctx: ctx} do
       # Mock entity without combat component
-      entity = %{id: "npc_1", name: "Friendly Monk"}
+      entity = %{id: "npc_1", name: "Friendly Monk", short_desc: "Friendly Monk"}
 
       result = CombatActions.attack(ctx, "npc_1", entity)
       assert {:error, message} = result
@@ -33,7 +33,7 @@ defmodule Loka.Game.Actions.CombatTest do
     end
 
     test "returns appropriate error message for non-combatant", %{ctx: ctx} do
-      entity = %{id: "npc_1", name: "Village Elder"}
+      entity = %{id: "npc_1", name: "Village Elder", short_desc: "Village Elder"}
 
       {:error, message} = CombatActions.attack(ctx, "npc_1", entity)
       # Either "doesn't want to fight" or "can't attack that"

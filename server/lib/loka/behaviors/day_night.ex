@@ -16,13 +16,26 @@ defmodule Loka.Behaviors.DayNight do
   """
 
   @behaviour Loka.Engine.EntityBehavior
+  require Logger
 
-  alias Loka.Engine.{EventBus, Event}
+  alias Loka.Engine.{EventBus, Event, StateMachine}
   alias Loka.Engine.EntityServer.Volatile
   alias Loka.Behaviors.Runner
 
   @default_phases ~w(dawn day dusk night)
   @default_ticks_per_phase 15
+
+  @phase_machine StateMachine.new(%{
+                   initial: "dawn",
+                   transitions: %{
+                     "dawn" => ["day"],
+                     "day" => ["dusk"],
+                     "dusk" => ["night"],
+                     "night" => ["dawn"]
+                   }
+                 })
+
+  def phase_machine, do: @phase_machine
 
   @impl true
   def on_init(entity) do
@@ -57,6 +70,24 @@ defmodule Loka.Behaviors.DayNight do
 
     next = next_phase(current, phases)
 
+    # Validate transition if using default phases
+    if phases == @default_phases do
+      case StateMachine.transition(@phase_machine, current, next) do
+        {:ok, _} ->
+          do_advance_phase(entity, time, current, next)
+
+        {:error, {:invalid_transition, from, to}} ->
+          Logger.warning("[DayNight] Invalid phase transition: #{from} → #{to}, skipping")
+
+          {:ok, entity}
+      end
+    else
+      # Custom phases bypass the machine (they have different valid transitions)
+      do_advance_phase(entity, time, current, next)
+    end
+  end
+
+  defp do_advance_phase(entity, time, current, next) do
     EventBus.emit(
       Event.new(:time_change, %{
         payload: %{

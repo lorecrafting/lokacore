@@ -14,11 +14,11 @@ data:
 
       # Illusions take no damage unless revealed with clarity
       if not has_status?(attacker, "clarity") do
-        message("Your attack passes through an illusion!")
-        default(0)  # No damage
+        message.("Your attack passes through an illusion!")
+        default.(0)  # No damage
       else
-        continue()  # Normal damage
+        continue.()  # Normal damage
       end
     else
-      continue()
+      continue.()
     end

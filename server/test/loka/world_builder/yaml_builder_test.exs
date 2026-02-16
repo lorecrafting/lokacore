@@ -197,7 +197,7 @@ defmodule Loka.WorldBuilder.YamlBuilderTest do
     end
 
     test "returns default for non-binary" do
-      assert YamlBuilder.indent_source(nil) == "    continue()"
+      assert YamlBuilder.indent_source(nil) == "    continue.()"
     end
   end
 

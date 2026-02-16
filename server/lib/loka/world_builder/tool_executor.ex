@@ -1270,7 +1270,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
     case Script.get(key) do
       {:ok, script} ->
         hook = input["hook"] || Script.hook(script) || "on_enter"
-        source = input["source"] || Script.source(script) || "continue()"
+        source = input["source"] || Script.source(script) || "continue.()"
         name = input["name"] || script.short_desc || "Script: #{key}"
 
         updated_data = %{

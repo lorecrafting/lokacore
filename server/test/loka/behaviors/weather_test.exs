@@ -83,4 +83,56 @@ defmodule Loka.Behaviors.WeatherTest do
       assert {:ok, ^entity} = Weather.on_event(entity, :damage, %{})
     end
   end
+
+  describe "weather_machine/0" do
+    alias Loka.Engine.StateMachine
+
+    test "returns a valid StateMachine struct" do
+      machine = Weather.weather_machine()
+      assert %StateMachine{} = machine
+      assert machine.initial == "clear"
+    end
+
+    test "allows adjacent weather transitions" do
+      machine = Weather.weather_machine()
+      assert {:ok, "cloudy"} = StateMachine.transition(machine, "clear", "cloudy")
+      assert {:ok, "rainy"} = StateMachine.transition(machine, "cloudy", "rainy")
+      assert {:ok, "stormy"} = StateMachine.transition(machine, "rainy", "stormy")
+      assert {:ok, "rainy"} = StateMachine.transition(machine, "stormy", "rainy")
+    end
+
+    test "rejects non-adjacent weather transitions" do
+      machine = Weather.weather_machine()
+      assert {:error, _} = StateMachine.transition(machine, "clear", "stormy")
+      assert {:error, _} = StateMachine.transition(machine, "clear", "rainy")
+    end
+
+    test "foggy can transition to clear or cloudy" do
+      machine = Weather.weather_machine()
+      assert {:ok, "clear"} = StateMachine.transition(machine, "foggy", "clear")
+      assert {:ok, "cloudy"} = StateMachine.transition(machine, "foggy", "cloudy")
+    end
+
+    test "foggy is reachable from clear and stormy" do
+      machine = Weather.weather_machine()
+      assert {:ok, "foggy"} = StateMachine.transition(machine, "clear", "foggy")
+      assert {:ok, "foggy"} = StateMachine.transition(machine, "stormy", "foggy")
+    end
+
+    test "weather only transitions to adjacent states" do
+      machine = Weather.weather_machine()
+
+      for {from, valid_targets} <- machine.transitions do
+        all_states = MapSet.to_list(machine.states)
+
+        for target <- all_states, target != from do
+          if target in valid_targets do
+            assert {:ok, ^target} = StateMachine.transition(machine, from, target)
+          else
+            assert {:error, _} = StateMachine.transition(machine, from, target)
+          end
+        end
+      end
+    end
+  end
 end

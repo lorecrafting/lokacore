@@ -24,7 +24,7 @@ data:
     pickup_msg = config.pickup_message || "picks up some litter."
 
     # Find items in room with matching tags
-    room_entities = entities_in_room()
+    room_entities = entities_in_room.()
     items = room_entities
       |> Enum.filter(fn e ->
         e[:type] == :item &&
@@ -34,9 +34,9 @@ data:
     if items != [] do
       target = pick(items)
       if target do
-        emote(pickup_msg)
-        despawn(target[:id])
+        emote.(pickup_msg)
+        despawn.(target[:id])
       end
     end
 
-    continue()
+    continue.()

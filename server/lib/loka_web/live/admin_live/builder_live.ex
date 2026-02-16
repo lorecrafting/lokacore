@@ -78,12 +78,16 @@ defmodule LokaWeb.AdminLive.BuilderLive do
     """
   end
 
-  # Generate JWT token for the terminal panel's GameChannel connection
+  # Generate JWT token for the terminal panel's GameChannel connection.
+  # Builder sessions get a 24hr token since they're admin-only and session-scoped.
   defp generate_terminal_token(socket) do
     player = socket.assigns[:current_scope] && socket.assigns.current_scope.player
 
     if player do
-      case Loka.Auth.Guardian.encode_and_sign(player, %{}, token_type: "access") do
+      case Loka.Auth.Guardian.encode_and_sign(player, %{},
+             token_type: "access",
+             ttl: {24, :hour}
+           ) do
         {:ok, token, _claims} -> token
         {:error, _reason} -> ""
       end

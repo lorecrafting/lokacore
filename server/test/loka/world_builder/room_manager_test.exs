@@ -89,14 +89,11 @@ defmodule Loka.WorldBuilder.RoomManagerTest do
       assert room.exits["north"] == dest_room.key
     end
 
-    # NOTE: Currently duplicate keys are allowed in the DB layer.
-    # This is a known limitation - keys are not enforced as unique.
-    # The system supports multiple entities with the same key (like prototype instances).
-    @tag :skip
     test "returns error for duplicate key" do
       {:ok, _room} = RoomManager.create_room(%{key: "duplicate_key"})
-      # Second creation with same key should fail
-      assert {:error, _reason} = RoomManager.create_room(%{key: "duplicate_key"})
+
+      assert {:error, "Room 'duplicate_key' already exists."} =
+               RoomManager.create_room(%{key: "duplicate_key"})
     end
   end
 

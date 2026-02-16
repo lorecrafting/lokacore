@@ -31,18 +31,18 @@ data:
     cond do
       # Opening time
       event == open_event ->
-        set_flag("shop_open", true)
-        emit(:opening_shop)
-        set_trait_state(:shop_open, true)
-        handled()
+        set_flag.("shop_open", true)
+        emit.(:opening_shop)
+        set_trait_state.(:shop_open, true)
+        handled.()
 
       # Closing time
       event == close_event ->
-        set_flag("shop_open", false)
-        emit(:closing_shop)
-        set_trait_state(:shop_open, false)
-        handled()
+        set_flag.("shop_open", false)
+        emit.(:closing_shop)
+        set_trait_state.(:shop_open, false)
+        handled.()
 
       true ->
-        continue()
+        continue.()
     end

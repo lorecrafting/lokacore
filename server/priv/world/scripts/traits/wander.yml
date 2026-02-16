@@ -23,7 +23,7 @@ data:
       description: "Don't move to rooms with these tags (optional)"
   source: |
     # Wander trait - move randomly within constraints
-    exits = room_exits()
+    exits = room_exits.()
 
     # Get destination keys from exits
     destinations = exits
@@ -45,13 +45,13 @@ data:
       target = pick(destinations)
 
       if target do
-        teleport(entity.id, target)
-        emit(:wander_arrive)
+        teleport.(entity.id, target)
+        emit.(:wander_arrive)
       end
     end
 
     # Schedule next wander
     interval = config.interval || 600
-    after(interval * 1000, "wander")
+    after.(interval * 1000, "wander")
 
-    continue()
+    continue.()

@@ -16,7 +16,7 @@ data:
       # spawn_entity("moha_illusion", context.room, %{is_real: false}, location: self().location_id)
       # spawn_entity("moha_illusion", context.room, %{is_real: false}, location: self().location_id)
 
-      message("Moha Mara splits into multiple forms!")
+      message.("Moha Mara splits into multiple forms!")
     end
 
-    continue()
+    continue.()

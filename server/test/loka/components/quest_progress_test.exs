@@ -71,4 +71,64 @@ defmodule Loka.Components.QuestProgressTest do
       assert {:ok, "accepted"} = StateMachine.transition(machine, "abandoned", "accepted")
     end
   end
+
+  describe "status/2" do
+    test "returns status of an active quest" do
+      e =
+        entity(%{
+          "quest_progress" => %{
+            "active" => %{"q1" => %{"status" => "in_progress"}}
+          }
+        })
+
+      assert QuestProgress.status(e, "q1") == "in_progress"
+    end
+
+    test "returns nil for non-existent quest" do
+      assert QuestProgress.status(entity(), "q1") == nil
+    end
+  end
+
+  describe "transition_quest/3" do
+    test "transitions quest status via state machine" do
+      e =
+        entity(%{
+          "quest_progress" => %{
+            "active" => %{"q1" => %{"status" => "accepted", "objectives" => %{}}}
+          }
+        })
+
+      assert {:ok, updated} = QuestProgress.transition_quest(e, "q1", "in_progress")
+      assert QuestProgress.status(updated, "q1") == "in_progress"
+    end
+
+    test "rejects invalid transition" do
+      e =
+        entity(%{
+          "quest_progress" => %{
+            "active" => %{"q1" => %{"status" => "accepted"}}
+          }
+        })
+
+      assert {:error, {:invalid_transition, "accepted", "turned_in"}} =
+               QuestProgress.transition_quest(e, "q1", "turned_in")
+    end
+
+    test "returns error for non-active quest" do
+      assert {:error, :quest_not_active} =
+               QuestProgress.transition_quest(entity(), "q1", "in_progress")
+    end
+
+    test "defaults to accepted status when not set" do
+      e =
+        entity(%{
+          "quest_progress" => %{
+            "active" => %{"q1" => %{"objectives" => %{}}}
+          }
+        })
+
+      assert {:ok, updated} = QuestProgress.transition_quest(e, "q1", "in_progress")
+      assert QuestProgress.status(updated, "q1") == "in_progress"
+    end
+  end
 end

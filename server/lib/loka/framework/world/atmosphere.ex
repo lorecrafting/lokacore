@@ -13,12 +13,16 @@ defmodule Loka.Framework.World.Atmosphere do
   weather descriptions.
   """
 
-  alias Loka.Framework.World.{Weather, DayNight}
+  alias Loka.Engine.Entities
 
   @doc """
   Gets the current atmospheric description combining weather and time of day.
 
   Returns a short, evocative sentence suitable for the game UI.
+
+  Reads phase/weather from system entities with DayNight/Weather behaviors
+  (stored in `components["time"]["phase"]` and `components["weather"]["current"]`).
+  Falls back to `:day` / `"clear"` if no system entity is running.
 
   ## Options
 
@@ -101,50 +105,60 @@ defmodule Loka.Framework.World.Atmosphere do
 
   @doc """
   Gets the current time phase (:dawn, :day, :dusk, :night).
-  Returns :day if DayNight system is not running.
+  Reads from the world system entity's `components["time"]["phase"]`.
+  Returns :day if no system entity is running.
   """
   def get_phase do
-    if Process.whereis(DayNight) do
-      DayNight.get_phase()
-    else
-      :day
+    case find_world_system() do
+      %{components: %{"time" => %{"phase" => phase}}} ->
+        String.to_existing_atom(phase)
+
+      _ ->
+        :day
     end
+  rescue
+    ArgumentError -> :day
   end
 
   @doc """
   Gets the current weather key ("clear", "rain", etc.).
-  Returns "clear" if Weather system is not running.
+  Reads from the world system entity's `components["weather"]["current"]`.
+  Returns "clear" if no system entity is running.
   """
-  def get_weather(region \\ "default") do
-    if Process.whereis(Weather) do
-      Weather.get_weather(region)
-    else
-      "clear"
+  def get_weather(_region \\ "default") do
+    case find_world_system() do
+      %{components: %{"weather" => %{"current" => weather}}} -> weather
+      _ -> "clear"
     end
   end
 
   @doc """
-  Gets the formatted game time (e.g., "2:30 PM").
-  Returns nil if DayNight system is not running.
+  Gets the formatted game time.
+  Returns nil if no system entity is running (not yet implemented in V2).
   """
-  def get_formatted_time do
-    if Process.whereis(DayNight) do
-      DayNight.format_time()
-    else
-      nil
-    end
-  end
+  def get_formatted_time, do: nil
 
   @doc """
   Gets the current light level (0.0 to 1.0).
-  Returns 1.0 if DayNight system is not running.
+  Returns 1.0 if no system entity is running.
   """
   def get_light_level do
-    if Process.whereis(DayNight) do
-      DayNight.get_light_level()
-    else
-      1.0
+    case get_phase() do
+      :dawn -> 0.5
+      :day -> 1.0
+      :dusk -> 0.5
+      :night -> 0.1
+      _ -> 1.0
     end
+  end
+
+  defp find_world_system do
+    case Entities.find_one(key: "world_system", type: :system) do
+      {:ok, entity} -> entity
+      _ -> nil
+    end
+  rescue
+    _ -> nil
   end
 
   # Combine phase and weather into evocative descriptions

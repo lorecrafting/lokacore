@@ -8,7 +8,7 @@ data:
   source: |
     # Show special descriptions for sacred locations
     if "offering_shrine" in (context.room.tags || []) do
-      message("You sense this is a place where offerings have power.")
+      message.("You sense this is a place where offerings have power.")
     end
 
-    continue()
+    continue.()

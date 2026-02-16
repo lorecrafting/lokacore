@@ -37,9 +37,14 @@ defmodule LokaWeb.Channels.BuilderCommands.Publishing do
   defp do_publish(type, key) when type in @all_types do
     case Entities.find_one(key: key) do
       {:ok, entity} ->
-        set_draft_flag(entity, false)
-        Logger.info("Published content: #{key} (type: #{type})")
-        {:ok, "Published '#{key}' successfully."}
+        case set_draft_flag(entity, false) do
+          {:ok, _} ->
+            Logger.info("Published content: #{key} (type: #{type})")
+            {:ok, "Published '#{key}' successfully."}
+
+          {:error, reason} ->
+            {:error, "Failed to publish '#{key}': #{inspect(reason)}"}
+        end
 
       {:error, :not_found} ->
         {:error, "#{String.capitalize(type)} '#{key}' not found."}
@@ -108,9 +113,14 @@ defmodule LokaWeb.Channels.BuilderCommands.Publishing do
   defp do_unpublish(type, key) when type in @all_types do
     case Entities.find_one(key: key) do
       {:ok, entity} ->
-        set_draft_flag(entity, true)
-        Logger.info("Unpublished content: #{key} (type: #{type})")
-        {:ok, "Unpublished '#{key}' successfully."}
+        case set_draft_flag(entity, true) do
+          {:ok, _} ->
+            Logger.info("Unpublished content: #{key} (type: #{type})")
+            {:ok, "Unpublished '#{key}' successfully."}
+
+          {:error, reason} ->
+            {:error, "Failed to unpublish '#{key}': #{inspect(reason)}"}
+        end
 
       {:error, :not_found} ->
         {:error, "#{String.capitalize(type)} '#{key}' not found."}

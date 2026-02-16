@@ -23,7 +23,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
             components: %{
               "data" => %{
                 "hook" => hook,
-                "source" => "# Script: #{key}\n# Hook: #{hook}\ncontinue()",
+                "source" => "# Script: #{key}\n# Hook: #{hook}\ncontinue.()",
                 "timeout_ms" => 5000
               }
             },
@@ -309,12 +309,12 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
         source = """
         route = #{inspect(String.split(route, ","))}
         interval = #{interval}
-        current = get_flag(entity, "patrol_index") || 0
+        current = get_flag.(entity, "patrol_index") || 0
         next = rem(current + 1, length(route))
         target_room = Enum.at(route, next)
-        move_entity(entity, target_room)
-        set_flag(entity, "patrol_index", next)
-        continue()
+        move_entity.(entity, target_room)
+        set_flag.(entity, "patrol_index", next)
+        continue.()
         """
 
         {:ok, "Patrol: #{key}", "at_tick", String.trim(source)}
@@ -323,8 +323,8 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
         message = config["message"] || "Welcome, traveler!"
 
         source = """
-        message(player, "#{escape_yaml_string(message)}")
-        continue()
+        message.("#{escape_yaml_string(message)}")
+        continue.()
         """
 
         {:ok, "Greeting: #{key}", "at_enter_room", String.trim(source)}
@@ -334,11 +334,11 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
         direction = config["direction"] || "north"
 
         source = """
-        if context.direction == "#{direction}" and not has_flag?(player, "#{flag}") do
-          message(player, "The guard blocks your path.")
-          deny()
+        if context.direction == "#{direction}" and not has_flag?.("#{flag}") do
+          message.("The guard blocks your path.")
+          deny.()
         else
-          continue()
+          continue.()
         end
         """
 
@@ -350,10 +350,10 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
 
         source = """
         messages = #{inspect(String.split(messages, ","))}
-        if chance?(1, #{interval}) do
-          announce_room(room, pick(messages))
+        if chance?.(1, #{interval}) do
+          announce_room.(room, pick.(messages))
         end
-        continue()
+        continue.()
         """
 
         {:ok, "Ambient: #{key}", "at_tick", String.trim(source)}

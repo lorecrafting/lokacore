@@ -118,6 +118,7 @@ defmodule Loka.Session.Server do
     :dialogue_state,
     :disconnect_timer,
     :created_at,
+    session_state: "connecting",
     # %{monitor_ref => {client_type, pid, metadata}}
     clients: %{}
   ]
@@ -133,6 +134,7 @@ defmodule Loka.Session.Server do
           dialogue_state: map() | nil,
           disconnect_timer: reference() | nil,
           created_at: DateTime.t(),
+          session_state: String.t(),
           clients: %{reference() => {client_type(), pid(), map()}}
         }
 
@@ -282,10 +284,12 @@ defmodule Loka.Session.Server do
       player_id: player.id,
       player: player,
       session_id: session_id,
+      session_state: "connecting",
       created_at: DateTime.utc_now()
     }
 
-    {:ok, state}
+    # Player is authenticated by the time init runs
+    {:ok, transition_session(state, "authenticated")}
   end
 
   # Generate a short, readable session ID for correlation
@@ -310,8 +314,18 @@ defmodule Loka.Session.Server do
         "(#{map_size(clients)} total clients)"
     )
 
+    state = %{state | clients: clients}
+
+    # Transition to in_game on first client, or back from ghost on reconnect
+    state =
+      case state.session_state do
+        "authenticated" -> transition_session(state, "in_game")
+        "ghost" -> transition_session(state, "in_game")
+        _ -> state
+      end
+
     # Return session_id so clients can set their Logger metadata
-    {:reply, {:ok, state.session_id}, %{state | clients: clients}}
+    {:reply, {:ok, state.session_id}, state}
   end
 
   @impl true
@@ -372,6 +386,7 @@ defmodule Loka.Session.Server do
               "starting #{div(@disconnect_timeout, 1000)}s disconnect timer"
           )
 
+          state = transition_session(state, "ghost")
           timer = Process.send_after(self(), :disconnect_timeout, @disconnect_timeout)
           {:noreply, %{state | disconnect_timer: timer}}
         else
@@ -386,6 +401,8 @@ defmodule Loka.Session.Server do
       Logger.info(
         "[Session.Server] Disconnect timeout for player #{state.player_id}, terminating"
       )
+
+      state = transition_session(state, "disconnected")
 
       # Clean up room index
       SessionRegistry.remove_from_room_index(self(), state.current_room_id)
@@ -452,6 +469,24 @@ defmodule Loka.Session.Server do
     send(pid, {:session_message, message})
   end
 
+  defp transition_session(state, target) do
+    case StateMachine.transition(@session_machine, state.session_state, target) do
+      {:ok, new_state} ->
+        Logger.info(
+          "[Session.Server] #{state.player_id} session: #{state.session_state} → #{new_state}"
+        )
+
+        %{state | session_state: new_state}
+
+      {:error, {:invalid_transition, from, to}} ->
+        Logger.warning(
+          "[Session.Server] Invalid session transition for #{state.player_id}: #{from} → #{to}"
+        )
+
+        state
+    end
+  end
+
   defp cancel_disconnect_timer(%{disconnect_timer: nil} = state), do: state
 
   defp cancel_disconnect_timer(%{disconnect_timer: timer} = state) do
@@ -464,6 +499,7 @@ defmodule Loka.Session.Server do
       player_id: state.player_id,
       player_email: state.player.email,
       current_room_id: state.current_room_id,
+      session_state: state.session_state,
       in_combat: state.combat_state != nil,
       in_dialogue: state.dialogue_state != nil,
       client_count: map_size(state.clients),

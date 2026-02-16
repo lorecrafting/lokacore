@@ -15,7 +15,7 @@ data:
         "Somewhere deep in the rock, water drips in a steady rhythm."
       ]
 
-      message(Enum.random(messages))
+      message.(Enum.random(messages))
     end
 
-    continue()
+    continue.()

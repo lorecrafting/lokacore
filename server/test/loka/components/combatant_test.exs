@@ -108,5 +108,19 @@ defmodule Loka.Components.CombatantTest do
       assert {:error, _} = StateMachine.transition(machine, "idle", "dead")
       assert {:error, _} = StateMachine.transition(machine, "dead", "engaged")
     end
+
+    test "combat status flow: engaged → defending → engaged → fleeing" do
+      machine = Combatant.machine()
+      assert {:ok, "engaged"} = StateMachine.transition(machine, "idle", "engaged")
+      assert {:ok, "defending"} = StateMachine.transition(machine, "engaged", "defending")
+      assert {:ok, "engaged"} = StateMachine.transition(machine, "defending", "engaged")
+      assert {:ok, "fleeing"} = StateMachine.transition(machine, "engaged", "fleeing")
+      assert {:ok, "idle"} = StateMachine.transition(machine, "fleeing", "idle")
+    end
+
+    test "fleeing from idle is rejected" do
+      machine = Combatant.machine()
+      assert {:error, _} = StateMachine.transition(machine, "idle", "fleeing")
+    end
   end
 end

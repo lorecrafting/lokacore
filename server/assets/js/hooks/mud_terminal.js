@@ -70,12 +70,14 @@ const MudTerminal = {
     try {
       this.helper = new HookHelper(this)
       this.token = this.el.dataset.token
-      this.commandHistory = []
-      this.historyIndex = -1
+      this.commandHistory = this._loadHistory()
+      this.historyIndex = this.commandHistory.length
       this._lastCommandTime = 0
       this.socket = null
       this.channel = null
       this._aiStreamBuffer = ''
+      this._wasConnected = false
+      this._userScrolledUp = false
 
       // Scope DOM queries to terminal container instead of global document
       this.terminalContainer = this.el.closest('.world-builder-terminal') || this.el.parentElement
@@ -102,6 +104,13 @@ const MudTerminal = {
       }
 
       this.connect()
+
+      // Scroll-lock: pause auto-scroll when user scrolls up, resume at bottom
+      this.helper.on(this.outputEl, 'scroll', () => {
+        const el = this.outputEl
+        const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 30
+        this._userScrolledUp = !atBottom
+      })
 
       // Delegated click handler for .term-link elements in terminal output
       this.helper.on(this.outputEl, 'click', (e) => {
@@ -139,6 +148,7 @@ const MudTerminal = {
               // Handle clear client-side (no server round-trip needed)
               if (input.toLowerCase() === 'clear') {
                 this.commandHistory.push(input)
+                this._saveHistory()
                 this.historyIndex = this.commandHistory.length
                 this.clearOutput()
                 this.inputEl.value = ''
@@ -171,10 +181,19 @@ const MudTerminal = {
   },
 
   setConnectionState(state) {
-    // state: 'connecting', 'connected', 'disconnected'
+    // state: 'connecting', 'connected', 'disconnected', 'reconnecting'
+    this._connectionState = state
     if (this.statusDot) {
-      this.statusDot.className = `term-connection-dot ${state}`
+      // CSS: 'reconnecting' uses same style as 'connecting' (pulsing yellow)
+      const cssClass = state === 'reconnecting' ? 'connecting' : state
+      this.statusDot.className = `term-connection-dot ${cssClass}`
       this.statusDot.title = state.charAt(0).toUpperCase() + state.slice(1)
+    }
+    // Disable input when not connected
+    if (this.inputEl) {
+      this.inputEl.disabled = state !== 'connected'
+      this.inputEl.placeholder =
+        state === 'connected' ? 'Enter command...' : 'Reconnecting...'
     }
   },
 
@@ -183,11 +202,18 @@ const MudTerminal = {
   },
 
   sendCommand(input) {
+    if (this._connectionState !== 'connected') return
     const now = Date.now()
     if (now - this._lastCommandTime < 200) return
     this._lastCommandTime = now
+    // Resume auto-scroll on new command
+    this._userScrolledUp = false
     this.appendOutput(`> ${input}`, 'system')
-    this.commandHistory.push(input)
+    // Deduplicate consecutive identical commands
+    if (this.commandHistory[this.commandHistory.length - 1] !== input) {
+      this.commandHistory.push(input)
+      this._saveHistory()
+    }
     this.historyIndex = this.commandHistory.length
     this.channel.push('command', { input })
   },
@@ -199,12 +225,19 @@ const MudTerminal = {
   connect() {
     this.setConnectionState('connecting')
 
-    // Use the Phoenix Socket from the same module
+    // Phoenix Socket auto-reconnects with exponential backoff by default
     this.socket = new Socket('/socket', { params: { token: this.token } })
     this.socket.connect()
 
-    // Track socket-level connection state
-    this.socket.onError(() => this.setConnectionState('disconnected'))
+    // Track socket-level connection state with reconnection feedback
+    this.socket.onOpen(() => {
+      // Socket reconnected — channel will auto-rejoin
+      if (this._wasConnected) {
+        this.setConnectionState('connecting')
+        this.appendOutput('Reconnecting...', 'system')
+      }
+    })
+    this.socket.onError(() => this.setConnectionState('reconnecting'))
     this.socket.onClose(() => this.setConnectionState('disconnected'))
 
     this.channel = this.socket.channel('game:lobby', {})
@@ -212,10 +245,16 @@ const MudTerminal = {
     this.channel
       .join()
       .receive('ok', () => {
+        const wasReconnect = this._wasConnected
+        this._wasConnected = true
         this.setConnectionState('connected')
-        this.appendOutput('Connected to Loka.', 'system')
-        this.appendOutput('Type "help" for available commands.', 'system')
-        this.appendOutput('', 'system')
+        if (wasReconnect) {
+          this.appendOutput('Reconnected.', 'system')
+        } else {
+          this.appendOutput('Connected to Loka.', 'system')
+          this.appendOutput('Type "help" for available commands.', 'system')
+          this.appendOutput('', 'system')
+        }
       })
       .receive('error', (resp) => {
         this.setConnectionState('disconnected')
@@ -227,11 +266,26 @@ const MudTerminal = {
         }
       })
 
-    this.channel.onClose(() => this.setConnectionState('disconnected'))
-    this.channel.onError(() => this.setConnectionState('disconnected'))
+    this.channel.onClose(() => {
+      if (this._wasConnected) {
+        this.setConnectionState('reconnecting')
+      }
+    })
+    this.channel.onError(() => this.setConnectionState('reconnecting'))
+
+    // Helper to wrap channel event handlers with error protection
+    const safeOn = (event, fn) => {
+      this.channel.on(event, (data) => {
+        try {
+          fn(data)
+        } catch (err) {
+          console.error(`[MudTerminal] Error in ${event} handler:`, err)
+        }
+      })
+    }
 
     // Game state (on join)
-    this.channel.on('game_state', (state) => {
+    safeOn('game_state', (state) => {
       this.updateVitals(state)
       if (state.room) {
         this.updateExits(state.room.exits)
@@ -240,7 +294,7 @@ const MudTerminal = {
     })
 
     // Room updates (navigation, look)
-    this.channel.on('room_update', (data) => {
+    safeOn('room_update', (data) => {
       if (data.room) {
         this.updateExits(data.room.exits)
         this.appendRoomDescription(data.room, data.atmosphere, data.minimap)
@@ -248,7 +302,7 @@ const MudTerminal = {
     })
 
     // Text output (command responses, builder output)
-    this.channel.on('output', (data) => {
+    safeOn('output', (data) => {
       if (data.text) {
         const cls = data.text.startsWith('[BUILDER]') ? 'builder' : ''
         this.appendOutput(data.text, cls)
@@ -256,7 +310,7 @@ const MudTerminal = {
     })
 
     // Game events
-    this.channel.on('event', (data) => {
+    safeOn('event', (data) => {
       if (data.text) {
         const cls = data.type === 'ambient' ? 'ambient' : 'chat'
         this.appendOutput(data.text, cls)
@@ -264,12 +318,12 @@ const MudTerminal = {
     })
 
     // Resource updates
-    this.channel.on('resources_update', (data) => {
+    safeOn('resources_update', (data) => {
       this.updateResources(data.resources)
     })
 
     // Broadcast messages
-    this.channel.on('broadcast', (data) => {
+    safeOn('broadcast', (data) => {
       let cls = 'system'
       if (data.type === 'emergency') {
         cls = 'error'
@@ -280,36 +334,36 @@ const MudTerminal = {
     })
 
     // Combat events
-    this.channel.on('combat_start', (data) => {
+    safeOn('combat_start', (data) => {
       this.appendOutput(`Combat started with ${data.enemy?.name || 'enemy'}!`, 'error')
     })
 
-    this.channel.on('combat_update', (data) => {
+    safeOn('combat_update', (data) => {
       if (data.text) this.appendOutput(data.text, 'chat')
-      if (data.health) {
+      if (data.health && this.hpEl) {
         this.hpEl.textContent = `${data.health.current}/${data.health.max}`
       }
     })
 
-    this.channel.on('combat_end', (data) => {
+    safeOn('combat_end', (data) => {
       this.appendOutput(data.text || 'Combat ended.', 'system')
     })
 
     // Dialogue events
-    this.channel.on('dialogue_start', (data) => {
+    safeOn('dialogue_start', (data) => {
       this.renderDialogue(data)
     })
 
-    this.channel.on('dialogue_update', (data) => {
+    safeOn('dialogue_update', (data) => {
       this.renderDialogue(data)
     })
 
-    this.channel.on('dialogue_end', () => {
+    safeOn('dialogue_end', () => {
       this.appendOutput('(Conversation ended)', 'system')
     })
 
     // Entity context (response to click_entity - shows description + action menu)
-    this.channel.on('entity_context', (data) => {
+    safeOn('entity_context', (data) => {
       const entity = data.entity
       if (!entity) return
 
@@ -339,12 +393,12 @@ const MudTerminal = {
     })
 
     // Inventory updates
-    this.channel.on('inventory_update', (data) => {
+    safeOn('inventory_update', (data) => {
       if (data.text) this.appendOutput(data.text, 'system')
     })
 
     // Clear terminal
-    this.channel.on('clear_terminal', () => {
+    safeOn('clear_terminal', () => {
       this.clearOutput()
     })
 
@@ -353,7 +407,7 @@ const MudTerminal = {
     // =========================================================================
 
     // AI text streaming - accumulate into current line, flush on newlines
-    this.channel.on('ai_stream_delta', (data) => {
+    safeOn('ai_stream_delta', (data) => {
       if (!data.text) return
       this._aiStreamBuffer += data.text
 
@@ -370,14 +424,14 @@ const MudTerminal = {
     })
 
     // AI tool execution (verbose mode - shows tool calls inline)
-    this.channel.on('ai_stream_tool', (data) => {
+    safeOn('ai_stream_tool', (data) => {
       const name = data.name || 'unknown'
       const summary = data.summary || name
       this.appendOutput(`  [tool] ${summary}`, 'ai-tool')
     })
 
     // AI stream complete - flush remaining buffer
-    this.channel.on('ai_stream_done', () => {
+    safeOn('ai_stream_done', () => {
       if (this._aiStreamBuffer) {
         this.appendOutput(this._aiStreamBuffer, 'ai')
         this._aiStreamBuffer = ''
@@ -385,14 +439,14 @@ const MudTerminal = {
     })
 
     // AI stream error
-    this.channel.on('ai_stream_error', (data) => {
+    safeOn('ai_stream_error', (data) => {
       this._aiStreamBuffer = ''
       const msg = data.error || 'AI request failed'
       this.appendOutput(`[AI Error] ${msg}`, 'error')
     })
 
     // Chat mode toggle (NORMAL ↔ CHAT)
-    this.channel.on('chat_mode_changed', (data) => {
+    safeOn('chat_mode_changed', (data) => {
       const mode = data.mode || 'normal'
       this.setMode(mode)
     })
@@ -416,7 +470,10 @@ const MudTerminal = {
       this.outputEl.removeChild(this.outputEl.firstChild)
     }
 
-    this.outputEl.scrollTop = this.outputEl.scrollHeight
+    // Respect scroll-lock: don't auto-scroll if user scrolled up
+    if (!this._userScrolledUp) {
+      this.outputEl.scrollTop = this.outputEl.scrollHeight
+    }
   },
 
   appendRoomDescription(room, atmosphere, minimap) {
@@ -491,7 +548,9 @@ const MudTerminal = {
     while (this.outputEl.children.length > MAX_TERMINAL_LINES) {
       this.outputEl.removeChild(this.outputEl.firstChild)
     }
-    this.outputEl.scrollTop = this.outputEl.scrollHeight
+    if (!this._userScrolledUp) {
+      this.outputEl.scrollTop = this.outputEl.scrollHeight
+    }
   },
 
   renderDialogue(data) {
@@ -561,6 +620,30 @@ const MudTerminal = {
     this.exitsEl = this.terminalContainer.querySelector('#term-exits')
     this.statusDot = this.terminalContainer.querySelector('#term-connection-dot')
     this.modeEl = this.terminalContainer.querySelector('#term-mode')
+  },
+
+  _loadHistory() {
+    try {
+      const raw = localStorage.getItem('builder_command_history')
+      if (raw) {
+        const arr = JSON.parse(raw)
+        if (Array.isArray(arr)) return arr.slice(-200)
+      }
+    } catch {
+      // Ignore corrupted localStorage
+    }
+    return []
+  },
+
+  _saveHistory() {
+    try {
+      localStorage.setItem(
+        'builder_command_history',
+        JSON.stringify(this.commandHistory.slice(-200)),
+      )
+    } catch {
+      // Ignore quota errors
+    }
   },
 
   destroyed() {

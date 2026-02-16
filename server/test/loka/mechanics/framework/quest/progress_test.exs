@@ -527,6 +527,54 @@ defmodule Loka.Framework.Quest.ProgressTest do
     end
   end
 
+  describe "complete_objective advances status and enables turn-in" do
+    test "complete_objective followed by turn_in_quest succeeds" do
+      state = character_fixture(stats: %{"xp" => 0})
+
+      quest_fixture("manual_turnin", [
+        %{
+          "id" => "obj1",
+          "type" => "talk",
+          "description" => "Talk",
+          "target_id" => "npc1",
+          "target_count" => 1
+        }
+      ])
+
+      {:ok, state} = Progress.accept_quest(state, "manual_turnin")
+
+      # Complete via complete_objective (not update_progress)
+      {:ok, state} = Progress.complete_objective(state, "manual_turnin", "obj1")
+
+      # Status should have been advanced to "objectives_complete"
+      quest_data =
+        Entity.get_component(state, "quest_progress")["active"]["manual_turnin"]
+
+      assert quest_data["status"] == "objectives_complete"
+
+      # Turn in should succeed
+      assert {:ok, _updated, _rewards} = Progress.turn_in_quest(state, "manual_turnin")
+    end
+
+    test "turn_in_quest on quest with status accepted and incomplete objectives fails" do
+      state = character_fixture()
+
+      quest_fixture("incomplete_turnin", [
+        %{
+          "id" => "obj1",
+          "type" => "kill",
+          "description" => "Kill goblins",
+          "target_id" => "goblin",
+          "target_count" => 5
+        }
+      ])
+
+      {:ok, state} = Progress.accept_quest(state, "incomplete_turnin")
+
+      assert {:error, :quest_not_complete} = Progress.turn_in_quest(state, "incomplete_turnin")
+    end
+  end
+
   describe "get_active_quests/1" do
     test "returns list of active quests with progress" do
       state = character_fixture()

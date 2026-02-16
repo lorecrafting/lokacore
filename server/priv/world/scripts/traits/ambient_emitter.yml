@@ -32,11 +32,11 @@ data:
 
     # Check if we should emit this cycle
     if chance?(chance_value) do
-      emit(emote_key)
+      emit.(emote_key)
     end
 
     # Schedule next emission attempt
     interval = config.interval || 300
-    after(interval * 1000, "ambient_emitter")
+    after.(interval * 1000, "ambient_emitter")
 
-    continue()
+    continue.()

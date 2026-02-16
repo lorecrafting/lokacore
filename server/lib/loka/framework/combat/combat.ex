@@ -34,7 +34,8 @@ defmodule Loka.Framework.Combat do
       end
   """
 
-  alias Loka.Engine.{Entity, Entities, Event, EventBus}
+  alias Loka.Engine.{Entity, Entities, Event, EventBus, StateMachine}
+  alias Loka.Components.Combatant
   # DamageMessage was deleted in V2 — inline message generation below
   alias Loka.Mechanics.{Damage, Check}
 
@@ -57,6 +58,8 @@ defmodule Loka.Framework.Combat do
         combatant = get_combatant_component(entity)
 
         if combatant do
+          {:ok, status} = StateMachine.transition(Combatant.machine(), "idle", "engaged")
+
           combat_state = %{
             enemy_id: entity.id,
             enemy_key: entity.key,
@@ -72,6 +75,7 @@ defmodule Loka.Framework.Combat do
             pvp: false,
             player_turn: true,
             turn_count: 1,
+            status: status,
             player_defending: false,
             enemy_defending: false,
             player_buffs: [],
@@ -111,6 +115,8 @@ defmodule Loka.Framework.Combat do
         target_sta = Map.get(target_stats, "sta") || Map.get(target_stats, :sta) || 10
         target_level = Map.get(target_stats, "level") || Map.get(target_stats, :level) || 1
 
+        {:ok, status} = StateMachine.transition(Combatant.machine(), "idle", "engaged")
+
         combat_state = %{
           enemy_id: target_player_id,
           enemy: %{
@@ -131,6 +137,7 @@ defmodule Loka.Framework.Combat do
           pvp: true,
           player_turn: true,
           turn_count: 1,
+          status: status,
           player_defending: false,
           enemy_defending: false,
           player_buffs: [],
@@ -437,6 +444,15 @@ defmodule Loka.Framework.Combat do
     Map.get(entity.components || %{}, "combatant")
   end
 
+  defp transition_combat_status(combat_state, to) do
+    from = Map.get(combat_state, :status, "engaged")
+
+    case StateMachine.transition(Combatant.machine(), from, to) do
+      {:ok, new_status} -> {:ok, %{combat_state | status: new_status}}
+      {:error, _} = error -> error
+    end
+  end
+
   defp execute_player_attack(combat_state, character) do
     stats = Entity.get_component(character, "stats") || %{}
 
@@ -501,26 +517,43 @@ defmodule Loka.Framework.Combat do
         log: combat_state.log ++ [log_entry]
     }
 
+    # Reset status to "engaged" if player was defending
+    new_state =
+      if new_state.status == "defending" do
+        case transition_combat_status(new_state, "engaged") do
+          {:ok, transitioned} -> transitioned
+          {:error, _} -> new_state
+        end
+      else
+        new_state
+      end
+
     {:ok, new_state, %{action: :attack, damage: final_damage}}
   end
 
   defp execute_player_defend(combat_state, _character) do
-    messages = defense_message(:enter, "You")
+    case transition_combat_status(combat_state, "defending") do
+      {:error, _} = error ->
+        error
 
-    log_entry = %{
-      text: messages.to_attacker,
-      type: :player_defend,
-      turn: combat_state.turn_count
-    }
+      {:ok, combat_state} ->
+        messages = defense_message(:enter, "You")
 
-    new_state = %{
-      combat_state
-      | player_turn: false,
-        player_defending: true,
-        log: combat_state.log ++ [log_entry]
-    }
+        log_entry = %{
+          text: messages.to_attacker,
+          type: :player_defend,
+          turn: combat_state.turn_count
+        }
 
-    {:ok, new_state, %{action: :defend}}
+        new_state = %{
+          combat_state
+          | player_turn: false,
+            player_defending: true,
+            log: combat_state.log ++ [log_entry]
+        }
+
+        {:ok, new_state, %{action: :defend}}
+    end
   end
 
   defp execute_player_flee(combat_state, _character) do
@@ -533,6 +566,12 @@ defmodule Loka.Framework.Combat do
       {:ok, result, _audit} = Check.percent(flee_chance)
 
       if result.success do
+        combat_state =
+          case transition_combat_status(combat_state, "fleeing") do
+            {:ok, transitioned} -> transitioned
+            {:error, _} -> combat_state
+          end
+
         messages = flee_message(:success, "You", combat_state.enemy.name)
 
         log_entry = %{
@@ -667,6 +706,17 @@ defmodule Loka.Framework.Combat do
           action_cooldown: 3,
           log: combat_state.log ++ [log_entry]
       }
+
+      # Reset status to "engaged" if player was defending
+      new_state =
+        if new_state.status == "defending" do
+          case transition_combat_status(new_state, "engaged") do
+            {:ok, transitioned} -> transitioned
+            {:error, _} -> new_state
+          end
+        else
+          new_state
+        end
 
       {:ok, new_state, %{action: :power_strike, damage: final_damage}}
     end

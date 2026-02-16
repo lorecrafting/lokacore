@@ -12,9 +12,9 @@ data:
 
       if target.key == "raga_mara" do
         # Increase attack bonus (would need component update in real impl)
-        message("Raga Mara grows stronger from your desire!")
-        say("Yes! Want more! Use more!")
+        message.("Raga Mara grows stronger from your desire!")
+        say.("Yes! Want more! Use more!")
       end
     end
 
-    continue()
+    continue.()

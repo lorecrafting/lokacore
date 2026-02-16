@@ -16,8 +16,9 @@ defmodule LokaWeb.Channels.BuilderCommands.World do
   end
 
   def execute(:reload, _params, socket) do
-    # No ETS registry in V2; content is loaded from DB
-    {:ok, "Content reloaded.", socket}
+    # No ETS registry in V2; content is loaded from DB on access
+    {:ok, "No reload needed — V2 reads content from DB directly. Changes are live immediately.",
+     socket}
   end
 
   def execute(:validate, _params, socket) do

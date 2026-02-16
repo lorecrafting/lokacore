@@ -17,12 +17,25 @@ defmodule Loka.Behaviors.Weather do
 
   @behaviour Loka.Engine.EntityBehavior
 
-  alias Loka.Engine.{EventBus, Event}
+  alias Loka.Engine.{EventBus, Event, StateMachine}
   alias Loka.Engine.EntityServer.Volatile
   alias Loka.Behaviors.Runner
 
   @default_weather_types ~w(clear cloudy rainy stormy foggy)
   @default_transition_ticks 10
+
+  @weather_machine StateMachine.new(%{
+                     initial: "clear",
+                     transitions: %{
+                       "clear" => ["cloudy", "foggy"],
+                       "cloudy" => ["clear", "rainy"],
+                       "rainy" => ["cloudy", "stormy"],
+                       "stormy" => ["rainy", "foggy"],
+                       "foggy" => ["clear", "cloudy"]
+                     }
+                   })
+
+  def weather_machine, do: @weather_machine
 
   @impl true
   def on_init(entity) do
@@ -88,10 +101,22 @@ defmodule Loka.Behaviors.Weather do
         # 40% stay, 30% adjacent forward, 30% adjacent back
         roll = :rand.uniform(100)
 
-        cond do
-          roll <= 40 -> current
-          roll <= 70 -> Enum.at(types, min(current_index + 1, max_index))
-          true -> Enum.at(types, max(current_index - 1, 0))
+        candidate =
+          cond do
+            roll <= 40 -> current
+            roll <= 70 -> Enum.at(types, min(current_index + 1, max_index))
+            true -> Enum.at(types, max(current_index - 1, 0))
+          end
+
+        # Validate transition if using default weather types
+        if candidate != current && weather_types == @default_weather_types do
+          if StateMachine.can_transition?(@weather_machine, current, candidate) do
+            candidate
+          else
+            current
+          end
+        else
+          candidate
         end
     end
   end

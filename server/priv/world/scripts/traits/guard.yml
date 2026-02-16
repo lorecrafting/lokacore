@@ -39,22 +39,22 @@ data:
           is_hostile = any?(attack_tags, fn tag -> tag in entered_tags end)
 
           if is_hostile do
-            say("Halt! You are not welcome here!")
-            damage(entered[:id], 5)
+            say.("Halt! You are not welcome here!")
+            damage.(entered[:id], 5)
           end
         end
-        continue()
+        continue.()
 
       # Block passage in guarded directions
       event == :before_move ->
         direction = context.args[:direction]
         if direction && direction in block_directions do
-          say(block_message)
-          deny()
+          say.(block_message)
+          deny.()
         else
-          continue()
+          continue.()
         end
 
       true ->
-        continue()
+        continue.()
     end

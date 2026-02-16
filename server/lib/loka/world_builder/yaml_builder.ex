@@ -135,7 +135,7 @@ defmodule Loka.WorldBuilder.YamlBuilder do
     |> Enum.join("\n")
   end
 
-  def indent_source(_), do: "    continue()"
+  def indent_source(_), do: "    continue.()"
 
   @doc """
   Validate that referenced content exists. Returns `{:ok, warnings}` where

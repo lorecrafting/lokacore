@@ -36,10 +36,10 @@ data:
         should_ignore = any?(ignore_tags, fn tag -> tag in entered_tags end)
 
         unless should_ignore do
-          emote(attack_msg)
-          damage(entered[:id], 10)
+          emote.(attack_msg)
+          damage.(entered[:id], 10)
         end
       end
     end
 
-    continue()
+    continue.()

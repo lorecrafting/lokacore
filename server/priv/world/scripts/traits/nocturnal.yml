@@ -34,34 +34,34 @@ data:
     cond do
       # Become active at night
       event == wake_event ->
-        emit(:becoming_active)
+        emit.(:becoming_active)
 
         # Move to active room if configured
         active_room = config.active_room
         if active_room do
-          teleport(entity.id, active_room)
-          emit(:emerged)
+          teleport.(entity.id, active_room)
+          emit.(:emerged)
         end
 
-        set_flag("active", true)
-        set_trait_state(:active, true)
-        handled()
+        set_flag.("active", true)
+        set_trait_state.(:active, true)
+        handled.()
 
       # Go dormant during day
       event == sleep_event ->
-        emit(:going_dormant)
+        emit.(:going_dormant)
 
         # Move to hide room if configured
         hide_room = config.hide_room
         if hide_room do
-          teleport(entity.id, hide_room)
-          emit(:hidden)
+          teleport.(entity.id, hide_room)
+          emit.(:hidden)
         end
 
-        set_flag("active", false)
-        set_trait_state(:active, false)
-        handled()
+        set_flag.("active", false)
+        set_trait_state.(:active, false)
+        handled.()
 
       true ->
-        continue()
+        continue.()
     end

@@ -47,9 +47,10 @@ defmodule Loka.Framework.Quest.Progress do
       {:ok, entity, rewards} = Progress.turn_in_quest(entity, "find_sword")
   """
 
-  alias Loka.Engine.Entity
+  alias Loka.Engine.{Entity, StateMachine}
   alias Loka.Framework.Quest.{StateHelper, TimerManager, QuestItemSpawner}
   alias Loka.Framework.Quest.Progress.{Rewards, Tracking}
+  alias Loka.Components.QuestProgress, as: QP
   alias Loka.Admin.GameLog
   alias Loka.Content
 
@@ -91,11 +92,15 @@ defmodule Loka.Framework.Quest.Progress do
                 accepted_at = DateTime.utc_now()
                 objectives = initialize_objectives(quest_def.objectives, accepted_at)
 
-                new_active =
-                  Map.put(active, quest_id, %{
+                quest_data =
+                  %{
                     "objectives" => objectives,
-                    "accepted_at" => accepted_at
-                  })
+                    "accepted_at" => accepted_at,
+                    "status" => "accepted"
+                  }
+                  |> maybe_advance_quest_status(objectives)
+
+                new_active = Map.put(active, quest_id, quest_data)
 
                 new_quests = Map.put(quests, "active", new_active)
 
@@ -194,7 +199,11 @@ defmodule Loka.Framework.Quest.Progress do
         {updated_objectives, newly_completed} =
           Tracking.update_objectives(objectives, event, quest_id, player_id)
 
-        new_quest_data = Map.put(quest_data, "objectives", updated_objectives)
+        new_quest_data =
+          quest_data
+          |> Map.put("objectives", updated_objectives)
+          |> maybe_advance_quest_status(updated_objectives)
+
         {Map.put(acc_active, quest_id, new_quest_data), acc_completed ++ newly_completed}
       end)
 
@@ -228,7 +237,12 @@ defmodule Loka.Framework.Quest.Progress do
           _objective ->
             updated_objective = %{"completed" => true, "progress" => 1}
             updated_objectives = Map.put(objectives, objective_id, updated_objective)
-            updated_quest_data = Map.put(quest_data, "objectives", updated_objectives)
+
+            updated_quest_data =
+              quest_data
+              |> Map.put("objectives", updated_objectives)
+              |> maybe_advance_quest_status(updated_objectives)
+
             new_active = Map.put(active, quest_id, updated_quest_data)
             new_quests = Map.put(quests, "active", new_active)
             {:ok, Entity.add_component(entity, "quest_progress", new_quests)}
@@ -327,32 +341,42 @@ defmodule Loka.Framework.Quest.Progress do
     if not is_complete?(entity, quest_id) do
       {:error, :quest_not_complete}
     else
-      case Content.Quest.definition(quest_id) do
-        nil ->
-          {:error, :quest_not_found}
+      quests = Entity.get_component(entity, "quest_progress") || %{}
+      active = StateHelper.get_active(quests)
+      # Default to "objectives_complete" for pre-existing quests without a status field,
+      # since is_complete? already passed above
+      current_status = get_in(active, [quest_id, "status"]) || "objectives_complete"
 
-        quest_def ->
-          quests = Entity.get_component(entity, "quest_progress") || %{}
-          active = StateHelper.get_active(quests)
-          completed = StateHelper.get_completed(quests)
+      case StateMachine.transition(QP.machine(), current_status, "turned_in") do
+        {:error, _reason} ->
+          {:error, :invalid_quest_state}
 
-          new_active = Map.delete(active, quest_id)
-          new_completed = [quest_id | completed]
+        {:ok, _} ->
+          case Content.Quest.definition(quest_id) do
+            nil ->
+              {:error, :quest_not_found}
 
-          new_quests =
-            quests
-            |> Map.put("active", new_active)
-            |> Map.put("completed", new_completed)
+            quest_def ->
+              completed = StateHelper.get_completed(quests)
 
-          entity = Entity.add_component(entity, "quest_progress", new_quests)
+              new_active = Map.delete(active, quest_id)
+              new_completed = [quest_id | completed]
 
-          with {:ok, entity} <- Rewards.apply(entity, quest_def.rewards) do
-            GameLog.Quest.log_completed(entity.account_id, quest_id, quest_def.rewards)
+              new_quests =
+                quests
+                |> Map.put("active", new_active)
+                |> Map.put("completed", new_completed)
 
-            # Trigger chain progression (auto-start next quest if in a chain)
-            entity = trigger_chain_progression(entity, quest_id)
+              entity = Entity.add_component(entity, "quest_progress", new_quests)
 
-            {:ok, entity, quest_def.rewards}
+              with {:ok, entity} <- Rewards.apply(entity, quest_def.rewards) do
+                GameLog.Quest.log_completed(entity.account_id, quest_id, quest_def.rewards)
+
+                # Trigger chain progression (auto-start next quest if in a chain)
+                entity = trigger_chain_progression(entity, quest_id)
+
+                {:ok, entity, quest_def.rewards}
+              end
           end
       end
     end
@@ -400,6 +424,46 @@ defmodule Loka.Framework.Quest.Progress do
   # =============================================================================
   # Private - Helpers
   # =============================================================================
+
+  defp maybe_advance_quest_status(quest_data, objectives) do
+    current_status = quest_data["status"] || "accepted"
+    machine = QP.machine()
+
+    cond do
+      all_objectives_complete?(objectives) ->
+        # May need to advance through in_progress first if coming from accepted
+        status_after_progress =
+          if current_status == "accepted" do
+            case StateMachine.transition(machine, "accepted", "in_progress") do
+              {:ok, s} -> s
+              {:error, _} -> current_status
+            end
+          else
+            current_status
+          end
+
+        case StateMachine.transition(machine, status_after_progress, "objectives_complete") do
+          {:ok, new_status} -> Map.put(quest_data, "status", new_status)
+          {:error, _} -> Map.put(quest_data, "status", status_after_progress)
+        end
+
+      current_status == "accepted" && any_objective_has_progress?(objectives) ->
+        case StateMachine.transition(machine, current_status, "in_progress") do
+          {:ok, new_status} -> Map.put(quest_data, "status", new_status)
+          {:error, _} -> quest_data
+        end
+
+      true ->
+        quest_data
+    end
+  end
+
+  defp any_objective_has_progress?(objectives) do
+    Enum.any?(objectives, fn {_id, obj} ->
+      progress = Map.get(obj, "progress") || Map.get(obj, :progress, 0)
+      progress > 0
+    end)
+  end
 
   defp all_objectives_complete?(objectives) do
     Enum.all?(objectives, fn {_id, obj} ->

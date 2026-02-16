@@ -14,11 +14,6 @@ defmodule Loka.Components.QuestProgress do
                "objectives_complete" => ["turned_in", "abandoned"],
                "abandoned" => ["accepted"],
                "failed" => ["accepted"]
-             },
-             on_enter: %{
-               "accepted" => :start_objective_timers,
-               "turned_in" => :apply_rewards,
-               "failed" => :cleanup_quest_items
              }
            })
 
@@ -35,4 +30,33 @@ defmodule Loka.Components.QuestProgress do
   def active(entity), do: get_in(entity.components, [@component_key, "active"]) || %{}
   def completed(entity), do: get_in(entity.components, [@component_key, "completed"]) || []
   def failed(entity), do: get_in(entity.components, [@component_key, "failed"]) || []
+
+  @doc "Gets the status of a specific active quest."
+  def status(entity, quest_id) do
+    get_in(entity.components, [@component_key, "active", quest_id, "status"])
+  end
+
+  @doc "Validates and updates a quest's status via StateMachine transition."
+  def transition_quest(entity, quest_id, to_state) do
+    case get_in(entity.components, [@component_key, "active", quest_id]) do
+      nil ->
+        {:error, :quest_not_active}
+
+      quest_data ->
+        current = quest_data["status"] || "accepted"
+
+        case StateMachine.transition(@machine, current, to_state) do
+          {:ok, new_status} ->
+            updated = Map.put(quest_data, "status", new_status)
+
+            new_components =
+              put_in(entity.components, [@component_key, "active", quest_id], updated)
+
+            {:ok, %{entity | components: new_components}}
+
+          {:error, _} = error ->
+            error
+        end
+    end
+  end
 end

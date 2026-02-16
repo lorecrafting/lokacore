@@ -48,8 +48,17 @@ defmodule Loka.WorldBuilder.RoomManager do
   """
   def create_room(attrs) when is_map(attrs) do
     attrs = ensure_atom_keys(attrs)
-
     key = Map.get(attrs, :key)
+
+    # Prevent duplicate room keys — rooms are prototypes and should be unique
+    if key && match?({:ok, _}, Entities.find_one(key: key, type: :room)) do
+      {:error, "Room '#{key}' already exists."}
+    else
+      do_create_room(attrs, key)
+    end
+  end
+
+  defp do_create_room(attrs, key) do
     name = Map.get(attrs, :name, Map.get(attrs, :key, "New Room"))
     description = Map.get(attrs, :description, "A room in the world")
     exits = Map.get(attrs, :exits, %{})
@@ -187,8 +196,10 @@ defmodule Loka.WorldBuilder.RoomManager do
 
       case update_room(from_key, %{exits: exits}) do
         {:ok, _} = result ->
-          spawn_exit_entity(from_key, direction, to_key)
-          result
+          case spawn_exit_entity(from_key, direction, to_key) do
+            :ok -> result
+            {:error, reason} -> {:error, "Exit saved but entity spawn failed: #{reason}"}
+          end
 
         error ->
           error
@@ -259,13 +270,17 @@ defmodule Loka.WorldBuilder.RoomManager do
 
             {:error, reason} ->
               Logger.warning("[RoomManager] Failed to spawn exit: #{inspect(reason)}")
+              {:error, inspect(reason)}
           end
 
         _ ->
           :ok
       end
     else
-      _ -> :ok
+      _ ->
+        Logger.warning("[RoomManager] Could not find rooms for exit: #{from_key} -> #{to_key}")
+
+        {:error, "source or destination room not found in DB"}
     end
   end
 

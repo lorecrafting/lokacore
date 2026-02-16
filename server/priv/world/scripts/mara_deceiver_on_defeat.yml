@@ -11,7 +11,7 @@ data:
     if enemy.key == "mara_the_deceiver" do
       # Trigger the final choice cutscene
       # show_cutscene("final_choice")
-      message("Mara falls... but something feels incomplete.")
+      message.("Mara falls... but something feels incomplete.")
     end
 
-    continue()
+    continue.()

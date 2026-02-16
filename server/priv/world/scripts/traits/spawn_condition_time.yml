@@ -35,7 +35,7 @@ data:
     spawn_chance_value = config.spawn_chance || 100
 
     # Get current hour
-    hour = current_hour()
+    hour = current_hour.()
 
     # Check if current hour is in active hours
     is_active_time = hour in active_hours
@@ -43,7 +43,7 @@ data:
     # Get current spawned count in this room/zone
     current_room = room()
     spawned_count = if current_room do
-      entities_in_room()
+      entities_in_room.()
       |> Enum.filter(fn e ->
         e.key == prototype_key or
         (e.metadata && e.metadata["prototype_key"] == prototype_key)
@@ -57,24 +57,24 @@ data:
       # Active time and under max - maybe spawn
       is_active_time and spawned_count < max_count and chance?(spawn_chance_value) ->
         if current_room do
-          spawn_at(prototype_key, current_room.id)
-          emit(:spawned_entity)
+          spawn_at.(prototype_key, current_room.id)
+          emit.(:spawned_entity)
         end
-        handled()
+        handled.()
 
       # Inactive time and entities exist - despawn them
       not is_active_time and spawned_count > 0 ->
         if current_room do
-          entities_in_room()
+          entities_in_room.()
           |> Enum.filter(fn e ->
             e.key == prototype_key or
             (e.metadata && e.metadata["prototype_key"] == prototype_key)
           end)
-          |> Enum.each(fn e -> despawn(e.id) end)
-          emit(:despawned_entities)
+          |> Enum.each(fn e -> despawn.(e.id) end)
+          emit.(:despawned_entities)
         end
-        handled()
+        handled.()
 
       true ->
-        continue()
+        continue.()
     end
