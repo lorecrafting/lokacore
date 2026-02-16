@@ -32,7 +32,7 @@ sequence:
             ending: destruction
       - id: liberate
         text: "I recognize it as empty. I offer it compassion."
-        available: "player.insight >= 10"
+        available: true
         sequence:
           - type: dialogue
             speaker: mara

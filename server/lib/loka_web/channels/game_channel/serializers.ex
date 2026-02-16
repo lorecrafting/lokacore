@@ -300,8 +300,7 @@ defmodule LokaWeb.Channels.GameChannel.Serializers do
       :water,
       :desert,
       :swamp,
-      :enchanted,
-      :bardo
+      :enchanted
     ]
 
     Enum.find(biome_tags, :default, fn biome ->

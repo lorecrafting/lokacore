@@ -1,9 +1,0 @@
-key: focus
-name: "Focus"
-max_formula: "50 + level * 3"
-regen_rate: 1
-regen_condition: in_combat
-color: yellow
-description: "Mental concentration that builds during combat. Used for powerful finishing moves."
-min_value: 0
-starts_full: false

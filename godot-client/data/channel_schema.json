@@ -13,12 +13,13 @@
         "type": "string"
       }
     },
-    "bardo": {
-      "action": {
+    "resurrect": {
+      "method": {
         "required": true,
         "type": "enum",
         "values": [
-          "reincarnate"
+          "shrine",
+          "healer"
         ]
       }
     },
@@ -211,14 +212,13 @@
         "type": "map"
       }
     },
-    "bardo_can_reincarnate": {},
-    "bardo_enter": {
-      "bind_point": {
+    "ghost_enter": {
+      "killer": {
         "required": true,
         "type": "string"
       }
     },
-    "bardo_exit": {},
+    "ghost_exit": {},
     "capture_screenshot": {},
     "combat_end": {
       "reason": {

@@ -81,11 +81,18 @@ defmodule Loka.Game.Actions do
   - `{:ok, Result.t()}` - Action succeeded with result
   - `{:error, String.t()}` - Action failed with reason
   """
+  # Actions allowed while in ghost state
+  @ghost_allowed_actions [:navigate, :chat, :emote, :die, :resurrect]
+
   @spec execute(atom(), map(), Context.t()) :: {:ok, Result.t()} | {:error, String.t()}
   def execute(action, params, ctx) do
-    case do_action(action, params, ctx) do
-      {:ok, result} -> {:ok, result}
-      {:error, reason} -> {:error, reason}
+    if ghost?(ctx.character) and action not in @ghost_allowed_actions do
+      {:error, "You are a ghost. Find a resurrection shrine or healer to return to life."}
+    else
+      case do_action(action, params, ctx) do
+        {:ok, result} -> {:ok, result}
+        {:error, reason} -> {:error, reason}
+      end
     end
   end
 
@@ -356,7 +363,7 @@ defmodule Loka.Game.Actions do
   end
 
   defp do_action(:unequip_item, %{slot: slot}, ctx) do
-    slot_atom = if is_atom(slot), do: slot, else: String.to_existing_atom(slot)
+    slot_atom = if is_atom(slot), do: slot, else: String.to_atom(slot)
 
     case Equipment.unequip(ctx.character, slot_atom) do
       {:ok, new_character} ->
@@ -387,16 +394,30 @@ defmodule Loka.Game.Actions do
   # =============================================================================
 
   defp do_action(:chat, %{mode: mode, message: message}, ctx) do
+    is_ghost = ghost?(ctx.character)
+
     events =
-      case mode do
-        "say" ->
+      case {mode, is_ghost} do
+        {"say", true} ->
+          ghostly = "The ghost of #{ctx.player_name} whispers, \"#{message}\""
+
+          [
+            {:broadcast_room, ctx.room.id,
+             {:player_emotes, ctx.player_id, ctx.player_name, ghostly}},
+            {:event, "You whisper, \"#{message}\""}
+          ]
+
+        {"say", false} ->
           [
             {:broadcast_room, ctx.room.id,
              {:player_says, ctx.player_id, ctx.player_name, message}},
             {:event, "You say, \"#{message}\""}
           ]
 
-        "shout" ->
+        {"shout", true} ->
+          [{:event, "You try to shout, but only a faint moan escapes."}]
+
+        {"shout", false} ->
           [
             {:broadcast_room, ctx.room.id,
              {:player_shouts, ctx.player_id, ctx.player_name, message}},
@@ -526,17 +547,17 @@ defmodule Loka.Game.Actions do
   end
 
   # =============================================================================
-  # Bardo Actions (delegated to Actions.Bardo)
+  # Death Actions (delegated to Actions.Death)
   # =============================================================================
 
-  defp do_action(:enter_bardo, %{killer_name: killer_name}, ctx) do
-    alias Loka.Game.Actions.Bardo, as: BardoActions
-    BardoActions.enter_bardo(ctx, killer_name)
+  defp do_action(:die, %{killer_name: killer_name}, ctx) do
+    alias Loka.Game.Actions.Death, as: DeathActions
+    DeathActions.die(ctx, killer_name)
   end
 
-  defp do_action(:reincarnate, %{bardo: bardo}, ctx) do
-    alias Loka.Game.Actions.Bardo, as: BardoActions
-    BardoActions.reincarnate(ctx, bardo)
+  defp do_action(:resurrect, %{method: method}, ctx) do
+    alias Loka.Game.Actions.Death, as: DeathActions
+    DeathActions.resurrect(ctx, method)
   end
 
   # =============================================================================
@@ -600,6 +621,30 @@ defmodule Loka.Game.Actions do
     QuestListeners.check_room_entry(character, room_key)
   end
 
+  defp ghost?(character) do
+    Loka.Game.Actions.Death.ghost?(character)
+  end
+
+  defp maybe_auto_resurrect(character, room) do
+    tags = room.tags || []
+
+    if ghost?(character) and "resurrection_shrine" in tags do
+      case Loka.Game.Actions.Death.resurrect(
+             %Context{character: character, room: room},
+             :shrine
+           ) do
+        {:ok, result} ->
+          new_character = result.state[:character] || character
+          {new_character, result.events}
+
+        {:error, _} ->
+          {character, []}
+      end
+    else
+      {character, []}
+    end
+  end
+
   defp navigate_to_room(ctx, destination_id, direction) do
     player_context = %{
       player_id: ctx.player_id,
@@ -632,6 +677,10 @@ defmodule Loka.Game.Actions do
               %{room_id: new_room.id, room_key: room_key}
             ])
 
+            # Check for auto-resurrection at shrine
+            {new_character, resurrect_events} =
+              maybe_auto_resurrect(new_character, new_room)
+
             result =
               Result.new(
                 state: %{character: new_character, room: new_room},
@@ -646,7 +695,7 @@ defmodule Loka.Game.Actions do
                      {:player_left, ctx.player_id, ctx.player_name, direction}},
                     {:broadcast_room, new_room.id,
                      {:player_entered, ctx.player_id, ctx.player_name}}
-                  ] ++ Enum.map(quest_events, fn e -> {:event, e.text} end)
+                  ] ++ Enum.map(quest_events, fn e -> {:event, e.text} end) ++ resurrect_events
               )
 
             {:ok, result}
@@ -685,10 +734,10 @@ defmodule Loka.Game.Actions do
     %{
       id: entity.id,
       key: Map.get(entity, :key),
-      name: entity.name,
+      name: entity.short_desc,
       type: Map.get(entity, :type, :npc),
       long_desc: Map.get(entity, :long_desc) || "",
-      description: entity.description || Map.get(entity, :extra_desc),
+      description: entity.extra_desc || "",
       primary_keyword: Map.get(entity, :primary_keyword)
     }
   end
@@ -712,10 +761,10 @@ defmodule Loka.Game.Actions do
 
     %{
       id: entity.id,
-      name: entity.name,
+      name: entity.short_desc,
       type: Map.get(entity, :type, :npc),
       long_desc: Map.get(entity, :long_desc) || "",
-      description: entity.description || Map.get(entity, :extra_desc),
+      description: entity.extra_desc || "",
       primary_keyword: Map.get(entity, :primary_keyword),
       components: component_keys,
       tags: Map.get(entity, :tags) || [],
@@ -727,9 +776,9 @@ defmodule Loka.Game.Actions do
     %{
       id: item.id,
       key: Map.get(item, :key),
-      name: item.name,
+      name: item.short_desc,
       long_desc: Map.get(item, :long_desc) || "",
-      description: item.description || Map.get(item, :desc),
+      description: item.extra_desc || "",
       primary_keyword: Map.get(item, :primary_keyword)
     }
   end

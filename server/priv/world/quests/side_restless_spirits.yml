@@ -37,7 +37,6 @@ objectives:
     description: "Return to the cemetery with offering rice"
 rewards:
   xp: 125
-  insight: 1
   items:
     - ghost_shroud
 journal_entries:

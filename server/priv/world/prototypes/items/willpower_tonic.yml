@@ -31,9 +31,6 @@ components:
       - type: apply_status
         status: warded
         duration: 5
-      - type: resource_restore
-        resource: insight
-        amount: 1
     use_message: "You drink the bitter tonic, grimacing at its taste. Your mind clears, your will strengthens."
   valuable:
     base_price: 50

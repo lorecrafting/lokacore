@@ -60,7 +60,7 @@ defmodule LokaWeb.GameChannel do
   - `yell` - `%{"message" => text}` - Yell to wider area
 
   ### Death & Respawn
-  - `bardo: reincarnate` - `%{"action" => "reincarnate"}` - Respawn after death
+  - `resurrect` - `%{"method" => "shrine"|"healer"}` - Resurrect from ghost state
 
   ### Text Commands (MUD-style)
   - `command` - `%{"text" => "look"}` - Parse and execute text command
@@ -89,11 +89,9 @@ defmodule LokaWeb.GameChannel do
   - `container_open` - Container contents displayed
   - `container_close` - Container interface closed
 
-  ### Bardo (Death)
-  - `bardo_enter` - Player entered death realm
-  - `bardo_message` - Dream/vision message during death
-  - `bardo_ready` - Player can now reincarnate
-  - `bardo_exit` - Player respawned
+  ### Ghost (Death)
+  - `ghost_enter` - Player died and became a ghost
+  - `ghost_exit` - Player resurrected from ghost state
 
   ### Notifications
   - `event` - Game event (combat result, chat message, rewards, etc.)
@@ -122,7 +120,7 @@ defmodule LokaWeb.GameChannel do
   # Configuration Constants
   # =============================================================================
 
-  # NOTE: Bardo and social configuration moved to Loka.Game.Actions.Bardo and Loka.Game.Actions.Social
+  # NOTE: Death and social configuration moved to Loka.Game.Actions.Death and Loka.Game.Actions.Social
 
   # =============================================================================
   # Channel Callbacks
@@ -605,13 +603,13 @@ defmodule LokaWeb.GameChannel do
   end
 
   # =============================================================================
-  # Bardo (Death/Reincarnation)
+  # Resurrection
   # =============================================================================
 
-  def handle_in("bardo", %{"action" => "reincarnate"}, socket) do
-    bardo = socket.assigns[:bardo]
+  def handle_in("resurrect", %{"method" => method}, socket) do
+    method_atom = if method in ["shrine", "healer"], do: String.to_atom(method), else: :shrine
 
-    case ActionBridge.execute(socket, :reincarnate, %{bardo: bardo}) do
+    case ActionBridge.execute(socket, :resurrect, %{method: method_atom}) do
       {:ok, socket} -> {:reply, :ok, socket}
       {:error, _reason, socket} -> {:reply, :ok, socket}
     end
@@ -626,16 +624,28 @@ defmodule LokaWeb.GameChannel do
       player = socket.assigns.player
       room = socket.assigns.room
       player_name = player_display_name(player)
+      is_ghost = Loka.Game.Actions.Death.ghost?(socket.assigns.character)
 
-      # Broadcast to room
-      Phoenix.PubSub.broadcast(
-        Loka.PubSub,
-        "location:#{room.id}",
-        {:player_says, player.id, player_name, message}
-      )
+      if is_ghost do
+        # Ghosts whisper — broadcast as emote (raw text, no wrapping)
+        ghostly = "The ghost of #{player_name} whispers, \"#{message}\""
 
-      # Echo back to sender
-      push(socket, "event", %{text: "You say, \"#{message}\""})
+        Phoenix.PubSub.broadcast(
+          Loka.PubSub,
+          "location:#{room.id}",
+          {:player_emotes, player.id, player_name, ghostly}
+        )
+
+        push(socket, "event", %{text: "You whisper, \"#{message}\""})
+      else
+        Phoenix.PubSub.broadcast(
+          Loka.PubSub,
+          "location:#{room.id}",
+          {:player_says, player.id, player_name, message}
+        )
+
+        push(socket, "event", %{text: "You say, \"#{message}\""})
+      end
 
       {:reply, :ok, socket}
     end)
@@ -643,28 +653,29 @@ defmodule LokaWeb.GameChannel do
 
   def handle_in("chat", %{"mode" => "shout", "message" => message}, socket) do
     with_rate_limit(socket, fn ->
-      player = socket.assigns.player
-      room = socket.assigns.room
-      player_name = player_display_name(player)
+      if Loka.Game.Actions.Death.ghost?(socket.assigns.character) do
+        push(socket, "event", %{text: "You try to shout, but only a faint moan escapes."})
+        {:reply, :ok, socket}
+      else
+        player = socket.assigns.player
+        room = socket.assigns.room
+        player_name = player_display_name(player)
 
-      # Broadcast to current room and adjacent rooms
-      Phoenix.PubSub.broadcast(
-        Loka.PubSub,
-        "location:#{room.id}",
-        {:player_shouts, player.id, player_name, message}
-      )
+        # Broadcast to current room and adjacent rooms
+        Phoenix.PubSub.broadcast(
+          Loka.PubSub,
+          "location:#{room.id}",
+          {:player_shouts, player.id, player_name, message}
+        )
 
-      # TODO: Broadcast to adjacent rooms
+        # TODO: Broadcast to adjacent rooms
 
-      push(socket, "event", %{text: "You shout, \"#{message}\""})
+        push(socket, "event", %{text: "You shout, \"#{message}\""})
 
-      {:reply, :ok, socket}
+        {:reply, :ok, socket}
+      end
     end)
   end
-
-  # =============================================================================
-  # Spark Companion
-  # =============================================================================
 
   def handle_in("spark", %{"action" => "status"}, socket) do
     case ActionBridge.execute(socket, :spark_status, %{}) do
@@ -1282,51 +1293,13 @@ defmodule LokaWeb.GameChannel do
   end
 
   # =============================================================================
-  # Bardo Handlers
+  # Death Handlers
   # =============================================================================
 
-  def handle_info({:enter_bardo, killer_name}, socket) do
-    case ActionBridge.execute(socket, :enter_bardo, %{killer_name: killer_name}) do
+  def handle_info({:die, killer_name}, socket) do
+    case ActionBridge.execute(socket, :die, %{killer_name: killer_name}) do
       {:ok, socket} -> {:noreply, socket}
       {:error, _reason, socket} -> {:noreply, socket}
-    end
-  end
-
-  def handle_info(:bardo_timer_complete, socket) do
-    alias Loka.Game.Actions.Bardo, as: BardoActions
-    bardo = socket.assigns[:bardo]
-
-    if bardo && bardo.active do
-      push(socket, "event", %{text: "The path back to the living opens before you..."})
-      push(socket, "bardo_can_reincarnate", %{})
-
-      socket = assign(socket, :bardo, BardoActions.mark_can_reincarnate(bardo))
-      {:noreply, socket}
-    else
-      {:noreply, socket}
-    end
-  end
-
-  def handle_info(:bardo_next_message, socket) do
-    alias Loka.Game.Actions.Bardo, as: BardoActions
-    bardo = socket.assigns[:bardo]
-
-    if bardo && bardo.active do
-      case BardoActions.next_message(bardo) do
-        {:ok, message, new_bardo, has_more} ->
-          push(socket, "event", %{text: message})
-
-          if has_more do
-            Process.send_after(self(), :bardo_next_message, BardoActions.message_interval_ms())
-          end
-
-          {:noreply, assign(socket, :bardo, new_bardo)}
-
-        :done ->
-          {:noreply, socket}
-      end
-    else
-      {:noreply, socket}
     end
   end
 
@@ -1475,7 +1448,7 @@ defmodule LokaWeb.GameChannel do
 
   defp update_result_socket_for_rate_limit(other), do: other
 
-  # NOTE: Bardo, Shop, Container, Gathering/Crafting, and Emote/Social helpers
+  # NOTE: Death, Shop, Container, Gathering/Crafting, and Emote/Social helpers
   # moved to Loka.Game.Actions.* modules
 
   # Deliver completed timers that occurred while player was offline

@@ -27,13 +27,13 @@ defmodule Loka.Game.Actions.Combat do
   @spec attack(Context.t(), String.t(), map()) :: {:ok, Result.t()} | {:error, String.t()}
   def attack(ctx, entity_id, entity) do
     Logger.info(
-      "[COMBAT] Attack initiated: player_id=#{ctx.player_id} target=#{entity_id} target_name=#{entity.name}"
+      "[COMBAT] Attack initiated: player_id=#{ctx.player_id} target=#{entity_id} target_name=#{entity.short_desc}"
     )
 
     case Combat.start_combat(entity_id, ctx.character) do
       {:ok, combat_state} ->
         Logger.info(
-          "[COMBAT] Combat started: player_id=#{ctx.player_id} enemy=#{entity.name} enemy_hp=#{inspect(combat_state.enemy.health)}"
+          "[COMBAT] Combat started: player_id=#{ctx.player_id} enemy=#{entity.short_desc} enemy_hp=#{inspect(combat_state.enemy.health)}"
         )
 
         result =
@@ -44,7 +44,7 @@ defmodule Loka.Game.Actions.Combat do
                %{
                  enemy: %{
                    id: entity_id,
-                   name: entity.name,
+                   name: entity.short_desc,
                    health: combat_state.enemy.health
                  }
                }},
@@ -59,7 +59,7 @@ defmodule Loka.Game.Actions.Combat do
           "[COMBAT] Attack refused - not combatant: player_id=#{ctx.player_id} target=#{entity_id}"
         )
 
-        {:error, "The #{entity.name} doesn't want to fight."}
+        {:error, "The #{entity.short_desc} doesn't want to fight."}
 
       {:error, reason} ->
         Logger.warning(
@@ -258,7 +258,7 @@ defmodule Loka.Game.Actions.Combat do
         events: [
           {:combat_end, %{reason: "defeat"}},
           {:cancel_timer, :combat_tick},
-          {:enter_bardo, combat.enemy.name}
+          {:die, combat.enemy.name}
         ]
       )
 

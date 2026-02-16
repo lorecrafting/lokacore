@@ -61,7 +61,7 @@ defmodule LokaWeb.Channels.VersionCompatibility do
       :crafting,
       :emotes,
       :social,
-      :bardo,
+      :ghost_death,
       :quests,
       :timers
     ]

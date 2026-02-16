@@ -53,11 +53,10 @@ signal container_updated(data: Dictionary)
 signal container_closed
 
 # =============================================================================
-# Bardo (Death) Signals
+# Ghost (Death) Signals
 # =============================================================================
-signal bardo_entered(data: Dictionary)
-signal bardo_can_reincarnate
-signal bardo_exited
+signal ghost_entered(data: Dictionary)
+signal ghost_exited
 
 # =============================================================================
 # Quest Signals
@@ -219,9 +218,9 @@ func combat_action(action_name: String) -> void:
 	_send_channel_message("combat_action", {"action": action_name})
 
 
-## Bardo action (e.g., reincarnate)
-func bardo_action(action_name: String) -> void:
-	_send_channel_message("bardo", {"action": action_name})
+## Resurrect from ghost state
+func resurrect(method: String = "shrine") -> void:
+	_send_channel_message("resurrect", {"method": method})
 
 
 ## Shop action (buy, sell)
@@ -539,17 +538,13 @@ func _handle_game_event(event: String, payload: Dictionary) -> void:
 		# =====================================================================
 		# Bardo (Death) Events
 		# =====================================================================
-		"bardo_enter":
-			print("[Phoenix] Received bardo_enter")
-			bardo_entered.emit(payload)
+		"ghost_enter":
+			print("[Phoenix] Received ghost_enter")
+			ghost_entered.emit(payload)
 
-		"bardo_can_reincarnate":
-			print("[Phoenix] Received bardo_can_reincarnate")
-			bardo_can_reincarnate.emit()
-
-		"bardo_exit":
-			print("[Phoenix] Received bardo_exit")
-			bardo_exited.emit()
+		"ghost_exit":
+			print("[Phoenix] Received ghost_exit")
+			ghost_exited.emit()
 
 		# =====================================================================
 		# Character Creation Events

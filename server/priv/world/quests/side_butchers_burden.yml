@@ -30,7 +30,6 @@ objectives:
     dialogue_topic: vow_complete
 rewards:
   xp: 100
-  insight: 1
   karma: wisdom
   items:
     - redemption_blade

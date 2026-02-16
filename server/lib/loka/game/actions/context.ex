@@ -30,8 +30,7 @@ defmodule Loka.Game.Actions.Context do
           room: map(),
           combat: map() | nil,
           dialogue: map() | nil,
-          container: map() | nil,
-          bardo: map() | nil
+          container: map() | nil
         }
 
   defstruct [
@@ -41,8 +40,7 @@ defmodule Loka.Game.Actions.Context do
     :room,
     :combat,
     :dialogue,
-    :container,
-    :bardo
+    :container
   ]
 
   @doc """
@@ -57,8 +55,7 @@ defmodule Loka.Game.Actions.Context do
       room: socket.assigns.room,
       combat: socket.assigns[:combat],
       dialogue: socket.assigns[:dialogue],
-      container: socket.assigns[:open_container],
-      bardo: socket.assigns[:bardo]
+      container: socket.assigns[:open_container]
     }
   end
 
@@ -76,8 +73,7 @@ defmodule Loka.Game.Actions.Context do
       room: socket.assigns[:room],
       combat: socket.assigns[:combat],
       dialogue: socket.assigns[:dialogue],
-      container: socket.assigns[:open_container],
-      bardo: socket.assigns[:bardo]
+      container: socket.assigns[:open_container]
     }
   end
 
@@ -92,7 +88,6 @@ defmodule Loka.Game.Actions.Context do
     |> maybe_update(:combat, state_changes[:combat])
     |> maybe_update(:dialogue, state_changes[:dialogue])
     |> maybe_update(:container, state_changes[:container])
-    |> maybe_update(:bardo, state_changes[:bardo])
   end
 
   defp maybe_update(ctx, _key, nil), do: ctx

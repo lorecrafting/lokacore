@@ -18,7 +18,7 @@ func _init() -> void:
 		test_dialogue_signals_exist(),
 		test_character_state_signals_exist(),
 		test_shop_container_signals_exist(),
-		test_bardo_signals_exist(),
+		test_ghost_signals_exist(),
 		test_quest_signals_exist(),
 		test_environment_signals_exist(),
 	]
@@ -144,11 +144,11 @@ func test_shop_container_signals_exist() -> bool:
 	return true
 
 
-func test_bardo_signals_exist() -> bool:
-	print("[TEST] Bardo signals exist")
+func test_ghost_signals_exist() -> bool:
+	print("[TEST] Ghost signals exist")
 
 	var phoenix = PhoenixScript.new()
-	var signals := ["bardo_entered", "bardo_can_reincarnate", "bardo_exited"]
+	var signals := ["ghost_entered", "ghost_exited"]
 
 	for sig in signals:
 		if not phoenix.has_signal(sig):
@@ -157,7 +157,7 @@ func test_bardo_signals_exist() -> bool:
 			return false
 
 	phoenix.free()
-	print("  [PASS] All bardo signals exist")
+	print("  [PASS] All ghost signals exist")
 	return true
 
 

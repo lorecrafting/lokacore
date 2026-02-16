@@ -168,12 +168,11 @@ defmodule Loka.Channel.Events do
     },
     "container_close" => %{},
 
-    # Bardo (death) events
-    "bardo_enter" => %{
-      bind_point: :string
+    # Ghost (death) events
+    "ghost_enter" => %{
+      killer: :string
     },
-    "bardo_can_reincarnate" => %{},
-    "bardo_exit" => %{},
+    "ghost_exit" => %{},
 
     # Resource events
     "stats_update" => %{
@@ -279,9 +278,9 @@ defmodule Loka.Channel.Events do
       pose: {:optional, :string}
     },
 
-    # Bardo
-    "bardo" => %{
-      action: {:enum, ["reincarnate"]}
+    # Resurrection
+    "resurrect" => %{
+      method: {:enum, ["shrine", "healer"]}
     }
   }
 

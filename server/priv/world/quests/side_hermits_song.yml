@@ -26,7 +26,6 @@ objectives:
     description: "Return the stones to Milarepa"
 rewards:
   xp: 75
-  insight: 1
   items:
     - wisdom_blade
   teaches:

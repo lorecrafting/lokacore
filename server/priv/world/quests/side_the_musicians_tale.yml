@@ -40,7 +40,6 @@ objectives:
 
 rewards:
   xp: 100
-  insight: 1
   teaches:
     - song_of_warding
 

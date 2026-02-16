@@ -175,14 +175,11 @@ end
 ```elixir
 defp do_action(:my_new_action, %{param1: value1}, ctx) do
   # Use Mechanics for calculations
-  {:ok, damage, _audit} = Mechanics.Damage.calculate(%{str: ctx.game_state.stats.str})
-
-  # Use Framework for domain logic
-  {:ok, new_game_state} = PlayerGameState.update_state(ctx.game_state, %{...})
+  {:ok, damage, _audit} = Mechanics.Damage.calculate(%{str: ctx.character.components["stats"]["str"]})
 
   # Return Result with state changes and events
   result = Result.new(
-    state: %{game_state: new_game_state},
+    state: %{character: updated_character},
     events: [
       {:event, "Action completed!"},
       {:my_custom_event, %{data: "..."}}
@@ -237,7 +234,9 @@ end
 | `{:broadcast_player, player_id, msg}` | - | Send to specific player |
 | `{:schedule_timer, name, ms}` | - | Schedule a timer |
 | `{:cancel_timer, name}` | - | Cancel a timer |
-| `{:enter_bardo, killer}` | String | Player died, enter death sequence |
+| `{:die, killer}` | String | Player died, become ghost |
+| `{:ghost_enter, data}` | Map | Ghost state entered |
+| `{:ghost_exit, data}` | Map | Ghost resurrected |
 
 ## State Changes
 

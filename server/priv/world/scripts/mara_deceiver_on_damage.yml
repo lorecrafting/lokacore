@@ -1,7 +1,7 @@
 key: mara_deceiver_on_damage
 type: script
-name: "Final Mara Insight Weakness"
-description: "The Deceiver takes bonus damage based on player's insight level"
+name: "Final Mara Damage Handler"
+description: "Handles damage events for the Deceiver boss fight"
 tags: [combat, boss, mara_deceiver, final_boss]
 data:
   hook: at_damage
@@ -9,21 +9,8 @@ data:
     target = context.target
 
     if target.key == "mara_the_deceiver" do
-      attacker = context.attacker
       damage = context.damage
-
-      # Get player's insight level (would need framework support)
-      insight = get_component(self(), "stats", "insight") || 0
-      weakness = insight * 10  # 10% per insight point
-
-      # Apply insight bonus
-      bonus = div(damage * weakness, 100)
-
-      if bonus > 0 do
-        message("Your insight pierces Mara's illusions! +#{bonus} damage!")
-      end
-
-      default(damage + bonus)
+      continue.(damage)
     else
-      continue()
+      continue.()
     end

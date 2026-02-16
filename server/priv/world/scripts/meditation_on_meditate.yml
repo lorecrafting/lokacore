@@ -1,30 +1,28 @@
 key: meditation_on_meditate
 type: script
 name: "Meditation Vision Handler"
-description: "Handles meditation-triggered visions and insight gains"
-tags: [meditation, vision, insight]
+description: "Handles meditation-triggered visions"
+tags: [meditation, vision]
 data:
   hook: at_meditate
   source: |
     # First vision in meditation hall
     if context.room.key == "meditation_hall" and not has_flag?("first_vision") do
       # show_cutscene("first_vision")
-      set_flag("first_vision", true)
-      # add_insight(1)
-      message("You feel a moment of clarity. Insight +1")
-      handled()
+      set_flag.("first_vision", true)
+      message.("You feel a moment of clarity.")
+      handled.()
     else
-      # Gain insight from meditating in new locations
+      # Track meditation in new locations
       meditation_key = "meditated_#{context.room.key}"
 
       if not has_flag?(meditation_key) do
-        set_flag(meditation_key, true)
+        set_flag.(meditation_key, true)
 
         if "sacred" in (context.room.tags || []) do
-          # add_insight(1)
-          message("Meditating in this sacred place brings understanding. Insight +1")
+          message.("Meditating in this sacred place brings understanding.")
         end
       end
 
-      continue()
+      continue.()
     end

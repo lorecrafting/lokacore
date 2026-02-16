@@ -112,17 +112,14 @@ signal container_updated(data: Dictionary)
 signal container_closed
 
 # =============================================================================
-# Signals - Bardo (Death)
+# Signals - Ghost (Death)
 # =============================================================================
 
-## Emitted when player enters bardo (dies)
-signal bardo_entered(data: Dictionary)
+## Emitted when player dies and becomes a ghost
+signal ghost_entered(data: Dictionary)
 
-## Emitted when player can reincarnate
-signal bardo_can_reincarnate
-
-## Emitted when player exits bardo
-signal bardo_exited
+## Emitted when player resurrects from ghost state
+signal ghost_exited
 
 # =============================================================================
 # Signals - Quests
@@ -198,11 +195,11 @@ var shop_data: Dictionary = {}
 var container_data: Dictionary = {}
 
 # =============================================================================
-# State Variables - Bardo
+# State Variables - Ghost (Death)
 # =============================================================================
 
-## Bardo state when player has died
-var bardo_data: Dictionary = {}
+## Ghost state when player has died
+var ghost_data: Dictionary = {}
 
 # =============================================================================
 # State Variables - Event Log
@@ -291,13 +288,11 @@ func _connect_phoenix_signals() -> void:
 	if _phoenix.has_signal("container_closed"):
 		_phoenix.container_closed.connect(_on_container_closed)
 
-	# Bardo (death) signals
-	if _phoenix.has_signal("bardo_entered"):
-		_phoenix.bardo_entered.connect(_on_bardo_entered)
-	if _phoenix.has_signal("bardo_can_reincarnate"):
-		_phoenix.bardo_can_reincarnate.connect(_on_bardo_can_reincarnate)
-	if _phoenix.has_signal("bardo_exited"):
-		_phoenix.bardo_exited.connect(_on_bardo_exited)
+	# Ghost (death) signals
+	if _phoenix.has_signal("ghost_entered"):
+		_phoenix.ghost_entered.connect(_on_ghost_entered)
+	if _phoenix.has_signal("ghost_exited"):
+		_phoenix.ghost_exited.connect(_on_ghost_exited)
 
 	# Quest signals
 	if _phoenix.has_signal("quest_accepted"):
@@ -883,24 +878,19 @@ func _on_container_closed() -> void:
 
 
 # =============================================================================
-# Event Handlers - Bardo (Death)
+# Event Handlers - Ghost (Death)
 # =============================================================================
 
-func _on_bardo_entered(data: Dictionary) -> void:
-	print("[GameState] Entered bardo (death)")
-	bardo_data = data
-	bardo_entered.emit(data)
+func _on_ghost_entered(data: Dictionary) -> void:
+	print("[GameState] Died, became ghost")
+	ghost_data = data
+	ghost_entered.emit(data)
 
 
-func _on_bardo_can_reincarnate() -> void:
-	print("[GameState] Can now reincarnate")
-	bardo_can_reincarnate.emit()
-
-
-func _on_bardo_exited() -> void:
-	print("[GameState] Exited bardo")
-	bardo_data = {}
-	bardo_exited.emit()
+func _on_ghost_exited() -> void:
+	print("[GameState] Resurrected from ghost")
+	ghost_data = {}
+	ghost_exited.emit()
 
 
 # =============================================================================

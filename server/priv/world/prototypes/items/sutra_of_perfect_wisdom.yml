@@ -23,9 +23,6 @@ components:
       attainment. Gate gate paragate parasamgate bodhi svaha."
   collectible:
     type: sutra
-    bonus:
-      - type: insight
-        amount: 2
   physical:
     weight: 0.3
   valuable:

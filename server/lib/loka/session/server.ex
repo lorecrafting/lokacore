@@ -63,7 +63,7 @@ defmodule Loka.Session.Server do
   - Combat state (if in combat)
   - Dialogue state (if in dialogue)
 
-  Game state is NOT stored here—it lives in `PlayerGameState` (database).
+  Game state is NOT stored here—it lives in character entities (V2).
   The session just tracks ephemeral connection state.
 
   ## Usage
@@ -97,8 +97,8 @@ defmodule Loka.Session.Server do
                      transitions: %{
                        "connecting" => ["authenticated", "disconnected"],
                        "authenticated" => ["in_game", "disconnected"],
-                       "in_game" => ["in_bardo", "disconnected"],
-                       "in_bardo" => ["in_game", "disconnected"],
+                       "in_game" => ["ghost", "disconnected"],
+                       "ghost" => ["in_game", "disconnected"],
                        "disconnected" => ["connecting"]
                      }
                    })

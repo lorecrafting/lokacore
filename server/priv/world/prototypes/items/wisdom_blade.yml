@@ -17,10 +17,6 @@ components:
     damage: 10
     damage_type: slashing
     speed: 0.9
-    bonus:
-      - type: insight
-        amount: 1
-        on: kill
   physical:
     weight: 2
   valuable:

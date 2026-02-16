@@ -83,8 +83,7 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
       room: socket.assigns.room,
       combat: socket.assigns[:combat],
       dialogue: socket.assigns[:dialogue_state],
-      container: socket.assigns[:open_container],
-      bardo: socket.assigns[:bardo]
+      container: socket.assigns[:open_container]
     }
   end
 
@@ -117,17 +116,8 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
     |> maybe_assign(:combat, state[:combat])
     |> maybe_assign(:dialogue_state, state[:dialogue])
     |> maybe_assign(:open_container, state[:container])
-    |> maybe_assign_bardo(state[:bardo])
     |> maybe_handle_room_change(state[:room], socket.assigns[:room])
   end
-
-  # Bardo needs special handling - nil means clear the bardo state
-  defp maybe_assign_bardo(socket, nil) when is_map_key(socket.assigns, :bardo) do
-    Phoenix.Socket.assign(socket, :bardo, nil)
-  end
-
-  defp maybe_assign_bardo(socket, nil), do: socket
-  defp maybe_assign_bardo(socket, bardo), do: Phoenix.Socket.assign(socket, :bardo, bardo)
 
   defp maybe_assign(socket, _key, nil), do: socket
 
@@ -324,30 +314,19 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
     socket
   end
 
-  # Bardo (death) events
-  defp dispatch_event({:enter_bardo, killer_name}, socket) when is_binary(killer_name) do
-    # Legacy: Dispatch to channel to handle bardo sequence
-    send(self(), {:enter_bardo, killer_name})
+  # Death (ghost) events
+  defp dispatch_event({:die, killer_name}, socket) when is_binary(killer_name) do
+    send(self(), {:die, killer_name})
     socket
   end
 
-  defp dispatch_event({:bardo_enter, data}, socket) do
-    validated_push(socket, "bardo_enter", data)
+  defp dispatch_event({:ghost_enter, data}, socket) do
+    validated_push(socket, "ghost_enter", data)
     socket
   end
 
-  defp dispatch_event({:bardo_exit, data}, socket) do
-    validated_push(socket, "bardo_exit", data)
-    socket
-  end
-
-  defp dispatch_event({:bardo_subscribe_room, room_id}, socket) do
-    Phoenix.PubSub.subscribe(Loka.PubSub, "location:#{room_id}")
-    socket
-  end
-
-  defp dispatch_event({:bardo_unsubscribe_room, room_id}, socket) do
-    Phoenix.PubSub.unsubscribe(Loka.PubSub, "location:#{room_id}")
+  defp dispatch_event({:ghost_exit, data}, socket) do
+    validated_push(socket, "ghost_exit", data)
     socket
   end
 

@@ -31,7 +31,6 @@ objectives:
     hint: "The Om Tare Tuttare mantra reveals the true form"
 rewards:
   xp: 250
-  insight: 3
   unlocks:
     - main_liberation
 journal_entries:

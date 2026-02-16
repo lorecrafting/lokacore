@@ -55,7 +55,6 @@ defmodule Loka.Testing.Bot.DirectSocketAdapter do
   alias Loka.Game.Actions
   alias Loka.Game.Actions.{Context, Result}
   alias Loka.Engine.{Entity, Entities}
-  alias Loka.Framework.Player.GameState
   alias Loka.Framework.World.RoomLoader
 
   defstruct [
@@ -66,7 +65,6 @@ defmodule Loka.Testing.Bot.DirectSocketAdapter do
     :combat,
     :dialogue,
     :container,
-    :bardo,
     :events
   ]
 
@@ -192,82 +190,70 @@ defmodule Loka.Testing.Bot.DirectSocketAdapter do
   # =============================================================================
 
   defp initialize_game(player) do
-    case GameState.get_or_create_state(player.id) do
-      {:ok, game_state} ->
-        # Auto-create character if needed
-        game_state =
-          if GameState.character_created?(game_state) do
-            game_state
-          else
-            case auto_create_character(player, game_state) do
-              {:ok, updated_state} -> updated_state
-              {:error, _} -> game_state
-            end
-          end
+    # Find or create character entity (player state lives in entity components)
+    character = find_or_create_character_entity(player)
 
-        # Find the character entity for quest operations (V2 uses Entity, not GameState)
-        character = find_or_create_character_entity(player, game_state)
+    # Grant system quests using the character entity
+    character = grant_system_quests_if_first_time(character)
 
-        # Grant system quests using the character entity
-        character = grant_system_quests_if_first_time(character)
+    # Get starting room from character's location or default
+    room_id = character.location_id || RoomLoader.get_starting_room_id()
 
-        # Load the current room
-        case RoomLoader.load_room_for_display(game_state.current_room_id) do
-          {:ok, room} -> {:ok, game_state, character, room}
-          error -> error
-        end
+    # Build a game_state-compatible map from entity components
+    components = character.components || %{}
 
-      error ->
-        error
+    game_state = %{
+      id: character.id,
+      player_id: player.id,
+      inventory: Map.get(components, "inventory", %{}) |> Map.get("items", []),
+      equipment: Map.get(components, "equipment", %{}),
+      quests: Map.get(components, "quest_progress", %{}),
+      flags: Map.get(components, "flags", %{}),
+      stats: Map.get(components, "stats", %{}),
+      health: Map.get(components, "resources", %{"current" => 100, "max" => 100}),
+      current_room_id: room_id
+    }
+
+    # Load the current room
+    case RoomLoader.load_room_for_display(room_id) do
+      {:ok, room} -> {:ok, game_state, character, room}
+      error -> error
     end
   end
 
-  defp find_or_create_character_entity(player, game_state) do
+  defp find_or_create_character_entity(player) do
     case Entities.find_one(account_id: player.id) do
       {:ok, entity} ->
         entity
 
       {:error, :not_found} ->
-        # Create a minimal character entity for quest tracking
+        name = player.name || "Bot#{player.id}"
+
+        character_name =
+          name
+          |> String.replace(~r/[^A-Za-z]/, "")
+          |> String.slice(0, 20)
+          |> case do
+            "" -> "Traveler"
+            sanitized -> sanitized
+          end
+
         {:ok, schema} =
           Entities.create_entity(%{
             type: "character",
             key: "player_#{player.id}",
-            short_desc: game_state.character_name || player.name || "Bot",
+            short_desc: character_name,
             account_id: player.id,
+            location_id: RoomLoader.get_starting_room_id(),
             components: %{
               "quest_progress" => %{},
-              "stats" => game_state.stats || %{},
-              "resources" => game_state.health || %{"current" => 100, "max" => 100}
+              "stats" => %{},
+              "resources" => %{"current" => 100, "max" => 100}
             }
           })
 
         Entities.to_entity(schema)
     end
-  end
-
-  # Auto-create a character for bot players
-  defp auto_create_character(player, game_state) do
-    name = player.name || "Bot#{player.id}"
-
-    # Sanitize name to only allow letters
-    character_name =
-      name
-      |> String.replace(~r/[^A-Za-z]/, "")
-      |> String.slice(0, 20)
-      |> case do
-        "" -> "Traveler"
-        sanitized -> sanitized
-      end
-
-    attrs = %{
-      character_name: character_name,
-      gender: "they/them",
-      background: "pilgrim"
-    }
-
-    changeset = GameState.character_creation_changeset(game_state, attrs)
-    Loka.Repo.update(changeset)
   end
 
   # Grant system quests if this is the bot's first time (no quests yet)
@@ -328,14 +314,16 @@ defmodule Loka.Testing.Bot.DirectSocketAdapter do
     # Read quest data from character entity (V2 stores quests in components)
     quest_progress = Entity.get_component(state.character, "quest_progress") || %{}
 
+    gs = state.game_state
+
     %{
       room: state.room,
-      inventory: state.game_state.inventory || [],
-      equipped: state.game_state.equipment || %{},
-      stats: state.game_state.stats || %{},
-      health: state.game_state.health || %{current: 100, max: 100},
+      inventory: gs[:inventory] || [],
+      equipped: gs[:equipment] || %{},
+      stats: gs[:stats] || %{},
+      health: gs[:health] || %{current: 100, max: 100},
       quests: quest_progress,
-      game_state: state.game_state
+      game_state: gs
     }
   end
 
@@ -446,8 +434,7 @@ defmodule Loka.Testing.Bot.DirectSocketAdapter do
       room: state.room,
       combat: state.combat,
       dialogue: state.dialogue,
-      container: state.container,
-      bardo: state.bardo
+      container: state.container
     }
   end
 
@@ -460,7 +447,6 @@ defmodule Loka.Testing.Bot.DirectSocketAdapter do
       |> maybe_update(:combat, result.state[:combat])
       |> maybe_update(:dialogue, result.state[:dialogue])
       |> maybe_update(:container, result.state[:container])
-      |> maybe_update(:bardo, result.state[:bardo])
 
     # Convert events to adapter format
     events = Enum.map(result.events, &convert_event/1)

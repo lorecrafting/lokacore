@@ -22,10 +22,10 @@ var bottom_bar: BottomBar
 @onready var error_label: Label = $CanvasLayer/LoginPanel/VBox/ErrorLabel
 @onready var status_label: Label = $CanvasLayer/LoginPanel/VBox/StatusLabel
 
-## Bardo (death) overlay
-var bardo_overlay: Panel = null
-var bardo_message: Label = null
-var reincarnate_btn: Button = null
+## Ghost (death) overlay
+var ghost_overlay: Panel = null
+var ghost_message: Label = null
+var resurrect_btn: Button = null
 
 ## Character creation panel
 var character_creation: CharacterCreation = null
@@ -106,9 +106,8 @@ func _setup_game_state_signals() -> void:
 	GameState.server_disconnected.connect(_on_server_disconnected)
 	GameState.game_event.connect(_on_game_event)
 	GameState.force_disconnect.connect(_on_force_disconnect)
-	GameState.bardo_entered.connect(_on_bardo_entered)
-	GameState.bardo_can_reincarnate.connect(_on_bardo_can_reincarnate)
-	GameState.bardo_exited.connect(_on_bardo_exited)
+	GameState.ghost_entered.connect(_on_ghost_entered)
+	GameState.ghost_exited.connect(_on_ghost_exited)
 
 
 # =============================================================================
@@ -443,15 +442,15 @@ func _on_force_disconnect(reason: String) -> void:
 # Bardo (Death) Overlay
 # =============================================================================
 
-func _setup_bardo_overlay() -> void:
-	if bardo_overlay != null:
+func _setup_ghost_overlay() -> void:
+	if ghost_overlay != null:
 		return
-	bardo_overlay = Panel.new()
-	bardo_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
-	bardo_overlay.visible = false
+	ghost_overlay = Panel.new()
+	ghost_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	ghost_overlay.visible = false
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.05, 0.02, 0.08, 0.92)
-	bardo_overlay.add_theme_stylebox_override("panel", style)
+	style.bg_color = Color(0.08, 0.08, 0.12, 0.85)
+	ghost_overlay.add_theme_stylebox_override("panel", style)
 
 	var vbox := VBoxContainer.new()
 	vbox.set_anchors_preset(Control.PRESET_CENTER)
@@ -460,64 +459,36 @@ func _setup_bardo_overlay() -> void:
 	vbox.offset_top = -100
 	vbox.offset_bottom = 100
 	vbox.add_theme_constant_override("separation", 20)
-	bardo_overlay.add_child(vbox)
+	ghost_overlay.add_child(vbox)
 
 	var title := Label.new()
-	title.text = "-- You Have Died --"
+	title.text = "-- You Are A Ghost --"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 28)
-	title.add_theme_color_override("font_color", Color(0.8, 0.6, 0.6))
+	title.add_theme_color_override("font_color", Color(0.7, 0.7, 0.9))
 	vbox.add_child(title)
 
-	bardo_message = Label.new()
-	bardo_message.text = "The spirits guide you to the bardo realm..."
-	bardo_message.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	bardo_message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	bardo_message.add_theme_font_size_override("font_size", 18)
-	bardo_message.add_theme_color_override("font_color", Color(0.7, 0.7, 0.8))
-	vbox.add_child(bardo_message)
+	ghost_message = Label.new()
+	ghost_message.text = "Find a resurrection shrine or healer to return to life."
+	ghost_message.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ghost_message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	ghost_message.add_theme_font_size_override("font_size", 18)
+	ghost_message.add_theme_color_override("font_color", Color(0.7, 0.7, 0.8))
+	vbox.add_child(ghost_message)
 
-	var spacer := Control.new()
-	spacer.custom_minimum_size = Vector2(0, 20)
-	vbox.add_child(spacer)
-
-	reincarnate_btn = Button.new()
-	reincarnate_btn.text = "Waiting..."
-	reincarnate_btn.disabled = true
-	reincarnate_btn.custom_minimum_size = Vector2(200, 50)
-	reincarnate_btn.add_theme_font_size_override("font_size", 20)
-	reincarnate_btn.pressed.connect(_on_reincarnate_pressed)
-	vbox.add_child(reincarnate_btn)
-
-	$CanvasLayer.add_child(bardo_overlay)
+	$CanvasLayer.add_child(ghost_overlay)
 
 
-func _on_bardo_entered(data: Dictionary) -> void:
-	_setup_bardo_overlay()
-	var bind_point: String = data.get("bind_point", "")
-	if bind_point != "":
-		bardo_message.text = "The spirits guide you to the bardo realm...\nYou will return at: %s" % bind_point
+func _on_ghost_entered(data: Dictionary) -> void:
+	_setup_ghost_overlay()
+	var killer: String = data.get("killer", "")
+	if killer != "":
+		ghost_message.text = "Slain by %s.\nFind a resurrection shrine or healer to return to life." % killer
 	else:
-		bardo_message.text = "The spirits guide you to the bardo realm..."
-	reincarnate_btn.disabled = true
-	reincarnate_btn.text = "Waiting..."
-	bardo_overlay.visible = true
+		ghost_message.text = "Find a resurrection shrine or healer to return to life."
+	ghost_overlay.visible = true
 
 
-func _on_bardo_can_reincarnate() -> void:
-	if reincarnate_btn:
-		reincarnate_btn.disabled = false
-		reincarnate_btn.text = "Reincarnate"
-
-
-func _on_bardo_exited() -> void:
-	if bardo_overlay:
-		bardo_overlay.visible = false
-
-
-func _on_reincarnate_pressed() -> void:
-	reincarnate_btn.disabled = true
-	reincarnate_btn.text = "Reincarnating..."
-	var phoenix: Node = get_node_or_null("/root/PhoenixClient")
-	if phoenix and phoenix.has_method("bardo_action"):
-		phoenix.bardo_action("reincarnate")
+func _on_ghost_exited() -> void:
+	if ghost_overlay:
+		ghost_overlay.visible = false

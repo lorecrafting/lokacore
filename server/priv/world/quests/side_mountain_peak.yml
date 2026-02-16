@@ -39,7 +39,6 @@ objectives:
     description: "Return to Teacher Lobsang"
 rewards:
   xp: 100
-  insight: 1
   teaches:
     - fortitude
 journal_entries:
