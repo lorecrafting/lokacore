@@ -514,28 +514,25 @@ defmodule Loka.Testing.Content.WorldValidator do
     end)
   end
 
-  # Check if NPC has wander behavior
+  # Check if NPC has wander trait
   defp has_wander_behavior?(npc) do
-    behaviors = npc.behaviors || []
+    traits = npc.traits || []
 
-    Enum.any?(behaviors, fn b ->
-      behavior_name =
-        cond do
-          is_binary(b) -> b
-          is_atom(b) -> Atom.to_string(b)
-          is_map(b) -> Map.get(b, "module") || Map.get(b, :module) || ""
-          true -> ""
-        end
-
-      String.contains?(behavior_name, "Wander")
+    Enum.any?(traits, fn t ->
+      cond do
+        is_map(t) -> Map.get(t, "script") == "wander"
+        is_binary(t) -> String.contains?(t, "Wander") || t == "wander"
+        is_atom(t) -> Atom.to_string(t) |> String.contains?("Wander")
+        true -> false
+      end
     end)
   end
 
   # Get allowed_rooms from wander config
   defp get_wander_allowed_rooms(npc) do
     components = npc.components || %{}
-    behavior_config = components["behavior_config"] || %{}
-    wander_config = behavior_config["wander"] || %{}
+    trait_config = components["trait_config"] || %{}
+    wander_config = trait_config["wander"] || %{}
     wander_config["allowed_rooms"] || []
   end
 

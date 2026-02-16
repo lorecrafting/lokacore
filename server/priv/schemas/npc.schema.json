@@ -48,10 +48,10 @@
       "items": { "type": "string" },
       "description": "Tags for filtering (e.g., 'friendly', 'hostile', 'quest_giver', 'vendor')"
     },
-    "behaviors": {
+    "traits": {
       "type": "array",
-      "items": { "type": "string" },
-      "description": "Behavior modules (e.g., 'patrol', 'guard', 'scavenger')"
+      "items": {},
+      "description": "Script-based traits (e.g., {script: 'patrol', config: {...}})"
     },
     "attributes": {
       "type": "object",

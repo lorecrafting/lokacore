@@ -50,7 +50,7 @@ defmodule Loka.Engine.Schema.EntitySchema do
 
     # Serialized complex data (stored as JSON)
     field :components, Loka.Ecto.Json, default: %{}
-    field :behaviors, Loka.Ecto.Json, default: []
+    field :traits, Loka.Ecto.Json, default: []
     field :scripts, Loka.Ecto.Json, default: %{}
     field :metadata, Loka.Ecto.Json, default: %{}
 
@@ -77,7 +77,7 @@ defmodule Loka.Engine.Schema.EntitySchema do
     :location_id,
     :account_id,
     :components,
-    :behaviors,
+    :traits,
     :scripts,
     :metadata
   ]
@@ -128,7 +128,7 @@ defmodule Loka.Engine.Schema.EntitySchema do
       location_id: schema.location_id,
       account_id: schema.account_id,
       components: schema.components || %{},
-      behaviors: schema.behaviors || [],
+      traits: schema.traits || [],
       tags: extract_tags(schema),
       scripts: schema.scripts || %{},
       metadata:
@@ -161,7 +161,7 @@ defmodule Loka.Engine.Schema.EntitySchema do
       location_id: entity.location_id,
       account_id: entity.account_id,
       components: entity.components,
-      behaviors: entity.behaviors,
+      traits: entity.traits,
       scripts: entity.scripts,
       metadata: entity.metadata,
       # Tags are stored in entity_tags join table, not a column.

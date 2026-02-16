@@ -25,7 +25,7 @@ tags:
   - spiritual
 
 # Behaviors - elderly pilgrim has a gentle schedule, mostly resting
-behaviors:
+traits:
   - script: day_night_schedule
     config:
       wake_at: dawn

@@ -25,8 +25,10 @@ defmodule Loka.Engine.Behavior do
   @doc """
   Processes an event through all behaviors attached to an entity.
   """
-  def process_event(%Entity{behaviors: behaviors} = entity, %Event{} = event, context \\ %{}) do
-    behaviors
+  def process_event(%Entity{traits: traits} = entity, %Event{} = event, context \\ %{}) do
+    # Only module traits participate in the Behavior protocol
+    traits
+    |> Enum.filter(&is_atom/1)
     |> Enum.filter(&behavior_can_handle?(&1, entity, event.type))
     |> Enum.reduce_while({:ok, entity, []}, fn behavior, {:ok, ent, events} ->
       case behavior.handle_event(ent, event, context) do

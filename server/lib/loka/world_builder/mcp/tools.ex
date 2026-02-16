@@ -47,7 +47,7 @@ defmodule Loka.WorldBuilder.MCP.Tools do
         - entity_patterns: Room, NPC, item design patterns
         - dialogue_patterns: Dialogue tree format, branching
         - quest_patterns: Quest design, objectives, rewards
-        - npc_behaviors: Behaviors, emotes, schedules
+        - npc_traits: Traits, emotes, schedules
 
         Use these guides to understand the framework and ensure consistent quality.
         """,
@@ -239,10 +239,10 @@ defmodule Loka.WorldBuilder.MCP.Tools do
             description: %{type: "string", description: "Physical description"},
             room: %{type: "string", description: "Starting room key"},
             dialogue: %{type: "string", description: "Dialogue tree key"},
-            behaviors: %{
+            traits: %{
               type: "array",
-              items: %{type: "string"},
-              description: "Behavior scripts (e.g., ['patrol', 'merchant'])"
+              items: %{},
+              description: "Script-based traits (e.g., [{script: 'patrol', config: {...}}])"
             },
             stats: %{
               type: "object",

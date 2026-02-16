@@ -26,7 +26,7 @@ tags:
   - teacher
 
 # Behaviors - gentle herbalist keeps calm hours
-behaviors:
+traits:
   - script: day_night_schedule
     config:
       wake_at: dawn

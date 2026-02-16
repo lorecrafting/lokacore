@@ -323,7 +323,7 @@ defmodule Loka.Engine.Spawner do
           "destination_key" => destination
         }
       },
-      behaviors: [],
+      traits: [],
       tags: ["exit"],
       scripts: %{},
       metadata: %{
@@ -379,7 +379,7 @@ defmodule Loka.Engine.Spawner do
       keywords: Map.get(exit_config, "keywords", [direction_str]),
       location_id: room.id,
       components: components,
-      behaviors: [],
+      traits: [],
       tags: ["exit"] ++ Map.get(exit_config, "tags", []),
       scripts: %{},
       metadata: %{

@@ -32,7 +32,7 @@ defmodule Loka.Engine.EntitySeeder do
   @consumed_fields MapSet.new(~w(
     key type short_desc long_desc extra_desc keywords primary_keyword mood
     is_prototype prototype_key location_id account_id
-    components behaviors tags scripts metadata
+    components traits tags scripts metadata
     parent parent_key id name description extra_description
     exits spawns attributes emotes
   ))
@@ -481,7 +481,7 @@ defmodule Loka.Engine.EntitySeeder do
       prototype_key: data["prototype_key"],
       location_id: data["location_id"],
       account_id: data["account_id"],
-      behaviors: data["behaviors"] || [],
+      traits: data["traits"] || [],
       tags: data["tags"] || [],
       scripts: data["scripts"] || %{},
       metadata: metadata,

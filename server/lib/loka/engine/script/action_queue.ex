@@ -57,7 +57,7 @@ defmodule Loka.Engine.Script.ActionQueue do
           | :unlock_exit
           | :schedule
           | :emit_event
-          | :set_behavior_state
+          | :set_trait_state
           | :set_cooldown
           | :signal
           | :create_room
@@ -560,17 +560,17 @@ defmodule Loka.Engine.Script.ActionQueue do
   end
 
   defp execute_action(
-         {:set_behavior_state,
-          %{entity_id: entity_id, behavior_key: behavior_key, state_key: state_key, value: value}},
+         {:set_trait_state,
+          %{entity_id: entity_id, trait_key: trait_key, state_key: state_key, value: value}},
          _context
        ) do
-    # Emit event to update entity's behavior state
+    # Emit event to update entity's trait state
     # The EntityServer will handle storing this in the entity
     event =
-      Event.new(:set_behavior_state, %{
+      Event.new(:set_trait_state, %{
         target: entity_id,
         payload: %{
-          behavior_key: behavior_key,
+          trait_key: trait_key,
           state_key: state_key,
           value: value
         }
@@ -578,6 +578,18 @@ defmodule Loka.Engine.Script.ActionQueue do
 
     EventBus.emit(event)
     :ok
+  end
+
+  # Legacy backward compatibility
+  defp execute_action(
+         {:set_behavior_state,
+          %{entity_id: entity_id, behavior_key: bk, state_key: sk, value: v}},
+         context
+       ) do
+    execute_action(
+      {:set_trait_state, %{entity_id: entity_id, trait_key: bk, state_key: sk, value: v}},
+      context
+    )
   end
 
   defp execute_action(

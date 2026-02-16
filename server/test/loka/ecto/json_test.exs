@@ -179,7 +179,7 @@ defmodule Loka.Ecto.JsonTest do
              }
     end
 
-    test "behaviors list round-trip" do
+    test "traits list round-trip" do
       original = ["DefaultObject", "Container", "Lockable"]
       assert {:ok, json} = Json.dump(original)
       assert {:ok, loaded} = Json.load(json)

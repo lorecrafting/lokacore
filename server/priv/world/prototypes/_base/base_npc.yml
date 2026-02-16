@@ -17,7 +17,7 @@ components:
       dex: 10
       sta: 10
     level: 1
-behaviors: []
+traits: []
 tags:
   - npc
 attributes:

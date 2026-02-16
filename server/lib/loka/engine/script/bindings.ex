@@ -78,10 +78,10 @@ defmodule Loka.Engine.Script.Bindings do
 
   # Context bindings - read-only data
   defp context_bindings(entity, player, context) do
-    # Extract behavior config from context (for behavior scripts)
+    # Extract trait config from context (for trait scripts)
     config = Map.get(context, :config, %{})
-    # Extract behavior key for state storage (keyed per-behavior)
-    behavior_key = Map.get(context, :behavior_key)
+    # Extract trait key for state storage (keyed per-trait)
+    trait_key = Map.get(context, :behavior_key) || Map.get(context, :trait_key)
 
     [
       # Entity being scripted (read-only map)
@@ -93,22 +93,33 @@ defmodule Loka.Engine.Script.Bindings do
       # Event context
       context: safe_context_map(context),
 
-      # Behavior config (read-only, for behaviors)
+      # Trait config (read-only, for trait scripts)
       # Scripts access via config.route, config.interval, etc.
       config: safe_config_map(config),
 
-      # Behavior state (persists across script executions)
-      # get_behavior_state(:key, default) - read state
-      # set_behavior_state(:key, value) - queue state update
+      # Trait state (persists across script executions)
+      # get_trait_state(:key, default) - read state
+      # set_trait_state(:key, value) - queue state update
+      get_trait_state: fn key, default ->
+        get_trait_state(entity, trait_key, key, default)
+      end,
+      set_trait_state: fn key, value ->
+        queue_set_trait_state(entity, trait_key, key, value)
+      end,
+
+      # Legacy aliases for backward compatibility with existing scripts
       get_behavior_state: fn key, default ->
-        get_behavior_state(entity, behavior_key, key, default)
+        get_trait_state(entity, trait_key, key, default)
       end,
       set_behavior_state: fn key, value ->
-        queue_set_behavior_state(entity, behavior_key, key, value)
+        queue_set_trait_state(entity, trait_key, key, value)
       end,
 
       # Room query function
-      room: fn -> get_room(entity) end
+      room: fn -> get_room(entity) end,
+
+      # Room exits query (returns exit entities from entity's current room)
+      room_exits: fn -> get_room_exits(entity) end
     ]
   end
 
@@ -130,9 +141,9 @@ defmodule Loka.Engine.Script.Bindings do
       get_skill: fn skill_name -> get_skill(game_state, skill_name) end,
       get_attribute: fn attr_name -> get_attribute(game_state, attr_name) end,
 
-      # Entity queries
-      entities_in_room: fn -> entities_in_room(player) end,
-      players_in_room: fn -> players_in_room(player) end,
+      # Entity queries (falls back to entity's location when player is nil)
+      entities_in_room: fn -> entities_in_room(player, entity) end,
+      players_in_room: fn -> players_in_room(player, entity) end,
       entity_present?: fn entity_key -> entity_present?(player, entity_key) end,
       find_entity: fn opts -> find_entity(player, opts) end,
       find_entities_by_tag: fn tag -> find_entities_by_tag(player, tag) end,
@@ -442,10 +453,11 @@ defmodule Loka.Engine.Script.Bindings do
 
   # Entity query functions - query active entities in rooms
 
-  defp entities_in_room(player) do
+  defp entities_in_room(player, entity \\ nil) do
     alias Loka.Engine.{EntityRegistry, EntityServer}
 
-    room_id = get_player_room_id(player)
+    # Fall back to entity's location when player is nil (trait context)
+    room_id = get_player_room_id(player) || get_location(entity)
 
     if room_id do
       # Get entity IDs in this room from the in-memory tracking
@@ -466,11 +478,11 @@ defmodule Loka.Engine.Script.Bindings do
     end
   end
 
-  defp players_in_room(player) do
+  defp players_in_room(player, entity) do
     # Filter entities_in_room to only include players
-    entities_in_room(player)
-    |> Enum.filter(fn entity ->
-      entity[:type] == :character || entity[:type] == :player
+    entities_in_room(player, entity)
+    |> Enum.filter(fn e ->
+      e[:type] == :character || e[:type] == :player
     end)
   end
 
@@ -787,42 +799,61 @@ defmodule Loka.Engine.Script.Bindings do
     :ok
   end
 
-  # Behavior state - persists per-behavior across executions
-  # State is stored in entity.behavior_state[behavior_key][state_key]
+  # Trait state - persists per-trait across executions
+  # State is stored in entity.trait_state[trait_key][state_key]
 
-  defp get_behavior_state(entity, behavior_key, state_key, default) do
-    behavior_state = Map.get(entity, :behavior_state, %{})
+  defp get_trait_state(entity, trait_key, state_key, default) do
+    trait_state =
+      case Map.get(entity, :trait_state) do
+        nil -> Map.get(entity, :behavior_state, %{})
+        ts -> ts
+      end
 
     cond do
-      # No behavior key - fall back to global state
-      is_nil(behavior_key) ->
-        Map.get(behavior_state, state_key, default)
+      # No trait key - fall back to global state
+      is_nil(trait_key) ->
+        Map.get(trait_state, state_key, default)
 
-      # Get state for this specific behavior
+      # Get state for this specific trait
       true ->
-        behavior_key_state = Map.get(behavior_state, behavior_key, %{})
-        Map.get(behavior_key_state, state_key, default)
+        trait_key_state = Map.get(trait_state, trait_key, %{})
+        Map.get(trait_key_state, state_key, default)
     end
   end
 
-  defp queue_set_behavior_state(entity, behavior_key, state_key, value) do
+  defp queue_set_trait_state(entity, trait_key, state_key, value) do
     entity_id = Map.get(entity, :id)
 
     if entity_id do
       ActionQueue.queue(
-        {:set_behavior_state,
+        {:set_trait_state,
          %{
            entity_id: entity_id,
-           behavior_key: behavior_key,
+           trait_key: trait_key,
            state_key: state_key,
            value: value
          }}
       )
     else
-      Logger.warning("[Bindings] Cannot set behavior state without entity id")
+      Logger.warning("[Bindings] Cannot set trait state without entity id")
     end
 
     :ok
+  end
+
+  # Room exits query - returns exit entities from entity's current room
+  defp get_room_exits(entity) do
+    alias Loka.Engine.Entities
+
+    room_id = get_location(entity)
+
+    if room_id do
+      Entities.get_contents(room_id)
+      |> Enum.filter(fn e -> e.type == :exit end)
+      |> Enum.map(&safe_entity_map/1)
+    else
+      []
+    end
   end
 
   # =============================================================================

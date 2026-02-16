@@ -18,7 +18,7 @@ tags:
   - eccentric
 
 # Behaviors - hermit keeps unconventional hours, more active at night
-behaviors:
+traits:
   - script: day_night_schedule
     config:
       wake_at: dusk      # He's nocturnal, meditating through the day

@@ -1,0 +1,42 @@
+key: janitor
+type: script
+name: "Janitor Trait"
+description: "Makes an NPC pick up and dispose of items left on the ground"
+tags: [trait, utility, janitor]
+data:
+  hook: behavior
+  config_schema:
+    picks_up:
+      type: list
+      default: [junk, trash, debris]
+      description: "Tags of items to pick up"
+    dispose_after_seconds:
+      type: integer
+      default: 300
+      description: "Seconds before disposing of picked up items"
+    pickup_message:
+      type: string
+      default: "picks up some litter."
+      description: "Emote when picking up items"
+  source: |
+    # Janitor trait - pick up items with matching tags
+    picks_up = config.picks_up || ["junk", "trash", "debris"]
+    pickup_msg = config.pickup_message || "picks up some litter."
+
+    # Find items in room with matching tags
+    room_entities = entities_in_room()
+    items = room_entities
+      |> Enum.filter(fn e ->
+        e[:type] == :item &&
+        any?(picks_up, fn tag -> tag in (e[:tags] || []) end)
+      end)
+
+    if items != [] do
+      target = pick(items)
+      if target do
+        emote(pickup_msg)
+        despawn(target[:id])
+      end
+    end
+
+    continue()

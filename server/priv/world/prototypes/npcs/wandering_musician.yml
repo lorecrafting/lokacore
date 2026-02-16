@@ -26,7 +26,7 @@ tags:
   - artist
 
 # Behaviors - musician travels during day, rests at evening
-behaviors:
+traits:
   - script: day_night_schedule
     config:
       wake_at: dawn

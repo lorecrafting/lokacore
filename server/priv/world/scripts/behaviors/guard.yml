@@ -1,0 +1,60 @@
+key: guard
+type: script
+name: "Guard Trait"
+description: "Makes an NPC guard a location, blocking unauthorized entry and responding to threats"
+tags: [trait, combat, guard]
+data:
+  hook: behavior
+  events: [entity_entered, before_move, damage_taken]
+  config_schema:
+    attack_tags:
+      type: list
+      default: [hostile, criminal]
+      description: "Tags on entities that trigger attack"
+    block_directions:
+      type: list
+      description: "Directions to block unauthorized passage (optional)"
+    block_message:
+      type: string
+      default: "You shall not pass!"
+      description: "Message when blocking passage"
+    wimpy_threshold:
+      type: integer
+      default: 20
+      description: "HP percentage below which guard flees"
+  source: |
+    # Guard trait - block passage and respond to threats
+    event = context.trigger
+    attack_tags = config.attack_tags || ["hostile", "criminal"]
+    block_directions = config.block_directions || []
+    block_message = config.block_message || "You shall not pass!"
+    wimpy = config.wimpy_threshold || 20
+
+    cond do
+      # Check if entity entering has hostile tags
+      event == :entity_entered ->
+        entered = context.target
+        if entered do
+          entered_tags = entered[:tags] || []
+          is_hostile = any?(attack_tags, fn tag -> tag in entered_tags end)
+
+          if is_hostile do
+            say("Halt! You are not welcome here!")
+            damage(entered[:id], 5)
+          end
+        end
+        continue()
+
+      # Block passage in guarded directions
+      event == :before_move ->
+        direction = context.args[:direction]
+        if direction && direction in block_directions do
+          say(block_message)
+          deny()
+        else
+          continue()
+        end
+
+      true ->
+        continue()
+    end

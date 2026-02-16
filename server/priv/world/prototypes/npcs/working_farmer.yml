@@ -24,7 +24,7 @@ tags:
   - worker
 
 # Behaviors - hard working farmer rises early, sleeps when sun sets
-behaviors:
+traits:
   - script: day_night_schedule
     config:
       wake_at: dawn

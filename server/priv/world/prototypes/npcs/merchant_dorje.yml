@@ -28,7 +28,7 @@ emotes:
   sale_complete: "*bows slightly* A fair trade! May it serve you well."
 
 # Behaviors - traveling merchant with flexible hours
-behaviors:
+traits:
   - script: shopkeeper_hours
     config:
       open_at: morning

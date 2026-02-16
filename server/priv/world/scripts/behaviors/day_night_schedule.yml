@@ -50,39 +50,39 @@ data:
       event == wake_event ->
         # Schedule staggered emote (random delay prevents spam when multiple NPCs wake)
         stagger_delay = if stagger_max > 0, do: :rand.uniform(stagger_max), else: 0
-        set_state(:pending_emote, :waking_up)
-        set_state(:pending_emote_chance, emote_chance)
-        set_timer("day_night_staggered_emote", stagger_delay, "day_night_staggered_emote")
+        set_trait_state(:pending_emote, :waking_up)
+        set_trait_state(:pending_emote_chance, emote_chance)
+        after(stagger_delay * 1000, "day_night_staggered_emote")
 
         # Move to wake room if configured (immediate, not staggered)
         wake_room = config.wake_room
         if wake_room do
-          teleport(self().id, wake_room)
+          teleport(entity.id, wake_room)
           # Schedule arrival emote with additional stagger
-          set_state(:pending_emote, :arrived_at_work)
-          set_timer("day_night_staggered_emote", stagger_delay + 5, "day_night_staggered_emote")
+          set_trait_state(:pending_emote, :arrived_at_work)
+          after((stagger_delay + 5) * 1000, "day_night_staggered_emote")
         end
 
-        set_state(:awake, true)
+        set_trait_state(:awake, true)
         handled()
 
       # Sleep event
       event == sleep_event ->
         # Schedule staggered emote
         stagger_delay = if stagger_max > 0, do: :rand.uniform(stagger_max), else: 0
-        set_state(:pending_emote, :going_to_sleep)
-        set_state(:pending_emote_chance, emote_chance)
-        set_timer("day_night_staggered_emote", stagger_delay, "day_night_staggered_emote")
+        set_trait_state(:pending_emote, :going_to_sleep)
+        set_trait_state(:pending_emote_chance, emote_chance)
+        after(stagger_delay * 1000, "day_night_staggered_emote")
 
         # Move to sleep room if configured
         sleep_room = config.sleep_room
         if sleep_room do
-          teleport(self().id, sleep_room)
-          set_state(:pending_emote, :arrived_home)
-          set_timer("day_night_staggered_emote", stagger_delay + 5, "day_night_staggered_emote")
+          teleport(entity.id, sleep_room)
+          set_trait_state(:pending_emote, :arrived_home)
+          after((stagger_delay + 5) * 1000, "day_night_staggered_emote")
         end
 
-        set_state(:awake, false)
+        set_trait_state(:awake, false)
         handled()
 
       true ->

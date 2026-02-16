@@ -25,7 +25,7 @@ tags:
   - atmosphere
 
 # Behaviors - Karma works early morning to evening
-behaviors:
+traits:
   - script: shopkeeper_hours
     config:
       open_at: dawn

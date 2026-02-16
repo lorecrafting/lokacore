@@ -1,0 +1,45 @@
+key: aggressive
+type: script
+name: "Aggressive Trait"
+description: "Makes an NPC attack entities that enter its room based on level and tags"
+tags: [trait, combat, aggressive]
+data:
+  hook: behavior
+  events: [entity_entered, damage_taken]
+  config_schema:
+    target_level_range:
+      type: list
+      default: [1, 100]
+      description: "Min and max level of targets to attack"
+    ignore_tags:
+      type: list
+      default: [friendly, guard, shopkeeper]
+      description: "Tags on entities to ignore"
+    wimpy_threshold:
+      type: integer
+      default: 15
+      description: "HP percentage below which NPC flees"
+    attack_message:
+      type: string
+      default: "attacks with fury!"
+      description: "Emote when attacking"
+  source: |
+    # Aggressive trait - attack entities that enter the room
+    event = context.trigger
+    ignore_tags = config.ignore_tags || ["friendly", "guard", "shopkeeper"]
+    attack_msg = config.attack_message || "attacks with fury!"
+
+    if event == :entity_entered do
+      entered = context.target
+      if entered do
+        entered_tags = entered[:tags] || []
+        should_ignore = any?(ignore_tags, fn tag -> tag in entered_tags end)
+
+        unless should_ignore do
+          emote(attack_msg)
+          damage(entered[:id], 10)
+        end
+      end
+    end
+
+    continue()

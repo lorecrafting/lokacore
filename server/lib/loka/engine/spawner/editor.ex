@@ -73,7 +73,7 @@ defmodule Loka.Engine.Spawner.Editor do
         extra_desc: extra_desc,
         location_id: nil,
         components: components,
-        behaviors: [],
+        traits: [],
         tags: tags,
         scripts: %{},
         metadata: %{
@@ -181,7 +181,7 @@ defmodule Loka.Engine.Spawner.Editor do
           "destination_id" => dest_id
         }
       },
-      behaviors: [],
+      traits: [],
       tags: ["exit"],
       scripts: %{},
       metadata: %{

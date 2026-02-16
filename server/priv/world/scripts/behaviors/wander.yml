@@ -22,50 +22,36 @@ data:
       type: list
       description: "Don't move to rooms with these tags (optional)"
   source: |
-    # Wander behavior - move randomly within constraints
-    current_room = get_location(self())
+    # Wander trait - move randomly within constraints
+    exits = room_exits()
 
-    if current_room do
-      # Get exits from current room
-      exits = entities_in_room(current_room.id)
-               |> Enum.filter(fn e -> e.type == :exit end)
+    # Get destination keys from exits
+    destinations = exits
+      |> Enum.map(fn exit ->
+        exit[:components]["exit"]["destination_key"]
+      end)
+      |> Enum.filter(&(&1))
 
-      # Get destination keys from exits
-      destinations = exits
-        |> Enum.map(fn exit ->
-          # Get destination from exit component
-          exit_data = exit.components["exit"] || exit.components[:exit] || %{}
-          exit_data["destination_key"] || exit_data[:destination_key]
-        end)
-        |> Enum.filter(&(&1))
+    # Filter by zone if configured
+    zone_filter = config.zone
+    destinations = if zone_filter do
+      destinations
+    else
+      destinations
+    end
 
-      # Filter by zone if configured
-      zone_filter = config.zone
-      destinations = if zone_filter do
-        # TODO: Filter by zone membership
-        # For now, pass through
-        destinations
-      else
-        destinations
-      end
+    # Pick a random destination
+    if destinations != [] do
+      target = pick(destinations)
 
-      # Filter by room tags if configured
-      room_tags = config.room_tags || []
-      avoid_tags = config.avoid_tags || []
-
-      # Pick a random destination
-      if destinations != [] do
-        target = pick_random(destinations)
-
-        if target do
-          teleport(self().id, target)
-          emit(:wander_arrive)
-        end
+      if target do
+        teleport(entity.id, target)
+        emit(:wander_arrive)
       end
     end
 
     # Schedule next wander
     interval = config.interval || 600
-    set_timer("wander", interval, "wander")
+    after(interval * 1000, "wander")
 
     continue()

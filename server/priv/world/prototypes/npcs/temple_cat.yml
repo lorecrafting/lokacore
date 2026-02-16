@@ -25,7 +25,7 @@ tags:
   - sacred
 
 # Behaviors - cats sleep during the day, more active at dusk
-behaviors:
+traits:
   - script: day_night_schedule
     config:
       wake_at: dusk

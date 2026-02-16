@@ -35,7 +35,7 @@ emotes:
   forging_complete: "*holds the finished piece up to the light, examining it*"
 
 # Behaviors - shopkeeper with regular hours
-behaviors:
+traits:
   - script: shopkeeper_hours
     config:
       open_at: morning

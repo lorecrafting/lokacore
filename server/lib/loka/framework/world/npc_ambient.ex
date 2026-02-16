@@ -70,9 +70,9 @@ defmodule Loka.Framework.World.NpcAmbient do
   @spec get_config(map()) :: map() | nil
   def get_config(entity) when is_map(entity) do
     # First check components.ambient_actions (explicit ambient config)
-    # Then fall back to behavior_config.*.ambient_messages (patrol/wander behaviors)
+    # Then fall back to trait_config.*.ambient_messages (patrol/wander traits)
     case get_component_config(entity) do
-      nil -> get_behavior_config(entity)
+      nil -> get_trait_config(entity)
       config -> config
     end
   end
@@ -89,16 +89,16 @@ defmodule Loka.Framework.World.NpcAmbient do
 
   defp get_component_config(_), do: nil
 
-  # Check behavior_config for ambient_messages (patrol, wander, etc.)
-  defp get_behavior_config(entity) do
-    # Try to get behavior_config from components (Entity struct) or direct field (EntitySchema)
-    behavior_config = get_behavior_config_map(entity)
+  # Check trait_config for ambient_messages (patrol, wander, aggressive, etc.)
+  defp get_trait_config(entity) do
+    # Try to get trait_config from components (Entity struct) or direct field (EntitySchema)
+    trait_config = get_trait_config_map(entity)
 
-    if behavior_config do
-      # Look for ambient_messages in any behavior config (patrol, wander, aggressive, etc.)
+    if trait_config do
+      # Look for ambient_messages in any trait config (patrol, wander, aggressive, etc.)
       messages =
-        behavior_config
-        |> Enum.flat_map(fn {_behavior_name, config} ->
+        trait_config
+        |> Enum.flat_map(fn {_trait_name, config} ->
           get_ambient_messages_from_config(config)
         end)
 
@@ -117,11 +117,11 @@ defmodule Loka.Framework.World.NpcAmbient do
     end
   end
 
-  defp get_behavior_config_map(%{components: components}) when is_map(components) do
-    Map.get(components, :behavior_config) || Map.get(components, "behavior_config")
+  defp get_trait_config_map(%{components: components}) when is_map(components) do
+    Map.get(components, :trait_config) || Map.get(components, "trait_config")
   end
 
-  defp get_behavior_config_map(_), do: nil
+  defp get_trait_config_map(_), do: nil
 
   defp get_ambient_messages_from_config(config) when is_map(config) do
     messages = Map.get(config, :ambient_messages) || Map.get(config, "ambient_messages") || []

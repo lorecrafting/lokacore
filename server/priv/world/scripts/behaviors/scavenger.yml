@@ -1,0 +1,46 @@
+key: scavenger
+type: script
+name: "Scavenger Trait"
+description: "Makes an NPC collect valuable items from the ground"
+tags: [trait, utility, scavenger]
+data:
+  hook: behavior
+  config_schema:
+    min_value:
+      type: integer
+      default: 1
+      description: "Minimum item value to pick up"
+    prefer_types:
+      type: list
+      default: [weapon, armor, potion]
+      description: "Item subtypes to prefer"
+    carry_limit:
+      type: integer
+      default: 5
+      description: "Maximum items to carry"
+    collect_message:
+      type: string
+      default: "eyes something valuable and snatches it up."
+      description: "Emote when collecting items"
+  source: |
+    # Scavenger trait - collect valuable items
+    prefer_types = config.prefer_types || ["weapon", "armor", "potion"]
+    collect_msg = config.collect_message || "eyes something valuable and snatches it up."
+
+    # Find items in room
+    room_entities = entities_in_room()
+    items = room_entities
+      |> Enum.filter(fn e ->
+        e[:type] == :item &&
+        any?(prefer_types, fn t -> t in (e[:tags] || []) end)
+      end)
+
+    if items != [] do
+      target = pick(items)
+      if target do
+        emote(collect_msg)
+        despawn(target[:id])
+      end
+    end
+
+    continue()

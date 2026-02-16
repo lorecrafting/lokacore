@@ -55,7 +55,7 @@ defmodule Loka.Engine.Entity do
           account_id: String.t() | nil,
           # Game data
           components: map(),
-          behaviors: [module()],
+          traits: [module() | map()],
           tags: [String.t()],
           scripts: map(),
           metadata: map()
@@ -77,7 +77,7 @@ defmodule Loka.Engine.Entity do
     version: 1,
     keywords: [],
     components: %{},
-    behaviors: [],
+    traits: [],
     tags: [],
     scripts: %{},
     metadata: %{}
@@ -157,10 +157,10 @@ defmodule Loka.Engine.Entity do
   end
 
   @doc """
-  Adds a behavior module to an entity.
+  Adds a trait to an entity.
   """
-  def add_behavior(%__MODULE__{} = entity, behavior_module) when is_atom(behavior_module) do
-    %{entity | behaviors: [behavior_module | entity.behaviors] |> Enum.uniq()}
+  def add_trait(%__MODULE__{} = entity, trait) do
+    %{entity | traits: [trait | entity.traits] |> Enum.uniq()}
   end
 
   @doc """

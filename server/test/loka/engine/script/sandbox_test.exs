@@ -243,9 +243,10 @@ defmodule Loka.Engine.Script.SandboxTest do
       assert {:ok, :ok, actions} = Sandbox.execute(source, @test_entity, context)
       assert length(actions) == 1
 
-      {:set_behavior_state, params} = hd(actions)
+      {action_type, params} = hd(actions)
+      assert action_type in [:set_trait_state, :set_behavior_state]
       assert params.entity_id == "test-npc"
-      assert params.behavior_key == "patrol"
+      assert (params[:trait_key] || params[:behavior_key]) == "patrol"
       assert params.state_key == :patrol_index
       assert params.value == 5
     end

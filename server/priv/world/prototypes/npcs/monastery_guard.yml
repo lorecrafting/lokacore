@@ -33,7 +33,7 @@ emotes:
   standing_watch: "*stands firm, a guardian of the sacred grounds*"
   greeting: "Peace be upon you. The monastery is safe."
 
-behaviors:
+traits:
   - script: patrol
     config:
       route:

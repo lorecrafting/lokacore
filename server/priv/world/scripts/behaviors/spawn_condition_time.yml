@@ -41,9 +41,9 @@ data:
     is_active_time = hour in active_hours
 
     # Get current spawned count in this room/zone
-    current_room = get_location(self())
+    current_room = room()
     spawned_count = if current_room do
-      entities_in_room(current_room.id)
+      entities_in_room()
       |> Enum.filter(fn e ->
         e.key == prototype_key or
         (e.metadata && e.metadata["prototype_key"] == prototype_key)
@@ -57,7 +57,7 @@ data:
       # Active time and under max - maybe spawn
       is_active_time and spawned_count < max_count and chance?(spawn_chance_value) ->
         if current_room do
-          spawn_entity(prototype_key, location: current_room.id)
+          spawn_at(prototype_key, current_room.id)
           emit(:spawned_entity)
         end
         handled()
@@ -65,7 +65,7 @@ data:
       # Inactive time and entities exist - despawn them
       not is_active_time and spawned_count > 0 ->
         if current_room do
-          entities_in_room(current_room.id)
+          entities_in_room()
           |> Enum.filter(fn e ->
             e.key == prototype_key or
             (e.metadata && e.metadata["prototype_key"] == prototype_key)

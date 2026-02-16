@@ -29,7 +29,7 @@ emotes:
   encouragement: "*places a steadying hand on your shoulder* You have the spirit."
 
 # Behaviors - teacher follows monastic schedule
-behaviors:
+traits:
   - script: day_night_schedule
     config:
       wake_at: dawn

@@ -177,7 +177,7 @@ defmodule Mix.Tasks.Loka.Export do
     exits_field = [{"exits", non_empty_map(exits)}]
     spawns_field = [{"spawns", non_empty_list(spawns)}]
     attributes_field = [{"attributes", non_empty_map(attributes)}]
-    behaviors_field = [{"behaviors", non_empty_list(entity.behaviors)}]
+    traits_field = [{"traits", non_empty_list(entity.traits)}]
     emotes_field = [{"emotes", non_empty_map(emotes)}]
     components_field = [{"components", non_empty_map(components)}]
     scripts_field = [{"scripts", non_empty_map(entity.scripts)}]
@@ -198,7 +198,7 @@ defmodule Mix.Tasks.Loka.Export do
       exits_field ++
       spawns_field ++
       attributes_field ++
-      behaviors_field ++
+      traits_field ++
       emotes_field ++
       components_field ++
       scripts_field ++

@@ -20,7 +20,7 @@ tags:
   - troubled
 
 # Behaviors - restless from guilt, wanders but doesn't sleep well
-behaviors:
+traits:
   - script: day_night_schedule
     config:
       wake_at: dawn

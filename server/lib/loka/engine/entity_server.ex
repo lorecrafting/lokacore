@@ -285,10 +285,10 @@ defmodule Loka.Engine.EntityServer do
   def handle_cast({:event, event}, state) do
     Logger.debug("EntityServer #{state.entity_id} received event: #{inspect(event.type)}")
 
-    # Process event through entity's behaviors (V1 path)
-    case process_behaviors(state.entity, event) do
+    # Process event through entity's traits (V1 path: module behaviors)
+    case process_traits(state.entity, event) do
       {:ok, updated_entity, emitted_events} ->
-        # Broadcast any events emitted by behaviors
+        # Broadcast any events emitted by traits
         Enum.each(emitted_events, &EventBus.emit/1)
         new_state = %{state | entity: updated_entity} |> mark_dirty()
 
@@ -299,7 +299,7 @@ defmodule Loka.Engine.EntityServer do
 
       {:error, reason} ->
         Logger.warning(
-          "EntityServer #{state.entity_id} behavior error on #{event.type}: #{inspect(reason)}"
+          "EntityServer #{state.entity_id} trait error on #{event.type}: #{inspect(reason)}"
         )
 
         {:noreply, touch_state(state)}
@@ -366,29 +366,29 @@ defmodule Loka.Engine.EntityServer do
     {:noreply, touch_state(state)}
   end
 
-  # Tick handler — dispatches to behaviors but does NOT reset idle timer (Decision 13)
+  # Tick handler — dispatches to traits but does NOT reset idle timer (Decision 13)
   @impl true
   def handle_info(:tick, state) do
     entity = state.entity
 
-    # Initialize Volatile state for behaviors
+    # Initialize Volatile state for traits
     Process.put(:entity_volatile, Map.get(state, :volatile, %{}))
 
-    # Dispatch on_tick to all behaviors that implement it
+    # Dispatch on_tick to all module traits that implement it
+    # Script traits are dispatched separately via the script executor
     updated_entity =
-      (entity.behaviors || [])
-      |> Enum.reduce(entity, fn behavior_mod, ent ->
-        if function_exported?(behavior_mod, :on_tick, 1) do
+      (entity.traits || [])
+      |> Enum.filter(&is_atom/1)
+      |> Enum.reduce(entity, fn trait_mod, ent ->
+        if function_exported?(trait_mod, :on_tick, 1) do
           try do
-            case behavior_mod.on_tick(ent) do
+            case trait_mod.on_tick(ent) do
               {:ok, updated} -> updated
               _ -> ent
             end
           rescue
             e ->
-              Logger.warning(
-                "[#{entity.key}] behavior #{behavior_mod} crashed on tick: #{inspect(e)}"
-              )
+              Logger.warning("[#{entity.key}] trait #{trait_mod} crashed on tick: #{inspect(e)}")
 
               ent
           end
@@ -396,6 +396,9 @@ defmodule Loka.Engine.EntityServer do
           ent
         end
       end)
+
+    # Dispatch on_tick to script traits
+    updated_entity = dispatch_script_traits_tick(updated_entity)
 
     # Recover volatile state from process dictionary
     updated_volatile = Process.get(:entity_volatile, %{})
@@ -459,27 +462,30 @@ defmodule Loka.Engine.EntityServer do
   # =============================================================================
 
   @doc """
-  Dispatches an event through the entity's behavior chain with snapshot rollback.
+  Dispatches an event through the entity's trait chain with snapshot rollback.
 
-  Each behavior's `on_event/3` is called in order. If a behavior crashes, it is
+  Each module trait's `on_event/3` is called in order. If a trait crashes, it is
   skipped and the chain continues. If a catastrophic failure occurs, the entity
   reverts to the pre-event snapshot.
 
   Returns:
   - `{:ok, updated_entity}` — normal completion
-  - `{:halted, updated_entity}` — a behavior halted the chain
+  - `{:halted, updated_entity}` — a trait halted the chain
   - `{:error, snapshot}` — catastrophic failure, reverted to snapshot
   """
   def dispatch_event(entity, event_name, payload) do
     snapshot = Entity.snapshot(entity)
 
     try do
+      # Only module traits participate in dispatch_event (script traits use hooks)
+      module_traits = Enum.filter(entity.traits || [], &is_atom/1)
+
       result =
-        entity.behaviors
-        |> Enum.reduce_while({:ok, entity, payload}, fn behavior_mod, {:ok, ent, pl} ->
-          if function_exported?(behavior_mod, :on_event, 3) do
+        module_traits
+        |> Enum.reduce_while({:ok, entity, payload}, fn trait_mod, {:ok, ent, pl} ->
+          if function_exported?(trait_mod, :on_event, 3) do
             try do
-              case behavior_mod.on_event(ent, event_name, pl) do
+              case trait_mod.on_event(ent, event_name, pl) do
                 {:ok, updated} -> {:cont, {:ok, updated, pl}}
                 {:ok, updated, new_pl} -> {:cont, {:ok, updated, new_pl}}
                 {:halt, updated} -> {:halt, {:halt, updated}}
@@ -487,7 +493,7 @@ defmodule Loka.Engine.EntityServer do
             rescue
               e ->
                 Logger.warning(
-                  "[#{entity.key}] behavior #{inspect(behavior_mod)} crashed on #{event_name}: #{inspect(e)}"
+                  "[#{entity.key}] trait #{inspect(trait_mod)} crashed on #{event_name}: #{inspect(e)}"
                 )
 
                 {:cont, {:ok, ent, pl}}
@@ -611,13 +617,79 @@ defmodule Loka.Engine.EntityServer do
 
   defp maybe_run_signal_script(_, _), do: :ok
 
-  defp process_behaviors(%Entity{behaviors: []} = entity, _event) do
-    # No behaviors attached, entity unchanged
+  defp process_traits(%Entity{traits: []} = entity, _event) do
+    # No traits attached, entity unchanged
     {:ok, entity, []}
   end
 
-  defp process_behaviors(%Entity{} = entity, event) do
-    # Process event through all behaviors (V1 path)
+  defp process_traits(%Entity{} = entity, event) do
+    # Process event through module traits (V1 path)
     Behavior.process_event(entity, event, %{})
+  end
+
+  # =============================================================================
+  # Script Trait Dispatcher
+  # =============================================================================
+
+  defp dispatch_script_traits_tick(entity) do
+    script_traits =
+      (entity.traits || [])
+      |> Enum.filter(&is_map/1)
+      |> Enum.filter(fn t -> is_binary(t["script"]) end)
+
+    if script_traits == [] do
+      entity
+    else
+      Enum.reduce(script_traits, entity, fn trait, ent ->
+        run_script_trait(ent, trait, :tick)
+      end)
+    end
+  end
+
+  defp run_script_trait(entity, %{"script" => script_key} = trait, hook) do
+    alias Loka.Content.Script, as: ContentScript
+    config = trait["config"] || %{}
+
+    case ContentScript.get(script_key) do
+      {:ok, script} ->
+        script_hook = ContentScript.hook(script)
+
+        # Only run if the script's hook matches (behavior = tick-based)
+        if script_hook == "behavior" and hook == :tick do
+          source = ContentScript.source(script)
+
+          context = %{
+            trigger: :tick,
+            config: config,
+            behavior_key: script_key
+          }
+
+          try do
+            alias Loka.Engine.Script.Executor
+
+            case Executor.execute_source(source, entity, context) do
+              {:ok, _result, _actions} ->
+                entity
+
+              {:error, reason} ->
+                Logger.warning(
+                  "[EntityServer] Script trait #{script_key} failed: #{inspect(reason)}"
+                )
+
+                entity
+            end
+          rescue
+            e ->
+              Logger.warning("[EntityServer] Script trait #{script_key} crashed: #{inspect(e)}")
+              entity
+          end
+        else
+          entity
+        end
+
+      {:error, _} ->
+        Logger.debug("[EntityServer] Script trait not found: #{script_key}")
+        entity
+    end
   end
 end

@@ -62,11 +62,11 @@ defmodule Loka.Engine.BehaviorTest do
     end
   end
 
-  defp test_entity(behaviors \\ []) do
+  defp test_entity(traits \\ []) do
     %Entity{
       id: "test_entity_#{:erlang.unique_integer()}",
       type: :npc,
-      behaviors: behaviors
+      traits: traits
     }
   end
 

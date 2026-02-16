@@ -29,7 +29,7 @@ emotes:
   remembering: "*gazes into the distance, seeing memories long past*"
 
 # Behaviors - elder follows a gentle schedule
-behaviors:
+traits:
   - script: day_night_schedule
     config:
       wake_at: morning

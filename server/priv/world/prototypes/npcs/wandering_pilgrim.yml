@@ -26,7 +26,7 @@ tags:
   - atmosphere
 
 # Behaviors - pilgrim walks at dawn, rests during evening
-behaviors:
+traits:
   - script: day_night_schedule
     config:
       wake_at: dawn
