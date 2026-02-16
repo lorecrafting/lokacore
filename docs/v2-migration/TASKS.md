@@ -207,12 +207,12 @@
   - Verify: `mix test test/loka_web/channels/builder_commands/`
   - Commit: `"feat(v2): simplify builder commands — single write path, no dual-store sync"`
 
-- [ ] **6.3** Create export task
+- [x] **6.3** Create export task
   - Creates: `lib/mix/tasks/loka.export.ex`
   - Verify: `mix loka.export --type room | head -20` (outputs YAML)
   - Commit: `"feat(v2): add mix loka.export task (DB → YAML)"`
 
-- [ ] **6.4** Final schema verification
+- [x] **6.4** Final schema verification
   - Run: `mix loka.validate` (no orphaned refs)
   - Run: `mix test` (full green suite)
   - Run: `mix credo` (no new issues)
@@ -264,7 +264,7 @@
 | 3: EntityServer | 3.1-3.4 | **Complete** |
 | 4: Player | 4.0-4.3 | **Complete** |
 | 5: Content+Actions | 5.1-5.4 | **Complete** |
-| 6: Cleanup | 6.1-6.4 | **6.1-6.2 complete** |
+| 6: Cleanup | 6.1-6.4 | **Complete** |
 | 7: Polish | 7.1-7.4 | Not started |
 | **Total** | **23 tasks** | |
 
