@@ -227,8 +227,7 @@ Loka.Application
        │         ├── EntityServer (npc:def456)
        │         └── EntityServer (item:ghi789)
        │
-       ├── Loka.Engine.EntityRegistry
-       └── Loka.Framework.Combat.RespawnManager
+       └── Loka.Engine.EntityRegistry
 ```
 
 ## Related

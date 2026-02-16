@@ -4,7 +4,7 @@ defmodule Loka.Engine.Schema.EntitySchema do
 
   Uses a hybrid storage pattern:
   - Core fields (id, type, key, short_desc, long_desc, extra_desc) are direct columns
-  - Complex data (components, behaviors, scripts, metadata) are JSON text columns
+  - Complex data (components, traits, scripts, metadata) are JSON text columns
   - Tags are in the entity_tags join table (not a column)
   - Contents are derived from entities where location_id = this entity's id
 
@@ -57,7 +57,6 @@ defmodule Loka.Engine.Schema.EntitySchema do
     # Relationships
     has_many :tags, EntityTagSchema, foreign_key: :entity_id
     belongs_to :location, __MODULE__, define_field: false
-    has_many :contents, __MODULE__, foreign_key: :location_id
 
     timestamps(type: :utc_datetime)
   end

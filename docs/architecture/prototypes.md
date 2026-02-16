@@ -42,8 +42,9 @@ priv/world/prototypes/
 key: goblin               # Unique identifier (required)
 type: npc                 # room | npc | item | exit | character (required)
 parent: base_npc          # Inherits from this prototype (optional)
-name: "Goblin"
-description: "A sneaky green creature with pointed ears."
+short_desc: "Goblin"
+long_desc: "A sneaky green creature lurks here."
+extra_desc: "A sneaky green creature with pointed ears."
 tags:
   - hostile
   - monster
@@ -65,15 +66,15 @@ components:
 # _base/base_npc.yml
 key: base_npc
 type: npc
-name: "Base NPC"
-description: "A generic NPC."
+short_desc: "Base NPC"
+long_desc: "A generic NPC stands here."
 components:
   combatant:
     health: { current: 100, max: 100 }
     stats: { str: 10, dex: 10, sta: 10 }
     level: 1
-behaviors:
-  - Loka.Framework.Combat
+traits:
+  - Loka.Behaviors.Guard
 tags:
   - npc
 ```
@@ -84,8 +85,10 @@ tags:
 key: town_square
 parent: base_room
 type: room
-name: "Town Square"
-description: "The heart of the village. A stone fountain burbles at the center."
+short_desc: "Town Square"
+long_desc: "A stone fountain burbles at the center of the village square."
+extra_desc: |
+  The heart of the village. A stone fountain burbles at the center.
 exits:
   north: general_store    # Creates exit to room with key "general_store"
   east: tavern
@@ -246,7 +249,7 @@ defmodule Loka.Engine.TypedObject do
     :extra_description,  # Detailed examination text
     :keywords,           # List of targeting keywords
     :components,         # Map of component_type => data
-    :behaviors,          # List of behavior configs
+    :traits,             # List of trait module atoms or script maps
     :attributes,         # Flexible key-value storage
     :tags,               # List of categorization tags
     :scripts,            # Map of hook => script_name

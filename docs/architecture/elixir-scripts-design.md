@@ -6,12 +6,12 @@ Loka uses a clean separation between **systems** and **content**:
 
 | Layer | Who | How | Purpose |
 |-------|-----|-----|---------|
-| **Engine** | Developers | Elixir code | Core infrastructure |
-| **Framework** | Developers | Elixir code | Game subsystems (combat, quests) |
-| **Plugins** | Developers | Elixir modules | Features (guilds, crafting, economy) |
-| **Scripts** | Builders | DB-stored, sandboxed | Game world content |
+| **Engine** | Developers | Elixir code | Core infrastructure (entities, scripts, spawner) |
+| **Framework** | Developers | Elixir code | Game subsystems (combat, quests, inventory) |
+| **Traits** | Developers/Builders | EntityBehavior modules or script maps | Per-entity behavior (patrol, guard, wander) |
+| **Scripts** | Builders | YAML/DB-stored, sandboxed | Game world content (dialogue, room effects) |
 
-**Key Insight:** If you need full Elixir access, you're building a *system* (plugin). If you're customizing game world content (NPCs, rooms, quests), you're a *builder* using scripts.
+**Key Insight:** If you need full Elixir access, you're building a *system* (engine or framework module). If you're customizing game world content (NPCs, rooms, quests), you're a *builder* using scripts. Entity traits bridge the gap — they can be compiled Elixir modules or sandboxed scripts.
 
 All game world customization - Novice Pema's dialogue, room environmental effects, quest triggers - is builder-level content using sandboxed scripts.
 
@@ -52,12 +52,12 @@ end
 key: novice_pema
 type: npc
 # Reference DB script by key
-builder_scripts:
-  on_look: "novice_pema_look"
-  on_say: "novice_pema_say"
+scripts:
+  on_look: novice_pema_look
+  on_say: novice_pema_say
 ```
 
-Or attach via admin UI at runtime.
+Or attach via the builder terminal at runtime.
 
 ### Sandboxed API
 
@@ -372,20 +372,20 @@ LiveView interface for creating/editing scripts:
 
 ---
 
-## Global Systems (Plugins, Not Scripts)
+## Global Systems (Framework Modules, Not Scripts)
 
-Game-wide systems like weather, day/night cycles, and economy are **plugins**, not scripts:
+Game-wide systems like weather, day/night cycles, and economy are **framework modules**, not scripts:
 
 ```elixir
-# lib/loka/plugins/weather/weather.ex
-defmodule Loka.Plugins.Weather do
-  use Loka.Plugin
+# lib/loka/framework/world/weather.ex
+defmodule Loka.Framework.World.Weather do
+  use GenServer
 
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
-  # Full Elixir - this is a plugin, not a script
+  # Full Elixir - this is a framework module, not a script
   def handle_info(:tick, state) do
     new_weather = calculate_weather(state)
     broadcast_to_outdoor_rooms(new_weather)
@@ -487,10 +487,11 @@ scripts:
 | Layer | Who | Storage | Sandboxed | Use For |
 |-------|-----|---------|-----------|---------|
 | **Engine/Framework** | Developers | Code | No | Core systems |
-| **Plugins** | Developers | Code | No | Game features |
-| **Scripts** | Builders | Database | Yes | World content |
+| **Traits (compiled)** | Developers | Code (`EntityBehavior` modules) | No | Reusable entity behaviors |
+| **Traits (scripted)** | Builders | YAML scripts | Yes | Custom entity behaviors |
+| **Scripts** | Builders | YAML / Database | Yes | World content |
 
-**The Rule:** If you need full Elixir, write a plugin. If you're customizing game content, use scripts.
+**The Rule:** If you need full Elixir, write a framework module or compiled EntityBehavior trait. If you're customizing game content, use scripts.
 
 Scripts use Elixir syntax (LLM-friendly!) but with a controlled API. Builders can create immersive content without risking server stability.
 
@@ -513,7 +514,7 @@ The builder experience stays similar - write scripts in admin UI with a controll
 **vs Full Elixir Access:**
 - Builders shouldn't have System.cmd() or File.write()
 - Sandboxing prevents accidental/malicious damage
-- Clear separation: systems (plugins) vs content (scripts)
+- Clear separation: systems (framework modules) vs content (scripts)
 
 **vs Lua:**
 - One language in the codebase

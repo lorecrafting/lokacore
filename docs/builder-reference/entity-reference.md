@@ -38,9 +38,9 @@ keywords:                    # Words player can use to target
   - scout
 primary_keyword: "goblin"    # Single keyword for UI display
 
-# COMPONENTS & BEHAVIORS
+# COMPONENTS & TRAITS
 components: {}               # See component reference below
-behaviors: []                # Reusable behavior scripts (see behaviors.md)
+traits: []                   # Reusable behavior scripts (see behaviors.md)
 emotes: {}                   # Personality text for emit() events (see emotes.md)
 attributes: {}               # Custom key-value data
 tags: []                     # String tags for filtering
@@ -140,8 +140,8 @@ emotes:
   closing_shop: "*carefully packs goods* Until next time!"
   greeting: "*rubs hands together* Welcome, welcome!"
 
-# BEHAVIORS - reusable mechanics
-behaviors:
+# TRAITS - reusable mechanics
+traits:
   - script: shopkeeper_hours
     config:
       open_at: morning
