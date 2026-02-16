@@ -1,6 +1,8 @@
-# Framework Subsystems
+# Framework Subsystems (V2)
 
-Loka's framework layer provides ~25 game subsystems that build on the engine core. Each subsystem is designed to be optional and composable, allowing game developers to enable only what they need.
+Loka's framework layer provides ~52 modules across 14 subsystems that build on the unified entity system. In V2, the framework is a thin dispatch layer — most game logic lives in scripts and behaviors attached to entities.
+
+> **V2 Architecture:** Everything is an entity. All game data lives in `entity.components`. Content modules resolve via `Entities.find_one()`. Component accessor modules provide typed access. Behaviors use `EntityBehavior` callbacks. StateMachine engine powers quests, combat, dialogue, and NPC AI.
 
 > **Documentation Pattern:** This doc provides YAML configuration examples for content creators.
 > For Elixir API details, see each module's `@moduledoc`.
@@ -9,23 +11,24 @@ Loka's framework layer provides ~25 game subsystems that build on the engine cor
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    Framework Layer                           │
+│                  Framework Layer (~52 modules)               │
 ├─────────────────────────────────────────────────────────────┤
 │ Core Systems                                                │
-│   Player, Inventory, Progression, Combat, Quest, Dialogue  │
+│   Actions (2), Combat (4), Dialogue, Inventory (5)         │
+│   Player, Quest (19), Status                               │
 ├─────────────────────────────────────────────────────────────┤
 │ Character Systems                                           │
-│   Skills, Status, Resources, Progression                   │
+│   Skills (2), Resources (2), Conditions                    │
 ├─────────────────────────────────────────────────────────────┤
-│ World Systems                                               │
-│   World, Economy                                           │
-├─────────────────────────────────────────────────────────────┤
-│ Crafting Systems                                            │
-│   Crafting, Gathering                                      │
-├─────────────────────────────────────────────────────────────┤
-│ Social & Content                                            │
-│   Social, Storyline, Scripting, Spark                      │
+│ World & Content                                             │
+│   World (4), Social (6), Broadcast                         │
+│   Content Validator (3)                                    │
 └─────────────────────────────────────────────────────────────┘
+
+Supporting Layers:
+- Content Modules (12): Quest, Dialogue, Script, Zone, Skill, etc.
+- Component Accessors (23+): Typed access to entity.components
+- Behaviors (11): Weather, DayNight, Patrol, Guard, Wander, etc.
 ```
 
 ## Subsystem Reference
@@ -34,24 +37,25 @@ Loka's framework layer provides ~25 game subsystems that build on the engine cor
 
 #### Player (`lib/loka/framework/player/`)
 
-**Purpose**: Core player state management with Ecto persistence.
+**Purpose**: Player state management (V1 remnant, being phased out in V2).
 
 **Key Module**: `Loka.Framework.Player.GameState`
 
+**V2 Migration Status**: In V2, players are entities with player components. The `GameState` table is a temporary bridge during migration. New code should use `Entities.find_one(account_id: account_id, type: :player)` and component accessors.
+
 **Features**:
-- Stores inventory, equipment, quests, flags, stats, health
-- Single record per player in database
-- Current room tracking
+- Legacy: Stores inventory, equipment, quests, flags, stats, health
+- Current room tracking via `location_id`
 
-**Usage**:
+**V2 Pattern**:
 ```elixir
-# Get player game state
-game_state = GameState.get(player_id)
+# Get player entity
+{:ok, player} = Entities.find_one(account_id: account_id, type: :player)
 
-# Update state
-{:ok, updated} = GameState.update(player_id, fn gs ->
-  %{gs | health: %{current: 50, max: 100}}
-end)
+# Access components
+health = Components.Combatant.health(player)
+stats = Components.Combatant.stats(player)
+inventory = Entities.find_all(location_id: player.id, type: :item)
 ```
 
 ---
@@ -60,71 +64,65 @@ end)
 
 **Purpose**: Item management - adding, removing, using items.
 
-**Key Module**: `Loka.Framework.Inventory`
+**Key Modules**: `Loka.Framework.Inventory` (5 modules: inventory.ex, container.ex, equipment.ex, stacking.ex, item.ex)
+
+**V2 Pattern**: Containment via `location_id`. Items exist as entities with `location_id = player.id`. Equipment uses `components["equipment"]` slot tracking.
 
 **Features**:
-- Add/remove items from player inventory
-- Consumable items (healing, buffs)
-- Equipment slots (weapon, armor, accessory)
-- Item effect application
+- Add/remove items via entity location updates
+- Consumable items (healing, buffs) via `components["consumable"]`
+- Equipment slots (weapon, armor, accessory) via `components["equipment"]`
+- Item stacking for identical items
 
-**Usage**:
+**V2 Usage**:
 ```elixir
-# Add item to inventory
-{:ok, gs} = Inventory.add_item(game_state, item_entity)
+# Get player inventory (items with location_id = player.id)
+items = Entities.find_all(location_id: player.id, type: :item)
 
-# Use consumable
-{:ok, gs} = Inventory.use_item(game_state, item_id)
+# Add item to inventory (update location_id)
+{:ok, item} = Entities.update_entity(item, %{location_id: player.id})
 
-# Equip item (auto-detects slot from item)
-{:ok, gs} = Equipment.equip(game_state, item_id)
+# Use consumable (handled by Actions.Context)
+{:ok, result} = Actions.Context.use_item(player, item_id)
+
+# Equip item (Equipment module)
+{:ok, updated_player} = Equipment.equip(player, item_id)
 ```
 
 ---
 
-#### Progression (`lib/loka/framework/progression/`)
+#### Progression
 
-**Purpose**: XP and leveling system.
+**Status**: Removed in V2 cleanup (Feb 2026). XP/leveling functionality moved to component-based progression in `components["progression"]` with script-based level-up handlers.
 
-**Key Module**: `Loka.Framework.Progression`
+**V2 Alternative**: Define XP curves and level-up rewards in entity scripts. Use `components["progression"]` to track XP/level state.
 
-**Features**:
-- Quadratic XP curve: Level N requires `100 * N²` XP
-- Skill points awarded per level
-- Level-up notifications
-
-**XP Table**:
-| Level | Total XP Required |
-|-------|-------------------|
-| 2 | 400 |
-| 3 | 900 |
-| 5 | 2,500 |
-| 10 | 10,000 |
-
-**Usage**:
-```elixir
-# Award XP
-{:ok, gs, leveled_up?} = Progression.award_xp(game_state, 150)
-
-# Check level from XP
-level = Progression.level_for_xp(2500)  # => 5
+**Example**:
+```yaml
+# Player entity component
+components:
+  progression:
+    xp: 0
+    level: 1
+    xp_to_next: 400
 ```
 
 ---
 
 #### Combat (`lib/loka/framework/combat/`)
 
-**Purpose**: Turn-based combat system.
+**Purpose**: Combat system powered by StateMachine engine.
 
-**Key Modules**: `Loka.Framework.Combat`, `Loka.Framework.Combat.RespawnManager`
+**Key Modules**: `Loka.Framework.Combat` (4 modules: combat.ex, damage_calculator.ex, death_handler.ex, respawn_manager.ex)
+
+**V2 Pattern**: Combat uses `StateMachine` for state transitions (idle → combat → victory/defeat/fled). Combatant data in `components["combatant"]`. Death triggers `on_death` event for respawn/loot scripts.
 
 **Features**:
-- Attack/defend/flee actions
-- Damage calculation with variance
-- Weapon and defense bonuses
-- Enemy AI (attacks or defends)
-- XP and gold rewards on victory
-- PvE and PvP support
+- Attack/defend/flee actions via `Actions.Combat`
+- Damage calculation with weapon/armor modifiers
+- StateMachine-based combat phases
+- Death and respawn handling
+- XP and loot rewards on victory
 
 **YAML Component** (in NPC prototypes):
 ```yaml
@@ -133,33 +131,39 @@ components:
     health: {current: 100, max: 100}
     stats: {str: 10, dex: 10, sta: 10}
     xp_reward: 50
-    gold_reward: 25
+    loot_table: ["common_coin_drop"]
 ```
 
-**Usage**:
+**V2 Usage**:
 ```elixir
-# Start combat
-combat_state = Combat.start_combat(enemy_entity_id, game_state)
+# Start combat (via Actions.Context)
+{:ok, result} = Actions.Context.attack(attacker, target_id)
 
-# Execute action
-{:ok, new_combat} = Combat.player_action(combat_state, :attack)
+# Combat state tracked in StateMachine
+{:ok, state} = StateMachine.current_state(player.id, :combat)
+
+# Damage calculation
+damage = DamageCalculator.calculate(attacker, defender, weapon)
 ```
 
 ---
 
 #### Quest (`lib/loka/framework/quest/`)
 
-**Purpose**: Quest tracking and completion.
+**Purpose**: Quest tracking and completion using StateMachine.
 
-**Key Modules**: `Loka.Framework.Quest`, `Loka.Framework.Quest.Definitions`
+**Key Modules**: `Loka.Framework.Quest` (19 modules including quest.ex, objective_tracker.ex, state_machine_integration.ex, etc.)
+
+**V2 Pattern**: Quests are content entities with `components["data"]` containing quest definition. Player progress tracked in `components["quest_progress"]`. Quest state machines handle multi-objective progression.
 
 **Features**:
-- Multiple objective types (talk, kill, collect, visit)
-- Quest acceptance and turn-in
-- Rewards (XP, items, gold)
-- Prerequisite quests
+- Multiple objective types (talk, kill, collect, visit, craft, explore)
+- StateMachine-based quest phases (not_started → active → completed/failed)
+- Rewards (XP, items, gold) via reward handlers
+- Prerequisite quests and branching storylines
+- Content loaded via `Content.Quest.get(key)`
 
-**YAML Format**:
+**YAML Format** (`priv/world/quests/`):
 ```yaml
 key: find_the_hermit
 name: "The Hermit's Wisdom"
@@ -174,33 +178,66 @@ rewards:
   items: [wisdom_scroll]
 ```
 
+**V2 Usage**:
+```elixir
+# Get quest definition
+{:ok, quest} = Content.Quest.get("find_the_hermit")
+
+# Access quest data via component
+quest_data = Components.QuestDef.data(quest)
+objectives = Components.QuestDef.objectives(quest)
+
+# Track player progress
+progress = Components.QuestProgress.get(player, "find_the_hermit")
+```
+
 ---
 
 #### Dialogue (`lib/loka/framework/dialogue/`)
 
-**Purpose**: NPC conversation trees.
+**Purpose**: NPC conversation trees using StateMachine.
 
 **Key Module**: `Loka.Framework.Dialogue`
 
-**Features**:
-- Branching dialogue nodes
-- Action triggers (start quest, give item)
-- Conditional responses (show_if)
-- Quest-aware variants
+**V2 Pattern**: Dialogues are content entities loaded via `Content.Dialogue.get(key)`. Dialogue state tracked in StateMachine. Node transitions, conditions, and actions defined in `components["data"]`.
 
-**YAML Component**:
+**Features**:
+- Branching dialogue nodes with StateMachine transitions
+- Action triggers (start quest, give item, set flags)
+- Conditional responses (show_if conditions evaluated at runtime)
+- Quest progress-aware variants
+- Multi-speaker cutscenes
+
+**YAML Format** (`priv/world/dialogues/`):
 ```yaml
-components:
-  dialogue_tree:
-    greeting: "Welcome, traveler!"
-    nodes:
-      - id: greeting
-        text: "How can I help you?"
-        options:
-          - label: "About quests"
-            next: quests_info
-          - label: "Goodbye"
-            action: end
+key: hermit_greeting
+name: "Hermit Greeting"
+speaker: hermit
+nodes:
+  greeting:
+    text: "Welcome, seeker of wisdom."
+    options:
+      - label: "Tell me about the mountain"
+        next: mountain_info
+      - label: "Farewell"
+        action: end
+  mountain_info:
+    text: "The mountain holds many secrets..."
+    options:
+      - label: "Continue"
+        next: greeting
+```
+
+**V2 Usage**:
+```elixir
+# Get dialogue definition
+{:ok, dialogue} = Content.Dialogue.get("hermit_greeting")
+
+# Start dialogue (creates StateMachine instance)
+{:ok, state} = Dialogue.start(player, dialogue.id)
+
+# Advance to next node
+{:ok, state} = Dialogue.choose_option(player, dialogue.id, option_index)
 ```
 
 ---
@@ -211,15 +248,17 @@ components:
 
 **Purpose**: Learnable character skills (LegendMUD-style).
 
-**Key Module**: `Loka.Framework.Skills.Skill`
+**Key Modules**: `Loka.Framework.Skills` (2 modules: skill.ex, skill_use.ex)
+
+**V2 Pattern**: Skills are content entities with `components["data"]` containing skill definition. Player skill levels tracked in `components["skills"]`. Content loaded via `Content.Skill.get(key)`.
 
 **Features**:
 - Point-cost formulas
 - Prerequisites and skill trees
-- Practice to improve
-- Trainer NPCs
+- Practice to improve (use-based progression)
+- Trainer NPCs (learn from entities with `components["trainer"]`)
 
-**YAML Format**:
+**YAML Format** (`priv/world/prototypes/skills/`):
 ```yaml
 key: sword_mastery
 name: "Sword Mastery"
@@ -228,6 +267,19 @@ max_level: 100
 cost_formula: "level * 10"
 prerequisites: []
 trainers: [weapon_master]
+description: "Master the art of the blade"
+```
+
+**V2 Usage**:
+```elixir
+# Get skill definition
+{:ok, skill} = Content.Skill.get("sword_mastery")
+
+# Check player skill level
+level = Components.Skills.level(player, "sword_mastery")
+
+# Use skill (triggers practice)
+{:ok, result} = Skills.use_skill(player, "sword_mastery", target)
 ```
 
 ---
@@ -236,16 +288,18 @@ trainers: [weapon_master]
 
 **Purpose**: Buffs, debuffs, and status effects.
 
-**Key Module**: `Loka.Framework.Status.StatusManager`
+**Key Module**: `Loka.Framework.Status`
+
+**V2 Pattern**: Status effects stored in `components["status_effects"]` as a list of active effects. Effect definitions are content entities loaded via `Content.StatusEffect.get(key)`.
 
 **Features**:
 - Duration and stack tracking
-- Trigger effects (on_apply, on_remove, on_turn_start)
-- Stat modifiers
+- Trigger effects (on_apply, on_remove, on_tick)
+- Stat modifiers (temporary changes to combatant stats)
 - Damage-over-time and healing-over-time
 - Dispel mechanics
 
-**YAML Format**:
+**YAML Format** (`priv/world/prototypes/status_effects/`):
 ```yaml
 key: poison
 name: "Poisoned"
@@ -254,8 +308,22 @@ duration: 5
 stackable: true
 max_stacks: 3
 effects:
-  on_turn_start:
+  on_tick:
     damage: 5
+  on_apply:
+    message: "You feel poison coursing through your veins."
+```
+
+**V2 Usage**:
+```elixir
+# Apply status effect
+{:ok, entity} = Status.apply_effect(entity, "poison", stacks: 1)
+
+# Check active effects
+effects = Components.StatusEffects.list(entity)
+
+# Remove effect
+{:ok, entity} = Status.remove_effect(entity, "poison")
 ```
 
 ---
@@ -264,21 +332,35 @@ effects:
 
 **Purpose**: Consumable resource pools (mana, stamina, etc.).
 
-**Key Module**: `Loka.Framework.Resources.Resource`
+**Key Modules**: `Loka.Framework.Resources` (2 modules: resource.ex, resource_tracker.ex)
+
+**V2 Pattern**: Resources stored in `components["resources"]` as `{current, max}` pairs. Resource definitions are content entities. Regeneration handled by entity ticks or behavior scripts.
 
 **Features**:
 - Configurable regeneration rates
 - Regeneration conditions (always, out-of-combat, resting)
 - Stat-based max formulas
-- Custom resource types
+- Custom resource types (mana, stamina, focus, ki, etc.)
 
-**YAML Format**:
+**YAML Format** (`priv/world/prototypes/resources/` - removed in Feb 2026 cleanup, now in entity components):
 ```yaml
-key: mana
-name: "Mana"
-max_formula: "100 + (int * 5)"
-regen_rate: 2
-regen_condition: out_of_combat
+# Example: Player entity with resources
+components:
+  resources:
+    mana: {current: 100, max: 100}
+    stamina: {current: 50, max: 50}
+```
+
+**V2 Usage**:
+```elixir
+# Access resources
+mana = Components.Resources.get(entity, "mana")
+
+# Consume resource
+{:ok, entity} = Resources.consume(entity, "mana", 20)
+
+# Regenerate resource
+{:ok, entity} = Resources.regenerate(entity, "mana", 5)
 ```
 
 ---
@@ -289,196 +371,228 @@ regen_condition: out_of_combat
 
 **Purpose**: Room loading, display, and atmospheric systems.
 
-**Key Modules**:
-- `Loka.Framework.World.Room` - Room loading and entry events
-- `Loka.Framework.World.Ambient` - NPC and room ambient messages
-- `Loka.Framework.World.Weather` - Dynamic weather system
-- `Loka.Framework.World.DayNight` - Day/night cycle
-- `Loka.Framework.World.Atmosphere` - Weather + time descriptions
+**Key Modules**: `Loka.Framework.World` (4 modules: room.ex, weather.ex, day_night.ex, atmosphere.ex)
+
+**V2 Pattern**: Rooms are entities with `components["room"]`. Weather and DayNight are EntityBehavior modules (in `lib/loka/behaviors/`) with tick-based updates. Ambient messages via NpcAmbient and RoomAmbient behaviors.
+
 **Features**:
 - Load rooms for display with NPCs, items, exits
-- Atmospheric room entry messages (for special rooms)
-- NPC ambient dialogue (periodic NPC comments)
-- Room ambient messages (environmental sounds)
-- Weather effects with gameplay modifiers
-- Day/night cycles with phases (dawn, day, dusk, night)
+- Weather effects with gameplay modifiers (via Weather behavior)
+- Day/night cycles with phases (via DayNight behavior)
+- NPC ambient dialogue (via NpcAmbient behavior)
+- Room ambient messages (via RoomAmbient behavior)
 
 **Room Loading**:
 ```elixir
 # Load room for game client display
-{:ok, room} = Room.load_for_display(room_id)
-# => %{id: "uuid", title: "Forest", entities: [...], items: [...], exits: [...]}
+{:ok, room_data} = World.Room.load_for_display(room_id)
+# => %{id: "uuid", name: "Forest", description: "...", entities: [...], exits: [...]}
 ```
 
 **Ambient Messages** (YAML):
 ```yaml
-# NPC ambient dialogue
+# NPC with ambient behavior
+traits:
+  - NpcAmbient
 components:
-  ambient:
+  emotes:
     messages:
       - "Novice Pema shifts nervously."
       - "Novice Pema glances around."
-    chance: 0.3
+    interval: 45
 ```
 
-**Room Entry Effects** (YAML):
-```yaml
-# Add room_entry_effect tag for atmospheric messages on entry
-tags:
-  - outdoor
-  - sacred
-  - room_entry_effect  # Required for entry effect
-```
-
----
-
-#### Economy (`lib/loka/framework/economy/`)
-
-**Purpose**: Shops and trading.
-
-**Key Module**: `Loka.Framework.Economy`
-
-**Features**:
-- Buy/sell with merchant NPCs
-- Currency management
-- Stock limits
-- Faction-based pricing
-
-**YAML Component** (merchant NPC):
-```yaml
-components:
-  shop:
-    buy_multiplier: 1.0
-    sell_multiplier: 0.5
-    inventory:
-      - item: health_potion
-        stock: 10
+**Weather/DayNight** (Behaviors):
+```elixir
+# Weather and DayNight are EntityBehavior modules
+# They run on tick and broadcast state changes via PubSub
+# Entities can subscribe to weather/time events
 ```
 
 ---
 
-### Crafting Systems
+#### Economy
 
-#### Crafting (`lib/loka/framework/crafting/`)
+**Status**: Removed in V2 cleanup (Feb 2026). Shop/trading functionality moved to script-based merchant handlers.
 
-**Purpose**: Recipe-based item creation.
-
-**Key Module**: `Loka.Framework.Crafting`
-
-**Features**:
-- Ingredient and tool requirements
-- Skill checks
-- Success/failure outcomes
-- Crafting stations with quality bonuses
-
-**YAML Format**:
-```yaml
-key: iron_sword
-name: "Forge Iron Sword"
-skill: blacksmithing
-skill_level: 20
-ingredients:
-  - item: iron_ore
-    quantity: 3
-tools: [forge, hammer]
-result: iron_sword
-```
+**V2 Alternative**: Define shops via `components["shop"]` on NPC entities with `on_trade` event scripts.
 
 ---
 
-#### Gathering (`lib/loka/framework/gathering/`)
+#### Crafting
 
-**Purpose**: Resource node harvesting.
+**Status**: Removed in V2 cleanup (Feb 2026). Recipe-based crafting moved to content entities with `type: :recipe`.
 
-**Key Module**: `Loka.Framework.Gathering`
+**V2 Alternative**: Recipes are content entities loaded via `Content.Recipe.get(key)`. Crafting logic handled by Actions.Context or custom scripts.
 
-**Features**:
-- Skill requirements
-- Tool requirements
-- Node depletion and respawn
-- Yield calculations
+---
 
-**YAML Component** (room):
-```yaml
-components:
-  gathering_node:
-    type: mining
-    resource: iron_ore
-    skill_required: 10
-    uses: 5
-    respawn_minutes: 60
-```
+#### Gathering
+
+**Status**: Removed in V2 cleanup (Feb 2026). Resource nodes are now entities with `components["gathering_node"]` and `on_gather` event scripts.
 
 ---
 
 ### Social Systems
 
-**Social** (`social/`) provides chat channels and party grouping. Players can communicate via public, private, or system channels (e.g., trade, newbie, announcements), and a `MessageRouter` delivers scoped messages (room, direct, party) to the correct PubSub recipients. The `PartyManager` handles temporary player groups of up to 6 for coordinated gameplay.
+**Social** (`social/`, 6 modules) provides chat channels and party grouping. Players can communicate via public, private, or system channels (e.g., trade, newbie, announcements). A `MessageRouter` delivers scoped messages (room, direct, party) to the correct PubSub recipients. The `PartyManager` handles temporary player groups for coordinated gameplay.
 
-**Spark** (`spark/`) is the companion system. Every player bonds with a Spark during character creation -- a persistent companion that tracks world events while the player is offline and delivers "while you were away" summaries on login. The Spark's bond level and personality traits evolve over time through gameplay interactions.
+**V2 Pattern**: Channels and parties tracked in entity components. Social events broadcast via PubSub. No separate social state tables.
 
-## Common Patterns
+**Spark**: Removed in V2 cleanup (Feb 2026). Companion system deferred to post-MVP.
 
-### Registry Pattern
+## Common Patterns (V2)
 
-Many subsystems use GenServer registries for configuration:
+### Content Module Pattern
+
+Content modules provide domain-specific APIs that resolve to entities:
 
 ```elixir
-# Get a skill definition
-{:ok, skill} = SkillRegistry.get("sword_mastery")
+# Content modules resolve via Entities.find_one()
+{:ok, quest} = Content.Quest.get("intro_welcome")
+{:ok, dialogue} = Content.Dialogue.get("hermit_greeting")
+{:ok, skill} = Content.Skill.get("sword_mastery")
 
-# List all skills
-skills = SkillRegistry.all()
+# Access quest data via component
+objectives = Components.QuestDef.objectives(quest)
 ```
 
-### Component Pattern
+### Component Accessor Pattern
+
+Component modules provide typed access to `entity.components`:
+
+```elixir
+# Component accessors (23+ modules in lib/loka/components/)
+health = Components.Combatant.health(entity)
+stats = Components.Combatant.stats(entity)
+inventory = Components.Container.contents(entity)
+dialogue_tree = Components.DialogueTree.nodes(entity)
+```
+
+### Component Pattern in YAML
 
 Subsystems add functionality via entity components:
 
 ```yaml
 # NPC with multiple subsystem integrations
 components:
-  combatant: {...}      # Combat system
-  dialogue_tree: {...}  # Dialogue system
-  shop: {...}           # Economy system
+  combatant:
+    health: {current: 100, max: 100}
+    stats: {str: 10, dex: 10, sta: 10}
+  dialogue_tree:
+    greeting: "Welcome, traveler!"
+    nodes: {...}
+  trader:
+    buy_multiplier: 1.0
+    sell_multiplier: 0.5
 ```
 
-### GameState Integration
+### EntityBehavior Pattern
 
-Most subsystems read/update the player's GameState:
+Behaviors use `EntityBehavior` callbacks for recurring logic:
 
 ```elixir
-# Pattern: function takes game_state, returns updated game_state
-{:ok, new_game_state} = Inventory.add_item(game_state, item)
-{:ok, new_game_state} = Progression.award_xp(game_state, 100)
-{:ok, new_game_state} = Quest.complete(game_state, quest_id)
+defmodule Loka.Behaviors.Weather do
+  use Loka.Engine.EntityBehavior
+
+  @impl true
+  def on_init(entity, _config) do
+    # Initialize weather state
+    {:ok, entity}
+  end
+
+  @impl true
+  def on_tick(entity) do
+    # Update weather, broadcast changes
+    {:ok, entity}
+  end
+end
+```
+
+### StateMachine Pattern
+
+Quests, combat, dialogue, and NPC AI use the StateMachine engine:
+
+```elixir
+# Start a state machine instance
+{:ok, state} = StateMachine.start(entity_id, :quest, "not_started")
+
+# Transition to next state
+{:ok, state} = StateMachine.transition(entity_id, :quest, "active")
+
+# Get current state
+{:ok, state} = StateMachine.current_state(entity_id, :quest)
+```
+
+### Entity Query Pattern
+
+All queries go through `Entities` module:
+
+```elixir
+# Find by key and type
+{:ok, entity} = Entities.find_one(key: "goblin", type: :npc)
+
+# Find all by type and location
+entities = Entities.find_all(type: :item, location_id: room_id)
+
+# Find by component (capability-based)
+combatants = Entities.find_all(component: "combatant")
 ```
 
 ## Files
 
-| Directory | Subsystem | Key Files |
-|-----------|-----------|-----------|
-| `combat/` | Combat | combat.ex, respawn_manager.ex, damage_types.ex |
-| `conditions/` | Conditions | evaluator.ex |
-| `crafting/` | Crafting | crafting.ex, crafting_registry.ex |
-| `dialogue/` | Dialogue | dialogue.ex |
-| `economy/` | Economy | economy.ex, shop.ex |
-| `gathering/` | Gathering | gathering.ex, gathering_registry.ex |
-| `inventory/` | Inventory | inventory.ex, container.ex |
-| `player/` | Player | game_state.ex |
-| `progression/` | Progression | progression.ex |
-| `quest/` | Quest | quest.ex, definitions.ex, progress.ex |
-| `resources/` | Resources | resource.ex, resource_registry.ex |
-| `scripting/` | Scripting | behavior_registry.ex, world_event_handler.ex |
-| `skills/` | Skills | skill.ex, skill_registry.ex |
-| `social/` | Social | broadcast.ex, channel_manager.ex |
-| `spark/` | Spark | spark.ex |
-| `status/` | Status | status_manager.ex, status_registry.ex |
-| `storyline/` | Storyline | storyline_registry.ex |
-| `world/` | World | room.ex, ambient.ex, weather.ex, day_night.ex, atmosphere.ex |
+| Directory | Modules | Key Files |
+|-----------|---------|-----------|
+| `actions/` | 2 | context.ex, combat.ex |
+| `broadcast/` | 1 | broadcast.ex |
+| `combat/` | 4 | combat.ex, damage_calculator.ex, death_handler.ex, respawn_manager.ex |
+| `conditions/` | 1 | evaluator.ex |
+| `content_validator/` | 3 | validator.ex, quest_validator.ex, dialogue_validator.ex |
+| `dialogue/` | 1 | dialogue.ex |
+| `inventory/` | 5 | inventory.ex, container.ex, equipment.ex, stacking.ex, item.ex |
+| `player/` | 1 | game_state.ex (V1 remnant) |
+| `quest/` | 19 | quest.ex, objective_tracker.ex, state_machine_integration.ex, etc. |
+| `resources/` | 2 | resource.ex, resource_tracker.ex |
+| `skills/` | 2 | skill.ex, skill_use.ex |
+| `social/` | 6 | message_router.ex, channel_manager.ex, party_manager.ex, etc. |
+| `status/` | 1 | status.ex |
+| `world/` | 4 | room.ex, weather.ex, day_night.ex, atmosphere.ex |
+
+**Supporting Layers**:
+- **Content Modules** (`lib/loka/content/`, 12 modules): Quest, Dialogue, Script, Zone, Skill, Recipe, StatusEffect, GatheringNode, Cutscene, Resource, Storyline, Validator
+- **Component Accessors** (`lib/loka/components/`, 23+ modules): Combatant, QuestDef, QuestProgress, DialogueTree, Skills, Equipment, Container, Exit, Room, Player, etc.
+- **Behaviors** (`lib/loka/behaviors/`, 11 modules): Weather, DayNight, NpcAmbient, RoomAmbient, Patrol, Guard, Wander, Aggressive, Scavenger, Janitor, Runner
+
+## V2 Removed Systems
+
+The following systems were removed in the V2 cleanup (Feb 2026):
+
+- **Magic** (4 modules) - Magic word system
+- **Farming** (4 modules) - Crop planting/harvesting
+- **Housing** - Player housing
+- **Companion** - Pet/companion system (deferred to post-MVP as "Spark")
+- **Mail** - In-game mail system
+- **Barter** - Player-to-player trading
+- **Clothing** - Cosmetic clothing slots
+- **Elements** - Elemental damage types
+- **WeaponArmorTypes** - Type-specific weapon/armor bonuses
+- **CombatRound** - Turn-based combat rounds (replaced by StateMachine)
+- **Relationships** - NPC reputation system
+- **MVSystem** - Multi-variant system
+- **Quest.Status** - Old quest status tracking (replaced by StateMachine)
+- **Quest.ObjectiveTypes** - Old objective type registry (moved to content)
+- **Abilities** - Character abilities (replaced by Skills)
+- **Progression** - XP/leveling (moved to component-based progression)
+- **Economy** - Shop/trading (moved to script-based handlers)
+- **Crafting** - Recipe-based crafting (moved to content entities)
+- **Gathering** - Resource node harvesting (moved to entity scripts)
 
 ## Related
 
+- [Unified Object System (V2)](../architecture/unified-object-system-v2.md) - V2 architecture design doc
 - [Entity System](../architecture/entity-system.md) - How entities work
+- [Components](../architecture/components.md) - Component system
+- [StateMachine](../architecture/state-machine.md) - State machine engine
+- [EntityBehavior](../architecture/entity-behavior.md) - Behavior callbacks
+- [Content System](../architecture/content-system.md) - Content loading
 - [Prototypes](../architecture/prototypes.md) - YAML content format
-- [Hooks & Locks](../architecture/hooks-and-locks.md) - Lifecycle events

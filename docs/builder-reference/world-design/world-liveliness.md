@@ -16,8 +16,8 @@ Loka provides several systems for world liveliness:
 | Room Ambient Messages | Atmospheric room descriptions | No (auto) |
 | Day/Night Cycle | Time-aware content | No (YAML phases) |
 | Weather System | Dynamic weather events | No (config) |
-| Patrol Behavior | Fixed-route movement | No (YAML) |
-| WanderBehavior | Random movement within area | No (YAML) |
+| Patrol Trait | Fixed-route movement | No (YAML) |
+| Wander Trait | Random movement within area | No (YAML) |
 
 ## Quick Start
 
@@ -76,7 +76,7 @@ Wandering NPCs add movement and life. Good candidates:
 | Workers (sweeping monks) | Doing their job |
 | Patrol guards | Security routes |
 
-### Configuring WanderBehavior
+### Configuring Wander Trait
 
 ```yaml
 # priv/world/prototypes/npcs/monastery/temple_cat.yml
@@ -86,8 +86,8 @@ type: npc
 short_desc: "Temple Cat"
 long_desc: "A serene orange cat with knowing eyes."
 tags: [animal, ambient, non_hostile, cannot_attack]
-behaviors:
-  - Loka.Behaviors.Wander
+traits:
+  - script: wander
 attributes:
   behavior_config:
     wander:
@@ -151,8 +151,8 @@ long_desc: "An old woman here to light incense for her ancestors."
 keywords: [visitor, woman, elder, grandmother]
 primary_keyword: visitor
 tags: [friendly, atmosphere]
-behaviors:
-  - Loka.Behaviors.Wander
+traits:
+  - script: wander
 attributes:
   behavior_config:
     wander:
@@ -271,8 +271,8 @@ long_desc: "A sleek grey cat with knowing amber eyes lounges nearby."
 keywords: [cat, feline, temple]
 primary_keyword: cat
 tags: [friendly, animal, atmosphere, sacred]
-behaviors:
-  - Loka.Behaviors.Wander
+traits:
+  - script: wander
 attributes:
   behavior_config:
     wander:
@@ -318,8 +318,8 @@ long_desc: "An elderly pilgrim in dusty robes walks with the slow certainty of f
 keywords: [pilgrim, elder, traveler]
 primary_keyword: pilgrim
 tags: [friendly, traveler, sacred, atmosphere]
-behaviors:
-  - Loka.Behaviors.Wander
+traits:
+  - script: wander
 attributes:
   behavior_config:
     wander:
@@ -366,8 +366,8 @@ long_desc: "A monk in simple robes sweeps devotedly with a worn bamboo broom."
 keywords: [monk, sweeper, brother]
 primary_keyword: monk
 tags: [friendly, monk, atmosphere]
-behaviors:
-  - Loka.Behaviors.Wander
+traits:
+  - script: wander
 attributes:
   behavior_config:
     wander:
@@ -398,8 +398,8 @@ components:
 
 ## Related Documentation
 
-- **NPC Reference**: `docs/reference/npc-reference.md` - Full NPC YAML schema
-- **Room Reference**: `docs/reference/room-reference.md` - Room ambient config
-- **Behaviors**: `docs/framework/behaviors.md` - All NPC behaviors
+- **Entity Reference**: `docs/builder-reference/entity-reference.md` - Full entity YAML schema
+- **Traits Reference**: `docs/builder-reference/behaviors.md` - All available trait scripts
+- **Emotes Reference**: `docs/builder-reference/emotes.md` - Emote system
 - **Day/Night Cycle**: `lib/loka/framework/world/time.ex` - Time system
 - **Weather**: `lib/loka/framework/world/weather.ex` - Weather events

@@ -1,6 +1,8 @@
-# NPC Behaviors (V2 Trait System)
+# Entity Traits (V2)
 
-Pre-built, configurable NPC behaviors assignable via YAML. Based on DikuMUD special procedures.
+Pre-built, configurable entity behaviors assignable via YAML. Traits replace V1 "behaviors" field.
+
+> **V2 Migration Note:** `entity.behaviors` → `entity.traits` (DB column renamed Feb 16, 2026)
 
 ## Quick Reference
 
@@ -28,13 +30,18 @@ Pre-built, configurable NPC behaviors assignable via YAML. Based on DikuMUD spec
 │   components:                                           │
 │     guard: { attack_tags: [...] }                       │
 ├─────────────────────────────────────────────────────────┤
-│ EntityServer (on_tick / on_event)                       │
-│   Dispatches to each trait module                       │
-│   Manages per-trait state in entity components          │
+│ EntitySeeder → SQLite                                   │
+│   Seeded at startup from YAML in priv/world/           │
+│   Stored in entities table, traits as JSON array        │
 ├─────────────────────────────────────────────────────────┤
-│ Individual Behaviors (Guard, Patrol, etc.)              │
-│   Each implements EntityBehavior callbacks               │
-│   Reads config from entity.components                   │
+│ EntityServer (on_tick / on_event)                       │
+│   Dispatches to compiled trait modules                  │
+│   Dispatches to script traits via sandbox               │
+│   Manages per-trait state in entity.components          │
+├─────────────────────────────────────────────────────────┤
+│ Trait Modules (Guard, Patrol, etc.)                     │
+│   Implement EntityBehavior callbacks                    │
+│   Read config from entity.components[trait_key]         │
 └─────────────────────────────────────────────────────────┘
 ```
 

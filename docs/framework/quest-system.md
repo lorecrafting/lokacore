@@ -10,21 +10,23 @@
 ┌─────────────────────────────────────────────────────────────────────┐
 │ CONTENT LAYER (YAML)                                                │
 │   priv/world/quests/*.yml - Quest definitions                      │
-│   priv/world/storylines/*.yml - Storyline organization             │
 ├─────────────────────────────────────────────────────────────────────┤
-│ OBJECTIVE HANDLER REGISTRY                                          │
-│   ObjectiveRegistry - Plugin system for objective types             │
-│   Handlers: KillHandler, GetItemHandler, GoToHandler, TalkHandler   │
+│ ENTITY SEEDER (V2)                                                  │
+│   EntitySeeder.seed() - Loads YAML → entity structs → SQLite       │
+│   Content.Quest.get(key) - Type-safe quest accessor                │
+│   Entities.find_one(key: key, type: :quest) - Direct query         │
+├─────────────────────────────────────────────────────────────────────┤
+│ STATE MACHINE (V2)                                                  │
+│   StateMachine engine for quest progress states                    │
+│   States: not_started → active → complete / failed                 │
 ├─────────────────────────────────────────────────────────────────────┤
 │ QUEST FRAMEWORK                                                     │
 │   Quest.Progress - Accept, track, turn-in quests                   │
-│   Quest.Definitions - Load YAML, validate objectives               │
-│   Quest.Listeners - Hook callbacks for auto-tracking                │
-│   Quest.QuestRegistry - Cache YAML definitions in ETS               │
+│   Quest.Listeners - Event callbacks for auto-tracking               │
 ├─────────────────────────────────────────────────────────────────────┤
 │ ENGINE LAYER                                                        │
-│   Hooks - Register callbacks for game events                        │
-│   GameState - Persist player quest progress                         │
+│   Event system - PubSub for game events                             │
+│   Components - Player quest state in components["quests"]           │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -32,11 +34,10 @@
 
 | Module | Purpose |
 |--------|---------|
+| `Content.Quest` | Type-safe quest accessor (V2) |
+| `Entities` | Direct entity queries (V2) |
 | `Quest.Progress` | Accept, track progress, turn-in quests |
-| `Quest.Definitions` | Parse YAML, validate structure |
-| `Quest.QuestRegistry` | Cache quests in ETS, lookup |
-| `Quest.Listeners` | Hook callbacks for auto-tracking |
-| `Quest.ObjectiveRegistry` | Register/lookup objective handlers |
+| `Quest.Listeners` | Event callbacks for auto-tracking |
 | `Quest.Validator` | Validate quest definitions |
 
 ## Objective Handler System
@@ -92,9 +93,11 @@ end
 Quest.ObjectiveRegistry.register(MyGame.Quest.Handlers.CraftHandler)
 ```
 
-## Quest State Management
+## Quest State Management (V2)
 
-Player quest state is stored in `GameState.quests`:
+**Quest Definitions:** Content entities (`type: :quest`) seeded from YAML via `EntitySeeder`. Stored in SQLite `entities` table with `components["data"]` containing quest structure.
+
+**Player Progress:** Stored in player entity's `components["quests"]`:
 
 ```elixir
 %{
@@ -114,42 +117,45 @@ Player quest state is stored in `GameState.quests`:
 }
 ```
 
-### API Functions
+### API Functions (V2)
 
 ```elixir
+# Get quest definition
+{:ok, quest} = Content.Quest.get("quest_id")
+
 # Accept a quest
-{:ok, game_state} = Quest.Progress.accept_quest(game_state, "quest_id")
+{:ok, player} = Quest.Progress.accept_quest(player, "quest_id")
 
 # Update objective progress
-{:ok, game_state} = Quest.Progress.update_objective(game_state, "quest_id", "obj_id", progress)
+{:ok, player} = Quest.Progress.update_objective(player, "quest_id", "obj_id", progress)
 
 # Complete objective
-{:ok, game_state} = Quest.Progress.complete_objective(game_state, "quest_id", "obj_id")
+{:ok, player} = Quest.Progress.complete_objective(player, "quest_id", "obj_id")
 
 # Turn in quest (apply rewards)
-{:ok, game_state} = Quest.Progress.turn_in_quest(game_state, "quest_id")
+{:ok, player} = Quest.Progress.turn_in_quest(player, "quest_id")
 
 # Check quest state
-Quest.Progress.quest_active?(game_state, "quest_id")
-Quest.Progress.quest_completed?(game_state, "quest_id")
-Quest.Progress.all_objectives_complete?(game_state, "quest_id")
+Quest.Progress.quest_active?(player, "quest_id")
+Quest.Progress.quest_completed?(player, "quest_id")
+Quest.Progress.all_objectives_complete?(player, "quest_id")
 ```
 
-## Hook-Based Auto-Tracking
+## Event-Based Auto-Tracking (V2)
 
-Quest listeners register hooks to auto-complete objectives:
+Quest listeners subscribe to PubSub events to auto-complete objectives:
 
 ```elixir
-# Registered in Quest.Listeners
-Hooks.register(:at_enter_room, Quest.Listeners, :on_enter_room)
-Hooks.register(:at_death, Quest.Listeners, :on_kill)
-Hooks.register(:at_object_receive, Quest.Listeners, :on_item_pickup)
+# Events published via Phoenix.PubSub
+Phoenix.PubSub.broadcast(Loka.PubSub, "entity:#{player_id}", {:entity_entered_room, room_key})
+Phoenix.PubSub.broadcast(Loka.PubSub, "entity:#{player_id}", {:entity_killed, entity_key})
+Phoenix.PubSub.broadcast(Loka.PubSub, "entity:#{player_id}", {:item_received, item_key})
 ```
 
-When a hook fires, the listener:
+When an event fires, the listener:
 1. Finds active quests with matching objective type
-2. Calls the handler's `check_completion/2`
-3. Updates quest state if completed
+2. Checks objective completion criteria
+3. Updates quest state in player components
 
 ## Validation
 

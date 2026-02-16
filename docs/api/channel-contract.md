@@ -167,8 +167,7 @@ System-wide announcements and event messages.
 {
   resources: {
     health: { current: number, max: number, regen_rate: number },
-    mana: { current: number, max: number, regen_rate: number },
-    movement: { current: number, max: number, regen_rate: number }
+    stamina: { current: number, max: number, regen_rate: number }
   }
 }
 ```
@@ -303,30 +302,27 @@ System-wide announcements and event messages.
 {}
 ```
 
-### Bardo (Death) Events
+### Death Events
 
-#### `bardo_start`
+#### `death`
 ```typescript
 {
-  bind_point: string
+  respawn_location: string  // Room key where player will respawn
 }
 ```
 
-#### `bardo_message`
+#### `ghost_enter`
 ```typescript
 {
-  text: string
+  player: Player  // Ghost player entering the room
 }
 ```
 
-#### `bardo_ready`
+#### `ghost_exit`
 ```typescript
-{}
-```
-
-#### `bardo_end`
-```typescript
-{}
+{
+  player: Player  // Ghost player leaving the room
+}
 ```
 
 ### Quest Events
@@ -496,13 +492,11 @@ Generic action on entity.
 }
 ```
 
-### Bardo
+### Death
 
-#### `bardo`
+#### `respawn`
 ```typescript
-{
-  action: "reincarnate"
-}
+{}
 ```
 
 ### Text Commands

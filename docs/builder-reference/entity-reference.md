@@ -42,9 +42,9 @@ primary_keyword: "goblin"    # Single keyword for UI display
 components: {}               # See component reference below
 traits: []                   # Reusable behavior scripts (see behaviors.md)
 emotes: {}                   # Personality text for emit() events (see emotes.md)
-attributes: {}               # Custom key-value data
+attributes: {}               # Custom key-value data (stored in components["attributes"])
 tags: []                     # String tags for filtering
-scripts: {}                  # Elixir scripts
+scripts: {}                  # Elixir scripts (sandboxed)
 locks: {}                    # Access control strings
 ```
 
@@ -132,7 +132,7 @@ components:
 
 tags: [friendly, merchant]
 
-# EMOTES - personality text triggered by behaviors
+# EMOTES - personality text triggered by traits
 emotes:
   waking_up: "*unfolds merchant's cloth* Time for business!"
   going_to_sleep: "*wraps pack securely* Tomorrow brings opportunities."
@@ -140,7 +140,7 @@ emotes:
   closing_shop: "*carefully packs goods* Until next time!"
   greeting: "*rubs hands together* Welcome, welcome!"
 
-# TRAITS - reusable mechanics
+# TRAITS - reusable behavior scripts
 traits:
   - script: shopkeeper_hours
     config:

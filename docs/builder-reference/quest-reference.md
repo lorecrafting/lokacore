@@ -13,6 +13,7 @@ priv/world/quests/{quest_id}.yml
 ## Complete Quest Template
 
 ```yaml
+# Quest identifier (required)
 id: intro_find_temple
 name: "Find the Temple"
 description: |
@@ -220,7 +221,6 @@ requires_quest: basic_training
 rewards:
   xp: 100                  # Experience points
   gold: 50                 # Gold currency
-  insight: 1               # Insight points (optional)
   items:                   # Item keys to give
     - temple_key
     - rare_gem

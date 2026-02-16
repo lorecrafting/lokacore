@@ -35,6 +35,8 @@ When creating a new story arc or zone, use this checklist to ensure all mechanic
 
 ## 2. Skills & Trainers
 
+> **Note**: Skills system may be simplified in V2. This section reflects current design.
+
 ### Skill Availability Matrix
 
 For each skill players should learn in this arc:
@@ -90,54 +92,9 @@ Example skill tree check:
 
 ---
 
-## 3. Magic System - Sanskrit Words
+## 3. Magic System (If Applicable)
 
-### Word Strata Requirements
-
-| Stratum | INT Required | Words Available |
-|---------|--------------|-----------------|
-| First | 30 | 12 basic words |
-| Second | 50 | +9 intermediate |
-| Third | 70 | +5 advanced |
-
-### Word Trainers Required
-
-Players need NPCs to learn words from:
-
-**First Stratum Words (INT 30)**
-- [ ] RUPA (Form) words trainer - teaches: ASTRA, SPARSHA, HASTA, NETRA
-- [ ] TATTVA (Element) words trainer - teaches: AGNI, HIMA, VAYU, PRITHVI, TEJA, JALA, VISHA, BALA
-
-**Second Stratum Words (INT 50)**
-- [ ] Advanced RUPA trainer - teaches: KAVACA, CHAKRA, KSHETRA
-- [ ] Advanced TATTVA trainer - teaches: PRANA, KALA, VIDYUT, MRITYU, MAYA, AKASHA
-
-**Third Stratum Words (INT 70)**
-- [ ] Master word trainer - teaches: DVAYA, STHIRA, SHIGHRA, BHEDA, MAHA, LAGHU
-
-### Word Trainer Matrix
-
-| Word | Type | Stratum | Trainer NPC | Location | Quest Required? |
-|------|------|---------|-------------|----------|-----------------|
-| AGNI | TATTVA | 1st | fire_sage | temple | no |
-| HIMA | TATTVA | 1st | ice_monk | mountain | no |
-| ASTRA | RUPA | 1st | combat_mage | academy | no |
-| ... | | | | | |
-
-### Useful Spell Combinations to Enable
-
-Ensure trainers make these combinations learnable:
-
-| Mantra | Words | Effect | Trainers Needed |
-|--------|-------|--------|-----------------|
-| AGNI ASTRA | Fire + Arrow | Fire bolt | fire_sage + combat_mage |
-| HIMA SPARSHA | Ice + Touch | Ice touch | ice_monk + healer |
-| PRANA SPARSHA | Life + Touch | Heal | life_priest + healer |
-| MAHA AGNI ASTRA | Great Fire Arrow | Big fire bolt | master + fire_sage + combat_mage |
-
-- [ ] Players can learn basic attack combo (TATTVA + ASTRA)
-- [ ] Players can learn basic heal combo (PRANA + SPARSHA)
-- [ ] Players can learn basic defense (KAVACA variants)
+> **Note**: Magic system design is TBD for V2. This section may not apply to current content.
 
 ---
 

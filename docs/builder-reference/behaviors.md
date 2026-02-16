@@ -1,16 +1,16 @@
-# Behaviors Reference
+# Traits Reference (V2)
 
-> **For Builders**: This guide explains how to add behaviors to NPCs and other entities.
+> **For Builders**: This guide explains how to add traits to NPCs and other entities.
 
 ## Overview
 
-Behaviors are reusable scripts that define how entities react to world events (time changes, player interactions, etc.). Instead of writing custom scripts for each NPC, you can attach pre-built behaviors with configuration.
+Traits are reusable behavior scripts that define how entities react to world events (time changes, player interactions, etc.). Instead of writing custom scripts for each NPC, you can attach pre-built trait scripts with configuration.
 
 ```yaml
 # Example: NPC with patrol and day/night schedule
 key: monastery_guard
 type: npc
-behaviors:
+traits:
   - script: patrol
     config:
       route: [monastery_gate, main_courtyard, temple]
@@ -21,26 +21,28 @@ behaviors:
       sleep_at: dusk
 ```
 
-## Behaviors vs Scripts vs Emotes
+## Traits vs Scripts vs Emotes
 
 | Feature | Purpose | Triggers |
 |---------|---------|----------|
-| **Behaviors** | Reusable mechanics | World events (time, combat, etc.) |
+| **Traits** | Reusable mechanics | World events (time, combat, etc.) |
 | **Scripts** | Custom one-off logic | Hooks (on_look, on_say, etc.) |
-| **Emotes** | Personality text | Behavior events via emit() |
+| **Emotes** | Personality text | Trait events via emit() |
 
-**Pattern**: Behaviors handle *what happens*, emotes handle *what's displayed*.
+**Pattern**: Traits handle *what happens*, emotes handle *what's displayed*.
 
 ---
 
-## Available Behaviors
+## Available Trait Scripts
+
+All trait scripts are located in `priv/world/scripts/traits/`.
 
 ### patrol
 
 Makes an NPC walk a defined route between rooms.
 
 ```yaml
-behaviors:
+traits:
   - script: patrol
     config:
       route:              # Required: list of room keys
@@ -58,7 +60,7 @@ behaviors:
 Makes an NPC wake and sleep based on time events.
 
 ```yaml
-behaviors:
+traits:
   - script: day_night_schedule
     config:
       wake_at: dawn       # dawn, morning, noon (default: dawn)
@@ -74,7 +76,7 @@ behaviors:
 Controls shop open/close based on time.
 
 ```yaml
-behaviors:
+traits:
   - script: shopkeeper_hours
     config:
       open_at: morning    # When shop opens (default: morning)
@@ -90,7 +92,7 @@ Sets `shop_open` flag that can be checked in dialogues.
 Makes an NPC move randomly within constraints.
 
 ```yaml
-behaviors:
+traits:
   - script: wander
     config:
       interval: 600       # Seconds between moves (default: 600)
@@ -106,7 +108,7 @@ behaviors:
 Periodically emits flavor text events.
 
 ```yaml
-behaviors:
+traits:
   - script: ambient_emitter
     config:
       interval: 300       # Seconds between attempts (default: 300)
@@ -121,7 +123,7 @@ behaviors:
 Makes an NPC active only at night, hiding during day.
 
 ```yaml
-behaviors:
+traits:
   - script: nocturnal
     config:
       wake_at: dusk        # When to become active (default: dusk)
@@ -137,7 +139,7 @@ behaviors:
 Spawns/despawns entities based on time of day.
 
 ```yaml
-behaviors:
+traits:
   - script: spawn_condition_time
     config:
       prototype: hungry_ghost    # Required: entity to spawn
@@ -168,7 +170,7 @@ Behaviors can listen to these world time events:
 
 ## Combining with Emotes
 
-Behaviors emit events that trigger emotes. Define emotes on the entity to customize what's displayed:
+Traits emit events that trigger emotes. Define emotes on the entity to customize what's displayed:
 
 ```yaml
 key: blacksmith_tashi
@@ -178,7 +180,7 @@ emotes:
   opening_shop: "*pumps the bellows* Welcome to my forge!"
   closing_shop: "*banks the fire* Come back tomorrow."
   going_to_sleep: "*covers the anvil* The work is done."
-behaviors:
+traits:
   - script: shopkeeper_hours
     config:
       open_at: morning
@@ -189,13 +191,13 @@ behaviors:
       sleep_at: dusk
 ```
 
-When the shopkeeper_hours behavior emits `:opening_shop`, the emote `"*pumps the bellows* Welcome to my forge!"` is displayed to players in the room.
+When the shopkeeper_hours trait emits `:opening_shop`, the emote `"*pumps the bellows* Welcome to my forge!"` is displayed to players in the room.
 
 ---
 
 ## Config Schema
 
-Each behavior defines what configuration it accepts. Common schema types:
+Each trait script defines what configuration it accepts. Common schema types:
 
 | Type | Example | Description |
 |------|---------|-------------|
@@ -205,41 +207,41 @@ Each behavior defines what configuration it accepts. Common schema types:
 | `boolean` | `loop: true` | true/false |
 | `list` | `route: [a, b, c]` | Array of values |
 
-Invalid configs are logged as warnings and the behavior continues with defaults.
+Invalid configs are logged as warnings and the trait continues with defaults.
 
 ---
 
-## Legacy Format
+## Trait Format
 
-Old behavior format (module references) still works but is deprecated:
+Traits are defined in the `traits` field (renamed from `behaviors` in V2):
 
 ```yaml
-# Legacy - still works but avoid
-behaviors:
-  - Loka.Behaviors.Patrol
-
-# New format - use this
-behaviors:
+# V2 format (current)
+traits:
   - script: patrol
     config:
       route: [room_a, room_b]
+
+# V1 format (deprecated) - still works but avoid
+behaviors:
+  - Loka.Behaviors.Patrol
 ```
 
 ---
 
-## Creating Custom Behaviors
+## Creating Custom Trait Scripts
 
-Custom behaviors are scripts in `priv/world/scripts/behaviors/`:
+Custom trait scripts are located in `priv/world/scripts/traits/`:
 
 ```yaml
-# priv/world/scripts/behaviors/custom_behavior.yml
-key: custom_behavior
+# priv/world/scripts/traits/custom_trait.yml
+key: custom_trait
 type: script
-name: "My Custom Behavior"
+name: "My Custom Trait"
 description: "Does something custom"
-tags: [behavior, custom]
+tags: [trait, custom]
 data:
-  hook: behavior
+  hook: trait
   events: [dawn, dusk]  # Which time events to listen to
   config_schema:
     some_option:
@@ -259,10 +261,10 @@ data:
     emit(:custom_event)
 
     # Modify state
-    set_behavior_state(:my_state, value)
+    set_trait_state(:my_state, value)
 
     # Signal completion
     handled()
 ```
 
-See the existing behavior scripts in `priv/world/scripts/behaviors/` for examples.
+See the existing trait scripts in `priv/world/scripts/traits/` for examples.

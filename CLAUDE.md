@@ -17,7 +17,7 @@
 
 ## Architecture
 
-Layers (top to bottom): Game Content (YAML in `priv/world/`) → Game Framework (`lib/loka/framework/`, ~25 subsystems) → Engine Core (`lib/loka/engine/`) → Session Layer (`lib/loka/session/`) → Platform (Phoenix 1.8, LiveView, Ecto + SQLite)
+Layers (top to bottom): Game Content (YAML in `priv/world/`) → Game Framework (`lib/loka/framework/`, ~52 modules across 14 directories) → Engine Core (`lib/loka/engine/`) → Session Layer (`lib/loka/session/`) → Platform (Phoenix 1.8, LiveView, Ecto + SQLite)
 
 ### Core Patterns (V2)
 
@@ -57,7 +57,7 @@ lokacore/
 ├── server/
 │   ├── lib/loka/
 │   │   ├── engine/           # Core: entities, entity_server, entity_seeder, spawner, state_machine
-│   │   ├── components/       # Component accessor modules (23 modules)
+│   │   ├── components/       # Component accessor modules (24 modules)
 │   │   ├── behaviors/        # EntityBehavior modules (guard, patrol, weather, etc.)
 │   │   ├── content/          # Content modules (Quest, Dialogue, Script, Zone)
 │   │   ├── framework/        # Game subsystems (quest, combat, inventory, etc.)

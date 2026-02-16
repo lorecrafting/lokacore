@@ -31,7 +31,7 @@ If your system has distinct phases, modes, or lifecycle stages — use `Loka.Eng
 
 Define as a module attribute in your component accessor (`lib/loka/components/*.ex`). The machine is pure data — no processes, no side effects.
 
-**Existing examples:** Quest progress, combat, crafting, NPC AI, player session, dialogue, entity lifecycle. See `docs/v2-migration/phase-7-polish.md` Task 7.3.
+**Existing examples:** Quest progress, combat, player session, dialogue, day/night, weather. See `docs/architecture/state-machine.md` for the engine design doc.
 
 ## 2. Is it an entity?
 
@@ -41,12 +41,16 @@ In V2, everything is an entity. Your new system's data should live in entity com
 - **Runtime state** (player quest progress, combat state) → components on character/NPC entities
 - **Global singletons** (weather, day/night, economy) → system entities with behaviors
 
-## 3. Does it need a behavior?
+## 3. Does it need a trait?
 
 If your system has recurring logic (tick-based updates, event reactions), implement `EntityBehavior`:
 - `on_init/1` — setup on entity spawn
 - `on_tick/2` — periodic updates (interval set by `tick` component)
 - `on_event/3` — react to PubSub events
+
+Traits are stored in `entity.traits` as either:
+- Compiled module atoms: `Loka.Behaviors.Guard`
+- Script maps: `%{"script" => "ambient_emote", "config" => %{}}`
 
 ## 4. Does it need content validation?
 

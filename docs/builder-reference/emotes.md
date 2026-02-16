@@ -18,13 +18,13 @@ emotes:
 
 ## How Emotes Work
 
-1. **Behavior triggers emit()** → `emit(:waking_up)`
+1. **Trait triggers emit()** → `emit(:waking_up)`
 2. **System looks up emote** → `emotes.waking_up`
 3. **Message displayed** → "*stretches mindfully* Another day..."
 
 ```
 ┌─────────────┐     ┌──────────────┐     ┌─────────────────┐
-│  Behavior   │ ──▶ │  emit(:key)  │ ──▶ │ Emote Displayed │
+│    Trait    │ ──▶ │  emit(:key)  │ ──▶ │ Emote Displayed │
 │ (schedule)  │     │              │     │   to Room       │
 └─────────────┘     └──────────────┘     └─────────────────┘
 ```
@@ -54,7 +54,7 @@ emotes:
 
 ## Common Emote Keys
 
-These emote keys are used by the standard behaviors:
+These emote keys are used by the standard trait scripts:
 
 ### Day/Night Schedule
 
@@ -172,8 +172,8 @@ components:
 ```
 
 **Difference**:
-- `ambient_actions` - Random periodic messages (automatic)
-- `emotes` - Event-triggered messages (via emit())
+- `ambient_actions` - Random periodic messages (automatic, component-based)
+- `emotes` - Event-triggered messages (via emit() from traits/scripts)
 
 Use ambient_actions for passive flavor, emotes for reactive personality.
 

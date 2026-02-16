@@ -63,7 +63,14 @@ mix loka.test.storyline monastery_arc --run
 
 | File | Purpose |
 |------|---------|
+| `entity-reference.md` | All entity types, fields, validation |
+| `quest-reference.md` | Quest YAML format, objectives, rewards |
+| `dialogue-reference.md` | Dialogue format, actions, conditions |
 | `quest-dialogue-patterns.md` | Common issues and their fixes |
+| `behaviors.md` | Trait system and available traits |
+| `emotes.md` | Emote format and patterns |
+| `scripting-api-llm-guide.md` | Scripting API reference |
+| `story-creation-checklist.md` | Content creation checklist |
 | `README.md` | This file - quick reference |
 
 ## Elixir Modules

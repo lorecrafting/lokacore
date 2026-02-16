@@ -1,29 +1,29 @@
-# Quest Listeners - Hook-Based Auto-Tracking
+# Quest Listeners - Event-Based Auto-Tracking (V2)
 
 > **For custom handlers, see `quest-system.md`**
 > **For YAML format, see `docs/builder-reference/quest-reference.md`**
 
-## Overview
+## Overview (V2)
 
-Quest listeners automatically track objective progress via hooks. No manual checking needed.
+Quest listeners automatically track objective progress via PubSub events. No manual checking needed.
 
 ```
-Player Action → Hook Fires → Quest Listener → Progress Update
+Player Action → PubSub Event → Quest Listener → Progress Update
 ```
 
-## Registered Hooks
+## Event Subscriptions
 
-| Hook | Objective Type | Trigger |
+| Event | Objective Type | Trigger |
 |------|---------------|---------|
-| `:at_enter_room` | `go_to` | Player enters a room |
-| `:at_object_receive` | `get_item` | Player picks up item |
-| `:at_death` | `kill` | Entity dies (player-caused) |
+| `:entity_entered_room` | `go_to` | Player enters a room |
+| `:item_received` | `get_item` | Player picks up item |
+| `:entity_killed` | `kill` | Entity dies (player-caused) |
 
 ## Scaling
 
 The system scales well:
-- **Per-player processing** - Each LiveView handles its own quest checks
-- **No shared state** - Quest progress in each player's `game_state`
+- **Per-player processing** - Each EntityServer handles its own quest checks
+- **No shared state** - Quest progress in player's `components["quests"]`
 - **O(n)** where n = active quests (typically 1-5)
 
 ## Direct-Call Helpers
@@ -34,13 +34,13 @@ For manual triggering (returns updated state):
 alias Loka.Framework.Quest.Listeners, as: QuestListeners
 
 # Room entry
-{updated_state, quest_events} = QuestListeners.check_room_entry(game_state, room_key)
+{updated_player, quest_events} = QuestListeners.check_room_entry(player, room_key)
 
 # Item pickup
-{updated_state, quest_events} = QuestListeners.check_item_received(game_state, item_key)
+{updated_player, quest_events} = QuestListeners.check_item_received(player, item_key)
 
 # Entity kill
-{updated_state, quest_events} = QuestListeners.check_entity_death(game_state, entity_key, count)
+{updated_player, quest_events} = QuestListeners.check_entity_death(player, entity_key, count)
 ```
 
 ## Elixir Scripting API
@@ -98,4 +98,4 @@ mix loka.test.validate
 
 - [quest-system.md](quest-system.md) - Elixir API & custom handlers
 - [docs/builder-reference/quest-reference.md](../builder-reference/quest-reference.md) - YAML format
-- [docs/architecture/hooks-and-locks.md](../architecture/hooks-and-locks.md) - Hook system
+- [docs/architecture/event-system.md](../architecture/event-system.md) - PubSub event system

@@ -1,7 +1,7 @@
 # Live Operations Guide
 
-**Last Updated:** 2026-01-01
-**Status:** Current State Analysis + Recommendations
+**Last Updated:** 2026-02-15
+**Status:** Current State Analysis + Recommendations (V2 Unified Entity System)
 
 This document provides a comprehensive analysis of Loka's capabilities for running a production MMORPG with hundreds of concurrent players while using LLM-assisted development for rapid iteration. It covers hot-reload mechanisms, content update workflows, session persistence, and recommended practices for minimizing player disruption during updates.
 
@@ -25,14 +25,11 @@ This document provides a comprehensive analysis of Loka's capabilities for runni
 
 ### ✅ Strong Foundations
 
-**Content Hot-Reload:**
-- `TypedObject.Loader.reload()` - YAML prototypes update without restart
-- 15+ content registries with reload support:
-  - QuestRegistry, ZoneLoader, SocialLoader
-  - ResourceRegistry, GatheringRegistry, CraftingRegistry
-  - WeatherRegistry, FactionRegistry, StatusRegistry
-  - DamageTypes, Tactical
-- ETS with `read_concurrency: true` for fast concurrent lookups
+**Content Hot-Reload (V2):**
+- `EntitySeeder.seed()` - Re-seeds all content entities from YAML
+- Content types: quest, dialogue, script, zone, skill, recipe, cutscene, etc.
+- SQLite storage with `Entities` API for queries
+- Content modules provide type-safe accessors (`Content.Quest`, `Content.Dialogue`, etc.)
 
 **Session Resilience:**
 - 30-second reconnect grace period (`lib/loka/session/server.ex:69`)
@@ -53,53 +50,41 @@ This document provides a comprehensive analysis of Loka's capabilities for runni
 
 ## Hot-Reload Mechanisms
 
-### Prototype Hot-Reload (YAML Content)
+### Content Hot-Reload (YAML Prototypes)
 
-**File:** `lib/loka/engine/typed_object/loader.ex`
+**Status:** ✅ FULLY SUPPORTED (V2)
 
-**Status:** ✅ FULLY SUPPORTED
-
-```elixir
-# Lines 127-129: Hot-reload API
-@doc """
-Reloads all prototypes from disk. Hot-reload without restart.
-"""
-def reload(server \\ __MODULE__)
-```
+**V2 Implementation:**
+- Content entities (quests, dialogues, scripts, zones) seeded into SQLite at startup via `EntitySeeder`
+- Runtime reload via `EntitySeeder.seed()` (full re-seed, ~650ms)
+- Entities fetched via `Entities.find_one(key: key, type: :quest)`
+- Content modules (`Content.Quest`, `Content.Dialogue`, etc.) provide type-safe APIs
 
 **How it works:**
-1. `TypedObject.Loader.reload()` re-reads all YAML files from `priv/world/prototypes/`
-2. Parses and validates prototypes
-3. Resolves parent inheritance chains
-4. Updates ETS table atomically (lines 404-420)
+1. `EntitySeeder.seed()` reads YAML from `priv/world/`
+2. Transforms to entity structs with `components["data"]` containing content
+3. Inserts/updates SQLite `entities` table
+4. Content modules query via `Entities` API
 
-**Key Implementation (lines 404-420):**
-```elixir
-defp update_ets(table, resolved_prototypes) do
-  # Insert/update all new prototypes atomically
-  Enum.each(resolved_prototypes, fn {key, proto} ->
-    :ets.insert(table, {key, proto})
-  end)
-  # Remove orphaned entries (keys that no longer exist)
-  Enum.each(orphaned_keys, fn key ->
-    :ets.delete(table, key)
-  end)
-end
-```
-
-**Gap:** ❌ No notification mechanism to inform running EntityServers that their prototype changed.
+**Limitations:**
+- ❌ Full re-seed required (no incremental updates yet)
+- ❌ No notification to running EntityServers when content changes
+- ⚠️ Expensive operation (~650ms) - use judiciously
 
 ### Elixir Script Hot-Reload
 
-**File:** `lib/loka/engine/scripting.ex`
+**Status:** ✅ FULLY SUPPORTED (V2)
 
-**Status:** ⚠️ PARTIAL SUPPORT
+**V2 Implementation:**
+- Scripts are content entities (`type: :script`) seeded from YAML
+- Loaded via `Content.Script.get(key)`
+- Scripts fetched fresh on each execution (no caching)
+- Reload via `EntitySeeder.seed()` like other content
 
-- Scripts stored in database (`lib/loka/engine/scripts.ex`)
-- Scripts loaded fresh on each execution (not cached)
-- Admin dashboard can edit and test scripts at runtime
-
-**Gap:** ❌ No bulk script reload or invalidation mechanism.
+**Trait Scripts:**
+- Script traits: `%{"script" => "ambient_emote", "config" => %{}}` in `entity.traits`
+- Dispatched via `dispatch_script_traits_tick/1` in EntityServer
+- Sandboxed execution with bindings (`get_trait_state`, `set_trait_state`, etc.)
 
 ### Elixir Code Hot-Swapping
 
@@ -131,19 +116,19 @@ git add priv/world/prototypes
 git commit -m "Update merchant dialogue"
 git push  # Triggers GitHub Actions deploy
 
-# 4. Hot-reload on live server (via IEx or admin API)
+# 4. Hot-reload on live server (via IEx)
 iex> Session.broadcast_all("[System] Content update in 30 seconds...")
 iex> :timer.sleep(30_000)
-iex> TypedObject.Loader.reload()
-iex> QuestRegistry.reload()
+iex> Loka.Engine.EntitySeeder.seed()
 iex> Session.broadcast_all("[System] New content loaded!")
 ```
 
-**Player Impact:** ⭐ **Minimal** - Prototypes reload seamlessly, existing sessions unaffected
+**Player Impact:** ⭐ **Minimal** - Content re-seeded seamlessly, existing sessions unaffected
 
 **Current Gaps:**
-- ❌ No notification to running EntityServers when their prototype changes
-- ❌ Admin dashboard doesn't have "Reload Content" button (must use IEx)
+- ❌ No notification to running EntityServers when content changes
+- ❌ Admin builder doesn't have "Reload Content" command (must use IEx)
+- ❌ Full re-seed only (no incremental updates)
 
 ### Workflow B: Combat Mechanics Changes
 
@@ -251,18 +236,17 @@ defstruct [
 
 **Player State Persisted (Database):**
 
-**File:** `lib/loka/framework/player/game_state.ex`
+In V2, player state is stored in entity components (character entity in `entities` table):
 
-- `inventory` - Item list
-- `equipment` - Equipped items by slot
-- `quests` - Quest progress (active and completed)
-- `flags` - Game state flags
-- `stats` - Player stats (level, XP, attributes)
-- `health` - Current and max HP
-- `resources` - Mana, movement points
-- `skills` - Skill levels
-- `settings` - Player preferences
-- `current_room_id` - Current location
+- `components["combatant"]` - Health, stats, combat state
+- `components["equipment"]` - Equipped items by slot
+- `components["quest_progress"]` - Quest progress (active and completed)
+- `components["skills"]` - Skill levels
+- `components["resources"]` - Mana, stamina, etc.
+- `entity.location_id` - Current room
+- `entity.metadata` - Flags, settings, preferences
+
+**Note:** `GameState` (V1) still exists as a bridge during migration but is being phased out.
 
 **Gap:** ⚠️ Up to 60-second data loss window if crash occurs between auto-saves.
 
@@ -416,14 +400,14 @@ iex> Loka.Engine.WorldExporter.export_all("/tmp/backup.yml")
 iex> Loka.Engine.WorldImporter.import_from_file("/tmp/backup.yml")
 ```
 
-**Prototype Versioning (Git):**
+**Content Versioning (Git):**
 ```bash
 # Rollback content changes
 git log --oneline priv/world/prototypes/
 git revert <commit>
 git push
-# Then reload on server:
-iex> TypedObject.Loader.reload()
+# Then re-seed on server:
+iex> Loka.Engine.EntitySeeder.seed()
 ```
 
 ### Current LLM Integration Points
@@ -597,10 +581,10 @@ end
 
 ### Quick Wins (Can Implement Today)
 
-1. **Add "Reload Content" button to Admin Dashboard**
-   - Location: `lib/loka_web/live/admin_live/system_tab.ex`
-   - Action: Call `TypedObject.Loader.reload()` + all registry reloads
-   - Effort: 30 minutes
+1. **Add "reload" command to Builder**
+   - Location: `lib/loka_web/channels/game_channel/builder_commands/`
+   - Action: Call `EntitySeeder.seed()` with safety checks
+   - Effort: 1 hour
 
 2. **Create pre-shutdown announcement task**
    - Mix task: `mix loka.deploy.announce "Restarting in 5 minutes"`
@@ -656,10 +640,10 @@ end
 
 | Change Type | Current Method | Restart Required? | Player Disconnect? | Recommended Improvement |
 |-------------|---------------|-------------------|-------------------|------------------------|
-| Room descriptions | Edit YAML → reload | ❌ No | ❌ No | ✅ Already optimal |
-| NPC dialogue | Edit YAML → reload | ❌ No | ❌ No | ✅ Already optimal |
-| Quest definitions | Edit YAML → reload | ❌ No | ❌ No | Add registry reload button |
-| Item stats | Edit YAML → reload | ❌ No | ❌ No | Notify EntityServers of change |
+| Room descriptions | Edit YAML → re-seed | ❌ No | ❌ No | Add builder reload command |
+| NPC dialogue | Edit YAML → re-seed | ❌ No | ❌ No | Add builder reload command |
+| Quest definitions | Edit YAML → re-seed | ❌ No | ❌ No | Add builder reload command |
+| Item stats | Edit YAML → re-seed | ❌ No | ❌ No | Notify EntityServers of change |
 | Combat formulas | Edit code → deploy | ✅ Yes | ✅ Yes (30s) | **Move to YAML config** |
 | Database schema | Migration → deploy | ✅ Yes | ✅ Yes (30s) | Add graceful shutdown |
 | New features | Code → deploy | ✅ Yes | ✅ Yes (30s) | Use feature flags |
@@ -670,12 +654,12 @@ end
 ## Summary
 
 **What Works Well:**
-- ✅ Prototype hot-reload (YAML content)
+- ✅ Content re-seeding (YAML → SQLite entities)
 - ✅ 30-second session reconnect grace period
-- ✅ Combat state persistence across LiveView crashes
-- ✅ Comprehensive validation suite for LLM-generated content
-- ✅ Entity auto-save and save-on-termination
-- ✅ World export/import for backup and rollback
+- ✅ Single DB truth (no ETS/DB sync issues)
+- ✅ Comprehensive validation suite (`mix loka.test.validate`)
+- ✅ Entity auto-save and save-on-termination (60s interval)
+- ✅ Git-based content versioning and rollback
 
 **Critical Gaps:**
 - 🔴 Sessions don't survive server restarts
@@ -685,29 +669,29 @@ end
 - 🔴 No maintenance mode
 
 **For LLM-Assisted Development:**
-- ✅ Strong validation infrastructure
+- ✅ Strong validation infrastructure (`mix loka.test.validate`)
 - ✅ Dependency graph analysis tools
 - ✅ Human-readable error formatting
-- ✅ Content rollback via WorldExporter/Git
-- ⚠️ Admin dashboard lacks "Reload Content" button
+- ✅ Content rollback via Git (YAML files)
+- ⚠️ Builder lacks "reload" command (must use IEx)
 
 **Recommended Priority Order:**
 1. Add graceful shutdown with announcements (1 day)
-2. Add "Reload Content" admin button (30 min)
+2. Add "reload" builder command (1 hour)
 3. Implement maintenance mode (1 day)
-4. Move combat formulas to YAML config (3-5 days)
+4. Move combat formulas to components (2-3 days)
 5. Session persistence across restarts (2-3 days)
-6. Combat state persistence to DB (2-3 days)
+6. Incremental content updates (no full re-seed) (3-5 days)
 
 ---
 
 ## References
 
 **Key Files Analyzed:**
-- `lib/loka/engine/typed_object/loader.ex` - TypedObject hot-reload
+- `lib/loka/engine/entity_seeder.ex` - Content seeding from YAML
 - `lib/loka/engine/entity_server.ex` - Entity lifecycle
 - `lib/loka/session/server.ex` - Session management
-- `lib/loka/framework/combat/combat_server.ex` - Combat state
+- `lib/loka/game/actions/combat.ex` - Combat actions
 - `fly.toml` - Deployment configuration
 
 **Related Documentation:**
