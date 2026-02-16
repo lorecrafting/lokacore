@@ -1,0 +1,92 @@
+[info] [Session.Registry] Started with room index table
+[info] [Session.Supervisor] Starting
+[info] Balance config loaded from priv/config/balance.yml
+[info] TypedObject.Loader loaded 287 objects
+[info] TypedObject.Loader loaded 287 objects
+[info] SocialLoader loaded 114 socials
+[info] [LayoutManager] Registered hooks for automatic coordinate updates
+[info] [ChannelManager] Starting
+[info] [PartyManager] Starting
+[info] Elixir.Loka.Admin.GameLog started
+[info] Elixir.Loka.Framework.Quest.ObjectiveRegistry started with 5 handlers
+[info] Elixir.Loka.Framework.Quest.QuestRegistry loaded 16 quests
+[info] Elixir.Loka.Framework.Quest.TimerManager started
+[info] Elixir.Loka.Framework.Quest.ChainRegistry loaded 0 chains
+[info] Loka.Framework.Storyline.StorylineRegistry loaded 1 storylines
+[info] Loka.Framework.Gathering.GatheringRegistry loaded 12 gathering nodes
+[info] Loka.Framework.Crafting.CraftingRegistry loaded 7 recipes
+[info] Loka.Framework.Skills.BinarySkillRegistry loaded 20 binary skills
+[info] Loka.Framework.Resources.ResourceRegistry loaded 5 resources
+[info] [Timers.Server] Starting with 0 pending timers
+[info] DayNight cycle initialized (3600s cycle)
+[info] Weather system initialized with 6 weather types, 6 regions
+[info] Room ambient scheduler initialized (phase-aware)
+[info] NPC ambient scheduler initialized
+[info] [WorldEventHandler] Started and subscribed to world:events
+[info] ZoneLoader loaded 2 zones
+[info] ContentValidator: Running mandatory content validation...
+[info] Quest.Validator: Checked 16 quests, 0 errors, 0 warnings
+[info] ContentValidator: Checked content - 0 errors, 0 warnings
+[info] ContentValidator: All validations passed!
+[info] Quest.Listeners: Registering quest hooks...
+[info] Quest.Listeners: All hooks registered
+[info] Room: Registering room entry hooks...
+[info] WorldLoader: World already spawned (monastery_gate exists), skipping
+
+╔════════════════════════════════════════════╗
+║     Loka Content Validation Suite         ║
+╚════════════════════════════════════════════╝
+
+▶ Running: World Connectivity
+[info] WorldValidator: Checked 37 rooms, 36 reachable, 0 errors, 0 warnings
+▶ Running: Quest Completability (Prototypes)
+[info] QuestValidator: Checked 0 quests, 0 errors, 0 warnings
+▶ Running: Quest Completability (YAML)
+[info] Quest.Validator: Checked 16 quests, 0 errors, 0 warnings
+▶ Running: Prototype Definitions
+[info] PrototypeLinter: Checked 6 prototypes, 0 errors, 0 warnings
+▶ Running: Dialogue Trees
+[info] DialogueValidator: Checked 26 NPCs, 363 nodes, 0 errors, 19 warnings
+▶ Running: Dialogue Quest Chains
+▶ Running: Content Reachability
+[info] ReachabilityAnalyzer: 0 errors, 52 warnings
+▶ Running: Cutscene Definitions
+[info] CutsceneValidator: Checked 15 cutscenes, 0 errors, 1 warnings
+▶ Running: Crafting Recipes
+▶ Running: Storyline Structure
+[info] CraftingValidator: Checked 7 recipes, 0 errors, 1 warnings
+[info] StorylineValidator: Checked 1 storylines, 0 errors, 0 warnings
+▶ Running: UI/Data Consistency
+[info] UIValidator: Checked 127 entities, 0 errors, 2 warnings
+▶ Running: Wander Behavior Configs
+[info] WanderValidator: Checked 0 NPCs, 0 errors, 0 warnings
+▶ Running: Entity-Prototype Sync
+[info] EntitySyncValidator: Checked 88 entities, 0 errors, 0 warnings
+
+════════════════════════════════════════════
+                  RESULTS
+════════════════════════════════════════════
+
+✅ PASSED World Connectivity
+✅ PASSED Quest Completability (Prototypes)
+✅ PASSED Quest Completability (YAML)
+✅ PASSED Prototype Definitions
+✅ PASSED (with warnings) Dialogue Trees
+   Warnings: 19
+✅ PASSED (with warnings) Dialogue Quest Chains
+   Warnings: 2
+✅ PASSED (with warnings) Content Reachability
+   Warnings: 52
+✅ PASSED (with warnings) Cutscene Definitions
+   Warnings: 1
+✅ PASSED (with warnings) Crafting Recipes
+   Warnings: 1
+✅ PASSED Storyline Structure
+✅ PASSED (with warnings) UI/Data Consistency
+   Warnings: 2
+✅ PASSED Wander Behavior Configs
+✅ PASSED Entity-Prototype Sync
+
+────────────────────────────────────────────
+Total: 0 errors, 77 warnings
+

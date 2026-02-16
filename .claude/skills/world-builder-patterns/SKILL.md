@@ -72,6 +72,51 @@ When building YAML strings with Elixir heredocs (`~s"""`), the dedent strips lea
 """
 ```
 
+## RoomManager Dual-Storage Sync (Critical)
+
+Rooms exist in BOTH the TypedObject registry (YAML-backed) and the entity database (SQLite). Any RoomManager operation MUST sync both stores or the game world will be inconsistent.
+
+```elixir
+# BAD - Only updating YAML/registry (rooms invisible to game engine)
+save_room_yaml(room_data)
+
+# GOOD - Save YAML, then spawn/update the DB entity
+save_room_yaml(room_data)
+Spawner.spawn_room(key)  # for create
+Entities.get_entity_by_key(key) |> Entities.update_entity(attrs)  # for update
+```
+
+### Key sync points:
+- **create_room**: YAML save → `Spawner.spawn_room(key)` → return enriched entity
+- **update_room**: YAML save → `Entities.get_entity_by_key()` → `Entities.update_entity()`
+- **delete_room**: Find DB entity by key (NOT by room_id) → `Entities.delete_entity()`
+- **add_exit**: Update YAML exits → `spawn_exit_entity()` with proper `location_id`/`destination_id`
+- **remove_exit**: `despawn_exit_entity()` → then update YAML exits
+
+### UUID vs Key lookup:
+Registry indexes by **key**, DB indexes by **UUID**. When a room exists in both stores, UUID lookups hit the DB path and miss YAML sync. Use `maybe_promote_to_registry/1` to redirect:
+
+```elixir
+# In get_room_from_db, after finding DB entity:
+defp maybe_promote_to_registry(%{key: key} = schema) do
+  case Registry.get(key) do
+    {:ok, %{subtype: :room} = typed_obj} -> {:ok, {:registry, typed_obj}}
+    _ -> {:ok, {:db, schema}}
+  end
+end
+```
+
+### EntitySchema.from_entity excludes attributes:
+`attributes` is a `has_many` association (`EntityAttribute` table). Coordinates from YAML `attributes:` are lost after entity save→load. Fall back to TypedObject registry:
+
+```elixir
+case Loader.get(room.key) do
+  {:ok, typed_obj} ->
+    TypedObject.get_attribute(typed_obj, :x) || 0
+  _ -> 0
+end
+```
+
 ## Common Bug Patterns
 
 ### Pattern 1: Property Access on Wrong Level

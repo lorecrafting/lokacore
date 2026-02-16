@@ -166,7 +166,7 @@ func render_dialogue(data: Dictionary, history: Array) -> String:
 # Menu Rendering
 # =============================================================================
 
-## Menu tab enum (mirrors BookPage.MenuTab)
+## Menu tab enum (mirrors LokaBook.MenuTab)
 enum MenuTab { INVENTORY, EQUIPMENT, CHARACTER, QUESTS, MAP, SOCIAL, SETTINGS }
 
 ## Render menu header and tab bar
