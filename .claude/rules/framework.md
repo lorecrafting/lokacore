@@ -20,7 +20,7 @@ The framework contains ~25 game subsystems that implement game mechanics on top 
            ↑ calls ↓ returns events
      Framework Layer (Quest, Combat, Crafting...)
            ↑ calls ↓ returns data
-     Engine Layer (Entity, TypedObject, Hooks...)
+     Engine Layer (Entity, EntityServer, StateMachine, Hooks...)
 ```
 
 **CRITICAL**: Framework should NEVER import from `LokaWeb.*`
@@ -32,25 +32,11 @@ Every framework subsystem follows this structure:
 ```
 lib/loka/framework/my_subsystem/
 ├── my_subsystem.ex       # Public API
-├── my_registry.ex        # YAML/ETS storage (use RegistryBase)
-├── my_struct.ex          # Data structure
+├── my_struct.ex          # Data structure (optional)
 └── handlers/             # Event handlers (if needed)
 ```
 
-### Registry Pattern
-```elixir
-defmodule Loka.Framework.MySubsystem.MyRegistry do
-  use Loka.Framework.RegistryBase,
-    table_name: :my_subsystem,
-    directory: "priv/world/my_subsystem",
-    schema: Loka.Framework.MySubsystem.MyStruct
-
-  # RegistryBase provides:
-  # - get/1, list/0, reload/0
-  # - YAML loading on startup
-  # - ETS storage for fast lookup
-end
-```
+Framework subsystems use `Entities.find/1` for data access. The DB is the single source of truth — no ETS registries.
 
 ## Existing Subsystems (~25)
 
@@ -70,7 +56,7 @@ end
 ```elixir
 def execute_action(ctx, params) do
   result = Result.new(
-    state: %{game_state: updated_state},
+    state: %{entity: updated_entity},
     events: [{:my_event, data}]
   )
   {:ok, result}
@@ -79,7 +65,7 @@ end
 
 ### Quest Progress Pattern
 ```elixir
-Quest.update_progress(game_state, %{
+Quest.update_progress(entity, %{
   type: :talk,        # or :kill, :get_item, :go_to
   target_id: "npc_key"
 })

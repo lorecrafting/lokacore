@@ -24,11 +24,11 @@ These are architectural constants that must remain true:
    - Dirty flag triggers auto-save
    - State lives in GenServer process
 
-3. **TypedObject resolution order**
+3. **Entity resolution order**
    ```
    Content modules (Quest, Dialogue, Script, Zone)
-        ↓ (if not found)
-   Legacy loaders (YAML files, Database)
+        ↓ uses
+   Entities.find_one(key: key, type: :quest)  # DB is single source of truth
    ```
 
 4. **Hook system has 22 lifecycle events**
@@ -50,21 +50,9 @@ EntityServer.call(entity_id, :get_state)
 # Process created on first access, auto-despawns on inactivity
 ```
 
-### RegistryBase for Subsystems
-```elixir
-# New subsystems should use this macro
-defmodule Loka.Framework.MySubsystem.MyRegistry do
-  use Loka.Framework.RegistryBase,
-    table_name: :my_registry,
-    directory: "priv/world/my_data",
-    schema: MyStruct
-end
-```
-
 ### PubSub Topics
-- `room:{id}` - Room events (entry, exit, actions)
-- `player:{id}` - Player-specific events
-- `entity:{id}` - Entity lifecycle events
+- `location:{id}` - Room/location events (entry, exit, actions)
+- `entity:{id}` - Entity-specific events (lifecycle, player events)
 
 ### Error Handling
 ```elixir
@@ -98,13 +86,10 @@ end
 | `entity.ex` | Core entity struct |
 | `entity_server.ex` | GenServer lifecycle |
 | `entity_registry.ex` | Entity lookup |
-| `typed_object/` | Unified content system |
+| `entity_seeder.ex` | YAML → DB seeding on startup |
+| `state_machine.ex` | Shared state machine engine |
 | `hooks.ex` | Lifecycle events |
 | `locks.ex` | Access control |
-
-## Related Skills
-
-- `.claude/skills/typed-object-field-storage.md` - TypedObject internals and field storage
 
 ## Documentation
 

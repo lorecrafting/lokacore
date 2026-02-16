@@ -1,4 +1,4 @@
-# NPC Behaviors System
+# NPC Behaviors (V2 Trait System)
 
 Pre-built, configurable NPC behaviors assignable via YAML. Based on DikuMUD special procedures.
 
@@ -11,6 +11,11 @@ Pre-built, configurable NPC behaviors assignable via YAML. Based on DikuMUD spec
 | Patrol | Walk predefined route | `lib/loka/behaviors/patrol.ex` |
 | Scavenger | Pick up valuable items | `lib/loka/behaviors/scavenger.ex` |
 | Janitor | Clean up trash/corpses | `lib/loka/behaviors/janitor.ex` |
+| Wander | Random movement | `lib/loka/behaviors/wander.ex` |
+| Weather | Advance weather state | `lib/loka/behaviors/weather.ex` |
+| DayNight | Advance time of day | `lib/loka/behaviors/day_night.ex` |
+| NpcAmbient | Emit idle emotes | `lib/loka/behaviors/npc_ambient.ex` |
+| RoomAmbient | Atmospheric messages | `lib/loka/behaviors/room_ambient.ex` |
 
 **See each module's `@moduledoc` for full configuration options and examples.**
 
@@ -19,101 +24,115 @@ Pre-built, configurable NPC behaviors assignable via YAML. Based on DikuMUD spec
 ```
 ┌─────────────────────────────────────────────────────────┐
 │ YAML Prototype                                          │
-│   behaviors: [Loka.Behaviors.Guard, ...]              │
-│   behavior_config: { guard: { attack_tags: [...] } }   │
+│   traits: [Loka.Behaviors.Guard, ...]                  │
+│   components:                                           │
+│     guard: { attack_tags: [...] }                       │
 ├─────────────────────────────────────────────────────────┤
-│ Behaviors.Runner                                        │
-│   Processes events through behavior chain               │
-│   Manages per-behavior state in entity attributes       │
+│ EntityServer (on_tick / on_event)                       │
+│   Dispatches to each trait module                       │
+│   Manages per-trait state in entity components          │
 ├─────────────────────────────────────────────────────────┤
 │ Individual Behaviors (Guard, Patrol, etc.)              │
-│   Each implements handle_event/3 callback               │
-│   Reads config via get_config(entity, __MODULE__)       │
+│   Each implements EntityBehavior callbacks               │
+│   Reads config from entity.components                   │
 └─────────────────────────────────────────────────────────┘
 ```
 
-### Event Processing Flow
+## EntityBehavior Interface
 
-1. Event arrives (`:entity_entered`, `:tick`, etc.)
-2. `Runner.process_event/2` iterates through entity's behaviors
-3. Each behavior's `handle_event/3` is called with entity, event, state
-4. Processing stops when a behavior returns `{:handled, ...}` or `{:halt, ...}`
+All compiled behavior modules implement `Loka.Engine.EntityBehavior`:
 
-### Return Values
+```elixir
+@callback on_init(entity :: Entity.t()) :: {:ok, Entity.t()}
+@callback on_tick(entity :: Entity.t(), delta :: integer()) :: {:ok, Entity.t()} | :noop
+@callback on_event(entity :: Entity.t(), event :: term(), context :: map()) :: {:ok, Entity.t()} | :noop
+```
 
-| Return | Meaning |
-|--------|---------|
-| `{:ok, state}` | Continue to next behavior |
-| `{:ok, state, events}` | Continue, emit these events |
-| `{:handled, state}` | Stop chain, event was handled |
-| `{:handled, state, events}` | Stop chain, emit events |
-| `{:halt, reason}` | Block the action (for `:before_*` events) |
+### Lifecycle
 
-### State Persistence
+1. `on_init/1` — called when entity starts, set up initial state
+2. `on_tick/2` — called on periodic timer (configurable interval)
+3. `on_event/3` — called when entity receives events (entity_entered, damage_taken, etc.)
 
-Behavior state stored at `entity.attributes["behavior_state:<behavior_key>"]`.
-Persists across events and entity saves.
+## Trait Types
 
-## Combining Behaviors
+Traits can be compiled modules or script maps:
 
-Behaviors are additive. Order matters - first to return `{:handled, ...}` stops the chain.
+```elixir
+entity.traits = [
+  Loka.Behaviors.Guard,                              # Compiled module
+  Loka.Behaviors.Patrol,                             # Compiled module
+  %{"script" => "ambient_emote", "config" => %{}}   # Script trait (YAML-defined)
+]
+```
+
+Script traits are dispatched via `dispatch_script_traits_tick/1` in EntityServer.
+
+## Combining Traits
+
+Traits are additive. Each trait processes events independently.
 
 ```yaml
 key: city_guard
-behaviors:
-  - Loka.Behaviors.Guard      # Attack criminals
-  - Loka.Behaviors.Patrol     # Walk route
-attributes:
-  behavior_config:
-    guard:
-      attack_tags: [criminal]
-    patrol:
-      path: [gate, square, gate]
+traits:
+  - Loka.Behaviors.Guard
+  - Loka.Behaviors.Patrol
+components:
+  guard:
+    attack_tags: [criminal]
+  patrol:
+    path: [gate, square, gate]
+```
+
+## State Storage
+
+Trait state is stored in `entity.components` under the trait's component key.
+State persists across ticks and entity saves.
+
+```elixir
+# In a behavior module:
+def on_tick(entity, _delta) do
+  state = entity.components["patrol"] || %{}
+  # Update state...
+  updated = put_in(entity.components["patrol"], new_state)
+  {:ok, %{entity | components: updated}}
+end
 ```
 
 ## Creating Custom Behaviors
 
 ```elixir
 defmodule Loka.Behaviors.MyBehavior do
-  use Loka.Behaviors.Base
+  @behaviour Loka.Engine.EntityBehavior
 
   @impl true
-  def supported_types, do: [:npc]
+  def on_init(entity), do: {:ok, entity}
 
   @impl true
-  def handle_event(entity, %Event{type: :some_event}, state) do
-    config = get_config(entity, __MODULE__)
+  def on_tick(entity, _delta) do
+    config = entity.components["my_behavior"] || %{}
     # Your logic here
-    {:ok, state}
+    {:ok, entity}
   end
 
-  def handle_event(_entity, _event, state), do: {:ok, state}
+  @impl true
+  def on_event(entity, _event, _context), do: :noop
 end
 ```
 
-### Helper Functions (via `use Loka.Behaviors.Base`)
-
-| Function | Description |
-|----------|-------------|
-| `get_config(entity, module)` | Get behavior config map |
-| `has_tag?(entity, tag)` | Check if entity has tag |
-| `has_any_tag?(entity, tags)` | Check if entity has any tag |
-| `health_percent(entity)` | Health as 0-100 |
-| `location(entity)` | Current location ID |
-
-### Common Events
+## Common Events
 
 | Event | When | Payload |
 |-------|------|---------|
 | `:entity_entered` | Entity enters room | `%{entity: ...}` |
-| `:before_move` | Before movement | `%{direction: ...}` |
-| `:item_dropped` | Item dropped | `%{item: ...}` |
+| `:entity_left` | Entity leaves room | `%{entity: ...}` |
 | `:tick` | Periodic timer | `%{}` |
 | `:damage_taken` | Entity hurt | `%{damage: ..., source: ...}` |
+| `:time_change` | Day/night transition | `%{period: ...}` |
 
 ## Best Practices
 
-1. **Always handle unknown events** with `def handle_event(_, _, state), do: {:ok, state}`
-2. **Use `{:handled, ...}` sparingly** - only when the event is truly consumed
-3. **Keep state minimal** - entity attributes persist, don't store redundant data
-4. **Log at debug level** - helps troubleshoot without noise in production
+1. **Return `:noop` for unhandled events** — don't modify entity unnecessarily
+2. **Keep state minimal** — component data persists, don't store redundant data
+3. **Use component accessors** — `Components.Combatant.health(entity)` over raw map access
+4. **Log at debug level** — helps troubleshoot without noise in production

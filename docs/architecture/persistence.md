@@ -1,155 +1,105 @@
-# Persistence Architecture
+# Persistence Architecture (V2)
 
-Loka uses a persistence pattern that balances flexibility with queryability.
+Loka uses SQLite as the single source of truth. All game data lives in entities.
 
 ## Design
 
-Loka separates structured data (entities) from flexible attributes:
-
-| Concept | Loka Implementation |
-|---------|----------------------|
-| Entity storage | EntitySchema |
-| Flexible attributes | EntityAttribute (EAV table) |
-| Component data | Entity components (JSON text) |
+| Concept | Implementation |
+|---------|----------------|
+| Entity storage | `entities` table (UUID PK) |
+| Game data | `components` JSON field |
+| Tags | `entity_tags` join table |
+| Audit trail | `entity_logs` table |
 | Serialization | JSON (via `Loka.Ecto.Json`) |
 
-**Note**: Loka uses JSON for queryability and human-readability. This means **map keys become strings** when loaded from the database.
+**Note**: JSON means **map keys become strings** when loaded from the database. Use `entity.components["health"]` not `entity.components.health`.
 
 ## Database Schema
 
 ### Entities Table
-```elixir
-create table(:entities, primary_key: false) do
-  add :id, :uuid, primary_key: true
-  add :type, :string, null: false      # room, npc, item, exit, character
-  add :key, :string, null: false       # Prototype key (NOT unique - see below)
-  add :name, :string
-  add :description, :text
-  add :location_id, references(:entities, type: :uuid, on_delete: :nilify_all)
-
-  # Serialized JSON text fields (queryable)
-  add :components, :text               # Map of components
-  add :behaviors, :text                # List of behavior modules
-  add :tags, {:array, :string}, default: []
-  add :locks, :text                    # Access control map
-  add :scripts, :text                  # Elixir script assignments
-  add :metadata, :text                 # Timestamps, versions
-
-  timestamps(type: :utc_datetime)
-end
-
-# Non-unique index on key (multiple entities share the same prototype key)
-create index(:entities, [:key])
+```sql
+CREATE TABLE entities (
+  id          TEXT PRIMARY KEY,    -- UUID
+  type        TEXT NOT NULL,       -- room, npc, item, exit, character, quest, etc.
+  key         TEXT NOT NULL,       -- Prototype key (NOT unique)
+  prototype_key TEXT,              -- Parent prototype for inheritance
+  is_prototype INTEGER DEFAULT 0, -- Whether this is a prototype definition
+  version     INTEGER DEFAULT 1,  -- Optimistic locking
+  short_desc  TEXT,                -- Action/speech identifier
+  long_desc   TEXT,                -- Room listing sentence
+  extra_desc  TEXT,                -- Detailed examination text
+  keywords    TEXT,                -- JSON array of targeting words
+  primary_keyword TEXT,            -- Single keyword for UI
+  mood        TEXT,                -- Current mood
+  location_id TEXT REFERENCES entities(id),
+  account_id  TEXT REFERENCES players(id),
+  components  TEXT,                -- JSON map of all game data
+  traits      TEXT,                -- JSON list of behavior modules/scripts
+  tags        TEXT,                -- JSON array (deprecated, use entity_tags)
+  scripts     TEXT,                -- JSON map of script assignments
+  metadata    TEXT,                -- JSON map (timestamps, versions)
+  inserted_at TEXT,
+  updated_at  TEXT
+);
 ```
 
-**Key vs ID**: The `key` column stores the prototype key (e.g., "goblin") and is NOT unique. Multiple entities spawned from the same prototype share the same key. Use `id` (UUID) for instance-specific lookups. See [Entity System - Unified Key System](./entity-system.md#key-vs-id-unified-key-system).
+**Key vs ID**: `key` stores the prototype key (e.g., "goblin") and is NOT unique. Multiple instances share the same key. Use `id` (UUID) for instance-specific lookups.
 
-### Entity Attributes Table (EAV Pattern)
-```elixir
-create table(:entity_attributes, primary_key: false) do
-  add :id, :uuid, primary_key: true
-  add :entity_id, references(:entities, type: :uuid, on_delete: :delete_all), null: false
-  add :key, :string, null: false       # Attribute name
-  add :category, :string, default: "default"
-  add :value, :text, null: false       # JSON serialized
-  add :str_value, :string              # Searchable string representation
-
-  timestamps(type: :utc_datetime)
-end
-
-create unique_index(:entity_attributes, [:entity_id, :category, :key])
+### Entity Tags Table
+```sql
+CREATE TABLE entity_tags (
+  entity_id TEXT NOT NULL REFERENCES entities(id) ON DELETE CASCADE,
+  tag       TEXT NOT NULL,
+  PRIMARY KEY (entity_id, tag)
+);
 ```
 
-### Scripts Table
-```elixir
-create table(:scripts) do
-  add :name, :string, null: false
-  add :description, :text
-  add :source, :text, null: false      # Elixir source code
-  add :hook, :string                   # on_enter, on_attack, etc.
-  add :enabled, :boolean, default: true
-
-  timestamps(type: :utc_datetime)
-end
+### Entity Logs Table
+```sql
+CREATE TABLE entity_logs (
+  id         TEXT PRIMARY KEY,
+  entity_id  TEXT NOT NULL REFERENCES entities(id) ON DELETE CASCADE,
+  action     TEXT NOT NULL,
+  data       TEXT,              -- JSON payload
+  actor_id   TEXT,
+  inserted_at TEXT
+);
 ```
 
-## Custom Ecto Type for JSON Serialization
+## Custom Ecto Type for JSON
 
 ```elixir
 defmodule Loka.Ecto.Json do
-  @moduledoc """
-  Custom Ecto type for storing arbitrary Elixir terms as JSON.
-  Provides queryability and human-readable storage.
-
-  IMPORTANT: Map keys become strings when loaded from the database.
-  Code must use string keys: `Map.get(data, "key")` not `data.key`
-  """
+  @moduledoc "Stores Elixir terms as JSON. Map keys become strings on load."
   use Ecto.Type
 
   def type, do: :string
-
   def cast(term), do: {:ok, term}
-
   def load(nil), do: {:ok, nil}
-  def load(json) when is_binary(json) do
-    case Jason.decode(json) do
-      {:ok, term} -> {:ok, term}
-      {:error, _} -> :error
-    end
-  end
-
+  def load(json), do: Jason.decode(json)
   def dump(nil), do: {:ok, nil}
-  def dump(term) do
-    case Jason.encode(prepare_for_json(term)) do
-      {:ok, json} -> {:ok, json}
-      {:error, _} -> :error
-    end
-  end
-
-  # Converts atoms to strings, tuples to lists, etc.
-  defp prepare_for_json(term), do: # ... conversion logic
+  def dump(term), do: Jason.encode(prepare_for_json(term))
 end
 ```
 
-### String Keys on Load
-
-When data is loaded from the database, all map keys will be strings:
+## Entities API
 
 ```elixir
-# Saving (atom keys work)
-entity = %Entity{components: %{health: %{current: 100, max: 100}}}
-Entities.save_entity(entity)
+# Find entities
+Entities.find_one("uuid-here")                      # By UUID
+Entities.find_one(key: "goblin", type: :npc)        # By key + type
+Entities.find_all(type: :room)                      # All rooms
+Entities.find_all(location_id: room_id)             # Contents of a room
+Entities.find(key: "goblin", type: :npc)            # Returns list
 
-# Loading (use string keys!)
-loaded = Entities.get_entity!(id)
-loaded.components["health"]["current"]  # => 100
-```
+# Save and delete
+Entities.save(entity)                                # Insert or update
+Entities.delete(entity_id)                           # Delete by ID
 
-## Attribute System (EAV)
-
-The Entity-Attribute-Value pattern allows flexible storage:
-
-```elixir
-# Setting an attribute
-Entities.set_attribute(entity_id, "health", 100)
-Entities.set_attribute(entity_id, "quest_progress", %{quest_id: "q1", step: 3})
-
-# Getting attributes
-Entities.get_attribute(entity_id, "health")  # => 100
-Entities.get_attributes_by_category(entity_id, "stats")  # => [%{key: "health", ...}]
-
-# Searching by string representation
-Entities.search_by_attribute("quest_progress", "q1")  # Finds entities with matching str_value
-```
-
-### str_value Computation
-
-```elixir
-defp compute_str_value(value) when is_binary(value), do: value
-defp compute_str_value(value) when is_number(value), do: to_string(value)
-defp compute_str_value(value) when is_atom(value), do: to_string(value)
-defp compute_str_value(value) when is_boolean(value), do: to_string(value)
-defp compute_str_value(value), do: inspect(value)
+# Tags
+Entities.add_tag(entity_id, "auto_start")
+Entities.remove_tag(entity_id, "auto_start")
+Entities.find_by_tag("auto_start")
 ```
 
 ## Caching Strategy
@@ -157,82 +107,24 @@ defp compute_str_value(value), do: inspect(value)
 ```
 Layer 1: Entity process state (GenServer)
     ↓ miss
-Layer 2: ETS tables (shared read)
-    ↓ miss
-Layer 3: SQLite (persistent)
+Layer 2: SQLite (persistent, single source of truth)
 ```
 
-```elixir
-def get_entity(entity_id) do
-  case :ets.lookup(:loka_entities, entity_id) do
-    [{^entity_id, entity}] -> {:ok, entity}
-    [] ->
-      # Cache miss - load from database
-      case load_from_db(entity_id) do
-        {:ok, entity} ->
-          :ets.insert(:loka_entities, {entity_id, entity})
-          {:ok, entity}
-        error -> error
-      end
-  end
-end
-```
+No ETS caching layer — the GenServer process IS the cache for active entities.
 
 ## Auto-Save System
 
 Active entities auto-save every 60 seconds if dirty (via EntityServer):
 
 ```elixir
-# EntityServer lifecycle timings (configurable)
 @save_interval 60_000     # 60 seconds
 @hibernate_after 120_000  # 2 minutes - reduce memory usage
 @idle_timeout 300_000     # 5 minutes - stop process
 ```
 
-See [Entity Lifecycle](./entity-lifecycle.md) for full EntityServer implementation.
+## Prototype Seeding
 
-## Conversion: Schema ↔ Entity Struct
-
-```elixir
-# Schema to runtime Entity
-def to_entity(%EntitySchema{} = schema) do
-  %Entity{
-    id: schema.id,
-    type: String.to_existing_atom(schema.type),
-    key: schema.key,
-    name: schema.name,
-    description: schema.description,
-    location_id: schema.location_id,
-    components: schema.components || %{},
-    behaviors: schema.behaviors || [],
-    tags: schema.tags || [],
-    locks: schema.locks || %{},
-    scripts: schema.scripts || %{},
-    metadata: schema.metadata || %{}
-  }
-end
-
-# Runtime Entity to Schema params
-def to_schema_params(%Entity{} = entity) do
-  %{
-    type: to_string(entity.type),
-    key: entity.key,
-    name: entity.name,
-    description: entity.description,
-    location_id: entity.location_id,
-    components: entity.components,
-    behaviors: entity.behaviors,
-    tags: entity.tags,
-    locks: entity.locks,
-    scripts: entity.scripts,
-    metadata: entity.metadata
-  }
-end
-```
-
-## Prototype-Based Content
-
-Game content is defined in YAML files and loaded into entities via the prototype system:
+Game content is defined in YAML and seeded into the DB on startup:
 
 ```
 priv/world/prototypes/
@@ -243,23 +135,16 @@ priv/world/prototypes/
 └── exits/          # Exit prototypes
 ```
 
-**Flow**: YAML → TypedObject.Loader (ETS) → Spawner → EntitySchema (SQLite)
+**Flow**: YAML → EntitySeeder (startup) → entities table (SQLite)
 
 ```elixir
-# Load prototypes on startup
-TypedObject.Loader.reload()
-
-# Spawn entity from prototype
-Spawner.spawn("goblin", location_id: room_id)
-
-# Export entities back to YAML (backup)
-WorldExporter.export_all("output/")
+# EntitySeeder runs on application start:
+# 1. Resolves prototype inheritance (topological sort + deep merge)
+# 2. Seeds in phases: non-located → rooms → exits → NPCs/items
+# 3. Skips entities that already exist (idempotent)
 ```
 
-See [Prototypes](./prototypes.md) for YAML format and inheritance.
-
 ## Related
-- [Entity System](./entity-system.md) - Entity structure and behaviors
+- [Entity System](./entity-system.md) - Entity structure and traits
 - [Entity Lifecycle](./entity-lifecycle.md) - EntityServer auto-save
 - [Prototypes](./prototypes.md) - YAML-based entity templates
-- [Full Specification](../../Loka_Engine_Architecture.md) - Part 9: Persistence Layer

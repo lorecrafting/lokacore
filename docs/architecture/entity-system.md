@@ -1,197 +1,192 @@
-# Entity System Architecture
+# Entity System Architecture (V2)
 
-Loka uses a composition-based **Entity-Component-Behavior** model that maps naturally to Elixir's functional paradigm.
+Loka uses a unified entity system where everything is an entity. The database is the single source of truth.
 
 ## Core Entity Structure
 
 ```elixir
 defmodule Loka.Engine.Entity do
   defstruct [
-    :id,              # Unique identifier (UUID) - instance identity
-    :type,            # :character | :room | :item | :npc | :exit
-    :key,             # Prototype key (e.g., "goblin") - type identity
-    :name,            # Display name
-    :description,     # Full description
+    :id,              # UUID - instance identity
+    :type,            # :character | :room | :item | :npc | :exit | :quest | :skill | ...
+    :key,             # Prototype key (e.g., "goblin") - NOT unique
+    :prototype_key,   # Parent prototype for inheritance
+    :short_desc,      # Action/speech identifier ("Novice Pema says...")
+    :long_desc,       # Room listing sentence
+    :extra_desc,      # Detailed examination text
+    :keywords,        # Targeting words ["monk", "young", "pema"]
+    :primary_keyword, # Single keyword for UI
+    :mood,            # Current mood affecting display
     :location_id,     # Where this entity is (parent entity ID)
-    :contents,        # List of entity IDs contained within
-    :components,      # Map of component_type => component_data
-    :behaviors,       # List of behavior modules
-    :attributes,      # Flexible key-value storage (EAV pattern)
-    :tags,            # Categorization tags
-    :scripts,         # Attached Elixir scripts
-    :locks,           # Access control rules
-    :metadata,        # System metadata (timestamps, versions)
+    :account_id,      # Player account link (for characters)
+    is_prototype: false,
+    version: 1,       # Optimistic locking
+    components: %{},  # All game data (JSON map)
+    traits: [],       # Behavior modules or script maps
+    tags: [],         # Categorization tags
+    scripts: %{},     # Elixir script assignments
+    metadata: %{},    # System metadata
   ]
 end
 ```
 
+### V2 Changes from V1
+
+| V1 Field | V2 Equivalent |
+|----------|--------------|
+| `data` | Merged into `components` |
+| `attributes` (EAV) | Merged into `components` |
+| `contents` | Derived via `Entities.find_all(location_id: id)` |
+| `locks` | `components["locks"]` |
+| `parent_key` | `metadata["parent_key"]` |
+| `behaviors` | Renamed to `traits` |
+| `name`/`description` | Split into `short_desc`/`long_desc`/`extra_desc` |
+
 ## Key vs ID: Unified Key System
 
-Loka uses a unified key system where:
-- **`id`** (UUID): Unique per instance - "which one is this?"
-- **`key`** (prototype key): Shared by all instances of a prototype - "what type is this?"
+- **`id`** (UUID): Unique per instance — "which one is this?"
+- **`key`** (prototype key): Shared by all instances of a prototype — "what type is this?"
 
 ```elixir
-# Two goblins spawned from the same prototype:
 goblin1 = %Entity{id: "abc123...", key: "goblin", ...}
 goblin2 = %Entity{id: "def456...", key: "goblin", ...}  # Same key, different id
 ```
 
-### Benefits
-- **Quest matching**: Quest objectives can match `entity.key` directly (e.g., "kill goblin")
-- **Simple mental model**: `key` = "what it is", `id` = "which one"
-- **No metadata workarounds**: No need to extract `prototype_key` from metadata
-
-### display_ref for Logging
-For human-readable logging that includes instance identity:
-```elixir
-Entity.display_ref(goblin1)  # => "goblin#abc123"
-Entity.display_ref(goblin2)  # => "goblin#def456"
-```
-
 ### Finding Entities
 ```elixir
-# Find all goblins
-Entities.get_all_by_key("goblin")  # => [%Entity{...}, %Entity{...}]
-
-# Find a specific goblin by UUID
-Entities.get_entity("abc123...")  # => %Entity{key: "goblin", id: "abc123..."}
+Entities.find_one("abc123...")                     # By UUID
+Entities.find_one(key: "goblin", type: :npc)       # By key + type
+Entities.find_all(type: :npc)                      # All NPCs
+Entities.find_all(location_id: room_id)            # Room contents
+Entities.find(key: "goblin", type: :npc)           # Returns list
 ```
 
 ## Component System
 
-Components are pure data containers that can be attached to any entity.
-
-**Important**: Components are stored as JSON, so when loaded from the database, map keys become strings. Use atom keys when working with components in code:
+Components are pure data stored in `entity.components` (JSON map). All game data lives here.
 
 ```elixir
-# Combat-capable entities
-defmodule Combatant do
-  defstruct [
-    :health,          # %{current: integer, max: integer}
-    :mana,            # %{current: integer, max: integer}
-    :stats,           # %{strength: int, dexterity: int, ...}
-    :combat_flags,    # [:can_attack, :can_defend, :can_flee]
-  ]
-end
+# Access via component accessor modules (lib/loka/components/)
+Components.Combatant.health(entity)          # => 100
+Components.Stats.level(entity)               # => 5
+Components.QuestProgress.active(entity)      # => [...]
 
-# Entities that can hold other entities
-defmodule Container do
-  defstruct [
-    :capacity,        # Max items/weight
-    :accepts,         # Item types accepted
-    :locked?,         # Whether container is locked
-    :lock_id,         # Key item ID needed to unlock
-  ]
-end
+# Direct access
+entity.components["combatant"]["health"]     # => 100
 
-# Entities with dialogue
-defmodule Conversant do
-  defstruct [
-    :dialogue_tree_id,  # Reference to dialogue tree
-    :current_node,      # Current conversation state
-    :memory,            # Conversation history with players
-  ]
+# Update
+entity = Components.Combatant.set_health(entity, 80)
+```
+
+### Component Accessor Modules (23 modules)
+
+| Module | Key | Domain |
+|--------|-----|--------|
+| `Combatant` | `"combatant"` | health, attack, defense |
+| `Player` | `"player"` | settings, character_name |
+| `Stats` | `"stats"` | str, dex, sta, level |
+| `QuestProgress` | `"quest_progress"` | active, completed, failed |
+| `Room` | `"room"` | spawns config |
+| `Exit` | `"exit"` | direction, destination |
+| `Equipment` | `"equipment"` | slot → entity UUID |
+| ... | ... | See `lib/loka/components/` for all 23 |
+
+## Trait System
+
+Traits define HOW entities behave. They replace V1's `behaviors` field.
+
+```elixir
+entity.traits = [
+  Loka.Behaviors.Guard,                           # Compiled module
+  Loka.Behaviors.Patrol,                          # Compiled module
+  %{"script" => "ambient_emote", "config" => %{}} # Script trait
+]
+```
+
+### EntityBehavior Interface
+
+All compiled trait modules implement `EntityBehavior`:
+
+```elixir
+defmodule Loka.Engine.EntityBehavior do
+  @callback on_init(entity :: Entity.t()) :: {:ok, Entity.t()}
+  @callback on_tick(entity :: Entity.t(), delta :: integer()) :: {:ok, Entity.t()} | :noop
+  @callback on_event(entity :: Entity.t(), event :: term(), context :: map()) :: {:ok, Entity.t()} | :noop
 end
 ```
 
-## Behavior System
+### Available Behaviors
 
-Behaviors define HOW entities act. They're Elixir modules that implement specific callbacks:
+| Behavior | Purpose |
+|----------|---------|
+| Guard | Attack tagged players, block directions |
+| Aggressive | Attack on sight with filters |
+| Patrol | Walk predefined route |
+| Scavenger | Pick up valuable items |
+| Janitor | Clean up trash/corpses |
+| Wander | Random movement |
+| Weather | Advance weather, broadcast changes |
+| DayNight | Advance time, emit time_change events |
+| NpcAmbient | Emit random idle emotes |
+| RoomAmbient | Emit atmospheric messages |
 
-```elixir
-defmodule Loka.Engine.Behavior do
-  @callback handle_event(entity :: Entity.t(), event :: Event.t(), context :: map()) ::
-    {:ok, Entity.t()} | {:ok, Entity.t(), [Event.t()]} | {:error, term()}
+## StateMachine
 
-  @callback can_handle?(entity :: Entity.t(), event_type :: atom()) :: boolean()
-end
-
-# Example: Default Object Behavior
-defmodule DefaultObject do
-  @behaviour Loka.Engine.Behavior
-
-  @impl true
-  def can_handle?(_entity, event_type) do
-    event_type in [:look, :get, :drop, :examine]
-  end
-
-  @impl true
-  def handle_event(entity, %Event{type: :look}, context) do
-    description = get_description(entity, context.viewer)
-    {:ok, entity, [%Event{type: :display, payload: description}]}
-  end
-
-  @impl true
-  def handle_event(entity, %Event{type: :get, actor: actor}, _context) do
-    case Lock.check(entity, :get, actor) do
-      :allowed ->
-        {:ok, entity, [
-          %Event{type: :move_entity, payload: %{entity: entity.id, to: actor.id}},
-          %Event{type: :message, payload: "You pick up #{entity.name}."}
-        ]}
-      {:denied, reason} ->
-        {:ok, entity, [%Event{type: :message, payload: reason}]}
-    end
-  end
-end
-```
-
-## Entity Lifecycle
-
-Entity lifecycle is managed via the **Hooks** system. Key lifecycle events:
-
-| Hook | When Called | Purpose |
-|------|-------------|---------|
-| `:at_entity_creation` | Entity first created | Set initial state |
-| `:at_post_load` | Entity loaded into memory | Restore runtime state |
-| `:at_pre_save` | Before entity is persisted | Validate, clean up |
-| `:at_entity_delete` | Entity being destroyed | Cleanup references |
+Shared state machine engine used by quests, combat, crafting, dialogue, NPC AI:
 
 ```elixir
-# Register a lifecycle hook
-Hooks.register(:at_entity_creation, MyGame.Combat, :on_create, priority: 10)
+@quest_machine StateMachine.new(%{
+  initial: "available",
+  transitions: %{
+    "available"            => ["accepted"],
+    "accepted"            => ["in_progress", "abandoned"],
+    "in_progress"         => ["objectives_complete", "abandoned", "failed"],
+    "objectives_complete" => ["turned_in", "abandoned"],
+    "abandoned"           => ["accepted"],
+    "failed"              => ["accepted"],
+  }
+})
 
-# The Registry pattern for active entities (lazy loading)
-EntityRegistry.get_or_start(entity_id)  # Returns {:ok, pid}
+{:ok, "in_progress"} = StateMachine.transition(@quest_machine, "accepted", "in_progress")
 ```
-
-See [Entity Lifecycle](./entity-lifecycle.md) for detailed documentation of the EntityRegistry, EntityServer, and EntitySupervisor pattern.
-
-## Entity GenServer
-
-Each active entity runs as an `EntityServer` GenServer process:
-
-```elixir
-# Key API
-EntityServer.get_entity(pid)           # Get current state
-EntityServer.update(pid, update_fn)    # Update entity (marks dirty)
-EntityServer.handle_event(pid, event)  # Process event
-EntityServer.save_now(pid)             # Force immediate save
-EntityServer.touch(pid)                # Reset idle timer
-```
-
-**Lifecycle timings** (configurable):
-- Auto-save: Every 60 seconds if dirty
-- Hibernate: After 120 seconds idle (reduce memory)
-- Stop: After 300 seconds idle (final save, process removed)
-
-See [Entity Lifecycle](./entity-lifecycle.md) for implementation details.
 
 ## Entity Types
 
 | Type | Description | Example Components |
 |------|-------------|-------------------|
-| room | A location in the world | Container, exits |
-| character | Player character | Combatant, inventory |
-| npc | Non-player character | Combatant, Conversant, AI scripts |
-| item | Objects in the world | Equipable, Tradeable |
-| exit | Connection between rooms | destination, locks |
+| room | A location in the world | room, coordinates |
+| character | Player character | combatant, player, stats, quest_progress |
+| npc | Non-player character | combatant, emotes, traits |
+| item | Objects in the world | physical, weapon/armor |
+| exit | Connection between rooms | exit (direction, destination) |
+| quest | Quest definition | quest (objectives, rewards) |
+| skill | Skill definition | skill_def (cooldown, cost) |
+| recipe | Crafting recipe | recipe_def (ingredients, output) |
+
+## Entity Lifecycle
+
+Entity lifecycle managed via EntityServer GenServer:
+
+| Phase | Description |
+|-------|-------------|
+| Loading | Entity loaded from DB, traits initialized |
+| Alive | Processing events, ticking, auto-saving |
+| Despawning | Final save before process stops |
+| Saved | Terminal state |
+
+```elixir
+EntityServer.get_entity(pid)           # Get current state
+EntityServer.update(pid, update_fn)    # Update entity (marks dirty)
+EntityServer.dispatch_event(pid, event, context)  # Process event with snapshot rollback
+```
+
+**Timings** (configurable):
+- Auto-save: Every 60 seconds if dirty
+- Hibernate: After 120 seconds idle
+- Stop: After 300 seconds idle
 
 ## Related
-- [Entity Lifecycle](./entity-lifecycle.md) - EntityRegistry, EntityServer, EntitySupervisor
+- [Entity Lifecycle](./entity-lifecycle.md) - EntityServer details
 - [Prototypes](./prototypes.md) - YAML-based entity templates
+- [Persistence](./persistence.md) - Database schema
 - [Hooks & Locks](./hooks-and-locks.md) - Lifecycle hooks and access control
-- [Persistence](./persistence.md) - How entities are stored
-- [Events](./events.md) - How entities communicate
-- [Commands](./commands.md) - How players interact with entities

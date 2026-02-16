@@ -246,7 +246,7 @@
   - Verify: `mix test test/loka/engine/state_machine_test.exs && mix test test/loka/components/ && mix loka.test.validate`
   - Commit: `"feat(v2): add StateMachine engine + wire quest/combat/dialogue + content testing tiers 1-2"`
 
-- [ ] **7.4** Final integration tests + docs update
+- [x] **7.4** Final integration tests + docs update
   - Verify: `mix test` (full green suite)
   - Verify: `mix loka.test --quick` (all validators pass)
   - Update: CLAUDE.md, relevant docs in docs/
@@ -265,7 +265,7 @@
 | 4: Player | 4.0-4.3 | **Complete** |
 | 5: Content+Actions | 5.1-5.4 | **Complete** |
 | 6: Cleanup | 6.1-6.4 | **Complete** |
-| 7: Polish | 7.1-7.4 | Not started |
+| 7: Polish | 7.1-7.4 | **Complete** |
 | **Total** | **23 tasks** | |
 
 ## Critical Path

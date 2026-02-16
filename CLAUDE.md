@@ -19,26 +19,33 @@
 
 Layers (top to bottom): Game Content (YAML in `priv/world/`) → Game Framework (`lib/loka/framework/`, ~25 subsystems) → Engine Core (`lib/loka/engine/`) → Session Layer (`lib/loka/session/`) → Platform (Phoenix 1.8, LiveView, Ecto + SQLite)
 
-### Core Patterns
+### Core Patterns (V2)
 
-- **Entity-Component-Behavior**: Composition over inheritance
-- **Prototype System**: YAML templates with inheritance
-- **TypedObject**: Unified foundation for all game content
+- **Unified Entity System**: Everything is an entity — rooms, NPCs, items, quests, skills, etc.
+- **Single DB Truth**: SQLite is the source of truth. No ETS registries, no dual-store sync.
+- **Components**: All game data lives in `entity.components` (JSON map). No `data`, `attributes`, or `contents` fields.
+- **Traits**: `entity.traits` — list of behavior module atoms or script maps. Replaces V1 `behaviors`.
+- **Prototype System**: YAML templates with inheritance, seeded into DB on startup by `EntitySeeder`
 - **GenServer per Entity**: Supervised processes with auto-save (60s dirty check)
-- **Event Bus**: Phoenix.PubSub (`room:{id}`, `player:{id}`, `entity:{id}`)
+- **StateMachine**: Shared state machine engine for quests, combat, crafting, dialogue, NPC AI
+- **Event Bus**: Phoenix.PubSub (`location:{id}`, `entity:{id}`)
 - **Hooks**: 22 lifecycle event types for extensibility
-- **Locks**: String-based access control
 
-### TypedObject & Content Modules
+### Content & Entity Access
 
-**Content modules** wrap TypedObject with domain-specific APIs: `Content.Quest`, `Content.Dialogue`, `Content.Script`, `Content.Zone`. Resolution: Content modules → TypedObject.Loader → YAML files.
+**Content modules** provide domain-specific APIs: `Content.Quest`, `Content.Dialogue`, `Content.Script`, `Content.Zone`. Resolution: Content modules → `Entities.find_one(key: key, type: :quest)`.
 
 ```elixir
-# PREFER Content modules (type-safe, convenient)
+# Content modules (type-safe, convenient)
 {:ok, quest} = Content.Quest.get("intro_welcome")
 objectives = Content.Quest.objectives(quest)
 
-# Use TypedObject.Loader directly only for generic/cross-type operations
+# Direct entity lookup
+entity = Entities.find_one(key: "goblin", type: :npc)
+entities = Entities.find_all(type: :room, location_id: zone_id)
+
+# Component accessors (lib/loka/components/)
+health = Components.Combatant.health(entity)
 ```
 
 YAML directories: `priv/world/prototypes/`, `quests/`, `zones/`, `dialogues/`, `scripts/`
@@ -49,9 +56,11 @@ YAML directories: `priv/world/prototypes/`, `quests/`, `zones/`, `dialogues/`, `
 lokacore/
 ├── server/
 │   ├── lib/loka/
-│   │   ├── engine/           # Core: entities, registry, spawner, TypedObject
+│   │   ├── engine/           # Core: entities, entity_server, entity_seeder, spawner, state_machine
+│   │   ├── components/       # Component accessor modules (23 modules)
+│   │   ├── behaviors/        # EntityBehavior modules (guard, patrol, weather, etc.)
 │   │   ├── content/          # Content modules (Quest, Dialogue, Script, Zone)
-│   │   ├── framework/        # ~25 game subsystems
+│   │   ├── framework/        # Game subsystems (quest, combat, inventory, etc.)
 │   │   ├── timers/           # Persistent timers (crafting, offline progression)
 │   │   └── session/          # Client messaging layer
 │   ├── lib/loka_web/
