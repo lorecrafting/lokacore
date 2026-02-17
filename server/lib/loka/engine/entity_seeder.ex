@@ -114,21 +114,35 @@ defmodule Loka.Engine.EntitySeeder do
     yamls = load_all_yaml_files(paths)
     resolved = resolve_inheritance(yamls)
 
+    # Preload all existing entities into a lookup map to avoid N+1 queries.
+    # Key: {key, type} → entity. This turns ~350 individual queries into 1.
+    existing_map = preload_existing_entities()
+
     # Phase 1: Non-located entities (no location_id needed)
     non_located_types = Enum.map(@non_located_types, &String.to_atom/1)
-    count1 = seed_by_types(resolved, non_located_types)
+    count1 = seed_by_types(resolved, non_located_types, existing_map)
 
     # Phase 2: Rooms (must exist before exits reference them)
-    count2 = seed_by_types(resolved, [:room])
+    count2 = seed_by_types(resolved, [:room], existing_map)
+
+    # Refresh map after rooms are seeded — exits need room UUIDs
+    existing_map = preload_existing_entities()
 
     # Phase 3: Exits (need room UUIDs for destination_id)
-    count3 = seed_exits(resolved)
+    count3 = seed_exits(resolved, existing_map)
 
     # Phase 4: NPCs and items (need room UUIDs for location_id)
-    count4 = seed_by_types(resolved, [:npc, :item])
+    count4 = seed_by_types(resolved, [:npc, :item], existing_map)
 
     total = count1 + count2 + count3 + count4
     {:ok, total}
+  end
+
+  defp preload_existing_entities do
+    Entities.find_all([])
+    |> Enum.reduce(%{}, fn entity, acc ->
+      Map.put(acc, {entity.key, entity.type}, entity)
+    end)
   end
 
   # =============================================================================
@@ -308,13 +322,13 @@ defmodule Loka.Engine.EntitySeeder do
   # Phased Seeding
   # =============================================================================
 
-  defp seed_by_types(resolved, types) do
+  defp seed_by_types(resolved, types, existing_map) do
     type_strings = Enum.map(types, &to_string/1)
 
     resolved
     |> Enum.filter(fn {_key, data} -> to_string(data["type"]) in type_strings end)
     |> Enum.reduce(0, fn {_key, data}, count ->
-      case seed_entity(data) do
+      case seed_entity(data, existing_map) do
         {:ok, _} ->
           count + 1
 
@@ -325,7 +339,7 @@ defmodule Loka.Engine.EntitySeeder do
     end)
   end
 
-  defp seed_entity(data) do
+  defp seed_entity(data, existing_map) do
     type = safe_to_atom(data["type"])
 
     unless EntityTypes.valid?(type) do
@@ -333,8 +347,8 @@ defmodule Loka.Engine.EntitySeeder do
     else
       key = data["key"]
 
-      case Entities.find_one(key: key, type: type) do
-        {:ok, existing} ->
+      case Map.get(existing_map, {key, type}) do
+        %Entity{} = existing ->
           if existing.is_prototype do
             # Prototype exists — update from YAML (YAML is authoritative)
             entity = yaml_to_entity(data, existing.id)
@@ -345,22 +359,40 @@ defmodule Loka.Engine.EntitySeeder do
             {:ok, existing}
           end
 
-        {:error, :not_found} ->
+        nil ->
           entity = yaml_to_entity(data)
           Entities.save(entity)
       end
     end
   end
 
-  defp seed_exits(resolved) do
+  defp seed_exits(resolved, existing_map) do
     rooms =
       Enum.filter(resolved, fn {_k, d} -> to_string(d["type"]) == "room" end)
+
+    # Build key→entity lookup for rooms (avoid per-exit DB queries)
+    room_lookup =
+      existing_map
+      |> Enum.filter(fn {{_key, type}, _entity} -> type == :room end)
+      |> Map.new(fn {{key, _type}, entity} -> {key, entity} end)
+
+    # Build key→entity lookup for existing exits
+    exit_lookup =
+      existing_map
+      |> Enum.filter(fn {{_key, type}, _entity} -> type == :exit end)
+      |> Map.new(fn {{key, _type}, entity} -> {key, entity} end)
 
     Enum.reduce(rooms, 0, fn {room_key, room_data}, count ->
       exits = room_data["exits"] || %{}
 
       Enum.reduce(exits, count, fn {direction, destination_key}, acc ->
-        case seed_single_exit(room_key, to_string(direction), to_string(destination_key)) do
+        case seed_single_exit(
+               room_key,
+               to_string(direction),
+               to_string(destination_key),
+               room_lookup,
+               exit_lookup
+             ) do
           {:ok, _} -> acc + 1
           {:error, _} -> acc
         end
@@ -368,74 +400,75 @@ defmodule Loka.Engine.EntitySeeder do
     end)
   end
 
-  defp seed_single_exit(room_key, direction, destination_key) do
+  defp seed_single_exit(room_key, direction, destination_key, room_lookup, exit_lookup) do
     exit_key = "#{room_key}_#{direction}"
 
-    # Skip if already exists
-    case Entities.find_one(key: exit_key, type: :exit) do
-      {:ok, existing} ->
-        {:ok, existing}
+    # Skip if already exists (in-memory check)
+    if Map.has_key?(exit_lookup, exit_key) do
+      {:ok, exit_lookup[exit_key]}
+    else
+      source = Map.get(room_lookup, room_key)
+      dest = Map.get(room_lookup, destination_key)
 
-      {:error, :not_found} ->
-        with {:ok, source} <- Entities.find_one(key: room_key, type: :room),
-             {:ok, dest} <- Entities.find_one(key: destination_key, type: :room) do
-          entity =
-            Entity.new(%{
-              type: :exit,
-              key: exit_key,
-              location_id: source.id,
-              is_prototype: false,
-              components: %{
-                "exit" => %{
-                  "direction" => direction,
-                  "destination_id" => dest.id,
-                  "destination_key" => destination_key
-                }
+      if source && dest do
+        entity =
+          Entity.new(%{
+            type: :exit,
+            key: exit_key,
+            location_id: source.id,
+            is_prototype: false,
+            components: %{
+              "exit" => %{
+                "direction" => direction,
+                "destination_id" => dest.id,
+                "destination_key" => destination_key
               }
-            })
+            }
+          })
 
-          result = Entities.save(entity)
+        result = Entities.save(entity)
 
-          # Create reciprocal exit if it doesn't exist
-          maybe_create_reciprocal(destination_key, direction, room_key, dest.id, source.id)
+        # Create reciprocal exit if it doesn't exist
+        maybe_create_reciprocal(
+          destination_key,
+          direction,
+          room_key,
+          dest.id,
+          source.id,
+          exit_lookup
+        )
 
-          result
-        else
-          {:error, reason} ->
-            Logger.debug("EntitySeeder: skip exit #{exit_key}: #{inspect(reason)}")
-
-            {:error, reason}
-        end
+        result
+      else
+        Logger.debug("EntitySeeder: skip exit #{exit_key}: room not found")
+        {:error, :room_not_found}
+      end
     end
   end
 
-  defp maybe_create_reciprocal(dest_key, direction, source_key, dest_id, source_id) do
+  defp maybe_create_reciprocal(dest_key, direction, source_key, dest_id, source_id, exit_lookup) do
     reverse_dir = reverse_direction(direction)
 
     if reverse_dir do
       reverse_key = "#{dest_key}_#{reverse_dir}"
 
-      case Entities.find_one(key: reverse_key, type: :exit) do
-        {:ok, _} ->
-          :ok
-
-        {:error, :not_found} ->
-          entity =
-            Entity.new(%{
-              type: :exit,
-              key: reverse_key,
-              location_id: dest_id,
-              is_prototype: false,
-              components: %{
-                "exit" => %{
-                  "direction" => reverse_dir,
-                  "destination_id" => source_id,
-                  "destination_key" => source_key
-                }
+      unless Map.has_key?(exit_lookup, reverse_key) do
+        entity =
+          Entity.new(%{
+            type: :exit,
+            key: reverse_key,
+            location_id: dest_id,
+            is_prototype: false,
+            components: %{
+              "exit" => %{
+                "direction" => reverse_dir,
+                "destination_id" => source_id,
+                "destination_key" => source_key
               }
-            })
+            }
+          })
 
-          Entities.save(entity)
+        Entities.save(entity)
       end
     end
   end

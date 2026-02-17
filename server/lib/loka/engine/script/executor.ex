@@ -46,7 +46,6 @@ defmodule Loka.Engine.Script.Executor do
   require Logger
 
   alias Loka.Engine.Script.{Sandbox, ActionQueue}
-  alias Loka.Engine.Scripts
   alias Loka.Content.Script, as: ContentScript
 
   @type hook :: atom()
@@ -189,19 +188,7 @@ defmodule Loka.Engine.Script.Executor do
         }
 
       {:error, _} ->
-        # Fall back to database
-        case Scripts.get_script_by_name(key) do
-          nil ->
-            nil
-
-          db_script ->
-            %{
-              key: db_script.name,
-              source: db_script.source,
-              hook: db_script.hook,
-              timeout_ms: 5_000
-            }
-        end
+        nil
     end
   end
 

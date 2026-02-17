@@ -392,16 +392,15 @@ defmodule Loka.Engine.EntitiesV2Test do
   # ==========================================================================
 
   describe "location cascade" do
-    test "nilifies location_id when parent entity is deleted" do
+    test "deletes contained entities when parent entity is deleted" do
       room = create_entity!(key: "room1", type: :room)
       npc = create_entity!(key: "npc1", type: :npc, location_id: room.id)
 
       # Delete the room
       {:ok, _} = Entities.delete(room.id)
 
-      # NPC should still exist but with nil location
-      {:ok, found_npc} = Entities.find_one(npc.id)
-      assert found_npc.location_id == nil
+      # NPC should be deleted (cascade cleanup prevents orphans)
+      assert {:error, :not_found} = Entities.find_one(npc.id)
     end
   end
 

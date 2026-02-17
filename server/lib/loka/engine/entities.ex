@@ -238,12 +238,21 @@ defmodule Loka.Engine.Entities do
   end
 
   @doc """
-  Deletes an entity by ID.
+  Deletes an entity by ID. Also deletes contained entities (exits, items, NPCs)
+  to prevent orphans with NULL location_id.
   """
   def delete(id) when is_binary(id) do
     case Repo.get(EntitySchema, id) do
-      nil -> {:error, :not_found}
-      schema -> Repo.delete(schema)
+      nil ->
+        {:error, :not_found}
+
+      schema ->
+        # Delete contained entities first to prevent orphans
+        EntitySchema
+        |> where([e], e.location_id == ^id)
+        |> Repo.delete_all()
+
+        Repo.delete(schema)
     end
   end
 
@@ -273,7 +282,7 @@ defmodule Loka.Engine.Entities do
   # Tag Operations
   # =============================================================================
 
-  @doc "Adds a tag to an entity. No-op if already present."
+  @doc "Adds a tag to an entity. Idempotent — no-op if already present."
   def add_tag(entity_id, tag) when is_binary(entity_id) and is_binary(tag) do
     %EntityTagSchema{}
     |> EntityTagSchema.changeset(%{entity_id: entity_id, tag: tag})
@@ -401,9 +410,17 @@ defmodule Loka.Engine.Entities do
     |> Repo.one()
   end
 
-  @doc "V1 compat — gets entities at a location."
-  def get_contents(location_id) do
-    EntitySchema |> where([e], e.location_id == ^location_id) |> Repo.all()
+  @doc "V1 compat — gets entities at a location. Optional :type filter."
+  def get_contents(location_id, opts \\ []) do
+    query = EntitySchema |> where([e], e.location_id == ^location_id)
+
+    query =
+      case opts[:type] do
+        nil -> query
+        type -> where(query, [e], e.type == ^type)
+      end
+
+    Repo.all(query)
   end
 
   @doc "V1 compat — gets entities at multiple locations."

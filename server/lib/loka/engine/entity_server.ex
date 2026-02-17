@@ -326,10 +326,23 @@ defmodule Loka.Engine.EntityServer do
 
   @impl true
   def handle_info(:auto_save, state) do
-    new_state = save_if_dirty(state)
+    new_state = do_async_save(state)
     # Reschedule the auto-save timer
     save_timer = schedule_auto_save(state.save_interval_ms)
     {:noreply, %{new_state | save_timer: save_timer}}
+  end
+
+  @impl true
+  def handle_info({:async_save_result, {:ok, saved}}, state) do
+    Logger.debug("EntityServer #{state.entity_id} async save completed")
+    {:noreply, %{state | entity: saved}}
+  end
+
+  @impl true
+  def handle_info({:async_save_result, {:error, reason}}, state) do
+    Logger.error("EntityServer #{state.entity_id} async save failed: #{inspect(reason)}")
+    # Re-mark dirty so next auto_save retries
+    {:noreply, %{state | dirty: true}}
   end
 
   @impl true
@@ -540,6 +553,31 @@ defmodule Loka.Engine.EntityServer do
   defp save_if_dirty(%{dirty: false} = state), do: state
   defp save_if_dirty(%{dirty: true} = state), do: do_save(state)
 
+  # Async save for auto_save timer — doesn't block the GenServer
+  defp do_async_save(%{dirty: false} = state), do: state
+
+  defp do_async_save(%{dirty: true} = state) do
+    entity = state.entity
+    server_pid = self()
+
+    Task.start(fn ->
+      start_time = System.monotonic_time()
+      result = Entities.save(entity)
+
+      :telemetry.execute(
+        [:loka, :entity, :save],
+        %{duration: System.monotonic_time() - start_time},
+        %{entity_id: entity.id, entity_type: entity.type, success: match?({:ok, _}, result)}
+      )
+
+      send(server_pid, {:async_save_result, result})
+    end)
+
+    # Optimistically mark clean — will re-dirty on failure via handle_info
+    %{state | dirty: false}
+  end
+
+  # Synchronous save for force_save and terminate paths
   defp do_save(state) do
     start_time = System.monotonic_time()
 

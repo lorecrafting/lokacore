@@ -132,8 +132,7 @@ defmodule Loka.Engine.WorldGraph do
   Returns the room entity or nil if not found.
   """
   def get_room_at(x, y, z \\ 0) do
-    # Query rooms and filter by coordinates in components JSON
-    # SQLite JSON extraction
+    # Expression index on json_extract avoids full table scan
     EntitySchema
     |> where([e], e.type == :room)
     |> where(
@@ -187,8 +186,7 @@ defmodule Loka.Engine.WorldGraph do
 
     Enum.flat_map(exits, fn exit_schema ->
       exit_entity = Entities.to_entity(exit_schema)
-      # Exit data may be nested under "exit" key or directly in components
-      exit_component = Map.get(exit_entity.components, "exit", exit_entity.components)
+      exit_component = Map.get(exit_entity.components, "exit", %{})
       direction = Map.get(exit_component, "direction")
       dest_id = Map.get(exit_component, "destination_id")
       dest_key = Map.get(exit_component, "destination_key")
@@ -343,6 +341,7 @@ defmodule Loka.Engine.WorldGraph do
   Useful for rendering a viewport of the map.
   """
   def get_rooms_in_bounds(min_x, min_y, max_x, max_y, z \\ 0) do
+    # Expression index on json_extract avoids full table scan
     EntitySchema
     |> where([e], e.type == :room)
     |> where(
