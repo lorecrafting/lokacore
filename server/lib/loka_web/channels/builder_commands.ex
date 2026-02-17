@@ -23,6 +23,8 @@ defmodule LokaWeb.Channels.BuilderCommands do
   All output is prefixed with [BUILDER] for visual distinction.
   """
 
+  require Logger
+
   import Phoenix.Channel, only: [push: 3]
 
   alias LokaWeb.Channels.BuilderCommands.{
@@ -95,7 +97,14 @@ defmodule LokaWeb.Channels.BuilderCommands do
   Execute a builder command. Returns `{:reply, :ok, socket}`.
   """
   def execute(cmd, params, socket) do
-    result = dispatch(cmd, params, socket)
+    result =
+      try do
+        dispatch(cmd, params, socket)
+      rescue
+        e ->
+          Logger.error("[BUILDER] Command #{cmd} crashed: #{Exception.message(e)}")
+          {:error, "Command failed: #{Exception.message(e)}", socket}
+      end
 
     case result do
       {:ok, text, socket} ->

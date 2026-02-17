@@ -1,127 +1,176 @@
-defmodule Loka.Engine.CooldownsTest do
+defmodule Loka.Components.CooldownsTest do
   use ExUnit.Case, async: true
 
-  alias Loka.Engine.Cooldowns
+  alias Loka.Components.Cooldowns
+  alias Loka.Engine.Entity
 
-  # Use a unique entity_id per test to avoid cross-test contamination
-  defp entity_id, do: "test_entity_#{System.unique_integer([:positive])}"
+  defp entity_with_cooldowns(cooldowns \\ %{}) do
+    Entity.new(type: :npc, key: "test_npc", components: %{"cooldowns" => cooldowns})
+  end
 
-  describe "set/3 and ready?/2" do
-    test "newly set cooldown is not ready" do
-      id = entity_id()
-      Cooldowns.set(id, "heal", 60)
-      refute Cooldowns.ready?(id, "heal")
+  describe "ready?/2" do
+    test "returns true for absent cooldown" do
+      entity = entity_with_cooldowns()
+      assert Cooldowns.ready?(entity, "heal")
     end
 
-    test "unset cooldown is ready" do
-      id = entity_id()
-      assert Cooldowns.ready?(id, "nonexistent")
+    test "returns false for active cooldown" do
+      expiry = System.os_time(:second) + 60
+      entity = entity_with_cooldowns(%{"heal" => expiry})
+      refute Cooldowns.ready?(entity, "heal")
     end
 
-    test "different keys are independent" do
-      id = entity_id()
-      Cooldowns.set(id, "heal", 60)
-      assert Cooldowns.ready?(id, "attack")
-      refute Cooldowns.ready?(id, "heal")
+    test "returns true for expired cooldown" do
+      expiry = System.os_time(:second) - 10
+      entity = entity_with_cooldowns(%{"heal" => expiry})
+      assert Cooldowns.ready?(entity, "heal")
     end
 
     test "accepts atom keys" do
-      id = entity_id()
-      Cooldowns.set(id, :shrine, 60)
-      refute Cooldowns.ready?(id, :shrine)
-      refute Cooldowns.ready?(id, "shrine")
+      expiry = System.os_time(:second) + 60
+      entity = entity_with_cooldowns(%{"shrine" => expiry})
+      refute Cooldowns.ready?(entity, :shrine)
+    end
+
+    test "different keys are independent" do
+      expiry = System.os_time(:second) + 60
+      entity = entity_with_cooldowns(%{"heal" => expiry})
+      assert Cooldowns.ready?(entity, "attack")
+      refute Cooldowns.ready?(entity, "heal")
     end
   end
 
   describe "remaining/2" do
     test "returns positive value for active cooldown" do
-      id = entity_id()
-      Cooldowns.set(id, "heal", 60)
-      remaining = Cooldowns.remaining(id, "heal")
+      expiry = System.os_time(:second) + 60
+      entity = entity_with_cooldowns(%{"heal" => expiry})
+      remaining = Cooldowns.remaining(entity, "heal")
       assert remaining > 0
       assert remaining <= 60
     end
 
-    test "returns 0 for unset cooldown" do
-      id = entity_id()
-      assert Cooldowns.remaining(id, "nonexistent") == 0
+    test "returns 0 for absent cooldown" do
+      entity = entity_with_cooldowns()
+      assert Cooldowns.remaining(entity, "nonexistent") == 0
+    end
+
+    test "returns 0 for expired cooldown" do
+      expiry = System.os_time(:second) - 10
+      entity = entity_with_cooldowns(%{"heal" => expiry})
+      assert Cooldowns.remaining(entity, "heal") == 0
+    end
+  end
+
+  describe "set/3" do
+    test "adds a cooldown to the entity" do
+      entity = entity_with_cooldowns()
+      updated = Cooldowns.set(entity, "heal", 60)
+      refute Cooldowns.ready?(updated, "heal")
+      assert Cooldowns.remaining(updated, "heal") > 0
+    end
+
+    test "overwrites existing cooldown" do
+      entity = entity_with_cooldowns()
+      entity = Cooldowns.set(entity, "heal", 10)
+      entity = Cooldowns.set(entity, "heal", 120)
+      assert Cooldowns.remaining(entity, "heal") > 60
+    end
+
+    test "preserves other cooldowns" do
+      entity = entity_with_cooldowns()
+      entity = Cooldowns.set(entity, "heal", 60)
+      entity = Cooldowns.set(entity, "attack", 30)
+      refute Cooldowns.ready?(entity, "heal")
+      refute Cooldowns.ready?(entity, "attack")
     end
   end
 
   describe "clear/2" do
-    test "clears a specific cooldown" do
-      id = entity_id()
-      Cooldowns.set(id, "heal", 60)
-      refute Cooldowns.ready?(id, "heal")
+    test "removes a specific cooldown" do
+      entity = entity_with_cooldowns()
+      entity = Cooldowns.set(entity, "heal", 60)
+      entity = Cooldowns.set(entity, "attack", 60)
 
-      Cooldowns.clear(id, "heal")
-      assert Cooldowns.ready?(id, "heal")
+      entity = Cooldowns.clear(entity, "heal")
+      assert Cooldowns.ready?(entity, "heal")
+      refute Cooldowns.ready?(entity, "attack")
     end
 
-    test "does not affect other cooldowns" do
-      id = entity_id()
-      Cooldowns.set(id, "heal", 60)
-      Cooldowns.set(id, "attack", 60)
-
-      Cooldowns.clear(id, "heal")
-      assert Cooldowns.ready?(id, "heal")
-      refute Cooldowns.ready?(id, "attack")
+    test "no-ops for absent cooldown" do
+      entity = entity_with_cooldowns()
+      entity = Cooldowns.clear(entity, "nonexistent")
+      assert Cooldowns.get(entity) == %{}
     end
   end
 
   describe "clear_all/1" do
-    test "clears all cooldowns for an entity" do
-      id = entity_id()
-      Cooldowns.set(id, "heal", 60)
-      Cooldowns.set(id, "attack", 60)
-      Cooldowns.set(id, "shrine", 60)
+    test "removes all cooldowns" do
+      entity = entity_with_cooldowns()
+      entity = Cooldowns.set(entity, "heal", 60)
+      entity = Cooldowns.set(entity, "attack", 60)
 
-      Cooldowns.clear_all(id)
-      assert Cooldowns.ready?(id, "heal")
-      assert Cooldowns.ready?(id, "attack")
-      assert Cooldowns.ready?(id, "shrine")
-    end
-
-    test "does not affect other entities" do
-      id1 = entity_id()
-      id2 = entity_id()
-      Cooldowns.set(id1, "heal", 60)
-      Cooldowns.set(id2, "heal", 60)
-
-      Cooldowns.clear_all(id1)
-      assert Cooldowns.ready?(id1, "heal")
-      refute Cooldowns.ready?(id2, "heal")
+      entity = Cooldowns.clear_all(entity)
+      assert Cooldowns.ready?(entity, "heal")
+      assert Cooldowns.ready?(entity, "attack")
+      assert Cooldowns.get(entity) == %{}
     end
   end
 
-  describe "list/1" do
-    test "returns active cooldowns" do
-      id = entity_id()
-      Cooldowns.set(id, "heal", 60)
-      Cooldowns.set(id, "attack", 30)
+  describe "list_active/1" do
+    test "returns active cooldowns with remaining time" do
+      now = System.os_time(:second)
 
-      cooldowns = Cooldowns.list(id)
-      assert length(cooldowns) == 2
-      keys = Enum.map(cooldowns, & &1.key)
+      entity =
+        entity_with_cooldowns(%{
+          "heal" => now + 60,
+          "attack" => now + 30,
+          "expired" => now - 10
+        })
+
+      active = Cooldowns.list_active(entity)
+      assert length(active) == 2
+      keys = Enum.map(active, & &1.key)
       assert "heal" in keys
       assert "attack" in keys
+      refute "expired" in keys
     end
 
     test "returns empty list for no cooldowns" do
-      id = entity_id()
-      assert Cooldowns.list(id) == []
+      entity = entity_with_cooldowns()
+      assert Cooldowns.list_active(entity) == []
     end
   end
 
-  describe "expiry" do
-    test "very short cooldown becomes ready quickly" do
-      id = entity_id()
-      Cooldowns.set(id, "fast", 1)
+  describe "sweep_expired/1" do
+    test "removes expired entries" do
+      now = System.os_time(:second)
 
-      # Wait for expiry
-      Process.sleep(1100)
-      assert Cooldowns.ready?(id, "fast")
-      assert Cooldowns.remaining(id, "fast") == 0
+      entity =
+        entity_with_cooldowns(%{
+          "active" => now + 60,
+          "expired1" => now - 10,
+          "expired2" => now - 100
+        })
+
+      entity = Cooldowns.sweep_expired(entity)
+      cooldowns = Cooldowns.get(entity)
+      assert Map.has_key?(cooldowns, "active")
+      refute Map.has_key?(cooldowns, "expired1")
+      refute Map.has_key?(cooldowns, "expired2")
+    end
+  end
+
+  describe "get/1 and put/2" do
+    test "get returns empty map for entity without cooldowns" do
+      entity = Entity.new(type: :npc, key: "test")
+      assert Cooldowns.get(entity) == %{}
+    end
+
+    test "put sets the cooldowns component" do
+      entity = Entity.new(type: :npc, key: "test")
+      data = %{"heal" => 12345}
+      entity = Cooldowns.put(entity, data)
+      assert Cooldowns.get(entity) == data
     end
   end
 end

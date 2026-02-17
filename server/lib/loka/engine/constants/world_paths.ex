@@ -50,7 +50,7 @@ defmodule Loka.Engine.Constants.WorldPaths do
       # Get draft directories
       WorldPaths.drafts_dir("quests")  #=> "priv/world/drafts/quests"
 
-      # Get all loader paths (for TypedObject.Loader)
+      # Get all content paths (for EntitySeeder)
       WorldPaths.all_loader_paths()
   """
 
@@ -187,7 +187,7 @@ defmodule Loka.Engine.Constants.WorldPaths do
   # =============================================================================
 
   @doc """
-  Returns all content directory paths for TypedObject.Loader.
+  Returns all content directory paths for EntitySeeder.
 
   Includes both published and draft directories.
   """

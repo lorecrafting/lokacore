@@ -438,6 +438,46 @@ defmodule Loka.Engine.EntityServer do
     {:noreply, %{new_state | tick_timer: tick_timer}}
   end
 
+  # Respawn handler — restores health and removes despawned flag
+  @impl true
+  def handle_info(:respawn, state) do
+    entity = state.entity
+
+    case entity.components do
+      %{"despawned" => true} ->
+        respawn_data = Map.get(entity.components, "respawn_data", %{})
+
+        original_health =
+          Map.get(respawn_data, "original_health", %{"current" => 50, "max" => 50})
+
+        combatant = Map.get(entity.components, "combatant", %{})
+        restored_combatant = Map.put(combatant, "health", original_health)
+
+        updated_components =
+          entity.components
+          |> Map.put("combatant", restored_combatant)
+          |> Map.delete("despawned")
+          |> Map.delete("respawn_data")
+
+        updated_entity = %{entity | components: updated_components}
+        Entities.update_entity(updated_entity, %{components: updated_components})
+
+        # Broadcast respawn event
+        if entity.location_id do
+          Phoenix.PubSub.broadcast(
+            Loka.PubSub,
+            "location:#{entity.location_id}",
+            {:mob_respawned, state.entity_id, entity.short_desc}
+          )
+        end
+
+        {:noreply, %{state | entity: updated_entity, dirty: true}}
+
+      _ ->
+        {:noreply, state}
+    end
+  end
+
   # Catch-all for unknown messages to prevent crashes
   @impl true
   def handle_info(msg, state) do

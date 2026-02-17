@@ -155,7 +155,7 @@ def handle_event("navigate", %{"direction" => dir}, socket) do
     {:ok, result} ->
       socket =
         socket
-        |> assign(:game_state, result.state[:game_state] || socket.assigns.game_state)
+        |> assign(:character, result.state[:character] || socket.assigns.character)
         |> assign(:room, result.state[:room] || socket.assigns.room)
 
       # Convert events to LiveView updates

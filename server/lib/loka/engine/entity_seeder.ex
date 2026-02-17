@@ -2,8 +2,7 @@ defmodule Loka.Engine.EntitySeeder do
   @moduledoc """
   Boot-time content seeder that populates the DB from YAML files.
 
-  Replaces TypedObject.Loader as the V2 content loading system.
-  Key difference: Loader populated ETS; Seeder populates SQLite DB.
+  Reads YAML prototype files and upserts them as entities in SQLite.
 
   ## Phased Seeding Order
 

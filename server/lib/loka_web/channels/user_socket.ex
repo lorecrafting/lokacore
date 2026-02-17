@@ -32,7 +32,12 @@ defmodule LokaWeb.UserSocket do
   def connect(_params, socket, _connect_info) do
     if Application.get_env(:loka, :allow_guest_websocket, false) do
       # Create a guest player for testing
-      {:ok, assign(socket, :player, %{id: "guest-#{:rand.uniform(10000)}", name: "Guest"})}
+      {:ok,
+       assign(socket, :player, %{
+         id: "guest-#{:rand.uniform(10000)}",
+         name: "Guest",
+         is_admin: false
+       })}
     else
       :error
     end

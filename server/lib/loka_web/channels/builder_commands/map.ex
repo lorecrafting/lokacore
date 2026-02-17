@@ -14,6 +14,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Map do
 
   alias Loka.WorldBuilder.RoomManager
   alias Loka.Content
+  alias LokaWeb.Channels.RoomHelpers
 
   @direction_offsets %{
     "north" => {0, -1},
@@ -36,11 +37,11 @@ defmodule LokaWeb.Channels.BuilderCommands.Map do
   Execute the `map` command. Shows full zone map with numbered nodes and legend.
   """
   def execute(:map, params, socket) do
-    game_state = socket.assigns.game_state
-    room_id = game_state.current_room_id
+    character = socket.assigns.character
+    {current_room, _} = RoomHelpers.load_room_for_character(character)
     rooms_index = build_rooms_index()
 
-    current_key = find_room_key_by_id(rooms_index, room_id)
+    current_key = current_room.key
 
     zone_key =
       case Map.get(params, :zone_key) do
@@ -118,13 +119,6 @@ defmodule LokaWeb.Channels.BuilderCommands.Map do
 
       {:error, _} ->
         nil
-    end
-  end
-
-  defp find_room_key_by_id(rooms_index, room_id) do
-    case Enum.find(rooms_index, fn {_key, room} -> room.id == room_id end) do
-      {key, _room} -> key
-      nil -> nil
     end
   end
 

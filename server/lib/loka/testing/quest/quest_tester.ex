@@ -59,9 +59,8 @@ defmodule Loka.Testing.Quest.QuestTester do
 
   alias Loka.Framework.Quest.Progress
   alias Loka.Admin.GameLog
-  alias Loka.Framework.Player.GameState
   alias Loka.Content
-  alias Loka.Engine.Entities
+  alias Loka.Engine.{Entity, Entities}
 
   @default_max_steps 500
 
@@ -225,20 +224,28 @@ defmodule Loka.Testing.Quest.QuestTester do
   defp setup_test_state(opts) do
     player_id = Keyword.get(opts, :player_id, generate_test_player_id())
 
-    # Build a minimal GameState struct for testing
-    # Note: GameState is an Ecto schema, so we build it as a struct
-    game_state = %GameState{
-      player_id: player_id,
-      stats: %{"level" => 1, "xp" => 0},
-      flags: %{"gold" => 0},
-      inventory: [],
-      equipment: %{},
-      quests: %{"active" => %{}, "completed" => []},
-      health: %{"current" => 100, "max" => 100},
-      current_room_id: nil
-    }
+    # Build a minimal character entity for testing
+    entity =
+      Entity.new(
+        type: :character,
+        key: "test_player_#{player_id}",
+        short_desc: "TestPlayer",
+        account_id: player_id,
+        components: %{
+          "stats" => %{"level" => 1, "xp" => 0},
+          "flags" => %{"gold" => 0},
+          "inventory" => [],
+          "equipment" => %{},
+          "quest_progress" => %{"active" => %{}, "completed" => []},
+          "resources" => %{"health" => %{"current" => 100, "max" => 100}}
+        }
+      )
 
-    {:ok, game_state}
+    # Save to DB so Progress module can find it
+    case Entities.save(entity) do
+      {:ok, saved} -> {:ok, saved}
+      {:error, reason} -> {:error, {:setup_failed, reason}}
+    end
   end
 
   defp accept_quest(game_state, quest_id) do
@@ -352,8 +359,10 @@ defmodule Loka.Testing.Quest.QuestTester do
   defp verify_rewards_applied(old_state, new_state, rewards) do
     xp_reward = Map.get(rewards, "xp") || Map.get(rewards, :xp, 0)
 
-    old_xp = Map.get(old_state.stats, "xp") || Map.get(old_state.stats, :xp, 0)
-    new_xp = Map.get(new_state.stats, "xp") || Map.get(new_state.stats, :xp, 0)
+    old_stats = Entity.get_component(old_state, "stats") || %{}
+    new_stats = Entity.get_component(new_state, "stats") || %{}
+    old_xp = Map.get(old_stats, "xp") || Map.get(old_stats, :xp, 0)
+    new_xp = Map.get(new_stats, "xp") || Map.get(new_stats, :xp, 0)
 
     if xp_reward > 0 and new_xp != old_xp + xp_reward do
       Logger.warning(

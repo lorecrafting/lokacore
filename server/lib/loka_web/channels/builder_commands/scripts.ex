@@ -88,12 +88,8 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
   end
 
   def execute(:script_list, %{hook: hook}, socket) do
-    hook_atom =
-      try do
-        String.to_existing_atom(hook)
-      rescue
-        _ -> hook
-      end
+    # Hook names come from builder command input (trusted), use to_atom
+    hook_atom = String.to_atom(hook)
 
     scripts = Script.for_hook(hook_atom)
 
@@ -232,8 +228,14 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
             else
               updated_data = Map.put(data, "scripts", scripts ++ [script_key])
               updated_components = Map.put(entity.components || %{}, "data", updated_data)
-              Entities.update(entity.id, %{components: updated_components})
-              {:ok, "Attached script '#{script_key}' to '#{entity_key}'.", socket}
+
+              case Entities.update(entity.id, %{components: updated_components}) do
+                {:ok, _} ->
+                  {:ok, "Attached script '#{script_key}' to '#{entity_key}'.", socket}
+
+                {:error, reason} ->
+                  {:error, "Failed to attach script: #{inspect(reason)}", socket}
+              end
             end
 
           _ ->
@@ -254,8 +256,14 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
         if script_key in scripts do
           updated_data = Map.put(data, "scripts", List.delete(scripts, script_key))
           updated_components = Map.put(entity.components || %{}, "data", updated_data)
-          Entities.update(entity.id, %{components: updated_components})
-          {:ok, "Detached script '#{script_key}' from '#{entity_key}'.", socket}
+
+          case Entities.update(entity.id, %{components: updated_components}) do
+            {:ok, _} ->
+              {:ok, "Detached script '#{script_key}' from '#{entity_key}'.", socket}
+
+            {:error, reason} ->
+              {:error, "Failed to detach script: #{inspect(reason)}", socket}
+          end
         else
           {:error, "Script '#{script_key}' not attached to '#{entity_key}'.", socket}
         end
@@ -308,7 +316,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
 
         source = """
         route = #{inspect(String.split(route, ","))}
-        interval = #{interval}
+        interval = #{inspect(interval)}
         current = get_flag.(entity, "patrol_index") || 0
         next = rem(current + 1, length(route))
         target_room = Enum.at(route, next)
@@ -323,7 +331,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
         message = config["message"] || "Welcome, traveler!"
 
         source = """
-        message.("#{escape_yaml_string(message)}")
+        message.(#{inspect(message)})
         continue.()
         """
 
@@ -334,7 +342,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
         direction = config["direction"] || "north"
 
         source = """
-        if context.direction == "#{direction}" and not has_flag?.("#{flag}") do
+        if context.direction == #{inspect(direction)} and not has_flag?.(#{inspect(flag)}) do
           message.("The guard blocks your path.")
           deny.()
         else
@@ -350,7 +358,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
 
         source = """
         messages = #{inspect(String.split(messages, ","))}
-        if chance?.(1, #{interval}) do
+        if chance?.(1, #{inspect(interval)}) do
           announce_room.(room, pick.(messages))
         end
         continue.()
@@ -362,8 +370,6 @@ defmodule LokaWeb.Channels.BuilderCommands.Scripts do
         {:error, "Unknown template '#{tpl}'. Use 'script templates' to see available."}
     end
   end
-
-  defp escape_yaml_string(str), do: String.replace(str, "\"", "\\\"")
 
   defp parse_config(""), do: %{}
 

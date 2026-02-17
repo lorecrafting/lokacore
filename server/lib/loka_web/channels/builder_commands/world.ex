@@ -9,7 +9,9 @@ defmodule LokaWeb.Channels.BuilderCommands.World do
     valid_times = ~w(dawn noon dusk midnight)
 
     if time in valid_times do
-      {:ok, "Time period set to #{time}. (Note: full calendar implementation pending)", socket}
+      {:ok,
+       "[Not yet implemented] settime #{time} — time control requires V2 world_system entity.",
+       socket}
     else
       {:error, "Invalid time. Use: #{Enum.join(valid_times, ", ")}", socket}
     end
@@ -25,8 +27,8 @@ defmodule LokaWeb.Channels.BuilderCommands.World do
     rooms = RoomManager.list_rooms()
     validation = ValidationManager.validation_summary(rooms)
 
-    errors = Map.get(validation, :errors, 0)
-    warnings = Map.get(validation, :warnings, 0)
+    errors = Map.get(validation, :error_count, 0)
+    warnings = Map.get(validation, :warning_count, 0)
 
     text =
       if errors == 0 and warnings == 0 do

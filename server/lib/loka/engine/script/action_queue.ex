@@ -596,8 +596,32 @@ defmodule Loka.Engine.Script.ActionQueue do
          {:set_cooldown, %{entity_id: entity_id, key: key, duration: duration}},
          _context
        ) do
-    Loka.Engine.Cooldowns.set(entity_id, to_string(key), duration)
-    :ok
+    alias Loka.Engine.EntityRegistry
+
+    case EntityRegistry.lookup(entity_id) do
+      {:ok, pid} ->
+        Loka.Engine.EntityServer.update(pid, fn entity ->
+          Loka.Components.Cooldowns.set(entity, to_string(key), duration)
+        end)
+
+        :ok
+
+      :not_found ->
+        # Entity not running — update DB directly
+        alias Loka.Engine.Entities
+
+        case Entities.get_entity(entity_id) do
+          nil ->
+            Logger.warning("[ActionQueue] set_cooldown: entity #{entity_id} not found")
+            {:error, :entity_not_found}
+
+          schema ->
+            entity = Entities.to_entity(schema)
+            updated = Loka.Components.Cooldowns.set(entity, to_string(key), duration)
+            Entities.save_entity(updated)
+            :ok
+        end
+    end
   end
 
   defp execute_action(

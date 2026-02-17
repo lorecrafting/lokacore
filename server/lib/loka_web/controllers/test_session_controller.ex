@@ -17,8 +17,8 @@ defmodule LokaWeb.TestSessionController do
   plug :require_non_production
 
   alias Loka.Accounts
+  alias Loka.Engine.Entity
   alias Loka.Engine.Entities
-  alias Loka.Framework.Player.GameState
   alias LokaWeb.PlayerAuth
 
   # Dedicated test email for E2E tests
@@ -31,7 +31,14 @@ defmodule LokaWeb.TestSessionController do
   @starting_room_key "monastery_gate"
 
   # Test player stats for faster combat (bosses are level 4 with attack 14-18)
-  @test_player_stats %{str: 30, dex: 20, sta: 30, level: 5, xp: 0, skill_points: 0}
+  @test_player_stats %{
+    "str" => 30,
+    "dex" => 20,
+    "sta" => 30,
+    "level" => 5,
+    "xp" => 0,
+    "skill_points" => 0
+  }
   @test_player_health %{"current" => 200, "max" => 200}
 
   @doc """
@@ -41,8 +48,8 @@ defmodule LokaWeb.TestSessionController do
 
   This:
   1. Creates the test player if it doesn't exist
-  2. Deletes all game state (resets progress)
-  3. Creates a new character (bypassing character creation screen)
+  2. Deletes existing character entity (resets progress)
+  3. Creates a new character entity (bypassing character creation screen)
   4. Logs the player in with proper session cookies
   5. Redirects to /game
 
@@ -52,49 +59,64 @@ defmodule LokaWeb.TestSessionController do
     # Get or create the dedicated test player
     player = get_or_create_test_player()
 
-    # Delete existing game state (resets all progress)
-    GameState.delete_state(player.id)
+    # Delete existing character entity (resets all progress)
+    delete_character_entity(player.id)
 
     # Reset world items to their original locations (for repeatable tests)
     reset_world_items()
 
-    # Create fresh game state with character already created
-    {:ok, state} = GameState.get_or_create_state(player.id)
-    create_test_character(state)
+    # Create fresh character entity with test stats
+    create_test_character(player)
 
     # Log in using Phoenix's proper session handling (sets signed cookies)
     PlayerAuth.log_in_player(conn, player, %{"remember_me" => "true"})
   end
 
-  # Creates a test character with boosted stats for faster E2E testing.
+  # Creates a test character entity with boosted stats for faster E2E testing.
   # Also skips the intro cutscene by setting the seen_intro flag
   # And places the player at the starting room (monastery_gate)
-  defp create_test_character(state) do
-    # Get the starting room entity ID
-    starting_room = Entities.get_entity_by_key(@starting_room_key)
-
+  defp create_test_character(player) do
     starting_room_id =
-      case starting_room do
+      case Entities.get_entity_by_key(@starting_room_key) do
         %{id: id} -> id
         nil -> nil
       end
 
-    changeset =
-      GameState.character_creation_changeset(state, %{
-        character_name: @test_character_name,
-        gender: "they/them",
-        background: "pilgrim"
-      })
+    entity =
+      Entity.new(
+        type: :character,
+        key: "player_#{String.downcase(@test_character_name)}",
+        short_desc: @test_character_name,
+        account_id: player.id,
+        location_id: starting_room_id,
+        components: %{
+          "player" => %{
+            "settings" => %{},
+            "gender" => "they/them",
+            "background" => "pilgrim"
+          },
+          "combatant" => %{"health" => 200, "max_health" => 200},
+          "stats" => @test_player_stats,
+          "quest_progress" => %{},
+          "resources" => %{"health" => @test_player_health},
+          "skills" => %{},
+          "equipment" => %{},
+          "inventory" => [],
+          "flags" => %{"seen_intro" => true}
+        },
+        tags: ["playable"],
+        keywords: [String.downcase(@test_character_name)]
+      )
 
-    {:ok, updated_state} = Loka.Repo.update(changeset)
+    Entities.save(entity)
+  end
 
-    # Skip the intro cutscene, set starting room, and boost stats for faster combat
-    GameState.update_state(updated_state, %{
-      flags: %{"seen_intro" => true},
-      current_room_id: starting_room_id,
-      stats: @test_player_stats,
-      health: @test_player_health
-    })
+  # Delete existing character entity for a player
+  defp delete_character_entity(player_id) do
+    case Entities.find_one(account_id: player_id) do
+      {:ok, character} -> Entities.delete_entity(character.id)
+      {:error, :not_found} -> :ok
+    end
   end
 
   # Resets quest items to their original room locations for repeatable E2E tests

@@ -175,9 +175,9 @@ defmodule Loka.Engine.Script.Executor do
     end
   end
 
-  # Get script by key from database or TypedObject
+  # Get script by key from Content.Script (entity DB)
   defp get_script_by_key(key) do
-    # Try TypedObject (Content.Script) first
+    # Try Content.Script first
     case ContentScript.get(key) do
       {:ok, script} ->
         %{

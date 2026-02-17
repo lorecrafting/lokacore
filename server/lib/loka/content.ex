@@ -1,8 +1,9 @@
 defmodule Loka.Content do
   @moduledoc """
-  Content modules that wrap TypedObject with domain-specific APIs.
+  Content modules providing domain-specific entity APIs.
 
-  Provides convenient, type-safe access to YAML-defined game content:
+  Provides convenient, type-safe access to YAML-defined game content
+  stored as entities in the database (seeded by EntitySeeder):
 
   - `Content.Quest` - Quest definitions and objectives
   - `Content.Dialogue` - Dialogue trees and NPC conversations
@@ -12,7 +13,7 @@ defmodule Loka.Content do
 
   ## Boundary Rules
 
-  Content depends on Engine (for TypedObject.Loader) and Framework
+  Content depends on Engine (for Entities) and Framework
   (for quest/dialogue domain types).
   """
 

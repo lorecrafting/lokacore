@@ -13,8 +13,13 @@ defmodule LokaWeb.Channels.BuilderCommands.Navigation do
         {:error, "Room '#{room_key}' not found.", socket}
 
       room ->
-        {:ok, socket} = Helpers.teleport_to_room(room, socket)
-        {:ok, "Teleported to #{room_key}.", socket}
+        case Helpers.teleport_to_room(room, socket) do
+          {:ok, socket} ->
+            {:ok, "Teleported to #{room_key}.", socket}
+
+          {:error, reason, socket} ->
+            {:error, "Failed to teleport to '#{room_key}': #{reason}", socket}
+        end
     end
   end
 

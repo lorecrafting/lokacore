@@ -28,8 +28,6 @@ defmodule Loka.Testing.Bot.BotHelpers do
       dialogue = BotHelpers.get_dialogue_state(context)
   """
 
-  alias Loka.Framework.Player.GameState
-
   # ============================================================================
   # Entity Helpers
   # ============================================================================
@@ -119,7 +117,7 @@ defmodule Loka.Testing.Bot.BotHelpers do
   @doc """
   Gets the list of completed quest IDs from game state.
 
-  Handles both GameState structs and plain maps with mixed key types.
+  Handles plain maps with mixed key types.
 
   ## Examples
 
@@ -129,11 +127,7 @@ defmodule Loka.Testing.Bot.BotHelpers do
   Note: When using channel format (quests as list), completed quests are not
   included in the payload. This returns an empty list in that case.
   """
-  @spec get_completed_quests(GameState.t() | map()) :: [String.t()]
-  def get_completed_quests(%GameState{} = game_state) do
-    get_completed_quests(Map.from_struct(game_state))
-  end
-
+  @spec get_completed_quests(map()) :: [String.t()]
   def get_completed_quests(game_state) when is_map(game_state) do
     quests = game_state[:quests] || game_state["quests"] || %{}
 
@@ -158,15 +152,10 @@ defmodule Loka.Testing.Bot.BotHelpers do
   Gets the list of active quest IDs from game state.
 
   Handles multiple formats:
-  - GameState struct: Uses Quest.get_active_quests/1
   - Channel format: quests is a list of quest maps [%{id: "quest_id", ...}]
   - Internal format: quests is %{active: %{quest_id => progress}, completed: [...]}
   """
-  @spec get_active_quest_ids(GameState.t() | map()) :: [String.t()]
-  def get_active_quest_ids(%GameState{} = game_state) do
-    get_active_quest_ids(Map.from_struct(game_state))
-  end
-
+  @spec get_active_quest_ids(map()) :: [String.t()]
   def get_active_quest_ids(game_state) when is_map(game_state) do
     quests = game_state[:quests] || game_state["quests"] || %{}
 
@@ -195,7 +184,7 @@ defmodule Loka.Testing.Bot.BotHelpers do
       iex> quest_completed?(game_state, "main_quest")
       true
   """
-  @spec quest_completed?(GameState.t() | map(), String.t()) :: boolean()
+  @spec quest_completed?(map(), String.t()) :: boolean()
   def quest_completed?(game_state, quest_id) do
     quest_id in get_completed_quests(game_state)
   end
@@ -204,15 +193,10 @@ defmodule Loka.Testing.Bot.BotHelpers do
   Gets quest progress for a specific quest from game state.
 
   Handles multiple formats:
-  - GameState struct: Uses Quest.get_quest_progress/2
   - Channel format: quests is a list of quest maps, extracts progress from quest map
   - Internal format: quests is %{active: %{quest_id => progress}}
   """
-  @spec get_quest_progress(GameState.t() | map(), String.t()) :: map() | nil
-  def get_quest_progress(%GameState{} = game_state, quest_id) do
-    get_quest_progress(Map.from_struct(game_state), quest_id)
-  end
-
+  @spec get_quest_progress(map(), String.t()) :: map() | nil
   def get_quest_progress(game_state, quest_id) when is_map(game_state) do
     quests = game_state[:quests] || game_state["quests"] || %{}
 

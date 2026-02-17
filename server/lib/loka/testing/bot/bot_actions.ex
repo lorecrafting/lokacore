@@ -56,14 +56,13 @@ defmodule Loka.Testing.Bot.BotActions do
 
   alias Loka.Engine.{Entities, Entity, Hooks, Spawner}
   alias Loka.Framework.Combat
-  alias Loka.Framework.Player.GameState
   alias Loka.Framework.World.RoomLoader
   alias Loka.Framework.Dialogue
 
   @type bot_state :: %{
           id: String.t(),
           name: String.t(),
-          game_state: GameState.t(),
+          game_state: map(),
           room: Entity.t() | nil,
           nearby_entities: [Entity.t()],
           combat_state: map() | nil
@@ -299,7 +298,6 @@ defmodule Loka.Testing.Bot.BotActions do
   end
 
   # Updates a bot's game state in memory (no DB persist)
-  # Returns {:ok, updated_state} to match GameState.update_state API
   defp update_bot_game_state(game_state, attrs) do
     updated =
       Enum.reduce(attrs, game_state, fn {key, value}, acc ->

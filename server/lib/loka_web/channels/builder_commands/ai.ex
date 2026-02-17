@@ -22,6 +22,9 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
                            {:error, _} -> nil
                          end)
 
+  # AI streaming timeout (2 minutes)
+  @ai_timeout_ms 120_000
+
   @doc """
   Handle `/ai <prompt>` — send a one-shot prompt to the AI.
   """
@@ -30,13 +33,23 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
     conversation = socket.assigns.ai_conversation
 
     conversation = Conversation.send_message(conversation, prompt, build_context(socket))
-    socket = assign(socket, :ai_conversation, conversation)
+
+    # Set a timeout to auto-cancel hung streams
+    timer_ref = Process.send_after(self(), :ai_timeout, @ai_timeout_ms)
+
+    socket =
+      socket
+      |> assign(:ai_conversation, conversation)
+      |> assign(:ai_streaming, true)
+      |> assign(:ai_timeout_ref, timer_ref)
 
     {:ok, socket}
   end
 
   # Handle `/ai clear` — reset conversation history.
   def execute(:ai_clear, _params, socket) do
+    socket = cancel_ai_timeout(socket)
+
     socket =
       if socket.assigns[:ai_conversation] do
         conversation = Conversation.clear_history(socket.assigns.ai_conversation)
@@ -47,6 +60,18 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
 
     push(socket, "output", %{text: "[BUILDER] AI conversation history cleared."})
     {:ok, socket}
+  end
+
+  # Handle `/ai cancel` — cancel in-progress AI streaming.
+  def execute(:ai_cancel, _params, socket) do
+    if socket.assigns[:ai_streaming] do
+      socket = cancel_ai_streaming(socket)
+      push(socket, "output", %{text: "[BUILDER] AI request cancelled."})
+      {:ok, socket}
+    else
+      push(socket, "output", %{text: "[BUILDER] No AI request in progress."})
+      {:ok, socket}
+    end
   end
 
   # Handle `chat` — enter chat mode.
@@ -88,7 +113,15 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
       conversation = socket.assigns.ai_conversation
 
       conversation = Conversation.send_message(conversation, trimmed, build_context(socket))
-      socket = assign(socket, :ai_conversation, conversation)
+
+      # Set streaming timeout (same as /ai command)
+      timer_ref = Process.send_after(self(), :ai_timeout, @ai_timeout_ms)
+
+      socket =
+        socket
+        |> assign(:ai_conversation, conversation)
+        |> assign(:ai_streaming, true)
+        |> assign(:ai_timeout_ref, timer_ref)
 
       {:ok, socket}
     end
@@ -133,12 +166,13 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
   end
 
   def handle_ai_event({:ai_done}, socket) do
-    # No ETS registry reload needed in V2
+    socket = finish_ai_streaming(socket)
     push(socket, "ai_stream_done", %{})
     {:noreply, socket}
   end
 
   def handle_ai_event({:ai_error, reason}, socket) do
+    socket = finish_ai_streaming(socket)
     push(socket, "ai_stream_error", %{error: reason})
     {:noreply, socket}
   end
@@ -146,6 +180,17 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
   def handle_ai_event({:ai_tool_use, _name, _id, _input, _result}, socket) do
     # Verbose mode tool completion — already pushed during handle_tool_use_raw
     {:noreply, socket}
+  end
+
+  def handle_ai_event(:ai_timeout, socket) do
+    if socket.assigns[:ai_streaming] do
+      socket = cancel_ai_streaming(socket)
+      push(socket, "ai_stream_error", %{error: "AI request timed out after 2 minutes."})
+      push(socket, "ai_stream_done", %{})
+      {:noreply, socket}
+    else
+      {:noreply, socket}
+    end
   end
 
   # ---------------------------------------------------------------------------
@@ -181,14 +226,14 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
   end
 
   defp get_current_room_key(socket) do
-    game_state = socket.assigns[:game_state]
+    case socket.assigns[:character] do
+      nil ->
+        "unknown"
 
-    if game_state do
-      alias LokaWeb.Channels.RoomHelpers
-      {room, _} = RoomHelpers.load_player_room(game_state)
-      Map.get(room, :key, "unknown")
-    else
-      "unknown"
+      character ->
+        alias LokaWeb.Channels.RoomHelpers
+        {room, _} = RoomHelpers.load_room_for_character(character)
+        Map.get(room, :key, "unknown")
     end
   end
 
@@ -228,6 +273,29 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
       You have access to tools for managing rooms, NPCs, items, quests, dialogues,
       scripts, zones, and design documents.
       """
+  end
+
+  defp finish_ai_streaming(socket) do
+    socket
+    |> cancel_ai_timeout()
+    |> assign(:ai_streaming, false)
+  end
+
+  defp cancel_ai_streaming(socket) do
+    socket
+    |> cancel_ai_timeout()
+    |> assign(:ai_streaming, false)
+  end
+
+  defp cancel_ai_timeout(socket) do
+    case socket.assigns[:ai_timeout_ref] do
+      ref when is_reference(ref) ->
+        Process.cancel_timer(ref)
+        assign(socket, :ai_timeout_ref, nil)
+
+      _ ->
+        socket
+    end
   end
 
   defp format_tool_summary(name, input) do

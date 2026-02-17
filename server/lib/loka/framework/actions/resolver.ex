@@ -24,17 +24,16 @@ defmodule Loka.Framework.Actions.Resolver do
 
       alias Loka.Framework.Actions.Resolver
 
-      # Get available actions for an entity given player state
-      actions = Resolver.resolve(entity, game_state, room)
+      # Get available actions for an entity given a character entity
+      actions = Resolver.resolve(entity, character, room)
 
       # Returns list of %Action{} structs that are available
   """
 
   alias Loka.Content.StatusEffect, as: ContentStatusEffect
+  alias Loka.Engine.Entity
   alias Loka.Framework.Actions.Action
   alias Loka.Framework.Conditions.Evaluator
-  alias Loka.Framework.Status.StatusManager
-  alias Loka.Framework.Player.GameState
 
   require Logger
 
@@ -43,29 +42,32 @@ defmodule Loka.Framework.Actions.Resolver do
   # =============================================================================
 
   @doc """
-  Resolves the available actions for an entity given the player's state.
+  Resolves the available actions for an entity given a character entity.
+
+  The character is the player's entity with components for equipment, flags,
+  active_statuses, etc.
 
   Returns a list of Action structs that are available to the player.
   """
-  @spec resolve(map(), GameState.t(), map() | nil) :: [Action.t()]
-  def resolve(entity, %GameState{} = game_state, room \\ nil) do
+  @spec resolve(map(), Entity.t() | map(), map() | nil) :: [Action.t()]
+  def resolve(entity, character, room \\ nil) do
     # Check for full replacement first (transformation/possession)
-    case get_replacement_actions(game_state) do
+    case get_replacement_actions(character) do
       {:replace, actions} ->
         # Player is transformed - use ONLY replacement actions
         actions
-        |> filter_by_conditions(game_state)
+        |> filter_by_conditions(character)
         |> sort_by_priority()
 
       :none ->
         entity
         |> get_entity_actions()
-        |> union_equipment_actions(game_state)
-        |> union_script_granted_actions(game_state)
-        |> remove_status_blocked(game_state)
-        |> remove_script_blocked(game_state)
+        |> union_equipment_actions(character)
+        |> union_script_granted_actions(character)
+        |> remove_status_blocked(character)
+        |> remove_script_blocked(character)
         |> apply_room_modifiers(room)
-        |> filter_by_conditions(game_state)
+        |> filter_by_conditions(character)
         |> sort_by_priority()
     end
   end
@@ -204,8 +206,8 @@ defmodule Loka.Framework.Actions.Resolver do
   # Layer 2: Equipment Grants (Union)
   # =============================================================================
 
-  defp union_equipment_actions(actions, %GameState{} = game_state) do
-    equipment = Map.get(game_state, :equipment) || %{}
+  defp union_equipment_actions(actions, character) do
+    equipment = get_component(character, "equipment") || %{}
 
     equipment_actions =
       equipment
@@ -244,10 +246,10 @@ defmodule Loka.Framework.Actions.Resolver do
   # Layer 3: Script Grants (Union)
   # =============================================================================
 
-  defp union_script_granted_actions(actions, %GameState{} = game_state) do
+  defp union_script_granted_actions(actions, character) do
     # Scripts can store granted actions in player flags
     script_actions =
-      game_state
+      character
       |> get_flag("_granted_actions", [])
       |> Enum.map(&Action.from_map/1)
       |> Enum.reject(&is_nil/1)
@@ -259,9 +261,8 @@ defmodule Loka.Framework.Actions.Resolver do
   # Layer 4: Status Blocks (Remove)
   # =============================================================================
 
-  defp remove_status_blocked(actions, %GameState{} = game_state) do
-    player_id = to_string(game_state.player_id)
-    active_statuses = StatusManager.get_active(player_id)
+  defp remove_status_blocked(actions, character) do
+    active_statuses = get_component(character, "active_statuses") || []
 
     blocked_keys =
       active_statuses
@@ -274,7 +275,9 @@ defmodule Loka.Framework.Actions.Resolver do
   end
 
   defp get_status_blocked_actions(active_status) do
-    case ContentStatusEffect.get(active_status.status_key) do
+    status_key = Map.get(active_status, "status_key") || Map.get(active_status, :status_key)
+
+    case ContentStatusEffect.get(status_key) do
       {:ok, status_def} ->
         ContentStatusEffect.removes_actions(status_def)
 
@@ -287,9 +290,9 @@ defmodule Loka.Framework.Actions.Resolver do
   # Layer 5: Script Blocks (Remove)
   # =============================================================================
 
-  defp remove_script_blocked(actions, %GameState{} = game_state) do
+  defp remove_script_blocked(actions, character) do
     blocked_keys =
-      game_state
+      character
       |> get_flag("_blocked_actions", [])
       |> MapSet.new()
 
@@ -344,14 +347,15 @@ defmodule Loka.Framework.Actions.Resolver do
   # Layer 7: Transformation/Replacement
   # =============================================================================
 
-  defp get_replacement_actions(%GameState{} = game_state) do
-    player_id = to_string(game_state.player_id)
-    active_statuses = StatusManager.get_active(player_id)
+  defp get_replacement_actions(character) do
+    active_statuses = get_component(character, "active_statuses") || []
 
     # Find any status that replaces all actions
     replacement =
       Enum.find_value(active_statuses, fn active_status ->
-        case ContentStatusEffect.get(active_status.status_key) do
+        status_key = Map.get(active_status, "status_key") || Map.get(active_status, :status_key)
+
+        case ContentStatusEffect.get(status_key) do
           {:ok, status_def} ->
             if ContentStatusEffect.replaces_all_actions?(status_def) do
               ContentStatusEffect.grants_actions(status_def)
@@ -378,9 +382,12 @@ defmodule Loka.Framework.Actions.Resolver do
   # Condition Filtering
   # =============================================================================
 
-  defp filter_by_conditions(actions, %GameState{} = game_state) do
+  defp filter_by_conditions(actions, character) do
+    # Evaluator accepts Entity structs; wrap map if needed
+    entity = ensure_entity(character)
+
     Enum.filter(actions, fn action ->
-      Evaluator.evaluate_all(action.conditions, game_state)
+      Evaluator.evaluate_all(action.conditions, entity)
     end)
   end
 
@@ -407,9 +414,42 @@ defmodule Loka.Framework.Actions.Resolver do
     Map.has_key?(components, name) or Map.has_key?(components, String.to_atom(name))
   end
 
-  defp get_flag(%GameState{flags: flags}, key, default) when is_map(flags) do
-    Map.get(flags, key) || Map.get(flags, to_string(key)) || default
+  # Get a component value from a character entity or map
+  defp get_component(%{components: components}, key) when is_map(components) do
+    Map.get(components, key)
   end
 
-  defp get_flag(_, _, default), do: default
+  defp get_component(_, _), do: nil
+
+  # Get a flag value from a character entity's flags component
+  defp get_flag(character, key, default) do
+    flags = get_component(character, "flags") || %{}
+
+    case Map.get(flags, key) || Map.get(flags, to_string(key)) do
+      nil -> default
+      value -> value
+    end
+  end
+
+  # Ensure we have an Entity struct for the Evaluator
+  defp ensure_entity(%Entity{} = entity), do: entity
+
+  defp ensure_entity(map) when is_map(map) do
+    struct(
+      Entity,
+      Map.take(map, [
+        :id,
+        :key,
+        :type,
+        :short_desc,
+        :long_desc,
+        :extra_desc,
+        :tags,
+        :components,
+        :location_id,
+        :traits,
+        :metadata
+      ])
+    )
+  end
 end

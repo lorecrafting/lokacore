@@ -1,9 +1,12 @@
 defmodule Loka.Framework.Combat.RespawnManager do
   @moduledoc """
-  Handles mob spawning and respawning for the game framework.
+  Handles mob despawning and respawning using entity components.
 
-  When a mob is killed, it despawns (marked as dead) and a respawn timer starts.
-  After the respawn delay, the mob respawns at its original location with full health.
+  When a mob is killed, it's marked as despawned in its components and a respawn
+  timer is scheduled via the entity's EntityServer process. After the delay,
+  the EntityServer restores health and removes the despawned flag.
+
+  No GenServer state — all data lives in entity components.
 
   ## Usage
 
@@ -17,18 +20,11 @@ defmodule Loka.Framework.Combat.RespawnManager do
       RespawnManager.respawn_mob(entity_id)
   """
 
-  use GenServer
-
   alias Loka.Engine.Entities
+  alias Loka.Engine.EntityRegistry
 
   # 30 seconds
   @default_respawn_delay_ms 30_000
-
-  # Client API
-
-  def start_link(opts \\ []) do
-    GenServer.start_link(__MODULE__, opts, name: __MODULE__)
-  end
 
   @doc """
   Despawns a mob (marks it as dead and schedules respawn).
@@ -36,145 +32,92 @@ defmodule Loka.Framework.Combat.RespawnManager do
   """
   def despawn_mob(entity_id, opts \\ []) do
     respawn_delay = Keyword.get(opts, :respawn_delay, @default_respawn_delay_ms)
-    GenServer.call(__MODULE__, {:despawn, entity_id, respawn_delay})
+
+    case Entities.get_entity(entity_id) do
+      nil ->
+        {:error, :entity_not_found}
+
+      entity ->
+        # Store original health for restoration on respawn
+        combatant = Map.get(entity.components || %{}, "combatant", %{})
+        original_health = Map.get(combatant, "health", %{"current" => 50, "max" => 50})
+
+        respawn_data = %{"original_health" => original_health}
+
+        updated_components =
+          (entity.components || %{})
+          |> Map.put("despawned", true)
+          |> Map.put("respawn_data", respawn_data)
+
+        {:ok, _} = Entities.update_entity(entity, %{components: updated_components})
+
+        # Schedule respawn via the entity's EntityServer process
+        case EntityRegistry.lookup(entity_id) do
+          {:ok, pid} ->
+            Process.send_after(pid, :respawn, respawn_delay)
+
+          :not_found ->
+            :ok
+        end
+
+        respawn_at = DateTime.add(DateTime.utc_now(), respawn_delay, :millisecond)
+        {:ok, respawn_at}
+    end
   end
 
   @doc """
   Checks if a mob is currently despawned (dead, awaiting respawn).
   """
   def is_despawned?(entity_id) do
-    GenServer.call(__MODULE__, {:is_despawned, entity_id})
+    case Entities.get_entity(entity_id) do
+      nil -> false
+      entity -> entity.components["despawned"] == true
+    end
   end
 
   @doc """
   Forces immediate respawn of a mob.
   """
   def respawn_mob(entity_id) do
-    GenServer.call(__MODULE__, {:respawn, entity_id})
-  end
-
-  @doc """
-  Gets all currently despawned mobs.
-  """
-  def list_despawned do
-    GenServer.call(__MODULE__, :list_despawned)
-  end
-
-  # Server Callbacks
-
-  @impl true
-  def init(_opts) do
-    # State: %{entity_id => %{original_health: map, respawn_at: DateTime, timer_ref: ref}}
-    {:ok, %{despawned: %{}}}
-  end
-
-  @impl true
-  def handle_call({:despawn, entity_id, respawn_delay}, _from, state) do
     case Entities.get_entity(entity_id) do
       nil ->
-        {:reply, {:error, :entity_not_found}, state}
+        {:error, :not_despawned}
 
       entity ->
-        # Store original health from combatant component
-        combatant = Map.get(entity.components || %{}, "combatant", %{})
-        original_health = Map.get(combatant, "health", %{"current" => 50, "max" => 50})
+        if entity.components["despawned"] == true do
+          # Send immediate respawn to EntityServer
+          case EntityRegistry.lookup(entity_id) do
+            {:ok, pid} ->
+              send(pid, :respawn)
+              # Give the EntityServer a moment to process
+              Process.sleep(10)
+              :ok
 
-        # Mark entity as despawned by setting a flag in components
-        updated_components = Map.put(entity.components || %{}, "despawned", true)
-        {:ok, _} = Entities.update_entity(entity, %{components: updated_components})
-
-        # Schedule respawn
-        timer_ref = Process.send_after(self(), {:do_respawn, entity_id}, respawn_delay)
-        respawn_at = DateTime.add(DateTime.utc_now(), respawn_delay, :millisecond)
-
-        despawn_info = %{
-          original_health: original_health,
-          respawn_at: respawn_at,
-          timer_ref: timer_ref,
-          location_id: entity.location_id
-        }
-
-        new_state = put_in(state, [:despawned, entity_id], despawn_info)
-        {:reply, {:ok, respawn_at}, new_state}
-    end
-  end
-
-  @impl true
-  def handle_call({:is_despawned, entity_id}, _from, state) do
-    is_despawned = Map.has_key?(state.despawned, entity_id)
-    {:reply, is_despawned, state}
-  end
-
-  @impl true
-  def handle_call({:respawn, entity_id}, _from, state) do
-    case Map.get(state.despawned, entity_id) do
-      nil ->
-        {:reply, {:error, :not_despawned}, state}
-
-      despawn_info ->
-        # Cancel any pending timer
-        if despawn_info.timer_ref, do: Process.cancel_timer(despawn_info.timer_ref)
-
-        # Do the respawn
-        new_state = do_respawn_mob(entity_id, despawn_info, state)
-        {:reply, :ok, new_state}
-    end
-  end
-
-  @impl true
-  def handle_call(:list_despawned, _from, state) do
-    despawned_list =
-      Enum.map(state.despawned, fn {id, info} ->
-        %{entity_id: id, respawn_at: info.respawn_at}
-      end)
-
-    {:reply, despawned_list, state}
-  end
-
-  @impl true
-  def handle_info({:do_respawn, entity_id}, state) do
-    case Map.get(state.despawned, entity_id) do
-      nil ->
-        # Already respawned or doesn't exist
-        {:noreply, state}
-
-      despawn_info ->
-        new_state = do_respawn_mob(entity_id, despawn_info, state)
-        {:noreply, new_state}
-    end
-  end
-
-  # Private Functions
-
-  defp do_respawn_mob(entity_id, despawn_info, state) do
-    case Entities.get_entity(entity_id) do
-      nil ->
-        # Entity was deleted, just remove from tracking
-        %{state | despawned: Map.delete(state.despawned, entity_id)}
-
-      entity ->
-        # Restore health and remove despawned flag
-        combatant = Map.get(entity.components || %{}, "combatant", %{})
-        restored_combatant = Map.put(combatant, "health", despawn_info.original_health)
-
-        updated_components =
-          entity.components
-          |> Map.put("combatant", restored_combatant)
-          |> Map.delete("despawned")
-
-        {:ok, _} = Entities.update_entity(entity, %{components: updated_components})
-
-        # Broadcast respawn event
-        if despawn_info.location_id do
-          Phoenix.PubSub.broadcast(
-            Loka.PubSub,
-            "location:#{despawn_info.location_id}",
-            {:mob_respawned, entity_id, entity.short_desc}
-          )
+            :not_found ->
+              # No EntityServer running — do respawn inline
+              do_inline_respawn(entity)
+              :ok
+          end
+        else
+          {:error, :not_despawned}
         end
-
-        # Remove from despawned tracking
-        %{state | despawned: Map.delete(state.despawned, entity_id)}
     end
+  end
+
+  # Inline respawn for when no EntityServer is running (e.g., tests)
+  defp do_inline_respawn(entity) do
+    respawn_data = Map.get(entity.components, "respawn_data", %{})
+    original_health = Map.get(respawn_data, "original_health", %{"current" => 50, "max" => 50})
+
+    combatant = Map.get(entity.components, "combatant", %{})
+    restored_combatant = Map.put(combatant, "health", original_health)
+
+    updated_components =
+      entity.components
+      |> Map.put("combatant", restored_combatant)
+      |> Map.delete("despawned")
+      |> Map.delete("respawn_data")
+
+    Entities.update_entity(entity, %{components: updated_components})
   end
 end

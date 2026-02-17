@@ -167,7 +167,7 @@ defmodule Loka.Engine.Entity do
   Checks if an entity was spawned from a draft prototype.
 
   Draft entities carry `"draft" => true` in their metadata, propagated from
-  the source TypedObject at spawn time.
+  the source prototype at spawn time.
   """
   @spec draft?(t()) :: boolean()
   def draft?(%__MODULE__{metadata: metadata}) when is_map(metadata) do

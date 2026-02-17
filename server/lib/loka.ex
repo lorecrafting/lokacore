@@ -18,7 +18,7 @@ defmodule Loka do
   | `Loka` | relaxed (catch-all) | -- | Accounts, Admin, Utils, Game, WorldBuilder, etc. |
   | `Loka.Engine` | check inbound | none | Core entity system, hooks, scripting. No game logic. |
   | `Loka.Framework` | check inbound | Engine | Game systems (combat, quests, inventory). |
-  | `Loka.Content` | strict | Engine, Framework | Content modules wrapping TypedObject. |
+  | `Loka.Content` | strict | Engine, Framework | Content modules with domain-specific entity APIs. |
   | `Loka.Session` | strict | Engine | Player session management. |
   | `LokaWeb` | strict outbound | Engine, Framework, Content, Session | Web layer (LiveView, channels, controllers). |
 

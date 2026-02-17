@@ -17,7 +17,7 @@ defmodule LokaWeb.Api.TestController do
   use LokaWeb, :controller
 
   alias Loka.Accounts
-  alias Loka.Framework.Player.GameState
+  alias Loka.Engine.Entities
   alias Loka.Testing.TestData
   alias Loka.Testing.QuestStrategy
 
@@ -177,8 +177,11 @@ defmodule LokaWeb.Api.TestController do
     # Get or create the dedicated test player (handles race conditions)
     player = get_or_create_test_player()
 
-    # Delete existing game state (resets all progress)
-    GameState.delete_state(player.id)
+    # Delete existing character entity (resets all progress)
+    case Entities.find_one(account_id: player.id) do
+      {:ok, character} -> Entities.delete_entity(character.id)
+      {:error, :not_found} -> :ok
+    end
 
     # Generate fresh session token
     token = generate_session_token(player)
@@ -215,26 +218,27 @@ defmodule LokaWeb.Api.TestController do
         |> json(%{error: "Test player not found. Call /api/test/reset-player first."})
 
       player ->
-        case GameState.get_state(player.id) do
-          nil ->
+        case Entities.find_one(account_id: player.id) do
+          {:error, :not_found} ->
             json(conn, %{
               player_id: player.id,
               state: nil,
-              message: "No game state yet. Player needs to enter the game."
+              message: "No character entity yet. Player needs to enter the game."
             })
 
-          state ->
+          {:ok, character} ->
+            components = character.components || %{}
             # Get nearby entities from the current room
-            nearby_entities = get_room_entities(state.current_room_id)
+            nearby_entities = get_room_entities(character.location_id)
 
             json(conn, %{
               player_id: player.id,
-              quests: state.quests,
-              inventory: state.inventory,
-              equipment: state.equipment,
-              flags: state.flags,
-              stats: state.stats,
-              current_room_id: state.current_room_id,
+              quests: components["quest_progress"] || %{},
+              inventory: components["inventory"] || [],
+              equipment: components["equipment"] || %{},
+              flags: components["flags"] || %{},
+              stats: components["stats"] || %{},
+              current_room_id: character.location_id,
               nearby_entities: nearby_entities
             })
         end
@@ -247,13 +251,12 @@ defmodule LokaWeb.Api.TestController do
 
   defp get_room_entities(room_id) do
     alias Loka.Engine.Entities
-    alias Loka.Framework.Combat.RespawnManager
 
     room_id
     |> Entities.get_contents()
     |> Enum.reject(fn entity ->
       # Filter out despawned (dead) mobs
-      RespawnManager.is_despawned?(entity.id)
+      entity.components["despawned"] == true
     end)
     |> Enum.map(fn entity ->
       %{

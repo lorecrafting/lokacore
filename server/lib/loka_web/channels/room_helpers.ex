@@ -33,33 +33,7 @@ defmodule LokaWeb.Channels.RoomHelpers do
   end
 
   @doc """
-  V1 compat: Loads room from game_state.current_room_id.
-  Returns {room, game_state}. Used by builder commands (cleaned up in Phase 6).
-  """
-  def load_player_room(game_state) do
-    room_id = Map.get(game_state, :current_room_id) || Map.get(game_state, :location_id)
-
-    case try_load_room(room_id) do
-      {:ok, room} ->
-        activate_room_entity(room.id)
-        {room, game_state}
-
-      {:error, :not_found} ->
-        starting_room_id = RoomLoader.get_starting_room_id()
-
-        case try_load_room(starting_room_id) do
-          {:ok, room} ->
-            activate_room_entity(room.id)
-            {room, game_state}
-
-          {:error, :not_found} ->
-            {RoomLoader.empty_room(), game_state}
-        end
-    end
-  end
-
-  @doc """
-  V2: Loads room from character entity's location_id.
+  Loads room from character entity's location_id.
   Returns {room, updated_character}.
   """
   def load_room_for_character(%Entity{} = character) do

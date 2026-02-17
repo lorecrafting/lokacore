@@ -67,7 +67,7 @@ defmodule Loka.Testing.Bot.Strategy do
 
       %{
         bot: %{id: "uuid", name: "Bot 1"},
-        game_state: %GameState{...},
+        game_state: %{...},
         room: %Entity{...} | nil,
         nearby_entities: [%Entity{...}],
         in_combat: false,
@@ -76,7 +76,6 @@ defmodule Loka.Testing.Bot.Strategy do
   """
 
   alias Loka.Engine.Entity
-  alias Loka.Framework.Player.GameState
 
   # =============================================================================
   # Types
@@ -122,7 +121,7 @@ defmodule Loka.Testing.Bot.Strategy do
 
   @type context :: %{
           bot: %{id: String.t(), name: String.t()},
-          game_state: GameState.t(),
+          game_state: map(),
           room: Entity.t() | nil,
           nearby_entities: [Entity.t()],
           in_combat: boolean(),
@@ -152,7 +151,7 @@ defmodule Loka.Testing.Bot.Strategy do
 
   The context contains:
   - `bot` - Bot identification info
-  - `game_state` - Current GameState (inventory, stats, health, etc.)
+  - `game_state` - Current game state map (inventory, stats, health, etc.)
   - `room` - Current room entity (or nil if unknown)
   - `nearby_entities` - Entities in the current room
   - `in_combat` - Whether the bot is currently in combat

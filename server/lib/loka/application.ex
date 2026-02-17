@@ -29,7 +29,6 @@ defmodule Loka.Application do
       # Task supervisor for async hook execution
       {Task.Supervisor, name: Loka.Engine.Hooks.TaskSupervisor},
       Loka.Engine.Hooks,
-      Loka.Engine.Cooldowns,
       # EntitySeeder - populates DB from YAML (V2)
       Loka.Engine.EntitySeeder,
       {Registry, keys: :unique, name: Loka.Engine.EntityRegistry.Registry},
@@ -38,25 +37,11 @@ defmodule Loka.Application do
       Loka.Engine.SystemSupervisor,
       Loka.Engine.WorldGraph.LayoutManager,
 
-      # Framework layer - Social Systems
-      Loka.Framework.Social.ChannelManager,
-      Loka.Framework.Social.PartyManager,
-
       # Admin tools - GameLog for debugging/audit (replaces Quest.EventLog)
       Loka.Admin.GameLog,
 
       # Admin audit logging - Task supervisor for async audit log inserts
       {Task.Supervisor, name: Loka.Admin.Audit.TaskSupervisor},
-
-      # Framework layer - Quest System
-      Loka.Framework.Quest.TimerManager,
-      # Combat system - Registry for lookups, Supervisor for combat processes
-      {Registry, keys: :unique, name: Loka.CombatRegistry},
-      Loka.Framework.Combat.CombatSupervisor,
-      Loka.Framework.Combat.RespawnManager,
-
-      # Resource system (mana, mv, stamina, etc.)
-      Loka.Framework.Resources.ResourcePool,
 
       # Timer system (crafting queues, offline progression)
       Loka.Timers.Server,

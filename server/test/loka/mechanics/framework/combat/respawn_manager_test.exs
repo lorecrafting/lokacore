@@ -34,21 +34,6 @@ defmodule Loka.Framework.Combat.RespawnManagerTest do
     )
   end
 
-  setup do
-    # The RespawnManager GenServer is started by the application supervision tree.
-    # We don't manage its lifecycle in tests - just ensure it's running.
-    case GenServer.whereis(RespawnManager) do
-      nil ->
-        {:ok, _pid} = RespawnManager.start_link()
-        :ok
-
-      _pid ->
-        :ok
-    end
-
-    :ok
-  end
-
   describe "despawn_mob/2" do
     test "despawns a valid mob entity" do
       mob = mob_fixture()
@@ -59,6 +44,19 @@ defmodule Loka.Framework.Combat.RespawnManagerTest do
       # Verify mob is now marked as despawned in DB
       updated_mob = Loka.Engine.Entities.get_entity(mob.id)
       assert updated_mob.components["despawned"] == true
+    end
+
+    test "stores respawn_data with original health" do
+      mob = mob_fixture()
+
+      {:ok, _} = RespawnManager.despawn_mob(mob.id)
+
+      updated_mob = Loka.Engine.Entities.get_entity(mob.id)
+
+      assert updated_mob.components["respawn_data"]["original_health"] == %{
+               "current" => 30,
+               "max" => 30
+             }
     end
 
     test "returns error for non-existent entity" do
@@ -112,6 +110,7 @@ defmodule Loka.Framework.Combat.RespawnManagerTest do
       # Verify despawned flag removed and health restored
       updated_mob = Loka.Engine.Entities.get_entity(mob.id)
       refute Map.has_key?(updated_mob.components, "despawned")
+      refute Map.has_key?(updated_mob.components, "respawn_data")
 
       combatant = updated_mob.components["combatant"]
       assert combatant["health"]["current"] == 30
@@ -139,53 +138,6 @@ defmodule Loka.Framework.Combat.RespawnManagerTest do
       combatant = updated_mob.components["combatant"]
       assert combatant["health"]["current"] == 100
       assert combatant["health"]["max"] == 100
-    end
-  end
-
-  describe "list_despawned/0" do
-    test "returns list that includes newly despawned mobs" do
-      initial_count = length(RespawnManager.list_despawned())
-
-      mob1 = mob_fixture()
-      mob2 = mob_fixture()
-
-      {:ok, _} = RespawnManager.despawn_mob(mob1.id)
-      {:ok, _} = RespawnManager.despawn_mob(mob2.id)
-
-      despawned = RespawnManager.list_despawned()
-
-      # Should have at least our 2 new mobs
-      assert length(despawned) >= initial_count + 2
-      entity_ids = Enum.map(despawned, & &1.entity_id)
-      assert mob1.id in entity_ids
-      assert mob2.id in entity_ids
-    end
-
-    test "includes respawn_at time for each mob" do
-      mob = mob_fixture()
-      {:ok, expected_respawn} = RespawnManager.despawn_mob(mob.id)
-
-      despawned = RespawnManager.list_despawned()
-      info = Enum.find(despawned, &(&1.entity_id == mob.id))
-
-      assert info != nil
-      assert info.respawn_at == expected_respawn
-    end
-  end
-
-  describe "automatic respawn" do
-    test "mob respawns after delay" do
-      mob = mob_fixture()
-
-      # Use very short delay for testing
-      {:ok, _} = RespawnManager.despawn_mob(mob.id, respawn_delay: 50)
-
-      assert RespawnManager.is_despawned?(mob.id) == true
-
-      # Wait for respawn
-      Process.sleep(100)
-
-      assert RespawnManager.is_despawned?(mob.id) == false
     end
   end
 end

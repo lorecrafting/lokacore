@@ -9,7 +9,7 @@ defmodule LokaWeb.Channels.BuilderCommands.WorldTest do
     test "accepts valid time periods" do
       for time <- ~w(dawn noon dusk midnight) do
         {:ok, text, _socket} = World.execute(:settime, %{time: time}, @socket)
-        assert text =~ "Time period set to #{time}"
+        assert text =~ "settime #{time}"
       end
     end
 

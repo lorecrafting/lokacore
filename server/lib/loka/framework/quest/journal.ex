@@ -74,7 +74,7 @@ defmodule Loka.Framework.Quest.Journal do
   alias Loka.Content
   alias Loka.Engine.Entity
   alias Loka.Framework.Conditions.Evaluator
-  alias Loka.Framework.Quest.{Progress, TimerManager}
+  alias Loka.Framework.Quest.Progress
 
   @doc """
   Renders all visible journal entries for a quest.
@@ -174,7 +174,7 @@ defmodule Loka.Framework.Quest.Journal do
             progress: Map.get(obj_progress, "progress") || 0,
             target: obj.target_count || 1,
             completed: Map.get(obj_progress, "completed") || false,
-            time_remaining: get_time_remaining(state.account_id, quest_id, obj)
+            time_remaining: get_time_remaining(state.account_id, quest_id, obj, progress)
           }
         end)
       else
@@ -305,7 +305,7 @@ defmodule Loka.Framework.Quest.Journal do
       end,
       get_time_remaining: fn obj_id ->
         obj = quest_def && Enum.find(quest_def.objectives, &(&1.id == obj_id))
-        get_time_remaining(entity.account_id, quest_id, obj) || 0
+        get_time_remaining(entity.account_id, quest_id, obj, progress) || 0
       end,
 
       # Utility
@@ -433,11 +433,17 @@ defmodule Loka.Framework.Quest.Journal do
   # Private - Helpers
   # =============================================================================
 
-  defp get_time_remaining(_player_id, _quest_id, nil), do: nil
+  defp get_time_remaining(_player_id, _quest_id, nil, _progress), do: nil
 
-  defp get_time_remaining(player_id, quest_id, obj) do
-    if obj.time_limit && Process.whereis(TimerManager) do
-      TimerManager.get_remaining_time(player_id, quest_id, obj.id)
+  defp get_time_remaining(_player_id, _quest_id, obj, progress) do
+    if obj.time_limit do
+      objectives = (progress || %{})["objectives"] || %{}
+      obj_data = objectives[obj.id] || %{}
+
+      case Map.get(obj_data, "expires_at") do
+        nil -> nil
+        expires_at -> max(0, expires_at - System.os_time(:second))
+      end
     else
       nil
     end

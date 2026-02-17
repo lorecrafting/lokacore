@@ -71,7 +71,6 @@ defmodule Loka.Testing.Bot.Assertions do
       }
   """
 
-  alias Loka.Framework.Player.GameState
   alias Loka.Utils.MapHelpers
 
   @type assertion_type ::
@@ -121,7 +120,7 @@ defmodule Loka.Testing.Bot.Assertions do
 
   Returns `:passed`, `:failed`, `:pending`, or `{:error, reason}`.
   """
-  @spec check(assertion(), GameState.t(), map()) :: check_result()
+  @spec check(assertion(), map(), map()) :: check_result()
   def check(assertion, game_state, context \\ %{})
 
   def check({:quest_completed, quest_id}, game_state, _context) do
@@ -231,7 +230,7 @@ defmodule Loka.Testing.Bot.Assertions do
   Previously passed/failed assertions are preserved.
   Pending assertions are re-checked.
   """
-  @spec check_all([assertion()], GameState.t(), map()) :: results()
+  @spec check_all([assertion()], map(), map()) :: results()
   def check_all(assertions, game_state, context \\ %{}) do
     Enum.reduce(assertions, new(), fn assertion, acc ->
       result = check(assertion, game_state, context)
@@ -244,7 +243,7 @@ defmodule Loka.Testing.Bot.Assertions do
 
   Preserves passed/failed results and only re-evaluates pending ones.
   """
-  @spec recheck_pending(results(), GameState.t(), map()) :: results()
+  @spec recheck_pending(results(), map(), map()) :: results()
   def recheck_pending(results, game_state, context \\ %{}) do
     rechecked =
       Enum.reduce(results.pending, new(), fn assertion, acc ->

@@ -104,7 +104,7 @@ defmodule LokaWeb.GameChannel do
 
   alias Loka.Framework.{Inventory, Equipment, Quest}
   alias Loka.Framework.World.Atmosphere
-  alias Loka.Framework.Resources.ResourcePool
+  alias Loka.Components.ResourcePools
   alias Loka.Engine.{Entities, Entity, EntityRegistry}
   alias Loka.Session
   alias LokaWeb.Channels.RoomHelpers
@@ -742,6 +742,9 @@ defmodule LokaWeb.GameChannel do
       {:builder_ai_clear, params} ->
         execute_ai_command(:ai_clear, params, socket)
 
+      {:builder_ai_cancel, params} ->
+        execute_ai_command(:ai_cancel, params, socket)
+
       {:builder_chat_mode, params} ->
         execute_ai_command(:chat_mode, params, socket)
 
@@ -969,8 +972,15 @@ defmodule LokaWeb.GameChannel do
   # AI command execution (admin-gated, except chat_input which checks internally)
   defp execute_ai_command(:chat_input, text, socket) do
     if socket.assigns.player.is_admin do
-      {:ok, socket} = BuilderAI.handle_chat_input(text, socket)
-      {:reply, :ok, socket}
+      try do
+        {:ok, socket} = BuilderAI.handle_chat_input(text, socket)
+        {:reply, :ok, socket}
+      rescue
+        e ->
+          Logger.error("[BUILDER AI] Chat failed: #{Exception.message(e)}")
+          push(socket, "output", %{text: "[BUILDER] AI command failed: #{Exception.message(e)}"})
+          {:reply, :ok, socket}
+      end
     else
       push(socket, "output", %{text: "Unknown command. Type 'help' for commands."})
       {:reply, :ok, socket}
@@ -979,8 +989,15 @@ defmodule LokaWeb.GameChannel do
 
   defp execute_ai_command(cmd, params, socket) do
     if socket.assigns.player.is_admin do
-      {:ok, socket} = BuilderAI.execute(cmd, params, socket)
-      {:reply, :ok, socket}
+      try do
+        {:ok, socket} = BuilderAI.execute(cmd, params, socket)
+        {:reply, :ok, socket}
+      rescue
+        e ->
+          Logger.error("[BUILDER AI] Command #{cmd} failed: #{Exception.message(e)}")
+          push(socket, "output", %{text: "[BUILDER] AI command failed: #{Exception.message(e)}"})
+          {:reply, :ok, socket}
+      end
     else
       push(socket, "output", %{text: "Unknown command. Type 'help' for commands."})
       {:reply, :ok, socket}
@@ -1112,9 +1129,10 @@ defmodule LokaWeb.GameChannel do
     Phoenix.PubSub.subscribe(Loka.PubSub, "world:atmosphere")
     Phoenix.PubSub.subscribe(Loka.PubSub, "debug:screenshot")
 
-    # Initialize resource pools
+    # Initialize resource pools on character entity
     stats = Entity.get_component(character, "stats") || %{}
-    ResourcePool.init_pools(player.id, stats)
+    resource_pools = ResourcePools.init_pools(stats)
+    character = ResourcePools.put(character, resource_pools)
 
     # Register with session system
     {:ok, _session_pid, session_id} = Session.connect(player, :mobile, self())
@@ -1134,7 +1152,7 @@ defmodule LokaWeb.GameChannel do
     active_quests = Quest.Progress.get_active_quests(character)
     other_players = RoomHelpers.load_other_players(room.id, player.id)
     atmosphere = Atmosphere.describe_for_room(room)
-    resources = ResourcePool.get(player.id)
+    resources = ResourcePools.get(character)
     active_timers = Loka.Timers.get_active(player.id)
 
     # Get visual state for environmental effects
@@ -1354,6 +1372,10 @@ defmodule LokaWeb.GameChannel do
     BuilderAI.handle_ai_event(event, socket)
   end
 
+  def handle_info(:ai_timeout, socket) do
+    BuilderAI.handle_ai_event(:ai_timeout, socket)
+  end
+
   # Catch-all for unhandled messages
   def handle_info(_msg, socket) do
     {:noreply, socket}
@@ -1381,7 +1403,7 @@ defmodule LokaWeb.GameChannel do
         {:player_left, player.id, player_display_name(player), "away"}
       )
 
-      ResourcePool.clear(player.id)
+      # Resource pools live on the character entity — no separate cleanup needed
     end
 
     :ok
@@ -1414,14 +1436,8 @@ defmodule LokaWeb.GameChannel do
     end
   end
 
-  defp player_display_name(player) do
-    case Entities.find_one(account_id: player.id) do
-      {:ok, character} when character.short_desc != nil ->
-        character.short_desc
-
-      _ ->
-        player.name || player.email || "Unknown"
-    end
+  defp player_display_name(player) when is_map(player) do
+    player.name || player.email || "Unknown"
   end
 
   # Rate limiting wrapper for channel handlers

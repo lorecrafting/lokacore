@@ -362,12 +362,18 @@ defmodule LokaWeb.Channels.CommandParser do
 
   # Publish/unpublish commands
   defp do_parse(["publish", rest]) do
-    case String.split(rest, " ", parts: 3) do
-      ["--force", type, key] ->
-        {:builder_publish, %{type: String.trim(type), key: String.trim(key), force: true}}
+    # Strip --force from any position before parsing type/key
+    {force, rest} =
+      if String.contains?(rest, "--force") do
+        {true,
+         rest |> String.replace("--force", "") |> String.trim() |> String.replace(~r/\s+/, " ")}
+      else
+        {false, rest}
+      end
 
+    case String.split(rest, " ", parts: 2) do
       [type, key] ->
-        {:builder_publish, %{type: String.trim(type), key: String.trim(key), force: false}}
+        {:builder_publish, %{type: String.trim(type), key: String.trim(key), force: force}}
 
       _ ->
         {:unknown, %{text: "publish"}}
@@ -384,6 +390,7 @@ defmodule LokaWeb.Channels.CommandParser do
   defp do_parse(["guide", topic]), do: {:builder_guide, %{topic: topic}}
 
   # AI commands
+  defp do_parse(["/ai", "cancel"]), do: {:builder_ai_cancel, %{}}
   defp do_parse(["/ai", prompt]), do: {:builder_ai, %{prompt: prompt}}
   defp do_parse(["/ai"]), do: {:builder_ai_clear, %{}}
   defp do_parse(["chat"]), do: {:builder_chat_mode, %{}}

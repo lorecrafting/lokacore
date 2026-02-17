@@ -106,12 +106,21 @@ defmodule Loka.Framework.Quest.Progress do
 
                 GameLog.Quest.log_accepted(entity.account_id, quest_id)
 
-                start_objective_timers(
-                  entity.account_id,
-                  quest_id,
-                  quest_def.objectives,
-                  accepted_at
-                )
+                # Start timers for timed objectives (must happen after
+                # quest_progress component is updated so timer data
+                # can be stored in the objective)
+                temp_entity = Entity.add_component(entity, "quest_progress", new_quests)
+
+                temp_entity =
+                  start_objective_timers(
+                    temp_entity,
+                    quest_id,
+                    quest_def.objectives,
+                    accepted_at
+                  )
+
+                # Re-extract the updated quests (timers may have modified objectives)
+                new_quests = Entity.get_component(temp_entity, "quest_progress")
 
                 # Spawn player-instanced quest items for objectives with quest_spawn: true
                 QuestItemSpawner.spawn_quest_items(quest_def, entity.account_id)
@@ -405,20 +414,23 @@ defmodule Loka.Framework.Quest.Progress do
     |> Map.new()
   end
 
-  defp start_objective_timers(player_id, quest_id, objectives, accepted_at) do
-    if Process.whereis(TimerManager) do
-      Enum.each(objectives, fn obj ->
-        if obj.time_limit do
-          TimerManager.start_objective_timer(
-            player_id,
-            quest_id,
-            obj.id,
-            obj.time_limit,
-            started_at: accepted_at
-          )
+  defp start_objective_timers(entity, quest_id, objectives, accepted_at) do
+    Enum.reduce(objectives, entity, fn obj, acc_entity ->
+      if obj.time_limit do
+        case TimerManager.start_objective_timer(
+               acc_entity,
+               quest_id,
+               obj.id,
+               obj.time_limit,
+               started_at: accepted_at
+             ) do
+          {:ok, updated_entity, _expires_at} -> updated_entity
+          {:error, _reason} -> acc_entity
         end
-      end)
-    end
+      else
+        acc_entity
+      end
+    end)
   end
 
   # =============================================================================
@@ -501,7 +513,7 @@ defmodule Loka.Framework.Quest.Progress do
 
   defp humanize_key(_), do: nil
 
-  defp format_objectives(progress_map, quest_def, player_id, quest_id) do
+  defp format_objectives(progress_map, quest_def, _player_id, _quest_id) do
     if quest_def do
       Enum.map(quest_def.objectives, fn obj ->
         progress = Map.get(progress_map, obj.id, %{"completed" => false, "progress" => 0})
@@ -520,7 +532,11 @@ defmodule Loka.Framework.Quest.Progress do
         }
 
         if obj.time_limit do
-          remaining = Tracking.get_remaining_time(player_id, quest_id, obj.id)
+          # Timer data is now embedded in objective progress
+          expires_at = Map.get(progress, "expires_at")
+
+          remaining =
+            if expires_at, do: max(0, expires_at - System.os_time(:second)), else: 0
 
           base
           |> Map.put(:time_limit, obj.time_limit)

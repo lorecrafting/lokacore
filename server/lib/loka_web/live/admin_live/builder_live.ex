@@ -88,8 +88,13 @@ defmodule LokaWeb.AdminLive.BuilderLive do
              token_type: "access",
              ttl: {24, :hour}
            ) do
-        {:ok, token, _claims} -> token
-        {:error, _reason} -> ""
+        {:ok, token, _claims} ->
+          token
+
+        {:error, reason} ->
+          require Logger
+          Logger.error("[BUILDER] Token generation failed: #{inspect(reason)}")
+          ""
       end
     else
       ""

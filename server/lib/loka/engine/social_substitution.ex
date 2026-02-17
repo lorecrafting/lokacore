@@ -61,7 +61,7 @@ defmodule Loka.Engine.SocialSubstitution do
   Gets the display name for an entity.
 
   Uses short_desc if available, falls back to "someone".
-  For PlayerGameState, uses character_name.
+  For character entities, uses short_desc (character name).
   """
   def get_name(nil), do: "someone"
 

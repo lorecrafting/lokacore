@@ -232,7 +232,7 @@ defmodule Loka.Framework.Dialogue do
   # Private functions
 
   defp get_dialogue_tree(npc) do
-    # 1. First check Content.Dialogue (TypedObject system)
+    # 1. First check Content.Dialogue
     case get_dialogue_from_content(npc) do
       {:ok, tree} ->
         tree

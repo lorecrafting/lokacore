@@ -34,7 +34,6 @@ defmodule Loka.Testing.Bot.StateInspector do
   When a test fails, having access to internal state makes debugging much faster.
   """
 
-  alias Loka.Framework.Player.GameState
   alias Loka.Engine.{Entities, EntityRegistry}
   alias Loka.Framework.World.RoomLoader
 
@@ -43,18 +42,33 @@ defmodule Loka.Testing.Bot.StateInspector do
   # =============================================================================
 
   @doc """
-  Gets the full GameState for a player.
+  Gets the full game state for a player from their character entity.
 
-  Returns the actual server-side GameState struct.
+  Returns a map with atom keys for convenient field access.
   """
   def inspect_game_state(player_id) do
-    case GameState.get_state(player_id) do
-      %GameState{} = state -> {:ok, state}
-      nil -> {:error, :not_found}
+    case Entities.find_one(account_id: player_id) do
+      {:ok, character} ->
+        components = character.components || %{}
+
+        state = %{
+          player_id: player_id,
+          inventory: components["inventory"] || [],
+          equipment: components["equipment"] || %{},
+          quests: components["quest_progress"] || %{},
+          flags: components["flags"] || %{},
+          stats: components["stats"] || %{},
+          health: components["resources"]["health"] || %{"current" => 100, "max" => 100},
+          current_room_id: character.location_id
+        }
+
+        {:ok, state}
+
+      {:error, :not_found} ->
+        {:error, :not_found}
     end
   rescue
-    # Handle invalid player_id types (e.g., string instead of integer)
-    Ecto.Query.CastError -> {:error, :invalid_id}
+    _ -> {:error, :invalid_id}
   end
 
   @doc """
@@ -276,8 +290,8 @@ defmodule Loka.Testing.Bot.StateInspector do
     case inspect_game_state(player_id) do
       {:ok, game_state} ->
         health = game_state.health || %{current: 100, max: 100}
-        current = health.current || health["current"] || 100
-        max = health.max || health["max"] || 100
+        current = health[:current] || health["current"] || 100
+        max = health[:max] || health["max"] || 100
 
         percent = if max > 0, do: current / max * 100, else: 100
 
@@ -406,7 +420,7 @@ defmodule Loka.Testing.Bot.StateInspector do
         bot_health = bot_state.health || %{}
         server_health = server_state.health || %{}
         bot_current = bot_health["current"] || bot_health[:current]
-        server_current = server_health.current || server_health["current"]
+        server_current = server_health["current"] || server_health[:current]
 
         differences =
           if bot_current != server_current do
@@ -508,7 +522,7 @@ defmodule Loka.Testing.Bot.StateInspector do
   def health_percent(player_id) do
     case inspect_game_state(player_id) do
       {:ok, game_state} ->
-        health = game_state.health || %{current: 100, max: 100}
+        health = game_state.health || %{"current" => 100, "max" => 100}
         current = Map.get(health, :current) || Map.get(health, "current") || 100
         max = Map.get(health, :max) || Map.get(health, "max") || 100
         if max > 0, do: current / max * 100, else: 100

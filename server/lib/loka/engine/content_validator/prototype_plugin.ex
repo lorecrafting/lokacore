@@ -18,8 +18,7 @@ defmodule Loka.Engine.ContentValidator.PrototypePlugin do
 
   @impl true
   def validate do
-    # In V2, prototype validation is handled by seeder/migration
-    # No separate TypedObject.Loader to validate
+    # Prototype validation is handled by EntitySeeder at boot time
     %{critical: [], warnings: []}
   end
 end

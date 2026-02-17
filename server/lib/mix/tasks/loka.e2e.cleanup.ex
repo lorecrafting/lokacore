@@ -51,15 +51,18 @@ defmodule Mix.Tasks.Loka.E2e.Cleanup do
   # Clean up the fixed smoke test character names used by Maestro
   defp cleanup_smoke_test_characters do
     import Ecto.Query
-    alias Loka.Framework.Player.GameState
+    alias Loka.Engine.Schema.EntitySchema
 
     Enum.each(@smoke_test_names, fn name ->
-      # Delete GameState records with this character name
-      gs_query = from(gs in GameState, where: gs.character_name == ^name)
+      # Delete character entities with this name (short_desc)
+      entity_query =
+        from(e in EntitySchema,
+          where: e.short_desc == ^name and e.type == :character
+        )
 
-      case Loka.Repo.delete_all(gs_query) do
+      case Loka.Repo.delete_all(entity_query) do
         {count, _} when count > 0 ->
-          Logger.info("  Removed #{count} game state(s) for character '#{name}'")
+          Logger.info("  Removed #{count} character entity(ies) for '#{name}'")
 
         _ ->
           :ok

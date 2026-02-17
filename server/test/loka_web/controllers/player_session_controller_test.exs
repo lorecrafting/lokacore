@@ -3,30 +3,42 @@ defmodule LokaWeb.PlayerSessionControllerTest do
 
   import Loka.AccountsFixtures
   alias Loka.Accounts
-  alias Loka.Framework.Player.GameState
+  alias Loka.Engine.{Entity, Entities}
 
   setup do
     player = player_fixture()
     unconfirmed_player = unconfirmed_player_fixture()
 
-    # Helper to create character for a player
+    # Helper to create character entity for a player
     create_character = fn player_id ->
-      {:ok, game_state} = GameState.create_state(player_id)
-
       random_suffix =
         :crypto.strong_rand_bytes(6)
         |> Base.encode32()
         |> String.replace(~r/[^A-Za-z]/, "")
         |> String.slice(0, 6)
 
-      changeset =
-        GameState.character_creation_changeset(game_state, %{
-          character_name: "TestPlayer#{random_suffix}",
-          gender: "they/them",
-          background: "scholar"
-        })
+      name = "TestPlayer#{random_suffix}"
 
-      {:ok, _game_state} = Loka.Repo.update(changeset)
+      entity =
+        Entity.new(
+          type: :character,
+          key: "player_#{String.downcase(name)}",
+          short_desc: name,
+          account_id: player_id,
+          components: %{
+            "player" => %{"gender" => "they/them", "background" => "scholar"},
+            "combatant" => %{"health" => 100, "max_health" => 100},
+            "stats" => %{},
+            "quest_progress" => %{},
+            "resources" => %{"health" => %{"current" => 100, "max" => 100}},
+            "inventory" => [],
+            "equipment" => %{},
+            "flags" => %{}
+          },
+          tags: ["playable"]
+        )
+
+      Entities.save(entity)
     end
 
     # Create character for both players

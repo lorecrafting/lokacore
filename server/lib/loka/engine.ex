@@ -1,12 +1,12 @@
 defmodule Loka.Engine do
   @moduledoc """
-  Core entity system, hooks, scripting, prototypes, and TypedObject.
+  Core entity system, hooks, scripting, and prototypes.
 
   This is the foundational layer of the Loka game engine. It provides:
 
   - Entity lifecycle (EntityServer, EntityRegistry, EntitySupervisor)
   - Prototype system (YAML templates, inheritance, spawning)
-  - TypedObject system (unified content loading)
+  - EntitySeeder (boot-time YAML → DB content loading)
   - Hook system for extensibility
   - Lock-based access control
   - Scripting engine (sandboxed Elixir)

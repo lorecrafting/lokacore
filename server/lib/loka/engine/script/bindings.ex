@@ -155,14 +155,12 @@ defmodule Loka.Engine.Script.Bindings do
       is_outdoor?: fn -> is_outdoor?(player) end,
       is_dark?: fn -> is_dark?(player) end,
 
-      # Cooldown queries
+      # Cooldown queries (reads from entity components)
       on_cooldown?: fn key ->
-        entity_id = Map.get(entity, :id) || (player && player.id)
-        if entity_id, do: not Loka.Engine.Cooldowns.ready?(entity_id, key), else: false
+        not Loka.Components.Cooldowns.ready?(entity, key)
       end,
       cooldown_remaining: fn key ->
-        entity_id = Map.get(entity, :id) || (player && player.id)
-        if entity_id, do: Loka.Engine.Cooldowns.remaining(entity_id, key), else: 0
+        Loka.Components.Cooldowns.remaining(entity, key)
       end
     ]
   end
@@ -363,7 +361,7 @@ defmodule Loka.Engine.Script.Bindings do
     if room_id, do: get_room_data(room_id), else: nil
   end
 
-  # Get room data from Entities (V2: TypedObject.Registry removed)
+  # Get room data from Entities
   defp get_room_data(room_id) when is_binary(room_id) do
     alias Loka.Engine.Entities
 

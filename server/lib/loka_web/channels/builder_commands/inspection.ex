@@ -205,13 +205,17 @@ defmodule LokaWeb.Channels.BuilderCommands.Inspection do
     find_matches = fn list, type ->
       list
       |> Enum.filter(fn e ->
+        name = e[:name] || e[:short_desc]
+
         Helpers.matches?(e.key, search_lower) ||
-          Helpers.matches?(e.short_desc, search_lower)
+          Helpers.matches?(name, search_lower)
       end)
       |> Enum.map(fn e ->
-        status = if Entity.draft?(e), do: "DRAFT", else: ""
+        name = e[:name] || e[:short_desc] || e.key
+        draft? = get_in(e, [:metadata, "draft"]) == true
+        status = if draft?, do: "DRAFT", else: ""
         cmd = if type == "room", do: "goto #{e.key}", else: "info #{e.key}"
-        [type, "{{cmd:#{cmd}}}#{e.key}{{/cmd}}", status, e.short_desc || e.key]
+        [type, "{{cmd:#{cmd}}}#{e.key}{{/cmd}}", status, name]
       end)
     end
 

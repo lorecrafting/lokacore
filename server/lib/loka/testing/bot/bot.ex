@@ -35,7 +35,7 @@ defmodule Loka.Testing.Bot do
 
   GenServer for an individual testing bot.
 
-  Each bot maintains an in-memory game state (mirroring a player's GameState),
+  Each bot maintains an in-memory game state (plain map mirroring a character entity),
   runs a decision-making strategy, and executes actions via BotActions.
 
   Bots operate at the framework layer for performance - they don't go through
@@ -85,7 +85,6 @@ defmodule Loka.Testing.Bot do
   require Logger
 
   alias Loka.Testing.Bot.{BotActions, Strategy}
-  alias Loka.Framework.Player.GameState
   alias Loka.Framework.World.RoomLoader
   alias Loka.Engine.EventBus
 
@@ -397,9 +396,9 @@ defmodule Loka.Testing.Bot do
     room_id =
       starting_room_id || RoomLoader.get_starting_room_id()
 
-    # Create a virtual game state (not persisted to DB)
+    # Create a virtual game state as plain map (not persisted to DB)
     # Bot has high stats to ensure it can complete combat for testing
-    game_state = %GameState{
+    game_state = %{
       id: bot_id,
       player_id: bot_id,
       inventory: [],

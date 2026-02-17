@@ -23,7 +23,7 @@ defmodule Loka.Framework.Quest.Progress.Tracking do
         Tracking.update_objectives(objectives, event, quest_id, player_id, quest_def)
   """
 
-  alias Loka.Framework.Quest.{ObjectiveRegistry, TimerManager}
+  alias Loka.Framework.Quest.ObjectiveRegistry
   alias Loka.Admin.GameLog
 
   @doc """
@@ -49,8 +49,8 @@ defmodule Loka.Framework.Quest.Progress.Tracking do
       if is_completed || is_nil(obj_def) do
         {Map.put(acc_obj, obj_id, obj_data), acc_completed}
       else
-        # Check if timed objective has expired
-        if objective_expired?(obj_def, player_id, quest_id) do
+        # Check if timed objective has expired (reads from objective data)
+        if objective_expired?(obj_def, player_id, quest_id, obj_data) do
           updated = Map.merge(obj_data, %{"expired" => true})
           {Map.put(acc_obj, obj_id, updated), acc_completed}
         else
@@ -76,10 +76,20 @@ defmodule Loka.Framework.Quest.Progress.Tracking do
               completed_list =
                 if completed do
                   GameLog.Quest.log_objective_completed(player_id, quest_id, obj_id)
-                  cancel_timer(player_id, quest_id, obj_id)
                   [{quest_id, obj_id}]
                 else
                   []
+                end
+
+              # Strip timer fields when objective is completed
+              updated =
+                if completed do
+                  updated
+                  |> Map.delete("expires_at")
+                  |> Map.delete("time_limit")
+                  |> Map.delete("warned")
+                else
+                  updated
                 end
 
               {Map.put(acc_obj, obj_id, updated), acc_completed ++ completed_list}
@@ -118,11 +128,17 @@ defmodule Loka.Framework.Quest.Progress.Tracking do
 
   @doc """
   Checks if a timed objective has expired.
+
+  Now reads from the objective data's `expires_at` field (entity component)
+  instead of querying a GenServer.
   """
-  @spec objective_expired?(map(), term(), String.t()) :: boolean()
-  def objective_expired?(obj_def, player_id, quest_id) do
-    if obj_def.time_limit && Process.whereis(TimerManager) do
-      TimerManager.is_expired?(player_id, quest_id, obj_def.id)
+  @spec objective_expired?(map(), term(), String.t(), map()) :: boolean()
+  def objective_expired?(obj_def, _player_id, _quest_id, obj_data \\ %{}) do
+    if obj_def.time_limit do
+      case Map.get(obj_data, "expires_at") do
+        nil -> false
+        expires_at -> System.os_time(:second) >= expires_at
+      end
     else
       false
     end
@@ -130,25 +146,22 @@ defmodule Loka.Framework.Quest.Progress.Tracking do
 
   @doc """
   Gets remaining time for a timed objective in seconds.
+
+  Reads from the objective data's `expires_at` field.
   """
-  @spec get_remaining_time(term(), String.t(), String.t()) :: non_neg_integer()
-  def get_remaining_time(player_id, quest_id, objective_id) do
-    if Process.whereis(TimerManager) do
-      TimerManager.get_remaining_time(player_id, quest_id, objective_id) || 0
-    else
-      0
+  @spec get_remaining_time(map()) :: non_neg_integer()
+  def get_remaining_time(obj_data) when is_map(obj_data) do
+    case Map.get(obj_data, "expires_at") do
+      nil -> 0
+      expires_at -> max(0, expires_at - System.os_time(:second))
     end
   end
+
+  def get_remaining_time(_), do: 0
 
   # =============================================================================
   # Private
   # =============================================================================
-
-  defp cancel_timer(player_id, quest_id, objective_id) do
-    if Process.whereis(TimerManager) do
-      TimerManager.cancel_objective_timer(player_id, quest_id, objective_id)
-    end
-  end
 
   # Legacy matching for when ObjectiveRegistry is not available
   defp legacy_check(obj_def, event, current_progress) do
