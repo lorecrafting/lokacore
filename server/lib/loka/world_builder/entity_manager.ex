@@ -150,9 +150,14 @@ defmodule Loka.WorldBuilder.EntityManager do
       {:ok, entity} ->
         case Entities.get_entity_by_key(entity.key) do
           %{} = schema ->
-            Entities.delete_entity(schema)
-            Logger.info("[EntityManager] Deleted entity: #{entity_id}")
-            :ok
+            case Entities.delete_entity(schema) do
+              {:ok, _} ->
+                Logger.info("[EntityManager] Deleted entity: #{entity_id}")
+                :ok
+
+              {:error, reason} ->
+                {:error, reason}
+            end
 
           nil ->
             {:error, :not_found}

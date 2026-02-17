@@ -158,9 +158,14 @@ defmodule Loka.WorldBuilder.QuestManager do
   def delete_quest(key) when is_binary(key) do
     case Entities.get_entity_by_key(key) do
       %{type: :quest} = schema ->
-        Entities.delete_entity(schema)
-        Logger.info("[QuestManager] Deleted quest: #{key}")
-        :ok
+        case Entities.delete_entity(schema) do
+          {:ok, _} ->
+            Logger.info("[QuestManager] Deleted quest: #{key}")
+            :ok
+
+          {:error, reason} ->
+            {:error, reason}
+        end
 
       _ ->
         {:error, :not_found}

@@ -59,9 +59,14 @@ defmodule Loka.WorldBuilder.DialogueManager do
   def delete_dialogue(key) when is_binary(key) do
     case Entities.get_entity_by_key(key) do
       %{type: :dialogue} = schema ->
-        Entities.delete_entity(schema)
-        Logger.info("[DialogueManager] Deleted dialogue: #{key}")
-        :ok
+        case Entities.delete_entity(schema) do
+          {:ok, _} ->
+            Logger.info("[DialogueManager] Deleted dialogue: #{key}")
+            :ok
+
+          {:error, reason} ->
+            {:error, reason}
+        end
 
       _ ->
         {:error, :not_found}

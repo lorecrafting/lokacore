@@ -3,7 +3,7 @@
 > Temporary file tracking builder audit findings across sessions.
 > Delete when all issues are resolved.
 
-## Status: Pass 5 Complete (Feb 16, 2026)
+## Status: Pass 6 Complete (Feb 16, 2026)
 
 ---
 
@@ -73,6 +73,14 @@
 | L11 | `publishing.ex:68` | Error message now mentions `zone_all` as valid type | Done |
 | L12 | `publishing.ex:125-133` | Rollback errors now collected and logged instead of silently swallowed | Done |
 
+## FIXED (Pass 6 — Delete Return Handling)
+
+| # | File | Fix | Status |
+|---|------|-----|--------|
+| M18 | `quest_manager.ex:160-163` | delete_quest now checks Entities.delete_entity return before reporting success | Done |
+| M19 | `dialogue_manager.ex:61-64` | delete_dialogue now checks Entities.delete_entity return before reporting success | Done |
+| M20 | `entity_manager.ex:152-155` | delete_entity now checks Entities.delete_entity return before reporting success | Done |
+
 ---
 
 ## NOTED — Low Priority (Not Fixing)
@@ -88,7 +96,7 @@
 
 ## Summary
 
-**39 issues resolved** across 5 audit passes. 4 low-priority items noted but not fixed (harmless dead code / redundant fetches).
+**42 issues resolved** across 6 audit passes. 4 low-priority items noted but not fixed (harmless dead code / redundant fetches).
 
 ---
 
