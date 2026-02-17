@@ -119,23 +119,16 @@ defmodule Loka.WorldBuilder.RoomManager do
     case get_room_entity(room_id) do
       {:ok, entity} ->
         attrs = ensure_atom_keys(attrs)
+        db_updates = prepare_db_updates(attrs, entity)
 
-        case Entities.get_entity_by_key(entity.key) do
-          %{type: :room} = schema ->
-            db_updates = prepare_db_updates(attrs)
+        case Entities.update(entity.id, db_updates) do
+          {:ok, _} ->
+            Logger.info("[RoomManager] Updated room: #{room_id}")
+            get_room(room_id)
 
-            case Entities.update_entity(schema, db_updates) do
-              {:ok, _} ->
-                Logger.info("[RoomManager] Updated room: #{room_id}")
-                get_room(room_id)
-
-              {:error, reason} ->
-                Logger.error("[RoomManager] Update failed: #{inspect(reason)}")
-                {:error, "Failed to update room: #{inspect(reason)}"}
-            end
-
-          _ ->
-            {:error, "Room entity not found in DB"}
+          {:error, reason} ->
+            Logger.error("[RoomManager] Update failed: #{inspect(reason)}")
+            {:error, "Failed to update room: #{inspect(reason)}"}
         end
 
       {:error, :not_a_room} ->
@@ -259,8 +252,8 @@ defmodule Loka.WorldBuilder.RoomManager do
             },
             metadata: %{
               "draft" => true,
-              created_at: DateTime.utc_now(),
-              updated_at: DateTime.utc_now()
+              "created_at" => DateTime.utc_now() |> DateTime.to_iso8601(),
+              "updated_at" => DateTime.utc_now() |> DateTime.to_iso8601()
             }
           }
 
@@ -335,7 +328,8 @@ defmodule Loka.WorldBuilder.RoomManager do
       z: z,
       tags: room.tags || [],
       exits: get_exits_from_entity(room),
-      spawns: spawns
+      spawns: spawns,
+      metadata: room.metadata || %{}
     }
   end
 
@@ -404,12 +398,9 @@ defmodule Loka.WorldBuilder.RoomManager do
 
   defp ensure_atom_keys(attrs) when is_map(attrs) do
     Map.new(attrs, fn
-      {k, v} when is_binary(k) -> {String.to_existing_atom(k), v}
+      {k, v} when is_binary(k) -> {String.to_atom(k), v}
       {k, v} when is_atom(k) -> {k, v}
     end)
-  rescue
-    ArgumentError ->
-      attrs
   end
 
   @doc false
@@ -434,9 +425,10 @@ defmodule Loka.WorldBuilder.RoomManager do
     end
   end
 
-  # Prepare updates for DB entities (EntitySchema format)
-  defp prepare_db_updates(attrs) when is_map(attrs) do
+  # Prepare updates for DB entities — merges with existing entity components
+  defp prepare_db_updates(attrs, existing_entity) when is_map(attrs) do
     attrs = ensure_atom_keys(attrs)
+    existing_components = existing_entity.components || %{}
 
     updates = %{}
 
@@ -453,30 +445,32 @@ defmodule Loka.WorldBuilder.RoomManager do
     updates =
       if Map.has_key?(attrs, :tags), do: Map.put(updates, :tags, attrs[:tags]), else: updates
 
-    # Handle coordinates - store in components
-    updates =
+    # Handle coordinates — merge with existing coords to avoid clobbering
+    components = existing_components
+
+    components =
       if Map.has_key?(attrs, :x) || Map.has_key?(attrs, :y) || Map.has_key?(attrs, :z) do
+        existing_coords = Map.get(existing_components, "coordinates", %{})
+
         coords = %{
-          "x" => Map.get(attrs, :x, 0),
-          "y" => Map.get(attrs, :y, 0),
-          "z" => Map.get(attrs, :z, 0)
+          "x" => Map.get(attrs, :x, Map.get(existing_coords, "x", 0)),
+          "y" => Map.get(attrs, :y, Map.get(existing_coords, "y", 0)),
+          "z" => Map.get(attrs, :z, Map.get(existing_coords, "z", 0))
         }
 
-        existing_components = Map.get(updates, :components, %{})
-        Map.put(updates, :components, Map.put(existing_components, "coordinates", coords))
+        Map.put(components, "coordinates", coords)
       else
-        updates
+        components
       end
 
     # Handle exits if provided
-    updates =
+    components =
       if Map.has_key?(attrs, :exits) do
-        existing_components = Map.get(updates, :components, %{})
-        Map.put(updates, :components, Map.put(existing_components, "exits", attrs[:exits]))
+        Map.put(components, "exits", attrs[:exits])
       else
-        updates
+        components
       end
 
-    updates
+    Map.put(updates, :components, components)
   end
 end

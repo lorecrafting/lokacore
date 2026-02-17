@@ -19,7 +19,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Testing do
 
     case Spawner.spawn(npc_key, location_id: room_id) do
       {:ok, entity} ->
-        name = Map.get(entity, :name, npc_key)
+        name = entity.short_desc || npc_key
 
         {room, _character} = RoomHelpers.load_room_for_character(character)
         atmosphere = Atmosphere.describe_for_room(room)
@@ -76,7 +76,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Testing do
               items: Serializers.serialize_inventory(items)
             })
 
-            name = Map.get(item_entity, :name, item_key)
+            name = item_entity.short_desc || item_key
             {:ok, "Added '#{name}' to inventory.", socket}
 
           {:error, reason} ->
@@ -94,10 +94,15 @@ defmodule LokaWeb.Channels.BuilderCommands.Testing do
     updated_flags = Map.put(flags, flag, true)
 
     updated_components = Map.put(character.components, "flags", updated_flags)
-    {:ok, updated_character} = Entities.update(character.id, %{components: updated_components})
 
-    socket = assign(socket, :character, updated_character)
-    {:ok, "Flag '#{flag}' set to true.", socket}
+    case Entities.update(character.id, %{components: updated_components}) do
+      {:ok, updated_character} ->
+        socket = assign(socket, :character, updated_character)
+        {:ok, "Flag '#{flag}' set to true.", socket}
+
+      {:error, reason} ->
+        {:error, "Failed to set flag: #{inspect(reason)}", socket}
+    end
   end
 
   def execute(:clearflag, %{flag: flag}, socket) do
@@ -106,10 +111,15 @@ defmodule LokaWeb.Channels.BuilderCommands.Testing do
     updated_flags = Map.delete(flags, flag)
 
     updated_components = Map.put(character.components, "flags", updated_flags)
-    {:ok, updated_character} = Entities.update(character.id, %{components: updated_components})
 
-    socket = assign(socket, :character, updated_character)
-    {:ok, "Flag '#{flag}' cleared.", socket}
+    case Entities.update(character.id, %{components: updated_components}) do
+      {:ok, updated_character} ->
+        socket = assign(socket, :character, updated_character)
+        {:ok, "Flag '#{flag}' cleared.", socket}
+
+      {:error, reason} ->
+        {:error, "Failed to clear flag: #{inspect(reason)}", socket}
+    end
   end
 
   def execute(:flags, _params, socket) do
@@ -162,12 +172,17 @@ defmodule LokaWeb.Channels.BuilderCommands.Testing do
     active = Map.get(quests, "active", %{}) |> Map.delete(key)
     completed = Map.get(quests, "completed", []) |> List.delete(key)
 
-    updated_quests = %{quests | "active" => active, "completed" => completed}
+    updated_quests = Map.merge(quests, %{"active" => active, "completed" => completed})
     updated_components = Map.put(character.components, "quests", updated_quests)
 
-    {:ok, updated_character} = Entities.update(character.id, %{components: updated_components})
-    socket = assign(socket, :character, updated_character)
-    {:ok, "Quest '#{key}' reset.", socket}
+    case Entities.update(character.id, %{components: updated_components}) do
+      {:ok, updated_character} ->
+        socket = assign(socket, :character, updated_character)
+        {:ok, "Quest '#{key}' reset.", socket}
+
+      {:error, reason} ->
+        {:error, "Failed to reset quest: #{inspect(reason)}", socket}
+    end
   end
 
   def execute(:quests, _params, socket) do

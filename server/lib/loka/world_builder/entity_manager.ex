@@ -38,28 +38,35 @@ defmodule Loka.WorldBuilder.EntityManager do
     user_components = Map.get(attrs, :components, %{})
     merged_components = Map.merge(default_components, user_components)
 
-    entity =
-      Entity.new(
-        type: subtype,
-        key: key,
-        short_desc: name,
-        extra_desc: description,
-        is_prototype: true,
-        tags: Map.get(attrs, :tags, []),
-        keywords: [key],
-        components: merged_components,
-        metadata: %{"draft" => true}
-      )
+    # Check for duplicate keys
+    case Entities.find_one(key: key, type: subtype) do
+      {:ok, _existing} ->
+        {:error, "#{subtype} with key '#{key}' already exists"}
 
-    case Entities.save(entity) do
-      {:ok, schema} ->
-        saved = Entities.to_entity(schema)
-        Logger.info("[EntityManager] Created #{subtype}: #{key}")
-        {:ok, enrich_for_ui(saved)}
+      {:error, _} ->
+        entity =
+          Entity.new(
+            type: subtype,
+            key: key,
+            short_desc: name,
+            extra_desc: description,
+            is_prototype: true,
+            tags: Map.get(attrs, :tags, []),
+            keywords: [key],
+            components: merged_components,
+            metadata: %{"draft" => true}
+          )
 
-      {:error, reason} ->
-        Logger.error("[EntityManager] Failed to create #{subtype}: #{inspect(reason)}")
-        {:error, "Failed to create #{subtype}: #{inspect(reason)}"}
+        case Entities.save(entity) do
+          {:ok, schema} ->
+            saved = Entities.to_entity(schema)
+            Logger.info("[EntityManager] Created #{subtype}: #{key}")
+            {:ok, enrich_for_ui(saved)}
+
+          {:error, reason} ->
+            Logger.error("[EntityManager] Failed to create #{subtype}: #{inspect(reason)}")
+            {:error, "Failed to create #{subtype}: #{inspect(reason)}"}
+        end
     end
   end
 
@@ -232,6 +239,7 @@ defmodule Loka.WorldBuilder.EntityManager do
       description: entity.extra_desc || "",
       tags: entity.tags || [],
       components: components,
+      metadata: entity.metadata || %{},
       level: level,
       item_type: item_type
     }
@@ -259,15 +267,8 @@ defmodule Loka.WorldBuilder.EntityManager do
 
   defp ensure_atom_keys(attrs) when is_map(attrs) do
     Map.new(attrs, fn
-      {k, v} when is_binary(k) ->
-        try do
-          {String.to_existing_atom(k), v}
-        rescue
-          ArgumentError -> {String.to_atom(k), v}
-        end
-
-      {k, v} when is_atom(k) ->
-        {k, v}
+      {k, v} when is_binary(k) -> {String.to_atom(k), v}
+      {k, v} when is_atom(k) -> {k, v}
     end)
   end
 

@@ -11,7 +11,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Rooms do
   alias LokaWeb.Channels.GameChannel.Serializers
   alias LokaWeb.Channels.BuilderCommands.Helpers
 
-  @valid_directions ~w(north south east west up down)
+  @valid_directions ~w(north south east west up down northeast northwest southeast southwest)
 
   def execute(:dig, %{direction: dir, key: key, name: name}, socket) do
     direction = Helpers.normalize_direction(dir)
@@ -19,8 +19,8 @@ defmodule LokaWeb.Channels.BuilderCommands.Rooms do
     unless direction in @valid_directions do
       {:error, "Invalid direction '#{dir}'. Use: #{Enum.join(@valid_directions, ", ")}", socket}
     else
-      game_state = socket.assigns.game_state
-      {current_room, _} = RoomHelpers.load_player_room(game_state)
+      character = socket.assigns.character
+      {current_room, _} = RoomHelpers.load_room_for_character(character)
 
       room_params = %{
         "key" => key,
@@ -33,16 +33,35 @@ defmodule LokaWeb.Channels.BuilderCommands.Rooms do
         {:ok, _new_room} ->
           reverse = reverse_direction(direction)
 
-          RoomManager.add_exit(current_room.key, direction, key)
-          RoomManager.add_exit(key, reverse, current_room.key)
+          exit_errors =
+            [
+              RoomManager.add_exit(current_room.key, direction, key),
+              RoomManager.add_exit(key, reverse, current_room.key)
+            ]
+            |> Enum.filter(&match?({:error, _}, &1))
+
+          RoomHelpers.clear_minimap_cache()
+
+          exit_warning =
+            if exit_errors != [],
+              do: " (#{length(exit_errors)} exit(s) failed to create)",
+              else: ""
 
           case Helpers.find_room_by_key(key) do
             nil ->
-              {:ok, "Room '#{key}' created with exits, but could not teleport.", socket}
+              {:ok, "Room '#{key}' created#{exit_warning}, but could not teleport.", socket}
 
             room ->
-              {:ok, socket} = Helpers.teleport_to_room(room, socket)
-              {:ok, "Dug #{direction}: created '#{key}' with bidirectional exits.", socket}
+              case Helpers.teleport_to_room(room, socket) do
+                {:ok, socket} ->
+                  {:ok,
+                   "Dug #{direction}: created '#{key}' with bidirectional exits.#{exit_warning}",
+                   socket}
+
+                {:error, reason, socket} ->
+                  {:ok, "Room '#{key}' created#{exit_warning}, but teleport failed: #{reason}",
+                   socket}
+              end
           end
 
         {:error, reason} ->
@@ -52,12 +71,12 @@ defmodule LokaWeb.Channels.BuilderCommands.Rooms do
   end
 
   def execute(:set_desc, %{text: text}, socket) do
-    game_state = socket.assigns.game_state
-    {room, _} = RoomHelpers.load_player_room(game_state)
+    character = socket.assigns.character
+    {room, _} = RoomHelpers.load_room_for_character(character)
 
     case RoomManager.update_room(room.key, %{"description" => text}) do
       {:ok, _} ->
-        push_room_update(socket, game_state)
+        push_room_update(socket)
         {:ok, "Description updated for '#{room.key}'.", socket}
 
       {:error, reason} ->
@@ -66,12 +85,12 @@ defmodule LokaWeb.Channels.BuilderCommands.Rooms do
   end
 
   def execute(:set_name, %{text: text}, socket) do
-    game_state = socket.assigns.game_state
-    {room, _} = RoomHelpers.load_player_room(game_state)
+    character = socket.assigns.character
+    {room, _} = RoomHelpers.load_room_for_character(character)
 
     case RoomManager.update_room(room.key, %{"name" => text}) do
       {:ok, _} ->
-        push_room_update(socket, game_state)
+        push_room_update(socket)
         {:ok, "Name updated for '#{room.key}' -> '#{text}'.", socket}
 
       {:error, reason} ->
@@ -94,14 +113,13 @@ defmodule LokaWeb.Channels.BuilderCommands.Rooms do
 
   def execute(:link, %{direction: dir, key: key}, socket) do
     direction = Helpers.normalize_direction(dir)
-    game_state = socket.assigns.game_state
-    {room, _} = RoomHelpers.load_player_room(game_state)
+    character = socket.assigns.character
+    {room, _} = RoomHelpers.load_room_for_character(character)
 
     case RoomManager.add_exit(room.key, direction, key) do
       {:ok, _} ->
-        # Reload room into socket assigns so navigation picks up new exits
-        socket = reload_room_assign(socket, game_state)
-        push_room_update(socket, game_state)
+        socket = reload_room_assign(socket)
+        push_room_update(socket)
         {:ok, "Linked #{direction} -> #{key}.", socket}
 
       {:error, reason} ->
@@ -111,14 +129,13 @@ defmodule LokaWeb.Channels.BuilderCommands.Rooms do
 
   def execute(:unlink, %{direction: dir}, socket) do
     direction = Helpers.normalize_direction(dir)
-    game_state = socket.assigns.game_state
-    {room, _} = RoomHelpers.load_player_room(game_state)
+    character = socket.assigns.character
+    {room, _} = RoomHelpers.load_room_for_character(character)
 
     case RoomManager.remove_exit(room.key, direction) do
       {:ok, _} ->
-        # Reload room into socket assigns so navigation picks up removed exit
-        socket = reload_room_assign(socket, game_state)
-        push_room_update(socket, game_state)
+        socket = reload_room_assign(socket)
+        push_room_update(socket)
         {:ok, "Unlinked #{direction} from '#{room.key}'.", socket}
 
       {:error, reason} ->
@@ -137,13 +154,16 @@ defmodule LokaWeb.Channels.BuilderCommands.Rooms do
   # Private
   # ---------------------------------------------------------------------------
 
-  defp reload_room_assign(socket, game_state) do
-    {room, _} = RoomHelpers.load_player_room(game_state)
+  defp reload_room_assign(socket) do
+    RoomHelpers.clear_minimap_cache()
+    character = socket.assigns.character
+    {room, _} = RoomHelpers.load_room_for_character(character)
     Phoenix.Socket.assign(socket, :room, room)
   end
 
-  defp push_room_update(socket, game_state) do
-    {room, _} = RoomHelpers.load_player_room(game_state)
+  defp push_room_update(socket) do
+    character = socket.assigns.character
+    {room, _} = RoomHelpers.load_room_for_character(character)
     atmosphere = Atmosphere.describe_for_room(room)
 
     push(socket, "room_update", %{
