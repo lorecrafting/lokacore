@@ -3,7 +3,7 @@
 > Temporary file tracking builder audit findings across sessions.
 > Delete when all issues are resolved.
 
-## Status: Pass 6 Complete (Feb 16, 2026)
+## Status: Pass 7 Complete (Feb 16, 2026)
 
 ---
 
@@ -81,22 +81,32 @@
 | M19 | `dialogue_manager.ex:61-64` | delete_dialogue now checks Entities.delete_entity return before reporting success | Done |
 | M20 | `entity_manager.ex:152-155` | delete_entity now checks Entities.delete_entity return before reporting success | Done |
 
+## FIXED (Pass 7 — Dead Code & Redundancy Cleanup)
+
+| # | File | Fix | Status |
+|---|------|-----|--------|
+| L7 | `entity_manager.ex` | Eliminated double DB fetch in update/delete — uses `Entities.update`/`Entities.delete` (UUID path) instead of `get_entity_by_key` + `update_entity`/`delete_entity` (schema path) | Done |
+| L8 | `entity_manager.ex:233-236` | Removed dead atom key fallbacks in enrich_for_ui — V2 always uses string keys in components | Done |
+| L9 | `rooms.ex:29` | Removed dead `:zone` field from dig params — enriched rooms don't have zone, always defaulted to "default" | Done |
+| M21 | `entity_manager.ex` | Deleted dead `search_entities/2` (no callers) and `duplicate_entity/2` + `generate_duplicate_key/1` (no callers) | Done |
+| M22 | `quest_manager.ex` | Deleted dead `get_quest/1` (only tests) and `search_quests/1` (only tests) + removed associated tests | Done |
+| L13 | `helpers.ex:138` | Deleted dead `format_typed_object` alias — updated tests to use `format_entity` directly | Done |
+| L14 | `quest_manager.ex`, `dialogue_manager.ex` | Removed `to_existing_atom` trap in `ensure_atom_keys` — simplified to `to_atom` (trusted builder input) | Done |
+| L15 | `tool_executor.ex:1346,1677` | Same `to_existing_atom` → `to_atom` cleanup + removed unnecessary try/rescue wrappers | Done |
+
 ---
 
 ## NOTED — Low Priority (Not Fixing)
 
 | # | File | Note |
 |---|------|------|
-| L7 | `entity_manager.ex:122,148` | Double DB fetch in update_entity/delete_entity (find_one then get_entity_by_key). Works correctly, just redundant. |
-| L8 | `entity_manager.ex:228-231` | Dead atom key fallback in enrich_for_ui (components always use string keys in V2). Harmless. |
-| L9 | `rooms.ex:29` | Dead `:zone` field in dig params — create_room doesn't use zone field. Harmless. |
 | L10 | `content.ex:32-36` | edit_quest passes string values to QuestManager — depends on QuestManager internals. |
 
 ---
 
 ## Summary
 
-**42 issues resolved** across 6 audit passes. 4 low-priority items noted but not fixed (harmless dead code / redundant fetches).
+**50 issues resolved** across 7 audit passes. 1 low-priority item noted but not fixed.
 
 ---
 

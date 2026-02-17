@@ -25,8 +25,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Rooms do
       room_params = %{
         "key" => key,
         "name" => name,
-        "description" => "A newly created room.",
-        "zone" => Map.get(current_room, :zone, "default")
+        "description" => "A newly created room."
       }
 
       case RoomManager.create_room(room_params) do

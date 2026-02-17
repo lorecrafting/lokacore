@@ -25,7 +25,7 @@ defmodule LokaWeb.Channels.BuilderCommands.HelpersTest do
     end
   end
 
-  describe "format_typed_object/1" do
+  describe "format_entity/1" do
     test "formats basic typed object" do
       obj = %{
         key: "test_npc",
@@ -35,7 +35,7 @@ defmodule LokaWeb.Channels.BuilderCommands.HelpersTest do
         components: %{}
       }
 
-      result = Helpers.format_typed_object(obj)
+      result = Helpers.format_entity(obj)
 
       assert result =~ "key: test_npc"
       assert result =~ "type: entity"
@@ -51,7 +51,7 @@ defmodule LokaWeb.Channels.BuilderCommands.HelpersTest do
         components: %{}
       }
 
-      result = Helpers.format_typed_object(obj)
+      result = Helpers.format_entity(obj)
 
       assert result =~ "description: A friendly NPC"
     end
@@ -67,7 +67,7 @@ defmodule LokaWeb.Channels.BuilderCommands.HelpersTest do
         components: %{}
       }
 
-      result = Helpers.format_typed_object(obj)
+      result = Helpers.format_entity(obj)
 
       # Description line should be truncated with ...
       desc_line = result |> String.split("\n") |> Enum.find(&(&1 =~ "description:"))
@@ -83,7 +83,7 @@ defmodule LokaWeb.Channels.BuilderCommands.HelpersTest do
         components: %{"combat" => %{}, "dialogue" => %{}}
       }
 
-      result = Helpers.format_typed_object(obj)
+      result = Helpers.format_entity(obj)
 
       assert result =~ "components:"
       assert result =~ "- combat"
@@ -93,7 +93,7 @@ defmodule LokaWeb.Channels.BuilderCommands.HelpersTest do
     test "omits components section when empty" do
       obj = %{key: "npc", type: :entity, short_desc: "NPC", extra_desc: nil, components: %{}}
 
-      result = Helpers.format_typed_object(obj)
+      result = Helpers.format_entity(obj)
 
       refute result =~ "components:"
     end
@@ -101,7 +101,7 @@ defmodule LokaWeb.Channels.BuilderCommands.HelpersTest do
     test "uses key as fallback name" do
       obj = %{key: "my_key", type: :entity, short_desc: nil, extra_desc: nil, components: %{}}
 
-      result = Helpers.format_typed_object(obj)
+      result = Helpers.format_entity(obj)
 
       assert result =~ "name: my_key"
     end

@@ -49,21 +49,6 @@ defmodule Loka.WorldBuilder.QuestManager do
   end
 
   @doc """
-  Get a quest by key.
-
-  Returns {:ok, quest_map} or {:error, :not_found}
-  """
-  def get_quest(key) when is_binary(key) do
-    case Quest.get(key) do
-      {:ok, quest} ->
-        {:ok, enrich_for_ui(quest)}
-
-      {:error, :not_found} ->
-        {:error, :not_found}
-    end
-  end
-
-  @doc """
   List all quest definitions.
 
   Returns list of quest maps enriched for UI.
@@ -172,26 +157,6 @@ defmodule Loka.WorldBuilder.QuestManager do
     end
   end
 
-  @doc """
-  Search quests by name, description, or tags.
-
-  Returns list of matching quest maps.
-  """
-  def search_quests(query) when is_binary(query) do
-    query_lower = String.downcase(query)
-
-    list_quests()
-    |> Enum.filter(fn quest ->
-      name_match = String.contains?(String.downcase(quest.name || ""), query_lower)
-      desc_match = String.contains?(String.downcase(quest.description || ""), query_lower)
-
-      tag_match =
-        Enum.any?(quest.tags || [], &String.contains?(String.downcase(&1), query_lower))
-
-      name_match || desc_match || tag_match
-    end)
-  end
-
   # =============================================================================
   # Private Helpers
   # =============================================================================
@@ -288,15 +253,8 @@ defmodule Loka.WorldBuilder.QuestManager do
 
   defp ensure_atom_keys(map) when is_map(map) do
     Map.new(map, fn
-      {k, v} when is_binary(k) ->
-        try do
-          {String.to_existing_atom(k), v}
-        rescue
-          ArgumentError -> {String.to_atom(k), v}
-        end
-
-      {k, v} when is_atom(k) ->
-        {k, v}
+      {k, v} when is_binary(k) -> {String.to_atom(k), v}
+      {k, v} when is_atom(k) -> {k, v}
     end)
   end
 

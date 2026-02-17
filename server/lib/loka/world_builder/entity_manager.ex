@@ -119,20 +119,14 @@ defmodule Loka.WorldBuilder.EntityManager do
           db_updates
         end
 
-      case Entities.get_entity_by_key(entity.key) do
-        %{} = schema ->
-          case Entities.update_entity(schema, db_updates) do
-            {:ok, _} ->
-              Logger.info("[EntityManager] Updated entity: #{entity_id}")
-              get_entity(entity_id)
+      case Entities.update(entity.id, db_updates) do
+        {:ok, _} ->
+          Logger.info("[EntityManager] Updated entity: #{entity_id}")
+          get_entity(entity_id)
 
-            {:error, reason} ->
-              Logger.error("[EntityManager] Update failed: #{inspect(reason)}")
-              {:error, "Failed to update entity: #{inspect(reason)}"}
-          end
-
-        nil ->
-          {:error, "Entity not found in DB"}
+        {:error, reason} ->
+          Logger.error("[EntityManager] Update failed: #{inspect(reason)}")
+          {:error, "Failed to update entity: #{inspect(reason)}"}
       end
     else
       {:error, :not_found} ->
@@ -148,19 +142,13 @@ defmodule Loka.WorldBuilder.EntityManager do
   def delete_entity(entity_id) when is_binary(entity_id) do
     case Entities.find_one(key: entity_id) do
       {:ok, entity} ->
-        case Entities.get_entity_by_key(entity.key) do
-          %{} = schema ->
-            case Entities.delete_entity(schema) do
-              {:ok, _} ->
-                Logger.info("[EntityManager] Deleted entity: #{entity_id}")
-                :ok
+        case Entities.delete(entity.id) do
+          {:ok, _} ->
+            Logger.info("[EntityManager] Deleted entity: #{entity_id}")
+            :ok
 
-              {:error, reason} ->
-                {:error, reason}
-            end
-
-          nil ->
-            {:error, :not_found}
+          {:error, reason} ->
+            {:error, reason}
         end
 
       {:error, :not_found} ->
@@ -178,51 +166,6 @@ defmodule Loka.WorldBuilder.EntityManager do
     |> Enum.map(&enrich_for_ui/1)
   end
 
-  @doc """
-  Duplicate an entity (NPC or Item) with a new key.
-
-  Returns {:ok, entity_map} or {:error, reason}
-  """
-  def duplicate_entity(type, key) when type in [:npc, :item] and is_binary(key) do
-    Logger.info("[EntityManager] Duplicating #{type}: #{key}")
-
-    with {:ok, entity} <- get_entity(key) do
-      new_key = generate_duplicate_key(key)
-
-      attrs = %{
-        key: new_key,
-        name: "#{entity.name} (copy)",
-        description: entity.description,
-        level: entity[:level],
-        tags: entity.tags,
-        components: entity.components
-      }
-
-      create_entity(type, attrs)
-    end
-  end
-
-  defp generate_duplicate_key(original_key) do
-    suffix = :crypto.strong_rand_bytes(3) |> Base.encode16() |> String.downcase()
-    "#{original_key}_#{suffix}"
-  end
-
-  @doc """
-  Search entities by name or description.
-
-  Returns list of matching entity maps.
-  """
-  def search_entities(subtype, query) when is_atom(subtype) and is_binary(query) do
-    query_lower = String.downcase(query)
-
-    list_entities(subtype)
-    |> Enum.filter(fn entity ->
-      name_match = String.contains?(String.downcase(entity.name || ""), query_lower)
-      desc_match = String.contains?(String.downcase(entity.description || ""), query_lower)
-      name_match || desc_match
-    end)
-  end
-
   # =============================================================================
   # Private Helpers
   # =============================================================================
@@ -230,10 +173,8 @@ defmodule Loka.WorldBuilder.EntityManager do
   defp enrich_for_ui(%Entity{} = entity) do
     components = entity.components || %{}
 
-    level = get_in(components, ["combatant", "level"]) || get_in(components, [:combatant, :level])
-
-    item_type =
-      get_in(components, ["item", "item_type"]) || get_in(components, [:item, :item_type])
+    level = get_in(components, ["combatant", "level"])
+    item_type = get_in(components, ["item", "item_type"])
 
     %{
       id: entity.id || entity.key,

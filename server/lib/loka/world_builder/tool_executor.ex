@@ -1341,14 +1341,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
   defp execute_list_scripts(input) do
     scripts =
       if hook = input["hook"] do
-        hook_atom =
-          try do
-            String.to_existing_atom(hook)
-          rescue
-            _ -> hook
-          end
-
-        Script.for_hook(hook_atom)
+        Script.for_hook(String.to_atom(hook))
       else
         Script.all()
       end
@@ -1674,10 +1667,8 @@ defmodule Loka.WorldBuilder.ToolExecutor do
   defp maybe_filter_by_type(objects, nil), do: objects
 
   defp maybe_filter_by_type(objects, type_string) do
-    type_atom = String.to_existing_atom(type_string)
+    type_atom = String.to_atom(type_string)
     Enum.filter(objects, fn obj -> obj.type == type_atom end)
-  rescue
-    _ -> objects
   end
 
   defp build_searchable_text(obj) do

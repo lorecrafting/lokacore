@@ -144,15 +144,8 @@ defmodule Loka.WorldBuilder.DialogueManager do
 
   defp ensure_atom_keys(map) when is_map(map) do
     Map.new(map, fn
-      {k, v} when is_binary(k) ->
-        try do
-          {String.to_existing_atom(k), v}
-        rescue
-          ArgumentError -> {String.to_atom(k), v}
-        end
-
-      {k, v} when is_atom(k) ->
-        {k, v}
+      {k, v} when is_binary(k) -> {String.to_atom(k), v}
+      {k, v} when is_atom(k) -> {k, v}
     end)
   end
 end

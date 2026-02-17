@@ -32,7 +32,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Helpers do
   game state update, session update, and room_update push.
   Returns `{:ok, socket}` or `{:error, reason}`.
   """
-  def teleport_to_room(room, socket, _opts \\ []) do
+  def teleport_to_room(room, socket) do
     player = socket.assigns.player
     character = socket.assigns.character
     old_room_id = character.location_id
@@ -55,7 +55,10 @@ defmodule LokaWeb.Channels.BuilderCommands.Helpers do
 
         atmosphere = Atmosphere.describe_for_room(loaded_room)
 
-        socket = assign(socket, :character, final_character)
+        socket =
+          socket
+          |> assign(:character, final_character)
+          |> assign(:room, loaded_room)
 
         push(socket, "room_update", %{
           room: Serializers.serialize_room(loaded_room),
@@ -130,9 +133,6 @@ defmodule LokaWeb.Channels.BuilderCommands.Helpers do
     end)
     |> Enum.join("\n")
   end
-
-  # Keep backward-compatible alias
-  def format_typed_object(obj), do: format_entity(obj)
 
   def matches?(nil, _search), do: false
 

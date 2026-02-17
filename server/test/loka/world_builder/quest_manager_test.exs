@@ -7,7 +7,6 @@ defmodule Loka.WorldBuilder.QuestManagerTest do
   - Quest structure validation
   - Objectives and rewards handling
   - Prerequisites and level ranges
-  - Search functionality
   """
 
   use Loka.DataCase, async: false
@@ -51,38 +50,6 @@ defmodule Loka.WorldBuilder.QuestManagerTest do
         assert Map.has_key?(quest, :quest_type)
         assert Map.has_key?(quest, :objectives)
         assert Map.has_key?(quest, :rewards)
-      end
-    end
-  end
-
-  describe "get_quest/1" do
-    test "returns {:error, :not_found} for non-existent quest" do
-      assert {:error, :not_found} = QuestManager.get_quest("nonexistent_quest_key")
-    end
-
-    test "returns {:ok, quest} for existing quest" do
-      quests = QuestManager.list_quests()
-
-      if quests != [] do
-        quest = hd(quests)
-        assert {:ok, fetched} = QuestManager.get_quest(quest.key)
-        assert fetched.key == quest.key
-      end
-    end
-
-    test "returned quest has enriched fields" do
-      quests = QuestManager.list_quests()
-
-      if quests != [] do
-        quest = hd(quests)
-        {:ok, fetched} = QuestManager.get_quest(quest.key)
-
-        assert Map.has_key?(fetched, :quest_type)
-        assert Map.has_key?(fetched, :giver_key)
-        assert Map.has_key?(fetched, :objectives)
-        assert Map.has_key?(fetched, :rewards)
-        assert Map.has_key?(fetched, :prerequisites)
-        assert Map.has_key?(fetched, :level_range)
       end
     end
   end
@@ -415,7 +382,7 @@ defmodule Loka.WorldBuilder.QuestManagerTest do
           assert :ok = result
 
           # Verify deletion
-          assert {:error, :not_found} = QuestManager.get_quest(key)
+          assert {:error, :not_found} = Loka.Engine.Entities.find_one(key: key)
 
         {:error, _} ->
           :ok
@@ -430,57 +397,6 @@ defmodule Loka.WorldBuilder.QuestManagerTest do
     test "rejects invalid key patterns" do
       result = QuestManager.delete_quest("../invalid")
       assert {:error, _reason} = result
-    end
-  end
-
-  describe "search_quests/1" do
-    test "finds quests by name" do
-      quests = QuestManager.list_quests()
-
-      if quests != [] do
-        quest = hd(quests)
-        # Search for part of the name
-        query = String.slice(quest.name, 0, 3)
-        results = QuestManager.search_quests(query)
-        assert is_list(results)
-      end
-    end
-
-    test "returns empty list for no matches" do
-      results = QuestManager.search_quests("xyznonexistentquery123")
-      assert results == []
-    end
-
-    test "search is case insensitive" do
-      quests = QuestManager.list_quests()
-
-      if quests != [] do
-        quest = hd(quests)
-        upper_query = String.upcase(quest.name)
-        results = QuestManager.search_quests(upper_query)
-        # Should find results regardless of case
-        assert is_list(results)
-      end
-    end
-
-    test "finds quests by tag" do
-      key = unique_quest_key("search_tag")
-
-      create_attrs = %{
-        key: key,
-        name: "Tagged Quest",
-        tags: ["searchable_unique_tag_123"]
-      }
-
-      case QuestManager.create_quest(create_attrs) do
-        {:ok, _quest} ->
-          results = QuestManager.search_quests("searchable_unique_tag_123")
-          assert length(results) >= 1
-          cleanup_quest(key)
-
-        {:error, _} ->
-          :ok
-      end
     end
   end
 
