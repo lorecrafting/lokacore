@@ -46,7 +46,7 @@ defmodule Loka.Engine.Script.Executor do
   require Logger
 
   alias Loka.Engine.Script.{Sandbox, ActionQueue}
-  alias Loka.Content.Script, as: ContentScript
+  alias Loka.Engine.Entities
 
   @type hook :: atom()
   @type script_result ::
@@ -175,16 +175,19 @@ defmodule Loka.Engine.Script.Executor do
     end
   end
 
-  # Get script by key from Content.Script (entity DB)
+  @default_script_timeout_ms 5000
+
+  # Get script by key from entity DB
   defp get_script_by_key(key) do
-    # Try Content.Script first
-    case ContentScript.get(key) do
+    case Entities.find_one(key: key, type: :script) do
       {:ok, script} ->
+        data = script.components["data"] || %{}
+
         %{
           key: script.key,
-          source: ContentScript.source(script),
-          hook: ContentScript.hook(script),
-          timeout_ms: ContentScript.timeout_ms(script)
+          source: data["source"],
+          hook: data["hook"],
+          timeout_ms: data["timeout_ms"] || @default_script_timeout_ms
         }
 
       {:error, _} ->
@@ -309,7 +312,7 @@ defmodule Loka.Engine.Script.Executor do
   """
   @spec get_script_events(String.t()) :: [atom()]
   def get_script_events(script_key) do
-    case ContentScript.get(script_key) do
+    case Entities.find_one(key: script_key, type: :script) do
       {:ok, script} ->
         parse_script_events(script)
 

@@ -1,4 +1,4 @@
-defmodule Loka.Framework.Resources.FormulaEvaluator do
+defmodule Loka.Engine.FormulaEvaluator do
   @moduledoc """
   Safe formula evaluator for resource max values and other calculations.
 
@@ -28,7 +28,7 @@ defmodule Loka.Framework.Resources.FormulaEvaluator do
 
   ## Usage
 
-      alias Loka.Framework.Resources.FormulaEvaluator
+      alias Loka.Engine.FormulaEvaluator
 
       # Simple number
       {:ok, 100} = FormulaEvaluator.evaluate("100", %{})

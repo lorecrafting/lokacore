@@ -1,4 +1,4 @@
-defmodule Loka.Engine.ZoneReset do
+defmodule Loka.Framework.World.ZoneReset do
   @moduledoc """
   GenServer that manages zone reset timers and executes reset commands.
 

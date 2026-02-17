@@ -50,7 +50,7 @@ defmodule Loka.Application do
       Loka.Framework.World.NpcAmbient.Scheduler,
 
       # Zone system - periodic mob/item respawning (V2: zones are entities)
-      Loka.Engine.ZoneReset,
+      Loka.Framework.World.ZoneReset,
 
       # Content Validation - runs after all content is loaded
       # Will fail startup if critical content errors are found (unless mode is :warn or :skip)

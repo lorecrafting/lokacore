@@ -812,16 +812,16 @@ defmodule Loka.Engine.EntityServer do
   end
 
   defp run_script_trait(entity, %{"script" => script_key} = trait, hook) do
-    alias Loka.Content.Script, as: ContentScript
     config = trait["config"] || %{}
 
-    case ContentScript.get(script_key) do
+    case Entities.find_one(key: script_key, type: :script) do
       {:ok, script} ->
-        script_hook = ContentScript.hook(script)
+        data = script.components["data"] || %{}
+        script_hook = data["hook"]
 
         # Only run if the script's hook matches (behavior = tick-based)
         if script_hook == "behavior" and hook == :tick do
-          source = ContentScript.source(script)
+          source = data["source"]
 
           context = %{
             trigger: :tick,

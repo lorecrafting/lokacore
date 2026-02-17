@@ -1,7 +1,7 @@
-defmodule Loka.Framework.Resources.FormulaEvaluatorTest do
+defmodule Loka.Engine.FormulaEvaluatorTest do
   use ExUnit.Case, async: true
 
-  alias Loka.Framework.Resources.FormulaEvaluator
+  alias Loka.Engine.FormulaEvaluator
 
   describe "evaluate/2" do
     test "evaluates simple number" do

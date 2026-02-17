@@ -12,7 +12,7 @@ defmodule Loka.Components.ResourcePools do
   """
 
   alias Loka.Content.Resource, as: ContentResource
-  alias Loka.Framework.Resources.FormulaEvaluator
+  alias Loka.Engine.FormulaEvaluator
 
   @component_key "resource_pools"
 
