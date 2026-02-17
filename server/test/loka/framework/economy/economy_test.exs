@@ -141,7 +141,7 @@ defmodule Loka.Framework.EconomyTest do
         version: 1
       }
 
-      assert {:ok, updated} = Economy.credit(entity, 30)
+      assert {:ok, updated} = Economy.credit(entity, 30, :quest_reward)
       assert Wallet.balance(updated) == 80
     end
 
@@ -156,7 +156,7 @@ defmodule Loka.Framework.EconomyTest do
         version: 1
       }
 
-      assert {:ok, updated} = Economy.debit(entity, 20)
+      assert {:ok, updated} = Economy.debit(entity, 20, :shop_buy)
       assert Wallet.balance(updated) == 30
     end
 
@@ -171,7 +171,7 @@ defmodule Loka.Framework.EconomyTest do
         version: 1
       }
 
-      assert {:error, :insufficient_funds} = Economy.debit(entity, 50)
+      assert {:error, :insufficient_funds} = Economy.debit(entity, 50, :shop_buy)
     end
 
     test "credit works when entity has no wallet" do
@@ -185,7 +185,7 @@ defmodule Loka.Framework.EconomyTest do
         version: 1
       }
 
-      assert {:ok, updated} = Economy.credit(entity, 100)
+      assert {:ok, updated} = Economy.credit(entity, 100, :admin_grant)
       assert Wallet.balance(updated) == 100
     end
   end
@@ -199,7 +199,7 @@ defmodule Loka.Framework.EconomyTest do
           Wallet.put(entity, %{"gold" => 9999})
         end)
 
-      assert result == {:error, :protected_component}
+      assert {:error, :protected_component, ["wallet"]} = result
 
       # Balance unchanged
       assert Economy.balance(id) == 50

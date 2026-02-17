@@ -135,8 +135,10 @@ defmodule Loka.Engine.EntityServer do
   @doc """
   Updates the entity, allowing protected component changes.
 
-  This bypasses the wallet/protected component guard. Only use from
-  `Loka.Framework.Economy` — all other callers should use `update/3`.
+  This bypasses the protected component guard. Only use from authorized
+  framework modules (Economy, Quest.Progress, Equipment, Combat, etc.)
+  and the ActionBridge game action pipeline. All other callers should
+  use `update/3`.
   """
   def update_protected(server, fun, opts \\ []) when is_function(fun, 1) do
     GenServer.call(server, {:update_protected, fun, opts})
@@ -255,20 +257,39 @@ defmodule Loka.Engine.EntityServer do
     {:reply, state.entity, touch_state(state)}
   end
 
-  # Protected components that can only be modified via :update_protected
-  @protected_components ["wallet"]
+  # Protected components that can only be modified via :update_protected.
+  # Any EntityServer.update/3 call that changes these will be rejected.
+  # Legitimate writers must use EntityServer.update_protected/3 instead.
+  @protected_components MapSet.new([
+                          # → Loka.Framework.Economy
+                          "wallet",
+                          # → Loka.Framework.Quest.Progress
+                          "quest_progress",
+                          # → Loka.Framework.Inventory.Equipment
+                          "equipment",
+                          # → Loka.Framework.Combat / RespawnManager
+                          "combatant",
+                          # → Loka.Components.Cooldowns
+                          "cooldowns",
+                          # → Loka.Framework.Combat.RespawnManager
+                          "despawned",
+                          # → Loka.Framework.Combat.RespawnManager
+                          "respawn_data"
+                        ])
 
   @impl true
   def handle_call({:update, fun, opts}, _from, state) do
     updated_entity = fun.(state.entity)
 
-    if protected_component_changed?(state.entity, updated_entity) do
+    changed = changed_protected_components(state.entity, updated_entity)
+
+    if changed != [] do
       Logger.warning(
-        "[EntityServer] Rejected direct modification of protected component. " <>
-          "Use Loka.Framework.Economy for wallet changes."
+        "[EntityServer] Rejected direct write to protected component(s): #{inspect(changed)}. " <>
+          "Use the appropriate framework module or EntityServer.update_protected/3."
       )
 
-      {:reply, {:error, :protected_component}, state}
+      {:reply, {:error, :protected_component, changed}, state}
     else
       new_state = %{state | entity: updated_entity} |> mark_dirty()
 
@@ -625,9 +646,13 @@ defmodule Loka.Engine.EntityServer do
   # Private Helpers
   # =============================================================================
 
-  defp protected_component_changed?(old_entity, new_entity) do
-    Enum.any?(@protected_components, fn key ->
-      Map.get(old_entity.components, key) != Map.get(new_entity.components, key)
+  defp changed_protected_components(old_entity, new_entity) do
+    old_components = old_entity.components || %{}
+    new_components = new_entity.components || %{}
+
+    @protected_components
+    |> Enum.filter(fn key ->
+      Map.get(old_components, key) != Map.get(new_components, key)
     end)
   end
 

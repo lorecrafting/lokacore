@@ -296,7 +296,7 @@ defmodule Loka.Engine.Locks do
   ## Examples
 
       Locks.register_function("has_gold", fn _entity, accessor, [min_amount] ->
-        gold = get_in(accessor.components, ["inventory", "gold"]) || 0
+        gold = get_in(accessor.components, ["wallet", "gold"]) || 0
         gold >= String.to_integer(min_amount)
       end)
   """

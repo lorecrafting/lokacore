@@ -140,30 +140,30 @@ defmodule Loka.Framework.Economy do
   # =============================================================================
 
   @doc """
-  Add gold to an entity struct in memory. Does NOT persist or log.
+  Add gold to an entity struct in memory and log the transaction.
 
   Use this in action modules (shop, quest rewards) that build up entity
-  changes before returning a Result. The caller MUST also call
-  `Economy.log/5` to record the transaction.
+  changes before returning a Result.
 
   Returns `{:ok, updated_entity}`.
   """
-  @spec credit(Entity.t(), pos_integer()) :: {:ok, Entity.t()}
-  def credit(entity, amount) when is_integer(amount) and amount > 0 do
+  @spec credit(Entity.t(), pos_integer(), atom()) :: {:ok, Entity.t()}
+  def credit(entity, amount, source) when is_integer(amount) and amount > 0 do
     wallet = Wallet.get(entity)
     current = Map.get(wallet, "gold", 0)
     new_wallet = Map.put(wallet, "gold", current + amount)
+    EconomyLog.append(:faucet, source, entity.id, amount)
     {:ok, Wallet.put(entity, new_wallet)}
   end
 
   @doc """
-  Remove gold from an entity struct in memory. Does NOT persist or log.
+  Remove gold from an entity struct in memory and log the transaction.
 
   Returns `{:ok, updated_entity}` or `{:error, :insufficient_funds}`.
   """
-  @spec debit(Entity.t(), pos_integer()) ::
+  @spec debit(Entity.t(), pos_integer(), atom()) ::
           {:ok, Entity.t()} | {:error, :insufficient_funds}
-  def debit(entity, amount) when is_integer(amount) and amount > 0 do
+  def debit(entity, amount, sink) when is_integer(amount) and amount > 0 do
     current = Wallet.balance(entity)
 
     if current < amount do
@@ -171,17 +171,9 @@ defmodule Loka.Framework.Economy do
     else
       wallet = Wallet.get(entity)
       new_wallet = Map.put(wallet, "gold", current - amount)
+      EconomyLog.append(:sink, sink, entity.id, amount)
       {:ok, Wallet.put(entity, new_wallet)}
     end
-  end
-
-  @doc """
-  Log a transaction after an entity transform. Call this after using
-  `credit/3` or `debit/3` and persisting the entity.
-  """
-  @spec log(atom(), atom(), String.t(), pos_integer(), map()) :: :ok
-  def log(type, category, entity_id, amount, meta \\ %{}) do
-    EconomyLog.append(type, category, entity_id, amount, meta)
   end
 
   # =============================================================================

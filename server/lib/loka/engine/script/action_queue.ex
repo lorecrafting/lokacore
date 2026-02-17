@@ -593,7 +593,7 @@ defmodule Loka.Engine.Script.ActionQueue do
 
     case EntityRegistry.lookup(entity_id) do
       {:ok, pid} ->
-        Loka.Engine.EntityServer.update(pid, fn entity ->
+        Loka.Engine.EntityServer.update_protected(pid, fn entity ->
           Loka.Components.Cooldowns.set(entity, to_string(key), duration)
         end)
 

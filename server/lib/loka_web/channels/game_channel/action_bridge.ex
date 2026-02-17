@@ -126,7 +126,7 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
     # Also persist to EntityServer for durability
     if value do
       alias Loka.Engine.EntityServer
-      EntityServer.update(value.id, fn _old -> value end)
+      EntityServer.update_protected(value.id, fn _old -> value end)
     end
 
     Phoenix.Socket.assign(socket, :character, value)

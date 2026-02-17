@@ -58,9 +58,10 @@ config :loka, Loka.Auth.Guardian,
 # Disable rate limiting in tests
 config :loka, :rate_limiter_enabled, false
 
-# Set content validation to warn mode in tests (don't block startup)
-# Tests may intentionally create invalid content for testing purposes
-config :loka, content_validation: :warn
+# Skip content validation in tests — it hits the DB during boot, which can
+# exhaust the connection pool during concurrent compilation and cause flaky
+# failures. Content validation is covered by `mix loka.test.validate`.
+config :loka, content_validation: :skip
 
 # CORS: Allow all origins in tests
 config :loka, :cors_origins, :all

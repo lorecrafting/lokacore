@@ -256,21 +256,10 @@ defmodule Loka.Game.Actions.Shop do
   end
 
   defp deduct_currency(character, amount) do
-    case Economy.debit(character, amount) do
-      {:ok, updated} ->
-        Economy.log(:sink, :shop_buy, character.id, amount)
-        {:ok, updated}
-
-      {:error, _} = error ->
-        error
-    end
+    Economy.debit(character, amount, :shop_buy)
   end
 
   defp add_currency(character, amount) do
-    case Economy.credit(character, amount) do
-      {:ok, updated} ->
-        Economy.log(:faucet, :vendor_sell, character.id, amount)
-        {:ok, updated}
-    end
+    Economy.credit(character, amount, :vendor_sell)
   end
 end

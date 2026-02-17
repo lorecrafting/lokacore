@@ -19,6 +19,7 @@ defmodule Loka.Game.Actions.Combat do
   alias Loka.Framework.Combat.RespawnManager
   alias Loka.Framework.Quest.Listeners, as: QuestListeners
   alias Loka.Engine.{Entity, Entities}
+  alias Loka.Framework.Economy
   alias Loka.Mechanics.Damage
 
   @doc """
@@ -181,6 +182,9 @@ defmodule Loka.Game.Actions.Combat do
         {character, []}
       end
 
+    # Apply rewards — gold via Economy, XP directly to stats
+    new_character = apply_combat_rewards(new_character, rewards)
+
     events = [
       {:event,
        "Victory! You defeated the #{combat.enemy.name}. Gained #{rewards.xp} XP and #{rewards.gold} gold."},
@@ -263,5 +267,28 @@ defmodule Loka.Game.Actions.Combat do
       )
 
     {:ok, result}
+  end
+
+  defp apply_combat_rewards(character, rewards) do
+    # Apply gold via Economy (logs the faucet transaction)
+    character =
+      if is_integer(rewards.gold) and rewards.gold > 0 do
+        case Economy.credit(character, rewards.gold, :mob_kill) do
+          {:ok, updated} -> updated
+          _ -> character
+        end
+      else
+        character
+      end
+
+    # Apply XP to stats
+    if is_integer(rewards.xp) and rewards.xp > 0 do
+      stats = Entity.get_component(character, "stats") || %{}
+      current_xp = Map.get(stats, "xp", 0)
+      new_stats = Map.put(stats, "xp", current_xp + rewards.xp)
+      Entity.add_component(character, "stats", new_stats)
+    else
+      character
+    end
   end
 end

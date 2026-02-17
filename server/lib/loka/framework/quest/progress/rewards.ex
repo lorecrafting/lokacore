@@ -69,14 +69,7 @@ defmodule Loka.Framework.Quest.Progress.Rewards do
   def apply_gold(entity, 0), do: {:ok, entity}
 
   def apply_gold(%Entity{} = entity, gold) when gold > 0 do
-    case Economy.credit(entity, gold) do
-      {:ok, updated} ->
-        Economy.log(:faucet, :quest_reward, entity.id, gold)
-        {:ok, updated}
-
-      error ->
-        error
-    end
+    Economy.credit(entity, gold, :quest_reward)
   end
 
   @doc """

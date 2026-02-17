@@ -474,10 +474,10 @@ defmodule Loka.Engine.ZoneReset do
     # Update the entity's equipment component to track equipped items
     case EntityRegistry.get_or_start(entity_id) do
       {:ok, pid} ->
-        EntityServer.update(pid, fn entity ->
-          equipment = Map.get(entity.components, :equipment, %{})
+        EntityServer.update_protected(pid, fn entity ->
+          equipment = Map.get(entity.components, "equipment", %{})
           updated_equipment = Map.put(equipment, slot, item_id)
-          put_in(entity.components[:equipment], updated_equipment)
+          %{entity | components: Map.put(entity.components, "equipment", updated_equipment)}
         end)
 
       {:error, reason} ->
