@@ -111,7 +111,7 @@ defmodule Loka.Testing.AIEval.Runner do
       tool_executor_fn: &ToolExecutor.execute/3,
       verbosity: :conversational,
       caller_pid: self(),
-      model: opts[:model] || "claude-sonnet-4-5-20250929",
+      model: opts[:model] || "claude-sonnet-4-6",
       max_tokens: opts[:max_tokens] || 4096
     })
   end
@@ -186,6 +186,12 @@ defmodule Loka.Testing.AIEval.Runner do
 
         {:ai_error, reason} ->
           Logger.warning("[EvalRunner] AI error: #{inspect(reason)}")
+
+          if rate_limited?(reason) do
+            # Brief pause before returning — phase-level retry handles the rest
+            Process.sleep(2_000)
+          end
+
           conversation
 
         {:ai_tool_use, _name, _id, _input, _result} ->
@@ -200,6 +206,9 @@ defmodule Loka.Testing.AIEval.Runner do
       end
     end
   end
+
+  defp rate_limited?(reason) when is_binary(reason), do: String.contains?(reason, "429")
+  defp rate_limited?(_), do: false
 
   defp load_prompt(version) do
     versioned_path =

@@ -91,6 +91,16 @@ defmodule Loka.AI.Conversation do
   end
 
   @doc """
+  Resend the current conversation to the AI (for retry after transient errors).
+  Re-triggers streaming with existing messages without adding new ones.
+  """
+  @spec resend(state(), map()) :: state()
+  def resend(state, context \\ %{}) do
+    state = %{state | streaming: true}
+    start_streaming(state, context)
+  end
+
+  @doc """
   Handle a text delta from the streaming response.
   """
   @spec handle_text_delta(state(), String.t()) :: state()

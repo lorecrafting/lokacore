@@ -211,7 +211,7 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
         end,
         verbosity: :verbose,
         caller_pid: self(),
-        model: "claude-sonnet-4-5-20250929",
+        model: "claude-sonnet-4-6",
         max_tokens: 4096
       }
 
