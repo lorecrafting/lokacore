@@ -133,6 +133,16 @@ defmodule Loka.Engine.EntityServer do
   end
 
   @doc """
+  Updates the entity, allowing protected component changes.
+
+  This bypasses the wallet/protected component guard. Only use from
+  `Loka.Framework.Economy` — all other callers should use `update/3`.
+  """
+  def update_protected(server, fun, opts \\ []) when is_function(fun, 1) do
+    GenServer.call(server, {:update_protected, fun, opts})
+  end
+
+  @doc """
   Sends an event to the entity for processing.
   """
   def handle_event(server, event) do
@@ -245,19 +255,52 @@ defmodule Loka.Engine.EntityServer do
     {:reply, state.entity, touch_state(state)}
   end
 
+  # Protected components that can only be modified via :update_protected
+  @protected_components ["wallet"]
+
   @impl true
   def handle_call({:update, fun, opts}, _from, state) do
     updated_entity = fun.(state.entity)
-    new_state = %{state | entity: updated_entity} |> mark_dirty()
 
-    new_state =
-      if Keyword.get(opts, :force_save, false) do
-        do_save(new_state)
-      else
-        new_state
-      end
+    if protected_component_changed?(state.entity, updated_entity) do
+      Logger.warning(
+        "[EntityServer] Rejected direct modification of protected component. " <>
+          "Use Loka.Framework.Economy for wallet changes."
+      )
 
-    {:reply, {:ok, updated_entity}, new_state}
+      {:reply, {:error, :protected_component}, state}
+    else
+      new_state = %{state | entity: updated_entity} |> mark_dirty()
+
+      new_state =
+        if Keyword.get(opts, :force_save, false) do
+          do_save(new_state)
+        else
+          new_state
+        end
+
+      {:reply, {:ok, updated_entity}, new_state}
+    end
+  end
+
+  @impl true
+  def handle_call({:update_protected, fun, opts}, _from, state) do
+    case fun.(state.entity) do
+      {:error, _} = error ->
+        {:reply, error, state}
+
+      %Entity{} = updated_entity ->
+        new_state = %{state | entity: updated_entity} |> mark_dirty()
+
+        new_state =
+          if Keyword.get(opts, :force_save, false) do
+            do_save(new_state)
+          else
+            new_state
+          end
+
+        {:reply, {:ok, updated_entity}, new_state}
+    end
   end
 
   # V1 compat: handle {:update, fun} without opts
@@ -581,6 +624,12 @@ defmodule Loka.Engine.EntityServer do
   # =============================================================================
   # Private Helpers
   # =============================================================================
+
+  defp protected_component_changed?(old_entity, new_entity) do
+    Enum.any?(@protected_components, fn key ->
+      Map.get(old_entity.components, key) != Map.get(new_entity.components, key)
+    end)
+  end
 
   defp mark_dirty(state) do
     %{state | dirty: true, last_activity: DateTime.utc_now()}

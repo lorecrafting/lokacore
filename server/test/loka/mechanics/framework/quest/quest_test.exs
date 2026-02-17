@@ -199,7 +199,7 @@ defmodule Loka.Framework.QuestTest do
       entity =
         character_fixture(%{
           stats: %{"xp" => 0},
-          flags: %{"gold" => 100},
+          wallet: %{"gold" => 100},
           inventory: []
         })
 
@@ -279,8 +279,8 @@ defmodule Loka.Framework.QuestTest do
       # Verify rewards applied
       stats = Entity.get_component(entity, "stats")
       assert stats["xp"] == 500
-      flags = Entity.get_component(entity, "flags")
-      assert flags["gold"] == 350
+      wallet = Entity.get_component(entity, "wallet")
+      assert wallet["gold"] == 350
       inventory = Entity.get_component(entity, "inventory")
       assert "legendary_sword" in inventory
 

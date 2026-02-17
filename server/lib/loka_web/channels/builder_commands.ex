@@ -41,6 +41,7 @@ defmodule LokaWeb.Channels.BuilderCommands do
     Scripts,
     Publishing,
     Guides,
+    Economy,
     Map,
     Help,
     Helpers
@@ -89,6 +90,9 @@ defmodule LokaWeb.Channels.BuilderCommands do
 
   # Publishing commands
   @publishing_commands ~w(publish unpublish)a
+
+  # Economy commands
+  @economy_commands ~w(economy)a
 
   # Guide commands
   @guide_commands ~w(guide)a
@@ -174,6 +178,10 @@ defmodule LokaWeb.Channels.BuilderCommands do
 
   defp dispatch(cmd, params, socket) when cmd in @publishing_commands do
     Publishing.execute(cmd, params, socket)
+  end
+
+  defp dispatch(cmd, params, socket) when cmd in @economy_commands do
+    Economy.execute(cmd, params, socket)
   end
 
   defp dispatch(cmd, params, socket) when cmd in @guide_commands do

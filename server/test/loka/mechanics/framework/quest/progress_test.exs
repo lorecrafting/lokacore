@@ -471,7 +471,7 @@ defmodule Loka.Framework.Quest.ProgressTest do
 
       # Check rewards applied
       assert Entity.get_component(updated_state, "stats")["xp"] == 100
-      assert Entity.get_component(updated_state, "flags")["gold"] == 50
+      assert Entity.get_component(updated_state, "wallet")["gold"] == 50
       assert "potion" in Entity.get_component(updated_state, "inventory")
     end
 

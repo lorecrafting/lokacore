@@ -154,6 +154,7 @@ defmodule Loka.EngineFixtures do
           "inventory" => attrs[:inventory] || [],
           "equipment" => attrs[:equipment] || %{},
           "flags" => attrs[:flags] || %{},
+          "wallet" => attrs[:wallet] || %{"gold" => 0},
           "resources" =>
             attrs[:resources] ||
               %{

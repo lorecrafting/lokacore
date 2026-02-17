@@ -233,6 +233,21 @@ defmodule Loka.Engine.Script.Bindings do
 
         event_name when is_binary(event_name) ->
           queue_emit(entity, String.to_atom(event_name), %{})
+      end,
+
+      # Economy actions (gold only flows through Economy module)
+      # mint_gold.(50, "quest_reward") — create gold (faucet)
+      # burn_gold.(30, "shop_buy") — destroy gold (sink)
+      # gold.() — check balance
+      mint_gold: fn amount, source ->
+        queue_mint_gold(player, amount, source)
+      end,
+      burn_gold: fn amount, sink ->
+        queue_burn_gold(player, amount, sink)
+      end,
+      gold: fn ->
+        wallet = Loka.Components.Wallet.get(player || entity)
+        Map.get(wallet, "gold", 0)
       end
     ]
   end
@@ -766,6 +781,31 @@ defmodule Loka.Engine.Script.Bindings do
 
     :ok
   end
+
+  # Economy actions — mint/burn gold through the Economy module
+  defp queue_mint_gold(player, amount, source) when is_integer(amount) and amount > 0 do
+    if player do
+      ActionQueue.queue(
+        {:mint_gold, %{entity_id: player.id, amount: amount, source: to_string(source)}}
+      )
+    end
+
+    :ok
+  end
+
+  defp queue_mint_gold(_player, _amount, _source), do: :ok
+
+  defp queue_burn_gold(player, amount, sink) when is_integer(amount) and amount > 0 do
+    if player do
+      ActionQueue.queue(
+        {:burn_gold, %{entity_id: player.id, amount: amount, sink: to_string(sink)}}
+      )
+    end
+
+    :ok
+  end
+
+  defp queue_burn_gold(_player, _amount, _sink), do: :ok
 
   # Trait state - persists per-trait across executions
   # State is stored in entity.trait_state[trait_key][state_key]

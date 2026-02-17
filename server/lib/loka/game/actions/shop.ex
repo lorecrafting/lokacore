@@ -16,6 +16,7 @@ defmodule Loka.Game.Actions.Shop do
 
   alias Loka.Game.Actions.{Context, Result}
   alias Loka.Engine.{Entity, Entities, Spawner}
+  alias Loka.Framework.Economy
 
   @doc """
   Open a shop with an NPC merchant.
@@ -82,31 +83,39 @@ defmodule Loka.Game.Actions.Shop do
       true ->
         case Spawner.spawn(item_key) do
           {:ok, item_entity} ->
-            character_after_deduct = deduct_currency(character, item_info.price)
+            case deduct_currency(character, item_info.price) do
+              {:ok, character_after_deduct} ->
+                inventory = Entity.get_component(character_after_deduct, "inventory") || []
+                new_inventory = [item_entity.id | inventory]
 
-            inventory = Entity.get_component(character_after_deduct, "inventory") || []
-            new_inventory = [item_entity.id | inventory]
+                new_character =
+                  Entity.add_component(character_after_deduct, "inventory", new_inventory)
 
-            new_character =
-              Entity.add_component(character_after_deduct, "inventory", new_inventory)
+                Logger.info(
+                  "[SHOP] Purchase completed: player_id=#{ctx.player_id} item=#{item_key} cost=#{item_info.price} remaining_gold=#{get_currency(new_character)}"
+                )
 
-            Logger.info(
-              "[SHOP] Purchase completed: player_id=#{ctx.player_id} item=#{item_key} cost=#{item_info.price} remaining_gold=#{get_currency(new_character)}"
-            )
+                stats = Entity.get_component(new_character, "stats")
 
-            stats = Entity.get_component(new_character, "stats")
+                result =
+                  Result.new(
+                    state: %{character: new_character},
+                    events: [
+                      {:event, "You purchased #{item_info.name} for #{item_info.price} gold."},
+                      {:inventory_update, %{action: "add", item_id: item_entity.id}},
+                      {:stats_update, %{stats: stats}}
+                    ]
+                  )
 
-            result =
-              Result.new(
-                state: %{character: new_character},
-                events: [
-                  {:event, "You purchased #{item_info.name} for #{item_info.price} gold."},
-                  {:inventory_update, %{action: "add", item_id: item_entity.id}},
-                  {:stats_update, %{stats: stats}}
-                ]
-              )
+                {:ok, result}
 
-            {:ok, result}
+              {:error, :insufficient_funds} ->
+                {:error, "You don't have enough gold."}
+
+              {:error, reason} ->
+                Logger.error("[SHOP] Deduct failed: #{inspect(reason)}")
+                {:error, "Failed to complete purchase."}
+            end
 
           {:error, spawn_error} ->
             Logger.error(
@@ -155,7 +164,7 @@ defmodule Loka.Game.Actions.Shop do
 
       true ->
         sell_price = get_sell_price(item_entity)
-        character_after_add = add_currency(character, sell_price)
+        {:ok, character_after_add} = add_currency(character, sell_price)
         cur_inventory = Entity.get_component(character_after_add, "inventory") || []
         new_inventory = List.delete(cur_inventory, item_id)
         new_character = Entity.add_component(character_after_add, "inventory", new_inventory)
@@ -242,23 +251,26 @@ defmodule Loka.Game.Actions.Shop do
     div(base_price, 2)
   end
 
-  # Economy helpers (inline replacements for deleted Economy module)
   defp get_currency(character) do
-    stats = Entity.get_component(character, "stats") || %{}
-    Map.get(stats, "gold") || Map.get(stats, :gold) || 0
+    Economy.balance_from_entity(character)
   end
 
   defp deduct_currency(character, amount) do
-    stats = Entity.get_component(character, "stats") || %{}
-    current = Map.get(stats, "gold") || Map.get(stats, :gold) || 0
-    new_stats = Map.put(stats, "gold", max(0, current - amount))
-    Entity.add_component(character, "stats", new_stats)
+    case Economy.debit(character, amount) do
+      {:ok, updated} ->
+        Economy.log(:sink, :shop_buy, character.id, amount)
+        {:ok, updated}
+
+      {:error, _} = error ->
+        error
+    end
   end
 
   defp add_currency(character, amount) do
-    stats = Entity.get_component(character, "stats") || %{}
-    current = Map.get(stats, "gold") || Map.get(stats, :gold) || 0
-    new_stats = Map.put(stats, "gold", current + amount)
-    Entity.add_component(character, "stats", new_stats)
+    case Economy.credit(character, amount) do
+      {:ok, updated} ->
+        Economy.log(:faucet, :vendor_sell, character.id, amount)
+        {:ok, updated}
+    end
   end
 end

@@ -8,7 +8,7 @@ defmodule Loka.Framework.Quest.Progress.Rewards do
   ## Reward Types
 
   - `:xp` - Experience points (added to player stats)
-  - `:gold` - Gold currency (stored in player flags)
+  - `:gold` - Gold currency (stored in wallet component via Economy module)
   - `:items` - List of item IDs (added to inventory)
 
   ## Usage
@@ -25,6 +25,7 @@ defmodule Loka.Framework.Quest.Progress.Rewards do
   """
 
   alias Loka.Engine.Entity
+  alias Loka.Framework.Economy
 
   @doc """
   Applies all rewards from a rewards map.
@@ -62,19 +63,20 @@ defmodule Loka.Framework.Quest.Progress.Rewards do
   end
 
   @doc """
-  Applies gold reward to player flags component.
-
-  Gold is stored in the flags map for flexibility.
+  Applies gold reward via Economy module (credits wallet component in memory).
   """
   @spec apply_gold(Entity.t(), non_neg_integer()) :: {:ok, Entity.t()} | {:error, term()}
   def apply_gold(entity, 0), do: {:ok, entity}
 
   def apply_gold(%Entity{} = entity, gold) when gold > 0 do
-    flags = Entity.get_component(entity, "flags") || %{}
-    current_gold = Map.get(flags, "gold") || Map.get(flags, :gold, 0)
-    new_gold = current_gold + gold
-    new_flags = Map.put(flags, "gold", new_gold)
-    {:ok, Entity.add_component(entity, "flags", new_flags)}
+    case Economy.credit(entity, gold) do
+      {:ok, updated} ->
+        Economy.log(:faucet, :quest_reward, entity.id, gold)
+        {:ok, updated}
+
+      error ->
+        error
+    end
   end
 
   @doc """

@@ -233,7 +233,8 @@ defmodule Loka.Testing.Quest.QuestTester do
         account_id: player_id,
         components: %{
           "stats" => %{"level" => 1, "xp" => 0},
-          "flags" => %{"gold" => 0},
+          "flags" => %{},
+          "wallet" => %{"gold" => 0},
           "inventory" => [],
           "equipment" => %{},
           "quest_progress" => %{"active" => %{}, "completed" => []},

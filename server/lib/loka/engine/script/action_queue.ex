@@ -61,6 +61,8 @@ defmodule Loka.Engine.Script.ActionQueue do
           | :set_cooldown
           | :signal
           | :create_room
+          | :mint_gold
+          | :burn_gold
 
   @type action :: {action_type(), term()}
 
@@ -75,7 +77,8 @@ defmodule Loka.Engine.Script.ActionQueue do
     effects: 20,
     schedules: 5,
     signals: 10,
-    room_creates: 3
+    room_creates: 3,
+    economy: 10
   }
 
   @doc """
@@ -216,6 +219,8 @@ defmodule Loka.Engine.Script.ActionQueue do
   defp action_category({:schedule, _}), do: :schedules
   defp action_category({:signal, _}), do: :signals
   defp action_category({:create_room, _}), do: :room_creates
+  defp action_category({:mint_gold, _}), do: :economy
+  defp action_category({:burn_gold, _}), do: :economy
   defp action_category(_), do: :other
 
   defp get_count(category) do
@@ -660,10 +665,55 @@ defmodule Loka.Engine.Script.ActionQueue do
     :ok
   end
 
+  defp execute_action(
+         {:mint_gold, %{entity_id: entity_id, amount: amount, source: source}},
+         _context
+       ) do
+    # Use dynamic dispatch to avoid Engine → Framework dependency
+    economy = Module.concat(Loka.Framework, Economy)
+
+    case apply(economy, :mint, [entity_id, amount, safe_economy_atom(source), %{via: :script}]) do
+      {:ok, _result} ->
+        :ok
+
+      {:error, reason} ->
+        Logger.warning("[ActionQueue] mint_gold failed: #{inspect(reason)}")
+        {:error, reason}
+    end
+  end
+
+  defp execute_action(
+         {:burn_gold, %{entity_id: entity_id, amount: amount, sink: sink}},
+         _context
+       ) do
+    # Use dynamic dispatch to avoid Engine → Framework dependency
+    economy = Module.concat(Loka.Framework, Economy)
+
+    case apply(economy, :burn, [entity_id, amount, safe_economy_atom(sink), %{via: :script}]) do
+      {:ok, _result} ->
+        :ok
+
+      {:error, reason} ->
+        Logger.warning("[ActionQueue] burn_gold failed: #{inspect(reason)}")
+        {:error, reason}
+    end
+  end
+
   defp execute_action(action, _context) do
     Logger.warning("[ActionQueue] Unknown action: #{inspect(action)}")
     {:error, :unknown_action}
   end
+
+  @known_economy_atoms ~w(mob_kill quest_reward vendor_sell gathering login_bonus admin_grant script shop_buy repair fast_travel crafting_fee tax death_penalty admin_charge)a
+
+  defp safe_economy_atom(str) when is_binary(str) do
+    atom = String.to_existing_atom(str)
+    if atom in @known_economy_atoms, do: atom, else: :script
+  rescue
+    ArgumentError -> :script
+  end
+
+  defp safe_economy_atom(atom) when is_atom(atom), do: atom
 
   # =============================================================================
   # Room Creation Helpers

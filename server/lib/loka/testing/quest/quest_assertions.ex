@@ -207,7 +207,8 @@ defmodule Loka.Testing.Quest.QuestAssertions do
       end
 
       if gold = Keyword.get(expected, :gold) do
-        actual_gold = Map.get(game_state.flags, "gold") || Map.get(game_state.flags, :gold, 0)
+        wallet = Map.get(game_state, :wallet, %{})
+        actual_gold = Map.get(wallet, "gold") || Map.get(wallet, :gold, 0)
 
         unless actual_gold >= gold do
           raise ExUnit.AssertionError,
