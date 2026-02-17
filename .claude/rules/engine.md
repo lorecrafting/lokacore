@@ -77,7 +77,9 @@ end
 1. Run `mix test` - all tests must pass
 2. Run `mix loka.test.validate` - content integrity
 3. Check for compiler warnings - fix all
-4. Run `/check-work` for comprehensive verification
+4. Ensure all public functions have `@spec` annotations
+5. Run `mix dialyzer` to check type correctness (when PLT is built)
+6. Run `/check-work` for comprehensive verification
 
 ## Key Files
 

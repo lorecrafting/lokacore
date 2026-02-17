@@ -24,17 +24,23 @@ defmodule Loka.Components.Cooldowns do
 
   @component_key "cooldowns"
 
+  alias Loka.Engine.Entity
+
   @doc "Returns the raw cooldowns map or empty map."
+  @spec get(Entity.t()) :: map()
   def get(entity), do: Map.get(entity.components, @component_key, %{})
 
   @doc "Returns true if the entity has a cooldowns component."
+  @spec has?(Entity.t()) :: boolean()
   def has?(entity), do: Map.has_key?(entity.components, @component_key)
 
   @doc "Sets the entire cooldowns map on the entity."
+  @spec put(Entity.t(), map()) :: Entity.t()
   def put(entity, data) when is_map(data),
     do: %{entity | components: Map.put(entity.components, @component_key, data)}
 
   @doc "Returns the component key string."
+  @spec component_key() :: String.t()
   def component_key, do: @component_key
 
   @doc """
@@ -42,7 +48,7 @@ defmodule Loka.Components.Cooldowns do
 
   Returns `true` if the action can be performed.
   """
-  @spec ready?(map(), String.t()) :: boolean()
+  @spec ready?(Entity.t(), String.t()) :: boolean()
   def ready?(entity, key) do
     key = to_string(key)
 
@@ -60,7 +66,7 @@ defmodule Loka.Components.Cooldowns do
 
   Returns 0 if the cooldown is ready or was never set.
   """
-  @spec remaining(map(), String.t()) :: non_neg_integer()
+  @spec remaining(Entity.t(), String.t()) :: non_neg_integer()
   def remaining(entity, key) do
     key = to_string(key)
 
@@ -78,7 +84,7 @@ defmodule Loka.Components.Cooldowns do
 
   Duration is in seconds.
   """
-  @spec set(map(), String.t(), pos_integer()) :: map()
+  @spec set(Entity.t(), String.t(), pos_integer()) :: Entity.t()
   def set(entity, key, duration_seconds)
       when is_integer(duration_seconds) and duration_seconds > 0 do
     key = to_string(key)
@@ -88,7 +94,7 @@ defmodule Loka.Components.Cooldowns do
   end
 
   @doc "Clears a specific cooldown. Returns the updated entity."
-  @spec clear(map(), String.t()) :: map()
+  @spec clear(Entity.t(), String.t()) :: Entity.t()
   def clear(entity, key) do
     key = to_string(key)
     cooldowns = get(entity)
@@ -96,7 +102,7 @@ defmodule Loka.Components.Cooldowns do
   end
 
   @doc "Clears all cooldowns. Returns the updated entity."
-  @spec clear_all(map()) :: map()
+  @spec clear_all(Entity.t()) :: Entity.t()
   def clear_all(entity) do
     put(entity, %{})
   end
@@ -106,7 +112,7 @@ defmodule Loka.Components.Cooldowns do
 
   Returns a list of `%{key: String.t(), remaining: non_neg_integer()}`.
   """
-  @spec list_active(map()) :: [%{key: String.t(), remaining: non_neg_integer()}]
+  @spec list_active(Entity.t()) :: [%{key: String.t(), remaining: non_neg_integer()}]
   def list_active(entity) do
     now = System.os_time(:second)
 
@@ -118,7 +124,7 @@ defmodule Loka.Components.Cooldowns do
   end
 
   @doc "Removes expired cooldown entries. Returns the updated entity."
-  @spec sweep_expired(map()) :: map()
+  @spec sweep_expired(Entity.t()) :: Entity.t()
   def sweep_expired(entity) do
     now = System.os_time(:second)
 

@@ -88,7 +88,9 @@ Conditions.Evaluator.evaluate(condition, context)
 
 1. Run `mix test test/loka/framework/my_subsystem/`
 2. Run `mix loka.test.validate` if content affected
-3. Update `docs/framework/` if API changed
+3. Ensure all public functions have `@spec` annotations
+4. Run `mix dialyzer` to check type correctness (when PLT is built)
+5. Update `docs/framework/` if API changed
 
 ## Anti-Patterns to Avoid
 

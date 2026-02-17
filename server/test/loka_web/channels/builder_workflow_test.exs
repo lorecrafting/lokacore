@@ -7,8 +7,6 @@ defmodule LokaWeb.Channels.BuilderWorkflowTest do
   """
   use Loka.ChannelCase, async: false
 
-  alias Loka.Auth.Guardian
-
   @timeout 2000
 
   setup do
@@ -206,34 +204,5 @@ defmodule LokaWeb.Channels.BuilderWorkflowTest do
       text = receive_output()
       assert text =~ "Guide:" or text =~ "narrative"
     end
-  end
-
-  # ---------------------------------------------------------------------------
-  # Helpers
-  # ---------------------------------------------------------------------------
-
-  defp connect_player(player) do
-    {:ok, token, _claims} = Guardian.encode_and_sign(player, %{})
-    {:ok, socket} = connect(LokaWeb.UserSocket, %{"token" => token})
-    {:ok, _reply, socket} = subscribe_and_join(socket, LokaWeb.GameChannel, "game:lobby", %{})
-
-    assert_push "game_state", _state, @timeout
-
-    {:ok, socket}
-  end
-
-  defp send_cmd(socket, input) do
-    ref = push(socket, "command", %{"input" => input})
-    assert_reply ref, :ok, %{}, @timeout
-  end
-
-  defp receive_output do
-    assert_push "output", %{text: text}, @timeout
-    text
-  end
-
-  defp assert_output(expected) do
-    text = receive_output()
-    assert text =~ expected, "Expected output to contain #{inspect(expected)}, got: #{text}"
   end
 end

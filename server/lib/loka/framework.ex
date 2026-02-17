@@ -19,7 +19,10 @@ defmodule Loka.Framework do
   ## Boundary Rules
 
   Framework depends on Engine for entity manipulation, hooks, events, and
-  prototype access. It must NOT depend on Content, Session, or Web layers.
+  prototype access. It also calls Content modules (Quest, Dialogue, Script)
+  but cannot declare them as deps due to a Content→Framework cycle. These
+  cross-boundary calls are suppressed via `check: [out: false]` until the
+  cycle is resolved (Content should depend on Engine only, not Framework).
   """
 
   use Boundary, top_level?: true, exports: :all, check: [out: false]

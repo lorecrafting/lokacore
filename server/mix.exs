@@ -11,6 +11,12 @@ defmodule Loka.MixProject do
       aliases: aliases(),
       deps: deps(),
       compilers: [:boundary, :phoenix_live_view] ++ Mix.compilers(),
+      # Dialyzer configuration
+      dialyzer: [
+        plt_add_apps: [:mix, :ex_unit],
+        flags: [:unmatched_returns, :error_handling, :underspecs],
+        ignore_warnings: ".dialyzer_ignore.exs"
+      ],
       # ExDoc configuration
       name: "Loka",
       source_url: "https://github.com/lorecrafting/lokacore",
@@ -155,6 +161,9 @@ defmodule Loka.MixProject do
 
       # Static code analysis
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+
+      # Dialyzer for type checking
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
 
       # Required by Phoenix LiveView tests
       {:lazy_html, "~> 0.1.10", only: :test}

@@ -2,7 +2,7 @@
 
 > **A Complete Technical Reference for Understanding the Loka Game Engine**
 >
-> *Version 5.0 | February 2026 — V2 Unified Entity System*
+> *Version 6.0 | February 2026 — V2 Unified Entity System*
 
 ---
 
@@ -73,17 +73,17 @@ Loka is an Elixir-based MUD (Multi-User Dungeon) engine framework for building t
 ├─────────────────────────────────────────────────────────────┤
 │ WORLD BUILDER - Terminal at /admin/builder (AI-assisted)    │
 ├─────────────────────────────────────────────────────────────┤
-│ GAME CONTENT - priv/world/ (286 YAML files)                │
+│ GAME CONTENT - priv/world/ (~295 YAML files)               │
 ├─────────────────────────────────────────────────────────────┤
-│ GAME FRAMEWORK - lib/loka/framework/ (~52 modules)         │
+│ GAME FRAMEWORK - lib/loka/framework/ (39 modules, 12 dirs) │
 ├─────────────────────────────────────────────────────────────┤
-│ CONTENT MODULES - lib/loka/content/ (12 modules)           │
+│ CONTENT MODULES - lib/loka/content/ (10 modules)           │
 ├─────────────────────────────────────────────────────────────┤
-│ COMPONENTS - lib/loka/components/ (24 accessor modules)    │
+│ COMPONENTS - lib/loka/components/ (5 accessor modules)     │
 ├─────────────────────────────────────────────────────────────┤
-│ ENGINE CORE - lib/loka/engine/ (24 modules)                │
+│ ENGINE CORE - lib/loka/engine/ (~33 modules)               │
 ├─────────────────────────────────────────────────────────────┤
-│ SESSION LAYER - lib/loka/session/ (client messaging)       │
+│ SUPPORT LAYERS - mechanics, primitives, admin, session      │
 ├─────────────────────────────────────────────────────────────┤
 │ PLATFORM - Phoenix 1.8, LiveView, Ecto + SQLite            │
 └─────────────────────────────────────────────────────────────┘
@@ -101,7 +101,7 @@ Loka is an Elixir-based MUD (Multi-User Dungeon) engine framework for building t
 | **GenServer per Entity** | In-memory state with 60s auto-save, hibernation, idle shutdown |
 | **Prototype Inheritance** | YAML templates with parent/child merging |
 | **Content Modules** | Type-safe domain APIs (Quest, Dialogue, Script, Zone, etc.) |
-| **Component Accessors** | 24 typed accessor modules for entity components |
+| **Component Accessors** | Typed accessor modules for entity components |
 | **Event Bus (PubSub)** | Decoupled entity communication via Phoenix.PubSub |
 | **Hooks** | 22 lifecycle extension points |
 | **Locks** | String-based access control (Evennia-inspired) |
@@ -110,16 +110,17 @@ Loka is an Elixir-based MUD (Multi-User Dungeon) engine framework for building t
 
 | Metric | Count |
 |--------|-------|
-| Elixir modules | ~141 |
-| YAML content files | ~286 |
-| Test files | ~146 (~2,319 tests) |
+| Elixir .ex files (lib/) | ~270 |
+| YAML content files | ~295 |
+| Test files | ~112 |
 | Test suite time | ~33s |
-| Supervised children | ~50 (order matters) |
-| Framework subsystems | ~15 subdirectories |
-| Component accessors | 24 |
-| Behavior modules | 11 |
-| Content modules | 12 |
+| Supervised children | ~26 (order matters) |
+| Framework subdirectories | 12 |
+| Component accessors | 5 |
+| Content modules | 10 |
+| Script trait YAML files | 12 |
 | Event hook types | 22 |
+| Entity types | 18 |
 | Godot GDScript files | 19 (~7,100 LOC) |
 
 ---
@@ -140,7 +141,7 @@ V1 had a **three-store problem**: content lived in YAML files, ETS TypedObject R
 
 2. **Single DB truth.** SQLite is the only runtime data store. No ETS registries for content. YAML files are templates, seeded into DB at boot by `EntitySeeder`.
 
-3. **Components hold all data.** `entity.components` is a JSON map containing all game data. No separate `data`, `attributes`, or `contents` fields.
+3. **Components hold all data.** `entity.components` is a JSON map containing all game data. No separate `data`, `attributes`, or `contents` fields on the Entity struct.
 
 4. **Traits replace behaviors.** `entity.traits` is a list of behavior module atoms or script maps. The field was renamed from `behaviors` in Feb 2026.
 
@@ -155,17 +156,22 @@ V1 had a **three-store problem**: content lived in YAML files, ETS TypedObject R
 | `behaviors` field | `traits` field | Clearer naming |
 | ETS TypedObject Registry | Direct DB queries via Entities | No dual-store sync issues |
 | GameState (player state) | Player entity with components | Unified entity system |
-| 250+ framework modules | ~141 modules total | Scriptable framework |
+| `locks` field on Entity | `components["locks"]` | Everything in components |
+| Separate Cooldowns GenServer (ETS) | `components["cooldowns"]` | Component-based, no ETS |
+| Separate DayNight/Weather GenServers | `Atmosphere` reads system entity | Stateless module |
+| CombatServer/Registry GenServers | Deleted (dead code) | Unused |
+| 250+ framework modules | ~270 .ex files total | Scriptable framework |
 | Bardo death realm | UO-style ghost system | Simpler, more MUD-traditional |
-| Resource YAML files (focus, insight, ki) | Removed | Simplified resource model |
 
-### What Still Exists from V1
+### What's Been Fully Deleted from V1
 
-- **TypedObject.Loader** — Still loads YAML at boot, but primarily for EntitySeeder to consume
-- **Player.GameState** — Being phased out in favor of player entity components
-- **Hooks system** — Unchanged, still 22 hook types
-- **Locks system** — Unchanged, string-based access control
-- **Event/EventBus** — Unchanged, Phoenix.PubSub routing
+- **TypedObject.Loader** — Deleted. EntitySeeder loads YAML directly.
+- **Player.GameState** — Deleted. All callers migrated to character entity components. `player_game_states` table dropped.
+- **Engine.Cooldowns** (ETS GenServer) — Deleted. Replaced by `Components.Cooldowns` (pure component accessor).
+- **CombatServer/CombatSupervisor/CombatRegistry** — Deleted (dead code, zero callers).
+- **DayNight/Weather GenServers** — Deleted. Replaced by `Atmosphere` module reading system entity.
+- **RespawnManager GenServer** — Converted to plain module, stores data in entity components.
+- **Behaviors directory** (`lib/loka/behaviors/`) — Does not exist. All behavior logic is in script traits (12 YAML files in `priv/world/scripts/traits/`).
 
 ---
 
@@ -173,7 +179,7 @@ V1 had a **three-store problem**: content lived in YAML files, ETS TypedObject R
 
 **Key File:** `lib/loka/application.ex`
 
-The OTP application supervisor orchestrates startup of ~50 children in critical order.
+The OTP application supervisor orchestrates startup of ~26 children in critical order.
 
 ### Supervision Tree
 
@@ -192,7 +198,7 @@ Loka.Supervisor (strategy: :one_for_one)
 │   └── Phoenix.PubSub
 │
 ├── Session System
-│   ├── Loka.Session.PlayerRegistry
+│   ├── Loka.Session.PlayerRegistry (Elixir Registry)
 │   ├── Loka.Session.Registry
 │   └── Loka.Session.Supervisor
 │
@@ -202,38 +208,57 @@ Loka.Supervisor (strategy: :one_for_one)
 ├── Engine Core (order critical!)
 │   ├── Hooks.TaskSupervisor
 │   ├── Loka.Engine.Hooks
-│   ├── Loka.Engine.TypedObject.Loader  (loads YAML for EntitySeeder)
 │   ├── Loka.Engine.EntitySeeder        (seeds YAML → SQLite)
-│   ├── Loka.Engine.EntityRegistry      (on-demand process management)
-│   ├── Loka.Engine.CommandRegistry
+│   ├── Loka.Engine.EntityRegistry      (process registry — Elixir Registry)
 │   ├── Loka.Engine.EntitySupervisor    (DynamicSupervisor for EntityServers)
-│   └── Loka.Engine.Cooldowns           (ETS-backed cooldowns)
+│   ├── Loka.Engine.EntityRegistry      (on-demand process management)
+│   ├── Loka.Engine.SystemSupervisor    (system entity bootstrap)
+│   └── Loka.Engine.WorldGraph.LayoutManager
+│
+├── Admin & Logging
+│   ├── Loka.Admin.GameLog
+│   └── Loka.Admin.Audit.TaskSupervisor
+│
+├── Timers
+│   └── Loka.Timers.Server
 │
 ├── Framework Layer
-│   ├── Combat, Quest, Dialogue, Skills, etc.
-│   └── ... 20+ GenServers
-│
-├── Zone System
-│   ├── Loka.Engine.ZoneLoader
-│   ├── Loka.Engine.ZoneRegistry
-│   └── Loka.Engine.ZoneReset
+│   ├── Loka.Framework.World.NpcAmbient.Scheduler
+│   └── Loka.Framework.World.ZoneReset
 │
 ├── Content Validation
 │   └── Loka.Engine.ContentValidator
+│
+├── World Builder
+│   └── Loka.WorldBuilder.LLM.ObservabilityLogger
 │
 └── Web Server
     └── LokaWeb.Endpoint
 ```
 
+### Post-Boot Initialization (after children start)
+
+```elixir
+Loka.Engine.Locks.init_cache()
+LokaWeb.Channels.RoomHelpers.init_minimap_cache()
+LokaWeb.Plugs.RateLimiter.init_table()
+Loka.Framework.Quest.Listeners.register_all()
+Loka.Framework.World.RoomEvents.register_hooks()
+Loka.Framework.Inventory.Container.register_hooks()
+Loka.Engine.SystemSupervisor.boot_system_entities()
+```
+
 ### Initialization Phases
 
 1. **Infrastructure** — Telemetry, Database, PubSub
-2. **Game Config** — Balance formulas from YAML
-3. **Engine Core** — Hooks, YAML Loading, EntitySeeder, Entity Registry/Supervisor
-4. **Framework** — Social, Quest, Combat, Crafting
-5. **Zones** — Zone loading and reset scheduling
-6. **Validation** — Content validators
-7. **Web Server** — Phoenix endpoint ready
+2. **Session** — Player registry, session management
+3. **Game Config** — Balance formulas from YAML
+4. **Engine Core** — Hooks, EntitySeeder, Entity Registry/Supervisor, SystemSupervisor
+5. **Admin** — Game logging, audit
+6. **Timers** — Persistent timer server
+7. **Framework** — NPC ambient scheduler, zone resets
+8. **Validation** — Content validators
+9. **Web Server** — Phoenix endpoint ready
 
 ### Environment Configuration
 
@@ -247,7 +272,7 @@ Loka.Supervisor (strategy: :one_for_one)
 
 ## 4. Engine Core Layer
 
-**Location:** `lib/loka/engine/` — 24 modules
+**Location:** `lib/loka/engine/` — ~33 modules (including submodules)
 
 The Engine Core provides foundational primitives that all other layers build upon.
 
@@ -258,41 +283,63 @@ The Engine Core provides foundational primitives that all other layers build upo
 | **Entity** | Core data structure for all game objects |
 | **Entities** | Unified persistence API (DB CRUD) |
 | **EntityServer** | GenServer per active entity (60s auto-save) |
+| **EntityServer.Volatile** | Volatile (non-persisted) entity state |
 | **EntitySeeder** | Boot-time YAML → DB seeder |
 | **EntityRegistry** | On-demand process management |
 | **EntitySupervisor** | DynamicSupervisor for entity processes |
 | **EntityBehavior** | Behavior callback interface |
+| **Behavior** | Behavior dispatch utilities |
 | **Spawner** | Create entities from prototype templates |
+| **Spawner.Editor** | Entity editing for spawned entities |
+| **Spawner.Templates** | Spawn template helpers |
 | **StateMachine** | Shared state machine engine |
+| **FormulaEvaluator** | Formula parsing/evaluation |
 | **Event** | Immutable event data structure |
 | **EventBus** | PubSub routing to subscribers |
 | **Hooks** | Lifecycle callback system |
 | **Locks** | Access control expressions |
-| **Cooldowns** | ETS-backed cooldown manager |
-| **Scripts** | DB context for sandboxed scripts |
 | **WorldGraph** | Room connectivity / pathfinding |
+| **WorldGraph.LayoutManager** | Map layout computation |
 | **Directions** | Direction parsing/normalization |
 | **Social** / **SocialSubstitution** | Social commands and template substitution |
-| **Zone** / **ZoneReset** | Zone management and respawning |
+| **Zone** | Zone data structure |
 | **ContentValidator** | Content validation framework |
+| **ContentValidator.Plugin** | Validator plugin behaviour |
+| **ContentValidator.PrototypePlugin** | Prototype validation |
+| **SystemSupervisor** | System entity boot/management |
+| **Constants.EntityTypes** | Entity type enum (18 types) |
+| **Constants.EquipmentSlots** | Equipment slot definitions |
+| **Constants.WorldPaths** | Centralized `priv/world/` path constants |
+| **Schema.EntitySchema** | Ecto schema for entities table |
+| **Schema.EntityTagSchema** | Ecto schema for entity tags |
+
+### Script Subsystem (in `engine/script/`)
+
+| Module | Purpose |
+|--------|---------|
+| **Script.Sandbox** | Sandboxed code execution |
+| **Script.Bindings** | API bindings for scripts |
+| **Script.ActionQueue** | Queued action processing |
+| **Script.Executor** | Script execution orchestration |
+| **Script.Validator** | Script source validation |
 
 ### Module Interaction Diagram
 
 ```
-YAML Content ──→ TypedObject.Loader ──→ EntitySeeder ──→ SQLite DB
-                                                              │
-                                                              ↓
-                                              EntityRegistry.get_or_start(id)
-                                                              │
-                                                              ↓
-                                                        EntityServer
-                                                              │
-                        ┌─────────────────────┼─────────────────────┐
-                        ↓                     ↓                     ↓
-                  Trait Dispatch          EventBus              Hooks
-                  (on_tick, etc.)     (broadcasts)         (callbacks)
-                        ↓                     ↓
-                  StateMachine          Subscribers
+YAML Content ──→ EntitySeeder ──→ SQLite DB
+                                       │
+                                       ↓
+                       EntityRegistry.get_or_start(id)
+                                       │
+                                       ↓
+                                 EntityServer
+                                       │
+                 ┌─────────────────────┼─────────────────────┐
+                 ↓                     ↓                     ↓
+           Trait Dispatch          EventBus              Hooks
+           (on_tick, etc.)     (broadcasts)         (callbacks)
+                 ↓                     ↓
+           StateMachine          Subscribers
 ```
 
 ---
@@ -309,9 +356,13 @@ YAML Content ──→ TypedObject.Loader ──→ EntitySeeder ──→ SQLit
 
 ```elixir
 %Entity{
+  # Identity
   id: String.t(),              # UUID — unique instance ID
-  type: entity_type(),         # :character | :room | :item | :npc | :exit
+  type: entity_type(),         # 18 types (see Entity Types below)
   key: String.t(),             # Prototype key (shared across instances)
+  prototype_key: String.t(),   # Parent prototype key (for inheritance)
+  is_prototype: boolean(),     # true for prototype definitions
+  version: integer(),          # Schema version (default 1)
 
   # LegendMUD-style descriptions
   short_desc: String.t(),      # Action/speech identifier (~40 chars)
@@ -322,19 +373,24 @@ YAML Content ──→ TypedObject.Loader ──→ EntitySeeder ──→ SQLit
   primary_keyword: String.t(), # Single UI keyword
   mood: String.t(),            # Current mood
 
+  # Relationships
   location_id: String.t(),     # Parent entity ID (containment)
+  account_id: String.t(),      # Player account linkage (characters only)
 
   # V2 Core Fields
   components: map(),           # ALL game data: %{"combatant" => %{...}, "data" => %{...}}
   traits: [module() | map()],  # Behavior modules or script maps
   tags: [String.t()],          # Categorical markers
   scripts: map(),              # Elixir scripts by hook
-  locks: map(),                # Access control
   metadata: map()              # created_at, updated_at, draft flag, etc.
 }
 ```
 
-### Entity Types
+**Note:** The `locks` field was removed from the Entity struct. Lock data is now stored in `components["locks"]`.
+
+### Entity Types (18)
+
+**World entities** (have location, exist in-game):
 
 | Type | Purpose | Examples |
 |------|---------|---------|
@@ -344,27 +400,77 @@ YAML Content ──→ TypedObject.Loader ──→ EntitySeeder ──→ SQLit
 | `:item` | Inventory items | wisdom_blade, health_potion |
 | `:exit` | Directional connections | Stored in `components["exit"]` |
 
-Content entities (quests, skills, etc.) are also stored as entities with their data in `components["data"]`.
+**Content entities** (prototypes/definitions, no location):
+
+| Type | Purpose |
+|------|---------|
+| `:quest` | Quest definitions |
+| `:dialogue` | Dialogue trees |
+| `:zone` | Zone definitions |
+| `:storyline` | Storyline containers |
+| `:cutscene` | Cutscene definitions |
+| `:skill` | Skill definitions |
+| `:recipe` | Crafting recipes |
+| `:resource` | Gatherable resource definitions |
+| `:status` | Status effect definitions |
+| `:script` | Reusable script definitions |
+| `:gathering_node` | Gathering node definitions |
+| `:social` | Social command definitions |
+
+**System entities** (no location, background processes):
+
+| Type | Purpose |
+|------|---------|
+| `:system` | System-level entities (weather, day/night, economy config) |
 
 ### Entities API (Unified Persistence)
 
+The `Entities` module provides two API levels:
+
+**High-level API** (returns `%Entity{}` structs):
 ```elixir
-# Create
-entity = Entity.new(type: :npc, key: "goblin", components: %{...})
-{:ok, saved} = Entities.save_entity(entity)
-
-# Read
-entity = Entities.get_entity(uuid)
+# Find
 entity = Entities.find_one(key: "goblin", type: :npc)
+entity = Entities.find_one(uuid)  # by ID
 entities = Entities.find_all(type: :room, location_id: zone_id)
-entities = Entities.list_by_type(:npc)
+entities = Entities.find(opts)  # alias for find_one (id) or find_all (opts)
+entities = Entities.find_many(ids)
+entities = Entities.find_many(keys, :npc)
 
-# Update
-{:ok, updated} = Entities.save_entity(%{entity | short_desc: "changed"})
+# Save (create or update)
+{:ok, saved} = Entities.save(entity)
+{:ok, saved} = Entities.save_batch(entities)
 
 # Delete
-{:ok, _} = Entities.delete_entity(uuid)
+{:ok, _} = Entities.delete(uuid)
+{:ok, _} = Entities.delete(entity)
+
+# Update
+{:ok, updated} = Entities.update(uuid, %{short_desc: "changed"})
+
+# Tags
+Entities.add_tag(entity_id, "hostile")
+Entities.remove_tag(entity_id, "hostile")
+Entities.get_tags(entity_id)
+
+# List
+entities = Entities.list_entities(type: :npc)
+entities = Entities.list_by_type(:npc)
+
+# Convert schema to struct
+entity = Entities.to_entity(schema)
 ```
+
+**Low-level Schema API** (returns `%EntitySchema{}`, for Ecto operations):
+```elixir
+schema = Entities.get_entity(uuid)
+schema = Entities.get_entity_by_key(key)
+{:ok, schema} = Entities.create_entity(attrs)
+{:ok, schema} = Entities.update_entity(schema, attrs)
+{:ok, schema} = Entities.delete_entity(schema)
+```
+
+**Also:** `Entities.save_entity/1` accepts an `%Entity{}` struct and handles both create and update.
 
 ### EntityServer Lifecycle
 
@@ -383,7 +489,8 @@ entities = Entities.list_by_type(:npc)
    ├─ handle_call(:get_entity) → return entity
    ├─ handle_call({:update, fun}) → apply function, mark dirty
    ├─ handle_cast({:event, event}) → dispatch through traits
-   └─ handle_info(:tick) → dispatch on_tick to all traits
+   ├─ handle_info(:tick) → dispatch on_tick to all traits
+   └─ handle_info(:respawn) → respawn after death (RespawnManager)
 
 4. Auto-save (every 60s if dirty)
    └─ Save to database, clear dirty flag
@@ -419,9 +526,21 @@ occupants = EntityRegistry.get_room_occupants(room_id)
 
 ## 6. Component Accessors
 
-**Location:** `lib/loka/components/` — 24 modules
+**Location:** `lib/loka/components/` — 5 modules
 
 Component accessors provide typed, safe access to entity `components["key"]` data. They prevent typos and provide domain-specific convenience methods.
+
+**Note:** Many component keys (like `"weapon"`, `"room"`, `"exit"`, `"stats"`, etc.) are accessed directly via `get_in(entity.components, ["key", "field"])` throughout the codebase. Only the most complex/frequently-used components have dedicated accessor modules.
+
+### Existing Component Modules
+
+| Module | Component Key | Purpose |
+|--------|--------------|---------|
+| `Combatant` | `"combatant"` | Combat stats, health, StateMachine integration |
+| `Cooldowns` | `"cooldowns"` | Cooldown timestamps (pure component, no ETS/GenServer) |
+| `QuestProgress` | `"quest_progress"` | Quest state tracking |
+| `ResourcePools` | `"resource_pools"` | Health, mana, stamina resource pools |
+| `Wallet` | `"wallet"` | Currency balances (used by Economy system) |
 
 ### Pattern
 
@@ -438,8 +557,6 @@ defmodule Loka.Components.Combatant do
   # Domain-specific accessors
   def health(entity), do: get_in(entity.components, [@component_key, "health"]) || 0
   def max_health(entity), do: get_in(entity.components, [@component_key, "max_health"]) || 0
-  def attack(entity), do: get_in(entity.components, [@component_key, "attack"]) || 0
-  def defense(entity), do: get_in(entity.components, [@component_key, "defense"]) || 0
 
   # Mutations
   def set_health(entity, val) do
@@ -460,80 +577,59 @@ defmodule Loka.Components.Combatant do
 end
 ```
 
-### Component Modules
+### Common Component Keys (accessed directly, no accessor module)
 
-**Character/Progression:**
-| Module | Component Key | Purpose |
-|--------|--------------|---------|
-| `Player` | `"player"` | Player account linkage |
-| `Stats` | `"stats"` | Core stats (str, dex, int, etc.) |
-| `Skills` | `"skills"` | Skill levels and XP |
-| `Resources` | `"resources"` | Health, mana, stamina pools |
-| `Combatant` | `"combatant"` | Combat stats with StateMachine |
-| `Equipment` | `"equipment"` | Equipped items |
-| `QuestProgress` | `"quest_progress"` | Quest state tracking |
-
-**World Objects:**
-| Module | Component Key | Purpose |
-|--------|--------------|---------|
-| `Room` | `"room"` | Room metadata |
-| `Exit` | `"exit"` | Direction, destination_id, destination_key |
-| `Coordinates` | `"coordinates"` | X/Y/Z position |
-| `Physical` | `"physical"` | Weight, size, stackable |
-| `Container` | `"container"` | Capacity, contents |
-| `Spawnable` | `"spawnable"` | Spawn rules |
-
-**Items:**
-| Module | Component Key | Purpose |
-|--------|--------------|---------|
-| `Weapon` | `"weapon"` | Damage, damage_type, speed |
-| `Armor` | `"armor"` | Armor rating |
-
-**Content Definitions:**
-| Module | Component Key | Purpose |
-|--------|--------------|---------|
-| `QuestDef` | `"data"` | Quest definition data |
-| `SkillDef` | `"data"` | Skill definition data |
-| `RecipeDef` | `"data"` | Recipe definition data |
-| `DialogueTree` | `"dialogue_tree"` | Dialogue tree data |
-| `ZoneConfig` | `"data"` | Zone configuration |
-
-**Misc:**
-| Module | Component Key | Purpose |
-|--------|--------------|---------|
-| `Emotes` | `"ambient_actions"` | Ambient emote schedules |
-| `Tick` | `"tick"` | Tick interval configuration |
-| `Service` | `"service"` | Service entity config (shops, trainers) |
-| `Locks` | `"locks"` | Lock definitions |
+| Component Key | Purpose | Used By |
+|--------------|---------|---------|
+| `"data"` | Content entity data (quest, dialogue, skill, etc.) | Content modules |
+| `"attributes"` | YAML attributes (coordinates, respawn_time, etc.) | EntitySeeder |
+| `"exit"` | Exit direction/destination | Rooms, WorldGraph |
+| `"room"` | Room metadata | Room operations |
+| `"weapon"` | Weapon stats (damage, type) | Combat |
+| `"armor"` | Armor rating | Combat |
+| `"equipment"` | Equipped items | Equipment module |
+| `"stats"` | Core stats (str, dex, int) | Combat, skills |
+| `"skills"` | Skill levels/XP | Skill system |
+| `"player"` | Player account linkage | Auth, session |
+| `"container"` | Container capacity/contents | Inventory |
+| `"physical"` | Weight, size, stackable | Inventory |
+| `"spawnable"` | Spawn rules | Zone resets |
+| `"ambient_actions"` | Ambient emote config | NpcAmbient |
+| `"tick"` | Tick interval config | EntityServer |
+| `"behavior_config"` | Trait-specific config | Behaviors |
+| `"locks"` | Access control (was a top-level field in V1) | Locks system |
+| `"dialogue_tree"` | Dialogue tree data | Dialogue system |
+| `"despawned"` | Despawn state for respawn | RespawnManager |
+| `"respawn_data"` | Respawn timer data | RespawnManager |
+| `"valuable"` | Base price for economy | Economy/shops |
 
 ### Usage
 
 ```elixir
-# Read
+# Via accessor module
 health = Components.Combatant.health(entity)
-has_weapon = Components.Weapon.has?(entity)
+balance = Components.Wallet.balance(entity)
 
-# Write
+# Direct component access (more common)
+weapon_damage = get_in(entity.components, ["weapon", "damage"])
+room_data = entity.components["room"]
+quest_data = entity.components["data"]
+
+# Via accessor write
 entity = Components.Combatant.set_health(entity, 50)
-entity = Components.Weapon.put(entity, %{"damage" => 10, "damage_type" => "slashing"})
-
-# Check
-if Components.Combatant.alive?(entity) do
-  # ...
-end
+entity = Components.Wallet.credit(entity, 100, "gold")
 ```
 
 ---
 
 ## 7. Trait & Behavior System
 
-**Location:** `lib/loka/behaviors/` — 11 modules
+**Important:** There is no `lib/loka/behaviors/` directory. All behavior logic is implemented as script traits (YAML files in `priv/world/scripts/traits/`) or via the `EntityBehavior` callback interface in `lib/loka/engine/entity_behavior.ex`.
 
 ### Terminology
 
 - **Trait** = entry in `entity.traits` list (module atom or script map)
-- **EntityBehavior** = the callback interface that trait modules implement
-- **Behavior module** = compiled Elixir module implementing `EntityBehavior`
+- **EntityBehavior** = the callback interface that trait modules implement (`lib/loka/engine/entity_behavior.ex`)
 - **Script trait** = YAML script referenced by `%{"script" => key, "config" => %{...}}`
 
 ### EntityBehavior Callbacks
@@ -557,54 +653,9 @@ end
 
 All callbacks are optional. Return `{:halt, entity}` to stop the behavior chain.
 
-### Built-in Behavior Modules (11)
-
-**NPC AI:**
-| Module | Trigger | Action |
-|--------|---------|--------|
-| `Wander` | Timer tick | Random movement to allowed rooms |
-| `Patrol` | Timer tick | Walk predefined room sequence |
-| `Guard` | Threat enters | Protect area, attack threats |
-| `Aggressive` | Player enters | Attack on sight |
-| `Janitor` | Item dropped | Pick up and dispose items |
-| `Scavenger` | Specific item | Collect specific item types |
-| `Runner` | Shared utilities | Behavior config helper |
-
-**World Systems:**
-| Module | Trigger | Action |
-|--------|---------|--------|
-| `Weather` | Timer tick | Weather state transitions |
-| `DayNight` | Timer tick | Day/night cycle management |
-| `NpcAmbient` | Timer tick | NPC ambient emotes/actions |
-| `RoomAmbient` | Timer tick | Room atmospheric messages |
-
-### Trait Configuration in YAML
-
-```yaml
-key: temple_guard
-type: npc
-parent: base_npc
-
-# V2: traits (renamed from behaviors)
-traits:
-  - Loka.Behaviors.Guard       # Compiled module
-  - Loka.Behaviors.Aggressive  # Compiled module
-  - script: wander             # Script trait (from priv/world/scripts/traits/)
-    config:
-      interval: 600
-      zone: monastery
-
-components:
-  behavior_config:
-    guard:
-      protected_room: "temple_inner"
-      attack_on_intrusion: true
-    aggressive:
-      aggro_range: 1
-      attack_delay_ms: 2000
-```
-
 ### Script Traits (12 YAML files in `priv/world/scripts/traits/`)
+
+All behavior logic is implemented as script traits:
 
 | Script | Purpose |
 |--------|---------|
@@ -620,6 +671,29 @@ components:
 | `shopkeeper_hours` | Shop open/close |
 | `spawn_condition_time` | Time-based spawn rules |
 | `wander` | Random wandering |
+
+### Trait Configuration in YAML
+
+```yaml
+key: temple_guard
+type: npc
+parent: base_npc
+
+# V2: traits (renamed from behaviors)
+traits:
+  - script: guard
+    config:
+      protected_room: "temple_inner"
+      attack_on_intrusion: true
+  - script: aggressive
+    config:
+      aggro_range: 1
+      attack_delay_ms: 2000
+  - script: wander
+    config:
+      interval: 600
+      zone: monastery
+```
 
 ### Script Trait Dispatch
 
@@ -688,9 +762,9 @@ StateMachine.valid_transitions(machine, "engaged")
 | System | States | Module |
 |--------|--------|--------|
 | **Combat** | idle → engaged → defending/fleeing/dead → respawning | `Components.Combatant` |
-| **Quest** | available → accepted → in_progress → completed/failed | `Components.QuestDef` |
+| **Quest** | available → accepted → in_progress → completed/failed | Content.Quest |
 | **Dialogue** | closed → active → waiting_choice → closed | `Framework.Dialogue` |
-| **NPC AI** | idle → patrolling → alert → pursuing → attacking → returning | `EntityBehavior` |
+| **NPC AI** | idle → patrolling → alert → pursuing → attacking → returning | Script traits |
 | **Session** | connecting → authenticated → in_game → ghost → disconnected | `Session.Server` |
 
 ### Why StateMachine?
@@ -810,19 +884,18 @@ end
 
 ## 11. YAML Prototypes & EntitySeeder
 
-**Key Files:**
-- `lib/loka/engine/entity_seeder.ex` — Seeds YAML content into SQLite
-- `lib/loka/engine/typed_object/loader.ex` — Loads YAML with inheritance
+**Key File:** `lib/loka/engine/entity_seeder.ex` — Seeds YAML content into SQLite
 
 ### Boot Flow
 
 ```
-1. TypedObject.Loader starts, loads all YAML files from priv/world/
-2. Resolves prototype inheritance (parent → child merging)
-3. EntitySeeder.seed() runs, creates entities in SQLite from loaded YAML
-4. YAML attributes: → components["attributes"]
-5. YAML content data → components["data"]
-6. Runtime: All queries go through Entities API → SQLite
+1. EntitySeeder.seed() runs at application startup
+2. Reads all YAML files from priv/world/
+3. Resolves prototype inheritance (parent → child merging)
+4. Creates entities in SQLite from loaded YAML
+5. YAML attributes: → components["attributes"]
+6. YAML content data → components["data"]
+7. Runtime: All queries go through Entities API → SQLite
 ```
 
 ### Directory Structure
@@ -833,13 +906,14 @@ priv/world/
 │   ├── _base/           # Parent templates (6 files)
 │   ├── npcs/            # NPC definitions (39 files)
 │   ├── items/           # Item definitions (65+ files)
-│   │   ├── containers/  # Herb patches (9)
+│   │   ├── containers/  # Containers (8)
 │   │   ├── food/        # Consumables (1)
 │   │   ├── herbs/       # TCM herbs (12)
 │   │   └── teas/        # Tea items (3)
 │   └── rooms/           # Room definitions (36 files)
 ├── quests/              # Quest definitions (16 + 3 templates)
 ├── cutscenes/           # Cutscene sequences (15)
+├── dialogues/           # Dialogue trees (directory exists, empty)
 ├── scripts/             # Event scripts (10)
 │   └── traits/          # Trait scripts (12)
 ├── skills/              # Skill definitions (25)
@@ -847,13 +921,14 @@ priv/world/
 ├── statuses/            # Status effects (13)
 ├── zones/               # Zone definitions (2)
 ├── storylines/          # Storyline definitions (1)
-├── nodes/               # Gathering nodes
+├── nodes/               # Gathering nodes (12 total)
 │   ├── foraging/        # Wild plants (4)
 │   └── herbalism/       # Herb patches (8)
 ├── resources/           # Resource definitions (2: mana, mv)
 ├── config/              # System config (5 files)
 ├── combat/              # Damage types (1)
-├── drafts/              # Builder workspace (empty)
+├── systems/             # System entity definitions
+├── drafts/              # Builder workspace (mirrored dirs)
 └── socials.yml          # Social commands
 ```
 
@@ -918,7 +993,7 @@ attributes:
 
 ## 12. Content Modules
 
-**Location:** `lib/loka/content/` — 12 modules
+**Location:** `lib/loka/content/` — 10 modules
 
 Content modules provide domain-specific APIs for content entities. They resolve via `Entities.find_one()` against the SQLite database.
 
@@ -932,12 +1007,12 @@ Content modules provide domain-specific APIs for content entities. They resolve 
 | `Content.Zone` | zone | Zone definitions with resets |
 | `Content.Skill` | skill | Skill definitions |
 | `Content.Recipe` | recipe | Crafting recipes |
-| `Content.Cutscene` | cutscene | Cutscene sequences |
 | `Content.Resource` | resource | Resource pool definitions |
 | `Content.StatusEffect` | status | Status effect definitions |
-| `Content.GatheringNode` | gathering_node | Gathering node definitions |
 | `Content.Storyline` | storyline | Storyline definitions |
 | `Content.Validator` | — | Content validation |
+
+**Note:** `Content.Cutscene` and `Content.GatheringNode` do not exist as separate modules. Cutscene and gathering node entities are accessed directly via `Entities.find_one()`.
 
 ### Usage Pattern
 
@@ -971,6 +1046,8 @@ Content entities (quest, dialogue, script, zone, skill, recipe, etc.) store thei
 - `lib/loka/engine/script/sandbox.ex` — Sandboxed execution
 - `lib/loka/engine/script/bindings.ex` — API bindings
 - `lib/loka/engine/script/action_queue.ex` — Action processing
+- `lib/loka/engine/script/executor.ex` — Script execution orchestration
+- `lib/loka/engine/script/validator.ex` — Script source validation
 
 ### Sandbox Security
 
@@ -1052,9 +1129,7 @@ data:
 | Module | Purpose |
 |--------|---------|
 | `Engine.Zone` | Zone data structure |
-| `Engine.ZoneLoader` | Load zones from YAML |
-| `Engine.ZoneRegistry` | Track all zones |
-| `Engine.ZoneReset` | Periodic respawning |
+| `Framework.World.ZoneReset` | Periodic respawning (supervised) |
 
 **Zone YAML:**
 ```yaml
@@ -1070,14 +1145,15 @@ resets:
     max: 3
 ```
 
-### Atmosphere Systems
+### Atmosphere System
 
-| System | Purpose |
+| Module | Purpose |
 |--------|---------|
-| `Behaviors.DayNight` | Time-of-day cycle (8 phases) |
-| `Behaviors.Weather` | Dynamic weather per zone |
-| `Behaviors.RoomAmbient` | Room atmospheric messages |
-| `Behaviors.NpcAmbient` | NPC idle actions/emotes |
+| `Framework.World.Atmosphere` | Reads phase/weather from `world_system` entity |
+| `Framework.World.NpcAmbient` + `Scheduler` | NPC ambient emotes/actions |
+| `Framework.World.Room` | Room mechanics |
+
+**Note:** `Atmosphere` is a stateless module — it reads day/night phase and weather from a `world_system` entity's components. Falls back to `:day`/`"clear"` when no system entity exists. The old `DayNight` and `Weather` GenServer modules have been deleted.
 
 **Day/Night Phases:** dawn, morning, noon, afternoon, dusk, evening, night, midnight
 
@@ -1092,34 +1168,33 @@ exits = WorldGraph.get_exits("monastery_courtyard")
 WorldGraph.reachable?("monastery_gate", "secret_cave")
 ```
 
+`WorldGraph.LayoutManager` computes map layouts for the builder minimap feature.
+
 ---
 
 ## 15. Framework Subsystems
 
-**Location:** `lib/loka/framework/` — ~52 modules across ~15 subdirectories
+**Location:** `lib/loka/framework/` — 39 modules across 12 subdirectories
 
 ### Subsystem Directory
 
 | Directory | Modules | Purpose |
 |-----------|---------|---------|
-| `quest/` | 13+ | Quest progression, objectives, rewards, listeners |
-| `social/` | 6 | Chat channels, parties, message routing |
-| `inventory/` | 5 | Items, containers, equipment, stacking |
-| `combat/` | 4 | Combat mechanics, server, respawn |
-| `world/` | 4 | Atmosphere, calendar, room mechanics |
+| `quest/` | 17 | Quest progression, objectives, rewards, listeners, handlers |
+| `inventory/` | 5 | Items, containers, equipment, stacking, equipable |
+| `world/` | 4 | Atmosphere, NPC ambient, room mechanics, zone reset |
 | `content_validator/` | 3 | Dialogue, quest, world validation plugins |
-| `skills/` | 2 | Skill progression, binary skills |
-| `resources/` | 2 | Resource pools, formula evaluation |
+| `economy/` | 2 | Central economy system, transaction logging |
+| `combat/` | 2 | Combat mechanics, respawn manager |
+| `actions/` | 2 | Action definitions, resolution |
+| `skills/` | 1 | Skill progression |
 | `conditions/` | 1 | Condition evaluation (quest requirements) |
 | `dialogue/` | 1 | Dialogue tree traversal |
 | `broadcast/` | 1 | Global announcements |
-| `status/` | 1 | Status effect management |
-| `player/` | 1 | GameState (V1 remnant, being phased out) |
-| `actions/` | 2 | Action definitions, resolution |
 
 ### Quest System
 
-The quest system is the largest subsystem with 13+ modules:
+The quest system is the largest subsystem with 17 modules:
 
 ```
 quest/
@@ -1130,22 +1205,49 @@ quest/
 ├── metrics.ex            # Quest analytics
 ├── objective_handler.ex  # Objective type dispatch
 ├── objective_registry.ex # Objective type registry
-├── quest_item_spawner.ex # Quest item spawning
 ├── state_helper.ex       # Quest state machine helpers
-├── timer_manager.ex      # Quest timers
+├── timer_manager.ex      # Quest timers (stateless, data in components)
 ├── validator.ex          # Quest validation
 ├── handlers/             # Per-objective-type handlers
 │   ├── craft_handler.ex
 │   ├── get_item_handler.ex
 │   ├── go_to_handler.ex
 │   ├── kill_handler.ex
-│   └── talk_handler.ex
+│   ├── talk_handler.ex
+│   └── objective_helper.ex
 └── progress/
     ├── rewards.ex        # Reward distribution
     └── tracking.ex       # Progress tracking
 ```
 
 **Objective Types:** `go_to`, `talk`, `kill`, `get_item`, `craft`
+
+**TimerManager** is a stateless module (no GenServer). Timer data (`expires_at`, `time_limit`, `warned`) is embedded in objective data within the `quest_progress` component.
+
+### Economy System (NEW)
+
+**Location:** `lib/loka/framework/economy/`
+
+Central economy system where ALL currency changes must flow through:
+
+```elixir
+# Faucets (gold enters the world)
+Economy.mint(entity, amount, "gold", reason: "quest_reward")
+
+# Sinks (gold leaves the world)
+Economy.burn(entity, amount, "gold", reason: "shop_purchase")
+
+# Transfers (gold moves between entities)
+Economy.transfer(from_entity, to_entity, amount, "gold")
+
+# In-memory transforms (for action modules)
+entity = Economy.credit(entity, amount, "gold")
+entity = Economy.debit(entity, amount, "gold")
+```
+
+All transactions are logged via `EconomyLog` (append-only DB table). Config lives on a `economy_config` system entity for runtime tuning.
+
+The `Components.Wallet` accessor stores currency balances in `entity.components["wallet"]`.
 
 ### Combat System
 
@@ -1154,17 +1256,19 @@ quest/
 - Death: UO-style ghost system (die at location, walk to shrine to resurrect)
 - `Actions.Death` handles ghost_enter/ghost_exit events
 - Ghost state enforced in `Game.Actions` (only allow navigate/chat/resurrect)
+- `RespawnManager` is a plain module (no GenServer) — stores despawn data in entity `components["despawned"]` + `components["respawn_data"]`
 
 ### Inventory System
 
 - Container operations (open, take_from, put_in)
-- Equipment with slot/bonus system
+- Equipment with slot/bonus system (see `Constants.EquipmentSlots`)
 - Item stacking with max_stack limits
 - Physical properties (weight, stackable)
+- Equipable items with slot definitions
 
 ### Deleted V1 Subsystems
 
-Magic, Farming, Housing, Companion, Mail, Barter, Clothing, Elements, WeaponArmorTypes, CombatRound, Relationships, MVSystem, Quest.Status, Quest.ObjectiveTypes, Abilities — all removed in Feb 2026 cleanup.
+Magic, Farming, Housing, Companion, Mail, Barter, Clothing, Elements, WeaponArmorTypes, CombatRound, Relationships, MVSystem, Quest.Status, Quest.ObjectiveTypes, Abilities, GameState, CombatServer/Registry — all removed in Feb 2026 cleanup.
 
 ---
 
@@ -1294,6 +1398,7 @@ All other actions return `{:error, "You are a ghost..."}`.
 
 **Key Files:**
 - `lib/loka/channel/events.ex` — Single source of truth for all events
+- `lib/loka/channel/validator.ex` — Event payload validation
 - `lib/loka_web/channels/game_channel.ex` — Main game channel
 - `lib/loka_web/channels/game_channel/action_bridge.ex` — Transport adapter
 - `lib/loka_web/channels/game_channel/serializers.ex` — Client serialization
@@ -1428,19 +1533,23 @@ cd godot-client
 | `players` | User accounts | integer |
 | `players_tokens` | Session/email tokens | integer |
 | `entities` | All game objects (V2 unified) | UUID |
-| `scripts` | Elixir scripts (DB context) | integer |
+| `entity_tags` | Entity tag associations | integer |
 | `timers` | Persistent timers | UUID |
+| `economy_logs` | Economy transaction audit trail | integer |
 | `spark_states` | Companion AI state | integer |
 | `spark_events` | Companion world events | integer |
 
-**Note:** V1's `player_game_states` and `entity_attributes` tables are being phased out/dropped.
+**Dropped tables:** `player_game_states` (replaced by entity components), `entity_attributes` (replaced by entity components).
 
 ### Entity Schema
 
 ```elixir
 schema "entities" do
-  field :type, Ecto.Enum, values: [:room, :character, :npc, :item, :exit]
+  field :type, Ecto.Enum, values: EntityTypes.all()  # 18 types
   field :key, :string
+  field :prototype_key, :string
+  field :is_prototype, :boolean, default: false
+  field :version, :integer, default: 1
   field :short_desc, :string
   field :long_desc, :string
   field :extra_desc, :string
@@ -1448,16 +1557,19 @@ schema "entities" do
   field :primary_keyword, :string
   field :mood, :string
   field :location_id, :binary_id
+  field :account_id, :binary_id
 
   # Complex data as JSON
   field :components, Loka.Ecto.Json    # ALL game data
-  field :traits, Loka.Ecto.Json        # Behavior modules/scripts (renamed from behaviors)
-  field :tags, {:array, :string}
-  field :locks, Loka.Ecto.Json
+  field :traits, Loka.Ecto.Json        # Behavior modules/scripts
   field :scripts, Loka.Ecto.Json
   field :metadata, Loka.Ecto.Json
+
+  has_many :entity_tags, EntityTagSchema
 end
 ```
+
+**Note:** `tags` are stored via the `entity_tags` association table (not as a JSON array). `locks` is NOT a database field — lock data lives in `components["locks"]`.
 
 ### JSON Storage
 
@@ -1529,6 +1641,8 @@ Access at `/admin` (requires admin role).
 
 The World Builder is a terminal-based content creation tool using Phoenix Channels + MudTerminal JS hook. It replaces the old LiveView GUI (archived on `archive/old-world-builder` branch).
 
+**Implementation:** `lib/loka/world_builder/` (23 modules) — includes entity/room/quest/dialogue managers, tool executor (split into 7 domain modules), script templates, YAML builder, validation manager, audit logging, and LLM integration (AnthropicClient + MCP server).
+
 **Commands:**
 ```
 Navigation: goto <room>, rooms, where, find <search>
@@ -1564,17 +1678,17 @@ Map:        map (ASCII minimap)
 └────────────────────────────────────────────┘
 ```
 
-### Test Distribution (146 files, ~2,319 tests)
+### Test Distribution (~112 files)
 
-| Area | Files | Key Tests |
-|------|-------|-----------|
-| Engine | 25 | Entities, EntityServer, Seeder, StateMachine, Scripts |
-| Mechanics | 32 | Combat, Quest, Dialogue, Inventory |
-| Components | 24 | All 24 component accessor modules |
-| Behaviors | 11 | All 11 behavior modules |
-| Web/Channel | 20 | GameChannel, CommandParser, Builder |
-| World Builder | 9 | Script templates, YAML builder |
-| Integration | 1 | Full storyline playthrough via ChannelBot |
+| Area | Key Tests |
+|------|-----------|
+| Engine | Entities, EntityServer, Seeder, StateMachine, Scripts |
+| Mechanics | Combat, Quest, Dialogue, Inventory |
+| Components | Component accessor modules |
+| Web/Channel | GameChannel, CommandParser, Builder |
+| World Builder | Script templates, YAML builder, builder commands |
+| Testing utilities | 23 support modules in `lib/loka/testing/` |
+| Integration | Full storyline playthrough via ChannelBot |
 
 ### ChannelBot Testing
 
@@ -1588,7 +1702,7 @@ player = create_test_player()
 # Validates quest completability, dialogue trees, combat
 ```
 
-### Content Validators (13)
+### Content Validators
 
 | Validator | Checks |
 |-----------|--------|
@@ -1621,7 +1735,7 @@ mix test test/integration/storyline_channel_test.exs  # ChannelBot E2E
 - **EntitySeeder.seed() is expensive (~650ms)** — Only add to specific `describe` blocks that need DB prototypes
 - **TypedObjectSandbox.checkout()** — Tests mutating registry state must use this (saves/restores ETS tables)
 - **Test log level is `:warning`** — Use `Logger.warning` for debug output
-- **Draft YAML cleanup** — Tests creating YAML in `priv/world/drafts/` MUST clean up
+- **Draft YAML cleanup** — Tests creating YAML in `priv/world/drafts/` MUST clean up (leftover files pollute global registry state)
 
 ---
 
@@ -1640,18 +1754,25 @@ Game-specific + built-in Phoenix/Ecto/VM metrics. Protected by bearer token + IP
 
 - Structured logging with metadata
 - Log levels: debug (dev), warning (test), info (prod)
-- Game events logged to ETS (auto-prune after 24h)
+- Game events logged via `Admin.GameLog` (ETS-backed, auto-prune after 24h)
+- Audit logging via `Admin.AuditLog` (async Task.Supervisor)
 
-### Cooldowns
+### Cooldowns (V2 — Component-Based)
+
+Cooldowns are now stored in entity components, NOT in a separate ETS table:
 
 ```elixir
-Cooldowns.set(entity_id, :skill_meditate, 30_000)
-Cooldowns.ready?(entity_id, :skill_meditate)
-Cooldowns.remaining(entity_id, :skill_meditate)
-Cooldowns.clear(entity_id)
+# Via Components.Cooldowns accessor
+Components.Cooldowns.on_cooldown?(entity, "skill_meditate")
+Components.Cooldowns.remaining(entity, "skill_meditate")
+
+# Via script bindings
+set_cooldown.("skill_meditate", 30_000)
+on_cooldown?.("skill_meditate")
+cooldown_remaining.("skill_meditate")
 ```
 
-ETS-backed, supervised, auto-sweep every 60s.
+Cooldown timestamps are stored in `entity.components["cooldowns"]` as Unix timestamps. The `set_cooldown` action in ActionQueue updates the entity via EntityServer.
 
 ---
 
@@ -1709,15 +1830,21 @@ fly deploy
 
 | Path | Purpose |
 |------|---------|
-| `lib/loka/engine/` | Core engine (24 modules) |
-| `lib/loka/components/` | Component accessors (24 modules) |
-| `lib/loka/behaviors/` | Behavior modules (11 modules) |
-| `lib/loka/content/` | Content modules (12 modules) |
-| `lib/loka/framework/` | Game subsystems (~52 modules) |
+| `lib/loka/engine/` | Core engine (~33 modules) |
+| `lib/loka/components/` | Component accessors (5 modules) |
+| `lib/loka/content/` | Content modules (10 modules) |
+| `lib/loka/framework/` | Game subsystems (39 modules, 12 dirs) |
 | `lib/loka/game/` | Actions coordinator (11 modules) |
 | `lib/loka/session/` | Client communication (3 modules) |
-| `lib/loka_web/channels/` | Phoenix channels + builder |
-| `priv/world/` | YAML game content (286 files) |
+| `lib/loka/mechanics/` | Core mechanics (4 modules: Check, CombatStats, Damage, Heal) |
+| `lib/loka/primitives/` | Math primitives (2 modules: ResourcePool, Roll) |
+| `lib/loka/world_builder/` | Builder system (23 modules) |
+| `lib/loka/admin/` | Admin tools (5 modules) |
+| `lib/loka/testing/` | Test support (23 modules) |
+| `lib/loka/channel/` | Channel events/validation (2 modules) |
+| `lib/loka/timers/` | Persistent timers (2 modules) |
+| `lib/loka_web/` | Web layer (~64 modules) |
+| `priv/world/` | YAML game content (~295 files) |
 | `docs/` | Documentation |
 
 ### PubSub Topics
@@ -1887,35 +2014,40 @@ data:
 
 ## 28. Complete Module List
 
-### Engine Core (24 modules)
-- `Entity`, `Entities`, `EntityServer`, `EntitySeeder`, `EntityRegistry`, `EntitySupervisor`
-- `EntityBehavior`, `Behavior`, `Spawner`
-- `StateMachine`, `Cooldowns`
+### Engine Core (~33 modules in `lib/loka/engine/`)
+- `Entity`, `Entities`, `EntityServer`, `EntityServer.Volatile`, `EntitySeeder`
+- `EntityRegistry`, `EntitySupervisor`, `EntityBehavior`, `Behavior`, `Spawner`
+- `Spawner.Editor`, `Spawner.Templates`
+- `StateMachine`, `FormulaEvaluator`
 - `Event`, `EventBus`
-- `Hooks`, `Locks`, `Scripts`
-- `Zone`, `ZoneReset`, `WorldGraph`, `Directions`
+- `Hooks`, `Locks`
+- `Zone`, `WorldGraph`, `WorldGraph.LayoutManager`, `Directions`
 - `Social`, `SocialSubstitution`
-- `ContentValidator`, `SystemSupervisor`
+- `ContentValidator`, `ContentValidator.Plugin`, `ContentValidator.PrototypePlugin`
+- `SystemSupervisor`
+- `Constants.EntityTypes`, `Constants.EquipmentSlots`, `Constants.WorldPaths`
+- `Schema.EntitySchema`, `Schema.EntityTagSchema`
+- Script: `Sandbox`, `Bindings`, `ActionQueue`, `Executor`, `Validator`
 
-### Components (24 modules)
-- Player, Stats, Skills, Resources, Combatant, Equipment, QuestProgress
-- Room, Exit, Coordinates, Physical, Container, Spawnable
-- Weapon, Armor
-- QuestDef, SkillDef, RecipeDef, DialogueTree, ZoneConfig
-- Emotes, Tick, Service, Locks
+### Components (5 modules)
+- `Combatant`, `Cooldowns`, `QuestProgress`, `ResourcePools`, `Wallet`
 
-### Behaviors (11 modules)
-- Wander, Patrol, Guard, Aggressive, Janitor, Scavenger, Runner
-- Weather, DayNight, NpcAmbient, RoomAmbient
+### Content (10 modules)
+- `Quest`, `Dialogue`, `Script`, `Zone`, `Skill`, `Recipe`
+- `Resource`, `StatusEffect`, `Storyline`, `Validator`
 
-### Content (12 modules)
-- Quest, Dialogue, Script, Zone, Skill, Recipe, Cutscene
-- Resource, StatusEffect, GatheringNode, Storyline, Validator
-
-### Framework (~52 modules across ~15 subdirectories)
-- Quest (13+), Social (6), Inventory (5), Combat (4), World (4)
-- ContentValidator (3), Skills (2), Resources (2)
-- Conditions, Dialogue, Broadcast, Status, Player, Actions (2)
+### Framework (39 modules across 12 subdirectories)
+- Quest (17): Progress, Journal, Admin, Listeners, Metrics, ObjectiveHandler, ObjectiveRegistry, StateHelper, TimerManager, Validator, 5 Handlers + ObjectiveHelper, Rewards, Tracking
+- Inventory (5): Inventory, Container, Equipment, Equipable, Stacking
+- World (4): Atmosphere, NpcAmbient (+Scheduler), Room, ZoneReset
+- ContentValidator (3): DialoguePlugin, QuestPlugin, WorldPlugin
+- Economy (2): Economy, EconomyLog
+- Combat (2): Combat, RespawnManager
+- Actions (2): Action, Resolver
+- Skills (1): SkillManager
+- Conditions (1): Evaluator
+- Dialogue (1): Dialogue
+- Broadcast (1): Broadcast
 
 ### Game (11 modules)
 - Actions, Context, Result
@@ -1927,7 +2059,29 @@ data:
 ### Channel (2 modules)
 - Events, Validator
 
+### Mechanics (4 modules)
+- Check, CombatStats, Damage, Heal
+
+### Primitives (2 modules)
+- ResourcePool, Roll
+
+### World Builder (23 modules)
+- EntityManager, RoomManager, QuestManager, DialogueManager
+- ToolExecutor + 7 domain modules (Analysis, Dialogues, Entities, Quests, Rooms, Scripts, Zones)
+- ScriptTemplates, YamlBuilder, ValidationManager, Respawner
+- AuditLog, AuditLogEntry
+- AnthropicClient, LLM.ObservabilityLogger
+- MCP: Router, Server, Tools
+
+### Admin (5 modules)
+- AuditLog, Audit, GameLog, GameLog.Event, GameLog.Quest
+
+### Other
+- Accounts (3), Auth (1), AI (1), Config (1), Ecto (1), Timers (2), Utils (2)
+- Testing support (23 modules in `lib/loka/testing/`)
+- Web layer (~64 modules in `lib/loka_web/`)
+
 ---
 
 *This guide reflects the V2 Unified Entity System architecture as of February 2026.*
-*Previous version (V1/4.0) is available in git history.*
+*Previous version (V5.0) is available in git history.*

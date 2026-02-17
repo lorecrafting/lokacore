@@ -50,6 +50,10 @@ defmodule Loka do
   - `Framework.World.NpcAmbient` -> `Session.Registry` (1+ refs)
   - `Framework.World.RoomAmbient` -> `Session.Registry` (1+ refs)
 
+  Note: Framework→Content violations cannot be resolved by adding Content as
+  a dep because Content already depends on Framework, creating a cycle.
+  The long-term fix is to break the Content→Framework dependency.
+
   ## Soft Dependencies (runtime, not compile-time)
 
   Engine uses `Application.get_env` to read Framework configuration at runtime

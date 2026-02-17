@@ -54,6 +54,7 @@ defmodule Loka.Engine.StateMachine do
   defstruct [:initial, :transitions, :on_enter, :on_exit, :states]
 
   @doc "Create a new state machine definition."
+  @spec new(map()) :: t()
   def new(opts) do
     transitions = opts.transitions
 
@@ -72,11 +73,14 @@ defmodule Loka.Engine.StateMachine do
   end
 
   @doc "Check if a transition is valid."
+  @spec can_transition?(t(), String.t(), String.t()) :: boolean()
   def can_transition?(%__MODULE__{} = machine, from, to) do
     to in Map.get(machine.transitions, from, [])
   end
 
   @doc "Attempt a transition. Returns {:ok, new_state} or {:error, reason}."
+  @spec transition(t(), String.t(), String.t()) ::
+          {:ok, String.t()} | {:error, {:invalid_transition, String.t(), String.t()}}
   def transition(%__MODULE__{} = machine, current, target) do
     if can_transition?(machine, current, target) do
       {:ok, target}
@@ -86,6 +90,9 @@ defmodule Loka.Engine.StateMachine do
   end
 
   @doc "Transition with callback atoms. Returns {:ok, new_state, callbacks} or {:error, reason}."
+  @spec transition_with_callbacks(t(), String.t(), String.t()) ::
+          {:ok, String.t(), [{:enter | :exit, atom()}]}
+          | {:error, {:invalid_transition, String.t(), String.t()}}
   def transition_with_callbacks(%__MODULE__{} = machine, current, target) do
     case transition(machine, current, target) do
       {:ok, new_state} ->
@@ -102,16 +109,19 @@ defmodule Loka.Engine.StateMachine do
   end
 
   @doc "List all valid transitions from a state."
+  @spec available_transitions(t(), String.t()) :: [String.t()]
   def available_transitions(%__MODULE__{} = machine, from) do
     Map.get(machine.transitions, from, [])
   end
 
   @doc "Check if a state is terminal (no outgoing transitions)."
+  @spec terminal?(t(), String.t()) :: boolean()
   def terminal?(%__MODULE__{} = machine, state) do
     available_transitions(machine, state) == []
   end
 
   @doc "All defined states."
+  @spec states(t()) :: MapSet.t(String.t())
   def states(%__MODULE__{} = machine), do: machine.states
 
   defp maybe_add(list, _type, nil), do: list

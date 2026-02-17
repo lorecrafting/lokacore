@@ -21,17 +21,23 @@ defmodule Loka.Components.Wallet do
 
   @component_key "wallet"
 
+  alias Loka.Engine.Entity
+
   @doc "Returns the raw wallet map or empty map."
+  @spec get(Entity.t()) :: map()
   def get(entity), do: Map.get(entity.components, @component_key, %{})
 
   @doc "Returns true if the entity has a wallet component."
+  @spec has?(Entity.t()) :: boolean()
   def has?(entity), do: Map.has_key?(entity.components, @component_key)
 
   @doc "Sets the entire wallet map on the entity. Internal use only."
+  @spec put(Entity.t(), map()) :: Entity.t()
   def put(entity, data) when is_map(data),
     do: %{entity | components: Map.put(entity.components, @component_key, data)}
 
   @doc "Returns the component key string."
+  @spec component_key() :: String.t()
   def component_key, do: @component_key
 
   @doc """
@@ -39,7 +45,7 @@ defmodule Loka.Components.Wallet do
 
   Defaults to 0 if no wallet exists.
   """
-  @spec balance(map()) :: non_neg_integer()
+  @spec balance(Entity.t()) :: non_neg_integer()
   def balance(entity), do: balance(entity, "gold")
 
   @doc """
@@ -47,7 +53,7 @@ defmodule Loka.Components.Wallet do
 
   Defaults to 0 if the currency doesn't exist.
   """
-  @spec balance(map(), String.t()) :: non_neg_integer()
+  @spec balance(Entity.t(), String.t()) :: non_neg_integer()
   def balance(entity, currency) do
     get(entity) |> Map.get(currency, 0)
   end

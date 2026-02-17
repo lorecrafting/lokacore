@@ -8,7 +8,6 @@ defmodule LokaWeb.Channels.BuilderCommandSecurityTest do
   """
   use Loka.ChannelCase, async: false
 
-  alias Loka.Auth.Guardian
   alias Loka.Engine.EntitySeeder
 
   @builder_commands [
@@ -137,17 +136,5 @@ defmodule LokaWeb.Channels.BuilderCommandSecurityTest do
       # Responses must be identical (zero information leakage)
       assert builder_response == unknown_response
     end
-  end
-
-  # Connect a player to the game channel
-  defp connect_player(player) do
-    {:ok, token, _claims} = Guardian.encode_and_sign(player, %{})
-    {:ok, socket} = connect(LokaWeb.UserSocket, %{"token" => token})
-    {:ok, _reply, socket} = subscribe_and_join(socket, LokaWeb.GameChannel, "game:lobby", %{})
-
-    # Drain the initial game_state push
-    assert_push "game_state", _state
-
-    {:ok, socket}
   end
 end

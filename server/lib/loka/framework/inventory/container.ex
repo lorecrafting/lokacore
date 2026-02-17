@@ -96,6 +96,7 @@ defmodule Loka.Framework.Inventory.Container do
   Registers hooks for container initialization.
   Called from application startup after the Hooks GenServer is started.
   """
+  @spec register_hooks() :: :ok
   def register_hooks do
     Hooks.register(:at_entity_creation, __MODULE__, :on_entity_created, priority: 60)
     Logger.debug("[Container] Registered :at_entity_creation hook")
@@ -184,6 +185,7 @@ defmodule Loka.Framework.Inventory.Container do
   @doc """
   Checks if an entity is a container.
   """
+  @spec container?(map() | nil) :: boolean()
   def container?(nil), do: false
 
   def container?(entity) do
@@ -194,6 +196,7 @@ defmodule Loka.Framework.Inventory.Container do
   @doc """
   Gets the container component from an entity.
   """
+  @spec get_container(map() | nil) :: t() | nil
   def get_container(nil), do: nil
 
   def get_container(entity) do
@@ -223,6 +226,7 @@ defmodule Loka.Framework.Inventory.Container do
   @doc """
   Parses container from component data.
   """
+  @spec from_component(map() | nil) :: t() | nil
   def from_component(data) when is_map(data) do
     %__MODULE__{
       capacity: MapHelpers.get_flexible(data, :capacity, 10),
@@ -305,6 +309,7 @@ defmodule Loka.Framework.Inventory.Container do
   - Container has capacity
   - Item type is accepted
   """
+  @spec put_item(t(), String.t(), String.t() | nil) :: {:ok, t()} | {:error, term()}
   def put_item(%__MODULE__{} = container, item_id, item_type \\ nil) do
     cond do
       not container.can_put ->
@@ -332,6 +337,7 @@ defmodule Loka.Framework.Inventory.Container do
   - Container is not locked
   - Item exists in container
   """
+  @spec take_item(t(), String.t()) :: {:ok, t(), String.t()} | {:error, term()}
   def take_item(%__MODULE__{} = container, item_id) do
     cond do
       not container.can_take ->
@@ -355,6 +361,7 @@ defmodule Loka.Framework.Inventory.Container do
   Similar to take_item/2 but uses list index instead of item ID.
   Useful for UI interactions where user clicks on nth item.
   """
+  @spec take_item_at(t(), non_neg_integer()) :: {:ok, t(), String.t()} | {:error, term()}
   def take_item_at(%__MODULE__{} = container, index) when is_integer(index) do
     cond do
       not container.can_take ->
@@ -375,18 +382,21 @@ defmodule Loka.Framework.Inventory.Container do
   @doc """
   Lists contents of the container.
   """
+  @spec list_contents(t()) :: {:ok, [String.t()]} | {:error, :container_locked}
   def list_contents(%__MODULE__{locked: true}), do: {:error, :container_locked}
   def list_contents(%__MODULE__{contents: contents}), do: {:ok, contents}
 
   @doc """
   Checks if container is empty.
   """
+  @spec empty?(t()) :: boolean()
   def empty?(%__MODULE__{contents: []}), do: true
   def empty?(%__MODULE__{}), do: false
 
   @doc """
   Gets remaining capacity.
   """
+  @spec remaining_capacity(t()) :: non_neg_integer()
   def remaining_capacity(%__MODULE__{capacity: cap, contents: contents}) do
     cap - length(contents)
   end
@@ -394,6 +404,7 @@ defmodule Loka.Framework.Inventory.Container do
   @doc """
   Attempts to unlock the container with a key.
   """
+  @spec unlock(t(), String.t()) :: {:ok, t()} | {:error, :wrong_key}
   def unlock(%__MODULE__{locked: false} = container, _key_id) do
     {:ok, container}
   end
@@ -413,6 +424,7 @@ defmodule Loka.Framework.Inventory.Container do
   @doc """
   Locks the container.
   """
+  @spec lock(t()) :: {:ok, t()}
   def lock(%__MODULE__{} = container) do
     {:ok, %{container | locked: true}}
   end
@@ -422,6 +434,7 @@ defmodule Loka.Framework.Inventory.Container do
 
   Note: For state-aware descriptions, use `get_state_description/1` instead.
   """
+  @spec get_description(t()) :: String.t()
   def get_description(%__MODULE__{locked: true} = container) do
     container.description_closed
   end

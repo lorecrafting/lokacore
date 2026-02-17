@@ -81,6 +81,7 @@ mix deps.get && mix ecto.setup    # Setup
 mix phx.server                     # Start at localhost:4000
 mix test                           # Run tests
 mix credo                          # Code quality
+mix dialyzer                       # Type checking (first run builds PLT)
 mix loka.test                     # All tests (unit + content + balance)
 mix loka.test --quick             # Skip slow balance simulations
 mix loka.test.validate            # Validate prototypes, quests, dialogues
@@ -127,6 +128,8 @@ Main game client is the Godot app connecting via Phoenix Channels.
 - **No inline computation in `render/1`**: Cache results in assigns, update via helpers when source data changes.
 - **HEEx `:if` directives** only, never ERB `<%= if %>` syntax.
 - **Shared UI components** in `admin_live/components.ex` (badges, stat_cards, etc.)
+- **All public functions require `@spec`** — use domain types (`Entity.t()`, `StateMachine.t()`, not `map()`)
+- **Property tests** for math invariants, roundtrips, state machines — use `ExUnitProperties` + shared generators in `test/support/generators.ex`
 
 ## Pre-Commit Hooks
 
@@ -138,7 +141,9 @@ Skip with `git commit --no-verify` (use sparingly).
 
 1. `mix test` - ensure nothing broke
 2. `mix loka.test.validate` - check content integrity
-3. Check: pattern matching on `{:ok, value}`, nil guards
+3. `mix compile --warnings-as-errors` - no warnings
+4. `mix dialyzer` - type correctness (when PLT is built)
+5. Check: all public functions have `@spec`, pattern matching on `{:ok, value}`, nil guards
 
 ## Documentation & References
 

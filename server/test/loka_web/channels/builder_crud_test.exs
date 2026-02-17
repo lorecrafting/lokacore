@@ -7,8 +7,6 @@ defmodule LokaWeb.Channels.BuilderCRUDTest do
   """
   use Loka.ChannelCase, async: false
 
-  alias Loka.Auth.Guardian
-
   @timeout 2000
 
   setup do
@@ -167,15 +165,5 @@ defmodule LokaWeb.Channels.BuilderCRUDTest do
       assert_push "output", %{text: text}, @timeout
       assert text =~ "deleted"
     end
-  end
-
-  defp connect_player(player) do
-    {:ok, token, _claims} = Guardian.encode_and_sign(player, %{})
-    {:ok, socket} = connect(LokaWeb.UserSocket, %{"token" => token})
-    {:ok, _reply, socket} = subscribe_and_join(socket, LokaWeb.GameChannel, "game:lobby", %{})
-
-    assert_push "game_state", _state, @timeout
-
-    {:ok, socket}
   end
 end

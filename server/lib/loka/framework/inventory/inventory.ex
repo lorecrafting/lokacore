@@ -34,6 +34,7 @@ defmodule Loka.Framework.Inventory do
   Returns `{:ok, updated_entity}` on success.
   Returns `{:error, reason}` if the item doesn't exist.
   """
+  @spec add_item(Entity.t(), String.t()) :: {:ok, Entity.t()} | {:error, :item_not_found}
   def add_item(%Entity{} = entity, item_id) when is_binary(item_id) do
     Logger.debug("[INVENTORY] Adding item: item_id=#{item_id}")
 
@@ -50,7 +51,7 @@ defmodule Loka.Framework.Inventory do
     end
   end
 
-  # Allow adding items without entity lookup for testing/bootstrapping
+  @spec add_item_unchecked(Entity.t(), String.t()) :: {:ok, Entity.t()}
   def add_item_unchecked(%Entity{} = entity, item_id) when is_binary(item_id) do
     inventory = Entity.get_component(entity, "inventory") || []
     new_inventory = inventory ++ [item_id]
@@ -63,6 +64,7 @@ defmodule Loka.Framework.Inventory do
   Returns `{:ok, updated_entity}` on success.
   Returns `{:error, :not_found}` if the item is not in inventory.
   """
+  @spec remove_item(Entity.t(), String.t()) :: {:ok, Entity.t()} | {:error, :not_found}
   def remove_item(%Entity{} = entity, item_id) do
     Logger.debug("[INVENTORY] Removing item: item_id=#{item_id}")
     inventory = Entity.get_component(entity, "inventory") || []
@@ -80,6 +82,7 @@ defmodule Loka.Framework.Inventory do
   @doc """
   Checks if the player has a specific item in their inventory.
   """
+  @spec has_item?(Entity.t(), String.t()) :: boolean()
   def has_item?(%Entity{} = entity, item_id) do
     inventory = Entity.get_component(entity, "inventory") || []
     item_id in inventory
@@ -91,6 +94,7 @@ defmodule Loka.Framework.Inventory do
   Returns a list of maps containing item information.
   Items that no longer exist in the database are filtered out.
   """
+  @spec list_items(Entity.t()) :: [map()]
   def list_items(%Entity{} = entity) do
     inventory = Entity.get_component(entity, "inventory") || []
 
@@ -109,6 +113,7 @@ defmodule Loka.Framework.Inventory do
   Returns `{:ok, updated_entity, effect}` on success.
   Returns `{:error, reason}` if the item can't be used.
   """
+  @spec use_item(Entity.t(), String.t()) :: {:ok, Entity.t(), map()} | {:error, term()}
   def use_item(%Entity{} = entity, item_id) do
     Logger.debug("[INVENTORY] Using item: item_id=#{item_id}")
 
@@ -135,6 +140,7 @@ defmodule Loka.Framework.Inventory do
 
   Returns the Entity struct or nil if not found.
   """
+  @spec get_item_details(String.t() | nil) :: Entity.t() | nil
   def get_item_details(item_id) when is_binary(item_id) do
     case Entities.get_entity(item_id) do
       nil -> nil
@@ -147,6 +153,7 @@ defmodule Loka.Framework.Inventory do
   @doc """
   Returns the count of items in the inventory.
   """
+  @spec count(Entity.t()) :: non_neg_integer()
   def count(%Entity{} = entity) do
     inventory = Entity.get_component(entity, "inventory") || []
     length(inventory)
@@ -155,6 +162,7 @@ defmodule Loka.Framework.Inventory do
   @doc """
   Returns true if the inventory is empty.
   """
+  @spec empty?(Entity.t()) :: boolean()
   def empty?(%Entity{} = entity) do
     inventory = Entity.get_component(entity, "inventory") || []
     inventory == []

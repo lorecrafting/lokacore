@@ -10,3 +10,5 @@ Key reminders:
 - Recurring logic uses `EntityBehavior` (on_init, on_tick, on_event)
 - Content created by builders needs a validator in `lib/loka/testing/content/`
 - Create a component accessor in `lib/loka/components/`
+- **All public functions must have `@spec` annotations** — use domain types (Entity.t(), StateMachine.t())
+- **Write property-based tests** for invariants (math, roundtrips, state machine rules) using `ExUnitProperties` and shared generators in `test/support/generators.ex`

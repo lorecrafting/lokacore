@@ -16,18 +16,26 @@ defmodule Loka.Components.ResourcePools do
 
   @component_key "resource_pools"
 
+  alias Loka.Engine.Entity
+
+  @spec get(Entity.t()) :: map()
   def get(entity), do: Map.get(entity.components, @component_key, %{})
+
+  @spec has?(Entity.t()) :: boolean()
   def has?(entity), do: Map.has_key?(entity.components, @component_key)
 
+  @spec put(Entity.t(), map()) :: Entity.t()
   def put(entity, pools) when is_map(pools),
     do: %{entity | components: Map.put(entity.components, @component_key, pools)}
 
+  @spec component_key() :: String.t()
   def component_key, do: @component_key
 
   @doc """
   Initializes resource pools for an entity based on registered resource types
   and the entity's stats. Returns the pools map.
   """
+  @spec init_pools(map()) :: map()
   def init_pools(stats \\ %{}) do
     ContentResource.all()
     |> Enum.map(fn resource ->

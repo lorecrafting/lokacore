@@ -231,6 +231,7 @@ defmodule Loka.Engine.Event do
       Event.new(:attack, source: player_id, target: enemy_id, payload: %{damage: 10})
       Event.new(:say, source: player_id, location: room_id, payload: %{message: "Hello"})
   """
+  @spec new(event_type(), map()) :: t()
   def new(type, attrs \\ %{})
 
   def new(type, attrs) when type in @event_types do
@@ -297,6 +298,7 @@ defmodule Loka.Engine.Event do
   @doc """
   Cancels an event if it's cancellable.
   """
+  @spec cancel(t()) :: t()
   def cancel(%__MODULE__{cancellable?: true} = event) do
     %{event | cancelled?: true}
   end
@@ -306,6 +308,7 @@ defmodule Loka.Engine.Event do
   @doc """
   Checks if an event has been cancelled.
   """
+  @spec cancelled?(t()) :: boolean()
   def cancelled?(%__MODULE__{cancelled?: cancelled}), do: cancelled
 
   @doc """

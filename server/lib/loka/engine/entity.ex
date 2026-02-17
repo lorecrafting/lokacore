@@ -93,6 +93,7 @@ defmodule Loka.Engine.Entity do
       Entity.new(type: :npc, key: "goblin", short_desc: "a goblin")
       Entity.new(%{type: :room, key: "town_square"})
   """
+  @spec new(keyword() | map()) :: t()
   def new(attrs) when is_list(attrs), do: new(Map.new(attrs))
 
   def new(attrs) when is_map(attrs) do
@@ -119,6 +120,7 @@ defmodule Loka.Engine.Entity do
 
       Entity.new(:npc, %{key: "goblin", short_desc: "a goblin"})
   """
+  @spec new(entity_type(), keyword() | map()) :: t()
   def new(type, attrs) when is_atom(type) do
     attrs = normalize_attrs(attrs)
     new(Map.put(attrs, :type, type))
@@ -130,6 +132,7 @@ defmodule Loka.Engine.Entity do
   Currently returns the entity as-is. Will be extended to deep-copy
   volatile state when EntityServer rollback is implemented.
   """
+  @spec snapshot(t()) :: t()
   def snapshot(%__MODULE__{} = entity), do: entity
 
   defp normalize_attrs(attrs) when is_map(attrs), do: attrs
@@ -138,6 +141,7 @@ defmodule Loka.Engine.Entity do
   @doc """
   Adds a component to an entity.
   """
+  @spec add_component(t(), String.t(), map()) :: t()
   def add_component(%__MODULE__{} = entity, component_type, component_data) do
     %{entity | components: Map.put(entity.components, component_type, component_data)}
   end
@@ -145,6 +149,7 @@ defmodule Loka.Engine.Entity do
   @doc """
   Gets a component from an entity.
   """
+  @spec get_component(t(), String.t()) :: map() | nil
   def get_component(%__MODULE__{} = entity, component_type) do
     Map.get(entity.components, component_type)
   end
@@ -152,6 +157,7 @@ defmodule Loka.Engine.Entity do
   @doc """
   Checks if an entity has a specific component.
   """
+  @spec has_component?(t(), String.t()) :: boolean()
   def has_component?(%__MODULE__{} = entity, component_type) do
     Map.has_key?(entity.components, component_type)
   end
@@ -159,6 +165,7 @@ defmodule Loka.Engine.Entity do
   @doc """
   Adds a trait to an entity.
   """
+  @spec add_trait(t(), module() | map()) :: t()
   def add_trait(%__MODULE__{} = entity, trait) do
     %{entity | traits: [trait | entity.traits] |> Enum.uniq()}
   end
@@ -179,6 +186,7 @@ defmodule Loka.Engine.Entity do
   @doc """
   Adds a tag to an entity.
   """
+  @spec add_tag(t(), String.t()) :: t()
   def add_tag(%__MODULE__{} = entity, tag) when is_binary(tag) do
     %{entity | tags: [tag | entity.tags] |> Enum.uniq()}
   end
@@ -186,6 +194,7 @@ defmodule Loka.Engine.Entity do
   @doc """
   Checks if an entity has a specific tag.
   """
+  @spec has_tag?(t(), String.t()) :: boolean()
   def has_tag?(%__MODULE__{} = entity, tag) do
     tag in entity.tags
   end
@@ -203,11 +212,13 @@ defmodule Loka.Engine.Entity do
       iex> display_ref("44a2b1c3-d4e5-...", "goblin")
       "goblin#44a2b1"
   """
+  @spec display_ref(t()) :: String.t()
   def display_ref(%__MODULE__{key: key, id: id}) do
     short_id = id |> String.split("-") |> List.first() |> String.slice(0, 6)
     "#{key}##{short_id}"
   end
 
+  @spec display_ref(String.t(), String.t()) :: String.t()
   def display_ref(id, key) when is_binary(id) and is_binary(key) do
     short_id = id |> String.split("-") |> List.first() |> String.slice(0, 6)
     "#{key}##{short_id}"

@@ -48,6 +48,7 @@ defmodule Loka.Framework.Combat do
 
   Returns `{:ok, combat_state}` or `{:error, reason}`.
   """
+  @spec start_combat(String.t(), Entity.t()) :: {:ok, map()} | {:error, term()}
   def start_combat(entity_id, %Entity{} = _character) do
     case Entities.get_entity(entity_id) do
       nil ->
@@ -102,6 +103,10 @@ defmodule Loka.Framework.Combat do
 
   Both player and enemy attack in the same tick.
   """
+  @spec execute_combat_tick(map(), Entity.t()) ::
+          {:victory, map(), map(), Entity.t()}
+          | {:defeat, map(), Entity.t()}
+          | {:ongoing, map(), Entity.t()}
   def execute_combat_tick(combat_state, %Entity{} = character) do
     {:ok, combat_after_player, player_result} =
       execute_player_attack_silent(combat_state, character)
@@ -302,6 +307,7 @@ defmodule Loka.Framework.Combat do
   - `:defend` - Reduce incoming damage this turn
   - `:flee` - Attempt to escape (chance-based)
   """
+  @spec player_action(map(), atom(), Entity.t()) :: {:ok, map(), map()} | {:error, term()}
   def player_action(combat_state, action, %Entity{} = character) do
     case action do
       :attack -> execute_player_attack(combat_state, character)
@@ -325,6 +331,8 @@ defmodule Loka.Framework.Combat do
   - `{:fled}` - Player escaped
   - `:ongoing` - Combat continues
   """
+  @spec check_combat_end(map(), Entity.t()) ::
+          {:victory, map()} | {:defeat} | {:fled} | :ongoing
   def check_combat_end(combat_state, %Entity{} = character) do
     enemy_hp =
       get_in(combat_state.enemy.health, ["current"]) ||

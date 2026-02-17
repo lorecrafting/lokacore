@@ -29,6 +29,11 @@
             "type": "command",
             "command": "file_path=$(cat | jq -r '.tool_input.file_path' 2>/dev/null); if [[ \"$file_path\" == */priv/world/* ]] && [[ \"$file_path\" == *.yml ]]; then cd /Users/raymondluong/dev/lokacore/server && mix loka.test.validate --quiet 2>&1 | head -20; fi",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "file_path=$(cat | jq -r '.tool_input.file_path' 2>/dev/null); if [[ \"$file_path\" == */lib/*.ex ]] && [[ \"$file_path\" != *_test.exs ]]; then all_def=$(grep -cE '^[[:space:]]*def [a-z]' \"$file_path\" 2>/dev/null || echo 0); priv=$(grep -cE '^[[:space:]]*defp [a-z]' \"$file_path\" 2>/dev/null || echo 0); pub=$((all_def - priv)); specs=$(grep -c '@spec' \"$file_path\" 2>/dev/null || echo 0); echo \"📊 Specs: $specs/$pub public functions\"; fi",
+            "timeout": 5
           }
         ]
       }

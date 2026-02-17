@@ -31,13 +31,13 @@ defmodule Mix.Tasks.Loka.Test.Bot do
 
   @impl Mix.Task
   def run(args) do
-    # If no args provided, run all tests tagged with :full_storyline
+    # If no args provided, run all tests tagged with :integration
     # Otherwise, pass args to mix test (allows running specific files)
     test_args =
       if Enum.empty?(args) do
-        ["--only", "full_storyline"]
+        ["--only", "integration"]
       else
-        args ++ ["--only", "full_storyline"]
+        args ++ ["--only", "integration"]
       end
 
     Mix.Task.run("test", test_args)

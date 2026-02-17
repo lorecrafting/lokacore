@@ -57,6 +57,7 @@ defmodule Loka.Engine.Entities do
       find_one(key: "goblin", type: :npc)
       find_one(account_id: 42)
   """
+  @spec find_one(String.t() | keyword()) :: {:ok, Entity.t()} | {:error, :not_found}
   def find_one(id) when is_binary(id) do
     # Validate UUID format
     case Ecto.UUID.cast(id) do
@@ -122,6 +123,7 @@ defmodule Loka.Engine.Entities do
       find_all(tags: ["hostile"])
       find_all(is_prototype: true, type: :npc)
   """
+  @spec find_all(keyword()) :: [Entity.t()]
   def find_all(opts) when is_list(opts) do
     EntitySchema
     |> apply_filters(opts)
@@ -138,6 +140,7 @@ defmodule Loka.Engine.Entities do
   - Keyword with `:type` only → `find_all(type: t)`
   - Keyword with `:location_id` → `find_all(location_id: id)`
   """
+  @spec find(String.t() | keyword()) :: {:ok, Entity.t()} | {:error, :not_found} | [Entity.t()]
   def find(id) when is_binary(id), do: find_one(id)
 
   def find(opts) when is_list(opts) do
@@ -153,6 +156,7 @@ defmodule Loka.Engine.Entities do
 
       find_many(["uuid1", "uuid2"])
   """
+  @spec find_many([String.t()]) :: [Entity.t()]
   def find_many(ids) when is_list(ids) do
     EntitySchema
     |> where([e], e.id in ^ids)
@@ -166,6 +170,7 @@ defmodule Loka.Engine.Entities do
 
       find_many(["goblin", "orc"], :npc)
   """
+  @spec find_many([String.t()], atom()) :: [Entity.t()]
   def find_many(keys, type) when is_list(keys) and is_atom(type) do
     EntitySchema
     |> where([e], e.key in ^keys and e.type == ^type)
@@ -183,6 +188,7 @@ defmodule Loka.Engine.Entities do
 
   Returns `{:ok, entity}` or `{:error, reason}`.
   """
+  @spec save(Entity.t()) :: {:ok, Entity.t()} | {:error, term()}
   def save(%Entity{} = entity) do
     case Repo.get(EntitySchema, entity.id) do
       nil ->
@@ -222,6 +228,7 @@ defmodule Loka.Engine.Entities do
   @doc """
   Bulk-inserts entities. For seeding and batch operations only.
   """
+  @spec save_batch([Entity.t()]) :: {non_neg_integer(), nil | [term()]}
   def save_batch(entities) when is_list(entities) do
     now = DateTime.utc_now() |> DateTime.truncate(:second)
 
@@ -241,6 +248,7 @@ defmodule Loka.Engine.Entities do
   Deletes an entity by ID. Also deletes contained entities (exits, items, NPCs)
   to prevent orphans with NULL location_id.
   """
+  @spec delete(String.t() | Entity.t()) :: {:ok, EntitySchema.t()} | {:error, term()}
   def delete(id) when is_binary(id) do
     case Repo.get(EntitySchema, id) do
       nil ->
@@ -261,6 +269,7 @@ defmodule Loka.Engine.Entities do
   @doc """
   Partial update — applies a changes map to an existing entity.
   """
+  @spec update(String.t(), map()) :: {:ok, Entity.t()} | {:error, term()}
   def update(id, changes) when is_binary(id) and is_map(changes) do
     case Repo.get(EntitySchema, id) do
       nil ->
@@ -283,6 +292,8 @@ defmodule Loka.Engine.Entities do
   # =============================================================================
 
   @doc "Adds a tag to an entity. Idempotent — no-op if already present."
+  @spec add_tag(String.t(), String.t()) ::
+          {:ok, EntityTagSchema.t()} | {:error, Ecto.Changeset.t()}
   def add_tag(entity_id, tag) when is_binary(entity_id) and is_binary(tag) do
     %EntityTagSchema{}
     |> EntityTagSchema.changeset(%{entity_id: entity_id, tag: tag})
@@ -290,6 +301,7 @@ defmodule Loka.Engine.Entities do
   end
 
   @doc "Removes a tag from an entity."
+  @spec remove_tag(String.t(), String.t()) :: :ok
   def remove_tag(entity_id, tag) when is_binary(entity_id) and is_binary(tag) do
     EntityTagSchema
     |> where([t], t.entity_id == ^entity_id and t.tag == ^tag)
@@ -299,6 +311,7 @@ defmodule Loka.Engine.Entities do
   end
 
   @doc "Gets all tags for an entity."
+  @spec get_tags(String.t()) :: [String.t()]
   def get_tags(entity_id) when is_binary(entity_id) do
     EntityTagSchema
     |> where([t], t.entity_id == ^entity_id)
@@ -311,6 +324,7 @@ defmodule Loka.Engine.Entities do
   # =============================================================================
 
   @doc "V1 compat — lists entities with optional type/location filters."
+  @spec list_entities(keyword()) :: [EntitySchema.t()]
   def list_entities(opts \\ []) do
     EntitySchema
     |> filter_by_type(opts[:type])
@@ -321,21 +335,26 @@ defmodule Loka.Engine.Entities do
   end
 
   @doc "V1 compat — gets entity schema by ID."
+  @spec get_entity(String.t() | nil) :: EntitySchema.t() | nil
   def get_entity(id) when is_binary(id), do: Repo.get(EntitySchema, id)
   def get_entity(_), do: nil
 
   @doc "V1 compat — gets entity schema by ID, raises if not found."
+  @spec get_entity!(String.t()) :: EntitySchema.t()
   def get_entity!(id), do: Repo.get!(EntitySchema, id)
 
   @doc "V1 compat — gets entity schema by key (first match)."
+  @spec get_entity_by_key(String.t()) :: EntitySchema.t() | nil
   def get_entity_by_key(key) when is_binary(key), do: Repo.get_by(EntitySchema, key: key)
 
   @doc "V1 compat — gets all entity schemas with the given key."
+  @spec get_all_by_key(String.t()) :: [EntitySchema.t()]
   def get_all_by_key(key) when is_binary(key) do
     EntitySchema |> where([e], e.key == ^key) |> Repo.all()
   end
 
   @doc "V1 compat — creates entity from attrs map."
+  @spec create_entity(map()) :: {:ok, EntitySchema.t()} | {:error, Ecto.Changeset.t()}
   def create_entity(attrs) do
     tags = attrs[:tags] || attrs["tags"] || []
 
@@ -355,6 +374,8 @@ defmodule Loka.Engine.Entities do
   end
 
   @doc "V1 compat — updates entity schema."
+  @spec update_entity(EntitySchema.t() | String.t(), map()) ::
+          {:ok, EntitySchema.t()} | {:error, term()}
   def update_entity(%EntitySchema{} = entity, attrs) do
     entity
     |> EntitySchema.changeset(normalize_attrs(attrs))
@@ -369,19 +390,23 @@ defmodule Loka.Engine.Entities do
   end
 
   @doc "V1 compat — deletes entity schema."
+  @spec delete_entity(EntitySchema.t()) :: {:ok, EntitySchema.t()} | {:error, Ecto.Changeset.t()}
   def delete_entity(%EntitySchema{} = entity), do: Repo.delete(entity)
 
   @doc "V1 compat — returns changeset."
+  @spec change_entity(EntitySchema.t(), map()) :: Ecto.Changeset.t()
   def change_entity(%EntitySchema{} = entity, attrs \\ %{}) do
     EntitySchema.changeset(entity, normalize_attrs(attrs))
   end
 
   @doc "V1 compat — converts schema to Entity struct."
+  @spec to_entity(Entity.t() | EntitySchema.t() | nil) :: Entity.t() | nil
   def to_entity(%Entity{} = entity), do: entity
   def to_entity(%EntitySchema{} = schema), do: EntitySchema.to_entity(schema)
   def to_entity(nil), do: nil
 
   @doc "V1 compat — saves Entity struct to DB."
+  @spec save_entity(Entity.t()) :: {:ok, EntitySchema.t()} | {:error, term()}
   def save_entity(%Entity{id: nil} = entity) do
     entity |> EntitySchema.from_entity() |> create_entity()
   end
@@ -397,12 +422,15 @@ defmodule Loka.Engine.Entities do
   end
 
   @doc "V1 compat — lists entities by type."
+  @spec list_by_type(atom()) :: [EntitySchema.t()]
   def list_by_type(type), do: list_entities(type: type)
 
   @doc "V1 compat — lists rooms."
+  @spec list_rooms() :: [EntitySchema.t()]
   def list_rooms, do: list_entities(type: :room, preload: [:contents])
 
   @doc "V1 compat — gets room with contents."
+  @spec get_room(String.t()) :: EntitySchema.t() | nil
   def get_room(id) do
     EntitySchema
     |> where([e], e.id == ^id and e.type == :room)
@@ -411,6 +439,7 @@ defmodule Loka.Engine.Entities do
   end
 
   @doc "V1 compat — gets entities at a location. Optional :type filter."
+  @spec get_contents(String.t(), keyword()) :: [EntitySchema.t()]
   def get_contents(location_id, opts \\ []) do
     query = EntitySchema |> where([e], e.location_id == ^location_id)
 
@@ -424,6 +453,7 @@ defmodule Loka.Engine.Entities do
   end
 
   @doc "V1 compat — gets entities at multiple locations."
+  @spec get_contents_batch([String.t()]) :: %{String.t() => [EntitySchema.t()]}
   def get_contents_batch([]), do: %{}
 
   def get_contents_batch(location_ids) when is_list(location_ids) do
@@ -437,6 +467,7 @@ defmodule Loka.Engine.Entities do
   end
 
   @doc "V1 compat — batch fetch by IDs."
+  @spec get_all_by_ids([String.t()]) :: [EntitySchema.t()]
   def get_all_by_ids([]), do: []
 
   def get_all_by_ids(ids) when is_list(ids) do
@@ -444,16 +475,19 @@ defmodule Loka.Engine.Entities do
   end
 
   @doc "V1 compat — count by type."
+  @spec count_by_type(atom()) :: non_neg_integer()
   def count_by_type(type) do
     EntitySchema |> where([e], e.type == ^type) |> Repo.aggregate(:count)
   end
 
   @doc "V1 compat — count by key."
+  @spec count_by_key(String.t()) :: non_neg_integer()
   def count_by_key(key) when is_binary(key) do
     EntitySchema |> where([e], e.key == ^key) |> Repo.aggregate(:count)
   end
 
   @doc "V1 compat — count at location."
+  @spec count_by_location(String.t() | nil) :: non_neg_integer()
   def count_by_location(location_id) when is_binary(location_id) do
     EntitySchema |> where([e], e.location_id == ^location_id) |> Repo.aggregate(:count)
   end
@@ -461,6 +495,7 @@ defmodule Loka.Engine.Entities do
   def count_by_location(nil), do: 0
 
   @doc "V1 compat — count by key in room."
+  @spec count_by_key_in_room(String.t(), String.t()) :: non_neg_integer()
   def count_by_key_in_room(key, room_id) when is_binary(key) and is_binary(room_id) do
     EntitySchema
     |> where([e], e.key == ^key and e.location_id == ^room_id)
@@ -468,9 +503,11 @@ defmodule Loka.Engine.Entities do
   end
 
   @doc "V1 compat — count all."
+  @spec count_all() :: non_neg_integer()
   def count_all, do: Repo.aggregate(EntitySchema, :count)
 
   @doc "V1 compat — find by prototype_key in column."
+  @spec find_by_prototype_key(String.t()) :: EntitySchema.t() | nil
   def find_by_prototype_key(prototype_key) do
     EntitySchema
     |> where([e], e.prototype_key == ^prototype_key)
@@ -479,6 +516,7 @@ defmodule Loka.Engine.Entities do
   end
 
   @doc "V1 compat — delete all entities."
+  @spec delete_all() :: non_neg_integer()
   def delete_all do
     {count, _} = Repo.delete_all(EntitySchema)
     count

@@ -52,6 +52,7 @@ defmodule Loka.Engine.EntityServer do
                        }
                      })
 
+  @spec lifecycle_machine() :: StateMachine.t()
   def lifecycle_machine, do: @lifecycle_machine
 
   # Configuration - can be overridden via opts
@@ -89,6 +90,7 @@ defmodule Loka.Engine.EntityServer do
   - `:save_interval_ms` - Time between auto-saves (default: 1 min)
   - `:hibernate_after_ms` - Time before hibernating (default: 30s)
   """
+  @spec start_link(String.t(), keyword()) :: GenServer.on_start()
   def start_link(entity_id, opts \\ []) do
     name = Keyword.get(opts, :name)
     gen_opts = if name, do: [name: name], else: []
@@ -99,6 +101,7 @@ defmodule Loka.Engine.EntityServer do
   @doc """
   Gets the full EntityServer state (for debugging/testing).
   """
+  @spec get(GenServer.server()) :: %__MODULE__{}
   def get(server) do
     GenServer.call(server, :get)
   end
@@ -106,6 +109,7 @@ defmodule Loka.Engine.EntityServer do
   @doc """
   Gets the current entity struct.
   """
+  @spec get_entity(GenServer.server()) :: Entity.t()
   def get_entity(server) do
     GenServer.call(server, :get_entity)
   end
@@ -128,6 +132,8 @@ defmodule Loka.Engine.EntityServer do
         %{entity | short_desc: "New Name"}
       end, force_save: true)
   """
+  @spec update(GenServer.server(), (Entity.t() -> Entity.t()), keyword()) ::
+          {:ok, Entity.t()} | {:error, term()}
   def update(server, fun, opts \\ []) when is_function(fun, 1) do
     GenServer.call(server, {:update, fun, opts})
   end
@@ -140,6 +146,12 @@ defmodule Loka.Engine.EntityServer do
   and the ActionBridge game action pipeline. All other callers should
   use `update/3`.
   """
+  @spec update_protected(
+          GenServer.server(),
+          (Entity.t() -> Entity.t() | {:error, term()}),
+          keyword()
+        ) ::
+          {:ok, Entity.t()} | {:error, term()}
   def update_protected(server, fun, opts \\ []) when is_function(fun, 1) do
     GenServer.call(server, {:update_protected, fun, opts})
   end
@@ -147,6 +159,7 @@ defmodule Loka.Engine.EntityServer do
   @doc """
   Sends an event to the entity for processing.
   """
+  @spec handle_event(GenServer.server(), Event.t()) :: :ok
   def handle_event(server, event) do
     GenServer.cast(server, {:event, event})
   end
@@ -154,6 +167,7 @@ defmodule Loka.Engine.EntityServer do
   @doc """
   Resets the idle timer (touch to keep alive).
   """
+  @spec touch(GenServer.server()) :: :ok
   def touch(server) do
     GenServer.cast(server, :touch)
   end
@@ -161,6 +175,7 @@ defmodule Loka.Engine.EntityServer do
   @doc """
   Forces an immediate save of the entity state.
   """
+  @spec save_now(GenServer.server()) :: :ok
   def save_now(server) do
     GenServer.call(server, :save_now)
   end
@@ -168,6 +183,7 @@ defmodule Loka.Engine.EntityServer do
   @doc """
   Gracefully stops the EntityServer, saving state first.
   """
+  @spec stop(GenServer.server()) :: :ok
   def stop(server) do
     GenServer.call(server, :stop)
   end
@@ -175,6 +191,7 @@ defmodule Loka.Engine.EntityServer do
   @doc """
   Checks if the entity state has unsaved changes.
   """
+  @spec dirty?(GenServer.server()) :: boolean()
   def dirty?(server) do
     GenServer.call(server, :dirty?)
   end
@@ -182,6 +199,7 @@ defmodule Loka.Engine.EntityServer do
   @doc """
   Reloads the entity from the database, discarding in-memory changes.
   """
+  @spec reload(GenServer.server()) :: :ok | {:error, :not_found}
   def reload(server) do
     GenServer.call(server, :reload)
   end
@@ -603,6 +621,8 @@ defmodule Loka.Engine.EntityServer do
   - `{:halted, updated_entity}` — a trait halted the chain
   - `{:error, snapshot}` — catastrophic failure, reverted to snapshot
   """
+  @spec dispatch_event(Entity.t(), atom(), map()) ::
+          {:ok, Entity.t()} | {:halted, Entity.t()} | {:error, Entity.t()}
   def dispatch_event(entity, event_name, payload) do
     snapshot = Entity.snapshot(entity)
 
