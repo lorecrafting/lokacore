@@ -134,6 +134,29 @@ defmodule LokaWeb.Channels.BuilderCommands.Helpers do
     |> Enum.join("\n")
   end
 
+  @doc """
+  Coerce a string value to its appropriate Elixir type.
+  Used by edit commands that receive all values as strings from the terminal.
+  """
+  def coerce_value("true"), do: true
+  def coerce_value("false"), do: false
+  def coerce_value("nil"), do: nil
+
+  def coerce_value(value) when is_binary(value) do
+    case Integer.parse(value) do
+      {int, ""} ->
+        int
+
+      _ ->
+        case Float.parse(value) do
+          {float, ""} -> float
+          _ -> value
+        end
+    end
+  end
+
+  def coerce_value(value), do: value
+
   def matches?(nil, _search), do: false
 
   def matches?(text, search) do

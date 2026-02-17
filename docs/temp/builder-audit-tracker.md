@@ -96,17 +96,18 @@
 
 ---
 
-## NOTED — Low Priority (Not Fixing)
+## FIXED (Pass 7b — Coerce Value Consolidation)
 
-| # | File | Note |
-|---|------|------|
-| L10 | `content.ex:32-36` | edit_quest passes string values to QuestManager — depends on QuestManager internals. |
+| # | File | Fix | Status |
+|---|------|-----|--------|
+| L10 | `content.ex:33` | edit_quest now coerces string values (integers, bools) before passing to QuestManager | Done |
+| L16 | `helpers.ex` | Extracted shared `coerce_value/1` into Helpers — was duplicated in entities.ex and zones.ex | Done |
 
 ---
 
 ## Summary
 
-**50 issues resolved** across 7 audit passes. 1 low-priority item noted but not fixed.
+**52 issues resolved** across 7 audit passes. All items resolved.
 
 ---
 

@@ -30,8 +30,10 @@ defmodule LokaWeb.Channels.BuilderCommands.Content do
   end
 
   def execute(:edit_quest, %{key: key, field: field, value: value}, socket) do
-    case QuestManager.update_quest(key, %{field => value}) do
-      {:ok, _} -> {:ok, "Updated quest '#{key}': #{field} = #{value}", socket}
+    coerced = Helpers.coerce_value(value)
+
+    case QuestManager.update_quest(key, %{field => coerced}) do
+      {:ok, _} -> {:ok, "Updated quest '#{key}': #{field} = #{inspect(coerced)}", socket}
       {:error, reason} -> {:error, "Failed to update quest: #{inspect(reason)}", socket}
     end
   end

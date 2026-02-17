@@ -53,12 +53,13 @@ defmodule LokaWeb.Channels.BuilderCommands.Zones do
     case Entities.find_one(key: key, type: :zone) do
       {:ok, zone} ->
         data = (zone.components || %{})["data"] || %{}
-        updated_data = Map.put(data, field, value)
+        coerced = Helpers.coerce_value(value)
+        updated_data = Map.put(data, field, coerced)
         updated_components = Map.put(zone.components || %{}, "data", updated_data)
 
-        case Entities.update_entity(zone.id, %{components: updated_components}) do
+        case Entities.update(zone.id, %{components: updated_components}) do
           {:ok, _} ->
-            {:ok, "Updated zone '#{key}': #{field} = #{value}", socket}
+            {:ok, "Updated zone '#{key}': #{field} = #{inspect(coerced)}", socket}
 
           {:error, reason} ->
             {:error, "Failed to update zone: #{inspect(reason)}", socket}

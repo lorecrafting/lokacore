@@ -3,8 +3,10 @@ defmodule LokaWeb.Channels.BuilderCommands.Entities do
   Entity CRUD commands: create npc, create item, edit npc/item, delete npc/item.
   """
 
+  alias Loka.Engine.Entities
   alias Loka.WorldBuilder.EntityManager
   alias Loka.WorldBuilder.Respawner
+  alias LokaWeb.Channels.BuilderCommands.Helpers
 
   def execute(:respawn, %{key: key, type: "zone"}, socket) do
     case Respawner.respawn_zone(key) do
@@ -49,7 +51,8 @@ defmodule LokaWeb.Channels.BuilderCommands.Entities do
 
     case find_by_key(subtype, key) do
       {:ok, entity} ->
-        data = Map.get(entity, :data, %{})
+        components = Map.get(entity, :components, %{})
+        data = Map.get(components, "data", %{})
 
         lines =
           data
@@ -69,8 +72,10 @@ defmodule LokaWeb.Channels.BuilderCommands.Entities do
 
     case find_by_key(subtype, key) do
       {:ok, entity} ->
-        case EntityManager.update_entity(entity.id, %{field => value}) do
-          {:ok, _} -> {:ok, "Updated #{type} '#{key}': #{field} = #{value}", socket}
+        coerced = Helpers.coerce_value(value)
+
+        case EntityManager.update_entity(entity.key, %{field => coerced}) do
+          {:ok, _} -> {:ok, "Updated #{type} '#{key}': #{field} = #{inspect(coerced)}", socket}
           {:error, reason} -> {:error, "Failed to update: #{inspect(reason)}", socket}
         end
 
@@ -82,7 +87,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Entities do
   def execute(:delete_npc, %{key: key}, socket) do
     case find_by_key(:npc, key) do
       {:ok, entity} ->
-        case EntityManager.delete_entity(entity.id) do
+        case EntityManager.delete_entity(entity.key) do
           :ok -> {:ok, "NPC '#{key}' deleted.", socket}
           {:error, reason} -> {:error, "Failed to delete NPC: #{inspect(reason)}", socket}
         end
@@ -95,7 +100,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Entities do
   def execute(:delete_item, %{key: key}, socket) do
     case find_by_key(:item, key) do
       {:ok, entity} ->
-        case EntityManager.delete_entity(entity.id) do
+        case EntityManager.delete_entity(entity.key) do
           :ok -> {:ok, "Item '#{key}' deleted.", socket}
           {:error, reason} -> {:error, "Failed to delete item: #{inspect(reason)}", socket}
         end
@@ -106,11 +111,9 @@ defmodule LokaWeb.Channels.BuilderCommands.Entities do
   end
 
   defp find_by_key(subtype, key) do
-    entities = EntityManager.list_entities(subtype)
-
-    case Enum.find(entities, fn e -> e.key == key end) do
-      nil -> {:error, :not_found}
-      entity -> {:ok, entity}
+    case Entities.find_one(key: key, type: subtype) do
+      {:ok, entity} -> {:ok, entity}
+      {:error, _} -> {:error, :not_found}
     end
   end
 
