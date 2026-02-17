@@ -137,52 +137,18 @@ defmodule Loka.Framework.Dialogue do
       "[DIALOGUE] Choice selected: npc_id=#{npc_id} node=#{current_node_id} choice=#{choice_index}"
     )
 
-    case Entities.get_entity(npc_id) do
-      nil ->
-        Logger.debug("[DIALOGUE] Choice failed - NPC not found: npc_id=#{npc_id}")
-        {:error, :npc_not_found}
-
-      npc ->
-        dialogue_tree = get_dialogue_tree(npc)
-
-        if dialogue_tree do
-          current_node = get_node(dialogue_tree, current_node_id)
-
-          if current_node do
-            # Filter choices based on quest state before selecting
-            choices = current_node["choices"] || []
-            filtered_choices = filter_choices_by_quest_state(choices, player_quests)
-            choice = Enum.at(filtered_choices, choice_index)
-
-            if choice do
-              next_node_id = choice["next"]
-              action = parse_action(choice["action"])
-
-              if next_node_id do
-                case get_node(dialogue_tree, next_node_id) do
-                  nil ->
-                    {:ok, :end, %{action: action}}
-
-                  next_node ->
-                    # Check for completed variant on the next node
-                    next_node =
-                      maybe_use_completed_variant(next_node, dialogue_tree, player_quests)
-
-                    {:ok, format_node(next_node, next_node_id, player_quests), %{action: action}}
-                end
-              else
-                # nil next means end conversation
-                {:ok, :end, %{action: action}}
-              end
-            else
-              {:error, :invalid_choice}
-            end
-          else
-            {:error, :invalid_node}
-          end
-        else
-          {:error, :no_dialogue}
-        end
+    with {:npc, npc} when not is_nil(npc) <- {:npc, Entities.get_entity(npc_id)},
+         {:tree, tree} when not is_nil(tree) <- {:tree, get_dialogue_tree(npc)},
+         {:node, node} when not is_nil(node) <- {:node, get_node(tree, current_node_id)},
+         choices = node["choices"] || [],
+         filtered = filter_choices_by_quest_state(choices, player_quests),
+         {:choice, choice} when not is_nil(choice) <- {:choice, Enum.at(filtered, choice_index)} do
+      resolve_choice(choice, tree, player_quests)
+    else
+      {:npc, nil} -> {:error, :npc_not_found}
+      {:tree, nil} -> {:error, :no_dialogue}
+      {:node, nil} -> {:error, :invalid_node}
+      {:choice, nil} -> {:error, :invalid_choice}
     end
   end
 
@@ -610,6 +576,26 @@ defmodule Loka.Framework.Dialogue do
         Enum.all?(objectives, fn {_id, obj} ->
           Map.get(obj, "completed") || Map.get(obj, :completed, false)
         end)
+    end
+  end
+
+  defp resolve_choice(choice, dialogue_tree, player_quests) do
+    next_node_id = choice["next"]
+    action = parse_action(choice["action"])
+
+    case next_node_id do
+      nil ->
+        {:ok, :end, %{action: action}}
+
+      id ->
+        case get_node(dialogue_tree, id) do
+          nil ->
+            {:ok, :end, %{action: action}}
+
+          next_node ->
+            next_node = maybe_use_completed_variant(next_node, dialogue_tree, player_quests)
+            {:ok, format_node(next_node, id, player_quests), %{action: action}}
+        end
     end
   end
 

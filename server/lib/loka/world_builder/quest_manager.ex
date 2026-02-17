@@ -98,39 +98,16 @@ defmodule Loka.WorldBuilder.QuestManager do
 
       entity = Entity.new(updated_attrs)
 
-      case Quest.validate(entity) do
-        :ok ->
-          case Entities.get_entity_by_key(key) do
-            %{} = schema ->
-              db_updates = %{
-                components: updated_components
-              }
-
-              db_updates =
-                if Map.has_key?(user_attrs, :short_desc),
-                  do: Map.put(db_updates, :short_desc, user_attrs[:short_desc]),
-                  else: db_updates
-
-              db_updates =
-                if Map.has_key?(user_attrs, :extra_desc),
-                  do: Map.put(db_updates, :extra_desc, user_attrs[:extra_desc]),
-                  else: db_updates
-
-              case Entities.update_entity(schema, db_updates) do
-                {:ok, _} ->
-                  Logger.info("[QuestManager] Updated quest: #{key}")
-                  {:ok, enrich_for_ui(entity)}
-
-                {:error, reason} ->
-                  {:error, "Failed to save quest: #{inspect(reason)}"}
-              end
-
-            nil ->
-              {:error, "Quest not found in DB"}
-          end
-
-        {:error, errors} ->
-          {:error, Enum.join(errors, ", ")}
+      with :ok <- Quest.validate(entity),
+           %{} = schema <- Entities.get_entity_by_key(key) || :not_in_db,
+           db_updates = build_db_updates(updated_components, user_attrs),
+           {:ok, _} <- Entities.update_entity(schema, db_updates) do
+        Logger.info("[QuestManager] Updated quest: #{key}")
+        {:ok, enrich_for_ui(entity)}
+      else
+        :not_in_db -> {:error, "Quest not found in DB"}
+        {:error, errors} when is_list(errors) -> {:error, Enum.join(errors, ", ")}
+        {:error, reason} -> {:error, "Failed to save quest: #{inspect(reason)}"}
       end
     end
   end
@@ -160,6 +137,20 @@ defmodule Loka.WorldBuilder.QuestManager do
   # =============================================================================
   # Private Helpers
   # =============================================================================
+
+  defp build_db_updates(components, user_attrs) do
+    %{components: components}
+    |> then(fn updates ->
+      if Map.has_key?(user_attrs, :short_desc),
+        do: Map.put(updates, :short_desc, user_attrs[:short_desc]),
+        else: updates
+    end)
+    |> then(fn updates ->
+      if Map.has_key?(user_attrs, :extra_desc),
+        do: Map.put(updates, :extra_desc, user_attrs[:extra_desc]),
+        else: updates
+    end)
+  end
 
   defp enrich_for_ui(%Entity{} = quest) do
     %{
