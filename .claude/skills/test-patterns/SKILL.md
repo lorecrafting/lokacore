@@ -86,7 +86,7 @@ end
 | Unit tests | `test/loka/` | `mix test test/loka/` |
 | Integration | `test/integration/` | `mix test test/integration/` |
 | Content validation | - | `mix loka.test.validate` |
-| Storyline tests | - | `mix loka.test.storyline <id> --run` |
+| Storyline E2E | `test/integration/` | `mix test test/integration/storyline_channel_test.exs` |
 | Balance tests | - | `mix loka.test.balance` |
 
 ## Factory Functions

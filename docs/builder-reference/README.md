@@ -50,13 +50,10 @@ DependencyGraph.dependencies_for(graph, "quest:intro_find_temple")
 DependencyGraph.dependents_of(graph, "npc:abbot_jampa")
 ```
 
-### 3. Run Bot Test
+### 3. Run Storyline E2E Test
 ```bash
-# Validate storyline structure
-mix loka.test.storyline monastery_arc
-
-# Run full bot playthrough
-mix loka.test.storyline monastery_arc --run
+# Run ChannelBot E2E playthrough (95% production parity)
+mix test test/integration/storyline_channel_test.exs
 ```
 
 ## Files in This Directory
@@ -199,14 +196,8 @@ mix loka.test.validate --only quest,dialogue,world
 # Fail on warnings too
 mix loka.test.validate --strict
 
-# List available storylines
-mix loka.test.storyline --list
-
-# Validate storyline structure
-mix loka.test.storyline monastery_arc
-
-# Run bot playthrough
-mix loka.test.storyline monastery_arc --run
+# Run storyline E2E test (ChannelBot)
+mix test test/integration/storyline_channel_test.exs
 
 # Quick balance check
 mix loka.test.balance --quick

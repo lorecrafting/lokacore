@@ -11,7 +11,7 @@ mix loka.test.validate
 
 If specific to quests/storylines:
 ```bash
-mix loka.test.storyline monastery_arc --run
+mix test test/integration/storyline_channel_test.exs
 ```
 
 ---
@@ -172,6 +172,6 @@ Accept but note for later if:
 1. Claude makes changes
 2. You review changes (this checklist)
 3. Run `mix loka.test.validate`
-4. Run `mix loka.test.storyline <id> --run` if storyline-related
+4. Run `mix test test/integration/storyline_channel_test.exs` if storyline-related
 5. If issues, tell Claude what to fix
 6. If clean, approve and commit

@@ -135,7 +135,7 @@ The storyline bot is stuck on the monastery_arc. Debug and fix.
 ```
 
 ### What Claude Will Do
-1. Run `mix loka.test.storyline monastery_arc --run`
+1. Run `mix test test/integration/storyline_channel_test.exs`
 2. Analyze where it gets stuck
 3. Use dependency graph to find issues
 4. Fix missing connections

@@ -27,9 +27,9 @@ The workflow is **LLM-first with human oversight**:
 mix loka.test.validate
 ```
 
-### Run Bot Test
+### Run Storyline E2E Test
 ```bash
-mix loka.test.storyline monastery_arc --run
+mix test test/integration/storyline_channel_test.exs
 ```
 
 ### Check Specific Quest
@@ -54,7 +54,7 @@ Claude has access to:
 1. **Set direction** - Tell Claude what feature/fix you want
 2. **Review output** - Check the YAML/code changes make sense
 3. **Run validation** - `mix loka.test.validate`
-4. **Test playability** - `mix loka.test.storyline <id> --run`
+4. **Test playability** - `mix test test/integration/storyline_channel_test.exs`
 5. **Approve or redirect** - If issues, tell Claude what to fix
 
 ## See Also

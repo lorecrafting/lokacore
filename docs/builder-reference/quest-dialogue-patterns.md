@@ -21,8 +21,8 @@ mix loka.test.validate
 # Validate specific domains
 mix loka.test.validate --only quest,dialogue
 
-# Run storyline bot test
-mix loka.test.storyline monastery_arc --run
+# Run storyline E2E test (ChannelBot)
+mix test test/integration/storyline_channel_test.exs
 
 # Use dependency graph (in IEx)
 alias Loka.WorldBuilder.Analysis.DependencyGraph
@@ -550,9 +550,9 @@ When a quest/dialogue issue occurs:
    DependencyGraph.find_broken_references(graph)
    ```
 
-3. **Run bot test**
+3. **Run storyline E2E test**
    ```bash
-   mix loka.test.storyline monastery_arc --run
+   mix test test/integration/storyline_channel_test.exs
    ```
 
 5. **Check specific files**

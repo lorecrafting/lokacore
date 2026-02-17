@@ -39,12 +39,11 @@ test "completes monastery arc storyline" do
 end
 ```
 
-## Legacy Bot (Deprecated)
+## Storyline E2E Testing
 
-Only use for load testing (100+ concurrent bots):
+Run the ChannelBot-based storyline test (95% production parity):
 ```bash
-# Load test only
-mix loka.test.storyline monastery_arc --run --bots=100
+mix test test/integration/storyline_channel_test.exs
 ```
 
 ## Test Structure Pattern

@@ -298,7 +298,7 @@ Use this checklist when designing new storylines:
 - [ ] Is the XP reward appropriate for the effort required?
 
 ### Testing
-- [ ] Run `mix loka.test.storyline [storyline_id]` to validate
+- [ ] Run `mix test test/integration/storyline_channel_test.exs` to validate
 - [ ] Play through manually to check dialogue flow
 - [ ] Verify room entry triggers `go_to` objectives correctly
 

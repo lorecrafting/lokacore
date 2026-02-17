@@ -1,70 +1,30 @@
 # Test Storyline
 
-Run storyline tests to validate quest chains are completable.
+Run storyline E2E tests to validate quest chains are completable.
 
 ## Usage
 
 ```
-/test-storyline <storyline_id>
+/test-storyline
 ```
 
-## IMPORTANT: Recommended Approach
+## Instructions
 
-**The `mix loka.test.storyline` task is DEPRECATED.** It uses the legacy bot (40% production parity).
-
-**Preferred method**: Use ChannelBot tests (95% production parity):
+Run the ChannelBot-based storyline E2E test:
 
 ```bash
-# Run the ChannelBot-based storyline test
 cd server && mix test test/integration/storyline_channel_test.exs
 ```
 
-This tests the **real production code path**:
+This tests the **real production code path** with 95% production parity:
 - GameChannel message handling
 - Action serialization
 - WebSocket event delivery
 
-## Instructions
-
-### Option 1: ChannelBot Test (Recommended)
-
+For trace output:
 ```bash
-cd server && mix test test/integration/storyline_channel_test.exs
+cd server && mix test test/integration/storyline_channel_test.exs --trace
 ```
-
-This runs a full playthrough using ChannelBot with 95% production parity.
-
-### Option 2: Legacy Mix Task (Deprecated)
-
-If you need to use the legacy task:
-
-```bash
-# List available storylines
-cd server && mix loka.test.storyline --list
-
-# Validate storyline structure only (no bot run)
-cd server && mix loka.test.storyline <storyline_id>
-
-# Run legacy bot playthrough (40% parity - NOT recommended)
-cd server && mix loka.test.storyline <storyline_id> --run
-
-# Verbose output
-cd server && mix loka.test.storyline <storyline_id> --run --verbose
-```
-
-### Understanding the Difference
-
-| Approach | Production Parity | Tests |
-|----------|------------------|-------|
-| ChannelBot test | 95% | Real GameChannel code path |
-| Legacy mix task | 40% | Bypasses channel layer |
-
-The ChannelBot test catches:
-- Serialization bugs
-- Event delivery issues
-- Channel message handling bugs
-
-The legacy task misses these because it bypasses the channel layer.
 
 ## Validation Steps
 
@@ -74,20 +34,15 @@ When running storyline validation:
 2. **Dependency Check** - Quest chain dependencies are valid
 3. **Act Validation** - All acts have quests, required acts exist
 4. **Starting Room** - Starting room prototype exists
-5. **Playthrough** - Bot can complete all quests (if --run)
+5. **Playthrough** - ChannelBot can complete all quests
 
 ## Output Format
 
 ```markdown
-# Storyline Test Report: <storyline_id>
+# Storyline Test Report
 
-## Structure Validation
-- Quests found: X
-- Dependencies valid: ✅ | ❌
-- All references exist: ✅ | ❌
-
-## Playthrough Results (if using ChannelBot test)
-- Started: ✅
+## Playthrough Results
+- Started: pass/fail
 - Quests completed: X/Y
 - Objectives achieved: Z
 - Final status: COMPLETED | STUCK | FAILED
@@ -96,7 +51,7 @@ When running storyline validation:
 [List of errors/warnings]
 
 ## Summary
-Status: ✅ COMPLETABLE | ❌ BLOCKED AT [quest_id]
+Status: COMPLETABLE | BLOCKED AT [quest_id]
 ```
 
 ## Common Issues and Fixes
@@ -127,7 +82,6 @@ Status: ✅ COMPLETABLE | ❌ BLOCKED AT [quest_id]
 
 ## Notes
 
-- **Always prefer ChannelBot tests** over the legacy mix task
 - ChannelBot tests are integrated with ExUnit test suite
-- The legacy task is maintained for backwards compatibility only
 - Run storyline tests after any quest/dialogue changes
+- The legacy `mix loka.test.storyline` task has been deleted (Feb 2026)

@@ -375,8 +375,8 @@ rewards:
 # Validate all quests
 mix loka.test.validate --only quest
 
-# Run storyline bot test
-mix loka.test.storyline monastery_arc --run
+# Run storyline E2E test (ChannelBot)
+mix test test/integration/storyline_channel_test.exs
 
 # Check dependencies in IEx:
 alias Loka.WorldBuilder.Analysis.DependencyGraph

@@ -19,13 +19,11 @@ The storyline e2e tests currently use **Legacy Bot** (40% production parity), wh
 
 ### 1. Update Storyline Test Runner
 
-**Current** (`lib/mix/tasks/loka.test.storyline.ex`):
+**Old** (`lib/mix/tasks/loka.test.storyline.ex` -- DELETED):
 ```elixir
-# Uses BotSupervisor.spawn_bot with legacy Bot
-{:ok, bot_pid} = BotSupervisor.spawn_bot(
-  strategy: StorylineRunner,
-  strategy_opts: [storyline_id: storyline.key]
-)
+# Legacy bot path — no longer exists
+# Used BotSupervisor.spawn_bot with legacy Bot
+# Replaced by: mix test test/integration/storyline_channel_test.exs
 ```
 
 **Proposed**:
@@ -155,7 +153,7 @@ end
 - Verify it works end-to-end
 
 **Phase 2** (1 day):
-- Migrate `mix loka.test.storyline` to use ChannelBot
+- `mix loka.test.storyline` removed, replaced by `mix test test/integration/storyline_channel_test.exs`
 - Update CI configuration
 
 **Phase 3** (ongoing):

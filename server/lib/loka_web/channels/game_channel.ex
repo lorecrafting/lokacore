@@ -353,10 +353,7 @@ defmodule LokaWeb.GameChannel do
   @impl true
   def handle_in("navigate", %{"direction" => direction}, socket) do
     with_rate_limit(socket, fn ->
-      case ActionBridge.execute(socket, :navigate, %{direction: direction}) do
-        {:ok, socket} -> {:reply, :ok, socket}
-        {:error, _reason, socket} -> {:reply, :ok, socket}
-      end
+      dispatch_action(socket, :navigate, %{direction: direction})
     end)
   end
 
@@ -365,25 +362,16 @@ defmodule LokaWeb.GameChannel do
   # =============================================================================
 
   def handle_in("click_entity", %{"id" => id, "type" => type}, socket) do
-    case ActionBridge.execute(socket, :click_entity, %{entity_id: id, entity_type: type}) do
-      {:ok, socket} -> {:reply, :ok, socket}
-      {:error, _reason, socket} -> {:reply, :ok, socket}
-    end
+    dispatch_action(socket, :click_entity, %{entity_id: id, entity_type: type})
   end
 
   # Mobile app sends entity_id without type - auto-detect from room contents
   def handle_in("click_entity", %{"entity_id" => entity_id}, socket) do
-    case ActionBridge.execute(socket, :click_entity, %{entity_id: entity_id, entity_type: "auto"}) do
-      {:ok, socket} -> {:reply, :ok, socket}
-      {:error, _reason, socket} -> {:reply, :ok, socket}
-    end
+    dispatch_action(socket, :click_entity, %{entity_id: entity_id, entity_type: "auto"})
   end
 
   def handle_in("action", %{"action" => "talk", "entity_id" => entity_id}, socket) do
-    case ActionBridge.execute(socket, :talk, %{entity_id: entity_id}) do
-      {:ok, socket} -> {:reply, :ok, socket}
-      {:error, _reason, socket} -> {:reply, :ok, socket}
-    end
+    dispatch_action(socket, :talk, %{entity_id: entity_id})
   end
 
   def handle_in("dialogue_select", %{"choice_index" => choice_index}, socket) do
@@ -404,10 +392,7 @@ defmodule LokaWeb.GameChannel do
     entity = find_entity(room, entity_id, "npc")
 
     if entity do
-      case ActionBridge.execute(socket, :attack, %{entity_id: entity_id, entity: entity}) do
-        {:ok, socket} -> {:reply, :ok, socket}
-        {:error, _reason, socket} -> {:reply, :ok, socket}
-      end
+      dispatch_action(socket, :attack, %{entity_id: entity_id, entity: entity})
     else
       push(socket, "event", %{text: "You don't see that here."})
       {:reply, :ok, socket}
@@ -415,10 +400,7 @@ defmodule LokaWeb.GameChannel do
   end
 
   def handle_in("combat_action", %{"action" => "flee"}, socket) do
-    case ActionBridge.execute(socket, :flee, %{}) do
-      {:ok, socket} -> {:reply, :ok, socket}
-      {:error, _reason, socket} -> {:reply, :ok, socket}
-    end
+    dispatch_action(socket, :flee, %{})
   end
 
   # =============================================================================
@@ -426,31 +408,19 @@ defmodule LokaWeb.GameChannel do
   # =============================================================================
 
   def handle_in("action", %{"action" => "get", "entity_id" => entity_id}, socket) do
-    case ActionBridge.execute(socket, :get_item, %{entity_id: entity_id}) do
-      {:ok, socket} -> {:reply, :ok, socket}
-      {:error, _reason, socket} -> {:reply, :ok, socket}
-    end
+    dispatch_action(socket, :get_item, %{entity_id: entity_id})
   end
 
   def handle_in("inventory", %{"action" => "drop", "item_id" => item_id}, socket) do
-    case ActionBridge.execute(socket, :drop_item, %{item_id: item_id}) do
-      {:ok, socket} -> {:reply, :ok, socket}
-      {:error, _reason, socket} -> {:reply, :ok, socket}
-    end
+    dispatch_action(socket, :drop_item, %{item_id: item_id})
   end
 
   def handle_in("inventory", %{"action" => "equip", "item_id" => item_id}, socket) do
-    case ActionBridge.execute(socket, :equip_item, %{item_id: item_id}) do
-      {:ok, socket} -> {:reply, :ok, socket}
-      {:error, _reason, socket} -> {:reply, :ok, socket}
-    end
+    dispatch_action(socket, :equip_item, %{item_id: item_id})
   end
 
   def handle_in("inventory", %{"action" => "unequip", "slot" => slot}, socket) do
-    case ActionBridge.execute(socket, :unequip_item, %{slot: slot}) do
-      {:ok, socket} -> {:reply, :ok, socket}
-      {:error, _reason, socket} -> {:reply, :ok, socket}
-    end
+    dispatch_action(socket, :unequip_item, %{slot: slot})
   end
 
   # =============================================================================
@@ -462,10 +432,7 @@ defmodule LokaWeb.GameChannel do
     entity = find_entity(room, entity_id, "npc")
 
     if entity do
-      case ActionBridge.execute(socket, :open_shop, %{entity_id: entity_id, entity: entity}) do
-        {:ok, socket} -> {:reply, :ok, socket}
-        {:error, _reason, socket} -> {:reply, :ok, socket}
-      end
+      dispatch_action(socket, :open_shop, %{entity_id: entity_id, entity: entity})
     else
       push(socket, "event", %{text: "You don't see a merchant here."})
       {:reply, :ok, socket}
@@ -477,14 +444,7 @@ defmodule LokaWeb.GameChannel do
     npc = find_entity(room, npc_id, "npc")
 
     if npc do
-      case ActionBridge.execute(socket, :buy_item, %{
-             npc_id: npc_id,
-             item_key: item_key,
-             npc_entity: npc
-           }) do
-        {:ok, socket} -> {:reply, :ok, socket}
-        {:error, _reason, socket} -> {:reply, :ok, socket}
-      end
+      dispatch_action(socket, :buy_item, %{npc_id: npc_id, item_key: item_key, npc_entity: npc})
     else
       push(socket, "event", %{text: "You're not at a shop."})
       {:reply, :ok, socket}
@@ -496,14 +456,7 @@ defmodule LokaWeb.GameChannel do
     npc = find_entity(room, npc_id, "npc")
 
     if npc do
-      case ActionBridge.execute(socket, :sell_item, %{
-             npc_id: npc_id,
-             item_id: item_id,
-             npc_entity: npc
-           }) do
-        {:ok, socket} -> {:reply, :ok, socket}
-        {:error, _reason, socket} -> {:reply, :ok, socket}
-      end
+      dispatch_action(socket, :sell_item, %{npc_id: npc_id, item_id: item_id, npc_entity: npc})
     else
       push(socket, "event", %{text: "You're not at a shop."})
       {:reply, :ok, socket}
@@ -511,10 +464,7 @@ defmodule LokaWeb.GameChannel do
   end
 
   def handle_in("shop", %{"action" => "close"}, socket) do
-    case ActionBridge.execute(socket, :close_shop, %{}) do
-      {:ok, socket} -> {:reply, :ok, socket}
-      {:error, _reason, socket} -> {:reply, :ok, socket}
-    end
+    dispatch_action(socket, :close_shop, %{})
   end
 
   # =============================================================================
@@ -522,24 +472,15 @@ defmodule LokaWeb.GameChannel do
   # =============================================================================
 
   def handle_in("action", %{"action" => "open", "entity_id" => entity_id}, socket) do
-    case ActionBridge.execute(socket, :open_container, %{entity_id: entity_id}) do
-      {:ok, socket} -> {:reply, :ok, socket}
-      {:error, _reason, socket} -> {:reply, :ok, socket}
-    end
+    dispatch_action(socket, :open_container, %{entity_id: entity_id})
   end
 
   def handle_in("container", %{"action" => "take", "index" => index}, socket) do
-    case ActionBridge.execute(socket, :take_from_container, %{index: index}) do
-      {:ok, socket} -> {:reply, :ok, socket}
-      {:error, _reason, socket} -> {:reply, :ok, socket}
-    end
+    dispatch_action(socket, :take_from_container, %{index: index})
   end
 
   def handle_in("container", %{"action" => "close"}, socket) do
-    case ActionBridge.execute(socket, :close_container, %{}) do
-      {:ok, socket} -> {:reply, :ok, socket}
-      {:error, _reason, socket} -> {:reply, :ok, socket}
-    end
+    dispatch_action(socket, :close_container, %{})
   end
 
   # =============================================================================
@@ -547,10 +488,7 @@ defmodule LokaWeb.GameChannel do
   # =============================================================================
 
   def handle_in("gather", %{"node_type" => node_type}, socket) do
-    case ActionBridge.execute(socket, :gather, %{node_type: node_type}) do
-      {:ok, socket} -> {:reply, :ok, socket}
-      {:error, _reason, socket} -> {:reply, :ok, socket}
-    end
+    dispatch_action(socket, :gather, %{node_type: node_type})
   end
 
   # =============================================================================
@@ -558,10 +496,7 @@ defmodule LokaWeb.GameChannel do
   # =============================================================================
 
   def handle_in("craft", %{"recipe_key" => recipe_key, "tool_id" => tool_id}, socket) do
-    case ActionBridge.execute(socket, :craft, %{recipe_key: recipe_key, tool_id: tool_id}) do
-      {:ok, socket} -> {:reply, :ok, socket}
-      {:error, _reason, socket} -> {:reply, :ok, socket}
-    end
+    dispatch_action(socket, :craft, %{recipe_key: recipe_key, tool_id: tool_id})
   end
 
   # =============================================================================
@@ -570,18 +505,12 @@ defmodule LokaWeb.GameChannel do
 
   # Targeted emote - more specific pattern must come first
   def handle_in("emote", %{"emote_key" => emote_key, "target_id" => target_id}, socket) do
-    case ActionBridge.execute(socket, :emote, %{emote_key: emote_key, target_id: target_id}) do
-      {:ok, socket} -> {:reply, :ok, socket}
-      {:error, _reason, socket} -> {:reply, :ok, socket}
-    end
+    dispatch_action(socket, :emote, %{emote_key: emote_key, target_id: target_id})
   end
 
   # No-target emote
   def handle_in("emote", %{"emote_key" => emote_key}, socket) do
-    case ActionBridge.execute(socket, :emote, %{emote_key: emote_key}) do
-      {:ok, socket} -> {:reply, :ok, socket}
-      {:error, _reason, socket} -> {:reply, :ok, socket}
-    end
+    dispatch_action(socket, :emote, %{emote_key: emote_key})
   end
 
   # =============================================================================
@@ -589,17 +518,11 @@ defmodule LokaWeb.GameChannel do
   # =============================================================================
 
   def handle_in("social", %{"action" => "set_mood", "mood" => mood_str}, socket) do
-    case ActionBridge.execute(socket, :set_mood, %{mood: mood_str}) do
-      {:ok, socket} -> {:reply, :ok, socket}
-      {:error, _reason, socket} -> {:reply, :ok, socket}
-    end
+    dispatch_action(socket, :set_mood, %{mood: mood_str})
   end
 
   def handle_in("social", %{"action" => "set_pose", "pose" => pose_text}, socket) do
-    case ActionBridge.execute(socket, :set_pose, %{pose: pose_text}) do
-      {:ok, socket} -> {:reply, :ok, socket}
-      {:error, _reason, socket} -> {:reply, :ok, socket}
-    end
+    dispatch_action(socket, :set_pose, %{pose: pose_text})
   end
 
   # =============================================================================
@@ -609,10 +532,7 @@ defmodule LokaWeb.GameChannel do
   def handle_in("resurrect", %{"method" => method}, socket) do
     method_atom = if method in ["shrine", "healer"], do: String.to_atom(method), else: :shrine
 
-    case ActionBridge.execute(socket, :resurrect, %{method: method_atom}) do
-      {:ok, socket} -> {:reply, :ok, socket}
-      {:error, _reason, socket} -> {:reply, :ok, socket}
-    end
+    dispatch_action(socket, :resurrect, %{method: method_atom})
   end
 
   # =============================================================================
@@ -678,31 +598,19 @@ defmodule LokaWeb.GameChannel do
   end
 
   def handle_in("spark", %{"action" => "status"}, socket) do
-    case ActionBridge.execute(socket, :spark_status, %{}) do
-      {:ok, socket} -> {:reply, :ok, socket}
-      {:error, _reason, socket} -> {:reply, :ok, socket}
-    end
+    dispatch_action(socket, :spark_status, %{})
   end
 
   def handle_in("spark", %{"action" => "updates"}, socket) do
-    case ActionBridge.execute(socket, :spark_updates, %{}) do
-      {:ok, socket} -> {:reply, :ok, socket}
-      {:error, _reason, socket} -> {:reply, :ok, socket}
-    end
+    dispatch_action(socket, :spark_updates, %{})
   end
 
   def handle_in("spark", %{"action" => "dismiss"}, socket) do
-    case ActionBridge.execute(socket, :spark_dismiss_updates, %{}) do
-      {:ok, socket} -> {:reply, :ok, socket}
-      {:error, _reason, socket} -> {:reply, :ok, socket}
-    end
+    dispatch_action(socket, :spark_dismiss_updates, %{})
   end
 
   def handle_in("spark", %{"action" => "ask", "question" => question}, socket) do
-    case ActionBridge.execute(socket, :spark_ask, %{question: question}) do
-      {:ok, socket} -> {:reply, :ok, socket}
-      {:error, _reason, socket} -> {:reply, :ok, socket}
-    end
+    dispatch_action(socket, :spark_ask, %{question: question})
   end
 
   # =============================================================================
@@ -767,20 +675,11 @@ defmodule LokaWeb.GameChannel do
 
       # Navigation
       {:navigate, %{direction: direction}} ->
-        case ActionBridge.execute(socket, :navigate, %{direction: direction}) do
-          {:ok, socket} -> {:reply, :ok, socket}
-          {:error, _reason, socket} -> {:reply, :ok, socket}
-        end
+        dispatch_action(socket, :navigate, %{direction: direction})
 
       # Look (re-push current room)
       {:look, %{target: target}} ->
-        case ActionBridge.execute(socket, :click_entity, %{
-               entity_id: target,
-               entity_type: "auto"
-             }) do
-          {:ok, socket} -> {:reply, :ok, socket}
-          {:error, _reason, socket} -> {:reply, :ok, socket}
-        end
+        dispatch_action(socket, :click_entity, %{entity_id: target, entity_type: "auto"})
 
       {:look, %{}} ->
         push_current_room(socket)
@@ -790,10 +689,7 @@ defmodule LokaWeb.GameChannel do
       {:talk, %{target: target}} ->
         case find_entity_by_keyword(socket, target) do
           {:ok, entity_id} ->
-            case ActionBridge.execute(socket, :talk, %{entity_id: entity_id}) do
-              {:ok, socket} -> {:reply, :ok, socket}
-              {:error, _reason, socket} -> {:reply, :ok, socket}
-            end
+            dispatch_action(socket, :talk, %{entity_id: entity_id})
 
           :error ->
             push(socket, "output", %{text: "You don't see '#{target}' here."})
@@ -809,10 +705,7 @@ defmodule LokaWeb.GameChannel do
       {:get_item, %{target: target}} ->
         case find_entity_by_keyword(socket, target) do
           {:ok, entity_id} ->
-            case ActionBridge.execute(socket, :get_item, %{entity_id: entity_id}) do
-              {:ok, socket} -> {:reply, :ok, socket}
-              {:error, _reason, socket} -> {:reply, :ok, socket}
-            end
+            dispatch_action(socket, :get_item, %{entity_id: entity_id})
 
           :error ->
             push(socket, "output", %{text: "You don't see '#{target}' here."})
@@ -823,10 +716,7 @@ defmodule LokaWeb.GameChannel do
       {:drop_item, %{target: target}} ->
         case find_inventory_item_by_keyword(socket, target) do
           {:ok, item_id} ->
-            case ActionBridge.execute(socket, :drop_item, %{item_id: item_id}) do
-              {:ok, socket} -> {:reply, :ok, socket}
-              {:error, _reason, socket} -> {:reply, :ok, socket}
-            end
+            dispatch_action(socket, :drop_item, %{item_id: item_id})
 
           :error ->
             push(socket, "output", %{text: "You don't have '#{target}'."})
@@ -835,10 +725,7 @@ defmodule LokaWeb.GameChannel do
 
       # Say
       {:say, %{message: message}} ->
-        case ActionBridge.execute(socket, :chat, %{mode: :say, message: message}) do
-          {:ok, socket} -> {:reply, :ok, socket}
-          {:error, _reason, socket} -> {:reply, :ok, socket}
-        end
+        dispatch_action(socket, :chat, %{mode: :say, message: message})
 
       # Combat
       {:attack, %{target: target}} ->
@@ -852,13 +739,7 @@ defmodule LokaWeb.GameChannel do
                 to_string(e.id) == to_string(entity_id)
               end)
 
-            case ActionBridge.execute(socket, :attack, %{
-                   entity_id: entity_id,
-                   entity: entity
-                 }) do
-              {:ok, socket} -> {:reply, :ok, socket}
-              {:error, _reason, socket} -> {:reply, :ok, socket}
-            end
+            dispatch_action(socket, :attack, %{entity_id: entity_id, entity: entity})
 
           :error ->
             push(socket, "output", %{text: "You don't see '#{target}' here."})
@@ -866,19 +747,13 @@ defmodule LokaWeb.GameChannel do
         end
 
       {:flee, %{}} ->
-        case ActionBridge.execute(socket, :flee, %{}) do
-          {:ok, socket} -> {:reply, :ok, socket}
-          {:error, _reason, socket} -> {:reply, :ok, socket}
-        end
+        dispatch_action(socket, :flee, %{})
 
       # Equip/Unequip
       {:equip, %{target: target}} ->
         case find_inventory_item_by_keyword(socket, target) do
           {:ok, item_id} ->
-            case ActionBridge.execute(socket, :equip_item, %{item_id: item_id}) do
-              {:ok, socket} -> {:reply, :ok, socket}
-              {:error, _reason, socket} -> {:reply, :ok, socket}
-            end
+            dispatch_action(socket, :equip_item, %{item_id: item_id})
 
           :error ->
             push(socket, "output", %{text: "You don't have '#{target}'."})
@@ -886,10 +761,7 @@ defmodule LokaWeb.GameChannel do
         end
 
       {:unequip, %{target: target}} ->
-        case ActionBridge.execute(socket, :unequip_item, %{slot: target}) do
-          {:ok, socket} -> {:reply, :ok, socket}
-          {:error, _reason, socket} -> {:reply, :ok, socket}
-        end
+        dispatch_action(socket, :unequip_item, %{slot: target})
 
       # Use item (on self or on target)
       {:use_item, %{item: item_keyword} = params} ->
@@ -907,14 +779,7 @@ defmodule LokaWeb.GameChannel do
                   end
               end
 
-            case ActionBridge.execute(
-                   socket,
-                   :use_item,
-                   Map.merge(%{item_id: item_id}, target_context)
-                 ) do
-              {:ok, socket} -> {:reply, :ok, socket}
-              {:error, _reason, socket} -> {:reply, :ok, socket}
-            end
+            dispatch_action(socket, :use_item, Map.merge(%{item_id: item_id}, target_context))
 
           :error ->
             push(socket, "output", %{text: "You don't have '#{item_keyword}'."})
@@ -977,8 +842,14 @@ defmodule LokaWeb.GameChannel do
         {:reply, :ok, socket}
       rescue
         e ->
-          Logger.error("[BUILDER AI] Chat failed: #{Exception.message(e)}")
-          push(socket, "output", %{text: "[BUILDER] AI command failed: #{Exception.message(e)}"})
+          Logger.error(
+            "[BUILDER AI] Chat failed: #{Exception.message(e)}\n#{Exception.format_stacktrace(__STACKTRACE__)}"
+          )
+
+          push(socket, "output", %{
+            text: "[BUILDER] AI command failed. Check server logs for details."
+          })
+
           {:reply, :ok, socket}
       end
     else
@@ -994,8 +865,14 @@ defmodule LokaWeb.GameChannel do
         {:reply, :ok, socket}
       rescue
         e ->
-          Logger.error("[BUILDER AI] Command #{cmd} failed: #{Exception.message(e)}")
-          push(socket, "output", %{text: "[BUILDER] AI command failed: #{Exception.message(e)}"})
+          Logger.error(
+            "[BUILDER AI] Command #{cmd} failed: #{Exception.message(e)}\n#{Exception.format_stacktrace(__STACKTRACE__)}"
+          )
+
+          push(socket, "output", %{
+            text: "[BUILDER] AI command failed. Check server logs for details."
+          })
+
           {:reply, :ok, socket}
       end
     else
@@ -1415,6 +1292,13 @@ defmodule LokaWeb.GameChannel do
 
   # NOTE: Navigation, inventory, equipment logic moved to Loka.Game.Actions
   # GameChannel now uses ActionBridge.execute/3 for these actions
+
+  defp dispatch_action(socket, action, params) do
+    case ActionBridge.execute(socket, action, params) do
+      {:ok, socket} -> {:reply, :ok, socket}
+      {:error, _reason, socket} -> {:reply, :ok, socket}
+    end
+  end
 
   defp find_entity(room, id, "npc") do
     Enum.find(room.entities, fn e -> e.id == id end)

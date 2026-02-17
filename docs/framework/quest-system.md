@@ -176,8 +176,8 @@ Quest.Validator.valid?()
 # Run quest validators
 mix loka.test.validate --only quest
 
-# Run storyline bot test
-mix loka.test.storyline monastery_arc --run
+# Run storyline E2E test (ChannelBot)
+mix test test/integration/storyline_channel_test.exs
 ```
 
 ### Dependency Analysis Tools

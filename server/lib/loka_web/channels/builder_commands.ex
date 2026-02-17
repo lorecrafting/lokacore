@@ -106,8 +106,11 @@ defmodule LokaWeb.Channels.BuilderCommands do
         dispatch(cmd, params, socket)
       rescue
         e ->
-          Logger.error("[BUILDER] Command #{cmd} crashed: #{Exception.message(e)}")
-          {:error, "Command failed: #{Exception.message(e)}", socket}
+          Logger.error(
+            "[BUILDER] Command #{cmd} crashed: #{Exception.message(e)}\n#{Exception.format_stacktrace(__STACKTRACE__)}"
+          )
+
+          {:error, "Command failed. Check server logs for details.", socket}
       end
 
     case result do

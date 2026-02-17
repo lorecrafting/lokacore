@@ -32,15 +32,14 @@ cd server && mix loka.test.validate
 - Check for missing entities, broken references
 - Flag any errors or warnings
 
-### Step 3: Storyline Tests (if applicable)
+### Step 3: Storyline E2E Tests (if applicable)
 
 ```bash
-cd server && mix loka.test.storyline --list
-# Then test relevant storylines
-cd server && mix loka.test.storyline monastery_arc --run
+cd server && mix test test/integration/storyline_channel_test.exs
 ```
 
 - Only run if storyline-related changes were made
+- Uses ChannelBot for 95% production parity E2E testing
 - Verify quest chains are completable
 
 ### Step 4: Balance Check

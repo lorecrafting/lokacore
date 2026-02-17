@@ -139,8 +139,8 @@ quest_info: ...
 # Validate all content
 mix loka.test.validate
 
-# Run storyline test
-mix loka.test.storyline monastery_arc --run
+# Run storyline E2E test (ChannelBot)
+mix test test/integration/storyline_channel_test.exs
 
 # Check specific quest dependencies (in IEx)
 alias Loka.Testing.LLM.DependencyGraph

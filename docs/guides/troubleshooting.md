@@ -8,8 +8,8 @@ When things go wrong with LLM-assisted game content work.
 
 ### Symptom
 ```
-mix loka.test.storyline monastery_arc --run
-# Bot stuck at quest X, action: :idle for 20+ ticks
+mix test test/integration/storyline_channel_test.exs
+# Test stuck at quest X, action: :idle for 20+ ticks
 ```
 
 ### Diagnosis
@@ -273,5 +273,5 @@ What am I missing?"
 ```bash
 # Run this regularly during content work
 mix loka.test.validate
-mix loka.test.storyline monastery_arc --run
+mix test test/integration/storyline_channel_test.exs
 ```

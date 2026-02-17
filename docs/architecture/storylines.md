@@ -292,17 +292,14 @@ components:
 
 ## Validation
 
-Validate storylines with the mix task:
+Validate storylines with the ChannelBot E2E test:
 
 ```bash
-# List all storylines
-mix loka.test.storyline --list
+# Run storyline E2E test (95% production parity)
+mix test test/integration/storyline_channel_test.exs
 
-# Validate structure
-mix loka.test.storyline monastery_arc --verbose
-
-# Run full playthrough with bot
-mix loka.test.storyline monastery_arc --run
+# With trace output
+mix test test/integration/storyline_channel_test.exs --trace
 ```
 
 **Validation checks:**
@@ -354,6 +351,6 @@ end
 1. **One quest per objective type** - Keep quests focused
 2. **Clear quest chains** - Use prerequisites to guide players
 3. **Side quests are optional** - Don't block main story on side content
-4. **Test with bots** - Run `mix loka.test.storyline --run` regularly
+4. **Test with bots** - Run `mix test test/integration/storyline_channel_test.exs` regularly
 5. **Journal entries** - Provide clear guidance at each step
 6. **Level gates sparingly** - Use story prerequisites over level requirements

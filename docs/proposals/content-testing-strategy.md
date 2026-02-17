@@ -273,7 +273,7 @@ CI (weekly):    mix loka.test.balance (Tier 5 simulation, ~30 min)
 1. **Deprecate QuestTester** — Replace all usages with ChannelBot-based tests
 2. **Deprecate legacy Bot** — Only ChannelBot for E2E
 3. **Deprecate `mix loka.test.quest`** — Replace with generated state machine tests
-4. **Deprecate `mix loka.test.storyline`** — Already deprecated, remove entirely
+4. **`mix loka.test.storyline` removed** — Replaced by `mix test test/integration/storyline_channel_test.exs` (ChannelBot E2E)
 
 ## Prerequisite: Shared StateMachine Engine
 

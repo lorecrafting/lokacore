@@ -24,7 +24,7 @@ Loka has a **unified testing architecture** with a single source of truth for qu
 │ │ BOT TESTING (Elixir)    │   │ E2E TESTING (Playwright)│   │
 │ │ Direct function calls   │   │ HTTP API + UI clicks    │   │
 │ │ ~300 lines              │   │ ~250 lines              │   │
-│ │ mix loka.test.storyline │   │ mix e2e                 │   │
+│ │ ChannelBot E2E test     │   │ mix e2e                 │   │
 │ └─────────────────────────┘   └─────────────────────────┘   │
 ├─────────────────────────────────────────────────────────────┤
 │ STRATEGY API (for Playwright)                               │
@@ -160,20 +160,14 @@ The legacy bot directly calls framework modules, bypassing the channel layer:
 
 ## Quick Start
 
-### Running Storyline Tests
+### Running Storyline E2E Tests
 
 ```bash
-# List available storylines
-mix loka.test.storyline --list
+# Run ChannelBot E2E storyline test (95% production parity)
+mix test test/integration/storyline_channel_test.exs
 
-# Validate a storyline (fast, no bot run)
-mix loka.test.storyline monastery_arc
-
-# Run full playthrough simulation
-mix loka.test.storyline monastery_arc --run
-
-# Verbose output
-mix loka.test.storyline monastery_arc --run --verbose
+# With trace output
+mix test test/integration/storyline_channel_test.exs --trace
 ```
 
 ### Master Test Runner
@@ -943,8 +937,8 @@ jobs:
       - name: Content Validation
         run: mix loka.test.validate --strict
 
-      - name: Storyline Validation
-        run: mix loka.test.storyline --list | xargs -I {} mix loka.test.storyline {}
+      - name: Storyline E2E
+        run: mix test test/integration/storyline_channel_test.exs
 
       - name: Balance Check
         run: mix loka.test.balance --quick

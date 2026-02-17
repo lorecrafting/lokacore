@@ -272,7 +272,7 @@ Bug Found
 jobs:
   test:
     - name: Run e2e storyline test
-      run: mix loka.test.storyline monastery_arc --run --diagnostic-output
+      run: mix test test/integration/storyline_channel_test.exs
       continue-on-error: true
 
     - name: Upload diagnostics
