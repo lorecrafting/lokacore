@@ -467,7 +467,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
         {:error, "#{subtype} '#{key}' not found"}
 
       entity ->
-        case EntityManager.update_entity(entity.id, updates) do
+        case EntityManager.update_entity(entity.key, updates) do
           {:ok, updated} ->
             {:ok,
              %{
@@ -494,7 +494,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
         {:error, "#{subtype} '#{key}' not found"}
 
       entity ->
-        case EntityManager.delete_entity(entity.id) do
+        case EntityManager.delete_entity(entity.key) do
           :ok ->
             {:ok,
              %{

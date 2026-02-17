@@ -9,8 +9,8 @@ defmodule Loka.WorldBuilder.EntityManager do
       EntityManager.create_entity(:npc, %{name: "Guard", level: 5})
       EntityManager.create_entity(:item, %{name: "Sword", item_type: "weapon"})
       EntityManager.list_entities(:npc)
-      EntityManager.update_entity(entity_id, %{name: "Elite Guard"})
-      EntityManager.delete_entity(entity_id)
+      EntityManager.update_entity(entity_key, %{name: "Elite Guard"})
+      EntityManager.delete_entity(entity_key)
   """
 
   require Logger
@@ -71,12 +71,12 @@ defmodule Loka.WorldBuilder.EntityManager do
   end
 
   @doc """
-  Get an entity by ID.
+  Get an entity by key.
 
   Returns {:ok, entity_map} or {:error, reason}
   """
-  def get_entity(entity_id) when is_binary(entity_id) do
-    case Entities.find_one(key: entity_id) do
+  def get_entity(entity_key) when is_binary(entity_key) do
+    case Entities.find_one(key: entity_key) do
       {:ok, entity} ->
         {:ok, enrich_for_ui(entity)}
 
@@ -86,12 +86,12 @@ defmodule Loka.WorldBuilder.EntityManager do
   end
 
   @doc """
-  Update an existing entity.
+  Update an existing entity by key.
 
   Returns {:ok, entity_map} or {:error, reason}
   """
-  def update_entity(entity_id, attrs) when is_binary(entity_id) and is_map(attrs) do
-    with {:ok, entity} <- Entities.find_one(key: entity_id) do
+  def update_entity(entity_key, attrs) when is_binary(entity_key) and is_map(attrs) do
+    with {:ok, entity} <- Entities.find_one(key: entity_key) do
       attrs = ensure_atom_keys(attrs)
 
       db_updates = %{}
@@ -121,8 +121,8 @@ defmodule Loka.WorldBuilder.EntityManager do
 
       case Entities.update(entity.id, db_updates) do
         {:ok, _} ->
-          Logger.info("[EntityManager] Updated entity: #{entity_id}")
-          get_entity(entity_id)
+          Logger.info("[EntityManager] Updated entity: #{entity_key}")
+          get_entity(entity_key)
 
         {:error, reason} ->
           Logger.error("[EntityManager] Update failed: #{inspect(reason)}")
@@ -135,16 +135,16 @@ defmodule Loka.WorldBuilder.EntityManager do
   end
 
   @doc """
-  Delete an entity by ID.
+  Delete an entity by key.
 
   Returns :ok or {:error, reason}
   """
-  def delete_entity(entity_id) when is_binary(entity_id) do
-    case Entities.find_one(key: entity_id) do
+  def delete_entity(entity_key) when is_binary(entity_key) do
+    case Entities.find_one(key: entity_key) do
       {:ok, entity} ->
         case Entities.delete(entity.id) do
           {:ok, _} ->
-            Logger.info("[EntityManager] Deleted entity: #{entity_id}")
+            Logger.info("[EntityManager] Deleted entity: #{entity_key}")
             :ok
 
           {:error, reason} ->
@@ -177,7 +177,7 @@ defmodule Loka.WorldBuilder.EntityManager do
     item_type = get_in(components, ["item", "item_type"])
 
     %{
-      id: entity.id || entity.key,
+      id: entity.id,
       key: entity.key,
       type: entity.type,
       subtype: entity.type,

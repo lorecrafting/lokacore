@@ -25,8 +25,8 @@ defmodule Loka.WorldBuilder.RoomManager do
 
   Returns {:ok, room_map} or {:error, :not_found}
   """
-  def get_room(room_id) when is_binary(room_id) do
-    case get_room_entity(room_id) do
+  def get_room(room_id_or_key) when is_binary(room_id_or_key) do
+    case get_room_entity(room_id_or_key) do
       {:ok, entity} ->
         {:ok, enrich_room_for_frontend_from_entity(entity)}
 
@@ -110,21 +110,21 @@ defmodule Loka.WorldBuilder.RoomManager do
   Updates an existing room.
 
   ## Parameters
-  - room_id: Room ID or key to update
+  - room_id_or_key: Room UUID or key to update
   - attrs: Map of fields to update
 
   Returns {:ok, room_map} or {:error, reason}
   """
-  def update_room(room_id, attrs) when is_binary(room_id) and is_map(attrs) do
-    case get_room_entity(room_id) do
+  def update_room(room_id_or_key, attrs) when is_binary(room_id_or_key) and is_map(attrs) do
+    case get_room_entity(room_id_or_key) do
       {:ok, entity} ->
         attrs = ensure_atom_keys(attrs)
         db_updates = prepare_db_updates(attrs, entity)
 
         case Entities.update(entity.id, db_updates) do
           {:ok, _} ->
-            Logger.info("[RoomManager] Updated room: #{room_id}")
-            get_room(room_id)
+            Logger.info("[RoomManager] Updated room: #{room_id_or_key}")
+            get_room(room_id_or_key)
 
           {:error, reason} ->
             Logger.error("[RoomManager] Update failed: #{inspect(reason)}")
@@ -144,8 +144,8 @@ defmodule Loka.WorldBuilder.RoomManager do
 
   Returns {:ok, room_map} or {:error, reason}
   """
-  def delete_room(room_id) when is_binary(room_id) do
-    case get_room_entity(room_id) do
+  def delete_room(room_id_or_key) when is_binary(room_id_or_key) do
+    case get_room_entity(room_id_or_key) do
       {:ok, entity} ->
         room_map = enrich_room_for_frontend_from_entity(entity)
 
@@ -161,7 +161,7 @@ defmodule Loka.WorldBuilder.RoomManager do
             :ok
         end
 
-        Logger.info("[RoomManager] Deleted room: #{room_id}")
+        Logger.info("[RoomManager] Deleted room: #{room_id_or_key}")
         {:ok, room_map}
 
       {:error, :not_a_room} ->
@@ -404,15 +404,15 @@ defmodule Loka.WorldBuilder.RoomManager do
   end
 
   @doc false
-  defp get_room_entity(room_id) when is_binary(room_id) do
+  defp get_room_entity(room_id_or_key) when is_binary(room_id_or_key) do
     # Try by key first
-    case Entities.find_one(key: room_id, type: :room) do
+    case Entities.find_one(key: room_id_or_key, type: :room) do
       {:ok, entity} ->
         {:ok, entity}
 
       {:error, :not_found} ->
         # Try by UUID
-        case Entities.get_entity(room_id) do
+        case Entities.get_entity(room_id_or_key) do
           %{type: :room} = schema ->
             {:ok, Entities.to_entity(schema)}
 

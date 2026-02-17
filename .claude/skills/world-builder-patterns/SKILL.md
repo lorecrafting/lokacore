@@ -47,8 +47,8 @@ get_in(item, [:components, :item, :item_type])
 ```elixir
 # GOOD - Use EntityManager for NPCs, Items, etc.
 EntityManager.create_entity(:npc, %{name: "Guard", key: "town_guard"})
-EntityManager.update_entity(:item, item_id, %{name: "New Name"})
-EntityManager.delete_entity(:npc, npc_id)
+EntityManager.update_entity(entity_key, %{name: "New Name"})
+EntityManager.delete_entity(entity_key)
 
 # BAD - Don't create redundant managers
 NPCManager.create_npc(...)  # Use EntityManager instead!
