@@ -315,11 +315,15 @@ defmodule Loka.WorldBuilder.AnthropicClient do
 
   @doc """
   Get tool definitions in Anthropic API format.
+
+  - `:builder` (default) — all tools including CRUD and world mutation
+  - `:player` — read-only query tools only (safe for player-facing AI)
   """
-  def get_tools do
+  @spec get_tools(atom()) :: [map()]
+  def get_tools(mode \\ :builder) do
     alias Loka.WorldBuilder.MCP.Tools
 
-    Tools.tools()
+    Tools.tools(mode)
     |> Enum.map(fn tool ->
       %{
         name: tool.name,

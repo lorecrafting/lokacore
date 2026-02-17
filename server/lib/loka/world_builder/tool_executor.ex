@@ -10,6 +10,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
   - `ToolExecutor.Zones` — zone, cutscene, and storyline CRUD
   - `ToolExecutor.Scripts` — script CRUD, templates, attach/detach
   - `ToolExecutor.Analysis` — search, validation, guides
+  - `ToolExecutor.GameQueries` — read-only entity/player state queries (builder vs player modes)
   """
   require Logger
 
@@ -23,7 +24,8 @@ defmodule Loka.WorldBuilder.ToolExecutor do
     Dialogues,
     Zones,
     Scripts,
-    Analysis
+    Analysis,
+    GameQueries
   }
 
   @doc """
@@ -47,7 +49,13 @@ defmodule Loka.WorldBuilder.ToolExecutor do
     # Normalize tool name - strip wb_ prefix if present for backwards compatibility
     normalized_name = String.replace_prefix(tool_name, "wb_", "")
 
-    result = dispatch(normalized_name, input)
+    # Enforce mode — player mode can only use read-only tools
+    result =
+      if opts[:mode] == :player and not player_allowed?(normalized_name) do
+        {:error, "Tool '#{tool_name}' is not available in player mode"}
+      else
+        dispatch(normalized_name, input, opts)
+      end
 
     # Log to audit log
     case result do
@@ -106,7 +114,7 @@ defmodule Loka.WorldBuilder.ToolExecutor do
   # Dispatch
   # =============================================================================
 
-  defp dispatch(name, input) do
+  defp dispatch(name, input, opts) do
     case name do
       # Guidance
       "read_guide" -> Analysis.execute_read_guide(input)
@@ -169,9 +177,17 @@ defmodule Loka.WorldBuilder.ToolExecutor do
       # Analysis tools
       "validate_world" -> Analysis.execute_validate_world(input)
       "search_content" -> Analysis.execute_search_content(input)
+      # Game query tools (read-only, mode-aware)
+      "get_entity" -> GameQueries.execute_get_entity(input, opts)
+      "query_entities" -> GameQueries.execute_query_entities(input, opts)
+      "get_player_state" -> GameQueries.execute_get_player_state(opts)
       _ -> {:error, "Unknown tool: #{name}"}
     end
   end
+
+  # Tools allowed in :player mode (read-only, no world mutation)
+  @player_tools ~w(get_entity query_entities get_player_state)
+  defp player_allowed?(name), do: name in @player_tools
 
   defp result_preview({:ok, data}) when is_map(data) do
     data[:message] || "success"

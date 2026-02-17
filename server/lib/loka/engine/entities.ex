@@ -336,16 +336,27 @@ defmodule Loka.Engine.Entities do
 
   @doc "V1 compat — gets entity schema by ID."
   @spec get_entity(String.t() | nil) :: EntitySchema.t() | nil
-  def get_entity(id) when is_binary(id), do: Repo.get(EntitySchema, id)
+  def get_entity(id) when is_binary(id) do
+    case Repo.get(EntitySchema, id) do
+      nil -> nil
+      schema -> Repo.preload(schema, :tags)
+    end
+  end
+
   def get_entity(_), do: nil
 
   @doc "V1 compat — gets entity schema by ID, raises if not found."
   @spec get_entity!(String.t()) :: EntitySchema.t()
-  def get_entity!(id), do: Repo.get!(EntitySchema, id)
+  def get_entity!(id), do: Repo.get!(EntitySchema, id) |> Repo.preload(:tags)
 
   @doc "V1 compat — gets entity schema by key (first match)."
   @spec get_entity_by_key(String.t()) :: EntitySchema.t() | nil
-  def get_entity_by_key(key) when is_binary(key), do: Repo.get_by(EntitySchema, key: key)
+  def get_entity_by_key(key) when is_binary(key) do
+    case Repo.get_by(EntitySchema, key: key) do
+      nil -> nil
+      schema -> Repo.preload(schema, :tags)
+    end
+  end
 
   @doc "V1 compat — gets all entity schemas with the given key."
   @spec get_all_by_key(String.t()) :: [EntitySchema.t()]
@@ -533,6 +544,7 @@ defmodule Loka.Engine.Entities do
     |> filter_by_prototype(opts[:is_prototype])
     |> filter_by_prototype_key(opts[:prototype_key])
     |> filter_by_tags(opts[:tags])
+    |> filter_by_limit(opts[:limit])
   end
 
   defp filter_by_type(query, nil), do: query
@@ -559,6 +571,9 @@ defmodule Loka.Engine.Entities do
       )
     end)
   end
+
+  defp filter_by_limit(query, nil), do: query
+  defp filter_by_limit(query, n) when is_integer(n), do: limit(query, ^n)
 
   defp preload_associations(query, []), do: query
   defp preload_associations(query, assocs), do: preload(query, ^assocs)

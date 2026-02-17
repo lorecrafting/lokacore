@@ -9,9 +9,15 @@ defmodule Loka.WorldBuilder.MCP.Tools do
   alias Loka.WorldBuilder.ToolExecutor
 
   @doc """
-  Returns all World Builder tools in MCP format.
+  Returns World Builder tools in MCP format, filtered by access mode.
+
+  - `:builder` (default) — all tools including CRUD and world mutation
+  - `:player` — read-only query tools only (safe for player-facing AI)
   """
-  def tools do
+  @spec tools(atom()) :: [map()]
+  def tools(mode \\ :builder)
+
+  def tools(:builder) do
     guidance_tools() ++
       room_tools() ++
       entity_tools() ++
@@ -22,7 +28,12 @@ defmodule Loka.WorldBuilder.MCP.Tools do
       storyline_tools() ++
       script_tools() ++
       query_tools() ++
+      game_query_tools() ++
       analysis_tools()
+  end
+
+  def tools(:player) do
+    game_query_tools()
   end
 
   @doc """
@@ -863,6 +874,72 @@ defmodule Loka.WorldBuilder.MCP.Tools do
           }
         },
         callback: fn args -> dispatch("detach_script", args) end
+      }
+    ]
+  end
+
+  # Game query tools — read-only access to the entity database and player state
+  defp game_query_tools do
+    [
+      %{
+        name: "wb_get_entity",
+        description: """
+        Get a single entity by key or UUID, with all its components.
+        Use this to inspect any entity in the game world (rooms, NPCs, items,
+        quests, scripts, etc.) in full detail.
+        """,
+        inputSchema: %{
+          type: "object",
+          required: ["key"],
+          properties: %{
+            key: %{type: "string", description: "Entity key or UUID"},
+            type: %{
+              type: "string",
+              description: "Optional entity type filter (room, npc, item, quest, etc.)"
+            }
+          }
+        },
+        callback: fn args -> dispatch("get_entity", args) end
+      },
+      %{
+        name: "wb_query_entities",
+        description: """
+        Query entities by type and optional filters. Returns a list of matching
+        entities with key, name, type, and location. Use for exploring what exists
+        in the world.
+        """,
+        inputSchema: %{
+          type: "object",
+          required: ["type"],
+          properties: %{
+            type: %{
+              type: "string",
+              description:
+                "Entity type to query (room, npc, item, character, quest, exit, script, etc.)"
+            },
+            location_id: %{
+              type: "string",
+              description: "Filter by location (room UUID)"
+            },
+            limit: %{
+              type: "integer",
+              description: "Max results to return (default 50)"
+            }
+          }
+        },
+        callback: fn args -> dispatch("query_entities", args) end
+      },
+      %{
+        name: "wb_get_player_state",
+        description: """
+        Get the current player's full character state including all components
+        (inventory, equipment, quests, stats, flags, etc.). No parameters needed.
+        """,
+        inputSchema: %{
+          type: "object",
+          properties: %{}
+        },
+        callback: fn _args -> dispatch("get_player_state", %{}) end
       }
     ]
   end
