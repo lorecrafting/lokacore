@@ -124,20 +124,15 @@ defmodule Mix.Tasks.Loka.Test.Ai do
       "test/loka/world_builder/tool_definitions_test.exs"
     ]
 
-    # Filter to paths that exist
-    existing =
-      test_paths
-      |> Enum.map(&Path.join("server", &1))
-      |> Enum.filter(&File.exists?/1)
-      |> Enum.map(&String.replace_prefix(&1, "server/", ""))
+    # Filter to paths that exist (relative to CWD, which is server/)
+    existing = Enum.filter(test_paths, &File.exists?/1)
 
     if existing == [] do
       Mix.shell().info("No AI test files found yet.")
       return_ok()
     end
 
-    args = Enum.flat_map(existing, fn path -> ["--include", "ai_test", path] end)
-    args = ["test" | args]
+    args = ["test" | existing]
 
     case System.cmd("mix", args, cd: File.cwd!(), into: IO.stream(:stdio, :line)) do
       {_, 0} ->
