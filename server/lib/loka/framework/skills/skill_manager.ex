@@ -133,24 +133,6 @@ defmodule Loka.Framework.Skills.SkillManager do
     end
   end
 
-  @doc """
-  Reduces a skill level, refunding points.
-  """
-  def untrain(%Entity{} = entity, skill_key) do
-    current_level = get_level(entity, skill_key)
-
-    if current_level > 0 do
-      skills = get_player_skills(entity)
-      skill_data = Map.get(skills, skill_key, %{level: 0, xp: 0})
-      updated_skill = Map.put(skill_data, :level, current_level - 1)
-      updated_skills = Map.put(skills, skill_key, updated_skill)
-
-      {:ok, put_player_skills(entity, updated_skills)}
-    else
-      {:error, :skill_not_trained}
-    end
-  end
-
   # =============================================================================
   # Skill Practice (XP Gain)
   # =============================================================================

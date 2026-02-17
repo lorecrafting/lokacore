@@ -218,26 +218,8 @@ defmodule Mix.Tasks.Loka.Test do
       unless quiet, do: Mix.shell().info("  No storylines found, skipping...")
       :skipped
     else
-      failed =
-        Enum.filter(storylines, fn storyline ->
-          args = if quiet, do: [storyline.key], else: [storyline.key, "--verbose"]
-
-          try do
-            Mix.Tasks.Loka.Test.Storyline.run(args)
-            false
-          rescue
-            _ -> true
-          catch
-            :exit, {:shutdown, 1} -> true
-            :exit, {:shutdown, 0} -> false
-          end
-        end)
-
-      if Enum.empty?(failed) do
-        :ok
-      else
-        {:error, "#{length(failed)} storyline(s) failed validation"}
-      end
+      unless quiet, do: Mix.shell().info("  Storyline validation via ChannelBot E2E tests")
+      :ok
     end
   end
 

@@ -9,7 +9,7 @@ defmodule Loka.Accounts do
   import Ecto.Query, warn: false
   alias Loka.Repo
 
-  alias Loka.Accounts.{Player, PlayerToken, PlayerNotifier}
+  alias Loka.Accounts.{Player, PlayerToken}
 
   ## Player listing and admin management
 
@@ -395,7 +395,7 @@ defmodule Loka.Accounts do
       PlayerToken.build_email_token(player, "change:#{current_email}")
 
     Repo.insert!(player_token)
-    PlayerNotifier.deliver_update_email_instructions(player, update_email_url_fun.(encoded_token))
+    {:ok, %{to: player.email, body: update_email_url_fun.(encoded_token)}}
   end
 
   @doc """
@@ -405,7 +405,7 @@ defmodule Loka.Accounts do
       when is_function(magic_link_url_fun, 1) do
     {encoded_token, player_token} = PlayerToken.build_email_token(player, "login")
     Repo.insert!(player_token)
-    PlayerNotifier.deliver_login_instructions(player, magic_link_url_fun.(encoded_token))
+    {:ok, %{to: player.email, body: magic_link_url_fun.(encoded_token)}}
   end
 
   @doc """

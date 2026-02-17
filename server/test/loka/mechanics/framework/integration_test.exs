@@ -183,12 +183,6 @@ defmodule Loka.Framework.IntegrationTest do
           assert rewards.xp == 50
           assert rewards.gold == 25
 
-          # Apply rewards
-          {:ok, updated_state} = Combat.apply_rewards(game_state, rewards)
-
-          # Verify gold was added
-          assert Entity.get_component(updated_state, "stats")["gold"] == 125
-
         :ongoing ->
           # Enemy might have survived somehow, but we expect victory with 1 HP enemy
           flunk("Expected victory but combat is ongoing")
@@ -495,14 +489,8 @@ defmodule Loka.Framework.IntegrationTest do
       # 4. Check if enemy died
       case Combat.check_combat_end(combat_state, game_state) do
         {:victory, rewards} ->
-          # 5. Apply rewards
           assert rewards.xp == 100
           assert rewards.gold == 50
-
-          {:ok, updated_state} = Combat.apply_rewards(game_state, rewards)
-
-          # Verify gold was added
-          assert Entity.get_component(updated_state, "stats")["gold"] == 150
 
         :ongoing ->
           # Combat ongoing is acceptable if enemy survived the hit

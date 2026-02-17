@@ -243,52 +243,6 @@ defmodule Loka.Framework.CombatTest do
     end
   end
 
-  describe "apply_rewards/2" do
-    test "adds gold to player stats" do
-      entity = character_fixture(stats: %{"gold" => 100, "str" => 10, "sta" => 10})
-
-      rewards = %{xp: 10, gold: 50}
-
-      {:ok, updated_entity} = Combat.apply_rewards(entity, rewards)
-
-      # Gold should be added
-      new_gold = Entity.get_component(updated_entity, "stats")["gold"]
-      assert new_gold == 150
-    end
-
-    test "awards XP to player" do
-      entity =
-        character_fixture(
-          stats: %{"gold" => 0, "xp" => 0, "level" => 1, "str" => 10, "sta" => 10}
-        )
-
-      rewards = %{xp: 10, gold: 0}
-
-      result = Combat.apply_rewards(entity, rewards)
-
-      case result do
-        {:ok, _updated_entity} ->
-          # XP was awarded (no level up)
-          assert true
-
-        {:ok, _updated_entity, _level_up_info} ->
-          # XP was awarded with level up
-          assert true
-      end
-    end
-
-    test "handles zero rewards" do
-      entity = character_fixture(stats: %{"gold" => 100, "str" => 10, "sta" => 10})
-
-      rewards = %{xp: 0, gold: 0}
-
-      {:ok, updated_entity} = Combat.apply_rewards(entity, rewards)
-
-      # Gold should remain the same
-      assert Entity.get_component(updated_entity, "stats")["gold"] == 100
-    end
-  end
-
   describe "damage calculation" do
     test "damage is always at least 1" do
       # Create high defense enemy

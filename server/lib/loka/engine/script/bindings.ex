@@ -526,33 +526,11 @@ defmodule Loka.Engine.Script.Bindings do
   end
 
   defp current_hour do
-    # Use configured module to avoid Engine → Framework dependency
-    case Application.get_env(:loka, :world_time_module) do
-      nil ->
-        DateTime.utc_now().hour
-
-      module ->
-        try do
-          module.get_hour()
-        rescue
-          _ -> DateTime.utc_now().hour
-        end
-    end
+    DateTime.utc_now().hour
   end
 
-  defp current_weather(player) do
-    room = get_room(player)
-    # Check if we have a valid room and if it's outdoors
-    if room && "outdoor" in (room[:tags] || []) do
-      # Use configured module to avoid Engine → Framework dependency
-      case Application.get_env(:loka, :world_weather_module) do
-        nil -> :clear
-        module -> module.get_weather("default")
-      end
-    else
-      # Indoor always clear/neutral
-      :clear
-    end
+  defp current_weather(_player) do
+    :clear
   end
 
   defp is_outdoor?(player) do

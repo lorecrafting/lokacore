@@ -28,15 +28,6 @@ config :loka,
 # Game configuration
 config :loka, :game, starting_room_key: "monastery_gate"
 
-# World modules - injected into Engine to maintain layer separation
-# Engine uses these via Application.get_env to avoid direct Framework imports
-config :loka, :world_time_module, Loka.Framework.World.DayNight
-config :loka, :world_weather_module, Loka.Framework.World.Weather
-config :loka, :world_event_handler_module, Loka.Framework.Scripting.WorldEventHandler
-
-# Scripting extensions - modules implementing ScriptingExtension behaviour
-config :loka, :scripting_extensions, []
-
 # ContentValidator plugins - loaded via config to avoid Engine→Framework layer violation
 # Engine only has PrototypePlugin built-in, others are Framework layer
 config :loka, :content_validator_plugins, [

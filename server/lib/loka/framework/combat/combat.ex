@@ -93,64 +93,6 @@ defmodule Loka.Framework.Combat do
     end
   end
 
-  @doc """
-  Starts PvP combat with another player.
-
-  Takes the target player's id and name, and looks up their character entity
-  to get their stats for combat.
-
-  Returns `{:ok, combat_state}` or `{:error, reason}`.
-  """
-  def start_pvp_combat(target_player_id, target_player_name, %Entity{} = _character) do
-    case Entities.find_one(account_id: target_player_id, type: :character) do
-      {:error, :not_found} ->
-        {:error, :player_not_found}
-
-      {:ok, target} ->
-        target_stats = Entity.get_component(target, "stats") || %{}
-        target_resources = Entity.get_component(target, "resources") || %{}
-        target_health = target_resources["health"] || %{"current" => 100, "max" => 100}
-
-        target_str = Map.get(target_stats, "str") || Map.get(target_stats, :str) || 10
-        target_sta = Map.get(target_stats, "sta") || Map.get(target_stats, :sta) || 10
-        target_level = Map.get(target_stats, "level") || Map.get(target_stats, :level) || 1
-
-        {:ok, status} = StateMachine.transition(Combatant.machine(), "idle", "engaged")
-
-        combat_state = %{
-          enemy_id: target_player_id,
-          enemy: %{
-            name: target_player_name,
-            description: "A fellow adventurer",
-            health: %{
-              "current" => target_health["current"] || 100,
-              "max" => target_health["max"] || 100
-            },
-            stats: %{
-              "attack" => target_str,
-              "defense" => div(target_sta, 2)
-            },
-            level: target_level,
-            xp_reward: target_level * 5,
-            gold_reward: 0
-          },
-          pvp: true,
-          player_turn: true,
-          turn_count: 1,
-          status: status,
-          player_defending: false,
-          enemy_defending: false,
-          player_buffs: [],
-          enemy_buffs: [],
-          fled: false,
-          pending_ability: nil,
-          log: []
-        }
-
-        {:ok, combat_state}
-    end
-  end
-
   # =============================================================================
   # Auto-Combat Tick System (LegendMUD style)
   # =============================================================================
@@ -412,30 +354,6 @@ defmodule Loka.Framework.Combat do
     end
   end
 
-  @doc """
-  Applies victory rewards to the player's character entity.
-
-  Returns {:ok, updated_entity} or {:ok, updated_entity, level_up_info} if leveled up.
-  """
-  def apply_rewards(%Entity{} = character, rewards) do
-    xp_amount = Map.get(rewards, :xp, 0)
-    gold_amount = Map.get(rewards, :gold, 0)
-
-    # Add gold to stats
-    stats = Entity.get_component(character, "stats") || %{}
-    current_gold = Map.get(stats, "gold") || Map.get(stats, :gold) || 0
-    new_gold = current_gold + gold_amount
-    new_stats = Map.put(stats, "gold", new_gold)
-    character = Entity.add_component(character, "stats", new_stats)
-
-    # Award XP directly (Progression module removed in V2)
-    stats = Entity.get_component(character, "stats") || %{}
-    current_xp = Map.get(stats, "xp") || Map.get(stats, :xp) || 0
-    new_stats = Map.put(stats, "xp", current_xp + xp_amount)
-    updated_entity = Entity.add_component(character, "stats", new_stats)
-    {:ok, updated_entity}
-  end
-
   # =============================================================================
   # Private Functions
   # =============================================================================
@@ -625,34 +543,6 @@ defmodule Loka.Framework.Combat do
     else
       0
     end
-  end
-
-  # =============================================================================
-  # Combat Turn Management
-  # =============================================================================
-
-  @doc """
-  Ticks buff/debuff durations at end of turn.
-  """
-  def tick_combat_effects(combat_state, _player_id) do
-    new_player_buffs =
-      (combat_state.player_buffs || [])
-      |> Enum.map(&Map.update!(&1, :duration, fn d -> d - 1 end))
-      |> Enum.filter(&(&1.duration > 0))
-
-    new_enemy_buffs =
-      (combat_state.enemy_buffs || [])
-      |> Enum.map(&Map.update!(&1, :duration, fn d -> d - 1 end))
-      |> Enum.filter(&(&1.duration > 0))
-
-    new_action_cooldown = max(0, Map.get(combat_state, :action_cooldown, 0) - 1)
-
-    %{
-      combat_state
-      | player_buffs: new_player_buffs,
-        enemy_buffs: new_enemy_buffs,
-        action_cooldown: new_action_cooldown
-    }
   end
 
   # =============================================================================

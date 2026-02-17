@@ -364,21 +364,8 @@ defmodule Loka.Engine.Script.Executor do
   List of events the entity was subscribed to
   """
   @spec register_behavior_events(String.t(), String.t(), map()) :: [atom()]
-  def register_behavior_events(entity_id, behavior_key, config \\ %{}) do
-    events = get_script_events(behavior_key)
-
-    # Use configured module to avoid Engine → Framework dependency
-    case Application.get_env(:loka, :world_event_handler_module) do
-      nil ->
-        :ok
-
-      module ->
-        Enum.each(events, fn event ->
-          module.subscribe(entity_id, event, behavior_key, config)
-        end)
-    end
-
-    events
+  def register_behavior_events(_entity_id, behavior_key, _config \\ %{}) do
+    get_script_events(behavior_key)
   end
 
   @doc """
@@ -387,11 +374,7 @@ defmodule Loka.Engine.Script.Executor do
   Call this when an entity despawns or is removed.
   """
   @spec unregister_behavior_events(String.t()) :: :ok
-  def unregister_behavior_events(entity_id) do
-    # Use configured module to avoid Engine → Framework dependency
-    case Application.get_env(:loka, :world_event_handler_module) do
-      nil -> :ok
-      module -> module.unsubscribe_all(entity_id)
-    end
+  def unregister_behavior_events(_entity_id) do
+    :ok
   end
 end

@@ -48,7 +48,7 @@ defmodule Loka.Framework.Quest.Progress do
   """
 
   alias Loka.Engine.{Entity, StateMachine}
-  alias Loka.Framework.Quest.{StateHelper, TimerManager, QuestItemSpawner}
+  alias Loka.Framework.Quest.{StateHelper, TimerManager}
   alias Loka.Framework.Quest.Progress.{Rewards, Tracking}
   alias Loka.Components.QuestProgress, as: QP
   alias Loka.Admin.GameLog
@@ -121,9 +121,6 @@ defmodule Loka.Framework.Quest.Progress do
 
                 # Re-extract the updated quests (timers may have modified objectives)
                 new_quests = Entity.get_component(temp_entity, "quest_progress")
-
-                # Spawn player-instanced quest items for objectives with quest_spawn: true
-                QuestItemSpawner.spawn_quest_items(quest_def, entity.account_id)
 
                 {:ok, Entity.add_component(entity, "quest_progress", new_quests)}
             end

@@ -314,48 +314,6 @@ defmodule Loka.Framework.Skills.SkillManagerTest do
     end
   end
 
-  describe "untrain/2" do
-    test "reduces skill level by 1", %{state: state} do
-      skills = %{"basic_combat" => %{level: 5, xp: 0}}
-      state = set_skills(state, skills)
-
-      assert {:ok, updated_state} = SkillManager.untrain(state, "basic_combat")
-      assert SkillManager.get_level(updated_state, "basic_combat") == 4
-    end
-
-    test "refunds points when untraining", %{state: state} do
-      skills = %{"basic_combat" => %{level: 5, xp: 0}}
-      state = set_skills(state, skills)
-
-      # Level 5 costs 15 points total, 85 remaining
-      assert SkillManager.points_remaining(state) == 85
-
-      assert {:ok, updated_state} = SkillManager.untrain(state, "basic_combat")
-
-      # After untrain to level 4, costs 10 points, 90 remaining
-      assert SkillManager.points_remaining(updated_state) == 90
-    end
-
-    test "preserves XP when untraining", %{state: state} do
-      skills = %{"basic_combat" => %{level: 5, xp: 75}}
-      state = set_skills(state, skills)
-
-      assert {:ok, updated_state} = SkillManager.untrain(state, "basic_combat")
-      assert SkillManager.get_xp(updated_state, "basic_combat") == 75
-    end
-
-    test "returns error when skill not trained", %{state: state} do
-      assert {:error, :skill_not_trained} = SkillManager.untrain(state, "basic_combat")
-    end
-
-    test "returns error when skill is at level 0", %{state: state} do
-      skills = %{"basic_combat" => %{level: 0, xp: 50}}
-      state = set_skills(state, skills)
-
-      assert {:error, :skill_not_trained} = SkillManager.untrain(state, "basic_combat")
-    end
-  end
-
   describe "practice/3" do
     test "grants default XP to untrained skill", %{state: state} do
       assert {:ok, updated_state} = SkillManager.practice(state, "basic_combat")

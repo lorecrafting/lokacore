@@ -187,39 +187,6 @@ defmodule Loka.Framework.Dialogue do
   end
 
   @doc """
-  Gets a specific dialogue node by ID.
-
-  ## Options
-
-  - `:player_quests` - Map containing player's quest state for filtering choices.
-  """
-  def get_dialogue_node(npc_id, node_id, opts \\ [])
-      when is_binary(npc_id) and is_binary(node_id) do
-    player_quests = Keyword.get(opts, :player_quests, %{})
-
-    case Entities.get_entity(npc_id) do
-      nil ->
-        {:error, :npc_not_found}
-
-      npc ->
-        dialogue_tree = get_dialogue_tree(npc)
-
-        if dialogue_tree do
-          case get_node(dialogue_tree, node_id) do
-            nil ->
-              {:error, :node_not_found}
-
-            node ->
-              node = maybe_use_completed_variant(node, dialogue_tree, player_quests)
-              {:ok, format_node(node, node_id, player_quests)}
-          end
-        else
-          {:error, :no_dialogue}
-        end
-    end
-  end
-
-  @doc """
   Checks if an NPC has a dialogue tree.
   """
   def has_dialogue?(npc_id) when is_binary(npc_id) do

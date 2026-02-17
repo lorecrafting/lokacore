@@ -54,40 +54,6 @@ defmodule Loka.Framework.World.Atmosphere do
   end
 
   @doc """
-  Gets atmospheric description with a pre-computed phase.
-
-  Use this when calling from within the DayNight GenServer to avoid
-  a self-call deadlock.
-  """
-  def describe_with_phase(phase, opts \\ []) do
-    indoor = Keyword.get(opts, :indoor, false)
-    region = Keyword.get(opts, :region, "default")
-    weather = get_weather(region)
-
-    if indoor do
-      indoor_description(phase)
-    else
-      combine_description(phase, weather)
-    end
-  end
-
-  @doc """
-  Gets atmospheric description with pre-computed phase and weather.
-
-  Use this when calling from within the Weather or DayNight GenServer
-  to avoid self-call deadlocks.
-  """
-  def describe_with_phase_and_weather(phase, weather, opts \\ []) do
-    indoor = Keyword.get(opts, :indoor, false)
-
-    if indoor do
-      indoor_description(phase)
-    else
-      combine_description(phase, weather)
-    end
-  end
-
-  @doc """
   Gets an atmospheric description appropriate for the given room.
 
   Checks room tags to determine if it's indoor or outdoor and returns
@@ -137,20 +103,6 @@ defmodule Loka.Framework.World.Atmosphere do
   Returns nil if no system entity is running (not yet implemented in V2).
   """
   def get_formatted_time, do: nil
-
-  @doc """
-  Gets the current light level (0.0 to 1.0).
-  Returns 1.0 if no system entity is running.
-  """
-  def get_light_level do
-    case get_phase() do
-      :dawn -> 0.5
-      :day -> 1.0
-      :dusk -> 0.5
-      :night -> 0.1
-      _ -> 1.0
-    end
-  end
 
   defp find_world_system do
     case Entities.find_one(key: "world_system", type: :system) do

@@ -474,68 +474,6 @@ defmodule Loka.Framework.DialogueTest do
     end
   end
 
-  describe "get_dialogue_node/3" do
-    test "gets specific node by ID" do
-      npc = npc_with_dialogue_fixture(simple_dialogue_tree())
-
-      assert {:ok, node} = Dialogue.get_dialogue_node(npc.id, "hello_response")
-
-      assert node.id == "hello_response"
-      assert node.text == "How can I help you today?"
-      assert length(node.choices) == 2
-    end
-
-    test "gets start node" do
-      npc = npc_with_dialogue_fixture(simple_dialogue_tree())
-
-      assert {:ok, node} = Dialogue.get_dialogue_node(npc.id, "start")
-
-      assert node.id == "start"
-      assert node.text == "Greetings, traveler!"
-    end
-
-    test "returns error for non-existent node" do
-      npc = npc_with_dialogue_fixture(simple_dialogue_tree())
-
-      assert {:error, :node_not_found} =
-               Dialogue.get_dialogue_node(npc.id, "nonexistent")
-    end
-
-    test "returns error for non-existent NPC" do
-      fake_id = Ecto.UUID.generate()
-
-      assert {:error, :npc_not_found} = Dialogue.get_dialogue_node(fake_id, "start")
-    end
-
-    test "returns error for NPC without dialogue" do
-      npc = npc_fixture()
-
-      assert {:error, :no_dialogue} = Dialogue.get_dialogue_node(npc.id, "start")
-    end
-
-    test "filters choices based on player quest state" do
-      npc = npc_with_dialogue_fixture(conditional_dialogue_tree())
-      player_quests = %{"completed" => ["find_leaf"]}
-
-      assert {:ok, node} =
-               Dialogue.get_dialogue_node(npc.id, "start", player_quests: player_quests)
-
-      choice_texts = Enum.map(node.choices, & &1.text)
-      assert "I completed your quest!" in choice_texts
-      refute "About that quest..." in choice_texts
-    end
-
-    test "uses completed variant when applicable" do
-      npc = npc_with_dialogue_fixture(completed_variant_dialogue_tree())
-      player_quests = %{"completed" => ["find_leaf"]}
-
-      assert {:ok, node} =
-               Dialogue.get_dialogue_node(npc.id, "start", player_quests: player_quests)
-
-      assert node.text == "Thank you for finding the leaf!"
-    end
-  end
-
   describe "has_dialogue?/1" do
     test "returns true for NPC with dialogue tree" do
       npc = npc_with_dialogue_fixture(simple_dialogue_tree())

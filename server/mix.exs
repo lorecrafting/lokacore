@@ -149,9 +149,6 @@ defmodule Loka.MixProject do
       # Property-based testing
       {:stream_data, "~> 1.1", only: [:dev, :test]},
 
-      # Performance benchmarking
-      {:benchee, "~> 1.3", only: [:dev, :test]},
-
       # Architecture boundary enforcement (compile-time layer checking)
       # See Loka module and Loka.Engine/Framework/Content/Session for boundary defs
       {:boundary, "~> 0.10", runtime: false},
