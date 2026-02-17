@@ -7,19 +7,6 @@
 # General application configuration
 import Config
 
-config :loka, :scopes,
-  player: [
-    default: true,
-    module: Loka.Accounts.Scope,
-    assign_key: :current_scope,
-    access_path: [:player, :id],
-    schema_key: :player_id,
-    schema_type: :id,
-    schema_table: :players,
-    test_data_fixture: Loka.AccountsFixtures,
-    test_setup_helper: :register_and_log_in_player
-  ]
-
 config :loka,
   ecto_repos: [Loka.Repo],
   generators: [timestamp_type: :utc_datetime],
@@ -36,12 +23,6 @@ config :loka, :content_validator_plugins, [
   Loka.Framework.ContentValidator.DialoguePlugin,
   Loka.Framework.ContentValidator.WorldPlugin
 ]
-
-# Plugin system - third-party/contrib plugins that extend the engine
-# Plugins can add commands, hooks, validators, scripting extensions, prototypes, and balance config
-# See Loka.Engine.Plugin for how to create plugins
-# Example: config :loka, :plugins, [Loka.Plugins.Guilds]
-config :loka, :plugins, []
 
 # Session signing salt - used for cookie security
 # Dev/Test: Fixed salt (configured here for compile-time access)

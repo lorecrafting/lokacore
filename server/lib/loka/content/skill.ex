@@ -3,9 +3,7 @@ defmodule Loka.Content.Skill do
   Skill definition - OOC Entity.
 
   Skills define character progression paths with categories,
-  prerequisites, and experience formulas. Covers both leveled
-  skills (with max_level/xp_per_level) and binary skills
-  (with cost, learned or not).
+  prerequisites, and experience formulas.
   """
 
   alias Loka.Engine.{Entity, Entities}
@@ -38,15 +36,6 @@ defmodule Loka.Content.Skill do
     |> Enum.reject(&Entity.draft?/1)
   end
 
-  @doc """
-  Returns all binary skills (skills with a "cost" field, no leveling).
-  """
-  @spec all_binary() :: [Entity.t()]
-  def all_binary do
-    all_published()
-    |> Enum.filter(&binary?/1)
-  end
-
   @spec by_category(String.t()) :: [Entity.t()]
   def by_category(category) when is_binary(category) do
     all_published()
@@ -62,19 +51,8 @@ defmodule Loka.Content.Skill do
     |> Enum.reject(&Entity.draft?/1)
   end
 
-  @doc """
-  Returns all binary skills taught by a specific trainer.
-  """
-  @spec by_trainer(String.t()) :: [Entity.t()]
-  def by_trainer(trainer_key) when is_binary(trainer_key) do
-    all_binary()
-    |> Enum.filter(fn skill ->
-      trainer_key in trainers(skill)
-    end)
-  end
-
   # =============================================================================
-  # Accessors (shared)
+  # Accessors
   # =============================================================================
 
   def category(%Entity{type: :skill} = skill),
@@ -92,10 +70,6 @@ defmodule Loka.Content.Skill do
   def tags(%Entity{type: :skill} = skill),
     do: get_data(skill, "tags", [])
 
-  # =============================================================================
-  # Leveled Skill Accessors
-  # =============================================================================
-
   def xp_per_use(%Entity{type: :skill} = skill),
     do: get_data(skill, "xp_per_use", 1)
 
@@ -106,61 +80,11 @@ defmodule Loka.Content.Skill do
     do: get_data(skill, "point_cost_formula", "level")
 
   # =============================================================================
-  # Binary Skill Accessors
+  # Calculations
   # =============================================================================
 
   @doc """
-  Returns the point cost to learn a binary skill (1-3).
-  """
-  def cost(%Entity{type: :skill} = skill),
-    do: get_data(skill, "cost", 1)
-
-  @doc """
-  Returns the governing stat for a binary skill (as atom).
-  """
-  def stat(%Entity{type: :skill} = skill) do
-    raw = get_data(skill, "stat", "str")
-
-    cond do
-      is_atom(raw) -> raw
-      is_binary(raw) -> String.to_atom(raw)
-      true -> :str
-    end
-  end
-
-  def lag(%Entity{type: :skill} = skill),
-    do: get_data(skill, "lag", 1)
-
-  def cooldown(%Entity{type: :skill} = skill),
-    do: get_data(skill, "cooldown", 0)
-
-  def mv_cost(%Entity{type: :skill} = skill),
-    do: get_data(skill, "mv_cost", 0)
-
-  def mana_cost(%Entity{type: :skill} = skill),
-    do: get_data(skill, "mana_cost", 0)
-
-  def effect(%Entity{type: :skill} = skill),
-    do: get_data(skill, "effect", nil)
-
-  # =============================================================================
-  # Classification
-  # =============================================================================
-
-  @doc """
-  Returns true if a skill is binary (has a "cost" field, no leveling).
-  """
-  @spec binary?(Entity.t()) :: boolean()
-  def binary?(%Entity{type: :skill} = skill) do
-    get_data(skill, "cost") != nil
-  end
-
-  # =============================================================================
-  # Leveled Skill Calculations
-  # =============================================================================
-
-  @doc """
-  Calculates XP needed for next level (leveled skills).
+  Calculates XP needed for next level.
   """
   @spec xp_for_level(Entity.t(), non_neg_integer()) :: non_neg_integer()
   def xp_for_level(%Entity{type: :skill} = skill, level) do
@@ -169,7 +93,7 @@ defmodule Loka.Content.Skill do
   end
 
   @doc """
-  Calculates skill point cost for a given level (leveled skills).
+  Calculates skill point cost for a given level.
   """
   @spec point_cost(Entity.t(), non_neg_integer()) :: non_neg_integer()
   def point_cost(%Entity{type: :skill} = skill, level) do
@@ -183,7 +107,7 @@ defmodule Loka.Content.Skill do
   end
 
   @doc """
-  Calculates total points spent on a leveled skill at a given level.
+  Calculates total points spent on a skill at a given level.
   """
   @spec total_points_spent(Entity.t(), non_neg_integer()) :: non_neg_integer()
   def total_points_spent(%Entity{type: :skill}, 0), do: 0
@@ -195,9 +119,9 @@ defmodule Loka.Content.Skill do
   end
 
   @doc """
-  Checks if prerequisites are met for a leveled skill.
+  Checks if prerequisites are met.
 
-  Leveled skill prerequisites are maps with %{"skill" => key, "level" => n}.
+  Prerequisites are maps with %{"skill" => key, "level" => n}.
   """
   @spec prerequisites_met?(Entity.t(), map()) :: boolean()
   def prerequisites_met?(%Entity{type: :skill} = skill, player_skills)
@@ -210,68 +134,6 @@ defmodule Loka.Content.Skill do
       player_level = Map.get(player_skills, skill_key, 0)
       player_level >= required_level
     end)
-  end
-
-  # =============================================================================
-  # Binary Skill Calculations
-  # =============================================================================
-
-  @doc """
-  Checks if prerequisites are met for a binary skill.
-
-  Binary skill prerequisites are a list of skill key strings.
-  """
-  @spec binary_prerequisites_met?(Entity.t(), MapSet.t() | [String.t()]) :: boolean()
-  def binary_prerequisites_met?(%Entity{type: :skill} = skill, learned_skills) do
-    learned_set =
-      case learned_skills do
-        %MapSet{} -> learned_skills
-        list when is_list(list) -> MapSet.new(list)
-        map when is_map(map) -> MapSet.new(Map.keys(map))
-      end
-
-    prereqs = prerequisites(skill)
-
-    Enum.all?(prereqs, fn prereq ->
-      MapSet.member?(learned_set, prereq)
-    end)
-  end
-
-  @doc """
-  Calculates skill effectiveness based on the governing stat.
-  Returns a multiplier (1.0 = base at stat 10).
-  """
-  @spec effectiveness(Entity.t(), map()) :: float()
-  def effectiveness(%Entity{type: :skill} = skill, player_stats) do
-    stat_key = stat(skill)
-    stat_value = Map.get(player_stats, stat_key) || Map.get(player_stats, to_string(stat_key), 10)
-    1.0 + (stat_value - 10) / 100.0
-  end
-
-  @doc """
-  Returns the stat bonus for a binary skill (stat / 3).
-  """
-  @spec stat_bonus(Entity.t(), map()) :: non_neg_integer()
-  def stat_bonus(%Entity{type: :skill} = skill, player_stats) do
-    stat_key = stat(skill)
-    stat_value = Map.get(player_stats, stat_key) || Map.get(player_stats, to_string(stat_key), 0)
-    div(stat_value, 3)
-  end
-
-  @doc """
-  Checks if player has enough MV to use a binary skill.
-  """
-  @spec has_mv?(Entity.t(), non_neg_integer()) :: boolean()
-  def has_mv?(%Entity{type: :skill} = skill, current_mv) do
-    current_mv >= mv_cost(skill)
-  end
-
-  @doc """
-  Checks if player has enough Mana to use a binary skill.
-  """
-  @spec has_mana?(Entity.t(), non_neg_integer()) :: boolean()
-  def has_mana?(%Entity{type: :skill} = skill, current_mana) do
-    current_mana >= mana_cost(skill)
   end
 
   # =============================================================================
