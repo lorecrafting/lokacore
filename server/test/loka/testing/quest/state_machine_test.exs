@@ -82,7 +82,7 @@ defmodule Loka.Testing.Quest.StateMachineTest do
 
     test "all quests have valid definitions" do
       definitions = Quest.all_definitions()
-      assert length(definitions) > 0, "Expected at least one quest definition"
+      assert definitions != [], "Expected at least one quest definition"
 
       for quest_def <- definitions do
         assert quest_def.id, "Quest missing id"
@@ -95,7 +95,7 @@ defmodule Loka.Testing.Quest.StateMachineTest do
       for quest_def <- definitions do
         objectives = quest_def.objectives || []
 
-        assert length(objectives) > 0,
+        assert objectives != [],
                "Quest '#{quest_def.id}' has no objectives"
       end
     end

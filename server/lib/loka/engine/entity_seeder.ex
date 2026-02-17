@@ -548,7 +548,7 @@ defmodule Loka.Engine.EntitySeeder do
     # Store spawns in components
     components =
       case data["spawns"] do
-        spawns when is_list(spawns) and length(spawns) > 0 ->
+        [_ | _] = spawns ->
           Map.put(components, "spawns", spawns)
 
         _ ->

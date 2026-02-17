@@ -5,36 +5,12 @@ defmodule Loka.Testing.Bot.BotSupervisor do
   Provides functions to spawn, stop, and list active bots.
   Each bot is a GenServer process managed by this supervisor.
 
-  ## ⚠️  Deprecation Notice (2026)
-
-  The legacy `spawn_bot/1` function uses the old Bot implementation (40% production parity).
-  For storyline and integration tests, use ChannelBot directly instead:
-
-  ```elixir
-  # ✅ RECOMMENDED: ChannelBot (95% production parity)
-  use Loka.ChannelCase
-  {:ok, bot} = ChannelBot.start_link(socket: socket, strategy: StorylineRunner)
-
-  # ⚠️  LEGACY: Direct bot (40% parity, load testing only)
-  {:ok, pid} = BotSupervisor.spawn_bot(strategy: StorylineRunner)
-  ```
-
-  See `test/integration/storyline_channel_test.exs` for examples.
-
-  ## Bot Types
-
-  - **ChannelBot** (recommended): Executes actions through Phoenix channels, testing
-    the full code path that real clients use (95% production parity).
-
-  - **Bot** (legacy/deprecated): Directly calls framework modules. Faster but only
-    40% production parity. Use for load testing only.
-
   ## Usage
 
       # Start the supervisor (usually done in application.ex for testing)
       {:ok, _pid} = BotSupervisor.start_link()
 
-      # Spawn a channel-based bot (recommended - tests real code path)
+      # Spawn a channel-based bot (tests real code path)
       {:ok, pid} = BotSupervisor.spawn_channel_bot(
         strategy: Loka.Testing.Bot.Strategies.RandomWalker,
         strategy_opts: [max_steps: 100],
@@ -45,12 +21,6 @@ defmodule Loka.Testing.Bot.BotSupervisor do
       {:ok, pid} = BotSupervisor.spawn_channel_bot(
         player: existing_player,
         strategy: RandomWalker
-      )
-
-      # Legacy direct-call bot (for backward compatibility)
-      {:ok, pid} = BotSupervisor.spawn_bot(
-        strategy: RandomWalker,
-        use_channel: false
       )
 
       # List all active bots
@@ -67,7 +37,6 @@ defmodule Loka.Testing.Bot.BotSupervisor do
 
   require Logger
 
-  alias Loka.Testing.Bot, as: LegacyBot
   alias Loka.Testing.Bot.ChannelBot
   alias Loka.Accounts
 
@@ -143,63 +112,6 @@ defmodule Loka.Testing.Bot.BotSupervisor do
   end
 
   @doc """
-  Spawns a legacy bot (for backward compatibility).
-
-  The legacy bot directly calls framework modules instead of going through
-  channels. This is faster but doesn't test the channel layer.
-
-  Use `spawn_channel_bot/1` instead for realistic testing.
-
-  ## Options
-
-  - `:strategy` - (required) The strategy module to use
-  - `:strategy_opts` - Options passed to strategy's init/1
-  - `:name` - Bot name (default: auto-generated)
-  - `:starting_room_id` - Room to start in (default: world's starting room)
-  - `:tick_interval_ms` - Time between decisions (default: 1000)
-
-  ## Returns
-
-  - `{:ok, pid}` - Bot started successfully
-  - `{:error, reason}` - Failed to start
-  """
-  def spawn_bot(opts \\ []) do
-    # Ensure required options
-    unless Keyword.has_key?(opts, :strategy) do
-      raise ArgumentError, "must provide :strategy option"
-    end
-
-    # Generate bot ID and name
-    bot_id = generate_bot_id()
-    bot_name = Keyword.get(opts, :name, "Bot #{bot_id}")
-
-    # Build bot config
-    config = %{
-      id: bot_id,
-      name: bot_name,
-      strategy: Keyword.fetch!(opts, :strategy),
-      strategy_opts: Keyword.get(opts, :strategy_opts, []),
-      starting_room_id: Keyword.get(opts, :starting_room_id),
-      tick_interval_ms: Keyword.get(opts, :tick_interval_ms, 1000)
-    }
-
-    # Start bot under supervisor
-    spec = {LegacyBot, config}
-
-    case DynamicSupervisor.start_child(__MODULE__, spec) do
-      {:ok, pid} ->
-        # Register bot in registry if available
-        maybe_register(bot_id, pid)
-        Logger.info("BotSupervisor: Started bot #{bot_name} (#{bot_id})")
-        {:ok, pid}
-
-      {:error, reason} = error ->
-        Logger.error("BotSupervisor: Failed to start bot - #{inspect(reason)}")
-        error
-    end
-  end
-
-  @doc """
   Stops a specific bot.
   """
   def stop_bot(pid) when is_pid(pid) do
@@ -269,13 +181,10 @@ defmodule Loka.Testing.Bot.BotSupervisor do
 
   @doc """
   Gets info about a specific bot.
-
-  Works with both ChannelBot and legacy Bot.
   """
   def get_bot_info(pid) when is_pid(pid) do
     if Process.alive?(pid) do
       try do
-        # Both ChannelBot and LegacyBot implement get_info/1
         info = GenServer.call(pid, :get_info)
         {:ok, info}
       catch
@@ -301,10 +210,6 @@ defmodule Loka.Testing.Bot.BotSupervisor do
   # =============================================================================
   # Private Helpers
   # =============================================================================
-
-  defp generate_bot_id do
-    :crypto.strong_rand_bytes(8) |> Base.encode16(case: :lower)
-  end
 
   defp start_registry do
     case Registry.start_link(keys: :unique, name: @registry) do

@@ -80,13 +80,13 @@ defmodule Loka.Testing.QuestBotIntegrationTest do
       # Or at least the bot should have made progress on objectives
       objectives_achieved = strategy_state.results.objectives_achieved
 
-      assert length(objectives_achieved) >= 1,
-             "Bot should have achieved at least 1 objective, got: #{length(objectives_achieved)}"
+      assert objectives_achieved != [],
+             "Bot should have achieved at least 1 objective, got: #{inspect(objectives_achieved)}"
 
       # Check that bot actually talked to an NPC
       npcs_talked = strategy_state.results.npcs_talked_to
 
-      assert length(npcs_talked) >= 1,
+      assert npcs_talked != [],
              "Bot should have talked to at least 1 NPC, got: #{inspect(npcs_talked)}"
 
       # Cleanup
@@ -111,7 +111,7 @@ defmodule Loka.Testing.QuestBotIntegrationTest do
       # Check that bot completed at least one quest
       completed_quests = strategy_state.results.quests_completed
 
-      assert length(completed_quests) >= 1,
+      assert completed_quests != [],
              "Bot should have completed at least 1 quest, got: #{inspect(completed_quests)}"
 
       # Check that bot is not stuck

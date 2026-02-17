@@ -107,14 +107,6 @@ defmodule Loka.Engine.Script.Bindings do
         queue_set_trait_state(entity, trait_key, key, value)
       end,
 
-      # Legacy aliases for backward compatibility with existing scripts
-      get_behavior_state: fn key, default ->
-        get_trait_state(entity, trait_key, key, default)
-      end,
-      set_behavior_state: fn key, value ->
-        queue_set_trait_state(entity, trait_key, key, value)
-      end,
-
       # Room query function
       room: fn -> get_room(entity) end,
 

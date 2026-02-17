@@ -1,6 +1,6 @@
 # Unified Object System (V2 Architecture)
 
-> **Status:** Draft — under active refinement
+> **Status:** V2 core implemented — design reference for remaining migration phases
 > **Date:** 2026-02-10
 > **Scope:** Complete rearchitecture of Loka's data storage and entity system
 > **Design Doc:** `docs/architecture/unified-object-system-v2.md`

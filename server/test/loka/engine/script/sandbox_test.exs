@@ -211,15 +211,15 @@ defmodule Loka.Engine.Script.SandboxTest do
                Sandbox.execute(source, @test_entity, context_with_string_keys)
     end
 
-    test "get_behavior_state returns default when no state exists" do
+    test "get_trait_state returns default when no state exists" do
       context = Map.put(@test_context, :behavior_key, "patrol")
 
-      source = "get_behavior_state.(:patrol_index, 0)"
+      source = "get_trait_state.(:patrol_index, 0)"
 
       assert {:ok, 0, []} = Sandbox.execute(source, @test_entity, context)
     end
 
-    test "get_behavior_state returns stored state value" do
+    test "get_trait_state returns stored state value" do
       entity_with_state =
         Map.put(@test_entity, :behavior_state, %{
           "patrol" => %{patrol_index: 2}
@@ -227,44 +227,44 @@ defmodule Loka.Engine.Script.SandboxTest do
 
       context = Map.put(@test_context, :behavior_key, "patrol")
 
-      source = "get_behavior_state.(:patrol_index, 0)"
+      source = "get_trait_state.(:patrol_index, 0)"
 
       assert {:ok, 2, []} = Sandbox.execute(source, entity_with_state, context)
     end
 
-    test "set_behavior_state queues action" do
+    test "set_trait_state queues action" do
       context = Map.put(@test_context, :behavior_key, "patrol")
 
       source = """
-      set_behavior_state.(:patrol_index, 5)
+      set_trait_state.(:patrol_index, 5)
       :ok
       """
 
       assert {:ok, :ok, actions} = Sandbox.execute(source, @test_entity, context)
-      assert length(actions) == 1
+      assert [action] = actions
 
-      {action_type, params} = hd(actions)
-      assert action_type in [:set_trait_state, :set_behavior_state]
+      {action_type, params} = action
+      assert action_type == :set_trait_state
       assert params.entity_id == "test-npc"
-      assert (params[:trait_key] || params[:behavior_key]) == "patrol"
+      assert params.trait_key == "patrol"
       assert params.state_key == :patrol_index
       assert params.value == 5
     end
 
-    test "behavior state is isolated per behavior" do
+    test "trait state is isolated per trait" do
       entity_with_state =
         Map.put(@test_entity, :behavior_state, %{
           "patrol" => %{index: 1},
           "schedule" => %{index: 99}
         })
 
-      # When running as patrol behavior
+      # When running as patrol trait
       patrol_context = Map.put(@test_context, :behavior_key, "patrol")
-      source = "get_behavior_state.(:index, 0)"
+      source = "get_trait_state.(:index, 0)"
 
       assert {:ok, 1, []} = Sandbox.execute(source, entity_with_state, patrol_context)
 
-      # When running as schedule behavior
+      # When running as schedule trait
       schedule_context = Map.put(@test_context, :behavior_key, "schedule")
 
       assert {:ok, 99, []} = Sandbox.execute(source, entity_with_state, schedule_context)

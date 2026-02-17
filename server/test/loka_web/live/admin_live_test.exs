@@ -28,11 +28,7 @@ defmodule LokaWeb.AdminLiveTest do
       assert has_element?(view, "button", "Audit Log")
     end
 
-    @tag :skip
     test "redirects non-admin players", %{conn: conn} do
-      # SKIPPED: Authentication disabled for World Builder development
-      # Re-enable this test when authentication is restored
-      # Create a non-admin player
       non_admin = AccountsFixtures.player_fixture()
       conn = log_in_player(conn, non_admin)
 

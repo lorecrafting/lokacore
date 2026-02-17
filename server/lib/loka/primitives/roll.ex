@@ -309,7 +309,7 @@ defmodule Loka.Primitives.Roll do
       Roll.weighted(table)
   """
   @spec weighted([{number(), any()}]) :: {:ok, weighted_result(), audit()}
-  def weighted(table) when is_list(table) and length(table) > 0 do
+  def weighted([_ | _] = table) do
     total_weight = table |> Enum.map(&elem(&1, 0)) |> Enum.sum()
     roll = :rand.uniform() * total_weight
 
@@ -348,7 +348,7 @@ defmodule Loka.Primitives.Roll do
       Roll.pick([:sword, :axe, :mace, :dagger])
   """
   @spec pick([any()]) :: {:ok, weighted_result(), audit()}
-  def pick(items) when is_list(items) and length(items) > 0 do
+  def pick([_ | _] = items) do
     table = Enum.map(items, &{1, &1})
     weighted(table)
   end

@@ -60,7 +60,7 @@ defmodule Loka.Engine.Script.ExecutorTest do
       assert {:ok, :handled, actions} =
                Executor.execute_source(source, @test_entity, @test_context)
 
-      assert length(actions) >= 1
+      assert actions != []
     end
 
     test "handles script errors gracefully" do
@@ -79,7 +79,7 @@ defmodule Loka.Engine.Script.ExecutorTest do
       """
 
       assert {:ok, :handled, actions} = Executor.test_script(source, @test_entity, @test_context)
-      assert length(actions) >= 1
+      assert actions != []
     end
 
     test "works with empty entity and context" do

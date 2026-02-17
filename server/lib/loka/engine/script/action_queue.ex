@@ -580,18 +580,6 @@ defmodule Loka.Engine.Script.ActionQueue do
     :ok
   end
 
-  # Legacy backward compatibility
-  defp execute_action(
-         {:set_behavior_state,
-          %{entity_id: entity_id, behavior_key: bk, state_key: sk, value: v}},
-         context
-       ) do
-    execute_action(
-      {:set_trait_state, %{entity_id: entity_id, trait_key: bk, state_key: sk, value: v}},
-      context
-    )
-  end
-
   defp execute_action(
          {:set_cooldown, %{entity_id: entity_id, key: key, duration: duration}},
          _context
