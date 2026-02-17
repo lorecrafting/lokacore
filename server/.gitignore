@@ -65,6 +65,10 @@ npm-debug.log
 
 # LLM observability logs
 priv/llm_logs/*.jsonl
+priv/llm_logs/eval_results/
+
+# AI eval sandbox content
+/priv/world/eval/
 
 # Test temp files
 test/tmp/

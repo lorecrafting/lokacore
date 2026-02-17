@@ -73,7 +73,7 @@ defmodule LokaWeb.Channels.BuilderWorkflowTest do
       {:ok, socket} = connect_player(player)
 
       # Use unique keys per test to avoid collision with other test runs
-      npc_key = "wf_npc_#{:rand.uniform(10000)}"
+      npc_key = "wf_npc_#{System.unique_integer([:positive])}"
 
       # 1. Create NPC
       send_cmd(socket, "create npc #{npc_key} Traveling Merchant")
@@ -101,7 +101,7 @@ defmodule LokaWeb.Channels.BuilderWorkflowTest do
     test "create script → validate → test → delete", %{admin: player} do
       {:ok, socket} = connect_player(player)
 
-      script_key = "wf_script_#{:rand.uniform(10000)}"
+      script_key = "wf_script_#{System.unique_integer([:positive])}"
 
       # 1. Create script from template
       send_cmd(socket, "script from-template #{script_key} guard flag=has_pass direction=north")

@@ -45,7 +45,7 @@ defmodule Loka.WorldBuilder.ToolExecutorTest do
   describe "execute/2 - create_room tool" do
     test "creates a room with valid input" do
       input = %{
-        "key" => "tool_test_room_#{:rand.uniform(10000)}",
+        "key" => "tool_test_room_#{System.unique_integer([:positive])}",
         "name" => "Tool Test Room",
         "description" => "A room created via tool",
         "x" => 10,
@@ -64,7 +64,7 @@ defmodule Loka.WorldBuilder.ToolExecutorTest do
 
     test "creates room with default coordinates" do
       input = %{
-        "key" => "tool_test_default_coords_#{:rand.uniform(10000)}",
+        "key" => "tool_test_default_coords_#{System.unique_integer([:positive])}",
         "name" => "Default Coords Room"
       }
 
@@ -76,7 +76,7 @@ defmodule Loka.WorldBuilder.ToolExecutorTest do
 
     test "creates room with tags" do
       input = %{
-        "key" => "tool_test_tags_#{:rand.uniform(10000)}",
+        "key" => "tool_test_tags_#{System.unique_integer([:positive])}",
         "name" => "Tagged Room",
         "tags" => ["test", "important"]
       }
@@ -90,7 +90,7 @@ defmodule Loka.WorldBuilder.ToolExecutorTest do
     setup do
       {:ok, room} =
         RoomManager.create_room(%{
-          key: "update_tool_test_#{:rand.uniform(10000)}",
+          key: "update_tool_test_#{System.unique_integer([:positive])}",
           name: "Original Name",
           description: "Original description"
         })
@@ -151,7 +151,7 @@ defmodule Loka.WorldBuilder.ToolExecutorTest do
       # Create room first
       {:ok, room} =
         RoomManager.create_room(%{
-          key: "delete_tool_test_#{:rand.uniform(10000)}",
+          key: "delete_tool_test_#{System.unique_integer([:positive])}",
           name: "To Delete"
         })
 
@@ -178,13 +178,13 @@ defmodule Loka.WorldBuilder.ToolExecutorTest do
     setup do
       {:ok, from_room} =
         RoomManager.create_room(%{
-          key: "exit_from_#{:rand.uniform(10000)}",
+          key: "exit_from_#{System.unique_integer([:positive])}",
           name: "From Room"
         })
 
       {:ok, to_room} =
         RoomManager.create_room(%{
-          key: "exit_to_#{:rand.uniform(10000)}",
+          key: "exit_to_#{System.unique_integer([:positive])}",
           name: "To Room"
         })
 
@@ -218,13 +218,13 @@ defmodule Loka.WorldBuilder.ToolExecutorTest do
     setup do
       {:ok, from_room} =
         RoomManager.create_room(%{
-          key: "remove_exit_from_#{:rand.uniform(10000)}",
+          key: "remove_exit_from_#{System.unique_integer([:positive])}",
           name: "From Room"
         })
 
       {:ok, to_room} =
         RoomManager.create_room(%{
-          key: "remove_exit_to_#{:rand.uniform(10000)}",
+          key: "remove_exit_to_#{System.unique_integer([:positive])}",
           name: "To Room"
         })
 
@@ -259,7 +259,7 @@ defmodule Loka.WorldBuilder.ToolExecutorTest do
     # but the EntityManager stores level in a different location
     test "creates an NPC with valid input" do
       input = %{
-        "key" => "tool_npc_#{:rand.uniform(10000)}",
+        "key" => "tool_npc_#{System.unique_integer([:positive])}",
         "name" => "Tool Test NPC",
         "description" => "An NPC created via tool",
         "level" => 5
@@ -278,7 +278,7 @@ defmodule Loka.WorldBuilder.ToolExecutorTest do
 
     test "creates NPC with default level" do
       input = %{
-        "key" => "tool_npc_default_#{:rand.uniform(10000)}",
+        "key" => "tool_npc_default_#{System.unique_integer([:positive])}",
         "name" => "Default Level NPC"
       }
 
@@ -296,12 +296,12 @@ defmodule Loka.WorldBuilder.ToolExecutorTest do
     test "creates NPC with room assignment" do
       {:ok, room} =
         RoomManager.create_room(%{
-          key: "npc_room_#{:rand.uniform(10000)}",
+          key: "npc_room_#{System.unique_integer([:positive])}",
           name: "NPC Room"
         })
 
       input = %{
-        "key" => "tool_npc_in_room_#{:rand.uniform(10000)}",
+        "key" => "tool_npc_in_room_#{System.unique_integer([:positive])}",
         "name" => "Room NPC",
         "room_key" => room.key
       }
@@ -324,7 +324,7 @@ defmodule Loka.WorldBuilder.ToolExecutorTest do
     # These tests are marked to catch this error behavior
     test "creates an item with valid input" do
       input = %{
-        "key" => "tool_item_#{:rand.uniform(10000)}",
+        "key" => "tool_item_#{System.unique_integer([:positive])}",
         "name" => "Tool Test Item",
         "description" => "An item created via tool",
         "item_type" => "weapon"
@@ -343,7 +343,7 @@ defmodule Loka.WorldBuilder.ToolExecutorTest do
 
     test "creates item with tags" do
       input = %{
-        "key" => "tool_item_tagged_#{:rand.uniform(10000)}",
+        "key" => "tool_item_tagged_#{System.unique_integer([:positive])}",
         "name" => "Tagged Item",
         "item_type" => "quest_item",
         "tags" => ["important", "unique"]
@@ -365,7 +365,7 @@ defmodule Loka.WorldBuilder.ToolExecutorTest do
     setup do
       {:ok, room} =
         RoomManager.create_room(%{
-          key: "info_test_#{:rand.uniform(10000)}",
+          key: "info_test_#{System.unique_integer([:positive])}",
           name: "Info Test Room",
           description: "A room for testing info retrieval",
           x: 5,
@@ -406,7 +406,7 @@ defmodule Loka.WorldBuilder.ToolExecutorTest do
       # Create a tagged room
       {:ok, _room} =
         RoomManager.create_room(%{
-          key: "filter_test_#{:rand.uniform(10000)}",
+          key: "filter_test_#{System.unique_integer([:positive])}",
           name: "Filter Test Room",
           tags: ["filter_test_tag"]
         })
@@ -424,13 +424,13 @@ defmodule Loka.WorldBuilder.ToolExecutorTest do
       input = %{
         "rooms" => [
           %{
-            "key" => "batch_room_1_#{:rand.uniform(10000)}",
+            "key" => "batch_room_1_#{System.unique_integer([:positive])}",
             "name" => "Batch Room 1",
             "x" => 0,
             "y" => 0
           },
           %{
-            "key" => "batch_room_2_#{:rand.uniform(10000)}",
+            "key" => "batch_room_2_#{System.unique_integer([:positive])}",
             "name" => "Batch Room 2",
             "x" => 5,
             "y" => 0
@@ -447,7 +447,7 @@ defmodule Loka.WorldBuilder.ToolExecutorTest do
       # Include one invalid room (nil key)
       input = %{
         "rooms" => [
-          %{"key" => "batch_ok_#{:rand.uniform(10000)}", "name" => "OK Room"},
+          %{"key" => "batch_ok_#{System.unique_integer([:positive])}", "name" => "OK Room"},
           %{"name" => "No Key Room"}
         ]
       }
@@ -555,7 +555,7 @@ defmodule Loka.WorldBuilder.ToolExecutorTest do
   describe "execute/2 - create_quest tool" do
     test "creates a quest with valid input" do
       input = %{
-        "key" => "tool_quest_#{:rand.uniform(10000)}",
+        "key" => "tool_quest_#{System.unique_integer([:positive])}",
         "name" => "Tool Test Quest",
         "description" => "A quest created via tool",
         "quest_type" => "side",
@@ -573,7 +573,7 @@ defmodule Loka.WorldBuilder.ToolExecutorTest do
 
     test "creates quest with minimal input" do
       input = %{
-        "key" => "minimal_quest_#{:rand.uniform(10000)}",
+        "key" => "minimal_quest_#{System.unique_integer([:positive])}",
         "name" => "Minimal Quest",
         "description" => "A minimal quest",
         "giver_key" => "some_npc",
@@ -588,7 +588,7 @@ defmodule Loka.WorldBuilder.ToolExecutorTest do
   describe "execute/2 - update_quest tool" do
     test "returns error for non-existent quest" do
       input = %{
-        "quest_key" => "nonexistent_quest_#{:rand.uniform(10000)}",
+        "quest_key" => "nonexistent_quest_#{System.unique_integer([:positive])}",
         "name" => "Updated Name"
       }
 
@@ -625,7 +625,7 @@ defmodule Loka.WorldBuilder.ToolExecutorTest do
   describe "execute/2 - create_dialogue tool" do
     test "creates dialogue with valid input" do
       input = %{
-        "key" => "tool_dialogue_#{:rand.uniform(10000)}",
+        "key" => "tool_dialogue_#{System.unique_integer([:positive])}",
         "entity_key" => "test_npc",
         "trigger" => "on_talk",
         "entry_node" => "greeting",
@@ -663,7 +663,7 @@ defmodule Loka.WorldBuilder.ToolExecutorTest do
 
   describe "execute/2 - get_dialogue tool" do
     test "returns error for non-existent dialogue" do
-      input = %{"dialogue_key" => "nonexistent_dialogue_#{:rand.uniform(10000)}"}
+      input = %{"dialogue_key" => "nonexistent_dialogue_#{System.unique_integer([:positive])}"}
 
       assert {:error, _reason} = ToolExecutor.execute("get_dialogue", input)
     end
@@ -671,7 +671,7 @@ defmodule Loka.WorldBuilder.ToolExecutorTest do
 
   describe "execute/2 - get_zone_info tool" do
     test "returns error for non-existent zone" do
-      input = %{"zone_key" => "nonexistent_zone_#{:rand.uniform(10000)}"}
+      input = %{"zone_key" => "nonexistent_zone_#{System.unique_integer([:positive])}"}
 
       assert {:error, _reason} = ToolExecutor.execute("get_zone_info", input)
     end

@@ -238,7 +238,8 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
   end
 
   defp build_system_prompt(context) do
-    base = load_system_prompt()
+    version = context[:prompt_version]
+    base = load_system_prompt(version)
 
     room_context =
       case context[:room_key] do
@@ -261,18 +262,34 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
     base <> room_context <> terminal_context
   end
 
-  defp load_system_prompt do
-    @cached_system_prompt ||
-      """
-      # World Builder Assistant
+  @doc false
+  @spec load_system_prompt(String.t() | nil) :: String.t()
+  def load_system_prompt(version \\ nil) do
+    case version do
+      nil ->
+        @cached_system_prompt || default_system_prompt()
 
-      You are a creative writing and game design assistant specialized in building
-      MUD (Multi-User Dungeon) worlds. You help create rich, interconnected game
-      worlds with compelling narratives, memorable characters, and engaging quests.
+      ver ->
+        path = Path.join([:code.priv_dir(:loka), "world_builder", "prompts", "#{ver}.md"])
 
-      You have access to tools for managing rooms, NPCs, items, quests, dialogues,
-      scripts, zones, and design documents.
-      """
+        case File.read(path) do
+          {:ok, content} -> content
+          {:error, _} -> @cached_system_prompt || default_system_prompt()
+        end
+    end
+  end
+
+  defp default_system_prompt do
+    """
+    # World Builder Assistant
+
+    You are a creative writing and game design assistant specialized in building
+    MUD (Multi-User Dungeon) worlds. You help create rich, interconnected game
+    worlds with compelling narratives, memorable characters, and engaging quests.
+
+    You have access to tools for managing rooms, NPCs, items, quests, dialogues,
+    scripts, zones, and design documents.
+    """
   end
 
   defp finish_ai_streaming(socket) do
