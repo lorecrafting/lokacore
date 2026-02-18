@@ -25,7 +25,7 @@ defmodule Loka.Framework.Quest.Progress.Rewards do
   """
 
   alias Loka.Engine.Entity
-  alias Loka.Framework.Economy
+  alias Loka.Framework.{Economy, Progression}
 
   @doc """
   Applies all rewards from a rewards map.
@@ -55,11 +55,9 @@ defmodule Loka.Framework.Quest.Progress.Rewards do
   def apply_xp(entity, 0), do: {:ok, entity}
 
   def apply_xp(%Entity{} = entity, xp) when xp > 0 do
-    stats = Entity.get_component(entity, "stats") || %{}
-    current_xp = Map.get(stats, "xp") || Map.get(stats, :xp, 0)
-    new_xp = current_xp + xp
-    new_stats = Map.put(stats, "xp", new_xp)
-    {:ok, Entity.add_component(entity, "stats", new_stats)}
+    {:ok, updated_entity, level_up_events} = Progression.apply_xp(entity, xp)
+    Progression.broadcast_level_ups(updated_entity, level_up_events)
+    {:ok, updated_entity}
   end
 
   @doc """

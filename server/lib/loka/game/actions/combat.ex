@@ -19,7 +19,7 @@ defmodule Loka.Game.Actions.Combat do
   alias Loka.Framework.Combat.RespawnManager
   alias Loka.Framework.Quest.Listeners, as: QuestListeners
   alias Loka.Engine.{Entity, Entities}
-  alias Loka.Framework.Economy
+  alias Loka.Framework.{Economy, Progression}
   alias Loka.Mechanics.Damage
 
   @doc """
@@ -281,12 +281,11 @@ defmodule Loka.Game.Actions.Combat do
         character
       end
 
-    # Apply XP to stats
+    # Apply XP to stats and check for level-up
     if is_integer(rewards.xp) and rewards.xp > 0 do
-      stats = Entity.get_component(character, "stats") || %{}
-      current_xp = Map.get(stats, "xp", 0)
-      new_stats = Map.put(stats, "xp", current_xp + rewards.xp)
-      Entity.add_component(character, "stats", new_stats)
+      {:ok, updated, level_up_events} = Progression.apply_xp(character, rewards.xp)
+      Progression.broadcast_level_ups(updated, level_up_events)
+      updated
     else
       character
     end
