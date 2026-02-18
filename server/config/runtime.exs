@@ -1,5 +1,32 @@
 import Config
 
+# Load .env file in dev (prod uses system env or Fly secrets)
+if config_env() == :dev do
+  env_file = Path.expand("../.env", __DIR__)
+
+  if File.exists?(env_file) do
+    env_file
+    |> File.read!()
+    |> String.split("\n", trim: true)
+    |> Enum.each(fn line ->
+      line = String.trim(line)
+
+      unless String.starts_with?(line, "#") or line == "" do
+        case String.split(line, "=", parts: 2) do
+          [key, value] ->
+            key = String.trim(key)
+            value = value |> String.trim() |> String.trim("\"") |> String.trim("'")
+            # Only set if not already in environment (explicit env vars take precedence)
+            unless System.get_env(key), do: System.put_env(key, value)
+
+          _ ->
+            :skip
+        end
+      end
+    end)
+  end
+end
+
 # config/runtime.exs is executed for all environments, including
 # during releases. It is executed after compilation and before the
 # system starts, so it is typically used to load production configuration

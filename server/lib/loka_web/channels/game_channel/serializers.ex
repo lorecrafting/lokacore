@@ -16,7 +16,7 @@ defmodule LokaWeb.Channels.GameChannel.Serializers do
       exits: Enum.map(room.exits, &serialize_exit/1),
       entities: Enum.map(room.entities || [], &serialize_entity/1),
       items: Enum.map(room.items || [], &serialize_item/1),
-      tags: room.tags || []
+      tags: safe_tags(room)
     }
   end
 
@@ -332,8 +332,12 @@ defmodule LokaWeb.Channels.GameChannel.Serializers do
   defp safe_tags(entity) do
     case Map.get(entity, :tags, []) do
       %Ecto.Association.NotLoaded{} -> []
-      tags when is_list(tags) -> tags
+      tags when is_list(tags) -> Enum.map(tags, &extract_tag/1)
       _ -> []
     end
   end
+
+  defp extract_tag(%{tag: tag}) when is_binary(tag), do: tag
+  defp extract_tag(tag) when is_binary(tag), do: tag
+  defp extract_tag(_), do: nil
 end

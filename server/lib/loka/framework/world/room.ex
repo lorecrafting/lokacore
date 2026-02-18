@@ -291,7 +291,7 @@ defmodule Loka.Framework.World.Room do
       key: room.key,
       title: title,
       description: room.extra_desc || "An empty room.",
-      tags: room.tags || [],
+      tags: safe_tags(room.tags),
       components: room.components || %{},
       entities: npcs,
       items: items,
@@ -348,6 +348,19 @@ defmodule Loka.Framework.World.Room do
   end
 
   defp draft_entity?(_), do: false
+
+  defp safe_tags(%Ecto.Association.NotLoaded{}), do: []
+
+  defp safe_tags(tags) when is_list(tags) do
+    Enum.map(tags, fn
+      %{tag: tag} when is_binary(tag) -> tag
+      tag when is_binary(tag) -> tag
+      _ -> nil
+    end)
+    |> Enum.reject(&is_nil/1)
+  end
+
+  defp safe_tags(_), do: []
 
   defp format_npc(npc) do
     components = npc.components || %{}

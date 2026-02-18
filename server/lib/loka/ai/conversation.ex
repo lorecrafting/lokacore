@@ -49,6 +49,11 @@ defmodule Loka.AI.Conversation do
 
   @max_tool_iterations 10
 
+  # Minimum delay (ms) between consecutive API calls to avoid rate limits.
+  # The Anthropic API rate-limits by tokens-per-minute; with large payloads
+  # (55 tool defs + system prompt), rapid-fire calls easily trigger 429s.
+  @tool_continuation_delay_ms 3_000
+
   @type state :: %{
           messages: [map()],
           pending_tool_results: [map()],
@@ -204,9 +209,10 @@ defmodule Loka.AI.Conversation do
   # Private
   # ---------------------------------------------------------------------------
 
-  defp start_streaming(state, context) do
+  defp start_streaming(state, context, opts \\ []) do
     config = state.config
     caller = config.caller_pid
+    delay_ms = Keyword.get(opts, :delay_ms, 0)
 
     # Build system prompt
     system = config.system_prompt_fn.(context)
@@ -221,6 +227,10 @@ defmodule Loka.AI.Conversation do
     on_error = fn error -> send(caller, {:ai_error, format_error(error)}) end
 
     Task.start(fn ->
+      # Throttle between consecutive API calls to avoid rate limits.
+      # Only applies to tool-continuation calls, not the initial request.
+      if delay_ms > 0, do: Process.sleep(delay_ms)
+
       case AnthropicClient.chat(
              api_messages,
              tools,
@@ -265,8 +275,8 @@ defmodule Loka.AI.Conversation do
     messages = state.messages ++ result_messages
     state = %{state | messages: messages, streaming: true}
 
-    # Continue streaming with updated context
-    start_streaming(state, %{})
+    # Continue streaming with updated context (delay applied inside the Task)
+    start_streaming(state, %{}, delay_ms: @tool_continuation_delay_ms)
   end
 
   defp format_messages_for_api(messages) do

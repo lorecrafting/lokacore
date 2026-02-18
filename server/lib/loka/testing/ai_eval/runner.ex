@@ -33,6 +33,9 @@ defmodule Loka.Testing.AIEval.Runner do
           total_duration_ms: non_neg_integer()
         }
 
+  # Max retries per phase on rate limit (429) errors
+  @max_retries 3
+
   @doc """
   Run a single scenario with all its phases.
   """
@@ -153,10 +156,10 @@ defmodule Loka.Testing.AIEval.Runner do
   defp await_completion(conversation, timeout) do
     end_time = System.monotonic_time(:millisecond) + timeout
 
-    await_loop(conversation, end_time)
+    await_loop(conversation, end_time, _retries = 0)
   end
 
-  defp await_loop(conversation, end_time) do
+  defp await_loop(conversation, end_time, retries) do
     remaining = end_time - System.monotonic_time(:millisecond)
 
     if remaining <= 0 do
@@ -165,18 +168,18 @@ defmodule Loka.Testing.AIEval.Runner do
     else
       receive do
         {:ai_text_delta, _text} ->
-          await_loop(conversation, end_time)
+          await_loop(conversation, end_time, retries)
 
         {:ai_tool_use_raw, name, id, input} ->
           conversation = Conversation.handle_tool_use(conversation, name, id, input)
-          await_loop(conversation, end_time)
+          await_loop(conversation, end_time, retries)
 
         {:ai_done_raw, response} ->
           conversation = Conversation.handle_done(conversation, response)
 
           if conversation.streaming do
             # Tool use loop continues
-            await_loop(conversation, end_time)
+            await_loop(conversation, end_time, retries)
           else
             conversation
           end
@@ -187,19 +190,34 @@ defmodule Loka.Testing.AIEval.Runner do
         {:ai_error, reason} ->
           Logger.warning("[EvalRunner] AI error: #{inspect(reason)}")
 
-          if rate_limited?(reason) do
-            # Brief pause before returning — phase-level retry handles the rest
-            Process.sleep(2_000)
+          if rate_limited?(reason) and retries < @max_retries do
+            backoff_ms = retry_backoff_ms(retries)
+
+            Mix.shell().info(
+              "      Rate limited (429), retry #{retries + 1}/#{@max_retries} after #{backoff_ms}ms..."
+            )
+
+            Process.sleep(backoff_ms)
+
+            # Flush any stale messages from the failed stream
+            flush_ai_messages()
+
+            conversation = Conversation.resend(conversation, %{})
+            await_loop(conversation, end_time, retries + 1)
+          else
+            if rate_limited?(reason) do
+              Logger.warning("[EvalRunner] Max retries (#{@max_retries}) exhausted on 429")
+            end
+
+            conversation
           end
 
-          conversation
-
         {:ai_tool_use, _name, _id, _input, _result} ->
-          await_loop(conversation, end_time)
+          await_loop(conversation, end_time, retries)
       after
         min(remaining, 5000) ->
           if conversation.streaming do
-            await_loop(conversation, end_time)
+            await_loop(conversation, end_time, retries)
           else
             conversation
           end
@@ -209,6 +227,23 @@ defmodule Loka.Testing.AIEval.Runner do
 
   defp rate_limited?(reason) when is_binary(reason), do: String.contains?(reason, "429")
   defp rate_limited?(_), do: false
+
+  # Exponential backoff: 2s, 4s, 8s
+  defp retry_backoff_ms(retry_count), do: 2_000 * Integer.pow(2, retry_count)
+
+  # Flush stale AI messages from the mailbox before retrying
+  defp flush_ai_messages do
+    receive do
+      {:ai_text_delta, _} -> flush_ai_messages()
+      {:ai_tool_use_raw, _, _, _} -> flush_ai_messages()
+      {:ai_done_raw, _} -> flush_ai_messages()
+      {:ai_done} -> flush_ai_messages()
+      {:ai_error, _} -> flush_ai_messages()
+      {:ai_tool_use, _, _, _, _} -> flush_ai_messages()
+    after
+      0 -> :ok
+    end
+  end
 
   defp load_prompt(version) do
     versioned_path =

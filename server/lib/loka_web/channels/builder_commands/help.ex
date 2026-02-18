@@ -70,8 +70,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Help do
       Guides:     guide <topic>
 
       AI:         /ai <prompt>     - One-shot AI prompt
-                  chat             - Enter chat mode (freeform AI)
-                  exit             - Leave chat mode
+                  /ai              - Toggle AI mode (freeform chat)
                   /ai clear        - Clear AI history
 
     Abbreviations: dl=dialogue, sc=script, cs=cutscene, sl=storyline
@@ -148,20 +147,20 @@ defmodule LokaWeb.Channels.BuilderCommands.Help do
     """
     AI Commands:
       /ai <prompt>    - Send prompt to AI (one-shot)
-      chat            - Enter chat mode (freeform conversation)
-      exit            - Leave chat mode
+      /ai             - Toggle AI mode (freeform chat)
       /ai clear       - Clear conversation history
+      /ai cancel      - Cancel in-progress AI request
 
-    In chat mode, everything you type goes to the AI.
-    Use 'exit' or '/exit' to return to normal mode.
+    In AI mode, everything you type goes to the AI.
+    Use '/ai' or '/exit' to return to normal mode.
 
     Examples:
       /ai create a forest zone with 5 rooms
       /ai list all NPCs and suggest improvements
-      chat
-      > Create a tavern with a mysterious bartender
-      > Now add a quest where the bartender asks for help
-      exit
+      /ai
+      ai> Create a tavern with a mysterious bartender
+      ai> Now add a quest where the bartender asks for help
+      /ai
     """
   end
 

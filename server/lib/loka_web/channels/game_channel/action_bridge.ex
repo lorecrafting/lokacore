@@ -125,8 +125,17 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
     # Update character entity in socket assigns
     # Also persist to EntityServer for durability
     if value do
-      alias Loka.Engine.EntityServer
-      EntityServer.update_protected(value.id, fn _old -> value end)
+      alias Loka.Engine.{EntityRegistry, EntityServer}
+
+      case EntityRegistry.get_or_start(value.id) do
+        {:ok, pid} ->
+          EntityServer.update_protected(pid, fn _old -> value end)
+
+        {:error, reason} ->
+          Logger.warning(
+            "[ActionBridge] Could not sync character to EntityServer: #{inspect(reason)}"
+          )
+      end
     end
 
     Phoenix.Socket.assign(socket, :character, value)

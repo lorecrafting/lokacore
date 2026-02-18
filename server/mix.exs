@@ -11,6 +11,7 @@ defmodule Loka.MixProject do
       aliases: aliases(),
       deps: deps(),
       compilers: [:boundary, :phoenix_live_view] ++ Mix.compilers(),
+      listeners: [Phoenix.CodeReloader],
       # Dialyzer configuration
       dialyzer: [
         plt_add_apps: [:mix, :ex_unit],
