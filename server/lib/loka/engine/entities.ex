@@ -582,9 +582,20 @@ defmodule Loka.Engine.Entities do
   defp maybe_preload_tags(schema), do: Repo.preload(schema, :tags)
 
   defp sync_tags(entity_id, tags) when is_list(tags) do
-    for tag <- tags, is_binary(tag) do
-      add_tag(entity_id, tag)
+    new_tags = Enum.filter(tags, &is_binary/1)
+
+    # Delete tags that are no longer in the new list (one query)
+    EntityTagSchema
+    |> where([t], t.entity_id == ^entity_id and t.tag not in ^new_tags)
+    |> Repo.delete_all()
+
+    # Bulk insert new tags, ignoring duplicates (one query)
+    if new_tags != [] do
+      rows = Enum.map(new_tags, fn tag -> %{entity_id: entity_id, tag: tag} end)
+      Repo.insert_all(EntityTagSchema, rows, on_conflict: :nothing)
     end
+
+    :ok
   end
 
   defp sync_tags(_entity_id, _), do: :ok
