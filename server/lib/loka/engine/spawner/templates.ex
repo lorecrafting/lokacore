@@ -43,7 +43,7 @@ defmodule Loka.Engine.Spawner.Templates do
   end
 
   defp generate_template_instance_key(template_key) do
-    short_id = UUID.uuid4() |> String.split("-") |> List.first()
+    short_id = Ecto.UUID.generate() |> String.split("-") |> List.first()
     "#{template_key}_#{short_id}"
   end
 
@@ -92,7 +92,7 @@ defmodule Loka.Engine.Spawner.Templates do
 
     entity = %Entity{
       prototype
-      | id: UUID.uuid4(),
+      | id: Ecto.UUID.generate(),
         is_prototype: false,
         prototype_key: prototype.key,
         metadata:

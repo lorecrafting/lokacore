@@ -132,7 +132,6 @@ defmodule Loka.MixProject do
       {:guardian, "~> 2.4"},
 
       # UUID generation for entities
-      {:elixir_uuid, "~> 1.2"},
 
       # YAML parsing for prototype files
       {:yaml_elixir, "~> 2.9"},

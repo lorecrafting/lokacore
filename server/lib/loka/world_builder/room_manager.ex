@@ -235,7 +235,7 @@ defmodule Loka.WorldBuilder.RoomManager do
       case Entities.get_entity_by_key(exit_key) do
         nil ->
           exit_entity = %Entity{
-            id: UUID.uuid4(),
+            id: Ecto.UUID.generate(),
             type: :exit,
             key: exit_key,
             short_desc: String.capitalize(direction),

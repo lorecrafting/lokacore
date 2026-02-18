@@ -219,7 +219,7 @@ defmodule Loka.Engine.Spawner do
 
     entity = %Entity{
       prototype
-      | id: UUID.uuid4(),
+      | id: Ecto.UUID.generate(),
         is_prototype: false,
         prototype_key: prototype.key,
         metadata: metadata
@@ -308,7 +308,7 @@ defmodule Loka.Engine.Spawner do
     exit_key = "exit_#{room.key}_#{direction_str}"
 
     exit_entity = %Entity{
-      id: UUID.uuid4(),
+      id: Ecto.UUID.generate(),
       type: :exit,
       key: exit_key,
       short_desc: String.capitalize(direction_str),
@@ -370,7 +370,7 @@ defmodule Loka.Engine.Spawner do
       end
 
     exit_entity = %Entity{
-      id: UUID.uuid4(),
+      id: Ecto.UUID.generate(),
       type: :exit,
       key: exit_key,
       short_desc: Map.get(exit_config, "short_desc", String.capitalize(direction_str)),

@@ -225,7 +225,7 @@ defmodule Loka.WorldBuilder.EntityManager do
       |> String.replace(~r/[^a-z0-9]+/, "_")
       |> String.trim("_")
 
-    short_id = UUID.uuid4() |> String.split("-") |> List.first()
+    short_id = Ecto.UUID.generate() |> String.split("-") |> List.first()
     "#{slug}_#{short_id}"
   end
 

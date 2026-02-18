@@ -235,10 +235,10 @@ defmodule Loka.Engine.Event do
   def new(type, attrs \\ %{})
 
   def new(type, attrs) when type in @event_types do
-    correlation_id = Map.get(attrs, :correlation_id) || UUID.uuid4()
+    correlation_id = Map.get(attrs, :correlation_id) || Ecto.UUID.generate()
 
     %__MODULE__{
-      id: UUID.uuid4(),
+      id: Ecto.UUID.generate(),
       type: type,
       timestamp: DateTime.utc_now(),
       correlation_id: correlation_id
@@ -261,10 +261,10 @@ defmodule Loka.Engine.Event do
   """
   @spec new_unchecked(atom(), map()) :: t()
   def new_unchecked(type, attrs \\ %{}) do
-    correlation_id = Map.get(attrs, :correlation_id) || UUID.uuid4()
+    correlation_id = Map.get(attrs, :correlation_id) || Ecto.UUID.generate()
 
     %__MODULE__{
-      id: UUID.uuid4(),
+      id: Ecto.UUID.generate(),
       type: type,
       timestamp: DateTime.utc_now(),
       correlation_id: correlation_id

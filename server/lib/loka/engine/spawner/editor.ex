@@ -65,7 +65,7 @@ defmodule Loka.Engine.Spawner.Editor do
       components = Map.merge(extra_components, %{"coordinates" => coordinates})
 
       room = %Entity{
-        id: UUID.uuid4(),
+        id: Ecto.UUID.generate(),
         type: :room,
         key: key,
         short_desc: short_desc,
@@ -163,7 +163,7 @@ defmodule Loka.Engine.Spawner.Editor do
     exit_key = "exit_#{source_key || source_id}_#{direction}"
 
     exit_entity = %Entity{
-      id: UUID.uuid4(),
+      id: Ecto.UUID.generate(),
       type: :exit,
       key: exit_key,
       short_desc:
@@ -250,7 +250,7 @@ defmodule Loka.Engine.Spawner.Editor do
       |> String.replace(~r/[^a-z0-9]+/, "_")
       |> String.trim("_")
 
-    short_id = UUID.uuid4() |> String.split("-") |> List.first()
+    short_id = Ecto.UUID.generate() |> String.split("-") |> List.first()
     "#{slug}_#{short_id}"
   end
 end
