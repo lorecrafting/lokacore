@@ -1,0 +1,15 @@
+key: common_fire_circle
+type: room
+parent: base_room
+short_desc: "The Common Fire"
+extra_desc: |
+  A wide stone ring surrounds a fire that burns through all seasons. Tenders eat, argue, tell stories, and fall asleep here against the warm stones. The fire never runs low and never runs high — steady regardless of how much wood is given. The flames lean slightly inward, always toward center.
+
+exits:
+  west: heartwood
+  north: tender_quarters
+  east: heartwood_market
+
+tags:
+  - outdoor
+  - safe_zone

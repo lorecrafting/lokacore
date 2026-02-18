@@ -1,0 +1,91 @@
+id: grove_belonging
+name: "The Second Root"
+description: |
+  The Grove is asking more of you now — healing knowledge, tending work, the truth of what's happening to the eastern trees. And Thera is carrying something heavy. You've been close enough to see it, and you haven't looked away.
+
+type: main
+priority: 2
+act: 1
+
+giver: thera
+turn_in_npc: thera
+
+requires_quest: grove_arrival
+
+objectives:
+  - id: healing_lesson
+    type: talk
+    target_id: thera
+    dialogue_topic: healing_lesson
+    description: "Learn the basics of healing from Thera"
+    hint: "Find her in the healing grove."
+
+  - id: see_blight
+    type: go_to
+    target_id: blight_zone
+    description: "See the Blight for yourself in the eastern groves"
+
+  - id: tell_kira
+    type: talk
+    target_id: kira
+    description: "Talk to Kira about the Blight"
+    hint: "She works in the eastern groves. She'll have observations."
+
+  - id: thera_melody
+    type: talk
+    target_id: thera
+    dialogue_topic: humming
+    description: "Catch Thera humming — ask her about the melody"
+    hint: "She hums when she thinks no one is listening."
+
+  - id: explore_thinning
+    type: go_to
+    target_id: the_thinning
+    description: "Explore toward the Thinning"
+    hint: "Past the understory, north. Brennan warned you not to go far."
+
+  - id: thera_rescue
+    type: talk
+    target_id: thera
+    dialogue_topic: after_thinning
+    description: "Talk to Thera after she pulls you back from the Thinning"
+
+  - id: first_training_session
+    type: talk
+    target_id: thera
+    dialogue_topic: teaching_session_sync
+    description: "Learn to synchronize with the Pulse — the first lesson"
+    hint: "She said she'd teach you properly. Start with the roots in the training grove."
+
+  - id: training_session
+    type: talk
+    target_id: thera
+    dialogue_topic: teaching_session
+    description: "Learn the 70/30 rule — the second lesson"
+    hint: "The 70/30 rule. What you can give and what you must keep."
+
+  - id: find_thera_broken
+    type: talk
+    target_id: thera
+    dialogue_topic: breaking_point
+    description: "Find Thera alone in the hidden hollow"
+    hint: "She disappears when it becomes too much. The hollow off the understory."
+
+rewards:
+  xp: 350
+  gold: 0
+
+journal_entries:
+  start: "Thera said there are things I should know how to do here. Healing, tending. And there's something wrong with the eastern trees — she wants me to see it."
+  healing_lesson: "The hands follow the heart. Work with the person, not on them. And keep 30 percent for yourself — always. Thera says this like it's a rule she knows she breaks."
+  see_blight: "The Blight is worse than I expected. The eastern groves feel wrong — the Pulse muted, the trees silent in a way trees shouldn't be."
+  tell_kira: "Kira is careful with what she shares. But her mother worked in these groves. There's something she isn't saying about why that matters."
+  thera_melody: "She was humming. An old melody, she said — older than anyone here. She doesn't know where she learned it. The way she said it made me think she's been afraid to ask."
+  explore_thinning: "I went too far. The Thinning is aptly named — something in me thinned with it. Thera had to come find me."
+  thera_rescue: "She was drained after the rescue and pretending not to be. The friction between us cleared. Whatever comes next, we're in it together."
+  first_training_session: "Synchronization — joining before acting. I felt the full network, including the Blight sections struggling. She said most healers flinch from that feeling. She said I didn't have to."
+  training_session: "The 70/30 rule. You give 70, keep 30. The Grove gives the rest. She says this like it's a law she knows she bends. I've started to notice when she's afraid — she pulls back, goes careful. She's been afraid for a long time."
+  find_thera_broken: "I found her in the hollow by the split-trunked tree. She'd finally stopped. She said: 'You see me. Not just the healer.' I said I'd been seeing her for a while. We agreed to investigate together. We don't tell anyone. Not yet."
+  complete: "Something has shifted between Thera and me. She's carrying something enormous and I've asked to help carry it. She let me."
+
+labels: [main, grove_arc, act_1, act_2]

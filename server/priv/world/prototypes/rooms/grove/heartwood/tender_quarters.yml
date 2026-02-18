@@ -1,0 +1,13 @@
+key: tender_quarters
+type: room
+parent: base_room
+short_desc: "The Tender Quarters"
+extra_desc: |
+  Sleeping platforms and hammocks of dried vine fill the spaces between great root systems, with small alcoves where the roots curve into natural walls. The roots are warm at night — steadily, evenly warm, with no sun source. Every alcove has roots of the same diameter. Tenders sleep well here and call it the Grove's care.
+
+exits:
+  south: common_fire_circle
+
+tags:
+  - outdoor
+  - safe_zone

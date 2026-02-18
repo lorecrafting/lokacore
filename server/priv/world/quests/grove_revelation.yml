@@ -1,0 +1,77 @@
+id: grove_revelation
+name: "The Ship Tells Its Name"
+description: |
+  Elder Maren has called the council. The truth that has been kept for sixty years is coming out. Everything you thought you understood about the Grove is about to change.
+
+type: main
+priority: 3
+act: 3
+
+giver: elder_maren
+turn_in_npc: thera
+
+requires_quest: grove_belonging
+
+objectives:
+  - id: attend_council
+    type: talk
+    target_id: elder_maren
+    dialogue_topic: council_call
+    description: "Attend the council in the elder hall"
+    hint: "Elder Maren called a gathering. Everyone will be there."
+
+  - id: edge_journey
+    type: go_to
+    target_id: the_edge
+    description: "Follow Brennan to the Edge — see what's beyond the Thinning"
+
+  - id: brennan_confession
+    type: talk
+    target_id: brennan
+    dialogue_topic: edge_truth
+    description: "Ask Brennan what he knows — he's been carrying this too"
+
+  - id: learn_hearts
+    type: talk
+    target_id: elder_maren
+    dialogue_topic: the_hearts
+    description: "Ask Elder Maren to explain the Hearts"
+    hint: "What Lira became. What Thera is being asked to become."
+
+  - id: tomas_message
+    type: talk
+    target_id: tomas
+    dialogue_topic: lira_message
+    description: "Speak with Tomas — Lira has a message for you"
+    hint: "Tomas sits by the memorial stone. Wait for a lucid moment."
+
+  - id: find_thera_deep
+    type: talk
+    target_id: thera
+    dialogue_topic: deep_alone
+    description: "Find Thera at the Heartroot — she went to hear it all directly"
+    hint: "She went into the Deep alone. She needed to know."
+
+  - id: small_grove_moment
+    type: talk
+    target_id: thera
+    dialogue_topic: small_grove_truth
+    description: "Go with Thera to the small grove — she has something to show you"
+    hint: "She'll take you when she's ready."
+
+rewards:
+  xp: 600
+  gold: 0
+
+journal_entries:
+  start: "Elder Maren called a gathering. She said it's time. Sixty years of kept knowledge is coming out in the elder hall."
+  attend_council: "The Grove is a ship. The sky is a membrane. The Pulse is a living system designed to carry us to another world. Lira is still here — she never left. She is the Grove. And the Grove is failing, because Lira is exhausted. It needs a new Heart."
+  edge_journey: "We went to the Edge. Through the Thinning, through the approach, to the place where the trees stop and the membrane begins. Stars. I saw stars through it. We are in space. We have always been in space."
+  brennan_confession: "Seren. Brennan's Seren. She chose rest — the second root — and bought the Grove thirty more years, and Brennan has carried that grief alone since. Thirty years. The badge she gave him."
+  learn_hearts: "The Hearts chose the third root. Not rest, not dissolution. Remaining — staying awake to carry others. Lira chose it two hundred years ago. Thera is being asked to choose it now."
+  tomas_message: "Lira spoke through Tomas. She said the smile meant she found something she'd been looking for so long she forgot she was looking. She said: tell her I was waiting for you."
+  find_thera_deep: "She heard everything from the roots. She went pale and still and then she said: 'I always knew. I didn't want to know.' She asked me to follow her."
+  small_grove_moment: "The small grove. Her secret place since she was eight years old. She gave me a flower — the same species Lira planted at the beginning. She said she'd never shown anyone this place. Not in thirty years."
+  complete: "We sat in the small grove until the light changed. She said: 'I need to understand what I'm becoming.' I said: we'll do it together. I meant it."
+
+labels: [main, grove_arc, act_3]

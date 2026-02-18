@@ -1,0 +1,13 @@
+key: blight_zone_deep
+type: room
+parent: base_room
+short_desc: "The Heart of the Blight"
+extra_desc: |
+  The worst of it. The line here is unmistakable — a seam of dead and dying trees running arrow-straight through the grove, turning at ninety degrees where it meets the boundary of something beneath. The smell is bark-rot and something faintly metallic. No birds here. No insects. Just the silent inventory of what is failing.
+
+exits:
+  south: blight_zone
+  west: kira_lookout
+
+tags:
+  - outdoor

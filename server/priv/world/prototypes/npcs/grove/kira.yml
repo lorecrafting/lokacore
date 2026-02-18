@@ -1,0 +1,271 @@
+key: kira
+type: npc
+parent: base_npc
+short_desc: "Kira"
+long_desc: "Kira crouches over the soil, working with quick efficient hands."
+extra_desc: |
+  She is young and angular, her movements precise the way grief sometimes makes people precise — no wasted motion, no idle lingering. There is dirt under her nails and an old scar on her forearm from something she's never explained. She notices you noticing.
+keywords: [kira, shaper, gardener, woman]
+primary_keyword: kira
+
+components:
+  combatant:
+    health:
+      current: 90
+      max: 90
+    stats:
+      str: 10
+      dex: 14
+      sta: 9
+    level: 3
+
+  ai:
+    aggression: friendly
+    wander: false
+
+  dialogue_tree:
+    # ==========================================================================
+    # KIRA — The Shaper
+    # Key dialogue_topic nodes:
+    #   about_blight (grove_belonging)
+    #   about_mother (grove_revelation)
+    # ==========================================================================
+
+    start:
+      text: "You need something?"
+      choices:
+        - text: "What happened to the eastern trees?"
+          show_if:
+            quest_active: grove_belonging
+          next: about_blight
+
+        - text: "How are you holding up?"
+          show_if:
+            quest_active: grove_sacrifice
+          next: kira_sacrifice_check
+
+        - text: "Tell me about the Blight."
+          next: about_blight
+
+        - text: "Can I help?"
+          next: can_help
+
+        - text: "Goodbye."
+          next: null
+
+    can_help:
+      text: "Can you tell healthy root from sick root?"
+      choices:
+        - text: "Not yet."
+          next: cant_help_yet
+        - text: "Show me."
+          next: teach_roots
+
+    cant_help_yet:
+      text: "Come back when you can. We don't have time for mistakes out here."
+      choices:
+        - text: "Fair."
+          next: null
+
+    teach_roots:
+      text: "Healthy root is firm. It has give but it doesn't yield. Sick root feels wrong — soft in the wrong places, and it smells. You'll know it when you smell it."
+      choices:
+        - text: "What causes the sickness?"
+          next: blight_cause
+        - text: "What do you do with sick root?"
+          next: blight_what_to_do
+
+    blight_cause:
+      text: "Nobody knows. It follows patterns that don't match any disease we've documented. Like it's... intentional, somehow."
+      choices:
+        - text: "Intentional?"
+          next: blight_intentional
+
+    blight_intentional:
+      text: "That's the wrong word. Forget I said that."
+      choices:
+        - text: "(You don't forget)"
+          next: null
+
+    blight_what_to_do:
+      text: "Cut it out. Pack the wound with healmoss. Mark the tree for monitoring. Hope."
+      choices:
+        - text: "Has it gotten worse recently?"
+          next: blight_worse
+
+    blight_worse:
+      text: "*She pauses.* \"Yes. Don't repeat that.\""
+      choices:
+        - text: "Why not?"
+          next: blight_worse_why
+
+    blight_worse_why:
+      text: "Because people are already worried. Adding confirmed bad news doesn't help anyone work."
+      choices:
+        - text: "(You respect that logic, even if you don't fully agree)"
+          next: null
+
+    about_blight:
+      text: "The Blight's been spreading for a year. Follows the root lines east."
+      choices:
+        - text: "What are the root lines?"
+          next: blight_root_lines
+        - text: "Is it dangerous?"
+          next: blight_dangerous
+
+    blight_root_lines:
+      text: "The main roots of the Grove — the ones that connect everything. The Pulse runs through them. The Blight follows them like a map."
+      choices:
+        - text: "What does Elder Maren say?"
+          next: blight_maren
+
+    blight_maren:
+      text: "She says it's manageable. She's been saying that for eight months. I don't know if I believe her anymore."
+      choices:
+        - text: "(Say nothing)"
+          next: null
+
+    blight_dangerous:
+      text: "It will be. If it reaches the heartwood roots..."
+      choices:
+        - text: "Your mother worked in the eastern groves, didn't she?"
+          show_if:
+            flag_set: maren_truth_hinted
+          next: mother_mention
+
+    mother_mention:
+      text: "*She stops working.* \"Where did you hear that?\""
+      choices:
+        - text: "Elder Maren mentioned her."
+          next: mother_maren
+        - text: "Someone told me she got sick."
+          next: mother_sick
+
+    mother_maren:
+      text: "Of course she did."
+      choices:
+        - text: "She said she got tired."
+          next: mother_tired
+
+    mother_tired:
+      text: "She got TIRED. Yes. That's one way to say it."
+      choices:
+        - text: "What's another way?"
+          next: mother_another_way
+
+    mother_another_way:
+      text: "She gave everything she had to this place. To this work. And there was nothing left. And no one told her to stop."
+      choices:
+        - text: "I'm sorry."
+          next: mother_sorry
+
+    mother_sorry:
+      text: "She loved it here. I know she loved it here. That doesn't make me less angry."
+      choices:
+        - text: "It doesn't have to."
+          next: mother_doesnt_have_to
+
+    mother_doesnt_have_to:
+      text: "..."
+      next: mother_doesnt_have_to_2
+
+    mother_doesnt_have_to_2:
+      text: "Go away. Please. I need to work."
+      choices:
+        - text: "(Leave her)"
+          next: null
+
+    mother_sick:
+      text: "She didn't get sick."
+      choices:
+        - text: "(Leave it)"
+          next: null
+
+    # ---- grove_revelation dialogue_topic node ----
+
+    about_mother:
+      text: "Elder Maren told you."
+      choices:
+        - text: "Yes. I thought you should know I know."
+          next: about_mother_2
+        - text: "I wanted to tell you myself, before you heard it some other way."
+          next: about_mother_2
+
+    about_mother_2:
+      text: "She tried to become the Heart. To protect Thera from having to."
+      choices:
+        - text: "Yes."
+          next: about_mother_3
+
+    about_mother_3:
+      text: "She couldn't."
+      choices:
+        - text: "No."
+          next: about_mother_4
+
+    about_mother_4:
+      text: "And now Thera has to anyway."
+      choices:
+        - text: "Thera chose it. Thera chose it knowing."
+          next: about_mother_5
+
+    about_mother_5:
+      text: "My mother chose it too."
+      choices:
+        - text: "I know. And it cost her everything. Thera's path is different."
+          next: about_mother_6
+
+    about_mother_6:
+      text: "How?"
+      choices:
+        - text: "She's not carrying it alone. She has all of us."
+          next: about_mother_7
+
+    about_mother_7:
+      text: "And she's a Rootspeaker. The ship chose her."
+      choices:
+        - text: "Yes."
+          next: about_mother_8
+
+    about_mother_8:
+      text: "My mother wasn't chosen. She tried anyway."
+      choices:
+        - text: "She tried because she loved Thera."
+          next: about_mother_9
+
+    about_mother_9:
+      text: "*Long pause.* \"Yes. She did.\""
+      choices:
+        - text: "(Stay with her)"
+          next: null
+
+    kira_sacrifice_check:
+      text: "Fine. Not fine. Both."
+      choices:
+        - text: "I know."
+          next: kira_sacrifice_2
+
+    kira_sacrifice_2:
+      text: "Is she afraid?"
+      choices:
+        - text: "She said she's strangely calm."
+          next: kira_sacrifice_3
+
+    kira_sacrifice_3:
+      text: "Of course she is. That's so — that is so like her."
+      choices:
+        - text: "(A sound between laugh and grief)"
+          next: null
+
+tags: [friendly, shaper, grove]
+
+emotes:
+  idle: "*works with precise, careful hands*"
+  morning: "*checks the eastern root lines at first light*"
+  worried: "*stands at the edge of the blight zone, staring*"
+
+traits:
+  - script: ambient_emitter
+    config:
+      interval: 90
+      emotes: [idle, morning, worried]

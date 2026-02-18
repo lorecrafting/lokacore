@@ -1,0 +1,64 @@
+id: grove_arrival
+name: "Finding Ground"
+description: |
+  You've woken in a place you don't know. A woman named Thera found you. She's asked you to learn the shape of the Grove — its people, its rhythms, its heartbeat underfoot.
+
+type: main
+priority: 1
+act: 1
+
+giver: thera
+turn_in_npc: thera
+
+requires_quest: null
+
+objectives:
+  - id: visit_heartwood
+    type: go_to
+    target_id: heartwood
+    description: "Find the Heartwood"
+    hint: "The main gathering place — north of the spring."
+
+  - id: meet_maren
+    type: talk
+    target_id: elder_maren
+    description: "Speak with Elder Maren"
+    hint: "She keeps to the elder hall and the study."
+
+  - id: feel_pulse
+    type: go_to
+    target_id: heartwood_spring
+    description: "Sit at the spring and feel the Pulse"
+    hint: "Thera said to stand still and listen downward."
+
+  - id: tend_meadow
+    type: go_to
+    target_id: morning_meadow
+    description: "Help with morning tending in the meadow"
+
+  - id: learn_pulse
+    type: talk
+    target_id: thera
+    dialogue_topic: first_lesson
+    description: "Ask Thera to teach you the Pulse properly"
+
+  - id: meet_brennan
+    type: talk
+    target_id: brennan
+    description: "Meet Brennan at the Watcher's Post"
+    hint: "He's north, where the trees start thinning toward the edge."
+
+rewards:
+  xp: 150
+  gold: 0
+
+journal_entries:
+  start: "A woman found me in the clearing. She said her name was Thera and that I'd been asleep. She asked me to learn the Grove — its places, its people, its heartbeat. I should start by finding the Heartwood."
+  visit_heartwood: "The Heartwood. Ancient trees, gathering fires, the smell of soil and smoke. This is the center of things."
+  meet_maren: "Elder Maren knew me on sight — or knew something about me. She said people like me had arrived before. She didn't explain what that meant."
+  feel_pulse: "At the spring, I stood still until the ground pressed back. Slow, old, steady. The Pulse is real."
+  tend_meadow: "Morning tending. There is something to be said for work that asks nothing but attention."
+  learn_pulse: "Thera sat with me and taught me to find the Pulse on purpose, not by accident. It felt like being let in on a long-kept secret."
+  complete: "I know this place now — its shape, its rhythm, its people. Thera said: welcome to the Grove, properly. I think I understand what she meant."
+
+labels: [main, tutorial, grove_arc, act_1]

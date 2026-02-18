@@ -1,0 +1,14 @@
+key: roots_passage
+type: room
+parent: base_room
+short_desc: "The Roots Passage"
+extra_desc: |
+  A long corridor running north through the ship's infrastructure, its walls alive with pulsing veins of blue-white light. The passage is human-scale and clearly designed for it — the ceiling height exact, the floor smooth. The Rootsong is different here: structured, information-dense, like a language being spoken just below your ability to understand.
+
+exits:
+  south: roots_entrance
+  north: roots_junction
+
+tags:
+  - underground
+  - indoor

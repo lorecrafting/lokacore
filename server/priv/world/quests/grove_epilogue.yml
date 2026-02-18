@@ -1,0 +1,65 @@
+id: grove_epilogue
+name: "What Remains"
+description: |
+  The Grove landed. Thera is gone — and everywhere. Walk the places she loved. Let the grief have its full shape. Something is waiting on the other side of it.
+
+type: main
+priority: 5
+act: 4
+
+giver: elder_maren
+turn_in_npc: elder_maren
+
+requires_quest: grove_sacrifice
+
+objectives:
+  - id: attend_memorial
+    type: go_to
+    target_id: heartwood
+    description: "Attend the memorial gathering in the Heartwood"
+    hint: "The community is gathering to grieve together."
+
+  - id: walk_healing_grove
+    type: go_to
+    target_id: healing_grove
+    description: "Walk through the healing grove — the place she worked"
+    hint: "Her absence will be loudest in the places she most inhabited."
+
+  - id: find_tomas
+    type: talk
+    target_id: tomas
+    description: "Find Tomas at the memorial stone"
+    hint: "He knows something about the smile. He's always known."
+
+  - id: return_heartroot
+    type: go_to
+    target_id: heartroot_chamber
+    description: "Return to the Heartroot Chamber"
+    hint: "She said: if you look for me and can't find me... Go back. Look."
+
+  - id: thera_presence
+    type: talk
+    target_id: thera
+    dialogue_topic: presence_speaks
+    description: "Listen for her in the Pulse"
+    hint: "Touch the stone. Stand still. Listen downward."
+
+  - id: speak_to_maren_end
+    type: talk
+    target_id: elder_maren
+    description: "Tell Elder Maren what you found at the Heartroot"
+
+rewards:
+  xp: 500
+  gold: 0
+
+journal_entries:
+  start: "Maren asked me to walk the Grove. To let it happen. She said the joy comes after the grief, not instead of it."
+  attend_memorial: "Everyone placed something. Flowers, small objects, things they'd been holding back. Kira was last. She laid down her pruning shears — the ones her mother left her. She'll pick them up again. But not today."
+  walk_healing_grove: "Empty. Every spot she used to stand in is just... air now. The plants she tended are still growing. That's something."
+  find_tomas: "Tomas looked up when I sat beside him. He said: 'She's here, you know. She never left. That's what I've been trying to tell everyone.' Then he went back to his conversation with the stone."
+  return_heartroot: "The chamber was warmer than before. The roots were full of light — not emergency light, living light."
+  thera_presence: "She was there. The love didn't get smaller, she said. It got bigger. The whole thing. She asked me to listen for her. I said I would."
+  complete: "Maren asked what I found. I said: I think she found the third root, and then found what's past it. Maren was quiet for a long time. Then she said: yes. That's what Lira tried to tell Tomas for two hundred years."
+
+labels: [main, grove_arc, act_4, epilogue]

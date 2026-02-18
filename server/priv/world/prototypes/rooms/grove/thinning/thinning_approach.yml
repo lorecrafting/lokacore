@@ -1,0 +1,13 @@
+key: thinning_approach
+type: room
+parent: base_room
+short_desc: "The Thinning Approach"
+extra_desc: |
+  The forest begins to thin here — subtly at first, easily dismissed. Perhaps fewer trees than expected, perhaps the light slightly more even. Tenders on the north circuit notice it without stopping to name it. Watchers assigned to the outer patrol learn quickly not to think about it too hard.
+
+exits:
+  south: north_understory
+  north: the_thinning
+
+tags:
+  - outdoor

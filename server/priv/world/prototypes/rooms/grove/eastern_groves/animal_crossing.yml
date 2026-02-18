@@ -1,0 +1,12 @@
+key: animal_crossing
+type: room
+parent: base_room
+short_desc: "The Animal Crossing"
+extra_desc: |
+  A wide path through the eastern growth where animals cross regularly — their tracks pressed into the soil, the undergrowth bent back by passage. The path they use is straight. A long, deliberate straight line between two sections of forest. Animals do not make straight paths.
+
+exits:
+  south: gatherer_camp
+
+tags:
+  - outdoor

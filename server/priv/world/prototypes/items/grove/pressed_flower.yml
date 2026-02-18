@@ -1,0 +1,17 @@
+key: pressed_flower
+type: item
+parent: base_item
+short_desc: "A Pressed White Flower"
+long_desc: "A small pressed white flower rests here, perfectly preserved."
+extra_desc: |
+  A small white flower, pressed flat and dried. The species is old — older than anyone in the Grove, according to Thera. She said Lira planted the first ones at the beginning of the voyage. This one she found by the root line in the small grove. She gave it to you like it was ordinary. It wasn't.
+keywords: [flower, pressed, white, gift]
+primary_keyword: flower
+
+components:
+  physical:
+    weight: 0
+    size: tiny
+    material: organic
+
+tags: [quest_item, no_drop, grove]

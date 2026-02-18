@@ -1,0 +1,13 @@
+key: north_understory
+type: room
+parent: base_room
+short_desc: "The North Understory"
+extra_desc: |
+  Paths heading north toward the Thinning. The ground underfoot becomes firmer here, the soil shallower over something harder beneath. The trees thin slightly. Watchers who patrol the north circuit move through quickly — not from rule, but from a low, unreasonable urgency to be out again before long.
+
+exits:
+  south: brennan_path
+  north: thinning_approach
+
+tags:
+  - outdoor

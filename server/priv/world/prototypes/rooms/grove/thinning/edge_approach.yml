@@ -1,0 +1,13 @@
+key: edge_approach
+type: room
+parent: base_room
+short_desc: "The Edge Approach"
+extra_desc: |
+  The last trees. Two of them, standing alone, and then nothing — the open space where the world ends. The sky here curves visibly downward at the periphery. The air smells faintly of something recycled, something old and mechanical. Tenders are forbidden from going further. Most have never wanted to.
+
+exits:
+  south: thinning_far_reach
+  north: the_edge
+
+tags:
+  - outdoor

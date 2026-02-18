@@ -1,0 +1,268 @@
+key: tomas
+type: npc
+parent: base_npc
+short_desc: "Tomas"
+long_desc: "An old man sits by the memorial stone, talking quietly to it."
+extra_desc: |
+  He is ancient in a way the others aren't — not just old, but settled into age the way a tree settles into the hillside it planted itself in. He holds a worn trowel in both hands like a rosary. Most of the time he looks at the stone and talks in a low voice that doesn't carry. Occasionally he stops and looks at you with sudden, startling clarity.
+keywords: [tomas, old man, elder, witness, man]
+primary_keyword: tomas
+
+components:
+  combatant:
+    health:
+      current: 40
+      max: 40
+    stats:
+      str: 4
+      dex: 5
+      sta: 6
+    level: 1
+
+  ai:
+    aggression: passive
+    wander: false
+
+  dialogue_tree:
+    # ==========================================================================
+    # TOMAS — The Witness
+    # Ancient (205 years old), Lira speaks through him in lucid moments.
+    # Key dialogue_topic nodes:
+    #   first_meeting (grove_arrival)
+    #   three_roots_location (grove_belonging — points player to the carving)
+    #   lira_message (grove_revelation — full lucid moment)
+    # ==========================================================================
+
+    start:
+      text: "She was smiling. Why won't anyone tell me why?"
+      choices:
+        - text: "Who was smiling?"
+          next: who_smiling
+        - text: "Hello, Tomas."
+          show_if:
+            flag_set: met_tomas
+          next: hello_again
+        - text: "(He seems confused)"
+          next: confused_response
+
+    who_smiling:
+      text: "Lira. At the end. The light came in and she was smiling and nobody could tell me why."
+      choices:
+        - text: "When was this?"
+          next: when_this
+        - text: "Maybe she was happy."
+          next: maybe_happy
+
+    when_this:
+      text: "A long time ago. Two hundred years, if you count. I don't count anymore."
+      choices:
+        - text: "You knew Lira?"
+          next: knew_lira
+
+    maybe_happy:
+      text: "Happy people smile like they mean it. That was different. That was a smile that knew something."
+      choices:
+        - text: "What did it know?"
+          next: smile_what_knows
+
+    knew_lira:
+      text: "I was there. Right there. The light took her and the whole Grove went quiet for a moment and then the Pulse — the Pulse was different after. Warmer."
+      choices:
+        - text: "What was she like?"
+          next: lira_like
+
+    smile_what_knows:
+      text: "That's what I keep asking. No one answers. Maybe you'll find out."
+      choices:
+        - text: "(He looks at you with sudden intent)"
+          action: ["set_flag", "met_tomas"]
+          next: intent_look
+
+    lira_like:
+      text: "Practical. Funny, when she wanted to be. She kept making us plant things she said would take a hundred years to be beautiful. Said she'd see it eventually."
+      choices:
+        - text: "She was right."
+          next: lira_right
+
+    lira_right:
+      text: "*A long pause.* \"Yes. She was.\""
+      choices:
+        - text: "(He drifts back into his own world)"
+          next: null
+
+    intent_look:
+      text: "You're the witness."
+      choices:
+        - text: "I don't know what that means."
+          next: witness_meaning
+        - text: "Yes."
+          next: witness_meaning
+
+    witness_meaning:
+      text: "Lira said there'd be a witness. Someone preserved to see the end and carry the story forward. She said — she said make sure they know it isn't sad."
+      choices:
+        - text: "What isn't sad?"
+          next: not_sad
+
+    not_sad:
+      text: "The smile. Whatever she found. Make sure the witness knows."
+      choices:
+        - text: "How do I find out what she found?"
+          next: how_find_out
+
+    how_find_out:
+      text: "*He taps the trowel against the stone.* \"Go to the Heart. At the end. Stay.\""
+      choices:
+        - text: "I will."
+          next: null
+
+    confused_response:
+      text: "My father gave me this trowel. He planted the first orchard, you know. Before I was born."
+      choices:
+        - text: "He sounds like a good man."
+          next: father_good
+        - text: "(Leave him)"
+          next: null
+
+    father_good:
+      text: "He was. He was from Earth. He planted things he said smelled like home. I never knew what Earth smelled like."
+      choices:
+        - text: "What does the orchard smell like?"
+          next: orchard_smell
+
+    orchard_smell:
+      text: "Like home. That's what he always said. He was right. I didn't understand until I was very old."
+      choices:
+        - text: "(Leave him to his memories)"
+          next: null
+
+    hello_again:
+      text: "You again. Good. I like you."
+      choices:
+        - text: "I like you too, Tomas."
+          next: hello_again_2
+        - text: "Do you have lucid moments? When you remember everything?"
+          next: lucid_moments
+
+    hello_again_2:
+      text: "She says you're doing well."
+      choices:
+        - text: "Who says?"
+          next: who_says
+
+    who_says:
+      text: "She does. She watches."
+      choices:
+        - text: "Lira?"
+          next: hello_lira
+
+    hello_lira:
+      text: "She never left. That's what I've been trying to tell everyone. She never left."
+      choices:
+        - text: "(He drifts again)"
+          next: null
+
+    lucid_moments:
+      text: "It's not that simple. It's more like... the voice gets louder sometimes. And then I'm both of us for a while."
+      choices:
+        - text: "What voice?"
+          next: the_voice
+
+    the_voice:
+      text: "You know what voice."
+      choices:
+        - text: "Lira."
+          next: lucid_lira
+
+    lucid_lira:
+      text: "She likes you. For what it's worth."
+      choices:
+        - text: "(That's worth quite a lot)"
+          next: null
+
+    # ---- grove_belonging dialogue_topic node ----
+
+    three_roots_location:
+      text: "The carving. Yes. I know where it is."
+      choices:
+        - text: "Can you tell me?"
+          next: three_roots_2
+
+    three_roots_2:
+      text: "In the deep. The eastern reach — where the roots go down. There's a stone half-covered, you'll feel it in the Pulse before you see it. The words are worn but readable if you're patient."
+      choices:
+        - text: "Do you know what it says?"
+          next: three_roots_3
+
+    three_roots_3:
+      text: "I wrote it. A long time ago. At Lira's request."
+      choices:
+        - text: "Why?"
+          next: three_roots_why
+
+    three_roots_why:
+      text: "She said the time would come when someone would need to read it. She was specific about that. 'Someone will need to read this and then look for me.'"
+      choices:
+        - text: "And here I am."
+          next: three_roots_here_you_are
+
+    three_roots_here_you_are:
+      text: "Here you are."
+      choices:
+        - text: "(Find the carving)"
+          next: null
+
+    # ---- grove_revelation dialogue_topic node ----
+
+    lira_message:
+      text: "*His eyes change. He looks at you with a clarity that has nothing confused about it.*"
+      next: lira_message_2
+
+    lira_message_2:
+      text: "Hello. I've been waiting to do this properly. You understand I don't have full control over when — he goes where he goes. But I'm glad you came."
+      choices:
+        - text: "Lira?"
+          next: lira_message_3
+
+    lira_message_3:
+      text: "Yes. I wanted to tell you something about what happens at the end. I know you're afraid — not for yourself. For her."
+      choices:
+        - text: "I am."
+          next: lira_message_4
+
+    lira_message_4:
+      text: "Don't be. The thing she's afraid of — the dissolving — that's not what it is. You lose the boundary of yourself, yes. But you don't lose yourself. It's more like... remembering you were always bigger than the boundary."
+      choices:
+        - text: "Is that what the smile meant?"
+          next: lira_message_5
+
+    lira_message_5:
+      text: "The smile meant I found something I'd been looking for so long I forgot I was looking. I can't give you the word for it. But she'll have it soon, and she'll understand."
+      choices:
+        - text: "Is she going to be okay?"
+          next: lira_message_6
+
+    lira_message_6:
+      text: "More than okay. Tell her I said — tell her I said: 'I was waiting for you.'"
+      choices:
+        - text: "I'll tell her."
+          next: lira_message_7
+
+    lira_message_7:
+      text: "*The clarity fades. Tomas blinks and looks around, confused.* \"What were we talking about?\""
+      choices:
+        - text: "(He doesn't remember)"
+          next: null
+
+tags: [friendly, witness, ancient, grove]
+
+emotes:
+  idle: "*talks quietly to the memorial stone*"
+  lucid: "*stops and looks up with sudden, startling clarity*"
+  morning: "*polishes the trowel with the hem of his shirt*"
+
+traits:
+  - script: ambient_emitter
+    config:
+      interval: 45
+      emotes: [idle, lucid, morning]

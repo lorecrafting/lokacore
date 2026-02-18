@@ -1,0 +1,16 @@
+key: heartwood_spring
+type: room
+parent: base_room
+short_desc: "The Spring"
+extra_desc: |
+  A shallow pool gathers at the base of a mossy outcropping, fed by water welling up from somewhere below. The stones lining the pool are uniformly smooth — not river-worn, but shaped. Along the western edge, the water flows briefly upward before rejoining the pool. It has always done this. No one seems to have noticed.
+
+exits:
+  north: heartwood
+  south: awakening_clearing
+  west: morning_meadow
+  east: south_understory
+
+tags:
+  - outdoor
+  - safe_zone

@@ -1,0 +1,12 @@
+key: seed_vault_passage
+type: room
+parent: base_room
+short_desc: "The Sealed Passage"
+extra_desc: |
+  A short passage ending at a door that has no business being here. It is wood-faced, root-wrapped, and very old — but underneath the growth, something smooth and dark shows at the seams. The door is warm to the touch. It does not open. Tenders who find this place rarely stay long.
+
+exits:
+  east: elder_hall
+
+tags:
+  - indoor

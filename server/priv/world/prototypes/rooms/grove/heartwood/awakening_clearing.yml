@@ -1,0 +1,17 @@
+key: awakening_clearing
+type: room
+parent: base_room
+short_desc: "The Awakening Clearing"
+extra_desc: |
+  A perfect oval of soft earth opens among the ancient trees. Mist clings close. The roots along its edge form an unbroken border, as if they agreed to stop here and go no further — the earth inside is level and firm, packed rather than worn. Somewhere above, something hums low in the chest.
+
+exits:
+  north: heartwood_spring
+
+spawns:
+  - prototype: thera
+
+tags:
+  - outdoor
+  - starting_room
+  - safe_zone

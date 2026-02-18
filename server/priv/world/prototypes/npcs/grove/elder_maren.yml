@@ -1,0 +1,290 @@
+key: elder_maren
+type: npc
+parent: base_npc
+short_desc: "Elder Maren"
+long_desc: "Elder Maren stands here with the stillness of someone who has learned to wait."
+extra_desc: |
+  She is old in the way of roots — not frail, just deeply set. Her hands rest in front of her without fidgeting. When she looks at you, you have the strange feeling she's looking at something just behind your face, something she already knows the shape of.
+keywords: [elder, maren, elder_maren, woman, elder]
+primary_keyword: elder_maren
+
+components:
+  combatant:
+    health:
+      current: 80
+      max: 80
+    stats:
+      str: 6
+      dex: 8
+      sta: 9
+    level: 8
+
+  ai:
+    aggression: friendly
+    wander: false
+
+  dialogue_tree:
+    # ==========================================================================
+    # ELDER MAREN — The Elder
+    # Quest giver: grove_revelation, grove_epilogue
+    # Quest turn-in: grove_epilogue
+    # Key dialogue_topic nodes:
+    #   council_call, the_hearts (grove_revelation)
+    #   after_sacrifice, epilogue_end (grove_epilogue)
+    # ==========================================================================
+
+    start:
+      text: "You're the newcomer."
+      choices:
+        - text: "Yes. Thera sent me."
+          show_if:
+            quest_active: grove_arrival
+          next: grove_intro
+
+        - text: "[Accept Quest] Tell me what's really happening."
+          show_if:
+            quest_completed: grove_belonging
+            quest_not_active: grove_revelation
+          action: ["accept_quest", "grove_revelation"]
+          next: revelation_accepted
+
+        - text: "[Accept Quest] I should know what comes next."
+          show_if:
+            quest_completed: grove_sacrifice
+            quest_not_active: grove_epilogue
+          action: ["accept_quest", "grove_epilogue"]
+          next: epilogue_accepted
+
+        - text: "[Turn in] I've been back to the Heartroot."
+          show_if:
+            quest_complete: grove_epilogue
+          action: ["complete_quest", "grove_epilogue"]
+          next: epilogue_complete
+
+        - text: "How are you?"
+          next: maren_how_are_you
+
+        - text: "Goodbye."
+          next: null
+
+    grove_intro:
+      text: "She did. Good. You've been here before — not you specifically, but something like you. A person who arrives not knowing why they were kept."
+      choices:
+        - text: "What does that mean?"
+          next: grove_intro_2
+        - text: "I don't understand."
+          next: grove_intro_2
+
+    grove_intro_2:
+      text: "It means you were preserved. Carried here for a purpose. Don't ask me what purpose — the Grove keeps that until it's time."
+      choices:
+        - text: "Is that supposed to be reassuring?"
+          next: grove_intro_3
+
+    grove_intro_3:
+      text: "No. It's supposed to be true."
+      choices:
+        - text: "(Leave for now)"
+          next: null
+
+    maren_how_are_you:
+      text: "Tired. I've carried this knowledge for forty years. It doesn't get lighter."
+      choices:
+        - text: "What knowledge?"
+          show_if:
+            flag_not_set: maren_truth_hinted
+          action: ["set_flag", "maren_truth_hinted"]
+          next: maren_hint_truth
+        - text: "I won't pry."
+          next: null
+
+    maren_hint_truth:
+      text: "You'll understand, when it's time. The Grove shows its truths slowly."
+      choices:
+        - text: "And when it's time?"
+          next: maren_hint_truth_2
+
+    maren_hint_truth_2:
+      text: "It'll be unmistakable."
+      choices:
+        - text: "(Leave)"
+          next: null
+
+    revelation_accepted:
+      text: "It's time. I've been waiting for you to be ready, and Thera agrees you're ready. Come to the elder hall. I'll gather the others."
+      choices:
+        - text: "What are you going to tell us?"
+          next: revelation_accepted_2
+
+    revelation_accepted_2:
+      text: "Everything. Sixty years of keeping this should be enough. Come when you're ready."
+      choices:
+        - text: "(I'll come now)"
+          next: null
+
+    epilogue_accepted:
+      text: "She chose well. Even Lira, at the beginning, had to grieve the shape of herself before the joy came."
+      choices:
+        - text: "I don't feel joy yet. Just the absence."
+          next: epilogue_accepted_2
+
+    epilogue_accepted_2:
+      text: "That's right. The absence first. Give it time. Go to the places she loved. Walk them slowly."
+      choices:
+        - text: "(I will)"
+          next: null
+
+    epilogue_complete:
+      text: "You felt it."
+      choices:
+        - text: "Yes."
+          next: epilogue_complete_2
+
+    epilogue_complete_2:
+      text: "Then you understand why Lira was smiling. Why Tomas never stopped asking."
+      choices:
+        - text: "She found the third root."
+          next: epilogue_complete_3
+
+    epilogue_complete_3:
+      text: "She found what's beyond all the roots. There's no word for it. There doesn't need to be."
+      choices:
+        - text: "Thank you, Elder."
+          next: null
+
+    # ---- grove_revelation dialogue_topic nodes ----
+
+    council_call:
+      text: "We are a ship. We have always been a ship. The Grove — the trees, the soil, the Pulse — is a living system designed to carry us to a new world. That world is close now. Close enough that the system is failing."
+      choices:
+        - text: "What does failing mean?"
+          next: council_failing
+        - text: "How long have you known?"
+          next: council_known
+
+    council_failing:
+      text: "The Blight. The sky flickering. The Thinning spreading. The Heart — the consciousness that sustains the Grove — is exhausted. Lira has held this for two hundred years. She cannot hold it much longer."
+      choices:
+        - text: "What happens when she stops?"
+          next: council_stops
+
+    council_known:
+      text: "I've known for forty years. My predecessor knew before me. We have kept this secret because the knowledge of it destroys people — it destroyed Yara, in its way."
+      choices:
+        - text: "Thera's mother."
+          next: council_yara
+
+    council_stops:
+      text: "The Grove dies. The ship falls. We never land."
+      choices:
+        - text: "Then what do we do?"
+          next: council_what
+
+    council_what:
+      text: "The system needs a new Heart. A Rootspeaker — someone who can merge with the ship's core and sustain the Grove as Lira has. The ship has been growing one since birth."
+      choices:
+        - text: "Thera."
+          next: council_thera
+
+    council_thera:
+      text: "Thera."
+      choices:
+        - text: "Does she know?"
+          next: council_thera_knows
+
+    council_thera_knows:
+      text: "Not yet. Not fully. The Grove has been telling her in the only language it has — dreams, the melody, visions. She knows something is coming. She doesn't know what it asks."
+      choices:
+        - text: "She needs to hear this from you."
+          next: council_tell_her
+
+    council_tell_her:
+      text: "Yes. Take her to the Edge. Let the Grove show her directly. Then bring her to me."
+      choices:
+        - text: "(I'll do that)"
+          next: null
+
+    council_yara:
+      text: "Yara learned the truth from a record she found in the archive. She tried to become the Heart herself — to protect Thera from this. The Grove couldn't accept her. She... diminished. Kira was eight years old."
+      choices:
+        - text: "Does Kira know?"
+          next: council_yara_kira
+
+    council_yara_kira:
+      text: "She knows her mother didn't die of illness. She doesn't know why. That conversation is coming."
+      choices:
+        - text: "(This is a lot to carry)"
+          next: null
+
+    the_hearts:
+      text: "The Hearts are those who chose the third root. Lira was the first. If Thera accepts, she will be the second. After the landing, the ship will no longer need sustaining — the Hearts will be free."
+      choices:
+        - text: "Free to do what?"
+          next: hearts_free
+        - text: "Is it painful?"
+          next: hearts_painful
+
+    hearts_free:
+      text: "We don't know. Lira said she would find out and tell us. The message has been slow in coming."
+      choices:
+        - text: "Maybe it takes a while to learn the words."
+          next: hearts_free_2
+
+    hearts_free_2:
+      text: "That is a generous interpretation. I've chosen to hold it."
+      choices:
+        - text: "(Leave)"
+          next: null
+
+    hearts_painful:
+      text: "Lira said no. Lira said it was like putting down something very heavy you'd been carrying for so long you forgot it had weight."
+      choices:
+        - text: "That sounds like relief."
+          next: hearts_relief
+
+    hearts_relief:
+      text: "It sounds like the second root, yes. But Lira chose the third. The difference is what happens after you put it down."
+      choices:
+        - text: "(I need to think about this)"
+          next: null
+
+    # ---- grove_epilogue dialogue_topic nodes ----
+
+    after_sacrifice:
+      text: "She was smiling. Did you see?"
+      choices:
+        - text: "Yes. I didn't understand why."
+          next: after_sacrifice_2
+        - text: "I couldn't look away."
+          next: after_sacrifice_2
+
+    after_sacrifice_2:
+      text: "Neither did I, the first time. When Lira... the records say she was laughing, at the end. Tomas has been asking why for two hundred years."
+      choices:
+        - text: "I think I understand now."
+          next: after_sacrifice_3
+
+    after_sacrifice_3:
+      text: "Not yet. But you will."
+      choices:
+        - text: "(Leave)"
+          next: null
+
+    epilogue_end:
+      text: "The Grove endures. The landing was clean. And we carry her with us, not as memory but as presence. That is the gift of the third root."
+      choices:
+        - text: "I'll carry her."
+          next: null
+
+tags: [friendly, quest_giver, elder, grove, rememberer]
+
+emotes:
+  idle: "*reviews the records with careful attention*"
+  dawn: "*stands at the study window watching the Grove wake*"
+  worried: "*closes her eyes briefly, hands folded*"
+
+traits:
+  - script: day_night_schedule
+    config:
+      wake_at: dawn
+      sleep_at: dusk

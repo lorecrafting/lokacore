@@ -1,0 +1,927 @@
+key: thera
+type: npc
+parent: base_npc
+short_desc: "Thera"
+long_desc: "Thera stands here, her attention completely on whatever is in front of her."
+extra_desc: |
+  She wears practical clothes worn soft at the elbows. There is something on her fingers — herb-stain, dark green at the knuckles. She looks up when you approach, and the look is unhurried. As if she had been waiting, and it's fine that you took your time.
+keywords: [thera, healer, rootspeaker, woman]
+primary_keyword: thera
+
+components:
+  combatant:
+    health:
+      current: 120
+      max: 120
+    stats:
+      str: 8
+      dex: 12
+      sta: 10
+    level: 5
+
+  ai:
+    aggression: friendly
+    wander: false
+
+  dialogue_tree:
+    # ==========================================================================
+    # THERA — The Companion
+    # Quest giver: grove_arrival, grove_belonging, grove_sacrifice
+    # Quest turn-in: grove_arrival, grove_belonging, grove_revelation, grove_sacrifice
+    # Key dialogue_topic nodes:
+    #   introduction, first_lesson (grove_arrival)
+    #   healing_lesson, humming, after_thinning, teaching_session, breaking_point (grove_belonging)
+    #   deep_alone, small_grove_truth (grove_revelation)
+    #   volunteer_attempt, last_night, heartroot_truth (grove_sacrifice)
+    # ==========================================================================
+
+    start:
+      text: "You're awake. Good."
+      choices:
+        - text: "[Accept Quest] What is this place? What happened to me?"
+          show_if:
+            quest_not_active: grove_arrival
+            quest_not_completed: grove_arrival
+          action: ["accept_quest", "grove_arrival"]
+          next: arrival_accepted
+
+        - text: "[Turn in] I've met everyone you mentioned."
+          show_if:
+            quest_complete: grove_arrival
+          action: ["complete_quest", "grove_arrival"]
+          next: arrival_complete
+
+        - text: "[Accept Quest] I want to start helping properly."
+          show_if:
+            quest_completed: grove_arrival
+            quest_not_active: grove_belonging
+          action: ["accept_quest", "grove_belonging"]
+          next: belonging_accepted
+
+        - text: "[Turn in] I found you in the hollow. That conversation changed things."
+          show_if:
+            quest_complete: grove_belonging
+          action: ["complete_quest", "grove_belonging"]
+          next: belonging_complete
+
+        - text: "[Turn in] We've seen it. The edge of everything."
+          show_if:
+            quest_complete: grove_revelation
+          action: ["complete_quest", "grove_revelation"]
+          next: revelation_complete
+
+        - text: "[Accept Quest] I need to talk to you. About what comes next."
+          show_if:
+            quest_completed: grove_revelation
+            quest_not_active: grove_sacrifice
+          action: ["accept_quest", "grove_sacrifice"]
+          next: sacrifice_accepted
+
+        - text: "How are you?"
+          show_if:
+            quest_active: grove_arrival
+          next: how_are_you
+
+        - text: "Tell me about the Pulse."
+          show_if:
+            quest_active: grove_arrival
+          next: about_pulse
+
+        - text: "Goodbye."
+          next: null
+
+    arrival_accepted:
+      text: "The Grove. You've been asleep — I don't know for how long. Neither do you, and that's fine for now. Explore a little. Find Elder Maren in the study hall, then come back when you've got your feet under you."
+      choices:
+        - text: "What should I feel at the spring?"
+          next: pulse_hint
+        - text: "(I'll explore)"
+          next: null
+
+    pulse_hint:
+      text: "Stand still at the spring. Take off your shoes if you have them. The Pulse is subtle — it doesn't announce itself. Just... listen downward."
+      choices:
+        - text: "(Understood)"
+          next: null
+
+    how_are_you:
+      text: "Busy. Always busy."
+      choices:
+        - text: "You don't have to pretend."
+          next: no_pretend
+        - text: "Of course. Sorry to bother you."
+          next: null
+
+    no_pretend:
+      text: "..."
+      next: no_pretend_2
+
+    no_pretend_2:
+      text: "I'm not pretending. I am busy. That's different from unhappy."
+      choices:
+        - text: "(Leave her be)"
+          next: null
+
+    about_pulse:
+      text: "It's what holds the Grove together. Everything living sends a signal — roots, soil, water. Stack them and you get something you can feel. The Heartwood spring is a good place to start. Sit still and listen."
+      choices:
+        - text: "(I'll try)"
+          next: null
+
+    arrival_complete:
+      text: "You went everywhere I suggested. How does it feel?"
+      choices:
+        - text: "Strange. Like I know the shape of it now."
+          next: arrival_complete_2
+        - text: "Still a lot I don't understand."
+          next: arrival_complete_2
+
+    arrival_complete_2:
+      text: "That's exactly right. You know the shape. The rest comes with time. Welcome to the Grove... properly."
+      choices:
+        - text: "Thank you."
+          next: null
+
+    belonging_accepted:
+      text: "There are things you should know how to do here. Healing, tending. I'll show you, when there's a moment. For now — go have a look at the eastern groves. There's something I want you to see."
+      choices:
+        - text: "(I'll start there)"
+          next: null
+
+    belonging_complete:
+      text: "You found me. In the hollow."
+      choices:
+        - text: "I wasn't going to leave."
+          next: belonging_complete_2
+
+    belonging_complete_2:
+      text: "I know. That's... that's the thing of it."
+      choices:
+        - text: "(Sit with her)"
+          next: null
+
+    revelation_complete:
+      text: "You've been to the small grove. You stayed."
+      choices:
+        - text: "You needed someone to."
+          next: revelation_complete_2
+
+    revelation_complete_2:
+      text: "I don't know what I'm becoming. But I know I want you to see it."
+      choices:
+        - text: "(Say nothing)"
+          next: null
+
+    sacrifice_accepted:
+      text: "I know what you're going to say. The answer is no — not because I don't believe you'd try. Because the Grove doesn't work that way. It needs a Rootspeaker."
+      choices:
+        - text: "Then tell me what I can do."
+          next: sacrifice_accepted_2
+
+    sacrifice_accepted_2:
+      text: "Stay. Be here. That's not a small thing."
+      choices:
+        - text: "(I'll stay)"
+          next: null
+
+    # ---- grove_arrival dialogue_topic nodes ----
+
+    introduction:
+      text: "I'm Thera. I tend the sick, the wounded, the plants when they need it. Everyone here does something — you'll find yours."
+      choices:
+        - text: "How long was I asleep?"
+          next: intro_sleep
+        - text: "Who else is here?"
+          next: intro_who
+        - text: "I'll go look around."
+          next: null
+
+    intro_sleep:
+      text: "Long enough that I worried. But you're here now, and your color's good."
+      choices:
+        - text: "Thank you for watching over me."
+          next: intro_thanks
+
+    intro_thanks:
+      text: "That's what I do."
+      choices:
+        - text: "(Leave)"
+          next: null
+
+    intro_who:
+      text: "Elder Maren runs things — she's in the study hall, she'll want to know you're on your feet. And Tomas sits near the memorial stone most days. Talk to him when you have a moment. He's... interesting."
+      choices:
+        - text: "I'll find them."
+          next: null
+
+    first_lesson:
+      text: "You want to learn the Pulse."
+      choices:
+        - text: "I felt something at the spring. I want to know what it was."
+          next: first_lesson_2
+        - text: "You mentioned it. I'm curious."
+          next: first_lesson_2
+
+    first_lesson_2:
+      text: "Sit down."
+      next: first_lesson_3
+
+    first_lesson_3:
+      text: "Close your eyes. Don't try to feel anything yet — just let the weight of you press into the ground. Wait until the ground presses back."
+      choices:
+        - text: "(Wait)"
+          next: first_lesson_4
+
+    first_lesson_4:
+      text: "There it is. Slow, isn't it? Like breathing, but older. That's the Pulse. Every root in the Grove is part of it. You're part of it now too."
+      choices:
+        - text: "What does it mean that I can feel it?"
+          next: first_lesson_5
+        - text: "It felt like a heartbeat."
+          next: first_lesson_5
+
+    first_lesson_5:
+      text: "It means you're listening. That's rarer than you'd think."
+      choices:
+        - text: "(Remember this)"
+          next: null
+
+    # ---- grove_belonging dialogue_topic nodes ----
+
+    healing_lesson:
+      text: "Take this. Pressed heartleaf — it reduces fever and slows bleeding. You don't need to know more than that right now. What you need to know is this: you work with the person, not on them. Ask before you touch."
+      choices:
+        - text: "Is that the Pulse at work?"
+          next: healing_lesson_2
+        - text: "Who taught you that?"
+          next: healing_lesson_mother
+
+    healing_lesson_2:
+      text: "The Pulse tells you what's wrong. But knowledge of the person — their fear, what they need to hear — that's yours to give. The Pulse can't carry that."
+      choices:
+        - text: "(I understand)"
+          next: null
+
+    healing_lesson_mother:
+      text: "My mother. She had a saying — 'the hands follow the heart.' She wasn't speaking metaphorically."
+      choices:
+        - text: "What happened to her?"
+          next: healing_lesson_mother_2
+
+    healing_lesson_mother_2:
+      text: "She... she got tired. More than tired."
+      choices:
+        - text: "I'm sorry."
+          next: healing_lesson_mother_3
+
+    healing_lesson_mother_3:
+      text: "It was a long time ago."
+      choices:
+        - text: "(Leave it there)"
+          next: null
+
+    humming:
+      text: "Oh."
+      choices:
+        - text: "What is that melody?"
+          next: humming_2
+        - text: "It's beautiful. Don't stop."
+          next: humming_3
+
+    humming_2:
+      text: "Old. It's very old. Older than me, older than Elder Maren. I... I don't know where I learned it. It's just always been there."
+      choices:
+        - text: "Have you asked where it came from?"
+          next: humming_4
+        - text: "(Let it go)"
+          next: null
+
+    humming_3:
+      text: "I didn't know I was doing it. That happens sometimes."
+      choices:
+        - text: "Where does it come from?"
+          next: humming_2
+
+    humming_4:
+      text: "No. Some things feel like they need to stay unexamined."
+      choices:
+        - text: "(You understand that)"
+          next: null
+
+    after_thinning:
+      text: "Sit down before you fall down."
+      choices:
+        - text: "I'm fine."
+          next: after_thinning_2
+        - text: "I'm sorry. I didn't know it would do that."
+          next: after_thinning_3
+
+    after_thinning_2:
+      text: "You are absolutely not fine. Sit."
+      next: after_thinning_3
+
+    after_thinning_3:
+      text: "The Thinning does that. It's not the trees that thin — it's something else. The further you go, the less yourself you are. Most people feel it before they're in danger. You... went past that point."
+      choices:
+        - text: "Why didn't you warn me?"
+          next: after_thinning_warn
+        - text: "What's out there? Past the Thinning?"
+          next: after_thinning_edge
+
+    after_thinning_warn:
+      text: "I should have. I'm sorry. I assumed you'd feel it like everyone else."
+      choices:
+        - text: "What does everyone else feel?"
+          next: after_thinning_others
+
+    after_thinning_others:
+      text: "Unease. A pull to go back. Something that says 'not yet.' You apparently don't have that voice."
+      choices:
+        - text: "Or I don't listen to it."
+          next: after_thinning_laugh
+
+    after_thinning_laugh:
+      text: "Yes. That would fit."
+      choices:
+        - text: "(A small, tired smile)"
+          next: null
+
+    after_thinning_edge:
+      text: "..."
+      next: after_thinning_edge_2
+
+    after_thinning_edge_2:
+      text: "I don't know. I've never been further than I was today."
+      choices:
+        - text: "But you've wondered."
+          next: after_thinning_edge_3
+
+    after_thinning_edge_3:
+      text: "Everyone wonders. Nobody goes."
+      choices:
+        - text: "We could go together."
+          next: after_thinning_edge_4
+
+    after_thinning_edge_4:
+      text: "Get some rest first."
+      choices:
+        - text: "(That's not a no)"
+          next: null
+
+    teaching_session:
+      text: "The first thing you need to know about healing is the 70/30 rule. I give 70% — the Grove gives 70. You give 30. You keep 30 for yourself. Always. No exceptions."
+      choices:
+        - text: "What happens if you give more than 70?"
+          next: teaching_70_30
+        - text: "Where does the Grove's part come from?"
+          next: teaching_grove_part
+
+    teaching_70_30:
+      text: "You burn. Not quickly. Slowly. You keep finding ways to give a little more, and then a little more, and then one day you can't feel the Pulse at all. And then you can't do anything."
+      choices:
+        - text: "Has that happened to you?"
+          next: teaching_70_30_her
+        - text: "I'll remember."
+          next: null
+
+    teaching_70_30_her:
+      text: "Not yet. I'm careful."
+      choices:
+        - text: "(You watch her say this and wonder if she believes it)"
+          next: null
+
+    teaching_grove_part:
+      text: "The roots hold what we can't. Every healing draws on the whole Grove — its memory, its age, everything that's been tended and tended in turn. That's why tending matters. You're adding to what we'll draw on later."
+      choices:
+        - text: "It's all connected."
+          next: teaching_connected
+
+    teaching_connected:
+      text: "Everything is connected. That sounds obvious until the first time you feel it directly."
+      choices:
+        - text: "(I felt it at the spring)"
+          next: null
+
+    teaching_session_sync:
+      text: "Before you can heal anything, you have to be able to synchronize with it. Not fix it — not yet. Just touch the same note."
+      choices:
+        - text: "How do you do that?"
+          next: sync_2
+        - text: "I think I felt something like this at the spring."
+          next: sync_felt
+
+    sync_felt:
+      text: "Good. That's exactly right — you joined it, you didn't analyze it. That's the difference. Do it again, deliberately."
+      next: sync_2
+
+    sync_2:
+      text: "Put your hand on this root. Don't reach for the Pulse — just feel the surface. Temperature. Texture. Start there, only there."
+      choices:
+        - text: "(Touch the root)"
+          next: sync_3
+
+    sync_3:
+      text: "Now let your awareness expand outward from that contact point. Like a sound spreading from where a stone hit water. Slowly. Don't push."
+      choices:
+        - text: "(Expand)"
+          next: sync_4
+
+    sync_4:
+      text: "There. You're in the network — the whole root system sending and receiving. You're not observing it anymore. You're part of it."
+      choices:
+        - text: "It's very loud."
+          next: sync_loud
+        - text: "It feels like grief."
+          next: sync_grief
+
+    sync_loud:
+      text: "The Blight sections are struggling. The healthy sections are compensating — working harder. You can feel the difference. That's useful."
+      choices:
+        - text: "This is what you do. All the time."
+          next: sync_alltime
+
+    sync_grief:
+      text: "*She looks at you carefully.* \"Yes. You're sensing correctly. The eastern groves know they're sick.\""
+      choices:
+        - text: "That's awful."
+          next: sync_awful
+
+    sync_alltime:
+      text: "Part of it. The other part is knowing when to pull back. I'll show you that next."
+      choices:
+        - text: "(Continue learning)"
+          next: null
+
+    sync_awful:
+      text: "It is. And it's important that you feel that — not manage it, feel it. Most healers flinch away from that feeling. You don't have to."
+      choices:
+        - text: "What do I do with it?"
+          next: sync_do
+
+    sync_do:
+      text: "Hold it. Stay in it. Synchronization means you take the full signal, not the comfortable parts."
+      choices:
+        - text: "(Stay in it)"
+          next: null
+
+    breaking_point:
+      text: "..."
+      next: breaking_2
+
+    breaking_2:
+      text: "I heard you coming. I didn't... I couldn't move."
+      choices:
+        - text: "(Sit beside her. Say nothing.)"
+          next: breaking_sit
+        - text: "Let me get you water."
+          next: breaking_water
+
+    breaking_sit:
+      text: "The tree at the edge of the grove — the one with the split trunk. I've been coming here since I was eight years old. When it gets to be too much."
+      choices:
+        - text: "How often does it get to be too much?"
+          next: breaking_often
+
+    breaking_water:
+      text: "I don't need water."
+      next: breaking_sit
+
+    breaking_often:
+      text: "Often enough that I know this tree very well."
+      choices:
+        - text: "You should tell someone when that happens."
+          next: breaking_tell
+
+    breaking_tell:
+      text: "You see me. Not just the healer. You actually see me."
+      choices:
+        - text: "I think I've seen you for a while."
+          next: breaking_seen
+
+    breaking_seen:
+      text: "I know. I've been... I've been not looking at that."
+      choices:
+        - text: "Why?"
+          next: breaking_why
+
+    breaking_why:
+      text: "Because if you see me, then I have to be real to someone. And if I'm real to someone, then what's happening to me is real."
+      choices:
+        - text: "What's happening to you?"
+          next: breaking_whats_happening
+
+    breaking_whats_happening:
+      text: "I don't know. I have dreams. Visions that feel like memory but can't be — I wasn't there. I hear the melody I don't remember learning and it sounds like a name. Something is... moving in the Pulse. Something that knows my name."
+      choices:
+        - text: "We should investigate."
+          next: breaking_investigate
+        - text: "I'll help you find out."
+          next: breaking_investigate
+
+    breaking_investigate:
+      text: "We don't tell anyone. Not yet. Not until we understand what we're looking at."
+      choices:
+        - text: "Agreed."
+          next: null
+
+    # ---- grove_revelation dialogue_topic nodes ----
+
+    deep_alone:
+      text: "I knew you'd come."
+      choices:
+        - text: "Of course I came."
+          next: deep_alone_2
+        - text: "I looked everywhere."
+          next: deep_alone_2
+
+    deep_alone_2:
+      text: "I had to hear it from the roots. All of it, directly. No... no more half-truths and protection."
+      choices:
+        - text: "What did you hear?"
+          next: deep_alone_3
+
+    deep_alone_3:
+      text: "Everything. Two hundred years of it."
+      choices:
+        - text: "Lira?"
+          next: deep_alone_lira
+
+    deep_alone_lira:
+      text: "She was here. She IS here. The Grove isn't a grove. I knew. I didn't want to know."
+      choices:
+        - text: "I'm here now. Whatever comes next, I'm here."
+          next: deep_alone_response
+
+    deep_alone_response:
+      text: "Come with me. I want to show you something."
+      choices:
+        - text: "(Follow her)"
+          next: null
+
+    small_grove_truth:
+      text: "I used to come here alone. Before."
+      choices:
+        - text: "Before what?"
+          next: small_grove_before
+        - text: "(Sit beside her)"
+          next: small_grove_sit
+
+    small_grove_before:
+      text: "Before I understood that I'd always known. I'd have these moments of — clarity, I thought. Insight. Turns out it was the ship, trying to tell me."
+      choices:
+        - text: "Were you afraid of those moments?"
+          next: small_grove_afraid
+
+    small_grove_sit:
+      text: "It's the same light here every morning. I've been watching it since I was small."
+      choices:
+        - text: "It's beautiful."
+          next: small_grove_beautiful
+
+    small_grove_afraid:
+      text: "Yes. And also... no. Some part of me was relieved every time. Like confirmation of something I was pretending not to believe."
+      choices:
+        - text: "What do you believe now?"
+          next: small_grove_believe
+
+    small_grove_believe:
+      text: "I need to understand what I'm becoming. That's the only honest answer."
+      choices:
+        - text: "Then let's understand it together."
+          next: small_grove_together
+
+    small_grove_beautiful:
+      text: "I want to give you something."
+      next: small_grove_flower
+
+    small_grove_flower:
+      text: "*She finds a small white flower near the root line and holds it out.* \"This species has been here since the beginning. Lira planted them.\""
+      choices:
+        - text: "(Take the flower)"
+          action: ["give_item", "pressed_flower"]
+          next: small_grove_flower_taken
+
+    small_grove_flower_taken:
+      text: "Don't lose it."
+      choices:
+        - text: "I won't."
+          next: small_grove_together
+
+    small_grove_together:
+      text: "I've never shown anyone this place. Not in thirty years."
+      choices:
+        - text: "(Say nothing. Just be here.)"
+          next: null
+
+    # ---- grove_sacrifice dialogue_topic nodes ----
+
+    volunteer_attempt:
+      text: "No."
+      choices:
+        - text: "You haven't heard me out."
+          next: volunteer_2
+        - text: "I have to try."
+          next: volunteer_2
+
+    volunteer_2:
+      text: "You don't have the Pulse. Not like a Rootspeaker. The Grove wouldn't accept you — it would just... take everything you have and not use it."
+      choices:
+        - text: "Then there has to be another way."
+          next: volunteer_3
+        - text: "I can't just watch."
+          next: volunteer_watch
+
+    volunteer_3:
+      text: "Elder Maren has been looking for another way for sixty years. Brennan for thirty. I've been looking since I understood what I was. There isn't one."
+      choices:
+        - text: "I know. I just had to try."
+          next: volunteer_accept
+
+    volunteer_watch:
+      text: "You're not just watching. Without you, there's no one to carry this forward. Without a witness, a story dissolves. It happened to Seren — even Brennan barely remembers her voice now."
+      choices:
+        - text: "I'll be your witness."
+          next: volunteer_witness
+
+    volunteer_accept:
+      text: "I know. I love that about you."
+      choices:
+        - text: "(Stay with her)"
+          next: null
+
+    volunteer_witness:
+      text: "Good. Then let me show you something. Come with me tonight."
+      choices:
+        - text: "Where?"
+          next: null
+
+    last_night:
+      text: "The others are giving us space. I noticed."
+      choices:
+        - text: "They're kind."
+          next: last_night_kind
+        - text: "How are you feeling?"
+          next: last_night_feeling
+        - text: "Ask me something. You never have."
+          next: last_night_ask
+
+    last_night_kind:
+      text: "They're frightened. This is how they show it. Acts of consideration instead of grief — it's easier to handle."
+      choices:
+        - text: "Are you frightened?"
+          next: last_night_afraid
+
+    last_night_feeling:
+      text: "Strangely calm. I've been afraid of this for so long that the actual arrival of it feels like relief."
+      choices:
+        - text: "That makes sense."
+          next: last_night_sense
+
+    last_night_afraid:
+      text: "Not of what I'm going toward. Of leaving. Of not being able to look after everyone."
+      choices:
+        - text: "They'll manage. Kira especially."
+          next: last_night_kira
+
+    last_night_sense:
+      text: "I used to dream I was dissolving. I'd wake up terrified. Now I dream of dissolving and there's... nothing wrong with it. Something shifted."
+      choices:
+        - text: "The Three Roots."
+          next: last_night_roots
+
+    last_night_kira:
+      text: "Kira knows the work. She doesn't know how to stop yet — she'll need someone to sit with her the way you sat with me. Will you do that?"
+      choices:
+        - text: "Yes."
+          next: last_night_yes
+
+    last_night_yes:
+      text: "Thank you."
+      choices:
+        - text: "Tell me something. A memory you want me to keep."
+          next: last_night_memory
+
+    last_night_roots:
+      text: "You found the carving."
+      choices:
+        - text: "Tomas pointed me there."
+          next: last_night_roots_2
+
+    last_night_roots_2:
+      text: "I've dreamed of the second root my whole life. Just... stopping. Being still. I thought that was what this was — what it had to be. But it isn't."
+      choices:
+        - text: "What is it then?"
+          next: last_night_roots_3
+
+    last_night_roots_3:
+      text: "The third root. Not rest. Not stopping. Remaining."
+      choices:
+        - text: "You're not afraid."
+          next: last_night_not_afraid
+
+    last_night_not_afraid:
+      text: "I have a long time to be curious about what comes next. And all of you to watch over. That seems like enough."
+      choices:
+        - text: "(Sit with her until morning)"
+          next: null
+
+    last_night_memory:
+      text: "The morning I found you. The clearing was full of mist and you were just... there. Like the Grove had left you for me to find."
+      choices:
+        - text: "I didn't know what I was walking into."
+          next: last_night_memory_2
+
+    last_night_memory_2:
+      text: "Neither did I. Isn't that wonderful?"
+      choices:
+        - text: "(Sit with her until morning)"
+          next: null
+
+    last_night_ask:
+      text: "*She's quiet for a moment. Looking for the right question.*\n\n\"What do you miss? From before you came here?\""
+      choices:
+        - text: "I'm not sure I remember enough to miss it."
+          next: last_night_ask_2
+        - text: "I don't think I had much to miss."
+          next: last_night_ask_3
+
+    last_night_ask_2:
+      text: "I used to wonder if that was frightening. Arriving with so little."
+      choices:
+        - text: "It was. And then I was here."
+          next: last_night_ask_4
+
+    last_night_ask_3:
+      text: "There's something about arriving with nothing. Like you were always supposed to carry only what the Grove would give you."
+      choices:
+        - text: "I think that might be true."
+          next: last_night_ask_4
+
+    last_night_ask_4:
+      text: "I want to tell you something. When I found you in the clearing — I didn't know yet what you were. I just knew you needed to wake up."
+      choices:
+        - text: "You were afraid I wouldn't."
+          next: last_night_ask_5
+
+    last_night_ask_5:
+      text: "I sat with you for three days. Talked to you about the Grove. The Pulse. The way the light comes through in late afternoon. I don't know if you heard any of it."
+      choices:
+        - text: "I think I did. Somewhere."
+          next: last_night_ask_6
+        - text: "Tell me again. Now."
+          next: last_night_ask_6
+
+    last_night_ask_6:
+      text: "*She laughs — just for a moment. A real one.*\n\n\"You're the same as you were then. You want to stay in the moment.\""
+      choices:
+        - text: "(That's not the worst thing to be)"
+          next: null
+
+    heartroot_truth:
+      text: "She's here. Lira. I can feel her — not like before, not as a pressure or a pull. Just... present. Like a hand on the shoulder."
+      choices:
+        - text: "What does she want?"
+          next: heartroot_2
+        - text: "(Stay close)"
+          next: heartroot_2
+
+    heartroot_2:
+      text: "To show me. What it actually is."
+      next: heartroot_3
+
+    heartroot_3:
+      text: "It's not death. She's trying to show me — it's not death. It's more like... you know how the Pulse is everywhere? She's that. She IS the Grove."
+      choices:
+        - text: "Is that terrifying?"
+          next: heartroot_3b
+
+    heartroot_3b:
+      text: "No. That's the thing. She's also... she's offering me something. I can feel it."
+      choices:
+        - text: "What is she offering?"
+          next: heartroot_3c
+
+    heartroot_3c:
+      text: "Rest. The Second Root. Just... quiet. Peace. Putting down something very heavy after a very long time of carrying it."
+      choices:
+        - text: "What does it feel like?"
+          next: heartroot_3d
+
+    heartroot_3d:
+      text: "Like finally being allowed to stop."
+      choices:
+        - text: "Do you want it?"
+          next: heartroot_3e
+
+    heartroot_3e:
+      text: "Part of me. Yes. The part that's been tired since I was eight years old."
+      choices:
+        - text: "You're allowed to want it."
+          next: heartroot_3f
+        - text: "(Say nothing)"
+          next: heartroot_3f
+
+    heartroot_3f:
+      text: "I know. But I keep feeling the roots. Everyone I love is in them — their weight in the Pulse, their particular signals. I know which footfall is whose. Which grief is whose. I don't want to stop knowing that."
+      choices:
+        - text: "That's the Third Root."
+          next: heartroot_4
+
+    heartroot_4:
+      text: "She was smiling when it happened. Tomas always said she was smiling. I thought that was just how people remembered her. But she was."
+      choices:
+        - text: "Why?"
+          next: heartroot_5
+
+    heartroot_5:
+      text: "Because she looked for herself — for the part of her that would end — and couldn't find it. Isn't that strange?"
+      choices:
+        - text: "What does that mean?"
+          next: heartroot_6
+
+    heartroot_6:
+      text: "I'm not sure yet. I'll find out soon."
+      choices:
+        - text: "I don't want you to go."
+          next: heartroot_7
+
+    heartroot_7:
+      text: "All my life, I listened. To the sick, the grieving, the Grove itself. You were the first voice that listened back."
+      choices:
+        - text: "(Say nothing)"
+          next: heartroot_final
+
+    heartroot_final:
+      text: "*She places her hands on the central root. The roots respond — a soft glow, a warmth. She looks at you once more.*\n\n\"Just remember: if you ever look for me and can't find me... that might not be as sad as it sounds.\""
+      choices:
+        - text: "(Watch. Be her witness.)"
+          next: null
+
+    # ---- grove_epilogue dialogue_topic node ----
+
+    presence_speaks:
+      show_if:
+        quest_active: grove_epilogue
+      text: "*The chamber is warmer than it was. You put your hand against the stone where she stood.*"
+      next: presence_2
+
+    presence_2:
+      text: "*Something stirs in the Pulse — not pressure, not pull. More like attention. A presence that recognizes you.*"
+      choices:
+        - text: "Thera?"
+          next: presence_3
+        - text: "(Stay still and listen)"
+          next: presence_3
+
+    presence_3:
+      text: "*The warmth concentrates. Not quite words, not quite sound — but unmistakably her.*\n\n\"You found me.\""
+      choices:
+        - text: "I promised I would."
+          next: presence_4
+        - text: "(Stay very still)"
+          next: presence_4
+
+    presence_4:
+      text: "\"It's strange. I thought losing the boundary would feel like losing myself. But I can still see you. I can see all of them. The love — it didn't get smaller. It got bigger.\""
+      choices:
+        - text: "Are you happy?"
+          next: presence_5
+
+    presence_5:
+      text: "\"Happy isn't... that's not quite the word anymore. It's more like — I understand Lira's smile now. The one Tomas could never explain.\""
+      choices:
+        - text: "What was it?"
+          next: presence_6
+
+    presence_6:
+      text: "\"She looked for the part of herself that would end. And found that there wasn't one. And understood, finally, what she'd always been.\""
+      choices:
+        - text: "And you?"
+          next: presence_7
+
+    presence_7:
+      text: "\"I looked for the part of me that loves you all. And I found it's the whole thing.\""
+      choices:
+        - text: "(Be here with her)"
+          next: presence_8
+
+    presence_8:
+      text: "*The warmth spreads through the roots. Through the floor. Into you.*\n\n\"Listen for me. I'll be there.\""
+      choices:
+        - text: "(Listen)"
+          next: null
+
+tags: [friendly, quest_giver, rootspeaker, grove]
+
+emotes:
+  idle: "*hums quietly while checking the roots*"
+  greeting: "*looks up with immediate attention* You needed something?"
+  healing: "*moves with practiced calm, hands steady*"
+  morning: "*stands at the edge of the grove watching the light change*"
+  worried: "*stands very still, looking at nothing*"
+
+traits:
+  - script: ambient_emitter
+    config:
+      interval: 60
+      emotes: [idle, morning, worried]

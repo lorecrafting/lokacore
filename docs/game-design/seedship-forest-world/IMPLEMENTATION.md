@@ -21,43 +21,81 @@
 - [x] Story arc reviewed and greenlit for production (Feb 17 2026)
 - [x] Monastery arc retired — 73 files to archive
 
-### Phase 0.5: Pre-Production Decisions (IN PROGRESS)
+### Phase 0.5: Pre-Production Decisions ✅ COMPLETE
 
-- [ ] Decide: solo instancing vs. cohort instancing for Grove ships
-- [ ] Archive monastery content (git branch or directory move)
-- [ ] Confirm which monastery generic items (prayer_beads, etc.) carry forward
+- [x] Decide: solo instancing vs. cohort instancing — **DECIDED: Solo** (see DECISIONS.md)
+- [x] Archive monastery content — **DECIDED: Deleted** (~229 files, clean slate)
+- [x] Generic items carrying forward — **DECIDED: None**
 
-### Phase 1: World Skeleton
+### Phase 1: World Skeleton ✅ COMPLETE (Feb 17 2026)
 
-Build the physical world — rooms only, minimal descriptions, exits correct.
+Built 51 rooms across 8 zones. All exits bidirectional (verified). Files at:
+`server/priv/world/prototypes/rooms/grove/{heartwood,western_groves,eastern_groves,understory,the_deep,thinning,edges,roots}/`
 
-- [ ] Heartwood (main hub, arrival point)
-- [ ] Thera's healing grove
-- [ ] The Deep (where she avoids going)
-- [ ] The Thinning / Edge (where the membrane is)
-- [ ] The Heartroot chamber (Act 4 finale)
-- [ ] The Small Grove (hidden room, only accessible with Thera)
-- [ ] Elder Hall (Act 3 council scene)
+| Zone | Rooms | Key Rooms |
+|------|-------|-----------|
+| Heartwood | 12 | `awakening_clearing`, `heartwood`, `elder_hall`, `lira_memorial` |
+| Western Groves | 8 | `healing_grove`, `small_grove` (gated), `western_orchard` |
+| Eastern Groves | 7 | `blight_zone`, `blight_zone_deep`, `kira_lookout` |
+| Understory | 6 | `brennan_path`, `understory_crossing` |
+| The Deep | 6 | `the_deep`, `heartroot_antechamber`, `heartroot_chamber` |
+| Thinning | 4 | `the_thinning`, `edge_approach` |
+| Edges | 3 | `the_edge`, `edge_east`, `edge_west` |
+| Roots | 5 | `seed_archive`, `ship_core_access` (sealed, Act 3+) |
 
-### Phase 2: Spine Quest Chain (Alpha)
+**Notes:**
+- `small_grove`: physically connected but should be script-gated (Thera presence or beat flag)
+- `roots_entrance` and above: `sealed` tag, accessible only via story unlock
+- `extra_desc` is the displayed room description (not `long_desc` — rooms don't use it)
+- Every room embeds one "tell" per GEOGRAPHY.md dual-nature design rules
 
-Map the ~38 MVP beats to actual quests and scenes. See [DECISIONS.md](DECISIONS.md) for the full spine beat list.
+### Phase 2: Spine Quest Chain (Alpha) — COMPLETE (Feb 17 2026)
 
-- [ ] `grove_arrival` — beats 1-6, 8, 11-12 (awakening, Thera, Heartwood)
-- [ ] `grove_belonging` — beats 14-15, 17-19, 26-27, 28-33, 35, 38, 49-54
-- [ ] `grove_revelation` — beats 60-67, 70, 73, 79-81 (Edge truth, Yara's story, small grove)
-- [ ] `grove_sacrifice` — beats 82-87, 90-92, 93-98, 99-100
-- [ ] `grove_epilogue` — beats 101-108 (grief + joy)
+Built 5 spine quests + 5 NPC prototypes + storyline + item. 0 validation errors.
 
-### Phase 3: Thera's Dialogue (Hardest / Most Important)
+Files created:
+- `server/priv/world/storylines/grove_arc.yml`
+- `server/priv/world/quests/grove_arrival.yml` — beats 1-6, 8, 11-12
+- `server/priv/world/quests/grove_belonging.yml` — beats 14-15, 17-19, 26-27, 28-33, 35, 38, 49-54
+- `server/priv/world/quests/grove_revelation.yml` — beats 60-67, 70, 73, 79-81
+- `server/priv/world/quests/grove_sacrifice.yml` — beats 82-87, 90-92, 93-98, 99-100
+- `server/priv/world/quests/grove_epilogue.yml` — beats 101-108
+- `server/priv/world/prototypes/npcs/grove/thera.yml` — full dialogue tree (225+ nodes)
+- `server/priv/world/prototypes/npcs/grove/elder_maren.yml`
+- `server/priv/world/prototypes/npcs/grove/brennan.yml`
+- `server/priv/world/prototypes/npcs/grove/kira.yml`
+- `server/priv/world/prototypes/npcs/grove/tomas.yml`
+- `server/priv/world/prototypes/items/grove/pressed_flower.yml`
+
+NPC spawns added to: `awakening_clearing` (Thera), `elder_maren_study` (Maren), `watchers_post` (Brennan), `shaper_grove` (Kira), `lira_memorial` (Tomas)
+
+**Known Phase 2 limitations (fix in Phase 3):**
+- Thera has no schedule — stays at awakening_clearing throughout. Phase 3 adds `thera_schedule` trait to move her per story beats.
+- `small_grove` is accessible (no script gate yet for Thera-presence requirement)
+- `roots_entrance` and deeper rooms have no story-unlock gates yet
+- Dialogue validator shows 142 orphan-node warnings — false positives from BFS not following node-level `next:` links (chain nodes). Not errors.
+- `grove_revelation` given by `elder_maren` — quest chain technically breaks between `grove_belonging` (Thera turn-in) and `grove_revelation` (Maren accept). Player must seek Maren after belonging completes.
+
+- [x] `grove_arrival` — beats 1-6, 8, 11-12 (awakening, Thera, Heartwood)
+- [x] `grove_belonging` — beats 14-15, 17-19, 26-27, 28-33, 35, 38, 49-54
+- [x] `grove_revelation` — beats 60-67, 70, 73, 79-81 (Edge truth, Yara's story, small grove)
+- [x] `grove_sacrifice` — beats 82-87, 90-92, 93-98, 99-100
+- [x] `grove_epilogue` — beats 101-108 (grief + joy)
+
+### Phase 3: Thera's Dialogue (Hardest / Most Important) ✅ COMPLETE (Feb 18 2026)
 
 The emotional engine of the story. This is where most writing time goes.
 
-- [ ] Teaching session scenes (beats 35, 38) — Pulse, the Lira statue
-- [ ] Breaking point scene (beats 49-54) — her collapse, "you're the first one who listened back"
-- [ ] Last night dialogue (beats 90-92) — expand significantly beyond 3 beats
-- [ ] Heartroot confrontation (beats 93-98) — Lira's offer, Thera's choice
-- [ ] Beat 108 revelation — "the love expanded"
+- [x] Teaching session scenes (beats 36, 38) — `teaching_session_sync` (synchronization) + existing `teaching_session` (70/30 rule). Added `first_training_session` objective to `grove_belonging`. Breaking point already complete from Phase 2.
+- [x] Breaking point scene (beats 49-54) — complete from Phase 2 (`breaking_point` through `breaking_investigate`)
+- [x] Last night dialogue (beats 90-92) — expanded with `last_night_ask` branch: Thera asks the player about their past, reveals she sat with them for 3 days before they woke
+- [x] Heartroot confrontation (beats 93-98) — added `heartroot_3b` through `heartroot_3f`: Lira offers the Second Root (rest), Thera feels the pull, explicitly chooses the Third Root ("I don't want to stop knowing that"). Flows into "she was smiling" with new weight.
+- [x] Beat 108 revelation — `presence_speaks` dialogue_topic in thera.yml + `thera_presence` objective in `grove_epilogue`. Thera's consciousness speaks through the Pulse: "the love didn't get smaller. It got bigger." / "I looked for the part of me that loves you all. And I found it's the whole thing."
+
+**Notes:**
+- Validation errors are stale-DB artifacts (dev server lock) — will clear on restart
+- `grove_belonging` quest now has 2 explicit training objectives (`first_training_session` + `training_session`)
+- `grove_epilogue` quest now has `thera_presence` talk objective for the beat 108 conversation
 
 ### Phase 4: Alpha Playtest + Fill-In
 

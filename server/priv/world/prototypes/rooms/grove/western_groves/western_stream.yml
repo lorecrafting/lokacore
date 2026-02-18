@@ -1,0 +1,13 @@
+key: western_stream
+type: room
+parent: base_room
+short_desc: "The Western Stream"
+extra_desc: |
+  A stream threads between the western trees, narrow enough to step across and clear enough to see the bottom. The sound of it fills the air pleasantly. The flow has a rhythm to it — not random, not the rhythm of wind or gradient, but a steady pulse slightly slower than a resting heartbeat.
+
+exits:
+  east: healing_grove
+  north: training_grove
+
+tags:
+  - outdoor

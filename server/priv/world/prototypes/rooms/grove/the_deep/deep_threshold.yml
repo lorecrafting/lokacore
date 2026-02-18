@@ -1,0 +1,13 @@
+key: deep_threshold
+type: room
+parent: base_room
+short_desc: "The Deep Threshold"
+extra_desc: |
+  The forest changes here. Trees grow closer, light dims to something older, and the air carries weight that wasn't there a moment ago. There is a hum — not in the ears but in the teeth, in the sternum, lower than sound. The temperature rises several degrees past this line. Thera will not cross. She says: "Too loud for me."
+
+exits:
+  south: elder_hall
+  north: deep_entrance
+
+tags:
+  - outdoor

@@ -1,0 +1,12 @@
+key: kira_lookout
+type: room
+parent: base_room
+short_desc: "Kira's Lookout"
+extra_desc: |
+  A slight rise in the ground east of the blight's worst stretch, where Kira keeps watch. Her notebook is filled with observations: dates, measurements, the direction of spread. She hasn't shown it to anyone yet. The view from here makes the straight line of the blight impossible to explain away.
+
+exits:
+  east: blight_zone_deep
+
+tags:
+  - outdoor

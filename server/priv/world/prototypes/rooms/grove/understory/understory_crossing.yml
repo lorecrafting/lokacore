@@ -1,0 +1,14 @@
+key: understory_crossing
+type: room
+parent: base_room
+short_desc: "The Understory Crossing"
+extra_desc: |
+  Four paths converge here in a junction beneath the canopy, the crossing point of the understory network. No matter which direction you arrived from, it feels like you were meant to pass through this exact spot. The worn earth at the center of the crossing is older and more compacted than any of the paths leading away.
+
+exits:
+  south: south_understory
+  north: brennan_path
+  east: stream_bed
+
+tags:
+  - outdoor

@@ -1,0 +1,16 @@
+key: roots_entrance
+type: room
+parent: base_room
+short_desc: "The Roots Entrance"
+extra_desc: |
+  The transition from forest to something else entirely. The biological gives way to structural: walls here are smooth and dark, root-veined with bioluminescence running in channels rather than growing wild. The smell is the ship's own breath — old, recycled, alive in a different way. This is not forest. This is the vessel itself.
+
+# NOTE: Sealed in Phase 1. Accessible from heartroot_chamber (down) only after story unlock.
+exits:
+  up: heartroot_chamber
+  north: roots_passage
+
+tags:
+  - underground
+  - indoor
+  - sealed

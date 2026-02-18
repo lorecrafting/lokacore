@@ -54,7 +54,7 @@ defmodule Loka.Testing.Content.WorldValidator do
           {:missing_return_exit, String.t(), String.t(), String.t()}
 
   # Starting room key for BFS — update when world content changes
-  @starting_room nil
+  @starting_room "awakening_clearing"
 
   # =============================================================================
   # Public API

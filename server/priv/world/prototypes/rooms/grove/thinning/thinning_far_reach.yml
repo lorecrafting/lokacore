@@ -1,0 +1,13 @@
+key: thinning_far_reach
+type: room
+parent: base_room
+short_desc: "The Far Thinning"
+extra_desc: |
+  Unmistakable now. The last scattered trees stand in too much space, the ground between them entirely wrong — hard and smooth under a thin layer of debris. The light has no angle to it, no warmth, nowhere it comes from. A Watcher who made it this far once described it as "standing inside something."
+
+exits:
+  south: the_thinning
+  north: edge_approach
+
+tags:
+  - outdoor

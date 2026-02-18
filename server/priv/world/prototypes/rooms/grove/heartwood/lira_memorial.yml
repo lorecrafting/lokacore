@@ -1,0 +1,17 @@
+key: lira_memorial
+type: room
+parent: base_room
+short_desc: "Lira's Memorial"
+extra_desc: |
+  A carved stone figure stands in a clearing of its own, surrounded by flowers and small offerings. The flowers are always fresh — every morning, unbruised, though no one tends them. The air here is not quite peaceful: too attentive, as if someone is paying close attention.
+
+exits:
+  east: heartwood
+  north: healing_grove
+
+spawns:
+  - prototype: tomas
+
+tags:
+  - outdoor
+  - safe_zone

@@ -1,0 +1,15 @@
+key: eastern_edge_grove
+type: room
+parent: base_room
+short_desc: "The Eastern Edge Grove"
+extra_desc: |
+  The first stretch of the eastern forest — wilder than the western groves, less tended, with animals that move through without much concern for Tenders nearby. The trees are not planted in rows here, but their spacing is still somewhat too regular for natural growth.
+
+exits:
+  west: watchers_post
+  north: gatherer_camp
+  east: blight_zone
+  south: eastern_stream
+
+tags:
+  - outdoor

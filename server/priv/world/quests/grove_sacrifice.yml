@@ -1,0 +1,64 @@
+id: grove_sacrifice
+name: "The Third Root"
+description: |
+  The community knows the truth now. Thera knows what is being asked of her. You've tried to give what she's giving — and she told you no. She needs you for something else entirely.
+
+type: main
+priority: 4
+act: 4
+
+giver: thera
+turn_in_npc: elder_maren
+
+requires_quest: grove_revelation
+
+objectives:
+  - id: public_announcement
+    type: go_to
+    target_id: heartwood
+    description: "Be present for the public announcement in the Heartwood"
+    hint: "Thera is going to tell everyone. She asked you to be there."
+
+  - id: volunteer_attempt
+    type: talk
+    target_id: thera
+    dialogue_topic: volunteer_attempt
+    description: "Tell Thera you'll do it instead — hear her answer"
+
+  - id: last_night
+    type: talk
+    target_id: thera
+    dialogue_topic: last_night
+    description: "Spend the last night with Thera — just the two of you"
+    hint: "The others are giving you space. Find her when you're ready."
+
+  - id: heartroot_descent
+    type: go_to
+    target_id: heartroot_chamber
+    description: "Go with Thera to the Heartroot Chamber"
+
+  - id: witness_choice
+    type: talk
+    target_id: thera
+    dialogue_topic: heartroot_truth
+    description: "Be with Thera as she makes her choice — be her witness"
+
+  - id: speak_to_maren_after
+    type: talk
+    target_id: elder_maren
+    description: "Find Elder Maren after — she needs to speak with you"
+
+rewards:
+  xp: 1000
+  gold: 0
+
+journal_entries:
+  start: "Thera is going to tell the whole community. She asked me to be there. I will be."
+  public_announcement: "The Heartwood was silent after she finished speaking. Not the silence of rejection — the silence of people understanding something too large to argue with."
+  volunteer_attempt: "She said no. Clearly and without cruelty. The Grove needs a Rootspeaker. I'm not one. Without a witness, she said, the story dissolves. Seren barely exists in memory now. I am the witness."
+  last_night: "The others gave us space. She was strangely calm. She told me she used to dream of dissolving and wake up terrified — but now the dream came without fear. Something had shifted. She asked me to watch over Kira. I said yes."
+  heartroot_descent: "The chamber is vast. The roots go up into darkness and down further still. The Pulse here is so dense it's almost sound."
+  witness_choice: "She placed her hands on the central root. The roots responded — glow, warmth, a sound like the deepest note of a very large instrument. She looked at me once before the light took her. She was smiling. She said: if you look for me and can't find me... that might not be as sad as it sounds."
+  complete: "The Grove changed. The sky opened — real sky, real stars, closer now. We're landing. She did it."
+
+labels: [main, grove_arc, act_4]

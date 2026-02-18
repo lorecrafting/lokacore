@@ -137,6 +137,21 @@ defmodule LokaWeb.Router do
     get "/health/detailed", HealthController, :detailed
   end
 
+  # Dev game console — Claude Code testing endpoint (dev only)
+  if Mix.env() == :dev do
+    scope "/dev", LokaWeb do
+      pipe_through :api
+
+      # Run a game command as the admin player
+      # Usage: curl -s http://localhost:4000/dev/cmd -H "Content-Type: application/json" \
+      #   -d '{"command": "look"}' | jq -r '.output'
+      post "/cmd", DevController, :cmd
+
+      # Reset character to starting room
+      post "/reset", DevController, :reset
+    end
+  end
+
   # Mobile debug logging endpoint (dev/test only — not exposed in production)
   if Mix.env() in [:dev, :test] do
     scope "/api/debug", LokaWeb do

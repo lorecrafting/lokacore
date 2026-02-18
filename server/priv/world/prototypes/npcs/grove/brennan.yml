@@ -1,0 +1,227 @@
+key: brennan
+type: npc
+parent: base_npc
+short_desc: "Brennan"
+long_desc: "Brennan stands at the path's edge with the stillness of a man who has stood this watch many times."
+extra_desc: |
+  He is built for endurance rather than speed — broad shoulders, wind-darkened skin, eyes that have spent decades scanning horizons. There is a badge on his chest, worn and hand-polished. He does not look at it. He does not need to.
+keywords: [brennan, watcher, guard, man]
+primary_keyword: brennan
+
+components:
+  combatant:
+    health:
+      current: 150
+      max: 150
+    stats:
+      str: 14
+      dex: 10
+      sta: 14
+    level: 6
+
+  ai:
+    aggression: neutral
+    wander: false
+
+  dialogue_tree:
+    # ==========================================================================
+    # BRENNAN — The Watcher
+    # Key dialogue_topic nodes:
+    #   introduction (grove_arrival)
+    #   edge_truth (grove_revelation)
+    # ==========================================================================
+
+    start:
+      text: "You're the newcomer."
+      choices:
+        - text: "Thera sent me to meet you."
+          show_if:
+            quest_active: grove_arrival
+          next: intro_meeting
+
+        - text: "What do you watch for?"
+          next: watches_for
+
+        - text: "Can I pass?"
+          next: can_pass
+
+        - text: "Goodbye."
+          next: null
+
+    intro_meeting:
+      text: "Good. You should know the Watchers exist and what we do."
+      choices:
+        - text: "What do you do?"
+          next: watches_for
+
+    watches_for:
+      text: "We watch the Thinning. Make sure no one goes too far. The edges of the Grove are... not safe for long exposure."
+      choices:
+        - text: "What's out there?"
+          next: out_there
+        - text: "Why aren't they safe?"
+          next: not_safe
+
+    out_there:
+      text: "Nothing worth seeing."
+      choices:
+        - text: "That's not an answer."
+          next: out_there_2
+        - text: "(You let it go)"
+          next: null
+
+    out_there_2:
+      text: "No. It isn't."
+      choices:
+        - text: "(He's not going to say more)"
+          next: null
+
+    not_safe:
+      text: "The Thinning thins more than trees. Something about the far edges affects cognition. People lose themselves. I've pulled a dozen people back over the years."
+      choices:
+        - text: "Have you ever lost one?"
+          next: lost_one
+
+    lost_one:
+      text: "..."
+      next: lost_one_2
+
+    lost_one_2:
+      text: "Once."
+      choices:
+        - text: "(Don't ask more)"
+          next: null
+        - text: "I'm sorry."
+          next: lost_one_sorry
+
+    lost_one_sorry:
+      text: "Thirty years ago. I've had time."
+      choices:
+        - text: "(Some things don't heal with time)"
+          next: null
+
+    can_pass:
+      text: "As far as the thinning_approach, yes. Not past. I don't make exceptions."
+      choices:
+        - text: "Understood."
+          next: null
+        - text: "What if it's important?"
+          next: cant_pass_important
+
+    cant_pass_important:
+      text: "People always think their reason is important. That's not what determines whether you lose yourself."
+      choices:
+        - text: "(Fair enough)"
+          next: null
+
+    # ---- grove_arrival dialogue_topic node ----
+
+    introduction:
+      text: "I'm Brennan. Chief Watcher. My job is to make sure the Grove's edge stays a boundary and not a door."
+      choices:
+        - text: "Has it ever been a door?"
+          next: intro_door
+        - text: "How many Watchers are there?"
+          next: intro_how_many
+
+    intro_door:
+      text: "Once. It was a mistake."
+      choices:
+        - text: "(Leave it there)"
+          next: null
+
+    intro_how_many:
+      text: "Three, counting me. Enough for the rotation."
+      choices:
+        - text: "Do you ever sleep?"
+          next: intro_sleep
+
+    intro_sleep:
+      text: "When I'm off shift."
+      choices:
+        - text: "(He says this without irony)"
+          next: null
+
+    # ---- grove_revelation dialogue_topic node ----
+
+    edge_truth:
+      text: "You've seen it. The membrane."
+      choices:
+        - text: "Yes. The stars."
+          next: edge_truth_2
+        - text: "I need to understand what I saw."
+          next: edge_truth_2
+
+    edge_truth_2:
+      text: "I've known for thirty years. Since Seren."
+      choices:
+        - text: "Who was Seren?"
+          next: edge_seren
+        - text: "Why didn't you tell anyone?"
+          next: edge_why_not
+
+    edge_seren:
+      text: "The Rootspeaker before Thera. She was — we were close. She was chosen the way Thera has been chosen."
+      choices:
+        - text: "What happened to her?"
+          next: edge_seren_what
+
+    edge_seren_what:
+      text: "She went to the Heartroot alone. She understood what was asked. She... chose differently than Thera will choose."
+      choices:
+        - text: "She chose rest."
+          next: edge_seren_rest
+        - text: "She said no?"
+          next: edge_seren_rest
+
+    edge_seren_rest:
+      text: "The second root. Not wrong. Lira herself said it wasn't wrong — just not enough to hold the Grove. Without a new Heart, the ship fails slowly. Seren's choice bought thirty years. That's all."
+      choices:
+        - text: "You loved her."
+          next: edge_seren_loved
+
+    edge_seren_loved:
+      text: "Yes."
+      choices:
+        - text: "I'm sorry."
+          next: edge_seren_sorry
+        - text: "(Stay with him)"
+          next: edge_seren_sorry
+
+    edge_seren_sorry:
+      text: "She was peaceful. She told me not to grieve. I've spent thirty years almost managing it."
+      choices:
+        - text: "The badge."
+          next: edge_badge
+
+    edge_badge:
+      text: "*He touches it once, not looking down.* \"She gave it to me. 'Guard the truth,' she said. I have.\""
+      choices:
+        - text: "(Leave him to his watch)"
+          next: null
+
+    edge_why_not:
+      text: "Because knowing doesn't help. It just shifts what you're afraid of."
+      choices:
+        - text: "It helps Thera."
+          next: edge_why_thera
+
+    edge_why_thera:
+      text: "Yes. I think that's why the time is now."
+      choices:
+        - text: "(Leave)"
+          next: null
+
+tags: [neutral, watcher, grove]
+
+emotes:
+  idle: "*scans the treeline with practiced stillness*"
+  patrol: "*walks the path's edge, unhurried*"
+  dawn: "*stands at the boundary, watching the light change*"
+  night: "*moves quietly through the dark*"
+
+traits:
+  - script: patrol
+    config:
+      rooms: [watchers_post, brennan_path, north_understory, thinning_approach]
+      interval: 120

@@ -7,62 +7,65 @@ defmodule Loka.Application do
 
   @impl true
   def start(_type, _args) do
-    children = [
-      LokaWeb.Telemetry,
-      Loka.PromEx,
-      Loka.Repo,
-      {Ecto.Migrator,
-       repos: Application.fetch_env!(:loka, :ecto_repos), skip: skip_migrations?()},
-      {DNSCluster, query: Application.get_env(:loka, :dns_cluster_query) || :ignore},
-      {Phoenix.PubSub, name: Loka.PubSub},
+    # Dev-only tools (not compiled into prod/test)
+    children =
+      [
+        LokaWeb.Telemetry,
+        Loka.PromEx,
+        Loka.Repo,
+        {Ecto.Migrator,
+         repos: Application.fetch_env!(:loka, :ecto_repos), skip: skip_migrations?()},
+        {DNSCluster, query: Application.get_env(:loka, :dns_cluster_query) || :ignore},
+        {Phoenix.PubSub, name: Loka.PubSub},
 
-      # Session System (unified client messaging)
-      # Order: Registry for lookups → Supervisor for session processes
-      {Registry, keys: :unique, name: Loka.Session.PlayerRegistry},
-      Loka.Session.Registry,
-      Loka.Session.Supervisor,
+        # Session System (unified client messaging)
+        # Order: Registry for lookups → Supervisor for session processes
+        {Registry, keys: :unique, name: Loka.Session.PlayerRegistry},
+        Loka.Session.Registry,
+        Loka.Session.Supervisor,
 
-      # Balance Config - load game formulas and constants from YAML
-      Loka.Config.Balance,
+        # Balance Config - load game formulas and constants from YAML
+        Loka.Config.Balance,
 
-      # Engine Core - New Components (order matters!)
-      # Task supervisor for async hook execution
-      {Task.Supervisor, name: Loka.Engine.Hooks.TaskSupervisor},
-      Loka.Engine.Hooks,
-      # EntitySeeder - populates DB from YAML (V2)
-      Loka.Engine.EntitySeeder,
-      {Registry, keys: :unique, name: Loka.Engine.EntityRegistry.Registry},
-      {Loka.Engine.EntitySupervisor, name: Loka.Engine.EntitySupervisor},
-      Loka.Engine.EntityRegistry,
-      Loka.Engine.SystemSupervisor,
-      Loka.Engine.WorldGraph.LayoutManager,
+        # Engine Core - New Components (order matters!)
+        # Task supervisor for async hook execution
+        {Task.Supervisor, name: Loka.Engine.Hooks.TaskSupervisor},
+        Loka.Engine.Hooks,
+        # EntitySeeder - populates DB from YAML (V2)
+        Loka.Engine.EntitySeeder,
+        {Registry, keys: :unique, name: Loka.Engine.EntityRegistry.Registry},
+        {Loka.Engine.EntitySupervisor, name: Loka.Engine.EntitySupervisor},
+        Loka.Engine.EntityRegistry,
+        Loka.Engine.SystemSupervisor,
+        Loka.Engine.WorldGraph.LayoutManager,
 
-      # Admin tools - GameLog for debugging/audit (replaces Quest.EventLog)
-      Loka.Admin.GameLog,
+        # Admin tools - GameLog for debugging/audit (replaces Quest.EventLog)
+        Loka.Admin.GameLog,
 
-      # Admin audit logging - Task supervisor for async audit log inserts
-      {Task.Supervisor, name: Loka.Admin.Audit.TaskSupervisor},
+        # Admin audit logging - Task supervisor for async audit log inserts
+        {Task.Supervisor, name: Loka.Admin.Audit.TaskSupervisor},
 
-      # Timer system (crafting queues, offline progression)
-      Loka.Timers.Server,
+        # Timer system (crafting queues, offline progression)
+        Loka.Timers.Server,
 
-      # World systems (NPC ambient messages)
-      Loka.Framework.World.NpcAmbient.Scheduler,
+        # World systems (NPC ambient messages)
+        Loka.Framework.World.NpcAmbient.Scheduler,
 
-      # Zone system - periodic mob/item respawning (V2: zones are entities)
-      Loka.Framework.World.ZoneReset,
+        # Zone system - periodic mob/item respawning (V2: zones are entities)
+        Loka.Framework.World.ZoneReset,
 
-      # Content Validation - runs after all content is loaded
-      # Will fail startup if critical content errors are found (unless mode is :warn or :skip)
-      # Set LOKA_CONTENT_VALIDATION=warn to bypass during development
-      Loka.Engine.ContentValidator,
+        # Content Validation - runs after all content is loaded
+        # Will fail startup if critical content errors are found (unless mode is :warn or :skip)
+        # Set LOKA_CONTENT_VALIDATION=warn to bypass during development
+        Loka.Engine.ContentValidator,
 
-      # World Builder - LLM services
-      Loka.WorldBuilder.LLM.ObservabilityLogger,
+        # World Builder - LLM services
+        Loka.WorldBuilder.LLM.ObservabilityLogger,
 
-      # Start to serve requests, typically the last entry
-      LokaWeb.Endpoint
-    ]
+        # Start to serve requests, typically the last entry
+        LokaWeb.Endpoint
+      ] ++
+        if Mix.env() == :dev, do: [Loka.Dev.TelnetServer], else: []
 
     # Initialize lock expression cache
     Loka.Engine.Locks.init_cache()

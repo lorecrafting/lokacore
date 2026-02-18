@@ -10,6 +10,7 @@ defmodule Loka.Engine.EntitySeeder do
   2. Rooms (must exist before exits reference them)
   3. Exits (need room UUIDs for destination_id)
   4. Located entities (NPCs, items — need room UUIDs for location_id)
+  5. Room spawn instances (NPCs/items declared in room YAML `spawns:` lists)
 
   ## Conflict Resolution
 
@@ -133,7 +134,13 @@ defmodule Loka.Engine.EntitySeeder do
     # Phase 4: NPCs and items (need room UUIDs for location_id)
     count4 = seed_by_types(resolved, [:npc, :item], existing_map)
 
-    total = count1 + count2 + count3 + count4
+    # Refresh map after NPCs/items are seeded — spawn lookup needs prototype UUIDs
+    existing_map = preload_existing_entities()
+
+    # Phase 5: Room spawn lists (instantiate NPCs/items declared in room YAML spawns:)
+    count5 = seed_room_spawns(existing_map)
+
+    total = count1 + count2 + count3 + count4 + count5
     {:ok, total}
   end
 
@@ -375,36 +382,41 @@ defmodule Loka.Engine.EntitySeeder do
       |> Enum.filter(fn {{_key, type}, _entity} -> type == :room end)
       |> Map.new(fn {{key, _type}, entity} -> {key, entity} end)
 
-    # Build key→entity lookup for existing exits
-    exit_lookup =
+    # Build seen set from existing exits — threaded through accumulator so
+    # reciprocals created mid-seeding don't cause duplicates on the next room.
+    seen =
       existing_map
       |> Enum.filter(fn {{_key, type}, _entity} -> type == :exit end)
-      |> Map.new(fn {{key, _type}, entity} -> {key, entity} end)
+      |> Enum.map(fn {{key, _type}, _entity} -> key end)
+      |> MapSet.new()
 
-    Enum.reduce(rooms, 0, fn {room_key, room_data}, count ->
-      exits = room_data["exits"] || %{}
+    {count, _seen} =
+      Enum.reduce(rooms, {0, seen}, fn {room_key, room_data}, {count, seen_acc} ->
+        exits = room_data["exits"] || %{}
 
-      Enum.reduce(exits, count, fn {direction, destination_key}, acc ->
-        case seed_single_exit(
-               room_key,
-               to_string(direction),
-               to_string(destination_key),
-               room_lookup,
-               exit_lookup
-             ) do
-          {:ok, _} -> acc + 1
-          {:error, _} -> acc
-        end
+        Enum.reduce(exits, {count, seen_acc}, fn {direction, destination_key}, {acc, s} ->
+          case seed_single_exit(
+                 room_key,
+                 to_string(direction),
+                 to_string(destination_key),
+                 room_lookup,
+                 s
+               ) do
+            {:ok, _entity, updated_seen} -> {acc + 1, updated_seen}
+            {:skip, updated_seen} -> {acc, updated_seen}
+            {:error, _} -> {acc, s}
+          end
+        end)
       end)
-    end)
+
+    count
   end
 
-  defp seed_single_exit(room_key, direction, destination_key, room_lookup, exit_lookup) do
+  defp seed_single_exit(room_key, direction, destination_key, room_lookup, seen) do
     exit_key = "#{room_key}_#{direction}"
 
-    # Skip if already exists (in-memory check)
-    if Map.has_key?(exit_lookup, exit_key) do
-      {:ok, exit_lookup[exit_key]}
+    if MapSet.member?(seen, exit_key) do
+      {:skip, seen}
     else
       source = Map.get(room_lookup, room_key)
       dest = Map.get(room_lookup, destination_key)
@@ -426,18 +438,16 @@ defmodule Loka.Engine.EntitySeeder do
           })
 
         result = Entities.save(entity)
+        seen = MapSet.put(seen, exit_key)
 
-        # Create reciprocal exit if it doesn't exist
-        maybe_create_reciprocal(
-          destination_key,
-          direction,
-          room_key,
-          dest.id,
-          source.id,
-          exit_lookup
-        )
+        # Create reciprocal only if not already seen (covers explicit bidirectional YAML)
+        {seen, _} =
+          maybe_create_reciprocal(destination_key, direction, room_key, dest.id, source.id, seen)
 
-        result
+        case result do
+          {:ok, _} -> {:ok, entity, seen}
+          {:error, _} = err -> err
+        end
       else
         Logger.debug("EntitySeeder: skip exit #{exit_key}: room not found")
         {:error, :room_not_found}
@@ -445,13 +455,15 @@ defmodule Loka.Engine.EntitySeeder do
     end
   end
 
-  defp maybe_create_reciprocal(dest_key, direction, source_key, dest_id, source_id, exit_lookup) do
+  defp maybe_create_reciprocal(dest_key, direction, source_key, dest_id, source_id, seen) do
     reverse_dir = reverse_direction(direction)
 
     if reverse_dir do
       reverse_key = "#{dest_key}_#{reverse_dir}"
 
-      unless Map.has_key?(exit_lookup, reverse_key) do
+      if MapSet.member?(seen, reverse_key) do
+        {seen, :skipped}
+      else
         entity =
           Entity.new(%{
             type: :exit,
@@ -468,12 +480,75 @@ defmodule Loka.Engine.EntitySeeder do
           })
 
         Entities.save(entity)
+        {MapSet.put(seen, reverse_key), :created}
       end
+    else
+      {seen, :no_reverse}
     end
   end
 
   @doc false
   def reverse_direction(direction), do: Map.get(@reverse_directions, direction)
+
+  # =============================================================================
+  # Room Spawn Seeding
+  # =============================================================================
+
+  # For each room entity in the DB that has a spawns list in components["spawns"],
+  # instantiate any missing NPC/item instances in that room.
+  # Skips spawns that already have an existing instance (non-prototype) in the room.
+  defp seed_room_spawns(existing_map) do
+    rooms =
+      existing_map
+      |> Map.values()
+      |> Enum.filter(&(&1.type == :room))
+
+    Enum.reduce(rooms, 0, fn room, total ->
+      spawns = (room.components || %{})["spawns"] || []
+      total + seed_spawns_for_room(room, spawns, existing_map)
+    end)
+  end
+
+  defp seed_spawns_for_room(_room, [], _existing_map), do: 0
+
+  defp seed_spawns_for_room(room, spawns, existing_map) do
+    Enum.reduce(spawns, 0, fn spawn_config, count ->
+      prototype_key = spawn_config["prototype"]
+
+      cond do
+        is_nil(prototype_key) ->
+          Logger.warning("EntitySeeder: spawn config missing 'prototype' key in room #{room.key}")
+          count
+
+        already_spawned?(prototype_key, room, existing_map) ->
+          count
+
+        true ->
+          case Loka.Engine.Spawner.spawn(prototype_key, location_id: room.id) do
+            {:ok, _entity} ->
+              count + 1
+
+            {:error, reason} ->
+              Logger.warning(
+                "EntitySeeder: failed to spawn #{prototype_key} in #{room.key}: #{inspect(reason)}"
+              )
+
+              count
+          end
+      end
+    end)
+  end
+
+  # Returns true if a non-prototype instance of this prototype already exists in the room.
+  defp already_spawned?(prototype_key, room, existing_map) do
+    existing_map
+    |> Map.values()
+    |> Enum.any?(fn e ->
+      not e.is_prototype and
+        e.location_id == room.id and
+        e.key == prototype_key
+    end)
+  end
 
   # =============================================================================
   # YAML → Entity Conversion

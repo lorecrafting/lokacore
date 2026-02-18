@@ -91,6 +91,20 @@ mix test test/integration/storyline_channel_test.exs  # ChannelBot E2E (95% pari
 # Content Scaffolding
 mix loka.new quest|npc|room <name>
 
+# Dev Game Console (test game state without browser)
+# HTTP endpoint (against running server — fastest):
+curl -s http://localhost:4000/dev/cmd -H "Content-Type: application/json" \
+  -d '{"command": "look"}' | jq -r '.output'
+curl -s http://localhost:4000/dev/reset -H "Content-Type: application/json" \
+  -d '{}' | jq -r '.output'                              # Teleport to starting room
+
+# Telnet (interactive + ambient events — needs server restart to activate):
+nc localhost 4023                                        # Interactive session
+printf "look\nnorth\nlook\n" | nc localhost 4023        # Multi-step sequence
+
+# Mix task (offline, starts own app — slow on first use):
+mix loka.console "look" "talk thera" "1" north look
+
 # Godot Client
 cd godot-client
 ./dev.sh                          # Hot reload (~1s per change)
@@ -142,6 +156,8 @@ A vague prompt like "fix the authentication bug" is not acceptable. Write it as 
 ## Development Guidelines
 
 - Actions return `{:ok, Result.t()}` with events - never mutate directly
+- **`Actions.execute/3` without a socket**: Build `%Context{player_id, player_name, character, room, dialogue, combat, container}` manually, call `Actions.execute(action, params, ctx)` → `{:ok, result}`. Format `result.events` as text: `{:event, text}`, `{:dialogue_start, data}`, `{:room_changed, data}`. Used by `Loka.Dev.GameConsole`.
+- **Dev tools only in supervision tree**: Use `Mix.env() == :dev` in `application.ex` children list for dev-only supervised processes. Pattern: `children = [...] ++ if Mix.env() == :dev, do: [MyServer], else: []`
 - **Timers**: Use `Loka.Timers` for persistent timers (survive restarts, work offline)
 - **Function Clause Grouping**: Keep all clauses of the same function together. Don't place private helpers between `handle_event/3` or `handle_info/2` clauses.
 - **No inline computation in `render/1`**: Cache results in assigns, update via helpers when source data changes.

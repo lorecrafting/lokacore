@@ -1,0 +1,14 @@
+key: heartroot_chamber
+type: room
+parent: base_room
+short_desc: "The Heartroot Chamber"
+extra_desc: |
+  A vast underground chamber, its ceiling lost in darkness. From a platform of ancient stone at the center, the Heartroot rises — a column of interwoven roots as wide as a house, pulsing cold light. The roots branch in mathematical progressions. The chamber is warm everywhere at once. It knows you are here. Not in an animal way. In a larger way.
+
+exits:
+  south: heartroot_antechamber
+  down: roots_entrance
+
+tags:
+  - underground
+  - indoor

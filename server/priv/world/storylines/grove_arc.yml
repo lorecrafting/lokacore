@@ -1,0 +1,39 @@
+key: grove_arc
+name: "Seedship Forest: The Grove"
+starting_room: awakening_clearing
+
+acts:
+  - id: arrival
+    name: "Arrival"
+    quests:
+      - grove_arrival
+
+  - id: belonging
+    name: "Belonging"
+    quests:
+      - grove_belonging
+    requires:
+      - arrival
+
+  - id: revelation
+    name: "Discovery"
+    quests:
+      - grove_revelation
+    requires:
+      - belonging
+
+  - id: crisis
+    name: "Crisis"
+    quests:
+      - grove_sacrifice
+    requires:
+      - revelation
+
+  - id: grief_and_joy
+    name: "Grief and Joy"
+    quests:
+      - grove_epilogue
+    requires:
+      - crisis
+
+side_quests: []

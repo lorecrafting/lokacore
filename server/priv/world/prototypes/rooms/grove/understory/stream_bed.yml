@@ -1,0 +1,12 @@
+key: stream_bed
+type: room
+parent: base_room
+short_desc: "The Stream Bed"
+extra_desc: |
+  A shallow stream runs between roots here, its banks lined with smooth stones. The stones are smooth in the way carved things are smooth: uniform, not rounded differently by current, all alike. Frogs rest on them in the morning. No one has ever commented on the stones.
+
+exits:
+  west: understory_crossing
+
+tags:
+  - outdoor

@@ -1,0 +1,16 @@
+key: healing_grove
+type: room
+parent: base_room
+short_desc: "Thera's Healing Grove"
+extra_desc: |
+  Thera's workspace — bundles of herbs drying from low branches, a narrow stream running along one edge, the smell of medicine and warm stone. The temperature is always right here, even when Tenders elsewhere complain of cold. The herbs grow in rows she didn't plant, and the stream never lowers despite no visible source above.
+
+exits:
+  south: lira_memorial
+  north: small_grove
+  east: shaper_grove
+  west: western_stream
+
+tags:
+  - outdoor
+  - safe_zone

@@ -64,7 +64,7 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
           | {:npc_in_single_room, String.t(), String.t()}
 
   # Starting room key for BFS — update when world content changes
-  @starting_room nil
+  @starting_room "awakening_clearing"
 
   # =============================================================================
   # Public API
@@ -185,11 +185,8 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
 
     all_room_keys = MapSet.new(Enum.map(all_rooms, & &1.key))
 
-    # BFS from starting room (nil when no world content exists yet)
-    case @starting_room && Entities.find_one(key: @starting_room) do
-      nil ->
-        MapSet.new()
-
+    # BFS from starting room
+    case Entities.find_one(key: @starting_room) do
       {:error, :not_found} ->
         MapSet.new()
 

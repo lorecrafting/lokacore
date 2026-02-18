@@ -13,7 +13,7 @@ config :loka,
   env: config_env()
 
 # Game configuration
-config :loka, :game, starting_room_key: "monastery_gate"
+config :loka, :game, starting_room_key: "awakening_clearing"
 
 # ContentValidator plugins - loaded via config to avoid Engine→Framework layer violation
 # Engine only has PrototypePlugin built-in, others are Framework layer

@@ -1,0 +1,15 @@
+key: roots_junction
+type: room
+parent: base_room
+short_desc: "The Roots Junction"
+extra_desc: |
+  The passage splits here into three directions, marked with directional symbols in a script no living Tender can read. The markings are precise and deliberate and very old. Someone placed them knowing others would come after, knowing they would need to choose. One direction leads deeper. One leads toward the seed archive. One leads toward the heart.
+
+exits:
+  south: roots_passage
+  east: seed_archive
+  west: ship_core_access
+
+tags:
+  - underground
+  - indoor

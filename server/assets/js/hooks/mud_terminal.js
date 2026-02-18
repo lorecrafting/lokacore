@@ -290,15 +290,20 @@ const MudTerminal = {
       this.updateVitals(state)
       if (state.room) {
         this.updateExits(state.room.exits)
-        this.appendRoomDescription(state.room, state.atmosphere)
+        this.appendRoomDescription(state.room, null)
+        if (state.atmosphere) this.appendOutput(state.atmosphere, 'ambient')
+        this._currentRoomId = state.room.id
       }
     })
 
     // Room updates (navigation, look)
     safeOn('room_update', (data) => {
       if (data.room) {
+        const isNavigation = data.room.id !== this._currentRoomId
         this.updateExits(data.room.exits)
-        this.appendRoomDescription(data.room, data.atmosphere, data.minimap)
+        this.appendRoomDescription(data.room, null, data.minimap)
+        if (isNavigation && data.atmosphere) this.appendOutput(data.atmosphere, 'ambient')
+        this._currentRoomId = data.room.id
       }
     })
 
@@ -477,13 +482,10 @@ const MudTerminal = {
     }
   },
 
-  appendRoomDescription(room, atmosphere, minimap) {
+  appendRoomDescription(room, _atmosphere, minimap) {
     this.appendOutput('')
     this.appendOutput(room.title || room.name, 'room-title')
     this.appendOutput('-'.repeat((room.title || room.name || '').length))
-    if (atmosphere) {
-      this.appendOutput(atmosphere, 'emote')
-    }
     this.appendOutput('')
     this.appendOutput(room.description || '')
     this.appendOutput('')

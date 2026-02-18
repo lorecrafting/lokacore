@@ -141,11 +141,13 @@ defmodule Loka.Testing.Content.DialogueQuestChainValidator do
         results
       end
 
-    # Check 2: If quest has a next quest in chain, completion should offer next quest
+    # Check 2: If quest has a next quest in chain, completion should offer next quest.
+    # Skip when next quest has a different NPC giver (player must discover them themselves).
     next_quest = find_next_quest_in_chain(quest_id, quest_order)
+    next_quest_giver = next_quest && get_quest_giver(next_quest)
 
     results =
-      if next_quest do
+      if next_quest && (next_quest_giver == nil || next_quest_giver == giver_key) do
         validate_quest_completion_chain(quest_id, next_quest, giver_key, dialogue, results)
       else
         results
@@ -399,6 +401,13 @@ defmodule Loka.Testing.Content.DialogueQuestChainValidator do
     case Enum.find_index(quest_order, &(&1 == quest_id)) do
       nil -> nil
       index -> Enum.at(quest_order, index + 1)
+    end
+  end
+
+  defp get_quest_giver(quest_id) do
+    case Content.Quest.definition(quest_id) do
+      nil -> nil
+      quest_def -> quest_def.giver || quest_def.turn_in_npc
     end
   end
 

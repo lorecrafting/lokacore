@@ -1,0 +1,14 @@
+key: the_deep
+type: room
+parent: base_room
+short_desc: "The Deep"
+extra_desc: |
+  Trees older than memory rise here in near-total silence. Their bark is covered in geometric patterns — whorls and lines too regular to be growth, too deliberate to ignore. Under close examination they look, uncomfortably, like circuit traces. The ground is warm with no sun source. The Rootsong is overwhelming: a sound beneath sound, pressing from every direction at once.
+
+exits:
+  south: deep_entrance
+  east: deep_eastern_reach
+  down: heartroot_antechamber
+
+tags:
+  - outdoor

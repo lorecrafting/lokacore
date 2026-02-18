@@ -1,0 +1,13 @@
+key: the_thinning
+type: room
+parent: base_room
+short_desc: "The Thinning"
+extra_desc: |
+  Trees fall away in a gradient that feels wrong — not forest thinning to meadow, but something deliberate. The light is too even, sourceless. The ground stops being soil and becomes something that looks like soil but presses back differently. Tenders who count — and some have — find the trees thin at a rate too consistent to be natural.
+
+exits:
+  south: thinning_approach
+  north: thinning_far_reach
+
+tags:
+  - outdoor

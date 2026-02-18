@@ -1,0 +1,13 @@
+key: heartwood_market
+type: room
+parent: base_room
+short_desc: "The Tender Market"
+extra_desc: |
+  A covered space beneath a spreading canopy where tools, surplus harvest, and remedies change hands. The smell of dried herbs and cut wood mingles with raised voices arguing fair trade. Tenders have noticed their stores are often in better order than they left them — surplus moved forward, depleted stock shifted back. No one stays awake to see who does it.
+
+exits:
+  west: common_fire_circle
+
+tags:
+  - outdoor
+  - safe_zone
