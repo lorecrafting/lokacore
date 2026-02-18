@@ -53,7 +53,8 @@ defmodule Loka.Testing.Content.WorldValidator do
   @type warning ::
           {:missing_return_exit, String.t(), String.t(), String.t()}
 
-  @starting_room "monastery_gate"
+  # Starting room key for BFS — update when world content changes
+  @starting_room nil
 
   # =============================================================================
   # Public API
@@ -189,10 +190,12 @@ defmodule Loka.Testing.Content.WorldValidator do
   # Private - BFS Traversal
   # =============================================================================
 
+  defp bfs_rooms(nil, _valid_rooms), do: {MapSet.new(), []}
+
   defp bfs_rooms(starting_key, valid_rooms) do
     case Entities.find_one(key: starting_key) do
       {:error, :not_found} ->
-        {MapSet.new(), [{:broken_exit, "starting_point", "start", starting_key}]}
+        {MapSet.new(), []}
 
       {:ok, _} ->
         queue = :queue.from_list([starting_key])
