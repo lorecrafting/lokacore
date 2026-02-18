@@ -29,6 +29,7 @@ defmodule Loka.WorldBuilder.MCP.Tools do
       script_tools() ++
       query_tools() ++
       game_query_tools() ++
+      game_action_tools() ++
       analysis_tools()
   end
 
@@ -940,6 +941,44 @@ defmodule Loka.WorldBuilder.MCP.Tools do
           properties: %{}
         },
         callback: fn _args -> dispatch("get_player_state", %{}) end
+      }
+    ]
+  end
+
+  # Game action tools — execute MUD commands as the AI agent (builder only)
+  defp game_action_tools do
+    [
+      %{
+        name: "wb_game_command",
+        description: """
+        Execute a game command as if you were a player. This lets you move around,
+        look at things, talk to NPCs, pick up items, and interact with the world.
+
+        Available commands:
+        - Movement: north, south, east, west, up, down (or n,s,e,w,u,d)
+        - Look: look (current room), look <target> (examine entity)
+        - Talk: talk <npc_name> (start conversation with NPC)
+        - Dialogue: choose <N> (select dialogue option by number, 1-indexed)
+        - Items: get <item>, drop <item>, use <item>, use <item> on <target>
+        - Equipment: equip <item>, unequip <slot>
+        - Combat: attack <target>, flee
+        - Chat: say <message>
+        - Info: inventory (or i), who
+
+        Entity names are matched by keyword (name, key, or partial match).
+        """,
+        inputSchema: %{
+          type: "object",
+          required: ["command"],
+          properties: %{
+            command: %{
+              type: "string",
+              description:
+                "The game command to execute (e.g., 'north', 'talk merchant', 'get sword')"
+            }
+          }
+        },
+        callback: fn args -> dispatch("game_command", args) end
       }
     ]
   end

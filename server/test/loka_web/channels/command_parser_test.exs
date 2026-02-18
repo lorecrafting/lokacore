@@ -320,15 +320,15 @@ defmodule LokaWeb.Channels.CommandParserTest do
                {:builder_ai, %{prompt: "create a forest zone"}}
     end
 
-    test "/ai without prompt clears" do
-      assert CommandParser.parse("/ai") == {:builder_ai_clear, %{}}
+    test "/ai without prompt toggles AI mode" do
+      assert CommandParser.parse("/ai") == {:builder_ai_toggle, %{}}
     end
 
-    test "chat enters chat mode" do
-      assert CommandParser.parse("chat") == {:builder_chat_mode, %{}}
+    test "/ai clear clears conversation" do
+      assert CommandParser.parse("/ai clear") == {:builder_ai_clear, %{}}
     end
 
-    test "/exit leaves chat mode" do
+    test "/exit leaves AI mode" do
       assert CommandParser.parse("/exit") == {:builder_exit_chat, %{}}
     end
   end
@@ -375,6 +375,22 @@ defmodule LokaWeb.Channels.CommandParserTest do
     test "parses respawn zone" do
       assert CommandParser.parse("respawn zone monastery") ==
                {:builder_respawn, %{key: "monastery", type: "zone"}}
+    end
+  end
+
+  describe "dialogue choice commands" do
+    test "choose with valid number" do
+      assert CommandParser.parse("choose 1") == {:dialogue_choice, %{choice_index: 0}}
+      assert CommandParser.parse("choose 3") == {:dialogue_choice, %{choice_index: 2}}
+    end
+
+    test "select with valid number" do
+      assert CommandParser.parse("select 2") == {:dialogue_choice, %{choice_index: 1}}
+    end
+
+    test "choose with invalid input" do
+      assert CommandParser.parse("choose abc") == {:unknown, %{text: "choose"}}
+      assert CommandParser.parse("choose 0") == {:unknown, %{text: "choose"}}
     end
   end
 

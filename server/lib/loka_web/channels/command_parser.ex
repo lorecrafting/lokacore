@@ -391,9 +391,9 @@ defmodule LokaWeb.Channels.CommandParser do
 
   # AI commands
   defp do_parse(["/ai", "cancel"]), do: {:builder_ai_cancel, %{}}
+  defp do_parse(["/ai", "clear"]), do: {:builder_ai_clear, %{}}
   defp do_parse(["/ai", prompt]), do: {:builder_ai, %{prompt: prompt}}
-  defp do_parse(["/ai"]), do: {:builder_ai_clear, %{}}
-  defp do_parse(["chat"]), do: {:builder_chat_mode, %{}}
+  defp do_parse(["/ai"]), do: {:builder_ai_toggle, %{}}
   defp do_parse(["/exit"]), do: {:builder_exit_chat, %{}}
 
   # Spark command (available to all players)
@@ -401,6 +401,10 @@ defmodule LokaWeb.Channels.CommandParser do
 
   # Help with topic
   defp do_parse(["help", topic]), do: {:help, %{topic: topic}}
+
+  # Dialogue choice commands (choose/select N, 1-indexed)
+  defp do_parse(["choose", n]), do: parse_dialogue_choice(n)
+  defp do_parse(["select", n]), do: parse_dialogue_choice(n)
 
   # Normal MUD commands
   defp do_parse(["clear"]), do: {:clear, %{}}
@@ -429,6 +433,13 @@ defmodule LokaWeb.Channels.CommandParser do
   defp do_parse(["help"]), do: {:help, %{}}
   defp do_parse([unknown | _rest]), do: {:unknown, %{text: unknown}}
   defp do_parse([]), do: {:unknown, %{text: ""}}
+
+  defp parse_dialogue_choice(n) do
+    case Integer.parse(n) do
+      {num, ""} when num >= 1 -> {:dialogue_choice, %{choice_index: num - 1}}
+      _ -> {:unknown, %{text: "choose"}}
+    end
+  end
 
   defp expand_dir("n"), do: "north"
   defp expand_dir("s"), do: "south"

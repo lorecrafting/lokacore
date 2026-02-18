@@ -2,7 +2,7 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
   @moduledoc """
   AI command handlers for the builder terminal.
 
-  Manages `/ai <prompt>`, `chat` mode toggle, `/ai clear` commands.
+  Manages `/ai <prompt>`, `/ai` mode toggle, `/ai clear` commands.
   Uses Loka.AI.Conversation engine for streaming responses.
   """
 
@@ -80,28 +80,32 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
     end
   end
 
-  # Handle `chat` — enter chat mode.
-  def execute(:chat_mode, _params, socket) do
-    socket =
-      socket
-      |> assign(:chat_mode, true)
-      |> ensure_conversation()
+  # Handle `/ai` (no args) — toggle AI chat mode.
+  def execute(:ai_toggle, _params, socket) do
+    if socket.assigns[:chat_mode] do
+      execute(:exit_chat, %{}, socket)
+    else
+      socket =
+        socket
+        |> assign(:chat_mode, true)
+        |> ensure_conversation()
 
-    push(socket, "chat_mode_changed", %{mode: "chat"})
+      push(socket, "chat_mode_changed", %{mode: "chat"})
 
-    push(socket, "output", %{
-      text: "[BUILDER] Entered chat mode. Type 'exit' or '/exit' to leave."
-    })
+      push(socket, "output", %{
+        text: "[BUILDER] Entered AI mode. Type '/ai' or '/exit' to leave."
+      })
 
-    {:ok, socket}
+      {:ok, socket}
+    end
   end
 
-  # Handle `exit` / `/exit` — leave chat mode.
+  # Handle `/exit` — leave AI chat mode.
   def execute(:exit_chat, _params, socket) do
     socket = assign(socket, :chat_mode, false)
 
     push(socket, "chat_mode_changed", %{mode: "normal"})
-    push(socket, "output", %{text: "[BUILDER] Left chat mode."})
+    push(socket, "output", %{text: "[BUILDER] Left AI mode."})
     {:ok, socket}
   end
 
@@ -112,7 +116,7 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
     # Check for exit commands
     trimmed = String.trim(text)
 
-    if trimmed in ["exit", "/exit"] do
+    if trimmed in ["/ai", "/exit"] do
       execute(:exit_chat, %{}, socket)
     else
       socket = ensure_conversation(socket)
@@ -148,6 +152,10 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
 
     if conversation do
       conversation = Conversation.handle_tool_use(conversation, name, id, input)
+
+      # Flush game command results — apply state changes and push events to client
+      socket = flush_game_result(socket)
+
       socket = assign(socket, :ai_conversation, conversation)
 
       # Push tool event to client
@@ -246,10 +254,12 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
     end
   end
 
-  # Stash the latest character in the process dictionary so the tool executor
+  # Stash the latest character and player in the process dictionary so the tool executor
   # closure always sees current state (not a stale snapshot from conversation init).
   defp stash_character(socket) do
     Process.put(:loka_ai_character, socket.assigns[:character])
+    Process.put(:loka_ai_player, socket.assigns[:player])
+    Process.put(:loka_ai_dialogue_state, socket.assigns[:dialogue_state])
   end
 
   defp build_context(socket) do
@@ -476,6 +486,42 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
     end)
   end
 
+  # Flush any game action result stashed by GameActions during tool execution.
+  # Applies state changes to socket (character, room, dialogue, etc.) and
+  # pushes events to the client so the user sees what the AI is doing.
+  defp flush_game_result(socket) do
+    alias LokaWeb.Channels.GameChannel.ActionBridge
+
+    case Process.delete(:loka_ai_game_result) do
+      nil ->
+        socket
+
+      result ->
+        try do
+          socket = ActionBridge.apply_result(socket, result)
+
+          # Update stashed character for subsequent tool calls in same turn
+          if result.state[:character],
+            do: Process.put(:loka_ai_character, result.state[:character])
+
+          if result.state[:dialogue],
+            do: Process.put(:loka_ai_dialogue_state, result.state[:dialogue])
+
+          # Sync dialogue state to socket assigns
+          if Map.has_key?(result.state, :dialogue) do
+            assign(socket, :dialogue_state, result.state[:dialogue])
+          else
+            socket
+          end
+        rescue
+          e ->
+            Logger.warning("[BuilderAI] Failed to flush game result: #{Exception.message(e)}")
+
+            socket
+        end
+    end
+  end
+
   defp truncate(str, max) when byte_size(str) <= max, do: str
   defp truncate(str, max), do: String.slice(str, 0, max) <> "..."
 
@@ -566,6 +612,7 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
       "wb_get_entity" -> "Reading entity: #{input["key"]}"
       "wb_query_entities" -> "Querying #{input["type"]} entities..."
       "wb_get_player_state" -> "Reading player state..."
+      "wb_game_command" -> "Game: #{input["command"]}"
       _ -> name
     end
   end

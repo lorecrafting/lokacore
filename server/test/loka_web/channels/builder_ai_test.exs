@@ -2,7 +2,7 @@ defmodule LokaWeb.Channels.BuilderAITest do
   @moduledoc """
   Channel integration tests for the AI builder commands.
 
-  Tests `/ai`, `/ai cancel`, `/ai clear`, `chat` mode, and streaming event
+  Tests `/ai`, `/ai cancel`, `/ai clear`, `/ai` mode toggle, and streaming event
   handling through the game channel. Uses no real API calls — streaming events
   are either triggered by the no-API-key error path or simulated via
   direct `send/2` to the channel process.
@@ -33,21 +33,21 @@ defmodule LokaWeb.Channels.BuilderAITest do
     test "clears conversation with no prior conversation", %{admin: player} do
       {:ok, socket} = connect_player(player)
 
-      send_cmd(socket, "/ai")
+      send_cmd(socket, "/ai clear")
       assert_output("[BUILDER] AI conversation history cleared.")
     end
 
-    test "clears conversation after chat mode init", %{admin: player} do
+    test "clears conversation after AI mode init", %{admin: player} do
       {:ok, socket} = connect_player(player)
 
-      # Enter chat mode to initialize conversation
-      send_cmd(socket, "chat")
+      # Enter AI mode to initialize conversation
+      send_cmd(socket, "/ai")
       assert_push "chat_mode_changed", %{mode: "chat"}, @timeout
       assert_push "output", %{text: text}, @timeout
-      assert text =~ "chat mode"
+      assert text =~ "AI mode"
 
       # Clear conversation
-      send_cmd(socket, "/ai")
+      send_cmd(socket, "/ai clear")
       assert_output("[BUILDER] AI conversation history cleared.")
     end
   end
@@ -61,36 +61,34 @@ defmodule LokaWeb.Channels.BuilderAITest do
     end
   end
 
-  describe "chat mode" do
-    test "enter and exit chat mode", %{admin: player} do
+  describe "AI mode toggle" do
+    test "enter and exit AI mode via /ai toggle", %{admin: player} do
       {:ok, socket} = connect_player(player)
 
-      # Enter
-      send_cmd(socket, "chat")
+      # Enter via /ai
+      send_cmd(socket, "/ai")
       assert_push "chat_mode_changed", %{mode: "chat"}, @timeout
       assert_push "output", %{text: enter_text}, @timeout
-      assert enter_text =~ "Entered chat mode"
+      assert enter_text =~ "Entered AI mode"
 
-      # Exit via /exit
-      send_cmd(socket, "/exit")
+      # Exit via /ai again (toggle)
+      send_cmd(socket, "/ai")
       assert_push "chat_mode_changed", %{mode: "normal"}, @timeout
       assert_push "output", %{text: exit_text}, @timeout
-      assert exit_text =~ "Left chat mode"
+      assert exit_text =~ "Left AI mode"
     end
 
-    test "bare 'exit' in chat mode goes through command parser, not chat input", %{admin: player} do
+    test "exit AI mode via /exit", %{admin: player} do
       {:ok, socket} = connect_player(player)
 
-      send_cmd(socket, "chat")
+      send_cmd(socket, "/ai")
       assert_push "chat_mode_changed", %{mode: "chat"}, @timeout
       _text = receive_output()
 
-      # "exit" is in command_prefix? whitelist, so it bypasses chat mode
-      # and goes to CommandParser, which has no "exit" clause → unknown command.
-      # Only "/exit" properly exits chat mode via the parser.
-      send_cmd(socket, "exit")
-      assert_push "output", %{text: text}, @timeout
-      assert text =~ "Unknown command"
+      send_cmd(socket, "/exit")
+      assert_push "chat_mode_changed", %{mode: "normal"}, @timeout
+      assert_push "output", %{text: exit_text}, @timeout
+      assert exit_text =~ "Left AI mode"
     end
   end
 
@@ -107,12 +105,12 @@ defmodule LokaWeb.Channels.BuilderAITest do
     end
   end
 
-  describe "chat mode input (error flow without API key)" do
+  describe "AI mode input (error flow without API key)" do
     test "chat text triggers AI and returns error without API key", %{admin: player} do
       {:ok, socket} = connect_player(player)
 
-      # Enter chat mode
-      send_cmd(socket, "chat")
+      # Enter AI mode
+      send_cmd(socket, "/ai")
       assert_push "chat_mode_changed", %{mode: "chat"}, @timeout
       _text = receive_output()
 
@@ -129,8 +127,8 @@ defmodule LokaWeb.Channels.BuilderAITest do
     setup %{admin: player} do
       {:ok, socket} = connect_player(player)
 
-      # Enter chat mode to initialize ai_conversation in assigns
-      send_cmd(socket, "chat")
+      # Enter AI mode to initialize ai_conversation in assigns
+      send_cmd(socket, "/ai")
       assert_push "chat_mode_changed", %{mode: "chat"}, @timeout
       _text = receive_output()
 
@@ -194,11 +192,42 @@ defmodule LokaWeb.Channels.BuilderAITest do
     end
   end
 
+  describe "wb_game_command tool availability" do
+    test "game_command is in builder tools list" do
+      tools = Loka.WorldBuilder.MCP.Tools.tools(:builder)
+      tool_names = Enum.map(tools, & &1.name)
+      assert "wb_game_command" in tool_names
+    end
+
+    test "game_command is NOT in player tools list" do
+      tools = Loka.WorldBuilder.MCP.Tools.tools(:player)
+      tool_names = Enum.map(tools, & &1.name)
+      refute "wb_game_command" in tool_names
+    end
+
+    test "game_command tool summary shows command", %{admin: player} do
+      {:ok, socket} = connect_player(player)
+
+      send_cmd(socket, "/ai")
+      assert_push "chat_mode_changed", %{mode: "chat"}, @timeout
+      _text = receive_output()
+
+      send(
+        socket.channel_pid,
+        {:ai_tool_use_raw, "wb_game_command", "tool_gc", %{"command" => "north"}}
+      )
+
+      assert_push "ai_stream_tool",
+                  %{name: "wb_game_command", summary: "Game: north"},
+                  @timeout
+    end
+  end
+
   describe "format_tool_summary coverage" do
     setup %{admin: player} do
       {:ok, socket} = connect_player(player)
 
-      send_cmd(socket, "chat")
+      send_cmd(socket, "/ai")
       assert_push "chat_mode_changed", %{mode: "chat"}, @timeout
       _text = receive_output()
 

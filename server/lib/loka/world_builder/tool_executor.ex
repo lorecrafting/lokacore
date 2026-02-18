@@ -25,7 +25,8 @@ defmodule Loka.WorldBuilder.ToolExecutor do
     Zones,
     Scripts,
     Analysis,
-    GameQueries
+    GameQueries,
+    GameActions
   }
 
   @doc """
@@ -181,6 +182,8 @@ defmodule Loka.WorldBuilder.ToolExecutor do
       "get_entity" -> GameQueries.execute_get_entity(input, opts)
       "query_entities" -> GameQueries.execute_query_entities(input, opts)
       "get_player_state" -> GameQueries.execute_get_player_state(opts)
+      # Game action tools (builder only)
+      "game_command" -> GameActions.execute_game_command(input, opts)
       _ -> {:error, "Unknown tool: #{name}"}
     end
   end
