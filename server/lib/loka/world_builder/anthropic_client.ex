@@ -130,7 +130,6 @@ defmodule Loka.WorldBuilder.AnthropicClient do
 
       {:error, reason} = error ->
         Logger.error("[AnthropicClient] Chat failed: #{inspect(reason)}")
-        if on_error = opts[:on_error], do: on_error.(reason)
         error
     end
   end
@@ -145,7 +144,12 @@ defmodule Loka.WorldBuilder.AnthropicClient do
   end
 
   defp maybe_add_system(body, nil), do: body
-  defp maybe_add_system(body, system), do: Map.put(body, :system, system)
+
+  defp maybe_add_system(body, system) do
+    Map.put(body, :system, [
+      %{type: "text", text: system, cache_control: %{type: "ephemeral"}}
+    ])
+  end
 
   defp maybe_add_tools(body, []), do: body
 
@@ -157,6 +161,12 @@ defmodule Loka.WorldBuilder.AnthropicClient do
           description: tool[:description] || tool["description"],
           input_schema: tool[:input_schema] || tool[:inputSchema] || tool["input_schema"]
         }
+      end)
+
+    # Mark last tool for caching (caches entire tools prefix)
+    formatted_tools =
+      List.update_at(formatted_tools, -1, fn tool ->
+        Map.put(tool, :cache_control, %{type: "ephemeral"})
       end)
 
     Map.put(body, :tools, formatted_tools)
@@ -213,6 +223,11 @@ defmodule Loka.WorldBuilder.AnthropicClient do
 
         if on_done, do: on_done.(response)
         {:ok, response}
+
+      {:ok, %Req.Response{status: 429, headers: headers}} ->
+        Process.delete(:anthropic_stream_state)
+        retry_after = extract_retry_after(headers)
+        {:error, "API error: 429 - rate limited (retry after #{retry_after}s)"}
 
       {:ok, %Req.Response{status: status, body: body}} ->
         Process.delete(:anthropic_stream_state)
@@ -307,6 +322,21 @@ defmodule Loka.WorldBuilder.AnthropicClient do
   end
 
   defp process_event(_, state, _, _), do: state
+
+  defp extract_retry_after(headers) when is_map(headers) do
+    case Map.get(headers, "retry-after") do
+      [value | _] ->
+        case Integer.parse(to_string(value)) do
+          {secs, _} -> secs
+          :error -> 30
+        end
+
+      _ ->
+        30
+    end
+  end
+
+  defp extract_retry_after(_), do: 30
 
   defp get_api_key do
     Application.get_env(:loka, :anthropic_api_key) ||
