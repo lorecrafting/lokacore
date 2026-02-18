@@ -834,15 +834,10 @@ defmodule Loka.Engine.EntityServer do
   defp run_script_trait(entity, %{"script" => script_key} = trait, hook) do
     config = trait["config"] || %{}
 
-    case Entities.find_one(key: script_key, type: :script) do
-      {:ok, script} ->
-        data = script.components["data"] || %{}
-        script_hook = data["hook"]
-
+    case fetch_script_cached(script_key) do
+      {:ok, {script_hook, source}} ->
         # Only run if the script's hook matches (behavior = tick-based)
         if script_hook == "behavior" and hook == :tick do
-          source = data["source"]
-
           context = %{
             trigger: :tick,
             config: config,
@@ -875,6 +870,29 @@ defmodule Loka.Engine.EntityServer do
       {:error, _} ->
         Logger.debug("[EntityServer] Script trait not found: #{script_key}")
         entity
+    end
+  end
+
+  # Cache script {hook, source} in process dictionary to avoid DB query every tick.
+  # Scripts are YAML content; they change only on reload, not at runtime.
+  defp fetch_script_cached(script_key) do
+    cache_key = {:script_cache, script_key}
+
+    case Process.get(cache_key) do
+      nil ->
+        case Entities.find_one(key: script_key, type: :script) do
+          {:ok, script} ->
+            data = script.components["data"] || %{}
+            cached = {data["hook"], data["source"]}
+            Process.put(cache_key, cached)
+            {:ok, cached}
+
+          {:error, _} = err ->
+            err
+        end
+
+      cached ->
+        {:ok, cached}
     end
   end
 end
