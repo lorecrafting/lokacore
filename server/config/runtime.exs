@@ -64,6 +64,11 @@ if anthropic_key = System.get_env("ANTHROPIC_API_KEY") do
   config :loka, :anthropic_api_key, anthropic_key
 end
 
+# Sentry DSN — optional, no-ops gracefully when absent
+if sentry_dsn = System.get_env("SENTRY_DSN") do
+  config :sentry, dsn: sentry_dsn
+end
+
 # Enable JSON logging in production for better log aggregation and querying
 if config_env() == :prod do
   config :logger, :default_handler,

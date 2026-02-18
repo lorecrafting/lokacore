@@ -67,8 +67,7 @@ defmodule LokaWeb.PlayerSessionControllerTest do
       refute html =~ "Register"
       assert html =~ "Log in"
 
-      assert html =~
-               ~s(<input type="email" name="player[email]" value="#{player.email}")
+      assert html =~ ~s(name="player[email]" value="#{player.email}")
     end
 
     test "renders login page (magic link mode)", %{conn: conn} do

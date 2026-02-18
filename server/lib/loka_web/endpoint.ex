@@ -1,4 +1,5 @@
 defmodule LokaWeb.Endpoint do
+  use Sentry.PlugCapture
   use Phoenix.Endpoint, otp_app: :loka
 
   # The session will be stored in the cookie and signed,
@@ -74,6 +75,7 @@ defmodule LokaWeb.Endpoint do
     param_key: "request_logger",
     cookie_key: "request_logger"
 
+  plug Sentry.PlugContext
   plug Plug.RequestId
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 

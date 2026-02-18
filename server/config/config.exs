@@ -49,6 +49,15 @@ config :loka, LokaWeb.Endpoint,
 # at the `config/runtime.exs`.
 config :loka, Loka.Mailer, adapter: Swoosh.Adapters.Local
 
+# Sentry error tracking — DSN configured via SENTRY_DSN env var in runtime.exs
+# Disabled by default (no DSN = no-op). Enable in production by setting the secret.
+config :sentry,
+  dsn: nil,
+  environment_name: config_env(),
+  enable_source_code_context: true,
+  root_source_code_paths: [File.cwd!()],
+  tags: %{app: "loka"}
+
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.25.4",

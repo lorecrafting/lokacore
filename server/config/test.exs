@@ -55,6 +55,9 @@ config :phoenix,
 config :loka, Loka.Auth.Guardian,
   secret_key: "test_only_guardian_secret_key_not_for_production_use"
 
+# Disable Sentry source code scanning in tests — it causes SQLite lock contention
+config :sentry, enable_source_code_context: false
+
 # Disable rate limiting in tests
 config :loka, :rate_limiter_enabled, false
 

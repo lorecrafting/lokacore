@@ -148,6 +148,8 @@ defmodule Loka.MixProject do
 
       # Production monitoring
       {:prom_ex, "~> 1.11"},
+      {:sentry, "~> 10.8"},
+      {:hackney, "~> 1.20"},
 
       # Structured JSON logging for production
       {:logger_json, "~> 6.2"},
