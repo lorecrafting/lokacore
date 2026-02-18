@@ -137,27 +137,29 @@ defmodule LokaWeb.Router do
     get "/health/detailed", HealthController, :detailed
   end
 
-  # Mobile debug logging endpoint
-  scope "/api/debug", LokaWeb do
-    pipe_through :api
+  # Mobile debug logging endpoint (dev/test only — not exposed in production)
+  if Mix.env() in [:dev, :test] do
+    scope "/api/debug", LokaWeb do
+      pipe_through :api
 
-    # Receive logs from mobile clients
-    post "/logs", DebugLogController, :create
+      # Receive logs from mobile clients
+      post "/logs", DebugLogController, :create
 
-    # Read logs (for LLM debugging)
-    get "/logs", DebugLogController, :index
+      # Read logs (for LLM debugging)
+      get "/logs", DebugLogController, :index
 
-    # Get latest logs formatted for LLM consumption
-    get "/logs/latest", DebugLogController, :latest
+      # Get latest logs formatted for LLM consumption
+      get "/logs/latest", DebugLogController, :latest
 
-    # Clear logs
-    delete "/logs", DebugLogController, :clear
+      # Clear logs
+      delete "/logs", DebugLogController, :clear
 
-    # Screenshot capture
-    post "/screenshot/request", DebugScreenshotController, :request
-    post "/screenshot", DebugScreenshotController, :upload
-    get "/screenshot", DebugScreenshotController, :latest
-    get "/screenshot/image", DebugScreenshotController, :serve_latest
+      # Screenshot capture
+      post "/screenshot/request", DebugScreenshotController, :request
+      post "/screenshot", DebugScreenshotController, :upload
+      get "/screenshot", DebugScreenshotController, :latest
+      get "/screenshot/image", DebugScreenshotController, :serve_latest
+    end
   end
 
   # Content validation API for content creators

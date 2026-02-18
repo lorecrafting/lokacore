@@ -542,7 +542,7 @@ defmodule Loka.Engine.EntityServer do
           |> Map.delete("respawn_data")
 
         updated_entity = %{entity | components: updated_components}
-        Entities.update_entity(updated_entity, %{components: updated_components})
+        {:ok, _} = Entities.save(updated_entity)
 
         # Broadcast respawn event
         if entity.location_id do

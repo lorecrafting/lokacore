@@ -638,7 +638,7 @@ defmodule LokaWeb.GameChannel do
   # Check if text starts with a command prefix (/, or known commands)
   defp command_prefix?(text) do
     trimmed = String.trim(text)
-    String.starts_with?(trimmed, "/") || trimmed in ~w(exit clear help look who)
+    String.starts_with?(trimmed, "/") || trimmed in ~w(clear help look who)
   end
 
   defp dispatch_parsed_command(parsed, socket) do
@@ -653,8 +653,8 @@ defmodule LokaWeb.GameChannel do
       {:builder_ai_cancel, params} ->
         execute_ai_command(:ai_cancel, params, socket)
 
-      {:builder_chat_mode, params} ->
-        execute_ai_command(:chat_mode, params, socket)
+      {:builder_ai_toggle, params} ->
+        execute_ai_command(:ai_toggle, params, socket)
 
       {:builder_exit_chat, params} ->
         execute_ai_command(:exit_chat, params, socket)
@@ -795,6 +795,10 @@ defmodule LokaWeb.GameChannel do
       {:help, %{}} ->
         push_help(socket)
         {:reply, :ok, socket}
+
+      # Bare integer dialogue choice (player typed "1", "2", etc.)
+      {:dialogue_choice, %{choice_index: choice_index}} ->
+        dispatch_action(socket, :dialogue_choice, %{choice_index: choice_index})
 
       # Builder admin commands - dynamic dispatch strips :builder_ prefix
       {cmd, params} when is_atom(cmd) ->
@@ -1251,6 +1255,10 @@ defmodule LokaWeb.GameChannel do
 
   def handle_info(:ai_timeout, socket) do
     BuilderAI.handle_ai_event(:ai_timeout, socket)
+  end
+
+  def handle_info(:ai_retry, socket) do
+    BuilderAI.handle_ai_retry(socket)
   end
 
   # Catch-all for unhandled messages

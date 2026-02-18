@@ -34,7 +34,7 @@ defmodule Loka.Testing.Content.PrototypeLinter do
 
   require Logger
 
-  alias Loka.Engine.Entities
+  alias Loka.Engine.{Entities, Constants.EntityTypes}
 
   @type lint_result :: %{
           files_checked: non_neg_integer(),
@@ -56,21 +56,7 @@ defmodule Loka.Testing.Content.PrototypeLinter do
           | {:unknown_component, String.t(), String.t(), String.t()}
           | {:primary_keyword_not_in_long_desc, String.t(), String.t(), String.t(), String.t()}
 
-  @valid_types [
-    :room,
-    :npc,
-    :item,
-    :exit,
-    :player,
-    :quest,
-    :recipe,
-    :resource,
-    :script,
-    :skill,
-    :status,
-    :storyline,
-    :zone
-  ]
+  @valid_types EntityTypes.all()
 
   @known_components [
     # Combat & Stats
@@ -141,7 +127,9 @@ defmodule Loka.Testing.Content.PrototypeLinter do
   """
   @spec lint() :: {:ok, lint_result()}
   def lint do
-    all_prototypes = Entities.find_all(is_prototype: true)
+    all_prototypes =
+      Entities.find_all(is_prototype: true)
+      |> Enum.reject(&draft?/1)
 
     {errors, warnings} =
       Enum.reduce(all_prototypes, {[], []}, fn proto, {errs, warns} ->
@@ -380,6 +368,8 @@ defmodule Loka.Testing.Content.PrototypeLinter do
         end
     end
   end
+
+  defp draft?(entity), do: get_in(entity.metadata || %{}, ["draft"]) == true
 
   defp count_prototype_files do
     case File.ls(@prototype_dir) do

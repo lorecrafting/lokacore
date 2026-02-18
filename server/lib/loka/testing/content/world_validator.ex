@@ -75,10 +75,11 @@ defmodule Loka.Testing.Content.WorldValidator do
     check_bidirectional = Keyword.get(opts, :check_bidirectional, true)
     check_live = Keyword.get(opts, :check_live_entities, false)
 
-    # Get all room prototypes (excluding templates)
+    # Get all room prototypes (excluding templates and drafts)
     all_rooms =
       Entities.find_all(type: :room, is_prototype: true)
       |> Enum.reject(&is_template?/1)
+      |> Enum.reject(&draft?/1)
 
     all_room_keys = MapSet.new(Enum.map(all_rooms, & &1.key))
 
@@ -332,6 +333,9 @@ defmodule Loka.Testing.Content.WorldValidator do
       []
     end
   end
+
+  # Check if an entity is a draft (should be excluded from validation)
+  defp draft?(entity), do: get_in(entity.metadata || %{}, ["draft"]) == true
 
   # Check if a prototype is a template (should be excluded from validation)
   defp is_template?(proto) do

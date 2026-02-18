@@ -73,18 +73,20 @@ defmodule LokaWeb.Plugs.MetricsAuth do
   end
 
   defp get_client_ip(conn) do
-    # Check X-Forwarded-For first (for proxied requests like Fly.io)
-    case get_req_header(conn, "x-forwarded-for") do
-      [forwarded | _] ->
-        forwarded
-        |> String.split(",")
-        |> List.first()
-        |> String.trim()
+    # On Fly.io, Fly-Client-IP is set by infrastructure and cannot be spoofed by clients.
+    # Fall back to X-Forwarded-For (for local dev), then conn.remote_ip.
+    fly_ip = get_req_header(conn, "fly-client-ip") |> List.first()
+    forwarded = get_req_header(conn, "x-forwarded-for") |> List.first()
 
-      [] ->
-        conn.remote_ip
-        |> :inet.ntoa()
-        |> to_string()
+    cond do
+      fly_ip && fly_ip != "" ->
+        fly_ip
+
+      forwarded && forwarded != "" ->
+        forwarded |> String.split(",") |> List.first() |> String.trim()
+
+      true ->
+        conn.remote_ip |> :inet.ntoa() |> to_string()
     end
   end
 

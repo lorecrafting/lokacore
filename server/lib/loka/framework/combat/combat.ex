@@ -544,9 +544,8 @@ defmodule Loka.Framework.Combat do
 
         entity_schema ->
           entity = Entities.to_entity(entity_schema)
-          equipable = Map.get(entity.components || %{}, "equipable", %{})
-          bonuses = Map.get(equipable, "bonuses", %{})
-          Map.get(bonuses, "attack", 0)
+          weapon = Map.get(entity.components || %{}, "weapon", %{})
+          Map.get(weapon, "damage", 0)
       end
     else
       0

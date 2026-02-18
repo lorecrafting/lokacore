@@ -431,6 +431,14 @@ defmodule LokaWeb.Channels.CommandParser do
   defp do_parse(["equip", target]), do: {:equip, %{target: target}}
   defp do_parse(["unequip", target]), do: {:unequip, %{target: target}}
   defp do_parse(["help"]), do: {:help, %{}}
+  # Bare integer → dialogue choice (player types "1" to pick option 1)
+  defp do_parse([n]) do
+    case Integer.parse(n) do
+      {num, ""} when num >= 1 -> {:dialogue_choice, %{choice_index: num - 1}}
+      _ -> {:unknown, %{text: n}}
+    end
+  end
+
   defp do_parse([unknown | _rest]), do: {:unknown, %{text: unknown}}
   defp do_parse([]), do: {:unknown, %{text: ""}}
 

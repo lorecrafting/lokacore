@@ -142,21 +142,20 @@ defmodule LokaWeb.Plugs.RateLimiter do
   end
 
   defp get_client_ip(conn) do
-    # Check for forwarded IP (from proxy)
-    forwarded =
-      get_req_header(conn, "x-forwarded-for")
-      |> List.first()
+    # On Fly.io, Fly-Client-IP is set by infrastructure and cannot be spoofed by clients.
+    # Fall back to X-Forwarded-For (for local dev), then conn.remote_ip.
+    fly_ip = get_req_header(conn, "fly-client-ip") |> List.first()
+    forwarded = get_req_header(conn, "x-forwarded-for") |> List.first()
 
-    case forwarded do
-      nil ->
+    cond do
+      fly_ip && fly_ip != "" ->
+        fly_ip
+
+      forwarded && forwarded != "" ->
+        forwarded |> String.split(",") |> List.first() |> String.trim()
+
+      true ->
         conn.remote_ip |> Tuple.to_list() |> Enum.join(".")
-
-      ip_string ->
-        # Take first IP from X-Forwarded-For header
-        ip_string
-        |> String.split(",")
-        |> List.first()
-        |> String.trim()
     end
   end
 

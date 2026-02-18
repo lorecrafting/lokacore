@@ -180,6 +180,7 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
     all_rooms =
       Entities.find_all(type: :room, is_prototype: true)
       |> Enum.reject(&is_template?/1)
+      |> Enum.reject(&draft?/1)
 
     all_room_keys = MapSet.new(Enum.map(all_rooms, & &1.key))
 
@@ -235,6 +236,7 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
     npcs =
       Entities.find_all(type: :npc, is_prototype: true)
       |> Enum.reject(&is_template?/1)
+      |> Enum.reject(&draft?/1)
 
     # Build map of NPC -> rooms where they spawn
     npc_locations = build_npc_location_map()
@@ -287,8 +289,8 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
   end
 
   defp build_npc_location_map do
-    # Find all rooms and their spawned NPCs
-    rooms = Entities.find_all(type: :room, is_prototype: true)
+    # Find all rooms and their spawned NPCs (excluding drafts)
+    rooms = Entities.find_all(type: :room, is_prototype: true) |> Enum.reject(&draft?/1)
 
     Enum.reduce(rooms, %{}, fn room, acc ->
       npcs_in_room = get_npcs_in_room(room)
@@ -355,6 +357,7 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
     items =
       Entities.find_all(type: :item, is_prototype: true)
       |> Enum.reject(&is_template?/1)
+      |> Enum.reject(&draft?/1)
 
     # Build sources for each item
     item_sources = build_item_source_map(reachable_rooms)
@@ -844,6 +847,7 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
     rooms =
       Entities.find_all(type: :room, is_prototype: true)
       |> Enum.reject(&is_template?/1)
+      |> Enum.reject(&draft?/1)
 
     errors = []
     total_nodes = 0
@@ -940,6 +944,8 @@ defmodule Loka.Testing.Content.ReachabilityAnalyzer do
       []
     end
   end
+
+  defp draft?(entity), do: get_in(entity.metadata || %{}, ["draft"]) == true
 
   defp is_template?(proto) do
     components = proto.components || %{}
