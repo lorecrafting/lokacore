@@ -94,6 +94,7 @@ const MudTerminal = {
       this.exitsEl = this.terminalContainer.querySelector('#term-exits')
       this.statusDot = this.terminalContainer.querySelector('#term-connection-dot')
       this.modeEl = this.terminalContainer.querySelector('#term-mode')
+      this.promptEl = this.terminalContainer.querySelector('#term-prompt')
 
       this.setConnectionState('connecting')
 
@@ -537,7 +538,7 @@ const MudTerminal = {
     // Minimap - compact spatial map after exits
     if (minimap) {
       this.appendOutput('')
-      this.appendOutput(minimap)
+      this.appendOutput(minimap, 'minimap')
     }
 
     this.pruneAndScroll()
@@ -604,9 +605,13 @@ const MudTerminal = {
 
   setMode(mode) {
     if (this.modeEl) {
-      const label = mode === 'chat' ? 'CHAT' : 'NORMAL'
+      const label = mode === 'chat' ? '\u2728 AI' : 'NORMAL'
       this.modeEl.textContent = label
-      this.modeEl.className = mode === 'chat' ? 'text-warning font-medium' : 'text-primary font-medium'
+      this.modeEl.className =
+        mode === 'chat' ? 'text-warning font-medium' : 'text-primary font-medium'
+    }
+    if (this.promptEl) {
+      this.promptEl.textContent = mode === 'chat' ? 'ai>' : '>'
     }
   },
 
@@ -620,6 +625,7 @@ const MudTerminal = {
     this.exitsEl = this.terminalContainer.querySelector('#term-exits')
     this.statusDot = this.terminalContainer.querySelector('#term-connection-dot')
     this.modeEl = this.terminalContainer.querySelector('#term-mode')
+    this.promptEl = this.terminalContainer.querySelector('#term-prompt')
   },
 
   _loadHistory() {

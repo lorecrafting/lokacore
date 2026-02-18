@@ -538,13 +538,13 @@ defmodule LokaWeb.Channels.BuilderCommands.Map do
       for x <- min_x..max_x do
         case Map.get(grid, {x, y}) do
           nil ->
-            "   "
+            " "
 
           key ->
             if key == current_key do
-              "[*]"
+              "*"
             else
-              "{{cmd:goto #{key}}} o {{/cmd}}"
+              "{{cmd:goto #{key}}}o{{/cmd}}"
             end
         end
       end
@@ -575,7 +575,7 @@ defmodule LokaWeb.Channels.BuilderCommands.Map do
       left_key != nil and right_key != nil and
         rooms_connected?(rooms_index, left_key, right_key, :horizontal)
 
-    if connected, do: "--", else: "  "
+    if connected, do: "-", else: " "
   end
 
   defp render_minimap_vertical(grid, rooms_index, min_x, max_x, y) do
@@ -588,10 +588,10 @@ defmodule LokaWeb.Channels.BuilderCommands.Map do
           top_key != nil and bottom_key != nil and
             rooms_connected?(rooms_index, top_key, bottom_key, :vertical)
 
-        if connected, do: " | ", else: "   "
+        if connected, do: "|", else: " "
       end
 
-    line = cells |> Enum.join("  ") |> String.trim_trailing()
+    line = cells |> Enum.join(" ") |> String.trim_trailing()
 
     if String.trim(line) == "" do
       nil
