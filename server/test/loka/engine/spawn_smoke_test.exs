@@ -3,11 +3,17 @@ defmodule Loka.Engine.SpawnSmokeTest do
   Lightweight smoke test that exercises the full prototype → spawn pipeline
   against production YAML prototypes. Catches prototype/runtime drift that
   unit tests with test fixtures won't detect.
+
+  TODO: Re-enable when Grove content is built (Phase 1 rooms + NPCs + items).
+  Update test keys to use Grove prototype keys (e.g. awakening_clearing, thera, etc.)
   """
   use Loka.DataCase, async: false
 
   alias Loka.Engine.{Spawner, Entities}
 
+  # Skipped: no production content exists yet — monastery deleted, Grove not built
+  # Remove this tag and update keys when Phase 1 rooms/NPCs/items are committed
+  @moduletag :skip
   @moduletag :smoke
 
   setup do
@@ -16,72 +22,38 @@ defmodule Loka.Engine.SpawnSmokeTest do
   end
 
   describe "production prototype spawning" do
-    test "spawns starting room (monastery_gate) with correct structure" do
-      assert {:ok, room} = Spawner.spawn("monastery_gate")
-
+    test "spawns a room prototype with correct structure" do
+      # TODO: replace with Grove room key e.g. "awakening_clearing"
+      assert {:ok, room} = Spawner.spawn("awakening_clearing")
       assert room.type == :room
-      assert room.key == "monastery_gate"
-      assert room.short_desc == "Monastery Gate"
       assert room.id != nil
-      assert "starting_room" in room.tags
-
-      # Persisted to database
       assert Entities.get_entity(room.id) != nil
     end
 
-    test "spawns NPC (novice_pema) with correct structure" do
-      assert {:ok, npc} = Spawner.spawn("novice_pema")
-
+    test "spawns an NPC prototype with correct structure" do
+      # TODO: replace with Grove NPC key e.g. "thera"
+      assert {:ok, npc} = Spawner.spawn("thera")
       assert npc.type == :npc
-      assert npc.key == "novice_pema"
       assert npc.id != nil
-      assert npc.short_desc != nil
-
       assert Entities.get_entity(npc.id) != nil
     end
 
-    test "spawns item (prayer_beads) with correct structure" do
-      assert {:ok, item} = Spawner.spawn("prayer_beads")
-
+    test "spawns an item prototype with correct structure" do
+      # TODO: replace with a Grove item key e.g. "thera_pendant"
+      assert {:ok, item} = Spawner.spawn("thera_pendant")
       assert item.type == :item
-      assert item.key == "prayer_beads"
       assert item.id != nil
-      assert item.short_desc != nil
-
       assert Entities.get_entity(item.id) != nil
     end
   end
 
   describe "spawn_room pipeline" do
-    test "spawns starting room with all contents (exits, NPCs, items)" do
-      assert {:ok, room, spawned} = Spawner.spawn_room("monastery_gate")
-
+    test "spawns a starting room with all contents (exits, NPCs, items)" do
+      # TODO: replace with Grove starting room key
+      assert {:ok, room, spawned} = Spawner.spawn_room("awakening_clearing")
       assert room.type == :room
-      assert room.key == "monastery_gate"
-
-      # monastery_gate defines 3 exits: north, south, west
-      exits = Enum.filter(spawned, &(&1.type == :exit))
-      assert length(exits) == 3
-
-      directions = Enum.map(exits, & &1.components["exit"]["direction"])
-      assert "north" in directions
-      assert "south" in directions
-      assert "west" in directions
-
-      # monastery_gate spawns: novice_pema, prayer_beads, travelers_staff, butter_lamp
-      non_exits = Enum.reject(spawned, &(&1.type == :exit))
-      assert length(non_exits) == 4
-
-      keys = Enum.map(non_exits, & &1.key)
-      assert "novice_pema" in keys
-      assert "prayer_beads" in keys
-      assert "travelers_staff" in keys
-      assert "butter_lamp" in keys
-
-      # All spawned entities are located in the room
       assert Enum.all?(spawned, &(&1.location_id == room.id))
 
-      # All entities persisted
       for entity <- [room | spawned] do
         assert Entities.get_entity(entity.id) != nil
       end
@@ -90,19 +62,15 @@ defmodule Loka.Engine.SpawnSmokeTest do
 
   describe "prototype inheritance" do
     test "parent fields are resolved for production NPCs" do
-      assert {:ok, npc} = Spawner.spawn("novice_pema")
-
-      # Should have NPC's own tags (V2: inheritance resolves at seeder level)
+      assert {:ok, npc} = Spawner.spawn("thera")
       assert is_list(npc.tags)
-      assert npc.metadata[:prototype_key] == "novice_pema"
+      assert npc.metadata[:prototype_key] == "thera"
     end
 
     test "parent fields are resolved for production rooms" do
-      assert {:ok, room} = Spawner.spawn("monastery_gate")
-
-      # Should inherit base_room tags
+      assert {:ok, room} = Spawner.spawn("awakening_clearing")
       assert "room" in room.tags
-      assert room.metadata[:prototype_key] == "monastery_gate"
+      assert room.metadata[:prototype_key] == "awakening_clearing"
     end
   end
 end

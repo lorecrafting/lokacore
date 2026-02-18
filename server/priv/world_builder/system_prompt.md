@@ -95,6 +95,12 @@ Always:
 
 ## Tool Usage
 
+**Efficiency is critical.** Each tool-use round-trip is an API call that counts against rate limits. To avoid 429 errors:
+- **Use parallel tool calls**: Request multiple independent tools in a single response whenever possible (e.g., read a room AND list NPCs at the same time instead of sequentially).
+- **Plan before gathering**: Think about ALL the information you need, then request it in one batch.
+- **Minimize read-before-write**: If you're creating new content, you often don't need to read existing content first. Use your context.
+- **Batch creates**: Use `batch_create_rooms` for multiple rooms. Create exits alongside rooms rather than in a separate round.
+
 Use the right tool for each task:
 - **Rooms**: create_room, update_room, delete_room, batch_create_rooms
 - **Connections**: create_exit, remove_exit
