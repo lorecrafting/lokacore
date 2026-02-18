@@ -235,8 +235,9 @@ defmodule Loka.Engine.Hooks do
   @doc """
   Runs all registered hooks for a hook type.
 
-  Executes each hook in priority order. Return values are collected
-  but generally ignored (use `run_until_halt/3` for control flow).
+  Reads hooks from ETS (non-blocking) and executes each in the calling process
+  in priority order. Return values are collected but generally ignored
+  (use `run_until_halt/3` for control flow).
 
   ## Examples
 
@@ -245,15 +246,34 @@ defmodule Loka.Engine.Hooks do
   @spec run(atom(), list(), keyword()) :: :ok
   def run(hook_type, args, opts \\ []) do
     server = Keyword.get(opts, :server, __MODULE__)
-    GenServer.call(server, {:run, hook_type, args})
+    hooks = read_hooks(server, hook_type)
+    start_time = System.monotonic_time()
+
+    Enum.each(hooks, fn {_priority, {module, function}} ->
+      hook_start = System.monotonic_time()
+
+      try do
+        apply(module, function, args)
+      rescue
+        e ->
+          Logger.error(
+            "Hooks: error in #{hook_type} hook #{inspect(module)}.#{function}: #{inspect(e)}"
+          )
+      end
+
+      emit_hook_telemetry(hook_type, module, function, hook_start, :sync)
+    end)
+
+    emit_batch_telemetry(hook_type, length(hooks), start_time, :sync)
+    :ok
   end
 
   @doc """
   Runs all registered hooks asynchronously (non-blocking).
 
-  Returns immediately after spawning tasks. Hook execution happens
-  in the background via Task.Supervisor. Use this for "after" hooks
-  that don't affect control flow.
+  Reads hooks from ETS (non-blocking) and returns immediately after spawning
+  tasks. Hook execution happens in the background via Task.Supervisor.
+  Use this for "after" hooks that don't affect control flow.
 
   ## Options
 
@@ -268,16 +288,36 @@ defmodule Loka.Engine.Hooks do
   @spec run_async(atom(), list(), keyword()) :: :ok
   def run_async(hook_type, args, opts \\ []) do
     server = Keyword.get(opts, :server, __MODULE__)
-    GenServer.cast(server, {:run_async, hook_type, args})
+    hooks = read_hooks(server, hook_type)
+    task_supervisor = read_task_supervisor(server)
+
+    # Spawn each hook as a separate task for parallel execution
+    Enum.each(hooks, fn {_priority, {module, function}} ->
+      Task.Supervisor.start_child(task_supervisor, fn ->
+        hook_start = System.monotonic_time()
+
+        try do
+          apply(module, function, args)
+        rescue
+          e ->
+            Logger.error(
+              "Hooks: error in async #{hook_type} hook #{inspect(module)}.#{function}: #{inspect(e)}"
+            )
+        end
+
+        emit_hook_telemetry(hook_type, module, function, hook_start, :async)
+      end)
+    end)
+
+    :ok
   end
 
   @doc """
   Runs hooks until one returns `{:halt, reason}`.
 
+  Reads hooks from ETS (non-blocking) and executes in the calling process.
   Returns `:ok` if all hooks pass, or `{:halt, reason}` if any hook
   requests a halt. Useful for validation hooks.
-
-  This always runs synchronously since validation requires blocking.
 
   ## Examples
 
@@ -289,18 +329,49 @@ defmodule Loka.Engine.Hooks do
   @spec run_until_halt(atom(), list(), keyword()) :: :ok | {:halt, term()}
   def run_until_halt(hook_type, args, opts \\ []) do
     server = Keyword.get(opts, :server, __MODULE__)
-    GenServer.call(server, {:run_until_halt, hook_type, args})
+    hooks = read_hooks(server, hook_type)
+    start_time = System.monotonic_time()
+    hooks_run = :counters.new(1, [:atomics])
+
+    result =
+      Enum.reduce_while(hooks, :ok, fn {_priority, {module, function}}, _acc ->
+        hook_start = System.monotonic_time()
+        :counters.add(hooks_run, 1, 1)
+
+        try do
+          result = apply(module, function, args)
+          emit_hook_telemetry(hook_type, module, function, hook_start, :sync)
+
+          case validate_hook_result(result, hook_type, module, function) do
+            {:halt, reason} -> {:halt, {:halt, reason}}
+            :ok -> {:cont, :ok}
+          end
+        rescue
+          e ->
+            Logger.error(
+              "Hooks: error in #{hook_type} hook #{inspect(module)}.#{function}: #{inspect(e)}"
+            )
+
+            emit_hook_telemetry(hook_type, module, function, hook_start, :sync)
+            {:cont, :ok}
+        end
+      end)
+
+    emit_batch_telemetry(hook_type, :counters.get(hooks_run, 1), start_time, :sync)
+    result
   end
 
   @doc """
   Lists all hooks registered for a hook type.
+
+  Reads directly from ETS — no GenServer call.
 
   Returns a list of `{priority, {module, function}}` tuples.
   """
   @spec list_hooks(atom(), keyword()) :: [{integer(), {module(), atom()}}]
   def list_hooks(hook_type, opts \\ []) do
     server = Keyword.get(opts, :server, __MODULE__)
-    GenServer.call(server, {:list_hooks, hook_type})
+    read_hooks(server, hook_type)
   end
 
   @doc """
@@ -331,12 +402,24 @@ defmodule Loka.Engine.Hooks do
   @impl true
   def init(opts) do
     task_supervisor = Keyword.get(opts, :task_supervisor, @default_task_supervisor)
-    {:ok, %{hooks: %{}, task_supervisor: task_supervisor}}
+    name = Keyword.get(opts, :name, __MODULE__)
+
+    # Create a public ETS table for concurrent reads without going through the GenServer.
+    # Table name matches the server name so clients can derive it without a round-trip.
+    table = :ets.new(name, [:set, :named_table, :public, {:read_concurrency, true}])
+
+    # Initialize all hook types with empty lists
+    Enum.each(@hook_types, fn hook_type -> :ets.insert(table, {hook_type, []}) end)
+
+    # Store config so run_async can find the task supervisor
+    :ets.insert(table, {:__meta__, %{task_supervisor: task_supervisor}})
+
+    {:ok, %{table: name}}
   end
 
   @impl true
   def handle_call({:register, hook_type, {module, function}, priority}, _from, state) do
-    hooks = Map.get(state.hooks, hook_type, [])
+    [{^hook_type, hooks}] = :ets.lookup(state.table, hook_type)
 
     # Check for duplicates
     if Enum.any?(hooks, fn {_p, mf} -> mf == {module, function} end) do
@@ -344,112 +427,59 @@ defmodule Loka.Engine.Hooks do
     else
       new_hook = {priority, {module, function}}
       updated_hooks = [new_hook | hooks] |> Enum.sort_by(fn {p, _} -> p end)
+      :ets.insert(state.table, {hook_type, updated_hooks})
       Logger.debug("Hooks: registered #{hook_type} -> #{inspect(module)}.#{function}")
-      {:reply, :ok, put_in(state.hooks[hook_type], updated_hooks)}
+      {:reply, :ok, state}
     end
   end
 
   @impl true
   def handle_call({:unregister, hook_type, {module, function}}, _from, state) do
-    hooks = Map.get(state.hooks, hook_type, [])
+    [{^hook_type, hooks}] = :ets.lookup(state.table, hook_type)
     updated_hooks = Enum.reject(hooks, fn {_p, mf} -> mf == {module, function} end)
-    {:reply, :ok, put_in(state.hooks[hook_type], updated_hooks)}
-  end
-
-  @impl true
-  def handle_call({:run, hook_type, args}, _from, state) do
-    hooks = Map.get(state.hooks, hook_type, [])
-    start_time = System.monotonic_time()
-
-    Enum.each(hooks, fn {_priority, {module, function}} ->
-      hook_start = System.monotonic_time()
-
-      try do
-        apply(module, function, args)
-      rescue
-        e ->
-          Logger.error(
-            "Hooks: error in #{hook_type} hook #{inspect(module)}.#{function}: #{inspect(e)}"
-          )
-      end
-
-      emit_hook_telemetry(hook_type, module, function, hook_start, :sync)
-    end)
-
-    emit_batch_telemetry(hook_type, length(hooks), start_time, :sync)
+    :ets.insert(state.table, {hook_type, updated_hooks})
     {:reply, :ok, state}
   end
 
   @impl true
-  def handle_call({:run_until_halt, hook_type, args}, _from, state) do
-    hooks = Map.get(state.hooks, hook_type, [])
-    start_time = System.monotonic_time()
-    hooks_run = :counters.new(1, [:atomics])
-
-    result =
-      Enum.reduce_while(hooks, :ok, fn {_priority, {module, function}}, _acc ->
-        hook_start = System.monotonic_time()
-        :counters.add(hooks_run, 1, 1)
-
-        try do
-          result = apply(module, function, args)
-          emit_hook_telemetry(hook_type, module, function, hook_start, :sync)
-
-          case validate_hook_result(result, hook_type, module, function) do
-            {:halt, reason} -> {:halt, {:halt, reason}}
-            :ok -> {:cont, :ok}
-          end
-        rescue
-          e ->
-            Logger.error(
-              "Hooks: error in #{hook_type} hook #{inspect(module)}.#{function}: #{inspect(e)}"
-            )
-
-            emit_hook_telemetry(hook_type, module, function, hook_start, :sync)
-            {:cont, :ok}
-        end
-      end)
-
-    emit_batch_telemetry(hook_type, :counters.get(hooks_run, 1), start_time, :sync)
-    {:reply, result, state}
-  end
-
-  @impl true
-  def handle_call({:list_hooks, hook_type}, _from, state) do
-    hooks = Map.get(state.hooks, hook_type, [])
-    {:reply, hooks, state}
-  end
-
-  @impl true
   def handle_call(:clear_all, _from, state) do
-    {:reply, :ok, %{state | hooks: %{}}}
+    Enum.each(@hook_types, fn hook_type -> :ets.insert(state.table, {hook_type, []}) end)
+    {:reply, :ok, state}
   end
 
-  @impl true
-  def handle_cast({:run_async, hook_type, args}, state) do
-    hooks = Map.get(state.hooks, hook_type, [])
-    task_supervisor = state.task_supervisor
+  # =============================================================================
+  # Private Helpers
+  # =============================================================================
 
-    # Spawn each hook as a separate task for parallel execution
-    Enum.each(hooks, fn {_priority, {module, function}} ->
-      Task.Supervisor.start_child(task_supervisor, fn ->
-        hook_start = System.monotonic_time()
-
-        try do
-          apply(module, function, args)
-        rescue
-          e ->
-            Logger.error(
-              "Hooks: error in async #{hook_type} hook #{inspect(module)}.#{function}: #{inspect(e)}"
-            )
-        end
-
-        emit_hook_telemetry(hook_type, module, function, hook_start, :async)
-      end)
-    end)
-
-    {:noreply, state}
+  # Reads hooks from ETS without going through GenServer.
+  # For atom servers (the common case), the table name is the server atom.
+  # For non-atom servers (PIDs, via-tuples), fall back to a GenServer call.
+  defp read_hooks(server, hook_type) when is_atom(server) do
+    case :ets.lookup(server, hook_type) do
+      [{^hook_type, hooks}] -> hooks
+      [] -> []
+    end
+  rescue
+    ArgumentError -> []
   end
+
+  defp read_hooks(server, hook_type) do
+    # Non-atom server (rare in tests): can't derive table name, skip optimization
+    table = GenServer.call(server, :table_name)
+    [{^hook_type, hooks}] = :ets.lookup(table, hook_type)
+    hooks
+  end
+
+  defp read_task_supervisor(server) when is_atom(server) do
+    case :ets.lookup(server, :__meta__) do
+      [{:__meta__, %{task_supervisor: ts}}] -> ts
+      _ -> @default_task_supervisor
+    end
+  rescue
+    ArgumentError -> @default_task_supervisor
+  end
+
+  defp read_task_supervisor(_server), do: @default_task_supervisor
 
   # =============================================================================
   # Hook Result Validation
