@@ -1207,6 +1207,8 @@ At this point, systems should enable emergent culture:
 
 | Document | Contents |
 |----------|----------|
+| `docs/game-design/CONTENT-DESIGN-FRAMEWORK.md` | **How to design content** — the 5-layer methodology, bead framework, skill gating philosophy, design checklist |
+| `docs/game-design/seedship-forest-world/DECISIONS.md` | All greenlit decisions for the Grove (first world) — instancing, skill split, content scope, etc. |
 | `docs/architecture/progression-and-content-design.md` | Complete skill definitions, XP formulas, trainers |
 | `docs/architecture/immersion-systems-design.md` | Stat architecture, karma system, meditation |
 | `docs/game-design/social-primitives.md` | All 30 social primitives with implementation notes |

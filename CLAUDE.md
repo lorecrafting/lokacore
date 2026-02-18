@@ -120,6 +120,25 @@ Main game client is the Godot app connecting via Phoenix Channels.
 3. **No Redis**: ETS handles caching until multi-server needed
 4. **Elixir Scripting**: Sandboxed Elixir for game customization (replaces Lua)
 
+## Sub-Agent Model Policy
+
+When using the Task tool to spawn sub-agents:
+
+**Model selection:**
+- Use `model: "sonnet"` for all execution tasks — file edits, targeted searches, bash commands, test runs, content changes, any well-scoped unit of work
+- Use `model: "opus"` only when the sub-task itself requires deep architectural reasoning across many files
+- Default to `model: "sonnet"` when in doubt — it handles the vast majority of implementation work well
+
+**Task prompt quality (non-negotiable):**
+Sub-agent prompts must be self-contained and explicit. The sub-agent has no memory of the parent conversation. Every prompt must include:
+- **What** to do — the exact change, in concrete terms
+- **Where** — specific file paths, function names, line references if known
+- **Why** — enough context to make correct judgment calls (e.g., which pattern to follow, what invariant to preserve)
+- **How to verify** — what success looks like (test to run, output to check, pattern to confirm)
+- **Constraints** — relevant conventions, things NOT to change, architectural rules that apply
+
+A vague prompt like "fix the authentication bug" is not acceptable. Write it as if handing off to a skilled developer who has never seen the codebase.
+
 ## Development Guidelines
 
 - Actions return `{:ok, Result.t()}` with events - never mutate directly

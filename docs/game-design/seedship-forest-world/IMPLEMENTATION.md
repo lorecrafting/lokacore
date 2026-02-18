@@ -6,31 +6,68 @@
 
 ## Implementation Roadmap
 
-### Current Phase: Concept Development
+### Phase 0: Concept Development ✅ COMPLETE (Feb 2026)
 
 - [x] Core concept established (seedship forest)
 - [x] Design pillars defined
 - [x] Answer key worldbuilding questions
 - [x] Name the people, the ship, key concepts
 - [x] Design the crisis
-- [x] Outline the story arc
+- [x] Outline the story arc (108 beats)
 - [x] Map the geography
 - [x] Create key NPCs
 - [x] Document healing systems (Dong Han integration)
 - [x] Document spiritual arc (Lamrim integration)
+- [x] Story arc reviewed and greenlit for production (Feb 17 2026)
+- [x] Monastery arc retired — 73 files to archive
 
-### Next Phase: Detail Design
+### Phase 0.5: Pre-Production Decisions (IN PROGRESS)
 
-- [ ] Write room descriptions
-- [ ] Write NPC dialogues
-- [ ] Design quests in detail
-- [ ] Create items and resources
+- [ ] Decide: solo instancing vs. cohort instancing for Grove ships
+- [ ] Archive monastery content (git branch or directory move)
+- [ ] Confirm which monastery generic items (prayer_beads, etc.) carry forward
 
-### Implementation Phase
+### Phase 1: World Skeleton
 
-- [ ] Create YAML files
-- [ ] Test with ChannelBot
-- [ ] Polish and iterate
+Build the physical world — rooms only, minimal descriptions, exits correct.
+
+- [ ] Heartwood (main hub, arrival point)
+- [ ] Thera's healing grove
+- [ ] The Deep (where she avoids going)
+- [ ] The Thinning / Edge (where the membrane is)
+- [ ] The Heartroot chamber (Act 4 finale)
+- [ ] The Small Grove (hidden room, only accessible with Thera)
+- [ ] Elder Hall (Act 3 council scene)
+
+### Phase 2: Spine Quest Chain (Alpha)
+
+Map the ~38 MVP beats to actual quests and scenes. See [DECISIONS.md](DECISIONS.md) for the full spine beat list.
+
+- [ ] `grove_arrival` — beats 1-6, 8, 11-12 (awakening, Thera, Heartwood)
+- [ ] `grove_belonging` — beats 14-15, 17-19, 26-27, 28-33, 35, 38, 49-54
+- [ ] `grove_revelation` — beats 60-67, 70, 73, 79-81 (Edge truth, Yara's story, small grove)
+- [ ] `grove_sacrifice` — beats 82-87, 90-92, 93-98, 99-100
+- [ ] `grove_epilogue` — beats 101-108 (grief + joy)
+
+### Phase 3: Thera's Dialogue (Hardest / Most Important)
+
+The emotional engine of the story. This is where most writing time goes.
+
+- [ ] Teaching session scenes (beats 35, 38) — Pulse, the Lira statue
+- [ ] Breaking point scene (beats 49-54) — her collapse, "you're the first one who listened back"
+- [ ] Last night dialogue (beats 90-92) — expand significantly beyond 3 beats
+- [ ] Heartroot confrontation (beats 93-98) — Lira's offer, Thera's choice
+- [ ] Beat 108 revelation — "the love expanded"
+
+### Phase 4: Alpha Playtest + Fill-In
+
+- [ ] ChannelBot E2E test of spine
+- [ ] Kira arc (her mother's fate)
+- [ ] Brennan side quest (full Seren confession)
+- [ ] Tomas's trowel (Earth artifact story)
+- [ ] Maren's locked records room
+- [ ] Community fractures (beats 89a-89e) — with specific named characters
+- [ ] NPC ambient dialogue density pass
 
 ---
 

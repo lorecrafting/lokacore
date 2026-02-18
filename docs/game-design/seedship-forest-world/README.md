@@ -1,8 +1,8 @@
 # Seedship Forest World
 
-> **Status**: Active Design Phase
+> **Status**: Pre-Production (Design complete, greenlit Feb 17 2026)
 > **Created**: 2026-01-31
-> **Last Updated**: 2026-02-01
+> **Last Updated**: 2026-02-17
 > **Philosophy**: Buddhist Lamrim via forest mythology (Three Roots, Hollow Root, Carrying Heart)
 
 The Seedship Forest is Loka's first starting world - a forest that's secretly a generation ship approaching its destination.
@@ -18,7 +18,8 @@ The Seedship Forest is Loka's first starting world - a forest that's secretly a 
 | **[CHARACTERS.md](CHARACTERS.md)** | NPCs, factions, Thera deep dive, spiritual arc | Writing dialogue, character moments |
 | **[SYSTEMS.md](SYSTEMS.md)** | Pulse, Blight, Nine Sectors, healing philosophy | Implementing game mechanics |
 | **[GEOGRAPHY.md](GEOGRAPHY.md)** | Zones, rooms, ecology, flora/fauna | Building the physical world |
-| **[IMPLEMENTATION.md](IMPLEMENTATION.md)** | Device mapping, scripts, roadmap | Translating to code |
+| **[IMPLEMENTATION.md](IMPLEMENTATION.md)** | Device mapping, scripts, phased roadmap | Translating to code |
+| **[DECISIONS.md](DECISIONS.md)** | Key decisions, rationale, open questions | Understanding why things are the way they are |
 | **[DESIGN-NOTES.md](DESIGN-NOTES.md)** | Session notes, sources, working space | Reference & history |
 
 ---
