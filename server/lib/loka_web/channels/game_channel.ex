@@ -102,14 +102,15 @@ defmodule LokaWeb.GameChannel do
 
   require Logger
 
-  alias Loka.Framework.{Inventory, Equipment, Quest}
+  alias Loka.Framework.Inventory
   alias Loka.Framework.World.Atmosphere
-  alias Loka.Components.ResourcePools
   alias Loka.Engine.{Entities, Entity, EntityRegistry}
-  alias Loka.Session
   alias LokaWeb.Channels.RoomHelpers
   alias LokaWeb.Channels.GameChannel.Serializers
   alias LokaWeb.Channels.GameChannel.ActionBridge
+  alias LokaWeb.Channels.GameChannel.Character
+  alias LokaWeb.Channels.GameChannel.JoinHandler
+  alias LokaWeb.Channels.GameChannel.PubSubEvents
   alias LokaWeb.Channels.VersionCompatibility
   alias LokaWeb.Channels.ChannelRateLimiter
   alias LokaWeb.Channels.CommandParser
@@ -149,7 +150,7 @@ defmodule LokaWeb.GameChannel do
       end
 
     # V2: Look up character entity by account_id
-    case find_or_create_character(player) do
+    case Character.find_or_create(player) do
       {:ok, character} ->
         # Start character's EntityServer
         EntityRegistry.get_or_start(character.id)
@@ -187,111 +188,10 @@ defmodule LokaWeb.GameChannel do
     {:error, %{reason: "invalid_topic"}}
   end
 
-  # Auto-create a character for mobile guests who have a name but no character
-  # In dev mode: directly set character name (skip validation for quick testing)
-  # In prod mode: use proper validation
-  # Sanitize name to only allow letters (character name validation)
-  defp sanitize_character_name(name) do
-    name
-    |> String.replace(~r/[^A-Za-z]/, "")
-    |> String.slice(0, 20)
-    |> case do
-      "" -> "Traveler"
-      sanitized -> sanitized
-    end
-  end
-
-  # =============================================================================
-  # V2 Character Entity Helpers
-  # =============================================================================
-
-  # Find existing character entity or auto-create one
-  defp find_or_create_character(player) do
-    case Entities.find_one(account_id: player.id) do
-      {:ok, character} ->
-        {:ok, character}
-
-      {:error, :not_found} ->
-        auto_create_character_entity(player)
-    end
-  end
-
-  # Auto-create a character entity for a new player
-  defp auto_create_character_entity(player) do
-    base_name =
-      player.name || (player.email && player.email |> String.split("@") |> hd()) || "Traveler"
-
-    character_name = sanitize_character_name(base_name)
-
-    # Find unique name
-    name = find_available_name(character_name, 0)
-
-    starting_room_id = Loka.Framework.World.Room.get_starting_room_id()
-
-    entity =
-      Entity.new(
-        type: :character,
-        key: "player_#{String.downcase(name)}",
-        short_desc: name,
-        account_id: player.id,
-        location_id: starting_room_id,
-        components: %{
-          "player" => %{
-            "settings" => %{},
-            "gender" => "they/them",
-            "background" => "pilgrim"
-          },
-          "combatant" => %{"health" => 100, "max_health" => 100},
-          "stats" => %{},
-          "quest_progress" => %{},
-          "resources" => %{"health" => %{"current" => 100, "max" => 100}},
-          "skills" => %{},
-          "equipment" => %{},
-          "inventory" => [],
-          "flags" => %{}
-        },
-        tags: ["playable"],
-        keywords: [String.downcase(name)]
-      )
-
-    case Entities.save(entity) do
-      {:ok, saved} ->
-        Entities.add_tag(saved.id, "playable")
-        Logger.info("[GameChannel] Auto-created character '#{name}' for player #{player.id}")
-        {:ok, %{saved | tags: ["playable"]}}
-
-      {:error, reason} ->
-        {:error, reason}
-    end
-  end
-
-  # Find an available character name by appending numbers if taken
-  defp find_available_name(base_name, attempt) when attempt > 99 do
-    base_name <> Integer.to_string(:rand.uniform(9999))
-  end
-
-  defp find_available_name(base_name, attempt) do
-    import Ecto.Query
-
-    name = if attempt == 0, do: base_name, else: "#{base_name}#{attempt}"
-    key = "player_#{String.downcase(name)}"
-
-    exists? =
-      Loka.Repo.exists?(
-        from e in Loka.Engine.Schema.EntitySchema,
-          where: e.key == ^key and e.type == :character
-      )
-
-    if exists? do
-      find_available_name(base_name, attempt + 1)
-    else
-      name
-    end
-  end
-
   # =============================================================================
   # Character Creation
   # =============================================================================
+  # NOTE: Character entity helpers extracted to GameChannel.Character
 
   @impl true
   def handle_in("create_character", params, socket) do
@@ -299,7 +199,7 @@ defmodule LokaWeb.GameChannel do
     character = socket.assigns.character
 
     # Extract character data from params
-    character_name = sanitize_character_name(Map.get(params, "name", player.name))
+    character_name = Character.sanitize_name(Map.get(params, "name", player.name))
     gender = Map.get(params, "gender", "they/them")
     background = Map.get(params, "background", "pilgrim")
     stats = Map.get(params, "stats", %{})
@@ -993,276 +893,92 @@ defmodule LokaWeb.GameChannel do
   end
 
   # =============================================================================
-  # PubSub Handlers
+  # PubSub / Info Handlers
+  # NOTE: Implementations extracted to GameChannel.JoinHandler and GameChannel.PubSubEvents
   # =============================================================================
 
   @impl true
-  def handle_info(:after_join, socket) do
-    player = socket.assigns.player
-    character = socket.assigns.character
-
-    # V2: Load room using character entity's location_id
-    {room, character} = RoomHelpers.load_room_for_character(character)
-
-    # Subscribe to PubSub topics
-    Phoenix.PubSub.subscribe(Loka.PubSub, "location:#{room.id}")
-    Phoenix.PubSub.subscribe(Loka.PubSub, "entity:#{player.id}")
-    Phoenix.PubSub.subscribe(Loka.PubSub, "world:atmosphere")
-    Phoenix.PubSub.subscribe(Loka.PubSub, "debug:screenshot")
-
-    # Initialize resource pools on character entity
-    stats = Entity.get_component(character, "stats") || %{}
-    resource_pools = ResourcePools.init_pools(stats)
-    character = ResourcePools.put(character, resource_pools)
-
-    # Register with session system
-    {:ok, _session_pid, session_id} = Session.connect(player, :mobile, self())
-    Logger.metadata(session_id: session_id, player_id: player.id)
-    Session.update_room(player.id, room.id)
-
-    # Emit login telemetry (drives active_players counter via PromEx polling)
-    :telemetry.execute([:loka, :game, :player_login], %{count: 1}, %{player_id: player.id})
-
-    # Broadcast player entered
-    Phoenix.PubSub.broadcast(
-      Loka.PubSub,
-      "location:#{room.id}",
-      {:player_entered, player.id, player_display_name(player)}
-    )
-
-    # Load game data (V2: use character entity)
-    inventory_items = Inventory.list_items(character)
-    equipped_items = Equipment.get_equipped(character)
-    active_quests = Quest.Progress.get_active_quests(character)
-    other_players = RoomHelpers.load_other_players(room.id, player.id)
-    atmosphere = Atmosphere.describe_for_room(room)
-    resources = ResourcePools.get(character)
-    active_timers = Loka.Timers.get_active(player.id)
-
-    # Get visual state for environmental effects
-    player_compat = %{equipped: Entity.get_component(character, "equipment") || %{}}
-    visual_state = Serializers.serialize_visual_state(room: room, player: player_compat)
-
-    # Get sound state for ambient audio
-    sound_state = Serializers.serialize_sound_state(room: room, player: player_compat)
-
-    # Send full game state to client (including server capabilities for version negotiation)
-    push(socket, "game_state", %{
-      room: Serializers.serialize_room(room),
-      atmosphere: atmosphere,
-      calendar: nil,
-      visual_state: visual_state,
-      sound_state: sound_state,
-      other_players: Serializers.serialize_players(other_players),
-      inventory: Serializers.serialize_inventory(inventory_items),
-      equipped: Serializers.serialize_equipped(equipped_items),
-      quests: Serializers.serialize_quests(active_quests),
-      stats: stats,
-      # Health from character entity resources component
-      health: get_character_health(character),
-      resources: Serializers.serialize_resources(resources),
-      timers: Serializers.serialize_timers(active_timers),
-      spark: nil,
-      player: %{
-        id: player.id,
-        name: player_display_name(player)
-      },
-      # Server capabilities for version negotiation
-      server: VersionCompatibility.server_capabilities()
-    })
-
-    # Deliver any timers that completed while offline
-    deliver_offline_timers(socket, player.id)
-
-    socket =
-      socket
-      |> assign(:character, character)
-      |> assign(:room, room)
-      |> assign(:seen_ambient, MapSet.new())
-
-    {:noreply, socket}
-  end
+  def handle_info(:after_join, socket), do: JoinHandler.handle(socket)
 
   def handle_info({:player_entered, player_id, player_name}, socket) do
-    if player_id != socket.assigns.player.id do
-      push(socket, "event", %{text: "#{player_name} arrives."})
-      # Refresh other players list
-      room = socket.assigns.room
-      other_players = RoomHelpers.load_other_players(room.id, socket.assigns.player.id)
-      push(socket, "players_update", %{players: Serializers.serialize_players(other_players)})
-    end
-
-    {:noreply, socket}
+    PubSubEvents.handle_player_entered(socket, player_id, player_name)
   end
 
   def handle_info({:player_left, player_id, player_name, direction}, socket) do
-    if player_id != socket.assigns.player.id do
-      push(socket, "event", %{text: "#{player_name} leaves #{direction}."})
-      room = socket.assigns.room
-      other_players = RoomHelpers.load_other_players(room.id, socket.assigns.player.id)
-      push(socket, "players_update", %{players: Serializers.serialize_players(other_players)})
-    end
-
-    {:noreply, socket}
+    PubSubEvents.handle_player_left(socket, player_id, player_name, direction)
   end
 
   def handle_info({:player_says, player_id, player_name, message}, socket) do
-    if player_id != socket.assigns.player.id do
-      push(socket, "event", %{text: "#{player_name} says, \"#{message}\""})
-    end
-
-    {:noreply, socket}
+    PubSubEvents.handle_player_says(socket, player_id, player_name, message)
   end
 
   def handle_info({:player_shouts, player_id, player_name, message}, socket) do
-    if player_id != socket.assigns.player.id do
-      push(socket, "event", %{text: "#{player_name} shouts, \"#{message}\""})
-    end
-
-    {:noreply, socket}
+    PubSubEvents.handle_player_shouts(socket, player_id, player_name, message)
   end
 
-  def handle_info({:atmosphere_changed, _}, socket) do
-    room = socket.assigns.room
-    character = socket.assigns.character
-    atmosphere = Atmosphere.describe_for_room(room)
-    player_compat = %{equipped: Entity.get_component(character, "equipment") || %{}}
-    visual_state = Serializers.serialize_visual_state(room: room, player: player_compat)
-    sound_state = Serializers.serialize_sound_state(room: room, player: player_compat)
-
-    push(socket, "atmosphere_update", %{
-      atmosphere: atmosphere,
-      calendar: nil,
-      visual_state: visual_state,
-      sound_state: sound_state
-    })
-
-    {:noreply, socket}
+  def handle_info({:atmosphere_changed, _} = msg, socket) do
+    PubSubEvents.handle_atmosphere_changed(socket, msg)
   end
 
-  # NPC and Room ambient messages (deduplicated per room visit)
   def handle_info({:ambient_message, text}, socket) do
-    seen = socket.assigns[:seen_ambient] || MapSet.new()
-
-    if MapSet.member?(seen, text) do
-      # Already seen this message in current room, skip it
-      {:noreply, socket}
-    else
-      push(socket, "event", %{text: text, type: "ambient"})
-      {:noreply, assign(socket, :seen_ambient, MapSet.put(seen, text))}
-    end
+    PubSubEvents.handle_ambient_message(socket, text)
   end
 
   def handle_info({:resources_updated, pools}, socket) do
-    push(socket, "resources_update", %{resources: Serializers.serialize_resources(pools)})
-    {:noreply, socket}
+    PubSubEvents.handle_resources_updated(socket, pools)
   end
 
-  def handle_info({:session_message, {:room_message, text}}, socket) do
-    push(socket, "event", %{text: text})
-    {:noreply, socket}
+  def handle_info({:session_message, message}, socket) do
+    PubSubEvents.handle_session_message(socket, message)
   end
 
-  def handle_info({:session_message, {:announcement, text}}, socket) do
-    push(socket, "event", %{text: "[Announcement] #{text}"})
-    {:noreply, socket}
-  end
-
-  def handle_info({:session_message, {:force_disconnect, reason}}, socket) do
-    push(socket, "force_disconnect", %{reason: reason})
-    {:stop, :normal, socket}
-  end
-
-  def handle_info({:session_message, {:timer_completed, data}}, socket) do
-    push(socket, "timer_completed", data)
-    {:noreply, socket}
-  end
-
-  def handle_info({:session_message, {:broadcast_message, text, type}}, socket) do
-    push(socket, "broadcast", %{text: text, type: Atom.to_string(type)})
-    {:noreply, socket}
-  end
-
-  # =============================================================================
-  # Combat Tick Handler
-  # =============================================================================
-
-  def handle_info(:combat_tick, socket) do
-    case ActionBridge.execute(socket, :combat_tick, %{}) do
-      {:ok, socket} -> {:noreply, socket}
-      {:error, _reason, socket} -> {:noreply, socket}
-    end
-  end
-
-  # =============================================================================
-  # Death Handlers
-  # =============================================================================
+  def handle_info(:combat_tick, socket), do: PubSubEvents.handle_combat_tick(socket)
 
   def handle_info({:die, killer_name}, socket) do
-    case ActionBridge.execute(socket, :die, %{killer_name: killer_name}) do
-      {:ok, socket} -> {:noreply, socket}
-      {:error, _reason, socket} -> {:noreply, socket}
-    end
+    PubSubEvents.handle_die(socket, killer_name)
   end
 
-  def handle_info({:player_emotes, player_id, _player_name, text}, socket) do
-    if player_id != socket.assigns.player.id do
-      push(socket, "event", %{text: text})
-    end
-
-    {:noreply, socket}
+  def handle_info({:player_emotes, player_id, player_name, text}, socket) do
+    PubSubEvents.handle_player_emotes(socket, player_id, player_name, text)
   end
 
-  def handle_info({:player_emotes_at, player_id, _target_id, _player_name, text}, socket) do
-    if player_id != socket.assigns.player.id do
-      push(socket, "event", %{text: text})
-    end
-
-    {:noreply, socket}
+  def handle_info({:player_emotes_at, player_id, target_id, player_name, text}, socket) do
+    PubSubEvents.handle_player_emotes_at(socket, player_id, target_id, player_name, text)
   end
 
-  # Debug screenshot request - forward to client
-  def handle_info(:capture_screenshot, socket) do
-    Logger.info("[Screenshot] Pushing capture_screenshot event to client")
-    push(socket, "capture_screenshot", %{})
-    {:noreply, socket}
-  end
+  def handle_info(:capture_screenshot, socket), do: PubSubEvents.handle_capture_screenshot(socket)
 
   # =============================================================================
   # AI Streaming Events (from Loka.AI.Conversation engine)
   # =============================================================================
 
   def handle_info({:ai_text_delta, _text} = event, socket) do
-    BuilderAI.handle_ai_event(event, socket)
+    PubSubEvents.handle_ai_event(socket, event)
   end
 
   def handle_info({:ai_tool_use_raw, _name, _id, _input} = event, socket) do
-    BuilderAI.handle_ai_event(event, socket)
+    PubSubEvents.handle_ai_event(socket, event)
   end
 
   def handle_info({:ai_done_raw, _response} = event, socket) do
-    BuilderAI.handle_ai_event(event, socket)
+    PubSubEvents.handle_ai_event(socket, event)
   end
 
   def handle_info({:ai_done} = event, socket) do
-    BuilderAI.handle_ai_event(event, socket)
+    PubSubEvents.handle_ai_event(socket, event)
   end
 
   def handle_info({:ai_error, _reason} = event, socket) do
-    BuilderAI.handle_ai_event(event, socket)
+    PubSubEvents.handle_ai_event(socket, event)
   end
 
   def handle_info({:ai_tool_use, _name, _id, _input, _result} = event, socket) do
-    BuilderAI.handle_ai_event(event, socket)
+    PubSubEvents.handle_ai_event(socket, event)
   end
 
-  def handle_info(:ai_timeout, socket) do
-    BuilderAI.handle_ai_event(:ai_timeout, socket)
-  end
+  def handle_info(:ai_timeout, socket), do: PubSubEvents.handle_ai_event(socket, :ai_timeout)
 
-  def handle_info(:ai_retry, socket) do
-    BuilderAI.handle_ai_retry(socket)
-  end
+  def handle_info(:ai_retry, socket), do: PubSubEvents.handle_ai_retry(socket)
 
   # Catch-all for unhandled messages
   def handle_info(_msg, socket) do
@@ -1301,9 +1017,6 @@ defmodule LokaWeb.GameChannel do
   # Private Helpers
   # =============================================================================
 
-  # NOTE: Navigation, inventory, equipment logic moved to Loka.Game.Actions
-  # GameChannel now uses ActionBridge.execute/3 for these actions
-
   defp dispatch_action(socket, action, params) do
     case ActionBridge.execute(socket, action, params) do
       {:ok, socket} -> {:reply, :ok, socket}
@@ -1320,16 +1033,6 @@ defmodule LokaWeb.GameChannel do
   end
 
   defp find_entity(_room, _id, _type), do: nil
-
-  # V2: Extract health from character entity's resources component
-  defp get_character_health(character) do
-    resources = Entity.get_component(character, "resources") || %{}
-
-    case resources["health"] do
-      %{"current" => current, "max" => max} -> %{"current" => current, "max" => max}
-      _ -> %{"current" => 100, "max" => 100}
-    end
-  end
 
   defp player_display_name(player) when is_map(player) do
     player.name || player.email || "Unknown"
@@ -1358,26 +1061,4 @@ defmodule LokaWeb.GameChannel do
   end
 
   defp update_result_socket_for_rate_limit(other), do: other
-
-  # NOTE: Death, Shop, Container, Gathering/Crafting, and Emote/Social helpers
-  # moved to Loka.Game.Actions.* modules
-
-  # Deliver completed timers that occurred while player was offline
-  defp deliver_offline_timers(socket, player_id) do
-    completed_timers = Loka.Timers.get_completed_undelivered(player_id)
-
-    if completed_timers != [] do
-      Enum.each(completed_timers, fn timer ->
-        push(socket, "timer_completed", %{
-          timer_id: timer.id,
-          timer_type: timer.timer_type,
-          data: timer.data,
-          scheduled_at: timer.scheduled_at,
-          completed_at: timer.completed_at
-        })
-      end)
-
-      Loka.Timers.mark_delivered(completed_timers)
-    end
-  end
 end
