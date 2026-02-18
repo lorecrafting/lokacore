@@ -74,6 +74,11 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends libstdc++6 openssl libncurses6 locales ca-certificates gosu sqlite3 \
   && rm -rf /var/lib/apt/lists/*
 
+# Install litestream for continuous SQLite replication
+ARG LITESTREAM_VERSION=0.3.13
+ADD https://github.com/benbjohnson/litestream/releases/download/v${LITESTREAM_VERSION}/litestream-v${LITESTREAM_VERSION}-linux-amd64.tar.gz /tmp/litestream.tar.gz
+RUN tar -xzf /tmp/litestream.tar.gz -C /usr/local/bin/ && rm /tmp/litestream.tar.gz
+
 # Set the locale
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen \
   && locale-gen
@@ -100,7 +105,12 @@ COPY scripts/backup_db.sh /app/scripts/backup_db.sh
 COPY scripts/restore_db.sh /app/scripts/restore_db.sh
 RUN chmod +x /app/scripts/*.sh
 
+# Copy litestream entrypoint and config
+COPY litestream.sh /app/litestream.sh
+COPY config/litestream.yml /etc/litestream.yml
+RUN chmod +x /app/litestream.sh
+
 # Use entrypoint that fixes volume permissions and drops to nobody user for security
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
-CMD ["/app/bin/server"]
+CMD ["/app/litestream.sh", "/app/bin/server"]
