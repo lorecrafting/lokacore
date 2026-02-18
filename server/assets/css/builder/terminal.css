@@ -24,6 +24,7 @@
 }
 .term-link:hover { color: var(--wb-accent-hover); text-decoration-color: var(--wb-accent-hover); }
 .term-link:active { opacity: 0.7; }
+.terminal-line.minimap { line-height: 0.7; padding: 0; margin: 0; }
 .minimap .term-link { text-decoration: none; }
 .term-actions { color: var(--wb-text-dim); }
 

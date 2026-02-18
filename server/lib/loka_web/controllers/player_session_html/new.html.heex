@@ -19,9 +19,10 @@
 
     <.form :let={f} for={@form} as={:player} action={~p"/players/log-in"} class="admin-auth-form">
       <div class="admin-form-group">
-        <label class="admin-label">Your email address</label>
+        <label class="admin-label" for={f[:email].id}>Your email address</label>
         <input
           type="email"
+          id={f[:email].id}
           name={f[:email].name}
           value={if Mix.env() == :dev, do: "admin@loka.local", else: f[:email].value}
           class="admin-input"
@@ -33,9 +34,12 @@
       </div>
 
       <div class="admin-form-group">
-        <label class="admin-label">Password (optional - leave blank for magic link)</label>
+        <label class="admin-label" for={f[:password].id}>
+          Password (optional - leave blank for magic link)
+        </label>
         <input
           type="password"
+          id={f[:password].id}
           name={f[:password].name}
           value={if Mix.env() == :dev, do: "adminadmin12", else: f[:password].value}
           class="admin-input"

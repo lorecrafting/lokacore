@@ -61,7 +61,9 @@ defmodule LokaWeb.AdminLive.BuilderLive do
 
             <div class="flex items-center border-t border-base-content/10 bg-base-300 px-3 py-1.5 shrink-0">
               <span id="term-connection-dot" class="term-connection-dot connecting"></span>
-              <span class="text-green-400 mr-2 select-none font-bold font-mono">&gt;</span>
+              <span id="term-prompt" class="text-green-400 mr-2 select-none font-bold font-mono">
+                &gt;
+              </span>
               <input
                 type="text"
                 class="flex-1 bg-transparent border-none text-base-content font-mono text-[13px] outline-none placeholder:text-base-content/30"
@@ -69,6 +71,7 @@ defmodule LokaWeb.AdminLive.BuilderLive do
                 placeholder="Enter command..."
                 autocomplete="off"
                 phx-update="ignore"
+                aria-label="Command input"
               />
             </div>
           </div>
