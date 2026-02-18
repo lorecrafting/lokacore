@@ -1020,6 +1020,9 @@ defmodule LokaWeb.GameChannel do
     Logger.metadata(session_id: session_id, player_id: player.id)
     Session.update_room(player.id, room.id)
 
+    # Emit login telemetry (drives active_players counter via PromEx polling)
+    :telemetry.execute([:loka, :game, :player_login], %{count: 1}, %{player_id: player.id})
+
     # Broadcast player entered
     Phoenix.PubSub.broadcast(
       Loka.PubSub,

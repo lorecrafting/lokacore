@@ -103,9 +103,11 @@ defmodule Loka.PromEx.GamePlugin do
   end
 
   defp count_active_game_sessions do
-    # Count active GameChannel connections
-    # Returns 0 for now - accurate counting requires tracking in GameChannel
-    0
+    try do
+      Loka.Session.Registry.online_count()
+    rescue
+      _ -> 0
+    end
   end
 
   defp count_active_entities do
