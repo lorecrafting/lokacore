@@ -38,6 +38,7 @@ defmodule Loka.Framework.Combat do
   alias Loka.Components.Combatant
   # DamageMessage was deleted in V2 — inline message generation below
   alias Loka.Mechanics.{Damage, Check}
+  alias Loka.Config.Balance
 
   # =============================================================================
   # Combat Initialization
@@ -209,7 +210,8 @@ defmodule Loka.Framework.Combat do
 
   defp execute_enemy_attack_silent(combat_state, character) do
     agility_level = get_skill_level(character, "agility")
-    dodge_chance = min(30, agility_level * 2)
+    dodge_cap = Balance.get(:combat_stats, :dodge, :cap, default: 20)
+    dodge_chance = min(dodge_cap, agility_level * 2)
 
     dodge_success =
       if dodge_chance > 0 do
@@ -487,7 +489,9 @@ defmodule Loka.Framework.Combat do
       {:error, :on_cooldown}
     else
       enemy_level = combat_state.enemy.level || 1
-      flee_chance = max(20, 60 - enemy_level * 3)
+      flee_base = Balance.get(:combat_round, :flee_base_chance, default: 60)
+      flee_level_penalty = Balance.get(:abilities, :flee, :level_penalty, default: 3)
+      flee_chance = max(20, flee_base - enemy_level * flee_level_penalty)
 
       {:ok, result, _audit} = Check.percent(flee_chance)
 
@@ -578,7 +582,11 @@ defmodule Loka.Framework.Combat do
       }
 
       {:ok, base_damage, _audit} = Damage.calculate(context, defense: enemy_def)
-      final_damage = trunc(base_damage * 1.5)
+
+      power_strike_multiplier =
+        Balance.get(:abilities, :power_strike, :damage_multiplier, default: 1.5)
+
+      final_damage = trunc(base_damage * power_strike_multiplier)
 
       current_hp =
         get_in(combat_state.enemy.health, ["current"]) ||
