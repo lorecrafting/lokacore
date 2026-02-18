@@ -321,6 +321,20 @@ defmodule Loka.WorldBuilder.AnthropicClient do
     %{state | stop_reason: reason}
   end
 
+  defp process_event(%{"type" => "message_start", "message" => %{"usage" => usage}}, state, _, _) do
+    cache_created = usage["cache_creation_input_tokens"] || 0
+    cache_read = usage["cache_read_input_tokens"] || 0
+    input = usage["input_tokens"] || 0
+
+    if cache_read > 0 or cache_created > 0 do
+      Logger.info(
+        "[AnthropicClient] Cache: #{cache_read} read, #{cache_created} created, #{input} uncached input tokens"
+      )
+    end
+
+    state
+  end
+
   defp process_event(_, state, _, _), do: state
 
   defp extract_retry_after(headers) when is_map(headers) do

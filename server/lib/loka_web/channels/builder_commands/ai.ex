@@ -17,7 +17,7 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
 
   @max_desc_length 300
 
-  @max_retries 3
+  @max_retries 5
 
   # Cache system prompt at compile time to avoid reading from disk on every AI call
   @system_prompt_path Path.join(:code.priv_dir(:loka), "world_builder/system_prompt.md")
@@ -173,7 +173,12 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
 
     if conversation do
       conversation = Conversation.handle_done(conversation, response)
-      socket = assign(socket, :ai_conversation, conversation)
+
+      socket =
+        socket
+        |> assign(:ai_conversation, conversation)
+        |> assign(:ai_retry_count, 0)
+
       {:noreply, socket}
     else
       {:noreply, socket}
@@ -182,6 +187,7 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
 
   def handle_ai_event({:ai_done}, socket) do
     socket = finish_ai_streaming(socket)
+    socket = assign(socket, :ai_retry_count, 0)
     push(socket, "ai_stream_done", %{})
     {:noreply, socket}
   end
@@ -190,22 +196,30 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
     retries = socket.assigns[:ai_retry_count] || 0
 
     if rate_limited?(reason) and retries < @max_retries do
-      backoff_ms = 2_000 * Integer.pow(2, retries)
+      backoff_ms = max(parse_retry_after(reason) * 1_000, 2_000 * Integer.pow(2, retries))
 
       Logger.warning(
         "[BuilderAI] Rate limited (429), retry #{retries + 1}/#{@max_retries} after #{backoff_ms}ms"
       )
 
-      push(socket, "ai_stream_text", %{
+      push(socket, "ai_stream_delta", %{
         text: "\n[Rate limited, retrying in #{div(backoff_ms, 1000)}s...]\n"
       })
 
       Process.send_after(self(), :ai_retry, backoff_ms)
+
+      # Reset the timeout timer so retry waits don't eat into the budget.
+      # The new timeout starts after the retry fires.
+      socket = cancel_ai_timeout(socket)
+      timer_ref = Process.send_after(self(), :ai_timeout, backoff_ms + @ai_timeout_ms)
+      socket = assign(socket, :ai_timeout_ref, timer_ref)
+
       {:noreply, assign(socket, :ai_retry_count, retries + 1)}
     else
       socket = finish_ai_streaming(socket)
       socket = assign(socket, :ai_retry_count, 0)
       push(socket, "ai_stream_error", %{error: reason})
+      push(socket, "ai_stream_done", %{})
       {:noreply, socket}
     end
   end
@@ -571,6 +585,15 @@ defmodule LokaWeb.Channels.BuilderCommands.AI do
 
   defp rate_limited?(reason) when is_binary(reason), do: String.contains?(reason, "429")
   defp rate_limited?(_), do: false
+
+  defp parse_retry_after(reason) when is_binary(reason) do
+    case Regex.run(~r/retry after (\d+)s/, reason) do
+      [_, secs] -> String.to_integer(secs)
+      _ -> 0
+    end
+  end
+
+  defp parse_retry_after(_), do: 0
 
   defp finish_ai_streaming(socket) do
     socket
