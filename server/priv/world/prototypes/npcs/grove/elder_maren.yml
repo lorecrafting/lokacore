@@ -61,6 +61,12 @@ components:
           action: ["complete_quest", "grove_epilogue"]
           next: epilogue_complete
 
+        - text: "I'd like to see the records."
+          show_if:
+            quest_active: grove_revelation
+            flag_not_set: maren_records_shown
+          next: records_offer
+
         - text: "How are you?"
           next: maren_how_are_you
 
@@ -150,6 +156,7 @@ components:
       text: "She found what's beyond all the roots. There's no word for it. There doesn't need to be."
       choices:
         - text: "Thank you, Elder."
+          action: ["teleport", "planet_awakening_clearing"]
           next: null
 
     # ---- grove_revelation dialogue_topic nodes ----
@@ -248,6 +255,111 @@ components:
         - text: "(I need to think about this)"
           next: null
 
+    # ---- side_brennan dialogue_topic node ----
+
+    seren_records:
+      show_if:
+        quest_active: side_brennan
+      text: "You're asking about Brennan."
+      choices:
+        - text: "He mentioned losing someone thirty years ago."
+          next: seren_records_2
+        - text: "He told me to come to you."
+          next: seren_records_2
+
+    seren_records_2:
+      text: "Seren."
+      next: seren_records_3
+
+    seren_records_3:
+      text: "She was the Rootspeaker before Thera. We don't speak of her — Brennan asked us not to, forty years ago, and I've honored that. But since you've come looking, I'll give you the shape of it."
+      choices:
+        - text: "Please."
+          next: seren_records_4
+
+    seren_records_4:
+      text: "She understood what was being asked of her. She went to the Heartroot. She chose the second root — rest, not remaining — because she loved the Grove but also loved Brennan, and she couldn't find a way to hold both. Choosing rest meant she dissolved without remaining as a Heart. She's not here, the way Lira is here. She's simply... gone."
+      choices:
+        - text: "And Brennan has carried that alone since."
+          next: seren_records_5
+
+    seren_records_5:
+      text: "Before I was Elder. He has never spoken her name in my presence. Not once. The badge is hers — she gave it to him the last morning."
+      choices:
+        - text: "Where would she have left a mark? Something of hers still here."
+          next: seren_records_6
+
+    seren_records_6:
+      text: "The Watcher's Post. She stood that watch with him in the last year. There's something carved on the bark of the boundary tree — initials, I think. I noticed it once and never asked. It wasn't mine to ask about."
+      choices:
+        - text: "(I'll find it)"
+          next: null
+
+    # ---- records room / star map ----
+
+    records_offer:
+      text: "The archive. Yes. You've earned that."
+      next: records_offer_2
+
+    records_offer_2:
+      text: "*She leads you to a door at the back of the study and unlocks it with a key on a cord at her waist. Inside: floor to ceiling bound records, and on the far wall, a large navigation chart pinned with careful notation.*"
+      choices:
+        - text: "The star map."
+          action: ["set_flag", "maren_records_shown"]
+          next: star_map_look
+
+    star_map_look:
+      text: "*She points to a mark near the outer arc of the chart — a small black circle, set apart from any other notation. The ink is older than everything around it.*"
+      choices:
+        - text: "What is that mark?"
+          next: star_map_quiet
+
+    star_map_quiet:
+      text: "We call it the Quiet. That is where Seren chose to rest. The Pulse there still carries a faint difference — she is still present in the way a sound is present after the bell stops. Not gone. Simply no longer speaking."
+      choices:
+        - text: "She's still with us?"
+          next: star_map_still
+        - text: "How did the ship know exactly where?"
+          next: star_map_how
+
+    star_map_still:
+      text: "In the way light is still here after the candle goes out. Yes. She chose rest, not absence. We carry her forward. She cannot answer."
+      choices:
+        - text: "Brennan doesn't know this."
+          next: star_map_brennan_silent
+
+    star_map_brennan_silent:
+      text: "No. He has stood his watch for thirty years — over that place, without knowing what the mark means. I have chosen not to tell him. It was not mine to give."
+      choices:
+        - text: "Maybe it should be."
+          next: star_map_brennan_maybe
+        - text: "I understand."
+          next: null
+
+    star_map_brennan_maybe:
+      text: "Perhaps. Now that the truth has come out... perhaps the time has passed for keeping that particular silence."
+      choices:
+        - text: "(Leave)"
+          next: null
+
+    star_map_how:
+      text: "The ship records candidates who choose rest rather than remaining. Lira added the notation herself. She wanted us to understand: the difference is not moral. It is a matter of what you find when the boundary dissolves."
+      choices:
+        - text: "What Seren found."
+          next: star_map_seren_found
+
+    star_map_seren_found:
+      text: "Peace. Rest. She had wanted it so badly, for so long. There is no shame in it. She bought thirty years and she left Brennan something to guard. Both of those things are real."
+      choices:
+        - text: "The badge."
+          next: star_map_badge
+
+    star_map_badge:
+      text: "'Guard the truth until the right person comes.' She knew. And she was right — you came."
+      choices:
+        - text: "(Leave)"
+          next: null
+
     # ---- grove_epilogue dialogue_topic nodes ----
 
     after_sacrifice:
@@ -282,9 +394,16 @@ emotes:
   idle: "*reviews the records with careful attention*"
   dawn: "*stands at the study window watching the Grove wake*"
   worried: "*closes her eyes briefly, hands folded*"
+  comparing: "*traces a finger along a page, comparing two passages*"
+  evening: "*stands in the study doorway, watching the Grove settle for the night*"
+  heavy: "*sets down the record she's holding and breathes slowly before continuing*"
 
 traits:
   - script: day_night_schedule
     config:
       wake_at: dawn
       sleep_at: dusk
+  - script: ambient_emitter
+    config:
+      interval: 85
+      emotes: [idle, dawn, worried, comparing, evening, heavy]

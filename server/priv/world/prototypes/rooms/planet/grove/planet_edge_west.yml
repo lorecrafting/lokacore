@@ -1,0 +1,11 @@
+key: planet_edge_west
+type: room
+parent: base_room
+short_desc: "The Western Opening"
+extra_desc: |
+  The western section of the old boundary. The grove wall is visible here as a physical thing — roots and soil exposed where the membrane seal pulled away. The planet's wind comes from the west. Cold, dry, carrying dust that is not grove dust. The barren begins just past the root line.
+exits:
+  east: planet_the_edge
+  west: western_threshold
+tags:
+  - outdoor

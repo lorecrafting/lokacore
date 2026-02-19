@@ -1,0 +1,13 @@
+key: planet_training_grove
+type: room
+parent: base_room
+short_desc: "The Training Grove"
+extra_desc: |
+  Where she taught. The practice forms she walked you through are still visible in the worn paths between the roots. The grove records use. Kira uses this space now, in the mornings, before she goes to the blight line. She does not talk about why.
+exits:
+  east: planet_healing_grove
+tags:
+  - outdoor
+  - safe_zone
+spawns:
+  - prototype: tomas

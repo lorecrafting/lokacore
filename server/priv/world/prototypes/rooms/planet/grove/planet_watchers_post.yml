@@ -1,0 +1,13 @@
+key: planet_watchers_post
+type: room
+parent: base_room
+short_desc: "The Watchers Post"
+extra_desc: |
+  Brennan's post, where he watched the membrane for thirty years. The equipment is still here. The numbers on the monitoring log for the last day read differently from every other day — not stress readings. The membrane releasing. He has left a note on the equipment: "I was right. It was worth watching." Beneath it, in older ink: "She was here."
+exits:
+  south: planet_edge_east
+tags:
+  - outdoor
+  - safe_zone
+spawns:
+  - prototype: brennan

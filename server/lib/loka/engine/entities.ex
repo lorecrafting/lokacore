@@ -85,6 +85,17 @@ defmodule Loka.Engine.Entities do
           schema -> {:ok, EntitySchema.to_entity(schema)}
         end
 
+      opts[:key] && not is_nil(opts[:is_prototype]) ->
+        EntitySchema
+        |> where([e], e.key == ^opts[:key] and e.is_prototype == ^opts[:is_prototype])
+        |> limit(1)
+        |> Repo.one()
+        |> maybe_preload_tags()
+        |> case do
+          nil -> {:error, :not_found}
+          schema -> {:ok, EntitySchema.to_entity(schema)}
+        end
+
       opts[:account_id] ->
         EntitySchema
         |> where([e], e.account_id == ^opts[:account_id])
@@ -349,10 +360,16 @@ defmodule Loka.Engine.Entities do
   @spec get_entity!(String.t()) :: EntitySchema.t()
   def get_entity!(id), do: Repo.get!(EntitySchema, id) |> Repo.preload(:tags)
 
-  @doc "V1 compat — gets entity schema by key (first match)."
+  @doc "V1 compat — gets entity schema by key. When both a prototype and an instance exist
+  with the same key (the normal V2 pattern for spawned NPCs), returns the instance."
   @spec get_entity_by_key(String.t()) :: EntitySchema.t() | nil
   def get_entity_by_key(key) when is_binary(key) do
-    case Repo.get_by(EntitySchema, key: key) do
+    EntitySchema
+    |> where([e], e.key == ^key)
+    |> order_by([e], asc: e.is_prototype)
+    |> limit(1)
+    |> Repo.one()
+    |> case do
       nil -> nil
       schema -> Repo.preload(schema, :tags)
     end

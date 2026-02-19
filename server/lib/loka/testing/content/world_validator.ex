@@ -193,7 +193,7 @@ defmodule Loka.Testing.Content.WorldValidator do
   defp bfs_rooms(nil, _valid_rooms), do: {MapSet.new(), []}
 
   defp bfs_rooms(starting_key, valid_rooms) do
-    case Entities.find_one(key: starting_key) do
+    case Entities.find_one(key: starting_key, type: :room) do
       {:error, :not_found} ->
         {MapSet.new(), []}
 
@@ -215,7 +215,7 @@ defmodule Loka.Testing.Content.WorldValidator do
         if MapSet.member?(visited, room_key) do
           do_bfs(queue, visited, errors, valid_rooms)
         else
-          case Entities.find_one(key: room_key) do
+          case Entities.find_one(key: room_key, type: :room) do
             {:error, :not_found} ->
               # This shouldn't happen if we're only queuing valid rooms
               do_bfs(queue, MapSet.put(visited, room_key), errors, valid_rooms)

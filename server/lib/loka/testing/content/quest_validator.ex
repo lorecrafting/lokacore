@@ -282,7 +282,7 @@ defmodule Loka.Testing.Content.QuestValidator do
   defp validate_dialogue_topic(_quest_key, _target_key, nil), do: {[], []}
 
   defp validate_dialogue_topic(quest_key, target_key, topic) when is_binary(target_key) do
-    case Entities.find_one(key: target_key) do
+    case Entities.find_one(key: target_key, is_prototype: true) do
       {:ok, proto} ->
         dialogue_tree =
           get_in(proto.components || %{}, ["dialogue_tree"]) || %{}

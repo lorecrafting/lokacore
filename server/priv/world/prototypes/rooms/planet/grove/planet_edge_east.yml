@@ -1,0 +1,12 @@
+key: planet_edge_east
+type: room
+parent: base_room
+short_desc: "The Eastern Opening"
+extra_desc: |
+  The eastern section of what was the membrane boundary. The horizon is visible from here — the planet's horizon, further than the membrane ever showed. The barren stretches east. In the distance, something that might be a formation or might be a structure. Too far to tell yet.
+exits:
+  west: planet_the_edge
+  east: eastern_threshold
+  north: planet_watchers_post
+tags:
+  - outdoor

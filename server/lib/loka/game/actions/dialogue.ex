@@ -357,6 +357,44 @@ defmodule Loka.Game.Actions.Dialogue do
     handle_dialogue_action(character, {:offer_quest, quest_id})
   end
 
+  defp handle_dialogue_action(character, ["teleport", room_key]) do
+    handle_dialogue_action(character, {:teleport, room_key})
+  end
+
+  defp handle_dialogue_action(character, {:teleport, room_key}) do
+    alias Loka.Engine.Entities
+    alias Loka.Framework.World.RoomLoader
+    alias Loka.Framework.World.Atmosphere
+
+    case Entities.get_entity_by_key(room_key) do
+      nil ->
+        require Logger
+        Logger.warning("[DIALOGUE] Teleport failed: room '#{room_key}' not found")
+        {character, []}
+
+      room_entity ->
+        case RoomLoader.load_room_for_display(room_entity.id) do
+          {:ok, room} ->
+            new_character = %{character | location_id: room.id}
+
+            events = [
+              {:room_changed,
+               %{
+                 room: Serializers.serialize_room(room),
+                 atmosphere: Atmosphere.describe_for_room(room)
+               }}
+            ]
+
+            {new_character, events}
+
+          {:error, _} ->
+            require Logger
+            Logger.warning("[DIALOGUE] Teleport failed: could not load room '#{room_key}'")
+            {character, []}
+        end
+    end
+  end
+
   defp handle_dialogue_action(character, _unknown_action), do: {character, []}
 
   defp format_quest_rewards(rewards) do

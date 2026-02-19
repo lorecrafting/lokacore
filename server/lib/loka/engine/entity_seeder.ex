@@ -145,9 +145,21 @@ defmodule Loka.Engine.EntitySeeder do
   end
 
   defp preload_existing_entities do
+    # Prefer prototypes over instances: if both share a key+type, the prototype wins.
+    # Without this, instances overwrite prototypes in the map and EntitySeeder
+    # skips YAML updates (thinking the entity is an instance).
     Entities.find_all([])
     |> Enum.reduce(%{}, fn entity, acc ->
-      Map.put(acc, {entity.key, entity.type}, entity)
+      key = {entity.key, entity.type}
+
+      case Map.get(acc, key) do
+        %{is_prototype: true} ->
+          # Prototype already in map — don't overwrite with an instance
+          acc
+
+        _ ->
+          Map.put(acc, key, entity)
+      end
     end)
   end
 

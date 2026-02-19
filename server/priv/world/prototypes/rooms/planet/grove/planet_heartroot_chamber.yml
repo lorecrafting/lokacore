@@ -1,0 +1,11 @@
+key: planet_heartroot_chamber
+type: room
+parent: base_room
+short_desc: "The Heartroot Chamber"
+extra_desc: |
+  Where she went. Where Lira went before her. The chamber is quiet in a way the rest of the grove is not — the Pulse is loudest here and also most still, like the center of something large. If you listen, there is something that is not quite sound. It has always been there. You only know now what to call it.
+exits:
+  up: planet_the_deep
+tags:
+  - underground
+  - indoor

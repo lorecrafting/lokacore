@@ -367,7 +367,7 @@ defmodule Loka.Framework.Quest.Validator do
     topic = Map.get(obj, :dialogue_topic) || Map.get(obj, "dialogue_topic")
 
     if obj_type == :talk and not is_nil(topic) and topic != "" do
-      case Entities.find_one(key: target_id) do
+      case Entities.find_one(key: target_id, is_prototype: true) do
         {:ok, entity} ->
           dialogue_tree = get_dialogue_tree(entity)
 

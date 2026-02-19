@@ -1,0 +1,11 @@
+key: planet_small_grove
+type: room
+parent: base_room
+short_desc: "The Small Grove"
+extra_desc: |
+  The place she only showed you. It is unchanged. The same quality of light, the same quiet. You understand now why it felt like shelter: it was designed to. The grove built this pocket on purpose, for whoever needed it. She knew. She brought you here anyway.
+exits:
+  south: planet_healing_grove
+tags:
+  - outdoor
+  - safe_zone

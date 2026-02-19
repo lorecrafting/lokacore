@@ -81,6 +81,11 @@ defmodule Mix.Tasks.Loka.Test.Validate do
     # Start the application to load prototypes
     Mix.Task.run("app.start")
 
+    # Force-seed from YAML so validators see fresh prototype data.
+    # EntitySeeder skips seeding in :test env by default, but validators
+    # need up-to-date DB state (NPC dialogue trees, room exits, etc.).
+    Loka.Engine.EntitySeeder.seed()
+
     only = parse_list(opts[:only])
     skip = parse_list(opts[:skip])
     strict = opts[:strict] || false

@@ -1,0 +1,11 @@
+key: planet_awakening_clearing
+type: room
+parent: base_room
+short_desc: "The Landing Ground"
+extra_desc: |
+  The clearing where you first woke. The sky above is real — clouds moving, wind from somewhere off the ship's edge. The trees are the same. The silence is different: no membrane hum. The grove is on the planet now. So are you.
+exits:
+  north: planet_heartwood_spring
+tags:
+  - outdoor
+  - safe_zone

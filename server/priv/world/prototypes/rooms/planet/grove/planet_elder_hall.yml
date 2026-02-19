@@ -1,0 +1,14 @@
+key: planet_elder_hall
+type: room
+parent: base_room
+short_desc: "The Elder Hall"
+extra_desc: |
+  The hall where the council met and did not tell you. Where Elder Maren decided, again, to carry the weight alone. The carved seat at the head of the hall is empty. She is sitting in the second seat now, the same one she always used when she was thinking rather than presiding.
+exits:
+  south: planet_heartwood
+  north: planet_the_deep
+tags:
+  - outdoor
+  - safe_zone
+spawns:
+  - prototype: elder_maren

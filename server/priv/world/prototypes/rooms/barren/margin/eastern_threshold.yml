@@ -1,0 +1,13 @@
+key: eastern_threshold
+type: room
+parent: base_room
+short_desc: "The Eastern Threshold"
+extra_desc: |
+  The hull stress fractures are visible from here — long horizontal cracks that run east to west along the ship's outer skin where it met the ground. They are not new. The corrosion along their edges says centuries. Whatever pressure caused them was not the landing — this happened long before, during the long stillness, the ship straining against itself. Not dangerous. Just the evidence that holding still this long is not the same as being at rest.
+
+exits:
+  west: planet_edge_east
+  north: margin_rootline
+
+tags:
+  - outdoor
