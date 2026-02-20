@@ -1,0 +1,67 @@
+key: thera_presence
+type: npc
+parent: base_npc
+short_desc: "Thera's Presence"
+long_desc: "The air here hums with something that is not sound. A warmth, a weight, a quality of attention that you recognize."
+extra_desc: |
+  She is not here in the way a person is here. But the roots are full of light. The Pulse carries a rhythm you know — the way she breathed when she was concentrating, the cadence of her voice when she was teaching. It is not memory. It is current. She is paying attention to this room, right now, and you can feel it.
+keywords: [thera, presence, pulse, voice]
+primary_keyword: thera
+
+components:
+  combatant:
+    health:
+      current: 999
+      max: 999
+    stats:
+      str: 1
+      dex: 1
+      sta: 1
+    level: 1
+
+  ai:
+    aggression: friendly
+    wander: false
+
+  dialogue_tree:
+    start:
+      text: |
+        The warmth intensifies. The roots around you pulse once, slowly, like a breath. Not a greeting — a recognition. She knows you are here.
+      choices:
+        - text: "(Touch the root)"
+          next: presence_speaks
+
+    presence_speaks:
+      show_if: { quest_active: grove_epilogue }
+      text: |
+        The Pulse deepens. Not words — you do not hear words. But something settles into your awareness the way warmth settles into cold hands. A meaning without language:
+
+        I found the part of me that loves you all. It is the whole thing. I am not less than I was. I am more.
+      choices:
+        - text: "(Listen)"
+          next: presence_speaks_2
+
+    presence_speaks_2:
+      text: |
+        The roots dim slightly, then brighten. A rhythm — almost playful. The quality of attention you remember from the training grove, when she was about to say something she thought was funny and important at the same time.
+
+        The love did not get smaller. It got bigger. That is the trick. That is the third root and what is past it.
+      choices:
+        - text: "I will listen for you."
+          next: presence_speaks_3
+
+    presence_speaks_3:
+      text: |
+        A pulse. Warm. Steady. The specific pressure of someone squeezing your hand who cannot squeeze your hand anymore but is doing it anyway, somehow, through root and soil and the whole living system of a grove that used to be a ship and is now a world.
+
+        She does not say goodbye. She says: listen.
+      choices:
+        - text: "(You will)"
+          next: null
+
+    post_landing:
+      text: |
+        The roots pulse gently. A steady warmth. She is here. She is always here.
+      choices:
+        - text: "(Listen)"
+          next: null

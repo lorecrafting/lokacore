@@ -1,0 +1,30 @@
+key: planet_tomas
+type: npc
+parent: tomas
+short_desc: "Tomas"
+
+components:
+  dialogue_tree:
+    epilogue_tomas:
+      show_if: { quest_active: grove_epilogue }
+      text: |
+        He is sitting beside the memorial stone, one hand resting on its surface. Not talking to it — listening. When you sit beside him he does not startle. He knew you were coming.
+      choices:
+        - text: "(Sit with him)"
+          next: epilogue_tomas_2
+
+    epilogue_tomas_2:
+      text: |
+        "She is here, you know." He does not look up. His hand moves slowly across the stone's surface. "She never left. That is what I have been trying to tell everyone."
+      choices:
+        - text: "I believe you."
+          next: epilogue_tomas_3
+        - text: "Can you feel her?"
+          next: epilogue_tomas_3
+
+    epilogue_tomas_3:
+      text: |
+        "The roots are different since the landing. Quieter. But warmer." He turns the trowel once in his hands. "Two hundred years I have been asking Lira why she smiled. Now there are two of them in there. Both smiling. I can feel it."
+      choices:
+        - text: "(Stay with him a moment longer)"
+          next: null

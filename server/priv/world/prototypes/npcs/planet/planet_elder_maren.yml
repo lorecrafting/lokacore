@@ -1,0 +1,14 @@
+key: planet_elder_maren
+type: npc
+parent: elder_maren
+short_desc: "Elder Maren"
+
+components:
+  dialogue_tree:
+    # Override epilogue_complete_3 — remove teleport (player is already in planet rooms)
+    epilogue_complete_3:
+      text: "She found what is beyond all the roots. There is no word for it. There does not need to be."
+      choices:
+        - text: "Thank you, Elder."
+          action: ["complete_quest", "grove_epilogue"]
+          next: null

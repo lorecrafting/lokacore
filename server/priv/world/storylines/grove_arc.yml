@@ -29,11 +29,22 @@ acts:
     requires:
       - revelation
 
+  - id: descent
+    name: "The Descent"
+    quests:
+      - grove_landing
+    requires:
+      - crisis
+
   - id: grief_and_joy
     name: "Grief and Joy"
     quests:
       - grove_epilogue
     requires:
-      - crisis
+      - descent
 
-side_quests: []
+side_quests:
+  - side_brennan
+  - side_tomas
+  - side_three_roots
+  - side_yara

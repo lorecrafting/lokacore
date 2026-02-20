@@ -9,3 +9,5 @@ exits:
 tags:
   - underground
   - indoor
+spawns:
+  - prototype: thera_presence

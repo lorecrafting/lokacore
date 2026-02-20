@@ -26,7 +26,7 @@ components:
   dialogue_tree:
     # ==========================================================================
     # ELDER MAREN — The Elder
-    # Quest giver: grove_revelation, grove_epilogue
+    # Quest giver: grove_revelation, grove_landing, grove_epilogue
     # Quest turn-in: grove_epilogue
     # Key dialogue_topic nodes:
     #   council_call, the_hearts (grove_revelation)
@@ -45,8 +45,17 @@ components:
           show_if:
             quest_completed: grove_belonging
             quest_not_active: grove_revelation
+            quest_not_completed: grove_revelation
           action: ["accept_quest", "grove_revelation"]
           next: revelation_accepted
+
+        - text: "[Accept Quest] Something is shaking. What is happening?"
+          show_if:
+            quest_completed: grove_sacrifice
+            quest_not_active: grove_landing
+            quest_not_completed: grove_landing
+          action: ["accept_quest", "grove_landing"]
+          next: landing_start
 
         - text: "[Accept Quest] I should know what comes next."
           show_if:
@@ -66,6 +75,11 @@ components:
             quest_active: grove_revelation
             flag_not_set: maren_records_shown
           next: records_offer
+
+        - text: "How does it feel — now that it's done?"
+          show_if:
+            completed_quest: grove_epilogue
+          next: post_landing_maren
 
         - text: "How are you?"
           next: maren_how_are_you
@@ -363,6 +377,8 @@ components:
     # ---- grove_epilogue dialogue_topic nodes ----
 
     after_sacrifice:
+      show_if: { quest_active: grove_sacrifice }
+      action: ["complete_quest", "grove_sacrifice"]
       text: "She was smiling. Did you see?"
       choices:
         - text: "Yes. I didn't understand why."
@@ -379,13 +395,79 @@ components:
     after_sacrifice_3:
       text: "Not yet. But you will."
       choices:
-        - text: "(Leave)"
+        - text: "(The ground shudders)"
+          action: ["accept_quest", "grove_landing"]
+          next: landing_start
+
+    landing_start:
+      show_if: { quest_active: grove_landing }
+      text: |
+        The floor shifts beneath you. Not a tremor — a settling, deep and structural, as if the world just found a new center of gravity. Maren puts one hand flat against the wall. Her expression does not change. If anything, she looks calmer than you have ever seen her.
+
+        "It has begun. Can you feel it? The Pulse — listen. Two voices now. She is doing it."
+      choices:
+        - text: "What do we do?"
+          next: landing_start_2
+
+    landing_start_2:
+      text: |
+        "Find the others. Brennan will be at the Thinning — he will want to see the membrane go. Tomas..." She pauses. Something crosses her face that might be two hundred years of waiting. "Tomas will know what this is before anyone. He has been waiting for this sound his whole life."
+
+        She straightens. The wall shudders again beneath her hand.
+
+        "Go. I will gather everyone here."
+      choices:
+        - text: "(Go)"
+          next: null
+
+    landing_maren_waiting:
+      show_if: { quest_active: grove_landing }
+      text: |
+        She is standing in the elder hall, steady as the walls shake around her. Others are arriving — you can hear voices in the corridor. She sees you and shakes her head once.
+
+        "Not here. Go find them. Brennan and Tomas — they should not be alone for this."
+      choices:
+        - text: "(Go)"
           next: null
 
     epilogue_end:
       text: "The Grove endures. The landing was clean. And we carry her with us, not as memory but as presence. That is the gift of the third root."
       choices:
         - text: "I'll carry her."
+          next: epilogue_complete
+
+    # ---- post-landing dialogue (show after grove_epilogue complete) ----
+
+    post_landing_maren:
+      text: "Not what I expected. I thought it would feel like relief. It's more like the end of a long carrying — the weight is still in your muscles even after you've put it down."
+      choices:
+        - text: "Forty years."
+          next: post_landing_maren_2
+
+    post_landing_maren_2:
+      text: "Forty years. Lira carried it for two hundred. I remind myself of that when I think I have the right to feel tired."
+      choices:
+        - text: "Do you regret keeping it secret?"
+          next: post_landing_maren_3
+        - text: "You don't have to justify it."
+          next: post_landing_maren_4
+
+    post_landing_maren_3:
+      text: "No. I regret the necessity. The secret itself — every day I kept it, I kept it because the alternative was worse. I've seen what it did to Yara."
+      choices:
+        - text: "What happens now?"
+          next: post_landing_maren_5
+
+    post_landing_maren_4:
+      text: "I'm not justifying. I'm accounting. There's a difference."
+      choices:
+        - text: "What happens now?"
+          next: post_landing_maren_5
+
+    post_landing_maren_5:
+      text: "We learn the planet. We open the records. We stop carrying things alone."
+      choices:
+        - text: "(Leave her)"
           next: null
 
 tags: [friendly, quest_giver, elder, grove, rememberer]

@@ -29,6 +29,8 @@ components:
     # Key dialogue_topic nodes:
     #   about_blight (grove_belonging)
     #   about_mother (grove_revelation)
+    #   yara_offer (side_yara — first objective)
+    #   yara_journal_returned (side_yara — return)
     # ==========================================================================
 
     start:
@@ -43,6 +45,19 @@ components:
           show_if:
             quest_active: grove_sacrifice
           next: kira_sacrifice_check
+
+        - text: "Your mother's research — is any of it still around?"
+          show_if:
+            quest_not_active: side_yara
+            quest_not_completed: side_yara
+            quest_completed: grove_belonging
+          action: ["accept_quest", "side_yara"]
+          next: yara_offer
+
+        - text: "What are you working on now?"
+          show_if:
+            completed_quest: grove_epilogue
+          next: post_landing_kira
 
         - text: "Tell me about the Blight."
           next: about_blight
@@ -184,6 +199,8 @@ components:
     # ---- grove_revelation dialogue_topic node ----
 
     about_mother:
+      show_if:
+        quest_active: grove_revelation
       text: "Elder Maren told you."
       choices:
         - text: "Yes. I thought you should know I know."
@@ -255,6 +272,187 @@ components:
       text: "Of course she is. That's so — that is so like her."
       choices:
         - text: "(A sound between laugh and grief)"
+          next: kira_sacrifice_4
+        - text: "How is the community taking it?"
+          next: kira_fracture_question
+
+    kira_sacrifice_4:
+      text: "*She crouches back down and starts working again — harder than before.*"
+      choices:
+        - text: "(Stay with her)"
+          next: null
+        - text: "How is the community taking it?"
+          next: kira_fracture_question
+
+    kira_fracture_question:
+      text: "Badly. Rendell spent three hours arguing with Elder Maren that the ship must have a backup system we haven't found yet. As if she hasn't spent forty years looking."
+      choices:
+        - text: "Are you one of them? Looking for another way?"
+          next: kira_fracture_herself
+
+    kira_fracture_herself:
+      text: "I spent two weeks trying to prove the Blight was the real problem — that if I fixed the Blight, the ship would stabilize without a new Heart."
+      next: kira_fracture_herself_2
+
+    kira_fracture_herself_2:
+      text: "The Pulse told me no directly. I wanted it to work. It doesn't."
+      choices:
+        - text: "You tried."
+          next: kira_fracture_tried
+        - text: "So you accept it."
+          next: kira_fracture_accept
+
+    kira_fracture_tried:
+      text: "I did. I'll keep tending the Blight anyway. That's still my work. But I'm done pretending it's the answer to this."
+      choices:
+        - text: "Thera would want that. The work continuing."
+          next: kira_fracture_thera_wants
+
+    kira_fracture_accept:
+      text: "I accept that there's no other way. That's not the same thing as being all right with it."
+      choices:
+        - text: "No. It isn't."
+          next: kira_fracture_not_same
+
+    kira_fracture_thera_wants:
+      text: "*She doesn't say anything for a moment.* \"Yes. She would.\""
+      choices:
+        - text: "(Leave her to her work)"
+          next: null
+
+    kira_fracture_not_same:
+      text: "*She keeps working.* \"Go. I need to finish this section.\""
+      choices:
+        - text: "(Leave her)"
+          next: null
+
+    # ---- grove_landing optional dialogue nodes ----
+
+    landing_kira:
+      show_if: { quest_active: grove_landing }
+      text: |
+        She is at her field station, scribbling furiously. Instruments scattered everywhere. The blight sample jars are glowing — not the sickly flicker of decay but a steady, warm pulse.
+      choices:
+        - text: "Kira, what is happening?"
+          next: landing_kira_2
+
+    landing_kira_2:
+      text: |
+        "The conduit patterns. They are reversing." She holds up a jar. The blight lines inside are running backward, sealing shut, becoming something else. "The decay channels — they were never decay. They were dormant growth channels. The whole time."
+
+        She looks up at you. Her eyes are wide.
+
+        "This is what they were always for."
+      choices:
+        - text: "The blight was part of the design?"
+          next: landing_kira_3
+
+    landing_kira_3:
+      text: |
+        "Not the blight — the pathways. The blight was the system failing because the pathways had no purpose yet. Now they do." She turns back to her notes. "I need to document everything. When this is over I am going to need years to understand what I am seeing right now."
+
+        She is already writing again before you finish nodding.
+      choices:
+        - text: "(Leave her to it)"
+          next: null
+
+    # ---- side_yara quest nodes ----
+
+    yara_offer:
+      show_if:
+        quest_active: side_yara
+      text: "*A pause. She keeps working.*"
+      next: yara_offer_2
+
+    yara_offer_2:
+      text: "Her notes are in the healing grove. I keep meaning to go get them."
+      choices:
+        - text: "I'll get them for you."
+          next: yara_offer_3
+
+    yara_offer_3:
+      text: "*She doesn't look up.* \"You don't have to.\""
+      choices:
+        - text: "I know."
+          next: yara_offer_4
+
+    yara_offer_4:
+      text: "Main stores. South wall shelf. Her handwriting leans left. You'll know it."
+      choices:
+        - text: "(Go)"
+          next: null
+
+    yara_journal_returned:
+      show_if:
+        quest_active: side_yara
+      text: "*She sets down what she's doing.*"
+      next: yara_journal_2
+
+    yara_journal_2:
+      text: "What was there?"
+      choices:
+        - text: "Twenty years of notes. Root diagrams. Questions she was still working through."
+          next: yara_journal_3
+
+    yara_journal_3:
+      text: "She kept records. I knew she did. I just..."
+      next: yara_journal_4
+
+    yara_journal_4:
+      text: "*She stops.*"
+      choices:
+        - text: "One line near the end, underlined twice. 'It wants to teach us something.'"
+          next: yara_journal_5
+
+    yara_journal_5:
+      text: "*Long pause.*"
+      next: yara_journal_6
+
+    yara_journal_6:
+      text: "She was right. She was right about all of it. I just didn't know yet what she was right about."
+      choices:
+        - text: "You still might not. But now you can read it."
+          next: yara_journal_7
+
+    yara_journal_7:
+      text: "*She nods once. Then picks up her tools.*"
+      choices:
+        - text: "(Leave her to it)"
+          action: ["complete_quest", "side_yara"]
+          next: null
+
+    # ---- post-landing dialogue (show after grove_epilogue complete) ----
+
+    post_landing_kira:
+      text: "Same as always. Thera's schedule is still a schedule."
+      choices:
+        - text: "You took over her rounds?"
+          next: post_landing_kira_2
+
+    post_landing_kira_2:
+      text: "Someone had to. The plants don't know the difference."
+      choices:
+        - text: "Do you?"
+          next: post_landing_kira_3
+
+    post_landing_kira_3:
+      text: "*She keeps working.* \"Every hour.\""
+      choices:
+        - text: "The blight — is it on the planet surface too?"
+          next: post_landing_kira_4
+        - text: "(Leave her to it)"
+          next: null
+
+    post_landing_kira_4:
+      text: "Yes. Different presentation but the same root cause. I've been looking at it from the margin. I need samples from further in."
+      choices:
+        - text: "You're going out there?"
+          next: post_landing_kira_5
+
+    post_landing_kira_5:
+      text: "Tomorrow. Rendell thinks it's too soon. *She glances up once.* Thera would've wanted the answer. That's enough."
+      choices:
+        - text: "(She goes back to work)"
           next: null
 
 tags: [friendly, shaper, grove]
@@ -263,9 +461,12 @@ emotes:
   idle: "*works with precise, careful hands*"
   morning: "*checks the eastern root lines at first light*"
   worried: "*stands at the edge of the blight zone, staring*"
+  healing: "*applies healmoss to a damaged root with practiced efficiency*"
+  focused: "*goes very still, listening for something beneath the soil*"
+  tired: "*wipes soil from her hands, slower than usual*"
 
 traits:
   - script: ambient_emitter
     config:
       interval: 90
-      emotes: [idle, morning, worried]
+      emotes: [idle, morning, worried, healing, focused, tired]

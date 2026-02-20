@@ -1,0 +1,68 @@
+id: grove_landing
+name: "The Descent"
+description: |
+  The ground is shaking. The sky is wrong. Thera is bringing you down. Find the others before the world changes forever.
+
+type: main
+priority: 4
+act: 4
+
+giver: elder_maren
+turn_in_npc: null
+
+requires_quest: grove_sacrifice
+
+objectives:
+  - id: find_brennan
+    type: talk
+    target_id: brennan
+    dialogue_topic: landing_brennan
+    description: "Find Brennan — he will be watching the membrane"
+    hint: "He patrols the thinning. He will want to see it go."
+
+  - id: find_tomas
+    type: talk
+    target_id: tomas
+    dialogue_topic: landing_tomas
+    description: "Find Tomas"
+    hint: "He will be where the soil is deepest."
+
+  - id: reach_the_edge
+    type: go_to
+    target_id: planet_the_edge
+    description: "Walk to where the membrane was"
+    hint: "Outward. Through the grove. To the place that used to be a wall."
+
+  - id: cross_threshold
+    type: go_to
+    target_id: threshold_gate
+    description: "Step beyond the grove"
+    hint: "North. Where the grove ends and the planet begins."
+
+  - id: see_the_world
+    type: go_to
+    target_id: threshold_summit
+    description: "Climb to where you can see it all"
+    hint: "Higher ground. You need to see where you are."
+
+  - id: return_to_grove
+    type: go_to
+    target_id: planet_awakening_clearing
+    description: "Return to the grove"
+    hint: "You have seen the world. Now go home."
+
+rewards:
+  xp: 500
+  gold: 0
+
+journal_entries:
+  start: "The ground is moving. Not earthquake. Direction. Maren said to find the others."
+  find_brennan: "Brennan was at the thinning, watching the membrane flicker apart. He said: ready has not mattered for a while. He will be where he needs to be."
+  find_tomas: "Tomas was in the orchard with his hands in the dirt. He felt it first. He said hello to the ground. The landing came through him — through roots lighting up in patterns no one has seen in two hundred years."
+  reach_the_edge: "The membrane is gone. Where it stood there is a seam in the earth, and beyond it, wind. Real wind."
+  cross_threshold: "I stepped past the grove. The soil changed under my feet — pale, dry, ancient. A single root threaded through it. The grove's first reach."
+  see_the_world: "From the summit I could see both: the grove behind me, green and enormous and no longer the whole world. And ahead, the planet — grey and flat and quiet and very, very large."
+  return_to_grove: "The walk back felt different. Shorter. The grove looked the same from outside — green against grey. But I know what it is now. An island. A seed. The beginning of something."
+  complete: "I have seen where we are. I have seen what we have to do. The grove is an island. The roots are already reaching."
+
+labels: [main, grove_arc, act_4, landing]

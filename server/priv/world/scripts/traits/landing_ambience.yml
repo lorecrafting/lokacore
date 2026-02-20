@@ -1,0 +1,41 @@
+key: landing_ambience
+type: script
+name: "Landing Ambience"
+
+components:
+  data:
+    hook: behavior
+    description: "Fires escalating tremor ambient messages during the landing sequence"
+    source: |
+      state = get_trait_state.("tick_count") || 0
+      set_trait_state.("tick_count", state + 1)
+
+      early_messages = [
+        "The ground shifts beneath your feet. A vibration you have never felt before.",
+        "A low hum rises through the floor, deeper than the Pulse. Structural.",
+        "The roots beneath the path flare bright for a moment, then dim."
+      ]
+
+      mid_messages = [
+        "A crack of light splits the sky above the canopy. Through it: darkness and stars.",
+        "Your ears pop. The air pressure is changing.",
+        "The trees sway — not from wind. From movement. The whole grove is moving."
+      ]
+
+      late_messages = [
+        "A sound like metal settling. The membrane above flickers. A panel goes dark.",
+        "Through the gaps in the sky you can see a horizon. An actual horizon.",
+        "The Pulse stutters, catches, changes rhythm. Two voices where there was one."
+      ]
+
+      messages = cond do
+        state < 3 -> early_messages
+        state < 6 -> mid_messages
+        true -> late_messages
+      end
+
+      message = Enum.random(messages)
+      emit.(message)
+
+      delay = 35 + :rand.uniform(10)
+      after.(delay * 1000)

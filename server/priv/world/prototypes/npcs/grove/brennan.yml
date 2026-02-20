@@ -4,7 +4,7 @@ parent: base_npc
 short_desc: "Brennan"
 long_desc: "Brennan stands at the path's edge with the stillness of a man who has stood this watch many times."
 extra_desc: |
-  He is built for endurance rather than speed — broad shoulders, wind-darkened skin, eyes that have spent decades scanning horizons. There is a badge on his chest, worn and hand-polished. He does not look at it. He does not need to.
+  He is built for endurance rather than speed — broad shoulders, wind darkened skin, eyes that have spent decades scanning horizons. There is a badge on his chest, worn and hand polished. He does not look at it. He does not need to.
 keywords: [brennan, watcher, guard, man]
 primary_keyword: brennan
 
@@ -38,6 +38,23 @@ components:
           show_if:
             quest_active: grove_arrival
           next: intro_meeting
+
+        - text: "I've been thinking about something you said."
+          show_if:
+            quest_not_active: side_brennan
+            quest_not_completed: side_brennan
+            quest_completed: grove_arrival
+          next: seren_quest_lead
+
+        - text: "Are you all right?"
+          show_if:
+            quest_active: grove_sacrifice
+          next: brennan_sacrifice_check
+
+        - text: "You're still at your post."
+          show_if:
+            completed_quest: grove_epilogue
+          next: post_landing_brennan
 
         - text: "What do you watch for?"
           next: watches_for
@@ -212,6 +229,191 @@ components:
         - text: "(Leave)"
           next: null
 
+    # ---- side_brennan quest lead chain ----
+
+    seren_quest_lead:
+      text: "Did I?"
+      choices:
+        - text: "About losing someone. Thirty years ago."
+          next: seren_quest_lead_2
+
+    seren_quest_lead_2:
+      text: "..."
+      next: seren_quest_lead_3
+
+    seren_quest_lead_3:
+      text: "What do you want to know?"
+      choices:
+        - text: "[Accept Quest] I'd like to understand."
+          action: ["accept_quest", "side_brennan"]
+          next: seren_quest_accepted
+        - text: "Nothing. I shouldn't have asked."
+          next: null
+
+    seren_quest_accepted:
+      text: "Then start with Maren. She has the records. She knows what this badge means, even if she's never said so."
+      choices:
+        - text: "(I will)"
+          next: null
+
+    # ---- side_brennan dialogue_topic node ----
+
+    seren_named:
+      show_if:
+        quest_active: side_brennan
+      text: "Maren told you about her."
+      choices:
+        - text: "Seren."
+          next: seren_named_2
+        - text: "She chose rest."
+          next: seren_named_2
+
+    seren_named_2:
+      text: "..."
+      next: seren_named_3
+
+    seren_named_3:
+      text: "She told me — on the last morning — she said: 'Watch it for me. The truth. Make sure it finds the right person when it's time.' I've been watching for forty years."
+      choices:
+        - text: "She knew someone would come."
+          next: seren_named_4
+
+    seren_named_4:
+      text: "She always looked ahead. Said it was the Rootspeaker way — to look forward and not flinch."
+      choices:
+        - text: "You haven't said her name."
+          next: seren_say_name
+
+    seren_say_name:
+      text: "*A long pause. He does not look at the badge.*"
+      next: seren_say_name_2
+
+    seren_say_name_2:
+      text: "Seren."
+      choices:
+        - text: "(Stay)"
+          next: seren_after_name
+
+    seren_after_name:
+      text: "I haven't said it to anyone. In forty years. Not for any reason that wasn't alone."
+      choices:
+        - text: "I know."
+          next: seren_after_name_2
+
+    seren_after_name_2:
+      text: "*He touches the badge once, then drops his hand.* \"She'd be glad you came. She always did want this done properly.\""
+      choices:
+        - text: "(Leave him to his watch)"
+          action: ["complete_quest", "side_brennan"]
+          next: null
+
+    # ---- grove_landing dialogue nodes ----
+
+    landing_brennan:
+      show_if: { quest_active: grove_landing }
+      text: |
+        He stands at the edge of the thinning, one hand on his blade hilt. Not for defense. For steadiness. Above him, the membrane flickers in long, slow pulses. Through the gaps: darkness. Points of light.
+      choices:
+        - text: "What do you see?"
+          next: landing_brennan_2
+
+    landing_brennan_2:
+      text: |
+        "Stars. And something else. A surface. Grey, flat, going on forever." He does not take his eyes off it. "I have spent my whole life patrolling a wall I could not see. Now it is disappearing."
+      choices:
+        - text: "Are you ready?"
+          next: landing_brennan_3
+        - text: "We will need you out there."
+          next: landing_brennan_3b
+
+    landing_brennan_3:
+      text: |
+        He is quiet for a moment.
+
+        "No. But I was not ready for any of this. I was not ready when the blight started. I was not ready when Maren told us the truth." He adjusts his grip on the blade. "Ready has not mattered for a while now. I will be where I need to be."
+      choices:
+        - text: "(Nod)"
+          next: null
+
+    landing_brennan_3b:
+      text: |
+        "Out there." He looks north, through a gap in the membrane where sky should be and is not. "I have been protecting a boundary my whole life. Now it is going to be a frontier."
+
+        A pause. The practical mind, already working.
+
+        "Wider patrols. I will need to talk to Rendell about the shifts."
+      choices:
+        - text: "(Nod)"
+          next: null
+
+    # ---- grove_sacrifice phase dialogue ----
+
+    brennan_sacrifice_check:
+      text: "I've been here before. Not the same — but the shape of it."
+      choices:
+        - text: "Seren."
+          next: brennan_sacrifice_seren
+
+    brennan_sacrifice_seren:
+      text: "She chose rest. Thera's choosing something else. I keep reminding myself of that."
+      choices:
+        - text: "Is it helping?"
+          next: brennan_sacrifice_helping
+
+    brennan_sacrifice_helping:
+      text: "Slowly."
+      choices:
+        - text: "She'll be here. Not gone — present."
+          next: brennan_sacrifice_present
+        - text: "(Stay with him)"
+          next: brennan_sacrifice_present
+
+    brennan_sacrifice_present:
+      text: "Seren used to talk about Lira that way. 'She's not gone — just bigger.' I couldn't understand it then."
+      choices:
+        - text: "Do you understand it now?"
+          next: brennan_sacrifice_now
+
+    brennan_sacrifice_now:
+      text: "I understand it differently. Seren chose rest because she had nothing left. Thera's choosing remaining because she still has everything. That's the part I couldn't see until now."
+      choices:
+        - text: "(Leave him to his watch)"
+          next: null
+
+    # ---- post-landing dialogue (show after grove_epilogue complete) ----
+
+    post_landing_brennan:
+      text: "The post is still here. *He gestures at the monitoring equipment.* Still works."
+      choices:
+        - text: "What are you watching now?"
+          next: post_landing_brennan_2
+
+    post_landing_brennan_2:
+      text: "Weather. Wind patterns. What the planet does at dawn versus midday. The membrane is gone but the habit is thirty years deep."
+      choices:
+        - text: "You don't have to keep watching."
+          next: post_landing_brennan_3
+
+    post_landing_brennan_3:
+      text: "I know. *He keeps watching anyway.* I left a note for whoever comes next. 'I was right. It was worth watching.' Beneath it, in older ink — 'She was here.'"
+      choices:
+        - text: "Seren."
+          next: post_landing_brennan_4
+        - text: "(Leave him to it)"
+          next: null
+
+    post_landing_brennan_4:
+      text: "She stood here once. Early years. Said the edge felt like a door. I thought she was being poetic."
+      choices:
+        - text: "She wasn't."
+          next: post_landing_brennan_5
+
+    post_landing_brennan_5:
+      text: "No. *Long pause.* She never was."
+      choices:
+        - text: "(Leave him)"
+          next: null
+
 tags: [neutral, watcher, grove]
 
 emotes:
@@ -219,9 +421,15 @@ emotes:
   patrol: "*walks the path's edge, unhurried*"
   dawn: "*stands at the boundary, watching the light change*"
   night: "*moves quietly through the dark*"
+  thinking: "*stands motionless at the post, looking inward rather than outward*"
+  checking: "*walks the boundary markers, touching each one briefly*"
 
 traits:
   - script: patrol
     config:
-      rooms: [watchers_post, brennan_path, north_understory, thinning_approach]
+      rooms: [watchers_post, brennan_path, north_understory, thinning_approach, thinning_patrol_route]
       interval: 120
+  - script: ambient_emitter
+    config:
+      interval: 100
+      emotes: [idle, patrol, dawn, thinking, checking]
