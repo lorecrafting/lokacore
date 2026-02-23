@@ -225,6 +225,9 @@ var atmosphere: String = "peaceful"
 ## Rooms that have been explored (for fog of war)
 var explored_rooms: Array = []
 
+## Visited rooms cache for minimap (room_key -> MockWorld.Room)
+var visited_rooms: Dictionary = {}
+
 ## Reference to PhoenixClient autoload
 var _phoenix: Node = null
 
@@ -427,11 +430,22 @@ func teleport_to(room_key: String) -> bool:
 # Map Exploration
 # =============================================================================
 
-## Mark a room as explored (for fog of war on map)
+## Mark a room as explored (for fog of war on map) and cache room data for minimap
 func mark_room_explored(room_key: String) -> void:
 	if room_key not in explored_rooms:
 		explored_rooms.append(room_key)
 		exploration_changed.emit()
+
+	# Cache room data for minimap BFS
+	if not visited_rooms.has(room_key) and current_room and current_room.key == room_key:
+		visited_rooms[room_key] = current_room
+
+
+## Cache a room in visited_rooms for minimap (used by online + offline paths)
+func _cache_visited_room(room: MockWorld.Room) -> void:
+	if room and room.key != "":
+		visited_rooms[room.key] = room
+		mark_room_explored(room.key)
 
 
 ## Check if a room has been explored
@@ -512,6 +526,7 @@ func _on_server_game_state(state: Dictionary) -> void:
 	current_room = _convert_server_room(room_data)
 
 	if current_room:
+		_cache_visited_room(current_room)
 		room_changed.emit(current_room)
 
 
@@ -521,6 +536,7 @@ func _on_server_room_update(data: Dictionary) -> void:
 	current_room = _convert_server_room(room_data)
 
 	if current_room:
+		_cache_visited_room(current_room)
 		room_changed.emit(current_room)
 
 

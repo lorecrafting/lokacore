@@ -11,7 +11,7 @@
 ##   Slot 1 (left static):  decorative parchment page
 ##   Slot 2 (right static): active game content (room/menu/entity/dialogue/shop/container)
 ##   Slot 3 (anim face A):  current content (during page turn)
-##   Slot 4 (anim face B):  new content (during page turn)
+##   Slot 4 (anim face B):  parchment back (during page turn)
 extends Node2D
 class_name LokaBook
 
@@ -21,8 +21,14 @@ signal page_turn_started(direction: String)
 ## Emitted when page turn animation completes
 signal page_turn_completed(direction: String)
 
-## Emitted when a bottom bar button is tapped (forwarded from BottomBar)
-signal bottom_bar_pressed(button: String)
+## Emitted when menu button is tapped from in-page nav footer
+signal menu_pressed
+
+## Emitted when say button is tapped from in-page nav footer
+signal say_pressed
+
+## Emitted when a navigation direction is tapped from in-page nav footer
+signal nav_direction_pressed(direction: String)
 
 ## Page types
 enum PageType { ROOM, MENU, ENTITY, DIALOGUE, SHOP, CONTAINER }
@@ -80,7 +86,6 @@ var _page_flip: PageFlip2D
 
 ## Page content (right page = active game content)
 var _right_page: PageContentManager.PageContent
-var _right_page_back: PageContentManager.PageContent  # Back buffer for page turns
 
 ## Effects controller
 var _effects: EffectsController
@@ -92,12 +97,16 @@ var _content_manager: PageContentManager
 var _shop_container_handler: ShopContainerHandler
 var _content_renderer: PageContentRenderer
 
-## Decorative left page viewport
-var _left_page_viewport: SubViewport
 
 ## Turn animation state
 var _is_turning: bool = false
 var _pending_turn_direction: String = ""
+
+## Staging viewport for page turn pre-rendering
+var _staging_page: PageContentManager.PageContent
+
+## Room page turn queue
+var _pending_room: MockWorld.Room = null
 
 # =============================================================================
 # Drag/scroll state
@@ -119,15 +128,16 @@ func _ready() -> void:
 	# Find or create PageFlip2D
 	_page_flip = _find_or_create_page_flip()
 
-	# Create page content viewports
-	_right_page = _content_manager.create_page_content(_on_label_meta_clicked, true)
-	_right_page_back = _content_manager.create_page_content(_on_label_meta_clicked, true)
-	_left_page_viewport = _content_manager.create_decorative_page()
+	# Create page content viewport
+	_right_page = _content_manager.create_page_content(_on_label_meta_clicked)
 
-	# Add viewports as children (required for rendering)
+	# Add viewport as child (required for rendering)
 	add_child(_right_page.viewport)
-	add_child(_right_page_back.viewport)
-	add_child(_left_page_viewport)
+
+	# Create staging viewport for page turn pre-rendering
+	_staging_page = _content_manager.create_page_content(_on_label_meta_clicked)
+	_staging_page.viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	add_child(_staging_page.viewport)
 
 	# Setup effects
 	_effects = EffectsController.new()
@@ -154,6 +164,12 @@ func _ready() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	_inject_content_into_page_flip()
+	_adjust_camera_for_single_page()
+	_disable_pageflip_click_navigation()
+
+	# Connect bottom bar signals
+	_right_page.bar.bar_pressed.connect(_handle_nav_click)
+	_staging_page.bar.bar_pressed.connect(_handle_nav_click)
 
 	# Display initial room if available
 	if GameState.current_room:
@@ -180,7 +196,6 @@ func _find_or_create_page_flip() -> PageFlip2D:
 			instance.enable_composite_pages = false
 
 			# Use a single spread (left = decorative, right = game content)
-			# We provide 2 pages so PageFlip has 1 spread + covers
 			instance.pages_paths = []
 
 			# Volume settings for a thick book feel
@@ -202,18 +217,10 @@ func _inject_content_into_page_flip() -> void:
 	if not _page_flip:
 		return
 
-	# We use PageFlip in dynamic mode: manage our own viewport textures
-	# Slot 1 (left static) = decorative parchment
-	# Slot 2 (right static) = active game content
-	if _page_flip._slot_1:
-		# Clear existing content and inject our viewport texture
-		_clear_slot(_page_flip._slot_1)
-		var left_rect := TextureRect.new()
-		left_rect.texture = _left_page_viewport.get_texture()
-		left_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		left_rect.stretch_mode = TextureRect.STRETCH_SCALE
-		left_rect.size = _page_flip._slot_1.size
-		_page_flip._slot_1.add_child(left_rect)
+	# Single page mode: only use right page (slot 2)
+	# Hide left page entirely
+	if _page_flip.static_left:
+		_page_flip.static_left.visible = false
 
 	if _page_flip._slot_2:
 		_clear_slot(_page_flip._slot_2)
@@ -224,10 +231,7 @@ func _inject_content_into_page_flip() -> void:
 		right_rect.size = _page_flip._slot_2.size
 		_page_flip._slot_2.add_child(right_rect)
 
-	# Update static visuals
-	if _page_flip.static_left:
-		_page_flip.static_left.texture = _page_flip._slot_1.get_texture()
-		_page_flip.static_left.visible = true
+	# Update static right visual
 	if _page_flip.static_right:
 		_page_flip.static_right.texture = _page_flip._slot_2.get_texture()
 		_page_flip.static_right.visible = true
@@ -236,6 +240,52 @@ func _inject_content_into_page_flip() -> void:
 func _clear_slot(slot: SubViewport) -> void:
 	for child in slot.get_children():
 		child.queue_free()
+
+
+## Disable PageFlip2D's built-in click-to-flip behavior.
+func _disable_pageflip_click_navigation() -> void:
+	if _page_flip and "disable_click_navigation" in _page_flip:
+		_page_flip.disable_click_navigation = true
+
+
+## Override camera to frame only the right page (single page view)
+func _adjust_camera_for_single_page() -> void:
+	if not _page_flip:
+		return
+
+	var cam: Camera2D = _page_flip.get_node_or_null("Camera2D")
+	if not cam:
+		return
+
+	# Zoom to fit single page width instead of two-page spread
+	var page_size := _page_flip.target_page_size
+	var screen_size := get_viewport_rect().size
+	if screen_size == Vector2.ZERO:
+		return
+
+	var margin := 1.05
+	var zoom_x := screen_size.x / (page_size.x * margin)
+	var zoom_y := screen_size.y / (page_size.y * margin)
+	var final_zoom: float = min(zoom_x, zoom_y)
+	cam.zoom = Vector2(final_zoom, final_zoom)
+
+	# Center camera on the right page using global coordinates.
+	var vc_pos := _page_flip.visuals_container.global_position
+	cam.global_position = vc_pos + Vector2(page_size.x * 0.5, 0)
+
+	# Hide spine and volume layers (single page doesn't need them)
+	_hide_book_chrome()
+
+
+## Hide spine, volume layers, and left page (single-page mode).
+func _hide_book_chrome() -> void:
+	if not _page_flip or not _page_flip.visuals_container:
+		return
+	for child in _page_flip.visuals_container.get_children():
+		if child.name.begins_with("Vol") or child.name == "RuntimeSpine":
+			child.visible = false
+	if _page_flip.static_left:
+		_page_flip.static_left.visible = false
 
 
 # =============================================================================
@@ -303,6 +353,7 @@ func _input(event: InputEvent) -> void:
 				if _is_dragging and _drag_start_pos.distance_to(event.position) < 10:
 					_handle_page_click(event.position)
 				_is_dragging = false
+			get_viewport().set_input_as_handled()
 
 	# Mouse drag for scroll
 	elif event is InputEventMouseMotion and _is_dragging:
@@ -388,19 +439,20 @@ func stop_text_effect() -> void:
 # =============================================================================
 
 func _handle_page_click(screen_pos: Vector2) -> void:
-	# In 2D, we can convert screen position directly to viewport coordinates
-	# The right page viewport fills the right half of the book
-	var viewport_size := get_viewport().get_visible_rect().size
+	# Convert click to the page content SubViewport coordinates.
+	# Use static_right.to_local() to map directly to the Polygon2D's local space,
+	# matching how PageFlip's own _inject_event_to_viewport works.
+	if not _page_flip or not _page_flip.static_right:
+		return
 
-	# Map screen position to page viewport coordinates
-	# PageFlip occupies the screen, right page is the right half
-	var page_size := Vector2(PageContentManager.VIEWPORT_WIDTH, PageContentManager.VIEWPORT_HEIGHT)
+	var local_pos := _page_flip.static_right.to_local(get_global_mouse_position())
+	# Polygon is centered vertically: y from -h/2 to +h/2, so shift to 0..h
+	var vp_x := local_pos.x
+	var vp_y := local_pos.y + PageContentManager.VIEWPORT_HEIGHT / 2.0
 
-	# Simple mapping: screen coords -> viewport coords proportionally
-	var vp_x := (screen_pos.x / viewport_size.x) * page_size.x
-	var vp_y := (screen_pos.y / viewport_size.y) * page_size.y
+	if vp_x < 0 or vp_x > PageContentManager.VIEWPORT_WIDTH or vp_y < 0 or vp_y > PageContentManager.VIEWPORT_HEIGHT:
+		return
 
-	# Forward click to text viewport
 	_forward_click_to_viewport(vp_x, vp_y)
 
 
@@ -454,51 +506,32 @@ func _on_label_meta_clicked(meta: Variant) -> void:
 
 
 # =============================================================================
-# Page Turn Animation
+# Page Turn Animation (manual drive — bypasses PageFlip's spread management)
 # =============================================================================
 
 func turn_page(direction: String = "right") -> void:
 	if _is_turning:
 		return
 
-	if _page_flip:
-		_is_turning = true
-		_pending_turn_direction = direction
-
-		# Pre-render new content to back buffer
-		_render_pending_content_to_page(_right_page_back, pending_page)
-
-		# Inject back buffer into animation slots
-		if _page_flip._slot_3:
-			_clear_slot(_page_flip._slot_3)
-			var face_a := TextureRect.new()
-			face_a.texture = _right_page.viewport.get_texture()
-			face_a.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-			face_a.stretch_mode = TextureRect.STRETCH_SCALE
-			face_a.size = _page_flip._slot_3.size
-			_page_flip._slot_3.add_child(face_a)
-
-		if _page_flip._slot_4:
-			_clear_slot(_page_flip._slot_4)
-			var face_b := TextureRect.new()
-			face_b.texture = _right_page_back.viewport.get_texture()
-			face_b.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-			face_b.stretch_mode = TextureRect.STRETCH_SCALE
-			face_b.size = _page_flip._slot_4.size
-			_page_flip._slot_4.add_child(face_b)
-
-		page_turn_started.emit(direction)
-
-		if direction == "right":
-			_page_flip.next_page()
-		else:
-			_page_flip.prev_page()
-	else:
-		# No PageFlip - instant swap
+	if not _page_flip or not _page_flip.anim_player or not _page_flip.dynamic_poly:
+		# Fallback: instant content swap (no animation available)
 		_render_pending_content_to_page(_right_page, pending_page)
 		current_page = pending_page
 		page_turn_started.emit(direction)
 		page_turn_completed.emit(direction)
+		return
+
+	_is_turning = true
+
+	# Pre-render new content into staging viewport
+	_staging_page.viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	_render_pending_content_to_page(_staging_page, pending_page)
+
+	# Wait 2 frames for viewport to render
+	await get_tree().process_frame
+	await get_tree().process_frame
+
+	_drive_page_flip_animation()
 
 
 func _on_page_flip_started() -> void:
@@ -507,27 +540,6 @@ func _on_page_flip_started() -> void:
 
 func _on_page_flip_ended() -> void:
 	_is_turning = false
-
-	# Swap buffers: back becomes front
-	var temp := _right_page
-	_right_page = _right_page_back
-	_right_page_back = temp
-
-	# Update the static right slot with new content
-	if _page_flip and _page_flip._slot_2:
-		_clear_slot(_page_flip._slot_2)
-		var right_rect := TextureRect.new()
-		right_rect.texture = _right_page.viewport.get_texture()
-		right_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		right_rect.stretch_mode = TextureRect.STRETCH_SCALE
-		right_rect.size = _page_flip._slot_2.size
-		_page_flip._slot_2.add_child(right_rect)
-
-		if _page_flip.static_right:
-			_page_flip.static_right.texture = _page_flip._slot_2.get_texture()
-
-	current_page = pending_page
-	page_turn_completed.emit(_pending_turn_direction)
 
 
 func switch_to_page(page_type: PageType, direction: String = "right") -> void:
@@ -552,8 +564,9 @@ func _render_pending_content_to_page(page: PageContentManager.PageContent, page_
 			if current_entity:
 				_render_entity_to_page(page, current_entity)
 		PageType.DIALOGUE:
-			if not dialogue_data.is_empty():
-				_render_dialogue_to_page(page, dialogue_data)
+			var ddata: Dictionary = dialogue_data if not dialogue_data.is_empty() else GameState.dialogue_data
+			if not ddata.is_empty():
+				_render_dialogue_to_page(page, ddata)
 		PageType.SHOP:
 			_render_shop_to_page(page)
 		PageType.CONTAINER:
@@ -566,10 +579,14 @@ func _render_room_to_page(page: PageContentManager.PageContent, room: MockWorld.
 		return
 	available_exits = room.exits.keys() if room.exits else []
 	page.label.text = _content_renderer.render_room(room, events)
+	page.bar.update_exits(available_exits)
+	page.bar.update_minimap(room, GameState.visited_rooms)
+	page.bar.set_bar_visible(true)
 
 
 func _render_menu_to_page(page: PageContentManager.PageContent) -> void:
 	page.label.text = _content_renderer.render_menu(current_menu_tab, _menu_renderer)
+	page.bar.set_bar_visible(false)
 
 
 func _render_entity_to_page(page: PageContentManager.PageContent, entity: Variant) -> void:
@@ -579,14 +596,17 @@ func _render_entity_to_page(page: PageContentManager.PageContent, entity: Varian
 	var result := _content_renderer.render_entity(entity)
 	page.label.text = result.text
 	current_entity_actions = result.actions
+	page.bar.set_bar_visible(false)
 
 
 func _render_shop_to_page(page: PageContentManager.PageContent) -> void:
 	page.label.text = _shop_container_handler.render_shop()
+	page.bar.set_bar_visible(false)
 
 
 func _render_container_to_page(page: PageContentManager.PageContent) -> void:
 	page.label.text = _shop_container_handler.render_container()
+	page.bar.set_bar_visible(false)
 
 
 func _render_dialogue_to_page(page: PageContentManager.PageContent, data: Dictionary) -> void:
@@ -606,6 +626,7 @@ func _render_dialogue_to_page(page: PageContentManager.PageContent, data: Dictio
 	if should_add:
 		dialogue_history.append({"speaker": speaker, "text": dialogue_text, "is_player": false})
 	page.label.text = _content_renderer.render_dialogue(data, dialogue_history)
+	page.bar.set_bar_visible(false)
 
 
 func _render_dialogue_from_game_state(page: PageContentManager.PageContent) -> void:
@@ -650,7 +671,9 @@ func _connect_game_state_signals() -> void:
 
 func _on_room_changed(room: MockWorld.Room) -> void:
 	events.clear()
-	if current_page == PageType.ROOM:
+	if current_page == PageType.ROOM and _page_flip and _page_flip.anim_player:
+		_do_room_page_turn(room)
+	elif current_page == PageType.ROOM:
 		display_room(room)
 
 
@@ -669,28 +692,21 @@ func _on_events_changed() -> void:
 
 
 func _on_game_state_page_changed(new_page: GameState.PageType) -> void:
+	# Update entity ref if needed before page switch
+	if new_page == GameState.PageType.ENTITY and not GameState.current_entity.is_empty():
+		current_entity = GameState.current_entity
+
+	var page_type: PageType
 	match new_page:
-		GameState.PageType.ROOM:
-			current_page = PageType.ROOM
-			if GameState.current_room:
-				_render_room_to_page(_right_page, GameState.current_room)
-		GameState.PageType.MENU:
-			current_page = PageType.MENU
-			_render_menu_to_page(_right_page)
-		GameState.PageType.ENTITY:
-			current_page = PageType.ENTITY
-			if not GameState.current_entity.is_empty():
-				current_entity = GameState.current_entity
-				_render_entity_to_page(_right_page, current_entity)
-		GameState.PageType.DIALOGUE:
-			current_page = PageType.DIALOGUE
-			_render_dialogue_from_game_state(_right_page)
-		GameState.PageType.SHOP:
-			current_page = PageType.SHOP
-			_render_shop_to_page(_right_page)
-		GameState.PageType.CONTAINER:
-			current_page = PageType.CONTAINER
-			_render_container_to_page(_right_page)
+		GameState.PageType.ROOM: page_type = PageType.ROOM
+		GameState.PageType.MENU: page_type = PageType.MENU
+		GameState.PageType.ENTITY: page_type = PageType.ENTITY
+		GameState.PageType.DIALOGUE: page_type = PageType.DIALOGUE
+		GameState.PageType.SHOP: page_type = PageType.SHOP
+		GameState.PageType.CONTAINER: page_type = PageType.CONTAINER
+		_: page_type = PageType.ROOM
+
+	switch_to_page(page_type, "right")
 
 
 func _on_atmosphere_changed(atmo: String) -> void:
@@ -717,21 +733,13 @@ func _on_dialogue_changed(data: Dictionary) -> void:
 	_is_mock_dialogue = false
 	dialogue_data = data
 	pre_dialogue_page = current_page
-	current_page = PageType.DIALOGUE
-	_render_dialogue_from_game_state(_right_page)
+	switch_to_page(PageType.DIALOGUE, "right")
 
 
 func _on_dialogue_ended() -> void:
 	dialogue_data = {}
 	dialogue_history = []
-	current_page = pre_dialogue_page
-	match pre_dialogue_page:
-		PageType.ENTITY:
-			if current_entity:
-				_render_entity_to_page(_right_page, current_entity)
-		PageType.ROOM, _:
-			if GameState.current_room:
-				_render_room_to_page(_right_page, GameState.current_room)
+	switch_to_page(pre_dialogue_page, "right")
 
 
 # =============================================================================
@@ -740,15 +748,12 @@ func _on_dialogue_ended() -> void:
 
 func show_entity_details(entity: Variant) -> void:
 	current_entity = entity
-	current_page = PageType.ENTITY
-	_render_entity_to_page(_right_page, entity)
+	switch_to_page(PageType.ENTITY, "right")
 
 
 func go_back_to_room() -> void:
 	current_entity = null
-	current_page = PageType.ROOM
-	if GameState.current_room:
-		_render_room_to_page(_right_page, GameState.current_room)
+	switch_to_page(PageType.ROOM, "right")
 
 
 func _execute_entity_action(action_key: String) -> void:
@@ -821,11 +826,30 @@ func _click_entity(entity: Variant) -> void:
 
 
 # =============================================================================
+# Navigation Click Handling
+# =============================================================================
+
+func _handle_nav_click(action: String) -> void:
+	if _is_turning:
+		return
+	match action:
+		"menu":
+			menu_pressed.emit()
+		"say":
+			say_pressed.emit()
+		"north", "south", "east", "west", "up", "down":
+			nav_direction_pressed.emit(action)
+
+
+# =============================================================================
 # Menu Click Handling
 # =============================================================================
 
 func _handle_menu_click(tab_key: String) -> void:
 	match tab_key:
+		"back":
+			go_back_to_room()
+			return
 		"inventory": current_menu_tab = MenuTab.INVENTORY
 		"equipment": current_menu_tab = MenuTab.EQUIPMENT
 		"character": current_menu_tab = MenuTab.CHARACTER
@@ -834,7 +858,6 @@ func _handle_menu_click(tab_key: String) -> void:
 		"social": current_menu_tab = MenuTab.SOCIAL
 		"settings": current_menu_tab = MenuTab.SETTINGS
 		"quit":
-			bottom_bar_pressed.emit("quit")
 			return
 	_render_menu_to_page(_right_page)
 
@@ -916,11 +939,10 @@ func _start_mock_dialogue(entity: Variant) -> void:
 	dialogue_data = mock_data
 	dialogue_history = []
 	pre_dialogue_page = current_page
-	current_page = PageType.DIALOGUE
 	var speaker: String = mock_data.get("speaker", "Someone")
 	var text: String = mock_data.get("text", "")
 	dialogue_history.append({"speaker": speaker, "text": text, "is_player": false})
-	_render_dialogue_to_page(_right_page, mock_data)
+	switch_to_page(PageType.DIALOGUE, "right")
 
 
 func _advance_mock_dialogue(choice_index: int) -> void:
@@ -964,8 +986,197 @@ func _get_mock_dialogue_node(entity: Variant, node_index: int) -> Dictionary:
 
 
 # =============================================================================
+# Page Turn Animation (shared by all page transitions)
+# =============================================================================
+
+func _do_room_page_turn(room: MockWorld.Room) -> void:
+	if _is_turning:
+		_pending_room = room
+		return
+
+	# Use the generic animation path
+	pending_page = PageType.ROOM
+	_is_turning = true
+
+	# Pre-render new room into staging viewport
+	_staging_page.viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	_render_room_to_page(_staging_page, room)
+
+	# Wait 2 frames for viewport to render
+	await get_tree().process_frame
+	await get_tree().process_frame
+
+	_drive_page_flip_animation()
+
+
+func _drive_page_flip_animation() -> void:
+	if not _page_flip or not _page_flip.anim_player or not _page_flip.dynamic_poly:
+		_finish_page_turn()
+		return
+
+	var anim_player: AnimationPlayer = _page_flip.anim_player
+	var dynamic_poly: Polygon2D = _page_flip.dynamic_poly
+	var anim_name := "turn_flexible_page"
+
+	if not anim_player.has_animation(anim_name):
+		_finish_page_turn()
+		return
+
+	# --- 1. Set up slot content ---
+	_page_flip._set_flying_slots_active(true)
+
+	var content_tex = _right_page.viewport.get_texture()
+	var parchment_tex := _get_parchment_texture()
+
+	# Slot 3 (Face A / front of turning page) = current content
+	if _page_flip._slot_3:
+		_clear_slot(_page_flip._slot_3)
+		var front_rect := TextureRect.new()
+		front_rect.texture = content_tex
+		front_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		front_rect.stretch_mode = TextureRect.STRETCH_SCALE
+		front_rect.size = _page_flip._slot_3.size
+		_page_flip._slot_3.add_child(front_rect)
+
+	# Slot 4 (Face B / back of turning page) = blank parchment
+	if _page_flip._slot_4:
+		_clear_slot(_page_flip._slot_4)
+		var back_rect := TextureRect.new()
+		back_rect.texture = parchment_tex
+		back_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		back_rect.stretch_mode = TextureRect.STRETCH_SCALE
+		back_rect.size = _page_flip._slot_4.size
+		_page_flip._slot_4.add_child(back_rect)
+
+	# --- 2. Set up static + dynamic textures ---
+	# static_right shows the NEW content underneath the turning page
+	_page_flip.static_right.texture = _staging_page.viewport.get_texture()
+	_page_flip.static_right.visible = true
+
+	var tex_front = _page_flip._slot_3.get_texture()
+	var tex_back = _page_flip._slot_4.get_texture()
+
+	# PageFlip sets dynamic_poly.texture to tex_back (used for UV normalization)
+	dynamic_poly.texture = tex_back
+
+	if dynamic_poly.material is ShaderMaterial:
+		# The shader's UV face detection classifies our visible face as "back"
+		# during the first half, applying 1.0-UV.x mirroring. Swap params so
+		# content goes through back_texture (shader mirrors it, correcting display).
+		dynamic_poly.material.set_shader_parameter("front_texture", tex_back)
+		dynamic_poly.material.set_shader_parameter("back_texture", tex_front)
+		dynamic_poly.material.set_shader_parameter("shadow_intensity", 0.0)
+		dynamic_poly.material.set_shader_parameter("max_shadow_spread", 0.0)
+
+	# --- 3. Disconnect PageFlip's own handlers to prevent state corruption ---
+	if anim_player.is_connected("animation_finished", _page_flip._on_animation_finished):
+		anim_player.disconnect("animation_finished", _page_flip._on_animation_finished)
+
+	# --- 4. Configure animation ---
+	dynamic_poly.visible = true
+	dynamic_poly.z_index = 10
+
+	# Play page flip sound
+	if _page_flip.sfx_page_flip and _page_flip.audio_player:
+		_page_flip.audio_player.stream = _page_flip.sfx_page_flip
+		_page_flip.audio_player.pitch_scale = randf_range(0.95, 1.05)
+		_page_flip.audio_player.play()
+
+	_hide_book_chrome()
+	page_turn_started.emit("right")
+
+	anim_player.current_animation = anim_name
+	anim_player.seek(0.0, true)
+
+	# Wait for slot viewports to render with correct content + bone positions
+	await RenderingServer.frame_post_draw
+
+	# Use a Timer to stop at the halfway point
+	var anim_len: float = anim_player.get_animation(anim_name).length
+	var half_duration: float = anim_len * 0.5
+	get_tree().create_timer(half_duration).timeout.connect(
+		_on_half_animation_midpoint
+	)
+
+	# Shadow tween for the first half only
+	if dynamic_poly.material is ShaderMaterial:
+		var shadow_tween := create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		shadow_tween.tween_property(dynamic_poly.material, "shader_parameter/shadow_intensity", 0.5, half_duration * 0.7)
+		shadow_tween.parallel().tween_property(dynamic_poly.material, "shader_parameter/max_shadow_spread", 0.3, half_duration * 0.7)
+
+	# Start the animation
+	anim_player.play(anim_name)
+
+
+## Called at animation midpoint: page is vertical, stop and snap to new content.
+func _on_half_animation_midpoint() -> void:
+	if not _page_flip:
+		_finish_page_turn()
+		return
+
+	var anim_player: AnimationPlayer = _page_flip.anim_player
+	var dynamic_poly: Polygon2D = _page_flip.dynamic_poly
+
+	# Hide the dynamic poly BEFORE stopping to avoid bone-reset visual flash
+	dynamic_poly.visible = false
+	anim_player.stop()
+
+	# Reset shader params
+	if dynamic_poly.material is ShaderMaterial:
+		dynamic_poly.material.set_shader_parameter("shadow_intensity", 0.0)
+		dynamic_poly.material.set_shader_parameter("max_shadow_spread", 0.0)
+
+	# Disable flying slots
+	_page_flip._set_flying_slots_active(false)
+
+	# Reconnect PageFlip's animation handler for future use
+	if not anim_player.is_connected("animation_finished", _page_flip._on_animation_finished):
+		anim_player.animation_finished.connect(_page_flip._on_animation_finished)
+
+	_finish_page_turn()
+
+
+func _finish_page_turn() -> void:
+	# Swap page references: staging already has the new content fully rendered.
+	var old_right := _right_page
+	_right_page = _staging_page
+	_staging_page = old_right
+	_staging_page.viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+
+	# Update current page type to match what was rendered
+	current_page = pending_page
+
+	if _page_flip:
+		# Point static_right at the new right page viewport
+		_page_flip.static_right.texture = _right_page.viewport.get_texture()
+		_page_flip.static_right.visible = true
+		_hide_book_chrome()
+
+	_is_turning = false
+	page_turn_completed.emit("right")
+
+	# If another room was queued during animation, start next turn
+	if _pending_room != null:
+		var next_room := _pending_room
+		_pending_room = null
+		_do_room_page_turn(next_room)
+
+
+# =============================================================================
 # Utility Functions
 # =============================================================================
+
+## Cached parchment texture matching our viewport background color
+var _parchment_tex: ImageTexture = null
+
+func _get_parchment_texture() -> ImageTexture:
+	if _parchment_tex:
+		return _parchment_tex
+	var img := Image.create(PageContentManager.VIEWPORT_WIDTH, PageContentManager.VIEWPORT_HEIGHT, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0.878, 0.816, 0.706))  # Matches page_content_manager.gd parchment bg
+	_parchment_tex = ImageTexture.create_from_image(img)
+	return _parchment_tex
+
 
 func _strip_html_tags(text: String) -> String:
 	var regex := RegEx.new()

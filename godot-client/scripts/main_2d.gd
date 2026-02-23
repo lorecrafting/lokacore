@@ -68,17 +68,23 @@ func _ready() -> void:
 
 
 func _setup_book() -> void:
-	loka_book.bottom_bar_pressed.connect(_on_bottom_bar_pressed)
+	pass
 
 
 func _setup_bottom_bar() -> void:
 	bottom_bar.bar_pressed.connect(_on_bottom_bar_pressed)
-	# Connect room changes to update compass
-	GameState.room_changed.connect(func(room: MockWorld.Room):
-		if room:
-			var exits: Array = room.exits.keys() if room.exits else []
-			bottom_bar.update_exits(exits)
-	)
+	# Connect room changes to update compass and minimap
+	GameState.room_changed.connect(_on_room_changed_update_bar)
+	# Catch up with current room (GameState._ready fires before this connection)
+	if GameState.current_room:
+		_on_room_changed_update_bar(GameState.current_room)
+
+
+func _on_room_changed_update_bar(room: MockWorld.Room) -> void:
+	if room:
+		var exits: Array = room.exits.keys() if room.exits else []
+		bottom_bar.update_exits(exits)
+		bottom_bar.update_minimap(room, GameState.visited_rooms)
 
 
 func _setup_chat_modal() -> void:
@@ -120,7 +126,7 @@ func _on_bottom_bar_pressed(button: String) -> void:
 			_toggle_menu()
 		"say":
 			_open_chat_modal()
-		"north", "south", "east", "west":
+		"north", "south", "east", "west", "up", "down":
 			_navigate(button)
 
 
@@ -134,9 +140,6 @@ func _toggle_menu() -> void:
 func _navigate(direction: String) -> void:
 	if loka_book.current_page != LokaBook.PageType.ROOM:
 		return
-	var turn_dir := "right" if direction in ["north", "east"] else "left"
-	loka_book.turn_page(turn_dir)
-	await get_tree().create_timer(0.2).timeout
 	GameState.navigate(direction)
 
 
