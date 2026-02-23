@@ -1,6 +1,5 @@
 key: the_edge
 type: room
-parent: base_room
 short_desc: "The Edge"
 extra_desc: |
   Where the world ends. The sky curves downward here, meeting the ground in a seam that runs from horizon to horizon. Up close, it is not sky — it is a membrane, with a join along its base. The surface is faintly reflective; you can see your face in it. When it flickers, the light stutters like a system fault.
@@ -9,7 +8,10 @@ exits:
   south: edge_approach
   east: edge_east
   west: edge_west
+  north: threshold_gate
 
 tags:
   - outdoor
   - forbidden
+  - edge_zone
+  - room_entry_effect

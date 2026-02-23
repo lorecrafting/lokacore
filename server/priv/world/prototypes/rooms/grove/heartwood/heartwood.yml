@@ -1,6 +1,5 @@
 key: heartwood
 type: room
-parent: base_room
 short_desc: "The Heartwood"
 extra_desc: |
   Ancient trees the size of small houses ring a communal clearing where a central fire burns. Voices, work, and laughter rise and fall like breath. Every tree in the ring spirals clockwise without exception, their bark warm to the touch even in deep shade — impossibly large for their species, impossibly warm for the light they receive.

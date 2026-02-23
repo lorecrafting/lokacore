@@ -1,6 +1,5 @@
 key: blight_zone
 type: room
-parent: base_room
 short_desc: "The Dying Trees"
 extra_desc: |
   Trees along the eastern reach have begun to blacken — leaves curling inward, bark splitting in long seams, ground cracked beneath them. The dying follows a line: not the wandering spread of disease, but a perfectly straight line that turns at a sharp right angle before continuing. Organic rot does not work this way. Kira has been watching.
@@ -8,6 +7,8 @@ extra_desc: |
 exits:
   west: eastern_edge_grove
   north: blight_zone_deep
+  east: blight_border
+  south: eastern_grove_south
 
 tags:
   - outdoor

@@ -1,6 +1,5 @@
 key: western_outskirts
 type: room
-parent: base_room
 short_desc: "The Western Outskirts"
 extra_desc: |
   Where the cultivated western forest gives way to something less managed. The Shapers don't come here often — they say it isn't needed, that this section tends itself. Some admit it feels less welcoming, though they cannot explain why. The trees here are spaced wider, the undergrowth thinner, the light harsher.

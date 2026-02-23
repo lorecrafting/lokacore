@@ -1,6 +1,5 @@
 key: pressed_flower
 type: item
-parent: base_item
 short_desc: "A Pressed White Flower"
 long_desc: "A small pressed white flower rests here, perfectly preserved."
 extra_desc: |
@@ -11,6 +10,8 @@ primary_keyword: flower
 components:
   physical:
     weight: 0
+    stackable: false
+    max_stack: 1
     size: tiny
     material: organic
 

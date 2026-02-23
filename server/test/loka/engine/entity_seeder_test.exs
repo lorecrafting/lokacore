@@ -37,99 +37,6 @@ defmodule Loka.Engine.EntitySeederTest do
   # Inheritance Resolution
   # ==========================================================================
 
-  describe "resolve_inheritance/1" do
-    test "child overrides parent fields" do
-      raw = %{
-        "base_npc" => %{
-          "key" => "base_npc",
-          "type" => "npc",
-          "short_desc" => "Base NPC",
-          "components" => %{"combatant" => %{"level" => 1}},
-          "tags" => ["npc"]
-        },
-        "goblin" => %{
-          "key" => "goblin",
-          "type" => "npc",
-          "parent" => "base_npc",
-          "short_desc" => "a goblin",
-          "components" => %{"combatant" => %{"level" => 5}}
-        }
-      }
-
-      resolved = EntitySeeder.resolve_inheritance(raw)
-
-      assert resolved["goblin"]["short_desc"] == "a goblin"
-      assert resolved["goblin"]["components"]["combatant"]["level"] == 5
-    end
-
-    test "child inherits unset fields from parent" do
-      raw = %{
-        "base_npc" => %{
-          "key" => "base_npc",
-          "type" => "npc",
-          "tags" => ["npc"],
-          "components" => %{"combatant" => %{"health" => 100}}
-        },
-        "goblin" => %{
-          "key" => "goblin",
-          "type" => "npc",
-          "parent" => "base_npc",
-          "components" => %{"combatant" => %{"level" => 3}}
-        }
-      }
-
-      resolved = EntitySeeder.resolve_inheritance(raw)
-
-      # Inherits tags from parent
-      assert resolved["goblin"]["tags"] == ["npc"]
-      # Deep merge: inherits health, child adds level
-      assert resolved["goblin"]["components"]["combatant"]["health"] == 100
-      assert resolved["goblin"]["components"]["combatant"]["level"] == 3
-    end
-
-    test "multi-level inheritance" do
-      raw = %{
-        "base" => %{
-          "key" => "base",
-          "type" => "npc",
-          "components" => %{"combatant" => %{"health" => 50}}
-        },
-        "mid" => %{
-          "key" => "mid",
-          "type" => "npc",
-          "parent" => "base",
-          "components" => %{"combatant" => %{"level" => 2}}
-        },
-        "leaf" => %{
-          "key" => "leaf",
-          "type" => "npc",
-          "parent" => "mid",
-          "short_desc" => "a leaf npc"
-        }
-      }
-
-      resolved = EntitySeeder.resolve_inheritance(raw)
-
-      assert resolved["leaf"]["short_desc"] == "a leaf npc"
-      assert resolved["leaf"]["components"]["combatant"]["health"] == 50
-      assert resolved["leaf"]["components"]["combatant"]["level"] == 2
-    end
-
-    test "handles broken parent refs gracefully" do
-      raw = %{
-        "orphan" => %{
-          "key" => "orphan",
-          "type" => "npc",
-          "parent" => "nonexistent_parent",
-          "short_desc" => "an orphan"
-        }
-      }
-
-      resolved = EntitySeeder.resolve_inheritance(raw)
-      assert resolved["orphan"]["short_desc"] == "an orphan"
-    end
-  end
-
   # ==========================================================================
   # YAML to Entity Conversion
   # ==========================================================================
@@ -174,17 +81,6 @@ defmodule Loka.Engine.EntitySeederTest do
       # Quest-specific fields go into components["data"] for TypedObject compat
       assert entity.components["data"]["objectives"] == [%{"id" => "obj1", "type" => "talk"}]
       assert entity.components["data"]["rewards"] == %{"xp" => 10}
-    end
-
-    test "stores parent_key in metadata" do
-      data = %{
-        "key" => "child",
-        "type" => "npc",
-        "parent" => "base_npc"
-      }
-
-      entity = EntitySeeder.yaml_to_entity(data)
-      assert entity.metadata["parent_key"] == "base_npc"
     end
 
     test "merges attributes into components" do
@@ -254,28 +150,16 @@ defmodule Loka.Engine.EntitySeederTest do
       assert entity.short_desc == "Test Room"
     end
 
-    test "seeds NPCs with parent inheritance", %{dir: dir} do
-      write_yaml(dir, "prototypes/_base/base_npc.yml", """
-      key: base_npc
+    test "seeds NPCs with standalone YAML", %{dir: dir} do
+      write_yaml(dir, "prototypes/npcs/test_goblin.yml", """
+      key: test_goblin
       type: npc
-      short_desc: Base NPC
+      short_desc: a goblin
       components:
         combatant:
           health:
             current: 100
             max: 100
-          level: 1
-      tags:
-        - npc
-      """)
-
-      write_yaml(dir, "prototypes/npcs/test_goblin.yml", """
-      key: test_goblin
-      type: npc
-      parent: base_npc
-      short_desc: a goblin
-      components:
-        combatant:
           level: 5
       tags:
         - hostile
@@ -285,9 +169,7 @@ defmodule Loka.Engine.EntitySeederTest do
       assert {:ok, entity} = Entities.find_one(key: "test_goblin", type: :npc)
 
       assert entity.short_desc == "a goblin"
-      # Inherited from parent
       assert entity.components["combatant"]["health"] == %{"current" => 100, "max" => 100}
-      # Overridden by child
       assert entity.components["combatant"]["level"] == 5
     end
 

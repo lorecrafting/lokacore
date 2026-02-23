@@ -1,6 +1,5 @@
 key: ship_core_access
 type: room
-parent: base_room
 short_desc: "The Ship Core"
 extra_desc: |
   The deepest accessible point. Drive systems pulse through the walls in steady rhythm — the Pulse the Tenders have always felt in the ground above, but here undisguised, mechanical, enormous. The room is hot. Everything vibrates faintly. This has been running for two hundred years. It is very, very tired.

@@ -1,6 +1,5 @@
 key: threshold_gate
 type: room
-parent: base_room
 short_desc: "The Threshold"
 extra_desc: |
   The membrane is gone. You stand where it ended, and the ground continues north without interruption. The seam where it met the earth is still visible — a faint ridge of compressed soil running east to west, as if the world pressed back against whatever held it closed. The sky is open above you in a way that has no precedent. Wind moves across your face. You have never felt wind before.

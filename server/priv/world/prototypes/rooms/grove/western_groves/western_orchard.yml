@@ -1,6 +1,5 @@
 key: western_orchard
 type: room
-parent: base_room
 short_desc: "The Western Orchard"
 extra_desc: |
   Cultivated trees heavy with fruit grow in generous rows, tended by Shapers and Gatherers who move between them with baskets. The harvest is always good. Two hundred years of growing from the same soil, never fertilized, never depleted — perfect yields every season, without exception.
@@ -9,6 +8,7 @@ exits:
   south: shaper_grove
   north: western_outskirts
   west: old_hollow
+  east: grove_pond
 
 tags:
   - outdoor

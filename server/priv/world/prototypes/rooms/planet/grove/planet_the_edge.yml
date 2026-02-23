@@ -1,6 +1,5 @@
 key: planet_the_edge
 type: room
-parent: base_room
 short_desc: "The Open Edge"
 extra_desc: |
   Where the membrane was. The seam is still visible along the ground — a line where the ship's hull met the biological layer for two hundred years, now open to weather. Wind comes through here. Real wind, from the planet, carrying something that isn't grove and isn't ship. The edge is no longer an ending. It is a threshold.

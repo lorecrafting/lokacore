@@ -1,13 +1,16 @@
 key: edge_east
 type: room
-parent: base_room
 short_desc: "The Eastern Edge"
 extra_desc: |
   The eastern section of the membrane, where the hull seam is most visible and most stressed. Long horizontal cracks run along the junction where the membrane meets the substrate, dark and dry. Near the cracks, the surface is slightly warmer. This is where the Blight line above corresponds to what is failing below.
 
 exits:
   west: the_edge
+  east: eastern_threshold
+  north: edge_monitoring_post
 
 tags:
   - outdoor
   - forbidden
+  - edge_zone
+  - room_entry_effect

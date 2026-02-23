@@ -1,6 +1,5 @@
 key: deep_entrance
 type: room
-parent: base_room
 short_desc: "The Deep Entrance"
 extra_desc: |
   Just inside the threshold. The sounds of the Heartwood — voices, fire crackling, birds — stop at the tree line behind you with no fade, no gradual muffling. The silence begins abruptly. Bioluminescent lichen clings to the lower bark here, pulsing in slow rhythm.

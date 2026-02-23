@@ -1,6 +1,5 @@
 key: tomas
 type: npc
-parent: base_npc
 short_desc: "Tomas"
 long_desc: "An old man sits by the memorial stone, talking quietly to it."
 extra_desc: |

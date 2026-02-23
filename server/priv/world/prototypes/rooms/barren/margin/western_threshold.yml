@@ -1,13 +1,13 @@
 key: western_threshold
 type: room
-parent: base_room
 short_desc: "The Western Threshold"
 extra_desc: |
   The hull section here is exposed — the membrane's western anchor point pulled free cleanly. What looked like darkness from inside is now visible as a section of the ship's outer hull, slightly curved, with markings scored into the surface. Dates in the old counting system. Tallies. Someone stood here for years tracking something from the outside. The marks run for the full span of two generations.
 
 exits:
-  east: planet_edge_west
+  east: edge_west
   north: margin_overlook
+  south: threshold_gate
 
 tags:
   - outdoor

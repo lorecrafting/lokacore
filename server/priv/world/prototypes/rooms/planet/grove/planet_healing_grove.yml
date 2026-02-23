@@ -1,6 +1,5 @@
 key: planet_healing_grove
 type: room
-parent: base_room
 short_desc: "Thera's Healing Grove"
 extra_desc: |
   The herbs still grow in rows she didn't plant. The temperature is still right. She is not here. The narrow stream along one edge runs exactly as it always did, because the system she tended still runs. Kira has taken over the morning rounds. The tools are in the same places.
@@ -8,8 +7,8 @@ exits:
   south: planet_lira_memorial
   north: planet_small_grove
   west: planet_training_grove
+spawns:
+  - prototype: planet_kira
 tags:
   - outdoor
   - safe_zone
-spawns:
-  - prototype: kira

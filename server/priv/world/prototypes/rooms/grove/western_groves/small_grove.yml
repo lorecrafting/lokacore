@@ -1,6 +1,5 @@
 key: small_grove
 type: room
-parent: base_room
 short_desc: "The Small Grove"
 extra_desc: |
   A hidden pocket of forest that feels set apart — smaller, more concentrated, the Pulse noticeably stronger. Pale blue flowers grow in a ring at the edge. Thera found this place as a child and has returned ever since, drawn to something she has never been able to name.
@@ -8,6 +7,9 @@ extra_desc: |
 # NOTE: Access should eventually be gated by story flag (Thera's presence or beat completion).
 exits:
   south: healing_grove
+  west: healing_grove_south
+  east: grove_garden
+  north: western_orchard_west
 
 tags:
   - outdoor

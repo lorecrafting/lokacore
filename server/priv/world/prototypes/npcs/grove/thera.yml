@@ -1,10 +1,9 @@
 key: thera
 type: npc
-parent: base_npc
 short_desc: "Thera"
 long_desc: "Thera stands here, her attention completely on whatever is in front of her."
 extra_desc: |
-  She wears practical clothes worn soft at the elbows. There is something on her fingers — herb-stain, dark green at the knuckles. She looks up when you approach, and the look is unhurried. As if she had been waiting, and it's fine that you took your time.
+  She wears practical clothes worn soft at the elbows. There is something on her fingers — herb stain, dark green at the knuckles. She looks up when you approach, and the look is unhurried. As if she had been waiting, and it's fine that you took your time.
 keywords: [thera, healer, rootspeaker, woman]
 primary_keyword: thera
 
@@ -535,7 +534,7 @@ components:
           next: deep_alone_2
 
     deep_alone_2:
-      text: "I had to hear it from the roots. All of it, directly. No... no more half-truths and protection."
+      text: "I had to hear it from the roots. All of it, directly. No... no more half truths and protection."
       choices:
         - text: "What did you hear?"
           next: deep_alone_3
@@ -921,7 +920,14 @@ emotes:
   worried: "*stands very still, looking at nothing*"
 
 traits:
+  - script: thera_schedule
+    config:
+      morning_room: awakening_clearing
+      midday_room: healing_grove
+      evening_room: training_grove
+      night_room: awakening_clearing
+      check_interval: 600
   - script: ambient_emitter
     config:
       interval: 60
-      emotes: [idle, morning, worried]
+      emotes: [idle, morning, worried, healing]

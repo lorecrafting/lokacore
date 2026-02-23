@@ -1,10 +1,517 @@
 key: planet_tomas
 type: npc
-parent: tomas
 short_desc: "Tomas"
+long_desc: "An old man sits by the memorial stone, talking quietly to it."
+extra_desc: |
+  He is ancient in a way the others aren't — not just old, but settled into age the way a tree settles into the hillside it planted itself in. He holds a worn trowel in both hands like a rosary. Most of the time he looks at the stone and talks in a low voice that doesn't carry. Occasionally he stops and looks at you with sudden, startling clarity.
+keywords: [tomas, old man, elder, witness, man]
+primary_keyword: tomas
 
 components:
+  combatant:
+    health:
+      current: 40
+      max: 40
+    stats:
+      str: 4
+      dex: 5
+      sta: 6
+    level: 1
+
+  ai:
+    aggression: passive
+    wander: false
+
   dialogue_tree:
+    # ==========================================================================
+    # TOMAS — The Witness
+    # Ancient (205 years old), Lira speaks through him in lucid moments.
+    # Key dialogue_topic nodes:
+    #   first_meeting (grove_arrival)
+    #   three_roots_location (grove_belonging — points player to the carving)
+    #   lira_message (grove_revelation — full lucid moment)
+    # ==========================================================================
+
+    start:
+      text: "She was smiling. Why won't anyone tell me why?"
+      choices:
+        - text: "Who was smiling?"
+          next: who_smiling
+        - text: "Tomas — the roots."
+          show_if:
+            completed_quest: grove_epilogue
+          next: post_landing_tomas
+
+        - text: "Hello, Tomas."
+          show_if:
+            flag_set: met_tomas
+          next: hello_again
+        - text: "What do you think about what's happening?"
+          show_if:
+            quest_active: grove_sacrifice
+          next: tomas_sacrifice_check
+        - text: "[Accept Quest] Tell me about that old trowel."
+          show_if:
+            quest_completed: grove_arrival
+            quest_not_active: side_tomas
+            quest_not_completed: side_tomas
+          action: ["accept_quest", "side_tomas"]
+          next: trowel_accepted
+        - text: "(He seems confused)"
+          next: confused_response
+
+    who_smiling:
+      text: "Lira. At the end. The light came in and she was smiling and nobody could tell me why."
+      choices:
+        - text: "When was this?"
+          next: when_this
+        - text: "Maybe she was happy."
+          next: maybe_happy
+
+    when_this:
+      text: "A long time ago. Two hundred years, if you count. I don't count anymore."
+      choices:
+        - text: "You knew Lira?"
+          next: knew_lira
+
+    maybe_happy:
+      text: "Happy people smile like they mean it. That was different. That was a smile that knew something."
+      choices:
+        - text: "What did it know?"
+          next: smile_what_knows
+
+    knew_lira:
+      text: "I was there. Right there. The light took her and the whole Grove went quiet for a moment and then the Pulse — the Pulse was different after. Warmer."
+      choices:
+        - text: "What was she like?"
+          next: lira_like
+
+    smile_what_knows:
+      text: "That's what I keep asking. No one answers. Maybe you'll find out."
+      choices:
+        - text: "(He looks at you with sudden intent)"
+          action: ["set_flag", "met_tomas"]
+          next: intent_look
+
+    lira_like:
+      text: "Practical. Funny, when she wanted to be. She kept making us plant things she said would take a hundred years to be beautiful. Said she'd see it eventually."
+      choices:
+        - text: "She was right."
+          next: lira_right
+
+    lira_right:
+      text: "*A long pause.* \"Yes. She was.\""
+      choices:
+        - text: "(He drifts back into his own world)"
+          next: null
+
+    intent_look:
+      text: "You're the witness."
+      choices:
+        - text: "I don't know what that means."
+          next: witness_meaning
+        - text: "Yes."
+          next: witness_meaning
+
+    witness_meaning:
+      text: "Lira said there'd be a witness. Someone preserved to see the end and carry the story forward. She said — she said make sure they know it isn't sad."
+      choices:
+        - text: "What isn't sad?"
+          next: not_sad
+
+    not_sad:
+      text: "The smile. Whatever she found. Make sure the witness knows."
+      choices:
+        - text: "How do I find out what she found?"
+          next: how_find_out
+
+    how_find_out:
+      text: "*He taps the trowel against the stone.* \"Go to the Heart. At the end. Stay.\""
+      choices:
+        - text: "I will."
+          next: null
+
+    confused_response:
+      text: "My father gave me this trowel. He planted the first orchard, you know. Before I was born."
+      choices:
+        - text: "He sounds like a good man."
+          next: father_good
+        - text: "(Leave him)"
+          next: null
+
+    father_good:
+      text: "He was. He was from Earth. He planted things he said smelled like home. I never knew what Earth smelled like."
+      choices:
+        - text: "What does the orchard smell like?"
+          next: orchard_smell
+
+    orchard_smell:
+      text: "Like home. That's what he always said. He was right. I didn't understand until I was very old."
+      choices:
+        - text: "(Leave him to his memories)"
+          next: null
+        - text: "[Accept Quest] Tell me more about him. What was he like?"
+          show_if:
+            quest_not_active: side_tomas
+            quest_completed: grove_arrival
+          action: ["accept_quest", "side_tomas"]
+          next: trowel_accepted
+
+    hello_again:
+      text: "You again. Good. I like you."
+      choices:
+        - text: "I like you too, Tomas."
+          next: hello_again_2
+        - text: "Do you have lucid moments? When you remember everything?"
+          next: lucid_moments
+        - text: "You mentioned a carving once. In the Deep."
+          show_if:
+            quest_not_active: side_three_roots
+            quest_not_completed: side_three_roots
+            quest_completed: grove_belonging
+          next: three_roots_offer
+
+    hello_again_2:
+      text: "She says you're doing well."
+      choices:
+        - text: "Who says?"
+          next: who_says
+
+    who_says:
+      text: "She does. She watches."
+      choices:
+        - text: "Lira?"
+          next: hello_lira
+
+    hello_lira:
+      text: "She never left. That's what I've been trying to tell everyone. She never left."
+      choices:
+        - text: "(He drifts again)"
+          next: null
+
+    lucid_moments:
+      text: "It's not that simple. It's more like... the voice gets louder sometimes. And then I'm both of us for a while."
+      choices:
+        - text: "What voice?"
+          next: the_voice
+
+    the_voice:
+      text: "You know what voice."
+      choices:
+        - text: "Lira."
+          next: lucid_lira
+
+    lucid_lira:
+      text: "She likes you. For what it's worth."
+      choices:
+        - text: "(That's worth quite a lot)"
+          next: null
+
+    # ---- grove_belonging dialogue_topic node ----
+
+    three_roots_location:
+      text: "The carving. Yes. I know where it is."
+      choices:
+        - text: "Can you tell me?"
+          next: three_roots_2
+
+    three_roots_2:
+      text: "In the deep. The eastern reach — where the roots go down. There's a stone half covered, you'll feel it in the Pulse before you see it. The words are worn but readable if you're patient."
+      choices:
+        - text: "Do you know what it says?"
+          next: three_roots_3
+
+    three_roots_3:
+      text: "I wrote it. A long time ago. At Lira's request."
+      choices:
+        - text: "Why?"
+          next: three_roots_why
+
+    three_roots_why:
+      text: "She said the time would come when someone would need to read it. She was specific about that. 'Someone will need to read this and then look for me.'"
+      choices:
+        - text: "And here I am."
+          next: three_roots_here_you_are
+
+    three_roots_here_you_are:
+      text: "Here you are."
+      choices:
+        - text: "(Find the carving)"
+          next: null
+
+    three_roots_offer:
+      text: "*He becomes very still. Very present.* \"Yes. I know the one you mean.\""
+      choices:
+        - text: "Can you tell me where to find it?"
+          action: ["accept_quest", "side_three_roots"]
+          next: three_roots_location
+        - text: "Never mind."
+          next: null
+
+    # ---- grove_revelation dialogue_topic node ----
+
+    lira_message:
+      text: "*His eyes change. He looks at you with a clarity that has nothing confused about it.*"
+      next: lira_message_2
+
+    lira_message_2:
+      text: "Hello. I've been waiting to do this properly. You understand I don't have full control over when — he goes where he goes. But I'm glad you came."
+      choices:
+        - text: "Lira?"
+          next: lira_message_3
+
+    lira_message_3:
+      text: "Yes. I wanted to tell you something about what happens at the end. I know you're afraid — not for yourself. For her."
+      choices:
+        - text: "I am."
+          next: lira_message_4
+
+    lira_message_4:
+      text: "Don't be. The thing she's afraid of — the dissolving — that's not what it is. You lose the boundary of yourself, yes. But you don't lose yourself. It's more like... remembering you were always bigger than the boundary."
+      choices:
+        - text: "Is that what the smile meant?"
+          next: lira_message_5
+
+    lira_message_5:
+      text: "The smile meant I found something I'd been looking for so long I forgot I was looking. I can't give you the word for it. But she'll have it soon, and she'll understand."
+      choices:
+        - text: "Is she going to be okay?"
+          next: lira_message_6
+
+    lira_message_6:
+      text: "More than okay. Tell her I said — tell her I said: 'I was waiting for you.'"
+      choices:
+        - text: "I'll tell her."
+          next: lira_message_7
+
+    lira_message_7:
+      text: "*The clarity fades. Tomas blinks and looks around, confused.* \"What were we talking about?\""
+      choices:
+        - text: "(He doesn't remember)"
+          next: null
+
+    # ---- side_three_roots return nodes ----
+
+    three_roots_found:
+      show_if:
+        quest_active: side_three_roots
+      text: "*He doesn't ask how you found it. He already knows.*"
+      next: three_roots_found_2
+
+    three_roots_found_2:
+      text: "She wrote that last part herself. 'And then look for me.' I only did the roots."
+      choices:
+        - text: "She left it for me specifically."
+          next: three_roots_found_3
+
+    three_roots_found_3:
+      text: "That's what she said. She knew who would need it. She was always seventy years ahead of the rest of us."
+      choices:
+        - text: "It was beautiful."
+          next: three_roots_found_4
+
+    three_roots_found_4:
+      text: "*He turns the trowel in his hands.* \"Yes. She had an eye for that. Go be what she needed you to be.\""
+      choices:
+        - text: "(Leave him)"
+          action: ["complete_quest", "side_three_roots"]
+          next: null
+
+    # ---- side_tomas trowel quest nodes ----
+
+    trowel_accepted:
+      text: "*He blinks. For a moment he's very here.* \"You want to know about my father?\""
+      choices:
+        - text: "I do."
+          next: trowel_story
+
+    trowel_story:
+      show_if:
+        quest_active: side_tomas
+      text: "*He holds up the trowel with both hands. The light catches the worn metal.*"
+      next: trowel_story_2
+
+    trowel_story_2:
+      text: "He carried this from Earth. The last thing he brought. He was a planter — he said if the ship was going to carry people to a new world, someone should make sure things could grow when they got there."
+      choices:
+        - text: "He planted the first trees."
+          next: trowel_story_3
+
+    trowel_story_3:
+      text: "The orchard. The heartwood grove. He broke the first soil with this. Sixty years before I was born."
+      choices:
+        - text: "And then he gave it to you."
+          next: trowel_story_4
+
+    trowel_story_4:
+      text: "When he died. He said: 'Take care of what he started.' I've been trying. The trowel reminds me — every time I hold it — what this place actually is."
+      choices:
+        - text: "What is it?"
+          next: trowel_story_5
+
+    trowel_story_5:
+      text: "The largest garden anyone ever made. Go feel it. The western orchard — the oldest trees there are his. You'll feel the difference."
+      choices:
+        - text: "(I'll go)"
+          next: null
+
+    trowel_return:
+      show_if:
+        quest_active: side_tomas
+      text: "*He looks up. A clear moment — eyes steady, present.*"
+      next: trowel_return_2
+
+    trowel_return_2:
+      text: "You went."
+      choices:
+        - text: "I felt something there. Something old."
+          next: trowel_return_3
+
+    trowel_return_3:
+      text: "Two hundred years of roots. He put them in believing someone would stand there someday and feel them. You're the someone."
+      choices:
+        - text: "Why did he leave Earth?"
+          next: trowel_return_why
+
+    trowel_return_why:
+      text: "It was ending. Not quickly — slowly, the way things that end slowly break your heart worse. He said: 'Pick the life that goes forward.'"
+      choices:
+        - text: "That's what we're all doing. Right now."
+          next: trowel_return_now
+
+    trowel_return_now:
+      text: "*He turns the trowel once in his hands.* \"Home is wherever you put the first root down. He taught me that. Now you know it too.\""
+      choices:
+        - text: "(Leave him)"
+          action: ["complete_quest", "side_tomas"]
+          next: null
+
+
+    # ---- grove_landing dialogue + cutscene nodes ----
+
+    landing_tomas:
+      show_if: { quest_active: grove_landing }
+      text: |
+        He is kneeling in the orchard, both hands pressed flat against the soil. Eyes closed. He is smiling — not the confused half smile you have seen before. A full one. Clear and certain.
+      choices:
+        - text: "Tomas?"
+          next: landing_tomas_2
+
+    landing_tomas_2:
+      text: |
+        "I can feel it. Under the substrate. Real ground. It has been there for..." He shakes his head slowly. "I do not know how long. Getting closer."
+      choices:
+        - text: "We are landing."
+          next: landing_tomas_3
+        - text: "Are you afraid?"
+          next: landing_tomas_3b
+
+    landing_tomas_3:
+      text: |
+        "Landing." He says the word like he is tasting it. His fingers dig deeper into the dirt.
+
+        "Two hundred years. Lira told me once — she could feel the planet before anyone else could. She aimed us here. She has been steering for two centuries." A long breath. "She is tired."
+      choices:
+        - text: "(Stay with him)"
+          next: landing_tomas_4
+
+    landing_tomas_3b:
+      text: |
+        "Afraid?" He opens his eyes. They are wet. "I have been afraid for two hundred years. This is the part that comes after afraid."
+      choices:
+        - text: "(Stay with him)"
+          next: landing_tomas_4
+
+    landing_tomas_4:
+      text: |
+        The ground shifts. Not subtly — a deep, structural movement, like the world settling into its final position. Above the canopy, the membrane peels away in long silent strips, dissolving into the air like morning frost.
+      choices:
+        - text: "(Look up)"
+          next: landing_tomas_5
+
+    landing_tomas_5:
+      text: |
+        Stars. Real stars. And below them, growing closer with each breath — a horizon. Not the membrane curving back on itself but actual distance, actual planet, actual sky without a ceiling.
+
+        The Pulse changes. Two voices now. The old one easing, slowing, releasing a weight held for two centuries. And a new one, strong and steady and unmistakably hers. The roots beneath the orchard light up in sequences no one alive has ever seen. Not emergency patterns. Landing patterns.
+      choices:
+        - text: "(Stay still)"
+          next: landing_tomas_6
+
+    landing_tomas_6:
+      text: |
+        The trees hold. The roots hold. There is a sound — deep, resonant, final — like the largest door in the world closing for the last time. The air pressure changes. Your ears adjust. Wind comes through the canopy. Real wind, carrying dust from a planet you have never touched.
+
+        Tomas has not moved. His hands are in the dirt. He is crying and he is smiling and he says, very quietly:
+
+        "Hello, ground."
+      choices:
+        - text: "(The grove has landed)"
+          action: ["teleport", "planet_awakening_clearing"]
+          next: null
+
+    # ---- grove_sacrifice phase dialogue ----
+
+    tomas_sacrifice_check:
+      text: "She's going to smile. The same smile."
+      choices:
+        - text: "You've seen it before."
+          next: tomas_sacrifice_2
+        - text: "How do you know?"
+          next: tomas_sacrifice_2
+
+    tomas_sacrifice_2:
+      text: "Two hundred years I've been asking why Lira smiled like that. I think I finally know."
+      choices:
+        - text: "What do you think it was?"
+          next: tomas_sacrifice_3
+
+    tomas_sacrifice_3:
+      text: "She found something she'd been looking for so long she forgot she was looking. And when she found it — she wasn't relieved. She was delighted."
+      choices:
+        - text: "(Stay with him)"
+          next: tomas_sacrifice_4
+
+    tomas_sacrifice_4:
+      text: "*He polishes the trowel slowly.* \"She'll be all right. She'll be more than all right. I just wish I could tell the young ones that.\""
+      choices:
+        - text: "(Leave him)"
+          next: null
+
+    # ---- post-landing dialogue (show after grove_epilogue complete) ----
+
+    post_landing_tomas:
+      text: "*He looks up, surprised.* \"Oh. You can feel it too?\""
+      choices:
+        - text: "Feel what?"
+          next: post_landing_tomas_2
+
+    post_landing_tomas_2:
+      text: "They're different. Since the landing. They've touched planet soil for the first time in two hundred years and they are — *he searches for the word* — relieved."
+      choices:
+        - text: "You can tell that?"
+          next: post_landing_tomas_3
+
+    post_landing_tomas_3:
+      text: "I have been talking to roots for two hundred years. I can tell a great deal."
+      choices:
+        - text: "Is Thera in there?"
+          next: post_landing_tomas_4
+
+    post_landing_tomas_4:
+      text: "*He is quiet for a long moment.* \"Yes. Changed. But yes.\" *He touches the root beside him.* \"If you know how to listen.\""
+      choices:
+        - text: "How do you listen?"
+          next: post_landing_tomas_5
+        - text: "(Leave him)"
+          next: null
+
+    post_landing_tomas_5:
+      text: "Stand still. Don't ask a question. Just — wait. She'll find you. That's what she always did."
+      choices:
+        - text: "(Stay with him a moment)"
+          next: null
+
     epilogue_tomas:
       show_if: { quest_active: grove_epilogue }
       text: |
@@ -28,3 +535,19 @@ components:
       choices:
         - text: "(Stay with him a moment longer)"
           next: null
+
+tags: [friendly, witness, ancient, grove]
+
+emotes:
+  idle: "*talks quietly to the memorial stone*"
+  lucid: "*stops and looks up with sudden, startling clarity*"
+  morning: "*polishes the trowel with the hem of his shirt*"
+  touching: "*reaches out and rests one hand against the memorial stone*"
+  examining: "*holds the trowel up to the light and turns it slowly*"
+  counting: "*counts something under his breath, nodding at intervals*"
+
+traits:
+  - script: ambient_emitter
+    config:
+      interval: 45
+      emotes: [idle, lucid, morning, touching, examining, counting]

@@ -1,6 +1,5 @@
 key: eastern_stream
 type: room
-parent: base_room
 short_desc: "The Eastern Stream"
 extra_desc: |
   A stream running south through the eastern forest, wider than the western one and more deeply banked. The water runs clear even when conditions should muddy it — after rain, after the animals cross upstream, always clear. Tenders who gather here don't complain.

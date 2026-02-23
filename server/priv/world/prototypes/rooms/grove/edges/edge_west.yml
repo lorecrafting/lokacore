@@ -1,13 +1,16 @@
 key: edge_west
 type: room
-parent: base_room
 short_desc: "The Western Edge"
 extra_desc: |
-  The western section of the membrane, older-looking than the east — the surface here is covered in markings scored into it over time, too deliberate to be damage. Some are dates in a counting system no living Tender can read. Someone has been here, over long years, keeping track of something.
+  The western section of the membrane, older looking than the east — the surface here is covered in markings scored into it over time, too deliberate to be damage. Some are dates in a counting system no living Tender can read. Someone has been here, over long years, keeping track of something.
 
 exits:
   east: the_edge
+  west: western_threshold
+  north: edge_arch
 
 tags:
   - outdoor
   - forbidden
+  - edge_zone
+  - room_entry_effect

@@ -1,6 +1,5 @@
 key: planet_the_thinning
 type: room
-parent: base_room
 short_desc: "The Former Thinning"
 extra_desc: |
   The spatial distortion is gone. The ground is soil again. The trees that were distressed here are recovering — you can see new growth where the bark was splitting. Whatever the membrane was doing to this area has stopped. The thinning is just forest now. Strange, for the grove's strangest place to become ordinary.

@@ -1,12 +1,11 @@
 key: elder_maren
 type: npc
-parent: base_npc
 short_desc: "Elder Maren"
 long_desc: "Elder Maren stands here with the stillness of someone who has learned to wait."
 extra_desc: |
   She is old in the way of roots — not frail, just deeply set. Her hands rest in front of her without fidgeting. When she looks at you, you have the strange feeling she's looking at something just behind your face, something she already knows the shape of.
 keywords: [elder, maren, elder_maren, woman, elder]
-primary_keyword: elder_maren
+primary_keyword: maren
 
 components:
   combatant:

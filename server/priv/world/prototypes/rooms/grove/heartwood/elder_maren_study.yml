@@ -1,9 +1,8 @@
 key: elder_maren_study
 type: room
-parent: base_room
 short_desc: "Elder Maren's Study"
 extra_desc: |
-  A small space formed by converging roots, fitted with flat bark-slabs for writing and shelves of pressed-leaf records. Certain shelves are conspicuously empty — not disorganized, but cleared. The gaps follow a pattern: anything regarding the Edges, the origins of the Elders' knowledge, or the full text of the Three Roots. Maren knows exactly where those records went.
+  A small space formed by converging roots, fitted with flat bark slabs for writing and shelves of pressed leaf records. Certain shelves are conspicuously empty — not disorganized, but cleared. The gaps follow a pattern: anything regarding the Edges, the origins of the Elders' knowledge, or the full text of the Three Roots. Maren knows exactly where those records went.
 
 exits:
   west: elder_hall

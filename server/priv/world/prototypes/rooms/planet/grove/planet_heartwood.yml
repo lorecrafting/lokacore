@@ -1,6 +1,5 @@
 key: planet_heartwood
 type: room
-parent: base_room
 short_desc: "The Heartwood"
 extra_desc: |
   The ancient trees still spiral clockwise, still warm to the touch. Above them, real sky — the first time the canopy has been open to anything other than the membrane. The warmth in the bark is no longer impossible. The grove chose its own sun.

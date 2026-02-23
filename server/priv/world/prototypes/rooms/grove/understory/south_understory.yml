@@ -1,6 +1,5 @@
 key: south_understory
 type: room
-parent: base_room
 short_desc: "The South Understory"
 extra_desc: |
   The canopy closes thick here, the paths below dim and quiet. This is the understory network — a web of routes connecting the groves to each other below the level where Tenders usually work. The paths are worn by generations of passage, though no one is sure who made them first.
@@ -9,6 +8,7 @@ exits:
   west: heartwood_spring
   north: understory_crossing
   east: eastern_stream
+  south: stream_confluence
 
 tags:
   - outdoor

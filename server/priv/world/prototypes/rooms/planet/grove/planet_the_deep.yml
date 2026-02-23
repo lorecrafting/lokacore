@@ -1,6 +1,5 @@
 key: planet_the_deep
 type: room
-parent: base_room
 short_desc: "The Deep"
 extra_desc: |
   The geometric circuit traces on the bark are the same. They were always readable. No one tried to read them. Now they are ship systems documentation, still legible, still accurate. The Pulse here is different: it carries her. Not her voice. Her weight. The way a room holds the shape of someone who lived in it.

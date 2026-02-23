@@ -1,9 +1,8 @@
 key: gatherer_camp
 type: room
-parent: base_room
 short_desc: "The Gatherer Camp"
 extra_desc: |
-  A semi-permanent camp where Gatherers rest between work in the eastern groves — packs, tools, half-sorted harvest laid out on flat stones. The camp is always sheltered from wind regardless of its direction, always warmer than the surrounding forest. Gatherers have never remarked on it; a good camp is a good camp.
+  A semi permanent camp where Gatherers rest between work in the eastern groves — packs, tools, half sorted harvest laid out on flat stones. The camp is always sheltered from wind regardless of its direction, always warmer than the surrounding forest. Gatherers have never remarked on it; a good camp is a good camp.
 
 exits:
   south: eastern_edge_grove

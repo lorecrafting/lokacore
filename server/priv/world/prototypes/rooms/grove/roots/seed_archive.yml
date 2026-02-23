@@ -1,6 +1,5 @@
 key: seed_archive
 type: room
-parent: base_room
 short_desc: "The Seed Archive"
 extra_desc: |
   Rows of sealed chambers line the walls from floor to ceiling, each containing seeds in impossible variety — thousands of species, each preserved in dry cold stasis. This is what the ship is carrying. Every tree, every herb, every flowering thing the Tenders tend above is only a fraction of what waits here. The Ancestors packed enough life for a world.

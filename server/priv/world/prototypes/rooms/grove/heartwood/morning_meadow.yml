@@ -1,12 +1,13 @@
 key: morning_meadow
 type: room
-parent: base_room
 short_desc: "The Morning Meadow"
 extra_desc: |
   A gentle clearing west of the spring where the canopy breaks and Tenders gather at dawn for a quiet ritual of breath and stillness. The light carries a rich amber quality, as if this patch of sky has a different temperature than the rest. The grass is always trimmed, though no animal grazes here. Tenders have said the morning light is best here for generations.
 
 exits:
   east: heartwood_spring
+  north: heartwood_grove_path
+  west: elder_tree_hollow
 
 tags:
   - outdoor

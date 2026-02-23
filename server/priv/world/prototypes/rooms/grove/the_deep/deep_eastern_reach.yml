@@ -1,12 +1,12 @@
 key: deep_eastern_reach
 type: room
-parent: base_room
 short_desc: "The Deep Eastern Reach"
 extra_desc: |
-  A quieter extension of the Deep where fewer trees stand but those that remain are enormous beyond reason. The bioluminescent pulse here beats at a slightly different rhythm than the main grove — a half-beat offset, as if two systems are running out of sync. Rootspeakers who come here sometimes weep without knowing why.
+  A quieter extension of the Deep where fewer trees stand but those that remain are enormous beyond reason. The bioluminescent pulse here beats at a slightly different rhythm than the main grove — a half beat offset, as if two systems are running out of sync. Rootspeakers who come here sometimes weep without knowing why.
 
 exits:
   west: the_deep
+  north: deep_far_east
 
 tags:
   - outdoor

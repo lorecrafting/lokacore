@@ -1,6 +1,5 @@
 key: brennan_path
 type: room
-parent: base_room
 short_desc: "The Patrol Path"
 extra_desc: |
   A worn track running perfectly straight through the forest, trees on either side equally spaced as if planted to flank it. Brennan walks this circuit every night. He traces his fingers along certain trees as he passes — checking something he couldn't name, taught by someone who is gone, who was taught by someone before them. He doesn't know he's running diagnostics.

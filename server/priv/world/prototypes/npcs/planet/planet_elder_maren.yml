@@ -1,14 +1,490 @@
 key: planet_elder_maren
 type: npc
-parent: elder_maren
 short_desc: "Elder Maren"
+long_desc: "Elder Maren stands here with the stillness of someone who has learned to wait."
+extra_desc: |
+  She is old in the way of roots — not frail, just deeply set. Her hands rest in front of her without fidgeting. When she looks at you, you have the strange feeling she's looking at something just behind your face, something she already knows the shape of.
+keywords: [elder, maren, elder_maren, woman, elder]
+primary_keyword: maren
 
 components:
+  combatant:
+    health:
+      current: 80
+      max: 80
+    stats:
+      str: 6
+      dex: 8
+      sta: 9
+    level: 8
+
+  ai:
+    aggression: friendly
+    wander: false
+
   dialogue_tree:
-    # Override epilogue_complete_3 — remove teleport (player is already in planet rooms)
+    # ==========================================================================
+    # ELDER MAREN — The Elder
+    # Quest giver: grove_revelation, grove_landing, grove_epilogue
+    # Quest turn-in: grove_epilogue
+    # Key dialogue_topic nodes:
+    #   council_call, the_hearts (grove_revelation)
+    #   after_sacrifice, epilogue_end (grove_epilogue)
+    # ==========================================================================
+
+    start:
+      text: "You're the newcomer."
+      choices:
+        - text: "Yes. Thera sent me."
+          show_if:
+            quest_active: grove_arrival
+          next: grove_intro
+
+        - text: "[Accept Quest] Tell me what's really happening."
+          show_if:
+            quest_completed: grove_belonging
+            quest_not_active: grove_revelation
+            quest_not_completed: grove_revelation
+          action: ["accept_quest", "grove_revelation"]
+          next: revelation_accepted
+
+        - text: "[Accept Quest] Something is shaking. What is happening?"
+          show_if:
+            quest_completed: grove_sacrifice
+            quest_not_active: grove_landing
+            quest_not_completed: grove_landing
+          action: ["accept_quest", "grove_landing"]
+          next: landing_start
+
+        - text: "[Accept Quest] I should know what comes next."
+          show_if:
+            quest_completed: grove_sacrifice
+            quest_not_active: grove_epilogue
+          action: ["accept_quest", "grove_epilogue"]
+          next: epilogue_accepted
+
+        - text: "[Turn in] I've been back to the Heartroot."
+          show_if:
+            quest_complete: grove_epilogue
+          action: ["complete_quest", "grove_epilogue"]
+          next: epilogue_complete
+
+        - text: "I'd like to see the records."
+          show_if:
+            quest_active: grove_revelation
+            flag_not_set: maren_records_shown
+          next: records_offer
+
+        - text: "How does it feel — now that it's done?"
+          show_if:
+            completed_quest: grove_epilogue
+          next: post_landing_maren
+
+        - text: "How are you?"
+          next: maren_how_are_you
+
+        - text: "Goodbye."
+          next: null
+
+    grove_intro:
+      text: "She did. Good. You've been here before — not you specifically, but something like you. A person who arrives not knowing why they were kept."
+      choices:
+        - text: "What does that mean?"
+          next: grove_intro_2
+        - text: "I don't understand."
+          next: grove_intro_2
+
+    grove_intro_2:
+      text: "It means you were preserved. Carried here for a purpose. Don't ask me what purpose — the Grove keeps that until it's time."
+      choices:
+        - text: "Is that supposed to be reassuring?"
+          next: grove_intro_3
+
+    grove_intro_3:
+      text: "No. It's supposed to be true."
+      choices:
+        - text: "(Leave for now)"
+          next: null
+
+    maren_how_are_you:
+      text: "Tired. I've carried this knowledge for forty years. It doesn't get lighter."
+      choices:
+        - text: "What knowledge?"
+          show_if:
+            flag_not_set: maren_truth_hinted
+          action: ["set_flag", "maren_truth_hinted"]
+          next: maren_hint_truth
+        - text: "I won't pry."
+          next: null
+
+    maren_hint_truth:
+      text: "You'll understand, when it's time. The Grove shows its truths slowly."
+      choices:
+        - text: "And when it's time?"
+          next: maren_hint_truth_2
+
+    maren_hint_truth_2:
+      text: "It'll be unmistakable."
+      choices:
+        - text: "(Leave)"
+          next: null
+
+    revelation_accepted:
+      text: "It's time. I've been waiting for you to be ready, and Thera agrees you're ready. Come to the elder hall. I'll gather the others."
+      choices:
+        - text: "What are you going to tell us?"
+          next: revelation_accepted_2
+
+    revelation_accepted_2:
+      text: "Everything. Sixty years of keeping this should be enough. Come when you're ready."
+      choices:
+        - text: "(I'll come now)"
+          next: null
+
+    epilogue_accepted:
+      text: "She chose well. Even Lira, at the beginning, had to grieve the shape of herself before the joy came."
+      choices:
+        - text: "I don't feel joy yet. Just the absence."
+          next: epilogue_accepted_2
+
+    epilogue_accepted_2:
+      text: "That's right. The absence first. Give it time. Go to the places she loved. Walk them slowly."
+      choices:
+        - text: "(I will)"
+          next: null
+
+    epilogue_complete:
+      text: "You felt it."
+      choices:
+        - text: "Yes."
+          next: epilogue_complete_2
+
+    epilogue_complete_2:
+      text: "Then you understand why Lira was smiling. Why Tomas never stopped asking."
+      choices:
+        - text: "She found the third root."
+          next: epilogue_complete_3
+
     epilogue_complete_3:
       text: "She found what is beyond all the roots. There is no word for it. There does not need to be."
       choices:
         - text: "Thank you, Elder."
           action: ["complete_quest", "grove_epilogue"]
           next: null
+
+    # ---- grove_revelation dialogue_topic nodes ----
+
+    council_call:
+      text: "We are a ship. We have always been a ship. The Grove — the trees, the soil, the Pulse — is a living system designed to carry us to a new world. That world is close now. Close enough that the system is failing."
+      choices:
+        - text: "What does failing mean?"
+          next: council_failing
+        - text: "How long have you known?"
+          next: council_known
+
+    council_failing:
+      text: "The Blight. The sky flickering. The Thinning spreading. The Heart — the consciousness that sustains the Grove — is exhausted. Lira has held this for two hundred years. She cannot hold it much longer."
+      choices:
+        - text: "What happens when she stops?"
+          next: council_stops
+
+    council_known:
+      text: "I've known for forty years. My predecessor knew before me. We have kept this secret because the knowledge of it destroys people — it destroyed Yara, in its way."
+      choices:
+        - text: "Thera's mother."
+          next: council_yara
+
+    council_stops:
+      text: "The Grove dies. The ship falls. We never land."
+      choices:
+        - text: "Then what do we do?"
+          next: council_what
+
+    council_what:
+      text: "The system needs a new Heart. A Rootspeaker — someone who can merge with the ship's core and sustain the Grove as Lira has. The ship has been growing one since birth."
+      choices:
+        - text: "Thera."
+          next: council_thera
+
+    council_thera:
+      text: "Thera."
+      choices:
+        - text: "Does she know?"
+          next: council_thera_knows
+
+    council_thera_knows:
+      text: "Not yet. Not fully. The Grove has been telling her in the only language it has — dreams, the melody, visions. She knows something is coming. She doesn't know what it asks."
+      choices:
+        - text: "She needs to hear this from you."
+          next: council_tell_her
+
+    council_tell_her:
+      text: "Yes. Take her to the Edge. Let the Grove show her directly. Then bring her to me."
+      choices:
+        - text: "(I'll do that)"
+          next: null
+
+    council_yara:
+      text: "Yara learned the truth from a record she found in the archive. She tried to become the Heart herself — to protect Thera from this. The Grove couldn't accept her. She... diminished. Kira was eight years old."
+      choices:
+        - text: "Does Kira know?"
+          next: council_yara_kira
+
+    council_yara_kira:
+      text: "She knows her mother didn't die of illness. She doesn't know why. That conversation is coming."
+      choices:
+        - text: "(This is a lot to carry)"
+          next: null
+
+    the_hearts:
+      text: "The Hearts are those who chose the third root. Lira was the first. If Thera accepts, she will be the second. After the landing, the ship will no longer need sustaining — the Hearts will be free."
+      choices:
+        - text: "Free to do what?"
+          next: hearts_free
+        - text: "Is it painful?"
+          next: hearts_painful
+
+    hearts_free:
+      text: "We don't know. Lira said she would find out and tell us. The message has been slow in coming."
+      choices:
+        - text: "Maybe it takes a while to learn the words."
+          next: hearts_free_2
+
+    hearts_free_2:
+      text: "That is a generous interpretation. I've chosen to hold it."
+      choices:
+        - text: "(Leave)"
+          next: null
+
+    hearts_painful:
+      text: "Lira said no. Lira said it was like putting down something very heavy you'd been carrying for so long you forgot it had weight."
+      choices:
+        - text: "That sounds like relief."
+          next: hearts_relief
+
+    hearts_relief:
+      text: "It sounds like the second root, yes. But Lira chose the third. The difference is what happens after you put it down."
+      choices:
+        - text: "(I need to think about this)"
+          next: null
+
+    # ---- side_brennan dialogue_topic node ----
+
+    seren_records:
+      show_if:
+        quest_active: side_brennan
+      text: "You're asking about Brennan."
+      choices:
+        - text: "He mentioned losing someone thirty years ago."
+          next: seren_records_2
+        - text: "He told me to come to you."
+          next: seren_records_2
+
+    seren_records_2:
+      text: "Seren."
+      next: seren_records_3
+
+    seren_records_3:
+      text: "She was the Rootspeaker before Thera. We don't speak of her — Brennan asked us not to, forty years ago, and I've honored that. But since you've come looking, I'll give you the shape of it."
+      choices:
+        - text: "Please."
+          next: seren_records_4
+
+    seren_records_4:
+      text: "She understood what was being asked of her. She went to the Heartroot. She chose the second root — rest, not remaining — because she loved the Grove but also loved Brennan, and she couldn't find a way to hold both. Choosing rest meant she dissolved without remaining as a Heart. She's not here, the way Lira is here. She's simply... gone."
+      choices:
+        - text: "And Brennan has carried that alone since."
+          next: seren_records_5
+
+    seren_records_5:
+      text: "Before I was Elder. He has never spoken her name in my presence. Not once. The badge is hers — she gave it to him the last morning."
+      choices:
+        - text: "Where would she have left a mark? Something of hers still here."
+          next: seren_records_6
+
+    seren_records_6:
+      text: "The Watcher's Post. She stood that watch with him in the last year. There's something carved on the bark of the boundary tree — initials, I think. I noticed it once and never asked. It wasn't mine to ask about."
+      choices:
+        - text: "(I'll find it)"
+          next: null
+
+    # ---- records room / star map ----
+
+    records_offer:
+      text: "The archive. Yes. You've earned that."
+      next: records_offer_2
+
+    records_offer_2:
+      text: "*She leads you to a door at the back of the study and unlocks it with a key on a cord at her waist. Inside: floor to ceiling bound records, and on the far wall, a large navigation chart pinned with careful notation.*"
+      choices:
+        - text: "The star map."
+          action: ["set_flag", "maren_records_shown"]
+          next: star_map_look
+
+    star_map_look:
+      text: "*She points to a mark near the outer arc of the chart — a small black circle, set apart from any other notation. The ink is older than everything around it.*"
+      choices:
+        - text: "What is that mark?"
+          next: star_map_quiet
+
+    star_map_quiet:
+      text: "We call it the Quiet. That is where Seren chose to rest. The Pulse there still carries a faint difference — she is still present in the way a sound is present after the bell stops. Not gone. Simply no longer speaking."
+      choices:
+        - text: "She's still with us?"
+          next: star_map_still
+        - text: "How did the ship know exactly where?"
+          next: star_map_how
+
+    star_map_still:
+      text: "In the way light is still here after the candle goes out. Yes. She chose rest, not absence. We carry her forward. She cannot answer."
+      choices:
+        - text: "Brennan doesn't know this."
+          next: star_map_brennan_silent
+
+    star_map_brennan_silent:
+      text: "No. He has stood his watch for thirty years — over that place, without knowing what the mark means. I have chosen not to tell him. It was not mine to give."
+      choices:
+        - text: "Maybe it should be."
+          next: star_map_brennan_maybe
+        - text: "I understand."
+          next: null
+
+    star_map_brennan_maybe:
+      text: "Perhaps. Now that the truth has come out... perhaps the time has passed for keeping that particular silence."
+      choices:
+        - text: "(Leave)"
+          next: null
+
+    star_map_how:
+      text: "The ship records candidates who choose rest rather than remaining. Lira added the notation herself. She wanted us to understand: the difference is not moral. It is a matter of what you find when the boundary dissolves."
+      choices:
+        - text: "What Seren found."
+          next: star_map_seren_found
+
+    star_map_seren_found:
+      text: "Peace. Rest. She had wanted it so badly, for so long. There is no shame in it. She bought thirty years and she left Brennan something to guard. Both of those things are real."
+      choices:
+        - text: "The badge."
+          next: star_map_badge
+
+    star_map_badge:
+      text: "'Guard the truth until the right person comes.' She knew. And she was right — you came."
+      choices:
+        - text: "(Leave)"
+          next: null
+
+    # ---- grove_epilogue dialogue_topic nodes ----
+
+    after_sacrifice:
+      show_if: { quest_active: grove_sacrifice }
+      action: ["complete_quest", "grove_sacrifice"]
+      text: "She was smiling. Did you see?"
+      choices:
+        - text: "Yes. I didn't understand why."
+          next: after_sacrifice_2
+        - text: "I couldn't look away."
+          next: after_sacrifice_2
+
+    after_sacrifice_2:
+      text: "Neither did I, the first time. When Lira... the records say she was laughing, at the end. Tomas has been asking why for two hundred years."
+      choices:
+        - text: "I think I understand now."
+          next: after_sacrifice_3
+
+    after_sacrifice_3:
+      text: "Not yet. But you will."
+      choices:
+        - text: "(The ground shudders)"
+          action: ["accept_quest", "grove_landing"]
+          next: landing_start
+
+    landing_start:
+      show_if: { quest_active: grove_landing }
+      text: |
+        The floor shifts beneath you. Not a tremor — a settling, deep and structural, as if the world just found a new center of gravity. Maren puts one hand flat against the wall. Her expression does not change. If anything, she looks calmer than you have ever seen her.
+
+        "It has begun. Can you feel it? The Pulse — listen. Two voices now. She is doing it."
+      choices:
+        - text: "What do we do?"
+          next: landing_start_2
+
+    landing_start_2:
+      text: |
+        "Find the others. Brennan will be at the Thinning — he will want to see the membrane go. Tomas..." She pauses. Something crosses her face that might be two hundred years of waiting. "Tomas will know what this is before anyone. He has been waiting for this sound his whole life."
+
+        She straightens. The wall shudders again beneath her hand.
+
+        "Go. I will gather everyone here."
+      choices:
+        - text: "(Go)"
+          next: null
+
+    landing_maren_waiting:
+      show_if: { quest_active: grove_landing }
+      text: |
+        She is standing in the elder hall, steady as the walls shake around her. Others are arriving — you can hear voices in the corridor. She sees you and shakes her head once.
+
+        "Not here. Go find them. Brennan and Tomas — they should not be alone for this."
+      choices:
+        - text: "(Go)"
+          next: null
+
+    epilogue_end:
+      text: "The Grove endures. The landing was clean. And we carry her with us, not as memory but as presence. That is the gift of the third root."
+      choices:
+        - text: "I'll carry her."
+          next: epilogue_complete
+
+    # ---- post-landing dialogue (show after grove_epilogue complete) ----
+
+    post_landing_maren:
+      text: "Not what I expected. I thought it would feel like relief. It's more like the end of a long carrying — the weight is still in your muscles even after you've put it down."
+      choices:
+        - text: "Forty years."
+          next: post_landing_maren_2
+
+    post_landing_maren_2:
+      text: "Forty years. Lira carried it for two hundred. I remind myself of that when I think I have the right to feel tired."
+      choices:
+        - text: "Do you regret keeping it secret?"
+          next: post_landing_maren_3
+        - text: "You don't have to justify it."
+          next: post_landing_maren_4
+
+    post_landing_maren_3:
+      text: "No. I regret the necessity. The secret itself — every day I kept it, I kept it because the alternative was worse. I've seen what it did to Yara."
+      choices:
+        - text: "What happens now?"
+          next: post_landing_maren_5
+
+    post_landing_maren_4:
+      text: "I'm not justifying. I'm accounting. There's a difference."
+      choices:
+        - text: "What happens now?"
+          next: post_landing_maren_5
+
+    post_landing_maren_5:
+      text: "We learn the planet. We open the records. We stop carrying things alone."
+      choices:
+        - text: "(Leave her)"
+          next: null
+
+tags: [friendly, quest_giver, elder, grove, rememberer]
+
+emotes:
+  idle: "*reviews the records with careful attention*"
+  dawn: "*stands at the study window watching the Grove wake*"
+  worried: "*closes her eyes briefly, hands folded*"
+  comparing: "*traces a finger along a page, comparing two passages*"
+  evening: "*stands in the study doorway, watching the Grove settle for the night*"
+  heavy: "*sets down the record she's holding and breathes slowly before continuing*"
+
+traits:
+  - script: day_night_schedule
+    config:
+      wake_at: dawn
+      sleep_at: dusk
+  - script: ambient_emitter
+    config:
+      interval: 85
+      emotes: [idle, dawn, worried, comparing, evening, heavy]

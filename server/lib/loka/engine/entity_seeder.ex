@@ -26,14 +26,13 @@ defmodule Loka.Engine.EntitySeeder do
 
   alias Loka.Engine.{Entity, Entities}
   alias Loka.Engine.Constants.{WorldPaths, EntityTypes}
-  alias Loka.Utils.MapHelpers
 
   # YAML fields consumed during seeding (entity struct fields + aliases + transient)
   @consumed_fields MapSet.new(~w(
     key type short_desc long_desc extra_desc keywords primary_keyword mood
     is_prototype prototype_key location_id account_id
     components traits tags scripts metadata
-    parent parent_key id name description extra_description
+    id name description extra_description
     exits spawns attributes emotes
   ))
 
@@ -111,8 +110,7 @@ defmodule Loka.Engine.EntitySeeder do
 
   @doc false
   def do_seed(paths) do
-    yamls = load_all_yaml_files(paths)
-    resolved = resolve_inheritance(yamls)
+    resolved = load_all_yaml_files(paths)
 
     # Preload all existing entities into a lookup map to avoid N+1 queries.
     # Key: {key, type} → entity. This turns ~350 individual queries into 1.
@@ -270,73 +268,6 @@ defmodule Loka.Engine.EntitySeeder do
   end
 
   # =============================================================================
-  # Inheritance Resolution
-  # =============================================================================
-
-  @doc """
-  Resolves parent inheritance chains via topological sort + deep merge.
-
-  Parents are resolved first, then children deep-merge over them.
-  """
-  def resolve_inheritance(raw_objects) do
-    case build_resolution_order(raw_objects) do
-      {:ok, order} ->
-        Enum.reduce(order, %{}, fn key, acc ->
-          raw = Map.fetch!(raw_objects, key)
-          parent_key = raw["parent"] || raw["parent_key"]
-
-          resolved =
-            case parent_key && Map.get(acc, parent_key) do
-              nil -> raw
-              parent -> deep_merge_yaml(parent, raw)
-            end
-
-          Map.put(acc, key, resolved)
-        end)
-
-      {:error, _} ->
-        raw_objects
-    end
-  end
-
-  defp build_resolution_order(raw_objects) do
-    keys = Map.keys(raw_objects)
-    do_topological_sort(keys, raw_objects, [], MapSet.new())
-  end
-
-  defp do_topological_sort([], _raw, sorted, _visited) do
-    {:ok, Enum.reverse(sorted)}
-  end
-
-  defp do_topological_sort(remaining, raw, sorted, visited) do
-    {ready, not_ready} =
-      Enum.split_with(remaining, fn key ->
-        obj = Map.get(raw, key)
-        parent = obj["parent"] || obj["parent_key"]
-        parent == nil or MapSet.member?(visited, parent)
-      end)
-
-    cond do
-      Enum.empty?(ready) and Enum.empty?(not_ready) ->
-        {:ok, Enum.reverse(sorted)}
-
-      Enum.empty?(ready) ->
-        Logger.warning("EntitySeeder: broken parent refs: #{inspect(not_ready)}")
-        {:ok, Enum.reverse(sorted) ++ not_ready}
-
-      true ->
-        new_visited = Enum.reduce(ready, visited, &MapSet.put(&2, &1))
-        do_topological_sort(not_ready, raw, ready ++ sorted, new_visited)
-    end
-  end
-
-  defp deep_merge_yaml(parent, child) do
-    # Don't inherit identity fields from parent
-    parent_cleaned = Map.drop(parent, ["key", "parent", "parent_key", "is_prototype", "id"])
-    MapHelpers.deep_merge(parent_cleaned, child)
-  end
-
-  # =============================================================================
   # Phased Seeding
   # =============================================================================
 
@@ -402,6 +333,19 @@ defmodule Loka.Engine.EntitySeeder do
       |> Enum.map(fn {{key, _type}, _entity} -> key end)
       |> MapSet.new()
 
+    # Build set of all exits explicitly defined in room YAML (format: "room_key_direction").
+    # Used to prevent reciprocal auto-creation from overriding explicit exits.
+    # Example: if threshold_gate.yml says `south: planet_the_edge`, the reciprocal of
+    # `the_edge north: threshold_gate` (which would be threshold_gate_south → the_edge)
+    # must NOT be created — the explicit definition takes precedence.
+    explicit_exits =
+      rooms
+      |> Enum.flat_map(fn {room_key, room_data} ->
+        exits = room_data["exits"] || %{}
+        Enum.map(exits, fn {dir, _dest} -> "#{room_key}_#{to_string(dir)}" end)
+      end)
+      |> MapSet.new()
+
     {count, _seen} =
       Enum.reduce(rooms, {0, seen}, fn {room_key, room_data}, {count, seen_acc} ->
         exits = room_data["exits"] || %{}
@@ -412,7 +356,8 @@ defmodule Loka.Engine.EntitySeeder do
                  to_string(direction),
                  to_string(destination_key),
                  room_lookup,
-                 s
+                 s,
+                 explicit_exits
                ) do
             {:ok, _entity, updated_seen} -> {acc + 1, updated_seen}
             {:skip, updated_seen} -> {acc, updated_seen}
@@ -424,7 +369,7 @@ defmodule Loka.Engine.EntitySeeder do
     count
   end
 
-  defp seed_single_exit(room_key, direction, destination_key, room_lookup, seen) do
+  defp seed_single_exit(room_key, direction, destination_key, room_lookup, seen, explicit_exits) do
     exit_key = "#{room_key}_#{direction}"
 
     if MapSet.member?(seen, exit_key) do
@@ -452,9 +397,21 @@ defmodule Loka.Engine.EntitySeeder do
         result = Entities.save(entity)
         seen = MapSet.put(seen, exit_key)
 
-        # Create reciprocal only if not already seen (covers explicit bidirectional YAML)
+        # Create reciprocal only if not already seen AND the destination room doesn't
+        # explicitly define its own exit in the reverse direction. This prevents a
+        # reciprocal from overriding an explicit cross-zone exit (e.g., the_edge north →
+        # threshold_gate creating a reciprocal threshold_gate south → the_edge, which
+        # would override the explicit threshold_gate south: planet_the_edge).
         {seen, _} =
-          maybe_create_reciprocal(destination_key, direction, room_key, dest.id, source.id, seen)
+          maybe_create_reciprocal(
+            destination_key,
+            direction,
+            room_key,
+            dest.id,
+            source.id,
+            seen,
+            explicit_exits
+          )
 
         case result do
           {:ok, _} -> {:ok, entity, seen}
@@ -467,32 +424,49 @@ defmodule Loka.Engine.EntitySeeder do
     end
   end
 
-  defp maybe_create_reciprocal(dest_key, direction, source_key, dest_id, source_id, seen) do
+  defp maybe_create_reciprocal(
+         dest_key,
+         direction,
+         source_key,
+         dest_id,
+         source_id,
+         seen,
+         explicit_exits
+       ) do
     reverse_dir = reverse_direction(direction)
 
     if reverse_dir do
       reverse_key = "#{dest_key}_#{reverse_dir}"
 
-      if MapSet.member?(seen, reverse_key) do
-        {seen, :skipped}
-      else
-        entity =
-          Entity.new(%{
-            type: :exit,
-            key: reverse_key,
-            location_id: dest_id,
-            is_prototype: false,
-            components: %{
-              "exit" => %{
-                "direction" => reverse_dir,
-                "destination_id" => source_id,
-                "destination_key" => source_key
-              }
-            }
-          })
+      cond do
+        MapSet.member?(seen, reverse_key) ->
+          # Already created (explicit or earlier reciprocal) — skip
+          {seen, :skipped}
 
-        Entities.save(entity)
-        {MapSet.put(seen, reverse_key), :created}
+        MapSet.member?(explicit_exits, reverse_key) ->
+          # Destination room has an explicit exit in this direction in its YAML.
+          # Don't create a reciprocal — the explicit definition will be processed
+          # when we reach that room, and it may point to a different destination.
+          {seen, :deferred_to_explicit}
+
+        true ->
+          entity =
+            Entity.new(%{
+              type: :exit,
+              key: reverse_key,
+              location_id: dest_id,
+              is_prototype: false,
+              components: %{
+                "exit" => %{
+                  "direction" => reverse_dir,
+                  "destination_id" => source_id,
+                  "destination_key" => source_key
+                }
+              }
+            })
+
+          Entities.save(entity)
+          {MapSet.put(seen, reverse_key), :created}
       end
     else
       {seen, :no_reverse}
@@ -515,15 +489,24 @@ defmodule Loka.Engine.EntitySeeder do
       |> Map.values()
       |> Enum.filter(&(&1.type == :room))
 
+    # Build a set of {key, location_id} pairs for non-prototype instances already in the DB.
+    # This must be a fresh DB query — existing_map only contains prototypes (by design, to
+    # prevent YAML updates from being skipped). Using existing_map for spawn idempotency
+    # would always return false (no instances in map) and accumulate clones across seed runs.
+    spawned_set =
+      Entities.find_all(is_prototype: false)
+      |> Enum.map(fn e -> {e.key, e.location_id} end)
+      |> MapSet.new()
+
     Enum.reduce(rooms, 0, fn room, total ->
       spawns = (room.components || %{})["spawns"] || []
-      total + seed_spawns_for_room(room, spawns, existing_map)
+      total + seed_spawns_for_room(room, spawns, spawned_set)
     end)
   end
 
-  defp seed_spawns_for_room(_room, [], _existing_map), do: 0
+  defp seed_spawns_for_room(_room, [], _spawned_set), do: 0
 
-  defp seed_spawns_for_room(room, spawns, existing_map) do
+  defp seed_spawns_for_room(room, spawns, spawned_set) do
     Enum.reduce(spawns, 0, fn spawn_config, count ->
       prototype_key = spawn_config["prototype"]
 
@@ -532,7 +515,7 @@ defmodule Loka.Engine.EntitySeeder do
           Logger.warning("EntitySeeder: spawn config missing 'prototype' key in room #{room.key}")
           count
 
-        already_spawned?(prototype_key, room, existing_map) ->
+        MapSet.member?(spawned_set, {prototype_key, room.id}) ->
           count
 
         true ->
@@ -551,17 +534,6 @@ defmodule Loka.Engine.EntitySeeder do
     end)
   end
 
-  # Returns true if a non-prototype instance of this prototype already exists in the room.
-  defp already_spawned?(prototype_key, room, existing_map) do
-    existing_map
-    |> Map.values()
-    |> Enum.any?(fn e ->
-      not e.is_prototype and
-        e.location_id == room.id and
-        e.key == prototype_key
-    end)
-  end
-
   # =============================================================================
   # YAML → Entity Conversion
   # =============================================================================
@@ -571,17 +543,7 @@ defmodule Loka.Engine.EntitySeeder do
   """
   def yaml_to_entity(data, id \\ nil) do
     type = safe_to_atom(data["type"])
-    parent_key = data["parent"] || data["parent_key"]
-
-    # Build metadata with parent_key
     metadata = data["metadata"] || %{}
-
-    metadata =
-      if parent_key do
-        Map.put(metadata, "parent_key", parent_key)
-      else
-        metadata
-      end
 
     # Build components from explicit components + extra fields
     components = build_components(data)

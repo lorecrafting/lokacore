@@ -1,6 +1,5 @@
 key: thera_presence
 type: npc
-parent: base_npc
 short_desc: "Thera's Presence"
 long_desc: "The air here hums with something that is not sound. A warmth, a weight, a quality of attention that you recognize."
 extra_desc: |

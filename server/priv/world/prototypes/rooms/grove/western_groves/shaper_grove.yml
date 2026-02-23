@@ -1,6 +1,5 @@
 key: shaper_grove
 type: room
-parent: base_room
 short_desc: "The Shaper Grove"
 extra_desc: |
   Where the Shapers work — guiding growth, trimming, coaxing branches into shapes that serve. The ground is littered with wood shavings and tied bundles of young growth. Shapers have noticed that some cuts take themselves overnight: a branch bent in the morning is bent further by dawn, continuing the work without hands.
@@ -8,6 +7,7 @@ extra_desc: |
 exits:
   west: healing_grove
   north: western_orchard
+  up: shaper_workshop
 
 spawns:
   - prototype: kira

@@ -1,6 +1,5 @@
 key: planet_heartwood_spring
 type: room
-parent: base_room
 short_desc: "The Spring"
 extra_desc: |
   The water still flows briefly upward along the western edge before rejoining the pool. It did this before anyone knew what it was doing. Now you know: pressure regulation. The grove's water system, still running. The pool is still clear.

@@ -1,9 +1,8 @@
 key: training_grove
 type: room
-parent: base_room
 short_desc: "The Training Grove"
 extra_desc: |
-  A clearing used for physical practice — climbing, movement, the endurance work the Watchers require. The ground underfoot is soft in a way that forests rarely manage, absorbing falls and landings without the bruising a rock-strewn floor would give. Tenders who train here have always remarked on it. No one has wondered why.
+  A clearing used for physical practice — climbing, movement, the endurance work the Watchers require. The ground underfoot is soft in a way that forests rarely manage, absorbing falls and landings without the bruising a rock strewn floor would give. Tenders who train here have always remarked on it. No one has wondered why.
 
 exits:
   south: western_stream

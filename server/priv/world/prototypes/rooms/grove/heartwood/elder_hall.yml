@@ -1,6 +1,5 @@
 key: elder_hall
 type: room
-parent: base_room
 short_desc: "The Elder Hall"
 extra_desc: |
   The great trees grow inward here, canopies interlaced into a natural vault. Below is a formal circle of flat stones, the ground between them marked with lines too precise to be decorative. A whisper at one edge carries perfectly to the other with no echo. Elders always sit in the same positions, as if drawn there — and no one has ever mapped what lies directly beneath.
@@ -10,6 +9,7 @@ exits:
   north: deep_threshold
   east: elder_maren_study
   west: seed_vault_passage
+  up: heartwood_upper_path
 
 tags:
   - outdoor
