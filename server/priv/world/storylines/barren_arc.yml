@@ -2,5 +2,10 @@ key: barren_arc
 name: "The Barren"
 starting_room: threshold_gate
 
-acts: []
+acts:
+  - id: arrival
+    name: "Arrival"
+    quests:
+      - barren_arrival
+
 side_quests: []
