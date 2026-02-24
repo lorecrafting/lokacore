@@ -4,9 +4,6 @@ category: magic_utility
 cost: 1
 stat: spi
 prerequisites: []
-trainers:
-  - monastery_elder
-  - magic_trainer
 lag: 0
 cooldown: 0
 mv_cost: 0

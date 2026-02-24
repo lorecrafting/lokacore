@@ -13,32 +13,32 @@ defmodule Loka.Engine.Zone do
 
   ## Example YAML
 
-      key: monastery
-      name: "The Mountain Monastery"
+      key: grove
+      name: "The Ancient Grove"
       rooms:
-        - monastery_entrance
-        - meditation_hall
-        - abbot_quarters
+        - awakening_clearing
+        - heartwood_grove_path
+        - gathering_circle
       lifespan_minutes: 30
       reset_mode: empty
 
       resets:
         - type: mob
-          prototype: abbot_tenzin
-          room: abbot_quarters
+          prototype: thera
+          room: awakening_clearing
           max: 1
           equipment:
-            wield: prayer_beads
+            wield: elder_staff
           inventory:
-            - monastery_key
+            - grove_key
 
         - type: object
-          prototype: incense_burner
-          room: meditation_hall
+          prototype: root_lantern
+          room: gathering_circle
           max: 1
 
         - type: door
-          room: abbot_quarters
+          room: gathering_circle
           direction: north
           state: closed
   """

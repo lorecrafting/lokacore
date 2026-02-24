@@ -28,17 +28,17 @@ defmodule Loka.Framework.Conditions.Evaluator do
 
   ### Tuple Format (used in code)
       {:flag, "spoke_to_elder"}
-      {:quest_completed, "monastery_arc"}
+      {:quest_completed, "grove_arc"}
       {:level_gte, 5}
 
   ### Map Format (from YAML/JSON)
       %{"flag" => "spoke_to_elder"}
-      %{"quest_completed" => "monastery_arc"}
+      %{"quest_completed" => "grove_arc"}
       %{"level_gte" => 5}
 
   ### Atom Map Format
       %{flag: "spoke_to_elder"}
-      %{quest_completed: "monastery_arc"}
+      %{quest_completed: "grove_arc"}
       %{level_gte: 5}
 
   ## Examples
@@ -273,7 +273,7 @@ defmodule Loka.Framework.Conditions.Evaluator do
   # Note: Factions are stored in flags as "faction_<id>" keys
   defp do_evaluate({:faction_gte, faction_id, value}, %Entity{} = entity) do
     flags = Entity.get_component(entity, "flags") || %{}
-    # Look for faction reputation in flags (e.g., "faction_monastery" => 50)
+    # Look for faction reputation in flags (e.g., "faction_grove" => 50)
     faction_key = "faction_#{faction_id}"
     current = get_flexible(flags, faction_key, 0)
     current >= value

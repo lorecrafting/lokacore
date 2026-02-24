@@ -4,9 +4,6 @@ category: combat_melee
 cost: 1
 stat: dex
 prerequisites: []
-trainers:
-  - combat_trainer
-  - monastery_martial_master
 lag: 2
 cooldown: 0
 mv_cost: 8

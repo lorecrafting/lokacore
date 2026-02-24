@@ -7,21 +7,6 @@
 # Phases: dawn, day, dusk, night
 
 tag_messages:
-  # Monastery environments
-  monastery:
-    dawn:
-      - "Temple bells ring across the monastery, calling monks to morning prayers."
-      - "The sound of shuffling feet echoes as monks make their way to the temple."
-    day:
-      - "The rhythmic murmur of chanting drifts through the air."
-      - "A monk passes by, prayer beads clicking softly."
-    dusk:
-      - "The evening gong resonates through the monastery, signaling vespers."
-      - "Monks gather their robes as they head toward evening prayers."
-    night:
-      - "The monastery settles into contemplative silence."
-      - "Distant chanting carries on the night air."
-
   # Sacred spaces (temples, shrines, stupas)
   sacred:
     dawn:

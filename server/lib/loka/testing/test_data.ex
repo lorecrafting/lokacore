@@ -17,13 +17,13 @@ defmodule Loka.Testing.TestData do
 
   ### Get pathfinding data:
 
-      TestData.find_path("monastery_gate", "temple")
+      TestData.find_path("awakening_clearing", "gathering_circle")
       # => {:ok, ["north", "east"]}
 
   ### Get quest definitions:
 
       TestData.get_quest("main_sleeping_master")
-      # => %{id: "main_sleeping_master", giver: "abbot_jampa", objectives: [...]}
+      # => %{id: "grove_arrival", giver: "thera", objectives: [...]}
 
   ## Data Files
 

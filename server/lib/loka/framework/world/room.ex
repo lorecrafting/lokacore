@@ -29,7 +29,6 @@ defmodule Loka.Framework.World.Room do
   - Boss rooms or dramatic moments
 
   NOT recommended for entry effects:
-  - Regular monastery rooms
   - Common corridors
   - Frequently-visited locations
   """
@@ -122,12 +121,6 @@ defmodule Loka.Framework.World.Room do
   # =============================================================================
 
   @entry_messages %{
-    "monastery" => [
-      "The scent of incense greets you.",
-      "The peaceful atmosphere settles over you.",
-      "Ancient stone walls echo with silence.",
-      "Prayer flags flutter at the edge of your vision."
-    ],
     "sacred" => [
       "You sense a profound stillness here.",
       "The air feels charged with old power.",

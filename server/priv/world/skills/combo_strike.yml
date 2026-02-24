@@ -6,9 +6,6 @@ stat: str
 prerequisites:
   - kick
   - bash
-trainers:
-  - monastery_martial_master
-  - weapon_master
 lag: 4
 cooldown: 6
 mv_cost: 25

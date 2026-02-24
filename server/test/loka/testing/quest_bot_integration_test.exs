@@ -34,8 +34,8 @@ defmodule Loka.Testing.QuestBotIntegrationTest do
       Entities.create_entity(%{
         key: starting_key,
         type: "room",
-        short_desc: "Monastery Gate",
-        extra_desc: "Ancient stone pillars mark the entrance."
+        short_desc: "Awakening Clearing",
+        extra_desc: "A quiet clearing where the journey begins."
       })
 
     # Create Novice Pema NPC in the starting room (needed for intro_welcome quest)
@@ -61,7 +61,7 @@ defmodule Loka.Testing.QuestBotIntegrationTest do
       {:ok, bot} =
         ChannelBot.start(player,
           strategy: QuestStrategy,
-          strategy_opts: [storyline_id: "monastery_arc"]
+          strategy_opts: [storyline_id: "grove_arc"]
         )
 
       # Run bot for up to 50 ticks (about 5 seconds worth of gameplay)
@@ -99,7 +99,7 @@ defmodule Loka.Testing.QuestBotIntegrationTest do
       {:ok, bot} =
         ChannelBot.start(player,
           strategy: QuestStrategy,
-          strategy_opts: [storyline_id: "monastery_arc"]
+          strategy_opts: [storyline_id: "grove_arc"]
         )
 
       # Run bot for longer to attempt multiple quests
@@ -123,20 +123,20 @@ defmodule Loka.Testing.QuestBotIntegrationTest do
     end
 
     @tag :full_storyline
-    test "bot completes ALL monastery_arc quests" do
+    test "bot completes ALL grove_arc quests" do
       require Logger
       player = create_test_player()
 
       {:ok, bot} =
         ChannelBot.start(player,
           strategy: QuestStrategy,
-          strategy_opts: [storyline_id: "monastery_arc"]
+          strategy_opts: [storyline_id: "grove_arc"]
         )
 
       # Run bot for many ticks to complete all quests
-      # Main quests: intro_welcome, intro_find_temple, main_sleeping_master, main_three_trials, main_liberation
-      # Side quests: 7 additional quests
-      # Total: 12 quests
+      # Main quests: grove_arrival, grove_belonging, grove_revelation, grove_sacrifice, grove_epilogue
+      # Side quests: side_brennan, side_tomas, side_three_roots, side_yara
+      # Total: 9 quests
       max_ticks = 2000
       check_interval = 100
 
@@ -169,7 +169,7 @@ defmodule Loka.Testing.QuestBotIntegrationTest do
       Logger.info("[TEST] Failure reason: #{inspect(strategy_state.failure_reason)}")
 
       # Expected quests
-      expected_main = ["intro_welcome", "intro_find_temple", "main_sleeping_master"]
+      expected_main = ["grove_arrival", "grove_belonging", "grove_revelation"]
 
       # Check we completed at least the first 3 main quests
       assert length(completed_quests) >= 2,

@@ -4,9 +4,6 @@ category: social
 cost: 1
 stat: str
 prerequisites: []
-trainers:
-  - combat_trainer
-  - monastery_martial_master
 lag: 2
 cooldown: 30
 mv_cost: 0

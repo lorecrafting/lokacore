@@ -5,9 +5,6 @@ cost: 2
 stat: spi
 prerequisites:
   - meditate
-trainers:
-  - monastery_elder
-  - temple_priest
 lag: 2
 cooldown: 15
 mv_cost: 0

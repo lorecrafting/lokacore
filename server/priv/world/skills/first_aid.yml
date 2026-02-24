@@ -4,9 +4,6 @@ category: survival
 cost: 2
 stat: int
 prerequisites: []
-trainers:
-  - healer
-  - monastery_infirmary_keeper
 lag: 4
 cooldown: 60
 mv_cost: 0

@@ -5,9 +5,6 @@ cost: 2
 stat: dex
 prerequisites:
   - parry
-trainers:
-  - combat_trainer
-  - monastery_martial_master
 lag: 2
 cooldown: 4
 mv_cost: 20

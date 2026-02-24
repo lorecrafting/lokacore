@@ -44,7 +44,7 @@ defmodule Loka.Testing.Bot.Strategies.StorylineRunner do
 
       {:ok, pid} = BotSupervisor.spawn_bot(
         strategy: Loka.Testing.Bot.Strategies.StorylineRunner,
-        strategy_opts: [storyline_id: "monastery_arc"]
+        strategy_opts: [storyline_id: "grove_arc"]
       )
 
   ## Results

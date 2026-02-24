@@ -18,8 +18,8 @@ defmodule Loka.Testing.Content.StorylineValidator do
       %{
         storylines_checked: 2,
         errors: [
-          {:missing_quest, "monastery_arc", "unknown_quest"},
-          {:invalid_act_dependency, "monastery_arc", "act_2", "nonexistent_act"}
+          {:missing_quest, "grove_arc", "unknown_quest"},
+          {:invalid_act_dependency, "grove_arc", "act_2", "nonexistent_act"}
         ],
         warnings: [
           {:no_side_quests, "tutorial_arc"}

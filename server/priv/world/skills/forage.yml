@@ -4,9 +4,6 @@ category: survival
 cost: 1
 stat: per
 prerequisites: []
-trainers:
-  - herbalist
-  - monastery_garden_keeper
 lag: 3
 cooldown: 30
 mv_cost: 10

@@ -61,21 +61,19 @@ end
 # DEMO WORLD (DISABLED)
 # =============================================================================
 # The demo world (room_oak_tree, etc.) is no longer created here.
-# The monastery world from priv/world/prototypes/ is spawned via
+# The game world from priv/world/prototypes/ is spawned via
 # WorldLoader.spawn_world() on application startup instead.
 #
 # This avoids conflicts between the demo world and the real game world.
 # =============================================================================
 
-# Skip demo world creation - monastery world is spawned on app start
-existing_monastery = Entities.get_entity_by_key("monastery_gate")
+# Skip demo world creation - game world is spawned on app start
+existing_world = Entities.get_entity_by_key("awakening_clearing")
 
-if existing_monastery do
-  IO.puts("Monastery world already exists. Skipping demo content...")
+if existing_world do
+  IO.puts("Game world already exists. Skipping demo content...")
 else
-  IO.puts(
-    "Note: Monastery world will be spawned on application startup via WorldLoader.spawn_world()"
-  )
+  IO.puts("Note: Game world will be spawned on application startup via WorldLoader.spawn_world()")
 
   IO.puts("Skipping legacy demo world creation...")
 end

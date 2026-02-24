@@ -4,9 +4,6 @@ category: movement
 cost: 1
 stat: dex
 prerequisites: []
-trainers:
-  - scout_trainer
-  - monastery_shadow_monk
 lag: 2
 cooldown: 0
 mv_cost: 20

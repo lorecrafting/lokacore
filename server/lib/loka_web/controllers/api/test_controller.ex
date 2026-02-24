@@ -126,8 +126,8 @@ defmodule LokaWeb.Api.TestController do
   ## Response
 
       {
-        "monastery_gate": { "north": "courtyard" },
-        "courtyard": { "south": "monastery_gate", "east": "temple" }
+        "awakening_clearing": { "north": "heartwood_grove_path" },
+        "heartwood_grove_path": { "south": "awakening_clearing", "east": "gathering_circle" }
       }
   """
   def world_graph(conn, _params) do
@@ -145,8 +145,8 @@ defmodule LokaWeb.Api.TestController do
   ## Response
 
       {
-        "abbot_jampa": "temple",
-        "novice_pema": "courtyard"
+        "thera": "awakening_clearing",
+        "elder_maren": "gathering_circle"
       }
   """
   def npc_locations(conn, _params) do
@@ -283,8 +283,8 @@ defmodule LokaWeb.Api.TestController do
 
       POST /api/test/strategy/next-action
       {
-        "storyline_id": "monastery_arc",
-        "current_room_id": "monastery_gate",
+        "storyline_id": "grove_arc",
+        "current_room_id": "awakening_clearing",
         "game_state": {...},
         "nearby_entities": [...],
         "dialogue_state": null,
@@ -404,7 +404,7 @@ defmodule LokaWeb.Api.TestController do
 
   ## Request
 
-      GET /api/test/strategy/quest-order?storyline_id=monastery_arc
+      GET /api/test/strategy/quest-order?storyline_id=grove_arc
 
   ## Response
 

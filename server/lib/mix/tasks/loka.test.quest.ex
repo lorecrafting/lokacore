@@ -11,7 +11,7 @@ defmodule Mix.Tasks.Loka.Test.Quest do
       mix loka.test.quest find_treasure
 
       # Test a storyline
-      mix loka.test.quest --storyline monastery_arc
+      mix loka.test.quest --storyline grove_arc
 
       # Validate quests without running (static analysis)
       mix loka.test.quest --validate

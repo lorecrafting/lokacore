@@ -4,9 +4,6 @@ category: movement
 cost: 1
 stat: con
 prerequisites: []
-trainers:
-  - combat_trainer
-  - monastery_martial_master
 lag: 0
 cooldown: 10
 mv_cost: 0  # Uses MV faster while active

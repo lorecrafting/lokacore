@@ -28,7 +28,7 @@ defmodule LokaWeb.TestSessionController do
   @test_character_name "TestHero"
 
   # Starting room for test player
-  @starting_room_key "monastery_gate"
+  @starting_room_key "awakening_clearing"
 
   # Test player stats for faster combat (bosses are level 4 with attack 14-18)
   @test_player_stats %{
@@ -74,7 +74,7 @@ defmodule LokaWeb.TestSessionController do
 
   # Creates a test character entity with boosted stats for faster E2E testing.
   # Also skips the intro cutscene by setting the seen_intro flag
-  # And places the player at the starting room (monastery_gate)
+  # And places the player at the starting room (awakening_clearing)
   defp create_test_character(player) do
     starting_room_id =
       case Entities.get_entity_by_key(@starting_room_key) do
@@ -123,9 +123,7 @@ defmodule LokaWeb.TestSessionController do
   # This is needed because picking up items sets their location_id to nil
   defp reset_world_items do
     # Map of item_key -> room_key (items that need to be reset)
-    item_locations = %{
-      "meditation_journal" => "tenzins_cell"
-    }
+    item_locations = %{}
 
     Enum.each(item_locations, fn {item_key, room_key} ->
       case {Entities.get_entity_by_key(item_key), Entities.get_entity_by_key(room_key)} do

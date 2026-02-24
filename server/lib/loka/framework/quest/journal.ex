@@ -19,9 +19,9 @@ defmodule Loka.Framework.Quest.Journal do
 
       # Static entries
       journal_entries:
-        accepted: "I've agreed to help Abbot Jampa find the missing master."
-        objective_complete_find_temple: "I found the temple entrance."
-        completed: "Master Tenzin is safe. The monastery is at peace."
+        accepted: "I've agreed to help Elder Maren find what was lost."
+        objective_complete_find_grove_path: "I found the path deeper into the grove."
+        completed: "Thera is safe. The grove is at peace."
 
       # Dynamic entries with Elixir
       journal_entries:

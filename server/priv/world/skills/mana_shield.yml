@@ -6,9 +6,6 @@ stat: int
 prerequisites:
   - ward
   - meditate
-trainers:
-  - archmage
-  - monastery_elder
 lag: 2
 cooldown: 60
 mv_cost: 0

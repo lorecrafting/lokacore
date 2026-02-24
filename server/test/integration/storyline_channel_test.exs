@@ -20,7 +20,7 @@ defmodule Loka.Integration.StorylineChannelTest do
   @moduletag :integration
   @moduletag timeout: 180_000
 
-  describe "monastery_arc storyline playthrough" do
+  describe "grove_arc storyline playthrough" do
     setup do
       # Clean up any existing entities from previous runs
       {deleted, _} = Loka.Repo.delete_all(Loka.Engine.Schema.EntitySchema)
@@ -30,7 +30,7 @@ defmodule Loka.Integration.StorylineChannelTest do
       end
 
       # Load storyline to get starting room
-      {:ok, storyline} = StorylineContent.get_struct("monastery_arc")
+      {:ok, storyline} = StorylineContent.get_struct("grove_arc")
 
       # Spawn world
       IO.puts("▶ Spawning world from #{storyline.starting_room}...")

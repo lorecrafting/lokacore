@@ -5,9 +5,6 @@ cost: 2
 stat: int
 prerequisites:
   - ward
-trainers:
-  - monastery_elder
-  - magic_trainer
 lag: 2
 cooldown: 20
 mv_cost: 0

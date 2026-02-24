@@ -4,9 +4,6 @@ category: combat_defense
 cost: 1
 stat: dex
 prerequisites: []
-trainers:
-  - combat_trainer
-  - monastery_martial_master
 lag: 1
 cooldown: 3
 mv_cost: 5

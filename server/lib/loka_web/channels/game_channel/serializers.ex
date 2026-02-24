@@ -295,7 +295,6 @@ defmodule LokaWeb.Channels.GameChannel.Serializers do
       :mountain,
       :cave,
       :village,
-      :monastery,
       :market,
       :water,
       :desert,

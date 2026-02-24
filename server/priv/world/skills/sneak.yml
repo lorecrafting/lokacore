@@ -4,9 +4,6 @@ category: stealth
 cost: 1
 stat: dex
 prerequisites: []
-trainers:
-  - shadow_trainer
-  - monastery_shadow_monk
 lag: 0
 cooldown: 0
 mv_cost: 0  # Toggle, costs extra MV while active

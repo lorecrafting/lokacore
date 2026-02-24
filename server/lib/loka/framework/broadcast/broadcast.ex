@@ -60,14 +60,14 @@ defmodule Loka.Framework.Broadcast do
 
   ## Parameters
 
-  - `zone_key` - The zone's key (e.g., "eldoria", "monastery")
+  - `zone_key` - The zone's key (e.g., "eldoria", "grove")
   - `message` - The text message to send
   - `type` - Message type for styling (default: `:event`)
 
   ## Examples
 
       Broadcast.to_zone("eldoria", "A dragon has been spotted!", :event)
-      Broadcast.to_zone("monastery", "The bells toll for evening prayer.", :system)
+      Broadcast.to_zone("grove", "The roots hum with ancient energy.", :system)
   """
   @spec to_zone(zone_key(), String.t(), message_type()) :: :ok
   def to_zone(zone_key, message, type \\ :event) do

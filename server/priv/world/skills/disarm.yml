@@ -6,9 +6,6 @@ stat: dex
 prerequisites:
   - parry
   - thrust
-trainers:
-  - monastery_martial_master
-  - weapon_master
 lag: 3
 cooldown: 5
 mv_cost: 15

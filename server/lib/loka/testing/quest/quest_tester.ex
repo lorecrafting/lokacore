@@ -24,7 +24,7 @@ defmodule Loka.Testing.Quest.QuestTester do
 
   ### Test an Entire Storyline
 
-      {:ok, results} = QuestTester.test_storyline("monastery_arc")
+      {:ok, results} = QuestTester.test_storyline("grove_arc")
 
   ### Interactive Quest Walkthrough
 

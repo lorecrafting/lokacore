@@ -7,5 +7,4 @@ cost_per_level: 1
 effect:
   type: damage_reduction
   per_level: 1
-trainers:
-  - teacher_lobsang
+

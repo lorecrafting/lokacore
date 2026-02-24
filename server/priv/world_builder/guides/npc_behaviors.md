@@ -7,16 +7,16 @@ Making NPCs feel alive through behaviors and emotes.
 Behaviors are reusable components that give NPCs life.
 
 ```yaml
-key: monastery_guard
+key: grove_guardian
 type: npc
-name: Monastery Guard
+name: Grove Guardian
 description: |
   A weathered face beneath a simple hood. Her staff shows years of use.
 
 behaviors:
   - script: patrol
     config:
-      route: [gate, courtyard, temple]
+      route: [awakening_clearing, heartwood_grove_path, gathering_circle]
       interval: 180
 
   - script: day_night_schedule

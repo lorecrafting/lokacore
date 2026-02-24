@@ -37,8 +37,8 @@ defmodule Loka.Testing.QuestStrategy do
   ```elixir
   # Get the next action to take
   context = %{
-    storyline_id: "monastery_arc",
-    current_room_id: "monastery_gate",
+    storyline_id: "grove_arc",
+    current_room_id: "awakening_clearing",
     game_state: game_state,
     nearby_entities: [...],
     dialogue_state: nil,
@@ -159,7 +159,7 @@ defmodule Loka.Testing.QuestStrategy do
       Enum.find(entities, fn e ->
         # Try matching by key field
         # Try matching by primary_keyword
-        # Try matching by normalized name (e.g., "Abbot Jampa" -> "abbot_jampa")
+        # Try matching by normalized name (e.g., "Elder Maren" -> "elder_maren")
         e[:key] == key || e["key"] == key ||
           (e[:primary_keyword] == key || e["primary_keyword"] == key) ||
           normalize_entity_name(e[:name] || e["name"]) == key
@@ -168,7 +168,7 @@ defmodule Loka.Testing.QuestStrategy do
     entity && (entity[:id] || entity["id"])
   end
 
-  # Normalize entity name to key format (e.g., "Abbot Jampa" -> "abbot_jampa")
+  # Normalize entity name to key format (e.g., "Elder Maren" -> "elder_maren")
   defp normalize_entity_name(name) when is_binary(name) do
     name
     |> String.downcase()
@@ -1261,7 +1261,7 @@ defmodule Loka.Testing.QuestStrategy do
       Logger.info("[STRATEGY] No direct path found, trying text heuristics for #{target_node_id}")
 
       # Fall back to text heuristics based on common dialogue topic patterns
-      # For "tenzin_info" look for choices mentioning Tenzin
+      # For "thera_info" look for choices mentioning Thera
       # For "journal" look for choices mentioning journal, etc.
       keywords = extract_keywords_from_node_id(target_node_id)
 
@@ -1308,8 +1308,8 @@ defmodule Loka.Testing.QuestStrategy do
   end
 
   # Extract keywords from a node ID for text matching
-  # "tenzin_info" -> ["tenzin", "info"]
-  # "return_to_abbot" -> ["return", "abbot"]
+  # "thera_info" -> ["thera", "info"]
+  # "return_to_elder" -> ["return", "elder"]
   defp extract_keywords_from_node_id(node_id) when is_binary(node_id) do
     node_id
     |> String.split("_")

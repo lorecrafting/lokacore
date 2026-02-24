@@ -7,5 +7,4 @@ cost_per_level: 1
 effect:
   type: max_hp_bonus
   per_level: 5
-trainers:
-  - teacher_lobsang
+

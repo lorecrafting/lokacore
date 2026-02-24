@@ -4,9 +4,6 @@ category: social
 cost: 1
 stat: per
 prerequisites: []
-trainers:
-  - merchant
-  - monastery_quartermaster
 lag: 0
 cooldown: 0
 mv_cost: 0

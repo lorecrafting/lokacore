@@ -64,7 +64,7 @@ defmodule Loka.Testing.Content.WorldValidator do
   Validates world connectivity and integrity.
 
   Options:
-  - `:starting_room` - The prototype key to start BFS from (default: "monastery_gate")
+  - `:starting_room` - The prototype key to start BFS from (default: "awakening_clearing")
   - `:check_bidirectional` - Whether to warn about missing return exits (default: true)
   - `:check_live_entities` - Also check live entities in DB, not just prototypes (default: false)
 
@@ -628,7 +628,7 @@ defmodule Loka.Testing.Content.WorldValidator do
       %{
         entities_checked: 15,
         errors: [
-          {:missing_component, "abbot_jampa", "2abc...", "ambient_actions"}
+          {:missing_component, "thera", "2abc...", "ambient_actions"}
         ],
         warnings: []
       }

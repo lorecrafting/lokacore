@@ -15,13 +15,13 @@ defmodule Loka.Framework.World.ZoneReset do
   ## Usage
 
       # Manual reset (e.g., from admin dashboard)
-      ZoneReset.reset("monastery")
+      ZoneReset.reset("grove")
 
       # Get zone status
-      {:ok, status} = ZoneReset.status("monastery")
+      {:ok, status} = ZoneReset.status("grove")
 
       # Enable/disable a zone
-      ZoneReset.set_enabled("monastery", false)
+      ZoneReset.set_enabled("grove", false)
   """
 
   use GenServer
