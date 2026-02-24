@@ -9,9 +9,10 @@ defmodule LokaWeb.Channels.GameChannel.JoinHandler do
   require Logger
 
   alias Phoenix.Socket
-  alias Loka.Engine.Entity
-  alias Loka.Framework.{Inventory, Equipment, Quest}
+  alias Loka.Engine.{Entity, Entities}
+  alias Loka.Framework.{Inventory, Equipment, Quest, Cutscene}
   alias Loka.Framework.World.Atmosphere
+  alias Loka.Content
   alias Loka.Components.ResourcePools
   alias Loka.Session
   alias LokaWeb.Channels.RoomHelpers
@@ -101,6 +102,9 @@ defmodule LokaWeb.Channels.GameChannel.JoinHandler do
     # Deliver any timers that completed while offline
     deliver_offline_timers(socket, player.id)
 
+    # Auto-play intro cutscene for new players
+    character = maybe_play_intro_cutscene(socket, character)
+
     socket =
       socket
       |> Phoenix.Socket.assign(:character, character)
@@ -120,6 +124,43 @@ defmodule LokaWeb.Channels.GameChannel.JoinHandler do
     case resources["health"] do
       %{"current" => current, "max" => max} -> %{"current" => current, "max" => max}
       _ -> %{"current" => 100, "max" => 100}
+    end
+  end
+
+  # Play the grove_awakening cutscene on first join, then set flag so it won't replay.
+  @spec maybe_play_intro_cutscene(Socket.t(), Entity.t()) :: Entity.t()
+  defp maybe_play_intro_cutscene(socket, character) do
+    player_component = Entity.get_component(character, "player") || %{}
+    flags = Map.get(player_component, "flags", %{}) || %{}
+
+    if flags["seen_intro_cutscene"] do
+      character
+    else
+      case Content.Cutscene.get("grove_awakening") do
+        {:ok, cutscene} ->
+          name = cutscene.short_desc || "Grove Awakening"
+
+          Phoenix.Channel.push(socket, "cutscene_start", %{
+            cutscene_key: "grove_awakening",
+            name: name
+          })
+
+          Cutscene.play(self(), "grove_awakening")
+
+          # Set flag on character entity and persist
+          new_flags = Map.put(flags, "seen_intro_cutscene", true)
+          new_player = Map.put(player_component, "flags", new_flags)
+          updated = Entity.add_component(character, "player", new_player)
+
+          case Entities.save(updated) do
+            {:ok, saved} -> saved
+            {:error, _} -> updated
+          end
+
+        {:error, :not_found} ->
+          Logger.warning("[JoinHandler] Intro cutscene grove_awakening not found")
+          character
+      end
     end
   end
 

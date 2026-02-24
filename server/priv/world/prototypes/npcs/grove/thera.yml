@@ -36,7 +36,6 @@ components:
 
     start:
       text: "You're awake. Good."
-      action: ["play_cutscene", "grove_awakening"]
       choices:
         - text: "[Accept Quest] What is this place? What happened to me?"
           show_if:
