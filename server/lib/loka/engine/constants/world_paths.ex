@@ -9,7 +9,6 @@ defmodule Loka.Engine.Constants.WorldPaths do
 
       priv/world/
       ├── prototypes/          # Entity prototypes
-      │   ├── _base/           # Base prototypes (parents)
       │   ├── rooms/
       │   ├── items/
       │   └── npcs/

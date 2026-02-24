@@ -249,7 +249,7 @@ defmodule Loka.Testing.Content.PrototypeLinter do
 
   defp check_type(key, proto, errors, warnings) do
     cond do
-      # Base prototypes in _base/ directory have nil subtype by design
+      # Legacy: base_ prefixed keys may have nil subtype
       is_nil(proto.type) and String.starts_with?(proto.key || "", "base_") ->
         {errors, warnings}
 
@@ -316,7 +316,7 @@ defmodule Loka.Testing.Content.PrototypeLinter do
 
   defp check_description(key, proto, errors, warnings) do
     if is_nil(proto.extra_desc) or proto.extra_desc == "" do
-      # Only warn for non-base prototypes
+      # Only warn for non-base-prefixed prototypes
       if not String.starts_with?(proto.key || "", "base_") do
         {errors, [{:empty_description, key, proto.key || "unknown"} | warnings]}
       else
@@ -348,7 +348,7 @@ defmodule Loka.Testing.Content.PrototypeLinter do
       is_nil(proto.long_desc) or proto.long_desc == "" ->
         {errors, warnings}
 
-      # Skip base prototypes
+      # Skip base-prefixed prototypes
       String.starts_with?(proto.key || "", "base_") ->
         {errors, warnings}
 

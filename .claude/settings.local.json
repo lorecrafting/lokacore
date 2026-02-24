@@ -32,7 +32,10 @@
       "Bash(MIX_ENV=dev mix loka.test.balance:*)",
       "Bash(mix deps.get:*)",
       "Bash(mix sobelow:*)",
-      "Bash(claude-mem install:*)"
+      "Bash(claude-mem install:*)",
+      "Bash(tail:*)",
+      "Bash(sqlite3:*)",
+      "Bash(sqlite3 /Users/raymondluong/dev/lokacore/server/loka_dev.db \"DELETE FROM entities WHERE key = 'barren_arrival'\" && LOKA_CONTENT_VALIDATION=skip git push 2>&1)"
     ]
   }
 }
