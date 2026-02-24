@@ -1,0 +1,48 @@
+id: side_yara
+name: "What She Was Looking For"
+description: |
+  Kira's mother Yara kept twenty years of research notes about the Pulse.
+  After she died, Kira couldn't bring herself to go back for them.
+  Someone else could.
+
+type: side
+priority: 2
+
+giver: kira
+turn_in_npc: kira
+
+requires_quest: grove_belonging
+
+objectives:
+  - id: hear_about_notes
+    type: talk
+    target_id: kira
+    dialogue_topic: yara_offer
+    description: "Hear Kira describe the notes and where to find them"
+    hint: "She'll tell you if you ask. She won't ask for help herself."
+
+  - id: visit_healing_grove
+    type: go_to
+    target_id: healing_stores
+    description: "Go to the healing grove where Yara worked"
+    hint: "The healing stores in the western grove. Her notes are still there."
+
+  - id: tell_kira_what_you_found
+    type: talk
+    target_id: kira
+    dialogue_topic: yara_journal_returned
+    description: "Return to Kira and tell her what you found"
+    hint: "She needs to hear it."
+
+rewards:
+  xp: 150
+  gold: 0
+
+journal_entries:
+  start: "Kira's mother left twenty years of research notes in the healing grove. Kira hasn't been able to go back and get them. I told her I'd go."
+  hear_about_notes: "The healing grove, south wall shelf. Yara's handwriting leans left. That's how I'll know it."
+  visit_healing_grove: "Found them. Twenty years of records — root diagrams, Pulse measurements, questions she was still working through when she died. And one line near the end, underlined twice: 'It wants to teach us something.'"
+  tell_kira_what_you_found: "She went very still when I told her. Then: 'She was right. She was right about all of it. I just didn't know yet what she was right about.' Then she went back to work."
+  complete: "Something changed in the way she moved after that. Like she'd been carrying something for three years and finally picked it up properly."
+
+labels: [side, grove_arc, kira]

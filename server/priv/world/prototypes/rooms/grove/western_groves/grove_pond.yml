@@ -1,0 +1,13 @@
+key: grove_pond
+type: room
+short_desc: "The Grove Pond"
+extra_desc: |
+  A still pond fed by the stream network — used for irrigation, used as a marker of the grove's water cycle, used as a place to think. Frogs. Clear water. Everything in the grove eventually reflects in it, if you stay long enough. The pond has no visible overflow channel, yet its level never rises. Something below drains it at exactly the rate water enters. The frogs have always been here. They are always the same kind.
+
+exits:
+  south: grove_garden
+  west: western_orchard
+
+tags:
+  - outdoor
+  - safe_zone

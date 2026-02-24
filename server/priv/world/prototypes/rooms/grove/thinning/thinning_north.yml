@@ -1,0 +1,15 @@
+key: thinning_north
+type: room
+short_desc: "The Northern Thinning"
+extra_desc: |
+  Further in, and the effects are stronger. Sound behaves wrong here — footsteps arrive slightly before they should. Distance between two visible points varies depending on which direction you measure it from. The biological layer of the grove is thinnest in the north thinning; the gap between the root soil and the structure beneath it is locally three centimeters. This is the closest the two layers come to meeting.
+
+exits:
+  south: thinning_patrol_route
+  west: thinning_far_reach
+  north: membrane_observation
+
+tags:
+  - outdoor
+  - thinning
+  - room_entry_effect

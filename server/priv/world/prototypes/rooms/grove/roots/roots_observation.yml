@@ -1,0 +1,14 @@
+key: roots_observation
+type: room
+short_desc: "The Observation Window"
+extra_desc: |
+  A transparent panel in the wall of the passage looks directly into the root mass — the junction of biological and mechanical laid bare. Roots and conduits occupy the same space in the substrate, intertwined past the point of separation. Neither is clearly primary; both are functioning.
+  Looking through the panel, it is impossible to determine where the root ends and the conduit begins. They grew together. The roots grew into their designed positions.
+
+exits:
+  south: roots_thermal
+  east: roots_deep_junction
+
+tags:
+  - underground
+  - indoor

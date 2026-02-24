@@ -1,0 +1,14 @@
+key: roots_west_branch
+type: room
+short_desc: "The West Branch"
+extra_desc: |
+  A lateral passage running west from the entrance, narrower and older looking than the main corridor. The bioluminescent veins in the walls are dimmer here, their light adequate rather than purposeful. The air is still and constant in a way that suggests the ventilation system considers this passage low priority.
+  The dimmer veins are not inactive — they are on standby. Something in this passage is waiting. The wait has been long enough that the passage has settled into a functional sleep, but nothing has been decommissioned.
+
+exits:
+  east: roots_entrance
+  north: roots_maintenance
+
+tags:
+  - underground
+  - indoor

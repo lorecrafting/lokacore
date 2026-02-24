@@ -1,0 +1,13 @@
+key: blight_border
+type: room
+short_desc: "The Blight Border"
+extra_desc: |
+  Kira's stakes mark this line — painted at the top, driven into the soil at measured intervals, connected by string that gets replaced every month. The healthy trees end exactly here. The Blight has not crossed this line in six months, which is not reassuring; it means something is holding it at the boundary, not that the boundary is holding. The grid spacing of whatever is buried below matches no biological structure anyone has named.
+
+exits:
+  west: blight_zone
+  east: kira_field_station
+  north: blight_deep_edge
+
+tags:
+  - outdoor

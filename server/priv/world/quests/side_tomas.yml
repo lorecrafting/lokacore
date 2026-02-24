@@ -1,0 +1,47 @@
+id: side_tomas
+name: "What He Carried Here"
+description: |
+  Tomas keeps polishing an old trowel. He says his father gave it to him.
+  But his father wasn't born here — he came from somewhere else entirely.
+
+type: side
+priority: 1
+
+giver: tomas
+turn_in_npc: tomas
+
+requires_quest: grove_arrival
+
+objectives:
+  - id: ask_about_trowel
+    type: talk
+    target_id: tomas
+    dialogue_topic: trowel_story
+    description: "Ask Tomas about the trowel — catch him in a clear moment"
+    hint: "He mentions his father. He mentions Earth. Ask him to tell you more."
+
+  - id: visit_orchard
+    type: go_to
+    target_id: western_orchard_deep
+    description: "Visit the western orchard — his father planted the first trees here"
+    hint: "The oldest trees, the deepest roots, at the far end. They were put in by hand. You'll feel the difference in the Pulse."
+
+  - id: trowel_meaning
+    type: talk
+    target_id: tomas
+    dialogue_topic: trowel_return
+    description: "Return to Tomas and tell him what you felt"
+    hint: "He'll be clearer than usual. He tends to be, when the Pulse is full."
+
+rewards:
+  xp: 100
+  gold: 0
+
+journal_entries:
+  start: "Tomas holds that old trowel like it's the most important thing he owns. His father came from Earth. He doesn't say much more than that."
+  ask_about_trowel: "His father was a planter — broke the first soil on this ship, put the first living things in this ground. This trowel made that first cut. Tomas has carried it since his father died, trying to keep what was started."
+  visit_orchard: "The oldest trees in the western orchard feel different. The roots go down in a way that seems intentional — like they were placed with care rather than grown by chance. Two hundred years of intention in the Pulse."
+  trowel_meaning: "He went clear and said: 'Home is wherever you put the first root down. My father taught me that.' He held the trowel out to the light. 'Now you know it too.'"
+  complete: "He polished the trowel once more and said nothing else. He didn't need to. His father left Earth believing the journey mattered. Tomas has carried that belief for two hundred years."
+
+labels: [side, grove_arc, tomas]

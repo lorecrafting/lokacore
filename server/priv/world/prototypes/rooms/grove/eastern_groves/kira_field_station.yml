@@ -1,0 +1,15 @@
+key: kira_field_station
+type: room
+short_desc: "Kira's Field Station"
+extra_desc: |
+  Measurement marks scored into bark, notes nailed under bark flaps to keep them dry, stakes driven at precise intervals. Kira's handwriting covers everything — dates, readings, questions with no answers yet. One stake at the northeast corner has never moved despite two seasons of frost heave and ground shift around it. She marked it differently two years ago: a double ring, red, no annotation.
+
+exits:
+  west: blight_border
+  east: blight_deep_edge
+
+spawns:
+  - prototype: kira
+
+tags:
+  - outdoor

@@ -1,0 +1,10 @@
+key: deep_west
+type: room
+short_desc: "The Western Deep"
+extra_desc: |
+  The western branch of the Deep — older growth, ordinary ancient trees, none of the enormous circuit traced trunks that dominate the main chamber. The Pulse is present here but quieter, a single thread where the center runs a chord. Rootspeakers who find the Deep overwhelming come west to listen to one thing at a time.
+exits:
+  east: the_deep
+  west: deep_pool
+tags:
+  - outdoor

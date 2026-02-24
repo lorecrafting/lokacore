@@ -1,0 +1,12 @@
+key: western_orchard_deep
+type: room
+short_desc: "The Deep Orchard"
+extra_desc: |
+  Trees planted by Tomas's father — older, more settled, their roots going down differently than the younger growth to the east. The fruit is the same variety but tastes subtly richer. No one has an explanation for that. The root system here connects directly to the Pulse network. Tomas has known this for years and has never said so out loud.
+
+exits:
+  east: western_orchard_west
+
+tags:
+  - outdoor
+  - safe_zone

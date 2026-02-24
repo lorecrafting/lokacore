@@ -1,0 +1,14 @@
+key: healing_grove_south
+type: room
+short_desc: "The Southern Healing Grove"
+extra_desc: |
+  The southern extension of the healing grove — quieter, less trafficked, used for rest and recovery rather than active treatment. The sounds here are softer than anywhere else in the western groves: fewer birds, less wind, the Pulse more felt than heard. No one in living memory has been cold in this room. The root system maintains it two degrees warmer than the northern grove. It has always done this.
+
+exits:
+  west: healing_stores
+  south: healing_approach
+  east: small_grove
+
+tags:
+  - outdoor
+  - safe_zone

@@ -1,0 +1,46 @@
+id: side_brennan
+name: "The Name She Carried"
+description: |
+  Brennan mentioned losing someone once. Just "once" — and then nothing more. Some grief has been carried so long it forgot it was grief. He guards a name he's never said out loud.
+
+type: side
+priority: 2
+
+giver: brennan
+turn_in_npc: brennan
+
+requires_quest: grove_arrival
+
+objectives:
+  - id: ask_maren_about_seren
+    type: talk
+    target_id: elder_maren
+    dialogue_topic: seren_records
+    description: "Ask Elder Maren who Brennan lost"
+    hint: "She keeps the records. If anyone knows the shape of that grief, she does."
+
+  - id: find_the_carving
+    type: go_to
+    target_id: watchers_post
+    description: "Find Seren's mark at the Watcher's Post"
+    hint: "She left something on the bark of the boundary tree. Brennan has stood beside it every watch since."
+
+  - id: tell_brennan_you_know
+    type: talk
+    target_id: brennan
+    dialogue_topic: seren_named
+    description: "Return to Brennan and tell him what you found"
+    hint: "He's never said her name to anyone who came looking for it."
+
+rewards:
+  xp: 200
+  gold: 0
+
+journal_entries:
+  start: "Brennan mentioned losing someone once. Thirty years ago. He said nothing else — just 'once.' The badge on his chest is worn from handling."
+  ask_maren_about_seren: "Maren told me about Seren. Rootspeaker before Thera. She chose the second root — rest — and dissolved without remaining. She's simply gone. And Brennan has been the Watcher ever since, guarding the truth she handed him."
+  find_the_carving: "There are initials carved into the bark of the boundary tree at the post. Old, deep, deliberate. She put them there when she understood what was coming. He's stood next to them every watch since."
+  tell_brennan_you_know: "I told him I knew her name. He said it out loud — just once, quietly — like a door he'd kept shut for forty years and finally opened far enough to breathe through."
+  complete: "He didn't say thank you. He didn't need to. He touched the badge once and went back to the watch."
+
+labels: [side, grove_arc, brennan]

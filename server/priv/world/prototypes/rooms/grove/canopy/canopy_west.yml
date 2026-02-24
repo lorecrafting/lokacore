@@ -1,0 +1,10 @@
+key: canopy_west
+type: room
+short_desc: "The Western Canopy"
+extra_desc: |
+  The upper grove, western side — from here the healing and orchard zones are green patches below and outward, larger than they feel from inside. The orchard's planting geometry is visible as a grid: rows and spacing extended over two centuries of additions, all aligned to the same orientation. The original planters used the same grid as the root passage below the grove's center. No one has noted this correspondence in writing.
+exits:
+  east: canopy_access
+tags:
+  - outdoor
+  - safe_zone

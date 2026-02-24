@@ -1,0 +1,12 @@
+key: stream_pool
+type: room
+short_desc: "The Stream Pool"
+extra_desc: |
+  The stream widens into a still pool before narrowing again downstream. The water is clear enough to see the bottom in detail — Rootspeakers monitor this place; what the water carries tells them things the trees cannot. After weeks of drought or days of heavy rain, the pool maintains exactly forty centimeters of depth. Something below is regulating it.
+
+exits:
+  north: stream_lower
+  east: stream_confluence
+
+tags:
+  - outdoor

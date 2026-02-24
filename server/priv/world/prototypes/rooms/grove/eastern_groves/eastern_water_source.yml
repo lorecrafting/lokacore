@@ -1,0 +1,12 @@
+key: eastern_water_source
+type: room
+short_desc: "The Eastern Spring"
+extra_desc: |
+  A secondary spring feeding the eastern grove — clear, cold, currently healthy. Kira's flow measurements are posted on a post beside it, each reading dated, each one slightly less than the one before. The water carries trace minerals that match nothing in the surrounding soil. They match the maintenance fluid composition documented in a partial record found in the roots passage two years ago, which no one has been able to fully explain.
+
+exits:
+  west: eastern_grove_north
+
+tags:
+  - outdoor
+  - safe_zone

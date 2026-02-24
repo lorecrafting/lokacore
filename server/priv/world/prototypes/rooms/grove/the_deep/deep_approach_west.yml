@@ -1,0 +1,9 @@
+key: deep_approach_west
+type: room
+short_desc: "The Western Approach"
+extra_desc: |
+  An alternate route deeper into the ancient grove — longer than the main path, worn thin by generations of deliberate use. The ground here is smooth underfoot in a way that should not persist after two centuries of weather. It looks like bark and compresses like bark and does not cut, splinter, or degrade like bark.
+exits:
+  east: deep_pool
+tags:
+  - outdoor

@@ -1,0 +1,12 @@
+key: shaper_workshop
+type: room
+short_desc: "The Shaper Workshop"
+extra_desc: |
+  Kira's field station — tools, monitoring equipment, samples, records of root health spanning months. The work that does not get done standing up gets done here. Every surface holds evidence of methodical long observation: charts, comparison samples, notes written in the margins of other notes. The monitoring equipment gives readings she cannot fully explain. Fluctuations in root conductivity that should not exist in biological tissue. She keeps meticulous records of things she does not understand yet.
+
+exits:
+  down: shaper_grove
+
+tags:
+  - indoor
+  - safe_zone

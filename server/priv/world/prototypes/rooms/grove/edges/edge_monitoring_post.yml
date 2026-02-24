@@ -1,0 +1,15 @@
+key: edge_monitoring_post
+type: room
+short_desc: "The Edge Post"
+extra_desc: |
+  A built structure, weathered but maintained — equipment for measuring membrane stress mounted on a permanent frame, records kept in a sealed box going back forty years. The equipment works. The membrane stress readings have been increasing at a constant rate for the entire forty years of documentation. Brennan calculated the trend in year three. If it holds, the readings become significant in eleven years. He has been watching the numbers ever since and has not shared the calculation.
+
+exits:
+  west: edge_north
+  south: edge_east
+
+tags:
+  - outdoor
+  - forbidden
+  - edge_zone
+  - room_entry_effect

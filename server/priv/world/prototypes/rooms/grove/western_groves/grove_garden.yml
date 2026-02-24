@@ -1,0 +1,13 @@
+key: grove_garden
+type: room
+short_desc: "The Grove Garden"
+extra_desc: |
+  Cultivated beds in precise rows — two hundred years of uninterrupted human attention on this ground. The plants grow faster than they should, and every Tender who works here notices it and does not mention it. The soil tests differently than soil from the surrounding grove: richer, more complex, as if something has been enriching it from below for a very long time.
+
+exits:
+  west: small_grove
+  north: grove_pond
+
+tags:
+  - outdoor
+  - safe_zone

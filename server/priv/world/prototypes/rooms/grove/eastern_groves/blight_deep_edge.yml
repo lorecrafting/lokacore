@@ -1,0 +1,12 @@
+key: blight_deep_edge
+type: room
+short_desc: "The Deep Blight Edge"
+extra_desc: |
+  The trees here are still standing. Their bark is intact, their leaves mostly present. But the sound when you strike the trunk is wrong — hollow where wood should answer solid. Kira has them on a list. The advance that brought them to this list has been decelerating for three months: not stopping, not reversing, but slowing at a rate too consistent to be the disease losing momentum. As if something is adjusting a dial.
+
+exits:
+  south: blight_border
+  west: kira_field_station
+
+tags:
+  - outdoor

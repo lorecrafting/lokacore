@@ -1,0 +1,13 @@
+key: eastern_grove_north
+type: room
+short_desc: "The Northern Eastern Grove"
+extra_desc: |
+  The northeastern section where the Blight hasn't reached yet. Healthy trees, watched carefully — Kira checks here every third day. The trees are fine. The trees also lean very slightly toward the center of the grove, all of them, at the same angle, not from wind or available light, but from something below that they have been orienting toward since before anyone was measuring.
+
+exits:
+  south: eastern_grove_path
+  east: eastern_water_source
+
+tags:
+  - outdoor
+  - safe_zone

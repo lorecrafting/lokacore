@@ -1,0 +1,14 @@
+key: old_campground
+type: room
+short_desc: "The Old Campground"
+extra_desc: |
+  A traditional overnight stop — flat ground, a ring of stones for a fire rarely lit, worn hollows in the earth where generations of Tenders slept during long monitoring shifts. The space carries a residue of habitation even when empty. Someone was here recently enough that the worn hollows are still soft.
+  The ground is flat in a way that does not naturally occur in forest — no root intrusion, no gradient, no settling. Something level beneath has been keeping it level for centuries.
+
+exits:
+  east: understory_northwest
+  west: understory_deep_south
+
+tags:
+  - outdoor
+  - safe_zone

@@ -1,0 +1,11 @@
+key: canopy_bridge
+type: room
+short_desc: "The Rope Bridge"
+extra_desc: |
+  A bridge between two of the tallest trees — boards and rope, old and maintained and reliable. It swings in a way that is alarming and then fine. The rope is not rope. It is a composite fiber with a recorded service life of one hundred and twenty years and no sign of degradation. Someone who built this knew it would need to outlast them.
+exits:
+  west: canopy_access
+  east: canopy_platform
+tags:
+  - outdoor
+  - safe_zone

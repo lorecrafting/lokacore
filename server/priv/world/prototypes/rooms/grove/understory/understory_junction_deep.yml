@@ -1,0 +1,14 @@
+key: understory_junction_deep
+type: room
+short_desc: "The Deep Junction"
+extra_desc: |
+  A lower junction in the understory network, where more routes branch than at the upper crossing. More confusing for the unfamiliar, faster for those who know it. The markings on the trees here are older than the Tender naming system — carved into wood that has long since grown around them, pressing the cuts outward.
+  The markings are in the same script as the passages below — the script no living Tender can read. Whoever marked this junction expected someone to understand it.
+
+exits:
+  up: understory_crossing
+  east: understory_deep_south
+
+tags:
+  - outdoor
+  - safe_zone

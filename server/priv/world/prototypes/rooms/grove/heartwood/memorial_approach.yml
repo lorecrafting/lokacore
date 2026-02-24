@@ -1,0 +1,13 @@
+key: memorial_approach
+type: room
+short_desc: "The Memorial Approach"
+extra_desc: |
+  A wide formal path leads north through the trees. People quiet themselves before continuing — voices drop without prompting, arguments resolve mid-sentence, the urge to rush simply goes away. The path is kept clear, though no one organizes the clearing. The path is exactly 1.2 meters wide along its entire length. No one measured it. No one has ever maintained that width. It simply is.
+
+exits:
+  north: lira_memorial
+  south: gathering_circle
+
+tags:
+  - outdoor
+  - safe_zone

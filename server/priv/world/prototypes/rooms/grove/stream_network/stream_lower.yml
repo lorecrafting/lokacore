@@ -1,0 +1,12 @@
+key: stream_lower
+type: room
+short_desc: "The Lower Stream"
+extra_desc: |
+  The stream runs wider here than its sound suggests from above — audible before visible, a low rushing that builds as the path descends. Frogs. The sound of water over stone, the grove's most alive register. The streambed is lined with stones that are too regular and too smooth, not river worn but shaped. Placed here before the first Tender was born.
+
+exits:
+  north: stream_source
+  south: stream_pool
+
+tags:
+  - outdoor

@@ -1,0 +1,13 @@
+key: heartwood_east
+type: room
+short_desc: "The Eastern Heartwood"
+extra_desc: |
+  The trees here are slightly younger — the grove expanded east over generations, and the growth shows. Less dense overhead, the canopy a shade lighter, the Rootsong a degree quieter. Still clearly part of the same network, but newer. The bark spiral pattern present throughout the grove is faint here, still clockwise, but noticeably younger — as if the pattern was applied later, following the expansion outward.
+
+exits:
+  west: gathering_circle
+  north: common_fire_circle
+
+tags:
+  - outdoor
+  - safe_zone

@@ -1,0 +1,14 @@
+key: roots_maintenance
+type: room
+short_desc: "The Maintenance Passage"
+extra_desc: |
+  A service corridor alongside the main passage, narrower and lower ceilinged. The walls here are panels rather than continuous stone — designed to be opened and accessed. Some panels have been opened before and closed again without record: the edges worn smooth in a way that requires decades of repeated use, not centuries.
+  Someone has been in this passage in living memory and left no explanation for why.
+
+exits:
+  south: roots_west_branch
+  north: roots_thermal
+
+tags:
+  - underground
+  - indoor

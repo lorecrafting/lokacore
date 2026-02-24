@@ -1,0 +1,14 @@
+key: gathering_circle
+type: room
+short_desc: "The Gathering Circle"
+extra_desc: |
+  The trees around the perimeter have grown back from a circular clearing, their roots rising into natural seats. Bark worn smooth where hands and shoulders have rested over generations. No one built this place — the grove accommodated. The trees around the perimeter are equidistant from each other. Not approximately. Precisely.
+
+exits:
+  north: memorial_approach
+  east: heartwood_east
+  west: heartwood_grove_path
+
+tags:
+  - outdoor
+  - safe_zone

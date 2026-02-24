@@ -1,0 +1,11 @@
+key: canopy_edge_view
+type: room
+short_desc: "The Edge View"
+extra_desc: |
+  Where canopy meets membrane at the grove's boundary, visible simultaneously from height. The membrane here is slightly translucent — not transparent, but less absolute than at ground level. Shapes on the other side, at a distance that should not exist given the membrane's apparent thickness. The most revealing vantage in the grove: from here both the membrane's extent and the grove's edge are visible at once, and they are exactly the same shape.
+exits:
+  west: canopy_high
+tags:
+  - outdoor
+  - forbidden
+  - edge_zone

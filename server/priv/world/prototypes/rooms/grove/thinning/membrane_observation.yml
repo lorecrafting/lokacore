@@ -1,0 +1,14 @@
+key: membrane_observation
+type: room
+short_desc: "The Observation Post"
+extra_desc: |
+  A rough shelter — a wind break of stacked stone, a worn seat, a place to stand still for long periods. From here the membrane surface is close enough to read. It is not uniform: it has seams, panels, maintenance access points that have not been touched in two hundred years or possibly longer. Brennan's records go back eleven years. He counts things here that no one has asked him to count and has not yet decided whether to stop.
+
+exits:
+  south: thinning_north
+
+tags:
+  - outdoor
+  - forbidden
+  - edge_zone
+  - room_entry_effect

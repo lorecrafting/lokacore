@@ -1,0 +1,15 @@
+key: edge_arch
+type: room
+short_desc: "The Edge Arch"
+extra_desc: |
+  A natural rock formation forces the membrane inward and downward at this point, creating an arch at ground level where the surface is close enough to touch overhead. People have been leaving objects pressed against it — small stones, braided cord, things of the kind left at significant places. None of them have fallen. The membrane holds them. The surface tension that does this was not an accident of material physics; it was specified.
+
+exits:
+  south: edge_west
+  east: edge_north
+
+tags:
+  - outdoor
+  - forbidden
+  - edge_zone
+  - room_entry_effect

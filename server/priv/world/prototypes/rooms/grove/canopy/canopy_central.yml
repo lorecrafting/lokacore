@@ -1,0 +1,12 @@
+key: canopy_central
+type: room
+short_desc: "The Canopy Center"
+extra_desc: |
+  The highest accessible crown of the grove's central trees. The membrane is visible above — closer than expected, close enough to feel the scale of the thing the grove is inside. From here, the grove below resolves into a pattern: zone arrangement, path spacing, the way clearings radiate from center. It looks designed. Someone positioned all of this from above.
+exits:
+  south: canopy_platform
+  down: heartwood_upper_path
+  up: canopy_high
+tags:
+  - outdoor
+  - safe_zone

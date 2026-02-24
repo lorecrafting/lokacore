@@ -1,0 +1,10 @@
+key: rootspeaker_hollow
+type: room
+short_desc: "The Rootspeaker Hollow"
+extra_desc: |
+  A pocket of the Deep where the Pulse is accessible to someone untrained — the specific quality of attention it demands is lower here, as if it is leaning toward the listener. The name of every Rootspeaker who trained here is carved into the same root. Thera's name is near the middle. The oldest names are in a script no one can read, and there are forty seven of them, which is more than the grove's recorded Rootspeakers by seven.
+exits:
+  south: the_deep
+  north: deep_meditation_cave
+tags:
+  - outdoor

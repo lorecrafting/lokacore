@@ -1,0 +1,10 @@
+key: deep_pool
+type: room
+short_desc: "The Deep Pool"
+extra_desc: |
+  A still pool of clear water in the western Deep, fed by the stream network far above through ways that are not visible. The bioluminescent lichen reflects in the surface without distortion, as if the water resists ripple. Rootspeakers report the Pulse is audible near water in a way it isn't elsewhere — closer to the surface, more legible.
+exits:
+  east: deep_west
+  west: deep_approach_west
+tags:
+  - outdoor

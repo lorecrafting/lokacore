@@ -1,0 +1,14 @@
+key: roots_thermal
+type: room
+short_desc: "The Thermal Systems"
+extra_desc: |
+  Pipes, venting shafts, and regulation chambers line the walls — the mechanism behind the grove's stable temperature, visible and operational. The noise here is rhythmic and deep, something breathing with very long breaths. It has been doing this for two hundred years without interruption.
+  The components show no wear. The materials they are made from do not degrade in any way anyone in the grove can measure or identify.
+
+exits:
+  south: roots_maintenance
+  north: roots_observation
+
+tags:
+  - underground
+  - indoor

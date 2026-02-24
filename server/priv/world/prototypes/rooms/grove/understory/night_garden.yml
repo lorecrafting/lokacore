@@ -1,0 +1,14 @@
+key: night_garden
+type: room
+short_desc: "The Night Garden"
+extra_desc: |
+  Unremarkable in daylight — a clearing in the roots with some fungal growth on the lower wood. At night, the fungi illuminate in shifting patterns and soft creatures come to circle them, drawn to something in the light. The Pulse feels cooler here, slower, like the grove itself exhaling.
+  The fungi emit light in a spectrum that matches no natural fungal species — precisely what is needed for the grove's photosynthesis cycle. At night, when there is no other light, they continue the cycle regardless.
+
+exits:
+  north: root_cathedral
+  south: understory_deep_south
+
+tags:
+  - outdoor
+  - safe_zone

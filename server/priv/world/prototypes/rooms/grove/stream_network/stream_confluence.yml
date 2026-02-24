@@ -1,0 +1,12 @@
+key: stream_confluence
+type: room
+short_desc: "The Confluence"
+extra_desc: |
+  The main stream meets a smaller tributary here, the sound doubling as two water systems become one. Both continue north together toward the understory above. The two streams join at an angle that produces a specific standing wave — the same wave, always, regardless of flow volume. The angle is not natural. It has been maintained.
+
+exits:
+  west: stream_pool
+  north: south_understory
+
+tags:
+  - outdoor

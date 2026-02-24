@@ -1,0 +1,13 @@
+key: healing_stores
+type: room
+short_desc: "The Healing Stores"
+extra_desc: |
+  The working room behind the healing grove — shelves of processed medicinals, tools, drying racks, preparation surfaces where gathered things are made into usable things. The smell here is dense and specific: bark, rendered fat, something faintly sweet that Tenders cannot identify but recognize on contact. The shelves are at a height and spacing no one finds comfortable at first. Every Tender adapts within a week and stops noticing.
+
+exits:
+  down: healing_grove
+  east: healing_grove_south
+
+tags:
+  - indoor
+  - safe_zone

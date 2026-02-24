@@ -1,0 +1,12 @@
+key: canopy_platform
+type: room
+short_desc: "The Platform"
+extra_desc: |
+  A built platform where three crowns converge, large enough for six people. Used for observation, for discussions that needed distance from below, for being alone with the whole grove visible. The platform is supported by exactly three points. The trees that hold it grew into these positions from seed — either placed knowing where they would grow, or luck of a kind that strains the word.
+exits:
+  west: canopy_bridge
+  north: canopy_central
+  south: canopy_east
+tags:
+  - outdoor
+  - safe_zone

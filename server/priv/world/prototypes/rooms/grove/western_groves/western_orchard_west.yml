@@ -1,0 +1,13 @@
+key: western_orchard_west
+type: room
+short_desc: "The Western Orchard Extension"
+extra_desc: |
+  The most recent expansion of the orchard — trees younger, soil still learning what it is. The Pulse here is quieter, the root connections still forming. There is a sense of becoming rather than being, of process rather than settled fact. The young trees grow at a rate that would take forty years in the original orchard. The roots are being guided.
+
+exits:
+  south: small_grove
+  west: western_orchard_deep
+
+tags:
+  - outdoor
+  - safe_zone

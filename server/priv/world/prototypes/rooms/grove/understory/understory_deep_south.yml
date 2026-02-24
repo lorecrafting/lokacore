@@ -1,0 +1,15 @@
+key: understory_deep_south
+type: room
+short_desc: "The Deep South Understory"
+extra_desc: |
+  Further into the lower grove network, where paths connect things that are not connected above. Quieter here than the upper crossing — less sky, more root, the grove pressing in from all sides. The kind of place you pass through with purpose rather than linger.
+  The root density here is significantly higher than the trees above would account for. More roots than can be explained by what grows at the surface. Something else is rooted here.
+
+exits:
+  north: night_garden
+  east: old_campground
+  west: understory_junction_deep
+
+tags:
+  - outdoor
+  - safe_zone

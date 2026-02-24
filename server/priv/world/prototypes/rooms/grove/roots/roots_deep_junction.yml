@@ -1,0 +1,14 @@
+key: roots_deep_junction
+type: room
+short_desc: "The Deep Junction"
+extra_desc: |
+  A lower level of the junction system, reached by descending from the main junction above. The passages here go places the upper junction does not, including one that has been sealed — not by collapse or blockage, but by a mechanism with a panel still set into the wall beside it.
+  The code panel is functional. It has been waiting for input for longer than anyone has been tracking it. No one in the grove knows it exists.
+
+exits:
+  south: roots_junction
+  west: roots_observation
+
+tags:
+  - underground
+  - indoor

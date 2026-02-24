@@ -1,0 +1,9 @@
+key: deep_far_east
+type: room
+short_desc: "The Far Eastern Deep"
+extra_desc: |
+  The eastern extension of the Deep — bioluminescent root patterns densest here, the geometric circuit traces on bark most visible, most clearly not growth. In full daylight they would be impossible to dismiss. There is no daylight here. The traces in this section run in parallel rows, branching at consistent intervals: the signature of active circuitry, not ornament. Whatever process this root network is running, it is running here most intensely.
+exits:
+  south: deep_eastern_reach
+tags:
+  - outdoor

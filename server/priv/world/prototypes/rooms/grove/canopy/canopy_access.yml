@@ -1,0 +1,12 @@
+key: canopy_access
+type: room
+short_desc: "The Climb"
+extra_desc: |
+  Bark hand holds cut into the oldest tree, the grove receding below as the first branches pass underfoot. The transition from ground to canopy takes effort; people who make this climb do it with intention. The hand holds were cut with a tool that left marks no implement in the grove's inventory matches. They were here when the first Tender arrived. Someone prepared this climb before anyone was here to climb it.
+exits:
+  down: elder_tree_hollow
+  east: canopy_bridge
+  west: canopy_west
+tags:
+  - outdoor
+  - safe_zone

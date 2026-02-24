@@ -1,0 +1,15 @@
+key: root_cathedral
+type: room
+short_desc: "The Root Cathedral"
+extra_desc: |
+  Several massive exposed root systems arch overhead, the space between them tall enough to stand in and dark enough to feel enclosed. No one built this — it grew this way over centuries, shaping itself into something that works too well as shelter to be accidental. The Pulse is clearer here than almost anywhere above ground, as if the roots are conducting it directly upward.
+  The arches repeat at precise intervals — 2.4 meters across, the same measurement as the structural supports in the root passages far below. The grove grew to the spacing it was given.
+
+exits:
+  east: understory_crossing
+  north: understory_northwest
+  south: night_garden
+
+tags:
+  - outdoor
+  - safe_zone

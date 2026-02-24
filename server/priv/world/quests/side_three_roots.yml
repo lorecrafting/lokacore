@@ -1,0 +1,48 @@
+id: side_three_roots
+name: "What Lira Left Behind"
+description: |
+  Tomas carved the Three Roots teaching into stone in the Deep — at Lira's request,
+  a long time ago. She said someone would need to read it.
+  He thinks that someone is you.
+
+type: side
+priority: 2
+
+giver: tomas
+turn_in_npc: tomas
+
+requires_quest: grove_belonging
+
+objectives:
+  - id: hear_about_carving
+    type: talk
+    target_id: tomas
+    dialogue_topic: three_roots_location
+    description: "Hear Tomas describe the carving and where to find it"
+    hint: "Catch him in a clear moment. He'll know what you're asking about."
+
+  - id: find_the_carving
+    type: go_to
+    target_id: deep_eastern_reach
+    description: "Find the carved stone in the Deep's eastern reach"
+    hint: "The eastern extension of the Deep. The roots go down there. You'll feel it before you see it."
+
+  - id: return_to_tomas
+    type: talk
+    target_id: tomas
+    dialogue_topic: three_roots_found
+    description: "Tell Tomas you've seen the carving"
+    hint: "Find him at the memorial stone. He'll want to know."
+
+rewards:
+  xp: 200
+  gold: 0
+
+journal_entries:
+  start: "Tomas mentioned a carving in the Deep. Lira asked him to make it. She said someone would need to read it and then look for her. He looked at me when he said that."
+  hear_about_carving: "He told me where to find it. The eastern reach of the Deep — a stone half covered with old growth, words worn but readable. The carving says three things. And then a name."
+  find_the_carving: "I found it. The stone is smooth where the chisel worked it. Three roots etched deep: Into the Earth. Back to the Source. Through to the Other Side. And below them, different hand: Lira."
+  return_to_tomas: "He already knew I'd found it. He said: 'She wrote that last part herself. I only did the roots.' Then he was quiet for a long time."
+  complete: "The carving is still there. The roots still go in three directions. Lira left something in stone long ago, and it arrived exactly when it was supposed to."
+
+labels: [side, grove_arc, tomas, deep]

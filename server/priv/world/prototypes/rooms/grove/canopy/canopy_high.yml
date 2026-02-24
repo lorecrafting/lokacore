@@ -1,0 +1,11 @@
+key: canopy_high
+type: room
+short_desc: "The High Canopy"
+extra_desc: |
+  The absolute highest accessible point — topmost branches that still hold weight, where the grove below has become abstraction and the membrane above is close enough to see its surface. The sounds from below are gone. What remains is the membrane's near silence and, faintly, the Pulse from far below. At this distance the membrane has a texture: a fine grid, each cell approximately two centimeters. It is clearly manufactured.
+exits:
+  down: canopy_central
+  east: canopy_edge_view
+tags:
+  - outdoor
+  - safe_zone

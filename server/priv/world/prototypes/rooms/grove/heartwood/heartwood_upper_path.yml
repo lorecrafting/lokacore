@@ -1,0 +1,14 @@
+key: heartwood_upper_path
+type: room
+short_desc: "The Upper Path"
+extra_desc: |
+  A path elevated through the heartwood's higher branches, the grove visible in most directions. Tenders come here when they need to be above something without leaving it entirely. From this height, the grove's arrangement resolves into something almost legible — the clearing spacing, the zone boundaries, the way paths radiate from the center. It looks almost planned.
+
+exits:
+  south: heartwood_grove_path
+  down: elder_hall
+  up: canopy_central
+
+tags:
+  - outdoor
+  - safe_zone

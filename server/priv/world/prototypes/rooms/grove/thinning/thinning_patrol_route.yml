@@ -1,0 +1,15 @@
+key: thinning_patrol_route
+type: room
+short_desc: "The Patrol Route"
+extra_desc: |
+  A worn path maintained for Watcher perimeter patrols — the most used ground in the thinning zone. Evidence of disciplined, repeated foot traffic over years. The path was already here when the first Watchers organized, already worn into the substrate by someone who walked it before there was a name for what they were doing or a word for what they were watching.
+
+exits:
+  west: the_thinning
+  south: thinning_west
+  north: thinning_north
+
+tags:
+  - outdoor
+  - thinning
+  - room_entry_effect

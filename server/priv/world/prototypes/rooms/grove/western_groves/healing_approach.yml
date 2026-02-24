@@ -1,0 +1,13 @@
+key: healing_approach
+type: room
+short_desc: "The Healing Approach"
+extra_desc: |
+  A path lined on both sides by planters — functional, not decorative. The things growing here are harvested on a schedule and the planters show it: trimmed, productive, none of it left to simply be. The smell shifts on this path, herbs giving way to something mineral and clean. The planters are evenly spaced. The spacing exactly matches the lighting interval in the root passages below, though no one has made the comparison.
+
+exits:
+  east: lira_memorial
+  north: healing_grove_south
+
+tags:
+  - outdoor
+  - safe_zone

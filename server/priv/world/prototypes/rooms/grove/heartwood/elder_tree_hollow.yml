@@ -1,0 +1,13 @@
+key: elder_tree_hollow
+type: room
+short_desc: "The Elder Hollow"
+extra_desc: |
+  The oldest tree in the grove has opened at its base — a hollow large enough for several people, bark worn smooth at the entrance where hands have rested for generations. The Rootsong is louder here than anywhere above ground, more complex, layered. The hollow has perfect acoustic dampening: sound from outside does not enter. The Rootsong, however, does.
+
+exits:
+  east: morning_meadow
+  up: canopy_access
+
+tags:
+  - outdoor
+  - safe_zone

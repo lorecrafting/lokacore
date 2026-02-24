@@ -1,0 +1,13 @@
+key: stream_source
+type: room
+short_desc: "The Source"
+extra_desc: |
+  Water surfaces here through a crack in a root — cold and clear, the very beginning of everything downstream. The sound is distinct from the Rootsong above: lower, more continuous, something between a hum and a rush. The water temperature is constant to the tenth of a degree regardless of season. The flow rate is equally constant. Neither property is possible from a natural spring.
+
+exits:
+  up: heartwood_spring
+  south: stream_lower
+
+tags:
+  - underground
+  - indoor

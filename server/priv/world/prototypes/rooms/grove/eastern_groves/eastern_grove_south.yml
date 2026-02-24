@@ -1,0 +1,13 @@
+key: eastern_grove_south
+type: room
+short_desc: "The Southern Eastern Grove"
+extra_desc: |
+  The south end of the eastern groves is calmer — lower traffic, less monitored, used for unhurried cultivation. The trees here are healthy and unremarkable, which is itself unusual; every tree in the grove planted from older transplanted stock eventually develops a spiral pattern in its bark. Every tree here was seeded from scratch. None of them have it. The pattern is not hereditary. It is applied.
+
+exits:
+  north: blight_zone
+  west: eastern_grove_path
+
+tags:
+  - outdoor
+  - safe_zone

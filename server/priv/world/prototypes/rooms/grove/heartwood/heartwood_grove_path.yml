@@ -1,0 +1,14 @@
+key: heartwood_grove_path
+type: room
+short_desc: "The Grove Path"
+extra_desc: |
+  A main connecting path through the heartwood, worn by daily use. Trees arch overhead where the path narrows to a corridor of bark and root. Voices carry strangely here — a conversation twenty meters back remains audible long after it should have faded. After rain, when the neighboring ground becomes soft and holds footprints, this path stays dry. Whatever drainage runs beneath it is not visible.
+
+exits:
+  north: heartwood_upper_path
+  south: morning_meadow
+  east: gathering_circle
+
+tags:
+  - outdoor
+  - safe_zone

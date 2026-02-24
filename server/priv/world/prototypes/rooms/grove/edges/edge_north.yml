@@ -1,0 +1,15 @@
+key: edge_north
+type: room
+short_desc: "The Northern Edge"
+extra_desc: |
+  The center north section of the membrane, less visited than the arch or the monitoring post — unmarked, unworn, the surface here in better condition than to either side. The light passing through it is unchanged in color. Something in it is filtered: ultraviolet readings within five meters drop to zero and the Blight monitoring equipment returns anomalous values. Whatever is being filtered was filtered deliberately.
+
+exits:
+  west: edge_arch
+  east: edge_monitoring_post
+
+tags:
+  - outdoor
+  - forbidden
+  - edge_zone
+  - room_entry_effect

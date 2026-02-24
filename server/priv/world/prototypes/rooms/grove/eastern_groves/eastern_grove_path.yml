@@ -1,0 +1,13 @@
+key: eastern_grove_path
+type: room
+short_desc: "The Eastern Grove Path"
+extra_desc: |
+  The main route through the eastern groves before the Blight starts — wider than the grove trails, worn by years of daily attention. Footprints going both directions at most hours. The substrate does not compact the way soil should under this volume of traffic. It absorbs the weight rather than yielding to it, and has been doing so longer than anyone has been walking here.
+
+exits:
+  east: eastern_grove_south
+  north: eastern_grove_north
+
+tags:
+  - outdoor
+  - safe_zone

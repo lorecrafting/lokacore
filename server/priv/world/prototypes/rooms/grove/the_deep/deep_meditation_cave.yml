@@ -1,0 +1,9 @@
+key: deep_meditation_cave
+type: room
+short_desc: "The Meditation Cave"
+extra_desc: |
+  A depression between roots, partially enclosed by bark and canopy both, used by every Rootspeaker in the hollow's history for extended listening practice. Outside sound is dampened to near silence. The Pulse is amplified — not louder exactly, but cleaner, stripped of interference. The acoustics are too consistent to be accidental. The root spacing that creates this space is not random. It is consistent with designed acoustic geometry.
+exits:
+  south: rootspeaker_hollow
+tags:
+  - outdoor

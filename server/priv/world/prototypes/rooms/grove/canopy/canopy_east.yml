@@ -1,0 +1,10 @@
+key: canopy_east
+type: room
+short_desc: "The Eastern Canopy"
+extra_desc: |
+  The eastern canopy — from here the Blight is visible as a pattern, its spread mapped in the color difference between healthy and stressed crown. More visible from above than from inside. The pattern is not random: a spiral, tightening around a point at the eastern edge. Something at the center of the spiral is not visible from here. It is underground. Kira has been up here. She did not share what she saw.
+exits:
+  north: canopy_platform
+tags:
+  - outdoor
+  - safe_zone

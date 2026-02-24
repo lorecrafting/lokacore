@@ -1,0 +1,58 @@
+key: thera_schedule
+type: script
+name: "Thera's Daily Schedule"
+description: "Moves Thera between her daily locations based on the time of day. She's at the awakening clearing in the morning, healing grove midday, and training grove in the evening."
+tags: [behavior, schedule, thera]
+data:
+  hook: behavior
+  config_schema:
+    morning_room:
+      type: string
+      default: awakening_clearing
+      description: "Room key for morning hours (6am-11am)"
+    midday_room:
+      type: string
+      default: healing_stores
+      description: "Room key for midday hours (11am-5pm)"
+    evening_room:
+      type: string
+      default: training_grove
+      description: "Room key for evening hours (5pm-9pm)"
+    night_room:
+      type: string
+      default: awakening_clearing
+      description: "Room key for night hours (9pm-6am)"
+    check_interval:
+      type: integer
+      default: 600
+      description: "How often to check schedule in seconds"
+  source: |
+    # Thera's schedule - she moves through her day
+    # Uses wall-clock UTC hours (roughly approximate day cycle)
+    morning_room = config.morning_room || "awakening_clearing"
+    midday_room = config.midday_room || "healing_stores"
+    evening_room = config.evening_room || "training_grove"
+    night_room = config.night_room || "awakening_clearing"
+
+    hour = current_hour.()
+
+    target_room = cond do
+      hour >= 6 and hour < 11  -> morning_room
+      hour >= 11 and hour < 17 -> midday_room
+      hour >= 17 and hour < 21 -> evening_room
+      true                     -> night_room
+    end
+
+    # Only move if not already in the right place
+    current = room()
+    current_key = if current, do: current.key, else: nil
+
+    if current_key != target_room do
+      teleport.(entity.id, target_room)
+    end
+
+    # Re-check every 10 minutes
+    interval = config.check_interval || 600
+    after.(interval * 1000, "thera_schedule")
+
+    continue.()

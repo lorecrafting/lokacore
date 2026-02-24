@@ -1,0 +1,14 @@
+key: thinning_west
+type: room
+short_desc: "The Western Thinning"
+extra_desc: |
+  The western extension of the thinning — approached from a different angle, the same wrongness. Watcher patrols pass through here on the perimeter circuit, ground harder than it should be underfoot, light without direction. Brennan mapped the spatial distortion here three years ago: distances between marked points return inconsistent values depending on the instrument and the day. He recorded it and told no one.
+
+exits:
+  east: the_thinning
+  north: thinning_patrol_route
+
+tags:
+  - outdoor
+  - thinning
+  - room_entry_effect

@@ -1,0 +1,14 @@
+key: understory_northwest
+type: room
+short_desc: "The Northwest Understory"
+extra_desc: |
+  The northwestern branch of the understory network, quieter and less used. Some paths here have grown over but remain passable — the kind of neglect that doesn't quite reach abandonment. The sense of going somewhere no one has been recently, even though the path is clear and deliberate beneath the overgrowth.
+  The bioluminescent fungi in this section pulse at a slower rate than fungi in the main understory — 0.8 seconds per cycle instead of 1.2. The rate difference has been consistent for as long as anyone has measured it.
+
+exits:
+  south: root_cathedral
+  west: old_campground
+
+tags:
+  - outdoor
+  - safe_zone
