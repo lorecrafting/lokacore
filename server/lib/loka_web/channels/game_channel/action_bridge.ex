@@ -307,6 +307,12 @@ defmodule LokaWeb.Channels.GameChannel.ActionBridge do
     socket
   end
 
+  # Cutscene events
+  defp dispatch_event({:cutscene_start, data}, socket) do
+    validated_push(socket, "cutscene_start", data)
+    socket
+  end
+
   # Quest events
   defp dispatch_event({:quest_accepted, data}, socket) do
     validated_push(socket, "quest_accepted", data)

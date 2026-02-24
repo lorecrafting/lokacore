@@ -949,6 +949,20 @@ defmodule LokaWeb.GameChannel do
   def handle_info(:capture_screenshot, socket), do: PubSubEvents.handle_capture_screenshot(socket)
 
   # =============================================================================
+  # Cutscene Streaming Events (from Framework.Cutscene.play/2)
+  # =============================================================================
+
+  def handle_info({:cutscene_line, text, class}, socket) do
+    push(socket, "cutscene_line", %{text: text, class: class})
+    {:noreply, socket}
+  end
+
+  def handle_info(:cutscene_end, socket) do
+    push(socket, "cutscene_end", %{})
+    {:noreply, socket}
+  end
+
+  # =============================================================================
   # AI Streaming Events (from Loka.AI.Conversation engine)
   # =============================================================================
 

@@ -81,41 +81,40 @@ defmodule Loka.WorldBuilder.YamlBuilderTest do
 
   describe "build_cutscene_yaml/4" do
     test "produces valid YAML with a single scene" do
-      scenes = [%{"type" => "narration", "text" => "Hello", "delay" => 1000}]
+      scenes = [%{"text" => "Hello", "delay" => 1000, "class" => "cutscene"}]
       yaml = YamlBuilder.build_cutscene_yaml("cs_test", "Test Cutscene", "manual", scenes)
       parsed = YamlElixir.read_from_string!(yaml)
 
       assert parsed["key"] == "cs_test"
       assert parsed["type"] == "cutscene"
       assert parsed["name"] == "Test Cutscene"
-      assert parsed["data"]["trigger"] == "manual"
 
-      [scene] = parsed["data"]["scenes"]
-      assert scene["type"] == "narration"
-      assert scene["text"] == "Hello"
-      assert scene["delay"] == 1000
+      [line] = parsed["sequence"]
+      assert line["text"] == "Hello"
+      assert line["delay"] == 1000
+      assert line["class"] == "cutscene"
     end
 
     test "produces valid YAML with multiple scenes" do
       scenes = [
-        %{"type" => "narration", "text" => "Scene one", "delay" => 2000},
-        %{"type" => "dialogue", "text" => "Scene two", "delay" => 3000}
+        %{"text" => "Scene one", "delay" => 2000},
+        %{"text" => "Scene two", "delay" => 3000, "class" => "cutscene dialogue"}
       ]
 
       yaml = YamlBuilder.build_cutscene_yaml("cs_multi", "Multi", "on_enter", scenes)
       parsed = YamlElixir.read_from_string!(yaml)
 
-      assert length(parsed["data"]["scenes"]) == 2
-      assert Enum.at(parsed["data"]["scenes"], 0)["text"] == "Scene one"
-      assert Enum.at(parsed["data"]["scenes"], 1)["type"] == "dialogue"
+      assert length(parsed["sequence"]) == 2
+      assert Enum.at(parsed["sequence"], 0)["text"] == "Scene one"
+      assert Enum.at(parsed["sequence"], 1)["class"] == "cutscene dialogue"
     end
 
     test "escapes special characters in scene text" do
-      scenes = [%{"type" => "narration", "text" => ~s(He said "stop!"), "delay" => 1000}]
+      scenes = [%{"text" => ~s(He said "stop!"), "delay" => 1000}]
       yaml = YamlBuilder.build_cutscene_yaml("cs_esc", "Esc", "manual", scenes)
       parsed = YamlElixir.read_from_string!(yaml)
 
-      assert hd(parsed["data"]["scenes"])["text"] == ~s(He said "stop!")
+      assert hd(parsed["sequence"])["text"] == ~s(He said "stop!")
     end
   end
 

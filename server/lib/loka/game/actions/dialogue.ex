@@ -361,6 +361,34 @@ defmodule Loka.Game.Actions.Dialogue do
     handle_dialogue_action(character, {:teleport, room_key})
   end
 
+  defp handle_dialogue_action(character, {:play_cutscene, cutscene_key}) do
+    alias Loka.Framework.Cutscene
+    alias Loka.Content
+
+    case Content.Cutscene.get(cutscene_key) do
+      {:ok, cutscene} ->
+        name = cutscene.short_desc || cutscene_key
+
+        # Schedule timed lines to the channel process (self() inside handle_in)
+        Cutscene.play(self(), cutscene_key)
+
+        events = [
+          {:cutscene_start, %{cutscene_key: cutscene_key, name: name}}
+        ]
+
+        {character, events}
+
+      {:error, :not_found} ->
+        require Logger
+        Logger.warning("[DIALOGUE] Cutscene not found: #{cutscene_key}")
+        {character, []}
+    end
+  end
+
+  defp handle_dialogue_action(character, ["play_cutscene", cutscene_key]) do
+    handle_dialogue_action(character, {:play_cutscene, cutscene_key})
+  end
+
   defp handle_dialogue_action(character, {:teleport, room_key}) do
     alias Loka.Engine.Entities
     alias Loka.Framework.World.RoomLoader

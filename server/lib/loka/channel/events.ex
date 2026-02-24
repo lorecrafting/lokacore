@@ -123,6 +123,17 @@ defmodule Loka.Channel.Events do
     },
     "dialogue_end" => %{},
 
+    # Cutscene events
+    "cutscene_start" => %{
+      cutscene_key: :string,
+      name: :string
+    },
+    "cutscene_line" => %{
+      text: :string,
+      class: {:optional, :string}
+    },
+    "cutscene_end" => %{},
+
     # Quest events
     "quest_accepted" => %{
       quest_id: :string,

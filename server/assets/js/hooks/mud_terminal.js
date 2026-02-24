@@ -368,6 +368,21 @@ const MudTerminal = {
       this.appendOutput('(Conversation ended)', 'system')
     })
 
+    // Cutscene events (server-timed streaming)
+    safeOn('cutscene_start', (data) => {
+      this.appendOutput('')
+      this.appendOutput(`— ${data.name || 'Cutscene'} —`, 'cutscene')
+      this.appendOutput('')
+    })
+
+    safeOn('cutscene_line', (data) => {
+      this.appendOutput(data.text || '', data.class || 'cutscene')
+    })
+
+    safeOn('cutscene_end', () => {
+      this.appendOutput('')
+    })
+
     // Entity context (response to click_entity - shows description + action menu)
     safeOn('entity_context', (data) => {
       const entity = data.entity

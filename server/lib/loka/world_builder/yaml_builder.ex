@@ -58,14 +58,14 @@ defmodule Loka.WorldBuilder.YamlBuilder do
   @doc """
   Build YAML content for a cutscene definition.
   """
-  def build_cutscene_yaml(key, name, trigger, scenes) do
-    scenes_yaml =
+  def build_cutscene_yaml(key, name, _trigger, scenes) do
+    sequence_yaml =
       scenes
       |> Enum.map(fn scene ->
-        type = scene["type"] || "narration"
         text = scene["text"] || ""
         delay = scene["delay"] || 2000
-        "    - type: #{type}\n      text: \"#{escape_yaml(text)}\"\n      delay: #{delay}"
+        class = scene["class"] || "cutscene"
+        "    - text: \"#{escape_yaml(text)}\"\n      delay: #{delay}\n      class: #{class}"
       end)
       |> Enum.join("\n")
 
@@ -73,10 +73,10 @@ defmodule Loka.WorldBuilder.YamlBuilder do
     key: #{key}
     type: cutscene
     name: "#{escape_yaml(name)}"
-    data:
-      trigger: #{trigger}
-      scenes:
-    #{scenes_yaml}
+    description: "#{escape_yaml(name)}"
+
+    sequence:
+    #{sequence_yaml}
     """
   end
 
@@ -171,22 +171,32 @@ defmodule Loka.WorldBuilder.YamlBuilder do
     {:ok, room_warnings}
   end
 
-  def validate_references(:cutscene, %{scenes: scenes}) do
+  def validate_references(:cutscene, %{sequence: sequence}) do
     speaker_warnings =
-      scenes
-      |> Enum.filter(fn scene -> scene["type"] == "dialogue" end)
-      |> Enum.flat_map(fn scene ->
-        speaker = scene["speaker"]
+      sequence
+      |> Enum.filter(fn line -> (line["class"] || "") |> String.contains?("dialogue") end)
+      |> Enum.flat_map(fn line ->
+        text = line["text"] || ""
 
-        if speaker && match?({:error, _}, Entities.find_one(key: speaker)) do
-          ["Speaker '#{speaker}' not found (may not be created yet)"]
-        else
-          []
+        case String.split(text, ":", parts: 2) do
+          [speaker, _] ->
+            speaker = String.trim(speaker)
+
+            if match?({:error, _}, Entities.find_one(key: String.downcase(speaker))) do
+              ["Speaker '#{speaker}' not found (may not be created yet)"]
+            else
+              []
+            end
+
+          _ ->
+            []
         end
       end)
 
     {:ok, speaker_warnings}
   end
+
+  def validate_references(:cutscene, _params), do: {:ok, []}
 
   def validate_references(_type, _params), do: {:ok, []}
 end

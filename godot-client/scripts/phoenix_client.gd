@@ -33,6 +33,13 @@ signal dialogue_updated(data: Dictionary)
 signal dialogue_ended
 
 # =============================================================================
+# Cutscene Signals
+# =============================================================================
+signal cutscene_started(data: Dictionary)
+signal cutscene_line_received(data: Dictionary)
+signal cutscene_ended
+
+# =============================================================================
 # Character State Signals
 # =============================================================================
 signal character_created(data: Dictionary)
@@ -491,6 +498,20 @@ func _handle_game_event(event: String, payload: Dictionary) -> void:
 
 		"dialogue_end":
 			dialogue_ended.emit()
+
+		# =====================================================================
+		# Cutscene Events
+		# =====================================================================
+		"cutscene_start":
+			print("[Phoenix] Received cutscene_start: %s" % payload.get("name", "unknown"))
+			cutscene_started.emit(payload)
+
+		"cutscene_line":
+			cutscene_line_received.emit(payload)
+
+		"cutscene_end":
+			print("[Phoenix] Received cutscene_end")
+			cutscene_ended.emit()
 
 		# =====================================================================
 		# Character State Events

@@ -135,6 +135,19 @@ signal quest_completed(data: Dictionary)
 signal quest_progress(data: Dictionary)
 
 # =============================================================================
+# Signals - Cutscene
+# =============================================================================
+
+## Emitted when a cutscene starts
+signal cutscene_started(data: Dictionary)
+
+## Emitted when a cutscene line arrives
+signal cutscene_line_received(data: Dictionary)
+
+## Emitted when a cutscene ends
+signal cutscene_ended
+
+# =============================================================================
 # Signals - Atmosphere
 # =============================================================================
 
@@ -214,6 +227,12 @@ const MAX_EVENTS := 10
 # =============================================================================
 # State Variables - Atmosphere
 # =============================================================================
+
+## Whether a cutscene is currently playing
+var in_cutscene: bool = false
+
+## Accumulated cutscene lines
+var cutscene_lines: Array[Dictionary] = []
 
 ## Current atmosphere (affects visual mood)
 var atmosphere: String = "peaceful"
@@ -304,6 +323,14 @@ func _connect_phoenix_signals() -> void:
 		_phoenix.quest_completed.connect(_on_quest_completed)
 	if _phoenix.has_signal("quest_progress"):
 		_phoenix.quest_progress.connect(_on_quest_progress)
+
+	# Cutscene signals
+	if _phoenix.has_signal("cutscene_started"):
+		_phoenix.cutscene_started.connect(_on_cutscene_started)
+	if _phoenix.has_signal("cutscene_line_received"):
+		_phoenix.cutscene_line_received.connect(_on_cutscene_line)
+	if _phoenix.has_signal("cutscene_ended"):
+		_phoenix.cutscene_ended.connect(_on_cutscene_ended)
 
 	# Atmosphere signals
 	if _phoenix.has_signal("atmosphere_updated"):
@@ -948,6 +975,28 @@ func _on_quest_progress(data: Dictionary) -> void:
 	if total > 0:
 		add_event("%s: %s (%d/%d)" % [quest_name, objective, current, total])
 	quest_progress.emit(data)
+
+
+# =============================================================================
+# Event Handlers - Cutscene
+# =============================================================================
+
+func _on_cutscene_started(data: Dictionary) -> void:
+	print("[GameState] Cutscene started: %s" % data.get("name", "unknown"))
+	in_cutscene = true
+	cutscene_lines.clear()
+	cutscene_started.emit(data)
+
+
+func _on_cutscene_line(data: Dictionary) -> void:
+	cutscene_lines.append(data)
+	cutscene_line_received.emit(data)
+
+
+func _on_cutscene_ended() -> void:
+	print("[GameState] Cutscene ended")
+	in_cutscene = false
+	cutscene_ended.emit()
 
 
 # =============================================================================

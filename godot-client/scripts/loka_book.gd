@@ -667,6 +667,9 @@ func _connect_game_state_signals() -> void:
 	GameState.events_changed.connect(_on_events_changed)
 	GameState.page_changed.connect(_on_game_state_page_changed)
 	GameState.atmosphere_changed.connect(_on_atmosphere_changed)
+	GameState.cutscene_started.connect(_on_cutscene_started)
+	GameState.cutscene_line_received.connect(_on_cutscene_line)
+	GameState.cutscene_ended.connect(_on_cutscene_ended)
 
 
 func _on_room_changed(room: MockWorld.Room) -> void:
@@ -737,6 +740,43 @@ func _on_dialogue_changed(data: Dictionary) -> void:
 
 
 func _on_dialogue_ended() -> void:
+	dialogue_data = {}
+	dialogue_history = []
+	switch_to_page(pre_dialogue_page, "right")
+
+
+# =============================================================================
+# Cutscene Handling
+# =============================================================================
+
+func _on_cutscene_started(data: Dictionary) -> void:
+	# Switch to dialogue page to display cutscene text
+	dialogue_history.clear()
+	dialogue_data = {"speaker": "", "text": "", "choices": []}
+	pre_dialogue_page = current_page
+	switch_to_page(PageType.DIALOGUE, "right")
+
+
+func _on_cutscene_line(data: Dictionary) -> void:
+	var text: String = data.get("text", "")
+	if text.strip_edges().is_empty():
+		return
+	var cls: String = data.get("class", "cutscene")
+	# Use "dialogue" class lines as speaker lines
+	var speaker := ""
+	if cls.contains("dialogue") and ":" in text:
+		var colon_pos := text.find(":")
+		speaker = text.substr(0, colon_pos)
+		text = text.substr(colon_pos + 1).strip_edges()
+		text = text.trim_prefix("\"").trim_suffix("\"")
+	dialogue_history.append({"speaker": speaker, "text": text, "is_player": false})
+	var cutscene_data := {"speaker": speaker, "text": text, "choices": []}
+	_render_dialogue_to_page(_right_page, cutscene_data)
+
+
+func _on_cutscene_ended() -> void:
+	# Return to room page after a short delay
+	await get_tree().create_timer(1.5).timeout
 	dialogue_data = {}
 	dialogue_history = []
 	switch_to_page(pre_dialogue_page, "right")
