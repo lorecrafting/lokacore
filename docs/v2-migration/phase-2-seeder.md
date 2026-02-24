@@ -1,5 +1,7 @@
 # Phase 2: EntitySeeder
 
+> **Note (Feb 2026):** The inheritance system described in this doc (topological sort, deep merge, parent references) was removed in the flat prototype refactor. All YAML prototypes are now self-contained. The `_base/` directory was deleted. This doc is kept for historical reference.
+
 > Full spec: `docs/architecture/unified-object-system-v2.md` Section 8 (YAML Authoring + Seeder) + Section 16 (Steps 2.1-2.3)
 > **Depends on**: Phase 1 (schema + Entities API must exist)
 

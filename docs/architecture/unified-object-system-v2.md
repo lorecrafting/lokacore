@@ -735,7 +735,7 @@ Application.start/2
 EntitySeeder.seed()
     │
     ├── Phase 1: Parse all YAML files
-    │   └── Resolve prototype inheritance (topological sort + deep merge)
+    │   └── Read all YAML files (each self-contained, no inheritance)
     │
     ├── Phase 2: Seed non-located entities (skills, quests, zones, etc.)
     │   └── For each: INSERT IF NOT EXISTS by key+type
@@ -757,7 +757,7 @@ EntitySeeder.seed()
 
 **Batch inserts:** The seeder uses `Repo.insert_all` in chunks of 100 for initial seeding (~286 YAML files → ~1400 entities). At ~0.1ms per batch insert, first boot takes ~0.2 seconds instead of ~1.4 seconds with individual inserts.
 
-**Inheritance resolution:** The topological sort and deep-merge logic from the current `TypedObject.Loader` is reused by EntitySeeder. Inheritance is resolved ONCE at seed time. The DB stores fully-merged entities. `metadata["parent_key"]` is stored for provenance but not consulted at runtime.
+**Flat prototypes:** All YAML prototypes are self-contained — no inheritance, no `parent:` field. Each file includes all fields it needs. The `_base/` directory and inheritance resolution (topological sort + deep merge) were removed in the Feb 2026 flattening refactor. The DB stores entities exactly as defined in YAML.
 
 **Validation:** Each entity is validated against its component schemas before insertion. Invalid YAML content (wrong types, missing required fields) is skipped with loud warnings. The `--strict` flag makes validation errors fatal. This integrates the ContentValidator functionality into the seeding pipeline.
 
@@ -1200,13 +1200,12 @@ tags: [npc, friendly, quest_giver, zone:village]
 ```elixir
 defmodule Loka.Engine.EntitySeeder do
   @moduledoc """
-  Seeds the entities DB from YAML files on boot.
-  Resolves prototype inheritance. Idempotent.
+  Seeds the entities DB from YAML files on boot. Idempotent.
+  All YAML prototypes are self-contained (no inheritance).
   """
 
   def seed do
-    yamls = load_all_yaml_files()
-    resolved = resolve_inheritance(yamls)  # topological sort + deep merge
+    resolved = load_all_yaml_files()
 
     # Phase 1: Non-located entities (skills, quests, zones, recipes, etc.)
     seed_by_types(resolved, [:skill, :quest, :dialogue, :zone, :storyline,

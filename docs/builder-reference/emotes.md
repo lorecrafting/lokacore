@@ -179,27 +179,9 @@ Use ambient_actions for passive flavor, emotes for reactive personality.
 
 ---
 
-## Inheritance
+## Emote Definitions
 
-Emotes merge when using prototype inheritance:
-
-```yaml
-# Parent
-key: base_monk
-emotes:
-  greeting: "Peace be with you."
-  meditation_start: "*closes eyes in contemplation*"
-
-# Child inherits and overrides
-key: anxious_monk
-parent: base_monk
-emotes:
-  greeting: "Oh! You startled me. Peace... peace be with you."
-  # meditation_start inherited as-is
-  becoming_anxious: "*shifts nervously*"
-```
-
-Child emotes override parent emotes with the same key.
+Each prototype defines its own complete set of emotes — there is no inheritance. Include all emotes directly in the prototype file.
 
 ---
 

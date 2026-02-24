@@ -128,7 +128,6 @@ Game content is defined in YAML and seeded into the DB on startup:
 
 ```
 priv/world/prototypes/
-├── _base/          # Parent prototypes (base_npc, base_room, etc.)
 ├── rooms/          # Room prototypes
 ├── npcs/           # NPC prototypes
 ├── items/          # Item prototypes
@@ -139,8 +138,8 @@ priv/world/prototypes/
 
 ```elixir
 # EntitySeeder runs on application start:
-# 1. Resolves prototype inheritance (topological sort + deep merge)
-# 2. Seeds in phases: non-located → rooms → exits → NPCs/items
+# 1. Reads all YAML files (each self-contained, no inheritance)
+# 2. Seeds in phases: non-located → rooms → exits → NPCs/items → room spawns
 # 3. Skips entities that already exist (idempotent)
 ```
 

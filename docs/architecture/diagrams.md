@@ -367,47 +367,31 @@ erDiagram
     PLAYERS ||--|| GAME_STATES : has
 ```
 
-## Prototype Inheritance
+## YAML Prototype Seeding
 
-How YAML prototypes inherit from parent templates.
+How YAML prototype files are seeded into the database at boot.
 
 ```mermaid
-flowchart BT
-    subgraph Base["_base/ (Parent Templates)"]
-        BaseRoom["base_room.yml"]
-        BaseNPC["base_npc.yml"]
-        BaseItem["base_item.yml"]
+flowchart LR
+    subgraph YAML["priv/world/prototypes/"]
+        Rooms["rooms/*.yml"]
+        NPCs["npcs/*.yml"]
+        Items["items/*.yml"]
     end
 
-    subgraph Rooms["rooms/"]
-        Monastery["monastery_gate.yml"]
-        Courtyard["monastery_courtyard.yml"]
-        Temple["monastery_temple.yml"]
+    subgraph Seeder["EntitySeeder (boot)"]
+        P1["Phase 1: Skills, Quests, Zones..."]
+        P2["Phase 2: Rooms"]
+        P3["Phase 3: Exits"]
+        P4["Phase 4: NPCs, Items"]
+        P5["Phase 5: Room Spawns"]
     end
 
-    subgraph NPCs["npcs/"]
-        Hermit["hermit.yml"]
-        Guard["monastery_guard.yml"]
-        Merchant["traveling_merchant.yml"]
+    subgraph DB["SQLite"]
+        Entities["entities table"]
     end
 
-    subgraph Items["items/"]
-        Sword["iron_sword.yml"]
-        Potion["health_potion.yml"]
-        Scroll["wisdom_scroll.yml"]
-    end
-
-    Monastery -->|parent| BaseRoom
-    Courtyard -->|parent| BaseRoom
-    Temple -->|parent| BaseRoom
-
-    Hermit -->|parent| BaseNPC
-    Guard -->|parent| BaseNPC
-    Merchant -->|parent| BaseNPC
-
-    Sword -->|parent| BaseItem
-    Potion -->|parent| BaseItem
-    Scroll -->|parent| BaseItem
+    YAML --> Seeder --> DB
 ```
 
 ## Request Flow (LiveView)

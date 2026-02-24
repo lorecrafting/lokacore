@@ -99,7 +99,7 @@ Loka is an Elixir-based MUD (Multi-User Dungeon) engine framework for building t
 | **Traits** | `entity.traits` — behavior modules or script maps |
 | **StateMachine** | Shared state machine engine for quests, combat, dialogue, NPC AI |
 | **GenServer per Entity** | In-memory state with 60s auto-save, hibernation, idle shutdown |
-| **Prototype Inheritance** | YAML templates with parent/child merging |
+| **YAML Prototypes** | Self-contained YAML templates seeded into DB at boot |
 | **Content Modules** | Type-safe domain APIs (Quest, Dialogue, Script, Zone, etc.) |
 | **Component Accessors** | Typed accessor modules for entity components |
 | **Event Bus (PubSub)** | Decoupled entity communication via Phoenix.PubSub |
@@ -891,11 +891,10 @@ end
 ```
 1. EntitySeeder.seed() runs at application startup
 2. Reads all YAML files from priv/world/
-3. Resolves prototype inheritance (parent → child merging)
-4. Creates entities in SQLite from loaded YAML
-5. YAML attributes: → components["attributes"]
-6. YAML content data → components["data"]
-7. Runtime: All queries go through Entities API → SQLite
+3. Creates entities in SQLite from loaded YAML
+4. YAML attributes: → components["attributes"]
+5. YAML content data → components["data"]
+6. Runtime: All queries go through Entities API → SQLite
 ```
 
 ### Directory Structure
@@ -903,7 +902,6 @@ end
 ```
 priv/world/
 ├── prototypes/
-│   ├── _base/           # Parent templates (6 files)
 │   ├── npcs/            # NPC definitions (39 files)
 │   ├── items/           # Item definitions (65+ files)
 │   │   ├── containers/  # Containers (8)
@@ -937,7 +935,6 @@ priv/world/
 ```yaml
 key: "temple_guard"
 type: npc
-parent: "base_npc"
 
 short_desc: "Temple Guard"
 long_desc: "A stern-faced guard watches the temple entrance."
@@ -976,11 +973,9 @@ attributes:
   respawn_time: 300
 ```
 
-### Inheritance Rules
+### Flat Prototype Model
 
-- Child values override parent values
-- Maps are deep-merged
-- Lists are concatenated (child + parent, deduplicated)
+All YAML prototypes are self-contained — no inheritance. Each file includes all fields it needs directly. There is no `parent:` field or `_base/` directory.
 
 ### EntitySeeder Details
 

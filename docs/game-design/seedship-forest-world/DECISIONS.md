@@ -102,7 +102,7 @@ These were identified during review — worth flagging for writers:
 **Deleted (~229 files):** all quests, zones, rooms, NPCs, items, cutscenes, storylines, recipes, foraging nodes, combat config, and all non-trait world scripts.
 
 **Kept (66 files):**
-- `prototypes/_base/` — base templates EntitySeeder uses to spawn anything
+- (Previously `prototypes/_base/` — removed in flat prototype refactor)
 - `scripts/traits/` — 12 behavior trait scripts (patrol, wander, guard, etc.) — engine-wide, not world-specific
 - `skills/` — 25 skill YAML files (engine-defined, see below)
 - `statuses/` — 13 status effects

@@ -5,19 +5,13 @@ Loka uses a prototype system that allows defining game content in YAML files wit
 ## Overview
 
 Prototypes are templates for creating entities. They support:
-- **Inheritance**: Child prototypes inherit from parents via the `parent` field
-- **Deep merging**: Maps are recursively merged, lists are concatenated
+- **Self-contained**: Each YAML file includes all fields it needs — no inheritance
 - **Hot reload**: Reload prototypes without restarting the server
 
 ## Directory Structure
 
 ```
 priv/world/prototypes/
-├── _base/              # Base prototypes (parents)
-│   ├── base_npc.yml
-│   ├── base_room.yml
-│   ├── base_item.yml
-│   └── base_weapon.yml
 ├── rooms/              # Room prototypes
 │   ├── town_square.yml
 │   ├── tavern.yml
@@ -41,7 +35,6 @@ priv/world/prototypes/
 ```yaml
 key: goblin               # Unique identifier (required)
 type: npc                 # room | npc | item | exit | character (required)
-parent: base_npc          # Inherits from this prototype (optional)
 short_desc: "Goblin"
 long_desc: "A sneaky green creature lurks here."
 extra_desc: "A sneaky green creature with pointed ears."
@@ -60,30 +53,10 @@ components:
       - { item: rusty_dagger, chance: 0.2 }
 ```
 
-### Base Prototype (Parent)
-
-```yaml
-# _base/base_npc.yml
-key: base_npc
-type: npc
-short_desc: "Base NPC"
-long_desc: "A generic NPC stands here."
-components:
-  combatant:
-    health: { current: 100, max: 100 }
-    stats: { str: 10, dex: 10, sta: 10 }
-    level: 1
-traits:
-  - Loka.Behaviors.Guard
-tags:
-  - npc
-```
-
 ### Room with Exits and Spawns
 
 ```yaml
 key: town_square
-parent: base_room
 type: room
 short_desc: "Town Square"
 long_desc: "A stone fountain burbles at the center of the village square."
@@ -104,41 +77,9 @@ spawns:
         level: 5
 ```
 
-## Inheritance
+## Flat Prototype Model
 
-Child prototypes inherit all fields from parents with deep merging:
-
-```yaml
-# Parent: base_weapon.yml
-key: base_weapon
-type: item
-components:
-  equipable:
-    slot: weapon
-  damage:
-    min: 1
-    max: 3
-    type: physical
-tags:
-  - weapon
-
-# Child: iron_sword.yml
-key: iron_sword
-parent: base_weapon
-name: "Iron Sword"
-components:
-  damage:
-    min: 5     # Overrides parent
-    max: 10    # Overrides parent
-    # type: physical inherited from parent
-tags:
-  - sword     # Added to parent's tags: [weapon, sword]
-```
-
-**Merge rules**:
-- Scalar values: child overrides parent
-- Maps: deep merge (child keys override, parent keys preserved)
-- Lists: concatenate (child items added to parent items)
+All prototypes are self-contained — each YAML file includes every field it needs. There is no `parent:` field or inheritance system. This keeps prototypes simple and explicit.
 
 ## Prototype API
 
@@ -148,9 +89,9 @@ tags:
 # Loads all YAML files into ETS (called on startup)
 TypedObject.Loader.reload()
 
-# Get prototype by key (with inheritance resolved)
+# Get prototype by key
 TypedObject.Loader.get("goblin")
-# => %TypedObject{key: "goblin", parent_key: "base_npc", ...}
+# => %TypedObject{key: "goblin", ...}
 
 # List prototypes by type
 TypedObject.Loader.list_by_type(:entity, :npc)
@@ -243,7 +184,6 @@ defmodule Loka.Engine.TypedObject do
     :key,                # Unique identifier (required)
     :type,               # :entity | :quest | :dialogue | :script | :zone (required)
     :subtype,            # :npc | :room | :item | :exit (entities only)
-    :parent_key,         # Parent prototype key (optional)
     :name,               # Display name
     :description,        # Full description
     :extra_description,  # Detailed examination text
@@ -260,7 +200,7 @@ defmodule Loka.Engine.TypedObject do
 end
 ```
 
-**Note**: YAML files still use legacy field names (`short_desc`, `long_desc`, `extra_desc`, `parent`, `type: npc`).
+**Note**: YAML files still use legacy field names (`short_desc`, `long_desc`, `extra_desc`, `type: npc`).
 The Loader automatically maps these to the new struct fields during loading.
 
 ## Hot Reload
