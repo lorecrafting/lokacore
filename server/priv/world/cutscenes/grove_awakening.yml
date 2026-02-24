@@ -1,0 +1,59 @@
+key: grove_awakening
+type: cutscene
+name: Grove Awakening
+description: Opening cutscene for new players arriving in the grove.
+
+sequence:
+  - text: "..."
+    delay: 1500
+
+  - text: "Darkness. Then — warmth on your skin, faint and shifting."
+    delay: 3000
+    class: cutscene
+
+  - text: "A sound rises. Wind through leaves, layered and close. Somewhere above you, branches creak with a rhythm that is almost mechanical."
+    delay: 4000
+    class: cutscene
+
+  - text: "Green light filters through your eyelids. You open them."
+    delay: 3000
+    class: cutscene
+
+  - text: "Trees. Moss. A canopy so thick the sky is just a suggestion. The ground beneath you hums — faint, steady, like something vast is sleeping underneath."
+    delay: 5000
+    class: cutscene
+
+  - text: "Your body is slow to respond. Your hands find grass, cool and damp. You push yourself upright."
+    delay: 4000
+    class: cutscene
+
+  - text: "A woman sits nearby on a fallen log, watching you with careful patience. She has the look of someone who has been waiting a long time."
+    delay: 4500
+    class: cutscene
+
+  - text: "Thera: \"There you are.\""
+    delay: 2500
+    class: cutscene dialogue
+
+  - text: "Thera: \"Three days. I was starting to worry.\""
+    delay: 3000
+    class: cutscene dialogue
+
+  - text: "She stands, brushing moss from her knees."
+    delay: 2500
+    class: cutscene
+
+  - text: "Thera: \"Don't try to rush it. Your body needs a moment to remember what it's for.\""
+    delay: 3500
+    class: cutscene dialogue
+
+  - text: "The clearing around you is small, ringed by enormous trees. Sunlight falls in broken columns through gaps in the canopy. Everything smells green and alive."
+    delay: 4500
+    class: cutscene
+
+  - text: "Thera: \"When you're ready, we should talk. I'll be right here.\""
+    delay: 3000
+    class: cutscene dialogue
+
+  - text: " "
+    delay: 1000
