@@ -29,15 +29,21 @@ const DEVICE_ID_KEY := "loka_device_id"
 const TOKEN_KEY := "loka_token"
 const PLAYER_KEY := "loka_player"
 
-## HTTP request node
+## HTTP request node (used on non-web platforms)
 var _http_request: HTTPRequest = null
 
 ## HTTP timeout in seconds (10s for mobile networks)
 const HTTP_TIMEOUT_SECONDS := 10.0
 
+## Web fetch polling timer
+var _web_fetch_timer: Timer = null
+
+## Web fetch result key for JavaScriptBridge
+const _WEB_FETCH_KEY := "_lokaAuthResult"
+
 
 func _ready() -> void:
-	# Create HTTP request node
+	# Create HTTP request node (for non-web platforms)
 	_http_request = HTTPRequest.new()
 	_http_request.timeout = HTTP_TIMEOUT_SECONDS
 	add_child(_http_request)
@@ -63,12 +69,20 @@ func guest_login(name: String) -> void:
 		"name": name.strip_edges()
 	})
 
-	var headers := ["Content-Type: application/json"]
-
 	print("[Auth] Logging in as guest: %s" % name)
 	print("[Auth] URL: %s" % url)
 
-	# Connect the request_completed signal
+	# On web, use JavaScriptBridge fetch to bypass Godot 4.6 Emscripten HTTP bug
+	if OS.has_feature("web"):
+		_web_fetch_login(url, body)
+	else:
+		_native_fetch_login(url, body)
+
+
+## Native platform login via HTTPRequest node
+func _native_fetch_login(url: String, body: String) -> void:
+	var headers := ["Content-Type: application/json"]
+
 	if _http_request.request_completed.is_connected(_on_login_response):
 		_http_request.request_completed.disconnect(_on_login_response)
 	_http_request.request_completed.connect(_on_login_response)
@@ -77,6 +91,95 @@ func guest_login(name: String) -> void:
 	if error != OK:
 		push_error("[Auth] Failed to send login request: %s" % error)
 		login_error.emit("Failed to connect to server")
+
+
+## Web platform login via JavaScriptBridge fetch (bypasses Godot HTTPRequest bug)
+func _web_fetch_login(url: String, body: String) -> void:
+	# Guard against duplicate fetches
+	if _web_fetch_timer != null:
+		return
+
+	# Clear any previous result
+	JavaScriptBridge.eval("window.%s = null;" % _WEB_FETCH_KEY)
+
+	# Fire browser fetch — stores result on window object
+	var js_code := """
+	(function() {
+		if (window._lokaFetchLock) return;
+		window._lokaFetchLock = true;
+		fetch('%s', {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json'},
+			body: '%s'
+		})
+		.then(function(r) { return r.text().then(function(t) { return {status: r.status, body: t}; }); })
+		.then(function(data) {
+			window.%s = JSON.stringify({ok: true, status: data.status, body: data.body});
+			window._lokaFetchLock = false;
+		})
+		.catch(function(err) {
+			window.%s = JSON.stringify({ok: false, error: err.message || 'Network error'});
+			window._lokaFetchLock = false;
+		});
+	})();
+	""" % [url, body.replace("'", "\\'"), _WEB_FETCH_KEY, _WEB_FETCH_KEY]
+
+	JavaScriptBridge.eval(js_code)
+
+	# Poll for result via Timer
+	_web_fetch_timer = Timer.new()
+	_web_fetch_timer.wait_time = 0.1
+	_web_fetch_timer.timeout.connect(_poll_web_fetch_result)
+	add_child(_web_fetch_timer)
+	_web_fetch_timer.start()
+
+	# Safety timeout after 10s
+	get_tree().create_timer(10.0).timeout.connect(_web_fetch_timeout)
+
+
+func _poll_web_fetch_result() -> void:
+	var result_json = JavaScriptBridge.eval("window.%s;" % _WEB_FETCH_KEY)
+	if result_json == null:
+		return  # Still waiting
+
+	# Clean up timer
+	_cleanup_web_fetch_timer()
+
+	# Parse the result
+	var result = JSON.parse_string(result_json)
+	if not result is Dictionary:
+		login_error.emit("Invalid response from server")
+		return
+
+	if not result.get("ok", false):
+		var error_msg: String = result.get("error", "Network error")
+		push_error("[Auth] Web fetch failed: %s" % error_msg)
+		login_error.emit(error_msg)
+		return
+
+	# Process like a normal HTTP response
+	var status: int = result.get("status", 0)
+	var body_text: String = result.get("body", "")
+
+	print("[Auth] Response code: %s" % status)
+	print("[Auth] Response body: %s" % body_text)
+
+	_process_login_response(status, body_text)
+
+
+func _web_fetch_timeout() -> void:
+	if _web_fetch_timer == null:
+		return  # Already resolved
+	_cleanup_web_fetch_timer()
+	JavaScriptBridge.eval("window._lokaFetchLock = false; window.%s = null;" % _WEB_FETCH_KEY)
+	login_error.emit("Connection timed out - please check your network")
+
+
+func _cleanup_web_fetch_timer() -> void:
+	if _web_fetch_timer != null:
+		_web_fetch_timer.stop()
+		_web_fetch_timer.queue_free()
+		_web_fetch_timer = null
 
 
 ## Clear authentication and logout
@@ -117,6 +220,11 @@ func _on_login_response(result: int, response_code: int, _headers: PackedStringA
 	print("[Auth] Response code: %s" % response_code)
 	print("[Auth] Response body: %s" % response_text)
 
+	_process_login_response(response_code, response_text)
+
+
+## Shared response processing for both native and web login paths
+func _process_login_response(response_code: int, response_text: String) -> void:
 	if response_code != 200:
 		var error_msg := "Login failed (HTTP %s)" % response_code
 
