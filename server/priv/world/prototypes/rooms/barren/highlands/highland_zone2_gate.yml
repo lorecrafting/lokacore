@@ -1,0 +1,16 @@
+key: highland_zone2_gate
+type: room
+short_desc: "The Northern Gate"
+extra_desc: |
+  The pass where Zone 1 ends and Zone 2 begins. The terrain opens ahead into the steppe.
+  Looking back south, the full highlands are visible — the summit behind you, the plains
+  beyond them, the grove a dark green suggestion at the far edge. Looking north: a different
+  character entirely. The steppe shows color the barren does not. Something was alive there
+  more recently. The exit from Zone 1 is not dramatic — the ground simply becomes something
+  else.
+
+exits:
+  south: highland_plateau
+
+tags:
+  - outdoor

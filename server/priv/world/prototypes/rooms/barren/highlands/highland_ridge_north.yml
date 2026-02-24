@@ -1,0 +1,16 @@
+key: highland_ridge_north
+type: room
+short_desc: "The Ridge North"
+extra_desc: |
+  The ridge continues north into a view that changes character. Zone 2 terrain is visible
+  below — the ground more textured, the color shifted slightly from the grey of the barren.
+  Something may be intact there. From this angle, looking down the northern slope, you can see
+  hints of it that the plains below never offer. The ridge narrows as it descends. The wind
+  does not diminish.
+
+exits:
+  south: highland_ridge
+  west: highland_plateau
+
+tags:
+  - outdoor

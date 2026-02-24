@@ -1,0 +1,13 @@
+key: shore_ridge
+type: room
+short_desc: "The Shore Ridge"
+extra_desc: |
+  The elevated coastal bluff above what was a harbor. Looking north, the cliff drops away to the former seafloor. Looking east, the bone forest ridge you came from. The air here carries something the forest and the flats do not — a slight chemical quality, old salt and exposed mineral, the smell of a world that was covered by something for a very long time and is no longer covered by anything. The harbor below is visible as shapes: dock structures standing in dry air, dark curves of beached ships settled into the white ground, everything exactly where it was left.
+
+exits:
+  south: shore_ridge_east
+  west: shore_cliff_overlook
+  east: shore_cliff_north
+
+tags:
+  - outdoor

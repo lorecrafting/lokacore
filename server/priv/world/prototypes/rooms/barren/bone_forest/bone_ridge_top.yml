@@ -1,0 +1,13 @@
+key: bone_ridge_top
+type: room
+short_desc: "The Ridge Top"
+extra_desc: |
+  The high point of the ridge, and the view opens in both directions. East: the ashen plains extending toward the city ruins, the skyline of the dead city visible as a low grey irregularity on the horizon. West: the salt flats stretching to the former shore, white and enormous and level. Below you on both sides, the bone forest — seen from above, it resolves into a pattern. The trees follow old water courses. The network of dead trunks is a map of where water moved through this ground, a century ago, when there was water to move.
+
+exits:
+  south: bone_salt_approach
+  west: bone_west_ridge
+  north: bone_ridge_north
+
+tags:
+  - outdoor

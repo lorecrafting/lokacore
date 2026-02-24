@@ -1,0 +1,13 @@
+key: shore_descent
+type: room
+short_desc: "The Descent"
+extra_desc: |
+  Old stairs carved into the cliff face — worn but intact, still navigable. The stone has the texture of something that was always wet and is now always dry: a particular roughness where mineral deposits have recrystallized in the absence of water, different from the weathering of any surface that was never submerged. The sound of descent is hollow. Your footsteps echo off stone that held water for centuries and now holds only air. The stairs are regular, deliberate, cut by someone who used them often — a path between the harbor above and the dock below, walked every day when there was water in the harbor and something to dock.
+
+exits:
+  north: shore_cliff_mid
+  south: shore_mid
+  east: shore_lighthouse
+
+tags:
+  - outdoor

@@ -1,0 +1,17 @@
+key: highland_spring
+type: room
+short_desc: "The Spring"
+extra_desc: |
+  Water seeps from a crack in the rock — a thin trickle, almost nothing, but real. Cold and
+  clear and tasting of mineral in a way that is not unpleasant but is unmistakably of the
+  earth. It runs a short distance across the stone and disappears back into the rock. The
+  spring is consistent: not seasonal, not subject to weather. A seam in the geology opens
+  here and lets the deep groundwater show itself briefly before it returns to wherever it
+  goes.
+
+exits:
+  west: highland_cairn_field
+  north: highland_plateau
+
+tags:
+  - outdoor

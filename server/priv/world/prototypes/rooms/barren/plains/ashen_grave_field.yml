@@ -1,0 +1,11 @@
+key: ashen_grave_field
+type: room
+short_desc: "The Grave Field"
+extra_desc: |
+  Rows of smooth river worked stones stretch across the grey dust, each set upright, each carved with a single name in the old script. Hundreds of them. They are not graves — there are no bodies here, no mounds, no marked plots beneath. These are memorials, a public accounting of loss. The civilization that built them chose not to hide what they had lost. The names are still legible on most stones, worn at the edges but not gone. The field extends further than you can count from any single point within it.
+
+exits:
+  west: plains_south_entry
+
+tags:
+  - outdoor

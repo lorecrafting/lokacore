@@ -1,0 +1,12 @@
+key: ruins_temple_approach
+type: room
+short_desc: "The Temple Approach"
+extra_desc: |
+  Tall crystal obelisks line the processional path on both sides — uncarved, just shaped and smoothed, set at precise intervals. Walking between them you pass through something at each gap between obelisks. Not a sound. Not a feeling exactly. A threshold — a brief moment where the air, or the light, or something below both of those, is slightly different on one side than the other. Each gap produces the same thing. You stop, back up, and walk through the same gap again. It does the same thing again. They were placed for exactly this.
+
+exits:
+  south: ruins_inner_plaza
+  north: ruins_temple
+
+tags:
+  - outdoor

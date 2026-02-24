@@ -1,0 +1,13 @@
+key: rift_narrowing
+type: room
+short_desc: "The Narrowing"
+extra_desc: |
+  The fissure constricts. You turn sideways and work through carefully, stone close against
+  your back and chest. The minerals in the wall catch whatever light you carry — mica, or
+  something unfamiliar, a faint sparkle in the dark that vanishes when you look directly at
+  it. Beyond the narrowing, the space opens again. The constriction feels less like an
+  obstacle than a threshold — the rock checking whether you mean it before letting you deeper.
+
+exits:
+  south: rift_descent
+  north: rift_deep

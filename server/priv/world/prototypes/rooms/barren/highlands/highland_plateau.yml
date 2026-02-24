@@ -1,0 +1,18 @@
+key: highland_plateau
+type: room
+short_desc: "The Highland Plateau"
+extra_desc: |
+  A broad flat area opens behind the summit. The terrain character changes here — more
+  textured, showing evidence of more recent life. The Zone 2 landscape is visible ahead:
+  the Steppe Lands, further from the grove, further from the city, the open middle distance
+  of the planet. A walking path continues north. Whatever the highlands remember, the steppe
+  remembers something different, something closer in time to now.
+
+exits:
+  west: highland_cave
+  south: highland_spring
+  east: highland_ridge_north
+  north: highland_zone2_gate
+
+tags:
+  - outdoor

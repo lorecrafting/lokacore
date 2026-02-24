@@ -1,0 +1,16 @@
+key: highland_east_slopes
+type: room
+short_desc: "The East Slopes"
+extra_desc: |
+  The eastern approach to the highlands rises more gradually than the main path. The terrain
+  is quieter — fewer footprints, more remnants of vegetation: dry stalks and the husks of
+  things that tried to grow in the sheltered eastern exposure, and nearly managed. Looking
+  east, the ruins of the crystal city are visible at an angle that shows the spire clearly,
+  a thin vertical line against the pale sky.
+
+exits:
+  west: highland_lower_path
+  north: highland_cirque
+
+tags:
+  - outdoor

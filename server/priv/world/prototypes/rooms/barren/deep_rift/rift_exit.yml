@@ -1,0 +1,17 @@
+key: rift_exit
+type: room
+short_desc: "The Rift Exit"
+extra_desc: |
+  The second surface emergence of the rift system — a crack in the plains that opens from
+  below, releasing you at the northern plains surface. The rift ran further north underground
+  than the entrance above suggested. Emerging feels like being released from something that
+  was holding very still. The plains spread around you again, flat and grey and open, the
+  sky enormous overhead. Wind returns immediately. The underground quiet closes behind you
+  like a door.
+
+exits:
+  down: rift_deep
+  up: plains_north
+
+tags:
+  - outdoor

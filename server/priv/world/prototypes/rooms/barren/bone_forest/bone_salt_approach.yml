@@ -1,0 +1,13 @@
+key: bone_salt_approach
+type: room
+short_desc: "The Salt Approach"
+extra_desc: |
+  The forest gives way here without ceremony. The trees thin and stop — the last trunk is behind you, the next open ground ahead. The earth changes underfoot: first a scatter of small salt crystals in the darker soil, then more, then the soil itself begins to pale. The smell changes too, from the dry organic scent of dead bark to something sharper, mineral, older in a different way. Three more steps and the forest will be behind you entirely. The transition from dead organic ground to white mineral flat is gradual, and then it is sudden.
+
+exits:
+  south: bone_forest_heart
+  west: salt_flats_entry
+  north: bone_ridge_top
+
+tags:
+  - outdoor

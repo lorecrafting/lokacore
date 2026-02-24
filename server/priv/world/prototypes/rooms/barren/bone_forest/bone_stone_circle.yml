@@ -1,0 +1,12 @@
+key: bone_stone_circle
+type: room
+short_desc: "The Stone Circle"
+extra_desc: |
+  Eleven standing stones in a circle, each about two meters tall. The weathering pattern is different from anything in the ruins — the stone type is unfamiliar, the erosion deeper, older. Whatever happened here preceded the civilization that built the city by a significant margin. The circle predates everything else you have seen in this zone. The arrangement is deliberate — the spacing regular, the stones oriented. You cannot tell what it was for. The forest stands around it at a respectful distance, or at least the trees happened not to grow here, which is the same thing.
+
+exits:
+  west: bone_forest_deep
+  north: bone_forest_clearing
+
+tags:
+  - outdoor

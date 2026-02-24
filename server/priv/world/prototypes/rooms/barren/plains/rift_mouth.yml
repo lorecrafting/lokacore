@@ -1,0 +1,12 @@
+key: rift_mouth
+type: room
+short_desc: "The Rift Mouth"
+extra_desc: |
+  A crack in the flat ground, four meters across, edges clean and unhurried — not crumbling, not threatening, simply open. The air rising from it is noticeably cooler than the surface, ten degrees at least, and carries the smell of deep stone: mineral, old, faintly damp in a way nothing on the surface is. You can see perhaps thirty meters down before the light gives out entirely. The crack did not come from anything the civilization did. It was here before them, will be here after you. Standing at the edge, you feel the depth of it through your feet more than your eyes.
+
+exits:
+  up: ashen_crossroads
+  down: rift_entrance
+
+tags:
+  - outdoor

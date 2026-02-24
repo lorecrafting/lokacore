@@ -1,0 +1,13 @@
+key: ruins_crystal_plaza
+type: room
+short_desc: "The Crystal Plaza"
+extra_desc: |
+  Three sides of the plaza are lined with crystal panels three meters tall, each set in a frame of dark stone. In the current light, they are just large, pale, translucent surfaces. Then the sun shifts and something happens — the light is briefly organized, held in a specific arrangement that has nothing to do with reflection or refraction as you know them. It lasts less than a second. Then it releases and the panels are large, pale, translucent surfaces again. You stand in the open center and wait for the light to shift again.
+
+exits:
+  west: ruins_residential_south
+  north: ruins_square
+  east: ruins_convergence
+
+tags:
+  - outdoor

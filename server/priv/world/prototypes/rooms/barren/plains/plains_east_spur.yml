@@ -1,0 +1,12 @@
+key: plains_east_spur
+type: room
+short_desc: "The Eastern Spur"
+extra_desc: |
+  Running east from here, visible even from this distance, the dry canal cuts a straight edged trough through the landscape — two meters deep, precise, carved by people who had calculated exactly where water would run and then made the ground conform to the calculation. The calculation was correct. You can see the logic of it from here: the slight grade, the deliberate line, the sense of something engineered to be efficient. The water was the variable. The engineering remains.
+
+exits:
+  west: plains_south_mid
+  north: ashen_east
+
+tags:
+  - outdoor

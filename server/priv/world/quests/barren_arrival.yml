@@ -1,0 +1,53 @@
+id: barren_arrival
+name: "First Ground"
+description: |
+  The threshold is behind you. The grove is still visible if you turn south. Ahead: a planet. Real sky, real wind, real distance. No one from the grove has walked this ground before you. Find out what is here.
+
+type: main
+priority: 1
+act: 1
+
+giver: null
+turn_in_npc: null
+
+requires_quest: null
+# TODO Phase 2: Add barren_scout NPC giver + set requires_quest: grove_epilogue once
+# cross-storyline quest requirements are supported by the validator.
+
+objectives:
+  - id: enter_margin
+    type: go_to
+    target_id: margin_clearing
+    description: "Step away from the threshold"
+    hint: "Head north through the gate. The first open ground is a clearing past the ridge."
+
+  - id: reach_plains
+    type: go_to
+    target_id: plains_south_entry
+    description: "Reach the open plains"
+    hint: "Follow the path north from the clearing. The ground levels out into something vast."
+
+  - id: see_bone_forest
+    type: go_to
+    target_id: bone_forest_edge
+    description: "Find the dead forest to the west"
+    hint: "East of the plains, the ground changes. Something is wrong with the trees here — or was, once."
+
+  - id: return_to_threshold
+    type: go_to
+    target_id: threshold_gate
+    description: "Return to the grove threshold"
+    hint: "You know the way back. The grove is south."
+
+rewards:
+  xp: 200
+  gold: 0
+
+journal_entries:
+  start: "Past the threshold. Real planet air. The grove edge is still visible behind me — I can turn back. Not yet."
+  enter_margin: "The first open ground since the landing. An old foundation here, half buried, worked stone. Someone lived here before the grove. Before whatever made this planet what it is now."
+  reach_plains: "The grey begins here and doesn't stop. Fine pale dust, not quite soil. The sky is open in every direction. I've never seen this much sky at once. I don't know what to do with it."
+  see_bone_forest: "Dead trees, still standing. Not fallen — the structure is perfect, just hollow. Stripped of leaves but the shape remains: branches, forks, the exact form of living things preserved in dying. They didn't fall. They stopped."
+  complete: "I came back. The threshold is still there. The grove is still there. What I didn't expect: that I would want to go further. Tomorrow, maybe. For now: I know something about what's out there."
+
+labels: [main, barren_arc, act_1]

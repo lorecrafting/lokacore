@@ -1,0 +1,14 @@
+key: ruins_square
+type: room
+short_desc: "The Central Square"
+extra_desc: |
+  The square opens wide around you, and at its center stands a large crystal formation in a stone basin — unbroken, perfectly clear, catching the sky in its faces without distorting it. It is not a fountain. There is no water channel, no drain. Whatever it was for, it was not ornamental. You stand in the square and the city feels present around you, not as if people are here but as if the space is doing what it was designed to do. The design is still working. You are inside it.
+
+exits:
+  west: ruins_outer_plaza
+  east: ruins_resonance_hall
+  north: ruins_library
+  south: ruins_crystal_plaza
+
+tags:
+  - outdoor

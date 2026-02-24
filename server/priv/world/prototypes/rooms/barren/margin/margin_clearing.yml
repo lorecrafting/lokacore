@@ -1,0 +1,12 @@
+key: margin_clearing
+type: room
+short_desc: "The Clearing"
+extra_desc: |
+  Open ground, the first wide sky. The clearing is a natural flat between the ridge and the plains — not large, perhaps thirty meters across, but enough to stand in the middle and see horizon in all directions. In the center: an old foundation, half buried. Small, domestic in scale. A single room, once. The stones are worked but weathered past identifying. Someone lived here. Not the civilization. Before the civilization.
+
+exits:
+  south: threshold_summit
+  north: margin_north_path
+
+tags:
+  - outdoor

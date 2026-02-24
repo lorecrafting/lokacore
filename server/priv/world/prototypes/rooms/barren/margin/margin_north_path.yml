@@ -1,0 +1,12 @@
+key: margin_north_path
+type: room
+short_desc: "The North Path"
+extra_desc: |
+  The natural route north, and already there are footprints. Not recent — pressed into the dust and then sealed over by wind. Someone was here before the landing, walking this path from the south to the plains. The footprints are too large to be a Tender's. The civilization walked here. Or someone after the civilization. The path continues north into the grey expanse of the Ashen Plains.
+
+exits:
+  south: margin_clearing
+  north: plains_south_entry
+
+tags:
+  - outdoor

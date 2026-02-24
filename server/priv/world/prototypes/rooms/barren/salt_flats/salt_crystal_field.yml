@@ -1,0 +1,13 @@
+key: salt_crystal_field
+type: room
+short_desc: "The Crystal Field"
+extra_desc: |
+  Dense formation of salt crystals up to three meters tall, white and geometric and beautiful in the way something is beautiful when it is the product of pure process. Navigating through them requires attention — the spacing is irregular, the shapes complex, branching arms at unexpected heights. Sound behaves differently here: the crystals reflect and redirect it, so that you hear your footsteps arriving a fraction before you feel them, and the echo of your breathing comes back from a slightly different direction than you expect. The field is large enough to get turned around in. The formations show no interest in your orientation.
+
+exits:
+  east: salt_crystal_south
+  west: salt_brine_pool
+  north: salt_crystal_north
+
+tags:
+  - outdoor

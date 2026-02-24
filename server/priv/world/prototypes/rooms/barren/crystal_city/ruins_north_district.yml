@@ -1,0 +1,14 @@
+key: ruins_north_district
+type: room
+short_desc: "The North District"
+extra_desc: |
+  The northern district is workshops and production: wide benches, stone racks, open floor space for moving material. The crystal work here has a different quality than the civic buildings — functional rather than structural, shaped pieces in various states of completion stacked in sequence along the walls. They were still making things when they left. On one bench, a piece of formed crystal sits next to a tool that was set down carefully, parallel to the bench edge, as if it would be picked up again shortly. It has been centuries. The tool is still parallel to the bench edge.
+
+exits:
+  south: ruins_spire_base
+  north: ruins_north_road
+  east: ruins_east_road
+  west: ashen_northeast
+
+tags:
+  - outdoor

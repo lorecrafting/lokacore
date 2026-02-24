@@ -1,0 +1,9 @@
+key: ruins_spire_mid
+type: room
+short_desc: "The Spire Mid"
+extra_desc: |
+  Halfway up, the staircase levels onto a landing and the view through the translucent crystal cladding begins. The city below reads as channels of light rather than walls and streets — the crystal inlay in the roads and plazas visible from here as a web of faint luminescence, a map of something laid into the city's skeleton that you could not see from ground level. Far to the south, the grove is a small green smudge. From here you understand for the first time how small it is, and how much open plain lies between here and there.
+
+exits:
+  down: ruins_spire_base
+  up: ruins_spire_top

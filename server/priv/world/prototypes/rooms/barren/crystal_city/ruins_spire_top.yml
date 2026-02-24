@@ -1,0 +1,11 @@
+key: ruins_spire_top
+type: room
+short_desc: "The Spire Top"
+extra_desc: |
+  The full horizon opens in every direction: plains rolling south, highlands rising north, the pale geometry of the bone forest northwest, salt flats a white blur far west, the grove a green dot far south below the curve of land. On clear days the northern terrain is visible beyond the city edge, the steppe beginning. At the apex, the crystal structure catches the horizon light at dawn and at dusk and does something with it — directs it south, or marks the moment, or both. You have arrived at midday and missed it. You understand you would need to be here twice to see it fully: once at each end of the day.
+
+exits:
+  down: ruins_spire_mid
+
+tags:
+  - outdoor

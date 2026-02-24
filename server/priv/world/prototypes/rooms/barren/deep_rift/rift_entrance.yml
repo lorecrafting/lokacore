@@ -1,0 +1,16 @@
+key: rift_entrance
+type: room
+short_desc: "The Rift Entrance"
+extra_desc: |
+  The crack in the plains surface, viewed from below. Wide enough to descend carefully, no
+  more. The air here is already different — still, mineral, entirely removed from wind. Light
+  from above reaches the first few meters and then diffuses and fades. Below: darkness that
+  adjusts gradually as your eyes do. The geological walls are close enough to touch on both
+  sides. The sound of the surface disappears the moment you clear the lip.
+
+exits:
+  up: rift_mouth
+  north: rift_passage
+
+tags:
+  - outdoor

@@ -1,0 +1,12 @@
+key: ruins_outer_road
+type: room
+short_desc: "The Outer Road"
+extra_desc: |
+  The road curves along the exterior of the outer wall, close enough to touch the stonework. Inlaid into the wall face are veins of crystal running in geometric lines — not decorative, nothing here suggests decoration. The lines converge as you walk south toward the gate, drawing together like tributaries. Walking against the convergence, you feel nothing. Walking with it, something in your chest settles almost imperceptibly, without your doing anything at all.
+
+exits:
+  south: ruins_residential_north
+  east: ruins_residential_south
+
+tags:
+  - outdoor

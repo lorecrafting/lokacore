@@ -1,0 +1,13 @@
+key: ruins_spire_base
+type: room
+short_desc: "The Spire Base"
+extra_desc: |
+  The spire rises above you — not a tower, a spire, narrowing as it climbs, its exterior entirely clad in crystal panels set in a spiral pattern that winds upward out of sight. Looking up, the spiral seems to continue turning for a moment after you stop rotating your gaze, as if you were the one still moving. The stone at the base, where you stand, is warm under your hand. The face of the stone here is north-facing. The sun does not reach it. The warmth comes from below, through the stone, steady and sourceless.
+
+exits:
+  west: ruins_inner_plaza
+  north: ruins_north_district
+  up: ruins_spire_mid
+
+tags:
+  - outdoor

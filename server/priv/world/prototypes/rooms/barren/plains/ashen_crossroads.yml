@@ -1,0 +1,15 @@
+key: ashen_crossroads
+type: room
+short_desc: "The Plains Crossroads"
+extra_desc: |
+  You feel the compaction before you see it — the ground here is slightly more settled underfoot, the dust pressed fractionally deeper over years of use. There is nothing to mark this as a junction, no post, no carved stone, just the convergence of worn paths that all routes through the zone must pass through. North lies the wide middle of the plains. South is the way you came. East, the faint darkening on the horizon that is the city ruins. West, the dead tree line of the bone forest. Down, a crack in the ground breathes cold air from the dark.
+
+exits:
+  south: plains_south_mid
+  north: plains_mid
+  east: ashen_east
+  west: plains_west
+  down: rift_mouth
+
+tags:
+  - outdoor

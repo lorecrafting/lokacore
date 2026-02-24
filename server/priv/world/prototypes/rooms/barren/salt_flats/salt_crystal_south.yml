@@ -1,0 +1,13 @@
+key: salt_crystal_south
+type: room
+short_desc: "The Crystal Approaches"
+extra_desc: |
+  The first of the large salt formations. Columns rise from the crust — branching, geometric in the way crystals are geometric, not carved and not placed but grown into these shapes through chemistry and time and the slow patience of evaporation. The smallest are knee height. The largest approach two meters. They catch the light at an angle that makes them briefly luminous, white going momentarily gold, and then the angle changes and they are white again. They have nothing to do with the city's crystal work. They are something older, something that needed no civilization to produce it.
+
+exits:
+  east: salt_approach_south
+  west: salt_crystal_field
+  north: salt_fossil_field
+
+tags:
+  - outdoor

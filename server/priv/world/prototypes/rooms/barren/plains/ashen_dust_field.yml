@@ -1,0 +1,12 @@
+key: ashen_dust_field
+type: room
+short_desc: "The Dust Field"
+extra_desc: |
+  The ground here is finer than the main plains, wind worked into low regular ripples across the surface. You look back and your footprints are already filling — not quickly, not dramatically, just steadily. In a few minutes there will be no sign you were here. The light is diffuse, shadowless the way it is on overcast days, and most days are overcast. The dead tree line ahead to the west is the only vertical reference in the landscape. Without it, direction would require constant attention.
+
+exits:
+  east: plains_west
+  west: ashen_ridge_approach
+
+tags:
+  - outdoor

@@ -1,0 +1,14 @@
+key: rift_side_chamber
+type: room
+short_desc: "The Side Chamber"
+extra_desc: |
+  A lateral chamber off the main rift. Ancient geological formations cover the walls:
+  flowstone draped in slow curves, old mineral deposits in colors that have no names in
+  common use — ochre shading into rust shading into something pale and almost white. These
+  formations required water, specific minerals, and time, in that order. All three are gone.
+  What remains is the record of their having been here, which is a different kind of
+  presence than the things themselves.
+
+exits:
+  west: rift_chamber
+  south: rift_deep

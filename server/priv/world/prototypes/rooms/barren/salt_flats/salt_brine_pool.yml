@@ -1,0 +1,12 @@
+key: salt_brine_pool
+type: room
+short_desc: "The Brine Pool"
+extra_desc: |
+  A relic brine pool — liquid, but not water, or not water in any useful sense. Hypersaline, thick, reflecting the sky like a mirror. You cannot see into it. Around the edges: the tallest salt crystal formations on the flats, the product of centuries of evaporation pulling water upward and leaving its mineral content behind in slow accretion. The pool has no visible source. It persists because the water table is still close to the surface here, still pressing upward through the salt, still trying. The crystals around the edge record exactly how long it has been trying.
+
+exits:
+  east: salt_crystal_field
+  north: salt_depth_marker
+
+tags:
+  - outdoor

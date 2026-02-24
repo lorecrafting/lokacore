@@ -1,0 +1,12 @@
+key: salt_crystal_north
+type: room
+short_desc: "The Crystal North"
+extra_desc: |
+  The northern edge of the crystal field, where the formations begin to thin. They decrease toward the former shoreline — fewer, smaller, more scattered, isolated outcroppings rather than a field. The ground transitions back to plain salt crust with occasional upcroppings of crystal, the chemistry here having had less time to accumulate before the ocean left. To the north, the old shoreline cliffs are visible, rising from the flat white ground with the abruptness of something that was once a coastline and still holds the shape of that purpose.
+
+exits:
+  south: salt_crystal_field
+  east: salt_north_mid
+
+tags:
+  - outdoor

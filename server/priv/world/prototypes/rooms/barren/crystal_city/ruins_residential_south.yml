@@ -1,0 +1,13 @@
+key: ruins_residential_south
+type: room
+short_desc: "The South Residences"
+extra_desc: |
+  The homes here are slightly later construction than those to the north — you can tell by the crystal inlay. The channels are finer, the geometric patterns more intricate, fitted into the stone with a precision the earlier buildings do not have. Someone learned something between one generation and the next and applied it here. You are looking at the work of people who inherited an understanding they could improve without having been taught from the beginning. The homes are intact. The improvement is embedded in the walls.
+
+exits:
+  north: ruins_outer_plaza
+  west: ruins_outer_road
+  east: ruins_crystal_plaza
+
+tags:
+  - outdoor

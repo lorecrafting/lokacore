@@ -1,0 +1,12 @@
+key: ashen_northeast
+type: room
+short_desc: "The Northeast Plains"
+extra_desc: |
+  The ground here is quieter than the main routes — less compacted, longer intervals between evidence of passage, but not unused. Someone preferred this approach. The city is visible from here at a different angle than from the main route: the northern face of the ruins, its geometry distinct from the south facing silhouette, the spire visible above the roofline from this direction. The approach through here arrives at the city's north district. Some people walked the long way deliberately.
+
+exits:
+  west: plains_north_mid
+  east: ruins_north_district
+
+tags:
+  - outdoor

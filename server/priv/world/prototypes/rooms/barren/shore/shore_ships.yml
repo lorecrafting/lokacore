@@ -1,0 +1,11 @@
+key: shore_ships
+type: room
+short_desc: "The Beached Ships"
+extra_desc: |
+  Three ships resting on the former seafloor, tilted slightly — they were at anchor when the water left, and they settled as the water retreated below their keels and set them down. The civilization didn't move them, or couldn't, or chose to leave them where they were. The wood has been dry for decades: it contracts in dryness, splits at the joints, the hull planking still curved in the shape the water made it but cracked now along the grain. The masts are standing on two of the three. Everything aboard is still there — rigging, ballast, hold contents — preserved in the same still dry air that has preserved everything else here. You can climb aboard. You will be the first.
+
+exits:
+  west: shore_dock
+
+tags:
+  - outdoor

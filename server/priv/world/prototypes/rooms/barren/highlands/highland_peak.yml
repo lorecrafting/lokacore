@@ -1,0 +1,17 @@
+key: highland_peak
+type: room
+short_desc: "The Peak"
+extra_desc: |
+  Most people call this the peak and it is close enough. The true summit is a short way east.
+  From here, 270 degrees of Zone 1 is visible at once: the city ruins distinct to the east,
+  the bone forest as a dark edge to the west, the grey plains spreading south between them.
+  The wind comes from the north and presses against your chest with a steadiness that feels
+  less like weather and more like the landscape making a point.
+
+exits:
+  west: highland_ridge
+  east: highland_summit
+  south: highland_upper_path
+
+tags:
+  - outdoor

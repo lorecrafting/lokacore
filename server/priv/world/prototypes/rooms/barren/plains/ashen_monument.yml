@@ -1,0 +1,12 @@
+key: ashen_monument
+type: room
+short_desc: "The Standing Stone"
+extra_desc: |
+  A pillar of worked stone rises nine meters from the flat ground, still vertical, still precise, undamaged by whatever stopped everything else. All four faces are carved with direction reckoning: triangulations, distances, bearings to the highlands, the city, the coast, the rift. It was built so travellers would know exactly where they were. The carvings are in the old script but the logic is universal — angles, ratios, the unchanging geometry of position. It still points in the same directions. Direction has not changed. The stone has not moved. It was built to last, and it has.
+
+exits:
+  south: plains_mid
+  north: plains_north_mid
+
+tags:
+  - outdoor

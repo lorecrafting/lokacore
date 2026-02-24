@@ -1,0 +1,14 @@
+key: rift_biolume
+type: room
+short_desc: "The Bioluminescent Wall"
+extra_desc: |
+  A wall of mineral glows faintly: cold blue white light from the stone itself, a chemical
+  reaction that has been running for centuries without interruption. Not life. Chemistry. It
+  is enough to see by — the chamber walls, your own hands, the texture of the rock — in light
+  that does not flicker and does not warm. The reaction will continue until the reagents are
+  exhausted. They are not exhausted yet. You stand in the light of something that does not
+  know you are here.
+
+exits:
+  west: rift_deep
+  north: rift_chamber

@@ -1,0 +1,18 @@
+key: highland_ridge
+type: room
+short_desc: "The Highland Ridge"
+extra_desc: |
+  The main east west ridge is fully exposed. The wind here has nothing to stop it and does
+  not hesitate. You feel it as something with intention. The ridge runs both ways — east
+  toward the summit, west into quieter terrain — and in both directions the sky is very clear
+  and very high. Standing here long enough, the scale of the landscape becomes comprehensible.
+  Then it exceeds comprehension again.
+
+exits:
+  west: highland_mid_path
+  east: highland_peak
+  north: highland_ridge_north
+  south: highland_cirque
+
+tags:
+  - outdoor

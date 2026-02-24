@@ -1,0 +1,13 @@
+key: threshold_summit
+type: room
+short_desc: "The Threshold Summit"
+extra_desc: |
+  The highest point of the margin, and the first place where the full scale of emptiness ahead is apparent. South: the grove, a green island in grey ground, smaller than you imagined it from inside. North: the Ashen Plains, flat and vast and the same pale grey in every direction as far as you can see. The grove is not small. The planet is simply very large.
+
+exits:
+  south: threshold_ridge
+  north: margin_clearing
+  west: margin_overlook
+
+tags:
+  - outdoor

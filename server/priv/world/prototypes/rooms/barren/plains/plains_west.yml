@@ -1,0 +1,12 @@
+key: plains_west
+type: room
+short_desc: "The Western Reach"
+extra_desc: |
+  The dead tree line is visible from here — a dark vertical frieze pressed against the pale sky, the silhouettes of branches intact but still, every limb holding its shape without any intention behind it. The ground underfoot is slightly different than the main plains: darker, faintly more textured, a trace of something organic worked into the grey. The trees were not always dead. Whatever fed the soil here was alive long enough to change the earth, and the earth remembers it even now.
+
+exits:
+  east: ashen_crossroads
+  west: ashen_dust_field
+
+tags:
+  - outdoor

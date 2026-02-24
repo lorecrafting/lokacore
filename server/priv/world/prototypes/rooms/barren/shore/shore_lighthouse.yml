@@ -1,0 +1,12 @@
+key: shore_lighthouse
+type: room
+short_desc: "The Lighthouse"
+extra_desc: |
+  A lighthouse on what was once a rocky promontory — now a dry prominence above the former beach. The lens mechanism is still here: the crystal and metal assembly that focused and directed the light still turns when you move it, the bearings intact, the years of salt air having done nothing the original construction did not anticipate. The light source is gone, burned out or removed, but the mechanism is in perfect order. It would still work. The mirror array would still concentrate whatever light you gave it, direct it across the former ocean's surface in a sweeping arc, signal across the water that something was here, that the coast was navigable, that someone was watching. There is no sea to signal across.
+
+exits:
+  west: shore_descent
+  south: shore_dock
+
+tags:
+  - outdoor

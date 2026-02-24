@@ -1,0 +1,12 @@
+key: bone_ridge_north
+type: room
+short_desc: "The Ridge North"
+extra_desc: |
+  The ridge continues north and the exposed rock here is dense with lichen — denser than anywhere in the forest below, the altitude apparently agreeing with it. The wind comes from the north, regular, carrying the faint chemical quality of the old coastline. Below and northwest, the dry harbor is visible: the dock structures standing in open air, the dark curves of the beached ships settled into the former seafloor. The shore cliffs are close. The trees below this point are shorter, younger dead than the forest proper — they ran out of water sooner than the deep rooted ones.
+
+exits:
+  south: bone_ridge_top
+  north: shore_ridge_east
+
+tags:
+  - outdoor

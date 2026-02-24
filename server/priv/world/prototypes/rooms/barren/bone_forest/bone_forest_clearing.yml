@@ -1,0 +1,14 @@
+key: bone_forest_clearing
+type: room
+short_desc: "The Dead Clearing"
+extra_desc: |
+  A natural clearing in the forest, and at its center a sapling — dead, but younger than the others by many decades. The last thing that tried to grow here. It was perhaps six years old when it stopped. You can count the growth rings on its trunk where a branch broke off: six rings, each one thinner than the last, the final year barely a line. Something tried to grow here six years ago and ran out of something. The forest roots have not reached this far. The ground is harder here, the connection to the deep network more distant.
+
+exits:
+  south: bone_forest_deep
+  west: bone_stone_circle
+  east: bone_west_ridge
+  north: bone_forest_heart
+
+tags:
+  - outdoor

@@ -1,0 +1,12 @@
+key: ruins_approach
+type: room
+short_desc: "The Road In"
+extra_desc: |
+  The paved road runs straight to the gate, wide enough for three carts abreast. The surface is pale stone — ordinary at first, until the light catches the edges of each slab and the translucent aggregate embedded in the mix holds it a fraction longer than it should. Dust has gathered in the seams but not on the faces of the stones. The city ahead is intact. Every wall, every arch. Silence sits on it like weather.
+
+exits:
+  west: ashen_canal
+  north: ruins_gate
+
+tags:
+  - outdoor

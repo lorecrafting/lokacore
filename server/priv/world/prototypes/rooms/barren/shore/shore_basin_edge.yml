@@ -1,0 +1,12 @@
+key: shore_basin_edge
+type: room
+short_desc: "The Basin Edge"
+extra_desc: |
+  The shore ends here at a geological fact. The cliff before you is not carved by the civilization — the stone layers and their orientation make clear this is the work of the planet's own deep history, the edge of the continental shelf, the point where the former ocean floor descends sharply to its deepest point. Looking west and down: the coastal basin drops further below the current surface level, the depression enormous, its far wall not visible. Looking east: the old beach, the dry dock, the former harbor. You are standing at the hinge between the shallow coast and the true deep. Whatever the ocean was at its fullest, its weight was most concentrated below this edge.
+
+exits:
+  east: shore_mid
+  south: salt_flats_northwest
+
+tags:
+  - outdoor

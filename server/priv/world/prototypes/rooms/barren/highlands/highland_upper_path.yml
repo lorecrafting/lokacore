@@ -1,0 +1,16 @@
+key: highland_upper_path
+type: room
+short_desc: "The Upper Path"
+extra_desc: |
+  The final approach to the peak requires more than walking — the terrain asks for your hands
+  occasionally, a choice of footholds, attention to what the rock will hold. The air is
+  noticeably thinner here, breathable but present in a way that flat-ground air is not. Far
+  south, the grove is a small green patch against the grey. It is much smaller than it feels
+  from inside.
+
+exits:
+  south: highland_west_trail
+  north: highland_peak
+
+tags:
+  - outdoor

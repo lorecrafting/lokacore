@@ -1,0 +1,13 @@
+key: threshold_path
+type: room
+short_desc: "The Threshold Path"
+extra_desc: |
+  The first steps away from the grove. The soil here is barren — pale grey, compacted into a fine dust that holds the impression of your foot and then drifts closed. A single root line threads north through the surface, a thin ridge half a handspan wide, pushing through ground that has not been alive in a century. It is the grove's first reach. You are walking alongside it.
+
+exits:
+  south: threshold_gate
+  north: threshold_ridge
+  east: margin_rootline
+
+tags:
+  - outdoor

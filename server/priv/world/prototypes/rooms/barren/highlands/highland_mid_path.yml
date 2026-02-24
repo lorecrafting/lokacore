@@ -1,0 +1,17 @@
+key: highland_mid_path
+type: room
+short_desc: "The Mid-Path"
+extra_desc: |
+  This is real mountain terrain. The path is clear but requires attention — loose rock, uneven
+  ground, the occasional step that shifts underfoot. Most travelers stop before this point. The
+  people who come this far do so with a reason. The wind is consistent and from the north, cold
+  enough that you feel it in the exposed skin of your face and hands. The altitude is not
+  dramatic yet, but it is present.
+
+exits:
+  south: highland_lower_path
+  north: highland_west_trail
+  east: highland_ridge
+
+tags:
+  - outdoor

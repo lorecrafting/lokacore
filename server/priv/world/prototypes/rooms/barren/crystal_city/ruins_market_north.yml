@@ -1,0 +1,9 @@
+key: ruins_market_north
+type: room
+short_desc: "The Market North"
+extra_desc: |
+  The northern end of the hall, where the larger stalls cluster — the trading spaces of the market's busiest quarter. The crystal density in the roof panels here is higher than in the southern section, and the light quality is different because of it: too even, equalizing, your shadow softer-edged than it should be in this much direct light. You hold your hand up and the shadow it casts on the stall surface behind you looks like it was made in overcast sky. The sun is full overhead. Your hand looks ordinary.
+
+exits:
+  south: ruins_market
+  west: ruins_library

@@ -1,0 +1,12 @@
+key: bone_forest_heart
+type: room
+short_desc: "The Heart Tree"
+extra_desc: |
+  The largest tree in the forest. Its root system at the base is exposed and massive — roots like walls, like rooms, like the infrastructure of something that thought in decades. You could shelter under them. The root spread reaches four meters in every direction, still locked into the earth, still holding the shape of the tree's former life with perfect fidelity. Carved into the bark at the base: old script. Not a warning. Not a lament. A statement of fact: this tree grew where water was, and when the water was gone, the tree was still here.
+
+exits:
+  south: bone_forest_clearing
+  north: bone_salt_approach
+
+tags:
+  - outdoor

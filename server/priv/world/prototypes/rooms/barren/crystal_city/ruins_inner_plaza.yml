@@ -1,0 +1,13 @@
+key: ruins_inner_plaza
+type: room
+short_desc: "The Inner Plaza"
+extra_desc: |
+  The stone here is older — you can see it in the color and the texture, a slightly different construction vocabulary than the outer city. The crystal inlay is minimal compared to what surrounds it: narrow channels, simpler patterns, the work of people who had begun to understand what they were doing with the material but had not yet worked out the full scope of what was possible. This is where the city started. The archive is where it ended. Everything they learned is between here and there, embedded in the buildings between these two points.
+
+exits:
+  west: ruins_resonance_hall
+  east: ruins_spire_base
+  north: ruins_temple_approach
+
+tags:
+  - outdoor

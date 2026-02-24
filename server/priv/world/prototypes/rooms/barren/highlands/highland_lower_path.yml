@@ -1,0 +1,16 @@
+key: highland_lower_path
+type: room
+short_desc: "The Lower Path"
+extra_desc: |
+  The flat of the plains is behind you now. The ground rises ahead at an angle that requires
+  intention — not steep, but deliberate. The stone here is different from the plains: darker,
+  denser, older. It emerges from the dust rather than being buried by it. The plains remember
+  water running across them. The highlands remember nothing except weight.
+
+exits:
+  south: highland_foothills_south
+  north: highland_mid_path
+  east: highland_east_slopes
+
+tags:
+  - outdoor

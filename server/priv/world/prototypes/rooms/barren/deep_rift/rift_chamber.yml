@@ -1,0 +1,16 @@
+key: rift_chamber
+type: room
+short_desc: "The Rift Chamber"
+extra_desc: |
+  The main underground space — large enough that the far wall is not immediately visible.
+  Something is present in the rock here that was only a suggestion above. You feel it in the
+  soles of your feet, in your chest, in the fine bones of your face: a frequency, slow and
+  deliberate, older than any biological thing that could produce it. The same movement as the
+  grove's deepest rooms, but expressed in mineral rather than root. Ancient in the way stone
+  is ancient. It does not ask for anything.
+
+exits:
+  south: rift_deep
+  west: rift_biolume
+  east: rift_side_chamber
+  north: rift_heart

@@ -1,0 +1,13 @@
+key: plains_south_mid
+type: room
+short_desc: "The Plains South"
+extra_desc: |
+  The dust covers everything here — your boots, the back of your hands, the inside of your mouth before long. A low wind moves across the surface in a constant slow erasure, never strong enough to lift visibility, just enough to smooth away any trace of passage. You taste the grey before you notice you are breathing it. To the north, the horizon is unbroken, a clean line between dust and sky that gives no information about what lies beyond it.
+
+exits:
+  south: plains_south_entry
+  north: ashen_crossroads
+  east: plains_east_spur
+
+tags:
+  - outdoor

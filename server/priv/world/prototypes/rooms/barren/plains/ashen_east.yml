@@ -1,0 +1,13 @@
+key: ashen_east
+type: room
+short_desc: "The Eastern Plains"
+extra_desc: |
+  The route east is quieter than the main spine — longer pauses between signs of passage, the dust less settled underfoot. Someone walked here, but not as many, and not as often. On the eastern horizon, the city ruins are visible as a slight darkening where ground meets sky, not yet buildings, not yet anything definite, just a thickening of the line. The canal will be somewhere ahead, running toward that darkening. The route is longer this way, and somehow that matters, though you could not say why.
+
+exits:
+  west: ashen_crossroads
+  east: ashen_old_farm
+  south: plains_east_spur
+
+tags:
+  - outdoor

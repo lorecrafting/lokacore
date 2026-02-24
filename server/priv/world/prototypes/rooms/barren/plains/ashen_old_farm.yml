@@ -1,0 +1,12 @@
+key: ashen_old_farm
+type: room
+short_desc: "The Old Farm"
+extra_desc: |
+  The ground here has been shaped deliberately — flat cuts into the slope, terracing in careful increments, irrigation channels carved in stone running between levels. Someone spent years on this. The geometry is exact: the terraces hold their angle, the channels still follow their calculated grade, the whole system intact and purposeful and empty. Fine grey dust has collected at the bottom of every channel. The terracing still works as terracing — the logic of it is sound, the engineering holds. The only thing missing is the thing that was always going to run out.
+
+exits:
+  west: ashen_east
+  east: ashen_canal
+
+tags:
+  - outdoor

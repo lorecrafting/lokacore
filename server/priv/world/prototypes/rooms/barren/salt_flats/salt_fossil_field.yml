@@ -1,0 +1,13 @@
+key: salt_fossil_field
+type: room
+short_desc: "The Fossil Field"
+extra_desc: |
+  Marine fossils at the surface here, so dense they constitute the ground. Shells, carapaces, the articulated remains of hundreds of species pressed into the salt crust with extraordinary fidelity. You are walking on the seafloor. Every step is on the preserved record of an ocean ecosystem: filter feeders and armored crawlers and things that drifted in the water column and eventually settled here. The variety is past counting. They are not scattered — they are deposited, the way current deposits things, in the orientation the water left them. The ocean arranged them here. You are the first thing to walk through the arrangement.
+
+exits:
+  south: salt_crystal_south
+  east: salt_flats_mid
+  north: salt_north_mid
+
+tags:
+  - outdoor

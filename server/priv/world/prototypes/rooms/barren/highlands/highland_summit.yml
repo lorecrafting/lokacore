@@ -1,0 +1,17 @@
+key: highland_summit
+type: room
+short_desc: "The True Summit"
+extra_desc: |
+  The highest point in Zone 1. The view is complete: plains to the south, bone forest
+  northwest, city ruins to the east, salt flats far west, and the grove — a small green
+  dot far south, smaller than you expected. On clear days, Zone 2 terrain opens to the north.
+  This is where the whole landscape becomes legible as a single thing. The grove is smaller
+  than you thought. The planet is larger. Both of these are true at the same time.
+
+exits:
+  west: highland_peak
+  east: highland_cairn_field
+  north: highland_cave
+
+tags:
+  - outdoor

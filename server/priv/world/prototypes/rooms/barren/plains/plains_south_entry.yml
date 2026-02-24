@@ -1,0 +1,13 @@
+key: plains_south_entry
+type: room
+short_desc: "The Southern Plains"
+extra_desc: |
+  The grey begins here. Behind you, the margin's slight rise is the last terrain feature for a long walk — a shallow crest, already receding. Ahead, the ground levels into something unbroken and vast, a pale expanse that extends north without variation. The dust is fine and dry beneath your feet, not quite soil, not quite sand. Nothing distinguishes one direction from another except the faint memory of where you came from.
+
+exits:
+  south: margin_north_path
+  north: plains_south_mid
+  east: ashen_grave_field
+
+tags:
+  - outdoor

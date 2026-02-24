@@ -1,0 +1,8 @@
+key: ruins_temple
+type: room
+short_desc: "The Resonance Temple"
+extra_desc: |
+  Pure crystal and stone, no wood, no fabric, no organic material of any kind. The ceiling is a single massive crystal panel through which the sky is visible — there but blue-shifted, as if viewed through deep water. At the center of the floor: a depression filled with sand, and in the sand, the marks of repeated disturbance, thousands of repetitions layered over each other into a palimpsest of use. This room was used constantly. The sand is disturbed right up to a point, and then it is not. Whatever changed, changed completely. The absence of use is not the same as the absence of the practice.
+
+exits:
+  south: ruins_temple_approach

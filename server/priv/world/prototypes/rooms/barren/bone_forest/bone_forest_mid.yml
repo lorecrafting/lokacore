@@ -1,0 +1,14 @@
+key: bone_forest_mid
+type: room
+short_desc: "The Mid-Forest"
+extra_desc: |
+  This is the densest part of the forest. The canopy of interlaced dead branches forms a lattice roof — light comes through in patterns, grey bars crossing grey ground. Sound is most muffled here. You can hear your own breath clearly. The trunks are close enough that you orient by memory rather than sight, each one identical in its bleached and branchless lower section, distinct only in girth. Something reaches you that is not sound and not light — faint, attenuated, like a voice heard from the next room with the door closed.
+
+exits:
+  south: bone_forest_path
+  west: bone_forest_west_track
+  east: bone_lichen_field
+  north: bone_forest_deep
+
+tags:
+  - outdoor

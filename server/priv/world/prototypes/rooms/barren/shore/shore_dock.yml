@@ -1,0 +1,13 @@
+key: shore_dock
+type: room
+short_desc: "The Old Dock"
+extra_desc: |
+  Harbor infrastructure standing in dry air. The dock boards are intact — rotted soft but still connected, still holding the shape of a working platform. The bollards still have rope through them: old rope, brittle, the fibers separated but the knot geometry preserved, still tied in the same configuration that tied boats before the water left. The dock pilings end two meters above the ground, the platform cantilevered over air where water was. Below the platform: the former seafloor, dry and white. The scale of the dock — the spacing of the pilings, the width of the platform, the number of bollards — suggests a working harbor, not a small landing. Many boats came here.
+
+exits:
+  west: shore_mid
+  north: shore_lighthouse
+  east: shore_ships
+
+tags:
+  - outdoor

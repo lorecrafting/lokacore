@@ -1,0 +1,12 @@
+key: margin_rootline
+type: room
+short_desc: "The Root Line"
+extra_desc: |
+  The active seed front. The grove's leading edge is visible here as a web of fine roots threading up through cracked soil — dozens of them, each no thicker than a finger, each pushing upward from below with enough force to fracture the hardened crust. At their tips, seedlings. Two centimetres tall. The first green things this ground has known in a hundred years. They are not uncertain. They are simply beginning.
+
+exits:
+  west: threshold_path
+  south: eastern_threshold
+
+tags:
+  - outdoor

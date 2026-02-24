@@ -1,0 +1,14 @@
+key: rift_heart
+type: room
+short_desc: "The Rift Heart"
+extra_desc: |
+  The rock is faintly warm here. Not body warm — warmer than the stone above, warmer than
+  it should be at this depth and this state of the planet. A thermal trace. The frequency
+  in the stone is two directional here: you feel it moving downward into the planet as well
+  as upward through the rock above. Something far below is meeting something that comes from
+  above. Neither of them is you. You are standing at the point of contact between two things
+  that have been reaching toward each other for a very long time.
+
+exits:
+  south: rift_chamber
+  north: rift_abyss

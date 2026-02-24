@@ -1,0 +1,12 @@
+key: bone_forest_west_track
+type: room
+short_desc: "The West Track"
+extra_desc: |
+  The forest opens slightly here. The larger trees have absorbed the space of smaller ones that fell at some earlier point — the spacing has spread, the canopy is less dense. Grey green lichen grows on the north facing bark of nearly every trunk in this direction, consistent and methodical, not caring whether you notice it or not. The ground underfoot holds the faint impression of an old track, though nothing has walked it in a very long time. The lichen is the only living thing you can see.
+
+exits:
+  east: bone_forest_path
+  north: bone_forest_mid
+
+tags:
+  - outdoor

@@ -1,0 +1,12 @@
+key: ruins_gate
+type: room
+short_desc: "The City Gate"
+extra_desc: |
+  The archway rises fourteen meters above you, built from blocks of pale stone with crystal panels set at intervals along its curve. As you pass through, something shifts — not in the air, not quite in your ears, but somewhere between your sternum and your throat. It is already gone by the time you locate it. The gate shows no damage, no forcing, no break. The iron fittings are fully intact. It stopped being used at some point. That is all.
+
+exits:
+  south: ruins_approach
+  east: ruins_outer_plaza
+
+tags:
+  - outdoor

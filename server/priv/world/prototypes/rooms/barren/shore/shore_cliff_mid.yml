@@ -1,0 +1,13 @@
+key: shore_cliff_mid
+type: room
+short_desc: "The Cliff Mid"
+extra_desc: |
+  Partway down the cliff face, and the old waterline is visible above you — a horizontal stain in the stone thirty meters up, a clear demarcation where chemistry changed, where the ocean surface was for long enough to leave a permanent mark. You are below the waterline of a sea that no longer exists. The stone around you was submerged for the entire history of this civilization and for a long time before that. The texture of the rock face is different here than at the top — smoother, the long work of water on stone visible in how the surface has been rounded and sorted and made consistent.
+
+exits:
+  north: shore_cliff_north
+  south: shore_descent
+  west: shore_cliff_overlook
+
+tags:
+  - outdoor

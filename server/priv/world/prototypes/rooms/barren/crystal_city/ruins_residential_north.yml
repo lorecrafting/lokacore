@@ -1,0 +1,13 @@
+key: ruins_residential_north
+type: room
+short_desc: "The North Residences"
+extra_desc: |
+  The homes stand intact on both sides of the street, built from pale stone with a single crystal panel set above each threshold — every one of them, the same position, the same size, without exception. A carved stone figure rests on a window sill. A child's cup sits upright on a low ledge inside an open doorway. They left in order. The cup is not knocked over. Nothing is knocked over. They expected to return, or they wanted whoever came next to find the place intact. You cannot settle which.
+
+exits:
+  south: ruins_outer_plaza
+  north: ruins_outer_road
+  east: ruins_market
+
+tags:
+  - outdoor

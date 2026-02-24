@@ -1,0 +1,13 @@
+key: plains_north
+type: room
+short_desc: "The Northern Plains"
+extra_desc: |
+  The flat ground makes its last argument here. Outcroppings of darker stone push through the dust, their surfaces rougher and more varied than the pale grey that covered them. The dust between them has shifted to a darker tone — traces of something organic, old soil memory. The highlands ahead have resolved from a band into walls, a clear hard edge where the plains stop and the stone begins. Beneath your feet, if you look closely, a sealed fracture runs through the rock — hairline, filled with sediment, the surface sign of a rift system that goes deeper than the entrance behind you.
+
+exits:
+  south: plains_north_mid
+  north: highland_foothills_south
+  down: rift_exit
+
+tags:
+  - outdoor

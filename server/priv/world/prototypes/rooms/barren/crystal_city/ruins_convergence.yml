@@ -1,0 +1,13 @@
+key: ruins_convergence
+type: room
+short_desc: "The Convergence"
+extra_desc: |
+  Beneath the paving here, multiple crystal channels from different parts of the city meet and surface. You feel it through your boots the moment you step into the room — a low, slow something that has nothing to do with sound. It is not unpleasant. It is simply there, consistent, indifferent to your presence. If you have spent time in the grove, something about this is familiar: the same underlying quality, expressed through stone instead of root tissue, mineral instead of living fiber. The family resemblance is unmistakable. You did not expect to find it here.
+
+exits:
+  north: ruins_resonance_hall
+  west: ruins_crystal_plaza
+  south: ruins_archive
+
+tags:
+  - outdoor

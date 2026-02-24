@@ -1,0 +1,14 @@
+key: ruins_outer_plaza
+type: room
+short_desc: "The Outer Plaza"
+extra_desc: |
+  The first open space inside the gate fans out around you, the polished stone floor inlaid with crystal channels running like spokes toward the plaza's center. Where several channels meet, you crouch without quite deciding to — the floor there is warm. Not the warmth of sun on stone. The warmth is the same in shadow as in light, the same in the cool of morning as the heat of afternoon. It has been the same temperature for a very long time, and nothing about the climate has anything to do with it.
+
+exits:
+  west: ruins_gate
+  east: ruins_square
+  north: ruins_residential_north
+  south: ruins_residential_south
+
+tags:
+  - outdoor

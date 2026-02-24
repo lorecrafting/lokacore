@@ -1,0 +1,10 @@
+key: ruins_library
+type: room
+short_desc: "The Library"
+extra_desc: |
+  The shelves are carved directly into the stone walls, nothing freestanding, nothing that could be moved or taken. Most are bare. What remains is inscribed into the stone itself and into crystal panels set at reading height, the text pressed or scored into the surface. There is no medium that could be removed. The inscription stays with the building. You understand, reading a line of it in a script you cannot parse, that this was intentional — they knew there would be no one to carry things out. They wrote on the walls.
+
+exits:
+  south: ruins_square
+  east: ruins_market_north
+  west: ruins_archive

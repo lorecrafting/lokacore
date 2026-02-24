@@ -1,0 +1,13 @@
+key: salt_flats_entry
+type: room
+short_desc: "The Flats Entry"
+extra_desc: |
+  The ground whitens underfoot and the crunch of salt crust begins — a sound you have not made before, clean and precise, the sound of crystal yielding to weight. The smell changes immediately: sharp, mineral, old in a way organic things are never old. Behind you the bone forest is the last landmark you will see for some time. Ahead: white in every direction, the horizon identical east and west and north, the flatness so absolute it reads as a kind of pressure, the land having nothing to say for itself in any direction.
+
+exits:
+  east: bone_salt_approach
+  west: salt_flats_mid
+  south: salt_approach_south
+
+tags:
+  - outdoor

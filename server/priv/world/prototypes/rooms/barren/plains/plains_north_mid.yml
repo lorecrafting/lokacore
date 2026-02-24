@@ -1,0 +1,13 @@
+key: plains_north_mid
+type: room
+short_desc: "The North-Mid Plains"
+extra_desc: |
+  The dust thins here. Small stones emerge first — rounded, pale, indistinct — then larger ones, the underlying geology pushing through where the fine grey layer has worn away or blown south. Your footsteps change sound, softer dust giving way to the occasional scrape of stone. To the north, the highlands have become something more than a suggestion: a dark band across the horizon, a wall the sky presses against. The plains are not quite over, but they are beginning to end.
+
+exits:
+  south: ashen_monument
+  north: plains_north
+  east: ashen_northeast
+
+tags:
+  - outdoor

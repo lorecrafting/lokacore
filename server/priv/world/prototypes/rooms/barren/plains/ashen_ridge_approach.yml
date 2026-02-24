@@ -1,0 +1,12 @@
+key: ashen_ridge_approach
+type: room
+short_desc: "The Ridge Approach"
+extra_desc: |
+  The dust thins as the ground begins its slow rise toward the bone forest ridge. Darker stone appears in irregular patches where the grey layer has worn away, older and more varied than anything on the open plains. The first trees are visible ahead — dead and upright, their branches still intact, held against the pale sky in perfect silhouette. From here they are still distant enough to read as a line, a border, a transition. A few hundred meters more and you will be among them.
+
+exits:
+  east: ashen_dust_field
+  west: bone_forest_edge
+
+tags:
+  - outdoor

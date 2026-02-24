@@ -1,0 +1,13 @@
+key: rift_descent
+type: room
+short_desc: "The Descent"
+extra_desc: |
+  Steeper here. The last sounds from the surface — wind, the distant settle of dust — have
+  faded completely. What replaces them is not silence so much as a different quality of
+  stillness: geological, not passive. The rock has been undisturbed here for millions of
+  years. You can feel its mass through the walls when you brace against them, something
+  enormous and patient on both sides. The cold increases with depth.
+
+exits:
+  south: rift_passage
+  north: rift_narrowing

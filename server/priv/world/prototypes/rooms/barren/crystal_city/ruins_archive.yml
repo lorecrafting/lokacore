@@ -1,0 +1,12 @@
+key: ruins_archive
+type: room
+short_desc: "The Archive"
+extra_desc: |
+  The archive is built below ground level, the ceiling low, every surface crystal-lined: floor, walls, ceiling, all paneled and smooth. The formal records inscribed here are dense and precise — tallies, dates, names in a regular official hand. Then at the end of the last panel, a different hand, simpler letters scored without the control of official inscription. Direct. A planet's name in their script, and below it, in the same rough hand: words you parse slowly, character by character, against the patterns you have been building. "They will come from the sky. Preserve this for them." The archive has been preserved. You are the first to read this.
+
+exits:
+  north: ruins_convergence
+  east: ruins_library
+
+tags:
+  - underground

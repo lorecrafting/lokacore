@@ -1,0 +1,12 @@
+key: salt_flats_northwest
+type: room
+short_desc: "The Northwest Flats"
+extra_desc: |
+  The northwestern edge of the salt flats, where the coastal basin begins its descent. The ground here is still white and level, but looking west you can see the terrain change: the basin visible as a vast depression, the actual ocean floor dropping further below the current surface. The depth of what was here is comprehensible from this angle — not just shallow coastal water, but genuine ocean, its weight pressing down on everything below it for an unimaginable duration. The shelf edge is ahead. Below and west: the deep basin, the world the sea left behind.
+
+exits:
+  east: salt_flats_mid
+  north: shore_basin_edge
+
+tags:
+  - outdoor

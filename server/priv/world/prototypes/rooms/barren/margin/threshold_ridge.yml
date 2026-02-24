@@ -1,0 +1,12 @@
+key: threshold_ridge
+type: room
+short_desc: "The Threshold Ridge"
+extra_desc: |
+  A small rise, perhaps a meter above the flat ground. The grove is behind you and below you and south. The planet is ahead. For the first time, the grove does not fill your entire forward view — it is a green mass at your back and the rest of the world is grey and enormous in front of you. The wind is stronger here, coming from the north. You stand in it and it does not know what you are.
+
+exits:
+  south: threshold_path
+  north: threshold_summit
+
+tags:
+  - outdoor

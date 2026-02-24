@@ -1,0 +1,14 @@
+key: salt_north_mid
+type: room
+short_desc: "The Northern Mid-Flats"
+extra_desc: |
+  Moving north, the terrain begins to have slight relief — old seafloor ridges where different current patterns deposited differently over millions of years. The ground is no longer completely flat. Small variations appear: a handspan of elevation here, a meter long low ridge there, the ghost of an ocean current written in compressed sediment. The former shoreline cliffs are closer now, rising clearly at the northern edge of the white expanse. Behind you, the salt pan extends beyond clear sight. You have been walking across the bottom of something for a long time.
+
+exits:
+  south: salt_fossil_field
+  west: salt_crystal_north
+  east: salt_depth_marker
+  north: salt_flats_north
+
+tags:
+  - outdoor

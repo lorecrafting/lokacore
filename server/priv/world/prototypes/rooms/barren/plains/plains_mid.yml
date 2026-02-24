@@ -1,0 +1,12 @@
+key: plains_mid
+type: room
+short_desc: "The Mid-Plains"
+extra_desc: |
+  You are in the center of something too large to see the edges of. The grey extends in every direction without variation — no rise, no rock, no tree, nothing to fix your eye on. The wind comes from the north. It always comes from the north here, a low constant pressure against your face that has been blowing for longer than anyone who might have noticed. Your shadow stretches very long across the dust. Standing still, you feel the size of the place as a physical weight, a stillness that is not peaceful so much as simply enormous.
+
+exits:
+  south: ashen_crossroads
+  north: ashen_monument
+
+tags:
+  - outdoor

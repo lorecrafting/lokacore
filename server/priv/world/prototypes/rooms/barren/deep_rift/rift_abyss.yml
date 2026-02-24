@@ -1,0 +1,13 @@
+key: rift_abyss
+type: room
+short_desc: "The Abyss"
+extra_desc: |
+  The rift continues down. Far down — too far to see the bottom even with light, too far
+  to hear anything from below. Air moves upward from the darkness, cooler than the chamber
+  above, carrying the smell of deep mineral and something else, faint and mineral and
+  indistinct. The Zone 3 Deep Canyons begin somewhere below you. The geological scales shift
+  here. What you can see is a fraction of what exists. The planet is very large and most
+  of it is below you.
+
+exits:
+  south: rift_heart

@@ -1,0 +1,13 @@
+key: bone_forest_path
+type: room
+short_desc: "The Forest Path"
+extra_desc: |
+  You pick your way through the trunks. The sound in here is different from the plains — muffled, absorbed, as though the dead wood is still doing something with what reaches it. Your footsteps are quieter even on the drier ground. The trees are close enough to feel enclosed, far enough apart to move through without contact. Above you, the branches interlock at a height just above reach, forming a lattice of negative space that has held this shape for a hundred years.
+
+exits:
+  south: bone_forest_edge
+  north: bone_forest_mid
+  west: bone_forest_west_track
+
+tags:
+  - outdoor

@@ -1,0 +1,12 @@
+key: bone_forest_edge
+type: room
+short_desc: "The Forest Edge"
+extra_desc: |
+  The first dead trees stand here, still upright. Their branches are intact — stripped of leaves by a century of wind, but the structure remains: limbs, forks, the exact shape a living tree made while it was still alive. The transition from the ashen plains is immediate. One step on grey dust, the next on ground that is darker, more complex, a century of bark and debris composted into something neither soil nor stone. These trees did not die in a storm. They died standing up, the way things die when the water simply runs out.
+
+exits:
+  north: bone_forest_path
+  east: ashen_ridge_approach
+
+tags:
+  - outdoor

@@ -1,0 +1,12 @@
+key: bone_west_ridge
+type: room
+short_desc: "The West Ridge"
+extra_desc: |
+  The ground rises here to a low ridge, and through the thinning trees to the west, the salt flats are visible — white, enormous, level as a floor. The distance is hard to judge. The former ocean floor extends further than seems possible from this elevation, the horizon no different at the far edge than at the near one. The dead forest behind you, the dead sea ahead. Both stopped at different times and for different reasons, and both are equally stopped now.
+
+exits:
+  west: bone_forest_clearing
+  north: bone_ridge_top
+
+tags:
+  - outdoor

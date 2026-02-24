@@ -1,0 +1,12 @@
+key: bone_lichen_field
+type: room
+short_desc: "The Lichen Field"
+extra_desc: |
+  The grey green lichen grows so thickly on the north facing bark here that the trees look painted. It covers rocks as well, spreading across anything that holds moisture long enough to matter. In daylight it is unremarkable — grey green, flat, a texture. But you can tell from the density that in darkness this would be different: lichen like this glows faintly, cold blue white, beautiful in the specific way things are beautiful when no one is watching them. It is the only biological life in the forest. It is doing exactly what it needs to do.
+
+exits:
+  west: bone_forest_mid
+  north: bone_forest_deep
+
+tags:
+  - outdoor

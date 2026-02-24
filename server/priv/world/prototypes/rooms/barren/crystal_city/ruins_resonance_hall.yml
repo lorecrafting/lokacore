@@ -1,0 +1,10 @@
+key: ruins_resonance_hall
+type: room
+short_desc: "The Resonance Hall"
+extra_desc: |
+  The civic hall is large and high-ceilinged, the walls inlaid floor to ceiling with crystal in a dense overlapping lattice. You walk to the center of the room and exhale. You feel the breath leave your body more than you should — not just the pressure of it, but the shape, the edges of it, as if the room is returning something to you. The seats face a raised platform and at the platform's center, a single large uncut crystal on a plinth. For gathering. For speaking. Something about standing here with your voice makes you want to use it carefully.
+
+exits:
+  west: ruins_square
+  east: ruins_inner_plaza
+  south: ruins_convergence

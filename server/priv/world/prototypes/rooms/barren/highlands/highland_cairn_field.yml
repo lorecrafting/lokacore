@@ -1,0 +1,17 @@
+key: highland_cairn_field
+type: room
+short_desc: "The Cairn Field"
+extra_desc: |
+  Dozens of cairns cover the upper approach, varying in age by centuries. The oldest are
+  visibly weathered, their stones incorporated into the mountain's surface as if the mountain
+  is slowly accepting them. The newest are deliberate piles — people who came all the way up
+  and left something. The practice of marking this summit predates the civilization that
+  built the city visible to the east. Whatever impulse it serves, it is older than any
+  particular intention.
+
+exits:
+  west: highland_summit
+  east: highland_spring
+
+tags:
+  - outdoor

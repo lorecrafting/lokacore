@@ -1,0 +1,9 @@
+key: ruins_market
+type: room
+short_desc: "The Market"
+extra_desc: |
+  The covered hall runs long and wide, its roof partially translucent — crystal panels set into the overhead framework that filter the light to an even, directionless quality inside. There are no shadows where there should be shadows. The stalls line both sides, sealed stone containers stacked on the surfaces, some goods still inside. They left food. The light quality in here keeps things from degrading — temperature, humidity, something about the consistency of the air. Whatever the panels do with sunlight, they also do with everything passing through them. The food is old. It is not spoiled.
+
+exits:
+  west: ruins_residential_north
+  north: ruins_market_north

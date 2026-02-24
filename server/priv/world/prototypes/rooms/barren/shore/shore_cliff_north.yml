@@ -1,0 +1,12 @@
+key: shore_cliff_north
+type: room
+short_desc: "The Cliff North"
+extra_desc: |
+  The former sea cliff face, now fully exposed. The layers of sediment are visible in cross section — each stratum a period of ocean history compressed into stone: dark rich bands where life was abundant, pale barren layers where it was not, thin lines of different chemistry marking events that happened in the water column above and settled slowly down. The history of the ocean's changing health is written in the wall beside you. Someone who knew what the colors meant could read it. You can see that it is a record. You can see that it goes back a very long way.
+
+exits:
+  west: shore_ridge
+  south: shore_cliff_mid
+
+tags:
+  - outdoor

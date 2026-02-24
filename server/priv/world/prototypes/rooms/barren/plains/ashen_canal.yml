@@ -1,0 +1,12 @@
+key: ashen_canal
+type: room
+short_desc: "The Dry Canal"
+extra_desc: |
+  Standing at the edge, you can step down into it — the walls rise above your head, worked stone, smooth finished on the interior face. The canal runs arrow straight east toward the city, no meander, no accommodation to the landscape, just the most direct path for water to travel. The bottom still has its slight concave shaping, a gentle curve designed to center flow and minimize loss. Fine grey dust has settled there now, undisturbed. The canal carried water for a long time. You can tell by the smoothness of the stone where the current ran.
+
+exits:
+  west: ashen_old_farm
+  east: ruins_approach
+
+tags:
+  - outdoor

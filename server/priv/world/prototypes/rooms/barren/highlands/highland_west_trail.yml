@@ -1,0 +1,16 @@
+key: highland_west_trail
+type: room
+short_desc: "The West Trail"
+extra_desc: |
+  A trail runs west along the upper highlands, less traveled than the summit approach. It is
+  quieter here, the wind at a different angle, the views to the west uncomplicated. You can
+  see the bone forest as a dark mass at the western edge of the zone, the white expanse of
+  the salt flats beyond it, and the former coastline as a cliff line in the far distance.
+  From this angle, everything looks like a geological map of itself.
+
+exits:
+  south: highland_mid_path
+  north: highland_upper_path
+
+tags:
+  - outdoor

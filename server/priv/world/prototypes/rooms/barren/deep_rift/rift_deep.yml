@@ -1,0 +1,17 @@
+key: rift_deep
+type: room
+short_desc: "The Deep Rift"
+extra_desc: |
+  The fissure opens into the first substantial underground space — larger than the passage
+  above suggested, the ceiling high enough to stand fully upright with room above. Geological
+  formations cover the walls: crystals, banded layers, the visual record of what this place
+  has been across time. Something moves in the soles of your feet. Not vibration exactly —
+  a frequency in the stone, slow and old, deeper in the rock than you are. It does not feel
+  like the grove. It feels like what was here before the grove.
+
+exits:
+  south: rift_narrowing
+  north: rift_chamber
+  east: rift_biolume
+  west: rift_side_chamber
+  up: rift_exit

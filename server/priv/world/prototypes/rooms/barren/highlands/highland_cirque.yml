@@ -1,0 +1,16 @@
+key: highland_cirque
+type: room
+short_desc: "The Frozen Cirque"
+extra_desc: |
+  A sheltered depression sits between two ridge shoulders in permanent shadow. The sun never
+  quite reaches this angle — and because of that, old ice survives here: a compressed
+  snowpack, centuries deep, grey-white and dense. This is water. The only exposed surface
+  water in Zone 1 that is not the grove. Not a trickle, not a stream — a solid mass of
+  ancient compressed snow, waiting. It will melt if the planet warms. That is the plan.
+
+exits:
+  south: highland_east_slopes
+  north: highland_ridge
+
+tags:
+  - outdoor

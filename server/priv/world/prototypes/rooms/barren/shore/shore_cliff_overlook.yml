@@ -1,0 +1,12 @@
+key: shore_cliff_overlook
+type: room
+short_desc: "The Cliff Overlook"
+extra_desc: |
+  The best view of the coastal basin from anywhere in this zone. The former ocean floor extends west for many kilometers — visible as a vast depression, the lowest ground you can see from any surface point here, the basin's depth comprehensible for the first time. The ocean was very deep. Everything in that basin was under an enormous weight of water for a very long time, pressed down, preserved, held. From up here the scale of the absence is finally legible: not a lake, not a sea, but something that filled an entire geography and then left it intact and empty.
+
+exits:
+  east: shore_ridge
+  south: shore_cliff_mid
+
+tags:
+  - outdoor

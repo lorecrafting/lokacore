@@ -1,0 +1,14 @@
+key: salt_flats_mid
+type: room
+short_desc: "The Mid-Flats"
+extra_desc: |
+  The center of nowhere. The horizon is the same in all directions — white ground meeting grey sky at an identical elevation all the way around. There is no reference point for direction except the sun, which the overcast sometimes obscures entirely. The ground underfoot is faintly crystalline, consistent, not soft, not giving. It does not feel like walking across land. It feels like standing at the bottom of something that used to be full, something whose walls have receded so far they are no longer visible, and you are what is left at the center of its absence.
+
+exits:
+  east: salt_flats_entry
+  west: salt_flats_northwest
+  north: salt_fossil_field
+  south: salt_depth_marker
+
+tags:
+  - outdoor

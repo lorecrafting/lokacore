@@ -1,0 +1,11 @@
+key: ruins_east_road
+type: room
+short_desc: "The East Road"
+extra_desc: |
+  The road heading east is older than the city's eastern quarter — the crystal aggregate worn down to flush with the surface of the stone over centuries of use before the district behind you was built. Where the newer aggregate catches and throws light, this surface refracts it: a softer, more diffuse quality, the light scattered rather than held. The road was long used. It is still legible underfoot, still level, still functional. The eastern reaches open ahead, the terrain flattening further as the city's geometry gives way to open land.
+
+exits:
+  west: ruins_north_district
+
+tags:
+  - outdoor

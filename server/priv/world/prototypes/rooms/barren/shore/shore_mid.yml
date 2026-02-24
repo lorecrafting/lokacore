@@ -1,0 +1,14 @@
+key: shore_mid
+type: room
+short_desc: "The Former Shore"
+extra_desc: |
+  The old beach. Pebbles, sand, tide pools that are dry and have been dry for decades. The smell is old salt and old sun and old mineral — not quite like anything you have smelled before, the olfactory record of a specific chemistry that only exists where ocean met land for a thousand years and then the meeting stopped. The pebbles are still water smooth though there has been no water here to smooth them. Small shells lie in the curve of the last wave's deposition, exactly where the tide left them. The evidence of the sea is everywhere. The sea is not here. Both facts are equally present.
+
+exits:
+  north: shore_descent
+  south: salt_flats_north
+  east: shore_dock
+  west: shore_basin_edge
+
+tags:
+  - outdoor

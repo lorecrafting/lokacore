@@ -1,0 +1,12 @@
+key: highland_foothills_south
+type: room
+short_desc: "The Southern Foothills"
+extra_desc: |
+  You feel the incline in your legs before you register it in your eyes — the first actual rise since the margin. The stone underfoot is darker here, harder, older than the dust plains it borders, a different geology entirely. Behind you, the full expanse of the Ashen Plains is visible as a single view: grey and enormous and flat, stretching south until it blurs at the edges of the world. The highlands ahead begin quietly — no cliff face, no dramatic threshold, just a steady increase in elevation and a change in the quality of the stone beneath your feet.
+
+exits:
+  south: plains_north
+  north: highland_lower_path
+
+tags:
+  - outdoor

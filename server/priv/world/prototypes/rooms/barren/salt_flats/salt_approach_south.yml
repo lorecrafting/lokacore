@@ -1,0 +1,12 @@
+key: salt_approach_south
+type: room
+short_desc: "The Southern Approach"
+extra_desc: |
+  The southern margin of the flats, before the crystal formations begin. The surface here is smoother than the center of the salt pan — sheltered by the ridge to the east, fewer wind patterns crossing it. Fossils are beginning to appear: small shells just visible in the salt crust, pressed nearly flat by the weight of whatever sediment compressed them over millennia. You can make out the spiral of a shell, the articulated sections of a carapace, a small fan shape that was once a filter feeder. The ocean was here. These are the things it left in the ground when it went.
+
+exits:
+  north: salt_flats_entry
+  west: salt_crystal_south
+
+tags:
+  - outdoor

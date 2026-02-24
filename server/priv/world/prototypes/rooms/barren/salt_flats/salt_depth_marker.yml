@@ -1,0 +1,13 @@
+key: salt_depth_marker
+type: room
+short_desc: "The Depth Marker"
+extra_desc: |
+  A carved stone pillar rises from the salt crust, marked with notched lines and script: an old ocean depth survey marker. This exact spot was underwater at a specific and recorded depth. The civilization measured where they were standing in the ocean and set this stone to say so. The marker is still here, still pointing upward toward a surface that no longer exists above it, still accurate in every particular except the one that matters. The salt crust has grown around its base. The ocean floor sediment holds it perfectly vertical. It is the most precise object in this zone.
+
+exits:
+  north: salt_flats_mid
+  south: salt_brine_pool
+  west: salt_north_mid
+
+tags:
+  - outdoor

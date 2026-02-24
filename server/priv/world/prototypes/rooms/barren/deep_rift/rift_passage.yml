@@ -1,0 +1,12 @@
+key: rift_passage
+type: room
+short_desc: "The Rift Passage"
+extra_desc: |
+  The crack widens into a navigable fissure. The geological layers are visible in the walls —
+  lighter bands, darker bands, the compressed record of what was being deposited when each
+  layer formed. You are moving through the planet's history literally: each meter of descent
+  is a span of time. The temperature drops steadily. The air carries the smell of deep mineral,
+  cold and specific, nothing living in it.
+exits:
+  south: rift_entrance
+  north: rift_descent

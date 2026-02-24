@@ -1,0 +1,12 @@
+key: margin_overlook
+type: room
+short_desc: "The Overlook"
+extra_desc: |
+  Slight elevation west of the main path. From here you can see both — the grove canopy south and east, green and enormous, and the white plains opening to the north. It is a good place to understand where you are. The grove is your home and it is behind you and it is smaller than it felt from inside. The world ahead is not hostile. It is simply very old and very quiet and you have not been in it before.
+
+exits:
+  east: threshold_summit
+  south: western_threshold
+
+tags:
+  - outdoor

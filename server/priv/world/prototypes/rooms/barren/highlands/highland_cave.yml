@@ -1,0 +1,16 @@
+key: highland_cave
+type: room
+short_desc: "The Highland Cave"
+extra_desc: |
+  Natural shelter in the rock, low ceilinged and dry. The oldest markings on the cave wall
+  are pre civilization — geometric patterns, handprints, shapes whose purpose is not legible
+  from this distance in time. Something or someone took shelter here before the city was
+  built, before anyone thought to name the summit. The cave is habitable. Tenders who stay
+  in the highlands overnight shelter here. The stone holds warmth that the open ridge does not.
+
+exits:
+  south: highland_summit
+  east: highland_plateau
+
+tags:
+  - outdoor

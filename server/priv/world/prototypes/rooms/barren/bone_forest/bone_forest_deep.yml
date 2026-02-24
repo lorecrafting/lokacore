@@ -1,0 +1,14 @@
+key: bone_forest_deep
+type: room
+short_desc: "The Deep Forest"
+extra_desc: |
+  The older growth. Trunks two meters across at the base, widely spaced, their lower sections as pale and bare as bone. The ground is soft with a century of bark debris — composting in its own slow time, a silence made physical. At the base of each tree the roots are exposed and large, spreading two and three meters across the forest floor, grasping the ground the way the tree once grasped the water table. They are still connected to each other underground. The network exists. Whatever it once carried is gone. The structure remains.
+
+exits:
+  south: bone_forest_mid
+  west: bone_lichen_field
+  east: bone_stone_circle
+  north: bone_forest_clearing
+
+tags:
+  - outdoor

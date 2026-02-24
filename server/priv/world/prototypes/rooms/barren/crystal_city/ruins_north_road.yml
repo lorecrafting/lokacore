@@ -1,0 +1,11 @@
+key: ruins_north_road
+type: room
+short_desc: "The North Road"
+extra_desc: |
+  The road exits the city heading north, and the crystal aggregate in the paving runs all the way to the city's edge and beyond for some distance — the construction crew did not stop at the wall. In low light, the aggregate catches and holds enough to make the road faintly legible in the dark. The terrain ahead becomes more textured as it rises toward the steppe: scattered stones, dried brush, the first suggestions of contour in a landscape that has been flat for a long time. The city at your back is still visible as a pale shape for a considerable distance.
+
+exits:
+  south: ruins_north_district
+
+tags:
+  - outdoor

@@ -1,0 +1,12 @@
+key: shore_ridge_east
+type: room
+short_desc: "Shore Ridge East"
+extra_desc: |
+  The bone forest ridge joins the cliff line here, and the character of the terrain changes. Behind you: dead trees, the forest's grey interior, the network of still standing trunks. Ahead and below: the dry harbor, the beached ships visible as dark shapes against the white salt ground, the dock pilings standing in open air. The air is different here — drier, if that is possible, and carrying a deep mineral smell, the smell of ancient ocean sediment exposed to a sky it has not seen in a very long time.
+
+exits:
+  south: bone_ridge_north
+  north: shore_ridge
+
+tags:
+  - outdoor

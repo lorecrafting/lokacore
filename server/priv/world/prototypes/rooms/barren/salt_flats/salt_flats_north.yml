@@ -1,0 +1,12 @@
+key: salt_flats_north
+type: room
+short_desc: "The Northern Flats"
+extra_desc: |
+  The approach to the former shoreline cliffs. The flats end ahead — the ground rises to the old cliff line, the stone face of what was once a coast visible as a wall of layered sediment and exposed rock. Looking back south, the salt flats extend beyond clear sight, white and level and enormous. Looking north, the cliff base is close. The old beach is somewhere between here and the stone: a narrow band, neither flat nor cliff, where the sea met land for the last time and then stopped meeting it. Whatever is preserved in that band has been preserved in still, dry air ever since.
+
+exits:
+  south: salt_north_mid
+  north: shore_mid
+
+tags:
+  - outdoor
