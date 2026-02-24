@@ -54,6 +54,7 @@ defmodule Loka.Framework.Dialogue do
     start_combat
     open_shop
     trigger_event
+    play_cutscene
   )a
 
   @doc """
