@@ -28,6 +28,7 @@ class PageContent extends RefCounted:
 	var bg_container: Control          # Parchment background
 	var text_container: Control        # Text content area
 	var label: RichTextLabel           # BBCode text
+	var bar: BottomBar                 # Navigation bar (compass + buttons)
 	var meta_callback: Callable        # Link click handler
 
 
@@ -99,6 +100,11 @@ void fragment() {
 	# Hide scrollbar but keep scroll functionality
 	var scrollbar := page.label.get_v_scroll_bar()
 	scrollbar.modulate = Color(1, 1, 1, 0)
+
+	# Bottom bar (compass + menu/say buttons)
+	if include_bottom_space:
+		page.bar = BottomBar.new()
+		page.viewport.add_child(page.bar)
 
 	return page
 

@@ -216,6 +216,7 @@ var is_animating: bool = false
 var going_forward: bool = true
 var page_width: float
 var is_book_open: bool = false
+var disable_click_navigation: bool = false
 
 var _runtime_pages: Array[String] = []
 var _spine_poly: Polygon2D
@@ -778,6 +779,7 @@ func _input(event):
 func _unhandled_input(event):
 	if Engine.is_editor_hint(): return
 	if not visible or is_animating: return
+	if disable_click_navigation: return
 	
 	if event.is_action_pressed("ui_cancel") and close_condition == CloseCondition.ON_CANCEL_INPUT:
 		_perform_close_action()
