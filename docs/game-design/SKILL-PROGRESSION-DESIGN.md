@@ -1,6 +1,6 @@
 # Skill & Progression System Design
 
-> Status: Draft — active design discussion (Feb 23 2026)
+> Status: Draft — pre-implementation review complete (Mar 3 2026)
 > Philosophy: "SWG flexibility, LegendMUD discovery, UO feel — levelless, cooperation-first"
 
 ---
@@ -97,11 +97,32 @@ Each activity earns its own XP type. You progress in what you DO:
 | XP Type | Earned By | Unlocks |
 |---------|-----------|---------|
 | **Combat XP** | Defeating hostile creatures/NPCs | Combat skill training |
-| **Crafting XP** | Creating items, combining materials | Crafting skill training |
+| **Crafting XP** | Creating items, combining materials, gathering resources | Crafting skill training |
 | **Pulse XP** | Using Pulse words, tending, sensing | Pulse skill training |
 | **Exploration XP** | Entering new rooms, discovering landmarks | Movement/survival training |
 | **Social XP** | Teaching others, group activities, governance | Social skill training |
 | **Building XP** | Constructing structures, surveying | Building skill training |
+
+### XP Rates (Concrete Values)
+
+All three rates below must be set before the progression loop can be balanced:
+
+| Event | XP Amount | Notes |
+|-------|-----------|-------|
+| Defeat creature | Creature-specific (e.g., thorn_beetle: 25, blight_hound: 50, blight_walker: 100) | Combat XP |
+| Successful Pulse weave | **50 XP** | Pulse XP; applies on any functional combo; fizzled combos grant nothing |
+| Successful gathering event | **25 XP** | Crafting XP |
+| First-entry into a new room | **5 XP** | Exploration XP; only on first visit, never repeats |
+| Quest completion | 3-5 skill points (major quests) | Bonus skill points directly, no XP type |
+| Story milestone (Grove completion) | 5-10 skill points | Bonus skill points directly |
+
+**Expected at Grove completion:**
+- 15 combat encounters → ~725 combat XP → 1 milestone (2 pts, 225 banked)
+- 10 Pulse weaves → 500 Pulse XP → 1 milestone (2 pts)
+- 20 gathering sessions → 500 crafting XP → 1 milestone (2 pts)
+- 108 new rooms → 540 exploration XP → 1 milestone (2 pts)
+- 9 quests → ~36 pts | Grove completion → ~7 pts
+- **Total: ~51 skill points earned** (Wanderer title range: 26-75 ✓)
 
 ### Skill Point Milestones (Replaces Leveling)
 
@@ -1677,7 +1698,7 @@ This staged approach lets us validate the progression feel before building the s
 | Callings (multiple loadouts) | Solo experience, one skill set is enough | Alpha 2 (multiplayer identity) |
 | Skill surrender | No respec pressure in narrative game | Alpha 2 (with callings) |
 | Anti-macro (daily caps, diminishing returns) | Solo, no abuse vector | Alpha 2 (multiplayer) |
-| Mutual exclusion enforcement | Present choice in story, enforce lock later | Alpha 2 (when other players exist) |
+| Mutual exclusion enforcement | Present choice in story, enforce lock later | Alpha 2 (when other players exist) — but see note below |
 | Derived stats (top-3 formula) | Current flat stats work for combat | Alpha 2 (with callings) |
 | Experimentation (crafting focus choice) | Basic craft-from-recipe is enough | Alpha 2 (crafter economy) |
 | Resource quality variation | Flat quality for solo | Alpha 2 (crafter differentiation) |
@@ -1686,6 +1707,8 @@ This staged approach lets us validate the progression feel before building the s
 | Day/night gameplay effects | Visual atmosphere exists, gameplay effects can wait | Alpha 2 |
 | Death redesign (corpse, condition penalty) | Existing ghost/resurrect works for Grove | Alpha 2 (risk/reward in Barren) |
 | `tell` (cross-room messaging) | Solo experience | Alpha 2 |
+
+> **Mutual exclusion — lightweight Alpha 1 enforcement:** The grow/break choice is the central moral beat of the Grove story. Deferring ALL enforcement means the player chooses grow, but nothing prevents granting them the break word later. The choice feels hollow. The fix requires 5 lines of code: when granting a Pulse word, check if it's in the excluded pair for the player's choice and simply skip the grant. No full exclusion system needed. The player just never receives the word they didn't choose. They won't notice the absence — they'll only see what they have.
 
 #### What to Build — Work Breakdown
 
@@ -1742,10 +1765,12 @@ Existing `SkillManager` has `train/2` and `practice/3` — fully implemented but
 - `bash` → new. Chance to STAGGER enemy (miss next turn). Chance = proficiency / 3, cap 33%.
 - `parry` → replaces generic "defend" action. Damage reduction = proficiency / 2 (% of incoming).
 - `sprint` → flee success chance bonus. Base 40% + proficiency / 2.
-- `sneak` → new passive. If sneak > enemy perception: guaranteed first strike.
+- `sneak` → new passive. If sneak > 50: +1 free action at start of combat before enemy responds (not guaranteed first strike — avoids turn-ordering complexity).
 - `dodge` → replaces `agility`. Passive dodge = proficiency * 0.3%, cap 30%.
 - `first_aid` → new combat action. Heal self for 10 + proficiency / 2 HP. Costs your attack turn.
 - Files: `lib/loka/framework/combat/combat.ex` (extend `execute_combat_tick`, `player_action`)
+
+> **Status Effects Sub-System (hidden dependency):** STAGGER (bash) and WEAKEN (break+life Pulse combo) both require a status effect system: apply a named status to a combatant entity, decrement/expire it each combat turn, display active statuses in combat output ("Blight hound [STAGGERED]"). This does not exist in the codebase. It is ~100-150 LOC of new combat state management. Build it as part of Item 7 since bash is the first consumer. The Pulse system (Item 12) then uses the same infrastructure for WEAKEN at no additional cost. Do not underestimate this as a minor extension of combat.ex.
 
 **8. Combat skill practice**
 - After each combat action, roll proficiency gain for the skill used
@@ -1785,22 +1810,24 @@ No Pulse code exists. This is the one genuinely new system.
 | `light` | Target | Discovered in seed_archive (exploration reward) |
 | `deep` | Target | Discovered in heartroot_chamber (story moment) |
 
-**12. ~10-15 combinations with effects**
+**12. Ten combinations with effects (full spec)**
 
-| Combo | Effect | Gameplay Impact |
-|-------|--------|-----------------|
-| `grow + root` | Accelerate plant growth, heal damaged land | Heals blight patches in Thinning rooms |
-| `grow + life` | Nurture living things | Area heal: restores HP to self + allies in room |
-| `grow + form` | Shape living wood | Creates a temporary shelter object (lean-to) |
-| `grow + light` | Coax bioluminescence | Illuminates dark rooms, reveals hidden details |
-| `grow + deep` | Strengthen root networks | Sense all NPCs/creatures within 3 rooms |
-| `break + root` | Uproot corruption | Removes blight from a room (stronger than grow+root) |
-| `break + life` | Disrupt living energy | Damage + WEAKEN effect on target creature |
-| `break + form` | Shatter objects | Demolish weak barriers, open blocked paths |
-| `break + light` | Extinguish | Create darkness (sneak bonus in room for 5 minutes) |
-| `break + deep` | Fracture foundations | Reveal hidden exits, structural weaknesses |
+> **Content prerequisite:** Thinning/Edge rooms need `blight_patch: true` added to their components YAML before blight-affecting combos work. Also add `extra_desc` language noting "the darkened, wrong-smelling earth" when blight_patch is present. Room illumination state (`illuminated`/`darkened`) is a simple boolean component, same pattern as blight_patch.
 
-Unrecognized combinations produce flavor text: sparks, hums, brief sensations. Not errors.
+| Combo | Player sees | Mechanical change | Grove integration | Alpha 1 |
+|-------|-------------|------------------|-------------------|---------|
+| `grow + root` | "The Pulse flows through your hands into the soil. The roots breathe again." | Removes `blight_patch: true` from room. Blight creatures lose +3 ATK from corrupted ground. | **Core** — required for `grove_sacrifice` blight-cleansing objectives | KEEP |
+| `grow + life` | "Warmth radiates outward. [Names in room] breathe easier." | Restores 15 HP to all non-hostile entities in room. Costs player's next action (like first_aid). | Survival in `heartroot_chamber` — primary group-heal tool, no dedicated healer | KEEP |
+| `grow + form` | "The sapling bends to your intent, forming a rough shelter." | Applies `sheltered` status to all in room for 30 minutes: +2 HP regen/turn while resting. No entity creation. | Environmental flavor, Barren building preview | KEEP (simplified — no temp entity spawn) |
+| `grow + light` | "The moss along the walls begins to glow, soft blue-green." | Room gains `illuminated: true` for 30 minutes. Dark rooms show hidden `lore_reveal` text in `look` output. | `seed_archive` has hidden lore text gated on illumination | KEEP |
+| `grow + deep` | "Your awareness spreads through the root network. You sense [N] presences [direction]." | Reports count and cardinal direction of NPCs/creatures in **adjacent rooms only** (1 hop). No names. | Tactical in Thinning/Edge zones — detect blight creatures before engaging | KEEP (simplified to 1-hop) |
+| `break + root` | "The corruption tears free from the earth." | Same as `grow + root` (removes blight_patch) PLUS deals 20 damage to all blight creatures in room. Faster, more aggressive. | Alternative blight-cleanse for break-path players | KEEP |
+| `break + life` | "Your intent cuts through the creature's vitality. It shudders." | Target takes 15 damage + WEAKEN status (2 turns: target's attacks deal 50% damage). Uses status effect system from Item 7. | Combat tool in Thinning/Edge. Synergizes with bash STAGGER combo chain | KEEP |
+| `break + form` | "The structure splinters. But this passage requires more than a single weave." | **Flavor text only.** No dynamic exit creation in Alpha 1. | None — sealed rooms open via story gates, not Pulse | CUT as functional. Flavor only. |
+| `break + light` | "The bioluminescence dims. The room falls into shadow." | Room gains `darkened: true` for 5 minutes. Sneak checks get +15 bonus while dark. | Tactical — rewards Pulse + sneak investment together | KEEP |
+| `break + deep` | "A fracture runs through the deep structure. Something hidden catches your attention." | Reveals exits flagged `hidden: true` for 10 minutes. Outputs room's `hidden_desc` field if present. | Exploration reward — specific rooms have hidden passages discoverable only this way | KEEP |
+
+Unrecognized combinations produce flavor text: sparks, hums, brief sensations. Not errors. This covers 9 functional combinations (break+form is flavor). All are satisfying for Alpha 1.
 
 **13. Wire to Grove story**
 - `sense_pulse` taught by Thera (existing training session quest objectives)
@@ -1879,7 +1906,7 @@ Recipe data: YAML files in `priv/world/prototypes/recipes/` (entity type `:recip
 
 | Skill | Story Moment | Effect |
 |-------|-------------|--------|
-| `sense_pulse` | `grove_belonging` — Thera teaches | Detect living things in adjacent rooms |
+| `sense_pulse` | `grove_belonging` — Thera teaches | Passive: appends "You sense N presences nearby" to room description when proficiency > 10 (active command version with 1-hop query deferred to Alpha 2) |
 | `tend` | `grove_belonging` — healing grove training | Heal blight on plants/land |
 | `shape` | `grove_revelation` — small grove moment | Influence plant growth, coax living wood |
 
@@ -1902,6 +1929,10 @@ Recipe data: YAML files in `priv/world/prototypes/recipes/` (entity type `:recip
 - Combat XP on victory: 50/100/25 respectively
 - Files: new NPC YAML in `priv/world/prototypes/npcs/grove/creatures/`, room YAML updates
 
+> **Territorial behavior (hidden complexity):** "Attacks if you linger" is NOT the same as existing patrol behavior (Brennan). It requires a linger-triggered script: after N turns in the same room as a hostile NPC without engaging, combat starts automatically. This needs a new script trait — likely using the `after.()` binding to schedule a check and `spawn_at.()` to initiate combat context. Budget 3-4 extra hours for this trait. The `blight_walker` patrol behavior reuses Brennan's existing pattern — that one is free.
+
+> **Item prototypes needed:** The drops (blight-resistant hide, corrupted bone, chitin shard, blight_patch room resources) plus all gathering resources (moonpetal, sunleaf, shaped_wood, binding_fiber, crystal, resin) need item prototype YAML files in `priv/world/prototypes/items/grove/resources/`. Count: ~8-10 new files. Low complexity each but unaccounted in the timeline estimate.
+
 **24. Character creation**
 - New flow: name → appearance descriptor (freeform short text) → "Choose your origin: The Grove" (only option for Alpha 1)
 - On creation: spawn at `awakening_clearing`, grant no skills (learned through story)
@@ -1919,7 +1950,7 @@ Recipe data: YAML files in `priv/world/prototypes/recipes/` (entity type `:recip
 | Pulse word UI | `pulse weave` command input, effect text rendering | Must-have |
 | Crafting UI | Recipe list, material check, craft button | Must-have |
 | Tier ceiling message | Distinct formatting for "you've hit a wall" | Nice-to-have |
-| Proficiency gain toast | Brief "+0.1 kick" notification on skill gain | Nice-to-have |
+| Proficiency gain toast | Brief "+0.1 kick" notification on skill gain | **Must-have** — primary feedback signal that UO-style gains are working. At ~1-3 proficiency by Grove end, players need to SEE the gains to believe the system is functioning. |
 
 #### Dependency Order & Timeline
 
@@ -2225,3 +2256,134 @@ All identified gaps now have sections in this doc:
 - Anti-abuse protections ✓
 
 **Deferred to post-alpha:** Seasons, mail system, party formation, map/cartography, pack animals/mounts.
+
+---
+
+## MASTER-GDD Reconciliation
+
+The MASTER-GDD (v1.0, Jan 2026) is partially superseded by this document. This table records every conflict and which version wins. The MASTER-GDD remains authoritative for monetization, lore/setting vision, and social primitives (Section 7) until those are explicitly superseded.
+
+| Topic | MASTER-GDD | This Document | Winner | Rationale |
+|-------|-----------|---------------|--------|-----------|
+| **Stats** | STR/DEX/**STA**/INT/**WIS**/**CHA** | STR/DEX/**CON**/INT/**SPI**/**PER** | **This doc** | CHA replaced by permission/social systems. SPI captures Pulse mechanics. PER needed for foraging/detection. STA→CON is a naming cleanup. |
+| **Skill pool size** | 500 points (per-level cost 1-4 pts) | 250 points per calling (12 pts per mastery) | **This doc** | 500-pt pool with per-level costs creates unmanageable veteran/newcomer gap. 12-pt mastery with ~20-skill ceiling forces meaningful tradeoffs. |
+| **Skill structure** | 5 pillars: Gathering/Crafting/Building/Social/Combat | 4 tiers: Universal/Elective/Origin-unique/Barren | **This doc for acquisition tier; GDD pillar categories remain valid as metadata** | The "what skills do" groupings (pillars) are still useful organizational tags within each tier. |
+| **Skill synergies** | Explicit coded bonus pairs (mining+smithing, etc.) | Not present | **Deferred to Phase 3** | Valid system, but adds balancing complexity before base system is proven. Not needed for Alpha 1 or 2. |
+| **Keystones** | PoE-inspired major trade-offs (master_craftsman, lone_wolf, etc.) | Not present | **Deferred to Phase 3+** | Good layer-2 differentiation for when players have mastered basics. Too early for alpha. |
+| **Stat growth model** | Base stats from creation (backgrounds) + Skyrim use-based growth | Fully derived from skill proficiencies — no allocation | **This doc** | Stat allocation at character creation is a confusing newbie tax. Derived-from-skills model is self-consistent. |
+| **Progression model** | Vertical levels 1-50 + horizontal post-50 mastery | Levelless typed XP + skill points | **This doc** | Explicitly replaced. The old model contradicts the core "levelless" design principle. |
+| **3 planets vs. origin worlds** | 3 planets (Celtic/Mediterranean/East Asian), FTL gates, sci-fi setting | 3 origin solo stories (Grove/Depths/Reach) + The Barren (shared world) | **Not a conflict — different time horizons** | The GDD's 3-planet vision describes Loka's eventual scope. The new doc's origin worlds are the Alpha implementation. The Barren is the first "planet." Origin worlds are the prologues. These compose, not contradict. |
+| **Familiar/Spark** | Full AI companion system designed | "Done" — exists in codebase | **Consistent** | No conflict. |
+| **Social primitives** | 30 primitives (say/whisper/tell/party/guild + emotes/relationships/witnessing/oaths) | Alpha-required subset (say/shout/emote/tell/notice boards) | **GDD Section 7 remains authoritative for Alpha 2+ social systems** | The new doc specifies what's needed for Alpha 1. GDD Section 7 is the full roadmap. Not superseded. |
+| **Monetization** | Calm tiered subs (Wanderer/Resident/Builder/Architect) | Not addressed | **GDD still owns this** | Intentionally out of scope for this design doc. |
+
+---
+
+## Grove Ending: The Transition to The Barren
+
+The transition from the Grove to The Barren is the last thing Alpha 1 players experience. It must be satisfying as an ending AND create genuine anticipation for Alpha 2 — not a cliffhanger that feels like a broken game.
+
+### The Narrative Logic
+
+The Grove's seedship arrived. The Barren is that arrival — the planet the ship was seeking for generations. The community that tended the ship-forest can't leave (the ship IS the living forest now; uprooting it would kill everything). But one person can go ahead. The player is that person — sent, not abandoned. This transforms the ending from "you're leaving behind everyone you met" to "you're completing the mission they couldn't."
+
+### Transition Sequence
+
+**Act A: The Discovery** (end of `grove_epilogue`)
+
+When the final quest resolves, Elder Maren leads the player to the roots — specifically `roots_observation` (or a new terminal room `roots_transit`). The ship's ancient navigation systems activate for the first time in living memory. A sealed door opens. Not by Pulse, not by force — the ship *chooses* to open it.
+
+**Act B: The Sending-Off** (farewell scene at `awakening_clearing`)
+
+The community gathers. Each NPC present delivers one line — personal, reflecting their quest arc:
+
+| NPC | Line | Shows if |
+|-----|------|---------|
+| **Thera** | "You feel the Pulse even when it's quiet. That'll matter out there." | grove_belonging completed |
+| **Brennan** | "I trained you enough to get into trouble. Try not to." | side_brennan completed |
+| **Tomas** | "Every place you plant something, that's a home." | side_tomas completed |
+| **Kira** | "Report back what you find about the source. I'm not done with this." | grove_revelation completed |
+| **Elder Maren** | "We've been preparing something to leave for centuries. We didn't know it was a *you*." | always |
+
+NPCs whose quests were skipped aren't present — they're elsewhere in the grove. Players who did all side quests see a fuller farewell. Not punishing, but rewarding.
+
+**Act C: The Threshold** (new terminal room in roots zone)
+
+A single room: `the_threshold`. Where forest becomes mineral, where ship becomes planet. The `look` description shows both worlds at once. Then the readout:
+
+```
+You carry the Grove with you:
+
+  Origin: Grove
+    Pulse Sensitivity  — your Pulse words carry 10% further
+    Root Memory        — sense_pulse works in any terrain
+    Blight Resistance  — corrupted zones deal 20% less damage
+
+  Words of Power:
+    [grow] root, life, form, light, deep
+
+  Skills earned:
+    first_aid (2.1), meditate (1.8), sense_pulse (3.4), tend (2.2),
+    shape (0.9), forage (4.1), kick (1.3), parry (0.8), ...
+
+  Skill points: [N] unspent / [total] earned
+  Title: Wanderer
+
+These are yours. The Grove holds everything else.
+
+  > cross
+```
+
+On `cross`:
+
+```
+The dry air hits you first.
+
+The sky is enormous. No canopy. No root-smell.
+Just wind and distance and a pale sun overhead.
+
+Someone planted a cairn at the tree line.
+Scratched into the top stone, still readable:
+
+  "You are not the first.
+   Look for smoke to the north."
+
+The Grove hums faintly at your back.
+The Barren stretches ahead.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Alpha 1 complete.
+  The Barren arrives in Alpha 2.
+
+  Your progress is saved. Your skills, words, and
+  origin travel with you.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+"Smoke to the north" is a promise without false content. When Alpha 2 ships, that cairn is still in the world, and players returning from Alpha 1 find it exactly where it was.
+
+### What Persists Through the Transition
+
+| Carries Through | Rationale |
+|-----------------|-----------|
+| All skills and proficiency | Your body remembers |
+| Pulse words + grow/break choice | This is who you are |
+| Origin traits (permanent) | Biological/psychological — can't be left behind |
+| Typed XP totals + skill points | Progress is real |
+| Character title | Social identity |
+
+### What Resets (with narrative cover)
+
+| Resets | Reason |
+|--------|--------|
+| Inventory | "The Grove holds everything else" — the forest keeps the moonpetals. You pass through with what's in your hands. |
+| Gold | Grove economy was barter; The Barren has different needs. (Or: you never had much.) |
+| Location | You arrive at Barren Arrival Zone when Alpha 2 opens. |
+
+### Implementation Notes
+
+- Add `the_threshold` room to roots zone YAML
+- Add `cross` as a special exit command (or a directional exit `east`) from that room
+- The "what you carry" display is a new screen/push event — server renders it, Godot shows it in a journal-style overlay
+- The farewell scene is a cutscene triggered by `grove_epilogue` completion — uses existing cutscene infrastructure
+- NPC presence at farewell is gated by `completed_quest` flags in the cutscene YAML

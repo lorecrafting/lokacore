@@ -19,33 +19,97 @@ import {
   useDerivedValue,
 } from 'react-native-reanimated';
 
+// ── Curl mode enum ──
+// 0 = STRAIGHT, 1 = TOP_CORNER_FIRST, 2 = BOTTOM_CORNER_FIRST
+type CurlMode = 0 | 1 | 2;
+
+export interface CurlPreset {
+  name: string;
+  stiffness: number;
+  liftBend: number;
+  landBend: number;
+  curlMode: CurlMode;
+  curlLag: number;
+  duration: number; // seconds
+  peakLift: number;
+  peakLand: number;
+}
+
+export const CURL_PRESETS: Record<string, CurlPreset> = {
+  DEFAULT: {
+    name: 'Default',
+    stiffness: 2.0, liftBend: -15.0, landBend: 5.0,
+    curlMode: 1, curlLag: 0.5, duration: 0.75,
+    peakLift: 0.15, peakLand: 0.85,
+  },
+  STANDARD_PAPER: {
+    name: 'Standard Paper',
+    stiffness: 2.5, liftBend: -12.0, landBend: 3.0,
+    curlMode: 1, curlLag: 0.4, duration: 0.65,
+    peakLift: 0.12, peakLand: 0.88,
+  },
+  HEAVY_GRIMOIRE: {
+    name: 'Heavy Grimoire',
+    stiffness: 4.0, liftBend: -3.0, landBend: 1.0,
+    curlMode: 0, curlLag: 0.1, duration: 1.1,
+    peakLift: 0.25, peakLand: 0.75,
+  },
+  LIGHT_MAGAZINE: {
+    name: 'Light Magazine',
+    stiffness: 0.8, liftBend: -16.0, landBend: 0.0,
+    curlMode: 2, curlLag: 0.6, duration: 0.8,
+    peakLift: 0.10, peakLand: 0.92,
+  },
+  OLD_SCROLL: {
+    name: 'Old Scroll',
+    stiffness: 1.8, liftBend: -20.0, landBend: 8.0,
+    curlMode: 1, curlLag: 0.9, duration: 0.9,
+    peakLift: 0.18, peakLand: 0.82,
+  },
+  RIGID_BOARD: {
+    name: 'Rigid Board',
+    stiffness: 5.0, liftBend: 0.0, landBend: 0.0,
+    curlMode: 0, curlLag: 0.0, duration: 0.8,
+    peakLift: 0.2, peakLand: 0.8,
+  },
+  WET_CLOTH: {
+    name: 'Wet Cloth',
+    stiffness: 0.3, liftBend: -28.0, landBend: 0.0,
+    curlMode: 2, curlLag: 0.6, duration: 1.3,
+    peakLift: 0.2, peakLand: 0.95,
+  },
+  PLASTIC_SHEET: {
+    name: 'Plastic Sheet',
+    stiffness: 3.5, liftBend: -12.0, landBend: 12.0,
+    curlMode: 1, curlLag: 0.2, duration: 0.5,
+    peakLift: 0.08, peakLand: 0.92,
+  },
+  METAL_PLATE: {
+    name: 'Metal Plate',
+    stiffness: 5.0, liftBend: 0.0, landBend: 0.0,
+    curlMode: 0, curlLag: 0.0, duration: 1.4,
+    peakLift: 0.15, peakLand: 0.98,
+  },
+};
+
+export const PRESET_KEYS = Object.keys(CURL_PRESETS);
+
 interface PageCurlAnimationProps {
   animating: boolean;
   departingImage: SkImage | null;
   onComplete: () => void;
-  direction?: 'forward' | 'back';
+  preset?: string;
   width?: number;
   height?: number;
 }
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-// ── Godot STANDARD_PAPER preset ──
 const SUBDIV_X = 8;
 const SUBDIV_Y = 5;
-const COLS = SUBDIV_X + 1; // 9
-const ROWS = SUBDIV_Y + 1; // 6
-const VERTEX_COUNT = COLS * ROWS; // 54
-const STIFFNESS = 2.5;
-const LIFT_BEND = -12.0;
-const LAND_BEND = 3.0;
-const CURL_LAG = 0.4;
-const DURATION = 0.65;
-const T_PEAK_LIFT = 0.12;
-const T_PEAK_LAND = 0.88;
+const COLS = SUBDIV_X + 1;
+const VERTEX_COUNT = COLS * (SUBDIV_Y + 1);
 const DEG2RAD = Math.PI / 180;
-
-// Parchment back-face color
 const PARCHMENT_HEX = '#D1C0A3';
 
 // ── Worklet math helpers ──
@@ -60,23 +124,15 @@ function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
 }
 
-/**
- * Root bone (spine hinge) rotation in degrees.
- * 0° = flat right (page at rest) → -90° = perpendicular → -180° = flat left (turned)
- */
 function computeRootAngle(
-  t: number,
-  tLift: number,
-  tMid: number,
-  tLand: number,
-  dur: number,
-  rowFactor: number,
+  t: number, tLift: number, tMid: number, tLand: number,
+  dur: number, rowFactor: number,
 ): number {
   'worklet';
   const tSettle = lerp(tLand, dur, 0.7);
   const liftAngle = -15.0 * rowFactor;
-  const landAngle = lerp(-90, -180, 0.88); // -169.2
-  const settleAngle = lerp(landAngle, -179.9, 0.85); // ~-178
+  const landAngle = lerp(-90, -180, 0.88);
+  const settleAngle = lerp(landAngle, -179.9, 0.85);
 
   if (t <= 0) return 0;
   if (t <= tLift) return lerp(0, liftAngle, t / tLift);
@@ -87,22 +143,15 @@ function computeRootAngle(
   return -179.9;
 }
 
-/**
- * Surface bone bend (relative to parent) in degrees.
- * Creates the paper stiffness curve — tip bends more than spine.
- */
 function computeSurfaceBend(
-  t: number,
-  tLift: number,
-  tLand: number,
-  dur: number,
-  rowFactor: number,
-  influence: number,
+  t: number, tLift: number, tLand: number, dur: number,
+  liftBend: number, landBend: number,
+  rowFactor: number, influence: number,
 ): number {
   'worklet';
   const tSettle = lerp(tLand, dur, 0.7);
-  const liftVal = LIFT_BEND * rowFactor * influence;
-  const landVal = LAND_BEND * rowFactor * influence;
+  const liftVal = liftBend * rowFactor * influence;
+  const landVal = landBend * rowFactor * influence;
   const settleVal = landVal * 0.15;
 
   if (t <= 0) return 0;
@@ -113,9 +162,6 @@ function computeSurfaceBend(
   return 0;
 }
 
-/**
- * Scale squash at midpoint — page goes edge-on, briefly compress x to 0.88.
- */
 function computeSquash(t: number, dur: number): number {
   'worklet';
   const tMid = dur * 0.5;
@@ -128,7 +174,6 @@ function computeSquash(t: number, dur: number): number {
   return 1.0;
 }
 
-/** Build triangle indices for the quad grid (static, computed once) */
 function buildQuadIndices(): number[] {
   const indices: number[] = [];
   for (let row = 0; row < SUBDIV_Y; row++) {
@@ -151,13 +196,39 @@ export function PageCurlAnimation({
   animating,
   departingImage,
   onComplete,
-  direction: _direction = 'forward',
+  preset: presetKey = 'STANDARD_PAPER',
   width = SCREEN_WIDTH,
   height = SCREEN_HEIGHT,
 }: PageCurlAnimationProps) {
+  const p = CURL_PRESETS[presetKey] ?? CURL_PRESETS.STANDARD_PAPER;
+
   const progress = useSharedValue(0);
   const onCompleteRef = useRef<(() => void) | null>(onComplete);
   onCompleteRef.current = onComplete;
+
+  // Pass preset values into shared values so worklets can read them
+  const sStiffness = useSharedValue(p.stiffness);
+  const sLiftBend = useSharedValue(p.liftBend);
+  const sLandBend = useSharedValue(p.landBend);
+  const sCurlMode = useSharedValue(p.curlMode);
+  const sCurlLag = useSharedValue(p.curlLag);
+  const sDuration = useSharedValue(p.duration);
+  const sPeakLift = useSharedValue(p.peakLift);
+  const sPeakLand = useSharedValue(p.peakLand);
+
+  // Sync shared values when preset changes
+  useEffect(() => {
+    sStiffness.value = p.stiffness;
+    sLiftBend.value = p.liftBend;
+    sLandBend.value = p.landBend;
+    sCurlMode.value = p.curlMode;
+    sCurlLag.value = p.curlLag;
+    sDuration.value = p.duration;
+    sPeakLift.value = p.peakLift;
+    sPeakLand.value = p.peakLand;
+  }, [p, sStiffness, sLiftBend, sLandBend, sCurlMode, sCurlLag, sDuration, sPeakLift, sPeakLand]);
+
+  const durationMs = Math.round(p.duration * 1000);
 
   useEffect(() => {
     if (!animating) {
@@ -166,19 +237,18 @@ export function PageCurlAnimation({
     }
     progress.value = withTiming(
       1,
-      { duration: 650, easing: Easing.inOut(Easing.cubic) },
+      { duration: durationMs, easing: Easing.inOut(Easing.cubic) },
       (finished) => {
         if (finished) {
           runOnJS(fireOnComplete)(onCompleteRef);
         }
       },
     );
-  }, [animating, progress]);
+  }, [animating, progress, durationMs]);
 
   const stepX = width / SUBDIV_X;
   const stepY = height / SUBDIV_Y;
 
-  // Static UVs for front face — maps 1:1 to the captured image
   const frontTextures = useMemo(() => {
     const uvs: SkPoint[] = [];
     for (let row = 0; row <= SUBDIV_Y; row++) {
@@ -189,64 +259,74 @@ export function PageCurlAnimation({
     return uvs;
   }, [stepX, stepY]);
 
-  // Parchment vertex colors for back face (one color per vertex)
   const parchmentColors = useMemo(
     () => Array(VERTEX_COUNT).fill(PARCHMENT_HEX),
     [],
   );
 
-  /**
-   * Vertex positions — recomputed every frame on UI thread.
-   *
-   * Spine is at x=0 (left edge). Bone chain extends rightward at rest (angle 0°).
-   * As root bone rotates 0° → -180°, the chain sweeps up and over to the left.
-   *
-   * Grid layout (row-major):
-   *   col 0 = spine (x=0), col 8 = tip (x=width at rest)
-   *   row 0 = top, row 5 = bottom
-   */
   const animatedVertices = useDerivedValue(() => {
-    const t = progress.value * DURATION;
-    const tMid = DURATION * 0.5;
-    const squash = computeSquash(t, DURATION);
+    const dur = sDuration.value;
+    const stiffness = sStiffness.value;
+    const liftBend = sLiftBend.value;
+    const landBend = sLandBend.value;
+    const curlMode = sCurlMode.value;
+    const curlLag = sCurlLag.value;
+    const peakLift = sPeakLift.value;
+    const peakLand = sPeakLand.value;
+
+    const t = progress.value * dur;
+    const tMid = dur * 0.5;
+    const squash = computeSquash(t, dur);
+    const sx = width / SUBDIV_X;
+    const sy = height / SUBDIV_Y;
 
     const verts: { x: number; y: number }[] = [];
 
     for (let row = 0; row <= SUBDIV_Y; row++) {
       const yRatio = row / SUBDIV_Y;
-      const rowFactor = lerp(1.0, 1.0 - CURL_LAG, yRatio);
-      const timeOffset = (1.0 - rowFactor) * DURATION * 0.1;
 
-      const tLift = clamp(DURATION * T_PEAK_LIFT + timeOffset, 0, tMid - 0.05);
-      const tLand = clamp(DURATION * T_PEAK_LAND - timeOffset, tMid + 0.05, DURATION);
+      // Curl mode determines which corner leads
+      let lagRatio: number;
+      if (curlMode === 0) {
+        // STRAIGHT — no lag, all rows turn together
+        lagRatio = 0;
+      } else if (curlMode === 2) {
+        // BOTTOM_CORNER_FIRST — invert: bottom leads, top lags
+        lagRatio = 1.0 - yRatio;
+      } else {
+        // TOP_CORNER_FIRST — top leads, bottom lags
+        lagRatio = yRatio;
+      }
 
-      const rootAngleDeg = computeRootAngle(t, tLift, tMid, tLand, DURATION, rowFactor);
-      const baseY = row * stepY;
+      const rowFactor = lerp(1.0, 1.0 - curlLag, lagRatio);
+      const timeOffset = (1.0 - rowFactor) * dur * 0.1;
 
-      // Chain starts at spine (x=0)
+      const tLift = clamp(dur * peakLift + timeOffset, 0, tMid - 0.05);
+      const tLand = clamp(dur * peakLand - timeOffset, tMid + 0.05, dur);
+
+      const rootAngleDeg = computeRootAngle(t, tLift, tMid, tLand, dur, rowFactor);
+      const baseY = row * sy;
+
       let chainX = 0;
       let chainY = baseY;
       let chainAngle = rootAngleDeg;
 
       for (let col = 0; col <= SUBDIV_X; col++) {
         if (col === 0) {
-          // Root bone — pinned at the spine
           verts.push({ x: 0, y: baseY });
         } else {
-          // Surface bone — extends from previous bone
           const xRatio = col / SUBDIV_X;
-          const influence = Math.pow(xRatio, STIFFNESS);
+          const influence = Math.pow(xRatio, stiffness);
           const surfaceBend = computeSurfaceBend(
-            t, tLift, tLand, DURATION, rowFactor, influence,
+            t, tLift, tLand, dur, liftBend, landBend, rowFactor, influence,
           );
 
           const totalAngle = chainAngle + surfaceBend;
           const rad = totalAngle * DEG2RAD;
-          chainX = chainX + Math.cos(rad) * stepX;
-          chainY = chainY + Math.sin(rad) * stepX;
+          chainX = chainX + Math.cos(rad) * sx;
+          chainY = chainY + Math.sin(rad) * sx;
           chainAngle = totalAngle;
 
-          // Apply squash toward spine (x=0) for display only
           verts.push({ x: chainX * squash, y: chainY });
         }
       }
@@ -255,30 +335,27 @@ export function PageCurlAnimation({
     return verts;
   });
 
-  // Front face: visible 100% early, fades out as page passes vertical
   const frontOpacity = useDerivedValue(() => {
-    const p = progress.value;
-    if (p < 0.38) return 1.0;
-    if (p < 0.52) return lerp(1.0, 0.0, (p - 0.38) / 0.14);
+    const pg = progress.value;
+    if (pg < 0.38) return 1.0;
+    if (pg < 0.52) return lerp(1.0, 0.0, (pg - 0.38) / 0.14);
     return 0.0;
   });
 
-  // Back face: invisible early, fades in as page passes vertical
   const backOpacity = useDerivedValue(() => {
-    const p = progress.value;
-    if (p < 0.38) return 0.0;
-    if (p < 0.52) return lerp(0.0, 1.0, (p - 0.38) / 0.14);
+    const pg = progress.value;
+    if (pg < 0.38) return 0.0;
+    if (pg < 0.52) return lerp(0.0, 1.0, (pg - 0.38) / 0.14);
     return 1.0;
   });
 
-  // Spine shadow: 0 → 0.65 → 0 with cubic easing
   const shadowOpacity = useDerivedValue(() => {
-    const p = progress.value;
-    if (p <= 0.5) {
-      const f = p / 0.5;
+    const pg = progress.value;
+    if (pg <= 0.5) {
+      const f = pg / 0.5;
       return 0.65 * (1 - Math.pow(1 - f, 3));
     } else {
-      const f = Math.min((p - 0.5) / 0.4, 1.0);
+      const f = Math.min((pg - 0.5) / 0.4, 1.0);
       return 0.65 * (1 - Math.pow(f, 3));
     }
   });
@@ -288,7 +365,6 @@ export function PageCurlAnimation({
   return (
     <View style={[styles.container, { width, height }]} pointerEvents="none">
       <Canvas style={{ width, height }}>
-        {/* Layer 1: Back face (parchment) — drawn first, behind front */}
         <Group opacity={backOpacity}>
           <Vertices
             vertices={animatedVertices}
@@ -297,7 +373,6 @@ export function PageCurlAnimation({
           />
         </Group>
 
-        {/* Layer 2: Front face (captured page image) — drawn on top */}
         <Group opacity={frontOpacity}>
           <ImageShader
             image={departingImage}
@@ -311,7 +386,6 @@ export function PageCurlAnimation({
           />
         </Group>
 
-        {/* Layer 3: Spine shadow — gradient along left edge (book binding) */}
         <Group opacity={shadowOpacity}>
           <Rect x={0} y={0} width={35} height={height}>
             <LinearGradient
