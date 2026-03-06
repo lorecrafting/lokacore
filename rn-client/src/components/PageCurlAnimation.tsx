@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useMemo } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import {
   Canvas,
@@ -99,6 +99,7 @@ interface PageCurlAnimationProps {
   departingImage: SkImage | null;
   onComplete: () => void;
   preset?: string;
+  direction?: 'forward' | 'reverse';
   width?: number;
   height?: number;
 }
@@ -197,6 +198,7 @@ export function PageCurlAnimation({
   departingImage,
   onComplete,
   preset: presetKey = 'STANDARD_PAPER',
+  direction = 'forward',
   width = SCREEN_WIDTH,
   height = SCREEN_HEIGHT,
 }: PageCurlAnimationProps) {
@@ -230,21 +232,39 @@ export function PageCurlAnimation({
 
   const durationMs = Math.round(p.duration * 1000);
 
-  useEffect(() => {
+  // useLayoutEffect fires after React commits but before the native layer paints,
+  // so setting progress.value here ensures the correct starting position (spine=1
+  // for reverse, flat=0 for forward) is applied before the first frame is drawn.
+  // Using useEffect instead would allow one painted frame at progress=0, which
+  // causes the reverse animation to flash its full front-face image briefly.
+  useLayoutEffect(() => {
     if (!animating) {
       progress.value = 0;
       return;
     }
-    progress.value = withTiming(
-      1,
-      { duration: durationMs, easing: Easing.inOut(Easing.cubic) },
-      (finished) => {
-        if (finished) {
-          runOnJS(fireOnComplete)(onCompleteRef);
-        }
-      },
-    );
-  }, [animating, progress, durationMs]);
+    // Forward: page curls from right to left (spine at x=0, progress 0→1).
+    // Reverse: page starts folded on the left (progress=1) and returns right (progress→0).
+    // Same spine, same pivot — opposite time direction.
+    if (direction === 'reverse') {
+      progress.value = 1;
+      progress.value = withTiming(
+        0,
+        { duration: durationMs, easing: Easing.inOut(Easing.cubic) },
+        (finished) => {
+          if (finished) runOnJS(fireOnComplete)(onCompleteRef);
+        },
+      );
+    } else {
+      progress.value = 0;
+      progress.value = withTiming(
+        1,
+        { duration: durationMs, easing: Easing.inOut(Easing.cubic) },
+        (finished) => {
+          if (finished) runOnJS(fireOnComplete)(onCompleteRef);
+        },
+      );
+    }
+  }, [animating, direction, progress, durationMs]);
 
   const stepX = width / SUBDIV_X;
   const stepY = height / SUBDIV_Y;
