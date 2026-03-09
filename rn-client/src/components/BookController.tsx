@@ -218,6 +218,19 @@ export function BookController() {
     <NavigationContext.Provider value={navigationValue}>
       <PresetPreviewContext.Provider value={presetValue}>
         <View style={styles.container}>
+          {/* Hidden capture surface — rendered FIRST so it is naturally beneath the
+              main page in z-order (last sibling = on top in RN). No zIndex needed. */}
+          {hiddenCapturePage !== null && (
+            <View
+              ref={hiddenCaptureRef}
+              style={styles.hiddenCapture}
+              collapsable={false}
+              pointerEvents="none"
+            >
+              <PageContent page={hiddenCapturePage} />
+            </View>
+          )}
+
           {/* Main page — what the user sees */}
           <View
             ref={pageRef}
@@ -231,18 +244,6 @@ export function BookController() {
           {showBottomBar && (
             <View style={styles.bottomBar}>
               <BottomBar />
-            </View>
-          )}
-
-          {/* Hidden capture surface — renders destination page for reverse transitions */}
-          {hiddenCapturePage !== null && (
-            <View
-              ref={hiddenCaptureRef}
-              style={styles.hiddenCapture}
-              collapsable={false}
-              pointerEvents="none"
-            >
-              <PageContent page={hiddenCapturePage} />
             </View>
           )}
 
@@ -296,15 +297,14 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
-  // Capture surface for reverse transitions: rendered behind the main page at full
-  // opacity so makeImageFromView gets accurate pixel content. zIndex: -1 ensures
-  // it stays invisible to the user (the main page sits on top).
+  // Capture surface for reverse transitions: rendered at full opacity so
+  // makeImageFromView gets accurate pixel content. Placed before the main page
+  // in JSX so it is naturally beneath it in z-order (last sibling = on top in RN).
   hiddenCapture: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    zIndex: -1,
   },
 });
