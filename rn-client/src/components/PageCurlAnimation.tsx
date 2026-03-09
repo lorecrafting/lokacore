@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useMemo } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 import {
   Canvas,
   Vertices,
@@ -11,13 +11,14 @@ import {
   type SkImage,
   type SkPoint,
 } from '@shopify/react-native-skia';
-import {
+import Animated, {
   useSharedValue,
   withTiming,
   runOnJS,
   Easing,
   useDerivedValue,
   useAnimatedReaction,
+  useAnimatedStyle,
 } from 'react-native-reanimated';
 
 // ── Curl mode enum ──
@@ -214,6 +215,11 @@ export function PageCurlAnimation({
   const p = CURL_PRESETS[presetKey] ?? CURL_PRESETS.STANDARD_PAPER;
 
   const progress = useSharedValue(0);
+  // Opacity of the entire overlay View. After the Skia animation reaches its
+  // target (mesh perfectly flat), this fades 1→0 over COMPLETION_FADE_MS before
+  // onComplete fires. This means the page is always fully flat when the fade
+  // begins — no "didn't go all the way" snap.
+  const completionOpacity = useSharedValue(1);
   const onCompleteRef = useRef<(() => void) | null>(onComplete);
   onCompleteRef.current = onComplete;
   const onNearCompleteRef = useRef<(() => void) | null>(onNearComplete ?? null);
@@ -256,8 +262,11 @@ export function PageCurlAnimation({
   // for reverse, flat=0 for forward) is applied before the first frame is drawn.
   // Using useEffect instead would allow one painted frame at progress=0, which
   // causes the reverse animation to flash its full front-face image briefly.
+  const COMPLETION_FADE_MS = 80;
+
   useLayoutEffect(() => {
     firedNearComplete.value = 0;
+    completionOpacity.value = 1;
     if (!animating) {
       progress.value = 0;
       return;
@@ -265,13 +274,26 @@ export function PageCurlAnimation({
     // Forward: page curls from right to left (spine at x=0, progress 0→1).
     // Reverse: page starts folded on the left (progress=1) and returns right (progress→0).
     // Same spine, same pivot — opposite time direction.
+    //
+    // After withTiming reaches its target (mesh perfectly flat), completionOpacity
+    // fades 1→0 over COMPLETION_FADE_MS. onComplete fires only after that fade,
+    // ensuring the overlay is invisible before it's removed — no snap at landing.
+    const startCompletionFade = () => {
+      completionOpacity.value = withTiming(
+        0,
+        { duration: COMPLETION_FADE_MS, easing: Easing.out(Easing.quad) },
+        (fadeDone) => {
+          if (fadeDone) runOnJS(fireOnComplete)(onCompleteRef);
+        },
+      );
+    };
     if (direction === 'reverse') {
       progress.value = 1;
       progress.value = withTiming(
         0,
         { duration: durationMs, easing: Easing.inOut(Easing.cubic) },
         (finished) => {
-          if (finished) runOnJS(fireOnComplete)(onCompleteRef);
+          if (finished) startCompletionFade();
         },
       );
     } else {
@@ -280,17 +302,17 @@ export function PageCurlAnimation({
         1,
         { duration: durationMs, easing: Easing.inOut(Easing.cubic) },
         (finished) => {
-          if (finished) runOnJS(fireOnComplete)(onCompleteRef);
+          if (finished) startCompletionFade();
         },
       );
     }
-  }, [animating, direction, progress, durationMs, firedNearComplete]);
+  }, [animating, direction, progress, durationMs, firedNearComplete, completionOpacity]);
 
   // Fire onNearComplete when progress is within this threshold of landing.
-  // Must be larger than landingFadeOpacity's fadeWindow (0.02) so displayedPage
-  // switches to the destination BEFORE the fade begins — that way ROOM (not ENTITY)
-  // shows through as the overlay becomes transparent.
-  const NEAR_COMPLETE_THRESHOLD = 0.05;
+  // Must be large enough to give React time to render and natively paint the
+  // destination page before the completionOpacity fade begins. At 0.10, with
+  // inOut-cubic easing, this fires ~200ms before animation end — plenty of time.
+  const NEAR_COMPLETE_THRESHOLD = 0.10;
 
   useAnimatedReaction(
     () => {
@@ -420,60 +442,47 @@ export function PageCurlAnimation({
     }
   });
 
-  // Fade the entire overlay to transparent as the page reaches its landing position.
-  // This prevents the snap between "nearly-flat Skia mesh" and "static page" that occurs
-  // when runOnJS fires a frame or two after progress reaches its target value. By the time
-  // onComplete fires, the canvas is already invisible, so removing it causes no flash.
-  // For forward: landing = progress → 1. For reverse: landing = progress → 0.
-  const landingFadeOpacity = useDerivedValue(() => {
-    const pg = progress.value;
-    const fadeWindow = 0.02; // last 2% of progress — nearly-flat, imperceptible curl
-    const distFromLanding = sDirection.value === 1 ? pg : 1 - pg;
-    if (distFromLanding < fadeWindow) {
-      return distFromLanding / fadeWindow;
-    }
-    return 1.0;
-  });
+  const overlayStyle = useAnimatedStyle(() => ({
+    opacity: completionOpacity.value,
+  }));
 
   if (!animating || !departingImage) return null;
 
   return (
-    <View style={[styles.container, { width, height }]} pointerEvents="none">
+    <Animated.View style={[styles.container, { width, height }, overlayStyle]} pointerEvents="none">
       <Canvas style={{ width, height }}>
-        <Group opacity={landingFadeOpacity}>
-          <Group opacity={backOpacity}>
-            <Vertices
-              vertices={animatedVertices}
-              indices={TRIANGLE_INDICES}
-              colors={parchmentColors}
-            />
-          </Group>
+        <Group opacity={backOpacity}>
+          <Vertices
+            vertices={animatedVertices}
+            indices={TRIANGLE_INDICES}
+            colors={parchmentColors}
+          />
+        </Group>
 
-          <Group opacity={frontOpacity}>
-            <ImageShader
-              image={departingImage}
-              fit="fill"
-              rect={{ x: 0, y: 0, width, height }}
-            />
-            <Vertices
-              vertices={animatedVertices}
-              textures={frontTextures}
-              indices={TRIANGLE_INDICES}
-            />
-          </Group>
+        <Group opacity={frontOpacity}>
+          <ImageShader
+            image={departingImage}
+            fit="fill"
+            rect={{ x: 0, y: 0, width, height }}
+          />
+          <Vertices
+            vertices={animatedVertices}
+            textures={frontTextures}
+            indices={TRIANGLE_INDICES}
+          />
+        </Group>
 
-          <Group opacity={shadowOpacity}>
-            <Rect x={0} y={0} width={35} height={height}>
-              <LinearGradient
-                start={vec(0, 0)}
-                end={vec(35, 0)}
-                colors={['rgba(18, 14, 8, 0.6)', 'rgba(18, 14, 8, 0)']}
-              />
-            </Rect>
-          </Group>
+        <Group opacity={shadowOpacity}>
+          <Rect x={0} y={0} width={35} height={height}>
+            <LinearGradient
+              start={vec(0, 0)}
+              end={vec(35, 0)}
+              colors={['rgba(18, 14, 8, 0.6)', 'rgba(18, 14, 8, 0)']}
+            />
+          </Rect>
         </Group>
       </Canvas>
-    </View>
+    </Animated.View>
   );
 }
 
