@@ -208,6 +208,12 @@ export function PageCurlAnimation({
   const onCompleteRef = useRef<(() => void) | null>(onComplete);
   onCompleteRef.current = onComplete;
 
+  // Track direction as a shared value so worklets can read it without closure capture.
+  const sDirection = useSharedValue(direction === 'reverse' ? 1 : 0);
+  useEffect(() => {
+    sDirection.value = direction === 'reverse' ? 1 : 0;
+  }, [direction, sDirection]);
+
   // Pass preset values into shared values so worklets can read them
   const sStiffness = useSharedValue(p.stiffness);
   const sLiftBend = useSharedValue(p.liftBend);
@@ -380,40 +386,57 @@ export function PageCurlAnimation({
     }
   });
 
+  // Fade the entire overlay to transparent as the page reaches its landing position.
+  // This prevents the snap between "nearly-flat Skia mesh" and "static page" that occurs
+  // when runOnJS fires a frame or two after progress reaches its target value. By the time
+  // onComplete fires, the canvas is already invisible, so removing it causes no flash.
+  // For forward: landing = progress → 1. For reverse: landing = progress → 0.
+  const landingFadeOpacity = useDerivedValue(() => {
+    const pg = progress.value;
+    const fadeWindow = 0.02; // last 2% of progress — nearly-flat, imperceptible curl
+    const distFromLanding = sDirection.value === 1 ? pg : 1 - pg;
+    if (distFromLanding < fadeWindow) {
+      return distFromLanding / fadeWindow;
+    }
+    return 1.0;
+  });
+
   if (!animating || !departingImage) return null;
 
   return (
     <View style={[styles.container, { width, height }]} pointerEvents="none">
       <Canvas style={{ width, height }}>
-        <Group opacity={backOpacity}>
-          <Vertices
-            vertices={animatedVertices}
-            indices={TRIANGLE_INDICES}
-            colors={parchmentColors}
-          />
-        </Group>
-
-        <Group opacity={frontOpacity}>
-          <ImageShader
-            image={departingImage}
-            fit="fill"
-            rect={{ x: 0, y: 0, width, height }}
-          />
-          <Vertices
-            vertices={animatedVertices}
-            textures={frontTextures}
-            indices={TRIANGLE_INDICES}
-          />
-        </Group>
-
-        <Group opacity={shadowOpacity}>
-          <Rect x={0} y={0} width={35} height={height}>
-            <LinearGradient
-              start={vec(0, 0)}
-              end={vec(35, 0)}
-              colors={['rgba(18, 14, 8, 0.6)', 'rgba(18, 14, 8, 0)']}
+        <Group opacity={landingFadeOpacity}>
+          <Group opacity={backOpacity}>
+            <Vertices
+              vertices={animatedVertices}
+              indices={TRIANGLE_INDICES}
+              colors={parchmentColors}
             />
-          </Rect>
+          </Group>
+
+          <Group opacity={frontOpacity}>
+            <ImageShader
+              image={departingImage}
+              fit="fill"
+              rect={{ x: 0, y: 0, width, height }}
+            />
+            <Vertices
+              vertices={animatedVertices}
+              textures={frontTextures}
+              indices={TRIANGLE_INDICES}
+            />
+          </Group>
+
+          <Group opacity={shadowOpacity}>
+            <Rect x={0} y={0} width={35} height={height}>
+              <LinearGradient
+                start={vec(0, 0)}
+                end={vec(35, 0)}
+                colors={['rgba(18, 14, 8, 0.6)', 'rgba(18, 14, 8, 0)']}
+              />
+            </Rect>
+          </Group>
         </Group>
       </Canvas>
     </View>

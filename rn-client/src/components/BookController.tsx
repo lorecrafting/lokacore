@@ -48,12 +48,6 @@ export function BookController() {
   const [hiddenCapturePage, setHiddenCapturePage] = useState<PageType | null>(null);
   const hiddenCaptureRef = useRef<View>(null);
 
-  // For reverse transitions: the page switch is deferred until animation completion
-  // so ENTITY stays as background (no ROOM content to accidentally ghost-tap during
-  // the animation). Called before clearing the overlay so the correct page is
-  // always in place when the animation disappears.
-  const pendingCompletionRef = useRef<(() => void) | null>(null);
-
   const pageRef = useRef<View>(null);
   const prevCurrentPageRef = useRef(currentPage);
   const transitioningRef = useRef(false);
@@ -144,12 +138,10 @@ export function BookController() {
       return;
     }
 
-    // Reverse: the destination page (e.g. ROOM) should be the page that animates IN,
-    // while the source page (e.g. ENTITY) stays visible as the background.
-    //
-    // We render the destination in a hidden off-screen surface, capture it, then
-    // play the reverse animation with that image as the "arriving" page. The
-    // displayedPage only switches to the destination once the animation completes.
+    // Reverse: render the destination (e.g. ROOM) in a hidden off-screen surface,
+    // capture it as the "arriving" page image, then play the reverse animation.
+    // displayedPage switches to the destination before the animation starts so that
+    // ROOM is already the static background when the overlay fades out at landing.
     const dest = currentPage;
 
     transitioningRef.current = true;
@@ -174,10 +166,12 @@ export function BookController() {
       setHiddenCapturePage(null);
 
       if (arrivalImage) {
-        // Keep displayedPage = ENTITY during the animation so there is no
-        // live ROOM content underneath that a ghost tap could trigger. The
-        // page switch is deferred to handleAnimationComplete via pendingCompletionRef.
-        pendingCompletionRef.current = () => setDisplayedPage(dest);
+        // Switch displayedPage to the destination NOW, in the same React render
+        // as setAnimState('ANIMATING'). This means the static page already shows
+        // ROOM when the overlay fades out near landing — no ENTITY flash.
+        // Ghost taps are not a concern: pointerEvents='none' is set on the static
+        // page for the entire animation (via animState check in the JSX).
+        setDisplayedPage(dest);
         setDepartingImage(arrivalImage);
         playFlip();
         setAnimState('ANIMATING');
@@ -191,21 +185,13 @@ export function BookController() {
   }, [currentPage, startTransition, playFlip]);
 
   const handleAnimationComplete = useCallback(() => {
-    // Switch to the destination page BEFORE clearing the overlay. runOnJS runs
-    // outside React's batching context, so these may be separate renders. By
-    // switching pages first, displayedPage is correct when the overlay disappears —
-    // no entity flash even if the renders aren't batched.
-    const pending = pendingCompletionRef.current;
-    pendingCompletionRef.current = null;
-    if (pending) {
-      pending();
-    } else {
-      setDisplayedPage(currentPage);
-    }
+    // displayedPage is already correct (set at animation start for both forward and
+    // reverse). The landingFadeOpacity in PageCurlAnimation has already faded the
+    // canvas to transparent, so clearing departingImage here causes no flash.
     setDepartingImage(null);
     transitioningRef.current = false;
     setAnimState('IDLE');
-  }, [currentPage]);
+  }, []);
 
   const navigationValue = useMemo(() => ({ navigate }), [navigate]);
   const presetValue = useMemo(
