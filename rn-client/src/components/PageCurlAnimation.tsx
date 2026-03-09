@@ -279,6 +279,7 @@ export function PageCurlAnimation({
     // fades 1→0 over COMPLETION_FADE_MS. onComplete fires only after that fade,
     // ensuring the overlay is invisible before it's removed — no snap at landing.
     const startCompletionFade = () => {
+      'worklet';
       completionOpacity.value = withTiming(
         0,
         { duration: COMPLETION_FADE_MS, easing: Easing.out(Easing.quad) },
