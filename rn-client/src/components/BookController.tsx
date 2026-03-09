@@ -51,6 +51,10 @@ export function BookController() {
   const pageRef = useRef<View>(null);
   const prevCurrentPageRef = useRef(currentPage);
   const transitioningRef = useRef(false);
+  // Destination page for the current reverse transition. Set before animation starts
+  // and read by onNearComplete (fired mid-animation) to switch displayedPage while
+  // the overlay is still fully opaque — so ROOM, not ENTITY, shows through the fade.
+  const nearCompleteDestRef = useRef<PageType | null>(null);
 
   const startTransition = useCallback(
     async (action: () => void, preset?: string) => {
@@ -166,12 +170,11 @@ export function BookController() {
       setHiddenCapturePage(null);
 
       if (arrivalImage) {
-        // Switch displayedPage to the destination NOW, in the same React render
-        // as setAnimState('ANIMATING'). This means the static page already shows
-        // ROOM when the overlay fades out near landing — no ENTITY flash.
-        // Ghost taps are not a concern: pointerEvents='none' is set on the static
-        // page for the entire animation (via animState check in the JSX).
-        setDisplayedPage(dest);
+        // Keep displayedPage = ENTITY so the page doesn't change before the flip
+        // covers it. nearCompleteDestRef stores the destination; onNearComplete
+        // (fired by PageCurlAnimation at progress ≈ 0.05, before the landing fade
+        // begins at 0.02) switches displayedPage while the overlay is still opaque.
+        nearCompleteDestRef.current = dest;
         setDepartingImage(arrivalImage);
         playFlip();
         setAnimState('ANIMATING');
@@ -184,10 +187,21 @@ export function BookController() {
     })();
   }, [currentPage, startTransition, playFlip]);
 
+  // Fired mid-animation (progress ≈ 0.05) while overlay is still fully opaque.
+  // Switches displayedPage so ROOM is the static background before the landing
+  // fade (progress 0.02→0) begins — no ENTITY shows through as overlay fades.
+  const handleNearComplete = useCallback(() => {
+    if (nearCompleteDestRef.current) {
+      setDisplayedPage(nearCompleteDestRef.current);
+      nearCompleteDestRef.current = null;
+    }
+  }, []);
+
   const handleAnimationComplete = useCallback(() => {
-    // displayedPage is already correct (set at animation start for both forward and
-    // reverse). The landingFadeOpacity in PageCurlAnimation has already faded the
-    // canvas to transparent, so clearing departingImage here causes no flash.
+    // displayedPage was already switched in handleNearComplete. landingFadeOpacity
+    // in PageCurlAnimation faded the canvas to 0 before this fires, so removing
+    // departingImage here causes no flash.
+    nearCompleteDestRef.current = null; // safety clear
     setDepartingImage(null);
     transitioningRef.current = false;
     setAnimState('IDLE');
@@ -236,6 +250,7 @@ export function BookController() {
             animating={animState === 'ANIMATING'}
             departingImage={departingImage}
             onComplete={handleAnimationComplete}
+            onNearComplete={handleNearComplete}
             preset={curlPreset}
             direction={flipDirection}
           />

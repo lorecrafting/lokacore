@@ -17,6 +17,7 @@ import {
   runOnJS,
   Easing,
   useDerivedValue,
+  useAnimatedReaction,
 } from 'react-native-reanimated';
 
 // ── Curl mode enum ──
@@ -98,6 +99,9 @@ interface PageCurlAnimationProps {
   animating: boolean;
   departingImage: SkImage | null;
   onComplete: () => void;
+  // Called when progress is within nearCompleteThreshold of landing. Fires on the
+  // JS thread via runOnJS — use it to switch displayedPage before the overlay fades.
+  onNearComplete?: () => void;
   preset?: string;
   direction?: 'forward' | 'reverse';
   width?: number;
@@ -193,10 +197,15 @@ function fireOnComplete(ref: React.RefObject<(() => void) | null>) {
   ref.current?.();
 }
 
+function fireOnNearComplete(ref: React.RefObject<(() => void) | null>) {
+  ref.current?.();
+}
+
 export function PageCurlAnimation({
   animating,
   departingImage,
   onComplete,
+  onNearComplete,
   preset: presetKey = 'STANDARD_PAPER',
   direction = 'forward',
   width = SCREEN_WIDTH,
@@ -207,6 +216,10 @@ export function PageCurlAnimation({
   const progress = useSharedValue(0);
   const onCompleteRef = useRef<(() => void) | null>(onComplete);
   onCompleteRef.current = onComplete;
+  const onNearCompleteRef = useRef<(() => void) | null>(onNearComplete ?? null);
+  onNearCompleteRef.current = onNearComplete ?? null;
+  // Guards so onNearComplete fires at most once per animation.
+  const firedNearComplete = useSharedValue(0);
 
   // Track direction as a shared value so worklets can read it without closure capture.
   const sDirection = useSharedValue(direction === 'reverse' ? 1 : 0);
@@ -244,6 +257,7 @@ export function PageCurlAnimation({
   // Using useEffect instead would allow one painted frame at progress=0, which
   // causes the reverse animation to flash its full front-face image briefly.
   useLayoutEffect(() => {
+    firedNearComplete.value = 0;
     if (!animating) {
       progress.value = 0;
       return;
@@ -270,7 +284,27 @@ export function PageCurlAnimation({
         },
       );
     }
-  }, [animating, direction, progress, durationMs]);
+  }, [animating, direction, progress, durationMs, firedNearComplete]);
+
+  // Fire onNearComplete when progress is within this threshold of landing.
+  // Must be larger than landingFadeOpacity's fadeWindow (0.02) so displayedPage
+  // switches to the destination BEFORE the fade begins — that way ROOM (not ENTITY)
+  // shows through as the overlay becomes transparent.
+  const NEAR_COMPLETE_THRESHOLD = 0.05;
+
+  useAnimatedReaction(
+    () => {
+      const pg = progress.value;
+      const distFromLanding = sDirection.value === 1 ? pg : 1 - pg;
+      return distFromLanding < NEAR_COMPLETE_THRESHOLD;
+    },
+    (isNear, wasNear) => {
+      if (isNear && !wasNear && firedNearComplete.value === 0) {
+        firedNearComplete.value = 1;
+        runOnJS(fireOnNearComplete)(onNearCompleteRef);
+      }
+    },
+  );
 
   const stepX = width / SUBDIV_X;
   const stepY = height / SUBDIV_Y;
