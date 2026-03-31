@@ -1,6 +1,6 @@
 # Loka
 
-A text-based RPG engine built with Elixir/Phoenix and Godot. Leverages Elixir's OTP concurrency, fault tolerance, and real-time Phoenix Channels for modern MUD development.
+A text-based RPG engine built with Elixir/Phoenix and React Native. Leverages Elixir's OTP concurrency, fault tolerance, and real-time Phoenix Channels for modern MUD development.
 
 ## What is Loka?
 
@@ -9,7 +9,7 @@ Loka is a MUD (Multi-User Dungeon) engine framework for building text-based RPGs
 - **Entity-Component-Behavior architecture** - Composition over inheritance for flexible game objects
 - **Prototype system** - YAML templates with inheritance for rapid content creation
 - **Real-time multiplayer** - Phoenix Channels for instant updates across all clients
-- **Web and mobile clients** - Admin LiveView dashboard + Godot 3D mobile client
+- **Web and mobile clients** - Admin LiveView dashboard + React Native (Expo) mobile client
 - **Sandboxed scripting** - Elixir-based scripting for game customization
 - **Quest and dialogue systems** - Built-in support for narrative content
 
@@ -20,7 +20,7 @@ lokacore/
 ├── server/           # Elixir/Phoenix backend
 │   ├── lib/loka/     # Game engine and framework
 │   └── priv/world/   # YAML game content (prototypes, quests, dialogues)
-├── godot-client/     # Godot 4.6 mobile/web client
+├── rn-client/        # React Native (Expo) mobile client
 └── docs/             # Architecture documentation
 ```
 
@@ -39,9 +39,8 @@ git clone https://github.com/lorecrafting/lokacore.git
 ### Prerequisites
 
 - **Elixir** 1.19+ ([install guide](https://elixir-lang.org/install.html))
-- **Node.js** 18+ (for assets)
+- **Node.js** 18+ (for assets and React Native)
 - **SQLite** 3.x
-- **Godot** 4.6+ (for client development)
 - **Git LFS** (for audio assets): `brew install git-lfs && git lfs install`
 
 ### Server Setup
@@ -62,19 +61,22 @@ mix phx.server
 
 Server runs at http://localhost:4000. Admin dashboard at http://localhost:4000/admin.
 
-### Godot Client Setup
+### React Native Client Setup
 
 ```bash
-cd godot-client
+cd rn-client
 
-# Validate scripts
-./check.sh
+# Install dependencies
+npm install
 
-# Development with hot reload
-./dev.sh
+# Start Expo dev server
+npm start
 
-# Build web export
-./build_web.sh --fast
+# iOS simulator
+npm run ios
+
+# Android emulator
+npm run android
 ```
 
 ## Development
