@@ -79,6 +79,81 @@ npm run ios
 npm run android
 ```
 
+## Architecture
+
+Loka is organized in layers from content to platform:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ GAME CONTENT (priv/world/)                                  │
+│   YAML prototypes (rooms, NPCs, items) + quests, dialogues  │
+│   Seeded into SQLite on boot via EntitySeeder               │
+├─────────────────────────────────────────────────────────────┤
+│ GAME FRAMEWORK (lib/loka/framework/)                        │
+│   Combat, Inventory, Quest, Skills, StateMachine            │
+│   Shared StateMachine engine for quests/combat/dialogue     │
+├─────────────────────────────────────────────────────────────┤
+│ ENGINE CORE (lib/loka/engine/)                              │
+│   Entities, EntityServer, EntitySeeder, Spawner             │
+│   SQLite is single source of truth — no ETS dual-store      │
+├─────────────────────────────────────────────────────────────┤
+│ PLATFORM                                                    │
+│   Phoenix 1.8, LiveView, Ecto + SQLite                      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Key design principles:**
+
+- **Everything is an entity** — rooms, NPCs, items, quests, skills, dialogues all unified
+- **Components as JSON** — all game data lives in `entity.components` (no separate EAV tables)
+- **GenServer per entity** — active entities are supervised OTP processes with auto-save
+- **Traits** — `entity.traits` lists behavior modules or Elixir script maps for NPC AI
+- **StateMachine engine** — shared state engine drives quests, combat, dialogue, crafting
+- **Flat YAML prototypes** — self-contained templates, no inheritance, seeded to DB on boot
+
+### Process Supervision Tree
+
+```
+Loka.Application (~50 supervised children)
+       │
+  ┌────┴────────────────────────────────┐
+  │                                     │
+Hooks / Seeder / Registry       EntitySupervisor (DynamicSupervisor)
+                                         │
+                              ┌──────────┼──────────┐
+                              │          │          │
+                         EntityServer EntityServer  ...
+                          (room:1)    (npc:5)
+                              │
+                         Traits (on_tick/on_event)
+                         StateMachine
+```
+
+### Codebase Metrics
+
+| Category | Count | Location |
+|----------|-------|----------|
+| Engine Core | 24 modules | `lib/loka/engine/` |
+| Components | 24 modules | `lib/loka/components/` |
+| Framework | 52 modules | `lib/loka/framework/` |
+| Content API | 12 modules | `lib/loka/content/` |
+| YAML Content | ~286 files | `priv/world/` |
+| Tests | ~2,319 tests | `test/` |
+
+### Architecture Docs
+
+| Topic | Doc |
+|-------|-----|
+| Entity system | [docs/architecture/entity-system.md](docs/architecture/entity-system.md) |
+| Entity lifecycle & GenServer | [docs/architecture/entity-lifecycle.md](docs/architecture/entity-lifecycle.md) |
+| Unified entity system (V2 design) | [docs/architecture/unified-object-system-v2.md](docs/architecture/unified-object-system-v2.md) |
+| Elixir scripting | [docs/architecture/elixir-scripts-design.md](docs/architecture/elixir-scripts-design.md) |
+| Events & PubSub | [docs/architecture/events.md](docs/architecture/events.md) |
+| Architecture diagrams | [docs/architecture/diagrams.md](docs/architecture/diagrams.md) |
+| Channel API contract | [docs/api/channel-contract.md](docs/api/channel-contract.md) |
+| Framework subsystems | [docs/framework/README.md](docs/framework/README.md) |
+| Full architecture index | [docs/architecture/README.md](docs/architecture/README.md) |
+
 ## Development
 
 See `CLAUDE.md` for the comprehensive development guide, including architecture details, all routes and API endpoints, test commands, deployment, and coding conventions.

@@ -82,7 +82,7 @@ This documentation covers the V2 engine architecture for Loka - an Elixir MUD fr
 11. **Hooks System**: 22 lifecycle event types for extensibility
 12. **Elixir Scripting**: Sandboxed Elixir with 40+ bindings for game creators
 13. **Death as Ghost State**: UO-style ghost system, no separate Bardo realm
-14. **Godot Client**: Mobile-first 3D "magic book" client (web/iOS/Android)
+14. **React Native Client**: Expo-based mobile client (iOS/Android) connecting via Phoenix Channels
 
 ## Process Supervision Tree (V2)
 
