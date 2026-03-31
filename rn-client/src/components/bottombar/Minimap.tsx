@@ -9,6 +9,7 @@ const GRID_SPACING = 20;
 const MAX_DEPTH = 2;
 const RADIUS_CURRENT = 6;
 const RADIUS_VISITED = 4.5;
+const RADIUS_KNOWN = 3;
 const STROKE_WIDTH = 1.5;
 
 const DIRECTION_OFFSETS: Record<Direction, [number, number]> = {
@@ -25,25 +26,27 @@ interface PlacedRoom {
   dx: number;
   dy: number;
   exits: Direction[];
+  visited: boolean;
 }
 
 function buildMinimapLayout(
-  visitedRooms: Map<string, { exits: Direction[] }>,
+  visitedRooms: Map<string, { exits: Direction[]; destinations: Partial<Record<Direction, string>> }>,
   currentRoomKey: string | null,
 ): PlacedRoom[] {
-  if (!currentRoomKey || !visitedRooms.has(currentRoomKey)) {
-    return [];
-  }
+  if (!currentRoomKey) return [];
 
   const placed = new Map<string, PlacedRoom>();
-  const queue: Array<{ key: string; dx: number; dy: number; depth: number }> =
-    [{ key: currentRoomKey, dx: 0, dy: 0, depth: 0 }];
+  const queue: Array<{ key: string; dx: number; dy: number; depth: number }> = [
+    { key: currentRoomKey, dx: 0, dy: 0, depth: 0 },
+  ];
 
+  const currentData = visitedRooms.get(currentRoomKey);
   placed.set(currentRoomKey, {
     key: currentRoomKey,
     dx: 0,
     dy: 0,
-    exits: visitedRooms.get(currentRoomKey)?.exits ?? [],
+    exits: currentData?.exits ?? [],
+    visited: true,
   });
 
   while (queue.length > 0) {
@@ -54,72 +57,59 @@ function buildMinimapLayout(
     if (!roomData) continue;
 
     for (const exit of roomData.exits) {
+      const destKey = roomData.destinations[exit];
+      if (!destKey || placed.has(destKey)) continue;
+
       const offset = DIRECTION_OFFSETS[exit];
       if (!offset) continue;
 
       const [odx, ody] = offset;
       const neighborDx = current.dx + odx;
       const neighborDy = current.dy + ody;
+      const neighborData = visitedRooms.get(destKey);
 
-      // Find the neighboring room key from the visited map.
-      // We don't have a direct key lookup from (dx,dy), so we look for a
-      // visited room that would be adjacent in the expected direction. Since
-      // the game only tracks visited keys we match by checking if any
-      // already-placed room sits at (neighborDx, neighborDy). If not, we
-      // create a phantom entry only if we can infer a key.
-      //
-      // The visited map is keyed by room key, not by position. We can only
-      // place a neighbor if we know its key. The store records exits on the
-      // room that was visited but doesn't store destination keys per exit.
-      // So we skip unknown neighbors — the minimap only renders rooms we
-      // have actually visited and can position relative to the current room
-      // by cross-referencing already-placed rooms.
-      //
-      // Strategy: use the position slot. If something is already placed at
-      // (neighborDx, neighborDy) skip. Otherwise leave an empty slot — we
-      // can only render rooms whose keys we know from the visited map. We
-      // infer adjacency by checking all visited rooms for an exit in the
-      // opposite direction back to current.
+      placed.set(destKey, {
+        key: destKey,
+        dx: neighborDx,
+        dy: neighborDy,
+        exits: neighborData?.exits ?? [],
+        visited: !!neighborData,
+      });
 
-      const oppositeDir = getOppositeDirection(exit);
+      if (neighborData) {
+        queue.push({ key: destKey, dx: neighborDx, dy: neighborDy, depth: current.depth + 1 });
+      }
+    }
+  }
 
-      // Check if any visited room "points back" to the current room via
-      // the opposite direction, i.e. is a plausible neighbor.
-      for (const [candidateKey, candidateData] of visitedRooms.entries()) {
-        if (placed.has(candidateKey)) continue;
-        if (!candidateData.exits.includes(oppositeDir)) continue;
-
-        // Claim this slot.
-        placed.set(candidateKey, {
-          key: candidateKey,
-          dx: neighborDx,
-          dy: neighborDy,
-          exits: candidateData.exits,
+  // Phantom pass: for every exit of every placed room, if the exit position
+  // has no room yet, add a ghost dot there. This shows unvisited rooms whose
+  // key we don't know yet, based purely on the exit direction.
+  const occupiedPositions = new Set<string>(
+    Array.from(placed.values()).map((r) => `${r.dx},${r.dy}`),
+  );
+  for (const room of Array.from(placed.values())) {
+    for (const exit of room.exits) {
+      const offset = DIRECTION_OFFSETS[exit];
+      if (!offset) continue;
+      const [odx, ody] = offset;
+      const phantomDx = room.dx + odx;
+      const phantomDy = room.dy + ody;
+      const posKey = `${phantomDx},${phantomDy}`;
+      if (!occupiedPositions.has(posKey)) {
+        placed.set(`phantom:${posKey}`, {
+          key: `phantom:${posKey}`,
+          dx: phantomDx,
+          dy: phantomDy,
+          exits: [],
+          visited: false,
         });
-        queue.push({
-          key: candidateKey,
-          dx: neighborDx,
-          dy: neighborDy,
-          depth: current.depth + 1,
-        });
-        break;
+        occupiedPositions.add(posKey);
       }
     }
   }
 
   return Array.from(placed.values());
-}
-
-function getOppositeDirection(dir: Direction): Direction {
-  const opposites: Record<Direction, Direction> = {
-    north: "south",
-    south: "north",
-    east: "west",
-    west: "east",
-    up: "down",
-    down: "up",
-  };
-  return opposites[dir];
 }
 
 interface Connection {
@@ -148,7 +138,6 @@ function buildConnections(rooms: PlacedRoom[]): Connection[] {
       const neighbor = positionMap.get(neighborKey);
       if (!neighbor) continue;
 
-      // Deduplicate bidirectional connections.
       const edgeKey =
         room.dx < neighbor.dx ||
         (room.dx === neighbor.dx && room.dy < neighbor.dy)
@@ -205,14 +194,24 @@ export function Minimap() {
           const isCurrent = placedRoom.key === currentRoomKey;
           const cx = centerX + placedRoom.dx * GRID_SPACING;
           const cy = centerY + placedRoom.dy * GRID_SPACING;
+          const dotColor = isCurrent
+            ? colors.dotCurrent
+            : placedRoom.visited
+              ? colors.dotVisited
+              : colors.dotKnown;
+          const radius = isCurrent
+            ? RADIUS_CURRENT
+            : placedRoom.visited
+              ? RADIUS_VISITED
+              : RADIUS_KNOWN;
 
           return (
             <Circle
               key={placedRoom.key}
               cx={cx}
               cy={cy}
-              r={isCurrent ? RADIUS_CURRENT : RADIUS_VISITED}
-              color={isCurrent ? colors.dotCurrent : colors.dotVisited}
+              r={radius}
+              color={dotColor}
             />
           );
         })}

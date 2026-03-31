@@ -5,11 +5,12 @@ import { ParchmentText } from '../ui/ParchmentText';
 import { ClickableEntity } from '../ui/ClickableEntity';
 import { useGameStore } from '../../store/gameStore';
 import { colors } from '../../theme/colors';
-import type { EntitySummary } from '../../types/game';
+import type { EntitySummary, EntityDetail } from '../../types/game';
 
 export function RoomPage() {
   const room = useGameStore((s) => s.room);
   const events = useGameStore((s) => s.events);
+  const setCurrentEntity = useGameStore((s) => s.setCurrentEntity);
 
   if (!room) {
     return (
@@ -24,8 +25,18 @@ export function RoomPage() {
   const recentEvents = events.slice(-5);
 
   function handleEntityPress(entity: EntitySummary) {
-    // TODO: wire to phoenixClient.clickEntity(entity.id)
-    console.log('[RoomPage] entity tapped:', entity.id, entity.name);
+    // In the real game, tapping an entity sends a look/examine command to the server
+    // and the server responds with EntityDetail including the authoritative actions list.
+    // For mock mode we use minimal sensible defaults.
+    const detail: EntityDetail = {
+      id: entity.id,
+      key: entity.key,
+      name: entity.name,
+      description: entity.description || entity.long_desc || entity.name,
+      type: entity.type === 'player' ? 'npc' : entity.type,
+      actions: entity.type === 'npc' ? ['Talk'] : ['Take'],
+    };
+    setCurrentEntity(detail);
   }
 
   const hasNpcs = room.npcs.length > 0;
@@ -39,9 +50,6 @@ export function RoomPage() {
         {room.name}
       </ParchmentText>
 
-      {/* Separator */}
-      <View style={styles.separator} />
-
       {/* Room description */}
       <ParchmentText variant="body" style={styles.description}>
         {room.description}
@@ -50,9 +58,6 @@ export function RoomPage() {
       {/* NPCs */}
       {hasNpcs && (
         <View style={styles.section}>
-          <ParchmentText variant="italic" style={styles.sectionLabel}>
-            You see:
-          </ParchmentText>
           <View style={styles.entityList}>
             {room.npcs.map((npc) => (
               <View key={npc.id} style={styles.entityRow}>
@@ -79,7 +84,6 @@ export function RoomPage() {
       {/* Events */}
       {hasEvents && (
         <View style={styles.eventsSection}>
-          <View style={styles.eventsSeparator} />
           {recentEvents.map((ev, i) => (
             <ParchmentText
               key={`${ev.timestamp}-${i}`}
@@ -101,19 +105,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 12,
   },
-  separator: {
-    height: 1,
-    backgroundColor: colors.separator,
-    marginBottom: 16,
-  },
   description: {
     marginBottom: 20,
   },
   section: {
     marginBottom: 16,
-  },
-  sectionLabel: {
-    marginBottom: 6,
   },
   entityList: {
     gap: 6,
@@ -124,11 +120,6 @@ const styles = StyleSheet.create({
   },
   eventsSection: {
     marginTop: 8,
-  },
-  eventsSeparator: {
-    height: 1,
-    backgroundColor: colors.decorative,
-    marginBottom: 12,
   },
   eventLine: {
     marginBottom: 4,

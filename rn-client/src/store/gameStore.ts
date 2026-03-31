@@ -89,10 +89,11 @@ interface GameStore {
   setAtmosphere: (atmosphere: Atmosphere) => void;
 
   // Minimap
-  visitedRooms: Map<string, { exits: Direction[] }>;
+  visitedRooms: Map<string, { exits: Direction[]; destinations: Partial<Record<Direction, string>> }>;
   markRoomVisited: (
     key: string,
     exits: Direction[],
+    destinations: Partial<Record<Direction, string>>,
   ) => void;
 }
 
@@ -108,8 +109,24 @@ const MOCK_ROOM: Room = {
     { direction: "south", destination_key: "stream_bank" },
   ],
   npcs: [
-    { id: "npc-1", key: "thera", name: "Thera", type: "npc" },
-    { id: "npc-2", key: "elder_maren", name: "Elder Maren", type: "npc" },
+    {
+      id: "npc-1",
+      key: "thera",
+      name: "Thera",
+      type: "npc",
+      long_desc: "Thera stands here, her attention completely on whatever is in front of her.",
+      description: "She wears practical clothes worn soft at the elbows. There is something on her fingers — herb stain, dark green at the knuckles. She looks up when you approach, and the look is unhurried. As if she had been waiting, and it's fine that you took your time.",
+      primary_keyword: "thera",
+    },
+    {
+      id: "npc-2",
+      key: "elder_maren",
+      name: "Elder Maren",
+      type: "npc",
+      long_desc: "Elder Maren stands here with the stillness of someone who has learned to wait.",
+      description: "She is old in the way of roots — not frail, just deeply set. Her hands rest in front of her without fidgeting. When she looks at you, you have the strange feeling she's looking at something just behind your face, something she already knows the shape of.",
+      primary_keyword: "maren",
+    },
   ],
   items: [
     {
@@ -117,6 +134,9 @@ const MOCK_ROOM: Room = {
       key: "worn_journal",
       name: "a worn journal",
       type: "item",
+      long_desc: "A worn journal lies here, its pages swollen with damp.",
+      description: "The cover is soft from handling, the spine cracked at intervals that suggest habitual opening. Inside, the handwriting changes — urgent in places, careful in others.",
+      primary_keyword: "journal",
     },
   ],
   players: [],
@@ -145,10 +165,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
   room: MOCK_ROOM,
   setRoom: (room) => {
     const { markRoomVisited } = get();
-    markRoomVisited(
-      room.key,
-      room.exits.map((e) => e.direction),
-    );
+    const destinations: Partial<Record<Direction, string>> = {};
+    for (const exit of room.exits) {
+      if (exit.destination_key) destinations[exit.direction] = exit.destination_key;
+    }
+    markRoomVisited(room.key, room.exits.map((e) => e.direction), destinations);
     set({ room });
   },
 
@@ -256,12 +277,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   // Minimap
   visitedRooms: new Map([
-    ["awakening_clearing", { exits: ["north", "east", "south"] as Direction[] }],
+    ["awakening_clearing", { exits: ["north", "east", "south"] as Direction[], destinations: { north: "heartwood_path", east: "eastern_trail", south: "stream_bank" } }],
+    ["heartwood_path", { exits: ["south", "north"] as Direction[], destinations: { south: "awakening_clearing", north: "heartwood_grove" } }],
+    ["eastern_trail", { exits: ["west", "east"] as Direction[], destinations: { west: "awakening_clearing", east: "kira_field_station" } }],
+    ["stream_bank", { exits: ["north"] as Direction[], destinations: { north: "awakening_clearing" } }],
   ]),
-  markRoomVisited: (key, exits) =>
+  markRoomVisited: (key, exits, destinations) =>
     set((s) => {
       const next = new Map(s.visitedRooms);
-      next.set(key, { exits });
+      next.set(key, { exits, destinations });
       return { visitedRooms: next };
     }),
 }));

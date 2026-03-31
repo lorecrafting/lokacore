@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { ParchmentPage } from '../ParchmentPage';
 import { ParchmentText } from '../ui/ParchmentText';
 import { useGameStore } from '../../store/gameStore';
-import { colors } from '../../theme/colors';
+import { colors, fonts, fontSizes } from '../../theme/colors';
 
 export function EntityPage() {
   const currentEntity = useGameStore((s) => s.currentEntity);
@@ -41,15 +41,12 @@ export function EntityPage() {
         {currentEntity.name}
       </ParchmentText>
 
-      {/* Separator */}
-      <View style={styles.separator} />
-
       {/* Description */}
       <ParchmentText variant="body" style={styles.description}>
         {currentEntity.description}
       </ParchmentText>
 
-      {/* Actions */}
+      {/* Actions — authoritative list from server; underlined inline links */}
       {currentEntity.actions.length > 0 && (
         <View style={styles.actionsSection}>
           {currentEntity.actions.map((action) => (
@@ -57,17 +54,14 @@ export function EntityPage() {
               key={action}
               onPress={() => handleAction(action)}
               activeOpacity={0.6}
-              style={styles.actionButton}
             >
-              <ParchmentText variant="body" color={colors.action} style={styles.actionText}>
-                {action}
-              </ParchmentText>
+              <Text style={styles.actionText}>{action}</Text>
             </TouchableOpacity>
           ))}
         </View>
       )}
 
-      {/* Back button */}
+      {/* Back */}
       <TouchableOpacity onPress={handleBack} activeOpacity={0.6} style={styles.backButton}>
         <ParchmentText variant="small" color={colors.secondary}>
           [Back]
@@ -81,29 +75,19 @@ const styles = StyleSheet.create({
   entityName: {
     marginBottom: 12,
   },
-  separator: {
-    height: 1,
-    backgroundColor: colors.separator,
-    marginBottom: 16,
-  },
   description: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   actionsSection: {
-    gap: 10,
-    marginBottom: 24,
-  },
-  actionButton: {
-    borderWidth: 1,
-    borderColor: colors.separator,
-    borderRadius: 2,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    alignSelf: 'flex-start',
-    backgroundColor: 'rgba(138, 122, 106, 0.08)',
+    gap: 8,
+    marginBottom: 20,
   },
   actionText: {
-    letterSpacing: 0.3,
+    fontFamily: fonts.regular,
+    fontSize: fontSizes.body,
+    color: colors.action,
+    textDecorationLine: 'underline',
+    textDecorationColor: colors.action,
   },
   backButton: {
     marginTop: 8,

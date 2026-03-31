@@ -27,6 +27,8 @@ export interface EntitySummary {
   id: string;
   key: string;
   name: string;
+  long_desc?: string;
+  description?: string;
   primary_keyword?: string;
   type: "npc" | "item" | "player";
 }

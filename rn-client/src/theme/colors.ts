@@ -31,6 +31,7 @@ export const colors = {
   // Minimap
   dotCurrent: "#4D3824",
   dotVisited: "#B29E84",
+  dotKnown: "#D4C8B4",
   pathLine: "#8C7A66",
 
   // Vignette

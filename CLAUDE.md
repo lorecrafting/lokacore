@@ -12,7 +12,7 @@
 | Database | SQLite (via Ecto) | ecto_sqlite3 |
 | Auth | phx.gen.auth + Guardian JWT | 2.4.0 |
 | Scripting | Elixir (sandboxed) | Native |
-| Mobile Client | Godot | 4.6 |
+| Mobile Client | React Native (Expo) | SDK 52 |
 | Deployment | Fly.io | ~$5/month |
 
 ## Architecture
@@ -68,7 +68,7 @@ lokacore/
 │   │   └── live/admin_live/  # Admin dashboard + Builder (MUD terminal)
 │   └── priv/world/           # YAML game content (prototypes, quests, zones, scripts)
 ├── docs/                     # Architecture documentation
-├── godot-client/             # Godot 4.6 mobile client (3D "magic book")
+├── rn-client/                # React Native (Expo) mobile client
 └── CLAUDE.md
 ```
 
@@ -105,12 +105,11 @@ printf "look\nnorth\nlook\n" | nc localhost 4023        # Multi-step sequence
 # Mix task (offline, starts own app — slow on first use):
 mix loka.console "look" "talk thera" "1" north look
 
-# Godot Client
-cd godot-client
-./dev.sh                          # Hot reload (~1s per change)
-./build_web.sh --fast             # Quick build (~30s)
-./check.sh                        # Validate scripts (headless)
-./run_tests.sh                    # Run unit tests
+# React Native Client
+cd rn-client
+npm start                         # Start Expo dev server
+npm run ios                       # iOS simulator
+npm run android                   # Android emulator
 
 # Deployment
 fly deploy
@@ -125,11 +124,11 @@ fly deploy
 | `/admin/builder` | MUD terminal builder (content creation) | Admin |
 | `/client/auth/login` | Game client auth (magic link → JWT deep link) | No |
 
-Main game client is the Godot app connecting via Phoenix Channels.
+Main game client is the React Native (Expo) app connecting via Phoenix Channels. Godot client archived on `archive/godot-client` branch.
 
 ## Key Design Decisions
 
-1. **Godot Client**: 3D "magic book" for mobile/web (see `docs/decisions/2026-01-26-godot-client-migration.md`)
+1. **React Native Client**: Expo-based mobile client replacing the Godot "magic book" (archived on `archive/godot-client`)
 2. **SQLite**: Simpler, cheaper, sufficient for single-server MVP
 3. **No Redis**: ETS handles caching until multi-server needed
 4. **Elixir Scripting**: Sandboxed Elixir for game customization (replaces Lua)
