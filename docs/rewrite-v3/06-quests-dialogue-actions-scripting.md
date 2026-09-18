@@ -297,11 +297,11 @@ Parser should support classic MUD conveniences:
 
 We want a powerful AI-friendly escape hatch without reintroducing unrestricted runtime code.
 
-V3 SHOULD define **LokaScript**, an Elixir-looking restricted language.
+V3 SHOULD define **LokaScript**, an Elixir-looking restricted language whose released form is portable across offline mobile and online BEAM hosting.
 
 Key idea:
 
-> Parse Elixir syntax into AST, but interpret the permitted AST ourselves. Do not execute cartridge source with `Code.eval_string`.
+> Parse Elixir-like syntax during authoring into a portable normalized AST/bytecode, then interpret that representation inside the shared deterministic kernel. Do not execute cartridge source with `Code.eval_string`.
 
 This keeps syntax familiar to Elixir-capable models while creating a real semantic boundary.
 
@@ -332,7 +332,7 @@ Forbidden:
 - arbitrary Erlang BIF access;
 - wall clock/global randomness.
 
-## 17. Script binding registry
+## 17. Portable script binding registry
 
 Bindings are capabilities:
 
@@ -355,7 +355,7 @@ rng.chance
 rng.pick
 ```
 
-Each binding has input/result schema and cost.
+Each binding has input/result schema, cost, and portability classification. Offline cartridges may call portable bindings only.
 
 Mutation-like bindings return typed effects/signals; they do not write DB directly.
 
@@ -382,7 +382,7 @@ Scripts receive:
 - explicit RNG;
 - immutable view/query context.
 
-Given same state/event/seed they should produce same result.
+Given the same compiled script, state/event, logical time, and RNG state they MUST produce the same canonical result on mobile and server hosts.
 
 No hidden wall-clock access.
 
