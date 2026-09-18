@@ -21,7 +21,7 @@ The Builder API has explicit build targets. An author/model does not work in an 
 
 ### `story`
 
-For Loka Stories.
+For Story Mode.
 
 Constraints:
 
@@ -40,7 +40,7 @@ workspace.create target=story cartridge=fox_spirit_of_yunmeng
 
 ### `realm`
 
-For Loka Online native multiplayer content.
+For Realm Mode native multiplayer content.
 
 Allows:
 
@@ -55,7 +55,7 @@ Realm mode is not required to remain offline-portable.
 
 ### `promote`
 
-For adapting an existing portable story cartridge into Loka Online.
+For adapting an existing portable Story cartridge into Realm deployment.
 
 The workflow starts from an immutable certified cartridge and creates a new online deployment/adaptation workspace.
 
@@ -89,6 +89,18 @@ capability.search(target=realm, "shop")
 ```
 
 A story author cannot accidentally select server-only mechanics; a realm author is not constrained by offline portability where it provides no product value.
+
+Builder target is an authoring/runtime contract, **not a mobile-app target**. Story and Realm content are both consumed by the same Loka mobile app under different session authority modes.
+
+### Target determines certification
+
+The workspace target MUST select a default certification policy:
+
+- `story` → `offline_private_story` plus portable/offline/save-compatibility gates;
+- `realm` → an online profile such as `online_private_story`, `party_story`, or `shared_area`, including concurrency/security/load gates appropriate to scope;
+- `promote` → validates the source Story certificate, requires explicit multiplayer adaptation decisions, then runs the selected Realm certification profile.
+
+The builder may add stricter gates, but content cannot weaken target-mandated certification.
 
 ## 3. Workspace-first authoring
 
