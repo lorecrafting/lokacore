@@ -125,6 +125,93 @@ Quest instances, flags, reputation tracks, world events, and similar state MUST 
 
 No helper may default to realm/global scope merely because an ID was omitted.
 
+### Multiplayer state uses independent axes
+
+Do not overload one `scope` field to answer every multiplayer question.
+
+For multiplayer content, distinguish at least:
+
+1. **progress/state scope** — who owns quest/fact/progression state;
+2. **authority/instance scope** — which WorldInstance/ZoneShard owns the simulated entity/resource;
+3. **audience/visibility scope** — who is allowed to perceive/interact with a runtime entity/projection;
+4. **resource/contention scope** — who competes for a scarce facility, stock, spawn, reservation, or cooldown.
+
+Examples:
+
+| Example | Progress | Authority | Audience | Contention |
+|---|---|---|---|---|
+| Personal quest in shared town | player | shared ZoneShard | public/shared NPCs | none |
+| Personal quest NPC only quester sees | player | shared ZoneShard | player | none |
+| Party dungeon | party | private party WorldInstance | instance/party | instance |
+| Public world boss, personal quest credit | player | shared ZoneShard | public | realm/zone spawn |
+| One smithy can forge one sword/day | player quest | shared ZoneShard/service | public | realm/service queue |
+| Story Mode smithy one sword/day | player | local Story instance | player | local instance |
+
+A compiler/Builder MUST require each nontrivial multiplayer mechanic to be explicit about the axes it uses rather than infer them from quest scope.
+
+### Audience / visibility policy
+
+Runtime entities and projections MAY declare an audience policy independent of state ownership:
+
+```text
+public
+player(character_id)
+party(party_id)
+instance(instance_id)
+audience_set(...)
+```
+
+Audience controls:
+
+- inclusion in GameView;
+- search/target resolution;
+- interaction/action resolution;
+- narrative/ambient projection.
+
+It is not merely UI filtering. The authority MUST reject interactions from actors outside the audience.
+
+Use audience scoping when content should coexist in shared geography without being visible to everyone.
+
+### Scoped runtime entities
+
+A quest-specific actor may be a real RuntimeEntity owned by the shared ZoneShard but visible only to one player/party.
+
+Example:
+
+```text
+definition: npc/ghost_child
+authority: zone/shard town_square
+audience: player(A)
+lifecycle: until quest resolved
+```
+
+Player B in the same room receives no projection for that entity and cannot target it by forged ID.
+
+This is useful for:
+
+- personal apparitions;
+- quest witnesses;
+- temporary guides;
+- personal enemies;
+- quest-only objects/clues.
+
+Do not create a full private WorldInstance merely to hide one NPC.
+
+### Projection override versus separate entity
+
+If the “different NPC” is actually the same physical public actor with personalized dialogue/actions, prefer a **shared entity plus player-scoped projection/relationship/fact rules**.
+
+Use a separate scoped RuntimeEntity only when the actor needs independent:
+
+- presence/location;
+- health/lifecycle;
+- combat;
+- schedule;
+- containment;
+- spawn/despawn state.
+
+This avoids one physical blacksmith becoming 5,000 duplicate runtime entities just because every player sees different dialogue.
+
 ## 7. Typed world facts and narrative memory
 
 Cross-system story/world state MUST NOT become an untyped bag of string flags.
