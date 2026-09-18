@@ -165,7 +165,7 @@ requires:
     - contextual_actions_v1
     - dialogue_choices_v1
 
-execution_profiles:
+supported_profiles:
   - offline_private
   - online_private
 
