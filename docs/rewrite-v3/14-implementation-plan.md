@@ -189,15 +189,16 @@ Make machine-readable contracts exist before features.
 
 ### Gate R3
 
-From registries, tooling can generate/check:
+From the portable/content registries, tooling can generate/check:
 
-- Elixir host types/validators;
-- TypeScript protocol types;
-- builder/MCP tool definitions;
-- docs/help excerpts;
-- test fixtures.
+- Elixir portable/domain types and validators;
+- TypeScript portable command/GameView/content types used by Story Mode;
+- capability/schema docs and help excerpts;
+- canonical test fixtures.
 
 No handwritten duplicate portable command/event/GameView catalogs.
+
+R3 intentionally does **not** generate Builder/MCP operations or the Realm network protocol. Those contracts are introduced only when R11 and R14 need them.
 
 Do **not** build the generalized Builder operation registry or the full Realm transport protocol in R3. Builder operation schemas belong to R11; Realm protocol/codegen belongs to R14.
 
