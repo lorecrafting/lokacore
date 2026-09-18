@@ -4,7 +4,7 @@
 **Date:** 2026-09-17  
 **Source system:** `lorecrafting/lokacore`  
 **Strategic parent:** `docs/product/CARTRIDGE-ROADMAP.md`  
-**Purpose:** define a clean-room rebuild of Loka with a BEAM-native online runtime and a portable offline rules kernel, preserving useful Lokacore product/mechanical ideas while removing transitional architecture and making AI-assisted development safe, testable, and bounded.
+**Purpose:** define a clean-room rebuild of Loka as a shared game platform with two deliberately separate clients—offline-first **Loka Stories** and BEAM-authoritative **Loka Online**—while preserving portable cartridge semantics where reuse is valuable and removing transitional Lokacore architecture.
 
 ## 1. Why this packet exists
 
@@ -38,9 +38,9 @@ When code and this packet disagree in the future, accepted amendments and tests 
 
 Loka v3 is one game platform with one portable rules/content model serving:
 
-1. offline private storypack instances executed locally;
-2. online private and small-party cartridge instances hosted by BEAM;
-3. certified shared areas;
+1. offline private storypacks in Loka Stories;
+2. online private/party adventures in Loka Online;
+3. certified shared areas in Loka Online;
 4. eventually, a persistent text-first multiplayer world.
 
 These modes MUST use the same compiled cartridge contracts and portable deterministic rule semantics where the cartridge declares offline support. Single-player is not a disposable engine: the authority host changes from local mobile to BEAM as content moves online.
@@ -99,7 +99,7 @@ The online authority/orchestration layer SHOULD remain idiomatic Elixir/OTP. Rul
 | Online language/runtime | Elixir on BEAM/OTP |
 | Portable offline rules | Shared deterministic kernel; Rust is the working choice pending a mandatory cross-platform spike |
 | Server UI/API | Phoenix |
-| Mobile | React Native / Expo |
+| Clients | Two React Native / Expo app targets: Loka Stories (offline-first) and Loka Online (multiplayer-only), sharing packages but not authority responsibilities |
 | Online production DB | PostgreSQL from v3 start; offline saves use local SQLite |
 | Game authority | offline: local serialized authority; online: BEAM server authoritative |
 | Offline private authority | local serialized instance authority + local SQLite |
