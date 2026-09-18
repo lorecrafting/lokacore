@@ -357,7 +357,7 @@ Required for commercial release:
 - save/reconnect/cloud backup if offered;
 - completion/end state.
 
-## 20. Certification profiles
+## 20. Certification profiles and Builder targets
 
 ```text
 offline_private_story
@@ -370,6 +370,52 @@ mobile_release
 ```
 
 Each profile selects mandatory gates.
+
+### `story` target
+
+Minimum required evidence:
+
+- static/schema/reference validation;
+- portable capability check;
+- deterministic kernel tests;
+- quest/dialogue model checks;
+- autonomous simulation where applicable;
+- script fuzzing where scripts exist;
+- offline lifecycle/app-kill/storage/clock tests;
+- save and app/kernel compatibility;
+- semantic review;
+- physical-device Story Mode smoke.
+
+Network availability MUST NOT be a prerequisite for certified ordinary play after acquisition/download.
+
+### `realm` target
+
+Select `online_private_story`, `party_story`, or `shared_area`.
+
+Minimum evidence adds as relevant:
+
+- protocol/version negotiation;
+- command receipt/idempotency;
+- PostgreSQL transactional recovery;
+- reconnect/resync;
+- concurrent-player interleavings;
+- authorization/abuse checks;
+- mailbox/backpressure/load envelope;
+- shard/handoff testing for shared areas;
+- Realm Mode physical-device smoke.
+
+Realm certification does not require offline portability unless the content is explicitly a portable Story cartridge being reused online.
+
+### `promote` target
+
+Promotion MUST:
+
+1. verify the immutable source Story artifact/certificate;
+2. record explicit decisions for scope, NPC multiplicity, death/respawn, loot/resource contention, economy, and mount/instance policy;
+3. produce a new deployment/adaptation hash;
+4. run the selected Realm certification profile.
+
+A prior Story certificate is evidence, not a substitute for multiplayer certification.
 
 ## 21. Release certificate
 
