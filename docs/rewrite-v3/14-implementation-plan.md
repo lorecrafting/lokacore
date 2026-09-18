@@ -42,11 +42,13 @@ No unresolved contradiction about:
 - mobile protocol;
 - cartridge versioning.
 
-## R1 — Portable-kernel feasibility spike
+## R1 — Disposable portable-kernel feasibility spike
 
 ### Objective
 
 Prove the hardest new architectural decision before investing in the rebuild.
+
+R1 SHOULD live in a disposable spike repository/workspace, not as compatibility code inside Lokacore and not as the foundation of the production v3 repository. Keep only evidence, benchmarks, fixtures, and code worth deliberately re-implementing after the decision.
 
 ### Working hypothesis
 
@@ -86,7 +88,9 @@ Commands:
 - deterministic RNG;
 - same errors;
 - build automation on all hosts;
-- acceptable FFI overhead;
+- acceptable FFI overhead/copy behavior at realistic world-state sizes;
+- a safe decide → persist → apply-delta protocol;
+- deterministic IDs/map ordering/numeric behavior;
 - no BEAM scheduler starvation.
 
 ### Rejection criteria
