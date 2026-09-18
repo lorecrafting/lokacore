@@ -2,6 +2,8 @@
 
 This document tracks planned work and issues for the Loka MUD engine.
 
+> **Product sequencing:** [`docs/product/CARTRIDGE-ROADMAP.md`](product/CARTRIDGE-ROADMAP.md) is the proposed working product/architecture roadmap. This backlog is tactical; it does not override that roadmap's gates or architectural decisions.
+
 ## Using This Backlog
 
 Tasks are tracked here with categories and priorities. We use Claude Code's native task tools for active work during development sessions.

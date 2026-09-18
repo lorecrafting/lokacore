@@ -2,15 +2,27 @@
 
 Business strategy, monetization, and product vision for Loka.
 
+## Current working direction
+
+The [Cartridge & Living World Roadmap](CARTRIDGE-ROADMAP.md) is the proposed official
+working baseline for product sequencing and becomes current when merged. It consolidates
+the cartridge-first path: ship isolated mobile story worlds on the existing multiplayer
+runtime, certify them as immutable content releases, and expand toward shared areas and
+a persistent MUD without building a second engine.
+
+Earlier product and monetization documents remain useful research. When their product
+sequencing conflicts with the roadmap, the roadmap owns the current working direction.
+
 ## Documents
 
 ### Strategy
 
 | Document | Description |
 |----------|-------------|
+| **[Cartridge & Living World Roadmap](CARTRIDGE-ROADMAP.md)** | **Working product/architecture roadmap: cartridges, quest reliability, scripting, certification, mobile commerce, and MUD expansion** |
 | [World Platform Vision](world-platform.md) | Long-term platform vision and positioning |
 | [AI Resilience Strategy](ai-resilience-strategy.md) | How Loka thrives in an age of LLM automation |
-| [Open Product Questions](open-product-questions.md) | Unresolved product decisions |
+| [Open Product Questions](open-product-questions.md) | Earlier unresolved product decisions; retained as decision history/research |
 
 ### Monetization
 
