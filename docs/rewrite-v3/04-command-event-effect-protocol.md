@@ -177,7 +177,7 @@ Rules:
 
 This is the online extension point that lets BEAM-native Realm systems coexist with portable cartridge mechanics without reintroducing multiple mutation authorities.
 
-## 8. Game error taxonomy
+## 7. Game error taxonomy
 
 Every rejection has stable machine code:
 
@@ -202,7 +202,7 @@ Human text is localized/rendered separately.
 
 Agents and mobile clients should never need to parse an English error string to decide what happened.
 
-## 7. Domain event envelope
+## 8. Domain event envelope
 
 ```elixir
 %DomainEvent{
