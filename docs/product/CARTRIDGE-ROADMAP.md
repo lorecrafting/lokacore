@@ -6,6 +6,14 @@
 
 This document owns product sequencing for the cartridge strategy. It does not by itself authorize a large rewrite. Each architecture change still needs a bounded implementation plan, tests, review, and migration path. Existing product notes remain useful research unless they conflict with an explicit decision here.
 
+### Clean-rebuild decision
+
+The working implementation direction is now a **clean-sheet Loka v3 rebuild**, not an in-place refactor or module-by-module port of Lokacore.
+
+The normative draft architecture packet is [`docs/rewrite-v3/README.md`](../rewrite-v3/README.md). Lokacore remains a reference/evidence corpus for requirements, mechanics, tests, failure modes, and selected content semantics. The new implementation should start from accepted v3 contracts rather than preserve legacy APIs or compatibility layers.
+
+The rewrite packet refines this roadmap in one major respect: offline-capable single-player storypacks are locally authoritative and use a portable deterministic rules kernel, while online private/party/shared play is authoritative under the BEAM runtime. The cartridge/content model is shared so storypack work can graduate into the later MMORPG without becoming throwaway work.
+
 ## Strategy in one page
 
 Build **one Loka runtime and one mobile app**. Ship small, self-contained story worlds first as purchasable **cartridges**. Run those cartridges on the same authoritative Elixir/Phoenix simulation that can later host shared areas and a persistent MUD.
