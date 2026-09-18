@@ -134,6 +134,8 @@ Read in this order:
 13. [Lokacore Feature Inventory](13-lokacore-feature-inventory.md)
 14. [Implementation Plan](14-implementation-plan.md)
 15. [Acceptance Scenarios](15-acceptance-scenarios.md)
+16. [Architecture Decision Register](16-decision-register.md)
+17. [Research Baseline and External References](17-research-baseline.md)
 
 ## 8. What this packet deliberately does not do
 
