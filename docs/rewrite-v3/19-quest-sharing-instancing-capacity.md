@@ -20,7 +20,7 @@ Every multiplayer quest/deployment should be explainable across these dimensions
 | Consequence scope | player / party / instance / realm | Who experiences the durable world change? |
 | Presence audience | all / player / party / participants / condition | Who can see or interact with an entity/presentation? |
 | Spatial placement | shared world / scoped overlay / private instance | Is this the same physical simulation or a separate copy? |
-| Capacity scope | unlimited / player / party / facility / instance / realm | Who competes for this scarce service/resource? |
+| Capacity scope | unlimited / player / party / service / instance / realm | Who competes for this scarce service/resource? |
 
 No dimension is inferred from another.
 
@@ -239,7 +239,7 @@ Preferred escalation order:
 3. private/party instance;
 4. realm-shared mutation when the fiction intentionally affects everyone.
 
-## 9. Scarce facilities are world systems, not quest state
+## 9. Scarce services are compositions of reusable primitives
 
 A quest may depend on a genuinely scarce service.
 
@@ -255,43 +255,47 @@ Examples:
 - auction counter;
 - rare resource node.
 
-Scarcity belongs to a reusable Facility/Service capability.
+Do not hardcode a `Smithy`, `Healer`, or other profession-specific engine subsystem.
 
-A facility declares:
+Model scarce world services by composing reusable capability primitives.
 
-- capacity model;
-- capacity scope;
-- service duration;
-- queue/reservation policy;
-- admission requirements;
-- cancellation policy;
-- input/output ownership.
+A typical long-running service may compose:
 
-Capacity models may include:
+- **AdmissionPolicy** — who may request the service and under what prerequisites;
+- **CapacityPolicy** — concurrent slots, tokens per period, finite stock, reservation windows, or unlimited capacity;
+- **CapacityScope** — player, party, service entity, instance, realm, or another explicit owner;
+- **Queue/ReservationPolicy** — FIFO, reservation window, priority class, no queue, etc.;
+- **InputEscrow** — optional atomic custody of materials/currency/items;
+- **DurationPolicy** — instant, fixed duration, recipe-defined duration, or scheduled window;
+- **CompletionRule** — what constitutes successful completion/failure;
+- **OutputPolicy** — immediate delivery, claimable output, beneficiary ownership, shared result;
+- **CancellationPolicy** — what happens to reservation/inputs when cancelled;
+- **Cooldown/RatePolicy** — optional per-requester or shared throttling.
 
-- concurrent slots;
-- tokens per period;
-- finite stock;
-- reservation windows.
+Not every service uses every primitive.
 
-Capacity scope may be:
+Examples:
 
-- player;
-- party;
-- facility;
-- instance;
-- realm.
+- **smithy** = admission + shared capacity + reservation + escrow + duration + output;
+- **ferry** = schedule + shared capacity + boarding reservation + departure/completion;
+- **healer** = admission + capacity + duration + payment + status removal;
+- **trainer** = admission + capacity + duration + skill/progression consequence;
+- **ritual altar** = admission + participant set + optional item escrow + timed completion;
+- **inn room** = finite stock/reservation + duration + occupancy;
+- **resource processor** = stock/input + capacity + duration + output;
+- **auction window** = admission + reservation/queue + deadline + settlement;
+- **rare harvest node** = finite stock + regeneration policy + contention.
 
-A single physical Realm smithy normally uses facility scope.
+A single physical Realm smithy is merely one authored Service composition whose capacity owner is that shared service/entity.
 
-## 10. Durable WorkOrders
+## 10. Durable ServiceJobs
 
-Long-running services create durable WorkOrders.
+Long-running or queued services create durable **ServiceJobs**.
 
-A WorkOrder records:
+A ServiceJob records:
 
-- work order ID;
-- facility ID;
+- service job ID;
+- service/provider ID;
 - requester;
 - beneficiary;
 - recipe/service;
@@ -313,22 +317,24 @@ Status examples:
     cancelled
     failed
 
-The facility owns the queue/timer.
+The owning service/provider authority owns the queue/reservation/timing semantics.
 
-The quest only observes facility DomainEvents.
+The quest only observes typed service/job DomainEvents.
 
-## 11. The one-sword-per-day smithy
+## 11. Worked example: the one-sword-per-day smithy
 
 Requirement:
 
 > There is one smithy. It can forge only one sword per day. My personal quest requires a sword forged overnight.
 
-Correct model:
+This is only a worked example of the generic service primitives above, not a hardcoded engine feature.
+
+Correct composition:
 
 - quest progress: player scoped;
 - smith NPC: shared;
-- smithy facility: shared;
-- capacity: facility scoped;
+- service/provider: shared smithy entity;
+- capacity: scoped to that service/provider;
 - work order beneficiary: player;
 - world space: shared;
 - crafting completion: durable scheduler/domain event.
@@ -336,18 +342,18 @@ Correct model:
 Flow:
 
     player invokes forge
-      -> facility validates materials and admission
-      -> inputs move into escrow
-      -> facility atomically reserves the next legal slot
-      -> WorkOrder is committed
-      -> work_order_submitted event
+      -> AdmissionPolicy validates materials/prerequisites
+      -> InputEscrow takes materials atomically
+      -> CapacityPolicy + Queue/ReservationPolicy reserve the next legal slot
+      -> ServiceJob is committed
+      -> service_job_submitted event
 
 At completion:
 
     scheduler
-      -> facility completes WorkOrder
+      -> owning service completes ServiceJob
       -> output created/claimable
-      -> work_order_completed event
+      -> service_job_completed event
       -> player's quest objective observes eligible event
 
 The quest does not own the queue or overnight timer.
@@ -363,9 +369,9 @@ Possible meanings are different:
 
 Content must choose one.
 
-## 12. Shared bottleneck fairness
+## 12. Shared service fairness and contention
 
-Realm facilities may define:
+Shared services may define:
 
 - FIFO queue;
 - visible estimated start/completion;
@@ -383,9 +389,9 @@ All allocation is server-authoritative and transactional.
 
 Two players racing for the last slot cannot both receive it.
 
-## 13. Story Mode facility behavior
+## 13. Story Mode service behavior
 
-The same facility capability runs locally.
+The same composed service primitives run locally.
 
 A Story cartridge may model:
 
@@ -438,7 +444,7 @@ Example party objective:
     reward_credit: members_present_at_completion
     unique_drop_owner: roll
 
-Example party facility job:
+Example party service job:
 
     requester: party
     beneficiary: designated_member
@@ -521,9 +527,9 @@ For realm events:
 | Contradictory/destroyed geometry | private/party instance |
 | Exclusive boss or reset puzzle | private/party instance |
 | Public world boss | realm-shared state |
-| One physical smithy with queue | shared facility |
-| Story smithy overnight crafting | local facility |
+| One physical smithy with queue | shared service |
+| Story smithy overnight crafting | local service |
 | Personal phased-NPC loot | player-scoped drop |
-| Shared scarce resource | shared facility/entity with atomic contention |
+| Shared scarce resource | shared service/entity with atomic contention |
 
 This flexibility is intentional. A living MUD needs both private narrative and genuinely shared scarcity.
