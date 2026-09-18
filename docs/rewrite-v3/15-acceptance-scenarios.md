@@ -1101,53 +1101,53 @@ The correct instance identity and state are restored; a duplicate instance is no
 
 Completed/expired private instance tears down ephemeral entities while explicitly exported rewards/memories survive according to policy.
 
-### FACILITY-01 — One shared smithy slot race
+### SERVICE-01 — Shared service slot race
 
-Two Realm players submit a forge order for the only available facility slot concurrently.
+Two Realm players submit requests for the only available slot on a shared service concurrently. The smithy forge case is one fixture.
 
 Exactly one order receives that slot; the other is queued/rejected according to policy.
 
-### FACILITY-02 — WorkOrder input escrow
+### SERVICE-02 — ServiceJob input escrow
 
-Submitting a sword order moves required materials into escrow atomically with WorkOrder creation.
+Submitting a sword order moves required materials into escrow atomically with ServiceJob creation.
 
 Crash at every boundary cannot duplicate or lose inputs.
 
-### FACILITY-03 — WorkOrder completion exactly once
+### SERVICE-03 — ServiceJob completion exactly once
 
 Scheduler retries the completion job after a crash.
 
 Sword output is created/claimed once and the completion DomainEvent is idempotent.
 
-### FACILITY-04 — Personal quest observes shared work
+### SERVICE-04 — Personal quest observes shared ServiceJob
 
 Player A's personal quest requires the sword.
 
 Player B also uses the same smithy.
 
-Only completion of A's eligible WorkOrder progresses A's quest.
+Only completion of A's eligible ServiceJob progresses A's quest.
 
-### FACILITY-05 — Capacity semantics are precise
+### SERVICE-05 — Capacity semantics are precise
 
 Content declaring one start per day behaves differently from one concurrent one-day slot and one completion per day, and certification fixtures prove the selected rule.
 
-### FACILITY-06 — Queue persists through restart
+### SERVICE-06 — Queue persists through restart
 
-Realm service/ZoneShard restarts with queued and active WorkOrders.
+Realm service/ZoneShard restarts with queued and active ServiceJobs.
 
 Queue order, reservations, escrow, and scheduled completion remain correct.
 
-### FACILITY-07 — Story overnight forge
+### SERVICE-07 — Story overnight forge
 
 Story Mode submits an overnight order, app closes, and the cartridge's declared time policy is applied on resume.
 
 The order completes or remains pending deterministically according to real-elapsed/play-time policy.
 
-### FACILITY-08 — Cancellation and refund
+### SERVICE-08 — Cancellation and refund
 
 Cancelling a queued/in-progress order applies the configured cancellation/escrow/refund policy once and cannot be exploited for material duplication.
 
-### FACILITY-09 — Queue abuse limits
+### SERVICE-09 — Queue abuse limits
 
 A character/account attempts to monopolize the smithy with excessive queued orders.
 
@@ -1158,8 +1158,8 @@ Configured max-outstanding/admission policy is enforced transactionally.
 One quest simultaneously uses:
 
 - player-scoped progress;
-- shared smithy facility;
-- player-beneficiary WorkOrder;
+- shared service using the smithy fixture;
+- player-beneficiary ServiceJob;
 - player-phased quest apparition;
 - shared town geometry.
 
@@ -1169,4 +1169,4 @@ All scopes remain independent and correct.
 
 A portable Story cartridge with local overnight smithing is promoted.
 
-Promotion explicitly chooses whether Realm deployment uses personal capacity, an instanced facility, or a genuinely shared facility queue and runs the matching certification gates.
+Promotion explicitly chooses whether Realm deployment uses personal capacity, an instanced service, or a genuinely shared service queue and runs the matching certification gates.
