@@ -1,43 +1,69 @@
 # 10 — Mobile, Commerce, and Release
 
-## 1. Two focused React Native clients
+## 1. One React Native client, two session modes
 
-Loka v3 ships two product clients from one monorepo:
+Loka v3 ships one React Native / Expo application.
 
-### Loka Stories
+The app has two strict gameplay modes:
 
-Offline-first cartridge player. It embeds the local authority/kernel bridge, local SQLite save layer, catalog/download/purchase UI, campaigns, and optional cloud backup/account linking.
+### Story Mode
 
-### Loka Online
+Offline-first cartridge play. Uses `LocalStorySession`, the portable-kernel bridge, local SQLite, save slots, cartridge library, campaigns, and offline entitlement proof.
 
-Online-only multiplayer/MUD client. It authenticates, joins Phoenix/BEAM-authoritative worlds, renders server GameViews, and provides social/party/realm UI. It has no local authoritative world save.
+### Realm Mode
 
-The clients SHOULD share packages for design system, portable GameView rendering, localization, generated types, and common presentation components, but MUST NOT share a giant authority state machine full of offline/online conditionals.
+Online multiplayer/MUD play. Uses `RemoteRealmSession` over Phoenix/BEAM and renders server-authoritative GameViews. It has no local authoritative world save.
 
-## 2. Mobile monorepo structure
+### GameSession boundary
+
+Shared gameplay UI talks to a small session interface, not directly to SQLite, Rust, Phoenix, or Ecto concepts.
+
+Conceptually:
+
+```text
+start(context)
+dispatch(command)
+current_view()
+subscribe()
+close()
+```
+
+The exact API may differ, but there MUST be one active authority implementation per gameplay session:
+
+- `LocalStorySession`
+- `RemoteRealmSession`
+
+Mode-specific UI such as cartridge library or guild chat lives outside the common GameView canvas.
+
+## 2. Mobile structure
 
 Recommended:
 
 ```text
 mobile/
-├── apps/
-│   ├── stories/        # offline-first product shell
-│   └── online/         # multiplayer/MUD product shell
+├── app/                     # one Expo application / navigation shell
+├── features/
+│   ├── story/               # library, saves, local-session UX
+│   └── realm/               # login, social, realm-session UX
+├── authority/
+│   ├── local-story/         # kernel bridge + SQLite authority
+│   └── remote-realm/        # Phoenix transport + resync
 ├── packages/
-│   ├── ui/             # shared design system/components
-│   ├── game-view/      # host-neutral GameView rendering
+│   ├── ui/
+│   ├── game-view/
 │   ├── localization/
-│   └── generated/      # generated shared types/schemas
+│   └── generated/
 ├── native/
-│   └── stories-kernel/ # portable-kernel bindings used by Stories
+│   └── portable-kernel/
 └── test/
 ```
 
-The Online client may share GameView/rendering packages but does not need to embed the portable kernel merely because the BEAM server uses it.
+Use lint/build architecture rules so shared packages cannot import either authority implementation.
 
-No manually authored duplicate game-rule implementation.
+The presence of the local kernel in the app binary does not weaken Realm authority because the server revalidates every Realm command and owns all committed Realm state.
 
 ## 3. Online connection lifecycle
+
 
 ```text
 authenticate
@@ -94,22 +120,21 @@ Mobile persists:
 
 Online server projections are cache only.
 
-## 6. Stories app: many cartridges
+## 6. One app, many cartridges, later Realm Mode
 
-The Loka Stories store binary contains:
+The Loka binary contains the Story runtime foundation from launch:
 
-- offline presentation shell;
 - portable kernel native library/version;
 - local authority + SQLite save support;
 - supported render/action capabilities;
 - catalog/purchase/download UI;
 - optional account/cloud-backup adapters.
 
-Cartridges are separately downloadable data/assets/bounded portable rule IR compatible with installed Stories kernel/client features.
+Cartridges are separately downloadable data/assets/bounded portable rule IR compatible with installed kernel/client features.
 
-Normal story release SHOULD NOT require a new Stories binary.
+Normal story release SHOULD NOT require a new app binary.
 
-Loka Online has its own release cadence and only needs updates when multiplayer client/protocol/presentation capabilities change.
+Realm Mode MAY ship later through an app update. Once present, Realm-specific UI/protocol code can evolve while offline-save compatibility remains a release invariant.
 
 ## 7. Client/kernel feature negotiation
 
@@ -454,16 +479,16 @@ An app update with no network must still open supported offline saves.
 
 
 
-## 29. Cross-client account and entitlement boundary
+## 29. Account, entitlement, and mode boundary
 
-Separate apps make authority simpler but create a deliberate commerce/account question.
+One app removes the need for cross-app purchase portability, but it does not remove trust boundaries.
 
-Default launch rule SHOULD be:
+Default rules:
 
-- a Loka Stories purchase guarantees access in Loka Stories;
-- Loka Online access/rewards are governed by online account entitlements and product rules;
-- do not promise automatic cross-app purchase portability until current Apple/Google rules, receipt/account linking, and product economics are verified.
+- Story Mode MAY work without a logged-in Loka account after legitimate acquisition/download.
+- Realm Mode requires an authenticated online identity.
+- canonical cartridge entitlement may be cached locally for offline Story access and also known server-side when purchase evidence has been verified;
+- editable Story save contents never grant authoritative Realm gold, items, levels, or progression;
+- owning a Story cartridge MAY unlock a Realm adventure, cosmetic, badge, or account feature only through an explicit server-side product rule—not because Realm reads the local save.
 
-If product later grants an Online benefit because a user owns a Stories cartridge, the server may map verified purchase/account evidence into a **separate canonical online entitlement** or non-competitive memory/badge. The mobile clients never directly trust each other's local purchase flags.
-
-An optional Loka account can link Stories purchases/cloud backups to a player identity when online, but Stories ordinary offline play must not require that account after legitimate acquisition/download.
+A user may link Story cloud backup/purchases to the same Loka account used by Realm, which simplifies UX while preserving authority separation.
