@@ -10,6 +10,7 @@ loka/
 │   ├── loka_core/       # pure domain types/rules/capability contracts
 │   ├── loka_content/    # cartridge parsing/compiler/definition registry
 │   ├── loka_store/      # Ecto/PostgreSQL persistence adapters
+│   ├── loka_platform/   # accounts, catalog, entitlements, purchase/restore services
 │   ├── loka_runtime/    # OTP world/session/scheduling authority
 │   ├── loka_builder/    # workspaces, Builder API, lab, certification
 │   └── loka_web/        # Phoenix HTTP/channels/admin/MCP adapter
@@ -23,24 +24,25 @@ loka/
 This exact split MAY be adjusted after a compile-dependency spike, but the dependency direction is normative:
 
 ```text
-core
- ↑  ↑
- |  content
- |   ↑
-store |
-  ↑  |
- runtime
-  ↑  ↑
-builder
-  ↑
- web
+core        content
+ ↑            ↑
+ |            |
+ store      platform
+  ↑  \       /  ↑
+  |   runtime   |
+  |      ↑      |
+  +---- builder-+
+          ↑
+         web
 ```
 
 `loka_core` MUST NOT depend on Phoenix, Ecto, filesystem, network, or runtime processes. Portable rule semantics that must execute offline SHOULD live in or call the shared kernel behind a narrow adapter.
 
-`loka_store` may depend on core domain types but MUST NOT contain game rules.
+`loka_store` may depend on core/domain data contracts but MUST NOT contain game rules.
 
-`loka_web` is an adapter layer and MUST NOT become a source of game truth.
+`loka_platform` owns online account/catalog/entitlement/purchase-restore application rules. It MUST NOT own world simulation or cartridge mechanics.
+
+`loka_web` is an adapter layer and MUST NOT become a source of game or commerce truth.
 
 Boundary enforcement SHOULD use separate umbrella apps plus compile-time boundary checks/tests.
 
