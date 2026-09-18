@@ -59,9 +59,11 @@ Examples:
 
 Client messages are not domain events.
 
-## 2. Command envelope
+## 2. Host-neutral command semantics
 
-External command schema:
+The same logical command types drive offline and online play. Online they arrive through the external protocol; offline the React Native/local authority constructs the same canonical command payload locally.
+
+### External online command envelope
 
 ```json
 {
@@ -82,9 +84,9 @@ The gateway supplies authenticated account/session identity; the client cannot c
 
 `expected_revision` MAY be omitted for commutative/read-like operations but SHOULD be used for state-sensitive interactions where stale UI matters.
 
-## 3. Internal command struct
+## 3. Canonical command representation
 
-After protocol validation:
+After online protocol validation—or local offline input adaptation—the authority host constructs:
 
 ```elixir
 %Command{
@@ -249,7 +251,7 @@ command c1
 
 The trace viewer must reconstruct this graph.
 
-## 11. Protocol source of truth
+## 11. Protocol source of truth for online transport
 
 External protocol definitions MUST live in a language-neutral machine-readable schema source under `protocol/`.
 
@@ -395,3 +397,10 @@ CI MUST include fixtures asserting both Elixir and TypeScript agree on:
 - representative snapshots.
 
 Breaking protocol changes require version bump and compatibility policy.
+
+
+## 19. Offline command conformance
+
+The portable kernel command schema is also machine-readable. The online Elixir host and offline native/mobile host MUST serialize equivalent commands into the same kernel representation.
+
+Golden conformance fixtures cover command -> decision/event/effect output independent of network transport. Online protocol code wraps these semantics; it does not redefine them.
