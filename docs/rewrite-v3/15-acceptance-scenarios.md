@@ -196,13 +196,13 @@ Equipped item remains owned/contained consistently and cannot also be equipped b
 
 ## D. Quest correctness
 
-### QST-01 — Accept
+### QST-01 — Offered activation
 
-Available quest becomes accepted/in-progress through legal transition.
+An eligible offered quest has no QuestInstance before acceptance. Accepting it creates exactly one active QuestInstance with activation metadata through a legal transition.
 
-### QST-02 — Double accept
+### QST-02 — Double activation
 
-Retry does not create duplicate QuestInstance.
+Retrying the offered/automatic/discovery activation event does not create a duplicate QuestInstance.
 
 ### QST-03 — Wrong NPC talk
 
@@ -483,7 +483,7 @@ Budget enforced.
 
 ### SCR-07 — Event recursion
 
-Script signals itself recursively.
+Script emits a custom DomainEvent that recursively causes itself.
 
 Event-chain depth/cycle controls terminate with diagnostic.
 
