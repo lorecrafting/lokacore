@@ -300,14 +300,14 @@ Support real narrative cartridges.
 - idempotent rewards;
 - dialogue graph;
 - dialogue conditions/actions;
-- portable LokaScript normalized AST/bytecode;
+- LokaScript parser/normalized-IR skeleton and interpreter core sufficient to prove containment/determinism;
+- only the bindings actually needed by the first cartridge plus a small synthetic safety fixture set;
 - interpreter budgets;
-- portable binding registry;
 - event-chain bounds.
 
 ### Gate R7
 
-Known Lokacore quest-bug class has a regression scenario that cannot reproduce corruption/premature completion.
+Known Lokacore quest-bug class has a regression scenario that cannot reproduce corruption/premature completion. LokaScript containment/determinism fixtures pass, but a broad general-purpose binding library is **not** required before R10.
 
 ## R8 — Living-world capability pack
 
@@ -397,7 +397,7 @@ Full `offline_private_story` certification plus a **developer-harness physical-d
 
 The cartridge should be authored primarily through source files/compiler/Lab at this stage. Record every repetitive or error-prone authoring operation as evidence for the Builder API rather than prematurely generalizing it.
 
-## R11 — Builder API v1
+## R11 — Builder API v1 and script-surface generalization
 
 ### Objective
 
@@ -415,7 +415,8 @@ Let humans/agents author without raw repo semantics.
 - semantic rename;
 - audit receipts;
 - terminal adapter;
-- MCP adapter.
+- MCP adapter;
+- expand LokaScript bindings/recipes only from concrete R10 authoring needs and accepted reusable capability gaps.
 
 ### Gate R11
 
