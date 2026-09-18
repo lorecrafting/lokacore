@@ -256,13 +256,15 @@ command_id
 actor_id
 accepted_revision
 result_code
+committed_revision
+response_payload_or_ref
 result_digest
 created_at
 ```
 
 Unique key: `(instance_id, command_id)`.
 
-If the same command is retried, runtime returns the prior result/ack rather than executing again.
+If the same command is retried, runtime returns the prior committed result/ack rather than executing again. The receipt therefore MUST retain either the stable response payload required for retry or a durable reference from which that response can be reconstructed; a digest alone is insufficient.
 
 ## 13. Transactional command commit
 
