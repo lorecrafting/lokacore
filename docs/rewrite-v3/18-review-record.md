@@ -446,3 +446,44 @@ The first real cartridge is now required to prove at least:
 - branch comparison and forward simulation.
 
 This turns “living and breathing” from an aspiration into an architecture and certification requirement.
+
+
+## 25. Review round two: quest tracking, phasing, instancing, and bottlenecks
+
+The review then challenged a common MMORPG ambiguity: whether a quest is simply “instanced” or “shared.”
+
+That binary is insufficient.
+
+The architecture now separates five independent dimensions:
+
+- progress scope;
+- consequence scope;
+- presence/audience;
+- spatial placement;
+- capacity scope.
+
+This permits, for example:
+
+- player-scoped quest progress;
+- one shared blacksmith NPC;
+- one shared smithy queue for the whole facility;
+- a private apparition visible only to the questing player;
+- a private party dungeon later in the same quest.
+
+A dedicated normative specification now defines these combinations.
+
+### Smithy bottleneck
+
+A one-sword-per-day smithy is owned by a reusable Facility/Service capability and durable WorkOrder system.
+
+The quest observes work-order completion; it does not own the overnight timer or queue.
+
+Inputs can be escrowed, allocation is atomic, capacity is inspectable, and Realm fairness/retry semantics can be certified.
+
+### Phasing
+
+Personal quest actors use scoped AudiencePolicy/overlay presence under the shared ZoneShard rather than requiring whole-zone instancing.
+
+Shared NPCs remain shared when only dialogue/relationship differs.
+
+Full private instances are reserved for incompatible physical simulations such as destructive branches, exclusive bosses, puzzle resets, or heavily private scripted sequences.
