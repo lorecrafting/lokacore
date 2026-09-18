@@ -464,7 +464,7 @@ Later the MMO can expose:
 
 Campaign ordering/continuity is product metadata; cartridge content remains reusable.
 
-## 15. Cartridge versus deployment
+## 14. Cartridge versus deployment
 
 Separate reusable story/content from how it is hosted.
 
@@ -510,7 +510,7 @@ policies:
 
 Deployment is separately hashed and certified.
 
-## 14. Three ways a single-player cartridge enters the MMO
+## 15. Three ways a single-player cartridge enters the MMO
 
 This is the central reconciliation mechanism.
 
