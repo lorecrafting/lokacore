@@ -491,12 +491,12 @@ For Realm content, prefer the least-isolated model that preserves correctness:
 
 Personal dialogue alone is not a reason to clone an NPC or zone.
 
-## ADR-045 — Scarce services are Facilities with durable WorkOrders
+## ADR-045 — Scarce services compose Capacity/Reservation/ServiceJob primitives
 
 **Status:** Accepted
 
-Shared bottlenecks such as a one-sword-per-day smithy are modeled by reusable Facility/Service capacity plus durable WorkOrders, not quest timers.
+Shared bottlenecks are modeled by reusable Service capabilities composed from CapacityPolicy, Reservation/QueuePolicy, optional Escrow, DurationPolicy, CompletionRule, OutputPolicy, and durable ServiceJobs—not by quest-specific timers.
 
-The facility owns queueing, escrow, capacity allocation, duration, and completion.
+The owning service/provider authority owns queueing/reservations, escrow where used, capacity allocation, duration, and completion.
 
-Quests observe typed WorkOrder DomainEvents and remain independently scoped.
+Quests observe typed ServiceJob DomainEvents and remain independently scoped.
