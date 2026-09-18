@@ -157,13 +157,15 @@ Lokacore MUST be retained during the rebuild as a read-only design corpus/refere
 It is useful for:
 
 - feature archaeology;
-- porting content;
+- extracting content semantics and examples;
 - studying successful tests;
 - identifying historical failure modes;
 - recovering world-building primitives;
-- comparing behavior during migration.
+- comparing new behavior against the old reference implementation where useful.
 
-The v3 implementation SHOULD NOT import old modules as dependencies. Any importer should translate old content into v3 source formats at a one-way boundary.
+The v3 implementation MUST be a clean-sheet codebase. It MUST NOT copy, import, wrap, preserve compatibility with, or depend on Lokacore modules/APIs merely to accelerate the rebuild. Lokacore is evidence, not a codebase migration target.
+
+A later one-way content importer MAY translate selected old world/content files into v3 source formats, but the imported result must satisfy v3 schemas exactly and must not require legacy runtime compatibility.
 
 ## 10. Specification change discipline
 
