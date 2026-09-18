@@ -348,12 +348,16 @@ Make the world feel like a MUD, not a branching ebook.
 - fact-driven access/topology policies;
 - on-demand temporal state;
 - durable local jobs;
-- simple merchant/shop if needed.
+- simple merchant/shop if needed;
+- portable Facility/Service capacity primitive;
+- durable local WorkOrder model sufficient for overnight Story crafting.
 
 ### Gate R8
 
 30 simulated days:
 
+- facility queues/jobs remain bounded and deterministic;
+- escrowed inputs/outputs conserve ownership;
 - no schedule deadlocks;
 - no runaway population;
 - bounded jobs;
@@ -565,6 +569,8 @@ Two materially different cartridges produced mostly as content changes without u
 
 - party model;
 - party-scoped quest state;
+- party membership/progress/reward policy modes;
+- party AudiencePolicy overlays;
 - concurrent command handling;
 - join/leave/reconnect;
 - loot ownership;
@@ -578,6 +584,10 @@ Full party certification including race/fault tests.
 
 ### Build selectively
 
+- shared-zone player/party overlay projection;
+- lazy materialization/cleanup of phased quest actors;
+- shared NPC with player-specific dialogue/relationship projections;
+- Realm Facility/Service capacity and durable WorkOrders;
 - online profiles;
 - friends;
 - presence;
@@ -589,7 +599,7 @@ Full party certification including race/fault tests.
 
 ### Gate R18
 
-Offline cartridges remain independent; same packs can launch from shared hub as private/party adventures.
+Offline cartridges remain independent; same packs can launch from shared hub as private/party adventures. Personal overlays do not leak to unrelated players, and a shared facility contention test proves one scarce slot cannot be double-allocated.
 
 ## R19 — Instanced story regions in world geography
 
