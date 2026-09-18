@@ -45,10 +45,10 @@ id: fox_spirit_of_yunmeng
 version: 1.2.0
 title: The Fox Spirit of Yunmeng
 
-engine:
-  api: ">=3.1 <4.0"
-
 requires:
+  kernel_api: ">=1.3 <2.0"
+  rule_ir: 1
+  content_schema: 1
   capabilities:
     - movement@1
     - dialogue@2
@@ -73,6 +73,12 @@ locales:
   default: en
   available: [en, zh]
 ```
+
+### Compatibility versions
+
+`kernel_api` describes portable semantic capabilities implemented by the installed kernel. `rule_ir` versions the normalized LokaScript/rule representation. `content_schema` versions compiled definition structure.
+
+Published cartridges pin all three. Compatibility and migrations MUST be explicit; host/app upgrades may not reinterpret old rule IR implicitly.
 
 ## 4. Local keys and qualified identity
 
