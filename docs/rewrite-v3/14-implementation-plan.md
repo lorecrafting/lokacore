@@ -130,7 +130,10 @@ apps/loka_runtime
 apps/loka_builder
 apps/loka_web
 kernel/
-mobile/
+mobile/apps/stories
+mobile/apps/online
+mobile/packages/ui
+mobile/packages/game-view
 protocol/
 cartridges/
 docs/
@@ -141,7 +144,7 @@ docs/
 - Mix umbrella;
 - strict compile/dependency boundaries;
 - Rust workspace if accepted;
-- mobile Expo app;
+- two minimal Expo app targets (Stories and Online) plus shared UI/GameView packages;
 - PostgreSQL dev/test container;
 - formatter/lint/security configs;
 - one unified CI;
@@ -423,13 +426,14 @@ Let humans/agents author without raw repo semantics.
 
 Astra/another agent can recreate or extend representative first-cartridge content using only Builder API tools and fix intentionally injected validation failures without shell/Git editing.
 
-## R12 — Mobile product shell
+## R12 — Loka Stories product shell
 
 Can overlap late R10.
 
 ### Build
 
-- production RN navigation;
+- production Stories navigation;
+- shared UI/GameView package extraction only where demonstrated useful;
 - catalog shell;
 - cartridge install/delete/update;
 - save slots;
@@ -468,7 +472,7 @@ Store sandbox tests on iOS/Android:
 - second device;
 - refund/reconnect policy.
 
-## R14 — BEAM online authority v1
+## R14 — BEAM online authority + Loka Online skeleton
 
 ### Objective
 
@@ -486,6 +490,7 @@ Run the same cartridge rules online under OTP.
 - effect outbox;
 - snapshots;
 - Phoenix typed protocol;
+- minimal Loka Online client target using that protocol;
 - reconnect/resync;
 - observability.
 
@@ -545,7 +550,7 @@ Two materially different cartridges produced mostly as content changes without u
 
 Full party certification including race/fault tests.
 
-## R18 — Persistent social shell
+## R18 — Loka Online persistent social shell
 
 ### Build selectively
 
