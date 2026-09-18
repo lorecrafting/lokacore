@@ -14,7 +14,7 @@ Primary references:
 - Sessions: <https://www.evennia.com/docs/latest/Components/Sessions.html>
 - Accounts: <https://www.evennia.com/docs/latest/Components/Accounts.html>
 - Command Sets: <https://www.evennia.com/docs/latest/Components/Command-Sets.html>
-- CmdSet API: <https://www.evennia.com/docs/3.x/api/evennia.commands.cmdset.html>
+- CmdSet API: <https://www.evennia.com/docs/latest/api/evennia.commands.cmdset.html>
 - Locks: <https://www.evennia.com/docs/latest/Components/Locks.html>
 - Tags: <https://www.evennia.com/docs/latest/Components/Tags.html>
 - Prototypes: <https://www.evennia.com/docs/latest/Components/Prototypes.html>
