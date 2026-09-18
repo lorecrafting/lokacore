@@ -350,14 +350,14 @@ effect.move
 effect.damage
 effect.heal
 effect.schedule
-signal.send
+event.emit
 rng.chance
 rng.pick
 ```
 
 Each binding has input/result schema, cost, and portability classification. Offline cartridges may call portable bindings only.
 
-Mutation-like bindings return typed effects/signals; they do not write DB directly.
+Mutation-like bindings return typed effects/events; they do not write DB directly.
 
 ## 18. Script budgets
 
@@ -410,22 +410,25 @@ source
 
 Runtime never executes unvalidated raw source.
 
-## 22. Signals
+## 22. Cartridge custom domain events
 
-Scripts/entities may emit typed signals for loosely coupled world behavior:
+Cartridges may declare namespaced custom DomainEvents for loosely coupled world behavior:
 
 ```text
-bell_rung
-guard_alerted
-festival_started
-ferry_arrived
+fox_spirit/bell_rung
+village/guard_alerted
+festival/started
+ferry/arrived
 ```
 
-Signals are registered/declared in cartridge or capabilities.
+These are ordinary typed DomainEvents, not a separate signal bus.
 
-Unknown signal names should be validated at compile time when possible.
+Rules:
 
-Signals may become DomainEvents but must respect event-chain budgets.
+- event keys/schemas are registered by the cartridge/capability compiler;
+- unknown events fail validation where statically knowable;
+- event emission uses the same bounded event chain, causation/correlation, and deterministic ordering as engine events;
+- scripts use `event.emit` and receive no direct PubSub/database escape hatch.
 
 ## 23. State machine use outside quests
 
