@@ -13,7 +13,8 @@ loka/
 │   ├── loka_runtime/    # OTP world/session/scheduling authority
 │   ├── loka_builder/    # workspaces, Builder API, lab, certification
 │   └── loka_web/        # Phoenix HTTP/channels/admin/MCP adapter
-├── mobile/              # React Native / Expo
+├── kernel/              # portable deterministic rules kernel (Rust; spike-gated)
+├── mobile/              # React Native / Expo + local authority/persistence
 ├── protocol/            # external machine-readable schemas/codegen
 ├── cartridges/          # first-party source cartridges in development
 └── docs/
@@ -35,7 +36,7 @@ builder
  web
 ```
 
-`loka_core` MUST NOT depend on Phoenix, Ecto, filesystem, network, or runtime processes.
+`loka_core` MUST NOT depend on Phoenix, Ecto, filesystem, network, or runtime processes. Portable rule semantics that must execute offline SHOULD live in or call the shared kernel behind a narrow adapter.
 
 `loka_store` may depend on core domain types but MUST NOT contain game rules.
 
@@ -67,7 +68,13 @@ Loka.Runtime.Supervisor
 
 All dynamic processes MUST be addressable by stable IDs through Registries rather than hidden process dictionary conventions.
 
-## 3. Session, account, character, instance
+## 3. Offline versus online authority
+
+The BEAM runtime described in this document is the **online authority host**. Offline private cartridges use a local authority shell and the same portable kernel, as specified in [07 — Offline Storypacks and the Path to the MMORPG](07-offline-storypacks-to-mmo.md).
+
+Do not attempt to embed a BEAM node in the mobile app merely to preserve architectural symmetry.
+
+## 4. Session, account, character, instance
 
 Keep these concepts separate.
 
@@ -128,9 +135,9 @@ Authority for one private or party play space:
 - scheduled game jobs;
 - instance revision.
 
-## 4. Private/party world owner
+## 5. Online private/party world owner
 
-For initial cartridges, one `WorldInstance` GenServer SHOULD own the mutable in-memory state of the instance.
+For online private/party cartridges, one `WorldInstance` GenServer SHOULD own the mutable in-memory state of the instance.
 
 Why:
 
@@ -161,7 +168,7 @@ It SHOULD NOT block on slow external I/O while holding command serialization. Pe
 
 The exact transaction strategy may batch entity changes, but step 6 must prevent a crash from producing half a logical action.
 
-## 5. Why not one GenServer per entity by default
+## 6. Why not one GenServer per entity by default
 
 Lokacore's entity-process approach provides useful isolation but makes operations like “move item from room to inventory and advance quest” cross multiple authorities.
 
@@ -171,7 +178,7 @@ Use a process per entity only when an entity truly owns concurrent autonomous wo
 
 NPC autonomous behavior SHOULD usually be scheduled as commands/events to the world owner, not a permanently ticking process per NPC.
 
-## 6. Shared MUD evolution
+## 7. Shared MUD evolution
 
 Do not distribute the private-instance architecture prematurely.
 
@@ -198,7 +205,7 @@ Cross-shard movement MUST use an explicit handoff protocol:
 
 Do not rely on “send two PubSub messages and hope.”
 
-## 7. BEAM distribution
+## 8. BEAM distribution
 
 Initial production SHOULD run on one BEAM node plus PostgreSQL unless measured scale requires clustering.
 
@@ -212,7 +219,7 @@ The architecture MUST avoid assumptions that prevent later clustering:
 
 Do not add Horde/Swarm/distributed Registry solely because BEAM clustering is possible.
 
-## 8. Gateway/runtime separation
+## 9. Gateway/runtime separation
 
 Borrow the **principle**, not the literal implementation, of a network-facing portal separate from game logic.
 
@@ -235,7 +242,7 @@ Borrow the **principle**, not the literal implementation, of a network-facing po
 
 A production deploy MAY later split gateway and runtime into different releases/nodes, but the first implementation SHOULD keep them in one deployment unless operational evidence justifies separation.
 
-## 9. Restart behavior
+## 10. Restart behavior
 
 WorldInstance restart:
 
@@ -247,7 +254,7 @@ WorldInstance restart:
 
 A client may receive a transient retry/resync response. It MUST NOT observe duplicated durable rewards.
 
-## 10. Schedulers: use three temporal strategies
+## 11. Schedulers: use three temporal strategies
 
 Do not use one timer mechanism for every feature.
 
@@ -285,7 +292,7 @@ For disposable local behavior:
 
 These may be recreated after restart rather than persisted.
 
-## 11. Backpressure and overload
+## 12. Backpressure and overload
 
 Every externally reachable command path SHOULD have bounded queues/rate limits.
 
@@ -300,7 +307,7 @@ World owners SHOULD expose telemetry for:
 
 If an instance is overloaded, the gateway should reject/throttle new non-critical commands rather than allowing unbounded mailbox growth.
 
-## 12. BEAM-specific review questions
+## 13. BEAM-specific review questions
 
 Every proposed process must answer:
 
