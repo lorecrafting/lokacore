@@ -466,15 +466,15 @@ This permits, for example:
 
 - player-scoped quest progress;
 - one shared blacksmith NPC;
-- one shared smithy queue for the whole facility;
+- one shared service queue for a scarce world service;
 - a private apparition visible only to the questing player;
 - a private party dungeon later in the same quest.
 
 A dedicated normative specification now defines these combinations.
 
-### Smithy bottleneck
+### Scarce-service bottleneck
 
-A one-sword-per-day smithy is owned by a reusable Facility/Service capability and durable WorkOrder system.
+The one-sword-per-day smithy is only a worked example. The architecture uses generic Service/Capacity/Reservation/ServiceJob primitives that can also model ferries, healers, trainers, ritual altars, inns, processors, and other scarce services.
 
 The quest observes work-order completion; it does not own the overnight timer or queue.
 
