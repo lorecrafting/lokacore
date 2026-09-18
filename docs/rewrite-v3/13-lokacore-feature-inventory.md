@@ -1,4 +1,4 @@
-# 13 — Lokacore Feature Inventory and Porting Disposition
+# 13 — Lokacore Feature Inventory and Rebuild Disposition
 
 **Purpose:** ensure the rebuild does not accidentally discard useful work or blindly reproduce transitional architecture.
 
@@ -29,7 +29,7 @@ The rebuild should treat this as a design corpus.
 - **FIRST CARTRIDGE** — implement when needed by the initial vertical slice.
 - **LATER** — valuable but not a foundation blocker.
 - **REFERENCE** — preserve concept/docs/tests but redesign implementation.
-- **DROP** — do not port unless future evidence revives it.
+- **DROP** — do not reproduce unless future evidence revives the product need.
 
 ## 3. Architectural substrate
 
@@ -109,7 +109,7 @@ Disposition: **LATER/shared capability**, but preserve the concepts:
 - door reset;
 - cleanup.
 
-Do not port the current global-count behavior directly; v3 counts must be scope/instance/shard aware.
+Do not reproduce the current global-count behavior; v3 counts must be scope/instance/shard aware.
 
 ## 6. Action system
 
@@ -209,7 +209,7 @@ Disposition: **FOUNDATION / PORTABLE CORE, complete redesign around reducer**.
 
 Preserve objective semantics and useful tests.
 
-Do not port:
+Do not carry forward these implementation patterns:
 
 - multiple direct mutation paths;
 - dialogue/manual bypasses;
@@ -509,7 +509,7 @@ V3:
 - deterministic clock/RNG;
 - effects, not DB writes.
 
-Current same-BEAM `Code.eval_string` does not port.
+Current same-BEAM `Code.eval_string` implementation is not carried forward.
 
 ## 21. Script templates
 
@@ -682,7 +682,7 @@ These should be mined for exact failure cases and rebuilt as compiler/certificat
 
 Current ChannelBot, strategies, assertions, state inspector, random walker, storyline runner are especially valuable.
 
-Disposition: **FOUNDATION / migrate concepts early**.
+Disposition: **FOUNDATION / rebuild these concepts early**.
 
 New bots target canonical command API rather than Phoenix-specific behavior unless explicitly testing transport.
 
@@ -754,7 +754,7 @@ Current RN client contains:
 
 Disposition: **REFERENCE / preserve product feel where desired**.
 
-Do not port current protocol/store code directly because it has drifted from server.
+Do not reuse current protocol/store code because it has drifted from the server contract.
 
 Rebuild client over generated protocol + offline kernel.
 
@@ -847,7 +847,7 @@ Lokacore documentation is both valuable and inconsistent.
 Disposition:
 
 - archive historical decision/docs rather than delete immediately;
-- port only current semantic contracts into v3;
+- restate only still-valid semantic contracts in v3-native terms;
 - machine-generate/check contract docs;
 - mark reference docs as historical;
 - never feed the entire historical corpus to an implementation agent without routing.
@@ -858,7 +858,7 @@ Existing 200+ rooms and arcs are valuable test/import material.
 
 Disposition:
 
-- do not manually port all at foundation stage;
+- do not rebuild all historical content at foundation stage;
 - choose one compact coherent arc as importer/vertical-slice target;
 - build one-way importer/diagnostics;
 - use remaining old content as fuzz/reference corpus;
@@ -904,9 +904,9 @@ If everything else were lost, keep these ideas:
 15. production state imported from offline saves;
 16. duplicated/contradictory historical docs as “authority.”
 
-## 46. Porting rule
+## 46. Rebuild extraction rule
 
-For every old feature, an implementation issue must answer:
+For every old feature considered for the rebuild, an implementation issue must answer:
 
 - What player/product need does this feature satisfy?
 - Is it required by the current milestone?
@@ -918,4 +918,4 @@ For every old feature, an implementation issue must answer:
 - What old tests/content demonstrate expected behavior?
 - What old architecture must NOT be copied?
 
-No module gets ported merely because it exists.
+No Lokacore module, API, schema, compatibility shim, or process topology is carried forward merely because it exists. The new implementation starts from v3 contracts; old code is consulted only to recover requirements, examples, edge cases, tests, and content semantics.
