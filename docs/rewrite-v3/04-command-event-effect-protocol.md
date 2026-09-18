@@ -363,7 +363,7 @@ Host-only views—account catalog, entitlement, social realm presence, admin—r
 
 This avoids a second semantic fork where the server and offline client disagree about what the player can see/do.
 
-## 16. Snapshot and delta model
+## 15. Snapshot and delta model
 
 On join/resync, server sends authoritative snapshot.
 
@@ -373,7 +373,7 @@ If the client detects a gap or server requests resync, it discards/reconciles lo
 
 The client store is a cache of server projection, not authority.
 
-## 15. Text commands
+## 16. Text commands
 
 Text parser is an adapter:
 
