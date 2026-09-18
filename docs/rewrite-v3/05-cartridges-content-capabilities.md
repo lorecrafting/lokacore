@@ -80,6 +80,24 @@ locales:
 
 Published cartridges pin all three. Compatibility and migrations MUST be explicit; host/app upgrades may not reinterpret old rule IR implicitly.
 
+### Version vocabulary
+
+These version fields are intentionally separate:
+
+| Field | Owns |
+|---|---|
+| `api_version` | Human/LLM-authored source document/schema family. |
+| `kernel_api` | Portable deterministic semantics implemented by the installed kernel. |
+| `rule_ir` | Normalized interpreted LokaScript/rule representation. |
+| `content_schema` | Compiled definition/artifact structure. |
+| `protocol_version` | Realm Mode network command/message compatibility; not required for offline Story execution. |
+| `client_features` | Presentation/input capabilities available in the installed Loka app. |
+| capability `key@version` | Semantic contract for one reusable capability. |
+
+Do not use one version number as a proxy for another.
+
+A cartridge certificate records the exact versions/ranges that were compiled and tested.
+
 ## 4. Local keys and qualified identity
 
 Within a cartridge:
