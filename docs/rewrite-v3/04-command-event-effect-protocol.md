@@ -107,7 +107,7 @@ Unknown command types fail before reaching game rules.
 
 ## 4. Decision environment
 
-Pure decision functions receive explicit environment:
+The host-neutral decision layer / portable kernel receives explicit environment:
 
 ```elixir
 %DecisionEnv{
