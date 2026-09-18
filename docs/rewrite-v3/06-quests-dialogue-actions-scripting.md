@@ -114,14 +114,24 @@ Dialogue does not call “complete objective.”
 Scripts do not directly edit quest JSON.
 
 ```text
-domain event
+world DomainEvent
    ↓
 matching active quest instances by scope/subscription
    ↓
 QuestReducer.reduce()
    ↓
-new quest state + quest domain events + typed effects
+Quest StateDelta
+   + quest DomainEvents
+   + typed outcome-consequence requests
+   ↓
+capability consequence evaluators
+   ↓
+combined world StateDelta / DomainEvents / Effects
+   ↓
+one authority commit
 ```
+
+The quest engine never receives generic write access to entity/component storage.
 
 ## 6. Exactly-once rewards
 
@@ -163,7 +173,359 @@ Certification MUST check:
 - version migration explicit;
 - state scope intentional.
 
-## 9. Dialogue definition
+## 9. Quest/world contract
+
+A quest is not a private world-mutation engine.
+
+It has three responsibilities:
+
+1. **observe** typed world DomainEvents and current scoped facts/state;
+2. **remember** quest-specific objective/lifecycle/branch state;
+3. **declare outcomes/consequences** through registered capability operations.
+
+The world remains responsible for applying its own semantics.
+
+This creates a feedback loop:
+
+```text
+WORLD
+ movement / NPC schedules / combat / weather / dialogue / economy
+       ↓ DomainEvents
+QUEST
+ objectives / branches / outcome
+       ↓ typed consequences
+WORLD STATE
+ facts / entity states / topology / relationships / spawned actors
+       ↓ reactive rules + changed policies
+WORLD
+ new dialogue / new routes / changed schedules / rumors / ambience
+       ↓
+future DomainEvents
+```
+
+A quest can therefore cause meaningful world change without bypassing world invariants.
+
+## 18. Quest outcomes and typed consequences
+
+Quest definitions SHOULD name explicit outcomes rather than encode all consequences in arbitrary scripts.
+
+Example:
+
+```yaml
+outcomes:
+  rescued:
+    when:
+      branch_completed: rescue
+
+    consequences:
+      - fact.set:
+          key: village.child_status
+          value: rescued
+          scope: instance
+
+      - connection.set_state:
+          target: exits/shrine_road
+          state: open
+          scope: instance
+
+      - relationship.adjust:
+          npc: npcs/old_ferryman
+          subject: quest_actor
+          trust: 10
+          scope: player
+
+      - event.emit:
+          type: village/child_returned
+          scope: instance
+```
+
+Each consequence operator is registered by a capability and declares:
+
+- valid target types;
+- input schema;
+- allowed scopes;
+- portability;
+- whether it produces StateDelta, DomainEvents, Effects, or a bounded combination;
+- idempotency semantics;
+- conflict/composition behavior;
+- certification rules.
+
+A consequence may not write arbitrary component fields.
+
+### Same-authority consequences
+
+When quest state and affected world state share one authority owner, quest completion and its StateDelta-producing consequences SHOULD commit atomically in the same decision.
+
+Example in Story Mode:
+
+```text
+quest outcome = rescued
++ village.child_status = rescued
++ shrine road = open
++ mother role state = relieved
+--------------------------------
+one local SQLite commit
+```
+
+### Cross-authority Realm consequences
+
+A quest running in one ZoneShard may need to affect another authority such as:
+
+- realm economy;
+- guild state;
+- another shard;
+- global event service.
+
+Those cannot pretend to be one database transaction.
+
+The local quest/outcome commits first with a durable, idempotent cross-authority Effect/outbox record. The receiving authority applies its own command/protocol and reconciliation rules.
+
+Certification must test failure/retry at that boundary.
+
+## 19. Prefer facts for broad narrative consequences
+
+If many independent systems need to know the same durable story truth, prefer a typed scoped Fact instead of directly editing each subsystem.
+
+Example:
+
+```text
+village.child_status = rescued
+```
+
+may drive:
+
+- mother's dialogue;
+- mother's daily schedule;
+- ferryman ambient lines;
+- guard disposition;
+- town description variants;
+- rumor availability;
+- shop inventory;
+- follow-up quest prerequisites;
+- festival attendance;
+- access to the northern road.
+
+This is more coherent than a quest directly issuing eight unrelated edits.
+
+Use direct consequence operators when the mechanical change is inherently local:
+
+- open this gate;
+- move this NPC;
+- grant this item;
+- spawn this encounter;
+- reveal this map location.
+
+The rule of thumb:
+
+> **Facts express truths. Consequences express actions. Reactive world rules express how the world responds to truths/actions.**
+
+## 20. Opening and changing areas
+
+Quest-gated exploration SHOULD normally use precompiled topology/content plus runtime access/activation state.
+
+Preferred patterns:
+
+### Access policy
+
+The exit/portal already exists but is inaccessible until a condition becomes true:
+
+```yaml
+connection:
+  to: rooms/mountain_pass
+  when:
+    fact_equals:
+      key: village.pass_open
+      value: true
+```
+
+Useful for personal/player-scoped unlocks.
+
+### Stateful connection
+
+A gate/bridge/door has runtime state:
+
+```text
+collapsed → repairing → open
+```
+
+The corresponding capability controls whether movement/action is available.
+
+Useful when the world itself physically changes.
+
+### Content activation
+
+A precompiled encounter/location group is inactive until a typed capability activates it.
+
+Useful for:
+
+- cave-in reveals;
+- temporary festival spaces;
+- invasion camps;
+- post-quest settlements.
+
+Do not make ordinary quest progression dynamically generate arbitrary new definitions at runtime.
+
+### Map discovery
+
+A location can exist physically while the player's map/journal does not reveal it until discovery.
+
+Map visibility and physical accessibility are separate concerns.
+
+### Multiplayer scope
+
+In Realm Mode, “unlock this area for me” normally uses player/party policy or instancing/phasing.
+
+A player-scoped quest MUST NOT silently open a realm-shared gate for everyone.
+
+A true realm-wide unlock requires explicit realm scope and shared-area certification.
+
+## 21. NPC state, schedules, relationships, and memory
+
+Quest consequences should change **runtime state/profile**, not replace NPC definitions.
+
+Useful capability patterns:
+
+### NPC role/state machine
+
+```text
+mother:
+  searching → grieving
+  searching → relieved
+  relieved  → rebuilding_life
+```
+
+Transitions can be triggered by facts/events and validated by a state machine.
+
+### Behavior/schedule profiles
+
+An NPC definition can provide profiles:
+
+```yaml
+schedule:
+  profiles:
+    searching:
+      ...
+    normal:
+      ...
+    mourning:
+      ...
+```
+
+The active profile may derive from world facts instead of requiring the quest to manually rewrite schedule entries.
+
+### Player-specific relationship state
+
+Shared NPC:
+
+```text
+relationship(player, ferryman).trust += 10
+```
+
+does not alter the ferryman's global personality toward every Realm player.
+
+Dialogue/action availability can query that scoped relationship.
+
+### NPC memory
+
+Important narrative interactions may create typed personal memories:
+
+```text
+memory:
+  key: player_returned_child
+  subject: player_id
+  value: true
+```
+
+A memory should have bounded schema/meaning, not become unlimited free-form model-generated history.
+
+## 22. Reactive world rules
+
+World systems may register deterministic reactions to DomainEvents/fact changes.
+
+Example:
+
+```yaml
+react:
+  on:
+    fact_changed:
+      key: village.child_status
+
+  when:
+    fact_equals:
+      key: village.child_status
+      value: rescued
+
+  apply:
+    - behavior.select_profile:
+        target: npcs/child_mother
+        behavior: schedule
+        profile: normal
+
+    - ambient.enable:
+        group: child_returned_lines
+```
+
+At runtime these compile into registered capability evaluators inside the same bounded event/decision model.
+
+Rules:
+
+- no polling every frame just to discover a fact changed;
+- reactions produce typed StateDelta/DomainEvents/Effects;
+- event chains remain bounded and deterministic;
+- cycles are detected/budgeted;
+- all referenced facts/capabilities/targets are compile-validated.
+
+Whenever possible, prefer **derived behavior** over mutation. For example, a room description may select its variant directly from facts/time/weather with no stored “current description” field.
+
+## 23. Consequence scope and escalation
+
+Quest scope and consequence scope are related but NOT automatically identical.
+
+A player-scoped quest may safely produce:
+
+- player-scoped facts;
+- personal relationships;
+- personal map discovery;
+- personal ActionSet/access changes.
+
+It may also affect instance/party/realm state only when the consequence explicitly declares that broader scope and the target profile permits it.
+
+Compiler/certification MUST flag scope escalation such as:
+
+```text
+player-scoped quest
+   ↓
+realm-scoped gate unlock
+```
+
+unless explicitly authored and certified.
+
+No consequence operator defaults to realm/global scope because scope was omitted.
+
+## 24. Branches should leave durable world consequences
+
+Meaningful quest branches SHOULD differ in more than reward text.
+
+Possible consequences include:
+
+- alternate NPC role states;
+- different faction reputation;
+- different schedules;
+- destroyed/repaired locations;
+- permanent access differences;
+- prices/services available;
+- ambient descriptions;
+- rumors;
+- follow-up quests;
+- companion availability;
+- weather/world-event triggers;
+- campaign continuity memories.
+
+The Cartridge Lab should be able to fork before the branch and compare resulting world states/simulations.
+
+A branch does not need to change everything. The requirement is that intended consequences are represented as typed world state rather than hidden in prose only.
+
+## 25. Dialogue definition
 
 Dialogue is a graph of nodes with typed conditions/actions.
 
@@ -359,7 +721,7 @@ Each binding has input/result schema, cost, and portability classification. Offl
 
 Mutation-like bindings return typed effects/events; they do not write DB directly.
 
-## 18. Script budgets
+## 26. Script budgets
 
 Each execution has:
 
@@ -374,7 +736,7 @@ Each execution has:
 
 Budget exceed is a typed script error and trace.
 
-## 19. Deterministic scripts
+## 27. Deterministic scripts
 
 Scripts receive:
 
@@ -386,7 +748,7 @@ Given the same compiled script, state/event, logical time, and RNG state they MU
 
 No hidden wall-clock access.
 
-## 20. Trusted compiled Elixir extensions
+## 28. Trusted compiled Elixir extensions
 
 Engine developers MAY implement new capabilities as normal compiled Elixir modules.
 
@@ -394,7 +756,7 @@ That is different from cartridge scripting and normally requires engine release/
 
 Repeated LokaScript patterns SHOULD be candidates for promotion into compiled capabilities.
 
-## 21. Script lifecycle
+## 29. Script lifecycle
 
 ```text
 source
@@ -410,7 +772,7 @@ source
 
 Runtime never executes unvalidated raw source.
 
-## 22. Cartridge custom domain events
+## 30. Cartridge custom domain events
 
 Cartridges may declare namespaced custom DomainEvents for loosely coupled world behavior:
 
@@ -430,7 +792,7 @@ Rules:
 - event emission uses the same bounded event chain, causation/correlation, and deterministic ordering as engine events;
 - scripts use `event.emit` and receive no direct PubSub/database escape hatch.
 
-## 23. State machine use outside quests
+## 31. State machine use outside quests
 
 Small state machines remain useful for:
 
