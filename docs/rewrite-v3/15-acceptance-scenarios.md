@@ -326,6 +326,31 @@ Two guards match “guard.”
 
 Parser returns structured candidates, not arbitrary target.
 
+
+### ACT-09 — Forged hidden action invocation
+
+Client submits an ActionInvocation for an action key not present in its current GameView.
+
+Local Story authority or BEAM Realm authority re-resolves current ActionSet and rejects it unless independently legal. Hidden UI is never the security boundary.
+
+### ACT-10 — Stale action invocation
+
+Client submits an invocation from GameView revision 41 after authority state advanced to revision 42 and the action is no longer legal.
+
+Authority returns a typed stale/invalid-action result and fresh projection/resync guidance; it does not execute based solely on the old view.
+
+### ACT-11 — Invocation retry
+
+Client retries the same invocation after losing the acknowledgement.
+
+The active authority maps it into the command/idempotency contract so a state-changing action cannot execute twice.
+
+### ACT-12 — Realm local-kernel forgery
+
+A modified one-app client computes a favorable local result for a Realm action and submits it.
+
+The server ignores local decision output and accepts only the ActionInvocation, then performs its own authoritative resolution/decision.
+
 ## G. Scripting
 
 ### SCR-01 — Allowed binding
