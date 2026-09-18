@@ -1,7 +1,6 @@
 # Loka Cartridge & Living World Roadmap
 
-**Status:** proposed official working strategic baseline, 2026-09-17; becomes current on merge.
-**Source baseline:** `main` at `0765784dc08b6fc5ba9299771195516541bb572e`.
+**Status:** current working strategic baseline; continuously refined by reviewed v3 specification amendments.
 **Scope:** product and architecture direction for turning Loka into a mobile-first cartridge platform that can grow into a persistent multiplayer MUD.
 
 This document owns product sequencing for the cartridge strategy. It does not by itself authorize a large rewrite. Each architecture change still needs a bounded implementation plan, tests, review, and migration path. Existing product notes remain useful research unless they conflict with an explicit decision here.
