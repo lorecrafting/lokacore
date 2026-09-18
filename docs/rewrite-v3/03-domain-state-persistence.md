@@ -134,7 +134,7 @@ For multiplayer content, distinguish at least:
 1. **progress/state scope** — who owns quest/fact/progression state;
 2. **authority/instance scope** — which WorldInstance/ZoneShard owns the simulated entity/resource;
 3. **audience/visibility scope** — who is allowed to perceive/interact with a runtime entity/projection;
-4. **resource/contention scope** — who competes for a scarce facility, stock, spawn, reservation, or cooldown.
+4. **resource/contention scope** — who competes for a scarce service, stock, spawn, reservation, or cooldown.
 
 Examples:
 
@@ -318,7 +318,7 @@ world_instances
 runtime_entities
 scoped_facts
 quest_instances
-facility_work_orders
+service_jobs
 scheduled_jobs
 command_receipts
 effect_outbox
@@ -411,7 +411,7 @@ resolved_at nullable
 
 A unique constraint should prevent duplicate active quest instances where the quest's repeatability rules disallow them.
 
-## 13. Scoped facts and facility WorkOrders
+## 13. Scoped facts and durable ServiceJobs
 
 ### Scoped facts
 
@@ -432,14 +432,14 @@ Unique identity is the owning authority/context plus scope and fact key.
 
 Facts may also be stored inside a versioned aggregate when that is more efficient, but the logical semantics remain typed and scoped.
 
-### Facility WorkOrders
+### Durable ServiceJobs
 
 Logical fields:
 
 ```text
 id UUID
 authority_id
-facility_entity_id
+service_entity_id
 capacity_scope_type
 capacity_scope_id
 requester_id
@@ -460,7 +460,7 @@ created_at
 updated_at
 ```
 
-The exact physical schema may normalize escrow/output separately, but allocation + escrow + WorkOrder creation MUST be one authoritative transaction.
+The exact physical schema may normalize escrow/output separately, but allocation + escrow + ServiceJob creation MUST be one authoritative transaction.
 
 Capacity allocation must have a database/authority invariant sufficient to prevent double allocation under concurrent submissions.
 
