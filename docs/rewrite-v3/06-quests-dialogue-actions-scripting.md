@@ -264,6 +264,8 @@ future DomainEvents
 
 A quest can therefore cause meaningful world change without bypassing world invariants.
 
+Multiplayer ownership, phasing, instancing, personal quest actors, shared bottlenecks, and durable facility queues are specified normatively in [19 — Quest Sharing, Phasing, Instancing, and Scarce World Services](19-quest-sharing-instancing-capacity.md).
+
 ## 10. Quest outcomes and typed consequences
 
 Quest definitions SHOULD name explicit outcomes rather than encode all consequences in arbitrary scripts.
