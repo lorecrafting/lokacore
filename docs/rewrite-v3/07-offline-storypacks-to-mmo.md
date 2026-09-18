@@ -78,7 +78,7 @@ Do not make a single giant client package conditionalize every offline/online be
 
 The Online app does not need to embed the portable kernel just because the server uses it; it receives authoritative GameViews/messages from BEAM.
 
-## 4. Execution profiles
+## 3. Execution profiles
 
 Each cartridge/deployment declares supported profiles.
 
@@ -114,7 +114,7 @@ Each cartridge/deployment declares supported profiles.
 
 A cartridge can support more than one profile.
 
-## 3. Portable Simulation Kernel
+## 4. Portable Simulation Kernel
 
 ### Problem
 
