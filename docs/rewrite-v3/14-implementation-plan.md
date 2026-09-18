@@ -364,7 +364,7 @@ Make failures reproducible before content scale.
 
 Every seeded injected failure generates a one-command/fixture reproducible report.
 
-## R10 — Builder API v1
+## R11 — Builder API v1
 
 ### Objective
 
@@ -384,11 +384,13 @@ Let humans/agents author without raw repo semantics.
 - terminal adapter;
 - MCP adapter.
 
-### Gate R10
+### Gate R11
 
-Astra/another agent can create the tiny test world using only Builder API tools and fix intentionally injected validation failures without shell/Git editing.
+Astra/another agent can recreate or extend representative first-cartridge content using only Builder API tools and fix intentionally injected validation failures without shell/Git editing.
 
-## R11 — First real offline cartridge
+## R10 — First real offline cartridge
+
+**Sequencing rule:** prove authoring requirements with a real cartridge before completing the generalized Builder API. Minimal scripts/CLI helpers are allowed, but do not let tooling delay product proof.
 
 ### Objective
 
@@ -413,9 +415,11 @@ Hand-author substantial portions first. Do not immediately ask the factory to ma
 
 The first cartridge exists to stress contracts.
 
-### Gate R11
+### Gate R10
 
 Full `offline_private_story` certification + human mobile smoke.
+
+The cartridge should be authored primarily through source files/compiler/Lab at this stage. Record every repetitive or error-prone authoring operation as evidence for the Builder API rather than prematurely generalizing it.
 
 ## R12 — Mobile product shell
 
@@ -651,9 +655,9 @@ R8 living world
  |
 R9 lab
  |
-R10 builder
+R10 first cartridge ── R12 mobile shell
  |
-R11 first cartridge ── R12 mobile shell
+R11 builder
  |                     |
  +───────────────┬─────+
                  R13 commerce
