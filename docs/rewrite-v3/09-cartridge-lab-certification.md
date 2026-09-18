@@ -146,6 +146,7 @@ Checks:
 For each quest/dialogue:
 
 - lifecycle transition validity;
+- activation/resolution mode validity;
 - prerequisite cycles;
 - branch reachability;
 - terminal outcome reachability;
@@ -156,6 +157,8 @@ For each quest/dialogue:
 - timeout behavior;
 - abandon/retry behavior;
 - scope correctness;
+- multiplayer credit/participation rules;
+- unrelated players cannot receive progress unless policy allows it;
 - every consequence operator/target/scope is valid;
 - broader-scope consequences are explicit;
 - consequence idempotency;
