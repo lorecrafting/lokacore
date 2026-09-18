@@ -185,7 +185,7 @@ Choose the simplest model that preserves:
 
 Do not freeze a hidden mutable NIF resource design before this evidence.
 
-## 7. Server execution
+## 6. Server execution
 
 Online:
 
@@ -209,7 +209,7 @@ The BEAM process serializes authority and provides resilience.
 
 Short bounded kernel calls may use a normal Rustler NIF if proven safe for scheduler latency. Heavy Lab/model-check simulations MUST use a dirty CPU scheduler or isolated worker so they cannot starve BEAM schedulers.
 
-## 6. Offline execution
+## 7. Offline execution
 
 On device:
 
