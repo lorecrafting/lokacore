@@ -246,9 +246,9 @@ Existing saves remain pinned or use explicit tested migrations.
 
 **Status:** Provisional product decision
 
-Working launch model:
+Working Loka Stories launch model:
 
-- one app;
+- one free Stories app;
 - one free showcase cartridge;
 - permanent à-la-carte cartridge unlocks;
 - optional bundles later;
@@ -379,3 +379,39 @@ After compiler/kernel/offline/narrative/living-world/Lab foundations, substantia
 Use observed authoring pain to finish the canonical Builder API.
 
 Do not delay the first game for a generalized world-building platform.
+
+
+## ADR-037 — Separate Stories and Online clients
+
+**Status:** Accepted
+
+Loka ships two focused React Native/Expo app targets from one monorepo:
+
+- **Loka Stories** — offline-first cartridge/campaign product with local authority and local saves;
+- **Loka Online** — online-only multiplayer/MUD client with BEAM authority.
+
+They share presentation/schema packages where useful but do not share authority responsibilities.
+
+This is preferred over one giant app with pervasive offline/online conditionals.
+
+## ADR-038 — Builder has explicit story/realm targets
+
+**Status:** Accepted
+
+Builder workspaces declare target:
+
+- `story` — portable/offline capability set and offline certification;
+- `realm` — online multiplayer capability set, including server-only systems;
+- `promote` — explicit adaptation of an existing story cartridge into an online deployment.
+
+A workspace cannot silently cross target boundaries.
+
+## ADR-039 — Cross-client purchase portability is not promised by default
+
+**Status:** Accepted product boundary; future policy provisional
+
+Owning a cartridge in Loka Stories guarantees Stories access.
+
+Any Loka Online benefit/unlock derived from that purchase must be a separately defined server-side entitlement/product rule based on verified evidence and current platform policy.
+
+Local purchase flags or offline save contents never grant authoritative Online value directly.
