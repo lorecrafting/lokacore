@@ -59,12 +59,9 @@ requires:
     - contextual_actions_v1
     - dialogue_choices_v1
 
-execution_profiles:
+supported_profiles:
   - offline_private
   - online_private
-
-instance_modes:
-  - private
 
 entry:
   room: rooms/ferry_dock
@@ -151,7 +148,7 @@ Use these terms consistently in v3:
 | **Capability** | Versioned feature contract registered by the engine. Owns schemas and the commands/events/effects/policies/rules it introduces. |
 | **Component** | Typed definition/runtime data attached to an entity or scoped state. A component is data/state, not an independent authority. |
 | **Behavior** | Declarative autonomous/reactive rule configuration supplied by a capability, such as patrol or schedule. |
-| **Action** | Player/agent affordance resolved into a typed Command. |
+| **Action** | Player/agent affordance advertised in GameView; invocation is revalidated by the active authority and resolved into a typed Command. |
 | **Policy / condition** | Pure predicate tree deciding whether an action/content path is allowed/visible. |
 | **Command** | Request to authoritative game semantics. |
 | **DomainEvent** | Immutable fact produced during a decision. |
