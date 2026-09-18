@@ -131,6 +131,9 @@ Checks:
 - localization;
 - asset hashes;
 - scripts;
+- typed FactSpecs and allowed transitions/scopes;
+- consequence operators and targets;
+- reactive-rule references/cycles;
 - policies/actions;
 - unknown fields;
 - state-scope declarations;
@@ -143,6 +146,7 @@ Checks:
 For each quest/dialogue:
 
 - lifecycle transition validity;
+- activation/resolution mode validity;
 - prerequisite cycles;
 - branch reachability;
 - terminal outcome reachability;
@@ -152,7 +156,40 @@ For each quest/dialogue:
 - required-NPC survivability or alternate path;
 - timeout behavior;
 - abandon/retry behavior;
-- scope correctness.
+- scope correctness;
+- multiplayer credit/participation rules;
+- unrelated players cannot receive progress unless policy allows it;
+- every consequence operator/target/scope is valid;
+- broader-scope consequences are explicit;
+- consequence idempotency;
+- fact transition legality;
+- reactive-rule cycles/event-chain budgets;
+- consequence dependencies do not silently destroy required future quest paths unless intentional.
+
+### World-consequence branch testing
+
+For each meaningful quest outcome, the Lab SHOULD fork from the last common snapshot and compare:
+
+- changed facts;
+- runtime entity/component state;
+- accessible/revealed topology;
+- NPC behavior/schedule profiles;
+- dialogue/action availability;
+- spawned/despawned entities;
+- follow-up quest availability;
+- relationship/personal memory state;
+- environment/ambient variants.
+
+Then advance logical time after each branch to catch delayed problems:
+
+- NPC cannot reach a new schedule destination;
+- a newly opened path becomes inaccessible at night;
+- a quest-critical NPC despawns;
+- reaction rules loop;
+- a “rescued” NPC continues emitting mourning ambience;
+- a branch accidentally exposes content intended for another outcome.
+
+The comparison output becomes semantic-review evidence.
 
 Bounded state exploration SHOULD exhaust small graphs.
 
@@ -332,7 +369,9 @@ Reviewer inspects:
 - dead-feeling spaces;
 - impossible narrative causality;
 - repeated prose;
-- consequences not reflected;
+- consequences not reflected across world systems;
+- NPC/world reactions that contradict typed facts or quest outcomes;
+- branches whose world-state differences are too weak for the intended narrative consequence;
 - misleading choice labels;
 - inaccessible endings;
 - multiplayer narrative mismatches;
@@ -357,7 +396,7 @@ Required for commercial release:
 - save/reconnect/cloud backup if offered;
 - completion/end state.
 
-## 20. Certification profiles
+## 20. Certification profiles and Builder targets
 
 ```text
 offline_private_story
@@ -366,10 +405,69 @@ party_story
 shared_area
 portable_capability_pack
 server_capability_pack
-mobile_release
+mobile_app_release
 ```
 
 Each profile selects mandatory gates.
+
+### `story` target
+
+Minimum required evidence:
+
+- static/schema/reference validation;
+- portable capability check;
+- deterministic kernel tests;
+- quest/dialogue model checks;
+- autonomous simulation where applicable;
+- script fuzzing where scripts exist;
+- offline lifecycle/app-kill/storage/clock tests;
+- save and app/kernel compatibility;
+- semantic review;
+- physical-device Story Mode smoke.
+
+Network availability MUST NOT be a prerequisite for certified ordinary play after acquisition/download.
+
+### `realm` target
+
+Select `online_private_story`, `party_story`, or `shared_area`.
+
+Minimum evidence adds as relevant:
+
+- protocol/version negotiation;
+- command receipt/idempotency;
+- PostgreSQL transactional recovery;
+- reconnect/resync;
+- concurrent-player interleavings;
+- authorization/abuse checks;
+- mailbox/backpressure/load envelope;
+- shard/handoff testing for shared areas;
+- Realm Mode physical-device smoke.
+
+Realm certification does not require offline portability unless the content is explicitly a portable Story cartridge being reused online.
+
+### `promote` target
+
+Promotion MUST:
+
+1. verify the immutable source Story artifact/certificate;
+2. record explicit decisions for scope, NPC multiplicity, death/respawn, loot/resource contention, economy, and mount/instance policy;
+3. produce a new deployment/adaptation hash;
+4. run the selected Realm certification profile.
+
+A prior Story certificate is evidence, not a substitute for multiplayer certification.
+
+### `mobile_app_release` profile
+
+Every production mobile binary runs the Story Mode regression suite, including supported save/kernel/rule-IR compatibility.
+
+After Realm Mode exists, the same app release MUST also run:
+
+- Realm protocol compatibility fixtures;
+- authentication/reconnect/resync smoke;
+- remote-authority boundary tests;
+- representative Realm physical-device smoke.
+
+Online release cadence is never allowed to silently drop supported offline Story saves.
 
 ## 21. Release certificate
 
@@ -381,6 +479,7 @@ Machine-readable example:
   "deployment_hash": "...",
   "kernel_revision": "...",
   "engine_revision": "...",
+  "capability_lock_hash": "...",
   "profile": "offline_private_story",
   "gates": {
     "static": "pass",

@@ -145,7 +145,7 @@ Why:
 - NPC schedules can be managed collectively;
 - a crashed instance can reload from durable state.
 
-The instance process MUST call the shared portable deterministic kernel through the `loka_core` host adapter for portable rules. Server-only orchestration MAY use pure Elixir domain functions when the behavior is explicitly not part of offline cartridge semantics.
+The instance process routes commands through the shared DecisionCoordinator. Portable rules execute through the shared kernel; server-only Realm capabilities execute as pure Elixir rule evaluators. Both return typed StateDelta/DomainEvent/Effect proposals into the same decision and commit boundary. Neither path may persist directly.
 
 It SHOULD NOT block on slow external I/O while holding command serialization. Persistence commits should be bounded and synchronous where correctness requires; non-authoritative notifications are effects.
 
@@ -156,7 +156,7 @@ It SHOULD NOT block on slow external I/O while holding command serialization. Pe
 2 gateway authenticates + validates protocol
 3 command routed to owning WorldInstance
 4 instance checks command id / expected revision
-5 portable kernel / host decision layer evaluates state
+5 DecisionCoordinator evaluates portable + server-only rules into one proposal
 6 store transaction commits affected durable records + command receipt + effect outbox
 7 in-memory state advances to committed revision
 8 response/notifications are emitted
@@ -201,6 +201,16 @@ Cross-shard movement MUST use an explicit handoff protocol:
 6. recovery reconciles incomplete transfers.
 
 Do not rely on “send two PubSub messages and hope.”
+
+### Shared online services are authorities too
+
+Realm-wide services such as guild banks, auctions, mail, global economy ledgers, or social organizations own their own durable state domains.
+
+A ZoneShard MUST NOT mutate another service's authoritative tables/state directly.
+
+Cross-authority operations use explicit idempotent protocols—transfer intent, command receipt, outbox/saga/reconciliation as appropriate—so a crash cannot leave both authorities believing they own or transferred the same value.
+
+Avoid distributed transactions as an implicit design assumption. Each authority commits its own state and participates in a recoverable protocol with traceable causation.
 
 ## 8. BEAM distribution
 

@@ -246,9 +246,9 @@ Existing saves remain pinned or use explicit tested migrations.
 
 **Status:** Provisional product decision
 
-Working Loka Stories launch model:
+Working Loka Story Mode launch model:
 
-- one free Stories app;
+- one free Loka app with Story Mode available at launch;
 - one free showcase cartridge;
 - permanent à-la-carte cartridge unlocks;
 - optional bundles later;
@@ -381,18 +381,22 @@ Use observed authoring pain to finish the canonical Builder API.
 Do not delay the first game for a generalized world-building platform.
 
 
-## ADR-037 — Separate Stories and Online clients
+## ADR-037 — One mobile client, two strict gameplay modes
 
 **Status:** Accepted
 
-Loka ships two focused React Native/Expo app targets from one monorepo:
+Loka ships one React Native / Expo application.
 
-- **Loka Stories** — offline-first cartridge/campaign product with local authority and local saves;
-- **Loka Online** — online-only multiplayer/MUD client with BEAM authority.
+It contains two gameplay session modes:
 
-They share presentation/schema packages where useful but do not share authority responsibilities.
+- **Story Mode** — `LocalStorySession`, portable kernel, local SQLite authority;
+- **Realm Mode** — `RemoteRealmSession`, Phoenix transport, BEAM authority.
 
-This is preferred over one giant app with pervasive offline/online conditionals.
+Shared UI/GameView/schema packages are reused. Authority implementations remain isolated modules with enforceable dependency boundaries.
+
+Exactly one gameplay authority is active for a running session. Realm Mode never falls back to local authority when disconnected.
+
+This is preferred over two store apps unless future evidence shows binary size, release cadence, store policy, branding, or operational isolation makes a split materially better.
 
 ## ADR-038 — Builder has explicit story/realm targets
 
@@ -404,14 +408,95 @@ Builder workspaces declare target:
 - `realm` — online multiplayer capability set, including server-only systems;
 - `promote` — explicit adaptation of an existing story cartridge into an online deployment.
 
+These are **authority/content targets, not app targets**.
+
 A workspace cannot silently cross target boundaries.
 
-## ADR-039 — Cross-client purchase portability is not promised by default
+## ADR-039 — One app simplifies entitlement UX without weakening trust
 
-**Status:** Accepted product boundary; future policy provisional
+**Status:** Accepted product boundary; future reward policy provisional
 
-Owning a cartridge in Loka Stories guarantees Stories access.
+Story purchase/library and Realm entry live in one app and may share one authenticated Loka account when online.
 
-Any Loka Online benefit/unlock derived from that purchase must be a separately defined server-side entitlement/product rule based on verified evidence and current platform policy.
+However:
 
-Local purchase flags or offline save contents never grant authoritative Online value directly.
+- Story Mode may remain playable offline without an active account session after legitimate acquisition;
+- local save contents and local entitlement flags never become authoritative Realm progression/economy state;
+- Realm unlocks/benefits derived from ownership require explicit server-side verified product rules.
+
+One app simplifies discovery, restore, branding, and account linking; it does not merge the authority models.
+
+
+## ADR-040 — Quests influence the world through typed consequences
+
+**Status:** Accepted
+
+Quest Runtime observes canonical DomainEvents and owns quest-specific scoped state.
+
+Quest outcomes may affect the world only through registered capability consequence operators that return typed StateDelta/DomainEvents/Effects.
+
+Quests do not receive arbitrary component/database write access.
+
+Same-authority quest/world changes should commit atomically in one decision. Cross-authority Realm consequences use durable idempotent protocols.
+
+## ADR-041 — Typed scoped facts coordinate narrative state
+
+**Status:** Accepted
+
+Durable truths needed by multiple world systems use namespaced, typed, scoped FactSpecs rather than ad-hoc string flags.
+
+Examples include:
+
+- bridge repaired;
+- child rescued/dead;
+- town faction control;
+- player allegiance;
+- festival state.
+
+World systems may derive behavior, descriptions, dialogue, access, spawn rules, and follow-up content from facts.
+
+Components remain the home for entity-owned mechanical state such as HP/location.
+
+## ADR-042 — Prefer reactive/derived world responses over quest puppeteering
+
+**Status:** Accepted
+
+When many systems should respond to an outcome, the quest SHOULD set a shared fact or emit a typed DomainEvent and let registered world rules/policies/behaviors respond.
+
+Direct consequences are preferred for local mechanical changes such as opening one gate, spawning one encounter, or granting one item.
+
+This is intended to produce coherent living-world reactions while keeping quest definitions decoupled from subsystem internals.
+
+
+## ADR-043 — Quest sharing uses independent dimensions
+
+**Status:** Accepted
+
+Multiplayer quest design does not use one instanced/shared boolean.
+
+Progress scope, consequence scope, presence audience, spatial placement, and scarce-resource capacity are independent contracts.
+
+This permits combinations such as personal quest progress with a shared NPC and shared smithy, plus a private phased apparition and later private dungeon.
+
+## ADR-044 — Prefer shared world, then overlay, then instance
+
+**Status:** Accepted
+
+For Realm content, prefer the least-isolated model that preserves correctness:
+
+1. shared world + personal progress;
+2. shared world + scoped overlay/phasing;
+3. private/party instance;
+4. Realm-wide mutation only when intentionally public.
+
+Personal dialogue alone is not a reason to clone an NPC or zone.
+
+## ADR-045 — Scarce services compose Capacity/Reservation/ServiceJob primitives
+
+**Status:** Accepted
+
+Shared bottlenecks are modeled by reusable Service capabilities composed from CapacityPolicy, Reservation/QueuePolicy, optional Escrow, DurationPolicy, CompletionRule, OutputPolicy, and durable ServiceJobs—not by quest-specific timers.
+
+The owning service/provider authority owns queueing/reservations, escrow where used, capacity allocation, duration, and completion.
+
+Quests observe typed ServiceJob DomainEvents and remain independently scoped.

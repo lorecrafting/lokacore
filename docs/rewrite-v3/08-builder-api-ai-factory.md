@@ -21,7 +21,7 @@ The Builder API has explicit build targets. An author/model does not work in an 
 
 ### `story`
 
-For Loka Stories.
+For Story Mode.
 
 Constraints:
 
@@ -40,7 +40,7 @@ workspace.create target=story cartridge=fox_spirit_of_yunmeng
 
 ### `realm`
 
-For Loka Online native multiplayer content.
+For Realm Mode native multiplayer content.
 
 Allows:
 
@@ -55,7 +55,7 @@ Realm mode is not required to remain offline-portable.
 
 ### `promote`
 
-For adapting an existing portable story cartridge into Loka Online.
+For adapting an existing portable Story cartridge into Realm deployment.
 
 The workflow starts from an immutable certified cartridge and creates a new online deployment/adaptation workspace.
 
@@ -89,6 +89,18 @@ capability.search(target=realm, "shop")
 ```
 
 A story author cannot accidentally select server-only mechanics; a realm author is not constrained by offline portability where it provides no product value.
+
+Builder target is an authoring/runtime contract, **not a mobile-app target**. Story and Realm content are both consumed by the same Loka mobile app under different session authority modes.
+
+### Target determines certification
+
+The workspace target MUST select a default certification policy:
+
+- `story` → `offline_private_story` plus portable/offline/save-compatibility gates;
+- `realm` → an online profile such as `online_private_story`, `party_story`, or `shared_area`, including concurrency/security/load gates appropriate to scope;
+- `promote` → validates the source Story certificate, requires explicit multiplayer adaptation decisions, then runs the selected Realm certification profile.
+
+The builder may add stricter gates, but content cannot weaken target-mandated certification.
 
 ## 3. Workspace-first authoring
 
@@ -171,6 +183,8 @@ npc.create/update/delete/get/list
 item.*
 quest.*
 dialogue.*
+fact.*
+reaction.*
 script.*
 zone.*
 system.*
@@ -186,7 +200,11 @@ references.outgoing
 world.path
 world.component
 quest.graph
+quest.consequence_graph
+quest.world_impact
 dialogue.graph
+fact.references
+reaction.graph
 dependency.graph
 schedule.timeline
 ```
@@ -213,6 +231,8 @@ lab.command
 lab.advance_time
 lab.run_bot
 lab.run_scenario
+lab.fork_branch
+lab.compare_branches
 lab.trace
 lab.invariants
 lab.compare_hosts
@@ -230,6 +250,75 @@ publish.rollback
 ```
 
 Policy controls protect promotion operations.
+
+### Quest/world authoring workflow
+
+The Builder should help an author design quests as part of the world rather than as isolated objective lists.
+
+Recommended workflow:
+
+```text
+narrative intent
+   ↓
+identify world facts and scopes
+   ↓
+identify observable DomainEvents/objectives
+   ↓
+define named quest outcomes
+   ↓
+attach typed consequences
+   ↓
+inspect consequence/reference graph
+   ↓
+fork/simulate each branch
+   ↓
+inspect NPC schedules / access / dialogue / world state
+   ↓
+certify
+```
+
+Useful operations:
+
+```text
+quest.preview_outcome
+quest.consequence_graph
+quest.world_impact
+fact.references
+world.explain_access
+world.explain_behavior
+lab.fork_branch
+lab.compare_branches
+```
+
+`quest.world_impact` should report all statically knowable downstream dependencies affected by facts/consequences:
+
+- exits/access policies;
+- room description variants;
+- NPC behavior/schedule profiles;
+- dialogue nodes/choices;
+- shops/services;
+- spawn rules;
+- follow-up quests;
+- map visibility;
+- reactions.
+
+This is especially useful for Astra: before changing an outcome it can ask, “what else in the world depends on this fact?”
+
+### Builder should suggest facts before scripts
+
+If an author asks for:
+
+> After the child is rescued, the mother returns home, the ferryman thanks you, villagers gossip about it, and the northern road opens.
+
+The Builder SHOULD first propose a shared fact/outcome model such as:
+
+```text
+village.child_status = rescued
+```
+
+plus direct mechanical consequences only where needed.
+
+It SHOULD NOT immediately generate separate scripts for every NPC/room.
 
 ## 6. Structured diagnostics
 

@@ -196,13 +196,13 @@ Equipped item remains owned/contained consistently and cannot also be equipped b
 
 ## D. Quest correctness
 
-### QST-01 — Accept
+### QST-01 — Offered activation
 
-Available quest becomes accepted/in-progress through legal transition.
+An eligible offered quest has no QuestInstance before acceptance. Accepting it creates exactly one active QuestInstance with activation metadata through a legal transition.
 
-### QST-02 — Double accept
+### QST-02 — Double activation
 
-Retry does not create duplicate QuestInstance.
+Retrying the offered/automatic/discovery activation event does not create a duplicate QuestInstance.
 
 ### QST-03 — Wrong NPC talk
 
@@ -261,6 +261,108 @@ Party quest progresses according to explicit party membership/policy and does no
 ### QST-14 — Realm event
 
 Realm-scoped event intentionally changes all eligible players/world state; certification verifies this broad scope is explicit.
+
+### QST-15 — Automatic discovery quest
+
+Player discovers a hidden shrine whose prerequisite facts are satisfied.
+
+The quest activates without an NPC giver, records the discovery event once, appears/reveals according to its activation mode, and can resolve automatically without a turn-in NPC.
+
+### QST-16 — Multiplayer kill credit
+
+Player A and Player B share a zone. A kills a quest target.
+
+For an `actor` credit objective, only A progresses.
+
+For an eligible `party` policy, configured party members progress.
+
+An unrelated nearby player does not progress unless the objective explicitly uses witness/scope policy.
+
+### QST-17 — Witness credit requires actual observation
+
+An objective credits witnesses to a public event.
+
+A player in another room/instance does not progress merely because the DomainEvent exists globally.
+
+### QST-18 — World-caused quest event
+
+A quest target dies due to world simulation or another NPC rather than the player.
+
+The quest follows its authored failure/alternate-outcome rule instead of assuming every relevant event has the questing player as actor.
+
+### QST-19 — Quest unlocks area atomically
+
+Completing a Story quest outcome opens a stateful gate/connection in the same local authority.
+
+Crash is injected before and after commit.
+
+After recovery, quest outcome and gate state are either both old or both committed; never split.
+
+### QST-20 — Personal unlock does not leak
+
+In Realm Mode, player A completes a player-scoped quest that grants access to a hidden passage.
+
+Player A can use the passage. Player B, who has not met the condition, cannot.
+
+The shared Realm connection/entity is not accidentally opened globally.
+
+### QST-21 — Fact-driven world reaction
+
+Quest sets `village.child_status = rescued`.
+
+Without direct quest edits to each subsystem:
+
+- mother dialogue changes;
+- mother schedule/profile changes;
+- ferryman ambient line set changes;
+- follow-up quest becomes available;
+- town description variant changes.
+
+All reactions are explainable through fact/reference graphs.
+
+### QST-22 — NPC branch state
+
+Two branch forks end in `rescued` versus `dead`.
+
+The mother's typed role state becomes `relieved` versus `grieving`; each state selects a valid schedule/dialogue profile and remains deterministic after seven simulated days.
+
+### QST-23 — Consequence exactly once
+
+Quest outcome grants item, sets fact, opens gate, and emits a custom DomainEvent.
+
+Duplicate triggering event/retry cannot grant the item twice or re-run non-idempotent consequences.
+
+### QST-24 — Consequence scope escalation rejected
+
+A player-scoped quest contains an undeclared Realm-scoped consequence.
+
+Compilation/certification rejects the quest rather than inferring global scope.
+
+### QST-25 — Explicit Realm-wide consequence
+
+A shared-area quest intentionally changes a Realm-scoped festival state.
+
+The broader scope is explicit and multiplayer-certified; all eligible players observe the intended shared change.
+
+### QST-26 — Cross-authority consequence retry
+
+A quest outcome in ZoneShard A produces an idempotent effect intended for a Realm-wide service.
+
+Crash/failure occurs after local outcome commit but before remote acknowledgement.
+
+Outbox/reconciliation retries the remote operation exactly once without rolling back or duplicating the local quest outcome.
+
+### QST-27 — Area unlock preserves reachability
+
+A branch closes one road and opens another.
+
+Static graph checks plus branch simulation prove the player is not trapped away from required content unless the branch explicitly defines that ending.
+
+### QST-28 — Branch world comparison
+
+The Lab forks immediately before a major choice.
+
+Its comparison report correctly identifies differing facts, access, NPC states, dialogue/action sets, spawned actors, and follow-up quests.
 
 ## E. Dialogue
 
@@ -326,6 +428,31 @@ Two guards match “guard.”
 
 Parser returns structured candidates, not arbitrary target.
 
+
+### ACT-09 — Forged hidden action invocation
+
+Client submits an ActionInvocation for an action key not present in its current GameView.
+
+Local Story authority or BEAM Realm authority re-resolves current ActionSet and rejects it unless independently legal. Hidden UI is never the security boundary.
+
+### ACT-10 — Stale action invocation
+
+Client submits an invocation from GameView revision 41 after authority state advanced to revision 42 and the action is no longer legal.
+
+Authority returns a typed stale/invalid-action result and fresh projection/resync guidance; it does not execute based solely on the old view.
+
+### ACT-11 — Invocation retry
+
+Client retries the same invocation after losing the acknowledgement.
+
+The active authority maps it into the command/idempotency contract so a state-changing action cannot execute twice.
+
+### ACT-12 — Realm local-kernel forgery
+
+A modified one-app client computes a favorable local result for a Realm action and submits it.
+
+The server ignores local decision output and accepts only the ActionInvocation, then performs its own authoritative resolution/decision.
+
 ## G. Scripting
 
 ### SCR-01 — Allowed binding
@@ -356,7 +483,7 @@ Budget enforced.
 
 ### SCR-07 — Event recursion
 
-Script signals itself recursively.
+Script emits a custom DomainEvent that recursively causes itself.
 
 Event-chain depth/cycle controls terminate with diagnostic.
 
@@ -766,6 +893,14 @@ Artifact substitutes key ID or signed metadata without valid signature.
 
 Verification fails before launch.
 
+### COMPAT-07 — Capability version remains semantically pinned
+
+A published cartridge is certified against `schedule@1`.
+
+The engine later introduces `schedule@2` with different semantics.
+
+The old cartridge continues to execute `schedule@1` semantics or follows an explicit certified migration; merely installing the newer engine/app does not reinterpret the old artifact.
+
 ## U. Receipt and platform boundaries
 
 ### RECEIPT-01 — Retry returns stable committed response
@@ -793,31 +928,67 @@ Offline already-downloaded cartridge remains playable.
 New purchase/restore may fail gracefully, while world simulation and unrelated online game instances remain isolated from the platform-service failure according to deployment topology.
 
 
-## V. Client and builder target separation
+## V. Client mode and builder target separation
 
-### CLIENT-01 — Stories has no online world dependency
+### MODE-01 — Story Mode has no online world dependency
 
-With all Loka online services unavailable, an installed offline-capable Stories cartridge launches, plays, saves, and resumes.
+With all Loka online services unavailable, an installed offline-capable cartridge launches in Story Mode, plays, saves, and resumes.
 
-### CLIENT-02 — Online has no local authority fallback
+### MODE-02 — Realm Mode has no local authority fallback
 
-Loka Online loses server connectivity during authoritative play.
+Realm Mode loses server connectivity during authoritative play.
 
-It does not silently continue mutating a local authoritative world; it reconnects/resyncs or presents offline status according to policy.
+It does not continue mutating a local authoritative copy. It reconnects/resyncs or presents disconnected status according to policy.
 
-### CLIENT-03 — Shared GameView parity
+### MODE-03 — Exactly one active gameplay authority
 
-Equivalent portable story state rendered through Stories and through an Online private instance yields semantically equivalent GameView action/quest/dialogue visibility.
+While a Story session is active, the user switches to Realm Mode.
 
-Presentation styling may differ.
+The Story session commits/closes before RemoteRealmSession becomes active. No world/save is simultaneously authoritative locally and remotely.
 
-### CLIENT-04 — Online app does not require embedded portable kernel
+The reverse transition has the same guarantee.
 
-A normal shared-realm Loka Online client build operates entirely from typed server projections/commands; no client-side simulation kernel is used as authority.
+### MODE-04 — Local kernel cannot authorize Realm state
 
-### CLIENT-05 — Stories app excludes realm-only surface
+A modified client invokes the embedded local kernel while connected to Realm Mode and fabricates favorable results.
 
-Stories production binary/workspace has no requirement for guild chat, shard handoff, shared realm economy, or other realm-only authority to play ordinary cartridges.
+BEAM ignores those results; only validated Realm commands and server decisions can mutate Realm state.
+
+### MODE-05 — Shared GameView parity
+
+Equivalent portable cartridge state rendered through LocalStorySession and an online-private RemoteRealmSession yields semantically equivalent GameView action/quest/dialogue visibility.
+
+Presentation chrome may differ.
+
+### MODE-06 — Realm code cannot mutate Story saves
+
+Realm session/social/transport code attempts to write a Story save or local world revision.
+
+Architecture/boundary test fails.
+
+### MODE-07 — Story authority cannot bypass Realm transport
+
+Story/local authority code attempts to mutate Realm character/economy/session state.
+
+Architecture/boundary test fails.
+
+### MODE-08 — Realm-specific UI is not on Story critical path
+
+Guild/presence/shard services are unavailable or uninitialized.
+
+Ordinary Story Mode launch/play remains functional.
+
+### MODE-09 — App update preserves offline saves while Realm evolves
+
+An app update changes Realm protocol/client features but leaves a supported Story save installed.
+
+The Story save still opens through the documented kernel/rule-IR compatibility path.
+
+### MODE-10 — Optional Story account, required Realm account
+
+A legitimately acquired cartridge remains playable in Story Mode while signed out/offline.
+
+Entering Realm Mode requires authenticated online identity.
 
 ### BUILDTARGET-01 — Story rejects server-only capability
 
@@ -837,7 +1008,7 @@ Validation fails rather than defaulting to global.
 
 ### BUILDTARGET-04 — Promotion preserves source artifact
 
-A `promote` workspace adapts a certified Stories cartridge.
+A `promote` workspace adapts a certified Story cartridge.
 
 Original cartridge hash remains unchanged; promotion creates a new deployment/adaptation artifact and certificate.
 
@@ -845,8 +1016,157 @@ Original cartridge hash remains unchanged; promotion creates a new deployment/ad
 
 Promotion of a cartridge containing permanently killable quest giver, unique loot, and player-local door flags returns structured required decisions for respawn, contention, and scope before shared-area certification can pass.
 
-### CLIENT-ENTITLEMENT-01 — Stories purchase does not self-authorize Online
+### ENTITLEMENT-01 — Local ownership is not Realm authority
 
-Stories device reports local cartridge ownership but no verified online entitlement exists.
+The app has a locally cached verified Story entitlement and a modified local save.
 
-Loka Online does not grant competitive/persistent access solely from the local claim.
+Realm Mode may use server-verified entitlement/account rules to unlock content, but it does not grant competitive/persistent value from the local save or an unverified local ownership flag.
+
+
+## W. Quest sharing, phasing, and scarce services
+
+### SCOPE-01 — Personal progress in shared world
+
+Players A and B share the same town and ferryman.
+
+A accepts a player-scoped quest. B does not.
+
+Only A's QuestInstance progresses while both continue to see/interact with the shared ferryman.
+
+### SCOPE-02 — Party progress membership snapshot
+
+A party activates a quest using snapshot membership.
+
+A late joiner does not retroactively become an owner/recipient unless the definition explicitly allows it.
+
+Leaving/rejoining cannot duplicate progress or rewards.
+
+### SCOPE-03 — Party dynamic-present credit
+
+A party quest using dynamic-present credit advances only eligible present members according to the objective's credit policy.
+
+### SCOPE-04 — Instance-scoped puzzle
+
+Two parties enter separate instances of the same dungeon.
+
+Solving the puzzle in one instance changes only that instance.
+
+### SCOPE-05 — Realm-scoped public event
+
+A certified Realm event advances shared reconstruction progress once and is visible consistently to all eligible players.
+
+### PHASE-01 — Personal quest NPC invisible to others
+
+Player A is eligible for a quest apparition in a shared room.
+
+A's GameView/search/action resolution includes it.
+
+Player B's does not.
+
+### PHASE-02 — Phased actor cannot leak shared effects
+
+A player-scoped quest NPC dies and drops an item.
+
+The drop remains player-scoped by default and cannot be looted or targeted by unrelated players.
+
+### PHASE-03 — Lazy materialization survives cleanup
+
+A personal quest actor is materialized while the player is nearby, then cleaned up after leaving.
+
+On return, durable quest/fact state reconstructs the correct actor state without duplication.
+
+### PHASE-04 — Shared NPC stays shared
+
+Two players interact with the same shared smith NPC but have different trust/dialogue/quest actions.
+
+Only one world NPC exists; per-player projections differ correctly.
+
+### PHASE-05 — Overlay provenance
+
+Developer/Lab trace can explain which shared/party/player layer caused a visible NPC, action, exit, or description variant.
+
+### INSTANCE-01 — Private destructive branch
+
+Player A destroys a bridge inside a private quest instance.
+
+Shared Realm geography and Player B's experience remain unchanged.
+
+### INSTANCE-02 — Instance reconnect
+
+Player disconnects from a private/party quest instance and reconnects.
+
+The correct instance identity and state are restored; a duplicate instance is not created.
+
+### INSTANCE-03 — Instance teardown
+
+Completed/expired private instance tears down ephemeral entities while explicitly exported rewards/memories survive according to policy.
+
+### SERVICE-01 — Shared service slot race
+
+Two Realm players submit requests for the only available slot on a shared service concurrently. The smithy forge case is one fixture.
+
+Exactly one order receives that slot; the other is queued/rejected according to policy.
+
+### SERVICE-02 — ServiceJob input escrow
+
+Submitting a sword order moves required materials into escrow atomically with ServiceJob creation.
+
+Crash at every boundary cannot duplicate or lose inputs.
+
+### SERVICE-03 — ServiceJob completion exactly once
+
+Scheduler retries the completion job after a crash.
+
+Sword output is created/claimed once and the completion DomainEvent is idempotent.
+
+### SERVICE-04 — Personal quest observes shared ServiceJob
+
+Player A's personal quest requires the sword.
+
+Player B also uses the same smithy.
+
+Only completion of A's eligible ServiceJob progresses A's quest.
+
+### SERVICE-05 — Capacity semantics are precise
+
+Content declaring one start per day behaves differently from one concurrent one-day slot and one completion per day, and certification fixtures prove the selected rule.
+
+### SERVICE-06 — Queue persists through restart
+
+Realm service/ZoneShard restarts with queued and active ServiceJobs.
+
+Queue order, reservations, escrow, and scheduled completion remain correct.
+
+### SERVICE-07 — Story overnight forge
+
+Story Mode submits an overnight order, app closes, and the cartridge's declared time policy is applied on resume.
+
+The order completes or remains pending deterministically according to real-elapsed/play-time policy.
+
+### SERVICE-08 — Cancellation and refund
+
+Cancelling a queued/in-progress order applies the configured cancellation/escrow/refund policy once and cannot be exploited for material duplication.
+
+### SERVICE-09 — Queue abuse limits
+
+A character/account attempts to monopolize the smithy with excessive queued orders.
+
+Configured max-outstanding/admission policy is enforced transactionally.
+
+### MIXED-01 — Personal quest + shared bottleneck + phased NPC
+
+One quest simultaneously uses:
+
+- player-scoped progress;
+- shared service using the smithy fixture;
+- player-beneficiary ServiceJob;
+- player-phased quest apparition;
+- shared town geometry.
+
+All scopes remain independent and correct.
+
+### MIXED-02 — Promote Story smithy to Realm
+
+A portable Story cartridge with local overnight smithing is promoted.
+
+Promotion explicitly chooses whether Realm deployment uses personal capacity, an instanced service, or a genuinely shared service queue and runs the matching certification gates.

@@ -318,3 +318,172 @@ Decision:
 The Builder API now has explicit `story`, `realm`, and `promote` targets.
 
 This reduces architecture coupling at the cost of two app-store/release tracks and a deliberate cross-client entitlement/account policy. The latter is intentionally not assumed to be automatic.
+
+
+## 22. Review round two: revisit the two-client decision
+
+After PR #4 merged, the client split was challenged again from a maintenance/product perspective.
+
+### Finding
+
+Two separate store apps preserved authority separation, but duplicated:
+
+- store listings/review tracks;
+- release/version management;
+- navigation/onboarding;
+- design/accessibility shell;
+- account/catalog/purchase/restore UX;
+- analytics/support surface;
+- installed-user migration path when Realm launches.
+
+The authority problem did not actually require two binaries.
+
+### Revised decision
+
+Use **one Loka app with two strict gameplay session modes**:
+
+- `LocalStorySession` — local kernel + SQLite;
+- `RemoteRealmSession` — Phoenix/BEAM.
+
+The common renderer consumes host-neutral GameViews. Exactly one session authority is active at a time. Realm never accepts local simulation as authority.
+
+The mobile codebase keeps separate Story and Realm feature/authority modules so “one app” does not become pervasive `if online?` conditionals.
+
+### Why this is simpler
+
+- one store presence and installed user base;
+- one design/accessibility/localization system;
+- one cartridge/account/catalog experience;
+- Realm can arrive later as an app update;
+- no cross-app entitlement problem;
+- Story cartridges can open online adventures/Realm portals without deep-linking to another product.
+
+### New cost
+
+Online development cadence can force more frequent app updates, so offline save/kernel/rule-IR backward compatibility becomes even more important. The existing compatibility contract already treats this as a release invariant.
+
+### Builder decision retained
+
+`story`, `realm`, and `promote` remain distinct Builder targets because they represent authority/trust/certification semantics, not clients.
+
+## 23. Review round two: master-plan clarity
+
+The packet has grown large enough that an implementation model could confuse research/history with requirements.
+
+Correction: the packet index now explicitly labels:
+
+- normative architecture;
+- normative sequencing/acceptance gates;
+- informative/reference evidence.
+
+A disagreement between normative documents is itself a spec defect and blocks implementation until reconciled; there is no implicit “pick the newest paragraph” rule.
+
+Certification is now explicitly target-driven:
+
+- Story workspaces select portable/offline/save-compatibility gates;
+- Realm workspaces select online/concurrency/security/load gates;
+- Promote workspaces retain the immutable Story artifact and add explicit multiplayer adaptation plus Realm certification.
+
+
+## 24. Review round two: quests as living-world participants
+
+The master-plan review revisited how quests should create immersive, persistent world change.
+
+### Problem
+
+A traditional quest engine can become a second scripting/mutation authority:
+
+- objective completes;
+- quest script edits a door;
+- separately rewrites an NPC;
+- separately changes dialogue;
+- separately spawns actors;
+- separately flips arbitrary flags.
+
+This is brittle, hard to replay, and encourages world systems to depend on quest implementation details.
+
+### Revised contract
+
+Quests now follow:
+
+```text
+world DomainEvents
+  → QuestReducer
+  → named quest outcome
+  → typed capability consequences
+  → combined StateDelta/DomainEvents/Effects
+  → authority commit
+  → reactive world rules
+```
+
+Typed scoped **Facts** coordinate broad narrative truths across systems.
+
+Example:
+
+`village.child_status = rescued`
+
+can drive schedules, dialogue, ambience, access, follow-up quests, and descriptions without the quest directly rewriting each subsystem.
+
+Direct consequence operators remain available for mechanical actions such as opening a gate or spawning an encounter.
+
+### Scope safety
+
+Quest scope does not automatically authorize world scope.
+
+Player-scoped Story/Realm progression cannot silently mutate Realm-global state. Broader consequences require explicit scope and matching certification.
+
+### Builder/Lab implications
+
+Builder gains consequence/fact/reference/impact tools.
+
+The Lab must fork quest branches, compare world state, and simulate forward after outcomes.
+
+The first real cartridge is now required to prove at least:
+
+- a quest-gated area/access change;
+- an NPC state/schedule/dialogue reaction;
+- an ambient/environmental reaction;
+- branch comparison and forward simulation.
+
+This turns “living and breathing” from an aspiration into an architecture and certification requirement.
+
+
+## 25. Review round two: quest tracking, phasing, instancing, and bottlenecks
+
+The review then challenged a common MMORPG ambiguity: whether a quest is simply “instanced” or “shared.”
+
+That binary is insufficient.
+
+The architecture now separates five independent dimensions:
+
+- progress scope;
+- consequence scope;
+- presence/audience;
+- spatial placement;
+- capacity scope.
+
+This permits, for example:
+
+- player-scoped quest progress;
+- one shared blacksmith NPC;
+- one shared service queue for a scarce world service;
+- a private apparition visible only to the questing player;
+- a private party dungeon later in the same quest.
+
+A dedicated normative specification now defines these combinations.
+
+### Scarce-service bottleneck
+
+The one-sword-per-day smithy is only a worked example. The architecture uses generic Service/Capacity/Reservation/ServiceJob primitives that can also model ferries, healers, trainers, ritual altars, inns, processors, and other scarce services.
+
+The quest observes work-order completion; it does not own the overnight timer or queue.
+
+Inputs can be escrowed, allocation is atomic, capacity is inspectable, and Realm fairness/retry semantics can be certified.
+
+### Phasing
+
+Personal quest actors use scoped AudiencePolicy/overlay presence under the shared ZoneShard rather than requiring whole-zone instancing.
+
+Shared NPCs remain shared when only dialogue/relationship differs.
+
+Full private instances are reserved for incompatible physical simulations such as destructive branches, exclusive bosses, puzzle resets, or heavily private scripted sequences.

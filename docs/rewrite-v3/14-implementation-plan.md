@@ -39,7 +39,7 @@ No unresolved contradiction about:
 - command/event/effect model;
 - persistence transaction semantics;
 - scripting boundary;
-- mobile protocol;
+- mobile Story session/GameView boundary and the fact that Realm transport is intentionally deferred;
 - cartridge versioning.
 
 ## R1 — Disposable portable-kernel feasibility spike
@@ -130,8 +130,11 @@ apps/loka_runtime
 apps/loka_builder
 apps/loka_web
 kernel/
-mobile/apps/stories
-mobile/apps/online
+mobile/app
+mobile/features/story
+mobile/features/realm
+mobile/authority/local-story
+mobile/authority/remote-realm
 mobile/packages/ui
 mobile/packages/game-view
 protocol/
@@ -144,8 +147,7 @@ docs/
 - Mix umbrella;
 - strict compile/dependency boundaries;
 - Rust workspace if accepted;
-- two minimal Expo app targets (Stories and Online) plus shared UI/GameView packages;
-- PostgreSQL dev/test container;
+- one minimal Expo app with strict Story/Realm feature and authority-module boundaries, plus shared UI/GameView packages;
 - formatter/lint/security configs;
 - one unified CI;
 - generated-schema drift check;
@@ -158,11 +160,12 @@ docs/
 Empty-system CI is green on:
 
 - Elixir;
-- Rust;
 - TypeScript;
-- iOS binding compile;
-- Android binding compile;
-- PostgreSQL integration.
+- the R1-selected portable execution implementation;
+- the R1-selected iOS/Android integration path;
+- mobile portability/binding smoke appropriate to that choice.
+
+If R1 rejects Rust/native bindings, R2 MUST NOT keep Rust-specific gates merely because they appeared in the original hypothesis.
 
 ## R3 — Contract/schema foundation
 
@@ -180,22 +183,27 @@ Make machine-readable contracts exist before features.
 - domain-event registry;
 - effect registry;
 - policy AST;
-- Builder API operation registry;
-- protocol schema/codegen;
+- FactSpec / scoped narrative-state schema;
+- consequence-operator registry shape;
+- portable GameView schema;
+- portable kernel ABI/serialization contract;
 - canonical serialization/hash rules;
 - diagnostic/error registry.
 
 ### Gate R3
 
-From registries, tooling can generate/check:
+From the portable/content registries, tooling can generate/check:
 
-- Elixir host types/validators;
-- TypeScript protocol types;
-- builder/MCP tool definitions;
-- docs/help excerpts;
-- test fixtures.
+- Elixir portable/domain types and validators;
+- TypeScript portable command/GameView/content types used by Story Mode;
+- capability/schema docs and help excerpts;
+- canonical test fixtures.
 
-No handwritten duplicate command/event catalogs.
+No handwritten duplicate portable command/event/GameView catalogs.
+
+R3 intentionally does **not** generate Builder/MCP operations or the Realm network protocol. Those contracts are introduced only when R11 and R14 need them.
+
+Do **not** build the generalized Builder operation registry or the full Realm transport protocol in R3. Builder operation schemas belong to R11; Realm protocol/codegen belongs to R14.
 
 ## R4 — Cartridge compiler v1
 
@@ -301,13 +309,17 @@ Support real narrative cartridges.
 - quest graph operators;
 - quest reducer;
 - quest event indexing;
-- idempotent rewards;
+- typed quest outcome/consequence grammar;
+- FactSpec reads/writes with scope validation;
+- capability consequence evaluators returning StateDelta/events/effects;
+- idempotent rewards/consequences;
 - dialogue graph;
 - dialogue conditions/actions;
 - LokaScript parser/normalized-IR skeleton and interpreter core sufficient to prove containment/determinism;
 - only the bindings actually needed by the first cartridge plus a small synthetic safety fixture set;
 - interpreter budgets;
-- event-chain bounds.
+- event-chain bounds;
+- branch/world-consequence trace output.
 
 ### Gate R7
 
@@ -321,6 +333,8 @@ Make the world feel like a MUD, not a branching ebook.
 
 ### Build initially
 
+- reactive fact/event rule evaluation;
+- NPC role/state profiles;
 - schedule;
 - patrol;
 - wander;
@@ -330,14 +344,20 @@ Make the world feel like a MUD, not a branching ebook.
 - spawn/despawn policy;
 - day/night;
 - basic weather;
+- fact-driven room/ambient variants;
+- fact-driven access/topology policies;
 - on-demand temporal state;
 - durable local jobs;
-- simple merchant/shop if needed.
+- simple merchant/shop if needed;
+- portable Service/Capacity composition primitives;
+- durable local ServiceJob model sufficient to prove queued/timed services.
 
 ### Gate R8
 
 30 simulated days:
 
+- service queues/jobs remain bounded and deterministic;
+- escrowed inputs/outputs conserve ownership;
 - no schedule deadlocks;
 - no runaway population;
 - bounded jobs;
@@ -355,6 +375,8 @@ Make failures reproducible before content scale.
 - virtual clock;
 - seed/RNG controls;
 - snapshots/forks;
+- branch outcome fork/compare;
+- quest world-impact/consequence graph;
 - trace viewer data;
 - static validator gates;
 - property tests;
@@ -382,7 +404,10 @@ Target scope:
 - 5–8 NPCs;
 - 10–20 items;
 - 1–3 connected quests;
-- branching outcome;
+- branching outcome with typed durable world consequences;
+- at least one quest-gated area/access change;
+- at least one NPC role/schedule/dialogue reaction to quest outcome;
+- at least one ambient/environmental reaction to shared fact state;
 - schedules;
 - environmental change;
 - simple skill/check;
@@ -393,7 +418,7 @@ Target scope:
 
 Hand-author substantial portions first. Do not immediately ask the factory to mass-generate.
 
-The first cartridge exists to stress contracts.
+The first cartridge exists to stress contracts. It MUST prove that quests and living-world systems interact through typed facts/consequences rather than cartridge-specific mutation scripts.
 
 ### Gate R10
 
@@ -409,6 +434,7 @@ Let humans/agents author without raw repo semantics.
 
 ### Build
 
+- Builder API operation registry/schema generation;
 - workspace/revision;
 - capability search/describe;
 - content CRUD;
@@ -426,13 +452,13 @@ Let humans/agents author without raw repo semantics.
 
 Astra/another agent can recreate or extend representative first-cartridge content using only Builder API tools and fix intentionally injected validation failures without shell/Git editing.
 
-## R12 — Loka Stories product shell
+## R12 — Loka app: production Story Mode
 
 Can overlap late R10.
 
 ### Build
 
-- production Stories navigation;
+- production app navigation with Story Mode as the shipped gameplay mode;
 - shared UI/GameView package extraction only where demonstrated useful;
 - catalog shell;
 - cartridge install/delete/update;
@@ -451,6 +477,7 @@ Non-developer can install the polished build, enter airplane mode, play/finish t
 
 ### Build
 
+- introduce PostgreSQL dev/test/runtime infrastructure needed by platform services;
 - `loka_platform` account/catalog/entitlement application service boundary;
 - catalog service;
 - canonical entitlement;
@@ -472,7 +499,7 @@ Store sandbox tests on iOS/Android:
 - second device;
 - refund/reconnect policy.
 
-## R14 — BEAM online authority + Loka Online skeleton
+## R14 — BEAM online authority + Realm Mode skeleton
 
 ### Objective
 
@@ -489,8 +516,9 @@ Run the same cartridge rules online under OTP.
 - command receipts;
 - effect outbox;
 - snapshots;
-- Phoenix typed protocol;
-- minimal Loka Online client target using that protocol;
+- machine-readable Realm transport protocol + Elixir/TypeScript codegen and compatibility fixtures;
+- Phoenix typed protocol adapter;
+- Realm Mode route/session driver inside the existing Loka app using that protocol;
 - reconnect/resync;
 - observability.
 
@@ -516,7 +544,7 @@ Offer same story as cloud-authoritative run.
 
 ### Gate R15
 
-Player can choose offline or connected deployment of same cartridge; narrative/rules match.
+Within the same Loka app, the player can choose local Story execution or a connected Realm/private deployment of the same portable cartridge where offered; narrative/rules match.
 
 ## R16 — Repeatable AI factory
 
@@ -541,6 +569,8 @@ Two materially different cartridges produced mostly as content changes without u
 
 - party model;
 - party-scoped quest state;
+- party membership/progress/reward policy modes;
+- party AudiencePolicy overlays;
 - concurrent command handling;
 - join/leave/reconnect;
 - loot ownership;
@@ -550,10 +580,14 @@ Two materially different cartridges produced mostly as content changes without u
 
 Full party certification including race/fault tests.
 
-## R18 — Loka Online persistent social shell
+## R18 — Realm Mode persistent social shell
 
 ### Build selectively
 
+- shared-zone player/party overlay projection;
+- lazy materialization/cleanup of phased quest actors;
+- shared NPC with player-specific dialogue/relationship projections;
+- Realm Service/Capacity primitives and durable ServiceJobs;
 - online profiles;
 - friends;
 - presence;
@@ -565,7 +599,7 @@ Full party certification including race/fault tests.
 
 ### Gate R18
 
-Offline cartridges remain independent; same packs can launch from shared hub as private/party adventures.
+Offline cartridges remain independent; same packs can launch from shared hub as private/party adventures. Personal overlays do not leak to unrelated players, and a shared service contention test proves one scarce slot cannot be double-allocated.
 
 ## R19 — Instanced story regions in world geography
 
@@ -741,6 +775,6 @@ Models should not silently amend architecture during implementation.
 
 The rebuild has failed if it spends a year building a universal engine without shipping a cartridge.
 
-The first major product gate remains R10/R13: **a polished offline purchasable storypack**.
+The first major product gate spans R10 + R12 + R13: **a polished offline purchasable storypack in the production Loka app**.
 
 The MMORPG path exists in the architecture so that work compounds, not so it blocks shipping.

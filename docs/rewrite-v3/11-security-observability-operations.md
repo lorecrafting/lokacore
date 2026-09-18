@@ -113,22 +113,29 @@ Defense in depth:
 
 If public scripting arrives, conduct a dedicated security review and consider additional OS-process isolation even with the custom interpreter.
 
-## 7. Native kernel safety
+## 7. Portable-kernel implementation safety
 
-The portable kernel becomes high-trust code.
+The portable rules implementation becomes high-trust code regardless of language.
 
-Requirements:
+Common requirements:
+
+- fuzz parsers/deserializers;
+- canonical input size limits;
+- cartridge-driven allocation/work quotas;
+- versioned serialization;
+- hostile package corpus tests;
+- well-defined failure/panic/exception handling at host boundaries.
+
+If R1 accepts a Rust/native kernel, additionally require:
 
 - safe Rust by default;
 - unsafe code denied/linted unless explicitly justified/reviewed;
-- fuzz parsers/deserializers;
-- canonical input size limits;
-- no cartridge-driven native allocation without quotas;
-- panic handling at FFI boundary;
-- versioned serialization;
-- hostile package corpus tests.
+- panic handling at the FFI boundary;
+- no cartridge-driven native allocation without quotas.
 
-On BEAM, long/heavy kernel operations must not block normal schedulers.
+If R1 chooses a non-native fallback, apply equivalent sandbox/resource/error-boundary requirements for that implementation.
+
+On BEAM, any native long/heavy kernel operations must not block normal schedulers.
 
 ## 8. Content integrity
 

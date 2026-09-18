@@ -1,10 +1,10 @@
 # Loka v3 Rebuild Specification Packet
 
-**Status:** Draft 0.1 — architecture specification, not implementation authorization  
-**Date:** 2026-09-17  
+**Status:** Draft 0.2 — master architecture specification under iterative review; not implementation authorization  
+**Date:** 2026-09-18  
 **Source system:** `lorecrafting/lokacore`  
 **Strategic parent:** `docs/product/CARTRIDGE-ROADMAP.md`  
-**Purpose:** define a clean-room rebuild of Loka as a shared game platform with two deliberately separate clients—offline-first **Loka Stories** and BEAM-authoritative **Loka Online**—while preserving portable cartridge semantics where reuse is valuable and removing transitional Lokacore architecture.
+**Purpose:** define a clean-room rebuild of Loka as one mobile product with two strictly separated authority modes—offline-first **Story Mode** and BEAM-authoritative **Realm Mode**—while preserving portable cartridge semantics where reuse is valuable and removing transitional Lokacore architecture.
 
 ## 1. Why this packet exists
 
@@ -34,13 +34,30 @@ This packet uses:
 
 When code and this packet disagree in the future, accepted amendments and tests determine the contract. Markdown alone must not become a second unverified source of truth for machine-readable schemas.
 
+### Do not conflate product, authoring, and runtime axes
+
+| Axis | Values | Meaning |
+|---|---|---|
+| **App mode** | Story Mode / Realm Mode | Which authority adapter the one Loka mobile app is using now. |
+| **Builder target** | `story` / `realm` / `promote` | Which authoring constraints and certification policy apply to the workspace. |
+| **Execution profile** | `offline_private` / `online_private` / `party` / `shared_area` | How a compiled cartridge/deployment is hosted at runtime. |
+| **Artifact type** | cartridge release / deployment / campaign | Immutable content module, hosting policy, or composition/continuity manifest. |
+
+These axes interact but are not aliases.
+
+Examples:
+
+- Story Mode normally runs an `offline_private` profile built with target `story`.
+- Realm Mode can run `online_private`, `party`, or `shared_area`.
+- A `promote` workspace takes a certified Story cartridge and produces a new Realm deployment/adaptation; it does not change the app mode or mutate the source artifact.
+
 ## 3. Product invariant
 
-Loka v3 is one game platform with one portable rules/content model serving:
+Loka v3 is one game platform with one content/capability framework and a portable deterministic subset serving:
 
-1. offline private storypacks in Loka Stories;
-2. online private/party adventures in Loka Online;
-3. certified shared areas in Loka Online;
+1. offline private storypacks in Loka Story Mode;
+2. online private/party adventures in Loka Realm Mode;
+3. certified shared areas in Loka Realm Mode;
 4. eventually, a persistent text-first multiplayer world.
 
 These modes MUST use the same compiled cartridge contracts and portable deterministic rule semantics where the cartridge declares offline support. Single-player is not a disposable engine: the authority host changes from local mobile to BEAM as content moves online.
@@ -50,28 +67,40 @@ A released cartridge MUST remain playable without an AI model or authoring facto
 ## 4. Architecture in one diagram
 
 ```text
-                      COMPILED CARTRIDGE
+                         ONE LOKA APP
                               |
-                    portable rules/kernel
-                      /               \
-                     /                 \
-       OFFLINE MOBILE                  ONLINE BEAM
-   LocalInstanceAuthority             loka_runtime
-   local SQLite                     WorldInstance/Shard
-         |                                |
- React Native projection        commit/effects/observation
-                                          |
-                                      PostgreSQL
-                                          |
-                                      loka_gateway
-                                  Phoenix / HTTP / channels
+                         GameView UI
+                              |
+                         GameSession
+                        /           \
+                       /             \
+          LocalStorySession       RemoteRealmSession
+          portable kernel          Phoenix transport
+          local SQLite                  |
+                                      BEAM
+                              WorldInstance / ZoneShard
+                                      |
+                              DecisionCoordinator
+                               /              \
+                    portable kernel      server-only
+                                         Elixir rules
+                               \              /
+                                StateDelta/events/effects
+                                         |
+                                     PostgreSQL
 
 AUTHORING PLANE
 Astra / Foundry / human terminal / CI
              |
         loka_builder
- workspace -> Builder API -> compiler -> Cartridge Lab -> certificate
+ story | realm | promote workspaces
+             |
+ compiler -> Cartridge Lab -> certificate
 ```
+
+The mobile shell is shared; **authority is not**.
+
+Story Mode commits locally. Realm Mode sends commands to BEAM and never treats the embedded local kernel as authority.
 
 The transport, authoring, runtime, domain, and persistence planes MUST remain separable.
 
@@ -94,13 +123,13 @@ The online authority/orchestration layer SHOULD remain idiomatic Elixir/OTP. Rul
 
 ## 6. Working top-level decisions
 
-| Topic | Draft v0.1 decision |
+| Topic | Draft v0.2 decision |
 |---|---|
 | Online language/runtime | Elixir on BEAM/OTP |
 | Portable offline rules | Shared deterministic kernel; Rust is the working choice pending a mandatory cross-platform spike |
 | Server UI/API | Phoenix |
-| Clients | Two React Native / Expo app targets: Loka Stories (offline-first) and Loka Online (multiplayer-only), sharing packages but not authority responsibilities |
-| Online production DB | PostgreSQL from v3 start; offline saves use local SQLite |
+| Mobile | One React Native / Expo app with strict Story Mode (local authority) and Realm Mode (remote BEAM authority) session boundaries |
+| Persistence | PostgreSQL for online/platform durability when those phases arrive; offline Story saves use local SQLite |
 | Game authority | offline: local serialized authority; online: BEAM server authoritative |
 | Offline private authority | local serialized instance authority + local SQLite |
 | Online private concurrency | one authoritative BEAM world-instance owner process |
@@ -111,9 +140,18 @@ The online authority/orchestration layer SHOULD remain idiomatic Elixir/OTP. Rul
 | Game decisions | pure/replayable functions with injected clock and RNG |
 | Scripting | declarative capabilities first; restricted Elixir-syntax LokaScript interpreter as escape hatch |
 | Builder | canonical typed Builder API; MCP/terminal/CLI are adapters |
-| Mobile protocol | one machine-readable external schema with generated TypeScript/Elixir validation |
+| Realm transport protocol | one machine-readable external schema with generated TypeScript/Elixir validation, introduced with Realm Mode |
 | Release | exact certified cartridge hash |
 | AI | author/reviewer/tool client, never runtime authority |
+
+### Intentionally unresolved evidence gates
+
+Two choices remain deliberately provisional rather than being papered over by the specification:
+
+1. **portable kernel technology/binding** — Rust is the working hypothesis, but R1 must prove the BEAM/mobile binding, determinism, debugging, and release ergonomics;
+2. **App Store treatment of downloadable rule content** — the product requires downloadable offline stories, but the exact bounded rule representation must survive current store-review constraints.
+
+Implementation MUST NOT treat either provisional choice as settled before its evidence gate passes.
 
 ## 7. Packet index
 
@@ -137,8 +175,54 @@ Read in this order:
 16. [Architecture Decision Register](16-decision-register.md)
 17. [Research Baseline and External References](17-research-baseline.md)
 18. [Specification Review Record](18-review-record.md)
+19. [Quest Sharing, Phasing, Instancing, and Scarce World Services](19-quest-sharing-instancing-capacity.md)
 
-## 8. What this packet deliberately does not do
+## 8. Specification authority map
+
+This packet is intentionally comprehensive, but not every document has the same authority.
+
+### Normative architecture
+
+Implementation MUST conform to:
+
+- `01-core-principles.md`
+- `02-beam-runtime-architecture.md`
+- `03-domain-state-persistence.md`
+- `04-command-event-effect-protocol.md`
+- `05-cartridges-content-capabilities.md`
+- `06-quests-dialogue-actions-scripting.md`
+- `07-offline-storypacks-to-mmo.md`
+- `08-builder-api-ai-factory.md`
+- `09-cartridge-lab-certification.md`
+- `10-mobile-commerce-release.md`
+- `11-security-observability-operations.md`
+- `19-quest-sharing-instancing-capacity.md`
+- accepted decisions in `16-decision-register.md`
+
+### Normative gates and sequencing
+
+- `14-implementation-plan.md`
+- `15-acceptance-scenarios.md`
+
+These define what evidence is required before later phases may depend on earlier work. Exact ticket decomposition may evolve without changing architecture.
+
+### Informative/reference evidence
+
+- `12-evennia-lessons.md`
+- `13-lokacore-feature-inventory.md`
+- `17-research-baseline.md`
+- `18-review-record.md`
+- historical Lokacore documents linked from the product roadmap
+
+These explain why decisions were made but do not override normative contracts.
+
+### Conflict rule
+
+Two normative documents disagreeing is a **specification defect**. Implementation MUST stop at that boundary until the packet is reconciled. Do not invent an implicit precedence rule, pick whichever text is convenient, or treat newer prose as silently overriding an accepted ADR.
+
+Machine-readable schemas/registries become the executable source of truth for their defined contracts once implemented; this packet governs their intended semantics.
+
+## 9. What this packet deliberately does not do
 
 It does not:
 
@@ -153,7 +237,7 @@ It does not:
 
 The clean implementation SHOULD begin in a fresh repository only after this packet receives self-review, adversarial review, corrections, and explicit acceptance.
 
-## 9. Reference implementation policy
+## 10. Reference implementation policy
 
 Lokacore MUST be retained during the rebuild as a read-only design corpus/reference implementation.
 
@@ -170,7 +254,7 @@ The v3 implementation MUST be a clean-sheet codebase. It MUST NOT copy, import, 
 
 A later one-way content importer MAY translate selected old world/content files into v3 source formats, but the imported result must satisfy v3 schemas exactly and must not require legacy runtime compatibility.
 
-## 10. Specification change discipline
+## 11. Specification change discipline
 
 Every major implementation slice MUST cite the relevant spec section in its issue/PR.
 

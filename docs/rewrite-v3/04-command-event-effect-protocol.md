@@ -1,12 +1,36 @@
-# 04 — Commands, Domain Events, Effects, and Client Protocol
+# 04 — Action Invocations, Commands, Domain Events, Effects, and Client Protocol
 
-## 1. Four concepts, four responsibilities
+## 1. Five concepts, five responsibilities
 
 Loka v3 MUST distinguish:
 
+### ActionInvocation
+
+A host-neutral gameplay intent emitted by shared UI, text parsing, bots, or accessibility tooling from a currently advertised GameView action.
+
+Example:
+
+```json
+{
+  "invocation_id": "uuid",
+  "action_key": "talk",
+  "actor_id": "uuid",
+  "target_ids": ["uuid"],
+  "input": {},
+  "view_revision": 9201
+}
+```
+
+An ActionInvocation is **not yet an authoritative Command**.
+
+- Story Mode: `LocalStorySession` resolves/revalidates the invocation against current local GameView/state and constructs the typed Command.
+- Realm Mode: `RemoteRealmSession` sends the invocation to BEAM; the server re-resolves/revalidates the advertised action and constructs the typed Command.
+
+The shared renderer MUST NOT construct authority-specific command payloads.
+
 ### Command
 
-An authenticated request to change/inspect authoritative game state.
+An authority-side typed request to change/inspect game state after action resolution/authentication.
 
 Examples:
 
@@ -59,34 +83,40 @@ Examples:
 
 Client messages are not domain events.
 
-## 2. Host-neutral command semantics
+## 2. Action invocation and command semantics
 
-The same logical command types drive offline and online play. Online they arrive through the external protocol; offline the React Native/local authority constructs the same canonical command payload locally.
+Portable gameplay may resolve to the same logical Command types offline and online, but shared mobile UI speaks **ActionInvocation**, not internal Command structs.
 
-### External online command envelope
+The ActionSet/GameView is the affordance contract: it advertises valid action keys, target/input schema, labels, and relevant presentation hints.
+
+Authority always revalidates because the GameView can be stale.
+
+### External Realm gameplay envelope
 
 ```json
 {
   "protocol_version": 1,
-  "command_id": "uuid",
   "client_seq": 184,
+  "session_id": "uuid",
   "instance_id": "uuid",
-  "character_id": "uuid",
-  "type": "move",
-  "payload": {
-    "direction": "north"
-  },
-  "expected_revision": 9201
+  "invocation": {
+    "invocation_id": "uuid",
+    "action_key": "move",
+    "actor_id": "uuid",
+    "target_ids": [],
+    "input": {"direction": "north"},
+    "view_revision": 9201
+  }
 }
 ```
 
-The gateway supplies authenticated account/session identity; the client cannot claim arbitrary actor authority.
+The gateway supplies authenticated account/session identity; the client cannot claim arbitrary actor authority. The server verifies the invocation actor is controllable by that session and re-resolves the action against current state.
 
-`expected_revision` MAY be omitted for commutative/read-like operations but SHOULD be used for state-sensitive interactions where stale UI matters.
+The server then creates the internal Command ID/idempotency identity. The invocation ID is retained for client retry/correlation.
 
 ## 3. Canonical command representation
 
-After online protocol validation—or local offline input adaptation—the authority host constructs:
+After Realm invocation validation/action resolution—or Story local invocation resolution—the authority host constructs:
 
 ```elixir
 %Command{
@@ -126,7 +156,7 @@ They do not read wall clock/network/database.
 ```elixir
 {:ok,
  %Decision{
-   new_state: state,
+   state_delta: delta,
    rng: new_rng,
    domain_events: events,
    effects: effects,
@@ -142,7 +172,42 @@ or:
 
 Expected gameplay failure is data, not exception control flow.
 
-## 6. Game error taxonomy
+## 6. Online hybrid decision coordination
+
+Realm commands may involve both portable capabilities and server-only Elixir capabilities. They MUST still form one logical decision.
+
+The `WorldInstance` / `ZoneShard` uses a **DecisionCoordinator**:
+
+```text
+typed Command
+   ↓
+ordered capability/rule dispatch
+   ├─ portable evaluators → shared kernel
+   └─ server-only evaluators → pure Elixir rule modules
+   ↓
+proposal overlay
+   + StateDelta
+   + DomainEvents
+   + Effects
+   + RNG/logical-time updates
+   ↓
+final invariants
+   ↓
+one authoritative transaction
+```
+
+Rules:
+
+- evaluators MUST NOT persist or publish directly;
+- every evaluator sees a deterministic proposal-state view containing prior accepted deltas in the current decision;
+- event subscribers are dispatched in deterministic registry order, with explicit priority only where the capability contract declares it;
+- conflicting writes to the same authoritative field either use a declared composition rule or fail as an invariant/capability conflict;
+- portable and server-only events share the same bounded event-chain/cycle limits;
+- only after the full decision succeeds does the host commit state, receipts, traces, and durable effects.
+
+This is the online extension point that lets BEAM-native Realm systems coexist with portable cartridge mechanics without reintroducing multiple mutation authorities.
+
+## 7. Game error taxonomy
 
 Every rejection has stable machine code:
 
@@ -167,7 +232,7 @@ Human text is localized/rendered separately.
 
 Agents and mobile clients should never need to parse an English error string to decide what happened.
 
-## 7. Domain event envelope
+## 8. Domain event envelope
 
 ```elixir
 %DomainEvent{
@@ -188,7 +253,7 @@ Event types and payloads are registered/machine-readable.
 
 Events SHOULD be immutable values.
 
-## 8. Event processing model
+## 9. Event processing model
 
 Within one command, deterministic event reactions may form a bounded chain:
 
@@ -211,7 +276,7 @@ The runtime MUST impose:
 
 This prevents script/rule loops.
 
-## 9. Effect types
+## 10. Effect types
 
 Effects are registered and typed.
 
@@ -237,7 +302,7 @@ Every effect declares:
 - allowed origin capabilities;
 - schema.
 
-## 10. Causation and correlation
+## 11. Causation and correlation
 
 All command-derived events/effects/messages share a correlation ID.
 
@@ -251,7 +316,7 @@ command c1
 
 The trace viewer must reconstruct this graph.
 
-## 11. Protocol source of truth for online transport
+## 12. Protocol source of truth for online transport
 
 External protocol definitions MUST live in a language-neutral machine-readable schema source under `protocol/`.
 
@@ -267,7 +332,7 @@ Generate/check:
 
 No hand-maintained duplicate `Room` interfaces.
 
-## 12. Version negotiation
+## 13. Version negotiation
 
 Client join request includes:
 
@@ -291,7 +356,7 @@ Server responds with:
 
 If incompatible, return a typed upgrade error before joining game state.
 
-## 13. Client projection
+## 14. Client projection
 
 The client SHOULD receive view models, not internal DB/entity structs.
 
@@ -325,7 +390,7 @@ Example room view:
 
 Internal component state is not dumped wholesale to mobile.
 
-## 14. Portable game-view projection
+## 15. Portable game-view projection
 
 Game-semantic view construction that must match offline and online SHOULD be defined once over portable committed state and cartridge definitions.
 
@@ -363,7 +428,7 @@ Host-only views—account catalog, entitlement, social realm presence, admin—r
 
 This avoids a second semantic fork where the server and offline client disagree about what the player can see/do.
 
-## 15. Snapshot and delta model
+## 16. Snapshot and delta model
 
 On join/resync, server sends authoritative snapshot.
 
@@ -373,7 +438,7 @@ If the client detects a gap or server requests resync, it discards/reconciles lo
 
 The client store is a cache of server projection, not authority.
 
-## 16. Text commands
+## 17. Text commands
 
 Text parser is an adapter:
 
@@ -382,12 +447,14 @@ Text parser is an adapter:
    ↓ parse
 ActionIntent(:give, item query, target query)
    ↓ canonical Search service resolves IDs
-Command(:give_item, ...)
+ActionInvocation(action_key=:give, targets=[...])
+   ↓ active GameSession
+authoritative Command
 ```
 
-Touch UI sends IDs directly but reaches the same command.
+Touch UI creates the same ActionInvocation directly from GameView action metadata.
 
-## 17. Search/target resolution
+## 18. Search/target resolution
 
 One canonical Search service supports:
 
@@ -405,7 +472,7 @@ Ambiguous search returns structured candidates.
 
 No transport-specific duplicated keyword lookup helpers.
 
-## 18. Action availability
+## 19. Action availability
 
 The server exposes resolved ActionSets so the touch UI does not reinvent conditions.
 
@@ -424,7 +491,7 @@ accessibility description
 
 The same metadata can feed terminal help.
 
-## 19. Protocol tests
+## 20. Protocol tests
 
 CI MUST include fixtures asserting both Elixir and TypeScript agree on:
 
@@ -437,7 +504,7 @@ CI MUST include fixtures asserting both Elixir and TypeScript agree on:
 Breaking protocol changes require version bump and compatibility policy.
 
 
-## 20. Offline command conformance
+## 21. Offline command conformance
 
 The portable kernel command schema is also machine-readable. The online Elixir host and offline native/mobile host MUST serialize equivalent commands into the same kernel representation.
 

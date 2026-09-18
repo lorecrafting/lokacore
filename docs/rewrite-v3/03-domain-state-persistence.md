@@ -125,7 +125,161 @@ Quest instances, flags, reputation tracks, world events, and similar state MUST 
 
 No helper may default to realm/global scope merely because an ID was omitted.
 
-## 7. Persistence by authority host
+### Multiplayer state uses independent axes
+
+Do not overload one `scope` field to answer every multiplayer question.
+
+For multiplayer content, distinguish at least:
+
+1. **progress/state scope** — who owns quest/fact/progression state;
+2. **authority/instance scope** — which WorldInstance/ZoneShard owns the simulated entity/resource;
+3. **audience/visibility scope** — who is allowed to perceive/interact with a runtime entity/projection;
+4. **resource/contention scope** — who competes for a scarce service, stock, spawn, reservation, or cooldown.
+
+Examples:
+
+| Example | Progress | Authority | Audience | Contention |
+|---|---|---|---|---|
+| Personal quest in shared town | player | shared ZoneShard | public/shared NPCs | none |
+| Personal quest NPC only quester sees | player | shared ZoneShard | player | none |
+| Party dungeon | party | private party WorldInstance | instance/party | instance |
+| Public world boss, personal quest credit | player | shared ZoneShard | public | realm/zone spawn |
+| One smithy can forge one sword/day | player quest | shared ZoneShard/service | public | realm/service queue |
+| Story Mode smithy one sword/day | player | local Story instance | player | local instance |
+
+A compiler/Builder MUST require each nontrivial multiplayer mechanic to be explicit about the axes it uses rather than infer them from quest scope.
+
+### Audience / visibility policy
+
+Runtime entities and projections MAY declare an audience policy independent of state ownership:
+
+```text
+public
+player(character_id)
+party(party_id)
+instance(instance_id)
+audience_set(...)
+```
+
+Audience controls:
+
+- inclusion in GameView;
+- search/target resolution;
+- interaction/action resolution;
+- narrative/ambient projection.
+
+It is not merely UI filtering. The authority MUST reject interactions from actors outside the audience.
+
+Use audience scoping when content should coexist in shared geography without being visible to everyone.
+
+### Scoped runtime entities
+
+A quest-specific actor may be a real RuntimeEntity owned by the shared ZoneShard but visible only to one player/party.
+
+Example:
+
+```text
+definition: npc/ghost_child
+authority: zone/shard town_square
+audience: player(A)
+lifecycle: until quest resolved
+```
+
+Player B in the same room receives no projection for that entity and cannot target it by forged ID.
+
+This is useful for:
+
+- personal apparitions;
+- quest witnesses;
+- temporary guides;
+- personal enemies;
+- quest-only objects/clues.
+
+Do not create a full private WorldInstance merely to hide one NPC.
+
+### Projection override versus separate entity
+
+If the “different NPC” is actually the same physical public actor with personalized dialogue/actions, prefer a **shared entity plus player-scoped projection/relationship/fact rules**.
+
+Use a separate scoped RuntimeEntity only when the actor needs independent:
+
+- presence/location;
+- health/lifecycle;
+- combat;
+- schedule;
+- containment;
+- spawn/despawn state.
+
+This avoids one physical blacksmith becoming 5,000 duplicate runtime entities just because every player sees different dialogue.
+
+## 7. Typed world facts and narrative memory
+
+Cross-system story/world state MUST NOT become an untyped bag of string flags.
+
+Cartridges/capabilities may declare typed, namespaced **FactSpecs**:
+
+```yaml
+facts:
+  village.child_status:
+    type: enum
+    values: [missing, rescued, dead]
+    default: missing
+    scope: instance
+
+  temple.allegiance:
+    type: enum
+    values: [unknown, abbot, rebels]
+    default: unknown
+    scope: player
+```
+
+A fact has:
+
+- namespaced key;
+- versioned type/schema;
+- default value;
+- allowed scope(s);
+- optional transition constraints;
+- documentation/meaning;
+- incoming/outgoing reference graph.
+
+Facts are useful for durable truths that several systems need to observe:
+
+- who controls the town;
+- whether the bridge is repaired;
+- whether a secret has been discovered;
+- a player's allegiance;
+- whether the festival has started;
+- whether a service is available.
+
+Facts are NOT the right storage for:
+
+- current HP;
+- an NPC's coordinates;
+- arbitrary temporary UI state;
+- values already owned by a typed component.
+
+Those remain component/entity/session state.
+
+Changing a fact produces a typed `fact_changed` DomainEvent with old/new values and scope so reactive world rules can respond without polling.
+
+### Relationship and personal NPC memory
+
+Player-specific NPC reactions SHOULD use scoped relationship/memory state rather than mutate a shared NPC globally.
+
+Example logical key:
+
+```text
+relationship(player_id, npc_id):
+  trust
+  fear
+  affinity
+  memories[]
+```
+
+The exact storage may be a typed scoped component rather than a generic fact table, but its scope must remain explicit.
+
+## 8. Persistence by authority host
 
 Online v3 SHOULD use PostgreSQL from the beginning in all realistic server environments.
 
@@ -142,7 +296,7 @@ Tests MAY use sandboxed PostgreSQL. Server development SHOULD use PostgreSQL too
 
 Offline private storypacks use local SQLite (or an equivalent transactional local store) behind a local persistence adapter. The logical save/snapshot formats and command-receipt semantics MUST remain compatible with the portable kernel, but local tables do not need to mirror the server schema byte-for-byte.
 
-## 8. Proposed online durable schema families
+## 9. Proposed online durable schema families
 
 Exact migrations are implementation work, but the logical model should include:
 
@@ -162,7 +316,9 @@ cartridge_certificates
 ```text
 world_instances
 runtime_entities
+scoped_facts
 quest_instances
+service_jobs
 scheduled_jobs
 command_receipts
 effect_outbox
@@ -181,7 +337,7 @@ certification_runs
 
 First-party source may primarily live in Git; authoring tables can reference Git/workspace revisions rather than replacing version control.
 
-## 9. World instance row
+## 10. World instance row
 
 Logical fields:
 
@@ -202,7 +358,7 @@ updated_at
 
 The instance revision increments with committed authoritative commands/batches.
 
-## 10. Runtime entity rows
+## 11. Runtime entity rows
 
 Logical fields:
 
@@ -215,6 +371,11 @@ definition_kind
 definition_key
 kind
 location_id nullable
+state_scope_type nullable
+state_scope_id nullable
+presence_mode shared|overlay
+audience_policy JSONB nullable
+materialization_key nullable
 state JSONB
 tags/search columns as needed
 revision bigint
@@ -224,9 +385,11 @@ updated_at
 
 JSONB is acceptable for typed component state if schemas/migrations validate it. Frequently queried/indexed fields may be promoted to columns deliberately.
 
+Shared entities normally omit scoped-presence fields. Player/party overlay entities use explicit state scope and AudiencePolicy metadata. Lazily materialized actors may be reconstructed from durable quest/fact state plus a stable materialization key rather than persisted forever.
+
 Do not create an EAV table for every component field by default.
 
-## 11. Quest instance rows
+## 12. Quest instance rows
 
 Keep quest runtime separate enough to query, migrate, and certify:
 
@@ -237,22 +400,82 @@ scope_type
 scope_id
 quest_definition_ref
 lifecycle_state
+activation_mode
+activated_logical_time
+resolved_outcome nullable
 objective_state JSONB
 variables JSONB
-accepted_logical_time
 revision
-completed_at nullable
+resolved_at nullable
 ```
 
 A unique constraint should prevent duplicate active quest instances where the quest's repeatability rules disallow them.
 
-## 12. Command receipts
+## 13. Scoped facts and durable ServiceJobs
 
-Every client/agent command carries a stable command ID.
+### Scoped facts
+
+Logical fields:
+
+```text
+instance_or_realm_id
+scope_type
+scope_id
+fact_key
+fact_version
+value JSONB
+revision
+updated_at
+```
+
+Unique identity is the owning authority/context plus scope and fact key.
+
+Facts may also be stored inside a versioned aggregate when that is more efficient, but the logical semantics remain typed and scoped.
+
+### Durable ServiceJobs
+
+Logical fields:
+
+```text
+id UUID
+authority_id
+service_entity_id
+capacity_scope_type
+capacity_scope_id
+requester_id
+beneficiary_type
+beneficiary_id
+service_key
+input_escrow JSONB/reference
+submitted_logical_time
+scheduled_start
+scheduled_finish
+status
+queue_sequence
+slot_key nullable
+idempotency_key
+output_state/reference
+revision
+created_at
+updated_at
+```
+
+The exact physical schema may normalize escrow/output separately, but allocation + escrow + ServiceJob creation MUST be one authoritative transaction.
+
+Capacity allocation must have a database/authority invariant sufficient to prevent double allocation under concurrent submissions.
+
+## 14. Command receipts
+
+Every authority-side state-changing Command carries a stable idempotency identity.
+
+For external ActionInvocations, the authority MUST derive/reuse a stable Command ID from trusted context plus the invocation ID (for example instance + actor/session + invocation ID), so a network retry cannot become a fresh mutation.
+
+Internal scheduled/system commands carry their own stable job/command identity.
 
 ```text
 instance_id
 command_id
+invocation_id nullable
 actor_id
 accepted_revision
 result_code
@@ -266,7 +489,7 @@ Unique key: `(instance_id, command_id)`.
 
 If the same command is retried, runtime returns the prior committed result/ack rather than executing again. The receipt therefore MUST retain either the stable response payload required for retry or a durable reference from which that response can be reconstructed; a digest alone is insufficient.
 
-## 13. Transactional command commit
+## 15. Transactional command commit
 
 For a command changing durable state:
 
@@ -286,7 +509,7 @@ Only after commit does the in-memory owner adopt the committed state revision.
 
 If commit fails, no authoritative in-memory advancement is allowed.
 
-## 14. Effect outbox
+## 16. Effect outbox
 
 External/delayed effects that cannot safely occur inside the DB transaction use an outbox.
 
@@ -314,7 +537,7 @@ next_attempt_at
 causation_id
 ```
 
-## 15. Event trace is not full event sourcing
+## 17. Event trace is not full event sourcing
 
 The current durable state remains authoritative.
 
@@ -331,7 +554,7 @@ The system MUST NOT require replaying the entire history from genesis to boot a 
 
 Periodic snapshots plus current state are sufficient.
 
-## 16. Snapshots
+## 18. Snapshots
 
 A snapshot captures enough state to recreate an instance deterministically:
 
@@ -355,7 +578,7 @@ Snapshots are useful for:
 
 Snapshot format must be versioned.
 
-## 17. Optimistic concurrency
+## 19. Optimistic concurrency
 
 World owners serialize normal commands, reducing contention.
 
@@ -370,7 +593,7 @@ Updates SHOULD include expected revisions.
 
 A revision conflict is an invariant signal, not something to silently overwrite.
 
-## 18. Persistence adapters
+## 20. Persistence adapters
 
 `loka_core` defines ports/protocols such as:
 
@@ -383,7 +606,7 @@ A revision conflict is an invariant signal, not something to silently overwrite.
 
 The Cartridge Lab can provide an in-memory deterministic adapter where appropriate, while integration certification uses PostgreSQL too.
 
-## 19. Migration rules
+## 21. Migration rules
 
 ### Engine schema migration
 
@@ -408,7 +631,7 @@ Each component version transition that changes persisted runtime state must regi
 
 No “read old shape and guess.”
 
-## 20. Deletion semantics
+## 22. Deletion semantics
 
 Deleting content source never invalidates an already published immutable release.
 
@@ -423,7 +646,7 @@ No generic `delete(entity)` may recursively delete contents unless the caller ex
 
 This prevents surprising inventory/world loss.
 
-## 21. Inventory/location invariant
+## 23. Inventory/location invariant
 
 An item has one authoritative containment/location relation.
 
@@ -447,7 +670,7 @@ Inventory is a query/index over contained item IDs.
 
 Equipment adds an equipment-slot relation/assignment but does not duplicate ownership.
 
-## 22. Definition cache
+## 24. Definition cache
 
 Compiled cartridge definitions are immutable and may be aggressively cached in ETS/`:persistent_term` or application memory.
 
@@ -456,7 +679,7 @@ Because they are content-hash/version keyed, invalidation is simple.
 Runtime mutable state must not use the same cache semantics.
 
 
-## 23. Offline save lineage and trust
+## 25. Offline save lineage and trust
 
 Offline save identity includes a lineage/ancestor revision so cloud backup can detect divergent branches.
 

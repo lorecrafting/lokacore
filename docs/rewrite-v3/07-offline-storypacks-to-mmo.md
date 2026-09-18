@@ -17,13 +17,13 @@ Offline, the authority shell lives on the device.
 
 Online, authority lives in BEAM/OTP.
 
-The same compiled cartridge definitions and simulation semantics run in both places.
+For a **portable Story cartridge**, the same compiled cartridge definitions and portable simulation semantics run in both places. Realm-native cartridges may add or depend on server-only capabilities and are not required to execute offline.
 
-## 2. Product/client boundary
+## 2. One client, two strict authority modes
 
-Loka uses two distinct client products.
+Loka uses one mobile application with two session modes.
 
-### Loka Stories
+### Story Mode
 
 Responsibilities:
 
@@ -35,50 +35,73 @@ Responsibilities:
 - optional cloud backup/account linking;
 - portable GameView rendering.
 
-It does NOT need:
+Ordinary Story play MUST NOT require:
 
-- Phoenix world sessions for ordinary play;
+- Phoenix world sessions;
 - realm chat/presence;
 - guild/economy services;
 - shard handoff;
-- anti-cheat authority over local saves.
+- server authority.
 
-### Loka Online
+### Realm Mode
 
 Responsibilities:
 
-- authentication/session;
-- Phoenix online protocol;
+- authenticated online session;
+- Phoenix protocol;
 - BEAM-authoritative world/party instances;
-- persistent characters;
+- persistent online characters;
 - chat/presence/social;
 - shared zones and later realm systems;
 - server-authoritative economy/progression.
 
-It does NOT need:
+Realm Mode MUST NOT:
 
-- local authoritative world saves;
-- offline cartridge entitlement execution;
-- local SQLite as game authority;
-- offline campaign merge semantics.
+- create a local authoritative fallback when disconnected;
+- treat Story SQLite saves as online world authority;
+- derive competitive/persistent Realm value directly from editable local Story state.
 
-### Shared packages, not shared responsibility
+### The session boundary
 
-One monorepo SHOULD share:
+The app selects exactly one gameplay authority for a running session:
 
-- design system/components;
-- portable GameView types/renderers;
+```text
+                    Loka UI / GameView renderer
+                              |
+                         GameSession
+                         /         \
+                        /           \
+             LocalStorySession   RemoteRealmSession
+               local kernel        Phoenix/BEAM
+               local SQLite        server state
+```
+
+The shared renderer receives host-neutral `GameView` data and emits typed intents/commands through the active session. It MUST NOT contain separate copies of quest/action/policy semantics.
+
+Switching modes MUST close/commit the current session before another authority is activated. No save/world may be concurrently authoritative locally and remotely.
+
+The local kernel may physically exist in the same binary while Realm Mode is active, but Realm Mode MUST never trust it for authoritative decisions. Local simulation/prediction for Realm is deferred unless separately specified.
+
+### One app, modular code
+
+Do not solve one-app maintenance by creating one giant conditional client.
+
+The mobile codebase SHOULD keep explicit packages/modules for:
+
+- app shell/navigation;
+- Story session/SQLite/kernel bridge;
+- Realm session/Phoenix transport;
+- shared GameView renderer;
+- shared UI/design system;
 - localization;
-- cartridge/capability schemas;
-- generated model/types;
-- portable kernel bindings where the Stories app needs them;
-- test fixtures/assets.
+- generated schemas/types;
+- Story library/commerce;
+- Realm social/chrome.
 
-Do not make a single giant client package conditionalize every offline/online behavior behind feature flags.
-
-The Online app does not need to embed the portable kernel just because the server uses it; it receives authoritative GameViews/messages from BEAM.
+Import-boundary tests SHOULD prevent Realm authority code from mutating Story saves and Story authority code from bypassing the Realm transport.
 
 ## 3. Execution profiles
+
 
 Each cartridge/deployment declares supported profiles.
 
@@ -158,7 +181,7 @@ BEAM/OTP still owns the online system:
 - observability integration;
 - admin/builder services.
 
-Rust owns only deterministic portable simulation semantics.
+If R1 accepts Rust, Rust owns only deterministic portable simulation semantics.
 
 This is analogous to using a physics/rules library inside an actor-oriented server.
 

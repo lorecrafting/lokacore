@@ -59,12 +59,9 @@ requires:
     - contextual_actions_v1
     - dialogue_choices_v1
 
-execution_profiles:
+supported_profiles:
   - offline_private
   - online_private
-
-instance_modes:
-  - private
 
 entry:
   room: rooms/ferry_dock
@@ -79,6 +76,24 @@ locales:
 `kernel_api` describes portable semantic capabilities implemented by the installed kernel. `rule_ir` versions the normalized LokaScript/rule representation. `content_schema` versions compiled definition structure.
 
 Published cartridges pin all three. Compatibility and migrations MUST be explicit; host/app upgrades may not reinterpret old rule IR implicitly.
+
+### Version vocabulary
+
+These version fields are intentionally separate:
+
+| Field | Owns |
+|---|---|
+| `api_version` | Human/LLM-authored source document/schema family. |
+| `kernel_api` | Portable deterministic semantics implemented by the installed kernel. |
+| `rule_ir` | Normalized interpreted LokaScript/rule representation. |
+| `content_schema` | Compiled definition/artifact structure. |
+| `protocol_version` | Realm Mode network command/message compatibility; not required for offline Story execution. |
+| `client_features` | Presentation/input capabilities available in the installed Loka app. |
+| capability `key@version` | Semantic contract for one reusable capability. |
+
+Do not use one version number as a proxy for another.
+
+A cartridge certificate records the exact versions/ranges that were compiled and tested.
 
 ## 4. Local keys and qualified identity
 
@@ -124,6 +139,28 @@ Fields outside registered schemas are errors unless explicitly allowed under ext
 
 A capability is an engine-supported reusable semantic feature.
 
+### Canonical capability vocabulary
+
+Use these terms consistently in v3:
+
+| Term | Meaning |
+|---|---|
+| **Capability** | Versioned feature contract registered by the engine. Owns schemas and the commands/events/effects/policies/rules it introduces. |
+| **Component** | Typed definition/runtime data attached to an entity or scoped state. A component is data/state, not an independent authority. |
+| **Behavior** | Declarative autonomous/reactive rule configuration supplied by a capability, such as patrol or schedule. |
+| **Action** | Player/agent affordance advertised in GameView; invocation is revalidated by the active authority and resolved into a typed Command. |
+| **Policy / condition** | Pure predicate tree deciding whether an action/content path is allowed/visible. |
+| **Command** | Request to authoritative game semantics. |
+| **DomainEvent** | Immutable fact produced during a decision. |
+| **StateDelta** | Proposed authoritative state change accumulated before commit. |
+| **Effect** | Typed post-decision instruction whose durability/retry semantics are explicit; not a hidden DB mutation path. |
+| **GameView** | Host-neutral semantic projection consumed by mobile rendering. |
+| **Fact** | Typed, namespaced, scoped durable narrative/world truth intended for cross-system observation. |
+
+`trait` is historical Lokacore terminology and SHOULD NOT be a separate v3 schema concept. Old trait ideas become Behaviors/capabilities.
+
+Likewise, a generic runtime `signal` is not a fifth event system. Cartridge-local notifications compile to registered/namespaced DomainEvents.
+
 Examples:
 
 ```text
@@ -158,6 +195,7 @@ Capability metadata includes portability classification:
   commands: [...],
   events: [...],
   effects: [...],
+  consequence_operators: [...],
   policies: [...],
   dependencies: [...],
   docs: ...,
@@ -167,7 +205,27 @@ Capability metadata includes portability classification:
 
 The registry is engine-owned and enumerable.
 
+### Capability version immutability
+
+A published capability contract `key@version` is immutable in meaning.
+
+Once a certified/published cartridge depends on `schedule@1`, a later engine release MUST NOT silently change `schedule@1` semantics.
+
+Breaking semantic/schema changes require a new capability version.
+
+Published cartridges/deployments pin exact capability versions in their compiled lock data. Deprecation may prevent **new** content from selecting an old version, but supported old artifacts either:
+
+- continue to execute that version;
+- receive an explicit certified migration;
+- or are covered by a documented compatibility-support policy.
+
+This rule applies to both portable and server-only capabilities.
+
 Portability is one of `:portable`, `:server_only`, or `:client_presentation_only`. An `offline_private` cartridge cannot compile if a gameplay dependency is server-only.
+
+If one immutable cartridge release declares both `offline_private` and an online profile, its **base gameplay semantics MUST remain portable**. Realm-only mechanics belong in a separate deployment/adaptation overlay or a Realm-native cartridge, not a hidden profile branch that changes the meaning of the offline artifact.
+
+Server-only does **not** mean side-effectful arbitrary Elixir. Server-only gameplay capabilities MUST participate in the same command/event/delta/effect decision contract as portable capabilities. They return proposed state deltas/events/effects to the online decision coordinator and MUST NOT write Repo/PubSub/external services directly from rule evaluation.
 
 ## 7. Capability discovery API
 
@@ -486,3 +544,27 @@ Rules:
 - adding an expansion changes the composite campaign/deployment manifest, not the old artifact.
 
 This creates a stable module boundary for chapters, side adventures, and MMO region mounting.
+
+
+## 24. Realm-native cartridges and portable Story reuse
+
+`cartridge` is the generic immutable content/rules artifact in v3; it does not mean “must be purchasable offline.”
+
+There are two common forms:
+
+### Portable Story cartridge
+
+- built with target `story`;
+- portable capabilities only;
+- may certify `offline_private`;
+- may later be hosted online unchanged for private/party use where semantics fit;
+- Realm-only additions are deployment/adaptation overlays.
+
+### Realm-native cartridge
+
+- built with target `realm`;
+- may depend on server-only capabilities;
+- need not run offline;
+- still uses the same content namespaces, capability registry, compiler, hashes, references, and certification machinery.
+
+This preserves one content toolchain without pretending all Realm content is portable.
