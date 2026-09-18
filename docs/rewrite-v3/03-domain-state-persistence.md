@@ -125,7 +125,74 @@ Quest instances, flags, reputation tracks, world events, and similar state MUST 
 
 No helper may default to realm/global scope merely because an ID was omitted.
 
-## 7. Persistence by authority host
+## 7. Typed world facts and narrative memory
+
+Cross-system story/world state MUST NOT become an untyped bag of string flags.
+
+Cartridges/capabilities may declare typed, namespaced **FactSpecs**:
+
+```yaml
+facts:
+  village.child_status:
+    type: enum
+    values: [missing, rescued, dead]
+    default: missing
+    scope: instance
+
+  temple.allegiance:
+    type: enum
+    values: [unknown, abbot, rebels]
+    default: unknown
+    scope: player
+```
+
+A fact has:
+
+- namespaced key;
+- versioned type/schema;
+- default value;
+- allowed scope(s);
+- optional transition constraints;
+- documentation/meaning;
+- incoming/outgoing reference graph.
+
+Facts are useful for durable truths that several systems need to observe:
+
+- who controls the town;
+- whether the bridge is repaired;
+- whether a secret has been discovered;
+- a player's allegiance;
+- whether the festival has started;
+- whether a service is available.
+
+Facts are NOT the right storage for:
+
+- current HP;
+- an NPC's coordinates;
+- arbitrary temporary UI state;
+- values already owned by a typed component.
+
+Those remain component/entity/session state.
+
+Changing a fact produces a typed `fact_changed` DomainEvent with old/new values and scope so reactive world rules can respond without polling.
+
+### Relationship and personal NPC memory
+
+Player-specific NPC reactions SHOULD use scoped relationship/memory state rather than mutate a shared NPC globally.
+
+Example logical key:
+
+```text
+relationship(player_id, npc_id):
+  trust
+  fear
+  affinity
+  memories[]
+```
+
+The exact storage may be a typed scoped component rather than a generic fact table, but its scope must remain explicit.
+
+## 9. Persistence by authority host
 
 Online v3 SHOULD use PostgreSQL from the beginning in all realistic server environments.
 
@@ -181,7 +248,7 @@ certification_runs
 
 First-party source may primarily live in Git; authoring tables can reference Git/workspace revisions rather than replacing version control.
 
-## 9. World instance row
+## 10. World instance row
 
 Logical fields:
 
@@ -202,7 +269,7 @@ updated_at
 
 The instance revision increments with committed authoritative commands/batches.
 
-## 10. Runtime entity rows
+## 11. Runtime entity rows
 
 Logical fields:
 
@@ -226,7 +293,7 @@ JSONB is acceptable for typed component state if schemas/migrations validate it.
 
 Do not create an EAV table for every component field by default.
 
-## 11. Quest instance rows
+## 12. Quest instance rows
 
 Keep quest runtime separate enough to query, migrate, and certify:
 
@@ -246,7 +313,7 @@ completed_at nullable
 
 A unique constraint should prevent duplicate active quest instances where the quest's repeatability rules disallow them.
 
-## 12. Command receipts
+## 13. Command receipts
 
 Every client/agent command carries a stable command ID.
 
@@ -266,7 +333,7 @@ Unique key: `(instance_id, command_id)`.
 
 If the same command is retried, runtime returns the prior committed result/ack rather than executing again. The receipt therefore MUST retain either the stable response payload required for retry or a durable reference from which that response can be reconstructed; a digest alone is insufficient.
 
-## 13. Transactional command commit
+## 14. Transactional command commit
 
 For a command changing durable state:
 
@@ -286,7 +353,7 @@ Only after commit does the in-memory owner adopt the committed state revision.
 
 If commit fails, no authoritative in-memory advancement is allowed.
 
-## 14. Effect outbox
+## 15. Effect outbox
 
 External/delayed effects that cannot safely occur inside the DB transaction use an outbox.
 
@@ -314,7 +381,7 @@ next_attempt_at
 causation_id
 ```
 
-## 15. Event trace is not full event sourcing
+## 16. Event trace is not full event sourcing
 
 The current durable state remains authoritative.
 
@@ -331,7 +398,7 @@ The system MUST NOT require replaying the entire history from genesis to boot a 
 
 Periodic snapshots plus current state are sufficient.
 
-## 16. Snapshots
+## 17. Snapshots
 
 A snapshot captures enough state to recreate an instance deterministically:
 
@@ -355,7 +422,7 @@ Snapshots are useful for:
 
 Snapshot format must be versioned.
 
-## 17. Optimistic concurrency
+## 18. Optimistic concurrency
 
 World owners serialize normal commands, reducing contention.
 
@@ -370,7 +437,7 @@ Updates SHOULD include expected revisions.
 
 A revision conflict is an invariant signal, not something to silently overwrite.
 
-## 18. Persistence adapters
+## 19. Persistence adapters
 
 `loka_core` defines ports/protocols such as:
 
@@ -383,7 +450,7 @@ A revision conflict is an invariant signal, not something to silently overwrite.
 
 The Cartridge Lab can provide an in-memory deterministic adapter where appropriate, while integration certification uses PostgreSQL too.
 
-## 19. Migration rules
+## 20. Migration rules
 
 ### Engine schema migration
 
@@ -408,7 +475,7 @@ Each component version transition that changes persisted runtime state must regi
 
 No “read old shape and guess.”
 
-## 20. Deletion semantics
+## 21. Deletion semantics
 
 Deleting content source never invalidates an already published immutable release.
 
@@ -423,7 +490,7 @@ No generic `delete(entity)` may recursively delete contents unless the caller ex
 
 This prevents surprising inventory/world loss.
 
-## 21. Inventory/location invariant
+## 22. Inventory/location invariant
 
 An item has one authoritative containment/location relation.
 
@@ -447,7 +514,7 @@ Inventory is a query/index over contained item IDs.
 
 Equipment adds an equipment-slot relation/assignment but does not duplicate ownership.
 
-## 22. Definition cache
+## 23. Definition cache
 
 Compiled cartridge definitions are immutable and may be aggressively cached in ETS/`:persistent_term` or application memory.
 
@@ -456,7 +523,7 @@ Because they are content-hash/version keyed, invalidation is simple.
 Runtime mutable state must not use the same cache semantics.
 
 
-## 23. Offline save lineage and trust
+## 24. Offline save lineage and trust
 
 Offline save identity includes a lineage/ancestor revision so cloud backup can detect divergent branches.
 
