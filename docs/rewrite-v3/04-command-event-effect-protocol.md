@@ -325,7 +325,45 @@ Example room view:
 
 Internal component state is not dumped wholesale to mobile.
 
-## 14. Snapshot and delta model
+## 14. Portable game-view projection
+
+Game-semantic view construction that must match offline and online SHOULD be defined once over portable committed state and cartridge definitions.
+
+Examples:
+
+- resolved ActionSet for an entity;
+- visible room contents;
+- quest journal state;
+- dialogue choices currently available;
+- shop/container semantic contents;
+- map-discovery state;
+- localized string IDs plus interpolation data.
+
+The portable projector returns a host-neutral **GameView** / projection model.
+
+Online:
+
+```text
+portable GameView
+  -> Elixir protocol adapter
+  -> Phoenix client message
+```
+
+Offline:
+
+```text
+portable GameView
+  -> native/mobile binding
+  -> React Native projection store
+```
+
+React Native owns presentation, animation, layout, accessibility, and localization rendering. It MUST NOT reimplement policy/action/quest visibility rules.
+
+Host-only views—account catalog, entitlement, social realm presence, admin—remain outside the portable projector.
+
+This avoids a second semantic fork where the server and offline client disagree about what the player can see/do.
+
+## 16. Snapshot and delta model
 
 On join/resync, server sends authoritative snapshot.
 
@@ -349,7 +387,7 @@ Command(:give_item, ...)
 
 Touch UI sends IDs directly but reaches the same command.
 
-## 16. Search/target resolution
+## 17. Search/target resolution
 
 One canonical Search service supports:
 
@@ -367,7 +405,7 @@ Ambiguous search returns structured candidates.
 
 No transport-specific duplicated keyword lookup helpers.
 
-## 17. Action availability
+## 18. Action availability
 
 The server exposes resolved ActionSets so the touch UI does not reinvent conditions.
 
@@ -386,7 +424,7 @@ accessibility description
 
 The same metadata can feed terminal help.
 
-## 18. Protocol tests
+## 19. Protocol tests
 
 CI MUST include fixtures asserting both Elixir and TypeScript agree on:
 
@@ -399,7 +437,7 @@ CI MUST include fixtures asserting both Elixir and TypeScript agree on:
 Breaking protocol changes require version bump and compatibility policy.
 
 
-## 19. Offline command conformance
+## 20. Offline command conformance
 
 The portable kernel command schema is also machine-readable. The online Elixir host and offline native/mobile host MUST serialize equivalent commands into the same kernel representation.
 
