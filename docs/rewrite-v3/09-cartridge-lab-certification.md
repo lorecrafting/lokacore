@@ -131,6 +131,9 @@ Checks:
 - localization;
 - asset hashes;
 - scripts;
+- typed FactSpecs and allowed transitions/scopes;
+- consequence operators and targets;
+- reactive-rule references/cycles;
 - policies/actions;
 - unknown fields;
 - state-scope declarations;
@@ -152,7 +155,38 @@ For each quest/dialogue:
 - required-NPC survivability or alternate path;
 - timeout behavior;
 - abandon/retry behavior;
-- scope correctness.
+- scope correctness;
+- every consequence operator/target/scope is valid;
+- broader-scope consequences are explicit;
+- consequence idempotency;
+- fact transition legality;
+- reactive-rule cycles/event-chain budgets;
+- consequence dependencies do not silently destroy required future quest paths unless intentional.
+
+### World-consequence branch testing
+
+For each meaningful quest outcome, the Lab SHOULD fork from the last common snapshot and compare:
+
+- changed facts;
+- runtime entity/component state;
+- accessible/revealed topology;
+- NPC behavior/schedule profiles;
+- dialogue/action availability;
+- spawned/despawned entities;
+- follow-up quest availability;
+- relationship/personal memory state;
+- environment/ambient variants.
+
+Then advance logical time after each branch to catch delayed problems:
+
+- NPC cannot reach a new schedule destination;
+- a newly opened path becomes inaccessible at night;
+- a quest-critical NPC despawns;
+- reaction rules loop;
+- a “rescued” NPC continues emitting mourning ambience;
+- a branch accidentally exposes content intended for another outcome.
+
+The comparison output becomes semantic-review evidence.
 
 Bounded state exploration SHOULD exhaust small graphs.
 
@@ -332,7 +366,9 @@ Reviewer inspects:
 - dead-feeling spaces;
 - impossible narrative causality;
 - repeated prose;
-- consequences not reflected;
+- consequences not reflected across world systems;
+- NPC/world reactions that contradict typed facts or quest outcomes;
+- branches whose world-state differences are too weak for the intended narrative consequence;
 - misleading choice labels;
 - inaccessible endings;
 - multiplayer narrative mismatches;
