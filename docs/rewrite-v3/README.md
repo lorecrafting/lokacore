@@ -129,7 +129,7 @@ The online authority/orchestration layer SHOULD remain idiomatic Elixir/OTP. Rul
 | Portable offline rules | Shared deterministic kernel; Rust is the working choice pending a mandatory cross-platform spike |
 | Server UI/API | Phoenix |
 | Mobile | One React Native / Expo app with strict Story Mode (local authority) and Realm Mode (remote BEAM authority) session boundaries |
-| Online production DB | PostgreSQL from v3 start; offline saves use local SQLite |
+| Persistence | PostgreSQL for online/platform durability when those phases arrive; offline Story saves use local SQLite |
 | Game authority | offline: local serialized authority; online: BEAM server authoritative |
 | Offline private authority | local serialized instance authority + local SQLite |
 | Online private concurrency | one authoritative BEAM world-instance owner process |
