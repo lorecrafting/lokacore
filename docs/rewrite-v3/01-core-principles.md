@@ -2,11 +2,13 @@
 
 ## 1. Product principles
 
-### P1. One engine, multiple world modes
+### P1. One rules/content model, multiple authority hosts
 
-Private cartridges, party instances, shared areas, and the later MUD MUST execute through the same command/rule/runtime architecture.
+Offline private cartridges, online private/party instances, shared areas, and the later MUD MUST execute the same portable deterministic cartridge semantics where a capability is declared portable.
 
-A feature is not considered cartridge-ready if it depends on single-player assumptions that cannot declare state scope.
+Offline authority lives on-device; online authority lives in BEAM/OTP. This host difference MUST NOT fork the quest/action/content rules into unrelated engines.
+
+A feature is not considered offline-cartridge-ready if it requires a server-only capability. A feature is not considered multiplayer-ready if it depends on undeclared single-player/global assumptions.
 
 ### P2. Rich primitive library, narrow composition grammar
 
@@ -58,9 +60,9 @@ Examples:
 
 Two independent writers MUST NOT race on the same logical state without an explicit coordination/transaction protocol.
 
-### A2. Pure core, actor shell
+### A2. Portable pure kernel, actor shell online
 
-Use BEAM processes around concurrency and lifecycle boundaries; keep decisions pure.
+Use a portable deterministic kernel for rules that must run both offline and online. Use BEAM processes around online concurrency and lifecycle boundaries; keep decisions pure.
 
 Preferred pattern:
 
@@ -78,7 +80,7 @@ Domain.decide(state, command, env)
 transactional commit
 ```
 
-The process is the serialization/fault-containment shell. The rule function is replayable.
+Online, the BEAM process is the serialization/fault-containment shell. Offline, a local serialized authority shell provides the same command/commit contract. The rule function/kernel is replayable in both.
 
 ### A3. No direct persistence from domain rules
 
@@ -109,7 +111,7 @@ Markdown MAY explain them but MUST be test-checked against implementation.
 
 ### A6. Time and randomness are dependencies
 
-Game code MUST NOT casually call:
+Portable game-rule code MUST NOT directly call:
 
 - `DateTime.utc_now/0`;
 - `System.system_time/0`;
@@ -149,7 +151,7 @@ Retries MUST NOT duplicate:
 
 ## 3. BEAM/OTP principles
 
-### B1. Processes represent concurrency boundaries, not object orientation
+### B1. BEAM processes represent online concurrency boundaries, not object orientation
 
 Use processes for:
 
