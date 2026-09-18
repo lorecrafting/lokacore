@@ -90,7 +90,7 @@ capability.search(target=realm, "shop")
 
 A story author cannot accidentally select server-only mechanics; a realm author is not constrained by offline portability where it provides no product value.
 
-## 4. Workspace-first authoring
+## 3. Workspace-first authoring
 
 Normal authoring happens inside a workspace:
 
@@ -109,7 +109,7 @@ Every mutation command specifies workspace and expected revision.
 
 No generic builder operation edits published cartridge content in place.
 
-## 3. Builder operation envelope
+## 4. Builder operation envelope
 
 ```json
 {
