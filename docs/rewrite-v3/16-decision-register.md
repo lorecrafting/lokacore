@@ -246,9 +246,9 @@ Existing saves remain pinned or use explicit tested migrations.
 
 **Status:** Provisional product decision
 
-Working Loka Stories launch model:
+Working Loka Story Mode launch model:
 
-- one free Stories app;
+- one free Loka app with Story Mode available at launch;
 - one free showcase cartridge;
 - permanent à-la-carte cartridge unlocks;
 - optional bundles later;
