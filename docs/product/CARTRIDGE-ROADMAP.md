@@ -6,83 +6,110 @@
 
 This document owns product sequencing for the cartridge strategy. It does not by itself authorize a large rewrite. Each architecture change still needs a bounded implementation plan, tests, review, and migration path. Existing product notes remain useful research unless they conflict with an explicit decision here.
 
+### Clean-rebuild decision
+
+The working implementation direction is now a **clean-sheet Loka v3 rebuild**, not an in-place refactor or module-by-module port of Lokacore.
+
+The normative draft architecture packet is [`docs/rewrite-v3/README.md`](../rewrite-v3/README.md). Lokacore remains a reference/evidence corpus for requirements, mechanics, tests, failure modes, and selected content semantics. The new implementation should start from accepted v3 contracts rather than preserve legacy APIs or compatibility layers.
+
+The rewrite packet refines this roadmap in one major respect: offline-capable single-player storypacks are locally authoritative and use a portable deterministic rules kernel, while online private/party/shared play is authoritative under the BEAM runtime. The cartridge/content model is shared so storypack work can graduate into the later MMORPG without becoming throwaway work.
+
 ## Strategy in one page
 
-Build **one Loka runtime and one mobile app**. Ship small, self-contained story worlds first as purchasable **cartridges**. Run those cartridges on the same authoritative Elixir/Phoenix simulation that can later host shared areas and a persistent MUD.
+Build **one Loka platform with two focused mobile clients**. Ship small, self-contained story worlds first as purchasable cartridges in **Loka Stories**. Build the later persistent multiplayer product as **Loka Online**. The clients share schemas, UI packages, and portable story semantics where useful, but they do not share authority responsibilities:
 
-The engine should become increasingly expressive: many reusable primitives for movement, schedules, weather, spawning, combat, dialogue, factions, reputation, inventory, world events, timers, and other old-school MUD behaviors. The authoring contract should become more constrained and more machine-readable: one stable way to invoke each primitive, one canonical schema, and deterministic validation around composition.
+- **offline private:** local mobile authority + local SQLite;
+- **online private/party/shared:** BEAM/OTP authority + PostgreSQL.
+
+The shared portable deterministic rules layer prevents offline storypacks from becoming throwaway work while allowing the online system to use Elixir/OTP where concurrency, supervision, networking, scheduling, and fault recovery matter most.
+
+The capability library should become increasingly expressive: movement, schedules, weather, spawning, combat, dialogue, factions, reputation, inventory, world events, timers, social systems, and other old-school MUD mechanics. The authoring contract should become more constrained and machine-readable: one stable way to invoke each primitive, one canonical schema, deterministic composition, and certification.
 
 The central product rule is:
 
-> New stories should normally add content, not application code. New mechanics should become reviewed engine primitives that future stories can reuse.
+> New stories should normally add content, not application code. New mechanics should become reviewed capabilities that future stories can reuse.
 
 | Decision | Working direction |
 |---|---|
-| Runtime | Keep Loka's authoritative Phoenix/OTP engine and React Native client. Do not build a separate single-player engine. |
-| Single-player | A cartridge starts an isolated private world instance using the multiplayer runtime. |
-| Multiplayer | The same cartridge model may later support party instances or mounting a certified area into the persistent shared world. |
+| Implementation | Clean-sheet Loka v3. Lokacore is evidence/reference, not a code-migration target. |
+| Online runtime | Elixir/Phoenix on BEAM/OTP, using explicit world/zone authority processes and PostgreSQL. |
+| Portable rules | Shared deterministic kernel for mechanics that must run both offline and online; Rust is the provisional language pending the mandatory spike. |
+| Loka Stories | Offline-first cartridge player: local authority, local saves, campaigns/expansions, no multiplayer/world-service requirements. |
+| Loka Online | Online-only multiplayer/MUD client: BEAM-authoritative private/party adventures, shared areas, social systems, persistent realm. |
+| Reuse boundary | Portable story cartridges may be reused online as private/party adventures or adapted through an explicit promotion workflow; realm-native content may use server-only capabilities. |
 | World richness | Preserve and expand a large primitive/capability library. Simplify composition rules, not the world simulation. |
-| Quests | Keep the shared StateMachine and existing Event/EventBus foundation, but redesign quest progress around one canonical typed event → pure reducer → effects path. |
-| Scripting | Keep constrained server-side Elixir scripting for first-party/AI-authored content, but do not treat the current same-BEAM `Code.eval_string` runtime as a hard security boundary for untrusted public code. |
-| AI authoring | Give builders a generated capability catalog and schema rather than expecting a model to reconcile stale Markdown and engine internals. |
-| Authoring surface | Make the canonical Builder API the source of truth. Agents use structured MCP/tool calls, humans may use a thin terminal/CLI over the same operations, and visual UI is primarily for inspection/debugging rather than a second authoring implementation. |
-| Testing | Every cartridge/area earns a release certificate from static checks, state exploration, deterministic simulation, bots, chaos/concurrency, restart/replay, and semantic review. |
-| Mobile distribution | One App Store / Play Store app. Cartridges are content/data/assets interpreted by already-shipped client/runtime capabilities; server-side scripts never become downloaded mobile executable code. |
-| Launch monetization | Default hypothesis: free app + free showcase cartridge, then permanent à-la-carte cartridge unlocks using non-consumable IAP / Play one-time products. Subscription can be evaluated only after a reliable release cadence exists. |
-| Factory | AI/factory orchestration is build-time tooling, never a gameplay dependency. Loka must run released content if the factory is unavailable. |
+| Quests | Small lifecycle StateMachine + canonical domain events → pure quest reducer → typed/idempotent effects. |
+| Scripting | Declarative capabilities first; Elixir-like LokaScript compiles to portable normalized form interpreted by the shared rules system. No released cartridge executes via `Code.eval_string`. |
+| AI authoring | Give builders a generated capability catalog/schema and a canonical Builder API rather than asking models to reconcile engine internals and stale Markdown. |
+| Authoring surface | Agents use structured MCP/tool calls; humans may use a thin terminal/CLI over the same Builder API; visual UI is primarily inspection/debugging. |
+| Testing | Every cartridge/deployment earns an exact-hash release certificate from static checks, model/property checks, deterministic simulation, bots, chaos/concurrency where relevant, restart/replay, host conformance, semantic review, and mobile smoke. |
+| Mobile distribution | Two store apps from one monorepo: Stories ships offline kernel/save/download capability; Online ships multiplayer transport/social/realm capability. Shared packages prevent UI/schema duplication. |
+| Launch monetization | Default hypothesis: free app + free showcase cartridge, then permanent à-la-carte cartridge unlocks; bundles later; subscription only after a reliable content cadence exists. |
+| Factory | AI/factory orchestration is build-time tooling, never a gameplay dependency. |
 
-## 1. Product shape: stories first, MUD later, same engine
+## 1. Product shape: offline stories first, MMORPG later, shared semantics
 
-The earlier product question of isolated interactive stories versus a shared MUD should be treated as sequencing rather than a fork.
+The earlier product question of isolated interactive stories versus a shared MUD is sequencing rather than a fork, but **offline single-player and online multiplayer use different authority hosts**.
 
 ### Phase-one experience
 
-A player installs one polished mobile app, browses a small catalog, chooses a story, and enters a private world instance. The world is not a branching ebook. It is a real Loka simulation with rooms, NPCs, inventory, time, weather, schedules, combat, quests, random events, and whatever engine capabilities that cartridge declares.
+A player installs Loka Stories, acquires/downloads a cartridge, and can play it offline. The world is not a branching ebook. It is a real Loka simulation with rooms, NPCs, inventory, time, schedules, quests, dialogue, environmental behavior, and whatever portable capabilities the cartridge declares.
 
-A cartridge can be thirty minutes or several hours. It should feel like a compact MUD questline or zone with a beginning and a bounded set of outcomes.
+The local mobile authority serializes commands and commits durable state to local SQLite. No ordinary gameplay connection is required after acquisition/download for an offline-capable cartridge.
+
+A cartridge can be thirty minutes or many hours. Multiple cartridges may compose into a versioned campaign with explicit continuity exports/imports.
 
 ### Expansion path
 
-The same content model then grows through instance modes:
+The same cartridge/content model grows through deployment profiles:
 
-1. **private** — one player, isolated world state;
-2. **party** — a small group shares the instance;
-3. **shared-area** — a certified cartridge/area is mounted into a persistent realm;
-4. **persistent-world** — many areas, shared services, social systems, economy, guilds, events, and long-lived characters.
+1. **offline_private** — one player, local device authority;
+2. **online_private** — one player, BEAM WorldInstance authority;
+3. **party** — a small group shares a BEAM-hosted instance;
+4. **embedded instance** — a storypack is entered geographically from the shared MMORPG but retains private/party state;
+5. **shared_area** — selected content is adapted through a separately certified multiplayer deployment;
+6. **persistent_world** — many areas, shared services, social systems, economy, guilds, events, and long-lived characters.
 
-This sequence lets single-player releases pay for and validate the eventual MUD. A successful cartridge can later become a tested questline or region in the shared game rather than throwaway content.
+A successful single-player cartridge can later remain a private/party adventure, become an embedded instanced region, or—when its fiction and mechanics suit it—be promoted into a shared area. We do not force every intimate story into globally shared state.
 
-## 2. Preserve Loka's strong foundation
+## 2. Preserve Lokacore's lessons, not its implementation
 
-The current repository already contains most of the substrate this strategy needs:
+Lokacore remains valuable evidence for the rebuild. High-value concepts include:
 
-- Phoenix Channels and an authoritative server;
-- React Native / Expo mobile work;
-- the entity/component/trait model;
+- Phoenix/OTP multiplayer experience and session ideas;
+- the entity/component/trait composition direction;
 - rooms, exits, NPCs, items, inventory, combat, quests, dialogue, timers, schedules, and world events;
-- reusable traits such as patrol, wandering, day/night schedules, shop hours, ambient emitters, nocturnal behavior, and timed spawning;
+- reusable living-world ideas such as patrol, wandering, day/night schedules, shop hours, ambient emitters, nocturnal behavior, and timed spawning;
 - content validators and dependency/reachability analysis;
-- ChannelBot and storyline integration testing;
-- AI-evaluation, balance, and builder infrastructure;
-- server-side constrained Elixir scripts.
+- ChannelBot/storyline playthrough testing;
+- AI evaluation, balance simulation, and builder/MCP work;
+- the constrained-scripting product need;
+- React Native touch-oriented game UI experiments.
 
-Do not replace these merely to get a cleaner story format. Repair the boundaries around them.
+The new implementation MUST start from v3 contracts rather than reusing Lokacore modules/APIs/process topology. Existing tests, content, and failure cases may be translated into new acceptance fixtures.
 
-### Storage evolution
+### Storage direction
 
-Keep SQLite for the private-cartridge MVP unless measurement shows a real bottleneck. The
-cartridge, quest, and capability contracts should not depend on SQLite-specific behavior.
-Before persistent shared-realm scale, benchmark write contention, backup/restore, and
-operational needs and make an explicit SQLite-versus-PostgreSQL decision from evidence
-rather than migrating the database merely because the long-term product is multiplayer.
+The clean rebuild uses two explicit persistence hosts:
 
-### What should change first
+- **offline storypacks:** local SQLite (or equivalent transactional local store);
+- **online authority:** PostgreSQL from the start.
 
-The repository currently contains contract drift. One prominent example is prototype inheritance: current architecture/README material describes flat self-contained prototypes while the LLM-oriented entity reference still documents `parent:` inheritance. Scripting comments and older design material also retain assumptions from the pre-entity scripts table.
+The logical cartridge/state/command/snapshot contracts remain host-neutral. Offline and online physical schemas do not need to match byte-for-byte.
 
-An AI builder should not have to decide which era of the architecture is true.
+### What changes first
 
-The first architectural product is therefore not another feature. It is a **canonical machine-readable authoring contract**.
+Before implementation scale, make the contracts unambiguous and machine-readable:
+
+- capability registry;
+- cartridge/deployment schemas;
+- command/domain-event/effect schemas;
+- state-scope rules;
+- Builder API;
+- external mobile protocol;
+- offline/online conformance vectors.
+
+An AI builder should not have to decide which era of Lokacore documentation is true.
 
 ## 3. Capability catalog and cartridge contract
 
@@ -124,29 +151,31 @@ An AI builder should be able to query capabilities by meaning, target type, inpu
 A cartridge is an immutable compiled content release, not an alternate application:
 
 ```yaml
+api_version: loka/v3
 id: fox_spirit_of_yunmeng
 version: 1.2.0
 
 requires:
-  engine_api: ">=1.3 <2.0"
-  content_schema: 1
-  script_api: 1
+  kernel_api: ">=1.3 <2.0"
+  capabilities:
+    - movement@1
+    - dialogue@2
+    - quest@3
+    - schedule@1
   client_features:
+    - contextual_actions_v1
     - dialogue_choices_v1
-    - minimap_v1
 
-instance_modes:
-  - private
+execution_profiles:
+  - offline_private
+  - online_private
 
 entry:
-  starting_room: yunmeng_ferry
+  room: rooms/ferry_dock
 
-content:
-  world: world/
-  quests: quests/
-  dialogue: dialogue/
-  scripts: scripts/
-  assets: assets/
+locales:
+  default: en
+  available: [en, zh]
 ```
 
 The compiled artifact should record a content hash and the exact compatibility contract it was certified against.
@@ -431,46 +460,25 @@ The objective is **event-replayable quest logic**, not turning the entire game d
 
 Snapshots/current state can remain authoritative. Retain enough normalized event/effect evidence to reproduce failures, test migrations, and produce a compact repro bundle.
 
-## 5. Server-side Elixir scripting remains useful, with a stricter trust boundary
+## 5. Portable scripting remains useful, with a real semantic boundary
 
-### Current implementation
+Lokacore proved the value of giving builders a scripting escape hatch, but its current same-BEAM sandbox is reference evidence only. The v3 target is **LokaScript**:
 
-The existing script runtime is real and useful:
+- Elixir-like authoring syntax;
+- parsed/validated during cartridge build;
+- compiled to a portable normalized AST/bytecode;
+- interpreted by the shared deterministic rules system;
+- typed binding registry;
+- explicit clock/RNG;
+- query/effect/event budgets;
+- no filesystem/network/process/module escape;
+- same semantics offline and online.
 
-- scripts are content entities (`type: :script`);
-- `Loka.Engine.Script.Validator` performs source/AST checks;
-- `Sandbox` runs source with approved bindings and a timeout;
-- `ActionQueue` collects and rate-limits effects before they are executed;
-- scripts can react to hooks/events and compose richer behavior.
+Declarative capabilities remain preferred. Repeated script patterns should be promoted into tested capabilities.
 
-This is a strong first-party builder tool.
+Compiled Elixir remains appropriate for **engine capability implementation on the BEAM**, but that is an engine release change—not cartridge code.
 
-### Important limitation
-
-The current runtime ultimately calls `Code.eval_string` in a task on the same BEAM. Static checks, restricted bindings, timeouts, and result-size limits reduce risk, but they are **not an OS/process isolation boundary against hostile code**.
-
-Therefore:
-
-- keep it for reviewed first-party and AI-authored content;
-- do not offer arbitrary public script execution as a launch feature;
-- do not describe same-BEAM execution as sufficient isolation for untrusted creators;
-- keep all scripts server-side; cartridges must never deliver executable Elixir to the mobile client.
-
-### Direction for Script API v2
-
-Scripts should become a controlled orchestration escape hatch over typed engine capabilities.
-
-1. Generate script bindings from the same capability registry.
-2. Inject clock and RNG capabilities so tests can control time/randomness.
-3. Have mutation bindings produce typed commands/events/effects rather than direct DB writes.
-4. Remove dynamic atom creation from content-controlled paths.
-5. Version the Script API per cartridge.
-6. Make effect batches previewable and auditable.
-7. Put explicit budgets on queries, effects, spawned entities, timers, output, and execution.
-8. Prefer declarative conditions/effects/traits when the engine already has the primitive.
-9. When authors repeatedly need the same script pattern, promote it into a tested engine capability.
-
-If Loka later accepts untrusted public builder scripts, add a stronger boundary first: a strict interpreted AST/DSL or a separately isolated worker with OS-level resource and filesystem/network restrictions.
+Public/untrusted creator scripting remains deferred until the custom interpreter and broader creator security/moderation model receive dedicated review.
 
 ## 6. Cartridge Lab: test worlds as products, not YAML files
 
@@ -697,51 +705,41 @@ External orchestration tooling may coordinate this pipeline, but Loka should not
 
 ## 9. App Store / Play Store release and commerce strategy
 
-Store policies change; re-check them before launch. The following baseline was verified against official Apple/Google documentation on 2026-09-17.
+Store policies change; re-check them before implementation and launch. The current baseline and source links are tracked in [`docs/rewrite-v3/17-research-baseline.md`](../rewrite-v3/17-research-baseline.md).
 
-### 9.1 Ship one app, not one app per story
+### 9.1 Two products, not one app per story
 
-The app is the Loka player/catalog/runtime. Cartridges are entries inside it.
+Ship two long-lived clients, not dozens of story-specific apps:
 
-This keeps one client to maintain, avoids repeated binary releases for content-only additions, and fits the product goal that all worlds share one engine and interaction vocabulary.
+- **Loka Stories** — cartridge catalog/player, offline saves, campaigns, purchase/download/restore.
+- **Loka Online** — multiplayer/MUD client, online identity/social/realm/party systems.
 
-### 9.2 Keep mobile cartridges declarative
+Both are built from one monorepo and shared packages. Individual cartridges remain downloadable content inside Loka Stories rather than separate store apps.
 
-Apple's App Review Guideline 2.5.2 prohibits downloading/installing/executing code that introduces or changes app features/functionality. Apple separately has rules for mini apps/mini games under Guideline 4.7, with additional requirements.
+### 9.2 Keep downloadable cartridges within shipped capabilities
 
-For the simplest initial review posture:
+For the simplest review and maintenance posture:
 
-- do not ship downloadable executable Elixir/JavaScript/native code in cartridges;
-- execute Loka builder scripts only on the server;
-- have the mobile client receive declarative content, assets, state, and supported action/render descriptions;
-- require a client update when a cartridge needs a genuinely new client capability.
+- do not download arbitrary native libraries or JavaScript executable modules per cartridge;
+- portable LokaScript is interpreted by the already-shipped kernel/interpreter;
+- cartridge downloads contain definitions, normalized portable script representation, localization, and assets;
+- require a client/kernel update when a cartridge needs a genuinely new native/client capability.
 
-Official reference: <https://developer.apple.com/app-store/review/guidelines/>
+Apple currently treats game levels/premium content as IAP content, and non-consumable IAPs are one-time purchases that do not expire. Google Play supports non-consumable one-time products such as additional game levels, while billing programs/policies vary by region and have changed materially in 2025–2026.
 
 ### 9.3 Permanent cartridge purchases
-
-Apple explicitly treats game levels/premium content as in-app-purchase content, and its non-consumable type is purchased once and does not expire. Google Play's non-consumable one-time products similarly support permanent unlocks such as additional game levels.
 
 Default launch hypothesis:
 
 - free app;
 - at least one complete free showcase cartridge;
-- each premium cartridge maps to a permanent entitlement;
+- premium cartridges map to permanent canonical Loka entitlements;
 - optional bundles later;
-- subscription only if Loka establishes a meaningful ongoing catalog/service cadence.
+- subscription only if an ongoing catalog/service cadence eventually justifies it.
 
-Official references:
-
-- Apple IAP overview: <https://developer.apple.com/help/app-store-connect/configure-in-app-purchase-settings/overview-for-configuring-in-app-purchases>
-- Apple App Review Guidelines 3.1.1: <https://developer.apple.com/app-store/review/guidelines/>
-- Google Play Payments policy: <https://support.google.com/googleplay/android-developer/answer/9858738>
-- Google Play one-time products: <https://developer.android.com/google/play/billing/one-time-products>
-
-### 9.4 Entitlement service
+### 9.4 Canonical entitlement + offline grant
 
 Do not make Apple/Google product IDs the domain model.
-
-Use a canonical server entitlement:
 
 ```text
 entitlement: cartridge.fox_spirit_of_yunmeng
@@ -749,42 +747,39 @@ entitlement: cartridge.fox_spirit_of_yunmeng
   google_product_id: ...
 ```
 
-The server records platform provenance and verified purchase state, handles restore/revocation/refund signals, and decides which cartridge catalog entries a Loka account may enter.
+A trusted service verifies purchase provenance and records the canonical entitlement. For offline-capable purchased content it also issues whatever locally verifiable grant/proof the accepted platform implementation uses so normal play does not require periodic connectivity.
 
-Define cross-platform portability deliberately before launch; do not let accidental receipt handling decide the policy.
+Offline saves remain on-device authority for the private story but are not trusted as MMO economy/progression authority.
 
 ### 9.5 Cartridge release without app binary release
 
 A content-only cartridge should be releasable without a new client version when:
 
-- the installed client already supports every declared client feature;
-- the server engine supports the cartridge contract;
-- its IAP/product metadata is approved/available;
-- its exact cartridge hash has a release certificate.
+- the installed app/kernel supports all declared capabilities/client features;
+- its product/catalog metadata is available;
+- the exact cartridge/deployment hash has the required release certificate.
 
-On Apple, the first consumable/non-consumable IAP must be submitted with a new app version; after the first of that type is approved, additional IAPs of that type can be submitted without including a new app version.
-
-Official reference: <https://developer.apple.com/help/app-store-connect/manage-submissions-to-app-review/submit-an-in-app-purchase>
-
-A new cartridge that requires a new UI/rendering/client mechanic waits for the binary carrying that capability.
+Apple currently requires the first IAP of a given type to be submitted with a new app version; after approval, later items of that type can be submitted separately when Apple's current conditions are met. Reverify at release time.
 
 ### 9.6 Content delivery
 
-Default cross-platform model:
+Typical paid offline-capable flow:
 
 ```text
-store purchase
+store/platform purchase
     ↓
-server verifies / updates entitlement
+trusted verification → canonical entitlement
     ↓
-catalog shows unlocked
+locally verifiable offline grant
     ↓
-client fetches manifest/assets as needed
+download signed/hash-addressed cartridge + assets
     ↓
-player enters server-side instance
+verify compatibility/integrity
+    ↓
+play locally with LocalInstanceAuthority + SQLite
 ```
 
-Use normal CDN/object storage for cross-platform assets unless platform-hosted asset packs offer a measured operational benefit. Apple-hosted asset packs are an optional later optimization, not a dependency of the cartridge model.
+Online-private/party deployment instead enters a BEAM WorldInstance after entitlement and compatibility checks.
 
 ### 9.7 Review/staging logistics
 
@@ -792,119 +787,76 @@ Maintain distinct environments:
 
 - local Cartridge Lab;
 - automated CI certification;
-- internal/staging server;
+- internal/staging services;
 - TestFlight / Play internal testing;
 - production catalog.
 
-App review must be able to access required backend services and purchasable content. Release notes should explain non-obvious cartridge/IAP behavior.
-
-Public user-authored cartridges are deferred. They introduce moderation, reporting, blocking, age-rating, IP, and creator-content obligations beyond the first-party catalog.
+Public user-authored cartridges remain deferred because they add moderation, reporting, age-rating, IP, creator security, and marketplace obligations beyond the first-party catalog.
 
 ## 10. Roadmap and gates
 
-Sequence by evidence, not by a fixed calendar.
+The older in-place L0–L5 repair sequence is superseded by the clean-rebuild implementation graph in [`docs/rewrite-v3/14-implementation-plan.md`](../rewrite-v3/14-implementation-plan.md).
 
-### L0 — Contract reconciliation
+At strategy level, the checkpoints are:
 
-**Goal:** make the builder surface unambiguous before generating more worlds.
+### S0 — Accept the v3 specification and prove portability
 
-Deliver:
+- finish self/adversarial review;
+- accept decision register;
+- run the mandatory shared-kernel/mobile/BEAM feasibility spike;
+- reject or freeze the provisional Rust/binding choice from evidence.
 
-- inventory of actual engine capabilities;
-- canonical machine-readable schemas;
-- capability registry;
-- generated/checked builder docs;
-- resolve prototype/script/documentation drift;
-- cartridge manifest v1;
-- explicit player/party/instance/realm scope vocabulary.
+### S1 — Build the offline cartridge foundation
 
-**Gate:** an AI builder can discover and create representative entities/behaviors without consulting contradictory legacy references.
+- fresh repository and strict boundaries;
+- machine-readable contracts;
+- cartridge compiler;
+- portable deterministic world kernel;
+- local authority + SQLite;
+- quest/dialogue/LokaScript;
+- living-world primitives;
+- Cartridge Lab;
+- canonical Builder API.
 
-### L1 — Quest Runtime v3 + certification kernel
+**Gate:** a small real cartridge can be completed fully offline, survives app termination/restart, and passes deterministic certification.
 
-**Goal:** make quest/world state diagnosable and replayable before scaling content.
+### S2 — Ship the first commercial cartridge
 
-Deliver:
+- polished mobile shell;
+- download/install/save lifecycle;
+- purchase/restore/offline entitlement;
+- device smoke and store review.
 
-- canonical quest event schemas/metadata on the existing `Loka.Engine.Event` foundation;
-- pure quest reducer;
-- typed/idempotent quest effects;
-- pinned quest definition versions;
-- state machine retained as lifecycle guard;
-- deterministic clock/RNG seams;
-- core Cartridge Lab;
-- static + property + bounded-state quest certification.
+**Gate:** a non-developer can buy/download, enter airplane mode, play, resume, and finish.
 
-**Gate:** migrate one existing problematic questline and prove happy, alternate, duplicate, abandon, timer, restart, and adversarial traces without state corruption.
+### S3 — Add BEAM online authority using the same cartridge semantics
 
-### L2 — First shippable cartridge
+- sessions/accounts/characters;
+- WorldInstance supervision;
+- PostgreSQL transactional command commits;
+- command receipts/outbox;
+- typed Phoenix protocol;
+- online-private deployment.
 
-**Goal:** prove the complete player and commerce loop manually before factory scale.
+**Gate:** representative cartridge traces conform between offline and online hosts apart from explicit host-only effects.
 
-Create one small polished cartridge with enough systems to stress the architecture:
+### S4 — Scale the factory and social/co-op layer
 
-- living NPC schedules;
-- exploration;
-- dialogue;
-- items;
-- at least one combat/noncombat challenge;
-- branching quest outcome;
-- time/world events;
-- multiple endings or meaningful consequences.
+- AI factory/reviewer loop;
+- second and third materially different cartridges;
+- party instances;
+- shared hub/social identity;
+- storypack portals/embedded instances.
 
-Run full certification, mobile smoke, purchase, restore, download, save/resume, and update tests.
+### S5 — Grow into the persistent MMORPG
 
-**Gate:** a real player can install one app, acquire the cartridge, complete it, restore it on a fresh install, and resume safely across server/client restart.
+- zone/shard authority;
+- cross-shard handoff;
+- selected shared-area promotion;
+- realm economy/social systems/live operations;
+- ongoing cartridge pipeline feeding both instanced adventures and shared regions.
 
-### L3 — Repeatable cartridge factory
-
-**Goal:** make cartridge creation primarily content work.
-
-Deliver:
-
-- machine-readable capability search;
-- authoring agents/roles;
-- automated compile → certify → review → correct loop;
-- primitive-proposal workflow;
-- semantic review;
-- release-candidate packaging;
-- catalog/IAP operational tooling.
-
-**Gate:** produce at least two materially different cartridges without cartridge-specific engine patches except explicitly approved new reusable primitives.
-
-Track the percentage of each cartridge diff that is content/assets versus runtime code.
-
-### L4 — Persistent identity and social shell
-
-**Goal:** connect isolated stories without yet taking on full MMO world coupling.
-
-Possible additions:
-
-- persistent profile/character choices;
-- achievements/history;
-- friends;
-- shared lobby/town;
-- party formation;
-- cross-cartridge unlocks where designed.
-
-**Gate:** isolated cartridges remain deterministic/recoverable while shared identity cannot leak or corrupt cartridge-local state.
-
-### L5 — Shared areas and modern MUD
-
-**Goal:** mount certified content into a persistent multiplayer world.
-
-Add only after multiplayer certification is mature:
-
-- shared area state;
-- guilds/factions;
-- economy;
-- persistent world events;
-- live operations;
-- area canaries/rollback;
-- cross-area migrations;
-- stronger load and abuse testing.
-
-**Gate:** a certified area survives concurrency, restarts, upgrades, and rollback with persistent player/world state intact.
+The MMORPG path exists so cartridge work compounds; it must not block shipping S1/S2.
 
 ## 11. Metrics that matter
 
@@ -930,20 +882,25 @@ The strategic factory metric is:
 
 ## 12. Immediate implementation order
 
-After this roadmap is accepted, prefer small architecture tickets rather than one "Loka v3 rewrite":
+Do **not** start a module-by-module rewrite of Lokacore.
 
-1. reconcile current authoring contracts, generate a capability inventory, and define the canonical Builder API beneath MCP/terminal adapters;
-2. write the Cartridge Manifest v1, workspace/revision model, and state-scope contract;
-3. design the canonical `Loka.Engine.Event` → Quest Runtime v3 interfaces against current quest bugs before changing implementation;
-4. build a reducer spike for one existing quest and compare it with current behavior;
-5. add deterministic clock/RNG seams and a minimal Cartridge Lab trace/replay path;
-6. convert the existing content-testing proposal into executable certification gates;
-7. harden Script API boundaries around typed capabilities/effects;
-8. build one handcrafted shippable cartridge;
-9. add store entitlement/catalog plumbing;
-10. automate authoring only after the first cartridge proves the contract.
+The current order is:
 
-Do not begin with a giant content generation run. First make one small world impossible to break in ordinary and adversarial ways, then make the factory reproduce that quality.
+1. finish and accept the v3 specification packet;
+2. run the portable-kernel feasibility spike;
+3. create the fresh repository only after the spike resolves provisional architecture;
+4. establish strict repo/app boundaries and unified CI;
+5. create the machine-readable contracts before large feature work;
+6. compile one tiny cartridge;
+7. make that cartridge deterministic and crash-safe offline;
+8. add quests/dialogue/living-world capabilities and the Cartridge Lab;
+9. build the canonical Builder API/MCP/terminal adapters;
+10. ship one handcrafted commercial-quality offline cartridge before scaling AI generation;
+11. add commerce;
+12. add BEAM online authority and prove host conformance;
+13. then expand factory/co-op/social/shared-world work.
+
+The detailed R0–R22 dependency graph and gates live in [`docs/rewrite-v3/14-implementation-plan.md`](../rewrite-v3/14-implementation-plan.md).
 
 ## Related current material
 
