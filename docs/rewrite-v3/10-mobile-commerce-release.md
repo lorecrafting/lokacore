@@ -378,19 +378,25 @@ Offline existing saves should continue on their compatible installed app/kernel 
 
 ## 23. Mobile CI
 
-Every PR touching kernel bindings/protocol/mobile runs:
+Every PR touching kernel bindings/protocol/mobile runs the relevant subset of:
 
 - clean install;
 - TypeScript;
 - lint/format;
 - unit tests;
-- generated protocol drift;
+- generated schema/protocol drift;
 - native module compile targets;
 - portable conformance vectors;
+- Story authority-boundary tests;
+- Realm authority-boundary tests where Realm exists;
 - representative offline save roundtrip;
+- supported old-save compatibility corpus;
+- Realm protocol fixtures/reconnect tests where Realm exists;
 - Expo config validation.
 
-Pre-release adds real iOS/Android internal-build smoke.
+Every production mobile release runs the full supported Story compatibility suite even if the release was motivated only by Realm work.
+
+Pre-release adds real iOS/Android internal-build smoke for every enabled gameplay mode.
 
 ## 24. Deep links
 
