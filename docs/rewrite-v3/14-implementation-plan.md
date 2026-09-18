@@ -393,7 +393,7 @@ The first cartridge exists to stress contracts.
 
 ### Gate R10
 
-Full `offline_private_story` certification + human mobile smoke.
+Full `offline_private_story` certification plus a **developer-harness physical-device smoke** using the minimal Expo/native integration established by R1/R2/R6. Polished non-developer product-shell acceptance belongs to R12.
 
 The cartridge should be authored primarily through source files/compiler/Lab at this stage. Record every repetitive or error-prone authoring operation as evidence for the Builder API rather than prematurely generalizing it.
 
@@ -439,7 +439,7 @@ Can overlap late R10.
 
 ### Gate R12
 
-Non-developer can install build, enter airplane mode, play/finish free cartridge, resume after app/device restart.
+Non-developer can install the polished build, enter airplane mode, play/finish the free cartridge, resume after app/device restart, and use production cartridge/save UX without developer tooling.
 
 ## R13 — Commerce and entitlement
 
