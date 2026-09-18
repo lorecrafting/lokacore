@@ -181,7 +181,7 @@ BEAM/OTP still owns the online system:
 - observability integration;
 - admin/builder services.
 
-Rust owns only deterministic portable simulation semantics.
+If R1 accepts Rust, Rust owns only deterministic portable simulation semantics.
 
 This is analogous to using a physics/rules library inside an actor-oriented server.
 
