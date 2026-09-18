@@ -318,3 +318,68 @@ Decision:
 The Builder API now has explicit `story`, `realm`, and `promote` targets.
 
 This reduces architecture coupling at the cost of two app-store/release tracks and a deliberate cross-client entitlement/account policy. The latter is intentionally not assumed to be automatic.
+
+
+## 22. Review round two: revisit the two-client decision
+
+After PR #4 merged, the client split was challenged again from a maintenance/product perspective.
+
+### Finding
+
+Two separate store apps preserved authority separation, but duplicated:
+
+- store listings/review tracks;
+- release/version management;
+- navigation/onboarding;
+- design/accessibility shell;
+- account/catalog/purchase/restore UX;
+- analytics/support surface;
+- installed-user migration path when Realm launches.
+
+The authority problem did not actually require two binaries.
+
+### Revised decision
+
+Use **one Loka app with two strict gameplay session modes**:
+
+- `LocalStorySession` — local kernel + SQLite;
+- `RemoteRealmSession` — Phoenix/BEAM.
+
+The common renderer consumes host-neutral GameViews. Exactly one session authority is active at a time. Realm never accepts local simulation as authority.
+
+The mobile codebase keeps separate Story and Realm feature/authority modules so “one app” does not become pervasive `if online?` conditionals.
+
+### Why this is simpler
+
+- one store presence and installed user base;
+- one design/accessibility/localization system;
+- one cartridge/account/catalog experience;
+- Realm can arrive later as an app update;
+- no cross-app entitlement problem;
+- Story cartridges can open online adventures/Realm portals without deep-linking to another product.
+
+### New cost
+
+Online development cadence can force more frequent app updates, so offline save/kernel/rule-IR backward compatibility becomes even more important. The existing compatibility contract already treats this as a release invariant.
+
+### Builder decision retained
+
+`story`, `realm`, and `promote` remain distinct Builder targets because they represent authority/trust/certification semantics, not clients.
+
+## 23. Review round two: master-plan clarity
+
+The packet has grown large enough that an implementation model could confuse research/history with requirements.
+
+Correction: the packet index now explicitly labels:
+
+- normative architecture;
+- normative sequencing/acceptance gates;
+- informative/reference evidence.
+
+A disagreement between normative documents is itself a spec defect and blocks implementation until reconciled; there is no implicit “pick the newest paragraph” rule.
+
+Certification is now explicitly target-driven:
+
+- Story workspaces select portable/offline/save-compatibility gates;
+- Realm workspaces select online/concurrency/security/load gates;
+- Promote workspaces retain the immutable Story artifact and add explicit multiplayer adaptation plus Realm certification.
