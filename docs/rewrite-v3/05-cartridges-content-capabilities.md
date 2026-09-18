@@ -438,3 +438,45 @@ Authors cannot skip from draft directly to production.
 The cartridge defines reusable story/world semantics. A deployment defines how that exact cartridge is hosted: offline private, online private, party, embedded instance, or shared realm area.
 
 Deployment overlays may change hosting policy—such as realm mount point, NPC respawn policy, or economy integration—but any semantic override is separately hashed and certified. This is the mechanism for reusing a storypack inside the later MMORPG without pretending every private-world assumption is globally shareable.
+
+
+## 23. Cartridge ports and extension points
+
+Cartridges that may participate in campaigns or the later MMORPG SHOULD expose explicit composition ports rather than encourage arbitrary cross-cartridge references.
+
+Examples:
+
+```yaml
+ports:
+  entries:
+    ferry_road:
+      room: rooms/ferry_dock
+  exits:
+    northern_road:
+      room: rooms/north_gate
+  continuity:
+    exports:
+      - memory.saved_ferryman
+  extension_points:
+    village_notice_board:
+      accepts: [quest_hook, rumor_source]
+```
+
+A campaign/deployment may bind ports:
+
+```yaml
+mounts:
+  - from: chapter_1:exits/northern_road
+    to: chapter_2:entries/southern_road
+```
+
+Rules:
+
+- ports are versioned cartridge API;
+- internal definition keys remain private unless exported;
+- extension points declare accepted contribution kinds/schemas;
+- binding validation happens at campaign/deployment compile time;
+- published cartridge artifacts remain immutable;
+- adding an expansion changes the composite campaign/deployment manifest, not the old artifact.
+
+This creates a stable module boundary for chapters, side adventures, and MMO region mounting.
