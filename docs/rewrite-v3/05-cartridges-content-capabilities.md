@@ -124,6 +124,27 @@ Fields outside registered schemas are errors unless explicitly allowed under ext
 
 A capability is an engine-supported reusable semantic feature.
 
+### Canonical capability vocabulary
+
+Use these terms consistently in v3:
+
+| Term | Meaning |
+|---|---|
+| **Capability** | Versioned feature contract registered by the engine. Owns schemas and the commands/events/effects/policies/rules it introduces. |
+| **Component** | Typed definition/runtime data attached to an entity or scoped state. A component is data/state, not an independent authority. |
+| **Behavior** | Declarative autonomous/reactive rule configuration supplied by a capability, such as patrol or schedule. |
+| **Action** | Player/agent affordance resolved into a typed Command. |
+| **Policy / condition** | Pure predicate tree deciding whether an action/content path is allowed/visible. |
+| **Command** | Request to authoritative game semantics. |
+| **DomainEvent** | Immutable fact produced during a decision. |
+| **StateDelta** | Proposed authoritative state change accumulated before commit. |
+| **Effect** | Typed post-decision instruction whose durability/retry semantics are explicit; not a hidden DB mutation path. |
+| **GameView** | Host-neutral semantic projection consumed by mobile rendering. |
+
+`trait` is historical Lokacore terminology and SHOULD NOT be a separate v3 schema concept. Old trait ideas become Behaviors/capabilities.
+
+Likewise, a generic runtime `signal` is not a fifth event system. Cartridge-local notifications compile to registered/namespaced DomainEvents.
+
 Examples:
 
 ```text
@@ -168,6 +189,8 @@ Capability metadata includes portability classification:
 The registry is engine-owned and enumerable.
 
 Portability is one of `:portable`, `:server_only`, or `:client_presentation_only`. An `offline_private` cartridge cannot compile if a gameplay dependency is server-only.
+
+Server-only does **not** mean side-effectful arbitrary Elixir. Server-only gameplay capabilities MUST participate in the same command/event/delta/effect decision contract as portable capabilities. They return proposed state deltas/events/effects to the online decision coordinator and MUST NOT write Repo/PubSub/external services directly from rule evaluation.
 
 ## 7. Capability discovery API
 
