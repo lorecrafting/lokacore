@@ -1021,3 +1021,152 @@ Promotion of a cartridge containing permanently killable quest giver, unique loo
 The app has a locally cached verified Story entitlement and a modified local save.
 
 Realm Mode may use server-verified entitlement/account rules to unlock content, but it does not grant competitive/persistent value from the local save or an unverified local ownership flag.
+
+
+## W. Quest sharing, phasing, and scarce services
+
+### SCOPE-01 — Personal progress in shared world
+
+Players A and B share the same town and ferryman.
+
+A accepts a player-scoped quest. B does not.
+
+Only A's QuestInstance progresses while both continue to see/interact with the shared ferryman.
+
+### SCOPE-02 — Party progress membership snapshot
+
+A party activates a quest using snapshot membership.
+
+A late joiner does not retroactively become an owner/recipient unless the definition explicitly allows it.
+
+Leaving/rejoining cannot duplicate progress or rewards.
+
+### SCOPE-03 — Party dynamic-present credit
+
+A party quest using dynamic-present credit advances only eligible present members according to the objective's credit policy.
+
+### SCOPE-04 — Instance-scoped puzzle
+
+Two parties enter separate instances of the same dungeon.
+
+Solving the puzzle in one instance changes only that instance.
+
+### SCOPE-05 — Realm-scoped public event
+
+A certified Realm event advances shared reconstruction progress once and is visible consistently to all eligible players.
+
+### PHASE-01 — Personal quest NPC invisible to others
+
+Player A is eligible for a quest apparition in a shared room.
+
+A's GameView/search/action resolution includes it.
+
+Player B's does not.
+
+### PHASE-02 — Phased actor cannot leak shared effects
+
+A player-scoped quest NPC dies and drops an item.
+
+The drop remains player-scoped by default and cannot be looted or targeted by unrelated players.
+
+### PHASE-03 — Lazy materialization survives cleanup
+
+A personal quest actor is materialized while the player is nearby, then cleaned up after leaving.
+
+On return, durable quest/fact state reconstructs the correct actor state without duplication.
+
+### PHASE-04 — Shared NPC stays shared
+
+Two players interact with the same shared smith NPC but have different trust/dialogue/quest actions.
+
+Only one world NPC exists; per-player projections differ correctly.
+
+### PHASE-05 — Overlay provenance
+
+Developer/Lab trace can explain which shared/party/player layer caused a visible NPC, action, exit, or description variant.
+
+### INSTANCE-01 — Private destructive branch
+
+Player A destroys a bridge inside a private quest instance.
+
+Shared Realm geography and Player B's experience remain unchanged.
+
+### INSTANCE-02 — Instance reconnect
+
+Player disconnects from a private/party quest instance and reconnects.
+
+The correct instance identity and state are restored; a duplicate instance is not created.
+
+### INSTANCE-03 — Instance teardown
+
+Completed/expired private instance tears down ephemeral entities while explicitly exported rewards/memories survive according to policy.
+
+### FACILITY-01 — One shared smithy slot race
+
+Two Realm players submit a forge order for the only available facility slot concurrently.
+
+Exactly one order receives that slot; the other is queued/rejected according to policy.
+
+### FACILITY-02 — WorkOrder input escrow
+
+Submitting a sword order moves required materials into escrow atomically with WorkOrder creation.
+
+Crash at every boundary cannot duplicate or lose inputs.
+
+### FACILITY-03 — WorkOrder completion exactly once
+
+Scheduler retries the completion job after a crash.
+
+Sword output is created/claimed once and the completion DomainEvent is idempotent.
+
+### FACILITY-04 — Personal quest observes shared work
+
+Player A's personal quest requires the sword.
+
+Player B also uses the same smithy.
+
+Only completion of A's eligible WorkOrder progresses A's quest.
+
+### FACILITY-05 — Capacity semantics are precise
+
+Content declaring one start per day behaves differently from one concurrent one-day slot and one completion per day, and certification fixtures prove the selected rule.
+
+### FACILITY-06 — Queue persists through restart
+
+Realm service/ZoneShard restarts with queued and active WorkOrders.
+
+Queue order, reservations, escrow, and scheduled completion remain correct.
+
+### FACILITY-07 — Story overnight forge
+
+Story Mode submits an overnight order, app closes, and the cartridge's declared time policy is applied on resume.
+
+The order completes or remains pending deterministically according to real-elapsed/play-time policy.
+
+### FACILITY-08 — Cancellation and refund
+
+Cancelling a queued/in-progress order applies the configured cancellation/escrow/refund policy once and cannot be exploited for material duplication.
+
+### FACILITY-09 — Queue abuse limits
+
+A character/account attempts to monopolize the smithy with excessive queued orders.
+
+Configured max-outstanding/admission policy is enforced transactionally.
+
+### MIXED-01 — Personal quest + shared bottleneck + phased NPC
+
+One quest simultaneously uses:
+
+- player-scoped progress;
+- shared smithy facility;
+- player-beneficiary WorkOrder;
+- player-phased quest apparition;
+- shared town geometry.
+
+All scopes remain independent and correct.
+
+### MIXED-02 — Promote Story smithy to Realm
+
+A portable Story cartridge with local overnight smithing is promoted.
+
+Promotion explicitly chooses whether Realm deployment uses personal capacity, an instanced facility, or a genuinely shared facility queue and runs the matching certification gates.
