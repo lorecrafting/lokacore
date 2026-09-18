@@ -36,7 +36,7 @@ When code and this packet disagree in the future, accepted amendments and tests 
 
 ## 3. Product invariant
 
-Loka v3 is one authoritative game platform serving:
+Loka v3 is one game platform with one portable rules/content model serving:
 
 1. offline private storypack instances executed locally;
 2. online private and small-party cartridge instances hosted by BEAM;
@@ -50,27 +50,21 @@ A released cartridge MUST remain playable without an AI model or authoring facto
 ## 4. Architecture in one diagram
 
 ```text
-                            CLIENTS
-            React Native / terminal / future web
+                      COMPILED CARTRIDGE
                               |
-                       typed protocol
-                              |
-                       loka_gateway
-                 Phoenix auth / channels / HTTP
-                              |
-                       typed commands
-                              |
-                       loka_runtime
-        sessions -> instance/shard authority -> scheduler
-                              |
-                 decide -> commit -> effects
-                         /           \
-                  loka_core       loka_store
-             pure domain rules     PostgreSQL
-                  content refs      outbox/traces
-                         \
-                          loka_content
-             cartridge compiler / capability registry
+                    portable rules/kernel
+                      /               \
+                     /                 \
+       OFFLINE MOBILE                  ONLINE BEAM
+   LocalInstanceAuthority             loka_runtime
+   local SQLite                     WorldInstance/Shard
+         |                                |
+ React Native projection        commit/effects/observation
+                                          |
+                                      PostgreSQL
+                                          |
+                                      loka_gateway
+                                  Phoenix / HTTP / channels
 
 AUTHORING PLANE
 Astra / Foundry / human terminal / CI
@@ -96,7 +90,7 @@ The rebuild MUST use the strengths of Elixir/OTP intentionally:
 
 The rebuild MUST NOT turn every room, item, quest, or NPC into a GenServer merely because the BEAM makes processes cheap.
 
-The deterministic game decision layer SHOULD remain ordinary pure Elixir data/functions wherever possible.
+The online authority/orchestration layer SHOULD remain idiomatic Elixir/OTP. Rules that must execute both offline and online SHOULD live in the shared portable deterministic kernel; server-only orchestration and capability adapters remain Elixir.
 
 ## 6. Working top-level decisions
 
