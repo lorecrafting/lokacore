@@ -425,3 +425,44 @@ However:
 - Realm unlocks/benefits derived from ownership require explicit server-side verified product rules.
 
 One app simplifies discovery, restore, branding, and account linking; it does not merge the authority models.
+
+
+## ADR-040 — Quests influence the world through typed consequences
+
+**Status:** Accepted
+
+Quest Runtime observes canonical DomainEvents and owns quest-specific scoped state.
+
+Quest outcomes may affect the world only through registered capability consequence operators that return typed StateDelta/DomainEvents/Effects.
+
+Quests do not receive arbitrary component/database write access.
+
+Same-authority quest/world changes should commit atomically in one decision. Cross-authority Realm consequences use durable idempotent protocols.
+
+## ADR-041 — Typed scoped facts coordinate narrative state
+
+**Status:** Accepted
+
+Durable truths needed by multiple world systems use namespaced, typed, scoped FactSpecs rather than ad-hoc string flags.
+
+Examples include:
+
+- bridge repaired;
+- child rescued/dead;
+- town faction control;
+- player allegiance;
+- festival state.
+
+World systems may derive behavior, descriptions, dialogue, access, spawn rules, and follow-up content from facts.
+
+Components remain the home for entity-owned mechanical state such as HP/location.
+
+## ADR-042 — Prefer reactive/derived world responses over quest puppeteering
+
+**Status:** Accepted
+
+When many systems should respond to an outcome, the quest SHOULD set a shared fact or emit a typed DomainEvent and let registered world rules/policies/behaviors respond.
+
+Direct consequences are preferred for local mechanical changes such as opening one gate, spawning one encounter, or granting one item.
+
+This is intended to produce coherent living-world reactions while keeping quest definitions decoupled from subsystem internals.
