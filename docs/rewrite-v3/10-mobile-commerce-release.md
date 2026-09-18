@@ -386,7 +386,8 @@ As of this spec's 2026-09-17 research baseline:
 
 - Expo supports custom native modules for iOS/Android;
 - modern React Native uses the New Architecture/JSI-native module model;
-- Rust-to-React-Native TurboModule tooling exists in the ecosystem;
-- Rustler provides a mature Rust/BEAM NIF bridge.
+- React Native provides Turbo Native Module/codegen mechanisms for native integration and also documents a pure cross-platform C++ module path;
+- Rustler provides a mature Rust/BEAM NIF bridge;
+- Rust-to-React-Native generator projects exist, but current ecosystem maturity varies and at least one prominent option warns against production use today.
 
-Therefore a shared Rust kernel is feasible enough to justify a spike, but the spike—not this document—must prove build/release ergonomics and deterministic cross-host parity before the architecture is frozen.
+Therefore a shared Rust kernel is feasible enough to justify a spike, but **neither Rust nor a particular React Native binding generator is frozen by this document**. The spike must prove build/release ergonomics, crash/debug behavior, Expo/EAS integration, upgrade burden, and deterministic cross-host parity first.
