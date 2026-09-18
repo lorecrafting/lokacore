@@ -60,16 +60,21 @@ jobs:
         working-directory: ./server
         run: mix compile --warnings-as-errors
 
-      # Content validation starts the Loka application. Prepare the test DB first
-      # so supervised services such as Loka.Timers.Server can query migrated tables.
-      - name: Prepare test database
+      # Content validation boots supervised application processes such as
+      # EntitySeeder and Timers.Server. Run it in dev rather than the test SQL
+      # sandbox, and explicitly prepare the validation database first.
+      - name: Prepare content validation database
         working-directory: ./server
+        env:
+          MIX_ENV: dev
         run: |
           mix ecto.create --quiet
           mix ecto.migrate --quiet
 
       - name: Run content validation
         working-directory: ./server
+        env:
+          MIX_ENV: dev
         run: mix loka.test.validate --quiet
 
       - name: Run unit tests
