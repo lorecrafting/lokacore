@@ -364,30 +364,6 @@ Make failures reproducible before content scale.
 
 Every seeded injected failure generates a one-command/fixture reproducible report.
 
-## R11 — Builder API v1
-
-### Objective
-
-Let humans/agents author without raw repo semantics.
-
-### Build
-
-- workspace/revision;
-- capability search/describe;
-- content CRUD;
-- reference graph;
-- compile/validate;
-- Lab control;
-- batch/dry-run;
-- semantic rename;
-- audit receipts;
-- terminal adapter;
-- MCP adapter.
-
-### Gate R11
-
-Astra/another agent can recreate or extend representative first-cartridge content using only Builder API tools and fix intentionally injected validation failures without shell/Git editing.
-
 ## R10 — First real offline cartridge
 
 **Sequencing rule:** prove authoring requirements with a real cartridge before completing the generalized Builder API. Minimal scripts/CLI helpers are allowed, but do not let tooling delay product proof.
@@ -421,9 +397,33 @@ Full `offline_private_story` certification + human mobile smoke.
 
 The cartridge should be authored primarily through source files/compiler/Lab at this stage. Record every repetitive or error-prone authoring operation as evidence for the Builder API rather than prematurely generalizing it.
 
+## R11 — Builder API v1
+
+### Objective
+
+Let humans/agents author without raw repo semantics.
+
+### Build
+
+- workspace/revision;
+- capability search/describe;
+- content CRUD;
+- reference graph;
+- compile/validate;
+- Lab control;
+- batch/dry-run;
+- semantic rename;
+- audit receipts;
+- terminal adapter;
+- MCP adapter.
+
+### Gate R11
+
+Astra/another agent can recreate or extend representative first-cartridge content using only Builder API tools and fix intentionally injected validation failures without shell/Git editing.
+
 ## R12 — Mobile product shell
 
-Can overlap late R11.
+Can overlap late R10.
 
 ### Build
 
@@ -655,18 +655,19 @@ R8 living world
  |
 R9 lab
  |
-R10 first cartridge ── R12 mobile shell
+R10 first cartridge
+ |\
+ | R11 builder
  |
-R11 builder
- |                     |
- +───────────────┬─────+
-                 R13 commerce
+ R12 mobile shell
+ |
+R13 commerce
                   |
                  R14 BEAM online
                   |
                  R15 online-private
                   |
-                 R16 factory
+                 R16 factory  (also requires R11 Builder API)
                   |
                  R17 party
                   |
@@ -732,6 +733,6 @@ Models should not silently amend architecture during implementation.
 
 The rebuild has failed if it spends a year building a universal engine without shipping a cartridge.
 
-The first major product gate remains R11/R13: **a polished offline purchasable storypack**.
+The first major product gate remains R10/R13: **a polished offline purchasable storypack**.
 
 The MMORPG path exists in the architecture so that work compounds, not so it blocks shipping.
