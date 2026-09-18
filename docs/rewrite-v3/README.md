@@ -38,12 +38,12 @@ When code and this packet disagree in the future, accepted amendments and tests 
 
 Loka v3 is one authoritative game platform serving:
 
-1. private single-player cartridge instances;
-2. small-party cartridge instances;
+1. offline private storypack instances executed locally;
+2. online private and small-party cartridge instances hosted by BEAM;
 3. certified shared areas;
 4. eventually, a persistent text-first multiplayer world.
 
-These modes MUST use the same game rules and content contracts. Single-player is not a separate engine.
+These modes MUST use the same compiled cartridge contracts and portable deterministic rule semantics where the cartridge declares offline support. Single-player is not a disposable engine: the authority host changes from local mobile to BEAM as content moves online.
 
 A released cartridge MUST remain playable without an AI model or authoring factory online.
 
@@ -102,12 +102,14 @@ The deterministic game decision layer SHOULD remain ordinary pure Elixir data/fu
 
 | Topic | Draft v0.1 decision |
 |---|---|
-| Language/runtime | Elixir on BEAM/OTP |
+| Online language/runtime | Elixir on BEAM/OTP |
+| Portable offline rules | Shared deterministic kernel; Rust is the working choice pending a mandatory cross-platform spike |
 | Server UI/API | Phoenix |
 | Mobile | React Native / Expo |
 | Production DB | PostgreSQL from v3 start |
 | Game authority | server authoritative |
-| Private cartridge concurrency | one authoritative world-instance owner process |
+| Offline private authority | local serialized instance authority + local SQLite |
+| Online private concurrency | one authoritative BEAM world-instance owner process |
 | Shared-world concurrency | zone/area shard owners under a realm coordinator |
 | Content | source YAML/JSON-like data -> compiled immutable cartridge |
 | Runtime identity | cartridge-qualified definition refs + UUID runtime instance IDs |
@@ -129,14 +131,15 @@ Read in this order:
 4. [Commands, Events, Effects, and Protocol](04-command-event-effect-protocol.md)
 5. [Cartridges, Content, and Capabilities](05-cartridges-content-capabilities.md)
 6. [Quests, Dialogue, Actions, and Scripting](06-quests-dialogue-actions-scripting.md)
-7. [Builder API and AI Factory](07-builder-api-ai-factory.md)
-8. [Cartridge Lab and Certification](08-cartridge-lab-certification.md)
-9. [Mobile, Commerce, and Release](09-mobile-commerce-release.md)
-10. [Security, Observability, and Operations](10-security-observability-operations.md)
-11. [Evennia Design Review](11-evennia-lessons.md)
-12. [Lokacore Feature Inventory](12-lokacore-feature-inventory.md)
-13. [Implementation Plan](13-implementation-plan.md)
-14. [Acceptance Scenarios](14-acceptance-scenarios.md)
+7. [Offline Storypacks and the Path to the MMORPG](07-offline-storypacks-to-mmo.md)
+8. [Builder API and AI Factory](08-builder-api-ai-factory.md)
+9. [Cartridge Lab and Certification](09-cartridge-lab-certification.md)
+10. [Mobile, Commerce, and Release](10-mobile-commerce-release.md)
+11. [Security, Observability, and Operations](11-security-observability-operations.md)
+12. [Evennia Design Review](12-evennia-lessons.md)
+13. [Lokacore Feature Inventory](13-lokacore-feature-inventory.md)
+14. [Implementation Plan](14-implementation-plan.md)
+15. [Acceptance Scenarios](15-acceptance-scenarios.md)
 
 ## 8. What this packet deliberately does not do
 
