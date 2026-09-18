@@ -3,8 +3,14 @@ name: Tests
 on:
   push:
     branches: [main]
+    paths:
+      - "server/**"
+      - ".github/workflows/test.yml"
   pull_request:
     branches: [main]
+    paths:
+      - "server/**"
+      - ".github/workflows/test.yml"
 
 jobs:
   test:
@@ -53,6 +59,14 @@ jobs:
       - name: Compile
         working-directory: ./server
         run: mix compile --warnings-as-errors
+
+      # Content validation starts the Loka application. Prepare the test DB first
+      # so supervised services such as Loka.Timers.Server can query migrated tables.
+      - name: Prepare test database
+        working-directory: ./server
+        run: |
+          mix ecto.create --quiet
+          mix ecto.migrate --quiet
 
       - name: Run content validation
         working-directory: ./server
