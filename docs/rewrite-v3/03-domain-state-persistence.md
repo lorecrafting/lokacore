@@ -192,7 +192,7 @@ relationship(player_id, npc_id):
 
 The exact storage may be a typed scoped component rather than a generic fact table, but its scope must remain explicit.
 
-## 9. Persistence by authority host
+## 8. Persistence by authority host
 
 Online v3 SHOULD use PostgreSQL from the beginning in all realistic server environments.
 
@@ -209,7 +209,7 @@ Tests MAY use sandboxed PostgreSQL. Server development SHOULD use PostgreSQL too
 
 Offline private storypacks use local SQLite (or an equivalent transactional local store) behind a local persistence adapter. The logical save/snapshot formats and command-receipt semantics MUST remain compatible with the portable kernel, but local tables do not need to mirror the server schema byte-for-byte.
 
-## 8. Proposed online durable schema families
+## 9. Proposed online durable schema families
 
 Exact migrations are implementation work, but the logical model should include:
 
@@ -229,7 +229,9 @@ cartridge_certificates
 ```text
 world_instances
 runtime_entities
+scoped_facts
 quest_instances
+facility_work_orders
 scheduled_jobs
 command_receipts
 effect_outbox
@@ -282,6 +284,11 @@ definition_kind
 definition_key
 kind
 location_id nullable
+state_scope_type nullable
+state_scope_id nullable
+presence_mode shared|overlay
+audience_policy JSONB nullable
+materialization_key nullable
 state JSONB
 tags/search columns as needed
 revision bigint
@@ -290,6 +297,8 @@ updated_at
 ```
 
 JSONB is acceptable for typed component state if schemas/migrations validate it. Frequently queried/indexed fields may be promoted to columns deliberately.
+
+Shared entities normally omit scoped-presence fields. Player/party overlay entities use explicit state scope and AudiencePolicy metadata. Lazily materialized actors may be reconstructed from durable quest/fact state plus a stable materialization key rather than persisted forever.
 
 Do not create an EAV table for every component field by default.
 
@@ -304,22 +313,82 @@ scope_type
 scope_id
 quest_definition_ref
 lifecycle_state
+activation_mode
+activated_logical_time
+resolved_outcome nullable
 objective_state JSONB
 variables JSONB
-accepted_logical_time
 revision
-completed_at nullable
+resolved_at nullable
 ```
 
 A unique constraint should prevent duplicate active quest instances where the quest's repeatability rules disallow them.
 
-## 13. Command receipts
+## 13. Scoped facts and facility WorkOrders
 
-Every client/agent command carries a stable command ID.
+### Scoped facts
+
+Logical fields:
+
+```text
+instance_or_realm_id
+scope_type
+scope_id
+fact_key
+fact_version
+value JSONB
+revision
+updated_at
+```
+
+Unique identity is the owning authority/context plus scope and fact key.
+
+Facts may also be stored inside a versioned aggregate when that is more efficient, but the logical semantics remain typed and scoped.
+
+### Facility WorkOrders
+
+Logical fields:
+
+```text
+id UUID
+authority_id
+facility_entity_id
+capacity_scope_type
+capacity_scope_id
+requester_id
+beneficiary_type
+beneficiary_id
+service_key
+input_escrow JSONB/reference
+submitted_logical_time
+scheduled_start
+scheduled_finish
+status
+queue_sequence
+slot_key nullable
+idempotency_key
+output_state/reference
+revision
+created_at
+updated_at
+```
+
+The exact physical schema may normalize escrow/output separately, but allocation + escrow + WorkOrder creation MUST be one authoritative transaction.
+
+Capacity allocation must have a database/authority invariant sufficient to prevent double allocation under concurrent submissions.
+
+## 15. Command receipts
+
+Every authority-side state-changing Command carries a stable idempotency identity.
+
+For external ActionInvocations, the authority MUST derive/reuse a stable Command ID from trusted context plus the invocation ID (for example instance + actor/session + invocation ID), so a network retry cannot become a fresh mutation.
+
+Internal scheduled/system commands carry their own stable job/command identity.
 
 ```text
 instance_id
 command_id
+invocation_id nullable
 actor_id
 accepted_revision
 result_code
@@ -353,7 +422,7 @@ Only after commit does the in-memory owner adopt the committed state revision.
 
 If commit fails, no authoritative in-memory advancement is allowed.
 
-## 15. Effect outbox
+## 16. Effect outbox
 
 External/delayed effects that cannot safely occur inside the DB transaction use an outbox.
 
@@ -381,7 +450,7 @@ next_attempt_at
 causation_id
 ```
 
-## 16. Event trace is not full event sourcing
+## 17. Event trace is not full event sourcing
 
 The current durable state remains authoritative.
 
@@ -398,7 +467,7 @@ The system MUST NOT require replaying the entire history from genesis to boot a 
 
 Periodic snapshots plus current state are sufficient.
 
-## 17. Snapshots
+## 18. Snapshots
 
 A snapshot captures enough state to recreate an instance deterministically:
 
@@ -422,7 +491,7 @@ Snapshots are useful for:
 
 Snapshot format must be versioned.
 
-## 18. Optimistic concurrency
+## 19. Optimistic concurrency
 
 World owners serialize normal commands, reducing contention.
 
@@ -437,7 +506,7 @@ Updates SHOULD include expected revisions.
 
 A revision conflict is an invariant signal, not something to silently overwrite.
 
-## 19. Persistence adapters
+## 20. Persistence adapters
 
 `loka_core` defines ports/protocols such as:
 
@@ -450,7 +519,7 @@ A revision conflict is an invariant signal, not something to silently overwrite.
 
 The Cartridge Lab can provide an in-memory deterministic adapter where appropriate, while integration certification uses PostgreSQL too.
 
-## 20. Migration rules
+## 21. Migration rules
 
 ### Engine schema migration
 
@@ -475,7 +544,7 @@ Each component version transition that changes persisted runtime state must regi
 
 No “read old shape and guess.”
 
-## 21. Deletion semantics
+## 22. Deletion semantics
 
 Deleting content source never invalidates an already published immutable release.
 
@@ -490,7 +559,7 @@ No generic `delete(entity)` may recursively delete contents unless the caller ex
 
 This prevents surprising inventory/world loss.
 
-## 22. Inventory/location invariant
+## 23. Inventory/location invariant
 
 An item has one authoritative containment/location relation.
 
@@ -514,7 +583,7 @@ Inventory is a query/index over contained item IDs.
 
 Equipment adds an equipment-slot relation/assignment but does not duplicate ownership.
 
-## 23. Definition cache
+## 24. Definition cache
 
 Compiled cartridge definitions are immutable and may be aggressively cached in ETS/`:persistent_term` or application memory.
 
@@ -523,7 +592,7 @@ Because they are content-hash/version keyed, invalidation is simple.
 Runtime mutable state must not use the same cache semantics.
 
 
-## 24. Offline save lineage and trust
+## 25. Offline save lineage and trust
 
 Offline save identity includes a lineage/ancestor revision so cloud backup can detect divergent branches.
 
