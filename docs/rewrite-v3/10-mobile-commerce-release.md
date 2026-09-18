@@ -16,13 +16,13 @@ Online multiplayer/MUD play. Uses `RemoteRealmSession` over Phoenix/BEAM and ren
 
 ### GameSession boundary
 
-Shared gameplay UI talks to a small session interface, not directly to SQLite, Rust, Phoenix, or Ecto concepts.
+Shared gameplay UI talks to a small session interface using host-neutral ActionInvocations, not directly to SQLite, Rust, Phoenix, Ecto, or internal Command structs.
 
 Conceptually:
 
 ```text
 start(context)
-dispatch(command)
+invoke(action_invocation)
 current_view()
 subscribe()
 close()
