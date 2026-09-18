@@ -26,7 +26,7 @@ Loka SHOULD grow a large vocabulary of reusable primitives:
 - spawning/despawning;
 - dialogue;
 - quests/objectives;
-- rumors/signals;
+- rumors/custom domain events;
 - crafting/gathering;
 - social actions;
 - world and instance events.
