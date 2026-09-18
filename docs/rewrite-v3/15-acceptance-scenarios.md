@@ -766,6 +766,14 @@ Artifact substitutes key ID or signed metadata without valid signature.
 
 Verification fails before launch.
 
+### COMPAT-07 — Capability version remains semantically pinned
+
+A published cartridge is certified against `schedule@1`.
+
+The engine later introduces `schedule@2` with different semantics.
+
+The old cartridge continues to execute `schedule@1` semantics or follows an explicit certified migration; merely installing the newer engine/app does not reinterpret the old artifact.
+
 ## U. Receipt and platform boundaries
 
 ### RECEIPT-01 — Retry returns stable committed response
