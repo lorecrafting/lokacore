@@ -1,34 +1,39 @@
 # 10 — Mobile, Commerce, and Release
 
-## 1. Mobile has two game-host roles
+## 1. Two focused React Native clients
 
-React Native/Expo is:
+Loka v3 ships two product clients from one monorepo:
 
-1. a presentation/input client for online BEAM-hosted play; and
-2. the shell around a local portable-kernel authority for offline private storypacks.
+### Loka Stories
 
-The UI layer should not contain game-rule logic in either mode.
+Offline-first cartridge player. It embeds the local authority/kernel bridge, local SQLite save layer, catalog/download/purchase UI, campaigns, and optional cloud backup/account linking.
 
-## 2. Mobile structure
+### Loka Online
+
+Online-only multiplayer/MUD client. It authenticates, joins Phoenix/BEAM-authoritative worlds, renders server GameViews, and provides social/party/realm UI. It has no local authoritative world save.
+
+The clients SHOULD share packages for design system, portable GameView rendering, localization, generated types, and common presentation components, but MUST NOT share a giant authority state machine full of offline/online conditionals.
+
+## 2. Mobile monorepo structure
 
 Recommended:
 
 ```text
 mobile/
-├── src/
-│   ├── protocol/       # generated online types/codecs
-│   ├── kernel/         # generated/native portable-kernel bindings
-│   ├── authority/      # LocalInstanceAuthority
-│   ├── persistence/    # local SQLite/save slots
-│   ├── transport/      # Phoenix socket for online
-│   ├── state/          # projection cache
-│   ├── screens/
-│   ├── components/
-│   ├── features/
-│   ├── assets/
-│   └── test/
-└── modules/            # custom native module integration if needed
+├── apps/
+│   ├── stories/        # offline-first product shell
+│   └── online/         # multiplayer/MUD product shell
+├── packages/
+│   ├── ui/             # shared design system/components
+│   ├── game-view/      # host-neutral GameView rendering
+│   ├── localization/
+│   └── generated/      # generated shared types/schemas
+├── native/
+│   └── stories-kernel/ # portable-kernel bindings used by Stories
+└── test/
 ```
+
+The Online client may share GameView/rendering packages but does not need to embed the portable kernel merely because the BEAM server uses it.
 
 No manually authored duplicate game-rule implementation.
 
@@ -89,19 +94,22 @@ Mobile persists:
 
 Online server projections are cache only.
 
-## 6. One app, many cartridges
+## 6. Stories app: many cartridges
 
-The store binary contains:
+The Loka Stories store binary contains:
 
-- React Native presentation shell;
+- offline presentation shell;
 - portable kernel native library/version;
-- supported client render/action capabilities;
-- online transport;
-- catalog/purchase/download UI.
+- local authority + SQLite save support;
+- supported render/action capabilities;
+- catalog/purchase/download UI;
+- optional account/cloud-backup adapters.
 
-Cartridges are separately downloadable data/assets/bounded portable rule IR compatible with installed kernel/client features.
+Cartridges are separately downloadable data/assets/bounded portable rule IR compatible with installed Stories kernel/client features.
 
-Normal content release SHOULD NOT require a new app binary.
+Normal story release SHOULD NOT require a new Stories binary.
+
+Loka Online has its own release cadence and only needs updates when multiplayer client/protocol/presentation capabilities change.
 
 ## 7. Client/kernel feature negotiation
 
@@ -444,3 +452,18 @@ Before removing old kernel/rule-IR support:
 
 An app update with no network must still open supported offline saves.
 
+
+
+## 29. Cross-client account and entitlement boundary
+
+Separate apps make authority simpler but create a deliberate commerce/account question.
+
+Default launch rule SHOULD be:
+
+- a Loka Stories purchase guarantees access in Loka Stories;
+- Loka Online access/rewards are governed by online account entitlements and product rules;
+- do not promise automatic cross-app purchase portability until current Apple/Google rules, receipt/account linking, and product economics are verified.
+
+If product later grants an Online benefit because a user owns a Stories cartridge, the server may map verified purchase/account evidence into a **separate canonical online entitlement** or non-competitive memory/badge. The mobile clients never directly trust each other's local purchase flags.
+
+An optional Loka account can link Stories purchases/cloud backups to a player identity when online, but Stories ordinary offline play must not require that account after legitimate acquisition/download.
