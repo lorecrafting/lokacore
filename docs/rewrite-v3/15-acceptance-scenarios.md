@@ -262,6 +262,80 @@ Party quest progresses according to explicit party membership/policy and does no
 
 Realm-scoped event intentionally changes all eligible players/world state; certification verifies this broad scope is explicit.
 
+### QST-15 — Quest unlocks area atomically
+
+Completing a Story quest outcome opens a stateful gate/connection in the same local authority.
+
+Crash is injected before and after commit.
+
+After recovery, quest outcome and gate state are either both old or both committed; never split.
+
+### QST-16 — Personal unlock does not leak
+
+In Realm Mode, player A completes a player-scoped quest that grants access to a hidden passage.
+
+Player A can use the passage. Player B, who has not met the condition, cannot.
+
+The shared Realm connection/entity is not accidentally opened globally.
+
+### QST-17 — Fact-driven world reaction
+
+Quest sets `village.child_status = rescued`.
+
+Without direct quest edits to each subsystem:
+
+- mother dialogue changes;
+- mother schedule/profile changes;
+- ferryman ambient line set changes;
+- follow-up quest becomes available;
+- town description variant changes.
+
+All reactions are explainable through fact/reference graphs.
+
+### QST-18 — NPC branch state
+
+Two branch forks end in `rescued` versus `dead`.
+
+The mother's typed role state becomes `relieved` versus `grieving`; each state selects a valid schedule/dialogue profile and remains deterministic after seven simulated days.
+
+### QST-19 — Consequence exactly once
+
+Quest outcome grants item, sets fact, opens gate, and emits a custom DomainEvent.
+
+Duplicate triggering event/retry cannot grant the item twice or re-run non-idempotent consequences.
+
+### QST-20 — Consequence scope escalation rejected
+
+A player-scoped quest contains an undeclared Realm-scoped consequence.
+
+Compilation/certification rejects the quest rather than inferring global scope.
+
+### QST-21 — Explicit Realm-wide consequence
+
+A shared-area quest intentionally changes a Realm-scoped festival state.
+
+The broader scope is explicit and multiplayer-certified; all eligible players observe the intended shared change.
+
+### QST-22 — Cross-authority consequence retry
+
+A quest outcome in ZoneShard A produces an idempotent effect intended for a Realm-wide service.
+
+Crash/failure occurs after local outcome commit but before remote acknowledgement.
+
+Outbox/reconciliation retries the remote operation exactly once without rolling back or duplicating the local quest outcome.
+
+### QST-23 — Area unlock preserves reachability
+
+A branch closes one road and opens another.
+
+Static graph checks plus branch simulation prove the player is not trapped away from required content unless the branch explicitly defines that ending.
+
+### QST-24 — Branch world comparison
+
+The Lab forks immediately before a major choice.
+
+Its comparison report correctly identifies differing facts, access, NPC states, dialogue/action sets, spawned actors, and follow-up quests.
+
 ## E. Dialogue
 
 ### DIA-01 — Conditional choice
