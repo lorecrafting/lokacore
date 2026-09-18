@@ -4,7 +4,7 @@
 **Date:** 2026-09-17  
 **Source system:** `lorecrafting/lokacore`  
 **Strategic parent:** `docs/product/CARTRIDGE-ROADMAP.md`  
-**Purpose:** define a clean-room, BEAM-native rebuild of Loka that preserves the useful product/mechanical ideas in Lokacore while removing transitional architecture and making AI-assisted development safe, testable, and bounded.
+**Purpose:** define a clean-room rebuild of Loka with a BEAM-native online runtime and a portable offline rules kernel, preserving useful Lokacore product/mechanical ideas while removing transitional architecture and making AI-assisted development safe, testable, and bounded.
 
 ## 1. Why this packet exists
 
@@ -100,8 +100,8 @@ The online authority/orchestration layer SHOULD remain idiomatic Elixir/OTP. Rul
 | Portable offline rules | Shared deterministic kernel; Rust is the working choice pending a mandatory cross-platform spike |
 | Server UI/API | Phoenix |
 | Mobile | React Native / Expo |
-| Production DB | PostgreSQL from v3 start |
-| Game authority | server authoritative |
+| Online production DB | PostgreSQL from v3 start; offline saves use local SQLite |
+| Game authority | offline: local serialized authority; online: BEAM server authoritative |
 | Offline private authority | local serialized instance authority + local SQLite |
 | Online private concurrency | one authoritative BEAM world-instance owner process |
 | Shared-world concurrency | zone/area shard owners under a realm coordinator |
