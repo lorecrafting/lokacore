@@ -266,3 +266,38 @@ The highest-risk unresolved decision is the **shared portable kernel technology/
 The second important release risk is **App Store treatment of downloaded rule content**; the architecture has been constrained to minimize that risk, but current review policy must be tested/reverified before commercial submission.
 
 The specification should not be considered implementation-final until this PR itself receives external/adversarial review and any resulting corrections.
+
+
+## 19. Self-review corrections after PR opening
+
+A fresh PR self-review found:
+
+- stale pre-v3 manifest fields still present in the roadmap;
+- no explicit portable GameView/projection contract for offline versus online;
+- deterministic gameplay IDs required but underspecified;
+- R10 mobile smoke wording depended on the later polished R12 shell;
+- overly broad “portable bytecode” wording.
+
+Corrections:
+
+- roadmap manifest aligned to v3 kernel/capability profiles;
+- host-neutral GameView projection added so React Native does not reimplement game visibility/action rules;
+- deterministic gameplay IDs now come from an explicit deterministic IdSource;
+- R10 uses a developer mobile harness, R12 owns polished product-shell acceptance;
+- downloadable rules are described as bounded portable rule IR.
+
+## 20. Adversarial review after self-review
+
+The next pass assumed long-lived commercial offline saves, automatic app updates, real command retries, signing-key rotation, and later MMO concurrency.
+
+Findings and corrections:
+
+1. **Old saves versus app auto-update** — added explicit kernel/rule-IR/content-schema compatibility matrix, local migrations/rollback, and acceptance scenarios.
+2. **Command receipts could not actually replay a response** — receipt now stores committed revision plus response payload/reference, not only a digest.
+3. **Commerce/account logic had no domain home** — introduced `loka_platform`; `loka_web` remains adapter-only.
+4. **Artifact signing had no key-rotation contract** — added signing key IDs/trust-set rotation/revocation semantics.
+5. **General scripting was too front-loaded** — R7 now builds only the interpreter core/minimal bindings needed to prove containment and the first cartridge; R11 generalizes from observed authoring needs.
+6. **Portable projection could drift** — corrected during self-review and now covered as a host-neutral GameView.
+7. **Cartridge/app compatibility is now part of certification**, not a support afterthought.
+
+No adversarial finding currently requires abandoning the clean-sheet/offline-first architecture. The shared-kernel decision remains the primary R1 evidence gate.
