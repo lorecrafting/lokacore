@@ -126,7 +126,7 @@ They do not read wall clock/network/database.
 ```elixir
 {:ok,
  %Decision{
-   new_state: state,
+   state_delta: delta,
    rng: new_rng,
    domain_events: events,
    effects: effects,
@@ -142,7 +142,42 @@ or:
 
 Expected gameplay failure is data, not exception control flow.
 
-## 6. Game error taxonomy
+## 6. Online hybrid decision coordination
+
+Realm commands may involve both portable capabilities and server-only Elixir capabilities. They MUST still form one logical decision.
+
+The `WorldInstance` / `ZoneShard` uses a **DecisionCoordinator**:
+
+```text
+typed Command
+   ↓
+ordered capability/rule dispatch
+   ├─ portable evaluators → shared kernel
+   └─ server-only evaluators → pure Elixir rule modules
+   ↓
+proposal overlay
+   + StateDelta
+   + DomainEvents
+   + Effects
+   + RNG/logical-time updates
+   ↓
+final invariants
+   ↓
+one authoritative transaction
+```
+
+Rules:
+
+- evaluators MUST NOT persist or publish directly;
+- every evaluator sees a deterministic proposal-state view containing prior accepted deltas in the current decision;
+- event subscribers are dispatched in deterministic registry order, with explicit priority only where the capability contract declares it;
+- conflicting writes to the same authoritative field either use a declared composition rule or fail as an invariant/capability conflict;
+- portable and server-only events share the same bounded event-chain/cycle limits;
+- only after the full decision succeeds does the host commit state, receipts, traces, and durable effects.
+
+This is the online extension point that lets BEAM-native Realm systems coexist with portable cartridge mechanics without reintroducing multiple mutation authorities.
+
+## 8. Game error taxonomy
 
 Every rejection has stable machine code:
 
@@ -188,7 +223,7 @@ Event types and payloads are registered/machine-readable.
 
 Events SHOULD be immutable values.
 
-## 8. Event processing model
+## 9. Event processing model
 
 Within one command, deterministic event reactions may form a bounded chain:
 
@@ -211,7 +246,7 @@ The runtime MUST impose:
 
 This prevents script/rule loops.
 
-## 9. Effect types
+## 10. Effect types
 
 Effects are registered and typed.
 
@@ -237,7 +272,7 @@ Every effect declares:
 - allowed origin capabilities;
 - schema.
 
-## 10. Causation and correlation
+## 11. Causation and correlation
 
 All command-derived events/effects/messages share a correlation ID.
 
@@ -251,7 +286,7 @@ command c1
 
 The trace viewer must reconstruct this graph.
 
-## 11. Protocol source of truth for online transport
+## 12. Protocol source of truth for online transport
 
 External protocol definitions MUST live in a language-neutral machine-readable schema source under `protocol/`.
 
@@ -267,7 +302,7 @@ Generate/check:
 
 No hand-maintained duplicate `Room` interfaces.
 
-## 12. Version negotiation
+## 13. Version negotiation
 
 Client join request includes:
 
@@ -291,7 +326,7 @@ Server responds with:
 
 If incompatible, return a typed upgrade error before joining game state.
 
-## 13. Client projection
+## 14. Client projection
 
 The client SHOULD receive view models, not internal DB/entity structs.
 
@@ -325,7 +360,7 @@ Example room view:
 
 Internal component state is not dumped wholesale to mobile.
 
-## 14. Portable game-view projection
+## 15. Portable game-view projection
 
 Game-semantic view construction that must match offline and online SHOULD be defined once over portable committed state and cartridge definitions.
 
@@ -363,7 +398,7 @@ Host-only views—account catalog, entitlement, social realm presence, admin—r
 
 This avoids a second semantic fork where the server and offline client disagree about what the player can see/do.
 
-## 15. Snapshot and delta model
+## 16. Snapshot and delta model
 
 On join/resync, server sends authoritative snapshot.
 
@@ -373,7 +408,7 @@ If the client detects a gap or server requests resync, it discards/reconciles lo
 
 The client store is a cache of server projection, not authority.
 
-## 16. Text commands
+## 17. Text commands
 
 Text parser is an adapter:
 
@@ -387,7 +422,7 @@ Command(:give_item, ...)
 
 Touch UI sends IDs directly but reaches the same command.
 
-## 17. Search/target resolution
+## 18. Search/target resolution
 
 One canonical Search service supports:
 
@@ -405,7 +440,7 @@ Ambiguous search returns structured candidates.
 
 No transport-specific duplicated keyword lookup helpers.
 
-## 18. Action availability
+## 19. Action availability
 
 The server exposes resolved ActionSets so the touch UI does not reinvent conditions.
 
@@ -424,7 +459,7 @@ accessibility description
 
 The same metadata can feed terminal help.
 
-## 19. Protocol tests
+## 20. Protocol tests
 
 CI MUST include fixtures asserting both Elixir and TypeScript agree on:
 
@@ -437,7 +472,7 @@ CI MUST include fixtures asserting both Elixir and TypeScript agree on:
 Breaking protocol changes require version bump and compatibility policy.
 
 
-## 20. Offline command conformance
+## 21. Offline command conformance
 
 The portable kernel command schema is also machine-readable. The online Elixir host and offline native/mobile host MUST serialize equivalent commands into the same kernel representation.
 
