@@ -262,7 +262,35 @@ Party quest progresses according to explicit party membership/policy and does no
 
 Realm-scoped event intentionally changes all eligible players/world state; certification verifies this broad scope is explicit.
 
-### QST-15 — Quest unlocks area atomically
+### QST-15 — Automatic discovery quest
+
+Player discovers a hidden shrine whose prerequisite facts are satisfied.
+
+The quest activates without an NPC giver, records the discovery event once, appears/reveals according to its activation mode, and can resolve automatically without a turn-in NPC.
+
+### QST-16 — Multiplayer kill credit
+
+Player A and Player B share a zone. A kills a quest target.
+
+For an `actor` credit objective, only A progresses.
+
+For an eligible `party` policy, configured party members progress.
+
+An unrelated nearby player does not progress unless the objective explicitly uses witness/scope policy.
+
+### QST-17 — Witness credit requires actual observation
+
+An objective credits witnesses to a public event.
+
+A player in another room/instance does not progress merely because the DomainEvent exists globally.
+
+### QST-18 — World-caused quest event
+
+A quest target dies due to world simulation or another NPC rather than the player.
+
+The quest follows its authored failure/alternate-outcome rule instead of assuming every relevant event has the questing player as actor.
+
+### QST-19 — Quest unlocks area atomically
 
 Completing a Story quest outcome opens a stateful gate/connection in the same local authority.
 
@@ -270,7 +298,7 @@ Crash is injected before and after commit.
 
 After recovery, quest outcome and gate state are either both old or both committed; never split.
 
-### QST-16 — Personal unlock does not leak
+### QST-20 — Personal unlock does not leak
 
 In Realm Mode, player A completes a player-scoped quest that grants access to a hidden passage.
 
@@ -278,7 +306,7 @@ Player A can use the passage. Player B, who has not met the condition, cannot.
 
 The shared Realm connection/entity is not accidentally opened globally.
 
-### QST-17 — Fact-driven world reaction
+### QST-21 — Fact-driven world reaction
 
 Quest sets `village.child_status = rescued`.
 
@@ -292,31 +320,31 @@ Without direct quest edits to each subsystem:
 
 All reactions are explainable through fact/reference graphs.
 
-### QST-18 — NPC branch state
+### QST-22 — NPC branch state
 
 Two branch forks end in `rescued` versus `dead`.
 
 The mother's typed role state becomes `relieved` versus `grieving`; each state selects a valid schedule/dialogue profile and remains deterministic after seven simulated days.
 
-### QST-19 — Consequence exactly once
+### QST-23 — Consequence exactly once
 
 Quest outcome grants item, sets fact, opens gate, and emits a custom DomainEvent.
 
 Duplicate triggering event/retry cannot grant the item twice or re-run non-idempotent consequences.
 
-### QST-20 — Consequence scope escalation rejected
+### QST-24 — Consequence scope escalation rejected
 
 A player-scoped quest contains an undeclared Realm-scoped consequence.
 
 Compilation/certification rejects the quest rather than inferring global scope.
 
-### QST-21 — Explicit Realm-wide consequence
+### QST-25 — Explicit Realm-wide consequence
 
 A shared-area quest intentionally changes a Realm-scoped festival state.
 
 The broader scope is explicit and multiplayer-certified; all eligible players observe the intended shared change.
 
-### QST-22 — Cross-authority consequence retry
+### QST-26 — Cross-authority consequence retry
 
 A quest outcome in ZoneShard A produces an idempotent effect intended for a Realm-wide service.
 
@@ -324,13 +352,13 @@ Crash/failure occurs after local outcome commit but before remote acknowledgemen
 
 Outbox/reconciliation retries the remote operation exactly once without rolling back or duplicating the local quest outcome.
 
-### QST-23 — Area unlock preserves reachability
+### QST-27 — Area unlock preserves reachability
 
 A branch closes one road and opens another.
 
 Static graph checks plus branch simulation prove the player is not trapped away from required content unless the branch explicitly defines that ending.
 
-### QST-24 — Branch world comparison
+### QST-28 — Branch world comparison
 
 The Lab forks immediately before a major choice.
 
