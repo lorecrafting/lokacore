@@ -21,28 +21,23 @@ loka/
 └── docs/
 ```
 
-This exact split MAY be adjusted after a compile-dependency spike, but the dependency direction is normative:
+This exact split MAY be adjusted after a compile-dependency spike, but dependency rules are normative:
 
-```text
-core        content
- ↑            ↑
- |            |
- store      platform
-  ↑  \       /  ↑
-  |   runtime   |
-  |      ↑      |
-  +---- builder-+
-          ↑
-         web
-```
+- `loka_core` depends only on portable/domain contracts and the narrow kernel adapter.
+- `loka_content` depends on `loka_core`; it owns compile-time cartridge definitions/registries, not runtime authority.
+- `loka_store` depends on `loka_core`; it implements persistence ports and contains no game rules.
+- `loka_platform` depends on `loka_core` plus persistence/platform adapters; it owns account/catalog/entitlement/purchase-restore application rules, not world simulation.
+- `loka_runtime` depends on `loka_core`, `loka_content`, and persistence ports; it owns online world/session/scheduler authority.
+- `loka_builder` depends on content/compiler/Lab contracts and may orchestrate runtime test hosts; production runtime MUST NOT depend on builder.
+- `loka_web` depends inward on application/runtime/builder interfaces and is an external transport adapter only.
 
 `loka_core` MUST NOT depend on Phoenix, Ecto, filesystem, network, or runtime processes. Portable rule semantics that must execute offline SHOULD live in or call the shared kernel behind a narrow adapter.
 
 `loka_store` may depend on core/domain data contracts but MUST NOT contain game rules.
 
-`loka_platform` owns online account/catalog/entitlement/purchase-restore application rules. It MUST NOT own world simulation or cartridge mechanics.
+`loka_platform` MUST NOT own world simulation or cartridge mechanics.
 
-`loka_web` is an adapter layer and MUST NOT become a source of game or commerce truth.
+`loka_web` MUST NOT become a source of game or commerce truth.
 
 Boundary enforcement SHOULD use separate umbrella apps plus compile-time boundary checks/tests.
 
