@@ -1,0 +1,271 @@
+# 01 — Core Principles and Non-Goals
+
+## 1. Product principles
+
+### P1. One engine, multiple world modes
+
+Private cartridges, party instances, shared areas, and the later MUD MUST execute through the same command/rule/runtime architecture.
+
+A feature is not considered cartridge-ready if it depends on single-player assumptions that cannot declare state scope.
+
+### P2. Rich primitive library, narrow composition grammar
+
+Loka SHOULD grow a large vocabulary of reusable primitives:
+
+- movement and topology;
+- doors/locks/containers;
+- inventory/equipment;
+- combat/status;
+- checks/resources/skills;
+- shops/economy;
+- factions/reputation;
+- schedules/patrol/wander;
+- time/weather/environment;
+- spawning/despawning;
+- dialogue;
+- quests/objectives;
+- rumors/signals;
+- crafting/gathering;
+- social actions;
+- world and instance events.
+
+Complexity belongs in **what can be composed**, not in having many contradictory ways to mutate the same state.
+
+### P3. Content is not code by default
+
+A new storyline SHOULD normally consist of cartridge source, assets, and tests.
+
+If the author repeatedly needs a new behavior, the factory SHOULD propose a reusable capability rather than hiding bespoke semantics inside arbitrary code.
+
+### P4. Mobile touch and text commands are two views of the same action model
+
+A touch action such as “Inspect altar” and a text command such as `look altar` MUST resolve to the same internal action/command contract.
+
+The server resolves currently available actions. The client is not the rules authority.
+
+## 2. Architecture principles
+
+### A1. One authoritative owner per mutable state domain
+
+At any instant, mutable world state MUST have one authoritative owner.
+
+Examples:
+
+- one private world instance process owns its instance state;
+- one zone shard owns shared-zone state;
+- a session process owns connection-local ephemeral state;
+- PostgreSQL owns durable committed state.
+
+Two independent writers MUST NOT race on the same logical state without an explicit coordination/transaction protocol.
+
+### A2. Pure core, actor shell
+
+Use BEAM processes around concurrency and lifecycle boundaries; keep decisions pure.
+
+Preferred pattern:
+
+```text
+GenServer.handle_call(command)
+        |
+        v
+Domain.decide(state, command, env)
+        |
+        +--> new state
+        +--> domain events
+        +--> effects
+        |
+        v
+transactional commit
+```
+
+The process is the serialization/fault-containment shell. The rule function is replayable.
+
+### A3. No direct persistence from domain rules
+
+Domain rules MUST NOT call Ecto, Repo, Phoenix, PubSub, filesystem, HTTP, wall clock, or process-global randomness.
+
+These dependencies arrive through explicit adapters/effects/environment.
+
+### A4. No web dependency in game logic
+
+No module in domain/runtime/content/store MUST depend on `LokaWeb` serializers, sockets, controllers, or LiveView structures.
+
+Transport adapters translate internal results into protocol messages.
+
+### A5. External contracts are generated or checked
+
+The following MUST have machine-readable source-of-truth schemas:
+
+- mobile commands/messages;
+- Builder API operations/results/errors;
+- cartridge manifest;
+- content kinds;
+- capabilities/components;
+- policies/conditions;
+- script bindings;
+- quest objective operators.
+
+Markdown MAY explain them but MUST be test-checked against implementation.
+
+### A6. Time and randomness are dependencies
+
+Game code MUST NOT casually call:
+
+- `DateTime.utc_now/0`;
+- `System.system_time/0`;
+- process-global `:rand.uniform/1`.
+
+The decision environment supplies a logical clock and explicit RNG state/service.
+
+This is mandatory for deterministic simulation and exact bug reproduction.
+
+### A7. Fail closed at authority boundaries
+
+Unknown:
+
+- capabilities;
+- permissions;
+- policies;
+- protocol variants;
+- effect types;
+- content references;
+- script operations
+
+MUST fail validation rather than silently continue.
+
+User-facing gameplay may degrade gracefully only where the contract explicitly defines a fallback.
+
+### A8. Idempotency at retryable boundaries
+
+Client commands, reward effects, purchase reconciliation, scheduled jobs, and promotion operations MUST have stable IDs or idempotency keys.
+
+Retries MUST NOT duplicate:
+
+- inventory;
+- currency;
+- quest rewards;
+- world spawns;
+- entitlements.
+
+## 3. BEAM/OTP principles
+
+### B1. Processes represent concurrency boundaries, not object orientation
+
+Use processes for:
+
+- connected sessions;
+- private/party world instances;
+- shared-world shards;
+- schedulers/coordinators;
+- external integrations;
+- long-running isolated workers.
+
+Do not default to a process per item/NPC/quest.
+
+### B2. Let it crash, but only inside a recoverable boundary
+
+A process may crash on violated internal assumptions if:
+
+- its supervisor can restart it;
+- durable state is consistent;
+- the triggering command has a receipt or can be retried safely;
+- no partial external effect escaped without recovery metadata.
+
+### B3. Prefer supervision to defensive catch-all code
+
+Do not add broad rescue/catch handlers merely to keep corrupted processes alive.
+
+Expected validation errors should be data. Programmer faults should be visible and restartable.
+
+### B4. PubSub is observation/fan-out, not authority
+
+Phoenix PubSub is ideal for:
+
+- client notifications;
+- telemetry subscribers;
+- world observation;
+- non-authoritative ambient fan-out.
+
+It MUST NOT be the sole mechanism guaranteeing durable state transitions or exactly-once rewards.
+
+## 4. Content principles
+
+### C1. Definition and runtime instance are different concepts
+
+Definitions are immutable cartridge content.
+
+Runtime entities are mutable world instances referencing definitions.
+
+The same DB row or struct SHOULD NOT ambiguously represent both.
+
+### C2. Cartridge-local names are allowed
+
+Authors should be free to name a room `tavern` in many cartridges.
+
+Canonical definition identity includes cartridge ID and version.
+
+### C3. Compile-time reuse, runtime flattening
+
+Reusable templates/mixins MAY exist in source authoring, but compilation SHOULD flatten them into explicit definitions.
+
+Runtime rules MUST NOT chase deep prototype inheritance graphs.
+
+### C4. State scope is explicit
+
+Every stateful feature MUST declare or derive one of:
+
+- player;
+- party;
+- instance;
+- realm.
+
+No implicit “global because it worked in a solo test.”
+
+## 5. AI principles
+
+### AI1. AI is a client of contracts
+
+Astra/Foundry/other models use:
+
+- capability discovery;
+- Builder API;
+- compiler;
+- validators;
+- lab;
+- trace/replay.
+
+They SHOULD NOT need arbitrary repository access for normal content authoring.
+
+### AI2. Deterministic systems decide correctness first
+
+AI semantic review supplements:
+
+- schema checks;
+- graph checks;
+- reducer/property tests;
+- simulation;
+- concurrency tests;
+- restart tests.
+
+A model opinion cannot waive a failed invariant.
+
+### AI3. Missing capability is explicit
+
+If an author cannot express a mechanic, the tool returns a missing-capability diagnosis.
+
+The model may propose a new engine capability, but cannot secretly implement new authority semantics inside content.
+
+## 6. Non-goals for v3 foundation
+
+The foundation is NOT trying to provide:
+
+- arbitrary mod execution from untrusted users;
+- seamless hot code upgrades across every production deploy;
+- multi-region active/active world state;
+- blockchain/decentralized ownership;
+- a generic 3D engine;
+- runtime LLM NPC consciousness;
+- user-generated marketplace moderation;
+- every Lokacore experimental feature on day one.
+
+The first target is a small, certifiable, purchasable cartridge that proves the architecture.
