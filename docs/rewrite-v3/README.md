@@ -175,6 +175,7 @@ Read in this order:
 16. [Architecture Decision Register](16-decision-register.md)
 17. [Research Baseline and External References](17-research-baseline.md)
 18. [Specification Review Record](18-review-record.md)
+19. [Quest Sharing, Phasing, Instancing, and Scarce World Services](19-quest-sharing-instancing-capacity.md)
 
 ## 8. Specification authority map
 
@@ -195,6 +196,7 @@ Implementation MUST conform to:
 - `09-cartridge-lab-certification.md`
 - `10-mobile-commerce-release.md`
 - `11-security-observability-operations.md`
+- `19-quest-sharing-instancing-capacity.md`
 - accepted decisions in `16-decision-register.md`
 
 ### Normative gates and sequencing
