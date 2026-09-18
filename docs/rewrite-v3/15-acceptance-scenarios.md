@@ -793,31 +793,67 @@ Offline already-downloaded cartridge remains playable.
 New purchase/restore may fail gracefully, while world simulation and unrelated online game instances remain isolated from the platform-service failure according to deployment topology.
 
 
-## V. Client and builder target separation
+## V. Client mode and builder target separation
 
-### CLIENT-01 — Stories has no online world dependency
+### MODE-01 — Story Mode has no online world dependency
 
-With all Loka online services unavailable, an installed offline-capable Stories cartridge launches, plays, saves, and resumes.
+With all Loka online services unavailable, an installed offline-capable cartridge launches in Story Mode, plays, saves, and resumes.
 
-### CLIENT-02 — Online has no local authority fallback
+### MODE-02 — Realm Mode has no local authority fallback
 
-Loka Online loses server connectivity during authoritative play.
+Realm Mode loses server connectivity during authoritative play.
 
-It does not silently continue mutating a local authoritative world; it reconnects/resyncs or presents offline status according to policy.
+It does not continue mutating a local authoritative copy. It reconnects/resyncs or presents disconnected status according to policy.
 
-### CLIENT-03 — Shared GameView parity
+### MODE-03 — Exactly one active gameplay authority
 
-Equivalent portable story state rendered through Stories and through an Online private instance yields semantically equivalent GameView action/quest/dialogue visibility.
+While a Story session is active, the user switches to Realm Mode.
 
-Presentation styling may differ.
+The Story session commits/closes before RemoteRealmSession becomes active. No world/save is simultaneously authoritative locally and remotely.
 
-### CLIENT-04 — Online app does not require embedded portable kernel
+The reverse transition has the same guarantee.
 
-A normal shared-realm Loka Online client build operates entirely from typed server projections/commands; no client-side simulation kernel is used as authority.
+### MODE-04 — Local kernel cannot authorize Realm state
 
-### CLIENT-05 — Stories app excludes realm-only surface
+A modified client invokes the embedded local kernel while connected to Realm Mode and fabricates favorable results.
 
-Stories production binary/workspace has no requirement for guild chat, shard handoff, shared realm economy, or other realm-only authority to play ordinary cartridges.
+BEAM ignores those results; only validated Realm commands and server decisions can mutate Realm state.
+
+### MODE-05 — Shared GameView parity
+
+Equivalent portable cartridge state rendered through LocalStorySession and an online-private RemoteRealmSession yields semantically equivalent GameView action/quest/dialogue visibility.
+
+Presentation chrome may differ.
+
+### MODE-06 — Realm code cannot mutate Story saves
+
+Realm session/social/transport code attempts to write a Story save or local world revision.
+
+Architecture/boundary test fails.
+
+### MODE-07 — Story authority cannot bypass Realm transport
+
+Story/local authority code attempts to mutate Realm character/economy/session state.
+
+Architecture/boundary test fails.
+
+### MODE-08 — Realm-specific UI is not on Story critical path
+
+Guild/presence/shard services are unavailable or uninitialized.
+
+Ordinary Story Mode launch/play remains functional.
+
+### MODE-09 — App update preserves offline saves while Realm evolves
+
+An app update changes Realm protocol/client features but leaves a supported Story save installed.
+
+The Story save still opens through the documented kernel/rule-IR compatibility path.
+
+### MODE-10 — Optional Story account, required Realm account
+
+A legitimately acquired cartridge remains playable in Story Mode while signed out/offline.
+
+Entering Realm Mode requires authenticated online identity.
 
 ### BUILDTARGET-01 — Story rejects server-only capability
 
@@ -837,7 +873,7 @@ Validation fails rather than defaulting to global.
 
 ### BUILDTARGET-04 — Promotion preserves source artifact
 
-A `promote` workspace adapts a certified Stories cartridge.
+A `promote` workspace adapts a certified Story cartridge.
 
 Original cartridge hash remains unchanged; promotion creates a new deployment/adaptation artifact and certificate.
 
@@ -845,8 +881,8 @@ Original cartridge hash remains unchanged; promotion creates a new deployment/ad
 
 Promotion of a cartridge containing permanently killable quest giver, unique loot, and player-local door flags returns structured required decisions for respawn, contention, and scope before shared-area certification can pass.
 
-### CLIENT-ENTITLEMENT-01 — Stories purchase does not self-authorize Online
+### ENTITLEMENT-01 — Local ownership is not Realm authority
 
-Stories device reports local cartridge ownership but no verified online entitlement exists.
+The app has a locally cached verified Story entitlement and a modified local save.
 
-Loka Online does not grant competitive/persistent access solely from the local claim.
+Realm Mode may use server-verified entitlement/account rules to unlock content, but it does not grant competitive/persistent value from the local save or an unverified local ownership flag.
