@@ -16,7 +16,7 @@ The rewrite packet refines this roadmap in one major respect: offline-capable si
 
 ## Strategy in one page
 
-Build **one Loka platform with two focused mobile clients**. Ship small, self-contained story worlds first as purchasable cartridges in **Loka Stories**. Build the later persistent multiplayer product as **Loka Online**. The clients share schemas, UI packages, and portable story semantics where useful, but they do not share authority responsibilities:
+Build **one Loka mobile app with two strict authority modes**. Ship small, self-contained story worlds first through **Story Mode**. Add the persistent multiplayer product later as **Realm Mode** in the same app. The modes share rendering, account/catalog surfaces, accessibility, localization, and generated contracts, but they do not share authority:
 
 - **offline private:** local mobile authority + local SQLite;
 - **online private/party/shared:** BEAM/OTP authority + PostgreSQL.
@@ -34,8 +34,8 @@ The central product rule is:
 | Implementation | Clean-sheet Loka v3. Lokacore is evidence/reference, not a code-migration target. |
 | Online runtime | Elixir/Phoenix on BEAM/OTP, using explicit world/zone authority processes and PostgreSQL. |
 | Portable rules | Shared deterministic kernel for mechanics that must run both offline and online; Rust is the provisional language pending the mandatory spike. |
-| Loka Stories | Offline-first cartridge player: local authority, local saves, campaigns/expansions, no multiplayer/world-service requirements. |
-| Loka Online | Online-only multiplayer/MUD client: BEAM-authoritative private/party adventures, shared areas, social systems, persistent realm. |
+| Story Mode | Offline-first cartridge player inside the Loka app: local authority, local saves, campaigns/expansions, no multiplayer/world-service requirement for ordinary play. |
+| Realm Mode | Online-only mode inside the same Loka app: BEAM-authoritative private/party adventures, shared areas, social systems, persistent realm. |
 | Reuse boundary | Portable story cartridges may be reused online as private/party adventures or adapted through an explicit promotion workflow; realm-native content may use server-only capabilities. |
 | World richness | Preserve and expand a large primitive/capability library. Simplify composition rules, not the world simulation. |
 | Quests | Small lifecycle StateMachine + canonical domain events → pure quest reducer → typed/idempotent effects. |
@@ -43,7 +43,7 @@ The central product rule is:
 | AI authoring | Give builders a generated capability catalog/schema and a canonical Builder API rather than asking models to reconcile engine internals and stale Markdown. |
 | Authoring surface | Agents use structured MCP/tool calls; humans may use a thin terminal/CLI over the same Builder API; visual UI is primarily inspection/debugging. |
 | Testing | Every cartridge/deployment earns an exact-hash release certificate from static checks, model/property checks, deterministic simulation, bots, chaos/concurrency where relevant, restart/replay, host conformance, semantic review, and mobile smoke. |
-| Mobile distribution | Two store apps from one monorepo: Stories ships offline kernel/save/download capability; Online ships multiplayer transport/social/realm capability. Shared packages prevent UI/schema duplication. |
+| Mobile distribution | One store app. A strict session boundary selects local Story authority or remote Realm authority; shared GameView/UI avoids duplicated clients. |
 | Launch monetization | Default hypothesis: free app + free showcase cartridge, then permanent à-la-carte cartridge unlocks; bundles later; subscription only after a reliable content cadence exists. |
 | Factory | AI/factory orchestration is build-time tooling, never a gameplay dependency. |
 
@@ -53,7 +53,7 @@ The earlier product question of isolated interactive stories versus a shared MUD
 
 ### Phase-one experience
 
-A player installs Loka Stories, acquires/downloads a cartridge, and can play it offline. The world is not a branching ebook. It is a real Loka simulation with rooms, NPCs, inventory, time, schedules, quests, dialogue, environmental behavior, and whatever portable capabilities the cartridge declares.
+A player installs Loka, enters Story Mode, acquires/downloads a cartridge, and can play it offline. The world is not a branching ebook. It is a real Loka simulation with rooms, NPCs, inventory, time, schedules, quests, dialogue, environmental behavior, and whatever portable capabilities the cartridge declares.
 
 The local mobile authority serializes commands and commits durable state to local SQLite. No ordinary gameplay connection is required after acquisition/download for an offline-capable cartridge.
 
@@ -707,14 +707,14 @@ External orchestration tooling may coordinate this pipeline, but Loka should not
 
 Store policies change; re-check them before implementation and launch. The current baseline and source links are tracked in [`docs/rewrite-v3/17-research-baseline.md`](../rewrite-v3/17-research-baseline.md).
 
-### 9.1 Two products, not one app per story
+### 9.1 One app, many stories, one later realm
 
-Ship two long-lived clients, not dozens of story-specific apps:
+Ship one long-lived **Loka** app, not separate apps per story or per authority mode.
 
-- **Loka Stories** — cartridge catalog/player, offline saves, campaigns, purchase/download/restore.
-- **Loka Online** — multiplayer/MUD client, online identity/social/realm/party systems.
+- **Story Mode** owns cartridge library, offline saves, campaigns, purchase/download/restore, and local authority.
+- **Realm Mode** owns online identity/social/party/realm UX and always delegates authority to BEAM.
 
-Both are built from one monorepo and shared packages. Individual cartridges remain downloadable content inside Loka Stories rather than separate store apps.
+Individual cartridges remain downloadable content inside Story Mode. Realm Mode can be added later through a normal app update without asking the installed Story player base to migrate to a second product.
 
 ### 9.2 Keep downloadable cartridges within shipped capabilities
 
