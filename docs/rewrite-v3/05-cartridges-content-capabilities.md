@@ -206,6 +206,22 @@ Capability metadata includes portability classification:
 
 The registry is engine-owned and enumerable.
 
+### Capability version immutability
+
+A published capability contract `key@version` is immutable in meaning.
+
+Once a certified/published cartridge depends on `schedule@1`, a later engine release MUST NOT silently change `schedule@1` semantics.
+
+Breaking semantic/schema changes require a new capability version.
+
+Published cartridges/deployments pin exact capability versions in their compiled lock data. Deprecation may prevent **new** content from selecting an old version, but supported old artifacts either:
+
+- continue to execute that version;
+- receive an explicit certified migration;
+- or are covered by a documented compatibility-support policy.
+
+This rule applies to both portable and server-only capabilities.
+
 Portability is one of `:portable`, `:server_only`, or `:client_presentation_only`. An `offline_private` cartridge cannot compile if a gameplay dependency is server-only.
 
 If one immutable cartridge release declares both `offline_private` and an online profile, its **base gameplay semantics MUST remain portable**. Realm-only mechanics belong in a separate deployment/adaptation overlay or a Realm-native cartridge, not a hidden profile branch that changes the meaning of the offline artifact.
