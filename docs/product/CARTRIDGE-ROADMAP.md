@@ -76,7 +76,7 @@ A successful single-player cartridge can later remain a private/party adventure,
 Lokacore remains valuable evidence for the rebuild. High-value concepts include:
 
 - Phoenix/OTP multiplayer experience and session ideas;
-- the entity/component/trait composition direction;
+- the entity/component/behavior composition direction;
 - rooms, exits, NPCs, items, inventory, combat, quests, dialogue, timers, schedules, and world events;
 - reusable living-world ideas such as patrol, wandering, day/night schedules, shop hours, ambient emitters, nocturnal behavior, and timed spawning;
 - content validators and dependency/reachability analysis;
@@ -133,7 +133,7 @@ Engine capabilities should be registered with schemas that tooling can inspect, 
 The registry should cover at least:
 
 - entity components;
-- behaviors/traits;
+- behaviors;
 - actions and effects;
 - condition predicates;
 - event types;
@@ -451,7 +451,7 @@ Rewards, item grants, timer scheduling, messages, spawn/despawn, and other mutat
 
 A retry must not duplicate a rare item or reward gold twice.
 
-Script helpers such as `complete_objective` should either disappear from the preferred authoring surface or be implemented as a typed quest signal/event that still passes through the reducer. No script gets a second private path into quest storage.
+Script helpers such as `complete_objective` should either disappear from the preferred authoring surface or be implemented as a typed quest DomainEvent that still passes through the reducer. No script gets a second private path into quest storage.
 
 ### Do not require full event sourcing
 
