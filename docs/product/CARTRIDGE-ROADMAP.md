@@ -37,7 +37,7 @@ The central product rule is:
 | Realm Mode | Online-only mode inside the same Loka app: BEAM-authoritative private/party adventures, shared areas, social systems, persistent realm. |
 | Reuse boundary | Portable story cartridges may be reused online as private/party adventures or adapted through an explicit promotion workflow; realm-native content may use server-only capabilities. |
 | World richness | Preserve and expand a large primitive/capability library. Simplify composition rules, not the world simulation. |
-| Quests | Small lifecycle StateMachine + canonical domain events → pure quest reducer → typed/idempotent effects. |
+| Quests/world immersion | Quests observe canonical DomainEvents, reach named outcomes, then apply typed scoped consequences. Shared typed facts let NPCs, access, dialogue, schedules, ambience, and follow-up content react coherently without arbitrary quest scripts. |
 | Scripting | Declarative capabilities first; Elixir-like LokaScript compiles to portable normalized form interpreted by the shared rules system. No released cartridge executes via `Code.eval_string`. |
 | AI authoring | Give builders a generated capability catalog/schema and a canonical Builder API rather than asking models to reconcile engine internals and stale Markdown. |
 | Authoring surface | Agents use structured MCP/tool calls; humans may use a thin terminal/CLI over the same Builder API; visual UI is primarily inspection/debugging. |
