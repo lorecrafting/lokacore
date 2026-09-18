@@ -440,6 +440,7 @@ Machine-readable example:
   "deployment_hash": "...",
   "kernel_revision": "...",
   "engine_revision": "...",
+  "capability_lock_hash": "...",
   "profile": "offline_private_story",
   "gates": {
     "static": "pass",
