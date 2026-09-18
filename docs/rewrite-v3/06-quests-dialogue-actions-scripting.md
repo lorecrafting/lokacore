@@ -205,7 +205,7 @@ future DomainEvents
 
 A quest can therefore cause meaningful world change without bypassing world invariants.
 
-## 18. Quest outcomes and typed consequences
+## 10. Quest outcomes and typed consequences
 
 Quest definitions SHOULD name explicit outcomes rather than encode all consequences in arbitrary scripts.
 
@@ -282,7 +282,7 @@ The local quest/outcome commits first with a durable, idempotent cross-authority
 
 Certification must test failure/retry at that boundary.
 
-## 19. Prefer facts for broad narrative consequences
+## 11. Prefer facts for broad narrative consequences
 
 If many independent systems need to know the same durable story truth, prefer a typed scoped Fact instead of directly editing each subsystem.
 
@@ -319,7 +319,7 @@ The rule of thumb:
 
 > **Facts express truths. Consequences express actions. Reactive world rules express how the world responds to truths/actions.**
 
-## 20. Opening and changing areas
+## 12. Opening and changing areas
 
 Quest-gated exploration SHOULD normally use precompiled topology/content plus runtime access/activation state.
 
@@ -379,7 +379,7 @@ A player-scoped quest MUST NOT silently open a realm-shared gate for everyone.
 
 A true realm-wide unlock requires explicit realm scope and shared-area certification.
 
-## 21. NPC state, schedules, relationships, and memory
+## 13. NPC state, schedules, relationships, and memory
 
 Quest consequences should change **runtime state/profile**, not replace NPC definitions.
 
@@ -438,7 +438,7 @@ memory:
 
 A memory should have bounded schema/meaning, not become unlimited free-form model-generated history.
 
-## 22. Reactive world rules
+## 14. Reactive world rules
 
 World systems may register deterministic reactions to DomainEvents/fact changes.
 
@@ -477,7 +477,7 @@ Rules:
 
 Whenever possible, prefer **derived behavior** over mutation. For example, a room description may select its variant directly from facts/time/weather with no stored “current description” field.
 
-## 23. Consequence scope and escalation
+## 15. Consequence scope and escalation
 
 Quest scope and consequence scope are related but NOT automatically identical.
 
@@ -502,7 +502,7 @@ unless explicitly authored and certified.
 
 No consequence operator defaults to realm/global scope because scope was omitted.
 
-## 24. Branches should leave durable world consequences
+## 16. Branches should leave durable world consequences
 
 Meaningful quest branches SHOULD differ in more than reward text.
 
@@ -525,7 +525,7 @@ The Cartridge Lab should be able to fork before the branch and compare resulting
 
 A branch does not need to change everything. The requirement is that intended consequences are represented as typed world state rather than hidden in prose only.
 
-## 25. Dialogue definition
+## 17. Dialogue definition
 
 Dialogue is a graph of nodes with typed conditions/actions.
 
@@ -550,13 +550,13 @@ nodes:
 
 Dialogue selection emits canonical DomainEvents such as `dialogue_node_reached`.
 
-## 10. Dialogue state
+## 18. Dialogue state
 
 Session may track which dialogue UI is open, but authoritative dialogue/quest state that matters after reconnect belongs to world/player state as defined by the feature.
 
 Do not make socket assigns the only location of consequential branch state.
 
-## 11. ActionSet algebra
+## 19. ActionSet algebra
 
 Adopt a formal composition model inspired by mature MUD command-set systems and Lokacore's existing Action Resolver.
 
@@ -586,7 +586,7 @@ Stable action key is identity.
 
 After composition, evaluate policies/conditions and sort by priority/presentation group.
 
-## 12. Action definition
+## 20. Action definition
 
 ```yaml
 key: talk
@@ -603,7 +603,7 @@ Actions may require additional input schema.
 
 The same action supports touch and terminal adapters.
 
-## 13. Policies/conditions
+## 21. Policies/conditions
 
 Policy AST is typed and fail-closed.
 
@@ -631,7 +631,7 @@ A policy evaluator is pure.
 
 Policy definitions may be reused by exits, actions, dialogue choices, builder operations, and publication rules where semantics match.
 
-## 14. Text command parser
+## 22. Text command parser
 
 Text parsing is not game logic.
 
@@ -655,7 +655,7 @@ Parser should support classic MUD conveniences:
 - quoting names;
 - helpful ambiguity errors.
 
-## 15. Scripting goals
+## 23. Scripting goals
 
 We want a powerful AI-friendly escape hatch without reintroducing unrestricted runtime code.
 
@@ -667,7 +667,7 @@ Key idea:
 
 This keeps syntax familiar to Elixir-capable models while creating a real semantic boundary.
 
-## 16. LokaScript allowed model
+## 24. LokaScript allowed model
 
 Potential allowed forms:
 
@@ -694,7 +694,7 @@ Forbidden:
 - arbitrary Erlang BIF access;
 - wall clock/global randomness.
 
-## 17. Portable script binding registry
+## 25. Portable script binding registry
 
 Bindings are capabilities:
 
