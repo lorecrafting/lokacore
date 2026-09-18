@@ -724,3 +724,70 @@ Only composite campaign/deployment manifest changes.
 Shared realm mounts a certified cartridge through declared entry/exit ports.
 
 No ad-hoc global-key reference is required.
+
+
+## T. Long-lived offline compatibility and signing
+
+### COMPAT-01 — App auto-update with old save
+
+Device has cartridge/save pinned to older supported kernel API/rule-IR/content-schema versions.
+
+App auto-updates with no network available.
+
+Save opens and plays through backward-compatible execution or a fully local deterministic migration.
+
+### COMPAT-02 — Failed save migration rollback
+
+Injected crash/write failure occurs during local compatibility migration.
+
+Original save and old artifact remain recoverable; no half-migrated save becomes authoritative.
+
+### COMPAT-03 — Unsupported version removal gate
+
+Release attempts to remove the only interpreter/migration path for a still-supported published cartridge.
+
+Release certification blocks until compatibility/migration policy is satisfied.
+
+### COMPAT-04 — Signing-key rotation
+
+Cartridge A was signed with old trusted key K1. New catalog content uses K2 after rotation.
+
+A remains verifiable while K1 is still in the supported verification keyset; new content verifies with K2.
+
+### COMPAT-05 — Revoked signing key
+
+On reconnect, client learns K1 is revoked due compromise.
+
+Current product/security policy is applied explicitly; client does not silently equate signing-key revocation with deleting local saves.
+
+### COMPAT-06 — Tampered key ID/signature metadata
+
+Artifact substitutes key ID or signed metadata without valid signature.
+
+Verification fails before launch.
+
+## U. Receipt and platform boundaries
+
+### RECEIPT-01 — Retry returns stable committed response
+
+Online state-changing command commits, client times out before receiving reply, then retries same command ID.
+
+Runtime does not execute again and returns the original stable committed result/ack (or a reconstruction explicitly equivalent under the protocol), not merely “already processed.”
+
+### RECEIPT-02 — Receipt/result corruption
+
+Receipt claims processed command but durable response reference is missing/corrupt.
+
+Runtime raises an integrity fault/resync path rather than re-executing mutation.
+
+### PLATFORM-01 — Web adapter cannot grant entitlement directly
+
+Attempt to mutate entitlement from Phoenix controller/channel without going through `loka_platform` application service/policy.
+
+Architecture test fails.
+
+### PLATFORM-02 — Entitlement service unavailable
+
+Offline already-downloaded cartridge remains playable.
+
+New purchase/restore may fail gracefully, while world simulation and unrelated online game instances remain isolated from the platform-service failure according to deployment topology.
