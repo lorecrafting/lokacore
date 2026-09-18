@@ -34,6 +34,23 @@ This packet uses:
 
 When code and this packet disagree in the future, accepted amendments and tests determine the contract. Markdown alone must not become a second unverified source of truth for machine-readable schemas.
 
+### Do not conflate product, authoring, and runtime axes
+
+| Axis | Values | Meaning |
+|---|---|---|
+| **App mode** | Story Mode / Realm Mode | Which authority adapter the one Loka mobile app is using now. |
+| **Builder target** | `story` / `realm` / `promote` | Which authoring constraints and certification policy apply to the workspace. |
+| **Execution profile** | `offline_private` / `online_private` / `party` / `shared_area` | How a compiled cartridge/deployment is hosted at runtime. |
+| **Artifact type** | cartridge release / deployment / campaign | Immutable content module, hosting policy, or composition/continuity manifest. |
+
+These axes interact but are not aliases.
+
+Examples:
+
+- Story Mode normally runs an `offline_private` profile built with target `story`.
+- Realm Mode can run `online_private`, `party`, or `shared_area`.
+- A `promote` workspace takes a certified Story cartridge and produces a new Realm deployment/adaptation; it does not change the app mode or mutate the source artifact.
+
 ## 3. Product invariant
 
 Loka v3 is one game platform with one portable rules/content model serving:
