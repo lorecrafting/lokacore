@@ -183,6 +183,8 @@ Make machine-readable contracts exist before features.
 - domain-event registry;
 - effect registry;
 - policy AST;
+- FactSpec / scoped narrative-state schema;
+- consequence-operator registry shape;
 - portable GameView schema;
 - portable kernel ABI/serialization contract;
 - canonical serialization/hash rules;
@@ -307,13 +309,17 @@ Support real narrative cartridges.
 - quest graph operators;
 - quest reducer;
 - quest event indexing;
-- idempotent rewards;
+- typed quest outcome/consequence grammar;
+- FactSpec reads/writes with scope validation;
+- capability consequence evaluators returning StateDelta/events/effects;
+- idempotent rewards/consequences;
 - dialogue graph;
 - dialogue conditions/actions;
 - LokaScript parser/normalized-IR skeleton and interpreter core sufficient to prove containment/determinism;
 - only the bindings actually needed by the first cartridge plus a small synthetic safety fixture set;
 - interpreter budgets;
-- event-chain bounds.
+- event-chain bounds;
+- branch/world-consequence trace output.
 
 ### Gate R7
 
@@ -327,6 +333,8 @@ Make the world feel like a MUD, not a branching ebook.
 
 ### Build initially
 
+- reactive fact/event rule evaluation;
+- NPC role/state profiles;
 - schedule;
 - patrol;
 - wander;
@@ -336,6 +344,8 @@ Make the world feel like a MUD, not a branching ebook.
 - spawn/despawn policy;
 - day/night;
 - basic weather;
+- fact-driven room/ambient variants;
+- fact-driven access/topology policies;
 - on-demand temporal state;
 - durable local jobs;
 - simple merchant/shop if needed.
@@ -361,6 +371,8 @@ Make failures reproducible before content scale.
 - virtual clock;
 - seed/RNG controls;
 - snapshots/forks;
+- branch outcome fork/compare;
+- quest world-impact/consequence graph;
 - trace viewer data;
 - static validator gates;
 - property tests;
@@ -388,7 +400,10 @@ Target scope:
 - 5–8 NPCs;
 - 10–20 items;
 - 1–3 connected quests;
-- branching outcome;
+- branching outcome with typed durable world consequences;
+- at least one quest-gated area/access change;
+- at least one NPC role/schedule/dialogue reaction to quest outcome;
+- at least one ambient/environmental reaction to shared fact state;
 - schedules;
 - environmental change;
 - simple skill/check;
@@ -399,7 +414,7 @@ Target scope:
 
 Hand-author substantial portions first. Do not immediately ask the factory to mass-generate.
 
-The first cartridge exists to stress contracts.
+The first cartridge exists to stress contracts. It MUST prove that quests and living-world systems interact through typed facts/consequences rather than cartridge-specific mutation scripts.
 
 ### Gate R10
 
