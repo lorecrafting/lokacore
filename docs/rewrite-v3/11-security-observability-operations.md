@@ -167,7 +167,7 @@ Key rotation rules:
 
 Signature verification proves publisher/artifact integrity. It does not make offline save state authoritative for the MMO.
 
-## 11. Secrets
+## 10. Secrets
 
 Use runtime secret management/env/provider appropriate to deployment.
 
@@ -178,7 +178,7 @@ Secrets never enter:
 - traces exported to models;
 - mobile bundle except public keys/config intended public.
 
-## 10. Observability identity
+## 11. Observability identity
 
 Every online command records/correlates:
 
