@@ -144,7 +144,7 @@ Portable deterministic rules MUST define:
 - canonical map/set iteration order;
 - canonical serialization;
 - fixed RNG algorithm/version;
-- deterministic ID generation/source;
+- deterministic gameplay ID generation/source. New runtime entities/events created inside a decision should derive IDs from an explicit IdSource (for example a namespaced hash/UUID over instance identity + command/event identity + allocation ordinal), never host entropy. Account/session/request IDs that do not affect portable game semantics may remain host-generated;
 - deterministic integer/fixed-point arithmetic for rule-critical calculations where floating-point variation could change outcomes;
 - explicit handling/avoidance of NaN/infinity/platform math differences;
 - stable sorting/tie-break rules.
