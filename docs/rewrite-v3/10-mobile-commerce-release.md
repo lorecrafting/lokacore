@@ -463,7 +463,8 @@ The release process therefore tracks a compatibility matrix across:
 - cartridge content schema;
 - rule-IR version;
 - kernel API version;
-- client feature set.
+- client feature set;
+- exact capability lock / capability-version requirements.
 
 Allowed strategies for an older installed save/package:
 
