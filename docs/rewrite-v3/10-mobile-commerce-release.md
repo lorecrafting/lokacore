@@ -99,7 +99,7 @@ The store binary contains:
 - online transport;
 - catalog/purchase/download UI.
 
-Cartridges are separately downloadable data/assets/portable bytecode compatible with installed kernel/client features.
+Cartridges are separately downloadable data/assets/bounded portable rule IR compatible with installed kernel/client features.
 
 Normal content release SHOULD NOT require a new app binary.
 
