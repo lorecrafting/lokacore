@@ -16,7 +16,7 @@ The rewrite packet refines this roadmap in one major respect: offline-capable si
 
 ## Strategy in one page
 
-Build **one Loka platform and one mobile app**. Ship small, self-contained story worlds first as purchasable **cartridges**. A cartridge uses one compiled content/rules contract but may run under different authority hosts:
+Build **one Loka platform with two focused mobile clients**. Ship small, self-contained story worlds first as purchasable cartridges in **Loka Stories**. Build the later persistent multiplayer product as **Loka Online**. The clients share schemas, UI packages, and portable story semantics where useful, but they do not share authority responsibilities:
 
 - **offline private:** local mobile authority + local SQLite;
 - **online private/party/shared:** BEAM/OTP authority + PostgreSQL.
@@ -34,15 +34,16 @@ The central product rule is:
 | Implementation | Clean-sheet Loka v3. Lokacore is evidence/reference, not a code-migration target. |
 | Online runtime | Elixir/Phoenix on BEAM/OTP, using explicit world/zone authority processes and PostgreSQL. |
 | Portable rules | Shared deterministic kernel for mechanics that must run both offline and online; Rust is the provisional language pending the mandatory spike. |
-| Single-player | Offline-capable cartridges run locally after download, with local transactional saves. The same cartridge may later also have an online-private deployment. |
-| Multiplayer | Online-private → party → embedded instances/shared-area promotion → persistent realm, all using BEAM authority. |
+| Loka Stories | Offline-first cartridge player: local authority, local saves, campaigns/expansions, no multiplayer/world-service requirements. |
+| Loka Online | Online-only multiplayer/MUD client: BEAM-authoritative private/party adventures, shared areas, social systems, persistent realm. |
+| Reuse boundary | Portable story cartridges may be reused online as private/party adventures or adapted through an explicit promotion workflow; realm-native content may use server-only capabilities. |
 | World richness | Preserve and expand a large primitive/capability library. Simplify composition rules, not the world simulation. |
 | Quests | Small lifecycle StateMachine + canonical domain events → pure quest reducer → typed/idempotent effects. |
 | Scripting | Declarative capabilities first; Elixir-like LokaScript compiles to portable normalized form interpreted by the shared rules system. No released cartridge executes via `Code.eval_string`. |
 | AI authoring | Give builders a generated capability catalog/schema and a canonical Builder API rather than asking models to reconcile engine internals and stale Markdown. |
 | Authoring surface | Agents use structured MCP/tool calls; humans may use a thin terminal/CLI over the same Builder API; visual UI is primarily inspection/debugging. |
 | Testing | Every cartridge/deployment earns an exact-hash release certificate from static checks, model/property checks, deterministic simulation, bots, chaos/concurrency where relevant, restart/replay, host conformance, semantic review, and mobile smoke. |
-| Mobile distribution | One App Store / Play Store app. Downloaded cartridges contain data/assets/portable interpreted content compatible with capabilities already shipped in the app; new native/client capabilities require a binary update. |
+| Mobile distribution | Two store apps from one monorepo: Stories ships offline kernel/save/download capability; Online ships multiplayer transport/social/realm capability. Shared packages prevent UI/schema duplication. |
 | Launch monetization | Default hypothesis: free app + free showcase cartridge, then permanent à-la-carte cartridge unlocks; bundles later; subscription only after a reliable content cadence exists. |
 | Factory | AI/factory orchestration is build-time tooling, never a gameplay dependency. |
 
@@ -52,7 +53,7 @@ The earlier product question of isolated interactive stories versus a shared MUD
 
 ### Phase-one experience
 
-A player installs one polished mobile app, acquires/downloads a cartridge, and can play it offline. The world is not a branching ebook. It is a real Loka simulation with rooms, NPCs, inventory, time, schedules, quests, dialogue, environmental behavior, and whatever portable capabilities the cartridge declares.
+A player installs Loka Stories, acquires/downloads a cartridge, and can play it offline. The world is not a branching ebook. It is a real Loka simulation with rooms, NPCs, inventory, time, schedules, quests, dialogue, environmental behavior, and whatever portable capabilities the cartridge declares.
 
 The local mobile authority serializes commands and commits durable state to local SQLite. No ordinary gameplay connection is required after acquisition/download for an offline-capable cartridge.
 
@@ -706,11 +707,14 @@ External orchestration tooling may coordinate this pipeline, but Loka should not
 
 Store policies change; re-check them before implementation and launch. The current baseline and source links are tracked in [`docs/rewrite-v3/17-research-baseline.md`](../rewrite-v3/17-research-baseline.md).
 
-### 9.1 Ship one app, not one app per story
+### 9.1 Two products, not one app per story
 
-The app is the Loka player/catalog/runtime shell. Cartridges are catalog entries/downloadable game content.
+Ship two long-lived clients, not dozens of story-specific apps:
 
-This keeps one client to maintain and avoids repeated binary releases for content-only additions.
+- **Loka Stories** — cartridge catalog/player, offline saves, campaigns, purchase/download/restore.
+- **Loka Online** — multiplayer/MUD client, online identity/social/realm/party systems.
+
+Both are built from one monorepo and shared packages. Individual cartridges remain downloadable content inside Loka Stories rather than separate store apps.
 
 ### 9.2 Keep downloadable cartridges within shipped capabilities
 
