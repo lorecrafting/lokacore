@@ -383,3 +383,66 @@ Certification is now explicitly target-driven:
 - Story workspaces select portable/offline/save-compatibility gates;
 - Realm workspaces select online/concurrency/security/load gates;
 - Promote workspaces retain the immutable Story artifact and add explicit multiplayer adaptation plus Realm certification.
+
+
+## 24. Review round two: quests as living-world participants
+
+The master-plan review revisited how quests should create immersive, persistent world change.
+
+### Problem
+
+A traditional quest engine can become a second scripting/mutation authority:
+
+- objective completes;
+- quest script edits a door;
+- separately rewrites an NPC;
+- separately changes dialogue;
+- separately spawns actors;
+- separately flips arbitrary flags.
+
+This is brittle, hard to replay, and encourages world systems to depend on quest implementation details.
+
+### Revised contract
+
+Quests now follow:
+
+```text
+world DomainEvents
+  → QuestReducer
+  → named quest outcome
+  → typed capability consequences
+  → combined StateDelta/DomainEvents/Effects
+  → authority commit
+  → reactive world rules
+```
+
+Typed scoped **Facts** coordinate broad narrative truths across systems.
+
+Example:
+
+`village.child_status = rescued`
+
+can drive schedules, dialogue, ambience, access, follow-up quests, and descriptions without the quest directly rewriting each subsystem.
+
+Direct consequence operators remain available for mechanical actions such as opening a gate or spawning an encounter.
+
+### Scope safety
+
+Quest scope does not automatically authorize world scope.
+
+Player-scoped Story/Realm progression cannot silently mutate Realm-global state. Broader consequences require explicit scope and matching certification.
+
+### Builder/Lab implications
+
+Builder gains consequence/fact/reference/impact tools.
+
+The Lab must fork quest branches, compare world state, and simulate forward after outcomes.
+
+The first real cartridge is now required to prove at least:
+
+- a quest-gated area/access change;
+- an NPC state/schedule/dialogue reaction;
+- an ambient/environmental reaction;
+- branch comparison and forward simulation.
+
+This turns “living and breathing” from an aspiration into an architecture and certification requirement.
