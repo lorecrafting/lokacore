@@ -190,6 +190,8 @@ The registry is engine-owned and enumerable.
 
 Portability is one of `:portable`, `:server_only`, or `:client_presentation_only`. An `offline_private` cartridge cannot compile if a gameplay dependency is server-only.
 
+If one immutable cartridge release declares both `offline_private` and an online profile, its **base gameplay semantics MUST remain portable**. Realm-only mechanics belong in a separate deployment/adaptation overlay or a Realm-native cartridge, not a hidden profile branch that changes the meaning of the offline artifact.
+
 Server-only does **not** mean side-effectful arbitrary Elixir. Server-only gameplay capabilities MUST participate in the same command/event/delta/effect decision contract as portable capabilities. They return proposed state deltas/events/effects to the online decision coordinator and MUST NOT write Repo/PubSub/external services directly from rule evaluation.
 
 ## 7. Capability discovery API
@@ -509,3 +511,27 @@ Rules:
 - adding an expansion changes the composite campaign/deployment manifest, not the old artifact.
 
 This creates a stable module boundary for chapters, side adventures, and MMO region mounting.
+
+
+## 24. Realm-native cartridges and portable Story reuse
+
+`cartridge` is the generic immutable content/rules artifact in v3; it does not mean “must be purchasable offline.”
+
+There are two common forms:
+
+### Portable Story cartridge
+
+- built with target `story`;
+- portable capabilities only;
+- may certify `offline_private`;
+- may later be hosted online unchanged for private/party use where semantics fit;
+- Realm-only additions are deployment/adaptation overlays.
+
+### Realm-native cartridge
+
+- built with target `realm`;
+- may depend on server-only capabilities;
+- need not run offline;
+- still uses the same content namespaces, capability registry, compiler, hashes, references, and certification machinery.
+
+This preserves one content toolchain without pretending all Realm content is portable.
