@@ -466,3 +466,37 @@ When many systems should respond to an outcome, the quest SHOULD set a shared fa
 Direct consequences are preferred for local mechanical changes such as opening one gate, spawning one encounter, or granting one item.
 
 This is intended to produce coherent living-world reactions while keeping quest definitions decoupled from subsystem internals.
+
+
+## ADR-043 — Quest sharing uses independent dimensions
+
+**Status:** Accepted
+
+Multiplayer quest design does not use one instanced/shared boolean.
+
+Progress scope, consequence scope, presence audience, spatial placement, and scarce-resource capacity are independent contracts.
+
+This permits combinations such as personal quest progress with a shared NPC and shared smithy, plus a private phased apparition and later private dungeon.
+
+## ADR-044 — Prefer shared world, then overlay, then instance
+
+**Status:** Accepted
+
+For Realm content, prefer the least-isolated model that preserves correctness:
+
+1. shared world + personal progress;
+2. shared world + scoped overlay/phasing;
+3. private/party instance;
+4. Realm-wide mutation only when intentionally public.
+
+Personal dialogue alone is not a reason to clone an NPC or zone.
+
+## ADR-045 — Scarce services are Facilities with durable WorkOrders
+
+**Status:** Accepted
+
+Shared bottlenecks such as a one-sword-per-day smithy are modeled by reusable Facility/Service capacity plus durable WorkOrders, not quest timers.
+
+The facility owns queueing, escrow, capacity allocation, duration, and completion.
+
+Quests observe typed WorkOrder DomainEvents and remain independently scoped.
