@@ -4,26 +4,28 @@
 
 Quest correctness is a primary v3 requirement.
 
-The high-level lifecycle remains deliberately small:
+The persisted lifecycle remains deliberately small:
 
 ```text
-available
-  -> accepted
-  -> in_progress
+active
   -> objectives_complete
-  -> turned_in
+  -> resolved(outcome_id)
 
 branches:
-  in_progress -> failed
-  in_progress -> abandoned
-  failed/abandoned -> accepted   # only if definition allows retry
+  active/objectives_complete -> failed(outcome_id?)
+  active/objectives_complete -> abandoned
+  abandoned/failed -> active   # only if retry policy permits
 ```
+
+**Availability/eligibility is derived**, not a persisted QuestInstance lifecycle state. An offered/discovered/automatic quest normally has no QuestInstance until activation.
+
+**Acceptance is an activation interaction**, not a permanent lifecycle layer. Offered quests record activation metadata when a QuestInstance is created.
+
+**Turn-in is a resolution policy**, not a universal terminal state. The terminal success state is `resolved` with a named outcome.
 
 A state-machine validator guards lifecycle transitions.
 
-The terminal successful state SHOULD be modeled as `resolved` with a named outcome rather than assuming every quest literally ends by “turning in” to an NPC. A turn-in interaction is one completion policy.
-
-Complexity belongs in objective graphs/outcomes, not dozens of lifecycle states.
+Complexity belongs in objective graphs/outcomes/consequences, not dozens of lifecycle states.
 
 ## 2. Quest definition
 
@@ -147,13 +149,14 @@ Do not add arbitrary scripting for common quest logic.
   id: ...,
   definition_ref: ...,
   scope: {:player, character_id},
-  lifecycle: :in_progress,
+  lifecycle: :active,
+  activation_mode: :offered,
+  activated_at: logical_time,
   resolved_outcome: nil,
   objectives: typed_state,
   variables: %{},
   revision: 8,
-  processed_event_ids: bounded/idempotency structure,
-  accepted_at: logical_time
+  processed_event_ids: bounded/idempotency structure
 }
 ```
 
