@@ -136,6 +136,7 @@ Read in this order:
 15. [Acceptance Scenarios](15-acceptance-scenarios.md)
 16. [Architecture Decision Register](16-decision-register.md)
 17. [Research Baseline and External References](17-research-baseline.md)
+18. [Specification Review Record](18-review-record.md)
 
 ## 8. What this packet deliberately does not do
 
