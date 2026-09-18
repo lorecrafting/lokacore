@@ -78,7 +78,7 @@ Reasons:
 - no garbage-collected runtime dependency inside the kernel;
 - good fit for pure deterministic state transition code.
 
-Current React Native/Expo supports custom native modules, and current React Native's architecture centers typed native modules/JSI. Rust-to-React-Native bindings also exist in the ecosystem. Rustler provides a mature Elixir/Rust NIF bridge. These facts make the approach technically plausible, but **a spike is mandatory before freezing the choice**.
+Current React Native/Expo supports custom native modules, React Native provides typed TurboModule/JSI native integration, and Rustler provides a mature Elixir/Rust NIF bridge. Rust-to-React-Native binding generators also exist, but at least one prominent current option explicitly describes itself as early-development and not yet recommended for production. Therefore the **kernel language and both host-binding strategies remain provisional until the mandatory spike**. The architecture must not depend on any one third-party Rust-to-React-Native generator.
 
 ### What stays Elixir/BEAM-native
 
@@ -324,12 +324,14 @@ Prove:
 
 1. Rust kernel runs exact scenario;
 2. Elixir/Rustler host produces canonical trace hash;
-3. iOS React Native host produces same trace hash;
-4. Android React Native host produces same trace hash;
-5. local SQLite save/reload preserves hash;
-6. BEAM/PostgreSQL save/reload preserves hash;
-7. 10,000 deterministic command runs show acceptable latency;
-8. a deliberately injected mismatch is caught by conformance CI.
+3. at least two viable mobile binding strategies are evaluated (for example direct platform wrappers around a stable C ABI versus TurboModule/JSI generation);
+4. iOS React Native host produces same trace hash;
+5. Android React Native host produces same trace hash;
+6. local SQLite save/reload preserves hash;
+7. BEAM/PostgreSQL save/reload preserves hash;
+8. 10,000 deterministic command runs show acceptable latency;
+9. a deliberately injected mismatch is caught by conformance CI;
+10. chosen mobile binding approach has a credible Expo/EAS build, upgrade, crash-debugging, and maintenance story.
 
 If this spike is too operationally costly, fallback is dual Elixir/TypeScript implementations with mandatory golden-vector parity. That is the fallback, not first choice.
 
