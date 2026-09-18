@@ -148,7 +148,7 @@ Why:
 - NPC schedules can be managed collectively;
 - a crashed instance can reload from durable state.
 
-The instance process MUST call pure core decision functions for game rules.
+The instance process MUST call the shared portable deterministic kernel through the `loka_core` host adapter for portable rules. Server-only orchestration MAY use pure Elixir domain functions when the behavior is explicitly not part of offline cartridge semantics.
 
 It SHOULD NOT block on slow external I/O while holding command serialization. Persistence commits should be bounded and synchronous where correctness requires; non-authoritative notifications are effects.
 
@@ -159,7 +159,7 @@ It SHOULD NOT block on slow external I/O while holding command serialization. Pe
 2 gateway authenticates + validates protocol
 3 command routed to owning WorldInstance
 4 instance checks command id / expected revision
-5 core decision evaluates state
+5 portable kernel / host decision layer evaluates state
 6 store transaction commits affected durable records + command receipt + effect outbox
 7 in-memory state advances to committed revision
 8 response/notifications are emitted
