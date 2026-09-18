@@ -39,7 +39,7 @@ No unresolved contradiction about:
 - command/event/effect model;
 - persistence transaction semantics;
 - scripting boundary;
-- mobile protocol;
+- mobile Story session/GameView boundary and the fact that Realm transport is intentionally deferred;
 - cartridge versioning.
 
 ## R1 — Disposable portable-kernel feasibility spike
@@ -160,11 +160,12 @@ docs/
 Empty-system CI is green on:
 
 - Elixir;
-- Rust;
 - TypeScript;
-- iOS binding compile;
-- Android binding compile;
-- mobile native-binding smoke.
+- the R1-selected portable execution implementation;
+- the R1-selected iOS/Android integration path;
+- mobile portability/binding smoke appropriate to that choice.
+
+If R1 rejects Rust/native bindings, R2 MUST NOT keep Rust-specific gates merely because they appeared in the original hypothesis.
 
 ## R3 — Contract/schema foundation
 
@@ -749,6 +750,6 @@ Models should not silently amend architecture during implementation.
 
 The rebuild has failed if it spends a year building a universal engine without shipping a cartridge.
 
-The first major product gate remains R10/R13: **a polished offline purchasable storypack**.
+The first major product gate spans R10 + R12 + R13: **a polished offline purchasable storypack in the production Loka app**.
 
 The MMORPG path exists in the architecture so that work compounds, not so it blocks shipping.
