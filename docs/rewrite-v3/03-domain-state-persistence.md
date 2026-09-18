@@ -125,9 +125,9 @@ Quest instances, flags, reputation tracks, world events, and similar state MUST 
 
 No helper may default to realm/global scope merely because an ID was omitted.
 
-## 7. PostgreSQL working decision
+## 7. Persistence by authority host
 
-The v3 rebuild SHOULD use PostgreSQL from the beginning in all realistic environments.
+Online v3 SHOULD use PostgreSQL from the beginning in all realistic server environments.
 
 Reasons:
 
@@ -138,9 +138,11 @@ Reasons:
 - fewer production-only surprises than switching from SQLite later;
 - Ecto support is excellent.
 
-Tests MAY use sandboxed PostgreSQL. Development SHOULD use PostgreSQL too, preferably via a simple container/dev setup, so database behavior does not drift.
+Tests MAY use sandboxed PostgreSQL. Server development SHOULD use PostgreSQL too, preferably via a simple container/dev setup, so database behavior does not drift.
 
-## 8. Proposed durable schema families
+Offline private storypacks use local SQLite (or an equivalent transactional local store) behind a local persistence adapter. The logical save/snapshot formats and command-receipt semantics MUST remain compatible with the portable kernel, but local tables do not need to mirror the server schema byte-for-byte.
+
+## 8. Proposed online durable schema families
 
 Exact migrations are implementation work, but the logical model should include:
 
@@ -450,3 +452,12 @@ Compiled cartridge definitions are immutable and may be aggressively cached in E
 Because they are content-hash/version keyed, invalidation is simple.
 
 Runtime mutable state must not use the same cache semantics.
+
+
+## 23. Offline save lineage and trust
+
+Offline save identity includes a lineage/ancestor revision so cloud backup can detect divergent branches.
+
+Two independently advanced offline branches MUST NOT be auto-merged unless a cartridge provides an explicit deterministic merge strategy. Preserve both and ask the user to select.
+
+Offline runtime state is user-controlled and therefore MUST NOT be imported as authoritative MMO economy/progression state. Reuse cartridge definitions and low-stakes narrative metadata; online-authoritative state has a separate trust boundary.
