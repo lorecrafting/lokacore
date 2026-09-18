@@ -146,7 +146,28 @@ Published release stores:
 
 Runtime/local client refuses artifact/hash mismatch.
 
-## 9. Secrets
+## 9. Artifact signing trust and key rotation
+
+Signed cartridge/catalog artifacts MUST include:
+
+- signing key ID;
+- signature algorithm/version;
+- artifact/content hash;
+- signed metadata version.
+
+The mobile app ships or securely obtains a trusted public-key set.
+
+Key rotation rules:
+
+- new signing keys may be introduced before old keys are retired;
+- old public keys remain available long enough to verify still-supported installed cartridges;
+- compromised keys can be revoked on reconnect, but true offline operation means already-downloaded content cannot always be remotely revoked immediately;
+- private signing keys never ship to clients;
+- build/certification records identify which key signed each release.
+
+Signature verification proves publisher/artifact integrity. It does not make offline save state authoritative for the MMO.
+
+## 11. Secrets
 
 Use runtime secret management/env/provider appropriate to deployment.
 
@@ -175,7 +196,7 @@ kernel version
 
 Offline debug traces use local save/instance IDs and should not be uploaded by default.
 
-## 11. Structured logs
+## 12. Structured logs
 
 Logs are structured events, not prose-only strings.
 
@@ -195,7 +216,7 @@ protocol.validation_failed
 
 PII fields are minimized/redacted.
 
-## 12. Telemetry
+## 13. Telemetry
 
 Metrics:
 
@@ -234,7 +255,7 @@ Metrics:
 - restore failures;
 - cartridge download/hash failures.
 
-## 13. Tracing
+## 14. Tracing
 
 OpenTelemetry-style span/correlation model SHOULD allow:
 
@@ -250,7 +271,7 @@ channel command
 
 Do not trace giant state payloads by default.
 
-## 14. Game trace store
+## 15. Game trace store
 
 Separate debug/game trace from generic application logs.
 
@@ -267,7 +288,7 @@ Retention can vary by environment/profile.
 
 Certification retains reproducible traces longer than ordinary production.
 
-## 15. Health/readiness
+## 16. Health/readiness
 
 Liveness: BEAM process responds.
 
@@ -281,7 +302,7 @@ Readiness checks:
 
 Do not fail readiness because an optional AI/provider is unavailable.
 
-## 16. Deployment
+## 17. Deployment
 
 Recommended initial online topology:
 
@@ -295,7 +316,7 @@ object storage/CDN for cartridge assets
 
 Scale vertically/replica read services before introducing distributed-world complexity unless measurements demand it.
 
-## 17. Rolling deploys
+## 18. Rolling deploys
 
 Online release process:
 
@@ -307,7 +328,7 @@ Online release process:
 
 Exact hot-code-upgrade support is not a foundation requirement.
 
-## 18. Backups
+## 19. Backups
 
 Back up:
 
@@ -321,7 +342,7 @@ Regularly test restore, not only backup creation.
 
 Offline saves use device/platform backup/cloud-save mechanisms separately.
 
-## 19. Admin operations
+## 20. Admin operations
 
 Admin actions go through typed audited APIs.
 
@@ -338,7 +359,7 @@ Examples:
 
 No production admin shell should be the normal operational interface.
 
-## 20. Rate limits and abuse
+## 21. Rate limits and abuse
 
 Rate limits by:
 
@@ -357,7 +378,7 @@ Shared MUD later adds:
 - automation/bot policy;
 - spam/flood controls.
 
-## 21. Crash reporting
+## 22. Crash reporting
 
 BEAM crashes should include correlation/instance IDs but not dump secrets or enormous state.
 
@@ -365,7 +386,7 @@ Mobile native-kernel crashes require symbolicated iOS/Android reporting.
 
 A crash should ideally point to a deterministic repro seed/snapshot if privacy and storage policy allow.
 
-## 22. Supply chain
+## 23. Supply chain
 
 Pin/check:
 
@@ -379,7 +400,7 @@ CI runs dependency/security audits.
 
 Native kernel release artifacts must be reproducibly associated with source commit and build pipeline.
 
-## 23. SLO candidates
+## 24. SLO candidates
 
 Before launch define measurable targets, for example:
 
@@ -393,7 +414,7 @@ Before launch define measurable targets, for example:
 
 Numbers come from vertical-slice benchmarks, not guessed here.
 
-## 24. Incident principle
+## 25. Incident principle
 
 Correctness over availability for authoritative mutations.
 
