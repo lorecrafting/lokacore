@@ -333,7 +333,138 @@ Prove:
 
 If this spike is too operationally costly, fallback is dual Elixir/TypeScript implementations with mandatory golden-vector parity. That is the fallback, not first choice.
 
-## 13. Cartridge versus deployment
+## 13. Campaigns, sequels, and single-player expansions
+
+A **cartridge** is the smallest independently versioned/certified world-content unit. A **campaign** is an optional composition layer that lets multiple cartridges/chapters form one continuing offline adventure.
+
+Example:
+
+```text
+Campaign: Riverlands Chronicle
+
+Chapter 1
+  fox_spirit_of_yunmeng@1.2.0
+
+Chapter 2
+  monastery_beneath_the_bell@1.0.0
+
+Expansion
+  ghosts_of_the_southern_road@1.1.0
+```
+
+The campaign manifest pins exact compatible cartridge releases for a save lineage.
+
+### Campaign state classes
+
+Continuing stories need state that outlives one cartridge without making everything global.
+
+Use explicit classes:
+
+```text
+cartridge_local
+  flags/entities/quest state meaningful only inside one cartridge
+
+campaign_character
+  portable character stats/equipment only when the campaign rules declare them shared
+
+campaign_memory
+  narrative facts: who lived, faction choice, ending, promises, discoveries
+
+account_memory
+  optional non-competitive profile/lore achievements that may sync later
+
+realm/MMO state
+  online authoritative only; never sourced from offline campaign economy
+```
+
+A cartridge declares which continuity keys it exports and which it accepts.
+
+Example:
+
+```yaml
+continuity:
+  exports:
+    - memory.saved_ferryman
+    - memory.temple_allegiance
+  imports:
+    - memory.village_ending
+
+  character:
+    mode: campaign
+    schema: riverlands_character_v1
+```
+
+Do not let a sequel read arbitrary internal state from its predecessor.
+
+### Continuity record
+
+On cartridge completion/checkpoint, the portable kernel can emit a typed continuity record:
+
+```text
+campaign ID
+source cartridge/release/hash
+campaign save lineage
+exported narrative memories
+portable campaign-character snapshot if allowed
+schema versions
+```
+
+The next cartridge validates/imports only declared fields.
+
+This makes sequels deterministic and migration-friendly.
+
+### Standalone compatibility
+
+A sequel/expansion SHOULD define one of:
+
+- `requires_prior`;
+- `prior_optional_with_defaults`;
+- `standalone`.
+
+If prior state is optional, the content explicitly defines default continuity rather than guessing.
+
+### Expansion installation
+
+An expansion may:
+
+1. add a new independent chapter;
+2. add optional content to a campaign map;
+3. add side-adventure portals;
+4. extend a previous cartridge through an explicit composite deployment.
+
+It MUST NOT mutate an already certified cartridge artifact in place.
+
+A campaign save pins the exact release set it was using. Installing an expansion changes the campaign composition through a versioned campaign/deployment manifest and migration if needed.
+
+### Character continuity versus MMO continuity
+
+Offline campaign-character state is trusted only within that local campaign lineage.
+
+If the future MMO includes the same hero/story continuity, use explicit translation such as:
+
+- narrative memories;
+- cosmetic badges;
+- unlocked dialogue variants;
+- account lore.
+
+Do not automatically import offline levels, gold, items, or power into realm authority.
+
+Online-private versions of the campaign may later use an online-authoritative character and therefore can participate in MMO progression under explicit product rules.
+
+### Why this helps the MMORPG
+
+A campaign becomes a curated set of reusable adventure modules.
+
+Later the MMO can expose:
+
+- Chapter 1 as a private quest-board adventure;
+- Chapter 2 as a party dungeon;
+- the expansion road as an instanced region;
+- selected geography as a shared promoted zone.
+
+Campaign ordering/continuity is product metadata; cartridge content remains reusable.
+
+## 15. Cartridge versus deployment
 
 Separate reusable story/content from how it is hosted.
 
@@ -434,7 +565,7 @@ Create a shared deployment overlay and recertify for:
 
 This is adaptation, not an automatic flag flip.
 
-## 15. Quest design for future reuse
+## 16. Quest design for future reuse
 
 Default story quest scope SHOULD be `player`.
 
@@ -451,7 +582,7 @@ For personal consequences, use:
 
 Use realm scope only for intentional world events.
 
-## 16. Shared NPC versus personal narrative
+## 17. Shared NPC versus personal narrative
 
 An NPC definition can be reused across modes, but deployment policy decides runtime multiplicity.
 
@@ -475,7 +606,7 @@ one shared ferryman per zone shard
 
 Player-specific dialogue/quest knowledge lives in player-scoped state rather than mutating the shared ferryman into contradictory global states.
 
-## 17. Death and permanence
+## 18. Death and permanence
 
 A story may allow the ferryman to die permanently.
 
@@ -491,7 +622,7 @@ Deployment/capability policy can choose:
 
 Any semantic change requires multiplayer semantic review.
 
-## 18. Economy boundary
+## 19. Economy boundary
 
 Offline saves are user-controlled and therefore untrusted for competitive MMO value.
 
@@ -507,7 +638,7 @@ MUST NOT be imported as authoritative MMO economy state.
 
 This is a security boundary, not an accusation against players.
 
-## 19. What may transfer from offline
+## 20. What may transfer from offline
 
 Optional low-stakes synchronization may include:
 
@@ -520,7 +651,7 @@ Optional low-stakes synchronization may include:
 
 Because offline saves can be modified, anything transferred MUST be treated as non-competitive/untrusted unless independently verified.
 
-## 20. Online-authoritative cartridge mode
+## 21. Online-authoritative cartridge mode
 
 Later, a player may choose to run the same cartridge in `online_private` mode.
 
@@ -542,7 +673,7 @@ Connected Adventure Mode
 
 Do not require Connected Adventure Mode for launch.
 
-## 21. Cloud save for offline storypacks
+## 22. Cloud save for offline storypacks
 
 Cloud backup is optional convenience, not runtime authority.
 
@@ -560,7 +691,7 @@ If two devices diverge from a common ancestor, DO NOT attempt arbitrary semantic
 
 Preserve both branches and let the player choose, or use an explicit cartridge-specific merge only if defined/tested.
 
-## 22. Offline entitlement
+## 23. Offline entitlement
 
 After a paid cartridge is legitimately acquired and downloaded, ordinary offline play SHOULD not require periodic connectivity.
 
@@ -570,7 +701,7 @@ Server revocation/refund state takes effect when the device next reconnects acco
 
 Exact Apple/Google implementation must be re-verified at commerce implementation time.
 
-## 23. Cartridge update while offline
+## 24. Cartridge update while offline
 
 A save is pinned to exact cartridge release/hash.
 
@@ -582,7 +713,7 @@ If a new release is downloaded:
 
 Never silently load a v1.2 save with v1.3 definitions.
 
-## 24. Offline download/package integrity
+## 25. Offline download/package integrity
 
 Downloaded cartridge package is signed/hashed.
 
@@ -596,7 +727,7 @@ Client verifies:
 
 Corrupt/partial download never becomes playable state.
 
-## 25. Local privacy
+## 26. Local privacy
 
 Offline gameplay SHOULD stay local unless user/account sync features require upload.
 
@@ -604,7 +735,7 @@ Do not upload full private play traces by default solely because the Lab uses ri
 
 Telemetry policy can be opt-in/configurable and privacy-minimized.
 
-## 26. Why this still uses BEAM's strengths
+## 27. Why this still uses BEAM's strengths
 
 Offline mode cannot use BEAM because the mobile app should not embed an entire Erlang VM merely to play a story.
 
@@ -631,7 +762,7 @@ BEAM is used exactly where its concurrency/fault-tolerance model creates leverag
 
 The portable kernel exists because the product explicitly requires disconnected execution.
 
-## 27. Product progression
+## 28. Product progression
 
 Recommended evolution:
 
