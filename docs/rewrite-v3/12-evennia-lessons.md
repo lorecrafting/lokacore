@@ -386,3 +386,267 @@ Loka v3 should center the **world instance/shard authority** because:
 Entities remain important data, but the world owner coordinates them.
 
 That is the major architectural divergence.
+
+
+## 17. Extended rooms: details without entity explosion
+
+Evennia's `extended_room` contrib supports:
+
+- time/season/state-dependent room descriptions;
+- small inspectable `details` that do not require creating a full database object;
+- random echoes.
+
+This is highly relevant.
+
+### Loka adaptation
+
+Add a portable **RoomDetail** definition:
+
+```yaml
+components:
+  details:
+    altar:
+      aliases: [stone altar, shrine]
+      description: room.shrine.altar
+      actions: [inspect, pray]
+```
+
+A detail is targetable/searchable but not automatically a full RuntimeEntity.
+
+Promote to a RuntimeEntity only if it needs independent:
+
+- containment;
+- movement;
+- state;
+- ownership;
+- lifecycle.
+
+This can dramatically reduce world-object bloat while preserving old-school MUD richness.
+
+Room prose may support declarative variants based on:
+
+- time;
+- weather;
+- state;
+- quest/personal projection.
+
+The variant resolver must stay deterministic and typed.
+
+## 18. Safe barter/trade is worth adopting later
+
+Evennia's barter contrib explicitly avoids the dangerous “you give yours, then I give mine” pattern by holding both sides until agreement.
+
+For the future MMO, Loka SHOULD implement trade as a transaction state machine:
+
+```text
+proposed
+  -> both editing offers
+  -> A confirms
+  -> B confirms
+  -> atomically commit exchange
+  -> completed
+```
+
+Changing either offer invalidates prior confirmation.
+
+No player owns both sides mid-transaction.
+
+This belongs in a later online social/economy capability pack, but the acceptance pattern should be remembered.
+
+## 19. Independent escape/adventure instances validate the cartridge model
+
+Evennia's EvscapeRoom contrib supports independently spawned multiplayer puzzle-room instances.
+
+This is strong precedent for our:
+
+- cartridge WorldInstance;
+- party adventure;
+- MMO portal into an instanced storypack.
+
+Loka's model goes further by making this the core product path instead of an optional contrib.
+
+## 20. Wilderness virtualization
+
+Evennia's wilderness contrib creates large conceptual spaces without persisting a unique room object for every coordinate.
+
+Potential Loka use later:
+
+- forests;
+- oceans;
+- deserts;
+- procedural travel;
+- large overworlds.
+
+Design a `VirtualRegion` capability in the future where a coordinate/cell is derived from:
+
+- region definition;
+- seed;
+- coordinates;
+- persistent exceptions/landmarks.
+
+Do not make this a v3 foundation blocker, but avoid architecture that requires every traversable location to have a static authored room definition.
+
+## 21. XYZ-grid and route finding
+
+Evennia's XYZ-grid demonstrates the usefulness of explicit spatial coordinates, fast route finding, and limited-view map rendering.
+
+Loka SHOULD keep topology independent from presentation:
+
+- graph identity is canonical;
+- coordinates are optional metadata/region model;
+- pathfinder is a service/pure capability;
+- map projection can render only discovered/nearby nodes.
+
+This fits mobile minimap and NPC schedules.
+
+## 22. RP recognition and language systems
+
+Evennia's `rpsystem` includes:
+
+- short descriptions;
+- recognizing/renaming people from a player's perspective;
+- persistent poses;
+- masks/disguises;
+- language comprehension/garbling;
+- whispers partly overheard;
+- rich in-emote references.
+
+These are excellent ideas for a later text-MMORPG because they exploit text as a medium rather than imitate a graphical MMO.
+
+Potential capability packs:
+
+- recognition;
+- disguise;
+- language;
+- pose;
+- rich emote references;
+- overhearing.
+
+They are intentionally deferred from the first offline cartridge unless a story needs one.
+
+## 23. Traits/buffs/cooldowns support the typed component direction
+
+Evennia's contribs separately model:
+
+- traits: bounded/modifiable values;
+- buffs: timed modifiers/code triggers;
+- cooldowns: lightweight persistent queried timers.
+
+Loka v3 SHOULD make these typed portable concepts rather than generic attributes:
+
+```text
+Stat/Resource
+Modifier/Status
+Cooldown
+```
+
+Cooldowns are a good candidate for **derived temporal state**: store expiry logical time and query remaining duration rather than scheduling a tick.
+
+## 24. Crafting recipe/tool model
+
+Evennia's crafting contrib separates:
+
+- recipes;
+- consumed ingredients;
+- required non-consumed tools;
+- output.
+
+This maps well to a future Loka portable crafting capability.
+
+Keep recipe semantics declarative and deterministic. Duration/offline progression uses the v3 temporal model.
+
+## 25. Auditing and reports
+
+Evennia includes both I/O auditing and player report systems.
+
+Loka already plans a richer correlated command trace.
+
+Future MMO operations SHOULD also include a player-facing report flow that can attach bounded contextual evidence, with privacy/retention rules.
+
+Do not automatically log all private conversation forever solely for moderation convenience.
+
+## 26. Batch processing validates source-controlled world building
+
+Evennia's batch processor applies version-controlled static files to create game content.
+
+This strongly supports Loka's choice to treat cartridge source/Git as durable authoring history and compile/promote immutable artifacts, rather than make a mutable admin database the only source of truth.
+
+Unlike Evennia's executable batch-Python option, Loka's Builder batch plan remains typed and bounded.
+
+## 27. Contrib architecture validates capability packs—but not dynamic plugin chaos
+
+Evennia currently ships dozens of optional contrib systems across base systems, game systems, grid, RPG, tutorials, and utilities.
+
+The useful lesson is organizational:
+
+- keep core small;
+- make game-type-specific systems optional;
+- document dependencies;
+- test systems in isolation.
+
+Loka adaptation:
+
+```text
+core portable capabilities
++
+optional engine capability packs
++
+cartridge-declared requirements
+```
+
+Do not copy a runtime plugin marketplace for the first rebuild.
+
+## 28. Evennia feature ideas triage
+
+| Evennia idea | Loka v3 disposition |
+|---|---|
+| Portal/server separation | adapt as gateway/runtime boundary |
+| Session/account/character | adopt strongly |
+| Typeclasses | do not copy; use definitions/components |
+| Components contrib | validates composition |
+| Attributes/NAttributes | replace with typed durable/ephemeral state |
+| Tags/aliases/permissions | adopt as separate indexed/search/policy concepts |
+| CmdSets | adopt ActionSet algebra |
+| Locks | adopt typed fail-closed policies |
+| Prototypes | adapt to compile-time templates/mixins |
+| Protfuncs | adapt to registered compiler functions |
+| OLC/build menus | terminal/API first; visual inspection |
+| Scripts | split into derived state/durable jobs/portable scripts |
+| TickerHandler | scheduler subscription pattern where needed |
+| TaskHandler/delay | durable-job equivalent |
+| OnDemandHandler | adopt strongly |
+| ExtendedRoom details | adopt RoomDetail concept |
+| Wilderness | later virtual-region capability |
+| XYZGrid | later map/region capability |
+| Barter | later atomic trade state machine |
+| Crafting | later recipe capability |
+| Cooldowns | portable derived state |
+| Traits/buffs | portable typed stats/statuses |
+| Mail/channels | later MMO social pack |
+| RP recognition/languages | later differentiating text-MMO feature |
+| Achievements | later account/character profile |
+| Player reports | later moderation/ops |
+| REST API | Builder/game APIs are typed and purpose-specific |
+| Contrib packaging | capability-pack organizational model |
+| In-game Python | explicit cautionary evidence for not executing arbitrary builder code |
+
+## 29. Sources reviewed
+
+Primary/current Evennia documentation areas reviewed include:
+
+- Core Components overview: <https://www.evennia.com/docs/latest/Components/Components-Overview.html>
+- Portal and Server: <https://www.evennia.com/docs/latest/Components/Portal-And-Server.html>
+- Accounts: <https://www.evennia.com/docs/latest/Components/Accounts.html>
+- Tags: <https://www.evennia.com/docs/latest/Components/Tags.html>
+- CmdSet API: <https://www.evennia.com/docs/latest/api/evennia.commands.cmdset.html>
+- Locks/lock functions: <https://www.evennia.com/docs/latest/api/evennia.locks.lockfuncs.html>
+- Prototypes/Spawner: <https://www.evennia.com/docs/latest/Components/Prototypes.html>
+- Prototype functions: <https://www.evennia.com/docs/latest/api/evennia.prototypes.protfuncs.html>
+- TickerHandler: <https://www.evennia.com/docs/latest/api/evennia.scripts.tickerhandler.html>
+- TaskHandler: <https://www.evennia.com/docs/latest/api/evennia.scripts.taskhandler.html>
+- OnDemandHandler: <https://www.evennia.com/docs/latest/Components/OnDemandHandler.html>
+- REST API: <https://www.evennia.com/docs/latest/Components/Web-API.html>
+- Contrib overview (53 bundled contribs at review time): <https://www.evennia.com/docs/latest/Contribs/Contribs-Overview.html>
+- Components contrib: <https://www.evennia.com/docs/latest/Contribs/Contrib-Components.html>
+
+The intent was not to reproduce Evennia exhaustively; it was to review mature patterns and feature categories for architectural evidence.
