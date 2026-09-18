@@ -125,6 +125,7 @@ Suggested shape:
 apps/loka_core
 apps/loka_content
 apps/loka_store
+apps/loka_platform
 apps/loka_runtime
 apps/loka_builder
 apps/loka_web
@@ -446,6 +447,7 @@ Non-developer can install the polished build, enter airplane mode, play/finish t
 
 ### Build
 
+- `loka_platform` account/catalog/entitlement application service boundary;
 - catalog service;
 - canonical entitlement;
 - Apple/Google product mapping;
