@@ -1,7 +1,7 @@
 # Loka v3 Rebuild Specification Packet
 
-**Status:** Draft 0.1 — architecture specification, not implementation authorization  
-**Date:** 2026-09-17  
+**Status:** Draft 0.2 — master architecture specification under iterative review; not implementation authorization  
+**Date:** 2026-09-18  
 **Source system:** `lorecrafting/lokacore`  
 **Strategic parent:** `docs/product/CARTRIDGE-ROADMAP.md`  
 **Purpose:** define a clean-room rebuild of Loka as one mobile product with two strictly separated authority modes—offline-first **Story Mode** and BEAM-authoritative **Realm Mode**—while preserving portable cartridge semantics where reuse is valuable and removing transitional Lokacore architecture.
@@ -131,6 +131,15 @@ The online authority/orchestration layer SHOULD remain idiomatic Elixir/OTP. Rul
 | Mobile protocol | one machine-readable external schema with generated TypeScript/Elixir validation |
 | Release | exact certified cartridge hash |
 | AI | author/reviewer/tool client, never runtime authority |
+
+### Intentionally unresolved evidence gates
+
+Two choices remain deliberately provisional rather than being papered over by the specification:
+
+1. **portable kernel technology/binding** — Rust is the working hypothesis, but R1 must prove the BEAM/mobile binding, determinism, debugging, and release ergonomics;
+2. **App Store treatment of downloadable rule content** — the product requires downloadable offline stories, but the exact bounded rule representation must survive current store-review constraints.
+
+Implementation MUST NOT treat either provisional choice as settled before its evidence gate passes.
 
 ## 7. Packet index
 
