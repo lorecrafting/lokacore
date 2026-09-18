@@ -21,7 +21,9 @@ branches:
 
 A state-machine validator guards lifecycle transitions.
 
-Complexity belongs in objective graphs, not dozens of lifecycle states.
+The terminal successful state SHOULD be modeled as `resolved` with a named outcome rather than assuming every quest literally ends by “turning in” to an NPC. A turn-in interaction is one completion policy.
+
+Complexity belongs in objective graphs/outcomes, not dozens of lifecycle states.
 
 ## 2. Quest definition
 
@@ -61,9 +63,38 @@ objectives:
             type: discovered
             target: clues/child_fate
 
+activation:
+  mode: offered
+
+resolution:
+  mode: turn_in
+
 outcomes:
   ...
 ```
+
+### Activation modes
+
+Quest availability SHOULD normally be derived from prerequisites/facts rather than creating persistent QuestInstances for every locked quest.
+
+Supported activation patterns should include:
+
+- `offered` — player explicitly accepts from an NPC/object/action;
+- `automatic` — becomes active when prerequisites/world condition becomes true;
+- `discovered` — activates when the player discovers a place/clue/event;
+- `hidden` — tracks internally without exposing normal journal UI until revealed.
+
+### Resolution modes
+
+Supported completion patterns should include:
+
+- `turn_in` — objectives complete, then a valid turn-in action resolves the quest;
+- `automatic` — resolving objective/outcome resolves immediately;
+- `choice` — a final dialogue/action choice selects outcome and resolves.
+
+The resolved outcome ID is durable quest state.
+
+A quest giver and turn-in target are therefore optional content roles, not hard engine requirements.
 
 ## 3. Objective operators
 
@@ -83,6 +114,30 @@ Quest grammar SHOULD support:
 
 Each operator has a pure reducer and schema.
 
+### Objective credit/causation policy
+
+In multiplayer, matching the event is not enough. Each objective type MUST define who is eligible to receive credit.
+
+Common policies:
+
+- `actor` — only the event actor;
+- `party` — eligible members of the actor's party;
+- `participants` — entities recorded as participants/contributors;
+- `witness` — scoped characters who actually witnessed/observed the event according to world rules;
+- `scope_any` — any eligible quest instance in the declared instance/realm scope.
+
+Policies may add constraints such as:
+
+- same instance/zone;
+- within distance;
+- contribution threshold;
+- alive/present;
+- event happened after quest activation.
+
+Credit is deterministic data derived from event/state, not a transport/UI guess.
+
+Story Mode normally collapses to actor/player semantics, but uses the same contract.
+
 Do not add arbitrary scripting for common quest logic.
 
 ## 4. Quest instance
@@ -93,6 +148,7 @@ Do not add arbitrary scripting for common quest logic.
   definition_ref: ...,
   scope: {:player, character_id},
   lifecycle: :in_progress,
+  resolved_outcome: nil,
   objectives: typed_state,
   variables: %{},
   revision: 8,
