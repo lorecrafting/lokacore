@@ -25,6 +25,7 @@ The central product rule is:
 | Quests | Keep the shared StateMachine and existing Event/EventBus foundation, but redesign quest progress around one canonical typed event → pure reducer → effects path. |
 | Scripting | Keep constrained server-side Elixir scripting for first-party/AI-authored content, but do not treat the current same-BEAM `Code.eval_string` runtime as a hard security boundary for untrusted public code. |
 | AI authoring | Give builders a generated capability catalog and schema rather than expecting a model to reconcile stale Markdown and engine internals. |
+| Authoring surface | Make the canonical Builder API the source of truth. Agents use structured MCP/tool calls, humans may use a thin terminal/CLI over the same operations, and visual UI is primarily for inspection/debugging rather than a second authoring implementation. |
 | Testing | Every cartridge/area earns a release certificate from static checks, state exploration, deterministic simulation, bots, chaos/concurrency, restart/replay, and semantic review. |
 | Mobile distribution | One App Store / Play Store app. Cartridges are content/data/assets interpreted by already-shipped client/runtime capabilities; server-side scripts never become downloaded mobile executable code. |
 | Launch monetization | Default hypothesis: free app + free showcase cartridge, then permanent à-la-carte cartridge unlocks using non-consumable IAP / Play one-time products. Subscription can be evaluated only after a reliable release cadence exists. |
@@ -162,6 +163,115 @@ Every stateful mechanic needs a declared scope so private content can later surv
 Per-player quest progress should be the default. A world boss death, town election, weather system, or shared gate can be explicitly broader.
 
 This prevents one of the classic MUD bugs: content that works with one player but silently assumes global state when twenty players arrive.
+
+### 3.4 Authoring architecture: API-first, terminal-human, MCP-agent
+
+Loka should not maintain a rich visual CRUD application as the primary way to author worlds. The existing repository is already moving in the preferred direction: the old GUI builder was archived, `/admin/builder` is a terminal-first LiveView, and the World Builder already exposes structured MCP tools.
+
+The next step is to make those surfaces converge on **one canonical Builder API**.
+
+The architectural rule is:
+
+> The terminal should not be the API. The canonical typed Builder API should power the terminal, MCP, future CLI, automation, and tests.
+
+Today the repository has partially overlapping paths:
+
+```text
+terminal commands → BuilderCommands.* → managers
+MCP/AI tools      → ToolExecutor.*    → managers
+```
+
+That duplication can drift. Replace it incrementally with one domain operation layer:
+
+```text
+                    Canonical Builder API
+                           │
+              ┌────────────┼────────────┐
+              │            │            │
+            MCP          Terminal      CLI/tests
+           agents         humans        automation
+```
+
+A room creation, quest update, script validation, publish, or simulation action should have one schema, one implementation, one result/error model, and one audit trail regardless of caller.
+
+#### Structured tools are the preferred AI surface
+
+A model should not need to type terminal commands and parse prose responses. It should receive typed inputs and machine-readable results, for example:
+
+```json
+{
+  "ok": false,
+  "code": "QUEST_TARGET_UNREACHABLE",
+  "path": "objectives[2].target",
+  "target": "abandoned_shrine",
+  "diagnostic": {
+    "from": "ferry_dock",
+    "connected_component": 3
+  }
+}
+```
+
+This makes repair loops cheaper, safer, and easier to test than terminal-text automation.
+
+The current MCP tool layer is a useful starting point, but its schemas should eventually be generated from or checked against the same capability/content contracts described above. Loka should not hard-wire the architecture to one model vendor; Astra, Foundry, Claude, or another orchestrator should all see the same stable Builder API.
+
+#### Keep the terminal as a thin human shell
+
+The current terminal-first `BuilderLive` is small and useful. Keep it for:
+
+- direct inspection;
+- quick mutations;
+- play/debug commands;
+- certification commands;
+- trace exploration;
+- AI conversation when convenient.
+
+Its parser should translate human commands into canonical Builder API operations rather than owning separate mutation semantics.
+
+A future CLI can do the same.
+
+#### Use visual UI for inspection, not duplicated authoring logic
+
+Visual interfaces are valuable where humans gain real leverage from spatial or temporal presentation. Prefer read-heavy/debugging views such as:
+
+- world/zone maps;
+- quest graphs;
+- dialogue graphs;
+- NPC schedule timelines;
+- event/causation traces;
+- simulation playback;
+- cartridge certification dashboards;
+- dependency/reachability views.
+
+Avoid rebuilding large form-based editors for rooms, quests, NPCs, scripts, or components unless later user research proves a specific visual editing workflow is substantially better than API/terminal authoring.
+
+The rule is:
+
+> **Author with typed tools/text. Inspect and debug with visuals.**
+
+#### Author in cartridge workspaces, not directly in production state
+
+The factory should normally mutate a bounded candidate workspace, not the live world:
+
+```text
+Astra / human
+    ↓
+cartridge workspace
+    ↓
+compile + validate
+    ↓
+Cartridge Lab
+    ↓
+simulate + review
+    ↓
+certify exact hash
+    ↓
+publish/promote
+```
+
+An AI builder must be free to make and repair destructive mistakes inside an isolated draft without affecting production players.
+
+The Builder API should therefore make workspace/revision context explicit on mutations. Publishing is a separate promotion operation with certification policy that content authors cannot bypass.
 
 ## 4. Quest engine audit: keep the state machine, redesign the mutation path
 
@@ -822,8 +932,8 @@ The strategic factory metric is:
 
 After this roadmap is accepted, prefer small architecture tickets rather than one "Loka v3 rewrite":
 
-1. reconcile current authoring contracts and generate a capability inventory;
-2. write the Cartridge Manifest v1 and state-scope contract;
+1. reconcile current authoring contracts, generate a capability inventory, and define the canonical Builder API beneath MCP/terminal adapters;
+2. write the Cartridge Manifest v1, workspace/revision model, and state-scope contract;
 3. design the canonical `Loka.Engine.Event` → Quest Runtime v3 interfaces against current quest bugs before changing implementation;
 4. build a reducer spike for one existing quest and compare it with current behavior;
 5. add deterministic clock/RNG seams and a minimal Cartridge Lab trace/replay path;
