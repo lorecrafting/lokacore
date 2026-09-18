@@ -110,6 +110,8 @@ Cartridge manifest declares:
 ```yaml
 requires:
   kernel_api: ">=1.3 <2.0"
+  rule_ir: 1
+  content_schema: 1
   client_features:
     - contextual_actions_v1
     - dialogue_choices_v1
@@ -223,7 +225,7 @@ Working launch hypothesis:
 
 For the simplest initial review posture:
 
-- cartridge assets/data/portable bytecode are interpreted by capabilities already shipped in the app;
+- cartridge assets/data/bounded portable rule IR are interpreted by capabilities already shipped in the app;
 - do not download arbitrary JavaScript/native libraries per cartridge;
 - server-only compiled Elixir remains on server;
 - kernel changes ship through reviewed app binary.
@@ -239,7 +241,7 @@ artifact hash
 signature
 kernel compatibility
 manifest
-definition/bytecode blobs
+definition/rule-IR blobs
 asset hashes
 locale files
 ```
@@ -408,3 +410,37 @@ Before the first App Store submission, run a dedicated review-position spike:
 5. if necessary, further restrict/compile LokaScript into a declarative rule graph rather than a general instruction VM.
 
 The product goal—downloadable offline storypacks—remains; the precise portable rule representation must be compatible with current store review policy.
+
+
+## 28. App/kernel upgrades must not strand offline saves
+
+Automatic app updates create a compatibility obligation that is independent of cartridge updates.
+
+A new app/kernel release MUST NOT make a previously valid installed save unopenable merely because native code was replaced.
+
+The release process therefore tracks a compatibility matrix across:
+
+- save format version;
+- cartridge content schema;
+- rule-IR version;
+- kernel API version;
+- client feature set.
+
+Allowed strategies for an older installed save/package:
+
+1. **backward-compatible execution** — new kernel still understands the pinned versions;
+2. **explicit deterministic migration** — package/save is migrated locally with rollback-safe backup;
+3. **bundled compatibility interpreter** — retain an older rule-IR interpreter path when practical.
+
+The implementation MAY define a supported compatibility window, but it must be long enough for commercial offline ownership expectations and must be visible in release policy.
+
+Before removing old kernel/rule-IR support:
+
+- inventory locally installed/published cartridge requirements;
+- provide/certify migrations where needed;
+- verify user saves;
+- retain recovery backup;
+- never silently rewrite a save during app startup without a recoverable migration transaction.
+
+An app update with no network must still open supported offline saves.
+
