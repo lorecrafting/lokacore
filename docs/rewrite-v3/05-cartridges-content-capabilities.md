@@ -59,6 +59,10 @@ requires:
     - contextual_actions_v1
     - dialogue_choices_v1
 
+execution_profiles:
+  - offline_private
+  - online_private
+
 instance_modes:
   - private
 
@@ -135,12 +139,13 @@ status_effect
 crafting_station
 ```
 
-Capability metadata:
+Capability metadata includes portability classification:
 
 ```elixir
 %CapabilitySpec{
   key: "schedule",
   version: 1,
+  portability: :portable,
   applies_to: [:npc, :system],
   definition_schema: ...,
   runtime_components: [...],
@@ -155,6 +160,8 @@ Capability metadata:
 ```
 
 The registry is engine-owned and enumerable.
+
+Portability is one of `:portable`, `:server_only`, or `:client_presentation_only`. An `offline_private` cartridge cannot compile if a gameplay dependency is server-only.
 
 ## 7. Capability discovery API
 
@@ -424,3 +431,10 @@ deprecated/withdrawn (still available to pinned saves as policy allows)
 ```
 
 Authors cannot skip from draft directly to production.
+
+
+## 22. Cartridge/deployment split
+
+The cartridge defines reusable story/world semantics. A deployment defines how that exact cartridge is hosted: offline private, online private, party, embedded instance, or shared realm area.
+
+Deployment overlays may change hosting policy—such as realm mount point, NPC respawn policy, or economy integration—but any semantic override is separately hashed and certified. This is the mechanism for reusing a storypack inside the later MMORPG without pretending every private-world assumption is globally shareable.
