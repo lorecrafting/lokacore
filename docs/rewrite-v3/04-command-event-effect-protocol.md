@@ -1,12 +1,36 @@
-# 04 — Commands, Domain Events, Effects, and Client Protocol
+# 04 — Action Invocations, Commands, Domain Events, Effects, and Client Protocol
 
-## 1. Four concepts, four responsibilities
+## 1. Five concepts, five responsibilities
 
 Loka v3 MUST distinguish:
 
+### ActionInvocation
+
+A host-neutral gameplay intent emitted by shared UI, text parsing, bots, or accessibility tooling from a currently advertised GameView action.
+
+Example:
+
+```json
+{
+  "invocation_id": "uuid",
+  "action_key": "talk",
+  "actor_id": "uuid",
+  "target_ids": ["uuid"],
+  "input": {},
+  "view_revision": 9201
+}
+```
+
+An ActionInvocation is **not yet an authoritative Command**.
+
+- Story Mode: `LocalStorySession` resolves/revalidates the invocation against current local GameView/state and constructs the typed Command.
+- Realm Mode: `RemoteRealmSession` sends the invocation to BEAM; the server re-resolves/revalidates the advertised action and constructs the typed Command.
+
+The shared renderer MUST NOT construct authority-specific command payloads.
+
 ### Command
 
-An authenticated request to change/inspect authoritative game state.
+An authority-side typed request to change/inspect game state after action resolution/authentication.
 
 Examples:
 
@@ -59,34 +83,40 @@ Examples:
 
 Client messages are not domain events.
 
-## 2. Host-neutral command semantics
+## 2. Action invocation and command semantics
 
-The same logical command types drive offline and online play. Online they arrive through the external protocol; offline the React Native/local authority constructs the same canonical command payload locally.
+Portable gameplay may resolve to the same logical Command types offline and online, but shared mobile UI speaks **ActionInvocation**, not internal Command structs.
 
-### External online command envelope
+The ActionSet/GameView is the affordance contract: it advertises valid action keys, target/input schema, labels, and relevant presentation hints.
+
+Authority always revalidates because the GameView can be stale.
+
+### External Realm gameplay envelope
 
 ```json
 {
   "protocol_version": 1,
-  "command_id": "uuid",
   "client_seq": 184,
+  "session_id": "uuid",
   "instance_id": "uuid",
-  "character_id": "uuid",
-  "type": "move",
-  "payload": {
-    "direction": "north"
-  },
-  "expected_revision": 9201
+  "invocation": {
+    "invocation_id": "uuid",
+    "action_key": "move",
+    "actor_id": "uuid",
+    "target_ids": [],
+    "input": {"direction": "north"},
+    "view_revision": 9201
+  }
 }
 ```
 
-The gateway supplies authenticated account/session identity; the client cannot claim arbitrary actor authority.
+The gateway supplies authenticated account/session identity; the client cannot claim arbitrary actor authority. The server verifies the invocation actor is controllable by that session and re-resolves the action against current state.
 
-`expected_revision` MAY be omitted for commutative/read-like operations but SHOULD be used for state-sensitive interactions where stale UI matters.
+The server then creates the internal Command ID/idempotency identity. The invocation ID is retained for client retry/correlation.
 
 ## 3. Canonical command representation
 
-After online protocol validation—or local offline input adaptation—the authority host constructs:
+After Realm invocation validation/action resolution—or Story local invocation resolution—the authority host constructs:
 
 ```elixir
 %Command{
@@ -417,10 +447,12 @@ Text parser is an adapter:
    ↓ parse
 ActionIntent(:give, item query, target query)
    ↓ canonical Search service resolves IDs
-Command(:give_item, ...)
+ActionInvocation(action_key=:give, targets=[...])
+   ↓ active GameSession
+authoritative Command
 ```
 
-Touch UI sends IDs directly but reaches the same command.
+Touch UI creates the same ActionInvocation directly from GameView action metadata.
 
 ## 18. Search/target resolution
 
