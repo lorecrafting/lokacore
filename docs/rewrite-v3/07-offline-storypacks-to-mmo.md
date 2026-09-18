@@ -124,7 +124,7 @@ new portable state or state delta
 new RNG state
 domain events
 portable effects
-projection hints
+portable game-view/projection delta or projection hints
 trace data
 ```
 
@@ -226,7 +226,7 @@ local SQLite transaction
    ↓
 local state adopted
    ↓
-React Native projection
+portable GameView → React Native projection
 ```
 
 `LocalInstanceAuthority` serializes local commands just as `WorldInstance` does online.
