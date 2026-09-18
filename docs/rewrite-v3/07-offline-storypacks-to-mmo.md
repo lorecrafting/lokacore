@@ -17,7 +17,7 @@ Offline, the authority shell lives on the device.
 
 Online, authority lives in BEAM/OTP.
 
-The same compiled cartridge definitions and simulation semantics run in both places.
+For a **portable Story cartridge**, the same compiled cartridge definitions and portable simulation semantics run in both places. Realm-native cartridges may add or depend on server-only capabilities and are not required to execute offline.
 
 ## 2. One client, two strict authority modes
 
