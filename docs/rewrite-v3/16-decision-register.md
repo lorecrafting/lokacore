@@ -381,18 +381,22 @@ Use observed authoring pain to finish the canonical Builder API.
 Do not delay the first game for a generalized world-building platform.
 
 
-## ADR-037 — Separate Stories and Online clients
+## ADR-037 — One mobile client, two strict gameplay modes
 
 **Status:** Accepted
 
-Loka ships two focused React Native/Expo app targets from one monorepo:
+Loka ships one React Native / Expo application.
 
-- **Loka Stories** — offline-first cartridge/campaign product with local authority and local saves;
-- **Loka Online** — online-only multiplayer/MUD client with BEAM authority.
+It contains two gameplay session modes:
 
-They share presentation/schema packages where useful but do not share authority responsibilities.
+- **Story Mode** — `LocalStorySession`, portable kernel, local SQLite authority;
+- **Realm Mode** — `RemoteRealmSession`, Phoenix transport, BEAM authority.
 
-This is preferred over one giant app with pervasive offline/online conditionals.
+Shared UI/GameView/schema packages are reused. Authority implementations remain isolated modules with enforceable dependency boundaries.
+
+Exactly one gameplay authority is active for a running session. Realm Mode never falls back to local authority when disconnected.
+
+This is preferred over two store apps unless future evidence shows binary size, release cadence, store policy, branding, or operational isolation makes a split materially better.
 
 ## ADR-038 — Builder has explicit story/realm targets
 
@@ -404,14 +408,20 @@ Builder workspaces declare target:
 - `realm` — online multiplayer capability set, including server-only systems;
 - `promote` — explicit adaptation of an existing story cartridge into an online deployment.
 
+These are **authority/content targets, not app targets**.
+
 A workspace cannot silently cross target boundaries.
 
-## ADR-039 — Cross-client purchase portability is not promised by default
+## ADR-039 — One app simplifies entitlement UX without weakening trust
 
-**Status:** Accepted product boundary; future policy provisional
+**Status:** Accepted product boundary; future reward policy provisional
 
-Owning a cartridge in Loka Stories guarantees Stories access.
+Story purchase/library and Realm entry live in one app and may share one authenticated Loka account when online.
 
-Any Loka Online benefit/unlock derived from that purchase must be a separately defined server-side entitlement/product rule based on verified evidence and current platform policy.
+However:
 
-Local purchase flags or offline save contents never grant authoritative Online value directly.
+- Story Mode may remain playable offline without an active account session after legitimate acquisition;
+- local save contents and local entitlement flags never become authoritative Realm progression/economy state;
+- Realm unlocks/benefits derived from ownership require explicit server-side verified product rules.
+
+One app simplifies discovery, restore, branding, and account linking; it does not merge the authority models.
