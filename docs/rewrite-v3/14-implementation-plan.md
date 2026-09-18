@@ -130,8 +130,11 @@ apps/loka_runtime
 apps/loka_builder
 apps/loka_web
 kernel/
-mobile/apps/stories
-mobile/apps/online
+mobile/app
+mobile/features/story
+mobile/features/realm
+mobile/authority/local-story
+mobile/authority/remote-realm
 mobile/packages/ui
 mobile/packages/game-view
 protocol/
@@ -144,7 +147,7 @@ docs/
 - Mix umbrella;
 - strict compile/dependency boundaries;
 - Rust workspace if accepted;
-- two minimal Expo app targets (Stories and Online) plus shared UI/GameView packages;
+- one minimal Expo app with strict Story/Realm feature and authority-module boundaries, plus shared UI/GameView packages;
 - PostgreSQL dev/test container;
 - formatter/lint/security configs;
 - one unified CI;
@@ -426,13 +429,13 @@ Let humans/agents author without raw repo semantics.
 
 Astra/another agent can recreate or extend representative first-cartridge content using only Builder API tools and fix intentionally injected validation failures without shell/Git editing.
 
-## R12 — Loka Stories product shell
+## R12 — Loka app: production Story Mode
 
 Can overlap late R10.
 
 ### Build
 
-- production Stories navigation;
+- production app navigation with Story Mode as the shipped gameplay mode;
 - shared UI/GameView package extraction only where demonstrated useful;
 - catalog shell;
 - cartridge install/delete/update;
@@ -472,7 +475,7 @@ Store sandbox tests on iOS/Android:
 - second device;
 - refund/reconnect policy.
 
-## R14 — BEAM online authority + Loka Online skeleton
+## R14 — BEAM online authority + Realm Mode skeleton
 
 ### Objective
 
@@ -490,7 +493,7 @@ Run the same cartridge rules online under OTP.
 - effect outbox;
 - snapshots;
 - Phoenix typed protocol;
-- minimal Loka Online client target using that protocol;
+- Realm Mode route/session driver inside the existing Loka app using that protocol;
 - reconnect/resync;
 - observability.
 
@@ -516,7 +519,7 @@ Offer same story as cloud-authoritative run.
 
 ### Gate R15
 
-Player can choose offline or connected deployment of same cartridge; narrative/rules match.
+Within the same Loka app, the player can choose local Story execution or a connected Realm/private deployment of the same portable cartridge where offered; narrative/rules match.
 
 ## R16 — Repeatable AI factory
 
@@ -550,7 +553,7 @@ Two materially different cartridges produced mostly as content changes without u
 
 Full party certification including race/fault tests.
 
-## R18 — Loka Online persistent social shell
+## R18 — Realm Mode persistent social shell
 
 ### Build selectively
 
