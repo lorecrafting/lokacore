@@ -46,7 +46,37 @@ Artifact references unknown capability/version.
 
 Compile/launch fails closed with typed diagnostic.
 
-### DET-06 — Kernel panic boundary
+### DET-06 — Deterministic map ordering
+
+Two hosts construct logically equivalent state maps/sets in different insertion orders.
+
+Canonical decision/trace hash is identical.
+
+### DET-07 — Deterministic IDs
+
+A scripted spawn under identical instance/command/RNG/ID-source state produces the same canonical identity sequence across hosts.
+
+### DET-08 — Numeric boundary
+
+Rule-critical arithmetic at rounding/threshold boundaries produces identical results on ARM mobile and server host.
+
+No platform floating-point difference changes quest/combat/economy outcome.
+
+### DET-09 — Kernel proposal is non-mutating before commit
+
+Decision returns a proposal/delta.
+
+Host simulates persistence failure.
+
+Subsequent decision observes the original committed state.
+
+### DET-10 — Post-commit in-memory apply failure
+
+Persistence commits delta, then injected kernel-state apply failure occurs.
+
+Authority restarts/reloads committed state and does not execute command twice.
+
+### DET-11 — Kernel panic boundary
 
 Injected native failure cannot silently produce committed game state.
 
@@ -661,3 +691,36 @@ Any bug affecting state correctness should result in:
 - permanent test in the relevant profile.
 
 The acceptance suite should grow monotonically with real failures.
+
+
+## S. Cartridge composition
+
+### COMP-01 — Campaign port binding
+
+Chapter 1 exported exit is bound to Chapter 2 entry through campaign manifest.
+
+Compiler resolves connection without exposing unrelated internals.
+
+### COMP-02 — Private internal key
+
+Expansion attempts to reference non-exported internal room from prior cartridge.
+
+Compilation fails.
+
+### COMP-03 — Extension point schema
+
+Expansion contributes a quest hook to an exported extension point with wrong schema.
+
+Compilation fails with typed diagnostic.
+
+### COMP-04 — Immutable prior artifact
+
+Installing expansion does not modify prior cartridge hash.
+
+Only composite campaign/deployment manifest changes.
+
+### COMP-05 — MMO mount
+
+Shared realm mounts a certified cartridge through declared entry/exit ports.
+
+No ad-hoc global-key reference is required.
