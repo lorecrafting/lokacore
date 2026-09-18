@@ -148,7 +148,6 @@ docs/
 - strict compile/dependency boundaries;
 - Rust workspace if accepted;
 - one minimal Expo app with strict Story/Realm feature and authority-module boundaries, plus shared UI/GameView packages;
-- PostgreSQL dev/test container;
 - formatter/lint/security configs;
 - one unified CI;
 - generated-schema drift check;
@@ -165,7 +164,7 @@ Empty-system CI is green on:
 - TypeScript;
 - iOS binding compile;
 - Android binding compile;
-- PostgreSQL integration.
+- mobile native-binding smoke.
 
 ## R3 — Contract/schema foundation
 
@@ -183,8 +182,8 @@ Make machine-readable contracts exist before features.
 - domain-event registry;
 - effect registry;
 - policy AST;
-- Builder API operation registry;
-- protocol schema/codegen;
+- portable GameView schema;
+- portable kernel ABI/serialization contract;
 - canonical serialization/hash rules;
 - diagnostic/error registry.
 
@@ -198,7 +197,9 @@ From registries, tooling can generate/check:
 - docs/help excerpts;
 - test fixtures.
 
-No handwritten duplicate command/event catalogs.
+No handwritten duplicate portable command/event/GameView catalogs.
+
+Do **not** build the generalized Builder operation registry or the full Realm transport protocol in R3. Builder operation schemas belong to R11; Realm protocol/codegen belongs to R14.
 
 ## R4 — Cartridge compiler v1
 
@@ -412,6 +413,7 @@ Let humans/agents author without raw repo semantics.
 
 ### Build
 
+- Builder API operation registry/schema generation;
 - workspace/revision;
 - capability search/describe;
 - content CRUD;
@@ -454,6 +456,7 @@ Non-developer can install the polished build, enter airplane mode, play/finish t
 
 ### Build
 
+- introduce PostgreSQL dev/test/runtime infrastructure needed by platform services;
 - `loka_platform` account/catalog/entitlement application service boundary;
 - catalog service;
 - canonical entitlement;
@@ -492,7 +495,8 @@ Run the same cartridge rules online under OTP.
 - command receipts;
 - effect outbox;
 - snapshots;
-- Phoenix typed protocol;
+- machine-readable Realm transport protocol + Elixir/TypeScript codegen and compatibility fixtures;
+- Phoenix typed protocol adapter;
 - Realm Mode route/session driver inside the existing Loka app using that protocol;
 - reconnect/resync;
 - observability.
