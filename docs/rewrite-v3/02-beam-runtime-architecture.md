@@ -202,6 +202,16 @@ Cross-shard movement MUST use an explicit handoff protocol:
 
 Do not rely on “send two PubSub messages and hope.”
 
+### Shared online services are authorities too
+
+Realm-wide services such as guild banks, auctions, mail, global economy ledgers, or social organizations own their own durable state domains.
+
+A ZoneShard MUST NOT mutate another service's authoritative tables/state directly.
+
+Cross-authority operations use explicit idempotent protocols—transfer intent, command receipt, outbox/saga/reconciliation as appropriate—so a crash cannot leave both authorities believing they own or transferred the same value.
+
+Avoid distributed transactions as an implicit design assumption. Each authority commits its own state and participates in a recoverable protocol with traceable causation.
+
 ## 8. BEAM distribution
 
 Initial production SHOULD run on one BEAM node plus PostgreSQL unless measured scale requires clustering.
