@@ -791,3 +791,62 @@ Architecture test fails.
 Offline already-downloaded cartridge remains playable.
 
 New purchase/restore may fail gracefully, while world simulation and unrelated online game instances remain isolated from the platform-service failure according to deployment topology.
+
+
+## V. Client and builder target separation
+
+### CLIENT-01 — Stories has no online world dependency
+
+With all Loka online services unavailable, an installed offline-capable Stories cartridge launches, plays, saves, and resumes.
+
+### CLIENT-02 — Online has no local authority fallback
+
+Loka Online loses server connectivity during authoritative play.
+
+It does not silently continue mutating a local authoritative world; it reconnects/resyncs or presents offline status according to policy.
+
+### CLIENT-03 — Shared GameView parity
+
+Equivalent portable story state rendered through Stories and through an Online private instance yields semantically equivalent GameView action/quest/dialogue visibility.
+
+Presentation styling may differ.
+
+### CLIENT-04 — Online app does not require embedded portable kernel
+
+A normal shared-realm Loka Online client build operates entirely from typed server projections/commands; no client-side simulation kernel is used as authority.
+
+### CLIENT-05 — Stories app excludes realm-only surface
+
+Stories production binary/workspace has no requirement for guild chat, shard handoff, shared realm economy, or other realm-only authority to play ordinary cartridges.
+
+### BUILDTARGET-01 — Story rejects server-only capability
+
+A `story` workspace attempts to add `guild_market@1` or another server-only capability.
+
+Compilation fails with a portability/target diagnostic.
+
+### BUILDTARGET-02 — Realm permits server-only capability
+
+A `realm` workspace may use a registered server-only capability and receives the corresponding multiplayer certification obligations.
+
+### BUILDTARGET-03 — Realm state scope must be explicit
+
+A realm quest/door/world event omits required multiplayer state scope where ambiguity exists.
+
+Validation fails rather than defaulting to global.
+
+### BUILDTARGET-04 — Promotion preserves source artifact
+
+A `promote` workspace adapts a certified Stories cartridge.
+
+Original cartridge hash remains unchanged; promotion creates a new deployment/adaptation artifact and certificate.
+
+### BUILDTARGET-05 — Promotion surfaces multiplayer questions
+
+Promotion of a cartridge containing permanently killable quest giver, unique loot, and player-local door flags returns structured required decisions for respawn, contention, and scope before shared-area certification can pass.
+
+### CLIENT-ENTITLEMENT-01 — Stories purchase does not self-authorize Online
+
+Stories device reports local cartridge ownership but no verified online entitlement exists.
+
+Loka Online does not grant competitive/persistent access solely from the local claim.
