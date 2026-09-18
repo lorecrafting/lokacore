@@ -137,7 +137,23 @@ MUST fail validation rather than silently continue.
 
 User-facing gameplay may degrade gracefully only where the contract explicitly defines a fallback.
 
-### A8. Idempotency at retryable boundaries
+### A8. Determinism includes representation, not only algorithms
+
+Portable deterministic rules MUST define:
+
+- canonical map/set iteration order;
+- canonical serialization;
+- fixed RNG algorithm/version;
+- deterministic ID generation/source;
+- deterministic integer/fixed-point arithmetic for rule-critical calculations where floating-point variation could change outcomes;
+- explicit handling/avoidance of NaN/infinity/platform math differences;
+- stable sorting/tie-break rules.
+
+Do not rely on language hash-map iteration order or host entropy.
+
+Presentation-only animation/audio calculations may use ordinary platform floating point because they are outside authoritative game state.
+
+### A9. Idempotency at retryable boundaries
 
 Client commands, reward effects, purchase reconciliation, scheduled jobs, and promotion operations MUST have stable IDs or idempotency keys.
 
