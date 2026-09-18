@@ -155,6 +155,7 @@ Use these terms consistently in v3:
 | **StateDelta** | Proposed authoritative state change accumulated before commit. |
 | **Effect** | Typed post-decision instruction whose durability/retry semantics are explicit; not a hidden DB mutation path. |
 | **GameView** | Host-neutral semantic projection consumed by mobile rendering. |
+| **Fact** | Typed, namespaced, scoped durable narrative/world truth intended for cross-system observation. |
 
 `trait` is historical Lokacore terminology and SHOULD NOT be a separate v3 schema concept. Old trait ideas become Behaviors/capabilities.
 
