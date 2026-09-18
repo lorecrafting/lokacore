@@ -391,3 +391,20 @@ As of this spec's 2026-09-17 research baseline:
 - Rust-to-React-Native generator projects exist, but current ecosystem maturity varies and at least one prominent option warns against production use today.
 
 Therefore a shared Rust kernel is feasible enough to justify a spike, but **neither Rust nor a particular React Native binding generator is frozen by this document**. The spike must prove build/release ergonomics, crash/debug behavior, Expo/EAS integration, upgrade burden, and deterministic cross-host parity first.
+
+
+## 27. Store-review gate for downloadable rule content
+
+Apple's current Guideline 2.5.2 says apps may not download/install/execute code that introduces or changes app features/functionality, while Guideline 4.7 separately permits certain non-binary software categories such as mini games under additional rules.
+
+Therefore the architecture MUST NOT assume that calling a downloaded payload “bytecode” or “script” makes it acceptable.
+
+Before the first App Store submission, run a dedicated review-position spike:
+
+1. characterize cartridge rule content as bounded game data/rules over pre-shipped capabilities;
+2. ensure it cannot expose new native APIs or general computation;
+3. provide App Review with clear notes/demo content explaining downloadable game levels;
+4. determine whether the exact implementation is reviewed under ordinary game-content/IAP expectations, Guideline 4.7, or another current interpretation;
+5. if necessary, further restrict/compile LokaScript into a declarative rule graph rather than a general instruction VM.
+
+The product goal—downloadable offline storypacks—remains; the precise portable rule representation must be compatible with current store review policy.
