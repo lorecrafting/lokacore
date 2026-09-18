@@ -301,3 +301,20 @@ Findings and corrections:
 7. **Cartridge/app compatibility is now part of certification**, not a support afterthought.
 
 No adversarial finding currently requires abandoning the clean-sheet/offline-first architecture. The shared-kernel decision remains the primary R1 evidence gate.
+
+
+## 21. Product-boundary interruption: separate Stories and Online clients
+
+During adversarial review, the product boundary was challenged again: offline single-player and persistent multiplayer have sufficiently different trust, release, UX, and state requirements that one client risks becoming condition-heavy.
+
+Decision:
+
+- **Loka Stories** is a separate offline-first cartridge/campaign app;
+- **Loka Online** is a separate online-only multiplayer/MUD app;
+- both live in one monorepo and share UI/GameView/schema packages where valuable;
+- the Online client does not become a local simulation authority;
+- the Stories client does not carry realm/social/shard responsibilities.
+
+The Builder API now has explicit `story`, `realm`, and `promote` targets.
+
+This reduces architecture coupling at the cost of two app-store/release tracks and a deliberate cross-client entitlement/account policy. The latter is intentionally not assumed to be automatic.
