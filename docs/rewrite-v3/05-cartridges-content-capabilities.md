@@ -195,6 +195,7 @@ Capability metadata includes portability classification:
   commands: [...],
   events: [...],
   effects: [...],
+  consequence_operators: [...],
   policies: [...],
   dependencies: [...],
   docs: ...,
