@@ -19,7 +19,66 @@ Online, authority lives in BEAM/OTP.
 
 The same compiled cartridge definitions and simulation semantics run in both places.
 
-## 2. Execution profiles
+## 2. Product/client boundary
+
+Loka uses two distinct client products.
+
+### Loka Stories
+
+Responsibilities:
+
+- cartridge catalog/download;
+- permanent story purchases;
+- offline local authority;
+- local SQLite saves;
+- campaigns/sequels/expansions;
+- optional cloud backup/account linking;
+- portable GameView rendering.
+
+It does NOT need:
+
+- Phoenix world sessions for ordinary play;
+- realm chat/presence;
+- guild/economy services;
+- shard handoff;
+- anti-cheat authority over local saves.
+
+### Loka Online
+
+Responsibilities:
+
+- authentication/session;
+- Phoenix online protocol;
+- BEAM-authoritative world/party instances;
+- persistent characters;
+- chat/presence/social;
+- shared zones and later realm systems;
+- server-authoritative economy/progression.
+
+It does NOT need:
+
+- local authoritative world saves;
+- offline cartridge entitlement execution;
+- local SQLite as game authority;
+- offline campaign merge semantics.
+
+### Shared packages, not shared responsibility
+
+One monorepo SHOULD share:
+
+- design system/components;
+- portable GameView types/renderers;
+- localization;
+- cartridge/capability schemas;
+- generated model/types;
+- portable kernel bindings where the Stories app needs them;
+- test fixtures/assets.
+
+Do not make a single giant client package conditionalize every offline/online behavior behind feature flags.
+
+The Online app does not need to embed the portable kernel just because the server uses it; it receives authoritative GameViews/messages from BEAM.
+
+## 4. Execution profiles
 
 Each cartridge/deployment declares supported profiles.
 
@@ -103,7 +162,7 @@ Rust owns only deterministic portable simulation semantics.
 
 This is analogous to using a physics/rules library inside an actor-oriented server.
 
-## 4. Kernel boundary
+## 5. Kernel boundary
 
 Input:
 
@@ -142,7 +201,7 @@ The kernel MUST NOT:
 
 It is a pure deterministic engine boundary.
 
-## 5. Kernel state and commit boundary
+## 6. Kernel state and commit boundary
 
 The portability spike MUST decide how state crosses the native boundary without violating transactional authority or causing pathological full-world copies.
 
@@ -185,7 +244,7 @@ Choose the simplest model that preserves:
 
 Do not freeze a hidden mutable NIF resource design before this evidence.
 
-## 6. Server execution
+## 7. Server execution
 
 Online:
 
@@ -209,7 +268,7 @@ The BEAM process serializes authority and provides resilience.
 
 Short bounded kernel calls may use a normal Rustler NIF if proven safe for scheduler latency. Heavy Lab/model-check simulations MUST use a dirty CPU scheduler or isolated worker so they cannot starve BEAM schedulers.
 
-## 7. Offline execution
+## 8. Offline execution
 
 On device:
 
@@ -233,7 +292,7 @@ portable GameView → React Native projection
 
 It need not emulate OTP. It only must enforce the same command/commit semantics.
 
-## 8. Offline persistence
+## 9. Offline persistence
 
 Use a local transactional database, normally SQLite.
 
@@ -257,7 +316,7 @@ A command is locally committed before UI treats it as durable.
 
 A crash cannot leave “item removed from room but not placed in inventory.”
 
-## 9. Offline time
+## 10. Offline time
 
 Cartridge declares its time policy.
 
@@ -277,7 +336,7 @@ No background process is required to simulate every second while the app is clos
 
 Use on-demand derivation and process due durable jobs on resume.
 
-## 10. Offline scripts
+## 11. Offline scripts
 
 Offline-capable cartridges may use only **portable LokaScript** and portable bindings.
 
@@ -301,7 +360,7 @@ The authoring compiler MAY use Elixir's parser during build time to convert synt
 
 Engine-native compiled Elixir capabilities are automatically server-only unless equivalent portable kernel semantics exist.
 
-## 11. Capability portability classification
+## 12. Capability portability classification
 
 Every capability declares:
 
@@ -328,7 +387,7 @@ haptics@1            client_presentation_only
 
 The first storypacks SHOULD target the portable capability set.
 
-## 12. Conformance suite
+## 13. Conformance suite
 
 The portable kernel creates a critical new invariant:
 
@@ -343,7 +402,7 @@ CI runs golden vectors through:
 
 Any divergence blocks release.
 
-## 13. Architecture spike gate
+## 14. Architecture spike gate
 
 Before writing the full engine, implement a tiny vertical spike:
 
@@ -378,7 +437,7 @@ Prove:
 
 If this spike is too operationally costly, fallback is dual Elixir/TypeScript implementations with mandatory golden-vector parity. That is the fallback, not first choice.
 
-## 14. Campaigns, sequels, and single-player expansions
+## 15. Campaigns, sequels, and single-player expansions
 
 A **cartridge** is the smallest independently versioned/certified world-content unit. A **campaign** is an optional composition layer that lets multiple cartridges/chapters form one continuing offline adventure.
 
@@ -509,7 +568,7 @@ Later the MMO can expose:
 
 Campaign ordering/continuity is product metadata; cartridge content remains reusable.
 
-## 15. Cartridge versus deployment
+## 16. Cartridge versus deployment
 
 Separate reusable story/content from how it is hosted.
 
@@ -555,7 +614,7 @@ policies:
 
 Deployment is separately hashed and certified.
 
-## 16. Three ways a single-player cartridge enters the MMO
+## 17. Three ways a single-player cartridge enters the MMO
 
 This is the central reconciliation mechanism.
 
@@ -610,7 +669,7 @@ Create a shared deployment overlay and recertify for:
 
 This is adaptation, not an automatic flag flip.
 
-## 17. Quest design for future reuse
+## 18. Quest design for future reuse
 
 Default story quest scope SHOULD be `player`.
 
@@ -627,7 +686,7 @@ For personal consequences, use:
 
 Use realm scope only for intentional world events.
 
-## 18. Shared NPC versus personal narrative
+## 19. Shared NPC versus personal narrative
 
 An NPC definition can be reused across modes, but deployment policy decides runtime multiplicity.
 
@@ -651,7 +710,7 @@ one shared ferryman per zone shard
 
 Player-specific dialogue/quest knowledge lives in player-scoped state rather than mutating the shared ferryman into contradictory global states.
 
-## 19. Death and permanence
+## 20. Death and permanence
 
 A story may allow the ferryman to die permanently.
 
@@ -667,7 +726,7 @@ Deployment/capability policy can choose:
 
 Any semantic change requires multiplayer semantic review.
 
-## 20. Economy boundary
+## 21. Economy boundary
 
 Offline saves are user-controlled and therefore untrusted for competitive MMO value.
 
@@ -683,7 +742,7 @@ MUST NOT be imported as authoritative MMO economy state.
 
 This is a security boundary, not an accusation against players.
 
-## 21. What may transfer from offline
+## 22. What may transfer from offline
 
 Optional low-stakes synchronization may include:
 
@@ -696,7 +755,7 @@ Optional low-stakes synchronization may include:
 
 Because offline saves can be modified, anything transferred MUST be treated as non-competitive/untrusted unless independently verified.
 
-## 22. Online-authoritative cartridge mode
+## 23. Online-authoritative cartridge mode
 
 Later, a player may choose to run the same cartridge in `online_private` mode.
 
@@ -718,7 +777,7 @@ Connected Adventure Mode
 
 Do not require Connected Adventure Mode for launch.
 
-## 23. Cloud save for offline storypacks
+## 24. Cloud save for offline storypacks
 
 Cloud backup is optional convenience, not runtime authority.
 
@@ -736,7 +795,7 @@ If two devices diverge from a common ancestor, DO NOT attempt arbitrary semantic
 
 Preserve both branches and let the player choose, or use an explicit cartridge-specific merge only if defined/tested.
 
-## 24. Offline entitlement
+## 25. Offline entitlement
 
 After a paid cartridge is legitimately acquired and downloaded, ordinary offline play SHOULD not require periodic connectivity.
 
@@ -746,7 +805,7 @@ Server revocation/refund state takes effect when the device next reconnects acco
 
 Exact Apple/Google implementation must be re-verified at commerce implementation time.
 
-## 25. Cartridge update while offline
+## 26. Cartridge update while offline
 
 A save is pinned to exact cartridge release/hash.
 
@@ -758,7 +817,7 @@ If a new release is downloaded:
 
 Never silently load a v1.2 save with v1.3 definitions.
 
-## 26. Offline download/package integrity
+## 27. Offline download/package integrity
 
 Downloaded cartridge package is signed/hashed.
 
@@ -772,7 +831,7 @@ Client verifies:
 
 Corrupt/partial download never becomes playable state.
 
-## 27. Local privacy
+## 28. Local privacy
 
 Offline gameplay SHOULD stay local unless user/account sync features require upload.
 
@@ -780,7 +839,7 @@ Do not upload full private play traces by default solely because the Lab uses ri
 
 Telemetry policy can be opt-in/configurable and privacy-minimized.
 
-## 28. Why this still uses BEAM's strengths
+## 29. Why this still uses BEAM's strengths
 
 Offline mode cannot use BEAM because the mobile app should not embed an entire Erlang VM merely to play a story.
 
@@ -807,7 +866,7 @@ BEAM is used exactly where its concurrency/fault-tolerance model creates leverag
 
 The portable kernel exists because the product explicitly requires disconnected execution.
 
-## 29. Product progression
+## 30. Product progression
 
 Recommended evolution:
 
