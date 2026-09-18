@@ -53,7 +53,7 @@ Examples:
 
 ## 3. Product invariant
 
-Loka v3 is one game platform with one portable rules/content model serving:
+Loka v3 is one game platform with one content/capability framework and a portable deterministic subset serving:
 
 1. offline private storypacks in Loka Story Mode;
 2. online private/party adventures in Loka Realm Mode;
@@ -67,28 +67,40 @@ A released cartridge MUST remain playable without an AI model or authoring facto
 ## 4. Architecture in one diagram
 
 ```text
-                      COMPILED CARTRIDGE
+                         ONE LOKA APP
                               |
-                    portable rules/kernel
-                      /               \
-                     /                 \
-       OFFLINE MOBILE                  ONLINE BEAM
-   LocalInstanceAuthority             loka_runtime
-   local SQLite                     WorldInstance/Shard
-         |                                |
- React Native projection        commit/effects/observation
-                                          |
-                                      PostgreSQL
-                                          |
-                                      loka_gateway
-                                  Phoenix / HTTP / channels
+                         GameView UI
+                              |
+                         GameSession
+                        /           \
+                       /             \
+          LocalStorySession       RemoteRealmSession
+          portable kernel          Phoenix transport
+          local SQLite                  |
+                                      BEAM
+                              WorldInstance / ZoneShard
+                                      |
+                              DecisionCoordinator
+                               /              \
+                    portable kernel      server-only
+                                         Elixir rules
+                               \              /
+                                StateDelta/events/effects
+                                         |
+                                     PostgreSQL
 
 AUTHORING PLANE
 Astra / Foundry / human terminal / CI
              |
         loka_builder
- workspace -> Builder API -> compiler -> Cartridge Lab -> certificate
+ story | realm | promote workspaces
+             |
+ compiler -> Cartridge Lab -> certificate
 ```
+
+The mobile shell is shared; **authority is not**.
+
+Story Mode commits locally. Realm Mode sends commands to BEAM and never treats the embedded local kernel as authority.
 
 The transport, authoring, runtime, domain, and persistence planes MUST remain separable.
 
@@ -111,7 +123,7 @@ The online authority/orchestration layer SHOULD remain idiomatic Elixir/OTP. Rul
 
 ## 6. Working top-level decisions
 
-| Topic | Draft v0.1 decision |
+| Topic | Draft v0.2 decision |
 |---|---|
 | Online language/runtime | Elixir on BEAM/OTP |
 | Portable offline rules | Shared deterministic kernel; Rust is the working choice pending a mandatory cross-platform spike |
@@ -128,7 +140,7 @@ The online authority/orchestration layer SHOULD remain idiomatic Elixir/OTP. Rul
 | Game decisions | pure/replayable functions with injected clock and RNG |
 | Scripting | declarative capabilities first; restricted Elixir-syntax LokaScript interpreter as escape hatch |
 | Builder | canonical typed Builder API; MCP/terminal/CLI are adapters |
-| Mobile protocol | one machine-readable external schema with generated TypeScript/Elixir validation |
+| Realm transport protocol | one machine-readable external schema with generated TypeScript/Elixir validation, introduced with Realm Mode |
 | Release | exact certified cartridge hash |
 | AI | author/reviewer/tool client, never runtime authority |
 
