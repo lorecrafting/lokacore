@@ -150,29 +150,31 @@ An AI builder should be able to query capabilities by meaning, target type, inpu
 A cartridge is an immutable compiled content release, not an alternate application:
 
 ```yaml
+api_version: loka/v3
 id: fox_spirit_of_yunmeng
 version: 1.2.0
 
 requires:
-  engine_api: ">=1.3 <2.0"
-  content_schema: 1
-  script_api: 1
+  kernel_api: ">=1.3 <2.0"
+  capabilities:
+    - movement@1
+    - dialogue@2
+    - quest@3
+    - schedule@1
   client_features:
+    - contextual_actions_v1
     - dialogue_choices_v1
-    - minimap_v1
 
-instance_modes:
-  - private
+execution_profiles:
+  - offline_private
+  - online_private
 
 entry:
-  starting_room: yunmeng_ferry
+  room: rooms/ferry_dock
 
-content:
-  world: world/
-  quests: quests/
-  dialogue: dialogue/
-  scripts: scripts/
-  assets: assets/
+locales:
+  default: en
+  available: [en, zh]
 ```
 
 The compiled artifact should record a content hash and the exact compatibility contract it was certified against.
