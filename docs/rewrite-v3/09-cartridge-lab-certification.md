@@ -366,7 +366,7 @@ party_story
 shared_area
 portable_capability_pack
 server_capability_pack
-mobile_release
+mobile_app_release
 ```
 
 Each profile selects mandatory gates.
@@ -416,6 +416,19 @@ Promotion MUST:
 4. run the selected Realm certification profile.
 
 A prior Story certificate is evidence, not a substitute for multiplayer certification.
+
+### `mobile_app_release` profile
+
+Every production mobile binary runs the Story Mode regression suite, including supported save/kernel/rule-IR compatibility.
+
+After Realm Mode exists, the same app release MUST also run:
+
+- Realm protocol compatibility fixtures;
+- authentication/reconnect/resync smoke;
+- remote-authority boundary tests;
+- representative Realm physical-device smoke.
+
+Online release cadence is never allowed to silently drop supported offline Story saves.
 
 ## 21. Release certificate
 
