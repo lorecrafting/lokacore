@@ -338,3 +338,44 @@ Do not tick everything.
 The architecture is not considered successful until it ships a polished offline story cartridge.
 
 MMORPG infrastructure must not block that milestone.
+
+
+## ADR-033 — Keep the portable kernel deliberately narrow
+
+**Status:** Accepted
+
+The portable kernel owns only deterministic mechanics that must be shared by offline and online cartridge execution.
+
+Do not move online-only orchestration, networking, persistence coordination, sessions, shard ownership, admin, or commerce into Rust merely to reduce language count.
+
+BEAM remains the online application/runtime architecture.
+
+## ADR-034 — Cartridge composition uses explicit ports
+
+**Status:** Accepted
+
+Campaigns, expansions, embedded instances, and shared-area mounts compose through versioned exported ports/extension points.
+
+Cartridge internals are private unless exported.
+
+No ad-hoc global-key cross-cartridge coupling.
+
+## ADR-035 — Downloaded rule representation is an App Store release gate
+
+**Status:** Accepted risk treatment; exact representation provisional
+
+The product requires downloadable offline storypacks, but Apple review treatment of downloadable interpreted rule content must be verified against the implementation.
+
+LokaScript/portable rule IR should be as bounded/declarative as practical and expose only capabilities already shipped in the app.
+
+A dedicated store-review position is required before first App Store submission.
+
+## ADR-036 — Prove a real cartridge before generalizing authoring tools
+
+**Status:** Accepted
+
+After compiler/kernel/offline/narrative/living-world/Lab foundations, substantially hand-author the first real cartridge.
+
+Use observed authoring pain to finish the canonical Builder API.
+
+Do not delay the first game for a generalized world-building platform.
