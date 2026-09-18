@@ -15,7 +15,82 @@ No adapter owns separate mutation semantics.
        AI agents          human          automation
 ```
 
-## 2. Workspace-first authoring
+## 2. Builder targets: story, realm, promote
+
+The Builder API has explicit build targets. An author/model does not work in an ambiguous “generic Loka world” mode.
+
+### `story`
+
+For Loka Stories.
+
+Constraints:
+
+- cartridge must compile against portable capabilities only;
+- offline save/campaign semantics required;
+- no realm/global service assumptions;
+- default quest scope is player/campaign;
+- certification profile is offline-first;
+- economy/power remains local to the story/campaign lineage.
+
+Typical command:
+
+```text
+workspace.create target=story cartridge=fox_spirit_of_yunmeng
+```
+
+### `realm`
+
+For Loka Online native multiplayer content.
+
+Allows:
+
+- server-only capabilities;
+- party/instance/realm scopes;
+- persistent online economy;
+- social/presence/guild dependencies;
+- zone/shard deployment metadata;
+- concurrency/abuse/load requirements.
+
+Realm mode is not required to remain offline-portable.
+
+### `promote`
+
+For adapting an existing portable story cartridge into Loka Online.
+
+The workflow starts from an immutable certified cartridge and creates a new online deployment/adaptation workspace.
+
+It must explicitly resolve:
+
+- player/party/realm state scopes;
+- shared NPC multiplicity;
+- death/respawn;
+- loot/resource contention;
+- economy integration;
+- personal versus shared quest state;
+- instance versus shared-area hosting;
+- entry/exit mount ports;
+- concurrency and griefing concerns.
+
+Promotion does not mutate the original Stories cartridge.
+
+This mode may produce:
+
+- a private/party online deployment with little or no narrative change;
+- an embedded instanced region;
+- a genuinely shared-area adaptation.
+
+### One API, target-specific capability surface
+
+All targets use the same Builder API/diagnostic model. Capability discovery is filtered by target:
+
+```text
+capability.search(target=story, "shop")
+capability.search(target=realm, "shop")
+```
+
+A story author cannot accidentally select server-only mechanics; a realm author is not constrained by offline portability where it provides no product value.
+
+## 4. Workspace-first authoring
 
 Normal authoring happens inside a workspace:
 
@@ -64,7 +139,7 @@ Response:
 
 Errors use stable codes and field paths.
 
-## 4. Operation families
+## 5. Operation families
 
 ### Workspace
 
@@ -156,7 +231,7 @@ publish.rollback
 
 Policy controls protect promotion operations.
 
-## 5. Structured diagnostics
+## 6. Structured diagnostics
 
 Diagnostics are first-class:
 
@@ -176,7 +251,7 @@ Diagnostics are first-class:
 
 AI repair loops consume codes/data, not prose scraping.
 
-## 6. Batch plans
+## 7. Batch plans
 
 Agents often need multi-step edits.
 
@@ -202,7 +277,7 @@ Builder API may:
 
 For file-backed first-party source, implementation may use a staging tree and atomic Git/workspace commit.
 
-## 7. Dry run
+## 8. Dry run
 
 All destructive/high-impact operations SHOULD support dry-run:
 
@@ -215,7 +290,7 @@ All destructive/high-impact operations SHOULD support dry-run:
 
 Dry-run reports incoming refs, generated migrations, validation impact, and affected tests.
 
-## 8. Rename/move must be semantic
+## 9. Rename/move must be semantic
 
 Never make AI perform blind text replacement for definition IDs.
 
@@ -227,7 +302,7 @@ Never make AI perform blind text replacement for definition IDs.
 4. validates;
 5. returns diff.
 
-## 9. Terminal adapter
+## 10. Terminal adapter
 
 Human terminal commands remain ergonomic:
 
@@ -245,7 +320,7 @@ Parser converts commands to Builder API calls.
 
 Terminal output can be pretty text, but underlying operation result stays structured.
 
-## 10. MCP adapter
+## 11. MCP adapter
 
 MCP exposes Builder API operations as tools.
 
@@ -260,7 +335,7 @@ MCP adapter responsibilities:
 
 MCP does not directly call low-level managers bypassing Builder API.
 
-## 11. AI model independence
+## 12. AI model independence
 
 Lokacore currently contains model-provider-specific conversation plumbing.
 
@@ -276,7 +351,7 @@ Possible clients:
 
 Model selection is external orchestration configuration.
 
-## 12. AI authoring workflow
+## 13. AI authoring workflow
 
 Recommended pipeline:
 
@@ -310,7 +385,7 @@ certificate
 
 Not every step requires a separate model process, but responsibilities should be separable.
 
-## 13. Context minimization
+## 14. Context minimization
 
 An authoring agent SHOULD retrieve only:
 
@@ -323,7 +398,7 @@ An authoring agent SHOULD retrieve only:
 
 Do not feed the entire engine documentation on every turn.
 
-## 14. Primitive proposal workflow
+## 15. Primitive proposal workflow
 
 If the builder cannot represent requested behavior:
 
@@ -349,7 +424,7 @@ Agent may produce a capability proposal containing:
 
 That proposal enters normal engine-development review. It does not auto-install into production.
 
-## 15. AI semantic review contract
+## 16. AI semantic review contract
 
 Semantic reviewer receives compact artifacts:
 
@@ -376,7 +451,7 @@ confidence
 
 No “looks good” approval substitutes for mechanical gates.
 
-## 16. Audit trail
+## 17. Audit trail
 
 Every Builder API write records:
 
@@ -391,7 +466,7 @@ Every Builder API write records:
 
 Secrets/prompts with sensitive data should not be retained blindly.
 
-## 17. Visual tools
+## 18. Visual tools
 
 Visual UI is primarily read/debug oriented:
 
@@ -407,7 +482,7 @@ Visual UI is primarily read/debug oriented:
 
 Visual editing may be added later only when it demonstrably improves a specific workflow.
 
-## 18. Git relationship
+## 19. Git relationship
 
 For first-party cartridges, Git SHOULD remain the durable collaborative source history.
 
@@ -421,7 +496,7 @@ Publication records exact source commit + compiled content hash.
 
 AI should not need raw Git operations for normal content work.
 
-## 19. Factory and runtime separation
+## 20. Factory and runtime separation
 
 The factory may be completely offline and gameplay must continue.
 
@@ -434,7 +509,7 @@ No released world may require:
 
 to run ordinary game mechanics.
 
-## 20. Builder API schema source
+## 21. Builder API schema source
 
 Builder operations SHOULD be declared from a machine-readable registry containing:
 
@@ -449,7 +524,7 @@ Builder operations SHOULD be declared from a machine-readable registry containin
 
 Generate MCP tool declarations, terminal help, API docs, and contract tests from the same registry.
 
-## 21. Agent permissions
+## 22. Agent permissions
 
 Agent roles SHOULD be capability-limited.
 
@@ -463,7 +538,7 @@ Examples:
 
 The Builder API must not expose “shell” or arbitrary filesystem execution as a normal authoring tool.
 
-## 22. Foundry integration
+## 23. Foundry integration
 
 Foundry MAY eventually orchestrate:
 
