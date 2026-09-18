@@ -377,7 +377,7 @@ The exact physical schema may normalize escrow/output separately, but allocation
 
 Capacity allocation must have a database/authority invariant sufficient to prevent double allocation under concurrent submissions.
 
-## 15. Command receipts
+## 14. Command receipts
 
 Every authority-side state-changing Command carries a stable idempotency identity.
 
@@ -402,7 +402,7 @@ Unique key: `(instance_id, command_id)`.
 
 If the same command is retried, runtime returns the prior committed result/ack rather than executing again. The receipt therefore MUST retain either the stable response payload required for retry or a durable reference from which that response can be reconstructed; a digest alone is insufficient.
 
-## 14. Transactional command commit
+## 15. Transactional command commit
 
 For a command changing durable state:
 
