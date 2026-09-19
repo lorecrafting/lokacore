@@ -1663,3 +1663,13 @@ invariant.
 
 The result is retained as exploratory semantic evidence; it cannot fail or pass the
 release until the property is separately reviewed/admitted.
+
+
+### CERT-14 — Opaque dependency widens impact set
+
+A changed Fact/event is consumed through a dynamic script/selector edge that static
+analysis cannot prove local.
+
+Impact analysis marks the dependency boundary unknown and widens required authoring/
+release checks according to policy. It never reuses stale downstream receipts on the
+assumption that no static edge means no dependency.
