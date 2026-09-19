@@ -545,3 +545,472 @@ Additional checks:
 - load.
 
 The private cartridge certificate remains evidence for underlying story logic.
+
+
+## 24. Certification pyramid: fast preflight to exact-hash release
+
+Certification should be usable continuously during authoring without confusing partial
+evidence with release approval.
+
+### Level 0 — edit-time validation
+
+Fast, deterministic checks after a small change:
+
+- schema/type/reference;
+- local graph integrity;
+- policy/action shape;
+- changed quest/scene/reaction checks;
+- changed-unit focused tests.
+
+### Level 1 — component/area preflight
+
+Run broader checks for one quest, AreaDefinition, storyline, capability composition, or
+other selected slice.
+
+Useful for builder feedback, but **not promotable release certification** because external
+dependencies and cross-area interactions may still be untested.
+
+### Level 2 — cartridge candidate certification
+
+Freeze one exact compiled cartridge hash and run every gate required by the selected
+Story/online-private/party profile.
+
+### Level 3 — deployment/shared-area certification
+
+Freeze exact cartridge + deployment hashes and run multiplayer/economy/abuse/load/
+authority-placement gates required by that deployment.
+
+### Level 4 — commercial release evidence
+
+Bind the exact certified semantic hash to:
+
+- package/signature verification;
+- supported app/runtime versions;
+- physical-device smoke;
+- commerce/entitlement evidence where relevant;
+- release-policy/human disposition;
+- immutable certification evidence manifest.
+
+A lower-level preflight must never be rendered or interpreted as Level-4 acceptance.
+
+## 25. Freeze first, certify the exact candidate
+
+Full certification starts by freezing/importing the exact normalized artifact and
+governing compatibility locks.
+
+Every gate receipt records:
+
+- semantic cartridge hash;
+- deployment hash when applicable;
+- engine/portable-rules revisions;
+- capability lock;
+- certification profile/policy revision;
+- test/check implementation revision;
+- environment/host identity where relevant.
+
+A content edit after freeze creates a new candidate hash and invalidates downstream
+candidate-specific evidence unless the gate's contract explicitly proves it is
+content-independent.
+
+There is no "tests were green before the final edit" release path.
+
+## 26. Coverage manifest
+
+A release candidate SHOULD produce a machine-readable **CoverageManifest** describing
+which authored semantic surfaces were exercised and which remain intentionally
+unreachable/dormant.
+
+Coverage dimensions should include, where present:
+
+- rooms/AreaDefinitions/connections/barriers;
+- InspectableDetails;
+- Actions/ActionRecipes and result bands;
+- policies and important true/false branches;
+- facts and state-machine transitions;
+- quest activation modes, objectives, milestones, branches and outcomes;
+- dialogue nodes/choices;
+- SceneSequence beats, choices, waits, outcomes and SceneSpaces;
+- InstancePlan entry/reconnect/reset/teardown/export paths;
+- ReactionRule triggers/conditions/consequences;
+- Behavior arbitration combinations;
+- SpawnBundle/PopulationPlan lifecycle;
+- commerce buy/sell/admission/stock/restock/price paths;
+- ServiceJob queue/cancel/complete/failure paths;
+- world-event phases/outcomes;
+- scripts/bindings;
+- save/migration paths;
+- multiplayer scopes/interleavings where applicable.
+
+Coverage is evidence of exercised structure, **not proof of semantic correctness**.
+
+An uncovered required branch is a release blocker unless the definition/certification
+policy marks it intentionally unreachable, content-only presentation, or otherwise
+outside the profile with an explicit reason.
+
+## 27. Static graph and model analysis
+
+Before simulation, compile semantic graphs and detect mechanically provable defects.
+
+Examples:
+
+### Topology
+
+- unreachable required locations;
+- one-way link mistakes where reciprocity was declared;
+- contradictory Barrier faces;
+- path loss under required schedule/time states;
+- orphan exported ports;
+- InstancePlan entry with no valid exit/teardown path where one is required.
+
+### Quest/story
+
+- prerequisite cycles;
+- impossible conjunctions;
+- dead objectives;
+- branches with no terminal outcome;
+- required outcome with no reachable path;
+- turn-in/scene target impossible under branch state;
+- quest branch destroys all future required progress;
+- storyline arc references incompatible outcome prerequisites.
+
+### Scene
+
+- unreachable beats;
+- nonterminal branch with no wait/end;
+- endless immediate beat loop;
+- choice with no legal option under reachable state;
+- modal scene with no escape/continuation;
+- InstancePlan scene whose required export references temporary-only state.
+
+### Reaction/event
+
+- statically visible reaction cycles;
+- event chains that necessarily exceed budget;
+- trigger references impossible event/target;
+- scope escalation without explicit operator.
+
+### Population/economy/services
+
+- impossible min/max or stock constraints;
+- population plan whose placement selector is empty;
+- negative/nonconserving transfer paths;
+- service output with no ownership/delivery policy;
+- restock/capacity windows with missing time basis.
+
+Static proof should eliminate cheap defects before expensive simulation/model review.
+
+## 28. Bounded state exploration and path search
+
+For small quest/scene/world graphs, certification SHOULD exhaust all reachable logical
+states within the declared finite model.
+
+For larger worlds, use bounded search guided by coverage gaps and risk:
+
+- breadth/depth path exploration;
+- branch/outcome enumeration;
+- pairwise/combinatorial policy variation;
+- state-machine transition exploration;
+- seed search;
+- temporal boundary search;
+- multiplayer interleaving search.
+
+The candidate records exploration bounds. "No failure found in 10,000 paths" is not
+reported as exhaustive proof unless the state space was actually exhausted.
+
+The Lab should support goals such as:
+
+~~~text
+find path to every quest outcome
+find path that strands the player
+find state where required NPC is unavailable
+find sequence that duplicates a unique reward
+find schedule/time state where route disappears
+find interleaving that violates stock/capacity
+find scene state with no legal continuation
+~~~
+
+A found counterexample becomes a deterministic repro fixture.
+
+## 29. Invariant registry
+
+Capabilities SHOULD register reusable invariants so a new cartridge automatically gains
+the appropriate checks.
+
+Examples:
+
+### Core/world
+
+- entity location/containment is unique;
+- no containment cycles;
+- one logical Barrier has one authoritative state;
+- state scope/audience/placement constraints hold;
+- no unknown runtime definition ref.
+
+### Quest/narrative
+
+- legal lifecycle transition;
+- reward/consequence once;
+- scene choice once;
+- no hidden pre-activation credit unless declared;
+- temporary InstancePlan state cannot leak except through allowed exports.
+
+### Population/economy
+
+- population stays within policy bounds;
+- provenance-safe cleanup;
+- currency/item conservation except registered source/sink;
+- finite stock never becomes negative;
+- escrow/custody unique;
+- ServiceJob output once.
+
+### Runtime
+
+- command/idempotency identity never changes on retry/reconnect;
+- authority revision monotonic;
+- stale owner cannot write;
+- event/reaction/script chain stays bounded.
+
+The Lab runs applicable invariants continuously during simulation, not only at the end.
+
+## 30. Mutation-sensitivity testing
+
+A certification suite should prove that important gates can actually detect representative
+defects.
+
+For selected high-risk content/capability contracts, create disposable candidate
+mutations such as:
+
+- remove a quest prerequisite;
+- swap a target ref;
+- broaden player scope to realm;
+- break a reverse connection/barrier binding;
+- duplicate a reward key;
+- remove a SceneSequence terminal;
+- alter an idempotency key;
+- change PopulationPlan provenance;
+- make merchant stock non-conserving;
+- disable a required reaction;
+- weaken an access policy;
+- reorder conflicting Behavior priority.
+
+The expected gate must fail.
+
+Mutation testing is evidence about **test sensitivity**, not production content. Mutants
+never become publishable candidates.
+
+## 31. Differential and metamorphic testing
+
+In addition to exact cross-host replay, test transformations that should preserve or
+predictably alter semantics.
+
+Examples:
+
+- serialization/deserialize round trip;
+- save/reload at arbitrary command boundaries;
+- irrelevant insertion-order changes;
+- reconnect under a new session ID;
+- equivalent text versus touch ActionInvocation;
+- same scenario with presentation-only locale change;
+- duplicate delivery of idempotent event/command;
+- advancing time in one step versus permitted equivalent substeps;
+- party player-order permutation where policy is symmetric.
+
+A semantic difference where equivalence is expected is a blocker.
+
+## 32. Adversarial gameplay generation
+
+Deterministic bots remain the release baseline, but high-reasoning models may propose
+new adversarial play plans.
+
+Useful model-generated challenges include:
+
+- "How could I sequence these legal actions to strand the quest?";
+- "Which NPC death/timing combinations threaten completion?";
+- "What does a malicious player spam or retry?";
+- "Which branch combinations produce contradictory facts?";
+- "Which shared-resource races are missing?";
+- "What player behavior would reveal an implausible schedule/economy?";
+- "What scene interruption/reconnect point is least tested?".
+
+The model's text is not test evidence.
+
+Foundry/Builder tooling converts an accepted proposed scenario into:
+
+- typed initial state;
+- ActionInvocation/Command sequence;
+- clock/RNG/fault schedule;
+- expected invariant/property.
+
+The deterministic Lab executes it. Failures become permanent regression fixtures.
+
+## 33. LLM semantic review as a separate evidence layer
+
+A high-reasoning semantic reviewer is useful for defects that static/model checks cannot
+define completely.
+
+Reviewer inputs SHOULD be compact, exact evidence views such as:
+
+- frozen artifact/hash and relevant definitions;
+- topology and quest/storyline graphs;
+- SceneSequence/InstancePlan graphs;
+- branch world-state comparisons;
+- NPC schedule timelines;
+- population/commerce/service summaries;
+- coverage gaps;
+- invariant/simulation findings;
+- representative transcripts/traces;
+- declared narrative intent/rubric.
+
+Review questions can include:
+
+- Does the story causality make sense?
+- Are player choices honestly reflected in outcomes?
+- Does NPC knowledge precede any plausible source?
+- Does a rescued/dead NPC still behave inconsistently?
+- Are areas dead, repetitive, or incoherent?
+- Are there soft-locks that mechanical reachability missed because the path is
+  narratively nonsensical?
+- Do dream/vision exports contradict ordinary-world state?
+- Does shared Realm adaptation undermine private-story assumptions?
+- Are prices/schedules/populations believable enough for the cartridge's design goals?
+
+The reviewer should be independent of the authoring assignment where policy requires it.
+
+The model may emit blockers/warnings/questions with cited evidence. It cannot:
+
+- alter the candidate;
+- waive a deterministic failed gate;
+- mark its own authored candidate accepted;
+- publish;
+- convert uncertainty into pass.
+
+Resolved findings and human/operator waivers are explicit evidence bound to the exact
+candidate.
+
+## 34. Jev/System-One-style fast semantic triage
+
+A fast typed probabilistic decision model such as Jev MAY sit in front of expensive
+semantic review **after held-out evaluation proves value**.
+
+Appropriate advisory questions are narrow and typed:
+
+- which evidence bundle deserves deeper review;
+- which rubric category a trace threatens;
+- whether two findings are likely duplicates;
+- which quest/scene/area is highest semantic risk;
+- whether a simulation anomaly looks likely narrative, mechanical, or infrastructure;
+- which already-authorized reviewer/test profile should inspect next.
+
+Possible outputs are Choice/Score/probability-style signals plus confidence.
+
+Deterministic policy owns:
+
+- minimum confidence;
+- maximum autonomous triage effect;
+- fallback to full review;
+- mandatory evidence that triage may never suppress.
+
+Jev is **not** an acceptance oracle. It cannot certify correctness, waive coverage,
+replace invariants, establish reviewer independence, or turn an untested area green.
+
+Pin provider/model/question-schema/threshold identity in the review evidence. If the
+provider is unavailable, malformed, low-confidence or stale, fall back to deterministic
+baseline/full review rather than weakening certification.
+
+## 35. Release blocker classes
+
+Certification SHOULD classify findings instead of flattening everything into pass/fail
+logs.
+
+### Mechanical blocker
+
+Examples:
+
+- schema/ref/invariant failure;
+- deterministic repro failure;
+- required branch unreachable;
+- cross-host divergence;
+- duplicate reward/stock/custody;
+- crash/recovery inconsistency.
+
+Cannot be waived by an LLM.
+
+### Security/authority blocker
+
+Examples:
+
+- script escape;
+- scope leak;
+- unauthorized action;
+- stale-owner write;
+- package traversal;
+- cross-player data leak.
+
+Requires code/content correction or an explicit architecture/security process—not an
+ordinary content-editor waiver.
+
+### Semantic blocker
+
+Examples:
+
+- contradiction with declared narrative intent;
+- inaccessible intended ending not mechanically encoded as required;
+- severe knowledge leak;
+- branch consequence contradicts story canon.
+
+Requires explicit reviewer/operator disposition and normally correction before release.
+
+### Warning / accepted design tradeoff
+
+Non-blocking concern retained in certificate evidence with reason.
+
+Unknown evidence is not pass.
+
+## 36. Release evidence bundle
+
+Every release candidate should produce a content-addressed **CertificationEvidenceBundle**
+containing or referencing:
+
+- candidate/deployment hashes and compatibility locks;
+- static diagnostics;
+- CoverageManifest;
+- graph/model-analysis report;
+- deterministic/property/fuzz results;
+- explored path/seed/interleaving summary;
+- invariant results;
+- mutation-sensitivity report where required;
+- cross-host differential receipts;
+- crash/chaos recovery receipts;
+- performance/load report;
+- semantic reviewer evidence;
+- Jev/fast-assessor evidence if used;
+- human/device smoke evidence;
+- unresolved warnings/waivers;
+- regression fixtures added from findings.
+
+The final certificate is a small signed/attested summary over this exact bundle and
+candidate hash.
+
+Agents and humans should be able to inspect *why* a release passed, not merely see a
+green badge.
+
+## 37. Regression ratchet
+
+Every escaped production defect, certification-discovered blocker, or important
+adversarial counterexample SHOULD be reduced to the smallest durable regression artifact
+that still reproduces the failure.
+
+Classify it into the relevant permanent suite:
+
+- static compiler;
+- capability invariant;
+- quest/scene model;
+- deterministic scenario;
+- property/fuzz;
+- multiplayer interleaving;
+- crash/recovery;
+- security;
+- semantic reviewer fixture.
+
+Certification should become harder to fool over time without making the whole suite
+depend on ever-growing LLM prompts.
