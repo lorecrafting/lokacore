@@ -457,6 +457,7 @@ beneficiary_id
 service_key
 input_escrow JSONB/reference
 submitted_logical_time
+time_basis
 scheduled_start
 scheduled_finish
 status
@@ -513,15 +514,25 @@ For a command changing durable state:
 
 ```text
 BEGIN
-  verify command_id not processed, or exact semantic digest matches an existing receipt
-  verify expected instance revision if supplied
-  update affected runtime entities / quest instances
-  update world instance revision + RNG/logical state
-  insert command receipt
-  insert event trace records required for diagnostics
-  insert durable effect_outbox entries
+  lookup command receipt by authority/instance + command_id
+
+  if receipt exists:
+    require exact semantic_command_digest match
+    return/reconstruct prior committed response
+    perform NO state mutation
+
+  else:
+    verify expected authority/instance revision if supplied
+    verify ownership/fencing generation where applicable
+    update affected runtime entities / quest instances
+    update owning authority revision + RNG/logical state
+    insert command receipt
+    insert event trace records required for diagnostics
+    insert durable effect_outbox entries
 COMMIT
 ```
+
+The duplicate-command branch is an early replay path, not permission to continue the mutation transaction after a matching receipt is found.
 
 Only after commit does the in-memory owner adopt the committed state revision.
 
