@@ -361,7 +361,9 @@ Those cannot pretend to be one database transaction.
 
 The local quest/outcome commits first with a durable, idempotent cross-authority Effect/outbox record. The receiving authority applies its own command/protocol and reconciliation rules.
 
-Certification must test failure/retry at that boundary.
+Delivery may repeat after acknowledgement loss; the stable effect identity makes remote authoritative application idempotent rather than assuming exactly-once transport. A required remote consequence that exhausts ordinary retry remains a durable unresolved/reconciliation obligation and MUST NOT silently disappear while the local quest presents the cross-authority work as successfully settled.
+
+Certification must test failure, duplicate delivery, terminal retry disposition, and reconciliation at that boundary.
 
 ## 11. Prefer facts for broad narrative consequences
 
