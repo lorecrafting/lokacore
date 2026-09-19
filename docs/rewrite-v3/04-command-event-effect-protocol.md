@@ -170,7 +170,7 @@ All payload variants are typed structs.
 
 The semantic Command is the portable/replayable input. Host-only context is used for authentication, admission, tracing, freshness/concurrency checks, and transport behavior; it MUST NOT make portable game semantics depend on an ephemeral session ID or host monotonic timestamp.
 
-The stable Command ID is derived/reused from trusted authority context + actor + invocation ID as defined by the persistence contract, so reconnecting through a new session cannot turn one invocation into a second mutation.
+The stable Command ID is derived/reused from the persistence contract's logical idempotency scope + invocation ID. That scope is stable across reconnect and, where ownership may move, across shard/process/authority handoff; current routing/owner identity MUST NOT turn one invocation into a second mutation.
 
 Unknown command types fail before reaching game rules.
 
@@ -328,6 +328,10 @@ Actual Effects are registered and typed in two broad categories:
 
 Use the outbox. These cross a boundary that cannot be completed atomically with the current authority commit.
 
+Outbox delivery MUST be designed as **at-least-once delivery with idempotent application**, unless a stronger mechanism is actually proven for a particular boundary. A lost acknowledgement may cause the same effect to be delivered multiple times; the receiver uses the stable effect/idempotency identity so the authoritative consequence is not applied twice. The specification MUST NOT describe network/outbox transport itself as "exactly once."
+
+A durable effect also declares its terminal-failure/reconciliation behavior. Exhausted retries cannot silently disappear if the effect represents a required gameplay consequence, custody transfer, entitlement change, or other authoritative obligation.
+
 ### Ephemeral post-commit effects
 
 Notifications/presentation hints may be emitted after commit and dropped/reconstructed if necessary.
@@ -337,6 +341,7 @@ Every effect declares:
 - durability;
 - idempotency requirement;
 - retry policy;
+- terminal-failure/reconciliation policy for durable effects;
 - allowed origin capabilities;
 - schema.
 
