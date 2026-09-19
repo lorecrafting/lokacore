@@ -75,7 +75,8 @@ Adapters MAY collapse implementation steps, but they MUST NOT collapse the seman
 Use these terms consistently:
 
 - **authority host** — the environment running authoritative gameplay: local Story authority or BEAM Realm authority;
-- **mutation owner** — the serialized owner of one mutable state domain, such as `LocalStorySession`, `WorldInstance`, or `ZoneShard`;
+- **GameSession adapter** — the UI-facing Story/Realm session abstraction; `LocalStorySession` delegates to local authority while `RemoteRealmSession` delegates over transport and is never Realm authority;
+- **mutation owner** — the serialized owner of one mutable state domain, such as `LocalInstanceAuthority`, `WorldInstance`, or `ZoneShard`;
 - **durable store** — SQLite/PostgreSQL persistence for committed state; durability does not make the database a second decision authority;
 - **state scope** — who owns a fact/progression value: player, party, instance, or realm;
 - **audience** — who may perceive/interact with a projection/entity;
@@ -116,10 +117,10 @@ A released cartridge MUST remain playable without an AI model or authoring facto
                         /           \
                        /             \
           LocalStorySession       RemoteRealmSession
-          portable rules host      Phoenix transport
-          local SQLite                  |
-                                      BEAM
-                              WorldInstance / ZoneShard
+                 |                  Phoenix transport
+       LocalInstanceAuthority            |
+          portable rules                BEAM
+          local SQLite          WorldInstance / ZoneShard
                                       |
                               DecisionCoordinator
                                /              \
@@ -139,9 +140,9 @@ Astra / Foundry / human terminal / CI
  compiler -> Cartridge Lab -> certificate
 ```
 
-The mobile shell is shared; **authority is not**.
+The mobile shell and `GameSession` interface are shared; **authority is not**.
 
-Story Mode resolves and commits locally. Realm Mode sends ActionInvocations to BEAM and never treats any embedded/local rules execution as Realm authority.
+`LocalStorySession` is an adapter over `LocalInstanceAuthority`, which resolves/commits Story play locally. `RemoteRealmSession` is a transport adapter only: it sends ActionInvocations to BEAM, where `WorldInstance`/`ZoneShard` owns Realm mutation authority. It never treats any embedded/local rules execution as Realm authority.
 
 The transport, authoring, runtime, domain, and persistence planes MUST remain separable.
 
