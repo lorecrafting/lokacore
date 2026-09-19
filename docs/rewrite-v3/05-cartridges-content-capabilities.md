@@ -147,7 +147,7 @@ Use these terms consistently in v3:
 |---|---|
 | **Capability** | Versioned feature contract registered by the engine. Owns schemas and the commands/events/effects/policies/rules it introduces. |
 | **Component** | Typed definition/runtime data attached to an entity or scoped state. A component is data/state, not an independent authority. |
-| **Behavior** | Declarative autonomous/reactive rule configuration supplied by a capability, such as patrol or schedule. |
+| **Behavior** | Declarative autonomous rule configuration supplied by a capability, such as patrol or schedule. Behaviors produce typed intents/proposals and never bypass the authority decision path. |\n| **ReactionRule** | Builder-composable event/fact/state-transition reaction: typed trigger + selector + Policy + registered consequences. The safe replacement for arbitrary special-procedure callbacks. |
 | **Action** | Player/agent affordance advertised in GameView; invocation is revalidated by the active authority and resolved into a typed Command. |
 | **Policy / condition** | Pure predicate tree deciding whether an action/content path is allowed/visible. |
 | **Command** | Request to authoritative game semantics. |
@@ -578,3 +578,44 @@ There are two common forms:
 - still uses the same content namespaces, capability registry, compiler, hashes, references, and certification machinery.
 
 This preserves one content toolchain without pretending all Realm content is portable.
+
+
+## 25. Composable world-primitive contract
+
+The normative layered composition model is defined in [21 — Composable World Primitives and Builder Expressivity](21-composable-world-primitives.md).
+
+The capability/content system MUST be able to represent, version, validate, and introspect at least the foundation shapes needed for:
+
+- deterministic TargetSpec/TargetResolution;
+- typed relations rather than duplicated subsystem-local truth;
+- InspectableDetail and description variants;
+- coherent Connection/Barrier state;
+- ReactionRule;
+- Behavior intent/arbitration metadata;
+- SpawnBundle and provenance-safe PopulationPlan;
+- commerce provider/catalog/stock/price/admission/liquidity/restock semantics;
+- NarrationSpec;
+- SceneDefinition/SceneInstance;
+- WorldEventPlan composition.
+
+Not every item in the broader primitive catalog is an R3/R5 implementation requirement. The primitive-graduation rule in document 21 determines when a repeated composition should become an engine capability.
+
+### Authored area versus runtime shard
+
+An **AreaDefinition/WorldRegion** is a content/geography organization concept.
+
+A **ZoneShard** is a Realm mutation-owner placement concept.
+
+They MUST NOT be synonyms. A deployment may place multiple authored areas in one shard or partition one large authored area across authority domains if later topology requires it.
+
+### Population provenance
+
+A PopulationPlan may replenish/clean up only the lifecycle state that its explicit provenance/policy owns.
+
+It MUST NOT reset an area to definition defaults by deleting or rewriting unrelated player-owned, quest-owned, or independently mutated entities/state.
+
+### Coherent connections
+
+Where two room faces represent one logical door/gate/bridge, they SHOULD reference one authoritative Barrier state.
+
+The compiler should reject contradictory duplicated mutable barrier definitions unless the author explicitly declares independent/asymmetric semantics.
