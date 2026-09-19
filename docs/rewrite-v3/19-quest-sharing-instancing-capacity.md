@@ -565,3 +565,35 @@ For realm events:
 | Shared scarce resource | shared service/entity with atomic contention |
 
 This flexibility is intentional. A living MUD needs both private narrative and genuinely shared scarcity.
+
+
+## 20. Commerce and services compose but are not the same mechanism
+
+A merchant/shop is normally an immediate **Commerce** composite, not a ServiceJob.
+
+Immediate trade may compose:
+
+- provider;
+- catalog/offers;
+- stock;
+- price policy;
+- currency/payment;
+- buy/sell admission;
+- liquidity;
+- restock;
+- schedule;
+- relationship/faction/world-fact modifiers;
+- NarrationSpec.
+
+A successful same-authority purchase/sale transfers payment and item/stock atomically in one command commit.
+
+Use Service/Capacity/Reservation/ServiceJob when the transaction represents scarce or long-running work.
+
+Examples:
+
+- buying a finished sword from the shelf -> CommerceTransaction;
+- ordering a sword forged overnight -> Commerce offer + ServiceJob;
+- buying a ferry ticket -> CommerceTransaction, optionally followed by capacity/reservation/transport service;
+- renting an inn room -> Commerce/payment + finite reservation/duration service.
+
+This split keeps merchant behavior data-driven without forcing every shop action through a job queue.
