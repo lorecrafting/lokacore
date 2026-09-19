@@ -592,6 +592,14 @@ A different artifact H2 attempts publication under the same cartridge ID/version
 
 Publication fails; a new semantic version/release is required.
 
+### CAR-10 — Certificate/signature does not change semantic identity
+
+A compiled candidate has semantic cartridge hash H.
+
+Certification produces a certificate referencing H and release signing adds signature/certificate metadata.
+
+The semantic cartridge hash remains H. An exact archive/package hash may differ after envelope material is added, and verification can prove both domains without circular hashing.
+
 ## J. Builder/AI
 
 ### BLD-01 — Revision conflict
