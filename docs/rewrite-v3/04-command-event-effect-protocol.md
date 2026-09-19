@@ -61,12 +61,12 @@ An instruction produced by a decision that must be applied/executed.
 
 Examples:
 
-- schedule durable job;
-- emit client notification;
-- enqueue external push;
-- transfer entity to another shard.
+- wake/notify a scheduler after a durable job was committed;
+- emit an ephemeral client notification;
+- enqueue an external push;
+- request an idempotent cross-authority entity transfer.
 
-Pure in-instance state changes should usually already be reflected in the new state; effects are not a second backdoor to mutate arbitrary state.
+Authoritative same-domain changes—including creation of a durable scheduled-job record owned by the current authority—belong in StateDelta/commit data. Effects are not a second backdoor to mutate arbitrary state.
 
 ### Client Message
 
@@ -95,7 +95,7 @@ Authority always revalidates because the GameView can be stale.
 
 ```json
 {
-  "protocol_version": 1,
+  "protocol_version": 3,
   "client_seq": 184,
   "session_id": "uuid",
   "instance_id": "uuid",
@@ -105,7 +105,7 @@ Authority always revalidates because the GameView can be stale.
     "actor_id": "uuid",
     "target_ids": [],
     "input": {"direction": "north"},
-    "view_revision": 9201
+    "view_revision": "view-token-9201"
   }
 }
 ```
@@ -116,22 +116,30 @@ The server then creates the internal Command ID/idempotency identity. The invoca
 
 ## 3. Canonical command representation
 
-After Realm invocation validation/action resolution—or Story local invocation resolution—the authority host constructs:
+After Realm invocation validation/action resolution—or Story local invocation resolution—the authority host constructs a **semantic Command** plus host-only execution metadata.
 
 ```elixir
 %Command{
-  id: uuid,
+  id: stable_command_id,
   type: :move,
   actor: character_id,
   instance_id: instance_id,
-  session_id: session_id,
-  payload: %Move{direction: :north},
-  expected_revision: 9201,
+  payload: %Move{direction: :north}
+}
+
+%CommandContext{
+  invocation_id: invocation_id,
+  authenticated_session_id: session_id,
+  expected_authority_revision: optional_revision,
   received_at_monotonic: ...
 }
 ```
 
 All payload variants are typed structs.
+
+The semantic Command is the portable/replayable input. Host-only context is used for authentication, admission, tracing, freshness/concurrency checks, and transport behavior; it MUST NOT make portable game semantics depend on an ephemeral session ID or host monotonic timestamp.
+
+The stable Command ID is derived/reused from trusted authority context + actor + invocation ID as defined by the persistence contract, so reconnecting through a new session cannot turn one invocation into a second mutation.
 
 Unknown command types fail before reaching game rules.
 
@@ -282,17 +290,17 @@ Effects are registered and typed.
 
 Categories:
 
-### Synchronous commit effects
+### Authoritative commit changes
 
-Represented inside state transaction, not external dispatcher.
+These are **StateDelta/commit data**, not Effects. They are applied transactionally with the command receipt. Examples include entity/quest/fact changes and same-authority durable scheduled-job rows.
 
 ### Durable asynchronous effects
 
-Use outbox.
+Use the outbox. These cross a boundary that cannot be completed atomically with the current authority commit.
 
-### Ephemeral notifications
+### Ephemeral post-commit effects
 
-May be emitted after commit and dropped/reconstructed if necessary.
+Notifications/presentation hints may be emitted after commit and dropped/reconstructed if necessary.
 
 Every effect declares:
 
@@ -394,6 +402,8 @@ Internal component state is not dumped wholesale to mobile.
 
 Game-semantic view construction that must match offline and online SHOULD be defined once over portable committed state and cartridge definitions.
 
+Realm-only capabilities MAY contribute additional Realm-only GameView fields/actions through registered pure projection evaluators on the server. Those evaluators use the same typed GameView schema, deterministic ordering, policy checks, and fail-closed capability registry; they do not cause React Native to reimplement Realm rules. A portable cartridge hosted online must still project the same portable semantics for equivalent portable state.
+
 Examples:
 
 - resolved ActionSet for an entity;
@@ -428,15 +438,19 @@ Host-only views—account catalog, entitlement, social realm presence, admin—r
 
 This avoids a second semantic fork where the server and offline client disagree about what the player can see/do.
 
-## 16. Snapshot and delta model
+## 16. Snapshot, projection sequence, and freshness model
 
-On join/resync, server sends authoritative snapshot.
+On join/resync, server sends an authoritative semantic GameView snapshot.
 
-Subsequent messages may be deltas tagged with instance revision.
+Subsequent projection messages carry a monotonically ordered **projection sequence** for that client/subscription stream. If the client detects a projection-sequence gap or the server requests resync, it discards/reconciles local view state from a fresh snapshot.
 
-If the client detects a gap or server requests resync, it discards/reconciles local view state from a fresh snapshot.
+A projected view/action may also carry an opaque **view freshness token** (historically named `view_revision`) used when submitting ActionInvocations. The authority re-resolves current legality and may use the token to diagnose/reject stale interaction.
 
-The client store is a cache of server projection, not authority.
+Do **not** require the projection sequence or view token to equal the WorldInstance/ZoneShard database revision. In a shared zone, unrelated authoritative mutations may occur without changing one player's projection, and one authoritative mutation may yield several projection messages.
+
+Authority revisions remain internal concurrency/commit tokens. Projection sequence is transport ordering. View token is interaction freshness. They may be correlated for diagnostics but are distinct contracts.
+
+The client store is a cache of authority projection, not authority.
 
 ## 17. Text commands
 
@@ -474,7 +488,7 @@ No transport-specific duplicated keyword lookup helpers.
 
 ## 19. Action availability
 
-The server exposes resolved ActionSets so the touch UI does not reinvent conditions.
+The active authority exposes resolved ActionSets so touch/text adapters do not reinvent conditions.
 
 Action definitions include:
 
@@ -506,6 +520,6 @@ Breaking protocol changes require version bump and compatibility policy.
 
 ## 21. Offline command conformance
 
-The portable kernel command schema is also machine-readable. The online Elixir host and offline native/mobile host MUST serialize equivalent commands into the same kernel representation.
+The portable semantic Command schema is also machine-readable. The online Elixir host and offline native/mobile host MUST serialize equivalent semantic commands into the same kernel representation. Host-only CommandContext fields such as authenticated session identity or receipt timestamp are excluded from portable command equivalence.
 
 Golden conformance fixtures cover command -> decision/event/effect output independent of network transport. Online protocol code wraps these semantics; it does not redefine them.
