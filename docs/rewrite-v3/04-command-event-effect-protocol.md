@@ -1,6 +1,6 @@
-# 04 — Action Invocations, Commands, Domain Events, Effects, and Client Protocol
+# 04 — Action Invocations, Commands, State Deltas, Domain Events, Effects, and Client Protocol
 
-## 1. Five concepts, five responsibilities
+## 1. Six concepts, six responsibilities
 
 Loka v3 MUST distinguish:
 
@@ -40,6 +40,19 @@ Examples:
 - attack NPC;
 - buy item;
 - accept quest.
+
+### StateDelta
+
+A typed, non-committed proposal describing authoritative state changes inside the current mutation authority.
+
+Examples:
+
+- move an entity between containers;
+- update a typed fact;
+- advance a QuestInstance;
+- create a same-authority ServiceJob or scheduled job.
+
+StateDelta is produced by pure decision logic and becomes authoritative only after the host commit succeeds. It is not a transport message and not an Effect.
 
 ### Domain Event
 
