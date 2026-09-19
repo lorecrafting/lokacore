@@ -75,7 +75,7 @@ locales:
 
 `kernel_api` describes portable semantic capabilities implemented by the installed kernel. `rule_ir` versions the normalized LokaScript/rule representation. `content_schema` versions compiled definition structure.
 
-Published cartridges pin all three. Compatibility and migrations MUST be explicit; host/app upgrades may not reinterpret old rule IR implicitly.
+Published cartridges pin exact `rule_ir` and `content_schema` versions and declare a `kernel_api` compatibility range. Their compiled lock data pins exact capability versions, and their certificate records the exact portable-rules/kernel implementation revision(s) actually tested. Compatibility and migrations MUST be explicit; host/app upgrades may not reinterpret old rule IR or capability semantics implicitly.
 
 ### Version vocabulary
 
@@ -338,18 +338,20 @@ Large binary assets SHOULD live in object storage/CDN referenced by hash.
 A cartridge content hash covers:
 
 - normalized definitions;
-- script sources/byte representation;
+- canonical compiled/normalized rule IR (and source digest/provenance where desired);
 - asset manifest;
 - localization manifest;
-- compatibility requirements.
+- compatibility requirements and exact capability lock.
+
+Runtime semantics are keyed to the normalized artifact, not to host-specific compiler output bytes.
 
 ## 12. Immutability
 
 Published cartridge release cannot be edited in place.
 
-Fixes create a new release/hash even if semver patch only.
+For a published cartridge ID, a semantic version identifies exactly one immutable artifact hash. A different hash MUST NOT later be published under the same `cartridge_id@version`; fixes require a new version/release.
 
-Catalog may point new purchases/instances to latest compatible release while old active saves remain pinned.
+Catalog may point new purchases/instances to the latest compatible release while old active saves remain pinned.
 
 ## 13. Dependencies between cartridges
 
