@@ -45,6 +45,47 @@ When code and this packet disagree in the future, accepted amendments and tests 
 
 These axes interact but are not aliases.
 
+### Canonical gameplay pipeline
+
+Every gameplay path MUST preserve this conceptual order:
+
+```text
+input/touch/text/bot
+  -> ActionInvocation
+  -> active authority re-resolves + revalidates
+  -> typed semantic Command
+  -> DecisionCoordinator / portable decision layer
+  -> StateDelta + DomainEvents + Effects
+  -> authoritative commit + receipt/outbox
+  -> committed state
+  -> GameView projection
+  -> client presentation
+```
+
+Adapters MAY collapse implementation steps, but they MUST NOT collapse the semantic boundaries. In particular:
+
+- shared UI/text/bots emit `ActionInvocation`, not authority-internal Commands;
+- authoritative same-domain mutations are represented by `StateDelta`, not hidden Effects;
+- DomainEvents describe facts produced by a decision; they are not transport messages;
+- Effects cross a post-decision boundary or request explicitly typed follow-up work; they are not an alternate state-write path;
+- GameView is a semantic projection, not a dump of persistence structs.
+
+### Authority vocabulary
+
+Use these terms consistently:
+
+- **authority host** — the environment running authoritative gameplay: local Story authority or BEAM Realm authority;
+- **mutation owner** — the serialized owner of one mutable state domain, such as `LocalStorySession`, `WorldInstance`, or `ZoneShard`;
+- **durable store** — SQLite/PostgreSQL persistence for committed state; durability does not make the database a second decision authority;
+- **state scope** — who owns a fact/progression value: player, party, instance, or realm;
+- **audience** — who may perceive/interact with a projection/entity;
+- **capacity owner/scope** — who competes for a scarce resource or service;
+- **service aggregate/provider** — the domain object whose queue/capacity is modeled; it does **not** automatically imply a dedicated OTP process;
+- **authority revision** — concurrency/version token for committed authoritative state;
+- **projection sequence/view token** — client-facing ordering/freshness token for one projected stream. It is not necessarily the authority revision.
+
+State scope, audience, capacity scope, and physical authority placement are deliberately independent. A player-scoped quest in a shared Realm zone, for example, does not imply that the player becomes a new mutation authority.
+
 Examples:
 
 - Story Mode normally runs an `offline_private` profile built with target `story`.
@@ -163,19 +204,19 @@ Read in this order:
 4. [Commands, Events, Effects, and Protocol](04-command-event-effect-protocol.md)
 5. [Cartridges, Content, and Capabilities](05-cartridges-content-capabilities.md)
 6. [Quests, Dialogue, Actions, and Scripting](06-quests-dialogue-actions-scripting.md)
-7. [Offline Storypacks and the Path to the MMORPG](07-offline-storypacks-to-mmo.md)
-8. [Builder API and AI Factory](08-builder-api-ai-factory.md)
-9. [Cartridge Lab and Certification](09-cartridge-lab-certification.md)
-10. [Mobile, Commerce, and Release](10-mobile-commerce-release.md)
-11. [Security, Observability, and Operations](11-security-observability-operations.md)
-12. [Evennia Design Review](12-evennia-lessons.md)
-13. [Lokacore Feature Inventory](13-lokacore-feature-inventory.md)
-14. [Implementation Plan](14-implementation-plan.md)
-15. [Acceptance Scenarios](15-acceptance-scenarios.md)
-16. [Architecture Decision Register](16-decision-register.md)
-17. [Research Baseline and External References](17-research-baseline.md)
-18. [Specification Review Record](18-review-record.md)
-19. [Quest Sharing, Phasing, Instancing, and Scarce World Services](19-quest-sharing-instancing-capacity.md)
+7. [Quest Sharing, Phasing, Instancing, and Scarce World Services](19-quest-sharing-instancing-capacity.md)
+8. [Offline Storypacks and the Path to the MMORPG](07-offline-storypacks-to-mmo.md)
+9. [Builder API and AI Factory](08-builder-api-ai-factory.md)
+10. [Cartridge Lab and Certification](09-cartridge-lab-certification.md)
+11. [Mobile, Commerce, and Release](10-mobile-commerce-release.md)
+12. [Security, Observability, and Operations](11-security-observability-operations.md)
+13. [Evennia Design Review](12-evennia-lessons.md)
+14. [Lokacore Feature Inventory](13-lokacore-feature-inventory.md)
+15. [Implementation Plan](14-implementation-plan.md)
+16. [Acceptance Scenarios](15-acceptance-scenarios.md)
+17. [Architecture Decision Register](16-decision-register.md)
+18. [Research Baseline and External References](17-research-baseline.md)
+19. [Specification Review Record](18-review-record.md)
 
 ## 8. Specification authority map
 
