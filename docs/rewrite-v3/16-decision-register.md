@@ -9,6 +9,19 @@ This register separates accepted direction from provisional choices that still r
 - **Deferred** — intentionally not decided for current milestone.
 - **Rejected** — explicitly not part of the v3 foundation.
 
+## Decision checkpoints
+
+Not every non-Accepted ADR blocks the same milestone.
+
+- **R1 must resolve ADR-004/ADR-005** before the fresh implementation foundation depends on a portable-runtime/binding choice.
+- **ADR-023** is a provisional launch business model, not a blocker for core engine architecture.
+- **ADR-027** fixes the offline-ownership product principle while leaving the exact platform proof/grant mechanism to implementation evidence.
+- **ADR-035** is a release gate: downloadable rule representation must be revalidated against current store policy before commercial submission.
+- **ADR-024** remains deferred until public creator content is actually planned.
+- **ADR-025** remains deferred until multi-node clustering is justified; R18 may prove one shared authority domain on one node, while R20 must resolve ownership placement/fencing/handoff details needed for partitioned Realm play.
+- Accepted ADRs may still contain deliberately deferred implementation details, but an implementation ticket must not silently choose one when the detail affects a later normative gate.
+
+
 ## ADR-001 — Clean-sheet rebuild
 
 **Status:** Accepted
