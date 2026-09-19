@@ -922,3 +922,85 @@ Internal Commands are typed, carry stable causation/idempotency where retryable,
 The preferred discipline is to use the most specific typed construct that captures the invariant and escalate toward LokaScript/new engine capabilities only when lower-level composition is genuinely insufficient.
 
 The same section records additional immersive-world candidate families—knowledge/secrecy, language/communication, institutions/obligations, transport, property, supply, drives, navigation, hazards, selected world history, companions, documents, rituals, and governance—without turning them into first-cartridge requirements.
+
+
+## 28. Scene-space, release-assurance, and Foundry portability review
+
+### 28.1 SceneSequence was being asked to carry two different responsibilities
+
+**Finding:** dreams/visions were described as SceneSequence use cases, but an interactive
+dream may contain ordinary movement, rooms, NPCs, combat, puzzles and population between
+narrative beats.
+
+**Risk:** SceneSequence becomes a mini-world engine or dream receives a bespoke spatial
+runtime.
+
+**Correction:** SceneSequence now owns narrative sequencing only. Generic InstancePlan
+owns scoped spatial instantiation from precompiled definitions. SceneSpace chooses
+current world, scoped overlay, or InstancePlan.
+
+A dream/vision/flashback is therefore a content composition. The same InstancePlan serves
+private dungeons, party puzzles, tutorials and ritual/trial spaces.
+
+### 28.2 Existing Lab gates were strong but partial/test evidence could be confused with release proof
+
+**Finding:** static checks, branch simulation, property tests, bots, chaos, semantic review
+and exact-hash certificates already existed, but the packet did not fully specify the
+progression from edit-time checks to frozen-candidate release assurance or account for
+what authored surfaces remained unexercised.
+
+**Correction:** document 09 now adds:
+
+- explicit certification pyramid;
+- freeze-first exact-candidate evidence binding;
+- machine-readable CoverageManifest;
+- static topology/quest/scene/reaction model analysis;
+- bounded state/path/seed/interleaving exploration;
+- reusable invariant registry;
+- mutation-sensitivity testing;
+- differential/metamorphic testing;
+- model-proposed adversarial scenarios executed deterministically;
+- explicit blocker classes;
+- content-addressed CertificationEvidenceBundle;
+- regression ratchet.
+
+Partial area/quest/component preflights remain useful but are not release certificates.
+
+### 28.3 LLM review is useful only as a separate evidence layer
+
+High-reasoning models may inspect exact graphs/traces/branch comparisons and identify
+causal contradictions, knowledge leaks, implausible schedules, dead-feeling areas,
+misleading choices or missing adversarial scenarios.
+
+Their findings must cite evidence and cannot waive deterministic/security failures.
+
+Model-proposed gameplay attacks become typed Lab scenarios before they count as evidence.
+
+### 28.4 Jev is positioned as optional fast triage, not certification
+
+Current TypeSafe material presents Jev as a typed probabilistic decision model intended
+for structured workflows.
+
+Loka records it only as a candidate for high-volume semantic routing/triage after held-out
+evaluation. It may prioritize evidence or classify likely anomaly type, but cannot turn
+an untested candidate green, suppress mandatory review, establish independence, or
+publish.
+
+### 28.5 Loka now exposes the boundaries an orchestrator such as Foundry should enforce
+
+The Builder document now records representative role surfaces:
+
+- world builder: L3–L6 Builder/Lab authoring, normally no engine-source/shell;
+- quest/story builder: narrower content surface;
+- engine-capability developer: explicitly admitted L2 source-code work;
+- semantic reviewer: read/simulate only;
+- certification/release role: exact-hash evidence/publication surface only.
+
+MISSING_CAPABILITY returns a CapabilityProposal. It does not grant the builder permission
+to edit engine code.
+
+Context routing follows the admitted role. A model may act in different roles, but role
+labels/sessions do not mint authority or reviewer independence.
+
+Foundry remains optional: Loka's Builder API, Lab, capability registry and certificate
+contracts define the semantic/evidence truth even when Foundry orchestrates them.
