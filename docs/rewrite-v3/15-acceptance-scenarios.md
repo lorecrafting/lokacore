@@ -1363,6 +1363,30 @@ Merchant catalog, price, or admission changes through derived policy/reaction se
 
 ## Y. Quest scenes, dreams, cutscenes, and scripted world events
 
+
+
+### INSTANCEPLAN-01 — Interactive dream reuses generic instance semantics
+
+A quest launches a dream using SceneSequence + InstancePlan over precompiled rooms.
+
+The player may move, inspect, talk, fight or solve a puzzle between scene beats through
+ordinary Actions/Commands. Dream entities/population obey normal instance invariants and
+only declared exports survive teardown.
+
+### INSTANCEPLAN-02 — Same plan machinery supports non-dream dungeon
+
+A party dungeon and a player dream use the same InstancePlan lifecycle/entry/reconnect/
+teardown contracts with different content and audience policies.
+
+No dream-specific persistence or spatial authority path exists.
+
+### INSTANCEPLAN-03 — Runtime cannot invent uncertified room definitions
+
+A script/scene attempts to create a brand-new arbitrary room schema at runtime.
+
+Validation/runtime refuses it; InstancePlan may instantiate only compiled definitions or
+registered bounded generation semantics explicitly supported by a capability.
+
 ### SCENE-01 — Text cutscene survives crash
 
 A consequential text SceneSequence crashes after a checkpoint and before the next acknowledgement.
