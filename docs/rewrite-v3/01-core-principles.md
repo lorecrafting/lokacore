@@ -33,6 +33,27 @@ Loka SHOULD grow a large vocabulary of reusable primitives:
 
 Complexity belongs in **what can be composed**, not in having many contradictory ways to mutate the same state.
 
+### P2a. Closed semantics, open composition
+
+Builders SHOULD have extremely broad expressive power through composition while engine authority semantics remain closed and versioned.
+
+Cartridge content may define and combine:
+
+- typed facts/events;
+- policies and target selectors;
+- Actions;
+- ReactionRules;
+- Behaviors/state machines;
+- population/encounter plans;
+- commerce/services;
+- dialogue/scenes/quests/world events;
+- templates/archetypes;
+- bounded LokaScript.
+
+Content MUST NOT gain expressivity by adding hidden persistence paths, arbitrary host callbacks, or a second mutation authority.
+
+The layered primitive model is normative in [21 — Composable World Primitives and Builder Expressivity](21-composable-world-primitives.md).
+
 ### P3. Content is not code by default
 
 A new storyline SHOULD normally consist of cartridge source, assets, and tests.
