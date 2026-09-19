@@ -261,6 +261,7 @@ Establish world/state mechanics needed by everything else.
 - RNG;
 - policies;
 - ActionSet algebra;
+- minimal ActionRecipe/ComposedAction execution over registered consequences;
 - inspect/look;
 - move;
 - take/drop/give;
