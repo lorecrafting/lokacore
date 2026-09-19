@@ -1030,6 +1030,45 @@ SceneInstance
 
 Definition version is pinned.
 
+### Scene roles and durable participant bindings
+
+A SceneDefinition MAY declare named semantic roles such as:
+
+~~~text
+player
+old_master
+witness
+guard_captain
+ritual_officiant
+~~~
+
+Each role declares a typed selector/cardinality and whether it must resolve at scene start,
+may resolve later, or may be absent.
+
+When a consequential scene starts, the authority resolves required roles inside the
+declared SceneSpace/InstancePlan context and persists **SceneRoleBindings** in the
+SceneInstance.
+
+Later beats target the bound runtime identity, not a fresh display-name search.
+
+This prevents:
+
+- reconnect binding to another copy of the same NPC definition;
+- respawn causing a scene to jump actors;
+- shared Realm players accidentally targeting another participant's phased actor;
+- ambiguous aliases selecting a different entity halfway through a cutscene.
+
+If a bound participant disappears/dies/becomes invalid, the definition must declare a
+missing-participant policy such as:
+
+- wait;
+- branch;
+- fail scene;
+- substitute an explicitly compatible role;
+- re-resolve through a named policy when rebinding is genuinely intended.
+
+Silent arbitrary rebinding is forbidden.
+
 ## 34. Scene step vocabulary
 
 Scene steps are registered and typed.
