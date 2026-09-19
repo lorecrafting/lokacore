@@ -111,8 +111,13 @@ Verified:
 - App Review Guidelines 3.1.1 includes game levels/premium content among content/features unlocked with IAP.
 - Non-consumable IAP is purchased once and does not expire/decrease with use.
 - Current App Store Connect guidance says the first IAP of a given type must be submitted with a new app version; after approval, additional IAPs of that type can be submitted without a new app version when conditions are met.
+- Current Guideline 4.7 expressly permits certain software not embedded in the app binary—such as HTML5/JavaScript mini apps or mini games, streaming games, chatbots, plug-ins, and downloadable games in specified emulator apps—subject to additional rules. It does **not** by itself establish that Loka's custom downloaded rule IR is an approved category.
 
-The executable-code/download policy must be rechecked at launch; the current strategy keeps cartridge downloads declarative/portable-data driven rather than arbitrary downloaded app code.
+Architectural consequence:
+
+- do not infer App Review approval merely because LokaScript is interpreted rather than native code;
+- keep downloadable Story rules bounded to capabilities already shipped in the app;
+- treat the exact representation/review posture as ADR-035's release evidence gate and recheck the then-current guideline before submission.
 
 ## 6. Google Play
 
