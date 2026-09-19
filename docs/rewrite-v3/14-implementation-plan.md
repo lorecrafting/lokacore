@@ -365,7 +365,7 @@ Make the world feel like a MUD, not a branching ebook.
 - ambient emitter;
 - shop hours;
 - nocturnal/activity windows;
-- AreaDefinition/WorldRegion authoring grouping distinct from ZoneShard placement;
+- AreaDefinition authoring grouping distinct from ZoneShard placement;
 - SpawnBundle + provenance-safe PopulationPlan;
 - spawn/despawn/cleanup policy;
 - day/night;
