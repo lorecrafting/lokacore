@@ -340,7 +340,11 @@ Support real narrative cartridges.
 
 ### Gate R7
 
-Known Lokacore quest-bug class has a regression scenario that cannot reproduce corruption/premature completion. LokaScript containment/determinism fixtures pass, but a broad general-purpose binding library is **not** required before R10.
+Known Lokacore quest-bug class has a regression scenario that cannot reproduce corruption/premature completion.
+
+A quest can drive a durable SceneSequence containing text narration, an authoritative choice, a crash/reconnect checkpoint, and typed world consequences exactly once. A player-scoped dream/private scene proves isolation plus explicit export semantics.
+
+LokaScript containment/determinism fixtures pass, but a broad general-purpose binding library is **not** required before R10.
 
 ## R8 — Living-world capability pack
 
@@ -379,10 +383,14 @@ Make the world feel like a MUD, not a branching ebook.
 
 - service queues/jobs remain bounded and deterministic;
 - escrowed inputs/outputs conserve ownership;
+- merchant stock/payment conservation holds under retries/concurrency;
 - no schedule deadlocks;
+- Behavior conflict arbitration is deterministic;
+- PopulationPlan counts remain bounded and provenance-safe;
 - no runaway population;
 - bounded jobs;
 - required NPCs available per intended design;
+- ReactionRule/event chains remain bounded;
 - deterministic replay.
 
 ## R9 — Cartridge Lab v1
