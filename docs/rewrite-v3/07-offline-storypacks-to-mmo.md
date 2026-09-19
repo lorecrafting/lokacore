@@ -76,7 +76,7 @@ The app selects exactly one gameplay authority for a running session:
                local SQLite        server state
 ```
 
-The shared renderer receives host-neutral `GameView` data and emits typed intents/commands through the active session. It MUST NOT contain separate copies of quest/action/policy semantics.
+The shared renderer receives host-neutral `GameView` data and emits host-neutral `ActionInvocation` values through the active session. It never constructs authority-internal Commands. It MUST NOT contain separate copies of quest/action/policy semantics.
 
 Switching modes MUST close/commit the current session before another authority is activated. No save/world may be concurrently authoritative locally and remotely.
 
@@ -202,13 +202,15 @@ Output:
 
 ```text
 accepted/rejected
-new portable state or state delta
+StateDelta proposal
 new RNG state
 domain events
 portable effects
-portable game-view/projection delta or projection hints
+portable game-view/projection hints
 trace data
 ```
+
+An implementation may materialize a candidate state internally for efficient evaluation, but the host-visible authority contract is a non-committed proposal until persistence succeeds.
 
 The kernel MUST NOT:
 
@@ -345,19 +347,23 @@ Cartridge declares its time policy.
 
 ### `play_time`
 
-Logical world time advances only while game is actively running.
+Logical world time advances only through explicit authority-controlled game-time advancement while the game is actively running.
 
 ### `real_elapsed`
 
-On resume, wall-clock delta is converted to logical elapsed time, then deterministic scheduled/derived state is reconciled.
+On resume, the local authority samples wall-clock evidence once, applies the cartridge's documented clamp/rollback policy, and converts the accepted elapsed interval into an explicit idempotent **resume-time advancement input**. That input is then processed through the normal deterministic decision/commit path.
+
+A crash/retry during resume MUST NOT apply the same elapsed interval twice.
 
 ### `hybrid`
 
-Specific systems opt into real elapsed time.
+Specific systems declare which named time basis they use—for example gameplay time versus accepted real-elapsed time. A system may not silently read wall time simply because the cartridge is hybrid.
+
+The save records enough checkpoint/time-basis metadata to make resume reconciliation deterministic after the wall-clock sample has been accepted.
 
 No background process is required to simulate every second while the app is closed.
 
-Use on-demand derivation and process due durable jobs on resume.
+Use on-demand derivation and process due durable jobs on resume. Device wall time is an input to local private play, not a trusted Realm/competitive clock.
 
 ## 11. Offline scripts
 
@@ -792,13 +798,13 @@ Offline Story Mode
   local save
   no valuable MMO-state import
 
-Connected Adventure Mode
+Realm Mode / online-private deployment
   same story/content
   server-authoritative
   may interact with persistent account/MMO systems
 ```
 
-Do not require Connected Adventure Mode for launch.
+Do not require Realm online-private deployment for launch.
 
 ## 24. Cloud save for offline storypacks
 
