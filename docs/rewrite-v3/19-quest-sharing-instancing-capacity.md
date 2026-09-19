@@ -275,6 +275,13 @@ ordinary spatial/world simulation and can be explored interactively between scen
 An InstancePlan creates runtime instances of already compiled definitions; ordinary
 content does not generate new uncertified definitions at runtime.
 
+The plan also declares an explicit instancing closure/import model. References leaving
+the instance closure do not get recursively cloned. Shared/singleton/account-owned or
+otherwise non-instantiable state is either bound through an explicit supported import/
+authority contract or rejected. Instance teardown exports only declared typed
+rewards/facts/memories/continuity; temporary entities are not bulk-copied back to the
+shared world.
+
 ## 10. Scarce services are compositions of reusable primitives
 
 A quest may depend on a genuinely scarce service.
