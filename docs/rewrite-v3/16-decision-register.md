@@ -104,19 +104,29 @@ Runtime entities reference versioned DefinitionRefs.
 
 Content keys are cartridge-qualified globally and local within cartridge authoring.
 
-## ADR-009 — Command / DomainEvent / Effect / ClientMessage separation
+## ADR-009 — ActionInvocation / Command / StateDelta / DomainEvent / Effect / GameView separation
 
 **Status:** Accepted
 
-These concepts have distinct schemas and responsibilities.
+These concepts have distinct schemas and responsibilities:
 
-“Event” is not a universal bucket.
+- ActionInvocation is host-neutral player/agent intent from a current GameView;
+- Command is the authority-constructed semantic request;
+- StateDelta is proposed authoritative same-domain mutation;
+- DomainEvent describes a fact produced during a decision;
+- Effect crosses a post-decision/cross-authority/external boundary or requests typed follow-up work;
+- GameView is the host-neutral semantic projection;
+- ClientMessage is transport/presentation delivery and is not a DomainEvent.
+
+“Event” is not a universal bucket and Effect is not a second state-write path.
 
 ## ADR-010 — Transactional command receipts
 
 **Status:** Accepted
 
-Retryable state-changing commands use stable IDs.
+Retryable state-changing commands use stable IDs derived from durable/trusted authority context plus the invocation identity.
+
+Ephemeral session/connection identity MUST NOT be part of semantic idempotency identity; the same committed invocation retried after reconnect must deduplicate.
 
 Online commits atomically cover authoritative state + command receipt + required durable effects/outbox metadata.
 
@@ -140,6 +150,8 @@ State explicitly belongs to:
 - party;
 - instance;
 - realm.
+
+This semantic scope does not by itself choose physical authority placement, visibility/audience, spatial instancing, or scarce-resource contention.
 
 No accidental globals.
 
@@ -189,7 +201,7 @@ Touch and terminal interfaces use the same action semantics.
 
 Keep a small StateMachine lifecycle guard.
 
-Quest progress is updated only through canonical domain events -> pure reducer -> typed/idempotent effects.
+Quest progress is updated only through canonical DomainEvents -> pure reducer -> typed StateDelta/DomainEvents/Effects with explicit idempotency.
 
 No dialogue/script direct quest-storage mutation.
 
@@ -497,6 +509,44 @@ Personal dialogue alone is not a reason to clone an NPC or zone.
 
 Shared bottlenecks are modeled by reusable Service capabilities composed from CapacityPolicy, Reservation/QueuePolicy, optional Escrow, DurationPolicy, CompletionRule, OutputPolicy, and durable ServiceJobs—not by quest-specific timers.
 
-The owning service/provider authority owns queueing/reservations, escrow where used, capacity allocation, duration, and completion.
+The owning mutation authority owns queueing/reservations, escrow where used, capacity allocation, duration, and completion for the service aggregate.
 
-Quests observe typed ServiceJob DomainEvents and remain independently scoped.
+A service/provider is a domain aggregate, not automatically a dedicated OTP process. Quests observe typed ServiceJob DomainEvents and remain independently scoped.
+
+## ADR-046 — State scope and physical authority placement are independent
+
+**Status:** Accepted
+
+Player/party/instance/realm StateScope describes semantic ownership of gameplay truth.
+
+It does not imply a process/table placement strategy. A shared Realm may route player- or party-scoped state across zone boundaries without making the current ZoneShard its permanent owner.
+
+The exact placement/routing strategy for long-lived cross-zone player/party state must be resolved and certified before multi-zone Realm milestones depend on it.
+
+## ADR-047 — Projection sequencing is not authority revisioning
+
+**Status:** Accepted
+
+Realm clients order projected GameView updates with a client/subscription projection sequence and may send an opaque view-freshness token with ActionInvocation.
+
+WorldInstance/ZoneShard revisions remain internal authority commit/concurrency tokens.
+
+A busy shared zone may mutate without changing a given player's view, and one mutation may yield several projection messages. Therefore client gap detection MUST NOT assume a one-to-one mapping to authority revision.
+
+## ADR-048 — Online owners require fencing once ownership can move
+
+**Status:** Accepted
+
+When restart overlap, failover, clustering, or operational error could leave more than one process believing it owns the same durable authority domain, persistence commits must validate an ownership/fencing generation or equivalently strong token in addition to ordinary state revisions.
+
+A stale owner cannot resume authoritative writes merely because its data revision appears current.
+
+## ADR-049 — Real-elapsed Story time enters through an idempotent authority input
+
+**Status:** Accepted
+
+For offline cartridges that use real-elapsed time, device wall time is sampled/clamped according to product policy and converted into an explicit resume-time advancement input.
+
+That input follows the normal deterministic decision/commit path and is idempotent across crash/retry.
+
+Systems in hybrid time mode declare their time basis; they do not read wall clock directly from game rules.
