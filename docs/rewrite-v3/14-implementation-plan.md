@@ -181,6 +181,7 @@ Make machine-readable contracts exist before features.
 - campaign/continuity manifest schema;
 - capability registry + exact capability-lock format;
 - Action/ActionInvocation registry/schema;
+- ActionRecipe/ComposedAction schema;
 - portable semantic Command registry;
 - StateDelta schema/algebra;
 - DomainEvent registry;
@@ -192,6 +193,8 @@ Make machine-readable contracts exist before features.
 - Connection/Barrier schema;
 - ReactionRule schema;
 - SpawnBundle/PopulationPlan registry shape;
+- commerce-provider/policy registry shape;
+- WorldEventPlan schema;
 - FactSpec / scoped narrative-state schema;
 - NarrationSpec + SceneDefinition/SceneInstance schema;
 - consequence-operator registry shape;
