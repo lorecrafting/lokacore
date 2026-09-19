@@ -414,17 +414,28 @@ Make failures reproducible before content scale.
 - scene/dream/cutscene trace + crash/retry replay;
 - target-resolution/provenance/behavior/population/price explanation traces;
 - trace viewer data;
-- static validator gates;
-- property tests;
+- static validator + topology/quest/scene/reaction model-analysis gates;
+- CoverageManifest generation;
+- bounded state/path/seed exploration;
+- reusable capability invariant registry;
+- property/fuzz tests;
+- mutation-sensitivity fixtures for high-risk gates;
 - deterministic bots;
 - autonomous simulation;
+- adversarial scenario import/generation interface;
 - fault injection for local authority;
-- cross-host conformance runner;
-- repro bundle export.
+- cross-host differential/conformance runner;
+- semantic-review evidence bundle support;
+- content-addressed CertificationEvidenceBundle + repro export.
 
 ### Gate R9
 
 Every seeded injected failure generates a one-command/fixture reproducible report.
+
+A deliberately broken mini-cartridge is detected by the expected static/model/invariant/
+mutation-sensitivity gates. The Lab can account for quest/scene/area coverage, explore
+declared bounded branches, export an exact evidence bundle, and reproduce a model-proposed
+adversarial scenario deterministically without treating the model output itself as pass/fail evidence.
 
 ## R10 — First real offline cartridge
 
@@ -492,6 +503,8 @@ Let humans/agents author without raw repo semantics.
 - MCP adapter;
 - semantic intent-level operations for demonstrated needs such as topology.connect, detail.add, reaction.add, population.add, merchant.configure, scene.create, quest.attach_scene, and world_event.create;
 - explainability operations for target resolution, behavior, population, prices, scenes, quest progress, and world-event phase;
+- machine-readable role/surface metadata sufficient for an orchestrator to distinguish L3–L6 builders, read-only reviewers and engine-capability escalation;
+- typed MISSING_CAPABILITY / CapabilityProposal result path;
 - expand LokaScript bindings/recipes only from concrete R10 authoring needs and accepted reusable capability gaps.
 
 ### Gate R11
