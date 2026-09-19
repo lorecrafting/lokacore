@@ -646,3 +646,24 @@ AreaDefinition groups authored geography/content for maps, population, environme
 ZoneShard/WorldInstance describes runtime mutation ownership.
 
 The two concepts are not aliases and future partitioning may map them many-to-one or one-to-many.
+
+
+## ADR-057 — Scene sequencing and spatial instancing are orthogonal
+
+**Status:** Accepted direction
+
+SceneSequence owns ordered narrative orchestration, waiting, choices, checkpoints and
+scene outcomes.
+
+InstancePlan owns scoped spatial simulation instantiated from precompiled definitions,
+including participant/admission, entry/exit, population, persistence/reconnect/reset and
+teardown policy.
+
+Dreams, visions and flashbacks are content compositions over these primitives:
+
+- presentation-only/current-world SceneSequence;
+- SceneSequence + scoped overlay;
+- SceneSequence + InstancePlan for fully interactive temporary worlds.
+
+The same InstancePlan primitive serves private dungeons, party puzzles, tutorials,
+ritual/trial spaces and other instanced gameplay. There is no separate DreamEngine.
