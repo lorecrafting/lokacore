@@ -275,6 +275,8 @@ Agents and mobile clients should never need to parse an English error string to 
 
 Event types and payloads are registered/machine-readable.
 
+A DomainEvent's semantic scope is **not** a client-broadcast audience. Events may contain authority-internal facts or drive player/party-scoped reducers without being exposed verbatim to clients. ClientMessage/GameView projection applies its own AudiencePolicy and redaction rules.
+
 Events SHOULD be immutable values.
 
 ## 9. Event processing model
