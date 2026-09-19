@@ -198,8 +198,9 @@ Cross-shard movement MUST use an explicit handoff protocol:
 2. durable transfer intent is recorded;
 3. destination accepts/imports entity state;
 4. ownership pointer commits;
-5. source removes local authority;
-6. recovery reconciles incomplete transfers.
+5. command-receipt/idempotency continuity is preserved so a lost-response retry cannot become fresh work merely because routing now reaches the destination owner;
+6. source removes local authority;
+7. recovery reconciles incomplete transfers.
 
 Do not rely on “send two PubSub messages and hope.”
 
