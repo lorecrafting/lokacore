@@ -1146,3 +1146,92 @@ unknown dependency != safe evidence reuse
 The remaining high-risk unknowns are still the deliberate evidence gates already recorded:
 portable implementation/binding choice, store-review posture for downloaded rule content,
 and later multi-zone Realm placement/routing.
+
+## 30. Final closure adversarial review
+
+A fresh high-reasoning closure pass was run after the §29 self/adversarial review instead
+of treating the prior "no blocking issue" conclusion as sufficient. The pass focused on
+retry identity during ownership movement, distributed-effect delivery semantics, and
+cross-document vocabulary that could still cause two implementations to diverge.
+
+### 30.1 Command retry identity could fracture across authority handoff
+
+**Finding:** command receipts were keyed/described in terms of the current authority/
+instance. Reconnect retry was covered, and shard handoff was covered, but the two cases
+were not composed. A command could commit on ZoneShard A, move the character to ZoneShard
+B, lose its acknowledgement, and then be retried through normal routing after B became
+owner. An implementation that derived idempotency from the current owner could treat the
+retry as fresh work.
+
+**Correction:** external mutation idempotency now uses a logical gameplay lineage/
+controlled-actor scope that outlives session/process/shard ownership. Receipt lookup must
+remain reachable after ownership movement. R20 may choose a realm-level receipt index,
+receipt migration, forwarding/tombstones, or an equivalently durable mechanism, but
+ownership movement cannot mint a new command identity.
+
+The runtime architecture, persistence contract, command protocol, R20 gate, acceptance
+suite, and ADR register now all carry this invariant. ACT-14 specifically tests a lost
+acknowledgement after a handoff.
+
+### 30.2 Cross-authority delivery accidentally implied exactly-once transport
+
+**Finding:** the architecture correctly used outbox/idempotency for cross-authority work,
+but one acceptance scenario said the remote operation was retried "exactly once." That
+wording could cause an implementation to assume a transport property that the architecture
+cannot generally guarantee after acknowledgement loss.
+
+**Correction:** durable asynchronous effects are now explicitly at-least-once delivery
+with idempotent authoritative application. Duplicate delivery is expected and tested.
+Durable effects also declare terminal-failure/reconciliation behavior; required gameplay,
+custody, entitlement, or similar obligations cannot silently disappear when ordinary retry
+is exhausted.
+
+Quest cross-authority consequences and the outbox acceptance scenarios now use the same
+semantics.
+
+### 30.3 Certification profile vocabulary had drifted from execution-profile vocabulary
+
+**Finding:** runtime docs use the canonical execution profiles:
+
+~~~text
+offline_private
+online_private
+party
+shared_area
+~~~
+
+but Builder/certification/implementation prose still used older
+`offline_private_story`, `online_private_story`, and `party_story` labels in a few
+normative places.
+
+**Risk:** schema authors could create a second parallel profile enum or require ad-hoc
+mapping between authoring, runtime and certification.
+
+**Correction:** gameplay certification now reuses the canonical execution-profile names.
+Capability-pack and mobile-app-release certification profiles remain separate because they
+are not gameplay execution profiles.
+
+### 30.4 Closure result
+
+The corrections above do not change the v3 product or authority architecture. They close
+three remaining implementation-ambiguity classes:
+
+~~~text
+owner movement != new idempotency identity
+at-least-once delivery != duplicate authoritative application
+certification profile != second gameplay-profile vocabulary
+~~~
+
+No additional blocking contradiction was found in the final cross-document pass.
+
+The deliberate evidence gates remain deliberate:
+
+- R1 portable implementation/binding selection;
+- current-store review posture for downloaded rule representation;
+- R20 concrete long-lived placement/routing/handoff mechanism, now constrained by
+  migration-stable retry identity;
+- later capability candidates that must graduate from real content evidence.
+
+This review is still part of the repository's specification process, not independent
+third-party approval. With these corrections applied, the PR is internally ready to leave
+draft status and proceed to human merge/acceptance.
