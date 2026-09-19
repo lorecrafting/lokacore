@@ -40,7 +40,9 @@ turn_in: npcs/old_ferryman
 
 prerequisites:
   all:
-    - quest_completed: village_arrival
+    - quest_state:
+        quest: village_arrival
+        state: resolved
 
 objectives:
   all:
