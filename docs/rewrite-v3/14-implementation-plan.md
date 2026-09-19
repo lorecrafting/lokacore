@@ -480,7 +480,7 @@ The first cartridge exists to stress contracts. It MUST prove that quests and li
 
 ### Gate R10
 
-Full `offline_private_story` certification plus a **developer-harness physical-device smoke** using the minimal Expo/native integration established by R1/R2/R6. Polished non-developer product-shell acceptance belongs to R12.
+Full `offline_private` certification plus a **developer-harness physical-device smoke** using the minimal Expo/native integration established by R1/R2/R6. Polished non-developer product-shell acceptance belongs to R12.
 
 The cartridge should be authored primarily through source files/compiler/Lab at this stage. Record every repetitive or error-prone authoring operation as evidence for the Builder API rather than prematurely generalizing it.
 
@@ -703,13 +703,14 @@ Generalize the R18 single shared-hub authority into multiple explicit ownership 
 - owner registry;
 - shard state;
 - cross-shard handoff protocol;
+- migration-stable command receipt/idempotency routing across ownership handoff;
 - shared durable jobs;
 - realm services;
 - load/backpressure.
 
 ### Gate R20
 
-Synthetic multi-zone concurrency/load + crash/fencing/handoff certification. Cross-zone player/party scoped state placement/routing must be explicitly resolved here rather than inferred from StateScope.
+Synthetic multi-zone concurrency/load + crash/fencing/handoff certification. Cross-zone player/party scoped state placement/routing must be explicitly resolved here rather than inferred from StateScope. A command that commits immediately before ownership moves and then loses its acknowledgement MUST replay from the original receipt after handoff rather than execute again under the destination owner.
 
 ## R21 — Shared-area promotion
 
