@@ -149,6 +149,18 @@ Response:
 }
 ```
 
+### Builder mutation idempotency
+
+Builder writes are network/agent operations and MUST be safe to retry after an unknown response outcome.
+
+For each mutating `operation_id`, the workspace mutation layer records enough receipt data to compare an input/operation digest and return the prior committed result/revision.
+
+- same `operation_id` + same semantic operation digest → return the original committed result;
+- same `operation_id` + different digest → reject with a stable idempotency/integrity conflict;
+- a retry after commit MUST NOT fail merely because its original `expected_revision` is now stale.
+
+The receipt/audit retention policy may be bounded, but it must cover supported retry/recovery workflows. High-impact publish/promotion operations require durable idempotency appropriate to release history.
+
 Errors use stable codes and field paths.
 
 ## 5. Operation families
@@ -348,6 +360,7 @@ Support a batch plan:
 
 ```json
 {
+  "plan_id": "uuid",
   "operations": [
     {...},
     {...}
@@ -362,7 +375,8 @@ Builder API may:
 - apply it to a temporary revision;
 - return the diff;
 - reject if expected references break;
-- commit atomic workspace mutations as one workspace revision.
+- commit atomic workspace mutations as one workspace revision;
+- make an atomic plan retry-safe under its stable `plan_id` and semantic plan digest.
 
 If a future batch includes operations that cannot be atomic, that must be an explicit different mode with per-operation receipts/recovery semantics. Do not make `atomic_if_possible` silently weaken atomicity.
 
