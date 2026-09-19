@@ -89,6 +89,8 @@ Supported activation patterns should include:
 
 **Journal visibility/reveal is a separate axis from activation.** A quest may be visible immediately, hidden until a typed reveal condition/event, or intentionally absent from the normal journal. Do not encode presentation visibility as another activation mode.
 
+Activation prerequisites are revalidated by the authority at the activation transition. After a QuestInstance becomes active, prerequisites are not continuously treated as a hidden deactivation rule. If losing a condition should fail/pause/branch an active quest, the definition must express that as an explicit failure/sustain rule.
+
 ### Resolution modes
 
 Supported completion patterns should include:
@@ -136,8 +138,9 @@ Policies may add constraints such as:
 - same instance/zone;
 - within distance;
 - contribution threshold;
-- alive/present;
-- event happened after quest activation.
+- alive/present.
+
+For event-observation objectives, **post-activation credit is the default**: events that happened before the QuestInstance activated are not silently replayed into progress. If author intent is “already possess X / already know Y / current fact is Z,” model that as an explicit current-state predicate evaluated at activation or as a separately declared retroactive/history operator with bounded evidence semantics.
 
 Credit is deterministic data derived from event/state, not a transport/UI guess.
 
