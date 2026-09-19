@@ -1004,3 +1004,145 @@ labels/sessions do not mint authority or reviewer independence.
 
 Foundry remains optional: Loka's Builder API, Lab, capability registry and certificate
 contracts define the semantic/evidence truth even when Foundry orchestrates them.
+
+
+## 29. Post-composition self-review and adversarial review
+
+This round reviewed the classic-MUD/composable-world additions, Foundry/Astra role
+integration, SceneSequence/InstancePlan decomposition, and expanded Cartridge Lab release
+assurance as one combined contract.
+
+### 29.1 Self-review findings corrected
+
+**Stale dream-space vocabulary.** One acceptance case still named a
+`private_scene_instance` after SceneSpace had been generalized.
+
+**Correction:** the case now uses SceneSequence + SceneSpace `instance` + InstancePlan.
+
+**Certification profile drift.** Document 09 described CoverageManifest, model analysis,
+invariants, exploration and evidence bundles, but the explicit Story/Realm profile
+minimums had not yet named those gates.
+
+**Correction:** the profile requirements now include frozen-candidate identity,
+model-analysis/coverage/invariants/exploration, profile-selected mutation sensitivity,
+evidence-bundle binding, and mounted/soak obligations where relevant.
+
+**Instance sequencing gap.** InstancePlan appeared in narrative/runtime prose after R3
+without an explicit registry/schema obligation and after the first Story milestone in
+some readings.
+
+**Correction:** R3 now includes SceneSpace/InstancePlan schema; R7 proves a minimal
+portable Story InstancePlan before R19 integrates the same semantics into shared Realm
+geography.
+
+### 29.2 Adversarial authority findings corrected
+
+**Instance deep-copy ambiguity.** "Instantiate an area" could be misread as recursively
+cloning referenced shared/singleton/account-owned runtime state.
+
+**Correction:** InstancePlan now has explicit instancing closure/import/export semantics.
+Non-instantiable/shared/account-owned state must bind through a supported authority
+contract or fail; temporary state exports only through declared typed consequences.
+
+**Scene actor re-resolution ambiguity.** A scene could otherwise repeatedly search a
+display name/definition and bind another NPC after reconnect, respawn or phasing.
+
+**Correction:** consequential scenes persist SceneRoleBindings with cardinality and
+missing-participant policy. Silent arbitrary rebinding is forbidden.
+
+**Autonomous-work input ambiguity.** New Behavior/Population/WorldEvent mechanisms made it
+important to distinguish player ActionInvocation from trusted internal world work.
+
+**Correction:** schedulers/jobs/selected BehaviorIntents/population/world-event machinery
+originate registered authority-internal Commands and converge on the same
+DecisionCoordinator/StateDelta/DomainEvent/Effect/commit spine.
+
+### 29.3 Adversarial certification findings corrected
+
+**Self-reported coverage.** Candidate content could otherwise claim a branch was covered
+or excluded.
+
+**Correction:** certification tooling generates CoverageManifest from the frozen artifact
+plus observed/proved receipts. Candidate exclusions require policy validation/disposition.
+
+**Model-authored test oracle.** An LLM-generated adversarial scenario could otherwise
+invent its own expected invariant and thereby mint a release failure/pass.
+
+**Correction:** model-proposed properties become governing only when they map to an
+existing registered/profile invariant or are separately reviewed/admitted.
+
+**Candidate-authored checker.** Cartridge-authored tests could otherwise present a friendly
+green suite as release evidence.
+
+**Correction:** authored tests are supplemental candidate-controlled evidence and cannot
+replace or weaken engine/profile gates.
+
+**Impact-analysis false negative.** Dynamic script/selectors/custom-event edges may make
+static dependency analysis incomplete.
+
+**Correction:** ImpactSet is fail-conservative; unknown dependency widens required checks
+rather than allowing stale receipt reuse.
+
+**Waivable hard blocker.** Mechanical/security failures could be misread as ordinary
+review findings.
+
+**Correction:** ordinary author/reviewer/release/model waivers cannot clear
+mechanical/security blockers. Changing their classification requires an explicit reviewed
+certification/architecture policy revision.
+
+### 29.4 Area/release robustness added
+
+The Lab now distinguishes:
+
+- edit-time checks;
+- isolated AreaDefinition assurance;
+- mounted dependency-closure assurance;
+- frozen cartridge certification;
+- deployment/shared-area certification;
+- commercial release evidence.
+
+Whole-cartridge/deployment certification remains mandatory even if every area passes in
+isolation.
+
+Change-impact analysis accelerates author feedback but cannot shrink protected release
+truth. Final living-world candidates also receive profile-appropriate long-horizon soak
+simulation to find slow population/economy/job/state leaks.
+
+### 29.5 Foundry/Astra boundary review
+
+The Loka docs now expose machine-readable role/surface intent but do not make Foundry
+part of gameplay or certification truth.
+
+Representative orchestration roles remain project vocabulary:
+
+- world/quest builder: typed L3–L6 Builder/Lab authoring;
+- engine-capability developer: separately admitted L2 source work;
+- semantic reviewer: read/simulate only;
+- release role: exact-certified-artifact surface only.
+
+MISSING_CAPABILITY yields a CapabilityProposal/escalation; it does not grant the builder
+engine-code authority.
+
+The corresponding Foundry strategy work must enforce capability grants outside prompts,
+derive API scope from authenticated assignment identity, protect reviewer independence by
+durable lineage, and keep broader escalated engine work in a separately admitted
+assignment.
+
+### 29.6 Adversarial conclusion
+
+No new reason was found to replace the v3 authority architecture.
+
+The main hardening result is stronger separation of concerns:
+
+~~~text
+narrative sequence != spatial instance
+project role name != authority
+candidate tests != certification authority
+semantic model opinion != deterministic gate
+area preflight != release certificate
+unknown dependency != safe evidence reuse
+~~~
+
+The remaining high-risk unknowns are still the deliberate evidence gates already recorded:
+portable implementation/binding choice, store-review posture for downloaded rule content,
+and later multi-zone Realm placement/routing.
