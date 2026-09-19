@@ -571,3 +571,78 @@ For offline cartridges that use real-elapsed time, device wall time is sampled/c
 That input follows the normal deterministic decision/commit path and is idempotent across crash/retry.
 
 Systems in hybrid time mode declare their time basis; they do not read wall clock directly from game rules.
+
+
+## ADR-050 — Closed semantics, open composition
+
+**Status:** Accepted
+
+Loka maximizes builder expressive power through layered composition of registered semantics.
+
+Builders may define and compose facts/events, policies/selectors, Actions, ReactionRules, Behaviors, state machines, population plans, commerce/services, scenes, quests, world events, templates, and bounded LokaScript.
+
+Cartridge content cannot introduce arbitrary persistence writes, host callbacks, unregistered mutation/effect types, or a second authority model.
+
+The normative layer map and primitive-graduation rule are in document 21.
+
+## ADR-051 — Target resolution, details, and coherent barriers are core world contracts
+
+**Status:** Accepted direction
+
+Target resolution is deterministic and action-declared, returning none/unique/ambiguous rather than random/source-order choice.
+
+InspectableDetail provides lightweight targetable descriptive world detail without forcing RuntimeEntity identity.
+
+Two faces of one logical door/gate/bridge should share one authoritative Barrier state unless explicitly authored as independent/asymmetric connections.
+
+## ADR-052 — Population, reactions, and behaviors compose living-world activity
+
+**Status:** Accepted direction
+
+SpawnBundle explicitly defines nested spawn composition.
+
+PopulationPlan owns bounded population/replenishment/cleanup through explicit provenance and scope; it does not destructively reset unrelated world state.
+
+ReactionRule is the safe builder-composable replacement for arbitrary special-procedure callbacks: typed trigger + selector + Policy + registered consequences.
+
+Autonomous Behaviors produce typed intents and use deterministic registered arbitration rather than content-source ordering.
+
+## ADR-053 — Commerce is a typed composite contract
+
+**Status:** Accepted direction
+
+Immediate merchant trade composes provider, catalog/stock, price/payment, buy/sell admission, liquidity, restock, schedule, and narration semantics and commits transfers atomically within one mutation authority.
+
+Long-running/scarce work continues to use Service/Capacity/Reservation/ServiceJob primitives.
+
+Merchant NPC code is not a special-case transaction engine.
+
+## ADR-054 — SceneSequence is reusable narrative orchestration
+
+**Status:** Accepted direction
+
+Text cutscenes, dreams, visions, ceremonies, staged conversations, and other authored sequences use typed SceneDefinition/SceneInstance semantics.
+
+Consequential scenes are durable/idempotent, resume safely, use normal ActionSet/authority validation, and may mutate the world only through registered consequences.
+
+Dream/private scene state is isolated; only explicitly declared exports/consequences cross back to ordinary world state.
+
+## ADR-055 — Quests are the narrative spine, not a second world authority
+
+**Status:** Accepted
+
+Quests are the primary authored thread carrying story through exploration, dialogue, scenes, world events, and durable consequences.
+
+Quest Runtime owns quest-specific progress/branch state and observes canonical DomainEvents.
+
+It coordinates the living world through typed facts, SceneSequences, named outcomes, and registered consequences rather than generic component/database writes.
+
+## ADR-056 — Authored geography is independent from Realm authority placement
+
+**Status:** Accepted
+
+AreaDefinition/WorldRegion groups authored geography/content for maps, population, environment, and certification.
+
+ZoneShard/WorldInstance describes runtime mutation ownership.
+
+The two concepts are not aliases and future partitioning may map them many-to-one or one-to-many.
