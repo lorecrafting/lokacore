@@ -604,7 +604,8 @@ The capability/content system MUST be able to represent, version, validate, and 
 - SpawnBundle and provenance-safe PopulationPlan;
 - commerce provider/catalog/stock/price/admission/liquidity/restock semantics;
 - NarrationSpec;
-- SceneDefinition/SceneInstance;
+- SceneDefinition/SceneInstance + SceneSpace;
+- InstancePlan instancing/import/export semantics;
 - WorldEventPlan composition.
 
 Not every item in the broader primitive catalog is an R3/R5 implementation requirement. The primitive-graduation rule in document 21 determines when a repeated composition should become an engine capability.
