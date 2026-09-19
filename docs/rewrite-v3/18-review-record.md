@@ -896,3 +896,29 @@ The remaining implementation discipline is to resist both extremes:
 - do not collapse all unusual behavior into an arbitrary scripting escape hatch.
 
 The middle layer is now explicit enough to guide that tradeoff.
+
+
+### 27.11 Autonomous world work must not fabricate player invocations
+
+**Finding:** once Behavior, PopulationPlan, ServiceJob, and WorldEventPlan became explicit, the earlier simplified canonical diagram could be read as requiring autonomous world machinery to manufacture fake player ActionInvocations.
+
+**Risk:** either internal systems spoof player intent, or they bypass the Command/decision/commit spine entirely.
+
+**Correction:** the packet now distinguishes two Command origins:
+
+1. player/agent/test-bot interaction: ActionInvocation -> authority re-resolution/revalidation -> semantic Command;
+2. trusted autonomous world work: scheduler/job, selected BehaviorIntent, population reconciliation, and world-event/system transitions -> registered authority-internal Command.
+
+Both converge on the same DecisionCoordinator/pure decision -> StateDelta + DomainEvents + Effects -> commit path.
+
+Internal Commands are typed, carry stable causation/idempotency where retryable, and cannot be submitted by an untrusted client to bypass ActionInvocation validation.
+
+### 27.12 Primitive selection needed an escape-hatch discipline
+
+**Finding:** a large primitive catalog can paradoxically make authoring worse if builders do not know whether a mechanic should be an ActionRecipe, ReactionRule, Behavior, SceneSequence, ServiceJob, Quest, script, or engine capability.
+
+**Correction:** document 21 now includes a decision table and escalation rule.
+
+The preferred discipline is to use the most specific typed construct that captures the invariant and escalate toward LokaScript/new engine capabilities only when lower-level composition is genuinely insufficient.
+
+The same section records additional immersive-world candidate families—knowledge/secrecy, language/communication, institutions/obligations, transport, property, supply, drives, navigation, hazards, selected world history, companions, documents, rituals, and governance—without turning them into first-cartridge requirements.
