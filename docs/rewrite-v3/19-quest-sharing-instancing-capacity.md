@@ -30,7 +30,7 @@ A player-scoped quest can use a shared NPC, a shared smithy, a personal ghost, a
 
 Story Mode normally has one local player inside one local world instance.
 
-Quest progress is usually player or campaign scoped.
+Quest progress is usually player scoped (or instance scoped when the whole local scenario intentionally shares one progression state). Campaign continuity is exported/imported typed continuity data, not a fifth runtime StateScope.
 
 The same scope machinery still applies because it provides:
 
@@ -317,7 +317,9 @@ Status examples:
     cancelled
     failed
 
-The owning service/provider authority owns the queue/reservation/timing semantics.
+The owning **mutation authority** owns the queue/reservation/timing semantics for the service aggregate.
+
+A service/provider does not automatically receive its own OTP process. In a private world it will usually be state inside the WorldInstance/LocalStory authority; in a shared Realm it may be state inside a ZoneShard or, when genuinely realm-wide concurrency warrants it, a dedicated shared-service authority.
 
 The quest only observes typed service/job DomainEvents.
 
@@ -333,7 +335,7 @@ Correct composition:
 
 - quest progress: player scoped;
 - smith NPC: shared;
-- service/provider: shared smithy entity;
+- service/provider: shared smithy aggregate/entity;
 - capacity: scoped to that service/provider;
 - work order beneficiary: player;
 - world space: shared;
@@ -489,7 +491,7 @@ For party quests:
 - contribution policy;
 - party split/reconnect.
 
-For facilities:
+For scarce/queued services:
 
 - simultaneous submissions;
 - slot exhaustion;
