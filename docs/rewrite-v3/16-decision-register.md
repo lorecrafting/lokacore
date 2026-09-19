@@ -641,7 +641,7 @@ It coordinates the living world through typed facts, SceneSequences, named outco
 
 **Status:** Accepted
 
-AreaDefinition/WorldRegion groups authored geography/content for maps, population, environment, and certification.
+AreaDefinition groups authored geography/content for maps, population, environment, and certification.
 
 ZoneShard/WorldInstance describes runtime mutation ownership.
 
