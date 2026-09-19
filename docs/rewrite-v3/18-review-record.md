@@ -737,3 +737,162 @@ Its core direction remains coherent:
 - prove a real game before over-generalizing authoring/factory tooling.
 
 The Draft 0.3 branch tightens the places where a competent implementation agent could previously choose materially different semantics. It should receive an independent high-reasoning adversarial pass before R0 acceptance.
+
+
+## 27. Classic MUD / builder-expression / narrative-depth review
+
+### 27.1 Why this pass was run
+
+After the Draft 0.3 integrity audit, the remaining question was not whether Loka needed another authority-model rewrite. It was whether the **middle layer between low-level engine semantics and finished story content** was expressive enough to build a dense, living MUD without falling back to arbitrary scripting.
+
+A focused design archaeology pass reviewed preserved DikuMUD/TinyMUD source plus CircleMUD builder conventions.
+
+### 27.2 Finding: v3 execution contracts were stronger than the classic engines, but world-composition grammar was under-specified
+
+The classic systems repeatedly derive useful expressivity from:
+
+- prototype/instance separation;
+- explicit spatial/containment relations;
+- target matching/search scopes;
+- compact locks/policies;
+- data-driven shops/socials;
+- small orthogonal NPC behavior;
+- declarative area population/reset recipes;
+- highly semantic builder operations;
+- special procedures as a local behavior escape hatch.
+
+V3 already had better authority, determinism, scoping, packaging, testing, and portability boundaries, so none of the classic storage/loop architecture was adopted.
+
+Instead the pass added an explicit layered composition model.
+
+### 27.3 Correction: closed semantics, open composition
+
+Document 21 now makes the builder-expression boundary normative.
+
+The stack is:
+
+~~~text
+authority/transactions
+ -> world model contracts
+ -> semantic capabilities
+ -> composition grammar
+ -> domain composites
+ -> narrative/world orchestration
+ -> cartridges/campaigns/deployments
+~~~
+
+Builders normally operate in the upper layers and may create custom facts/events, policies/selectors, Actions/ActionRecipes, ReactionRules, state machines, Behaviors, population plans, commerce/services, scenes, quests, world events, templates, and bounded scripts.
+
+They cannot introduce hidden persistence or authority semantics.
+
+### 27.4 Correction: safe descendants of TinyMUD/Diku patterns
+
+The packet now explicitly defines/adopts the direction for:
+
+- deterministic TargetResolution rather than arbitrary/first/random match;
+- InspectableDetail for rich environmental detail without entity inflation;
+- one coherent Barrier state for one logical door/gate;
+- SpawnBundle + provenance-safe PopulationPlan instead of destructive zone reset;
+- ReactionRule instead of arbitrary special-procedure callbacks;
+- deterministic Behavior intent arbitration rather than source-order behavior;
+- AreaDefinition/WorldRegion separate from ZoneShard ownership placement;
+- audience-aware NarrationSpec;
+- typed commerce/merchant composition.
+
+### 27.5 Correction: builders can invent new verbs safely
+
+A major adversarial question was whether builders could create actions such as “ring bell,” “pray,” “search rubble,” or “offer incense” without either:
+
+1. asking for a new compiled engine command; or
+2. hiding behavior in a script.
+
+The answer is now **ActionRecipe / ComposedAction**.
+
+An immutable compiled recipe combines TargetSpec, Policy, costs, optional Check/result bands, typed consequences/events, and NarrationSpec inside one normal authority decision.
+
+Asynchronous multi-step behavior is intentionally not smuggled into ActionRecipe; SceneSequence/ServiceJob/state-machine primitives own durable continuation.
+
+### 27.6 Correction: quest becomes the narrative spine without becoming world authority
+
+Quest architecture was expanded substantially.
+
+Quests may now coordinate:
+
+- stages/milestones;
+- SceneSequences;
+- text cutscenes;
+- dreams/visions/private scenes;
+- scripted world events;
+- dialogue;
+- services;
+- population/world reactions;
+- world-state mutation through typed consequences;
+- named branch outcomes and follow-up content.
+
+SceneDefinition/SceneInstance provides durable, idempotent narrative orchestration with crash/reconnect recovery, authority-enforced control modes, choices, checkpoints, scene-space semantics, and typed consequence export.
+
+WorldEventPlan composes multi-phase events from ordinary primitives rather than creating another authority.
+
+### 27.7 Correction: merchant/shop is a reusable composite
+
+Merchant behavior is no longer left as a placeholder concept.
+
+The spec now decomposes immediate commerce into:
+
+- provider;
+- offers/catalog;
+- stock;
+- PricePolicy;
+- payment/currency;
+- purchase/sell admission;
+- liquidity;
+- restock;
+- schedule;
+- narration.
+
+Immediate trade is one transactional Commerce decision. Scarce/long-running fulfillment composes with existing ServiceJob primitives.
+
+### 27.8 Primitive catalog is intentionally broader than the first milestone
+
+Document 21 brainstorms a much larger immersive-world vocabulary—perception, recognition, materials, survival, social memory, rumor, witness/knowledge, crime/law, ecology, crafting, world events, etc.
+
+This is **not** a mandate to implement all of them before the first cartridge.
+
+A primitive graduates into engine semantics only when repeated use, invariants, determinism, Builder discovery, or certification needs justify it. Otherwise prefer a recipe/template/reaction/scene/script composition.
+
+This keeps the design expressive without turning R3/R5 into an attempt to prebuild every future game feature.
+
+### 27.9 Implementation and acceptance gates were updated
+
+R3/R5/R7/R8/R9/R10/R11 now explicitly prove the new layers.
+
+The first real cartridge now stresses:
+
+- several connected quests;
+- branch consequences;
+- text cutscene;
+- dream/private narrative sequence;
+- scripted world event/reaction;
+- inspectable details;
+- target ambiguity;
+- coherent barrier;
+- population plan;
+- merchant behavior;
+- behavior arbitration.
+
+New acceptance scenarios cover ActionRecipe retry safety, TargetResolution, details, barrier coherence, population provenance, behavior conflicts, reactions, commerce, SceneSequence crash/retry, dream isolation, quest/scene integration, and multi-phase WorldEventPlan behavior.
+
+### 27.10 Review conclusion
+
+The classic-MUD pass strengthens rather than overturns the v3 architecture.
+
+The desired synthesis is:
+
+> **TinyMUD-style relational/manipulable world + Diku/Circle-style reusable curated mechanics + Loka's typed deterministic authority + a powerful composition/narrative layer.**
+
+The remaining implementation discipline is to resist both extremes:
+
+- do not hardcode every immersive feature as a new subsystem;
+- do not collapse all unusual behavior into an arbitrary scripting escape hatch.
+
+The middle layer is now explicit enough to guide that tradeoff.
