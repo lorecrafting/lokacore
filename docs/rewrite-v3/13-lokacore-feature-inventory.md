@@ -163,9 +163,9 @@ Rebuild around one Search/TargetResolver:
 - exact IDs for tools;
 - structured ambiguous-result error.
 
-Text parser converts to canonical Commands.
+Text parser and touch UI both produce host-neutral ActionInvocations. The active authority re-resolves/revalidates them and constructs canonical semantic Commands.
 
-Touch UI sends canonical IDs/inputs directly.
+Touch UI can supply exact IDs from GameView action metadata; text input reaches the same boundary through Search/TargetResolver.
 
 ## 8. Conditions and access
 
@@ -175,7 +175,7 @@ Disposition: **merge into one typed Policy/Condition algebra**.
 
 Core conditions:
 
-- flag;
+- typed fact comparison;
 - not;
 - all/any;
 - stat/resource compare;
