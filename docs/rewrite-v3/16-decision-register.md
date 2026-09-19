@@ -226,6 +226,8 @@ Cartridge scripting is an Elixir-like restricted authoring language compiled to 
 
 No released cartridge execution through `Code.eval_string`.
 
+Deterministic step/query/resource budgets define script semantics. A host wall-time kill switch is defense in depth only; firing it on certified supported input is a runtime/conformance fault, not a valid cartridge branch.
+
 Exact bytecode/AST format is implementation work.
 
 ## ADR-019 — Builder API canonical authority
@@ -264,6 +266,8 @@ AI is build/review tooling unless a future feature explicitly adds bounded optio
 **Status:** Accepted
 
 Published releases are immutable/hash-addressed and exact-hash certified.
+
+The canonical semantic cartridge/deployment hash covers normalized game semantics and compatibility locks, but excludes certificate/signature/catalog/download-envelope material that is created after that hash exists. Certification/signing attest the semantic hash. Exact downloadable archive bytes may additionally have a separate package/transport hash.
 
 Existing saves remain pinned or use explicit tested migrations.
 
@@ -523,6 +527,10 @@ Personal dialogue alone is not a reason to clone an NPC or zone.
 Shared bottlenecks are modeled by reusable Service capabilities composed from CapacityPolicy, Reservation/QueuePolicy, optional Escrow, DurationPolicy, CompletionRule, OutputPolicy, and durable ServiceJobs—not by quest-specific timers.
 
 The owning mutation authority owns queueing/reservations, escrow where used, capacity allocation, duration, and completion for the service aggregate.
+
+When inputs/capacity share one mutation authority, allocation + escrow + ServiceJob creation commit atomically. When custody crosses authorities, use an explicit durable idempotent reservation/transfer/reconciliation protocol rather than pretending PostgreSQL creates one distributed authority.
+
+Service period/window policies declare their time basis and boundary/anchor semantics; “per day” is not allowed to inherit device/server local-midnight behavior implicitly.
 
 A service/provider is a domain aggregate, not automatically a dedicated OTP process. Quests observe typed ServiceJob DomainEvents and remain independently scoped.
 
