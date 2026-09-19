@@ -1630,3 +1630,21 @@ A PopulationPlan/merchant/restock interaction is correct for two days but slowly
 unbounded items/currency over 90 simulated days.
 
 Frozen-candidate soak certification detects invariant growth and blocks release.
+
+
+### CERT-12 — Candidate cannot self-report coverage
+
+Cartridge source claims a required branch is covered/excluded, but trusted Lab receipts
+show it was never exercised/proven and the profile does not authorize the exclusion.
+
+Generated CoverageManifest records the gap and release remains blocked.
+
+### CERT-13 — Model cannot invent a release invariant
+
+An LLM adversarial tester proposes a scenario and says "this outcome should be impossible."
+
+Lab executes the scenario, but the proposed expectation is not a registered/profile
+invariant.
+
+The result is retained as exploratory semantic evidence; it cannot fail or pass the
+release until the property is separately reviewed/admitted.
