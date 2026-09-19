@@ -333,8 +333,10 @@ Support real narrative cartridges.
 - dialogue conditions/actions;
 - NarrationSpec;
 - SceneDefinition + durable SceneInstance reducer;
+- SceneSpace semantics;
+- minimal portable InstancePlan for precompiled room-subgraph/private Story spaces under LocalInstanceAuthority, including entry/exit, reconnect/save, teardown and explicit exports;
 - text-cutscene beats, choices, checkpoints, and action-control modes;
-- player-scoped dream/private-scene semantics with explicit exported consequences;
+- player-scoped dream/vision compositions over current-world, overlay, or InstancePlan space with explicit exported consequences;
 - quest milestone/scene hooks and scene outcome objectives;
 - LokaScript parser/normalized-IR skeleton and interpreter core sufficient to prove containment/determinism;
 - only the bindings actually needed by the first cartridge plus a small synthetic safety fixture set;
@@ -346,7 +348,7 @@ Support real narrative cartridges.
 
 Known Lokacore quest-bug class has a regression scenario that cannot reproduce corruption/premature completion.
 
-A quest can drive a durable SceneSequence containing text narration, an authoritative choice, a crash/reconnect checkpoint, and typed world consequences exactly once. A player-scoped dream/private scene proves isolation plus explicit export semantics.
+A quest can drive a durable SceneSequence containing text narration, an authoritative choice, a crash/reconnect checkpoint, and typed world consequences exactly once. A player-scoped dream proves both overlay and minimal InstancePlan composition, isolation, reconnect/save behavior, and explicit export semantics.
 
 LokaScript containment/determinism fixtures pass, but a broad general-purpose binding library is **not** required before R10.
 
@@ -669,6 +671,10 @@ The implementation may use one `ZoneShard`-shaped owner for this hub if that is 
 Offline cartridges remain independent; same packs can launch from shared hub as private/party adventures. Personal overlays do not leak to unrelated players, and a shared service contention test proves one scarce slot cannot be double-allocated.
 
 ## R19 — Instanced story regions in world geography
+
+R19 does **not** invent a second instance model. It integrates the portable/private
+InstancePlan semantics already proved for Story Mode with shared Realm geography and
+WorldInstance handoff.
 
 ### Build
 
