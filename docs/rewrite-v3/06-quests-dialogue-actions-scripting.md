@@ -2,7 +2,7 @@
 
 ## 1. Quest Runtime
 
-Quest correctness is a primary v3 requirement.
+Quest correctness is a primary v3 requirement. Quests are also the primary authored narrative thread that carries story through the living world; scenes, dreams, cutscenes, and scripted world events extend that thread without giving quests a second mutation authority.
 
 The persisted lifecycle remains deliberately small:
 
@@ -40,7 +40,9 @@ turn_in: npcs/old_ferryman
 
 prerequisites:
   all:
-    - quest_completed: village_arrival
+    - quest_state:
+        quest: village_arrival
+        state: resolved
 
 objectives:
   all:
@@ -83,8 +85,11 @@ Supported activation patterns should include:
 
 - `offered` — player explicitly accepts from an NPC/object/action;
 - `automatic` — becomes active when prerequisites/world condition becomes true;
-- `discovered` — activates when the player discovers a place/clue/event;
-- `hidden` — tracks internally without exposing normal journal UI until revealed.
+- `discovered` — activates when the player discovers a place/clue/event.
+
+**Journal visibility/reveal is a separate axis from activation.** A quest may be visible immediately, hidden until a typed reveal condition/event, or intentionally absent from the normal journal. Do not encode presentation visibility as another activation mode.
+
+Activation prerequisites are revalidated by the authority at the activation transition. After a QuestInstance becomes active, prerequisites are not continuously treated as a hidden deactivation rule. If losing a condition should fail/pause/branch an active quest, the definition must express that as an explicit failure/sustain rule.
 
 ### Resolution modes
 
@@ -103,6 +108,9 @@ A quest giver and turn-in target are therefore optional content roles, not hard 
 Quest grammar SHOULD support:
 
 - event match;
+- current-state/fact predicate;
+- scene outcome;
+- world-event phase/outcome;
 - all;
 - any;
 - sequence;
@@ -133,8 +141,9 @@ Policies may add constraints such as:
 - same instance/zone;
 - within distance;
 - contribution threshold;
-- alive/present;
-- event happened after quest activation.
+- alive/present.
+
+For event-observation objectives, **post-activation credit is the default**: events that happened before the QuestInstance activated are not silently replayed into progress. If author intent is “already possess X / already know Y / current fact is Z,” model that as an explicit current-state predicate evaluated at activation or as a separately declared retroactive/history operator with bounded evidence semantics.
 
 Credit is deterministic data derived from event/state, not a transport/UI guess.
 
@@ -152,15 +161,17 @@ Do not add arbitrary scripting for common quest logic.
   lifecycle: :active,
   activation_mode: :offered,
   activated_at: logical_time,
-  resolved_outcome: nil,
+  outcome_id: nil,
   objectives: typed_state,
   variables: %{},
   revision: 8,
-  processed_event_ids: bounded/idempotency structure
+  event_delivery_cursor_or_dedupe: authority-defined idempotency state
 }
 ```
 
 Definition version is pinned.
+
+Quest event delivery MUST be idempotent without relying on an unsafe forever-growing or arbitrarily evicted set of event IDs. The authority may use durable delivery receipts, monotonic per-source cursors where valid, or a bounded dedupe structure only when its pruning rule cannot make an old retry executable again.
 
 ## 5. Quest event processing
 
@@ -206,16 +217,25 @@ Retry/restart cannot grant twice.
 
 Do not evaluate every active quest against every event if scale grows.
 
-At acceptance/compile/load time build indexes by event type and target where possible.
+Maintain two conceptually distinct indexes:
+
+1. **active-instance subscriptions** — which existing QuestInstances may consume an event;
+2. **activation subscriptions** — which quest definitions with no QuestInstance yet may need to evaluate automatic/discovered activation when a relevant event/fact transition occurs.
+
+At compile/load/activation time build indexes by event type, fact dependency, target, and scope where possible.
 
 Example:
 
 ```text
-{:death, "goblin"} -> [quest instance ids]
-:dialogue_node_reached -> [...]
+active {:death, "goblin"} -> [quest instance ids]
+active :dialogue_node_reached -> [...]
+activate {:discovered, "hidden_shrine"} -> [quest definition refs]
+activate {:fact_changed, "village.arrived"} -> [quest definition refs]
 ```
 
-Private cartridges may begin simpler but API should allow indexing.
+Offered quest availability may be derived on interaction/projection; automatic/discovered activation must not require pre-creating locked QuestInstances.
+
+Private cartridges may begin with simpler scans, but the semantic API must distinguish activation candidates from active-instance delivery.
 
 ## 8. Quest invariants
 
@@ -341,7 +361,9 @@ Those cannot pretend to be one database transaction.
 
 The local quest/outcome commits first with a durable, idempotent cross-authority Effect/outbox record. The receiving authority applies its own command/protocol and reconciliation rules.
 
-Certification must test failure/retry at that boundary.
+Delivery may repeat after acknowledgement loss; the stable effect identity makes remote authoritative application idempotent rather than assuming exactly-once transport. A required remote consequence that exhausts ordinary retry remains a durable unresolved/reconciliation obligation and MUST NOT silently disappear while the local quest presents the cross-authority work as successfully settled.
+
+Certification must test failure, duplicate delivery, terminal retry disposition, and reconciliation at that boundary.
 
 ## 11. Prefer facts for broad narrative consequences
 
@@ -603,9 +625,8 @@ nodes:
       - id: ask_missing_child
         text: dialogue.ferryman.ask_child
         when:
-          quest_state:
+          quest_available:
             quest: quests/missing_child
-            state: available
         next: missing_child_offer
 ```
 
@@ -664,6 +685,38 @@ Actions may require additional input schema.
 
 The same action supports touch and terminal adapters.
 
+### Composed actions / ActionRecipe
+
+A builder MAY define a cartridge-local Action whose semantics are entirely composed from registered primitives rather than requiring a new engine command implementation.
+
+Representative recipe:
+
+~~~yaml
+key: ring_bell
+aliases: [ring, bell]
+target:
+  kind: inspectable_detail
+  ref: details/temple_bell
+policy:
+  all:
+    - target_present: true
+outcomes:
+  success:
+    events:
+      - temple/bell_rung
+    narration:
+      actor: narration.bell.actor
+      observers: narration.bell.room
+~~~
+
+A richer recipe may include typed costs, a Check, result bands, cooldown/duration, and registered consequence operators.
+
+The compiled recipe is immutable, schema-validated, bounded, and deterministic. The active authority still re-resolves the action and executes it through the normal semantic Command/decision path.
+
+ActionRecipe is preferred over LokaScript for simple new verbs. If the verb requires a genuinely new invariant or mutation semantic, add a versioned engine capability instead.
+
+The same action supports touch and terminal adapters.
+
 ## 21. Policies/conditions
 
 Policy AST is typed and fail-closed.
@@ -678,15 +731,19 @@ permission
 owner/self
 tag
 has_item
-flag
+fact_compare
 stat_compare
 resource_compare
+quest_available
 quest_state
+quest_outcome
 faction_compare
 time_window
 target_present
 scope_matches
 ```
+
+`quest_state` refers to persisted QuestInstance lifecycle state. Availability is derived and therefore uses `quest_available`; named terminal branches use `quest_outcome`. Broad narrative truths use typed facts rather than generic string flags.
 
 A policy evaluator is pure.
 
@@ -703,9 +760,13 @@ raw text
  -> tokenize/parse
  -> identify action alias
  -> Search resolve target(s)
- -> build typed command
- -> runtime
+ -> build ActionInvocation
+ -> active GameSession
+ -> authority re-resolves/revalidates
+ -> typed semantic Command
 ```
+
+The text parser is an input adapter just like touch UI; it MUST NOT bypass the ActionInvocation authority boundary.
 
 Parser should support classic MUD conveniences:
 
@@ -761,18 +822,18 @@ Bindings are capabilities:
 
 ```text
 query.entity
-query.flag
+query.fact
 query.quest
 query.time
 query.weather
 emit.say
 emit.message
-effect.set_flag
-effect.spawn
-effect.move
-effect.damage
-effect.heal
-effect.schedule
+fact.set
+world.spawn
+world.move
+combat.damage
+combat.heal
+job.schedule
 event.emit
 rng.chance
 rng.pick
@@ -780,22 +841,23 @@ rng.pick
 
 Each binding has input/result schema, cost, and portability classification. Offline cartridges may call portable bindings only.
 
-Mutation-like bindings return typed effects/events; they do not write DB directly.
+Mutation-like bindings return typed StateDelta/DomainEvents/Effects according to their registered capability contract; they do not write DB directly.
 
 ## 26. Script budgets
 
-Each execution has:
+Each execution has deterministic semantic limits such as:
 
-- max AST steps;
-- max wall execution budget as outer safety;
+- max AST/interpreter steps;
 - max queries;
-- max emitted events/effects;
+- max emitted StateDelta operations/events/effects;
 - max spawn count;
 - max scheduled jobs;
 - max result size;
 - max collection size.
 
-Budget exceed is a typed script error and trace.
+Exceeding a deterministic semantic limit is a typed script error and trace.
+
+A host MAY also enforce a conservative **wall-time safety guard** to protect the process/device, but that guard is not part of cartridge semantics. Certification MUST demonstrate that valid scripts hit deterministic step/resource budgets before wall time can create host-dependent behavior and that supported hosts complete certified workloads comfortably inside the outer guard. If the outer wall guard fires unexpectedly, treat it as a host/runtime fault/conformance failure rather than a normal deterministic script branch.
 
 ## 27. Deterministic scripts
 
@@ -867,3 +929,402 @@ Small state machines remain useful for:
 Use them when states/transitions are explicit.
 
 Do not force every behavior into a state machine when a pure function/derived state is simpler.
+
+
+## 32. Quest as the narrative spine
+
+Quests are the primary authored **narrative thread** that carries a story through a living world, but a quest is not a second world authority.
+
+A robust quest may coordinate:
+
+- exploration;
+- dialogue;
+- combat or non-combat encounters;
+- investigations and discoveries;
+- timers/windows;
+- services/jobs;
+- NPC role and schedule changes;
+- SceneSequences;
+- dream/vision sequences;
+- text cutscenes;
+- map/location reveals;
+- world-event phase changes;
+- named outcomes;
+- durable cross-system facts;
+- follow-up quest activation.
+
+The quest owns its own objective/branch/lifecycle state and observes the world. It coordinates other mechanics through typed events, facts, scenes, and consequences.
+
+This allows the quest to feel like the thread making the world/story alive without giving it generic component/database write access.
+
+### Stages and milestones
+
+Long quests may define named **stages/milestones** as authoring structure over the objective graph.
+
+A stage may:
+
+- group objectives;
+- expose journal text;
+- start a SceneSequence;
+- reveal content;
+- change active hints;
+- emit a milestone DomainEvent.
+
+Stage/milestone is not automatically another persisted QuestInstance lifecycle dimension. Where possible it compiles to ordinary objective/branch state plus named milestone events.
+
+### Storyline/arc grouping
+
+A **Storyline/ArcDefinition** MAY group several quests, scenes, expected branches, entry conditions, and endings for authoring, Lab coverage, catalog presentation, and certification.
+
+It is not another gameplay authority or mandatory progress store. Runtime truth remains in QuestInstances, scoped Facts, SceneInstances, and world state.
+
+This gives a long narrative a visible high-level spine without creating one giant monolithic quest.
+
+## 33. SceneSequence: reusable narrative orchestration
+
+A **SceneSequence** is a registered narrative orchestration primitive reusable by quests and non-quest world events.
+
+Use it for:
+
+- text-based cutscenes;
+- dreams and visions;
+- ceremonies;
+- staged conversations;
+- travel interludes;
+- scripted reveals;
+- tutorials;
+- dramatic event beats;
+- player choices that happen inside a controlled scene.
+
+A scene is not a raw script and is not a new authority.
+
+Player scene choices/continuations are ordinary Actions: touch/text emits ActionInvocation, authority re-resolves/revalidates, and a typed Command advances the SceneReducer. Automatic scene progress is driven only by deterministic immediate beats or explicit typed events/jobs/inputs.
+
+Conceptual flow:
+
+~~~text
+quest/reaction/world event
+   -> start SceneSequence
+   -> SceneReducer advances registered beats
+   -> Narration / choices / waits / typed consequence requests
+   -> DomainEvents
+   -> quest/world reactions
+~~~
+
+A consequential scene has a durable SceneInstance so app kill, server crash, reconnect, or retry cannot replay consequential beats incorrectly.
+
+Representative state:
+
+~~~text
+SceneInstance
+  id
+  definition_ref
+  scope
+  participants
+  scene_space
+  control_mode
+  current_beat
+  local_variables
+  checkpoint
+  revision
+  completed_outcome
+~~~
+
+Definition version is pinned.
+
+### Scene roles and durable participant bindings
+
+A SceneDefinition MAY declare named semantic roles such as:
+
+~~~text
+player
+old_master
+witness
+guard_captain
+ritual_officiant
+~~~
+
+Each role declares a typed selector/cardinality and whether it must resolve at scene start,
+may resolve later, or may be absent.
+
+When a consequential scene starts, the authority resolves required roles inside the
+declared SceneSpace/InstancePlan context and persists **SceneRoleBindings** in the
+SceneInstance.
+
+Later beats target the bound runtime identity, not a fresh display-name search.
+
+This prevents:
+
+- reconnect binding to another copy of the same NPC definition;
+- respawn causing a scene to jump actors;
+- shared Realm players accidentally targeting another participant's phased actor;
+- ambiguous aliases selecting a different entity halfway through a cutscene.
+
+If a bound participant disappears/dies/becomes invalid, the definition must declare a
+missing-participant policy such as:
+
+- wait;
+- branch;
+- fail scene;
+- substitute an explicitly compatible role;
+- re-resolve through a named policy when rebinding is genuinely intended.
+
+Silent arbitrary rebinding is forbidden.
+
+## 34. Scene step vocabulary
+
+Scene steps are registered and typed.
+
+Foundation candidates:
+
+- **narrate** — emit localized NarrationSpec;
+- **dialogue** — enter/use a dialogue node;
+- **choice** — present typed choices and wait for one authoritative selection;
+- **check** — perform a registered deterministic/stat/RNG check;
+- **branch** — choose next beat from state/check result;
+- **present** — presentation hint such as image/audio/animation metadata where supported;
+- **await_ack** — wait for player acknowledgement/continue;
+- **await_event** — wait for a matching typed DomainEvent;
+- **await_action** — wait for an allowed Action;
+- **advance_time** — request explicit logical-time advance only where the profile permits it;
+- **consequence** — request a registered typed consequence operator;
+- **overlay** — set/clear scene presentation or scoped visibility overlay through registered semantics;
+- **checkpoint** — persist a safe resume point;
+- **end** — complete with an optional named scene outcome.
+
+A step MUST NOT contain arbitrary state-field writes.
+
+A scene does not block a BEAM process or mobile thread while waiting. It persists/derives a waiting state and resumes from a new ActionInvocation, DomainEvent, logical-time input, or scheduled job.
+
+## 35. Text cutscenes
+
+Text-first cutscenes are a first-class SceneSequence rendering mode.
+
+A cutscene should support:
+
+- ordered narrative beats;
+- actor/target/observer-aware NarrationSpec;
+- paragraph/page grouping;
+- optional player choices;
+- optional acknowledgement between beats;
+- skip/replay policy;
+- accessibility-friendly plain text;
+- mobile enhancement without changing semantics.
+
+Example conceptual sequence:
+
+~~~text
+narrate: temple doors slam shut
+narrate: incense smoke coils into a human shape
+dialogue: abbot_warning
+choice:
+  - kneel
+  - challenge
+branch on choice
+consequence: relationship.adjust / fact.set
+end
+~~~
+
+The semantic scene remains valid on a terminal client even if a mobile client adds art, sound, vibration, or animation.
+
+## 36. Dreams, visions, memories, and other private sequences
+
+Dream/vision content SHOULD use explicit scene-space semantics instead of pretending a shared Realm character physically teleported into ordinary shared geography.
+
+SceneSequence does not own spatial simulation. It references the generic SceneSpace/InstancePlan primitives from document 21.
+
+Recommended scene spaces:
+
+- **current_world** — scene happens in the ordinary current simulation;
+- **scoped_overlay** — current shared geometry remains, but presentation/entities/actions differ for eligible participants;
+- **instance** — a generic InstancePlan creates an isolated temporary/private/party spatial simulation from precompiled room/area definitions.
+
+Scene space does not itself choose a new mutation authority. In Story Mode the LocalInstanceAuthority may own the scoped subspace directly. In Realm Mode, genuinely separate physical simulation uses the existing private/party WorldInstance instancing semantics from document 19; a purely perceptual dream should prefer a scoped overlay.
+
+A dream/vision is therefore a **content composition**, not another engine subsystem.
+
+A dream may:
+
+1. trigger from sleep/rest/quest/world state;
+2. start a SceneInstance and choose current-world, overlay, or generic InstancePlan space;
+3. when interactive space is needed, instantiate precompiled rooms/entities/populations just like any other scoped dungeon/instance;
+4. expose dream-only actions/entities/details;
+5. progress choices/checks;
+6. end;
+7. export only explicitly declared typed consequences/facts/memories back to the owning world/quest.
+
+No accidental dream loot/entity may leak into Realm state unless an explicit certified consequence creates the corresponding real-world result.
+
+Dream-local temporary state can disappear on scene teardown while declared narrative memory survives.
+
+## 37. Scene control and player agency
+
+A scene declares its control mode.
+
+Representative modes:
+
+- **free** — scene narration occurs while ordinary actions remain available;
+- **restricted** — ActionSet is intersected with a declared allowed set while the scene is active;
+- **modal** — only scene continuation/choice actions are available;
+- **presentation_only** — no authoritative input required; scene advances through deterministic immediate beats or explicit acknowledgement.
+
+Restrictions MUST use normal ActionSet composition/policy rather than a transport/UI-only lock.
+
+A scene also declares:
+
+- whether it is skippable;
+- what skip means semantically;
+- whether it can be replayed as non-authoritative history;
+- what happens on disconnect;
+- any timeout behavior and time basis.
+
+Skipping presentation MUST NOT skip required authoritative consequences unless the definition explicitly maps skip to a deterministic terminal scene outcome.
+
+## 38. Quest-to-scene integration
+
+A quest may reference scenes at explicit hooks such as:
+
+- activation;
+- milestone/stage entry;
+- objective completion;
+- branch choice;
+- failure;
+- objectives complete;
+- final resolution;
+- post-resolution epilogue.
+
+A scene may emit typed DomainEvents that the quest observes.
+
+A quest may wait on a scene outcome as an objective:
+
+~~~text
+scene_completed(dream_of_river, outcome = accepted_oath)
+~~~
+
+Scene start/resume/completion must be idempotent.
+
+A command retry must not:
+
+- start duplicate dream instances;
+- replay a one-time reward;
+- emit the same consequential scene beat twice;
+- resolve a quest twice.
+
+## 39. Scripted world events and WorldEventPlan
+
+Not every scripted event belongs inside a quest.
+
+A **WorldEventPlan** is a higher-level composition for multi-phase living-world events such as:
+
+- festival;
+- storm;
+- invasion;
+- siege;
+- rebuilding effort;
+- election;
+- pilgrimage;
+- disaster response.
+
+It composes existing primitives:
+
+~~~text
+trigger
+ -> scoped phase/state machine
+ -> facts
+ -> PopulationPlans / activation groups
+ -> behavior/schedule changes
+ -> merchant/service changes
+ -> scenes/narration
+ -> quests
+ -> typed outcomes
+~~~
+
+A WorldEventPlan is not another mutation authority and SHOULD NOT become a universal kitchen-sink runtime manager. It compiles/coordinates ordinary scoped state machines, facts, reactions, populations, schedules, services, scenes, and quests under their existing authority contracts.
+
+Quests may:
+
+- start a world event through a typed consequence;
+- observe its phase/events;
+- contribute progress;
+- branch based on its outcome.
+
+World events may also exist independently of quests.
+
+## 40. Multiplayer scene semantics
+
+Realm scenes MUST declare participant/audience semantics independently from quest progress scope.
+
+Possible participant models:
+
+- one player;
+- party snapshot;
+- current eligible participants;
+- instance population;
+- explicit realm-event participants.
+
+Possible synchronization models:
+
+- **independent** — each participant advances their own player-scoped scene;
+- **leader_driven** — one authorized participant chooses for the group;
+- **barrier** — scene advances when all/required participants acknowledge;
+- **shared_choice** — an explicit voting/selection policy chooses one result.
+
+Disconnect/late-join/party-leave behavior must be declared.
+
+Do not hold an entire shared ZoneShard hostage to one player's modal cutscene.
+
+## 41. Journal, reveal, hints, and story readability
+
+A robust quest system also needs presentation metadata distinct from authoritative progress.
+
+Useful contracts include:
+
+- journal title/summary;
+- stage-specific journal text;
+- discovered/revealed entries;
+- optional objectives;
+- hints with reveal policies;
+- completed/failed summary;
+- named outcome recap;
+- related people/places/map links;
+- replayable non-authoritative scene transcript where product design wants it.
+
+These are projections of quest/world state, not alternate lifecycle truth.
+
+## 42. Narrative robustness and certification
+
+Quest/scene certification should test more than objective completion.
+
+Required relevant scenarios include:
+
+- app/server crash at every consequential scene beat;
+- retry of scene choice/start/completion;
+- skip versus non-skip semantic equivalence where skip is allowed;
+- disconnect/reconnect during modal scene;
+- dream/private-scene teardown with no leaked temporary state;
+- declared dream consequence exported exactly once;
+- branch-specific world mutations visible after scene/quest completion;
+- scheduled scripted event firing once;
+- quest objective waiting on scene/world-event outcome;
+- scene/action restriction enforced by authority, not client only;
+- multiplayer scene participant semantics;
+- cross-authority scene consequence recovery;
+- bounded scene/reaction/event chains.
+
+The Cartridge Lab SHOULD show a unified narrative trace:
+
+~~~text
+ActionInvocation
+ -> Command
+ -> DomainEvents
+ -> quest objective/milestone
+ -> SceneSequence beat
+ -> choice
+ -> scene outcome
+ -> quest outcome
+ -> world consequences
+ -> reactions
+ -> resulting GameView
+~~~
+
+This makes complex authored story behavior explainable and reproducible rather than opaque script execution.

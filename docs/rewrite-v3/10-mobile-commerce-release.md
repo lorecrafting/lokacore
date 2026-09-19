@@ -270,14 +270,17 @@ Store policies must be re-verified immediately before submission.
 Use content-addressed package/asset manifests:
 
 ```text
-artifact hash
-signature
+semantic cartridge/content hash
+optional exact package/transport hash
+signature/attestation envelope
 kernel compatibility
 manifest
 definition/rule-IR blobs
 asset hashes
 locale files
 ```
+
+The semantic cartridge hash excludes the certificate/signature envelope that attests it. The optional package hash covers exact downloadable bytes and may therefore change if packaging metadata changes without changing game semantics.
 
 Download can be resumable.
 

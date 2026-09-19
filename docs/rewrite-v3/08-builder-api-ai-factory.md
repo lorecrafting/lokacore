@@ -28,7 +28,7 @@ Constraints:
 - cartridge must compile against portable capabilities only;
 - offline save/campaign semantics required;
 - no realm/global service assumptions;
-- default quest scope is player/campaign;
+- default runtime quest scope is player; campaign continuity is handled through explicit continuity exports/imports rather than a fifth runtime scope;
 - certification profile is offline-first;
 - economy/power remains local to the story/campaign lineage.
 
@@ -96,8 +96,8 @@ Builder target is an authoring/runtime contract, **not a mobile-app target**. St
 
 The workspace target MUST select a default certification policy:
 
-- `story` → `offline_private_story` plus portable/offline/save-compatibility gates;
-- `realm` → an online profile such as `online_private_story`, `party_story`, or `shared_area`, including concurrency/security/load gates appropriate to scope;
+- `story` → `offline_private` plus portable/offline/save-compatibility gates;
+- `realm` → an online profile such as `online_private`, `party`, or `shared_area`, including concurrency/security/load gates appropriate to scope;
 - `promote` → validates the source Story certificate, requires explicit multiplayer adaptation decisions, then runs the selected Realm certification profile.
 
 The builder may add stricter gates, but content cannot weaken target-mandated certification.
@@ -148,6 +148,18 @@ Response:
   "diagnostics": []
 }
 ```
+
+### Builder mutation idempotency
+
+Builder writes are network/agent operations and MUST be safe to retry after an unknown response outcome.
+
+For each mutating `operation_id`, the workspace mutation layer records enough receipt data to compare an input/operation digest and return the prior committed result/revision.
+
+- same `operation_id` + same semantic operation digest → return the original committed result;
+- same `operation_id` + different digest → reject with a stable idempotency/integrity conflict;
+- a retry after commit MUST NOT fail merely because its original `expected_revision` is now stale.
+
+The receipt/audit retention policy may be bounded, but it must cover supported retry/recovery workflows. High-impact publish/promotion operations require durable idempotency appropriate to release history.
 
 Errors use stable codes and field paths.
 
@@ -348,21 +360,25 @@ Support a batch plan:
 
 ```json
 {
+  "plan_id": "uuid",
   "operations": [
     {...},
     {...}
   ],
-  "mode": "atomic_if_possible"
+  "mode": "atomic"
 }
 ```
 
 Builder API may:
 
-- validate entire plan before write;
-- apply to temporary revision;
-- return diff;
+- validate the entire plan before write;
+- apply it to a temporary revision;
+- return the diff;
 - reject if expected references break;
-- optionally commit as one workspace revision.
+- commit atomic workspace mutations as one workspace revision;
+- make an atomic plan retry-safe under its stable `plan_id` and semantic plan digest.
+
+If a future batch includes operations that cannot be atomic, that must be an explicit different mode with per-operation receipts/recovery semantics. Do not make `atomic_if_possible` silently weaken atomicity.
 
 For file-backed first-party source, implementation may use a staging tree and atomic Git/workspace commit.
 
@@ -442,7 +458,8 @@ Model selection is external orchestration configuration.
 
 ## 13. AI authoring workflow
 
-Recommended pipeline:
+Recommended responsibility pipeline (one model/process may perform multiple stages when
+policy permits; these are not mandatory permanent agent classes):
 
 ```text
 brief
@@ -615,7 +632,10 @@ Generate MCP tool declarations, terminal help, API docs, and contract tests from
 
 ## 22. Agent permissions
 
-Agent roles SHOULD be capability-limited.
+When an orchestrator uses named roles, those names are Loka project/workflow vocabulary,
+not runtime authority and not a fixed Foundry taxonomy.
+
+Agent assignments SHOULD be capability-limited.
 
 Examples:
 
@@ -644,3 +664,291 @@ objective
 But the Builder API and certification artifacts must remain independently useful without Foundry.
 
 A future portability proof could use the Loka v3 repository as a materially different second project once Foundry's own repair gates are complete.
+
+
+## 24. Builder expressive power: semantic composition, not arbitrary authority
+
+The Builder's expressive-power contract is defined in [21 — Composable World Primitives and Builder Expressivity](21-composable-world-primitives.md).
+
+The key rule is:
+
+> **closed semantics, open composition**
+
+Builders/agents should be able to create highly unusual mechanics and story situations by composing registered capabilities, without needing engine-code changes for every piece of content.
+
+Normal builder expression includes:
+
+- custom typed facts and namespaced DomainEvents;
+- Policy/condition trees;
+- bounded deterministic target selectors;
+- Actions and ActionRecipes;
+- ReactionRules;
+- state machines;
+- Behaviors and profiles;
+- SpawnBundles;
+- PopulationPlans;
+- commerce definitions;
+- Service compositions;
+- Dialogue graphs;
+- SceneSequences;
+- quest graphs/outcomes/consequences;
+- WorldEventPlans;
+- templates/mixins/archetypes/recipes;
+- bounded LokaScript;
+- Lab tests/scenarios.
+
+This is intentionally broad. What builders cannot do is introduce:
+
+- arbitrary persistence writes;
+- arbitrary BEAM/host code;
+- hidden network/filesystem calls;
+- new mutation authorities;
+- unregistered effect types;
+- untyped cross-system state mutation.
+
+### Semantic Builder verbs
+
+In addition to precise content CRUD, Builder v1 SHOULD grow intent-level operations from demonstrated R10 authoring pain.
+
+Candidate operation families include:
+
+~~~text
+topology.connect
+topology.make_barrier
+detail.add
+policy.attach
+action.add
+action_recipe.create
+reaction.add
+behavior.add
+spawn_bundle.create
+population.add
+encounter.create
+merchant.configure
+service.configure
+recipe.create
+relationship.define
+faction.define
+rumor.define
+scene.create
+scene.add_beat
+quest.attach_scene
+world_event.create
+world_event.add_phase
+~~~
+
+These are not a second storage API. They expand into ordinary workspace edits through the same revision/idempotency/audit layer.
+
+### Explainability operations
+
+Rich composition also requires rich explanation.
+
+Builder/Lab should be able to answer:
+
+~~~text
+world.explain_target_resolution
+world.explain_presence
+world.explain_description
+world.explain_behavior
+world.explain_population
+world.explain_price
+world.explain_connection
+world.explain_reaction
+quest.explain_progress
+scene.explain_state
+world_event.explain_phase
+~~~
+
+The result should identify the facts/policies/capabilities/provenance that contributed to the current result.
+
+### Capability-gap discipline
+
+If the requested behavior cannot be expressed safely from registered semantics, return MISSING_CAPABILITY rather than encouraging an agent to hide a new subsystem inside LokaScript.
+
+Conversely, do not promote every one-off pattern into engine code. Prefer, in order:
+
+1. ordinary declarative configuration;
+2. composition recipe/template;
+3. ReactionRule/state machine/SceneSequence;
+4. bounded LokaScript;
+5. new versioned engine capability only when repeated semantics/invariants justify it.
+
+
+## 25. Foundry/Astra orchestration: project roles map onto Loka layers
+
+Loka's Builder API and certification contracts should be usable by Foundry, Astra, a
+human operator, or another orchestrator without making any orchestrator part of gameplay
+authority.
+
+When Foundry is used, Loka SHOULD expose enough machine-readable policy for a
+project/workflow profile to grant **different tool surfaces by role**.
+
+Representative roles:
+
+### World builder
+
+Normal semantic scope: **L3–L6** from document 21.
+
+May receive:
+
+- Builder API workspace operations;
+- capability discovery/docs/examples;
+- content CRUD/semantic authoring operations;
+- Cartridge Lab simulation;
+- preflight validation;
+- read-only certification evidence.
+
+Should normally receive **no engine-source write surface and no arbitrary shell**.
+
+### Quest/story builder
+
+A narrower world-builder role focused on:
+
+- quests;
+- dialogues;
+- scenes;
+- storylines;
+- facts;
+- reactions;
+- related world content explicitly in assignment scope.
+
+A quest needing a missing mechanic does not authorize engine editing.
+
+### Engine capability developer
+
+May receive an isolated source checkout and approved build/test tools for explicit L2
+capability work.
+
+L0/L1 authority/transaction architecture changes require separately admitted
+higher-risk scope.
+
+### Semantic reviewer
+
+Read/simulate only.
+
+Receives the frozen candidate, exact relevant definitions, graphs, traces, CoverageManifest,
+branch comparisons and rubric. It cannot mutate the candidate or publish.
+
+### Certification/release role
+
+May run/inspect mandatory certification and, where protected policy allows, stage only
+the exact already-certified artifact/hash.
+
+It cannot waive a failed gate or silently edit content to make a gate pass.
+
+These are **project workflow roles**, not Loka runtime concepts and not mandatory model
+identities.
+
+## 26. Capability escalation contract
+
+If a builder cannot express requested semantics from registered primitives:
+
+~~~text
+Builder API
+ -> MISSING_CAPABILITY
+ -> CapabilityProposal
+~~~
+
+A CapabilityProposal SHOULD include:
+
+- requested behavior in domain terms;
+- motivating content examples;
+- nearest existing primitives and why composition is insufficient;
+- proposed semantic invariants;
+- portability need: portable / Realm-only / presentation-only;
+- commands/events/deltas/effects/policies/bindings likely required;
+- compatibility/migration implications;
+- proposed deterministic/property/adversarial tests.
+
+The originating builder cannot self-upgrade its authority.
+
+An orchestrator may propose a separate engine-capability assignment, but protected
+project/operator policy decides whether it is admitted and what source/tool scope it
+receives.
+
+After a new capability is implemented/released, the content workspace must explicitly
+adopt the new capability version and rerun affected certification. Engine work does not
+silently mutate the frozen cartridge candidate.
+
+## 27. Context routing follows role and escalation
+
+Astra/Foundry should not preload the whole engine into every authoring session.
+
+### World/quest builder context
+
+Prefer:
+
+- permitted Builder operations;
+- capability schemas/docs/examples;
+- local cartridge neighborhood;
+- incoming/outgoing references;
+- relevant world/quest graph;
+- failing Lab/certification evidence;
+- L3–L6 composition guidance.
+
+Normally omit:
+
+- engine internals;
+- unrelated platform/commerce code;
+- protected release credentials;
+- other projects.
+
+### Engine developer context
+
+Add only when escalation is admitted:
+
+- exact CapabilityProposal;
+- L0–L2 governing contracts;
+- affected capability registry/schema;
+- engine modules/callers/tests;
+- compatibility locks/migration consequences;
+- related regression/adversarial fixtures.
+
+### Reviewer context
+
+Supply:
+
+- exact frozen candidate/hash;
+- assignment/rubric;
+- mandatory check receipts;
+- coverage gaps;
+- raw traces/evidence needed to challenge claims;
+- relevant semantic intent.
+
+A fast assessor may rank optional context, but mandatory policy/spec/evidence context is
+chosen deterministically and cannot be removed for token savings.
+
+## 28. Agents-as-tools versus authority handoff
+
+A builder may use a bounded subagent/model as a **tool** for brainstorming, prose,
+classification or candidate test generation while retaining the parent assignment's
+authority and responsibility.
+
+A real workflow **handoff** creates a new durable assignment/principal/grant.
+
+Examples:
+
+- world builder asks an LLM to suggest ambient descriptions -> tool/subtask, no new authority;
+- world builder hits MISSING_CAPABILITY -> capability proposal -> possible protected
+  handoff to engine-capability developer;
+- content candidate freezes -> handoff to independent semantic reviewer.
+
+A different model/session/role label alone does not establish reviewer independence.
+Independence belongs to the orchestrator's durable principal/candidate-ownership policy.
+
+## 29. Foundry is optional infrastructure
+
+Loka MUST remain fully authorable/testable/releasable through its own Builder/Lab/
+certification interfaces without Foundry.
+
+Foundry integration is valuable because it can automate role scoping, evidence routing,
+review/correction and escalation, but Loka remains the source of truth for:
+
+- content semantics;
+- Builder operation schemas;
+- capability boundaries;
+- Lab test semantics;
+- certification profile/gate definitions;
+- exact artifact identity.
+
+The orchestrator cannot redefine what a passing Loka certificate means.

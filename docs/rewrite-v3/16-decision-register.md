@@ -9,6 +9,19 @@ This register separates accepted direction from provisional choices that still r
 - **Deferred** — intentionally not decided for current milestone.
 - **Rejected** — explicitly not part of the v3 foundation.
 
+## Decision checkpoints
+
+Not every non-Accepted ADR blocks the same milestone.
+
+- **R1 must resolve ADR-004/ADR-005** before the fresh implementation foundation depends on a portable-runtime/binding choice.
+- **ADR-023** is a provisional launch business model, not a blocker for core engine architecture.
+- **ADR-027** fixes the offline-ownership product principle while leaving the exact platform proof/grant mechanism to implementation evidence.
+- **ADR-035** is a release gate: downloadable rule representation must be revalidated against current store policy before commercial submission.
+- **ADR-024** remains deferred until public creator content is actually planned.
+- **ADR-025** remains deferred until multi-node clustering is justified; R18 may prove one shared authority domain on one node, while R20 must resolve ownership placement/fencing/handoff details needed for partitioned Realm play, including migration-stable command-receipt routing from ADR-058.
+- Accepted ADRs may still contain deliberately deferred implementation details, but an implementation ticket must not silently choose one when the detail affects a later normative gate.
+
+
 ## ADR-001 — Clean-sheet rebuild
 
 **Status:** Accepted
@@ -104,19 +117,29 @@ Runtime entities reference versioned DefinitionRefs.
 
 Content keys are cartridge-qualified globally and local within cartridge authoring.
 
-## ADR-009 — Command / DomainEvent / Effect / ClientMessage separation
+## ADR-009 — ActionInvocation / Command / StateDelta / DomainEvent / Effect / GameView separation
 
 **Status:** Accepted
 
-These concepts have distinct schemas and responsibilities.
+These concepts have distinct schemas and responsibilities:
 
-“Event” is not a universal bucket.
+- ActionInvocation is host-neutral player/agent intent from a current GameView;
+- Command is the authority-constructed semantic request;
+- StateDelta is proposed authoritative same-domain mutation;
+- DomainEvent describes a fact produced during a decision;
+- Effect crosses a post-decision/cross-authority/external boundary or requests typed follow-up work;
+- GameView is the host-neutral semantic projection;
+- ClientMessage is transport/presentation delivery and is not a DomainEvent.
+
+“Event” is not a universal bucket and Effect is not a second state-write path.
 
 ## ADR-010 — Transactional command receipts
 
 **Status:** Accepted
 
-Retryable state-changing commands use stable IDs.
+Retryable state-changing commands use stable IDs derived from durable/trusted authority context plus the invocation identity.
+
+Ephemeral session/connection identity MUST NOT be part of semantic idempotency identity; the same committed invocation retried after reconnect must deduplicate.
 
 Online commits atomically cover authoritative state + command receipt + required durable effects/outbox metadata.
 
@@ -140,6 +163,8 @@ State explicitly belongs to:
 - party;
 - instance;
 - realm.
+
+This semantic scope does not by itself choose physical authority placement, visibility/audience, spatial instancing, or scarce-resource contention.
 
 No accidental globals.
 
@@ -189,7 +214,7 @@ Touch and terminal interfaces use the same action semantics.
 
 Keep a small StateMachine lifecycle guard.
 
-Quest progress is updated only through canonical domain events -> pure reducer -> typed/idempotent effects.
+Quest progress is updated only through canonical DomainEvents -> pure reducer -> typed StateDelta/DomainEvents/Effects with explicit idempotency.
 
 No dialogue/script direct quest-storage mutation.
 
@@ -200,6 +225,8 @@ No dialogue/script direct quest-storage mutation.
 Cartridge scripting is an Elixir-like restricted authoring language compiled to portable normalized AST/bytecode and interpreted by the portable rules system.
 
 No released cartridge execution through `Code.eval_string`.
+
+Deterministic step/query/resource budgets define script semantics. A host wall-time kill switch is defense in depth only; firing it on certified supported input is a runtime/conformance fault, not a valid cartridge branch.
 
 Exact bytecode/AST format is implementation work.
 
@@ -239,6 +266,8 @@ AI is build/review tooling unless a future feature explicitly adds bounded optio
 **Status:** Accepted
 
 Published releases are immutable/hash-addressed and exact-hash certified.
+
+The canonical semantic cartridge/deployment hash covers normalized game semantics and compatibility locks, but excludes certificate/signature/catalog/download-envelope material that is created after that hash exists. Certification/signing attest the semantic hash. Exact downloadable archive bytes may additionally have a separate package/transport hash.
 
 Existing saves remain pinned or use explicit tested migrations.
 
@@ -389,8 +418,8 @@ Loka ships one React Native / Expo application.
 
 It contains two gameplay session modes:
 
-- **Story Mode** — `LocalStorySession`, portable kernel, local SQLite authority;
-- **Realm Mode** — `RemoteRealmSession`, Phoenix transport, BEAM authority.
+- **Story Mode** — `LocalStorySession` is the UI-facing adapter over `LocalInstanceAuthority`, which owns local serialized mutation + SQLite commit through the selected portable-rules path;
+- **Realm Mode** — `RemoteRealmSession` is a Phoenix transport adapter only; BEAM `WorldInstance`/`ZoneShard` owns mutation authority.
 
 Shared UI/GameView/schema packages are reused. Authority implementations remain isolated modules with enforceable dependency boundaries.
 
@@ -497,6 +526,154 @@ Personal dialogue alone is not a reason to clone an NPC or zone.
 
 Shared bottlenecks are modeled by reusable Service capabilities composed from CapacityPolicy, Reservation/QueuePolicy, optional Escrow, DurationPolicy, CompletionRule, OutputPolicy, and durable ServiceJobs—not by quest-specific timers.
 
-The owning service/provider authority owns queueing/reservations, escrow where used, capacity allocation, duration, and completion.
+The owning mutation authority owns queueing/reservations, escrow where used, capacity allocation, duration, and completion for the service aggregate.
 
-Quests observe typed ServiceJob DomainEvents and remain independently scoped.
+When inputs/capacity share one mutation authority, allocation + escrow + ServiceJob creation commit atomically. When custody crosses authorities, use an explicit durable idempotent reservation/transfer/reconciliation protocol rather than pretending PostgreSQL creates one distributed authority.
+
+Service period/window policies declare their time basis and boundary/anchor semantics; “per day” is not allowed to inherit device/server local-midnight behavior implicitly.
+
+A service/provider is a domain aggregate, not automatically a dedicated OTP process. Quests observe typed ServiceJob DomainEvents and remain independently scoped.
+
+## ADR-046 — State scope and physical authority placement are independent
+
+**Status:** Accepted
+
+Player/party/instance/realm StateScope describes semantic ownership of gameplay truth.
+
+It does not imply a process/table placement strategy. A shared Realm may route player- or party-scoped state across zone boundaries without making the current ZoneShard its permanent owner.
+
+The exact placement/routing strategy for long-lived cross-zone player/party state must be resolved and certified before multi-zone Realm milestones depend on it.
+
+## ADR-047 — Projection sequencing is not authority revisioning
+
+**Status:** Accepted
+
+Realm clients order projected GameView updates with a client/subscription projection sequence and may send an opaque view-freshness token with ActionInvocation.
+
+WorldInstance/ZoneShard revisions remain internal authority commit/concurrency tokens.
+
+A busy shared zone may mutate without changing a given player's view, and one mutation may yield several projection messages. Therefore client gap detection MUST NOT assume a one-to-one mapping to authority revision.
+
+## ADR-048 — Online owners require fencing once ownership can move
+
+**Status:** Accepted
+
+When restart overlap, failover, clustering, or operational error could leave more than one process believing it owns the same durable authority domain, persistence commits must validate an ownership/fencing generation or equivalently strong token in addition to ordinary state revisions.
+
+A stale owner cannot resume authoritative writes merely because its data revision appears current.
+
+## ADR-049 — Real-elapsed Story time enters through an idempotent authority input
+
+**Status:** Accepted
+
+For offline cartridges that use real-elapsed time, device wall time is sampled/clamped according to product policy and converted into an explicit resume-time advancement input.
+
+That input follows the normal deterministic decision/commit path and is idempotent across crash/retry.
+
+Systems in hybrid time mode declare their time basis; they do not read wall clock directly from game rules.
+
+
+## ADR-050 — Closed semantics, open composition
+
+**Status:** Accepted
+
+Loka maximizes builder expressive power through layered composition of registered semantics.
+
+Builders may define and compose facts/events, policies/selectors, Actions/ActionRecipes, ReactionRules, Behaviors, state machines, population plans, commerce/services, scenes, quests, world events, templates, and bounded LokaScript.
+
+Cartridge content cannot introduce arbitrary persistence writes, host callbacks, unregistered mutation/effect types, or a second authority model.
+
+The normative layer map and primitive-graduation rule are in document 21.
+
+## ADR-051 — Target resolution, details, and coherent barriers are core world contracts
+
+**Status:** Accepted direction
+
+Target resolution is deterministic and action-declared, returning none/unique/ambiguous rather than random/source-order choice.
+
+InspectableDetail provides lightweight targetable descriptive world detail without forcing RuntimeEntity identity.
+
+Two faces of one logical door/gate/bridge should share one authoritative Barrier state unless explicitly authored as independent/asymmetric connections.
+
+## ADR-052 — Population, reactions, and behaviors compose living-world activity
+
+**Status:** Accepted direction
+
+SpawnBundle explicitly defines nested spawn composition.
+
+PopulationPlan owns bounded population/replenishment/cleanup through explicit provenance and scope; it does not destructively reset unrelated world state.
+
+ReactionRule is the safe builder-composable replacement for arbitrary special-procedure callbacks: typed trigger + selector + Policy + registered consequences.
+
+Autonomous Behaviors produce typed intents and use deterministic registered arbitration rather than content-source ordering.
+
+## ADR-053 — Commerce is a typed composite contract
+
+**Status:** Accepted direction
+
+Immediate merchant trade composes provider, catalog/stock, price/payment, buy/sell admission, liquidity, restock, schedule, and narration semantics and commits transfers atomically within one mutation authority.
+
+Long-running/scarce work continues to use Service/Capacity/Reservation/ServiceJob primitives.
+
+Merchant NPC code is not a special-case transaction engine.
+
+## ADR-054 — SceneSequence is reusable narrative orchestration
+
+**Status:** Accepted direction
+
+Text cutscenes, dreams, visions, ceremonies, staged conversations, and other authored sequences use typed SceneDefinition/SceneInstance semantics.
+
+Consequential scenes are durable/idempotent, resume safely, use normal ActionSet/authority validation, and may mutate the world only through registered consequences.
+
+Dream/private scene state is isolated; only explicitly declared exports/consequences cross back to ordinary world state.
+
+## ADR-055 — Quests are the narrative spine, not a second world authority
+
+**Status:** Accepted
+
+Quests are the primary authored thread carrying story through exploration, dialogue, scenes, world events, and durable consequences.
+
+Quest Runtime owns quest-specific progress/branch state and observes canonical DomainEvents.
+
+It coordinates the living world through typed facts, SceneSequences, named outcomes, and registered consequences rather than generic component/database writes.
+
+## ADR-056 — Authored geography is independent from Realm authority placement
+
+**Status:** Accepted
+
+AreaDefinition groups authored geography/content for maps, population, environment, and certification.
+
+ZoneShard/WorldInstance describes runtime mutation ownership.
+
+The two concepts are not aliases and future partitioning may map them many-to-one or one-to-many.
+
+
+## ADR-057 — Scene sequencing and spatial instancing are orthogonal
+
+**Status:** Accepted direction
+
+SceneSequence owns ordered narrative orchestration, waiting, choices, checkpoints and
+scene outcomes.
+
+InstancePlan owns scoped spatial simulation instantiated from precompiled definitions,
+including participant/admission, entry/exit, population, persistence/reconnect/reset and
+teardown policy.
+
+Dreams, visions and flashbacks are content compositions over these primitives:
+
+- presentation-only/current-world SceneSequence;
+- SceneSequence + scoped overlay;
+- SceneSequence + InstancePlan for fully interactive temporary worlds.
+
+The same InstancePlan primitive serves private dungeons, party puzzles, tutorials,
+ritual/trial spaces and other instanced gameplay. There is no separate DreamEngine.
+
+## ADR-058 — Retry identity survives authority migration
+
+**Status:** Accepted
+
+Client-visible mutation idempotency is keyed by a stable logical gameplay lineage + invocation identity, not by the current session, process, shard, or other mutation-owner placement.
+
+If a command commits and ownership moves before its acknowledgement is observed, a retry after handoff MUST discover/replay the original receipt rather than execute under a fresh destination-owner namespace.
+
+R20 chooses the concrete durable mechanism—realm-level receipt index, receipt migration, forwarding/tombstones, or an equivalently strong design—but may not weaken this semantic invariant.

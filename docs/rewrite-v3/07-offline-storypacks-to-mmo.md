@@ -72,15 +72,17 @@ The app selects exactly one gameplay authority for a running session:
                          /         \
                         /           \
              LocalStorySession   RemoteRealmSession
-               local kernel        Phoenix/BEAM
-               local SQLite        server state
+                    |              Phoenix transport
+          LocalInstanceAuthority          |
+             portable rules            BEAM
+             local SQLite             server state
 ```
 
-The shared renderer receives host-neutral `GameView` data and emits typed intents/commands through the active session. It MUST NOT contain separate copies of quest/action/policy semantics.
+The shared renderer receives host-neutral `GameView` data and emits host-neutral `ActionInvocation` values through the active session. It never constructs authority-internal Commands. It MUST NOT contain separate copies of quest/action/policy semantics.
 
-Switching modes MUST close/commit the current session before another authority is activated. No save/world may be concurrently authoritative locally and remotely.
+Switching modes MUST close/commit the current gameplay session/authority before another authority is activated. No save/world may be concurrently authoritative locally and remotely.
 
-The local kernel may physically exist in the same binary while Realm Mode is active, but Realm Mode MUST never trust it for authoritative decisions. Local simulation/prediction for Realm is deferred unless separately specified.
+The Story portable-rules implementation may physically exist in the same binary while Realm Mode is active, but Realm Mode MUST never trust local rule execution for authoritative decisions. Local simulation/prediction for Realm is deferred unless separately specified.
 
 ### One app, modular code
 
@@ -89,7 +91,7 @@ Do not solve one-app maintenance by creating one giant conditional client.
 The mobile codebase SHOULD keep explicit packages/modules for:
 
 - app shell/navigation;
-- Story session/SQLite/kernel bridge;
+- Story session/LocalInstanceAuthority/SQLite/portable-rules bridge;
 - Realm session/Phoenix transport;
 - shared GameView renderer;
 - shared UI/design system;
@@ -137,34 +139,34 @@ Each cartridge/deployment declares supported profiles.
 
 A cartridge can support more than one profile.
 
-## 4. Portable Simulation Kernel
+## 4. Portable rules contract and R1 implementation hypothesis
 
 ### Problem
 
-If game rules are implemented once in Elixir for the server and again in TypeScript for offline mobile, every new mechanic creates two implementations and an ongoing semantic-drift risk.
+Offline Story authority and online BEAM authority must implement the same portable gameplay semantics. Independently maintained rule implementations create an ongoing semantic-drift cost as the primitive library grows.
 
-With hundreds of MUD primitives, that is unacceptable as the default architecture.
+### Normative direction
 
-### Recommended direction
+Define one **portable deterministic semantic contract**: canonical commands, state/deltas, RNG/time behavior, rule IR, errors, and conformance vectors. Every supported authoritative host must conform to it.
 
-Introduce a small **portable deterministic simulation kernel** shared by offline mobile and BEAM runtime.
+The preferred implementation hypothesis for R1 is one small shared deterministic native kernel. The documented fallback is separate Elixir/mobile implementations generated/organized around the same schemas and held to golden cross-host conformance.
 
-Working technology choice for the architecture spike: **Rust**.
+### Working R1 hypothesis: Rust
 
-Reasons:
+Reasons to test Rust:
 
 - compiles to iOS and Android native libraries;
 - can be exposed to React Native through a native/TurboModule boundary;
 - can be called from Elixir through Rustler;
 - strong type system and serialization ecosystem;
-- no garbage-collected runtime dependency inside the kernel;
+- no garbage-collected runtime dependency inside the candidate kernel;
 - good fit for pure deterministic state transition code.
 
-Current React Native/Expo supports custom native modules, React Native provides typed TurboModule/JSI native integration, and Rustler provides a mature Elixir/Rust NIF bridge. Rust-to-React-Native binding generators also exist, but at least one prominent current option explicitly describes itself as early-development and not yet recommended for production. Therefore the **kernel language and both host-binding strategies remain provisional until the mandatory spike**. The architecture must not depend on any one third-party Rust-to-React-Native generator.
+Current React Native/Expo supports custom native modules, React Native provides typed TurboModule/JSI native integration, and Rustler provides an Elixir/Rust NIF bridge. Rust-to-React-Native binding generators also exist, but at least one prominent reviewed option describes itself as early-development and not yet recommended for production. Therefore the **shared-kernel language and both host-binding strategies remain provisional until R1**. The architecture must not depend on any one third-party Rust-to-React-Native generator.
 
 ### What stays Elixir/BEAM-native
 
-Using a portable kernel does NOT turn Loka into a Rust server.
+Selecting a shared native portable implementation does NOT turn Loka into a Rust server.
 
 BEAM/OTP still owns the online system:
 
@@ -181,11 +183,11 @@ BEAM/OTP still owns the online system:
 - observability integration;
 - admin/builder services.
 
-If R1 accepts Rust, Rust owns only deterministic portable simulation semantics.
+If R1 accepts Rust, Rust owns only deterministic portable simulation semantics. If R1 rejects it, the BEAM implementation still obeys the same portable semantic contract and conformance fixtures.
 
 This is analogous to using a physics/rules library inside an actor-oriented server.
 
-## 5. Kernel boundary
+## 5. Portable rules boundary
 
 Input:
 
@@ -202,15 +204,17 @@ Output:
 
 ```text
 accepted/rejected
-new portable state or state delta
+StateDelta proposal
 new RNG state
 domain events
 portable effects
-portable game-view/projection delta or projection hints
+portable game-view/projection hints
 trace data
 ```
 
-The kernel MUST NOT:
+An implementation may materialize a candidate state internally for efficient evaluation, but the host-visible authority contract is a non-committed proposal until persistence succeeds.
+
+The portable rules implementation MUST NOT:
 
 - access network;
 - access filesystem directly;
@@ -224,16 +228,14 @@ The kernel MUST NOT:
 
 It is a pure deterministic engine boundary.
 
-## 6. Kernel state and commit boundary
+## 6. Portable state and commit boundary
 
-The portability spike MUST decide how state crosses the native boundary without violating transactional authority or causing pathological full-world copies.
-
-Preferred semantic protocol:
+Every R1 strategy MUST preserve the same semantic proposal/commit protocol:
 
 ```text
 authority owns committed revision
         |
-kernel decide(read-only state handle/view, command, env)
+portable rules decide(committed state/view, semantic command, env)
         |
         +--> StateDelta
         +--> DomainEvents
@@ -242,41 +244,43 @@ kernel decide(read-only state handle/view, command, env)
         |
 authority transactionally persists delta + receipt
         |
-on success: apply committed delta to in-memory kernel state
+on success: adopt/apply committed result in memory
 on failure: discard proposal
 ```
 
-The kernel MUST NOT irreversibly mutate hidden authoritative state before the host commit succeeds.
+The portable rules layer MUST NOT irreversibly advance hidden authoritative state before host commit succeeds.
 
-If post-commit in-memory apply fails, the authority process/app instance may reconstruct kernel state from the committed durable snapshot/delta.
-
-R1 must benchmark and compare at least:
+If R1 selects a shared native implementation, the spike must decide how state crosses the FFI boundary without pathological full-world copies and benchmark at least:
 
 - stateless serialized state-in/state-out;
 - long-lived native state handle + non-mutating decision/delta;
 - compact touched-state slices/deltas.
 
-Choose the simplest model that preserves:
+If R1 selects separate conformant host implementations, each still obeys the same non-mutating proposal/commit boundary and canonical trace contract.
+
+Choose the simplest accepted strategy that preserves:
 
 - deterministic replay;
 - crash recovery;
 - snapshot export;
 - transaction ordering;
-- acceptable FFI copy/latency;
+- acceptable host-boundary cost;
 - testability.
 
-Do not freeze a hidden mutable NIF resource design before this evidence.
+Do not freeze a hidden mutable native/NIF resource design before this evidence.
 
 ## 7. Server execution
 
 Online:
 
 ```text
-Phoenix command
+Realm ActionInvocation
    ↓
-BEAM WorldInstance / ZoneShard
+BEAM authority re-resolves + constructs semantic Command
    ↓
-portable kernel decide(...)
+WorldInstance / ZoneShard DecisionCoordinator
+   ↓
+portable rules decide(...)
    ↓
 DecisionBatch
    ↓
@@ -284,12 +288,12 @@ PostgreSQL transaction + command receipt/outbox
    ↓
 BEAM adopts committed state
    ↓
-client projection / effects
+GameView projection / effects
 ```
 
 The BEAM process serializes authority and provides resilience.
 
-Short bounded kernel calls may use a normal Rustler NIF if proven safe for scheduler latency. Heavy Lab/model-check simulations MUST use a dirty CPU scheduler or isolated worker so they cannot starve BEAM schedulers.
+If R1 selects a Rust/Rustler implementation, short bounded calls may use a normal NIF only when measured safe for scheduler latency. Heavy Lab/model-check simulations MUST use appropriate dirty scheduling or isolated workers. Non-Rust strategies must provide equivalent host-safety isolation for heavy work.
 
 ## 8. Offline execution
 
@@ -298,9 +302,11 @@ On device:
 ```text
 touch/text input
    ↓
-LocalInstanceAuthority
+ActionInvocation
    ↓
-portable kernel decide(...)
+LocalInstanceAuthority re-resolves + constructs semantic Command
+   ↓
+portable rules decide(...)
    ↓
 DecisionBatch
    ↓
@@ -345,19 +351,23 @@ Cartridge declares its time policy.
 
 ### `play_time`
 
-Logical world time advances only while game is actively running.
+Logical world time advances only through explicit authority-controlled game-time advancement while the game is actively running.
 
 ### `real_elapsed`
 
-On resume, wall-clock delta is converted to logical elapsed time, then deterministic scheduled/derived state is reconciled.
+On resume, the local authority samples wall-clock evidence once, applies the cartridge's documented clamp/rollback policy, and converts the accepted elapsed interval into an explicit idempotent **resume-time advancement input**. That input is then processed through the normal deterministic decision/commit path.
+
+A crash/retry during resume MUST NOT apply the same elapsed interval twice.
 
 ### `hybrid`
 
-Specific systems opt into real elapsed time.
+Specific systems declare which named time basis they use—for example gameplay time versus accepted real-elapsed time. A system may not silently read wall time simply because the cartridge is hybrid.
+
+The save records enough checkpoint/time-basis metadata to make resume reconciliation deterministic after the wall-clock sample has been accepted.
 
 No background process is required to simulate every second while the app is closed.
 
-Use on-demand derivation and process due durable jobs on resume.
+Use on-demand derivation and process due durable jobs on resume. Device wall time is an input to local private play, not a trusted Realm/competitive clock.
 
 ## 11. Offline scripts
 
@@ -372,16 +382,16 @@ Elixir-like source syntax
   ↓
 authoring compiler parses permitted syntax
   ↓
-portable normalized AST/bytecode
+portable normalized AST/rule IR
   ↓
-portable kernel interpreter
+R1-selected portable rules interpreter/implementation
   ↓
 same semantics on mobile + server
 ```
 
-The authoring compiler MAY use Elixir's parser during build time to convert syntax to the portable representation, but released runtime execution occurs in the portable kernel.
+The authoring compiler MAY use Elixir's parser during build time to convert syntax to the portable representation, but released portable runtime execution occurs through the R1-selected portable rules path.
 
-Engine-native compiled Elixir capabilities are automatically server-only unless equivalent portable kernel semantics exist.
+Engine-native compiled Elixir capabilities are server-only unless an equivalent portable capability is registered and conformance-certified for Story hosts.
 
 ## 12. Capability portability classification
 
@@ -412,16 +422,18 @@ The first storypacks SHOULD target the portable capability set.
 
 ## 13. Conformance suite
 
-The portable kernel creates a critical new invariant:
+The portable-execution contract creates a critical new invariant:
 
-> The same input state, command, logical time, RNG state, and cartridge hash MUST produce byte-for-byte/canonically equivalent domain results on every supported host.
+> The same input state, semantic command, logical time, RNG state, and cartridge hash MUST produce byte-for-byte/canonically equivalent domain results on every supported authoritative host.
 
-CI runs golden vectors through:
+After R1 selects the execution strategy, CI runs golden vectors through every required host implementation/adapter:
 
-- Rust core unit tests;
-- BEAM/Rustler wrapper;
-- iOS binding test target;
-- Android binding test target.
+- the direct portable-rules implementation;
+- the BEAM authority adapter/implementation;
+- the iOS Story authority path;
+- the Android Story authority path.
+
+If R1 accepts the shared Rust kernel, these concretely become Rust core + Rustler + iOS/Android bindings. If R1 selects the documented dual-implementation fallback, the same conformance obligation applies to the accepted Elixir/mobile implementations instead.
 
 Any divergence blocks release.
 
@@ -489,7 +501,7 @@ Use explicit classes:
 
 ```text
 cartridge_local
-  flags/entities/quest state meaningful only inside one cartridge
+  facts/entities/quest state meaningful only inside one cartridge
 
 campaign_character
   portable character stats/equipment only when the campaign rules declare them shared
@@ -525,7 +537,7 @@ Do not let a sequel read arbitrary internal state from its predecessor.
 
 ### Continuity record
 
-On cartridge completion/checkpoint, the portable kernel can emit a typed continuity record:
+On cartridge completion/checkpoint, the portable rules layer can emit a typed continuity record:
 
 ```text
 campaign ID
@@ -690,7 +702,7 @@ Create a shared deployment overlay and recertify for:
 - world event semantics;
 - shard transfers.
 
-This is adaptation, not an automatic flag flip.
+This is an explicit adaptation/certification step, not an automatic boolean mode switch.
 
 ## 18. Quest design for future reuse
 
@@ -792,13 +804,13 @@ Offline Story Mode
   local save
   no valuable MMO-state import
 
-Connected Adventure Mode
+Realm Mode / online-private deployment
   same story/content
   server-authoritative
   may interact with persistent account/MMO systems
 ```
 
-Do not require Connected Adventure Mode for launch.
+Do not require Realm online-private deployment for launch.
 
 ## 24. Cloud save for offline storypacks
 
@@ -887,7 +899,7 @@ SQLite                     OTP + PostgreSQL
 
 BEAM is used exactly where its concurrency/fault-tolerance model creates leverage.
 
-The portable kernel exists because the product explicitly requires disconnected execution.
+The portable rules contract exists because the product explicitly requires disconnected execution while preserving reusable semantics online.
 
 ## 30. Product progression
 

@@ -75,7 +75,7 @@ locales:
 
 `kernel_api` describes portable semantic capabilities implemented by the installed kernel. `rule_ir` versions the normalized LokaScript/rule representation. `content_schema` versions compiled definition structure.
 
-Published cartridges pin all three. Compatibility and migrations MUST be explicit; host/app upgrades may not reinterpret old rule IR implicitly.
+Published cartridges pin exact `rule_ir` and `content_schema` versions and declare a `kernel_api` compatibility range. Their compiled lock data pins exact capability versions, and their certificate records the exact portable-rules/kernel implementation revision(s) actually tested. Compatibility and migrations MUST be explicit; host/app upgrades may not reinterpret old rule IR or capability semantics implicitly.
 
 ### Version vocabulary
 
@@ -147,8 +147,10 @@ Use these terms consistently in v3:
 |---|---|
 | **Capability** | Versioned feature contract registered by the engine. Owns schemas and the commands/events/effects/policies/rules it introduces. |
 | **Component** | Typed definition/runtime data attached to an entity or scoped state. A component is data/state, not an independent authority. |
-| **Behavior** | Declarative autonomous/reactive rule configuration supplied by a capability, such as patrol or schedule. |
+| **Behavior** | Declarative autonomous rule configuration supplied by a capability, such as patrol or schedule. Behaviors produce typed intents/proposals and never bypass the authority decision path. |
+| **ReactionRule** | Builder-composable event/fact/state-transition reaction: typed trigger + selector + Policy + registered consequences. The safe replacement for arbitrary special-procedure callbacks. |
 | **Action** | Player/agent affordance advertised in GameView; invocation is revalidated by the active authority and resolved into a typed Command. |
+| **ActionRecipe / ComposedAction** | Immutable builder-defined Action semantics assembled from registered TargetSpec/Policy/cost/check/consequence/narration primitives; useful for new local verbs without engine-code changes. |
 | **Policy / condition** | Pure predicate tree deciding whether an action/content path is allowed/visible. |
 | **Command** | Request to authoritative game semantics. |
 | **DomainEvent** | Immutable fact produced during a decision. |
@@ -180,6 +182,13 @@ faction_member
 reputation
 status_effect
 crafting_station
+inspectable_detail
+reaction
+population
+commerce
+scene
+narration
+perception
 ```
 
 Capability metadata includes portability classification:
@@ -338,18 +347,28 @@ Large binary assets SHOULD live in object storage/CDN referenced by hash.
 A cartridge content hash covers:
 
 - normalized definitions;
-- script sources/byte representation;
+- canonical compiled/normalized rule IR (and source digest/provenance where desired);
 - asset manifest;
 - localization manifest;
-- compatibility requirements.
+- compatibility requirements and exact capability lock.
+
+Runtime semantics are keyed to the normalized artifact, not to host-specific compiler output bytes.
+
+### Hash domains and attestations
+
+The canonical **cartridge/content hash** identifies the immutable semantic payload above. It MUST exclude signatures, certificate references/copies, catalog metadata, download-envelope metadata, and other values that can only be created after the semantic hash exists.
+
+Certification records reference the semantic hash. Signatures/attestations may sign that hash plus explicitly versioned release metadata. A downloadable archive MAY also have a separate **package/transport hash** covering its exact bytes.
+
+Do not create a self-referential hash cycle where adding `certificate-ref.json` or a signature changes the cartridge hash that the certificate/signature is supposed to attest.
 
 ## 12. Immutability
 
 Published cartridge release cannot be edited in place.
 
-Fixes create a new release/hash even if semver patch only.
+For a published cartridge ID, a semantic version identifies exactly one immutable artifact hash. A different hash MUST NOT later be published under the same `cartridge_id@version`; fixes require a new version/release.
 
-Catalog may point new purchases/instances to latest compatible release while old active saves remain pinned.
+Catalog may point new purchases/instances to the latest compatible release while old active saves remain pinned.
 
 ## 13. Dependencies between cartridges
 
@@ -471,10 +490,10 @@ scripts.bin
 localization/
 asset-manifest.json
 schema-lock.json
-certificate-ref.json (after certification)
+certificate-ref.json (optional release-envelope material; excluded from semantic cartridge hash)
 ```
 
-Packaging format is implementation detail; canonical hash must be reproducible from normalized inputs.
+Packaging format is implementation detail. The semantic cartridge hash must be reproducible from normalized inputs; exact archive bytes may additionally use a separate package/transport hash.
 
 ## 21. Promotion states
 
@@ -568,3 +587,45 @@ There are two common forms:
 - still uses the same content namespaces, capability registry, compiler, hashes, references, and certification machinery.
 
 This preserves one content toolchain without pretending all Realm content is portable.
+
+
+## 25. Composable world-primitive contract
+
+The normative layered composition model is defined in [21 — Composable World Primitives and Builder Expressivity](21-composable-world-primitives.md).
+
+The capability/content system MUST be able to represent, version, validate, and introspect at least the foundation shapes needed for:
+
+- deterministic TargetSpec/TargetResolution;
+- typed relations rather than duplicated subsystem-local truth;
+- InspectableDetail and description variants;
+- coherent Connection/Barrier state;
+- ReactionRule;
+- Behavior intent/arbitration metadata;
+- SpawnBundle and provenance-safe PopulationPlan;
+- commerce provider/catalog/stock/price/admission/liquidity/restock semantics;
+- NarrationSpec;
+- SceneDefinition/SceneInstance + SceneSpace;
+- InstancePlan instancing/import/export semantics;
+- WorldEventPlan composition.
+
+Not every item in the broader primitive catalog is an R3/R5 implementation requirement. The primitive-graduation rule in document 21 determines when a repeated composition should become an engine capability.
+
+### Authored area versus runtime shard
+
+An **AreaDefinition** is a content/geography organization concept.
+
+A **ZoneShard** is a Realm mutation-owner placement concept.
+
+They MUST NOT be synonyms. A deployment may place multiple authored areas in one shard or partition one large authored area across authority domains if later topology requires it.
+
+### Population provenance
+
+A PopulationPlan may replenish/clean up only the lifecycle state that its explicit provenance/policy owns.
+
+It MUST NOT reset an area to definition defaults by deleting or rewriting unrelated player-owned, quest-owned, or independently mutated entities/state.
+
+### Coherent connections
+
+Where two room faces represent one logical door/gate/bridge, they SHOULD reference one authoritative Barrier state.
+
+The compiler should reject contradictory duplicated mutable barrier definitions unless the author explicitly declares independent/asymmetric semantics.

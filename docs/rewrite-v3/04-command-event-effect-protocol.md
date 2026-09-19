@@ -1,6 +1,6 @@
-# 04 — Action Invocations, Commands, Domain Events, Effects, and Client Protocol
+# 04 — Action Invocations, Commands, State Deltas, Domain Events, Effects, and Client Protocol
 
-## 1. Five concepts, five responsibilities
+## 1. Six concepts, six responsibilities
 
 Loka v3 MUST distinguish:
 
@@ -17,20 +17,33 @@ Example:
   "actor_id": "uuid",
   "target_ids": ["uuid"],
   "input": {},
-  "view_revision": 9201
+  "view_revision": "view-token-9201"
 }
 ```
 
 An ActionInvocation is **not yet an authoritative Command**.
 
-- Story Mode: `LocalStorySession` resolves/revalidates the invocation against current local GameView/state and constructs the typed Command.
-- Realm Mode: `RemoteRealmSession` sends the invocation to BEAM; the server re-resolves/revalidates the advertised action and constructs the typed Command.
+- Story Mode: `LocalStorySession` forwards the invocation to `LocalInstanceAuthority`; the local mutation owner resolves/revalidates it against committed local state and constructs the typed Command.
+- Realm Mode: `RemoteRealmSession` sends the invocation to BEAM; the server mutation owner re-resolves/revalidates the advertised action and constructs the typed Command.
 
 The shared renderer MUST NOT construct authority-specific command payloads.
 
 ### Command
 
-An authority-side typed request to change/inspect game state after action resolution/authentication.
+An authority-side typed request to change/inspect game state.
+
+Commands have two allowed origin classes:
+
+1. **invocation-derived** — produced after a player/agent ActionInvocation is authenticated, re-resolved, and revalidated;
+2. **authority-internal** — produced by trusted world machinery such as a durable scheduler/job, selected BehaviorIntent, PopulationPlan reconciliation, or WorldEventPlan transition.
+
+Authority-internal Commands MUST:
+
+- use registered typed Command variants;
+- carry stable causation/idempotency identity;
+- be reconstructible/retryable where durable;
+- pass through the same pure decision, invariant, StateDelta/DomainEvent/Effect, and commit contracts;
+- never be directly constructible by an untrusted client as a way to skip ActionInvocation validation.
 
 Examples:
 
@@ -39,7 +52,23 @@ Examples:
 - choose dialogue option;
 - attack NPC;
 - buy item;
-- accept quest.
+- accept quest;
+- execute a due ServiceJob completion;
+- reconcile a PopulationPlan;
+- advance an autonomous NPC behavior intent.
+
+### StateDelta
+
+A typed, non-committed proposal describing authoritative state changes inside the current mutation authority.
+
+Examples:
+
+- move an entity between containers;
+- update a typed fact;
+- advance a QuestInstance;
+- create a same-authority ServiceJob or scheduled job.
+
+StateDelta is produced by pure decision logic and becomes authoritative only after the host commit succeeds. It is not a transport message and not an Effect.
 
 ### Domain Event
 
@@ -61,12 +90,12 @@ An instruction produced by a decision that must be applied/executed.
 
 Examples:
 
-- schedule durable job;
-- emit client notification;
-- enqueue external push;
-- transfer entity to another shard.
+- wake/notify a scheduler after a durable job was committed;
+- emit an ephemeral client notification;
+- enqueue an external push;
+- request an idempotent cross-authority entity transfer.
 
-Pure in-instance state changes should usually already be reflected in the new state; effects are not a second backdoor to mutate arbitrary state.
+Authoritative same-domain changes—including creation of a durable scheduled-job record owned by the current authority—belong in StateDelta/commit data. Effects are not a second backdoor to mutate arbitrary state.
 
 ### Client Message
 
@@ -95,7 +124,7 @@ Authority always revalidates because the GameView can be stale.
 
 ```json
 {
-  "protocol_version": 1,
+  "protocol_version": 3,
   "client_seq": 184,
   "session_id": "uuid",
   "instance_id": "uuid",
@@ -105,39 +134,50 @@ Authority always revalidates because the GameView can be stale.
     "actor_id": "uuid",
     "target_ids": [],
     "input": {"direction": "north"},
-    "view_revision": 9201
+    "view_revision": "view-token-9201"
   }
 }
 ```
 
-The gateway supplies authenticated account/session identity; the client cannot claim arbitrary actor authority. The server verifies the invocation actor is controllable by that session and re-resolves the action against current state.
+The gateway supplies authenticated account/session identity; the client cannot claim arbitrary actor authority. The server verifies the invocation actor is controllable by that session and re-resolves the action against current state. The logical idempotency scope is derived from trusted Story/Realm lineage and controlled-actor context, not from an untrusted client-selected routing/owner identifier.
 
-The server then creates the internal Command ID/idempotency identity. The invocation ID is retained for client retry/correlation.
+`invocation_id` is the client-visible stable retry identity used to derive/recover semantic Command idempotency. `client_seq` is a transport/order diagnostic and MUST NOT become mutation identity; it may restart after reconnect according to protocol rules. `view_revision` is an opaque view-freshness token, not a promise that the client knows the authority's database revision.
+
+The server then creates or recovers the internal Command ID/idempotency identity. The invocation ID is retained for client retry/correlation.
 
 ## 3. Canonical command representation
 
-After Realm invocation validation/action resolution—or Story local invocation resolution—the authority host constructs:
+After Realm invocation validation/action resolution—or Story local invocation resolution—the authority host constructs a **semantic Command** plus host-only execution metadata.
 
 ```elixir
 %Command{
-  id: uuid,
+  id: stable_command_id,
   type: :move,
   actor: character_id,
   instance_id: instance_id,
-  session_id: session_id,
-  payload: %Move{direction: :north},
-  expected_revision: 9201,
+  payload: %Move{direction: :north}
+}
+
+%CommandContext{
+  invocation_id: invocation_id,
+  idempotency_scope_id: trusted_logical_scope,
+  authenticated_session_id: session_id,
+  expected_authority_revision: optional_revision,
   received_at_monotonic: ...
 }
 ```
 
 All payload variants are typed structs.
 
+The semantic Command is the portable/replayable input. Host-only context is used for authentication, admission, tracing, freshness/concurrency checks, and transport behavior; it MUST NOT make portable game semantics depend on an ephemeral session ID or host monotonic timestamp.
+
+The stable Command ID is derived/reused from the persistence contract's logical idempotency scope + invocation ID. That scope is stable across reconnect and, where ownership may move, across shard/process/authority handoff; current routing/owner identity MUST NOT turn one invocation into a second mutation.
+
 Unknown command types fail before reaching game rules.
 
 ## 4. Decision environment
 
-The host-neutral decision layer / portable kernel receives explicit environment:
+The host-neutral decision layer / R1-selected portable-rules implementation receives explicit environment:
 
 ```elixir
 %DecisionEnv{
@@ -182,7 +222,7 @@ The `WorldInstance` / `ZoneShard` uses a **DecisionCoordinator**:
 typed Command
    ↓
 ordered capability/rule dispatch
-   ├─ portable evaluators → shared kernel
+   ├─ portable evaluators → portable-rules implementation
    └─ server-only evaluators → pure Elixir rule modules
    ↓
 proposal overlay
@@ -218,6 +258,7 @@ not_owned
 permission_denied
 invalid_target
 invalid_state
+stale_view
 stale_revision
 insufficient_resource
 exit_locked
@@ -251,6 +292,8 @@ Agents and mobile clients should never need to parse an English error string to 
 
 Event types and payloads are registered/machine-readable.
 
+A DomainEvent's semantic scope is **not** a client-broadcast audience. Events may contain authority-internal facts or drive player/party-scoped reducers without being exposed verbatim to clients. ClientMessage/GameView projection applies its own AudiencePolicy and redaction rules.
+
 Events SHOULD be immutable values.
 
 ## 9. Event processing model
@@ -262,7 +305,7 @@ take item
   -> item_acquired
      -> quest reducer advances objective
         -> quest_objective_completed
-           -> quest_completed
+           -> quest_resolved(outcome_id)
 ```
 
 This chain runs as part of the same decision/commit where possible.
@@ -278,27 +321,28 @@ This prevents script/rule loops.
 
 ## 10. Effect types
 
-Effects are registered and typed.
+Authoritative same-domain changes are **StateDelta/commit data**, not Effects. Examples include entity/quest/fact changes and same-authority durable scheduled-job rows.
 
-Categories:
-
-### Synchronous commit effects
-
-Represented inside state transaction, not external dispatcher.
+Actual Effects are registered and typed in two broad categories:
 
 ### Durable asynchronous effects
 
-Use outbox.
+Use the outbox. These cross a boundary that cannot be completed atomically with the current authority commit.
 
-### Ephemeral notifications
+Outbox delivery MUST be designed as **at-least-once delivery with idempotent application**, unless a stronger mechanism is actually proven for a particular boundary. A lost acknowledgement may cause the same effect to be delivered multiple times; the receiver uses the stable effect/idempotency identity so the authoritative consequence is not applied twice. The specification MUST NOT describe network/outbox transport itself as "exactly once."
 
-May be emitted after commit and dropped/reconstructed if necessary.
+A durable effect also declares its terminal-failure/reconciliation behavior. Exhausted retries cannot silently disappear if the effect represents a required gameplay consequence, custody transfer, entitlement change, or other authoritative obligation.
+
+### Ephemeral post-commit effects
+
+Notifications/presentation hints may be emitted after commit and dropped/reconstructed if necessary.
 
 Every effect declares:
 
 - durability;
 - idempotency requirement;
 - retry policy;
+- terminal-failure/reconciliation policy for durable effects;
 - allowed origin capabilities;
 - schema.
 
@@ -394,6 +438,8 @@ Internal component state is not dumped wholesale to mobile.
 
 Game-semantic view construction that must match offline and online SHOULD be defined once over portable committed state and cartridge definitions.
 
+Realm-only capabilities MAY contribute additional Realm-only GameView fields/actions through registered pure projection evaluators on the server. Those evaluators use the same typed GameView schema, deterministic ordering, policy checks, and fail-closed capability registry; they do not cause React Native to reimplement Realm rules. A portable cartridge hosted online must still project the same portable semantics for equivalent portable state.
+
 Examples:
 
 - resolved ActionSet for an entity;
@@ -428,15 +474,19 @@ Host-only views—account catalog, entitlement, social realm presence, admin—r
 
 This avoids a second semantic fork where the server and offline client disagree about what the player can see/do.
 
-## 16. Snapshot and delta model
+## 16. Snapshot, projection sequence, and freshness model
 
-On join/resync, server sends authoritative snapshot.
+On join/resync, server sends an authoritative semantic GameView snapshot.
 
-Subsequent messages may be deltas tagged with instance revision.
+Subsequent projection messages carry a monotonically ordered **projection sequence** for that client/subscription stream. If the client detects a projection-sequence gap or the server requests resync, it discards/reconciles local view state from a fresh snapshot.
 
-If the client detects a gap or server requests resync, it discards/reconciles local view state from a fresh snapshot.
+A projected view/action may also carry an opaque **view freshness token** (historically named `view_revision`) used when submitting ActionInvocations. The authority re-resolves current legality and may use the token to diagnose/reject stale interaction.
 
-The client store is a cache of server projection, not authority.
+Do **not** require the projection sequence or view token to equal the WorldInstance/ZoneShard database revision. In a shared zone, unrelated authoritative mutations may occur without changing one player's projection, and one authoritative mutation may yield several projection messages.
+
+Authority revisions remain internal concurrency/commit tokens. Projection sequence is transport ordering. View token is interaction freshness. They may be correlated for diagnostics but are distinct contracts.
+
+The client store is a cache of authority projection, not authority.
 
 ## 17. Text commands
 
@@ -474,7 +524,7 @@ No transport-specific duplicated keyword lookup helpers.
 
 ## 19. Action availability
 
-The server exposes resolved ActionSets so the touch UI does not reinvent conditions.
+The active authority exposes resolved ActionSets so touch/text adapters do not reinvent conditions.
 
 Action definitions include:
 
@@ -506,6 +556,6 @@ Breaking protocol changes require version bump and compatibility policy.
 
 ## 21. Offline command conformance
 
-The portable kernel command schema is also machine-readable. The online Elixir host and offline native/mobile host MUST serialize equivalent commands into the same kernel representation.
+The portable semantic Command schema is also machine-readable. Every authoritative host implementation MUST serialize equivalent semantic commands into the same canonical portable representation. Host-only CommandContext fields such as authenticated session identity or receipt timestamp are excluded from portable command equivalence.
 
 Golden conformance fixtures cover command -> decision/event/effect output independent of network transport. Online protocol code wraps these semantics; it does not redefine them.

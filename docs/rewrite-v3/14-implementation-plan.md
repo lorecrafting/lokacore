@@ -36,8 +36,10 @@ No unresolved contradiction about:
 - definition/runtime identity;
 - offline execution;
 - online authority;
-- command/event/effect model;
+- ActionInvocation/Command/StateDelta/DomainEvent/Effect/GameView model;
 - persistence transaction semantics;
+- retry/idempotency semantics across reconnect and authority ownership movement;
+- durable cross-authority effect redelivery/reconciliation semantics;
 - scripting boundary;
 - mobile Story session/GameView boundary and the fact that Realm transport is intentionally deferred;
 - cartridge versioning.
@@ -67,7 +69,7 @@ Definitions:
 - 1 NPC;
 - 1 item;
 - 1 player;
-- 1 flag;
+- 1 typed fact;
 - 1 quest;
 - 1 scheduled job;
 - 1 RNG check.
@@ -129,7 +131,7 @@ apps/loka_platform
 apps/loka_runtime
 apps/loka_builder
 apps/loka_web
-kernel/
+portable/                 # shared portable implementation only if selected by R1
 mobile/app
 mobile/features/story
 mobile/features/realm
@@ -178,15 +180,29 @@ Make machine-readable contracts exist before features.
 - DefinitionRef schema;
 - cartridge manifest schema;
 - deployment schema;
-- capability registry format;
-- command registry;
-- domain-event registry;
-- effect registry;
+- campaign/continuity manifest schema;
+- capability registry + exact capability-lock format;
+- Action/ActionInvocation registry/schema;
+- ActionRecipe/ComposedAction schema;
+- portable semantic Command registry;
+- StateDelta schema/algebra;
+- DomainEvent registry;
+- Effect registry;
 - policy AST;
+- TargetSpec / deterministic TargetResolution result schema;
+- typed relation/provenance shapes;
+- InspectableDetail/description-variant schema;
+- Connection/Barrier schema;
+- ReactionRule schema;
+- SpawnBundle/PopulationPlan registry shape;
+- commerce-provider/policy registry shape;
+- WorldEventPlan schema;
 - FactSpec / scoped narrative-state schema;
+- NarrationSpec + SceneDefinition/SceneInstance/SceneSpace schema;
+- InstancePlan schema including instancing closure/import/export policy;
 - consequence-operator registry shape;
 - portable GameView schema;
-- portable kernel ABI/serialization contract;
+- portable-rules ABI/serialization contract selected by R1;
 - canonical serialization/hash rules;
 - diagnostic/error registry.
 
@@ -195,7 +211,7 @@ Make machine-readable contracts exist before features.
 From the portable/content registries, tooling can generate/check:
 
 - Elixir portable/domain types and validators;
-- TypeScript portable command/GameView/content types used by Story Mode;
+- TypeScript ActionInvocation/GameView/content types used by Story Mode, plus authority-internal semantic Command types only where the local authority adapter needs them;
 - capability/schema docs and help excerpts;
 - canonical test fixtures.
 
@@ -231,7 +247,7 @@ Compile same source twice → identical artifact hash.
 
 Broken references/cycles/unknown capabilities fail deterministically.
 
-## R5 — Portable world kernel foundation
+## R5 — Portable world rules foundation
 
 ### Objective
 
@@ -242,13 +258,16 @@ Establish world/state mechanics needed by everything else.
 - world state;
 - definitions → runtime entities;
 - containment/location;
-- room/exits;
-- Search inputs/IDs;
-- flags/scoped variables;
+- room/place + coherent Connection/Barrier;
+- typed relations/provenance;
+- InspectableDetail + conditional descriptions;
+- TargetSpec/Search inputs/IDs + deterministic none/unique/ambiguous resolution;
+- typed facts and explicitly scoped runtime state;
 - logical clock;
 - RNG;
 - policies;
 - ActionSet algebra;
+- minimal ActionRecipe/ComposedAction execution over registered consequences;
 - inspect/look;
 - move;
 - take/drop/give;
@@ -265,7 +284,7 @@ Establish world/state mechanics needed by everything else.
 
 ### Gate R5
 
-Golden vectors pass through kernel and all accepted hosts.
+Golden vectors pass through the R1-selected portable-rules implementation(s) and every accepted authoritative host path.
 
 ## R6 — Offline authority and save system
 
@@ -308,13 +327,20 @@ Support real narrative cartridges.
 - QuestInstance;
 - quest graph operators;
 - quest reducer;
-- quest event indexing;
+- active-quest event indexing plus automatic/discovered activation indexing;
 - typed quest outcome/consequence grammar;
 - FactSpec reads/writes with scope validation;
 - capability consequence evaluators returning StateDelta/events/effects;
 - idempotent rewards/consequences;
 - dialogue graph;
 - dialogue conditions/actions;
+- NarrationSpec;
+- SceneDefinition + durable SceneInstance reducer;
+- SceneSpace semantics;
+- minimal portable InstancePlan for precompiled room-subgraph/private Story spaces under LocalInstanceAuthority, including entry/exit, reconnect/save, teardown and explicit exports;
+- text-cutscene beats, choices, checkpoints, and action-control modes;
+- player-scoped dream/vision compositions over current-world, overlay, or InstancePlan space with explicit exported consequences;
+- quest milestone/scene hooks and scene outcome objectives;
 - LokaScript parser/normalized-IR skeleton and interpreter core sufficient to prove containment/determinism;
 - only the bindings actually needed by the first cartridge plus a small synthetic safety fixture set;
 - interpreter budgets;
@@ -323,7 +349,11 @@ Support real narrative cartridges.
 
 ### Gate R7
 
-Known Lokacore quest-bug class has a regression scenario that cannot reproduce corruption/premature completion. LokaScript containment/determinism fixtures pass, but a broad general-purpose binding library is **not** required before R10.
+Known Lokacore quest-bug class has a regression scenario that cannot reproduce corruption/premature completion.
+
+A quest can drive a durable SceneSequence containing text narration, an authoritative choice, a crash/reconnect checkpoint, and typed world consequences exactly once. A player-scoped dream proves both overlay and minimal InstancePlan composition, isolation, reconnect/save behavior, and explicit export semantics.
+
+LokaScript containment/determinism fixtures pass, but a broad general-purpose binding library is **not** required before R10.
 
 ## R8 — Living-world capability pack
 
@@ -333,24 +363,29 @@ Make the world feel like a MUD, not a branching ebook.
 
 ### Build initially
 
-- reactive fact/event rule evaluation;
+- typed ReactionRule evaluation;
 - NPC role/state profiles;
+- deterministic Behavior intent/arbitration contract;
 - schedule;
 - patrol;
 - wander;
+- guard/flee/assist/scavenge behavior primitives as demanded by the conformance cartridge;
 - ambient emitter;
 - shop hours;
 - nocturnal/activity windows;
-- spawn/despawn policy;
+- AreaDefinition authoring grouping distinct from ZoneShard placement;
+- SpawnBundle + provenance-safe PopulationPlan;
+- spawn/despawn/cleanup policy;
 - day/night;
 - basic weather;
 - fact-driven room/ambient variants;
 - fact-driven access/topology policies;
 - on-demand temporal state;
 - durable local jobs;
-- simple merchant/shop if needed;
+- typed commerce/merchant contract: provider, catalog/stock, price/payment, buy/sell admission, liquidity, restock, schedule, atomic immediate trade;
 - portable Service/Capacity composition primitives;
-- durable local ServiceJob model sufficient to prove queued/timed services.
+- durable local ServiceJob model sufficient to prove queued/timed services;
+- WorldEventPlan phase composition sufficient for the first cartridge's scripted living-world event.
 
 ### Gate R8
 
@@ -358,10 +393,14 @@ Make the world feel like a MUD, not a branching ebook.
 
 - service queues/jobs remain bounded and deterministic;
 - escrowed inputs/outputs conserve ownership;
+- merchant stock/payment conservation holds under retries/concurrency;
 - no schedule deadlocks;
+- Behavior conflict arbitration is deterministic;
+- PopulationPlan counts remain bounded and provenance-safe;
 - no runaway population;
 - bounded jobs;
 - required NPCs available per intended design;
+- ReactionRule/event chains remain bounded;
 - deterministic replay.
 
 ## R9 — Cartridge Lab v1
@@ -377,18 +416,31 @@ Make failures reproducible before content scale.
 - snapshots/forks;
 - branch outcome fork/compare;
 - quest world-impact/consequence graph;
+- scene/dream/cutscene trace + crash/retry replay;
+- target-resolution/provenance/behavior/population/price explanation traces;
 - trace viewer data;
-- static validator gates;
-- property tests;
+- static validator + topology/quest/scene/reaction model-analysis gates;
+- CoverageManifest generation;
+- bounded state/path/seed exploration;
+- reusable capability invariant registry;
+- property/fuzz tests;
+- mutation-sensitivity fixtures for high-risk gates;
 - deterministic bots;
 - autonomous simulation;
+- adversarial scenario import/generation interface;
 - fault injection for local authority;
-- cross-host conformance runner;
-- repro bundle export.
+- cross-host differential/conformance runner;
+- semantic-review evidence bundle support;
+- content-addressed CertificationEvidenceBundle + repro export.
 
 ### Gate R9
 
 Every seeded injected failure generates a one-command/fixture reproducible report.
+
+A deliberately broken mini-cartridge is detected by the expected static/model/invariant/
+mutation-sensitivity gates. The Lab can account for quest/scene/area coverage, explore
+declared bounded branches, export an exact evidence bundle, and reproduce a model-proposed
+adversarial scenario deterministically without treating the model output itself as pass/fail evidence.
 
 ## R10 — First real offline cartridge
 
@@ -403,12 +455,20 @@ Target scope:
 - ~8–15 locations;
 - 5–8 NPCs;
 - 10–20 items;
-- 1–3 connected quests;
-- branching outcome with typed durable world consequences;
+- 2–4 connected quests forming a coherent story thread;
+- at least one multi-stage/branching quest with typed durable world consequences;
+- at least one quest-launched SceneSequence rendered as a text cutscene;
+- at least one dream/vision or private narrative scene with explicitly exported consequences;
+- at least one scripted world-event/reaction sequence driven by typed facts/events;
 - at least one quest-gated area/access change;
 - at least one NPC role/schedule/dialogue reaction to quest outcome;
 - at least one ambient/environmental reaction to shared fact state;
 - schedules;
+- InspectableDetails and deterministic text target ambiguity/disambiguation;
+- coherent locked/openable bidirectional barrier;
+- SpawnBundle + PopulationPlan;
+- merchant with hours/stock/price or admission variation;
+- at least one ReactionRule and conflicting Behavior arbitration fixture;
 - environmental change;
 - simple skill/check;
 - optional simple combat;
@@ -422,7 +482,7 @@ The first cartridge exists to stress contracts. It MUST prove that quests and li
 
 ### Gate R10
 
-Full `offline_private_story` certification plus a **developer-harness physical-device smoke** using the minimal Expo/native integration established by R1/R2/R6. Polished non-developer product-shell acceptance belongs to R12.
+Full `offline_private` certification plus a **developer-harness physical-device smoke** using the minimal Expo/native integration established by R1/R2/R6. Polished non-developer product-shell acceptance belongs to R12.
 
 The cartridge should be authored primarily through source files/compiler/Lab at this stage. Record every repetitive or error-prone authoring operation as evidence for the Builder API rather than prematurely generalizing it.
 
@@ -443,9 +503,13 @@ Let humans/agents author without raw repo semantics.
 - Lab control;
 - batch/dry-run;
 - semantic rename;
-- audit receipts;
+- audit/idempotency receipts for retry-safe mutations;
 - terminal adapter;
 - MCP adapter;
+- semantic intent-level operations for demonstrated needs such as topology.connect, detail.add, reaction.add, population.add, merchant.configure, scene.create, quest.attach_scene, and world_event.create;
+- explainability operations for target resolution, behavior, population, prices, scenes, quest progress, and world-event phase;
+- machine-readable role/surface metadata sufficient for an orchestrator to distinguish L3–L6 builders, read-only reviewers and engine-capability escalation;
+- typed MISSING_CAPABILITY / CapabilityProposal result path;
 - expand LokaScript bindings/recipes only from concrete R10 authoring needs and accepted reusable capability gaps.
 
 ### Gate R11
@@ -463,7 +527,7 @@ Can overlap late R10.
 - catalog shell;
 - cartridge install/delete/update;
 - save slots;
-- generated kernel bindings;
+- generated/validated portable-rules integration or native bindings selected by R1;
 - living-book/touch UI refined from old design;
 - accessibility;
 - settings;
@@ -510,12 +574,14 @@ Run the same cartridge rules online under OTP.
 - Session→Account→Character;
 - InstanceRegistry/Supervisor;
 - WorldInstance;
-- kernel adapter;
+- R1-selected portable-rules adapter/implementation;
 - PostgreSQL store;
 - transactional command commit;
-- command receipts;
+- command receipts with semantic-command digests and replayable prior results;
+- authority ownership/fencing generations for stale-owner protection;
 - effect outbox;
 - snapshots;
+- projection stream sequencing and opaque view-freshness tokens;
 - machine-readable Realm transport protocol + Elixir/TypeScript codegen and compatibility fixtures;
 - Phoenix typed protocol adapter;
 - Realm Mode route/session driver inside the existing Loka app using that protocol;
@@ -552,7 +618,8 @@ Only now automate content production heavily.
 
 ### Build
 
-- architect/builder/reviewer roles;
+- Loka project workflow RoleSpecs/templates for architect/builder/reviewer responsibilities
+  where an orchestrator is used; these are not hard-coded Foundry kernel roles;
 - context retrieval;
 - semantic review;
 - automated correction;
@@ -582,9 +649,15 @@ Full party certification including race/fault tests.
 
 ## R18 — Realm Mode persistent social shell
 
+### Boundary
+
+R18 introduces the **minimum single-node shared-hub authority** needed to prove shared presence, overlays, social UX, and scarce-service contention. It does not yet authorize generalized multi-zone partitioning or cross-shard handoff.
+
+The implementation may use one `ZoneShard`-shaped owner for this hub if that is the accepted ownership abstraction, but R20 owns the step from one shared authority domain to a partitioned Realm.
+
 ### Build selectively
 
-- shared-zone player/party overlay projection;
+- single shared-hub/zone player/party overlay projection;
 - lazy materialization/cleanup of phased quest actors;
 - shared NPC with player-specific dialogue/relationship projections;
 - Realm Service/Capacity primitives and durable ServiceJobs;
@@ -603,6 +676,10 @@ Offline cartridges remain independent; same packs can launch from shared hub as 
 
 ## R19 — Instanced story regions in world geography
 
+R19 does **not** invent a second instance model. It integrates the portable/private
+InstancePlan semantics already proved for Story Mode with shared Realm geography and
+WorldInstance handoff.
+
 ### Build
 
 - physical entrance/mount points;
@@ -619,7 +696,7 @@ MMO player walks from shared town into a previously released storypack without r
 
 ### Objective
 
-Enable truly shared regions.
+Generalize the R18 single shared-hub authority into multiple explicit ownership domains with recoverable handoff and load/backpressure behavior.
 
 ### Build
 
@@ -628,13 +705,14 @@ Enable truly shared regions.
 - owner registry;
 - shard state;
 - cross-shard handoff protocol;
+- migration-stable command receipt/idempotency routing across ownership handoff;
 - shared durable jobs;
 - realm services;
 - load/backpressure.
 
 ### Gate R20
 
-Synthetic concurrency/load + crash/handoff certification.
+Synthetic multi-zone concurrency/load + crash/fencing/handoff certification. Cross-zone player/party scoped state placement/routing must be explicitly resolved here rather than inferred from StateScope. A command that commits immediately before ownership moves and then loses its acknowledgement MUST replay from the original receipt after handoff rather than execute again under the destination owner.
 
 ## R21 — Shared-area promotion
 

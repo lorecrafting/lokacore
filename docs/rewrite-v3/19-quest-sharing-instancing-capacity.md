@@ -30,7 +30,7 @@ A player-scoped quest can use a shared NPC, a shared smithy, a personal ghost, a
 
 Story Mode normally has one local player inside one local world instance.
 
-Quest progress is usually player or campaign scoped.
+Quest progress is usually player scoped (or instance scoped when the whole local scenario intentionally shares one progression state). Campaign continuity is exported/imported typed continuity data, not a fifth runtime StateScope.
 
 The same scope machinery still applies because it provides:
 
@@ -239,7 +239,50 @@ Preferred escalation order:
 3. private/party instance;
 4. realm-shared mutation when the fiction intentionally affects everyone.
 
-## 9. Scarce services are compositions of reusable primitives
+## 9. InstancePlan: reusable scoped spatial simulation
+
+A private/party instance is not a quest-specific subsystem.
+
+An **InstancePlan** may instantiate a precompiled AreaDefinition, exported cartridge
+region, or room subgraph under explicit participant/admission/lifecycle policy.
+
+It may compose:
+
+- entry/exit bindings;
+- audience/participants;
+- progress/consequence scope;
+- SpawnBundles and PopulationPlans;
+- ActivationGroups;
+- encounter/scene hooks;
+- reconnect policy;
+- reset/re-entry behavior;
+- persistence/expiry;
+- teardown;
+- explicit exported rewards/facts/memories.
+
+Use the same primitive for:
+
+- private dungeon;
+- party puzzle;
+- escort/heist simulation;
+- tutorial;
+- dream/vision/flashback world;
+- temporary ritual/trial space.
+
+A SceneSequence may orchestrate beats **inside** an InstancePlan, but the instance remains
+ordinary spatial/world simulation and can be explored interactively between scene beats.
+
+An InstancePlan creates runtime instances of already compiled definitions; ordinary
+content does not generate new uncertified definitions at runtime.
+
+The plan also declares an explicit instancing closure/import model. References leaving
+the instance closure do not get recursively cloned. Shared/singleton/account-owned or
+otherwise non-instantiable state is either bound through an explicit supported import/
+authority contract or rejected. Instance teardown exports only declared typed
+rewards/facts/memories/continuity; temporary entities are not bulk-copied back to the
+shared world.
+
+## 10. Scarce services are compositions of reusable primitives
 
 A quest may depend on a genuinely scarce service.
 
@@ -262,10 +305,10 @@ Model scarce world services by composing reusable capability primitives.
 A typical long-running service may compose:
 
 - **AdmissionPolicy** — who may request the service and under what prerequisites;
-- **CapacityPolicy** — concurrent slots, tokens per period, finite stock, reservation windows, or unlimited capacity;
+- **CapacityPolicy** — concurrent slots, tokens per period, finite stock, reservation windows, or unlimited capacity; period/window policies declare an explicit time basis and boundary rule;
 - **CapacityScope** — player, party, service entity, instance, realm, or another explicit owner;
 - **Queue/ReservationPolicy** — FIFO, reservation window, priority class, no queue, etc.;
-- **InputEscrow** — optional atomic custody of materials/currency/items;
+- **InputEscrow** — optional custody/reservation of materials/currency/items; atomic with job creation when the inputs and service share one mutation authority, otherwise performed through an explicit idempotent transfer protocol;
 - **DurationPolicy** — instant, fixed duration, recipe-defined duration, or scheduled window;
 - **CompletionRule** — what constitutes successful completion/failure;
 - **OutputPolicy** — immediate delivery, claimable output, beneficiary ownership, shared result;
@@ -288,7 +331,7 @@ Examples:
 
 A single physical Realm smithy is merely one authored Service composition whose capacity owner is that shared service/entity.
 
-## 10. Durable ServiceJobs
+## 11. Durable ServiceJobs
 
 Long-running or queued services create durable **ServiceJobs**.
 
@@ -301,6 +344,7 @@ A ServiceJob records:
 - recipe/service;
 - input escrow;
 - submission time;
+- explicit time basis;
 - scheduled start;
 - scheduled finish;
 - status;
@@ -317,11 +361,29 @@ Status examples:
     cancelled
     failed
 
-The owning service/provider authority owns the queue/reservation/timing semantics.
+The owning **mutation authority** owns the queue/reservation/timing semantics for the service aggregate.
+
+A service/provider does not automatically receive its own OTP process. In a private world it will usually be state inside the WorldInstance/LocalStory authority; in a shared Realm it may be state inside a ZoneShard or, when genuinely realm-wide concurrency warrants it, a dedicated shared-service authority.
+
+### Escrow across authority boundaries
+
+When requester inputs and the service queue share one mutation authority, admission, slot allocation, escrow, and ServiceJob creation SHOULD commit atomically.
+
+If they live under different authorities, use an explicit durable protocol instead of a pretend distributed transaction. A safe protocol must define:
+
+- stable request/reservation identity;
+- provisional capacity reservation where necessary;
+- input custody/transfer intent;
+- acknowledgement/custody proof;
+- timeout/cancellation;
+- crash/retry reconciliation;
+- the exact point at which the ServiceJob may become queued/in-progress.
+
+A failed cross-authority handoff must not strand, duplicate, or simultaneously expose the same item/currency under both authorities.
 
 The quest only observes typed service/job DomainEvents.
 
-## 11. Worked example: the one-sword-per-day smithy
+## 12. Worked example: the one-sword-per-day smithy
 
 Requirement:
 
@@ -333,20 +395,21 @@ Correct composition:
 
 - quest progress: player scoped;
 - smith NPC: shared;
-- service/provider: shared smithy entity;
+- service/provider: shared smithy aggregate/entity;
 - capacity: scoped to that service/provider;
 - work order beneficiary: player;
 - world space: shared;
 - crafting completion: durable scheduler/domain event.
 
-Flow:
+Flow when requester inputs and service share one mutation authority:
 
     player invokes forge
       -> AdmissionPolicy validates materials/prerequisites
-      -> InputEscrow takes materials atomically
-      -> CapacityPolicy + Queue/ReservationPolicy reserve the next legal slot
-      -> ServiceJob is committed
+      -> authority computes capacity/queue allocation + escrow + ServiceJob proposal
+      -> one transaction commits reservation/allocation + escrow + ServiceJob
       -> service_job_submitted event
+
+For cross-authority inputs, replace the one-transaction step with the durable custody/reservation protocol above.
 
 At completion:
 
@@ -369,7 +432,19 @@ Possible meanings are different:
 
 Content must choose one.
 
-## 12. Shared service fairness and contention
+### Period/window time semantics
+
+Any capacity, cooldown, reservation, or service schedule expressed as “per hour/day/week” MUST also declare enough information to make the window deterministic:
+
+- **time basis** — e.g. world logical time, accepted Story real-elapsed time, or an authoritative Realm/service clock;
+- **window kind** — rolling interval, fixed/anchored bucket, or named world-calendar period;
+- **anchor/calendar/timezone semantics** where a fixed civil/calendar boundary exists.
+
+“1 per day” MUST NOT silently mean device-local midnight in Story Mode and server UTC midnight in Realm Mode.
+
+For portable content, prefer world logical/calendar semantics when fiction permits. Realm-only real-world schedules use a server-authoritative time basis.
+
+## 13. Shared service fairness and contention
 
 Shared services may define:
 
@@ -389,7 +464,7 @@ All allocation is server-authoritative and transactional.
 
 Two players racing for the last slot cannot both receive it.
 
-## 13. Story Mode service behavior
+## 14. Story Mode service behavior
 
 The same composed service primitives run locally.
 
@@ -407,7 +482,7 @@ If the Story time policy is real-elapsed, a work order may finish while the app 
 
 If it is play-time, it finishes only after enough logical game time advances.
 
-## 14. Phased quest drops and actors
+## 15. Phased quest drops and actors
 
 A personal phased NPC should not drop a realm-shared sword onto the ground by accident.
 
@@ -419,7 +494,7 @@ Default inheritance rules should be safe:
 
 Scope escalation requires an explicit registered operator and certification.
 
-## 15. Personal access versus shared geometry
+## 16. Personal access versus shared geometry
 
 If only the player should enter a place but the map geometry is otherwise identical, prefer a shared connection with a player-scoped access policy.
 
@@ -434,7 +509,7 @@ If the destination itself contains contradictory/destroyed/private world state, 
 
 Map discovery is separate again: a player may not see a known location on the map even if it physically exists.
 
-## 16. Party resources and rewards
+## 17. Party resources and rewards
 
 Progress, contribution, reward, and ownership are distinct policies.
 
@@ -453,7 +528,7 @@ Example party service job:
 
 A late joiner does not automatically inherit full contribution/reward unless the quest says so.
 
-## 17. Builder guidance
+## 18. Builder guidance
 
 Builder target story, realm, or promote should ask enough questions to infer the least-isolated correct model.
 
@@ -471,7 +546,7 @@ For a new quest it should be able to ask/derive:
 
 The Builder should prefer shared state plus scoped progress/overlays before proposing an instance.
 
-## 18. Certification requirements
+## 19. Certification requirements
 
 Certification must include scenarios relevant to the chosen sharing model.
 
@@ -489,7 +564,7 @@ For party quests:
 - contribution policy;
 - party split/reconnect.
 
-For facilities:
+For scarce/queued services:
 
 - simultaneous submissions;
 - slot exhaustion;
@@ -516,7 +591,7 @@ For realm events:
 - late join;
 - rollback/recovery.
 
-## 19. Selection table
+## 20. Selection table
 
 | Situation | Preferred model |
 |---|---|
@@ -533,3 +608,35 @@ For realm events:
 | Shared scarce resource | shared service/entity with atomic contention |
 
 This flexibility is intentional. A living MUD needs both private narrative and genuinely shared scarcity.
+
+
+## 21. Commerce and services compose but are not the same mechanism
+
+A merchant/shop is normally an immediate **Commerce** composite, not a ServiceJob.
+
+Immediate trade may compose:
+
+- provider;
+- catalog/offers;
+- stock;
+- price policy;
+- currency/payment;
+- buy/sell admission;
+- liquidity;
+- restock;
+- schedule;
+- relationship/faction/world-fact modifiers;
+- NarrationSpec.
+
+A successful same-authority purchase/sale transfers payment and item/stock atomically in one command commit.
+
+Use Service/Capacity/Reservation/ServiceJob when the transaction represents scarce or long-running work.
+
+Examples:
+
+- buying a finished sword from the shelf -> CommerceTransaction;
+- ordering a sword forged overnight -> Commerce offer + ServiceJob;
+- buying a ferry ticket -> CommerceTransaction, optionally followed by capacity/reservation/transport service;
+- renting an inn room -> Commerce/payment + finite reservation/duration service.
+
+This split keeps merchant behavior data-driven without forcing every shop action through a job queue.

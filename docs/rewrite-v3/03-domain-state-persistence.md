@@ -111,7 +111,7 @@ Ephemeral state may be reconstructed after restart.
 
 ## 6. State scopes
 
-State scope is a first-class type:
+State scope is a first-class semantic type:
 
 ```elixir
 @type scope ::
@@ -121,9 +121,17 @@ State scope is a first-class type:
   | {:realm, realm_id}
 ```
 
-Quest instances, flags, reputation tracks, world events, and similar state MUST declare a scope.
+Quest instances, typed facts, reputation tracks, world events, and similar state MUST declare a scope.
 
 No helper may default to realm/global scope merely because an ID was omitted.
+
+### Scope is not physical authority placement
+
+State scope answers who owns/experiences a gameplay truth; it does **not** by itself decide which process or table physically hosts that state.
+
+Private Story/WorldInstance execution may naturally co-locate player, party, and instance state under one authority. A persistent Realm may instead place or route player-, party-, instance-, and realm-scoped state through different authority domains as the world is partitioned.
+
+The exact long-lived placement/routing strategy for cross-zone player/party state MUST be decided and acceptance-tested before the corresponding shared-Realm milestones. Schemas and APIs MUST NOT assume that player or party scope is permanently owned by the current ZoneShard.
 
 ### Multiplayer state uses independent axes
 
@@ -402,11 +410,12 @@ quest_definition_ref
 lifecycle_state
 activation_mode
 activated_logical_time
-resolved_outcome nullable
+outcome_id nullable
 objective_state JSONB
 variables JSONB
+event_delivery_state_or_ref nullable
 revision
-resolved_at nullable
+ended_at nullable
 ```
 
 A unique constraint should prevent duplicate active quest instances where the quest's repeatability rules disallow them.
@@ -439,7 +448,7 @@ Logical fields:
 ```text
 id UUID
 authority_id
-service_entity_id
+service_ref
 capacity_scope_type
 capacity_scope_id
 requester_id
@@ -448,6 +457,7 @@ beneficiary_id
 service_key
 input_escrow JSONB/reference
 submitted_logical_time
+time_basis
 scheduled_start
 scheduled_finish
 status
@@ -460,7 +470,11 @@ created_at
 updated_at
 ```
 
-The exact physical schema may normalize escrow/output separately, but allocation + escrow + ServiceJob creation MUST be one authoritative transaction.
+The exact physical schema may normalize escrow/output separately.
+
+When the service capacity and required inputs are owned by the **same mutation authority**, capacity allocation + input escrow + ServiceJob creation MUST be one authoritative transaction.
+
+If input custody crosses an authority boundary—for example a realm-wide service accepting an item currently owned by another shard—do not pretend the operation is one database transaction merely because both authorities use PostgreSQL. Use an explicit idempotent reservation/transfer protocol with durable intent, custody proof, cancellation/timeout, and reconciliation. The ServiceJob cannot enter a state that consumes the inputs until the owning service authority can prove the required custody/reservation step completed.
 
 Capacity allocation must have a database/authority invariant sufficient to prevent double allocation under concurrent submissions.
 
@@ -468,15 +482,21 @@ Capacity allocation must have a database/authority invariant sufficient to preve
 
 Every authority-side state-changing Command carries a stable idempotency identity.
 
-For external ActionInvocations, the authority MUST derive/reuse a stable Command ID from trusted context plus the invocation ID (for example instance + actor/session + invocation ID), so a network retry cannot become a fresh mutation.
+For external ActionInvocations, the authority MUST derive/reuse a stable Command ID from a **logical idempotency scope** plus the invocation ID, so a network retry cannot become a fresh mutation.
 
-Internal scheduled/system commands carry their own stable job/command identity.
+The idempotency scope MUST outlive ephemeral connection/session identity and, where ownership may move, the current process/shard/owner identity. Representative scopes are a Story save lineage + controlled actor, or a Realm + controlled character. The same invocation retried after reconnecting through a new session **or after an authority handoff** must deduplicate against the original committed command. Session identity and current mutation-owner identity may authorize/route the request and be recorded for audit, but they are not semantic idempotency identity.
+
+If a command commits immediately before ownership moves, later routing MUST still be able to discover/replay that receipt. R20 may choose a realm-level receipt index, receipt migration, forwarding/tombstone records, or an equivalently durable mechanism; it MUST NOT mint a fresh command identity merely because the current owner changed.
+
+Internal scheduled/system commands carry their own stable job/command identity and follow the same rule when their owning authority can migrate.
 
 ```text
-instance_id
+idempotency_scope_id
+origin_authority_id
 command_id
 invocation_id nullable
 actor_id
+semantic_command_digest
 accepted_revision
 result_code
 committed_revision
@@ -485,9 +505,11 @@ result_digest
 created_at
 ```
 
-Unique key: `(instance_id, command_id)`.
+Unique key: `(idempotency_scope_id, command_id)`.
 
-If the same command is retried, runtime returns the prior committed result/ack rather than executing again. The receipt therefore MUST retain either the stable response payload required for retry or a durable reference from which that response can be reconstructed; a digest alone is insufficient.
+If the same command is retried with the same semantic command digest, runtime returns the prior committed result/ack rather than executing again. The receipt therefore MUST retain either the stable response payload required for retry or a durable reference from which that response can be reconstructed; a result digest alone is insufficient.
+
+If an already-used command/idempotency identity arrives with a **different semantic command digest**, the authority MUST reject it as an idempotency/integrity conflict. It must neither execute the new payload nor silently return the old result as though the requests were equivalent.
 
 ## 15. Transactional command commit
 
@@ -495,15 +517,25 @@ For a command changing durable state:
 
 ```text
 BEGIN
-  verify command_id not processed
-  verify expected instance revision if supplied
-  update affected runtime entities / quest instances
-  update world instance revision + RNG/logical state
-  insert command receipt
-  insert event trace records required for diagnostics
-  insert durable effect_outbox entries
+  lookup command receipt by idempotency_scope_id + command_id
+
+  if receipt exists:
+    require exact semantic_command_digest match
+    return/reconstruct prior committed response
+    perform NO state mutation
+
+  else:
+    verify expected authority/instance revision if supplied
+    verify ownership/fencing generation where applicable
+    update affected runtime entities / quest instances
+    update owning authority revision + RNG/logical state
+    insert command receipt
+    insert event trace records required for diagnostics
+    insert durable effect_outbox entries
 COMMIT
 ```
+
+The duplicate-command branch is an early replay path, not permission to continue the mutation transaction after a matching receipt is found.
 
 Only after commit does the in-memory owner adopt the committed state revision.
 
@@ -536,6 +568,8 @@ attempt_count
 next_attempt_at
 causation_id
 ```
+
+Workers MUST tolerate crash/reclaim/redelivery. Durable outbox transport is assumed to be at-least-once: the same effect may reach a receiver more than once after an acknowledgement loss, so the receiving authority/service must deduplicate by the stable idempotency identity before applying authoritative state. A `failed` row representing a required authoritative obligation is not permission to discard it; retry exhaustion transitions into the effect's explicit terminal reconciliation/operator-visible disposition.
 
 ## 17. Event trace is not full event sourcing
 
@@ -591,7 +625,9 @@ Database revisions still protect against:
 
 Updates SHOULD include expected revisions.
 
-A revision conflict is an invariant signal, not something to silently overwrite.
+When more than one runtime process could plausibly claim the same durable authority domain—because of restart overlap, failover, clustering, or an operational bug—the store MUST also validate an ownership/fencing generation (or an equivalently strong lease/owner token). A stale process with a valid-looking state revision must not be allowed to resume writing after ownership has moved.
+
+A revision or fencing conflict is an invariant signal, not something to silently overwrite.
 
 ## 20. Persistence adapters
 
@@ -628,6 +664,8 @@ Allowed strategies:
 ### Component migration
 
 Each component version transition that changes persisted runtime state must register a deterministic migration.
+
+For state that can exist in `offline_private` portable saves, the migration path itself must be executable by the supported mobile/portable compatibility path (or the app must retain the older interpreter/runtime). A server-only Elixir migration is not sufficient for an offline save that may update with no network.
 
 No “read old shape and guess.”
 

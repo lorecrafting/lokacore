@@ -1,6 +1,6 @@
 # 17 — Research Baseline and External References
 
-**Verified:** 2026-09-18 unless otherwise noted.
+**Verified:** 2026-09-19 unless otherwise noted.
 
 This appendix records external facts that influenced architecture decisions. It is not a substitute for rechecking fast-changing platform policies at implementation/release time.
 
@@ -111,8 +111,13 @@ Verified:
 - App Review Guidelines 3.1.1 includes game levels/premium content among content/features unlocked with IAP.
 - Non-consumable IAP is purchased once and does not expire/decrease with use.
 - Current App Store Connect guidance says the first IAP of a given type must be submitted with a new app version; after approval, additional IAPs of that type can be submitted without a new app version when conditions are met.
+- Current Guideline 4.7 expressly permits certain software not embedded in the app binary—such as HTML5/JavaScript mini apps or mini games, streaming games, chatbots, plug-ins, and downloadable games in specified emulator apps—subject to additional rules. It does **not** by itself establish that Loka's custom downloaded rule IR is an approved category.
 
-The executable-code/download policy must be rechecked at launch; the current strategy keeps cartridge downloads declarative/portable-data driven rather than arbitrary downloaded app code.
+Architectural consequence:
+
+- do not infer App Review approval merely because LokaScript is interpreted rather than native code;
+- keep downloadable Story rules bounded to capabilities already shipped in the app;
+- treat the exact representation/review posture as ADR-035's release evidence gate and recheck the then-current guideline before submission.
 
 ## 6. Google Play
 
@@ -134,7 +139,77 @@ Architectural consequence:
 - keep billing provider/region policy behind adapters;
 - reverify current Google policy immediately before implementation/submission instead of hardcoding “Play Billing is always mandatory everywhere.”
 
-## 7. Source freshness rule
+
+
+## 7. Classic MUD architecture evidence
+
+This pass reviewed classic codebases as clean-room architectural prior art, not as dependencies.
+
+Primary references:
+
+- preserved TinyMUD 1.5.4.1 source: <https://github.com/josefcub/tinymud154>
+- preserved DikuMUD source lineage: <https://github.com/sneezymud/dikumud>
+- DikuMUD Gamma archive: <https://github.com/DikuMUDOmnibus/DikuMUD-Gamma>
+- CircleMUD Builder's Manual: <https://www.circlemud.org/pub/CircleMUD/3.x/uncompressed/current/doc/building.pdf>
+- CircleMUD builder guidance: <https://www.circlemud.org/cdp/building/building-1.html>
+- tbaMUD/Circle lineage source used selectively for later comparison: <https://github.com/tbamud/tbamud>
+
+Verified useful observations:
+
+- Diku/Circle separate prototype definitions from runtime mobile/object instances.
+- Circle zone/reset data acts as a compact population/composition recipe linking rooms, mobiles, objects, equipment/containment, and door state.
+- Diku mobile behavior demonstrates strong emergent value from a small orthogonal behavior vocabulary.
+- Diku special procedures provide large local expressive power but do so through arbitrary callbacks that Loka should replace with typed ReactionRule/capability semantics.
+- Circle's extra descriptions demonstrate the value of lightweight targetable environmental detail.
+- Circle shops separate provider/catalog/trade policy/price/schedule concerns enough to inspire a typed Commerce composite.
+- TinyMUD's compact relational model makes location/containment, exits, ownership/control, locks, and target matching first-class.
+- TinyMUD builder commands operate at semantic world intent rather than generic storage-field mutation.
+
+See [20-classic-mud-lessons.md](20-classic-mud-lessons.md) for the design review and [21-composable-world-primitives.md](21-composable-world-primitives.md) for normative adaptations.
+
+
+
+## 8. Jev / System One semantic-assessor candidate
+
+Jev is a newly released early-access model from TypeSafe AI and is **not** a Loka
+dependency or certification authority.
+
+Official references reviewed 2026-09-19:
+
+- TypeSafe introduction: <https://typesafe.ai/blog/introducing-system-one-models-and-jev>
+- TypeSafe workflow evaluations: <https://evals.typesafe.ai/>
+- TypeSafe overview: <https://typesafe.ai/>
+
+TypeSafe describes Jev as a System One model that takes structured/unstructured program
+state and returns typed probabilistic decisions rather than open-ended generated prose.
+Their published workflow examples emphasize decomposing automation into narrow typed
+questions plus deterministic code.
+
+This shape is potentially useful for Loka's high-volume **semantic triage**, for example:
+
+- route suspicious traces to the right deeper rubric;
+- prioritize quests/scenes/areas for full semantic review;
+- classify likely narrative/mechanical/infrastructure anomalies;
+- deduplicate reviewer findings;
+- rank coverage gaps for further testing.
+
+The architecture does **not** rely on current provider performance/cost/latency claims.
+
+Rules for any later Jev integration:
+
+- held-out local evaluation before adoption;
+- exact model/question-schema/threshold identity in evidence;
+- no sole-gold-label evaluation by the same model;
+- confidence-gated use with deterministic/full-review fallback;
+- no ability to waive deterministic gates, alter candidate content, establish reviewer
+  independence, or publish;
+- provider unavailability must make review slower/more conservative, never weaker.
+
+A conventional high-reasoning LLM remains more appropriate for open-ended narrative
+critique, causal consistency, adversarial scenario invention and explanations. Jev-style
+typed assessment and full semantic review are complementary, replaceable layers.
+
+## 9. Source freshness rule
 
 These external facts can change faster than the Loka architecture.
 

@@ -106,10 +106,12 @@ Defense in depth:
 - step counter;
 - effect/query quotas;
 - memory/collection limits;
-- timeout outer guard;
+- non-semantic host wall-time kill switch as an outer safety guard;
 - result size;
 - telemetry;
 - certification fuzz suite.
+
+Deterministic step/query/memory/effect budgets define normal script failure semantics. The host wall-time guard exists only to protect a device/process from implementation failure or pathological behavior and MUST NOT become a cartridge-visible cross-host timing rule. If it fires during certified supported input, treat that as a runtime/conformance fault.
 
 If public scripting arrives, conduct a dedicated security review and consider additional OS-process isolation even with the custom interpreter.
 
@@ -139,19 +141,25 @@ On BEAM, any native long/heavy kernel operations must not block normal scheduler
 
 ## 8. Content integrity
 
-Compiled cartridge/deployment has canonical hash and signature/attestation metadata.
+Compiled cartridge/deployment has a canonical **semantic content/deployment hash** plus a separate release/signature/attestation envelope.
 
 Published release stores:
 
 - source revision;
 - compiler version;
 - kernel/schema versions;
-- artifact hash;
-- deployment hash;
+- semantic cartridge/content hash;
+- deployment/adaptation hash where applicable;
 - certificate hash;
+- signing/attestation metadata;
+- optional package/transport hash for exact downloadable bytes;
 - build identity.
 
+Certificate/signature/reference material is not part of the semantic hash domain it attests; otherwise certification/signing would create a self-referential hash cycle.
+
 Runtime/local client refuses artifact/hash mismatch.
+
+Package ingestion is hostile-input handling even for first-party distribution. Download/install code MUST enforce declared and actual size limits, bounded decompression, path normalization/no archive traversal, duplicate-path rules, media/type validation where relevant, and atomic staging-before-activation. A signed package is not allowed to bypass parser/resource limits.
 
 ## 9. Artifact signing trust and key rotation
 
@@ -159,7 +167,7 @@ Signed cartridge/catalog artifacts MUST include:
 
 - signing key ID;
 - signature algorithm/version;
-- artifact/content hash;
+- semantic artifact/content hash;
 - signed metadata version.
 
 The mobile app ships or securely obtains a trusted public-key set.

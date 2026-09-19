@@ -1,7 +1,7 @@
 # Loka v3 Rebuild Specification Packet
 
-**Status:** Draft 0.2 — master architecture specification under iterative review; not implementation authorization  
-**Date:** 2026-09-18  
+**Status:** Draft 0.3 — spec-integrity audit candidate; still awaiting independent adversarial review/acceptance; not implementation authorization  
+**Date:** 2026-09-19  
 **Source system:** `lorecrafting/lokacore`  
 **Strategic parent:** `docs/product/CARTRIDGE-ROADMAP.md`  
 **Purpose:** define a clean-room rebuild of Loka as one mobile product with two strictly separated authority modes—offline-first **Story Mode** and BEAM-authoritative **Realm Mode**—while preserving portable cartridge semantics where reuse is valuable and removing transitional Lokacore architecture.
@@ -45,6 +45,58 @@ When code and this packet disagree in the future, accepted amendments and tests 
 
 These axes interact but are not aliases.
 
+### Canonical gameplay pipeline
+
+Every authoritative gameplay mutation MUST converge on the same semantic decision/commit spine.
+
+Player/agent input uses ActionInvocation; trusted autonomous world work uses a typed authority-internal Command origin:
+
+```text
+touch/text/player-agent/test-bot
+  -> ActionInvocation
+  -> authority re-resolves + revalidates
+  -> typed semantic Command
+                         \
+scheduler / durable job  \
+BehaviorIntent arbitration -> typed internal Command
+Population reconciliation  /
+world-event/system trigger /
+                         /
+  -> DecisionCoordinator / portable decision layer
+  -> StateDelta + DomainEvents + Effects
+  -> authoritative commit + receipt/outbox
+  -> committed state
+  -> GameView projection
+  -> client presentation
+```
+
+Adapters MAY collapse implementation steps, but they MUST NOT collapse the semantic boundaries. In particular:
+
+- shared UI/text/player-agents/test bots emit `ActionInvocation`, not authority-internal Commands;
+- schedulers/autonomous Behaviors/population reconciliation/world-event machinery may originate only registered authority-internal Commands with stable causation/idempotency and must use the same decision/commit path;
+- authoritative same-domain mutations are represented by `StateDelta`, not hidden Effects;
+- DomainEvents describe facts produced by a decision; they are not transport messages;
+- Effects cross a post-decision boundary or request explicitly typed follow-up work; they are not an alternate state-write path;
+- GameView is a semantic projection, not a dump of persistence structs.
+
+### Authority vocabulary
+
+Use these terms consistently:
+
+- **authority host** — the environment running authoritative gameplay: local Story authority or BEAM Realm authority;
+- **GameSession adapter** — the UI-facing Story/Realm session abstraction; `LocalStorySession` delegates to local authority while `RemoteRealmSession` delegates over transport and is never Realm authority;
+- **mutation owner** — the serialized owner of one mutable state domain, such as `LocalInstanceAuthority`, `WorldInstance`, or `ZoneShard`;
+- **durable store** — SQLite/PostgreSQL persistence for committed state; durability does not make the database a second decision authority;
+- **state scope** — who owns a fact/progression value: player, party, instance, or realm;
+- **audience** — who may perceive/interact with a projection/entity;
+- **capacity owner/scope** — who competes for a scarce resource or service;
+- **service aggregate/provider** — the domain object whose queue/capacity is modeled; it does **not** automatically imply a dedicated OTP process;
+- **authority revision** — concurrency/version token for committed authoritative state;
+- **idempotency scope** — stable logical gameplay lineage used to deduplicate retryable mutations; it outlives session/process/shard ownership so a handoff cannot mint a fresh mutation identity;
+- **projection sequence/view token** — client-facing ordering/freshness token for one projected stream. It is not necessarily the authority revision.
+
+State scope, audience, capacity scope, and physical authority placement are deliberately independent. A player-scoped quest in a shared Realm zone, for example, does not imply that the player becomes a new mutation authority.
+
 Examples:
 
 - Story Mode normally runs an `offline_private` profile built with target `story`.
@@ -75,14 +127,14 @@ A released cartridge MUST remain playable without an AI model or authoring facto
                         /           \
                        /             \
           LocalStorySession       RemoteRealmSession
-          portable kernel          Phoenix transport
-          local SQLite                  |
-                                      BEAM
-                              WorldInstance / ZoneShard
+                 |                  Phoenix transport
+       LocalInstanceAuthority            |
+          portable rules                BEAM
+          local SQLite          WorldInstance / ZoneShard
                                       |
                               DecisionCoordinator
                                /              \
-                    portable kernel      server-only
+                    portable rules       server-only
                                          Elixir rules
                                \              /
                                 StateDelta/events/effects
@@ -98,9 +150,9 @@ Astra / Foundry / human terminal / CI
  compiler -> Cartridge Lab -> certificate
 ```
 
-The mobile shell is shared; **authority is not**.
+The mobile shell and `GameSession` interface are shared; **authority is not**.
 
-Story Mode commits locally. Realm Mode sends commands to BEAM and never treats the embedded local kernel as authority.
+`LocalStorySession` is an adapter over `LocalInstanceAuthority`, which resolves/commits Story play locally. `RemoteRealmSession` is a transport adapter only: it sends ActionInvocations to BEAM, where `WorldInstance`/`ZoneShard` owns Realm mutation authority. It never treats any embedded/local rules execution as Realm authority.
 
 The transport, authoring, runtime, domain, and persistence planes MUST remain separable.
 
@@ -119,14 +171,14 @@ The rebuild MUST use the strengths of Elixir/OTP intentionally:
 
 The rebuild MUST NOT turn every room, item, quest, or NPC into a GenServer merely because the BEAM makes processes cheap.
 
-The online authority/orchestration layer SHOULD remain idiomatic Elixir/OTP. Rules that must execute both offline and online SHOULD live in the shared portable deterministic kernel; server-only orchestration and capability adapters remain Elixir.
+The online authority/orchestration layer SHOULD remain idiomatic Elixir/OTP. Rules that must execute both offline and online MUST follow the portable deterministic semantic contract selected by R1. A shared native kernel is the working hypothesis; if R1 selects the documented dual-implementation fallback, golden conformance preserves the same contract. Server-only orchestration and capability adapters remain Elixir.
 
 ## 6. Working top-level decisions
 
-| Topic | Draft v0.2 decision |
+| Topic | Draft v0.3 decision |
 |---|---|
 | Online language/runtime | Elixir on BEAM/OTP |
-| Portable offline rules | Shared deterministic kernel; Rust is the working choice pending a mandatory cross-platform spike |
+| Portable offline rules | One deterministic portable semantic contract; a shared Rust kernel is the working hypothesis pending R1, with dual-implementation golden conformance as the fallback |
 | Server UI/API | Phoenix |
 | Mobile | One React Native / Expo app with strict Story Mode (local authority) and Realm Mode (remote BEAM authority) session boundaries |
 | Persistence | PostgreSQL for online/platform durability when those phases arrive; offline Story saves use local SQLite |
@@ -141,7 +193,7 @@ The online authority/orchestration layer SHOULD remain idiomatic Elixir/OTP. Rul
 | Scripting | declarative capabilities first; restricted Elixir-syntax LokaScript interpreter as escape hatch |
 | Builder | canonical typed Builder API; MCP/terminal/CLI are adapters |
 | Realm transport protocol | one machine-readable external schema with generated TypeScript/Elixir validation, introduced with Realm Mode |
-| Release | exact certified cartridge hash |
+| Release | exact certified semantic cartridge/deployment hash |
 | AI | author/reviewer/tool client, never runtime authority |
 
 ### Intentionally unresolved evidence gates
@@ -160,22 +212,24 @@ Read in this order:
 1. [Core Principles and Non-Goals](01-core-principles.md)
 2. [BEAM Runtime Architecture](02-beam-runtime-architecture.md)
 3. [Domain State and Persistence](03-domain-state-persistence.md)
-4. [Commands, Events, Effects, and Protocol](04-command-event-effect-protocol.md)
+4. [Action Invocations, Commands, State Deltas, Events, Effects, and Protocol](04-command-event-effect-protocol.md)
 5. [Cartridges, Content, and Capabilities](05-cartridges-content-capabilities.md)
 6. [Quests, Dialogue, Actions, and Scripting](06-quests-dialogue-actions-scripting.md)
-7. [Offline Storypacks and the Path to the MMORPG](07-offline-storypacks-to-mmo.md)
-8. [Builder API and AI Factory](08-builder-api-ai-factory.md)
-9. [Cartridge Lab and Certification](09-cartridge-lab-certification.md)
-10. [Mobile, Commerce, and Release](10-mobile-commerce-release.md)
-11. [Security, Observability, and Operations](11-security-observability-operations.md)
-12. [Evennia Design Review](12-evennia-lessons.md)
-13. [Lokacore Feature Inventory](13-lokacore-feature-inventory.md)
-14. [Implementation Plan](14-implementation-plan.md)
-15. [Acceptance Scenarios](15-acceptance-scenarios.md)
-16. [Architecture Decision Register](16-decision-register.md)
-17. [Research Baseline and External References](17-research-baseline.md)
-18. [Specification Review Record](18-review-record.md)
-19. [Quest Sharing, Phasing, Instancing, and Scarce World Services](19-quest-sharing-instancing-capacity.md)
+7. [Quest Sharing, Phasing, Instancing, and Scarce World Services](19-quest-sharing-instancing-capacity.md)
+8. [Composable World Primitives and Builder Expressivity](21-composable-world-primitives.md)
+9. [Offline Storypacks and the Path to the MMORPG](07-offline-storypacks-to-mmo.md)
+10. [Builder API and AI Factory](08-builder-api-ai-factory.md)
+11. [Cartridge Lab and Certification](09-cartridge-lab-certification.md)
+12. [Mobile, Commerce, and Release](10-mobile-commerce-release.md)
+13. [Security, Observability, and Operations](11-security-observability-operations.md)
+14. [Evennia Design Review](12-evennia-lessons.md)
+15. [Classic MUD Design Review](20-classic-mud-lessons.md)
+16. [Lokacore Feature Inventory](13-lokacore-feature-inventory.md)
+17. [Implementation Plan](14-implementation-plan.md)
+18. [Acceptance Scenarios](15-acceptance-scenarios.md)
+19. [Architecture Decision Register](16-decision-register.md)
+20. [Research Baseline and External References](17-research-baseline.md)
+21. [Specification Review Record](18-review-record.md)
 
 ## 8. Specification authority map
 
@@ -197,6 +251,7 @@ Implementation MUST conform to:
 - `10-mobile-commerce-release.md`
 - `11-security-observability-operations.md`
 - `19-quest-sharing-instancing-capacity.md`
+- `21-composable-world-primitives.md`
 - accepted decisions in `16-decision-register.md`
 
 ### Normative gates and sequencing
@@ -209,6 +264,7 @@ These define what evidence is required before later phases may depend on earlier
 ### Informative/reference evidence
 
 - `12-evennia-lessons.md`
+- `20-classic-mud-lessons.md`
 - `13-lokacore-feature-inventory.md`
 - `17-research-baseline.md`
 - `18-review-record.md`

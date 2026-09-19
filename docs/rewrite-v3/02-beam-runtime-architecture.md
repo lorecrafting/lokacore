@@ -23,7 +23,7 @@ loka/
 
 This exact split MAY be adjusted after a compile-dependency spike, but dependency rules are normative:
 
-- `loka_core` depends only on portable/domain contracts and the narrow kernel adapter.
+- `loka_core` depends only on portable/domain contracts and the narrow portable-rules adapter/port selected by R1.
 - `loka_content` depends on `loka_core`; it owns compile-time cartridge definitions/registries, not runtime authority.
 - `loka_store` depends on `loka_core`; it implements persistence ports and contains no game rules.
 - `loka_platform` depends on `loka_core` plus persistence/platform adapters; it owns account/catalog/entitlement/purchase-restore application rules, not world simulation.
@@ -31,7 +31,7 @@ This exact split MAY be adjusted after a compile-dependency spike, but dependenc
 - `loka_builder` depends on content/compiler/Lab contracts and may orchestrate runtime test hosts; production runtime MUST NOT depend on builder.
 - `loka_web` depends inward on application/runtime/builder interfaces and is an external transport adapter only.
 
-`loka_core` MUST NOT depend on Phoenix, Ecto, filesystem, network, or runtime processes. Portable rule semantics that must execute offline SHOULD live in or call the shared kernel behind a narrow adapter.
+`loka_core` MUST NOT depend on Phoenix, Ecto, filesystem, network, or runtime processes. Portable rule semantics that must execute offline MUST cross the narrow portable-rules port selected by R1; whether that port reaches one shared native implementation or a conformant host implementation is an implementation decision, not a domain dependency.
 
 `loka_store` may depend on core/domain data contracts but MUST NOT contain game rules.
 
@@ -67,7 +67,7 @@ All dynamic processes MUST be addressable by stable IDs through Registries rathe
 
 ## 3. Offline versus online authority
 
-The BEAM runtime described in this document is the **online authority host**. Offline private cartridges use a local authority shell and the same portable kernel, as specified in [07 — Offline Storypacks and the Path to the MMORPG](07-offline-storypacks-to-mmo.md).
+The BEAM runtime described in this document is the **online authority host**. Offline private cartridges use a local authority shell and the same portable semantic contract through the R1-selected implementation strategy, as specified in [07 — Offline Storypacks and the Path to the MMORPG](07-offline-storypacks-to-mmo.md).
 
 Do not attempt to embed a BEAM node in the mobile app merely to preserve architectural symmetry.
 
@@ -145,25 +145,26 @@ Why:
 - NPC schedules can be managed collectively;
 - a crashed instance can reload from durable state.
 
-The instance process routes commands through the shared DecisionCoordinator. Portable rules execute through the shared kernel; server-only Realm capabilities execute as pure Elixir rule evaluators. Both return typed StateDelta/DomainEvent/Effect proposals into the same decision and commit boundary. Neither path may persist directly.
+The instance process routes commands through the shared DecisionCoordinator. Portable rules execute through the R1-selected portable-rules implementation/adapter; server-only Realm capabilities execute as pure Elixir rule evaluators. Both return typed StateDelta/DomainEvent/Effect proposals into the same decision and commit boundary. Neither path may persist directly.
 
 It SHOULD NOT block on slow external I/O while holding command serialization. Persistence commits should be bounded and synchronous where correctness requires; non-authoritative notifications are effects.
 
-### Command lifecycle
+### Action/command lifecycle
 
 ```text
-1 client command arrives
-2 gateway authenticates + validates protocol
-3 command routed to owning WorldInstance
-4 instance checks command id / expected revision
-5 DecisionCoordinator evaluates portable + server-only rules into one proposal
-6 store transaction commits affected durable records + command receipt + effect outbox
-7 in-memory state advances to committed revision
-8 response/notifications are emitted
-9 durable outbox effects are dispatched/retried
+1 client ActionInvocation arrives
+2 gateway authenticates + validates transport/protocol
+3 invocation is routed to the owning WorldInstance/ZoneShard
+4 authority verifies actor control, re-resolves the current ActionSet, and constructs the typed Command
+5 authority checks idempotency identity and relevant expected authority revision
+6 DecisionCoordinator evaluates portable + server-only rules into one proposal
+7 store transaction commits affected durable records + command receipt + effect outbox
+8 in-memory state advances to committed revision
+9 response/projection notifications are emitted
+10 durable outbox effects are dispatched/retried
 ```
 
-The exact transaction strategy may batch entity changes, but step 6 must prevent a crash from producing half a logical action.
+The exact transaction strategy may batch entity changes, but step 7 must prevent a crash from producing half a logical action.
 
 ## 6. Why not one GenServer per entity by default
 
@@ -197,8 +198,9 @@ Cross-shard movement MUST use an explicit handoff protocol:
 2. durable transfer intent is recorded;
 3. destination accepts/imports entity state;
 4. ownership pointer commits;
-5. source removes local authority;
-6. recovery reconciles incomplete transfers.
+5. command-receipt/idempotency continuity is preserved so a lost-response retry cannot become fresh work merely because routing now reaches the destination owner;
+6. source removes local authority;
+7. recovery reconciles incomplete transfers.
 
 Do not rely on “send two PubSub messages and hope.”
 
@@ -287,7 +289,9 @@ For events that MUST happen even across restart:
 - paid construction completion;
 - scheduled world event with side effects.
 
-Persist job identity, due logical/wall time, payload, status, idempotency key.
+Persist job identity, explicit `time_basis`, due value, payload, status, and idempotency key.
+
+The time basis is part of job semantics (for example logical play time, accepted real-elapsed Story time, or an authoritative Realm/service clock). A job processor must not infer its clock source from host environment or deployment mode.
 
 ### C. Ephemeral timers
 

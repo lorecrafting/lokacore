@@ -33,6 +33,27 @@ Loka SHOULD grow a large vocabulary of reusable primitives:
 
 Complexity belongs in **what can be composed**, not in having many contradictory ways to mutate the same state.
 
+### P2a. Closed semantics, open composition
+
+Builders SHOULD have extremely broad expressive power through composition while engine authority semantics remain closed and versioned.
+
+Cartridge content may define and combine:
+
+- typed facts/events;
+- policies and target selectors;
+- Actions;
+- ReactionRules;
+- Behaviors/state machines;
+- population/encounter plans;
+- commerce/services;
+- dialogue/scenes/quests/world events;
+- templates/archetypes;
+- bounded LokaScript.
+
+Content MUST NOT gain expressivity by adding hidden persistence paths, arbitrary host callbacks, or a second mutation authority.
+
+The layered primitive model is normative in [21 — Composable World Primitives and Builder Expressivity](21-composable-world-primitives.md).
+
 ### P3. Content is not code by default
 
 A new storyline SHOULD normally consist of cartridge source, assets, and tests.
@@ -43,7 +64,7 @@ If the author repeatedly needs a new behavior, the factory SHOULD propose a reus
 
 A touch action such as “Inspect altar” and a text command such as `look altar` MUST resolve to the same internal action/command contract.
 
-The server resolves currently available actions. The client is not the rules authority.
+The active authority resolves currently available actions. In Story Mode that authority is local; in Realm Mode it is the BEAM server. Presentation code is never the rules authority.
 
 ## 2. Architecture principles
 
@@ -56,7 +77,7 @@ Examples:
 - one private world instance process owns its instance state;
 - one zone shard owns shared-zone state;
 - a session process owns connection-local ephemeral state;
-- PostgreSQL owns durable committed state.
+- SQLite/PostgreSQL durably record committed state for their authority host; persistence is not an independent gameplay decision authority.
 
 Two independent writers MUST NOT race on the same logical state without an explicit coordination/transaction protocol.
 
@@ -72,15 +93,18 @@ GenServer.handle_call(command)
         v
 Domain.decide(state, command, env)
         |
-        +--> new state
+        +--> StateDelta
         +--> domain events
         +--> effects
         |
         v
 transactional commit
+        |
+        v
+adopt committed state
 ```
 
-Online, the BEAM process is the serialization/fault-containment shell. Offline, a local serialized authority shell provides the same command/commit contract. The rule function/kernel is replayable in both.
+Online, the BEAM process is the serialization/fault-containment shell. Offline, a local serialized authority shell provides the same command/commit contract. The rule function/kernel is replayable in both and MUST NOT irreversibly advance hidden authoritative state before commit succeeds.
 
 ### A3. No direct persistence from domain rules
 
@@ -98,9 +122,11 @@ Transport adapters translate internal results into protocol messages.
 
 The following MUST have machine-readable source-of-truth schemas:
 
-- mobile commands/messages;
+- host-neutral ActionInvocation and GameView contracts;
+- portable semantic Commands, StateDelta, DomainEvents, and Effects;
+- Realm transport messages/envelopes when Realm Mode is introduced;
 - Builder API operations/results/errors;
-- cartridge manifest;
+- cartridge/deployment/campaign manifests;
 - content kinds;
 - capabilities/components;
 - policies/conditions;
@@ -155,7 +181,7 @@ Presentation-only animation/audio calculations may use ordinary platform floatin
 
 ### A9. Idempotency at retryable boundaries
 
-Client commands, reward effects, purchase reconciliation, scheduled jobs, and promotion operations MUST have stable IDs or idempotency keys.
+Retryable ActionInvocations/Commands, reward operations/effects, purchase reconciliation, scheduled jobs, Builder mutations, and promotion operations MUST have stable IDs or idempotency keys. Reuse of an idempotency identity with a different semantic payload MUST fail as an integrity conflict.
 
 Retries MUST NOT duplicate:
 
@@ -230,12 +256,14 @@ Runtime rules MUST NOT chase deep prototype inheritance graphs.
 
 ### C4. State scope is explicit
 
-Every stateful feature MUST declare or derive one of:
+Every scoped gameplay truth/progression feature MUST declare or derive one of:
 
 - player;
 - party;
 - instance;
 - realm.
+
+Scope answers **who owns the state**, not which process/table physically hosts it, who can see it, or who contends for a scarce resource. Those are separate contracts.
 
 No implicit “global because it worked in a solo test.”
 

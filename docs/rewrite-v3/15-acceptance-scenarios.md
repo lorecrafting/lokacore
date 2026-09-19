@@ -6,7 +6,7 @@ They are intended to seed automated tests, Cartridge Lab repros, architecture re
 
 Scenario IDs are stable.
 
-## A. Portable kernel and determinism
+## A. Portable rules and determinism
 
 ### DET-01 — Same command, same state
 
@@ -19,16 +19,13 @@ Given identical:
 - RNG state;
 - command
 
-the kernel returns canonically identical result across repeated runs.
+the portable rules layer returns a canonically identical result across repeated runs.
 
 ### DET-02 — Cross-host equivalence
 
-Run the same fixture through:
+Run the same fixture through every host implementation/adapter required by the R1-selected portable-execution strategy.
 
-- direct kernel;
-- BEAM/Rustler adapter;
-- iOS binding;
-- Android binding.
+For a shared native kernel this includes direct/native, BEAM, iOS, and Android host paths. For the documented dual-implementation fallback, compare the accepted Elixir and mobile implementations instead.
 
 Domain-result hash MUST match.
 
@@ -62,7 +59,7 @@ Rule-critical arithmetic at rounding/threshold boundaries produces identical res
 
 No platform floating-point difference changes quest/combat/economy outcome.
 
-### DET-09 — Kernel proposal is non-mutating before commit
+### DET-09 — Portable-rules proposal is non-mutating before commit
 
 Decision returns a proposal/delta.
 
@@ -72,13 +69,13 @@ Subsequent decision observes the original committed state.
 
 ### DET-10 — Post-commit in-memory apply failure
 
-Persistence commits delta, then injected kernel-state apply failure occurs.
+Persistence commits the delta, then an injected in-memory authority/portable-state adoption failure occurs.
 
 Authority restarts/reloads committed state and does not execute command twice.
 
-### DET-11 — Kernel panic boundary
+### DET-11 — Portable implementation fault boundary
 
-Injected native failure cannot silently produce committed game state.
+An injected portable-rules implementation failure—including a native panic when the R1-selected strategy uses native code—cannot silently produce committed game state.
 
 Host returns failure/restarts as applicable.
 
@@ -151,6 +148,12 @@ Save still opens with v1.2 or performs explicit certified migration.
 Attempt to delete v1.2 artifact while save requires it.
 
 Deletion blocked or save migration/deletion explicitly required.
+
+### OFF-13 — Resume-time advancement retry
+
+A real-elapsed Story save resumes after an absence. The authority samples/clamps elapsed time and commits a resume-time advancement input, then the app crashes before presenting the updated view.
+
+Restart/retry does not apply the same elapsed interval twice; scheduled jobs/deadlines observe exactly one accepted advancement.
 
 ## C. Containment and inventory
 
@@ -266,7 +269,7 @@ Realm-scoped event intentionally changes all eligible players/world state; certi
 
 Player discovers a hidden shrine whose prerequisite facts are satisfied.
 
-The quest activates without an NPC giver, records the discovery event once, appears/reveals according to its activation mode, and can resolve automatically without a turn-in NPC.
+Before the discovery trigger there is no QuestInstance. The activation index identifies the definition as a candidate, the quest activates without an NPC giver, records the discovery event once, and its journal visibility follows the separate reveal/visibility policy. It can resolve automatically without a turn-in NPC.
 
 ### QST-16 — Multiplayer kill credit
 
@@ -350,7 +353,7 @@ A quest outcome in ZoneShard A produces an idempotent effect intended for a Real
 
 Crash/failure occurs after local outcome commit but before remote acknowledgement.
 
-Outbox/reconciliation retries the remote operation exactly once without rolling back or duplicating the local quest outcome.
+Outbox delivery may occur more than once. Every retry carries the same stable effect/idempotency identity; the Realm-wide service applies the authoritative consequence at most once and returns/reconstructs the same acknowledgement. If retry policy reaches terminal failure, the required reconciliation path remains durable and visible rather than silently dropping the consequence. The local quest outcome is not duplicated or implicitly rolled back.
 
 ### QST-27 — Area unlock preserves reachability
 
@@ -363,6 +366,18 @@ Static graph checks plus branch simulation prove the player is not trapped away 
 The Lab forks immediately before a major choice.
 
 Its comparison report correctly identifies differing facts, access, NPC states, dialogue/action sets, spawned actors, and follow-up quests.
+
+### QST-29 — Prerequisite changes after activation
+
+A quest activates while prerequisite fact A is true. Later A becomes false for an unrelated world reason.
+
+The active QuestInstance does not silently disappear/deactivate. It changes lifecycle only if the quest explicitly declares a sustain/failure/branch rule for that condition.
+
+### QST-30 — Pre-activation events do not leak into progress
+
+The player kills a target before accepting a normal event-observation quest, then activates the quest.
+
+The old kill event does not retroactively advance the new QuestInstance. A quest that intends to credit already-satisfied state must use an explicit current-state or retroactive/history operator.
 
 ## E. Dialogue
 
@@ -437,7 +452,7 @@ Local Story authority or BEAM Realm authority re-resolves current ActionSet and 
 
 ### ACT-10 — Stale action invocation
 
-Client submits an invocation from GameView revision 41 after authority state advanced to revision 42 and the action is no longer legal.
+Client submits an invocation carrying stale view-freshness token V41 after relevant authoritative state changed and a newer GameView would carry V42. The action is no longer legal.
 
 Authority returns a typed stale/invalid-action result and fresh projection/resync guidance; it does not execute based solely on the old view.
 
@@ -447,17 +462,29 @@ Client retries the same invocation after losing the acknowledgement.
 
 The active authority maps it into the command/idempotency contract so a state-changing action cannot execute twice.
 
-### ACT-12 — Realm local-kernel forgery
+### ACT-12 — Realm local-rules forgery
 
 A modified one-app client computes a favorable local result for a Realm action and submits it.
 
 The server ignores local decision output and accepts only the ActionInvocation, then performs its own authoritative resolution/decision.
 
+### ACT-13 — Invocation retry after reconnect
+
+A Realm ActionInvocation commits, the acknowledgement is lost, and the client reconnects under a new session ID before retrying the same invocation ID.
+
+The authority derives the same semantic Command/idempotency identity and returns the prior result. The action executes once; ephemeral session identity does not mint a new mutation.
+
+### ACT-14 — Invocation retry after authority handoff
+
+A Realm ActionInvocation commits on ZoneShard A and causes the controlled character to hand off to ZoneShard B. The acknowledgement is lost after commit/ownership transfer.
+
+Retrying the same invocation ID through normal post-handoff routing reaches/reconstructs the original receipt and returns the prior result. ZoneShard B MUST NOT derive a fresh mutation identity from its new ownership and execute the action a second time.
+
 ## G. Scripting
 
 ### SCR-01 — Allowed binding
 
-Portable script emits typed effect and works identically offline/online.
+Portable script returns the registered typed StateDelta/DomainEvent/Effect result and behaves identically offline/online.
 
 ### SCR-02 — Filesystem escape
 
@@ -494,6 +521,12 @@ Same RNG state gives same script branch offline/online.
 ### SCR-09 — Server-only binding in offline cartridge
 
 Compilation fails portability gate.
+
+### SCR-10 — Wall-time guard is not game semantics
+
+A certified script has deterministic step/query/resource limits and runs on both a slower supported mobile host and the server.
+
+Both hosts produce the same semantic result or deterministic budget error. A host wall-time kill switch cannot produce a normal cartridge-visible branch on one host while the other succeeds; if the outer guard fires, conformance/runtime health fails instead.
 
 ## H. Living world and time
 
@@ -569,6 +602,28 @@ Installed app lacks required renderer capability.
 
 Offline launch fails gracefully before save mutation; online catalog blocks/requests update.
 
+### CAR-08 — Hostile package structure
+
+A signed or unsigned cartridge archive attempts path traversal, duplicate-path confusion, or decompression far beyond declared resource limits.
+
+Install fails in staging before activation; no filesystem escape or unbounded extraction occurs.
+
+### CAR-09 — Published version cannot be rebound
+
+`story@1.2.0` is already published at hash H1.
+
+A different artifact H2 attempts publication under the same cartridge ID/version.
+
+Publication fails; a new semantic version/release is required.
+
+### CAR-10 — Certificate/signature does not change semantic identity
+
+A compiled candidate has semantic cartridge hash H.
+
+Certification produces a certificate referencing H and release signing adds signature/certificate metadata.
+
+The semantic cartridge hash remains H. An exact archive/package hash may differ after envelope material is added, and verification can prove both domains without circular hashing.
+
 ## J. Builder/AI
 
 ### BLD-01 — Revision conflict
@@ -605,6 +660,18 @@ Author agent cannot bypass failed certification.
 
 Same Builder operation via MCP and terminal produces same underlying workspace result.
 
+### BLD-08 — Lost Builder response retry
+
+A mutating Builder operation commits revision 43, but the caller loses the response and retries the same `operation_id` with its original expected revision 42.
+
+The Builder returns the original committed result/revision without applying the mutation again.
+
+### BLD-09 — Reused Builder operation ID with different payload
+
+An already committed `operation_id` is retried with different semantic input.
+
+The Builder returns an idempotency/integrity conflict and does not apply either a second mutation or a misleading replay response.
+
 ## K. Mobile protocol
 
 ### PROTO-01 — Generated parity
@@ -615,11 +682,11 @@ Elixir and TypeScript fixtures decode same message schema.
 
 Unsupported protocol version rejected with typed upgrade response.
 
-### PROTO-03 — Revision gap
+### PROTO-03 — Projection-sequence gap
 
-Client misses delta.
+Client misses a projected delta/message.
 
-Detects gap and resyncs snapshot.
+It detects a gap in its projection stream sequence and resyncs from a fresh GameView snapshot. Unrelated ZoneShard authority revisions do not by themselves create false client-gap detection.
 
 ### PROTO-04 — Stale local projection
 
@@ -653,15 +720,15 @@ Restart loads committed revision; retry returns receipt.
 
 ### ONL-04 — Outbox retry
 
-External durable effect fails transiently.
+External durable effect commits locally, delivery succeeds remotely, but the acknowledgement is lost.
 
-Retries with same idempotency key.
+The outbox may redeliver the effect with the same idempotency key. The receiver applies the authoritative consequence once, returns/reconstructs the prior acknowledgement on duplicate delivery, and the sender eventually marks the effect complete. Network delivery itself is not assumed to be exactly once.
 
 ### ONL-05 — World owner duplicate
 
-Injected split-brain/stale owner attempts write with stale revision.
+Injected split-brain/stale owner attempts to write after ownership moved.
 
-DB revision/ownership guard rejects.
+DB revision plus ownership/fencing-generation guard rejects the stale writer, including the case where its state revision would otherwise appear current.
 
 ### ONL-06 — Mailbox overload
 
@@ -771,7 +838,7 @@ Published gameplay unaffected.
 
 Restore staging environment from backup and prove known instance/catalog/entitlement state.
 
-### OPS-05 — Kernel version deploy
+### OPS-05 — Portable-rules/API version deploy
 
 Incompatible active instance is checkpointed/migrated/kept on compatible runtime according to explicit release policy; never silently reinterpret state.
 
@@ -779,7 +846,7 @@ Incompatible active instance is checkpointed/migrated/kept on compatible runtime
 
 ### ARCH-01
 
-Portable kernel has no network/filesystem/database imports.
+Portable gameplay rules have no network/filesystem/database side channels; all required host inputs cross explicit ports/contracts.
 
 ### ARCH-02
 
@@ -787,7 +854,7 @@ Core/domain layer cannot import Phoenix/Ecto/web adapters.
 
 ### ARCH-03
 
-Web layer is only external adapter; game rules cannot import serializers/socket structs.
+`loka_web` is an external Realm transport adapter only; game rules cannot import serializers/socket structs.
 
 ### ARCH-04
 
@@ -915,6 +982,12 @@ Receipt claims processed command but durable response reference is missing/corru
 
 Runtime raises an integrity fault/resync path rather than re-executing mutation.
 
+### RECEIPT-03 — Reused idempotency identity with different command
+
+A previously committed Command ID/invocation identity is submitted again with a different semantic command payload.
+
+The stored semantic-command digest does not match. Runtime rejects with an idempotency/integrity conflict; it neither executes the new payload nor pretends the old response belongs to the different request.
+
 ### PLATFORM-01 — Web adapter cannot grant entitlement directly
 
 Attempt to mutate entitlement from Phoenix controller/channel without going through `loka_platform` application service/policy.
@@ -948,11 +1021,11 @@ The Story session commits/closes before RemoteRealmSession becomes active. No wo
 
 The reverse transition has the same guarantee.
 
-### MODE-04 — Local kernel cannot authorize Realm state
+### MODE-04 — Local rules execution cannot authorize Realm state
 
-A modified client invokes the embedded local kernel while connected to Realm Mode and fabricates favorable results.
+A modified client invokes whatever Story portable-rules implementation is embedded locally while connected to Realm Mode and fabricates favorable results.
 
-BEAM ignores those results; only validated Realm commands and server decisions can mutate Realm state.
+BEAM ignores those results; only server-resolved ActionInvocations and committed Realm decisions can mutate Realm state.
 
 ### MODE-05 — Shared GameView parity
 
@@ -982,7 +1055,7 @@ Ordinary Story Mode launch/play remains functional.
 
 An app update changes Realm protocol/client features but leaves a supported Story save installed.
 
-The Story save still opens through the documented kernel/rule-IR compatibility path.
+The Story save still opens through the documented portable-rules/rule-IR compatibility path.
 
 ### MODE-10 — Optional Story account, required Realm account
 
@@ -1014,7 +1087,7 @@ Original cartridge hash remains unchanged; promotion creates a new deployment/ad
 
 ### BUILDTARGET-05 — Promotion surfaces multiplayer questions
 
-Promotion of a cartridge containing permanently killable quest giver, unique loot, and player-local door flags returns structured required decisions for respawn, contention, and scope before shared-area certification can pass.
+Promotion of a cartridge containing a permanently killable quest giver, unique loot, and player-local access facts returns structured required decisions for respawn, contention, and scope before shared-area certification can pass.
 
 ### ENTITLEMENT-01 — Local ownership is not Realm authority
 
@@ -1107,11 +1180,11 @@ Two Realm players submit requests for the only available slot on a shared servic
 
 Exactly one order receives that slot; the other is queued/rejected according to policy.
 
-### SERVICE-02 — ServiceJob input escrow
+### SERVICE-02 — Same-authority ServiceJob input escrow
 
-Submitting a sword order moves required materials into escrow atomically with ServiceJob creation.
+When the requester inventory and service aggregate are owned by the same mutation authority, submitting a sword order moves required materials into escrow atomically with capacity allocation/ServiceJob creation.
 
-Crash at every boundary cannot duplicate or lose inputs.
+Crash at every boundary cannot duplicate or lose inputs. Cross-authority custody uses SERVICE-10 instead.
 
 ### SERVICE-03 — ServiceJob completion exactly once
 
@@ -1153,6 +1226,20 @@ A character/account attempts to monopolize the smithy with excessive queued orde
 
 Configured max-outstanding/admission policy is enforced transactionally.
 
+### SERVICE-10 — Cross-authority input escrow
+
+A realm-wide service reserves scarce capacity while a required item is still owned by another authority domain.
+
+Crashes/retries are injected before and after reservation, custody transfer, acknowledgement, and ServiceJob activation.
+
+Recovery yields exactly one of: the requester still owns the item with no active consuming job, or the service owns/proves custody with one valid job. The item is never duplicated, lost, or spendable under both authorities, and stale provisional capacity is eventually released/reconciled.
+
+### SERVICE-11 — Period boundary semantics
+
+Two otherwise identical services declare `1/day`, but one uses a rolling 24-hour window and the other uses a fixed world-calendar day.
+
+Requests near the boundary produce the intentionally different certified outcomes. Story and Realm hosts agree because the policy declares time basis, window kind, and anchor/calendar semantics rather than reading device/server local midnight implicitly.
+
 ### MIXED-01 — Personal quest + shared bottleneck + phased NPC
 
 One quest simultaneously uses:
@@ -1170,3 +1257,442 @@ All scopes remain independent and correct.
 A portable Story cartridge with local overnight smithing is promoted.
 
 Promotion explicitly chooses whether Realm deployment uses personal capacity, an instanced service, or a genuinely shared service queue and runs the matching certification gates.
+
+
+## X. Composable world primitives and classic-MUD conformance
+
+
+
+### ACTIONRECIPE-01 — Builder-defined verb without engine code
+
+A cartridge defines ring-bell as an ActionRecipe over an InspectableDetail.
+
+The action emits typed narration + temple/bell_rung DomainEvent and drives a ReactionRule/quest objective identically on Story and Realm hosts without adding a bespoke engine command.
+
+### ACTIONRECIPE-02 — Composed action cost/check/retry
+
+A search-rubble ActionRecipe consumes an allowed resource cost, performs a deterministic Check, and reveals a clue on success.
+
+Retry after an unknown response cannot charge twice or reveal twice; all operations are registered and bounded.
+
+### TARGET-01 — Deterministic target ambiguity
+
+Two visible targets share the same player-facing alias.
+
+Text input resolves to an explicit ambiguous result with stable candidates rather than random/first-source-order selection. An explicit ordinal/disambiguation then produces one ActionInvocation, which authority revalidates.
+
+### TARGET-02 — Touch and text target parity
+
+Touch selects a stable target ID while text resolves an alias to the same entity.
+
+Both paths resolve to the same semantic Command and outcome.
+
+### DETAIL-01 — Inspectable detail without entity inflation
+
+A room contains a mural InspectableDetail with aliases and a fact-dependent description.
+
+Look/examine can target it through TargetResolution, but it has no fake inventory/location identity and does not appear as a RuntimeEntity.
+
+### BARRIER-01 — Bidirectional barrier coherence
+
+North and south room faces reference one logical gate.
+
+Opening/locking/damaging the gate from either side changes one Barrier state and both projections agree after commit/reconnect.
+
+### AREA-01 — Authored area is not authority placement
+
+One AreaDefinition is hosted across two Realm ownership domains in a test deployment, while a second deployment hosts several small areas under one WorldInstance/ZoneShard.
+
+Content semantics do not depend on AreaDefinition == ZoneShard.
+
+### POP-01 — Population provenance-safe replenishment
+
+A PopulationPlan creates two wolves. One dies; a player drops an unrelated item and a quest mutates a nearby NPC.
+
+Reconciliation may replenish the owned wolf population but cannot delete/reset the unrelated item/NPC/quest state.
+
+### POP-02 — SpawnBundle explicit nesting
+
+A captain SpawnBundle creates equipment, inventory, and an item inside a container.
+
+All references are explicit and deterministic; there is no hidden previous-spawn context.
+
+### POP-03 — Scoped population cap
+
+The same population definition uses different player/instance/realm count scopes in certified fixtures.
+
+The cap is applied only in the declared scope; no accidental global max-existing behavior appears.
+
+### BEHAVIOR-01 — Deterministic intent conflict
+
+An NPC is simultaneously eligible to patrol east, flee west, and assist an ally.
+
+Registered arbitration semantics choose the same intent on every host independent of content file order.
+
+### BEHAVIOR-02 — No implicit wandering
+
+An NPC with no locomotion behavior remains in place indefinitely unless moved by another explicit rule.
+
+### REACT-01 — Typed reaction replaces special procedure
+
+A fact/event triggers a ReactionRule that changes guard behavior, emits narration, and opens an allowed action.
+
+The reaction uses typed consequences through the bounded decision chain and has no persistence/transport callback escape hatch.
+
+### REACT-02 — Reaction cycle bounded
+
+A pair of custom events/reactions would recursively trigger each other.
+
+Compile/runtime cycle/budget handling rejects or terminates deterministically without runaway event production.
+
+### NARRATE-01 — Actor/target/observer projection
+
+One social/interaction outcome produces different localized actor, target, and eligible-observer text from one NarrationSpec without changing game semantics.
+
+### COMMERCE-01 — Atomic immediate purchase
+
+A merchant with hours, admission policy, stock, price policy, and currency sells the final finite item.
+
+Payment + stock/item transfer commit once; concurrent/retried purchase cannot duplicate item or currency.
+
+### COMMERCE-02 — Merchant buys under policy/liquidity
+
+Player attempts to sell accepted, rejected, and over-liquidity items.
+
+SellAcceptancePolicy and LiquidityPolicy produce deterministic results without bespoke shopkeeper code.
+
+### COMMERCE-03 — Quest changes merchant world behavior
+
+Quest outcome changes a durable fact/reputation.
+
+Merchant catalog, price, or admission changes through derived policy/reaction semantics; the quest does not directly rewrite merchant internals.
+
+## Y. Quest scenes, dreams, cutscenes, and scripted world events
+
+
+
+### INSTANCEPLAN-01 — Interactive dream reuses generic instance semantics
+
+A quest launches a dream using SceneSequence + InstancePlan over precompiled rooms.
+
+The player may move, inspect, talk, fight or solve a puzzle between scene beats through
+ordinary Actions/Commands. Dream entities/population obey normal instance invariants and
+only declared exports survive teardown.
+
+### INSTANCEPLAN-02 — Same plan machinery supports non-dream dungeon
+
+A party dungeon and a player dream use the same InstancePlan lifecycle/entry/reconnect/
+teardown contracts with different content and audience policies.
+
+No dream-specific persistence or spatial authority path exists.
+
+### INSTANCEPLAN-03 — Runtime cannot invent uncertified room definitions
+
+A script/scene attempts to create a brand-new arbitrary room schema at runtime.
+
+Validation/runtime refuses it; InstancePlan may instantiate only compiled definitions or
+registered bounded generation semantics explicitly supported by a capability.
+
+
+
+### INSTANCEPLAN-04 — Shared singleton is not cloned into instance
+
+An instanced dream/dungeon room references a Realm-unique NPC/service outside its declared
+instancing closure.
+
+The compiler/runtime requires an explicit supported import/binding or rejects the plan.
+It never silently creates a second authoritative copy.
+
+### INSTANCEPLAN-05 — Player-owned item is not duplicated by entry
+
+A player enters an InstancePlan while carrying a unique sword.
+
+Entry/reconnect/teardown preserve one authoritative custody/ownership path. The sword
+cannot exist simultaneously in the parent world and as an independent deep-copied
+instance item.
+
+### INSTANCEPLAN-06 — Temporary state exports only through declared contract
+
+Player acquires dream-only temporary objects and one declared narrative memory.
+
+On teardown, temporary objects disappear with the instance. The declared memory exports
+exactly once. No other instance-local state leaks back.
+
+### SCENE-05 — Scene actor binding survives reconnect and duplicate definitions
+
+Two runtime NPCs share the same definition/display alias in different scoped spaces.
+
+A scene binds `old_master` to the eligible instance-local actor at start. After reconnect,
+the next beat targets the same runtime actor; it does not re-resolve by name/definition
+and jump to the other copy.
+
+### SCENE-06 — Missing bound actor follows explicit policy
+
+A bound scene actor dies/disappears before a later beat.
+
+The scene follows its declared wait/branch/fail/substitute/rebind policy. It never silently
+selects another matching NPC.
+
+### SCENE-01 — Text cutscene survives crash
+
+A consequential text SceneSequence crashes after a checkpoint and before the next acknowledgement.
+
+Resume restores the exact SceneInstance beat; already committed narration/consequences are not re-applied.
+
+### SCENE-02 — Choice idempotency
+
+Player chooses one branch, response is lost, and the same choice ActionInvocation is retried.
+
+Exactly one scene branch/outcome commits and downstream quest/world consequences occur once.
+
+### SCENE-03 — Modal/restricted authority enforcement
+
+During a restricted scene, client attempts an ordinary action hidden by the scene ActionSet restriction.
+
+Authority rejects/revalidates it even if a modified client sends it directly.
+
+### SCENE-04 — Skip policy preserves semantics
+
+A skippable presentation-heavy cutscene is completed normally and through skip.
+
+Both paths reach the definition's declared equivalent semantic checkpoint/outcome while optional presentation beats differ.
+
+### DREAM-01 — Private dream isolation
+
+Player enters a dream using SceneSequence + SceneSpace `instance` backed by an InstancePlan.
+
+Dream-only entities/items/actions never become shared Realm state. On completion, only declared typed memory/fact/relationship consequences export exactly once.
+
+### DREAM-02 — Dream resume
+
+Story app closes or Realm player disconnects mid-dream.
+
+Resume restores the correct participant/SceneInstance state or follows the declared abandonment/restart policy without duplicating dream consequences.
+
+### QUESTSCENE-01 — Quest milestone starts scene
+
+A quest objective reaches a named milestone that starts one SceneSequence.
+
+Duplicate delivery/retry does not start a second scene. Scene completion emits a typed event that advances the intended objective/outcome.
+
+### QUESTSCENE-02 — Scene mutates world through typed consequences
+
+A cutscene choice results in a named quest outcome that changes a Fact, relationship, Barrier state, NPC behavior profile, and merchant availability.
+
+Same-authority changes commit atomically where applicable; no scene/quest directly edits component storage.
+
+### QUESTSCENE-03 — Branches leave visibly different worlds
+
+Lab forks before a quest branch and completes both paths.
+
+World-state comparison shows the intentionally different facts, NPC schedules/relationships, access, population/ambient/merchant behavior, follow-up quests, and narration projections.
+
+### WORLDEVENT-01 — Multi-phase scripted event
+
+A WorldEventPlan drives a festival/invasion fixture through phases using PopulationPlans, schedule changes, services/commerce, scenes, and quests.
+
+Every phase transition is typed, replayable, and deterministic; the plan is not a new mutation authority.
+
+### WORLDEVENT-02 — Quest contributes to shared event without owning it
+
+A player/party quest contributes typed progress to an instance/realm WorldEventPlan.
+
+Quest progress scope, event progress scope, participant credit, and scene audience remain explicit and independent.
+
+### SCENE-MP-01 — Shared scene does not block shard
+
+One party runs a barrier-synchronized scene while unrelated players continue using the same ZoneShard.
+
+Disconnected participant handling follows declared scene policy; the shard itself remains responsive.
+
+### NARRATIVE-TRACE-01 — Unified explainable story trace
+
+Cartridge Lab can trace:
+
+~~~text
+ActionInvocation
+ -> Command
+ -> DomainEvents
+ -> quest objective/milestone
+ -> SceneSequence beat/choice
+ -> quest outcome
+ -> world consequences
+ -> ReactionRules
+ -> resulting GameView
+~~~
+
+so a builder can explain why the story/world changed without reading arbitrary runtime script state.
+
+
+## Z. Release assurance and orchestrated role boundaries
+
+### CERT-01 — Frozen-candidate evidence binding
+
+Full certification begins on semantic hash H1.
+
+Content changes to H2 after some gates pass.
+
+H1 receipts cannot certify H2; affected gates rerun against H2 and the final certificate
+binds one exact evidence bundle/candidate hash.
+
+### CERT-02 — Coverage gap blocks required branch
+
+CoverageManifest shows one required quest outcome/SceneSequence terminal branch was never
+exercised or proven reachable.
+
+Release remains blocked until the branch is exercised/proven or explicitly reclassified
+under reviewed certification policy.
+
+### CERT-03 — Exhaustive claim requires actual exhaustion
+
+A small finite quest/scene model is fully enumerated and may report exhaustive coverage.
+
+A large bounded search reports its actual limits/path/seed counts and must not label "no
+failure found" as exhaustive proof.
+
+### CERT-04 — Mutation sensitivity
+
+A disposable mutant removes a quest prerequisite and another breaks Barrier coherence.
+
+The designated gates fail. If a mutant survives the gate expected to catch it, the
+certification/test suite itself is deficient and release blocks until addressed or
+the sensitivity obligation is explicitly revised.
+
+### CERT-05 — Model-generated adversarial case becomes deterministic evidence
+
+An LLM proposes a strange legal action/timing sequence that may soft-lock a storyline.
+
+The proposal alone changes no verdict. Lab converts it into typed state/actions/time/fault
+inputs, executes it deterministically, and stores either a counterexample regression or a
+passing scenario receipt.
+
+### CERT-06 — Semantic reviewer cannot waive mechanical blocker
+
+Semantic reviewer says a cartridge looks coherent while a deterministic invariant reports
+duplicate unique reward.
+
+Candidate remains failed.
+
+### CERT-07 — Fast Jev triage failure degrades safely
+
+Optional Jev-style triage is unavailable, stale, low-confidence or malformed.
+
+No mandatory evidence disappears. Certification falls back to deterministic/full-review
+routing and cannot become easier to pass.
+
+### CERT-08 — Evidence bundle explains pass
+
+Given a release certificate, an operator can resolve every mandatory gate to exact
+candidate/profile/check identity, coverage/exploration evidence, semantic finding
+disposition and relevant repro artifacts.
+
+A green summary with missing underlying required evidence is invalid.
+
+### FOUNDRY-01 — World builder cannot edit engine
+
+An orchestrated world_builder assignment receives Builder/Lab capabilities for L3–L6.
+
+It attempts engine-source modification or arbitrary shell use.
+
+The operation is unavailable/denied by the admitted role surface; no candidate engine
+change is created.
+
+### FOUNDRY-02 — Missing capability escalates without grant expansion
+
+A quest builder requests a mechanic not expressible by registered primitives.
+
+Builder returns MISSING_CAPABILITY/CapabilityProposal. The builder's existing grant is
+unchanged. Any engine-capability task requires a separate protected assignment.
+
+### FOUNDRY-03 — Same model different role does not share ambient authority
+
+The same model identity is used first as world_builder and later as engine developer.
+
+Each assignment receives only its admitted role surface. Credentials/tool access from the
+engine assignment are not ambiently available to the world-builder assignment.
+
+### FOUNDRY-04 — Role rename does not fake independent review
+
+A model that authored a frozen candidate is relaunched under a different role label/session
+and attempts to satisfy an independence-required semantic review.
+
+Protected orchestration rejects the independence claim from durable principal/candidate
+lineage.
+
+### FOUNDRY-05 — Reviewer cannot mutate candidate
+
+Semantic reviewer discovers a broken scene and tries to fix the workspace directly.
+
+Review surface is read/simulate/comment only. It returns findings; correction requires a
+separately authorized author assignment and renewed exact-candidate evidence.
+
+
+
+### CERT-09 — Area passes alone but fails mounted closure
+
+Area A's isolated fixture passes all local quest/path/population checks.
+
+When mounted next to Area B, a duplicate target alias makes a required text action
+ambiguous and a cross-area schedule route closes at night.
+
+Mounted dependency-closure certification catches both; area isolation cannot certify the
+release.
+
+### CERT-10 — Impact analysis cannot waive mandatory release gate
+
+A builder changes a quest outcome FactSpec and ImpactSet initially appears small.
+
+Protected release policy determines that consumers/reactions/branch world comparison must
+rerun. The author/model cannot reuse stale receipts merely by claiming the change is local.
+
+### CERT-11 — Long-horizon leak detection
+
+A PopulationPlan/merchant/restock interaction is correct for two days but slowly creates
+unbounded items/currency over 90 simulated days.
+
+Frozen-candidate soak certification detects invariant growth and blocks release.
+
+
+### CERT-12 — Candidate cannot self-report coverage
+
+Cartridge source claims a required branch is covered/excluded, but trusted Lab receipts
+show it was never exercised/proven and the profile does not authorize the exclusion.
+
+Generated CoverageManifest records the gap and release remains blocked.
+
+### CERT-13 — Model cannot invent a release invariant
+
+An LLM adversarial tester proposes a scenario and says "this outcome should be impossible."
+
+Lab executes the scenario, but the proposed expectation is not a registered/profile
+invariant.
+
+The result is retained as exploratory semantic evidence; it cannot fail or pass the
+release until the property is separately reviewed/admitted.
+
+
+### CERT-14 — Opaque dependency widens impact set
+
+A changed Fact/event is consumed through a dynamic script/selector edge that static
+analysis cannot prove local.
+
+Impact analysis marks the dependency boundary unknown and widens required authoring/
+release checks according to policy. It never reuses stale downstream receipts on the
+assumption that no static edge means no dependency.
+
+
+### CERT-15 — Friendly cartridge tests cannot replace mandatory gates
+
+A cartridge ships custom scenario tests that all pass but omits the failure path that
+duplicates a unique reward.
+
+Engine/profile mandatory invariant and mutation-sensitivity gates still run and fail the
+candidate. The cartridge's green custom suite is supplemental evidence only.
+
+### CERT-16 — Commercial semantic reviewer cannot own the candidate
+
+For a commercial release profile requiring independent semantic review, the candidate-
+authoring principal attempts to submit the semantic review under a new model/session/role.
+
+Independence validation rejects it from durable candidate/principal lineage; a separate
+review assignment must inspect the frozen candidate.

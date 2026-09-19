@@ -4,7 +4,7 @@
 
 The Cartridge Lab is an executable test environment for a compiled cartridge or candidate shared area.
 
-It uses the same portable kernel and, where relevant, the same BEAM runtime contracts as production with controllable infrastructure adapters.
+It uses the same portable semantic contract and R1-selected implementation strategy as production and, where relevant, the same BEAM runtime contracts, with controllable infrastructure adapters.
 
 The Lab is a product feature for developers/agents, not merely an ExUnit helper.
 
@@ -71,7 +71,7 @@ Starts actual `WorldInstance` under test supervision.
 
 ### Offline host
 
-Runs local authority + SQLite semantics against the portable kernel.
+Runs local authority + SQLite semantics against the R1-selected Story portable-rules implementation.
 
 ### Integration
 
@@ -83,7 +83,7 @@ Exercises Phoenix channel contract and generated fixtures.
 
 ### Cross-host conformance
 
-Runs the same golden scenario through kernel host adapters and compares canonical trace hashes.
+Runs the same golden scenario through every host implementation/adapter selected by the accepted portable-execution ADR and compares canonical trace hashes. If R1 selects one shared native kernel, this includes its direct host plus BEAM/iOS/Android bindings; if R1 selects the dual-implementation fallback, it compares the accepted Elixir/mobile implementations instead.
 
 Certification uses all modes relevant to the deployment profile.
 
@@ -245,7 +245,7 @@ Prefer derived/on-demand systems where simulation reveals meaningless tick load.
 
 ## 12. Bot personas
 
-Bots use the same canonical command contract.
+Gameplay bots SHOULD use the same ActionInvocation → GameSession → authority path as real touch/text clients so they exercise action availability and stale-input rules. Lower-level reducer/property tests may construct semantic Commands directly when the layer under test is intentionally below that boundary.
 
 Profiles:
 
@@ -359,7 +359,7 @@ Performance warnings do not always block, but hard resource ceilings may.
 
 ## 18. Semantic review
 
-After deterministic gates:
+Semantic review runs **after deterministic/mechanical gates** and produces auditable review evidence. It is intentionally not treated as a deterministic game-rule oracle.
 
 Reviewer inspects:
 
@@ -378,6 +378,25 @@ Reviewer inspects:
 - private-to-shared deployment mismatches.
 
 Every semantic finding cites definitions/traces.
+
+The review record stores enough identity to audit what was judged, for example:
+
+- reviewer kind/provider/model and version when applicable;
+- rubric/prompt/policy revision;
+- input evidence bundle/hash;
+- output/findings hash;
+- blocker/warning disposition;
+- explicit waiver/resolution records.
+
+Re-running a stochastic model later is not expected to reproduce identical prose or findings. Release reproducibility comes from retaining the exact review evidence and disposition used by the certificate. Mechanical invariants remain enforced by deterministic/model/property tests rather than delegated to the reviewer.
+
+A certification policy MAY require “no unresolved semantic blockers,” but a model response by itself cannot silently publish, waive, or mutate content.
+
+For a commercially published first-party cartridge/deployment, semantic review MUST be
+performed by a review assignment/principal that does not own mutation authority over the
+frozen candidate and satisfies the configured independence predicate from the authoring
+assignment/candidate lineage. Relaunching the author under a new role/model/session label
+does not satisfy this requirement.
 
 ## 19. Human smoke
 
@@ -399,14 +418,16 @@ Required for commercial release:
 ## 20. Certification profiles and Builder targets
 
 ```text
-offline_private_story
-online_private_story
-party_story
+offline_private
+online_private
+party
 shared_area
 portable_capability_pack
 server_capability_pack
 mobile_app_release
 ```
+
+The gameplay profile names (`offline_private`, `online_private`, `party`, `shared_area`) intentionally reuse the canonical execution-profile vocabulary from the packet; certification does not invent a second parallel set of Story/Realm profile names. Capability-pack and app-release profiles are separate certification-only targets.
 
 Each profile selects mandatory gates.
 
@@ -414,25 +435,33 @@ Each profile selects mandatory gates.
 
 Minimum required evidence:
 
+- frozen exact-candidate identity;
 - static/schema/reference validation;
+- topology/quest/scene/reaction model analysis;
+- CoverageManifest with required surfaces accounted for;
 - portable capability check;
-- deterministic kernel tests;
-- quest/dialogue model checks;
-- autonomous simulation where applicable;
+- deterministic kernel + registered invariant tests;
+- quest/dialogue/scene model checks;
+- bounded branch/path/seed exploration appropriate to the content;
+- autonomous/long-horizon simulation where applicable;
 - script fuzzing where scripts exist;
+- mutation-sensitivity obligations selected by the certification profile;
 - offline lifecycle/app-kill/storage/clock tests;
 - save and app/kernel compatibility;
-- semantic review;
+- semantic review with explicit blocker disposition; commercial publication requires the
+  independent frozen-candidate reviewer rule from §18;
+- CertificationEvidenceBundle bound to the candidate hash;
 - physical-device Story Mode smoke.
 
 Network availability MUST NOT be a prerequisite for certified ordinary play after acquisition/download.
 
 ### `realm` target
 
-Select `online_private_story`, `party_story`, or `shared_area`.
+Select `online_private`, `party`, or `shared_area`.
 
 Minimum evidence adds as relevant:
 
+- mounted dependency-closure validation for Areas used by the deployment;
 - protocol/version negotiation;
 - command receipt/idempotency;
 - PostgreSQL transactional recovery;
@@ -441,6 +470,8 @@ Minimum evidence adds as relevant:
 - authorization/abuse checks;
 - mailbox/backpressure/load envelope;
 - shard/handoff testing for shared areas;
+- long-horizon shared population/economy/service soak where applicable;
+- CertificationEvidenceBundle bound to cartridge + deployment hashes;
 - Realm Mode physical-device smoke.
 
 Realm certification does not require offline portability unless the content is explicitly a portable Story cartridge being reused online.
@@ -477,26 +508,35 @@ Machine-readable example:
 {
   "cartridge_hash": "...",
   "deployment_hash": "...",
-  "kernel_revision": "...",
+  "portable_rules_revision": "...",
+  "portable_strategy": "...",
   "engine_revision": "...",
   "capability_lock_hash": "...",
-  "profile": "offline_private_story",
+  "profile": "offline_private",
   "gates": {
     "static": "pass",
+    "model_analysis": "pass",
+    "coverage": "pass",
     "host_conformance": "pass",
-    "quest_model": "pass",
-    "simulation": "pass",
+    "quest_scene_model": "pass",
+    "invariants": "pass",
+    "simulation_exploration": "pass",
+    "mutation_sensitivity": "pass",
+    "crash_recovery": "pass",
     "offline_lifecycle": "pass",
     "semantic": "pass",
     "human_mobile": "pass"
   },
-  "coverage": {...},
+  "evidence_bundle_hash": "...",
+  "semantic_review_evidence_hash": "...",
+  "coverage_manifest_hash": "...",
+  "exploration_bounds": {...},
   "seeds": [...],
   "warnings": [...]
 }
 ```
 
-Only exact artifact/deployment hash is promotable.
+Only the exact artifact/deployment hash with all profile-mandatory gate receipts bound to its CertificationEvidenceBundle is promotable. A summary certificate without resolvable required evidence is invalid.
 
 ## 22. Regression corpus
 
@@ -530,3 +570,618 @@ Additional checks:
 - load.
 
 The private cartridge certificate remains evidence for underlying story logic.
+
+
+## 24. Certification pyramid: fast preflight to exact-hash release
+
+Certification should be usable continuously during authoring without confusing partial
+evidence with release approval.
+
+### Level 0 — edit-time validation
+
+Fast, deterministic checks after a small change:
+
+- schema/type/reference;
+- local graph integrity;
+- policy/action shape;
+- changed quest/scene/reaction checks;
+- changed-unit focused tests.
+
+### Level 1 — component/area preflight
+
+Run broader checks for one quest, AreaDefinition, storyline, capability composition, or
+other selected slice.
+
+Useful for builder feedback, but **not promotable release certification** because external
+dependencies and cross-area interactions may still be untested.
+
+### Level 2 — cartridge candidate certification
+
+Freeze one exact compiled cartridge hash and run every gate required by the selected
+Story/online-private/party profile.
+
+### Level 3 — deployment/shared-area certification
+
+Freeze exact cartridge + deployment hashes and run multiplayer/economy/abuse/load/
+authority-placement gates required by that deployment.
+
+### Level 4 — commercial release evidence
+
+Bind the exact certified semantic hash to:
+
+- package/signature verification;
+- supported app/runtime versions;
+- physical-device smoke;
+- commerce/entitlement evidence where relevant;
+- release-policy/human disposition;
+- immutable certification evidence manifest.
+
+A lower-level preflight must never be rendered or interpreted as Level-4 acceptance.
+
+## 25. Freeze first, certify the exact candidate
+
+Full certification starts by freezing/importing the exact normalized artifact and
+governing compatibility locks.
+
+Every gate receipt records:
+
+- semantic cartridge hash;
+- deployment hash when applicable;
+- engine/portable-rules revisions;
+- capability lock;
+- certification profile/policy revision;
+- test/check implementation revision;
+- environment/host identity where relevant.
+
+A content edit after freeze creates a new candidate hash and invalidates downstream
+candidate-specific evidence unless the gate's contract explicitly proves it is
+content-independent.
+
+There is no "tests were green before the final edit" release path.
+
+## 26. Coverage manifest
+
+Certification tooling SHOULD produce a machine-readable **CoverageManifest** from the
+frozen compiled artifact plus observed/proved gate receipts, describing which authored
+semantic surfaces were exercised and which remain intentionally unreachable/dormant.
+
+The cartridge/author/model does not self-report coverage. Any author-declared exclusions
+or intentionally unreachable branches are inputs requiring schema/policy validation and,
+where release-relevant, explicit certification disposition.
+
+Coverage dimensions should include, where present:
+
+- rooms/AreaDefinitions/connections/barriers;
+- InspectableDetails;
+- Actions/ActionRecipes and result bands;
+- policies and important true/false branches;
+- facts and state-machine transitions;
+- quest activation modes, objectives, milestones, branches and outcomes;
+- dialogue nodes/choices;
+- SceneSequence beats, choices, waits, outcomes and SceneSpaces;
+- InstancePlan entry/reconnect/reset/teardown/export paths;
+- ReactionRule triggers/conditions/consequences;
+- Behavior arbitration combinations;
+- SpawnBundle/PopulationPlan lifecycle;
+- commerce buy/sell/admission/stock/restock/price paths;
+- ServiceJob queue/cancel/complete/failure paths;
+- world-event phases/outcomes;
+- scripts/bindings;
+- save/migration paths;
+- multiplayer scopes/interleavings where applicable.
+
+Coverage is evidence of exercised structure, **not proof of semantic correctness**.
+
+An uncovered required branch is a release blocker unless the definition/certification
+policy marks it intentionally unreachable, content-only presentation, or otherwise
+outside the profile with an explicit reason.
+
+## 27. Static graph and model analysis
+
+Before simulation, compile semantic graphs and detect mechanically provable defects.
+
+Examples:
+
+### Topology
+
+- unreachable required locations;
+- one-way link mistakes where reciprocity was declared;
+- contradictory Barrier faces;
+- path loss under required schedule/time states;
+- orphan exported ports;
+- InstancePlan entry with no valid exit/teardown path where one is required.
+
+### Quest/story
+
+- prerequisite cycles;
+- impossible conjunctions;
+- dead objectives;
+- branches with no terminal outcome;
+- required outcome with no reachable path;
+- turn-in/scene target impossible under branch state;
+- quest branch destroys all future required progress;
+- storyline arc references incompatible outcome prerequisites.
+
+### Scene
+
+- unreachable beats;
+- nonterminal branch with no wait/end;
+- endless immediate beat loop;
+- choice with no legal option under reachable state;
+- modal scene with no escape/continuation;
+- InstancePlan scene whose required export references temporary-only state.
+
+### Reaction/event
+
+- statically visible reaction cycles;
+- event chains that necessarily exceed budget;
+- trigger references impossible event/target;
+- scope escalation without explicit operator.
+
+### Population/economy/services
+
+- impossible min/max or stock constraints;
+- population plan whose placement selector is empty;
+- negative/nonconserving transfer paths;
+- service output with no ownership/delivery policy;
+- restock/capacity windows with missing time basis.
+
+Static proof should eliminate cheap defects before expensive simulation/model review.
+
+## 28. Bounded state exploration and path search
+
+For small quest/scene/world graphs, certification SHOULD exhaust all reachable logical
+states within the declared finite model.
+
+For larger worlds, use bounded search guided by coverage gaps and risk:
+
+- breadth/depth path exploration;
+- branch/outcome enumeration;
+- pairwise/combinatorial policy variation;
+- state-machine transition exploration;
+- seed search;
+- temporal boundary search;
+- multiplayer interleaving search.
+
+The candidate records exploration bounds. "No failure found in 10,000 paths" is not
+reported as exhaustive proof unless the state space was actually exhausted.
+
+The Lab should support goals such as:
+
+~~~text
+find path to every quest outcome
+find path that strands the player
+find state where required NPC is unavailable
+find sequence that duplicates a unique reward
+find schedule/time state where route disappears
+find interleaving that violates stock/capacity
+find scene state with no legal continuation
+~~~
+
+A found counterexample becomes a deterministic repro fixture.
+
+## 29. Invariant registry
+
+Capabilities SHOULD register reusable invariants so a new cartridge automatically gains
+the appropriate checks.
+
+Examples:
+
+### Core/world
+
+- entity location/containment is unique;
+- no containment cycles;
+- one logical Barrier has one authoritative state;
+- state scope/audience/placement constraints hold;
+- no unknown runtime definition ref.
+
+### Quest/narrative
+
+- legal lifecycle transition;
+- reward/consequence once;
+- scene choice once;
+- no hidden pre-activation credit unless declared;
+- temporary InstancePlan state cannot leak except through allowed exports.
+
+### Population/economy
+
+- population stays within policy bounds;
+- provenance-safe cleanup;
+- currency/item conservation except registered source/sink;
+- finite stock never becomes negative;
+- escrow/custody unique;
+- ServiceJob output once.
+
+### Runtime
+
+- command/idempotency identity never changes on retry/reconnect;
+- authority revision monotonic;
+- stale owner cannot write;
+- event/reaction/script chain stays bounded.
+
+The Lab runs applicable invariants continuously during simulation, not only at the end.
+
+## 30. Mutation-sensitivity testing
+
+A certification suite should prove that important gates can actually detect representative
+defects.
+
+For selected high-risk content/capability contracts, create disposable candidate
+mutations such as:
+
+- remove a quest prerequisite;
+- swap a target ref;
+- broaden player scope to realm;
+- break a reverse connection/barrier binding;
+- duplicate a reward key;
+- remove a SceneSequence terminal;
+- alter an idempotency key;
+- change PopulationPlan provenance;
+- make merchant stock non-conserving;
+- disable a required reaction;
+- weaken an access policy;
+- reorder conflicting Behavior priority.
+
+The expected gate must fail.
+
+Mutation testing is evidence about **test sensitivity**, not production content. Mutants
+never become publishable candidates.
+
+## 31. Differential and metamorphic testing
+
+In addition to exact cross-host replay, test transformations that should preserve or
+predictably alter semantics.
+
+Examples:
+
+- serialization/deserialize round trip;
+- save/reload at arbitrary command boundaries;
+- irrelevant insertion-order changes;
+- reconnect under a new session ID;
+- equivalent text versus touch ActionInvocation;
+- same scenario with presentation-only locale change;
+- duplicate delivery of idempotent event/command;
+- advancing time in one step versus permitted equivalent substeps;
+- party player-order permutation where policy is symmetric.
+
+A semantic difference where equivalence is expected is a blocker.
+
+## 32. Adversarial gameplay generation
+
+Deterministic bots remain the release baseline, but high-reasoning models may propose
+new adversarial play plans.
+
+Useful model-generated challenges include:
+
+- "How could I sequence these legal actions to strand the quest?";
+- "Which NPC death/timing combinations threaten completion?";
+- "What does a malicious player spam or retry?";
+- "Which branch combinations produce contradictory facts?";
+- "Which shared-resource races are missing?";
+- "What player behavior would reveal an implausible schedule/economy?";
+- "What scene interruption/reconnect point is least tested?".
+
+The model's text is not test evidence.
+
+Foundry/Builder tooling converts an accepted proposed scenario into:
+
+- typed initial state;
+- ActionInvocation/Command sequence;
+- clock/RNG/fault schedule;
+- candidate expected property.
+
+The deterministic Lab executes it. A model-proposed expected property becomes a release
+blocker only when it maps to an existing registered invariant/certification predicate or
+is separately reviewed/admitted into the test profile. Otherwise the execution is
+exploratory evidence requiring disposition.
+
+Failures against governing invariants become permanent regression fixtures.
+
+## 33. LLM semantic review as a separate evidence layer
+
+A high-reasoning semantic reviewer is useful for defects that static/model checks cannot
+define completely.
+
+Reviewer inputs SHOULD be compact, exact evidence views such as:
+
+- frozen artifact/hash and relevant definitions;
+- topology and quest/storyline graphs;
+- SceneSequence/InstancePlan graphs;
+- branch world-state comparisons;
+- NPC schedule timelines;
+- population/commerce/service summaries;
+- coverage gaps;
+- invariant/simulation findings;
+- representative transcripts/traces;
+- declared narrative intent/rubric.
+
+Review questions can include:
+
+- Does the story causality make sense?
+- Are player choices honestly reflected in outcomes?
+- Does NPC knowledge precede any plausible source?
+- Does a rescued/dead NPC still behave inconsistently?
+- Are areas dead, repetitive, or incoherent?
+- Are there soft-locks that mechanical reachability missed because the path is
+  narratively nonsensical?
+- Do dream/vision exports contradict ordinary-world state?
+- Does shared Realm adaptation undermine private-story assumptions?
+- Are prices/schedules/populations believable enough for the cartridge's design goals?
+
+The reviewer should be independent of the authoring assignment where policy requires it.
+
+The model may emit blockers/warnings/questions with cited evidence. It cannot:
+
+- alter the candidate;
+- waive a deterministic failed gate;
+- mark its own authored candidate accepted;
+- publish;
+- convert uncertainty into pass.
+
+Resolved findings and human/operator waivers are explicit evidence bound to the exact
+candidate.
+
+## 34. Jev/System-One-style fast semantic triage
+
+A fast typed probabilistic decision model such as Jev MAY sit in front of expensive
+semantic review **after held-out evaluation proves value**.
+
+Appropriate advisory questions are narrow and typed:
+
+- which evidence bundle deserves deeper review;
+- which rubric category a trace threatens;
+- whether two findings are likely duplicates;
+- which quest/scene/area is highest semantic risk;
+- whether a simulation anomaly looks likely narrative, mechanical, or infrastructure;
+- which already-authorized reviewer/test profile should inspect next.
+
+Possible outputs are Choice/Score/probability-style signals plus confidence.
+
+Deterministic policy owns:
+
+- minimum confidence;
+- maximum autonomous triage effect;
+- fallback to full review;
+- mandatory evidence that triage may never suppress.
+
+Jev is **not** an acceptance oracle. It cannot certify correctness, waive coverage,
+replace invariants, establish reviewer independence, or turn an untested area green.
+
+Pin provider/model/question-schema/threshold identity in the review evidence. If the
+provider is unavailable, malformed, low-confidence or stale, fall back to deterministic
+baseline/full review rather than weakening certification.
+
+## 35. Release blocker classes
+
+Certification SHOULD classify findings instead of flattening everything into pass/fail
+logs.
+
+### Mechanical blocker
+
+Examples:
+
+- schema/ref/invariant failure;
+- deterministic repro failure;
+- required branch unreachable;
+- cross-host divergence;
+- duplicate reward/stock/custody;
+- crash/recovery inconsistency.
+
+Cannot be waived by an LLM or by an ordinary content/release waiver. Changing what
+counts as a mechanical blocker requires an explicit reviewed certification/engine-policy
+revision and renewed evidence for affected candidates.
+
+### Security/authority blocker
+
+Examples:
+
+- script escape;
+- scope leak;
+- unauthorized action;
+- stale-owner write;
+- package traversal;
+- cross-player data leak.
+
+Requires code/content correction or an explicit architecture/security process—not an
+ordinary content-editor, reviewer, release-agent, or model waiver.
+
+### Semantic blocker
+
+Examples:
+
+- contradiction with declared narrative intent;
+- inaccessible intended ending not mechanically encoded as required;
+- severe knowledge leak;
+- branch consequence contradicts story canon.
+
+Requires explicit reviewer/operator disposition and normally correction before release.
+
+### Warning / accepted design tradeoff
+
+Non-blocking concern retained in certificate evidence with reason.
+
+Unknown evidence is not pass.
+
+## 36. Release evidence bundle
+
+Every release candidate should produce a content-addressed **CertificationEvidenceBundle**
+containing or referencing:
+
+- candidate/deployment hashes and compatibility locks;
+- static diagnostics;
+- CoverageManifest;
+- graph/model-analysis report;
+- deterministic/property/fuzz results;
+- explored path/seed/interleaving summary;
+- invariant results;
+- mutation-sensitivity report where required;
+- cross-host differential receipts;
+- crash/chaos recovery receipts;
+- performance/load report;
+- semantic reviewer evidence;
+- Jev/fast-assessor evidence if used;
+- human/device smoke evidence;
+- unresolved warnings/waivers;
+- regression fixtures added from findings.
+
+The final certificate is a small signed/attested summary over this exact bundle and
+candidate hash.
+
+Agents and humans should be able to inspect *why* a release passed, not merely see a
+green badge.
+
+## 37. Cartridge-authored tests are supplemental, not certification authority
+
+Cartridges MAY ship author-authored scenario/property tests to express design intent and
+speed development.
+
+Those tests:
+
+- run against the same frozen artifact;
+- may add stronger cartridge-specific invariants;
+- are included in evidence with exact source/revision;
+- cannot replace, disable, weaken or mark passed any engine/profile-mandatory gate;
+- cannot redefine a failed engine invariant as success;
+- are treated as candidate-controlled input when deciding release authority.
+
+A malicious or mistaken cartridge test suite that asserts only happy paths must not make
+the candidate easier to publish.
+
+## 38. Regression ratchet
+
+Every escaped production defect, certification-discovered blocker, or important
+adversarial counterexample SHOULD be reduced to the smallest durable regression artifact
+that still reproduces the failure.
+
+Classify it into the relevant permanent suite:
+
+- static compiler;
+- capability invariant;
+- quest/scene model;
+- deterministic scenario;
+- property/fuzz;
+- multiplayer interleaving;
+- crash/recovery;
+- security;
+- semantic reviewer fixture.
+
+Certification should become harder to fool over time without making the whole suite
+depend on ever-growing LLM prompts.
+
+
+## 39. Area-level assurance: isolate, then mount
+
+An AreaDefinition SHOULD be testable as a coherent authored module before whole-cartridge
+release, but area isolation is not enough.
+
+A Level-1 **AreaAssuranceProfile** may declare:
+
+- area identity and exact source/artifact revision;
+- entry/exit/exported ports;
+- imported facts/capabilities/assumptions;
+- contained quests/scenes/dialogues;
+- PopulationPlans/merchants/services;
+- required neighboring definitions;
+- intended player-level/resource assumptions;
+- required reachable outcomes;
+- area-local performance envelope.
+
+Run the area in two modes:
+
+### Isolated harness
+
+Supply explicit fixtures for declared imports and test the area's own invariants:
+
+- every required room/detail/connection reachable under intended states;
+- local quests/scenes can reach all intended outcomes;
+- required NPCs/services exist when needed;
+- schedules remain navigable;
+- population/economy bounded;
+- no local reaction/event loop;
+- instance/scene teardown clean;
+- no undeclared external reference.
+
+### Mounted dependency closure
+
+Mount the area into its real cartridge/deployment dependency closure and retest:
+
+- imported facts/policies resolve as expected;
+- neighboring topology/ports bind correctly;
+- cross-area quests/rumors/services/reactions remain coherent;
+- schedule/pathfinding across area boundaries works;
+- global stock/economy/population policies remain bounded;
+- no name/target ambiguity introduced by neighboring content;
+- shared Realm scope/audience assumptions remain valid.
+
+An area passing isolated tests but failing mounted-closure tests is not releasable.
+
+Whole-cartridge/deployment certification remains mandatory because two individually
+healthy areas can interact badly.
+
+## 40. Change-impact analysis accelerates feedback but cannot shrink release truth
+
+Builder/Lab should compute a typed **ImpactSet** from the reference/dependency graph after
+a content edit.
+
+Potential affected surfaces include:
+
+- direct definition refs;
+- quests/scenes/dialogues consuming changed facts/events;
+- paths/topology reachable through changed Connection/Barrier;
+- NPC schedules/Behaviors;
+- ReactionRules;
+- PopulationPlans;
+- merchants/services/economy;
+- InstancePlans;
+- exported cartridge ports;
+- localization/presentation;
+- tests/regression fixtures.
+
+Use ImpactSet to choose fast Level-0/1 checks during authoring.
+
+Impact analysis is fail-conservative. If the compiler cannot prove a dependency boundary
+because of dynamic selectors, LokaScript/query behavior, custom event subscriptions,
+deployment imports, or another opaque capability edge, the ImpactSet widens to the
+enclosing capability/area/cartridge scope required by policy. Unknown dependency is not
+treated as "unaffected."
+
+For Level-2+ release certification, protected profile policy—not the author/model—decides
+which previously valid receipts may be reused and which gates rerun. High-risk semantic
+changes may force wider/full recertification even when static references look local.
+
+Examples:
+
+- prose typo -> localization/presentation checks may suffice for authoring feedback;
+- quest outcome FactSpec change -> all consumers + branch simulations rerun;
+- connection topology change -> path/schedule/quest reachability rerun;
+- capability-version change -> all dependent semantics/conformance rerun;
+- scope change player -> realm -> multiplayer/shared-area recertification.
+
+Impact analysis is an optimization, never authority to declare an exact candidate safe.
+
+## 41. Release-candidate soak and long-horizon simulation
+
+For living-world cartridges, final certification SHOULD include profile-appropriate
+long-horizon simulation from the frozen candidate, not only unit scenarios.
+
+Examples:
+
+- 30/90/365 logical-day runs where practical;
+- repeated day/night/shop/service cycles;
+- population death/replenishment;
+- resource regeneration/decay;
+- merchant restock and currency/item conservation;
+- quest deadline expiration;
+- WorldEvent recurrence/cleanup;
+- NPC schedule/path stability;
+- save/snapshot growth;
+- bounded retained history/memory/job state.
+
+Search multiple deterministic seeds and starting states.
+
+The goal is to expose slow leaks and contradictions that a short playthrough misses:
+population inflation, currency creation, orphan jobs, accumulating scene state, NPCs
+drifting permanently out of schedule, or events that never clean up.
+
+Soak success is still bounded evidence. The certificate records duration/seeds/state
+coverage rather than claiming proof over infinite time.
