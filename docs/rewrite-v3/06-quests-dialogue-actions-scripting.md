@@ -787,11 +787,11 @@ query.weather
 emit.say
 emit.message
 fact.set
-effect.spawn
-effect.move
-effect.damage
-effect.heal
-effect.schedule
+world.spawn
+world.move
+combat.damage
+combat.heal
+job.schedule
 event.emit
 rng.chance
 rng.pick
