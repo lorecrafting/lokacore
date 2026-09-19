@@ -147,7 +147,8 @@ Use these terms consistently in v3:
 |---|---|
 | **Capability** | Versioned feature contract registered by the engine. Owns schemas and the commands/events/effects/policies/rules it introduces. |
 | **Component** | Typed definition/runtime data attached to an entity or scoped state. A component is data/state, not an independent authority. |
-| **Behavior** | Declarative autonomous rule configuration supplied by a capability, such as patrol or schedule. Behaviors produce typed intents/proposals and never bypass the authority decision path. |\n| **ReactionRule** | Builder-composable event/fact/state-transition reaction: typed trigger + selector + Policy + registered consequences. The safe replacement for arbitrary special-procedure callbacks. |
+| **Behavior** | Declarative autonomous rule configuration supplied by a capability, such as patrol or schedule. Behaviors produce typed intents/proposals and never bypass the authority decision path. |
+| **ReactionRule** | Builder-composable event/fact/state-transition reaction: typed trigger + selector + Policy + registered consequences. The safe replacement for arbitrary special-procedure callbacks. |
 | **Action** | Player/agent affordance advertised in GameView; invocation is revalidated by the active authority and resolved into a typed Command. |
 | **Policy / condition** | Pure predicate tree deciding whether an action/content path is allowed/visible. |
 | **Command** | Request to authoritative game semantics. |
@@ -180,6 +181,13 @@ faction_member
 reputation
 status_effect
 crafting_station
+inspectable_detail
+reaction
+population
+commerce
+scene
+narration
+perception
 ```
 
 Capability metadata includes portability classification:
