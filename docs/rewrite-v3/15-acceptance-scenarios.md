@@ -636,6 +636,18 @@ Author agent cannot bypass failed certification.
 
 Same Builder operation via MCP and terminal produces same underlying workspace result.
 
+### BLD-08 — Lost Builder response retry
+
+A mutating Builder operation commits revision 43, but the caller loses the response and retries the same `operation_id` with its original expected revision 42.
+
+The Builder returns the original committed result/revision without applying the mutation again.
+
+### BLD-09 — Reused Builder operation ID with different payload
+
+An already committed `operation_id` is retried with different semantic input.
+
+The Builder returns an idempotency/integrity conflict and does not apply either a second mutation or a misleading replay response.
+
 ## K. Mobile protocol
 
 ### PROTO-01 — Generated parity
