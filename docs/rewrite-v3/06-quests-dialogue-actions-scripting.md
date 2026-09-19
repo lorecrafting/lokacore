@@ -988,6 +988,8 @@ Use it for:
 
 A scene is not a raw script and is not a new authority.
 
+Player scene choices/continuations are ordinary Actions: touch/text emits ActionInvocation, authority re-resolves/revalidates, and a typed Command advances the SceneReducer. Automatic scene progress is driven only by deterministic immediate beats or explicit typed events/jobs/inputs.
+
 Conceptual flow:
 
 ~~~text
@@ -1086,6 +1088,8 @@ Recommended scene spaces:
 - **scoped_overlay** — current shared geometry remains, but presentation/entities/actions differ for eligible participants;
 - **private_scene_instance** — isolated temporary simulation for dream, memory, vision, trial, or tightly scripted sequence.
 
+Scene space does not itself choose a new mutation authority. In Story Mode the LocalInstanceAuthority may own the scene subspace directly. In Realm Mode, genuinely separate physical simulation uses the existing private/party WorldInstance/instancing semantics from document 19; a purely perceptual dream should prefer a scoped overlay.
+
 A dream may therefore:
 
 1. trigger from sleep/rest/quest/world state;
@@ -1181,7 +1185,7 @@ trigger
  -> typed outcomes
 ~~~
 
-A WorldEventPlan is not another mutation authority.
+A WorldEventPlan is not another mutation authority and SHOULD NOT become a universal kitchen-sink runtime manager. It compiles/coordinates ordinary scoped state machines, facts, reactions, populations, schedules, services, scenes, and quests under their existing authority contracts.
 
 Quests may:
 
