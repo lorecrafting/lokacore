@@ -458,7 +458,8 @@ Model selection is external orchestration configuration.
 
 ## 13. AI authoring workflow
 
-Recommended pipeline:
+Recommended responsibility pipeline (one model/process may perform multiple stages when
+policy permits; these are not mandatory permanent agent classes):
 
 ```text
 brief
@@ -631,7 +632,10 @@ Generate MCP tool declarations, terminal help, API docs, and contract tests from
 
 ## 22. Agent permissions
 
-Agent roles SHOULD be capability-limited.
+When an orchestrator uses named roles, those names are Loka project/workflow vocabulary,
+not runtime authority and not a fixed Foundry taxonomy.
+
+Agent assignments SHOULD be capability-limited.
 
 Examples:
 
