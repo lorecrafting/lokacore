@@ -72,15 +72,17 @@ The app selects exactly one gameplay authority for a running session:
                          /         \
                         /           \
              LocalStorySession   RemoteRealmSession
-               local kernel        Phoenix/BEAM
-               local SQLite        server state
+                    |              Phoenix transport
+          LocalInstanceAuthority          |
+             portable rules            BEAM
+             local SQLite             server state
 ```
 
 The shared renderer receives host-neutral `GameView` data and emits host-neutral `ActionInvocation` values through the active session. It never constructs authority-internal Commands. It MUST NOT contain separate copies of quest/action/policy semantics.
 
-Switching modes MUST close/commit the current session before another authority is activated. No save/world may be concurrently authoritative locally and remotely.
+Switching modes MUST close/commit the current gameplay session/authority before another authority is activated. No save/world may be concurrently authoritative locally and remotely.
 
-The local kernel may physically exist in the same binary while Realm Mode is active, but Realm Mode MUST never trust it for authoritative decisions. Local simulation/prediction for Realm is deferred unless separately specified.
+The Story portable-rules implementation may physically exist in the same binary while Realm Mode is active, but Realm Mode MUST never trust local rule execution for authoritative decisions. Local simulation/prediction for Realm is deferred unless separately specified.
 
 ### One app, modular code
 
@@ -89,7 +91,7 @@ Do not solve one-app maintenance by creating one giant conditional client.
 The mobile codebase SHOULD keep explicit packages/modules for:
 
 - app shell/navigation;
-- Story session/SQLite/kernel bridge;
+- Story session/LocalInstanceAuthority/SQLite/portable-rules bridge;
 - Realm session/Phoenix transport;
 - shared GameView renderer;
 - shared UI/design system;
