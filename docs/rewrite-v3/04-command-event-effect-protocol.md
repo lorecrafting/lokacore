@@ -241,6 +241,7 @@ not_owned
 permission_denied
 invalid_target
 invalid_state
+stale_view
 stale_revision
 insufficient_resource
 exit_locked
@@ -285,7 +286,7 @@ take item
   -> item_acquired
      -> quest reducer advances objective
         -> quest_objective_completed
-           -> quest_completed
+           -> quest_resolved(outcome_id)
 ```
 
 This chain runs as part of the same decision/commit where possible.
@@ -301,13 +302,9 @@ This prevents script/rule loops.
 
 ## 10. Effect types
 
-Effects are registered and typed.
+Authoritative same-domain changes are **StateDelta/commit data**, not Effects. Examples include entity/quest/fact changes and same-authority durable scheduled-job rows.
 
-Categories:
-
-### Authoritative commit changes
-
-These are **StateDelta/commit data**, not Effects. They are applied transactionally with the command receipt. Examples include entity/quest/fact changes and same-authority durable scheduled-job rows.
+Actual Effects are registered and typed in two broad categories:
 
 ### Durable asynchronous effects
 
