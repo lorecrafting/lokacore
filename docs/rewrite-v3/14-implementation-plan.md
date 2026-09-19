@@ -196,7 +196,8 @@ Make machine-readable contracts exist before features.
 - commerce-provider/policy registry shape;
 - WorldEventPlan schema;
 - FactSpec / scoped narrative-state schema;
-- NarrationSpec + SceneDefinition/SceneInstance schema;
+- NarrationSpec + SceneDefinition/SceneInstance/SceneSpace schema;
+- InstancePlan schema including instancing closure/import/export policy;
 - consequence-operator registry shape;
 - portable GameView schema;
 - portable-rules ABI/serialization contract selected by R1;
