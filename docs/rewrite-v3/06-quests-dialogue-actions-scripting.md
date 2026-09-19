@@ -108,6 +108,9 @@ A quest giver and turn-in target are therefore optional content roles, not hard 
 Quest grammar SHOULD support:
 
 - event match;
+- current-state/fact predicate;
+- scene outcome;
+- world-event phase/outcome;
 - all;
 - any;
 - sequence;
@@ -677,6 +680,38 @@ policy:
 ```
 
 Actions may require additional input schema.
+
+The same action supports touch and terminal adapters.
+
+### Composed actions / ActionRecipe
+
+A builder MAY define a cartridge-local Action whose semantics are entirely composed from registered primitives rather than requiring a new engine command implementation.
+
+Representative recipe:
+
+~~~yaml
+key: ring_bell
+aliases: [ring, bell]
+target:
+  kind: inspectable_detail
+  ref: details/temple_bell
+policy:
+  all:
+    - target_present: true
+outcomes:
+  success:
+    events:
+      - temple/bell_rung
+    narration:
+      actor: narration.bell.actor
+      observers: narration.bell.room
+~~~
+
+A richer recipe may include typed costs, a Check, result bands, cooldown/duration, and registered consequence operators.
+
+The compiled recipe is immutable, schema-validated, bounded, and deterministic. The active authority still re-resolves the action and executes it through the normal semantic Command/decision path.
+
+ActionRecipe is preferred over LokaScript for simple new verbs. If the verb requires a genuinely new invariant or mutation semantic, add a versioned engine capability instead.
 
 The same action supports touch and terminal adapters.
 
