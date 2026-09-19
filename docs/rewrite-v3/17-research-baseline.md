@@ -167,7 +167,49 @@ Verified useful observations:
 
 See [20-classic-mud-lessons.md](20-classic-mud-lessons.md) for the design review and [21-composable-world-primitives.md](21-composable-world-primitives.md) for normative adaptations.
 
-## 8. Source freshness rule
+
+
+## 8. Jev / System One semantic-assessor candidate
+
+Jev is a newly released early-access model from TypeSafe AI and is **not** a Loka
+dependency or certification authority.
+
+Official references reviewed 2026-09-19:
+
+- TypeSafe introduction: <https://typesafe.ai/blog/introducing-system-one-models-and-jev>
+- TypeSafe workflow evaluations: <https://evals.typesafe.ai/>
+- TypeSafe overview: <https://typesafe.ai/>
+
+TypeSafe describes Jev as a System One model that takes structured/unstructured program
+state and returns typed probabilistic decisions rather than open-ended generated prose.
+Their published workflow examples emphasize decomposing automation into narrow typed
+questions plus deterministic code.
+
+This shape is potentially useful for Loka's high-volume **semantic triage**, for example:
+
+- route suspicious traces to the right deeper rubric;
+- prioritize quests/scenes/areas for full semantic review;
+- classify likely narrative/mechanical/infrastructure anomalies;
+- deduplicate reviewer findings;
+- rank coverage gaps for further testing.
+
+The architecture does **not** rely on current provider performance/cost/latency claims.
+
+Rules for any later Jev integration:
+
+- held-out local evaluation before adoption;
+- exact model/question-schema/threshold identity in evidence;
+- no sole-gold-label evaluation by the same model;
+- confidence-gated use with deterministic/full-review fallback;
+- no ability to waive deterministic gates, alter candidate content, establish reviewer
+  independence, or publish;
+- provider unavailability must make review slower/more conservative, never weaker.
+
+A conventional high-reasoning LLM remains more appropriate for open-ended narrative
+critique, causal consistency, adversarial scenario invention and explanations. Jev-style
+typed assessment and full semantic review are complementary, replaceable layers.
+
+## 9. Source freshness rule
 
 These external facts can change faster than the Loka architecture.
 
