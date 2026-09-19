@@ -345,6 +345,14 @@ A cartridge content hash covers:
 
 Runtime semantics are keyed to the normalized artifact, not to host-specific compiler output bytes.
 
+### Hash domains and attestations
+
+The canonical **cartridge/content hash** identifies the immutable semantic payload above. It MUST exclude signatures, certificate references/copies, catalog metadata, download-envelope metadata, and other values that can only be created after the semantic hash exists.
+
+Certification records reference the semantic hash. Signatures/attestations may sign that hash plus explicitly versioned release metadata. A downloadable archive MAY also have a separate **package/transport hash** covering its exact bytes.
+
+Do not create a self-referential hash cycle where adding `certificate-ref.json` or a signature changes the cartridge hash that the certificate/signature is supposed to attest.
+
 ## 12. Immutability
 
 Published cartridge release cannot be edited in place.
@@ -473,10 +481,10 @@ scripts.bin
 localization/
 asset-manifest.json
 schema-lock.json
-certificate-ref.json (after certification)
+certificate-ref.json (optional release-envelope material; excluded from semantic cartridge hash)
 ```
 
-Packaging format is implementation detail; canonical hash must be reproducible from normalized inputs.
+Packaging format is implementation detail. The semantic cartridge hash must be reproducible from normalized inputs; exact archive bytes may additionally use a separate package/transport hash.
 
 ## 21. Promotion states
 
