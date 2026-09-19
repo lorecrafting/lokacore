@@ -1387,6 +1387,31 @@ A script/scene attempts to create a brand-new arbitrary room schema at runtime.
 Validation/runtime refuses it; InstancePlan may instantiate only compiled definitions or
 registered bounded generation semantics explicitly supported by a capability.
 
+
+
+### INSTANCEPLAN-04 — Shared singleton is not cloned into instance
+
+An instanced dream/dungeon room references a Realm-unique NPC/service outside its declared
+instancing closure.
+
+The compiler/runtime requires an explicit supported import/binding or rejects the plan.
+It never silently creates a second authoritative copy.
+
+### INSTANCEPLAN-05 — Player-owned item is not duplicated by entry
+
+A player enters an InstancePlan while carrying a unique sword.
+
+Entry/reconnect/teardown preserve one authoritative custody/ownership path. The sword
+cannot exist simultaneously in the parent world and as an independent deep-copied
+instance item.
+
+### INSTANCEPLAN-06 — Temporary state exports only through declared contract
+
+Player acquires dream-only temporary objects and one declared narrative memory.
+
+On teardown, temporary objects disappear with the instance. The declared memory exports
+exactly once. No other instance-local state leaks back.
+
 ### SCENE-01 — Text cutscene survives crash
 
 A consequential text SceneSequence crashes after a checkpoint and before the next acknowledgement.
