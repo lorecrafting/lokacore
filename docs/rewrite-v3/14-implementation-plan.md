@@ -67,7 +67,7 @@ Definitions:
 - 1 NPC;
 - 1 item;
 - 1 player;
-- 1 flag;
+- 1 typed fact;
 - 1 quest;
 - 1 scheduled job;
 - 1 RNG check.
@@ -178,15 +178,18 @@ Make machine-readable contracts exist before features.
 - DefinitionRef schema;
 - cartridge manifest schema;
 - deployment schema;
-- capability registry format;
-- command registry;
-- domain-event registry;
-- effect registry;
+- campaign/continuity manifest schema;
+- capability registry + exact capability-lock format;
+- Action/ActionInvocation registry/schema;
+- portable semantic Command registry;
+- StateDelta schema/algebra;
+- DomainEvent registry;
+- Effect registry;
 - policy AST;
 - FactSpec / scoped narrative-state schema;
 - consequence-operator registry shape;
 - portable GameView schema;
-- portable kernel ABI/serialization contract;
+- portable-rules ABI/serialization contract selected by R1;
 - canonical serialization/hash rules;
 - diagnostic/error registry.
 
@@ -195,7 +198,7 @@ Make machine-readable contracts exist before features.
 From the portable/content registries, tooling can generate/check:
 
 - Elixir portable/domain types and validators;
-- TypeScript portable command/GameView/content types used by Story Mode;
+- TypeScript ActionInvocation/GameView/content types used by Story Mode, plus authority-internal semantic Command types only where the local authority adapter needs them;
 - capability/schema docs and help excerpts;
 - canonical test fixtures.
 
@@ -244,7 +247,7 @@ Establish world/state mechanics needed by everything else.
 - containment/location;
 - room/exits;
 - Search inputs/IDs;
-- flags/scoped variables;
+- typed facts and explicitly scoped runtime state;
 - logical clock;
 - RNG;
 - policies;
@@ -582,9 +585,15 @@ Full party certification including race/fault tests.
 
 ## R18 — Realm Mode persistent social shell
 
+### Boundary
+
+R18 introduces the **minimum single-node shared-hub authority** needed to prove shared presence, overlays, social UX, and scarce-service contention. It does not yet authorize generalized multi-zone partitioning or cross-shard handoff.
+
+The implementation may use one `ZoneShard`-shaped owner for this hub if that is the accepted ownership abstraction, but R20 owns the step from one shared authority domain to a partitioned Realm.
+
 ### Build selectively
 
-- shared-zone player/party overlay projection;
+- single shared-hub/zone player/party overlay projection;
 - lazy materialization/cleanup of phased quest actors;
 - shared NPC with player-specific dialogue/relationship projections;
 - Realm Service/Capacity primitives and durable ServiceJobs;
@@ -619,7 +628,7 @@ MMO player walks from shared town into a previously released storypack without r
 
 ### Objective
 
-Enable truly shared regions.
+Generalize the R18 single shared-hub authority into multiple explicit ownership domains with recoverable handoff and load/backpressure behavior.
 
 ### Build
 
@@ -634,7 +643,7 @@ Enable truly shared regions.
 
 ### Gate R20
 
-Synthetic concurrency/load + crash/handoff certification.
+Synthetic multi-zone concurrency/load + crash/fencing/handoff certification. Cross-zone player/party scoped state placement/routing must be explicitly resolved here rather than inferred from StateScope.
 
 ## R21 — Shared-area promotion
 
