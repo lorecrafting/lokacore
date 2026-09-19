@@ -1476,3 +1476,107 @@ ActionInvocation
 ~~~
 
 so a builder can explain why the story/world changed without reading arbitrary runtime script state.
+
+
+## Z. Release assurance and orchestrated role boundaries
+
+### CERT-01 — Frozen-candidate evidence binding
+
+Full certification begins on semantic hash H1.
+
+Content changes to H2 after some gates pass.
+
+H1 receipts cannot certify H2; affected gates rerun against H2 and the final certificate
+binds one exact evidence bundle/candidate hash.
+
+### CERT-02 — Coverage gap blocks required branch
+
+CoverageManifest shows one required quest outcome/SceneSequence terminal branch was never
+exercised or proven reachable.
+
+Release remains blocked until the branch is exercised/proven or explicitly reclassified
+under reviewed certification policy.
+
+### CERT-03 — Exhaustive claim requires actual exhaustion
+
+A small finite quest/scene model is fully enumerated and may report exhaustive coverage.
+
+A large bounded search reports its actual limits/path/seed counts and must not label "no
+failure found" as exhaustive proof.
+
+### CERT-04 — Mutation sensitivity
+
+A disposable mutant removes a quest prerequisite and another breaks Barrier coherence.
+
+The designated gates fail. If a mutant survives the gate expected to catch it, the
+certification/test suite itself is deficient and release blocks until addressed or
+the sensitivity obligation is explicitly revised.
+
+### CERT-05 — Model-generated adversarial case becomes deterministic evidence
+
+An LLM proposes a strange legal action/timing sequence that may soft-lock a storyline.
+
+The proposal alone changes no verdict. Lab converts it into typed state/actions/time/fault
+inputs, executes it deterministically, and stores either a counterexample regression or a
+passing scenario receipt.
+
+### CERT-06 — Semantic reviewer cannot waive mechanical blocker
+
+Semantic reviewer says a cartridge looks coherent while a deterministic invariant reports
+duplicate unique reward.
+
+Candidate remains failed.
+
+### CERT-07 — Fast Jev triage failure degrades safely
+
+Optional Jev-style triage is unavailable, stale, low-confidence or malformed.
+
+No mandatory evidence disappears. Certification falls back to deterministic/full-review
+routing and cannot become easier to pass.
+
+### CERT-08 — Evidence bundle explains pass
+
+Given a release certificate, an operator can resolve every mandatory gate to exact
+candidate/profile/check identity, coverage/exploration evidence, semantic finding
+disposition and relevant repro artifacts.
+
+A green summary with missing underlying required evidence is invalid.
+
+### FOUNDRY-01 — World builder cannot edit engine
+
+An orchestrated world_builder assignment receives Builder/Lab capabilities for L3–L6.
+
+It attempts engine-source modification or arbitrary shell use.
+
+The operation is unavailable/denied by the admitted role surface; no candidate engine
+change is created.
+
+### FOUNDRY-02 — Missing capability escalates without grant expansion
+
+A quest builder requests a mechanic not expressible by registered primitives.
+
+Builder returns MISSING_CAPABILITY/CapabilityProposal. The builder's existing grant is
+unchanged. Any engine-capability task requires a separate protected assignment.
+
+### FOUNDRY-03 — Same model different role does not share ambient authority
+
+The same model identity is used first as world_builder and later as engine developer.
+
+Each assignment receives only its admitted role surface. Credentials/tool access from the
+engine assignment are not ambiently available to the world-builder assignment.
+
+### FOUNDRY-04 — Role rename does not fake independent review
+
+A model that authored a frozen candidate is relaunched under a different role label/session
+and attempts to satisfy an independence-required semantic review.
+
+Protected orchestration rejects the independence claim from durable principal/candidate
+lineage.
+
+### FOUNDRY-05 — Reviewer cannot mutate candidate
+
+Semantic reviewer discovers a broken scene and tries to fix the workspace directly.
+
+Review surface is read/simulate/comment only. It returns findings; correction requires a
+separately authorized author assignment and renewed exact-candidate evidence.
+
