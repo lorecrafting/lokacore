@@ -1,6 +1,6 @@
 # 17 — Research Baseline and External References
 
-**Verified:** 2026-09-18 unless otherwise noted.
+**Verified:** 2026-09-19 unless otherwise noted.
 
 This appendix records external facts that influenced architecture decisions. It is not a substitute for rechecking fast-changing platform policies at implementation/release time.
 
@@ -139,7 +139,35 @@ Architectural consequence:
 - keep billing provider/region policy behind adapters;
 - reverify current Google policy immediately before implementation/submission instead of hardcoding “Play Billing is always mandatory everywhere.”
 
-## 7. Source freshness rule
+
+
+## 7. Classic MUD architecture evidence
+
+This pass reviewed classic codebases as clean-room architectural prior art, not as dependencies.
+
+Primary references:
+
+- preserved TinyMUD 1.5.4.1 source: <https://github.com/josefcub/tinymud154>
+- preserved DikuMUD source lineage: <https://github.com/sneezymud/dikumud>
+- DikuMUD Gamma archive: <https://github.com/DikuMUDOmnibus/DikuMUD-Gamma>
+- CircleMUD Builder's Manual: <https://www.circlemud.org/pub/CircleMUD/3.x/uncompressed/current/doc/building.pdf>
+- CircleMUD builder guidance: <https://www.circlemud.org/cdp/building/building-1.html>
+- tbaMUD/Circle lineage source used selectively for later comparison: <https://github.com/tbamud/tbamud>
+
+Verified useful observations:
+
+- Diku/Circle separate prototype definitions from runtime mobile/object instances.
+- Circle zone/reset data acts as a compact population/composition recipe linking rooms, mobiles, objects, equipment/containment, and door state.
+- Diku mobile behavior demonstrates strong emergent value from a small orthogonal behavior vocabulary.
+- Diku special procedures provide large local expressive power but do so through arbitrary callbacks that Loka should replace with typed ReactionRule/capability semantics.
+- Circle's extra descriptions demonstrate the value of lightweight targetable environmental detail.
+- Circle shops separate provider/catalog/trade policy/price/schedule concerns enough to inspire a typed Commerce composite.
+- TinyMUD's compact relational model makes location/containment, exits, ownership/control, locks, and target matching first-class.
+- TinyMUD builder commands operate at semantic world intent rather than generic storage-field mutation.
+
+See [20-classic-mud-lessons.md](20-classic-mud-lessons.md) for the design review and [21-composable-world-primitives.md](21-composable-world-primitives.md) for normative adaptations.
+
+## 8. Source freshness rule
 
 These external facts can change faster than the Loka architecture.
 
