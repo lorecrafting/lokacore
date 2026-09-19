@@ -367,6 +367,18 @@ The Lab forks immediately before a major choice.
 
 Its comparison report correctly identifies differing facts, access, NPC states, dialogue/action sets, spawned actors, and follow-up quests.
 
+### QST-29 — Prerequisite changes after activation
+
+A quest activates while prerequisite fact A is true. Later A becomes false for an unrelated world reason.
+
+The active QuestInstance does not silently disappear/deactivate. It changes lifecycle only if the quest explicitly declares a sustain/failure/branch rule for that condition.
+
+### QST-30 — Pre-activation events do not leak into progress
+
+The player kills a target before accepting a normal event-observation quest, then activates the quest.
+
+The old kill event does not retroactively advance the new QuestInstance. A quest that intends to credit already-satisfied state must use an explicit current-state or retroactive/history operator.
+
 ## E. Dialogue
 
 ### DIA-01 — Conditional choice
