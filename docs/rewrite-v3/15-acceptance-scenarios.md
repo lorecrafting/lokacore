@@ -1673,3 +1673,20 @@ analysis cannot prove local.
 Impact analysis marks the dependency boundary unknown and widens required authoring/
 release checks according to policy. It never reuses stale downstream receipts on the
 assumption that no static edge means no dependency.
+
+
+### CERT-15 — Friendly cartridge tests cannot replace mandatory gates
+
+A cartridge ships custom scenario tests that all pass but omits the failure path that
+duplicates a unique reward.
+
+Engine/profile mandatory invariant and mutation-sensitivity gates still run and fail the
+candidate. The cartridge's green custom suite is supplemental evidence only.
+
+### CERT-16 — Commercial semantic reviewer cannot own the candidate
+
+For a commercial release profile requiring independent semantic review, the candidate-
+authoring principal attempts to submit the semantic review under a new model/session/role.
+
+Independence validation rejects it from durable candidate/principal lineage; a separate
+review assignment must inspect the frozen candidate.
