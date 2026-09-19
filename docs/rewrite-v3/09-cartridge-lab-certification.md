@@ -1021,3 +1021,115 @@ Classify it into the relevant permanent suite:
 
 Certification should become harder to fool over time without making the whole suite
 depend on ever-growing LLM prompts.
+
+
+## 38. Area-level assurance: isolate, then mount
+
+An AreaDefinition SHOULD be testable as a coherent authored module before whole-cartridge
+release, but area isolation is not enough.
+
+A Level-1 **AreaAssuranceProfile** may declare:
+
+- area identity and exact source/artifact revision;
+- entry/exit/exported ports;
+- imported facts/capabilities/assumptions;
+- contained quests/scenes/dialogues;
+- PopulationPlans/merchants/services;
+- required neighboring definitions;
+- intended player-level/resource assumptions;
+- required reachable outcomes;
+- area-local performance envelope.
+
+Run the area in two modes:
+
+### Isolated harness
+
+Supply explicit fixtures for declared imports and test the area's own invariants:
+
+- every required room/detail/connection reachable under intended states;
+- local quests/scenes can reach all intended outcomes;
+- required NPCs/services exist when needed;
+- schedules remain navigable;
+- population/economy bounded;
+- no local reaction/event loop;
+- instance/scene teardown clean;
+- no undeclared external reference.
+
+### Mounted dependency closure
+
+Mount the area into its real cartridge/deployment dependency closure and retest:
+
+- imported facts/policies resolve as expected;
+- neighboring topology/ports bind correctly;
+- cross-area quests/rumors/services/reactions remain coherent;
+- schedule/pathfinding across area boundaries works;
+- global stock/economy/population policies remain bounded;
+- no name/target ambiguity introduced by neighboring content;
+- shared Realm scope/audience assumptions remain valid.
+
+An area passing isolated tests but failing mounted-closure tests is not releasable.
+
+Whole-cartridge/deployment certification remains mandatory because two individually
+healthy areas can interact badly.
+
+## 39. Change-impact analysis accelerates feedback but cannot shrink release truth
+
+Builder/Lab should compute a typed **ImpactSet** from the reference/dependency graph after
+a content edit.
+
+Potential affected surfaces include:
+
+- direct definition refs;
+- quests/scenes/dialogues consuming changed facts/events;
+- paths/topology reachable through changed Connection/Barrier;
+- NPC schedules/Behaviors;
+- ReactionRules;
+- PopulationPlans;
+- merchants/services/economy;
+- InstancePlans;
+- exported cartridge ports;
+- localization/presentation;
+- tests/regression fixtures.
+
+Use ImpactSet to choose fast Level-0/1 checks during authoring.
+
+For Level-2+ release certification, protected profile policy—not the author/model—decides
+which previously valid receipts may be reused and which gates rerun. High-risk semantic
+changes may force wider/full recertification even when static references look local.
+
+Examples:
+
+- prose typo -> localization/presentation checks may suffice for authoring feedback;
+- quest outcome FactSpec change -> all consumers + branch simulations rerun;
+- connection topology change -> path/schedule/quest reachability rerun;
+- capability-version change -> all dependent semantics/conformance rerun;
+- scope change player -> realm -> multiplayer/shared-area recertification.
+
+Impact analysis is an optimization, never authority to declare an exact candidate safe.
+
+## 40. Release-candidate soak and long-horizon simulation
+
+For living-world cartridges, final certification SHOULD include profile-appropriate
+long-horizon simulation from the frozen candidate, not only unit scenarios.
+
+Examples:
+
+- 30/90/365 logical-day runs where practical;
+- repeated day/night/shop/service cycles;
+- population death/replenishment;
+- resource regeneration/decay;
+- merchant restock and currency/item conservation;
+- quest deadline expiration;
+- WorldEvent recurrence/cleanup;
+- NPC schedule/path stability;
+- save/snapshot growth;
+- bounded retained history/memory/job state.
+
+Search multiple deterministic seeds and starting states.
+
+The goal is to expose slow leaks and contradictions that a short playthrough misses:
+population inflation, currency creation, orphan jobs, accumulating scene state, NPCs
+drifting permanently out of schedule, or events that never clean up.
+
+Soak success is still bounded evidence. The certificate records duration/seeds/state
+coverage rather than claiming proof over infinite time.
