@@ -1,6 +1,6 @@
 # Loka v3 Rebuild Specification Packet
 
-**Status:** Draft 0.2 — master architecture specification under iterative review; not implementation authorization  
+**Status:** Draft 0.3 — spec-integrity audit candidate; still awaiting independent adversarial review/acceptance; not implementation authorization  
 **Date:** 2026-09-18  
 **Source system:** `lorecrafting/lokacore`  
 **Strategic parent:** `docs/product/CARTRIDGE-ROADMAP.md`  
@@ -116,14 +116,14 @@ A released cartridge MUST remain playable without an AI model or authoring facto
                         /           \
                        /             \
           LocalStorySession       RemoteRealmSession
-          portable kernel          Phoenix transport
+          portable rules host      Phoenix transport
           local SQLite                  |
                                       BEAM
                               WorldInstance / ZoneShard
                                       |
                               DecisionCoordinator
                                /              \
-                    portable kernel      server-only
+                    portable rules       server-only
                                          Elixir rules
                                \              /
                                 StateDelta/events/effects
@@ -141,7 +141,7 @@ Astra / Foundry / human terminal / CI
 
 The mobile shell is shared; **authority is not**.
 
-Story Mode commits locally. Realm Mode sends commands to BEAM and never treats the embedded local kernel as authority.
+Story Mode resolves and commits locally. Realm Mode sends ActionInvocations to BEAM and never treats any embedded/local rules execution as Realm authority.
 
 The transport, authoring, runtime, domain, and persistence planes MUST remain separable.
 
@@ -160,14 +160,14 @@ The rebuild MUST use the strengths of Elixir/OTP intentionally:
 
 The rebuild MUST NOT turn every room, item, quest, or NPC into a GenServer merely because the BEAM makes processes cheap.
 
-The online authority/orchestration layer SHOULD remain idiomatic Elixir/OTP. Rules that must execute both offline and online SHOULD live in the shared portable deterministic kernel; server-only orchestration and capability adapters remain Elixir.
+The online authority/orchestration layer SHOULD remain idiomatic Elixir/OTP. Rules that must execute both offline and online MUST follow the portable deterministic semantic contract selected by R1. A shared native kernel is the working hypothesis; if R1 selects the documented dual-implementation fallback, golden conformance preserves the same contract. Server-only orchestration and capability adapters remain Elixir.
 
 ## 6. Working top-level decisions
 
-| Topic | Draft v0.2 decision |
+| Topic | Draft v0.3 decision |
 |---|---|
 | Online language/runtime | Elixir on BEAM/OTP |
-| Portable offline rules | Shared deterministic kernel; Rust is the working choice pending a mandatory cross-platform spike |
+| Portable offline rules | One deterministic portable semantic contract; a shared Rust kernel is the working hypothesis pending R1, with dual-implementation golden conformance as the fallback |
 | Server UI/API | Phoenix |
 | Mobile | One React Native / Expo app with strict Story Mode (local authority) and Realm Mode (remote BEAM authority) session boundaries |
 | Persistence | PostgreSQL for online/platform durability when those phases arrive; offline Story saves use local SQLite |
@@ -182,7 +182,7 @@ The online authority/orchestration layer SHOULD remain idiomatic Elixir/OTP. Rul
 | Scripting | declarative capabilities first; restricted Elixir-syntax LokaScript interpreter as escape hatch |
 | Builder | canonical typed Builder API; MCP/terminal/CLI are adapters |
 | Realm transport protocol | one machine-readable external schema with generated TypeScript/Elixir validation, introduced with Realm Mode |
-| Release | exact certified cartridge hash |
+| Release | exact certified semantic cartridge/deployment hash |
 | AI | author/reviewer/tool client, never runtime authority |
 
 ### Intentionally unresolved evidence gates
@@ -201,7 +201,7 @@ Read in this order:
 1. [Core Principles and Non-Goals](01-core-principles.md)
 2. [BEAM Runtime Architecture](02-beam-runtime-architecture.md)
 3. [Domain State and Persistence](03-domain-state-persistence.md)
-4. [Commands, Events, Effects, and Protocol](04-command-event-effect-protocol.md)
+4. [Action Invocations, Commands, State Deltas, Events, Effects, and Protocol](04-command-event-effect-protocol.md)
 5. [Cartridges, Content, and Capabilities](05-cartridges-content-capabilities.md)
 6. [Quests, Dialogue, Actions, and Scripting](06-quests-dialogue-actions-scripting.md)
 7. [Quest Sharing, Phasing, Instancing, and Scarce World Services](19-quest-sharing-instancing-capacity.md)
