@@ -610,7 +610,7 @@ Not every item in the broader primitive catalog is an R3/R5 implementation requi
 
 ### Authored area versus runtime shard
 
-An **AreaDefinition/WorldRegion** is a content/geography organization concept.
+An **AreaDefinition** is a content/geography organization concept.
 
 A **ZoneShard** is a Realm mutation-owner placement concept.
 
