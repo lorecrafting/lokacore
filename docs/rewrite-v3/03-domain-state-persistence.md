@@ -413,6 +413,7 @@ activated_logical_time
 outcome_id nullable
 objective_state JSONB
 variables JSONB
+event_delivery_state_or_ref nullable
 revision
 ended_at nullable
 ```
@@ -468,7 +469,11 @@ created_at
 updated_at
 ```
 
-The exact physical schema may normalize escrow/output separately, but allocation + escrow + ServiceJob creation MUST be one authoritative transaction.
+The exact physical schema may normalize escrow/output separately.
+
+When the service capacity and required inputs are owned by the **same mutation authority**, capacity allocation + input escrow + ServiceJob creation MUST be one authoritative transaction.
+
+If input custody crosses an authority boundary—for example a realm-wide service accepting an item currently owned by another shard—do not pretend the operation is one database transaction merely because both authorities use PostgreSQL. Use an explicit idempotent reservation/transfer protocol with durable intent, custody proof, cancellation/timeout, and reconciliation. The ServiceJob cannot enter a state that consumes the inputs until the owning service authority can prove the required custody/reservation step completed.
 
 Capacity allocation must have a database/authority invariant sufficient to prevent double allocation under concurrent submissions.
 
@@ -487,6 +492,7 @@ instance_id
 command_id
 invocation_id nullable
 actor_id
+semantic_command_digest
 accepted_revision
 result_code
 committed_revision
@@ -497,7 +503,9 @@ created_at
 
 Unique key: `(instance_id, command_id)`.
 
-If the same command is retried, runtime returns the prior committed result/ack rather than executing again. The receipt therefore MUST retain either the stable response payload required for retry or a durable reference from which that response can be reconstructed; a digest alone is insufficient.
+If the same command is retried with the same semantic command digest, runtime returns the prior committed result/ack rather than executing again. The receipt therefore MUST retain either the stable response payload required for retry or a durable reference from which that response can be reconstructed; a result digest alone is insufficient.
+
+If an already-used command/idempotency identity arrives with a **different semantic command digest**, the authority MUST reject it as an idempotency/integrity conflict. It must neither execute the new payload nor silently return the old result as though the requests were equivalent.
 
 ## 15. Transactional command commit
 
@@ -505,7 +513,7 @@ For a command changing durable state:
 
 ```text
 BEGIN
-  verify command_id not processed
+  verify command_id not processed, or exact semantic digest matches an existing receipt
   verify expected instance revision if supplied
   update affected runtime entities / quest instances
   update world instance revision + RNG/logical state
