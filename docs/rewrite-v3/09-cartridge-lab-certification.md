@@ -427,15 +427,21 @@ Each profile selects mandatory gates.
 
 Minimum required evidence:
 
+- frozen exact-candidate identity;
 - static/schema/reference validation;
+- topology/quest/scene/reaction model analysis;
+- CoverageManifest with required surfaces accounted for;
 - portable capability check;
-- deterministic kernel tests;
-- quest/dialogue model checks;
-- autonomous simulation where applicable;
+- deterministic kernel + registered invariant tests;
+- quest/dialogue/scene model checks;
+- bounded branch/path/seed exploration appropriate to the content;
+- autonomous/long-horizon simulation where applicable;
 - script fuzzing where scripts exist;
+- mutation-sensitivity obligations selected by the certification profile;
 - offline lifecycle/app-kill/storage/clock tests;
 - save and app/kernel compatibility;
-- semantic review;
+- semantic review with explicit blocker disposition;
+- CertificationEvidenceBundle bound to the candidate hash;
 - physical-device Story Mode smoke.
 
 Network availability MUST NOT be a prerequisite for certified ordinary play after acquisition/download.
@@ -446,6 +452,7 @@ Select `online_private_story`, `party_story`, or `shared_area`.
 
 Minimum evidence adds as relevant:
 
+- mounted dependency-closure validation for Areas used by the deployment;
 - protocol/version negotiation;
 - command receipt/idempotency;
 - PostgreSQL transactional recovery;
@@ -454,6 +461,8 @@ Minimum evidence adds as relevant:
 - authorization/abuse checks;
 - mailbox/backpressure/load envelope;
 - shard/handoff testing for shared areas;
+- long-horizon shared population/economy/service soak where applicable;
+- CertificationEvidenceBundle bound to cartridge + deployment hashes;
 - Realm Mode physical-device smoke.
 
 Realm certification does not require offline portability unless the content is explicitly a portable Story cartridge being reused online.
