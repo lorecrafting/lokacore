@@ -970,6 +970,14 @@ A stage may:
 
 Stage/milestone is not automatically another persisted QuestInstance lifecycle dimension. Where possible it compiles to ordinary objective/branch state plus named milestone events.
 
+### Storyline/arc grouping
+
+A **Storyline/ArcDefinition** MAY group several quests, scenes, expected branches, entry conditions, and endings for authoring, Lab coverage, catalog presentation, and certification.
+
+It is not another gameplay authority or mandatory progress store. Runtime truth remains in QuestInstances, scoped Facts, SceneInstances, and world state.
+
+This gives a long narrative a visible high-level spine without creating one giant monolithic quest.
+
 ## 33. SceneSequence: reusable narrative orchestration
 
 A **SceneSequence** is a registered narrative orchestration primitive reusable by quests and non-quest world events.
