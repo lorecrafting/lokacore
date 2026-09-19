@@ -269,7 +269,7 @@ Realm-scoped event intentionally changes all eligible players/world state; certi
 
 Player discovers a hidden shrine whose prerequisite facts are satisfied.
 
-The quest activates without an NPC giver, records the discovery event once, appears/reveals according to its activation mode, and can resolve automatically without a turn-in NPC.
+Before the discovery trigger there is no QuestInstance. The activation index identifies the definition as a candidate, the quest activates without an NPC giver, records the discovery event once, and its journal visibility follows the separate reveal/visibility policy. It can resolve automatically without a turn-in NPC.
 
 ### QST-16 — Multiplayer kill credit
 
@@ -964,6 +964,12 @@ Receipt claims processed command but durable response reference is missing/corru
 
 Runtime raises an integrity fault/resync path rather than re-executing mutation.
 
+### RECEIPT-03 — Reused idempotency identity with different command
+
+A previously committed Command ID/invocation identity is submitted again with a different semantic command payload.
+
+The stored semantic-command digest does not match. Runtime rejects with an idempotency/integrity conflict; it neither executes the new payload nor pretends the old response belongs to the different request.
+
 ### PLATFORM-01 — Web adapter cannot grant entitlement directly
 
 Attempt to mutate entitlement from Phoenix controller/channel without going through `loka_platform` application service/policy.
@@ -1201,6 +1207,14 @@ Cancelling a queued/in-progress order applies the configured cancellation/escrow
 A character/account attempts to monopolize the smithy with excessive queued orders.
 
 Configured max-outstanding/admission policy is enforced transactionally.
+
+### SERVICE-10 — Cross-authority input escrow
+
+A realm-wide service reserves scarce capacity while a required item is still owned by another authority domain.
+
+Crashes/retries are injected before and after reservation, custody transfer, acknowledgement, and ServiceJob activation.
+
+Recovery yields exactly one of: the requester still owns the item with no active consuming job, or the service owns/proves custody with one valid job. The item is never duplicated, lost, or spendable under both authorities, and stale provisional capacity is eventually released/reconciled.
 
 ### MIXED-01 — Personal quest + shared bottleneck + phased NPC
 
