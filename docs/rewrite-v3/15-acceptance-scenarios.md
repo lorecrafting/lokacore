@@ -1580,3 +1580,28 @@ Semantic reviewer discovers a broken scene and tries to fix the workspace direct
 Review surface is read/simulate/comment only. It returns findings; correction requires a
 separately authorized author assignment and renewed exact-candidate evidence.
 
+
+
+### CERT-09 — Area passes alone but fails mounted closure
+
+Area A's isolated fixture passes all local quest/path/population checks.
+
+When mounted next to Area B, a duplicate target alias makes a required text action
+ambiguous and a cross-area schedule route closes at night.
+
+Mounted dependency-closure certification catches both; area isolation cannot certify the
+release.
+
+### CERT-10 — Impact analysis cannot waive mandatory release gate
+
+A builder changes a quest outcome FactSpec and ImpactSet initially appears small.
+
+Protected release policy determines that consumers/reactions/branch world comparison must
+rerun. The author/model cannot reuse stale receipts merely by claiming the change is local.
+
+### CERT-11 — Long-horizon leak detection
+
+A PopulationPlan/merchant/restock interaction is correct for two days but slowly creates
+unbounded items/currency over 90 simulated days.
+
+Frozen-candidate soak certification detects invariant growth and blocks release.
