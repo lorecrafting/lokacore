@@ -206,12 +206,14 @@ Read in this order:
 5. [Cartridges, Content, and Capabilities](05-cartridges-content-capabilities.md)
 6. [Quests, Dialogue, Actions, and Scripting](06-quests-dialogue-actions-scripting.md)
 7. [Quest Sharing, Phasing, Instancing, and Scarce World Services](19-quest-sharing-instancing-capacity.md)
-8. [Offline Storypacks and the Path to the MMORPG](07-offline-storypacks-to-mmo.md)
+8. [Composable World Primitives and Builder Expressivity](21-composable-world-primitives.md)
+9. [Offline Storypacks and the Path to the MMORPG](07-offline-storypacks-to-mmo.md)
 10. [Builder API and AI Factory](08-builder-api-ai-factory.md)
 11. [Cartridge Lab and Certification](09-cartridge-lab-certification.md)
 12. [Mobile, Commerce, and Release](10-mobile-commerce-release.md)
 13. [Security, Observability, and Operations](11-security-observability-operations.md)
 14. [Evennia Design Review](12-evennia-lessons.md)
+15. [Classic MUD Design Review](20-classic-mud-lessons.md)
 16. [Lokacore Feature Inventory](13-lokacore-feature-inventory.md)
 17. [Implementation Plan](14-implementation-plan.md)
 18. [Acceptance Scenarios](15-acceptance-scenarios.md)
@@ -239,6 +241,7 @@ Implementation MUST conform to:
 - `10-mobile-commerce-release.md`
 - `11-security-observability-operations.md`
 - `19-quest-sharing-instancing-capacity.md`
+- `21-composable-world-primitives.md`
 - accepted decisions in `16-decision-register.md`
 
 ### Normative gates and sequencing
@@ -251,6 +254,7 @@ These define what evidence is required before later phases may depend on earlier
 ### Informative/reference evidence
 
 - `12-evennia-lessons.md`
+- `20-classic-mud-lessons.md`
 - `13-lokacore-feature-inventory.md`
 - `17-research-baseline.md`
 - `18-review-record.md`
