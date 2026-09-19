@@ -1413,7 +1413,7 @@ Both paths reach the definition's declared equivalent semantic checkpoint/outcom
 
 ### DREAM-01 — Private dream isolation
 
-Player enters a dream in a private_scene_instance.
+Player enters a dream using SceneSequence + SceneSpace `instance` backed by an InstancePlan.
 
 Dream-only entities/items/actions never become shared Realm state. On completion, only declared typed memory/fact/relationship consequences export exactly once.
 
