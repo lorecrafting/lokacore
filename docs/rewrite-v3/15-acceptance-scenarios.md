@@ -1251,3 +1251,190 @@ All scopes remain independent and correct.
 A portable Story cartridge with local overnight smithing is promoted.
 
 Promotion explicitly chooses whether Realm deployment uses personal capacity, an instanced service, or a genuinely shared service queue and runs the matching certification gates.
+
+
+## X. Composable world primitives and classic-MUD conformance
+
+### TARGET-01 — Deterministic target ambiguity
+
+Two visible targets share the same player-facing alias.
+
+Text input resolves to an explicit ambiguous result with stable candidates rather than random/first-source-order selection. An explicit ordinal/disambiguation then produces one ActionInvocation, which authority revalidates.
+
+### TARGET-02 — Touch and text target parity
+
+Touch selects a stable target ID while text resolves an alias to the same entity.
+
+Both paths resolve to the same semantic Command and outcome.
+
+### DETAIL-01 — Inspectable detail without entity inflation
+
+A room contains a mural InspectableDetail with aliases and a fact-dependent description.
+
+Look/examine can target it through TargetResolution, but it has no fake inventory/location identity and does not appear as a RuntimeEntity.
+
+### BARRIER-01 — Bidirectional barrier coherence
+
+North and south room faces reference one logical gate.
+
+Opening/locking/damaging the gate from either side changes one Barrier state and both projections agree after commit/reconnect.
+
+### AREA-01 — Authored area is not authority placement
+
+One AreaDefinition is hosted across two Realm ownership domains in a test deployment, while a second deployment hosts several small areas under one WorldInstance/ZoneShard.
+
+Content semantics do not depend on AreaDefinition == ZoneShard.
+
+### POP-01 — Population provenance-safe replenishment
+
+A PopulationPlan creates two wolves. One dies; a player drops an unrelated item and a quest mutates a nearby NPC.
+
+Reconciliation may replenish the owned wolf population but cannot delete/reset the unrelated item/NPC/quest state.
+
+### POP-02 — SpawnBundle explicit nesting
+
+A captain SpawnBundle creates equipment, inventory, and an item inside a container.
+
+All references are explicit and deterministic; there is no hidden previous-spawn context.
+
+### POP-03 — Scoped population cap
+
+The same population definition uses different player/instance/realm count scopes in certified fixtures.
+
+The cap is applied only in the declared scope; no accidental global max-existing behavior appears.
+
+### BEHAVIOR-01 — Deterministic intent conflict
+
+An NPC is simultaneously eligible to patrol east, flee west, and assist an ally.
+
+Registered arbitration semantics choose the same intent on every host independent of content file order.
+
+### BEHAVIOR-02 — No implicit wandering
+
+An NPC with no locomotion behavior remains in place indefinitely unless moved by another explicit rule.
+
+### REACT-01 — Typed reaction replaces special procedure
+
+A fact/event triggers a ReactionRule that changes guard behavior, emits narration, and opens an allowed action.
+
+The reaction uses typed consequences through the bounded decision chain and has no persistence/transport callback escape hatch.
+
+### REACT-02 — Reaction cycle bounded
+
+A pair of custom events/reactions would recursively trigger each other.
+
+Compile/runtime cycle/budget handling rejects or terminates deterministically without runaway event production.
+
+### NARRATE-01 — Actor/target/observer projection
+
+One social/interaction outcome produces different localized actor, target, and eligible-observer text from one NarrationSpec without changing game semantics.
+
+### COMMERCE-01 — Atomic immediate purchase
+
+A merchant with hours, admission policy, stock, price policy, and currency sells the final finite item.
+
+Payment + stock/item transfer commit once; concurrent/retried purchase cannot duplicate item or currency.
+
+### COMMERCE-02 — Merchant buys under policy/liquidity
+
+Player attempts to sell accepted, rejected, and over-liquidity items.
+
+SellAcceptancePolicy and LiquidityPolicy produce deterministic results without bespoke shopkeeper code.
+
+### COMMERCE-03 — Quest changes merchant world behavior
+
+Quest outcome changes a durable fact/reputation.
+
+Merchant catalog, price, or admission changes through derived policy/reaction semantics; the quest does not directly rewrite merchant internals.
+
+## Y. Quest scenes, dreams, cutscenes, and scripted world events
+
+### SCENE-01 — Text cutscene survives crash
+
+A consequential text SceneSequence crashes after a checkpoint and before the next acknowledgement.
+
+Resume restores the exact SceneInstance beat; already committed narration/consequences are not re-applied.
+
+### SCENE-02 — Choice idempotency
+
+Player chooses one branch, response is lost, and the same choice ActionInvocation is retried.
+
+Exactly one scene branch/outcome commits and downstream quest/world consequences occur once.
+
+### SCENE-03 — Modal/restricted authority enforcement
+
+During a restricted scene, client attempts an ordinary action hidden by the scene ActionSet restriction.
+
+Authority rejects/revalidates it even if a modified client sends it directly.
+
+### SCENE-04 — Skip policy preserves semantics
+
+A skippable presentation-heavy cutscene is completed normally and through skip.
+
+Both paths reach the definition's declared equivalent semantic checkpoint/outcome while optional presentation beats differ.
+
+### DREAM-01 — Private dream isolation
+
+Player enters a dream in a private_scene_instance.
+
+Dream-only entities/items/actions never become shared Realm state. On completion, only declared typed memory/fact/relationship consequences export exactly once.
+
+### DREAM-02 — Dream resume
+
+Story app closes or Realm player disconnects mid-dream.
+
+Resume restores the correct participant/SceneInstance state or follows the declared abandonment/restart policy without duplicating dream consequences.
+
+### QUESTSCENE-01 — Quest milestone starts scene
+
+A quest objective reaches a named milestone that starts one SceneSequence.
+
+Duplicate delivery/retry does not start a second scene. Scene completion emits a typed event that advances the intended objective/outcome.
+
+### QUESTSCENE-02 — Scene mutates world through typed consequences
+
+A cutscene choice results in a named quest outcome that changes a Fact, relationship, Barrier state, NPC behavior profile, and merchant availability.
+
+Same-authority changes commit atomically where applicable; no scene/quest directly edits component storage.
+
+### QUESTSCENE-03 — Branches leave visibly different worlds
+
+Lab forks before a quest branch and completes both paths.
+
+World-state comparison shows the intentionally different facts, NPC schedules/relationships, access, population/ambient/merchant behavior, follow-up quests, and narration projections.
+
+### WORLDEVENT-01 — Multi-phase scripted event
+
+A WorldEventPlan drives a festival/invasion fixture through phases using PopulationPlans, schedule changes, services/commerce, scenes, and quests.
+
+Every phase transition is typed, replayable, and deterministic; the plan is not a new mutation authority.
+
+### WORLDEVENT-02 — Quest contributes to shared event without owning it
+
+A player/party quest contributes typed progress to an instance/realm WorldEventPlan.
+
+Quest progress scope, event progress scope, participant credit, and scene audience remain explicit and independent.
+
+### SCENE-MP-01 — Shared scene does not block shard
+
+One party runs a barrier-synchronized scene while unrelated players continue using the same ZoneShard.
+
+Disconnected participant handling follows declared scene policy; the shard itself remains responsive.
+
+### NARRATIVE-TRACE-01 — Unified explainable story trace
+
+Cartridge Lab can trace:
+
+~~~text
+ActionInvocation
+ -> Command
+ -> DomainEvents
+ -> quest objective/milestone
+ -> SceneSequence beat/choice
+ -> quest outcome
+ -> world consequences
+ -> ReactionRules
+ -> resulting GameView
+~~~
+
+so a builder can explain why the story/world changed without reading arbitrary runtime script state.
