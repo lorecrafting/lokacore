@@ -312,7 +312,7 @@ A navigable spatial container with:
 - tags;
 - access/presence policy.
 
-### AreaDefinition / WorldRegion
+### AreaDefinition
 
 Authoring/geographical grouping used for:
 
