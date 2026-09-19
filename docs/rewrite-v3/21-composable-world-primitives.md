@@ -977,6 +977,7 @@ bounded participant/scope and lifecycle.
 Candidate fields:
 
 - source AreaDefinition / room-subgraph / exported entry port;
+- instancing closure/import bindings;
 - participant/admission policy;
 - semantic progress/consequence scope;
 - audience;
@@ -1001,6 +1002,33 @@ Examples:
 
 An InstancePlan creates **runtime instances of immutable definitions**. It does not
 dynamically invent uncertified room definitions.
+
+### Instancing closure and anti-cloning rules
+
+"Instantiate this area" MUST NOT mean "deep-copy every referenced runtime thing."
+
+The compiler/runtime determines an explicit **instancing closure**:
+
+- definitions inside the closure that declare compatible instancing semantics create
+  new instance-scoped runtime entities/state;
+- references to shared/external entities, services, account state, Realm facts, or other
+  authorities use explicit import/binding semantics;
+- singleton/unique/non-instantiable definitions cannot be cloned merely because they are
+  referenced by an instanced room;
+- player/account-owned inventory is transferred/represented only through its owning
+  authority contract, never duplicated into the instance;
+- shared merchants/services/factions may be referenced as shared services only when the
+  deployment explicitly allows that interaction; otherwise the instance uses its own
+  authored provider/entity;
+- exports on teardown are explicit typed consequences/continuity data, not arbitrary
+  copying of temporary state back to the parent world.
+
+The compiler should reject an InstancePlan whose closure/import/export semantics are
+ambiguous.
+
+This prevents an interactive dream, dungeon, or flashback from accidentally cloning a
+unique Realm NPC, duplicating a player's sword, or creating a second authoritative copy
+of shared economy/state.
 
 In Story Mode, a local authority may host the scoped subspace inside the same local
 world authority when that preserves one mutation owner.
