@@ -38,6 +38,8 @@ No unresolved contradiction about:
 - online authority;
 - ActionInvocation/Command/StateDelta/DomainEvent/Effect/GameView model;
 - persistence transaction semantics;
+- retry/idempotency semantics across reconnect and authority ownership movement;
+- durable cross-authority effect redelivery/reconciliation semantics;
 - scripting boundary;
 - mobile Story session/GameView boundary and the fact that Realm transport is intentionally deferred;
 - cartridge versioning.
