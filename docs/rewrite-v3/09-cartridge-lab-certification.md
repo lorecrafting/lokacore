@@ -392,6 +392,12 @@ Re-running a stochastic model later is not expected to reproduce identical prose
 
 A certification policy MAY require “no unresolved semantic blockers,” but a model response by itself cannot silently publish, waive, or mutate content.
 
+For a commercially published first-party cartridge/deployment, semantic review MUST be
+performed by a review assignment/principal that does not own mutation authority over the
+frozen candidate and satisfies the configured independence predicate from the authoring
+assignment/candidate lineage. Relaunching the author under a new role/model/session label
+does not satisfy this requirement.
+
 ## 19. Human smoke
 
 Required for commercial release:
@@ -440,7 +446,8 @@ Minimum required evidence:
 - mutation-sensitivity obligations selected by the certification profile;
 - offline lifecycle/app-kill/storage/clock tests;
 - save and app/kernel compatibility;
-- semantic review with explicit blocker disposition;
+- semantic review with explicit blocker disposition; commercial publication requires the
+  independent frozen-candidate reviewer rule from §18;
 - CertificationEvidenceBundle bound to the candidate hash;
 - physical-device Story Mode smoke.
 
