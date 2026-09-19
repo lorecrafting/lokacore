@@ -958,7 +958,9 @@ Examples:
 - duplicate reward/stock/custody;
 - crash/recovery inconsistency.
 
-Cannot be waived by an LLM.
+Cannot be waived by an LLM or by an ordinary content/release waiver. Changing what
+counts as a mechanical blocker requires an explicit reviewed certification/engine-policy
+revision and renewed evidence for affected candidates.
 
 ### Security/authority blocker
 
@@ -972,7 +974,7 @@ Examples:
 - cross-player data leak.
 
 Requires code/content correction or an explicit architecture/security process—not an
-ordinary content-editor waiver.
+ordinary content-editor, reviewer, release-agent, or model waiver.
 
 ### Semantic blocker
 
