@@ -149,21 +149,22 @@ The instance process routes commands through the shared DecisionCoordinator. Por
 
 It SHOULD NOT block on slow external I/O while holding command serialization. Persistence commits should be bounded and synchronous where correctness requires; non-authoritative notifications are effects.
 
-### Command lifecycle
+### Action/command lifecycle
 
 ```text
-1 client command arrives
-2 gateway authenticates + validates protocol
-3 command routed to owning WorldInstance
-4 instance checks command id / expected revision
-5 DecisionCoordinator evaluates portable + server-only rules into one proposal
-6 store transaction commits affected durable records + command receipt + effect outbox
-7 in-memory state advances to committed revision
-8 response/notifications are emitted
-9 durable outbox effects are dispatched/retried
+1 client ActionInvocation arrives
+2 gateway authenticates + validates transport/protocol
+3 invocation is routed to the owning WorldInstance/ZoneShard
+4 authority verifies actor control, re-resolves the current ActionSet, and constructs the typed Command
+5 authority checks idempotency identity and relevant expected authority revision
+6 DecisionCoordinator evaluates portable + server-only rules into one proposal
+7 store transaction commits affected durable records + command receipt + effect outbox
+8 in-memory state advances to committed revision
+9 response/projection notifications are emitted
+10 durable outbox effects are dispatched/retried
 ```
 
-The exact transaction strategy may batch entity changes, but step 6 must prevent a crash from producing half a logical action.
+The exact transaction strategy may batch entity changes, but step 7 must prevent a crash from producing half a logical action.
 
 ## 6. Why not one GenServer per entity by default
 
