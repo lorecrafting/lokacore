@@ -262,7 +262,7 @@ Model scarce world services by composing reusable capability primitives.
 A typical long-running service may compose:
 
 - **AdmissionPolicy** — who may request the service and under what prerequisites;
-- **CapacityPolicy** — concurrent slots, tokens per period, finite stock, reservation windows, or unlimited capacity;
+- **CapacityPolicy** — concurrent slots, tokens per period, finite stock, reservation windows, or unlimited capacity; period/window policies declare an explicit time basis and boundary rule;
 - **CapacityScope** — player, party, service entity, instance, realm, or another explicit owner;
 - **Queue/ReservationPolicy** — FIFO, reservation window, priority class, no queue, etc.;
 - **InputEscrow** — optional custody/reservation of materials/currency/items; atomic with job creation when the inputs and service share one mutation authority, otherwise performed through an explicit idempotent transfer protocol;
@@ -301,6 +301,7 @@ A ServiceJob records:
 - recipe/service;
 - input escrow;
 - submission time;
+- explicit time basis;
 - scheduled start;
 - scheduled finish;
 - status;
@@ -357,14 +358,15 @@ Correct composition:
 - world space: shared;
 - crafting completion: durable scheduler/domain event.
 
-Flow:
+Flow when requester inputs and service share one mutation authority:
 
     player invokes forge
       -> AdmissionPolicy validates materials/prerequisites
-      -> InputEscrow takes materials atomically
-      -> CapacityPolicy + Queue/ReservationPolicy reserve the next legal slot
-      -> ServiceJob is committed
+      -> authority computes capacity/queue allocation + escrow + ServiceJob proposal
+      -> one transaction commits reservation/allocation + escrow + ServiceJob
       -> service_job_submitted event
+
+For cross-authority inputs, replace the one-transaction step with the durable custody/reservation protocol above.
 
 At completion:
 
@@ -386,6 +388,18 @@ Possible meanings are different:
 - one reservation may be accepted per day.
 
 Content must choose one.
+
+### Period/window time semantics
+
+Any capacity, cooldown, reservation, or service schedule expressed as “per hour/day/week” MUST also declare enough information to make the window deterministic:
+
+- **time basis** — e.g. world logical time, accepted Story real-elapsed time, or an authoritative Realm/service clock;
+- **window kind** — rolling interval, fixed/anchored bucket, or named world-calendar period;
+- **anchor/calendar/timezone semantics** where a fixed civil/calendar boundary exists.
+
+“1 per day” MUST NOT silently mean device-local midnight in Story Mode and server UTC midnight in Realm Mode.
+
+For portable content, prefer world logical/calendar semantics when fiction permits. Realm-only real-world schedules use a server-authoritative time basis.
 
 ## 12. Shared service fairness and contention
 
