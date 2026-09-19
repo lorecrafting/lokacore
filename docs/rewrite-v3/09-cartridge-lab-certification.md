@@ -359,7 +359,7 @@ Performance warnings do not always block, but hard resource ceilings may.
 
 ## 18. Semantic review
 
-After deterministic gates:
+Semantic review runs **after deterministic/mechanical gates** and produces auditable review evidence. It is intentionally not treated as a deterministic game-rule oracle.
 
 Reviewer inspects:
 
@@ -378,6 +378,19 @@ Reviewer inspects:
 - private-to-shared deployment mismatches.
 
 Every semantic finding cites definitions/traces.
+
+The review record stores enough identity to audit what was judged, for example:
+
+- reviewer kind/provider/model and version when applicable;
+- rubric/prompt/policy revision;
+- input evidence bundle/hash;
+- output/findings hash;
+- blocker/warning disposition;
+- explicit waiver/resolution records.
+
+Re-running a stochastic model later is not expected to reproduce identical prose or findings. Release reproducibility comes from retaining the exact review evidence and disposition used by the certificate. Mechanical invariants remain enforced by deterministic/model/property tests rather than delegated to the reviewer.
+
+A certification policy MAY require “no unresolved semantic blockers,” but a model response by itself cannot silently publish, waive, or mutate content.
 
 ## 19. Human smoke
 
@@ -491,6 +504,7 @@ Machine-readable example:
     "semantic": "pass",
     "human_mobile": "pass"
   },
+  "semantic_review_evidence_hash": "...",
   "coverage": {...},
   "seeds": [...],
   "warnings": [...]
