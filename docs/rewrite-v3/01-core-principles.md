@@ -160,7 +160,7 @@ Presentation-only animation/audio calculations may use ordinary platform floatin
 
 ### A9. Idempotency at retryable boundaries
 
-Client commands, reward effects, purchase reconciliation, scheduled jobs, and promotion operations MUST have stable IDs or idempotency keys.
+Retryable ActionInvocations/Commands, reward operations/effects, purchase reconciliation, scheduled jobs, Builder mutations, and promotion operations MUST have stable IDs or idempotency keys. Reuse of an idempotency identity with a different semantic payload MUST fail as an integrity conflict.
 
 Retries MUST NOT duplicate:
 
