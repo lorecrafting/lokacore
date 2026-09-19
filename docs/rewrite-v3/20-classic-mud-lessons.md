@@ -50,7 +50,7 @@ Circle areas/zones are authoring modules containing geography, mobs, objects, sh
 
 Loka cartridges and explicit composition ports are a stronger package boundary.
 
-However, a cartridge may contain several coherent authored geographical regions. V3 should support an **AreaDefinition/WorldRegion** concept without equating it with an OTP ZoneShard.
+However, a cartridge may contain several coherent authored geographical regions. V3 should support an **AreaDefinition** concept without equating it with an OTP ZoneShard.
 
 ### Builder versus coder
 
