@@ -487,3 +487,253 @@ Personal quest actors use scoped AudiencePolicy/overlay presence under the share
 Shared NPCs remain shared when only dialogue/relationship differs.
 
 Full private instances are reserved for incompatible physical simulations such as destructive branches, exclusive bosses, puzzle resets, or heavily private scripted sequences.
+
+
+## 26. Draft 0.3 spec-integrity audit of the complete merged packet
+
+**Baseline:** `main@33c32e8d77e68dd3c5ab6eba9547f8588208063f` after PR #5.  
+**Scope:** all normative v3 documents, implementation/acceptance gates, decision register, informative architecture evidence where it could contradict the normative packet, and `docs/product/CARTRIDGE-ROADMAP.md`.
+
+This pass treated the packet as a clean-room implementation contract rather than a prose review. It looked specifically for places where a future implementation agent could make two different reasonable interpretations and still believe it had followed the spec.
+
+### 26.1 Canonical gameplay pipeline was present conceptually but not stated once
+
+**Finding:** Individual documents described touch actions, text parsing, Commands, decisions, Effects, persistence, and GameView, but not one canonical end-to-end pipeline. The quest/action document still allowed text parsing to appear to construct a Command directly.
+
+**Risk:** touch, text, bots, and Realm transport acquire subtly different authority/security semantics.
+
+**Correction:** the packet index now states one semantic spine:
+
+```text
+input
+  -> ActionInvocation
+  -> authority re-resolution/revalidation
+  -> semantic Command
+  -> decision
+  -> StateDelta + DomainEvents + Effects
+  -> authoritative commit/receipt/outbox
+  -> GameView
+```
+
+Text and gameplay bots now cross the same ActionInvocation boundary as touch clients. StateDelta is first-class and Effects are explicitly not a second state-write path.
+
+### 26.2 Authority, scope, audience, capacity, and placement were overloaded
+
+**Finding:** “authority,” “scope,” “service owner,” and client revision terminology could be read as aliases.
+
+**Risk:** a player-scoped quest could accidentally imply player-owned mutation state; a service aggregate could acquire an unnecessary GenServer; a client projection revision could be coupled to a busy ZoneShard database revision.
+
+**Correction:** the packet now distinguishes:
+
+- authority host;
+- mutation owner;
+- durable store;
+- semantic StateScope;
+- AudiencePolicy;
+- capacity scope/owner;
+- service aggregate/provider;
+- authority revision;
+- projection sequence;
+- opaque view-freshness token.
+
+StateScope is independent from process/table placement, audience, instancing, and contention policy.
+
+### 26.3 Idempotency did not fully survive reconnect or payload mismatch
+
+**Finding:** earlier examples mixed session identity into Command context and required stable IDs, but did not explicitly forbid ephemeral session identity from semantic idempotency. They also did not define what happens if an ID is reused with a different payload.
+
+**Risk:** a lost acknowledgement followed by reconnect can duplicate a state change, or an accidental/malicious ID collision can return the wrong prior response.
+
+**Correction:** semantic Command identity derives from durable/trusted authority context + controlled actor + invocation identity, never ephemeral session identity. Receipts store a semantic-command digest and replayable prior response/reference.
+
+- same identity + same digest -> replay prior committed result with no mutation;
+- same identity + different digest -> integrity/idempotency conflict.
+
+The transaction pseudocode now has an explicit early duplicate-replay path rather than “match and continue.”
+
+Builder mutations and atomic batch plans receive the same retry discipline.
+
+### 26.4 Online stale-owner protection needed fencing, not revisions alone
+
+**Finding:** optimistic state revision checks do not prevent a previously valid process from writing again after ownership has moved if its state revision still appears current.
+
+**Risk:** split-brain/failover corruption in the future shared Realm.
+
+**Correction:** any authority domain whose ownership may move requires an ownership/fencing generation or equivalently strong token at persistence commit. R20 explicitly owns the generalized multi-zone placement/fencing/handoff proof.
+
+### 26.5 Client projection ordering was incorrectly close to world revisioning
+
+**Finding:** the mobile protocol could be implemented as though every WorldInstance/ZoneShard revision maps 1:1 to one client's projection delta.
+
+**Risk:** false gap detection in busy shared zones, or hidden coupling between persistence and transport.
+
+**Correction:** three separate concepts are now normative:
+
+- authority revision: persistence/concurrency;
+- projection sequence: ordering for one client/subscription stream;
+- view-freshness token: stale-interaction evidence.
+
+They may correlate for diagnostics but are not required to be equal.
+
+### 26.6 Quest activation, availability, visibility, and history needed sharper boundaries
+
+**Findings:**
+
+- `hidden` had been mixed into activation modes even though it is a journal/presentation concern;
+- automatic/discovered quests need to react before a QuestInstance exists;
+- prerequisites after activation had no explicit sustain semantics;
+- pre-activation events could be interpreted as retroactive objective credit;
+- older roadmap/reference prose still showed the historical Lokacore lifecycle as though it were v3.
+
+**Corrections:**
+
+- activation is `offered | automatic | discovered`;
+- journal visibility/reveal is a separate axis;
+- activation indexes definitions separately from active QuestInstance event subscriptions;
+- prerequisites are revalidated at activation but do not silently deactivate an active quest;
+- event-observation objectives are post-activation by default;
+- “already have/know/current fact” uses explicit current-state predicates or declared history semantics;
+- the roadmap now labels the old lifecycle as historical and restates the v3 `active -> objectives_complete -> resolved(outcome_id)` model.
+
+### 26.7 Real-elapsed offline time had an implicit side channel
+
+**Finding:** “compare wall clock on resume” was directionally correct but did not specify crash/retry identity or hybrid-system clock choice.
+
+**Risk:** overnight jobs/deadlines can advance twice after an app crash, or portable systems read different clocks on different hosts.
+
+**Correction:** accepted real-elapsed time becomes an explicit idempotent resume-time advancement input processed through normal decision/commit semantics. Hybrid systems declare a named time basis; game rules do not read wall clock directly.
+
+### 26.8 Scarce services needed authority-aware escrow and precise time windows
+
+**Findings:**
+
+- the smithy example risked turning one illustrative bottleneck into a special subsystem;
+- “service owner” could imply one process per service;
+- “allocation + escrow + job creation in one transaction” is only true when all state shares one mutation authority;
+- “one per day” was underspecified.
+
+**Corrections:**
+
+- Service/Capacity/Reservation/ServiceJob remains generic and composable;
+- a service is a domain aggregate, not automatically an OTP process;
+- same-authority allocation + escrow + job creation is atomic;
+- cross-authority custody uses a durable idempotent reservation/transfer/proof/cancellation/reconciliation protocol;
+- period/window policies declare time basis, rolling/fixed/calendar semantics, and anchors where needed;
+- new acceptance scenarios cover both custody recovery and period-boundary behavior.
+
+### 26.9 Artifact identity and signing had a potential self-reference cycle
+
+**Finding:** the artifact layout included certificate reference/signature metadata while also describing the cartridge hash as covering the artifact.
+
+**Risk:** certification/signing changes the hash it is supposed to attest.
+
+**Correction:** the packet now separates:
+
+- semantic cartridge/deployment hash — normalized game semantics + compatibility locks;
+- certificate/signature/release envelope — attests the semantic hash;
+- optional package/transport hash — exact downloadable archive bytes.
+
+A published `cartridge_id@version` cannot later be rebound to a different semantic hash.
+
+### 26.10 Download/install parsing needed explicit hostile-input treatment
+
+**Finding:** signed/hash-addressed content alone does not protect against archive traversal, decompression bombs, duplicate-path ambiguity, or pathological allocations.
+
+**Correction:** cartridge ingestion now requires bounded extraction/allocation, normalized paths, duplicate-path rules, media/type validation where relevant, and atomic staging-before-activation even for signed first-party packages.
+
+### 26.11 LokaScript wall-time timeout conflicted with cross-host determinism
+
+**Finding:** the script budget listed wall execution time beside deterministic AST/query/effect budgets.
+
+**Risk:** the same valid cartridge can “fail normally” on a slower phone while succeeding on a server.
+
+**Correction:** deterministic step/resource budgets define script semantics. A host wall-time kill switch remains defense in depth only; firing it on certified supported input is a runtime/conformance failure, not a cartridge-visible branch.
+
+Mutation bindings were also renamed away from `effect.spawn/move/damage/...` so the scripting surface does not reintroduce Effect as a generic mutation bucket.
+
+### 26.12 The Rust hypothesis leaked into permanent requirements
+
+**Finding:** several conformance/certificate/CI passages still hard-coded Rust/Rustler/iOS/Android even though ADR-004/005 are provisional.
+
+**Risk:** R1 could “reject Rust” on paper while later gates still require it.
+
+**Correction:** permanent requirements now describe the portable semantic/conformance obligation first. Rust/Rustler/native bindings become the concrete host matrix only if R1 accepts the shared-Rust strategy. The dual-implementation fallback has the same golden-conformance obligation.
+
+### 26.13 The product roadmap drifted from normative sequencing
+
+**Findings:**
+
+- roadmap immediate order generalized Builder API before the first real cartridge, contradicting the reviewed R10 -> R11 strategy;
+- roadmap vocabulary invented `persistent_world` as though it were another execution profile;
+- old quest lifecycle wording survived;
+- R18 appeared to use shared-zone architecture before R20 introduced shard architecture.
+
+**Corrections:**
+
+- substantially hand-author/certify the first real cartridge before generalizing Builder API;
+- runtime profiles remain `offline_private | online_private | party | shared_area`; embedded instances/persistent world are compositions/topologies, not silent extra profiles;
+- quest vocabulary is reconciled;
+- R18 now proves one single-node shared-hub authority; R20 generalizes to multiple ownership domains, placement/routing, fencing, and cross-zone handoff.
+
+### 26.14 Semantic AI review needed an evidence model rather than pretend determinism
+
+**Finding:** exact-hash certification included semantic model review without distinguishing deterministic gates from stochastic reviewer output.
+
+**Risk:** “reproducible certificate” could incorrectly mean re-running a future model must produce the same prose/verdict.
+
+**Correction:** semantic review is auditable evidence after deterministic gates. The certificate retains reviewer/model identity where applicable, rubric/prompt policy revision, evidence-bundle hash, findings/output hash, and blocker/waiver disposition. Models do not publish, waive, or mutate content by themselves.
+
+### 26.15 Decision register now records the newly important invariants
+
+The accepted register was updated to make the following explicit rather than leaving them scattered in prose:
+
+- ActionInvocation / Command / StateDelta / DomainEvent / Effect / GameView separation;
+- session-independent idempotency;
+- StateScope independent from physical placement;
+- projection sequencing independent from authority revision;
+- stale-owner fencing once ownership may move;
+- idempotent real-elapsed Story resume inputs;
+- semantic artifact hash separated from attestation/package envelopes;
+- deterministic script budgets versus host safety timeout;
+- same-authority versus cross-authority scarce-service transactions.
+
+A checkpoint map also identifies which provisional/deferred ADRs actually block which future milestones.
+
+### 26.16 External assumption recheck
+
+The portability/release assumptions were rechecked against current official material during this pass. The result did not justify reversing R1:
+
+- Expo development builds continue to support custom native code;
+- React Native continues to document cross-platform native/C++ module paths;
+- Rustler remains a viable BEAM/Rust bridge with scheduler constraints that the spike must measure;
+- downloadable rule/software treatment remains a current App Store review question, so the packet correctly keeps bounded rule representation/store review as an evidence gate rather than assuming approval.
+
+The stable architecture therefore remains abstraction-first and avoids selecting a production binding generator in the specification.
+
+### 26.17 Remaining deliberate open gates
+
+This audit does **not** paper over questions that require implementation or release evidence:
+
+1. **R1 / ADR-004/005:** shared Rust kernel versus the accepted dual-implementation fallback, including mobile bridge maintenance, FFI/state-crossing cost, debugging, determinism, and Expo/EAS release ergonomics.
+2. **ADR-035 / commercial release:** exact downloadable rule representation and current App Store review posture.
+3. **R20:** long-lived cross-zone placement/routing for player/party state once the Realm is genuinely partitioned; StateScope alone intentionally does not decide this.
+4. **Product policy details:** monetization/pricing, revocation UX, and later creator-marketplace policy remain product/release decisions rather than engine invariants.
+
+### 26.18 Audit conclusion
+
+The packet does not need a wholesale architectural rewrite.
+
+Its core direction remains coherent:
+
+- clean-sheet implementation;
+- offline-first Story authority;
+- BEAM-native Realm authority;
+- a narrow portable deterministic semantic layer;
+- explicit state scopes and ownership domains;
+- immutable certified cartridges/deployments;
+- facts/consequences instead of quest puppeteering;
+- shared-world overlays before unnecessary instancing;
+- reusable service/capacity primitives instead of feature-specific bottleneck code;
+- prove a real game before over-generalizing authoring/factory tooling.
+
+The Draft 0.3 branch tightens the places where a competent implementation agent could previously choose materially different semantics. It should receive an independent high-reasoning adversarial pass before R0 acceptance.
