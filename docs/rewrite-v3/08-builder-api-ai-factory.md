@@ -28,7 +28,7 @@ Constraints:
 - cartridge must compile against portable capabilities only;
 - offline save/campaign semantics required;
 - no realm/global service assumptions;
-- default quest scope is player/campaign;
+- default runtime quest scope is player; campaign continuity is handled through explicit continuity exports/imports rather than a fifth runtime scope;
 - certification profile is offline-first;
 - economy/power remains local to the story/campaign lineage.
 
@@ -352,17 +352,19 @@ Support a batch plan:
     {...},
     {...}
   ],
-  "mode": "atomic_if_possible"
+  "mode": "atomic"
 }
 ```
 
 Builder API may:
 
-- validate entire plan before write;
-- apply to temporary revision;
-- return diff;
+- validate the entire plan before write;
+- apply it to a temporary revision;
+- return the diff;
 - reject if expected references break;
-- optionally commit as one workspace revision.
+- commit atomic workspace mutations as one workspace revision.
+
+If a future batch includes operations that cannot be atomic, that must be an explicit different mode with per-operation receipts/recovery semantics. Do not make `atomic_if_possible` silently weaken atomicity.
 
 For file-backed first-party source, implementation may use a staging tree and atomic Git/workspace commit.
 
