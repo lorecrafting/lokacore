@@ -245,7 +245,7 @@ Prefer derived/on-demand systems where simulation reveals meaningless tick load.
 
 ## 12. Bot personas
 
-Bots use the same canonical command contract.
+Gameplay bots SHOULD use the same ActionInvocation → GameSession → authority path as real touch/text clients so they exercise action availability and stale-input rules. Lower-level reducer/property tests may construct semantic Commands directly when the layer under test is intentionally below that boundary.
 
 Profiles:
 
