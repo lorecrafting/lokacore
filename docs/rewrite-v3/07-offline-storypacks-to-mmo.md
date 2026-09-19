@@ -495,7 +495,7 @@ Use explicit classes:
 
 ```text
 cartridge_local
-  flags/entities/quest state meaningful only inside one cartridge
+  facts/entities/quest state meaningful only inside one cartridge
 
 campaign_character
   portable character stats/equipment only when the campaign rules declare them shared
