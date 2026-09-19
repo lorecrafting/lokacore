@@ -353,7 +353,7 @@ A quest outcome in ZoneShard A produces an idempotent effect intended for a Real
 
 Crash/failure occurs after local outcome commit but before remote acknowledgement.
 
-Outbox/reconciliation retries the remote operation exactly once without rolling back or duplicating the local quest outcome.
+Outbox delivery may occur more than once. Every retry carries the same stable effect/idempotency identity; the Realm-wide service applies the authoritative consequence at most once and returns/reconstructs the same acknowledgement. If retry policy reaches terminal failure, the required reconciliation path remains durable and visible rather than silently dropping the consequence. The local quest outcome is not duplicated or implicitly rolled back.
 
 ### QST-27 — Area unlock preserves reachability
 
@@ -473,6 +473,12 @@ The server ignores local decision output and accepts only the ActionInvocation, 
 A Realm ActionInvocation commits, the acknowledgement is lost, and the client reconnects under a new session ID before retrying the same invocation ID.
 
 The authority derives the same semantic Command/idempotency identity and returns the prior result. The action executes once; ephemeral session identity does not mint a new mutation.
+
+### ACT-14 — Invocation retry after authority handoff
+
+A Realm ActionInvocation commits on ZoneShard A and causes the controlled character to hand off to ZoneShard B. The acknowledgement is lost after commit/ownership transfer.
+
+Retrying the same invocation ID through normal post-handoff routing reaches/reconstructs the original receipt and returns the prior result. ZoneShard B MUST NOT derive a fresh mutation identity from its new ownership and execute the action a second time.
 
 ## G. Scripting
 
@@ -714,9 +720,9 @@ Restart loads committed revision; retry returns receipt.
 
 ### ONL-04 — Outbox retry
 
-External durable effect fails transiently.
+External durable effect commits locally, delivery succeeds remotely, but the acknowledgement is lost.
 
-Retries with same idempotency key.
+The outbox may redeliver the effect with the same idempotency key. The receiver applies the authoritative consequence once, returns/reconstructs the prior acknowledgement on duplicate delivery, and the sender eventually marks the effect complete. Network delivery itself is not assumed to be exactly once.
 
 ### ONL-05 — World owner duplicate
 
