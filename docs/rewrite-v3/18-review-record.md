@@ -795,7 +795,7 @@ The packet now explicitly defines/adopts the direction for:
 - SpawnBundle + provenance-safe PopulationPlan instead of destructive zone reset;
 - ReactionRule instead of arbitrary special-procedure callbacks;
 - deterministic Behavior intent arbitration rather than source-order behavior;
-- AreaDefinition/WorldRegion separate from ZoneShard ownership placement;
+- AreaDefinition separate from ZoneShard ownership placement;
 - audience-aware NarrationSpec;
 - typed commerce/merchant composition.
 
