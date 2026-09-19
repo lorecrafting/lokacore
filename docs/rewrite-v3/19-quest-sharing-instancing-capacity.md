@@ -265,7 +265,7 @@ A typical long-running service may compose:
 - **CapacityPolicy** — concurrent slots, tokens per period, finite stock, reservation windows, or unlimited capacity;
 - **CapacityScope** — player, party, service entity, instance, realm, or another explicit owner;
 - **Queue/ReservationPolicy** — FIFO, reservation window, priority class, no queue, etc.;
-- **InputEscrow** — optional atomic custody of materials/currency/items;
+- **InputEscrow** — optional custody/reservation of materials/currency/items; atomic with job creation when the inputs and service share one mutation authority, otherwise performed through an explicit idempotent transfer protocol;
 - **DurationPolicy** — instant, fixed duration, recipe-defined duration, or scheduled window;
 - **CompletionRule** — what constitutes successful completion/failure;
 - **OutputPolicy** — immediate delivery, claimable output, beneficiary ownership, shared result;
@@ -320,6 +320,22 @@ Status examples:
 The owning **mutation authority** owns the queue/reservation/timing semantics for the service aggregate.
 
 A service/provider does not automatically receive its own OTP process. In a private world it will usually be state inside the WorldInstance/LocalStory authority; in a shared Realm it may be state inside a ZoneShard or, when genuinely realm-wide concurrency warrants it, a dedicated shared-service authority.
+
+### Escrow across authority boundaries
+
+When requester inputs and the service queue share one mutation authority, admission, slot allocation, escrow, and ServiceJob creation SHOULD commit atomically.
+
+If they live under different authorities, use an explicit durable protocol instead of a pretend distributed transaction. A safe protocol must define:
+
+- stable request/reservation identity;
+- provisional capacity reservation where necessary;
+- input custody/transfer intent;
+- acknowledgement/custody proof;
+- timeout/cancellation;
+- crash/retry reconciliation;
+- the exact point at which the ServiceJob may become queued/in-progress.
+
+A failed cross-authority handoff must not strand, duplicate, or simultaneously expose the same item/currency under both authorities.
 
 The quest only observes typed service/job DomainEvents.
 
