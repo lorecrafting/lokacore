@@ -1,4 +1,4 @@
-# 11 — Evennia Design Review: What Loka v3 Should Learn
+# 12 — Evennia Design Review: What Loka v3 Should Learn
 
 **Review baseline:** current Evennia documentation and main-branch architecture reviewed 2026-09-17.
 
@@ -113,7 +113,7 @@ Merge operations:
 - **replace** — transformation/modal state;
 - **override** — same action key with higher-priority implementation.
 
-Then evaluate typed conditions and return a server-resolved `ActionSet`.
+Then evaluate typed conditions and return an authority-resolved `ActionSet` (local Story authority or BEAM Realm authority).
 
 This serves both:
 
@@ -136,9 +136,9 @@ policy:
     - permission: builder
     - any:
         - has_item: shrine_key
-        - quest_state:
+        - quest_outcome:
             quest: temple_intro
-            state: completed
+            outcome: completed
 ```
 
 Required operators may include:
@@ -149,7 +149,7 @@ Required operators may include:
 - tag;
 - attribute/stat comparison;
 - inventory ownership;
-- quest state;
+- quest availability/lifecycle/outcome;
 - faction/reputation;
 - world scope;
 - time/window.
