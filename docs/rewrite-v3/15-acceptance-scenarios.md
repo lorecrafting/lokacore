@@ -1069,7 +1069,7 @@ Original cartridge hash remains unchanged; promotion creates a new deployment/ad
 
 ### BUILDTARGET-05 — Promotion surfaces multiplayer questions
 
-Promotion of a cartridge containing permanently killable quest giver, unique loot, and player-local door flags returns structured required decisions for respawn, contention, and scope before shared-area certification can pass.
+Promotion of a cartridge containing a permanently killable quest giver, unique loot, and player-local access facts returns structured required decisions for respawn, contention, and scope before shared-area certification can pass.
 
 ### ENTITLEMENT-01 — Local ownership is not Realm authority
 
