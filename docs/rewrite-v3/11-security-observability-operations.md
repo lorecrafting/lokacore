@@ -106,10 +106,12 @@ Defense in depth:
 - step counter;
 - effect/query quotas;
 - memory/collection limits;
-- timeout outer guard;
+- non-semantic host wall-time kill switch as an outer safety guard;
 - result size;
 - telemetry;
 - certification fuzz suite.
+
+Deterministic step/query/memory/effect budgets define normal script failure semantics. The host wall-time guard exists only to protect a device/process from implementation failure or pathological behavior and MUST NOT become a cartridge-visible cross-host timing rule. If it fires during certified supported input, treat that as a runtime/conformance fault.
 
 If public scripting arrives, conduct a dedicated security review and consider additional OS-process isolation even with the custom interpreter.
 
