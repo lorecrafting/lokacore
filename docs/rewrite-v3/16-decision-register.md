@@ -579,7 +579,7 @@ Systems in hybrid time mode declare their time basis; they do not read wall cloc
 
 Loka maximizes builder expressive power through layered composition of registered semantics.
 
-Builders may define and compose facts/events, policies/selectors, Actions, ReactionRules, Behaviors, state machines, population plans, commerce/services, scenes, quests, world events, templates, and bounded LokaScript.
+Builders may define and compose facts/events, policies/selectors, Actions/ActionRecipes, ReactionRules, Behaviors, state machines, population plans, commerce/services, scenes, quests, world events, templates, and bounded LokaScript.
 
 Cartridge content cannot introduce arbitrary persistence writes, host callbacks, unregistered mutation/effect types, or a second authority model.
 
