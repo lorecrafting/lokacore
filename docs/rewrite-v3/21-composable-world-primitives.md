@@ -965,7 +965,63 @@ Foundation narrative vocabulary should include:
 
 Detailed quest/scene semantics live in [06 — Quests, Dialogue, Actions, and Scripting](06-quests-dialogue-actions-scripting.md).
 
-## 19. Scene and sequence primitives
+## 19. Spatial instance and scene primitives
+
+### InstancePlan / scoped spatial instance
+
+Interactive temporary spaces are a spatial primitive, not a special dream mechanic.
+
+An **InstancePlan** describes how precompiled spatial definitions are instantiated for a
+bounded participant/scope and lifecycle.
+
+Candidate fields:
+
+- source AreaDefinition / room-subgraph / exported entry port;
+- participant/admission policy;
+- semantic progress/consequence scope;
+- audience;
+- authority placement policy;
+- entry/exit/mount bindings;
+- initial SpawnBundles / PopulationPlans / ActivationGroups;
+- persistence policy;
+- reset/re-entry policy;
+- teardown/expiry policy;
+- reconnect policy;
+- explicit export/continuity rules.
+
+Examples:
+
+- private quest dungeon;
+- party puzzle;
+- dream world;
+- memory/flashback;
+- tutorial simulation;
+- trial/ritual space;
+- temporary event arena.
+
+An InstancePlan creates **runtime instances of immutable definitions**. It does not
+dynamically invent uncertified room definitions.
+
+In Story Mode, a local authority may host the scoped subspace inside the same local
+world authority when that preserves one mutation owner.
+
+In Realm Mode, genuinely independent physical simulation uses the existing
+WorldInstance/private-party instancing contract. The plan does not imply that each room
+or scene receives its own process.
+
+### SceneSpace
+
+A SceneSequence chooses a **SceneSpace** independently from its narrative beats:
+
+- `current_world` — ordinary current world geometry/state;
+- `scoped_overlay` — shared geometry with participant-specific presence/presentation/actions;
+- `instance` — an InstancePlan-created temporary/private/party spatial simulation.
+
+This lets one SceneSequence primitive support both a two-paragraph vision and a fully
+interactive dream dungeon without conflating sequencing with spatial simulation.
+
+
+## 20. Scene and sequence primitives
 
 A **SceneSequence** is a reusable, recoverable orchestration primitive for:
 
@@ -998,7 +1054,7 @@ Scene steps do not directly edit arbitrary state.
 
 A consequential SceneInstance is durable/idempotent and can resume after crash/reconnect.
 
-## 20. WorldEventPlan composite
+## 21. WorldEventPlan composite
 
 A world event is a higher-level composition, not a new authority.
 
@@ -1019,7 +1075,7 @@ A WorldEventPlan may compose:
 
 This pattern lets a builder create large living-world changes from existing primitives.
 
-## 21. Examples of emergent domain composites
+## 22. Examples of emergent domain composites
 
 ### Merchant
 
@@ -1123,7 +1179,7 @@ WorldEventPlan phase machine
 
 The value of the primitive architecture is that none of these require one giant hardcoded subsystem.
 
-## 22. Builder semantic operations
+## 23. Builder semantic operations
 
 The Builder API SHOULD expose intent-level operations in addition to generic CRUD.
 
@@ -1165,7 +1221,7 @@ These operations:
 - support dry-run/diff;
 - are available to terminal/MCP/AI through the same canonical API.
 
-## 23. Primitive graduation rule
+## 24. Primitive graduation rule
 
 Do not make every brainstormed concept a foundation requirement.
 
@@ -1182,7 +1238,7 @@ Otherwise keep it as a composition recipe, template/archetype, ReactionRule, que
 
 This prevents primitive from becoming another word for every possible feature.
 
-## 24. Builder expression test
+## 25. Builder expression test
 
 Before accepting the v3 primitive layer, an advanced builder should be able to express—without engine-code changes—examples such as:
 
@@ -1204,7 +1260,7 @@ If such content requires arbitrary host code despite all needed semantic atoms a
 If expressing it requires bypassing typed authority semantics, the composition layer is too powerful in the wrong way.
 
 
-## 25. Choosing the right composition shape
+## 26. Choosing the right composition shape
 
 Builder tooling SHOULD guide authors toward the smallest semantic shape that fits the mechanic.
 
@@ -1240,9 +1296,9 @@ declarative configuration
 
 The ordering is not a strict hierarchy of runtime cost; it is an **escape-hatch discipline**. Use the most specific typed construct that captures the invariant.
 
-## 26. Additional immersive-world capability candidates
+## 27. Additional immersive-world capability candidates
 
-The following families are worth preserving in the design vocabulary, but they are **not all foundation requirements**. They graduate under §23 only when real cartridge/Realm evidence justifies them.
+The following families are worth preserving in the design vocabulary, but they are **not all foundation requirements**. They graduate under §24 only when real cartridge/Realm evidence justifies them.
 
 ### Knowledge, secrecy, and information flow
 
