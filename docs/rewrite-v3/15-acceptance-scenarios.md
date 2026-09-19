@@ -23,12 +23,9 @@ the kernel returns canonically identical result across repeated runs.
 
 ### DET-02 — Cross-host equivalence
 
-Run the same fixture through:
+Run the same fixture through every host implementation/adapter required by the R1-selected portable-execution strategy.
 
-- direct kernel;
-- BEAM/Rustler adapter;
-- iOS binding;
-- Android binding.
+For a shared native kernel this includes direct/native, BEAM, iOS, and Android host paths. For the documented dual-implementation fallback, compare the accepted Elixir and mobile implementations instead.
 
 Domain-result hash MUST match.
 
@@ -151,6 +148,12 @@ Save still opens with v1.2 or performs explicit certified migration.
 Attempt to delete v1.2 artifact while save requires it.
 
 Deletion blocked or save migration/deletion explicitly required.
+
+### OFF-13 — Resume-time advancement retry
+
+A real-elapsed Story save resumes after an absence. The authority samples/clamps elapsed time and commits a resume-time advancement input, then the app crashes before presenting the updated view.
+
+Restart/retry does not apply the same elapsed interval twice; scheduled jobs/deadlines observe exactly one accepted advancement.
 
 ## C. Containment and inventory
 
@@ -453,6 +456,12 @@ A modified one-app client computes a favorable local result for a Realm action a
 
 The server ignores local decision output and accepts only the ActionInvocation, then performs its own authoritative resolution/decision.
 
+### ACT-13 — Invocation retry after reconnect
+
+A Realm ActionInvocation commits, the acknowledgement is lost, and the client reconnects under a new session ID before retrying the same invocation ID.
+
+The authority derives the same semantic Command/idempotency identity and returns the prior result. The action executes once; ephemeral session identity does not mint a new mutation.
+
 ## G. Scripting
 
 ### SCR-01 — Allowed binding
@@ -569,6 +578,20 @@ Installed app lacks required renderer capability.
 
 Offline launch fails gracefully before save mutation; online catalog blocks/requests update.
 
+### CAR-08 — Hostile package structure
+
+A signed or unsigned cartridge archive attempts path traversal, duplicate-path confusion, or decompression far beyond declared resource limits.
+
+Install fails in staging before activation; no filesystem escape or unbounded extraction occurs.
+
+### CAR-09 — Published version cannot be rebound
+
+`story@1.2.0` is already published at hash H1.
+
+A different artifact H2 attempts publication under the same cartridge ID/version.
+
+Publication fails; a new semantic version/release is required.
+
 ## J. Builder/AI
 
 ### BLD-01 — Revision conflict
@@ -615,11 +638,11 @@ Elixir and TypeScript fixtures decode same message schema.
 
 Unsupported protocol version rejected with typed upgrade response.
 
-### PROTO-03 — Revision gap
+### PROTO-03 — Projection-sequence gap
 
-Client misses delta.
+Client misses a projected delta/message.
 
-Detects gap and resyncs snapshot.
+It detects a gap in its projection stream sequence and resyncs from a fresh GameView snapshot. Unrelated ZoneShard authority revisions do not by themselves create false client-gap detection.
 
 ### PROTO-04 — Stale local projection
 
@@ -659,9 +682,9 @@ Retries with same idempotency key.
 
 ### ONL-05 — World owner duplicate
 
-Injected split-brain/stale owner attempts write with stale revision.
+Injected split-brain/stale owner attempts to write after ownership moved.
 
-DB revision/ownership guard rejects.
+DB revision plus ownership/fencing-generation guard rejects the stale writer, including the case where its state revision would otherwise appear current.
 
 ### ONL-06 — Mailbox overload
 
