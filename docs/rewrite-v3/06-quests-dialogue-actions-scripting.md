@@ -209,16 +209,25 @@ Retry/restart cannot grant twice.
 
 Do not evaluate every active quest against every event if scale grows.
 
-At acceptance/compile/load time build indexes by event type and target where possible.
+Maintain two conceptually distinct indexes:
+
+1. **active-instance subscriptions** — which existing QuestInstances may consume an event;
+2. **activation subscriptions** — which quest definitions with no QuestInstance yet may need to evaluate automatic/discovered activation when a relevant event/fact transition occurs.
+
+At compile/load/activation time build indexes by event type, fact dependency, target, and scope where possible.
 
 Example:
 
 ```text
-{:death, "goblin"} -> [quest instance ids]
-:dialogue_node_reached -> [...]
+active {:death, "goblin"} -> [quest instance ids]
+active :dialogue_node_reached -> [...]
+activate {:discovered, "hidden_shrine"} -> [quest definition refs]
+activate {:fact_changed, "village.arrived"} -> [quest definition refs]
 ```
 
-Private cartridges may begin simpler but API should allow indexing.
+Offered quest availability may be derived on interaction/projection; automatic/discovered activation must not require pre-creating locked QuestInstances.
+
+Private cartridges may begin with simpler scans, but the semantic API must distinguish activation candidates from active-instance delivery.
 
 ## 8. Quest invariants
 
@@ -790,22 +799,23 @@ rng.pick
 
 Each binding has input/result schema, cost, and portability classification. Offline cartridges may call portable bindings only.
 
-Mutation-like bindings return typed effects/events; they do not write DB directly.
+Mutation-like bindings return typed StateDelta/DomainEvents/Effects according to their registered capability contract; they do not write DB directly.
 
 ## 26. Script budgets
 
-Each execution has:
+Each execution has deterministic semantic limits such as:
 
-- max AST steps;
-- max wall execution budget as outer safety;
+- max AST/interpreter steps;
 - max queries;
-- max emitted events/effects;
+- max emitted StateDelta operations/events/effects;
 - max spawn count;
 - max scheduled jobs;
 - max result size;
 - max collection size.
 
-Budget exceed is a typed script error and trace.
+Exceeding a deterministic semantic limit is a typed script error and trace.
+
+A host MAY also enforce a conservative **wall-time safety guard** to protect the process/device, but that guard is not part of cartridge semantics. Certification MUST demonstrate that valid scripts hit deterministic step/resource budgets before wall time can create host-dependent behavior and that supported hosts complete certified workloads comfortably inside the outer guard. If the outer wall guard fires unexpectedly, treat it as a host/runtime fault/conformance failure rather than a normal deterministic script branch.
 
 ## 27. Deterministic scripts
 
