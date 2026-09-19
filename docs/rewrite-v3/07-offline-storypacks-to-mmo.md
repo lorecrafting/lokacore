@@ -698,7 +698,7 @@ Create a shared deployment overlay and recertify for:
 - world event semantics;
 - shard transfers.
 
-This is adaptation, not an automatic flag flip.
+This is an explicit adaptation/certification step, not an automatic boolean mode switch.
 
 ## 18. Quest design for future reuse
 
