@@ -768,3 +768,183 @@ Conversely, do not promote every one-off pattern into engine code. Prefer, in or
 3. ReactionRule/state machine/SceneSequence;
 4. bounded LokaScript;
 5. new versioned engine capability only when repeated semantics/invariants justify it.
+
+
+## 25. Foundry/Astra orchestration: project roles map onto Loka layers
+
+Loka's Builder API and certification contracts should be usable by Foundry, Astra, a
+human operator, or another orchestrator without making any orchestrator part of gameplay
+authority.
+
+When Foundry is used, Loka SHOULD expose enough machine-readable policy for a
+project/workflow profile to grant **different tool surfaces by role**.
+
+Representative roles:
+
+### World builder
+
+Normal semantic scope: **L3–L6** from document 21.
+
+May receive:
+
+- Builder API workspace operations;
+- capability discovery/docs/examples;
+- content CRUD/semantic authoring operations;
+- Cartridge Lab simulation;
+- preflight validation;
+- read-only certification evidence.
+
+Should normally receive **no engine-source write surface and no arbitrary shell**.
+
+### Quest/story builder
+
+A narrower world-builder role focused on:
+
+- quests;
+- dialogues;
+- scenes;
+- storylines;
+- facts;
+- reactions;
+- related world content explicitly in assignment scope.
+
+A quest needing a missing mechanic does not authorize engine editing.
+
+### Engine capability developer
+
+May receive an isolated source checkout and approved build/test tools for explicit L2
+capability work.
+
+L0/L1 authority/transaction architecture changes require separately admitted
+higher-risk scope.
+
+### Semantic reviewer
+
+Read/simulate only.
+
+Receives the frozen candidate, exact relevant definitions, graphs, traces, CoverageManifest,
+branch comparisons and rubric. It cannot mutate the candidate or publish.
+
+### Certification/release role
+
+May run/inspect mandatory certification and, where protected policy allows, stage only
+the exact already-certified artifact/hash.
+
+It cannot waive a failed gate or silently edit content to make a gate pass.
+
+These are **project workflow roles**, not Loka runtime concepts and not mandatory model
+identities.
+
+## 26. Capability escalation contract
+
+If a builder cannot express requested semantics from registered primitives:
+
+~~~text
+Builder API
+ -> MISSING_CAPABILITY
+ -> CapabilityProposal
+~~~
+
+A CapabilityProposal SHOULD include:
+
+- requested behavior in domain terms;
+- motivating content examples;
+- nearest existing primitives and why composition is insufficient;
+- proposed semantic invariants;
+- portability need: portable / Realm-only / presentation-only;
+- commands/events/deltas/effects/policies/bindings likely required;
+- compatibility/migration implications;
+- proposed deterministic/property/adversarial tests.
+
+The originating builder cannot self-upgrade its authority.
+
+An orchestrator may propose a separate engine-capability assignment, but protected
+project/operator policy decides whether it is admitted and what source/tool scope it
+receives.
+
+After a new capability is implemented/released, the content workspace must explicitly
+adopt the new capability version and rerun affected certification. Engine work does not
+silently mutate the frozen cartridge candidate.
+
+## 27. Context routing follows role and escalation
+
+Astra/Foundry should not preload the whole engine into every authoring session.
+
+### World/quest builder context
+
+Prefer:
+
+- permitted Builder operations;
+- capability schemas/docs/examples;
+- local cartridge neighborhood;
+- incoming/outgoing references;
+- relevant world/quest graph;
+- failing Lab/certification evidence;
+- L3–L6 composition guidance.
+
+Normally omit:
+
+- engine internals;
+- unrelated platform/commerce code;
+- protected release credentials;
+- other projects.
+
+### Engine developer context
+
+Add only when escalation is admitted:
+
+- exact CapabilityProposal;
+- L0–L2 governing contracts;
+- affected capability registry/schema;
+- engine modules/callers/tests;
+- compatibility locks/migration consequences;
+- related regression/adversarial fixtures.
+
+### Reviewer context
+
+Supply:
+
+- exact frozen candidate/hash;
+- assignment/rubric;
+- mandatory check receipts;
+- coverage gaps;
+- raw traces/evidence needed to challenge claims;
+- relevant semantic intent.
+
+A fast assessor may rank optional context, but mandatory policy/spec/evidence context is
+chosen deterministically and cannot be removed for token savings.
+
+## 28. Agents-as-tools versus authority handoff
+
+A builder may use a bounded subagent/model as a **tool** for brainstorming, prose,
+classification or candidate test generation while retaining the parent assignment's
+authority and responsibility.
+
+A real workflow **handoff** creates a new durable assignment/principal/grant.
+
+Examples:
+
+- world builder asks an LLM to suggest ambient descriptions -> tool/subtask, no new authority;
+- world builder hits MISSING_CAPABILITY -> capability proposal -> possible protected
+  handoff to engine-capability developer;
+- content candidate freezes -> handoff to independent semantic reviewer.
+
+A different model/session/role label alone does not establish reviewer independence.
+Independence belongs to the orchestrator's durable principal/candidate-ownership policy.
+
+## 29. Foundry is optional infrastructure
+
+Loka MUST remain fully authorable/testable/releasable through its own Builder/Lab/
+certification interfaces without Foundry.
+
+Foundry integration is valuable because it can automate role scoping, evidence routing,
+review/correction and escalation, but Loka remains the source of truth for:
+
+- content semantics;
+- Builder operation schemas;
+- capability boundaries;
+- Lab test semantics;
+- certification profile/gate definitions;
+- exact artifact identity.
+
+The orchestrator cannot redefine what a passing Loka certificate means.
