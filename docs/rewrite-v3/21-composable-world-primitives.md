@@ -1062,6 +1062,10 @@ A **SceneSequence** is a reusable, recoverable orchestration primitive for:
 - tutorial moments;
 - quest milestones.
 
+SceneSequence may also use durable named SceneRoleBindings resolved inside its SceneSpace,
+as specified in document 06. Scene beats should target semantic roles/bound runtime
+identities rather than repeatedly searching player-facing names.
+
 Potential registered step vocabulary:
 
 - narrate;
