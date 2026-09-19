@@ -60,14 +60,14 @@ A cartridge can be thirty minutes or many hours. Multiple cartridges may compose
 
 ### Expansion path
 
-The same cartridge/content model grows through deployment profiles:
+The runtime execution profiles remain the four defined by the v3 packet:
 
 1. **offline_private** — one player, local device authority;
 2. **online_private** — one player, BEAM WorldInstance authority;
 3. **party** — a small group shares a BEAM-hosted instance;
-4. **embedded instance** — a storypack is entered geographically from the shared MMORPG but retains private/party state;
-5. **shared_area** — selected content is adapted through a separately certified multiplayer deployment;
-6. **persistent_world** — many areas, shared services, social systems, economy, guilds, events, and long-lived characters.
+4. **shared_area** — many players under shared Realm authority with multiplayer certification.
+
+Product/topology evolution composes those profiles rather than inventing aliases for them. An **embedded instance** is an online-private/party deployment entered from Realm geography. The eventual **persistent world** is a Realm topology composed from shared-area deployments plus realm services, identity/social/economy systems, and long-lived characters; it is not a fifth execution profile unless a future ADR explicitly adds one.
 
 A successful single-player cartridge can later remain a private/party adventure, become an embedded instanced region, or—when its fiction and mechanics suit it—be promoted into a shared area. We do not force every intimate story into globally shared state.
 
@@ -98,15 +98,16 @@ The logical cartridge/state/command/snapshot contracts remain host-neutral. Offl
 
 ### What changes first
 
-Before implementation scale, make the contracts unambiguous and machine-readable:
+Before implementation scale, make the **portable/content semantic contracts** unambiguous and machine-readable:
 
-- capability registry;
-- cartridge/deployment schemas;
-- command/domain-event/effect schemas;
+- capability registry and exact capability locks;
+- cartridge/deployment/campaign schemas;
+- Action/ActionInvocation, semantic Command, StateDelta, DomainEvent, Effect, and GameView contracts;
 - state-scope rules;
-- Builder API;
-- external mobile protocol;
-- offline/online conformance vectors.
+- canonical serialization/determinism rules;
+- offline/online host-conformance vectors.
+
+Do not front-load every external surface. The generalized Builder operation registry is derived after the first real cartridge exposes authoring pain, and the Realm network protocol is introduced when Realm Mode begins.
 
 An AI builder should not have to decide which era of Lokacore documentation is true.
 
@@ -156,6 +157,8 @@ version: 1.2.0
 
 requires:
   kernel_api: ">=1.3 <2.0"
+  rule_ir: 1
+  content_schema: 1
   capabilities:
     - movement@1
     - dialogue@2
@@ -186,7 +189,7 @@ Every stateful mechanic needs a declared scope so private content can later surv
 - `player`
 - `party`
 - `instance`
-- `realm/world`
+- `realm`
 
 Per-player quest progress should be the default. A world boss death, town election, weather system, or shared gate can be explicitly broader.
 
@@ -305,13 +308,19 @@ The Builder API should therefore make workspace/revision context explicit on mut
 
 ### Why the StateMachine exists
 
-`Loka.Engine.StateMachine` is a useful pure primitive. The quest component currently uses it to declare legal lifecycle transitions such as:
+`Loka.Engine.StateMachine` is a useful pure primitive. Historical Lokacore quest code used lifecycle shapes such as:
 
 `available → accepted → in_progress → objectives_complete → turned_in`
 
-with abandon/failure branches.
+with abandon/failure branches. That history is evidence, not the v3 contract.
 
-That was the right direction. Explicit lifecycle states are easier to validate and test than implicit combinations of booleans.
+V3 deliberately simplifies persisted lifecycle to roughly:
+
+`active → objectives_complete → resolved(outcome_id)`
+
+with explicit failed/abandoned branches and retry policy where allowed. Availability is derived before a QuestInstance exists; acceptance is an activation interaction; turn-in is one possible resolution policy rather than a universal state.
+
+The useful lesson from the old StateMachine remains: explicit persisted states and legal transitions are easier to validate and test than implicit combinations of booleans.
 
 ### Why quests can still break
 
@@ -805,19 +814,21 @@ At strategy level, the checkpoints are:
 - run the mandatory shared-kernel/mobile/BEAM feasibility spike;
 - reject or freeze the provisional Rust/binding choice from evidence.
 
-### S1 — Build the offline cartridge foundation
+### S1 — Build the offline cartridge foundation and prove a real game
 
 - fresh repository and strict boundaries;
-- machine-readable contracts;
+- machine-readable portable/content contracts;
 - cartridge compiler;
-- portable deterministic world kernel;
+- portable deterministic world rules;
 - local authority + SQLite;
 - quest/dialogue/LokaScript;
 - living-world primitives;
 - Cartridge Lab;
-- canonical Builder API.
+- substantially hand-author the first real offline cartridge through source/compiler/Lab;
+- record repetitive/error-prone authoring work;
+- then generalize the canonical Builder API from that evidence.
 
-**Gate:** a small real cartridge can be completed fully offline, survives app termination/restart, and passes deterministic certification.
+**Gate:** a small real cartridge can be completed fully offline, survives app termination/restart, passes deterministic certification, and has produced concrete evidence for the Builder API rather than the Builder API delaying the game.
 
 ### S2 — Ship the first commercial cartridge
 
@@ -893,9 +904,9 @@ The current order is:
 6. compile one tiny cartridge;
 7. make that cartridge deterministic and crash-safe offline;
 8. add quests/dialogue/living-world capabilities and the Cartridge Lab;
-9. build the canonical Builder API/MCP/terminal adapters;
-10. ship one handcrafted commercial-quality offline cartridge before scaling AI generation;
-11. add commerce;
+9. substantially hand-author and certify the first real offline cartridge using source/compiler/Lab, recording authoring pain;
+10. generalize the canonical Builder API/MCP/terminal adapters from that evidence;
+11. polish the production Story shell, add commerce/entitlements, and ship the first commercial cartridge before scaling AI generation;
 12. add BEAM online authority and prove host conformance;
 13. then expand factory/co-op/social/shared-world work.
 
