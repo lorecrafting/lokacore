@@ -418,14 +418,16 @@ Required for commercial release:
 ## 20. Certification profiles and Builder targets
 
 ```text
-offline_private_story
-online_private_story
-party_story
+offline_private
+online_private
+party
 shared_area
 portable_capability_pack
 server_capability_pack
 mobile_app_release
 ```
+
+These names intentionally reuse the canonical execution-profile vocabulary from the packet; certification does not invent a second parallel set of Story/Realm profile names.
 
 Each profile selects mandatory gates.
 
@@ -455,7 +457,7 @@ Network availability MUST NOT be a prerequisite for certified ordinary play afte
 
 ### `realm` target
 
-Select `online_private_story`, `party_story`, or `shared_area`.
+Select `online_private`, `party`, or `shared_area`.
 
 Minimum evidence adds as relevant:
 
@@ -510,7 +512,7 @@ Machine-readable example:
   "portable_strategy": "...",
   "engine_revision": "...",
   "capability_lock_hash": "...",
-  "profile": "offline_private_story",
+  "profile": "offline_private",
   "gates": {
     "static": "pass",
     "model_analysis": "pass",
