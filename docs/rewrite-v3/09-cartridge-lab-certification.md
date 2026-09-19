@@ -1021,7 +1021,24 @@ candidate hash.
 Agents and humans should be able to inspect *why* a release passed, not merely see a
 green badge.
 
-## 37. Regression ratchet
+## 37. Cartridge-authored tests are supplemental, not certification authority
+
+Cartridges MAY ship author-authored scenario/property tests to express design intent and
+speed development.
+
+Those tests:
+
+- run against the same frozen artifact;
+- may add stronger cartridge-specific invariants;
+- are included in evidence with exact source/revision;
+- cannot replace, disable, weaken or mark passed any engine/profile-mandatory gate;
+- cannot redefine a failed engine invariant as success;
+- are treated as candidate-controlled input when deciding release authority.
+
+A malicious or mistaken cartridge test suite that asserts only happy paths must not make
+the candidate easier to publish.
+
+## 38. Regression ratchet
 
 Every escaped production defect, certification-discovered blocker, or important
 adversarial counterexample SHOULD be reduced to the smallest durable regression artifact
@@ -1043,7 +1060,7 @@ Certification should become harder to fool over time without making the whole su
 depend on ever-growing LLM prompts.
 
 
-## 38. Area-level assurance: isolate, then mount
+## 39. Area-level assurance: isolate, then mount
 
 An AreaDefinition SHOULD be testable as a coherent authored module before whole-cartridge
 release, but area isolation is not enough.
@@ -1092,7 +1109,7 @@ An area passing isolated tests but failing mounted-closure tests is not releasab
 Whole-cartridge/deployment certification remains mandatory because two individually
 healthy areas can interact badly.
 
-## 39. Change-impact analysis accelerates feedback but cannot shrink release truth
+## 40. Change-impact analysis accelerates feedback but cannot shrink release truth
 
 Builder/Lab should compute a typed **ImpactSet** from the reference/dependency graph after
 a content edit.
@@ -1133,7 +1150,7 @@ Examples:
 
 Impact analysis is an optimization, never authority to declare an exact candidate safe.
 
-## 40. Release-candidate soak and long-horizon simulation
+## 41. Release-candidate soak and long-horizon simulation
 
 For living-world cartridges, final certification SHOULD include profile-appropriate
 long-horizon simulation from the frozen candidate, not only unit scenarios.
