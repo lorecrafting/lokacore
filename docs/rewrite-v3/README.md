@@ -92,6 +92,7 @@ Use these terms consistently:
 - **capacity owner/scope** — who competes for a scarce resource or service;
 - **service aggregate/provider** — the domain object whose queue/capacity is modeled; it does **not** automatically imply a dedicated OTP process;
 - **authority revision** — concurrency/version token for committed authoritative state;
+- **idempotency scope** — stable logical gameplay lineage used to deduplicate retryable mutations; it outlives session/process/shard ownership so a handoff cannot mint a fresh mutation identity;
 - **projection sequence/view token** — client-facing ordering/freshness token for one projected stream. It is not necessarily the authority revision.
 
 State scope, audience, capacity scope, and physical authority placement are deliberately independent. A player-scoped quest in a shared Realm zone, for example, does not imply that the player becomes a new mutation authority.
