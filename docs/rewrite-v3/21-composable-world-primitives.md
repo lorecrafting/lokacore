@@ -594,6 +594,8 @@ Avoid a mandatory giant RPG character schema.
 
 Behaviors produce intents; they do not directly write world state.
 
+After deterministic arbitration, the owning authority validates the selected BehaviorIntent and turns it into a registered authority-internal semantic Command (or equivalent explicitly registered world-simulation Command). That Command follows the same decision/StateDelta/DomainEvent/Effect/commit path as other mutations.
+
 Candidate behaviors:
 
 - schedule;
@@ -740,6 +742,8 @@ Defines:
 - cleanup policy;
 - provenance;
 - uniqueness constraints.
+
+Population reconciliation is initiated through a registered authority-internal Command/world-simulation step with stable causation where retries matter. A PopulationPlan never writes persistence directly.
 
 ### EncounterPlan
 
