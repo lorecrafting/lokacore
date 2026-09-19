@@ -96,8 +96,8 @@ Builder target is an authoring/runtime contract, **not a mobile-app target**. St
 
 The workspace target MUST select a default certification policy:
 
-- `story` → `offline_private_story` plus portable/offline/save-compatibility gates;
-- `realm` → an online profile such as `online_private_story`, `party_story`, or `shared_area`, including concurrency/security/load gates appropriate to scope;
+- `story` → `offline_private` plus portable/offline/save-compatibility gates;
+- `realm` → an online profile such as `online_private`, `party`, or `shared_area`, including concurrency/security/load gates appropriate to scope;
 - `promote` → validates the source Story certificate, requires explicit multiplayer adaptation decisions, then runs the selected Realm certification profile.
 
 The builder may add stricter gates, but content cannot weaken target-mandated certification.
