@@ -418,8 +418,8 @@ Loka ships one React Native / Expo application.
 
 It contains two gameplay session modes:
 
-- **Story Mode** — `LocalStorySession`, portable kernel, local SQLite authority;
-- **Realm Mode** — `RemoteRealmSession`, Phoenix transport, BEAM authority.
+- **Story Mode** — `LocalStorySession` is the UI-facing adapter over `LocalInstanceAuthority`, which owns local serialized mutation + SQLite commit through the selected portable-rules path;
+- **Realm Mode** — `RemoteRealmSession` is a Phoenix transport adapter only; BEAM `WorldInstance`/`ZoneShard` owns mutation authority.
 
 Shared UI/GameView/schema packages are reused. Authority implementations remain isolated modules with enforceable dependency boundaries.
 
