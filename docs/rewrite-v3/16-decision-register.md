@@ -18,7 +18,7 @@ Not every non-Accepted ADR blocks the same milestone.
 - **ADR-027** fixes the offline-ownership product principle while leaving the exact platform proof/grant mechanism to implementation evidence.
 - **ADR-035** is a release gate: downloadable rule representation must be revalidated against current store policy before commercial submission.
 - **ADR-024** remains deferred until public creator content is actually planned.
-- **ADR-025** remains deferred until multi-node clustering is justified; R18 may prove one shared authority domain on one node, while R20 must resolve ownership placement/fencing/handoff details needed for partitioned Realm play.
+- **ADR-025** remains deferred until multi-node clustering is justified; R18 may prove one shared authority domain on one node, while R20 must resolve ownership placement/fencing/handoff details needed for partitioned Realm play, including migration-stable command-receipt routing from ADR-058.
 - Accepted ADRs may still contain deliberately deferred implementation details, but an implementation ticket must not silently choose one when the detail affects a later normative gate.
 
 
@@ -667,3 +667,13 @@ Dreams, visions and flashbacks are content compositions over these primitives:
 
 The same InstancePlan primitive serves private dungeons, party puzzles, tutorials,
 ritual/trial spaces and other instanced gameplay. There is no separate DreamEngine.
+
+## ADR-058 — Retry identity survives authority migration
+
+**Status:** Accepted
+
+Client-visible mutation idempotency is keyed by a stable logical gameplay lineage + invocation identity, not by the current session, process, shard, or other mutation-owner placement.
+
+If a command commits and ownership moves before its acknowledgement is observed, a retry after handoff MUST discover/replay the original receipt rather than execute under a fresh destination-owner namespace.
+
+R20 chooses the concrete durable mechanism—realm-level receipt index, receipt migration, forwarding/tombstones, or an equivalently strong design—but may not weaken this semantic invariant.
