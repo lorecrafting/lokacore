@@ -4,7 +4,7 @@
 
 The Cartridge Lab is an executable test environment for a compiled cartridge or candidate shared area.
 
-It uses the same portable kernel and, where relevant, the same BEAM runtime contracts as production with controllable infrastructure adapters.
+It uses the same portable semantic contract and R1-selected implementation strategy as production and, where relevant, the same BEAM runtime contracts, with controllable infrastructure adapters.
 
 The Lab is a product feature for developers/agents, not merely an ExUnit helper.
 
@@ -71,7 +71,7 @@ Starts actual `WorldInstance` under test supervision.
 
 ### Offline host
 
-Runs local authority + SQLite semantics against the portable kernel.
+Runs local authority + SQLite semantics against the R1-selected Story portable-rules implementation.
 
 ### Integration
 
