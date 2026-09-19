@@ -72,7 +72,8 @@ world-event/system trigger /
 
 Adapters MAY collapse implementation steps, but they MUST NOT collapse the semantic boundaries. In particular:
 
-- shared UI/text/player-agents/test bots emit `ActionInvocation`, not authority-internal Commands;\n- schedulers/autonomous Behaviors/population reconciliation/world-event machinery may originate only registered authority-internal Commands with stable causation/idempotency and must use the same decision/commit path;
+- shared UI/text/player-agents/test bots emit `ActionInvocation`, not authority-internal Commands;
+- schedulers/autonomous Behaviors/population reconciliation/world-event machinery may originate only registered authority-internal Commands with stable causation/idempotency and must use the same decision/commit path;
 - authoritative same-domain mutations are represented by `StateDelta`, not hidden Effects;
 - DomainEvents describe facts produced by a decision; they are not transport messages;
 - Effects cross a post-decision boundary or request explicitly typed follow-up work; they are not an alternate state-write path;
