@@ -1174,11 +1174,11 @@ Two Realm players submit requests for the only available slot on a shared servic
 
 Exactly one order receives that slot; the other is queued/rejected according to policy.
 
-### SERVICE-02 — ServiceJob input escrow
+### SERVICE-02 — Same-authority ServiceJob input escrow
 
-Submitting a sword order moves required materials into escrow atomically with ServiceJob creation.
+When the requester inventory and service aggregate are owned by the same mutation authority, submitting a sword order moves required materials into escrow atomically with capacity allocation/ServiceJob creation.
 
-Crash at every boundary cannot duplicate or lose inputs.
+Crash at every boundary cannot duplicate or lose inputs. Cross-authority custody uses SERVICE-10 instead.
 
 ### SERVICE-03 — ServiceJob completion exactly once
 
@@ -1227,6 +1227,12 @@ A realm-wide service reserves scarce capacity while a required item is still own
 Crashes/retries are injected before and after reservation, custody transfer, acknowledgement, and ServiceJob activation.
 
 Recovery yields exactly one of: the requester still owns the item with no active consuming job, or the service owns/proves custody with one valid job. The item is never duplicated, lost, or spendable under both authorities, and stale provisional capacity is eventually released/reconciled.
+
+### SERVICE-11 — Period boundary semantics
+
+Two otherwise identical services declare `1/day`, but one uses a rolling 24-hour window and the other uses a fixed world-calendar day.
+
+Requests near the boundary produce the intentionally different certified outcomes. Story and Realm hosts agree because the policy declares time basis, window kind, and anchor/calendar semantics rather than reading device/server local midnight implicitly.
 
 ### MIXED-01 — Personal quest + shared bottleneck + phased NPC
 
