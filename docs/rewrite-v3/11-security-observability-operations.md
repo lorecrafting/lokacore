@@ -139,17 +139,21 @@ On BEAM, any native long/heavy kernel operations must not block normal scheduler
 
 ## 8. Content integrity
 
-Compiled cartridge/deployment has canonical hash and signature/attestation metadata.
+Compiled cartridge/deployment has a canonical **semantic content/deployment hash** plus a separate release/signature/attestation envelope.
 
 Published release stores:
 
 - source revision;
 - compiler version;
 - kernel/schema versions;
-- artifact hash;
-- deployment hash;
+- semantic cartridge/content hash;
+- deployment/adaptation hash where applicable;
 - certificate hash;
+- signing/attestation metadata;
+- optional package/transport hash for exact downloadable bytes;
 - build identity.
+
+Certificate/signature/reference material is not part of the semantic hash domain it attests; otherwise certification/signing would create a self-referential hash cycle.
 
 Runtime/local client refuses artifact/hash mismatch.
 
@@ -161,7 +165,7 @@ Signed cartridge/catalog artifacts MUST include:
 
 - signing key ID;
 - signature algorithm/version;
-- artifact/content hash;
+- semantic artifact/content hash;
 - signed metadata version.
 
 The mobile app ships or securely obtains a trusted public-key set.
