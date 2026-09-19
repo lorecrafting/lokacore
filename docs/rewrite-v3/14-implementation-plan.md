@@ -616,7 +616,8 @@ Only now automate content production heavily.
 
 ### Build
 
-- architect/builder/reviewer roles;
+- Loka project workflow RoleSpecs/templates for architect/builder/reviewer responsibilities
+  where an orchestrator is used; these are not hard-coded Foundry kernel roles;
 - context retrieval;
 - semantic review;
 - automated correction;
