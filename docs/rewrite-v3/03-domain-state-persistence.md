@@ -121,7 +121,7 @@ State scope is a first-class semantic type:
   | {:realm, realm_id}
 ```
 
-Quest instances, flags, reputation tracks, world events, and similar state MUST declare a scope.
+Quest instances, typed facts, reputation tracks, world events, and similar state MUST declare a scope.
 
 No helper may default to realm/global scope merely because an ID was omitted.
 
