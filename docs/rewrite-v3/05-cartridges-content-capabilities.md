@@ -149,7 +149,7 @@ Use these terms consistently in v3:
 | **Component** | Typed definition/runtime data attached to an entity or scoped state. A component is data/state, not an independent authority. |
 | **Behavior** | Declarative autonomous rule configuration supplied by a capability, such as patrol or schedule. Behaviors produce typed intents/proposals and never bypass the authority decision path. |
 | **ReactionRule** | Builder-composable event/fact/state-transition reaction: typed trigger + selector + Policy + registered consequences. The safe replacement for arbitrary special-procedure callbacks. |
-| **Action** | Player/agent affordance advertised in GameView; invocation is revalidated by the active authority and resolved into a typed Command. |
+| **Action** | Player/agent affordance advertised in GameView; invocation is revalidated by the active authority and resolved into a typed Command. |\n| **ActionRecipe / ComposedAction** | Immutable builder-defined Action semantics assembled from registered TargetSpec/Policy/cost/check/consequence/narration primitives; useful for new local verbs without engine-code changes. |
 | **Policy / condition** | Pure predicate tree deciding whether an action/content path is allowed/visible. |
 | **Command** | Request to authoritative game semantics. |
 | **DomainEvent** | Immutable fact produced during a decision. |
