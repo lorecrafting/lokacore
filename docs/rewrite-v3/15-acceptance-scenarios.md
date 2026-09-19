@@ -1412,6 +1412,21 @@ Player acquires dream-only temporary objects and one declared narrative memory.
 On teardown, temporary objects disappear with the instance. The declared memory exports
 exactly once. No other instance-local state leaks back.
 
+### SCENE-05 — Scene actor binding survives reconnect and duplicate definitions
+
+Two runtime NPCs share the same definition/display alias in different scoped spaces.
+
+A scene binds `old_master` to the eligible instance-local actor at start. After reconnect,
+the next beat targets the same runtime actor; it does not re-resolve by name/definition
+and jump to the other copy.
+
+### SCENE-06 — Missing bound actor follows explicit policy
+
+A bound scene actor dies/disappears before a later beat.
+
+The scene follows its declared wait/branch/fail/substitute/rebind policy. It never silently
+selects another matching NPC.
+
 ### SCENE-01 — Text cutscene survives crash
 
 A consequential text SceneSequence crashes after a checkpoint and before the next acknowledgement.
