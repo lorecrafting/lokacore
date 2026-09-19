@@ -36,7 +36,7 @@ No unresolved contradiction about:
 - definition/runtime identity;
 - offline execution;
 - online authority;
-- command/event/effect model;
+- ActionInvocation/Command/StateDelta/DomainEvent/Effect/GameView model;
 - persistence transaction semantics;
 - scripting boundary;
 - mobile Story session/GameView boundary and the fact that Realm transport is intentionally deferred;
@@ -129,7 +129,7 @@ apps/loka_platform
 apps/loka_runtime
 apps/loka_builder
 apps/loka_web
-kernel/
+portable/                 # shared portable implementation only if selected by R1
 mobile/app
 mobile/features/story
 mobile/features/realm
@@ -234,7 +234,7 @@ Compile same source twice → identical artifact hash.
 
 Broken references/cycles/unknown capabilities fail deterministically.
 
-## R5 — Portable world kernel foundation
+## R5 — Portable world rules foundation
 
 ### Objective
 
@@ -268,7 +268,7 @@ Establish world/state mechanics needed by everything else.
 
 ### Gate R5
 
-Golden vectors pass through kernel and all accepted hosts.
+Golden vectors pass through the R1-selected portable-rules implementation(s) and every accepted authoritative host path.
 
 ## R6 — Offline authority and save system
 
@@ -311,7 +311,7 @@ Support real narrative cartridges.
 - QuestInstance;
 - quest graph operators;
 - quest reducer;
-- quest event indexing;
+- active-quest event indexing plus automatic/discovered activation indexing;
 - typed quest outcome/consequence grammar;
 - FactSpec reads/writes with scope validation;
 - capability consequence evaluators returning StateDelta/events/effects;
@@ -446,7 +446,7 @@ Let humans/agents author without raw repo semantics.
 - Lab control;
 - batch/dry-run;
 - semantic rename;
-- audit receipts;
+- audit/idempotency receipts for retry-safe mutations;
 - terminal adapter;
 - MCP adapter;
 - expand LokaScript bindings/recipes only from concrete R10 authoring needs and accepted reusable capability gaps.
@@ -466,7 +466,7 @@ Can overlap late R10.
 - catalog shell;
 - cartridge install/delete/update;
 - save slots;
-- generated kernel bindings;
+- generated/validated portable-rules integration or native bindings selected by R1;
 - living-book/touch UI refined from old design;
 - accessibility;
 - settings;
@@ -513,12 +513,14 @@ Run the same cartridge rules online under OTP.
 - Session→Account→Character;
 - InstanceRegistry/Supervisor;
 - WorldInstance;
-- kernel adapter;
+- R1-selected portable-rules adapter/implementation;
 - PostgreSQL store;
 - transactional command commit;
-- command receipts;
+- command receipts with semantic-command digests and replayable prior results;
+- authority ownership/fencing generations for stale-owner protection;
 - effect outbox;
 - snapshots;
+- projection stream sequencing and opaque view-freshness tokens;
 - machine-readable Realm transport protocol + Elixir/TypeScript codegen and compatibility fixtures;
 - Phoenix typed protocol adapter;
 - Realm Mode route/session driver inside the existing Loka app using that protocol;
