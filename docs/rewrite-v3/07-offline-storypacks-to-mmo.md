@@ -418,16 +418,18 @@ The first storypacks SHOULD target the portable capability set.
 
 ## 13. Conformance suite
 
-The portable kernel creates a critical new invariant:
+The portable-execution contract creates a critical new invariant:
 
-> The same input state, command, logical time, RNG state, and cartridge hash MUST produce byte-for-byte/canonically equivalent domain results on every supported host.
+> The same input state, semantic command, logical time, RNG state, and cartridge hash MUST produce byte-for-byte/canonically equivalent domain results on every supported authoritative host.
 
-CI runs golden vectors through:
+After R1 selects the execution strategy, CI runs golden vectors through every required host implementation/adapter:
 
-- Rust core unit tests;
-- BEAM/Rustler wrapper;
-- iOS binding test target;
-- Android binding test target.
+- the direct portable-rules implementation;
+- the BEAM authority adapter/implementation;
+- the iOS Story authority path;
+- the Android Story authority path.
+
+If R1 accepts the shared Rust kernel, these concretely become Rust core + Rustler + iOS/Android bindings. If R1 selects the documented dual-implementation fallback, the same conformance obligation applies to the accepted Elixir/mobile implementations instead.
 
 Any divergence blocks release.
 
