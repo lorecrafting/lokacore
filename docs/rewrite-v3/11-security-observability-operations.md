@@ -153,6 +153,8 @@ Published release stores:
 
 Runtime/local client refuses artifact/hash mismatch.
 
+Package ingestion is hostile-input handling even for first-party distribution. Download/install code MUST enforce declared and actual size limits, bounded decompression, path normalization/no archive traversal, duplicate-path rules, media/type validation where relevant, and atomic staging-before-activation. A signed package is not allowed to bypass parser/resource limits.
+
 ## 9. Artifact signing trust and key rotation
 
 Signed cartridge/catalog artifacts MUST include:
