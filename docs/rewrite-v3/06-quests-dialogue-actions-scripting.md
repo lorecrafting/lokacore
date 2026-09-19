@@ -83,8 +83,9 @@ Supported activation patterns should include:
 
 - `offered` — player explicitly accepts from an NPC/object/action;
 - `automatic` — becomes active when prerequisites/world condition becomes true;
-- `discovered` — activates when the player discovers a place/clue/event;
-- `hidden` — tracks internally without exposing normal journal UI until revealed.
+- `discovered` — activates when the player discovers a place/clue/event.
+
+**Journal visibility/reveal is a separate axis from activation.** A quest may be visible immediately, hidden until a typed reveal condition/event, or intentionally absent from the normal journal. Do not encode presentation visibility as another activation mode.
 
 ### Resolution modes
 
@@ -152,15 +153,17 @@ Do not add arbitrary scripting for common quest logic.
   lifecycle: :active,
   activation_mode: :offered,
   activated_at: logical_time,
-  resolved_outcome: nil,
+  outcome_id: nil,
   objectives: typed_state,
   variables: %{},
   revision: 8,
-  processed_event_ids: bounded/idempotency structure
+  event_delivery_cursor_or_dedupe: authority-defined idempotency state
 }
 ```
 
 Definition version is pinned.
+
+Quest event delivery MUST be idempotent without relying on an unsafe forever-growing or arbitrarily evicted set of event IDs. The authority may use durable delivery receipts, monotonic per-source cursors where valid, or a bounded dedupe structure only when its pruning rule cannot make an old retry executable again.
 
 ## 5. Quest event processing
 
@@ -603,9 +606,8 @@ nodes:
       - id: ask_missing_child
         text: dialogue.ferryman.ask_child
         when:
-          quest_state:
+          quest_available:
             quest: quests/missing_child
-            state: available
         next: missing_child_offer
 ```
 
@@ -678,15 +680,19 @@ permission
 owner/self
 tag
 has_item
-flag
+fact_compare
 stat_compare
 resource_compare
+quest_available
 quest_state
+quest_outcome
 faction_compare
 time_window
 target_present
 scope_matches
 ```
+
+`quest_state` refers to persisted QuestInstance lifecycle state. Availability is derived and therefore uses `quest_available`; named terminal branches use `quest_outcome`. Broad narrative truths use typed facts rather than generic string flags.
 
 A policy evaluator is pure.
 
@@ -703,9 +709,13 @@ raw text
  -> tokenize/parse
  -> identify action alias
  -> Search resolve target(s)
- -> build typed command
- -> runtime
+ -> build ActionInvocation
+ -> active GameSession
+ -> authority re-resolves/revalidates
+ -> typed semantic Command
 ```
+
+The text parser is an input adapter just like touch UI; it MUST NOT bypass the ActionInvocation authority boundary.
 
 Parser should support classic MUD conveniences:
 
@@ -761,13 +771,13 @@ Bindings are capabilities:
 
 ```text
 query.entity
-query.flag
+query.fact
 query.quest
 query.time
 query.weather
 emit.say
 emit.message
-effect.set_flag
+fact.set
 effect.spawn
 effect.move
 effect.damage
