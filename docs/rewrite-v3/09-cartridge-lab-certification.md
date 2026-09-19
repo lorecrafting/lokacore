@@ -632,9 +632,13 @@ There is no "tests were green before the final edit" release path.
 
 ## 26. Coverage manifest
 
-A release candidate SHOULD produce a machine-readable **CoverageManifest** describing
-which authored semantic surfaces were exercised and which remain intentionally
-unreachable/dormant.
+Certification tooling SHOULD produce a machine-readable **CoverageManifest** from the
+frozen compiled artifact plus observed/proved gate receipts, describing which authored
+semantic surfaces were exercised and which remain intentionally unreachable/dormant.
+
+The cartridge/author/model does not self-report coverage. Any author-declared exclusions
+or intentionally unreachable branches are inputs requiring schema/policy validation and,
+where release-relevant, explicit certification disposition.
 
 Coverage dimensions should include, where present:
 
@@ -855,9 +859,14 @@ Foundry/Builder tooling converts an accepted proposed scenario into:
 - typed initial state;
 - ActionInvocation/Command sequence;
 - clock/RNG/fault schedule;
-- expected invariant/property.
+- candidate expected property.
 
-The deterministic Lab executes it. Failures become permanent regression fixtures.
+The deterministic Lab executes it. A model-proposed expected property becomes a release
+blocker only when it maps to an existing registered invariant/certification predicate or
+is separately reviewed/admitted into the test profile. Otherwise the execution is
+exploratory evidence requiring disposition.
+
+Failures against governing invariants become permanent regression fixtures.
 
 ## 33. LLM semantic review as a separate evidence layer
 
