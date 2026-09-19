@@ -47,13 +47,21 @@ These axes interact but are not aliases.
 
 ### Canonical gameplay pipeline
 
-Every gameplay path MUST preserve this conceptual order:
+Every authoritative gameplay mutation MUST converge on the same semantic decision/commit spine.
+
+Player/agent input uses ActionInvocation; trusted autonomous world work uses a typed authority-internal Command origin:
 
 ```text
-input/touch/text/bot
+touch/text/player-agent/test-bot
   -> ActionInvocation
-  -> active authority re-resolves + revalidates
+  -> authority re-resolves + revalidates
   -> typed semantic Command
+                         \
+scheduler / durable job  \
+BehaviorIntent arbitration -> typed internal Command
+Population reconciliation  /
+world-event/system trigger /
+                         /
   -> DecisionCoordinator / portable decision layer
   -> StateDelta + DomainEvents + Effects
   -> authoritative commit + receipt/outbox
@@ -64,7 +72,7 @@ input/touch/text/bot
 
 Adapters MAY collapse implementation steps, but they MUST NOT collapse the semantic boundaries. In particular:
 
-- shared UI/text/bots emit `ActionInvocation`, not authority-internal Commands;
+- shared UI/text/player-agents/test bots emit `ActionInvocation`, not authority-internal Commands;\n- schedulers/autonomous Behaviors/population reconciliation/world-event machinery may originate only registered authority-internal Commands with stable causation/idempotency and must use the same decision/commit path;
 - authoritative same-domain mutations are represented by `StateDelta`, not hidden Effects;
 - DomainEvents describe facts produced by a decision; they are not transport messages;
 - Effects cross a post-decision boundary or request explicitly typed follow-up work; they are not an alternate state-write path;
