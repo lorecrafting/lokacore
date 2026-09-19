@@ -288,7 +288,9 @@ For events that MUST happen even across restart:
 - paid construction completion;
 - scheduled world event with side effects.
 
-Persist job identity, due logical/wall time, payload, status, idempotency key.
+Persist job identity, explicit `time_basis`, due value, payload, status, and idempotency key.
+
+The time basis is part of job semantics (for example logical play time, accepted real-elapsed Story time, or an authoritative Realm/service clock). A job processor must not infer its clock source from host environment or deployment mode.
 
 ### C. Ephemeral timers
 
