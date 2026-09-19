@@ -494,6 +494,10 @@ challenge guard
 
 The authority resolves the advertised action to the immutable compiled recipe and constructs a typed semantic invocation/command path. Recipe execution remains bounded and deterministic.
 
+One ActionRecipe executes as one logical decision. Same-authority costs/checks/outcomes/consequences join the proposal and commit atomically. Cross-authority work becomes explicit typed Effects/outbox work under the normal rules.
+
+If the mechanic must wait for later input/time/events, use SceneSequence, ServiceJob, a scheduled job, or another explicit durable state machine rather than hiding asynchronous continuation inside an ActionRecipe.
+
 ActionRecipe MUST NOT become an untyped effect list. Every operation/result is registered and schema-validated.
 
 Use a dedicated engine capability instead when the action requires genuinely new semantic invariants.
@@ -663,13 +667,43 @@ Reaction rules may observe:
 - fact transitions;
 - state-machine transitions;
 - service completion;
-- schedules/time boundaries;
+- scheduled/logical-time boundary DomainEvents;
 - population transitions;
 - scene/quest milestones.
+
+A wall clock or hidden timer never fires a reaction directly; temporal triggers enter authority through the normal scheduler/command/event semantics.
 
 Reactions produce only registered typed consequences.
 
 This is one of the main builder-expression layers.
+
+### Shared consequence vocabulary
+
+ActionRecipes, ReactionRules, quests, scenes, and world events SHOULD reuse one registered consequence vocabulary rather than each inventing a mutation API.
+
+Candidate operators include:
+
+- fact.set / fact.clear;
+- relationship.adjust;
+- reputation.adjust;
+- resource.adjust;
+- status.apply / status.remove;
+- containment.transfer / item.grant through registered inventory semantics;
+- connection.set_state;
+- map.reveal;
+- activation.enable / activation.disable;
+- behavior.select_profile;
+- population.enable / population.disable;
+- spawn/despawn within bounded registered semantics;
+- scene.start;
+- world_event.start / world_event.transition where valid;
+- schedule/profile selection;
+- narration.emit;
+- event.emit.
+
+Every operator declares target types, allowed scopes, portability, idempotency, StateDelta/DomainEvent/Effect production, conflict/composition rules, and certification tests.
+
+There is deliberately no generic set-component-field operator.
 
 ## 12. Population, encounter, and lifecycle primitives
 
