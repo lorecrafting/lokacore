@@ -139,7 +139,7 @@ Authority always revalidates because the GameView can be stale.
 }
 ```
 
-The gateway supplies authenticated account/session identity; the client cannot claim arbitrary actor authority. The server verifies the invocation actor is controllable by that session and re-resolves the action against current state.
+The gateway supplies authenticated account/session identity; the client cannot claim arbitrary actor authority. The server verifies the invocation actor is controllable by that session and re-resolves the action against current state. The logical idempotency scope is derived from trusted Story/Realm lineage and controlled-actor context, not from an untrusted client-selected routing/owner identifier.
 
 `invocation_id` is the client-visible stable retry identity used to derive/recover semantic Command idempotency. `client_seq` is a transport/order diagnostic and MUST NOT become mutation identity; it may restart after reconnect according to protocol rules. `view_revision` is an opaque view-freshness token, not a promise that the client knows the authority's database revision.
 
@@ -160,6 +160,7 @@ After Realm invocation validation/action resolution—or Story local invocation 
 
 %CommandContext{
   invocation_id: invocation_id,
+  idempotency_scope_id: trusted_logical_scope,
   authenticated_session_id: session_id,
   expected_authority_revision: optional_revision,
   received_at_monotonic: ...
