@@ -1202,3 +1202,257 @@ Before accepting the v3 primitive layer, an advanced builder should be able to e
 If such content requires arbitrary host code despite all needed semantic atoms already existing, the composition layer is too weak.
 
 If expressing it requires bypassing typed authority semantics, the composition layer is too powerful in the wrong way.
+
+
+## 25. Choosing the right composition shape
+
+Builder tooling SHOULD guide authors toward the smallest semantic shape that fits the mechanic.
+
+| Author intent | Preferred shape | Why |
+|---|---|---|
+| One player verb with immediate bounded outcome | **ActionRecipe / ComposedAction** | Defines target, policy, costs/check, consequences/events, narration in one authority decision. |
+| "When X happens, react with Y" | **ReactionRule** | Event/fact/state-transition driven glue with typed consequences. |
+| Autonomous actor routine/decision | **Behavior** | Produces an intent that deterministic arbitration turns into an internal Command. |
+| Explicit durable modes and legal transitions | **StateMachine** | Makes phase/state invariants inspectable and testable. |
+| Ordered multi-beat interaction that may wait for input/events | **SceneSequence** | Durable checkpoints, choices, narration, restricted actions, crash/reconnect recovery. |
+| Long-running/scarce work | **Service + ServiceJob** | Capacity, reservation, escrow, duration, completion, cancellation. |
+| Replenishing/maintaining world population | **PopulationPlan** | Scoped counts, provenance, placement, replenishment, cleanup. |
+| Coordinated encounter with participants/phases/cleanup | **EncounterPlan** | Composes population, phase state, conditions, scenes, rewards. |
+| Goal/progress/branch thread for a character/party/world | **Quest** | Observes events/state, remembers progress, produces named outcomes/consequences. |
+| Multi-phase public or regional living-world change | **WorldEventPlan** | Coordinates ordinary populations, schedules, services, scenes, quests, facts. |
+| Reusable authoring pattern with no new runtime semantics | **Template / mixin / archetype / recipe** | Compile-time reuse; flattened before runtime. |
+| Small pure calculation/branching awkward in declarative data | **LokaScript** | Bounded deterministic escape hatch over already-registered semantics. |
+| Repeated mechanic with new invariants not expressible above | **New versioned Capability** | Moves genuine semantic power into engine-owned, tested contracts. |
+
+### Escalation rule
+
+Do not choose a more powerful layer merely because it is convenient.
+
+Prefer:
+
+~~~text
+declarative configuration
+  -> ActionRecipe / ReactionRule / Behavior / StateMachine
+  -> SceneSequence / PopulationPlan / Service / Quest / WorldEventPlan
+  -> bounded LokaScript
+  -> new engine Capability
+~~~
+
+The ordering is not a strict hierarchy of runtime cost; it is an **escape-hatch discipline**. Use the most specific typed construct that captures the invariant.
+
+## 26. Additional immersive-world capability candidates
+
+The following families are worth preserving in the design vocabulary, but they are **not all foundation requirements**. They graduate under §23 only when real cartridge/Realm evidence justifies them.
+
+### Knowledge, secrecy, and information flow
+
+Potential primitives/composites:
+
+- KnowledgeFact / discovery state: what a player/NPC is known to know;
+- WitnessRecord: who actually perceived an event;
+- Concealment / reveal / investigation;
+- Evidence / clue;
+- RumorTopic and propagation;
+- Secret/access classification;
+- Recognition/identity knowledge;
+- map/topology knowledge separate from actual topology.
+
+These support mysteries, crime, diplomacy, rumors, NPC memory, and discovery-heavy quests without treating omniscient world state as universally known.
+
+### Language and communication
+
+Potential capability family:
+
+- Language/Comprehension;
+- speech/listen range or channel policy;
+- whisper/shout/emote/social actions;
+- written text/readability;
+- Message/Letter/Courier/Mail;
+- public board/notice;
+- party/guild/channel communication in Realm;
+- translation/interpreter effects.
+
+Semantic communication events should remain distinct from transport/socket messages.
+
+### Households, roles, institutions, and obligations
+
+Potential composable concepts:
+
+- Household/group membership;
+- Role/Office/Occupation;
+- Institution/Guild/Temple/Clan;
+- Duty/Shift assignment;
+- Contract/Promise/Oath;
+- Debt/Obligation/Favor;
+- Property ownership/lease/access;
+- reputation/standing per institution.
+
+These can be built on typed relationships, facts, schedules, commerce, services, and policies rather than one giant society subsystem.
+
+### Travel and transportation
+
+Potential capabilities:
+
+- Vehicle/Mount;
+- passenger/cargo containment;
+- route/stop;
+- timetable;
+- fare/payment;
+- capacity/reservation;
+- travel duration;
+- boarding/disembarkation;
+- journey scene/encounter hooks;
+- weather/terrain restrictions.
+
+A ferry, caravan, train, ship, elevator, or palanquin should share lower primitives wherever fiction permits.
+
+### Property, housing, and persistent places
+
+Potential composition:
+
+- ownership/lease relation;
+- access policy;
+- storage/container;
+- occupancy;
+- rent/service;
+- customization slots;
+- guest permissions;
+- upkeep/decay if desired.
+
+Property is gameplay ownership/control; it does not imply a new mutation authority.
+
+### Economic production and supply
+
+Beyond individual merchants/crafting:
+
+- Producer/Consumer;
+- Stockpile;
+- ProductionRecipe;
+- Input/Output flow;
+- transport/cargo;
+- restock source;
+- scarcity/price signals;
+- wages/payments;
+- market/order mechanism where a cartridge needs it.
+
+Start with simple deterministic stock/restock. Simulated supply chains should be added only when they create meaningful play rather than background complexity.
+
+### Needs, drives, and utility-based behavior
+
+Optional NPC simulation may expose typed Drives such as:
+
+- hunger/thirst/rest;
+- safety/fear;
+- duty/work;
+- social affiliation;
+- shelter;
+- curiosity/goal pursuit.
+
+Drives do not directly act. They contribute bounded, explainable scores/eligibility to Behavior intent arbitration.
+
+This can make NPCs feel less clockwork while retaining deterministic traceability.
+
+### Navigation and spatial reasoning
+
+Potential reusable services/capabilities:
+
+- path query;
+- reachability;
+- travel-cost model;
+- route preference;
+- hazard avoidance;
+- territory restriction;
+- pursuit/escape routing.
+
+Pathfinding is a pure query/service to Behaviors and tools; it is not authority.
+
+### Hazards, traps, and environmental interactions
+
+Potential primitives:
+
+- Hazard;
+- exposure;
+- trigger;
+- detection/disarm;
+- resistance/protection;
+- periodic/derived effects;
+- environmental transformation;
+- fire/flood/collapse/spread where explicitly supported.
+
+Prefer reusable trigger/check/status/consequence composition over bespoke trap code.
+
+### Historical trace and world memory
+
+Not full event sourcing, but selected durable history may be useful for:
+
+- memorials/chronicles;
+- NPC memory;
+- rumor/evidence;
+- statistics/achievements;
+- world-event aftermath;
+- procedural descriptions.
+
+Only explicitly retained semantic records become gameplay inputs. Telemetry/log history is not silently queryable game state.
+
+### Companion and follower systems
+
+Can compose:
+
+- Relationship;
+- membership/party;
+- follow/escort relation;
+- Behavior;
+- orders/Actions;
+- trust/loyalty;
+- inventory/equipment;
+- dialogue/memory;
+- separation/rejoin policy;
+- death/recovery policy.
+
+A companion should not require a separate engine architecture.
+
+### Books, documents, and authored information objects
+
+Potential capability:
+
+- readable pages/sections;
+- language/comprehension;
+- annotations;
+- clue/knowledge grants;
+- ownership/copying;
+- provenance/forgery where needed.
+
+This supports lore-heavy worlds without encoding every book as arbitrary script.
+
+### Ritual and multi-participant interaction
+
+Potential composition:
+
+- participant selector/set;
+- roles/positions;
+- prerequisites;
+- offerings/escrow;
+- synchronized actions;
+- SceneSequence;
+- duration;
+- interruption;
+- outcome/consequences.
+
+This generalizes beyond "rituals" to ceremonies, performances, group crafting, debates, or cooperative mechanisms.
+
+### Governance and territory
+
+Later Realm candidates:
+
+- jurisdiction/territory;
+- office/role;
+- rule/policy set;
+- election/appointment;
+- taxation/fees;
+- public project/resource;
+- faction control;
+- law/crime reactions.
+
+Use facts, institutions, relationships, commerce, WorldEventPlan, and policies first. Add dedicated semantics only where concurrency/invariants demand them.
+
+The purpose of this catalog is to make future composition opportunities visible—not to make R3/R5 a checklist for an entire simulated civilization.
