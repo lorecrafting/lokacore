@@ -684,7 +684,7 @@ Current ChannelBot, strategies, assertions, state inspector, random walker, stor
 
 Disposition: **FOUNDATION / rebuild these concepts early**.
 
-New bots target canonical command API rather than Phoenix-specific behavior unless explicitly testing transport.
+New gameplay bots target the canonical ActionInvocation/GameSession path rather than Phoenix-specific behavior unless explicitly testing transport. Lower-level deterministic fixtures may target semantic Commands where appropriate.
 
 Keep a protocol integration bot separately.
 
