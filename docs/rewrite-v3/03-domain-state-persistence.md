@@ -649,6 +649,8 @@ Allowed strategies:
 
 Each component version transition that changes persisted runtime state must register a deterministic migration.
 
+For state that can exist in `offline_private` portable saves, the migration path itself must be executable by the supported mobile/portable compatibility path (or the app must retain the older interpreter/runtime). A server-only Elixir migration is not sufficient for an offline save that may update with no network.
+
 No “read old shape and guess.”
 
 ## 22. Deletion semantics
