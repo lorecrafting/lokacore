@@ -1090,22 +1090,27 @@ The semantic scene remains valid on a terminal client even if a mobile client ad
 
 Dream/vision content SHOULD use explicit scene-space semantics instead of pretending a shared Realm character physically teleported into ordinary shared geography.
 
+SceneSequence does not own spatial simulation. It references the generic SceneSpace/InstancePlan primitives from document 21.
+
 Recommended scene spaces:
 
 - **current_world** — scene happens in the ordinary current simulation;
 - **scoped_overlay** — current shared geometry remains, but presentation/entities/actions differ for eligible participants;
-- **private_scene_instance** — isolated temporary simulation for dream, memory, vision, trial, or tightly scripted sequence.
+- **instance** — a generic InstancePlan creates an isolated temporary/private/party spatial simulation from precompiled room/area definitions.
 
-Scene space does not itself choose a new mutation authority. In Story Mode the LocalInstanceAuthority may own the scene subspace directly. In Realm Mode, genuinely separate physical simulation uses the existing private/party WorldInstance/instancing semantics from document 19; a purely perceptual dream should prefer a scoped overlay.
+Scene space does not itself choose a new mutation authority. In Story Mode the LocalInstanceAuthority may own the scoped subspace directly. In Realm Mode, genuinely separate physical simulation uses the existing private/party WorldInstance instancing semantics from document 19; a purely perceptual dream should prefer a scoped overlay.
 
-A dream may therefore:
+A dream/vision is therefore a **content composition**, not another engine subsystem.
+
+A dream may:
 
 1. trigger from sleep/rest/quest/world state;
-2. create a player-scoped SceneInstance or private scene space;
-3. expose dream-only actions/entities/details;
-4. progress choices/checks;
-5. end;
-6. export only explicitly declared typed consequences/facts/memories back to the owning world/quest.
+2. start a SceneInstance and choose current-world, overlay, or generic InstancePlan space;
+3. when interactive space is needed, instantiate precompiled rooms/entities/populations just like any other scoped dungeon/instance;
+4. expose dream-only actions/entities/details;
+5. progress choices/checks;
+6. end;
+7. export only explicitly declared typed consequences/facts/memories back to the owning world/quest.
 
 No accidental dream loot/entity may leak into Realm state unless an explicit certified consequence creates the corresponding real-world result.
 
