@@ -30,7 +30,20 @@ The shared renderer MUST NOT construct authority-specific command payloads.
 
 ### Command
 
-An authority-side typed request to change/inspect game state after action resolution/authentication.
+An authority-side typed request to change/inspect game state.
+
+Commands have two allowed origin classes:
+
+1. **invocation-derived** — produced after a player/agent ActionInvocation is authenticated, re-resolved, and revalidated;
+2. **authority-internal** — produced by trusted world machinery such as a durable scheduler/job, selected BehaviorIntent, PopulationPlan reconciliation, or WorldEventPlan transition.
+
+Authority-internal Commands MUST:
+
+- use registered typed Command variants;
+- carry stable causation/idempotency identity;
+- be reconstructible/retryable where durable;
+- pass through the same pure decision, invariant, StateDelta/DomainEvent/Effect, and commit contracts;
+- never be directly constructible by an untrusted client as a way to skip ActionInvocation validation.
 
 Examples:
 
@@ -39,7 +52,10 @@ Examples:
 - choose dialogue option;
 - attack NPC;
 - buy item;
-- accept quest.
+- accept quest;
+- execute a due ServiceJob completion;
+- reconcile a PopulationPlan;
+- advance an autonomous NPC behavior intent.
 
 ### StateDelta
 
