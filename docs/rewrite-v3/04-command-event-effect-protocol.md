@@ -17,7 +17,7 @@ Example:
   "actor_id": "uuid",
   "target_ids": ["uuid"],
   "input": {},
-  "view_revision": 9201
+  "view_revision": "view-token-9201"
 }
 ```
 
@@ -112,7 +112,9 @@ Authority always revalidates because the GameView can be stale.
 
 The gateway supplies authenticated account/session identity; the client cannot claim arbitrary actor authority. The server verifies the invocation actor is controllable by that session and re-resolves the action against current state.
 
-The server then creates the internal Command ID/idempotency identity. The invocation ID is retained for client retry/correlation.
+`invocation_id` is the client-visible stable retry identity used to derive/recover semantic Command idempotency. `client_seq` is a transport/order diagnostic and MUST NOT become mutation identity; it may restart after reconnect according to protocol rules. `view_revision` is an opaque view-freshness token, not a promise that the client knows the authority's database revision.
+
+The server then creates or recovers the internal Command ID/idempotency identity. The invocation ID is retained for client retry/correlation.
 
 ## 3. Canonical command representation
 
