@@ -569,6 +569,8 @@ next_attempt_at
 causation_id
 ```
 
+Workers MUST tolerate crash/reclaim/redelivery. Durable outbox transport is assumed to be at-least-once: the same effect may reach a receiver more than once after an acknowledgement loss, so the receiving authority/service must deduplicate by the stable idempotency identity before applying authoritative state. A `failed` row representing a required authoritative obligation is not permission to discard it; retry exhaustion transitions into the effect's explicit terminal reconciliation/operator-visible disposition.
+
 ## 17. Event trace is not full event sourcing
 
 The current durable state remains authoritative.
