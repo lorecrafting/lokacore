@@ -504,6 +504,12 @@ Same RNG state gives same script branch offline/online.
 
 Compilation fails portability gate.
 
+### SCR-10 — Wall-time guard is not game semantics
+
+A certified script has deterministic step/query/resource limits and runs on both a slower supported mobile host and the server.
+
+Both hosts produce the same semantic result or deterministic budget error. A host wall-time kill switch cannot produce a normal cartridge-visible branch on one host while the other succeeds; if the outer guard fires, conformance/runtime health fails instead.
+
 ## H. Living world and time
 
 ### WORLD-01 — NPC schedule
