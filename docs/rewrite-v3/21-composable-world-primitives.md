@@ -463,6 +463,41 @@ none | unique(target) | ambiguous(candidates)
 
 No random tie-breaking.
 
+### ActionRecipe / ComposedAction
+
+Builders may define new local verbs without adding engine code when the verb is only a composition of existing semantics.
+
+A compiled ActionRecipe may declare:
+
+- stable action key + aliases;
+- TargetSpec/input schema;
+- visibility/availability Policy;
+- costs/requirements;
+- optional Check;
+- success/failure/result bands;
+- typed consequences;
+- custom DomainEvents;
+- NarrationSpec;
+- cooldown/duration/interrupt policy where supported.
+
+Examples:
+
+~~~text
+ring bell
+pray at altar
+search rubble
+knock on gate
+offer incense
+study inscription
+challenge guard
+~~~
+
+The authority resolves the advertised action to the immutable compiled recipe and constructs a typed semantic invocation/command path. Recipe execution remains bounded and deterministic.
+
+ActionRecipe MUST NOT become an untyped effect list. Every operation/result is registered and schema-validated.
+
+Use a dedicated engine capability instead when the action requires genuinely new semantic invariants.
+
 ### Check
 
 Typed resolution primitive:
@@ -1064,6 +1099,7 @@ detail.add
 detail.reveal
 policy.attach
 action.add
+action_recipe.create
 reaction.add
 behavior.add
 behavior.configure
