@@ -427,7 +427,7 @@ server_capability_pack
 mobile_app_release
 ```
 
-These names intentionally reuse the canonical execution-profile vocabulary from the packet; certification does not invent a second parallel set of Story/Realm profile names.
+The gameplay profile names (`offline_private`, `online_private`, `party`, `shared_area`) intentionally reuse the canonical execution-profile vocabulary from the packet; certification does not invent a second parallel set of Story/Realm profile names. Capability-pack and app-release profiles are separate certification-only targets.
 
 Each profile selects mandatory gates.
 
