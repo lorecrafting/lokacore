@@ -23,7 +23,7 @@ loka/
 
 This exact split MAY be adjusted after a compile-dependency spike, but dependency rules are normative:
 
-- `loka_core` depends only on portable/domain contracts and the narrow kernel adapter.
+- `loka_core` depends only on portable/domain contracts and the narrow portable-rules adapter/port selected by R1.
 - `loka_content` depends on `loka_core`; it owns compile-time cartridge definitions/registries, not runtime authority.
 - `loka_store` depends on `loka_core`; it implements persistence ports and contains no game rules.
 - `loka_platform` depends on `loka_core` plus persistence/platform adapters; it owns account/catalog/entitlement/purchase-restore application rules, not world simulation.
@@ -31,7 +31,7 @@ This exact split MAY be adjusted after a compile-dependency spike, but dependenc
 - `loka_builder` depends on content/compiler/Lab contracts and may orchestrate runtime test hosts; production runtime MUST NOT depend on builder.
 - `loka_web` depends inward on application/runtime/builder interfaces and is an external transport adapter only.
 
-`loka_core` MUST NOT depend on Phoenix, Ecto, filesystem, network, or runtime processes. Portable rule semantics that must execute offline SHOULD live in or call the shared kernel behind a narrow adapter.
+`loka_core` MUST NOT depend on Phoenix, Ecto, filesystem, network, or runtime processes. Portable rule semantics that must execute offline MUST cross the narrow portable-rules port selected by R1; whether that port reaches one shared native implementation or a conformant host implementation is an implementation decision, not a domain dependency.
 
 `loka_store` may depend on core/domain data contracts but MUST NOT contain game rules.
 
@@ -67,7 +67,7 @@ All dynamic processes MUST be addressable by stable IDs through Registries rathe
 
 ## 3. Offline versus online authority
 
-The BEAM runtime described in this document is the **online authority host**. Offline private cartridges use a local authority shell and the same portable kernel, as specified in [07 — Offline Storypacks and the Path to the MMORPG](07-offline-storypacks-to-mmo.md).
+The BEAM runtime described in this document is the **online authority host**. Offline private cartridges use a local authority shell and the same portable semantic contract through the R1-selected implementation strategy, as specified in [07 — Offline Storypacks and the Path to the MMORPG](07-offline-storypacks-to-mmo.md).
 
 Do not attempt to embed a BEAM node in the mobile app merely to preserve architectural symmetry.
 
@@ -145,7 +145,7 @@ Why:
 - NPC schedules can be managed collectively;
 - a crashed instance can reload from durable state.
 
-The instance process routes commands through the shared DecisionCoordinator. Portable rules execute through the shared kernel; server-only Realm capabilities execute as pure Elixir rule evaluators. Both return typed StateDelta/DomainEvent/Effect proposals into the same decision and commit boundary. Neither path may persist directly.
+The instance process routes commands through the shared DecisionCoordinator. Portable rules execute through the R1-selected portable-rules implementation/adapter; server-only Realm capabilities execute as pure Elixir rule evaluators. Both return typed StateDelta/DomainEvent/Effect proposals into the same decision and commit boundary. Neither path may persist directly.
 
 It SHOULD NOT block on slow external I/O while holding command serialization. Persistence commits should be bounded and synchronous where correctness requires; non-authoritative notifications are effects.
 
