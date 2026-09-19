@@ -379,7 +379,8 @@ Make the world feel like a MUD, not a branching ebook.
 - durable local jobs;
 - typed commerce/merchant contract: provider, catalog/stock, price/payment, buy/sell admission, liquidity, restock, schedule, atomic immediate trade;
 - portable Service/Capacity composition primitives;
-- durable local ServiceJob model sufficient to prove queued/timed services;\n- WorldEventPlan phase composition sufficient for the first cartridge's scripted living-world event.
+- durable local ServiceJob model sufficient to prove queued/timed services;
+- WorldEventPlan phase composition sufficient for the first cartridge's scripted living-world event.
 
 ### Gate R8
 
