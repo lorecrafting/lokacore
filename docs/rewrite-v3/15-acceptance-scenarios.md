@@ -1255,6 +1255,20 @@ Promotion explicitly chooses whether Realm deployment uses personal capacity, an
 
 ## X. Composable world primitives and classic-MUD conformance
 
+
+
+### ACTIONRECIPE-01 — Builder-defined verb without engine code
+
+A cartridge defines ring-bell as an ActionRecipe over an InspectableDetail.
+
+The action emits typed narration + temple/bell_rung DomainEvent and drives a ReactionRule/quest objective identically on Story and Realm hosts without adding a bespoke engine command.
+
+### ACTIONRECIPE-02 — Composed action cost/check/retry
+
+A search-rubble ActionRecipe consumes an allowed resource cost, performs a deterministic Check, and reveals a clue on success.
+
+Retry after an unknown response cannot charge twice or reveal twice; all operations are registered and bounded.
+
 ### TARGET-01 — Deterministic target ambiguity
 
 Two visible targets share the same player-facing alias.
