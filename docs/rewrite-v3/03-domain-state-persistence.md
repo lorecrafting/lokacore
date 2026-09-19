@@ -111,7 +111,7 @@ Ephemeral state may be reconstructed after restart.
 
 ## 6. State scopes
 
-State scope is a first-class type:
+State scope is a first-class semantic type:
 
 ```elixir
 @type scope ::
@@ -124,6 +124,14 @@ State scope is a first-class type:
 Quest instances, flags, reputation tracks, world events, and similar state MUST declare a scope.
 
 No helper may default to realm/global scope merely because an ID was omitted.
+
+### Scope is not physical authority placement
+
+State scope answers who owns/experiences a gameplay truth; it does **not** by itself decide which process or table physically hosts that state.
+
+Private Story/WorldInstance execution may naturally co-locate player, party, and instance state under one authority. A persistent Realm may instead place or route player-, party-, instance-, and realm-scoped state through different authority domains as the world is partitioned.
+
+The exact long-lived placement/routing strategy for cross-zone player/party state MUST be decided and acceptance-tested before the corresponding shared-Realm milestones. Schemas and APIs MUST NOT assume that player or party scope is permanently owned by the current ZoneShard.
 
 ### Multiplayer state uses independent axes
 
@@ -402,11 +410,11 @@ quest_definition_ref
 lifecycle_state
 activation_mode
 activated_logical_time
-resolved_outcome nullable
+outcome_id nullable
 objective_state JSONB
 variables JSONB
 revision
-resolved_at nullable
+ended_at nullable
 ```
 
 A unique constraint should prevent duplicate active quest instances where the quest's repeatability rules disallow them.
@@ -439,7 +447,7 @@ Logical fields:
 ```text
 id UUID
 authority_id
-service_entity_id
+service_ref
 capacity_scope_type
 capacity_scope_id
 requester_id
@@ -468,7 +476,9 @@ Capacity allocation must have a database/authority invariant sufficient to preve
 
 Every authority-side state-changing Command carries a stable idempotency identity.
 
-For external ActionInvocations, the authority MUST derive/reuse a stable Command ID from trusted context plus the invocation ID (for example instance + actor/session + invocation ID), so a network retry cannot become a fresh mutation.
+For external ActionInvocations, the authority MUST derive/reuse a stable Command ID from trusted authority context plus the invocation ID (for example authority/instance + controlled actor/character + invocation ID), so a network retry cannot become a fresh mutation.
+
+The derivation MUST NOT depend on ephemeral connection/session identity. The same invocation retried after reconnecting through a new session must deduplicate against the original committed command. Session identity may authorize the request and be recorded for audit, but it is not part of semantic idempotency identity.
 
 Internal scheduled/system commands carry their own stable job/command identity.
 
@@ -591,7 +601,9 @@ Database revisions still protect against:
 
 Updates SHOULD include expected revisions.
 
-A revision conflict is an invariant signal, not something to silently overwrite.
+When more than one runtime process could plausibly claim the same durable authority domain—because of restart overlap, failover, clustering, or an operational bug—the store MUST also validate an ownership/fencing generation (or an equivalently strong lease/owner token). A stale process with a valid-looking state revision must not be allowed to resume writing after ownership has moved.
+
+A revision or fencing conflict is an invariant signal, not something to silently overwrite.
 
 ## 20. Persistence adapters
 
