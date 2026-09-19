@@ -677,7 +677,7 @@ Normal builder expression includes:
 - custom typed facts and namespaced DomainEvents;
 - Policy/condition trees;
 - bounded deterministic target selectors;
-- Actions;
+- Actions and ActionRecipes;
 - ReactionRules;
 - state machines;
 - Behaviors and profiles;
@@ -714,6 +714,7 @@ topology.make_barrier
 detail.add
 policy.attach
 action.add
+action_recipe.create
 reaction.add
 behavior.add
 spawn_bundle.create
