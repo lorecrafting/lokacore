@@ -83,7 +83,7 @@ Exercises Phoenix channel contract and generated fixtures.
 
 ### Cross-host conformance
 
-Runs the same golden scenario through kernel host adapters and compares canonical trace hashes.
+Runs the same golden scenario through every host implementation/adapter selected by the accepted portable-execution ADR and compares canonical trace hashes. If R1 selects one shared native kernel, this includes its direct host plus BEAM/iOS/Android bindings; if R1 selects the dual-implementation fallback, it compares the accepted Elixir/mobile implementations instead.
 
 Certification uses all modes relevant to the deployment profile.
 
@@ -477,7 +477,8 @@ Machine-readable example:
 {
   "cartridge_hash": "...",
   "deployment_hash": "...",
-  "kernel_revision": "...",
+  "portable_rules_revision": "...",
+  "portable_strategy": "...",
   "engine_revision": "...",
   "capability_lock_hash": "...",
   "profile": "offline_private_story",
