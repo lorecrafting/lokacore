@@ -23,8 +23,8 @@ Example:
 
 An ActionInvocation is **not yet an authoritative Command**.
 
-- Story Mode: `LocalStorySession` resolves/revalidates the invocation against current local GameView/state and constructs the typed Command.
-- Realm Mode: `RemoteRealmSession` sends the invocation to BEAM; the server re-resolves/revalidates the advertised action and constructs the typed Command.
+- Story Mode: `LocalStorySession` forwards the invocation to `LocalInstanceAuthority`; the local mutation owner resolves/revalidates it against committed local state and constructs the typed Command.
+- Realm Mode: `RemoteRealmSession` sends the invocation to BEAM; the server mutation owner re-resolves/revalidates the advertised action and constructs the typed Command.
 
 The shared renderer MUST NOT construct authority-specific command payloads.
 
