@@ -660,3 +660,110 @@ objective
 But the Builder API and certification artifacts must remain independently useful without Foundry.
 
 A future portability proof could use the Loka v3 repository as a materially different second project once Foundry's own repair gates are complete.
+
+
+## 24. Builder expressive power: semantic composition, not arbitrary authority
+
+The Builder's expressive-power contract is defined in [21 — Composable World Primitives and Builder Expressivity](21-composable-world-primitives.md).
+
+The key rule is:
+
+> **closed semantics, open composition**
+
+Builders/agents should be able to create highly unusual mechanics and story situations by composing registered capabilities, without needing engine-code changes for every piece of content.
+
+Normal builder expression includes:
+
+- custom typed facts and namespaced DomainEvents;
+- Policy/condition trees;
+- bounded deterministic target selectors;
+- Actions;
+- ReactionRules;
+- state machines;
+- Behaviors and profiles;
+- SpawnBundles;
+- PopulationPlans;
+- commerce definitions;
+- Service compositions;
+- Dialogue graphs;
+- SceneSequences;
+- quest graphs/outcomes/consequences;
+- WorldEventPlans;
+- templates/mixins/archetypes/recipes;
+- bounded LokaScript;
+- Lab tests/scenarios.
+
+This is intentionally broad. What builders cannot do is introduce:
+
+- arbitrary persistence writes;
+- arbitrary BEAM/host code;
+- hidden network/filesystem calls;
+- new mutation authorities;
+- unregistered effect types;
+- untyped cross-system state mutation.
+
+### Semantic Builder verbs
+
+In addition to precise content CRUD, Builder v1 SHOULD grow intent-level operations from demonstrated R10 authoring pain.
+
+Candidate operation families include:
+
+~~~text
+topology.connect
+topology.make_barrier
+detail.add
+policy.attach
+action.add
+reaction.add
+behavior.add
+spawn_bundle.create
+population.add
+encounter.create
+merchant.configure
+service.configure
+recipe.create
+relationship.define
+faction.define
+rumor.define
+scene.create
+scene.add_beat
+quest.attach_scene
+world_event.create
+world_event.add_phase
+~~~
+
+These are not a second storage API. They expand into ordinary workspace edits through the same revision/idempotency/audit layer.
+
+### Explainability operations
+
+Rich composition also requires rich explanation.
+
+Builder/Lab should be able to answer:
+
+~~~text
+world.explain_target_resolution
+world.explain_presence
+world.explain_description
+world.explain_behavior
+world.explain_population
+world.explain_price
+world.explain_connection
+world.explain_reaction
+quest.explain_progress
+scene.explain_state
+world_event.explain_phase
+~~~
+
+The result should identify the facts/policies/capabilities/provenance that contributed to the current result.
+
+### Capability-gap discipline
+
+If the requested behavior cannot be expressed safely from registered semantics, return MISSING_CAPABILITY rather than encouraging an agent to hide a new subsystem inside LokaScript.
+
+Conversely, do not promote every one-off pattern into engine code. Prefer, in order:
+
+1. ordinary declarative configuration;
+2. composition recipe/template;
+3. ReactionRule/state machine/SceneSequence;
+4. bounded LokaScript;
+5. new versioned engine capability only when repeated semantics/invariants justify it.
