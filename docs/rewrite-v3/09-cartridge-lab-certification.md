@@ -497,21 +497,28 @@ Machine-readable example:
   "profile": "offline_private_story",
   "gates": {
     "static": "pass",
+    "model_analysis": "pass",
+    "coverage": "pass",
     "host_conformance": "pass",
-    "quest_model": "pass",
-    "simulation": "pass",
+    "quest_scene_model": "pass",
+    "invariants": "pass",
+    "simulation_exploration": "pass",
+    "mutation_sensitivity": "pass",
+    "crash_recovery": "pass",
     "offline_lifecycle": "pass",
     "semantic": "pass",
     "human_mobile": "pass"
   },
+  "evidence_bundle_hash": "...",
   "semantic_review_evidence_hash": "...",
-  "coverage": {...},
+  "coverage_manifest_hash": "...",
+  "exploration_bounds": {...},
   "seeds": [...],
   "warnings": [...]
 }
 ```
 
-Only exact artifact/deployment hash is promotable.
+Only the exact artifact/deployment hash with all profile-mandatory gate receipts bound to its CertificationEvidenceBundle is promotable. A summary certificate without resolvable required evidence is invalid.
 
 ## 22. Regression corpus
 
