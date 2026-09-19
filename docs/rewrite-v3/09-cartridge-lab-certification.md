@@ -1111,6 +1111,12 @@ Potential affected surfaces include:
 
 Use ImpactSet to choose fast Level-0/1 checks during authoring.
 
+Impact analysis is fail-conservative. If the compiler cannot prove a dependency boundary
+because of dynamic selectors, LokaScript/query behavior, custom event subscriptions,
+deployment imports, or another opaque capability edge, the ImpactSet widens to the
+enclosing capability/area/cartridge scope required by policy. Unknown dependency is not
+treated as "unaffected."
+
 For Level-2+ release certification, protected profile policy—not the author/model—decides
 which previously valid receipts may be reused and which gates rerun. High-risk semantic
 changes may force wider/full recertification even when static references look local.
