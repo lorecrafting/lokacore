@@ -1,7 +1,7 @@
 # Loka v3 Rebuild Specification Packet
 
 **Status:** Draft 0.3 — spec-integrity audit candidate; still awaiting independent adversarial review/acceptance; not implementation authorization  
-**Date:** 2026-09-18  
+**Date:** 2026-09-19  
 **Source system:** `lorecrafting/lokacore`  
 **Strategic parent:** `docs/product/CARTRIDGE-ROADMAP.md`  
 **Purpose:** define a clean-room rebuild of Loka as one mobile product with two strictly separated authority modes—offline-first **Story Mode** and BEAM-authoritative **Realm Mode**—while preserving portable cartridge semantics where reuse is valuable and removing transitional Lokacore architecture.
@@ -207,17 +207,17 @@ Read in this order:
 6. [Quests, Dialogue, Actions, and Scripting](06-quests-dialogue-actions-scripting.md)
 7. [Quest Sharing, Phasing, Instancing, and Scarce World Services](19-quest-sharing-instancing-capacity.md)
 8. [Offline Storypacks and the Path to the MMORPG](07-offline-storypacks-to-mmo.md)
-9. [Builder API and AI Factory](08-builder-api-ai-factory.md)
-10. [Cartridge Lab and Certification](09-cartridge-lab-certification.md)
-11. [Mobile, Commerce, and Release](10-mobile-commerce-release.md)
-12. [Security, Observability, and Operations](11-security-observability-operations.md)
-13. [Evennia Design Review](12-evennia-lessons.md)
-14. [Lokacore Feature Inventory](13-lokacore-feature-inventory.md)
-15. [Implementation Plan](14-implementation-plan.md)
-16. [Acceptance Scenarios](15-acceptance-scenarios.md)
-17. [Architecture Decision Register](16-decision-register.md)
-18. [Research Baseline and External References](17-research-baseline.md)
-19. [Specification Review Record](18-review-record.md)
+10. [Builder API and AI Factory](08-builder-api-ai-factory.md)
+11. [Cartridge Lab and Certification](09-cartridge-lab-certification.md)
+12. [Mobile, Commerce, and Release](10-mobile-commerce-release.md)
+13. [Security, Observability, and Operations](11-security-observability-operations.md)
+14. [Evennia Design Review](12-evennia-lessons.md)
+16. [Lokacore Feature Inventory](13-lokacore-feature-inventory.md)
+17. [Implementation Plan](14-implementation-plan.md)
+18. [Acceptance Scenarios](15-acceptance-scenarios.md)
+19. [Architecture Decision Register](16-decision-register.md)
+20. [Research Baseline and External References](17-research-baseline.md)
+21. [Specification Review Record](18-review-record.md)
 
 ## 8. Specification authority map
 
