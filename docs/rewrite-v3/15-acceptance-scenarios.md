@@ -6,7 +6,7 @@ They are intended to seed automated tests, Cartridge Lab repros, architecture re
 
 Scenario IDs are stable.
 
-## A. Portable kernel and determinism
+## A. Portable rules and determinism
 
 ### DET-01 — Same command, same state
 
@@ -19,7 +19,7 @@ Given identical:
 - RNG state;
 - command
 
-the kernel returns canonically identical result across repeated runs.
+the portable rules layer returns a canonically identical result across repeated runs.
 
 ### DET-02 — Cross-host equivalence
 
@@ -59,7 +59,7 @@ Rule-critical arithmetic at rounding/threshold boundaries produces identical res
 
 No platform floating-point difference changes quest/combat/economy outcome.
 
-### DET-09 — Kernel proposal is non-mutating before commit
+### DET-09 — Portable-rules proposal is non-mutating before commit
 
 Decision returns a proposal/delta.
 
@@ -69,13 +69,13 @@ Subsequent decision observes the original committed state.
 
 ### DET-10 — Post-commit in-memory apply failure
 
-Persistence commits delta, then injected kernel-state apply failure occurs.
+Persistence commits the delta, then an injected in-memory authority/portable-state adoption failure occurs.
 
 Authority restarts/reloads committed state and does not execute command twice.
 
-### DET-11 — Kernel panic boundary
+### DET-11 — Portable implementation fault boundary
 
-Injected native failure cannot silently produce committed game state.
+An injected portable-rules implementation failure—including a native panic when the R1-selected strategy uses native code—cannot silently produce committed game state.
 
 Host returns failure/restarts as applicable.
 
@@ -452,7 +452,7 @@ Local Story authority or BEAM Realm authority re-resolves current ActionSet and 
 
 ### ACT-10 — Stale action invocation
 
-Client submits an invocation from GameView revision 41 after authority state advanced to revision 42 and the action is no longer legal.
+Client submits an invocation carrying stale view-freshness token V41 after relevant authoritative state changed and a newer GameView would carry V42. The action is no longer legal.
 
 Authority returns a typed stale/invalid-action result and fresh projection/resync guidance; it does not execute based solely on the old view.
 
@@ -462,7 +462,7 @@ Client retries the same invocation after losing the acknowledgement.
 
 The active authority maps it into the command/idempotency contract so a state-changing action cannot execute twice.
 
-### ACT-12 — Realm local-kernel forgery
+### ACT-12 — Realm local-rules forgery
 
 A modified one-app client computes a favorable local result for a Realm action and submits it.
 
@@ -478,7 +478,7 @@ The authority derives the same semantic Command/idempotency identity and returns
 
 ### SCR-01 — Allowed binding
 
-Portable script emits typed effect and works identically offline/online.
+Portable script returns the registered typed StateDelta/DomainEvent/Effect result and behaves identically offline/online.
 
 ### SCR-02 — Filesystem escape
 
@@ -832,7 +832,7 @@ Published gameplay unaffected.
 
 Restore staging environment from backup and prove known instance/catalog/entitlement state.
 
-### OPS-05 — Kernel version deploy
+### OPS-05 — Portable-rules/API version deploy
 
 Incompatible active instance is checkpointed/migrated/kept on compatible runtime according to explicit release policy; never silently reinterpret state.
 
@@ -840,7 +840,7 @@ Incompatible active instance is checkpointed/migrated/kept on compatible runtime
 
 ### ARCH-01
 
-Portable kernel has no network/filesystem/database imports.
+Portable gameplay rules have no network/filesystem/database side channels; all required host inputs cross explicit ports/contracts.
 
 ### ARCH-02
 
@@ -848,7 +848,7 @@ Core/domain layer cannot import Phoenix/Ecto/web adapters.
 
 ### ARCH-03
 
-Web layer is only external adapter; game rules cannot import serializers/socket structs.
+`loka_web` is an external Realm transport adapter only; game rules cannot import serializers/socket structs.
 
 ### ARCH-04
 
@@ -1015,11 +1015,11 @@ The Story session commits/closes before RemoteRealmSession becomes active. No wo
 
 The reverse transition has the same guarantee.
 
-### MODE-04 — Local kernel cannot authorize Realm state
+### MODE-04 — Local rules execution cannot authorize Realm state
 
-A modified client invokes the embedded local kernel while connected to Realm Mode and fabricates favorable results.
+A modified client invokes whatever Story portable-rules implementation is embedded locally while connected to Realm Mode and fabricates favorable results.
 
-BEAM ignores those results; only validated Realm commands and server decisions can mutate Realm state.
+BEAM ignores those results; only server-resolved ActionInvocations and committed Realm decisions can mutate Realm state.
 
 ### MODE-05 — Shared GameView parity
 
@@ -1049,7 +1049,7 @@ Ordinary Story Mode launch/play remains functional.
 
 An app update changes Realm protocol/client features but leaves a supported Story save installed.
 
-The Story save still opens through the documented kernel/rule-IR compatibility path.
+The Story save still opens through the documented portable-rules/rule-IR compatibility path.
 
 ### MODE-10 — Optional Story account, required Realm account
 
