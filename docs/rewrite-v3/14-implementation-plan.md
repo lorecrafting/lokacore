@@ -186,7 +186,14 @@ Make machine-readable contracts exist before features.
 - DomainEvent registry;
 - Effect registry;
 - policy AST;
+- TargetSpec / deterministic TargetResolution result schema;
+- typed relation/provenance shapes;
+- InspectableDetail/description-variant schema;
+- Connection/Barrier schema;
+- ReactionRule schema;
+- SpawnBundle/PopulationPlan registry shape;
 - FactSpec / scoped narrative-state schema;
+- NarrationSpec + SceneDefinition/SceneInstance schema;
 - consequence-operator registry shape;
 - portable GameView schema;
 - portable-rules ABI/serialization contract selected by R1;
@@ -245,8 +252,10 @@ Establish world/state mechanics needed by everything else.
 - world state;
 - definitions → runtime entities;
 - containment/location;
-- room/exits;
-- Search inputs/IDs;
+- room/place + coherent Connection/Barrier;
+- typed relations/provenance;
+- InspectableDetail + conditional descriptions;
+- TargetSpec/Search inputs/IDs + deterministic none/unique/ambiguous resolution;
 - typed facts and explicitly scoped runtime state;
 - logical clock;
 - RNG;
@@ -318,6 +327,11 @@ Support real narrative cartridges.
 - idempotent rewards/consequences;
 - dialogue graph;
 - dialogue conditions/actions;
+- NarrationSpec;
+- SceneDefinition + durable SceneInstance reducer;
+- text-cutscene beats, choices, checkpoints, and action-control modes;
+- player-scoped dream/private-scene semantics with explicit exported consequences;
+- quest milestone/scene hooks and scene outcome objectives;
 - LokaScript parser/normalized-IR skeleton and interpreter core sufficient to prove containment/determinism;
 - only the bindings actually needed by the first cartridge plus a small synthetic safety fixture set;
 - interpreter budgets;
@@ -336,22 +350,26 @@ Make the world feel like a MUD, not a branching ebook.
 
 ### Build initially
 
-- reactive fact/event rule evaluation;
+- typed ReactionRule evaluation;
 - NPC role/state profiles;
+- deterministic Behavior intent/arbitration contract;
 - schedule;
 - patrol;
 - wander;
+- guard/flee/assist/scavenge behavior primitives as demanded by the conformance cartridge;
 - ambient emitter;
 - shop hours;
 - nocturnal/activity windows;
-- spawn/despawn policy;
+- AreaDefinition/WorldRegion authoring grouping distinct from ZoneShard placement;
+- SpawnBundle + provenance-safe PopulationPlan;
+- spawn/despawn/cleanup policy;
 - day/night;
 - basic weather;
 - fact-driven room/ambient variants;
 - fact-driven access/topology policies;
 - on-demand temporal state;
 - durable local jobs;
-- simple merchant/shop if needed;
+- typed commerce/merchant contract: provider, catalog/stock, price/payment, buy/sell admission, liquidity, restock, schedule, atomic immediate trade;
 - portable Service/Capacity composition primitives;
 - durable local ServiceJob model sufficient to prove queued/timed services.
 
@@ -380,6 +398,8 @@ Make failures reproducible before content scale.
 - snapshots/forks;
 - branch outcome fork/compare;
 - quest world-impact/consequence graph;
+- scene/dream/cutscene trace + crash/retry replay;
+- target-resolution/provenance/behavior/population/price explanation traces;
 - trace viewer data;
 - static validator gates;
 - property tests;
@@ -406,12 +426,20 @@ Target scope:
 - ~8–15 locations;
 - 5–8 NPCs;
 - 10–20 items;
-- 1–3 connected quests;
-- branching outcome with typed durable world consequences;
+- 2–4 connected quests forming a coherent story thread;
+- at least one multi-stage/branching quest with typed durable world consequences;
+- at least one quest-launched SceneSequence rendered as a text cutscene;
+- at least one dream/vision or private narrative scene with explicitly exported consequences;
+- at least one scripted world-event/reaction sequence driven by typed facts/events;
 - at least one quest-gated area/access change;
 - at least one NPC role/schedule/dialogue reaction to quest outcome;
 - at least one ambient/environmental reaction to shared fact state;
 - schedules;
+- InspectableDetails and deterministic text target ambiguity/disambiguation;
+- coherent locked/openable bidirectional barrier;
+- SpawnBundle + PopulationPlan;
+- merchant with hours/stock/price or admission variation;
+- at least one ReactionRule and conflicting Behavior arbitration fixture;
 - environmental change;
 - simple skill/check;
 - optional simple combat;
@@ -449,6 +477,8 @@ Let humans/agents author without raw repo semantics.
 - audit/idempotency receipts for retry-safe mutations;
 - terminal adapter;
 - MCP adapter;
+- semantic intent-level operations for demonstrated needs such as topology.connect, detail.add, reaction.add, population.add, merchant.configure, scene.create, quest.attach_scene, and world_event.create;
+- explainability operations for target resolution, behavior, population, prices, scenes, quest progress, and world-event phase;
 - expand LokaScript bindings/recipes only from concrete R10 authoring needs and accepted reusable capability gaps.
 
 ### Gate R11
