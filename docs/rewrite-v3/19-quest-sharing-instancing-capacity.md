@@ -239,7 +239,43 @@ Preferred escalation order:
 3. private/party instance;
 4. realm-shared mutation when the fiction intentionally affects everyone.
 
-## 9. Scarce services are compositions of reusable primitives
+## 9. InstancePlan: reusable scoped spatial simulation
+
+A private/party instance is not a quest-specific subsystem.
+
+An **InstancePlan** may instantiate a precompiled AreaDefinition, exported cartridge
+region, or room subgraph under explicit participant/admission/lifecycle policy.
+
+It may compose:
+
+- entry/exit bindings;
+- audience/participants;
+- progress/consequence scope;
+- SpawnBundles and PopulationPlans;
+- ActivationGroups;
+- encounter/scene hooks;
+- reconnect policy;
+- reset/re-entry behavior;
+- persistence/expiry;
+- teardown;
+- explicit exported rewards/facts/memories.
+
+Use the same primitive for:
+
+- private dungeon;
+- party puzzle;
+- escort/heist simulation;
+- tutorial;
+- dream/vision/flashback world;
+- temporary ritual/trial space.
+
+A SceneSequence may orchestrate beats **inside** an InstancePlan, but the instance remains
+ordinary spatial/world simulation and can be explored interactively between scene beats.
+
+An InstancePlan creates runtime instances of already compiled definitions; ordinary
+content does not generate new uncertified definitions at runtime.
+
+## 10. Scarce services are compositions of reusable primitives
 
 A quest may depend on a genuinely scarce service.
 
@@ -288,7 +324,7 @@ Examples:
 
 A single physical Realm smithy is merely one authored Service composition whose capacity owner is that shared service/entity.
 
-## 10. Durable ServiceJobs
+## 11. Durable ServiceJobs
 
 Long-running or queued services create durable **ServiceJobs**.
 
@@ -340,7 +376,7 @@ A failed cross-authority handoff must not strand, duplicate, or simultaneously e
 
 The quest only observes typed service/job DomainEvents.
 
-## 11. Worked example: the one-sword-per-day smithy
+## 12. Worked example: the one-sword-per-day smithy
 
 Requirement:
 
@@ -401,7 +437,7 @@ Any capacity, cooldown, reservation, or service schedule expressed as “per hou
 
 For portable content, prefer world logical/calendar semantics when fiction permits. Realm-only real-world schedules use a server-authoritative time basis.
 
-## 12. Shared service fairness and contention
+## 13. Shared service fairness and contention
 
 Shared services may define:
 
@@ -421,7 +457,7 @@ All allocation is server-authoritative and transactional.
 
 Two players racing for the last slot cannot both receive it.
 
-## 13. Story Mode service behavior
+## 14. Story Mode service behavior
 
 The same composed service primitives run locally.
 
@@ -439,7 +475,7 @@ If the Story time policy is real-elapsed, a work order may finish while the app 
 
 If it is play-time, it finishes only after enough logical game time advances.
 
-## 14. Phased quest drops and actors
+## 15. Phased quest drops and actors
 
 A personal phased NPC should not drop a realm-shared sword onto the ground by accident.
 
@@ -451,7 +487,7 @@ Default inheritance rules should be safe:
 
 Scope escalation requires an explicit registered operator and certification.
 
-## 15. Personal access versus shared geometry
+## 16. Personal access versus shared geometry
 
 If only the player should enter a place but the map geometry is otherwise identical, prefer a shared connection with a player-scoped access policy.
 
@@ -466,7 +502,7 @@ If the destination itself contains contradictory/destroyed/private world state, 
 
 Map discovery is separate again: a player may not see a known location on the map even if it physically exists.
 
-## 16. Party resources and rewards
+## 17. Party resources and rewards
 
 Progress, contribution, reward, and ownership are distinct policies.
 
@@ -485,7 +521,7 @@ Example party service job:
 
 A late joiner does not automatically inherit full contribution/reward unless the quest says so.
 
-## 17. Builder guidance
+## 18. Builder guidance
 
 Builder target story, realm, or promote should ask enough questions to infer the least-isolated correct model.
 
@@ -503,7 +539,7 @@ For a new quest it should be able to ask/derive:
 
 The Builder should prefer shared state plus scoped progress/overlays before proposing an instance.
 
-## 18. Certification requirements
+## 19. Certification requirements
 
 Certification must include scenarios relevant to the chosen sharing model.
 
@@ -548,7 +584,7 @@ For realm events:
 - late join;
 - rollback/recovery.
 
-## 19. Selection table
+## 20. Selection table
 
 | Situation | Preferred model |
 |---|---|
@@ -567,7 +603,7 @@ For realm events:
 This flexibility is intentional. A living MUD needs both private narrative and genuinely shared scarcity.
 
 
-## 20. Commerce and services compose but are not the same mechanism
+## 21. Commerce and services compose but are not the same mechanism
 
 A merchant/shop is normally an immediate **Commerce** composite, not a ServiceJob.
 
