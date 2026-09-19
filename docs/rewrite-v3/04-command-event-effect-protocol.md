@@ -160,7 +160,7 @@ Unknown command types fail before reaching game rules.
 
 ## 4. Decision environment
 
-The host-neutral decision layer / portable kernel receives explicit environment:
+The host-neutral decision layer / R1-selected portable-rules implementation receives explicit environment:
 
 ```elixir
 %DecisionEnv{
@@ -205,7 +205,7 @@ The `WorldInstance` / `ZoneShard` uses a **DecisionCoordinator**:
 typed Command
    ↓
 ordered capability/rule dispatch
-   ├─ portable evaluators → shared kernel
+   ├─ portable evaluators → portable-rules implementation
    └─ server-only evaluators → pure Elixir rule modules
    ↓
 proposal overlay
@@ -534,6 +534,6 @@ Breaking protocol changes require version bump and compatibility policy.
 
 ## 21. Offline command conformance
 
-The portable semantic Command schema is also machine-readable. The online Elixir host and offline native/mobile host MUST serialize equivalent semantic commands into the same kernel representation. Host-only CommandContext fields such as authenticated session identity or receipt timestamp are excluded from portable command equivalence.
+The portable semantic Command schema is also machine-readable. Every authoritative host implementation MUST serialize equivalent semantic commands into the same canonical portable representation. Host-only CommandContext fields such as authenticated session identity or receipt timestamp are excluded from portable command equivalence.
 
 Golden conformance fixtures cover command -> decision/event/effect output independent of network transport. Online protocol code wraps these semantics; it does not redefine them.
