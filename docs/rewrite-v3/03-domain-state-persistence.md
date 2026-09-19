@@ -482,14 +482,17 @@ Capacity allocation must have a database/authority invariant sufficient to preve
 
 Every authority-side state-changing Command carries a stable idempotency identity.
 
-For external ActionInvocations, the authority MUST derive/reuse a stable Command ID from trusted authority context plus the invocation ID (for example authority/instance + controlled actor/character + invocation ID), so a network retry cannot become a fresh mutation.
+For external ActionInvocations, the authority MUST derive/reuse a stable Command ID from a **logical idempotency scope** plus the invocation ID, so a network retry cannot become a fresh mutation.
 
-The derivation MUST NOT depend on ephemeral connection/session identity. The same invocation retried after reconnecting through a new session must deduplicate against the original committed command. Session identity may authorize the request and be recorded for audit, but it is not part of semantic idempotency identity.
+The idempotency scope MUST outlive ephemeral connection/session identity and, where ownership may move, the current process/shard/owner identity. Representative scopes are a Story save lineage + controlled actor, or a Realm + controlled character. The same invocation retried after reconnecting through a new session **or after an authority handoff** must deduplicate against the original committed command. Session identity and current mutation-owner identity may authorize/route the request and be recorded for audit, but they are not semantic idempotency identity.
 
-Internal scheduled/system commands carry their own stable job/command identity.
+If a command commits immediately before ownership moves, later routing MUST still be able to discover/replay that receipt. R20 may choose a realm-level receipt index, receipt migration, forwarding/tombstone records, or an equivalently durable mechanism; it MUST NOT mint a fresh command identity merely because the current owner changed.
+
+Internal scheduled/system commands carry their own stable job/command identity and follow the same rule when their owning authority can migrate.
 
 ```text
-instance_id
+idempotency_scope_id
+origin_authority_id
 command_id
 invocation_id nullable
 actor_id
@@ -502,7 +505,7 @@ result_digest
 created_at
 ```
 
-Unique key: `(instance_id, command_id)`.
+Unique key: `(idempotency_scope_id, command_id)`.
 
 If the same command is retried with the same semantic command digest, runtime returns the prior committed result/ack rather than executing again. The receipt therefore MUST retain either the stable response payload required for retry or a durable reference from which that response can be reconstructed; a result digest alone is insufficient.
 
@@ -514,7 +517,7 @@ For a command changing durable state:
 
 ```text
 BEGIN
-  lookup command receipt by authority/instance + command_id
+  lookup command receipt by idempotency_scope_id + command_id
 
   if receipt exists:
     require exact semantic_command_digest match
