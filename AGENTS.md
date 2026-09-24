@@ -177,16 +177,17 @@ A test exists to catch a specific break. Adapted from
   violation at each rule's real path and requires the scan to report it.
 - TypeScript: `npx tsc --noEmit` in `mobile/app` (covers all of `mobile/`) and
   `npm run typecheck && npm test` in `kernel/ts` (Node's built-in test runner).
-- Size: source files at most 300 lines, test files 500, functions 40 (`.gen.` files exempt):
-  `elixir bin/check_size.exs` (Elixir), `node bin/check_ts_size.mjs` (TypeScript; red
-  control `bin/ts_size_red_controls.sh`). Escape hatch: a `size: allow N, reason` comment
-  in a file's first 5 lines or right above a function, at most 1.5x; the reviewer must agree
+- Size: source files at most 300 lines, test files 500, each function clause (and `fn`/arrow)
+  40, in every tracked `.ex`/`.exs`/`.ts`/`.tsx`/`.mjs` (`*.gen.*` exempt):
+  `elixir bin/check_size.exs`, `node bin/check_ts_size.mjs` (red control
+  `bin/ts_size_red_controls.sh`). Escape hatch: a `size: allow N, reason` comment in lines
+  1-5 (file) or right above a function after line 5, at most 1.5x; the reviewer must agree
   a split would be worse.
 - `mix credo --strict`: cyclomatic complexity 9, nesting 2, ABC size 30, arity 6; nothing else.
   Any `credo:disable` comment gives its reason on the same line; the reviewer checks it.
 - `elixir bin/red_controls.exs`: plants a boundary violation, a cycle, a compile edge, an
-  oversized AGENTS.md, oversized files and function, and Credo complexity and nesting
-  violations, and requires each check to fail.
+  oversized AGENTS.md, size-limit cases and one violation per Credo check, and requires
+  each check to fail.
 - `elixir bin/check_docs.exs`: links resolve; every doc is reachable; AGENTS.md stays
   within its word budget (it is loaded by every agent, every session).
 - CI: pull requests and pushes to main, superseded runs cancelled. Planned: native mobile

@@ -1,23 +1,27 @@
-# Size limits for Elixir, no deps: source files (lib/, bin/) at most 300 lines, test files
-# (test/) at most 500, each def/defp/defmacro clause in a source file at most 40 lines
-# (first to last line). Files named *.gen.* are exempt. A comment line reading
-# `size: allow N, reason` in a file's first 5 lines (or right above a function) raises that
-# limit to N, at most 1.5x; the marker must be needed. TypeScript: bin/check_ts_size.mjs.
+# Size limits for Elixir, no deps. Source files at most 300 lines, test files 500, each
+# function clause and `fn` in a source file 40 (first to last line). Tests: under the top
+# `test/` or `kernel/ts/test/`, under `__tests__/`, or named *_test.exs / *.test.* / *.spec.*.
+# Scans every git-listed .ex/.exs (or only the given paths), except *.gen.* files and
+# deps/_build/node_modules/android/ios. A comment line starting `# size: allow N, reason`
+# raises a limit to N (at most 1.5x, only when needed): in lines 1-5 for the file, on the
+# line right above a function (after line 5) for that function; anywhere else it fails.
+# TypeScript: bin/check_ts_size.mjs.
 #
-#   elixir bin/check_size.exs
+#   elixir bin/check_size.exs [path ...]
 root = Path.expand("..", __DIR__)
+test_file = ~r{^(test|kernel/ts/test)/|(^|/)__tests__/|(_test\.exs|\.(test|spec)\.(tsx?|mjs))$}
 
-{out, 0} =
-  System.cmd(
-    "git",
-    ~w(ls-files -z --cached --others --exclude-standard -- lib bin test),
-    cd: root
-  )
+candidates =
+  with [] <- System.argv() do
+    {out, 0} = System.cmd("git", ~w(ls-files -z --cached --others --exclude-standard), cd: root)
+    String.split(out, <<0>>, trim: true)
+  end
 
 files =
-  for rel <- String.split(out, <<0>>, trim: true),
+  for rel <- candidates,
       Path.extname(rel) in ~w(.ex .exs),
-      not String.contains?(rel, ".gen."),
+      not String.contains?(Path.basename(rel), ".gen."),
+      not (rel =~ ~r{(^|/)(deps|_build|node_modules|android|ios)/}),
       File.regular?(Path.join(root, rel)),
       do: rel
 
@@ -25,8 +29,14 @@ last_line = fn ast ->
   ast
   |> Macro.prewalk(0, fn
     {_, meta, _} = node, acc when is_list(meta) ->
-      {node,
-       Enum.max([acc, meta[:line] || 0, meta[:end][:line] || 0, meta[:closing][:line] || 0])}
+      keys = [
+        meta[:line],
+        meta[:end][:line],
+        meta[:closing][:line],
+        meta[:end_of_expression][:line]
+      ]
+
+      {node, Enum.max([acc | Enum.map(keys, &(&1 || 0))])}
 
     node, acc ->
       {node, acc}
@@ -34,65 +44,66 @@ last_line = fn ast ->
   |> elem(1)
 end
 
-# {what, first line, size, default limit, marker line or nil} -> report lines
+# [{what, first line, lines}] for every def/defp/defmacro/defmacrop clause and fn.
+functions = fn rel, src ->
+  src
+  |> Code.string_to_quoted!(token_metadata: true, file: rel)
+  |> Macro.prewalk([], fn
+    {kind, meta, [head, _]} = node, acc when kind in [:def, :defp, :defmacro, :defmacrop] ->
+      {name, _, _} = with {:when, _, [call | _]} <- head, do: call
+      name = if is_atom(name), do: name, else: Macro.to_string(name)
+      {node, [{"#{kind} #{name}", meta[:line], last_line.(node) - meta[:line] + 1} | acc]}
+
+    {:fn, meta, clauses} = node, acc when is_list(clauses) ->
+      {node, [{"fn", meta[:line], last_line.(node) - meta[:line] + 1} | acc]}
+
+    node, acc ->
+      {node, acc}
+  end)
+  |> elem(1)
+  |> Enum.reverse()
+end
+
+# {what, first line, lines, default limit, marker line or nil} -> report lines
 check = fn rel, text, {what, first, size, default, ln} ->
-  marker = ln && Regex.run(~r/^\s*# size: allow (\d+)(?:,\s*(\S.*))?/, Enum.at(text, ln - 1))
-  over = &if(size > &1, do: ["#{rel}:#{first}: #{what}, #{size} lines, limit #{&1}"], else: [])
+  parsed = ln && Regex.run(~r/^\s*# size: allow (\d+),\s*(\S.*)/, Enum.at(text, ln - 1))
+  [_, n, reason] = if parsed, do: parsed, else: [nil, "0", nil]
+  n = String.to_integer(n)
 
-  case marker do
-    [_, n, reason] when size <= default ->
-      ["#{rel}:#{ln}: size marker not needed (#{n}, #{reason}), #{size} lines" | over.(default)]
+  {limit, notes} =
+    cond do
+      !ln -> {default, []}
+      !parsed -> {default, ["#{rel}:#{ln}: size marker needs N and a reason"]}
+      size <= default -> {default, ["#{rel}:#{ln}: size marker not needed, #{size} lines"]}
+      n > div(default * 3, 2) -> {default, ["#{rel}:#{ln}: size marker #{n} over 1.5x"]}
+      true -> {n, ["#{rel}:#{ln}: info: size: allow #{n}, #{reason}"]}
+    end
 
-    [_, n, reason] ->
-      if String.to_integer(n) > div(default * 3, 2),
-        do: ["#{rel}:#{ln}: size marker #{n} over the 1.5x ceiling" | over.(default)],
-        else: ["#{rel}:#{ln}: info: size: allow #{n}, #{reason}" | over.(String.to_integer(n))]
-
-    [_, _] ->
-      ["#{rel}:#{ln}: size marker without a reason" | over.(default)]
-
-    _ ->
-      over.(default)
-  end
+  notes ++
+    if size > limit, do: ["#{rel}:#{first}: #{what}, #{size} lines, limit #{limit}"], else: []
 end
 
 report =
   Enum.flat_map(files, fn rel ->
     src = File.read!(Path.join(root, rel))
     text = String.split(src, "\n")
-    test? = String.starts_with?(rel, "test/")
+    test? = rel =~ test_file
+    marked = for {t, i} <- Enum.with_index(text, 1), t =~ ~r/^\s*# size: allow/, do: i
+    file_ln = Enum.find(marked, &(&1 <= 5))
+    fns = if test?, do: [], else: functions.(rel, src)
 
-    functions =
-      if test? do
-        []
-      else
-        src
-        |> Code.string_to_quoted!(token_metadata: true, file: rel)
-        |> Macro.prewalk([], fn
-          {kind, meta, [head, _body]} = node, acc
-          when kind in [:def, :defp, :defmacro, :defmacrop] ->
-            {name, _, _} = with {:when, _, [call | _]} <- head, do: call
-            l = meta[:line]
-            {node, [{"#{kind} #{name}", l, last_line.(node) - l + 1, 40, l > 1 && l - 1} | acc]}
+    fns =
+      for {what, l, size} <- fns,
+          do: {what, l, size, 40, (l - 1 > 5 and (l - 1) in marked) && l - 1}
 
-          node, acc ->
-            {node, acc}
-        end)
-        |> elem(1)
-        |> Enum.reverse()
-      end
-
-    before_fn = for {_, l, _, _, _} <- functions, do: l - 1
-
-    file_marker =
-      Enum.find(
-        1..min(5, length(text)),
-        &(&1 not in before_fn and Enum.at(text, &1 - 1) =~ ~r/^\s*# size: allow /)
-      )
-
+    consumed = [file_ln | for({_, _, _, _, ln} <- fns, do: ln)]
     lines = length(text) - if String.ends_with?(src, "\n"), do: 1, else: 0
-    file = {"file", 1, lines, if(test?, do: 500, else: 300), file_marker}
-    Enum.flat_map([file | functions], &check.(rel, text, &1))
+    file = {"file", 1, lines, if(test?, do: 500, else: 300), file_ln}
+
+    Enum.flat_map([file | fns], &check.(rel, text, &1)) ++
+      for i <- marked,
+          i not in consumed,
+          do: "#{rel}:#{i}: size marker not attached to a file header or function"
   end)
 
 Enum.each(report, &IO.puts/1)
