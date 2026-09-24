@@ -155,6 +155,7 @@ A test exists to catch a specific break. Adapted from
 - **Mutation check before handoff.** For each realistic mutation (wrong constant or
   branch, missing state change, empty return, missing validation of empty/zero/malformed
   input) at least one test fails; actually break the code once and watch it fail.
+  Mix compares mtimes to the second, so run Elixir mutants with `mix test --force`.
 
 ## Searching code (use precise tools first)
 
