@@ -23,5 +23,7 @@ Before handing off:
 4. Reply with: what changed, check output summary, self-review findings with dispositions,
    open questions. Keep it short.
 
+Never use `--no-verify` or force-push (including `--force-with-lease`) without the owner's OK; fix the cause, and if a hook blocks wrongly, report it.
+
 When review findings arrive: `git pull --rebase` (the review record is on the branch; never force-push), then fix each or dispute it with a concrete reason, rerun the
 checks, push, and reply with one line per finding (`fixed <sha>` / `disputed: why`).
