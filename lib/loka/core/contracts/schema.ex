@@ -14,6 +14,13 @@ defmodule Loka.Core.Contracts.Schema do
   `enum`, `const`. `enum` and `const` values are scalars. `oneOf` branches are inline
   objects, each with exactly one `const` property, the same required property in every
   branch with distinct values (the discriminator).
+
+  `pattern` is limited to a grammar that PCRE (Elixir, compiled with
+  `[:unicode, :dollar_endonly]`) and JavaScript (`u` flag) read the same way: anchored
+  `^...$`; literals `A-Z a-z 0-9 _ @ : / -`; escapes `\\.` and `\\-` only; classes `[...]`
+  or `[^...]` of those literals, `.` and ranges; groups `(...)` and lookahead `(?=...)`;
+  `|`; quantifiers `? * +`, `{n}`, `{n,m}`. No `.` outside a class, `\\s \\w \\d \\b \\p`,
+  inline flags or other escapes.
   """
 
   @annotations ~w($schema $id title description examples)
@@ -27,6 +34,10 @@ defmodule Loka.Core.Contracts.Schema do
   }
   @untyped ~w($ref enum const oneOf)
   @counts ~w(minItems maxItems minLength maxLength)
+  @class_atom ~S"(?:[A-Za-z0-9_.](?:-[A-Za-z0-9_.])?|\\[.-])"
+  @token ~S"(?:[A-Za-z0-9_@:/-]|\\[.-]|\((?:\?=|(?!\?))|\)|\||[?*+]|\{[0-9]+(?:,[0-9]+)?\}|\[\^?" <>
+           @class_atom <> ~S"+-?\])"
+  @portable "^\\^" <> @token <> "*\\$$"
 
   @doc "Checks decoded schema documents (file name => document) and returns the flat contracts."
   @spec flatten!(%{String.t() => term()}) :: %{String.t() => map()}
@@ -104,8 +115,10 @@ defmodule Loka.Core.Contracts.Schema do
 
   defp keyword("const", c, _, at, _), do: ok(scalar?(c), at)
 
-  defp keyword("pattern", p, _, at, _),
-    do: ok(is_binary(p) and match?({:ok, _}, :re.compile(p, [:unicode, :dollar_endonly])), at)
+  defp keyword("pattern", p, _, at, _) do
+    portable = is_binary(p) and :re.run(p, @portable, [:dollar_endonly, capture: :none]) == :match
+    ok(portable and match?({:ok, _}, :re.compile(p, [:unicode, :dollar_endonly])), at)
+  end
 
   defp keyword("$ref", ref, _, at, ctx), do: ok(resolves?(ref, ctx), at)
 

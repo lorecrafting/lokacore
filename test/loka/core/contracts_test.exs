@@ -55,33 +55,50 @@ defmodule Loka.Core.ContractsTest do
     one_of = &%{"A" => %{"oneOf" => &1}}
     object = &%{"A" => Map.merge(%{"type" => "object", "properties" => %{}}, &1)}
 
-    for {name, defs} <- [
-          {"an unsupported keyword", %{"A" => %{"type" => "string", "format" => "uuid"}}},
-          {"a keyword of another type", %{"A" => %{"type" => "string", "minimum" => 1}}},
-          {"an unsupported type", %{"A" => %{"type" => "number"}}},
-          {"open additionalProperties", object.(%{"additionalProperties" => true})},
-          {"missing additionalProperties", object.(%{})},
-          {"required but not declared",
-           object.(%{"additionalProperties" => false, "required" => ["x"]})},
-          {"a nested bad keyword",
-           %{"A" => %{"type" => "array", "items" => %{"type" => "null", "format" => "x"}}}},
-          {"a dangling $ref", %{"A" => %{"$ref" => "#/$defs/B"}}},
-          {"a $ref into a missing file", %{"A" => %{"$ref" => "other.schema.json#/$defs/A"}}},
-          {"no type and no $ref/enum/const/oneOf", %{"A" => %{"description" => "x"}}},
-          {"a non-scalar enum value", %{"A" => %{"enum" => [[1]]}}},
-          {"a pattern that does not compile", %{"A" => %{"type" => "string", "pattern" => "("}}},
-          {"nested $defs", %{"A" => %{"type" => "null", "$defs" => %{}}}},
-          {"oneOf branches with the same tag", one_of.([tagged.("a"), tagged.("a")])},
-          {"a oneOf branch without a tag", one_of.([tagged.("a"), obj.(%{}, [])])},
-          {"an optional tag", one_of.([tagged.("a"), obj.(%{"kind" => %{"const" => "b"}}, [])])},
-          {"different discriminators",
-           one_of.([tagged.("a"), obj.(%{"k" => %{"const" => "b"}}, ["k"])])}
-        ] do
+    for {name, defs} <-
+          [
+            {"an unsupported keyword", %{"A" => %{"type" => "string", "format" => "uuid"}}},
+            {"a keyword of another type", %{"A" => %{"type" => "string", "minimum" => 1}}},
+            {"an unsupported type", %{"A" => %{"type" => "number"}}},
+            {"open additionalProperties", object.(%{"additionalProperties" => true})},
+            {"missing additionalProperties", object.(%{})},
+            {"required but not declared",
+             object.(%{"additionalProperties" => false, "required" => ["x"]})},
+            {"a nested bad keyword",
+             %{"A" => %{"type" => "array", "items" => %{"type" => "null", "format" => "x"}}}},
+            {"a dangling $ref", %{"A" => %{"$ref" => "#/$defs/B"}}},
+            {"a $ref into a missing file", %{"A" => %{"$ref" => "other.schema.json#/$defs/A"}}},
+            {"no type and no $ref/enum/const/oneOf", %{"A" => %{"description" => "x"}}},
+            {"a non-scalar enum value", %{"A" => %{"enum" => [[1]]}}},
+            {"a pattern that does not compile",
+             %{"A" => %{"type" => "string", "pattern" => "^($"}}},
+            {"nested $defs", %{"A" => %{"type" => "null", "$defs" => %{}}}},
+            {"oneOf branches with the same tag", one_of.([tagged.("a"), tagged.("a")])},
+            {"a oneOf branch without a tag", one_of.([tagged.("a"), obj.(%{}, [])])},
+            {"an optional tag",
+             one_of.([tagged.("a"), obj.(%{"kind" => %{"const" => "b"}}, [])])},
+            {"different discriminators",
+             one_of.([tagged.("a"), obj.(%{"k" => %{"const" => "b"}}, ["k"])])}
+          ] ++
+            for(
+              p <-
+                ~W"^a.b$ ^\s$ ^\w$ ^\d$ ^\bx$ ^\p{L}$ ^[a-z]+\_x$ ^\@$ ^(?i)a$ ^(?:a)$ \Aa$ ^a\z abc ^a ^a$b$ ^a{$ ^[\s]$ ^é$",
+              do:
+                {"the non-portable pattern #{p}", %{"A" => %{"type" => "string", "pattern" => p}}}
+            ) do
       @case_defs defs
       test "rejects #{name}" do
         assert_raise ArgumentError, ~r"outside the schema subset", fn ->
           Schema.flatten!(%{"t.schema.json" => %{"$defs" => @case_defs}})
         end
+      end
+    end
+
+    test "rejects one name defined in two files" do
+      doc = %{"$defs" => %{"A" => %{"type" => "null"}}}
+
+      assert_raise ArgumentError, ~r"outside the schema subset", fn ->
+        Schema.flatten!(%{"a.schema.json" => doc, "b.schema.json" => doc})
       end
     end
   end
