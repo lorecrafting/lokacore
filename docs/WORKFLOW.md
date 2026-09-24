@@ -52,6 +52,13 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
 7. **Merge (PM).** Summarize for the owner: PR link, verdict, open notes. Merge with a merge
    commit only after the owner's OK. Update AGENTS.md lessons if the slice taught one.
 
+## Milestone gate: docs tidy pass
+
+The gate review also covers the docs changed during the milestone (not `docs/spec/`,
+which changes only by reviewed amendment, and not review or decision records, which are
+history): a fact stated in two places (keep one, link to it), a lesson that is stale or
+now enforced by a check, a doc turning into a catch-all. Findings are fixed in the gate PR.
+
 ## Git hygiene
 
 - Every developer works in its own worktree on its own branch; the main checkout stays

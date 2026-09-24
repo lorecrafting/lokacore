@@ -177,9 +177,10 @@ A test exists to catch a specific break. Adapted from
   violation at each rule's real path and requires the scan to report it.
 - TypeScript: `npx tsc --noEmit` in `mobile/app` (covers all of `mobile/`) and
   `npm run typecheck && npm test` in `kernel/ts` (Node's built-in test runner).
-- `elixir bin/red_controls.exs`: plants a boundary violation, a cycle and a compile edge,
-  and requires each check to fail.
-- `elixir bin/check_docs.exs`: links resolve; every doc is reachable.
+- `elixir bin/red_controls.exs`: plants a boundary violation, a cycle, a compile edge and
+  an oversized AGENTS.md, and requires each check to fail.
+- `elixir bin/check_docs.exs`: links resolve; every doc is reachable; AGENTS.md stays
+  within 2,500 words (it is loaded by every agent, every session).
 - CI: pull requests and pushes to main, superseded runs cancelled. Planned: native mobile
   builds only when mobile code changes or on manual trigger; the full 10,000-sequence
   differential runs nightly.
@@ -196,6 +197,7 @@ Run everything locally:
 - Merge record-bearing PRs with merge commits, never squash.
 - Reviews are independent ([records](docs/reviews/README.md)): a fresh agent that authored none of the work (owner ruling:
   fresh Fable, Opus or other-vendor agents such as Codex qualify, [ruling](docs/decisions/owner-decision-reviewers-2026-09-24.md); prefer Fable for design-judgment reviews, as defined in [the workflow](docs/WORKFLOW.md)).
+- Each fact lives in one place; other docs link to it rather than restate it.
 - Every Markdown file must be reachable by links from README.md, AGENTS.md or CLAUDE.md,
   and every relative link must resolve: `elixir bin/check_docs.exs`.
 - Readiness probes that exit 1 by design are expected; don't "fix" them.
