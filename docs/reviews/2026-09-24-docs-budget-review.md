@@ -50,3 +50,23 @@
 No contradictions found. The one-fact rule fits the existing reachability and link rules,
 and the gate tidy pass excludes `docs/spec/` (amendment-only) and the history records,
 which matches WORKFLOW.md. It adds no agent, schedule or config knob.
+
+## Re-review of fix commit `30c38f9`
+
+Scope: this commit only. Verdict: **APPROVE**.
+
+1. Finding 1 (should-fix), fixed. The red control now pads a copy in `System.tmp_dir!()`
+   and passes it to `check_docs.exs` as the optional file argument. The tracked AGENTS.md is
+   never written, so a hard kill can at worst leave a stray temp file. Verified:
+   AGENTS.md checksum is identical before and after `red_controls.exs`, the worktree is
+   clean, no `loka-red-*` file is left in the temp dir, and the default no-argument run
+   still budgets the real AGENTS.md (`check_docs.exs` exit 0, `red_controls.exs` all `ok`).
+   Mutation: dropping `over` from the problem list makes the control report
+   `FAIL docs: AGENTS.md over its word budget`.
+2. Finding 2 (nit), fixed. AGENTS.md says "its word budget", so the number is stated only
+   in `bin/check_docs.exs`.
+3. Finding 3 (nit), fixed. The expected string is now `"AGENTS.md is "`.
+
+New nit in touched code, optional: the `bin/check_docs.exs:6-8` header now shows the usage
+line twice, once with `[file-to-budget]` and once without. The first line alone covers
+both.
