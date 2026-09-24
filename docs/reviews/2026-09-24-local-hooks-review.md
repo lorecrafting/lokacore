@@ -90,3 +90,44 @@
   the PR says.
 - The ast-grep and Node versions match between `mise.toml` and CI.
 - Nothing is over-engineered. The PR adds three short scripts and no new dependencies.
+
+## Re-review of 443de20 (fix commit; 7a4c014 is a merge of main, skipped)
+
+Verdict: **APPROVE**. Each finding is resolved or accepted as a documented limitation. I
+reran every planted case in a detached worktree at `7a4c014`:
+
+1. Resolved. `bin/format_on_edit.sh` formats a file only when its `--git-common-dir`
+   matches `$CLAUDE_PROJECT_DIR`'s.
+   - The scratch repo whose `mix.exs` writes a file: no file was written, the file stayed
+     unformatted, exit 0.
+   - A file outside any repo: left alone, exit 0.
+   - This worktree, with the main checkout as the project dir: formatted, including the
+     paths with a space, `$(...)` and quotes. Nothing extra ran.
+   - A `.md` file, and an unset `CLAUDE_PROJECT_DIR`: exit 0.
+2. Resolved. `bin/check_all.sh` now runs every CI step except `mix hex.audit`, which the
+   script header says needs the network. It adds `deps.get --check-locked`,
+   `MIX_ENV=test`, the mobile `tsc --noEmit`, and the kernel red controls, now in
+   `bin/kernel_red_controls.sh`, which CI also calls.
+   - Adding `"DOM"` to the kernel tsconfig `lib` makes that script fail with
+     `tsc accepted fetch('x')`, and its trap removes `red_control.ts`.
+   - A pushed mobile `App.tsx` type error fails pre-push (exit 2).
+   - A full `bin/check_all.sh` run is green.
+3. Resolved as I proposed. pre-push reads the pushed refs from stdin.
+   - A docs-only push from a detached HEAD with no `node_modules` passes (`--no-ts`).
+   - A branch deletion passes, and a new branch is compared with `origin/main`.
+   - Pushing HEAD with a kernel type error fails (exit 2).
+   - `git push origin other-branch`, where `other-branch` has a kernel type error, now
+     selects the TypeScript checks. Without `node_modules` it fails (exit 1). With them it
+     passes (exit 0), because the checks run on the working tree. The new `ponytail:`
+     comment documents this, as the proposed fix asked, and CI checks the pushed commits.
+4. Resolved. pre-commit now checks only staged files. An untracked, misformatted
+   `lib/scratch.ex` no longer blocks a docs-only commit (exit 0). A staged misformatted
+   file, a staged ast-grep violation and a broken `.md` link each still fail (exit 1). A
+   non-code commit and a deletion-only commit pass.
+5. Resolved. Without mise, pre-commit prints `mise not found: install it (see mise.toml)`.
+6. Resolved. `MIX_ENV=test` is set in check_all.
+7. Resolved. AGENTS.md now says "fix the cause instead".
+
+New nit, `.githooks/pre-commit:10`: `mix format` treats each argument as a glob pattern. A
+staged file literally named `lib/a*.ex` also pulled in an untracked, misformatted
+`lib/ab.ex` and blocked the commit. Such a file name is unlikely, so no action is needed.
