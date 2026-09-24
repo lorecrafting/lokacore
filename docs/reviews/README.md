@@ -8,3 +8,5 @@ Each record is written by a fresh agent that authored none of the reviewed work 
   APPROVE WITH NOTES (docs-only, short review).
 - [2026-09-24 docs budget](2026-09-24-docs-budget-review.md): PR #3 at `910b6a6`,
   APPROVE WITH NOTES (tooling/docs, short review).
+- [2026-09-24 roadmap](2026-09-24-roadmap-review.md): PR #5 at `3638143`,
+  APPROVE WITH NOTES (docs-only planning, short review).
