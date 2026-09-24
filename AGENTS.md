@@ -185,9 +185,7 @@ A test exists to catch a specific break. Adapted from
   builds only when mobile code changes or on manual trigger; the full 10,000-sequence
   differential runs nightly.
 
-Run everything locally:
-`mix format --check-formatted && mix compile --warnings-as-errors && mix xref graph --format cycles --fail-above 0 && mix xref graph --label compile-connected --fail-above 0 && mix test && elixir bin/red_controls.exs && ast-grep test --skip-snapshot-tests && ast-grep scan --error && bin/lint_red_controls.sh && elixir bin/check_docs.exs`
-(prefix each with `mise exec --`, or activate mise).
+Run everything locally: `bin/check_all.sh` (what pre-push runs).
 
 ## Working rules
 

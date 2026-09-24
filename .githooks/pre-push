@@ -1,18 +1,6 @@
 #!/bin/sh
-# The full local check line from AGENTS.md, plus the TS kernel when it changed.
-set -e
-m() { mise exec -- "$@"; }
-m mix format --check-formatted
-m mix compile --warnings-as-errors
-m mix xref graph --format cycles --fail-above 0
-m mix xref graph --label compile-connected --fail-above 0
-m mix test
-m elixir bin/red_controls.exs
-m ast-grep test --skip-snapshot-tests
-m ast-grep scan --error
-m bin/lint_red_controls.sh
-m elixir bin/check_docs.exs
-# No upstream yet makes git diff fail, which also runs the kernel tests.
-if ! git diff --quiet '@{upstream}' HEAD -- kernel/ts 2>/dev/null; then
-  (cd kernel/ts && m npm run typecheck && m npm test)
+# The full check line; kernel/ts only when it differs from upstream (or there is none).
+if git diff --quiet '@{upstream}' HEAD -- kernel/ts 2>/dev/null; then
+  exec bin/check_all.sh --no-kernel
 fi
+exec bin/check_all.sh
