@@ -266,3 +266,112 @@ Q5: agree: Keeping GameError.data closed and empty is preferable to inventing un
 
 Q6: disagree: I would not keep two handwritten code lists as the settled design. Derive ErrorCode from the authoritative error_registry.json through the existing loading/generation path, rather than requiring every addition to update two sources. The equality assertion in test/loka/core/contracts_test.exs:36 is a meaningful guard and there is no demonstrated current mismatch, so this duplication alone is not a merge-blocking runtime defect; consolidation is a simplification, not a reason to introduce another registry framework.
 ```
+
+## Re-review (fix round 1)
+
+- Reviewed commit: `3786ea3` (fix round 1 of at most 2). Reviewer: Claude Fable 5.1, a fresh
+  agent (the first reviewer's context was gone); authored none of the work.
+- Commits reviewed: `99b0ba4` (F1, F3), `ff6f7fb` (F2, N2), `393f3f5` (N1), `547da5d` (A2,
+  A3, A4, AQ1, Q5), `3786ea3` (validate.ts table refactor). Skipped: `8e4cfa0` (merge),
+  `5d722d2` (Prettier only). Records: `2676654` states the owner decision on Q1-Q6 exactly as
+  the fix round assumes (lowercase UUIDs, CommandId derived in PR 3; snake_case segments of at
+  most 64 with plain semver; `audience_set` 1-64 with set semantics; instance scope on
+  `world_context_id`; `GameError.data` dropped; ErrorCode enum plus registry with the equality
+  test); `100b29d` appends the Astra review.
+- Checks at `3786ea3` in a detached worktree: `bin/check_all.sh` green through `check_docs`
+  (`mix test` 60/60, `elixir bin/contracts.exs --check` exit 0, xref, Credo, both size checks,
+  `red_controls.exs`, `ast-grep test --skip-snapshot-tests` 6/6, `ast-grep scan --error`,
+  `lint_red_controls.sh`, kernel `tsc` and `node --test` 22/22); the mobile `tsc` step was not
+  run here (no `npm ci` in `mobile/app`; no fix commit touches `mobile/`). Plain `ast-grep test`
+  without `--skip-snapshot-tests` reports missing snapshot baselines; that is pre-existing and
+  not part of this round.
+
+### Disposition
+
+| Finding | Disposition | Evidence |
+|---|---|---|
+| F1 pattern syntax not closed | **Fixed for every form F1 listed; not closed (F4 below)** | `schema.ex:37-40,119`: a portable grammar gates `pattern` before PCRE compile; 18 non-portable forms are test cases (`contracts_test.exs:94`); module doc records `[:unicode, :dollar_endonly]` vs `u`; astral probe `^[^a]$` / `"𝒶"` added. Mutants: grammar check removed (4 tests fail), `.` admitted outside a class (`^a.b$` case fails), TS `RegExp` without `u` (astral example fails). Remaining gap: F4. |
+| F2 boundary examples | Verified | `DefinitionRef` example with three 64-code-point segments; `audience_set` examples with exactly 1 and exactly 64 members. Mutants `maxLength <=`→`<`, `maxItems <=`→`<`, `minItems >=`→`>` each fail "every example validates" in **both** kernels (previously survived). |
+| F3 duplicate-name guard untested | Verified | `contracts_test.exs:106` two-file case; removing `duplicates/1` fails it. |
+| N1 unused `SAFE` import | Verified | Import gone (`393f3f5`). |
+| N2 `audience_set` prose | Verified | Description now "Order and duplicates carry no meaning (set semantics)", matching the owner's Q3 decision; `contracts.gen.ts` regenerated, `--check` exit 0. |
+| A1 (= F1) | As F1 | Astra's `\Aa\z` and `^.$` are both in the rejected list (`\Aa$`, `^a\z`, `^a.b$`). |
+| A2 `__proto__` lost in an object literal | Verified | `bin/contracts.exs:60`: each schema is `JSON.parse` of a JSON string; probe declares `__proto__`; tests in both kernels validate `{"__proto__":"ok"}`. Mutant: generator reverted to an object literal, regenerated: TS test fails (21/22). |
+| A3 unquoted property names | Verified | `bin/contracts.exs:33` uses `lit(k)`; probe declares `a/b~c`; the probe is now generated into `kernel/ts/test/subset.gen.ts` and typechecked (`tsconfig.json` include). Mutant: `lit(k)`→`k`, regenerated: `tsc` fails. |
+| A4 `File` exemption too wide | Verified | Rule admits `File` only as `File.read!(...)`/`File.read(...)` being the whole `@attr` value. Planted at `lib/loka/core/`: `@reader &File.read!/1` + `@reader.(path)`, `@m File` + `@m.read!`, `@s File.read!("x") \|> f()`, `@s [File.read!("x")]`, `@s {File.read!("x"), 1}`, `@s File.read!("x").a`, `@s File.write!` all reported; `@s File.read!("x")` and `@s File.read("x")` pass. Mutant: rule reverted to the any-descendant-of-`@` form: `ast-grep test` fails 5 cases. `contracts.ex:24-28` was restructured so its reads take that exact shape; scan is clean. See N4 for a dead clause. |
+| AQ1 decode precondition | Verified (question answered) | Both module docs state values must come from canonical `decode`; tests in both kernels show `{"n":1.0}`, `{"n":1e0}`, `{"n":1,"n":1}` rejected at decode. |
+| AQ2 Elixir nominal ids | **Deferred, no commit expected** | Not addressed by a commit and not named in the PR or the decision record; the first review's note ("nominally distinct only by contract name until PR 3's structs") is the disposition, and Astra's own text accepts that deferral. Recorded here so it is explicit. |
+| Astra Q6 dissent | Settled by the owner | `2676654`: enum plus registry with the equality test. |
+| Q5 `GameError.data` | Verified | `error.schema.json`: `GameError` is `{code}`; example, the three `invalid.json` cases (paths moved from `/data/...` to `/...`) and `contracts.gen.ts` updated; `{"code":"exit_locked","data":{}}` now `/data unknown_property` in both kernels. |
+| `3786ea3` table refactor | Behavior-preserving; no test lost | Only `validate.ts` changed (16+/24-); `validate.test.ts` untouched; fixtures pass; differential below agrees on all 127 values. Mutants: table bypassed, `too_many_items` swapped for `too_few_items`, `enum` `some`→`every`: each fails. `keyword()` is within the 40-line limit. |
+
+### Mutation results
+
+All 21 mutants killed (each reverted afterwards): Elixir grammar check removed; grammar admits
+`.`; `duplicates/1` removed; `maxItems`, `maxLength`, `minItems` off-by-one in Elixir and in TS
+(six); TS `RegExp` without `u`; generator object literal instead of `JSON.parse`; generator
+unquoted names (`tsc`); TS table bypassed; TS code swapped; TS `enum` inverted; lint rule
+reverted. Control runs green between mutants.
+
+### Differential corpus (Elixir `Contracts.validate/3` vs TS `validate()`, both fed by their canonical `decode`)
+
+127 values under `CharacterId`, `DefinitionRef`, `DefinitionRefString`, `AudiencePolicy`,
+`StateScope`, `GameError`, `ErrorCode`, `SubsetProbe` and three unknown contract names
+(`Nope`, `__proto__`, `constructor`): uppercase and mixed-case UUIDs, the nil UUID, leading and
+trailing newline and space, fullwidth and combining characters; 63/64/65-character segments in
+both `DefinitionRef` forms; versions `0.0.0`, `1.0`, `1.0.0.0`, `01.0.0`, `1.00.0`,
+`1.0.0-rc1`, `1.0.0+build`, Arabic-Indic digit, 64 and 65 characters, trailing newline,
+`.0.0`, `1..0`; `audience_set` with 0, 1, 2 (duplicate), 64 (all duplicate), 65 members and
+one uppercase member; wrong id keys per scope kind, missing `kind`, missing ids (realm never
+defaults); `GameError` with `data`; astral, combining, U+2028, Kelvin-sign strings against
+`^[^a]$`; `__proto__`, `constructor`, `a/b~c`, `""`, `~`, `/` keys; safe-integer edges and the
+decode-level rejects (`2^53`, `1.0`, `1e0`, `-0`, duplicate key, escaped surrogate pair, lone
+surrogate, non-ASCII key). **Zero disagreements.**
+
+49 patterns through `Schema.flatten!/1`, the accepted ones shipped to TS as `JSON.parse` of
+their flattened JSON and run against 27 sample strings (`a-b`, `a.b`, `a\nb`, `a\rb`, `𝒶`,
+`é`, `""`, `\n`, U+2028, U+00A0, `-`, `.`, `a@b:c/d`, ...). 38 accepted; 30 of them agree on
+every sample (810 cases: classes, ranges, trailing `-`, `\.`, `\-` in a class, lazy `*?`
+`+?`, `{0}`, `{02}`, `(a|b|)`, unquantified lookahead, `a{1,2}b`, negated classes against
+astral and U+2028). **8 accepted patterns throw in TypeScript on every sample (216 cases)**:
+`^a\-b$`, `^a*+$`, `^a++$`, `^a?+$`, `^a{2}+$`, `^(?=a)+a$`, `^(?=a)?a$`, `^(?=a){2}a$`.
+The corpus stays in scratch; the eight inputs belong in the "fails closed" list (F4).
+
+### New findings
+
+**F4 (should-fix)** `lib/loka/core/contracts/schema.ex:38` (`@token`). The grammar admits
+three forms PCRE compiles and JavaScript `u` mode rejects: the escape `\-` outside a class
+(`u`-mode identity escapes are limited to syntax characters; `-` is one only inside a class),
+possessive quantifiers (`*+`, `++`, `?+`, `{n}+`: two quantifier tokens in a row), and a
+quantified lookahead (`(?=...)+`, `?`, `{n}`: `)` may be followed by a quantifier whatever
+group it closes). Failure, reproduced through the toolchain at `3786ea3`: a temporary
+`protocol/zz_probe.schema.json` with optional properties `dash: "^a\\-b$"`,
+`poss: "^a*+$"`, `look: "^(?=a)+a$"` and example `{}` passes `elixir bin/contracts.exs`,
+`--check`, `mix test` 60/60, `tsc` and `node --test` 22/22; then
+`validate("EscProbe", {dash: "a-b"})` is `:ok` in Elixir and throws `Invalid escape` in
+TypeScript (`Nothing to repeat` and `Invalid quantifier` for the other two). Nothing shipped
+uses these forms (the committed patterns use `-` bare, one quantifier per atom, and an
+unquantified lookahead), so this is the toolchain gap F1 named, one step narrower. Fix in the
+grammar itself: drop `\\[.-]` from the top-level token (a bare `-` is already a literal
+there), bind quantifiers to an atom (`ATOM (?:[?*+]|\{n(,m)?\})? \??`) so two cannot follow
+each other, and either forbid a quantifier after `)` (one line; widen later if a schema needs
+`(...)+`) or track group kinds; add the eight inputs above to the rejected list.
+
+**N3 (nit)** `lib/loka/core/contracts/schema.ex:20-21` vs `:37`. The module doc says classes
+take "those literals" (`A-Z a-z 0-9 _ @ : / -`), but `@class_atom` admits only
+`A-Za-z0-9_.` (plus `\.`, `\-` and ranges): `^[a-z:]+$` is rejected. Fails closed, so a
+doc fix: say classes take `A-Z a-z 0-9 _ .`, ranges of those, `\.`, `\-`, and a trailing `-`.
+
+**N4 (nit)** `lint/rules/elixir-kernel-pure.yml:24-25`. `not: { has: { nthChild: 2 } }` is
+evaluated on the `@attr(...)` call's `arguments` node (always exactly one child), not on
+`File.read!`'s, so it never fires: `@s File.read!("x", "y")` passes although the comment
+says the call must be the whole value with one argument. No purity escape (any `File.read!`
+that is the whole attribute value runs at compile time), so delete the clause or move it
+under the `File.read!` call's `arguments`.
+
+### Verdict: APPROVE WITH NOTES
+
+Every F, N, A and AQ item and Q5 is fixed as the record asked, each with a test that fails
+without the fix, and the two kernels agree on all 127 corpus values. One should-fix (F4)
+remains for fix round 2: the portable grammar still admits three forms that make the
+TypeScript validator throw, the same failure mode F1 described. Two nits.

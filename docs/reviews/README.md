@@ -28,4 +28,6 @@ Each record is written by a fresh agent that authored none of the reviewed work 
   `324015c`, APPROVE WITH NOTES (full review, contract freeze; 8,653-case differential with
   zero disagreements; three should-fix: pattern syntax not closed, boundary test gap,
   untested duplicate-name guard); plus cross-vendor review (Astra): CHANGES REQUIRED, 4
-  should-fix.
+  should-fix; re-review of the fixes at `3786ea3`, APPROVE WITH NOTES (all dispositions
+  verified with mutants; 127-value differential with zero disagreements; one should-fix: the
+  pattern grammar still admits three forms that throw in TypeScript).
