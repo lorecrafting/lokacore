@@ -13,6 +13,8 @@ m elixir bin/contracts.exs --check
 m mix xref graph --format cycles --fail-above 0
 m mix xref graph --label compile-connected --fail-above 0
 m mix test
+m mix credo --strict
+m elixir bin/check_size.exs
 m elixir bin/red_controls.exs
 m ast-grep test --skip-snapshot-tests
 m ast-grep scan --error
@@ -24,4 +26,6 @@ for d in kernel/ts mobile/app; do
 done
 (cd kernel/ts && m npm run typecheck && m npm test)
 m bin/kernel_red_controls.sh
+m node bin/check_ts_size.mjs
+m bin/ts_size_red_controls.sh
 cd mobile/app && m npx tsc --noEmit

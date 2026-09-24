@@ -27,7 +27,8 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
 2. **Brief (PM).** Name the branch; do not check it out (the developer does, in its own
    worktree). Spawn `developer` with a self-contained brief: goal,
    spec sections, files in and out of scope, acceptance (which checks and fixtures must
-   pass, which red controls to add), and anything the owner decided.
+   pass, which red controls to add), the relevant `docs/lessons/` file, and anything the owner
+   decided.
 3. **Build and self-review (developer).** Implement; run the full local check line from
    AGENTS.md; run `/ponytail-review` (skill `ponytail:ponytail-review`, a user plugin) on the diff and a correctness pass over it
    (`/code-review medium`); fix what they find. Commit, push, open the PR (description cites
@@ -51,7 +52,8 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
    rewrote a core piece or the slice freezes a contract or closes a gate. At most two fix
    rounds; anything still open goes to the owner.
 7. **Merge (PM).** Summarize for the owner: PR link, verdict, open notes. Merge with a merge
-   commit only after the owner's OK. Update AGENTS.md lessons if the slice taught one.
+   commit only after the owner's OK. If the slice taught a lesson, record it in its area
+   file under `docs/lessons/` (AGENTS.md only if it applies to all work).
 
 ## Milestone gate: docs tidy pass
 

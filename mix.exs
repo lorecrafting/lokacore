@@ -19,7 +19,8 @@ defmodule Loka.MixProject do
 
   defp deps do
     [
-      {:boundary, "~> 0.11.0", runtime: false}
+      {:boundary, "~> 0.11.0", runtime: false},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false}
     ]
   end
 end
