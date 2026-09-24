@@ -4,6 +4,10 @@ defmodule Loka.Core.Contracts do
   14 §R3), read at compile time and checked against the closed schema subset
   (`Loka.Core.Contracts.Schema`). `kernel/ts/src/validate.ts` is the TypeScript twin: same
   paths, same codes (`protocol/error_registry.json`).
+
+  Values must come from `Loka.Core.Canonical.decode/1` (the frozen numeric profile). The
+  profile, not the validator, rejects floats, exponents, duplicate keys and invalid Unicode;
+  an ordinary JSON decoder loses or changes that information before validation sees it.
   """
   alias Loka.Core.Canonical
   alias Loka.Core.Contracts.Schema
@@ -13,12 +17,20 @@ defmodule Loka.Core.Contracts do
   # The directory's mtime changes when a schema file is added or removed.
   @external_resource @dir
   @paths Path.wildcard(Path.join(@dir, "*.schema.json"))
-  for path <- @paths, do: @external_resource(path)
 
-  @defs @paths
-        |> Map.new(fn path ->
-          {:ok, doc} = Canonical.decode(File.read!(path))
-          {Path.basename(path), doc}
+  # Compile-time reads only (lint/rules/elixir-kernel-pure.yml).
+  Module.register_attribute(__MODULE__, :docs, accumulate: true)
+
+  for path <- @paths do
+    @external_resource path
+    @source File.read!(path)
+    @docs {Path.basename(path), @source}
+  end
+
+  @defs @docs
+        |> Map.new(fn {name, text} ->
+          {:ok, doc} = Canonical.decode(text)
+          {name, doc}
         end)
         |> Schema.flatten!()
 

@@ -7,14 +7,25 @@ rule:
   any:
     - kind: alias
       regex: ^(Elixir\.)?(IO|System|Process|Port|Node|Task|Agent|GenServer|Supervisor|DynamicSupervisor|Registry|Application|Date|Time|DateTime|NaiveDateTime|Calendar|Ecto|Phoenix|Logger)(\.|$)
-    # File only inside a module-attribute definition (`@x File.read!(...)`): a compile-time read.
+    # File only as a compile-time read: `@x File.read!(...)` or `@x File.read(...)`, the call
+    # being the attribute's whole value. Captures and bare module values could escape to runtime.
     - kind: alias
       regex: ^(Elixir\.)?File(\.|$)
       not:
         inside:
-          kind: unary_operator
-          regex: ^@
-          stopBy: end
+          kind: dot
+          field: left
+          regex: ^(Elixir\.)?File\.read!?$
+          inside:
+            kind: call
+            field: target
+            has: { kind: arguments }
+            inside:
+              kind: arguments
+              not: { has: { nthChild: 2 } }
+              inside:
+                kind: call
+                inside: { kind: unary_operator, field: operand, regex: ^@ }
     - kind: alias
       regex: (^|\.)Repo$
     - kind: atom

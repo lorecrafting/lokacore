@@ -42,6 +42,15 @@ defmodule Loka.Core.ContractsTest do
     for %{"errors" => es} <- @invalid, %{"code" => c} <- es, do: assert(c in registered, c)
   end
 
+  test "a declared __proto__ property is accepted" do
+    assert Contracts.validate("SubsetProbe", JSON.decode!(~s({"__proto__":"ok"})), @defs) == :ok
+  end
+
+  test "values outside the canonical profile are rejected at decode, before validation" do
+    for text <- [~s({"n":1.0}), ~s({"n":1e0}), ~s({"n":1,"n":1})],
+        do: assert(Loka.Core.Canonical.decode(text) == {:error, :invalid_json}, text)
+  end
+
   describe "the schema subset fails closed" do
     obj =
       &%{

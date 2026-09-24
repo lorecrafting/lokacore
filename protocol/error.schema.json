@@ -52,27 +52,20 @@
       ]
     },
     "GameError": {
-      "description": "A typed error: stable code plus structured data, never English text to parse (04 §7). data is empty until a code needs fields; each such code then declares them.",
+      "description": "A typed error: a stable code, never English text to parse (04 §7). Per-code data fields are added, as optional properties, when a code first needs them (owner decision Q5, docs/decisions/owner-decisions-r3-2026-09-24.md).",
       "type": "object",
       "properties": {
         "code": {
           "$ref": "#/$defs/ErrorCode"
-        },
-        "data": {
-          "type": "object",
-          "properties": {},
-          "additionalProperties": false
         }
       },
       "required": [
-        "code",
-        "data"
+        "code"
       ],
       "additionalProperties": false,
       "examples": [
         {
-          "code": "exit_locked",
-          "data": {}
+          "code": "exit_locked"
         }
       ]
     },
