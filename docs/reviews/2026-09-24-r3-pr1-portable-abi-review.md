@@ -211,3 +211,102 @@ repository. The first on-device run in R5 should load this module before anythin
 - The new AGENTS.md lesson about Elixir small maps (≤ 32 keys iterate sorted) is accurate.
 - The merge of `origin/main` into the branch (rather than a rebase) follows "never
   force-pushes".
+
+## Re-review of the fix commits (`ed48a4b`, `0be8816`, `81ad9fd`; head `e258bff`)
+
+Scope: each disposition, the code each fix touched and its direct callers, the parser
+refactors in both `canonical` modules, and the amendment text read as normative. The merges
+`b7a9af3` and `e258bff` were not reviewed. The freeze itself is still pending the owner.
+
+Checks at `e258bff` in a fresh detached worktree: the full AGENTS.md line passes (`mix test`
+18/18, `npm test` 18/18, typecheck, both xref gates, `red_controls.exs`, `ast-grep test`
+6/6, `scan` clean, `lint_red_controls.sh` 6 ok, `check_docs.exs` 57 docs clean).
+
+### Verdict: APPROVE WITH NOTES
+
+All three findings and both nits are fixed as described, the two kernels still agree on
+every input, and the amendment covers the F2 list and matches the code. One should-fix
+remains, a test gap the refactor exposed (R1 below); it is a one-line addition to each
+suite, not a behavior change, and can land with the freeze approval.
+
+### Dispositions
+
+- **F1 (depth): fixed.** `MAX_DEPTH = 128` in `kernel/ts/src/canonical.ts:12` and
+  `@max_depth 128` in `lib/loka/core/canonical.ex:10`, counted the same way on both sides
+  (root container opens at depth 0; the 129th `{`/`[` is rejected). The `RangeError` catch is
+  gone. Differential corpus extended with 33 nesting cases (arrays, objects, and three
+  interleavings, at depths 1, 127, 128, 129, 130, 200, plus a depth-128 tree with wide
+  siblings and whitespace): both kernels accept 128 and reject 129 identically. Mutants
+  `depth === MAX_DEPTH` → `depth > MAX_DEPTH` on parse and on encode fail
+  `nesting is limited to 128 containers` in both kernels.
+- **F2 (spec): fixed, pending the owner.** The new "Frozen v1 rules (R3)" section covers
+  every item on my list: status and profile id (`loka-numeric-v1`, with the fixture's
+  `loka-numeric-proposed-v1` explained), whitespace set and BOM rejection, top-level scalars,
+  trailing data, `\/`, U+007F and non-ASCII literal, ASCII keys with byte order and
+  duplicate detection after decoding, the depth limit, hash definition, draw-budget semantics
+  and check order, operand-before-divisor order, the error registry (now including
+  `invalid_id`), and IdSource in full (domain tag and bump rule, tuple, `WorldContextId` from
+  03 and the stable Command ID from 04 §3, ordinal type and allocation, truncation with
+  version and variant leaving 122 bits, the 36-character form as the id). I checked each
+  sentence against both kernels: all consistent, including the claims about check order,
+  non-text input to `decode`, and the "four frames per level" remark (`value` → `array` →
+  `members` → closure). IMPORT.md records the amendment; the decision record marks the freeze
+  as pending.
+- **N1 (error shapes): fixed.** Elixir `encode`/`hash` return `{:ok, _} | {:error,
+  :invalid_canonical}`; `Int` returns `:integer_overflow` for non-integer operands and checks
+  operands before the divisor (both kernels, tested); `IdSource` returns `:invalid_id` /
+  throws `invalid_id` for non-string ids; `decode` on non-text is `invalid_json` in both.
+  Callers updated: `IdSource.id/3` consumes the encode tuple; `hash/1` uses `with`. No other
+  callers exist yet.
+- **N2 (hash copies): fixed.** `sha256.ts` reads whole blocks through a `DataView` over the
+  input's own buffer (honouring `byteOffset`) and copies only the tail into a 64- or 128-byte
+  pad; `utf8` writes into one preallocated `Uint8Array(3 * length)` and returns a subarray.
+  Verified against Node's `crypto` for every length 0..200, both at offset 0 and as a
+  subarray at offset 37 (0 mismatches); `utf8` equals `Buffer.from(s, 'utf8')` on a 48 KB
+  mixed 1- to 4-byte string; 3 MB hashes in 28 ms. Mutants killed by the new 55/56/120-byte
+  and U+2000B literals: tail threshold `< 56` → `<= 56`, padding byte at `tail[0]`, skipping
+  the first whole block, 4-byte lead `c >> 17` (the mutant that survived in round one). The
+  three new hash literals recomputed with `hashlib` match.
+- **Q1: answered** in the amendment (not yet run on Hermes; first R5 device run).
+- **Process note: recorded** in AGENTS.md (`mix test --force` for Elixir mutants).
+
+### Parser refactors
+
+`canonical.ts` moved from closures to module functions over a `Parser` cursor, with a shared
+`members` loop and an `ESCAPES` table; `canonical.ex` extracted `key/2` and `colon/1`.
+Re-ran the original 4,095-case corpus plus the 33 depth cases: identical accept/reject on all
+3,781 inputs both kernels can receive, identical canonical bytes on all 1,150 accepted, and
+`decode(encode(v))` stable in both. Mutants on the refactored code (duplicate check removed,
+`ESCAPES` missing `/`, `colon/1` accepting any byte, `decode` type guard removed) each fail a
+test in both kernels.
+
+### Finding
+
+**R1 (should-fix). No test pins the separator between members, in either kernel.**
+`kernel/ts/src/canonical.ts:73` (`if (c !== ',') invalid()`) and
+`lib/loka/core/canonical.ex:74,97` (`_ -> throw(:invalid)`). Mutating each to continue
+parsing instead of failing survives both suites (18/18 green), so `[1 2]` and
+`{"a":1 "b":2}` would parse as two-element containers with no test noticing. The shipped
+code rejects both (confirmed directly and by the corpus); the gap is in the tests, on the
+exact function the refactor rewrote. AGENTS.md "Mutation check" names missing validation of
+malformed input as a required mutant. Fix: add `'[1 2]'` and `'{"a":1 "b":2}'` to the
+`decode edge cases` rejection lists in both suites.
+
+Equivalent mutant, not a finding: `utf8`'s 3-byte branch boundary (`c > 0xdbff` →
+`c > 0xdfff`) survives because lone low surrogates never reach `utf8`; `encode` rejects
+them first.
+
+### Not findings
+
+- The `.githooks` directory the coordinator mentioned exists only on the `local-hooks`
+  branch, not at `e258bff`, so no pre-push hook ran from this worktree.
+- The amendment's "128 levels take about 500 JavaScript frames" is informative, not
+  normative; the normative sentence is the depth limit itself.
+
+### Addendum: `eb6dd03`
+
+Pushed while this re-review was being written; docs-only (decision record, IMPORT.md, the
+profile's status line). It quotes the owner's approval verbatim ("okay yes" to "Approve
+freezing it as v1?") and flips the status to **frozen v1, owner-approved 2026-09-24**. No
+rule text changed, so the consistency check above still holds. The freeze is no longer
+pending; R1 remains the only open item.
