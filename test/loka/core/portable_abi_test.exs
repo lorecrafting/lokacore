@@ -142,16 +142,32 @@ defmodule Loka.Core.PortableAbiTest do
     assert Int.divide(1, 0) == {:error, :division_by_zero}
   end
 
+  # Catches the kernels diverging at the contract edge: a bad budget must be a typed
+  # error (same code as TypeScript), not a crash or an immediate budget exhaustion.
+  test "uniform rejects a bad draw budget" do
+    for budget <- [-1, 1.5, true, nil] do
+      assert Rng.uniform([1, 2, 3, 4], 10, budget) == {:error, :invalid_rng_budget},
+             inspect(budget)
+    end
+  end
+
+  # Catches an unsafe ordinal crashing or hashing instead of the typed error TypeScript uses.
+  test "IdSource rejects a bad ordinal" do
+    for ordinal <- [-1, 9_007_199_254_740_992, 1.0, true] do
+      assert IdSource.id("w-1", "c-1", ordinal) == {:error, :invalid_ordinal}, inspect(ordinal)
+    end
+  end
+
   # Expected values, computed independently with Python:
   #   python3 -c 'import hashlib,json,sys; w,c,o=sys.argv[1],sys.argv[2],int(sys.argv[3]);
   #   h=bytearray(hashlib.sha256(json.dumps(["loka-id-v1",w,c,o],separators=(",",":"),
   #   ensure_ascii=False).encode()).digest()[:16]); h[6]=h[6]&15|128; h[8]=h[8]&63|128;
   #   x=h.hex(); print("-".join([x[:8],x[8:12],x[12:16],x[16:20],x[20:]]))' w-1 c-1 0
   test "IdSource ids" do
-    assert IdSource.id("w-1", "c-1", 0) == "eab7cf24-f843-8907-ab7a-610cf750dbe5"
-    assert IdSource.id("w-1", "c-1", 1) == "c47e5589-bb15-82c7-8492-7c392ee99f8d"
+    assert IdSource.id("w-1", "c-1", 0) == {:ok, "eab7cf24-f843-8907-ab7a-610cf750dbe5"}
+    assert IdSource.id("w-1", "c-1", 1) == {:ok, "c47e5589-bb15-82c7-8492-7c392ee99f8d"}
 
     assert IdSource.id("世界", "c\"1", 9_007_199_254_740_991) ==
-             "1711b795-4ff1-81d8-a547-80b2011ee4d1"
+             {:ok, "1711b795-4ff1-81d8-a547-80b2011ee4d1"}
   end
 end

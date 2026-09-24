@@ -103,6 +103,21 @@ test('checked integers overflow as a typed error', () => {
   assert.deepEqual(divide(0, -3), [0, 0]); // not -0: the profile has no negative zero
 });
 
+// Catches the kernels diverging at the contract edge: a bad budget must be the typed error
+// Elixir returns, not a silent 'rng_budget_exhausted' (NaN or negative skips the loop).
+test('uniform rejects a bad draw budget', () => {
+  for (const budget of [-1, 1.5, NaN, true]) {
+    assert.throws(() => uniform([1, 2, 3, 4], 10, budget as never), code('invalid_rng_budget'), String(budget));
+  }
+});
+
+// Catches an unsafe ordinal being hashed instead of the typed error Elixir returns.
+test('IdSource rejects a bad ordinal', () => {
+  for (const ordinal of [-1, 9007199254740992, 1.5, NaN]) {
+    assert.throws(() => id('w-1', 'c-1', ordinal), code('invalid_ordinal'), String(ordinal));
+  }
+});
+
 // Expected values, computed independently with Python:
 //   python3 -c 'import hashlib,json,sys; w,c,o=sys.argv[1],sys.argv[2],int(sys.argv[3]); h=bytearray(hashlib.sha256(json.dumps(["loka-id-v1",w,c,o],separators=(",",":"),ensure_ascii=False).encode()).digest()[:16]); h[6]=h[6]&15|128; h[8]=h[8]&63|128; x=h.hex(); print("-".join([x[:8],x[8:12],x[12:16],x[16:20],x[20:]]))' w-1 c-1 0
 test('IdSource ids', () => {

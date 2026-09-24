@@ -37,11 +37,13 @@ export const next = (state: RngState): [number, RngState] => step(checked(state)
 
 /**
  * Uniform integer in [0, bound), 1 <= bound <= 2^32, by rejection sampling. Rejected draws
- * advance the state. More than maxDraws draws throws 'rng_budget_exhausted', and the caller
+ * advance the state. A maxDraws that is not a non-negative integer throws 'invalid_rng_budget';
+ * more than maxDraws draws throws 'rng_budget_exhausted', and the caller
  * discards the whole decision.
  */
 export function uniform(state: RngState, bound: number, maxDraws: number): [number, RngState] {
   if (!Number.isInteger(bound) || bound < 1 || bound > TWO32) throw new KernelError('invalid_bound');
+  if (!Number.isInteger(maxDraws) || maxDraws < 0) throw new KernelError('invalid_rng_budget');
   let s = checked(state);
   const limit = TWO32 - (TWO32 % bound);
   for (let n = 0; n < maxDraws; n++) {

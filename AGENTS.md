@@ -107,6 +107,10 @@ at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
 - An "unknown COMMIT" test that discards the result of a COMMIT that succeeded never
   exercises the not-committed branch; inject a genuinely failed COMMIT too.
 
+**Canonical encoding (R3)**
+- Elixir maps with 32 keys or fewer iterate in sorted key order, so a key-order test with
+  fewer keys passes even when the encoder never sorts. Use more than 32 keys.
+
 ## Conventions
 
 - Elixir: [docs/ELIXIR-CONVENTIONS.md](docs/ELIXIR-CONVENTIONS.md), built on Phoenix's

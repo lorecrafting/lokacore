@@ -7,10 +7,17 @@ defmodule Loka.Core.IdSource do
   import Bitwise
   alias Loka.Core.Canonical
 
-  @spec id(String.t(), String.t(), non_neg_integer()) :: String.t()
+  @safe 9_007_199_254_740_991
+
+  @spec id(String.t(), String.t(), term()) :: {:ok, String.t()} | {:error, :invalid_ordinal}
   def id(world_context_id, command_id, ordinal)
-      when is_binary(world_context_id) and is_binary(command_id) and is_integer(ordinal) and
-             ordinal >= 0 do
+      when is_binary(world_context_id) and is_binary(command_id) do
+    if is_integer(ordinal) and ordinal in 0..@safe,
+      do: {:ok, uuid(world_context_id, command_id, ordinal)},
+      else: {:error, :invalid_ordinal}
+  end
+
+  defp uuid(world_context_id, command_id, ordinal) do
     json = Canonical.encode(["loka-id-v1", world_context_id, command_id, ordinal])
     <<a::binary-6, v, b, r, c::binary-7, _::binary>> = :crypto.hash(:sha256, json)
     # Version 8 in byte 6's high nibble, RFC 9562 variant in byte 8's top bits.

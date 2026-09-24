@@ -23,15 +23,18 @@ defmodule Loka.Core.Rng do
 
   @doc """
   Uniform integer in `[0, bound)`, `1 <= bound <= 2^32`, by rejection sampling. Rejected
-  draws advance the state. More than `max_draws` draws is `:rng_budget_exhausted`, and the
+  draws advance the state. A `max_draws` that is not a non-negative integer is
+  `:invalid_rng_budget`; more than `max_draws` draws is `:rng_budget_exhausted`, and the
   caller discards the whole decision.
   """
-  @spec uniform(term(), term(), non_neg_integer()) ::
+  @spec uniform(term(), term(), term()) ::
           {:ok, non_neg_integer(), state()}
-          | {:error, :invalid_bound | :invalid_rng_state | :rng_budget_exhausted}
-  def uniform(state, bound, max_draws) when is_integer(max_draws) and max_draws >= 0 do
+          | {:error,
+             :invalid_bound | :invalid_rng_budget | :invalid_rng_state | :rng_budget_exhausted}
+  def uniform(state, bound, max_draws) do
     cond do
       not is_integer(bound) or bound < 1 or bound > @two32 -> {:error, :invalid_bound}
+      not is_integer(max_draws) or max_draws < 0 -> {:error, :invalid_rng_budget}
       not valid?(state) -> {:error, :invalid_rng_state}
       true -> draw(state, bound, @two32 - rem(@two32, bound), max_draws)
     end
