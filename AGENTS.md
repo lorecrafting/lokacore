@@ -183,7 +183,7 @@ A test exists to catch a specific break. Adapted from
 - TypeScript: `npx tsc --noEmit` in `mobile/app` (covers all of `mobile/`) and
   `npm run typecheck && npm test` in `kernel/ts` (Node's built-in test runner).
 - Size: source files at most 300 lines, test files 500, each function clause (and `fn`/arrow)
-  40, in every tracked `.ex`/`.exs`/`.ts`/`.tsx`/`.mjs` (`*.gen.*` exempt):
+  40, in every tracked Elixir, TypeScript and `.mjs` file (`*.gen.*` exempt):
   `elixir bin/check_size.exs`, `node bin/check_ts_size.mjs` (red control
   `bin/ts_size_red_controls.sh`). Escape hatch: a `size: allow N, reason` comment in lines
   1-5 (file) or right above a function after line 5, at most 1.5x; the reviewer must agree

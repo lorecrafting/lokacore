@@ -136,7 +136,10 @@ sized = %{
   "L/colocated_test.exs" => lines.(500),
   "L/skip.gen.ex" => lines.(400),
   "L/proto.gen.v1/big.ex" => mod.(lines.(299)),
-  "T/big_test.exs" => lines.(501),
+  "L/deps/big.ex" => mod.(lines.(299)),
+  "T/big_helper.ex" => mod.("  def f(x) do\n#{lines.(39)}  end\n#{lines.(458)}"),
+  "L/m_early_fn.ex" =>
+    mod.("#{lines.(3)}  # size: allow 50, early\n  def f(x) do\n#{lines.(39)}  end\n"),
   "L/m_ceiling.ex" => marked.("# size: allow 450, table", "  # size: allow 60, match", 60, 450),
   "L/m_over.ex" => marked.("# size: allow 460, table", "  # size: allow 61, match", 61, 460),
   "L/m_reasonless.ex" => marked.("# size: allow 350", "  # size: allow 45,", 45, 350),
@@ -148,6 +151,9 @@ sized = %{
 
 expected = """
 L/big.ex:1: file, 301 lines, limit 300
+L/deps/big.ex:1: file, 301 lines, limit 300
+L/m_early_fn.ex:5: size marker not needed, 47 lines
+L/m_early_fn.ex:6: def f, 41 lines, limit 40
 L/do_literals.ex:2: def h, 53 lines, limit 40
 L/do_literals.ex:55: def l, 52 lines, limit 40
 L/fn.ex:2: defp f, 41 lines, limit 40
@@ -170,7 +176,7 @@ L/m_unneeded.ex:1: size marker not needed, 300 lines
 L/m_unneeded.ex:6: size marker not needed, 40 lines
 L/proto.gen.v1/big.ex:1: file, 301 lines, limit 300
 L/test/helper.ex:1: file, 301 lines, limit 300
-T/big_test.exs:1: file, 501 lines, limit 500
+T/big_helper.ex:1: file, 501 lines, limit 500
 """
 
 uniq = "red_size_#{System.unique_integer([:positive])}"
@@ -178,7 +184,7 @@ dirs = %{"L/" => "lib/#{uniq}/", "T/" => "test/#{uniq}/"}
 real = &String.replace(&1, Map.keys(dirs), fn d -> dirs[d] end)
 sorted = &(&1 |> String.split("\n", trim: true) |> Enum.sort())
 
-{out, status} =
+{out, status, scan_out, scan_status} =
   try do
     Enum.each(dirs, fn {_, dir} -> File.mkdir!(Path.join(root, dir)) end)
 
@@ -188,17 +194,22 @@ sorted = &(&1 |> String.split("\n", trim: true) |> Enum.sort())
     end
 
     args = ["bin/check_size.exs" | Enum.map(Map.keys(sized), real)]
-    System.cmd("elixir", args, cd: root, stderr_to_stdout: true)
+    {out, status} = System.cmd("elixir", args, cd: root, stderr_to_stdout: true)
+    # The no-argument scan (what CI runs) must find a planted file too.
+    {scan_out, scan_status} = System.cmd("elixir", ["bin/check_size.exs"], cd: root)
+    {out, status, scan_out, scan_status}
   after
     Enum.each(dirs, fn {_, dir} -> File.rm_rf!(Path.join(root, dir)) end)
   end
 
 failures =
-  if status != 0 and sorted.(out) == sorted.(real.(expected)) do
+  if status != 0 and sorted.(out) == sorted.(real.(expected)) and scan_status != 0 and
+       String.contains?(scan_out, real.("L/big.ex:1: file, 301 lines, limit 300")) do
     IO.puts("ok   size: limits and allow markers")
     failures
   else
     IO.puts("FAIL size: exit #{status}, expected\n#{real.(expected)}got\n#{out}")
+    IO.puts("no-argument scan: exit #{scan_status}\n#{scan_out}")
     failures + 1
   end
 

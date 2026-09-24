@@ -1,7 +1,8 @@
-// Size limits for TypeScript and .mjs, using the compiler kernel/ts already installs. Same
-// rules as bin/check_size.exs: source files at most 300 lines, test files 500, each function
-// in a source file 40; the same test-file rule, exclusions and `// size: allow N, reason`
-// markers (lines 1-5 for the file, the line right above a function after line 5).
+// Size limits for TypeScript (.ts/.tsx/.mts/.cts) and .mjs, using the compiler kernel/ts
+// already installs. Same rules as bin/check_size.exs: source files at most 300 lines, test
+// files 500, each function in a source file 40; the same test-file rule and
+// `// size: allow N, reason` markers (lines 1-5 for the file, the line right above a
+// function after line 5).
 //
 //   node bin/check_ts_size.mjs [path ...]   (after npm ci in kernel/ts)
 import { execFileSync } from 'node:child_process';
@@ -11,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const ts = createRequire(`${root}kernel/ts/package.json`)('typescript');
-const TEST = /^(test|kernel\/ts\/test)\/|(^|\/)__tests__\/|(_test\.exs|\.(test|spec)\.(tsx?|mjs))$/;
+const TEST = /^(test|kernel\/ts\/test)\/|(^|\/)__tests__\/|(_test\.exs|\.(test|spec)\.([cm]?ts|tsx|mjs))$/;
 
 const args = process.argv.slice(2);
 const candidates = args.length
@@ -19,9 +20,8 @@ const candidates = args.length
   : execFileSync('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], { cwd: root, encoding: 'utf8' }).split('\0');
 const files = candidates.filter(
   (f) =>
-    /\.(tsx?|mjs)$/.test(f) &&
+    /\.([cm]?ts|tsx|mjs)$/.test(f) &&
     !f.split('/').pop().includes('.gen.') &&
-    !/(^|\/)(deps|_build|node_modules|android|ios)\//.test(f) &&
     existsSync(root + f),
 );
 
