@@ -125,8 +125,7 @@ defmodule Loka.Core.Contracts.Schema do
 
   defp resolves?(ref, {file, names}) when is_binary(ref) do
     case String.split(ref, "#/$defs/") do
-      ["", name] -> MapSet.member?(names, {file, name})
-      [other, name] -> MapSet.member?(names, {other, name})
+      [f, name] -> MapSet.member?(names, {if(f == "", do: file, else: f), name})
       _ -> false
     end
   end
