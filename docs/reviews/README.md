@@ -17,3 +17,7 @@ Each record is written by a fresh agent that authored none of the reviewed work 
   `e258bff`, APPROVE WITH NOTES (one test-gap should-fix; freeze owner-approved in `eb6dd03`).
 - [2026-09-24 lessons split](2026-09-24-lessons-split-review.md): PR #8 at `9bbd478`,
   APPROVE WITH NOTES (docs-only, short review); re-review of the fixes at `9ab9094`, APPROVE.
+- [2026-09-24 size limits](2026-09-24-size-limits-review.md): PR #6 at `6c02aee`,
+  CHANGES REQUIRED (tooling, full review with mutation check); broad re-review of
+  `aa58475`: CHANGES REQUIRED (one blocker, two should-fix); final round `24c72ea`:
+  APPROVE WITH NOTES.
