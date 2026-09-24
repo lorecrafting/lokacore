@@ -71,6 +71,8 @@ jobs:
       - run: npx tsc --noEmit
       - run: npm ci --no-audit --no-fund && npm run typecheck && npm test
         working-directory: kernel/ts
+      - run: npm ci --no-audit --no-fund && git ls-files -z '*.ts' '*.tsx' '*.mjs' '*.js' '*.json' | xargs -0 npx prettier --check
+        working-directory: .
       - run: node bin/check_ts_size.mjs
         working-directory: .
       - run: bin/ts_size_red_controls.sh

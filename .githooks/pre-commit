@@ -8,5 +8,7 @@ IFS='
 staged=$(git diff --cached --name-only --diff-filter=ACMR)
 ex=$(printf '%s\n' "$staged" | grep -E '\.exs?$' || true)
 [ -z "$ex" ] || mise exec -- mix format --check-formatted $ex || { echo "run: mise exec -- mix format"; exit 1; }
+js=$(printf '%s\n' "$staged" | grep -E '\.(ts|tsx|mjs|js|json)$' || true)
+[ -z "$js" ] || mise exec -- node_modules/.bin/prettier --check $js || { echo "run: npm ci; npx prettier --write <files>"; exit 1; }
 [ -z "$staged" ] || mise exec -- ast-grep scan --error $staged
 if git diff --cached --name-only | grep -q '\.md$'; then mise exec -- elixir bin/check_docs.exs; fi
