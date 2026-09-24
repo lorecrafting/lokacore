@@ -4,8 +4,6 @@
 # AGENTS.md stays within a word budget: every agent loads it every session.
 #
 #   elixir bin/check_docs.exs [file-to-budget]
-#
-#   elixir bin/check_docs.exs
 root = Path.expand("..", __DIR__)
 
 {out, 0} =
