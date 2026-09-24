@@ -178,9 +178,12 @@ A test exists to catch a specific break. Adapted from
 - TypeScript: `npx tsc --noEmit` in `mobile/app` (covers all of `mobile/`) and
   `npm run typecheck && npm test` in `kernel/ts` (Node's built-in test runner).
 - Size: source files at most 300 lines, test files 500, functions 40 (`.gen.` files exempt):
-  `elixir bin/check_size.exs` (Elixir), `node bin/check_ts_size.mjs` (TypeScript, CI plants
-  its red control).
+  `elixir bin/check_size.exs` (Elixir), `node bin/check_ts_size.mjs` (TypeScript; red
+  control `bin/ts_size_red_controls.sh`). Escape hatch: a `size: allow N, reason` comment
+  in a file's first 5 lines or right above a function, at most 1.5x; the reviewer must agree
+  a split would be worse.
 - `mix credo --strict`: cyclomatic complexity 9, nesting 2, ABC size 30, arity 6; nothing else.
+  Any `credo:disable` comment gives its reason on the same line; the reviewer checks it.
 - `elixir bin/red_controls.exs`: plants a boundary violation, a cycle, a compile edge, an
   oversized AGENTS.md, oversized files and function, and Credo complexity and nesting
   violations, and requires each check to fail.
@@ -191,8 +194,8 @@ A test exists to catch a specific break. Adapted from
   differential runs nightly.
 
 Run everything locally:
-`mix format --check-formatted && mix compile --warnings-as-errors && mix xref graph --format cycles --fail-above 0 && mix xref graph --label compile-connected --fail-above 0 && mix test && mix credo --strict && elixir bin/check_size.exs && node bin/check_ts_size.mjs && elixir bin/red_controls.exs && ast-grep test --skip-snapshot-tests && ast-grep scan --error && bin/lint_red_controls.sh && elixir bin/check_docs.exs`
-(prefix each with `mise exec --`, or activate mise).
+`mix format --check-formatted && mix compile --warnings-as-errors && mix xref graph --format cycles --fail-above 0 && mix xref graph --label compile-connected --fail-above 0 && mix test && mix credo --strict && elixir bin/check_size.exs && node bin/check_ts_size.mjs && bin/ts_size_red_controls.sh && elixir bin/red_controls.exs && ast-grep test --skip-snapshot-tests && ast-grep scan --error && bin/lint_red_controls.sh && elixir bin/check_docs.exs`
+(prefix each with `mise exec --`, or activate mise; run `npm ci` in `kernel/ts` first).
 
 ## Working rules
 

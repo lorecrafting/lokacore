@@ -73,21 +73,8 @@ jobs:
         working-directory: kernel/ts
       - run: node bin/check_ts_size.mjs
         working-directory: .
-      - name: Red control, TS size limits (one line over fails, exactly at the limit passes)
+      - run: bin/ts_size_red_controls.sh
         working-directory: .
-        run: |
-          trap 'rm -rf kernel/ts/src/red_size_*.ts kernel/ts/test/red_size.test.ts mobile/features/story/red_size_fn.tsx mobile/features/story/__tests__' EXIT
-          x() { for i in $(seq "$1"); do echo '//'; done; }
-          x 301 > kernel/ts/src/red_size_big.ts
-          { echo 'export function ok() {'; x 38; echo '}'; x 260; } > kernel/ts/src/red_size_ok.ts
-          { echo 'export const f = () => {'; x 39; echo '};'; } > mobile/features/story/red_size_fn.tsx
-          x 501 > kernel/ts/test/red_size.test.ts
-          mkdir mobile/features/story/__tests__ && x 500 > mobile/features/story/__tests__/red_size_ok.test.ts
-          expected='kernel/ts/src/red_size_big.ts:1: file, 301 lines, limit 300
-          kernel/ts/test/red_size.test.ts:1: file, 501 lines, limit 500
-          mobile/features/story/red_size_fn.tsx:1: function f, 41 lines, limit 40'
-          out=$(node bin/check_ts_size.mjs) && { echo "size check passed planted violations"; exit 1; }
-          [ "$out" = "$expected" ] || { printf 'expected\n%s\ngot\n%s\n' "$expected" "$out"; exit 1; }
       - name: Red control, host and Node APIs are type errors in the kernel
         working-directory: kernel/ts
         run: |

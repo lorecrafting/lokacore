@@ -97,7 +97,14 @@ failures =
   end
 
 # Size limits: one line over each limit fails, exactly at the limit (red_size_ok) passes.
+# Markers: at the 1.5x ceiling passes; over it, without a reason, or not needed fails.
 lines = &String.duplicate("  x\n", &1)
+
+# `total` lines: file marker line 1, function marker line 3, `def f` of `fun` lines at line 4.
+marked = fn file_marker, fn_marker, fun, total ->
+  "#{file_marker}\ndefmodule Loka.RedSize do\n#{fn_marker}\n  def f(x) do\n#{lines.(fun - 2)}  end\n" <>
+    "#{lines.(total - fun - 4)}end\n"
+end
 
 sized = %{
   "lib/loka/red_size_big.ex" => "defmodule Loka.RedSizeBig do\n#{lines.(299)}end\n",
@@ -105,12 +112,34 @@ sized = %{
     "defmodule Loka.RedSizeFn do\n  defp f(x) do\n#{lines.(39)}  end\nend\n",
   "lib/loka/red_size_ok.ex" =>
     "defmodule Loka.RedSizeOk do\n  def f(x) do\n#{lines.(38)}  end\n#{lines.(258)}end\n",
-  "test/red_size_test.exs" => lines.(501)
+  "test/red_size_test.exs" => lines.(501),
+  "lib/loka/red_size_m_ceiling.ex" =>
+    marked.("# size: allow 450, table", "  # size: allow 60, match", 60, 450),
+  "lib/loka/red_size_m_over.ex" =>
+    marked.("# size: allow 460, table", "  # size: allow 61, match", 61, 460),
+  "lib/loka/red_size_m_reasonless.ex" =>
+    marked.("# size: allow 350", "  # size: allow 45,", 45, 350),
+  "lib/loka/red_size_m_unneeded.ex" =>
+    marked.("# size: allow 350, stale", "  # size: allow 50, stale", 40, 300),
+  "lib/loka/red_size_m_fn_only.ex" => marked.("", "  # size: allow 50, match", 50, 100)
 }
 
 expected = """
 lib/loka/red_size_big.ex:1: file, 301 lines, limit 300
 lib/loka/red_size_fn.ex:2: defp f, 41 lines, limit 40
+lib/loka/red_size_m_ceiling.ex:1: info: size: allow 450, table
+lib/loka/red_size_m_ceiling.ex:3: info: size: allow 60, match
+lib/loka/red_size_m_fn_only.ex:3: info: size: allow 50, match
+lib/loka/red_size_m_over.ex:1: size marker 460 over the 1.5x ceiling
+lib/loka/red_size_m_over.ex:1: file, 460 lines, limit 300
+lib/loka/red_size_m_over.ex:3: size marker 61 over the 1.5x ceiling
+lib/loka/red_size_m_over.ex:4: def f, 61 lines, limit 40
+lib/loka/red_size_m_reasonless.ex:1: size marker without a reason
+lib/loka/red_size_m_reasonless.ex:1: file, 350 lines, limit 300
+lib/loka/red_size_m_reasonless.ex:3: size marker without a reason
+lib/loka/red_size_m_reasonless.ex:4: def f, 45 lines, limit 40
+lib/loka/red_size_m_unneeded.ex:1: size marker not needed (350, stale), 300 lines
+lib/loka/red_size_m_unneeded.ex:3: size marker not needed (50, stale), 40 lines
 test/red_size_test.exs:1: file, 501 lines, limit 500
 """
 
@@ -124,7 +153,7 @@ test/red_size_test.exs:1: file, 501 lines, limit 500
 
 failures =
   if status != 0 and out == expected do
-    IO.puts("ok   size: files over 300/500 lines, a function over 40 lines")
+    IO.puts("ok   size: limits and allow markers")
     failures
   else
     IO.puts("FAIL size: exit #{status}, expected\n#{expected}got\n#{out}")
