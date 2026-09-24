@@ -29,5 +29,7 @@
   {"contract": "SubsetProbe", "value": {"n": -2}, "errors": [{"path": "/n", "code": "below_minimum"}]},
   {"contract": "SubsetProbe", "value": {"flag": 0, "nothing": false}, "errors": [{"path": "/flag", "code": "invalid_type"}, {"path": "/nothing", "code": "invalid_type"}]},
   {"contract": "SubsetProbe", "value": {"fixed": "y"}, "errors": [{"path": "/fixed", "code": "const_mismatch"}]},
-  {"contract": "SubsetProbe", "value": {"tags": ["ab", "𝒶"]}, "errors": [{"path": "/tags/1", "code": "too_short"}]}
+  {"contract": "SubsetProbe", "value": {"tags": ["ab", "𝒶"]}, "errors": [{"path": "/tags/1", "code": "too_short"}]},
+  {"contract": "DefinitionRefString", "value": "fox@1.2.0:npc/kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk", "errors": [{"path": "", "code": "pattern_mismatch"}]},
+  {"contract": "DefinitionRefString", "value": "fox@10000000000000000000000000000000000000000000000000000000000000000.2.0:npc/k", "errors": [{"path": "", "code": "pattern_mismatch"}]}
 ]

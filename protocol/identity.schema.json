@@ -45,13 +45,13 @@
       ]
     },
     "DefinitionRefString": {
-      "description": "Canonical string form of a DefinitionRef, cartridge_id@cartridge_version:kind/key (03 §2, 05 §4), with the same segment rules.",
+      "description": "Canonical string form of a DefinitionRef, cartridge_id@cartridge_version:kind/key (03 §2, 05 §4), with the same segment rules: each at most 64 characters, so every valid DefinitionRef has a valid string form.",
       "type": "string",
-      "pattern": "^[a-z][a-z0-9_]*@(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):[a-z][a-z0-9_]*/[a-z][a-z0-9_]*$",
-      "maxLength": 256,
+      "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):[a-z][a-z0-9_]{0,63}/[a-z][a-z0-9_]{0,63}$",
       "examples": [
         "fox_spirit_of_yunmeng@1.2.0:npc/old_ferryman",
-        "fox_spirit_of_yunmeng@1.2.0:room/ferry_dock"
+        "fox_spirit_of_yunmeng@1.2.0:room/ferry_dock",
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@111111111111111111111111111111111111111111111111111111111111.0.0:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
       ]
     },
     "WorldContextId": {
