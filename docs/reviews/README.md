@@ -11,4 +11,5 @@ Each record is written by a fresh agent that authored none of the reviewed work 
 - [2026-09-24 roadmap](2026-09-24-roadmap-review.md): PR #5 at `3638143`,
   APPROVE WITH NOTES (docs-only planning, short review).
 - [2026-09-24 size limits](2026-09-24-size-limits-review.md): PR #6 at `6c02aee`,
-  CHANGES REQUIRED (tooling, full review with mutation check).
+  CHANGES REQUIRED (tooling, full review with mutation check); broad re-review of
+  `aa58475`: CHANGES REQUIRED (one blocker, two should-fix).

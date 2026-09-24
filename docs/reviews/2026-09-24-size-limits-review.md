@@ -159,3 +159,103 @@ Survived:
   typescript job, after `npm ci`.
 - The AGENTS.md check line matches CI.
 - The AGENTS.md "(`.gen.` files exempt)" wording matches the intent but not the code (S2).
+
+## Re-review: fixes `b389b9f` and `aa58475` (head `aa58475`)
+
+This is a broad re-review of both checkers and both size red controls: the fixes rewrote
+path handling, scan scope, the test-file rule, S1 counting and how markers attach. `c11be5d`
+merges main and was skipped. Local run at `aa58475`: credo, both checkers on the real tree,
+`bin/ts_size_red_controls.sh` and `elixir bin/red_controls.exs` are all green.
+
+### Verdict: CHANGES REQUIRED (one blocker, two should-fix)
+
+Every first-round finding is resolved. The rewrite leaves the scan that CI actually runs
+(no arguments) without a red control, and it adds a new escape through directory names.
+
+### Earlier findings
+- **B1 resolved.** Both red controls now run the checker only on their planted paths. I
+  added real markers to the tree (`lib/loka/p/table.ex` with `# size: allow 400, big table`,
+  and `kernel/ts/src/table.ts`): both checkers passed and printed their `info:` lines, and
+  both red controls stayed `ok`. The developer's claim holds: the output for planted files
+  cannot contain lines about other files. See R1 for what this change cost.
+- **B2 resolved.** Plants go into `mktemp -d` / `unique_integer` directories, and only those
+  are removed (trap with `set -eu`; `try/after` with `rm_rf!`). A pre-existing `__tests__`
+  directory is no longer touched.
+- **B3 resolved.** The ABC 31 and arity 7 controls exist. Mutating ABC 30 → 300 and deleting
+  the arity check now makes both controls FAIL.
+- **S1 resolved.** `end_of_expression` metadata catches `do:` heredocs and lists: the planted
+  53- and 52-line one-liners are reported. `fn` passed as an argument is also measured
+  correctly; I probed it at 47 lines.
+- **S2 resolved as asked.**
+  - `.gen.` is matched on the basename only.
+  - Both languages share one test-file rule.
+  - `test/` inside a source tree now counts as source.
+  - Colocated `*.test.tsx` files count as tests.
+  - The scan covers the whole repository, including `.mjs`.
+
+  See R2 for a new escape.
+- **S3 resolved.** An unattached marker fails. My line-7 `@doc` case is now planted
+  (`m_stale`) in both languages.
+- **S4 resolved.** `def unquote(n)()` is reported through `Macro.to_string`.
+- **Q1 answered.** AGENTS.md now says "each function clause".
+- **Nits 1-4 resolved.** Function markers must be after line 5, so the line-1 ambiguity is
+  gone. The `fn` bodies in `bin/` scripts are now measured.
+
+### Mutation check (34 mutants: my 19 re-mapped onto the new code, plus mutants of the new logic)
+Killed:
+- **Elixir:** def size off by one; `<` for "not needed"; ceiling 2x; the trailing newline
+  dropped; `end_of_expression` dropped; a marker without a reason accepted; the test limit at
+  300; `defp` skipped; the file window at 4; `__tests__` dropped; `.gen.` matched on the full
+  path; `fn` dropped; unattached markers always or never reported; the `unquote` crash
+  restored.
+- **TS:** ceiling 2x; a marker without a reason accepted; `<` for "not needed"; the file
+  window at 4; the trailing newline dropped; the test limit at 300; function size off by
+  one; `__tests__` dropped; `.gen.` matched on the full path; unattached markers never
+  reported; `.tsx` dropped.
+
+Survived:
+- no-argument scan returns nothing, Elixir and TS (R1);
+- directory exclusion dropped (R2);
+- the top-level `test/` and `kernel/ts/test/` directory rule dropped, Elixir and TS (R3);
+- the `l - 1 > 5` guard dropped, Elixir and TS (nit R4);
+- `meta[:end]` dropped (equivalent: `end_of_expression` and `closing` cover every case I
+  probed, including `fn` as a call argument; not a finding).
+
+### R1. blocker: the no-argument scan, which CI and the check line run, has no red control
+`bin/check_size.exs:15-18`, `bin/check_ts_size.mjs:17-19`. Both red controls pass explicit
+paths, so the `git ls-files` branch is never exercised.
+
+Mutation: append `-- nothing` to the `ls-files` arguments, in either script. Both red
+controls stay `ok`, and CI's `elixir bin/check_size.exs` / `node bin/check_ts_size.mjs` then
+check zero files and exit 0 forever. This is the "empty return" mutation in AGENTS.md. Before
+the fix the red control ran the real scan, so the B1 fix removed this coverage.
+
+Fix: plant one oversized file in the real tree, run the checker with no arguments, and
+require that its report line is present (containment, not equality, so real markers
+elsewhere cannot break it).
+
+### R2. should-fix: the new directory exclusion lets tracked source escape
+`bin/check_size.exs:24`, `bin/check_ts_size.mjs:24`. `(^|/)(deps|_build|node_modules|android|ios)/`
+matches any path segment. Reproduced as tracked, intent-to-add files: neither
+`lib/loka/runtime/deps/big.ex` (402 lines) nor `mobile/packages/ui/ios/Big.tsx` (402 lines,
+a 402-line function) was reported, and the TS checker exited 0.
+
+The real directories are already gitignored, so the default scan never lists them anyway.
+Delete the regex. If explicit paths need it, anchor it to the real roots (`^deps/`,
+`^_build/`, `^mobile/app/(android|ios)/`, `node_modules/`).
+
+### R3. should-fix: no plant covers the test-directory rule
+`bin/red_controls.exs` (`T/big_test.exs`) and `bin/ts_size_red_controls.sh:25`
+(`$T/big.test.ts`) are also named `_test`/`.test`, so dropping `^(test|kernel/ts/test)/`
+from either regex survives. With that bug, `test/support/fixtures.ex` or
+`kernel/ts/test/helpers.ts` at 400 lines would be reported as oversized source, and its
+functions checked. This is the same gap `aa58475` closed for `__tests__`. Name the `T/`
+plant without a test suffix.
+
+### Nits
+- R4. `l - 1 > 5` (`bin/check_size.exs:97`, `bin/check_ts_size.mjs:62`) is untested. Without
+  it, a file marker on line 1 above a function starting on line 2 would also be consumed as
+  that function's marker. The same side effect means a function starting on lines 2-6 can
+  never take a marker; it fails closed.
+- R5. `.mts`/`.cts` are not scanned: `kernel/ts/src/big.mts` (402 lines) was not reported.
+  `/\.(tsx?|mjs)$/` → `/\.([cm]?tsx?|mjs)$/` would cover them, if they are ever used.
