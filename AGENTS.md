@@ -180,7 +180,7 @@ A test exists to catch a specific break. Adapted from
 - `elixir bin/red_controls.exs`: plants a boundary violation, a cycle, a compile edge and
   an oversized AGENTS.md, and requires each check to fail.
 - `elixir bin/check_docs.exs`: links resolve; every doc is reachable; AGENTS.md stays
-  within 2,500 words (it is loaded by every agent, every session).
+  within its word budget (it is loaded by every agent, every session).
 - CI: pull requests and pushes to main, superseded runs cancelled. Planned: native mobile
   builds only when mobile code changes or on manual trigger; the full 10,000-sequence
   differential runs nightly.

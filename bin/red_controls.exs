@@ -61,20 +61,23 @@ failures =
       end
   end
 
-# Docs budget: pad AGENTS.md past its word budget, require check_docs to fail, restore.
-agents = Path.join(root, "AGENTS.md")
-original = File.read!(agents)
+# Docs budget: a padded copy of AGENTS.md (never the real file) must fail check_docs.
+padded = Path.join(System.tmp_dir!(), "loka-red-agents-#{System.unique_integer([:positive])}.md")
+
+File.write!(
+  padded,
+  File.read!(Path.join(root, "AGENTS.md")) <> String.duplicate("padding ", 3000)
+)
 
 {out, status} =
   try do
-    File.write!(agents, original <> String.duplicate("padding ", 3000))
-    System.cmd("elixir", ["bin/check_docs.exs"], cd: root, stderr_to_stdout: true)
+    System.cmd("elixir", ["bin/check_docs.exs", padded], cd: root, stderr_to_stdout: true)
   after
-    File.write!(agents, original)
+    File.rm(padded)
   end
 
 failures =
-  if status != 0 and String.contains?(out, "budget") do
+  if status != 0 and String.contains?(out, "AGENTS.md is ") do
     IO.puts("ok   docs: AGENTS.md over its word budget")
     failures
   else
