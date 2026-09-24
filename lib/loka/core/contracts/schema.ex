@@ -17,10 +17,11 @@ defmodule Loka.Core.Contracts.Schema do
 
   `pattern` is limited to a grammar that PCRE (Elixir, compiled with
   `[:unicode, :dollar_endonly]`) and JavaScript (`u` flag) read the same way: anchored
-  `^...$`; literals `A-Z a-z 0-9 _ @ : / -`; escapes `\\.` and `\\-` only; classes `[...]`
-  or `[^...]` of those literals, `.` and ranges; groups `(...)` and lookahead `(?=...)`;
-  `|`; quantifiers `? * +`, `{n}`, `{n,m}`. No `.` outside a class, `\\s \\w \\d \\b \\p`,
-  inline flags or other escapes.
+  `^...$`; literals `A-Z a-z 0-9 _ @ : / -` and the escape `\\.`; classes `[...]` or
+  `[^...]` of `A-Z a-z 0-9 _ .`, ranges of those, `\\.`, `\\-` and a trailing `-`; groups
+  `(...)` and lookahead `(?=...)`; `|`; one quantifier `? * +`, `{n}`, `{n,m}` (optionally
+  lazy `?`) after a literal, escape or class only, never after `)`. No `.` outside a class,
+  `\\s \\w \\d \\b \\p`, inline flags or other escapes.
   """
 
   @annotations ~w($schema $id title description examples)
@@ -35,8 +36,8 @@ defmodule Loka.Core.Contracts.Schema do
   @untyped ~w($ref enum const oneOf)
   @counts ~w(minItems maxItems minLength maxLength)
   @class_atom ~S"(?:[A-Za-z0-9_.](?:-[A-Za-z0-9_.])?|\\[.-])"
-  @token ~S"(?:[A-Za-z0-9_@:/-]|\\[.-]|\((?:\?=|(?!\?))|\)|\||[?*+]|\{[0-9]+(?:,[0-9]+)?\}|\[\^?" <>
-           @class_atom <> ~S"+-?\])"
+  @atom ~S"(?:[A-Za-z0-9_@:/-]|\\\.|\[\^?" <> @class_atom <> ~S"+-?\])"
+  @token "(?:" <> @atom <> ~S"(?:(?:[?*+]|\{[0-9]+(?:,[0-9]+)?\})\??)?|\((?:\?=|(?!\?))|\)|\|)"
   @portable "^\\^" <> @token <> "*\\$$"
 
   @doc "Checks decoded schema documents (file name => document) and returns the flat contracts."

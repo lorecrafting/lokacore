@@ -91,7 +91,7 @@ defmodule Loka.Core.ContractsTest do
           ] ++
             for(
               p <-
-                ~W"^a.b$ ^\s$ ^\w$ ^\d$ ^\bx$ ^\p{L}$ ^[a-z]+\_x$ ^\@$ ^(?i)a$ ^(?:a)$ \Aa$ ^a\z abc ^a ^a$b$ ^a{$ ^[\s]$ ^é$",
+                ~W"^a.b$ ^\s$ ^\w$ ^\d$ ^\bx$ ^\p{L}$ ^[a-z]+\_x$ ^\@$ ^(?i)a$ ^(?:a)$ \Aa$ ^a\z abc ^a ^a$b$ ^a{$ ^[\s]$ ^é$ ^a\-b$ ^a*+$ ^a++$ ^a?+$ ^a{2}+$ ^(?=a)+a$ ^(?=a)?a$ ^(?=a){2}a$",
               do:
                 {"the non-portable pattern #{p}", %{"A" => %{"type" => "string", "pattern" => p}}}
             ) do
