@@ -10,11 +10,22 @@ in the archived repository
 [lorecrafting/lokacore-v2-legacy](https://github.com/lorecrafting/lokacore-v2-legacy)
 at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
 
+## Specification (source of truth)
+
+- [docs/spec/](docs/spec/README.md): the R0-accepted specification, imported at the R2
+  cutover ([import record](docs/spec/IMPORT.md)). Its README §8 says which documents are
+  normative. Two normative documents disagreeing is a defect: stop and ask.
+- [docs/decisions/](docs/decisions/README.md): proposed ADRs and verbatim owner decisions
+  since R0. [docs/reference/](docs/reference/README.md): informative material, linked in
+  the legacy repository, never authority.
+- Amend the spec here first, get it reviewed, then change code (spec README §11). Cite
+  the governing spec section in every PR.
+
 ## Architecture decisions already made (do not reopen silently)
 
 - **Candidate C (R1):** rules are implemented twice, in Elixir (server) and TypeScript
   (phone), held to the same reviewed fixtures and to randomized differential testing.
-  Proposed ADR-071 in the legacy `docs/rewrite-v3/prep/adr-071-072-proposal.md`.
+  [Proposed ADR-071](docs/decisions/adr-071-072-proposal.md).
 - **Persistence shape (proposed ADR-072):** the world lives in memory; rules are pure
   (`decide(state, command) → proposal`) and never write memory or storage; the host
   commits only the changed rows plus the receipt in one transaction, then adopts the
@@ -123,6 +134,8 @@ at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
 - Merge record-bearing PRs with merge commits, never squash.
 - Reviews are independent: a fresh agent that authored none of the work (owner ruling:
   fresh Fable or fresh Opus agents qualify; prefer Fable for design-judgment reviews).
+- Every Markdown file must be reachable by links from README.md, AGENTS.md or CLAUDE.md,
+  and every relative link must resolve: `elixir bin/check_docs.exs`.
 - Readiness probes that exit 1 by design are expected; don't "fix" them.
 - The owner wants nothing paid (no EAS); headless work runs on GitHub Actions, iPhone
   and UI work on the owner's M1.
