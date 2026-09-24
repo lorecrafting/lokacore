@@ -26,3 +26,12 @@ review and recording this ruling, the owner answered:
   coordinator should propose a fresh Fable reviewer again.
 - Independence still cannot be authenticated by any checker; this is an owner
   ruling, not proof.
+
+## Addendum: reviewers from other vendors (2026-09-24)
+
+Asked whether reviewers may come from other vendors such as Codex (the workflow review of
+PR #2 flagged that this ruling named only Fable and Opus), the owner answered:
+
+> yes reviewers can come from other vendors like codex.
+
+A fresh agent of any vendor that authored none of the work qualifies.
