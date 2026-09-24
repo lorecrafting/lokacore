@@ -18,7 +18,14 @@ The legacy packet is provenance only; never amend it or choose it over these fil
 - [docs/reference/](../reference/README.md): informative documents and evidence, left in
   the legacy repository and linked there. Not authority.
 
-## Link rewrites (the only byte changes)
+## Amendments since import
+
+The table below describes the files as imported. Later amendments are in git history:
+
+- 2026-09-24, [proposed ADR-073](../decisions/adr-073-single-app.md): documents 02 §1 and
+  14 §R2, one Mix application instead of an umbrella.
+
+## Link rewrites (the only byte changes at import)
 
 A relative Markdown link whose target was also imported now points at the imported
 copy. A relative link to a legacy file that was not imported now points at that file
