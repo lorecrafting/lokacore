@@ -62,7 +62,7 @@ test('uniform accepts bound 2^32', () => {
 test('decode edge cases', () => {
   assert.deepEqual(decode('["\\ud83d\\ude00",-9007199254740991]'), ['😀', -9007199254740991]);
   assert.equal(encode(decode('{"__proto__":1}')), '{"__proto__":1}');
-  for (const text of ['["\\udc00"]', '["\ud800a"]', '["\x01"]', '-9007199254740992', '01', '{"é":1}', '[1]x', '{"a":1,"\\u0061":2}', '', '{"a",1}']) {
+  for (const text of ['["\\udc00"]', '["\ud800a"]', '["\x01"]', '-9007199254740992', '01', '{"é":1}', '[1]x', '{"a":1,"\\u0061":2}', '[1 2]', '{"a":1 "b":2}', '', '{"a",1}']) {
     assert.throws(() => decode(text), code('invalid_json'), text);
   }
   assert.throws(() => decode(null as never), code('invalid_json'));

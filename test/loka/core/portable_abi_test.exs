@@ -82,6 +82,8 @@ defmodule Loka.Core.PortableAbiTest do
           ~S({"é":1}),
           "[1]x",
           ~S({"a":1,"\u0061":2}),
+          "[1 2]",
+          ~S({"a":1 "b":2}),
           "",
           ~S({"a",1})
         ] do
