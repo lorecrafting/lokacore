@@ -8,6 +8,8 @@ Each record is written by a fresh agent that authored none of the reviewed work 
   APPROVE WITH NOTES (docs-only, short review).
 - [2026-09-24 docs budget](2026-09-24-docs-budget-review.md): PR #3 at `910b6a6`,
   APPROVE WITH NOTES (tooling/docs, short review).
+- [2026-09-24 roadmap](2026-09-24-roadmap-review.md): PR #5 at `3638143`,
+  APPROVE WITH NOTES (docs-only planning, short review).
 - [2026-09-24 R3 PR 1 portable ABI](2026-09-24-r3-pr1-portable-abi-review.md): PR #4 at
   `99b9b37`, APPROVE WITH NOTES (full review, contract freeze); two should-fix items for
   the fix round.
