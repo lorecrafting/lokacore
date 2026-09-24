@@ -27,7 +27,8 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
 2. **Brief (PM).** Name the branch; do not check it out (the developer does, in its own
    worktree). Spawn `developer` with a self-contained brief: goal,
    spec sections, files in and out of scope, acceptance (which checks and fixtures must
-   pass, which red controls to add), and anything the owner decided.
+   pass, which red controls to add), the relevant `docs/lessons/` file, and anything the owner
+   decided.
 3. **Build and self-review (developer).** Implement; run the full local check line from
    AGENTS.md; run `/ponytail-review` (skill `ponytail:ponytail-review`, a user plugin) on the diff and a correctness pass over it
    (`/code-review medium`); fix what they find. Commit, push, open the PR (description cites

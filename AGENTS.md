@@ -36,7 +36,12 @@ at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
 - **Distribution (PREP-03):** the first release bundles its chapter in the app;
   downloadable story content waits for a pre-launch store-policy review.
 
-## Hard-won lessons from R1 (read before touching these areas)
+## Hard-won lessons
+
+New lessons go in the file for their area; a lesson enters AGENTS.md only if it applies to all work.
+- Before touching `mobile/` or running on a phone, read [mobile lessons](docs/lessons/mobile.md).
+- Before touching SQLite or persistence, read [storage lessons](docs/lessons/storage.md).
+- Before capturing or committing evidence, read [evidence lessons](docs/lessons/evidence.md).
 
 **Performance**
 - Whole-state copying kills phones. On a Pixel 3a (Hermes), copying a 190 KB state per
@@ -48,64 +53,6 @@ at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
 - A full canonical checkpoint of a 730 KB state still took about 490 ms on the Pixel 3a
   (not split into write/read/parse/encode). Keep it off the player-action path and
   measure it split.
-
-**expo-sqlite and React Native**
-- expo-sqlite 57.0.3 on Android: opening the same database file twice gives both JS
-  handles one native database, and garbage collection of either closes it. Symptom:
-  `NativeDatabase.execSync` rejected, `NullPointerException`. Open each database once
-  per process.
-- expo-sqlite's transaction helpers (`withTransactionSync`,
-  `withExclusiveTransactionAsync`) issue COMMIT themselves. To own the COMMIT point
-  (fault injection, unknown-commit handling) run `BEGIN IMMEDIATE` / `COMMIT` /
-  `ROLLBACK` yourself with `execSync` on one connection.
-- The React Native Gradle plugin (`configureDevServerLocation`) writes the build
-  machine's IPv4 address into every variant's `resources.arsc`, release included. Pass
-  `-PreactNativeDevServerIp=localhost`. APKs then differ only in AGP's encrypted
-  dependency-info signing block; the JS bundle, Hermes bytecode and source map are
-  byte-identical across builds.
-- Record the AGP version with the root `./gradlew buildEnvironment`, not
-  `:app:buildEnvironment` (AGP sits on the root buildscript classpath).
-
-**Mobile builds (measured 2026-09-24, minimal Expo 57 app, arm64 release)**
-- M1 Air: Android clean 78 s with warm download caches (first ever, with NDK download,
-  346 s); JS change with a warm Gradle daemon 9 s. iOS `pod install` 23 s, clean
-  `xcodebuild` 50 s, JS change 9 s. GitHub CI Android, uncached: Gradle 349 s, job 6 min 15 s.
-  Iterate on the M1; CI builds are clean-build proof, not the edit loop.
-- `pod install` writes React Native codegen into `ios/build/generated`. Never
-  `rm -rf ios/build` or use it as `-derivedDataPath`; rerun `pod install` if it is gone.
-- zsh does not word-split `$VAR`: wrap repeated commands in `function name { ...; }`.
-
-**Physical-device runs**
-- The owner can connect only one phone at a time. Batch all work per phone; ask for a
-  swap only when needed.
-- A locked screen stops the app's JS. Check the lock state before a run; keep the app in
-  the foreground; treat a lock or backgrounding as an invalid run.
-- Every wait on a device needs a timeout (for example 120 s per launch, a 10 minute
-  progress watchdog). An unbounded `until grep …` loop hung for minutes once.
-- The Android logcat ring buffer keeps lines from earlier runs; a stale progress marker
-  once looked like a finished run. Match on the current process id or a run id.
-- iOS: `xcode-select` may point at the Command Line Tools; set
-  `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer` (no sudo). Signing uses the
-  owner's free personal team (automatic signing); nothing paid, no EAS.
-- iOS symbolication with `atos`: look up the return address minus 1, or it names the
-  wrong function.
-
-**Evidence and privacy**
-- Never print or commit adb serials, iPhone UDID/ECID/serial/device name, team ID,
-  certificate or provisioning identifiers, home/scratch/worktree paths or
-  app-container UUIDs. Every capture script has a `redact()` covering them.
-- Retained raw tool output is hashed (`SHA256SUMS` with its verify output beside it,
-  not self-listed). Mark evidence folders `-whitespace` in `.gitattributes` so git never
-  "fixes" hashed bytes.
-- Keep owner-reported, inspected, catalogue and inferred facts separate and labeled.
-  Nothing invented; unknowns stay null. Owner decisions are retained verbatim in a file.
-- Declare any performance variant before tuning it, and keep failing results.
-
-**SQLite fault testing**
-- `PRAGMA max_page_count` clamped to the current page count, then a write that must grow
-  the file, gives a real deterministic `SQLITE_FULL`.
-- An "unknown COMMIT" test that discards the result of a COMMIT that succeeded never
-  exercises the not-committed branch; inject a genuinely failed COMMIT too.
 
 **Canonical encoding (R3)**
 - Elixir maps with 32 keys or fewer iterate in sorted key order, so a key-order test with
@@ -148,7 +95,7 @@ A test exists to catch a specific break. Adapted from
 - **Test our contract, not the library.** No tests for trivial structs, getters or
   forwarding; no tests of Elixir, Node or `boundary` mechanics.
 - **Real over mocks.** Mock only what is slow or external (the network, a device); storage
-  faults are real (see SQLite fault testing);
+  faults are real (see [storage lessons](docs/lessons/storage.md));
   never assert on the mock itself. Production modules carry no test-only functions.
 - **Nothing extra.** No fixture, helper or validation the test does not need; no test
   written for coverage alone.
