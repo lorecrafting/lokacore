@@ -1,7 +1,7 @@
 # Owner decisions on the R3 plan and the verification harness — 2026-09-24
 
-Relayed verbatim by the coordinating assistant (Claude Code, Claude Opus) from the owner's
-chat. No checker can verify these quotes against the chat. The IdSource answer is
+The owner's answers are verbatim; headings and question summaries are the coordinating
+assistant's (Claude Code, Claude Opus) words. No checker can verify these quotes against the chat. The IdSource answer is
 recorded with R3 PR 1 (`owner-decisions-r3-2026-09-24.md`).
 
 1. **Elixir contracts from schemas at compile time** (no committed generated Elixir):
