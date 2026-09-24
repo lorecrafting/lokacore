@@ -2,6 +2,9 @@ id: mobile-shared-no-authority
 valid:
   - "import { Button } from '../ui';"
   - "const s = 'authority/local-story kernel/ts features/realm features/story';"
+  - "export const label = 'realm/remote-realm/story/kernel/authority';"
 invalid:
   - "import { x } from '../../authority/local-story';"
   - "import { d } from '../../authority/remote-realm/socket';"
+  - "export * from '../../features/realm';"
+  - "const s = () => import('../../features/story');"

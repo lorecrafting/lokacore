@@ -227,7 +227,7 @@ Suggested shape:
 ```text
 lib/loka/{core,content,store,platform,runtime,builder}
 lib/loka_web
-portable/                 # shared portable implementation only if selected by R1
+kernel/ts/                # TypeScript kernel (candidate C); the Elixir kernel is Loka.Core
 mobile/app
 mobile/features/story
 mobile/features/realm

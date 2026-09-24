@@ -2,6 +2,8 @@ id: mobile-kernel-via-local-story
 valid:
   - "import { KERNEL_ID } from '../authority/local-story';"
   - "const s = 'authority/local-story kernel/ts features/realm features/story';"
+  - "export const label = 'realm/remote-realm/story/kernel/authority';"
 invalid:
   - "import { KERNEL_ID } from '../../kernel/ts/src';"
   - "export * from '../../../kernel/ts/src/index.ts';"
+  - "const k = () => require('../../../kernel/ts/src');"

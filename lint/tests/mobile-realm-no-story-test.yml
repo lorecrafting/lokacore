@@ -1,7 +1,10 @@
 id: mobile-realm-no-story
 valid:
   - "import { Button } from '../../packages/ui';"
+  - "export const label = 'story/local-story';"
   - "const s = 'authority/local-story kernel/ts features/realm features/story';"
+  - "export const label = 'realm/remote-realm/story/kernel/authority';"
 invalid:
   - "import { z } from '../story/index';"
   - "import { c } from '../../authority/local-story';"
+  - "const load = () => import('../story');"

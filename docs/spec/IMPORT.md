@@ -1,8 +1,19 @@
 # Specification import record (R2 cutover)
 
 Imported 2026-09-24 from [lorecrafting/lokacore-v2-legacy](https://github.com/lorecrafting/lokacore-v2-legacy/tree/997a7a8/docs/rewrite-v3) at commit `997a7a8`.
-Every imported file is byte-identical between the R0-accepted commit `f5bef28` and
-`997a7a8` (`git diff f5bef28 997a7a8` over these paths is empty).
+The 37 `docs/spec/` files in the table below are byte-identical between the R0-accepted commit `f5bef28` and
+`997a7a8` (`git diff f5bef28 997a7a8` over those paths is empty). The `docs/decisions/`
+files were written after R0 and are imported as they stand at `997a7a8`.
+
+**Cutover record** (required by the R0 record's `cutover_destination`): destination
+repository <https://github.com/lorecrafting/lokacore>, import commit `b968a8f`. The R0
+acceptance record itself is imported unchanged as
+[decisions/r0-acceptance.json](../decisions/r0-acceptance.json) (legacy
+`prep/after-pr-10/r0-acceptance.pending.json`, SHA-256
+`ceb006ce826ec0765594d226c9d6517520637a4a6b7acd622459d96e425066b5`). Its `normative_files`
+defines the R0-accepted file set (all imported here) and its `architecture_index` is the
+preserved invariant index. Its `governing_companions` include `r1-work-package.md`, which
+stays informative in the legacy repository because R1 is complete.
 
 From this cutover on, this repository is the source of truth for specification and ADR
 amendments (spec [README §12](README.md#12-r0-cutover-and-implementation-facing-specification-organization)).
@@ -23,7 +34,7 @@ The legacy packet is provenance only; never amend it or choose it over these fil
 The table below describes the files as imported. Later amendments are in git history:
 
 - 2026-09-24, [proposed ADR-073](../decisions/adr-073-single-app.md): documents 02 §1 and
-  14 §R2, one Mix application instead of an umbrella.
+  14 §R2, one Mix application instead of an umbrella; 14's shape names `kernel/ts/`.
 
 ## Link rewrites (the only byte changes at import)
 

@@ -7,7 +7,12 @@
     "noEmit": true,
     "allowImportingTsExtensions": true,
     "erasableSyntaxOnly": true,
-    "types": []
+    "types": [],
+    "lib": [
+      "ES2022"
+    ]
   },
-  "include": ["src"]
+  "include": [
+    "src"
+  ]
 }

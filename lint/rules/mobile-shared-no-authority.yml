@@ -1,13 +1,19 @@
 id: mobile-shared-no-authority
-language: typescript
+language: tsx
 severity: error
-message: Shared packages never import an authority implementation (spec document 10 §2).
+message: Shared packages never import an authority or a feature (spec documents 10 §2, 14 §R2).
 files: [mobile/packages/**]
+# Only module specifiers: import/export ... from '<here>', import('<here>'), require('<here>').
 rule:
   kind: string_fragment
-  regex: '(^|/)(authority|local-story|remote-realm)(/|$)'
+  regex: '(^|/)(authority|local-story|remote-realm|features|story|realm)(/|$)'
   inside:
+    kind: string
     any:
-      - kind: import_statement
-      - kind: export_statement
-    stopBy: end
+      - inside: { kind: import_statement, field: source }
+      - inside: { kind: export_statement, field: source }
+      - inside:
+          kind: arguments
+          inside:
+            kind: call_expression
+            has: { field: function, regex: '^(import|require)$' }

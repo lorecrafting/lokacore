@@ -1,8 +1,10 @@
 id: elixir-kernel-pure
 valid:
   - "def step(state, cmd), do: Map.put(state, :last, cmd)"
-  - "def next(rng), do: LokaCore.Rng.next(rng)"
+  - "def next(rng), do: Loka.Core.Rng.next(rng)"
   - "def f(x), do: Filesystem.ok(x)"
+  - "def g(xs), do: Enum.map(xs, &(&1 + 1))"
+  - "def h(state), do: state.self"
 invalid:
   - "def load, do: File.read!(\"world.json\")"
   - "alias File, as: F"
@@ -11,3 +13,15 @@ invalid:
   - "def save(x), do: Loka.Repo.insert(x)"
   - "def me, do: Process.get(:x)"
   - "def env, do: System.get_env(\"X\")"
+  - "def t, do: :erlang.monotonic_time()"
+  - "def r, do: :crypto.strong_rand_bytes(4)"
+  - "def e, do: Enum.random([1, 2])"
+  - "def s, do: send(self(), :x)"
+  - "def p, do: spawn(fn -> :ok end)"
+  - "def d, do: Date.utc_today()"
+  - "def pt, do: :persistent_term.get(:x)"
+  - "def a, do: Application.get_env(:loka, :x)"
+  - "def ap, do: apply(File, :read!, [\"x\"])"
+  - "def el, do: Elixir.File.read!(\"x\")"
+  - "def rf, do: make_ref()"
+  - "def rg, do: Registry.lookup(R, :k)"

@@ -2,3 +2,6 @@
 ruleDirs: [lint/rules]
 testConfigs:
   - testDir: lint/tests
+# Parse .ts with the TSX grammar too, so each TypeScript rule covers .ts and .tsx.
+languageGlobs:
+  tsx: ['*.ts']

@@ -12,7 +12,12 @@ owner answered:
 §1 are top-level boundaries (`Loka.Core`, `Loka.Content`, `Loka.Store`, `Loka.Platform`,
 `Loka.Runtime`, `Loka.Builder`, `LokaWeb`) checked by `boundary` in strict mode, so calls
 between areas, and into external applications such as Ecto or Phoenix, must be declared.
-The dependency rules of document 02 §1 are unchanged.
+The dependency rules of document 02 §1 are unchanged. The enforcement clause of 02 §1 is
+strengthened from SHOULD to MUST (compile-time checks, each rule with a planted violation).
+Document 14's suggested shape now names `kernel/ts/` (document 02's `kernel/`) instead of
+`portable/`. Strict `boundary` does not police Elixir/OTP standard modules (for example
+`:erlang`, `Application`); kernel purity against those rests on the ast-grep rule
+`lint/rules/elixir-kernel-pure.yml`.
 
 **Why.**
 - The umbrella's one unique guarantee, leaving builder code out of the production release,

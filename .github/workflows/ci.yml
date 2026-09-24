@@ -82,3 +82,9 @@ jobs:
       - run: npx tsc --noEmit
       - run: npm ci --no-audit --no-fund && npm run typecheck && npm test
         working-directory: kernel/ts
+      - name: Red control, host globals are type errors in the kernel
+        working-directory: kernel/ts
+        run: |
+          echo "export const g = fetch('x');" > src/red_control.ts
+          if npx tsc; then echo "tsc accepted fetch in the kernel"; exit 1; fi
+          rm src/red_control.ts
