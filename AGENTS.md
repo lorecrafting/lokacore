@@ -195,7 +195,7 @@ Run everything locally:
 - Toolchain: pinned in `mise.toml`; run `mise exec -- <cmd>`.
 - Merge record-bearing PRs with merge commits, never squash.
 - Reviews are independent ([records](docs/reviews/README.md)): a fresh agent that authored none of the work (owner ruling:
-  fresh Fable or fresh Opus agents qualify; prefer Fable for design-judgment reviews, as defined in [the workflow](docs/WORKFLOW.md)).
+  fresh Fable, Opus or other-vendor agents such as Codex qualify, [ruling](docs/decisions/owner-decision-reviewers-2026-09-24.md); prefer Fable for design-judgment reviews, as defined in [the workflow](docs/WORKFLOW.md)).
 - Every Markdown file must be reachable by links from README.md, AGENTS.md or CLAUDE.md,
   and every relative link must resolve: `elixir bin/check_docs.exs`.
 - Readiness probes that exit 1 by design are expected; don't "fix" them.
