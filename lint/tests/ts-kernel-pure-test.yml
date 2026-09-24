@@ -1,0 +1,14 @@
+id: ts-kernel-pure
+valid:
+  - "export const step = (s: S, c: C): S => ({ ...s, last: c });"
+  - "import { next } from './rng';"
+  - "const d = s.date;"
+invalid:
+  - "const t = Date.now();"
+  - "const d = new Date();"
+  - "const r = Math.random();"
+  - "import { readFileSync } from 'node:fs';"
+  - "import fs from 'fs';"
+  - "const env = process.env.X;"
+  - "setTimeout(f, 1);"
+  - "const x = require('os');"

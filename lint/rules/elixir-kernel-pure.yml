@@ -1,0 +1,13 @@
+id: elixir-kernel-pure
+language: elixir
+severity: error
+message: Kernel code must stay pure (spec document 01 A6, proposed ADR-072). Take time, randomness, storage and processes from the host.
+files: [apps/loka_core/lib/**]
+rule:
+  any:
+    - kind: alias
+      regex: ^(File|IO|System|Process|Port|Node|Task|Agent|GenServer|DateTime|NaiveDateTime|Ecto|Phoenix)(\.|$)
+    - kind: alias
+      regex: (^|\.)Repo$
+    - kind: atom
+      regex: ^:(rand|random|os|file|timer|ets)$

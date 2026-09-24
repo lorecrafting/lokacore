@@ -116,21 +116,31 @@ at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
   outline script once it exists.
 - Plain text search only for strings, docs and config.
 
-## Planned R2 checks (each with a deliberately broken case that must fail)
+## Checks (CI runs all of them; each has a planted case that must fail)
 
-- `boundary` (Hex, locked) makes illegal dependencies between apps a compile error.
-- `mix xref` ratchet: zero dependency cycles; compile-time edges only from an allowed
-  list.
-- ast-grep rules (`sgconfig.yml`, `ast-grep test`, pinned in CI) keep kernels pure: no
-  `File`, `System`, `:rand`, `DateTime`, `Process` or `Repo` in the Elixir kernel; no
-  Node APIs, `Date.now` or `Math.random` in the TypeScript kernel.
-- Lean CI: fast checks on every PR; native release builds only when mobile code changes
-  or on manual trigger; no push-plus-PR double runs; cancel superseded runs; the full
-  10,000-sequence differential runs nightly.
+- `boundary` (strict, every app): dependency directions from spec document 02 §1 are a
+  compile error. Declared in each app's top module (`apps/*/lib/loka_*.ex`).
+- `mix xref graph --format cycles --fail-above 0` and
+  `mix xref graph --label compile-connected --fail-above 0`: zero cycles, zero
+  compile-connected edges. When a compile edge is justified, replace the zero with a
+  reviewed allowed list.
+- `ast-grep test` and `ast-grep scan --error` (`sgconfig.yml`, `lint/`): the Elixir kernel
+  (`apps/loka_core/lib`) and the TypeScript kernel (`mobile/packages/kernel/src`) stay
+  pure. Every rule has valid and invalid cases in `lint/tests/`.
+- `elixir bin/red_controls.exs`: plants a boundary violation, a cycle and a compile edge,
+  and requires each check to fail.
+- `elixir bin/check_docs.exs`: links resolve; every doc is reachable.
+- CI: pull requests and pushes to main, superseded runs cancelled. Planned: native mobile
+  builds only when mobile code changes or on manual trigger; the full 10,000-sequence
+  differential runs nightly.
+
+Run everything locally:
+`mix format --check-formatted && mix compile --warnings-as-errors && mix xref graph --format cycles --fail-above 0 && mix xref graph --label compile-connected --fail-above 0 && mix test && elixir bin/red_controls.exs && ast-grep test --skip-snapshot-tests && ast-grep scan --error && elixir bin/check_docs.exs`
+(prefix each with `mise exec --`, or activate mise).
 
 ## Working rules
 
-- Toolchain: `mise exec elixir@1.20.4 erlang@28.4 node@24.21.0 -- <cmd>`.
+- Toolchain: pinned in `mise.toml`; run `mise exec -- <cmd>`.
 - Merge record-bearing PRs with merge commits, never squash.
 - Reviews are independent: a fresh agent that authored none of the work (owner ruling:
   fresh Fable or fresh Opus agents qualify; prefer Fable for design-judgment reviews).

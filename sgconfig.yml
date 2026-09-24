@@ -1,0 +1,4 @@
+# ast-grep lint rules: `ast-grep scan` (code) and `ast-grep test` (each rule's red cases).
+ruleDirs: [lint/rules]
+testConfigs:
+  - testDir: lint/tests

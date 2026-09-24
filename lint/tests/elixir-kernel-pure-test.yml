@@ -1,0 +1,13 @@
+id: elixir-kernel-pure
+valid:
+  - "def step(state, cmd), do: Map.put(state, :last, cmd)"
+  - "def next(rng), do: LokaCore.Rng.next(rng)"
+  - "def f(x), do: Filesystem.ok(x)"
+invalid:
+  - "def load, do: File.read!(\"world.json\")"
+  - "alias File, as: F"
+  - "def now, do: DateTime.utc_now()"
+  - "def roll, do: :rand.uniform(6)"
+  - "def save(x), do: Loka.Repo.insert(x)"
+  - "def me, do: Process.get(:x)"
+  - "def env, do: System.get_env(\"X\")"
