@@ -43,6 +43,13 @@ New lessons go in the file for their area; a lesson enters AGENTS.md only if it 
 - Before touching SQLite or persistence, read [storage lessons](docs/lessons/storage.md).
 - Before capturing or committing evidence, read [evidence lessons](docs/lessons/evidence.md).
 
+**All work**
+- Never print or commit adb serials, iPhone UDID/ECID/serial/device name, team ID,
+  certificate or provisioning identifiers, home/scratch/worktree paths or
+  app-container UUIDs. Every capture script has a `redact()` covering them.
+- Nothing invented; unknowns stay null.
+- zsh does not word-split `$VAR`: wrap repeated commands in `function name { ...; }`.
+
 **Performance**
 - Whole-state copying kills phones. On a Pixel 3a (Hermes), copying a 190 KB state per
   step took 216 ms; structural sharing took under 1 ms. Never deep-clone or re-encode
@@ -53,6 +60,7 @@ New lessons go in the file for their area; a lesson enters AGENTS.md only if it 
 - A full canonical checkpoint of a 730 KB state still took about 490 ms on the Pixel 3a
   (not split into write/read/parse/encode). Keep it off the player-action path and
   measure it split.
+- Declare any performance variant before tuning it, and keep failing results.
 
 **Canonical encoding (R3)**
 - Elixir maps with 32 keys or fewer iterate in sorted key order, so a key-order test with

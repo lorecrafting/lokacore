@@ -26,7 +26,6 @@ Hard-won lessons for `mobile/` and physical-device runs, moved verbatim from AGE
   Iterate on the M1; CI builds are clean-build proof, not the edit loop.
 - `pod install` writes React Native codegen into `ios/build/generated`. Never
   `rm -rf ios/build` or use it as `-derivedDataPath`; rerun `pod install` if it is gone.
-- zsh does not word-split `$VAR`: wrap repeated commands in `function name { ...; }`.
 
 **Physical-device runs**
 - The owner can connect only one phone at a time. Batch all work per phone; ask for a

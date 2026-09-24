@@ -52,7 +52,8 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
    rewrote a core piece or the slice freezes a contract or closes a gate. At most two fix
    rounds; anything still open goes to the owner.
 7. **Merge (PM).** Summarize for the owner: PR link, verdict, open notes. Merge with a merge
-   commit only after the owner's OK. Update AGENTS.md lessons if the slice taught one.
+   commit only after the owner's OK. If the slice taught a lesson, record it in its area
+   file under `docs/lessons/` (AGENTS.md only if it applies to all work).
 
 ## Milestone gate: docs tidy pass
 
