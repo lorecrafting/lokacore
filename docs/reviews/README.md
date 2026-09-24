@@ -8,3 +8,5 @@ Each record is written by a fresh agent that authored none of the reviewed work 
   APPROVE WITH NOTES (docs-only, short review).
 - [2026-09-24 docs budget](2026-09-24-docs-budget-review.md): PR #3 at `910b6a6`,
   APPROVE WITH NOTES (tooling/docs, short review).
+- [2026-09-24 local hooks](2026-09-24-local-hooks-review.md): PR #7 at `0673d90`,
+  APPROVE WITH NOTES (tooling, short review; hooks run on planted cases).
