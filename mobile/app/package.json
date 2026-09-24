@@ -1,0 +1,16 @@
+{
+  "name": "loka-app",
+  "version": "0.0.0",
+  "private": true,
+  "main": "index.ts",
+  "engines": { "node": "24.21.0" },
+  "dependencies": {
+    "expo": "57.0.24",
+    "react": "19.2.3",
+    "react-native": "0.86.3"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3",
+    "@types/react": "19.2.18"
+  }
+}

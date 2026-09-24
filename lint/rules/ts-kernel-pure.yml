@@ -1,0 +1,17 @@
+id: ts-kernel-pure
+language: tsx
+severity: error
+message: Kernel code must stay pure (spec document 01 A6, proposed ADR-072). No clock, randomness, locale or dynamic loading. Host and Node APIs are already type errors via "lib"/"types" in kernel/ts/tsconfig.json.
+files: [kernel/ts/src/**]
+rule:
+  any:
+    - pattern: Date.now()
+    - pattern: new Date($$$)
+    - pattern: Date($$$)
+    - pattern: Math.random()
+    - kind: subscript_expression
+      has: { field: object, regex: ^Math$ }
+    - kind: call_expression
+      has: { field: function, kind: import }
+    - kind: identifier
+      regex: ^(Intl|globalThis)$

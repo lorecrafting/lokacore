@@ -1,0 +1,15 @@
+id: ts-kernel-pure
+valid:
+  - "export const step = (s: S, c: C): S => ({ ...s, last: c });"
+  - "import { next } from './rng.ts';"
+  - "const d = s.date;"
+  - "const m = Math.floor(x / 2);"
+invalid:
+  - "const t = Date.now();"
+  - "const d = new Date();"
+  - "const a = Date();"
+  - "const r = Math.random();"
+  - "const c = Math['random']();"
+  - "export const e = () => import('./rules.ts');"
+  - "export const h = Intl.DateTimeFormat().resolvedOptions().timeZone;"
+  - "const g = globalThis;"

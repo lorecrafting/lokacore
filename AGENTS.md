@@ -10,11 +10,22 @@ in the archived repository
 [lorecrafting/lokacore-v2-legacy](https://github.com/lorecrafting/lokacore-v2-legacy)
 at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
 
+## Specification (source of truth)
+
+- [docs/spec/](docs/spec/README.md): the R0-accepted specification, imported at the R2
+  cutover ([import record](docs/spec/IMPORT.md)). Its README §8 says which documents are
+  normative. Two normative documents disagreeing is a defect: stop and ask.
+- [docs/decisions/](docs/decisions/README.md): proposed ADRs and verbatim owner decisions
+  since R0. [docs/reference/](docs/reference/README.md): informative material, linked in
+  the legacy repository, never authority.
+- Amend the spec here first, get it reviewed, then change code (spec README §11). Cite
+  the governing spec section in every PR.
+
 ## Architecture decisions already made (do not reopen silently)
 
 - **Candidate C (R1):** rules are implemented twice, in Elixir (server) and TypeScript
   (phone), held to the same reviewed fixtures and to randomized differential testing.
-  Proposed ADR-071 in the legacy `docs/rewrite-v3/prep/adr-071-072-proposal.md`.
+  [Proposed ADR-071](docs/decisions/adr-071-072-proposal.md).
 - **Persistence shape (proposed ADR-072):** the world lives in memory; rules are pure
   (`decide(state, command) → proposal`) and never write memory or storage; the host
   commits only the changed rows plus the receipt in one transaction, then adopts the
@@ -54,6 +65,15 @@ at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
   byte-identical across builds.
 - Record the AGP version with the root `./gradlew buildEnvironment`, not
   `:app:buildEnvironment` (AGP sits on the root buildscript classpath).
+
+**Mobile builds (measured 2026-09-24, minimal Expo 57 app, arm64 release)**
+- M1 Air: Android clean 78 s with warm download caches (first ever, with NDK download,
+  346 s); JS change with a warm Gradle daemon 9 s. iOS `pod install` 23 s, clean
+  `xcodebuild` 50 s, JS change 9 s. GitHub CI Android, uncached: Gradle 349 s, job 6 min 15 s.
+  Iterate on the M1; CI builds are clean-build proof, not the edit loop.
+- `pod install` writes React Native codegen into `ios/build/generated`. Never
+  `rm -rf ios/build` or use it as `-derivedDataPath`; rerun `pod install` if it is gone.
+- zsh does not word-split `$VAR`: wrap repeated commands in `function name { ...; }`.
 
 **Physical-device runs**
 - The owner can connect only one phone at a time. Batch all work per phone; ask for a
@@ -96,6 +116,18 @@ at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
   builder web apps (spec documents 01 and 07). Domain, runtime, content and store code never
   depend on it.
 
+## Simplicity (every change, every agent)
+
+Write the least code that correctly does the job. Before writing, stop at the first rung
+that holds: does it need to exist at all; is it already in this repo; does the standard
+library or platform do it; does an installed dependency do it; can it be one line. No
+abstraction with one implementation, no config nobody sets, no scaffolding for later.
+Never simplify away validation at trust boundaries, data-loss handling, security or
+anything the spec requires. Mark a deliberate shortcut with a `ponytail:` comment naming
+its limit. Before asking for review, audit the diff for over-engineering (Claude Code:
+`/ponytail-review`; other agents: the same questions by hand) and include the result in
+the PR. Pass this section into subagent prompts.
+
 ## Searching code (use precise tools first)
 
 - Elixir structure (callers, dependencies, cycles): `mix xref callers <Module>`,
@@ -105,24 +137,41 @@ at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
   outline script once it exists.
 - Plain text search only for strings, docs and config.
 
-## Planned R2 checks (each with a deliberately broken case that must fail)
+## Checks (CI runs all of them; each has a planted case that must fail)
 
-- `boundary` (Hex, locked) makes illegal dependencies between apps a compile error.
-- `mix xref` ratchet: zero dependency cycles; compile-time edges only from an allowed
-  list.
-- ast-grep rules (`sgconfig.yml`, `ast-grep test`, pinned in CI) keep kernels pure: no
-  `File`, `System`, `:rand`, `DateTime`, `Process` or `Repo` in the Elixir kernel; no
-  Node APIs, `Date.now` or `Math.random` in the TypeScript kernel.
-- Lean CI: fast checks on every PR; native release builds only when mobile code changes
-  or on manual trigger; no push-plus-PR double runs; cancel superseded runs; the full
-  10,000-sequence differential runs nightly.
+- `boundary` (strict, every boundary): dependency directions from spec document 02 §1 are a
+  compile error. Declared in each boundary's top module (`lib/loka/*.ex`, `lib/loka_web.ex`).
+- `mix xref graph --format cycles --fail-above 0` and
+  `mix xref graph --label compile-connected --fail-above 0`: zero cycles, zero
+  compile-connected edges. When a compile edge is justified, replace the zero with a
+  reviewed allowed list.
+- `ast-grep test` and `ast-grep scan --error` (`sgconfig.yml`, `lint/`): the Elixir kernel
+  (`lib/loka/core`) and the TypeScript kernel (`kernel/ts/src`) stay pure; in `mobile/`,
+  shared packages never import an authority, Story and Realm never import each other, and
+  only `authority/local-story` imports the kernel (spec documents 10 §2, 14 §R2). Every
+  rule has valid and invalid cases in `lint/tests/`; `bin/lint_red_controls.sh` plants a
+  violation at each rule's real path and requires the scan to report it.
+- TypeScript: `npx tsc --noEmit` in `mobile/app` (covers all of `mobile/`) and
+  `npm run typecheck && npm test` in `kernel/ts` (Node's built-in test runner).
+- `elixir bin/red_controls.exs`: plants a boundary violation, a cycle and a compile edge,
+  and requires each check to fail.
+- `elixir bin/check_docs.exs`: links resolve; every doc is reachable.
+- CI: pull requests and pushes to main, superseded runs cancelled. Planned: native mobile
+  builds only when mobile code changes or on manual trigger; the full 10,000-sequence
+  differential runs nightly.
+
+Run everything locally:
+`mix format --check-formatted && mix compile --warnings-as-errors && mix xref graph --format cycles --fail-above 0 && mix xref graph --label compile-connected --fail-above 0 && mix test && elixir bin/red_controls.exs && ast-grep test --skip-snapshot-tests && ast-grep scan --error && bin/lint_red_controls.sh && elixir bin/check_docs.exs`
+(prefix each with `mise exec --`, or activate mise).
 
 ## Working rules
 
-- Toolchain: `mise exec elixir@1.20.4 erlang@28.4 node@24.21.0 -- <cmd>`.
+- Toolchain: pinned in `mise.toml`; run `mise exec -- <cmd>`.
 - Merge record-bearing PRs with merge commits, never squash.
-- Reviews are independent: a fresh agent that authored none of the work (owner ruling:
+- Reviews are independent ([records](docs/reviews/README.md)): a fresh agent that authored none of the work (owner ruling:
   fresh Fable or fresh Opus agents qualify; prefer Fable for design-judgment reviews).
+- Every Markdown file must be reachable by links from README.md, AGENTS.md or CLAUDE.md,
+  and every relative link must resolve: `elixir bin/check_docs.exs`.
 - Readiness probes that exit 1 by design are expected; don't "fix" them.
 - The owner wants nothing paid (no EAS); headless work runs on GitHub Actions, iPhone
   and UI work on the owner's M1.

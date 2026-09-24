@@ -1,0 +1,7 @@
+# Project-pinned toolchain; CI pins the same versions.
+[tools]
+erlang = "28.4"
+elixir = "1.20.4"
+node = "24.21.0"
+java = "temurin-17.0.20+8"
+"npm:@ast-grep/cli" = "0.45.3"

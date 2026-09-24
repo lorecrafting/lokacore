@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "Loka",
+    "slug": "loka",
+    "version": "0.0.0",
+    "orientation": "portrait",
+    "android": { "package": "com.lorecrafting.loka" },
+    "ios": { "bundleIdentifier": "com.lorecrafting.loka" }
+  }
+}
