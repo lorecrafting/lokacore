@@ -57,8 +57,10 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
 - Every developer works in its own worktree on its own branch; the main checkout stays
   with the PM. The reviewer mutates code only in a throwaway detached worktree
   (`git worktree add --detach`) and removes it before finishing.
-- The reviewer commits only its record, pushes with `git push origin HEAD:<branch>`, and
-  leaves `git status` clean.
+- The reviewer commits only its record, in a detached worktree at `origin/<branch>`,
+  pushes from there with `git push origin HEAD:<branch>`, and removes the worktree.
+- A new worktree has no `deps/`, `_build/` or `node_modules`: run `mix deps.get` and
+  `npm ci` there first.
 - Agent types in `.claude/agents/` register only when a session starts. If one is missing,
   spawn `general-purpose` and tell it to follow the definition file.
 
