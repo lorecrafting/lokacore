@@ -57,13 +57,16 @@ test('uniform accepts bound 2^32', () => {
 
 // Catches missing strictness the fixtures do not reach: lowercase surrogate-pair escapes,
 // lone surrogates (escaped or raw UTF-16), raw control characters, negative range edge,
-// leading zeros, non-ASCII keys, trailing data, and "__proto__" becoming a prototype.
+// leading zeros, non-ASCII keys, trailing data, duplicates spelled with escapes, and
+// "__proto__" becoming a prototype; missing colon; a dropped short escape on input.
 test('decode edge cases', () => {
   assert.deepEqual(decode('["\\ud83d\\ude00",-9007199254740991]'), ['😀', -9007199254740991]);
   assert.equal(encode(decode('{"__proto__":1}')), '{"__proto__":1}');
-  for (const text of ['["\\udc00"]', '["\ud800a"]', '["\x01"]', '-9007199254740992', '01', '{"é":1}', '[1]x', '', '{"a" 1}']) {
+  for (const text of ['["\\udc00"]', '["\ud800a"]', '["\x01"]', '-9007199254740992', '01', '{"é":1}', '[1]x', '{"a":1,"\\u0061":2}', '', '{"a",1}']) {
     assert.throws(() => decode(text), code('invalid_json'), text);
   }
+  assert.throws(() => decode(null as never), code('invalid_json'));
+  assert.equal(decode('"\\b\\f\\n\\r\\t\\"\\\\\\/"'), '\b\f\n\r\t"\\/');
 });
 
 // Catches wrong escapes (uppercase hex, \u0008 for \b, escaping / or non-ASCII) and key
@@ -80,14 +83,29 @@ test('encode rejects values outside the profile', () => {
   }
 });
 
+// Catches a missing or off-by-one depth limit: without one, how deep a value may nest
+// depends on the host's stack (smaller on Hermes), and the two kernels disagree.
+test('nesting is limited to 128 containers', () => {
+  const nest = (n: number) => '['.repeat(n) + ']'.repeat(n);
+  const deepest = decode(nest(128));
+  assert.equal(encode(deepest), nest(128));
+  assert.throws(() => decode(nest(129)), code('invalid_json'));
+  assert.throws(() => encode([deepest]), code('invalid_canonical'));
+  assert.throws(() => encode({ a: deepest }), code('invalid_canonical'));
+});
+
 // Expected: printf '%s' '<canonical>' | shasum -a 256
 test('hash is lowercase SHA-256 of the canonical bytes', () => {
   // '{"a":"x","b":1}'
   assert.equal(hash({ b: 1, a: 'x' }), 'cdab067e9f3beb32d1252cfd63e492592fecbf591b0d08cadb24bb17f3864246');
-  // '["é幻😀",-7]': 2-, 3- and 4-byte UTF-8
-  assert.equal(hash(['é幻😀', -7]), '6416a19771baa45dc6d75fa8729efce39f1f0168ee11e76808d86d2bdc6c1463');
+  // '["é幻😀𠀋",-7]': 2-, 3- and 4-byte UTF-8, above U+1FFFF too
+  assert.equal(hash(['é幻😀𠀋', -7]), '6770c1e57b41f706835d6999cca3df572ac681152db03d185adf8916be83fed6');
+  // 55 bytes: the largest message whose padding fits one block
+  assert.equal(hash('a'.repeat(53)), '2ae89a8121a3f9d2709899b414da4c60234316951093ce35f41ce954a09533f4');
   // a 56-byte message: padding spills into a second block
   assert.equal(hash('a'.repeat(54)), '9b68496ab8c784a9ed22d25a7e3aada1736d7097061bb3149f3d66f1e22ceeef');
+  // 120 bytes: one whole block read in place, then a padded tail
+  assert.equal(hash('a'.repeat(118)), 'decf5e51fc0969aa2a06512dde0d3521a7ecd297ea81212ca626a65d2d4a1716');
 });
 
 // mul(94906266, 94906266) is 9007199326062756 exactly: a check that lost precision, or
@@ -109,6 +127,23 @@ test('uniform rejects a bad draw budget', () => {
   for (const budget of [-1, 1.5, NaN, true]) {
     assert.throws(() => uniform([1, 2, 3, 4], 10, budget as never), code('invalid_rng_budget'), String(budget));
   }
+});
+
+// Catches a non-string id being hashed into an id Elixir can never produce.
+test('IdSource rejects non-string ids', () => {
+  assert.throws(() => id(1 as never, 'c-1', 0), code('invalid_id'));
+  assert.throws(() => id('w-1', null as never, 0), code('invalid_id'));
+});
+
+// Catches operands that are not safe integers slipping through, or the zero-divisor check
+// running first (Elixir checks operands first, so both kernels must).
+test('unsafe operands are integer_overflow', () => {
+  for (const [a, b] of [[9007199254740992, 1], [1, 1.5], [true, 1]]) {
+    for (const op of [add, sub, mul, divide]) {
+      assert.throws(() => op(a as never, b as never), code('integer_overflow'), `${op.name}(${a}, ${b})`);
+    }
+  }
+  assert.throws(() => divide(1.5, 0), code('integer_overflow'));
 });
 
 // Catches an unsafe ordinal being hashed instead of the typed error Elixir returns.

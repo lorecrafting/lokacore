@@ -6,6 +6,7 @@ import { KernelError } from './error.ts';
 import { sha256, utf8 } from './sha256.ts';
 
 export function id(worldContextId: string, commandId: string, ordinal: number): string {
+  if (typeof worldContextId !== 'string' || typeof commandId !== 'string') throw new KernelError('invalid_id');
   if (!Number.isSafeInteger(ordinal) || ordinal < 0) throw new KernelError('invalid_ordinal');
   const b = sha256(utf8(encode(['loka-id-v1', worldContextId, commandId, ordinal]))).slice(0, 16);
   b[6] = (b[6] & 0x0f) | 0x80; // version 8

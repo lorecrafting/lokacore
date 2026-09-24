@@ -12,42 +12,49 @@ const K = [
 ];
 
 export function sha256(data: Uint8Array): Uint8Array {
-  const len = data.length;
-  const buf = new Uint8Array(Math.ceil((len + 9) / 64) * 64);
-  buf.set(data);
-  buf[len] = 0x80;
-  const view = new DataView(buf.buffer);
-  view.setUint32(buf.length - 8, Math.floor(len / 0x20000000)); // bit length, high word
-  view.setUint32(buf.length - 4, (len * 8) >>> 0);
   const h = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
   const w = new Array<number>(64);
-  const rotr = (x: number, r: number): number => (x >>> r) | (x << (32 - r));
-  for (let off = 0; off < buf.length; off += 64) {
-    for (let t = 0; t < 16; t++) w[t] = view.getUint32(off + t * 4);
-    for (let t = 16; t < 64; t++) {
-      const s0 = rotr(w[t - 15], 7) ^ rotr(w[t - 15], 18) ^ (w[t - 15] >>> 3);
-      const s1 = rotr(w[t - 2], 17) ^ rotr(w[t - 2], 19) ^ (w[t - 2] >>> 10);
-      w[t] = (w[t - 16] + s0 + w[t - 7] + s1) | 0;
-    }
-    let [a, b, c, d, e, f, g, hh] = h;
-    for (let t = 0; t < 64; t++) {
-      const t1 = (hh + (rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25)) + ((e & f) ^ (~e & g)) + K[t] + w[t]) | 0;
-      const t2 = ((rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22)) + ((a & b) ^ (a & c) ^ (b & c))) | 0;
-      hh = g;
-      g = f;
-      f = e;
-      e = (d + t1) | 0;
-      d = c;
-      c = b;
-      b = a;
-      a = (t1 + t2) | 0;
-    }
-    [a, b, c, d, e, f, g, hh].forEach((x, n) => (h[n] = (h[n] + x) | 0));
-  }
+  const full = data.length - (data.length % 64);
+  // Whole blocks are read in place; only the tail is copied, into the padding buffer.
+  const input = new DataView(data.buffer, data.byteOffset, data.byteLength);
+  for (let off = 0; off < full; off += 64) block(h, w, input, off);
+  const tail = new Uint8Array(data.length % 64 < 56 ? 64 : 128);
+  tail.set(data.subarray(full));
+  tail[data.length - full] = 0x80;
+  const pad = new DataView(tail.buffer);
+  pad.setUint32(tail.length - 8, Math.floor(data.length / 0x20000000)); // bit length, high word
+  pad.setUint32(tail.length - 4, (data.length * 8) >>> 0);
+  for (let off = 0; off < tail.length; off += 64) block(h, w, pad, off);
   const digest = new Uint8Array(32);
-  const dv = new DataView(digest.buffer);
-  h.forEach((x, n) => dv.setUint32(n * 4, x >>> 0));
+  const out = new DataView(digest.buffer);
+  h.forEach((x, n) => out.setUint32(n * 4, x >>> 0));
   return digest;
+}
+
+const rotr = (x: number, r: number): number => (x >>> r) | (x << (32 - r));
+
+// One 64-byte block at `off` into the state `h`; `w` is reused scratch.
+function block(h: number[], w: number[], view: DataView, off: number): void {
+  for (let t = 0; t < 16; t++) w[t] = view.getUint32(off + t * 4);
+  for (let t = 16; t < 64; t++) {
+    const s0 = rotr(w[t - 15], 7) ^ rotr(w[t - 15], 18) ^ (w[t - 15] >>> 3);
+    const s1 = rotr(w[t - 2], 17) ^ rotr(w[t - 2], 19) ^ (w[t - 2] >>> 10);
+    w[t] = (w[t - 16] + s0 + w[t - 7] + s1) | 0;
+  }
+  let [a, b, c, d, e, f, g, hh] = h;
+  for (let t = 0; t < 64; t++) {
+    const t1 = (hh + (rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25)) + ((e & f) ^ (~e & g)) + K[t] + w[t]) | 0;
+    const t2 = ((rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22)) + ((a & b) ^ (a & c) ^ (b & c))) | 0;
+    hh = g;
+    g = f;
+    f = e;
+    e = (d + t1) | 0;
+    d = c;
+    c = b;
+    b = a;
+    a = (t1 + t2) | 0;
+  }
+  [a, b, c, d, e, f, g, hh].forEach((x, n) => (h[n] = (h[n] + x) | 0));
 }
 
 export function sha256Hex(data: Uint8Array): string {
@@ -56,13 +63,25 @@ export function sha256Hex(data: Uint8Array): string {
 
 /** UTF-8 bytes of a well-formed string (the canonical encoder already rejects lone surrogates). */
 export function utf8(s: string): Uint8Array {
-  const out: number[] = [];
-  for (const ch of s) {
-    const c = ch.codePointAt(0) as number;
-    if (c < 0x80) out.push(c);
-    else if (c < 0x800) out.push(0xc0 | (c >> 6), 0x80 | (c & 63));
-    else if (c < 0x10000) out.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63));
-    else out.push(0xf0 | (c >> 18), 0x80 | ((c >> 12) & 63), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63));
+  const out = new Uint8Array(s.length * 3); // each UTF-16 unit yields at most 3 bytes
+  let n = 0;
+  for (let i = 0; i < s.length; i++) {
+    let c = s.charCodeAt(i);
+    if (c < 0x80) out[n++] = c;
+    else if (c < 0x800) {
+      out[n++] = 0xc0 | (c >> 6);
+      out[n++] = 0x80 | (c & 63);
+    } else if (c < 0xd800 || c > 0xdbff) {
+      out[n++] = 0xe0 | (c >> 12);
+      out[n++] = 0x80 | ((c >> 6) & 63);
+      out[n++] = 0x80 | (c & 63);
+    } else {
+      c = 0x10000 + ((c - 0xd800) << 10) + (s.charCodeAt(++i) - 0xdc00);
+      out[n++] = 0xf0 | (c >> 18);
+      out[n++] = 0x80 | ((c >> 12) & 63);
+      out[n++] = 0x80 | ((c >> 6) & 63);
+      out[n++] = 0x80 | (c & 63);
+    }
   }
-  return Uint8Array.from(out);
+  return out.subarray(0, n);
 }

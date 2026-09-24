@@ -7,18 +7,19 @@ defmodule Loka.Core.Canonical do
   binary keys. Both directions are linear in the input size.
   """
   @safe 9_007_199_254_740_991
+  @max_depth 128
 
   @type value :: nil | boolean() | integer() | binary() | [value()] | %{binary() => value()}
 
   @doc """
   Parses JSON text. Rejects duplicate or non-ASCII keys, fractions, exponents, NaN and
-  Infinity, integers outside the safe range, lone surrogates, invalid UTF-8 and trailing
-  data. `-0` parses as `0`.
+  Infinity, integers outside the safe range, lone surrogates, invalid UTF-8, nesting deeper
+  than #{@max_depth} and trailing data. `-0` parses as `0`.
   """
-  @spec decode(binary()) :: {:ok, value()} | {:error, :invalid_json}
+  @spec decode(term()) :: {:ok, value()} | {:error, :invalid_json}
   def decode(text) when is_binary(text) do
     # String.valid? also rejects UTF-8-encoded surrogates.
-    with true <- String.valid?(text), {v, rest} <- value(ws(text)), "" <- ws(rest) do
+    with true <- String.valid?(text), {v, rest} <- value(ws(text), 0), "" <- ws(rest) do
       {:ok, v}
     else
       _ -> {:error, :invalid_json}
@@ -27,58 +28,71 @@ defmodule Loka.Core.Canonical do
     :invalid -> {:error, :invalid_json}
   end
 
-  @doc "Canonical text: sorted keys, no whitespace. Raises `ArgumentError` on a value outside the profile."
-  @spec encode(value()) :: binary()
-  def encode(value), do: :binary.list_to_bin([enc(value)])
+  def decode(_), do: {:error, :invalid_json}
+
+  @doc "Canonical text: sorted keys, no whitespace. `:invalid_canonical` for a value outside the profile."
+  @spec encode(term()) :: {:ok, binary()} | {:error, :invalid_canonical}
+  def encode(value) do
+    {:ok, :binary.list_to_bin([enc(value, 0)])}
+  catch
+    :invalid -> {:error, :invalid_canonical}
+  end
 
   @doc "Lowercase hex SHA-256 of the canonical encoding."
-  @spec hash(value()) :: String.t()
-  def hash(value), do: :crypto.hash(:sha256, encode(value)) |> Base.encode16(case: :lower)
+  @spec hash(term()) :: {:ok, String.t()} | {:error, :invalid_canonical}
+  def hash(value) do
+    with {:ok, bytes} <- encode(value),
+         do: {:ok, :crypto.hash(:sha256, bytes) |> Base.encode16(case: :lower)}
+  end
 
   # ---- parser ----
+  # `depth` counts the containers already open around the value being parsed.
 
   defp ws(<<c, rest::binary>>) when c in ~c" \t\n\r", do: ws(rest)
   defp ws(rest), do: rest
 
-  defp value(<<?{, rest::binary>>), do: object(ws(rest), %{})
-  defp value(<<?[, rest::binary>>), do: array(ws(rest), [])
-  defp value(<<?", rest::binary>>), do: string(rest, rest, 0, [])
-  defp value(<<"true", rest::binary>>), do: {true, rest}
-  defp value(<<"false", rest::binary>>), do: {false, rest}
-  defp value(<<"null", rest::binary>>), do: {nil, rest}
-  defp value(<<?-, rest::binary>>), do: number(rest, -1)
-  defp value(rest), do: number(rest, 1)
+  defp value(<<c, _::binary>>, @max_depth) when c in ~c"{[", do: throw(:invalid)
+  defp value(<<?{, rest::binary>>, depth), do: object(ws(rest), %{}, depth + 1)
+  defp value(<<?[, rest::binary>>, depth), do: array(ws(rest), [], depth + 1)
+  defp value(<<?", rest::binary>>, _), do: string(rest, rest, 0, [])
+  defp value(<<"true", rest::binary>>, _), do: {true, rest}
+  defp value(<<"false", rest::binary>>, _), do: {false, rest}
+  defp value(<<"null", rest::binary>>, _), do: {nil, rest}
+  defp value(<<?-, rest::binary>>, _), do: number(rest, -1)
+  defp value(rest, _), do: number(rest, 1)
 
-  defp object(<<?}, rest::binary>>, acc) when acc == %{}, do: {acc, rest}
+  defp object(<<?}, rest::binary>>, acc, _) when acc == %{}, do: {acc, rest}
 
-  defp object(<<?", rest::binary>>, acc) do
-    {key, rest} = string(rest, rest, 0, [])
-    if Map.has_key?(acc, key) or not ascii?(key), do: throw(:invalid)
-
-    {v, rest} =
-      case ws(rest) do
-        <<?:, rest::binary>> -> value(ws(rest))
-        _ -> throw(:invalid)
-      end
-
+  defp object(<<?", rest::binary>>, acc, depth) do
+    {key, rest} = key(rest, acc)
+    {v, rest} = value(colon(ws(rest)), depth)
     acc = Map.put(acc, key, v)
 
     case ws(rest) do
-      <<?,, rest::binary>> -> object(ws(rest), acc)
+      <<?,, rest::binary>> -> object(ws(rest), acc, depth)
       <<?}, rest::binary>> -> {acc, rest}
       _ -> throw(:invalid)
     end
   end
 
-  defp object(_, _), do: throw(:invalid)
+  defp object(_, _, _), do: throw(:invalid)
 
-  defp array(<<?], rest::binary>>, []), do: {[], rest}
+  # Duplicates are detected after escape decoding.
+  defp key(text, acc) do
+    {key, rest} = string(text, text, 0, [])
+    if Map.has_key?(acc, key) or not ascii?(key), do: throw(:invalid), else: {key, rest}
+  end
 
-  defp array(text, acc) do
-    {v, rest} = value(text)
+  defp colon(<<?:, rest::binary>>), do: ws(rest)
+  defp colon(_), do: throw(:invalid)
+
+  defp array(<<?], rest::binary>>, [], _), do: {[], rest}
+
+  defp array(text, acc, depth) do
+    {v, rest} = value(text, depth)
 
     case ws(rest) do
-      <<?,, rest::binary>> -> array(ws(rest), [v | acc])
+      <<?,, rest::binary>> -> array(ws(rest), [v | acc], depth)
       <<?], rest::binary>> -> {Enum.reverse([v | acc]), rest}
       _ -> throw(:invalid)
     end
@@ -146,32 +160,36 @@ defmodule Loka.Core.Canonical do
 
   # ---- encoder ----
 
-  defp enc(nil), do: "null"
-  defp enc(true), do: "true"
-  defp enc(false), do: "false"
-  defp enc(n) when is_integer(n) and abs(n) <= @safe, do: Integer.to_string(n)
+  defp enc(nil, _), do: "null"
+  defp enc(true, _), do: "true"
+  defp enc(false, _), do: "false"
+  defp enc(n, _) when is_integer(n) and abs(n) <= @safe, do: Integer.to_string(n)
 
-  defp enc(s) when is_binary(s) do
-    if String.valid?(s), do: [?", esc(s, s, 0, []), ?"], else: invalid(s)
+  defp enc(s, _) when is_binary(s) do
+    if String.valid?(s), do: [?", esc(s, s, 0, []), ?"], else: throw(:invalid)
   end
 
-  defp enc(l) when is_list(l), do: [?[, Enum.map_intersperse(l, ?,, &enc/1), ?]]
+  defp enc(v, @max_depth) when is_list(v) or is_map(v), do: throw(:invalid)
 
-  defp enc(m) when is_map(m) and not is_struct(m) do
+  defp enc(l, depth) when is_list(l),
+    do: [?[, Enum.map_intersperse(l, ?,, &enc(&1, depth + 1)), ?]]
+
+  defp enc(m, depth) when is_map(m) and not is_struct(m) do
     pairs =
       m
       |> Enum.sort()
       |> Enum.map_intersperse(?,, fn
-        {k, v} when is_binary(k) -> if ascii?(k), do: [enc(k), ?:, enc(v)], else: invalid(k)
-        {k, _} -> invalid(k)
+        {k, v} when is_binary(k) ->
+          if ascii?(k), do: [enc(k, depth), ?:, enc(v, depth + 1)], else: throw(:invalid)
+
+        _ ->
+          throw(:invalid)
       end)
 
     [?{, pairs, ?}]
   end
 
-  defp enc(other), do: invalid(other)
-
-  defp invalid(v), do: raise(ArgumentError, "not a canonical JSON value: #{inspect(v)}")
+  defp enc(_, _), do: throw(:invalid)
 
   # Same run-copying as the parser: literal bytes leave in one piece.
   defp esc(<<>>, run, n, acc), do: [acc | binary_part(run, 0, n)]

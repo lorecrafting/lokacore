@@ -9,16 +9,23 @@ defmodule Loka.Core.IdSource do
 
   @safe 9_007_199_254_740_991
 
-  @spec id(String.t(), String.t(), term()) :: {:ok, String.t()} | {:error, :invalid_ordinal}
-  def id(world_context_id, command_id, ordinal)
-      when is_binary(world_context_id) and is_binary(command_id) do
-    if is_integer(ordinal) and ordinal in 0..@safe,
-      do: {:ok, uuid(world_context_id, command_id, ordinal)},
-      else: {:error, :invalid_ordinal}
+  @doc """
+  `:invalid_id` unless both ids are binaries, `:invalid_ordinal` unless the ordinal is an
+  integer in `0..2^53-1`, `:invalid_canonical` if an id is not valid UTF-8.
+  """
+  @spec id(term(), term(), term()) ::
+          {:ok, String.t()} | {:error, :invalid_id | :invalid_ordinal | :invalid_canonical}
+  def id(world_context_id, command_id, ordinal) do
+    cond do
+      not (is_binary(world_context_id) and is_binary(command_id)) -> {:error, :invalid_id}
+      not (is_integer(ordinal) and ordinal in 0..@safe) -> {:error, :invalid_ordinal}
+      true -> uuid(Canonical.encode(["loka-id-v1", world_context_id, command_id, ordinal]))
+    end
   end
 
-  defp uuid(world_context_id, command_id, ordinal) do
-    json = Canonical.encode(["loka-id-v1", world_context_id, command_id, ordinal])
+  defp uuid({:error, _} = error), do: error
+
+  defp uuid({:ok, json}) do
     <<a::binary-6, v, b, r, c::binary-7, _::binary>> = :crypto.hash(:sha256, json)
     # Version 8 in byte 6's high nibble, RFC 9562 variant in byte 8's top bits.
     hex =
@@ -27,6 +34,6 @@ defmodule Loka.Core.IdSource do
       )
 
     <<p1::binary-8, p2::binary-4, p3::binary-4, p4::binary-4, p5::binary-12>> = hex
-    Enum.join([p1, p2, p3, p4, p5], "-")
+    {:ok, Enum.join([p1, p2, p3, p4, p5], "-")}
   end
 end

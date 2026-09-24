@@ -45,7 +45,7 @@ defmodule Loka.Core.PortableAbiTest do
   test "numeric-vectors: canonical" do
     for %{"input" => input, "expected" => expected} <- @vectors["canonical"] do
       assert {:ok, value} = Canonical.decode(input)
-      assert Canonical.encode(value) == expected
+      assert Canonical.encode(value) == {:ok, expected}
     end
   end
 
@@ -69,7 +69,8 @@ defmodule Loka.Core.PortableAbiTest do
 
   # Catches missing strictness the fixtures do not reach: lowercase surrogate-pair escapes,
   # lone low surrogates, raw control characters, negative range edge, leading zeros,
-  # non-ASCII keys, trailing data.
+  # non-ASCII keys, trailing data, missing colon, duplicates spelled with escapes, and
+  # a dropped short escape on input.
   test "decode edge cases" do
     assert Canonical.decode(~S(["😀",-9007199254740991])) == {:ok, ["😀", -9_007_199_254_740_991]}
 
@@ -80,11 +81,15 @@ defmodule Loka.Core.PortableAbiTest do
           "01",
           ~S({"é":1}),
           "[1]x",
+          ~S({"a":1,"\u0061":2}),
           "",
-          ~S({"a" 1})
+          ~S({"a",1})
         ] do
       assert Canonical.decode(text) == {:error, :invalid_json}, text
     end
+
+    assert Canonical.decode(nil) == {:error, :invalid_json}
+    assert Canonical.decode(~S("\b\f\n\r\t\"\\\/")) == {:ok, "\b\f\n\r\t\"\\/"}
   end
 
   # Catches wrong escapes (uppercase hex, \u0008 for \b, escaping / or non-ASCII) and key
@@ -100,36 +105,56 @@ defmodule Loka.Core.PortableAbiTest do
     }
 
     assert Canonical.encode(value) ==
-             ~S({"10":5,"9":4,"B":2,"a":3,"b":1,"s":"\u0001\u001f\b\t\n\f\r\"\\/) <> "\x7f幻\"}"
+             {:ok,
+              ~S({"10":5,"9":4,"B":2,"a":3,"b":1,"s":"\u0001\u001f\b\t\n\f\r\"\\/) <> "\x7f幻\"}"}
   end
 
   # Catches relying on map iteration order: Elixir maps over 32 keys are hash-ordered.
   test "encode sorts keys of large maps" do
     keys = for i <- 10..42, do: "k#{i}"
     expected = "{" <> Enum.map_join(keys, ",", &~s("#{&1}":0)) <> "}"
-    assert Canonical.encode(Map.new(keys, &{&1, 0})) == expected
+    assert Canonical.encode(Map.new(keys, &{&1, 0})) == {:ok, expected}
   end
 
   # Catches an encoder that silently emits floats, unsafe integers, invalid UTF-8 or bad keys.
   test "encode rejects values outside the profile" do
     for v <- [1.5, 9_007_199_254_740_992, <<0xFF>>, %{"é" => 1}, %{a: 1}, :atom] do
-      assert_raise ArgumentError, fn -> Canonical.encode(v) end
+      assert Canonical.encode(v) == {:error, :invalid_canonical}, inspect(v)
     end
+  end
+
+  # Catches a missing or off-by-one depth limit: without one, how deep a value may nest
+  # depends on the host's stack, and the two kernels disagree.
+  test "nesting is limited to 128 containers" do
+    nest = fn n -> String.duplicate("[", n) <> String.duplicate("]", n) end
+    assert {:ok, deepest} = Canonical.decode(nest.(128))
+    assert Canonical.encode(deepest) == {:ok, nest.(128)}
+    assert Canonical.decode(nest.(129)) == {:error, :invalid_json}
+    assert Canonical.encode([deepest]) == {:error, :invalid_canonical}
+    assert Canonical.encode(%{"a" => deepest}) == {:error, :invalid_canonical}
   end
 
   # Expected: printf '%s' '<canonical>' | shasum -a 256
   test "hash is lowercase SHA-256 of the canonical bytes" do
     # '{"a":"x","b":1}'
     assert Canonical.hash(%{"b" => 1, "a" => "x"}) ==
-             "cdab067e9f3beb32d1252cfd63e492592fecbf591b0d08cadb24bb17f3864246"
+             {:ok, "cdab067e9f3beb32d1252cfd63e492592fecbf591b0d08cadb24bb17f3864246"}
 
-    # '["é幻😀",-7]': 2-, 3- and 4-byte UTF-8
-    assert Canonical.hash(["é幻😀", -7]) ==
-             "6416a19771baa45dc6d75fa8729efce39f1f0168ee11e76808d86d2bdc6c1463"
+    # '["é幻😀𠀋",-7]': 2-, 3- and 4-byte UTF-8, above U+1FFFF too
+    assert Canonical.hash(["é幻😀𠀋", -7]) ==
+             {:ok, "6770c1e57b41f706835d6999cca3df572ac681152db03d185adf8916be83fed6"}
+
+    # 55 bytes: the largest message whose padding fits one block
+    assert Canonical.hash(String.duplicate("a", 53)) ==
+             {:ok, "2ae89a8121a3f9d2709899b414da4c60234316951093ce35f41ce954a09533f4"}
 
     # a 56-byte message: padding spills into a second block
     assert Canonical.hash(String.duplicate("a", 54)) ==
-             "9b68496ab8c784a9ed22d25a7e3aada1736d7097061bb3149f3d66f1e22ceeef"
+             {:ok, "9b68496ab8c784a9ed22d25a7e3aada1736d7097061bb3149f3d66f1e22ceeef"}
+
+    # 120 bytes: one whole block read in place, then a padded tail
+    assert Canonical.hash(String.duplicate("a", 118)) ==
+             {:ok, "decf5e51fc0969aa2a06512dde0d3521a7ecd297ea81212ca626a65d2d4a1716"}
   end
 
   test "checked integers overflow as a typed error" do
@@ -142,6 +167,18 @@ defmodule Loka.Core.PortableAbiTest do
     assert Int.divide(1, 0) == {:error, :division_by_zero}
   end
 
+  # Catches a crash (or a different code than TypeScript) on operands that are not safe
+  # integers, including the operand check running after the zero-divisor check.
+  test "unsafe operands are integer_overflow" do
+    for {a, b} <- [{9_007_199_254_740_992, 1}, {1, 1.5}, {true, 1}] do
+      for op <- [&Int.add/2, &Int.sub/2, &Int.mul/2, &Int.divide/2] do
+        assert op.(a, b) == {:error, :integer_overflow}, inspect({op, a, b})
+      end
+    end
+
+    assert Int.divide(1.5, 0) == {:error, :integer_overflow}
+  end
+
   # Catches the kernels diverging at the contract edge: a bad budget must be a typed
   # error (same code as TypeScript), not a crash or an immediate budget exhaustion.
   test "uniform rejects a bad draw budget" do
@@ -149,6 +186,12 @@ defmodule Loka.Core.PortableAbiTest do
       assert Rng.uniform([1, 2, 3, 4], 10, budget) == {:error, :invalid_rng_budget},
              inspect(budget)
     end
+  end
+
+  # Catches non-string ids crashing, or hashing to an id, instead of TypeScript's typed error.
+  test "IdSource rejects non-string ids" do
+    assert IdSource.id(1, "c-1", 0) == {:error, :invalid_id}
+    assert IdSource.id("w-1", nil, 0) == {:error, :invalid_id}
   end
 
   # Catches an unsafe ordinal crashing or hashing instead of the typed error TypeScript uses.

@@ -8,6 +8,8 @@ import { sha256Hex, utf8 } from './sha256.ts';
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 
 export const SAFE = 9007199254740991;
+/** Deepest container nesting the profile allows; one more is invalid_json / invalid_canonical. */
+export const MAX_DEPTH = 128;
 
 const invalid = (): never => {
   throw new KernelError('invalid_json');
@@ -20,128 +22,129 @@ const NON_ASCII = /[^\u0000-\u007f]/;
 
 /**
  * Parses JSON text. Rejects duplicate or non-ASCII keys, fractions, exponents, NaN and
- * Infinity, integers outside the safe range, lone surrogates and trailing data. `-0`
- * parses as 0. Throws KernelError('invalid_json').
+ * Infinity, integers outside the safe range, lone surrogates, nesting deeper than
+ * MAX_DEPTH and trailing data. `-0` parses as 0. Throws KernelError('invalid_json').
  */
 export function decode(text: string): Json {
-  let i = 0;
-  const ws = (): void => {
-    while (text[i] === ' ' || text[i] === '\t' || text[i] === '\n' || text[i] === '\r') i++;
-  };
-  const hex4 = (): number => {
-    const h = text.slice(i, i + 4);
-    if (!/^[0-9a-fA-F]{4}$/.test(h)) invalid();
-    i += 4;
-    return parseInt(h, 16);
-  };
-  const string = (): string => {
-    i++;
-    const parts: string[] = [];
-    let run = i;
-    for (;;) {
-      const c = text.charCodeAt(i);
-      if (c === 0x22) break;
-      if (!(c >= 0x20)) invalid(); // controls, and NaN past the end
-      if (c === 0x5c) {
-        parts.push(text.slice(run, i));
-        const e = text[i + 1];
-        i += 2;
-        if (e === '"' || e === '\\' || e === '/') parts.push(e);
-        else if (e === 'b') parts.push('\b');
-        else if (e === 'f') parts.push('\f');
-        else if (e === 'n') parts.push('\n');
-        else if (e === 'r') parts.push('\r');
-        else if (e === 't') parts.push('\t');
-        else if (e === 'u') {
-          const hi = hex4();
-          if (isHigh(hi) && text[i] === '\\' && text[i + 1] === 'u') {
-            i += 2;
-            const lo = hex4();
-            if (!isLow(lo)) invalid();
-            parts.push(String.fromCharCode(hi, lo));
-          } else if (isSurrogate(hi)) invalid();
-          else parts.push(String.fromCharCode(hi));
-        } else invalid();
-        run = i;
-      } else if (isSurrogate(c)) {
-        if (!isHigh(c) || !isLow(text.charCodeAt(i + 1))) invalid();
-        i += 2;
-      } else i++;
+  if (typeof text !== 'string') invalid();
+  const p: Parser = { s: text, i: 0 };
+  const v = value(p, 0);
+  ws(p);
+  if (p.i !== text.length) invalid();
+  return v;
+}
+
+// Cursor over the text. `depth` counts the containers already open around a value.
+type Parser = { s: string; i: number };
+
+function ws(p: Parser): void {
+  for (let c = p.s[p.i]; c === ' ' || c === '\t' || c === '\n' || c === '\r'; c = p.s[++p.i]);
+}
+
+function value(p: Parser, depth: number): Json {
+  ws(p);
+  const c = p.s[p.i];
+  if ((c === '{' || c === '[') && depth === MAX_DEPTH) invalid();
+  if (c === '{') return object(p, depth + 1);
+  if (c === '[') return array(p, depth + 1);
+  if (c === '"') return string(p);
+  for (const [word, v] of LITERALS) {
+    if (p.s.startsWith(word, p.i)) {
+      p.i += word.length;
+      return v;
     }
-    parts.push(text.slice(run, i));
-    i++;
-    return parts.join('');
-  };
-  const number = (): number => {
-    const start = i;
-    if (text[i] === '-') i++;
-    if (text[i] === '0') i++;
-    else if (text[i] >= '1' && text[i] <= '9') while (text[i] >= '0' && text[i] <= '9') i++;
-    else invalid();
-    // A fraction or exponent is left as trailing data, which every caller rejects. Above
-    // 2^53 - 1 the double may round, but only to a value that is still out of range.
-    const n = Number(text.slice(start, i));
-    if (Math.abs(n) > SAFE) invalid();
-    return n + 0; // -0 becomes 0
-  };
-  const value = (): Json => {
-    ws();
-    const c = text[i];
-    if (c === '{') {
-      i++;
-      const o: { [key: string]: Json } = Object.create(null);
-      ws();
-      if (text[i] === '}') {
-        i++;
-        return o;
-      }
-      for (;;) {
-        ws();
-        if (text[i] !== '"') invalid();
-        const k = string();
-        if (NON_ASCII.test(k) || Object.hasOwn(o, k)) invalid();
-        ws();
-        if (text[i] !== ':') invalid();
-        i++;
-        o[k] = value();
-        ws();
-        if (text[i++] === '}') return o;
-        if (text[i - 1] !== ',') invalid();
-      }
-    }
-    if (c === '[') {
-      i++;
-      const a: Json[] = [];
-      ws();
-      if (text[i] === ']') {
-        i++;
-        return a;
-      }
-      for (;;) {
-        a.push(value());
-        ws();
-        if (text[i++] === ']') return a;
-        if (text[i - 1] !== ',') invalid();
-      }
-    }
-    if (c === '"') return string();
-    for (const [word, v] of LITERALS) {
-      if (text.startsWith(word, i)) {
-        i += word.length;
-        return v;
-      }
-    }
-    return number();
-  };
-  try {
-    const v = value();
-    ws();
-    if (i !== text.length) invalid();
-    return v;
-  } catch (e) {
-    if (e instanceof RangeError) invalid(); // stack exhaustion on absurd nesting
-    throw e;
   }
+  return number(p);
+}
+
+// Both containers: `{` or `[` at p.i, then members until `close`.
+function members(p: Parser, close: string, member: () => void): void {
+  p.i++;
+  ws(p);
+  if (p.s[p.i] === close) {
+    p.i++;
+    return;
+  }
+  for (;;) {
+    member();
+    ws(p);
+    const c = p.s[p.i++];
+    if (c === close) return;
+    if (c !== ',') invalid();
+  }
+}
+
+function object(p: Parser, depth: number): Json {
+  const o: { [key: string]: Json } = Object.create(null);
+  members(p, '}', () => {
+    ws(p);
+    if (p.s[p.i] !== '"') invalid();
+    const k = string(p); // duplicates are detected after escape decoding
+    if (NON_ASCII.test(k) || Object.hasOwn(o, k)) invalid();
+    ws(p);
+    if (p.s[p.i++] !== ':') invalid();
+    o[k] = value(p, depth);
+  });
+  return o;
+}
+
+function array(p: Parser, depth: number): Json {
+  const a: Json[] = [];
+  members(p, ']', () => a.push(value(p, depth)));
+  return a;
+}
+
+// Literal runs are copied with one slice at the next escape or the closing quote.
+function string(p: Parser): string {
+  const parts: string[] = [];
+  let run = ++p.i;
+  for (;;) {
+    const c = p.s.charCodeAt(p.i);
+    if (c === 0x22) break;
+    if (!(c >= 0x20)) invalid(); // controls, and NaN past the end
+    if (c === 0x5c) {
+      parts.push(p.s.slice(run, p.i), escape(p));
+      run = p.i;
+    } else if (isSurrogate(c)) {
+      if (!isHigh(c) || !isLow(p.s.charCodeAt(p.i + 1))) invalid();
+      p.i += 2;
+    } else p.i++;
+  }
+  parts.push(p.s.slice(run, p.i++));
+  return parts.join('');
+}
+
+const ESCAPES: { [e: string]: string } = { '"': '"', '\\': '\\', '/': '/', b: '\b', f: '\f', n: '\n', r: '\r', t: '\t' };
+
+// `\` at p.i; returns the decoded character(s) and leaves p.i after the escape.
+function escape(p: Parser): string {
+  const e = p.s[p.i + 1];
+  p.i += 2;
+  if (e !== 'u') return Object.hasOwn(ESCAPES, e) ? ESCAPES[e] : invalid();
+  const hi = hex4(p);
+  if (isHigh(hi) && p.s.startsWith('\\u', p.i)) {
+    p.i += 2;
+    const lo = hex4(p);
+    return isLow(lo) ? String.fromCharCode(hi, lo) : invalid();
+  }
+  return isSurrogate(hi) ? invalid() : String.fromCharCode(hi);
+}
+
+function hex4(p: Parser): number {
+  const h = p.s.slice(p.i, (p.i += 4));
+  return /^[0-9a-fA-F]{4}$/.test(h) ? parseInt(h, 16) : invalid();
+}
+
+// A fraction or exponent is left as trailing data, which every caller rejects. Above
+// 2^53 - 1 the double may round, but only to a value that is still out of range.
+function number(p: Parser): number {
+  const start = p.i;
+  if (p.s[p.i] === '-') p.i++;
+  if (p.s[p.i] === '0') p.i++;
+  else if (p.s[p.i] >= '1' && p.s[p.i] <= '9') while (p.s[p.i] >= '0' && p.s[p.i] <= '9') p.i++;
+  else invalid();
+  const n = Number(p.s.slice(start, p.i));
+  return Math.abs(n) <= SAFE ? n + 0 : invalid(); // -0 becomes 0
 }
 
 const LITERALS: [string, Json][] = [
@@ -153,7 +156,7 @@ const LITERALS: [string, Json][] = [
 /** Canonical text: sorted keys, no whitespace. Throws KernelError('invalid_canonical') outside the profile. */
 export function encode(value: Json): string {
   const out: string[] = [];
-  write(value, out);
+  write(value, out, 0);
   return out.join('');
 }
 
@@ -166,32 +169,33 @@ const notCanonical = (): never => {
   throw new KernelError('invalid_canonical');
 };
 
-function write(v: Json, out: string[]): void {
+function write(v: Json, out: string[], depth: number): void {
   if (v === null || v === true || v === false) out.push(String(v));
   else if (typeof v === 'number') {
     if (!Number.isInteger(v) || Math.abs(v) > SAFE) notCanonical();
     out.push(String(v + 0));
   } else if (typeof v === 'string') quote(v, out);
+  else if (typeof v !== 'object' || depth === MAX_DEPTH) notCanonical();
   else if (Array.isArray(v)) {
     out.push('[');
-    v.forEach((x, n) => {
+    for (let n = 0; n < v.length; n++) {
       if (n) out.push(',');
-      write(x, out);
-    });
+      write(v[n], out, depth + 1);
+    }
     out.push(']');
-  } else if (typeof v === 'object') {
+  } else {
     // ASCII keys only, so the default UTF-16 sort is ordinal order.
     const keys = Object.keys(v).sort();
     out.push('{');
-    keys.forEach((k, n) => {
-      if (NON_ASCII.test(k)) notCanonical();
+    for (let n = 0; n < keys.length; n++) {
+      if (NON_ASCII.test(keys[n])) notCanonical();
       if (n) out.push(',');
-      quote(k, out);
+      quote(keys[n], out);
       out.push(':');
-      write(v[k], out);
-    });
+      write(v[keys[n]], out, depth + 1);
+    }
     out.push('}');
-  } else notCanonical();
+  }
 }
 
 const SHORT: { [c: number]: string } = { 0x22: '\\"', 0x5c: '\\\\', 0x08: '\\b', 0x09: '\\t', 0x0a: '\\n', 0x0c: '\\f', 0x0d: '\\r' };
