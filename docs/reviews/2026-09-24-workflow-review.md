@@ -103,3 +103,50 @@ Review stance.
 `/ponytail-review` comes from a user plugin (`ponytail:ponytail-review`) and is not in the
 repository. That is fine for the owner's machine, and other agents already have the
 by-hand fallback. Naming the plugin once avoids a failed Skill call.
+
+---
+
+## Re-review of fix commit `e5120f9` (scoped to the fixes)
+
+Checked each disposition and the text each fix touched, plus the new Codex note. Not
+reopened: anything else.
+
+| Finding | Disposition | Result |
+|---|---|---|
+| F1 | developers always in their own worktree; PM names the branch without checking it out; reviewer mutates in a detached worktree; `pull --rebase` before fixes, no force-push | Partly fixed; see R1 |
+| F2 | mock examples are the network and a device; storage faults are real | Fixed (`AGENTS.md:146-147`) |
+| F3 | AGENTS.md defers to the workflow's definition of design judgment; `model: "fable"` passed at spawn; PM model is the owner's choice | Fixed; no contradiction left |
+| N1 | developer owns opening the PR | Fixed |
+| N2 | fallbacks for an unregistered agent type and for a PM restart | Fixed |
+| N3 | depth scaling moved into Review stance; reviewer.md skips mutation testing on docs and config slices | Fixed |
+| N4 | plugin skill named | Fixed |
+
+### R1 (should-fix): the review record's commit location is unstated
+
+`docs/WORKFLOW.md:57-61`. The main checkout "stays with the PM", which normally means
+`main`, and the only worktree the reviewer is told to create is the throwaway one for
+mutations, which it removes. Scenario: the reviewer commits its record in the main
+checkout, onto local `main`, then runs `git push origin HEAD:<branch>`. The push is
+rejected as non-fast-forward because `main` is not a descendant of the PR branch. The
+record commit also stays on local `main`, and the next push of `main` sends it there.
+Fix, one line: the reviewer commits the record in a detached worktree at `origin/<branch>`
+(`git fetch` first; this can be the same worktree, reset after the mutations) and pushes
+`HEAD:<branch>` from there.
+
+### R2 (nit): a fresh worktree has no dependencies
+
+Every developer and every mutation run now starts in a new worktree without `deps/`,
+`_build/` or `node_modules`. The check line fails loudly rather than silently, but the
+Git hygiene section could say to run `mix deps.get` / `npm ci` there first.
+
+### Question: a reviewer from another vendor
+
+`docs/WORKFLOW.md:5-7` calls a reviewer from another vendor (Codex) "a welcome source of
+independence". The owner ruling quoted at `AGENTS.md:196-197` lists fresh Fable or fresh
+Opus agents as qualifying. If the owner has agreed to other vendors, record that in the
+ruling; otherwise the new note goes beyond it.
+
+### Re-review verdict: APPROVE WITH NOTES
+
+F2, F3 and N1 to N4 are closed. R1 is a one-line fix and needs no further review round.
+R2 and the question are for the owner to decide.
