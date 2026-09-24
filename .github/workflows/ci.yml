@@ -70,3 +70,19 @@ jobs:
           out=$(ast-grep scan --error 2>&1 || true)
           echo "$out"
           grep -q elixir-kernel-pure <<<"$out" && grep -q ts-kernel-pure <<<"$out"
+
+  typescript:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: mobile/app
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '24.21.0'
+      - run: npm ci --no-audit --no-fund
+      - run: npx tsc --noEmit
