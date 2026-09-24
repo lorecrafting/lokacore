@@ -118,14 +118,14 @@ at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
 
 ## Checks (CI runs all of them; each has a planted case that must fail)
 
-- `boundary` (strict, every app): dependency directions from spec document 02 §1 are a
-  compile error. Declared in each app's top module (`apps/*/lib/loka_*.ex`).
+- `boundary` (strict, every boundary): dependency directions from spec document 02 §1 are a
+  compile error. Declared in each boundary's top module (`lib/loka/*.ex`, `lib/loka_web.ex`).
 - `mix xref graph --format cycles --fail-above 0` and
   `mix xref graph --label compile-connected --fail-above 0`: zero cycles, zero
   compile-connected edges. When a compile edge is justified, replace the zero with a
   reviewed allowed list.
 - `ast-grep test` and `ast-grep scan --error` (`sgconfig.yml`, `lint/`): the Elixir kernel
-  (`apps/loka_core/lib`) and the TypeScript kernel (`mobile/packages/kernel/src`) stay
+  (`lib/loka/core`) and the TypeScript kernel (`mobile/packages/kernel/src`) stay
   pure. Every rule has valid and invalid cases in `lint/tests/`.
 - `elixir bin/red_controls.exs`: plants a boundary violation, a cycle and a compile edge,
   and requires each check to fail.

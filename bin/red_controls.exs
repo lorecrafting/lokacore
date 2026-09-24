@@ -6,36 +6,55 @@
 root = Path.expand("..", __DIR__)
 
 controls = [
-  {"boundary: web reaches store through platform",
-   %{"apps/loka_web/lib/red_control.ex" =>
-       "defmodule LokaWeb.RedControl do\n  def x, do: LokaStore.__info__(:module)\nend\n"},
-   ~w(compile --warnings-as-errors --force), "forbidden reference to LokaStore"},
+  {"boundary: web reaches store (only platform may)",
+   %{
+     "lib/loka_web/red_control.ex" =>
+       "defmodule LokaWeb.RedControl do\n  def x, do: Loka.Store.__info__(:module)\nend\n"
+   }, ~w(compile --warnings-as-errors --force), "forbidden reference to Loka.Store"},
+  {"boundary: core reaches runtime",
+   %{
+     "lib/loka/core/red_control.ex" =>
+       "defmodule Loka.Core.RedControl do\n  def x, do: Loka.Runtime.__info__(:module)\nend\n"
+   }, ~w(compile --warnings-as-errors --force), "forbidden reference to Loka.Runtime"},
+  {"boundary: core calls an undeclared external app",
+   %{
+     "lib/loka/core/red_control.ex" =>
+       "defmodule Loka.Core.RedControl do\n  def x, do: Logger.flush()\nend\n"
+   }, ~w(compile --warnings-as-errors --force), "forbidden reference to Logger"},
   {"xref: dependency cycle",
-   %{"apps/loka_content/lib/red_control_a.ex" =>
-       "defmodule LokaContent.RedA do\n  def a, do: LokaContent.RedB.b()\nend\n",
-     "apps/loka_content/lib/red_control_b.ex" =>
-       "defmodule LokaContent.RedB do\n  def b, do: LokaContent.RedA.a()\nend\n"},
-   ~w(xref graph --format cycles --fail-above 0), "Too many cycles"},
+   %{
+     "lib/loka/content/red_control_a.ex" =>
+       "defmodule Loka.Content.RedA do\n  def a, do: Loka.Content.RedB.b()\nend\n",
+     "lib/loka/content/red_control_b.ex" =>
+       "defmodule Loka.Content.RedB do\n  def b, do: Loka.Content.RedA.a()\nend\n"
+   }, ~w(xref graph --format cycles --fail-above 0), "Too many cycles"},
   {"xref: compile-connected edge",
-   %{"apps/loka_content/lib/red_control_a.ex" =>
-       "defmodule LokaContent.RedA do\n  def a, do: LokaContent.RedC.c()\nend\n",
-     "apps/loka_content/lib/red_control_b.ex" =>
-       "defmodule LokaContent.RedB do\n  @x LokaContent.RedA.a()\n  def b, do: @x\nend\n",
-     "apps/loka_content/lib/red_control_c.ex" =>
-       "defmodule LokaContent.RedC do\n  def c, do: :ok\nend\n"},
-   ~w(xref graph --label compile-connected --fail-above 0), "Too many references"}
+   %{
+     "lib/loka/content/red_control_x.ex" =>
+       "defmodule Loka.Content.RedX do\n  def a, do: Loka.Content.RedZ.c()\nend\n",
+     "lib/loka/content/red_control_y.ex" =>
+       "defmodule Loka.Content.RedY do\n  @x Loka.Content.RedX.a()\n  def b, do: @x\nend\n",
+     "lib/loka/content/red_control_z.ex" =>
+       "defmodule Loka.Content.RedZ do\n  def c, do: :ok\nend\n"
+   }, ~w(xref graph --label compile-connected --fail-above 0), "Too many references"}
 ]
 
 failures =
   for {name, files, args, expected} <- controls, reduce: 0 do
     acc ->
-      paths = Enum.map(files, fn {rel, body} -> tap(Path.join(root, rel), &File.write!(&1, body)) end)
+      paths =
+        Enum.map(files, fn {rel, body} ->
+          path = Path.join(root, rel)
+          File.mkdir_p!(Path.dirname(path))
+          tap(path, &File.write!(&1, body))
+        end)
 
       {out, status} =
         try do
           System.cmd("mix", args, cd: root, stderr_to_stdout: true)
         after
           Enum.each(paths, &File.rm!/1)
+          Enum.each(paths, &File.rmdir(Path.dirname(&1)))
         end
 
       if status != 0 and String.contains?(out, expected) do

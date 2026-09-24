@@ -1,4 +1,4 @@
-defmodule LokaCore do
+defmodule Loka.Core do
   @moduledoc """
   Pure domain types, rules and capability contracts. No Phoenix, Ecto, filesystem, network or processes.
 

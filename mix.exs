@@ -3,19 +3,23 @@ defmodule Loka.MixProject do
 
   def project do
     [
-      apps_path: "apps",
+      app: :loka,
       version: "0.1.0",
+      elixir: "~> 1.20",
       start_permanent: Mix.env() == :prod,
+      compilers: [:boundary | Mix.compilers()],
+      boundary: [default: [type: :strict]],
       deps: deps()
     ]
   end
 
-  # Dependencies listed here are available only for this
-  # project and cannot be accessed from applications inside
-  # the apps folder.
-  #
-  # Run "mix help deps" for examples and options.
+  def application do
+    [extra_applications: [:logger]]
+  end
+
   defp deps do
-    []
+    [
+      {:boundary, "~> 0.11.0", runtime: false}
+    ]
   end
 end

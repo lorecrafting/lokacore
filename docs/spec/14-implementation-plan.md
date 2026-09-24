@@ -225,13 +225,8 @@ Create a clean repository with enforced boundaries and CI.
 Suggested shape:
 
 ```text
-apps/loka_core
-apps/loka_content
-apps/loka_store
-apps/loka_platform
-apps/loka_runtime
-apps/loka_builder
-apps/loka_web
+lib/loka/{core,content,store,platform,runtime,builder}
+lib/loka_web
 portable/                 # shared portable implementation only if selected by R1
 mobile/app
 mobile/features/story
@@ -247,7 +242,7 @@ docs/
 
 ### Tasks
 
-- Mix umbrella;
+- one Mix application with strict compile-checked boundaries (amended 2026-09-24 by [proposed ADR-073](../decisions/adr-073-single-app.md); previously a Mix umbrella);
 - strict compile/dependency boundaries;
 - Rust workspace if accepted;
 - one minimal Expo app with strict Story/Realm feature and authority-module boundaries, plus shared UI/GameView packages;

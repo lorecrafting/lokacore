@@ -62,3 +62,11 @@ jobs:
       - run: npm install --global @ast-grep/cli@0.45.3
       - run: ast-grep test --skip-snapshot-tests
       - run: ast-grep scan --error
+      - name: Red control, rules cover the real kernel paths
+        run: |
+          mkdir -p lib/loka/core mobile/packages/kernel/src
+          echo 'defmodule Loka.Core.Red do def x, do: File.read!("x") end' > lib/loka/core/red.ex
+          echo 'export const t = Date.now();' > mobile/packages/kernel/src/red.ts
+          out=$(ast-grep scan --error 2>&1 || true)
+          echo "$out"
+          grep -q elixir-kernel-pure <<<"$out" && grep -q ts-kernel-pure <<<"$out"

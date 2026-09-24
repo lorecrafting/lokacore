@@ -30,17 +30,17 @@ Account/progress service arrives at R12A; gameplay hosting at R14. Review owners
 
 ## 1. Proposed repository shape
 
-Use a Mix umbrella to make dependency direction mechanically obvious.
+Use one Mix application (`:loka`) whose top-level namespaces are compile-checked boundaries (the `boundary` library in strict mode) to make dependency direction mechanically obvious. *(Amended 2026-09-24 by [proposed ADR-073](../decisions/adr-073-single-app.md); previously a Mix umbrella.)* In the rules below, `loka_core` means the `Loka.Core` boundary, and likewise `Loka.Content`, `Loka.Store`, `Loka.Platform`, `Loka.Runtime`, `Loka.Builder` and `LokaWeb`.
 
 ```text
 loka/
-├── apps/
-│   ├── loka_core/       # pure domain types/rules/capability contracts
-│   ├── loka_content/    # cartridge parsing/compiler/definition registry
-│   ├── loka_store/      # Ecto/PostgreSQL persistence adapters
-│   ├── loka_platform/   # accounts, catalog, entitlements, purchase/restore services
-│   ├── loka_runtime/    # OTP world/session/scheduling authority
-│   ├── loka_builder/    # workspaces, Builder API, lab, certification
+├── lib/
+│   ├── loka/core/       # pure domain types/rules/capability contracts
+│   ├── loka/content/    # cartridge parsing/compiler/definition registry
+│   ├── loka/store/      # Ecto/PostgreSQL persistence adapters
+│   ├── loka/platform/   # accounts, catalog, entitlements, purchase/restore services
+│   ├── loka/runtime/    # OTP world/session/scheduling authority
+│   ├── loka/builder/    # workspaces, Builder API, lab, certification
 │   └── loka_web/        # Phoenix HTTP/channels/admin/MCP adapter
 ├── kernel/              # portable rules implementation (language and boundary selected by R1)
 ├── mobile/              # React Native / Expo + local authority/persistence
@@ -67,7 +67,7 @@ This exact split MAY be adjusted after a compile-dependency spike, but dependenc
 
 `loka_web` MUST NOT become a source of game or commerce truth.
 
-Boundary enforcement SHOULD use separate umbrella apps plus compile-time boundary checks/tests.
+Boundary enforcement MUST use compile-time boundary checks (strict `boundary`), each rule with a planted violation that must fail.
 
 ## 2. Supervision topology
 

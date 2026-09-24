@@ -4,5 +4,5 @@ defmodule LokaWeb do
 
   Dependency rules: spec document 02 §1.
   """
-  use Boundary, deps: [LokaCore, LokaPlatform, LokaRuntime, LokaBuilder], exports: []
+  use Boundary, deps: [Loka.Core, Loka.Platform, Loka.Runtime, Loka.Builder], exports: []
 end
