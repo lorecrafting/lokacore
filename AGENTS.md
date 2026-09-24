@@ -66,6 +66,15 @@ at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
 - Record the AGP version with the root `./gradlew buildEnvironment`, not
   `:app:buildEnvironment` (AGP sits on the root buildscript classpath).
 
+**Mobile builds (measured 2026-09-24, minimal Expo 57 app, arm64 release)**
+- M1 Air: Android clean 78 s with warm download caches (first ever, with NDK download,
+  346 s); JS change with a warm Gradle daemon 9 s. iOS `pod install` 23 s, clean
+  `xcodebuild` 50 s, JS change 9 s. GitHub CI Android, uncached: Gradle 349 s, job 6 min 15 s.
+  Iterate on the M1; CI builds are clean-build proof, not the edit loop.
+- `pod install` writes React Native codegen into `ios/build/generated`. Never
+  `rm -rf ios/build` or use it as `-derivedDataPath`; rerun `pod install` if it is gone.
+- zsh does not word-split `$VAR`: wrap repeated commands in `function name { ...; }`.
+
 **Physical-device runs**
 - The owner can connect only one phone at a time. Batch all work per phone; ask for a
   swap only when needed.
