@@ -1,0 +1,12 @@
+#!/bin/sh
+# Fast checks on the staged files. Activate once per clone: git config core.hooksPath .githooks
+# Each staged file is checked as it is on disk, so a partly staged file is checked whole.
+set -e
+command -v mise >/dev/null || { echo "mise not found: install it (see mise.toml)"; exit 1; }
+IFS='
+'
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+ex=$(printf '%s\n' "$staged" | grep -E '\.exs?$' || true)
+[ -z "$ex" ] || mise exec -- mix format --check-formatted $ex || { echo "run: mise exec -- mix format"; exit 1; }
+[ -z "$staged" ] || mise exec -- ast-grep scan --error $staged
+if git diff --cached --name-only | grep -q '\.md$'; then mise exec -- elixir bin/check_docs.exs; fi

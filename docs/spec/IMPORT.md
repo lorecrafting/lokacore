@@ -35,6 +35,9 @@ The table below describes the files as imported. Later amendments are in git his
 
 - 2026-09-24, [proposed ADR-073](../decisions/adr-073-single-app.md): documents 02 §1 and
   14 §R2, one Mix application instead of an umbrella; 14's shape names `kernel/ts/`.
+- 2026-09-24, R3 PR 1: [conformance/numeric-profile.md](conformance/numeric-profile.md)
+  frozen as `loka-numeric-v1` (owner-approved 2026-09-24), adding the parse, encode,
+  depth, hash, budget, error-code and IdSource rules. No fixture JSON changed.
 
 ## Link rewrites (the only byte changes at import)
 

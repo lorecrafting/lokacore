@@ -5,6 +5,7 @@ valid:
   - "def f(x), do: Filesystem.ok(x)"
   - "def g(xs), do: Enum.map(xs, &(&1 + 1))"
   - "def h(state), do: state.self"
+  - "def sha(x), do: :crypto.hash(:sha256, x)"
 invalid:
   - "def load, do: File.read!(\"world.json\")"
   - "alias File, as: F"
@@ -15,6 +16,9 @@ invalid:
   - "def env, do: System.get_env(\"X\")"
   - "def t, do: :erlang.monotonic_time()"
   - "def r, do: :crypto.strong_rand_bytes(4)"
+  - "def r1, do: :crypto.hash(:sha256)"
+  - "def r2, do: :crypto.hash(:sha256, :crypto.strong_rand_bytes(4))"
+  - "def r4(x), do: :crypto.hash(:sha256, x, 1)"
   - "def e, do: Enum.random([1, 2])"
   - "def s, do: send(self(), :x)"
   - "def p, do: spawn(fn -> :ok end)"
