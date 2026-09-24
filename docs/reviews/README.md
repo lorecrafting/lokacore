@@ -16,4 +16,4 @@ Each record is written by a fresh agent that authored none of the reviewed work 
   `99b9b37`, APPROVE WITH NOTES (full review, contract freeze); re-review of the fixes at
   `e258bff`, APPROVE WITH NOTES (one test-gap should-fix; freeze owner-approved in `eb6dd03`).
 - [2026-09-24 lessons split](2026-09-24-lessons-split-review.md): PR #8 at `9bbd478`,
-  APPROVE WITH NOTES (docs-only, short review; privacy rule should stay in AGENTS.md).
+  APPROVE WITH NOTES (docs-only, short review); re-review of the fixes at `9ab9094`, APPROVE.

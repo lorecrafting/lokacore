@@ -49,3 +49,22 @@
    covers it.
 5. **nit** `docs/lessons/mobile.md:29`. The zsh word-splitting lesson applies to any shell work,
    not just mobile builds.
+
+## Re-review of fix commit `9ab9094`
+
+Scope: that commit only. Verdict: **APPROVE**.
+
+- Finding 1 (privacy rule): resolved. The bullet is back in AGENTS.md under **All work**,
+  unchanged, including the `redact()` sentence, and removed from `evidence.md`.
+- Finding 2 (WORKFLOW step 7): resolved. Step 7 now records a lesson in its `docs/lessons/` file,
+  and in AGENTS.md only if it applies to all work, which matches the rule in AGENTS.md.
+- Nit 3: resolved. "Nothing invented; unknowns stay null." moved to **All work**. The rest of that
+  evidence bullet keeps its original wording. The performance-variant bullet is now under
+  **Performance**, unchanged.
+- Nit 4: resolved. `storage.md` now links to the mobile lessons for expo-sqlite, and the link
+  resolves.
+- Nit 5: resolved. The zsh bullet is now under **All work**, unchanged.
+- Verbatim: every relocated sentence matches the text removed from its old file character for
+  character. Nothing was dropped.
+- `elixir bin/check_docs.exs`: 62 docs, 0 broken links, 0 unreachable, exit 0 (word budget
+  included).
