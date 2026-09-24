@@ -34,6 +34,8 @@ jobs:
       - run: mix xref graph --format cycles --fail-above 0
       - run: mix xref graph --label compile-connected --fail-above 0
       - run: mix test
+      - run: mix credo --strict
+      - run: elixir bin/check_size.exs
       - run: elixir bin/red_controls.exs
       - run: elixir bin/check_docs.exs
 
@@ -69,6 +71,10 @@ jobs:
       - run: npx tsc --noEmit
       - run: npm ci --no-audit --no-fund && npm run typecheck && npm test
         working-directory: kernel/ts
+      - run: node bin/check_ts_size.mjs
+        working-directory: .
+      - run: bin/ts_size_red_controls.sh
+        working-directory: .
       - name: Red control, host and Node APIs are type errors in the kernel
         working-directory: kernel/ts
         run: ../../bin/kernel_red_controls.sh
