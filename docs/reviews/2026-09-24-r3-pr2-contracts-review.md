@@ -192,3 +192,77 @@ Not findings, recorded for the fix round and later slices:
    the registry would put registry-specific logic in a generic schema loader and make the
    schema file lie about its own content; generating the registry from the enum has nowhere
    to put category and description. Keep both with the test; no generator.
+
+## Cross-vendor review (Astra), relayed verbatim by the owner
+
+Reviewed commit `324015c`, independently of the review above. The PM checked findings A2–A4 against the code before forwarding them. A1 duplicates F1, which is already fixed in `99b0ba4`.
+
+```text
+ASTRA REVIEW
+PR: lorecrafting/lokacore#9
+Commit: 324015cd99de200440d0e0fbcf13c97a7baef246
+Verdict: CHANGES REQUIRED
+
+Requirements derived before reading the diff:
+R1. Shared contracts must have one language-neutral, machine-readable source under protocol/, from which Elixir validation and TypeScript types are generated or checked; independently maintained portable catalogs are forbidden (04 §12, §21; 14 Gate R3).
+R2. This slice must establish constitutional identity, scope and error contracts without prematurely implementing higher-level feature schemas, Builder operations or Realm transport; use the least code that correctly satisfies those obligations (14 R3A, R3B, Gate R3; AGENTS.md, Simplicity).
+R3. DefinitionRef must identify an immutable cartridge release plus definition kind/key, support qualified identity without a global content-key namespace, and remain distinct from UUID-based runtime entity identity (03 §2–3; 05 §4).
+R4. Logical world/context, mutation-authority domain, shard placement and Realm identities must have distinct nominal contracts; logical identity must not silently become a fencing or routing token (03 §6; 14 R3A).
+R5. StateScope must explicitly distinguish player, party, instance and realm and require the corresponding identity; an omitted identity must never default to realm/global scope (03 §6).
+R6. AudiencePolicy must remain independent of state ownership and authority placement; its eventual consumers must enforce visibility and interaction admission, not merely hide UI elements (03 §6).
+R7. Errors must have stable machine-readable codes, with human-readable/localized presentation separate from the code and with a machine-readable diagnostic/error registry (04 §7; 14 R3A).
+R8. Semantic Command identity must be derived/reused from trusted logical idempotency scope and invocation identity, remain stable through reconnect and authority handoff, and exclude ephemeral host metadata (04 §3, §21).
+R9. Both kernels must preserve the frozen canonical profile: safe integers distinct from booleans, rejection of fractional/exponent input syntax, scalar Unicode, ASCII decoded object keys, duplicate-key rejection, deterministic ordering and the specified parsing/encoding errors (conformance/numeric-profile.md).
+R10. Tests must use independently specified expected answers and exercise behavior rather than source text; realistic mutations and planted violations must actually make the relevant checks fail (AGENTS.md, Writing tests).
+
+Findings:
+A1 [should-fix] lib/loka/core/contracts/schema.ex:108
+   Defect: Pattern admission checks only PCRE compatibility, so the supposedly portable subset accepts patterns that either crash the TypeScript validator or produce different validation results.
+   Failure scenario: Add {"$defs":{"P":{"type":"string","pattern":"\\Aa\\z","examples":["a"]}}}; the subset checker accepts this PCRE pattern and Elixir accepts "a", but kernel/ts/src/validate.ts:67 constructs /\Aa\z/u and throws SyntaxError instead of returning validation errors.
+   A second case shows that checking compilation in both engines would not be sufficient: {"type":"string","pattern":"^.$"} accepts a carriage-return string under the Elixir validator's PCRE options, while TypeScript returns [{"path":"","code":"pattern_mismatch"}].
+   Suggested fix: Enforce a small explicitly portable pattern grammar, rejecting PCRE-only constructs and constructs with differing character semantics, and add literal cross-kernel regression cases for both failures.
+
+A2 [should-fix] bin/contracts.exs:58
+   Defect: Embedding canonical JSON directly as JavaScript object-literal source does not preserve JSON semantics for "__proto__" keys.
+   Failure scenario: Define a closed object contract P with properties {"__proto__":{"type":"string"}} and examples [{}]; this is admitted by the subset checker, but the generated properties object treats "__proto__" as a prototype setter rather than an own property.
+   For the input obtained from JSON.parse('{"__proto__":"ok"}'), Elixir recognizes the declared property and accepts the value, whereas TypeScript reports [{"path":"/__proto__","code":"unknown_property"}].
+   The empty example still validates, and the textual drift check cannot detect that the generated JavaScript changed the schema's meaning.
+   Suggested fix: Emit the schema data through JSON.parse of an appropriately quoted canonical JSON string, or another representation that preserves every key as an own data property, and add this exact regression case.
+
+A3 [should-fix] bin/contracts.exs:32
+   Defect: The generator inserts accepted JSON property names into TypeScript declarations without quoting them.
+   Failure scenario: A closed object contract declaring and requiring the ASCII property "a/b~c" passes Schema.flatten!/1, but generation produces a member such as "readonly a/b~c: string", which is invalid TypeScript and fails typechecking.
+   This is not an unsupported schema keyword or invalid canonical key; it is a property name accepted by the current toolchain.
+   Suggested fix: Emit the property name using the existing Gen.lit/1 helper instead of raw interpolation, and test generation/typechecking with a punctuation-bearing property name.
+
+A4 [should-fix] lint/rules/elixir-kernel-pure.yml:14
+   Defect: The new File exemption covers every descendant of a module attribute, including File references that escape into runtime execution rather than performing a compile-time read.
+   Failure scenario: A kernel module containing "@reader &File.read!/1" followed by "def read(path), do: @reader.(path)" passes this rule because its only File alias is beneath the exempt @ expression, but calling read/1 performs filesystem I/O at runtime.
+   The existing direct-call invalid cases do not exercise this escape.
+   Suggested fix: Narrow the exemption so module values and remote function captures cannot escape through attributes, and add this capture-and-invoke example as a planted purity violation.
+
+Questions (no concrete failure scenario yet):
+AQ1 kernel/ts/src/validate.ts:34
+   Is successful canonical decoding an enforced precondition of value-level validation, or must validate also accept arbitrary values from ordinary JSON decoders?
+   This distinction matters: ordinary decoding of {"n":1.0} gives TypeScript an integer-valued number that passes SubsetProbe, while Elixir's ordinary decoder preserves a float that contracts.ex:118 rejects; TypeScript's string predicate at validate.ts:33 also accepts lone-surrogate strings.
+   These inputs are outside the frozen canonical profile, so I am not presenting them as a demonstrated bypass of the existing strict parser.
+   The boundary should be explicit and tested: raw 1.0, 1e0 and duplicate keys must be rejected before their distinguishing information is lost, rather than expecting a value validator to reconstruct it after JSON.parse.
+
+AQ2 lib/loka/core/contracts.ex:36
+   The current Elixir interface validates ordinary values and returns :ok rather than a nominally typed identity; the PR explicitly defers structs to PR 3.
+   Before those contracts acquire server-side consumers, will the Elixir representation preserve the WorldContextId/AuthorityDomainId/ZoneShardId distinctions rather than reducing them to interchangeable binary aliases?
+   The named schemas and TypeScript brands reserve the intended distinctions here; I have not identified an existing consumer that mixes them up in this commit.
+
+Views on Q1-Q6:
+Q1: agree: A derived identity can still be represented as a lowercase UUID, so accepting different UUID versions is not itself inconsistent with 04 §3 or IdSource's v8 output. This validates representation, not provenance: the eventual Command constructor must derive/recover the same identity from logical scope and invocation identity, never mint another UUID on retry or include current authority placement in the derivation.
+
+Q2: agree: Lowercase segments bounded to 64 characters and plain MAJOR.MINOR.PATCH are reasonable explicit v1 restrictions, although those exact restrictions are implementation choices rather than requirements already stated by 03 §2 or 05 §4. The object and string forms now express matching segment bounds. No cited requirement justifies adding prerelease/build metadata support or unused parsing/formatting helpers to this slice.
+
+Q3: agree: A bounded list of character identities is a reasonable minimal representation for audience_set, and the cited spec does not require uniqueItems or a broader membership language. However, protocol/scope.schema.json:165 says members must not repeat while explicitly declining to enforce that promise. With duplicates deliberately tolerated, describe them as redundant membership rather than claiming a uniqueness invariant; consumers must not interpret repeated membership as permission to perform an action repeatedly.
+
+Q4: agree: world_context_id is the correct logical identity for instance-scoped state and audience membership. It avoids equating the instance with its current mutation owner, while the separate authority-domain and shard contracts preserve the distinction required by 03 §6. A second synonymous instance identifier would add no demonstrated value here.
+
+Q5: agree: Keeping GameError.data closed and empty is preferable to inventing unrestricted data fields before a code needs them. None of the cited requirements mandates a particular per-code payload in this slice. Introduce each code's typed data when its first consumer establishes the necessary fields; do not weaken additionalProperties merely to anticipate future errors.
+
+Q6: disagree: I would not keep two handwritten code lists as the settled design. Derive ErrorCode from the authoritative error_registry.json through the existing loading/generation path, rather than requiring every addition to update two sources. The equality assertion in test/loka/core/contracts_test.exs:36 is a meaningful guard and there is no demonstrated current mismatch, so this duplication alone is not a merge-blocking runtime defect; consolidation is a simplification, not a reason to introduce another registry framework.
+```
