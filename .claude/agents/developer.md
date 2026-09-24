@@ -18,10 +18,10 @@ Before handing off:
    questions by hand if skills are unavailable). Then break your own core logic once and
    confirm a test fails; if none does, the tests are not done. Fix or record a
    disposition for each finding.
-3. Commit (attribution lines per the session), push the branch, open the PR citing the
+3. Work in your own worktree (docs/WORKFLOW.md, Git hygiene). Commit (attribution lines per the session), push the branch, open the PR citing the
    spec sections and including the ponytail result. Do not merge.
 4. Reply with: what changed, check output summary, self-review findings with dispositions,
    open questions. Keep it short.
 
-When review findings arrive: fix each or dispute it with a concrete reason, rerun the
+When review findings arrive: `git pull --rebase` (the review record is on the branch; never force-push), then fix each or dispute it with a concrete reason, rerun the
 checks, push, and reply with one line per finding (`fixed <sha>` / `disputed: why`).
