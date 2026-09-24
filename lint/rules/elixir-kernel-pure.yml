@@ -10,7 +10,23 @@ rule:
     - kind: alias
       regex: (^|\.)Repo$
     - kind: atom
-      regex: ^:(rand|random|os|file|timer|ets|dets|erlang|crypto|persistent_term|calendar|gen_tcp|gen_udp|ssl|httpc|counters|atomics|global|mnesia|io|code)$
+      regex: ^:(rand|random|os|file|timer|ets|dets|erlang|persistent_term|calendar|gen_tcp|gen_udp|ssl|httpc|counters|atomics|global|mnesia|io|code)$
+    # :crypto also holds randomness; only :crypto.hash/2 (a pure digest) is allowed.
+    - kind: atom
+      regex: ^:crypto$
+      not:
+        inside:
+          kind: dot
+          field: left
+          has: { field: right, regex: ^hash$ }
+          inside:
+            kind: call
+            field: target
+            has:
+              kind: arguments
+              all:
+                - has: { nthChild: 2 }
+                - not: { has: { nthChild: 3 } }
     - kind: identifier
       regex: ^(self|send|spawn|spawn_link|spawn_monitor|make_ref|node|monitor|receive|apply)$
       inside:

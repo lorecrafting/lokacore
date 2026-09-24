@@ -1,0 +1,15 @@
+# Owner decisions for R3 — 2026-09-24
+
+Relayed verbatim by the coordinating assistant (Claude Code) from the owner's chat. No
+checker can verify these quotes against the chat.
+
+1. **IdSource** (spec 01 A8). Asked:
+   > IdSource: UUIDv8 from SHA-256 of canonical JSON ["loka-id-v1", world_context_id, command_id, ordinal]?
+
+   The owner answered:
+   > i'll go with your recommendation
+
+   Implemented in R3 PR 1: the two ids are strings and the ordinal is a non-negative safe
+   integer; take the first 16 bytes of the SHA-256 of the canonical encoding, set byte 6
+   to `(b & 0x0f) | 0x80` (version 8) and byte 8 to `(b & 0x3f) | 0x80` (RFC 9562
+   variant), and format as a lowercase hyphenated UUID.
