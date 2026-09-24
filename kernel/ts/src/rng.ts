@@ -42,7 +42,8 @@ export const next = (state: RngState): [number, RngState] => step(checked(state)
  * discards the whole decision.
  */
 export function uniform(state: RngState, bound: number, maxDraws: number): [number, RngState] {
-  if (!Number.isInteger(bound) || bound < 1 || bound > TWO32) throw new KernelError('invalid_bound');
+  if (!Number.isInteger(bound) || bound < 1 || bound > TWO32)
+    throw new KernelError('invalid_bound');
   if (!Number.isInteger(maxDraws) || maxDraws < 0) throw new KernelError('invalid_rng_budget');
   let s = checked(state);
   const limit = TWO32 - (TWO32 % bound);

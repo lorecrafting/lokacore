@@ -114,7 +114,16 @@ function string(p: Parser): string {
   return parts.join('');
 }
 
-const ESCAPES: { [e: string]: string } = { '"': '"', '\\': '\\', '/': '/', b: '\b', f: '\f', n: '\n', r: '\r', t: '\t' };
+const ESCAPES: { [e: string]: string } = {
+  '"': '"',
+  '\\': '\\',
+  '/': '/',
+  b: '\b',
+  f: '\f',
+  n: '\n',
+  r: '\r',
+  t: '\t',
+};
 
 // `\` at p.i; returns the decoded character(s) and leaves p.i after the escape.
 function escape(p: Parser): string {
@@ -198,7 +207,15 @@ function write(v: Json, out: string[], depth: number): void {
   }
 }
 
-const SHORT: { [c: number]: string } = { 0x22: '\\"', 0x5c: '\\\\', 0x08: '\\b', 0x09: '\\t', 0x0a: '\\n', 0x0c: '\\f', 0x0d: '\\r' };
+const SHORT: { [c: number]: string } = {
+  0x22: '\\"',
+  0x5c: '\\\\',
+  0x08: '\\b',
+  0x09: '\\t',
+  0x0a: '\\n',
+  0x0c: '\\f',
+  0x0d: '\\r',
+};
 
 function quote(s: string, out: string[]): void {
   out.push('"');

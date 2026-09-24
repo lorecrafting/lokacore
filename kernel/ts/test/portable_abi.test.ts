@@ -12,12 +12,19 @@ import { next, uniform } from '../src/rng.ts';
 function fixture(name: string, sha: string) {
   const bytes = readFileSync(new URL(`../../../docs/spec/conformance/${name}`, import.meta.url));
   const actual = createHash('sha256').update(bytes).digest('hex');
-  if (actual !== sha) throw new Error(`${name} hash ${actual}, expected ${sha} (docs/spec/IMPORT.md)`);
+  if (actual !== sha)
+    throw new Error(`${name} hash ${actual}, expected ${sha} (docs/spec/IMPORT.md)`);
   return JSON.parse(bytes.toString('utf8'));
 }
 
-const vectors = fixture('numeric-vectors.json', '85472ae4e7626ca7326b881766e21ae23dd253c82b5c9d4c8d0c86f89ee168c9');
-const adverse = fixture('adverse-cases.json', '1b699cf2ce71181a2b09a596ed2253c06caa435aad4b5eb8a8ea9601fbadf5b1');
+const vectors = fixture(
+  'numeric-vectors.json',
+  '85472ae4e7626ca7326b881766e21ae23dd253c82b5c9d4c8d0c86f89ee168c9',
+);
+const adverse = fixture(
+  'adverse-cases.json',
+  '1b699cf2ce71181a2b09a596ed2253c06caa435aad4b5eb8a8ea9601fbadf5b1',
+);
 
 const code = (c: string) => ({ code: c });
 
@@ -30,15 +37,18 @@ test('numeric-vectors: rng_steps from initial_rng', () => {
 });
 
 test('numeric-vectors: division', () => {
-  for (const { a, b, q, r } of vectors.division) assert.deepEqual(divide(a, b), [q, r], `${a} / ${b}`);
+  for (const { a, b, q, r } of vectors.division)
+    assert.deepEqual(divide(a, b), [q, r], `${a} / ${b}`);
 });
 
 test('numeric-vectors: invalid_json', () => {
-  for (const text of vectors.invalid_json) assert.throws(() => decode(text), code('invalid_json'), text);
+  for (const text of vectors.invalid_json)
+    assert.throws(() => decode(text), code('invalid_json'), text);
 });
 
 test('numeric-vectors: canonical', () => {
-  for (const { input, expected } of vectors.canonical) assert.equal(encode(decode(input)), expected);
+  for (const { input, expected } of vectors.canonical)
+    assert.equal(encode(decode(input)), expected);
 });
 
 test('adverse-cases: uniform', () => {
@@ -62,7 +72,20 @@ test('uniform accepts bound 2^32', () => {
 test('decode edge cases', () => {
   assert.deepEqual(decode('["\\ud83d\\ude00",-9007199254740991]'), ['😀', -9007199254740991]);
   assert.equal(encode(decode('{"__proto__":1}')), '{"__proto__":1}');
-  for (const text of ['["\\udc00"]', '["\ud800a"]', '["\x01"]', '-9007199254740992', '01', '{"é":1}', '[1]x', '{"a":1,"\\u0061":2}', '[1 2]', '{"a":1 "b":2}', '', '{"a",1}']) {
+  for (const text of [
+    '["\\udc00"]',
+    '["\ud800a"]',
+    '["\x01"]',
+    '-9007199254740992',
+    '01',
+    '{"é":1}',
+    '[1]x',
+    '{"a":1,"\\u0061":2}',
+    '[1 2]',
+    '{"a":1 "b":2}',
+    '',
+    '{"a",1}',
+  ]) {
     assert.throws(() => decode(text), code('invalid_json'), text);
   }
   assert.throws(() => decode(null as never), code('invalid_json'));
@@ -73,7 +96,10 @@ test('decode edge cases', () => {
 // order that is not ordinal (JS enumerates integer-like keys first, numerically).
 test('encode escapes and key order', () => {
   const value = { b: 1, B: 2, a: 3, 9: 4, 10: 5, s: '\x01\x1f\b\t\n\f\r"\\/\x7f幻' };
-  assert.equal(encode(value), '{"10":5,"9":4,"B":2,"a":3,"b":1,"s":"\\u0001\\u001f\\b\\t\\n\\f\\r\\"\\\\/\x7f幻"}');
+  assert.equal(
+    encode(value),
+    '{"10":5,"9":4,"B":2,"a":3,"b":1,"s":"\\u0001\\u001f\\b\\t\\n\\f\\r\\"\\\\/\x7f幻"}',
+  );
 });
 
 // Catches an encoder that silently emits floats, unsafe integers, lone surrogates or bad keys.
@@ -97,15 +123,30 @@ test('nesting is limited to 128 containers', () => {
 // Expected: printf '%s' '<canonical>' | shasum -a 256
 test('hash is lowercase SHA-256 of the canonical bytes', () => {
   // '{"a":"x","b":1}'
-  assert.equal(hash({ b: 1, a: 'x' }), 'cdab067e9f3beb32d1252cfd63e492592fecbf591b0d08cadb24bb17f3864246');
+  assert.equal(
+    hash({ b: 1, a: 'x' }),
+    'cdab067e9f3beb32d1252cfd63e492592fecbf591b0d08cadb24bb17f3864246',
+  );
   // '["é幻😀𠀋",-7]': 2-, 3- and 4-byte UTF-8, above U+1FFFF too
-  assert.equal(hash(['é幻😀𠀋', -7]), '6770c1e57b41f706835d6999cca3df572ac681152db03d185adf8916be83fed6');
+  assert.equal(
+    hash(['é幻😀𠀋', -7]),
+    '6770c1e57b41f706835d6999cca3df572ac681152db03d185adf8916be83fed6',
+  );
   // 55 bytes: the largest message whose padding fits one block
-  assert.equal(hash('a'.repeat(53)), '2ae89a8121a3f9d2709899b414da4c60234316951093ce35f41ce954a09533f4');
+  assert.equal(
+    hash('a'.repeat(53)),
+    '2ae89a8121a3f9d2709899b414da4c60234316951093ce35f41ce954a09533f4',
+  );
   // a 56-byte message: padding spills into a second block
-  assert.equal(hash('a'.repeat(54)), '9b68496ab8c784a9ed22d25a7e3aada1736d7097061bb3149f3d66f1e22ceeef');
+  assert.equal(
+    hash('a'.repeat(54)),
+    '9b68496ab8c784a9ed22d25a7e3aada1736d7097061bb3149f3d66f1e22ceeef',
+  );
   // 120 bytes: one whole block read in place, then a padded tail
-  assert.equal(hash('a'.repeat(118)), 'decf5e51fc0969aa2a06512dde0d3521a7ecd297ea81212ca626a65d2d4a1716');
+  assert.equal(
+    hash('a'.repeat(118)),
+    'decf5e51fc0969aa2a06512dde0d3521a7ecd297ea81212ca626a65d2d4a1716',
+  );
 });
 
 // mul(94906266, 94906266) is 9007199326062756 exactly: a check that lost precision, or
@@ -125,7 +166,11 @@ test('checked integers overflow as a typed error', () => {
 // Elixir returns, not a silent 'rng_budget_exhausted' (NaN or negative skips the loop).
 test('uniform rejects a bad draw budget', () => {
   for (const budget of [-1, 1.5, NaN, true]) {
-    assert.throws(() => uniform([1, 2, 3, 4], 10, budget as never), code('invalid_rng_budget'), String(budget));
+    assert.throws(
+      () => uniform([1, 2, 3, 4], 10, budget as never),
+      code('invalid_rng_budget'),
+      String(budget),
+    );
   }
 });
 
@@ -138,9 +183,17 @@ test('IdSource rejects non-string ids', () => {
 // Catches operands that are not safe integers slipping through, or the zero-divisor check
 // running first (Elixir checks operands first, so both kernels must).
 test('unsafe operands are integer_overflow', () => {
-  for (const [a, b] of [[9007199254740992, 1], [1, 1.5], [true, 1]]) {
+  for (const [a, b] of [
+    [9007199254740992, 1],
+    [1, 1.5],
+    [true, 1],
+  ]) {
     for (const op of [add, sub, mul, divide]) {
-      assert.throws(() => op(a as never, b as never), code('integer_overflow'), `${op.name}(${a}, ${b})`);
+      assert.throws(
+        () => op(a as never, b as never),
+        code('integer_overflow'),
+        `${op.name}(${a}, ${b})`,
+      );
     }
   }
   assert.throws(() => divide(1.5, 0), code('integer_overflow'));
