@@ -88,3 +88,23 @@ dispositions.
 
 The developer force-pushed once with `--force-with-lease` before the PR existed. This is
 recorded as a process note, not a finding.
+
+## Re-review of the fixes (scoped): `7c0c4a9`, `7e05205`
+
+Verdict: **APPROVE**.
+
+- **N1, fixed in `7c0c4a9`.** The Prettier line in AGENTS.md now says "run from the repo
+  root; `.prettierignore` only applies there". This is the documentation fix N1
+  suggested; no config-only fix exists (see N1).
+- **N2, fixed in `7c0c4a9`.** Both `git diff` calls in pre-commit now use
+  `-c core.quotePath=false`. I re-ran the case:
+  - A staged misformatted `mobile/app/café.ts` blocks the commit with
+    `[warn] mobile/app/café.ts`, and HEAD does not move.
+  - The formatted file commits, and `ast-grep` now gets the real file name instead of
+    the quoted one.
+  - A staged `docs/ré.md` with a broken link is now caught by `check_docs`, and the
+    commit is blocked.
+- **`7e05205`.** It adds one line to `.claude/agents/developer.md`: no `--no-verify` and
+  no force-push, `--force-with-lease` included, without the owner's OK. The line is
+  consistent with AGENTS.md (Working rules) and with WORKFLOW.md step 5. Its
+  `--no-verify` half repeats AGENTS.md, and it was added at the PM's request.
