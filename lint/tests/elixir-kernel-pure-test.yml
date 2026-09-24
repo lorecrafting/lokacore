@@ -6,9 +6,13 @@ valid:
   - "def g(xs), do: Enum.map(xs, &(&1 + 1))"
   - "def h(state), do: state.self"
   - "def sha(x), do: :crypto.hash(:sha256, x)"
+  - "@schema File.read!(\"protocol/a.json\")"
+  - "@schemas Map.new(paths, &{&1, File.read!(&1)})"
 invalid:
   - "def load, do: File.read!(\"world.json\")"
   - "alias File, as: F"
+  - "def load(p), do: @x || File.read!(p)"
+  - "def f, do: [@x, File.exists?(\"y\")]"
   - "def now, do: DateTime.utc_now()"
   - "def roll, do: :rand.uniform(6)"
   - "def save(x), do: Loka.Repo.insert(x)"

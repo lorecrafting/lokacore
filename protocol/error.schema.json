@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Error contracts",
+  "description": "The one error registry and GameError (04 §7; frozen ABI codes: docs/spec/conformance/numeric-profile.md).",
+  "$defs": {
+    "ErrorCode": {
+      "description": "A stable machine error code (04 §7). Exactly the codes in protocol/error_registry.json, which gives each one's category and description; unknown codes are invalid.",
+      "enum": [
+        "not_found",
+        "not_present",
+        "not_owned",
+        "permission_denied",
+        "invalid_target",
+        "invalid_state",
+        "stale_view",
+        "stale_revision",
+        "insufficient_resource",
+        "exit_locked",
+        "quest_requirement",
+        "cooldown",
+        "rate_limited",
+        "unsupported_capability",
+        "invalid_json",
+        "invalid_canonical",
+        "integer_overflow",
+        "division_by_zero",
+        "invalid_bound",
+        "invalid_rng_budget",
+        "invalid_rng_state",
+        "rng_budget_exhausted",
+        "invalid_id",
+        "invalid_ordinal",
+        "unknown_contract",
+        "invalid_type",
+        "missing_property",
+        "unknown_property",
+        "not_in_enum",
+        "const_mismatch",
+        "unknown_variant",
+        "below_minimum",
+        "above_maximum",
+        "pattern_mismatch",
+        "too_short",
+        "too_long",
+        "too_few_items",
+        "too_many_items"
+      ],
+      "examples": [
+        "not_found",
+        "invalid_json",
+        "missing_property"
+      ]
+    },
+    "GameError": {
+      "description": "A typed error: stable code plus structured data, never English text to parse (04 §7). data is empty until a code needs fields; each such code then declares them.",
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        "data": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "code",
+        "data"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "code": "exit_locked",
+          "data": {}
+        }
+      ]
+    },
+    "ErrorRegistryEntry": {
+      "description": "One entry of protocol/error_registry.json (04 §7): gameplay rejections, and ABI or contract-validation failures (numeric-profile.md, protocol/).",
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        "category": {
+          "enum": [
+            "gameplay_rejection",
+            "abi_validation"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "code",
+        "category",
+        "description"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "code": "not_found",
+          "category": "gameplay_rejection",
+          "description": "The referenced thing does not exist (04 §7)."
+        }
+      ]
+    }
+  }
+}

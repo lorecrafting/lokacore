@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Identity contracts",
+  "description": "Definition identity and runtime identities (03 §2, §3, §6; 05 §4). Each id is its own named type; the types are not interchangeable (03 §6).",
+  "$defs": {
+    "DefinitionRef": {
+      "description": "Globally stable, immutable reference to a content definition (03 §2; 05 §4: no global content-key namespace). cartridge_id, kind and key are lowercase snake_case of at most 64 characters; cartridge_version is MAJOR.MINOR.PATCH without leading zeros, pre-release or build metadata.",
+      "type": "object",
+      "properties": {
+        "cartridge_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "maxLength": 64
+        },
+        "cartridge_version": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+          "maxLength": 64
+        },
+        "kind": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "maxLength": 64
+        },
+        "key": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "cartridge_id",
+        "cartridge_version",
+        "kind",
+        "key"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "cartridge_id": "fox_spirit_of_yunmeng",
+          "cartridge_version": "1.2.0",
+          "kind": "npc",
+          "key": "old_ferryman"
+        }
+      ]
+    },
+    "DefinitionRefString": {
+      "description": "Canonical string form of a DefinitionRef, cartridge_id@cartridge_version:kind/key (03 §2, 05 §4), with the same segment rules.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*@(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):[a-z][a-z0-9_]*/[a-z][a-z0-9_]*$",
+      "maxLength": 256,
+      "examples": [
+        "fox_spirit_of_yunmeng@1.2.0:npc/old_ferryman",
+        "fox_spirit_of_yunmeng@1.2.0:room/ferry_dock"
+      ]
+    },
+    "WorldContextId": {
+      "description": "Logical world/context identity: the simulation, save or deployment context in which state exists (03 §6, 'Logical world identity is not mutation-owner placement'). Never a fencing, owner or shard token. Lowercase hyphenated UUID, any version.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "examples": [
+        "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+      ]
+    },
+    "AuthorityDomainId": {
+      "description": "The current serialized mutation-ownership domain (03 §6). Distinct from WorldContextId: one logical world can hold many authority domains. Lowercase hyphenated UUID, any version.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "examples": [
+        "7a1c2e3f-4b5d-4e6f-8a9b-0c1d2e3f4a5b"
+      ]
+    },
+    "ZoneShardId": {
+      "description": "One Realm placement/routing identity for an authority domain (03 §6). Player and party scope are not permanently owned by it. Lowercase hyphenated UUID, any version.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "examples": [
+        "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e"
+      ]
+    },
+    "RealmId": {
+      "description": "The broader persistent Realm identity (03 §6); the id of realm StateScope. Lowercase hyphenated UUID, any version.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "examples": [
+        "c3d4e5f6-a7b8-4c9d-8e0f-2a3b4c5d6e7f"
+      ]
+    },
+    "EntityId": {
+      "description": "Runtime entity identity (03 §3). Two entities from one DefinitionRef have different EntityIds. Lowercase hyphenated UUID, any version.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "examples": [
+        "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+      ]
+    },
+    "CommandId": {
+      "description": "Stable semantic Command id (04 §3), derived from the logical idempotency scope and the InvocationId; stable when the AuthorityDomainId changes (03 §6). Lowercase hyphenated UUID, any version.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "examples": [
+        "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b"
+      ]
+    },
+    "InvocationId": {
+      "description": "Client-visible stable retry identity of one ActionInvocation (04 §1, §2). Lowercase hyphenated UUID, any version.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "examples": [
+        "f6a7b8c9-d0e1-4f2a-8b3c-5d6e7f8a9b0c"
+      ]
+    },
+    "CharacterId": {
+      "description": "A character (02 §4); the id of player StateScope and player AudiencePolicy (03 §6). Lowercase hyphenated UUID, any version.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "examples": [
+        "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+      ]
+    },
+    "PartyId": {
+      "description": "A party; the id of party StateScope and party AudiencePolicy (03 §6). Lowercase hyphenated UUID, any version.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "examples": [
+        "18293a4b-5c6d-4e7f-8091-a2b3c4d5e6f7"
+      ]
+    }
+  }
+}

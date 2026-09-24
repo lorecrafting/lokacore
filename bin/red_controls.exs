@@ -10,19 +10,19 @@ controls = [
    %{
      "lib/loka_web/red_control.ex" =>
        "defmodule LokaWeb.RedControl do\n  def x, do: Loka.Store.__info__(:module)\nend\n"
-   }, ~w(compile --warnings-as-errors --force), "forbidden reference to Loka.Store"},
+   }, ~w(mix compile --warnings-as-errors --force), "forbidden reference to Loka.Store"},
   {"boundary: core calls an undeclared external app",
    %{
      "lib/loka/core/red_control.ex" =>
        "defmodule Loka.Core.RedControl do\n  def x, do: Logger.flush()\nend\n"
-   }, ~w(compile --warnings-as-errors --force), "forbidden reference to Logger"},
+   }, ~w(mix compile --warnings-as-errors --force), "forbidden reference to Logger"},
   {"xref: dependency cycle",
    %{
      "lib/loka/content/red_control_a.ex" =>
        "defmodule Loka.Content.RedA do\n  def a, do: Loka.Content.RedB.b()\nend\n",
      "lib/loka/content/red_control_b.ex" =>
        "defmodule Loka.Content.RedB do\n  def b, do: Loka.Content.RedA.a()\nend\n"
-   }, ~w(xref graph --format cycles --fail-above 0), "Too many cycles"},
+   }, ~w(mix xref graph --format cycles --fail-above 0), "Too many cycles"},
   {"xref: compile-connected edge",
    %{
      "lib/loka/content/red_control_x.ex" =>
@@ -31,11 +31,24 @@ controls = [
        "defmodule Loka.Content.RedY do\n  @x Loka.Content.RedX.a()\n  def b, do: @x\nend\n",
      "lib/loka/content/red_control_z.ex" =>
        "defmodule Loka.Content.RedZ do\n  def c, do: :ok\nend\n"
-   }, ~w(xref graph --label compile-connected --fail-above 0), "Too many references"}
+   }, ~w(mix xref graph --label compile-connected --fail-above 0), "Too many references"},
+  {"contracts: schema changed without regenerating the TypeScript",
+   %{"protocol/red_control.schema.json" => ~s({"$defs": {"RedControl": {"type": "null"}}})},
+   ~w(elixir bin/contracts.exs --check), "contracts.gen.ts is out of date"},
+  {"contracts: unsupported keyword fails compilation",
+   %{
+     "protocol/red_control.schema.json" =>
+       ~s({"$defs": {"RedControl": {"type": "string", "format": "uuid"}}})
+   }, ~w(mix compile --warnings-as-errors --force), "unsupported keyword format"},
+  {"contracts: unsupported keyword fails generation",
+   %{
+     "protocol/red_control.schema.json" =>
+       ~s({"$defs": {"RedControl": {"type": "string", "format": "uuid"}}})
+   }, ~w(elixir bin/contracts.exs --check), "unsupported keyword format"}
 ]
 
 failures =
-  for {name, files, args, expected} <- controls, reduce: 0 do
+  for {name, files, [cmd | args], expected} <- controls, reduce: 0 do
     acc ->
       paths =
         Enum.map(files, fn {rel, body} ->
@@ -46,7 +59,7 @@ failures =
 
       {out, status} =
         try do
-          System.cmd("mix", args, cd: root, stderr_to_stdout: true)
+          System.cmd(cmd, args, cd: root, stderr_to_stdout: true)
         after
           Enum.each(paths, &File.rm!/1)
           Enum.each(paths, &File.rmdir(Path.dirname(&1)))

@@ -6,7 +6,15 @@ files: [lib/loka/core.ex, lib/loka/core/**]
 rule:
   any:
     - kind: alias
-      regex: ^(Elixir\.)?(File|IO|System|Process|Port|Node|Task|Agent|GenServer|Supervisor|DynamicSupervisor|Registry|Application|Date|Time|DateTime|NaiveDateTime|Calendar|Ecto|Phoenix|Logger)(\.|$)
+      regex: ^(Elixir\.)?(IO|System|Process|Port|Node|Task|Agent|GenServer|Supervisor|DynamicSupervisor|Registry|Application|Date|Time|DateTime|NaiveDateTime|Calendar|Ecto|Phoenix|Logger)(\.|$)
+    # File only inside a module-attribute definition (`@x File.read!(...)`): a compile-time read.
+    - kind: alias
+      regex: ^(Elixir\.)?File(\.|$)
+      not:
+        inside:
+          kind: unary_operator
+          regex: ^@
+          stopBy: end
     - kind: alias
       regex: (^|\.)Repo$
     - kind: atom

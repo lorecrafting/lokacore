@@ -1,0 +1,192 @@
+[
+  {
+    "code": "not_found",
+    "category": "gameplay_rejection",
+    "description": "The referenced thing does not exist (04 \u00a77)."
+  },
+  {
+    "code": "not_present",
+    "category": "gameplay_rejection",
+    "description": "The thing exists but is not here (04 \u00a77)."
+  },
+  {
+    "code": "not_owned",
+    "category": "gameplay_rejection",
+    "description": "The actor does not own or hold the thing (04 \u00a77)."
+  },
+  {
+    "code": "permission_denied",
+    "category": "gameplay_rejection",
+    "description": "The actor may not do this (04 \u00a77)."
+  },
+  {
+    "code": "invalid_target",
+    "category": "gameplay_rejection",
+    "description": "The target cannot receive this action (04 \u00a77)."
+  },
+  {
+    "code": "invalid_state",
+    "category": "gameplay_rejection",
+    "description": "The world state does not allow this now (04 \u00a77)."
+  },
+  {
+    "code": "stale_view",
+    "category": "gameplay_rejection",
+    "description": "The command was built from an outdated view (04 \u00a77, \u00a716)."
+  },
+  {
+    "code": "stale_revision",
+    "category": "gameplay_rejection",
+    "description": "The expected authority revision no longer matches (04 \u00a77)."
+  },
+  {
+    "code": "insufficient_resource",
+    "category": "gameplay_rejection",
+    "description": "Not enough of a required resource (04 \u00a77)."
+  },
+  {
+    "code": "exit_locked",
+    "category": "gameplay_rejection",
+    "description": "The exit is locked (04 \u00a77)."
+  },
+  {
+    "code": "quest_requirement",
+    "category": "gameplay_rejection",
+    "description": "A quest requirement is not met (04 \u00a77)."
+  },
+  {
+    "code": "cooldown",
+    "category": "gameplay_rejection",
+    "description": "The action is cooling down (04 \u00a77)."
+  },
+  {
+    "code": "rate_limited",
+    "category": "gameplay_rejection",
+    "description": "Too many requests (04 \u00a77)."
+  },
+  {
+    "code": "unsupported_capability",
+    "category": "gameplay_rejection",
+    "description": "The capability is not supported here (04 \u00a77)."
+  },
+  {
+    "code": "invalid_json",
+    "category": "abi_validation",
+    "description": "Parse: input outside the canonical JSON profile (numeric-profile.md)."
+  },
+  {
+    "code": "invalid_canonical",
+    "category": "abi_validation",
+    "description": "Encode, hash, IdSource: a value outside the canonical profile (numeric-profile.md)."
+  },
+  {
+    "code": "integer_overflow",
+    "category": "abi_validation",
+    "description": "Integer operand or result outside the safe range (numeric-profile.md)."
+  },
+  {
+    "code": "division_by_zero",
+    "category": "abi_validation",
+    "description": "Division by zero (numeric-profile.md)."
+  },
+  {
+    "code": "invalid_bound",
+    "category": "abi_validation",
+    "description": "RNG uniform: invalid bound (numeric-profile.md)."
+  },
+  {
+    "code": "invalid_rng_budget",
+    "category": "abi_validation",
+    "description": "RNG uniform: max_draws is not a non-negative integer (numeric-profile.md)."
+  },
+  {
+    "code": "invalid_rng_state",
+    "category": "abi_validation",
+    "description": "RNG: not four integers in 0..2^32-1, or all zero (numeric-profile.md)."
+  },
+  {
+    "code": "rng_budget_exhausted",
+    "category": "abi_validation",
+    "description": "RNG uniform: no draw accepted within max_draws (numeric-profile.md)."
+  },
+  {
+    "code": "invalid_id",
+    "category": "abi_validation",
+    "description": "IdSource: an id that is not a string (numeric-profile.md)."
+  },
+  {
+    "code": "invalid_ordinal",
+    "category": "abi_validation",
+    "description": "IdSource: an ordinal that is not an integer in 0..2^53-1 (numeric-profile.md)."
+  },
+  {
+    "code": "unknown_contract",
+    "category": "abi_validation",
+    "description": "Contract validation: no contract has this name."
+  },
+  {
+    "code": "invalid_type",
+    "category": "abi_validation",
+    "description": "Contract validation: the value has the wrong JSON type; integers must be safe integers."
+  },
+  {
+    "code": "missing_property",
+    "category": "abi_validation",
+    "description": "Contract validation: a required property is absent (path names the property)."
+  },
+  {
+    "code": "unknown_property",
+    "category": "abi_validation",
+    "description": "Contract validation: a property the contract does not declare (path names the property)."
+  },
+  {
+    "code": "not_in_enum",
+    "category": "abi_validation",
+    "description": "Contract validation: the value is not one of the enumerated values."
+  },
+  {
+    "code": "const_mismatch",
+    "category": "abi_validation",
+    "description": "Contract validation: the value differs from the required constant."
+  },
+  {
+    "code": "unknown_variant",
+    "category": "abi_validation",
+    "description": "Contract validation: the discriminator matches no oneOf branch (path names the discriminator)."
+  },
+  {
+    "code": "below_minimum",
+    "category": "abi_validation",
+    "description": "Contract validation: integer below minimum."
+  },
+  {
+    "code": "above_maximum",
+    "category": "abi_validation",
+    "description": "Contract validation: integer above maximum."
+  },
+  {
+    "code": "pattern_mismatch",
+    "category": "abi_validation",
+    "description": "Contract validation: string does not match the pattern."
+  },
+  {
+    "code": "too_short",
+    "category": "abi_validation",
+    "description": "Contract validation: string shorter than minLength code points."
+  },
+  {
+    "code": "too_long",
+    "category": "abi_validation",
+    "description": "Contract validation: string longer than maxLength code points."
+  },
+  {
+    "code": "too_few_items",
+    "category": "abi_validation",
+    "description": "Contract validation: array shorter than minItems."
+  },
+  {
+    "code": "too_many_items",
+    "category": "abi_validation",
+    "description": "Contract validation: array longer than maxItems."
+  }
+]

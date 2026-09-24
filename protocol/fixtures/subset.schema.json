@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Test-only probe for subset keywords no protocol/ contract uses yet (integer, boolean, null, const outside oneOf, minimum, maximum, minLength). Read by the validator tests; not a contract.",
+  "$defs": {
+    "SubsetProbe": {
+      "type": "object",
+      "properties": {
+        "n": {
+          "type": "integer",
+          "minimum": -1,
+          "maximum": 1
+        },
+        "big": {
+          "type": "integer"
+        },
+        "flag": {
+          "type": "boolean"
+        },
+        "nothing": {
+          "type": "null"
+        },
+        "fixed": {
+          "type": "string",
+          "const": "x"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 2
+          }
+        }
+      },
+      "additionalProperties": false,
+      "examples": [
+        {
+          "n": -1,
+          "big": -9007199254740991,
+          "flag": false,
+          "nothing": null,
+          "fixed": "x",
+          "tags": [
+            "ab"
+          ]
+        },
+        {
+          "n": 1,
+          "big": 9007199254740991
+        },
+        {}
+      ]
+    }
+  }
+}

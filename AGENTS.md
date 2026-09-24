@@ -182,8 +182,10 @@ A test exists to catch a specific break. Adapted from
   violation at each rule's real path and requires the scan to report it.
 - TypeScript: `npx tsc --noEmit` in `mobile/app` (covers all of `mobile/`) and
   `npm run typecheck && npm test` in `kernel/ts` (Node's built-in test runner).
-- `elixir bin/red_controls.exs`: plants a boundary violation, a cycle, a compile edge and
-  an oversized AGENTS.md, and requires each check to fail.
+- `elixir bin/contracts.exs --check`: `kernel/ts/src/contracts.gen.ts` matches the
+  `protocol/` schemas (run without `--check` to regenerate).
+- `elixir bin/red_controls.exs`: plants a boundary violation, a cycle, a compile edge, a
+  stale and an out-of-subset schema and an oversized AGENTS.md, and requires each check to fail.
 - `elixir bin/check_docs.exs`: links resolve; every doc is reachable; AGENTS.md stays
   within its word budget (it is loaded by every agent, every session).
 - CI: pull requests and pushes to main, superseded runs cancelled. Planned: native mobile
