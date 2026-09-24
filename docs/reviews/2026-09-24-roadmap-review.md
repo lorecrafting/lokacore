@@ -84,3 +84,28 @@
 
 No over-engineering: one page plus one record, with links instead of copied gate text,
 except as noted in findings 1 and 4.
+
+## Re-review of `f564fa7` (fix commit, scoped)
+
+Verdict: **APPROVE**. I checked only `git show f564fa7`. `check_docs`: 55 docs, 0 broken,
+0 unreachable, and AGENTS.md is within its word budget (1,960 words). `check_docs` does not
+check anchors, so I checked the two new anchors against GitHub's slug rules by hand:
+`#r3--contractschema-foundation` and `#r6--offline-authority-and-save-system` both resolve.
+
+1. Seed target: fixed. The roadmap now links the envelope instead of giving numbers.
+   `AGENTS.md:185-186` now matches the envelope (at least 10,000 fresh sequences on every
+   fast CI run). It still restates the number with a filename citation. That is
+   acceptable in a checks summary, but it is not a link.
+2. Approval scope: fixed. The roadmap names what the owner approved and labels the slice
+   counts and estimate as PM planning.
+3. Fixtures: fixed. The reviewed known-answer fixtures are stated as authoritative, with
+   the reason.
+4. R3 coverage: fixed. Document 14 §R3A/§R3B and Gate R3 are the linked checklist. Policy
+   AST, TargetResolution, relations/provenance, the residency matrix and generated docs
+   are now assigned to PRs 3 and 4.
+5. R6 nit: fixed. The row links 14 §R6 and names the fake synchronization adapter.
+6. Owner-record nit: fixed. The header separates the verbatim answers from the
+   assistant's summaries. The IdSource filename stays in backticks until R3 PR 1 merges,
+   as the finding allowed.
+
+No new issues in the touched lines.
