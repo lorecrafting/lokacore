@@ -182,8 +182,8 @@ A test exists to catch a specific break. Adapted from
 - `elixir bin/check_docs.exs`: links resolve; every doc is reachable; AGENTS.md stays
   within its word budget (it is loaded by every agent, every session).
 - CI: pull requests and pushes to main, superseded runs cancelled. Planned: native mobile
-  builds only when mobile code changes or on manual trigger; the full 10,000-sequence
-  differential runs nightly.
+  builds only when mobile code changes or on manual trigger; the differential runs
+  at least 10,000 fresh sequences on every fast CI run (r1-acceptance-envelope.md).
 
 Run everything locally: `bin/check_all.sh` (what pre-push runs).
 

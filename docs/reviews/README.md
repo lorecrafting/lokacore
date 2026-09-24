@@ -10,3 +10,5 @@ Each record is written by a fresh agent that authored none of the reviewed work 
   APPROVE WITH NOTES (tooling/docs, short review).
 - [2026-09-24 local hooks](2026-09-24-local-hooks-review.md): PR #7 at `0673d90`,
   APPROVE WITH NOTES (tooling, short review; hooks run on planted cases).
+- [2026-09-24 roadmap](2026-09-24-roadmap-review.md): PR #5 at `3638143`,
+  APPROVE WITH NOTES (docs-only planning, short review).
