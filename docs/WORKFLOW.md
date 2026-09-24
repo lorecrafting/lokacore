@@ -69,6 +69,8 @@ now enforced by a check, a doc turning into a catch-all. Findings are fixed in t
   pushes from there with `git push origin HEAD:<branch>`, and removes the worktree.
 - A new worktree has no `deps/`, `_build/` or `node_modules`: run `mix deps.get` and
   `npm ci` there first.
+- Git hooks are set once per clone ([AGENTS.md, Working rules](../AGENTS.md#working-rules));
+  worktrees share that setting.
 - Agent types in `.claude/agents/` register only when a session starts. If one is missing,
   spawn `general-purpose` and tell it to follow the definition file.
 

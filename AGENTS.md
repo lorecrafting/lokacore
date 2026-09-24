@@ -190,15 +190,14 @@ A test exists to catch a specific break. Adapted from
   builds only when mobile code changes or on manual trigger; the differential runs
   at least 10,000 fresh sequences on every fast CI run (r1-acceptance-envelope.md).
 
-Run everything locally:
-`mix format --check-formatted && mix compile --warnings-as-errors && mix xref graph --format cycles --fail-above 0 && mix xref graph --label compile-connected --fail-above 0 && mix test && elixir bin/red_controls.exs && ast-grep test --skip-snapshot-tests && ast-grep scan --error && bin/lint_red_controls.sh && elixir bin/check_docs.exs`
-(prefix each with `mise exec --`, or activate mise).
+Run everything locally: `bin/check_all.sh` (what pre-push runs).
 
 ## Working rules
 
 - Every slice follows [the delivery workflow](docs/WORKFLOW.md): PM plans and briefs, a
   developer builds and self-reviews, a fresh reviewer reviews, the same developer fixes.
 - Toolchain: pinned in `mise.toml`; run `mise exec -- <cmd>`.
+- After cloning, run `git config core.hooksPath .githooks`; `--no-verify` only with the owner's OK; fix the cause instead.
 - Merge record-bearing PRs with merge commits, never squash.
 - Reviews are independent ([records](docs/reviews/README.md)): a fresh agent that authored none of the work (owner ruling:
   fresh Fable, Opus or other-vendor agents such as Codex qualify, [ruling](docs/decisions/owner-decision-reviewers-2026-09-24.md); prefer Fable for design-judgment reviews, as defined in [the workflow](docs/WORKFLOW.md)).

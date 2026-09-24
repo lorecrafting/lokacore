@@ -71,11 +71,4 @@ jobs:
         working-directory: kernel/ts
       - name: Red control, host and Node APIs are type errors in the kernel
         working-directory: kernel/ts
-        run: |
-          for probe in "fetch('x')" "setTimeout(() => 0, 1)" "process.env" "require('os')" "Buffer.from('x')" "performance.now()"; do
-            echo "export const p = $probe;" > src/red_control.ts
-            if npx tsc; then echo "tsc accepted $probe in the kernel"; exit 1; fi
-          done
-          echo "import 'node:fs';" > src/red_control.ts
-          if npx tsc; then echo "tsc accepted a node: import in the kernel"; exit 1; fi
-          rm src/red_control.ts
+        run: ../../bin/kernel_red_controls.sh

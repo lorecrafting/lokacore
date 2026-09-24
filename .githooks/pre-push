@@ -1,0 +1,10 @@
+#!/bin/sh
+# The full check line; TypeScript checks only when a pushed ref changes kernel/ts or mobile/.
+# ponytail: the checks run on the working tree, not the pushed commits; CI checks those.
+ts=--no-ts
+while read -r _ local _ remote; do
+  case $local in *[!0]*) ;; *) continue ;; esac          # branch deletion
+  case $remote in *[!0]*) ;; *) remote=origin/main ;; esac # new branch
+  git diff --quiet "$remote" "$local" -- kernel/ts mobile 2>/dev/null || ts=
+done
+exec bin/check_all.sh $ts
