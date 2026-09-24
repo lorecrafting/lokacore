@@ -1,0 +1,7 @@
+id: mobile-shared-no-authority
+valid:
+  - "import { Button } from '../ui';"
+  - "const s = 'authority/local-story kernel/ts features/realm features/story';"
+invalid:
+  - "import { x } from '../../authority/local-story';"
+  - "import { d } from '../../authority/remote-realm/socket';"

@@ -2,7 +2,7 @@ id: ts-kernel-pure
 language: typescript
 severity: error
 message: Kernel code must stay pure (spec document 01 A6, proposed ADR-072). No Node APIs, clock, randomness or timers.
-files: [mobile/packages/kernel/src/**]
+files: [kernel/ts/src/**]
 rule:
   any:
     - pattern: Date.now()

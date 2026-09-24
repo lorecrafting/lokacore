@@ -1,0 +1,8 @@
+id: mobile-story-no-realm
+valid:
+  - "import { KERNEL_ID } from '../../../kernel/ts/src/index.ts';"
+  - "const s = 'authority/local-story kernel/ts features/realm features/story';"
+invalid:
+  - "export { y } from '../../authority/remote-realm';"
+  - "import { a } from '../realm';"
+  - "import { b } from '../remote-realm/index';"

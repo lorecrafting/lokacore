@@ -1,0 +1,13 @@
+id: mobile-shared-no-authority
+language: typescript
+severity: error
+message: Shared packages never import an authority implementation (spec document 10 §2).
+files: [mobile/packages/**]
+rule:
+  kind: string_fragment
+  regex: '(^|/)(authority|local-story|remote-realm)(/|$)'
+  inside:
+    any:
+      - kind: import_statement
+      - kind: export_statement
+    stopBy: end

@@ -1,0 +1,13 @@
+id: mobile-story-no-realm
+language: typescript
+severity: error
+message: Story code never imports Realm code (spec document 14 §R2).
+files: [mobile/features/story/**, mobile/authority/local-story/**]
+rule:
+  kind: string_fragment
+  regex: '(^|/)(realm|remote-realm)(/|$)'
+  inside:
+    any:
+      - kind: import_statement
+      - kind: export_statement
+    stopBy: end

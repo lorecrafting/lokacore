@@ -134,8 +134,13 @@ at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
   compile-connected edges. When a compile edge is justified, replace the zero with a
   reviewed allowed list.
 - `ast-grep test` and `ast-grep scan --error` (`sgconfig.yml`, `lint/`): the Elixir kernel
-  (`lib/loka/core`) and the TypeScript kernel (`mobile/packages/kernel/src`) stay
-  pure. Every rule has valid and invalid cases in `lint/tests/`.
+  (`lib/loka/core`) and the TypeScript kernel (`kernel/ts/src`) stay pure; in `mobile/`,
+  shared packages never import an authority, Story and Realm never import each other, and
+  only `authority/local-story` imports the kernel (spec documents 10 §2, 14 §R2). Every
+  rule has valid and invalid cases in `lint/tests/`; `bin/lint_red_controls.sh` plants a
+  violation at each rule's real path and requires the scan to report it.
+- TypeScript: `npx tsc --noEmit` in `mobile/app` (covers all of `mobile/`) and
+  `npm run typecheck && npm test` in `kernel/ts` (Node's built-in test runner).
 - `elixir bin/red_controls.exs`: plants a boundary violation, a cycle and a compile edge,
   and requires each check to fail.
 - `elixir bin/check_docs.exs`: links resolve; every doc is reachable.
@@ -144,7 +149,7 @@ at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
   differential runs nightly.
 
 Run everything locally:
-`mix format --check-formatted && mix compile --warnings-as-errors && mix xref graph --format cycles --fail-above 0 && mix xref graph --label compile-connected --fail-above 0 && mix test && elixir bin/red_controls.exs && ast-grep test --skip-snapshot-tests && ast-grep scan --error && elixir bin/check_docs.exs`
+`mix format --check-formatted && mix compile --warnings-as-errors && mix xref graph --format cycles --fail-above 0 && mix xref graph --label compile-connected --fail-above 0 && mix test && elixir bin/red_controls.exs && ast-grep test --skip-snapshot-tests && ast-grep scan --error && bin/lint_red_controls.sh && elixir bin/check_docs.exs`
 (prefix each with `mise exec --`, or activate mise).
 
 ## Working rules

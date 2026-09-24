@@ -1,0 +1,7 @@
+id: mobile-realm-no-story
+valid:
+  - "import { Button } from '../../packages/ui';"
+  - "const s = 'authority/local-story kernel/ts features/realm features/story';"
+invalid:
+  - "import { z } from '../story/index';"
+  - "import { c } from '../../authority/local-story';"

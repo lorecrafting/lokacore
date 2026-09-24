@@ -1,0 +1,14 @@
+id: mobile-kernel-via-local-story
+language: typescript
+severity: error
+message: Only mobile/authority/local-story imports the kernel (spec document 10 §2).
+files: [mobile/**]
+ignores: [mobile/authority/local-story/**]
+rule:
+  kind: string_fragment
+  regex: '(^|/)kernel(/|$)'
+  inside:
+    any:
+      - kind: import_statement
+      - kind: export_statement
+    stopBy: end
