@@ -61,5 +61,29 @@ failures =
       end
   end
 
+# Docs budget: a padded copy of AGENTS.md (never the real file) must fail check_docs.
+padded = Path.join(System.tmp_dir!(), "loka-red-agents-#{System.unique_integer([:positive])}.md")
+
+File.write!(
+  padded,
+  File.read!(Path.join(root, "AGENTS.md")) <> String.duplicate("padding ", 3000)
+)
+
+{out, status} =
+  try do
+    System.cmd("elixir", ["bin/check_docs.exs", padded], cd: root, stderr_to_stdout: true)
+  after
+    File.rm(padded)
+  end
+
+failures =
+  if status != 0 and String.contains?(out, "AGENTS.md is ") do
+    IO.puts("ok   docs: AGENTS.md over its word budget")
+    failures
+  else
+    IO.puts("FAIL docs: AGENTS.md over its word budget: exit #{status}\n#{out}")
+    failures + 1
+  end
+
 System.cmd("mix", ~w(compile --force), cd: root)
 System.halt(if failures == 0, do: 0, else: 1)

@@ -1,8 +1,9 @@
 # Documentation check, no deps: every relative Markdown link in a tracked .md file
 # resolves, and every tracked .md file is reachable by links from an entry file (README.md, AGENTS.md, CLAUDE.md)
 # (an agent can find it). Fenced code blocks are skipped; anchors are not checked.
+# AGENTS.md stays within a word budget: every agent loads it every session.
 #
-#   elixir bin/check_docs.exs
+#   elixir bin/check_docs.exs [file-to-budget]
 root = Path.expand("..", __DIR__)
 
 {out, 0} =
@@ -52,7 +53,19 @@ roots = Enum.filter(["README.md", "AGENTS.md", "CLAUDE.md"], &Map.has_key?(links
 seen = reach.(reach, MapSet.new(roots), roots)
 orphans = for f <- docs, f not in seen, do: "unreachable #{f}"
 
-problems = Enum.sort(broken) ++ Enum.sort(orphans)
+agents_budget = 2500
+# Optional argument: the file to budget (the red control passes a padded copy).
+budget_file = List.first(System.argv(), Path.join(root, "AGENTS.md"))
+agents_words = budget_file |> File.read!() |> String.split() |> length()
+
+over =
+  if agents_words > agents_budget,
+    do: [
+      "AGENTS.md is #{agents_words} words, budget #{agents_budget}: move detail to a linked doc"
+    ],
+    else: []
+
+problems = Enum.sort(broken) ++ Enum.sort(orphans) ++ over
 Enum.each(problems, &IO.puts/1)
 IO.puts("#{length(docs)} docs, #{length(broken)} broken link(s), #{length(orphans)} unreachable")
 System.halt(if problems == [], do: 0, else: 1)
