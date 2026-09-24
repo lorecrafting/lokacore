@@ -1,0 +1,9 @@
+# Prettier formats kernel/ts, mobile/ and bin/ only; callers pass tracked files, so gitignored ones never reach it.
+/*
+!/kernel/
+!/mobile/
+!/bin/
+package-lock.json
+*.gen.*
+# Frozen, byte-exact fixtures: never reformat (already outside the scope above; kept explicit).
+/docs/spec/conformance/

@@ -12,7 +12,9 @@ const K = [
 ];
 
 export function sha256(data: Uint8Array): Uint8Array {
-  const h = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+  const h = [
+    0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,
+  ];
   const w = new Array<number>(64);
   const full = data.length - (data.length % 64);
   // Whole blocks are read in place; only the tail is copied, into the padding buffer.
@@ -43,7 +45,8 @@ function block(h: number[], w: number[], view: DataView, off: number): void {
   }
   let [a, b, c, d, e, f, g, hh] = h;
   for (let t = 0; t < 64; t++) {
-    const t1 = (hh + (rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25)) + ((e & f) ^ (~e & g)) + K[t] + w[t]) | 0;
+    const t1 =
+      (hh + (rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25)) + ((e & f) ^ (~e & g)) + K[t] + w[t]) | 0;
     const t2 = ((rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22)) + ((a & b) ^ (a & c) ^ (b & c))) | 0;
     hh = g;
     g = f;

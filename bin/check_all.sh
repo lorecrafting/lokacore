@@ -21,11 +21,12 @@ m ast-grep scan --error
 m bin/lint_red_controls.sh
 m elixir bin/check_docs.exs
 [ "${1-}" = --no-ts ] && exit 0
-for d in kernel/ts mobile/app; do
+for d in . kernel/ts mobile/app; do
   [ -d $d/node_modules ] || { echo "$d not checked: run (cd $d && mise exec -- npm ci)"; exit 1; }
 done
 (cd kernel/ts && m npm run typecheck && m npm test)
 m bin/kernel_red_controls.sh
 m node bin/check_ts_size.mjs
 m bin/ts_size_red_controls.sh
+git ls-files -z -co --exclude-standard '*.ts' '*.tsx' '*.mjs' '*.js' '*.json' | xargs -0 mise exec -- node_modules/.bin/prettier --check
 cd mobile/app && m npx tsc --noEmit

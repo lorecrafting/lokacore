@@ -12,17 +12,19 @@ import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const ts = createRequire(`${root}kernel/ts/package.json`)('typescript');
-const TEST = /^(test|kernel\/ts\/test)\/|(^|\/)__tests__\/|(_test\.exs|\.(test|spec)\.([cm]?ts|tsx|mjs))$/;
+const TEST =
+  /^(test|kernel\/ts\/test)\/|(^|\/)__tests__\/|(_test\.exs|\.(test|spec)\.([cm]?ts|tsx|mjs))$/;
 
 const args = process.argv.slice(2);
 const candidates = args.length
   ? args
-  : execFileSync('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], { cwd: root, encoding: 'utf8' }).split('\0');
+  : execFileSync('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], {
+      cwd: root,
+      encoding: 'utf8',
+    }).split('\0');
 const files = candidates.filter(
   (f) =>
-    /\.([cm]?ts|tsx|mjs)$/.test(f) &&
-    !f.split('/').pop().includes('.gen.') &&
-    existsSync(root + f),
+    /\.([cm]?ts|tsx|mjs)$/.test(f) && !f.split('/').pop().includes('.gen.') && existsSync(root + f),
 );
 
 const functions = (rel, src) => {
@@ -48,7 +50,7 @@ const check = (rel, text, { what, first, size, limit, ln }) => {
   if (ln && !m) report.push(`${rel}:${ln}: size marker needs N and a reason`);
   else if (m && size <= limit) report.push(`${rel}:${ln}: size marker not needed, ${size} lines`);
   else if (m && n > limit * 1.5) report.push(`${rel}:${ln}: size marker ${n} over 1.5x`);
-  else if (m) report.push(`${rel}:${ln}: info: size: allow ${n}, ${m[2]}`), (limit = n);
+  else if (m) (report.push(`${rel}:${ln}: info: size: allow ${n}, ${m[2]}`), (limit = n));
   if (size > limit) report.push(`${rel}:${first}: ${what}, ${size} lines, limit ${limit}`);
 };
 
@@ -63,7 +65,9 @@ for (const rel of files) {
     return { ...f, limit: 40, ln };
   });
   const size = text.length - (src.endsWith('\n') ? 1 : 0);
-  [{ what: 'file', first: 1, size, limit: test ? 500 : 300, ln: fileLn }, ...fns].forEach((f) => check(rel, text, f));
+  [{ what: 'file', first: 1, size, limit: test ? 500 : 300, ln: fileLn }, ...fns].forEach((f) =>
+    check(rel, text, f),
+  );
   const consumed = [fileLn, ...fns.map((f) => f.ln)];
   for (const i of marked.filter((i) => !consumed.includes(i))) {
     report.push(`${rel}:${i}: size marker not attached to a file header or function`);
