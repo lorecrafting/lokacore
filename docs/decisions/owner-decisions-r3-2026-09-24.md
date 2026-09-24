@@ -15,4 +15,14 @@ checker can verify these quotes against the chat.
    variant), and format as a lowercase hyphenated UUID. The full rule, including ordinal
    allocation, is in the frozen [numeric profile](../spec/conformance/numeric-profile.md#frozen-v1-rules-r3).
 2. **Freezing the numeric profile as `loka-numeric-v1`** (the parse, encode, depth, hash,
-   budget and error-code rules of R3 PR 1): pending; the PM will ask the owner.
+   budget, error-code and IdSource rules of R3 PR 1). The owner was told that
+   `numeric-profile.md` was marked "proposed", that the developer had written out every
+   rule the code now follows, and that changing any of them later means a new profile
+   version and a save migration. After asking "what is this encoding profile thing?" and
+   getting a plain explanation, the owner was asked:
+   > Should I freeze it?
+
+   and then "Approve freezing it as v1?" The owner answered:
+   > okay yes
+
+   Recorded in the [numeric profile](../spec/conformance/numeric-profile.md) status.

@@ -1,6 +1,6 @@
 # Portable numeric profile v1
 
-Status: **frozen v1 for R3 (profile id `loka-numeric-v1`), subject to the owner's approval**, amended 2026-09-24 by R3 PR 1 ([import record](../IMPORT.md#amendments-since-import), [owner decisions](../../decisions/owner-decisions-r3-2026-09-24.md)). It was the proposed R1 input `loka-numeric-proposed-v1`, the `profile` value in the frozen `numeric-vectors.json`; the rules and known answers are unchanged, and the [frozen v1 rules](#frozen-v1-rules-r3) below state what the R1 text left open. This profile is deliberately small and is separate from runtime selection.
+Status: **frozen v1 (`loka-numeric-v1`), owner-approved 2026-09-24** ([owner decision](../../decisions/owner-decisions-r3-2026-09-24.md)), amended 2026-09-24 by R3 PR 1 ([import record](../IMPORT.md#amendments-since-import)). It was the proposed R1 input `loka-numeric-proposed-v1`, the `profile` value in the frozen `numeric-vectors.json`; the rules and known answers are unchanged, and the [frozen v1 rules](#frozen-v1-rules-r3) below state what the R1 text left open. This profile is deliberately small and is separate from runtime selection.
 
 ## Integers and representation
 
