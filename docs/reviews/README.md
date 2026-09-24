@@ -30,4 +30,5 @@ Each record is written by a fresh agent that authored none of the reviewed work 
   untested duplicate-name guard); plus cross-vendor review (Astra): CHANGES REQUIRED, 4
   should-fix; re-review of the fixes at `3786ea3`, APPROVE WITH NOTES (all dispositions
   verified with mutants; 127-value differential with zero disagreements; one should-fix: the
-  pattern grammar still admits three forms that throw in TypeScript).
+  pattern grammar still admits three forms that throw in TypeScript); round 2 at `bb4a7fb`,
+  APPROVE (grammar closed; 65-pattern differential with zero disagreements).

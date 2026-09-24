@@ -375,3 +375,43 @@ Every F, N, A and AQ item and Q5 is fixed as the record asked, each with a test 
 without the fix, and the two kernels agree on all 127 corpus values. One should-fix (F4)
 remains for fix round 2: the portable grammar still admits three forms that make the
 TypeScript validator throw, the same failure mode F1 described. Two nits.
+
+## Re-review (fix round 2)
+
+- Reviewed commit: `bb4a7fb` (fix round 2 of 2). Same reviewer as round 1; authored none of
+  the work. Commits reviewed: `054bec4` (F4, N3), `bb4a7fb` (N4). Nothing else changed.
+- Checks at `bb4a7fb` in a detached worktree: `bin/check_all.sh` green through `check_docs`
+  (`mix test` 68/68, the 8 F4 inputs now in the rejected list; `contracts.exs --check` exit
+  0; `ast-grep test --skip-snapshot-tests` 6/6, `elixir-kernel-pure` 37 cases; kernel `tsc`
+  and `node --test` 22/22); mobile `tsc` not run, as in round 1 (nothing in `mobile/`).
+
+### Disposition
+
+| Finding | Disposition | Evidence |
+|---|---|---|
+| F4 grammar admits `\-`, stacked quantifiers, quantified lookahead | Verified | `schema.ex:39-40`: `@atom` is a literal, `\.` or a class; one quantifier (optionally lazy `?`) binds to an atom; `(`, `(?=`, `)` and `\|` take none. The 8 inputs are rejected test cases (`contracts_test.exs:94`). Mutants: quantifier allowed after `)` (3 lookahead cases fail), quantifier group `?`→`*` (4 possessive cases fail), top-level `\\[.-]` restored (`^a\-b$` fails). |
+| N3 doc vs class atoms | Verified | Module doc now lists `A-Z a-z 0-9 _ .`, ranges, `\.`, `\-`, trailing `-` for classes; matches `@class_atom`. |
+| N4 dead `nthChild: 2` clause | Verified | Clause deleted; lint tests pass; planted at `lib/loka/core/`: `&File.read!/1` capture, `@m File`, pipe, list, `File.write!` still reported; `@s File.read!("x")` and `@s File.read!("x", "y")` pass (both compile-time). |
+
+### Differential (patterns, rerun at `bb4a7fb`)
+
+The round-1 corpus (127 values, 49 patterns) plus 16 new patterns: lazy `??`, `{2}?`,
+`{1,2}?`, `[a-z]+?`, `{1,3}?x`, `\.+`; the malformed `?*`, `*?+`, `{2}??`, `(+)`, `|+`;
+quantified groups `(a)+`, `(a|b){2}`, `(a)?b`; and the two shipped shapes `[0-9a-f]{8}-...`
+and `(0|[1-9][0-9]*)\.(...)`. Values: **0 disagreements** (unchanged). Patterns: 37/65
+accepted; **999 match cases, 0 disagreements** (round 1: 216). Every accepted pattern
+compiles under `u`; every pattern JavaScript rejects (`?*`, `*?+`, `{2}??`, `(+)`, `|+`) is
+rejected by the grammar.
+
+Accepted in round 1 and rejected now: the 8 F4 inputs and `^(a)?$`. The last is the
+side effect the developer named: a quantified group is portable in both engines but the
+grammar now forbids any quantifier after `)`. The kernels agreed on it, so it is a
+capability the grammar gives up, not a correctness change; no shipped pattern quantifies a
+group (the version pattern's groups are unquantified). Widen with group tracking if a schema
+ever needs `(...)+`. Not a finding.
+
+### Verdict: APPROVE
+
+F4, N3 and N4 are fixed as asked, each with a test that fails without it. The portable
+grammar now accepts only patterns both engines compile and read the same way on this
+corpus. No open findings.
