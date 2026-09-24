@@ -1,0 +1,119 @@
+# AGENTS.md — Loka v3
+
+Instructions for every coding agent and LLM working here (Codex, Claude Code, others).
+`CLAUDE.md` only points to this file; it is not separate policy.
+
+Loka v3 is an offline-first story/MUD engine: an Elixir/OTP server and a TypeScript
+kernel running on Hermes in a React Native (Expo) phone app. This repository starts at
+R2 (fresh repository foundation). The history, the R1 spike and all R1 evidence live
+in the archived repository
+[lorecrafting/lokacore-v2-legacy](https://github.com/lorecrafting/lokacore-v2-legacy)
+at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
+
+## Architecture decisions already made (do not reopen silently)
+
+- **Candidate C (R1):** rules are implemented twice, in Elixir (server) and TypeScript
+  (phone), held to the same reviewed fixtures and to randomized differential testing.
+  Proposed ADR-071 in the legacy `docs/rewrite-v3/prep/adr-071-072-proposal.md`.
+- **Persistence shape (proposed ADR-072):** the world lives in memory; rules are pure
+  (`decide(state, command) → proposal`) and never write memory or storage; the host
+  commits only the changed rows plus the receipt in one transaction, then adopts the
+  proposal into memory, then replies. Kernels use structural sharing. No periodic or
+  rest-point snapshots; a full checkpoint exists only for export/backup.
+- **Databases (ADR-006, reconfirmed 2026-09-24):** PostgreSQL online, SQLite offline on
+  the phone. Server code uses Ecto with Ecto-managed migrations.
+- **Distribution (PREP-03):** the first release bundles its chapter in the app;
+  downloadable story content waits for a pre-launch store-policy review.
+
+## Hard-won lessons from R1 (read before touching these areas)
+
+**Performance**
+- Whole-state copying kills phones. On a Pixel 3a (Hermes), copying a 190 KB state per
+  step took 216 ms; structural sharing took under 1 ms. Never deep-clone or re-encode
+  the whole state per action. BEAM maps share structure; plain JS objects do not.
+- Per-action SQLite commits are cheap when they write only changed rows (about 190 bytes,
+  6 to 11 ms p99 on the Pixel 3a; 1 to 3 ms on an M1 even for whole-state writes).
+  The disk is not the bottleneck; work per action is.
+- A full canonical checkpoint of a 730 KB state still took about 490 ms on the Pixel 3a
+  (not split into write/read/parse/encode). Keep it off the player-action path and
+  measure it split.
+
+**expo-sqlite and React Native**
+- expo-sqlite 57.0.3 on Android: opening the same database file twice gives both JS
+  handles one native database, and garbage collection of either closes it. Symptom:
+  `NativeDatabase.execSync` rejected, `NullPointerException`. Open each database once
+  per process.
+- expo-sqlite's transaction helpers (`withTransactionSync`,
+  `withExclusiveTransactionAsync`) issue COMMIT themselves. To own the COMMIT point
+  (fault injection, unknown-commit handling) run `BEGIN IMMEDIATE` / `COMMIT` /
+  `ROLLBACK` yourself with `execSync` on one connection.
+- The React Native Gradle plugin (`configureDevServerLocation`) writes the build
+  machine's IPv4 address into every variant's `resources.arsc`, release included. Pass
+  `-PreactNativeDevServerIp=localhost`. APKs then differ only in AGP's encrypted
+  dependency-info signing block; the JS bundle, Hermes bytecode and source map are
+  byte-identical across builds.
+- Record the AGP version with the root `./gradlew buildEnvironment`, not
+  `:app:buildEnvironment` (AGP sits on the root buildscript classpath).
+
+**Physical-device runs**
+- The owner can connect only one phone at a time. Batch all work per phone; ask for a
+  swap only when needed.
+- A locked screen stops the app's JS. Check the lock state before a run; keep the app in
+  the foreground; treat a lock or backgrounding as an invalid run.
+- Every wait on a device needs a timeout (for example 120 s per launch, a 10 minute
+  progress watchdog). An unbounded `until grep …` loop hung for minutes once.
+- The Android logcat ring buffer keeps lines from earlier runs; a stale progress marker
+  once looked like a finished run. Match on the current process id or a run id.
+- iOS: `xcode-select` may point at the Command Line Tools; set
+  `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer` (no sudo). Signing uses the
+  owner's free personal team (automatic signing); nothing paid, no EAS.
+- iOS symbolication with `atos`: look up the return address minus 1, or it names the
+  wrong function.
+
+**Evidence and privacy**
+- Never print or commit adb serials, iPhone UDID/ECID/serial/device name, team ID,
+  certificate or provisioning identifiers, home/scratch/worktree paths or
+  app-container UUIDs. Every capture script has a `redact()` covering them.
+- Retained raw tool output is hashed (`SHA256SUMS` with its verify output beside it,
+  not self-listed). Mark evidence folders `-whitespace` in `.gitattributes` so git never
+  "fixes" hashed bytes.
+- Keep owner-reported, inspected, catalogue and inferred facts separate and labeled.
+  Nothing invented; unknowns stay null. Owner decisions are retained verbatim in a file.
+- Declare any performance variant before tuning it, and keep failing results.
+
+**SQLite fault testing**
+- `PRAGMA max_page_count` clamped to the current page count, then a write that must grow
+  the file, gives a real deterministic `SQLITE_FULL`.
+- An "unknown COMMIT" test that discards the result of a COMMIT that succeeded never
+  exercises the not-committed branch; inject a genuinely failed COMMIT too.
+
+## Searching code (use precise tools first)
+
+- Elixir structure (callers, dependencies, cycles): `mix xref callers <Module>`,
+  `mix xref graph --format cycles`. The compiler resolves aliases, so these are exact.
+- Syntax patterns in Elixir or TypeScript: `ast-grep --lang elixir -p '<pattern>' --json`
+  (`--lang typescript` for TS). `ast-grep outline` does not parse Elixir; use the Elixir
+  outline script once it exists.
+- Plain text search only for strings, docs and config.
+
+## Planned R2 checks (each with a deliberately broken case that must fail)
+
+- `boundary` (Hex, locked) makes illegal dependencies between apps a compile error.
+- `mix xref` ratchet: zero dependency cycles; compile-time edges only from an allowed
+  list.
+- ast-grep rules (`sgconfig.yml`, `ast-grep test`, pinned in CI) keep kernels pure: no
+  `File`, `System`, `:rand`, `DateTime`, `Process` or `Repo` in the Elixir kernel; no
+  Node APIs, `Date.now` or `Math.random` in the TypeScript kernel.
+- Lean CI: fast checks on every PR; native release builds only when mobile code changes
+  or on manual trigger; no push-plus-PR double runs; cancel superseded runs; the full
+  10,000-sequence differential runs nightly.
+
+## Working rules
+
+- Toolchain: `mise exec elixir@1.20.4 erlang@28.4 node@24.21.0 -- <cmd>`.
+- Merge record-bearing PRs with merge commits, never squash.
+- Reviews are independent: a fresh agent that authored none of the work (owner ruling:
+  fresh Fable or fresh Opus agents qualify; prefer Fable for design-judgment reviews).
+- Readiness probes that exit 1 by design are expected; don't "fix" them.
+- The owner wants nothing paid (no EAS); headless work runs on GitHub Actions, iPhone
+  and UI work on the owner's M1.
