@@ -21,7 +21,8 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
 
 ## Loop
 
-1. **Plan (PM).** Split the milestone into PR-sized slices, each citing its spec sections.
+1. **Plan (PM).** Split the milestone into PR-sized slices, each citing its spec sections;
+   keep [the roadmap](ROADMAP.md) current.
    Get the owner's OK on the plan and on any decision that is theirs.
 2. **Brief (PM).** Name the branch; do not check it out (the developer does, in its own
    worktree). Spawn `developer` with a self-contained brief: goal,
