@@ -1,0 +1,7 @@
+#!/bin/sh
+# Fast checks on every commit. Activate once per clone: git config core.hooksPath .githooks
+# ponytail: checks the working tree, not the index; a fix left unstaged still passes. CI is the backstop.
+set -e
+mise exec -- mix format --check-formatted || { echo "run: mise exec -- mix format"; exit 1; }
+mise exec -- ast-grep scan --error
+mise exec -- elixir bin/check_docs.exs
