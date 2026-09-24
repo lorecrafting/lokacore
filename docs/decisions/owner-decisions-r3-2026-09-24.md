@@ -12,4 +12,7 @@ checker can verify these quotes against the chat.
    Implemented in R3 PR 1: the two ids are strings and the ordinal is a non-negative safe
    integer; take the first 16 bytes of the SHA-256 of the canonical encoding, set byte 6
    to `(b & 0x0f) | 0x80` (version 8) and byte 8 to `(b & 0x3f) | 0x80` (RFC 9562
-   variant), and format as a lowercase hyphenated UUID.
+   variant), and format as a lowercase hyphenated UUID. The full rule, including ordinal
+   allocation, is in the frozen [numeric profile](../spec/conformance/numeric-profile.md#frozen-v1-rules-r3).
+2. **Freezing the numeric profile as `loka-numeric-v1`** (the parse, encode, depth, hash,
+   budget and error-code rules of R3 PR 1): pending; the PM will ask the owner.
