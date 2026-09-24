@@ -18,7 +18,7 @@ x 301 > "$L/big.ts"
 { echo 'export const f = () => {'; x 39; echo '};'; } > "$L/fn.tsx"
 { echo 'export function g() {'; x 39; echo '}'; } > "$L/script.mjs"
 x 301 > "$L/test/helper.ts"
-x 500 > "$L/__tests__/ok.test.ts"
+x 500 > "$L/__tests__/ok.ts"
 x 500 > "$L/colocated.test.tsx"
 x 400 > "$L/skip.gen.ts"
 x 301 > "$L/x.gen.d/big.ts"
@@ -27,6 +27,7 @@ m '// size: allow 450, table' '// size: allow 60, match' 60 450 > "$L/m_ceiling.
 m '// size: allow 460, table' '// size: allow 61, match' 61 460 > "$L/m_over.ts"
 m '// size: allow 350' '// size: allow 45,' 45 350 > "$L/m_reasonless.ts"
 m '// size: allow 350, stale' '// size: allow 50, stale' 40 300 > "$L/m_unneeded.ts"
+{ x 4; echo '// size: allow 400, late'; x 345; } > "$L/m_line5.ts"
 { x 5; echo '// size: allow 400, late'; x 344; } > "$L/m_line6.ts"
 { x 6; echo '// size: allow 60, old'; echo '/** doc */'; echo 'export function f() {}'; } > "$L/m_stale.ts"
 expected="$L/big.ts:1: file, 301 lines, limit 300
@@ -47,6 +48,7 @@ $L/m_reasonless.ts:6: size marker needs N and a reason
 $L/m_reasonless.ts:7: function f, 45 lines, limit 40
 $L/m_unneeded.ts:1: size marker not needed, 300 lines
 $L/m_unneeded.ts:6: size marker not needed, 40 lines
+$L/m_line5.ts:5: info: size: allow 400, late
 $L/m_line6.ts:1: file, 350 lines, limit 300
 $L/m_line6.ts:6: size marker not attached to a file header or function
 $L/m_stale.ts:7: size marker not attached to a file header or function"

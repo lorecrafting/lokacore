@@ -141,6 +141,7 @@ sized = %{
   "L/m_over.ex" => marked.("# size: allow 460, table", "  # size: allow 61, match", 61, 460),
   "L/m_reasonless.ex" => marked.("# size: allow 350", "  # size: allow 45,", 45, 350),
   "L/m_unneeded.ex" => marked.("# size: allow 350, stale", "  # size: allow 50, stale", 40, 300),
+  "L/m_line5.ex" => mod.("#{lines.(3)}# size: allow 400, late\n#{lines.(344)}"),
   "L/m_line6.ex" => mod.("#{lines.(4)}# size: allow 400, late\n#{lines.(343)}"),
   "L/m_stale.ex" => mod.("#{lines.(5)}  # size: allow 60, old\n  @doc false\n  def f, do: :ok\n")
 }
@@ -153,6 +154,7 @@ L/fn.ex:2: defp f, 41 lines, limit 40
 L/fn_anon.ex:2: fn, 41 lines, limit 40
 L/m_ceiling.ex:1: info: size: allow 450, table
 L/m_ceiling.ex:6: info: size: allow 60, match
+L/m_line5.ex:5: info: size: allow 400, late
 L/m_line6.ex:1: file, 350 lines, limit 300
 L/m_line6.ex:6: size marker not attached to a file header or function
 L/m_over.ex:1: file, 460 lines, limit 300
