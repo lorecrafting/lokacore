@@ -87,6 +87,15 @@ at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
 - An "unknown COMMIT" test that discards the result of a COMMIT that succeeded never
   exercises the not-committed branch; inject a genuinely failed COMMIT too.
 
+## Conventions
+
+- Elixir: [docs/ELIXIR-CONVENTIONS.md](docs/ELIXIR-CONVENTIONS.md), built on Phoenix's
+  vendored usage rules (`docs/conventions/phoenix/`, refreshed by
+  `elixir bin/sync_phoenix_rules.exs`). Upstream rules win unless that page overrides them.
+- Phoenix is used only at the edges: Realm transport, sessions, PubSub and the admin and
+  builder web apps (spec documents 01 and 07). Domain, runtime, content and store code never
+  depend on it.
+
 ## Searching code (use precise tools first)
 
 - Elixir structure (callers, dependencies, cycles): `mix xref callers <Module>`,
