@@ -132,6 +132,30 @@ its limit. Before asking for review, audit the diff for over-engineering (Claude
 `/ponytail-review`; other agents: the same questions by hand) and include the result in
 the PR. Pass this section into subagent prompts.
 
+## Writing tests (every change, every agent)
+
+A test exists to catch a specific break. Adapted from
+[obra/superpowers `writing-good-tests.md`](https://github.com/obra/superpowers/blob/main/skills/test-driven-development/writing-good-tests.md) (MIT).
+- **Name the break.** Before the body, name the realistic bug that makes it fail. If the
+  only thing that fails it is a deliberate decision (a constant, a message's wording, a
+  registry's size), it is a change detector: test the behavior that depends on it instead.
+- **Expected values never come from the code under test.** Use the frozen conformance
+  fixtures, hand-checked literals, or table rows with literal answers. Never compute the
+  answer with the implementation, its helpers, or the other kernel (Elixir and TypeScript
+  are compared to the fixtures, then to each other, never only to each other).
+- **Behavior, not text.** Run scripts and checks on controlled input and assert output or
+  exit status; do not grep source.
+- **Test our contract, not the library.** No tests for trivial structs, getters or
+  forwarding; no tests of Elixir, Node or `boundary` mechanics.
+- **Real over mocks.** Mock only what is slow or external (the network, a device); storage
+  faults are real (see SQLite fault testing);
+  never assert on the mock itself. Production modules carry no test-only functions.
+- **Nothing extra.** No fixture, helper or validation the test does not need; no test
+  written for coverage alone.
+- **Mutation check before handoff.** For each realistic mutation (wrong constant or
+  branch, missing state change, empty return, missing validation of empty/zero/malformed
+  input) at least one test fails; actually break the code once and watch it fail.
+
 ## Searching code (use precise tools first)
 
 - Elixir structure (callers, dependencies, cycles): `mix xref callers <Module>`,
@@ -170,10 +194,12 @@ Run everything locally:
 
 ## Working rules
 
+- Every slice follows [the delivery workflow](docs/WORKFLOW.md): PM plans and briefs, a
+  developer builds and self-reviews, a fresh reviewer reviews, the same developer fixes.
 - Toolchain: pinned in `mise.toml`; run `mise exec -- <cmd>`.
 - Merge record-bearing PRs with merge commits, never squash.
 - Reviews are independent ([records](docs/reviews/README.md)): a fresh agent that authored none of the work (owner ruling:
-  fresh Fable or fresh Opus agents qualify; prefer Fable for design-judgment reviews).
+  fresh Fable, Opus or other-vendor agents such as Codex qualify, [ruling](docs/decisions/owner-decision-reviewers-2026-09-24.md); prefer Fable for design-judgment reviews, as defined in [the workflow](docs/WORKFLOW.md)).
 - Every Markdown file must be reachable by links from README.md, AGENTS.md or CLAUDE.md,
   and every relative link must resolve: `elixir bin/check_docs.exs`.
 - Readiness probes that exit 1 by design are expected; don't "fix" them.
