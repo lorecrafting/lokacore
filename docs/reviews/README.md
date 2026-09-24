@@ -21,3 +21,5 @@ Each record is written by a fresh agent that authored none of the reviewed work 
   CHANGES REQUIRED (tooling, full review with mutation check); broad re-review of
   `aa58475`: CHANGES REQUIRED (one blocker, two should-fix); final round `24c72ea`:
   APPROVE WITH NOTES.
+- [2026-09-24 Prettier](2026-09-24-prettier-review.md): PR #10 at `7d8d7c8`,
+  APPROVE WITH NOTES (tooling, short review; hooks and checks run on planted cases).
