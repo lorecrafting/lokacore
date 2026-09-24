@@ -136,7 +136,8 @@ A test exists to catch a specific break. Adapted from
   rule has valid and invalid cases in `lint/tests/`; `bin/lint_red_controls.sh` plants a
   violation at each rule's real path and requires the scan to report it.
 - TypeScript: Prettier (`.prettierrc.json`, scope in `.prettierignore`, `npm ci` at the
-  root) formats on edit and is checked in pre-commit and CI;
+  root) formats on edit and is checked in pre-commit and CI (run from the repo root;
+  `.prettierignore` only applies there);
   `npx tsc --noEmit` in `mobile/app` (covers all of `mobile/`) and
   `npm run typecheck && npm test` in `kernel/ts` (Node's built-in test runner).
 - Size: source files at most 300 lines, test files 500, each function clause (and `fn`/arrow)
