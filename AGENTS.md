@@ -191,8 +191,8 @@ A test exists to catch a specific break. Adapted from
 - `elixir bin/check_docs.exs`: links resolve; every doc is reachable; AGENTS.md stays
   within its word budget (it is loaded by every agent, every session).
 - CI: pull requests and pushes to main, superseded runs cancelled. Planned: native mobile
-  builds only when mobile code changes or on manual trigger; the full 10,000-sequence
-  differential runs nightly.
+  builds only when mobile code changes or on manual trigger; the differential runs
+  at least 10,000 fresh sequences on every fast CI run (r1-acceptance-envelope.md).
 
 Run everything locally:
 `mix format --check-formatted && mix compile --warnings-as-errors && mix xref graph --format cycles --fail-above 0 && mix xref graph --label compile-connected --fail-above 0 && mix test && mix credo --strict && elixir bin/check_size.exs && node bin/check_ts_size.mjs && bin/ts_size_red_controls.sh && elixir bin/red_controls.exs && ast-grep test --skip-snapshot-tests && ast-grep scan --error && bin/lint_red_controls.sh && elixir bin/check_docs.exs`
