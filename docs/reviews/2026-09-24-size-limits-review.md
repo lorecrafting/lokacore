@@ -259,3 +259,41 @@ plant without a test suffix.
   never take a marker; it fails closed.
 - R5. `.mts`/`.cts` are not scanned: `kernel/ts/src/big.mts` (402 lines) was not reported.
   `/\.(tsx?|mjs)$/` → `/\.([cm]?tsx?|mjs)$/` would cover them, if they are ever used.
+
+## Fix round 2: `24c72ea` (final round)
+
+Scope: the R1-R5 dispositions and the `bin/check_all.sh` wiring. `815d8c1` merges main and
+was skipped. Local run at `24c72ea`: both size red controls and `elixir bin/red_controls.exs`
+are `ok`, and both checkers pass on the real tree.
+
+### Verdict: APPROVE WITH NOTES
+
+- **R1 resolved.** Both red controls now also run the no-argument scan. Each requires the exit
+  status to be non-zero and the planted `big` file's line to be present; the check is
+  containment, so real markers elsewhere cannot break it. The earlier mutation
+  (`ls-files ... -- nothing`) is now killed in both languages, and so is `ls-files --cached`
+  without `--others`, because the plants are untracked.
+- **R2 resolved.** The folder-name exclusion is deleted from both scripts. The `L/deps/big.ex`
+  and `$L/ios/Big.tsx` plants are reported, and re-adding a `deps|ios` exclusion is killed in
+  both languages.
+- **R3 resolved.** The test-folder plants carry no test suffix (`T/big_helper.ex`,
+  `$T/helper.ts`), and each holds a 41-line function that must not be reported. Dropping the
+  `^(test|kernel/ts/test)/` rule is now killed in both languages.
+- **R4 resolved.** The `m_early_fn` plants have a marker on line 5 above a function on line 6.
+  The marker is read as a file marker ("not needed"), and the function is still reported.
+  Dropping the `l - 1 > 5` guard is killed in both languages.
+- **R5 resolved.** `.mts`/`.cts` are scanned, and the test-name rule matches them. The
+  `big.mts` plant is reported, and dropping `[cm]?` is killed.
+- **Wiring.** `bin/check_all.sh` runs `mix credo --strict`, `elixir bin/check_size.exs`
+  and `elixir bin/red_controls.exs` (which includes the size controls). After `--no-ts` it
+  runs `node bin/check_ts_size.mjs` and `bin/ts_size_red_controls.sh`, matching CI.
+
+Mutations rerun: all 10 earlier survivors are killed (no-argument scan ×2, tracked-only
+listing, test folder ×2, marker guard ×2, folder exclusion ×2, `.mts`).
+
+### Nit
+- F1. `.githooks/pre-push:8` sets `--no-ts` unless a pushed ref changes `kernel/ts` or `mobile/`.
+  The TS size check now also covers `bin/*.mjs` and any tracked `.ts` outside those folders.
+  So a push that changes only `bin/check_ts_size.mjs` or `bin/ts_size_red_controls.sh` skips
+  both locally. CI still runs them, so nothing ships unchecked. Adding `bin/*.mjs
+  bin/ts_size_red_controls.sh` to that `git diff` pathspec would close the gap.
