@@ -13,20 +13,6 @@ permissions:
   contents: read
 
 jobs:
-  docs:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          persist-credentials: false
-      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124
-        with:
-          otp-version: '28.4'
-          elixir-version: '1.20.4'
-          version-type: strict
-      - run: elixir bin/check_docs.exs
-
   elixir:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -49,6 +35,7 @@ jobs:
       - run: mix xref graph --label compile-connected --fail-above 0
       - run: mix test
       - run: elixir bin/red_controls.exs
+      - run: elixir bin/check_docs.exs
 
   lint:
     runs-on: ubuntu-latest
@@ -82,9 +69,13 @@ jobs:
       - run: npx tsc --noEmit
       - run: npm ci --no-audit --no-fund && npm run typecheck && npm test
         working-directory: kernel/ts
-      - name: Red control, host globals are type errors in the kernel
+      - name: Red control, host and Node APIs are type errors in the kernel
         working-directory: kernel/ts
         run: |
-          echo "export const g = fetch('x');" > src/red_control.ts
-          if npx tsc; then echo "tsc accepted fetch in the kernel"; exit 1; fi
+          for probe in "fetch('x')" "setTimeout(() => 0, 1)" "process.env" "require('os')" "Buffer.from('x')" "performance.now()"; do
+            echo "export const p = $probe;" > src/red_control.ts
+            if npx tsc; then echo "tsc accepted $probe in the kernel"; exit 1; fi
+          done
+          echo "import 'node:fs';" > src/red_control.ts
+          if npx tsc; then echo "tsc accepted a node: import in the kernel"; exit 1; fi
           rm src/red_control.ts

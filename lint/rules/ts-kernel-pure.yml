@@ -1,7 +1,7 @@
 id: ts-kernel-pure
 language: tsx
 severity: error
-message: Kernel code must stay pure (spec document 01 A6, proposed ADR-072). No Node APIs, clock, randomness, locale or timers. Host globals (fetch, crypto, window, setTimeout) are already type errors via "lib" in kernel/ts/tsconfig.json.
+message: Kernel code must stay pure (spec document 01 A6, proposed ADR-072). No clock, randomness, locale or dynamic loading. Host and Node APIs are already type errors via "lib"/"types" in kernel/ts/tsconfig.json.
 files: [kernel/ts/src/**]
 rule:
   any:
@@ -9,16 +9,9 @@ rule:
     - pattern: new Date($$$)
     - pattern: Date($$$)
     - pattern: Math.random()
-    - pattern: performance.now()
-    - pattern: require($$$)
-    - kind: call_expression
-      has: { field: function, kind: import }
     - kind: subscript_expression
       has: { field: object, regex: ^Math$ }
+    - kind: call_expression
+      has: { field: function, kind: import }
     - kind: identifier
-      regex: ^(process|setTimeout|setInterval|setImmediate|Buffer|globalThis|global|Intl)$
-    - kind: string_fragment
-      inside:
-        kind: string
-        inside: { kind: import_statement, field: source }
-      regex: ^(node:.*|(fs|path|os|child_process|crypto|http|https|net)(/.*)?)$
+      regex: ^(Intl|globalThis)$

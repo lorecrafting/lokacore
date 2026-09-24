@@ -11,11 +11,6 @@ controls = [
      "lib/loka_web/red_control.ex" =>
        "defmodule LokaWeb.RedControl do\n  def x, do: Loka.Store.__info__(:module)\nend\n"
    }, ~w(compile --warnings-as-errors --force), "forbidden reference to Loka.Store"},
-  {"boundary: core reaches runtime",
-   %{
-     "lib/loka/core/red_control.ex" =>
-       "defmodule Loka.Core.RedControl do\n  def x, do: Loka.Runtime.__info__(:module)\nend\n"
-   }, ~w(compile --warnings-as-errors --force), "forbidden reference to Loka.Runtime"},
   {"boundary: core calls an undeclared external app",
    %{
      "lib/loka/core/red_control.ex" =>

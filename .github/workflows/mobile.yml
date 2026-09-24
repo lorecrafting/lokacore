@@ -35,10 +35,7 @@ jobs:
       - run: CI=1 EXPO_NO_TELEMETRY=1 npx expo prebuild --platform android --no-install
       - name: Release APK (arm64, no Gradle cache)
         working-directory: mobile/app/android
-        run: |
-          start=$(date +%s)
-          ./gradlew --no-daemon -PreactNativeArchitectures=arm64-v8a -PreactNativeDevServerIp=localhost assembleRelease
-          echo "gradle_seconds=$(( $(date +%s) - start ))" | tee -a "$GITHUB_STEP_SUMMARY"
+        run: ./gradlew --no-daemon -PreactNativeArchitectures=arm64-v8a -PreactNativeDevServerIp=localhost assembleRelease
       - name: Kernel is in the Hermes bundle (portability smoke)
         working-directory: mobile/app/android
         run: unzip -p app/build/outputs/apk/release/app-release.apk assets/index.android.bundle | grep -a -q loka-kernel
@@ -66,10 +63,8 @@ jobs:
       - name: Release build for the iOS simulator (unsigned)
         working-directory: mobile/app/ios
         run: |
-          start=$(date +%s)
           xcodebuild -workspace Loka.xcworkspace -scheme Loka -configuration Release \
             -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath "$RUNNER_TEMP/dd" CODE_SIGNING_ALLOWED=NO build
-          echo "xcodebuild_seconds=$(( $(date +%s) - start ))" | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Kernel is in the Hermes bundle (portability smoke)
         run: find "$RUNNER_TEMP/dd" -name main.jsbundle -path '*Loka.app*' -exec grep -a -q loka-kernel {} \; -print | grep -q .
