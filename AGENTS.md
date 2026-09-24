@@ -116,6 +116,18 @@ at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
   builder web apps (spec documents 01 and 07). Domain, runtime, content and store code never
   depend on it.
 
+## Simplicity (every change, every agent)
+
+Write the least code that correctly does the job. Before writing, stop at the first rung
+that holds: does it need to exist at all; is it already in this repo; does the standard
+library or platform do it; does an installed dependency do it; can it be one line. No
+abstraction with one implementation, no config nobody sets, no scaffolding for later.
+Never simplify away validation at trust boundaries, data-loss handling, security or
+anything the spec requires. Mark a deliberate shortcut with a `ponytail:` comment naming
+its limit. Before asking for review, audit the diff for over-engineering (Claude Code:
+`/ponytail-review`; other agents: the same questions by hand) and include the result in
+the PR. Pass this section into subagent prompts.
+
 ## Searching code (use precise tools first)
 
 - Elixir structure (callers, dependencies, cycles): `mix xref callers <Module>`,
