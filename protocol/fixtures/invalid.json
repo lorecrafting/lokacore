@@ -103,6 +103,8 @@
   {"contract": "SubsetProbe", "value": {"counts": {"abcd": "x"}}, "errors": [{"path": "/counts/abcd", "code": "invalid_type"}, {"path": "/counts/abcd", "code": "pattern_mismatch"}]},
   {"contract": "SubsetProbe", "value": {"counts": {"a/b": 0, "": 0}}, "errors": [{"path": "/counts/", "code": "pattern_mismatch"}, {"path": "/counts/a~1b", "code": "pattern_mismatch"}]},
   {"contract": "SubsetProbe", "value": {"counts": []}, "errors": [{"path": "/counts", "code": "invalid_type"}]},
+  {"contract": "Responsibility", "value": {}, "errors": [{"path": "/fixtures", "code": "missing_property"}, {"path": "/key", "code": "missing_property"}, {"path": "/residency", "code": "missing_property"}]},
+  {"contract": "Responsibility", "value": {"key": "transactions", "residency": "unclassified", "fixtures": ["docs/spec/composition-cases.json"]}, "errors": [{"path": "/fixtures/0", "code": "pattern_mismatch"}, {"path": "/residency", "code": "not_in_enum"}]},
   {"contract": "CapabilitySpec", "value": {"key": "movement", "version": 1, "portability": "portable", "residency": "realm_only_capability"}, "errors": [{"path": "/residency", "code": "not_in_enum"}]},
   {"contract": "CapabilitySpec", "value": {"key": "movement", "version": 1, "portability": "portable", "residency": "authority_host_coordination"}, "errors": [{"path": "/residency", "code": "not_in_enum"}]},
   {"contract": "CapabilitySpec", "value": {"key": "movement", "version": 1, "portability": "server_only", "residency": "portable_capability"}, "errors": [{"path": "/residency", "code": "not_in_enum"}]},

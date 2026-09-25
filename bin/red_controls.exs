@@ -16,6 +16,11 @@ controls = [
      "lib/loka/core/red_control.ex" =>
        "defmodule Loka.Core.RedControl do\n  def x, do: Logger.flush()\nend\n"
    }, ~w(mix compile --warnings-as-errors --force), "forbidden reference to Logger"},
+  {"types: a PartyId where a CharacterId is matched (03 §6)",
+   %{
+     "lib/loka/core/red_control.ex" =>
+       "defmodule Loka.Core.RedControl do\n  def scope({:character_id, id}), do: id\n  def x(v) do\n    {:ok, p} = Loka.Core.Contracts.party_id(v)\n    scope(p)\n  end\nend\n"
+   }, ~w(mix compile --warnings-as-errors --force), "incompatible types given to scope/1"},
   {"xref: dependency cycle",
    %{
      "lib/loka/content/red_control_a.ex" =>
@@ -56,6 +61,9 @@ controls = [
   {"contracts: schema changed without regenerating the TypeScript",
    %{"protocol/red_control.schema.json" => ~s({"$defs": {"RedControl": {"type": "null"}}})},
    ~w(elixir bin/contracts.exs --check), "contracts.gen.ts is out of date"},
+  {"contracts: schema changed without regenerating the docs",
+   %{"protocol/red_control.schema.json" => ~s({"$defs": {"RedControl": {"type": "null"}}})},
+   ~w(elixir bin/contracts.exs --check), "docs/contracts.gen.md is out of date"},
   {"contracts: unsupported keyword fails compilation",
    %{
      "protocol/red_control.schema.json" =>

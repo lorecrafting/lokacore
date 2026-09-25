@@ -37,6 +37,24 @@ defmodule Loka.Core.Contracts do
 
   @type error :: %{path: String.t(), code: atom()}
 
+  # Nominal ids (03 §6; 14 Gate R3): each string contract that bin/contracts.exs brands in
+  # TypeScript is a tagged tuple here, `{:character_id, value}`, built by its validating
+  # constructor. The compiler rejects a wrong tag only where inference reaches a literal tag
+  # pattern (in a call, across modules, inside a map); an @spec-only receiver, a value
+  # through Enum/Map or decoded JSON, and a runtime-chosen union are unchecked
+  # (test/loka/core/nominal_ids_test.exs). So: construct at the boundary, and match the tag
+  # explicitly at every domain boundary.
+  for {name, %{"type" => "string"} = s} <- @defs,
+      not is_map_key(s, "enum") and not is_map_key(s, "const") do
+    tag = name |> Macro.underscore() |> String.to_atom()
+    @type unquote(tag)() :: {unquote(tag), String.t()}
+    @doc "Validates `value` as `#{name}` and tags it."
+    @spec unquote(tag)(Canonical.value()) :: {:ok, unquote(tag)()} | {:error, [error()]}
+    def unquote(tag)(value) do
+      with :ok <- validate(unquote(name), value), do: {:ok, {unquote(tag), value}}
+    end
+  end
+
   @doc "Every contract by name, `$ref` values rewritten to contract names."
   @spec defs() :: %{String.t() => map()}
   def defs, do: @defs

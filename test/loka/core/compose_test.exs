@@ -68,6 +68,57 @@ defmodule Loka.Core.ComposeTest do
     end
   end
 
+  # A sequenced boundary (04 §5.1, 03 §15; 14 Gate R3), test-only: compose, commit, and only
+  # on a confirmed commit adopt the changes and then deliver the events. Commit, adoption and
+  # delivery are observed as messages in order. R6 replaces this with the real authority.
+  defp step(state, ops, events, status) do
+    case Compose.compose(state, %{"ops" => ops}) do
+      %{"changes" => rows} ->
+        send(self(), {:commit, status})
+        if status == "committed", do: observe(rows, events)
+
+      %{"fault" => _} ->
+        :ok
+    end
+  end
+
+  defp observe(rows, events) do
+    send(self(), {:adopted, rows})
+    for e <- events, do: send(self(), {:delivered, e})
+  end
+
+  defp history(seen \\ []) do
+    receive do
+      m -> history([m | seen])
+    after
+      0 -> Enum.reverse(seen)
+    end
+  end
+
+  test "failed or unknown commits and faults adopt and deliver nothing; a commit adopts, then delivers" do
+    by_id = &Enum.find(@fixture[&1], fn c -> c["id"] == &2 end)
+    ok = by_id.("cases", "explicit-sequence-across-kinds")
+    bad = by_id.("cases", "conflict-fact-opposite-groups")
+
+    [_ | _] =
+      events = by_id.("publication", "committed-publishes-committed-events")["decision"]["events"]
+
+    base = state("base")
+
+    step(base, ok["ops"], events, "failed")
+    step(base, ok["ops"], events, "unknown")
+    step(base, bad["ops"], events, "committed")
+    assert history() == [{:commit, "failed"}, {:commit, "unknown"}]
+
+    step(base, ok["ops"], events, "committed")
+    delivered = for e <- events, do: {:delivered, e}
+
+    assert history() == [
+             {:commit, "committed"},
+             {:adopted, ok["expected"]["changes"]} | delivered
+           ]
+  end
+
   test "invariant checks known answers, a holding and a violated case per r3_pr5 invariant" do
     for c <- @fixture["invariants"] do
       obs = Map.update(c["observation"], "state", nil, &state/1)

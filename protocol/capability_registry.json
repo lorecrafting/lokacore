@@ -39,19 +39,19 @@
     "key": "target_resolution",
     "version": 1,
     "portability": "portable",
-    "residency": null
+    "residency": "portable_capability"
   },
   {
     "key": "policy",
     "version": 1,
     "portability": "portable",
-    "residency": null
+    "residency": "portable_capability"
   },
   {
     "key": "fact",
     "version": 1,
     "portability": "portable",
-    "residency": null
+    "residency": "portable_capability"
   },
   {
     "key": "resource",

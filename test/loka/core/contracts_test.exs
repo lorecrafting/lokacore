@@ -204,6 +204,43 @@ defmodule Loka.Core.ContractsTest do
     assert Loka.Core.Canonical.hash(lock) == {:ok, sha}
   end
 
+  # Breaks if a row is malformed or duplicated, names a missing fixture, or a capability
+  # residency falls outside the six 05 §6 classes.
+  test "the residency rows: valid, unique keys, real fixtures; capability classes are 05 §6 classes" do
+    rows = JSON.decode!(File.read!("protocol/residency.json"))
+    for r <- rows, do: assert(Contracts.validate("Responsibility", r) == :ok, inspect(r))
+    assert Enum.uniq_by(rows, & &1["key"]) == rows
+    for r <- rows, f <- r["fixtures"], do: assert(File.regular?(f), f)
+
+    classes = Contracts.defs()["ResidencyClass"]["enum"]
+
+    for b <- Contracts.defs()["CapabilitySpec"]["oneOf"],
+        c <- b["properties"]["residency"]["enum"],
+        c != nil,
+        do: assert(c in classes, c)
+  end
+
+  # Breaks if a constructor tags without validating, or tags with another contract's name.
+  test "a nominal id constructor validates, then tags with its own contract" do
+    uuid = "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+    assert Contracts.party_id(uuid) == {:ok, {:party_id, uuid}}
+    assert Contracts.party_id("A7B8") == {:error, [%{path: "", code: :pattern_mismatch}]}
+  end
+
+  # Breaks if the brand rule in bin/contracts.exs and the tag rule in contracts.ex drift apart.
+  test "every TypeScript-branded contract has an Elixir tag constructor, and no other does" do
+    branded =
+      for [_, name] <-
+            Regex.scan(
+              ~r/^export type (\w+) = string & \{ readonly __brand/m,
+              File.read!("kernel/ts/src/contracts.gen.ts")
+            ),
+          do: {name |> Macro.underscore() |> String.to_atom(), 1}
+
+    constructors = Contracts.__info__(:functions) -- [defs: 0, validate: 2, validate: 3]
+    assert Enum.sort(constructors) == Enum.sort(branded)
+  end
+
   test "a declared __proto__ property is accepted" do
     assert Contracts.validate("SubsetProbe", JSON.decode!(~s({"__proto__":"ok"})), @defs) == :ok
   end

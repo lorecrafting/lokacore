@@ -74,7 +74,7 @@
       ]
     },
     "CapabilitySpec": {
-      "description": "One registry entry (05 §6): a capability version, its portability, and its semantic residency from the residency matrix (05 §6 'Capability semantic residency matrix'). Portability limits residency (this table is the PM's adopted reading of 05 §6, not spec text): a portable capability is a portable semantic foundation or portable capability implementation, server_only is a Realm-only semantic capability, client_presentation_only is client presentation; authority-host coordination and authoring/certification are never capabilities (05 §6). A null residency is not yet classified. Commands, events, effects and policies join by name once their registries exist (R3 PR 3).",
+      "description": "One registry entry (05 §6): a capability version, its portability, and its semantic residency from the residency matrix (05 §6 'Capability semantic residency matrix'). Portability limits residency (this table is the PM's adopted reading of 05 §6, not spec text): a portable capability is a portable semantic foundation or portable capability implementation, server_only is a Realm-only semantic capability, client_presentation_only is client presentation; authority-host coordination and authoring/certification are never capabilities (05 §6). A null residency is not yet classified. An Effect names the capabilities that may emit it (allowed_origins in protocol/effect_registry.json); commands, events and policies name no capability yet.",
       "oneOf": [
         {
           "description": "Runs on every host, Story and Realm (05 §6).",
@@ -184,6 +184,60 @@
           "version": 1,
           "portability": "client_presentation_only",
           "residency": "client_presentation"
+        }
+      ]
+    },
+    "ResidencyClass": {
+      "description": "The six responsibility classes of the 05 §6 residency view ('Capability semantic residency matrix'). A capability's residency is one of the other four (CapabilitySpec); authority-host coordination and authoring/certification are never capabilities and appear only as Responsibility rows.",
+      "enum": [
+        "portable_semantic_foundation",
+        "portable_capability",
+        "realm_only_capability",
+        "authority_host_coordination",
+        "client_presentation",
+        "authoring_certification"
+      ],
+      "examples": [
+        "portable_semantic_foundation",
+        "authoring_certification"
+      ]
+    },
+    "Responsibility": {
+      "description": "A row of the 05 §6 residency view that is not a registered capability (protocol/residency.json): a portable semantic foundation contract that both kernels must implement with golden cross-host parity, or a host or authoring responsibility named in 05 §6's 'Owns' column. fixtures lists the conformance files both kernels are tested against; an empty list means none is bound yet, never that none is needed. Host services are not made into gameplay capabilities by appearing here (05 §6).",
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "residency": {
+          "$ref": "#/$defs/ResidencyClass"
+        },
+        "fixtures": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(docs/spec/conformance|protocol/fixtures)/[a-z0-9_-]+\\.json$"
+          }
+        }
+      },
+      "required": [
+        "key",
+        "residency",
+        "fixtures"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "key": "state_delta_composition",
+          "residency": "portable_semantic_foundation",
+          "fixtures": [
+            "protocol/fixtures/composition.json"
+          ]
+        },
+        {
+          "key": "transactions",
+          "residency": "authority_host_coordination",
+          "fixtures": []
         }
       ]
     }

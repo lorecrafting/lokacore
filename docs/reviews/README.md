@@ -74,3 +74,12 @@ Each record is written by a fresh agent that authored none of the reviewed work 
   verified against `4e8f40b`; two one-line should-fix: the lone "must" row is neither a
   must nor a gap, and the needs list lives in three places; three nits); re-review of
   the fixes at `9cc66f6`, APPROVE (all five dispositions verified).
+- [2026-09-24 R3 gate](2026-09-24-r3-gate-review.md): PR #16 at `5ee2aa7`, APPROVE WITH
+  NOTES (full Fable review of the gate PR: ten type-checker probes, eight mutants, full
+  check line; two documentation should-fix, two nits); **Gate R3: PASS WITH NOTED GAPS**
+  (every R3A/R3B/Gate item verified against the code; follow-ups from #4-#15 traced; six
+  deferrals, none needing the owner; plain-language residency view for the owner); Astra
+  cross-vendor review appended (PR CHANGES REQUIRED, Gate NOT YET: A1 six classes, A2
+  composite Elixir types, A3 observed boundary, A4 guarantee overstated); re-review of the
+  fixes at `94b15fb`, APPROVE, **Gate R3: PASS WITH NOTED GAPS** (six-class view, boundary
+  test with five dying mutants in both kernels, probe test, owner-approved amendment).

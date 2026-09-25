@@ -47,6 +47,12 @@ The table below describes the files as imported. Later amendments are in git his
   gains the CommandId rule beside IdSource (additive; owner decision
   [R3 lanes](../decisions/owner-decisions-r3-lanes-2026-09-24.md)). No existing rule or
   fixture changed.
+- 2026-09-24, R3 PR 6b ([owner decision](../decisions/owner-decisions-r3-gate-2026-09-24.md)):
+  how document 14's Gate R3 item "Elixir portable/domain types and validators" is met. In
+  R3 it is satisfied by schema-driven validation (`Loka.Core.Contracts`, read from
+  `protocol/` at compile time) plus generated nominal id types. Elixir domain data types
+  for composite contracts arrive with their first Elixir consumer, generated from or
+  checked against `protocol/` at that point. Document 14's text is unchanged.
 
 ## Link rewrites (the only byte changes at import)
 

@@ -42,6 +42,7 @@ New lessons go in the file for their area; a lesson enters AGENTS.md only if it 
 - Before touching `mobile/` or running on a phone, read [mobile lessons](docs/lessons/mobile.md).
 - Before touching SQLite or persistence, read [storage lessons](docs/lessons/storage.md).
 - Before capturing or committing evidence, read [evidence lessons](docs/lessons/evidence.md).
+- Before touching `protocol/`, its fixtures or canonical encoding, read [contract lessons](docs/lessons/contracts.md).
 
 **All work**
 - Never print or commit adb serials, iPhone UDID/ECID/serial/device name, team ID,
@@ -61,10 +62,6 @@ New lessons go in the file for their area; a lesson enters AGENTS.md only if it 
   (not split into write/read/parse/encode). Keep it off the player-action path and
   measure it split.
 - Declare any performance variant before tuning it, and keep failing results.
-
-**Canonical encoding (R3)**
-- Elixir maps with 32 keys or fewer iterate in sorted key order, so a key-order test with
-  fewer keys passes even when the encoder never sorts. Use more than 32 keys.
 
 ## Conventions
 
@@ -148,11 +145,13 @@ A test exists to catch a specific break. Adapted from
   a split would be worse.
 - `mix credo --strict`: cyclomatic complexity 9, nesting 2, ABC size 30, arity 6; nothing else.
   Any `credo:disable` comment gives its reason on the same line; the reviewer checks it.
-- `elixir bin/contracts.exs --check`: `kernel/ts/src/contracts.gen.ts` matches the
-  `protocol/` schemas (run without `--check` to regenerate).
+- `elixir bin/contracts.exs --check`: `kernel/ts/src/contracts.gen.ts`, the
+  [capability/schema docs](docs/contracts.gen.md) and the capability/residency matrix
+  (`docs/residency.gen.json`) match `protocol/` (run without `--check` to regenerate).
 - `elixir bin/red_controls.exs`: plants a boundary violation, a cycle, a compile edge, an
-  oversized AGENTS.md, size-limit cases, one violation per Credo check, and a stale and an
-  out-of-subset schema, and requires each check to fail.
+  oversized AGENTS.md, size-limit cases, one violation per Credo check, a stale and an
+  out-of-subset schema, and a PartyId passed where a CharacterId is matched (nominal ids,
+  `Loka.Core.Contracts`), and requires each check to fail.
 - `elixir bin/check_docs.exs`: links resolve; every doc is reachable; AGENTS.md stays
   within its word budget (it is loaded by every agent, every session).
 - CI: pull requests and pushes to main, superseded runs cancelled. Planned: native mobile
