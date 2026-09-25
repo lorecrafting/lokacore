@@ -561,7 +561,7 @@ Document 09 §1a and the generated release matrix select the first-release gates
 - autonomous simulation;
 - adversarial scenario import/generation interface;
 - fault injection for local authority;
-- cross-host differential/conformance runner over the hosts that run the rules (before the [ADR-074 trigger](../decisions/adr-074-ts-first-proposal.md#3-the-proposal), the TypeScript kernel headless on Node: authoring, not server hosting);
+- cross-host differential/conformance runner over the hosts that run the rules (before the [ADR-074 trigger](../decisions/adr-074-ts-first-proposal.md#3-the-proposal), the TypeScript hosts: Node plus the Android and iOS Hermes replays; the Lab's headless Node run is authoring, not server hosting);
 - semantic-review evidence bundle support;
 - content-addressed CertificationEvidenceBundle + repro export.
 

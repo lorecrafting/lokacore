@@ -63,13 +63,16 @@ The table below describes the files as imported. Later amendments are in git his
   - Envelope §3: applicability note; Elixir pair deferred, TypeScript host pairs retained.
   - 02 §1: the Lab drives the TypeScript kernel headless.
   - 07 §4 and §13: the BEAM path joins conformance at the trigger.
-  - 09 §1a (retained, on the TypeScript kernel); §5 cross-host conformance and BEAM
+  - 09 §1a Determinism row (amended to the crosswalk's gloss: the TypeScript kernel on
+    Node and devices); §5 cross-host conformance and BEAM
     runtime boot mode; §10 StreamData on Elixir for the foundation only.
-  - 14 R5 gate, R9 runner, R10 certification: the hosts that run the rules; R14: the Elixir
+  - 14 R5 gate, R9 runner (Node plus the Hermes replays, as 09 §5), R10 certification:
+    the hosts that run the rules; R14: the Elixir
     port and differential precede its playthrough gate.
   - 15 DET-02, DET-08, SCR-10: TypeScript hosts now, the server host at the trigger.
   - pre-release-proof.md P6: TypeScript host adapters.
-  - README §5–§6: C selected, rules TypeScript-first.
+  - README §5–§6: C selected, rules TypeScript-first; the open gate is ADR-071's failed
+    and unmeasured evidence (accepted risk, not passed), not the choice.
   - Note only, text unchanged: 10 (R1 tests C first), R-MILESTONES R1 row, INDEX, 07 §14
     (R1 procedure). Retained unchanged: 05 §6 last paragraph (how the trigger is checked),
     09 §31.

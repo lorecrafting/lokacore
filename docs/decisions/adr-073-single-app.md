@@ -1,4 +1,4 @@
-# Proposed ADR-073 — One Mix application with strict boundaries, not an umbrella
+# ADR-073 — One Mix application with strict boundaries, not an umbrella
 
 **Status: Accepted — entered [document 16](../spec/16-decision-register.md) 2026-09-24.** Amends [document 02 §1](../spec/02-beam-runtime-architecture.md#1-proposed-repository-shape)
 and [document 14 §R2](../spec/14-implementation-plan.md#r2--fresh-repository-foundation) in place.

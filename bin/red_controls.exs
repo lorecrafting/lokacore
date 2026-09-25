@@ -138,14 +138,18 @@ failures =
   end
 
 # ADR-074 trigger: a registry copy (never the real file) giving a portable_capability an
-# Elixir host adapter without a differential must fail contracts --check.
+# Elixir host adapter without a differential, or with a declared but absent one, must fail
+# contracts --check with the ADR-074 diagnostic for each.
 registry =
   Path.join(System.tmp_dir!(), "loka-red-registry-#{System.unique_integer([:positive])}.json")
 
 entry =
-  ~s({"key": "movement", "version": 1, "portability": "portable", "residency": "portable_capability", "host_adapters": ["elixir"]})
+  &~s({"key": "#{&1}", "version": 1, "portability": "portable", "residency": "portable_capability", "host_adapters": ["elixir"]#{&2}})
 
-File.write!(registry, "[#{entry}]")
+File.write!(
+  registry,
+  "[#{entry.("movement", "")}, #{entry.("barrier", ~s(, "differential": "test/loka/core/absent_test.exs"))}]"
+)
 
 {out, status} =
   try do
@@ -159,7 +163,7 @@ File.write!(registry, "[#{entry}]")
 
 failures =
   if status != 0 and
-       String.contains?(out, "movement@1: duplicate host adapter, or elixir without") do
+       Enum.all?(~w(movement@1 barrier@1), &String.contains?(out, "#{&1}: elixir host adapter")) do
     IO.puts("ok   contracts: elixir host adapter without a differential (ADR-074)")
     failures
   else

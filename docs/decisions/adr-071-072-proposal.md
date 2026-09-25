@@ -1,9 +1,9 @@
-# Proposed ADR-071 and ADR-072 — 2026-09-24
+# ADR-071 and ADR-072 — 2026-09-24
 
 **Status: Accepted — entered [document 16](../spec/16-decision-register.md) 2026-09-24.** Written by the coordinating assistant (Claude Code, Claude
 Opus), the candidate author's side. Like ADR-070 in
-[a2-plan.md](https://github.com/lorecrafting/lokacore-v2-legacy/blob/997a7a8/docs/rewrite-v3/prep/after-pr-10/a2-plan.md), these enter document 16 only at the next
-contract amendment; document 16 is not edited here. Evidence:
+[a2-plan.md](https://github.com/lorecrafting/lokacore-v2-legacy/blob/997a7a8/docs/rewrite-v3/prep/after-pr-10/a2-plan.md), they entered document 16 at the next
+contract amendment. Evidence:
 [r1-a3-quick-evidence/](https://github.com/lorecrafting/lokacore-v2-legacy/blob/997a7a8/docs/rewrite-v3/r1-a3-quick-evidence/README.md) and
 [touched-1/](https://github.com/lorecrafting/lokacore-v2-legacy/blob/997a7a8/docs/rewrite-v3/r1-a3-quick-evidence/touched-1/README.md).
 

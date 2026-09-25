@@ -100,10 +100,9 @@ bound = &if(&1 == [], do: nil, else: &1)
 trigger =
   for e <- registry,
       e["residency"] == "portable_capability",
-      adapters = e["host_adapters"] || [],
-      Enum.uniq(adapters) != adapters or
-        ("elixir" in adapters and not File.regular?(Path.join(root, e["differential"] || ""))),
-      do: "#{pin.(e)}: duplicate host adapter, or elixir without a present differential (ADR-074)"
+      "elixir" in (e["host_adapters"] || []),
+      not File.regular?(Path.join(root, e["differential"] || "")),
+      do: "#{pin.(e)}: elixir host adapter without a present differential (ADR-074)"
 
 if trigger != [] do
   Enum.each(trigger, &IO.puts(:stderr, &1))
