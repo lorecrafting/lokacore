@@ -1,0 +1,167 @@
+<title>Loka Exits, Book Style</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,600&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap">
+<style>
+:root{
+  --bg:#eceee9; --fg:#1d2320; --muted:#56615b; --line:#cfd5ce; --accent:#7b2d20; --panel:#f6f7f3;
+  --head:'IM Fell English',Georgia,serif; --sc:'IM Fell English SC',Georgia,serif; --body:'EB Garamond',Georgia,serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark; --bg:#121614; --fg:#e2e5df; --muted:#9aa59e; --line:#2a322e; --accent:#d9937a; --panel:#181d1a}}
+:root[data-theme="dark"]{color-scheme:dark; --bg:#121614; --fg:#e2e5df; --muted:#9aa59e; --line:#2a322e; --accent:#d9937a; --panel:#181d1a}
+body{background:var(--bg); color:var(--fg); font:17px/1.55 var(--body); padding-inline:16px; padding-block:28px 64px}
+.wrap{max-width:1180px; margin:0 auto}
+h1{font:400 clamp(2rem,5vw,3rem)/1.05 var(--head); margin:0 0 .3em; text-wrap:balance}
+.lede{max-width:68ch; color:var(--muted); margin:0 0 .6em}
+.lede b{color:var(--fg); font-weight:500}
+.key{display:flex; flex-wrap:wrap; gap:4px 18px; margin:0 0 1em; font-size:.95rem; color:var(--muted)}
+.key b{color:var(--fg); font-weight:600}
+.key .g{opacity:.5} .key .s{text-decoration:line-through; color:var(--fg); font-weight:600} .key .i{font-style:italic; font-weight:600; color:var(--fg)}
+.ctl{display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center; margin:0 0 28px; padding:10px 0; border-block:1px solid var(--line); font-size:.95rem; position:sticky; top:env(safe-area-inset-top,0px); background:var(--bg); z-index:5}
+.grp{display:flex; flex-wrap:wrap; gap:4px; align-items:center}
+.grp>span{font:.9rem var(--sc); color:var(--muted); letter-spacing:.04em; margin-right:4px}
+.ctl button{font:inherit; font-size:.88rem; padding:3px 10px; border:1px solid var(--line); background:var(--panel); color:var(--fg); border-radius:4px; cursor:pointer}
+.ctl button[aria-pressed="true"]{background:var(--fg); color:var(--bg); border-color:var(--fg)}
+.gallery{display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,318px),1fr)); gap:36px 26px}
+figure{margin:0; display:flex; flex-direction:column; gap:10px}
+figcaption h2{font:400 1.18rem/1.2 var(--head); margin:0; display:flex; gap:.5em; align-items:baseline}
+figcaption h2 span{font:.95rem var(--sc); color:var(--accent)}
+figcaption p{margin:.2em 0 0; color:var(--muted); font-size:.95rem; line-height:1.45}
+
+.frame{--p-bg:#ebe6d7; --p-fg:#241f19; --p-dim:#6a6254; --p-line:#d0c7b0; --p-bad:#7b2d20; --p-warn:#8a5a14;
+  width:min(344px,100%); margin:0 auto; height:228px; display:flex; flex-direction:column; justify-content:flex-end;
+  background:var(--p-bg); color:var(--p-fg); border:8px solid #1a1b1a; border-top:0; border-radius:0 0 34px 34px; overflow:hidden; font:16px/1.45 var(--body); font-variant-numeric:oldstyle-nums}
+.night .frame{--p-bg:#0c0b09; --p-fg:#ecdfc3; --p-dim:#a79a83; --p-line:#2d271f; --p-bad:#eb9676; --p-warn:#e6b35a; color-scheme:dark}
+.frame button{font:inherit; color:inherit; background:none; border:0; padding:0; cursor:pointer}
+.frame :focus-visible{outline:2px solid var(--p-fg); outline-offset:2px}
+.ctx{flex:1; padding:14px 22px 0; -webkit-mask-image:linear-gradient(transparent,#000 60%); mask-image:linear-gradient(transparent,#000 60%); overflow:hidden; display:flex; flex-direction:column; justify-content:flex-end}
+.ctx p{margin:0 0 .3em}
+.ctx b{font-weight:500; border-bottom:1.5px dotted currentColor}
+.said{font-style:italic; color:var(--p-dim); min-height:1.45em}
+.ex{padding:2px 22px 4px; white-space:nowrap; overflow-x:auto; scrollbar-width:none; font-size:16.5px}
+.ex button,.ex .no{display:inline-block; min-height:40px; line-height:40px}
+.has{font-weight:600}
+.no{color:var(--p-dim); opacity:.5}
+.barred{text-decoration:line-through; text-decoration-thickness:1px}
+.closed{font-style:italic}
+.pr{padding:8px 22px 16px; border-top:1px solid var(--p-line); font-size:13.5px; color:var(--p-dim); white-space:nowrap; overflow-x:auto; scrollbar-width:none; display:flex; gap:8px; align-items:baseline}
+.pr .r{margin-left:auto}
+.pr .lo{color:var(--p-bad)} .pr .mid{color:var(--p-warn)}
+.pos{border-bottom:1px dotted currentColor!important}
+.lbl{font-family:var(--sc); letter-spacing:.08em; color:var(--p-dim); font-size:.92em}
+.it{font-style:italic; color:var(--p-dim)}
+.fell{font-family:var(--head)}
+.fsc{font-family:var(--sc); letter-spacing:.06em}
+.track{font-family:var(--sc); letter-spacing:.16em; text-transform:lowercase}
+.center{text-align:center}
+.spread{display:flex; justify-content:space-between; align-items:baseline}
+.ruled{display:flex; align-items:center; gap:10px}
+.ruled::before,.ruled::after{content:''; flex:1; height:1px; background:var(--p-line)}
+.margin{display:grid; grid-template-columns:3.2em 1fr; align-items:baseline}
+.margin .lbl{font:italic 13px var(--body); letter-spacing:0; text-transform:none}
+.small{font-size:14.5px}
+.caps{letter-spacing:.12em}
+.head{font:11px var(--sc); letter-spacing:.22em; text-transform:uppercase; color:var(--p-dim)}
+</style>
+
+<div class="wrap">
+  <h1>Exits, book style</h1>
+  <p class="lede">Twenty ways to set one line: <b>north east south west up down</b>, always in that order and always all six. A way you can take is <b>bold</b>, and no exit is grey. The layout comes from MUDs, but the type is set like a book. The prompt sits below it at the bottom.</p>
+  <p class="key"><span><b>bold</b> a way out</span><span class="g">grey: no exit</span><span><span class="s">struck</span> barred</span><span><span class="i">italic</span> a closed door</span></p>
+  <div class="ctl">
+    <div class="grp" role="group" aria-label="Room"><span>Room</span><button data-room="landing" aria-pressed="true">Ferry Landing</button><button data-room="mill" aria-pressed="false">Old Mill</button><button data-room="dark" aria-pressed="false">Dark shelter</button></div>
+    <div class="grp" role="group" aria-label="Position"><span>Position</span><button data-pos="standing" aria-pressed="true">standing</button><button data-pos="sitting" aria-pressed="false">sitting</button><button data-pos="resting" aria-pressed="false">resting</button><button data-pos="meditating" aria-pressed="false">meditating</button><button data-pos="sleeping" aria-pressed="false">sleeping</button></div>
+    <div class="grp" role="group" aria-label="Condition"><span>Condition</span><button data-hurt="0" aria-pressed="true">Hale</button><button data-hurt="1" aria-pressed="false">Hurt</button></div>
+    <div class="grp" role="group" aria-label="Page"><span>Page</span><button data-t="paper" aria-pressed="true">Paper</button><button data-t="night" aria-pressed="false">Night</button></div>
+  </div>
+  <div class="gallery" id="g"></div>
+</div>
+
+<script>
+const ROOMS={
+  landing:{name:'Ferry Landing',prose:'<p>Reeds crowd a slick wooden landing. A mooring post leans into the current.</p><p><b>Bram</b> the ferryman stands here, one boot on the ferry.</p>',
+    ex:{n:{st:'open',to:'the Village Green'},w:{st:'barred',why:'The causeway west is under the tide.'}}},
+  mill:{name:'Old Mill',prose:'<p>Flour dust hangs in the still air. The millstone has not turned in years.</p><p><b>Hob’s ledger</b> lies open on a grain sack.</p>',
+    ex:{n:{st:'open',to:'the Boathouse'},s:{st:'open',to:'the Empty Cottage'},u:{st:'open',to:'the Mill Loft'},d:{st:'closed',why:'The trapdoor is closed.'}}},
+  dark:{name:'Darkness',prose:'<p>It is too dark to see. You smell lamp oil and wet tar.</p><p><b>Something brass</b> is here, under your hand.</p>',
+    ex:{w:{st:'open',to:'the Reed Bank'}}},
+};
+const ORDER=['n','e','s','w','u','d'];
+const WORD={n:'north',e:'east',s:'south',w:'west',u:'up',d:'down'};
+const LET={n:'N',e:'E',s:'S',w:'W',u:'U',d:'D'};
+const SHORT={n:'N',e:'E',s:'S',w:'W',u:'Up',d:'Dn'};
+const ABBR={standing:'std',sitting:'sit',resting:'rst',meditating:'med',sleeping:'slp'};
+const S={room:'landing',pos:'standing',hurt:false,mv:0,said:{}};
+const R=()=>ROOMS[S.room];
+const V=()=>({hp:S.hurt?14:20,mhp:20,ma:S.hurt?5:12,mma:12,mv:(S.hurt?42:80)-S.mv,mmv:80});
+const band=(v,m)=>v/m<=.35?'lo':v/m<=.75?'mid':'';
+
+/* one direction: a bold button when there is a way, a grey span when there is none */
+function W(d,text){
+  const e=R().ex[d];
+  if(!e) return `<span class="no" aria-label="${WORD[d]}, no exit">${text}</span>`;
+  const lab=e.st==='open'?`${WORD[d]}`:`${WORD[d]}, ${e.st}`;
+  return `<button class="has ${e.st==='open'?'':e.st}" data-go="${d}" aria-label="${lab}">${text}</button>`;
+}
+const line=(names,sep=' ')=>ORDER.map(d=>W(d,names[d])).join(sep);
+const posB=t=>`<button class="pos" data-a="pos" aria-label="Position ${S.pos}, tap to change">${t??S.pos}</button>`;
+const clock='06:00', part='morning';
+const nums=(v,cls='')=>`<span class="${band(v.hp,v.mhp)}">${v.hp} hp</span> · <span class="${band(v.ma,v.mma)}">${v.ma} ma</span> · <span class="${band(v.mv,v.mmv)}">${v.mv} mv</span>`;
+
+/* four book-style prompts, borrowed from MUD prompt fields */
+const PA=v=>`<span>${clock}</span>·<span>${R().name}</span>·${posB()}<span class="r">${nums(v)}</span>`;
+const PB=v=>`<span class="lbl">${part} · ${R().name.toLowerCase()} · </span>${posB()}<span class="r lbl">hp <span class="${band(v.hp,v.mhp)}">${v.hp}</span> ma <span class="${band(v.ma,v.mma)}">${v.ma}</span> mv <span class="${band(v.mv,v.mmv)}">${v.mv}</span></span>`;
+const PC=v=>`<span class="it">${cap(part)} at the ${R().name}. You are ${posB()}; <span class="${band(v.hp,v.mhp)}">${v.hp}</span>, ${v.ma}, ${v.mv}.</span>`;
+const PD=v=>`<span style="display:grid;grid-template-columns:1fr auto 1fr;width:100%;align-items:baseline"><span>${R().name}</span><span class="it">~ ${clock} ~</span><span style="justify-self:end"><span class="${band(v.hp,v.mhp)}">${v.hp}</span> · <span class="${band(v.ma,v.mma)}">${v.ma}</span> · <span class="${band(v.mv,v.mmv)}">${v.mv}</span> · ${posB(ABBR[S.pos])}</span></span>`;
+const cap=w=>w[0].toUpperCase()+w.slice(1);
+
+const VARIANTS=[
+ ['Exits, in small caps','The plainest book version: a small-caps label, then the six words.','',()=>`<span class="lbl">Exits</span>&ensp;${line(WORD)}`,PA],
+ ['Exits, as letters','The same line with initials. Short enough to leave room, but the letters are small targets.','',()=>`<span class="lbl">Exits</span>&ensp;${line(LET,'&ensp;')}`,PA],
+ ['You can go','An italic lead-in that reads like the narrator speaking, followed by the words set roman.','',()=>`<span class="it">You can go</span>&ensp;${line(WORD)}`,PB],
+ ['You can travel, lettered','“You can travel” with thin-spaced initials. Warmer than “Exits” and still compact.','',()=>`<span class="it">You can travel</span>&ensp;${line(LET,'&thinsp;&ensp;')}`,PD],
+ ['A full sentence','All six in one sentence with the commas and the “or”. The grey words sit inside the grammar.','small',()=>`You can go ${ORDER.map((d,i)=>W(d,WORD[d])+(i<4?', ':i===4?' or ':'.')).join('')}`,PC],
+ ['Tracked small caps','No label. Six words in letterspaced small caps, centered like a book’s running head.','track center',()=>line(WORD,'&ensp;'),PB],
+ ['Middle dots','Words separated by middle dots, a common book device, with a label that is quiet next to them.','',()=>`<span class="lbl">Exits</span> · ${line(WORD,' · ')}`,PA],
+ ['Fleuron','A printer’s leaf (❧) opens the line, as it would a paragraph.','',()=>`<span class="it">❧ You can go</span>&ensp;${line(WORD)}`,PC],
+ ['Between rules','The six words centered between two hairlines, like a section break.','ruled small',()=>line(WORD,'&ensp;'),PD],
+ ['Short words','N, E, S and W as initials, with Up and Dn kept readable. A compromise between the two lengths.','',()=>`<span class="lbl">Exits</span>&ensp;${line(SHORT,'&ensp;')}`,PA],
+ ['Roman against italic','Open ways in bold roman and missing ones in grey italic, so style and weight both carry the difference.','',()=>`<span class="lbl">You can go</span>&ensp;${ORDER.map(d=>R().ex[d]?W(d,WORD[d]):`<span class="no" style="font-style:italic">${WORD[d]}</span>`).join(' ')}`,PB],
+ ['Marginal note','The label sits in the margin as an italic gloss, and the words hang from the text edge.','margin',()=>`<span class="lbl">exits</span><span>${line(WORD)}</span>`,PA],
+ ['Justified letters','The initials spread across the full width, each with a wide target, and the label at the end.','spread',()=>`${line(LET,'')}<span class="lbl">&ensp;exits</span>`,PD],
+ ['Exits, colon','The MUD form with a plain colon, but set in Garamond with en spaces. It shows how much the type alone changes it.','',()=>`Exits:&ensp;${line(WORD,'&ensp;')}`,PA],
+ ['Fell italic','“You can travel” and the six words in the inky Fell italic, the most old-book of the set.','fell',()=>`<span class="it">You can travel</span>&ensp;<i>${line(WORD)}</i>`,PC],
+ ['Pilcrow','A pilcrow (¶) and small caps: “¶ Exits”, then the initials.','',()=>`<span class="lbl">¶ Exits</span>&ensp;${line(LET,'&ensp;')}`,PB],
+ ['Small-cap words','The words in Fell small caps, where the capital initial stands a little taller and helps the eye find each direction.','fsc',()=>`<span class="lbl">Ways</span>&ensp;${line({n:'North',e:'East',s:'South',w:'West',u:'Up',d:'Down'},'&ensp;')}`,PA],
+ ['Parenthetical','A whisper in brackets, small and italic, as an aside to the reader.','it small',()=>`(you can go ${line(WORD)})`,PD],
+ ['Set right','The line set flush right, so the eye finds it where the thumb already is.','',()=>`<span style="display:block;text-align:right"><span class="lbl">Exits</span>&ensp;${line(LET,'&ensp;')}</span>`,PC],
+ ['Running head','EXITS as a tracked capital running head, then Fell initials. It reads as the page’s own furniture.','',()=>`<span class="head">Exits</span>&ensp;–&ensp;<span class="fell">${line(LET,'&ensp;')}</span>`,PA],
+];
+function render(){
+  const v=V();
+  document.getElementById('g').innerHTML=VARIANTS.map(([n,desc,cls,ex,pr],i)=>`<figure><div class="frame" data-i="${i}"><div class="ctx">${R().prose}<p class="said">${S.said[i]||''}</p></div><nav class="ex ${cls}" aria-label="Exits">${ex()}</nav><div class="pr" role="status">${pr(v)}</div></div><figcaption><h2><span>${i+1}</span>${n}</h2><p>${desc}</p></figcaption></figure>`).join('');
+}
+document.getElementById('g').addEventListener('click',ev=>{
+  const b=ev.target.closest('button'); if(!b) return; const i=b.closest('.frame').dataset.i;
+  if(b.dataset.a==='pos'){const ps=Object.keys(ABBR); S.pos=ps[(ps.indexOf(S.pos)+1)%ps.length]; syncCtl(); S.said[i]=`You are now ${S.pos}.`; return render();}
+  const d=b.dataset.go, e=R().ex[d]; if(!e) return;
+  if(S.pos==='sleeping') S.said[i]='You dream of walking. Wake and stand first.';
+  else if(S.pos!=='standing') S.said[i]=`You are ${S.pos}. Stand up first.`;
+  else if(e.st!=='open') S.said[i]=e.why;
+  else {S.mv++; S.said[i]=`You go ${WORD[d]}.`;}
+  render();
+});
+function syncCtl(){
+  document.querySelectorAll('[data-room]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.room===S.room));
+  document.querySelectorAll('[data-pos]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.pos===S.pos));
+  document.querySelectorAll('[data-hurt]').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.hurt==='1')===S.hurt));
+}
+document.querySelector('.ctl').addEventListener('click',ev=>{
+  const b=ev.target.closest('button'); if(!b) return;
+  if(b.dataset.room){S.room=b.dataset.room; S.said={};}
+  if(b.dataset.pos) S.pos=b.dataset.pos;
+  if(b.dataset.hurt){S.hurt=b.dataset.hurt==='1'; S.mv=0;}
+  if(b.dataset.t){document.querySelectorAll('[data-t]').forEach(x=>x.setAttribute('aria-pressed',x===b)); document.getElementById('g').classList.toggle('night',b.dataset.t==='night');}
+  syncCtl(); render();
+});
+render();
+</script>

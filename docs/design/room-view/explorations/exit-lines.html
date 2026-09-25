@@ -1,0 +1,179 @@
+<title>Loka Exit Lines</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap">
+<style>
+:root{
+  --bg:#eceee9; --fg:#1d2320; --muted:#56615b; --line:#cfd5ce; --accent:#7b2d20; --panel:#f6f7f3;
+  --head:'IM Fell English',Georgia,serif; --sc:'IM Fell English SC',Georgia,serif; --body:'EB Garamond',Georgia,serif;
+  --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark; --bg:#121614; --fg:#e2e5df; --muted:#9aa59e; --line:#2a322e; --accent:#d9937a; --panel:#181d1a}}
+:root[data-theme="dark"]{color-scheme:dark; --bg:#121614; --fg:#e2e5df; --muted:#9aa59e; --line:#2a322e; --accent:#d9937a; --panel:#181d1a}
+body{background:var(--bg); color:var(--fg); font:17px/1.55 var(--body); padding-inline:16px; padding-block:28px 64px}
+.wrap{max-width:1180px; margin:0 auto}
+h1{font:400 clamp(2rem,5vw,3rem)/1.05 var(--head); margin:0 0 .3em; text-wrap:balance}
+.lede{max-width:68ch; color:var(--muted); margin:0 0 1em}
+.lede b{color:var(--fg); font-weight:500}
+.ctl{display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center; margin:0 0 28px; padding:10px 0; border-block:1px solid var(--line); font-size:.95rem; position:sticky; top:env(safe-area-inset-top,0px); background:var(--bg); z-index:5}
+.grp{display:flex; flex-wrap:wrap; gap:4px; align-items:center}
+.grp>span{font:.9rem var(--sc); color:var(--muted); letter-spacing:.04em; margin-right:4px}
+.ctl button{font:inherit; font-size:.88rem; padding:3px 10px; border:1px solid var(--line); background:var(--panel); color:var(--fg); border-radius:4px; cursor:pointer}
+.ctl button[aria-pressed="true"]{background:var(--fg); color:var(--bg); border-color:var(--fg)}
+.gallery{display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,318px),1fr)); gap:36px 26px}
+figure{margin:0; display:flex; flex-direction:column; gap:10px}
+figcaption h2{font:400 1.18rem/1.2 var(--head); margin:0; display:flex; gap:.5em; align-items:baseline}
+figcaption h2 span{font:.95rem var(--sc); color:var(--accent)}
+figcaption p{margin:.2em 0 0; color:var(--muted); font-size:.95rem; line-height:1.45}
+
+.frame{--p-bg:#ebe6d7; --p-fg:#241f19; --p-dim:#6a6254; --p-line:#d0c7b0; --p-acc:#2f5d3a; --p-bad:#7b2d20; --p-warn:#8a5a14; --p-card:#e4decd;
+  width:min(344px,100%); margin:0 auto; height:236px; display:flex; flex-direction:column; justify-content:flex-end;
+  background:var(--p-bg); color:var(--p-fg); border:8px solid #1a1b1a; border-top:0; border-radius:0 0 34px 34px; overflow:hidden; font:16px/1.45 var(--body)}
+.night .frame{--p-bg:#0c0b09; --p-fg:#ecdfc3; --p-dim:#a79a83; --p-line:#2d271f; --p-acc:#9cc79a; --p-bad:#eb9676; --p-warn:#e6b35a; --p-card:#17140f; color-scheme:dark}
+.frame button{font:inherit; color:inherit; background:none; border:0; padding:0; cursor:pointer}
+.frame :focus-visible{outline:2px solid var(--p-fg); outline-offset:2px}
+.ctx{flex:1; padding:14px 20px 0; font-size:16px; -webkit-mask-image:linear-gradient(transparent,#000 60%); mask-image:linear-gradient(transparent,#000 60%); overflow:hidden; display:flex; flex-direction:column; justify-content:flex-end}
+.ctx p{margin:0 0 .3em}
+.ctx b{font-weight:500; border-bottom:1.5px dotted currentColor}
+.said{font-style:italic; color:var(--p-dim); min-height:1.45em}
+.ex{padding:4px 20px 6px; white-space:nowrap; overflow-x:auto; scrollbar-width:none}
+.ex button{min-height:40px}
+.pr{padding:8px 20px 16px; border-top:1px solid var(--p-line); font-size:13px; color:var(--p-dim); white-space:nowrap; overflow-x:auto; scrollbar-width:none; display:flex; gap:10px; align-items:center}
+.pr .r{margin-left:auto}
+.mono{font-family:var(--mono)!important; font-size:13.5px!important; letter-spacing:0}
+.sc{font-family:var(--sc)!important; letter-spacing:.05em}
+.o{color:var(--p-fg)} .x{color:var(--p-bad)} .c{color:var(--p-warn)} .z{color:var(--p-dim); opacity:.45}
+.u{border-bottom:1px solid currentColor}
+.strike{text-decoration:line-through}
+.lo{color:var(--p-bad)} .mid{color:var(--p-warn)}
+.pos{border-bottom:1px dotted currentColor}
+.m{display:inline-flex; align-items:center; gap:4px}
+.m i{display:inline-block; width:34px; height:5px; border-radius:3px; background:var(--p-card); border:1px solid var(--p-line); overflow:hidden; position:relative}
+.m i b{position:absolute; inset:0 auto 0 0; background:var(--p-dim)}
+.m i b.lo{background:var(--p-bad)}
+.lbl{font:11px var(--sc); letter-spacing:.1em; color:var(--p-dim); margin-right:6px}
+.dots{flex:1; border-bottom:1.5px dotted var(--p-line); transform:translateY(-4px); min-width:20px}
+.slot{display:inline-block; min-width:26px; text-align:center}
+sup{font-size:.7em}
+</style>
+
+<div class="wrap">
+  <h1>Exits on one line</h1>
+  <p class="lede">Sixteen ways to print the exits the way a MUD does: <b>one line under the room</b>, with the <b>prompt below it</b> at the very bottom (time, place, <b>hp, mana, mv</b> and your <b>position</b>). Every word is a tap target. Use the controls to change the room, your position and how hurt you are. Tap an exit while resting and you’re told to stand first, the way a MUD would.</p>
+  <div class="ctl">
+    <div class="grp" role="group" aria-label="Room"><span>Room</span><button data-room="landing" aria-pressed="true">Ferry Landing</button><button data-room="mill" aria-pressed="false">Old Mill</button><button data-room="dark" aria-pressed="false">Dark shelter</button></div>
+    <div class="grp" role="group" aria-label="Position"><span>Position</span><button data-pos="standing" aria-pressed="true">standing</button><button data-pos="sitting" aria-pressed="false">sitting</button><button data-pos="resting" aria-pressed="false">resting</button><button data-pos="meditating" aria-pressed="false">meditating</button><button data-pos="sleeping" aria-pressed="false">sleeping</button></div>
+    <div class="grp" role="group" aria-label="Condition"><span>Condition</span><button data-hurt="0" aria-pressed="true">Hale</button><button data-hurt="1" aria-pressed="false">Hurt</button></div>
+    <div class="grp" role="group" aria-label="Page"><span>Page</span><button data-t="paper" aria-pressed="true">Paper</button><button data-t="night" aria-pressed="false">Night</button></div>
+  </div>
+  <div class="gallery" id="g"></div>
+</div>
+
+<script>
+const ROOMS={
+  landing:{name:'Ferry Landing',light:'Daylight',prose:'<p>Reeds crowd a slick wooden landing. A mooring post leans into the current.</p><p><b>Bram</b> the ferryman stands here, one boot on the ferry.</p>',
+    ex:[{d:'n',to:'Village Green',st:'open'},{d:'w',to:'the causeway',st:'barred',why:'The causeway west is under the tide.'}]},
+  mill:{name:'Old Mill',light:'Daylight',prose:'<p>Flour dust hangs in the still air. The millstone has not turned in years.</p><p><b>Hob’s ledger</b> lies open on a grain sack.</p>',
+    ex:[{d:'n',to:'Boathouse',st:'open'},{d:'s',to:'Empty Cottage',st:'open'},{d:'u',to:'Mill Loft',st:'open'},{d:'d',to:'Mill Cellar',st:'closed',why:'The trapdoor is closed.'}]},
+  dark:{name:'Darkness',light:'Dark',prose:'<p>It is too dark to see. You smell lamp oil and wet tar.</p><p><b>Something brass</b> is here, under your hand.</p>',
+    ex:[{d:'w',to:'Reed Bank',st:'open',felt:true}]},
+};
+const NM={n:'north',e:'east',s:'south',w:'west',u:'up',d:'down'}, ORDER=['n','e','s','w','u','d'];
+const ABBR={standing:'Std',sitting:'Sit',resting:'Rst',meditating:'Med',sleeping:'Slp'};
+const S={room:'landing',pos:'standing',hurt:false,mv:0,said:{}};
+const cap=w=>w[0].toUpperCase()+w.slice(1);
+const R=()=>ROOMS[S.room];
+const V=()=>({hp:S.hurt?14:20,mhp:20,ma:S.hurt?5:12,mma:12,mv:(S.hurt?42:80)-S.mv,mmv:80});
+const band=(v,m)=>v/m<=.35?'lo':v/m<=.75?'mid':'';
+/* an exit word: every format goes through this, so every one of them is a real button */
+const E=(e,text,cls='')=>`<button class="${cls} ${e.st==='open'?'o':e.st==='barred'?'x':'c'}" data-go="${e.d}" aria-label="${cap(NM[e.d])}${e.st==='open'?', to '+e.to:', '+e.st+'. '+(e.why||'')}">${text}</button>`;
+const posB=(t)=>`<button class="pos" data-a="pos" aria-label="Position ${S.pos}, tap to change">${t??S.pos}</button>`;
+const clock='06:00';
+
+const VARIANTS=[
+ ['Diku classic','Plain “Obvious exits:” and the old angle-bracket prompt. Honest to the source. Barred and open exits look the same until you tap.','mono',
+  ()=>`Obvious exits: ${R().ex.map(e=>E(e,NM[e.d])).join(' ')}`,
+  v=>`&lt;${v.hp}hp ${v.ma}m ${v.mv}mv&gt; ${posB(ABBR[S.pos])}<span class="r">${R().name} ${clock}</span>`],
+ ['ROM brackets','The ROM/Merc bracket with current/max values in the prompt. The most recognisable to a MUD veteran.','mono',
+  ()=>`[Exits: ${R().ex.map(e=>E(e,NM[e.d])).join(' ')}]`,
+  v=>`&lt;${v.hp}/${v.mhp}hp ${v.ma}/${v.mma}m ${v.mv}/${v.mmv}mv&gt; ${posB()}`],
+ ['Parentheses for doors','A closed or barred way is wrapped in parentheses, the Diku door convention. The state is readable without color.','mono',
+  ()=>`[Exits: ${R().ex.map(e=>E(e,e.st==='open'?NM[e.d]:`(${NM[e.d]})`)).join(' ')}]`,
+  v=>`[HP ${v.hp}/${v.mhp}] [MA ${v.ma}/${v.mma}] [MV ${v.mv}/${v.mmv}] ${posB(cap(S.pos))}`],
+ ['Abbreviated','Single letters, the way speed-walkers type them. Short and fast, and the letters are small targets.','mono',
+  ()=>`[ ${R().ex.map(e=>E(e,e.st==='open'?e.d.toUpperCase():`<span class="strike">${e.d.toUpperCase()}</span>`,'slot')).join(' ')} ]`,
+  v=>`${v.hp}h ${v.ma}m ${v.mv}v · ${posB(ABBR[S.pos])}<span class="r">${clock}</span>`],
+ ['Fixed slots','All six directions always in the same place (N E S W U D), with a dot for no exit. Muscle memory builds fast, since north is always the first slot.','mono',
+  ()=>ORDER.map(d=>{const e=R().ex.find(x=>x.d===d); return e?E(e,e.st==='open'?d.toUpperCase():`<span class="strike">${d.toUpperCase()}</span>`,'slot'):`<span class="slot z">·</span>`}).join(''),
+  v=>`${meter('HP',v.hp,v.mhp)}${meter('MA',v.ma,v.mma)}${meter('MV',v.mv,v.mmv)}${posB()}`],
+ ['All six, dimmed','The same fixed order spelled out as words. Missing exits fade, barred ones are struck through, and closed ones turn amber.','sc',
+  ()=>ORDER.map(d=>{const e=R().ex.find(x=>x.d===d); return e?E(e,e.st==='barred'?`<span class="strike">${NM[d]}</span>`:NM[d]):`<span class="z">${NM[d]}</span>`}).join(' &nbsp;'),
+  v=>`<span>${R().name}</span> · <span>${clock}</span> · ${posB()}<span class="r ${band(v.hp,v.mhp)}">${v.hp}/${v.mhp}</span>`],
+ ['Named destinations','Each exit carries where it leads, once you know. The clearest for a new player, and the longest line.','',
+  ()=>`<span class="lbl">Exits</span>${R().ex.map(e=>e.st==='open'?E(e,`<span class="u">${NM[e.d]}</span> to ${e.to}`):E(e,`<span class="u">${NM[e.d]}</span>, ${e.st}`)).join(' · ')}`,
+  v=>`${R().name}, ${clock} · you are ${posB()}<span class="r">${v.hp<v.mhp?'<span class="lo">hurt</span>':'hale'}</span>`],
+ ['A sentence','The exits written as prose, as the narrator would say them. No numbers anywhere, so the prompt speaks in words too.','',
+  ()=>sentence(),
+  v=>`${v.hp<v.mhp?'<span class="lo">Hurt</span>':'Hale'}, ${posB()}, early morning<span class="r">${R().name}</span>`],
+ ['MUSH angle brackets','Open ways in angle brackets, closed ones in square brackets, from the MUSH tradition. A neat code once learned.','mono',
+  ()=>`Exits: ${R().ex.map(e=>E(e,e.st==='open'?`&lt;${cap(NM[e.d])}&gt;`:`[${cap(NM[e.d])}]`)).join(' ')}`,
+  v=>`HP:${v.hp}/${v.mhp} MA:${v.ma}/${v.mma} MV:${v.mv}/${v.mmv} | ${posB(cap(S.pos))} | ${clock}`],
+ ['Exits in the prompt','No separate line: the exits live inside the prompt, like a %e prompt code. One line total, and the densest option.','mono',
+  ()=>``,
+  v=>`&lt;${v.hp}hp ${v.ma}m ${v.mv}mv&gt; [${R().ex.map(e=>E(e,e.st==='open'?e.d.toUpperCase():e.d.toLowerCase())).join('')}] ${posB(ABBR[S.pos])} &gt;`],
+ ['Arrows','Arrows with the destination beside them. Readable at a glance, and Up and Down get their own arrows.','',
+  ()=>R().ex.map(e=>E(e,`${{n:'↑',e:'→',s:'↓',w:'←',u:'⤒',d:'⤓'}[e.d]} ${e.st==='open'?e.to:`<span class="strike">${e.to}</span>`}`)).join(' &nbsp;&nbsp; '),
+  v=>`<span class="sc">${R().name}</span><span>${clock}</span>${posB()}<span class="r">${v.hp}·${v.ma}·${v.mv}</span>`],
+ ['Small-caps label','A quiet “EXITS” label in small caps, then italic words. The book version of the Diku line.','',
+  ()=>`<span class="lbl">Exits</span><i>${R().ex.map(e=>E(e,e.st==='barred'?`<span class="strike">${NM[e.d]}</span>`:e.st==='closed'?`${NM[e.d]} (closed)`:NM[e.d])).join(', ')}</i>`,
+  v=>`<span class="sc">hp</span> <span class="${band(v.hp,v.mhp)}">${v.hp}</span> <span class="sc">ma</span> ${v.ma} <span class="sc">mv</span> ${v.mv} · ${posB()}<span class="r">${clock}</span>`],
+ ['Signpost','Each exit as a finger on a signpost pointing to its place. The shape is warm, but the line gets long in a room with four exits.','',
+  ()=>R().ex.map(e=>E(e,`${cap(NM[e.d])} ⟶ ${e.st==='open'?e.to:`<span class="strike">${e.to}</span>`}`)).join(' · '),
+  v=>`${R().name} · ${clock} · ${posB()}<span class="r">${v.hp}<sup>hp</sup> ${v.ma}<sup>m</sup> ${v.mv}<sup>mv</sup></span>`],
+ ['Dot leaders','Like a contents page: EXITS, a dotted leader, then the ways out. The prompt uses superscript labels to stay small.','',
+  ()=>`<span style="display:flex;align-items:baseline;gap:8px"><span class="lbl">Exits</span><span class="dots"></span>${R().ex.map(e=>E(e,e.st==='barred'?`<span class="strike">${NM[e.d]}</span>`:NM[e.d])).join(' · ')}</span>`,
+  v=>`${posB(cap(S.pos))} · ${v.hp}<sup>hp</sup> ${v.ma}<sup>ma</sup> ${v.mv}<sup>mv</sup><span class="r">${R().name}, ${clock}</span>`],
+ ['Colour codes','A nod to ANSI: open exits in green, blocked in red, doors in amber, and the hp number takes the color of its band. Paired with brackets, so color is never the only signal.','mono',
+  ()=>`[Exits: ${R().ex.map(e=>E(e,e.st==='open'?NM[e.d]:`(${NM[e.d]})`)).join(' ')}]`,
+  v=>`&lt;<span class="${band(v.hp,v.mhp)||'o'}">${v.hp}hp</span> <span class="${band(v.ma,v.mma)}">${v.ma}m</span> <span class="${band(v.mv,v.mmv)}">${v.mv}mv</span>&gt; ${posB()}`],
+ ['Only what matters','No label, just the words. The prompt shows numbers only when something isn’t full, so a hale player sees only place, time and position.','',
+  ()=>R().ex.map(e=>E(e,e.st==='barred'?`<span class="strike">${NM[e.d]}</span>`:NM[e.d])).join(' · '),
+  v=>`${R().name} · ${clock} · ${posB()}<span class="r">${[['hp',v.hp,v.mhp],['ma',v.ma,v.mma],['mv',v.mv,v.mmv]].filter(([,a,b])=>a<b).map(([l,a,b])=>`<span class="${band(a,b)}">${a}${l}</span>`).join(' ')}</span>`],
+];
+function meter(l,a,b){return `<span class="m"><span class="lbl" style="margin:0">${l}</span><i><b class="${band(a,b)}" style="width:${Math.max(0,a/b*100)}%"></b></i></span>`;}
+function sentence(){
+  const ex=R().ex, open=ex.filter(e=>e.st==='open'), shut=ex.filter(e=>e.st!=='open');
+  if(ex.every(e=>e.felt)) return `You can feel your way back ${E(ex[0],`<span class="u">${NM[ex[0].d]}</span>`)}.`;
+  let s='You can go '+open.map((e,i)=>E(e,`<span class="u">${NM[e.d]}</span>`)+(i<open.length-2?', ':i===open.length-2?' or ':'')).join('')+'.';
+  shut.forEach(e=>s+=` The way ${E(e,`<span class="u">${NM[e.d]}</span>`)} is ${e.st}.`);
+  return s;
+}
+function render(){
+  const v=V();
+  document.getElementById('g').innerHTML=VARIANTS.map(([n,desc,cls,ex,pr],i)=>{const exits=ex();
+    return `<figure><div class="frame" data-i="${i}"><div class="ctx">${R().prose}<p class="said">${S.said[i]||''}</p></div>${exits?`<nav class="ex ${cls}" aria-label="Exits">${exits}</nav>`:''}<div class="pr ${cls}" role="status">${pr(v)}</div></div><figcaption><h2><span>${i+1}</span>${n}</h2><p>${desc}</p></figcaption></figure>`;}).join('');
+}
+document.getElementById('g').addEventListener('click',ev=>{
+  const b=ev.target.closest('button'); if(!b) return; const i=b.closest('.frame').dataset.i;
+  if(b.dataset.a==='pos'){const ps=Object.keys(ABBR); S.pos=ps[(ps.indexOf(S.pos)+1)%ps.length]; syncCtl(); S.said[i]=`You are now ${S.pos}.`; return render();}
+  const e=R().ex.find(x=>x.d===b.dataset.go); if(!e) return;
+  if(S.pos==='sleeping') S.said[i]='You dream of walking. Wake and stand first.';
+  else if(S.pos!=='standing') S.said[i]=`You are ${S.pos}. Stand up first.`;
+  else if(e.st!=='open') S.said[i]=e.why;
+  else {S.mv++; S.said[i]=`You go ${NM[e.d]} to the ${e.to}. (-1 mv)`;}
+  render();
+});
+function syncCtl(){
+  document.querySelectorAll('[data-room]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.room===S.room));
+  document.querySelectorAll('[data-pos]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.pos===S.pos));
+  document.querySelectorAll('[data-hurt]').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.hurt==='1')===S.hurt));
+}
+document.querySelector('.ctl').addEventListener('click',ev=>{
+  const b=ev.target.closest('button'); if(!b) return;
+  if(b.dataset.room){S.room=b.dataset.room; S.said={};}
+  if(b.dataset.pos) S.pos=b.dataset.pos;
+  if(b.dataset.hurt) {S.hurt=b.dataset.hurt==='1'; S.mv=0;}
+  if(b.dataset.t){document.querySelectorAll('[data-t]').forEach(x=>x.setAttribute('aria-pressed',x===b)); document.getElementById('g').classList.toggle('night',b.dataset.t==='night');}
+  syncCtl(); render();
+});
+render();
+</script>

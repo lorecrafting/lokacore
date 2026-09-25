@@ -1,0 +1,332 @@
+<title>Loka Tiny Map Footers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap">
+<style>
+:root{
+  --bg:#eceee9; --fg:#1d2320; --muted:#56615b; --line:#cfd5ce; --accent:#7b2d20; --panel:#f6f7f3;
+  --head:'IM Fell English',Georgia,serif; --sc:'IM Fell English SC',Georgia,serif; --body:'EB Garamond',Georgia,serif;
+  --orn:'EB Garamond','Apple Symbols','Segoe UI Symbol',serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark; --bg:#121614; --fg:#e2e5df; --muted:#9aa59e; --line:#2a322e; --accent:#d9937a; --panel:#181d1a}}
+:root[data-theme="dark"]{color-scheme:dark; --bg:#121614; --fg:#e2e5df; --muted:#9aa59e; --line:#2a322e; --accent:#d9937a; --panel:#181d1a}
+body{background:var(--bg); color:var(--fg); font:17px/1.55 var(--body); padding-inline:16px; padding-block:28px 64px}
+.wrap{max-width:1180px; margin:0 auto}
+h1{font:400 clamp(2rem,5vw,3rem)/1.05 var(--head); margin:0 0 .3em; text-wrap:balance}
+.lede{max-width:68ch; color:var(--muted); margin:0 0 1em}
+.lede b{color:var(--fg); font-weight:500}
+.ctl{display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center; margin:0 0 28px; padding:10px 0; border-block:1px solid var(--line); font-size:.95rem; position:sticky; top:env(safe-area-inset-top,0px); background:var(--bg); z-index:5}
+.grp{display:flex; flex-wrap:wrap; gap:4px; align-items:center}
+.grp>span{font:.9rem var(--sc); color:var(--muted); letter-spacing:.04em; margin-right:4px}
+.ctl button{font:inherit; font-size:.88rem; padding:3px 10px; border:1px solid var(--line); background:var(--panel); color:var(--fg); border-radius:4px; cursor:pointer}
+.ctl button[aria-pressed="true"]{background:var(--fg); color:var(--bg); border-color:var(--fg)}
+.gallery{display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,318px),1fr)); gap:36px 26px}
+figure{margin:0; display:flex; flex-direction:column; gap:10px}
+figcaption h2{font:400 1.18rem/1.2 var(--head); margin:0; display:flex; gap:.5em; align-items:baseline}
+figcaption h2 span{font:.95rem var(--sc); color:var(--accent)}
+figcaption p{margin:.2em 0 0; color:var(--muted); font-size:.95rem; line-height:1.45}
+
+/* ---------- the phone slice ---------- */
+.frame{--p-bg:#ebe6d7; --p-fg:#241f19; --p-dim:#6a6254; --p-line:#cdc3aa; --p-bad:#7b2d20; --p-warn:#8a5a14;
+  width:min(344px,100%); margin:0 auto; height:250px; display:flex; flex-direction:column; justify-content:flex-end;
+  background:var(--p-bg); color:var(--p-fg); border:8px solid #1a1b1a; border-top:0; border-radius:0 0 34px 34px; overflow:hidden; font:16px/1.45 var(--body); font-variant-numeric:oldstyle-nums}
+.night .frame{--p-bg:#0c0b09; --p-fg:#ecdfc3; --p-dim:#a79a83; --p-line:#3a3228; --p-bad:#eb9676; --p-warn:#e6b35a; color-scheme:dark}
+.frame button{font:inherit; color:inherit; background:none; border:0; padding:0; cursor:pointer}
+.frame :focus-visible{outline:2px solid var(--p-fg); outline-offset:2px}
+.ctx{flex:1; padding:14px 22px 0; -webkit-mask-image:linear-gradient(transparent,#000 60%); mask-image:linear-gradient(transparent,#000 60%); overflow:hidden; display:flex; flex-direction:column; justify-content:flex-end}
+.ctx p{margin:0 0 .3em}
+.ctx b{font-weight:500; border-bottom:1.5px dotted currentColor}
+.said{font-style:italic; color:var(--p-dim); min-height:1.45em}
+
+/* the footer block: a divider, the exits, the status */
+.blk{padding:4px 22px 16px; display:flex; flex-direction:column; gap:0}
+.ex{white-space:nowrap; overflow-x:auto; scrollbar-width:none; font-size:15.5px}
+.ex button,.ex .no{display:inline-block; min-height:38px; line-height:38px}
+.go{color:var(--p-dim)}
+.has{font-weight:600}
+.no{color:var(--p-dim); opacity:.5}
+.barred{text-decoration:line-through; text-decoration-thickness:1px}
+.closed{font-style:italic}
+.st{display:flex; flex-wrap:wrap; align-items:baseline; gap:0 8px; font-size:13px; color:var(--p-dim); white-space:nowrap; line-height:1.55}
+.st.stack{flex-direction:column; align-items:inherit; gap:0}
+.st .r{margin-left:auto}
+.st .lo{color:var(--p-bad)} .st .mid{color:var(--p-warn)}
+.pos{border-bottom:0!important}
+.center{text-align:center; align-items:center}
+.center .st{justify-content:center}
+
+/* dividers: small, quiet, bookish */
+.dv{height:14px; display:flex; align-items:center; gap:10px; color:var(--p-dim); margin-bottom:2px}
+.dv.hair{border-top:1px solid var(--p-line); height:0; margin:6px 0 6px}
+.dv.double{height:3px; border-block:1px solid var(--p-line); margin:6px 0 6px}
+.dv.dots{border-top:1.5px dotted var(--p-line); height:0; margin:6px 0 6px}
+.dv.short{width:44px; border-top:1px solid var(--p-dim); height:0; margin:8px auto 6px; opacity:.7}
+.dv.orn::before,.dv.orn::after{content:''; flex:1; height:1px; background:var(--p-line)}
+.dv.orn.narrow{width:150px; margin-inline:auto}
+.dv span{font:13px/1 var(--orn); opacity:.8}
+.dv.sym{justify-content:center; font:13px/1 var(--orn); letter-spacing:.2em; opacity:.8; height:18px}
+.dv.swell svg{width:100%; height:6px; display:block}
+.dv.swell path{fill:var(--p-dim); opacity:.55}
+.dv.titled span{font:10.5px var(--sc); letter-spacing:.2em; opacity:.9}
+.dv.maprule{height:auto}
+.frame-tb{border-block:1px solid var(--p-line); margin:0 16px 14px; padding:6px 8px 6px}
+.corners{position:relative; margin:0 16px 14px; padding:8px 12px}
+.corners::before,.corners::after{content:''; position:absolute; width:12px; height:12px; border:1px solid var(--p-dim); opacity:.6}
+.corners::before{left:0; top:0; border-right:0; border-bottom:0}
+.corners::after{right:0; bottom:0; border-left:0; border-top:0}
+.card{margin:0 14px 14px; padding:6px 12px 8px; border:1px solid var(--p-line); border-radius:12px}
+
+/* the map ornament row */
+.mo{display:flex; align-items:center; justify-content:center; gap:7px; margin:6px 0 2px; color:var(--p-dim)}
+.mo.left{justify-content:flex-start} .mo.right{justify-content:flex-end}
+.rl{display:block; height:1px; background:var(--p-line); flex-shrink:0}
+.rl.double{height:3px; background:none; border-block:1px solid var(--p-line)}
+.rl.dots{height:0; background:none; border-top:1.5px dotted var(--p-dim); opacity:.55}
+.rl.fl{background:linear-gradient(to left,var(--p-dim),transparent); opacity:.7}
+.rl.fr{background:linear-gradient(to right,var(--p-dim),transparent); opacity:.7}
+.tp{display:block; flex-shrink:0} .tp path{fill:var(--p-dim); opacity:.6}
+.end{font:8px/1 var(--orn); opacity:.65}
+.end.leaf{font-size:14px}
+.end.pt{font-size:11px}
+.flank{font-size:13px; color:var(--p-dim)}
+.flank.sc{font:10.5px var(--sc); letter-spacing:.2em}
+.mini .fr{fill:none; stroke:var(--p-line); stroke-width:.9}
+.mini .nt{font:7.5px var(--sc); fill:var(--p-dim); letter-spacing:0}
+.right-text{text-align:right; align-items:flex-end}
+.right-text .st{justify-content:flex-end}
+.st.one{flex-wrap:nowrap; overflow:hidden; justify-content:center}
+.st.split{flex-wrap:nowrap; justify-content:space-between; overflow:hidden}
+.st .stat{color:inherit}
+.st .stat:focus-visible{outline:2px solid var(--p-fg)}
+.st sup{font-size:.72em; margin-left:1px}
+.st .mx{opacity:.6; font-size:.86em}
+.st .fr{font-variant-numeric:diagonal-fractions oldstyle-nums}
+.st .lb{font:.82em var(--sc); letter-spacing:.06em; margin-right:2px}
+.st .lbA{font:.82em var(--sc); letter-spacing:.06em; margin-left:2px}
+.mini .ho{fill:var(--p-bg); stroke:var(--p-fg); stroke-width:.8; opacity:.8}
+.mini .ring{fill:none; stroke:var(--p-fg); stroke-width:.9} .mini .ring.dk{stroke-dasharray:1.3 1.3}
+.mini .un{opacity:.35}
+.blk .lft{align-self:stretch; text-align:left; justify-content:flex-start}
+.mini .dark .you{fill:none; stroke:var(--p-fg); stroke-width:.9}
+/* a turned page inside the slice */
+.ov{position:absolute; inset:0; background:var(--p-bg); display:flex; flex-direction:column; padding:18px 22px 16px; gap:8px; z-index:3}
+.ov h3{font:400 1.5em/1.1 var(--head); margin:0}
+.ov .eb{font:11px var(--sc); letter-spacing:.14em; color:var(--p-dim); margin:0}
+.ov dl{display:grid; grid-template-columns:auto 1fr; gap:2px 14px; margin:0; font-size:15px}
+.ov dt{font:12px var(--sc); color:var(--p-dim); letter-spacing:.06em; padding-top:.2em}
+.ov dd{margin:0}
+.ov .bk{margin-top:auto; align-self:center; font:13px var(--sc)!important; letter-spacing:.08em; color:var(--p-dim)!important; min-height:40px}
+.ov .big{display:flex; justify-content:center}
+.frame{position:relative}
+/* layouts */
+.side{display:grid; grid-template-columns:1fr auto; align-items:center; gap:0 12px}
+.side.left{grid-template-columns:auto 1fr}
+.side>div{min-width:0}
+.side .st{white-space:normal; flex-wrap:wrap; row-gap:0; line-height:1.5}
+.marg{display:grid; grid-template-columns:4.6em 1fr; align-items:baseline}
+.marg .gl{font-size:13px; color:var(--p-dim)}
+.marg .ex{grid-column:2}
+.strip{display:flex; justify-content:center; margin:2px 0 0}
+
+/* the minimap: hairlines and dots, like an endpaper map */
+.mini{display:block; line-height:0}
+.mini svg{display:block; overflow:visible}
+.mini .e{stroke:var(--p-fg); stroke-width:.9; opacity:.75; fill:none}
+.mini .s{stroke:var(--p-fg); stroke-width:.9; opacity:.55; stroke-dasharray:1.2 2.2}
+.mini .x{stroke:var(--p-bad); stroke-width:.9; opacity:.8}
+.mini .n{fill:var(--p-fg); opacity:.75}
+.mini .me{fill:none; stroke:var(--p-fg); stroke-width:.9}
+.mini .dot{fill:var(--p-fg)}
+.mini .dark .me{stroke-dasharray:1.4 1.4}
+.mini .v{stroke:var(--p-fg); stroke-width:.8; opacity:.6; fill:none}
+.mini text{font:8.5px var(--sc); letter-spacing:.14em; fill:var(--p-dim)}
+</style>
+
+<div class="wrap">
+  <h1>Tiny map, long rules</h1>
+  <p class="lede">Built from #17 and #1. Paths now <b>meet each circle at its edge</b>, you are an <b>open ring</b>, and the map shows places <b>two steps out</b>. Variants 2–5 reverse it (a solid you, open rings for places), and 6–9 set “You can go” flush left. The status always stays on <b>one line</b>. Tap the <b>map</b> to open the Map page, tap the <b>numbers</b> to open Character, and tap your <b>position</b> to change it.</p>
+  <div class="ctl">
+    <div class="grp" role="group" aria-label="Room"><span>Room</span><button data-room="landing" aria-pressed="true">Ferry Landing</button><button data-room="mill" aria-pressed="false">Old Mill</button><button data-room="dark" aria-pressed="false">Dark shelter</button></div>
+    <div class="grp" role="group" aria-label="Position"><span>Position</span><button data-pos="standing" aria-pressed="true">standing</button><button data-pos="sitting" aria-pressed="false">sitting</button><button data-pos="resting" aria-pressed="false">resting</button><button data-pos="meditating" aria-pressed="false">meditating</button><button data-pos="sleeping" aria-pressed="false">sleeping</button></div>
+    <div class="grp" role="group" aria-label="Condition"><span>Condition</span><button data-hurt="0" aria-pressed="true">Hale</button><button data-hurt="1" aria-pressed="false">Hurt</button></div>
+    <div class="grp" role="group" aria-label="Page"><span>Page</span><button data-t="paper" aria-pressed="true">Paper</button><button data-t="night" aria-pressed="false">Night</button></div>
+  </div>
+  <div class="gallery" id="g"></div>
+</div>
+
+<script>
+const ROOMS={
+  landing:{prose:'<p>Reeds crowd a slick wooden landing. A mooring post leans into the current.</p><p><b>Bram</b> the ferryman stands here, one boot on the ferry.</p>',
+    ex:{n:{st:'open'},w:{st:'barred',why:'The causeway west is under the tide.'}},
+    map:{nodes:[[0,-1],[1,-1,'u'],[0,-2,'u']],edges:[[[0,0],[0,-1]],[[0,-1],[1,-1],'u'],[[0,-1],[0,-2],'u']],stubs:[[1,-1,1,0,'s'],[0,0,-1,0,'x']]}},
+  mill:{prose:'<p>Flour dust hangs in the still air. The millstone has not turned in years.</p><p><b>Hob’s ledger</b> lies open on a grain sack.</p>',
+    ex:{n:{st:'open'},s:{st:'open'},u:{st:'open'},d:{st:'closed',why:'The trapdoor is closed.'}},
+    map:{nodes:[[0,-1],[1,-1],[0,1,'u'],[0,2,'u']],edges:[[[0,0],[0,-1]],[[0,-1],[1,-1]],[[0,0],[0,1],'u'],[[0,1],[0,2],'u']],stubs:[]}},
+  dark:{prose:'<p>It is too dark to see. You smell lamp oil and wet tar.</p><p><b>Something brass</b> is here, under your hand.</p>',
+    ex:{w:{st:'open'}}, dark:true,
+    map:{nodes:[[-1,0],[-2,0],[-2,1]],edges:[[[0,0],[-1,0]],[[-1,0],[-2,0]],[[-2,0],[-2,1]]],stubs:[[-2,1,-1,0,'x']]}},
+};
+const ORDER=['n','e','s','w','u','d'];
+const WORD={n:'north',e:'east',s:'south',w:'west',u:'up',d:'down'};
+const SHORT={n:'N',e:'E',s:'S',w:'W',u:'Up',d:'Dn'};
+const POS=['standing','sitting','resting','meditating','sleeping'];
+const S={room:'landing',pos:'standing',hurt:false,mv:0,said:{},ov:{}};
+const R=()=>ROOMS[S.room];
+const band=(v,m)=>v/m<=.35?'lo':v/m<=.75?'mid':'';
+const cur=()=>[[S.hurt?104:300,300,'hp'],[S.hurt?70:120,120,'ma'],[(S.hurt?150:200)-S.mv,200,'mv']];
+
+function W(d,text){
+  const e=R().ex[d];
+  if(!e) return `<span class="no" aria-label="${WORD[d]}, no exit">${text}</span>`;
+  return `<button class="has ${e.st==='open'?'':e.st}" data-go="${d}" aria-label="${WORD[d]}${e.st==='open'?'':', '+e.st}">${text}</button>`;
+}
+const EX=(o={})=>`<nav class="ex" aria-label="Exits"><span class="go">You can go</span>&ensp;${ORDER.map(d=>W(d,(o.short?SHORT:WORD)[d])).join(o.short?'&ensp;':' ')}</nav>`;
+const posB=()=>`<button class="pos" data-a="pos" aria-label="Position ${S.pos}, tap to change">${S.pos}</button>`;
+/* the numbers, in several one-line forms; the whole group is one button to the Character page */
+const FMT={
+  plain:([a,b,l])=>`${a}/${b} ${l}`,
+  lead:([a,b,l])=>`<span class="lb">${l}</span>${a}/${b}`,
+  sup:([a,b,l])=>`${a}/${b}<sup>${l}</sup>`,
+  dimmax:([a,b,l])=>`${a}<span class="mx">/${b}</span> ${l}`,
+  frac:([a,b,l])=>`<span class="fr">${a}/${b}</span> ${l}`,
+  bare:([a,b])=>`${a}/${b}`,
+  scafter:([a,b,l])=>`${a}/${b}<span class="lbA">${l}</span>`,
+};
+function stats(f='plain',sep=' · '){
+  return `<button class="stat" data-a="stats" aria-label="${cur().map(([a,b,l])=>`${l} ${a} of ${b}`).join(', ')}. Open Character">${cur().map(v=>`<span class="${band(v[0],v[1])}">${FMT[f](v)}</span>`).join(sep)}</button>`;
+}
+/* one-line status; split puts time and position left, numbers right */
+function ST(o={}){
+  const f=o.f||'plain',sep=o.sep??' · ';
+  if(o.mode==='stats') return `<div class="st one" role="status">${stats(f,sep)}</div>`;
+  if(o.mode==='posstats') return `<div class="st one" role="status">${posB()} · ${stats(f,sep)}</div>`;
+  if(o.mode==='split') return `<div class="st split" role="status"><span>06:00 · ${posB()}</span>${stats(f,sep)}</div>`;
+  return `<div class="st one" role="status">06:00 · ${posB()} · ${stats(f,sep)}</div>`;
+}
+/* the map: paths meet each circle at its edge; you are an open ring; places two steps out */
+function MAP(w,h,o={}){
+  const m=R().map,k=o.k||9,cx=w/2,cy=o.cy??h/2,P=([x,y])=>[cx+x*k,cy+y*k],inv=o.inv,nr=o.nr??(inv?1.9:1.4),ry=o.you??(inv?2.4:2.7);
+  /* inv: you are the solid dot and the places around you are open rings */
+  const rad=([x,y])=>x===0&&y===0?(inv?ry:ry+.45):(inv?nr+.45:nr);
+  const seg=(a,b)=>{const [x1,y1]=P(a),[x2,y2]=P(b),dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy)||1,ra=rad(a),rb=rad(b);
+    return [x1+dx/L*ra,y1+dy/L*ra,x2-dx/L*rb,y2-dy/L*rb];};
+  let g='';
+  m.edges.forEach(([a,b,u])=>{const [x1,y1,x2,y2]=seg(a,b); g+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="${u?'s':'e'}"/>`;});
+  m.stubs.forEach(([x,y,dx,dy,t])=>{const [x0,y0]=P([x,y]),a=rad([x,y]),x1=x0+dx*a,y1=y0+dy*a,x2=x1+dx*k*.45,y2=y1+dy*k*.45;
+    g+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="${t==='x'?'x':'s'}"/>`;
+    if(t==='x') g+=`<line x1="${x2-dy*2}" y1="${y2-dx*2}" x2="${x2+dy*2}" y2="${y2+dx*2}" class="x"/>`;});
+  m.nodes.forEach(([x,y,u])=>{const [px,py]=P([x,y]); g+=`<circle cx="${px}" cy="${py}" r="${nr}" class="${inv?'ring':'n'} ${u?'un':''}"/>`;});
+  g+=`<circle cx="${cx}" cy="${cy}" r="${ry}" class="${inv?(R().dark?'ring dk':'you'):'ring '+(R().dark?'dk':'')}"/>`;
+  if(o.north) g+=`<text x="${cx}" y="6" text-anchor="middle" class="nt">n</text>`;
+  if(o.cap) g+=`<text x="${w/2}" y="${h-1}" text-anchor="middle">${o.cap}</text>`;
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true">${g}</svg>`;
+}
+const MAPB=(w,h,o)=>`<button class="mini" data-a="map" aria-label="Map of Ashmere. Open the Map page">${MAP(w,h,o)}</button>`;
+function RULE(kind,len,side){
+  if(kind==='none') return '';
+  if(kind==='taper') return `<svg class="tp" width="${len}" height="5" aria-hidden="true"><path d="${side==='l'?`M0 2.5 L${len} 1.2 L${len} 3.8 Z`:`M0 1.2 L0 3.8 L${len} 2.5 Z`}"/></svg>`;
+  if(kind==='fade') return `<i class="rl ${side==='l'?'fl':'fr'}" style="width:${len}px"></i>`;
+  return `<i class="rl ${kind==='hair'?'':kind}" style="width:${len}px"></i>`;
+}
+const ENDS={diamond:['◆','◆',''],dot:['•','•','pt'],point:['·','·','pt']};
+function MO(o={}){
+  const len=o.len??86,rule=o.rule??'hair',e=o.end&&ENDS[o.end],map=MAPB(...(o.map||[44,40]),o.mo||{});
+  const L=`${o.flankL?`<span class="flank">${o.flankL}</span>`:''}${e?`<span class="end ${e[2]}">${e[0]}</span>`:''}${RULE(rule,len,'l')}`;
+  const Rt=`${RULE(rule,len,'r')}${e?`<span class="end ${e[2]}">${e[1]}</span>`:''}${o.flankR?`<span class="flank">${o.flankR}</span>`:''}`;
+  if(o.align==='left') return `<div class="mo left">${map}${Rt}</div>`;
+  return `<div class="mo">${L}${map}${Rt}</div>`;
+}
+const C=(mo,st={},ex={})=>`<div class="blk center">${MO(mo)}${EX(ex)}${ST(st)}</div>`;
+const lft=h=>h.replace('class="ex"','class="ex lft"');
+const lftS=h=>h.replace(/class="st (one|split)"/,'class="st $1 lft"');
+
+const VARIANTS=[
+ ['#1, redrawn','Paths now meet each circle exactly at its edge. You are an open ring, and the map reaches two places out (places you haven’t visited are faint).',
+  ()=>C({})],
+ ['Solid you, open places','The reverse: you are the solid dot and every connected place is an open ring. The lines still stop exactly at each edge.',
+  ()=>C({mo:{inv:true}})],
+ ['Solid you, open places, flush left','The reversed map with “You can go” flush left and the status centered.',
+  ()=>`<div class="blk center">${MO({mo:{inv:true}})}${lft(EX())}${ST()}</div>`],
+ ['Solid you, larger rings','The reversed map drawn a size up, so the open rings read clearly, with the #2 status.',
+  ()=>`<div class="blk center">${MO({len:76,map:[54,46],mo:{inv:true,k:11,nr:2.3,you:2.9}})}${EX()}${ST({f:'lead',sep:'&ensp;'})}</div>`],
+ ['Solid you, all flush left','Reversed map leading the rule at the left, with both lines flush left beneath it.',
+  ()=>`<div class="blk">${MO({align:'left',len:200,mo:{inv:true}})}${EX()}${ST({f:'lead',sep:'&ensp;'}).replace('class="st one"','class="st one lft"')}</div>`],
+ ['“You can go” flush left','The exits line starts at the left margin like the prose above it, with the ornament and status still centered.',
+  ()=>`<div class="blk center">${MO({})}${lft(EX())}${ST()}</div>`],
+ ['Both lines flush left','“You can go” and the status both set flush left under a centered ornament, like the last lines of a paragraph.',
+  ()=>`<div class="blk center">${MO({})}${lft(EX())}${lftS(ST())}</div>`],
+ ['Flush left, map leading','Everything starts at the left margin. The map opens the rule, and the hairline runs out to the right.',
+  ()=>`<div class="blk">${MO({align:'left',len:210})}${EX()}${ST({f:'lead',sep:'&ensp;'}).replace('class="st one"','class="st one lft"')}</div>`],
+ ['Flush left, status from #2','Exits flush left, with the #2 status (labels first, hp 300/300) flush left as well.',
+  ()=>`<div class="blk center">${MO({})}${lft(EX())}${lftS(ST({f:'lead',sep:'&ensp;'}))}</div>`],
+ ['Hollow places','Places you’ve been are tiny open rings and you are the only solid dot, so you find yourself at once.',
+  ()=>C({mo:{hollow:true,nr:1.5}},{f:'lead',sep:'&ensp;'})],
+ ['Wider gaps','The paths float further from the dots, like a map drawn with a light hand. The labels are superscript.',
+  ()=>C({mo:{gap:4.5}},{f:'sup'})],
+ ['Fading rules, quiet maxima','Hairlines fade outward. In the status the maximum is set smaller and lighter than the current value.',
+  ()=>C({rule:'fade'},{f:'dimmax'})],
+ ['Book fractions','The numbers set as real typographic fractions, so 300/300 takes the room of one number.',
+  ()=>C({},{f:'frac'})],
+ ['Time and position on the rule','06:00 at the left end of the rule and your position at the right, so the line below is only the numbers.',
+  ()=>`<div class="blk center">${MO({len:64,flankL:'06:00',flankR:posB()})}${EX()}${ST({mode:'stats'})}</div>`],
+ ['Split line','One line, pushed to both edges: time and position at the left, the numbers at the right.',
+  ()=>C({},{mode:'split',sep:'&ensp;'})],
+ ['Set left','The map starts the rule at the left and the hairline runs out to the right. Everything is flush left.',
+  ()=>`<div class="blk">${MO({align:'left',len:200})}${EX()}${ST({mode:'split',sep:'&ensp;'})}</div>`],
+ ['Dot ends, labels first','Long rules finished with bullets. Labels come first in small caps: hp 300/300.',
+  ()=>C({len:82,end:'dot'},{f:'lead',sep:'&ensp;'})],
+ ['North mark','A tiny “n” over the map, which is otherwise unchanged.',
+  ()=>C({map:[30,32],mo:{north:true,cy:19}})],
+ ['Short exits','N E S W Up Dn keeps the exits line short so the whole block breathes.',
+  ()=>C({},{},{short:true})],
+ ['Tapered long rules','The long rules taper to a point at their outer ends. Small-caps labels follow the numbers.',
+  ()=>C({rule:'taper',len:96},{f:'scafter',sep:'&ensp;'})],
+ ['Dotted long rules','Dotted leaders in place of hairlines, with the hour on the left end of the rule.',
+  ()=>`<div class="blk center">${MO({rule:'dots',len:70,flankL:'06:00'})}${EX()}${ST({mode:'posstats'})}</div>`],
+ ['Numbers only','No labels at all: 300/300 · 120/120 · 200/200. The order never changes, and the Character page names them.',
+  ()=>C({},{f:'bare'})],
+ ['Bigger you','Your dot is a little heavier than the rest, so you read as the center of the drawing.',
+  ()=>C({mo:{you:2.6,nr:1.1}})],
+ ['Double rules','Two fine lines on each side, stretched long.',
+  ()=>C({rule:'double',len:84})],
+ ['Diamond ends, fractions','Diamond terminals on the rules, and fractions in the status.',
+  ()=>C({len:80,end:'diamond'},{f:'frac'})],
+ ['Map a touch larger','Slightly larger (36px) so the barred stub and unexplored path are easier to see, with the same long rules.',
+  ()=>C({len:84,map:[40,34],mo:{k:10}},{f:'dimmax'})],
+];
+function overlay(kind){
+  if(kind==='map') return `<div class="ov"><p class="eb">Contents</p><h3>Map</h3><div class="big">${MAP(200,110,{k:32,gap:7,nr:3,you:4.2,cap:'ashmere',cy:62})}</div><button class="bk" data-a="back">‹ Back</button></div>`;
+  const pos=`<button class="pos" data-a="pos">${S.pos}</button>`;
+  return `<div class="ov"><p class="eb">Contents</p><h3>Character</h3><dl>${cur().map(([a,b,l])=>`<dt>${{hp:'health',ma:'mana',mv:'moves'}[l]}</dt><dd class="${band(a,b)}">${a} of ${b}</dd>`).join('')}<dt>position</dt><dd>${pos}</dd></dl><button class="bk" data-a="back">‹ Back</button></div>`;
+}
+function render(){
+  document.getElementById('g').innerHTML=VARIANTS.map(([n,desc,f],i)=>`<figure><div class="frame" data-i="${i}"><div class="ctx">${R().prose}<p class="said">${S.said[i]||''}</p></div>${f()}${S.ov[i]?overlay(S.ov[i]):''}</div><figcaption><h2><span>${i+1}</span>${n}</h2><p>${desc}</p></figcaption></figure>`).join('');
+  /* safety net: a status that still overflows steps its size down until it fits on one line */
+  document.querySelectorAll('.st.one,.st.split').forEach(el=>{let fs=13; while(el.scrollWidth>el.clientWidth&&fs>10.5){fs-=.5; el.style.fontSize=fs+'px';}});
+}
+document.getElementById('g').addEventListener('click',ev=>{
+  const b=ev.target.closest('button'); if(!b) return; const i=b.closest('.frame').dataset.i;
+  if(b.dataset.a==='pos'){S.pos=POS[(POS.indexOf(S.pos)+1)%POS.length]; syncCtl(); S.said[i]=`You are now ${S.pos}.`; return render();}
+  if(b.dataset.a==='map'||b.dataset.a==='stats'){S.ov[i]=b.dataset.a; return render();}
+  if(b.dataset.a==='back'){delete S.ov[i]; return render();}
+  const d=b.dataset.go, e=R().ex[d]; if(!e) return;
+  if(S.pos==='sleeping') S.said[i]='You dream of walking. Wake and stand first.';
+  else if(S.pos!=='standing') S.said[i]=`You are ${S.pos}. Stand up first.`;
+  else if(e.st!=='open') S.said[i]=e.why;
+  else {S.mv++; S.said[i]=`You go ${WORD[d]}.`;}
+  render();
+});
+function syncCtl(){
+  document.querySelectorAll('[data-room]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.room===S.room));
+  document.querySelectorAll('[data-pos]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.pos===S.pos));
+  document.querySelectorAll('[data-hurt]').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.hurt==='1')===S.hurt));
+}
+document.querySelector('.ctl').addEventListener('click',ev=>{
+  const b=ev.target.closest('button'); if(!b) return;
+  if(b.dataset.room){S.room=b.dataset.room; S.said={}; S.ov={};}
+  if(b.dataset.pos) S.pos=b.dataset.pos;
+  if(b.dataset.hurt){S.hurt=b.dataset.hurt==='1'; S.mv=0;}
+  if(b.dataset.t){document.querySelectorAll('[data-t]').forEach(x=>x.setAttribute('aria-pressed',x===b)); document.getElementById('g').classList.toggle('night',b.dataset.t==='night');}
+  syncCtl(); render();
+});
+render();
+</script>

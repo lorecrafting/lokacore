@@ -1,0 +1,1042 @@
+<title>Loka Room View</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap">
+<style>
+:root{
+  --bg:#eceee9; --fg:#1d2320; --muted:#56615b; --line:#cfd5ce; --accent:#7b2d20; --panel:#f6f7f3;
+  --head:'IM Fell English',Georgia,serif; --sc:'IM Fell English SC',Georgia,serif;
+  --body:'EB Garamond',Georgia,serif; --size:18px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark; --bg:#121614; --fg:#e2e5df; --muted:#9aa59e; --line:#2a322e; --accent:#d9937a; --panel:#181d1a}}
+:root[data-theme="dark"]{color-scheme:dark; --bg:#121614; --fg:#e2e5df; --muted:#9aa59e; --line:#2a322e; --accent:#d9937a; --panel:#181d1a}
+body{background:var(--bg); color:var(--fg); font:17px/1.55 var(--body); padding-inline:16px; padding-block:28px 64px}
+.wrap{max-width:1040px; margin:0 auto}
+h1{font:400 clamp(2rem,5vw,3rem)/1.05 var(--head); margin:0 0 .3em; text-wrap:balance}
+h2{font:400 1.45rem/1.1 var(--sc); margin:0 0 .4em; letter-spacing:.02em}
+.lede{max-width:64ch; color:var(--muted); margin:0 0 1.4em}
+.lede b{color:var(--fg); font-weight:500}
+.grid{display:grid; grid-template-columns:minmax(0,380px) minmax(0,1fr); gap:36px; align-items:start}
+@media (max-width:820px){.grid{grid-template-columns:1fr}}
+.stage{display:flex; flex-direction:column; gap:12px}
+.phone{width:min(372px,100%); height:760px; margin:0 auto; border:9px solid #1a1b1a; border-radius:38px; overflow:hidden; background:#1a1b1a; box-shadow:0 18px 40px -24px rgba(0,0,0,.45)}
+.tools{display:flex; flex-wrap:wrap; gap:6px; justify-content:center}
+.tools button,.tools label{font:inherit; font-size:.85rem; padding:4px 10px; border:1px solid var(--line); background:var(--panel); color:var(--fg); border-radius:4px; cursor:pointer; display:flex; gap:6px; align-items:center}
+.tools input{accent-color:var(--accent)}
+.anat{margin:0; padding:0; list-style:none; display:grid; gap:14px; counter-reset:a}
+.anat li{display:grid; grid-template-columns:1.8em 1fr; gap:0 10px; counter-increment:a}
+.anat li::before{content:counter(a); font:1.1rem var(--head); color:var(--accent); grid-row:span 2}
+.anat b{font:400 1.08rem var(--head)}
+.anat p{margin:0; color:var(--muted); font-size:.97rem}
+code{font:.82em ui-monospace,Menlo,monospace; background:var(--panel); padding:1px 4px; border-radius:3px; color:var(--fg)}
+.decisions{margin:28px 0 0; padding:16px 0 0; border-top:1px solid var(--line); display:grid; gap:8px; font-size:.97rem}
+.decisions dt{font:400 1rem var(--sc); color:var(--accent); letter-spacing:.03em}
+.decisions dd{margin:0}
+.gv{margin-top:48px; padding-top:22px; border-top:1px solid var(--line); max-width:78ch}
+.gv ol{padding-left:1.4em; display:grid; gap:10px}
+
+/* ---------- the phone ---------- */
+.ph{--p-bg:#ebe6d7; --p-fg:#241f19; --p-dim:#645c4f; --p-line:#d0c7b0; --p-acc:#7b2d20; --p-card:#e4decd; --p-sheet:#f4f0e5; --p-bad:#7b2d20;
+  position:relative; height:100%; background:var(--p-bg); color:var(--p-fg); font:calc(var(--size)*.86)/1.4 var(--body); overflow:hidden; transition:background-color .6s,color .6s}
+.ph.unlit,.ph.lamp{--p-bg:#0c0b09; --p-fg:#ecdfc3; --p-dim:#a79a83; --p-line:#2d271f; --p-acc:#e6a650; --p-card:#17140f; --p-sheet:#15120e; --p-bad:#eb9676; color-scheme:dark}
+.ph button{font:inherit; color:inherit; cursor:pointer}
+.ph :focus-visible{outline:2px solid var(--p-acc); outline-offset:2px}
+.glow{position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity .9s; background:radial-gradient(130% 75% at 50% 104%, rgba(230,152,58,.30), rgba(230,152,58,.08) 45%, transparent 72%)}
+.ph.lamp .glow{opacity:1}
+.view{position:absolute; inset:0; display:flex; flex-direction:column; background:var(--p-bg)}
+.ph.lamp .view{background:transparent}
+.screen{flex:1; overflow-y:auto; padding:0 24px 12px; scroll-behavior:smooth}
+.visit{padding-bottom:.4em}
+.place{position:sticky; top:0; z-index:2; background:var(--p-bg); font:400 1.45em/1.1 var(--head); margin:0; padding:18px 0 10px; text-wrap:balance}
+.ph.lamp .place{background:#0c0b09}
+.place button{all:unset; cursor:pointer; display:block; width:100%}
+.place button:focus-visible{outline:2px solid var(--p-acc); outline-offset:2px}
+.ph.unlit .visit:last-child .place{font-style:italic; color:var(--p-dim)}
+.prose{font-size:var(--size); line-height:1.55}
+.prose p{margin:0 0 .7em}
+.ph.unlit .visit:last-child .prose{color:var(--p-dim)}
+.noun{background:none; border:0; padding:0; border-bottom:1.5px dotted currentColor; font-size:inherit; line-height:inherit}
+.ents{list-style:none; margin:0 0 .6em; padding:0; font-size:var(--size)}
+.ents button,.ents span{display:block; width:100%; text-align:left; background:none; border:0; padding:6px 0; min-height:40px; line-height:1.4}
+.ents b{font-weight:500; border-bottom:1.5px dotted currentColor}
+.ph.lamp .ents b{text-shadow:0 0 10px rgba(236,170,80,.5)}
+.ents .verb{font-style:italic; color:var(--p-acc)}
+.ev{font-size:calc(var(--size)*.95); border-left:2px solid var(--p-line); padding-left:12px; margin:.2em 0 .5em}
+.ev:empty{display:none}
+.ev p,.lines p,.dh p{margin:0 0 .45em}
+.say b{font:400 1em var(--sc); letter-spacing:.03em; margin-right:.35em}
+.sys{color:var(--p-dim); font-style:italic}
+.why{font:400 .8em var(--sc); letter-spacing:.05em; color:var(--p-bad); border:1px solid currentColor; border-radius:3px; padding:0 5px; margin-right:.45em; white-space:nowrap}
+
+.base{flex-shrink:0; border-top:1px solid var(--p-line); padding:6px 16px 12px; display:flex; flex-direction:column; gap:4px; background:var(--p-bg)}
+.ph.lamp .base{background:transparent}
+.prompt{text-align:center; font:12.5px var(--sc); letter-spacing:.06em; color:var(--p-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.prompt .hurt{color:var(--p-bad)}
+.row{display:grid; grid-template-columns:1fr auto 1fr; align-items:center}
+.row .txt{min-height:44px; min-width:64px; border:0; background:none; font:14px var(--sc)!important; letter-spacing:.08em; color:var(--p-dim)!important}
+.row .txt:first-child{justify-self:start} .row .txt:last-child{justify-self:end}
+.lefty .row{direction:rtl} .lefty .row>*{direction:ltr}
+.pad{display:grid; grid-template-columns:40px 50px 40px; grid-template-rows:38px 50px 38px; place-items:center}
+.pad .d{width:40px; height:38px; border:0; background:none; font:15px var(--sc)!important; border-radius:8px}
+.pad .ud{font-size:11px!important; color:var(--p-dim)}
+.pad .d:disabled{opacity:.2; cursor:default}
+.pad .d.barred{color:var(--p-bad); text-decoration:line-through}
+.mm{width:48px; height:48px; border-radius:50%; border:1px solid var(--p-fg); background:var(--p-card); padding:0; overflow:hidden}
+.mm.lamp{box-shadow:0 0 0 2px rgba(230,160,70,.55),0 0 18px rgba(230,160,70,.3)}
+.mm svg{width:100%; height:100%; display:block}
+.mm-l{stroke:var(--p-dim); stroke-width:1.6} .mm-f{stroke:var(--p-dim); stroke-width:1.2; stroke-dasharray:1.5 2}
+.mm-b,.mm-bb{stroke:var(--p-bad); stroke-width:1.6}
+.mm-r{fill:var(--p-dim)} .mm-cur{fill:var(--p-acc)} .mm-dark{fill:var(--p-bg); stroke:var(--p-dim); stroke-width:1}
+
+/* pages of the book */
+.page{position:absolute; inset:0; z-index:6; background:var(--p-bg); display:flex; flex-direction:column}
+.pg{flex:1; overflow-y:auto; padding:22px 24px 12px; display:flex; flex-direction:column; gap:14px}
+.pg .eyebrow{font:12px var(--sc); letter-spacing:.14em; color:var(--p-acc); margin:0}
+.pg h3{font:400 2em/1.05 var(--head); margin:-6px 0 0; text-wrap:balance}
+.pg p{margin:0; font-size:var(--size); line-height:1.5}
+.pg-foot{flex-shrink:0; display:flex; justify-content:center; padding:8px 16px 16px; border-top:1px solid var(--p-line)}
+.pg-foot button{min-height:44px; min-width:140px; border:0; background:none; font:14px var(--sc)!important; letter-spacing:.08em}
+/* the page turn: a leaf cut into strips, each hinged on the last, so the free edge curls ahead */
+.turn{position:absolute; inset:0; z-index:40; perspective:1700px; perspective-origin:50% 45%; overflow:hidden}
+.turn .snap{position:absolute; inset:0; height:auto}
+.turn .under-shade{position:absolute; inset:0; background:linear-gradient(90deg,rgba(0,0,0,.45),rgba(0,0,0,.1) 60%,rgba(0,0,0,0)); opacity:0}
+.strip{position:absolute; top:0; height:100%; transform-style:preserve-3d; transform-origin:left center}
+.face,.back{position:absolute; inset:0; overflow:hidden; backface-visibility:hidden; -webkit-backface-visibility:hidden}
+.face .snap{right:auto}
+.back{transform:rotateY(180deg); background:linear-gradient(90deg,#d9d2bf,#e6e0cf)}
+.unlit .back,.lamp .back{background:linear-gradient(90deg,#15130f,#1d1a14)}
+.lit{position:absolute; inset:0; background:#000; opacity:0; pointer-events:none}
+@media (prefers-reduced-motion:reduce){.ph,.glow{transition:none}}
+.acts,.choices{display:flex; flex-direction:column; gap:6px}
+.act{min-height:48px; text-align:left; padding:8px 14px; border:1px solid var(--p-line); border-radius:9px; background:var(--p-card); display:flex; flex-direction:column; gap:2px}
+.act.off{border-style:dashed; color:var(--p-dim)}
+.act small{font-size:.85em; line-height:1.35}
+.lines{font-size:var(--size); line-height:1.45}
+.topics{display:flex; flex-wrap:wrap; gap:6px; align-items:center}
+.lbl{font:12px var(--sc); color:var(--p-dim); letter-spacing:.08em; margin-right:2px}
+.chip{min-height:38px; padding:0 13px; border:1px solid var(--p-line); border-radius:19px; background:transparent}
+.toc{list-style:none; margin:0; padding:0}
+.toc button{display:flex; width:100%; align-items:baseline; gap:8px; background:none; border:0; padding:11px 0; font-size:var(--size); text-align:left}
+.toc .fill{flex:1; border-bottom:1.5px dotted var(--p-line); transform:translateY(-4px)}
+.toc .n{font:13px var(--sc); color:var(--p-dim); letter-spacing:.05em}
+.slots{display:grid; grid-template-columns:auto 1fr; gap:3px 14px; margin:0; font-size:calc(var(--size)*.92)}
+.slots dt{font:13px var(--sc); color:var(--p-dim); letter-spacing:.03em; padding-top:.25em; white-space:nowrap}
+.slots dd{margin:0}
+.slots .none{color:var(--p-dim); opacity:.7}
+.slots button{background:none; border:0; padding:0; border-bottom:1.5px dotted currentColor; font-size:inherit}
+.bar{height:6px; border-radius:3px; background:var(--p-card); border:1px solid var(--p-line); overflow:hidden}
+.bar i{display:block; height:100%; background:var(--p-dim)}
+.set{display:flex; justify-content:space-between; align-items:center; gap:12px; min-height:48px; border-bottom:1px solid var(--p-line); font-size:var(--size)}
+.set input{accent-color:var(--p-acc); width:22px; height:22px}
+.set input[type=range]{width:130px}
+.bigmap svg{width:100%; height:auto; display:block}
+.bigmap text{fill:var(--p-fg); font:11px var(--sc); letter-spacing:.03em}
+.pick{text-align:left; padding:14px 16px; border:1px solid var(--p-fg); background:var(--p-card); border-radius:10px; display:flex; flex-direction:column; gap:3px}
+.pick b{font:400 1.15em var(--head)} .pick span{font-size:.9em; color:var(--p-dim)}
+.cont{min-height:48px; border:0; background:var(--p-fg); color:var(--p-bg)!important; border-radius:10px; font:14px var(--sc)!important; letter-spacing:.08em}
+.later{min-height:44px; border:0; background:none; font:14px var(--sc)!important; color:var(--p-dim)!important; letter-spacing:.06em}
+
+/* the book footer */
+.foot{flex-shrink:0; padding:2px 22px 4px; display:flex; flex-direction:column; align-items:center; background:var(--p-bg); font-variant-numeric:oldstyle-nums}
+.ph.lamp .foot{background:transparent}
+.foot .mo{display:flex; align-items:center; justify-content:center; gap:7px; margin:4px 0 0}
+.foot .rl{display:block; width:92px; height:1px; background:var(--p-line)}
+.mini{display:block; line-height:0; border:0; background:none; padding:0}
+.mini .e{stroke:var(--p-fg); stroke-width:.9; opacity:.75}
+.mini .s{stroke:var(--p-fg); stroke-width:.9; opacity:.55; stroke-dasharray:1.2 2.2}
+.mini .x{stroke:var(--p-bad); stroke-width:.9; opacity:.8}
+.mini .n{fill:var(--p-fg); opacity:.75}
+.mini .you{fill:none; stroke:var(--p-fg); stroke-width:.9} .mini .dk{stroke-dasharray:1.3 1.3}
+.mini .un{opacity:.35}
+.foot.left .ex,.foot.left .st{align-self:stretch; text-align:left; justify-content:flex-start}
+.foot .ex{white-space:nowrap; overflow-x:auto; scrollbar-width:none; font-size:calc(var(--size)*.86); max-width:100%}
+.foot .ex button,.foot .ex .no{display:inline-block; min-height:38px; line-height:38px; background:none; border:0; padding:0}
+.foot .go{color:var(--p-dim)}
+.foot .has{font-weight:600}
+.foot .no{color:var(--p-dim); opacity:.5}
+.foot .barred{text-decoration:line-through; text-decoration-thickness:1px}
+.foot .st{display:flex; justify-content:center; align-items:baseline; gap:6px; white-space:nowrap; font-size:13px; color:var(--p-dim)}
+.foot .st button{background:none; border:0; padding:4px 0; color:inherit}
+.foot .lb{font:.82em var(--sc); letter-spacing:.06em; margin-right:2px}
+.foot .lo{color:var(--p-bad)} .foot .mid{color:#8a5a14}
+.ph.unlit .foot .mid,.ph.lamp .foot .mid{color:#e6b35a}
+.grab{width:56px; height:18px; border:0; background:none; position:relative; margin-top:2px}
+.grab::before{content:''; position:absolute; left:14px; right:14px; top:8px; height:3px; border-radius:2px; background:var(--p-line)}
+.eyebrow.link{background:none; border:0; padding:0; align-self:flex-start; text-align:left}
+/* the footer joystick */
+.foot{position:relative; z-index:3}
+.joy{position:relative; touch-action:none; user-select:none; -webkit-user-select:none; cursor:grab}
+.joy svg{display:block; overflow:visible; transform-origin:50% 60%; transition:transform .16s ease}
+.joy.big{z-index:6}
+.joy.big svg{transform:scale(2.6)}
+.joy .backing{fill:var(--p-bg); opacity:0; transition:opacity .16s}
+.joy.big .backing{opacity:.96}
+.joy .ring{fill:var(--p-bg); stroke:var(--p-fg); stroke-width:.8}
+.joy .knob{fill:var(--p-fg); transition:transform .18s ease}
+.joy .knob.dk{fill:var(--p-bg); stroke:var(--p-fg); stroke-width:.8; stroke-dasharray:1.2 1.2}
+.joy.dragging .knob{transition:none}
+.joy .tether{stroke:var(--p-fg); stroke-width:.6; opacity:.35}
+.joy .hot{opacity:1!important; stroke-width:1.5!important}
+.joy .stair{opacity:0; transition:opacity .15s}
+.joy.big .stair{opacity:1}
+.joy.big .stair.none{opacity:.18}
+.joy .stair .chev{fill:none; stroke:var(--p-fg); stroke-width:.6}
+.joy .stair.closed .ring{stroke-dasharray:1 1}
+.joy .stair.hot .ring{fill:var(--p-fg)} .joy .stair.hot .chev{stroke:var(--p-bg)}
+.joy .stair.hot.none .ring,.joy .stair.hot.closed .ring{fill:var(--p-bad); stroke:var(--p-bad)}
+.joy .slbl{font:3.6px var(--sc); fill:var(--p-dim); letter-spacing:.05em}
+.joy .tip{position:absolute; left:50%; bottom:calc(100% + 42px); transform:translateX(-50%); white-space:nowrap; font:12.5px var(--sc); letter-spacing:.08em; z-index:7; pointer-events:none}
+.joy .tip b{font-weight:400; color:var(--p-fg); background:var(--p-bg); padding:2px 8px; border-radius:4px}
+.joy .tip .bad{color:var(--p-bad)}
+.joy .bubble{position:absolute; left:50%; transform:translateX(-50%); bottom:calc(100% + 6px); width:236px; background:var(--p-fg); color:var(--p-bg); font:13.5px/1.4 var(--body); padding:9px 12px 8px; border-radius:10px; text-align:left; z-index:8}
+.joy .bubble::after{content:''; position:absolute; left:50%; bottom:-6px; margin-left:-6px; border:6px solid transparent; border-bottom:0; border-top-color:var(--p-fg)}
+.joy .bubble button{display:block; margin:6px 0 0 auto; background:none; border:0; font:12px var(--sc); letter-spacing:.08em; color:var(--p-bg); opacity:.85}
+@media (prefers-reduced-motion:reduce){.joy svg,.joy .knob{transition:none}}
+/* text drawer stays a drawer: it holds the keyboard */
+.scrim{position:absolute; inset:0; background:rgba(8,8,6,.42); z-index:7; border:0; width:100%}
+.sheet{position:absolute; left:0; right:0; bottom:0; z-index:8; height:66%; background:var(--p-sheet); border-radius:18px 18px 0 0; padding:8px 20px 14px; box-shadow:0 -10px 30px rgba(0,0,0,.25); display:flex; flex-direction:column; gap:10px}
+.grab{width:40px; height:4px; border-radius:2px; background:var(--p-line); align-self:center}
+.close{min-height:40px; border:0; background:none; font:14px var(--sc)!important; color:var(--p-dim)!important; letter-spacing:.06em}
+.dh{flex:1; overflow-y:auto}
+.dcmd{font:13px var(--sc); color:var(--p-acc); margin:.7em 0 .15em!important; letter-spacing:.03em}
+.dcmd::before{content:'› '}
+.dh ol{margin:.2em 0 .5em; padding-left:1.4em}
+.dh ol button{background:none; border:0; padding:4px 0; border-bottom:1px dotted currentColor}
+.sugg{display:flex; gap:6px; overflow-x:auto; scrollbar-width:none}
+.sugg .chip{flex-shrink:0; min-height:34px; font:13px var(--sc)}
+.cmd{display:flex; gap:8px; align-items:center; border:1px solid var(--p-line); border-radius:10px; padding:4px 4px 4px 12px; background:var(--p-bg)}
+.cmd input{flex:1; min-width:0; border:0; background:none; color:var(--p-fg); font:16px var(--body); padding:8px 0; outline:none}
+.cmd button{min-height:40px; padding:0 14px; border:0; border-radius:7px; background:var(--p-fg); color:var(--p-bg)!important; font:13px var(--sc)!important}
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0)}
+</style>
+
+<div class="wrap">
+  <h1>The room view</h1>
+  <p class="lede">Round six. The <b>tiny map is the joystick</b>: press it to zoom, drag to walk, and drag out to the stair nodes for up and down. The “You can go” line is gone. <b>Every room is a fresh page</b>: moving or looking turns the page and clears it, and events pile up under the room until you leave. <b>Tap the room title to look</b>. People and things are listed <b>under the description</b>. The prompt sits in the bottom bar with a <b>small centered compass</b>. Anything you open <b>turns to a new page</b> of the book instead of sliding up a menu. The minimap in the compass center opens the <b>Contents</b>.</p>
+  <div class="grid">
+    <div class="stage">
+      <div class="phone"><div class="ph"></div></div>
+      <div class="tools">
+        <button data-p="start">Restart</button><button data-p="shelter">Dark shelter</button><button data-p="choose">Lantern in hand</button><button data-p="night">Lamplit night</button>
+        <label for="hurt"><input id="hurt" type="checkbox"> Hurt</label>
+        <label for="left"><input id="left" type="checkbox"> Footer flush left</label>
+        <label for="snd"><input id="snd" type="checkbox" checked> Page sound</label>
+      </div>
+    </div>
+    <div>
+      <h2>Anatomy, top to bottom</h2>
+      <p class="lede" style="margin-bottom:1em">This is also the screen-reader order.</p>
+      <ol class="anat">
+        <li><b>Room title, which is also Look</b><p>Set in Fell and pinned while events scroll under it. Tapping it turns to a fresh page of the same room, just like typing <code>look</code>. In the dark it reads “Darkness”.</p></li>
+        <li><b>Description</b><p>Set in Garamond. Only the <em>details</em> are dotted (the post, the elm, the reeds); tapping one adds what you see to the log without leaving the page. Exits are left to the compass.</p></li>
+        <li><b>Here lines</b><p>MUD-style, directly under the description: “<b>Bram</b> the ferryman stands here, one boot on the ferry.” Each line is one tap target and turns to that person’s or thing’s page. In the dark the lines become verbs: <em>Feel around in the dark</em>, <em>Light your lantern</em>.</p></li>
+        <li><b>Event log</b><p>Results, dialogue and rejections with their reason tags pile up under the description. Leaving the room, or looking, turns to a clean page, and the full history lives in the text drawer.</p></li>
+        <li><b>Map between long rules</b><p>A tiny endpaper map in place of a fleuron. You are the solid dot and places are open rings, reaching two steps out, with the paths meeting each ring at its edge.</p></li>
+        <li><b>The map is the joystick</b><p>Press the tiny map and it zooms up. Drag toward a path to light it, then let go to walk. Drag back to the middle to cancel. For up and down, drag out to the stair nodes that appear on the right. A plain tap opens the Map page. A tip bubble shows until you first walk, and screen readers get hidden “Go north” buttons.</p></li><li><b>Status</b><p>One line, from the MUD prompt: the hour, your position (tap to change it) and hp/ma/mv as current/max. Tapping the numbers turns to Character. A small handle below opens the text drawer, and so does swiping up on the footer.</p></li>
+      </ol>
+      <dl class="decisions">
+        <dt>Pages, not menus</dt>
+        <dd>Every tap that used to open a sheet now turns to a new page: a person or thing, a conversation, the Contents and each section of it. The turn is a single transform lasting 0.4 seconds, cheap on a Pixel 3a, and it is switched off under reduced motion or the Settings toggle. The text drawer is the one exception. It stays a drawer because it holds the keyboard.</dd>
+        <dt>Contents</dt>
+        <dd>The book’s contents page, with dotted leaders, covers the map, carrying, equipment, character, journal and settings. Equipment is a plain LegendMUD-style list of 14 slots. Tapping a filled slot turns to that item’s page.</dd>
+        <dt>Discoverability risk</dt>
+        <dd>Tapping the compass center to reach the Contents can’t be seen from the screen. For the P5 test (a non-developer, no instructions), it needs a hint the first time, or a visible book mark on the minimap ring.</dd>
+      </dl>
+    </div>
+  </div>
+  <section class="gv">
+    <h2>GameView needs, new this round</h2>
+    <p class="lede" style="margin-bottom:.6em">These add to items 1–15 from earlier rounds.</p>
+    <ol start="16">
+      <li><b>A presence line per entity.</b> A short “is here” sentence for each person and thing (“Bram the ferryman stands here, one boot on the ferry”), which can change with state. It is separate from the long description and from the room prose, which no longer mentions entities.</li>
+      <li><b>Details kept apart from entities.</b> Inspectable details stay anchored in the prose (item 3), while people and things come as a list. The view needs to mark which is which.</li>
+      <li><b>Equipment projection.</b> An ordered slot list with a label (“used as light”, “worn on feet”) and the item or empty for each slot, plus compare hints later. A LegendMUD-style list needs nothing more.</li>
+      <li><b>Carrying summary.</b> The items, current weight and capacity, and coins. The Contents page counts come from this and the equipment list.</li>
+      <li><b>Character sheet.</b> Level, ancestry, resources with bands (see item 14), attributes and faction standing, all as display values. The UI does no arithmetic on them.</li>
+    </ol>
+  </section>
+</div>
+<script>
+const ROOMS={
+  landing:{name:'Ferry Landing',out:true,xy:[0,1],exits:{n:'green',w:{blocked:true,kind:'Barred',reason:'The causeway west is under the tide. Nothing crosses it today.'}}},
+  green:{name:'Village Green',out:true,xy:[0,0],exits:{s:'landing',e:'reed'}},
+  reed:{name:'Reed Bank',out:true,xy:[1,0],exits:{w:'green',e:'shelter'}},
+  shelter:{name:'Lantern Shelter',out:false,xy:[2,0],exits:{w:'reed'}},
+};
+const DIRS={n:'North',e:'East',s:'South',w:'West',u:'Up',d:'Down'};
+const DETAILS={landing:['post'],green:['elm'],reed:['reeds'],shelter:['nets']};
+const NAMES={bram:'Bram',post:'mooring post',elm:'old elm',reeds:'reeds',nets:'eel nets'};
+const ALIAS={bram:['bram','ferryman','man'],lantern:['lantern','brass','something','lamp'],post:['post','mooring'],elm:['elm','tree'],reeds:['reeds','reed'],nets:['nets','net']};
+const DESC={
+  bram:'A ferryman with rope-scarred hands and a coat that has never been dry.',
+  post:'Rope has worn a groove into the post. Someone has carved a fox into it.',
+  elm:'Its roots have lifted the turf. A strip of red cloth is tied to a low branch, faded to pink.',
+  reeds:'They close behind you as you pass. Something small moves off through them and does not come back.',
+  nets:'Eel nets, mended so often they are more knot than net.',
+};
+const TOPICS={
+  ferry:['the ferry','“She crosses at slack water. Two pence, or a favor.”'],
+  wren:['Wren','“Seven years old and knows every reed by name. That’s what worries me.”'],
+  lantern:['the lantern','“Brass, dented, older than me. It has never gone out in a fen wind.”'],
+  search:['the search',null],
+};
+const txt=t=>({t:'text',text:t}), sys=t=>({t:'sys',text:t}), bad=(k,t)=>({t:'bad',kind:k,text:t}), say=(w,t)=>({t:'say',who:w,text:t});
+const clock=h=>String(h).padStart(2,'0')+':00';
+
+/* ---------- the model (stands in for the engine's GameView) ---------- */
+function initState(p){
+  const s={room:'landing',hour:6,lantern:'shelter',lit:false,quest:'none',plan:null,topics:['ferry'],seen:['landing'],felt:false};
+  if(p==='shelter'||p==='choose'){Object.assign(s,{quest:'active',topics:['ferry','wren','lantern'],seen:['landing','green','reed','shelter']});}
+  if(p==='shelter') s.room='shelter';
+  if(p==='choose') s.lantern='player';
+  return s;
+}
+const bramAt=s=>s.hour<19?'landing':'green';
+function lightAt(s,r){
+  if(ROOMS[r].out&&s.hour<19) return 'day';
+  const src=s.lantern==='player'?s.room:s.lantern==='bram'?bramAt(s):s.lantern;
+  return s.lit&&src===r?'lamp':null;
+}
+function ents(s){
+  const r=s.room,L=lightAt(s,r),o=[];
+  if(L&&bramAt(s)===r) o.push('bram');
+  if(s.lantern===r&&(L||(r==='shelter'&&s.felt))) o.push('lantern');
+  if(s.lantern==='bram'&&bramAt(s)===r&&L) o.push('lantern');
+  if(L) o.push(...(DETAILS[r]||[]));
+  return o;
+}
+const reachable=s=>{const e=ents(s);if(s.lantern==='player'&&!e.includes('lantern'))e.push('lantern');return e;};
+function nameOf(s,id){
+  if(id!=='lantern') return NAMES[id];
+  return (s.lantern==='player'||lightAt(s,s.room))?'brass lantern':'something brass';
+}
+const canFeel=s=>!lightAt(s,s.room)&&s.lantern===s.room&&!s.felt;
+function actions(s,id){
+  const A=(key,label,why)=>({key,label,why:why||null});
+  if(id==='bram') return [A('talk','Talk'),A('examine','Examine')];
+  if(id==='lantern'){
+    if(s.lantern==='player') return [A(s.lit?'douse':'light',s.lit?'Put it out':'Light it'),A('examine','Examine'),
+      A('drop','Put it down',s.plan==='player_led'?{kind:'Promise',text:'You told Bram you would carry it along the bank.'}:null)];
+    if(s.lantern==='bram') return [A('examine','Examine'),A('take','Take it back',{kind:'Not yours',text:'Bram has it now, for the search party.'})];
+    return [A('take','Take'),A('examine','Examine')];
+  }
+  if(id==='here'){
+    const a=[A('look','Look around')];
+    if(canFeel(s)) a.push(A('feel','Feel around'));
+    a.push(A('wait','Wait an hour',s.hour>=23?{kind:'Too late',text:'This proof stops at 23:00.'}:null));
+    return a;
+  }
+  return [A('examine','Examine')];
+}
+function prose(s){
+  const r=s.room,L=lightAt(s,r),bramHere=bramAt(s)===r,out=[];
+  if(!L){
+    let p='It is too dark to see.';
+    if(r==='shelter') p+=' You smell lamp oil and wet tar.';
+    else p+=' Somewhere close, water moves.'+(bramHere?' Someone is breathing nearby.':'');
+    p+=' The way back is {exit:'+Object.keys(ROOMS[r].exits).find(d=>typeof ROOMS[r].exits[d]==='string')+'|behind you}.';
+    return [p];
+  }
+  if(r==='landing'){
+    let p='Reeds crowd a slick wooden landing. A {post|mooring post} leans into the current.';
+    if(!bramHere) p+=' The ferry knocks against the landing, empty.';
+    else if(s.plan==='player_led') p+=' The search boats are gone.';
+    else if(s.quest==='none') p+=' Across the water, a lantern swings once between the reeds and goes dark.';
+    out.push(p,'A {exit:n|lane} climbs north to the green. {exit:w|West}, the old causeway runs into the water and does not come out.');
+  } else if(r==='green'){
+    out.push('An old {elm|elm} shades a patch of trodden grass. A {exit:e|track} runs east, down toward the reeds. The {exit:s|landing} is south.');
+  } else if(r==='reed'){
+    out.push('The {exit:w|track} gives out into black mud and whispering {reeds|reeds}. {exit:e|Further east}, a shelter of tarred planks leans into the wind.');
+  } else {
+    out.push('A lean-to of tarred planks, smelling of lamp oil. Eel {nets|nets} hang from pegs.'+(s.lantern==='shelter'?' A shelf runs along the back wall.':' An empty hook sways over the shelf.'),'The {exit:w|doorway} lets in the grey of the reed bank.');
+  }
+  return out;
+}
+const plain=a=>a.join(' ').replace(/\{[^|}]+\|([^}]+)\}/g,'$1');
+function exitInfo(s,d){
+  const e=ROOMS[s.room].exits[d];
+  if(!e) return null;
+  if(typeof e!=='string') return {barred:true,kind:e.kind,reason:e.reason,label:'barred'};
+  return {to:e,label:s.seen.includes(e)?ROOMS[e].name:'unexplored'};
+}
+function move(s,d){
+  const e=exitInfo(s,d);
+  if(!e) return {msgs:[bad('No way',`There is no way ${DIRS[d].toLowerCase()} from here.`)]};
+  if(e.barred) return {msgs:[bad(e.kind,e.reason)],barrier:true};
+  s.room=e.to; if(!s.seen.includes(e.to)) s.seen.push(e.to);
+  return {msgs:[],look:true,moved:true};
+}
+function act(s,id,key){
+  const a=id==='here'||reachable(s).includes(id)?actions(s,id).find(x=>x.key===key):null;
+  if(!a) return {msgs:[bad('Not here','That isn’t something you can do right now.')]};
+  if(a.why) return {msgs:[bad(a.why.kind,a.why.text)]};
+  switch(key){
+    case 'look': return {msgs:[],look:true};
+    case 'examine': return {msgs:[txt(id==='lantern'?(nameOf(s,id)==='something brass'?'Cold metal, a wire handle. Something sloshes inside.':'Dented brass, oil sloshing inside. It would light a fen path.'+(s.lit?' The flame is steady.':'')):DESC[id])]};
+    case 'talk': return {msgs:[],open:'dlg'};
+    case 'feel': s.felt=true; return {msgs:[txt('You feel along the planks. Your hand finds a shelf, and something cold and brass on it.')]};
+    case 'take': s.lantern='player'; return {msgs:[txt('You lift the lantern. Oil sloshes inside.'),...(s.quest==='active'?[sys('Quest updated · Take the lantern to Bram.')]:[])],took:true};
+    case 'drop': s.lantern=s.room; return {msgs:[txt('You set the lantern down.')],look:true};
+    case 'light': s.lit=true; return {msgs:[txt(s.room==='shelter'?'The wick catches. The shelter jumps out of the dark around you.':'The wick catches. Warm light spills over your hands.')],look:true};
+    case 'douse': s.lit=false; return {msgs:[txt('You pinch the wick. The dark comes back in.')],look:true};
+    case 'wait': {
+      s.hour++; const m=[txt(`An hour passes. It is ${clock(s.hour)}.`)];
+      if(s.hour===14) m.push(sys('Slack water. The ferry could cross now.'));
+      if(s.hour===19){m.push(txt('The light goes out of the sky.')); if(['landing','green'].includes(s.room)) m.push(txt('Bram ties off the ferry and walks up to the green.'));}
+      return {msgs:m,look:s.hour===19};
+    }
+  }
+}
+function greet(s){
+  if(s.quest==='done') return s.plan==='player_led'?'“Keep it lit and keep to the bank. We’ll be on the water.”':'“The party goes at dusk. If they find her, you’ll hear the bell.”';
+  if(s.quest==='active') return s.lantern==='player'?'“You found it. Good.”':'“The shelter’s east, past the reeds. Mind the mud.”';
+  if(s.quest==='declined') return '“Changed your mind?”';
+  return '“You’ll be wanting the ferry. Or you’ll be wanting something else.”';
+}
+function dlgChoices(s,node){
+  const C=(id,label,why)=>({id,label,why:why||null}),c=[];
+  if(node==='offer') return [C('accept','“I’ll fetch it.”'),C('decline','“Not today.”')];
+  if(s.quest==='none'||s.quest==='declined') c.push(C('favor','“Something else. What do you need?”'));
+  if(s.quest==='active') c.push(C('decide','“About the search.”',s.lantern!=='player'?{kind:'Missing item',text:'You need the lantern in hand. It is up at the shelter.'}:null));
+  if(s.quest!=='done') c.push(C('row','“Row me across.”',s.hour<14?{kind:'Wrong time',text:'Bram only crosses at slack water, from 14:00.'}:null));
+  c.push(C('bye','“Good day.”'));
+  return c;
+}
+function topicReply(s,t){
+  if(t==='search') return s.plan==='player_led'?'“Boats on the water, a light on the bank. If she sees either, she’ll come to it.”':'“The lantern rides the prow. She knows that light.”';
+  return TOPICS[t][1];
+}
+const VERBS={take:'take',get:'take',pick:'take',grab:'take',drop:'drop',light:'light',douse:'douse',extinguish:'douse',x:'examine',examine:'examine',inspect:'examine',talk:'talk',speak:'talk',feel:'feel',wait:'wait',z:'wait'};
+const DIRW={n:'n',north:'n',e:'e',east:'e',s:'s',south:'s',w:'w',west:'w',u:'u',up:'u',d:'d',down:'d'};
+const CHECK=[['room','Read a room'],['topic','Ask Bram about a topic'],['take','Pick up the lantern'],['barrier','Try the barred west exit'],['scene','Reach the carry-or-leave choice'],['drawer','Open the text drawer']];
+const esc=t=>t.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+/* ---------- one phone ---------- */
+class Phone{
+  constructor(col){
+    this.col=col; this.mode=col.dataset.mode; this.el=col.querySelector('.ph'); this.done=new Set();
+    this.el.addEventListener('click',e=>{const b=e.target.closest('[data-a]'); if(b&&this.el.contains(b)) this.handle(b.dataset.a,b.dataset.v||'');});
+    this.el.addEventListener('submit',e=>{e.preventDefault(); const i=this.el.querySelector('.cmd input'); const v=i.value.trim(); this.ui.draft=''; if(v) this.command(v);});
+    this.el.addEventListener('input',e=>{if(e.target.matches('.cmd input')) this.ui.draft=e.target.value;});
+    col.querySelectorAll('.tools button').forEach(b=>b.onclick=()=>this.reset(b.dataset.p));
+    this.reset('start');
+  }
+  reset(p){
+    this.s=initState(p);
+    this.ui={sheet:null,dlg:null,scene:null,drawer:false,focus:null,msg:[],log:[],hist:[],draft:''};
+    this.pushRoom(); this.mark('room'); this.render();
+  }
+  mark(k){this.done.add(k); this.col.querySelector('.check').innerHTML=CHECK.map(([id,l])=>`<li class="${this.done.has(id)?'done':''}">${l}</li>`).join('');}
+  pushRoom(){const s=this.s; this.ui.log.push({t:'room',title:lightAt(s,s.room)?ROOMS[s.room].name:'Darkness',prose:prose(s)});}
+  emit(echo,msgs,r={}){
+    const u=this.ui,s=this.s;
+    u.msg=msgs;
+    if(echo) u.log.push({t:'echo',text:echo});
+    if(r.look) this.pushRoom();
+    u.log.push(...msgs);
+    u.hist.push({cmd:echo,out:[...(r.look?[txt((lightAt(s,s.room)?ROOMS[s.room].name+'. ':'')+plain(prose(s)))]:[]),...msgs]});
+    if(u.log.length>200) u.log.splice(0,u.log.length-200);
+  }
+  echoFor(id,key){return key==='look'||key==='wait'||key==='feel'?key:`${key} ${ALIAS[id][0]}`;}
+  run(p){
+    const s=this.s,u=this.ui;
+    const r=p.move?move(s,p.move):act(s,p.id,p.key);
+    if(r.barrier) this.mark('barrier');
+    if(r.took) this.mark('take');
+    if(u.dlg&&bramAt(s)!==s.room){u.dlg=null; r.msgs.push(bad('Not here','Bram has gone. He keeps the landing by day and the green after dark.'));}
+    this.emit(p.move?DIRS[p.move].toLowerCase():this.echoFor(p.id,p.key),r.msgs,r);
+    if(r.open==='dlg') this.startDlg();
+    this.render();
+  }
+  startDlg(){this.ui.dlg={node:null,lines:[]}; this.dsay([say('Bram',greet(this.s))]);}
+  dsay(ms){const u=this.ui; u.dlg&&u.dlg.lines.push(...ms); u.log.push(...ms); u.hist.push({cmd:'',out:ms});}
+  choose(id){
+    const s=this.s,u=this.ui; if(!u.dlg) return;
+    const c=dlgChoices(s,u.dlg.node).find(x=>x.id===id); if(!c) return;
+    if(c.why){this.dsay([bad(c.why.kind,c.why.text)]); return this.render();}
+    const L=[say('You',c.label)];
+    switch(id){
+      case 'favor': u.dlg.node='offer';
+        L.push(say('Bram','“Wren. Elspeth’s girl. She went into the fen last night and hasn’t come out.”'),say('Bram','“We search at dusk, and we need light. Mine is up at the shelter. Bring it down. Then tell me whether you are coming with us.”'));
+        ['wren','lantern'].forEach(t=>s.topics.includes(t)||s.topics.push(t)); L.push(sys('New topics · Wren · the lantern')); break;
+      case 'accept': u.dlg.node=null; s.quest='active';
+        L.push(say('Bram',s.lantern==='player'?'“You’ve got it already? Then you’re quicker than me.”':'“East past the green, where the reeds start. Mind the mud.”'),sys('Quest · The Ferryman’s Lantern · Bring Bram the lantern.')); break;
+      case 'decline': u.dlg.node=null; s.quest='declined'; L.push(say('Bram','“Then don’t stand in my light.”')); break;
+      case 'row': L.push(say('Bram','“Not with Wren still out there. Ask me tomorrow.”')); break;
+      case 'decide': this.dsay(L); u.scene={phase:'choose'}; this.mark('scene'); return this.render();
+      case 'bye': u.dlg=null; this.emit('',[txt(bramAt(s)==='landing'?'Bram nods and turns back to the water.':'Bram nods and goes back to watching the track.')]); return this.render();
+    }
+    this.dsay(L); this.render();
+  }
+  ask(t){
+    if(!this.ui.dlg) return;
+    this.dsay([say('You',`Ask about ${TOPICS[t][0]}.`),say('Bram',topicReply(this.s,t))]); this.mark('topic'); this.render();
+  }
+  sceneChoose(c){
+    const s=this.s,u=this.ui;
+    if(s.lantern!=='player'||bramAt(s)!==s.room){u.scene=null; this.emit('',[bad('Stale','The choice needs Bram here and the lantern in your hand.')]); return this.render();}
+    s.plan=c==='carry'?'player_led':'party_led'; s.quest='done'; s.topics.push('search');
+    if(c==='leave'){s.lantern='bram'; s.lit=true;}
+    u.scene={phase:'after',pick:c}; this.render();
+  }
+  sceneDone(){
+    const u=this.ui,c=u.scene.pick; u.scene=null; u.dlg=null;
+    this.emit('',[txt(c==='carry'?'You hook the lantern to your belt.':'The lantern burns on the ferry’s prow.'),sys('Quest resolved · '+(c==='carry'?'You lead the search along the bank.':'The party leads the search by boat.')),sys('New topic · the search')],{look:true});
+    this.render();
+  }
+  parse(raw){
+    const s=this.s,u=this.ui;
+    let w=raw.toLowerCase().replace(/[^a-z0-9 ]/g,' ').split(/\s+/).filter(Boolean);
+    if(!w.length) return null;
+    if(u.scene) return u.scene.phase==='choose'&&/^[12]$/.test(w[0])?{scene:w[0]==='1'?'carry':'leave'}:{msgs:[sys(u.scene.phase==='choose'?'Type 1 to carry it or 2 to leave it.':'Tap Continue.')]};
+    if(u.dlg){
+      const cs=dlgChoices(s,u.dlg.node);
+      if(/^\d$/.test(w[0])) return cs[+w[0]-1]?{choice:cs[+w[0]-1].id}:{msgs:[sys(`Pick 1–${cs.length}.`)]};
+      if(w[0]==='ask'){const t=s.topics.find(t=>w.slice(1).some(x=>TOPICS[t][0].includes(x))); return t?{topic:t}:{msgs:[sys('Bram has nothing to say about that. Topics: '+s.topics.map(t=>TOPICS[t][0]).join(', ')+'.')]};}
+      if(['bye','leave'].includes(w[0])) return {choice:'bye'};
+    }
+    if(w[0]==='go'&&w[1]) w=w.slice(1);
+    if(DIRW[w[0]]&&w.length===1) return {move:DIRW[w[0]]};
+    if(['l','look'].includes(w[0])&&w.length===1) return {id:'here',key:'look'};
+    if(['i','inv','inventory'].includes(w[0])) return {msgs:[txt(s.lantern==='player'?`You carry a brass lantern${s.lit?', lit':''}.`:'Your hands are empty.')]};
+    if(w[0]==='help') return {msgs:[sys('Try: look · n e s w · take lantern · light lantern · talk bram · x post · wait · i. In a conversation, type a number or “ask wren”.')]};
+    let verb=['l','look'].includes(w[0])?'examine':VERBS[w[0]];
+    if(!verb) return {msgs:[bad('Unknown',`I don’t know the word “${esc(w[0])}”. Type help.`)]};
+    if(verb==='wait'||verb==='feel') return {id:'here',key:verb};
+    const rest=w.slice(1).filter(x=>!['the','a','an','to','at','up','with','around'].includes(x));
+    const vis=reachable(s);
+    const cands=rest.length?vis.filter(id=>ALIAS[id].some(a=>rest.includes(a))):vis.filter(id=>actions(s,id).some(a=>a.key===verb));
+    if(!cands.length) return {msgs:[bad(lightAt(s,s.room)?'Not here':'Too dark',rest.length?(lightAt(s,s.room)?'You don’t see that here.':'It is too dark to see that.'):`There is nothing here to ${verb}.`)]};
+    if(cands.length>1) return {msgs:[{t:'which',opts:cands.map(id=>({label:nameOf(s,id),cmd:`${verb} ${ALIAS[id][0]}`}))}]};
+    return {id:cands[0],key:verb};
+  }
+  command(v){
+    const p=this.parse(v); if(!p) return;
+    if(p.msgs){this.ui.hist.push({cmd:v,out:p.msgs}); return this.render();}
+    if(p.scene||p.choice||p.topic) this.ui.hist.push({cmd:v,out:[]});
+    if(p.scene) return this.sceneChoose(p.scene);
+    if(p.choice) return this.choose(p.choice);
+    if(p.topic) return this.ask(p.topic);
+    this.run(p);
+  }
+  handle(a,v){
+    const u=this.ui;
+    switch(a){
+      case 'noun': if(v.startsWith('exit:')) return this.handle('go',v.slice(5)); if(this.mode==='rail'){u.focus=v; u.sheet=null;} else u.sheet={kind:'noun',id:v}; break;
+      case 'focus': u.focus=v; break;
+      case 'back': u.focus=null; break;
+      case 'act': {const [id,key]=v.split(':'); u.sheet=null; u.focus=null; return this.run({id,key});}
+      case 'go': u.sheet=null; u.focus=null; return this.run({move:v});
+      case 'you': u.sheet={kind:'you'}; break;
+      case 'map': u.sheet={kind:'map'}; break;
+      case 'drawer': u.drawer=true; this.mark('drawer'); break;
+      case 'close': if(u.drawer) u.drawer=false; else if(u.sheet) u.sheet=null; else if(u.dlg) return this.choose('bye'); break;
+      case 'choice': return this.choose(v);
+      case 'topic': return this.ask(v);
+      case 'scene': return this.sceneChoose(v);
+      case 'later': u.scene=null; this.dsay([sys('You can decide later. Bram will wait until dusk.')]); break;
+      case 'cont': return this.sceneDone();
+      case 'run': return this.command(v);
+    }
+    this.render();
+  }
+
+  /* ---------- rendering ---------- */
+  tokens(str,live){
+    return str.replace(/\{([^|}]+)\|([^}]+)\}/g,(_,id,t)=>{
+      if(!live) return `<span class="noun dead">${t}</span>`;
+      const ex=id.startsWith('exit:'), bar=ex&&exitInfo(this.s,id.slice(5))?.barred;
+      return `<button class="noun ${ex?'exit':''} ${bar?'barred':''}" data-a="noun" data-v="${id}" tabindex="-1" aria-hidden="true">${t}</button>`;
+    });
+  }
+  msg(m){
+    if(m.t==='say') return `<p class="say"><b>${m.who}</b>${m.text}</p>`;
+    if(m.t==='sys') return `<p class="sys">${m.text}</p>`;
+    if(m.t==='bad') return `<p class="bad"><span class="why">${m.kind}</span>${m.text}</p>`;
+    if(m.t==='which') return `<p>Which one?</p><ol>${m.opts.map(o=>`<li><button data-a="run" data-v="${o.cmd}">${o.label}</button></li>`).join('')}</ol>`;
+    if(m.t==='echo') return `<p class="echo">${m.text}</p>`;
+    return `<p>${m.text}</p>`;
+  }
+  compass(){
+    const s=this.s, b=d=>{
+      const e=exitInfo(s,d), lbl=e?(e.barred?`${DIRS[d]}, barred: ${e.reason}`:`${DIRS[d]}, to ${e.label}`):`${DIRS[d]}, no exit`;
+      return `<button class="cd ${d} ${e?.barred?'barred':''}" data-a="go" data-v="${d}" aria-label="${lbl}" ${e?'':'disabled'}>${d.toUpperCase()}</button>`;
+    };
+    const lamp=s.lantern==='player'&&s.lit;
+    return `<div class="compass"><div class="ud"><button data-a="go" data-v="u" aria-label="Up, no exit" disabled>Up</button><button data-a="go" data-v="d" aria-label="Down, no exit" disabled>Dn</button></div>
+      <div class="dial ${lamp?'lamp':''}" role="group" aria-label="Compass">${['n','w','e','s'].map(b).join('')}
+      <button class="mm" data-a="map" aria-label="Map, ${s.seen.length} places found">${this.minimap()}</button></div></div>`;
+  }
+  minimap(){
+    const s=this.s,[cx,cy]=ROOMS[s.room].xy,k=17,P=r=>[(ROOMS[r].xy[0]-cx)*k,(ROOMS[r].xy[1]-cy)*k],V={n:[0,-1],s:[0,1],e:[1,0],w:[-1,0]};
+    let g='';
+    for(const r of s.seen){const [x,y]=P(r);
+      for(const [d,e] of Object.entries(ROOMS[r].exits)){const v=V[d]; if(!v) continue;
+        if(typeof e==='string'){ if(s.seen.includes(e)){ if(r<e){const [x2,y2]=P(e); g+=`<line x1="${x}" y1="${y}" x2="${x2}" y2="${y2}" class="mm-l"/>`;} }
+          else g+=`<line x1="${x}" y1="${y}" x2="${x+v[0]*10}" y2="${y+v[1]*10}" class="mm-f"/>`; }
+        else {const x2=x+v[0]*8,y2=y+v[1]*8; g+=`<line x1="${x}" y1="${y}" x2="${x2}" y2="${y2}" class="mm-b"/><line x1="${x2-v[1]*3.5}" y1="${y2-v[0]*3.5}" x2="${x2+v[1]*3.5}" y2="${y2+v[0]*3.5}" class="mm-bb"/>`;}
+      }}
+    for(const r of s.seen){const [x,y]=P(r),cur=r===s.room,dark=this.mode==='dark'&&!lightAt(s,r)&&!cur;
+      g+=`<circle cx="${x}" cy="${y}" r="${cur?5:3.3}" class="${cur?'mm-cur':dark?'mm-dark':'mm-r'}"/>`;}
+    return `<svg viewBox="-27 -27 54 54" aria-hidden="true">${g}</svg>`;
+  }
+  cards(){
+    const s=this.s;
+    const e=reachable(s).map(id=>`<button class="card" data-a="noun" data-v="${id}">${id==='lantern'&&s.lantern==='player'?'Your lantern':nameOf(s,id)}</button>`);
+    if(canFeel(s)&&this.mode!=='dark') e.push(`<button class="card" data-a="act" data-v="here:feel">Feel around</button>`);
+    const x=['n','e','s','w'].map(d=>[d,exitInfo(s,d)]).filter(([,i])=>i).map(([d,i])=>`<button class="card exit ${i.barred?'barred':''}" data-a="go" data-v="${d}" aria-label="${DIRS[d]}, ${i.barred?'barred':'to '+i.label}">${DIRS[d]} · ${i.barred?'barred':i.label}</button>`);
+    return e.concat(x).join('');
+  }
+  rail(){
+    const s=this.s,u=this.ui;
+    if(u.dlg){
+      const cs=dlgChoices(s,u.dlg.node).map(c=>`<button class="chip say ${c.why?'off':''}" data-a="choice" data-v="${c.id}" ${c.why?'aria-disabled="true"':''}>${c.label}${c.why?` · <em>${c.why.kind.toLowerCase()}</em>`:''}</button>`);
+      const ts=u.dlg.node?[]:s.topics.filter(t=>TOPICS[t][1]||t==='search').map(t=>`<button class="chip ask" data-a="topic" data-v="${t}">Ask: ${TOPICS[t][0]}</button>`);
+      return cs.concat(ts).join('');
+    }
+    if(u.focus){
+      const id=u.focus;
+      return `<button class="chip back" data-a="back" aria-label="Back">‹ ${nameOf(s,id)}</button>`+actions(s,id).map(a=>`<button class="chip ${a.why?'off':''}" data-a="act" data-v="${id}:${a.key}" ${a.why?'aria-disabled="true"':''}>${a.label}${a.why?` · <em>${a.why.kind.toLowerCase()}</em>`:''}</button>`).join('');
+    }
+    return reachable(s).map(id=>`<button class="chip grp" data-a="focus" data-v="${id}">${id==='lantern'&&s.lantern==='player'?'Your lantern':nameOf(s,id)} ›</button>`).join('')
+      +actions(s,'here').filter(a=>a.key!=='look').map(a=>`<button class="chip ${a.why?'off':''}" data-a="act" data-v="here:${a.key}">${a.label}</button>`).join('');
+  }
+  sheet(){
+    const s=this.s,u=this.ui,sh=u.sheet; if(!sh) return '';
+    let h;
+    if(sh.kind==='noun'){
+      const id=sh.id; if(!reachable(s).includes(id)){u.sheet=null; return '';}
+      h=`<h4>${nameOf(s,id)}</h4><div class="acts">${actions(s,id).map(a=>`<button class="act ${a.why?'off':''}" data-a="act" data-v="${id}:${a.key}" ${a.why?'aria-disabled="true"':''}><span>${a.label}</span>${a.why?`<small><span class="why">${a.why.kind}</span>${a.why.text}</small>`:''}</button>`).join('')}</div>`;
+    } else if(sh.kind==='you'){
+      const q={none:'None yet',declined:'None yet',active:'The Ferryman’s Lantern · bring Bram the lantern',done:'The Ferryman’s Lantern · resolved'}[s.quest];
+      h=`<h4>You</h4><dl class="kv"><dt>Time</dt><dd>${clock(s.hour)}, day one</dd><dt>Quest</dt><dd>${q}</dd><dt>Carrying</dt><dd>${s.lantern==='player'?`<button class="link" data-a="noun" data-v="lantern">brass lantern${s.lit?' (lit)':''}</button>`:'Nothing'}</dd></dl>
+        <div class="acts">${actions(s,'here').map(a=>`<button class="act ${a.why?'off':''}" data-a="act" data-v="here:${a.key}"><span>${a.label}</span>${a.why?`<small><span class="why">${a.why.kind}</span>${a.why.text}</small>`:''}</button>`).join('')}</div>`;
+    } else {
+      h=`<h4>Map</h4><dl class="kv">${s.seen.map(r=>`<dt>${ROOMS[r].name}</dt><dd>${Object.entries(ROOMS[r].exits).map(([d,e])=>`${DIRS[d]}: ${typeof e==='string'?(s.seen.includes(e)?ROOMS[e].name:'unexplored'):'barred'}`).join(' · ')}</dd>`).join('')}</dl>`;
+    }
+    return `<div class="sheet" role="dialog" aria-label="${sh.kind}"><div class="grab"></div>${h}<button class="close" data-a="close">Close</button></div>`;
+  }
+  dlgPanel(){
+    const s=this.s,u=this.ui; if(!u.dlg||this.mode==='rail') return '';
+    const cs=dlgChoices(s,u.dlg.node), ts=u.dlg.node?[]:s.topics;
+    return `<div class="sheet tall" role="dialog" aria-label="Talking with Bram"><div class="grab"></div><h4>Bram</h4>
+      <div class="lines" aria-live="polite">${u.dlg.lines.map(m=>this.msg(m)).join('')}</div>
+      ${ts.length?`<div class="topics"><span class="lbl">Ask about</span>${ts.map(t=>`<button class="chip ask" data-a="topic" data-v="${t}">${TOPICS[t][0]}</button>`).join('')}</div>`:''}
+      <div class="choices">${cs.map(c=>`<button class="act ${c.why?'off':''}" data-a="choice" data-v="${c.id}" ${c.why?'aria-disabled="true"':''}><span>${c.label}</span>${c.why?`<small><span class="why">${c.why.kind}</span>${c.why.text}</small>`:''}</button>`).join('')}</div></div>`;
+  }
+  sceneView(){
+    const sc=this.ui.scene; if(!sc) return '';
+    const beats=`<p>Bram turns the lantern over in his rope-scarred hands, then gives it back. Out on the water, the reeds have gone the color of pewter.</p><p>“The party takes the boats at dusk,” he says. “Someone should walk the bank with a light. Or the light rides the prow, and you stay where I can see you.”</p>`;
+    const body=sc.phase==='choose'
+      ?`<button class="pick" data-a="scene" data-v="carry"><b>Carry it along the bank</b><span>You keep the lantern. The search follows your light.</span></button>
+        <button class="pick" data-a="scene" data-v="leave"><b>Leave it with the search party</b><span>Bram keeps the lantern. The party carries it by boat.</span></button>
+        <button class="close" data-a="later">Not yet</button>`
+      :`<p>${sc.pick==='carry'?'You hook the lantern to your belt. Bram nods once. “Then the bank is yours. We’ll take the boats.”':'Bram hangs the lantern from the ferry’s prow and lights it. “The party will carry it. Wait by the landing, in case she comes this way.”'}</p><button class="cont" data-a="cont">Continue</button>`;
+    return `<div class="scene" role="dialog" aria-label="The Search"><p class="eyebrow">A choice</p><h3>The Search</h3>${beats}${body}</div>`;
+  }
+  drawer(){
+    const s=this.s,u=this.ui; if(!u.drawer) return '';
+    let sug;
+    if(u.scene) sug=['1','2'];
+    else if(u.dlg) sug=dlgChoices(s,u.dlg.node).map((c,i)=>String(i+1)).concat(u.dlg.node?[]:s.topics.map(t=>'ask '+TOPICS[t][0].split(' ').pop()));
+    else sug=['n','e','s','w'].filter(d=>exitInfo(s,d)).concat(...reachable(s).map(id=>actions(s,id).filter(a=>!a.why).slice(0,1).map(a=>this.echoFor(id,a.key))),'look','wait','i').slice(0,9);
+    const hist=u.hist.slice(-30).map(h=>(h.cmd?`<p class="dcmd">${esc(h.cmd)}</p>`:'')+h.out.map(m=>this.msg(m)).join('')).join('');
+    return `<div class="sheet drawer" role="dialog" aria-label="Text commands"><div class="grab"></div>
+      <div class="dh" aria-live="polite">${hist||'<p class="sys">Every tap appears here as its command. Type help for a list.</p>'}</div>
+      <div class="sugg">${sug.map(c=>`<button class="chip" data-a="run" data-v="${c}">${c}</button>`).join('')}</div>
+      <form class="cmd"><label class="sr" for="cmd-${this.mode}">Command</label><input id="cmd-${this.mode}" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="look, take lantern, n…"><button type="submit">Go</button></form>
+      <button class="close" data-a="close">Close</button></div>`;
+  }
+  render(){
+    const s=this.s,u=this.ui,L=lightAt(s,s.room);
+    this.el.classList.toggle('lamp',L==='lamp'); this.el.classList.toggle('unlit',!L);
+    const q=s.quest==='active'?'Bring Bram the lantern':s.quest==='done'?(s.plan==='player_led'?'You lead the search':'The party leads'):'';
+    let h=`<div class="glow"></div><div class="st"><span>${clock(s.hour)}</span><span>${q}</span></div>`;
+    if(this.mode==='rail'){
+      const lastRoom=u.log.map(e=>e.t).lastIndexOf('room');
+      h+=`<main class="screen log" aria-label="Story">${u.log.map((e,i)=>e.t==='room'
+        ?`<div class="room ${i<lastRoom?'old':''}"><h4>${e.title}</h4>${e.prose.map(p=>`<p>${this.tokens(p,i===lastRoom)}</p>`).join('')}</div>`
+        :`<div class="${i<lastRoom?'old':''}">${this.msg(e)}</div>`).join('')}</main>
+        <nav class="rail" aria-label="${u.dlg?'Replies':'Things to do'}">${this.rail()}</nav>`;
+    } else {
+      h+=`<main class="screen"><h3 class="place">${L?ROOMS[s.room].name:'Darkness'}</h3>
+        <div class="prose">${prose(s).map(p=>`<p>${this.tokens(p,true)}</p>`).join('')}</div>
+        ${this.mode==='dark'&&canFeel(s)?`<button class="feel" data-a="act" data-v="here:feel">Feel around</button>`:''}
+        ${u.msg.length?`<div class="result" role="status">${u.msg.map(m=>this.msg(m)).join('')}</div>`:''}</main>
+        <nav class="cards" aria-label="In this place">${this.cards()}</nav>`;
+    }
+    h+=`<footer class="bar"><div class="left"><button class="pill" data-a="you">You${s.lantern==='player'?' · 1':''}</button><button class="pill" data-a="drawer">Type</button></div>${this.compass()}</footer>`;
+    const sheet=this.sheet(), dlg=this.dlgPanel(), dr=this.drawer(), sc=this.sceneView();
+    if((sheet||dlg||dr)&&!sc) h+=`<button class="scrim" data-a="close" aria-label="Close"></button>`;
+    h+=dlg+sheet+dr+sc;
+    this.el.innerHTML=h;
+    const log=this.el.querySelector('.log'); if(log) log.scrollTop=log.scrollHeight;
+    const ln=this.el.querySelector('.lines'); if(ln) ln.scrollTop=ln.scrollHeight;
+    const dh=this.el.querySelector('.dh'); if(dh) dh.scrollTop=dh.scrollHeight;
+    const inp=this.el.querySelector('.cmd input'); if(inp){inp.value=u.draft; inp.focus({preventScroll:true});}
+  }
+}
+
+
+/* ---------- the room view, round three ---------- */
+const DET=['post','elm','reeds','nets'];
+const WORN={body:'a patched wool coat',waist:'a rope belt',legs:'mud-stiff breeches',feet:'fen boots'};
+const SLOTS=[['light','used as light'],['head','worn on head'],['neck','worn around neck'],['about','worn about body'],['body','worn on body'],['arms','worn on arms'],['wrists','worn around wrists'],['hands','worn on hands'],['finger','worn on finger'],['waist','worn about waist'],['legs','worn on legs'],['feet','worn on feet'],['wield','wielded'],['hold','held']];
+function entLine(s,id){
+  if(id==='bram'){
+    if(s.room!=='landing') return '<b>Bram</b> the ferryman sits here under the elm.';
+    return s.plan==='player_led'?'<b>Bram</b> the ferryman waits here, watching the bank.':s.plan==='party_led'?'<b>Bram</b> the ferryman is here, counting the party aboard.':'<b>Bram</b> the ferryman stands here, one boot on the ferry.';
+  }
+  if(s.lantern==='bram') return s.room==='landing'?'Bram’s <b>brass lantern</b> burns on the prow.':'Bram’s <b>brass lantern</b> burns at his feet.';
+  if(!lightAt(s,s.room)) return '<b>Something brass</b> is here, under your hand.';
+  return 'A <b>brass lantern</b> sits here'+(s.lit?', lit.':'.');
+}
+class Room{
+  constructor(el){
+    this.el=el; this.hurt=false; this.mode='dark'; this.opts={still:false,lefty:false}; this.sound=true; this.pos='standing'; this.mv=0;
+    el.addEventListener('click',e=>{const b=e.target.closest('[data-a]'); if(b&&el.contains(b)) this.handle(b.dataset.a,b.dataset.v||'');});
+    let y0=null; el.addEventListener('pointerdown',e=>{y0=e.target.closest('.foot')&&!e.target.closest('.joy')?e.clientY:null;}); el.addEventListener('pointerup',e=>{if(y0!==null&&y0-e.clientY>30){this.ui.drawer=true; this.render();} y0=null;});
+    el.addEventListener('submit',e=>{e.preventDefault(); const i=el.querySelector('.cmd input'); const v=i.value.trim(); this.ui.draft=''; if(v) this.command(v);});
+    el.addEventListener('input',e=>{const t=e.target;
+      if(t.matches('.cmd input')) this.ui.draft=t.value;
+      if(t.id==='set-size'){document.documentElement.style.setProperty('--size',t.value+'px');}
+      if(t.id==='set-still'){this.opts.still=t.checked; this.render();}
+      if(t.id==='set-sound'){this.sound=t.checked; const o=document.getElementById('snd'); if(o) o.checked=t.checked;}
+      if(t.id==='set-lefty'){this.opts.lefty=t.checked; this.render();}});
+    this.reset('start');
+  }
+  reset(p){
+    this.s=initState(p==='night'?'choose':p);
+    if(p==='night') Object.assign(this.s,{hour:20,room:'green',lit:true});
+    this.ui={stack:[],flip:null,scene:null,dlg:null,drawer:false,log:[],hist:[],draft:''};
+    this.visit(); this.render();
+  }
+  visit(){const s=this.s; this.ui.log=[{title:lightAt(s,s.room)?ROOMS[s.room].name:'Darkness',prose:prose(s),ev:[]}];}
+  addEv(ms){this.ui.log.at(-1).ev.push(...ms);}
+  open(p){this.ui.stack.push(p); this.ui.flip='fwd';}
+  back(){this.ui.stack.pop(); this.ui.flip='bwd';}
+  home(){if(this.ui.stack.length||this.ui.scene) this.ui.flip='bwd'; this.ui.stack=[]; this.ui.scene=null;}
+  emit(echo,msgs,r={}){
+    const s=this.s,u=this.ui;
+    if(r.look) this.visit();
+    this.addEv(msgs);
+    u.hist.push({cmd:echo,out:[...(r.look?[txt((lightAt(s,s.room)?ROOMS[s.room].name+'. ':'')+plain(prose(s)))]:[]),...msgs]});
+    if(u.log.length>60) u.log.splice(0,u.log.length-60);
+  }
+  echoFor(id,key){return key==='look'||key==='wait'||key==='feel'?key:`${key} ${ALIAS[id][0]}`;}
+  run(p){
+    const s=this.s,u=this.ui;
+    if(p.move&&this.pos!=='standing'){this.emit(DIRS[p.move].toLowerCase(),[bad(this.pos==='sleeping'?'Asleep':'Not standing',this.pos==='sleeping'?'You dream of walking. Wake and stand first.':`You are ${this.pos}. Stand up first.`)]); this.home(); return this.render();}
+    const r=p.move?move(s,p.move):act(s,p.id,p.key);
+    if(p.move&&r.moved) this.mv++;
+    if(u.dlg&&bramAt(s)!==s.room){u.dlg=null; r.msgs.push(bad('Not here','Bram has gone. He keeps the landing by day and the green after dark.'));}
+    this.emit(p.move?DIRS[p.move].toLowerCase():this.echoFor(p.id,p.key),r.msgs,r);
+    if(r.open==='dlg'){u.dlg={node:null,lines:[]}; this.dsay([say('Bram',greet(s))]); u.stack=[{kind:'dlg'}]; u.flip='fwd';}
+    else {const had=u.stack.length||u.scene; this.home(); if(r.look&&!had) u.flip='fwd';}
+    this.render();
+  }
+  dsay(ms){const u=this.ui; u.dlg&&u.dlg.lines.push(...ms); this.addEv(ms); u.hist.push({cmd:'',out:ms});}
+  choose(id){
+    const s=this.s,u=this.ui; if(!u.dlg) return;
+    const c=dlgChoices(s,u.dlg.node).find(x=>x.id===id); if(!c) return;
+    if(c.why){this.dsay([bad(c.why.kind,c.why.text)]); return this.render();}
+    const L=[say('You',c.label)];
+    switch(id){
+      case 'favor': u.dlg.node='offer';
+        L.push(say('Bram','“Wren. Elspeth’s girl. She went into the fen last night and hasn’t come out.”'),say('Bram','“We search at dusk, and we need light. Mine is up at the shelter. Bring it down. Then tell me whether you are coming with us.”'));
+        ['wren','lantern'].forEach(t=>s.topics.includes(t)||s.topics.push(t)); L.push(sys('New topics · Wren · the lantern')); break;
+      case 'accept': u.dlg.node=null; s.quest='active';
+        L.push(say('Bram',s.lantern==='player'?'“You’ve got it already? Then you’re quicker than me.”':'“East past the green, where the reeds start. Mind the mud.”'),sys('Quest · The Ferryman’s Lantern · Bring Bram the lantern.')); break;
+      case 'decline': u.dlg.node=null; s.quest='declined'; L.push(say('Bram','“Then don’t stand in my light.”')); break;
+      case 'row': L.push(say('Bram','“Not with Wren still out there. Ask me tomorrow.”')); break;
+      case 'decide': this.dsay(L); u.scene={phase:'choose'}; u.flip='fwd'; return this.render();
+      case 'bye': u.dlg=null; this.dsay([say('You',c.label)]); this.addEv([txt(bramAt(s)==='landing'?'Bram nods and turns back to the water.':'Bram nods and goes back to watching the track.')]); this.home(); return this.render();
+    }
+    this.dsay(L); this.render();
+  }
+  ask(t){ if(!this.ui.dlg) return; this.dsay([say('You',`Ask about ${TOPICS[t][0]}.`),say('Bram',topicReply(this.s,t))]); this.render(); }
+  sceneChoose(c){
+    const s=this.s,u=this.ui;
+    if(s.lantern!=='player'||bramAt(s)!==s.room){this.addEv([bad('Stale','The choice needs Bram here and the lantern in your hand.')]); this.home(); return this.render();}
+    s.plan=c==='carry'?'player_led':'party_led'; s.quest='done'; s.topics.push('search');
+    if(c==='leave'){s.lantern='bram'; s.lit=true;}
+    u.scene={phase:'after',pick:c}; this.render();
+  }
+  sceneDone(){
+    const u=this.ui,c=u.scene.pick; u.dlg=null;
+    this.emit('',[txt(c==='carry'?'You hook the lantern to your belt.':'The lantern burns on the ferry’s prow.'),sys('Quest resolved · '+(c==='carry'?'You lead the search along the bank.':'The party leads the search by boat.'))],{look:true});
+    this.home(); this.render();
+  }
+  command(v){
+    const p=this.parse(v); if(!p) return;
+    if(p.msgs){this.ui.hist.push({cmd:v,out:p.msgs}); return this.render();}
+    if(p.scene||p.choice||p.topic) this.ui.hist.push({cmd:v,out:[]});
+    if(p.scene) return this.sceneChoose(p.scene);
+    if(p.choice) return this.choose(p.choice);
+    if(p.topic) return this.ask(p.topic);
+    this.run(p);
+  }
+  handle(a,v){
+    const u=this.ui;
+    switch(a){
+      case 'ent': this.open({kind:'ent',id:v}); break;
+      case 'detail': {const r=act(this.s,v,'examine'); this.emit('examine '+v,r.msgs); break;}
+      case 'act': {const [id,key]=v.split(':'); return this.run({id,key});}
+      case 'go': return this.run({move:v});
+      case 'look': return this.run({id:'here',key:'look'});
+      case 'gotit': this.learned=true; break;
+      case 'pos': {const P=['standing','sitting','resting','meditating','sleeping']; this.pos=P[(P.indexOf(this.pos)+1)%P.length]; this.addEv([txt(`You are now ${this.pos}.`)]); break;}
+      case 'page': this.open({kind:v}); break;
+      case 'back': if(u.stack.at(-1)?.kind==='dlg') return this.choose('bye'); this.back(); break;
+      case 'drawer': u.drawer=true; break;
+      case 'close': u.drawer=false; break;
+      case 'choice': return this.choose(v);
+      case 'topic': return this.ask(v);
+      case 'scene': return this.sceneChoose(v);
+      case 'later': u.scene=null; u.flip='bwd'; this.dsay([sys('You can decide later. Bram will wait until dusk.')]); break;
+      case 'cont': return this.sceneDone();
+      case 'run': return this.command(v);
+    }
+    this.render();
+  }
+
+  /* ---------- the room page ---------- */
+  entHTML(live){
+    const s=this.s,ids=ents(s).filter(id=>id==='bram'||id==='lantern');
+    let h=ids.map(id=>live?`<li><button data-a="ent" data-v="${id}">${entLine(s,id)}</button></li>`:`<li><span>${entLine(s,id)}</span></li>`).join('');
+    if(live&&canFeel(s)) h+=`<li><button class="verb" data-a="act" data-v="here:feel">Feel around in the dark.</button></li>`;
+    if(live&&!lightAt(s,s.room)&&s.lantern==='player'&&!s.lit) h+=`<li><button class="verb" data-a="act" data-v="lantern:light">Light your lantern.</button></li>`;
+    return h?`<ul class="ents" aria-label="Here">${h}</ul>`:'';
+  }
+  tok(str,live){return str.replace(/\{([^|}]+)\|([^}]+)\}/g,(_,id,t)=>live&&DET.includes(id)?`<button class="noun" data-a="detail" data-v="${id}">${t}</button>`:t);}
+  roomView(){
+    const s=this.s,u=this.ui,L=lightAt(s,s.room),n=u.log.length;
+    const log=u.log.map((v,i)=>{const last=i===n-1;
+      return `<section class="visit ${last?'':'old'}"><h3 class="place">${last?`<button data-a="look" aria-label="${v.title}. Tap to look around">${v.title}</button>`:v.title}</h3><div class="prose">${v.prose.map(p=>`<p>${this.tok(p,last)}</p>`).join('')}</div>${last?this.entHTML(true):''}<div class="ev" ${last?'role="log" aria-live="polite"':''}>${v.ev.map(m=>this.msg(m)).join('')}</div></section>`;}).join('');
+    const word=k=>{const e=exitInfo(s,k),w=DIRS[k].toLowerCase();
+      if(!e) return `<span class="no" aria-label="${w}, no exit">${w}</span>`;
+      return `<button class="has ${e.barred?'barred':''}" data-a="go" data-v="${k}" aria-label="${e.barred?`${w}, barred: ${e.reason}`:`${w}, to ${e.label}`}">${w}</button>`;};
+    const st=[[this.hurt?104:300,300,'hp'],[this.hurt?70:120,120,'ma'],[(this.hurt?150:200)-this.mv,200,'mv']];
+    const band=(a,b)=>a/b<=.35?'lo':a/b<=.75?'mid':'';
+    return `<div class="view ${u.flip==='bwd'&&!u.stack.length&&!u.scene?'bwd':''}"><main class="screen">${log}</main>
+      <footer class="foot ${this.opts.left?'left':''}">
+        <div class="mo"><i class="rl"></i>${this.joyMap()}<i class="rl"></i></div>
+        <div class="st" role="status">${clock(s.hour)} · <button class="pos" data-a="pos" aria-label="Position ${this.pos}, tap to change">${this.pos}</button> · <button class="stat" data-a="page" data-v="char" aria-label="${st.map(([a,b,l])=>`${l} ${a} of ${b}`).join(', ')}. Open Character">${st.map(([a,b,l])=>`<span class="${band(a,b)}"><span class="lb">${l}</span>${a}/${b}</span>`).join('&ensp;')}</button></div>
+        <button class="grab" data-a="drawer" aria-label="Open the text drawer"></button>
+      </footer></div>`;
+  }
+
+  /* the footer joystick: a tiny map between the rules. Press to zoom it, drag toward a path to walk,
+     drag out to the stair nodes for up and down, tap to open the Map page. */
+  joyMap(){
+    const s=this.s,Z=44,c=Z/2,k=8,nr=1.5,yr=2.6,sr=2.6,sx=Z+9,V={n:[0,-1],s:[0,1],e:[1,0],w:[-1,0]};
+    const dist={[s.room]:0},q=[s.room];
+    /* ponytail: mock reaches two steps out, seen or not; the real one draws GameView's discovered map */
+    while(q.length){const r=q.shift(); if(dist[r]===2) continue; for(const e of Object.values(ROOMS[r].exits)) if(typeof e==='string'&&dist[e]===undefined){dist[e]=dist[r]+1; q.push(e);}}
+    const [x0,y0]=ROOMS[s.room].xy,P=r=>[c+(ROOMS[r].xy[0]-x0)*k,c+(ROOMS[r].xy[1]-y0)*k],rad=r=>r===s.room?yr:nr+.45,seen=r=>s.seen.includes(r);
+    let g=`<circle cx="${c}" cy="${c}" r="${c+sx-Z+sr*2}" class="backing"/>`;
+    for(const r in dist) for(const [d,e] of Object.entries(ROOMS[r].exits)){const v=V[d]; if(!v) continue; const [x,y]=P(r),a=rad(r),tag=r===s.room?`data-d="${d}"`:'';
+      if(typeof e==='string'&&dist[e]!==undefined){ if(r<e||r===s.room||e===s.room){ if(e===s.room) continue; const [x2,y2]=P(e); g+=`<line x1="${x+v[0]*a}" y1="${y+v[1]*a}" x2="${x2-v[0]*rad(e)}" y2="${y2-v[1]*rad(e)}" class="${seen(r)&&seen(e)?'e':'s'}" ${tag}/>`;} }
+      else {const x2=x+v[0]*(a+k*.45),y2=y+v[1]*(a+k*.45); g+=`<line x1="${x+v[0]*a}" y1="${y+v[1]*a}" x2="${x2}" y2="${y2}" class="${typeof e==='string'?'s':'x'}" ${tag}/>`;
+        if(typeof e!=='string') g+=`<line x1="${x2-v[1]*1.6}" y1="${y2-v[0]*1.6}" x2="${x2+v[1]*1.6}" y2="${y2+v[0]*1.6}" class="x"/>`;}}
+    for(const r in dist){ if(r===s.room) continue; const [x,y]=P(r); g+=`<circle cx="${x}" cy="${y}" r="${nr}" class="ring ${seen(r)?'':'un'}"/>`;}
+    for(const [d,y] of [['u',c-9],['d',c+9]]){const has=exitInfo(s,d);
+      g+=`<g class="stair ${has?(has.barred?'closed':''):'none'}" data-d="${d}"><circle cx="${sx}" cy="${y}" r="${sr}" class="ring"/><path d="M${sx-1.3} ${y+(d==='u'?.65:-.65)} L${sx} ${y+(d==='u'?-.75:.75)} L${sx+1.3} ${y+(d==='u'?.65:-.65)}" class="chev"/><text x="${sx}" y="${y+(d==='u'?-4.6:7.8)}" text-anchor="middle" class="slbl">${has?(d==='u'?'up':'down'):''}</text></g>`;}
+    g+=`<line class="tether" x1="${c}" y1="${c}" x2="${c}" y2="${c}"/><circle cx="${c}" cy="${c}" r="${yr}" class="knob ${lightAt(s,s.room)?'':'dk'}"/>`;
+    const sr_=['n','e','s','w','u','d'].filter(d=>exitInfo(s,d)).map(d=>`<button class="sr" data-a="go" data-v="${d}">Go ${DIRS[d].toLowerCase()}${exitInfo(s,d).barred?', barred':''}</button>`).join('');
+    const tipFirst=!this.learned?`<div class="bubble">Hold the map and drag toward a path to walk. For up and down, drag out to the stairs that appear beside it.<button data-a="gotit">Got it</button></div>`:'';
+    return `<div class="mini joy" role="group" aria-label="Map. Hold and drag to walk, tap to open the map."><div class="tip" aria-live="polite"></div>${tipFirst}${sr_}<svg width="${Z}" height="${Z}" viewBox="0 0 ${Z} ${Z}" aria-hidden="true">${g}</svg></div>`;
+  }
+  bindJoy(el){
+    const Z=44,c=Z/2,RAD=c-2,SC=2.6,svg=el.querySelector('svg'),knob=svg.querySelector('.knob'),teth=svg.querySelector('.tether'),tip=el.querySelector('.tip');
+    const stairs={u:[Z+9,c-9],d:[Z+9,c+9]};
+    const label=d=>{const e=exitInfo(this.s,d),w=DIRS[d].toLowerCase(); return e?(e.barred?`${w} · barred`:w):`no way ${w}`;};
+    const say=d=>{tip.innerHTML=d?`<b class="${exitInfo(this.s,d)&&!exitInfo(this.s,d).barred?'':'bad'}">${label(d)}</b>`:'';};
+    const hot=d=>svg.querySelectorAll('[data-d]').forEach(n=>n.classList.toggle('hot',n.dataset.d===d));
+    const place=(x,y)=>{knob.style.transform=`translate(${x}px,${y}px)`; teth.setAttribute('x2',c+x); teth.setAttribute('y2',c+y);};
+    let st=null;
+    el.addEventListener('pointerdown',e=>{ if(e.target.closest('.bubble,.sr')) return;
+      el.setPointerCapture(e.pointerId); el.classList.add('big','dragging'); st={x:e.clientX,y:e.clientY,t:performance.now(),moved:false,dir:null}; });
+    el.addEventListener('pointermove',e=>{ if(!st) return;
+      const dx=(e.clientX-st.x)/SC,dy=(e.clientY-st.y)/SC,L=Math.hypot(dx,dy); if(L>2.5) st.moved=true; if(!st.moved) return;
+      for(const d of ['u','d']){const [x,y]=stairs[d]; if(Math.hypot(c+dx-x,c+dy-y)<5.5){place(x-c,y-c); st.dir=d; hot(d); say(d); return;}}
+      const cl=Math.min(L,RAD*.85); place(L?dx/L*cl:0,L?dy/L*cl:0);
+      st.dir=L>RAD*.45?['n','e','s','w'][Math.round(((Math.atan2(dx,-dy)*180/Math.PI+360)%360)/90)%4]:null; hot(st.dir); say(st.dir); });
+    const end=e=>{ if(!st) return; const s0=st; st=null; el.classList.remove('big','dragging'); place(0,0); hot(null); say(null);
+      if(e.type==='pointercancel') return;
+      if(!s0.moved&&performance.now()-s0.t<500){this.open({kind:'map'}); return this.render();}
+      if(s0.dir){ if(exitInfo(this.s,s0.dir)&&!exitInfo(this.s,s0.dir).barred) this.learned=true; this.run({move:s0.dir}); } };
+    el.addEventListener('pointerup',end); el.addEventListener('pointercancel',end);
+  }
+
+  /* the Map page drawing */
+  tinyMap(w,h,k){
+    const s=this.s,V={n:[0,-1],s:[0,1],e:[1,0],w:[-1,0]},dist={[s.room]:0},q=[s.room];
+    /* ponytail: mock shows every place within two steps, seen or not; the real one draws GameView's discovered map */
+    while(q.length){const r=q.shift(); if(dist[r]===2) continue; for(const e of Object.values(ROOMS[r].exits)) if(typeof e==='string'&&dist[e]===undefined){dist[e]=dist[r]+1; q.push(e);}}
+    const [cx0,cy0]=ROOMS[s.room].xy,cx=w/2,cy=h/2,P=r=>[cx+(ROOMS[r].xy[0]-cx0)*k,cy+(ROOMS[r].xy[1]-cy0)*k];
+    const rYou=k>12?4.4:2.7,rN=k>12?2.4:1.4,rad=r=>r===s.room?rYou+.45:rN,seen=r=>s.seen.includes(r);
+    let g='';
+    for(const r in dist) for(const [d,e] of Object.entries(ROOMS[r].exits)){const v=V[d]; if(!v) continue; const [x,y]=P(r),a=rad(r);
+      if(typeof e==='string'&&dist[e]!==undefined){ if(r<e){const [x2,y2]=P(e); g+=`<line x1="${x+v[0]*a}" y1="${y+v[1]*a}" x2="${x2-v[0]*rad(e)}" y2="${y2-v[1]*rad(e)}" class="${seen(r)&&seen(e)?'e':'s'}"/>`;} }
+      else {const x2=x+v[0]*(a+k*.45),y2=y+v[1]*(a+k*.45); g+=`<line x1="${x+v[0]*a}" y1="${y+v[1]*a}" x2="${x2}" y2="${y2}" class="${typeof e==='string'?'s':'x'}"/>`;
+        if(typeof e!=='string') g+=`<line x1="${x2-v[1]*2}" y1="${y2-v[0]*2}" x2="${x2+v[1]*2}" y2="${y2+v[0]*2}" class="x"/>`;}}
+    for(const r in dist){ if(r===s.room) continue; const [x,y]=P(r); g+=`<circle cx="${x}" cy="${y}" r="${rN}" class="n ${seen(r)?'':'un'}"/>`;}
+    g+=`<circle cx="${cx}" cy="${cy}" r="${rYou}" class="you ${lightAt(s,s.room)?'':'dk'}"/>`;
+    return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true">${g}</svg>`;
+  }
+
+  /* ---------- pages ---------- */
+  pageBody(p){
+    const s=this.s,u=this.ui;
+    const acts=(id,list)=>`<div class="acts">${list.map(a=>`<button class="act ${a.why?'off':''}" data-a="act" data-v="${id}:${a.key}" ${a.why?'aria-disabled="true"':''}><span>${a.label}</span>${a.why?`<small><span class="why">${a.why.kind}</span>${a.why.text}</small>`:''}</button>`).join('')}</div>`;
+    switch(p.kind){
+      case 'ent': {
+        if(!reachable(s).includes(p.id)) return `<h3>Gone</h3><p class="sys">It is no longer here.</p>`;
+        const kind=p.id==='bram'?'Person':'Thing';
+        return `<p class="eyebrow">${kind}</p><h3>${p.id==='lantern'&&nameOf(s,p.id)==='brass lantern'?'The brass lantern':nameOf(s,p.id)}</h3><p>${act(s,p.id,'examine').msgs[0].text}</p>${acts(p.id,actions(s,p.id).filter(a=>a.key!=='examine'))}`;
+      }
+      case 'dlg': {
+        const cs=dlgChoices(s,u.dlg.node), ts=u.dlg.node?[]:s.topics;
+        return `<p class="eyebrow">Talking with</p><h3>Bram</h3><div class="lines" aria-live="polite">${u.dlg.lines.map(m=>this.msg(m)).join('')}</div>
+          ${ts.length?`<div class="topics"><span class="lbl">Ask about</span>${ts.map(t=>`<button class="chip" data-a="topic" data-v="${t}">${TOPICS[t][0]}</button>`).join('')}</div>`:''}
+          <div class="choices">${cs.map(c=>`<button class="act ${c.why?'off':''}" data-a="choice" data-v="${c.id}" ${c.why?'aria-disabled="true"':''}><span>${c.label}</span>${c.why?`<small><span class="why">${c.why.kind}</span>${c.why.text}</small>`:''}</button>`).join('')}</div>`;
+      }
+      case 'contents': {
+        const carry=s.lantern==='player'?1:0, worn=Object.keys(WORN).length+(carry?1:0);
+        const q=s.quest==='active'?'1 open':s.quest==='done'?'1 resolved':'empty';
+        const row=(k,label,n)=>`<li><button data-a="page" data-v="${k}"><span>${label}</span><span class="fill"></span><span class="n">${n}</span></button></li>`;
+        return `<p class="eyebrow">The book</p><h3>Contents</h3><ul class="toc">${row('map','Map',s.seen.length+' places')}${row('inv','Carrying',carry+(carry===1?' item':' items'))}${row('eq','Equipment',worn+' in use')}${row('char','Character',this.hurt?'hurt':'hale')}${row('journal','Journal',q)}${row('settings','Settings','')}</ul>`;
+      }
+      case 'map': return `<button class="eyebrow link" data-a="page" data-v="contents">Contents ›</button><h3>Ashmere</h3><div class="bigmap" style="display:flex;justify-content:center">${this.tinyMap(260,150,36)}</div><p class="sys">You are at ${ROOMS[s.room].name}. North is up.</p>`;
+      case 'inv': {
+        const w=s.lantern==='player'?3:0;
+        return `<p class="eyebrow">You are carrying</p><h3>Carrying</h3>${s.lantern==='player'?`<ul class="ents"><li><button data-a="ent" data-v="lantern">a <b>brass lantern</b>${s.lit?' (lit)':''}</button></li></ul>`:'<p class="sys">Nothing but the clothes you stand in.</p>'}
+          <p class="lbl">Weight ${w} / 40 lb · 2 pence</p><div class="bar" role="img" aria-label="Weight ${w} of 40 pounds"><i style="width:${w/40*100}%"></i></div>`;
+      }
+      case 'eq': {
+        const eq={...WORN}; if(s.lantern==='player') eq[s.lit?'light':'hold']='a brass lantern'+(s.lit?' (lit)':'');
+        return `<p class="eyebrow">You are using</p><h3>Equipment</h3><dl class="slots">${SLOTS.map(([k,l])=>`<dt>&lt;${l}&gt;</dt><dd>${eq[k]?(k==='light'||k==='hold'?`<button data-a="ent" data-v="lantern">${eq[k]}</button>`:eq[k]):'<span class="none">nothing</span>'}</dd>`).join('')}</dl>`;
+      }
+      case 'char': return `<button class="eyebrow link" data-a="page" data-v="contents">Contents ›</button><h3>Character</h3>
+        <p>You are a fen-born wanderer of the first level.</p>
+        <dl class="slots"><dt>Health</dt><dd>${this.hurt?'104 / 300, hurt':'300 / 300, hale'}</dd><dt>Mana</dt><dd>${this.hurt?70:120} / 120</dd><dt>Moves</dt><dd>${(this.hurt?150:200)-this.mv} / 200</dd><dt>Position</dt><dd>${this.pos}</dd>
+        <dt>Strength</dt><dd>10</dd><dt>Dexterity</dt><dd>11</dd><dt>Constitution</dt><dd>12</dd><dt>Perception</dt><dd>14</dd><dt>Spirit</dt><dd>9</dd>
+        <dt>Priory</dt><dd>0</dd><dt>Fen-folk</dt><dd>+2</dd><dt>Crown</dt><dd>0</dd></dl>`;
+      case 'journal': return `<p class="eyebrow">Journal</p><h3>The Ferryman’s Lantern</h3>${
+        s.quest==='active'?`<p>Bram needs light for tonight’s search. His lantern is up at the shelter, east past the reeds.</p><p class="sys">${s.lantern==='player'?'You have the lantern. Take it to Bram.':'Fetch the lantern from the shelter.'}</p>`
+        :s.quest==='done'?`<p>${s.plan==='player_led'?'You carry the lantern along the bank. The boats take the water.':'The lantern rides the ferry’s prow with the search party.'}</p><p class="sys">Resolved.</p>`
+        :'<p class="sys">No entries yet. Someone at the landing looks like he needs a hand.</p>'}`;
+      case 'settings': return `<p class="eyebrow">The book</p><h3>Settings</h3>
+        <label class="set" for="set-size">Text size <input id="set-size" type="range" min="15" max="24" value="${parseInt(getComputedStyle(document.documentElement).getPropertyValue('--size'))||18}"></label>
+        <label class="set" for="set-still">Turn pages without motion <input id="set-still" type="checkbox" ${this.opts.still?'checked':''}></label>
+        <label class="set" for="set-sound">Page sound <input id="set-sound" type="checkbox" ${this.sound?'checked':''}></label>
+        <label class="set" for="set-lefty">Left-handed <input id="set-lefty" type="checkbox" ${this.opts.lefty?'checked':''}></label>`;
+    }
+  }
+  bigMap(){
+    const s=this.s,k=70,V={n:[0,-1],s:[0,1],e:[1,0],w:[-1,0]};
+    const xs=s.seen.map(r=>ROOMS[r].xy[0]),ys=s.seen.map(r=>ROOMS[r].xy[1]);
+    const x0=Math.min(...xs)-1,y0=Math.min(...ys)-.6,W=(Math.max(...xs)-x0+1)*k,H=(Math.max(...ys)-y0+.9)*k;
+    const P=r=>[(ROOMS[r].xy[0]-x0)*k,(ROOMS[r].xy[1]-y0)*k];
+    let g='';
+    for(const r of s.seen){const [x,y]=P(r);
+      for(const [d,e] of Object.entries(ROOMS[r].exits)){const v=V[d]; if(!v) continue;
+        if(typeof e==='string'){ if(s.seen.includes(e)){ if(r<e){const [x2,y2]=P(e); g+=`<line x1="${x}" y1="${y}" x2="${x2}" y2="${y2}" class="mm-l"/>`;} } else g+=`<line x1="${x}" y1="${y}" x2="${x+v[0]*30}" y2="${y+v[1]*30}" class="mm-f"/>`; }
+        else {const x2=x+v[0]*26,y2=y+v[1]*26; g+=`<line x1="${x}" y1="${y}" x2="${x2}" y2="${y2}" class="mm-b"/><line x1="${x2-v[1]*8}" y1="${y2-v[0]*8}" x2="${x2+v[1]*8}" y2="${y2+v[0]*8}" class="mm-bb"/>`;}}}
+    for(const r of s.seen){const [x,y]=P(r),cur=r===s.room;
+      g+=`<circle cx="${x}" cy="${y}" r="${cur?8:5}" class="${cur?'mm-cur':'mm-r'}"/><text x="${x}" y="${y+22}" text-anchor="middle">${ROOMS[r].name}</text>`;}
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Map of ${s.seen.length} places">${g}</svg>`;
+  }
+  pageView(){
+    const u=this.ui,p=u.stack.at(-1); if(!p) return '';
+    const f=u.flip&&!u.scene?u.flip:'';
+    return `<div class="page ${f}" role="region" aria-label="Page"><div class="pg">${this.pageBody(p)}</div>
+      <div class="pg-foot"><button data-a="back">${p.kind==='dlg'?'Leave the conversation':u.stack.length>1?'‹ Back':'‹ Back to the room'}</button></div></div>`;
+  }
+  render(){
+    const s=this.s,u=this.ui,L=lightAt(s,s.room),el=this.el;
+    const dir=u.flip, still=this.opts.still||matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const before=dir&&!still?this.snap():null;
+    el.classList.toggle('lamp',L==='lamp'); el.classList.toggle('unlit',!L);
+    el.classList.toggle('lefty',this.opts.lefty);
+    let h=`<div class="glow"></div>${this.roomView()}${this.pageView()}`;
+    if(u.scene) h+=Phone.prototype.sceneView.call(this).replace('class="scene"','class="page scene"').replace(/<p class="eyebrow">/,'<div class="pg"><p class="eyebrow">')+'</div>';
+    const dr=this.drawer(); if(dr) h+=`<button class="scrim" data-a="close" aria-label="Close"></button>`+dr;
+    el.innerHTML=h; u.flip=null;
+    const sc=el.querySelector('.screen'); if(sc){sc.style.scrollBehavior='auto'; sc.scrollTop=sc.scrollHeight;}
+    if(u.stack.at(-1)?.kind==='dlg'){const pg=el.querySelector('.page .pg'); pg.scrollTop=pg.scrollHeight;}
+    const dh=el.querySelector('.dh'); if(dh) dh.scrollTop=dh.scrollHeight;
+    const inp=el.querySelector('.cmd input'); if(inp){inp.value=u.draft; inp.focus({preventScroll:true});}
+    const joy=el.querySelector('.foot .joy'); if(joy&&!u.stack.length&&!u.scene) this.bindJoy(joy);
+    if(dir&&this.sound) pageSound(dir);
+    if(before) this.turn(dir,before);
+  }
+  /* a still copy of the whole screen, with its scroll positions */
+  snap(){
+    const el=this.el; this.ov?.remove();
+    return {cls:el.className,html:el.innerHTML,scroll:['.screen','.page .pg'].map(q=>el.querySelector(q)?.scrollTop||0)};
+  }
+  paint(sn){
+    const d=document.createElement('div'); d.className=sn.cls+' snap'; d.innerHTML=sn.html;
+    requestAnimationFrame(()=>['.screen','.page .pg'].forEach((q,i)=>{const n=d.querySelector(q); if(n) n.scrollTop=sn.scroll[i];}));
+    return d;
+  }
+  /* forward: the old page lifts off to the left, revealing the new one.
+     back: the new page swings in from the left and settles over the old one.
+     ponytail: DOM strips stand in for a real curl; on device use a Skia page-curl shader. */
+  turn(dir,before){
+    const el=this.el,W=el.clientWidth,N=10,sw=W/N,leafSnap=dir==='fwd'?before:this.snap();
+    const ov=document.createElement('div'); ov.className='turn'; ov.inert=true; ov.setAttribute('aria-hidden','true');
+    if(dir==='bwd') ov.appendChild(this.paint(before));
+    const shade=document.createElement('div'); shade.className='under-shade'; ov.appendChild(shade);
+    const strips=[],lits=[]; let parent=ov;
+    for(let i=0;i<N;i++){
+      const st=document.createElement('div'); st.className='strip'; st.style.left=(i?sw:0)+'px'; st.style.width=sw+'px';
+      const face=document.createElement('div'); face.className='face';
+      const p=this.paint(leafSnap); p.style.left=(-i*sw)+'px'; p.style.width=W+'px'; face.appendChild(p);
+      const lit=document.createElement('i'); lit.className='lit'; face.appendChild(lit);
+      const back=document.createElement('div'); back.className='back';
+      st.append(face,back); parent.appendChild(st); parent=st; strips.push(st); lits.push(lit);
+    }
+    el.appendChild(ov); this.ov=ov;
+    const D=620,t0=performance.now(),sign=dir==='fwd'?-1:1,ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+    const step=now=>{
+      if(this.ov!==ov) return;
+      const t=Math.min(1,(now-t0)/D),e=ease(t);
+      const base=dir==='fwd'?-178*e:-178*(1-e), curl=Math.sin(Math.PI*e)*85, tri=N*(N-1)/2;
+      let a=base;
+      strips.forEach((st,i)=>{const d=i?sign*curl*i/tri:base; if(i) a+=d; st.style.transform=`rotateY(${d}deg)`;
+        lits[i].style.opacity=((1-Math.abs(Math.cos(a*Math.PI/180)))*.5).toFixed(3);});
+      shade.style.opacity=(dir==='fwd'?.5*(1-e):.5*e).toFixed(3);
+      if(t<1) requestAnimationFrame(step); else {ov.remove(); this.ov=null;}
+    };
+    requestAnimationFrame(step);
+  }}
+for(const k of ['minimap','msg','drawer','parse']) Room.prototype[k]=Phone.prototype[k];
+
+/* page sound, synthesized: a crinkly paper rustle rising in pitch, then the soft slap of the page landing.
+   ponytail: synthesized so the mockup needs no audio file; ship a recorded sample in the app. */
+let actx;
+function pageSound(dir){
+  try{
+    actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+    const t=actx.currentTime,sr=actx.sampleRate,len=Math.floor(sr*.62),buf=actx.createBuffer(1,len,sr),d=buf.getChannelData(0);
+    let g=1; for(let i=0;i<len;i++){ if(i%Math.floor(sr*.004)===0) g=.35+Math.random()*.65; d[i]=(Math.random()*2-1)*g; }
+    const src=actx.createBufferSource(); src.buffer=buf;
+    const bp=actx.createBiquadFilter(); bp.type='bandpass'; bp.Q.value=.9;
+    bp.frequency.setValueAtTime(dir==='fwd'?700:900,t); bp.frequency.exponentialRampToValueAtTime(3200,t+.34); bp.frequency.exponentialRampToValueAtTime(1400,t+.5);
+    const env=actx.createGain(); env.gain.setValueAtTime(0,t);
+    env.gain.linearRampToValueAtTime(.22,t+.05); env.gain.linearRampToValueAtTime(.12,t+.24); env.gain.linearRampToValueAtTime(.34,t+.4); env.gain.exponentialRampToValueAtTime(.001,t+.6);
+    src.connect(bp).connect(env).connect(actx.destination); src.start(t); src.stop(t+.62);
+    const thud=actx.createBufferSource(); thud.buffer=buf;
+    const lp=actx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=700;
+    const tg=actx.createGain(); tg.gain.setValueAtTime(0,t+.44); tg.gain.linearRampToValueAtTime(.45,t+.455); tg.gain.exponentialRampToValueAtTime(.001,t+.56);
+    thud.connect(lp).connect(tg).connect(actx.destination); thud.start(t+.44,.1); thud.stop(t+.6);
+  }catch(e){}
+}
+const room=new Room(document.querySelector('.ph'));
+document.querySelectorAll('.tools [data-p]').forEach(b=>b.onclick=()=>room.reset(b.dataset.p));
+document.getElementById('hurt').onchange=e=>{room.hurt=e.target.checked; room.render();};
+document.getElementById('snd').onchange=e=>{room.sound=e.target.checked;};
+document.getElementById('left').onchange=e=>{room.opts.left=e.target.checked; room.render();};
+</script>

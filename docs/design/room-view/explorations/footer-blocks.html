@@ -1,0 +1,241 @@
+<title>Loka Page Footers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap">
+<style>
+:root{
+  --bg:#eceee9; --fg:#1d2320; --muted:#56615b; --line:#cfd5ce; --accent:#7b2d20; --panel:#f6f7f3;
+  --head:'IM Fell English',Georgia,serif; --sc:'IM Fell English SC',Georgia,serif; --body:'EB Garamond',Georgia,serif;
+  --orn:'EB Garamond','Apple Symbols','Segoe UI Symbol',serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark; --bg:#121614; --fg:#e2e5df; --muted:#9aa59e; --line:#2a322e; --accent:#d9937a; --panel:#181d1a}}
+:root[data-theme="dark"]{color-scheme:dark; --bg:#121614; --fg:#e2e5df; --muted:#9aa59e; --line:#2a322e; --accent:#d9937a; --panel:#181d1a}
+body{background:var(--bg); color:var(--fg); font:17px/1.55 var(--body); padding-inline:16px; padding-block:28px 64px}
+.wrap{max-width:1180px; margin:0 auto}
+h1{font:400 clamp(2rem,5vw,3rem)/1.05 var(--head); margin:0 0 .3em; text-wrap:balance}
+.lede{max-width:68ch; color:var(--muted); margin:0 0 1em}
+.lede b{color:var(--fg); font-weight:500}
+.ctl{display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center; margin:0 0 28px; padding:10px 0; border-block:1px solid var(--line); font-size:.95rem; position:sticky; top:env(safe-area-inset-top,0px); background:var(--bg); z-index:5}
+.grp{display:flex; flex-wrap:wrap; gap:4px; align-items:center}
+.grp>span{font:.9rem var(--sc); color:var(--muted); letter-spacing:.04em; margin-right:4px}
+.ctl button{font:inherit; font-size:.88rem; padding:3px 10px; border:1px solid var(--line); background:var(--panel); color:var(--fg); border-radius:4px; cursor:pointer}
+.ctl button[aria-pressed="true"]{background:var(--fg); color:var(--bg); border-color:var(--fg)}
+.gallery{display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,318px),1fr)); gap:36px 26px}
+figure{margin:0; display:flex; flex-direction:column; gap:10px}
+figcaption h2{font:400 1.18rem/1.2 var(--head); margin:0; display:flex; gap:.5em; align-items:baseline}
+figcaption h2 span{font:.95rem var(--sc); color:var(--accent)}
+figcaption p{margin:.2em 0 0; color:var(--muted); font-size:.95rem; line-height:1.45}
+
+/* ---------- the phone slice ---------- */
+.frame{--p-bg:#ebe6d7; --p-fg:#241f19; --p-dim:#6a6254; --p-line:#cdc3aa; --p-bad:#7b2d20; --p-warn:#8a5a14;
+  width:min(344px,100%); margin:0 auto; height:250px; display:flex; flex-direction:column; justify-content:flex-end;
+  background:var(--p-bg); color:var(--p-fg); border:8px solid #1a1b1a; border-top:0; border-radius:0 0 34px 34px; overflow:hidden; font:16px/1.45 var(--body); font-variant-numeric:oldstyle-nums}
+.night .frame{--p-bg:#0c0b09; --p-fg:#ecdfc3; --p-dim:#a79a83; --p-line:#3a3228; --p-bad:#eb9676; --p-warn:#e6b35a; color-scheme:dark}
+.frame button{font:inherit; color:inherit; background:none; border:0; padding:0; cursor:pointer}
+.frame :focus-visible{outline:2px solid var(--p-fg); outline-offset:2px}
+.ctx{flex:1; padding:14px 22px 0; -webkit-mask-image:linear-gradient(transparent,#000 60%); mask-image:linear-gradient(transparent,#000 60%); overflow:hidden; display:flex; flex-direction:column; justify-content:flex-end}
+.ctx p{margin:0 0 .3em}
+.ctx b{font-weight:500; border-bottom:1.5px dotted currentColor}
+.said{font-style:italic; color:var(--p-dim); min-height:1.45em}
+
+/* the footer block: a divider, the exits, the status */
+.blk{padding:4px 22px 16px; display:flex; flex-direction:column; gap:0}
+.ex{white-space:nowrap; overflow-x:auto; scrollbar-width:none; font-size:16.5px}
+.ex button,.ex .no{display:inline-block; min-height:38px; line-height:38px}
+.go{color:var(--p-dim)}
+.has{font-weight:600}
+.no{color:var(--p-dim); opacity:.5}
+.barred{text-decoration:line-through; text-decoration-thickness:1px}
+.closed{font-style:italic}
+.st{display:flex; align-items:baseline; gap:8px; font-size:13.5px; color:var(--p-dim); white-space:nowrap}
+.st .r{margin-left:auto}
+.st .lo{color:var(--p-bad)} .st .mid{color:var(--p-warn)}
+.pos{border-bottom:1px dotted currentColor!important}
+.center{text-align:center; align-items:center}
+.center .st{justify-content:center}
+
+/* dividers: small, quiet, bookish */
+.dv{height:14px; display:flex; align-items:center; gap:10px; color:var(--p-dim); margin-bottom:2px}
+.dv.hair{border-top:1px solid var(--p-line); height:0; margin:6px 0 6px}
+.dv.double{height:3px; border-block:1px solid var(--p-line); margin:6px 0 6px}
+.dv.dots{border-top:1.5px dotted var(--p-line); height:0; margin:6px 0 6px}
+.dv.short{width:44px; border-top:1px solid var(--p-dim); height:0; margin:8px auto 6px; opacity:.7}
+.dv.orn::before,.dv.orn::after{content:''; flex:1; height:1px; background:var(--p-line)}
+.dv.orn.narrow{width:150px; margin-inline:auto}
+.dv span{font:13px/1 var(--orn); opacity:.8}
+.dv.sym{justify-content:center; font:13px/1 var(--orn); letter-spacing:.2em; opacity:.8; height:18px}
+.dv.swell svg{width:100%; height:6px; display:block}
+.dv.swell path{fill:var(--p-dim); opacity:.55}
+.dv.titled span{font:10.5px var(--sc); letter-spacing:.2em; opacity:.9}
+.dv.maprule{height:auto}
+.frame-tb{border-block:1px solid var(--p-line); margin:0 16px 14px; padding:6px 8px 6px}
+.corners{position:relative; margin:0 16px 14px; padding:8px 12px}
+.corners::before,.corners::after{content:''; position:absolute; width:12px; height:12px; border:1px solid var(--p-dim); opacity:.6}
+.corners::before{left:0; top:0; border-right:0; border-bottom:0}
+.corners::after{right:0; bottom:0; border-left:0; border-top:0}
+.card{margin:0 14px 14px; padding:6px 12px 8px; border:1px solid var(--p-line); border-radius:12px}
+
+/* layouts */
+.side{display:grid; grid-template-columns:1fr auto; align-items:center; gap:0 12px}
+.side.left{grid-template-columns:auto 1fr}
+.side>div{min-width:0}
+.side .st{white-space:normal; flex-wrap:wrap; row-gap:0; line-height:1.5}
+.marg{display:grid; grid-template-columns:4.6em 1fr; align-items:baseline}
+.marg .gl{font-size:13px; color:var(--p-dim)}
+.marg .ex{grid-column:2}
+.strip{display:flex; justify-content:center; margin:2px 0 0}
+
+/* the minimap: hairlines and dots, like an endpaper map */
+.mini{display:block; line-height:0}
+.mini svg{display:block; overflow:visible}
+.mini .e{stroke:var(--p-fg); stroke-width:.9; opacity:.75; fill:none}
+.mini .s{stroke:var(--p-fg); stroke-width:.9; opacity:.55; stroke-dasharray:1.2 2.2}
+.mini .x{stroke:var(--p-bad); stroke-width:.9; opacity:.8}
+.mini .n{fill:var(--p-fg); opacity:.75}
+.mini .me{fill:none; stroke:var(--p-fg); stroke-width:.9}
+.mini .dot{fill:var(--p-fg)}
+.mini .dark .me{stroke-dasharray:1.4 1.4}
+.mini .v{stroke:var(--p-fg); stroke-width:.8; opacity:.6; fill:none}
+.mini text{font:8.5px var(--sc); letter-spacing:.14em; fill:var(--p-dim)}
+</style>
+
+<div class="wrap">
+  <h1>The page footer</h1>
+  <p class="lede">The divider now sits over the <b>whole block</b>: the “You can go” line and the status line under it. Twenty combinations of <b>divider</b>, <b>layout</b> and a <b>minimal minimap</b> drawn like the map on a novel’s endpapers. The zone name has moved out of the status line and appears on the map where there’s room. Everything is tappable, and the controls at the top change the room, your position and your condition.</p>
+  <div class="ctl">
+    <div class="grp" role="group" aria-label="Room"><span>Room</span><button data-room="landing" aria-pressed="true">Ferry Landing</button><button data-room="mill" aria-pressed="false">Old Mill</button><button data-room="dark" aria-pressed="false">Dark shelter</button></div>
+    <div class="grp" role="group" aria-label="Position"><span>Position</span><button data-pos="standing" aria-pressed="true">standing</button><button data-pos="sitting" aria-pressed="false">sitting</button><button data-pos="resting" aria-pressed="false">resting</button><button data-pos="meditating" aria-pressed="false">meditating</button><button data-pos="sleeping" aria-pressed="false">sleeping</button></div>
+    <div class="grp" role="group" aria-label="Condition"><span>Condition</span><button data-hurt="0" aria-pressed="true">Hale</button><button data-hurt="1" aria-pressed="false">Hurt</button></div>
+    <div class="grp" role="group" aria-label="Page"><span>Page</span><button data-t="paper" aria-pressed="true">Paper</button><button data-t="night" aria-pressed="false">Night</button></div>
+  </div>
+  <div class="gallery" id="g"></div>
+</div>
+
+<script>
+const ROOMS={
+  landing:{prose:'<p>Reeds crowd a slick wooden landing. A mooring post leans into the current.</p><p><b>Bram</b> the ferryman stands here, one boot on the ferry.</p>',
+    ex:{n:{st:'open'},w:{st:'barred',why:'The causeway west is under the tide.'}},
+    map:{nodes:[[0,-1]],edges:[[[0,0],[0,-1]]],stubs:[[0,-1,1,0,'s'],[0,0,-1,0,'x']]}},
+  mill:{prose:'<p>Flour dust hangs in the still air. The millstone has not turned in years.</p><p><b>Hob’s ledger</b> lies open on a grain sack.</p>',
+    ex:{n:{st:'open'},s:{st:'open'},u:{st:'open'},d:{st:'closed',why:'The trapdoor is closed.'}},
+    map:{nodes:[[0,-1],[1,-1]],edges:[[[0,0],[0,-1]],[[0,-1],[1,-1]]],stubs:[[0,0,0,1,'s']],up:true,down:true}},
+  dark:{prose:'<p>It is too dark to see. You smell lamp oil and wet tar.</p><p><b>Something brass</b> is here, under your hand.</p>',
+    ex:{w:{st:'open'}}, dark:true,
+    map:{nodes:[[-1,0],[-2,0],[-2,1]],edges:[[[0,0],[-1,0]],[[-1,0],[-2,0]],[[-2,0],[-2,1]]],stubs:[[-2,1,-1,0,'x']]}},
+};
+const ORDER=['n','e','s','w','u','d'];
+const WORD={n:'north',e:'east',s:'south',w:'west',u:'up',d:'down'};
+const SHORT={n:'N',e:'E',s:'S',w:'W',u:'Up',d:'Dn'};
+const ABBR=['standing','sitting','resting','meditating','sleeping'];
+const S={room:'landing',pos:'standing',hurt:false,mv:0,said:{}};
+const R=()=>ROOMS[S.room];
+const band=(v,m)=>v/m<=.35?'lo':v/m<=.75?'mid':'';
+
+function W(d,text){
+  const e=R().ex[d];
+  if(!e) return `<span class="no" aria-label="${WORD[d]}, no exit">${text}</span>`;
+  return `<button class="has ${e.st==='open'?'':e.st}" data-go="${d}" aria-label="${WORD[d]}${e.st==='open'?'':', '+e.st}">${text}</button>`;
+}
+/* the exits line: "You can go north east south west up down" */
+const EX=(o={})=>`<nav class="ex" aria-label="Exits">${o.label===false?'':`<span class="go">You can go</span>&ensp;`}${ORDER.map(d=>W(d,(o.short?SHORT:WORD)[d])).join(o.short?'&ensp;':' ')}</nav>`;
+/* the status line, from the MUD prompt: time and position, then hp, ma, mv */
+function ST(o={}){
+  const hp=S.hurt?14:20,ma=S.hurt?5:12,mv=(S.hurt?42:80)-S.mv;
+  const pos=`<button class="pos" data-a="pos" aria-label="Position ${S.pos}, tap to change">${S.pos}</button>`;
+  const n=`<span class="${band(hp,20)}">${hp} hp</span> · <span class="${band(ma,12)}">${ma} ma</span> · <span class="${band(mv,80)}">${mv} mv</span>`;
+  return o.one?`<div class="st" role="status">06:00 · ${pos} · ${n}</div>`:`<div class="st" role="status"><span>06:00</span>·${pos}<span class="r">${n}</span></div>`;
+}
+/* the minimap: hairline paths, small dots, a ring for you */
+function MAP(w,h,o={}){
+  const m=R().map,k=o.k||13,cx=o.cx??w/2,cy=o.cy??h/2,P=([x,y])=>[cx+x*k,cy+y*k];
+  let g='';
+  m.edges.forEach(([a,b])=>{const [x1,y1]=P(a),[x2,y2]=P(b); g+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="e"/>`;});
+  m.stubs.forEach(([x,y,dx,dy,t])=>{const [x1,y1]=P([x,y]),x2=x1+dx*k*.55,y2=y1+dy*k*.55;
+    g+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="${t==='x'?'x':'s'}"/>`;
+    if(t==='x') g+=`<line x1="${x2-dy*2.5}" y1="${y2-dx*2.5}" x2="${x2+dy*2.5}" y2="${y2+dx*2.5}" class="x"/>`;});
+  m.nodes.forEach(p=>{const [x,y]=P(p); g+=`<circle cx="${x}" cy="${y}" r="1.7" class="n"/>`;});
+  g+=`<g class="${R().dark?'dark':''}"><circle cx="${cx}" cy="${cy}" r="3.4" class="me"/><circle cx="${cx}" cy="${cy}" r="1.1" class="dot"/></g>`;
+  if(m.up) g+=`<path d="M${cx+5} ${cy-4} l2 -2.2 l2 2.2" class="v"/>`;
+  if(m.down) g+=`<path d="M${cx+5} ${cy+4} l2 2.2 l2 -2.2" class="v"/>`;
+  if(o.cap) g+=`<text x="${o.capX??w/2}" y="${h-1}" text-anchor="${o.capA||'middle'}">${o.cap}</text>`;
+  return `<button class="mini" data-a="map" aria-label="Map of Ashmere"><svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true">${g}</svg></button>`;
+}
+const DV=(k,inner='')=>({
+  hair:'<div class="dv hair"></div>', double:'<div class="dv double"></div>', dots:'<div class="dv dots"></div>', short:'<div class="dv short"></div>',
+  fleuron:'<div class="dv orn"><span>❧</span></div>', diamond:'<div class="dv orn"><span style="font-size:9px">◆</span></div>',
+  flower:'<div class="dv orn narrow"><span>❦</span></div>', asterism:'<div class="dv sym">⁂</div>', stars:'<div class="dv sym">*&ensp;*&ensp;*</div>',
+  swell:'<div class="dv swell"><svg viewBox="0 0 300 6" preserveAspectRatio="none" aria-hidden="true"><path d="M0 3 Q150 0 300 3 Q150 6 0 3Z"/></svg></div>',
+  dot:'<div class="dv orn"><span style="font-size:8px">●</span></div>', titled:'<div class="dv orn titled"><span>ashmere</span></div>',
+  map:`<div class="dv orn maprule">${inner}</div>`,
+}[k]);
+
+const VARIANTS=[
+ ['Hairline over the block','The baseline: one hairline, then “You can go”, then the status line. Everything left-aligned under the prose.',
+  ()=>`<div class="blk">${DV('hair')}${EX()}${ST()}</div>`],
+ ['Centered under a short rule','A short centered rule, like the end of a chapter, with both lines centered beneath it.',
+  ()=>`<div class="blk center">${DV('short')}${EX()}${ST({one:true})}</div>`],
+ ['Fleuron on the rule','A small printer’s leaf breaks the hairline. It’s the gentlest ornament in the set.',
+  ()=>`<div class="blk">${DV('fleuron')}${EX()}${ST()}</div>`],
+ ['Asterism','⁂, the old mark for a break in the text, stands alone with no line.',
+  ()=>`<div class="blk center">${DV('asterism')}${EX()}${ST({one:true})}</div>`],
+ ['Three stars','The dinkus (* * *), a scene break in many novels, heading the block.',
+  ()=>`<div class="blk">${DV('stars')}${EX()}${ST()}</div>`],
+ ['Swelled rule','A rule that swells in the middle and tapers at the ends, as in old books.',
+  ()=>`<div class="blk center">${DV('swell')}${EX()}${ST({one:true})}</div>`],
+ ['Map at the right','A double hairline, and the minimap hangs at the right beside both lines, under the thumb.',
+  ()=>`<div class="blk">${DV('double')}<div class="side"><div>${EX({short:true})}${ST({one:true})}</div>${MAP(56,52)}</div></div>`],
+ ['Map at the left','A diamond on the rule, and the map at the left like a vignette, with the text flowing beside it.',
+  ()=>`<div class="blk">${DV('diamond')}<div class="side left">${MAP(56,52)}<div>${EX({short:true})}${ST({one:true})}</div></div></div>`],
+ ['The map is the ornament','The minimap replaces the fleuron: it sits in the middle of the rule, and you can tap it.',
+  ()=>`<div class="blk center">${DV('map',MAP(54,34,{k:11}))}${EX()}${ST({one:true})}</div>`],
+ ['Dotted rule, captioned map','A dotted leader and a map captioned “Ashmere” in small caps, like a plate in a book.',
+  ()=>`<div class="blk">${DV('dots')}<div class="side">${`<div>${EX({short:true})}${ST({one:true})}</div>`}${MAP(62,58,{cap:'ashmere',cy:24})}</div></div>`],
+ ['Margin glosses','The labels hang in the left margin, “you can go” and the hour, so the words start at the text edge.',
+  ()=>`<div class="blk">${DV('hair')}<div class="marg"><span class="gl">you can go</span>${EX({label:false})}<span class="gl">06:00</span>${ST({one:true}).replace('06:00 · ','')}</div></div>`],
+ ['Ruled above and below','The block framed by two hairlines, a boxed note inside the page.',
+  ()=>`<div class="blk frame-tb">${EX()}${ST()}</div>`],
+ ['Corner marks','Two corner marks, like a photo mount, hold the block without drawing a box.',
+  ()=>`<div class="blk corners center">${EX()}${ST({one:true})}</div>`],
+ ['Flower between short rules','❦ between two short rules, centered, with a small map to the right of the status.',
+  ()=>`<div class="blk">${DV('flower')}<div class="side"><div>${EX({short:true})}${ST({one:true})}</div>${MAP(40,40,{k:10})}</div></div>`],
+ ['Titled rule','The rule carries the zone name, “ashmere”, as a tiny spaced running head. The map is gone.',
+  ()=>`<div class="blk">${DV('titled')}${EX()}${ST()}</div>`],
+ ['Map strip','A wide, low strip of map between the rule and the words, like a route map in a travel book.',
+  ()=>`<div class="blk">${DV('hair')}<div class="strip">${MAP(260,26,{k:14})}</div>${EX()}${ST()}</div>`],
+ ['Short words with map','N E S W Up Dn after “You can go”, with a fleuron and the map at the right.',
+  ()=>`<div class="blk">${DV('fleuron')}<div class="side"><div>${EX({short:true})}${ST({one:true})}</div>${MAP(48,48)}</div></div>`],
+ ['Hairline card','A thin rounded card around both lines. Softer, and it’s the one that reads as UI.',
+  ()=>`<div class="blk card">${EX()}${ST()}</div>`],
+ ['Dot on the rule','A single small dot interrupts the rule, a quieter cousin of the fleuron.',
+  ()=>`<div class="blk center">${DV('dot')}${EX()}${ST({one:true})}</div>`],
+ ['Map in the margin, captioned','The map, captioned in small caps, sits in the left margin under a swelled rule, and the lines sit beside it.',
+  ()=>`<div class="blk">${DV('swell')}<div class="side left">${MAP(58,58,{cap:'ashmere',cy:24})}<div>${EX({short:true})}${ST({one:true})}</div></div></div>`],
+];
+function render(){
+  document.getElementById('g').innerHTML=VARIANTS.map(([n,desc,f],i)=>`<figure><div class="frame" data-i="${i}"><div class="ctx">${R().prose}<p class="said">${S.said[i]||''}</p></div>${f()}</div><figcaption><h2><span>${i+1}</span>${n}</h2><p>${desc}</p></figcaption></figure>`).join('');
+}
+document.getElementById('g').addEventListener('click',ev=>{
+  const b=ev.target.closest('button'); if(!b) return; const i=b.closest('.frame').dataset.i;
+  if(b.dataset.a==='pos'){S.pos=ABBR[(ABBR.indexOf(S.pos)+1)%ABBR.length]; syncCtl(); S.said[i]=`You are now ${S.pos}.`; return render();}
+  if(b.dataset.a==='map'){S.said[i]='The map of Ashmere would turn up.'; return render();}
+  const d=b.dataset.go, e=R().ex[d]; if(!e) return;
+  if(S.pos==='sleeping') S.said[i]='You dream of walking. Wake and stand first.';
+  else if(S.pos!=='standing') S.said[i]=`You are ${S.pos}. Stand up first.`;
+  else if(e.st!=='open') S.said[i]=e.why;
+  else {S.mv++; S.said[i]=`You go ${WORD[d]}.`;}
+  render();
+});
+function syncCtl(){
+  document.querySelectorAll('[data-room]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.room===S.room));
+  document.querySelectorAll('[data-pos]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.pos===S.pos));
+  document.querySelectorAll('[data-hurt]').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.hurt==='1')===S.hurt));
+}
+document.querySelector('.ctl').addEventListener('click',ev=>{
+  const b=ev.target.closest('button'); if(!b) return;
+  if(b.dataset.room){S.room=b.dataset.room; S.said={};}
+  if(b.dataset.pos) S.pos=b.dataset.pos;
+  if(b.dataset.hurt){S.hurt=b.dataset.hurt==='1'; S.mv=0;}
+  if(b.dataset.t){document.querySelectorAll('[data-t]').forEach(x=>x.setAttribute('aria-pressed',x===b)); document.getElementById('g').classList.toggle('night',b.dataset.t==='night');}
+  syncCtl(); render();
+});
+render();
+</script>
