@@ -325,9 +325,9 @@ Cartridge, deployment and campaign manifests and their version fields (05 §3, �
 
 The one observation record format, its stores and correlation ids, and the game-trace entry (11 §11-§15; ADR-075, docs/decisions/adr-075-observability-proposal.md). Observation is never authority.
 
-- **AgentWork**: One agent's work on one pull request: its role, the tokens it used (a required Measure; unknown when the harness does not report it) and the work's outcome (accepted: merged; rejected: closed unmerged).
-- **BuildIds**: The correlation ids of a content diagnostic: the code revision, and the cartridge hash once one exists (a compile that fails before hashing has none).
-- **CommitOutcome**: What happened to the command's commit (04 §5.1; 03 §14, §15): committed at revision (the revision after; a rejection receipt does not advance it) with the committed events in order and the effect ids; failed (definitively rolled back); unknown (the outcome could not be observed; reconciled under 03 §15, never presumed rolled back); or unavailable (not_applicable: nothing was committed, such as a fault or a rejection without a receipt). Failed and unknown carry no events or effects: proposed events never leave a failed commit (04 §5.1).
+- **AgentWork**: One agent's work on one pull request: its role, model (opus, fable, astra, ...), instance (1, 2, ... among that role's agents on the pull request, so (pull_request, role, instance) is unique), the tokens it used (a required Measure; unknown when not reported, never 0) and the pull request's disposition (merged or closed), which is not a judgment of the agent's work. Evidence for analysis, never an acceptance authority.
+- **BuildIds**: The correlation ids of a content diagnostic: the source revision; input_digest, the SHA-256 of the input the producer read (the compiler: the canonical JSON object mapping each source file's cartridge-relative path to the SHA-256 of its bytes; the loader: the artifact file's bytes; the known answer arrives with the first producer), which exists even when the input does not parse; and content_hash only once an artifact's cartridge hash exists, never a stand-in for it.
+- **CommitOutcome**: What happened to the command's commit (04 §5.1; 03 §14, §15): committed at revision (the revision after; a rejection receipt does not advance it) with the committed events in order and the effect ids; failed (definitively rolled back) with its cause: injected (by the run's fault schedule) or storage_error (the store reported failure; host detail goes to operations); unknown (the outcome could not be observed; reconciled under 03 §15, never presumed rolled back) with its cause: injected or no_outcome (no answer from the store: crash, kill, lost acknowledgement); or unavailable (not_applicable: nothing was committed, such as a fault or a rejection without a receipt). Failed and unknown carry no events or effects: proposed events never leave a failed commit (04 §5.1). The allowed decision and commit pairs: ADR-075 §4.
   - `committed`
   - `failed`
   - `unknown`
@@ -337,13 +337,14 @@ The one observation record format, its stores and correlation ids, and the game-
 - **HostIds**: The correlation ids of an operations record: the code revision, the host kind, and the run and command the measure joins (the trace carries the rest).
 - **HostKind**: Which host ran the code: a kind, never a device identity (AGENTS.md: no serials, UDIDs or device names).
 - **InvariantFailure**: A registered invariant (protocol/invariants.json id) that failed after the command in ids (09 §2 expected and observed invariant: the invariant is the expectation; the record is the observed failure).
-- **KernelVersion**: The Loka code revision that produced a record (11 §11 kernel version; 09 §2 engine/kernel revision): the kernel id (kernel/ts/src/index.ts KERNEL_ID), @, and the full git commit of the build. Kernel, compiler and hosts build from one commit. How a build learns its commit is R5's.
+- **KernelVersion**: The source revision that produced a record (11 §11 kernel version; 09 §2 engine/kernel revision): the kernel id (kernel/ts/src/index.ts KERNEL_ID), @, and the full git commit; kernel, compiler and hosts build from one commit. The bare form only from a clean tree at that commit; a tree with uncommitted changes appends -dirty, and such a record is never an exact repro key. Reporting HEAD for a dirty tree is forbidden. It names source, not a fingerprint of a built artifact.
 - **Measure**: A measured quantity, never a bare number: observed with a non-negative integer value, unknown (it applies but could not be observed; never 0), or unavailable with its cause (never empty or absent).
   - `observed`
   - `unknown`
   - `unavailable`
 - **ObservationFormat**: The format tag of every observation record. A new field or meaning takes a new tag.
 - **ObservationRecord**: Every observation record, one per JSON Lines line in canonical encoding (ADR-075 §1): the format tag, the registered event name, its store, the store's closed correlation ids and the event's data. One branch per protocol/event_registry.json entry.
+  - `trace.run`
   - `trace.command`
   - `content.diagnostic`
   - `simulation.invariant_failed`
@@ -352,14 +353,17 @@ The one observation record format, its stores and correlation ids, and the game-
 - **ObservationStore**: The store a record belongs to (ADR-075 §2): game_trace (per-command decisions, host-independent, 11 §15), diagnostics (things to fix: 08 §6 diagnostics and simulator failures), operations (host timings, 11 §13), dev_evidence (agent work cost and outcome).
 - **ReplayIds**: The correlation ids of a record that must reproduce by deterministic replay (09 §2): the cartridge hash, the code revision, the run's initial RNG state, the run (a save lineage; for the simulator, one sequence), the command, and the authority revision the command was decided against. Local ids only: no host, device, account or time.
 - **RngDraw**: One bounded uniform draw (09 §4 draw trace; numeric profile): its bound and the value drawn, value below bound.
-- **RngTrace**: The RNG draws of an accepted decision, in draw order (11 §15 'RNG draws if configured'), or unavailable (not_collected) when the draw trace is off.
+- **RngTrace**: The RNG draws of an accepted decision, in draw order (11 §15 'RNG draws if configured'; 09 §4): observed (draws [] is a decision that drew nothing), unknown (collection was on but could not supply a complete list), or unavailable (not_collected: collection was off).
   - `observed`
+  - `unknown`
   - `unavailable`
-- **TraceDecision**: The decision outcome of a traced command (DecisionResult, 04 §5), compact: accepted with its typed outcome, the state delta digest (SHA-256 of the canonical bytes of its StateDelta, the content_hash construction; its known answer arrives with the first producer) and its RNG draws; rejected with its GameError; or fault with its ErrorCode.
+- **RunHeader**: The replay header of one run (09 §2; ADR-075 §4), written once before its first trace.command: with its ids (cartridge, source revision, seed, run) and the ordered commands of the run's trace.command entries, the complete replay input. initial_state: fresh (the cartridge's initial state) or unavailable (a start from a snapshot, whose identity arrives with R6 checkpoints). fault_schedule: the SHA-256 of the canonical fault schedule R6 fault simulation defines, or unavailable (not_applicable) when none is injected.
+- **RunIds**: The correlation ids of a run header: the replay inputs a run shares (ReplayIds without command and revision).
+- **TraceDecision**: The decision outcome of a traced command (DecisionResult, 04 §5), compact: accepted with its typed outcome, the state delta digest (SHA-256 of the canonical bytes of its StateDelta, the content_hash construction; its known answer arrives with the first producer), its RNG draws and the RNG state it returned (DecisionResult.rng; the delta does not cover it); rejected with its GameError; or fault with its ErrorCode and, when bound, its target (04 §5.5).
   - `accepted`
   - `rejected`
   - `fault`
-- **TraceEntry**: One game-trace entry (11 §15; 09 §7): the command's payload (its id is ids.command_id), the decision, and the commit outcome, for accepted and rejected decisions and failed commits alike. Derived, never authority. Host-independent: no time, duration, host or device field, so replaying one seed on two hosts yields identical canonical entries (09 §5).
+- **TraceEntry**: One game-trace entry (11 §15; 09 §7): its ordinal (1, 2, ... in the run's command order, binding it to the run's trace.run header), the full Command (command.id equals ids.command_id), the decision, and the commit outcome, for accepted and rejected decisions and failed commits alike. Derived, never authority. No time, duration, host or device field: entries are identical across hosts given identical complete replay inputs and controlled faults (ADR-075 §4).
 - **UnavailableCause**: Why a value is unavailable: not_applicable (it does not apply here, such as a commit for a fault), not_collected (collection is off, such as RNG draws when the draw trace is not configured).
 - **WorkIds**: The correlation id of a dev-evidence record: the pull request of the work on lorecrafting/lokacore.
 

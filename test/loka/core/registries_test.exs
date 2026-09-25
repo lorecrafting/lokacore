@@ -37,6 +37,56 @@ defmodule Loka.Core.RegistriesTest do
              Enum.sort(branches)
   end
 
+  # docs/dev-evidence.jsonl (ADR-075 §7): every line a canonical agent.work record, and
+  # (pull_request, role, instance) unique. Breaks if the PM appends a malformed, non-canonical,
+  # misfiled or repeated record.
+  defp evidence_problems(lines) do
+    checked = for l <- lines, d = Loka.Core.Canonical.decode(l), do: {l, d, line_problem(l, d)}
+
+    keys = for {_, {:ok, v}, nil} <- checked, do: evidence_key(v)
+
+    for({l, _, problem} <- checked, problem != nil, do: {problem, l}) ++
+      for {k, n} <- Enum.frequencies(keys), n > 1, do: {:duplicate, k}
+  end
+
+  defp evidence_key(%{"ids" => ids, "data" => d}),
+    do: {ids["pull_request"], d["role"], d["instance"]}
+
+  defp line_problem(_, {:error, _}), do: :invalid_json
+
+  defp line_problem(line, {:ok, v}) do
+    cond do
+      Contracts.validate("ObservationRecord", v) != :ok -> :invalid
+      v["event"] != "agent.work" -> :wrong_event
+      Loka.Core.Canonical.encode(v) != {:ok, line} -> :not_canonical
+      true -> nil
+    end
+  end
+
+  test "docs/dev-evidence.jsonl holds only unique canonical agent.work records" do
+    lines = String.split(File.read!("docs/dev-evidence.jsonl"), "\n", trim: true)
+    assert evidence_problems(lines) == []
+  end
+
+  test "the dev-evidence check catches a bare token count, a repeat, a misfiled and a non-canonical line" do
+    [latency, work] =
+      for e <- ["kernel.decision_latency", "agent.work"],
+          do: Enum.find(Contracts.defs()["ObservationRecord"]["examples"], &(&1["event"] == e))
+
+    {:ok, good} = Loka.Core.Canonical.encode(work)
+    {:ok, misfiled} = Loka.Core.Canonical.encode(latency)
+    bare = String.replace(good, ~s({"state":"unknown"}), "0")
+    spaced = String.replace(good, ",", ", ")
+
+    assert Enum.sort(evidence_problems([good, good, bare, misfiled, spaced])) ==
+             Enum.sort([
+               {:duplicate, {27, "reviewer", 1}},
+               {:invalid, bare},
+               {:wrong_event, misfiled},
+               {:not_canonical, spaced}
+             ])
+  end
+
   # The 14 §R3B list, one kind per named type; ActionRecipe/ComposedAction is one (21 §7).
   @r3b ~w(action_recipe inspectable_detail description_variant connection barrier reaction_rule
           consequence_operator narration_spec scene_definition scene_instance scene_space

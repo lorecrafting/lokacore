@@ -76,11 +76,12 @@
       ]
     },
     "KernelVersion": {
-      "description": "The Loka code revision that produced a record (11 §11 kernel version; 09 §2 engine/kernel revision): the kernel id (kernel/ts/src/index.ts KERNEL_ID), @, and the full git commit of the build. Kernel, compiler and hosts build from one commit. How a build learns its commit is R5's.",
+      "description": "The source revision that produced a record (11 §11 kernel version; 09 §2 engine/kernel revision): the kernel id (kernel/ts/src/index.ts KERNEL_ID), @, and the full git commit; kernel, compiler and hosts build from one commit. The bare form only from a clean tree at that commit; a tree with uncommitted changes appends -dirty, and such a record is never an exact repro key. Reporting HEAD for a dirty tree is forbidden. It names source, not a fingerprint of a built artifact.",
       "type": "string",
-      "pattern": "^[a-z][a-z0-9-]{0,63}@[0-9a-f]{40}$",
+      "pattern": "^[a-z][a-z0-9-]{0,63}@[0-9a-f]{40}(-dirty|)$",
       "examples": [
-        "loka-kernel@175f041c2e3a4b5d6e7f8091a2b3c4d5e6f70812"
+        "loka-kernel@175f041c2e3a4b5d6e7f8091a2b3c4d5e6f70812",
+        "loka-kernel@175f041c2e3a4b5d6e7f8091a2b3c4d5e6f70812-dirty"
       ]
     },
     "HostKind": {
@@ -216,8 +217,46 @@
         }
       ]
     },
+    "RunIds": {
+      "description": "The correlation ids of a run header: the replay inputs a run shares (ReplayIds without command and revision).",
+      "type": "object",
+      "properties": {
+        "content_hash": {
+          "$ref": "manifest.schema.json#/$defs/ContentHash"
+        },
+        "kernel_version": {
+          "$ref": "#/$defs/KernelVersion"
+        },
+        "seed": {
+          "$ref": "decision.schema.json#/$defs/RngState"
+        },
+        "run_id": {
+          "$ref": "account.schema.json#/$defs/StoryRunId"
+        }
+      },
+      "required": [
+        "content_hash",
+        "kernel_version",
+        "seed",
+        "run_id"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "content_hash": "fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2",
+          "kernel_version": "loka-kernel@175f041c2e3a4b5d6e7f8091a2b3c4d5e6f70812",
+          "seed": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "run_id": "6f6f6f6f-1111-4222-8333-444444444444"
+        }
+      ]
+    },
     "BuildIds": {
-      "description": "The correlation ids of a content diagnostic: the code revision, and the cartridge hash once one exists (a compile that fails before hashing has none).",
+      "description": "The correlation ids of a content diagnostic: the source revision; input_digest, the SHA-256 of the input the producer read (the compiler: the canonical JSON object mapping each source file's cartridge-relative path to the SHA-256 of its bytes; the loader: the artifact file's bytes; the known answer arrives with the first producer), which exists even when the input does not parse; and content_hash only once an artifact's cartridge hash exists, never a stand-in for it.",
       "type": "object",
       "properties": {
         "kernel_version": {
@@ -225,15 +264,20 @@
         },
         "content_hash": {
           "$ref": "manifest.schema.json#/$defs/ContentHash"
+        },
+        "input_digest": {
+          "$ref": "manifest.schema.json#/$defs/ContentHash"
         }
       },
       "required": [
-        "kernel_version"
+        "kernel_version",
+        "input_digest"
       ],
       "additionalProperties": false,
       "examples": [
         {
-          "kernel_version": "loka-kernel@175f041c2e3a4b5d6e7f8091a2b3c4d5e6f70812"
+          "kernel_version": "loka-kernel@175f041c2e3a4b5d6e7f8091a2b3c4d5e6f70812",
+          "input_digest": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
         }
       ]
     },
@@ -317,7 +361,7 @@
       ]
     },
     "RngTrace": {
-      "description": "The RNG draws of an accepted decision, in draw order (11 §15 'RNG draws if configured'), or unavailable (not_collected) when the draw trace is off.",
+      "description": "The RNG draws of an accepted decision, in draw order (11 §15 'RNG draws if configured'; 09 §4): observed (draws [] is a decision that drew nothing), unknown (collection was on but could not supply a complete list), or unavailable (not_collected: collection was off).",
       "oneOf": [
         {
           "type": "object",
@@ -335,6 +379,18 @@
           "required": [
             "state",
             "draws"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "state": {
+              "const": "unknown"
+            }
+          },
+          "required": [
+            "state"
           ],
           "additionalProperties": false
         },
@@ -361,13 +417,16 @@
           "draws": []
         },
         {
+          "state": "unknown"
+        },
+        {
           "state": "unavailable",
           "reason": "not_collected"
         }
       ]
     },
     "TraceDecision": {
-      "description": "The decision outcome of a traced command (DecisionResult, 04 §5), compact: accepted with its typed outcome, the state delta digest (SHA-256 of the canonical bytes of its StateDelta, the content_hash construction; its known answer arrives with the first producer) and its RNG draws; rejected with its GameError; or fault with its ErrorCode.",
+      "description": "The decision outcome of a traced command (DecisionResult, 04 §5), compact: accepted with its typed outcome, the state delta digest (SHA-256 of the canonical bytes of its StateDelta, the content_hash construction; its known answer arrives with the first producer), its RNG draws and the RNG state it returned (DecisionResult.rng; the delta does not cover it); rejected with its GameError; or fault with its ErrorCode and, when bound, its target (04 §5.5).",
       "oneOf": [
         {
           "type": "object",
@@ -383,13 +442,17 @@
             },
             "rng": {
               "$ref": "#/$defs/RngTrace"
+            },
+            "rng_state": {
+              "$ref": "decision.schema.json#/$defs/RngState"
             }
           },
           "required": [
             "kind",
             "outcome",
             "delta_digest",
-            "rng"
+            "rng",
+            "rng_state"
           ],
           "additionalProperties": false
         },
@@ -417,6 +480,9 @@
             },
             "code": {
               "$ref": "error.schema.json#/$defs/ErrorCode"
+            },
+            "target": {
+              "$ref": "delta.schema.json#/$defs/MutationTarget"
             }
           },
           "required": [
@@ -433,8 +499,39 @@
           "delta_digest": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
           "rng": {
             "state": "observed",
-            "draws": []
-          }
+            "draws": [
+              {
+                "bound": 20,
+                "value": 0
+              }
+            ]
+          },
+          "rng_state": [
+            7,
+            0,
+            1026,
+            12288
+          ]
+        },
+        {
+          "kind": "accepted",
+          "outcome": "taken",
+          "delta_digest": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+          "rng": {
+            "state": "observed",
+            "draws": [
+              {
+                "bound": 20,
+                "value": 0
+              }
+            ]
+          },
+          "rng_state": [
+            1,
+            2,
+            3,
+            4
+          ]
         },
         {
           "kind": "rejected",
@@ -445,11 +542,19 @@
         {
           "kind": "fault",
           "code": "conflicting_write"
+        },
+        {
+          "kind": "fault",
+          "code": "conflicting_write",
+          "target": {
+            "kind": "containment",
+            "entity_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+          }
         }
       ]
     },
     "CommitOutcome": {
-      "description": "What happened to the command's commit (04 §5.1; 03 §14, §15): committed at revision (the revision after; a rejection receipt does not advance it) with the committed events in order and the effect ids; failed (definitively rolled back); unknown (the outcome could not be observed; reconciled under 03 §15, never presumed rolled back); or unavailable (not_applicable: nothing was committed, such as a fault or a rejection without a receipt). Failed and unknown carry no events or effects: proposed events never leave a failed commit (04 §5.1).",
+      "description": "What happened to the command's commit (04 §5.1; 03 §14, §15): committed at revision (the revision after; a rejection receipt does not advance it) with the committed events in order and the effect ids; failed (definitively rolled back) with its cause: injected (by the run's fault schedule) or storage_error (the store reported failure; host detail goes to operations); unknown (the outcome could not be observed; reconciled under 03 §15, never presumed rolled back) with its cause: injected or no_outcome (no answer from the store: crash, kill, lost acknowledgement); or unavailable (not_applicable: nothing was committed, such as a fault or a rejection without a receipt). Failed and unknown carry no events or effects: proposed events never leave a failed commit (04 §5.1). The allowed decision and commit pairs: ADR-075 §4.",
       "oneOf": [
         {
           "type": "object",
@@ -487,10 +592,17 @@
           "properties": {
             "state": {
               "const": "failed"
+            },
+            "cause": {
+              "enum": [
+                "injected",
+                "storage_error"
+              ]
             }
           },
           "required": [
-            "state"
+            "state",
+            "cause"
           ],
           "additionalProperties": false
         },
@@ -499,10 +611,17 @@
           "properties": {
             "state": {
               "const": "unknown"
+            },
+            "cause": {
+              "enum": [
+                "injected",
+                "no_outcome"
+              ]
             }
           },
           "required": [
-            "state"
+            "state",
+            "cause"
           ],
           "additionalProperties": false
         },
@@ -533,10 +652,12 @@
           ]
         },
         {
-          "state": "failed"
+          "state": "failed",
+          "cause": "storage_error"
         },
         {
-          "state": "unknown"
+          "state": "unknown",
+          "cause": "no_outcome"
         },
         {
           "state": "unavailable",
@@ -544,12 +665,116 @@
         }
       ]
     },
-    "TraceEntry": {
-      "description": "One game-trace entry (11 §15; 09 §7): the command's payload (its id is ids.command_id), the decision, and the commit outcome, for accepted and rejected decisions and failed commits alike. Derived, never authority. Host-independent: no time, duration, host or device field, so replaying one seed on two hosts yields identical canonical entries (09 §5).",
+    "RunHeader": {
+      "description": "The replay header of one run (09 §2; ADR-075 §4), written once before its first trace.command: with its ids (cartridge, source revision, seed, run) and the ordered commands of the run's trace.command entries, the complete replay input. initial_state: fresh (the cartridge's initial state) or unavailable (a start from a snapshot, whose identity arrives with R6 checkpoints). fault_schedule: the SHA-256 of the canonical fault schedule R6 fault simulation defines, or unavailable (not_applicable) when none is injected.",
       "type": "object",
       "properties": {
+        "initial_state": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "fresh"
+                }
+              },
+              "required": [
+                "state"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "reason": {
+                  "$ref": "#/$defs/UnavailableCause"
+                }
+              },
+              "required": [
+                "state",
+                "reason"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "fault_schedule": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "identified"
+                },
+                "digest": {
+                  "$ref": "manifest.schema.json#/$defs/ContentHash"
+                }
+              },
+              "required": [
+                "state",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "reason": {
+                  "$ref": "#/$defs/UnavailableCause"
+                }
+              },
+              "required": [
+                "state",
+                "reason"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "initial_state",
+        "fault_schedule"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "initial_state": {
+            "state": "fresh"
+          },
+          "fault_schedule": {
+            "state": "unavailable",
+            "reason": "not_applicable"
+          }
+        },
+        {
+          "initial_state": {
+            "state": "unavailable",
+            "reason": "not_collected"
+          },
+          "fault_schedule": {
+            "state": "identified",
+            "digest": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+          }
+        }
+      ]
+    },
+    "TraceEntry": {
+      "description": "One game-trace entry (11 §15; 09 §7): its ordinal (1, 2, ... in the run's command order, binding it to the run's trace.run header), the full Command (command.id equals ids.command_id), the decision, and the commit outcome, for accepted and rejected decisions and failed commits alike. Derived, never authority. No time, duration, host or device field: entries are identical across hosts given identical complete replay inputs and controlled faults (ADR-075 §4).",
+      "type": "object",
+      "properties": {
+        "ordinal": {
+          "type": "integer",
+          "minimum": 1
+        },
         "command": {
-          "$ref": "command.schema.json#/$defs/CommandPayload"
+          "$ref": "command.schema.json#/$defs/Command"
         },
         "decision": {
           "$ref": "#/$defs/TraceDecision"
@@ -559,6 +784,7 @@
         }
       },
       "required": [
+        "ordinal",
         "command",
         "decision",
         "commit"
@@ -566,10 +792,15 @@
       "additionalProperties": false,
       "examples": [
         {
+          "ordinal": 1,
           "command": {
-            "type": "move",
-            "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
-            "direction": "north"
+            "id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+            "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+            "payload": {
+              "type": "move",
+              "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+              "direction": "north"
+            }
           },
           "decision": {
             "kind": "rejected",
@@ -603,7 +834,7 @@
       ]
     },
     "AgentWork": {
-      "description": "One agent's work on one pull request: its role, the tokens it used (a required Measure; unknown when the harness does not report it) and the work's outcome (accepted: merged; rejected: closed unmerged).",
+      "description": "One agent's work on one pull request: its role, model (opus, fable, astra, ...), instance (1, 2, ... among that role's agents on the pull request, so (pull_request, role, instance) is unique), the tokens it used (a required Measure; unknown when not reported, never 0) and the pull request's disposition (merged or closed), which is not a judgment of the agent's work. Evidence for analysis, never an acceptance authority.",
       "type": "object",
       "properties": {
         "role": {
@@ -613,36 +844,77 @@
             "reviewer"
           ]
         },
+        "model": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "instance": {
+          "type": "integer",
+          "minimum": 1
+        },
         "tokens": {
           "$ref": "#/$defs/Measure"
         },
-        "outcome": {
+        "pr_disposition": {
           "enum": [
-            "accepted",
-            "rejected"
+            "merged",
+            "closed"
           ]
         }
       },
       "required": [
         "role",
+        "model",
+        "instance",
         "tokens",
-        "outcome"
+        "pr_disposition"
       ],
       "additionalProperties": false,
       "examples": [
         {
           "role": "developer",
+          "model": "opus",
+          "instance": 1,
           "tokens": {
             "state": "observed",
             "value": 412000
           },
-          "outcome": "accepted"
+          "pr_disposition": "merged"
         }
       ]
     },
     "ObservationRecord": {
       "description": "Every observation record, one per JSON Lines line in canonical encoding (ADR-075 §1): the format tag, the registered event name, its store, the store's closed correlation ids and the event's data. One branch per protocol/event_registry.json entry.",
       "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "format": {
+              "$ref": "#/$defs/ObservationFormat"
+            },
+            "event": {
+              "const": "trace.run"
+            },
+            "store": {
+              "enum": [
+                "game_trace"
+              ]
+            },
+            "ids": {
+              "$ref": "#/$defs/RunIds"
+            },
+            "data": {
+              "$ref": "#/$defs/RunHeader"
+            }
+          },
+          "required": [
+            "format",
+            "event",
+            "store",
+            "ids",
+            "data"
+          ],
+          "additionalProperties": false
+        },
         {
           "type": "object",
           "properties": {
@@ -797,6 +1069,31 @@
       "examples": [
         {
           "format": "loka-obs-v1",
+          "event": "trace.run",
+          "store": "game_trace",
+          "ids": {
+            "content_hash": "fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2",
+            "kernel_version": "loka-kernel@175f041c2e3a4b5d6e7f8091a2b3c4d5e6f70812",
+            "seed": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "run_id": "6f6f6f6f-1111-4222-8333-444444444444"
+          },
+          "data": {
+            "initial_state": {
+              "state": "fresh"
+            },
+            "fault_schedule": {
+              "state": "unavailable",
+              "reason": "not_applicable"
+            }
+          }
+        },
+        {
+          "format": "loka-obs-v1",
           "event": "trace.command",
           "store": "game_trace",
           "ids": {
@@ -813,10 +1110,15 @@
             "revision": 18
           },
           "data": {
+            "ordinal": 1,
             "command": {
-              "type": "move",
-              "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
-              "direction": "north"
+              "id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+              "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+              "payload": {
+                "type": "move",
+                "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+                "direction": "north"
+              }
             },
             "decision": {
               "kind": "accepted",
@@ -825,7 +1127,13 @@
               "rng": {
                 "state": "unavailable",
                 "reason": "not_collected"
-              }
+              },
+              "rng_state": [
+                1,
+                2,
+                3,
+                4
+              ]
             },
             "commit": {
               "state": "committed",
@@ -873,10 +1181,15 @@
             "revision": 19
           },
           "data": {
+            "ordinal": 2,
             "command": {
-              "type": "move",
-              "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
-              "direction": "north"
+              "id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+              "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+              "payload": {
+                "type": "move",
+                "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+                "direction": "north"
+              }
             },
             "decision": {
               "kind": "accepted",
@@ -887,13 +1200,20 @@
                 "draws": [
                   {
                     "bound": 20,
-                    "value": 13
+                    "value": 0
                   }
                 ]
-              }
+              },
+              "rng_state": [
+                7,
+                0,
+                1026,
+                12288
+              ]
             },
             "commit": {
-              "state": "failed"
+              "state": "failed",
+              "cause": "injected"
             }
           }
         },
@@ -902,7 +1222,8 @@
           "event": "content.diagnostic",
           "store": "diagnostics",
           "ids": {
-            "kernel_version": "loka-kernel@175f041c2e3a4b5d6e7f8091a2b3c4d5e6f70812"
+            "kernel_version": "loka-kernel@175f041c2e3a4b5d6e7f8091a2b3c4d5e6f70812",
+            "input_digest": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
           },
           "data": {
             "severity": "error",
@@ -960,10 +1281,12 @@
           },
           "data": {
             "role": "reviewer",
+            "model": "fable",
+            "instance": 1,
             "tokens": {
               "state": "unknown"
             },
-            "outcome": "rejected"
+            "pr_disposition": "closed"
           }
         }
       ]

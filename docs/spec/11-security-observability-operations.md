@@ -353,7 +353,7 @@ Retention can vary by environment/profile.
 
 Certification retains reproducible traces longer than ordinary production.
 
-*Amendment 2026-09-25 ([proposed ADR-075](../decisions/adr-075-observability-proposal.md)):* the entry is `TraceEntry` (`protocol/observation.schema.json`; ADR-075 §4). It records rejected decisions and failed commits too, is host-independent, and is never authority: fixes are proven by deterministic replay.
+*Amendment 2026-09-25 ([proposed ADR-075](../decisions/adr-075-observability-proposal.md)):* the entry is `TraceEntry` (`protocol/observation.schema.json`; ADR-075 §4). A run starts with a `trace.run` replay header. It records rejected decisions and failed commits too, carries no host data (identical replay inputs give identical entries), and is never authority: fixes are proven by deterministic replay.
 
 ## 16. Health/readiness
 

@@ -1,5 +1,11 @@
 [
   {
+    "name": "trace.run",
+    "store": "game_trace",
+    "kind": "event",
+    "description": "The replay header of one run: initial state and fault schedule, with the run's cartridge, source revision and seed; its trace.command entries follow by ordinal (09 §2; 11 §15). Producers: as trace.command."
+  },
+  {
     "name": "trace.command",
     "store": "game_trace",
     "kind": "event",
@@ -9,7 +15,7 @@
     "name": "content.diagnostic",
     "store": "diagnostics",
     "kind": "event",
-    "description": "One structured diagnostic (08 §6; cartridge.schema.json Diagnostic). Producers: mix loka.compile (R4) and the TypeScript cartridge loader, through loka play (R5)."
+    "description": "One structured diagnostic (08 §6; cartridge.schema.json Diagnostic) with the digest of the input it is about. Producers: the TypeScript cartridge loader through loka play (R5 S1), and mix loka.compile from the slice that first stores its diagnostics."
   },
   {
     "name": "simulation.invariant_failed",
@@ -27,6 +33,6 @@
     "name": "agent.work",
     "store": "dev_evidence",
     "kind": "event",
-    "description": "One agent's tokens and the outcome of its pull request (ADR-075 §6; the roadmap re-estimates). Producer: the PM, when a pull request merges or closes."
+    "description": "One agent's model, tokens and its pull request's disposition (ADR-075 §8; the roadmap re-estimates). Producer: the PM, appending to docs/dev-evidence.jsonl when a pull request merges or closes."
   }
 ]
