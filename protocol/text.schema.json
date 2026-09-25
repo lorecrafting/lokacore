@@ -4,7 +4,7 @@
   "description": "Localized text as string ids plus bindings (04 §15; 05 §18; 06 §43), shared by GameView and DecisionResult narration.",
   "$defs": {
     "TextKey": {
-      "description": "A localization string id, never display text (04 §15; 05 §18): lowercase dotted snake_case of at most 128 characters, the ActionDefinition label rule. Interpolation data is added with its first use.",
+      "description": "A localization string id, never display text (04 §15; 05 §18): lowercase dotted snake_case of at most 128 characters, the ActionDefinition label rule. Text carries its interpolation bindings.",
       "type": "string",
       "pattern": "^[a-z][a-z0-9_.]*$",
       "maxLength": 128,

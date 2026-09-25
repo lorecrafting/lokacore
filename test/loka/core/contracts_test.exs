@@ -158,6 +158,31 @@ defmodule Loka.Core.ContractsTest do
              {:error, [%{path: "/candidate_ids", code: :too_many_items}]}
   end
 
+  # 64 narration lines (an admission limit, decision.schema.json) is the maximum; 65 is not.
+  test "narration at 64 and 65 lines" do
+    lines = &List.duplicate(%{"key" => "n"}, &1)
+
+    accepted =
+      Enum.find(Contracts.defs()["DecisionResult"]["examples"], &(&1["kind"] == "accepted"))
+
+    record = &%{"command_id" => "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b", "lines" => lines.(&1)}
+
+    assert Contracts.validate("DecisionResult", Map.put(accepted, "narration", lines.(64))) == :ok
+    assert Contracts.validate("NarrationRecord", record.(64)) == :ok
+
+    assert Contracts.validate("DecisionResult", Map.put(accepted, "narration", lines.(65))) ==
+             {:error, [%{path: "/narration", code: :too_many_items}]}
+
+    assert Contracts.validate("NarrationRecord", record.(65)) ==
+             {:error, [%{path: "/lines", code: :too_many_items}]}
+  end
+
+  test "FactSpec scopes are exactly the StateScope kinds" do
+    kinds = for b <- Contracts.defs()["StateScope"]["oneOf"], do: b["properties"]["kind"]["const"]
+    scopes = Contracts.defs()["FactSpec"]["properties"]["scopes"]["items"]["enum"]
+    assert Enum.sort(scopes) == Enum.sort(kinds)
+  end
+
   test "the capability registry: valid entries, key@version unique, covers the chapter-one lock, all portable" do
     for entry <- @capabilities,
         do: assert(Contracts.validate("CapabilitySpec", entry) == :ok, inspect(entry))

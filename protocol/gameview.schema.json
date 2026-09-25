@@ -4,7 +4,7 @@
   "description": "The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-release-proof.md P5). One schema for Story and Realm hosts; React Native renders it and never re-derives legality (04 §15).",
   "$defs": {
     "AdvertisedAction": {
-      "description": "One action of a resolved ActionSet (04 §19), for the entity or place it is listed under: invoking it builds an ActionInvocation with this action_key (action.schema.json). Lists are in presentation order, highest priority first (00 §4.10).",
+      "description": "One action of a resolved ActionSet (04 §19), for the entity or place it is listed under, with what the client needs to build its ActionInvocation (04 §2, §17) without a handwritten per-action catalog: the target spec (an entity target is the entity it is listed under) and the input parameters it requires, both from its ActionDefinition (action.schema.json). Lists are in presentation order, highest priority first (00 §4.10).",
       "oneOf": [
         {
           "description": "Offered and currently legal.",
@@ -18,12 +18,23 @@
             },
             "label": {
               "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "target": {
+              "$ref": "action.schema.json#/$defs/TargetSpec"
+            },
+            "input": {
+              "type": "array",
+              "items": {
+                "$ref": "action.schema.json#/$defs/ActionInputParameter"
+              }
             }
           },
           "required": [
             "available",
             "action_key",
-            "label"
+            "label",
+            "target",
+            "input"
           ],
           "additionalProperties": false
         },
@@ -42,13 +53,24 @@
             },
             "reason": {
               "$ref": "#/$defs/UnavailableReason"
+            },
+            "target": {
+              "$ref": "action.schema.json#/$defs/TargetSpec"
+            },
+            "input": {
+              "type": "array",
+              "items": {
+                "$ref": "action.schema.json#/$defs/ActionInputParameter"
+              }
             }
           },
           "required": [
             "available",
             "action_key",
             "label",
-            "reason"
+            "reason",
+            "target",
+            "input"
           ],
           "additionalProperties": false
         }
@@ -56,13 +78,46 @@
       "examples": [
         {
           "available": true,
+          "action_key": "wait",
+          "label": "action.wait",
+          "target": {
+            "kind": "none"
+          },
+          "input": [
+            "until"
+          ]
+        },
+        {
+          "available": true,
+          "action_key": "take",
+          "label": "action.take",
+          "target": {
+            "kind": "entity",
+            "scopes": [
+              "room_contents"
+            ]
+          },
+          "input": []
+        },
+        {
+          "available": true,
           "action_key": "look",
-          "label": "action.look"
+          "label": "action.look",
+          "target": {
+            "kind": "none"
+          },
+          "input": []
         },
         {
           "available": false,
           "action_key": "wait",
           "label": "action.wait",
+          "target": {
+            "kind": "none"
+          },
+          "input": [
+            "until"
+          ],
           "reason": {
             "code": "invalid_state"
           }
@@ -227,7 +282,14 @@
             {
               "available": true,
               "action_key": "talk",
-              "label": "action.talk"
+              "label": "action.talk",
+              "target": {
+                "kind": "entity",
+                "scopes": [
+                  "room_occupants"
+                ]
+              },
+              "input": []
             }
           ]
         }
@@ -375,7 +437,7 @@
       ]
     },
     "GameView": {
-      "description": "One actor's semantic view (04 §14, §15): the place, its exits, place-level actions, visible entities with their actions, the actor's inventory, quest journal, and the pending choice when one is open. The fields the R6P touch path needs (00 §4.10; P5); map, equipment, shop and other surfaces join with their capabilities.",
+      "description": "One actor's semantic view (04 §14, §15): the current logical time (to build wait until, P5), the place, its exits, place-level actions, visible entities with their actions, the actor's inventory, quest journal, and the pending choice when one is open. The fields the R6P touch path needs (00 §4.10; P5); map, equipment, shop and other surfaces join with their capabilities.",
       "type": "object",
       "properties": {
         "actor_id": {
@@ -416,6 +478,9 @@
         },
         "choice": {
           "$ref": "#/$defs/PendingChoice"
+        },
+        "time": {
+          "$ref": "command.schema.json#/$defs/LogicalTime"
         }
       },
       "required": [
@@ -425,7 +490,8 @@
         "actions",
         "entities",
         "inventory",
-        "journal"
+        "journal",
+        "time"
       ],
       "additionalProperties": false,
       "examples": [
@@ -463,7 +529,11 @@
             {
               "available": true,
               "action_key": "look",
-              "label": "action.look"
+              "label": "action.look",
+              "target": {
+                "kind": "none"
+              },
+              "input": []
             },
             {
               "available": false,
@@ -471,7 +541,13 @@
               "label": "action.wait",
               "reason": {
                 "code": "invalid_state"
-              }
+              },
+              "target": {
+                "kind": "none"
+              },
+              "input": [
+                "until"
+              ]
             }
           ],
           "entities": [
@@ -483,7 +559,14 @@
                 {
                   "available": true,
                   "action_key": "talk",
-                  "label": "action.talk"
+                  "label": "action.talk",
+                  "target": {
+                    "kind": "entity",
+                    "scopes": [
+                      "room_occupants"
+                    ]
+                  },
+                  "input": []
                 }
               ]
             }
@@ -497,7 +580,14 @@
                 {
                   "available": true,
                   "action_key": "drop",
-                  "label": "action.drop"
+                  "label": "action.drop",
+                  "target": {
+                    "kind": "entity",
+                    "scopes": [
+                      "inventory"
+                    ]
+                  },
+                  "input": []
                 }
               ]
             }
@@ -513,7 +603,8 @@
               "state": "active",
               "title": "quest.find_the_child.title"
             }
-          ]
+          ],
+          "time": 18
         },
         {
           "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
@@ -553,12 +644,13 @@
                 "label": "choice.leave"
               }
             ]
-          }
+          },
+          "time": 18
         }
       ]
     },
     "GameViewSnapshot": {
-      "description": "An authoritative GameView snapshot (04 §16). format versions the envelope: a new field or meaning takes a new format. projection_sequence orders this client stream's projection messages; a gap means resync from a fresh snapshot. view_freshness_token is opaque, echoed in ActionInvocation (same 1-128 character limit) for staleness diagnosis. Neither equals an authority revision (04 §16). Incremental projection messages are added with the Realm transport. narration holds committed narration records not yet delivered on this stream, oldest first.",
+      "description": "An authoritative GameView snapshot (04 §16). format versions the envelope: a new field or meaning takes a new format. projection_sequence orders this client stream's projection messages; a gap means resync from a fresh snapshot. view_freshness_token is opaque, echoed in ActionInvocation (same 1-128 character limit) for staleness diagnosis. Neither equals an authority revision (04 §16). Incremental projection messages are added with the Realm transport. narration holds committed narration records the client has not yet acknowledged, oldest first; the acknowledgement protocol arrives in R6.",
       "type": "object",
       "properties": {
         "format": {
@@ -629,7 +721,11 @@
               {
                 "available": true,
                 "action_key": "look",
-                "label": "action.look"
+                "label": "action.look",
+                "target": {
+                  "kind": "none"
+                },
+                "input": []
               },
               {
                 "available": false,
@@ -637,7 +733,13 @@
                 "label": "action.wait",
                 "reason": {
                   "code": "invalid_state"
-                }
+                },
+                "target": {
+                  "kind": "none"
+                },
+                "input": [
+                  "until"
+                ]
               }
             ],
             "entities": [
@@ -649,7 +751,14 @@
                   {
                     "available": true,
                     "action_key": "talk",
-                    "label": "action.talk"
+                    "label": "action.talk",
+                    "target": {
+                      "kind": "entity",
+                      "scopes": [
+                        "room_occupants"
+                      ]
+                    },
+                    "input": []
                   }
                 ]
               }
@@ -663,7 +772,14 @@
                   {
                     "available": true,
                     "action_key": "drop",
-                    "label": "action.drop"
+                    "label": "action.drop",
+                    "target": {
+                      "kind": "entity",
+                      "scopes": [
+                        "inventory"
+                      ]
+                    },
+                    "input": []
                   }
                 ]
               }
@@ -679,7 +795,8 @@
                 "state": "active",
                 "title": "quest.find_the_child.title"
               }
-            ]
+            ],
+            "time": 18
           },
           "narration": [
             {
@@ -733,7 +850,11 @@
               {
                 "available": true,
                 "action_key": "look",
-                "label": "action.look"
+                "label": "action.look",
+                "target": {
+                  "kind": "none"
+                },
+                "input": []
               },
               {
                 "available": false,
@@ -741,7 +862,13 @@
                 "label": "action.wait",
                 "reason": {
                   "code": "invalid_state"
-                }
+                },
+                "target": {
+                  "kind": "none"
+                },
+                "input": [
+                  "until"
+                ]
               }
             ],
             "entities": [
@@ -753,7 +880,14 @@
                   {
                     "available": true,
                     "action_key": "talk",
-                    "label": "action.talk"
+                    "label": "action.talk",
+                    "target": {
+                      "kind": "entity",
+                      "scopes": [
+                        "room_occupants"
+                      ]
+                    },
+                    "input": []
                   }
                 ]
               }
@@ -767,7 +901,14 @@
                   {
                     "available": true,
                     "action_key": "drop",
-                    "label": "action.drop"
+                    "label": "action.drop",
+                    "target": {
+                      "kind": "entity",
+                      "scopes": [
+                        "inventory"
+                      ]
+                    },
+                    "input": []
                   }
                 ]
               }
@@ -783,7 +924,8 @@
                 "state": "active",
                 "title": "quest.find_the_child.title"
               }
-            ]
+            ],
+            "time": 18
           }
         }
       ]
@@ -846,203 +988,6 @@
                 "direction": "north",
                 "destination": "room.village_green.title"
               }
-            }
-          ]
-        },
-        {
-          "command_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
-          "lines": [
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
-            },
-            {
-              "key": "n"
             }
           ]
         }

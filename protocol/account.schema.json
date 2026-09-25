@@ -36,7 +36,7 @@
       ]
     },
     "StoryRun": {
-      "description": "A Story run and its binding (23 §5, §11; 03 §25): the exact cartridge release, the local profile, and the account once bound (host-side, outside portable semantics, 23 §4). parent_run_id is the run a restore or fork branched from. The server enforces that an account binding and release never change after registration (23 §5).",
+      "description": "A Story run and its binding (23 §5, §11; 03 §25): the exact cartridge release, the local profile, and the account once bound (host-side, outside portable semantics, 23 §4). parent_run_id is the run a restore or fork branched from; alone it is not full restore provenance: the parent snapshot/ancestor revision (23 §11; 03 §25) belongs to the R6 save-header contract. The server enforces that an account binding and release never change after registration (23 §5).",
       "type": "object",
       "properties": {
         "run_id": {
