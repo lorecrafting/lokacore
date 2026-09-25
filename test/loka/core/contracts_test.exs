@@ -1,6 +1,8 @@
 defmodule Loka.Core.ContractsTest do
   # Expected errors are hand-written in protocol/fixtures/invalid.json; fixtures are decoded
-  # with the stdlib JSON so they never pass through the code under test.
+  # with the stdlib JSON so they never pass through the code under test. Registries:
+  # registries_test.exs; the schema subset: contracts/schema_test.exs; nominal ids:
+  # nominal_ids_test.exs.
   use ExUnit.Case, async: true
   alias Loka.Core.Contracts
   alias Loka.Core.Contracts.Schema
@@ -11,11 +13,6 @@ defmodule Loka.Core.ContractsTest do
          })
   @defs Map.merge(Contracts.defs(), @probe)
   @invalid JSON.decode!(File.read!("protocol/fixtures/invalid.json"))
-  @registry JSON.decode!(File.read!("protocol/error_registry.json"))
-  @effects JSON.decode!(File.read!("protocol/effect_registry.json"))
-  @invariants JSON.decode!(File.read!("protocol/invariants.json"))
-  @capabilities JSON.decode!(File.read!("protocol/capability_registry.json"))
-  @lock_kat JSON.decode!(File.read!("protocol/fixtures/capability_lock_hash.json"))
 
   test "every contract has examples and every example validates" do
     for {name, schema} <- @defs do
@@ -31,99 +28,6 @@ defmodule Loka.Core.ContractsTest do
       expected = Enum.map(expected, &%{path: &1["path"], code: String.to_atom(&1["code"])})
       assert Contracts.validate(c, v, @defs) == {:error, expected}, "#{c} #{inspect(v)}"
     end
-  end
-
-  test "the registry lists exactly the ErrorCode codes, each entry valid" do
-    for entry <- @registry,
-        do: assert(Contracts.validate("ErrorRegistryEntry", entry) == :ok, inspect(entry))
-
-    assert Enum.sort(for e <- @registry, do: e["code"]) ==
-             Enum.sort(Contracts.defs()["ErrorCode"]["enum"])
-  end
-
-  # The 14 §R3B list, one kind per named type; ActionRecipe/ComposedAction is one (21 §7).
-  @r3b ~w(action_recipe inspectable_detail description_variant connection barrier reaction_rule
-          consequence_operator narration_spec scene_definition scene_instance scene_space
-          instance_plan spawn_bundle population_plan commerce_composition service capacity
-          service_job world_event_plan)
-
-  test "the feature registry lists every 14 §R3B kind once, each entry valid" do
-    features = JSON.decode!(File.read!("protocol/feature_registry.json"))
-
-    for entry <- features,
-        do: assert(Contracts.validate("FeatureRegistryEntry", entry) == :ok, inspect(entry))
-
-    kinds = for e <- features, do: e["kind"]
-    assert Enum.sort(kinds) == Enum.sort(@r3b)
-    assert Enum.sort(Contracts.defs()["FeatureKind"]["enum"]) == Enum.sort(@r3b)
-  end
-
-  test "every code the fixtures expect is a registered abi_validation code" do
-    registered = for %{"code" => c, "category" => "abi_validation"} <- @registry, do: c
-    for %{"errors" => es} <- @invalid, %{"code" => c} <- es, do: assert(c in registered, c)
-  end
-
-  test "the effect registry classifies exactly the EffectPayload types, each entry valid" do
-    for entry <- @effects,
-        do: assert(Contracts.validate("EffectRegistryEntry", entry) == :ok, inspect(entry))
-
-    types =
-      for b <- Contracts.defs()["EffectPayload"]["oneOf"], do: b["properties"]["type"]["const"]
-
-    assert Enum.sort(for e <- @effects, do: e["type"]) == Enum.sort(types)
-  end
-
-  test "every effect origin is a registered capability key" do
-    keys = for c <- @capabilities, do: c["key"]
-    for e <- @effects, origin <- e["allowed_origins"], do: assert(origin in keys, origin)
-  end
-
-  # Invariants are checked by id (docs/ROADMAP.md), so an id must name one invariant, and a
-  # citation must point at a real docs/spec heading.
-  defp invariant_problems(entries) do
-    dupes = for {id, n} <- Enum.frequencies_by(entries, & &1["id"]), n > 1, do: {:duplicate, id}
-
-    dupes ++
-      for e <- entries,
-          problem <- [entry_problem(e)],
-          problem != nil,
-          do: {problem, e["id"]}
-  end
-
-  defp entry_problem(e) do
-    with :ok <- Contracts.validate("InvariantEntry", e),
-         {:ok, text} <- File.read(Path.join("docs/spec", e["citation"]["document"])) do
-      if e["citation"]["heading"] in String.split(text, "\n"), do: nil, else: :no_heading
-    else
-      {:error, :enoent} -> :no_document
-      {:error, _} -> :invalid
-    end
-  end
-
-  test "the invariant registry has unique ids and real citations" do
-    assert invariant_problems(@invariants) == []
-  end
-
-  test "the invariant check catches a duplicate id and bad or missing citations" do
-    [a, b | _] = @invariants
-    cite = &put_in(b, ["citation", &1], &2)
-
-    planted = [
-      a,
-      %{b | "id" => a["id"]},
-      Map.delete(b, "citation") |> Map.put("id", "no_citation"),
-      cite.("document", "99-missing.md") |> Map.put("id", "no_document"),
-      cite.("heading", String.slice(b["citation"]["heading"], 0..8))
-      |> Map.put("id", "no_heading")
-    ]
-
-    assert Enum.sort(invariant_problems(planted)) ==
-             Enum.sort([
-               {:duplicate, a["id"]},
-               {:invalid, "no_citation"},
-               {:no_document, "no_document"},
-               {:no_heading, "no_heading"}
-             ])
   end
 
   # validate/3 takes decoded values, so recursion is bounded by the canonical depth cap: a
@@ -183,64 +87,6 @@ defmodule Loka.Core.ContractsTest do
     assert Enum.sort(scopes) == Enum.sort(kinds)
   end
 
-  test "the capability registry: valid entries, key@version unique, covers the chapter-one lock, all portable" do
-    for entry <- @capabilities,
-        do: assert(Contracts.validate("CapabilitySpec", entry) == :ok, inspect(entry))
-
-    pins = for %{"key" => k, "version" => v} <- @capabilities, do: {k, v}
-    assert pins == Enum.uniq(pins)
-    by_pin = Map.new(@capabilities, &{{&1["key"], &1["version"]}, &1})
-
-    # 00a §1: every chapter-one capability is portable (offline_private).
-    for pin <- @lock_kat["value"]["capabilities"],
-        do: assert(by_pin[pin]["portability"] == "portable", inspect(pin))
-  end
-
-  # 37 keys: over 32, so the map iterates unsorted and the encoder must sort (AGENTS.md).
-  test "the capability lock encodes and hashes to the independent known answer" do
-    %{"value" => lock, "canonical" => canonical, "sha256" => sha} = @lock_kat
-    assert Contracts.validate("CapabilityLock", lock) == :ok
-    assert Loka.Core.Canonical.encode(lock) == {:ok, canonical}
-    assert Loka.Core.Canonical.hash(lock) == {:ok, sha}
-  end
-
-  # Breaks if a row is malformed or duplicated, names a missing fixture, or a capability
-  # residency falls outside the six 05 §6 classes.
-  test "the residency rows: valid, unique keys, real fixtures; capability classes are 05 §6 classes" do
-    rows = JSON.decode!(File.read!("protocol/residency.json"))
-    for r <- rows, do: assert(Contracts.validate("Responsibility", r) == :ok, inspect(r))
-    assert Enum.uniq_by(rows, & &1["key"]) == rows
-    for r <- rows, f <- r["fixtures"], do: assert(File.regular?(f), f)
-
-    classes = Contracts.defs()["ResidencyClass"]["enum"]
-
-    for b <- Contracts.defs()["CapabilitySpec"]["oneOf"],
-        c <- b["properties"]["residency"]["enum"],
-        c != nil,
-        do: assert(c in classes, c)
-  end
-
-  # Breaks if a constructor tags without validating, or tags with another contract's name.
-  test "a nominal id constructor validates, then tags with its own contract" do
-    uuid = "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
-    assert Contracts.party_id(uuid) == {:ok, {:party_id, uuid}}
-    assert Contracts.party_id("A7B8") == {:error, [%{path: "", code: :pattern_mismatch}]}
-  end
-
-  # Breaks if the brand rule in bin/contracts.exs and the tag rule in contracts.ex drift apart.
-  test "every TypeScript-branded contract has an Elixir tag constructor, and no other does" do
-    branded =
-      for [_, name] <-
-            Regex.scan(
-              ~r/^export type (\w+) = string & \{ readonly __brand/m,
-              File.read!("kernel/ts/src/contracts.gen.ts")
-            ),
-          do: {name |> Macro.underscore() |> String.to_atom(), 1}
-
-    constructors = Contracts.__info__(:functions) -- [defs: 0, validate: 2, validate: 3]
-    assert Enum.sort(constructors) == Enum.sort(branded)
-  end
-
   test "a declared __proto__ property is accepted" do
     assert Contracts.validate("SubsetProbe", JSON.decode!(~s({"__proto__":"ok"})), @defs) == :ok
   end
@@ -248,108 +94,5 @@ defmodule Loka.Core.ContractsTest do
   test "values outside the canonical profile are rejected at decode, before validation" do
     for text <- [~s({"n":1.0}), ~s({"n":1e0}), ~s({"n":1,"n":1})],
         do: assert(Loka.Core.Canonical.decode(text) == {:error, :invalid_json}, text)
-  end
-
-  describe "the schema subset fails closed" do
-    obj =
-      &%{
-        "type" => "object",
-        "properties" => &1,
-        "required" => &2,
-        "additionalProperties" => false
-      }
-
-    tagged = &obj.(%{"kind" => %{"const" => &1}}, ["kind"])
-    one_of = &%{"A" => %{"oneOf" => &1}}
-    object = &%{"A" => Map.merge(%{"type" => "object", "properties" => %{}}, &1)}
-
-    map =
-      &%{
-        "A" => Map.merge(%{"type" => "object", "additionalProperties" => %{"type" => "null"}}, &1)
-      }
-
-    closed = &object.(Map.put(&1, "additionalProperties", false))
-    any_of = &%{"A" => %{"anyOf" => &1}}
-    str = %{"type" => "string"}
-    int = %{"type" => "integer"}
-
-    for {name, defs} <-
-          [
-            {"an unsupported keyword", %{"A" => %{"type" => "string", "format" => "uuid"}}},
-            {"a keyword of another type", %{"A" => %{"type" => "string", "minimum" => 1}}},
-            {"an unsupported type", %{"A" => %{"type" => "number"}}},
-            {"open additionalProperties", object.(%{"additionalProperties" => true})},
-            {"missing additionalProperties", object.(%{})},
-            {"required but not declared",
-             object.(%{"additionalProperties" => false, "required" => ["x"]})},
-            {"a nested bad keyword",
-             %{"A" => %{"type" => "array", "items" => %{"type" => "null", "format" => "x"}}}},
-            {"a dangling $ref", %{"A" => %{"$ref" => "#/$defs/B"}}},
-            {"a $ref into a missing file", %{"A" => %{"$ref" => "other.schema.json#/$defs/A"}}},
-            {"no type and no $ref/enum/const/oneOf", %{"A" => %{"description" => "x"}}},
-            {"a non-scalar enum value", %{"A" => %{"enum" => [[1]]}}},
-            {"a pattern that does not compile",
-             %{"A" => %{"type" => "string", "pattern" => "^($"}}},
-            {"nested $defs", %{"A" => %{"type" => "null", "$defs" => %{}}}},
-            {"oneOf branches with the same tag", one_of.([tagged.("a"), tagged.("a")])},
-            {"a oneOf branch without a tag", one_of.([tagged.("a"), obj.(%{}, [])])},
-            {"an optional tag",
-             one_of.([tagged.("a"), obj.(%{"kind" => %{"const" => "b"}}, [])])},
-            {"different discriminators",
-             one_of.([tagged.("a"), obj.(%{"k" => %{"const" => "b"}}, ["k"])])},
-            {"a map with properties", map.(%{"properties" => %{}})},
-            {"a map with required", map.(%{"required" => []})},
-            {"a map with open values", map.(%{"additionalProperties" => true})},
-            {"a map without a value schema", %{"A" => %{"type" => "object"}}},
-            {"a bad map value schema",
-             map.(%{"additionalProperties" => %{"type" => "null", "format" => "x"}})},
-            {"propertyNames on a closed object",
-             closed.(%{"propertyNames" => %{"pattern" => "^a$"}})},
-            {"maxProperties on a closed object", closed.(%{"maxProperties" => 1})},
-            {"propertyNames without a pattern", map.(%{"propertyNames" => %{}})},
-            {"propertyNames with another keyword",
-             map.(%{"propertyNames" => %{"pattern" => "^a$", "maxLength" => 1}})},
-            {"a non-portable key pattern", map.(%{"propertyNames" => %{"pattern" => "^\\w$"}})},
-            {"a negative maxProperties", map.(%{"maxProperties" => -1})},
-            {"anyOf with overlapping types",
-             any_of.([str, %{"type" => "string", "minLength" => 1}])},
-            {"anyOf overlapping through a $ref",
-             Map.put(any_of.([%{"$ref" => "#/$defs/B"}, str]), "B", str)},
-            {"anyOf with an object branch", any_of.([str, obj.(%{}, [])])},
-            {"anyOf with an array branch", any_of.([str, %{"type" => "array", "items" => str}])},
-            {"anyOf with a null branch", any_of.([str, %{"type" => "null"}])},
-            {"anyOf with an enum branch", any_of.([int, %{"enum" => ["a"]}])},
-            {"a nested anyOf", any_of.([any_of.([str, int])["A"], %{"type" => "boolean"}])},
-            {"anyOf with one branch", any_of.([str])},
-            {"anyOf mixed with type", %{"A" => %{"anyOf" => [str, int], "type" => "string"}}},
-            {"anyOf mixed with enum", %{"A" => %{"anyOf" => [str, int], "enum" => ["a"]}}},
-            {"anyOf through a $ref cycle",
-             %{
-               "A" => %{"anyOf" => [%{"$ref" => "#/$defs/B"}, int]},
-               "B" => %{"$ref" => "#/$defs/C"},
-               "C" => %{"$ref" => "#/$defs/B"}
-             }}
-          ] ++
-            for(
-              p <-
-                ~W"^a.b$ ^\s$ ^\w$ ^\d$ ^\bx$ ^\p{L}$ ^[a-z]+\_x$ ^\@$ ^(?i)a$ ^(?:a)$ \Aa$ ^a\z abc ^a ^a$b$ ^a{$ ^[\s]$ ^é$ ^a\-b$ ^a*+$ ^a++$ ^a?+$ ^a{2}+$ ^(?=a)+a$ ^(?=a)?a$ ^(?=a){2}a$",
-              do:
-                {"the non-portable pattern #{p}", %{"A" => %{"type" => "string", "pattern" => p}}}
-            ) do
-      @case_defs defs
-      test "rejects #{name}" do
-        assert_raise ArgumentError, ~r"outside the schema subset", fn ->
-          Schema.flatten!(%{"t.schema.json" => %{"$defs" => @case_defs}})
-        end
-      end
-    end
-
-    test "rejects one name defined in two files" do
-      doc = %{"$defs" => %{"A" => %{"type" => "null"}}}
-
-      assert_raise ArgumentError, ~r"outside the schema subset", fn ->
-        Schema.flatten!(%{"a.schema.json" => doc, "b.schema.json" => doc})
-      end
-    end
   end
 end

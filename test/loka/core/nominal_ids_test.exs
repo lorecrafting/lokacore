@@ -5,6 +5,7 @@ defmodule Loka.Core.NominalIdsTest do
   # starts) warning after an Elixir upgrade fails here, and the guarantee in contracts.ex
   # and docs/lessons/contracts.md must be restated.
   use ExUnit.Case, async: false
+  alias Loka.Core.Contracts
 
   @receiver """
   defmodule Probe.Receiver do
@@ -65,5 +66,27 @@ defmodule Loka.Core.NominalIdsTest do
   test "which PartyId misuses the compiler rejects" do
     observed = for {name, _, body} <- @shapes, do: {name, warns?(body)}
     assert observed == for({name, warns, _} <- @shapes, do: {name, warns})
+  end
+
+  # Breaks if a constructor tags without validating, or tags with another contract's name.
+  test "a nominal id constructor validates, then tags with its own contract" do
+    uuid = "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+    assert Contracts.party_id(uuid) == {:ok, {:party_id, uuid}}
+
+    assert Contracts.party_id("A7B8") == {:error, [%{path: "", code: :pattern_mismatch}]}
+  end
+
+  # Breaks if the brand rule in bin/contracts.exs and the tag rule in contracts.ex drift apart.
+  test "every TypeScript-branded contract has an Elixir tag constructor, and no other does" do
+    branded =
+      for [_, name] <-
+            Regex.scan(
+              ~r/^export type (\w+) = string & \{ readonly __brand/m,
+              File.read!("kernel/ts/src/contracts.gen.ts")
+            ),
+          do: {name |> Macro.underscore() |> String.to_atom(), 1}
+
+    constructors = Contracts.__info__(:functions) -- [defs: 0, validate: 2, validate: 3]
+    assert Enum.sort(constructors) == Enum.sort(branded)
   end
 end
