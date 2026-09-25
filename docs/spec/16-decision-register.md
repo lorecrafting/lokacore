@@ -81,6 +81,11 @@ Accepted design direction is not R0 approval or implementation completion. Provi
 - [ADR-067 — Bounded start, early representation review, no speculative expansion](#adr-067--bounded-start-early-representation-review-no-speculative-expansion)
 - [ADR-068 — Candidate C first, with randomized differential testing](#adr-068--candidate-c-first-with-randomized-differential-testing)
 - [ADR-069 — Adverse known answers are an eighth frozen input](#adr-069--adverse-known-answers-are-an-eighth-frozen-input)
+- [ADR-070 — Pixel 3a stands in for the A14 class in the R1 experiment](#adr-070--pixel-3a-stands-in-for-the-a14-class-in-the-r1-experiment)
+- [ADR-071 — Candidate C selected on a quick A3; remaining R1 gates deferred](#adr-071--candidate-c-selected-on-a-quick-a3-remaining-r1-gates-deferred)
+- [ADR-072 — Online and local persistence shape](#adr-072--online-and-local-persistence-shape)
+- [ADR-073 — One Mix application with strict boundaries, not an umbrella](#adr-073--one-mix-application-with-strict-boundaries-not-an-umbrella)
+- [ADR-074 — TypeScript-first rules until a server consumes them](#adr-074--typescript-first-rules-until-a-server-consumes-them)
 
 </details>
 <!-- packet-navigation:end -->
@@ -152,7 +157,7 @@ Offline competitive/economic state is not trusted as MMO authority.
 
 **Status:** Provisional
 
-One portable deterministic semantic contract serves offline mobile and online BEAM hosts. ADR-068 tests dual implementations of it first; a single shared kernel remains a candidate.
+One portable deterministic semantic contract serves offline mobile and online BEAM hosts. ADR-068 tests dual implementations of it first; a single shared kernel remains a candidate. ADR-071 selected C; under ADR-074, C's Elixir `portable_capability` rules arrive at the ADR-074 trigger.
 
 R1 compares three candidates against a pre-registered envelope: (A) one TypeScript kernel native in React Native and reached from BEAM through a Port; (B) one Rust kernel behind a pre-registered NIF/isolated-worker BEAM boundary and native mobile bindings; (C) dual Elixir/TypeScript implementations with golden-vector conformance and randomized differential testing. ADR-068 sets the order C, then B, then A.
 
@@ -853,8 +858,40 @@ The owner wants the online server to stay a single Elixir/OTP runtime, without a
 
 A 2026-09-23 feasibility probe (`probes/elixir-wasm/`, not R1 evidence) found that the Hermes version in the retained lock has no WebAssembly, SharedArrayBuffer, Atomics or Worker, so an Elixir kernel cannot run in React Native's engine; the hidden-WebView alternative was declined by the owner. C accepts permanent two-implementation maintenance; differential testing and shared fixtures are its drift control, not a proof of correctness.
 
+Amended by ADR-074 (2026-09-24): the Elixir `portable_capability` rules and their differential arrive at the ADR-074 trigger; the portable semantic foundation keeps both kernels and its differential now.
+
 ## ADR-069 — Adverse known answers are an eighth frozen input
 
 **Status:** Proposed amendment to the accepted R0 contract `aaadaffff02e459dbf04e71d6ddc81d75eacf986`, 2026-09-23, chosen by the owner after the independent oracle review; expected-answer review and owner acceptance pending.
 
 The oracle review of the seven inputs (`reviews/2026-09-23-oracle-review.md`, finding F1) found that they freeze only success paths. Failed checks, rejections, conflicts, stale views, rollback, unknown COMMIT, response loss, budgets, bounds, rejection sampling and the adverse Lantern paths existed only as Python assertions, which no input hash binds; a candidate that restores the RNG after a failed check passed every frozen fixture. `conformance/adverse-cases.json` now freezes those answers as data, in the existing `cases.json`, `composition-cases.json` and `lantern-traces.json` shapes, and becomes the eighth input bound by both readiness checkers, the setup and oracle records and `spec_tools/preserved-inputs.json`. It records what the retained checks already asserted, plus two rejection-sampling rows the review verified independently; it adds no contract behavior. The review of those bytes (`reviews/2026-09-23-oracle-review-adverse.md`, A1) found the model checked authorization before envelope validation, against 03 §14; the model and the one affected answer (`bad-envelopes`, request `{}` → `invalid_envelope`) were corrected before approval. Publication is frozen only where the contract requires it (nothing before COMMIT, no duplicate on response loss), because document 04 §2 permits but does not require fan-out of committed events after recovery. Selector overflow stays a model-level check: no registered operation reaches it.
+
+## ADR-070 — Pixel 3a stands in for the A14 class in the R1 experiment
+
+**Status:** Accepted by the owner, 2026-09-23 ([record](../decisions/owner-decision-a2-2026-09-23.md), OD1); proposed text in the legacy [A2 plan](https://github.com/lorecrafting/lokacore-v2-legacy/blob/997a7a8/docs/rewrite-v3/prep/after-pr-10/a2-plan.md).
+
+The Google Pixel 3a (G020G, 3.5 GB kernel-visible memory) stands in for the `galaxy-a14-4gb` class for the disposable R1 experiment only, under the limits in the proposed text. It is not a qualification of the A14 class.
+
+## ADR-071 — Candidate C selected on a quick A3; remaining R1 gates deferred
+
+**Status:** Accepted by the owner, 2026-09-24 ([record](../decisions/owner-decisions-2026-09-24.md), item 4; [quick A3](../decisions/owner-decision-a3-2026-09-24.md)); full text in [the proposal](../decisions/adr-071-072-proposal.md). Amended by ADR-074.
+
+Candidate C (Elixir on the server, TypeScript on Hermes) is selected for R2 with the `touched-1` boundary variant, on a quick A3 rather than the full envelope procedure. This is not R1 acceptance: the failed phone checkpoint round trip (Medium, Stress) is recorded as accepted risk, and the unmeasured rows are deferred to R6P and R10 as the proposal lists. Reopens if a deferred measurement fails because of the TypeScript-on-Hermes kernel; then B is evaluated.
+
+## ADR-072 — Online and local persistence shape
+
+**Status:** Accepted by the owner, 2026-09-24 ([record](../decisions/owner-decisions-r3-open-questions-2026-09-24.md), item 3), after delegating the design ([hand-off](../decisions/owner-decisions-2026-09-24.md), item 3); full text in [the proposal](../decisions/adr-071-072-proposal.md).
+
+The world owner holds the world in memory and rules read only memory. Rules are pure (`decide(state, command) → proposal`) and never write memory or storage. The host commits only the changed rows plus the receipt and outbox rows in one transaction, then adopts the proposal into memory, then replies. Kernels use structural sharing. No periodic or rest-point snapshots; a full canonical checkpoint exists only for export, backup and the round-trip measurement. ADR-006 and ADR-007 are unchanged.
+
+## ADR-073 — One Mix application with strict boundaries, not an umbrella
+
+**Status:** Accepted by the owner, 2026-09-24 ([record](../decisions/owner-decision-r2-2026-09-24.md), item 2); full text in [the proposal](../decisions/adr-073-single-app.md).
+
+The server is one Mix application, `:loka`, whose document 02 §1 areas are top-level boundaries checked by `boundary` in strict mode. Documents 02 §1 and 14 §R2 were amended in place.
+
+## ADR-074 — TypeScript-first rules until a server consumes them
+
+**Status:** Accepted by the owner, 2026-09-24 ([record](../decisions/owner-decision-adr-074-2026-09-24.md)); full text and applicability crosswalk in [ADR-074](../decisions/adr-074-ts-first-proposal.md).
+
+`portable_semantic_foundation` contracts stay in both kernels with their differential. `portable_capability` rules and their invariant checks are TypeScript-only until the trigger: the first planned server consumer of any `portable_capability` semantics (Story content on a server host, a Realm-native cartridge using a portable capability, or a trusted trace-verification service). It is checked mechanically: a `portable_capability` row gaining an Elixir host adapter needs a declared cross-kernel differential (`bin/contracts.exs`). Static compilation and TypeScript test execution, including the R5 simulation and the R9/R11 Lab running the TypeScript kernel headless, do not fire it. Before that consumer is enabled the owner chooses a route and the Elixir-versus-TypeScript conformance evidence passes. TypeScript host conformance (Node, Android Hermes, iOS Hermes) is retained.

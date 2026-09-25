@@ -62,7 +62,7 @@ Both paths: accept → travel to shelter → take → return → talk → choose
 
 Adverse paths: acquire before acceptance (state credit); drop after opening choice (custody rejection); wait until Bram moves (presence rejection with close/return path); retry consumed choice after a stale view (receipt replay); alter choice under same ID (integrity conflict); conflict/budget fault (no partial proposal); rollback/unknown COMMIT/after-commit display interruption (durable reconciliation). Local account/report binding is tested with the fake adapter, never with invented authentication evidence.
 
-P4 must integrate the shared operation/reaction evaluator: the deliberately small Python Lantern model is only a specification example and cannot be copied as a special FerrymanEngine. P6 compares actual adapter bytes, narrative continuity and human comprehension against the frozen examples.
+P4 must integrate the shared operation/reaction evaluator: the deliberately small Python Lantern model is only a specification example and cannot be copied as a special FerrymanEngine. P6 compares actual adapter bytes (the TypeScript host adapters on Node, Android Hermes and iOS Hermes, [ADR-074](../decisions/adr-074-ts-first-proposal.md)), narrative continuity and human comprehension against the frozen examples.
 
 ## Implementation tickets and dependency graph
 

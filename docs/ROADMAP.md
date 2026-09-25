@@ -17,9 +17,13 @@ filter on top. Adapted from Datadog's
 - **Invariants are registered data (R3 PR 3/5).** Each spec invariant (for example one
   container per item, 03 §23; no proposed event escapes a failed commit, 04 §5.1; a retry
   replays its receipt and never rerolls, 03 §14) gets a stable ID, its spec citation and a
-  pure check in both kernels. Tests and the simulator check invariants by ID.
-- **Deterministic simulation (R5).** Seeded random command sequences run through both
-  kernels; every step compares canonical bytes and checks every registered invariant. A
+  pure check (foundation invariants in both kernels; rule invariants in TypeScript,
+  [ADR-074](decisions/adr-074-ts-first-proposal.md)). Tests and the simulator check
+  invariants by ID.
+- **Deterministic simulation (R5).** Seeded random command sequences run through the
+  TypeScript kernel headless on Node; every step records canonical bytes and checks every
+  registered invariant. The differential compares the foundation across both kernels and
+  the TypeScript hosts (Node bytes replayed on Hermes; a device sample at R6P). A
   failure reproduces from its seed and is shrunk to a minimal case. Seed counts follow
   the [envelope's differential target](spec/r1-acceptance-envelope.md) (every fast CI run).
 - **Fault simulation (R6).** The same runs through the local authority with injected
@@ -35,11 +39,12 @@ filter on top. Adapted from Datadog's
 |---|---|---|
 | R3 | 8 | Every item of [14 §R3A/§R3B and Gate R3](spec/14-implementation-plan.md#r3--contractschema-foundation) is the checklist. Done: PR 1 portable ABI (#4); PR 2 schema toolchain + identity/scope/error contracts (#9); PR 3 action/command/delta/event/effect/result, policy AST, TargetResolution + invariant registry (#13); PR 4a capability registry/lock, manifests (#12); PR 4b facts, relations/provenance, GameView, account/progress envelopes (#14); PR 5 StateDelta composition in both kernels + invariant checks (#15); PR 6a R3B envelopes (#11); PR 6b gate review, docs tidy pass, generated capability docs and residency matrix (#16) |
 | R4 minimal | 3 | loader, validation, reference resolution, capability lock, canonical artifact hash, diagnostics |
-| R5 subset | 7 + 1 | world rules the Lantern needs, in both kernels; plus the deterministic simulation slice |
+| R5 subset | 7 + 1 | world rules the Lantern needs, in TypeScript (ADR-074); plus the deterministic simulation slice |
 | R6 | 5 + 1 | the [14 §R6](spec/14-implementation-plan.md#r6--offline-authority-and-save-system) build list as R6P needs it (including the fake synchronization adapter); plus fault simulation |
-| Early R7/R8 | 5 | one quest, a dialogue choice, a schedule, reactions, narration |
+| Early R7/R8 | 5 | one quest, a dialogue choice, a schedule, reactions, narration (TypeScript) |
 | R6P | 4 | compiled Lantern cartridge, touch UI, device and human proof; the UI slices and GameView v2 take [the room view's GameView needs](design/room-view/README.md#gameview-needs) as input |
 
-About 34 slices. Estimate (2026-09-24, from one measured slice): 8 to 18 million tokens,
-most likely about 13 million; 2 to 5 weeks of calendar time, bounded by owner approvals and
-device sessions. Re-estimate after R3.
+26 slices after R3. Estimate ([ADR-074 §6](decisions/adr-074-ts-first-proposal.md#6-re-estimate-to-r6p-estimates-not-measurements),
+from R3's approximate counts): about 8.5 to 9.2 million subagent tokens to R6P; PM
+coordination is extra and unmeasured. Calendar time is bounded by owner approvals and
+device sessions. Re-estimate after the first two R5 slices.

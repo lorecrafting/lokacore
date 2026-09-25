@@ -53,6 +53,40 @@ The table below describes the files as imported. Later amendments are in git his
   `protocol/` at compile time) plus generated nominal id types. Elixir domain data types
   for composite contracts arrive with their first Elixir consumer, generated from or
   checked against `protocol/` at that point. Document 14's text is unchanged.
+- 2026-09-24, [ADR-074](../decisions/adr-074-ts-first-proposal.md)
+  ([owner record](../decisions/owner-decision-adr-074-2026-09-24.md)): TypeScript-first
+  `portable_capability` rules until the ADR-074 trigger, per its appendix crosswalk.
+  Historical failed and unmeasured results stand.
+  - 16 ADR-004 and ADR-068: C's Elixir rules arrive at the trigger; ADR-074 added. The
+    ADR-071 record gains a note: on-device differential replaced, server load, fault and
+    maintenance items deferred, phone rows retained.
+  - Envelope §3: applicability note; Elixir pair deferred, TypeScript host pairs retained.
+  - 02 §1: the Lab drives the TypeScript kernel headless.
+  - 07 §4 and §13: the BEAM path joins conformance at the trigger.
+  - 09 §1a Determinism row (amended to the crosswalk's gloss: the TypeScript kernel on
+    Node and devices); §5 cross-host conformance and BEAM
+    runtime boot mode; §10 StreamData on Elixir for the foundation only.
+  - 14 R5 gate, R9 runner (Node plus the Hermes replays, as 09 §5), R10 certification:
+    the hosts that run the rules; R14: the Elixir
+    port and differential precede its playthrough gate.
+  - 15 DET-02, DET-08, SCR-10: TypeScript hosts now, the server host at the trigger.
+  - pre-release-proof.md P6: TypeScript host adapters.
+  - README §5–§6: C selected, rules TypeScript-first; the open gate is ADR-071's failed
+    and unmeasured evidence (accepted risk, not passed), not the choice.
+  - Note only, text unchanged: 10 (R1 tests C first), R-MILESTONES R1 row, INDEX, 07 §14
+    (R1 procedure). Retained unchanged: 05 §6 last paragraph (how the trigger is checked),
+    09 §31.
+- 2026-09-24, document 16 gains entries for the owner-accepted proposals ADR-070
+  ([A2 record](../decisions/owner-decision-a2-2026-09-23.md)), ADR-071
+  ([record](../decisions/owner-decisions-2026-09-24.md)), ADR-072
+  ([record](../decisions/owner-decisions-r3-open-questions-2026-09-24.md), item 3) and
+  ADR-073 ([R2 record](../decisions/owner-decision-r2-2026-09-24.md)), each pointing to its
+  proposal.
+- 2026-09-24, [owner decision](../decisions/owner-decisions-r3-open-questions-2026-09-24.md),
+  dotted fact names: the R4 compiler maps each `.` in an authored fact name to `_`; two
+  authored names that map to the same key are a compile error, never a merge; the
+  64-character limit applies after mapping. (The same record keeps ambiguous-target order
+  as ascending id; no spec change.)
 
 ## Link rewrites (the only byte changes at import)
 

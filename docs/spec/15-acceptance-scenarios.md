@@ -68,7 +68,7 @@ the portable rules layer returns a canonically identical result across repeated 
 
 Run the same fixture through every host implementation/adapter required by the R1-selected portable-execution strategy.
 
-For a shared native kernel this includes direct/native, BEAM, iOS, and Android host paths. For the dual implementation, tested first (ADR-068), compare the accepted Elixir and mobile implementations instead.
+For a shared native kernel this includes direct/native, BEAM, iOS, and Android host paths. For the dual implementation, tested first (ADR-068), compare the accepted Elixir and mobile implementations instead. Under [ADR-074](../decisions/adr-074-ts-first-proposal.md), rules compare the TypeScript hosts (Node, Android Hermes, iOS Hermes) now and the server host at the [ADR-074 trigger](../decisions/adr-074-ts-first-proposal.md#3-the-proposal).
 
 Domain-result hash MUST match.
 
@@ -98,7 +98,7 @@ A scripted spawn under identical instance/command/RNG/ID-source state produces t
 
 ### DET-08 — Numeric boundary
 
-Rule-critical arithmetic at rounding/threshold boundaries produces identical results on ARM mobile and server host.
+Rule-critical arithmetic at rounding/threshold boundaries produces identical results on ARM mobile and server host. Under [ADR-074](../decisions/adr-074-ts-first-proposal.md), rule arithmetic compares ARM mobile with Node now and the server host at the [ADR-074 trigger](../decisions/adr-074-ts-first-proposal.md#3-the-proposal).
 
 No platform floating-point difference changes quest/combat/economy outcome.
 
@@ -567,7 +567,7 @@ Compilation fails portability gate.
 
 ### SCR-10 — Wall-time guard is not game semantics
 
-A certified script has deterministic step/query/resource limits and runs on both a slower supported mobile host and the server.
+A certified script has deterministic step/query/resource limits and runs on both a slower supported mobile host and the server (under [ADR-074](../decisions/adr-074-ts-first-proposal.md), Node until the [ADR-074 trigger](../decisions/adr-074-ts-first-proposal.md#3-the-proposal)).
 
 Both hosts produce the same semantic result or deterministic budget error. A host wall-time kill switch cannot produce a normal cartridge-visible branch on one host while the other succeeds; if the outer guard fires, conformance/runtime health fails instead.
 

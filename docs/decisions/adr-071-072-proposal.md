@@ -1,9 +1,9 @@
-# Proposed ADR-071 and ADR-072 — 2026-09-24
+# ADR-071 and ADR-072 — 2026-09-24
 
-**Status: proposed.** Written by the coordinating assistant (Claude Code, Claude
+**Status: Accepted — entered [document 16](../spec/16-decision-register.md) 2026-09-24.** Written by the coordinating assistant (Claude Code, Claude
 Opus), the candidate author's side. Like ADR-070 in
-[a2-plan.md](https://github.com/lorecrafting/lokacore-v2-legacy/blob/997a7a8/docs/rewrite-v3/prep/after-pr-10/a2-plan.md), these enter document 16 only at the next
-contract amendment; document 16 is not edited here. Evidence:
+[a2-plan.md](https://github.com/lorecrafting/lokacore-v2-legacy/blob/997a7a8/docs/rewrite-v3/prep/after-pr-10/a2-plan.md), they entered document 16 at the next
+contract amendment. Evidence:
 [r1-a3-quick-evidence/](https://github.com/lorecrafting/lokacore-v2-legacy/blob/997a7a8/docs/rewrite-v3/r1-a3-quick-evidence/README.md) and
 [touched-1/](https://github.com/lorecrafting/lokacore-v2-legacy/blob/997a7a8/docs/rewrite-v3/r1-a3-quick-evidence/touched-1/README.md).
 
@@ -21,6 +21,13 @@ contract amendment; document 16 is not edited here. Evidence:
   risk recorded, and proceed?", the owner answered "yes please go ahead".
 
 ## ADR-071 — Candidate C selected on a quick A3; remaining R1 gates deferred
+
+Amended 2026-09-24 by [ADR-074](adr-074-ts-first-proposal.md) (crosswalk rows): C's Elixir
+rules arrive at the ADR-074 trigger; the on-device differential below is replaced by
+Node-recorded per-step bytes replayed on Hermes; the server load, scheduler, faults under
+load, server fault-record items and the §10/§11 maintenance and fault-containment
+comparison are deferred to that trigger; the mutant check, iPhone timing and R6P phone rows
+stay. Results recorded below are unchanged.
 
 **Decision.** Candidate C (Elixir on the server, TypeScript on Hermes) is selected
 for R2 with the `touched-1` boundary variant. Candidates B and A are not built.

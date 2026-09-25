@@ -111,3 +111,13 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
   APPROVE WITH NOTES (cleanup, proportionate review: case lists and differential inputs
   byte-identical to `main` in both kernels, PR #15 mutants still die; one should-fix: the
   fixture description does not say how to rebuild the three built cases); re-review of the fix at `54688e7`, APPROVE.
+- [2026-09-24 maintenance: ADR-074 amendments](2026-09-24-maint-adr074-amendments-review.md):
+  PR #19 at `e7b1625`, CHANGES REQUIRED, no blocker (Fable design review: every spec hunk
+  traced to a crosswalk row, five owner records read, trigger check planted six ways and
+  its red control tested against a neutered check; four should-fix: the red control lacks
+  the declared-but-absent differential case, `minItems`/`maxItems` on `host_adapters` have
+  no fixture in either validator, README §5/§7 still call the kernel choice open, 14 §R9
+  names Node as the only pre-trigger host against 09 §5 and 15 DET-02; three nits; Astra
+  A1 agreed, A2 agreed in part); Astra's review appended verbatim; re-review of the fixes
+  at `7b5f5b0`, APPROVE (every disposition verified, four mutants die, merge with #20 kept
+  every README entry).

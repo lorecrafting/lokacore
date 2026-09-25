@@ -6,7 +6,7 @@
 # 14 Gate R3 and 05 §6. `--check` regenerates in memory and exits 1 if a committed file
 # differs. A schema outside the subset fails here as it fails `mix compile`.
 #
-#   elixir bin/contracts.exs [--check]
+#   elixir bin/contracts.exs [--check [REGISTRY]]
 root = Path.expand("..", __DIR__)
 
 for f <- ~w(canonical.ex contracts/schema.ex contracts.ex),
@@ -76,7 +76,7 @@ end
 {:ok, probe} =
   Loka.Core.Canonical.decode(File.read!(Path.join(root, "protocol/fixtures/subset.schema.json")))
 
-read = fn rel -> JSON.decode!(File.read!(Path.join(root, rel))) end
+read = fn rel -> JSON.decode!(File.read!(Path.expand(rel, root))) end
 
 faults =
   for e <- read.("protocol/error_registry.json"),
@@ -88,11 +88,26 @@ limits = read.("docs/spec/conformance/composition-profile.json")["limits"]
 # 05 §6 residency view: the six ResidencyClass values (plus unclassified, a null capability
 # residency), each with its capabilities and its non-capability responsibilities
 # (protocol/residency.json). Unbound host adapters and fixtures are null, never [].
-registry = read.("protocol/capability_registry.json")
+# `--check PATH` reads a registry copy instead (the red control plants one).
+registry = read.(Enum.at(System.argv(), 1, "protocol/capability_registry.json"))
 responsibilities = read.("protocol/residency.json")
 pin = &"#{&1["key"]}@#{&1["version"]}"
 class = &(&1["residency"] || "unclassified")
 bound = &if(&1 == [], do: nil, else: &1)
+
+# ADR-074 trigger: an Elixir host adapter on a portable_capability needs a cross-kernel
+# differential, declared and present.
+trigger =
+  for e <- registry,
+      e["residency"] == "portable_capability",
+      "elixir" in (e["host_adapters"] || []),
+      not File.regular?(Path.join(root, e["differential"] || "")),
+      do: "#{pin.(e)}: elixir host adapter without a present differential (ADR-074)"
+
+if trigger != [] do
+  Enum.each(trigger, &IO.puts(:stderr, &1))
+  System.halt(1)
+end
 
 effects = read.("protocol/effect_registry.json")
 origins = fn key -> for e <- effects, key in e["allowed_origins"], do: e["type"] end
@@ -105,7 +120,7 @@ matrix =
          %{
            "portability" => e["portability"],
            "effects" => origins.(e["key"]),
-           "host_adapters" => nil,
+           "host_adapters" => e["host_adapters"],
            "conformance_fixtures" => nil
          }}
       end
@@ -198,7 +213,7 @@ case System.argv() do
   [] ->
     for {rel, text} <- targets, do: File.write!(Path.join(root, rel), text)
 
-  ["--check"] ->
+  ["--check" | _] ->
     stale =
       for {rel, text} <- targets,
           File.read(Path.join(root, rel)) != {:ok, text},

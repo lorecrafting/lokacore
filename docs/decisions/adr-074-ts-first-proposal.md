@@ -1,8 +1,8 @@
-# Proposed ADR-074 — TypeScript-first rules until Story runs on a server — 2026-09-24
+# ADR-074 — TypeScript-first rules until Story runs on a server — 2026-09-24
 
 **Status: Accepted by the owner 2026-09-24 ([record](owner-decision-adr-074-2026-09-24.md));
-enters [document 16](../spec/16-decision-register.md) at the next contract amendment.
-Spec amendments per the crosswalk land in a separate reviewed PR.** Written by the
+entered [document 16](../spec/16-decision-register.md) 2026-09-24, with the spec
+amendments per the crosswalk.** Written by the
 developer agent (Claude Code, Claude Opus); revised after review
 ([record](../reviews/2026-09-24-adr-074-ts-first-review.md)).
 

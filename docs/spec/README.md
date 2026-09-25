@@ -202,14 +202,14 @@ The rebuild MUST use the strengths of Elixir/OTP intentionally:
 
 The rebuild MUST NOT turn every room, item, quest, or NPC into a GenServer merely because the BEAM makes processes cheap.
 
-The online authority/orchestration layer SHOULD remain idiomatic Elixir/OTP. Rules that must execute both offline and online MUST follow the portable deterministic semantic contract selected by R1. R1 tests C (dual Elixir/TypeScript with randomized differential testing) first, B (one Rust kernel) only if C fails, and A (one TypeScript kernel) if B fails (ADR-068). No execution strategy is selected before its applicable gates pass; golden conformance preserves the same semantic contract for every candidate. Server-only orchestration and capability adapters remain Elixir.
+The online authority/orchestration layer SHOULD remain idiomatic Elixir/OTP. Rules that must execute both offline and online MUST follow the portable deterministic semantic contract selected by R1. R1 tests C (dual Elixir/TypeScript with randomized differential testing) first, B (one Rust kernel) only if C fails, and A (one TypeScript kernel) if B fails (ADR-068). Golden conformance preserves the same semantic contract for every candidate. C was selected by owner decision on a quick A3 (ADR-071); its failed phone checkpoint row and its unmeasured rows are accepted risk deferred to R6P and R10, not passed. Under [ADR-074](../decisions/adr-074-ts-first-proposal.md), `portable_capability` rules are TypeScript-only until the first planned server consumer of them, while the portable semantic foundation stays in both kernels with its differential. Server-only orchestration and capability adapters remain Elixir.
 
 ## 6. Working top-level decisions
 
 | Topic | Current draft direction |
 |---|---|
 | Online language/runtime | Elixir on BEAM/OTP |
-| Portable offline rules | One deterministic portable semantic contract; R1 tests dual Elixir/TypeScript implementations with golden conformance and randomized differential testing first, then a shared Rust or TypeScript kernel (ADR-068) |
+| Portable offline rules | One deterministic portable semantic contract; R1 tests dual Elixir/TypeScript implementations with golden conformance and randomized differential testing first, then a shared Rust or TypeScript kernel (ADR-068); C selected (ADR-071), rules TypeScript-first (ADR-074) |
 | Server UI/API | Phoenix |
 | Mobile | One React Native / Expo app with strict Story Mode (local authority) and Realm Mode (remote BEAM authority) session boundaries |
 | Persistence | PostgreSQL for online/platform durability when those phases arrive; offline Story saves use local SQLite |
@@ -230,12 +230,12 @@ The online authority/orchestration layer SHOULD remain idiomatic Elixir/OTP. Rul
 
 ### Intentionally unresolved evidence gates
 
-Two choices remain deliberately provisional rather than being papered over by the specification:
+Two evidence gates remain open rather than being papered over by the specification:
 
-1. **portable kernel technology/binding** — three candidates (A one TypeScript kernel, B one Rust kernel, C dual Elixir/TypeScript implementation) are compared against `r1-acceptance-envelope.md`; C is built first (ADR-068), and none is selected before the spike;
+1. **portable kernel evidence** — the direction is decided: C (ADR-071), with rules TypeScript-first (ADR-074). The R1 evidence is not: the phone checkpoint round trip failed and the rows ADR-071 defers stay unmeasured until R6P and R10. If a deferred measurement fails because of the TypeScript-on-Hermes kernel, B is evaluated (`r1-acceptance-envelope.md` §2);
 2. **App Store treatment of downloadable rule content** — the product requires downloadable offline stories, but the exact bounded rule representation must survive current store-review constraints.
 
-Implementation MUST NOT treat either provisional choice as settled before its evidence gate passes.
+Implementation MUST NOT treat either open gate as passed before its evidence exists.
 
 ## 7. Packet index
 

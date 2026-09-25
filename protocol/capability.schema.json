@@ -95,6 +95,23 @@
                 "portable_capability",
                 null
               ]
+            },
+            "host_adapters": {
+              "description": "The kernels that implement this capability; absent means none bound yet. An elixir entry on a portable_capability needs a differential (ADR-074 trigger, checked by bin/contracts.exs).",
+              "type": "array",
+              "items": {
+                "enum": [
+                  "elixir",
+                  "typescript"
+                ]
+              },
+              "minItems": 1,
+              "maxItems": 2
+            },
+            "differential": {
+              "description": "The cross-kernel differential test for this capability (ADR-074).",
+              "type": "string",
+              "pattern": "^test/loka/[a-z0-9_]+/[a-z0-9_]+_test\\.exs$"
             }
           },
           "required": [
@@ -172,6 +189,17 @@
           "version": 1,
           "portability": "portable",
           "residency": null
+        },
+        {
+          "key": "movement",
+          "version": 1,
+          "portability": "portable",
+          "residency": "portable_capability",
+          "host_adapters": [
+            "typescript",
+            "elixir"
+          ],
+          "differential": "test/loka/core/movement_differential_test.exs"
         },
         {
           "key": "guild_market",

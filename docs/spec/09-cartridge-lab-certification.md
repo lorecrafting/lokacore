@@ -74,7 +74,7 @@ The rest of this document is the certification design for every profile and leve
 | Static | schema, references, unknown fields, template cycles, capability lock, portability check, localization keys, asset hashes |
 | Topology | all 57 rooms reachable under declared scenarios through exits AND transport (the ferry); validate admission/payment/schedule constraints separately from structural connectivity; Ashmere exits reciprocal; barrier faces coherent; no required quest target unreachable |
 | Quest/dialogue model | lifecycle transitions, activation/resolution validity, prerequisite cycles, terminal-outcome reachability for both endings, duplicate-event idempotency, reward-once, consequence scope |
-| Determinism | DET-01 through DET-10 on the R1-selected hosts; canonical ordering; RNG replay |
+| Determinism | DET-01 through DET-10 on the hosts that run the rules (TypeScript on Node and devices, [ADR-074](../decisions/adr-074-ts-first-proposal.md)); canonical ordering; RNG replay |
 | Crash/recovery | OFF-03 through OFF-07 at every commit boundary of every chapter-one command type |
 | Bot playthroughs | deterministic paths to both endings plus completionist and duplicate-tapper behaviors; record actual quest outcome/dialogue choice/scene beat coverage and explicit dispositions for uncovered surfaces |
 | Autonomous simulation | 30 logical days: schedules reach destinations, populations bounded, no reaction loops, tides and light replay identically |
@@ -146,7 +146,7 @@ Fast kernel/reducer tests without full OTP or mobile shell.
 
 ### BEAM runtime instance
 
-Starts actual `WorldInstance` under test supervision.
+Starts actual `WorldInstance` under test supervision. It runs `portable_capability` rules from the [ADR-074 trigger](../decisions/adr-074-ts-first-proposal.md#3-the-proposal) on.
 
 ### Offline host
 
@@ -162,7 +162,7 @@ Exercises Phoenix channel contract and generated fixtures.
 
 ### Cross-host conformance
 
-Runs the same golden scenario through every host implementation/adapter selected by the accepted portable-execution ADR and compares canonical trace hashes. If R1 selects one shared native kernel, this includes its direct host plus BEAM/iOS/Android bindings; if R1 selects the dual implementation, it compares the accepted Elixir/mobile implementations instead.
+Runs the same golden scenario through every host implementation/adapter selected by the accepted portable-execution ADR and compares canonical trace hashes. If R1 selects one shared native kernel, this includes its direct host plus BEAM/iOS/Android bindings; if R1 selects the dual implementation, it compares the accepted Elixir/mobile implementations instead. Under [ADR-074](../decisions/adr-074-ts-first-proposal.md) that is the TypeScript hosts (Node, Android Hermes, iOS Hermes) for rules, plus both kernels for the portable semantic foundation; Elixir rules join at the [ADR-074 trigger](../decisions/adr-074-ts-first-proposal.md#3-the-proposal).
 
 Certification uses all modes relevant to the deployment profile.
 
@@ -276,7 +276,7 @@ For larger graphs, use targeted search + property testing.
 
 ## 10. Property-based tests
 
-Use StreamData on Elixir host and equivalent portable-kernel property tests to generate:
+Use StreamData on Elixir host (portable semantic foundation only, [ADR-074](../decisions/adr-074-ts-first-proposal.md)) and equivalent portable-kernel property tests (TypeScript, for rules) to generate:
 
 - valid/invalid command sequences;
 - duplicate commands;
