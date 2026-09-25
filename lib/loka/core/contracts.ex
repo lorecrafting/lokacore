@@ -7,7 +7,8 @@ defmodule Loka.Core.Contracts do
 
   Values must come from `Loka.Core.Canonical.decode/1` (the frozen numeric profile). The
   profile, not the validator, rejects floats, exponents, duplicate keys and invalid Unicode;
-  an ordinary JSON decoder loses or changes that information before validation sees it.
+  an ordinary JSON decoder loses or changes that information before validation sees it. Its
+  nesting limit of 128 also bounds recursion through a recursive `$ref`.
   """
   alias Loka.Core.Canonical
   alias Loka.Core.Contracts.Schema

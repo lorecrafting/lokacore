@@ -39,17 +39,27 @@ test('values outside the canonical profile are rejected at decode, before valida
     assert.throws(() => decode(text), { code: 'invalid_json' }, text);
 });
 
-// validate() on an in-memory value never passes the canonical depth cap, so a recursive
-// contract must still return (not overflow the stack) on a value far deeper than 128.
-test('recursive contracts validate deep values', () => {
-  let deep: unknown = { n: 0 };
-  let bad: unknown = { n: 'x' };
-  for (let i = 1; i <= 200; i++) {
-    deep = { n: i, next: deep };
-    bad = { n: i, next: bad };
-  }
-  assert.deepEqual(validate('RecursiveProbe', deep, defs), []);
-  assert.deepEqual(validate('RecursiveProbe', bad, defs), [
-    { path: `${'/next'.repeat(200)}/n`, code: 'invalid_type' },
+// validate() takes decoded values, so recursion is bounded by the canonical depth cap: a
+// Policy nested 128 deep decodes and validates; 129 is rejected by the decoder.
+test('a recursive Policy at the depth cap', () => {
+  const nots = (n: number) =>
+    '{"op":"not","item":'.repeat(n) + '{"op":"target_present"}' + '}'.repeat(n);
+  assert.deepEqual(validate('Policy', decode(nots(127))), []);
+  assert.throws(() => decode(nots(128)), { code: 'invalid_json' });
+});
+
+// A 1025-id list is too large to keep as a fixture line; 1024 is the contract's maximum.
+test('ambiguous candidates at 1024 and 1025', () => {
+  const ids = (n: number) =>
+    Array.from(
+      { length: n },
+      (_, i) => `${(i + 1).toString(16).padStart(8, '0')}-0000-4000-8000-000000000000`,
+    );
+  assert.deepEqual(
+    validate('TargetResolution', { kind: 'ambiguous', candidate_ids: ids(1024) }),
+    [],
+  );
+  assert.deepEqual(validate('TargetResolution', { kind: 'ambiguous', candidate_ids: ids(1025) }), [
+    { path: '/candidate_ids', code: 'too_many_items' },
   ]);
 });

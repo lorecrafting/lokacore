@@ -106,7 +106,8 @@ defmodule Loka.Core.ContractsTest do
       %{b | "id" => a["id"]},
       Map.delete(b, "citation") |> Map.put("id", "no_citation"),
       cite.("document", "99-missing.md") |> Map.put("id", "no_document"),
-      cite.("heading", "## 99. Not a heading") |> Map.put("id", "no_heading")
+      cite.("heading", String.slice(b["citation"]["heading"], 0..8))
+      |> Map.put("id", "no_heading")
     ]
 
     assert Enum.sort(invariant_problems(planted)) ==
@@ -118,17 +119,36 @@ defmodule Loka.Core.ContractsTest do
              ])
   end
 
-  # validate/3 on an in-memory value never passes the canonical depth cap, so a recursive
-  # contract must still return (not overflow) on a value far deeper than 128.
-  test "recursive contracts validate deep values" do
-    deep = Enum.reduce(1..200, %{"n" => 0}, &%{"n" => &1, "next" => &2})
-    assert Contracts.validate("RecursiveProbe", deep, @defs) == :ok
+  # validate/3 takes decoded values, so recursion is bounded by the canonical depth cap: a
+  # Policy nested 128 deep decodes and validates; 129 is rejected by the decoder.
+  test "a recursive Policy at the depth cap" do
+    nots =
+      &(String.duplicate(~s({"op":"not","item":), &1) <>
+          ~s({"op":"target_present"}) <> String.duplicate("}", &1))
 
-    bad = Enum.reduce(1..200, %{"n" => "x"}, &%{"n" => &1, "next" => &2})
-    path = String.duplicate("/next", 200) <> "/n"
+    assert {:ok, deep} = Loka.Core.Canonical.decode(nots.(127))
+    assert Contracts.validate("Policy", deep) == :ok
+    assert Loka.Core.Canonical.decode(nots.(128)) == {:error, :invalid_json}
+  end
 
-    assert Contracts.validate("RecursiveProbe", bad, @defs) ==
-             {:error, [%{path: path, code: :invalid_type}]}
+  # A 1025-id list is too large to keep as a fixture line; 1024 is the contract's maximum.
+  test "ambiguous candidates at 1024 and 1025" do
+    ids =
+      &for(
+        i <- 1..&1,
+        do: :io_lib.format("~8.16.0b-0000-4000-8000-000000000000", [i]) |> to_string()
+      )
+
+    assert Contracts.validate("TargetResolution", %{
+             "kind" => "ambiguous",
+             "candidate_ids" => ids.(1024)
+           }) == :ok
+
+    assert Contracts.validate("TargetResolution", %{
+             "kind" => "ambiguous",
+             "candidate_ids" => ids.(1025)
+           }) ==
+             {:error, [%{path: "/candidate_ids", code: :too_many_items}]}
   end
 
   test "a declared __proto__ property is accepted" do

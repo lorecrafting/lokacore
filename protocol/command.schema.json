@@ -13,7 +13,7 @@
       ]
     },
     "Command": {
-      "description": "A semantic Command (04 §3): the portable, replayable input. id is derived from the idempotency scope and the InvocationId (IdSource command_id; owner decision, docs/decisions/owner-decisions-r3-lanes-2026-09-24.md), never from authority placement. Every host serializes an equivalent command to the same canonical bytes (04 §21).",
+      "description": "A semantic Command (04 §3): the portable, replayable input. id is derived from the idempotency scope and the InvocationId (IdSource command_id; owner decision, docs/decisions/owner-decisions-r3-lanes-2026-09-24.md), never from authority placement. That derivation is for invocation-derived commands only; an authority-internal command (run_job) derives its id under a different IdSource tag over its own identity (job id and occurrence), defined where run_job first executes, so a client invocation id can never land on a job's receipt. Every host serializes an equivalent command to the same canonical bytes (04 §21).",
       "type": "object",
       "properties": {
         "id": {
@@ -226,7 +226,7 @@
               "$ref": "identity.schema.json#/$defs/CharacterId"
             },
             "until": {
-              "$ref": "command.schema.json#/$defs/LogicalTime"
+              "$ref": "#/$defs/LogicalTime"
             }
           },
           "required": [

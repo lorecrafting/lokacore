@@ -1,7 +1,8 @@
 // Validates JSON values against the generated contracts (spec 04 §12). Twin of
 // lib/loka/core/contracts.ex: same schema subset, same JSON-pointer paths, same codes.
 // Values must come from canonical.ts `decode` (the frozen numeric profile), which rejects
-// floats, exponents, duplicate keys and lone surrogates; JSON.parse loses that information.
+// floats, exponents, duplicate keys and lone surrogates (JSON.parse loses that information)
+// and nesting over 128, which bounds recursion through a recursive $ref.
 import { DEFS, type ErrorCode } from './contracts.gen.ts';
 
 export interface ContractError {

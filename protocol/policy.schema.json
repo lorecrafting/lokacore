@@ -43,10 +43,10 @@
       ]
     },
     "Policy": {
-      "description": "A pure condition tree (06 §21). all/any/not compose; the leaves are the 06 §21 operators the R6P proof uses (pre-release-proof.md); the rest are added, versioned, with their first use. fact_compare compares key-valued facts until FactSpec types fact values.",
+      "description": "A pure condition tree (06 §21). all/any/not compose; the leaves are the 06 §21 operators the R6P proof uses (pre-release-proof.md); the rest are added, versioned, with their first use. fact_compare compares FactValue.",
       "oneOf": [
         {
-          "description": "Every item holds.",
+          "description": "Every item holds; an empty list is the policy with no condition.",
           "type": "object",
           "properties": {
             "op": {
@@ -56,8 +56,7 @@
               "type": "array",
               "items": {
                 "$ref": "#/$defs/Policy"
-              },
-              "minItems": 1
+              }
             }
           },
           "required": [
@@ -156,7 +155,7 @@
           "additionalProperties": false
         },
         {
-          "description": "The fact, in the actor's scope, equals this key.",
+          "description": "The fact, in the actor's scope, equals this value.",
           "type": "object",
           "properties": {
             "op": {
@@ -166,7 +165,7 @@
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
             "equals": {
-              "$ref": "action.schema.json#/$defs/Key"
+              "$ref": "delta.schema.json#/$defs/FactValue"
             }
           },
           "required": [

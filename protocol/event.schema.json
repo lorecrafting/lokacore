@@ -28,7 +28,7 @@
       ]
     },
     "DomainEvent": {
-      "description": "A typed fact from deterministic evaluation (04 §8). Inside a decision it is PROPOSED: it may drive in-decision reducers but MUST NOT be published, projected or sent anywhere (04 §5.1). It becomes observable only as a CommittedEvent. scope is semantic, not a broadcast audience (04 §8). position is the monotonic causal position in the decision (04 §5.2).",
+      "description": "A typed fact from deterministic evaluation (04 §8). Inside a decision it is PROPOSED: it may drive in-decision reducers but MUST NOT be published, projected or sent anywhere (04 §5.1). It becomes observable only as a CommittedEvent. scope is semantic, not a broadcast audience (04 §8). position is the monotonic causal position in the decision (04 §5.2). 04 §8's subject_id lives in each typed payload that has a subject, where it is required.",
       "type": "object",
       "properties": {
         "id": {
@@ -42,9 +42,6 @@
         },
         "actor_id": {
           "$ref": "identity.schema.json#/$defs/CharacterId"
-        },
-        "subject_id": {
-          "$ref": "identity.schema.json#/$defs/EntityId"
         },
         "logical_time": {
           "$ref": "command.schema.json#/$defs/LogicalTime"
@@ -83,13 +80,13 @@
             "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
           },
           "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
-          "subject_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
           "logical_time": 0,
           "position": 1,
           "causation_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
           "correlation_id": "99999999-aaaa-4bbb-8ccc-dddddddddddd",
           "payload": {
             "type": "item_acquired",
+            "item_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
             "holder_id": "12121212-3434-4565-8787-909090909090"
           }
         },
@@ -112,7 +109,8 @@
               "kind": "fact",
               "key": "search_plan"
             },
-            "value": "player_led"
+            "old": "undecided",
+            "new": "player_led"
           }
         }
       ]
@@ -160,11 +158,14 @@
       "description": "The registered event types (04 §8) the R6P proof uses (pre-release-proof.md). Content-declared custom events are an R3B envelope.",
       "oneOf": [
         {
-          "description": "subject_id entered room_id.",
+          "description": "entity_id entered room_id.",
           "type": "object",
           "properties": {
             "type": {
               "const": "entity_entered_room"
+            },
+            "entity_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
             },
             "room_id": {
               "$ref": "identity.schema.json#/$defs/EntityId"
@@ -172,16 +173,20 @@
           },
           "required": [
             "type",
+            "entity_id",
             "room_id"
           ],
           "additionalProperties": false
         },
         {
-          "description": "subject_id is now held by holder_id.",
+          "description": "item_id is now held by holder_id.",
           "type": "object",
           "properties": {
             "type": {
               "const": "item_acquired"
+            },
+            "item_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
             },
             "holder_id": {
               "$ref": "identity.schema.json#/$defs/EntityId"
@@ -189,16 +194,20 @@
           },
           "required": [
             "type",
+            "item_id",
             "holder_id"
           ],
           "additionalProperties": false
         },
         {
-          "description": "subject_id was dropped into room_id.",
+          "description": "item_id was dropped into room_id.",
           "type": "object",
           "properties": {
             "type": {
               "const": "item_dropped"
+            },
+            "item_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
             },
             "room_id": {
               "$ref": "identity.schema.json#/$defs/EntityId"
@@ -206,6 +215,7 @@
           },
           "required": [
             "type",
+            "item_id",
             "room_id"
           ],
           "additionalProperties": false
@@ -295,7 +305,7 @@
           "additionalProperties": false
         },
         {
-          "description": "A key-valued fact changed.",
+          "description": "A fact changed from old to new (03 §7).",
           "type": "object",
           "properties": {
             "type": {
@@ -304,14 +314,18 @@
             "fact": {
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "value": {
-              "$ref": "action.schema.json#/$defs/Key"
+            "old": {
+              "$ref": "delta.schema.json#/$defs/FactValue"
+            },
+            "new": {
+              "$ref": "delta.schema.json#/$defs/FactValue"
             }
           },
           "required": [
             "type",
             "fact",
-            "value"
+            "old",
+            "new"
           ],
           "additionalProperties": false
         }
@@ -319,14 +333,17 @@
       "examples": [
         {
           "type": "entity_entered_room",
+          "entity_id": "12121212-3434-4565-8787-909090909090",
           "room_id": "33333333-4444-4555-8666-777777777777"
         },
         {
           "type": "item_acquired",
+          "item_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
           "holder_id": "12121212-3434-4565-8787-909090909090"
         },
         {
           "type": "item_dropped",
+          "item_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
           "room_id": "22222222-3333-4444-8555-666666666666"
         },
         {
@@ -367,7 +384,8 @@
             "kind": "fact",
             "key": "search_plan"
           },
-          "value": "party_led"
+          "old": "undecided",
+          "new": "party_led"
         }
       ]
     }
