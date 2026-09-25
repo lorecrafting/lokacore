@@ -1,8 +1,9 @@
 # Decisions after R0
 
-Accepted ADRs live in [document 16](../spec/16-decision-register.md). This directory holds
-proposals that enter document 16 at the next contract amendment, and the owner's
-decisions retained verbatim.
+Accepted ADRs live in [document 16](../spec/16-decision-register.md); ADR-070, ADR-071,
+ADR-073 and ADR-074 entered it on 2026-09-24, and their files here hold the full text. This
+directory also holds proposals not yet accepted (ADR-072) and the owner's decisions
+retained verbatim.
 
 - [Proposed ADR-071 and ADR-072](adr-071-072-proposal.md): candidate C selected; persistence
   shape. ADR-070 (Pixel 3a substitution) is proposed in the legacy A2 plan linked from

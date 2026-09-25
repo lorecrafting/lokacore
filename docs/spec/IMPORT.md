@@ -73,6 +73,11 @@ The table below describes the files as imported. Later amendments are in git his
   - Note only, text unchanged: 10 (R1 tests C first), R-MILESTONES R1 row, INDEX, 07 §14
     (R1 procedure). Retained unchanged: 05 §6 last paragraph (how the trigger is checked),
     09 §31.
+- 2026-09-24, document 16 gains entries for the owner-accepted proposals ADR-070
+  ([A2 record](../decisions/owner-decision-a2-2026-09-23.md)), ADR-071
+  ([record](../decisions/owner-decisions-2026-09-24.md)) and ADR-073
+  ([R2 record](../decisions/owner-decision-r2-2026-09-24.md)), each pointing to its
+  proposal. ADR-072 stays a proposal: the owner delegated it, no acceptance is recorded.
 - 2026-09-24, [owner decision](../decisions/owner-decisions-r3-open-questions-2026-09-24.md),
   dotted fact names: the R4 compiler maps each `.` in an authored fact name to `_`; two
   authored names that map to the same key are a compile error, never a merge; the
