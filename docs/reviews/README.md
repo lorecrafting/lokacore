@@ -110,4 +110,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [2026-09-24 maintenance cleanup](2026-09-24-maint-cleanup-review.md): PR #20 at `d387b93`,
   APPROVE WITH NOTES (cleanup, proportionate review: case lists and differential inputs
   byte-identical to `main` in both kernels, PR #15 mutants still die; one should-fix: the
-  fixture description does not say how to rebuild the three built cases).
+  fixture description does not say how to rebuild the three built cases); re-review of the fix at `54688e7`, APPROVE.

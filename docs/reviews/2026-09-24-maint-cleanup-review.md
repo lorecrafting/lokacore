@@ -106,3 +106,18 @@ Fix: extend `description` by about three sentences, one per case. Suggested word
 - `protocol/README.md`: #19 adds `host_adapters` and `differential` to
   `capability.schema.json`. The capability row ("capability versions, the lock, residency")
   still reads correctly, so no edit is needed. No other overlap.
+
+## Re-review (fix round 1): `54688e7`
+
+Scope: F1 only. The fix changes one line, the `description` in
+`protocol/fixtures/composition.json`, and nothing else.
+
+**F1: fixed.** I rebuilt the three cases and the `full_queue` and `crowd` states in Python,
+using only the new description and `delta.schema.json` (its job-ref example gives the
+field names for "lantern 0.1.0 schedule bram"). The result equals `main`'s fixture
+entries under Python `==`: cases 56 to 58 and both states. Round 1 showed those entries
+are byte-identical to what both tests build, so the description matches the tests. The
+description also says that `d1…0` already exists in `base`, which I confirmed, and that
+every host must run these cases.
+
+Verdict: **APPROVE**.
