@@ -350,3 +350,29 @@ No additional owner decision is needed for the lesson relocation, WORKFLOW link-
 No new findings. The fixes touched `bin/contracts.exs` (its only caller is `--check` in
 `check_all.sh`, CI and the red controls, all green), `Loka.Core.Contracts` (comment only;
 constructors unchanged), and test code.
+
+## Cross-vendor re-check (Astra), relayed verbatim by the owner
+
+Astra re-checked its own findings against fix head `94b15fb`.
+
+```text
+PR VERDICT: APPROVE WITH NOTES
+GATE R3 VERDICT: PASS WITH NOTED GAPS
+
+DISPOSITIONS:
+A1: resolved — At 94b15fb, bin/contracts.exs:88-120 derives the architecture-level vocabulary from ResidencyClass, independently of CapabilitySpec admission, and separates capabilities from non-capability responsibilities. protocol/residency.json:1-119 supplies foundation, authority-host and authoring rows; docs/residency.gen.json:1 contains all six classes plus unclassified, with unbound fixtures represented as null. Host/authoring responsibilities have not become gameplay capabilities. Foundation fixture associations remain declarations rather than proof of both kernels consuming them; gap 6 remains acceptable.
+
+A2: resolved differently but acceptable — docs/spec/IMPORT.md:50-55 and docs/decisions/owner-decisions-r3-gate-2026-09-24.md:12-19, at 94b15fb, explicitly record the owner-authorized alternative offered in the original finding: schema-driven validators plus generated nominal-ID types satisfy this R3 requirement; composite Elixir types must be generated from or checked against protocol/ with their first Elixir consumer. This resolves the gate interpretation through an amendment, not by claiming the missing composite types now exist.
+
+A3: resolved — test/loka/core/compose_test.exs:72-122 and kernel/ts/test/compose.test.ts:63-103, at 94b15fb, invoke actual composition and observe ordered commit/adoption/delivery histories across failed commit, unknown commit, composition fault and success. Failure histories permit neither adoption nor delivery; success requires commit → adopt → deliver, with expected changes taken from the fixture. Eager delivery would leave forbidden history entries even if the helper retained its previous return values. This supplies the bounded test-only evidence originally requested; real storage failures, crash recovery and uncertain-outcome reconciliation remain R6. I inspected the mutant-sensitive assertions but did not independently rerun the reported mutants.
+
+A4: resolved — lib/loka/core/contracts.ex:40-46 and docs/lessons/contracts.md:11-15, at 94b15fb, replace general nominal-type enforcement claims with the narrower inference guarantee, explicitly identify @spec-only and dynamic-flow limitations, and require constructor use plus explicit tag matching at domain boundaries. The documentation no longer represents typespecs alone as enforcing CharacterId/PartyId separation.
+
+AQ1: resolved — test/loka/core/nominal_ids_test.exs:18-68, at 94b15fb, retains all four requested probes: cross-module tag matching warns; tag matching inside a map warns; the @spec-only receiver does not warn; the runtime-selected CharacterId|PartyId forwarded through another function does not warn. It also retains Enum-flow and correct-ID controls and explicitly enables signature inference for the probes. Head CI run 36101358446 passed the pinned Elixir tests, TypeScript tests and generated-output drift check. This verification used source inspection and existing head CI, not a local pinned-toolchain rerun.
+
+AQ2: resolved differently but acceptable — Concrete wire/domain conversion remains a first-consumer integration task, not implemented R3 behavior. At 94b15fb, contracts.ex:40-55 and docs/lessons/contracts.md:11-15 establish construction and explicit tag-matching discipline; PR #16's “Follow-ups (R5)” records a single wire/tag conversion boundary, forbids tagged tuples entering Canonical.encode, and requires unwrapping only at that boundary. Acceptable for this gate, but the first consumer must implement and test that boundary before relying on nominal-ID protection.
+
+NEW FINDINGS: none
+
+OWNER DECISIONS NEEDED: none
+```
