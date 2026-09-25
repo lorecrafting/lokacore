@@ -34,7 +34,7 @@ A new envelope field or meaning takes a new format tag.
 | `game_trace` | one `trace.run` header per run, then one `trace.command` entry per command (§4) | `loka play`, simulator (R5); local authority (R6) | dev and CI: `tmp/obs/game_trace/<run_id>.jsonl` (git-ignored); phone: the app sandbox, placement decided by R6 | dev: until deleted; CI: kept as a workflow artifact when the run fails; phone: bounded, cap decided by R6; certification keeps reproducible traces longer (11 §15, R9) | never (11 §11) |
 | `diagnostics` | things to fix: `content.diagnostic` (08 §6), `simulation.invariant_failed` (09 §2) | the TypeScript loader via `loka play` (R5 S1); `mix loka.compile` from the slice that first stores its diagnostics; simulator | `tmp/obs/diagnostics/` | as game_trace in CI | no |
 | `operations` | host-dependent measures: `kernel.decision_latency` (11 §13) | `loka play`, simulator (Node); local authority (Hermes) | `tmp/obs/operations/`; phone: the app sandbox | dev: until deleted; R6P timing evidence is captured under the [evidence lessons](../lessons/evidence.md) | no |
-| `dev_evidence` | `agent.work`: model, tokens and pull-request disposition per agent per pull request | the PM, when a pull request merges or closes: one record per agent (role and instance), summing its rounds | committed, `docs/dev-evidence.jsonl`, appended by the PM ([owner decision](owner-decisions-adr-075-2026-09-25.md), item 2) | kept (it feeds the roadmap re-estimates) | not applicable (in the repository) |
+| `dev_evidence` | `agent.work`: model, tokens and pull-request disposition per agent per pull request | the PM, when a pull request merges or closes: one record per agent (role and instance), summing its rounds; a sum that includes an unknown round is `unknown` | committed, `docs/dev-evidence.jsonl`, appended by the PM ([owner decision](owner-decisions-adr-075-2026-09-25.md), item 2) | kept (it feeds the roadmap re-estimates) | not applicable (in the repository) |
 
 Stores are separate because their rules differ: a game trace must be host-independent and
 stay on the phone; operations are host-dependent by nature; dev evidence is about the
@@ -85,7 +85,7 @@ appear only inside game-trace command and event payloads, which stay on the devi
 `kernel_version` (protocol/ is in the same commit); cartridge id/version/hash →
 `content_hash` (one hash names one release, 05 §12); RNG algorithm/state/seed → `seed` (the
 algorithm is fixed by the kernel version); initial snapshot → `trace.run`
-`initial_state` (fresh, or unavailable until R6 gives snapshots an identity); fault
+`initial_state` (fresh, or unavailable, not_collected, until R6 gives snapshots an identity); fault
 schedule → `trace.run` `fault_schedule`; ordered command stream → the full Commands of the
 run's `trace.command` entries by `ordinal`; expected and observed invariant →
 `simulation.invariant_failed`. The logical clock follows from the initial state and the
@@ -101,8 +101,13 @@ schedule), then one `trace.command` entry per command (`TraceEntry`, 11 §15; 09
 accepted (typed outcome, state delta digest, RNG draws, the returned RNG state), rejected
 (its GameError) or fault (its ErrorCode and bound target, 04 §5.5); and the commit outcome.
 Required relationship: every entry of a run shares the header's `run_id`, `content_hash`,
-`kernel_version` and `seed`; the header precedes the entries; ordinals are consecutive from
-1. Header plus the Commands by ordinal are the complete replay input.
+`kernel_version` and `seed`; the header precedes the entries. **Ordinals** run 1, 2, 3 with
+no gaps, and each is unique in its run with one exception: after an `unknown` commit,
+exactly one follow-up entry repeats that ordinal with an identical command and decision and
+carries the resolved commit outcome (03 §15); the first entry stays as written. A retry (a
+new decision for the same `command_id` after a confirmed non-commit) takes the next
+ordinal. The schema cannot relate records, so each producer's tests check these rules (§7).
+Header plus the Commands by ordinal are the complete replay input.
 
 | Decision | Possible commit outcomes |
 |---|---|
@@ -115,9 +120,7 @@ The schema subset cannot relate two fields, so each producer's tests check this 
 A failed commit's cause is `injected` (by the run's fault schedule) or `storage_error`; an
 unknown one's is `injected` or `no_outcome` (crash, kill, lost acknowledgement). Host detail
 (the store's error) goes to operations, correlated by `run_id` and `command_id`, under a
-name the R6 fault-simulation slice registers (11 §12 `runtime.commit.failed`). An unknown
-commit reconciled later (03 §15) gets a second entry with the same ordinal and the resolved
-outcome; the first stays as written. An explicit advance (04 §5.4) is one command, one
+name the R6 fault-simulation slice registers (11 §12 `runtime.commit.failed`). An explicit advance (04 §5.4) is one command, one
 entry; the jobs it runs appear in its committed events.
 
 - **Derived, never authority.** Nothing reads a trace to decide game state, to repair a

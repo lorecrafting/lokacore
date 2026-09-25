@@ -666,7 +666,7 @@
       ]
     },
     "RunHeader": {
-      "description": "The replay header of one run (09 §2; ADR-075 §4), written once before its first trace.command: with its ids (cartridge, source revision, seed, run) and the ordered commands of the run's trace.command entries, the complete replay input. initial_state: fresh (the cartridge's initial state) or unavailable (a start from a snapshot, whose identity arrives with R6 checkpoints). fault_schedule: the SHA-256 of the canonical fault schedule R6 fault simulation defines, or unavailable (not_applicable) when none is injected.",
+      "description": "The replay header of one run (09 §2; ADR-075 §4), written once before its first trace.command: with its ids (cartridge, source revision, seed, run) and the ordered commands of the run's trace.command entries, the complete replay input. initial_state: fresh (the cartridge's initial state) or unavailable, not_collected (a start from a snapshot, whose identity is not recorded until R6 checkpoints define one). fault_schedule: the SHA-256 of the canonical fault schedule R6 fault simulation defines, or unavailable (not_applicable) when none is injected.",
       "type": "object",
       "properties": {
         "initial_state": {
@@ -755,8 +755,7 @@
         },
         {
           "initial_state": {
-            "state": "unavailable",
-            "reason": "not_collected"
+            "state": "fresh"
           },
           "fault_schedule": {
             "state": "identified",
@@ -1177,13 +1176,13 @@
               4
             ],
             "run_id": "6f6f6f6f-1111-4222-8333-444444444444",
-            "command_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+            "command_id": "f6a7b8c9-d0e1-4f2a-8b3c-5d6e7f8a9b0c",
             "revision": 19
           },
           "data": {
             "ordinal": 2,
             "command": {
-              "id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+              "id": "f6a7b8c9-d0e1-4f2a-8b3c-5d6e7f8a9b0c",
               "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
               "payload": {
                 "type": "move",
