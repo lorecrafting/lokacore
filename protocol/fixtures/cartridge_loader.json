@@ -1,0 +1,1983 @@
+{
+  "description": "Invalid-artifact corpus for the cartridge loader (protocol/cartridge.schema.json DiagnosticCode: stage order, paths and data; 05 §11, §20; CAR-05, CAR-07). Each case is an artifact file as text (its UTF-8 bytes are the input), the installed kernel/app, and the one expected diagnostic, hand-written from the DiagnosticCode text; break names the bug the case catches. Artifacts derive from cartridge_hash.json value; each canonical text and content_hash was produced by Python json.dumps(sort_keys=True, separators=(\",\", \":\"), ensure_ascii=False) and hashlib.sha256 over its UTF-8 bytes, never by the kernels. Over-cap and non-UTF-8 inputs are bytes, not text, and live in the test.",
+  "cases": [
+    {
+      "name": "not_decodable",
+      "break": "the decoder accepts truncated JSON",
+      "artifact": "{\"content_hash\":\"0000000000000000000000000000000000000000000000000000000000000000\"",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "INVALID_JSON",
+        "path": "",
+        "message_key": "diagnostics.invalid_json",
+        "data": {},
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "duplicate_key",
+      "break": "the decoder keeps one of two equal keys",
+      "artifact": "{\"content_hash\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"content_hash\":\"fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2\",\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"ashmere_hello@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}}}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "INVALID_JSON",
+        "path": "",
+        "message_key": "diagnostics.invalid_json",
+        "data": {},
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "unknown_format",
+      "break": "the format tag is not checked",
+      "artifact": "{\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"ashmere_hello@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"3ed65cdad24ee1968949124596104f140d37a6f1d35117c2593935f392bd534a\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "UNKNOWN_FORMAT",
+        "path": ".cartridge.format",
+        "message_key": "diagnostics.unknown_format",
+        "data": {},
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "no_cartridge",
+      "break": "a document without cartridge reaches the schema stage",
+      "artifact": "[]",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "UNKNOWN_FORMAT",
+        "path": ".cartridge.format",
+        "message_key": "diagnostics.unknown_format",
+        "data": {},
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "unknown_field",
+      "break": "unknown_property maps to SCHEMA_VIOLATION or loses its path",
+      "artifact": "{\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"ashmere_hello@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"extra\":1,\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"c212095faf32efaa326291ce4c6eb5c8d50492f065db78ab39e825a2f9a6f342\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "UNKNOWN_FIELD",
+        "path": ".cartridge.manifest.extra",
+        "message_key": "diagnostics.unknown_field",
+        "data": {},
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "schema_violation",
+      "break": "a member path with non-name characters is not bracket-quoted",
+      "artifact": "{\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":\"high\",\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"ashmere_hello@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"f825c5db047db5bf8a8fec0dd33df242e59ec5cc2a46f4a0cc759f3c50facb9b\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "SCHEMA_VIOLATION",
+        "path": ".cartridge.actions[\"ashmere_hello@0.0.1:action/talk\"].priority",
+        "message_key": "diagnostics.schema_violation",
+        "data": {
+          "error": "invalid_type"
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "schema_violation_index",
+      "break": "an array index is written as a member step",
+      "artifact": "{\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"ashmere_hello@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_privat\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"a4ab3d95695ac4ec1c11bc6e1fc25a049e8bb93dbb5589f48f6c669bbf8de77d\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "SCHEMA_VIOLATION",
+        "path": ".cartridge.manifest.supported_profiles[0]",
+        "message_key": "diagnostics.schema_violation",
+        "data": {
+          "error": "not_in_enum"
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "kind_mismatch",
+      "break": "a fact keyed as a policy is accepted",
+      "artifact": "{\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"75e7c71c77091385a2f3e5c8f4abd1fb29783689db5197011351875d200fe82a\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "SCHEMA_VIOLATION",
+        "path": ".cartridge.facts[\"ashmere_hello@0.0.1:policy/village_arrived\"]",
+        "message_key": "diagnostics.schema_violation",
+        "data": {
+          "error": "pattern_mismatch"
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "hash_mismatch",
+      "break": "content_hash is not recomputed, or is computed over other bytes",
+      "artifact": "{\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"ashmere_hello@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"0000000000000000000000000000000000000000000000000000000000000000\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "CONTENT_HASH_MISMATCH",
+        "path": ".content_hash",
+        "message_key": "diagnostics.content_hash_mismatch",
+        "data": {
+          "declared": "0000000000000000000000000000000000000000000000000000000000000000",
+          "computed": "fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2"
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "key_cartridge_id",
+      "break": "a map key naming another cartridge is accepted",
+      "artifact": "{\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"other@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"0b66e51440d9151fce5c1173233c26dbafdaa7b484eaa84bbda5a4dca192a7bd\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "ARTIFACT_DEFINITION_KEY_MISMATCH",
+        "path": ".cartridge.facts[\"other@0.0.1:fact/village_arrived\"]",
+        "message_key": "diagnostics.artifact_definition_key_mismatch",
+        "data": {
+          "field": "cartridge_id",
+          "declared": "other",
+          "expected": "ashmere_hello"
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "key_cartridge_version",
+      "break": "a map key naming another release is accepted",
+      "artifact": "{\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"ashmere_hello@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.2:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"57ca990524752e14472179551b1107dcdf0dfe090d5a2ffdc1b2aa2423327cf8\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "ARTIFACT_DEFINITION_KEY_MISMATCH",
+        "path": ".cartridge.policies[\"ashmere_hello@0.0.2:policy/village_arrived\"]",
+        "message_key": "diagnostics.artifact_definition_key_mismatch",
+        "data": {
+          "field": "cartridge_version",
+          "declared": "0.0.2",
+          "expected": "0.0.1"
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "key_key",
+      "break": "a map key differing from the definition key is accepted",
+      "artifact": "{\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/speak\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"ashmere_hello@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"b64c99670063518de8b84ae43ef1c932385cb3048aac04ea6e2cc100b29fa1eb\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "ARTIFACT_DEFINITION_KEY_MISMATCH",
+        "path": ".cartridge.actions[\"ashmere_hello@0.0.1:action/speak\"]",
+        "message_key": "diagnostics.artifact_definition_key_mismatch",
+        "data": {
+          "field": "key",
+          "declared": "speak",
+          "expected": "talk"
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "lock_missing_required",
+      "break": "Astra R4-02: a capability required but absent from the lock loads",
+      "artifact": "{\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"ashmere_hello@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"e84c78658b2ba1ebd24b14474f77e3b6653487a091bd08ddb733a0f7d5337a2e\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "LOCK_MANIFEST_MISMATCH",
+        "path": ".cartridge.lock.capabilities.schedule",
+        "message_key": "diagnostics.lock_manifest_mismatch",
+        "data": {
+          "capability": "schedule",
+          "required": 1
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "lock_extra",
+      "break": "a lock entry the manifest does not require is accepted",
+      "artifact": "{\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"ashmere_hello@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"tide\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"954db169cf609f147cfdfe6dccc323ed328295f3e62846935a31f421dcf64423\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "LOCK_MANIFEST_MISMATCH",
+        "path": ".cartridge.lock.capabilities.tide",
+        "message_key": "diagnostics.lock_manifest_mismatch",
+        "data": {
+          "capability": "tide",
+          "locked": 1
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "command_owner_absent",
+      "break": "an action whose command owner is in neither lock nor manifest loads (CAR-07)",
+      "artifact": "{\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"ashmere_hello@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"9e96e52d5193b56b0ced64f803a71b750d0d1738640abb7c1a9c8b040704987c\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "UNDECLARED_CAPABILITY",
+        "path": ".cartridge.actions[\"ashmere_hello@0.0.1:action/talk\"].command",
+        "message_key": "diagnostics.undeclared_capability",
+        "data": {
+          "capability": "dialogue"
+        },
+        "suggested_capabilities": [
+          "dialogue@1"
+        ]
+      }
+    },
+    {
+      "name": "unknown_command",
+      "break": "an action whose command no capability owns loads (CAR-07)",
+      "artifact": "{\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"fly\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"ashmere_hello@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"eccbfdd6cbbf97a65a78ac6e106b8f924e14b2ecf2c45aa49ddbdbacf3f35c3f\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "UNKNOWN_COMMAND",
+        "path": ".cartridge.actions[\"ashmere_hello@0.0.1:action/talk\"].command",
+        "message_key": "diagnostics.unknown_command",
+        "data": {},
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "policy_op_owner_absent",
+      "break": "a nested policy op is not walked",
+      "artifact": "{\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"ashmere_hello@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"item\":{\"items\":[{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}],\"op\":\"all\"},\"op\":\"not\"}}}},\"content_hash\":\"49eb8c4d8e5f72eb73ddd5f8adbdf3798d509bff840f1479931d7387ff6d0772\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "UNDECLARED_CAPABILITY",
+        "path": ".cartridge.policies[\"ashmere_hello@0.0.1:policy/village_arrived\"].root.item.items[0].op",
+        "message_key": "diagnostics.undeclared_capability",
+        "data": {
+          "capability": "fact"
+        },
+        "suggested_capabilities": [
+          "fact@1"
+        ]
+      }
+    },
+    {
+      "name": "stage_list_order",
+      "break": "a stage reports its first-found diagnostic instead of the first in list order",
+      "artifact": "{\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"ashmere_hello@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"296fc5c1bbbed75b302bd211927f45ba1a8d227fe6cc3a1188eb96cfd5d1a08c\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "UNDECLARED_CAPABILITY",
+        "path": ".cartridge.actions[\"ashmere_hello@0.0.1:action/talk\"].command",
+        "message_key": "diagnostics.undeclared_capability",
+        "data": {
+          "capability": "dialogue"
+        },
+        "suggested_capabilities": [
+          "dialogue@1"
+        ]
+      }
+    },
+    {
+      "name": "capability_not_installed",
+      "break": "a locked capability the kernel lacks is accepted",
+      "artifact": "{\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"ashmere_hello@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "CAPABILITY_NOT_INSTALLED",
+        "path": ".cartridge.lock.capabilities.schedule",
+        "message_key": "diagnostics.capability_not_installed",
+        "data": {
+          "capability": "schedule@1"
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "capability_version_not_installed",
+      "break": "only the key is checked, not the version",
+      "artifact": "{\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"ashmere_hello@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            2
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "CAPABILITY_NOT_INSTALLED",
+        "path": ".cartridge.lock.capabilities.schedule",
+        "message_key": "diagnostics.capability_not_installed",
+        "data": {
+          "capability": "schedule@1"
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "kernel_api_at_below",
+      "break": "below is treated as inclusive",
+      "artifact": "{\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"ashmere_hello@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2\"}",
+      "installed": {
+        "kernel_api": "2.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "KERNEL_API_UNSUPPORTED",
+        "path": ".cartridge.manifest.requires.kernel_api",
+        "message_key": "diagnostics.kernel_api_unsupported",
+        "data": {
+          "installed": "2.0"
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "kernel_api_under",
+      "break": "at_least is not checked",
+      "artifact": "{\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"ashmere_hello@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2\"}",
+      "installed": {
+        "kernel_api": "0.9",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "KERNEL_API_UNSUPPORTED",
+        "path": ".cartridge.manifest.requires.kernel_api",
+        "message_key": "diagnostics.kernel_api_unsupported",
+        "data": {
+          "installed": "0.9"
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "kernel_api_numeric",
+      "break": "versions compare as text (10.0 before 2.0)",
+      "artifact": "{\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"ashmere_hello@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2\"}",
+      "installed": {
+        "kernel_api": "10.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "KERNEL_API_UNSUPPORTED",
+        "path": ".cartridge.manifest.requires.kernel_api",
+        "message_key": "diagnostics.kernel_api_unsupported",
+        "data": {
+          "installed": "10.0"
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "rule_ir_unsupported",
+      "break": "the rule_ir pin is not re-checked",
+      "artifact": "{\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"ashmere_hello@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 2,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "PINNED_VERSION_UNSUPPORTED",
+        "path": ".cartridge.manifest.requires.rule_ir",
+        "message_key": "diagnostics.pinned_version_unsupported",
+        "data": {
+          "field": "rule_ir",
+          "declared": 1,
+          "supported": 2
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "content_schema_unsupported",
+      "break": "the content_schema pin is not re-checked",
+      "artifact": "{\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"ashmere_hello@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 2,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "PINNED_VERSION_UNSUPPORTED",
+        "path": ".cartridge.manifest.requires.content_schema",
+        "message_key": "diagnostics.pinned_version_unsupported",
+        "data": {
+          "field": "content_schema",
+          "declared": 1,
+          "supported": 2
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "client_feature_missing",
+      "break": "a required client feature the app lacks is accepted",
+      "artifact": "{\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"ashmere_hello@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[\"zeta_v1\",\"compass_six_v1\"],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"0f49eb7adbaf1609de03038086d7af73cc8531c5055584ed5ca0e18545f33542\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": [
+          "zeta_v1"
+        ]
+      },
+      "expected": {
+        "severity": "error",
+        "code": "CLIENT_FEATURE_UNSUPPORTED",
+        "path": ".cartridge.manifest.requires.client_features[1]",
+        "message_key": "diagnostics.client_feature_unsupported",
+        "data": {
+          "feature": "compass_six_v1"
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "two_faults_schema_hash",
+      "break": "the hash stage runs before the schema stage",
+      "artifact": "{\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"ashmere_hello@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"extra\":1,\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "UNKNOWN_FIELD",
+        "path": ".cartridge.manifest.extra",
+        "message_key": "diagnostics.unknown_field",
+        "data": {},
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "two_faults_hash_keys",
+      "break": "the definition-key stage runs before the hash stage",
+      "artifact": "{\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"other@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "CONTENT_HASH_MISMATCH",
+        "path": ".content_hash",
+        "message_key": "diagnostics.content_hash_mismatch",
+        "data": {
+          "declared": "fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2",
+          "computed": "0b66e51440d9151fce5c1173233c26dbafdaa7b484eaa84bbda5a4dca192a7bd"
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "two_faults_lock_installed",
+      "break": "the installed stage runs before the lock stage",
+      "artifact": "{\"cartridge\":{\"actions\":{\"ashmere_hello@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"ashmere_hello@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_hello\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Hello World\",\"version\":\"0.0.1\"},\"policies\":{\"ashmere_hello@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_hello\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"e84c78658b2ba1ebd24b14474f77e3b6653487a091bd08ddb733a0f7d5337a2e\"}",
+      "installed": {
+        "kernel_api": "2.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "LOCK_MANIFEST_MISMATCH",
+        "path": ".cartridge.lock.capabilities.schedule",
+        "message_key": "diagnostics.lock_manifest_mismatch",
+        "data": {
+          "capability": "schedule",
+          "required": 1
+        },
+        "suggested_capabilities": []
+      }
+    }
+  ]
+}

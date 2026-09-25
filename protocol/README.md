@@ -30,7 +30,7 @@ lists only what a file adds to that.
 | `capability.schema.json`, `capability_registry.json` | capability versions, the lock, residency, owned commands, events and policy ops | 05 §3, §6, §11; 09 §21 | `capability_lock_hash.json` |
 | `residency.json` | 05 §6 rows that are not capabilities | 05 §6 | each row names its own |
 | `manifest.schema.json` | cartridge, deployment, campaign manifests | 05 §3, §20, §22; 07 §15; 01 A5 | |
-| `cartridge.schema.json` | compiled cartridge, artifact file and byte cap, diagnostics | 05 §8, §11, §20; 08 §6; 14 §R4 | `cartridge_hash.json` |
+| `cartridge.schema.json` | compiled cartridge, artifact file and byte cap, diagnostics | 05 §8, §11, §20; 08 §6; 14 §R4 | `cartridge_hash.json`, `cartridge_loader.json` (loader corpus, TypeScript) |
 | `feature.schema.json`, `feature_registry.json` | R3B feature envelopes | 14 §R3B | |
 | **Host, platform, verification** | | | |
 | `account.schema.json` | account/run binding, milestone reports, admission | 23 §2-§7, §11; 03 §25-§27 | |

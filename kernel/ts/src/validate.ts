@@ -28,7 +28,7 @@ const child = (path: string, key: string | number) =>
   `${path}/${String(key).replaceAll('~', '~0').replaceAll('/', '~1')}`;
 const codePoints = (s: string) => [...s].length;
 // Code-point order, which is Elixir's UTF-8 byte order; `<` compares UTF-16 code units.
-function cmp(a: string, b: string): number {
+export function cmp(a: string, b: string): number {
   const [x, y] = [[...a], [...b]];
   for (let i = 0; i < Math.min(x.length, y.length); i++)
     if (x[i] !== y[i]) return x[i].codePointAt(0)! - y[i].codePointAt(0)!;

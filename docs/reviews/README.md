@@ -47,3 +47,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [R4 S1: compiled-cartridge and diagnostic contracts](2026-09-25-r4-s1-review.md): PR #25 at `7015b00`, CHANGES REQUIRED; fixes `695473b`, APPROVE; Astra relay + `870d822`, APPROVE WITH NOTES.
 - [R4 S2: Elixir cartridge compiler (R4 minimal)](2026-09-25-r4-s2-review.md): PR #27 at `cd27dea`, CHANGES REQUIRED; fixes `6c1360c` (head `b87388f`), APPROVE.
 - [Observability design slice plan, Astra scope](2026-09-25-docs-observability-plan-review.md): PR #28 at `ac8d833`, APPROVE WITH NOTES; fixes `0af7b91`, APPROVE.
+- [R4 S3: TypeScript cartridge loader](2026-09-25-r4-s3-review.md): PR #26 at `0bb540b`, APPROVE WITH NOTES; fixes, merge of main and test 4 at `d5a1102`, APPROVE WITH NOTES.
