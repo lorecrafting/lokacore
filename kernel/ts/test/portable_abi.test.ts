@@ -1,5 +1,5 @@
-// Frozen fixtures from docs/spec/IMPORT.md, read in place and parsed with JSON.parse so
-// expected values never pass through the code under test.
+// The portable foundation (canonical, int, rng, id_source): first the frozen fixtures from
+// docs/spec/IMPORT.md, read in place and hash-checked, then hand-checked edge cases.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
@@ -8,6 +8,7 @@ import { decode, encode, hash } from '../src/canonical.ts';
 import { add, divide, mul, sub } from '../src/int.ts';
 import { commandId, id } from '../src/id_source.ts';
 import { next, uniform } from '../src/rng.ts';
+import { read } from './read.ts';
 
 function fixture(name: string, sha: string) {
   const bytes = readFileSync(new URL(`../../../docs/spec/conformance/${name}`, import.meta.url));
@@ -57,12 +58,6 @@ test('adverse-cases: uniform', () => {
     if (row.error) assert.throws(run, code(row.error), JSON.stringify(row));
     else assert.deepEqual(run(), [row.value, row.next_state], JSON.stringify(row));
   }
-});
-
-// Catches an off-by-one that rejects the top bound 2^32, where every draw is accepted:
-// the answer is the first raw draw and state of numeric-vectors rng_steps.
-test('uniform accepts bound 2^32', () => {
-  assert.deepEqual(uniform([1, 2, 3, 4], 4294967296, 1), [11520, [7, 0, 1026, 12288]]);
 });
 
 // Catches missing strictness the fixtures do not reach: lowercase surrogate-pair escapes,
@@ -162,24 +157,6 @@ test('checked integers overflow as a typed error', () => {
   assert.deepEqual(divide(0, -3), [0, 0]); // not -0: the profile has no negative zero
 });
 
-// Catches the kernels diverging at the contract edge: a bad budget must be the typed error
-// Elixir returns, not a silent 'rng_budget_exhausted' (NaN or negative skips the loop).
-test('uniform rejects a bad draw budget', () => {
-  for (const budget of [-1, 1.5, NaN, true]) {
-    assert.throws(
-      () => uniform([1, 2, 3, 4], 10, budget as never),
-      code('invalid_rng_budget'),
-      String(budget),
-    );
-  }
-});
-
-// Catches a non-string id being hashed into an id Elixir can never produce.
-test('IdSource rejects non-string ids', () => {
-  assert.throws(() => id(1 as never, 'c-1', 0), code('invalid_id'));
-  assert.throws(() => id('w-1', null as never, 0), code('invalid_id'));
-});
-
 // Catches operands that are not safe integers slipping through, or the zero-divisor check
 // running first (Elixir checks operands first, so both kernels must).
 test('unsafe operands are integer_overflow', () => {
@@ -199,10 +176,21 @@ test('unsafe operands are integer_overflow', () => {
   assert.throws(() => divide(1.5, 0), code('integer_overflow'));
 });
 
-// Catches an unsafe ordinal being hashed instead of the typed error Elixir returns.
-test('IdSource rejects a bad ordinal', () => {
-  for (const ordinal of [-1, 9007199254740992, 1.5, NaN]) {
-    assert.throws(() => id('w-1', 'c-1', ordinal), code('invalid_ordinal'), String(ordinal));
+// Catches an off-by-one that rejects the top bound 2^32, where every draw is accepted:
+// the answer is the first raw draw and state of numeric-vectors rng_steps.
+test('uniform accepts bound 2^32', () => {
+  assert.deepEqual(uniform([1, 2, 3, 4], 4294967296, 1), [11520, [7, 0, 1026, 12288]]);
+});
+
+// Catches the kernels diverging at the contract edge: a bad budget must be the typed error
+// Elixir returns, not a silent 'rng_budget_exhausted' (NaN or negative skips the loop).
+test('uniform rejects a bad draw budget', () => {
+  for (const budget of [-1, 1.5, NaN, true]) {
+    assert.throws(
+      () => uniform([1, 2, 3, 4], 10, budget as never),
+      code('invalid_rng_budget'),
+      String(budget),
+    );
   }
 });
 
@@ -214,13 +202,23 @@ test('IdSource ids', () => {
   assert.equal(id('世界', 'c"1', 9007199254740991), '1711b795-4ff1-81d8-a547-80b2011ee4d1');
 });
 
+// Catches a non-string id being hashed into an id Elixir can never produce.
+test('IdSource rejects non-string ids', () => {
+  assert.throws(() => id(1 as never, 'c-1', 0), code('invalid_id'));
+  assert.throws(() => id('w-1', null as never, 0), code('invalid_id'));
+});
+
+// Catches an unsafe ordinal being hashed instead of the typed error Elixir returns.
+test('IdSource rejects a bad ordinal', () => {
+  for (const ordinal of [-1, 9007199254740992, 1.5, NaN]) {
+    assert.throws(() => id('w-1', 'c-1', ordinal), code('invalid_ordinal'), String(ordinal));
+  }
+});
+
 // Catches a wrong domain tag, swapped arguments or any other input entering the hash. Same
 // fixture file as the Elixir suite; expected ids computed with Python and checked with shasum.
 test('CommandId known answers', () => {
-  const cases = JSON.parse(
-    readFileSync(new URL('../../../protocol/fixtures/command_id.json', import.meta.url), 'utf8'),
-  );
-  for (const c of cases)
+  for (const c of read('protocol/fixtures/command_id.json'))
     assert.equal(commandId(c.idempotency_scope_id, c.invocation_id), c.command_id, c.command_id);
 });
 
