@@ -121,3 +121,26 @@ not block.
 
 No redesign of the UI; the direction is the owner's call. No new links, fixtures or checks
 beyond the two one-line edits above.
+
+## Re-review: fix round 1 at `9cc66f6`
+
+Scope: the fix commit only (`docs/design/room-view/README.md`, `docs/reference/README.md`)
+and its direct callers (the reference index link, which is unchanged).
+
+- **F1 verified.** The `must` row is gone; "`up`/`down` exits (ExitView directions are
+  keys, with the same reasons)" joins the "already covers" sentence; the "Must" definition
+  is replaced by "None of the gaps below blocks the Lantern loop by touch", which matches
+  the proof map; the header reads "Need (nice to have)" and rows 1-11 are the old rows
+  2-12 in order, with no other text referencing the old numbers.
+- **F2 verified.** "This table supersedes the numbered notes panels inside the HTML pages,
+  which are the first-pass drafts." No HTML edit, as asked.
+- **N1 verified.** `docs/reference/README.md:4` now scopes "not copied here" to "The legacy
+  studies below"; the design bullet at line 19 no longer contradicts it.
+- **N2 verified.** New "Departures from 00 §4.10" section names the three departures
+  (joystick for the compass ring, pages for action sheets, position and current/max
+  resources new) and says adopting them needs a spec amendment. Informative stance intact.
+- **N3 verified.** Row 4 now says the player-facing `message` already tells a door from a
+  barred way and asks only for the typed distinction.
+- `mise exec -- elixir bin/check_docs.exs` at `9cc66f6`: 75 docs, 0 broken, 0 unreachable.
+
+**Verdict: APPROVE.** Nothing open.

@@ -72,4 +72,5 @@ Each record is written by a fresh agent that authored none of the reviewed work 
 - [2026-09-24 room view prototype](2026-09-24-room-view-prototype-review.md): PR #17 at
   `ba5e572`, APPROVE WITH NOTES (docs-only design record, short review; schema cells
   verified against `4e8f40b`; two one-line should-fix: the lone "must" row is neither a
-  must nor a gap, and the needs list lives in three places; three nits).
+  must nor a gap, and the needs list lives in three places; three nits); re-review of
+  the fixes at `9cc66f6`, APPROVE (all five dispositions verified).
