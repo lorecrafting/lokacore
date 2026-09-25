@@ -13,4 +13,4 @@ decisions retained verbatim.
   [PREP-03](owner-decision-prep-03-2026-09-24.md), [reviewers](owner-decision-reviewers-2026-09-24.md),
   [other 2026-09-24 quotes](owner-decisions-2026-09-24.md), [R2](owner-decision-r2-2026-09-24.md),
   [R3 plan and verification harness](owner-decision-roadmap-2026-09-24.md),
-  [R3](owner-decisions-r3-2026-09-24.md).
+  [R3](owner-decisions-r3-2026-09-24.md), [R3 lanes, CommandId, auto-merge](owner-decisions-r3-lanes-2026-09-24.md).
