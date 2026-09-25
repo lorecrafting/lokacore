@@ -38,3 +38,4 @@ holds the owner's decisions retained verbatim.
 ## R4
 
 - Owner decisions: [R4 minimal: JSON source, 4 MiB artifact cap, hello fixture's frozen subset](owner-decisions-r4-2026-09-25.md).
+- [Observability design slice before R5; Astra scope delegated to the PM](owner-decisions-observability-astra-2026-09-25.md).
