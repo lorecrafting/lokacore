@@ -115,5 +115,14 @@
     },
     "statement": "Reusing an idempotency identity with a different semantic payload fails as an integrity conflict, with no mutation.",
     "implemented_in": "r6"
+  },
+  {
+    "id": "job_complete_owned_by_run",
+    "citation": {
+      "document": "04-command-event-effect-protocol.md",
+      "heading": "### 5.4 Bounded causality and durable waiting"
+    },
+    "statement": "job.complete is proposed only by that job's own run_job at its visited due time (protocol/delta.schema.json job.complete).",
+    "implemented_in": "r5"
   }
 ]

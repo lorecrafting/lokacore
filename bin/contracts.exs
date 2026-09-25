@@ -1,5 +1,6 @@
 # Generates kernel/ts/src/contracts.gen.ts (TypeScript types plus the flattened schemas) from
-# protocol/*.schema.json (spec 04 §12), and kernel/ts/test/subset.gen.ts from the test-only
+# protocol/*.schema.json (spec 04 §12), plus the evaluation-fault codes of
+# protocol/error_registry.json and the composition-profile limits, and kernel/ts/test/subset.gen.ts from the test-only
 # probe protocol/fixtures/subset.schema.json. `--check` regenerates in memory and exits 1 if
 # a committed file differs. A schema outside the subset fails here as it fails `mix compile`.
 #
@@ -73,9 +74,26 @@ end
 {:ok, probe} =
   Loka.Core.Canonical.decode(File.read!(Path.join(root, "protocol/fixtures/subset.schema.json")))
 
+read = fn rel -> JSON.decode!(File.read!(Path.join(root, rel))) end
+
+faults =
+  for e <- read.("protocol/error_registry.json"),
+      e["category"] == "evaluation_fault",
+      do: e["code"]
+
+limits = read.("docs/spec/conformance/composition-profile.json")["limits"]
+
 targets = %{
   "kernel/ts/src/contracts.gen.ts" =>
-    source.(Loka.Core.Contracts.defs(), "protocol/*.schema.json"),
+    source.(Loka.Core.Contracts.defs(), "protocol/*.schema.json") <>
+      Enum.join(
+        [
+          "export const EVALUATION_FAULTS: readonly ErrorCode[] = #{Gen.lit(faults)};",
+          "export const LIMITS: Readonly<Record<string, number>> = JSON.parse(#{Gen.lit(Gen.lit(limits))});",
+          ""
+        ],
+        "\n"
+      ),
   "kernel/ts/test/subset.gen.ts" =>
     source.(
       Loka.Core.Contracts.Schema.flatten!(%{"subset.schema.json" => probe}),
