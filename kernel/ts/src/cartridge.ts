@@ -159,8 +159,8 @@ function keyStage(c: Obj): Diagnostic[] {
   return out;
 }
 
-// The lock equals requires.capabilities, and every command and policy op a definition uses
-// has its owning capability's key in the lock.
+// The lock equals requires.capabilities, every command is owned, and every command and policy
+// op a definition uses has its owning capability's key in the lock.
 function lockStage(c: Obj): Diagnostic[] {
   const locked: Obj = c.lock.capabilities;
   const required: Obj = c.manifest.requires.capabilities;
@@ -174,8 +174,8 @@ function lockStage(c: Obj): Diagnostic[] {
   }
   const use = (kind: 'command' | 'policy', name: string, path: string) => {
     const owners = CAPABILITY_OWNERS[kind];
-    // ponytail: a command no capability owns passes here (the loader has no code for it); dispatch rejects it (04 §5.3).
-    if (!Object.hasOwn(owners, name)) return;
+    // The schema closes policy ops, so only a command can be unowned.
+    if (!Object.hasOwn(owners, name)) return void out.push(diag('UNKNOWN_COMMAND', path));
     const [owner] = owners[name].split('@');
     if (!Object.hasOwn(locked, owner))
       out.push(diag('UNDECLARED_CAPABILITY', path, { capability: owner }, [owners[name]]));
