@@ -69,3 +69,7 @@ Each record is written by a fresh agent that authored none of the reviewed work 
   adjudicated (A1 not a compose blocker: an R5 coordinator obligation to register; A4 and
   AQ1 accepted; A2, A3, A5 deferred with follow-ups), verdict unchanged; re-review of the
   fixes at `2812a71`, APPROVE (every item verified, six mutants die, differential identical).
+- [2026-09-24 room view prototype](2026-09-24-room-view-prototype-review.md): PR #17 at
+  `ba5e572`, APPROVE WITH NOTES (docs-only design record, short review; schema cells
+  verified against `4e8f40b`; two one-line should-fix: the lone "must" row is neither a
+  must nor a gap, and the needs list lives in three places; three nits).
