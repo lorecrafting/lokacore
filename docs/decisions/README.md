@@ -9,6 +9,8 @@ decisions retained verbatim.
   [the A2 owner decision](owner-decision-a2-2026-09-23.md).
 - [Proposed ADR-073](adr-073-single-app.md): one Mix application with strict boundaries,
   not an umbrella.
+- [Proposed ADR-074](adr-074-ts-first-proposal.md): TypeScript-only story rules until Story
+  runs on a server (awaiting the owner's decision).
 - Owner decisions: [A2](owner-decision-a2-2026-09-23.md), [quick A3](owner-decision-a3-2026-09-24.md),
   [PREP-03](owner-decision-prep-03-2026-09-24.md), [reviewers](owner-decision-reviewers-2026-09-24.md),
   [other 2026-09-24 quotes](owner-decisions-2026-09-24.md), [R2](owner-decision-r2-2026-09-24.md),
