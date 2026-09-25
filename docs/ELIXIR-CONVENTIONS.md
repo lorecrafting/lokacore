@@ -22,8 +22,7 @@ Carried from Foundry's reviewed adaptation
 
 - **Pure kernels.** Domain rules never call Ecto, Repo, Phoenix, PubSub, the filesystem,
   HTTP, the wall clock or process-global randomness (spec document 01). Rules return a
-  proposal; the host commits it (proposed ADR-072).
-- **Structural sharing.** Never rebuild or re-encode the whole state per action.
+  proposal; the host commits it (ADR-072).
 - **All public functions have `@spec`.**
 - **Temporary directories.** Never hardcode `/private/tmp` (macOS only); use
   `System.tmp_dir!()`. Shell out through `/bin/sh`: CI runs on Ubuntu.

@@ -118,8 +118,7 @@ A test exists to catch a specific break. Adapted from
 - Elixir structure (callers, dependencies, cycles): `mix xref callers <Module>`,
   `mix xref graph --format cycles`. The compiler resolves aliases, so these are exact.
 - Syntax patterns in Elixir or TypeScript: `ast-grep --lang elixir -p '<pattern>' --json`
-  (`--lang typescript` for TS). `ast-grep outline` does not parse Elixir; use the Elixir
-  outline script once it exists.
+  (`--lang typescript` for TS). `ast-grep outline` does not parse Elixir.
 - Plain text search only for strings, docs and config.
 
 ## Checks (CI runs all of them; each has a planted case that must fail)
@@ -158,12 +157,14 @@ A test exists to catch a specific break. Adapted from
   out-of-subset schema, an Elixir adapter without a differential, and a PartyId passed
   where a CharacterId is matched (nominal ids, `Loka.Core.Contracts`), and requires each
   check to fail.
-- `elixir bin/check_docs.exs`: links resolve; every doc is reachable; AGENTS.md stays
+- `elixir bin/check_docs.exs`: relative links resolve; every Markdown file is reachable
+  by links from README.md, AGENTS.md or CLAUDE.md; AGENTS.md stays
   within its word budget (it is loaded by every agent, every session).
-- CI: pull requests and pushes to main, superseded runs cancelled. Planned: native mobile
-  builds only when mobile code changes or on manual trigger; the differential (the
-  foundation across both kernels; rules on Node, a Hermes replay sample at R6P: ADR-074) runs at least
-  10,000 fresh sequences on every fast CI run (r1-acceptance-envelope.md §3).
+- CI (`.github/workflows/`): `ci.yml` on pull requests and pushes to main, superseded runs
+  cancelled; `mobile.yml` builds the native apps when `mobile/` or `kernel/` changes, or on
+  manual trigger. Planned: the differential (the foundation across both kernels; rules on
+  Node, a Hermes replay sample at R6P: ADR-074) runs at least 10,000 fresh sequences on
+  every fast CI run (r1-acceptance-envelope.md §3).
 
 Run everything locally: `bin/check_all.sh` (what pre-push runs).
 
@@ -174,11 +175,10 @@ Run everything locally: `bin/check_all.sh` (what pre-push runs).
 - Toolchain: pinned in `mise.toml`; run `mise exec -- <cmd>`.
 - After cloning, run `git config core.hooksPath .githooks`; `--no-verify` only with the owner's OK; fix the cause instead.
 - Merge record-bearing PRs with merge commits, never squash.
-- Reviews are independent ([records](docs/reviews/README.md)): a fresh agent that authored none of the work (owner ruling:
-  fresh Fable, Opus or other-vendor agents such as Codex qualify, [ruling](docs/decisions/owner-decision-reviewers-2026-09-24.md); prefer Fable for design-judgment reviews, as defined in [the workflow](docs/WORKFLOW.md)).
+- Reviews are independent ([records](docs/reviews/README.md)): a fresh agent that authored
+  none of the work ([owner ruling](docs/decisions/owner-decision-reviewers-2026-09-24.md));
+  who reviews what: [the workflow](docs/WORKFLOW.md).
 - Each fact lives in one place; other docs link to it rather than restate it.
-- Every Markdown file must be reachable by links from README.md, AGENTS.md or CLAUDE.md,
-  and every relative link must resolve: `elixir bin/check_docs.exs`.
 - Readiness probes that exit 1 by design are expected; don't "fix" them.
 - The owner wants nothing paid (no EAS); headless work runs on GitHub Actions, iPhone
   and UI work on the owner's M1.

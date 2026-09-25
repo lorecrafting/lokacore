@@ -1,6 +1,6 @@
 # Mobile lessons
 
-Hard-won lessons for `mobile/` and physical-device runs, moved verbatim from AGENTS.md.
+Hard-won lessons for `mobile/` and physical-device runs.
 
 **expo-sqlite and React Native**
 - expo-sqlite 57.0.3 on Android: opening the same database file twice gives both JS

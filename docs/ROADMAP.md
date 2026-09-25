@@ -14,7 +14,7 @@ answer); around them, an automated harness every change must pass; review is a f
 filter on top. Adapted from Datadog's
 [harness-first write-up](https://www.datadoghq.com/blog/ai/harness-first-agents/).
 
-- **Invariants are registered data (R3 PR 3/5).** Each spec invariant (for example one
+- **Invariants are registered data** ([protocol/invariants.json](../protocol/invariants.json), since R3). Each spec invariant (for example one
   container per item, 03 §23; no proposed event escapes a failed commit, 04 §5.1; a retry
   replays its receipt and never rerolls, 03 §14) gets a stable ID, its spec citation and a
   pure check (foundation invariants in both kernels; rule invariants in TypeScript,
@@ -37,7 +37,7 @@ filter on top. Adapted from Datadog's
 
 | Stage | Slices | Content |
 |---|---|---|
-| R3 | 8 | Every item of [14 §R3A/§R3B and Gate R3](spec/14-implementation-plan.md#r3--contractschema-foundation) is the checklist. Done: PR 1 portable ABI (#4); PR 2 schema toolchain + identity/scope/error contracts (#9); PR 3 action/command/delta/event/effect/result, policy AST, TargetResolution + invariant registry (#13); PR 4a capability registry/lock, manifests (#12); PR 4b facts, relations/provenance, GameView, account/progress envelopes (#14); PR 5 StateDelta composition in both kernels + invariant checks (#15); PR 6a R3B envelopes (#11); PR 6b gate review, docs tidy pass, generated capability docs and residency matrix (#16) |
+| R3 | 8 | Done; [Gate R3](reviews/2026-09-24-r3-gate-review.md) passed with noted gaps against [14 §R3A/§R3B](spec/14-implementation-plan.md#r3--contractschema-foundation). PR 1 portable ABI (#4); PR 2 schema toolchain + identity/scope/error contracts (#9); PR 3 action/command/delta/event/effect/result, policy AST, TargetResolution + invariant registry (#13); PR 4a capability registry/lock, manifests (#12); PR 4b facts, relations/provenance, GameView, account/progress envelopes (#14); PR 5 StateDelta composition in both kernels + invariant checks (#15); PR 6a R3B envelopes (#11); PR 6b gate review, docs tidy pass, generated capability docs and residency matrix (#16) |
 | R4 minimal | 3 | loader, validation, reference resolution, capability lock, canonical artifact hash, diagnostics |
 | R5 subset | 7 + 1 | world rules the Lantern needs, in TypeScript (ADR-074); plus the deterministic simulation slice |
 | R6 | 5 + 1 | the [14 §R6](spec/14-implementation-plan.md#r6--offline-authority-and-save-system) build list as R6P needs it (including the fake synchronization adapter); plus fault simulation |
