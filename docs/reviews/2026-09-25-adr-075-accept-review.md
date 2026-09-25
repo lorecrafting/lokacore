@@ -80,3 +80,24 @@ No blocker. One should-fix (document 16 summary omissions), three nits.
    "proposed ADR-075". A reader of 11 may take those amendments as pending. Precedent left
    "proposed ADR-073" at `14-implementation-plan.md:245`, so optional; if changed, change
    all six.
+
+## Fix round 1: `7311cf3`, APPROVE
+
+Scoped to findings 1-4; `git diff 17da406 7311cf3` touches only documents 09, 11 and 16.
+
+1. **Resolved.** `16-decision-register.md:904` now states that replay reads only the
+   `trace.run` header and the Commands in ordinal order, never a recorded decision or commit
+   outcome (ADR §4), and that each producer's CI validation includes a planted schema-valid
+   leak (home path, device serial) its redaction must strip or reject (ADR §6).
+2. **Resolved.** A build from uncommitted changes reports `<commit>-dirty` and is never an
+   exact repro key (ADR §3; the ADR's full form is `<KERNEL_ID>@<commit>-dirty`, which the
+   summary abbreviates without changing the meaning).
+3. **Resolved.** Unknown (never 0) and unavailable (carries its cause, never empty or
+   absent) are stated separately and applied to measures, the commit outcome, RNG draws
+   and the run header, as ADR §5 does.
+4. **Resolved.** No "proposed ADR-075" remains in `docs/spec`; the six amendment links
+   (09:199; 11:256, 278, 319, 337, 356) still point at `adr-075-observability-proposal.md`.
+
+The summary is still one paragraph and still accurate against the ADR, with nothing
+overstated. `mix run bin/check_docs.exs`: 105 docs, 0 broken links, 0 unreachable. No
+review, decision or ledger file changed.

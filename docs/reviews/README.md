@@ -50,4 +50,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [R4 S3: TypeScript cartridge loader](2026-09-25-r4-s3-review.md): PR #26 at `0bb540b`, APPROVE WITH NOTES; fixes, merge of main and test 4 at `d5a1102`, APPROVE WITH NOTES.
 - [Observability design: ADR-075 and observation contracts](2026-09-25-observability-design-review.md): PR #29 at `fd0ab9f`, APPROVE WITH NOTES; Astra relay; fixes `59b55e2` (head `e2847af`), APPROVE WITH NOTES; final `dc44543`, APPROVE.
 - [CI: native mobile builds only on native inputs](2026-09-25-ci-mobile-split-review.md): PR #30 at `2f34de8`, APPROVE WITH NOTES.
-- [ADR-075 accepted; first dev-evidence entries](2026-09-25-adr-075-accept-review.md): PR #33 at `544b263`, APPROVE WITH NOTES.
+- [ADR-075 accepted; first dev-evidence entries](2026-09-25-adr-075-accept-review.md): PR #33 at `544b263`, APPROVE WITH NOTES; fixes `7311cf3`, APPROVE.
