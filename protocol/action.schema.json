@@ -1,0 +1,351 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Action contracts",
+  "description": "Action definitions, ActionInvocation, TargetSpec and TargetResolution (04 §1, §2, §18, §19; 06 §20; 21 §7).",
+  "$defs": {
+    "Key": {
+      "description": "A stable semantic key: lowercase snake_case of at most 64 characters, the DefinitionRef segment rule (03 §2). Used for action keys, directions, choices, outcomes and key-valued facts.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "maxLength": 64,
+      "examples": [
+        "talk",
+        "k",
+        "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk"
+      ]
+    },
+    "ActionInput": {
+      "description": "The validated input of an ActionInvocation (04 §1). Closed: each field is a registered input parameter, and the ActionDefinition's `input` lists which ones the action requires (06 §20). The parameters are those the R6P proof uses (pre-release-proof.md).",
+      "type": "object",
+      "properties": {
+        "direction": {
+          "$ref": "#/$defs/Key"
+        },
+        "choice_id": {
+          "$ref": "#/$defs/Key"
+        },
+        "continuation_id": {
+          "$ref": "delta.schema.json#/$defs/ContinuationId"
+        },
+        "until": {
+          "$ref": "command.schema.json#/$defs/LogicalTime"
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "examples": [
+        {},
+        {
+          "direction": "north"
+        },
+        {
+          "choice_id": "carry",
+          "continuation_id": "44444444-5555-8666-8777-888888888888"
+        },
+        {
+          "until": 0
+        }
+      ]
+    },
+    "ActionInvocation": {
+      "description": "A host-neutral gameplay intent from an advertised GameView action; not yet an authoritative Command (04 §1, §2). invocation_id is the stable retry identity (03 §14). target_ids is ordered and its order is semantic (03 §14, invocation-intent digest). view_freshness_token is opaque admission metadata, not intent (04 §16). The 8-target and 128-character caps are admission limits of this contract version (not spec numbers); changing them is a contract version change.",
+      "type": "object",
+      "properties": {
+        "invocation_id": {
+          "$ref": "identity.schema.json#/$defs/InvocationId"
+        },
+        "action_key": {
+          "$ref": "#/$defs/Key"
+        },
+        "actor_id": {
+          "$ref": "identity.schema.json#/$defs/CharacterId"
+        },
+        "target_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "identity.schema.json#/$defs/EntityId"
+          },
+          "minItems": 0,
+          "maxItems": 8
+        },
+        "input": {
+          "$ref": "#/$defs/ActionInput"
+        },
+        "view_freshness_token": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "invocation_id",
+        "action_key",
+        "actor_id",
+        "target_ids",
+        "input"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "invocation_id": "f6a7b8c9-d0e1-4f2a-8b3c-5d6e7f8a9b0c",
+          "action_key": "move",
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "target_ids": [],
+          "input": {
+            "direction": "north"
+          }
+        },
+        {
+          "invocation_id": "f6a7b8c9-d0e1-4f2a-8b3c-5d6e7f8a9b0c",
+          "action_key": "talk",
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "target_ids": [
+            "11111111-2222-4333-8444-555555555555"
+          ],
+          "input": {},
+          "view_freshness_token": "v"
+        },
+        {
+          "invocation_id": "f6a7b8c9-d0e1-4f2a-8b3c-5d6e7f8a9b0c",
+          "action_key": "give",
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "target_ids": [
+            "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+            "11111111-2222-4333-8444-555555555555",
+            "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+            "11111111-2222-4333-8444-555555555555",
+            "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+            "11111111-2222-4333-8444-555555555555",
+            "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+            "11111111-2222-4333-8444-555555555555"
+          ],
+          "input": {},
+          "view_freshness_token": "tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt"
+        }
+      ]
+    },
+    "TargetSpec": {
+      "description": "The candidate scopes an action's target is resolved from (21 §7): the scopes the R6P proof resolves to an EntityId. equipped, connections, inspectable_details, party and privileged global scope are added with their first use, with a target identity for non-entity targets (21 §6). Accepted kinds and capabilities are added with the capability registry.",
+      "oneOf": [
+        {
+          "description": "The action takes no target.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "none"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "One entity from the listed scopes.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "entity"
+            },
+            "scopes": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "self",
+                  "inventory",
+                  "room_contents",
+                  "room_occupants"
+                ]
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "kind",
+            "scopes"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "kind": "none"
+        },
+        {
+          "kind": "entity",
+          "scopes": [
+            "room_occupants"
+          ]
+        }
+      ]
+    },
+    "TargetResolution": {
+      "description": "The deterministic result of resolving a target (14 §R3A; 21 §7: none | unique(target) | ambiguous(candidates), no random tie-breaking; 04 §18: ambiguous search returns structured candidates). candidate_ids are 2 to 1024 distinct EntityIds (1024 is the composition profile's selector_cardinality) in ascending code-point order of the id string (PM ruling for this PR; the one place this rule is stated). The subset cannot express order or distinctness, so invariant target_candidates_ordered in protocol/invariants.json carries it.",
+      "oneOf": [
+        {
+          "description": "No candidate matched.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "none"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Exactly one candidate.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "unique"
+            },
+            "target_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "kind",
+            "target_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Two or more candidates.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "ambiguous"
+            },
+            "candidate_ids": {
+              "type": "array",
+              "items": {
+                "$ref": "identity.schema.json#/$defs/EntityId"
+              },
+              "minItems": 2,
+              "maxItems": 1024
+            }
+          },
+          "required": [
+            "kind",
+            "candidate_ids"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "kind": "none"
+        },
+        {
+          "kind": "unique",
+          "target_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+        },
+        {
+          "kind": "ambiguous",
+          "candidate_ids": [
+            "11111111-2222-4333-8444-555555555555",
+            "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+          ]
+        }
+      ]
+    },
+    "ActionDefinition": {
+      "description": "An advertised affordance (04 §19; 06 §20; 21 §7): stable key, localization label, target spec, the portable Command type it resolves to (checked against the command registry when content compiles), presentation priority, required input parameters, policy and accessibility description. Aliases, costs and cooldown hints arrive with the text parser and cost capabilities.",
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/Key"
+        },
+        "label": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_.]*$",
+          "maxLength": 128
+        },
+        "target": {
+          "$ref": "#/$defs/TargetSpec"
+        },
+        "command": {
+          "$ref": "#/$defs/Key"
+        },
+        "priority": {
+          "type": "integer"
+        },
+        "input": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "direction",
+              "choice_id",
+              "continuation_id",
+              "until"
+            ]
+          }
+        },
+        "policy": {
+          "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+        },
+        "accessibility": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_.]*$",
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "key",
+        "label",
+        "target",
+        "command",
+        "priority",
+        "input",
+        "policy",
+        "accessibility"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "key": "talk",
+          "label": "actions.talk",
+          "target": {
+            "kind": "entity",
+            "scopes": [
+              "room_occupants"
+            ]
+          },
+          "command": "talk",
+          "priority": 100,
+          "input": [],
+          "policy": {
+            "policy_version": 1,
+            "root": {
+              "op": "target_present"
+            }
+          },
+          "accessibility": "actions.talk.a11y"
+        },
+        {
+          "key": "move",
+          "label": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "target": {
+            "kind": "none"
+          },
+          "command": "move",
+          "priority": -1,
+          "input": [
+            "direction"
+          ],
+          "policy": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "accessibility": "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"
+        }
+      ]
+    }
+  }
+}

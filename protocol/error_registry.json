@@ -193,5 +193,10 @@
     "code": "too_many_properties",
     "category": "abi_validation",
     "description": "Contract validation: object with more properties than maxProperties."
+  },
+  {
+    "code": "conflicting_write",
+    "category": "evaluation_fault",
+    "description": "Two writer groups wrote one mutation target without a registered composition rule (04 \u00a75.1, \u00a75.3)."
   }
 ]

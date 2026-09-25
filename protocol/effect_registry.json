@@ -1,0 +1,20 @@
+[
+  {
+    "type": "client_notification",
+    "durability": "ephemeral",
+    "idempotency": "not_required",
+    "retry": "none",
+    "allowed_origins": [
+      "narration"
+    ]
+  },
+  {
+    "type": "scheduler_wake",
+    "durability": "ephemeral",
+    "idempotency": "not_required",
+    "retry": "reconstruct",
+    "allowed_origins": [
+      "schedule"
+    ]
+  }
+]

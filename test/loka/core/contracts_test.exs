@@ -12,6 +12,8 @@ defmodule Loka.Core.ContractsTest do
   @defs Map.merge(Contracts.defs(), @probe)
   @invalid JSON.decode!(File.read!("protocol/fixtures/invalid.json"))
   @registry JSON.decode!(File.read!("protocol/error_registry.json"))
+  @effects JSON.decode!(File.read!("protocol/effect_registry.json"))
+  @invariants JSON.decode!(File.read!("protocol/invariants.json"))
   @capabilities JSON.decode!(File.read!("protocol/capability_registry.json"))
   @lock_kat JSON.decode!(File.read!("protocol/fixtures/capability_lock_hash.json"))
 
@@ -59,6 +61,96 @@ defmodule Loka.Core.ContractsTest do
   test "every code the fixtures expect is a registered abi_validation code" do
     registered = for %{"code" => c, "category" => "abi_validation"} <- @registry, do: c
     for %{"errors" => es} <- @invalid, %{"code" => c} <- es, do: assert(c in registered, c)
+  end
+
+  test "the effect registry classifies exactly the EffectPayload types, each entry valid" do
+    for entry <- @effects,
+        do: assert(Contracts.validate("EffectRegistryEntry", entry) == :ok, inspect(entry))
+
+    types =
+      for b <- Contracts.defs()["EffectPayload"]["oneOf"], do: b["properties"]["type"]["const"]
+
+    assert Enum.sort(for e <- @effects, do: e["type"]) == Enum.sort(types)
+  end
+
+  # Invariants are checked by id (docs/ROADMAP.md), so an id must name one invariant, and a
+  # citation must point at a real docs/spec heading.
+  defp invariant_problems(entries) do
+    dupes = for {id, n} <- Enum.frequencies_by(entries, & &1["id"]), n > 1, do: {:duplicate, id}
+
+    dupes ++
+      for e <- entries,
+          problem <- [entry_problem(e)],
+          problem != nil,
+          do: {problem, e["id"]}
+  end
+
+  defp entry_problem(e) do
+    with :ok <- Contracts.validate("InvariantEntry", e),
+         {:ok, text} <- File.read(Path.join("docs/spec", e["citation"]["document"])) do
+      if e["citation"]["heading"] in String.split(text, "\n"), do: nil, else: :no_heading
+    else
+      {:error, :enoent} -> :no_document
+      {:error, _} -> :invalid
+    end
+  end
+
+  test "the invariant registry has unique ids and real citations" do
+    assert invariant_problems(@invariants) == []
+  end
+
+  test "the invariant check catches a duplicate id and bad or missing citations" do
+    [a, b | _] = @invariants
+    cite = &put_in(b, ["citation", &1], &2)
+
+    planted = [
+      a,
+      %{b | "id" => a["id"]},
+      Map.delete(b, "citation") |> Map.put("id", "no_citation"),
+      cite.("document", "99-missing.md") |> Map.put("id", "no_document"),
+      cite.("heading", String.slice(b["citation"]["heading"], 0..8))
+      |> Map.put("id", "no_heading")
+    ]
+
+    assert Enum.sort(invariant_problems(planted)) ==
+             Enum.sort([
+               {:duplicate, a["id"]},
+               {:invalid, "no_citation"},
+               {:no_document, "no_document"},
+               {:no_heading, "no_heading"}
+             ])
+  end
+
+  # validate/3 takes decoded values, so recursion is bounded by the canonical depth cap: a
+  # Policy nested 128 deep decodes and validates; 129 is rejected by the decoder.
+  test "a recursive Policy at the depth cap" do
+    nots =
+      &(String.duplicate(~s({"op":"not","item":), &1) <>
+          ~s({"op":"target_present"}) <> String.duplicate("}", &1))
+
+    assert {:ok, deep} = Loka.Core.Canonical.decode(nots.(127))
+    assert Contracts.validate("Policy", deep) == :ok
+    assert Loka.Core.Canonical.decode(nots.(128)) == {:error, :invalid_json}
+  end
+
+  # A 1025-id list is too large to keep as a fixture line; 1024 is the contract's maximum.
+  test "ambiguous candidates at 1024 and 1025" do
+    ids =
+      &for(
+        i <- 1..&1,
+        do: :io_lib.format("~8.16.0b-0000-4000-8000-000000000000", [i]) |> to_string()
+      )
+
+    assert Contracts.validate("TargetResolution", %{
+             "kind" => "ambiguous",
+             "candidate_ids" => ids.(1024)
+           }) == :ok
+
+    assert Contracts.validate("TargetResolution", %{
+             "kind" => "ambiguous",
+             "candidate_ids" => ids.(1025)
+           }) ==
+             {:error, [%{path: "/candidate_ids", code: :too_many_items}]}
   end
 
   test "the capability registry: valid entries, key@version unique, covers the chapter-one lock, all portable" do

@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { decode, encode, hash } from '../src/canonical.ts';
 import { add, divide, mul, sub } from '../src/int.ts';
-import { id } from '../src/id_source.ts';
+import { commandId, id } from '../src/id_source.ts';
 import { next, uniform } from '../src/rng.ts';
 
 function fixture(name: string, sha: string) {
@@ -212,4 +212,21 @@ test('IdSource ids', () => {
   assert.equal(id('w-1', 'c-1', 0), 'eab7cf24-f843-8907-ab7a-610cf750dbe5');
   assert.equal(id('w-1', 'c-1', 1), 'c47e5589-bb15-82c7-8492-7c392ee99f8d');
   assert.equal(id('世界', 'c"1', 9007199254740991), '1711b795-4ff1-81d8-a547-80b2011ee4d1');
+});
+
+// Catches a wrong domain tag, swapped arguments or any other input entering the hash. Same
+// fixture file as the Elixir suite; expected ids computed with Python and checked with shasum.
+test('CommandId known answers', () => {
+  const cases = JSON.parse(
+    readFileSync(new URL('../../../protocol/fixtures/command_id.json', import.meta.url), 'utf8'),
+  );
+  for (const c of cases)
+    assert.equal(commandId(c.idempotency_scope_id, c.invocation_id), c.command_id, c.command_id);
+});
+
+// Catches a non-string or lone-surrogate id hashing instead of Elixir's typed error.
+test('CommandId rejects bad ids', () => {
+  assert.throws(() => commandId(null as never, 'i'), code('invalid_id'));
+  assert.throws(() => commandId('s', 1 as never), code('invalid_id'));
+  assert.throws(() => commandId('\ud800', 'i'), code('invalid_canonical'));
 });

@@ -43,6 +43,10 @@ The table below describes the files as imported. Later amendments are in git his
   `kernel_api` range as `{at_least, below}` (MAJOR.MINOR, half-open, so `">=1.3 <2.0"` is
   `{"at_least": "1.3", "below": "2.0"}`) and `requires.capabilities` as a key-to-version
   map (`movement@1` is `"movement": 1`); the compiler normalizes the authored string forms.
+- 2026-09-24, R3 PR 3: [conformance/numeric-profile.md](conformance/numeric-profile.md)
+  gains the CommandId rule beside IdSource (additive; owner decision
+  [R3 lanes](../decisions/owner-decisions-r3-lanes-2026-09-24.md)). No existing rule or
+  fixture changed.
 
 ## Link rewrites (the only byte changes at import)
 

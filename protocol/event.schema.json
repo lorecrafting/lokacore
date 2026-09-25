@@ -1,0 +1,408 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DomainEvent contracts",
+  "description": "The DomainEvent envelope and registry, proposed versus committed (04 §1, §5.1, §8, §11; 14 §R3A).",
+  "$defs": {
+    "EventId": {
+      "description": "A DomainEvent, created from IdSource (01 A8). Lowercase hyphenated UUID, any version.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "examples": [
+        "77777777-8888-8999-8aaa-bbbbbbbbbbbb"
+      ]
+    },
+    "CorrelationId": {
+      "description": "Shared by every event, effect and message derived from one command (04 §11). Lowercase hyphenated UUID, any version.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "examples": [
+        "99999999-aaaa-4bbb-8ccc-dddddddddddd"
+      ]
+    },
+    "CausationId": {
+      "description": "The CommandId or EventId that caused this value (04 §11). Lowercase hyphenated UUID, any version.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "examples": [
+        "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b"
+      ]
+    },
+    "DomainEvent": {
+      "description": "A typed fact from deterministic evaluation (04 §8). Inside a decision it is PROPOSED: it may drive in-decision reducers but MUST NOT be published, projected or sent anywhere (04 §5.1). It becomes observable only as a CommittedEvent. scope is semantic, not a broadcast audience (04 §8). position is the monotonic causal position in the decision (04 §5.2). 04 §8's subject_id lives in each typed payload that has a subject, where it is required.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/EventId"
+        },
+        "world_context_id": {
+          "$ref": "identity.schema.json#/$defs/WorldContextId"
+        },
+        "scope": {
+          "$ref": "scope.schema.json#/$defs/StateScope"
+        },
+        "actor_id": {
+          "$ref": "identity.schema.json#/$defs/CharacterId"
+        },
+        "logical_time": {
+          "$ref": "command.schema.json#/$defs/LogicalTime"
+        },
+        "position": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "causation_id": {
+          "$ref": "#/$defs/CausationId"
+        },
+        "correlation_id": {
+          "$ref": "#/$defs/CorrelationId"
+        },
+        "payload": {
+          "$ref": "#/$defs/EventPayload"
+        }
+      },
+      "required": [
+        "id",
+        "world_context_id",
+        "scope",
+        "logical_time",
+        "position",
+        "causation_id",
+        "correlation_id",
+        "payload"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "id": "77777777-8888-8999-8aaa-bbbbbbbbbbbb",
+          "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+          "scope": {
+            "kind": "player",
+            "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+          },
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "logical_time": 0,
+          "position": 1,
+          "causation_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+          "correlation_id": "99999999-aaaa-4bbb-8ccc-dddddddddddd",
+          "payload": {
+            "type": "item_acquired",
+            "item_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+            "holder_id": "12121212-3434-4565-8787-909090909090"
+          }
+        },
+        {
+          "id": "77777777-8888-8999-8aaa-bbbbbbbbbbbb",
+          "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+          "scope": {
+            "kind": "player",
+            "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+          },
+          "logical_time": 6,
+          "position": 2,
+          "causation_id": "77777777-8888-8999-8aaa-bbbbbbbbbbbb",
+          "correlation_id": "99999999-aaaa-4bbb-8ccc-dddddddddddd",
+          "payload": {
+            "type": "fact_changed",
+            "fact": {
+              "cartridge_id": "ferrymans_lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "fact",
+              "key": "search_plan"
+            },
+            "old": "undecided",
+            "new": "player_led"
+          }
+        }
+      ]
+    },
+    "CommittedEvent": {
+      "description": "A DomainEvent after its enclosing commit succeeded (04 §5.1): the same value, with the committed revision. Only this form may be traced, projected or fanned out.",
+      "type": "object",
+      "properties": {
+        "committed_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "event": {
+          "$ref": "#/$defs/DomainEvent"
+        }
+      },
+      "required": [
+        "committed_revision",
+        "event"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "committed_revision": 1,
+          "event": {
+            "id": "77777777-8888-8999-8aaa-bbbbbbbbbbbb",
+            "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+            "scope": {
+              "kind": "player",
+              "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+            },
+            "logical_time": 0,
+            "position": 1,
+            "causation_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+            "correlation_id": "99999999-aaaa-4bbb-8ccc-dddddddddddd",
+            "payload": {
+              "type": "choice_opened",
+              "continuation_id": "44444444-5555-8666-8777-888888888888"
+            }
+          }
+        }
+      ]
+    },
+    "EventPayload": {
+      "description": "The registered event types (04 §8) the R6P proof uses (pre-release-proof.md). Content-declared custom events are an R3B envelope.",
+      "oneOf": [
+        {
+          "description": "entity_id entered room_id.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "entity_entered_room"
+            },
+            "entity_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "room_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "type",
+            "entity_id",
+            "room_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "item_id is now held by holder_id.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "item_acquired"
+            },
+            "item_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "holder_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "type",
+            "item_id",
+            "holder_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "item_id was dropped into room_id.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "item_dropped"
+            },
+            "item_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "room_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "type",
+            "item_id",
+            "room_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "A QuestInstance became active.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "quest_activated"
+            },
+            "quest": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "instance_id": {
+              "$ref": "delta.schema.json#/$defs/QuestInstanceId"
+            }
+          },
+          "required": [
+            "type",
+            "quest",
+            "instance_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "A QuestInstance resolved with a named outcome.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "quest_resolved"
+            },
+            "quest": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "instance_id": {
+              "$ref": "delta.schema.json#/$defs/QuestInstanceId"
+            },
+            "outcome": {
+              "$ref": "action.schema.json#/$defs/Key"
+            }
+          },
+          "required": [
+            "type",
+            "quest",
+            "instance_id",
+            "outcome"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "A pending choice opened.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "choice_opened"
+            },
+            "continuation_id": {
+              "$ref": "delta.schema.json#/$defs/ContinuationId"
+            }
+          },
+          "required": [
+            "type",
+            "continuation_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "A pending choice resolved.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "choice_resolved"
+            },
+            "continuation_id": {
+              "$ref": "delta.schema.json#/$defs/ContinuationId"
+            },
+            "choice_id": {
+              "$ref": "action.schema.json#/$defs/Key"
+            }
+          },
+          "required": [
+            "type",
+            "continuation_id",
+            "choice_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "A fact changed from old to new (03 §7). subject_id is present exactly when the fact.assign that changed it had one.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "fact_changed"
+            },
+            "fact": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "subject_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "old": {
+              "$ref": "delta.schema.json#/$defs/FactValue"
+            },
+            "new": {
+              "$ref": "delta.schema.json#/$defs/FactValue"
+            }
+          },
+          "required": [
+            "type",
+            "fact",
+            "old",
+            "new"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "type": "entity_entered_room",
+          "entity_id": "12121212-3434-4565-8787-909090909090",
+          "room_id": "33333333-4444-4555-8666-777777777777"
+        },
+        {
+          "type": "item_acquired",
+          "item_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+          "holder_id": "12121212-3434-4565-8787-909090909090"
+        },
+        {
+          "type": "item_dropped",
+          "item_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+          "room_id": "22222222-3333-4444-8555-666666666666"
+        },
+        {
+          "type": "quest_activated",
+          "quest": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find_the_lantern"
+          },
+          "instance_id": "55555555-6666-8777-8888-999999999999"
+        },
+        {
+          "type": "quest_resolved",
+          "quest": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find_the_lantern"
+          },
+          "instance_id": "55555555-6666-8777-8888-999999999999",
+          "outcome": "carry"
+        },
+        {
+          "type": "choice_opened",
+          "continuation_id": "44444444-5555-8666-8777-888888888888"
+        },
+        {
+          "type": "choice_resolved",
+          "continuation_id": "44444444-5555-8666-8777-888888888888",
+          "choice_id": "leave"
+        },
+        {
+          "type": "fact_changed",
+          "fact": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "fact",
+            "key": "search_plan"
+          },
+          "old": "undecided",
+          "new": "party_led"
+        },
+        {
+          "type": "fact_changed",
+          "fact": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "fact",
+            "key": "search_plan"
+          },
+          "subject_id": "11111111-2222-4333-8444-555555555555",
+          "old": "undecided",
+          "new": "party_led"
+        }
+      ]
+    }
+  }
+}

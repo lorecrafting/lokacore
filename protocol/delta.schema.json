@@ -1,0 +1,684 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "StateDelta contracts",
+  "description": "The StateDelta algebra: typed operations, their mutation targets and preconditions (04 §1, §5.1, §5.3; 14 §R3A). Composition behavior (overlay, conflicts, invariants) is implemented in R3 PR 5.",
+  "$defs": {
+    "QuestInstanceId": {
+      "description": "A QuestInstance (03 §12; 06 §1), created at activation from IdSource. Lowercase hyphenated UUID, any version.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "examples": [
+        "55555555-6666-8777-8888-999999999999"
+      ]
+    },
+    "ContinuationId": {
+      "description": "A pending choice/continuation (04 §5.3 'Choice/continuation resolution'), created from IdSource. Lowercase hyphenated UUID, any version.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "examples": [
+        "44444444-5555-8666-8777-888888888888"
+      ]
+    },
+    "JobId": {
+      "description": "A same-authority scheduled job (03 §13; 04 §5.4), created from IdSource. Lowercase hyphenated UUID, any version.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "examples": [
+        "66666666-7777-8888-8999-aaaaaaaaaaaa"
+      ]
+    },
+    "FactValue": {
+      "description": "The value of a fact, in fact.assign, fact_compare and fact_changed. A Key for now (the Lantern's facts are key-valued); FactSpec widens this one definition.",
+      "$ref": "action.schema.json#/$defs/Key",
+      "examples": [
+        "player_led"
+      ]
+    },
+    "RoleBinding": {
+      "description": "One role a continuation bound when it opened (04 §5.3 'bound roles'), for example the NPC the choice is made with.",
+      "type": "object",
+      "properties": {
+        "role": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "entity_id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        }
+      },
+      "required": [
+        "role",
+        "entity_id"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "role": "search_leader",
+          "entity_id": "11111111-2222-4333-8444-555555555555"
+        }
+      ]
+    },
+    "WriterGroup": {
+      "description": "Coordinator-assigned writer-group identity of one explicit sequence (04 §5.3): the root sequence or one reaction delivery. Content never chooses it.",
+      "type": "integer",
+      "minimum": 0,
+      "examples": [
+        0,
+        1
+      ]
+    },
+    "StateDelta": {
+      "description": "A non-committed proposal of authoritative changes (04 §1). ops are in semantic order: the root's explicit sequence, then deliveries in FIFO/registry order (04 §5.2); never map, file or arrival order. Each op names its mutation target (MutationTarget) and its precondition, checked against the proposal overlay of the ops before it; a failed precondition or two writer groups writing one target without a registered composition rule faults the whole decision (04 §5.1). There is no last-writer-wins. Canonical serialization is the canonical JSON of this value (numeric profile). Its size is bounded by the composition profile's operation budget, not by this schema.",
+      "type": "object",
+      "properties": {
+        "ops": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DeltaOp"
+          }
+        }
+      },
+      "required": [
+        "ops"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "ops": []
+        },
+        {
+          "ops": [
+            {
+              "op": "entity.transfer",
+              "writer_group": 0,
+              "entity_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+              "source_id": "22222222-3333-4444-8555-666666666666",
+              "destination_id": "12121212-3434-4565-8787-909090909090"
+            },
+            {
+              "op": "fact.assign",
+              "writer_group": 0,
+              "fact": {
+                "cartridge_id": "ferrymans_lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "fact",
+                "key": "search_plan"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+              },
+              "expected": "undecided",
+              "value": "player_led"
+            }
+          ]
+        }
+      ]
+    },
+    "DeltaOp": {
+      "description": "One registered delta operation (04 §5.3 families). Each description names the op's target and precondition. Resource adjustment arrives with the resource capability.",
+      "oneOf": [
+        {
+          "description": "Target: fact (fact, scope, subject_id). Precondition: current value equals `expected` (the fact's default if unset).",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "fact.assign"
+            },
+            "writer_group": {
+              "$ref": "#/$defs/WriterGroup"
+            },
+            "fact": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "scope": {
+              "$ref": "scope.schema.json#/$defs/StateScope"
+            },
+            "subject_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "expected": {
+              "$ref": "#/$defs/FactValue"
+            },
+            "value": {
+              "$ref": "#/$defs/FactValue"
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "fact",
+            "scope",
+            "expected",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Conserved transfer. Target: containment (entity_id). Preconditions: the entity is in source_id; destination_id is not the entity or inside it; destination capacity holds (03 §23: one container per entity).",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "entity.transfer"
+            },
+            "writer_group": {
+              "$ref": "#/$defs/WriterGroup"
+            },
+            "entity_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "source_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "destination_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "entity_id",
+            "source_id",
+            "destination_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Create a QuestInstance in state active. Target: quest (instance_id). Precondition: no instance of the quest is active or objectives_complete in the scope.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "quest.activate"
+            },
+            "writer_group": {
+              "$ref": "#/$defs/WriterGroup"
+            },
+            "quest": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "scope": {
+              "$ref": "scope.schema.json#/$defs/StateScope"
+            },
+            "instance_id": {
+              "$ref": "#/$defs/QuestInstanceId"
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "quest",
+            "scope",
+            "instance_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Target: quest (instance_id). Preconditions: current state is `from`; from -> to is a legal 06 §1 transition; `outcome` is present exactly when `to` is resolved or failed with an outcome.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "quest.transition"
+            },
+            "writer_group": {
+              "$ref": "#/$defs/WriterGroup"
+            },
+            "instance_id": {
+              "$ref": "#/$defs/QuestInstanceId"
+            },
+            "from": {
+              "$ref": "policy.schema.json#/$defs/QuestState"
+            },
+            "to": {
+              "$ref": "policy.schema.json#/$defs/QuestState"
+            },
+            "outcome": {
+              "$ref": "action.schema.json#/$defs/Key"
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "instance_id",
+            "from",
+            "to"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Open a durable continuation (04 §5.3 'Choice/continuation resolution') with everything needed to resume it after a restart: the character who may choose, the owning definition and beat, the bound roles and the offered choices. Target: choice (continuation_id). Precondition: the continuation does not exist.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "choice.open"
+            },
+            "writer_group": {
+              "$ref": "#/$defs/WriterGroup"
+            },
+            "continuation_id": {
+              "$ref": "#/$defs/ContinuationId"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "source": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "beat": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "roles": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/RoleBinding"
+              }
+            },
+            "choice_ids": {
+              "type": "array",
+              "items": {
+                "$ref": "action.schema.json#/$defs/Key"
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "continuation_id",
+            "actor_id",
+            "source",
+            "beat",
+            "roles",
+            "choice_ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Target: choice (continuation_id). Preconditions: the continuation is pending, offers choice_id, and opened at committed revision expected_revision (04 §5.3 'expected revision').",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "choice.resolve"
+            },
+            "writer_group": {
+              "$ref": "#/$defs/WriterGroup"
+            },
+            "continuation_id": {
+              "$ref": "#/$defs/ContinuationId"
+            },
+            "choice_id": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "expected_revision": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "continuation_id",
+            "choice_id",
+            "expected_revision"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Target: choice (continuation_id). Precondition: the continuation is pending.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "choice.close"
+            },
+            "writer_group": {
+              "$ref": "#/$defs/WriterGroup"
+            },
+            "continuation_id": {
+              "$ref": "#/$defs/ContinuationId"
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "continuation_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Target: job (job_id). Preconditions: the job does not exist; due_time is strictly later than the current logical time, and during an explicit advance later than its target (04 §5.4).",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "job.schedule"
+            },
+            "writer_group": {
+              "$ref": "#/$defs/WriterGroup"
+            },
+            "job_id": {
+              "$ref": "#/$defs/JobId"
+            },
+            "job": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "due_time": {
+              "$ref": "command.schema.json#/$defs/LogicalTime"
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "job_id",
+            "job",
+            "due_time"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Consume a due job occurrence when its run_job commits, so it is never selected again (04 §5.4). Target: job (job_id). Preconditions: the job is pending and its due_time is not later than the visited logical time (the clock at ordinary admission, or the job's visited due time during an explicit advance; 04 §5.4).",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "job.complete"
+            },
+            "writer_group": {
+              "$ref": "#/$defs/WriterGroup"
+            },
+            "job_id": {
+              "$ref": "#/$defs/JobId"
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "job_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Target: clock. Preconditions: current logical time equals `from`; `to` is later than `from` (04 §5.4).",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "time.advance"
+            },
+            "writer_group": {
+              "$ref": "#/$defs/WriterGroup"
+            },
+            "from": {
+              "$ref": "command.schema.json#/$defs/LogicalTime"
+            },
+            "to": {
+              "$ref": "command.schema.json#/$defs/LogicalTime"
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "from",
+            "to"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "op": "fact.assign",
+          "writer_group": 0,
+          "fact": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "fact",
+            "key": "search_plan"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+          },
+          "subject_id": "11111111-2222-4333-8444-555555555555",
+          "expected": "undecided",
+          "value": "party_led"
+        },
+        {
+          "op": "quest.activate",
+          "writer_group": 0,
+          "quest": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find_the_lantern"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+          },
+          "instance_id": "55555555-6666-8777-8888-999999999999"
+        },
+        {
+          "op": "quest.transition",
+          "writer_group": 1,
+          "instance_id": "55555555-6666-8777-8888-999999999999",
+          "from": "active",
+          "to": "resolved",
+          "outcome": "carry"
+        },
+        {
+          "op": "choice.open",
+          "writer_group": 0,
+          "continuation_id": "44444444-5555-8666-8777-888888888888",
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "source": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find_the_lantern"
+          },
+          "beat": "choose_search_plan",
+          "roles": [
+            {
+              "role": "search_leader",
+              "entity_id": "11111111-2222-4333-8444-555555555555"
+            }
+          ],
+          "choice_ids": [
+            "carry",
+            "leave"
+          ]
+        },
+        {
+          "op": "choice.open",
+          "writer_group": 0,
+          "continuation_id": "44444444-5555-8666-8777-888888888888",
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "source": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find_the_lantern"
+          },
+          "beat": "b",
+          "roles": [],
+          "choice_ids": [
+            "carry"
+          ]
+        },
+        {
+          "op": "choice.resolve",
+          "writer_group": 0,
+          "continuation_id": "44444444-5555-8666-8777-888888888888",
+          "choice_id": "carry",
+          "expected_revision": 1
+        },
+        {
+          "op": "choice.close",
+          "writer_group": 0,
+          "continuation_id": "44444444-5555-8666-8777-888888888888"
+        },
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "66666666-7777-8888-8999-aaaaaaaaaaaa",
+          "job": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "schedule",
+            "key": "bram_to_green"
+          },
+          "due_time": 19
+        },
+        {
+          "op": "job.complete",
+          "writer_group": 0,
+          "job_id": "66666666-7777-8888-8999-aaaaaaaaaaaa"
+        },
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 0,
+          "to": 19
+        }
+      ]
+    },
+    "MutationTarget": {
+      "description": "Canonical mutation-target identity (04 §5.1): two ops conflict when their targets are equal as canonical JSON and they come from different writer groups without a registered composition rule. Also the target a conflict fault reports (04 §5.5).",
+      "oneOf": [
+        {
+          "description": "A scoped fact.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "fact"
+            },
+            "fact": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "scope": {
+              "$ref": "scope.schema.json#/$defs/StateScope"
+            },
+            "subject_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "kind",
+            "fact",
+            "scope"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "An entity's one container.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "containment"
+            },
+            "entity_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "kind",
+            "entity_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "A QuestInstance's lifecycle.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "quest"
+            },
+            "instance_id": {
+              "$ref": "#/$defs/QuestInstanceId"
+            }
+          },
+          "required": [
+            "kind",
+            "instance_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "A continuation.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "choice"
+            },
+            "continuation_id": {
+              "$ref": "#/$defs/ContinuationId"
+            }
+          },
+          "required": [
+            "kind",
+            "continuation_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "A scheduled job.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "job"
+            },
+            "job_id": {
+              "$ref": "#/$defs/JobId"
+            }
+          },
+          "required": [
+            "kind",
+            "job_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "The logical clock.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "clock"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "kind": "fact",
+          "fact": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "fact",
+            "key": "search_plan"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+          }
+        },
+        {
+          "kind": "containment",
+          "entity_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+        },
+        {
+          "kind": "quest",
+          "instance_id": "55555555-6666-8777-8888-999999999999"
+        },
+        {
+          "kind": "choice",
+          "continuation_id": "44444444-5555-8666-8777-888888888888"
+        },
+        {
+          "kind": "job",
+          "job_id": "66666666-7777-8888-8999-aaaaaaaaaaaa"
+        },
+        {
+          "kind": "clock"
+        }
+      ]
+    }
+  }
+}

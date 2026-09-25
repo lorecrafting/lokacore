@@ -1,6 +1,6 @@
 # Portable numeric profile v1
 
-Status: **frozen v1 (`loka-numeric-v1`), owner-approved 2026-09-24** ([owner decision](../../decisions/owner-decisions-r3-2026-09-24.md)), amended 2026-09-24 by R3 PR 1 ([import record](../IMPORT.md#amendments-since-import)). It was the proposed R1 input `loka-numeric-proposed-v1`, the `profile` value in the frozen `numeric-vectors.json`; the rules and known answers are unchanged, and the [frozen v1 rules](#frozen-v1-rules-r3) below state what the R1 text left open. This profile is deliberately small and is separate from runtime selection.
+Status: **frozen v1 (`loka-numeric-v1`), owner-approved 2026-09-24** ([owner decision](../../decisions/owner-decisions-r3-2026-09-24.md)), amended 2026-09-24 by R3 PR 1 and, additively (CommandId), by R3 PR 3 ([import record](../IMPORT.md#amendments-since-import)). It was the proposed R1 input `loka-numeric-proposed-v1`, the `profile` value in the frozen `numeric-vectors.json`; the rules and known answers are unchanged, and the [frozen v1 rules](#frozen-v1-rules-r3) below state what the R1 text left open. This profile is deliberately small and is separate from runtime selection.
 
 ## Integers and representation
 
@@ -64,3 +64,5 @@ Both kernels (`lib/loka/core`, `kernel/ts/src`) implement exactly these rules; w
 4. written as 36 characters, lowercase hex in 8-4-4-4-12 groups. That string is the id; no layer re-parses it.
 
 Ordinals are allocated per command starting at 0, in the decision's deterministic order, each used once within a decision. Replaying the same command against the same state allocates the same ordinals and so yields the same ids.
+
+**CommandId** (additive amendment, R3 PR 3; 04 §3, 03 §14; owner decision [R3 lanes](../../decisions/owner-decisions-r3-lanes-2026-09-24.md)). The stable Command ID of an invocation-derived command is computed exactly as an IdSource id (steps 3 and 4 above) over the canonical JSON array `["loka-command-v1", idempotency_scope_id, invocation_id]`, both strings of Unicode scalars (a non-string is `invalid_id`). Authority placement, routing and session never enter it. An authority-internal command (for example a due job) derives its id under a different domain tag over its own durable identity, defined where it first executes. No earlier rule changes.

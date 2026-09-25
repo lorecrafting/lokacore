@@ -43,3 +43,13 @@ Each record is written by a fresh agent that authored none of the reviewed work 
   `consequence_operator` must freeze at R5, where ActionRecipe executes over registered
   consequences; docs part accurate, decision record byte-identical); re-review of the fixes at
   `b966814`, APPROVE (F1 mutants now fail in both kernels; F2 and N1 fixed).
+- [2026-09-24 R3 PR 3 commands](2026-09-24-r3-pr3-commands-review.md): PR #13 at `cfc6a14`,
+  CHANGES REQUIRED (full review, contract freeze; 7,911-case differential with zero
+  disagreements below the decoder's depth cap; CommandId known answers recomputed
+  independently; one blocker: 120 `required` entries of the frozen contracts survive
+  mutation; two should-fix: no "always allowed" policy, no id rule for internal commands);
+  plus cross-vendor review (Astra): CHANGES REQUIRED (A1 continuation context, A2 old/new,
+  A3 subjects); re-review of the fixes at `2c0d824`, CHANGES REQUIRED (all round-1 items
+  verified with mutants and a 177-mutant sweep; two new one-line should-fix in the reshaped
+  shapes: `fact_changed` subject, `job.complete` precondition during an advance); round 2
+  at `c2284ed`, APPROVE (F4/F5 fixed; PR #12 merge resolutions verified line by line).

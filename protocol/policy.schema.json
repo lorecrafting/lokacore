@@ -1,0 +1,228 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Policy contracts",
+  "description": "The core policy AST and its version (06 §21; 21 §3.2, §4 Policy; 14 §R3A). Typed, pure and fail-closed: an unknown operator is invalid.",
+  "$defs": {
+    "VersionedPolicy": {
+      "description": "A policy tree with the AST version it was written against (14 §R3A 'core policy AST/versioning'). A new operator or a changed meaning takes a new version.",
+      "type": "object",
+      "properties": {
+        "policy_version": {
+          "type": "integer",
+          "const": 1
+        },
+        "root": {
+          "$ref": "#/$defs/Policy"
+        }
+      },
+      "required": [
+        "policy_version",
+        "root"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "policy_version": 1,
+          "root": {
+            "op": "target_present"
+          }
+        }
+      ]
+    },
+    "QuestState": {
+      "description": "Persisted QuestInstance lifecycle state (06 §1). Availability is derived, not a state.",
+      "enum": [
+        "active",
+        "objectives_complete",
+        "resolved",
+        "failed",
+        "abandoned"
+      ],
+      "examples": [
+        "active"
+      ]
+    },
+    "Policy": {
+      "description": "A pure condition tree (06 §21). all/any/not compose; the leaves are the 06 §21 operators the R6P proof uses (pre-release-proof.md); the rest are added, versioned, with their first use. fact_compare compares FactValue.",
+      "oneOf": [
+        {
+          "description": "Every item holds; an empty list is the policy with no condition.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "all"
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Policy"
+              }
+            }
+          },
+          "required": [
+            "op",
+            "items"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "At least one item holds.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "any"
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Policy"
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "op",
+            "items"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "The item does not hold.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "not"
+            },
+            "item": {
+              "$ref": "#/$defs/Policy"
+            }
+          },
+          "required": [
+            "op",
+            "item"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "The resolved target is present to the actor.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "target_present"
+            }
+          },
+          "required": [
+            "op"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "The actor holds an item of this definition.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "has_item"
+            },
+            "item": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "op",
+            "item"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "The actor's instance of the quest is in this lifecycle state.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "quest_state"
+            },
+            "quest": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "state": {
+              "$ref": "#/$defs/QuestState"
+            }
+          },
+          "required": [
+            "op",
+            "quest",
+            "state"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "The fact, in the actor's scope, equals this value.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "fact_compare"
+            },
+            "fact": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "equals": {
+              "$ref": "delta.schema.json#/$defs/FactValue"
+            }
+          },
+          "required": [
+            "op",
+            "fact",
+            "equals"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "op": "target_present"
+        },
+        {
+          "op": "all",
+          "items": [
+            {
+              "op": "has_item",
+              "item": {
+                "cartridge_id": "ferrymans_lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "item",
+                "key": "lantern"
+              }
+            },
+            {
+              "op": "any",
+              "items": [
+                {
+                  "op": "quest_state",
+                  "quest": {
+                    "cartridge_id": "ferrymans_lantern",
+                    "cartridge_version": "0.1.0",
+                    "kind": "quest",
+                    "key": "find_the_lantern"
+                  },
+                  "state": "active"
+                }
+              ]
+            },
+            {
+              "op": "not",
+              "item": {
+                "op": "fact_compare",
+                "fact": {
+                  "cartridge_id": "ferrymans_lantern",
+                  "cartridge_version": "0.1.0",
+                  "kind": "fact",
+                  "key": "search_plan"
+                },
+                "equals": "player_led"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,315 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Command contracts",
+  "description": "The portable semantic Command registry (04 §1, §3, §21; 14 §R3A). Host-only CommandContext (session, receipt time) is not part of it.",
+  "$defs": {
+    "LogicalTime": {
+      "description": "Explicit logical time (01 A6; 04 §4). Units are fixed by the world calendar, not here.",
+      "type": "integer",
+      "minimum": 0,
+      "examples": [
+        0,
+        6
+      ]
+    },
+    "Command": {
+      "description": "A semantic Command (04 §3): the portable, replayable input. id is derived from the idempotency scope and the InvocationId (IdSource command_id; owner decision, docs/decisions/owner-decisions-r3-lanes-2026-09-24.md), never from authority placement. That derivation is for invocation-derived commands only; an authority-internal command (run_job) derives its id under a different IdSource tag over its own identity (job id and occurrence), defined where run_job first executes, so a client invocation id can never land on a job's receipt. Every host serializes an equivalent command to the same canonical bytes (04 §21).",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "identity.schema.json#/$defs/CommandId"
+        },
+        "world_context_id": {
+          "$ref": "identity.schema.json#/$defs/WorldContextId"
+        },
+        "payload": {
+          "$ref": "#/$defs/CommandPayload"
+        }
+      },
+      "required": [
+        "id",
+        "world_context_id",
+        "payload"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+          "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+          "payload": {
+            "type": "move",
+            "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+            "direction": "north"
+          }
+        }
+      ]
+    },
+    "CommandPayload": {
+      "description": "The registered Command types; an unknown type fails before game rules (04 §3). Invocation-derived types carry the actor; run_job is authority-internal (04 §1) and is never built from a client invocation. These are the types the R6P proof uses (pre-release-proof.md).",
+      "oneOf": [
+        {
+          "description": "Move through a connection.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "move"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "direction": {
+              "$ref": "action.schema.json#/$defs/Key"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "direction"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Observe the current place.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "look"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Take an item into the actor's inventory.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "take"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "item_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "item_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Drop a held item into the current place.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "drop"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "item_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "item_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Talk to a character.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "talk"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "target_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "target_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Activate an offered quest.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "accept_quest"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "quest": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "quest"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Resolve a pending choice.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "choose"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "continuation_id": {
+              "$ref": "delta.schema.json#/$defs/ContinuationId"
+            },
+            "choice_id": {
+              "$ref": "action.schema.json#/$defs/Key"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "continuation_id",
+            "choice_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Close a pending choice without choosing.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "close_choice"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "continuation_id": {
+              "$ref": "delta.schema.json#/$defs/ContinuationId"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "continuation_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Advance logical time to `until`.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "wait"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "until": {
+              "$ref": "#/$defs/LogicalTime"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "until"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Execute a due scheduled job (authority-internal).",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "run_job"
+            },
+            "job_id": {
+              "$ref": "delta.schema.json#/$defs/JobId"
+            }
+          },
+          "required": [
+            "type",
+            "job_id"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "type": "move",
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "direction": "north"
+        },
+        {
+          "type": "look",
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+        },
+        {
+          "type": "take",
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "item_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+        },
+        {
+          "type": "drop",
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "item_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+        },
+        {
+          "type": "talk",
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "target_id": "11111111-2222-4333-8444-555555555555"
+        },
+        {
+          "type": "accept_quest",
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "quest": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find_the_lantern"
+          }
+        },
+        {
+          "type": "choose",
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "continuation_id": "44444444-5555-8666-8777-888888888888",
+          "choice_id": "carry"
+        },
+        {
+          "type": "close_choice",
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "continuation_id": "44444444-5555-8666-8777-888888888888"
+        },
+        {
+          "type": "wait",
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "until": 19
+        },
+        {
+          "type": "run_job",
+          "job_id": "66666666-7777-8888-8999-aaaaaaaaaaaa"
+        }
+      ]
+    }
+  }
+}

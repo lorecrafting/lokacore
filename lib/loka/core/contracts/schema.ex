@@ -15,7 +15,9 @@ defmodule Loka.Core.Contracts.Schema do
   `maxItems`; string `pattern`, `minLength`, `maxLength`; integer `minimum`, `maximum`;
   string, integer and boolean `enum`, `const`. `enum` and `const` values are scalars.
   `oneOf` branches are inline objects, each with exactly one `const` property, the same
-  required property in every branch with distinct values (the discriminator).
+  required property in every branch with distinct values (the discriminator). A `$ref` may
+  name its own or an enclosing contract; recursion is bounded by the value, and decoded
+  values by the canonical depth limit.
 
   `pattern` is limited to a grammar that PCRE (Elixir, compiled with
   `[:unicode, :dollar_endonly]`) and JavaScript (`u` flag) read the same way: anchored

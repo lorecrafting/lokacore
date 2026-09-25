@@ -1,0 +1,5 @@
+[
+  {"idempotency_scope_id": "story/lineage-1/character-1", "invocation_id": "f6a7b8c9-d0e1-4f2a-8b3c-5d6e7f8a9b0c", "command_id": "3ee00071-4a05-8a6d-9ba7-fbf2e6211039"},
+  {"idempotency_scope_id": "f6a7b8c9-d0e1-4f2a-8b3c-5d6e7f8a9b0c", "invocation_id": "story/lineage-1/character-1", "command_id": "d23fa757-e432-83e7-b11b-4b528aea863c"},
+  {"idempotency_scope_id": "世界\"", "invocation_id": "", "command_id": "6064ae7a-5ee3-83d8-a699-15e811f3ad85"}
+]

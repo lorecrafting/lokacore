@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Decision contracts",
+  "description": "The decision result (04 §5, §5.0, §5.2).",
+  "$defs": {
+    "RngState": {
+      "description": "The four-word gameplay RNG state (numeric profile): integers in 0..2^32-1, not all zero.",
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 4294967295
+      },
+      "minItems": 4,
+      "maxItems": 4,
+      "examples": [
+        [
+          1,
+          2,
+          3,
+          4
+        ],
+        [
+          0,
+          0,
+          0,
+          4294967295
+        ]
+      ]
+    },
+    "DecisionResult": {
+      "description": "What a pure decision returns (04 §5). accepted: a provisional proposal (delta, proposed events, effects, next RNG) with a typed outcome, including an admitted attempt that failed in game terms (04 §5.0). rejected: not admitted; consumes no RNG, time or cost (04 §5.0). fault: budget, conflict or evaluator fault; the whole proposal is discarded, so it carries none (04 §5.2 step 7). Projection hints arrive with GameView.",
+      "oneOf": [
+        {
+          "description": "An admitted attempt.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "accepted"
+            },
+            "outcome": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "delta": {
+              "$ref": "delta.schema.json#/$defs/StateDelta"
+            },
+            "events": {
+              "type": "array",
+              "items": {
+                "$ref": "event.schema.json#/$defs/DomainEvent"
+              }
+            },
+            "effects": {
+              "type": "array",
+              "items": {
+                "$ref": "effect.schema.json#/$defs/Effect"
+              }
+            },
+            "rng": {
+              "$ref": "#/$defs/RngState"
+            }
+          },
+          "required": [
+            "kind",
+            "outcome",
+            "delta",
+            "events",
+            "effects",
+            "rng"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Not admitted.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "rejected"
+            },
+            "error": {
+              "$ref": "error.schema.json#/$defs/GameError"
+            }
+          },
+          "required": [
+            "kind",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Discarded whole.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "fault"
+            },
+            "code": {
+              "$ref": "error.schema.json#/$defs/ErrorCode"
+            },
+            "target": {
+              "$ref": "delta.schema.json#/$defs/MutationTarget"
+            }
+          },
+          "required": [
+            "kind",
+            "code"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "kind": "accepted",
+          "outcome": "taken",
+          "delta": {
+            "ops": []
+          },
+          "events": [],
+          "effects": [],
+          "rng": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "rejected",
+          "error": {
+            "code": "not_present"
+          }
+        },
+        {
+          "kind": "fault",
+          "code": "conflicting_write",
+          "target": {
+            "kind": "containment",
+            "entity_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+          }
+        },
+        {
+          "kind": "fault",
+          "code": "conflicting_write"
+        }
+      ]
+    }
+  }
+}
