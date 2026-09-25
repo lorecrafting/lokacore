@@ -463,3 +463,35 @@ explicit advance (04 §5.4)".
 Both are one-line contract edits in shapes this round introduced; a fixture for F4 is one
 line more. Nothing else is open. Once they land I will verify them and the record can close
 at APPROVE.
+
+## Re-review (fix round 2): `c2284ed` (merge `d92b371` checked for its conflict resolutions)
+
+Scope: the F4/F5 fix commit and the merge of `origin/main` (PR #12). Checks at `c2284ed` in a
+detached worktree: `bin/check_all.sh` exit 0 (70 docs, drift check, 89 ExUnit tests, 28 TS
+tests, all controls) and mobile `tsc` exit 0 after `npm ci`; CI lint/typescript/elixir green
+on the head (android/ios pending at the time).
+
+### Verdict: APPROVE
+
+**Merge `d92b371`.** Thirteen files changed on both sides since the common base `ab1e206`.
+For every conflict file I checked that each line added on the branch side (`d51ec04`) and on
+the main side (`e97a8e7`) is present in the merge result: all are, the only "misses" being
+two re-wrapped paragraphs whose sentences are both present (the `schema.ex` moduledoc now
+carries PR #12's map-form sentences and this PR's recursive-`$ref` sentence; the
+`subset.schema.json` description names both the map probe and `RecursiveProbe`).
+`ErrorCode` enum and `error_registry.json` end `..., too_many_items, too_many_properties,
+conflicting_write` in the same order, and the equality test passes. At the merge commit
+itself: `elixir bin/contracts.exs --check` exit 0 (so `contracts.gen.ts` and
+`subset.gen.ts` are regenerated), `mix test --force` 89 passed, `npm test` 28 passed, 0
+failed (the restored `end` compiles). Consistent.
+
+**F4, fixed.** `fact_changed` has optional `subject_id: EntityId`, described as present
+exactly when the `fact.assign` had one; a second example carries it; one fixture with a
+non-UUID `subject_id` expects `pattern_mismatch` (hand-written). Mutant (property removed):
+the example fails in Elixir and, after regeneration, in TypeScript.
+
+**F5, fixed.** `job.complete`'s precondition now reads "not later than the visited logical
+time (the clock at ordinary admission, or the job's visited due time during an explicit
+advance; 04 §5.4)". Wording only, as asked; matches 04 §5.4.
+
+Nothing open. The contract freeze stands as reviewed across the three rounds.

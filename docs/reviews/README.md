@@ -51,4 +51,5 @@ Each record is written by a fresh agent that authored none of the reviewed work 
   plus cross-vendor review (Astra): CHANGES REQUIRED (A1 continuation context, A2 old/new,
   A3 subjects); re-review of the fixes at `2c0d824`, CHANGES REQUIRED (all round-1 items
   verified with mutants and a 177-mutant sweep; two new one-line should-fix in the reshaped
-  shapes: `fact_changed` subject, `job.complete` precondition during an advance).
+  shapes: `fact_changed` subject, `job.complete` precondition during an advance); round 2
+  at `c2284ed`, APPROVE (F4/F5 fixed; PR #12 merge resolutions verified line by line).
