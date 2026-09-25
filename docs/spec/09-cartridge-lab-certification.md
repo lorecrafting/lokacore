@@ -196,6 +196,8 @@ command move north
 
 Trace includes state diffs by component, not giant whole-state dumps.
 
+*Amendment 2026-09-25 ([proposed ADR-075](../decisions/adr-075-observability-proposal.md)):* the stored game trace keeps a state delta digest (ADR-075 §4); the viewer derives per-component diffs by deterministic replay.
+
 ## 8. Static certification gate
 
 Checks:

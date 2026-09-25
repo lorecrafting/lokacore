@@ -40,3 +40,9 @@ holds the owner's decisions retained verbatim.
 - Owner decisions: [R4 minimal: JSON source, 4 MiB artifact cap, hello fixture's frozen subset](owner-decisions-r4-2026-09-25.md).
 - [Observability design slice before R5; Astra scope delegated to the PM](owner-decisions-observability-astra-2026-09-25.md).
 - [Native mobile builds only when native inputs change; fast Hermes bundle check otherwise](owner-decision-ci-mobile-builds-2026-09-25.md).
+
+## Observability design
+
+- [ADR-075](adr-075-observability-proposal.md) (proposed): one observation record format,
+  four stores joined by ids, a registered event-name list, the game-trace entry.
+- Owner decisions: [ADR-075 kernel version and dev-evidence ledger](owner-decisions-adr-075-2026-09-25.md).
