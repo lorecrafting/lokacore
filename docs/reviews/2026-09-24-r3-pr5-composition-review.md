@@ -322,3 +322,38 @@ VIEWS ON THE PR'S OPEN QUESTIONS 1-6:
 5 — One public budget_exceeded code is acceptable only if deterministic diagnostics separately identify the exhausted budget and causal location. Do not invent fields in the frozen DecisionResult envelope or claim that a bare code satisfies 04 §5.5.
 6 — Small, explicitly bounded linear scans can be an acceptable ponytail; unconditional whole-table allocation and quadratic ancestry validation are not. Cut those unnecessary costs first. The pinned Node setup in the Elixir CI job is the least that works for the existing native-TypeScript differential peer; no npm installation or additional orchestration is needed there.
 ```
+
+## Re-review (fix round 1): `2812a71`
+
+Scope: the fix commit only (the PM's list: F1+AQ1, F2, A4/N1, A1, N2, N3), the code each
+fix touched and its direct callers. `bin/check_all.sh` at `2812a71` in a detached worktree:
+exit 0 (94 ExUnit, 32 TS, contracts drift check included).
+
+- **F1 + AQ1, fixed.** Two fixture cases, states `full_queue` (1,024 pending) and `base`:
+  `pending-jobs-bound-is-the-final-queue` (schedule then complete on a full queue → two
+  changes; pins the final-queue reading) and `budget-before-first-op-fault` (65 schedules,
+  the first on a job that already exists → `budget_exceeded`, not `precondition_failed`;
+  pins precedence). The at-limit budget asserts now require the expected changes (clock at
+  6 + 4096; 64, 1 and 1,024 rows) instead of "not budget_exceeded". Mutants: drop `- due`
+  now dies in both kernels (Elixir 4/5, TS 3/4); "budget checked after the ops" dies
+  (Elixir). No existing case changed.
+- **F2, fixed.** `delta.schema.json` example `from` is `objectives_complete`. The only
+  drift in `contracts.gen.ts` is the two description strings; no shape change
+  (`contracts.exs --check` green).
+- **A4 / N1, fixed.** `compose.ts:172` returns before `rows()` when the destination has no
+  capacity; the capacity branch is unchanged. Mutant "missing capacity treated as zero"
+  dies (TS 3/4).
+- **A1, fixed as agreed.** `protocol/invariants.json` gains `job_complete_owned_by_run`
+  (04 §5.4, `implemented_in: r5`); the `job.complete` description says it is proposed only
+  by the job's own run_job at its visited due time. Data and description only.
+- **N2, fixed.** Both kernels fail closed on a non-integer clock with `precondition_failed`
+  on the clock target, before the budget check; fixture `missing-clock-fails-closed` (state
+  `no_clock`). Mutant "clock guard removed" dies in both kernels. My clockless probe now
+  gives identical bytes in both kernels.
+- **N3, fixed.** One scope comment on `delta_preconditions_hold` in each kernel.
+- Reviewer differential re-run at `2812a71` (2 seeds × 709 cases including the clockless
+  probe): byte-identical.
+- Follow-ups for R5 (A2, A5, `job_complete_owned_by_run`, Q5 diagnostics) and R6 (A3) are in
+  the PR body.
+
+**Verdict: APPROVE.** Nothing open.

@@ -58,4 +58,5 @@ Each record is written by a fresh agent that authored none of the reviewed work 
   differential of 2,124 cases over 3 seeds, 29 mutants of which 1 survives in both kernels;
   two one-line should-fix, four nits, no owner decision needed); Astra cross-vendor review
   adjudicated (A1 not a compose blocker: an R5 coordinator obligation to register; A4 and
-  AQ1 accepted; A2, A3, A5 deferred with follow-ups), verdict unchanged.
+  AQ1 accepted; A2, A3, A5 deferred with follow-ups), verdict unchanged; re-review of the
+  fixes at `2812a71`, APPROVE (every item verified, six mutants die, differential identical).
