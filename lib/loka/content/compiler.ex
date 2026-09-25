@@ -106,10 +106,18 @@ defmodule Loka.Content.Compiler do
     keyed = if contract == "VersionedPolicy", do: value, else: with_key(value, key)
 
     case authored_key(rel, steps, value) ++
-           validated(rel, steps, "Key", key) ++ validated(rel, steps, contract, keyed) do
+           validated(rel, steps, "Key", key) ++ body(rel, steps, contract, keyed) do
       [] -> {:ok, {rel, steps, keyed}}
       diags -> {:error, diags}
     end
+  end
+
+  # An error at /key is the inserted key's, already reported against Key.
+  defp body(rel, steps, contract, value) do
+    Enum.reject(
+      validated(rel, steps, contract, value),
+      &(&1["path"] == at(rel, steps ++ ["key"]))
+    )
   end
 
   defp with_key(value, key) when is_map(value), do: Map.put(value, "key", key)
@@ -120,11 +128,10 @@ defmodule Loka.Content.Compiler do
 
   defp authored_key(_, _, _), do: []
 
-  # Schema diagnostics; an error at /key is the inserted key's, reported against Key.
   defp validated(rel, steps, contract, value, defs \\ Contracts.defs()) do
     case Contracts.validate(contract, value, defs) do
       :ok -> []
-      {:error, es} -> schema(rel, steps, value, Enum.reject(es, &(&1.path == "/key")))
+      {:error, es} -> schema(rel, steps, value, es)
     end
   end
 

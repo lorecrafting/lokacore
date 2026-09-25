@@ -139,7 +139,10 @@ defmodule Loka.Content.Checks do
   defp reference(rel, steps, field, n, m, defs) do
     ref = n[field]
     target = defs[ref["kind"]][ref["key"]]
-    local? = ref["cartridge_id"] == m["id"] and ref["cartridge_version"] == m["version"]
+    # Each ref field is named after the kind it must name (fact, item, quest).
+    local? =
+      ref["cartridge_id"] == m["id"] and ref["cartridge_version"] == m["version"] and
+        ref["kind"] == field
 
     cond do
       not local? or target == nil ->

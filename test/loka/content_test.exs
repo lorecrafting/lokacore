@@ -145,11 +145,12 @@ defmodule Loka.ContentTest do
                ".hidden/x.json" => policy(@present),
                "notes.txt" => {:raw, "ignored"},
                "actions/talk.json" => Map.put(@talk, "key", "talk"),
-               "cartridge.json" => Map.put(@manifest, "entry", %{})
+               "cartridge.json" => Map.merge(@manifest, %{"entry" => %{}, "key" => "c"})
              }) == [
                d("UNKNOWN_FIELD", ~S(".hidden/x.json")),
                d("UNKNOWN_FIELD", "actions/talk.key"),
                d("UNKNOWN_FIELD", "cartridge.entry"),
+               d("UNKNOWN_FIELD", "cartridge.key"),
                d("UNKNOWN_FIELD", "polices/x")
              ]
     end
@@ -209,7 +210,9 @@ defmodule Loka.ContentTest do
         "items" => [
           %{"op" => "fact_compare", "fact" => ref("fact", "missing"), "equals" => true},
           %{"op" => "fact_compare", "fact" => ref("fact", "a_b", "2.0.0"), "equals" => true},
-          %{"op" => "fact_compare", "fact" => ref("fact", "a_b"), "equals" => true}
+          %{"op" => "fact_compare", "fact" => ref("fact", "a_b"), "equals" => true},
+          %{"op" => "fact_compare", "fact" => ref("action", "talk"), "equals" => true},
+          %{"op" => "has_item", "item" => ref("fact", "a_b")}
         ]
       }
 
@@ -229,6 +232,12 @@ defmodule Loka.ContentTest do
                }),
                d("UNRESOLVED_REFERENCE", "policies/p.root.items[1].fact", %{
                  "target" => "c@2.0.0:fact/a_b"
+               }),
+               d("UNRESOLVED_REFERENCE", "policies/p.root.items[3].fact", %{
+                 "target" => "c@1.0.0:action/talk"
+               }),
+               d("UNRESOLVED_REFERENCE", "policies/p.root.items[4].item", %{
+                 "target" => "c@1.0.0:fact/a_b"
                })
              ]
     end
@@ -358,6 +367,11 @@ defmodule Loka.ContentTest do
       assert Loka.Content.compile("cartridges/ashmere_hello", max_bytes: size - 1) ==
                {:error, [d("ARTIFACT_TOO_LARGE", "", %{"bytes" => size, "maximum" => size - 1})]}
     end
+  end
+
+  # Break: the source directory's name read as a glob pattern.
+  test "a directory name with glob characters", %{tmp_dir: tmp} do
+    assert {:ok, _} = Loka.Content.compile(source(Path.join(tmp, "c[1]{a,b}*?"), %{}))
   end
 
   # Break: the task writes other bytes than compile/2 returns, or writes on error.

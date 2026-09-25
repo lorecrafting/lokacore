@@ -17,8 +17,9 @@ defmodule Loka.Content.Source do
   """
   @spec load(Path.t()) :: {[{String.t(), file(), term()}], [map()]}
   def load(dir) do
+    # The directory name is literal, not glob syntax.
     entries =
-      dir
+      String.replace(dir, ~r/[\[\]{}*?\\]/, "\\\\\\0")
       |> Path.join("**/*.json")
       |> Path.wildcard(match_dot: true)
       |> Enum.filter(&File.regular?/1)
