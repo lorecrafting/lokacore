@@ -37,37 +37,39 @@ defmodule Loka.Core.ComposeTest do
 
   # Boundary cases too long to list in the fixture (65 ops, 1,024 queued jobs, 40 rows): the
   # inputs are built from a pattern here; each expected value is still hand-written.
-  defp cases do
-    @fixture["cases"] ++
-      [
-        %{
-          "id" => "budget-before-first-op-fault",
-          "state" => "base",
-          "ops" => [schedule(uuid("d1", 0), 30) | for(n <- 1..64, do: schedule(uuid("f2", n)))],
-          "expected" => budget()
-        },
-        %{
-          "id" => "pending-jobs-bound-is-the-final-queue",
-          "state" => "full_queue",
-          "ops" => [schedule(uuid("f1", 0), 20), complete(uuid("f0", 1))],
-          "expected" => %{
-            "changes" => [
-              %{"target" => job(uuid("f0", 1)), "value" => queued(3, "completed")},
-              %{"target" => job(uuid("f1", 0)), "value" => queued(20, "pending")}
-            ]
-          }
-        },
-        %{
-          "id" => "changes-sorted-by-target-over-32-rows",
-          "state" => "crowd",
-          "ops" => for(n <- 40..1//-1, do: transfer(uuid("e0", n))),
-          "expected" => %{
-            "changes" =>
-              for(n <- 1..40, do: %{"target" => containment(uuid("e0", n)), "value" => @room})
-          }
-        }
-      ]
-  end
+  defp cases, do: @fixture["cases"] ++ [budget_first(), final_queue(), sorted_rows()]
+
+  defp budget_first,
+    do: %{
+      "id" => "budget-before-first-op-fault",
+      "state" => "base",
+      "ops" => [schedule(uuid("d1", 0), 30) | for(n <- 1..64, do: schedule(uuid("f2", n)))],
+      "expected" => budget()
+    }
+
+  defp final_queue,
+    do: %{
+      "id" => "pending-jobs-bound-is-the-final-queue",
+      "state" => "full_queue",
+      "ops" => [schedule(uuid("f1", 0), 20), complete(uuid("f0", 1))],
+      "expected" => %{
+        "changes" => [
+          %{"target" => job(uuid("f0", 1)), "value" => queued(3, "completed")},
+          %{"target" => job(uuid("f1", 0)), "value" => queued(20, "pending")}
+        ]
+      }
+    }
+
+  defp sorted_rows,
+    do: %{
+      "id" => "changes-sorted-by-target-over-32-rows",
+      "state" => "crowd",
+      "ops" => for(n <- 40..1//-1, do: transfer(uuid("e0", n))),
+      "expected" => %{
+        "changes" =>
+          for(n <- 1..40, do: %{"target" => containment(uuid("e0", n)), "value" => @room})
+      }
+    }
 
   defp built("full_queue"),
     do: %{"clock" => 6, "jobs" => Map.new(1..1024, &{uuid("f0", &1), queued(3, "pending")})}
