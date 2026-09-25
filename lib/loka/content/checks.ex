@@ -54,7 +54,7 @@ defmodule Loka.Content.Checks do
   """
   @spec check(map() | nil, map(), [map()]) :: [map()]
   def check(manifest, defs, registry) do
-    all = for {_, ds} <- defs, {_, d} <- ds, do: d
+    all = for {_, ds} <- defs, {_, {_, _, _} = d} <- ds, do: d
 
     Enum.flat_map(all, &depth/1) ++
       if(manifest, do: uses(manifest, defs, owners(registry)), else: [])
@@ -148,6 +148,9 @@ defmodule Loka.Content.Checks do
       not local? or target == nil ->
         s = "#{ref["cartridge_id"]}@#{ref["cartridge_version"]}:#{ref["kind"]}/#{ref["key"]}"
         [diag("UNRESOLVED_REFERENCE", at(rel, steps ++ [field]), %{"target" => s})]
+
+      target == :invalid ->
+        []
 
       field == "fact" and not typed?(n["equals"], elem(target, 2)["value_type"]) ->
         [diag("FACT_TYPE_MISMATCH", at(rel, steps ++ ["equals"]))]

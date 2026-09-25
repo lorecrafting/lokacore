@@ -106,6 +106,8 @@ defmodule Loka.Content.Source do
 
   defp name?(s), do: s =~ ~r/\A[a-z0-9_]+\z/
 
+  # ponytail: a non-UTF-8 file name (possible on Linux builder hosts) fails this match and
+  # crashes; render the raw name as a quoted literal or reject it with a diagnostic if needed.
   defp literal(s) do
     {:ok, text} = Canonical.encode(s)
     text

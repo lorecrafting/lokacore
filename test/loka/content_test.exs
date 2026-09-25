@@ -242,6 +242,18 @@ defmodule Loka.ContentTest do
              ]
     end
 
+    # Break: a reference to a definition that failed validation adds a false second cause.
+    test "a reference to an invalid fact reports only the fact", %{tmp_dir: tmp} do
+      compare = %{"op" => "fact_compare", "fact" => ref("fact", "a_b"), "equals" => true}
+
+      assert errors(tmp, %{
+               "facts.json" => %{"facts" => %{"a.b" => %{@fact | "version" => 0}}},
+               "policies/p.json" => policy(compare)
+             }) == [
+               d("SCHEMA_VIOLATION", ~s(facts.facts["a.b"].version), %{"error" => "below_minimum"})
+             ]
+    end
+
     test "UNKNOWN_COMMAND", %{tmp_dir: tmp} do
       assert errors(tmp, %{"actions/talk.json" => %{@talk | "command" => "fly"}}) ==
                [d("UNKNOWN_COMMAND", "actions/talk.command")]

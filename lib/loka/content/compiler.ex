@@ -48,10 +48,14 @@ defmodule Loka.Content.Compiler do
   defp files(files, kind, contract),
     do: collect(for {rel, {^kind, k}, v} <- files, do: {k, definition(rel, [], k, v, contract)})
 
-  # {key => definition, diagnostics} from {key, {:ok, definition} | {:error, diagnostics}}.
+  # {key => definition | :invalid, diagnostics}. An invalid definition stays known, so a
+  # reference to it resolves instead of adding a second, false cause (08 §6); any
+  # diagnostic stops the build, so :invalid never reaches the artifact.
   defp collect(results) do
-    {Map.new(for {k, {:ok, d}} <- results, do: {k, d}),
-     for({_, {:error, ds}} <- results, d <- ds, do: d)}
+    {Map.new(results, fn
+       {k, {:ok, d}} -> {k, d}
+       {k, {:error, _}} -> {k, :invalid}
+     end), for({_, {:error, ds}} <- results, d <- ds, do: d)}
   end
 
   # facts.json: {"facts": {authored name: FactSpec without key}}; each . in a name becomes _.
