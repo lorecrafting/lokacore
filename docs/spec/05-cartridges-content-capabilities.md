@@ -76,6 +76,8 @@ cartridges/
 
 Source YAML is human/LLM friendly. The compiler normalizes it into typed definitions.
 
+*Amendment 2026-09-25 (R4, [owner decision](../decisions/owner-decisions-r4-2026-09-25.md) item 1):* the source form for now is JSON (`.json` files; every JSON file is valid YAML 1.2). YAML syntax comes later; the examples in this packet stay YAML.
+
 ## 3. Manifest
 
 Example:

@@ -87,6 +87,9 @@ The table below describes the files as imported. Later amendments are in git his
   authored names that map to the same key are a compile error, never a merge; the
   64-character limit applies after mapping. (The same record keeps ambiguous-target order
   as ascending id; no spec change.)
+- 2026-09-25, R4 S1 ([owner decision](../decisions/owner-decisions-r4-2026-09-25.md)):
+  notes in 05 §2 (source is JSON for now, YAML later) and 00a §12 (R4 compiles the hello
+  fixture's frozen subset; the rest after R5/R7/R8).
 
 ## Link rewrites (the only byte changes at import)
 

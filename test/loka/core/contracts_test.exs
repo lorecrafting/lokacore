@@ -95,4 +95,17 @@ defmodule Loka.Core.ContractsTest do
     for text <- [~s({"n":1.0}), ~s({"n":1e0}), ~s({"n":1,"n":1})],
         do: assert(Loka.Core.Canonical.decode(text) == {:error, :invalid_json}, text)
   end
+
+  # The subset allows only a pattern under propertyNames, so the definition maps copy the
+  # DefinitionRefString pattern with the kind fixed; this breaks when the two drift.
+  test "definition map keys use the DefinitionRefString pattern with their kind" do
+    ref = Contracts.defs()["DefinitionRefString"]["pattern"]
+    props = Contracts.defs()["CompiledCartridge"]["properties"]
+
+    for {map, kind} <- [{"facts", "fact"}, {"policies", "policy"}, {"actions", "action"}] do
+      expected = String.replace(ref, ":[a-z][a-z0-9_]{0,63}/", ":#{kind}/")
+      assert expected != ref
+      assert props[map]["propertyNames"]["pattern"] == expected, map
+    end
+  end
 end

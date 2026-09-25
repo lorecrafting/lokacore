@@ -1,7 +1,7 @@
 # Generates from protocol/ (spec 04 §12, 14 Gate R3, 05 §6):
 # - kernel/ts/src/contracts.gen.ts: TypeScript types and flattened schemas of
-#   protocol/*.schema.json, the evaluation-fault codes of protocol/error_registry.json and
-#   the composition-profile limits;
+#   protocol/*.schema.json, the evaluation-fault codes of protocol/error_registry.json, the
+#   composition-profile limits and the artifact byte cap (ArtifactSize);
 # - kernel/ts/test/subset.gen.ts: the same for the test-only probe
 #   protocol/fixtures/subset.schema.json;
 # - docs/contracts.gen.md (capability and schema docs) and docs/residency.gen.json (the
@@ -213,6 +213,7 @@ targets = %{
         [
           "export const EVALUATION_FAULTS: readonly ErrorCode[] = #{Gen.lit(faults)};",
           "export const LIMITS: Readonly<Record<string, number>> = JSON.parse(#{Gen.lit(Gen.lit(limits))});",
+          "export const ARTIFACT_MAX_BYTES = #{Loka.Core.Contracts.defs()["ArtifactSize"]["maximum"]};",
           ""
         ],
         "\n"

@@ -34,3 +34,7 @@ holds the owner's decisions retained verbatim.
 - Owner decisions: [R5 setup: rule lint lockdown, `loka play` CLI, feature map](owner-decision-r5-setup-2026-09-25.md).
 - [Type-check the TypeScript tests](owner-decision-ts-test-types-2026-09-25.md): owner
   approval to add `@types/node` and type-check `kernel/ts/test/` before R4.
+
+## R4
+
+- Owner decisions: [R4 minimal: JSON source, 4 MiB artifact cap, hello fixture's frozen subset](owner-decisions-r4-2026-09-25.md).
