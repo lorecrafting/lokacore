@@ -198,5 +198,30 @@
     "code": "conflicting_write",
     "category": "evaluation_fault",
     "description": "Two writer groups wrote one mutation target without a registered composition rule (04 \u00a75.1, \u00a75.3)."
+  },
+  {
+    "code": "precondition_failed",
+    "category": "evaluation_fault",
+    "description": "A delta op's precondition does not hold against the proposal overlay (04 \u00a75.1; protocol/delta.schema.json)."
+  },
+  {
+    "code": "containment_cycle",
+    "category": "evaluation_fault",
+    "description": "A transfer would put an entity inside itself (04 \u00a75.3)."
+  },
+  {
+    "code": "capacity_exceeded",
+    "category": "evaluation_fault",
+    "description": "A transfer would overfill the destination's capacity (04 \u00a75.3)."
+  },
+  {
+    "code": "nonfuture_job",
+    "category": "evaluation_fault",
+    "description": "A scheduled job is not later than the current time or the explicit advance's target (04 \u00a75.4)."
+  },
+  {
+    "code": "budget_exceeded",
+    "category": "evaluation_fault",
+    "description": "The delta exceeds a composition-profile budget (04 \u00a75.4; conformance/composition-profile.json)."
   }
 ]

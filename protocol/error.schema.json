@@ -45,7 +45,12 @@
         "too_few_items",
         "too_many_items",
         "too_many_properties",
-        "conflicting_write"
+        "conflicting_write",
+        "precondition_failed",
+        "containment_cycle",
+        "capacity_exceeded",
+        "nonfuture_job",
+        "budget_exceeded"
       ],
       "examples": [
         "not_found",

@@ -53,3 +53,10 @@ Each record is written by a fresh agent that authored none of the reviewed work 
   verified with mutants and a 177-mutant sweep; two new one-line should-fix in the reshaped
   shapes: `fact_changed` subject, `job.complete` precondition during an advance); round 2
   at `c2284ed`, APPROVE (F4/F5 fixed; PR #12 merge resolutions verified line by line).
+- [2026-09-24 R3 PR 5 composition](2026-09-24-r3-pr5-composition-review.md): PR #15 at
+  `9131dbe`, APPROVE WITH NOTES (full Fable review: spec-derived requirements, reviewer
+  differential of 2,124 cases over 3 seeds, 29 mutants of which 1 survives in both kernels;
+  two one-line should-fix, four nits, no owner decision needed); Astra cross-vendor review
+  adjudicated (A1 not a compose blocker: an R5 coordinator obligation to register; A4 and
+  AQ1 accepted; A2, A3, A5 deferred with follow-ups), verdict unchanged; re-review of the
+  fixes at `2812a71`, APPROVE (every item verified, six mutants die, differential identical).
