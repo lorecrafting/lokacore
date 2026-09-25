@@ -29,12 +29,76 @@ type Row = { target?: Json; fact?: Json; value: Json };
 const index = (rows: Row[] | undefined, field: 'target' | 'fact') =>
   Object.fromEntries((rows ?? []).map((r) => [key(r[field]), r.value]));
 const state = (name: string): State => {
-  const s = fixture.states[name];
+  const s = fixture.states[name] ?? built[name];
   return { ...s, facts: index(s.facts, 'target'), fact_defaults: index(s.fact_defaults, 'fact') };
 };
 
+// Boundary cases too long to list in the fixture (65 ops, 1,024 queued jobs, 40 rows): the
+// inputs are built from a pattern here; each expected value is still hand-written.
+const uuid = (prefix: string, n: number) =>
+  `${prefix}000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
+const range = (n: number) => [...Array(n).keys()].map((i) => i + 1);
+const HUB = '10000000-0000-4000-8000-000000000000';
+const ROOM = '20000000-0000-4000-8000-000000000000';
+const bram = { cartridge_id: 'lantern', cartridge_version: '0.1.0', kind: 'schedule', key: 'bram' };
+const schedule = (id: string, due = 100) => ({
+  op: 'job.schedule',
+  writer_group: 0,
+  job_id: id,
+  job: bram,
+  due_time: due,
+});
+const complete = (id: string) => ({ op: 'job.complete', writer_group: 0, job_id: id });
+const queued = (due: number, status: string) => ({ job: bram, due_time: due, status });
+const built: Record<string, object> = {
+  full_queue: {
+    clock: 6,
+    jobs: Object.fromEntries(range(1024).map((n) => [uuid('f0', n), queued(3, 'pending')])),
+  },
+  crowd: { clock: 0, containers: Object.fromEntries(range(40).map((n) => [uuid('e0', n), HUB])) },
+};
+const cases = [
+  ...fixture.cases,
+  {
+    id: 'budget-before-first-op-fault',
+    state: 'base',
+    ops: [schedule(uuid('d1', 0), 30), ...range(64).map((n) => schedule(uuid('f2', n)))],
+    expected: { fault: { kind: 'fault', code: 'budget_exceeded' } },
+  },
+  {
+    id: 'pending-jobs-bound-is-the-final-queue',
+    state: 'full_queue',
+    ops: [schedule(uuid('f1', 0), 20), complete(uuid('f0', 1))],
+    expected: {
+      changes: [
+        { target: { kind: 'job', job_id: uuid('f0', 1) }, value: queued(3, 'completed') },
+        { target: { kind: 'job', job_id: uuid('f1', 0) }, value: queued(20, 'pending') },
+      ],
+    },
+  },
+  {
+    id: 'changes-sorted-by-target-over-32-rows',
+    state: 'crowd',
+    ops: range(40)
+      .reverse()
+      .map((n) => ({
+        op: 'entity.transfer',
+        writer_group: 0,
+        entity_id: uuid('e0', n),
+        source_id: HUB,
+        destination_id: ROOM,
+      })),
+    expected: {
+      changes: range(40).map((n) => ({
+        target: { kind: 'containment', entity_id: uuid('e0', n) },
+        value: ROOM,
+      })),
+    },
+  },
+];
+
 test('composition known answers', () => {
-  for (const c of fixture.cases) {
+  for (const c of cases) {
     const delta = { ops: c.ops };
     const result = compose(state(c.state), delta);
     assert.equal(encode(result as Json), encode(c.expected), c.id);
@@ -101,21 +165,11 @@ test('failed or unknown commits and faults adopt and deliver nothing; a commit a
   );
 });
 
-const jobId = (n: number) => `d0000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
+const jobId = (n: number) => uuid('d0', n);
 const jobs = (n: number, due: number) =>
   Object.fromEntries(
     [...Array(n).keys()].map((i) => [jobId(i + 1), { due_time: due, status: 'pending' }]),
   );
-const range = (n: number) => [...Array(n).keys()].map((i) => i + 1);
-const bram = { cartridge_id: 'lantern', cartridge_version: '0.1.0', kind: 'schedule', key: 'bram' };
-const schedule = (n: number) => ({
-  job: bram,
-  op: 'job.schedule',
-  writer_group: 0,
-  job_id: jobId(n),
-  due_time: 100,
-});
-const complete = (n: number) => ({ op: 'job.complete', writer_group: 0, job_id: jobId(n) });
 const over = (s: object, ops: object[]) =>
   encode(compose({ ...s, clock: 6 } as State, { ops } as never) as Json) ===
   '{"fault":{"code":"budget_exceeded","kind":"fault"}}';
@@ -132,16 +186,37 @@ test('composition-profile budgets: at the limit composes with the expected chang
     `[{"target":{"kind":"clock"},"value":${6 + limits.operations}}]`,
   );
   assert.ok(over({}, advance(limits.operations + 1)));
-  assert.equal(changes({}, range(limits.created_jobs).map(schedule)).length, limits.created_jobs);
-  assert.ok(over({}, range(limits.created_jobs + 1).map(schedule)));
+  assert.equal(
+    changes(
+      {},
+      range(limits.created_jobs).map((n) => schedule(jobId(n))),
+    ).length,
+    limits.created_jobs,
+  );
+  assert.ok(
+    over(
+      {},
+      range(limits.created_jobs + 1).map((n) => schedule(jobId(n))),
+    ),
+  );
   const pending = limits.pending_jobs;
   assert.equal(
-    (changes({ jobs: jobs(pending - 1, 100) }, [schedule(pending)])[0]!.value as { status: string })
-      .status,
+    (
+      changes({ jobs: jobs(pending - 1, 100) }, [schedule(jobId(pending))])[0]!.value as {
+        status: string;
+      }
+    ).status,
     'pending',
   );
-  assert.ok(over({ jobs: jobs(pending, 100) }, [schedule(pending + 1)]));
+  assert.ok(over({ jobs: jobs(pending, 100) }, [schedule(jobId(pending + 1))]));
   const due = limits.due_jobs_per_advance;
-  assert.equal(changes({ jobs: jobs(due, 1) }, range(due).map(complete)).length, due);
-  assert.ok(over({ jobs: jobs(due + 1, 1) }, range(due + 1).map(complete)));
+  assert.equal(changes({ jobs: jobs(due, 1) }, range(due).map(jobId).map(complete)).length, due);
+  assert.ok(
+    over(
+      { jobs: jobs(due + 1, 1) },
+      range(due + 1)
+        .map(jobId)
+        .map(complete),
+    ),
+  );
 });

@@ -24,7 +24,74 @@ defmodule Loka.Core.ComposeTest do
     )
   end
 
-  defp state(name), do: index(@fixture["states"][name])
+  defp state(name), do: index(Map.get_lazy(@fixture["states"], name, fn -> built(name) end))
+
+  @hub "10000000-0000-4000-8000-000000000000"
+  @room "20000000-0000-4000-8000-000000000000"
+  @bram %{
+    "cartridge_id" => "lantern",
+    "cartridge_version" => "0.1.0",
+    "kind" => "schedule",
+    "key" => "bram"
+  }
+
+  # Boundary cases too long to list in the fixture (65 ops, 1,024 queued jobs, 40 rows): the
+  # inputs are built from a pattern here; each expected value is still hand-written.
+  defp cases, do: @fixture["cases"] ++ [budget_first(), final_queue(), sorted_rows()]
+
+  defp budget_first,
+    do: %{
+      "id" => "budget-before-first-op-fault",
+      "state" => "base",
+      "ops" => [schedule(uuid("d1", 0), 30) | for(n <- 1..64, do: schedule(uuid("f2", n)))],
+      "expected" => budget()
+    }
+
+  defp final_queue,
+    do: %{
+      "id" => "pending-jobs-bound-is-the-final-queue",
+      "state" => "full_queue",
+      "ops" => [schedule(uuid("f1", 0), 20), complete(uuid("f0", 1))],
+      "expected" => %{
+        "changes" => [
+          %{"target" => job(uuid("f0", 1)), "value" => queued(3, "completed")},
+          %{"target" => job(uuid("f1", 0)), "value" => queued(20, "pending")}
+        ]
+      }
+    }
+
+  defp sorted_rows,
+    do: %{
+      "id" => "changes-sorted-by-target-over-32-rows",
+      "state" => "crowd",
+      "ops" => for(n <- 40..1//-1, do: transfer(uuid("e0", n))),
+      "expected" => %{
+        "changes" =>
+          for(n <- 1..40, do: %{"target" => containment(uuid("e0", n)), "value" => @room})
+      }
+    }
+
+  defp built("full_queue"),
+    do: %{"clock" => 6, "jobs" => Map.new(1..1024, &{uuid("f0", &1), queued(3, "pending")})}
+
+  defp built("crowd"),
+    do: %{"clock" => 0, "containers" => Map.new(1..40, &{uuid("e0", &1), @hub})}
+
+  defp uuid(prefix, n),
+    do: "#{prefix}000000-0000-4000-8000-" <> String.pad_leading("#{n}", 12, "0")
+
+  defp queued(due, status), do: %{"job" => @bram, "due_time" => due, "status" => status}
+  defp job(id), do: %{"kind" => "job", "job_id" => id}
+  defp containment(e), do: %{"kind" => "containment", "entity_id" => e}
+
+  defp transfer(e),
+    do: %{
+      "op" => "entity.transfer",
+      "writer_group" => 0,
+      "entity_id" => e,
+      "source_id" => @hub,
+      "destination_id" => @room
+    }
 
   defp holds_all(state, delta, result) do
     for id <- @compose_invariants,
@@ -33,7 +100,7 @@ defmodule Loka.Core.ComposeTest do
   end
 
   test "composition known answers" do
-    for c <- @fixture["cases"] do
+    for c <- cases() do
       delta = %{"ops" => c["ops"]}
       assert Contracts.validate("StateDelta", delta) == :ok, c["id"]
       result = Compose.compose(state(c["state"]), delta)
@@ -132,24 +199,18 @@ defmodule Loka.Core.ComposeTest do
   defp jobs(n, due),
     do: Map.new(1..n//1, &{job_id(&1), %{"due_time" => due, "status" => "pending"}})
 
-  defp job_id(n), do: "d0000000-0000-4000-8000-" <> String.pad_leading("#{n}", 12, "0")
+  defp job_id(n), do: uuid("d0", n)
 
-  @bram %{
-    "cartridge_id" => "lantern",
-    "cartridge_version" => "0.1.0",
-    "kind" => "schedule",
-    "key" => "bram"
-  }
-  defp schedule(n),
+  defp schedule(id, due \\ 100),
     do: %{
       "op" => "job.schedule",
       "writer_group" => 0,
-      "job_id" => job_id(n),
+      "job_id" => id,
       "job" => @bram,
-      "due_time" => 100
+      "due_time" => due
     }
 
-  defp complete(n), do: %{"op" => "job.complete", "writer_group" => 0, "job_id" => job_id(n)}
+  defp complete(id), do: %{"op" => "job.complete", "writer_group" => 0, "job_id" => id}
 
   defp over?(state, ops),
     do: Compose.compose(Map.put(state, "clock", 6), %{"ops" => ops}) == budget()
@@ -174,19 +235,22 @@ defmodule Loka.Core.ComposeTest do
     assert over?(%{}, advance.(ops + 1))
 
     created = @limits["created_jobs"]
-    assert length(changes(%{}, Enum.map(1..created, &schedule/1))) == created
-    assert over?(%{}, Enum.map(1..(created + 1), &schedule/1))
+    assert length(changes(%{}, for(n <- 1..created, do: schedule(job_id(n))))) == created
+    assert over?(%{}, for(n <- 1..(created + 1), do: schedule(job_id(n))))
 
     pending = @limits["pending_jobs"]
 
     assert [%{"value" => %{"status" => "pending"}}] =
-             changes(%{"jobs" => jobs(pending - 1, 100)}, [schedule(pending)])
+             changes(%{"jobs" => jobs(pending - 1, 100)}, [schedule(job_id(pending))])
 
-    assert over?(%{"jobs" => jobs(pending, 100)}, [schedule(pending + 1)])
+    assert over?(%{"jobs" => jobs(pending, 100)}, [schedule(job_id(pending + 1))])
 
     due = @limits["due_jobs_per_advance"]
-    assert length(changes(%{"jobs" => jobs(due, 1)}, Enum.map(1..due, &complete/1))) == due
-    assert over?(%{"jobs" => jobs(due + 1, 1)}, Enum.map(1..(due + 1), &complete/1))
+
+    assert length(changes(%{"jobs" => jobs(due, 1)}, for(n <- 1..due, do: complete(job_id(n))))) ==
+             due
+
+    assert over?(%{"jobs" => jobs(due + 1, 1)}, for(n <- 1..(due + 1), do: complete(job_id(n))))
   end
 
   # Seeded random deltas over a small id pool (so conflicts and failed preconditions are
@@ -194,7 +258,8 @@ defmodule Loka.Core.ComposeTest do
   @peer "kernel/ts/test/differential_peer.ts"
   test "differential: Elixir and TypeScript compose identically" do
     :rand.seed(:exsss, {5, 5, 5})
-    cases = for _ <- 1..1000, do: random_case()
+    pool = for c <- cases(), c["state"] == "base", op <- c["ops"], do: op
+    cases = for _ <- 1..1000, do: random_case(pool)
 
     ours =
       for %{"state" => s, "delta" => d} <- cases do
@@ -222,7 +287,7 @@ defmodule Loka.Core.ComposeTest do
   @base @fixture["states"]["base"]
   defp pick(list), do: Enum.random(list)
 
-  defp random_case do
+  defp random_case(pool) do
     state =
       index(%{
         @base
@@ -231,13 +296,16 @@ defmodule Loka.Core.ComposeTest do
           "facts" => Enum.take(@base["facts"], pick(0..1))
       })
 
-    %{"state" => state, "delta" => %{"ops" => for(_ <- 1..pick(0..4)//1, do: random_op(state))}}
+    %{
+      "state" => state,
+      "delta" => %{"ops" => for(_ <- 1..pick(0..4)//1, do: random_op(pool, state))}
+    }
   end
 
-  @ops for c <- @fixture["cases"], c["state"] == "base", op <- c["ops"], do: op
   @ents Map.keys(@base["containers"]) ++ ["10000000-0000-4000-8000-000000000000"]
 
-  defp random_op(state), do: vary(%{pick(@ops) | "writer_group" => pick([0, 0, 0, 1, 2])}, state)
+  defp random_op(pool, state),
+    do: vary(%{pick(pool) | "writer_group" => pick([0, 0, 0, 1, 2])}, state)
 
   defp vary(%{"op" => "entity.transfer", "entity_id" => e} = op, s) do
     here = s["containers"][e]

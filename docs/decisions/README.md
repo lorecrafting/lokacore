@@ -4,17 +4,29 @@ Accepted ADRs live in [document 16](../spec/16-decision-register.md). This direc
 proposals that enter document 16 at the next contract amendment, and the owner's
 decisions retained verbatim.
 
+## R0/R1
+
 - [Proposed ADR-071 and ADR-072](adr-071-072-proposal.md): candidate C selected; persistence
   shape. ADR-070 (Pixel 3a substitution) is proposed in the legacy A2 plan linked from
   [the A2 owner decision](owner-decision-a2-2026-09-23.md).
+- Owner decisions: [A2](owner-decision-a2-2026-09-23.md), [quick A3](owner-decision-a3-2026-09-24.md),
+  [PREP-03](owner-decision-prep-03-2026-09-24.md).
+
+## R2
+
 - [Proposed ADR-073](adr-073-single-app.md): one Mix application with strict boundaries,
   not an umbrella.
-- [Proposed ADR-074](adr-074-ts-first-proposal.md): TypeScript-only story rules until Story
-  runs on a server ([accepted by the owner](owner-decision-adr-074-2026-09-24.md)).
-- Owner decisions: [A2](owner-decision-a2-2026-09-23.md), [quick A3](owner-decision-a3-2026-09-24.md),
-  [PREP-03](owner-decision-prep-03-2026-09-24.md), [reviewers](owner-decision-reviewers-2026-09-24.md),
-  [other 2026-09-24 quotes](owner-decisions-2026-09-24.md), [R2](owner-decision-r2-2026-09-24.md),
-  [R3 plan and verification harness](owner-decision-roadmap-2026-09-24.md),
+- Owner decisions: [R2](owner-decision-r2-2026-09-24.md), [reviewers](owner-decision-reviewers-2026-09-24.md),
+  [other 2026-09-24 quotes](owner-decisions-2026-09-24.md).
+
+## R3
+
+- Owner decisions: [R3 plan and verification harness](owner-decision-roadmap-2026-09-24.md),
   [R3](owner-decisions-r3-2026-09-24.md), [R3 lanes, CommandId, auto-merge](owner-decisions-r3-lanes-2026-09-24.md),
   [R3 PR 4a manifest forms and limits](owner-decisions-r3-pr4a-2026-09-24.md),
   [Gate R3 residency and Elixir types](owner-decisions-r3-gate-2026-09-24.md).
+
+## Post-R3
+
+- [Proposed ADR-074](adr-074-ts-first-proposal.md): TypeScript-only story rules until Story
+  runs on a server ([accepted by the owner](owner-decision-adr-074-2026-09-24.md)).
