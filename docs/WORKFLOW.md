@@ -8,7 +8,7 @@ a welcome source of independence. [AGENTS.md](../AGENTS.md) rules apply to every
 
 | Role | Who | Model | Owns |
 |---|---|---|---|
-| PM | the main session | the owner's choice | plan, slices, briefs, owner contact, merges after the owner's OK |
+| PM | the main session | the owner's choice | plan, slices, briefs, owner contact, merges |
 | Developer | [`developer`](../.claude/agents/developer.md) subagent, one per slice | Opus | code, checks, self-review, opening the PR, fixes |
 | Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | Opus; Fable for design judgment | independent review, review record |
 
@@ -51,8 +51,11 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
    result to its record. A broad re-review of the whole PR happens only when the fixes
    rewrote a core piece or the slice freezes a contract or closes a gate. At most two fix
    rounds; anything still open goes to the owner.
-7. **Merge (PM).** Summarize for the owner: PR link, verdict, open notes. Merge with a merge
-   commit only after the owner's OK. If the slice taught a lesson, record it in its area
+7. **Merge (PM).** Merge with a merge commit once the verdict is APPROVE or APPROVE WITH
+   NOTES with nothing open and every CI job is green on the head
+   ([owner decision](decisions/owner-decisions-r3-lanes-2026-09-24.md)); then tell the owner:
+   PR link, verdict, notes. Owner decisions, anything open after fix round 2 and Astra
+   relays still go to the owner. If the slice taught a lesson, record it in its area
    file under `docs/lessons/` (AGENTS.md only if it applies to all work).
 
 ## Milestone gate: docs tidy pass

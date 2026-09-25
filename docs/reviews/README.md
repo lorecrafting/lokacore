@@ -37,3 +37,9 @@ Each record is written by a fresh agent that authored none of the reviewed work 
   independently; 31-value differential with zero disagreements; 8 of 9 mutants caught; two
   should-fix: the chapter-one lock's portability is untested, and the normalized manifest
   shapes need a spec-amendment record; views on owner questions 1-9).
+- [2026-09-24 R3 PR 6a envelopes](2026-09-24-r3-pr6a-envelopes-review.md): PR #11 at
+  `018ccbf`, CHANGES REQUIRED (test-the-tests on the contract; one blocker: the envelope's
+  and registry entry's `required` lists survive mutation; one should-fix:
+  `consequence_operator` must freeze at R5, where ActionRecipe executes over registered
+  consequences; docs part accurate, decision record byte-identical); re-review of the fixes at
+  `b966814`, APPROVE (F1 mutants now fail in both kernels; F2 and N1 fixed).

@@ -57,5 +57,12 @@
   {"contract": "CartridgeRelease", "value": {"cartridge_id": "ashmere_1_the_missing_child", "cartridge_version": "1.0.0", "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0"}, "errors": [{"path": "/cartridge_hash", "code": "pattern_mismatch"}]},
   {"contract": "CampaignManifest", "value": {"api_version": "loka/v3", "id": "The Fox", "version": "1.0.0", "cartridges": []}, "errors": [{"path": "/cartridges", "code": "too_few_items"}, {"path": "/id", "code": "pattern_mismatch"}]},
   {"contract": "DefinitionRef", "value": {"cartridge_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "cartridge_version": "1.0.0-rc1", "kind": "npc", "key": "k"}, "errors": [{"path": "/cartridge_id", "code": "too_long"}, {"path": "/cartridge_version", "code": "pattern_mismatch"}]},
-  {"contract": "SubsetProbe", "value": {"counts": {"𝒶": 0, "Ａ": 0}}, "errors": [{"path": "/counts/Ａ", "code": "pattern_mismatch"}, {"path": "/counts/𝒶", "code": "pattern_mismatch"}]}
+  {"contract": "SubsetProbe", "value": {"counts": {"𝒶": 0, "Ａ": 0}}, "errors": [{"path": "/counts/Ａ", "code": "pattern_mismatch"}, {"path": "/counts/𝒶", "code": "pattern_mismatch"}]},
+  {"contract": "FeatureEnvelope", "value": {"kind": "dialogue", "version": 1}, "errors": [{"path": "/kind", "code": "not_in_enum"}]},
+  {"contract": "FeatureEnvelope", "value": {"kind": "barrier", "version": "1"}, "errors": [{"path": "/version", "code": "invalid_type"}]},
+  {"contract": "FeatureEnvelope", "value": {"kind": "barrier", "version": 0}, "errors": [{"path": "/version", "code": "below_minimum"}]},
+  {"contract": "FeatureEnvelope", "value": {"kind": "barrier", "version": 1, "body": {"open": true}}, "errors": [{"path": "/body", "code": "unknown_property"}]},
+  {"contract": "FeatureRegistryEntry", "value": {"kind": "barrier", "spec": "", "freeze": "R6"}, "errors": [{"path": "/freeze", "code": "not_in_enum"}, {"path": "/spec", "code": "too_short"}]},
+  {"contract": "FeatureEnvelope", "value": {}, "errors": [{"path": "/kind", "code": "missing_property"}, {"path": "/version", "code": "missing_property"}]},
+  {"contract": "FeatureRegistryEntry", "value": {"kind": "barrier", "spec": "21 §5 Barrier"}, "errors": [{"path": "/freeze", "code": "missing_property"}]}
 ]
