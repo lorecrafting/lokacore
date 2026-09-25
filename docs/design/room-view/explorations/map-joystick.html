@@ -1,0 +1,311 @@
+<title>Loka Map Joystick</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap">
+<style>
+:root{
+  --bg:#eceee9; --fg:#1d2320; --muted:#56615b; --line:#cfd5ce; --accent:#7b2d20; --panel:#f6f7f3;
+  --head:'IM Fell English',Georgia,serif; --sc:'IM Fell English SC',Georgia,serif; --body:'EB Garamond',Georgia,serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark; --bg:#121614; --fg:#e2e5df; --muted:#9aa59e; --line:#2a322e; --accent:#d9937a; --panel:#181d1a}}
+:root[data-theme="dark"]{color-scheme:dark; --bg:#121614; --fg:#e2e5df; --muted:#9aa59e; --line:#2a322e; --accent:#d9937a; --panel:#181d1a}
+body{background:var(--bg); color:var(--fg); font:17px/1.55 var(--body); padding-inline:16px; padding-block:28px 64px}
+.wrap{max-width:1180px; margin:0 auto}
+h1{font:400 clamp(2rem,5vw,3rem)/1.05 var(--head); margin:0 0 .3em; text-wrap:balance}
+h2.sec{font:400 1.35rem var(--sc); letter-spacing:.03em; margin:0 0 .4em}
+.lede{max-width:70ch; color:var(--muted); margin:0 0 1em}
+.lede b{color:var(--fg); font-weight:500}
+.ud-notes{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr)); gap:10px 24px; margin:0 0 22px; padding:0; list-style:none; font-size:.95rem; color:var(--muted)}
+.ud-notes b{color:var(--fg); font-weight:500; font-family:var(--head); font-size:1.05rem; display:block}
+.ctl{display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center; margin:0 0 28px; padding:10px 0; border-block:1px solid var(--line); font-size:.95rem; position:sticky; top:env(safe-area-inset-top,0px); background:var(--bg); z-index:5}
+.grp{display:flex; flex-wrap:wrap; gap:4px; align-items:center}
+.grp>span{font:.9rem var(--sc); color:var(--muted); letter-spacing:.04em; margin-right:4px}
+.ctl button{font:inherit; font-size:.88rem; padding:3px 10px; border:1px solid var(--line); background:var(--panel); color:var(--fg); border-radius:4px; cursor:pointer}
+.ctl button[aria-pressed="true"]{background:var(--fg); color:var(--bg); border-color:var(--fg)}
+.gallery{display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,318px),1fr)); gap:36px 26px}
+figure{margin:0; display:flex; flex-direction:column; gap:10px}
+figcaption h2{font:400 1.18rem/1.2 var(--head); margin:0; display:flex; gap:.5em; align-items:baseline}
+figcaption h2 span{font:.95rem var(--sc); color:var(--accent)}
+figcaption p{margin:.2em 0 0; color:var(--muted); font-size:.95rem; line-height:1.45}
+figcaption .how{color:var(--fg); font-size:.9rem}
+
+.frame{--p-bg:#ebe6d7; --p-fg:#241f19; --p-dim:#6a6254; --p-line:#cdc3aa; --p-bad:#7b2d20; --p-warn:#8a5a14; --p-card:#e4decd;
+  position:relative; width:min(344px,100%); margin:0 auto; height:318px; display:flex; flex-direction:column; justify-content:flex-end;
+  background:var(--p-bg); color:var(--p-fg); border:8px solid #1a1b1a; border-top:0; border-radius:0 0 34px 34px; overflow:hidden; font:16px/1.45 var(--body); font-variant-numeric:oldstyle-nums}
+.night .frame{--p-bg:#0c0b09; --p-fg:#ecdfc3; --p-dim:#a79a83; --p-line:#3a3228; --p-bad:#eb9676; --p-warn:#e6b35a; --p-card:#17140f; color-scheme:dark}
+.frame button{font:inherit; color:inherit; background:none; border:0; padding:0; cursor:pointer}
+.frame :focus-visible{outline:2px solid var(--p-fg); outline-offset:2px}
+.ctx{flex:1; padding:12px 22px 0; -webkit-mask-image:linear-gradient(transparent,#000 60%); mask-image:linear-gradient(transparent,#000 60%); overflow:hidden; display:flex; flex-direction:column; justify-content:flex-end}
+.ctx p{margin:0 0 .3em}
+.ctx b{font-weight:500; border-bottom:1.5px dotted currentColor}
+.said{font-style:italic; color:var(--p-dim); min-height:1.45em}
+.said .x{color:var(--p-bad); font-style:normal; font:12px var(--sc); letter-spacing:.06em; margin-right:.4em}
+
+.blk{padding:0 22px 14px; display:flex; flex-direction:column; align-items:center; gap:2px}
+.mo{display:flex; align-items:center; justify-content:center; gap:8px; width:100%}
+.rl{display:block; flex:1; max-width:78px; height:1px; background:var(--p-line)}
+.st{display:flex; justify-content:center; align-items:baseline; gap:6px; white-space:nowrap; font-size:13px; color:var(--p-dim)}
+.st button{padding:4px 0}
+.lb{font:.82em var(--sc); letter-spacing:.06em; margin-right:2px}
+.lo{color:var(--p-bad)} .mid{color:var(--p-warn)}
+.hintline{font-style:italic; font-size:13.5px; color:var(--p-dim); min-height:26px; line-height:26px}
+.readout{height:20px; font:12.5px var(--sc); letter-spacing:.08em; color:var(--p-dim); text-align:center}
+.readout b{color:var(--p-fg); font-weight:400}
+.readout .bad{color:var(--p-bad)}
+
+/* the joystick */
+.joy{position:relative; touch-action:none; user-select:none; -webkit-user-select:none; cursor:grab; line-height:0}
+.joy:active{cursor:grabbing}
+.joy svg{display:block; overflow:visible}
+.e{stroke:var(--p-fg); stroke-width:1; opacity:.7}
+.s{stroke:var(--p-fg); stroke-width:1; opacity:.5; stroke-dasharray:1.5 2.5}
+.x{stroke:var(--p-bad); stroke-width:1; opacity:.85}
+.hot{opacity:1!important; stroke-width:1.8!important}
+.n{fill:var(--p-fg); opacity:.75}
+.ring{fill:var(--p-bg); stroke:var(--p-fg); stroke-width:1}
+.un{opacity:.3}
+.zone{fill:none; stroke:var(--p-line); stroke-width:1; stroke-dasharray:2 4}
+.knob{fill:var(--p-fg); transition:transform .18s ease}
+.dragging .knob{transition:none}
+.tether{stroke:var(--p-fg); stroke-width:1; opacity:.35}
+.chev{fill:none; stroke:var(--p-fg); stroke-width:1.1; opacity:.75}
+.chev.closed{stroke-dasharray:1.5 1.5}
+.chev.none{opacity:.15}
+.let{font:9px var(--sc); fill:var(--p-dim); letter-spacing:.05em; transition:opacity .6s}
+.faded .let{opacity:0}
+.layer .zone{stroke:var(--p-fg); stroke-dasharray:none; opacity:.4}
+.layer .n,.layer .e,.layer .s{opacity:.15}
+.lz{font:10px var(--sc); fill:var(--p-fg); letter-spacing:.08em}
+.lz.closed{font-style:italic; fill:var(--p-warn)}
+.spiral{fill:none; stroke:var(--p-fg); stroke-width:1.4; opacity:.7}
+.joy.grows svg{transition:transform .16s ease; transform-origin:50% 100%}
+.joy.grows.big{z-index:6}
+.joy.grows.big svg{transform:scale(1.6)}
+.joy.orn svg{transform-origin:50% 60%}
+.joy.orn.big svg{transform:scale(2.6)}
+.backing{fill:var(--p-bg); opacity:0; transition:opacity .16s}
+.big .backing{opacity:.96}
+.joy.orn .stair{opacity:0}
+.joy.orn.big .stair{opacity:1}
+.joy.orn.big .stair.none{opacity:.18!important}
+.knob.hollow{fill:var(--p-bg); stroke:var(--p-fg); stroke-width:.9}
+.tip{position:absolute; left:50%; bottom:calc(100% + 42px); transform:translateX(-50%); white-space:nowrap; font:12.5px var(--sc); letter-spacing:.08em; color:var(--p-dim); z-index:7; line-height:1.2; pointer-events:none}
+.tip b{font-weight:400; color:var(--p-fg); background:var(--p-bg); padding:2px 8px; border-radius:4px}
+.tip .bad{color:var(--p-bad)}
+.joy.grows.big .zone{fill:var(--p-bg); fill-opacity:.94; stroke:var(--p-fg); stroke-opacity:.35; stroke-dasharray:none}
+.stair{opacity:.45; transition:opacity .15s}
+.big .stair,.dragging .stair{opacity:1}
+.stair.none{opacity:.12!important}
+.stair.closed .ring{stroke-dasharray:1.5 1.5}
+.stair.hot .ring{fill:var(--p-fg)} .stair.hot .chev{stroke:var(--p-bg); opacity:1}
+.stair.hot.closed .ring,.stair.hot.none .ring{fill:var(--p-bad); stroke:var(--p-bad)}
+@media (prefers-reduced-motion:reduce){.joy.grows svg{transition:none}}
+.stairs{display:flex; flex-direction:column; gap:4px}
+.stairs button{width:30px; height:40px; font:14px var(--sc)!important; border:1px solid var(--p-line)!important; border-radius:8px; letter-spacing:0}
+.stairs button.none{opacity:.25}
+.stairs button.closed{font-style:italic}
+.row{display:flex; align-items:center; gap:14px}
+.side{display:grid; grid-template-columns:auto 1fr; align-items:center; gap:14px; width:100%}
+.side .st{flex-direction:column; align-items:flex-start; gap:0; white-space:nowrap}
+
+/* first-run guidance */
+.bubble{position:absolute; left:50%; transform:translateX(-50%); bottom:calc(100% + 2px); width:230px; background:var(--p-fg); color:var(--p-bg); font:13.5px/1.4 var(--body); padding:9px 12px 8px; border-radius:10px; text-align:left; z-index:4; line-height:1.4}
+.bubble::after{content:''; position:absolute; left:50%; bottom:-6px; margin-left:-6px; border:6px solid transparent; border-bottom:0; border-top-color:var(--p-fg)}
+.bubble button{display:block; margin:6px 0 0 auto; font:12px var(--sc)!important; letter-spacing:.08em; color:var(--p-bg)!important; opacity:.8}
+.ghost{fill:var(--p-fg); opacity:0; animation:ghost 2.6s ease-in-out infinite}
+@keyframes ghost{0%{opacity:0; transform:translate(0,0)} 15%{opacity:.35} 55%{opacity:.35; transform:translate(0,-26px)} 70%{opacity:0; transform:translate(0,-26px)} 100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.ghost{animation:none; opacity:.3; transform:translate(0,-18px)} .knob{transition:none}}
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0)}
+</style>
+
+<div class="wrap">
+  <h1>The map as a joystick</h1>
+  <p class="lede">The minimap grows and becomes the way you walk. <b>Hold it and drag toward a path</b>, then let go to go that way. Drag back to the middle to cancel. <b>A plain tap</b> still opens the Map page. With this, the “You can go” line disappears, because the map shows where the paths lead. <b>Try it with a mouse or finger.</b> The Old Mill has all four cases: two open paths, up, and a closed trapdoor down.</p>
+  <h2 class="sec">Five answers to up and down</h2>
+  <ul class="ud-notes">
+    <li><b>The ornament that grows</b>Variants 1–3. At rest it’s the tiny map between long rules. Press it and it zooms up, and stair nodes appear beside it for up and down.</li>
+    <li><b>Stair nodes beside the map</b>Your first version, at a fixed large size. Press and the map grows. Up and down are two extra nodes to the right (or left) of the map, and you drag all the way out to one. The drag lights your target the whole way. Variants 1–3.</li>
+    <li><b>Diagonal stairs</b>Loka is six-way, so the diagonals are free. Drag up-left or up-right to go up, and down-left or down-right to go down. Small chevrons on the diagonals show when a stair exists.</li>
+    <li><b>Hold to climb</b>Hold the map still for half a second and it lifts into a “layer” view. Then drag up to go up or down to go down. It is slower on purpose, because stairs are rarer than paths.</li>
+    <li><b>Stair keys</b>Up and down stay as two small keys beside the map. It isn’t clever, but it can’t be misread.</li>
+    <li><b>Spiral stair</b>Circle your thumb around the map: clockwise climbs and counter-clockwise descends. It’s the most delightful and the least discoverable.</li>
+  </ul>
+  <div class="ctl">
+    <div class="grp" role="group" aria-label="Room"><span>Room</span><button data-room="mill" aria-pressed="true">Old Mill</button><button data-room="landing" aria-pressed="false">Ferry Landing</button><button data-room="dark" aria-pressed="false">Dark shelter</button></div>
+    <div class="grp" role="group" aria-label="Condition"><span>Condition</span><button data-hurt="0" aria-pressed="true">Hale</button><button data-hurt="1" aria-pressed="false">Hurt</button></div>
+    <div class="grp" role="group" aria-label="Guidance"><span>Guidance</span><button data-hints="1">Show first-run hints again</button></div>
+    <div class="grp" role="group" aria-label="Page"><span>Page</span><button data-t="paper" aria-pressed="true">Paper</button><button data-t="night" aria-pressed="false">Night</button></div>
+  </div>
+  <div class="gallery" id="g"></div>
+</div>
+
+<script>
+const ROOMS={
+  mill:{prose:'<p>Flour dust hangs in the still air. The millstone has not turned in years.</p><p><b>Hob’s ledger</b> lies open on a grain sack.</p>',
+    ex:{n:'open',s:'open',u:'open',d:'closed'}, why:{d:'The trapdoor is closed.'},
+    nodes:[[0,-1],[1,-1],[0,1,1],[0,2,1]], edges:[[[0,-1],[1,-1]],[[0,1],[0,2],1]]},
+  landing:{prose:'<p>Reeds crowd a slick wooden landing. A mooring post leans into the current.</p><p><b>Bram</b> the ferryman stands here, one boot on the ferry.</p>',
+    ex:{n:'open',w:'barred'}, why:{w:'The causeway west is under the tide.'},
+    nodes:[[0,-1],[1,-1,1],[0,-2,1]], edges:[[[0,-1],[1,-1],1],[[0,-1],[0,-2],1]]},
+  dark:{prose:'<p>It is too dark to see. You smell lamp oil and wet tar.</p><p><b>Something brass</b> is here, under your hand.</p>',
+    ex:{w:'open'}, why:{}, dark:true,
+    nodes:[[-1,0],[-2,0],[-2,1]], edges:[[[-1,0],[-2,0]],[[-2,0],[-2,1]]]},
+};
+const WORD={n:'north',e:'east',s:'south',w:'west',u:'up',d:'down'};
+const VEC={n:[0,-1],e:[1,0],s:[0,1],w:[-1,0]};
+const S={room:'mill',hurt:false,pos:'standing',mv:0,said:{},learned:{},moves:{}};
+const R=()=>ROOMS[S.room];
+const band=(a,b)=>a/b<=.35?'lo':a/b<=.75?'mid':'';
+function status(){
+  const st=[[S.hurt?104:300,300,'hp'],[S.hurt?70:120,120,'ma'],[(S.hurt?150:200)-S.mv,200,'mv']];
+  return `06:00 · <button data-a="pos" aria-label="Position ${S.pos}, tap to change">${S.pos}</button> · ${nums()}`;
+}
+function nums(){
+  const st=[[S.hurt?104:300,300,'hp'],[S.hurt?70:120,120,'ma'],[(S.hurt?150:200)-S.mv,200,'mv']];
+  return `<button data-a="stats" aria-label="Open Character">${st.map(([a,b,l])=>`<span class="${band(a,b)}"><span class="lb">${l}</span>${a}/${b}</span>`).join('&ensp;')}</button>`;
+}
+
+/* where the map sits and where the stair nodes go, in svg units */
+function geo(cfg){
+  const Z=cfg.size||112,c=Z/2,side=cfg.ud==='side',left=cfg.stairs==='left';
+  /* a small ornament map keeps its stairs outside its own box, so it stays centred between the rules */
+  if(cfg.orn) {const sx=left?-cfg.sg:Z+cfg.sg; return {W:Z,cx:c,u:[sx,c-cfg.sdy],d:[sx,c+cfg.sdy]};}
+  const W=side?Z+40:Z,cx=side&&left?40+c:c,sx=left?16:Z+22;
+  return {W,cx,u:[sx,c-20],d:[sx,c+20]};
+}
+/* the map, drawn big: rings for places, you as the draggable dot, paths meeting each ring's edge */
+function MAP(cfg){
+  const Z=cfg.size||112,c=Z/2,k=cfg.k||20,nr=cfg.nr??3.2,yr=cfg.yr??5.2,srad=cfg.sr??5,fs=cfg.fs??9,m=R(),G=geo(cfg),cx=G.cx,P=([x,y])=>[cx+x*k,c+y*k];
+  const rad=p=>p[0]===0&&p[1]===0?yr:nr+.5;
+  let g=`<circle cx="${cx}" cy="${c}" r="${cfg.orn?c+cfg.sg+cfg.sr*2:c-3}" class="${cfg.orn?'backing':'zone'}"/>`;
+  const line=(a,b,cls,d)=>{const [x1,y1]=P(a),[x2,y2]=P(b),dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy),ra=rad(a),rb=rad(b);
+    return `<line x1="${x1+dx/L*ra}" y1="${y1+dy/L*ra}" x2="${x2-dx/L*rb}" y2="${y2-dy/L*rb}" class="${cls}" ${d?`data-d="${d}"`:''}/>`;};
+  m.edges.forEach(([a,b,u])=>g+=line(a,b,u?'s':'e'));
+  for(const d of ['n','e','s','w']){const st=m.ex[d]; if(!st) continue; const [vx,vy]=VEC[d];
+    const node=m.nodes.find(([x,y])=>x===vx&&y===vy);
+    if(node&&st==='open') g+=line([0,0],[vx,vy],node[2]?'s':'e',d);
+    else {const [x0,y0]=P([0,0]),x1=x0+vx*yr,y1=y0+vy*yr,x2=x0+vx*k*.62,y2=y0+vy*k*.62;
+      g+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="${st==='open'?'s':'x'}" data-d="${d}"/>`;
+      if(st!=='open') g+=`<line x1="${x2-vy*3}" y1="${y2-vx*3}" x2="${x2+vy*3}" y2="${y2+vx*3}" class="x"/>`;}}
+  m.nodes.forEach(([x,y,u])=>{const [px,py]=P([x,y]); g+=`<circle cx="${px}" cy="${py}" r="${nr}" class="${cfg.dots?'n':'ring'} ${u?'un':''}"/>`;});
+  if(cfg.ud==='diag') for(const [d,ang] of [['u',-45],['u',-135],['d',45],['d',135]]){
+    const st=m.ex[d]||'none',a=ang*Math.PI/180,x=c+Math.cos(a)*k*.9,y=c+Math.sin(a)*k*.9,up=d==='u';
+    g+=`<path d="M${x-3.5} ${y+(up?2:-2)} L${x} ${y+(up?-2:2)} L${x+3.5} ${y+(up?2:-2)}" class="chev ${st}" data-d="${d}"/>`;}
+  if(cfg.letters) g+=[['n',c,9],['e',Z-5,c+3],['s',c,Z-3],['w',5,c+3]].map(([l,x,y])=>`<text x="${x}" y="${y}" text-anchor="middle" class="let">${l}</text>`).join('');
+  if(cfg.ud==='hold') g+=`<text x="${c}" y="${c-k*1.35}" text-anchor="middle" class="lz lzu" opacity="0">${m.ex.u?'up':'no way up'}</text><text x="${c}" y="${c+k*1.35+6}" text-anchor="middle" class="lz lzd ${m.ex.d==='closed'?'closed':''}" opacity="0">${m.ex.d?(m.ex.d==='closed'?'down · closed':'down'):'no way down'}</text>`;
+  if(cfg.ud==='spiral') g+=`<path class="spiral" d="" />`;
+  if(cfg.ud==='side') for(const d of ['u','d']){const st=m.ex[d]||'none',[x,y]=G[d];
+    g+=`<g class="stair ${st}" data-d="${d}"><circle cx="${x}" cy="${y}" r="${srad}" class="ring"/><path d="M${x-srad/2} ${y+(d==='u'?srad/4:-srad/4)} L${x} ${y+(d==='u'?-srad/3.5:srad/3.5)} L${x+srad/2} ${y+(d==='u'?srad/4:-srad/4)}" class="chev"/><text x="${x}" y="${y+(d==='u'?-srad*1.8:srad*3)}" text-anchor="middle" class="let" style="font-size:${fs}px">${st==='none'?'':WORD[d]}</text></g>`;}
+  if(cfg.hint==='ghost'&&!S.learned[cfg.i]) g+=`<circle cx="${cx}" cy="${c}" r="5" class="ghost"/>`;
+  g+=`<line class="tether" x1="${cx}" y1="${c}" x2="${cx}" y2="${c}"/><circle cx="${cx}" cy="${c}" r="${yr}" class="knob ${cfg.hollow?'hollow':''}"/>`;
+  const sr=['n','e','s','w','u','d'].filter(d=>m.ex[d]).map(d=>`<button class="sr" data-go="${d}">Go ${WORD[d]}${m.ex[d]!=='open'?', '+m.ex[d]:''}</button>`).join('');
+  return `<div class="joy ${cfg.letters&&(S.moves[cfg.i]||0)>=3?'faded':''} ${cfg.grow?'grows':''} ${cfg.orn?'orn':''}" data-i="${cfg.i}" role="group" aria-label="Map. Hold and drag to walk, tap to open the map.">${cfg.orn?'<div class="tip" aria-live="polite"></div>':''}${sr}<svg width="${G.W}" height="${Z}" viewBox="0 0 ${G.W} ${Z}" aria-hidden="true">${g}</svg>${cfg.hint==='bubble'&&!S.learned[cfg.i]?`<div class="bubble">Hold the map and drag toward a path to walk. ${cfg.ud==='diag'?'Drag up-left or up-right to climb, and down-left or down-right to go down.':cfg.ud==='hold'?'Hold still first to reach up and down.':cfg.ud==='spiral'?'Circle it to climb or descend.':cfg.ud==='side'?'For up and down, drag all the way to the stairs beside it.':''}<button data-a="gotit">Got it</button></div>`:''}</div>`;
+}
+const STAIRS=()=>`<div class="stairs">${['u','d'].map(d=>`<button class="${R().ex[d]||'none'}" data-go="${d}" aria-label="${WORD[d]}${R().ex[d]?'':', no way'}">${d==='u'?'˄':'˅'}</button>`).join('')}</div>`;
+const HINT=cfg=>cfg.hint==='inline'&&!S.learned[cfg.i]?`<div class="hintline">hold the map and drag to walk</div>`:'';
+
+const VARIANTS=[
+ {n:'The ornament that grows',d:'At rest it is #1 again: a tiny map between long rules, with no circle around it. Press and it zooms up over the prose so it’s easy to aim. Drag to light a path. For up and down, drag out to the stair nodes that appear on the right.',ud:'side',stairs:'right',grow:true,orn:true,zoom:2.6,size:44,k:10,nr:1.5,yr:2.6,sr:2.6,fs:4,sg:9,sdy:9,snap:5,hint:'bubble',lay:'rules'},
+ {n:'The ornament that grows, stairs left',d:'The same, with the stair nodes appearing to the left when pressed.',ud:'side',stairs:'left',grow:true,orn:true,zoom:2.6,size:44,k:10,nr:1.5,yr:2.6,sr:2.6,fs:4,sg:9,sdy:9,snap:5,hint:'ghost',lay:'rules'},
+ {n:'The ornament that grows, open-ring you',d:'#1’s drawing inverted: you are an open ring and the places are small solid dots. It grows on press the same way, with stairs on the right.',ud:'side',stairs:'right',grow:true,orn:true,zoom:2.6,size:44,k:10,nr:1.5,yr:2.6,sr:2.6,fs:4,sg:9,sdy:9,snap:5,hollow:true,dots:true,hint:'none',lay:'rules'},
+ {n:'Press to grow, stairs to the right',d:'Pressing the map enlarges it over the prose, so the paths are easy to aim at. The drag lights the path you’re heading for. For up and down, drag all the way out to the two stair nodes on the right.',ud:'side',stairs:'right',grow:true,hint:'bubble',lay:'bare',readout:true},
+ {n:'Press to grow, stairs to the left',d:'The same with the stairs on the left, for a left thumb or to keep the right side clear.',ud:'side',stairs:'left',grow:true,hint:'ghost',lay:'bare',readout:true},
+ {n:'Stairs to the right, between rules',d:'The stair nodes sit beside the map inside the ornament rules. There’s no growth, so it stays calm, and the readout names what you’re aiming at.',ud:'side',stairs:'right',hint:'none',lay:'rules',readout:true},
+ {n:'Diagonal stairs, with a coach bubble',d:'The map between long rules. The four cardinal drags walk, and the diagonals climb or descend. A speech-bubble tip shows once, until you walk or tap Got it.',ud:'diag',hint:'bubble',lay:'rules'},
+ {n:'Hold to climb, with a ghost thumb',d:'A translucent dot rehearses the drag from the center until you’ve walked once. Hold still to lift into the layer view for up and down.',ud:'hold',hint:'ghost',lay:'rules'},
+ {n:'Stair keys, with an inline hint',d:'Up and down are two small keys beside the map. A one-line italic hint sits where the status goes until you’ve walked, then the status returns.',ud:'keys',hint:'inline',lay:'keys'},
+ {n:'Spiral stair, with compass letters',d:'Faint n e s w letters ring the map for your first few walks, then fade. Circle the map to climb (clockwise) or descend (counter-clockwise).',ud:'spiral',hint:'letters',lay:'rules',letters:true},
+ {n:'Diagonal stairs, letters that fade',d:'No bubble, only the compass letters for your first three walks. The diagonal chevrons show where the stairs are.',ud:'diag',hint:'letters',lay:'rules',letters:true},
+ {n:'Map at the left, status beside',d:'A larger map at the left margin with the status stacked beside it, and stair keys under the thumb. The prose keeps the full width above.',ud:'keys',hint:'bubble',lay:'side'},
+ {n:'Readout on the rule',d:'While you drag, the direction appears above the map (“north”, “down · closed”), so you know before letting go. Diagonal stairs.',ud:'diag',hint:'none',lay:'rules',readout:true},
+ {n:'Hold to climb, readout, no rules',d:'The quietest frame: no rules, just the map, the readout and the status. Hold still for the stairs.',ud:'hold',hint:'bubble',lay:'bare',readout:true},
+ {n:'Bigger map',d:'A 136px map, the most prominent version. Its paths and places are easiest to hit, and it takes the most height. Diagonal stairs with a readout.',ud:'diag',hint:'ghost',lay:'bare',readout:true,size:136,k:24},
+ {n:'Spiral stair with readout',d:'The spiral with a live readout that counts the turn (“keep circling to climb”). Best as a delight rather than the only way up.',ud:'spiral',hint:'none',lay:'bare',readout:true},
+];
+VARIANTS.forEach((v,i)=>v.i=i);
+
+function block(cfg){
+  const map=MAP(cfg), st=`<div class="st" role="status">${status()}</div>`;
+  const readout=cfg.readout?`<div class="readout" aria-live="polite"></div>`:'';
+  if(cfg.lay==='side') return `<div class="blk"><div class="side"><div class="row">${map}${STAIRS()}</div><div class="st" role="status"><span>06:00 · <button data-a="pos">${S.pos}</button></span>${nums()}</div></div>${HINT(cfg)}</div>`;
+  if(cfg.lay==='keys') return `<div class="blk"><div class="mo"><i class="rl"></i><div class="row">${map}${STAIRS()}</div><i class="rl"></i></div>${HINT(cfg)||st}</div>`;
+  if(cfg.lay==='bare') return `<div class="blk">${readout}${map}${HINT(cfg)||st}</div>`;
+  return `<div class="blk">${readout}<div class="mo"><i class="rl"></i>${map}<i class="rl"></i></div>${HINT(cfg)||st}</div>`;
+}
+function render(){
+  document.getElementById('g').innerHTML=VARIANTS.map(v=>`<figure><div class="frame" data-i="${v.i}"><div class="ctx">${R().prose}<p class="said">${S.said[v.i]||''}</p></div>${block(v)}</div><figcaption><h2><span>${v.i+1}</span>${v.n}</h2><p>${v.d}</p></figcaption></figure>`).join('');
+  document.querySelectorAll('.joy').forEach(bind);
+}
+
+/* try to walk: position, exit state, then the step */
+function walk(i,d){
+  const st=R().ex[d];
+  if(S.pos!=='standing') S.said[i]=`You are ${S.pos}. Stand up first.`;
+  else if(!st) S.said[i]=`There is no way ${WORD[d]} from here.`;
+  else if(st!=='open') S.said[i]=`<span class="x">${st}</span>${R().why[d]}`;
+  else {S.mv++; S.said[i]=`You go ${WORD[d]}.`; S.learned[i]=true; S.moves[i]=(S.moves[i]||0)+1;}
+  render();
+}
+function bind(el){
+  const i=+el.dataset.i,cfg=VARIANTS[i],svg=el.querySelector('svg'),knob=svg.querySelector('.knob'),teth=svg.querySelector('.tether');
+  const Z=cfg.size||112,c=Z/2,RAD=cfg.orn?c-2:c-8,readout=el.closest('.blk').querySelector('.readout'),G=geo(cfg),cx=G.cx,SC=cfg.grow?(cfg.zoom||1.6):1;
+  let st=null;
+  const tip=el.querySelector('.tip');
+  const say=(t,bad)=>{const h=t?`<b class="${bad?'bad':''}">${t}</b>`:''; if(readout) readout.innerHTML=h; if(tip) tip.innerHTML=h;};
+  const dirOf=(dx,dy)=>{const a=(Math.atan2(dx,-dy)*180/Math.PI+360)%360;
+    if(cfg.ud==='diag'){return ['n','u','e','d','s','d','w','u'][Math.round(a/45)%8];}
+    return ['n','e','s','w'][Math.round(a/90)%4];};
+  const label=d=>{const s=R().ex[d]; return s?(s==='open'?WORD[d]:`${WORD[d]} · ${s}`):`no way ${WORD[d]}`;};
+  const hot=d=>svg.querySelectorAll('[data-d]').forEach(n=>n.classList.toggle('hot',n.dataset.d===d));
+  const place=(x,y)=>{knob.style.transform=`translate(${x}px,${y}px)`; teth.setAttribute('x2',cx+x); teth.setAttribute('y2',c+y);};
+  el.addEventListener('pointerdown',e=>{
+    if(e.target.closest('.bubble,.sr')) return;
+    el.setPointerCapture(e.pointerId); el.classList.add('dragging'); if(cfg.grow) el.classList.add('big');
+    st={x:e.clientX,y:e.clientY,t:performance.now(),mode:'press',dir:null,turn:0,last:null};
+    if(cfg.ud==='hold') st.timer=setTimeout(()=>{if(st&&st.mode==='press'){st.mode='layer'; el.classList.add('layer'); svg.querySelectorAll('.lz').forEach(n=>n.setAttribute('opacity','1')); say('drag up or down');}},550);
+  });
+  el.addEventListener('pointermove',e=>{
+    if(!st) return; const dx=(e.clientX-st.x)/SC,dy=(e.clientY-st.y)/SC,L=Math.hypot(dx,dy);
+    if(cfg.ud==='side'&&L>7){ st.mode='drag'; /* the stair nodes win when the knob reaches them */
+      for(const d of ['u','d']){const [x,y]=G[d]; if(Math.hypot(cx+dx-x,c+dy-y)<(cfg.snap??14)){place(x-cx,y-c); st.dir=d; hot(d); say(label(d),R().ex[d]!=='open'); return;}}}
+    if(st.mode==='press'&&L>7) st.mode='drag';
+    if(st.mode==='press') return;
+    const cl=Math.min(L,RAD*.85),ux=L?dx/L*cl:0,uy=L?dy/L*cl:0;
+    if(st.mode==='layer'){const y=Math.max(-RAD*.85,Math.min(RAD*.85,dy)); place(0,y); st.dir=y<-RAD*.45?'u':y>RAD*.45?'d':null;
+      say(st.dir?label(st.dir):'drag up or down',st.dir&&R().ex[st.dir]!=='open'); return;}
+    place(ux,uy);
+    if(cfg.ud==='spiral'&&L>RAD*.4){const a=Math.atan2(dy,dx); if(st.last!==null){let da=a-st.last; if(da>Math.PI) da-=2*Math.PI; if(da<-Math.PI) da+=2*Math.PI; st.turn+=da;} st.last=a;
+      const deg=st.turn*180/Math.PI;
+      if(Math.abs(deg)>100){st.dir=deg>0?'u':'d'; const pct=Math.min(1,Math.abs(deg)/330);
+        const arc=svg.querySelector('.spiral'); const r=RAD*.9,a0=-Math.PI/2,a1=a0+(deg>0?1:-1)*pct*2*Math.PI;
+        arc.setAttribute('d',`M${c+Math.cos(a0)*r} ${c+Math.sin(a0)*r} A${r} ${r} 0 ${pct>.5?1:0} ${deg>0?1:0} ${c+Math.cos(a1)*r} ${c+Math.sin(a1)*r}`);
+        say(pct<1?`keep circling to ${deg>0?'climb':'descend'}`:label(st.dir),pct>=1&&R().ex[st.dir]!=='open'); st.ready=pct>=1; return;}}
+    st.dir=L>RAD*.45?dirOf(dx,dy):null; hot(st.dir); say(st.dir?label(st.dir):'',st.dir&&R().ex[st.dir]!=='open');
+  });
+  const end=e=>{
+    if(!st) return; clearTimeout(st.timer); el.classList.remove('dragging','layer','big'); place(0,0); hot(null);
+    svg.querySelectorAll('.lz').forEach(n=>n.setAttribute('opacity','0')); const sp=svg.querySelector('.spiral'); if(sp) sp.setAttribute('d','');
+    const s=st; st=null; say('');
+    if(e.type==='pointercancel') return;
+    if(s.mode==='press'&&performance.now()-s.t<500){S.said[i]='The Map page would turn up.'; return render();}
+    if(cfg.ud==='spiral'&&(s.dir==='u'||s.dir==='d')){ if(s.ready) return walk(i,s.dir); S.said[i]='Keep circling all the way round to take the stair.'; return render();}
+    if(s.dir) return walk(i,s.dir);
+  };
+  el.addEventListener('pointerup',end); el.addEventListener('pointercancel',end);
+}
+document.getElementById('g').addEventListener('click',ev=>{
+  const b=ev.target.closest('button'); if(!b) return; const i=+b.closest('.frame').dataset.i;
+  if(b.dataset.a==='gotit'){S.learned[i]=true; return render();}
+  if(b.dataset.a==='pos'){const P=['standing','sitting','resting','meditating','sleeping']; S.pos=P[(P.indexOf(S.pos)+1)%P.length]; S.said[i]=`You are now ${S.pos}.`; return render();}
+  if(b.dataset.a==='stats'){S.said[i]='The Character page would turn up.'; return render();}
+  if(b.dataset.go) return walk(i,b.dataset.go);
+});
+document.querySelector('.ctl').addEventListener('click',ev=>{
+  const b=ev.target.closest('button'); if(!b) return;
+  if(b.dataset.room){S.room=b.dataset.room; S.said={}; document.querySelectorAll('[data-room]').forEach(x=>x.setAttribute('aria-pressed',x===b));}
+  if(b.dataset.hurt){S.hurt=b.dataset.hurt==='1'; S.mv=0; document.querySelectorAll('[data-hurt]').forEach(x=>x.setAttribute('aria-pressed',x===b));}
+  if(b.dataset.hints){S.learned={}; S.moves={};}
+  if(b.dataset.t){document.querySelectorAll('[data-t]').forEach(x=>x.setAttribute('aria-pressed',x===b)); document.getElementById('g').classList.toggle('night',b.dataset.t==='night');}
+  render();
+});
+render();
+</script>

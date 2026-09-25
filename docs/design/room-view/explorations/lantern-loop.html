@@ -1,0 +1,659 @@
+<title>Lantern Loop Mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap">
+<style>
+:root{
+  --bg:#eceee9; --fg:#1d2320; --muted:#56615b; --line:#cfd5ce; --accent:#7b2d20; --panel:#f6f7f3;
+  --prose:'IM Fell English','EB Garamond',Georgia,serif;
+  --sc:'IM Fell English SC','EB Garamond',Georgia,serif;
+  --size:18px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark; --bg:#121614; --fg:#e2e5df; --muted:#9aa59e; --line:#2a322e; --accent:#d9937a; --panel:#181d1a;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark; --bg:#121614; --fg:#e2e5df; --muted:#9aa59e; --line:#2a322e; --accent:#d9937a; --panel:#181d1a;
+}
+body{background:var(--bg); color:var(--fg); font:17px/1.55 'EB Garamond',Georgia,serif; padding-inline:16px; padding-block:28px 64px}
+.wrap{max-width:1180px; margin:0 auto}
+h1{font:400 clamp(2rem,5vw,3.1rem)/1.05 'IM Fell English',Georgia,serif; margin:0 0 .3em; text-wrap:balance}
+h2{font:400 1.6rem/1.1 'IM Fell English SC',Georgia,serif; margin:0; letter-spacing:.02em}
+.lede{max-width:62ch; color:var(--muted); margin:0 0 1.2em}
+.lede b{color:var(--fg); font-weight:500}
+.controls{display:flex; flex-wrap:wrap; gap:10px 22px; align-items:center; padding:12px 0; border-block:1px solid var(--line); margin-bottom:28px; font-size:.95rem}
+.controls label{display:flex; gap:8px; align-items:center}
+.controls select,.controls input{font:inherit; accent-color:var(--accent)}
+.cols{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr)); gap:40px 28px; align-items:start}
+.col{display:flex; flex-direction:column; gap:14px; min-width:0}
+.tag{color:var(--muted); margin:0; font-style:italic}
+.phone{width:min(360px,100%); height:720px; margin:0 auto; border:9px solid #1a1b1a; border-radius:36px; overflow:hidden; box-shadow:0 1px 0 var(--line),0 18px 40px -24px rgba(0,0,0,.45); background:#1a1b1a}
+.tools{display:flex; flex-wrap:wrap; gap:6px; justify-content:center}
+.tools button{font:inherit; font-size:.85rem; padding:4px 10px; border:1px solid var(--line); background:var(--panel); color:var(--fg); border-radius:4px; cursor:pointer}
+.check{list-style:none; padding:0; margin:0; display:grid; grid-template-columns:1fr 1fr; gap:2px 12px; font-size:.9rem; color:var(--muted)}
+.check li::before{content:'○ '; }
+.check li.done{color:var(--fg)}
+.check li.done::before{content:'● '; color:var(--accent)}
+.notes{margin:0; display:grid; gap:8px; font-size:.95rem}
+.notes dt{font:400 1rem 'IM Fell English SC',Georgia,serif; letter-spacing:.03em; color:var(--accent)}
+.notes dd{margin:0}
+.gv{margin-top:56px; padding-top:24px; border-top:1px solid var(--line); max-width:78ch}
+.gv ol{padding-left:1.4em; display:grid; gap:10px}
+.gv code{font:.85em ui-monospace,Menlo,monospace; background:var(--panel); padding:1px 4px; border-radius:3px}
+.gv li b{font-weight:500}
+
+/* ---------- phone internals ---------- */
+.ph{--p-bg:#ebe6d7; --p-fg:#241f19; --p-dim:#655d50; --p-line:#cbc2ab; --p-acc:#7b2d20; --p-card:#e3ddcc; --p-sheet:#f4f0e5; --p-bad:#7b2d20;
+  position:relative; height:100%; display:flex; flex-direction:column; background:var(--p-bg); color:var(--p-fg); font-family:var(--prose); font-size:calc(var(--size)*.86); overflow:hidden}
+.ph.m-rail{--p-bg:#0e1315; --p-fg:#d7dad1; --p-dim:#8e9993; --p-line:#2c3639; --p-acc:#d1b064; --p-card:#172124; --p-sheet:#131b1e; --p-bad:#e39a78; color-scheme:dark}
+.ph.m-dark{--p-bg:#0a0908; --p-fg:#ecdfc3; --p-dim:#a79a83; --p-line:#2b251e; --p-acc:#e6a650; --p-card:#15120e; --p-sheet:#14110d; --p-bad:#eb9676; color-scheme:dark}
+.ph button{font:inherit; color:inherit; cursor:pointer}
+.ph :focus-visible{outline:2px solid var(--p-acc); outline-offset:2px}
+.st,.screen,.cards,.rail,.bar{position:relative; z-index:1}
+.st{display:flex; justify-content:space-between; padding:9px 20px 3px; font:13px var(--sc); color:var(--p-dim); letter-spacing:.04em}
+.screen{flex:1; overflow-y:auto; padding:10px 22px 14px}
+.place{font:400 1em var(--sc); letter-spacing:.07em; color:var(--p-dim); margin:.2em 0 .7em}
+.prose{font-size:var(--size); line-height:1.52}
+.prose p{margin:0 0 .75em}
+.noun{background:none; border:0; padding:0; border-bottom:1.5px dotted currentColor; text-decoration:none; font-size:inherit; line-height:inherit}
+.noun.exit{border-bottom-style:solid; border-bottom-width:1px}
+.noun.barred{text-decoration:line-through; text-decoration-thickness:1px}
+.dead{border-bottom:0}
+.result{border-top:1px solid var(--p-line); padding-top:.6em; margin-top:.3em; font-size:.95em}
+.result p,.log p,.dh p,.lines p{margin:0 0 .5em}
+.say b{font:400 1em var(--sc); letter-spacing:.03em; margin-right:.3em}
+.sys{color:var(--p-dim); font-style:italic}
+.bad{color:var(--p-fg)}
+.why{font:400 .82em var(--sc); letter-spacing:.05em; color:var(--p-bad); border:1px solid currentColor; border-radius:3px; padding:0 5px; margin-right:.4em; white-space:nowrap}
+.cards{display:flex; gap:8px; overflow-x:auto; padding:9px 16px; border-top:1px solid var(--p-line); flex-shrink:0; scrollbar-width:none}
+.card,.chip{flex-shrink:0; min-height:40px; padding:0 13px; border:1px solid var(--p-line); border-radius:7px; background:var(--p-card); font-size:.95em}
+.card.exit{background:transparent; font-family:var(--sc); letter-spacing:.03em}
+.card.barred,.chip.off,.act.off{border-style:dashed; color:var(--p-dim)}
+.bar{display:flex; justify-content:space-between; align-items:center; padding:8px 14px 14px; border-top:1px solid var(--p-line); flex-shrink:0}
+.left{display:flex; flex-direction:column; gap:8px}
+.pill{min-height:44px; min-width:92px; border:1px solid var(--p-line); background:var(--p-card); border-radius:22px; font-family:var(--sc)!important; letter-spacing:.05em}
+.compass{display:flex; align-items:center; gap:8px}
+.dial{position:relative; width:122px; height:122px; border-radius:50%; border:1px solid var(--p-line); background:var(--p-card)}
+.dial.lamp{box-shadow:0 0 0 2px rgba(230,160,70,.55),0 0 22px rgba(230,160,70,.25)}
+.cd{position:absolute; width:44px; height:36px; border:0; background:none; font:15px var(--sc)!important; border-radius:8px}
+.cd.n{top:1px; left:39px}.cd.s{bottom:1px; left:39px}.cd.w{left:1px; top:43px; width:36px; height:36px}.cd.e{right:1px; top:43px; width:36px; height:36px}
+.cd:disabled,.ud button:disabled{opacity:.28; cursor:default}
+.cd.barred{color:var(--p-bad); text-decoration:line-through}
+.mm{position:absolute; left:33px; top:33px; width:54px; height:54px; border-radius:50%; border:1px solid var(--p-line); background:var(--p-bg); padding:0; overflow:hidden}
+.mm svg{width:100%; height:100%; display:block}
+.mm-l{stroke:var(--p-dim); stroke-width:1.6}
+.mm-f{stroke:var(--p-dim); stroke-width:1.2; stroke-dasharray:1.5 2}
+.mm-b,.mm-bb{stroke:var(--p-bad); stroke-width:1.6}
+.mm-r{fill:var(--p-dim)} .mm-cur{fill:var(--p-acc)} .mm-dark{fill:var(--p-bg); stroke:var(--p-dim); stroke-width:1}
+.ud{display:flex; flex-direction:column; gap:6px}
+.ud button{width:36px; height:44px; border:1px solid var(--p-line); background:var(--p-card); border-radius:8px; font:13px var(--sc)!important}
+
+/* log mode */
+.log{font-size:var(--size); line-height:1.48}
+.log .room{margin:.2em 0 .7em}
+.log .room h4{font:400 .9em var(--sc); letter-spacing:.07em; color:var(--p-acc); margin:.5em 0 .2em}
+.log .old{color:var(--p-dim)}
+.echo{font:.85em var(--sc); letter-spacing:.04em; color:var(--p-acc); margin:.9em 0 .2em!important}
+.echo::before{content:'› '}
+.rail{display:flex; flex-wrap:wrap; gap:7px; padding:9px 14px; border-top:1px solid var(--p-line); max-height:124px; overflow-y:auto; flex-shrink:0}
+.chip.grp{font-family:var(--sc); letter-spacing:.04em; background:transparent}
+.chip.say{border-radius:18px; text-align:left}
+.chip.ask{border-radius:18px; background:transparent}
+.chip.back{font-family:var(--sc)}
+
+/* overlays */
+.scrim{position:absolute; inset:0; background:rgba(8,8,6,.42); z-index:5; border:0; width:100%}
+.sheet{position:absolute; left:0; right:0; bottom:0; z-index:6; max-height:76%; overflow:auto; background:var(--p-sheet); border-radius:18px 18px 0 0; padding:8px 18px 16px; box-shadow:0 -10px 30px rgba(0,0,0,.25); display:flex; flex-direction:column; gap:10px}
+.sheet h4{font:400 1.1em var(--sc); letter-spacing:.05em; margin:.3em 0 0}
+.grab{width:40px; height:4px; border-radius:2px; background:var(--p-line); align-self:center}
+.acts{display:flex; flex-direction:column; gap:6px}
+.act{min-height:48px; text-align:left; padding:8px 14px; border:1px solid var(--p-line); border-radius:9px; background:var(--p-card); display:flex; flex-direction:column; gap:2px}
+.act small{font-size:.82em; line-height:1.35}
+.close{align-self:stretch; min-height:44px; border:0; background:none; font-family:var(--sc)!important; color:var(--p-dim)!important; letter-spacing:.05em}
+.sheet.tall{height:80%; max-height:none}
+.lines{flex:1; overflow-y:auto; font-size:var(--size); line-height:1.45}
+.choices{display:flex; flex-direction:column; gap:6px}
+.topics{display:flex; flex-wrap:wrap; gap:6px; align-items:center}
+.lbl{font:.85em var(--sc); color:var(--p-dim); letter-spacing:.05em; margin-right:2px}
+.kv{display:grid; grid-template-columns:auto 1fr; gap:4px 14px; margin:0}
+.kv dt{font:.9em var(--sc); color:var(--p-dim)} .kv dd{margin:0}
+.scene{position:absolute; inset:0; z-index:8; background:var(--p-bg); overflow-y:auto; padding:34px 24px 24px; display:flex; flex-direction:column; gap:14px}
+.scene .eyebrow{font:.85em var(--sc); letter-spacing:.12em; color:var(--p-acc); margin:0}
+.scene h3{font:400 1.7em/1.1 var(--prose); margin:0}
+.scene p{font-size:var(--size); line-height:1.52; margin:0}
+.pick{text-align:left; padding:14px 16px; border:1px solid var(--p-fg); background:var(--p-card); border-radius:10px; display:flex; flex-direction:column; gap:3px}
+.pick b{font:400 1.08em var(--prose)}
+.pick span{font-size:.88em; color:var(--p-dim)}
+.cont{min-height:48px; border:1px solid var(--p-fg); background:var(--p-fg); color:var(--p-bg)!important; border-radius:10px; font-family:var(--sc)!important; letter-spacing:.06em}
+.drawer{height:66%; max-height:none}
+.dh{flex:1; overflow-y:auto; font-size:.95em}
+.dcmd{font:.9em var(--sc); color:var(--p-acc); margin:.6em 0 .15em}
+.dcmd::before{content:'› '}
+.dh ol{margin:.2em 0 .5em; padding-left:1.4em}
+.dh ol button,.link{background:none; border:0; padding:4px 0; border-bottom:1px dotted currentColor}
+.sugg{display:flex; gap:6px; overflow-x:auto; scrollbar-width:none}
+.sugg .chip{min-height:34px; font-family:var(--sc); font-size:.85em}
+.cmd{display:flex; gap:8px; align-items:center; border:1px solid var(--p-line); border-radius:10px; padding:4px 4px 4px 12px; background:var(--p-bg)}
+.cmd input{flex:1; min-width:0; border:0; background:none; color:var(--p-fg); font:inherit; font-size:16px; padding:8px 0; outline:none}
+.cmd button{min-height:40px; padding:0 14px; border:0; border-radius:7px; background:var(--p-fg); color:var(--p-bg)!important; font-family:var(--sc)!important}
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0)}
+
+/* lantern light */
+.glow{position:absolute; inset:0; z-index:0; pointer-events:none; opacity:0; transition:opacity .9s ease;
+  background:radial-gradient(130% 75% at 50% 104%, rgba(230,152,58,.30), rgba(230,152,58,.08) 45%, transparent 72%)}
+.m-dark.lamp .glow{opacity:1}
+.m-dark.unlit .prose{color:var(--p-dim)}
+.m-dark.unlit .place{letter-spacing:.2em}
+.m-dark.lamp .noun{text-shadow:0 0 10px rgba(236,170,80,.55)}
+.feel{display:block; margin:26px auto 0; min-height:48px; padding:0 22px; border:1px dashed var(--p-dim); border-radius:24px; background:transparent; font-family:var(--sc)!important; letter-spacing:.08em}
+@media (prefers-reduced-motion:reduce){.glow{transition:none}}
+</style>
+
+<div class="wrap">
+  <h1>The Ferryman’s Lantern, three ways</h1>
+  <p class="lede">Three working mockups of the same small model: <b>four places, Bram, one lantern, one barred exit and one choice</b>. Everything works by touch. The <b>Type</b> button opens the text drawer, which takes the same commands. Each compass has a live minimap in its center. The dark shelter is a mockup assumption. The proof spec doesn’t list it, but it shows the LegendMUD rule where you can’t see without light.</p>
+  <div class="controls">
+    <label for="face">Typeface
+      <select id="face"><option value="fell">IM Fell English (inky)</option><option value="gara">EB Garamond (clean)</option></select></label>
+    <label for="size">Text size <input id="size" type="range" min="15" max="24" value="18"> <span id="sizeOut">18px</span></label>
+  </div>
+
+  <div class="cols">
+    <section class="col" data-mode="paper">
+      <h2>Paperback</h2>
+      <p class="tag">A book page with tappable nouns. Cards below repeat them, and actions rise in a sheet.</p>
+      <div class="phone"><div class="ph m-paper"></div></div>
+      <div class="tools"><button data-p="start">Restart</button><button data-p="shelter">Jump: at shelter</button><button data-p="choose">Jump: lantern in hand</button></div>
+      <ul class="check"></ul>
+      <dl class="notes">
+        <dt>Reading</dt><dd>The best of the three. There is one page per place and no scrollback noise, so the eye stays in the prose. Inline nouns keep the “what can I touch” question inside the sentence.</dd>
+        <dt>One hand</dt><dd>Compass, You and Type sit in the bottom bar, and sheets rise from the bottom. The top of the page is out of reach, but it is only for reading. It needs a mirrored layout for left-handed players.</dd>
+        <dt>Discovery</dt><dd>Strong. Dotted nouns plus the card strip give two routes to the same target. The weak spot is that what just happened disappears when you move. History lives only in the drawer.</dd>
+        <dt>Access</dt><dd>Ink on paper is about 13:1. Inline nouns are smaller than 44pt, so the cards are the real touch targets. For screen readers, the inline nouns should be hidden from the accessibility tree and the cards announced as the list. That order is place, prose, result, cards, compass. Dynamic type reflows well.</dd>
+        <dt>Render cost</dt><dd>The lowest. One text block is replaced per move, nothing accumulates, and no effects run.</dd>
+      </dl>
+    </section>
+
+    <section class="col" data-mode="rail">
+      <h2>Chip Rail</h2>
+      <p class="tag">A MUD transcript. Every touch echoes as a command, and choices live in the rail.</p>
+      <div class="phone"><div class="ph m-rail"></div></div>
+      <div class="tools"><button data-p="start">Restart</button><button data-p="shelter">Jump: at shelter</button><button data-p="choose">Jump: lantern in hand</button></div>
+      <ul class="check"></ul>
+      <dl class="notes">
+        <dt>Reading</dt><dd>Good for context, since what Bram said stays just above. It’s worse for immersion because the transcript invites skimming. Old room text is dimmed so the current place stands out.</dd>
+        <dt>One hand</dt><dd>The best. Tap an entity, then a verb, and neither leaves the thumb zone. Dialogue choices replace the rail instead of covering the page.</dd>
+        <dt>Discovery</dt><dd>Verbs are always on show, and the <code>› take lantern</code> echo teaches the text drawer for free. The risk is chip overload in busy rooms (crowds, 57 rooms), so it needs grouping and a priority cap.</dd>
+        <dt>Access</dt><dd>Chips are real buttons with plain labels. The transcript must announce only new entries, or VoiceOver re-reads the log. At large type sizes the rail grows to three rows and pushes the log up, so it needs a cap and a scroll.</dd>
+        <dt>Render cost</dt><dd>A FlatList append per step is cheap, but memory grows over a session. Cap the log at about 200 entries and virtualize it.</dd>
+      </dl>
+    </section>
+
+    <section class="col" data-mode="dark">
+      <h2>Lantern Light</h2>
+      <p class="tag">Darkness is the default. Light decides what the page can show.</p>
+      <div class="phone"><div class="ph m-dark"></div></div>
+      <div class="tools"><button data-p="start">Restart</button><button data-p="shelter">Jump: at shelter</button><button data-p="choose">Jump: lantern in hand</button></div>
+      <ul class="check"></ul>
+      <dl class="notes">
+        <dt>Reading</dt><dd>Lit rooms read like Paperback on a dark page. Dark rooms show almost nothing, on purpose. Darkness is shown by leaving content out, never by low-contrast text: the dim line is still 7:1.</dd>
+        <dt>One hand</dt><dd>The same as Paperback. <b>Feel around</b> sits mid-page when it is the only thing you can do.</dd>
+        <dt>Discovery</dt><dd>Hiding things is deliberate here, so there must always be one visible way forward. Without Feel around, a first-time player (the P5 test) gets stuck in the shelter. The minimap shows rooms you have not seen lit as hollow.</dd>
+        <dt>Access</dt><dd>Screen reader users get “too dark to see” too, which is the same game for everyone. Reduced motion removes the warm fade, and a high-contrast setting should flatten the glow.</dd>
+        <dt>Render cost</dt><dd>Low. One static gradient layer fades when the light changes, not on every step. In React Native that is an image or an SVG gradient with opacity. Avoid animated blur.</dd>
+      </dl>
+    </section>
+  </div>
+
+  <section class="gv">
+    <h2>GameView needs</h2>
+    <p class="lede">These are things the mockups needed from the engine that §4.10 and 04 §15 don’t yet name. The renderer must not work them out itself, because that would mean re-implementing rules.</p>
+    <ol>
+      <li><b>Unavailable actions with a typed reason.</b> Disabled entries belong in the ActionSet, not missing from it: <code>{action_key, target, enabled:false, reason:{kind: barrier|missing_item|wrong_time|skill|presence|commitment|darkness, text_key, bindings, available_from?}}</code>. This covers the barred west exit, “Row me across” before 14:00, “About the search” without the lantern, and dropping a lantern you promised to carry.</li>
+      <li><b>Exit projection per direction.</b> Each direction needs a state (<code>open | blocked | locked | hidden_found | none</code>), the destination label only if discovered, and the blocking reason. The compass badges and screen-reader labels (“West, barred: the causeway is under the tide”) are built from this.</li>
+      <li><b>Prose anchors.</b> Room and result text arrive as <code>text_key + bindings</code>, but tappable inline nouns need spans that map to target IDs, for example rich segments <code>[{text}, {text, target_id}]</code>. Without them the client string-matches names, which breaks under localization.</li>
+      <li><b>Visibility and light.</b> Each room needs a visibility of <code>lit | dark</code> with a source (daylight, carried, fixed). Obscured entities need a perceived name (“something brass”) and an opaque target handle, so the real ID or name doesn’t leak while it’s dark. Entities also need status tags such as <code>lit</code>.</li>
+      <li><b>Map layout for the compass minimap.</b> Discovered rooms need grid coordinates <code>(x, y, z)</code>, known edges including blocked stubs, the current room, and seen-lit flags. The §4.10 map lists names and exits but not positions.</li>
+      <li><b>Action ordering and roles.</b> Each action needs a priority, a group (social, item, move, meta), and which action is primary (tap) and which is examine (long-press). This keeps the 2–6 sheet and the rail chips the same order on every client.</li>
+      <li><b>Dialogue view.</b> This covers the speaker, current line, choices with reasons (item 1), discovered topics for this NPC with a <code>new</code> flag, and a way to close without mutating anything. It also needs the presence rule result when the NPC leaves mid-conversation.</li>
+      <li><b>Scene view.</b> This covers beats, the current beat, choices with a one-line consequence summary, and flags for <code>dismissible</code> (“Not yet”) and <code>skippable</code>. Stale choices get a typed rejection that tells the player why (the lantern is gone, Bram has left).</li>
+      <li><b>Result narration separate from description.</b> Each ActionInvocation outcome needs its own narration keys (“You lift the lantern. Oil sloshes inside.”), plus quest updates and granted topics as typed change notes. Then the UI can show “Quest updated” or “New topic” without diffing state.</li>
+      <li><b>Clock.</b> The view needs the current time for display, plus <code>available_from</code> on time-gated reasons so a “Wait until 14:00” action can be offered.</li>
+      <li><b>Text aliases per target and action.</b> The drawer builds suggestions, “which one?” lists and touch echoes (<code>› take lantern</code>) from the GameView. ACT-07 requires an alias to exist, but the view has to carry it.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+const ROOMS={
+  landing:{name:'Ferry Landing',out:true,xy:[0,1],exits:{n:'green',w:{blocked:true,kind:'Barred',reason:'The causeway west is under the tide. Nothing crosses it today.'}}},
+  green:{name:'Village Green',out:true,xy:[0,0],exits:{s:'landing',e:'reed'}},
+  reed:{name:'Reed Bank',out:true,xy:[1,0],exits:{w:'green',e:'shelter'}},
+  shelter:{name:'Lantern Shelter',out:false,xy:[2,0],exits:{w:'reed'}},
+};
+const DIRS={n:'North',e:'East',s:'South',w:'West',u:'Up',d:'Down'};
+const DETAILS={landing:['post'],green:['elm'],reed:['reeds'],shelter:['nets']};
+const NAMES={bram:'Bram',post:'mooring post',elm:'old elm',reeds:'reeds',nets:'eel nets'};
+const ALIAS={bram:['bram','ferryman','man'],lantern:['lantern','brass','something','lamp'],post:['post','mooring'],elm:['elm','tree'],reeds:['reeds','reed'],nets:['nets','net']};
+const DESC={
+  bram:'A ferryman with rope-scarred hands and a coat that has never been dry.',
+  post:'Rope has worn a groove into the post. Someone has carved a fox into it.',
+  elm:'Its roots have lifted the turf. A strip of red cloth is tied to a low branch, faded to pink.',
+  reeds:'They close behind you as you pass. Something small moves off through them and does not come back.',
+  nets:'Eel nets, mended so often they are more knot than net.',
+};
+const TOPICS={
+  ferry:['the ferry','“She crosses at slack water. Two pence, or a favor.”'],
+  wren:['Wren','“Seven years old and knows every reed by name. That’s what worries me.”'],
+  lantern:['the lantern','“Brass, dented, older than me. It has never gone out in a fen wind.”'],
+  search:['the search',null],
+};
+const txt=t=>({t:'text',text:t}), sys=t=>({t:'sys',text:t}), bad=(k,t)=>({t:'bad',kind:k,text:t}), say=(w,t)=>({t:'say',who:w,text:t});
+const clock=h=>String(h).padStart(2,'0')+':00';
+
+/* ---------- the model (stands in for the engine's GameView) ---------- */
+function initState(p){
+  const s={room:'landing',hour:6,lantern:'shelter',lit:false,quest:'none',plan:null,topics:['ferry'],seen:['landing'],felt:false};
+  if(p==='shelter'||p==='choose'){Object.assign(s,{quest:'active',topics:['ferry','wren','lantern'],seen:['landing','green','reed','shelter']});}
+  if(p==='shelter') s.room='shelter';
+  if(p==='choose') s.lantern='player';
+  return s;
+}
+const bramAt=s=>s.hour<19?'landing':'green';
+function lightAt(s,r){
+  if(ROOMS[r].out&&s.hour<19) return 'day';
+  const src=s.lantern==='player'?s.room:s.lantern==='bram'?bramAt(s):s.lantern;
+  return s.lit&&src===r?'lamp':null;
+}
+function ents(s){
+  const r=s.room,L=lightAt(s,r),o=[];
+  if(L&&bramAt(s)===r) o.push('bram');
+  if(s.lantern===r&&(L||(r==='shelter'&&s.felt))) o.push('lantern');
+  if(s.lantern==='bram'&&bramAt(s)===r&&L) o.push('lantern');
+  if(L) o.push(...(DETAILS[r]||[]));
+  return o;
+}
+const reachable=s=>{const e=ents(s);if(s.lantern==='player'&&!e.includes('lantern'))e.push('lantern');return e;};
+function nameOf(s,id){
+  if(id!=='lantern') return NAMES[id];
+  return (s.lantern==='player'||lightAt(s,s.room))?'brass lantern':'something brass';
+}
+const canFeel=s=>!lightAt(s,s.room)&&s.lantern===s.room&&!s.felt;
+function actions(s,id){
+  const A=(key,label,why)=>({key,label,why:why||null});
+  if(id==='bram') return [A('talk','Talk'),A('examine','Examine')];
+  if(id==='lantern'){
+    if(s.lantern==='player') return [A(s.lit?'douse':'light',s.lit?'Put it out':'Light it'),A('examine','Examine'),
+      A('drop','Put it down',s.plan==='player_led'?{kind:'Promise',text:'You told Bram you would carry it along the bank.'}:null)];
+    if(s.lantern==='bram') return [A('examine','Examine'),A('take','Take it back',{kind:'Not yours',text:'Bram has it now, for the search party.'})];
+    return [A('take','Take'),A('examine','Examine')];
+  }
+  if(id==='here'){
+    const a=[A('look','Look around')];
+    if(canFeel(s)) a.push(A('feel','Feel around'));
+    a.push(A('wait','Wait an hour',s.hour>=23?{kind:'Too late',text:'This proof stops at 23:00.'}:null));
+    return a;
+  }
+  return [A('examine','Examine')];
+}
+function prose(s){
+  const r=s.room,L=lightAt(s,r),bramHere=bramAt(s)===r,out=[];
+  if(!L){
+    let p='It is too dark to see.';
+    if(r==='shelter') p+=' You smell lamp oil and wet tar.'+(s.felt&&s.lantern===r?' Your hand rests on {lantern|something brass}.':'');
+    else p+=' Somewhere close, water moves.'+(bramHere?' Someone is breathing nearby.':'');
+    p+=' The way back is {exit:'+Object.keys(ROOMS[r].exits).find(d=>typeof ROOMS[r].exits[d]==='string')+'|behind you}.';
+    return [p];
+  }
+  if(r==='landing'){
+    let p='Reeds crowd a slick wooden landing. A {post|mooring post} leans into the current.';
+    if(bramHere){
+      if(s.plan==='player_led') p+=' The search boats are gone. {bram|Bram} waits alone, watching the bank for your light.';
+      else if(s.plan==='party_led') p+=' The {lantern|lantern} hangs lit from the ferry’s prow. {bram|Bram} counts the party aboard.';
+      else p+=' {bram|Bram} steadies the ferry with his boot.'+(s.quest==='none'?' Across the water, a lantern swings once between the reeds and goes dark.':'');
+    } else p+=' The ferry knocks against the landing, empty.';
+    out.push(p,'A {exit:n|lane} climbs north to the green. {exit:w|West}, the old causeway runs into the water and does not come out.');
+  } else if(r==='green'){
+    out.push('An old {elm|elm} shades a patch of trodden grass. A {exit:e|track} runs east, down toward the reeds. The {exit:s|landing} is south.');
+    if(bramHere) out.push(s.plan==='party_led'?'{bram|Bram} stands under the elm, the {lantern|lantern} at his feet, waiting for the boats.':'{bram|Bram} sits under the elm with his boots off, watching the east track.');
+  } else if(r==='reed'){
+    out.push('The {exit:w|track} gives out into black mud and whispering {reeds|reeds}. {exit:e|Further east}, a shelter of tarred planks leans into the wind.');
+  } else {
+    out.push('A lean-to of tarred planks, smelling of lamp oil. Eel {nets|nets} hang from pegs.'+(s.lantern==='shelter'?' A {lantern|brass lantern} sits on the shelf.':' An empty hook sways over the shelf.'),'The {exit:w|doorway} lets in the grey of the reed bank.');
+  }
+  if(s.lantern===r&&r!=='shelter') out.push('A {lantern|brass lantern} sits where you left it.');
+  return out;
+}
+const plain=a=>a.join(' ').replace(/\{[^|}]+\|([^}]+)\}/g,'$1');
+function exitInfo(s,d){
+  const e=ROOMS[s.room].exits[d];
+  if(!e) return null;
+  if(typeof e!=='string') return {barred:true,kind:e.kind,reason:e.reason,label:'barred'};
+  return {to:e,label:s.seen.includes(e)?ROOMS[e].name:'unexplored'};
+}
+function move(s,d){
+  const e=exitInfo(s,d);
+  if(!e) return {msgs:[bad('No way',`There is no way ${DIRS[d].toLowerCase()} from here.`)]};
+  if(e.barred) return {msgs:[bad(e.kind,e.reason)],barrier:true};
+  s.room=e.to; if(!s.seen.includes(e.to)) s.seen.push(e.to);
+  return {msgs:[],look:true,moved:true};
+}
+function act(s,id,key){
+  const a=id==='here'||reachable(s).includes(id)?actions(s,id).find(x=>x.key===key):null;
+  if(!a) return {msgs:[bad('Not here','That isn’t something you can do right now.')]};
+  if(a.why) return {msgs:[bad(a.why.kind,a.why.text)]};
+  switch(key){
+    case 'look': return {msgs:[],look:true};
+    case 'examine': return {msgs:[txt(id==='lantern'?(nameOf(s,id)==='something brass'?'Cold metal, a wire handle. Something sloshes inside.':'Dented brass, oil sloshing inside. It would light a fen path.'+(s.lit?' The flame is steady.':'')):DESC[id])]};
+    case 'talk': return {msgs:[],open:'dlg'};
+    case 'feel': s.felt=true; return {msgs:[txt('You feel along the planks. Your hand finds a shelf, and something cold and brass on it.')]};
+    case 'take': s.lantern='player'; return {msgs:[txt('You lift the lantern. Oil sloshes inside.'),...(s.quest==='active'?[sys('Quest updated · Take the lantern to Bram.')]:[])],took:true};
+    case 'drop': s.lantern=s.room; return {msgs:[txt('You set the lantern down.')],look:true};
+    case 'light': s.lit=true; return {msgs:[txt(s.room==='shelter'?'The wick catches. The shelter jumps out of the dark around you.':'The wick catches. Warm light spills over your hands.')],look:true};
+    case 'douse': s.lit=false; return {msgs:[txt('You pinch the wick. The dark comes back in.')],look:true};
+    case 'wait': {
+      s.hour++; const m=[txt(`An hour passes. It is ${clock(s.hour)}.`)];
+      if(s.hour===14) m.push(sys('Slack water. The ferry could cross now.'));
+      if(s.hour===19){m.push(txt('The light goes out of the sky.')); if(['landing','green'].includes(s.room)) m.push(txt('Bram ties off the ferry and walks up to the green.'));}
+      return {msgs:m,look:s.hour===19};
+    }
+  }
+}
+function greet(s){
+  if(s.quest==='done') return s.plan==='player_led'?'“Keep it lit and keep to the bank. We’ll be on the water.”':'“The party goes at dusk. If they find her, you’ll hear the bell.”';
+  if(s.quest==='active') return s.lantern==='player'?'“You found it. Good.”':'“The shelter’s east, past the reeds. Mind the mud.”';
+  if(s.quest==='declined') return '“Changed your mind?”';
+  return '“You’ll be wanting the ferry. Or you’ll be wanting something else.”';
+}
+function dlgChoices(s,node){
+  const C=(id,label,why)=>({id,label,why:why||null}),c=[];
+  if(node==='offer') return [C('accept','“I’ll fetch it.”'),C('decline','“Not today.”')];
+  if(s.quest==='none'||s.quest==='declined') c.push(C('favor','“Something else. What do you need?”'));
+  if(s.quest==='active') c.push(C('decide','“About the search.”',s.lantern!=='player'?{kind:'Missing item',text:'You need the lantern in hand. It is up at the shelter.'}:null));
+  if(s.quest!=='done') c.push(C('row','“Row me across.”',s.hour<14?{kind:'Wrong time',text:'Bram only crosses at slack water, from 14:00.'}:null));
+  c.push(C('bye','“Good day.”'));
+  return c;
+}
+function topicReply(s,t){
+  if(t==='search') return s.plan==='player_led'?'“Boats on the water, a light on the bank. If she sees either, she’ll come to it.”':'“The lantern rides the prow. She knows that light.”';
+  return TOPICS[t][1];
+}
+const VERBS={take:'take',get:'take',pick:'take',grab:'take',drop:'drop',light:'light',douse:'douse',extinguish:'douse',x:'examine',examine:'examine',inspect:'examine',talk:'talk',speak:'talk',feel:'feel',wait:'wait',z:'wait'};
+const DIRW={n:'n',north:'n',e:'e',east:'e',s:'s',south:'s',w:'w',west:'w',u:'u',up:'u',d:'d',down:'d'};
+const CHECK=[['room','Read a room'],['topic','Ask Bram about a topic'],['take','Pick up the lantern'],['barrier','Try the barred west exit'],['scene','Reach the carry-or-leave choice'],['drawer','Open the text drawer']];
+const esc=t=>t.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+/* ---------- one phone ---------- */
+class Phone{
+  constructor(col){
+    this.col=col; this.mode=col.dataset.mode; this.el=col.querySelector('.ph'); this.done=new Set();
+    this.el.addEventListener('click',e=>{const b=e.target.closest('[data-a]'); if(b&&this.el.contains(b)) this.handle(b.dataset.a,b.dataset.v||'');});
+    this.el.addEventListener('submit',e=>{e.preventDefault(); const i=this.el.querySelector('.cmd input'); const v=i.value.trim(); this.ui.draft=''; if(v) this.command(v);});
+    this.el.addEventListener('input',e=>{if(e.target.matches('.cmd input')) this.ui.draft=e.target.value;});
+    col.querySelectorAll('.tools button').forEach(b=>b.onclick=()=>this.reset(b.dataset.p));
+    this.reset('start');
+  }
+  reset(p){
+    this.s=initState(p);
+    this.ui={sheet:null,dlg:null,scene:null,drawer:false,focus:null,msg:[],log:[],hist:[],draft:''};
+    this.pushRoom(); this.mark('room'); this.render();
+  }
+  mark(k){this.done.add(k); this.col.querySelector('.check').innerHTML=CHECK.map(([id,l])=>`<li class="${this.done.has(id)?'done':''}">${l}</li>`).join('');}
+  pushRoom(){const s=this.s; this.ui.log.push({t:'room',title:lightAt(s,s.room)?ROOMS[s.room].name:'Darkness',prose:prose(s)});}
+  emit(echo,msgs,r={}){
+    const u=this.ui,s=this.s;
+    u.msg=msgs;
+    if(echo) u.log.push({t:'echo',text:echo});
+    if(r.look) this.pushRoom();
+    u.log.push(...msgs);
+    u.hist.push({cmd:echo,out:[...(r.look?[txt((lightAt(s,s.room)?ROOMS[s.room].name+'. ':'')+plain(prose(s)))]:[]),...msgs]});
+    if(u.log.length>200) u.log.splice(0,u.log.length-200);
+  }
+  echoFor(id,key){return key==='look'||key==='wait'||key==='feel'?key:`${key} ${ALIAS[id][0]}`;}
+  run(p){
+    const s=this.s,u=this.ui;
+    const r=p.move?move(s,p.move):act(s,p.id,p.key);
+    if(r.barrier) this.mark('barrier');
+    if(r.took) this.mark('take');
+    if(u.dlg&&bramAt(s)!==s.room){u.dlg=null; r.msgs.push(bad('Not here','Bram has gone. He keeps the landing by day and the green after dark.'));}
+    this.emit(p.move?DIRS[p.move].toLowerCase():this.echoFor(p.id,p.key),r.msgs,r);
+    if(r.open==='dlg') this.startDlg();
+    this.render();
+  }
+  startDlg(){this.ui.dlg={node:null,lines:[]}; this.dsay([say('Bram',greet(this.s))]);}
+  dsay(ms){const u=this.ui; u.dlg&&u.dlg.lines.push(...ms); u.log.push(...ms); u.hist.push({cmd:'',out:ms});}
+  choose(id){
+    const s=this.s,u=this.ui; if(!u.dlg) return;
+    const c=dlgChoices(s,u.dlg.node).find(x=>x.id===id); if(!c) return;
+    if(c.why){this.dsay([bad(c.why.kind,c.why.text)]); return this.render();}
+    const L=[say('You',c.label)];
+    switch(id){
+      case 'favor': u.dlg.node='offer';
+        L.push(say('Bram','“Wren. Elspeth’s girl. She went into the fen last night and hasn’t come out.”'),say('Bram','“We search at dusk, and we need light. Mine is up at the shelter. Bring it down. Then tell me whether you are coming with us.”'));
+        ['wren','lantern'].forEach(t=>s.topics.includes(t)||s.topics.push(t)); L.push(sys('New topics · Wren · the lantern')); break;
+      case 'accept': u.dlg.node=null; s.quest='active';
+        L.push(say('Bram',s.lantern==='player'?'“You’ve got it already? Then you’re quicker than me.”':'“East past the green, where the reeds start. Mind the mud.”'),sys('Quest · The Ferryman’s Lantern · Bring Bram the lantern.')); break;
+      case 'decline': u.dlg.node=null; s.quest='declined'; L.push(say('Bram','“Then don’t stand in my light.”')); break;
+      case 'row': L.push(say('Bram','“Not with Wren still out there. Ask me tomorrow.”')); break;
+      case 'decide': this.dsay(L); u.scene={phase:'choose'}; this.mark('scene'); return this.render();
+      case 'bye': u.dlg=null; this.emit('',[txt(bramAt(s)==='landing'?'Bram nods and turns back to the water.':'Bram nods and goes back to watching the track.')]); return this.render();
+    }
+    this.dsay(L); this.render();
+  }
+  ask(t){
+    if(!this.ui.dlg) return;
+    this.dsay([say('You',`Ask about ${TOPICS[t][0]}.`),say('Bram',topicReply(this.s,t))]); this.mark('topic'); this.render();
+  }
+  sceneChoose(c){
+    const s=this.s,u=this.ui;
+    if(s.lantern!=='player'||bramAt(s)!==s.room){u.scene=null; this.emit('',[bad('Stale','The choice needs Bram here and the lantern in your hand.')]); return this.render();}
+    s.plan=c==='carry'?'player_led':'party_led'; s.quest='done'; s.topics.push('search');
+    if(c==='leave'){s.lantern='bram'; s.lit=true;}
+    u.scene={phase:'after',pick:c}; this.render();
+  }
+  sceneDone(){
+    const u=this.ui,c=u.scene.pick; u.scene=null; u.dlg=null;
+    this.emit('',[txt(c==='carry'?'You hook the lantern to your belt.':'The lantern burns on the ferry’s prow.'),sys('Quest resolved · '+(c==='carry'?'You lead the search along the bank.':'The party leads the search by boat.')),sys('New topic · the search')],{look:true});
+    this.render();
+  }
+  parse(raw){
+    const s=this.s,u=this.ui;
+    let w=raw.toLowerCase().replace(/[^a-z0-9 ]/g,' ').split(/\s+/).filter(Boolean);
+    if(!w.length) return null;
+    if(u.scene) return u.scene.phase==='choose'&&/^[12]$/.test(w[0])?{scene:w[0]==='1'?'carry':'leave'}:{msgs:[sys(u.scene.phase==='choose'?'Type 1 to carry it or 2 to leave it.':'Tap Continue.')]};
+    if(u.dlg){
+      const cs=dlgChoices(s,u.dlg.node);
+      if(/^\d$/.test(w[0])) return cs[+w[0]-1]?{choice:cs[+w[0]-1].id}:{msgs:[sys(`Pick 1–${cs.length}.`)]};
+      if(w[0]==='ask'){const t=s.topics.find(t=>w.slice(1).some(x=>TOPICS[t][0].includes(x))); return t?{topic:t}:{msgs:[sys('Bram has nothing to say about that. Topics: '+s.topics.map(t=>TOPICS[t][0]).join(', ')+'.')]};}
+      if(['bye','leave'].includes(w[0])) return {choice:'bye'};
+    }
+    if(w[0]==='go'&&w[1]) w=w.slice(1);
+    if(DIRW[w[0]]&&w.length===1) return {move:DIRW[w[0]]};
+    if(['l','look'].includes(w[0])&&w.length===1) return {id:'here',key:'look'};
+    if(['i','inv','inventory'].includes(w[0])) return {msgs:[txt(s.lantern==='player'?`You carry a brass lantern${s.lit?', lit':''}.`:'Your hands are empty.')]};
+    if(w[0]==='help') return {msgs:[sys('Try: look · n e s w · take lantern · light lantern · talk bram · x post · wait · i. In a conversation, type a number or “ask wren”.')]};
+    let verb=['l','look'].includes(w[0])?'examine':VERBS[w[0]];
+    if(!verb) return {msgs:[bad('Unknown',`I don’t know the word “${esc(w[0])}”. Type help.`)]};
+    if(verb==='wait'||verb==='feel') return {id:'here',key:verb};
+    const rest=w.slice(1).filter(x=>!['the','a','an','to','at','up','with','around'].includes(x));
+    const vis=reachable(s);
+    const cands=rest.length?vis.filter(id=>ALIAS[id].some(a=>rest.includes(a))):vis.filter(id=>actions(s,id).some(a=>a.key===verb));
+    if(!cands.length) return {msgs:[bad(lightAt(s,s.room)?'Not here':'Too dark',rest.length?(lightAt(s,s.room)?'You don’t see that here.':'It is too dark to see that.'):`There is nothing here to ${verb}.`)]};
+    if(cands.length>1) return {msgs:[{t:'which',opts:cands.map(id=>({label:nameOf(s,id),cmd:`${verb} ${ALIAS[id][0]}`}))}]};
+    return {id:cands[0],key:verb};
+  }
+  command(v){
+    const p=this.parse(v); if(!p) return;
+    if(p.msgs){this.ui.hist.push({cmd:v,out:p.msgs}); return this.render();}
+    if(p.scene||p.choice||p.topic) this.ui.hist.push({cmd:v,out:[]});
+    if(p.scene) return this.sceneChoose(p.scene);
+    if(p.choice) return this.choose(p.choice);
+    if(p.topic) return this.ask(p.topic);
+    this.run(p);
+  }
+  handle(a,v){
+    const u=this.ui;
+    switch(a){
+      case 'noun': if(v.startsWith('exit:')) return this.handle('go',v.slice(5)); if(this.mode==='rail'){u.focus=v; u.sheet=null;} else u.sheet={kind:'noun',id:v}; break;
+      case 'focus': u.focus=v; break;
+      case 'back': u.focus=null; break;
+      case 'act': {const [id,key]=v.split(':'); u.sheet=null; u.focus=null; return this.run({id,key});}
+      case 'go': u.sheet=null; u.focus=null; return this.run({move:v});
+      case 'you': u.sheet={kind:'you'}; break;
+      case 'map': u.sheet={kind:'map'}; break;
+      case 'drawer': u.drawer=true; this.mark('drawer'); break;
+      case 'close': if(u.drawer) u.drawer=false; else if(u.sheet) u.sheet=null; else if(u.dlg) return this.choose('bye'); break;
+      case 'choice': return this.choose(v);
+      case 'topic': return this.ask(v);
+      case 'scene': return this.sceneChoose(v);
+      case 'later': u.scene=null; this.dsay([sys('You can decide later. Bram will wait until dusk.')]); break;
+      case 'cont': return this.sceneDone();
+      case 'run': return this.command(v);
+    }
+    this.render();
+  }
+
+  /* ---------- rendering ---------- */
+  tokens(str,live){
+    return str.replace(/\{([^|}]+)\|([^}]+)\}/g,(_,id,t)=>{
+      if(!live) return `<span class="noun dead">${t}</span>`;
+      const ex=id.startsWith('exit:'), bar=ex&&exitInfo(this.s,id.slice(5))?.barred;
+      return `<button class="noun ${ex?'exit':''} ${bar?'barred':''}" data-a="noun" data-v="${id}" tabindex="-1" aria-hidden="true">${t}</button>`;
+    });
+  }
+  msg(m){
+    if(m.t==='say') return `<p class="say"><b>${m.who}</b>${m.text}</p>`;
+    if(m.t==='sys') return `<p class="sys">${m.text}</p>`;
+    if(m.t==='bad') return `<p class="bad"><span class="why">${m.kind}</span>${m.text}</p>`;
+    if(m.t==='which') return `<p>Which one?</p><ol>${m.opts.map(o=>`<li><button data-a="run" data-v="${o.cmd}">${o.label}</button></li>`).join('')}</ol>`;
+    if(m.t==='echo') return `<p class="echo">${m.text}</p>`;
+    return `<p>${m.text}</p>`;
+  }
+  compass(){
+    const s=this.s, b=d=>{
+      const e=exitInfo(s,d), lbl=e?(e.barred?`${DIRS[d]}, barred: ${e.reason}`:`${DIRS[d]}, to ${e.label}`):`${DIRS[d]}, no exit`;
+      return `<button class="cd ${d} ${e?.barred?'barred':''}" data-a="go" data-v="${d}" aria-label="${lbl}" ${e?'':'disabled'}>${d.toUpperCase()}</button>`;
+    };
+    const lamp=s.lantern==='player'&&s.lit;
+    return `<div class="compass"><div class="ud"><button data-a="go" data-v="u" aria-label="Up, no exit" disabled>Up</button><button data-a="go" data-v="d" aria-label="Down, no exit" disabled>Dn</button></div>
+      <div class="dial ${lamp?'lamp':''}" role="group" aria-label="Compass">${['n','w','e','s'].map(b).join('')}
+      <button class="mm" data-a="map" aria-label="Map, ${s.seen.length} places found">${this.minimap()}</button></div></div>`;
+  }
+  minimap(){
+    const s=this.s,[cx,cy]=ROOMS[s.room].xy,k=17,P=r=>[(ROOMS[r].xy[0]-cx)*k,(ROOMS[r].xy[1]-cy)*k],V={n:[0,-1],s:[0,1],e:[1,0],w:[-1,0]};
+    let g='';
+    for(const r of s.seen){const [x,y]=P(r);
+      for(const [d,e] of Object.entries(ROOMS[r].exits)){const v=V[d]; if(!v) continue;
+        if(typeof e==='string'){ if(s.seen.includes(e)){ if(r<e){const [x2,y2]=P(e); g+=`<line x1="${x}" y1="${y}" x2="${x2}" y2="${y2}" class="mm-l"/>`;} }
+          else g+=`<line x1="${x}" y1="${y}" x2="${x+v[0]*10}" y2="${y+v[1]*10}" class="mm-f"/>`; }
+        else {const x2=x+v[0]*8,y2=y+v[1]*8; g+=`<line x1="${x}" y1="${y}" x2="${x2}" y2="${y2}" class="mm-b"/><line x1="${x2-v[1]*3.5}" y1="${y2-v[0]*3.5}" x2="${x2+v[1]*3.5}" y2="${y2+v[0]*3.5}" class="mm-bb"/>`;}
+      }}
+    for(const r of s.seen){const [x,y]=P(r),cur=r===s.room,dark=this.mode==='dark'&&!lightAt(s,r)&&!cur;
+      g+=`<circle cx="${x}" cy="${y}" r="${cur?5:3.3}" class="${cur?'mm-cur':dark?'mm-dark':'mm-r'}"/>`;}
+    return `<svg viewBox="-27 -27 54 54" aria-hidden="true">${g}</svg>`;
+  }
+  cards(){
+    const s=this.s;
+    const e=reachable(s).map(id=>`<button class="card" data-a="noun" data-v="${id}">${id==='lantern'&&s.lantern==='player'?'Your lantern':nameOf(s,id)}</button>`);
+    if(canFeel(s)&&this.mode!=='dark') e.push(`<button class="card" data-a="act" data-v="here:feel">Feel around</button>`);
+    const x=['n','e','s','w'].map(d=>[d,exitInfo(s,d)]).filter(([,i])=>i).map(([d,i])=>`<button class="card exit ${i.barred?'barred':''}" data-a="go" data-v="${d}" aria-label="${DIRS[d]}, ${i.barred?'barred':'to '+i.label}">${DIRS[d]} · ${i.barred?'barred':i.label}</button>`);
+    return e.concat(x).join('');
+  }
+  rail(){
+    const s=this.s,u=this.ui;
+    if(u.dlg){
+      const cs=dlgChoices(s,u.dlg.node).map(c=>`<button class="chip say ${c.why?'off':''}" data-a="choice" data-v="${c.id}" ${c.why?'aria-disabled="true"':''}>${c.label}${c.why?` · <em>${c.why.kind.toLowerCase()}</em>`:''}</button>`);
+      const ts=u.dlg.node?[]:s.topics.filter(t=>TOPICS[t][1]||t==='search').map(t=>`<button class="chip ask" data-a="topic" data-v="${t}">Ask: ${TOPICS[t][0]}</button>`);
+      return cs.concat(ts).join('');
+    }
+    if(u.focus){
+      const id=u.focus;
+      return `<button class="chip back" data-a="back" aria-label="Back">‹ ${nameOf(s,id)}</button>`+actions(s,id).map(a=>`<button class="chip ${a.why?'off':''}" data-a="act" data-v="${id}:${a.key}" ${a.why?'aria-disabled="true"':''}>${a.label}${a.why?` · <em>${a.why.kind.toLowerCase()}</em>`:''}</button>`).join('');
+    }
+    return reachable(s).map(id=>`<button class="chip grp" data-a="focus" data-v="${id}">${id==='lantern'&&s.lantern==='player'?'Your lantern':nameOf(s,id)} ›</button>`).join('')
+      +actions(s,'here').filter(a=>a.key!=='look').map(a=>`<button class="chip ${a.why?'off':''}" data-a="act" data-v="here:${a.key}">${a.label}</button>`).join('');
+  }
+  sheet(){
+    const s=this.s,u=this.ui,sh=u.sheet; if(!sh) return '';
+    let h;
+    if(sh.kind==='noun'){
+      const id=sh.id; if(!reachable(s).includes(id)){u.sheet=null; return '';}
+      h=`<h4>${nameOf(s,id)}</h4><div class="acts">${actions(s,id).map(a=>`<button class="act ${a.why?'off':''}" data-a="act" data-v="${id}:${a.key}" ${a.why?'aria-disabled="true"':''}><span>${a.label}</span>${a.why?`<small><span class="why">${a.why.kind}</span>${a.why.text}</small>`:''}</button>`).join('')}</div>`;
+    } else if(sh.kind==='you'){
+      const q={none:'None yet',declined:'None yet',active:'The Ferryman’s Lantern · bring Bram the lantern',done:'The Ferryman’s Lantern · resolved'}[s.quest];
+      h=`<h4>You</h4><dl class="kv"><dt>Time</dt><dd>${clock(s.hour)}, day one</dd><dt>Quest</dt><dd>${q}</dd><dt>Carrying</dt><dd>${s.lantern==='player'?`<button class="link" data-a="noun" data-v="lantern">brass lantern${s.lit?' (lit)':''}</button>`:'Nothing'}</dd></dl>
+        <div class="acts">${actions(s,'here').map(a=>`<button class="act ${a.why?'off':''}" data-a="act" data-v="here:${a.key}"><span>${a.label}</span>${a.why?`<small><span class="why">${a.why.kind}</span>${a.why.text}</small>`:''}</button>`).join('')}</div>`;
+    } else {
+      h=`<h4>Map</h4><dl class="kv">${s.seen.map(r=>`<dt>${ROOMS[r].name}</dt><dd>${Object.entries(ROOMS[r].exits).map(([d,e])=>`${DIRS[d]}: ${typeof e==='string'?(s.seen.includes(e)?ROOMS[e].name:'unexplored'):'barred'}`).join(' · ')}</dd>`).join('')}</dl>`;
+    }
+    return `<div class="sheet" role="dialog" aria-label="${sh.kind}"><div class="grab"></div>${h}<button class="close" data-a="close">Close</button></div>`;
+  }
+  dlgPanel(){
+    const s=this.s,u=this.ui; if(!u.dlg||this.mode==='rail') return '';
+    const cs=dlgChoices(s,u.dlg.node), ts=u.dlg.node?[]:s.topics;
+    return `<div class="sheet tall" role="dialog" aria-label="Talking with Bram"><div class="grab"></div><h4>Bram</h4>
+      <div class="lines" aria-live="polite">${u.dlg.lines.map(m=>this.msg(m)).join('')}</div>
+      ${ts.length?`<div class="topics"><span class="lbl">Ask about</span>${ts.map(t=>`<button class="chip ask" data-a="topic" data-v="${t}">${TOPICS[t][0]}</button>`).join('')}</div>`:''}
+      <div class="choices">${cs.map(c=>`<button class="act ${c.why?'off':''}" data-a="choice" data-v="${c.id}" ${c.why?'aria-disabled="true"':''}><span>${c.label}</span>${c.why?`<small><span class="why">${c.why.kind}</span>${c.why.text}</small>`:''}</button>`).join('')}</div></div>`;
+  }
+  sceneView(){
+    const sc=this.ui.scene; if(!sc) return '';
+    const beats=`<p>Bram turns the lantern over in his rope-scarred hands, then gives it back. Out on the water, the reeds have gone the color of pewter.</p><p>“The party takes the boats at dusk,” he says. “Someone should walk the bank with a light. Or the light rides the prow, and you stay where I can see you.”</p>`;
+    const body=sc.phase==='choose'
+      ?`<button class="pick" data-a="scene" data-v="carry"><b>Carry it along the bank</b><span>You keep the lantern. The search follows your light.</span></button>
+        <button class="pick" data-a="scene" data-v="leave"><b>Leave it with the search party</b><span>Bram keeps the lantern. The party carries it by boat.</span></button>
+        <button class="close" data-a="later">Not yet</button>`
+      :`<p>${sc.pick==='carry'?'You hook the lantern to your belt. Bram nods once. “Then the bank is yours. We’ll take the boats.”':'Bram hangs the lantern from the ferry’s prow and lights it. “The party will carry it. Wait by the landing, in case she comes this way.”'}</p><button class="cont" data-a="cont">Continue</button>`;
+    return `<div class="scene" role="dialog" aria-label="The Search"><p class="eyebrow">A choice</p><h3>The Search</h3>${beats}${body}</div>`;
+  }
+  drawer(){
+    const s=this.s,u=this.ui; if(!u.drawer) return '';
+    let sug;
+    if(u.scene) sug=['1','2'];
+    else if(u.dlg) sug=dlgChoices(s,u.dlg.node).map((c,i)=>String(i+1)).concat(u.dlg.node?[]:s.topics.map(t=>'ask '+TOPICS[t][0].split(' ').pop()));
+    else sug=['n','e','s','w'].filter(d=>exitInfo(s,d)).concat(...reachable(s).map(id=>actions(s,id).filter(a=>!a.why).slice(0,1).map(a=>this.echoFor(id,a.key))),'look','wait','i').slice(0,9);
+    const hist=u.hist.slice(-30).map(h=>(h.cmd?`<p class="dcmd">${esc(h.cmd)}</p>`:'')+h.out.map(m=>this.msg(m)).join('')).join('');
+    return `<div class="sheet drawer" role="dialog" aria-label="Text commands"><div class="grab"></div>
+      <div class="dh" aria-live="polite">${hist||'<p class="sys">Every tap appears here as its command. Type help for a list.</p>'}</div>
+      <div class="sugg">${sug.map(c=>`<button class="chip" data-a="run" data-v="${c}">${c}</button>`).join('')}</div>
+      <form class="cmd"><label class="sr" for="cmd-${this.mode}">Command</label><input id="cmd-${this.mode}" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="look, take lantern, n…"><button type="submit">Go</button></form>
+      <button class="close" data-a="close">Close</button></div>`;
+  }
+  render(){
+    const s=this.s,u=this.ui,L=lightAt(s,s.room);
+    this.el.classList.toggle('lamp',L==='lamp'); this.el.classList.toggle('unlit',!L);
+    const q=s.quest==='active'?'Bring Bram the lantern':s.quest==='done'?(s.plan==='player_led'?'You lead the search':'The party leads'):'';
+    let h=`<div class="glow"></div><div class="st"><span>${clock(s.hour)}</span><span>${q}</span></div>`;
+    if(this.mode==='rail'){
+      const lastRoom=u.log.map(e=>e.t).lastIndexOf('room');
+      h+=`<main class="screen log" aria-label="Story">${u.log.map((e,i)=>e.t==='room'
+        ?`<div class="room ${i<lastRoom?'old':''}"><h4>${e.title}</h4>${e.prose.map(p=>`<p>${this.tokens(p,i===lastRoom)}</p>`).join('')}</div>`
+        :`<div class="${i<lastRoom?'old':''}">${this.msg(e)}</div>`).join('')}</main>
+        <nav class="rail" aria-label="${u.dlg?'Replies':'Things to do'}">${this.rail()}</nav>`;
+    } else {
+      h+=`<main class="screen"><h3 class="place">${L?ROOMS[s.room].name:'Darkness'}</h3>
+        <div class="prose">${prose(s).map(p=>`<p>${this.tokens(p,true)}</p>`).join('')}</div>
+        ${this.mode==='dark'&&canFeel(s)?`<button class="feel" data-a="act" data-v="here:feel">Feel around</button>`:''}
+        ${u.msg.length?`<div class="result" role="status">${u.msg.map(m=>this.msg(m)).join('')}</div>`:''}</main>
+        <nav class="cards" aria-label="In this place">${this.cards()}</nav>`;
+    }
+    h+=`<footer class="bar"><div class="left"><button class="pill" data-a="you">You${s.lantern==='player'?' · 1':''}</button><button class="pill" data-a="drawer">Type</button></div>${this.compass()}</footer>`;
+    const sheet=this.sheet(), dlg=this.dlgPanel(), dr=this.drawer(), sc=this.sceneView();
+    if((sheet||dlg||dr)&&!sc) h+=`<button class="scrim" data-a="close" aria-label="Close"></button>`;
+    h+=dlg+sheet+dr+sc;
+    this.el.innerHTML=h;
+    const log=this.el.querySelector('.log'); if(log) log.scrollTop=log.scrollHeight;
+    const ln=this.el.querySelector('.lines'); if(ln) ln.scrollTop=ln.scrollHeight;
+    const dh=this.el.querySelector('.dh'); if(dh) dh.scrollTop=dh.scrollHeight;
+    const inp=this.el.querySelector('.cmd input'); if(inp){inp.value=u.draft; inp.focus({preventScroll:true});}
+  }
+}
+document.querySelectorAll('.col').forEach(c=>new Phone(c));
+
+const root=document.documentElement;
+document.getElementById('face').onchange=e=>{
+  const g=e.target.value==='gara';
+  root.style.setProperty('--prose',g?"'EB Garamond',Georgia,serif":"'IM Fell English','EB Garamond',Georgia,serif");
+  root.style.setProperty('--sc',g?"'EB Garamond',Georgia,serif":"'IM Fell English SC','EB Garamond',Georgia,serif");
+};
+document.getElementById('size').oninput=e=>{root.style.setProperty('--size',e.target.value+'px'); document.getElementById('sizeOut').textContent=e.target.value+'px';};
+</script>
