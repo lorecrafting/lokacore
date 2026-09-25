@@ -1,5 +1,5 @@
 import { Text, View } from 'react-native';
-import { KERNEL_ID } from '../authority/local-story';
+const KERNEL_ID = 'none';
 
 export default function App() {
   return (
