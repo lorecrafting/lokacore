@@ -301,3 +301,67 @@ anyOf assessment — No defect found in the inspected checker/dispatch/generator
 Account isolation — MilestoneReport contains neither account_id nor a client-selected evidence class, and the account contracts do not reference StateScope. Account binding on StoryRun/QueuedReport and authenticated-account identity on platform acceptance are correctly outside the milestone payload.
 Cuts — Keep the small type-disjoint anyOf implementation and capability-specific relations. Move the repetitive 64-line boundary examples into focused tests instead of duplicating them in shipped schema/DEFS data; the existing 1024/1025-candidate tests demonstrate that approach. Do not expand this PR into a generic relation framework, arbitrary-union validator, or Realm transport layer.
 ```
+
+## Re-review (fix round 1)
+
+- Reviewed: fix commit `1f96346` and merge commit `3c422a2` (origin/main with PR #15
+  merged in), scoped to the dispositions and the code each fix touched, per the role file.
+- Checks at `3c422a2` in a fresh detached worktree: `bin/check_all.sh` exit 0 (`mix test`
+  108 tests; `elixir bin/contracts.exs --check` clean at the merge; Credo, sizes, red
+  controls, ast-grep, docs, Prettier, both `tsc`).
+- The Astra section above was read after my own findings were written; its A1 is real and
+  the fix below closes it. AQ1 is answered in the PR body and by my oracle; AQ2/AQ3 became
+  R6 follow-ups, which is the right owner.
+
+### Merge consistency
+
+`git diff 1f96346 3c422a2` is exactly what `origin/main` brought (PR #15's compose,
+invariants, fixtures, error codes, generator additions, its review record) plus the
+regenerated `kernel/ts/src/contracts.gen.ts`, which now carries both PR #15's
+`EVALUATION_FAULTS`/`LIMITS` and this PR's unions (`FactValue = Key | number | boolean`,
+`TextValue`, `ActionInputParameter`, `GameView.time`); `--check` confirms it is a fresh
+generation. `protocol/delta.schema.json` at the merge keeps FactValue's `anyOf` and PR #15's
+two edits (the `job.consume` description sentence and the `quest.transition` example's
+`from: "objectives_complete"`); the merge-vs-main diff of that file is only this PR's
+FactValue hunk. `docs/reviews/README.md` is the union of both index lines. The independent
+oracle recomputed all 529 examples and fixtures at the merge: the same single regex-nuance
+exception as before, nothing new.
+
+### Dispositions
+
+| Item | Fix | Verified |
+|---|---|---|
+| Astra A1 (blocker): AdvertisedAction lacks target/input | Both `available` branches gain required `target: TargetSpec` and `input: [ActionInputParameter]`; `ActionInputParameter` is a named enum extracted from `ActionDefinition.input.items`, which now `$ref`s it (`protocol/action.schema.json:255-266, 289-293`). Examples: `wait` with `until` and no target, `take` with an entity target, `look` with neither. | A/B of ActionDefinition validation with the enum inlined back in place of the `$ref`: identical errors, paths and order on five inputs (`["hours", 1, null, "until", "until"]` gives `not_in_enum` at `/input/0..2`; a bare string gives `invalid_type` at `/input`; `[{}]` gives `not_in_enum`). The generated TypeScript type is the same union under a name. Fixtures: an unknown parameter and target kind (`/input/0 not_in_enum`, `/target/kind unknown_variant`), a non-array input, and both empty-branch lists now include `/input` and `/target`. |
+| F1 (should-fix): no logical time | `GameView.time: LogicalTime`, required (`protocol/gameview.schema.json`); the example shows `time: 18` with `wait` advertised as `input: ["until"]`, so the touch client can build `until` from the view alone. Fixture: `time: -1` is `below_minimum`. | Mutants below. |
+| F2 (process): fixture provenance | PR body now states the three provenances (first-round hand-written before any run; empty-object lists derived from each schema's `required` text; later fixtures hand-written then checked by a mismatch-only script) and the rule going forward. | Consistent with the oracle result; accepted. |
+| Astra cut: 64-line examples | Removed from `decision.schema.json` and `gameview.schema.json` examples and from `invalid.json`; `test/loka/core/contracts_test.exs:161-178` and `kernel/ts/test/validate.test.ts:72-90` pin 64 valid / 65 `too_many_items` for both DecisionResult and NarrationRecord, building the 64/65 lists in the test (the same pattern as the 1024/1025 candidates test). | The sweep's expected survivor (NarrationRecord cap) dies under the unit test: see mutants. |
+| Question 1: snapshot narration semantics | "not yet acknowledged by the client, oldest first; the acknowledgement protocol arrives in R6" plus an R6 follow-up in the PR body. | Wording checked; the meaning is now pinned to durable acknowledgement, which is the safe reading of 06 §43. |
+| Nit 4 / Astra AQ2: StoryRun provenance | Description now says `parent_run_id` alone is not full restore provenance and names the R6 save-header contract as the owner of the parent snapshot/ancestor revision; R6 follow-up in the PR body. | Accepted. |
+| Nit 1: stale TextKey description | Fixed (`protocol/text.schema.json:7`). | Accepted. |
+| Nit 2: FactSpec.scopes duplicate | `test "FactSpec scopes are exactly the StateScope kinds"` (`contracts_test.exs:180-184`). | Mutant N4 below. |
+| Owner Q1/Q5 wording | Q1 now asks for a collision-checked mapping with a compile error on a clash and the 64-character limit after mapping; Q5 states the two-segment form as an explicit v1 decision. | Matches both reviewers' views. |
+| Nit 3, question 2 | Deferred as R6/R7 follow-ups in the PR body. | Fine; neither is a schema rule. |
+
+### Mutants (each reverted; `mix test --force`, TypeScript after `elixir bin/contracts.exs`)
+
+| Mutant | Result |
+|---|---|
+| A1a AdvertisedAction available branch: `target` not required | Elixir 1 test fails; TS 1 test fails |
+| A1b AdvertisedAction unavailable branch: `input` not required | 1 test fails |
+| A1c AdvertisedAction.input items: any string | 1 test fails |
+| F1a GameView.time not required | Elixir 1 test fails; TS 1 test fails |
+| F1b GameView.time: plain integer instead of LogicalTime | 1 test fails (`time: -1` fixture) |
+| N1 NarrationRecord.lines `maxItems` dropped (the sweep's known survivor) | "narration at 64 and 65 lines" fails in both kernels |
+| N2 DecisionResult.narration `maxItems` dropped | same test fails in both kernels |
+| N3 ActionInputParameter enum gains `hours` | 1 test fails |
+| N4 FactSpec.scopes drops `realm` | the new equality test fails |
+
+9 of 9 caught.
+
+### Verdict: APPROVE
+
+Every disposition verified; the code each fix touched (AdvertisedAction, ActionDefinition
+via the extracted enum, GameView, the narration caps) and its direct consumers (the
+generated types, the fixtures, both validators' example and fixture tests) behave as
+before or as required. Nothing open. The merge with PR #15 is consistent. Ready to merge
+once CI is green on `3c422a2`.
