@@ -182,7 +182,7 @@ function lockStage(c: Obj): Diagnostic[] {
   };
   const walk = (p: Obj, path: string) => {
     use('policy', p.op, `${path}.op`);
-    if (p.item) walk(p.item, `${path}.item`);
+    if (p.op === 'not') walk(p.item, `${path}.item`); // has_item.item is a DefinitionRef
     (p.items ?? []).forEach((x: Obj, i: number) => walk(x, `${path}.items[${i}]`));
   };
   for (const [ref, a] of Object.entries(c.actions as Obj)) {
