@@ -132,3 +132,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
   equivalent at all four sites, xref green, generated files byte-identical, ADR-074 trigger
   and red-control exit status planted and biting, phoenix vendored docs unchanged, 113/113;
   one nit: contracts.exs "Inputs" section does not hold all inputs).
+- [Type-check the TypeScript tests](2026-09-25-ts-test-types-review.md): PR #24 at `f3d83b7`, APPROVE WITH NOTES.

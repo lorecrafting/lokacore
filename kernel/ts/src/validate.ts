@@ -19,7 +19,7 @@ interface Schema {
 type Value = unknown;
 type Obj = Record<string, Value>;
 
-type Defs = Record<string, Schema>;
+export type Defs = Record<string, Schema>;
 
 const isObj = (v: Value): v is Obj => typeof v === 'object' && v !== null && !Array.isArray(v);
 const err = (path: string, code: ErrorCode): ContractError[] => [{ path, code }];

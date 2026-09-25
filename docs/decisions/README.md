@@ -31,3 +31,5 @@ holds the owner's decisions retained verbatim.
 
 - [ADR-074](adr-074-ts-first-proposal.md): TypeScript-only story rules until a server first
   consumes them ([accepted by the owner](owner-decision-adr-074-2026-09-24.md)).
+- [Type-check the TypeScript tests](owner-decision-ts-test-types-2026-09-25.md): owner
+  approval to add `@types/node` and type-check `kernel/ts/test/` before R4.
