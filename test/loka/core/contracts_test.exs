@@ -73,6 +73,11 @@ defmodule Loka.Core.ContractsTest do
     assert Enum.sort(for e <- @effects, do: e["type"]) == Enum.sort(types)
   end
 
+  test "every effect origin is a registered capability key" do
+    keys = for c <- @capabilities, do: c["key"]
+    for e <- @effects, origin <- e["allowed_origins"], do: assert(origin in keys, origin)
+  end
+
   # Invariants are checked by id (docs/ROADMAP.md), so an id must name one invariant, and a
   # citation must point at a real docs/spec heading.
   defp invariant_problems(entries) do

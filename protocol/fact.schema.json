@@ -1,0 +1,223 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Fact contracts",
+  "description": "FactSpec and scoped facts (03 §7, §13; 21 §3.9, §4 Fact).",
+  "$defs": {
+    "FactType": {
+      "description": "A fact's value type and default (03 §7). The types chapter one declares (00a §6): bool, enum over Keys, and int with optional inclusive bounds. The value itself is a FactValue (delta.schema.json).",
+      "oneOf": [
+        {
+          "description": "true or false.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "bool"
+            },
+            "default": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "default"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "One of values (order and duplicates carry no meaning); default is one of them, which the compiler checks.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "enum"
+            },
+            "values": {
+              "type": "array",
+              "items": {
+                "$ref": "action.schema.json#/$defs/Key"
+              },
+              "minItems": 1
+            },
+            "default": {
+              "$ref": "action.schema.json#/$defs/Key"
+            }
+          },
+          "required": [
+            "type",
+            "values",
+            "default"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "A safe integer within the optional inclusive bounds; the compiler checks default against them.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "int"
+            },
+            "minimum": {
+              "type": "integer"
+            },
+            "maximum": {
+              "type": "integer"
+            },
+            "default": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "type",
+            "default"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "type": "bool",
+          "default": false
+        },
+        {
+          "type": "enum",
+          "values": [
+            "missing",
+            "rescued",
+            "lost"
+          ],
+          "default": "missing"
+        },
+        {
+          "type": "int",
+          "minimum": -10,
+          "maximum": 10,
+          "default": 0
+        },
+        {
+          "type": "int",
+          "default": 0
+        }
+      ]
+    },
+    "FactSpec": {
+      "description": "A typed, namespaced fact declaration (03 §7): key (the fact's DefinitionRef is cartridge@version:fact/key; the cartridge is the namespace, 05 §4), versioned type, default, allowed scope kinds (a set) and meaning. Transition constraints and the reference graph are added with the compiler (R4).",
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "value_type": {
+          "$ref": "#/$defs/FactType"
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "player",
+              "party",
+              "instance",
+              "realm"
+            ]
+          },
+          "minItems": 1
+        },
+        "meaning": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "key",
+        "version",
+        "value_type",
+        "scopes",
+        "meaning"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "key": "child_status",
+          "version": 1,
+          "value_type": {
+            "type": "enum",
+            "values": [
+              "missing",
+              "rescued",
+              "lost"
+            ],
+            "default": "missing"
+          },
+          "scopes": [
+            "instance"
+          ],
+          "meaning": "Whether the missing child was found."
+        },
+        {
+          "key": "search_plan",
+          "version": 1,
+          "value_type": {
+            "type": "enum",
+            "values": [
+              "undecided",
+              "player_led",
+              "party_led"
+            ],
+            "default": "undecided"
+          },
+          "scopes": [
+            "player"
+          ],
+          "meaning": "Who leads the search."
+        }
+      ]
+    },
+    "ScopedFact": {
+      "description": "One stored fact value (03 §13): unique by fact, scope and subject_id within its world context, the same identity as the fact MutationTarget (delta.schema.json). An unset fact has its FactSpec default and no record. Revision and timestamps are host persistence metadata, not portable state.",
+      "type": "object",
+      "properties": {
+        "fact": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "fact_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "scope": {
+          "$ref": "scope.schema.json#/$defs/StateScope"
+        },
+        "subject_id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "value": {
+          "$ref": "delta.schema.json#/$defs/FactValue"
+        }
+      },
+      "required": [
+        "fact",
+        "fact_version",
+        "scope",
+        "value"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "fact": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "fact",
+            "key": "search_plan"
+          },
+          "fact_version": 1,
+          "scope": {
+            "kind": "player",
+            "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+          },
+          "value": "player_led"
+        }
+      ]
+    }
+  }
+}

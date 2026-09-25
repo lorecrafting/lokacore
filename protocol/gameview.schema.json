@@ -1,0 +1,657 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GameView contracts",
+  "description": "The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-release-proof.md P5). One schema for Story and Realm hosts; React Native renders it and never re-derives legality (04 §15).",
+  "$defs": {
+    "TextKey": {
+      "description": "A localization string id, never display text (04 §15; 05 §18): lowercase dotted snake_case of at most 128 characters, the ActionDefinition label rule. Interpolation data is added with its first use.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.]*$",
+      "maxLength": 128,
+      "examples": [
+        "room.ferry_landing.title",
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ]
+    },
+    "AdvertisedAction": {
+      "description": "One action of a resolved ActionSet (04 §19), for the entity or place it is listed under: invoking it builds an ActionInvocation with this action_key (action.schema.json). Lists are in presentation order, highest priority first (00 §4.10).",
+      "oneOf": [
+        {
+          "description": "Offered and currently legal.",
+          "type": "object",
+          "properties": {
+            "available": {
+              "const": true
+            },
+            "action_key": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "label": {
+              "$ref": "#/$defs/TextKey"
+            }
+          },
+          "required": [
+            "available",
+            "action_key",
+            "label"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Shown but not legal now, with the typed reason (00 §4.10: greyed with the reason). Never a security boundary: the authority revalidates (ACT-09).",
+          "type": "object",
+          "properties": {
+            "available": {
+              "const": false
+            },
+            "action_key": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "label": {
+              "$ref": "#/$defs/TextKey"
+            },
+            "reason": {
+              "$ref": "error.schema.json#/$defs/GameError"
+            }
+          },
+          "required": [
+            "available",
+            "action_key",
+            "label",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "available": true,
+          "action_key": "look",
+          "label": "action.look"
+        },
+        {
+          "available": false,
+          "action_key": "wait",
+          "label": "action.wait",
+          "reason": {
+            "code": "invalid_state"
+          }
+        }
+      ]
+    },
+    "ChoiceOption": {
+      "description": "One option of a pending choice: choosing it invokes choose with this choice_id.",
+      "oneOf": [
+        {
+          "description": "Offered and currently legal.",
+          "type": "object",
+          "properties": {
+            "available": {
+              "const": true
+            },
+            "choice_id": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "label": {
+              "$ref": "#/$defs/TextKey"
+            }
+          },
+          "required": [
+            "available",
+            "choice_id",
+            "label"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Shown but not legal now, with the typed reason (00 §4.10: greyed with the reason). Never a security boundary: the authority revalidates (ACT-09).",
+          "type": "object",
+          "properties": {
+            "available": {
+              "const": false
+            },
+            "choice_id": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "label": {
+              "$ref": "#/$defs/TextKey"
+            },
+            "reason": {
+              "$ref": "error.schema.json#/$defs/GameError"
+            }
+          },
+          "required": [
+            "available",
+            "choice_id",
+            "label",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "available": true,
+          "choice_id": "carry",
+          "label": "choice.carry"
+        },
+        {
+          "available": true,
+          "choice_id": "leave",
+          "label": "choice.leave"
+        }
+      ]
+    },
+    "ExitView": {
+      "description": "One exit of the current place (04 §14): its direction and whether moving through it is legal now (00 §4.10: disabled when unavailable).",
+      "type": "object",
+      "properties": {
+        "direction": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "available": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "direction",
+        "available"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "direction": "north",
+          "available": true
+        },
+        {
+          "direction": "west",
+          "available": false
+        }
+      ]
+    },
+    "EntityView": {
+      "description": "A visible entity (04 §14): the view model, never internal component state. Only entities the actor's AudiencePolicy admits appear (03 §6).",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "name": {
+          "$ref": "#/$defs/TextKey"
+        },
+        "kind": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AdvertisedAction"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "kind",
+        "actions"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+          "name": "npc.wren.name",
+          "kind": "npc",
+          "actions": [
+            {
+              "available": true,
+              "action_key": "talk",
+              "label": "action.talk"
+            }
+          ]
+        }
+      ]
+    },
+    "PendingChoice": {
+      "description": "The actor's open choice (04 §15 'dialogue choices currently available'), in presentation order.",
+      "type": "object",
+      "properties": {
+        "continuation_id": {
+          "$ref": "delta.schema.json#/$defs/ContinuationId"
+        },
+        "choices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ChoiceOption"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "continuation_id",
+        "choices"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "continuation_id": "0f0e0d0c-0b0a-4908-8706-050403020100",
+          "choices": [
+            {
+              "available": true,
+              "choice_id": "carry",
+              "label": "choice.carry"
+            },
+            {
+              "available": true,
+              "choice_id": "leave",
+              "label": "choice.leave"
+            }
+          ]
+        }
+      ]
+    },
+    "QuestView": {
+      "description": "A journal entry (04 §15 'quest journal state'; 00 §4.10 Journal).",
+      "type": "object",
+      "properties": {
+        "quest": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "state": {
+          "$ref": "policy.schema.json#/$defs/QuestState"
+        },
+        "title": {
+          "$ref": "#/$defs/TextKey"
+        }
+      },
+      "required": [
+        "quest",
+        "state",
+        "title"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "quest": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find_the_child"
+          },
+          "state": "active",
+          "title": "quest.find_the_child.title"
+        }
+      ]
+    },
+    "PlaceView": {
+      "description": "The current place (04 §14 room).",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "title": {
+          "$ref": "#/$defs/TextKey"
+        },
+        "description": {
+          "$ref": "#/$defs/TextKey"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "description"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "id": "12121212-3434-4565-8787-909090909090",
+          "title": "room.ferry_landing.title",
+          "description": "room.ferry_landing.description"
+        }
+      ]
+    },
+    "GameView": {
+      "description": "One actor's semantic view (04 §14, §15): the place, its exits, place-level actions, visible entities with their actions, the actor's inventory, quest journal, and the pending choice when one is open. The fields the R6P touch path needs (00 §4.10; P5); map, equipment, shop and other surfaces join with their capabilities.",
+      "type": "object",
+      "properties": {
+        "actor_id": {
+          "$ref": "identity.schema.json#/$defs/CharacterId"
+        },
+        "place": {
+          "$ref": "#/$defs/PlaceView"
+        },
+        "exits": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExitView"
+          }
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AdvertisedAction"
+          }
+        },
+        "entities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EntityView"
+          }
+        },
+        "inventory": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EntityView"
+          }
+        },
+        "journal": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/QuestView"
+          }
+        },
+        "choice": {
+          "$ref": "#/$defs/PendingChoice"
+        }
+      },
+      "required": [
+        "actor_id",
+        "place",
+        "exits",
+        "actions",
+        "entities",
+        "inventory",
+        "journal"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "place": {
+            "id": "12121212-3434-4565-8787-909090909090",
+            "title": "room.ferry_landing.title",
+            "description": "room.ferry_landing.description"
+          },
+          "exits": [
+            {
+              "direction": "north",
+              "available": true
+            },
+            {
+              "direction": "west",
+              "available": false
+            }
+          ],
+          "actions": [
+            {
+              "available": true,
+              "action_key": "look",
+              "label": "action.look"
+            },
+            {
+              "available": false,
+              "action_key": "wait",
+              "label": "action.wait",
+              "reason": {
+                "code": "invalid_state"
+              }
+            }
+          ],
+          "entities": [
+            {
+              "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+              "name": "npc.wren.name",
+              "kind": "npc",
+              "actions": [
+                {
+                  "available": true,
+                  "action_key": "talk",
+                  "label": "action.talk"
+                }
+              ]
+            }
+          ],
+          "inventory": [
+            {
+              "id": "11111111-2222-4333-8444-555555555555",
+              "name": "item.lantern.name",
+              "kind": "item",
+              "actions": [
+                {
+                  "available": true,
+                  "action_key": "drop",
+                  "label": "action.drop"
+                }
+              ]
+            }
+          ],
+          "journal": [
+            {
+              "quest": {
+                "cartridge_id": "ferrymans_lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "find_the_child"
+              },
+              "state": "active",
+              "title": "quest.find_the_child.title"
+            }
+          ]
+        },
+        {
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "place": {
+            "id": "12121212-3434-4565-8787-909090909090",
+            "title": "room.ferry_landing.title",
+            "description": "room.ferry_landing.description"
+          },
+          "exits": [],
+          "actions": [],
+          "entities": [],
+          "inventory": [],
+          "journal": [],
+          "choice": {
+            "continuation_id": "0f0e0d0c-0b0a-4908-8706-050403020100",
+            "choices": [
+              {
+                "available": true,
+                "choice_id": "carry",
+                "label": "choice.carry"
+              },
+              {
+                "available": true,
+                "choice_id": "leave",
+                "label": "choice.leave"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "GameViewSnapshot": {
+      "description": "An authoritative GameView snapshot (04 §16). format versions the envelope: a new field or meaning takes a new format. projection_sequence orders this client stream's projection messages; a gap means resync from a fresh snapshot. view_freshness_token is opaque, echoed in ActionInvocation (same 1-128 character limit) for staleness diagnosis. Neither equals an authority revision (04 §16). Incremental projection messages are added with the Realm transport.",
+      "type": "object",
+      "properties": {
+        "format": {
+          "type": "string",
+          "const": "loka-gameview-v1"
+        },
+        "projection_sequence": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "view_freshness_token": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "view": {
+          "$ref": "#/$defs/GameView"
+        }
+      },
+      "required": [
+        "format",
+        "projection_sequence",
+        "view"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "format": "loka-gameview-v1",
+          "projection_sequence": 0,
+          "view_freshness_token": "tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt",
+          "view": {
+            "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+            "place": {
+              "id": "12121212-3434-4565-8787-909090909090",
+              "title": "room.ferry_landing.title",
+              "description": "room.ferry_landing.description"
+            },
+            "exits": [
+              {
+                "direction": "north",
+                "available": true
+              },
+              {
+                "direction": "west",
+                "available": false
+              }
+            ],
+            "actions": [
+              {
+                "available": true,
+                "action_key": "look",
+                "label": "action.look"
+              },
+              {
+                "available": false,
+                "action_key": "wait",
+                "label": "action.wait",
+                "reason": {
+                  "code": "invalid_state"
+                }
+              }
+            ],
+            "entities": [
+              {
+                "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+                "name": "npc.wren.name",
+                "kind": "npc",
+                "actions": [
+                  {
+                    "available": true,
+                    "action_key": "talk",
+                    "label": "action.talk"
+                  }
+                ]
+              }
+            ],
+            "inventory": [
+              {
+                "id": "11111111-2222-4333-8444-555555555555",
+                "name": "item.lantern.name",
+                "kind": "item",
+                "actions": [
+                  {
+                    "available": true,
+                    "action_key": "drop",
+                    "label": "action.drop"
+                  }
+                ]
+              }
+            ],
+            "journal": [
+              {
+                "quest": {
+                  "cartridge_id": "ferrymans_lantern",
+                  "cartridge_version": "0.1.0",
+                  "kind": "quest",
+                  "key": "find_the_child"
+                },
+                "state": "active",
+                "title": "quest.find_the_child.title"
+              }
+            ]
+          }
+        },
+        {
+          "format": "loka-gameview-v1",
+          "projection_sequence": 9007199254740991,
+          "view": {
+            "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+            "place": {
+              "id": "12121212-3434-4565-8787-909090909090",
+              "title": "room.ferry_landing.title",
+              "description": "room.ferry_landing.description"
+            },
+            "exits": [
+              {
+                "direction": "north",
+                "available": true
+              },
+              {
+                "direction": "west",
+                "available": false
+              }
+            ],
+            "actions": [
+              {
+                "available": true,
+                "action_key": "look",
+                "label": "action.look"
+              },
+              {
+                "available": false,
+                "action_key": "wait",
+                "label": "action.wait",
+                "reason": {
+                  "code": "invalid_state"
+                }
+              }
+            ],
+            "entities": [
+              {
+                "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+                "name": "npc.wren.name",
+                "kind": "npc",
+                "actions": [
+                  {
+                    "available": true,
+                    "action_key": "talk",
+                    "label": "action.talk"
+                  }
+                ]
+              }
+            ],
+            "inventory": [
+              {
+                "id": "11111111-2222-4333-8444-555555555555",
+                "name": "item.lantern.name",
+                "kind": "item",
+                "actions": [
+                  {
+                    "available": true,
+                    "action_key": "drop",
+                    "label": "action.drop"
+                  }
+                ]
+              }
+            ],
+            "journal": [
+              {
+                "quest": {
+                  "cartridge_id": "ferrymans_lantern",
+                  "cartridge_version": "0.1.0",
+                  "kind": "quest",
+                  "key": "find_the_child"
+                },
+                "state": "active",
+                "title": "quest.find_the_child.title"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

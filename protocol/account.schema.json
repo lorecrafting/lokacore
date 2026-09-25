@@ -1,0 +1,477 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Account, run and admission contracts",
+  "description": "Account/run binding, Story milestone reports and acceptances, and Realm admission (23 §2-§7, §11; 03 §25-§27). Host and platform records, never portable gameplay inputs: no StateScope here, and none of this enters the canonical gameplay hash (03 §26; 23 §2).",
+  "$defs": {
+    "AccountId": {
+      "description": "A platform account (23 §2, §5): server-owned, never reused. Lowercase hyphenated UUID, any version.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "examples": [
+        "7a7a7a7a-1111-4222-8333-444444444444"
+      ]
+    },
+    "LocalProfileId": {
+      "description": "A local profile on a device (23 §2), distinct from AccountId and CharacterId. Lowercase hyphenated UUID, any version.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "examples": [
+        "8b8b8b8b-1111-4222-8333-444444444444"
+      ]
+    },
+    "StoryRunId": {
+      "description": "A Story run/save lineage (23 §5; 03 §25). A semantic restore or fork is a new run (23 §11). Lowercase hyphenated UUID, any version.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "examples": [
+        "6f6f6f6f-1111-4222-8333-444444444444"
+      ]
+    },
+    "MilestoneReportId": {
+      "description": "One milestone occurrence's report, stable across retry and restore (23 §4, §11). Lowercase hyphenated UUID, any version.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "examples": [
+        "5e5e5e5e-1111-4222-8333-444444444444"
+      ]
+    },
+    "StoryRun": {
+      "description": "A Story run and its binding (23 §5, §11; 03 §25): the exact cartridge release, the local profile, and the account once bound (host-side, outside portable semantics, 23 §4). parent_run_id is the run a restore or fork branched from. The server enforces that an account binding and release never change after registration (23 §5).",
+      "type": "object",
+      "properties": {
+        "run_id": {
+          "$ref": "#/$defs/StoryRunId"
+        },
+        "parent_run_id": {
+          "$ref": "#/$defs/StoryRunId"
+        },
+        "release": {
+          "$ref": "manifest.schema.json#/$defs/CartridgeRelease"
+        },
+        "profile_id": {
+          "$ref": "#/$defs/LocalProfileId"
+        },
+        "account_id": {
+          "$ref": "#/$defs/AccountId"
+        }
+      },
+      "required": [
+        "run_id",
+        "release",
+        "profile_id"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "run_id": "6f6f6f6f-1111-4222-8333-444444444444",
+          "release": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+          },
+          "profile_id": "8b8b8b8b-1111-4222-8333-444444444444"
+        },
+        {
+          "run_id": "6f6f6f6f-1111-4222-8333-444444444444",
+          "parent_run_id": "9c9c9c9c-1111-4222-8333-444444444444",
+          "release": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+          },
+          "profile_id": "8b8b8b8b-1111-4222-8333-444444444444",
+          "account_id": "7a7a7a7a-1111-4222-8333-444444444444"
+        }
+      ]
+    },
+    "MilestoneReport": {
+      "description": "The payload of one milestone report (23 §5 'Local milestone/report'): milestone key, occurrence id, run and exact release, outcome and the observed game revision. It names no account (authentication supplies it) and no evidence class (only the server assigns one, 23 §6).",
+      "type": "object",
+      "properties": {
+        "report_id": {
+          "$ref": "#/$defs/MilestoneReportId"
+        },
+        "run_id": {
+          "$ref": "#/$defs/StoryRunId"
+        },
+        "release": {
+          "$ref": "manifest.schema.json#/$defs/CartridgeRelease"
+        },
+        "milestone": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "outcome": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "observed_revision": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "report_id",
+        "run_id",
+        "release",
+        "milestone",
+        "outcome",
+        "observed_revision"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "report_id": "5e5e5e5e-1111-4222-8333-444444444444",
+          "run_id": "6f6f6f6f-1111-4222-8333-444444444444",
+          "release": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+          },
+          "milestone": "prologue_completed",
+          "outcome": "player_led",
+          "observed_revision": 17
+        }
+      ]
+    },
+    "ReportDisposition": {
+      "description": "A queued report's delivery state (23 §4). A report is never dropped after a retry limit.",
+      "enum": [
+        "pending",
+        "accepted",
+        "rejected",
+        "needs_attention"
+      ],
+      "examples": [
+        "pending"
+      ]
+    },
+    "QueuedReport": {
+      "description": "A report in the local queue (23 §4, §5): account_id is the binding recorded when queued, verified on upload and never rebound to another account (absent for an unbound guest run).",
+      "type": "object",
+      "properties": {
+        "report": {
+          "$ref": "#/$defs/MilestoneReport"
+        },
+        "account_id": {
+          "$ref": "#/$defs/AccountId"
+        },
+        "disposition": {
+          "$ref": "#/$defs/ReportDisposition"
+        }
+      },
+      "required": [
+        "report",
+        "disposition"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "report": {
+            "report_id": "5e5e5e5e-1111-4222-8333-444444444444",
+            "run_id": "6f6f6f6f-1111-4222-8333-444444444444",
+            "release": {
+              "cartridge_id": "ferrymans_lantern",
+              "cartridge_version": "0.1.0",
+              "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+            },
+            "milestone": "prologue_completed",
+            "outcome": "player_led",
+            "observed_revision": 17
+          },
+          "account_id": "7a7a7a7a-1111-4222-8333-444444444444",
+          "disposition": "pending"
+        }
+      ]
+    },
+    "EvidenceClass": {
+      "description": "How a milestone was evidenced (23 §6). A client cannot select or upgrade it.",
+      "enum": [
+        "offline_client_report",
+        "server_replayed_trace",
+        "server_authoritative_run"
+      ],
+      "examples": [
+        "offline_client_report"
+      ]
+    },
+    "MilestoneAcceptance": {
+      "description": "The platform's durable acceptance record (23 §5 'Platform acceptance'): authenticated account, canonical payload digest (hash of the MilestoneReport), recognized release and milestone, evidence class, acceptance-policy revision and result. integrity_conflict: the report id was reused with a different payload; outcome_conflict: another outcome for the same milestone in the same run (23 §5). The server receipt time is host metadata whose format is fixed with the platform API (R12A).",
+      "type": "object",
+      "properties": {
+        "report_id": {
+          "$ref": "#/$defs/MilestoneReportId"
+        },
+        "account_id": {
+          "$ref": "#/$defs/AccountId"
+        },
+        "payload_digest": {
+          "$ref": "manifest.schema.json#/$defs/ContentHash"
+        },
+        "release": {
+          "$ref": "manifest.schema.json#/$defs/CartridgeRelease"
+        },
+        "milestone": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "outcome": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "evidence_class": {
+          "$ref": "#/$defs/EvidenceClass"
+        },
+        "policy_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "result": {
+          "enum": [
+            "accepted",
+            "rejected",
+            "integrity_conflict",
+            "outcome_conflict"
+          ]
+        }
+      },
+      "required": [
+        "report_id",
+        "account_id",
+        "payload_digest",
+        "release",
+        "milestone",
+        "outcome",
+        "evidence_class",
+        "policy_revision",
+        "result"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "report_id": "5e5e5e5e-1111-4222-8333-444444444444",
+          "account_id": "7a7a7a7a-1111-4222-8333-444444444444",
+          "payload_digest": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+          "release": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+          },
+          "milestone": "prologue_completed",
+          "outcome": "player_led",
+          "evidence_class": "offline_client_report",
+          "policy_revision": 1,
+          "result": "accepted"
+        }
+      ]
+    },
+    "RequirementId": {
+      "description": "A stable admission requirement id, namespace.name@version (23 §7: onboarding.loka_fundamentals@1); each segment lowercase snake_case, at most 64 characters.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,63}\\.[a-z][a-z0-9_]{0,63}@[1-9][0-9]{0,15}$",
+      "examples": [
+        "onboarding.loka_fundamentals@1"
+      ]
+    },
+    "QualifyingMilestone": {
+      "description": "One approved (release hash, milestone, outcome) that satisfies a requirement (23 §7).",
+      "type": "object",
+      "properties": {
+        "cartridge_hash": {
+          "$ref": "manifest.schema.json#/$defs/ContentHash"
+        },
+        "milestone": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "outcome": {
+          "$ref": "action.schema.json#/$defs/Key"
+        }
+      },
+      "required": [
+        "cartridge_hash",
+        "milestone",
+        "outcome"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+          "milestone": "prologue_completed",
+          "outcome": "player_led"
+        }
+      ]
+    },
+    "AdmissionRequirement": {
+      "description": "A requirement and its explicit alternative qualifying milestones, at least one (23 §7).",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/RequirementId"
+        },
+        "alternatives": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/QualifyingMilestone"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "id",
+        "alternatives"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "id": "onboarding.loka_fundamentals@1",
+          "alternatives": [
+            {
+              "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+              "milestone": "prologue_completed",
+              "outcome": "player_led"
+            }
+          ]
+        }
+      ]
+    },
+    "AdmissionPolicy": {
+      "description": "A deployment's versioned admission policy (23 §5, §7): a conjunction of requirements, at least one. Ungated is its own explicit kind, never an empty list.",
+      "oneOf": [
+        {
+          "description": "Every requirement must be met.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "gated"
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "requirements": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/AdmissionRequirement"
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "kind",
+            "version",
+            "requirements"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Intentionally no requirement.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "ungated"
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "kind",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "kind": "gated",
+          "version": 1,
+          "requirements": [
+            {
+              "id": "onboarding.loka_fundamentals@1",
+              "alternatives": [
+                {
+                  "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+                  "milestone": "prologue_completed",
+                  "outcome": "player_led"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "ungated",
+          "version": 1
+        }
+      ]
+    },
+    "AdmissionResult": {
+      "description": "A server admission decision (23 §7): eligible, or the missing requirements, with the policy and progress versions it was evaluated at.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "result": {
+              "const": "eligible"
+            },
+            "policy_version": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "progress_version": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "result",
+            "policy_version",
+            "progress_version"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "result": {
+              "const": "missing_requirements"
+            },
+            "missing": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/RequirementId"
+              },
+              "minItems": 1
+            },
+            "policy_version": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "progress_version": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "result",
+            "missing",
+            "policy_version",
+            "progress_version"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "result": "eligible",
+          "policy_version": 1,
+          "progress_version": 0
+        },
+        {
+          "result": "missing_requirements",
+          "missing": [
+            "onboarding.loka_fundamentals@1"
+          ],
+          "policy_version": 1,
+          "progress_version": 3
+        }
+      ]
+    }
+  }
+}

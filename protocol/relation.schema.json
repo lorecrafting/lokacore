@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Relation and provenance contracts",
+  "description": "Typed relations and runtime entity identity/provenance (21 §4; 03 §3, §11; 05 §25).",
+  "$defs": {
+    "Relation": {
+      "description": "A typed, capability-owned relation between runtime entities (21 §4 'Typed relations'; Loka is not an untyped graph). One branch per kind in use: containment (containment@1), an entity's one container (03 §23). Equipment, ownership, custody, membership, following, participation and relationship links join as branches with their owning capability.",
+      "oneOf": [
+        {
+          "description": "entity_id is directly inside container_id (a room, character or container).",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "containment"
+            },
+            "entity_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "container_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "kind",
+            "entity_id",
+            "container_id"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "kind": "containment",
+          "entity_id": "11111111-2222-4333-8444-555555555555",
+          "container_id": "12121212-3434-4565-8787-909090909090"
+        }
+      ]
+    },
+    "EntityOrigin": {
+      "description": "Where a runtime entity came from (21 §4 'spawn/population provenance'; 05 §25 'Population provenance': a plan may only replenish or clean up what it spawned).",
+      "oneOf": [
+        {
+          "description": "Placed by the cartridge's authored content.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "authored"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Created by the definition `by` (a spawn bundle or population plan).",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "spawned"
+            },
+            "by": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "kind",
+            "by"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "kind": "authored"
+        },
+        {
+          "kind": "spawned",
+          "by": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "population",
+            "key": "fen_wisps"
+          }
+        }
+      ]
+    },
+    "EntityIdentity": {
+      "description": "A runtime entity's identity and provenance (03 §3, §11; 21 §4): its own id, the definition it instantiates (never the definition record itself), its origin, and for a player/party overlay entity its StateScope and AudiencePolicy; shared entities omit both. Authority revision is host metadata.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "definition": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "origin": {
+          "$ref": "#/$defs/EntityOrigin"
+        },
+        "scope": {
+          "$ref": "scope.schema.json#/$defs/StateScope"
+        },
+        "audience": {
+          "$ref": "scope.schema.json#/$defs/AudiencePolicy"
+        }
+      },
+      "required": [
+        "id",
+        "definition",
+        "origin"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "id": "11111111-2222-4333-8444-555555555555",
+          "definition": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "item",
+            "key": "lantern"
+          },
+          "origin": {
+            "kind": "authored"
+          }
+        },
+        {
+          "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+          "definition": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "npc",
+            "key": "wren"
+          },
+          "origin": {
+            "kind": "authored"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+          },
+          "audience": {
+            "kind": "player",
+            "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+          }
+        }
+      ]
+    }
+  }
+}
