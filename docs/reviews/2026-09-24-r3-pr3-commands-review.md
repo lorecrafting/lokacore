@@ -360,3 +360,106 @@ V7 — The selected command names are proportionate to R6P; no rename is needed 
 
 V8 — Defer unused aliases, cost/cooldown hints, resource operations and later custom-event detail rather than expanding this PR into their implementations. Receipts at R6 and projection hints in PR 4 are reasonable phasing, but missing context for already-admitted continuation operations is not. The DomainEvent/CommittedEvent shapes are structurally distinct, so I found no implicit schema conversion that makes a bare proposed event publishable. That is not proof of commit safety: PR 5 must still demonstrate that publication occurs only after confirmed commit, with failed-commit and uncertain-outcome cases covered before Gate R3.
 ```
+
+## Re-review (fix round 1): `0c1e681`, `2c0d824` (merge `1a45244` checked for consistency)
+
+Scope: the fix commits, the code they touched and its direct callers, plus (because A1
+reshaped delta ops) whether PR 5 can still implement 04 §5.3 on the new shapes. Checks at
+`2c0d824` in a detached worktree: `bin/check_all.sh` exit 0 after `npm ci` in `mobile/app`;
+CI lint/typescript/elixir green on the head (android/ios pending at the time).
+
+### Verdict: CHANGES REQUIRED (two one-line should-fix items; every round-1 item is fixed)
+
+**Merge `1a45244`.** Its diff against the first parent is exactly PR #11's eleven files;
+`elixir bin/contracts.exs --check` exits 0 at the merge, so the regenerated
+`contracts.gen.ts` matches. Consistent.
+
+**My findings.**
+- **F1, fixed.** 60 discriminator-only fixtures with hand-written `missing_property` lists,
+  plus `{"op":"any","items":[]}` and an ephemeral entry with empty `allowed_origins`. My
+  own sweep re-run on `2c0d824` (now 177 mutants over the 34 new contracts, including
+  `FactValue` and `RoleBinding`): **1 survivor, `TargetResolution.candidate_ids maxItems
+  1024->1025`**, which the sweep cannot see because that bound moved from a fixture into
+  the two suites' built lists; the slow run (`mix test --force`, regenerate, `npm test`)
+  kills it in both kernels. Slow mutants also killed: `DomainEvent` without `position`
+  and `not` without `item` (round 1's survivors), `take` without `actor_id` (the F1
+  scenario), and one field from each new shape (below). The developer's "177 mutants, 0
+  survivors outside the 1024/1025 case" matches.
+- **F2, fixed.** `all.items` has no `minItems`; the empty conjunction is documented as "the
+  policy with no condition"; the `move` example is `all: []`; the old `too_few_items`
+  fixture for `all` is gone and `any` keeps `minItems: 1` with its own fixture. Mutant
+  (`minItems: 1` back on `all`): killed in both kernels.
+- **F3, fixed (`0c1e681`, `2c0d824`).** `Command`'s description, both `command_id` docs and
+  the numeric profile say the derivation is for invocation-derived commands and that
+  `run_job` uses a different tag over `(job id, occurrence)`, defined where it first
+  executes. No code change; none was asked.
+- **N1, fixed.** The planted heading is a 9-character prefix of a real heading. Mutant
+  (exact-line check loosened to `String.contains?`): now killed.
+- **N2, fixed by documentation.** `validate.ts` and `contracts.ex` say the decoder's
+  128-nesting cap bounds `$ref` recursion; the 200-deep in-memory probe is replaced by
+  `Policy` through `decode` at 128 containers (validates) and 129 (`invalid_json`), in both
+  suites. My 8,415-case differential re-run still shows the same 6 TypeScript `RangeError`s
+  at depths 1000 and 3000, unreachable through `decode`; zero other disagreements.
+- **N3/AQ3, fixed.** `TargetSpec.scopes` is `self, inventory, room_contents,
+  room_occupants`; the description defers the rest to a non-entity target identity (21 §6).
+- **N4, fixed.** No schema references its own file by name (grep over `protocol/`).
+
+**Astra's findings.**
+- **A1, fixed, and PR 5 can implement it.** `choice.open` carries `actor_id`, `source`
+  (DefinitionRef), `beat` (Key), `roles` (array of `RoleBinding {role, entity_id}`) and
+  `choice_ids`; `choice.resolve` carries `expected_revision` (integer ≥ 1). Against 04 §5.3's
+  row (stable instance, beat/occurrence, bound roles, pending choice, expected revision):
+  instance = `continuation_id`, beat = `source` + `beat`, roles = `roles`, pending choice =
+  `choice_ids` / `choice_id`, expected revision = `expected_revision`. The mutation target
+  is still `choice(continuation_id)` alone, so a resolve and a close from different writer
+  groups conflict as before, and the roles array adds no target. One note for PR 5/R6:
+  "opened at committed revision" is assigned by the host at commit, not known inside the
+  opening decision, so the continuation row must store its opening revision and the
+  resolving decision copies it from committed state into the op; the shape supports that
+  without change. Mutants (drop `roles`; drop `expected_revision`): killed in both kernels.
+- **A2, fixed.** `fact_changed` carries `old` and `new`, both `FactValue`. Mutant (drop
+  `old`): killed in both kernels. See F4 below for the one field this reshaped payload still
+  lacks.
+- **A3, fixed.** `DomainEvent.subject_id` is gone; `entity_entered_room.entity_id`,
+  `item_acquired.item_id`, `item_dropped.item_id` are required in the payloads; quest and
+  choice payloads already named their subject. Mutant (drop `item_id`): killed in both.
+- **AQ1, answered with `job.complete`.** Target `job(job_id)`, so a `job.schedule` and a
+  `job.complete` on one id from different writer groups conflict; `run_job` commits it. Mutant
+  (drop `job_id`): killed in both. See F5 for its precondition's wording.
+- **AQ2, aligned.** The tests now promise only what holds (decoded values, bound 128).
+- **V5 (FactValue), done.** One `FactValue` definition (a `Key` today) used by `fact.assign`,
+  `fact_compare` and `fact_changed`; FactSpec widens that one place.
+- **V6, done.** The 1,024-id example left `action.schema.json` (net −1,000 lines of generated
+  contract data); 1024/1025 are built in both suites with the hand-written expected error;
+  the 8-target and 128-character caps are described as admission limits of this contract
+  version.
+- **V3, done (`0c1e681`).** `numeric-profile.md` gains one CommandId paragraph beside
+  IdSource, marked additive; the only other change is the status line naming the amendment.
+  The frozen rules and `numeric-vectors.json` are untouched (diff inspected). The IMPORT.md
+  amendment entry is present and accurate ("No existing rule or fixture changed").
+
+### New findings (in the reshaped code only)
+
+**F4 (should-fix) `protocol/event.schema.json:312`: `fact_changed` cannot name the fact's subject.**
+`fact.assign` (`delta.schema.json`, target `fact(fact, scope, subject_id)`) admits an
+optional `subject_id`, so one fact key in one scope can be about several entities (03 §7
+relationship/NPC memory). The reshaped `fact_changed` payload is `{fact, old, new}` and the
+envelope's `subject_id` was removed in A3, so a subject-scoped fact change emits an event
+that no longer says which subject changed. Scenario: player-scoped fact `trust` about Bram
+and about a second NPC; both change in one decision; two `fact_changed` events differ only in
+`old`/`new`, and a reaction on Bram's trust fires for the other NPC. Same class as A3. Fix:
+optional `subject_id: EntityId` on `fact_changed` (one property, one example line), present
+exactly when the op had one.
+
+**F5 (should-fix) `protocol/delta.schema.json:379`: `job.complete`'s precondition reads wrong during an explicit advance.**
+"due_time is not later than the current logical time" uses the same phrase as
+`time.advance` ("current logical time equals `from`"), the committed clock. 04 §5.4 evaluates
+an advance's due jobs "inside the same proposal, then sets the target time": during `wait`
+6→19, the overlay clock is 6 while Bram's job (due 19) runs, so a PR 5 that implements the
+words as written faults every wait that has a due job. Fix: one line, "not later than the
+visited logical time: the clock at ordinary admission, or the job's visited due time during an
+explicit advance (04 §5.4)".
+
+Both are one-line contract edits in shapes this round introduced; a fixture for F4 is one
+line more. Nothing else is open. Once they land I will verify them and the record can close
+at APPROVE.
