@@ -2,72 +2,72 @@
   {
     "code": "not_found",
     "category": "gameplay_rejection",
-    "description": "The referenced thing does not exist (04 \u00a77)."
+    "description": "The referenced thing does not exist (04 §7)."
   },
   {
     "code": "not_present",
     "category": "gameplay_rejection",
-    "description": "The thing exists but is not here (04 \u00a77)."
+    "description": "The thing exists but is not here (04 §7)."
   },
   {
     "code": "not_owned",
     "category": "gameplay_rejection",
-    "description": "The actor does not own or hold the thing (04 \u00a77)."
+    "description": "The actor does not own or hold the thing (04 §7)."
   },
   {
     "code": "permission_denied",
     "category": "gameplay_rejection",
-    "description": "The actor may not do this (04 \u00a77)."
+    "description": "The actor may not do this (04 §7)."
   },
   {
     "code": "invalid_target",
     "category": "gameplay_rejection",
-    "description": "The target cannot receive this action (04 \u00a77)."
+    "description": "The target cannot receive this action (04 §7)."
   },
   {
     "code": "invalid_state",
     "category": "gameplay_rejection",
-    "description": "The world state does not allow this now (04 \u00a77)."
+    "description": "The world state does not allow this now (04 §7)."
   },
   {
     "code": "stale_view",
     "category": "gameplay_rejection",
-    "description": "The command was built from an outdated view (04 \u00a77, \u00a716)."
+    "description": "The command was built from an outdated view (04 §7, §16)."
   },
   {
     "code": "stale_revision",
     "category": "gameplay_rejection",
-    "description": "The expected authority revision no longer matches (04 \u00a77)."
+    "description": "The expected authority revision no longer matches (04 §7)."
   },
   {
     "code": "insufficient_resource",
     "category": "gameplay_rejection",
-    "description": "Not enough of a required resource (04 \u00a77)."
+    "description": "Not enough of a required resource (04 §7)."
   },
   {
     "code": "exit_locked",
     "category": "gameplay_rejection",
-    "description": "The exit is locked (04 \u00a77)."
+    "description": "The exit is locked (04 §7)."
   },
   {
     "code": "quest_requirement",
     "category": "gameplay_rejection",
-    "description": "A quest requirement is not met (04 \u00a77)."
+    "description": "A quest requirement is not met (04 §7)."
   },
   {
     "code": "cooldown",
     "category": "gameplay_rejection",
-    "description": "The action is cooling down (04 \u00a77)."
+    "description": "The action is cooling down (04 §7)."
   },
   {
     "code": "rate_limited",
     "category": "gameplay_rejection",
-    "description": "Too many requests (04 \u00a77)."
+    "description": "Too many requests (04 §7)."
   },
   {
     "code": "unsupported_capability",
     "category": "gameplay_rejection",
-    "description": "The capability is not supported here (04 \u00a77)."
+    "description": "The capability is not supported here (04 §7)."
   },
   {
     "code": "invalid_json",
@@ -197,31 +197,31 @@
   {
     "code": "conflicting_write",
     "category": "evaluation_fault",
-    "description": "Two writer groups wrote one mutation target without a registered composition rule (04 \u00a75.1, \u00a75.3)."
+    "description": "Two writer groups wrote one mutation target without a registered composition rule (04 §5.1, §5.3)."
   },
   {
     "code": "precondition_failed",
     "category": "evaluation_fault",
-    "description": "A delta op's precondition does not hold against the proposal overlay (04 \u00a75.1; protocol/delta.schema.json)."
+    "description": "A delta op's precondition does not hold against the proposal overlay (04 §5.1; protocol/delta.schema.json)."
   },
   {
     "code": "containment_cycle",
     "category": "evaluation_fault",
-    "description": "A transfer would put an entity inside itself (04 \u00a75.3)."
+    "description": "A transfer would put an entity inside itself (04 §5.3)."
   },
   {
     "code": "capacity_exceeded",
     "category": "evaluation_fault",
-    "description": "A transfer would overfill the destination's capacity (04 \u00a75.3)."
+    "description": "A transfer would overfill the destination's capacity (04 §5.3)."
   },
   {
     "code": "nonfuture_job",
     "category": "evaluation_fault",
-    "description": "A scheduled job is not later than the current time or the explicit advance's target (04 \u00a75.4)."
+    "description": "A scheduled job is not later than the current time or the explicit advance's target (04 §5.4)."
   },
   {
     "code": "budget_exceeded",
     "category": "evaluation_fault",
-    "description": "The delta exceeds a composition-profile budget (04 \u00a75.4; conformance/composition-profile.json)."
+    "description": "The delta exceeds a composition-profile budget (04 §5.4; conformance/composition-profile.json)."
   }
 ]
