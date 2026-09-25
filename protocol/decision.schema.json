@@ -29,7 +29,7 @@
       ]
     },
     "DecisionResult": {
-      "description": "What a pure decision returns (04 §5). accepted: a provisional proposal (delta, proposed events, effects, next RNG) with a typed outcome, including an admitted attempt that failed in game terms (04 §5.0). rejected: not admitted; consumes no RNG, time or cost (04 §5.0). fault: budget, conflict or evaluator fault; the whole proposal is discarded, so it carries none (04 §5.2 step 7). Projection hints arrive with GameView.",
+      "description": "What a pure decision returns (04 §5). accepted: a provisional proposal (delta, proposed events, effects, next RNG) with a typed outcome, including an admitted attempt that failed in game terms (04 §5.0). rejected: not admitted; consumes no RNG, time or cost (04 §5.0). fault: budget, conflict or evaluator fault; the whole proposal is discarded, so it carries none (04 §5.2 step 7). narration, when the attempt has any, is the required narration the host commits with the result and the receipt replays (04 §5.2 step 7; 06 §43); absent means none. Its 64-line cap is an admission limit of this contract version, not a spec number; output_bytes in the composition profile bounds the whole result. Projection hints arrive with GameView.",
       "oneOf": [
         {
           "description": "An admitted attempt.",
@@ -58,6 +58,14 @@
             },
             "rng": {
               "$ref": "#/$defs/RngState"
+            },
+            "narration": {
+              "type": "array",
+              "items": {
+                "$ref": "text.schema.json#/$defs/Text"
+              },
+              "minItems": 1,
+              "maxItems": 64
             }
           },
           "required": [
@@ -141,6 +149,30 @@
         {
           "kind": "fault",
           "code": "conflicting_write"
+        },
+        {
+          "kind": "accepted",
+          "outcome": "taken",
+          "delta": {
+            "ops": []
+          },
+          "events": [],
+          "effects": [],
+          "rng": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "narration": [
+            {
+              "key": "narration.move",
+              "bindings": {
+                "direction": "north",
+                "destination": "room.village_green.title"
+              }
+            }
+          ]
         }
       ]
     }

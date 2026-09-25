@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "description": "Test-only probe for subset keywords no protocol/ contract uses yet (integer, boolean, null, const outside oneOf, minimum, maximum, minLength, the map form with maxProperties), and one astral character that a pattern matches only in Unicode mode. Property names __proto__ and a/b~c check that generation keeps and quotes every key. RecursiveProbe refers to itself (a recursive $ref). Read by the validator tests and generated into kernel/ts/test/subset.gen.ts; not a contract.",
+  "description": "Test-only probe for subset keywords no protocol/ contract uses yet (integer, boolean, null, const outside oneOf, minimum, maximum, minLength, the map form with maxProperties, anyOf without a boolean branch), and one astral character that a pattern matches only in Unicode mode. Property names __proto__ and a/b~c check that generation keeps and quotes every key. RecursiveProbe refers to itself (a recursive $ref). Read by the validator tests and generated into kernel/ts/test/subset.gen.ts; not a contract.",
   "$defs": {
     "SubsetProbe": {
       "type": "object",
@@ -50,6 +50,18 @@
             "minimum": 0
           },
           "maxProperties": 2
+        },
+        "word_or_count": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 2
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            }
+          ]
         }
       },
       "additionalProperties": false,
@@ -83,6 +95,12 @@
             "a": 0,
             "bbb": 9007199254740991
           }
+        },
+        {
+          "word_or_count": "ab"
+        },
+        {
+          "word_or_count": 0
         }
       ]
     },

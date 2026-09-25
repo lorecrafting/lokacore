@@ -21,6 +21,7 @@ defmodule Gen do
 
   def type(%{"$ref" => name}), do: name
   def type(%{"oneOf" => bs}), do: Enum.map_join(bs, " | ", &type/1)
+  def type(%{"anyOf" => bs}), do: Enum.map_join(bs, " | ", &type/1)
   def type(%{"const" => c}), do: lit(c)
   def type(%{"enum" => e}), do: Enum.map_join(e, " | ", &lit/1)
   def type(%{"type" => "array", "items" => i}), do: "readonly (#{type(i)})[]"

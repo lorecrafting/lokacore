@@ -69,6 +69,26 @@ test('a recursive Policy at the depth cap', () => {
   assert.throws(() => decode(nots(128)), { code: 'invalid_json' });
 });
 
+// 64 narration lines (an admission limit, decision.schema.json) is the maximum; 65 is not.
+test('narration at 64 and 65 lines', () => {
+  const lines = (n: number) => Array.from({ length: n }, () => ({ key: 'n' }));
+  const accepted = (DEFS.DecisionResult as { examples: { kind: string }[] }).examples.find(
+    (x) => x.kind === 'accepted',
+  );
+  const record = (n: number) => ({
+    command_id: 'e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b',
+    lines: lines(n),
+  });
+  assert.deepEqual(validate('DecisionResult', { ...accepted, narration: lines(64) }), []);
+  assert.deepEqual(validate('NarrationRecord', record(64)), []);
+  assert.deepEqual(validate('DecisionResult', { ...accepted, narration: lines(65) }), [
+    { path: '/narration', code: 'too_many_items' },
+  ]);
+  assert.deepEqual(validate('NarrationRecord', record(65)), [
+    { path: '/lines', code: 'too_many_items' },
+  ]);
+});
+
 // A 1025-id list is too large to keep as a fixture line; 1024 is the contract's maximum.
 test('ambiguous candidates at 1024 and 1025', () => {
   const ids = (n: number) =>

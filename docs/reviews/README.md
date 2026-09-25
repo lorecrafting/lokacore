@@ -53,6 +53,15 @@ Each record is written by a fresh agent that authored none of the reviewed work 
   verified with mutants and a 177-mutant sweep; two new one-line should-fix in the reshaped
   shapes: `fact_changed` subject, `job.complete` precondition during an advance); round 2
   at `c2284ed`, APPROVE (F4/F5 fixed; PR #12 merge resolutions verified line by line).
+- [2026-09-24 R3 PR 4b facts, relations, GameView, accounts](2026-09-24-r3-pr4b-facts-review.md):
+  PR #14 at `bccc582`, APPROVE WITH NOTES (full review, contract freeze; 122-value
+  Elixir/TypeScript differential with zero disagreements; all 292 fixture expectations
+  recomputed by an independent oracle; 22 of 22 mutants caught; one should-fix: GameView
+  carries no logical time, so `wait` cannot be built by touch; one process should-fix on
+  generated fixture expectations; views on owner questions 1-5); Astra cross-vendor review
+  appended (A1 blocker: AdvertisedAction lacked target/input); re-review of the fixes at
+  `1f96346` and the PR #15 merge `3c422a2`, APPROVE (A1 and F1 verified with 9 mutants,
+  ActionDefinition A/B identical, merge consistent).
 - [2026-09-24 R3 PR 5 composition](2026-09-24-r3-pr5-composition-review.md): PR #15 at
   `9131dbe`, APPROVE WITH NOTES (full Fable review: spec-derived requirements, reviewer
   differential of 2,124 cases over 3 seeds, 29 mutants of which 1 survives in both kernels;

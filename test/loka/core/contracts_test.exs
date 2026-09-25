@@ -73,6 +73,11 @@ defmodule Loka.Core.ContractsTest do
     assert Enum.sort(for e <- @effects, do: e["type"]) == Enum.sort(types)
   end
 
+  test "every effect origin is a registered capability key" do
+    keys = for c <- @capabilities, do: c["key"]
+    for e <- @effects, origin <- e["allowed_origins"], do: assert(origin in keys, origin)
+  end
+
   # Invariants are checked by id (docs/ROADMAP.md), so an id must name one invariant, and a
   # citation must point at a real docs/spec heading.
   defp invariant_problems(entries) do
@@ -153,6 +158,31 @@ defmodule Loka.Core.ContractsTest do
              {:error, [%{path: "/candidate_ids", code: :too_many_items}]}
   end
 
+  # 64 narration lines (an admission limit, decision.schema.json) is the maximum; 65 is not.
+  test "narration at 64 and 65 lines" do
+    lines = &List.duplicate(%{"key" => "n"}, &1)
+
+    accepted =
+      Enum.find(Contracts.defs()["DecisionResult"]["examples"], &(&1["kind"] == "accepted"))
+
+    record = &%{"command_id" => "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b", "lines" => lines.(&1)}
+
+    assert Contracts.validate("DecisionResult", Map.put(accepted, "narration", lines.(64))) == :ok
+    assert Contracts.validate("NarrationRecord", record.(64)) == :ok
+
+    assert Contracts.validate("DecisionResult", Map.put(accepted, "narration", lines.(65))) ==
+             {:error, [%{path: "/narration", code: :too_many_items}]}
+
+    assert Contracts.validate("NarrationRecord", record.(65)) ==
+             {:error, [%{path: "/lines", code: :too_many_items}]}
+  end
+
+  test "FactSpec scopes are exactly the StateScope kinds" do
+    kinds = for b <- Contracts.defs()["StateScope"]["oneOf"], do: b["properties"]["kind"]["const"]
+    scopes = Contracts.defs()["FactSpec"]["properties"]["scopes"]["items"]["enum"]
+    assert Enum.sort(scopes) == Enum.sort(kinds)
+  end
+
   test "the capability registry: valid entries, key@version unique, covers the chapter-one lock, all portable" do
     for entry <- @capabilities,
         do: assert(Contracts.validate("CapabilitySpec", entry) == :ok, inspect(entry))
@@ -202,6 +232,9 @@ defmodule Loka.Core.ContractsTest do
       }
 
     closed = &object.(Map.put(&1, "additionalProperties", false))
+    any_of = &%{"A" => %{"anyOf" => &1}}
+    str = %{"type" => "string"}
+    int = %{"type" => "integer"}
 
     for {name, defs} <-
           [
@@ -240,7 +273,25 @@ defmodule Loka.Core.ContractsTest do
             {"propertyNames with another keyword",
              map.(%{"propertyNames" => %{"pattern" => "^a$", "maxLength" => 1}})},
             {"a non-portable key pattern", map.(%{"propertyNames" => %{"pattern" => "^\\w$"}})},
-            {"a negative maxProperties", map.(%{"maxProperties" => -1})}
+            {"a negative maxProperties", map.(%{"maxProperties" => -1})},
+            {"anyOf with overlapping types",
+             any_of.([str, %{"type" => "string", "minLength" => 1}])},
+            {"anyOf overlapping through a $ref",
+             Map.put(any_of.([%{"$ref" => "#/$defs/B"}, str]), "B", str)},
+            {"anyOf with an object branch", any_of.([str, obj.(%{}, [])])},
+            {"anyOf with an array branch", any_of.([str, %{"type" => "array", "items" => str}])},
+            {"anyOf with a null branch", any_of.([str, %{"type" => "null"}])},
+            {"anyOf with an enum branch", any_of.([int, %{"enum" => ["a"]}])},
+            {"a nested anyOf", any_of.([any_of.([str, int])["A"], %{"type" => "boolean"}])},
+            {"anyOf with one branch", any_of.([str])},
+            {"anyOf mixed with type", %{"A" => %{"anyOf" => [str, int], "type" => "string"}}},
+            {"anyOf mixed with enum", %{"A" => %{"anyOf" => [str, int], "enum" => ["a"]}}},
+            {"anyOf through a $ref cycle",
+             %{
+               "A" => %{"anyOf" => [%{"$ref" => "#/$defs/B"}, int]},
+               "B" => %{"$ref" => "#/$defs/C"},
+               "C" => %{"$ref" => "#/$defs/B"}
+             }}
           ] ++
             for(
               p <-

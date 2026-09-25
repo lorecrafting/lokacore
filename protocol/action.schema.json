@@ -252,6 +252,18 @@
         }
       ]
     },
+    "ActionInputParameter": {
+      "description": "An input parameter an action requires (06 §20), one of the ActionInput fields.",
+      "enum": [
+        "direction",
+        "choice_id",
+        "continuation_id",
+        "until"
+      ],
+      "examples": [
+        "until"
+      ]
+    },
     "ActionDefinition": {
       "description": "An advertised affordance (04 §19; 06 §20; 21 §7): stable key, localization label, target spec, the portable Command type it resolves to (checked against the command registry when content compiles), presentation priority, required input parameters, policy and accessibility description. Aliases, costs and cooldown hints arrive with the text parser and cost capabilities.",
       "type": "object",
@@ -276,12 +288,7 @@
         "input": {
           "type": "array",
           "items": {
-            "enum": [
-              "direction",
-              "choice_id",
-              "continuation_id",
-              "until"
-            ]
+            "$ref": "#/$defs/ActionInputParameter"
           }
         },
         "policy": {
