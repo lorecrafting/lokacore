@@ -69,3 +69,8 @@ Each record is written by a fresh agent that authored none of the reviewed work 
   adjudicated (A1 not a compose blocker: an R5 coordinator obligation to register; A4 and
   AQ1 accepted; A2, A3, A5 deferred with follow-ups), verdict unchanged; re-review of the
   fixes at `2812a71`, APPROVE (every item verified, six mutants die, differential identical).
+- [2026-09-24 R3 gate](2026-09-24-r3-gate-review.md): PR #16 at `5ee2aa7`, APPROVE WITH
+  NOTES (full Fable review of the gate PR: ten type-checker probes, eight mutants, full
+  check line; two documentation should-fix, two nits); **Gate R3: PASS WITH NOTED GAPS**
+  (every R3A/R3B/Gate item verified against the code; follow-ups from #4-#15 traced; six
+  deferrals, none needing the owner; plain-language residency view for the owner).
