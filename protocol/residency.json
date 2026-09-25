@@ -1,0 +1,119 @@
+[
+  {
+    "key": "canonical_encoding",
+    "residency": "portable_semantic_foundation",
+    "fixtures": [
+      "docs/spec/conformance/numeric-vectors.json"
+    ]
+  },
+  {
+    "key": "canonical_hash",
+    "residency": "portable_semantic_foundation",
+    "fixtures": [
+      "protocol/fixtures/capability_lock_hash.json"
+    ]
+  },
+  {
+    "key": "checked_integers",
+    "residency": "portable_semantic_foundation",
+    "fixtures": [
+      "docs/spec/conformance/numeric-vectors.json"
+    ]
+  },
+  {
+    "key": "rng",
+    "residency": "portable_semantic_foundation",
+    "fixtures": [
+      "docs/spec/conformance/numeric-vectors.json",
+      "docs/spec/conformance/adverse-cases.json"
+    ]
+  },
+  {
+    "key": "id_source",
+    "residency": "portable_semantic_foundation",
+    "fixtures": []
+  },
+  {
+    "key": "command_id",
+    "residency": "portable_semantic_foundation",
+    "fixtures": [
+      "protocol/fixtures/command_id.json"
+    ]
+  },
+  {
+    "key": "contract_validation",
+    "residency": "portable_semantic_foundation",
+    "fixtures": [
+      "protocol/fixtures/invalid.json"
+    ]
+  },
+  {
+    "key": "state_delta_composition",
+    "residency": "portable_semantic_foundation",
+    "fixtures": [
+      "protocol/fixtures/composition.json"
+    ]
+  },
+  {
+    "key": "invariant_checks",
+    "residency": "portable_semantic_foundation",
+    "fixtures": [
+      "protocol/fixtures/composition.json"
+    ]
+  },
+  {
+    "key": "serialization",
+    "residency": "authority_host_coordination",
+    "fixtures": []
+  },
+  {
+    "key": "receipts",
+    "residency": "authority_host_coordination",
+    "fixtures": []
+  },
+  {
+    "key": "transactions",
+    "residency": "authority_host_coordination",
+    "fixtures": []
+  },
+  {
+    "key": "persistence",
+    "residency": "authority_host_coordination",
+    "fixtures": []
+  },
+  {
+    "key": "scheduling_orchestration",
+    "residency": "authority_host_coordination",
+    "fixtures": []
+  },
+  {
+    "key": "fencing",
+    "residency": "authority_host_coordination",
+    "fixtures": []
+  },
+  {
+    "key": "handoff",
+    "residency": "authority_host_coordination",
+    "fixtures": []
+  },
+  {
+    "key": "compiler",
+    "residency": "authoring_certification",
+    "fixtures": []
+  },
+  {
+    "key": "builder",
+    "residency": "authoring_certification",
+    "fixtures": []
+  },
+  {
+    "key": "lab",
+    "residency": "authoring_certification",
+    "fixtures": []
+  },
+  {
+    "key": "evidence_production",
+    "residency": "authoring_certification",
+    "fixtures": []
+  }
+]

@@ -47,6 +47,34 @@ machine-readable matrix is [residency.gen.json](residency.gen.json).
 | narration@1 | portable | portable_capability | client_notification |
 | sense_cue@1 | portable | portable_capability |  |
 
+## Other responsibilities (`protocol/residency.json`)
+
+Foundation contracts that both kernels hold to golden parity, and host and authoring
+responsibilities, which are never capabilities (05 §6). No fixtures: none bound yet.
+
+| Responsibility | Residency | Fixtures |
+|---|---|---|
+| canonical_encoding | portable_semantic_foundation | docs/spec/conformance/numeric-vectors.json |
+| canonical_hash | portable_semantic_foundation | protocol/fixtures/capability_lock_hash.json |
+| checked_integers | portable_semantic_foundation | docs/spec/conformance/numeric-vectors.json |
+| rng | portable_semantic_foundation | docs/spec/conformance/numeric-vectors.json, docs/spec/conformance/adverse-cases.json |
+| id_source | portable_semantic_foundation |  |
+| command_id | portable_semantic_foundation | protocol/fixtures/command_id.json |
+| contract_validation | portable_semantic_foundation | protocol/fixtures/invalid.json |
+| state_delta_composition | portable_semantic_foundation | protocol/fixtures/composition.json |
+| invariant_checks | portable_semantic_foundation | protocol/fixtures/composition.json |
+| serialization | authority_host_coordination |  |
+| receipts | authority_host_coordination |  |
+| transactions | authority_host_coordination |  |
+| persistence | authority_host_coordination |  |
+| scheduling_orchestration | authority_host_coordination |  |
+| fencing | authority_host_coordination |  |
+| handoff | authority_host_coordination |  |
+| compiler | authoring_certification |  |
+| builder | authoring_certification |  |
+| lab | authoring_certification |  |
+| evidence_production | authoring_certification |  |
+
 ## Account, run and admission contracts (`protocol/account.schema.json`)
 
 Account/run binding, Story milestone reports and acceptances, and Realm admission (23 §2-§7, §11; 03 §25-§27). Host and platform records, never portable gameplay inputs: no StateScope here, and none of this enters the canonical gameplay hash (03 §26; 23 §2).
@@ -100,6 +128,8 @@ The capability registry vocabulary, exact capability versions and the capability
   - `client_presentation_only`: Presentation only, never gameplay legality or authoritative mutation (05 §6).
 - **CapabilityVersion**: A capability contract version (05 §6): a positive integer. key@version is immutable in meaning once published; a breaking change takes a new version (05 §6, 'Capability version immutability').
 - **CapabilityVersions**: Exact capability pins, capability key to version (05 §3 requires.capabilities; 05 §6). A map, so one version per key: the canonical decoder rejects a repeated key, and canonical encoding sorts keys.
+- **ResidencyClass**: The six responsibility classes of the 05 §6 residency view ('Capability semantic residency matrix'). A capability's residency is one of the other four (CapabilitySpec); authority-host coordination and authoring/certification are never capabilities and appear only as Responsibility rows.
+- **Responsibility**: A row of the 05 §6 residency view that is not a registered capability (protocol/residency.json): a portable semantic foundation contract that both kernels must implement with golden cross-host parity, or a host or authoring responsibility named in 05 §6's 'Owns' column. fixtures lists the conformance files both kernels are tested against; an empty list means none is bound yet, never that none is needed. Host services are not made into gameplay capabilities by appearing here (05 §6).
 
 ## Command contracts (`protocol/command.schema.json`)
 

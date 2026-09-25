@@ -85,33 +85,38 @@ faults =
 
 limits = read.("docs/spec/conformance/composition-profile.json")["limits"]
 
-# 05 §6 residency view: every class a CapabilitySpec admits (null: not yet classified). Host
-# adapters and conformance fixtures stay null until an implementation slice binds them.
+# 05 §6 residency view: the six ResidencyClass values (plus unclassified, a null capability
+# residency), each with its capabilities and its non-capability responsibilities
+# (protocol/residency.json). Unbound host adapters and fixtures are null, never [].
 registry = read.("protocol/capability_registry.json")
+responsibilities = read.("protocol/residency.json")
 pin = &"#{&1["key"]}@#{&1["version"]}"
 class = &(&1["residency"] || "unclassified")
+bound = &if(&1 == [], do: nil, else: &1)
 
 effects = read.("protocol/effect_registry.json")
 origins = fn key -> for e <- effects, key in e["allowed_origins"], do: e["type"] end
 
-classes =
-  for b <- Loka.Core.Contracts.defs()["CapabilitySpec"]["oneOf"],
-      r <- b["properties"]["residency"]["enum"],
-      uniq: true,
-      do: r || "unclassified"
-
 matrix =
-  Map.new(classes, fn c ->
-    {c,
-     for e <- registry, class.(e) == c, into: %{} do
-       {pin.(e),
-        %{
-          "portability" => e["portability"],
-          "effects" => origins.(e["key"]),
-          "host_adapters" => nil,
-          "conformance_fixtures" => nil
-        }}
-     end}
+  Map.new(Loka.Core.Contracts.defs()["ResidencyClass"]["enum"] ++ ["unclassified"], fn c ->
+    capabilities =
+      for e <- registry, class.(e) == c, into: %{} do
+        {pin.(e),
+         %{
+           "portability" => e["portability"],
+           "effects" => origins.(e["key"]),
+           "host_adapters" => nil,
+           "conformance_fixtures" => nil
+         }}
+      end
+
+    rows =
+      for r <- responsibilities,
+          r["residency"] == c,
+          into: %{},
+          do: {r["key"], %{"conformance_fixtures" => bound.(r["fixtures"])}}
+
+    {c, %{"capabilities" => capabilities, "responsibilities" => rows}}
   end)
 
 schema_docs =
@@ -150,6 +155,18 @@ contracts_md =
         e <- registry,
         do:
           "| #{pin.(e)} | #{e["portability"]} | #{class.(e)} | #{Enum.join(origins.(e["key"]), ", ")} |"
+      ),
+      "",
+      "## Other responsibilities (`protocol/residency.json`)",
+      "",
+      "Foundation contracts that both kernels hold to golden parity, and host and authoring",
+      "responsibilities, which are never capabilities (05 §6). No fixtures: none bound yet.",
+      "",
+      "| Responsibility | Residency | Fixtures |",
+      "|---|---|---|",
+      for(
+        r <- responsibilities,
+        do: "| #{r["key"]} | #{r["residency"]} | #{Enum.join(r["fixtures"], ", ")} |"
       ),
       schema_docs,
       ""
