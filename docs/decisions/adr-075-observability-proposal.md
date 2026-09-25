@@ -34,7 +34,7 @@ A new envelope field or meaning takes a new format tag.
 | `game_trace` | one `trace.run` header per run, then one `trace.command` entry per command (§4) | `loka play`, simulator (R5); local authority (R6) | dev and CI: `tmp/obs/game_trace/<run_id>.jsonl` (git-ignored); phone: the app sandbox, placement decided by R6 | dev: until deleted; CI: kept as a workflow artifact when the run fails; phone: bounded, cap decided by R6; certification keeps reproducible traces longer (11 §15, R9) | never (11 §11) |
 | `diagnostics` | things to fix: `content.diagnostic` (08 §6), `simulation.invariant_failed` (09 §2) | the TypeScript loader via `loka play` (R5 S1); `mix loka.compile` from the slice that first stores its diagnostics; simulator | `tmp/obs/diagnostics/` | as game_trace in CI | no |
 | `operations` | host-dependent measures: `kernel.decision_latency` (11 §13) | `loka play`, simulator (Node); local authority (Hermes) | `tmp/obs/operations/`; phone: the app sandbox | dev: until deleted; R6P timing evidence is captured under the [evidence lessons](../lessons/evidence.md) | no |
-| `dev_evidence` | `agent.work`: model, tokens and pull-request disposition per agent per pull request | the PM, when a pull request merges or closes: one record per agent (role and instance), summing its rounds | committed, `docs/dev-evidence.jsonl`, appended by the PM | kept (it feeds the roadmap re-estimates) | not applicable (in the repository) |
+| `dev_evidence` | `agent.work`: model, tokens and pull-request disposition per agent per pull request | the PM, when a pull request merges or closes: one record per agent (role and instance), summing its rounds | committed, `docs/dev-evidence.jsonl`, appended by the PM ([owner decision](owner-decisions-adr-075-2026-09-25.md), item 2) | kept (it feeds the roadmap re-estimates) | not applicable (in the repository) |
 
 Stores are separate because their rules differ: a game trace must be host-independent and
 stay on the phone; operations are host-dependent by nature; dev evidence is about the
@@ -64,7 +64,8 @@ build from one commit, and 09 §2 asks for the revision. The bare form is allowe
 clean tree at that commit; a tree with uncommitted changes reports `<KERNEL_ID>@<commit>-dirty`,
 and such a record is never an exact repro key. Reporting HEAD for a dirty tree is
 forbidden. It names source, not a fingerprint of a built artifact. How a build learns its
-commit is R5's; `KERNEL_ID` itself is still a placeholder.
+commit is R5's; `KERNEL_ID` itself is still a placeholder. The owner confirmed this
+([record](owner-decisions-adr-075-2026-09-25.md), item 1).
 
 **Input digest.** A compile that fails has no content_hash, so a diagnostic carries
 `input_digest`: SHA-256 of what the producer read. For the compiler that is the canonical

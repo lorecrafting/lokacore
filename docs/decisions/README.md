@@ -44,3 +44,4 @@ holds the owner's decisions retained verbatim.
 
 - [ADR-075](adr-075-observability-proposal.md) (proposed): one observation record format,
   four stores joined by ids, a registered event-name list, the game-trace entry.
+- Owner decisions: [ADR-075 kernel version and dev-evidence ledger](owner-decisions-adr-075-2026-09-25.md).
