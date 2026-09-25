@@ -1,6 +1,7 @@
 # Contract lessons
 
-Hard-won lessons for `protocol/` schemas, fixtures and canonical encoding (R3).
+Hard-won lessons for `protocol/` schemas, fixtures and canonical encoding (R3). What each
+file covers: [the protocol map](../../protocol/README.md).
 
 - Every `required` entry and every bound (`minItems`, `maximum`, `pattern`, `const`, ...)
   needs a fixture that fails when it is removed. A scripted sweep that drops one entry or
