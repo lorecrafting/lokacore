@@ -1,0 +1,97 @@
+[
+  {
+    "kind": "action_recipe",
+    "spec": "21 §7 ActionRecipe / ComposedAction; 05 §6",
+    "freeze": "R5"
+  },
+  {
+    "kind": "inspectable_detail",
+    "spec": "21 §6 InspectableDetail",
+    "freeze": "R5"
+  },
+  {
+    "kind": "description_variant",
+    "spec": "21 §6 DescriptionVariant",
+    "freeze": "R5"
+  },
+  {
+    "kind": "connection",
+    "spec": "21 §5 Connection; 05 §25 Coherent connections",
+    "freeze": "R5"
+  },
+  {
+    "kind": "barrier",
+    "spec": "21 §5 Barrier; 05 §25 Coherent connections",
+    "freeze": "R5"
+  },
+  {
+    "kind": "reaction_rule",
+    "spec": "21 §3.4, §11",
+    "freeze": "R8"
+  },
+  {
+    "kind": "consequence_operator",
+    "spec": "21 §11 Shared consequence vocabulary",
+    "freeze": "R7"
+  },
+  {
+    "kind": "narration_spec",
+    "spec": "21 §4 NarrationSpec",
+    "freeze": "R7"
+  },
+  {
+    "kind": "scene_definition",
+    "spec": "06 §33; 21 §20",
+    "freeze": "R7"
+  },
+  {
+    "kind": "scene_instance",
+    "spec": "06 §33; 21 §20",
+    "freeze": "R7"
+  },
+  {
+    "kind": "scene_space",
+    "spec": "21 §19 SceneSpace",
+    "freeze": "R7"
+  },
+  {
+    "kind": "instance_plan",
+    "spec": "21 §19 InstancePlan",
+    "freeze": "when_pulled"
+  },
+  {
+    "kind": "spawn_bundle",
+    "spec": "21 §12 SpawnBundle",
+    "freeze": "R8"
+  },
+  {
+    "kind": "population_plan",
+    "spec": "21 §12 PopulationPlan; 05 §25 Population provenance",
+    "freeze": "R8"
+  },
+  {
+    "kind": "commerce_composition",
+    "spec": "21 §13",
+    "freeze": "R8"
+  },
+  {
+    "kind": "service",
+    "spec": "21 §14",
+    "freeze": "R8"
+  },
+  {
+    "kind": "capacity",
+    "spec": "21 §14",
+    "freeze": "R8"
+  },
+  {
+    "kind": "service_job",
+    "spec": "21 §14",
+    "freeze": "R8"
+  },
+  {
+    "kind": "world_event_plan",
+    "spec": "21 §21",
+    "freeze": "R8"
+  }
+]

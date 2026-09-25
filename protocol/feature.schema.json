@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Feature envelopes",
+  "description": "R3B versioned feature envelopes (14 §R3B): the closed kind list, a version, and each kind's registration in protocol/feature_registry.json. Field vocabularies are frozen in the milestone that first exercises each kind (R5, R7, R8, or when pulled); until then an envelope carries no feature fields at all, so nothing can ship an unstable anonymous map (14 §R3B).",
+  "$defs": {
+    "FeatureKind": {
+      "description": "One R3B feature kind (14 §R3B). Exactly the kinds in protocol/feature_registry.json, which gives each one's spec section and freeze milestone; unknown kinds are invalid. A reference to a feature definition is a DefinitionRef whose kind is one of these values (05 §4).",
+      "enum": [
+        "action_recipe",
+        "inspectable_detail",
+        "description_variant",
+        "connection",
+        "barrier",
+        "reaction_rule",
+        "consequence_operator",
+        "narration_spec",
+        "scene_definition",
+        "scene_instance",
+        "scene_space",
+        "instance_plan",
+        "spawn_bundle",
+        "population_plan",
+        "commerce_composition",
+        "service",
+        "capacity",
+        "service_job",
+        "world_event_plan"
+      ],
+      "examples": [
+        "action_recipe",
+        "world_event_plan"
+      ]
+    },
+    "FeatureEnvelope": {
+      "description": "Kind and schema version of one feature value (14 §R3B). The kind's freeze milestone adds its versioned fields here, as a oneOf branch per kind; before that, any other property is invalid.",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/FeatureKind"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "kind",
+        "version"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "barrier",
+          "version": 1
+        }
+      ]
+    },
+    "FeatureRegistryEntry": {
+      "description": "One entry of protocol/feature_registry.json: a kind, the spec section that defines it, and the milestone that freezes its fields (14 §R3B).",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/FeatureKind"
+        },
+        "spec": {
+          "type": "string",
+          "minLength": 1
+        },
+        "freeze": {
+          "enum": [
+            "R5",
+            "R7",
+            "R8",
+            "when_pulled"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "spec",
+        "freeze"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "instance_plan",
+          "spec": "21 §19 InstancePlan",
+          "freeze": "when_pulled"
+        }
+      ]
+    }
+  }
+}

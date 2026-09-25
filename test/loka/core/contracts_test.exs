@@ -37,6 +37,23 @@ defmodule Loka.Core.ContractsTest do
              Enum.sort(Contracts.defs()["ErrorCode"]["enum"])
   end
 
+  # The 14 §R3B list, one kind per named type; ActionRecipe/ComposedAction is one (21 §7).
+  @r3b ~w(action_recipe inspectable_detail description_variant connection barrier reaction_rule
+          consequence_operator narration_spec scene_definition scene_instance scene_space
+          instance_plan spawn_bundle population_plan commerce_composition service capacity
+          service_job world_event_plan)
+
+  test "the feature registry lists every 14 §R3B kind once, each entry valid" do
+    features = JSON.decode!(File.read!("protocol/feature_registry.json"))
+
+    for entry <- features,
+        do: assert(Contracts.validate("FeatureRegistryEntry", entry) == :ok, inspect(entry))
+
+    kinds = for e <- features, do: e["kind"]
+    assert Enum.sort(kinds) == Enum.sort(@r3b)
+    assert Enum.sort(Contracts.defs()["FeatureKind"]["enum"]) == Enum.sort(@r3b)
+  end
+
   test "every code the fixtures expect is a registered abi_validation code" do
     registered = for %{"code" => c, "category" => "abi_validation"} <- @registry, do: c
     for %{"errors" => es} <- @invalid, %{"code" => c} <- es, do: assert(c in registered, c)
