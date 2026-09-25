@@ -41,3 +41,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Maintenance: ADR-074 amendments](2026-09-24-maint-adr074-amendments-review.md): PR #19 at `e7b1625`, CHANGES REQUIRED; fixes `7b5f5b0`, APPROVE.
 - [Pre-R4 sweep: TypeScript + mobile](2026-09-25-sweep-ts-review.md): PR #21 at `08be6f5`, APPROVE.
 - [Pre-R4 sweep: Elixir + scripts](2026-09-25-sweep-elixir-review.md): PR #23 at `c1e8b18`, APPROVE WITH NOTES.
+- [Pre-R4 sweep: docs, protocol, CI](2026-09-25-sweep-docs-review.md): PR #22 at `8cd606c`, APPROVE WITH NOTES.
