@@ -5,6 +5,20 @@
 #   elixir bin/red_controls.exs
 root = Path.expand("..", __DIR__)
 
+# Prints the control's result and returns its failure count (0 or 1).
+verdict = fn
+  name, true, _ ->
+    IO.puts("ok   #{name}")
+    0
+
+  name, false, detail ->
+    IO.puts("FAIL #{name}: #{detail}")
+    1
+end
+
+# A throwaway copy under the system temp dir: the real file is never edited.
+tmp = &Path.join(System.tmp_dir!(), "loka-red-#{&1}-#{System.unique_integer([:positive])}#{&2}")
+
 controls = [
   {"boundary: web reaches store (only platform may)",
    %{
@@ -104,17 +118,12 @@ failures =
           Enum.each(paths, &File.rmdir(Path.dirname(&1)))
         end
 
-      if status != 0 and String.contains?(out, expected) do
-        IO.puts("ok   #{name}")
-        acc
-      else
-        IO.puts("FAIL #{name}: exit #{status}, expected #{inspect(expected)}\n#{out}")
-        acc + 1
-      end
+      ok? = status != 0 and String.contains?(out, expected)
+      acc + verdict.(name, ok?, "exit #{status}, expected #{inspect(expected)}\n#{out}")
   end
 
 # Docs budget: a padded copy of AGENTS.md (never the real file) must fail check_docs.
-padded = Path.join(System.tmp_dir!(), "loka-red-agents-#{System.unique_integer([:positive])}.md")
+padded = tmp.("agents", ".md")
 
 File.write!(
   padded,
@@ -129,19 +138,17 @@ File.write!(
   end
 
 failures =
-  if status != 0 and String.contains?(out, "AGENTS.md is ") do
-    IO.puts("ok   docs: AGENTS.md over its word budget")
-    failures
-  else
-    IO.puts("FAIL docs: AGENTS.md over its word budget: exit #{status}\n#{out}")
-    failures + 1
-  end
+  failures +
+    verdict.(
+      "docs: AGENTS.md over its word budget",
+      status != 0 and String.contains?(out, "AGENTS.md is "),
+      "exit #{status}\n#{out}"
+    )
 
 # ADR-074 trigger: a registry copy (never the real file) giving a portable_capability an
 # Elixir host adapter without a differential, or with a declared but absent one, must fail
 # contracts --check with the ADR-074 diagnostic for each.
-registry =
-  Path.join(System.tmp_dir!(), "loka-red-registry-#{System.unique_integer([:positive])}.json")
+registry = tmp.("registry", ".json")
 
 entry =
   &~s({"key": "#{&1}", "version": 1, "portability": "portable", "residency": "portable_capability", "host_adapters": ["elixir"]#{&2}})
@@ -162,14 +169,13 @@ File.write!(
   end
 
 failures =
-  if status != 0 and
-       Enum.all?(~w(movement@1 barrier@1), &String.contains?(out, "#{&1}: elixir host adapter")) do
-    IO.puts("ok   contracts: elixir host adapter without a differential (ADR-074)")
-    failures
-  else
-    IO.puts("FAIL contracts: elixir host adapter without a differential: exit #{status}\n#{out}")
-    failures + 1
-  end
+  failures +
+    verdict.(
+      "contracts: elixir host adapter without a differential (ADR-074)",
+      status != 0 and
+        Enum.all?(~w(movement@1 barrier@1), &String.contains?(out, "#{&1}: elixir host adapter")),
+      "exit #{status}\n#{out}"
+    )
 
 # Size limits, checked on the planted files only (fresh directories, removed afterwards):
 # one line over each limit fails, exactly at it passes; markers at 1.5x pass, and over it,
@@ -268,15 +274,14 @@ sorted = &(&1 |> String.split("\n", trim: true) |> Enum.sort())
   end
 
 failures =
-  if status != 0 and sorted.(out) == sorted.(real.(expected)) and scan_status != 0 and
-       String.contains?(scan_out, real.("L/big.ex:1: file, 301 lines, limit 300")) do
-    IO.puts("ok   size: limits and allow markers")
-    failures
-  else
-    IO.puts("FAIL size: exit #{status}, expected\n#{real.(expected)}got\n#{out}")
-    IO.puts("no-argument scan: exit #{scan_status}\n#{scan_out}")
-    failures + 1
-  end
+  failures +
+    verdict.(
+      "size: limits and allow markers",
+      status != 0 and sorted.(out) == sorted.(real.(expected)) and scan_status != 0 and
+        String.contains?(scan_out, real.("L/big.ex:1: file, 301 lines, limit 300")),
+      "exit #{status}, expected\n#{real.(expected)}got\n#{out}" <>
+        "no-argument scan: exit #{scan_status}\n#{scan_out}"
+    )
 
 System.cmd("mix", ~w(compile --force), cd: root)
 System.halt(if failures == 0, do: 0, else: 1)

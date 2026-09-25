@@ -127,3 +127,8 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
   portable_abi test body is unchanged except the shared reader; the `same()` mutant dies;
   33/33, check_all green; recommends typechecking tests now, since a probe finds 3 latent
   errors in `validate.test.ts`).
+- [2026-09-25 pre-R4 sweep: Elixir + scripts](2026-09-25-sweep-elixir-review.md): PR #23 at
+  `c1e8b18`, APPROVE WITH NOTES (cleanup, proportionate review: shared safe-integer guard
+  equivalent at all four sites, xref green, generated files byte-identical, ADR-074 trigger
+  and red-control exit status planted and biting, phoenix vendored docs unchanged, 113/113;
+  one nit: contracts.exs "Inputs" section does not hold all inputs).
