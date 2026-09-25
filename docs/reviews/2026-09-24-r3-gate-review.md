@@ -253,3 +253,64 @@ when convenient:
    are mapped to keys by the compiler, with a collision error). The rest (#11 Q1-Q3, Q5;
    #13 Q4-Q8; #14 Q2-Q5) are engineering calls the earlier reviews found the spec already
    answers; the PM can settle them and record the settlement.
+
+## Cross-vendor review (Astra), relayed verbatim by the owner
+
+Reviewed commit `5ee2aa7`, independently of the review above. The PM checked A1 against 05 §6 before forwarding it: the residency table there names six classes, including authority-host coordination and authoring/certification, which `docs/residency.gen.json` omits.
+
+```text
+PR VERDICT: CHANGES REQUIRED
+GATE R3 VERDICT: NOT YET
+
+FINDINGS:
+
+A1 [blocker] bin/contracts.exs:97-101 (at 5ee2aa7) — The generated residency view omits two responsibility classes explicitly required by 05 §6 — Generating from the current registry produces docs/residency.gen.json with portable_semantic_foundation, portable_capability, realm_only_capability, client_presentation and unclassified, but no authority-host coordination or authoring/certification. A consumer asking where transaction coordination or compilation belongs cannot obtain that distinction from this purported architecture-level matrix. Regeneration and --check reproduce the same incomplete view.
+  The cause is deriving the complete residency vocabulary from CapabilitySpec's allowed residencies: that schema correctly excludes host coordination and authoring from gameplay capabilities, but those exclusions must not remove their architecture-level responsibility classes.
+  Fix: derive the full six-class residency vocabulary from a protocol-owned source independently of capability admission. Represent host/authoring responsibilities separately from capability entries, with unknown bindings explicit. Do not invent gameplay capabilities for PostgreSQL, sessions or the compiler. This is a completeness defect, not a failure of the textual drift comparison.
+
+A2 [blocker] lib/loka/core/contracts.ex:43-52 (at 5ee2aa7) — The “Elixir portable/domain types and validators” gate row is only partially implemented — Give the toolchain the already-frozen ActionInvocation, DefinitionRef, StateDelta or GameView contracts: TypeScript receives schema-derived type declarations, while the Elixir generation loop skips these object/union contracts entirely. It generates types only for non-enum, non-constant strings. defs/0 supplies schema data and validate/2,3 returns :ok/errors; neither supplies the missing Elixir domain type mappings.
+  Consequently, changing a frozen composite contract and regenerating the existing outputs still leaves no corresponding Elixir domain type artifact or mapping to check. The new ID types close part of the identity-representation gap, not the whole Gate R3 types requirement.
+  Fix: provide schema-derived Elixir representations/type mappings for the currently frozen domain contracts, with the promised generation/check coverage. This does not require implementing R5 rules or generating Builder/Realm contracts. Alternatively, explicitly amend the gate before describing validators plus string-ID types as full satisfaction.
+
+A3 [blocker] test/loka/core/compose_test.exs:54-70 (at 5ee2aa7) — The failed-commit publication requirement is represented as a return-value truth table, not exercised as a publication boundary — The helper receives an already-constructed decision and final commit status; the test compares its returned list and then checks an invariant against the fixture's literal published list. The TypeScript counterpart at kernel/ts/test/compose.test.ts:58-61 checks only those literal observations.
+  Concrete escaping-event scenario: propose E → deliver E to an observer before checking the commit result → commit fails → return []. A boundary helper mutated to perform that eager delivery while retaining the current return values would satisfy these publication assertions, because neither test observes delivery history. The composition tests also do not connect their later-fault cases to an observed publication boundary.
+  This is a gate-evidence defect, not a demonstrated production leak: no production commit/publication implementation exists here.
+  Fix: add a small test-only sequenced boundary exercise that runs composition, injects a failed commit, and records actual observer delivery and adoption. Assert that both histories remain empty on failure and that delivery occurs only after confirmed success. Demonstrate that an eager-delivery mutant fails. Real SQLite failures, crash recovery and uncertain-outcome reconciliation can remain R6. The PR #15 review's deferral does not itself amend 14's explicit R3 fixture obligation.
+
+A4 [should-fix] bin/red_controls.exs:19-23 (at 5ee2aa7) — The nominal-ID red control supports a narrower guarantee than the PR's owner-facing claim — It proves a definitely incompatible literal tag reaches an explicitly tag-matching receiver. It does not establish that declaring Contracts.character_id() in an @spec enforces that contract across ordinary domain APIs or map construction.
+  Concrete consumer:
+    @spec player_scope(Contracts.character_id()) :: map()
+    def player_scope(id), do: %{kind: :player, character_id: id}
+  Passing the p obtained from {:ok, p} = Contracts.party_id(valid_uuid) to this function has no tag check in the function body and returns a player-scope map containing a party tag. The generated @type/@spec declarations do not make this a compiler-enforced CharacterId boundary.
+  Literal-tag patterns are useful and are not restricted to the exact red-control spelling: inferable constraints can propagate through calls and map patterns. However, Elixir 1.20.4's inference is best-effort, existing typespecs are not its user-supplied static signatures, and gradual unions with an accepted alternative need not produce a warning. “A party id cannot be passed where a character id is expected” is therefore too broad.
+  Fix: state the actual guarantee, require explicit tag validation/matching at nominal domain boundaries, and test representative boundary shapes rather than treating this one red control as general nominal-type enforcement. No new dependency is automatically warranted.
+  Language reference: Elixir 1.20.4, “Gradual set-theoretic types,” especially “The dynamic() type,” “Type inference,” and “Roadmap”:
+  https://elixir.hexdocs.pm/gradual-set-theoretic-types.html
+  The consumer above is a source-derived counterexample, not a claim that I executed the pinned compiler during this review.
+
+QUESTIONS:
+
+AQ1 — Can the pinned-toolchain verification retain results for a cross-module tag-matching receiver, a tag matched inside a map, the @spec-only receiver above, and a runtime-selected CharacterId|PartyId value forwarded through another function? These cases distinguish genuine inferred protection from the broader guarantee being claimed. I inspected the committed control and existing review/CI evidence; I did not rerun Elixir 1.20.4 or the complete dual-runtime suite.
+
+AQ2 — Which boundary will convert validated wire UUID strings into tagged Elixir domain identities and convert them back? The constructors introduce tuples, while the frozen canonical protocol remains JSON. This is appropriately a first-consumer integration question, but R5 must not accidentally pass tagged tuples into canonical serialization or unwrap them early enough to lose the intended identity distinction.
+
+GAP VIEWS:
+
+Gap 1 — ACCEPT WITH A FIRST-USE CONDITION: null host_adapters and conformance_fixtures honestly report absent bindings; 05 §6's per-capability reporting language is SHOULD, and R5 is a reasonable binding point for unimplemented capability rules. The capability rows, effect associations and schema-description excerpts are source-derived; the generator's comparison also detects missing or stale generated files. Those properties do not cure A1's omitted architecture classes, and declared residency must never be presented as demonstrated conformance.
+
+Gap 2 — ACCEPT AS A BOUNDED R4/R5 FOLLOW-UP: command/event/policy ownership must be recorded before compilation, dispatch or emission authorization relies on it. The current command/event schemas still provide machine-readable catalogs; missing ownership metadata does not require implementing future evaluators now. R3B's deferral must not become permission for R4/R5 consumers to infer ownership ad hoc or maintain another handwritten catalog.
+
+Gap 3 — ACCEPT UNTIL THE SPECIFIED TRIGGER: the immutability check must exist before the first certified/published cartridge depends on a capability version. A checked-in lock known-answer fixture is not itself certification/publication. Tie the follow-up to that trigger rather than an indefinite later milestone; the lack of a published dependency is not permission to change an already-frozen constitutional contract without its amendment process.
+
+Gap 4 — NOT ACCEPTABLE AS A COMPLETE R3 DEFERRAL: actual SQLite fault simulation and recovery belong to R6, but the failed-commit non-publication fixture obligation is explicitly in Gate R3. Supply the bounded observed-boundary evidence in A3 now, or obtain a reviewed gate amendment. A status-to-list truth table alone does not establish the temporal guarantee.
+
+Gap 5 — ACCEPT THE ABSENCE OF PRODUCTION CONSUMERS, NOT THE CLAIMED COMPLETE TYPE COVERAGE: R3 may reserve nominal identities before R5 consumes them. That does not satisfy the missing composite Elixir type mappings in A2 or justify the compiler guarantee challenged in A4. Establish the boundary discipline before the first consumer. The small constructor-generation loop itself is proportionate; a larger abstraction or new checker dependency is not inherently necessary.
+
+OWNER DECISIONS NEEDED:
+
+1. Resolve the disputed R3 closure interpretation. Recommended disposition: implement A1-A3 under the current normative text. Closing R3 with fewer residency classes, reduced Elixir type output or only the publication truth table requires an explicit reviewed amendment to the relevant gate/spec obligations—not merely acceptance of a PR-body deferral.
+
+2. Record the policy@1, target_resolution@1 and fact@1 residency choice. I support portable_capability for their gameplay evaluators; their AST/value/result contracts remain shared protocol foundations. Their inclusion in R3A does not by itself make their evaluators portable_semantic_foundation.
+
+No additional owner decision is needed for the lesson relocation, WORKFLOW link-based deduplication or the compact generation approach. I found no additional material docs-tidy or over-engineering defect in those changes.
+```
