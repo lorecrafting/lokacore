@@ -2,6 +2,7 @@
 // terminal adapters"): a table from words to Commands, and the room as text. Action
 // definitions carry no aliases yet (action.schema.json), so the aliases live here.
 import type { Cartridge, World } from '../src/index.ts';
+import { COMPASS } from '../src/decision.ts';
 import { gameView } from '../src/index.ts';
 
 export type Parsed = { type: 'look' } | { type: 'move'; direction: string } | 'quit' | null;
@@ -12,8 +13,7 @@ const WORDS: Record<string, Parsed> = {
   quit: 'quit',
   q: 'quit',
 };
-for (const d of ['north', 'south', 'east', 'west', 'up', 'down'])
-  WORDS[d] = WORDS[d[0]] = { type: 'move', direction: d };
+for (const d of COMPASS) WORDS[d] = WORDS[d[0]] = { type: 'move', direction: d };
 
 /**
  * `look`/`l`, a direction or its initial, `go <direction>`, `quit`/`q`; null for anything
