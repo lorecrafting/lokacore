@@ -1,7 +1,8 @@
 # Generates from protocol/ (spec 04 §12, 14 Gate R3, 05 §6):
 # - kernel/ts/src/contracts.gen.ts: TypeScript types and flattened schemas of
 #   protocol/*.schema.json, the evaluation-fault codes of protocol/error_registry.json, the
-#   composition-profile limits and the artifact byte cap (ArtifactSize);
+#   composition-profile limits, the artifact byte cap (ArtifactSize) and the command and
+#   policy-op owners of protocol/capability_registry.json;
 # - kernel/ts/test/subset.gen.ts: the same for the test-only probe
 #   protocol/fixtures/subset.schema.json;
 # - docs/contracts.gen.md (capability and schema docs) and docs/residency.gen.json (the
@@ -201,6 +202,14 @@ faults =
 
 limits = read.("docs/spec/conformance/composition-profile.json")["limits"]
 
+# Owning capability (key@version) of each command and policy op, for the loader's
+# UNDECLARED_CAPABILITY re-check (cartridge.schema.json DiagnosticCode). Events join when a
+# frozen definition kind references one.
+owners =
+  for {kind, field} <- [{"command", "commands"}, {"policy", "policies"}], into: %{} do
+    {kind, for(e <- registry, name <- e[field] || [], into: %{}, do: {name, pin.(e)})}
+  end
+
 {:ok, probe} =
   Loka.Core.Canonical.decode(File.read!(Path.join(root, "protocol/fixtures/subset.schema.json")))
 
@@ -213,6 +222,7 @@ targets = %{
         [
           "export const EVALUATION_FAULTS: readonly ErrorCode[] = #{Gen.lit(faults)};",
           "export const LIMITS: Readonly<Record<string, number>> = JSON.parse(#{Gen.lit(Gen.lit(limits))});",
+          "export const CAPABILITY_OWNERS: Readonly<Record<'command' | 'policy', Readonly<Record<string, string>>>> = JSON.parse(#{Gen.lit(Gen.lit(owners))});",
           "export const ARTIFACT_MAX_BYTES = #{Loka.Core.Contracts.defs()["ArtifactSize"]["maximum"]};",
           ""
         ],
