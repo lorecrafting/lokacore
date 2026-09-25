@@ -24,7 +24,7 @@ The legacy packet is provenance only; never amend it or choose it over these fil
 - `docs/spec/`: normative architecture, content pull list, gates and sequencing, and
   their companions and reading aids. The authority map is spec [README §8](README.md#8-specification-authority-map).
   The directory stays flat so the packet's relative links keep working.
-- [docs/decisions/](../decisions/README.md): proposed ADRs and verbatim owner decisions
+- [docs/decisions/](../decisions/README.md): full ADR texts (accepted in document 16) and verbatim owner decisions
   made after R0.
 - [docs/reference/](../reference/README.md): informative documents and evidence, left in
   the legacy repository and linked there. Not authority.
@@ -33,7 +33,7 @@ The legacy packet is provenance only; never amend it or choose it over these fil
 
 The table below describes the files as imported. Later amendments are in git history:
 
-- 2026-09-24, [proposed ADR-073](../decisions/adr-073-single-app.md): documents 02 §1 and
+- 2026-09-24, [ADR-073](../decisions/adr-073-single-app.md): documents 02 §1 and
   14 §R2, one Mix application instead of an umbrella; 14's shape names `kernel/ts/`.
 - 2026-09-24, R3 PR 1: [conformance/numeric-profile.md](conformance/numeric-profile.md)
   frozen as `loka-numeric-v1` (owner-approved 2026-09-24), adding the parse, encode,
