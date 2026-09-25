@@ -206,4 +206,263 @@ detached worktree. Recording it so the PM can verify.
 
 ## Astra (cross-vendor) review
 
-To be appended verbatim when the owner relays it.
+Relayed by the owner via the PM, 2026-09-25, reviewed at `fd0ab9f`. Verbatim, fence included.
+
+```text
+VERDICT: REQUEST CHANGES
+
+Reviewed: lorecrafting/lokacore#29 at
+fd0ab9fe123549a3ec2d5120cffc5ddcbeb23df5.
+
+This is a contract/design review, not a claim that nonexistent producers have
+already failed. The scenarios below identify information the frozen shapes
+lose or guarantees they cannot currently support. I read the observation
+fixtures and registry test; I did not rerun the repository test suite.
+
+A1 | blocker
+protocol/observation.schema.json:547-566
+protocol/observation.schema.json:170-202
+docs/decisions/adr-075-observability-proposal.md:72-79
+
+The trace drops a required part of the portable Command, without defining a
+replay-input artifact that preserves it.
+
+Failure scenario:
+A valid command has id C, world_context_id W, and an accept_quest payload.
+Evaluation generates a quest-instance identity using IdSource(W, C, ordinal).
+Persistence then fails. The trace retains C, the payload, seed, revision and
+delta digest, but not W; the failed commit correctly contains no events from
+which W might otherwise be recovered.
+
+Replaying the recorded payload in a freshly initialized context W' generates
+a different quest-instance identity and delta digest despite the same RNG
+seed. StoryRunId is a save-lineage identity, not a specified encoding of
+WorldContextId. A digest cannot recover the omitted input.
+
+The existing Command contract explicitly requires world_context_id
+(protocol/command.schema.json:15-35), and the frozen IdSource algorithm uses
+it. The ADR's reference to “the run's replay input (transcript or seed)” does
+not define or bind an immutable artifact containing that missing input.
+
+Required change:
+Preserve the full existing Command, or explicitly retain world_context_id
+alongside the already-recorded command_id and payload. Define how records
+bind to the initial state and ordered replay inputs. A small, required
+replay-header/companion contract is sufficient; this does not require
+implementing snapshots or the Lab now.
+
+The same binding must accommodate snapshot and fault-schedule provenance
+without silently changing trace.command's frozen meaning. A newly registered
+companion record can preserve the v1 envelope, but its required relationship
+to the trace must be specified rather than assumed.
+
+
+A2 | blocker
+protocol/observation.schema.json:451-507
+docs/decisions/adr-075-observability-proposal.md:92-100
+
+“Replay the seed” does not reproduce a failed or uncertain persistence
+operation, and the recorded commit outcome contains no failure diagnosis.
+
+Failure scenario:
+The same accepted proposal encounters a definitive storage rollback because
+the device is out of space. Another attempt rolls back because of a
+transaction conflict. Both produce exactly {"state":"failed"}.
+
+For an uncertain COMMIT, a lost acknowledgement after a successful durable
+commit produces {"state":"unknown"}, without recording where observation
+failed or a typed cause. Replaying the gameplay seed against healthy storage
+succeeds and cannot distinguish these cases or establish that a storage fix
+resolved the original failure.
+
+There is also an unconditional host-independence overclaim: identical
+gameplay inputs on a healthy host and a host with a persistence failure
+necessarily produce different commit fields. Canonical encoding cannot make
+different observations identical.
+
+Required change:
+Define a minimal typed, redacted failure/uncertainty diagnosis and its
+correlation to the command attempt. Host-specific details belong in
+operations, not in the portable decision trace. Reproducible injected failures
+need an explicitly identified fault schedule/commit model.
+
+State the equality guarantee over identical complete replay inputs and
+controlled fault conditions, or define a portable comparison projection that
+excludes host-attempt observations. Never make replay consult trace.commit
+as authority to force the recorded outcome.
+
+Keeping CommittedEvent lists out of failed/unknown outcomes is correct.
+The blocker is the missing failure evidence and replay contract, not that
+prohibition.
+
+
+A3 | should-fix
+protocol/observation.schema.json:369-394
+docs/decisions/adr-075-observability-proposal.md:101-105
+
+The compact decision omits the returned RNG state, so equal trace bytes can
+hide different authoritative next states.
+
+Failure scenario:
+Starting from [1,2,3,4], the frozen RNG's first uniform(20) result is 0 and its
+next state is [7,0,1026,12288].
+
+One host returns that next state. A buggy host records the same draw but
+returns the old [1,2,3,4]. Both return otherwise identical outcomes, deltas,
+events and effects, and commit at the same revision.
+
+The resulting trace entries are identical:
+- ids.seed is the same initial state;
+- the recorded draw is the same;
+- delta_digest is the same;
+- commit revision, events and effect IDs are the same.
+
+DecisionResult.rng is separate from StateDelta
+(protocol/decision.schema.json:44-60), so hashing StateDelta does not cover
+this divergence. I checked this counterexample independently against the
+specified RNG transition and trace projection.
+
+Required change:
+Retain the returned RNG state, or a compact digest that explicitly covers
+the relevant complete decision result, including returned RNG state.
+Do not hash the whole world per command. Add a counterexample where only the
+returned RNG state changes and the comparison evidence must differ.
+
+Optional draw collection and next-state identity are different concerns:
+recording draw values does not prove the producer returned or committed the
+correct next RNG state.
+
+
+A4 | should-fix
+protocol/observation.schema.json:319-368
+protocol/fixtures/invalid.json:337
+docs/decisions/adr-075-observability-proposal.md:109-114
+
+RngTrace explicitly rejects the “unknown” state that the ADR promises.
+
+Failure scenario:
+An accepted decision consumes RNG. Draw collection was enabled, but the
+collector cannot supply a trustworthy complete draw list. The truthful
+representation is {"state":"unknown"}.
+
+The schema rejects it, and invalid.json:337 freezes that rejection as the
+expected result. A producer must instead lose the record, claim that
+collection was disabled, or emit observed draws:[] and falsely report zero
+draws.
+
+Required change:
+Add the unknown branch and change that fixture into a valid example.
+Keep observed draws:[] valid for a genuinely observed zero-draw decision.
+Reserve unavailable/not_collected for collection actually being disabled,
+rather than using it to disguise failed observation.
+
+
+A5 | should-fix
+protocol/observation.schema.json:219-239
+protocol/event_registry.json:9-12
+
+Failed compilation diagnostics have no input/build identity.
+
+Failure scenario:
+Two cartridges are compiled by the same kernel build. Both fail before a
+semantic content hash exists, and both report an error at a cartridge-relative
+path such as cartridge or quests/start.
+
+Their BuildIds are identical: only kernel_version is present. When their
+records are retained in the diagnostics store, a repair consumer cannot
+determine which source input produced a record. The relative path identifies
+a location within a cartridge, not the cartridge or source revision itself.
+
+This affects the compiler's first observation producer, not only a future
+distributed logging service.
+
+Required change:
+Provide a build/input identity, or explicitly require a per-build bundle that
+binds every diagnostic to its immutable source input. It is correct for
+content_hash to be absent when no compiled artifact exists; do not replace it
+with a zero hash or pretend that a source-input hash is a semantic cartridge
+hash.
+
+
+A6 | nit | QUESTION — redaction acceptance
+docs/decisions/adr-075-observability-proposal.md:118-124
+docs/decisions/adr-075-observability-proposal.md:134-138
+protocol/cartridge.schema.json:357-377
+
+Will each producer's acceptance tests include schema-valid leakage cases,
+rather than only a schema-invalid observation?
+
+For example, Diagnostic.path can contain an absolute home/worktree path,
+and Diagnostic.data can contain arbitrary string-valued keys such as
+device_serial. These values can satisfy the schema and canonical encoding.
+Only the producer's redaction/content policy can stop them.
+
+The ADR does prohibit such content. Because no observation producer exists,
+I am not asserting an implemented leak. The question is whether the promised
+acceptance evidence exercises this known escape hatch. Closed envelope
+objects and identifier patterns are not a redaction proof.
+
+
+RESPONSES TO THE THREE QUESTIONS
+
+Question 1 — How should a kernel build be identified?
+
+Use the full Git commit as the source revision. A human-readable release
+version can be an additional display label, not the sole reproduction key.
+
+However, adopt a concrete clean/dirty-build policy before the first producer.
+The current schema permits only <KERNEL_ID>@<40-hex-commit>, while the ADR
+defers what an uncommitted tree reports
+(protocol/observation.schema.json:76-83;
+docs/decisions/adr-075-observability-proposal.md:60-63).
+
+The failure to prevent is straightforward: change a rule locally, run the
+CLI, stamp the unchanged HEAD commit, and then find that checking out that
+commit does not reproduce the recorded behavior.
+
+The smallest policy is that a record claiming exact commit identity must
+come from that clean source revision. Supporting dirty-tree repros requires
+an explicit distinguishable identity/provenance scheme; silently reporting
+HEAD is not acceptable. Also describe this field as source revision, not
+by itself a fingerprint of every possible built artifact.
+
+
+Question 2 — Should docs/dev-evidence.jsonl live in the repository?
+
+Yes, as a small PM-maintained cost/disposition ledger. Do not build a separate
+service for it now.
+
+There is an important interpretation question before freezing AgentWork:
+is this PR-level accounting, or an evaluation of each agent's work?
+The current contract supports the former, not the latter
+(protocol/observation.schema.json:605-631).
+
+A reviewer who correctly identifies a fatal defect can cause a PR to close
+unmerged. The current mapping records that reviewer's outcome as “rejected,”
+even though the review was valuable and accepted. Likewise, one record per
+role cannot distinguish multiple reviewers or models.
+
+Keep the first version simple, but name/document the outcome as PR
+disposition rather than agent correctness. Treat the ledger as evidence for
+analysis, never as an acceptance authority. For token totals, a missing
+round must not silently contribute zero to an “observed” total.
+
+Appending after merge/closure is reasonable; those records should report
+already-established outcomes, not establish them.
+
+
+Question 3 — Should failed saves keep no event list?
+
+Yes: keep failed and unknown outcomes free of CommittedEvent lists under the
+currently frozen event contract. Do not invent a committed revision or expose
+proposed events as facts that happened.
+
+But reject the stronger claim that the exact save failure can always be
+reproduced from the seed. Complete deterministic inputs can recover the pure
+proposal; reproducing the persistence failure additionally requires the
+failure context/fault schedule described in A1 and A2.
+
+A trace viewer may show a proposal reconstructed by replay, clearly labeled
+as reconstructed and uncommitted. It must not present it as a recovered
+committed event history or use it to repair authoritative state.
+```
