@@ -17,6 +17,11 @@ change (a spec amendment, a canonical encoding, an identity or delta contract, a
 review), or an Opus reviewer and the developer disagreeing twice. The PM passes
 `model: "fable"` when spawning that reviewer (the file's default is Opus). Everything else
 stays on Opus.
+**Cross-vendor review (Astra)** runs beside the Fable review on the same kinds of slice:
+once CI is green, the PM gives the owner a paste-ready prompt (PR, head SHA, spec sections,
+focus, and the output format: verdict, then findings with id, severity, `path:line` at that
+SHA and a failure scenario, in one fenced block). The owner runs it and pastes the answer
+back; the reviewer appends it verbatim to its record, and its findings join the fix list.
 Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
 
 ## Loop
