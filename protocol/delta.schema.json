@@ -28,10 +28,25 @@
       ]
     },
     "FactValue": {
-      "description": "The value of a fact, in fact.assign, fact_compare and fact_changed. A Key for now (the Lantern's facts are key-valued); FactSpec widens this one definition.",
-      "$ref": "action.schema.json#/$defs/Key",
+      "description": "The value of a fact, in fact.assign, fact_compare and fact_changed: a Key, a safe integer or a boolean, the value types FactSpec declares (fact.schema.json; 03 §7). Which one a fact takes is its FactType, which the compiler checks.",
+      "anyOf": [
+        {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        {
+          "type": "integer"
+        },
+        {
+          "type": "boolean"
+        }
+      ],
       "examples": [
-        "player_led"
+        "player_led",
+        1,
+        0,
+        -9007199254740991,
+        true,
+        false
       ]
     },
     "RoleBinding": {

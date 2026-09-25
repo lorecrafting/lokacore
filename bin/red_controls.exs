@@ -70,7 +70,12 @@ controls = [
    %{
      "protocol/red_control.schema.json" =>
        ~s({"$defs": {"RedControl": {"type": "object", "properties": {}, "additionalProperties": {"type": "null"}}}})
-   }, ~w(mix compile --warnings-as-errors --force), "RedControl/type: invalid"}
+   }, ~w(mix compile --warnings-as-errors --force), "RedControl/type: invalid"},
+  {"contracts: anyOf with overlapping types fails compilation",
+   %{
+     "protocol/red_control.schema.json" =>
+       ~s({"$defs": {"RedControl": {"anyOf": [{"type": "string"}, {"type": "string"}]}}})
+   }, ~w(mix compile --warnings-as-errors --force), "RedControl/anyOf: invalid"}
 ]
 
 failures =

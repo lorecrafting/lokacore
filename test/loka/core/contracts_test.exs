@@ -207,6 +207,9 @@ defmodule Loka.Core.ContractsTest do
       }
 
     closed = &object.(Map.put(&1, "additionalProperties", false))
+    any_of = &%{"A" => %{"anyOf" => &1}}
+    str = %{"type" => "string"}
+    int = %{"type" => "integer"}
 
     for {name, defs} <-
           [
@@ -245,7 +248,25 @@ defmodule Loka.Core.ContractsTest do
             {"propertyNames with another keyword",
              map.(%{"propertyNames" => %{"pattern" => "^a$", "maxLength" => 1}})},
             {"a non-portable key pattern", map.(%{"propertyNames" => %{"pattern" => "^\\w$"}})},
-            {"a negative maxProperties", map.(%{"maxProperties" => -1})}
+            {"a negative maxProperties", map.(%{"maxProperties" => -1})},
+            {"anyOf with overlapping types",
+             any_of.([str, %{"type" => "string", "minLength" => 1}])},
+            {"anyOf overlapping through a $ref",
+             Map.put(any_of.([%{"$ref" => "#/$defs/B"}, str]), "B", str)},
+            {"anyOf with an object branch", any_of.([str, obj.(%{}, [])])},
+            {"anyOf with an array branch", any_of.([str, %{"type" => "array", "items" => str}])},
+            {"anyOf with a null branch", any_of.([str, %{"type" => "null"}])},
+            {"anyOf with an enum branch", any_of.([int, %{"enum" => ["a"]}])},
+            {"a nested anyOf", any_of.([any_of.([str, int])["A"], %{"type" => "boolean"}])},
+            {"anyOf with one branch", any_of.([str])},
+            {"anyOf mixed with type", %{"A" => %{"anyOf" => [str, int], "type" => "string"}}},
+            {"anyOf mixed with enum", %{"A" => %{"anyOf" => [str, int], "enum" => ["a"]}}},
+            {"anyOf through a $ref cycle",
+             %{
+               "A" => %{"anyOf" => [%{"$ref" => "#/$defs/B"}, int]},
+               "B" => %{"$ref" => "#/$defs/C"},
+               "C" => %{"$ref" => "#/$defs/B"}
+             }}
           ] ++
             for(
               p <-

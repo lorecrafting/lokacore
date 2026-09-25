@@ -8,14 +8,16 @@ defmodule Loka.Core.Contracts.Schema do
 
   The subset: annotations `$schema`, `$id`, `title`, `description`, `examples` (`$defs` only
   at document level); a schema has one `type` or else exactly one of `$ref`, `enum`,
-  `const`, `oneOf`. Per type: object either `properties`, `required`,
+  `const`, `oneOf`, `anyOf`. Per type: object either `properties`, `required`,
   `additionalProperties` (always `false`), or, as a map, no `properties` and
   `additionalProperties` as the schema of every value, with optional `propertyNames`
   (exactly `{"pattern": ...}`) and `maxProperties`; array `items` (required), `minItems`,
   `maxItems`; string `pattern`, `minLength`, `maxLength`; integer `minimum`, `maximum`;
   string, integer and boolean `enum`, `const`. `enum` and `const` values are scalars.
   `oneOf` branches are inline objects, each with exactly one `const` property, the same
-  required property in every branch with distinct values (the discriminator). A `$ref` may
+  required property in every branch with distinct values (the discriminator). `anyOf` has two
+  or more branches, each a `type` or `$ref` resolving to a different one of string, integer
+  and boolean, so a value's JSON type selects its branch. A `$ref` may
   name its own or an enclosing contract; recursion is bounded by the value, and decoded
   values by the canonical depth limit.
 
@@ -37,7 +39,8 @@ defmodule Loka.Core.Contracts.Schema do
     "boolean" => ~w(type enum const),
     "null" => ~w(type)
   }
-  @untyped ~w($ref enum const oneOf)
+  @untyped ~w($ref enum const oneOf anyOf)
+  @scalar_types ~w(string integer boolean)
   @counts ~w(minItems maxItems minLength maxLength maxProperties)
   @class_atom ~S"(?:[A-Za-z0-9_.](?:-[A-Za-z0-9_.])?|\\[.-])"
   @atom ~S"(?:[A-Za-z0-9_@:/-]|\\\.|\[\^?" <> @class_atom <> ~S"+-?\])"
@@ -56,7 +59,7 @@ defmodule Loka.Core.Contracts.Schema do
   end
 
   defp problems(docs, defs) do
-    names = MapSet.new(defs, fn {file, name, _} -> {file, name} end)
+    names = Map.new(defs, fn {file, name, s} -> {{file, name}, s} end)
 
     Enum.flat_map(docs, fn {file, doc} -> document(file, doc) end) ++
       duplicates(defs) ++
@@ -86,7 +89,7 @@ defmodule Loka.Core.Contracts.Schema do
         unknown ++ Enum.flat_map(s, fn {k, arg} -> keyword(k, arg, s, "#{at}/#{k}", ctx) end)
 
       :error ->
-        ["#{at}: needs one supported type, or exactly one of $ref, enum, const, oneOf"]
+        ["#{at}: needs one supported type, or exactly one of $ref, enum, const, oneOf, anyOf"]
     end
   end
 
@@ -120,6 +123,14 @@ defmodule Loka.Core.Contracts.Schema do
   defp keyword("items", sub, _, at, ctx), do: check(sub, at, ctx)
   defp keyword("oneOf", bs, _, at, ctx) when is_list(bs), do: one_of(bs, at, ctx)
 
+  defp keyword("anyOf", bs, _, at, ctx) when is_list(bs) do
+    types = Enum.map(bs, &json_type(&1, ctx, []))
+    distinct = length(bs) >= 2 and nil not in types and types == Enum.uniq(types)
+
+    ok(distinct, at) ++
+      Enum.flat_map(Enum.with_index(bs), fn {b, i} -> check(b, "#{at}/#{i}", ctx) end)
+  end
+
   defp keyword("enum", e, _, at, _),
     do: ok(is_list(e) and e != [] and Enum.all?(e, &scalar?/1), at)
 
@@ -130,7 +141,7 @@ defmodule Loka.Core.Contracts.Schema do
     ok(portable and match?({:ok, _}, :re.compile(p, [:unicode, :dollar_endonly])), at)
   end
 
-  defp keyword("$ref", ref, _, at, ctx), do: ok(resolves?(ref, ctx), at)
+  defp keyword("$ref", ref, _, at, ctx), do: ok(target(ref, ctx) != nil, at)
 
   defp keyword("type", "object", %{"properties" => _} = s, at, _),
     do: ok(s["additionalProperties"] === false and not map?(s), at)
@@ -142,7 +153,7 @@ defmodule Loka.Core.Contracts.Schema do
   defp keyword(k, n, _, at, _) when k in @counts, do: ok(is_integer(n) and n >= 0, at)
   defp keyword(k, n, _, at, _) when k in ~w(minimum maximum), do: ok(is_integer(n), at)
 
-  defp keyword(k, _, _, at, _) when k in ~w(properties oneOf propertyNames),
+  defp keyword(k, _, _, at, _) when k in ~w(properties oneOf propertyNames anyOf),
     do: ["#{at}: invalid"]
 
   defp keyword(_, _, _, _, _), do: []
@@ -154,14 +165,31 @@ defmodule Loka.Core.Contracts.Schema do
 
   defp scalar?(v), do: is_binary(v) or is_integer(v) or is_boolean(v) or is_nil(v)
 
-  defp resolves?(ref, {file, names}) when is_binary(ref) do
-    case String.split(ref, "#/$defs/") do
-      [f, name] -> MapSet.member?(names, {if(f == "", do: file, else: f), name})
-      _ -> false
+  # {file, name} of the contract a $ref names, or nil.
+  defp target(ref, {file, names}) when is_binary(ref) do
+    with [f, name] <- String.split(ref, "#/$defs/"),
+         key = {if(f == "", do: file, else: f), name},
+         true <- is_map_key(names, key),
+         do: key,
+         else: (_ -> nil)
+  end
+
+  defp target(_, _), do: nil
+
+  # The scalar JSON type an anyOf branch accepts, following $refs (seen stops a cycle); else nil.
+  defp json_type(%{"type" => t}, _, _) when t in @scalar_types, do: t
+
+  defp json_type(%{"$ref" => ref}, {_, names} = ctx, seen) do
+    case target(ref, ctx) do
+      {f, _} = key ->
+        if key in seen, do: nil, else: json_type(names[key], {f, names}, [key | seen])
+
+      nil ->
+        nil
     end
   end
 
-  defp resolves?(_, _), do: false
+  defp json_type(_, _, _), do: nil
 
   defp one_of(bs, at, ctx) do
     tags = Enum.map(bs, &tag/1)
@@ -196,7 +224,7 @@ defmodule Loka.Core.Contracts.Schema do
 
   # Only schema positions are rewritten; `examples`, `enum` and `const` hold values.
   defp rewrite(ps, "properties"), do: Map.new(ps, fn {k, v} -> {k, rewrite(v)} end)
-  defp rewrite(bs, "oneOf"), do: Enum.map(bs, &rewrite/1)
+  defp rewrite(bs, k) when k in ~w(oneOf anyOf), do: Enum.map(bs, &rewrite/1)
   defp rewrite(sub, k) when k in ~w(items additionalProperties), do: rewrite(sub)
   defp rewrite(v, _), do: v
 end

@@ -97,6 +97,14 @@ defmodule Loka.Core.Contracts do
   defp keyword("additionalProperties", sub, v, path, defs) when is_map(sub),
     do: Enum.flat_map(v, fn {k, x} -> errors(sub, x, child(path, k), defs) end)
 
+  # The subset gives each anyOf branch a different scalar JSON type, so the type selects it.
+  defp keyword("anyOf", bs, v, path, defs) do
+    case Enum.find(bs, &type?(json_type(&1, defs), v)) do
+      nil -> [%{path: path, code: :invalid_type}]
+      b -> errors(b, v, path, defs)
+    end
+  end
+
   defp keyword("items", sub, v, path, defs) do
     v |> Enum.with_index() |> Enum.flat_map(fn {x, i} -> errors(sub, x, "#{path}/#{i}", defs) end)
   end
@@ -141,6 +149,9 @@ defmodule Loka.Core.Contracts do
   defp type?("integer", v), do: is_integer(v) and v in -@safe..@safe
   defp type?("boolean", v), do: is_boolean(v)
   defp type?("null", v), do: v == nil
+
+  defp json_type(%{"$ref" => name}, defs), do: json_type(defs[name], defs)
+  defp json_type(%{"type" => t}, _), do: t
 
   defp code_points(s), do: s |> String.to_charlist() |> length()
 
