@@ -83,3 +83,12 @@ Each record is written by a fresh agent that authored none of the reviewed work 
   composite Elixir types, A3 observed boundary, A4 guarantee overstated); re-review of the
   fixes at `94b15fb`, APPROVE, **Gate R3: PASS WITH NOTED GAPS** (six-class view, boundary
   test with five dying mutants in both kernels, probe test, owner-approved amendment).
+- [2026-09-24 ADR-074 TypeScript-first proposal](2026-09-24-adr-074-ts-first-review.md): PR #18
+  at `0f7c4f6`, CHANGES REQUIRED (Fable design review of the proposal document: citations
+  and re-estimate arithmetic verified; six should-fix: the R9 Lab runs rules before the
+  first release and is unaddressed, the deferral boundary and reopen trigger are by feature
+  name rather than by residency class and code, the on-device differential is downgraded
+  without reason, the plain-words section misstates the present and omits the net cost,
+  the post-release "TypeScript becomes the rulebook" consequence is missing, and the
+  amendment list is incomplete; four nits, one question; owner recommendation: accept
+  the direction after the fixes).
