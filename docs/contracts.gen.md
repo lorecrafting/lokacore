@@ -321,6 +321,51 @@ Cartridge, deployment and campaign manifests and their version fields (05 §3, �
 - **KernelApiRange**: The kernel_api compatibility range a cartridge declares (05 §3 'Compatibility versions'): at_least inclusive, below exclusive, so '>=1.3 <2.0' is at_least 1.3, below 2.0.
 - **KernelApiVersion**: A kernel_api version, MAJOR.MINOR without leading zeros (05 §3).
 
+## Observation contracts (`protocol/observation.schema.json`)
+
+The one observation record format, its stores and correlation ids, and the game-trace entry (11 §11-§15; ADR-075, docs/decisions/adr-075-observability-proposal.md). Observation is never authority.
+
+- **AgentWork**: One agent's work on one pull request: its role, the tokens it used (a required Measure; unknown when the harness does not report it) and the work's outcome (accepted: merged; rejected: closed unmerged).
+- **BuildIds**: The correlation ids of a content diagnostic: the code revision, and the cartridge hash once one exists (a compile that fails before hashing has none).
+- **CommitOutcome**: What happened to the command's commit (04 §5.1; 03 §14, §15): committed at revision (the revision after; a rejection receipt does not advance it) with the committed events in order and the effect ids; failed (definitively rolled back); unknown (the outcome could not be observed; reconciled under 03 §15, never presumed rolled back); or unavailable (not_applicable: nothing was committed, such as a fault or a rejection without a receipt). Failed and unknown carry no events or effects: proposed events never leave a failed commit (04 §5.1).
+  - `committed`
+  - `failed`
+  - `unknown`
+  - `unavailable`
+- **EventName**: An event or metric name (11 §12): two or three lowercase snake_case segments joined by dots, area first. The registered names are protocol/event_registry.json, which must equal the ObservationRecord branches.
+- **EventRegistryEntry**: One entry of protocol/event_registry.json: a name, its store, whether it is an event or a metric (a metric's data is a Measure in its unit), and a description citing the spec and naming its producers.
+  - `event`
+  - `metric`
+- **HostIds**: The correlation ids of an operations record: the code revision and the host kind, and where the measure belongs to one, the cartridge, run and command it joins.
+- **HostKind**: Which host ran the code: a kind, never a device identity (AGENTS.md: no serials, UDIDs or device names).
+- **InvariantFailure**: A registered invariant (protocol/invariants.json id) that failed after the command in ids (09 §2 expected and observed invariant: the invariant is the expectation; the record is the observed failure).
+- **KernelVersion**: The Loka code revision that produced a record (11 §11 kernel version; 09 §2 engine/kernel revision): the kernel id (kernel/ts/src/index.ts KERNEL_ID), @, and the full git commit of the build. Kernel, compiler and hosts build from one commit. How a build learns its commit is R5's.
+- **Measure**: A measured quantity, never a bare number: observed with a non-negative integer value, unknown (it applies but could not be observed; never 0), or unavailable with its cause (never empty or absent).
+  - `observed`
+  - `unknown`
+  - `unavailable`
+- **MetricUnit**: The unit of a registered metric's observed value.
+- **ObservationFormat**: The format tag of every observation record. A new field or meaning takes a new tag.
+- **ObservationRecord**: Every observation record, one per JSON Lines line in canonical encoding (ADR-075 §1): the format tag, the registered event name, its store, the store's closed correlation ids and the event's data. One branch per protocol/event_registry.json entry.
+  - `trace.command`
+  - `content.diagnostic`
+  - `simulation.invariant_failed`
+  - `kernel.decision_latency`
+  - `agent.work`
+- **ObservationStore**: The store a record belongs to (ADR-075 §2): game_trace (per-command decisions, host-independent, 11 §15), diagnostics (things to fix: 08 §6 diagnostics and simulator failures), operations (host timings, 11 §13), dev_evidence (agent work cost and outcome).
+- **ReplayIds**: The correlation ids of a record that must reproduce by deterministic replay (09 §2): the cartridge hash, the code revision, the run's initial RNG state, the run (a save lineage; for the simulator, one sequence), the command, and the authority revision the command was decided against. Local ids only: no host, device, account or time.
+- **RngDraw**: One bounded uniform draw (09 §4 draw trace; numeric profile): its bound and the value drawn, value below bound.
+- **RngTrace**: The RNG draws of an accepted decision, in draw order (11 §15 'RNG draws if configured'), or unavailable (not_collected) when the draw trace is off.
+  - `observed`
+  - `unavailable`
+- **TraceDecision**: The decision outcome of a traced command (DecisionResult, 04 §5), compact: accepted with its typed outcome, the state delta digest (SHA-256 of the canonical bytes of its StateDelta, the content_hash construction; its known answer arrives with the first producer) and its RNG draws; rejected with its GameError; or fault with its ErrorCode.
+  - `accepted`
+  - `rejected`
+  - `fault`
+- **TraceEntry**: One game-trace entry (11 §15; 09 §7): the command's payload (its id is ids.command_id), the decision, and the commit outcome, for accepted and rejected decisions and failed commits alike. Derived, never authority. Host-independent: no time, duration, host or device field, so replaying one seed on two hosts yields identical canonical entries (09 §5).
+- **UnavailableCause**: Why a value is unavailable: not_applicable (it does not apply here, such as a commit for a fault), not_collected (collection is off, such as RNG draws when the draw trace is not configured).
+- **WorkIds**: The correlation id of a dev-evidence record: the pull request of the work on lorecrafting/lokacore.
+
 ## Policy contracts (`protocol/policy.schema.json`)
 
 The core policy AST and its version (06 §21; 21 §3.2, §4 Policy; 14 §R3A). Typed, pure and fail-closed: an unknown operator is invalid.

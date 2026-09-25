@@ -21,6 +21,22 @@ defmodule Loka.Core.RegistriesTest do
              Enum.sort(Contracts.defs()["ErrorCode"]["enum"])
   end
 
+  # Breaks if a name is registered without a record branch (or the reverse), or a branch's
+  # store, or a metric's Measure data, disagrees with its registry entry (ADR-075).
+  test "the event registry lists exactly the ObservationRecord events, same store and kind" do
+    events = JSON.decode!(File.read!("protocol/event_registry.json"))
+
+    for entry <- events,
+        do: assert(Contracts.validate("EventRegistryEntry", entry) == :ok, inspect(entry))
+
+    branches =
+      for %{"properties" => p} <- Contracts.defs()["ObservationRecord"]["oneOf"],
+          do: {p["event"]["const"], p["store"]["enum"], p["data"]["$ref"] == "Measure"}
+
+    assert Enum.sort(for e <- events, do: {e["name"], [e["store"]], e["kind"] == "metric"}) ==
+             Enum.sort(branches)
+  end
+
   # The 14 §R3B list, one kind per named type; ActionRecipe/ComposedAction is one (21 §7).
   @r3b ~w(action_recipe inspectable_detail description_variant connection barrier reaction_rule
           consequence_operator narration_spec scene_definition scene_instance scene_space
