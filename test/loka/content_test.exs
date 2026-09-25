@@ -138,13 +138,16 @@ defmodule Loka.ContentTest do
                [d("DUPLICATE_KEY", "actions/talk.target.kind")]
     end
 
-    test "UNKNOWN_FIELD: a stray .json file, an authored key, an unregistered field",
+    test "UNKNOWN_FIELD: stray .json files (dot directories too), an authored key, an unregistered field",
          %{tmp_dir: tmp} do
       assert errors(tmp, %{
                "polices/x.json" => policy(@present),
+               ".hidden/x.json" => policy(@present),
+               "notes.txt" => {:raw, "ignored"},
                "actions/talk.json" => Map.put(@talk, "key", "talk"),
                "cartridge.json" => Map.put(@manifest, "entry", %{})
              }) == [
+               d("UNKNOWN_FIELD", ~S(".hidden/x.json")),
                d("UNKNOWN_FIELD", "actions/talk.key"),
                d("UNKNOWN_FIELD", "cartridge.entry"),
                d("UNKNOWN_FIELD", "polices/x")
