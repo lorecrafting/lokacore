@@ -32,3 +32,8 @@ Each record is written by a fresh agent that authored none of the reviewed work 
   verified with mutants; 127-value differential with zero disagreements; one should-fix: the
   pattern grammar still admits three forms that throw in TypeScript); round 2 at `bb4a7fb`,
   APPROVE (grammar closed; 65-pattern differential with zero disagreements).
+- [2026-09-24 R3 PR 3 commands](2026-09-24-r3-pr3-commands-review.md): PR #13 at `cfc6a14`,
+  CHANGES REQUIRED (full review, contract freeze; 7,911-case differential with zero
+  disagreements below the decoder's depth cap; CommandId known answers recomputed
+  independently; one blocker: 120 `required` entries of the frozen contracts survive
+  mutation; two should-fix: no "always allowed" policy, no id rule for internal commands).
