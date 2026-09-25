@@ -51,7 +51,7 @@
               "$ref": "#/$defs/TextKey"
             },
             "reason": {
-              "$ref": "error.schema.json#/$defs/GameError"
+              "$ref": "#/$defs/UnavailableReason"
             }
           },
           "required": [
@@ -117,7 +117,7 @@
               "$ref": "#/$defs/TextKey"
             },
             "reason": {
-              "$ref": "error.schema.json#/$defs/GameError"
+              "$ref": "#/$defs/UnavailableReason"
             }
           },
           "required": [
@@ -143,29 +143,61 @@
       ]
     },
     "ExitView": {
-      "description": "One exit of the current place (04 §14): its direction and whether moving through it is legal now (00 §4.10: disabled when unavailable).",
-      "type": "object",
-      "properties": {
-        "direction": {
-          "$ref": "action.schema.json#/$defs/Key"
+      "description": "One exit of the current place (04 §14; 00 §4.10 compass: disabled when unavailable, badge when locked), with the typed reason when moving through it is not legal now.",
+      "oneOf": [
+        {
+          "description": "Moving through it is legal now.",
+          "type": "object",
+          "properties": {
+            "available": {
+              "const": true
+            },
+            "direction": {
+              "$ref": "action.schema.json#/$defs/Key"
+            }
+          },
+          "required": [
+            "available",
+            "direction"
+          ],
+          "additionalProperties": false
         },
-        "available": {
-          "type": "boolean"
+        {
+          "description": "Shown but not legal now, with the reason. Never a security boundary (ACT-09).",
+          "type": "object",
+          "properties": {
+            "available": {
+              "const": false
+            },
+            "direction": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "reason": {
+              "$ref": "#/$defs/UnavailableReason"
+            }
+          },
+          "required": [
+            "available",
+            "direction",
+            "reason"
+          ],
+          "additionalProperties": false
         }
-      },
-      "required": [
-        "direction",
-        "available"
       ],
-      "additionalProperties": false,
       "examples": [
         {
-          "direction": "north",
-          "available": true
+          "available": true,
+          "direction": "north"
         },
         {
+          "available": false,
           "direction": "west",
-          "available": false
+          "reason": {
+            "code": "exit_locked",
+            "message": {
+              "key": "reason.causeway_flooded"
+            }
+          }
         }
       ]
     },
@@ -212,11 +244,20 @@
       ]
     },
     "PendingChoice": {
-      "description": "The actor's open choice (04 §15 'dialogue choices currently available'), in presentation order.",
+      "description": "The actor's open choice (04 §15 'dialogue choices currently available'; 06 §43): its prompt (the line or scene text shown above the options), the speaking participant when there is one, the options in presentation order, and whether the player may close it without choosing (the close_choice command; 06 §43: never trapped in a modal screen, and closing does not change the outcome).",
       "type": "object",
       "properties": {
         "continuation_id": {
           "$ref": "delta.schema.json#/$defs/ContinuationId"
+        },
+        "speaker_id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "prompt": {
+          "$ref": "#/$defs/Text"
+        },
+        "closable": {
+          "type": "boolean"
         },
         "choices": {
           "type": "array",
@@ -228,12 +269,38 @@
       },
       "required": [
         "continuation_id",
+        "prompt",
+        "closable",
         "choices"
       ],
       "additionalProperties": false,
       "examples": [
         {
           "continuation_id": "0f0e0d0c-0b0a-4908-8706-050403020100",
+          "speaker_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+          "prompt": {
+            "key": "dialogue.bram.search_plan"
+          },
+          "closable": true,
+          "choices": [
+            {
+              "available": true,
+              "choice_id": "carry",
+              "label": "choice.carry"
+            },
+            {
+              "available": true,
+              "choice_id": "leave",
+              "label": "choice.leave"
+            }
+          ]
+        },
+        {
+          "continuation_id": "0f0e0d0c-0b0a-4908-8706-050403020100",
+          "prompt": {
+            "key": "dialogue.bram.search_plan"
+          },
+          "closable": false,
           "choices": [
             {
               "available": true,
@@ -290,10 +357,10 @@
           "$ref": "identity.schema.json#/$defs/EntityId"
         },
         "title": {
-          "$ref": "#/$defs/TextKey"
+          "$ref": "#/$defs/Text"
         },
         "description": {
-          "$ref": "#/$defs/TextKey"
+          "$ref": "#/$defs/Text"
         }
       },
       "required": [
@@ -305,8 +372,15 @@
       "examples": [
         {
           "id": "12121212-3434-4565-8787-909090909090",
-          "title": "room.ferry_landing.title",
-          "description": "room.ferry_landing.description"
+          "title": {
+            "key": "room.ferry_landing.title"
+          },
+          "description": {
+            "key": "room.ferry_landing.description",
+            "bindings": {
+              "time": "clock.dusk"
+            }
+          }
         }
       ]
     },
@@ -369,17 +443,30 @@
           "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
           "place": {
             "id": "12121212-3434-4565-8787-909090909090",
-            "title": "room.ferry_landing.title",
-            "description": "room.ferry_landing.description"
+            "title": {
+              "key": "room.ferry_landing.title"
+            },
+            "description": {
+              "key": "room.ferry_landing.description",
+              "bindings": {
+                "time": "clock.dusk"
+              }
+            }
           },
           "exits": [
             {
-              "direction": "north",
-              "available": true
+              "available": true,
+              "direction": "north"
             },
             {
+              "available": false,
               "direction": "west",
-              "available": false
+              "reason": {
+                "code": "exit_locked",
+                "message": {
+                  "key": "reason.causeway_flooded"
+                }
+              }
             }
           ],
           "actions": [
@@ -442,8 +529,15 @@
           "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
           "place": {
             "id": "12121212-3434-4565-8787-909090909090",
-            "title": "room.ferry_landing.title",
-            "description": "room.ferry_landing.description"
+            "title": {
+              "key": "room.ferry_landing.title"
+            },
+            "description": {
+              "key": "room.ferry_landing.description",
+              "bindings": {
+                "time": "clock.dusk"
+              }
+            }
           },
           "exits": [],
           "actions": [],
@@ -452,6 +546,11 @@
           "journal": [],
           "choice": {
             "continuation_id": "0f0e0d0c-0b0a-4908-8706-050403020100",
+            "speaker_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+            "prompt": {
+              "key": "dialogue.bram.search_plan"
+            },
+            "closable": true,
             "choices": [
               {
                 "available": true,
@@ -469,7 +568,7 @@
       ]
     },
     "GameViewSnapshot": {
-      "description": "An authoritative GameView snapshot (04 §16). format versions the envelope: a new field or meaning takes a new format. projection_sequence orders this client stream's projection messages; a gap means resync from a fresh snapshot. view_freshness_token is opaque, echoed in ActionInvocation (same 1-128 character limit) for staleness diagnosis. Neither equals an authority revision (04 §16). Incremental projection messages are added with the Realm transport.",
+      "description": "An authoritative GameView snapshot (04 §16). format versions the envelope: a new field or meaning takes a new format. projection_sequence orders this client stream's projection messages; a gap means resync from a fresh snapshot. view_freshness_token is opaque, echoed in ActionInvocation (same 1-128 character limit) for staleness diagnosis. Neither equals an authority revision (04 §16). Incremental projection messages are added with the Realm transport. narration holds committed narration records not yet delivered on this stream, oldest first.",
       "type": "object",
       "properties": {
         "format": {
@@ -487,6 +586,12 @@
         },
         "view": {
           "$ref": "#/$defs/GameView"
+        },
+        "narration": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NarrationRecord"
+          }
         }
       },
       "required": [
@@ -504,17 +609,30 @@
             "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
             "place": {
               "id": "12121212-3434-4565-8787-909090909090",
-              "title": "room.ferry_landing.title",
-              "description": "room.ferry_landing.description"
+              "title": {
+                "key": "room.ferry_landing.title"
+              },
+              "description": {
+                "key": "room.ferry_landing.description",
+                "bindings": {
+                  "time": "clock.dusk"
+                }
+              }
             },
             "exits": [
               {
-                "direction": "north",
-                "available": true
+                "available": true,
+                "direction": "north"
               },
               {
+                "available": false,
                 "direction": "west",
-                "available": false
+                "reason": {
+                  "code": "exit_locked",
+                  "message": {
+                    "key": "reason.causeway_flooded"
+                  }
+                }
               }
             ],
             "actions": [
@@ -572,7 +690,21 @@
                 "title": "quest.find_the_child.title"
               }
             ]
-          }
+          },
+          "narration": [
+            {
+              "command_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+              "lines": [
+                {
+                  "key": "narration.move",
+                  "bindings": {
+                    "direction": "north",
+                    "destination": "room.village_green.title"
+                  }
+                }
+              ]
+            }
+          ]
         },
         {
           "format": "loka-gameview-v1",
@@ -581,17 +713,30 @@
             "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
             "place": {
               "id": "12121212-3434-4565-8787-909090909090",
-              "title": "room.ferry_landing.title",
-              "description": "room.ferry_landing.description"
+              "title": {
+                "key": "room.ferry_landing.title"
+              },
+              "description": {
+                "key": "room.ferry_landing.description",
+                "bindings": {
+                  "time": "clock.dusk"
+                }
+              }
             },
             "exits": [
               {
-                "direction": "north",
-                "available": true
+                "available": true,
+                "direction": "north"
               },
               {
+                "available": false,
                 "direction": "west",
-                "available": false
+                "reason": {
+                  "code": "exit_locked",
+                  "message": {
+                    "key": "reason.causeway_flooded"
+                  }
+                }
               }
             ],
             "actions": [
@@ -650,6 +795,132 @@
               }
             ]
           }
+        }
+      ]
+    },
+    "TextValue": {
+      "description": "A value interpolated into localized text (04 §15 'interpolation data'; 06 §43 'bindings'): a TextKey (localized in turn, so a Key such as a direction also fits), an integer (a count, a time) or a boolean.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TextKey"
+        },
+        {
+          "type": "integer"
+        },
+        {
+          "type": "boolean"
+        }
+      ],
+      "examples": [
+        "room.village_green.title",
+        "north",
+        420,
+        true
+      ]
+    },
+    "Text": {
+      "description": "Localized text: a string id and its named bindings (04 §15 'localized string IDs plus interpolation data'; 06 §43 'pinned text keys and bindings'). Binding names are lowercase snake_case, at most 64 characters.",
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/TextKey"
+        },
+        "bindings": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/TextValue"
+          }
+        }
+      },
+      "required": [
+        "key"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "key": "narration.move"
+        },
+        {
+          "key": "narration.move",
+          "bindings": {
+            "direction": "north",
+            "destination": "room.village_green.title"
+          }
+        },
+        {
+          "key": "clock.time",
+          "bindings": {
+            "minutes": 420
+          }
+        },
+        {
+          "key": "k",
+          "bindings": {}
+        }
+      ]
+    },
+    "UnavailableReason": {
+      "description": "Why an action, choice or exit is shown but not legal now (00 §4.10: greyed with the reason, badge when locked; P5 'clear unavailable-action feedback'): the typed code, and optionally the player-facing sentence that tells apart two reasons with one code (a locked door, a causeway under the tide). A GameView presentation field, so GameError and the error registry stay unchanged.",
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "error.schema.json#/$defs/ErrorCode"
+        },
+        "message": {
+          "$ref": "#/$defs/Text"
+        }
+      },
+      "required": [
+        "code"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "code": "exit_locked"
+        },
+        {
+          "code": "exit_locked",
+          "message": {
+            "key": "reason.causeway_flooded"
+          }
+        }
+      ]
+    },
+    "NarrationRecord": {
+      "description": "The committed narration of one accepted command, as this actor sees it (06 §43: required narration is committed with its consequence as a stable record of pinned text keys and bindings; 04 §5.2 steps 7-8). Redisplay is read-only. A retry of that command replays its receipt and returns this same record (same command_id) with a current GameView (06 §43; 03 §14).",
+      "type": "object",
+      "properties": {
+        "command_id": {
+          "$ref": "identity.schema.json#/$defs/CommandId"
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Text"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "command_id",
+        "lines"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "command_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+          "lines": [
+            {
+              "key": "narration.move",
+              "bindings": {
+                "direction": "north",
+                "destination": "room.village_green.title"
+              }
+            }
+          ]
         }
       ]
     }
