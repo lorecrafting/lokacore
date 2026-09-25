@@ -4,11 +4,11 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { decode, encode, hash } from '../src/canonical.ts';
 import { DEFS } from '../src/contracts.gen.ts';
-import { validate } from '../src/validate.ts';
+import { validate, type Defs } from '../src/validate.ts';
 import { read } from './read.ts';
 import { DEFS as PROBE } from './subset.gen.ts';
 
-const defs = { ...DEFS, ...PROBE };
+const defs = { ...DEFS, ...PROBE } as Defs;
 
 test('every contract has examples and every example validates', () => {
   for (const [name, schema] of Object.entries(defs) as [string, { examples?: unknown[] }][]) {
