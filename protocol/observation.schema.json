@@ -1,0 +1,1294 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Observation contracts",
+  "description": "The one observation record format, its stores and correlation ids, and the game-trace entry (11 §11-§15; ADR-075, docs/decisions/adr-075-observability-proposal.md). Observation is never authority.",
+  "$defs": {
+    "ObservationFormat": {
+      "description": "The format tag of every observation record. A new field or meaning takes a new tag.",
+      "const": "loka-obs-v1",
+      "examples": [
+        "loka-obs-v1"
+      ]
+    },
+    "ObservationStore": {
+      "description": "The store a record belongs to (ADR-075 §2): game_trace (per-command decisions, host-independent, 11 §15), diagnostics (things to fix: 08 §6 diagnostics and simulator failures), operations (host timings, 11 §13), dev_evidence (agent work cost and outcome).",
+      "enum": [
+        "game_trace",
+        "diagnostics",
+        "operations",
+        "dev_evidence"
+      ],
+      "examples": [
+        "game_trace"
+      ]
+    },
+    "EventName": {
+      "description": "An event or metric name (11 §12): two or three lowercase snake_case segments joined by dots, area first. The registered names are protocol/event_registry.json, which must equal the ObservationRecord branches.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*|)$",
+      "maxLength": 64,
+      "examples": [
+        "trace.command",
+        "runtime.command.rejected"
+      ]
+    },
+    "EventRegistryEntry": {
+      "description": "One entry of protocol/event_registry.json: a name, its store, whether it is an event or a metric (a metric's data is a Measure; the description gives its unit), and a description citing the spec and naming its producers.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/EventName"
+        },
+        "store": {
+          "$ref": "#/$defs/ObservationStore"
+        },
+        "kind": {
+          "enum": [
+            "event",
+            "metric"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "name",
+        "store",
+        "kind",
+        "description"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "name": "trace.command",
+          "store": "game_trace",
+          "kind": "event",
+          "description": "One game-trace entry per command (11 §15)."
+        },
+        {
+          "name": "kernel.decision_latency",
+          "store": "operations",
+          "kind": "metric",
+          "description": "Kernel decision latency in microseconds (11 §13)."
+        }
+      ]
+    },
+    "KernelVersion": {
+      "description": "The source revision that produced a record (11 §11 kernel version; 09 §2 engine/kernel revision): the kernel id (kernel/ts/src/index.ts KERNEL_ID), @, and the full git commit; kernel, compiler and hosts build from one commit. The bare form only from a clean tree at that commit; a tree with uncommitted changes appends -dirty, and such a record is never an exact repro key. Reporting HEAD for a dirty tree is forbidden. It names source, not a fingerprint of a built artifact.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,63}@[0-9a-f]{40}(-dirty|)$",
+      "examples": [
+        "loka-kernel@175f041c2e3a4b5d6e7f8091a2b3c4d5e6f70812",
+        "loka-kernel@175f041c2e3a4b5d6e7f8091a2b3c4d5e6f70812-dirty"
+      ]
+    },
+    "HostKind": {
+      "description": "Which host ran the code: a kind, never a device identity (AGENTS.md: no serials, UDIDs or device names).",
+      "enum": [
+        "node",
+        "hermes_android",
+        "hermes_ios"
+      ],
+      "examples": [
+        "node"
+      ]
+    },
+    "UnavailableCause": {
+      "description": "Why a value is unavailable: not_applicable (it does not apply here, such as a commit for a fault), not_collected (collection is off, such as RNG draws when the draw trace is not configured).",
+      "enum": [
+        "not_applicable",
+        "not_collected"
+      ],
+      "examples": [
+        "not_collected"
+      ]
+    },
+    "Measure": {
+      "description": "A measured quantity, never a bare number: observed with a non-negative integer value, unknown (it applies but could not be observed; never 0), or unavailable with its cause (never empty or absent).",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "state": {
+              "const": "observed"
+            },
+            "value": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "state",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "state": {
+              "const": "unknown"
+            }
+          },
+          "required": [
+            "state"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "state": {
+              "const": "unavailable"
+            },
+            "reason": {
+              "$ref": "#/$defs/UnavailableCause"
+            }
+          },
+          "required": [
+            "state",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "state": "observed",
+          "value": 0
+        },
+        {
+          "state": "unknown"
+        },
+        {
+          "state": "unavailable",
+          "reason": "not_collected"
+        }
+      ]
+    },
+    "ReplayIds": {
+      "description": "The correlation ids of a record that must reproduce by deterministic replay (09 §2): the cartridge hash, the code revision, the run's initial RNG state, the run (a save lineage; for the simulator, one sequence), the command, and the authority revision the command was decided against. Local ids only: no host, device, account or time.",
+      "type": "object",
+      "properties": {
+        "content_hash": {
+          "$ref": "manifest.schema.json#/$defs/ContentHash"
+        },
+        "kernel_version": {
+          "$ref": "#/$defs/KernelVersion"
+        },
+        "seed": {
+          "$ref": "decision.schema.json#/$defs/RngState"
+        },
+        "run_id": {
+          "$ref": "account.schema.json#/$defs/StoryRunId"
+        },
+        "command_id": {
+          "$ref": "identity.schema.json#/$defs/CommandId"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "content_hash",
+        "kernel_version",
+        "seed",
+        "run_id",
+        "command_id",
+        "revision"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "content_hash": "fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2",
+          "kernel_version": "loka-kernel@175f041c2e3a4b5d6e7f8091a2b3c4d5e6f70812",
+          "seed": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "run_id": "6f6f6f6f-1111-4222-8333-444444444444",
+          "command_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+          "revision": 0
+        }
+      ]
+    },
+    "RunIds": {
+      "description": "The correlation ids of a run header: the replay inputs a run shares (ReplayIds without command and revision).",
+      "type": "object",
+      "properties": {
+        "content_hash": {
+          "$ref": "manifest.schema.json#/$defs/ContentHash"
+        },
+        "kernel_version": {
+          "$ref": "#/$defs/KernelVersion"
+        },
+        "seed": {
+          "$ref": "decision.schema.json#/$defs/RngState"
+        },
+        "run_id": {
+          "$ref": "account.schema.json#/$defs/StoryRunId"
+        }
+      },
+      "required": [
+        "content_hash",
+        "kernel_version",
+        "seed",
+        "run_id"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "content_hash": "fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2",
+          "kernel_version": "loka-kernel@175f041c2e3a4b5d6e7f8091a2b3c4d5e6f70812",
+          "seed": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "run_id": "6f6f6f6f-1111-4222-8333-444444444444"
+        }
+      ]
+    },
+    "BuildIds": {
+      "description": "The correlation ids of a content diagnostic: the source revision; input_digest, the SHA-256 of the input the producer read (the compiler: the canonical JSON object mapping each source file's cartridge-relative path to the SHA-256 of its bytes; the loader: the artifact file's bytes; the known answer arrives with the first producer), which exists even when the input does not parse; and content_hash only once an artifact's cartridge hash exists, never a stand-in for it.",
+      "type": "object",
+      "properties": {
+        "kernel_version": {
+          "$ref": "#/$defs/KernelVersion"
+        },
+        "content_hash": {
+          "$ref": "manifest.schema.json#/$defs/ContentHash"
+        },
+        "input_digest": {
+          "$ref": "manifest.schema.json#/$defs/ContentHash"
+        }
+      },
+      "required": [
+        "kernel_version",
+        "input_digest"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kernel_version": "loka-kernel@175f041c2e3a4b5d6e7f8091a2b3c4d5e6f70812",
+          "input_digest": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+        }
+      ]
+    },
+    "HostIds": {
+      "description": "The correlation ids of an operations record: the code revision, the host kind, and the run and command the measure joins (the trace carries the rest).",
+      "type": "object",
+      "properties": {
+        "kernel_version": {
+          "$ref": "#/$defs/KernelVersion"
+        },
+        "host": {
+          "$ref": "#/$defs/HostKind"
+        },
+        "run_id": {
+          "$ref": "account.schema.json#/$defs/StoryRunId"
+        },
+        "command_id": {
+          "$ref": "identity.schema.json#/$defs/CommandId"
+        }
+      },
+      "required": [
+        "kernel_version",
+        "host",
+        "run_id",
+        "command_id"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kernel_version": "loka-kernel@175f041c2e3a4b5d6e7f8091a2b3c4d5e6f70812",
+          "host": "hermes_android",
+          "run_id": "6f6f6f6f-1111-4222-8333-444444444444",
+          "command_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b"
+        }
+      ]
+    },
+    "WorkIds": {
+      "description": "The correlation id of a dev-evidence record: the pull request of the work on lorecrafting/lokacore.",
+      "type": "object",
+      "properties": {
+        "pull_request": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "pull_request"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "pull_request": 27
+        }
+      ]
+    },
+    "RngDraw": {
+      "description": "One bounded uniform draw (09 §4 draw trace; numeric profile): its bound and the value drawn, value below bound.",
+      "type": "object",
+      "properties": {
+        "bound": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4294967296
+        },
+        "value": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        }
+      },
+      "required": [
+        "bound",
+        "value"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "bound": 20,
+          "value": 13
+        }
+      ]
+    },
+    "RngTrace": {
+      "description": "The RNG draws of an accepted decision, in draw order (11 §15 'RNG draws if configured'; 09 §4): observed (draws [] is a decision that drew nothing), unknown (collection was on but could not supply a complete list), or unavailable (not_collected: collection was off).",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "state": {
+              "const": "observed"
+            },
+            "draws": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/RngDraw"
+              }
+            }
+          },
+          "required": [
+            "state",
+            "draws"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "state": {
+              "const": "unknown"
+            }
+          },
+          "required": [
+            "state"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "state": {
+              "const": "unavailable"
+            },
+            "reason": {
+              "$ref": "#/$defs/UnavailableCause"
+            }
+          },
+          "required": [
+            "state",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "state": "observed",
+          "draws": []
+        },
+        {
+          "state": "unknown"
+        },
+        {
+          "state": "unavailable",
+          "reason": "not_collected"
+        }
+      ]
+    },
+    "TraceDecision": {
+      "description": "The decision outcome of a traced command (DecisionResult, 04 §5), compact: accepted with its typed outcome, the state delta digest (SHA-256 of the canonical bytes of its StateDelta, the content_hash construction; its known answer arrives with the first producer), its RNG draws and the RNG state it returned (DecisionResult.rng; the delta does not cover it); rejected with its GameError; or fault with its ErrorCode and, when bound, its target (04 §5.5).",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "accepted"
+            },
+            "outcome": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "delta_digest": {
+              "$ref": "manifest.schema.json#/$defs/ContentHash"
+            },
+            "rng": {
+              "$ref": "#/$defs/RngTrace"
+            },
+            "rng_state": {
+              "$ref": "decision.schema.json#/$defs/RngState"
+            }
+          },
+          "required": [
+            "kind",
+            "outcome",
+            "delta_digest",
+            "rng",
+            "rng_state"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "rejected"
+            },
+            "error": {
+              "$ref": "error.schema.json#/$defs/GameError"
+            }
+          },
+          "required": [
+            "kind",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "fault"
+            },
+            "code": {
+              "$ref": "error.schema.json#/$defs/ErrorCode"
+            },
+            "target": {
+              "$ref": "delta.schema.json#/$defs/MutationTarget"
+            }
+          },
+          "required": [
+            "kind",
+            "code"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "kind": "accepted",
+          "outcome": "taken",
+          "delta_digest": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+          "rng": {
+            "state": "observed",
+            "draws": [
+              {
+                "bound": 20,
+                "value": 0
+              }
+            ]
+          },
+          "rng_state": [
+            7,
+            0,
+            1026,
+            12288
+          ]
+        },
+        {
+          "kind": "accepted",
+          "outcome": "taken",
+          "delta_digest": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+          "rng": {
+            "state": "observed",
+            "draws": [
+              {
+                "bound": 20,
+                "value": 0
+              }
+            ]
+          },
+          "rng_state": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "rejected",
+          "error": {
+            "code": "exit_locked"
+          }
+        },
+        {
+          "kind": "fault",
+          "code": "conflicting_write"
+        },
+        {
+          "kind": "fault",
+          "code": "conflicting_write",
+          "target": {
+            "kind": "containment",
+            "entity_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+          }
+        }
+      ]
+    },
+    "CommitOutcome": {
+      "description": "What happened to the command's commit (04 §5.1; 03 §14, §15): committed at revision (the revision after; a rejection receipt does not advance it) with the committed events in order and the effect ids; failed (definitively rolled back) with its cause: injected (by the run's fault schedule) or storage_error (the store reported failure; host detail goes to operations); unknown (the outcome could not be observed; reconciled under 03 §15, never presumed rolled back) with its cause: injected or no_outcome (no answer from the store: crash, kill, lost acknowledgement); or unavailable (not_applicable: nothing was committed, such as a fault or a rejection without a receipt). Failed and unknown carry no events or effects: proposed events never leave a failed commit (04 §5.1). The allowed decision and commit pairs: ADR-075 §4.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "state": {
+              "const": "committed"
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "events": {
+              "type": "array",
+              "items": {
+                "$ref": "event.schema.json#/$defs/CommittedEvent"
+              }
+            },
+            "effect_ids": {
+              "type": "array",
+              "items": {
+                "$ref": "effect.schema.json#/$defs/EffectId"
+              }
+            }
+          },
+          "required": [
+            "state",
+            "revision",
+            "events",
+            "effect_ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "state": {
+              "const": "failed"
+            },
+            "cause": {
+              "enum": [
+                "injected",
+                "storage_error"
+              ]
+            }
+          },
+          "required": [
+            "state",
+            "cause"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "state": {
+              "const": "unknown"
+            },
+            "cause": {
+              "enum": [
+                "injected",
+                "no_outcome"
+              ]
+            }
+          },
+          "required": [
+            "state",
+            "cause"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "state": {
+              "const": "unavailable"
+            },
+            "reason": {
+              "$ref": "#/$defs/UnavailableCause"
+            }
+          },
+          "required": [
+            "state",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "state": "committed",
+          "revision": 1,
+          "events": [],
+          "effect_ids": [
+            "88888888-9999-8aaa-8bbb-cccccccccccc"
+          ]
+        },
+        {
+          "state": "failed",
+          "cause": "storage_error"
+        },
+        {
+          "state": "unknown",
+          "cause": "no_outcome"
+        },
+        {
+          "state": "unavailable",
+          "reason": "not_applicable"
+        }
+      ]
+    },
+    "RunHeader": {
+      "description": "The replay header of one run (09 §2; ADR-075 §4), written once before its first trace.command: with its ids (cartridge, source revision, seed, run) and the ordered commands of the run's trace.command entries, the complete replay input. initial_state: fresh (the cartridge's initial state) or unavailable, not_collected (a start from a snapshot, whose identity is not recorded until R6 checkpoints define one). fault_schedule: the SHA-256 of the canonical fault schedule R6 fault simulation defines, or unavailable (not_applicable) when none is injected.",
+      "type": "object",
+      "properties": {
+        "initial_state": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "fresh"
+                }
+              },
+              "required": [
+                "state"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "reason": {
+                  "$ref": "#/$defs/UnavailableCause"
+                }
+              },
+              "required": [
+                "state",
+                "reason"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "fault_schedule": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "identified"
+                },
+                "digest": {
+                  "$ref": "manifest.schema.json#/$defs/ContentHash"
+                }
+              },
+              "required": [
+                "state",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "reason": {
+                  "$ref": "#/$defs/UnavailableCause"
+                }
+              },
+              "required": [
+                "state",
+                "reason"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "initial_state",
+        "fault_schedule"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "initial_state": {
+            "state": "fresh"
+          },
+          "fault_schedule": {
+            "state": "unavailable",
+            "reason": "not_applicable"
+          }
+        },
+        {
+          "initial_state": {
+            "state": "fresh"
+          },
+          "fault_schedule": {
+            "state": "identified",
+            "digest": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+          }
+        }
+      ]
+    },
+    "TraceEntry": {
+      "description": "One game-trace entry (11 §15; 09 §7): its ordinal (1, 2, ... in the run's command order, binding it to the run's trace.run header), the full Command (command.id equals ids.command_id), the decision, and the commit outcome, for accepted and rejected decisions and failed commits alike. Derived, never authority. No time, duration, host or device field: entries are identical across hosts given identical complete replay inputs and controlled faults (ADR-075 §4).",
+      "type": "object",
+      "properties": {
+        "ordinal": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "command": {
+          "$ref": "command.schema.json#/$defs/Command"
+        },
+        "decision": {
+          "$ref": "#/$defs/TraceDecision"
+        },
+        "commit": {
+          "$ref": "#/$defs/CommitOutcome"
+        }
+      },
+      "required": [
+        "ordinal",
+        "command",
+        "decision",
+        "commit"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "ordinal": 1,
+          "command": {
+            "id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+            "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+            "payload": {
+              "type": "move",
+              "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+              "direction": "north"
+            }
+          },
+          "decision": {
+            "kind": "rejected",
+            "error": {
+              "code": "exit_locked"
+            }
+          },
+          "commit": {
+            "state": "unavailable",
+            "reason": "not_applicable"
+          }
+        }
+      ]
+    },
+    "InvariantFailure": {
+      "description": "A registered invariant (protocol/invariants.json id) that failed after the command in ids (09 §2 expected and observed invariant: the invariant is the expectation; the record is the observed failure).",
+      "type": "object",
+      "properties": {
+        "invariant": {
+          "$ref": "action.schema.json#/$defs/Key"
+        }
+      },
+      "required": [
+        "invariant"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "invariant": "one_container_per_item"
+        }
+      ]
+    },
+    "AgentWork": {
+      "description": "One agent's work on one pull request: its role, model (opus, fable, astra, ...), instance (1, 2, ... among that role's agents on the pull request, so (pull_request, role, instance) is unique), the tokens it used (a required Measure; unknown when not reported, never 0) and the pull request's disposition (merged or closed), which is not a judgment of the agent's work. Evidence for analysis, never an acceptance authority.",
+      "type": "object",
+      "properties": {
+        "role": {
+          "enum": [
+            "pm",
+            "developer",
+            "reviewer"
+          ]
+        },
+        "model": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "instance": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "tokens": {
+          "$ref": "#/$defs/Measure"
+        },
+        "pr_disposition": {
+          "enum": [
+            "merged",
+            "closed"
+          ]
+        }
+      },
+      "required": [
+        "role",
+        "model",
+        "instance",
+        "tokens",
+        "pr_disposition"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "role": "developer",
+          "model": "opus",
+          "instance": 1,
+          "tokens": {
+            "state": "observed",
+            "value": 412000
+          },
+          "pr_disposition": "merged"
+        }
+      ]
+    },
+    "ObservationRecord": {
+      "description": "Every observation record, one per JSON Lines line in canonical encoding (ADR-075 §1): the format tag, the registered event name, its store, the store's closed correlation ids and the event's data. One branch per protocol/event_registry.json entry.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "format": {
+              "$ref": "#/$defs/ObservationFormat"
+            },
+            "event": {
+              "const": "trace.run"
+            },
+            "store": {
+              "enum": [
+                "game_trace"
+              ]
+            },
+            "ids": {
+              "$ref": "#/$defs/RunIds"
+            },
+            "data": {
+              "$ref": "#/$defs/RunHeader"
+            }
+          },
+          "required": [
+            "format",
+            "event",
+            "store",
+            "ids",
+            "data"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "format": {
+              "$ref": "#/$defs/ObservationFormat"
+            },
+            "event": {
+              "const": "trace.command"
+            },
+            "store": {
+              "enum": [
+                "game_trace"
+              ]
+            },
+            "ids": {
+              "$ref": "#/$defs/ReplayIds"
+            },
+            "data": {
+              "$ref": "#/$defs/TraceEntry"
+            }
+          },
+          "required": [
+            "format",
+            "event",
+            "store",
+            "ids",
+            "data"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "format": {
+              "$ref": "#/$defs/ObservationFormat"
+            },
+            "event": {
+              "const": "content.diagnostic"
+            },
+            "store": {
+              "enum": [
+                "diagnostics"
+              ]
+            },
+            "ids": {
+              "$ref": "#/$defs/BuildIds"
+            },
+            "data": {
+              "$ref": "cartridge.schema.json#/$defs/Diagnostic"
+            }
+          },
+          "required": [
+            "format",
+            "event",
+            "store",
+            "ids",
+            "data"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "format": {
+              "$ref": "#/$defs/ObservationFormat"
+            },
+            "event": {
+              "const": "simulation.invariant_failed"
+            },
+            "store": {
+              "enum": [
+                "diagnostics"
+              ]
+            },
+            "ids": {
+              "$ref": "#/$defs/ReplayIds"
+            },
+            "data": {
+              "$ref": "#/$defs/InvariantFailure"
+            }
+          },
+          "required": [
+            "format",
+            "event",
+            "store",
+            "ids",
+            "data"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "format": {
+              "$ref": "#/$defs/ObservationFormat"
+            },
+            "event": {
+              "const": "kernel.decision_latency"
+            },
+            "store": {
+              "enum": [
+                "operations"
+              ]
+            },
+            "ids": {
+              "$ref": "#/$defs/HostIds"
+            },
+            "data": {
+              "$ref": "#/$defs/Measure"
+            }
+          },
+          "required": [
+            "format",
+            "event",
+            "store",
+            "ids",
+            "data"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "format": {
+              "$ref": "#/$defs/ObservationFormat"
+            },
+            "event": {
+              "const": "agent.work"
+            },
+            "store": {
+              "enum": [
+                "dev_evidence"
+              ]
+            },
+            "ids": {
+              "$ref": "#/$defs/WorkIds"
+            },
+            "data": {
+              "$ref": "#/$defs/AgentWork"
+            }
+          },
+          "required": [
+            "format",
+            "event",
+            "store",
+            "ids",
+            "data"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "format": "loka-obs-v1",
+          "event": "trace.run",
+          "store": "game_trace",
+          "ids": {
+            "content_hash": "fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2",
+            "kernel_version": "loka-kernel@175f041c2e3a4b5d6e7f8091a2b3c4d5e6f70812",
+            "seed": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "run_id": "6f6f6f6f-1111-4222-8333-444444444444"
+          },
+          "data": {
+            "initial_state": {
+              "state": "fresh"
+            },
+            "fault_schedule": {
+              "state": "unavailable",
+              "reason": "not_applicable"
+            }
+          }
+        },
+        {
+          "format": "loka-obs-v1",
+          "event": "trace.command",
+          "store": "game_trace",
+          "ids": {
+            "content_hash": "fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2",
+            "kernel_version": "loka-kernel@175f041c2e3a4b5d6e7f8091a2b3c4d5e6f70812",
+            "seed": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "run_id": "6f6f6f6f-1111-4222-8333-444444444444",
+            "command_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+            "revision": 18
+          },
+          "data": {
+            "ordinal": 1,
+            "command": {
+              "id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+              "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+              "payload": {
+                "type": "move",
+                "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+                "direction": "north"
+              }
+            },
+            "decision": {
+              "kind": "accepted",
+              "outcome": "moved",
+              "delta_digest": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+              "rng": {
+                "state": "unavailable",
+                "reason": "not_collected"
+              },
+              "rng_state": [
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            "commit": {
+              "state": "committed",
+              "revision": 19,
+              "events": [
+                {
+                  "committed_revision": 19,
+                  "event": {
+                    "id": "77777777-8888-8999-8aaa-bbbbbbbbbbbb",
+                    "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+                    "scope": {
+                      "kind": "player",
+                      "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+                    },
+                    "logical_time": 0,
+                    "position": 1,
+                    "causation_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+                    "correlation_id": "99999999-aaaa-4bbb-8ccc-dddddddddddd",
+                    "payload": {
+                      "type": "choice_opened",
+                      "continuation_id": "44444444-5555-8666-8777-888888888888"
+                    }
+                  }
+                }
+              ],
+              "effect_ids": []
+            }
+          }
+        },
+        {
+          "format": "loka-obs-v1",
+          "event": "trace.command",
+          "store": "game_trace",
+          "ids": {
+            "content_hash": "fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2",
+            "kernel_version": "loka-kernel@175f041c2e3a4b5d6e7f8091a2b3c4d5e6f70812",
+            "seed": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "run_id": "6f6f6f6f-1111-4222-8333-444444444444",
+            "command_id": "f6a7b8c9-d0e1-4f2a-8b3c-5d6e7f8a9b0c",
+            "revision": 19
+          },
+          "data": {
+            "ordinal": 2,
+            "command": {
+              "id": "f6a7b8c9-d0e1-4f2a-8b3c-5d6e7f8a9b0c",
+              "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+              "payload": {
+                "type": "move",
+                "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+                "direction": "north"
+              }
+            },
+            "decision": {
+              "kind": "accepted",
+              "outcome": "moved",
+              "delta_digest": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+              "rng": {
+                "state": "observed",
+                "draws": [
+                  {
+                    "bound": 20,
+                    "value": 0
+                  }
+                ]
+              },
+              "rng_state": [
+                7,
+                0,
+                1026,
+                12288
+              ]
+            },
+            "commit": {
+              "state": "failed",
+              "cause": "injected"
+            }
+          }
+        },
+        {
+          "format": "loka-obs-v1",
+          "event": "content.diagnostic",
+          "store": "diagnostics",
+          "ids": {
+            "kernel_version": "loka-kernel@175f041c2e3a4b5d6e7f8091a2b3c4d5e6f70812",
+            "input_digest": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+          },
+          "data": {
+            "severity": "error",
+            "code": "UNRESOLVED_REFERENCE",
+            "path": "quests/missing_child.objectives[2].target",
+            "message_key": "diagnostics.unresolved_reference",
+            "data": {
+              "target": "npcs/old_ferryman"
+            },
+            "suggested_capabilities": []
+          }
+        },
+        {
+          "format": "loka-obs-v1",
+          "event": "simulation.invariant_failed",
+          "store": "diagnostics",
+          "ids": {
+            "content_hash": "fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2",
+            "kernel_version": "loka-kernel@175f041c2e3a4b5d6e7f8091a2b3c4d5e6f70812",
+            "seed": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "run_id": "6f6f6f6f-1111-4222-8333-444444444444",
+            "command_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+            "revision": 7
+          },
+          "data": {
+            "invariant": "one_container_per_item"
+          }
+        },
+        {
+          "format": "loka-obs-v1",
+          "event": "kernel.decision_latency",
+          "store": "operations",
+          "ids": {
+            "kernel_version": "loka-kernel@175f041c2e3a4b5d6e7f8091a2b3c4d5e6f70812",
+            "host": "node",
+            "command_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+            "run_id": "6f6f6f6f-1111-4222-8333-444444444444"
+          },
+          "data": {
+            "state": "observed",
+            "value": 840
+          }
+        },
+        {
+          "format": "loka-obs-v1",
+          "event": "agent.work",
+          "store": "dev_evidence",
+          "ids": {
+            "pull_request": 27
+          },
+          "data": {
+            "role": "reviewer",
+            "model": "fable",
+            "instance": 1,
+            "tokens": {
+              "state": "unknown"
+            },
+            "pr_disposition": "closed"
+          }
+        }
+      ]
+    }
+  }
+}
