@@ -204,3 +204,87 @@ None of these needs an owner decision; the spec already answers them.
 
 F1 and F2 are one-line fixes each; nothing else is open. With them landed this record can
 close at APPROVE.
+
+## PM-requested adjudication of the Astra review (at `9131dbe`)
+
+Astra's cross-vendor review (relayed by the owner) returned CHANGES REQUIRED with A1 as a
+blocker. Dispositions, with the evidence the PM asked for:
+
+**A1 (Astra: blocker) — `job.complete` compares against the advance target, not the visited
+time.** *Disagree that compose is where this is decided; agree there is an unregistered
+obligation, and I correct my own record.* Astra's scenario is real: clock 6, J10 due 10,
+J19 due 19, advance to 20; a reaction running while J10 is visited (time 10) proposes
+`job.complete(J19)`, and both kernels accept because 19 ≤ 20. The frozen shape carries no
+per-op visited time, so compose cannot tell that op from J19's own completion; my earlier
+"equivalent for eligibility" holds only under an obligation I did not state: **`job.complete(J)`
+is proposed by J's own `run_job` root sequence, at J's visited due time, and by nothing else.**
+That is what the frozen description already says ("Consume a due job occurrence when its
+run_job commits", delta.schema.json:375) and what 04 §5.3 means by content not forging
+"engine-owned … completion … evidence"; the composition profile adds "capability emission
+permissions fail closed". Under it, the visited time at the only legal `job.complete(J)` is
+J's due time, `due ≤ visited` is `due ≤ due`, and compose's `due ≤ target` is the remaining
+check: membership in the advance's snapshot ("up to the requested target", §5.4). A reaction
+that wants J19 not to run uses the cancel op §5.4 names ("cancelled, completed or
+rescheduled"), which is not in the shape yet. Sizing the alternatives: a per-op
+`visited_time` is a PR 3 shape change and hands content a field to forge; an extra compose
+input (job → visited time) still trusts the coordinator that supplies it, so it buys nothing
+over the obligation itself. **Smallest change, land now:** one data row in
+`protocol/invariants.json` (for example `job_complete_owned_by_run`, citation 04 §5.4 and
+delta.schema.json `job.complete`, `implemented_in: r5`) so the R5 coordinator slice must
+enforce and test it, plus one sentence in the `job.complete` description ("proposed only by
+the job's own run_job"; a description, not a shape). Astra's requested fixture (an earlier
+job completing a later occurrence must fault) cannot be written against the frozen shape and
+belongs to that R5 invariant. Not a blocker for this PR.
+
+**A2 (should-fix) — `delta_preconditions_hold` checks only the value chain.** *Agree on the
+fact (my N3); defer the extension to the R5 simulator slice, add follow-up.* Its only
+consumer today is the fixture run, where every frozen precondition is already pinned and the
+mutants that weaken them die in both kernels (16 + 13 above). A check that re-implements
+every precondition is a third compose; the harness deliberately trusts fixtures over
+agreement. Do the one-line scope note now; extend the check (revision, offered choice, time
+bounds, legal table, each with a negative observation) in the slice that gives it a consumer.
+
+**A3 (should-fix) — the commit-boundary evidence is a truth table.** *Disagree for this
+slice; defer the stateful model to R6, add follow-up.* Gate R3's clause is about the fixture
+suite; the brief asked for the model to be tiny and in test code. The sequence Astra wants
+("propose E, then a fault or a failed/unknown COMMIT, inspect what escaped, with adoption
+history") is R6's fault simulation on the real local authority with real SQLite faults
+(ROADMAP harness); a stateful fake host now is scaffolding R6 replaces. Agree that
+`fault_discards_whole_proposal` is shape-only until state, receipt, RNG and time exist to
+observe. Follow-up: R6's brief must run `no_proposed_event_escapes` and
+`fault_discards_whole_proposal` against injected failed and unknown commits with observed
+publication and adoption history.
+
+**A4 (should-fix) — TS transfer materializes every containment row without a capacity.**
+*Agree (my N1); fix as: read `cap` first and skip `rows()` when it is undefined,
+`compose.ts:170-174`.* The bounded scan when a capacity exists stays a marked `ponytail:`.
+
+**A5 (should-fix) — `containment_acyclic` is quadratic.** *Agree on the cost; defer to the
+R5 simulator slice, add follow-up, unless the developer is already in the file.* The check
+has no production caller and the simulator's states are Tiny/Medium; the fix is small (a
+"proven acyclic" set makes the walk linear, about four lines per kernel), but its value is
+measurable only when the simulator exists. Do not switch to affected-path validation; that
+changes the invariant's meaning by assuming a valid base.
+
+**AQ1 — budget preflight precedence and pending-prefix semantics.** *Agree; fix as two
+fixture cases (folds F1 in).* No frozen text orders budget faults before op faults (04 §5.2
+step 7 only says all three discard the whole proposal), so the precedence is a determinism
+choice that both kernels make and no fixture pins: add an over-budget delta whose first op
+also fails a precondition, expected `budget_exceeded`. `pending_jobs` is an admission bound
+on the queue ("Admission also bounds pending jobs", §5.4), so the final-queue reading is
+right; pin it with a queue at the limit, one `job.schedule` then one `job.complete`,
+expected changes. That case kills F1's surviving mutant in both kernels. Astra's AQ3 point
+that the at-limit asserts pass on any non-budget fault is fair; the same fixture answers it.
+
+**AQ2 — derivation record for the fixtures.** No separate record exists; the evidence for
+hand derivation is in "Verification" above (op order reversed against ascending expected
+rows; canonical-text row order; stdlib JSON in both tests). Per A1, the fixture
+`job-complete-at-visited-time-inside-advance` (J19 completing at target 19) is J19's own
+completion and stays correct; no expectation needs correction.
+
+**AQ3 — larger differential.** Done in this review (3 × 708 cases: 70-row states, 60-deep
+chains, 40 writer groups, 45-op deltas, exact budget boundaries), byte-identical.
+
+**Verdict unchanged: APPROVE WITH NOTES.** Open before APPROVE: F1/AQ1 (two fixture cases),
+F2 (example edit), A4/N1 (one-line reorder), A1's registry row and description sentence.
+Follow-ups to register for R5 (A2, A5, A1 invariant) and R6 (A3).
