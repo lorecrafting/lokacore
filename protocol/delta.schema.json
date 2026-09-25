@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "StateDelta contracts",
-  "description": "The StateDelta algebra: typed operations, their mutation targets and preconditions (04 §1, §5.1, §5.3; 14 §R3A). Composition behavior (overlay, conflicts, invariants) is implemented in R3 PR 5.",
+  "description": "The StateDelta algebra: typed operations, their mutation targets and preconditions (04 §1, §5.1, §5.3; 14 §R3A). Composition (overlay, conflicts, invariant checks) is kernel behavior with known answers in protocol/fixtures/composition.json.",
   "$defs": {
     "QuestInstanceId": {
       "description": "A QuestInstance (03 §12; 06 §1), created at activation from IdSource. Lowercase hyphenated UUID, any version.",

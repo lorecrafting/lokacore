@@ -108,7 +108,7 @@ Action definitions, ActionInvocation, TargetSpec and TargetResolution (04 §1, �
 - **ActionInputParameter**: An input parameter an action requires (06 §20), one of the ActionInput fields.
 - **ActionInvocation**: A host-neutral gameplay intent from an advertised GameView action; not yet an authoritative Command (04 §1, §2). invocation_id is the stable retry identity (03 §14). target_ids is ordered and its order is semantic (03 §14, invocation-intent digest). view_freshness_token is opaque admission metadata, not intent (04 §16). The 8-target and 128-character caps are admission limits of this contract version (not spec numbers); changing them is a contract version change.
 - **Key**: A stable semantic key: lowercase snake_case of at most 64 characters, the DefinitionRef segment rule (03 §2). Used for action keys, directions, choices, outcomes and key-valued facts.
-- **TargetResolution**: The deterministic result of resolving a target (14 §R3A; 21 §7: none | unique(target) | ambiguous(candidates), no random tie-breaking; 04 §18: ambiguous search returns structured candidates). candidate_ids are 2 to 1024 distinct EntityIds (1024 is the composition profile's selector_cardinality) in ascending code-point order of the id string (PM ruling for this PR; the one place this rule is stated). The subset cannot express order or distinctness, so invariant target_candidates_ordered in protocol/invariants.json carries it.
+- **TargetResolution**: The deterministic result of resolving a target (14 §R3A; 21 §7: none | unique(target) | ambiguous(candidates), no random tie-breaking; 04 §18: ambiguous search returns structured candidates). candidate_ids are 2 to 1024 distinct EntityIds (1024 is the composition profile's selector_cardinality) in ascending code-point order of the id string (owner decision: docs/decisions/owner-decisions-r3-open-questions-2026-09-24.md, item 1). The subset cannot express order or distinctness, so invariant target_candidates_ordered in protocol/invariants.json carries it.
   - `none`: No candidate matched.
   - `unique`: Exactly one candidate.
   - `ambiguous`: Two or more candidates.
@@ -161,7 +161,7 @@ The decision result (04 §5, §5.0, §5.2).
 
 ## StateDelta contracts (`protocol/delta.schema.json`)
 
-The StateDelta algebra: typed operations, their mutation targets and preconditions (04 §1, §5.1, §5.3; 14 §R3A). Composition behavior (overlay, conflicts, invariants) is implemented in R3 PR 5.
+The StateDelta algebra: typed operations, their mutation targets and preconditions (04 §1, §5.1, §5.3; 14 §R3A). Composition (overlay, conflicts, invariant checks) is kernel behavior with known answers in protocol/fixtures/composition.json.
 
 - **ContinuationId**: A pending choice/continuation (04 §5.3 'Choice/continuation resolution'), created from IdSource. Lowercase hyphenated UUID, any version.
 - **DeltaOp**: One registered delta operation (04 §5.3 families). Each description names the op's target and precondition. Resource adjustment arrives with the resource capability.

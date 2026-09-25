@@ -1,6 +1,6 @@
 # Storage lessons
 
-Hard-won lessons for SQLite and persistence, moved verbatim from AGENTS.md. Persistence lessons from R6 onward go here too. For expo-sqlite on the phone, see [mobile lessons](mobile.md).
+Hard-won lessons for SQLite and persistence. Persistence lessons from R6 onward go here too. For expo-sqlite on the phone, see [mobile lessons](mobile.md).
 
 **SQLite fault testing**
 - `PRAGMA max_page_count` clamped to the current page count, then a write that must grow

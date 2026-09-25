@@ -1,6 +1,6 @@
 # Evidence lessons
 
-Hard-won lessons for evidence capture and privacy, moved verbatim from AGENTS.md.
+Hard-won lessons for evidence capture and privacy.
 
 **Evidence and privacy**
 - Retained raw tool output is hashed (`SHA256SUMS` with its verify output beside it,

@@ -180,7 +180,7 @@
       ]
     },
     "TargetResolution": {
-      "description": "The deterministic result of resolving a target (14 §R3A; 21 §7: none | unique(target) | ambiguous(candidates), no random tie-breaking; 04 §18: ambiguous search returns structured candidates). candidate_ids are 2 to 1024 distinct EntityIds (1024 is the composition profile's selector_cardinality) in ascending code-point order of the id string (PM ruling for this PR; the one place this rule is stated). The subset cannot express order or distinctness, so invariant target_candidates_ordered in protocol/invariants.json carries it.",
+      "description": "The deterministic result of resolving a target (14 §R3A; 21 §7: none | unique(target) | ambiguous(candidates), no random tie-breaking; 04 §18: ambiguous search returns structured candidates). candidate_ids are 2 to 1024 distinct EntityIds (1024 is the composition profile's selector_cardinality) in ascending code-point order of the id string (owner decision: docs/decisions/owner-decisions-r3-open-questions-2026-09-24.md, item 1). The subset cannot express order or distinctness, so invariant target_candidates_ordered in protocol/invariants.json carries it.",
       "oneOf": [
         {
           "description": "No candidate matched.",

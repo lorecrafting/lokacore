@@ -1,7 +1,7 @@
 #!/bin/sh
 # The full local check line (AGENTS.md, Checks): everything CI runs except `mix hex.audit`,
 # which needs the network. Toolchain from mise.toml.
-# --no-ts skips the TypeScript checks (pre-push passes it when kernel/ts and mobile/ are unchanged).
+# --no-ts skips the TypeScript checks (pre-push passes it when no TypeScript input changed).
 set -e
 cd "$(dirname "$0")/.."
 export MIX_ENV=test
