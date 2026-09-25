@@ -1,10 +1,10 @@
 # Proposed ADR-074 — TypeScript-first rules until Story runs on a server — 2026-09-24
 
-**Status: proposed, not decided.** Written by the developer agent (Claude Code, Claude
-Opus) at the owner's request after Gate R3; revised after review
-([record](../reviews/2026-09-24-adr-074-ts-first-review.md)). It enters
-[document 16](../spec/16-decision-register.md) only if the owner accepts it and the
-amendments in the appendix are reviewed. No spec text changes here.
+**Status: Accepted by the owner 2026-09-24 ([record](owner-decision-adr-074-2026-09-24.md));
+enters [document 16](../spec/16-decision-register.md) at the next contract amendment.
+Spec amendments per the crosswalk land in a separate reviewed PR.** Written by the
+developer agent (Claude Code, Claude Opus); revised after review
+([record](../reviews/2026-09-24-adr-074-ts-first-review.md)).
 
 ## In plain words
 
@@ -193,6 +193,7 @@ recorded as they are.
 | 09 §10 ("StreamData on Elixir host") | Amend: foundation only; rule properties on TS |
 | 09 §31 metamorphic | Retained, single kernel |
 | 10 (line ~482, "R1 tests dual ... C first") | Note only |
+| Reading aids (R-MILESTONES R1 row, INDEX line 232); 07 §14 line 521 (R1 procedure) | Note only |
 | 14 R5 gate; R9 runner; R10 certification | Amend: "hosts that run the rules" |
 | 14 R14 | Amend: Elixir port and differential before its playthrough gate |
 | 15 DET-02, DET-08, SCR-10 | Amend: TS hosts now; server host at the trigger |
