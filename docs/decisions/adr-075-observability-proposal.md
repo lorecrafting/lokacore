@@ -34,7 +34,7 @@ A new envelope field or meaning takes a new format tag.
 | `game_trace` | one `trace.command` entry per command (§4) | `loka play`, simulator (R5); local authority (R6) | dev and CI: `tmp/obs/game_trace/<run_id>.jsonl` (git-ignored); phone: the app sandbox, placement decided by R6 | dev: until deleted; CI: kept as a workflow artifact when the run fails; phone: bounded, cap decided by R6; certification keeps reproducible traces longer (11 §15, R9) | never (11 §11) |
 | `diagnostics` | things to fix: `content.diagnostic` (08 §6), `simulation.invariant_failed` (09 §2) | `mix loka.compile`, the TypeScript loader via `loka play`, simulator | `tmp/obs/diagnostics/` | as game_trace in CI | no |
 | `operations` | host-dependent measures: `kernel.decision_latency` (11 §13) | `loka play`, simulator (Node); local authority (Hermes) | `tmp/obs/operations/`; phone: the app sandbox | dev: until deleted; R6P timing evidence is captured under the [evidence lessons](../lessons/evidence.md) | no |
-| `dev_evidence` | `agent.work`: tokens and outcome per agent per pull request | the PM, when a pull request merges or closes | committed, `docs/dev-evidence.jsonl`, appended by the PM | kept (it feeds the roadmap re-estimates) | not applicable (in the repository) |
+| `dev_evidence` | `agent.work`: tokens and outcome per agent per pull request | the PM, when a pull request merges or closes: one record per role per pull request, summing that role's rounds; the check that validates the file rejects a repeated (pull_request, role) | committed, `docs/dev-evidence.jsonl`, appended by the PM | kept (it feeds the roadmap re-estimates) | not applicable (in the repository) |
 
 Stores are separate because their rules differ: a game trace must be host-independent and
 stay on the phone; operations are host-dependent by nature; dev evidence is about the
@@ -54,7 +54,7 @@ may appear at all:
 |---|---|---|---|
 | ReplayIds | `trace.command`, `simulation.invariant_failed` | content_hash, kernel_version, seed, run_id, command_id, revision | none |
 | BuildIds | `content.diagnostic` | kernel_version | content_hash (absent when compiling failed before hashing) |
-| HostIds | `kernel.decision_latency` | kernel_version, host | run_id, command_id |
+| HostIds | `kernel.decision_latency` | kernel_version, host, run_id, command_id | none |
 | WorkIds | `agent.work` | pull_request | none |
 
 **Kernel version.** `<KERNEL_ID>@<full git commit>`, for example
@@ -84,7 +84,10 @@ run start from a save) and fault schedule (R6 fault simulation) are added by tho
 decision: accepted (typed outcome, state delta digest, RNG draws), rejected (its
 GameError) or fault (its ErrorCode); and the commit outcome: committed (revision after,
 committed events, effect ids), failed, unknown, or unavailable (nothing committed). It
-records rejected decisions and failed commits as well as successes.
+records rejected decisions and failed commits as well as successes. Which decision and
+commit pairs are possible (a fault commits nothing; an accepted decision is committed,
+failed or unknown) crosses fields the schema subset cannot relate, so each producer's
+tests check it (§7).
 
 - **Derived, never authority.** Nothing reads a trace to decide game state, to repair a
   save or to accept a fix. A fix is proven by deterministic replay (09 §2): the seed or
@@ -106,7 +109,8 @@ records rejected decisions and failed commits as well as successes.
 A measure is a `Measure`: observed with a value, `unknown` (it applies but could not be
 observed), or `unavailable` with a cause (`not_applicable`, `not_collected`). The commit
 outcome and the RNG draws use the same unknown and unavailable branches. Unknown is never
-0, and unavailable is never empty or absent: the schema rejects a bare number, an
+0, and unavailable is never empty or absent (an optional id is different: it is absent only when
+the thing does not exist, such as the hash of a compile that failed): the schema rejects a bare number, an
 `unknown` carrying a value, and an `unavailable` without its cause.
 
 ## 6. Redaction

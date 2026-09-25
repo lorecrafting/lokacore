@@ -238,7 +238,7 @@
       ]
     },
     "HostIds": {
-      "description": "The correlation ids of an operations record: the code revision and the host kind, and where the measure belongs to one, the run and command it joins (the trace carries the rest).",
+      "description": "The correlation ids of an operations record: the code revision, the host kind, and the run and command the measure joins (the trace carries the rest).",
       "type": "object",
       "properties": {
         "kernel_version": {
@@ -256,7 +256,9 @@
       },
       "required": [
         "kernel_version",
-        "host"
+        "host",
+        "run_id",
+        "command_id"
       ],
       "additionalProperties": false,
       "examples": [
@@ -941,7 +943,8 @@
           "ids": {
             "kernel_version": "loka-kernel@175f041c2e3a4b5d6e7f8091a2b3c4d5e6f70812",
             "host": "node",
-            "command_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b"
+            "command_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+            "run_id": "6f6f6f6f-1111-4222-8333-444444444444"
           },
           "data": {
             "state": "observed",

@@ -334,7 +334,7 @@ The one observation record format, its stores and correlation ids, and the game-
   - `unavailable`
 - **EventName**: An event or metric name (11 §12): two or three lowercase snake_case segments joined by dots, area first. The registered names are protocol/event_registry.json, which must equal the ObservationRecord branches.
 - **EventRegistryEntry**: One entry of protocol/event_registry.json: a name, its store, whether it is an event or a metric (a metric's data is a Measure; the description gives its unit), and a description citing the spec and naming its producers.
-- **HostIds**: The correlation ids of an operations record: the code revision and the host kind, and where the measure belongs to one, the run and command it joins (the trace carries the rest).
+- **HostIds**: The correlation ids of an operations record: the code revision, the host kind, and the run and command the measure joins (the trace carries the rest).
 - **HostKind**: Which host ran the code: a kind, never a device identity (AGENTS.md: no serials, UDIDs or device names).
 - **InvariantFailure**: A registered invariant (protocol/invariants.json id) that failed after the command in ids (09 §2 expected and observed invariant: the invariant is the expectation; the record is the observed failure).
 - **KernelVersion**: The Loka code revision that produced a record (11 §11 kernel version; 09 §2 engine/kernel revision): the kernel id (kernel/ts/src/index.ts KERNEL_ID), @, and the full git commit of the build. Kernel, compiler and hosts build from one commit. How a build learns its commit is R5's.
