@@ -54,7 +54,7 @@ defmodule Loka.Content.Checks do
   """
   @spec check(map() | nil, map(), [map()]) :: [map()]
   def check(manifest, defs, registry) do
-    all = for {_, ds} <- defs, {_, {_, _, _} = d} <- ds, do: d
+    all = for {_, ds} <- defs, is_map(ds), {_, {_, _, _} = d} <- ds, do: d
 
     Enum.flat_map(all, &depth/1) ++
       if(manifest, do: uses(manifest, defs, owners(registry)), else: [])
@@ -138,27 +138,42 @@ defmodule Loka.Content.Checks do
 
   defp reference(rel, steps, field, n, m, defs) do
     ref = n[field]
-    target = defs[ref["kind"]][ref["key"]]
-    # Each ref field is named after the kind it must name (fact, item, quest).
-    local? =
-      ref["cartridge_id"] == m["id"] and ref["cartridge_version"] == m["version"] and
-        ref["kind"] == field
 
-    cond do
-      not local? or target == nil ->
+    case resolve(ref, field, m, defs) do
+      :unresolved ->
         s = "#{ref["cartridge_id"]}@#{ref["cartridge_version"]}:#{ref["kind"]}/#{ref["key"]}"
         [diag("UNRESOLVED_REFERENCE", at(rel, steps ++ [field]), %{"target" => s})]
 
-      target == :invalid ->
-        []
+      {_, _, %{"value_type" => t}} ->
+        if typed?(n["equals"], t),
+          do: [],
+          else: [diag("FACT_TYPE_MISMATCH", at(rel, steps ++ ["equals"]))]
 
-      field == "fact" and not typed?(n["equals"], elem(target, 2)["value_type"]) ->
-        [diag("FACT_TYPE_MISMATCH", at(rel, steps ++ ["equals"]))]
-
-      true ->
+      _ ->
         []
     end
   end
+
+  # A ref names this cartridge and the kind its field is named after (fact, item, quest).
+  # An :invalid definition or an :unknown namespace (rejected facts.json) counts as
+  # resolved: the real error is already reported there.
+  defp resolve(
+         %{"cartridge_id" => id, "cartridge_version" => v, "kind" => k, "key" => key},
+         k,
+         %{
+           "id" => id,
+           "version" => v
+         },
+         defs
+       ) do
+    case defs[k] do
+      %{^key => target} -> target
+      :unknown -> :unknown
+      _ -> :unresolved
+    end
+  end
+
+  defp resolve(_, _, _, _), do: :unresolved
 
   defp typed?(v, %{"type" => "bool"}), do: is_boolean(v)
   defp typed?(v, %{"type" => "enum", "values" => vs}), do: v in vs

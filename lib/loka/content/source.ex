@@ -13,7 +13,8 @@ defmodule Loka.Content.Source do
   @doc """
   Every `.json` regular file under `dir` (dot files included) as `{relative path, kind,
   decoded value}`, plus the INVALID_JSON, DUPLICATE_KEY and UNKNOWN_FIELD diagnostics.
-  Files that fail to decode or sit in an unrecognised place are left out.
+  A recognised file that fails to decode has the value `:invalid` (present, not absent);
+  a file in an unrecognised place is left out.
   """
   @spec load(Path.t()) :: {[{String.t(), file(), term()}], [map()]}
   def load(dir) do
@@ -23,25 +24,26 @@ defmodule Loka.Content.Source do
       |> Path.join("**/*.json")
       |> Path.wildcard(match_dot: true)
       |> Enum.filter(&File.regular?/1)
-      |> Enum.map(&Path.relative_to(&1, dir))
-      |> Enum.map(&entry(&1, classify(&1), dir))
+      |> Enum.map(&entry(Path.relative_to(&1, dir), dir))
 
-    {for({:ok, file} <- entries, do: file), for({:error, ds} <- entries, d <- ds, do: d)}
+    {for({file, _} <- entries, file != nil, do: file), for({_, ds} <- entries, d <- ds, do: d)}
   end
 
-  defp entry(rel, :unknown, _), do: {:error, [diag("UNKNOWN_FIELD", at(rel, []))]}
+  defp entry(rel, dir), do: entry(rel, classify(rel), dir)
+
+  defp entry(rel, :unknown, _), do: {nil, [diag("UNKNOWN_FIELD", at(rel, []))]}
 
   defp entry(rel, kind, dir) do
     case JSON.decode(File.read!(Path.join(dir, rel)), [], object_finish: &finish/2) do
       {value, [], ""} -> checked(rel, kind, value)
-      _ -> {:error, [diag("INVALID_JSON", at(rel, []))]}
+      _ -> {{rel, kind, :invalid}, [diag("INVALID_JSON", at(rel, []))]}
     end
   end
 
   defp checked(rel, kind, value) do
     case duplicates(value, []) do
-      [] -> {:ok, {rel, kind, value}}
-      dups -> {:error, Enum.map(dups, &diag("DUPLICATE_KEY", at(rel, &1)))}
+      [] -> {{rel, kind, value}, []}
+      dups -> {{rel, kind, :invalid}, Enum.map(dups, &diag("DUPLICATE_KEY", at(rel, &1)))}
     end
   end
 

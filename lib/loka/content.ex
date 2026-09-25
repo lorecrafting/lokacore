@@ -44,11 +44,7 @@ defmodule Loka.Content do
   end
 
   defp compiled(files, diags, registry) do
-    case {Compiler.compile(files, registry), diags} do
-      {{:ok, cartridge}, []} -> {:ok, cartridge}
-      {{:ok, _}, ds} -> {:error, sorted(ds)}
-      {{:error, more}, ds} -> {:error, sorted(ds ++ more)}
-    end
+    with {:error, ds} <- Compiler.compile(files, diags, registry), do: {:error, sorted(ds)}
   end
 
   defp too_large(bytes, max) do

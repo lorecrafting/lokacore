@@ -9,6 +9,8 @@ defmodule Mix.Tasks.Loka.Compile do
 
   @impl Mix.Task
   def run([dir, out]) do
+    if !File.dir?(dir), do: Mix.raise("mix loka.compile: #{dir} is not a directory")
+
     case Loka.Content.compile(dir) do
       {:ok, bytes} ->
         File.write!(out, bytes)

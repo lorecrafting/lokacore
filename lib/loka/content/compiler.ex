@@ -15,13 +15,17 @@ defmodule Loka.Content.Compiler do
     "additionalProperties" => false
   }
 
-  @doc "The CompiledCartridge for the loaded files, or its diagnostics (unsorted)."
-  @spec compile([{String.t(), term(), term()}], [map()]) :: {:ok, map()} | {:error, [map()]}
-  def compile(files, registry) do
+  @doc """
+  The CompiledCartridge for the loaded files, or all diagnostics (unsorted), `loaded` (the
+  load diagnostics) included.
+  """
+  @spec compile([{String.t(), term(), term()}], [map()], [map()]) ::
+          {:ok, map()} | {:error, [map()]}
+  def compile(files, loaded, registry) do
     {manifest, d1} = manifest(of(files, :manifest), registry)
     {defs, d2} = definitions(files)
 
-    case d1 ++ d2 ++ Checks.check(manifest, defs, registry) do
+    case loaded ++ d1 ++ d2 ++ Checks.check(manifest, defs, registry) do
       [] -> {:ok, cartridge(manifest, defs)}
       diags -> {:error, diags}
     end
@@ -30,6 +34,7 @@ defmodule Loka.Content.Compiler do
   defp of(files, kind), do: for({rel, ^kind, v} <- files, do: {rel, v})
 
   defp manifest([], _), do: {nil, [diag("MISSING_MANIFEST", "cartridge")]}
+  defp manifest([{_, :invalid}], _), do: {nil, []}
 
   defp manifest([{rel, m}], registry) do
     case validated(rel, [], "CartridgeManifest", m) do
@@ -59,7 +64,10 @@ defmodule Loka.Content.Compiler do
   end
 
   # facts.json: {"facts": {authored name: FactSpec without key}}; each . in a name becomes _.
+  # A present but rejected facts.json leaves the fact namespace :unknown, so fact
+  # references are not resolved against it.
   defp facts([]), do: {%{}, []}
+  defp facts([{_, :invalid}]), do: {:unknown, []}
 
   defp facts([{rel, file}]) do
     case validated(
@@ -70,7 +78,7 @@ defmodule Loka.Content.Compiler do
            Map.put(Contracts.defs(), "FactsFile", @facts_file)
          ) do
       [] -> named_facts(rel, file["facts"])
-      diags -> {%{}, diags}
+      diags -> {:unknown, diags}
     end
   end
 
@@ -106,6 +114,8 @@ defmodule Loka.Content.Compiler do
   end
 
   # The key comes from the file stem or fact name, so an authored key is UNKNOWN_FIELD.
+  defp definition(_, _, _, :invalid, _), do: {:error, []}
+
   defp definition(rel, steps, key, value, contract) do
     keyed = if contract == "VersionedPolicy", do: value, else: with_key(value, key)
 

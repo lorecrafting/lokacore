@@ -136,6 +136,13 @@ defmodule Loka.ContentTest do
 
       assert errors(tmp, %{"actions/talk.json" => {:raw, text}}) ==
                [d("DUPLICATE_KEY", "actions/talk.target.kind")]
+
+      root = %{"op" => "all", "items" => [@present]}
+      talk = JSON.encode!(%{@talk | "policy" => policy(root)})
+      text = String.replace(talk, ~s("op":"target_present"), ~s("op":"target_present","op":"x"))
+
+      assert errors(tmp, %{"actions/talk.json" => {:raw, text}}) ==
+               [d("DUPLICATE_KEY", "actions/talk.policy.root.items[0].op")]
     end
 
     test "UNKNOWN_FIELD: stray .json files (dot directories too), an authored key, an unregistered field",
@@ -177,8 +184,32 @@ defmodule Loka.ContentTest do
                [d("SCHEMA_VIOLATION", ~s(facts.facts["#{long}"]), %{"error" => "too_long"})]
     end
 
-    test "MISSING_MANIFEST", %{tmp_dir: tmp} do
+    test "MISSING_MANIFEST only when cartridge.json is absent", %{tmp_dir: tmp} do
       assert errors(tmp, %{"cartridge.json" => nil}) == [d("MISSING_MANIFEST", "cartridge")]
+      assert errors(tmp, %{"cartridge.json" => {:raw, "{"}}) == [d("INVALID_JSON", "cartridge")]
+    end
+
+    # Break: a rejected facts.json reads as "no facts", so every fact reference cascades.
+    test "a rejected facts.json reports only itself, not the fact references",
+         %{tmp_dir: tmp} do
+      compare = %{"op" => "fact_compare", "fact" => ref("fact", "a_b"), "equals" => true}
+      other = %{compare | "fact" => ref("fact", "a_b", "2.0.0")}
+      facts = %{"facts" => %{"a.b" => @fact}, "api_version" => "loka/v3"}
+
+      assert errors(tmp, %{
+               "facts.json" => facts,
+               "policies/p.json" => policy(compare),
+               "policies/q.json" => policy(other)
+             }) == [
+               d("UNKNOWN_FIELD", "facts.api_version"),
+               d("UNRESOLVED_REFERENCE", "policies/q.root.fact", %{"target" => "c@2.0.0:fact/a_b"})
+             ]
+
+      assert errors(Path.join(tmp, "bad"), %{
+               "facts.json" => {:raw, "{"},
+               "policies/p.json" => policy(compare)
+             }) ==
+               [d("INVALID_JSON", "facts")]
     end
 
     test "FACT_NAME_COLLISION at every name mapping to one key", %{tmp_dir: tmp} do
@@ -211,7 +242,7 @@ defmodule Loka.ContentTest do
           %{"op" => "fact_compare", "fact" => ref("fact", "missing"), "equals" => true},
           %{"op" => "fact_compare", "fact" => ref("fact", "a_b", "2.0.0"), "equals" => true},
           %{"op" => "fact_compare", "fact" => ref("fact", "a_b"), "equals" => true},
-          %{"op" => "fact_compare", "fact" => ref("action", "talk"), "equals" => true},
+          %{"op" => "fact_compare", "fact" => ref("action", "a_b"), "equals" => true},
           %{"op" => "has_item", "item" => ref("fact", "a_b")}
         ]
       }
@@ -234,7 +265,7 @@ defmodule Loka.ContentTest do
                  "target" => "c@2.0.0:fact/a_b"
                }),
                d("UNRESOLVED_REFERENCE", "policies/p.root.items[3].fact", %{
-                 "target" => "c@1.0.0:action/talk"
+                 "target" => "c@1.0.0:action/a_b"
                }),
                d("UNRESOLVED_REFERENCE", "policies/p.root.items[4].item", %{
                  "target" => "c@1.0.0:fact/a_b"
@@ -400,6 +431,10 @@ defmodule Loka.ContentTest do
     end)
 
     refute File.exists?(missing)
+
+    assert_raise Mix.Error, ~r/not a directory/, fn ->
+      Mix.Tasks.Loka.Compile.run([Path.join(tmp, "typo"), missing])
+    end
   end
 
   # Break: sorting by file, by code first, or not at all.
