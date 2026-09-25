@@ -11,6 +11,9 @@ defmodule Loka.Core.Canonical do
 
   @type value :: nil | boolean() | integer() | binary() | [value()] | %{binary() => value()}
 
+  @doc "An integer in the profile's safe range, [-(2^53 - 1), 2^53 - 1]."
+  defguard is_safe_integer(n) when is_integer(n) and abs(n) <= @safe
+
   @doc """
   Parses JSON text. Rejects duplicate or non-ASCII keys, fractions, exponents, NaN and
   Infinity, integers outside the safe range, lone surrogates, invalid UTF-8, nesting deeper
@@ -152,7 +155,7 @@ defmodule Loka.Core.Canonical do
       end
 
     n = if byte_size(digits) <= 16, do: sign * String.to_integer(digits), else: throw(:invalid)
-    if abs(n) > @safe, do: throw(:invalid), else: {n, rest}
+    if is_safe_integer(n), do: {n, rest}, else: throw(:invalid)
   end
 
   defp digits(<<c, rest::binary>>, all, n) when c in ?0..?9, do: digits(rest, all, n + 1)
@@ -163,7 +166,7 @@ defmodule Loka.Core.Canonical do
   defp enc(nil, _), do: "null"
   defp enc(true, _), do: "true"
   defp enc(false, _), do: "false"
-  defp enc(n, _) when is_integer(n) and abs(n) <= @safe, do: Integer.to_string(n)
+  defp enc(n, _) when is_safe_integer(n), do: Integer.to_string(n)
 
   defp enc(s, _) when is_binary(s) do
     if String.valid?(s), do: [?", esc(s, s, 0, []), ?"], else: throw(:invalid)
