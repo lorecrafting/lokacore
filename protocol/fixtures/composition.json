@@ -1,0 +1,4135 @@
+{
+  "description": "Known answers for StateDelta composition (04 §5.1-§5.4), the commit boundary (04 §5.1, 03 §15) and the r3_pr5 invariant checks. Expected values are hand-written. States: facts and fact_defaults are row lists here; the test harness indexes them by canonical text (lib/loka/core/compose.ex).",
+  "states": {
+    "base": {
+      "clock": 6,
+      "facts": [
+        {
+          "target": {
+            "kind": "fact",
+            "fact": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "fact",
+              "key": "plan"
+            },
+            "scope": {
+              "kind": "player",
+              "character_id": "a0000000-0000-4000-8000-000000000000"
+            }
+          },
+          "value": "undecided"
+        }
+      ],
+      "fact_defaults": [
+        {
+          "fact": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "fact",
+            "key": "trust"
+          },
+          "value": "neutral"
+        }
+      ],
+      "containers": {
+        "20000000-0000-4000-8000-000000000000": "10000000-0000-4000-8000-000000000000",
+        "30000000-0000-4000-8000-000000000000": "20000000-0000-4000-8000-000000000000",
+        "40000000-0000-4000-8000-000000000000": "20000000-0000-4000-8000-000000000000",
+        "50000000-0000-4000-8000-000000000000": "10000000-0000-4000-8000-000000000000"
+      },
+      "capacities": {
+        "30000000-0000-4000-8000-000000000000": 1
+      },
+      "quests": {
+        "b1000000-0000-4000-8000-000000000000": {
+          "quest": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "state": "active"
+        },
+        "b3000000-0000-4000-8000-000000000000": {
+          "quest": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "bell"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "state": "failed",
+          "outcome": "lost"
+        }
+      },
+      "choices": {
+        "c1000000-0000-4000-8000-000000000000": {
+          "actor_id": "a0000000-0000-4000-8000-000000000000",
+          "source": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find"
+          },
+          "beat": "at_the_ford",
+          "roles": [],
+          "choice_ids": [
+            "carry",
+            "leave"
+          ],
+          "status": "pending",
+          "opened_revision": 3
+        },
+        "c2000000-0000-4000-8000-000000000000": {
+          "actor_id": "a0000000-0000-4000-8000-000000000000",
+          "source": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find"
+          },
+          "beat": "at_the_ford",
+          "roles": [],
+          "choice_ids": [
+            "carry",
+            "leave"
+          ],
+          "status": "closed",
+          "opened_revision": 1
+        }
+      },
+      "jobs": {
+        "d1000000-0000-4000-8000-000000000000": {
+          "job": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "schedule",
+            "key": "bram"
+          },
+          "due_time": 19,
+          "status": "pending"
+        },
+        "d3000000-0000-4000-8000-000000000000": {
+          "job": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "schedule",
+            "key": "bram"
+          },
+          "due_time": 3,
+          "status": "completed"
+        }
+      }
+    },
+    "crowd": {
+      "clock": 0,
+      "containers": {
+        "e0000000-0000-4000-8000-000000000001": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000002": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000003": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000004": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000005": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000006": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000007": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000008": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000009": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000010": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000011": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000012": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000013": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000014": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000015": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000016": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000017": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000018": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000019": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000020": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000021": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000022": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000023": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000024": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000025": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000026": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000027": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000028": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000029": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000030": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000031": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000032": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000033": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000034": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000035": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000036": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000037": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000038": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000039": "10000000-0000-4000-8000-000000000000",
+        "e0000000-0000-4000-8000-000000000040": "10000000-0000-4000-8000-000000000000"
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "empty-delta",
+      "state": "base",
+      "ops": [],
+      "expected": {
+        "changes": []
+      }
+    },
+    {
+      "id": "explicit-sequence-across-kinds",
+      "state": "base",
+      "ops": [
+        {
+          "op": "fact.assign",
+          "writer_group": 0,
+          "fact": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "fact",
+            "key": "plan"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "expected": "undecided",
+          "value": "player_led"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "40000000-0000-4000-8000-000000000000",
+          "source_id": "20000000-0000-4000-8000-000000000000",
+          "destination_id": "30000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "quest.transition",
+          "writer_group": 0,
+          "instance_id": "b1000000-0000-4000-8000-000000000000",
+          "from": "active",
+          "to": "objectives_complete"
+        },
+        {
+          "op": "choice.resolve",
+          "writer_group": 0,
+          "continuation_id": "c1000000-0000-4000-8000-000000000000",
+          "choice_id": "carry",
+          "expected_revision": 3
+        },
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "d2000000-0000-4000-8000-000000000000",
+          "job": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "schedule",
+            "key": "bram"
+          },
+          "due_time": 20
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "choice",
+              "continuation_id": "c1000000-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "actor_id": "a0000000-0000-4000-8000-000000000000",
+              "source": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "find"
+              },
+              "beat": "at_the_ford",
+              "roles": [],
+              "choice_ids": [
+                "carry",
+                "leave"
+              ],
+              "status": "resolved",
+              "opened_revision": 3,
+              "choice_id": "carry"
+            }
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "40000000-0000-4000-8000-000000000000"
+            },
+            "value": "30000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "fact",
+              "fact": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "fact",
+                "key": "plan"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              }
+            },
+            "value": "player_led"
+          },
+          {
+            "target": {
+              "kind": "quest",
+              "instance_id": "b1000000-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "quest": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "find"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "state": "objectives_complete"
+            }
+          },
+          {
+            "target": {
+              "kind": "job",
+              "job_id": "d2000000-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "job": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "schedule",
+                "key": "bram"
+              },
+              "due_time": 20,
+              "status": "pending"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "same-group-successive-fact-transitions",
+      "state": "base",
+      "ops": [
+        {
+          "op": "fact.assign",
+          "writer_group": 0,
+          "fact": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "fact",
+            "key": "plan"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "expected": "undecided",
+          "value": "player_led"
+        },
+        {
+          "op": "fact.assign",
+          "writer_group": 0,
+          "fact": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "fact",
+            "key": "plan"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "expected": "player_led",
+          "value": "party_led"
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "fact",
+              "fact": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "fact",
+                "key": "plan"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              }
+            },
+            "value": "party_led"
+          }
+        ]
+      }
+    },
+    {
+      "id": "same-group-quest-chain",
+      "state": "base",
+      "ops": [
+        {
+          "op": "quest.transition",
+          "writer_group": 0,
+          "instance_id": "b1000000-0000-4000-8000-000000000000",
+          "from": "active",
+          "to": "objectives_complete"
+        },
+        {
+          "op": "quest.transition",
+          "writer_group": 0,
+          "instance_id": "b1000000-0000-4000-8000-000000000000",
+          "from": "objectives_complete",
+          "to": "resolved",
+          "outcome": "carry"
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "quest",
+              "instance_id": "b1000000-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "quest": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "find"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "state": "resolved",
+              "outcome": "carry"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "same-group-clock-chain",
+      "state": "base",
+      "ops": [
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 6,
+          "to": 10
+        },
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 10,
+          "to": 19
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "clock"
+            },
+            "value": 19
+          }
+        ]
+      }
+    },
+    {
+      "id": "conflict-fact-opposite-groups",
+      "state": "base",
+      "ops": [
+        {
+          "op": "fact.assign",
+          "writer_group": 0,
+          "fact": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "fact",
+            "key": "plan"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "expected": "undecided",
+          "value": "player_led"
+        },
+        {
+          "op": "fact.assign",
+          "writer_group": 1,
+          "fact": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "fact",
+            "key": "plan"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "expected": "player_led",
+          "value": "party_led"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "conflicting_write",
+          "target": {
+            "kind": "fact",
+            "fact": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "fact",
+              "key": "plan"
+            },
+            "scope": {
+              "kind": "player",
+              "character_id": "a0000000-0000-4000-8000-000000000000"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "conflict-fact-identical-groups-before-precondition",
+      "state": "base",
+      "ops": [
+        {
+          "op": "fact.assign",
+          "writer_group": 0,
+          "fact": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "fact",
+            "key": "plan"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "expected": "undecided",
+          "value": "player_led"
+        },
+        {
+          "op": "fact.assign",
+          "writer_group": 1,
+          "fact": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "fact",
+            "key": "plan"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "expected": "undecided",
+          "value": "player_led"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "conflicting_write",
+          "target": {
+            "kind": "fact",
+            "fact": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "fact",
+              "key": "plan"
+            },
+            "scope": {
+              "kind": "player",
+              "character_id": "a0000000-0000-4000-8000-000000000000"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "conflict-transfer-two-destinations",
+      "state": "base",
+      "ops": [
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "40000000-0000-4000-8000-000000000000",
+          "source_id": "20000000-0000-4000-8000-000000000000",
+          "destination_id": "30000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 1,
+          "entity_id": "40000000-0000-4000-8000-000000000000",
+          "source_id": "30000000-0000-4000-8000-000000000000",
+          "destination_id": "10000000-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "conflicting_write",
+          "target": {
+            "kind": "containment",
+            "entity_id": "40000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "conflict-quest-two-next-states",
+      "state": "base",
+      "ops": [
+        {
+          "op": "quest.transition",
+          "writer_group": 0,
+          "instance_id": "b1000000-0000-4000-8000-000000000000",
+          "from": "active",
+          "to": "objectives_complete"
+        },
+        {
+          "op": "quest.transition",
+          "writer_group": 1,
+          "instance_id": "b1000000-0000-4000-8000-000000000000",
+          "from": "objectives_complete",
+          "to": "failed"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "conflicting_write",
+          "target": {
+            "kind": "quest",
+            "instance_id": "b1000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "conflict-choice-resolve-close",
+      "state": "base",
+      "ops": [
+        {
+          "op": "choice.resolve",
+          "writer_group": 0,
+          "continuation_id": "c1000000-0000-4000-8000-000000000000",
+          "choice_id": "carry",
+          "expected_revision": 3
+        },
+        {
+          "op": "choice.close",
+          "writer_group": 1,
+          "continuation_id": "c1000000-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "conflicting_write",
+          "target": {
+            "kind": "choice",
+            "continuation_id": "c1000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "conflict-job-schedule-complete",
+      "state": "base",
+      "ops": [
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "d2000000-0000-4000-8000-000000000000",
+          "job": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "schedule",
+            "key": "bram"
+          },
+          "due_time": 20
+        },
+        {
+          "op": "job.complete",
+          "writer_group": 1,
+          "job_id": "d2000000-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "conflicting_write",
+          "target": {
+            "kind": "job",
+            "job_id": "d2000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "conflict-clock-two-advances",
+      "state": "base",
+      "ops": [
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 6,
+          "to": 10
+        },
+        {
+          "op": "time.advance",
+          "writer_group": 1,
+          "from": 10,
+          "to": 19
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "conflicting_write",
+          "target": {
+            "kind": "clock"
+          }
+        }
+      }
+    },
+    {
+      "id": "disjoint-targets-different-groups",
+      "state": "base",
+      "ops": [
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "40000000-0000-4000-8000-000000000000",
+          "source_id": "20000000-0000-4000-8000-000000000000",
+          "destination_id": "10000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 1,
+          "entity_id": "50000000-0000-4000-8000-000000000000",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "40000000-0000-4000-8000-000000000000"
+            },
+            "value": "10000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "50000000-0000-4000-8000-000000000000"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fact-subject-is-part-of-target",
+      "state": "base",
+      "ops": [
+        {
+          "op": "fact.assign",
+          "writer_group": 0,
+          "fact": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "fact",
+            "key": "trust"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "expected": "neutral",
+          "value": "wary",
+          "subject_id": "50000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "fact.assign",
+          "writer_group": 1,
+          "fact": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "fact",
+            "key": "trust"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "expected": "neutral",
+          "value": "wary"
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "fact",
+              "fact": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "fact",
+                "key": "trust"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "subject_id": "50000000-0000-4000-8000-000000000000"
+            },
+            "value": "wary"
+          },
+          {
+            "target": {
+              "kind": "fact",
+              "fact": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "fact",
+                "key": "trust"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              }
+            },
+            "value": "wary"
+          }
+        ]
+      }
+    },
+    {
+      "id": "capacity-across-groups",
+      "state": "base",
+      "ops": [
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "40000000-0000-4000-8000-000000000000",
+          "source_id": "20000000-0000-4000-8000-000000000000",
+          "destination_id": "30000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 1,
+          "entity_id": "50000000-0000-4000-8000-000000000000",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "30000000-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "capacity_exceeded",
+          "target": {
+            "kind": "containment",
+            "entity_id": "50000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "capacity-all-or-nothing",
+      "state": "base",
+      "ops": [
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "40000000-0000-4000-8000-000000000000",
+          "source_id": "20000000-0000-4000-8000-000000000000",
+          "destination_id": "30000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "50000000-0000-4000-8000-000000000000",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "30000000-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "capacity_exceeded",
+          "target": {
+            "kind": "containment",
+            "entity_id": "50000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "capacity-freed-in-overlay",
+      "state": "base",
+      "ops": [
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "40000000-0000-4000-8000-000000000000",
+          "source_id": "20000000-0000-4000-8000-000000000000",
+          "destination_id": "30000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "40000000-0000-4000-8000-000000000000",
+          "source_id": "30000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "50000000-0000-4000-8000-000000000000",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "30000000-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "40000000-0000-4000-8000-000000000000"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "50000000-0000-4000-8000-000000000000"
+            },
+            "value": "30000000-0000-4000-8000-000000000000"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fact-stale-expected",
+      "state": "base",
+      "ops": [
+        {
+          "op": "fact.assign",
+          "writer_group": 0,
+          "fact": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "fact",
+            "key": "plan"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "expected": "player_led",
+          "value": "party_led"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "fact",
+            "fact": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "fact",
+              "key": "plan"
+            },
+            "scope": {
+              "kind": "player",
+              "character_id": "a0000000-0000-4000-8000-000000000000"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "fact-default-when-unset",
+      "state": "base",
+      "ops": [
+        {
+          "op": "fact.assign",
+          "writer_group": 0,
+          "fact": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "fact",
+            "key": "trust"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "expected": "neutral",
+          "value": "wary"
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "fact",
+              "fact": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "fact",
+                "key": "trust"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              }
+            },
+            "value": "wary"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fact-default-mismatch",
+      "state": "base",
+      "ops": [
+        {
+          "op": "fact.assign",
+          "writer_group": 0,
+          "fact": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "fact",
+            "key": "trust"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "expected": "wary",
+          "value": "friendly"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "fact",
+            "fact": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "fact",
+              "key": "trust"
+            },
+            "scope": {
+              "kind": "player",
+              "character_id": "a0000000-0000-4000-8000-000000000000"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "fact-unset-without-default",
+      "state": "base",
+      "ops": [
+        {
+          "op": "fact.assign",
+          "writer_group": 0,
+          "fact": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "fact",
+            "key": "mood"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "expected": "calm",
+          "value": "angry"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "fact",
+            "fact": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "fact",
+              "key": "mood"
+            },
+            "scope": {
+              "kind": "player",
+              "character_id": "a0000000-0000-4000-8000-000000000000"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "transfer-wrong-source",
+      "state": "base",
+      "ops": [
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "40000000-0000-4000-8000-000000000000",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "containment",
+            "entity_id": "40000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "transfer-into-itself",
+      "state": "base",
+      "ops": [
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "30000000-0000-4000-8000-000000000000",
+          "source_id": "20000000-0000-4000-8000-000000000000",
+          "destination_id": "30000000-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "containment_cycle",
+          "target": {
+            "kind": "containment",
+            "entity_id": "30000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "transfer-into-descendant",
+      "state": "base",
+      "ops": [
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "20000000-0000-4000-8000-000000000000",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "40000000-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "containment_cycle",
+          "target": {
+            "kind": "containment",
+            "entity_id": "20000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "transfer-into-descendant-via-overlay",
+      "state": "base",
+      "ops": [
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "40000000-0000-4000-8000-000000000000",
+          "source_id": "20000000-0000-4000-8000-000000000000",
+          "destination_id": "30000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "30000000-0000-4000-8000-000000000000",
+          "source_id": "20000000-0000-4000-8000-000000000000",
+          "destination_id": "40000000-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "containment_cycle",
+          "target": {
+            "kind": "containment",
+            "entity_id": "30000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "quest-activate",
+      "state": "base",
+      "ops": [
+        {
+          "op": "quest.activate",
+          "writer_group": 0,
+          "quest": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "bell"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "instance_id": "b2000000-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "quest",
+              "instance_id": "b2000000-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "quest": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "bell"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "state": "active"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "quest-activate-while-open-in-scope",
+      "state": "base",
+      "ops": [
+        {
+          "op": "quest.activate",
+          "writer_group": 0,
+          "quest": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "instance_id": "b2000000-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "quest",
+            "instance_id": "b2000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "quest-activate-existing-instance",
+      "state": "base",
+      "ops": [
+        {
+          "op": "quest.activate",
+          "writer_group": 0,
+          "quest": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "bell"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "instance_id": "b1000000-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "quest",
+            "instance_id": "b1000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "quest-activate-after-abandon-in-overlay",
+      "state": "base",
+      "ops": [
+        {
+          "op": "quest.transition",
+          "writer_group": 0,
+          "instance_id": "b1000000-0000-4000-8000-000000000000",
+          "from": "active",
+          "to": "abandoned"
+        },
+        {
+          "op": "quest.activate",
+          "writer_group": 0,
+          "quest": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "instance_id": "b2000000-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "quest",
+              "instance_id": "b1000000-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "quest": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "find"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "state": "abandoned"
+            }
+          },
+          {
+            "target": {
+              "kind": "quest",
+              "instance_id": "b2000000-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "quest": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "find"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "state": "active"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "quest-transition-wrong-from",
+      "state": "base",
+      "ops": [
+        {
+          "op": "quest.transition",
+          "writer_group": 0,
+          "instance_id": "b1000000-0000-4000-8000-000000000000",
+          "from": "objectives_complete",
+          "to": "resolved",
+          "outcome": "carry"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "quest",
+            "instance_id": "b1000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "quest-transition-skips-objectives-complete",
+      "state": "base",
+      "ops": [
+        {
+          "op": "quest.transition",
+          "writer_group": 0,
+          "instance_id": "b1000000-0000-4000-8000-000000000000",
+          "from": "active",
+          "to": "resolved",
+          "outcome": "carry"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "quest",
+            "instance_id": "b1000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "quest-resolved-needs-outcome",
+      "state": "base",
+      "ops": [
+        {
+          "op": "quest.transition",
+          "writer_group": 0,
+          "instance_id": "b1000000-0000-4000-8000-000000000000",
+          "from": "active",
+          "to": "objectives_complete"
+        },
+        {
+          "op": "quest.transition",
+          "writer_group": 0,
+          "instance_id": "b1000000-0000-4000-8000-000000000000",
+          "from": "objectives_complete",
+          "to": "resolved"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "quest",
+            "instance_id": "b1000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "quest-abandoned-takes-no-outcome",
+      "state": "base",
+      "ops": [
+        {
+          "op": "quest.transition",
+          "writer_group": 0,
+          "instance_id": "b1000000-0000-4000-8000-000000000000",
+          "from": "active",
+          "to": "abandoned",
+          "outcome": "gave_up"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "quest",
+            "instance_id": "b1000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "quest-failed-outcome-optional",
+      "state": "base",
+      "ops": [
+        {
+          "op": "quest.transition",
+          "writer_group": 0,
+          "instance_id": "b1000000-0000-4000-8000-000000000000",
+          "from": "active",
+          "to": "failed"
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "quest",
+              "instance_id": "b1000000-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "quest": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "find"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "state": "failed"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "quest-retry-clears-outcome",
+      "state": "base",
+      "ops": [
+        {
+          "op": "quest.transition",
+          "writer_group": 0,
+          "instance_id": "b3000000-0000-4000-8000-000000000000",
+          "from": "failed",
+          "to": "active"
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "quest",
+              "instance_id": "b3000000-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "quest": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "bell"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "state": "active"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "quest-transition-missing-instance",
+      "state": "base",
+      "ops": [
+        {
+          "op": "quest.transition",
+          "writer_group": 0,
+          "instance_id": "b2000000-0000-4000-8000-000000000000",
+          "from": "active",
+          "to": "objectives_complete"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "quest",
+            "instance_id": "b2000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "choice-open",
+      "state": "base",
+      "ops": [
+        {
+          "op": "choice.open",
+          "writer_group": 0,
+          "continuation_id": "c3000000-0000-4000-8000-000000000000",
+          "actor_id": "a0000000-0000-4000-8000-000000000000",
+          "source": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find"
+          },
+          "beat": "at_the_ford",
+          "roles": [
+            {
+              "role": "search_leader",
+              "entity_id": "50000000-0000-4000-8000-000000000000"
+            }
+          ],
+          "choice_ids": [
+            "carry",
+            "leave"
+          ]
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "choice",
+              "continuation_id": "c3000000-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "actor_id": "a0000000-0000-4000-8000-000000000000",
+              "source": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "find"
+              },
+              "beat": "at_the_ford",
+              "roles": [
+                {
+                  "role": "search_leader",
+                  "entity_id": "50000000-0000-4000-8000-000000000000"
+                }
+              ],
+              "choice_ids": [
+                "carry",
+                "leave"
+              ],
+              "status": "pending"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "choice-open-existing",
+      "state": "base",
+      "ops": [
+        {
+          "op": "choice.open",
+          "writer_group": 0,
+          "continuation_id": "c1000000-0000-4000-8000-000000000000",
+          "actor_id": "a0000000-0000-4000-8000-000000000000",
+          "source": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find"
+          },
+          "beat": "at_the_ford",
+          "roles": [
+            {
+              "role": "search_leader",
+              "entity_id": "50000000-0000-4000-8000-000000000000"
+            }
+          ],
+          "choice_ids": [
+            "carry",
+            "leave"
+          ]
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "choice",
+            "continuation_id": "c1000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "choice-resolve-not-offered",
+      "state": "base",
+      "ops": [
+        {
+          "op": "choice.resolve",
+          "writer_group": 0,
+          "continuation_id": "c1000000-0000-4000-8000-000000000000",
+          "choice_id": "flee",
+          "expected_revision": 3
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "choice",
+            "continuation_id": "c1000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "choice-resolve-wrong-revision",
+      "state": "base",
+      "ops": [
+        {
+          "op": "choice.resolve",
+          "writer_group": 0,
+          "continuation_id": "c1000000-0000-4000-8000-000000000000",
+          "choice_id": "carry",
+          "expected_revision": 4
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "choice",
+            "continuation_id": "c1000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "choice-resolve-closed",
+      "state": "base",
+      "ops": [
+        {
+          "op": "choice.resolve",
+          "writer_group": 0,
+          "continuation_id": "c2000000-0000-4000-8000-000000000000",
+          "choice_id": "carry",
+          "expected_revision": 1
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "choice",
+            "continuation_id": "c2000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "choice-resolve-uncommitted-open",
+      "state": "base",
+      "ops": [
+        {
+          "op": "choice.open",
+          "writer_group": 0,
+          "continuation_id": "c3000000-0000-4000-8000-000000000000",
+          "actor_id": "a0000000-0000-4000-8000-000000000000",
+          "source": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find"
+          },
+          "beat": "at_the_ford",
+          "roles": [
+            {
+              "role": "search_leader",
+              "entity_id": "50000000-0000-4000-8000-000000000000"
+            }
+          ],
+          "choice_ids": [
+            "carry",
+            "leave"
+          ]
+        },
+        {
+          "op": "choice.resolve",
+          "writer_group": 0,
+          "continuation_id": "c3000000-0000-4000-8000-000000000000",
+          "choice_id": "carry",
+          "expected_revision": 1
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "choice",
+            "continuation_id": "c3000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "choice-close",
+      "state": "base",
+      "ops": [
+        {
+          "op": "choice.close",
+          "writer_group": 0,
+          "continuation_id": "c1000000-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "choice",
+              "continuation_id": "c1000000-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "actor_id": "a0000000-0000-4000-8000-000000000000",
+              "source": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "find"
+              },
+              "beat": "at_the_ford",
+              "roles": [],
+              "choice_ids": [
+                "carry",
+                "leave"
+              ],
+              "status": "closed",
+              "opened_revision": 3
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "choice-close-not-pending",
+      "state": "base",
+      "ops": [
+        {
+          "op": "choice.close",
+          "writer_group": 0,
+          "continuation_id": "c2000000-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "choice",
+            "continuation_id": "c2000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "job-schedule-existing",
+      "state": "base",
+      "ops": [
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "d1000000-0000-4000-8000-000000000000",
+          "job": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "schedule",
+            "key": "bram"
+          },
+          "due_time": 30
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "job",
+            "job_id": "d1000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "job-schedule-at-current-time",
+      "state": "base",
+      "ops": [
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "d2000000-0000-4000-8000-000000000000",
+          "job": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "schedule",
+            "key": "bram"
+          },
+          "due_time": 6
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "nonfuture_job",
+          "target": {
+            "kind": "job",
+            "job_id": "d2000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "job-schedule-inside-advance",
+      "state": "base",
+      "ops": [
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "d2000000-0000-4000-8000-000000000000",
+          "job": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "schedule",
+            "key": "bram"
+          },
+          "due_time": 10
+        },
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 6,
+          "to": 19
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "nonfuture_job",
+          "target": {
+            "kind": "job",
+            "job_id": "d2000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "job-schedule-after-advance-target",
+      "state": "base",
+      "ops": [
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "d2000000-0000-4000-8000-000000000000",
+          "job": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "schedule",
+            "key": "bram"
+          },
+          "due_time": 20
+        },
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 6,
+          "to": 19
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "job",
+              "job_id": "d2000000-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "job": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "schedule",
+                "key": "bram"
+              },
+              "due_time": 20,
+              "status": "pending"
+            }
+          },
+          {
+            "target": {
+              "kind": "clock"
+            },
+            "value": 19
+          }
+        ]
+      }
+    },
+    {
+      "id": "job-complete-not-due",
+      "state": "base",
+      "ops": [
+        {
+          "op": "job.complete",
+          "writer_group": 0,
+          "job_id": "d1000000-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "job",
+            "job_id": "d1000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "job-complete-at-visited-time-inside-advance",
+      "state": "base",
+      "ops": [
+        {
+          "op": "job.complete",
+          "writer_group": 0,
+          "job_id": "d1000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 6,
+          "to": 19
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "job",
+              "job_id": "d1000000-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "job": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "schedule",
+                "key": "bram"
+              },
+              "due_time": 19,
+              "status": "completed"
+            }
+          },
+          {
+            "target": {
+              "kind": "clock"
+            },
+            "value": 19
+          }
+        ]
+      }
+    },
+    {
+      "id": "job-complete-already-completed",
+      "state": "base",
+      "ops": [
+        {
+          "op": "job.complete",
+          "writer_group": 0,
+          "job_id": "d3000000-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "job",
+            "job_id": "d3000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "job-complete-missing",
+      "state": "base",
+      "ops": [
+        {
+          "op": "job.complete",
+          "writer_group": 0,
+          "job_id": "d2000000-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "job",
+            "job_id": "d2000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "time-advance-wrong-from",
+      "state": "base",
+      "ops": [
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 5,
+          "to": 10
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "clock"
+          }
+        }
+      }
+    },
+    {
+      "id": "time-advance-not-later",
+      "state": "base",
+      "ops": [
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 6,
+          "to": 6
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "clock"
+          }
+        }
+      }
+    },
+    {
+      "id": "first-fault-in-op-order",
+      "state": "base",
+      "ops": [
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "40000000-0000-4000-8000-000000000000",
+          "source_id": "20000000-0000-4000-8000-000000000000",
+          "destination_id": "30000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "fact.assign",
+          "writer_group": 0,
+          "fact": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "fact",
+            "key": "plan"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "expected": "player_led",
+          "value": "party_led"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 1,
+          "entity_id": "40000000-0000-4000-8000-000000000000",
+          "source_id": "30000000-0000-4000-8000-000000000000",
+          "destination_id": "10000000-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "fact",
+            "fact": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "fact",
+              "key": "plan"
+            },
+            "scope": {
+              "kind": "player",
+              "character_id": "a0000000-0000-4000-8000-000000000000"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "changes-sorted-by-target-over-32-rows",
+      "state": "crowd",
+      "ops": [
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000040",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000039",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000038",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000037",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000036",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000035",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000034",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000033",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000032",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000031",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000030",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000029",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000028",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000027",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000026",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000025",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000024",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000023",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000022",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000021",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000020",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000019",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000018",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000017",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000016",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000015",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000014",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000013",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000012",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000011",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000010",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000009",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000008",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000007",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000006",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000005",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000004",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000003",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000002",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "e0000000-0000-4000-8000-000000000001",
+          "source_id": "10000000-0000-4000-8000-000000000000",
+          "destination_id": "20000000-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000001"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000002"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000003"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000004"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000005"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000006"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000007"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000008"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000009"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000010"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000011"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000012"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000013"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000014"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000015"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000016"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000017"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000018"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000019"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000020"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000021"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000022"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000023"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000024"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000025"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000026"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000027"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000028"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000029"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000030"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000031"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000032"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000033"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000034"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000035"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000036"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000037"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000038"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000039"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "e0000000-0000-4000-8000-000000000040"
+            },
+            "value": "20000000-0000-4000-8000-000000000000"
+          }
+        ]
+      }
+    }
+  ],
+  "publication": [
+    {
+      "id": "committed-publishes-committed-events",
+      "decision": {
+        "kind": "accepted",
+        "outcome": "opened",
+        "delta": {
+          "ops": [
+            {
+              "op": "choice.open",
+              "writer_group": 0,
+              "continuation_id": "c3000000-0000-4000-8000-000000000000",
+              "actor_id": "a0000000-0000-4000-8000-000000000000",
+              "source": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "find"
+              },
+              "beat": "at_the_ford",
+              "roles": [
+                {
+                  "role": "search_leader",
+                  "entity_id": "50000000-0000-4000-8000-000000000000"
+                }
+              ],
+              "choice_ids": [
+                "carry",
+                "leave"
+              ]
+            }
+          ]
+        },
+        "events": [
+          {
+            "id": "77777777-8888-8999-8aaa-bbbbbbbbbbbb",
+            "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+            "scope": {
+              "kind": "player",
+              "character_id": "a0000000-0000-4000-8000-000000000000"
+            },
+            "logical_time": 6,
+            "position": 1,
+            "causation_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+            "correlation_id": "99999999-aaaa-4bbb-8ccc-dddddddddddd",
+            "payload": {
+              "type": "choice_opened",
+              "continuation_id": "c3000000-0000-4000-8000-000000000000"
+            }
+          }
+        ],
+        "effects": [],
+        "rng": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "commit": {
+        "status": "committed",
+        "revision": 7
+      },
+      "published": [
+        {
+          "committed_revision": 7,
+          "event": {
+            "id": "77777777-8888-8999-8aaa-bbbbbbbbbbbb",
+            "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+            "scope": {
+              "kind": "player",
+              "character_id": "a0000000-0000-4000-8000-000000000000"
+            },
+            "logical_time": 6,
+            "position": 1,
+            "causation_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+            "correlation_id": "99999999-aaaa-4bbb-8ccc-dddddddddddd",
+            "payload": {
+              "type": "choice_opened",
+              "continuation_id": "c3000000-0000-4000-8000-000000000000"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "failed-commit-publishes-nothing",
+      "decision": {
+        "kind": "accepted",
+        "outcome": "opened",
+        "delta": {
+          "ops": [
+            {
+              "op": "choice.open",
+              "writer_group": 0,
+              "continuation_id": "c3000000-0000-4000-8000-000000000000",
+              "actor_id": "a0000000-0000-4000-8000-000000000000",
+              "source": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "find"
+              },
+              "beat": "at_the_ford",
+              "roles": [
+                {
+                  "role": "search_leader",
+                  "entity_id": "50000000-0000-4000-8000-000000000000"
+                }
+              ],
+              "choice_ids": [
+                "carry",
+                "leave"
+              ]
+            }
+          ]
+        },
+        "events": [
+          {
+            "id": "77777777-8888-8999-8aaa-bbbbbbbbbbbb",
+            "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+            "scope": {
+              "kind": "player",
+              "character_id": "a0000000-0000-4000-8000-000000000000"
+            },
+            "logical_time": 6,
+            "position": 1,
+            "causation_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+            "correlation_id": "99999999-aaaa-4bbb-8ccc-dddddddddddd",
+            "payload": {
+              "type": "choice_opened",
+              "continuation_id": "c3000000-0000-4000-8000-000000000000"
+            }
+          }
+        ],
+        "effects": [],
+        "rng": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "commit": {
+        "status": "failed",
+        "revision": 7
+      },
+      "published": []
+    },
+    {
+      "id": "unknown-commit-publishes-nothing",
+      "decision": {
+        "kind": "accepted",
+        "outcome": "opened",
+        "delta": {
+          "ops": [
+            {
+              "op": "choice.open",
+              "writer_group": 0,
+              "continuation_id": "c3000000-0000-4000-8000-000000000000",
+              "actor_id": "a0000000-0000-4000-8000-000000000000",
+              "source": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "find"
+              },
+              "beat": "at_the_ford",
+              "roles": [
+                {
+                  "role": "search_leader",
+                  "entity_id": "50000000-0000-4000-8000-000000000000"
+                }
+              ],
+              "choice_ids": [
+                "carry",
+                "leave"
+              ]
+            }
+          ]
+        },
+        "events": [
+          {
+            "id": "77777777-8888-8999-8aaa-bbbbbbbbbbbb",
+            "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+            "scope": {
+              "kind": "player",
+              "character_id": "a0000000-0000-4000-8000-000000000000"
+            },
+            "logical_time": 6,
+            "position": 1,
+            "causation_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+            "correlation_id": "99999999-aaaa-4bbb-8ccc-dddddddddddd",
+            "payload": {
+              "type": "choice_opened",
+              "continuation_id": "c3000000-0000-4000-8000-000000000000"
+            }
+          }
+        ],
+        "effects": [],
+        "rng": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "commit": {
+        "status": "unknown",
+        "revision": 7
+      },
+      "published": []
+    },
+    {
+      "id": "rejected-publishes-nothing",
+      "decision": {
+        "kind": "rejected",
+        "error": {
+          "code": "not_present"
+        }
+      },
+      "commit": {
+        "status": "committed",
+        "revision": 7
+      },
+      "published": []
+    },
+    {
+      "id": "fault-publishes-nothing",
+      "decision": {
+        "kind": "fault",
+        "code": "conflicting_write",
+        "target": {
+          "kind": "containment",
+          "entity_id": "40000000-0000-4000-8000-000000000000"
+        }
+      },
+      "commit": {
+        "status": "committed",
+        "revision": 7
+      },
+      "published": []
+    }
+  ],
+  "invariants": [
+    {
+      "id": "one_container_per_item",
+      "holds": true,
+      "note": "one move",
+      "observation": {
+        "state": "base",
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "containment",
+                "entity_id": "40000000-0000-4000-8000-000000000000"
+              },
+              "value": "30000000-0000-4000-8000-000000000000"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "one_container_per_item",
+      "holds": false,
+      "note": "one item written twice",
+      "observation": {
+        "state": "base",
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "containment",
+                "entity_id": "40000000-0000-4000-8000-000000000000"
+              },
+              "value": "30000000-0000-4000-8000-000000000000"
+            },
+            {
+              "target": {
+                "kind": "containment",
+                "entity_id": "40000000-0000-4000-8000-000000000000"
+              },
+              "value": "10000000-0000-4000-8000-000000000000"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "one_container_per_item",
+      "holds": false,
+      "note": "two containers for one item",
+      "observation": {
+        "state": "base",
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "containment",
+                "entity_id": "40000000-0000-4000-8000-000000000000"
+              },
+              "value": [
+                "30000000-0000-4000-8000-000000000000",
+                "20000000-0000-4000-8000-000000000000"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "one_container_per_item",
+      "holds": false,
+      "note": "a transfer created an item",
+      "observation": {
+        "state": "base",
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "containment",
+                "entity_id": "c3000000-0000-4000-8000-000000000000"
+              },
+              "value": "30000000-0000-4000-8000-000000000000"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "containment_acyclic",
+      "holds": true,
+      "note": "one move into a bag with room",
+      "observation": {
+        "state": "base",
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "containment",
+                "entity_id": "40000000-0000-4000-8000-000000000000"
+              },
+              "value": "30000000-0000-4000-8000-000000000000"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "containment_acyclic",
+      "holds": false,
+      "note": "bag and lantern inside each other",
+      "observation": {
+        "state": "base",
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "containment",
+                "entity_id": "30000000-0000-4000-8000-000000000000"
+              },
+              "value": "40000000-0000-4000-8000-000000000000"
+            },
+            {
+              "target": {
+                "kind": "containment",
+                "entity_id": "40000000-0000-4000-8000-000000000000"
+              },
+              "value": "30000000-0000-4000-8000-000000000000"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "containment_acyclic",
+      "holds": false,
+      "note": "bag over capacity",
+      "observation": {
+        "state": "base",
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "containment",
+                "entity_id": "40000000-0000-4000-8000-000000000000"
+              },
+              "value": "30000000-0000-4000-8000-000000000000"
+            },
+            {
+              "target": {
+                "kind": "containment",
+                "entity_id": "50000000-0000-4000-8000-000000000000"
+              },
+              "value": "30000000-0000-4000-8000-000000000000"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "no_last_writer_wins",
+      "holds": true,
+      "note": "two groups, one target, fault",
+      "observation": {
+        "delta": {
+          "ops": [
+            {
+              "op": "entity.transfer",
+              "writer_group": 0,
+              "entity_id": "40000000-0000-4000-8000-000000000000",
+              "source_id": "20000000-0000-4000-8000-000000000000",
+              "destination_id": "30000000-0000-4000-8000-000000000000"
+            },
+            {
+              "op": "entity.transfer",
+              "writer_group": 1,
+              "entity_id": "40000000-0000-4000-8000-000000000000",
+              "source_id": "30000000-0000-4000-8000-000000000000",
+              "destination_id": "10000000-0000-4000-8000-000000000000"
+            }
+          ]
+        },
+        "result": {
+          "fault": {
+            "kind": "fault",
+            "code": "conflicting_write",
+            "target": {
+              "kind": "containment",
+              "entity_id": "40000000-0000-4000-8000-000000000000"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "no_last_writer_wins",
+      "holds": false,
+      "note": "two groups, one target, last writer won",
+      "observation": {
+        "delta": {
+          "ops": [
+            {
+              "op": "entity.transfer",
+              "writer_group": 0,
+              "entity_id": "40000000-0000-4000-8000-000000000000",
+              "source_id": "20000000-0000-4000-8000-000000000000",
+              "destination_id": "30000000-0000-4000-8000-000000000000"
+            },
+            {
+              "op": "entity.transfer",
+              "writer_group": 1,
+              "entity_id": "40000000-0000-4000-8000-000000000000",
+              "source_id": "30000000-0000-4000-8000-000000000000",
+              "destination_id": "10000000-0000-4000-8000-000000000000"
+            }
+          ]
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "containment",
+                "entity_id": "40000000-0000-4000-8000-000000000000"
+              },
+              "value": "10000000-0000-4000-8000-000000000000"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "no_last_writer_wins",
+      "holds": true,
+      "note": "two groups, two targets",
+      "observation": {
+        "delta": {
+          "ops": [
+            {
+              "op": "entity.transfer",
+              "writer_group": 0,
+              "entity_id": "40000000-0000-4000-8000-000000000000",
+              "source_id": "20000000-0000-4000-8000-000000000000",
+              "destination_id": "10000000-0000-4000-8000-000000000000"
+            },
+            {
+              "op": "entity.transfer",
+              "writer_group": 1,
+              "entity_id": "50000000-0000-4000-8000-000000000000",
+              "source_id": "10000000-0000-4000-8000-000000000000",
+              "destination_id": "20000000-0000-4000-8000-000000000000"
+            }
+          ]
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "containment",
+                "entity_id": "40000000-0000-4000-8000-000000000000"
+              },
+              "value": "10000000-0000-4000-8000-000000000000"
+            },
+            {
+              "target": {
+                "kind": "containment",
+                "entity_id": "50000000-0000-4000-8000-000000000000"
+              },
+              "value": "20000000-0000-4000-8000-000000000000"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "delta_preconditions_hold",
+      "holds": true,
+      "note": "chained fact values",
+      "observation": {
+        "state": "base",
+        "delta": {
+          "ops": [
+            {
+              "op": "fact.assign",
+              "writer_group": 0,
+              "fact": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "fact",
+                "key": "plan"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "expected": "undecided",
+              "value": "player_led"
+            },
+            {
+              "op": "fact.assign",
+              "writer_group": 0,
+              "fact": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "fact",
+                "key": "plan"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "expected": "player_led",
+              "value": "party_led"
+            }
+          ]
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "fact",
+                "fact": {
+                  "cartridge_id": "lantern",
+                  "cartridge_version": "0.1.0",
+                  "kind": "fact",
+                  "key": "plan"
+                },
+                "scope": {
+                  "kind": "player",
+                  "character_id": "a0000000-0000-4000-8000-000000000000"
+                }
+              },
+              "value": "party_led"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "delta_preconditions_hold",
+      "holds": false,
+      "note": "stale expected value accepted",
+      "observation": {
+        "state": "base",
+        "delta": {
+          "ops": [
+            {
+              "op": "fact.assign",
+              "writer_group": 0,
+              "fact": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "fact",
+                "key": "plan"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "expected": "player_led",
+              "value": "party_led"
+            }
+          ]
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "fact",
+                "fact": {
+                  "cartridge_id": "lantern",
+                  "cartridge_version": "0.1.0",
+                  "kind": "fact",
+                  "key": "plan"
+                },
+                "scope": {
+                  "kind": "player",
+                  "character_id": "a0000000-0000-4000-8000-000000000000"
+                }
+              },
+              "value": "party_led"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "delta_preconditions_hold",
+      "holds": true,
+      "note": "stale expected value faulted",
+      "observation": {
+        "state": "base",
+        "delta": {
+          "ops": [
+            {
+              "op": "fact.assign",
+              "writer_group": 0,
+              "fact": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "fact",
+                "key": "plan"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "expected": "player_led",
+              "value": "party_led"
+            }
+          ]
+        },
+        "result": {
+          "fault": {
+            "kind": "fault",
+            "code": "precondition_failed",
+            "target": {
+              "kind": "fact",
+              "fact": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "fact",
+                "key": "plan"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "delta_preconditions_hold",
+      "holds": false,
+      "note": "existing quest instance re-created",
+      "observation": {
+        "state": "base",
+        "delta": {
+          "ops": [
+            {
+              "op": "quest.activate",
+              "writer_group": 0,
+              "quest": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "bell"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "instance_id": "b1000000-0000-4000-8000-000000000000"
+            }
+          ]
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "quest",
+                "instance_id": "b1000000-0000-4000-8000-000000000000"
+              },
+              "value": {
+                "quest": {
+                  "cartridge_id": "lantern",
+                  "cartridge_version": "0.1.0",
+                  "kind": "quest",
+                  "key": "bell"
+                },
+                "scope": {
+                  "kind": "player",
+                  "character_id": "a0000000-0000-4000-8000-000000000000"
+                },
+                "state": "active"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "fault_discards_whole_proposal",
+      "holds": true,
+      "note": "fault alone",
+      "observation": {
+        "result": {
+          "fault": {
+            "kind": "fault",
+            "code": "conflicting_write"
+          }
+        }
+      }
+    },
+    {
+      "id": "fault_discards_whole_proposal",
+      "holds": false,
+      "note": "fault with changes",
+      "observation": {
+        "result": {
+          "fault": {
+            "kind": "fault",
+            "code": "conflicting_write"
+          },
+          "changes": []
+        }
+      }
+    },
+    {
+      "id": "fault_discards_whole_proposal",
+      "holds": false,
+      "note": "fault carrying a delta",
+      "observation": {
+        "result": {
+          "fault": {
+            "kind": "fault",
+            "code": "conflicting_write",
+            "delta": {
+              "ops": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "fault_codes_are_evaluation_faults",
+      "holds": true,
+      "note": "evaluation fault",
+      "observation": {
+        "result": {
+          "fault": {
+            "kind": "fault",
+            "code": "capacity_exceeded",
+            "target": {
+              "kind": "containment",
+              "entity_id": "50000000-0000-4000-8000-000000000000"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "fault_codes_are_evaluation_faults",
+      "holds": true,
+      "note": "no fault",
+      "observation": {
+        "result": {
+          "changes": []
+        }
+      }
+    },
+    {
+      "id": "fault_codes_are_evaluation_faults",
+      "holds": false,
+      "note": "gameplay rejection code",
+      "observation": {
+        "result": {
+          "fault": {
+            "kind": "fault",
+            "code": "invalid_state",
+            "target": {
+              "kind": "containment",
+              "entity_id": "50000000-0000-4000-8000-000000000000"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "target_candidates_ordered",
+      "holds": true,
+      "note": "ascending",
+      "observation": {
+        "resolution": {
+          "kind": "ambiguous",
+          "candidate_ids": [
+            "20000000-0000-4000-8000-000000000000",
+            "40000000-0000-4000-8000-000000000000"
+          ]
+        }
+      }
+    },
+    {
+      "id": "target_candidates_ordered",
+      "holds": true,
+      "note": "not ambiguous",
+      "observation": {
+        "resolution": {
+          "kind": "unique",
+          "target_id": "40000000-0000-4000-8000-000000000000"
+        }
+      }
+    },
+    {
+      "id": "target_candidates_ordered",
+      "holds": false,
+      "note": "descending",
+      "observation": {
+        "resolution": {
+          "kind": "ambiguous",
+          "candidate_ids": [
+            "40000000-0000-4000-8000-000000000000",
+            "20000000-0000-4000-8000-000000000000"
+          ]
+        }
+      }
+    },
+    {
+      "id": "target_candidates_ordered",
+      "holds": false,
+      "note": "duplicate",
+      "observation": {
+        "resolution": {
+          "kind": "ambiguous",
+          "candidate_ids": [
+            "20000000-0000-4000-8000-000000000000",
+            "20000000-0000-4000-8000-000000000000"
+          ]
+        }
+      }
+    },
+    {
+      "id": "no_proposed_event_escapes",
+      "holds": true,
+      "note": "published after commit",
+      "observation": {
+        "decision": {
+          "kind": "accepted",
+          "outcome": "opened",
+          "delta": {
+            "ops": [
+              {
+                "op": "choice.open",
+                "writer_group": 0,
+                "continuation_id": "c3000000-0000-4000-8000-000000000000",
+                "actor_id": "a0000000-0000-4000-8000-000000000000",
+                "source": {
+                  "cartridge_id": "lantern",
+                  "cartridge_version": "0.1.0",
+                  "kind": "quest",
+                  "key": "find"
+                },
+                "beat": "at_the_ford",
+                "roles": [
+                  {
+                    "role": "search_leader",
+                    "entity_id": "50000000-0000-4000-8000-000000000000"
+                  }
+                ],
+                "choice_ids": [
+                  "carry",
+                  "leave"
+                ]
+              }
+            ]
+          },
+          "events": [
+            {
+              "id": "77777777-8888-8999-8aaa-bbbbbbbbbbbb",
+              "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "logical_time": 6,
+              "position": 1,
+              "causation_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+              "correlation_id": "99999999-aaaa-4bbb-8ccc-dddddddddddd",
+              "payload": {
+                "type": "choice_opened",
+                "continuation_id": "c3000000-0000-4000-8000-000000000000"
+              }
+            }
+          ],
+          "effects": [],
+          "rng": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        "commit": {
+          "status": "committed",
+          "revision": 7
+        },
+        "published": [
+          {
+            "committed_revision": 7,
+            "event": {
+              "id": "77777777-8888-8999-8aaa-bbbbbbbbbbbb",
+              "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "logical_time": 6,
+              "position": 1,
+              "causation_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+              "correlation_id": "99999999-aaaa-4bbb-8ccc-dddddddddddd",
+              "payload": {
+                "type": "choice_opened",
+                "continuation_id": "c3000000-0000-4000-8000-000000000000"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "no_proposed_event_escapes",
+      "holds": true,
+      "note": "nothing after failed commit",
+      "observation": {
+        "decision": {
+          "kind": "accepted",
+          "outcome": "opened",
+          "delta": {
+            "ops": [
+              {
+                "op": "choice.open",
+                "writer_group": 0,
+                "continuation_id": "c3000000-0000-4000-8000-000000000000",
+                "actor_id": "a0000000-0000-4000-8000-000000000000",
+                "source": {
+                  "cartridge_id": "lantern",
+                  "cartridge_version": "0.1.0",
+                  "kind": "quest",
+                  "key": "find"
+                },
+                "beat": "at_the_ford",
+                "roles": [
+                  {
+                    "role": "search_leader",
+                    "entity_id": "50000000-0000-4000-8000-000000000000"
+                  }
+                ],
+                "choice_ids": [
+                  "carry",
+                  "leave"
+                ]
+              }
+            ]
+          },
+          "events": [
+            {
+              "id": "77777777-8888-8999-8aaa-bbbbbbbbbbbb",
+              "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "logical_time": 6,
+              "position": 1,
+              "causation_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+              "correlation_id": "99999999-aaaa-4bbb-8ccc-dddddddddddd",
+              "payload": {
+                "type": "choice_opened",
+                "continuation_id": "c3000000-0000-4000-8000-000000000000"
+              }
+            }
+          ],
+          "effects": [],
+          "rng": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        "commit": {
+          "status": "failed",
+          "revision": 7
+        },
+        "published": []
+      }
+    },
+    {
+      "id": "no_proposed_event_escapes",
+      "holds": false,
+      "note": "published after failed commit",
+      "observation": {
+        "decision": {
+          "kind": "accepted",
+          "outcome": "opened",
+          "delta": {
+            "ops": [
+              {
+                "op": "choice.open",
+                "writer_group": 0,
+                "continuation_id": "c3000000-0000-4000-8000-000000000000",
+                "actor_id": "a0000000-0000-4000-8000-000000000000",
+                "source": {
+                  "cartridge_id": "lantern",
+                  "cartridge_version": "0.1.0",
+                  "kind": "quest",
+                  "key": "find"
+                },
+                "beat": "at_the_ford",
+                "roles": [
+                  {
+                    "role": "search_leader",
+                    "entity_id": "50000000-0000-4000-8000-000000000000"
+                  }
+                ],
+                "choice_ids": [
+                  "carry",
+                  "leave"
+                ]
+              }
+            ]
+          },
+          "events": [
+            {
+              "id": "77777777-8888-8999-8aaa-bbbbbbbbbbbb",
+              "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "logical_time": 6,
+              "position": 1,
+              "causation_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+              "correlation_id": "99999999-aaaa-4bbb-8ccc-dddddddddddd",
+              "payload": {
+                "type": "choice_opened",
+                "continuation_id": "c3000000-0000-4000-8000-000000000000"
+              }
+            }
+          ],
+          "effects": [],
+          "rng": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        "commit": {
+          "status": "failed",
+          "revision": 7
+        },
+        "published": [
+          {
+            "committed_revision": 7,
+            "event": {
+              "id": "77777777-8888-8999-8aaa-bbbbbbbbbbbb",
+              "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "logical_time": 6,
+              "position": 1,
+              "causation_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+              "correlation_id": "99999999-aaaa-4bbb-8ccc-dddddddddddd",
+              "payload": {
+                "type": "choice_opened",
+                "continuation_id": "c3000000-0000-4000-8000-000000000000"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "no_proposed_event_escapes",
+      "holds": false,
+      "note": "published while commit unknown",
+      "observation": {
+        "decision": {
+          "kind": "accepted",
+          "outcome": "opened",
+          "delta": {
+            "ops": [
+              {
+                "op": "choice.open",
+                "writer_group": 0,
+                "continuation_id": "c3000000-0000-4000-8000-000000000000",
+                "actor_id": "a0000000-0000-4000-8000-000000000000",
+                "source": {
+                  "cartridge_id": "lantern",
+                  "cartridge_version": "0.1.0",
+                  "kind": "quest",
+                  "key": "find"
+                },
+                "beat": "at_the_ford",
+                "roles": [
+                  {
+                    "role": "search_leader",
+                    "entity_id": "50000000-0000-4000-8000-000000000000"
+                  }
+                ],
+                "choice_ids": [
+                  "carry",
+                  "leave"
+                ]
+              }
+            ]
+          },
+          "events": [
+            {
+              "id": "77777777-8888-8999-8aaa-bbbbbbbbbbbb",
+              "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "logical_time": 6,
+              "position": 1,
+              "causation_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+              "correlation_id": "99999999-aaaa-4bbb-8ccc-dddddddddddd",
+              "payload": {
+                "type": "choice_opened",
+                "continuation_id": "c3000000-0000-4000-8000-000000000000"
+              }
+            }
+          ],
+          "effects": [],
+          "rng": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        "commit": {
+          "status": "unknown",
+          "revision": 7
+        },
+        "published": [
+          {
+            "committed_revision": 7,
+            "event": {
+              "id": "77777777-8888-8999-8aaa-bbbbbbbbbbbb",
+              "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "logical_time": 6,
+              "position": 1,
+              "causation_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+              "correlation_id": "99999999-aaaa-4bbb-8ccc-dddddddddddd",
+              "payload": {
+                "type": "choice_opened",
+                "continuation_id": "c3000000-0000-4000-8000-000000000000"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "no_proposed_event_escapes",
+      "holds": false,
+      "note": "proposed event published bare",
+      "observation": {
+        "decision": {
+          "kind": "accepted",
+          "outcome": "opened",
+          "delta": {
+            "ops": [
+              {
+                "op": "choice.open",
+                "writer_group": 0,
+                "continuation_id": "c3000000-0000-4000-8000-000000000000",
+                "actor_id": "a0000000-0000-4000-8000-000000000000",
+                "source": {
+                  "cartridge_id": "lantern",
+                  "cartridge_version": "0.1.0",
+                  "kind": "quest",
+                  "key": "find"
+                },
+                "beat": "at_the_ford",
+                "roles": [
+                  {
+                    "role": "search_leader",
+                    "entity_id": "50000000-0000-4000-8000-000000000000"
+                  }
+                ],
+                "choice_ids": [
+                  "carry",
+                  "leave"
+                ]
+              }
+            ]
+          },
+          "events": [
+            {
+              "id": "77777777-8888-8999-8aaa-bbbbbbbbbbbb",
+              "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "logical_time": 6,
+              "position": 1,
+              "causation_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+              "correlation_id": "99999999-aaaa-4bbb-8ccc-dddddddddddd",
+              "payload": {
+                "type": "choice_opened",
+                "continuation_id": "c3000000-0000-4000-8000-000000000000"
+              }
+            }
+          ],
+          "effects": [],
+          "rng": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        "commit": {
+          "status": "committed",
+          "revision": 7
+        },
+        "published": [
+          {
+            "id": "77777777-8888-8999-8aaa-bbbbbbbbbbbb",
+            "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+            "scope": {
+              "kind": "player",
+              "character_id": "a0000000-0000-4000-8000-000000000000"
+            },
+            "logical_time": 6,
+            "position": 1,
+            "causation_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+            "correlation_id": "99999999-aaaa-4bbb-8ccc-dddddddddddd",
+            "payload": {
+              "type": "choice_opened",
+              "continuation_id": "c3000000-0000-4000-8000-000000000000"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "no_proposed_event_escapes",
+      "holds": false,
+      "note": "wrong committed revision",
+      "observation": {
+        "decision": {
+          "kind": "accepted",
+          "outcome": "opened",
+          "delta": {
+            "ops": [
+              {
+                "op": "choice.open",
+                "writer_group": 0,
+                "continuation_id": "c3000000-0000-4000-8000-000000000000",
+                "actor_id": "a0000000-0000-4000-8000-000000000000",
+                "source": {
+                  "cartridge_id": "lantern",
+                  "cartridge_version": "0.1.0",
+                  "kind": "quest",
+                  "key": "find"
+                },
+                "beat": "at_the_ford",
+                "roles": [
+                  {
+                    "role": "search_leader",
+                    "entity_id": "50000000-0000-4000-8000-000000000000"
+                  }
+                ],
+                "choice_ids": [
+                  "carry",
+                  "leave"
+                ]
+              }
+            ]
+          },
+          "events": [
+            {
+              "id": "77777777-8888-8999-8aaa-bbbbbbbbbbbb",
+              "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "logical_time": 6,
+              "position": 1,
+              "causation_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+              "correlation_id": "99999999-aaaa-4bbb-8ccc-dddddddddddd",
+              "payload": {
+                "type": "choice_opened",
+                "continuation_id": "c3000000-0000-4000-8000-000000000000"
+              }
+            }
+          ],
+          "effects": [],
+          "rng": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        "commit": {
+          "status": "committed",
+          "revision": 7
+        },
+        "published": [
+          {
+            "committed_revision": 8,
+            "event": {
+              "id": "77777777-8888-8999-8aaa-bbbbbbbbbbbb",
+              "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "logical_time": 6,
+              "position": 1,
+              "causation_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+              "correlation_id": "99999999-aaaa-4bbb-8ccc-dddddddddddd",
+              "payload": {
+                "type": "choice_opened",
+                "continuation_id": "c3000000-0000-4000-8000-000000000000"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
