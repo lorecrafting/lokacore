@@ -92,3 +92,11 @@ Each record is written by a fresh agent that authored none of the reviewed work 
   the post-release "TypeScript becomes the rulebook" consequence is missing, and the
   amendment list is incomplete; four nits, one question; owner recommendation: accept
   the direction after the fixes); re-review of the fixes at `1545b82`, APPROVE (every disposition verified, arithmetic reproduced, crosswalk complete but for two reading aids; fit for the owner to decide).
+- [2026-09-24 maintenance: ADR-074 amendments](2026-09-24-maint-adr074-amendments-review.md):
+  PR #19 at `e7b1625`, CHANGES REQUIRED, no blocker (Fable design review: every spec hunk
+  traced to a crosswalk row, five owner records read, trigger check planted six ways and
+  its red control tested against a neutered check; four should-fix: the red control lacks
+  the declared-but-absent differential case, `minItems`/`maxItems` on `host_adapters` have
+  no fixture in either validator, README §5/§7 still call the kernel choice open, 14 §R9
+  names Node as the only pre-trigger host against 09 §5 and 15 DET-02; three nits; Astra
+  A1 agreed, A2 agreed in part).

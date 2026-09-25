@@ -1,0 +1,170 @@
+# Review: PR #19, maintenance: apply ADR-074 to the spec; enforced trigger; R3 owner decisions
+
+- **PR:** #19, branch `maint-adr074-amendments`, head `e7b1625` (four commits on `main`).
+  CI green on all five jobs. Reviewed by a fresh Fable reviewer that authored none of it
+  (design judgment for the spec amendments; test-the-tests for the one new check).
+- **Verdict: CHANGES REQUIRED**, no blocker. Four should-fix items, about a dozen lines in
+  all: one planted case and two fixtures the new check and schema bounds lack, one
+  sentence in 14 §R9 that contradicts 09 §5 and 15 DET-02 as amended by this same PR, and
+  README §5/§7 still calling the kernel choice open. Everything else traces.
+- Line numbers are at `e7b1625`. Parallel PR #20 is noted at the end; conflicts only.
+
+## 1. Written before the diff: what must be true
+
+1. Every text change under `docs/spec/` maps to a crosswalk row marked Amend or Replaced in
+   ADR-074's appendix, and says what that row says: `portable_capability` rules are
+   TypeScript-only until the first planned server consumer; the portable semantic
+   foundation keeps both kernels and its differential now; TypeScript host conformance
+   (Node, Android Hermes, iOS Hermes; Node-recorded bytes replayed on device; 10,000
+   fresh sequences on Node per fast CI run; a device sample at R6P) is retained; the R5
+   simulation and the R9/R11 Lab run the TypeScript kernel headless on Node and do not
+   fire the trigger; the compiler stays Elixir; R14 needs the Elixir port and differential
+   before its playthrough gate; the route choice waits for the trigger.
+2. Rows marked Retained, Note only, Unchanged or Unaffected have no text change, or a
+   change that only restates the row's own gloss.
+3. `protocol/` changes are additive (optional fields on the portable variant only);
+   `conformance/` and every frozen fixture are untouched; historical results stand.
+4. Each document 16 entry cites an owner record that contains an acceptance, in 16's
+   heading-plus-Status form.
+5. The trigger check fails on a `portable_capability` with an `elixir` host adapter and no
+   differential, and on a declared differential whose file does not exist; passes with an
+   existing file and for TypeScript-only adapters; the red control catches a neutered
+   check; every new schema bound has a fixture that fails when the bound is removed
+   ([contract lessons](../lessons/contracts.md)).
+6. AGENTS.md stays within its 2,500-word budget and links rather than restates; the
+   ROADMAP estimate equals ADR-074 §6; the owner records are verbatim-style and the
+   IMPORT.md compiler rule says what the record says.
+
+## 2. Verified
+
+- **Crosswalk tracing (1).** Every spec hunk maps to an Amend/Replaced row: 16 ADR-004
+  (l.160) and ADR-068 (l.861); envelope §3 (l.63); 02 §1 (l.59); 07 §4 (l.198) and §13
+  (l.484); 09 §5 boot modes (l.149, l.165) and §10 (l.279); 14 R5 (l.407), R9 (l.564), R10
+  (l.645), R14 (l.764); 15 DET-02 (l.71), DET-08 (l.101), SCR-10 (l.570); pre-release-proof
+  P6 (l.65); README §5 (l.205) and §6 (l.212). Each says what its row says, no more, with
+  the one exception in S4 below. IMPORT.md l.56-75 lists all of them.
+- **Retained / note-only rows (2).** 05 §6 last paragraph (l.300), 09 §31 (l.929-946), 10
+  l.482, INDEX l.232, 07 §14 l.521 and the R-MILESTONES R1 row (l.18) are unchanged and
+  read as R1 history, which ADR-074 keeps. 09 §1a's Determinism row (l.77) is listed
+  Retained but was edited; the edit is the row's own gloss ("run on the TS kernel on Node
+  and devices"), so nothing to fix beyond the IMPORT.md wording (N3). Grep of `docs/spec`
+  for "both kernels", "differential", "cross-host", "Elixir and TypeScript", "dual" and
+  "Candidate C" found no rule contradicting ADR-074 outside the README paragraphs in S3:
+  04 §20 and 15 l.722 are protocol-message agreement (crosswalk: unaffected);
+  `conformance/numeric-profile.md` l.27 "both kernels" is the foundation, which stays
+  dual; 14 §R1 and 07 §4 candidate descriptions are the R1 procedure.
+- **Frozen inputs (3).** No file under `docs/spec/conformance/` or `protocol/fixtures/`
+  changed except two added rows in `invalid.json`; `capability.schema.json` adds two
+  optional properties to the portable variant only, with one example; `contracts.gen.ts`
+  gains the same two optional fields; `docs/residency.gen.json` is byte-identical because
+  no registry entry declares adapters (`elixir bin/contracts.exs --check` exits 0 in the
+  worktree). The envelope's recorded results are untouched (l.63 says so).
+- **Document 16 (4).** The five entries use 16's heading + `**Status:**` + body form. The
+  cited records were read: ADR-070, `owner-decision-a2-2026-09-23.md` OD1 "Yes, prep
+  decision file" to the question whether the Pixel 3a stands in under ADR-070's text;
+  ADR-071, `owner-decisions-2026-09-24.md` item 4 "yes please go ahead" to "Accept C with
+  the checkpoint risk recorded", with the quick-A3 record; ADR-072,
+  `owner-decisions-r3-open-questions-2026-09-24.md` item 3 "Yes, accept it
+  (Recommended)"; ADR-073, `owner-decision-r2-2026-09-24.md` item 2 "yes please amend to
+  flatten and not use umbrella"; ADR-074, `owner-decision-adr-074-2026-09-24.md` "accept,
+  go with the typescript first approach". Each is an acceptance of the decision named.
+- **The trigger check (5), planted on a registry copy** via `--check PATH` with `movement@1`
+  edited: `host_adapters: ["elixir"]` and no differential, exit 1 with the ADR-074
+  diagnostic; `differential: "test/loka/core/nope_test.exs"` (well-formed, absent), exit 1
+  with the diagnostic; `differential: "test/loka/core"` (a directory), exit 1; duplicate
+  `["elixir","elixir"]`, exit 1; `["typescript","elixir"]` with an existing file and
+  `["typescript"]` alone pass the trigger (they exit 1 only on the expected staleness of
+  the generated matrix, a different message). The red-control block reports `ok` against
+  the real script and `FAIL` when `if trigger != [] do` is neutered, because it requires
+  the diagnostic string (`bin/red_controls.exs:161-162`), not just a non-zero exit. Fixture
+  suites: the new `invalid.json` rows fail on `rust` and on the `differential` pattern, and
+  the `host_adapters` on `server_only` row fails on `unknown_property`, in both validators
+  (86 Elixir, 34 TypeScript). Mutations: `minItems` removed and `maxItems` 2→9 in both
+  validators leave both suites green (S2); the enum control (`rust` admitted) fails both.
+- **AGENTS.md and ROADMAP (6).** 1,748 words of 2,500 (`bin/check_docs.exs` passes, 83 docs,
+  0 broken, 0 unreachable). The Candidate C bullet summarises and links ADR-071/074; the
+  CI line and the tests rule follow the crosswalk. ROADMAP "26 slices after R3 ... 8.5 to
+  9.2 million subagent tokens" matches ADR-074 §6's 26 slices and 8.48–9.20M; R3's 8
+  slices match. The owner records quote the options and the chosen option; IMPORT.md
+  l.82-86 states the dotted-name rule exactly as item 2 of the record (dots to
+  underscores, collision is a compile error, 64-character limit after mapping) and keeps
+  ascending id with no spec change, as item 1 says.
+
+## 3. Findings
+
+### S1 (should-fix) `bin/red_controls.exs:140-167`: the red control plants only the missing-differential case
+
+The check has two conditions, declared and present (`bin/contracts.exs:105`). The planted
+entry omits `differential`, so a mutation that keeps the declaration test and drops the
+presence test (`is_nil(e["differential"])` in place of `not File.regular?(...)`) passes
+the red control. Scenario: an R14 slice declares
+`"differential": "test/loka/core/movement_differential_test.exs"` and never writes the
+file; `contracts --check` stays green and the trigger is unenforced. Fix: a second
+planted entry with a well-formed path to a file that does not exist, same diagnostic.
+
+### S2 (should-fix) `protocol/capability.schema.json:108-109`, `kernel/ts/src/contracts.gen.ts:132`: `minItems` and `maxItems` have no fixture
+
+Both suites stay green with `minItems` deleted and with `maxItems` at 9 (verified in both
+validators). Scenario: `minItems` is dropped in a later edit, `host_adapters: []` validates,
+and `bin/contracts.exs:124` emits `[]` into `docs/residency.gen.json` against its own rule
+"null, never []" (`bin/contracts.exs:90`). Fix: two `invalid.json` rows on the portable
+variant, `host_adapters: []` and three entries, with the expected error codes.
+
+### S3 (should-fix) `docs/spec/README.md:205` and `235`: the kernel choice is still described as open
+
+Line 205, as amended, says in one paragraph "No execution strategy is selected before its
+applicable gates pass" and "C was selected (ADR-071)". §7 item 1 (l.235) still says "none
+is selected before the spike". Both contradict the ADR-071 entry this PR adds to
+document 16 (16:875-879). Scenario: an agent reading README §7 for the open choices
+treats the kernel choice as open and reopens it, which AGENTS.md forbids doing silently.
+Fix: state the accepted direction (C, TypeScript-first) and, separately, what remains
+outstanding: ADR-071's deferred rows are accepted risk, not an unmade choice.
+
+### S4 (should-fix) `docs/spec/14-implementation-plan.md:564`: 14 §R9 names Node as the only pre-trigger host
+
+"over the hosts that run the rules (before the ADR-074 trigger, the TypeScript kernel
+headless on Node ...)" defines the pre-trigger host set as Node alone, while 09 §5
+(l.165), 15 DET-02 (l.71) and the envelope note (l.63), all amended by this PR, require
+Node, Android Hermes and iOS Hermes with Node-recorded bytes replayed on device. Two
+normative documents disagreeing is a defect (AGENTS.md). Scenario: the R9 runner is built
+Node-only, Gate R9 passes as written, and DET-02 has no runner for the device replay.
+Fix: "the TypeScript hosts, Node plus the Hermes replays; the Lab's headless Node run is
+authoring, not server hosting".
+
+### N1 (nit) `docs/decisions/adr-071-072-proposal.md:3-6`, `adr-074-ts-first-proposal.md:1-5`, `docs/decisions/README.md:7,10`
+
+The ADR-071/072 status now says "entered document 16" while the same paragraph still says
+"these enter document 16 only at the next contract amendment; document 16 is not edited
+here". ADR-074's title is still "Proposed" and its status line says "Accepted" twice. The
+decisions README says at l.3 that ADR-070 to 074 entered 16 and at l.7 and l.10 still
+labels 071/072/073 "Proposed".
+
+### N2 (nit) `bin/contracts.exs:104`: unplanted branch
+
+`Enum.uniq(adapters) != adapters` has no planted case and shares the diagnostic with the
+differential branch. A duplicate adapter is harmless to the trigger; delete the branch,
+or plant it if kept (over-engineering count: one).
+
+### N3 (nit) `docs/spec/IMPORT.md:66`: 09 §1a is listed "retained" but its text changed
+
+The Determinism row (09:77) was edited; IMPORT.md should say amended (to the crosswalk's
+own gloss) so the record matches git history.
+
+### Note: PR #20
+
+PR #20 also edits `docs/decisions/README.md` and `docs/reviews/README.md`; both will
+conflict textually with this PR (and this record's index line). It does not touch
+`protocol/fixtures/invalid.json`, `capability.schema.json` or `bin/`.
+
+## 4. Cross-vendor review (Astra), relayed by the owner: agreement
+
+- **A1** (README l.205, l.233-238, kernel choice described as unresolved): agree; it is S3
+  here. I rate it should-fix rather than nit because the PR's own edit at l.205 puts the
+  contradiction inside one paragraph, and README §7 is where an agent looks for what is
+  still open.
+- **A2** (red control covers a missing differential, not a well-formed path to a missing
+  file; should require the diagnostic text): agree with the first half, it is S1. The
+  second half is already true at `e7b1625`: `bin/red_controls.exs:161` requires the
+  `movement@1: duplicate host adapter, or elixir without` string, and with the check
+  neutered the script's output is the stale-matrix message, which the control rejects
+  (verified). Nothing to add there.
