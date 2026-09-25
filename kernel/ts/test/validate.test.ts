@@ -49,6 +49,13 @@ test('the capability lock encodes and hashes to the independent known answer', (
   assert.equal(hash(value), sha256);
 });
 
+test('the hello cartridge encodes and hashes to the independent known answer', () => {
+  const { value, canonical, sha256 } = read('protocol/fixtures/cartridge_hash.json');
+  assert.deepEqual(validate('CompiledCartridge', value), []);
+  assert.equal(encode(value), canonical);
+  assert.equal(hash(value), sha256);
+});
+
 test('a declared __proto__ property survives generation', () => {
   assert.deepEqual(validate('SubsetProbe', JSON.parse('{"__proto__":"ok"}'), defs), []);
 });

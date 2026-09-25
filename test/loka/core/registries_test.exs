@@ -11,6 +11,7 @@ defmodule Loka.Core.RegistriesTest do
   @invariants JSON.decode!(File.read!("protocol/invariants.json"))
   @capabilities JSON.decode!(File.read!("protocol/capability_registry.json"))
   @lock_kat JSON.decode!(File.read!("protocol/fixtures/capability_lock_hash.json"))
+  @cartridge_kat JSON.decode!(File.read!("protocol/fixtures/cartridge_hash.json"))
 
   test "the registry lists exactly the ErrorCode codes, each entry valid" do
     for entry <- @registry,
@@ -55,6 +56,50 @@ defmodule Loka.Core.RegistriesTest do
   test "every effect origin is a registered capability key" do
     keys = for c <- @capabilities, do: c["key"]
     for e <- @effects, origin <- e["allowed_origins"], do: assert(origin in keys, origin)
+  end
+
+  # Gate R3 gap 2: every registered command, event and policy op has exactly one owning
+  # capability, recorded on the capability's registry entry, so the owner is always a
+  # registered capability; the schemas stay the only catalogs of names.
+  @owned for {field, contract, tag} <- [
+               {"commands", "CommandPayload", "type"},
+               {"events", "EventPayload", "type"},
+               {"policies", "Policy", "op"}
+             ],
+             do:
+               {field,
+                for(b <- Contracts.defs()[contract]["oneOf"], do: b["properties"][tag]["const"])}
+
+  defp ownership_problems(registry) do
+    for {field, names} <- @owned,
+        owned = for(c <- registry, n <- c[field] || [], do: n),
+        n <- Enum.uniq(names ++ owned),
+        problem = ownership(n in names, Enum.count(owned, &(&1 == n))),
+        problem != nil,
+        do: {problem, n}
+  end
+
+  defp ownership(false, _), do: :unknown
+  defp ownership(true, 0), do: :unowned
+  defp ownership(true, 1), do: nil
+  defp ownership(true, _), do: :two_owners
+
+  test "every command, event and policy op has exactly one owning capability" do
+    assert ownership_problems(@capabilities) == []
+  end
+
+  test "the ownership check catches an unowned, a doubly owned and an unknown name" do
+    planted =
+      for c <- @capabilities do
+        case c["key"] do
+          "movement" -> Map.delete(c, "commands")
+          "quest" -> Map.update!(c, "commands", &["take", "fly" | &1])
+          _ -> c
+        end
+      end
+
+    assert Enum.sort(ownership_problems(planted)) ==
+             [{:two_owners, "take"}, {:unknown, "fly"}, {:unowned, "move"}]
   end
 
   # Invariants are checked by id (docs/ROADMAP.md), so an id must name one invariant, and a
@@ -125,6 +170,15 @@ defmodule Loka.Core.RegistriesTest do
     assert Contracts.validate("CapabilityLock", lock) == :ok
     assert Loka.Core.Canonical.encode(lock) == {:ok, canonical}
     assert Loka.Core.Canonical.hash(lock) == {:ok, sha}
+  end
+
+  # Breaks if the encoder mishandles non-ASCII text or nested definition maps, or if the
+  # frozen contracts drift from the hello subset.
+  test "the hello cartridge encodes and hashes to the independent known answer" do
+    %{"value" => cartridge, "canonical" => canonical, "sha256" => sha} = @cartridge_kat
+    assert Contracts.validate("CompiledCartridge", cartridge) == :ok
+    assert Loka.Core.Canonical.encode(cartridge) == {:ok, canonical}
+    assert Loka.Core.Canonical.hash(cartridge) == {:ok, sha}
   end
 
   # Breaks if a row is malformed or duplicated, names a missing fixture, or a capability

@@ -3,7 +3,13 @@
     "key": "movement",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "commands": [
+      "move"
+    ],
+    "events": [
+      "entity_entered_room"
+    ]
   },
   {
     "key": "barrier",
@@ -15,7 +21,18 @@
     "key": "containment",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "commands": [
+      "take",
+      "drop"
+    ],
+    "events": [
+      "item_acquired",
+      "item_dropped"
+    ],
+    "policies": [
+      "has_item"
+    ]
   },
   {
     "key": "equipment",
@@ -33,25 +50,42 @@
     "key": "description_variant",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "commands": [
+      "look"
+    ]
   },
   {
     "key": "target_resolution",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "policies": [
+      "target_present"
+    ]
   },
   {
     "key": "policy",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "policies": [
+      "all",
+      "any",
+      "not"
+    ]
   },
   {
     "key": "fact",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "events": [
+      "fact_changed"
+    ],
+    "policies": [
+      "fact_compare"
+    ]
   },
   {
     "key": "resource",
@@ -105,13 +139,32 @@
     "key": "quest",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "commands": [
+      "accept_quest"
+    ],
+    "events": [
+      "quest_activated",
+      "quest_resolved"
+    ],
+    "policies": [
+      "quest_state"
+    ]
   },
   {
     "key": "dialogue",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "commands": [
+      "talk",
+      "choose",
+      "close_choice"
+    ],
+    "events": [
+      "choice_opened",
+      "choice_resolved"
+    ]
   },
   {
     "key": "scene",
@@ -141,7 +194,10 @@
     "key": "schedule",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "commands": [
+      "run_job"
+    ]
   },
   {
     "key": "population",
@@ -165,7 +221,10 @@
     "key": "calendar",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "commands": [
+      "wait"
+    ]
   },
   {
     "key": "tide",

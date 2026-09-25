@@ -74,7 +74,7 @@
       ]
     },
     "CapabilitySpec": {
-      "description": "One registry entry (05 §6): a capability version, its portability, and its semantic residency from the residency matrix (05 §6 'Capability semantic residency matrix'). Portability limits residency (this table is the PM's adopted reading of 05 §6, not spec text): a portable capability is a portable semantic foundation or portable capability implementation, server_only is a Realm-only semantic capability, client_presentation_only is client presentation; authority-host coordination and authoring/certification are never capabilities (05 §6). A null residency is not yet classified. An Effect names the capabilities that may emit it (allowed_origins in protocol/effect_registry.json); commands, events and policies name no capability yet.",
+      "description": "One registry entry (05 §6): a capability version, its portability, and its semantic residency from the residency matrix (05 §6 'Capability semantic residency matrix'). Portability limits residency (this table is the PM's adopted reading of 05 §6, not spec text): a portable capability is a portable semantic foundation or portable capability implementation, server_only is a Realm-only semantic capability, client_presentation_only is client presentation; authority-host coordination and authoring/certification are never capabilities (05 §6). A null residency is not yet classified. An Effect names the capabilities that may emit it (allowed_origins in protocol/effect_registry.json). A capability lists the commands, events and policy ops it owns (05 §6: a capability owns the commands, events and policies it introduces); each registered one has exactly one owner, checked in test/loka/core/registries_test.exs.",
       "oneOf": [
         {
           "description": "Runs on every host, Story and Realm (05 §6).",
@@ -112,6 +112,27 @@
               "description": "The cross-kernel differential test for this capability (ADR-074).",
               "type": "string",
               "pattern": "^test/loka/[a-z0-9_]+/[a-z0-9_]+_test\\.exs$"
+            },
+            "commands": {
+              "description": "The Command types this capability owns, by name (CommandPayload type, command.schema.json); absent means none.",
+              "type": "array",
+              "items": {
+                "$ref": "action.schema.json#/$defs/Key"
+              }
+            },
+            "events": {
+              "description": "The DomainEvent types this capability owns, by name (EventPayload type, event.schema.json); absent means none.",
+              "type": "array",
+              "items": {
+                "$ref": "action.schema.json#/$defs/Key"
+              }
+            },
+            "policies": {
+              "description": "The policy operators this capability owns, by name (Policy op, policy.schema.json); absent means none.",
+              "type": "array",
+              "items": {
+                "$ref": "action.schema.json#/$defs/Key"
+              }
             }
           },
           "required": [
@@ -182,7 +203,13 @@
           "key": "movement",
           "version": 1,
           "portability": "portable",
-          "residency": "portable_capability"
+          "residency": "portable_capability",
+          "commands": [
+            "move"
+          ],
+          "events": [
+            "entity_entered_room"
+          ]
         },
         {
           "key": "fact",
