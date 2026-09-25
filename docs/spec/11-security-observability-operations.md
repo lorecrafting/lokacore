@@ -253,7 +253,7 @@ kernel version
 
 Offline debug traces use local save/instance IDs and should not be uploaded by default.
 
-*Amendment 2026-09-25 ([proposed ADR-075](../decisions/adr-075-observability-proposal.md)):* records carry the closed correlation ids of `protocol/observation.schema.json`; ADR-075 §3 maps this list onto them.
+*Amendment 2026-09-25 ([ADR-075](../decisions/adr-075-observability-proposal.md)):* records carry the closed correlation ids of `protocol/observation.schema.json`; ADR-075 §3 maps this list onto them.
 
 ## 12. Structured logs
 
@@ -275,7 +275,7 @@ protocol.validation_failed
 
 PII fields are minimized/redacted.
 
-*Amendment 2026-09-25 ([proposed ADR-075](../decisions/adr-075-observability-proposal.md)):* every record is an `ObservationRecord` (`protocol/observation.schema.json`) whose name is registered in `protocol/event_registry.json`. The names above are examples; each is registered with its first producer (ADR-075 §7). Redaction: ADR-075 §6.
+*Amendment 2026-09-25 ([ADR-075](../decisions/adr-075-observability-proposal.md)):* every record is an `ObservationRecord` (`protocol/observation.schema.json`) whose name is registered in `protocol/event_registry.json`. The names above are examples; each is registered with its first producer (ADR-075 §7). Redaction: ADR-075 §6.
 
 ## 13. Telemetry
 
@@ -316,7 +316,7 @@ Metrics:
 - restore failures;
 - cartridge download/hash failures.
 
-*Amendment 2026-09-25 ([proposed ADR-075](../decisions/adr-075-observability-proposal.md)):* a metric is registered with its first producer, and its value is a `Measure`: unknown and unavailable are explicit, never 0 or empty (ADR-075 §5).
+*Amendment 2026-09-25 ([ADR-075](../decisions/adr-075-observability-proposal.md)):* a metric is registered with its first producer, and its value is a `Measure`: unknown and unavailable are explicit, never 0 or empty (ADR-075 §5).
 
 ## 14. Tracing
 
@@ -334,7 +334,7 @@ channel command
 
 Do not trace giant state payloads by default.
 
-*Amendment 2026-09-25 ([proposed ADR-075](../decisions/adr-075-observability-proposal.md)):* OpenTelemetry export waits for the trigger in ADR-075 §8; the record ids map onto it.
+*Amendment 2026-09-25 ([ADR-075](../decisions/adr-075-observability-proposal.md)):* OpenTelemetry export waits for the trigger in ADR-075 §8; the record ids map onto it.
 
 ## 15. Game trace store
 
@@ -353,7 +353,7 @@ Retention can vary by environment/profile.
 
 Certification retains reproducible traces longer than ordinary production.
 
-*Amendment 2026-09-25 ([proposed ADR-075](../decisions/adr-075-observability-proposal.md)):* the entry is `TraceEntry` (`protocol/observation.schema.json`; ADR-075 §4). A run starts with a `trace.run` replay header. It records rejected decisions and failed commits too, carries no host data (identical replay inputs give identical entries), and is never authority: fixes are proven by deterministic replay.
+*Amendment 2026-09-25 ([ADR-075](../decisions/adr-075-observability-proposal.md)):* the entry is `TraceEntry` (`protocol/observation.schema.json`; ADR-075 §4). A run starts with a `trace.run` replay header. It records rejected decisions and failed commits too, carries no host data (identical replay inputs give identical entries), and is never authority: fixes are proven by deterministic replay.
 
 ## 16. Health/readiness
 
