@@ -24,3 +24,12 @@ questions; the owner's selected option is quoted.
 
    Rule for the R4 compiler, recorded as an amendment in
    [docs/spec/IMPORT.md](../spec/IMPORT.md).
+3. **ADR-072 accepted** ([proposal](adr-071-072-proposal.md); earlier hand-off in
+   [owner-decisions-2026-09-24.md](owner-decisions-2026-09-24.md), item 3). Asked:
+   > ADR-072 is the persistence design: the world lives in memory, rules only propose changes, and each action saves only the changed rows plus a receipt in one transaction. When it came up you said "idk i leave it up to you", and the assistant chose this design. The spec's decision register only lists decisions you've accepted. Should ADR-072 go in as accepted?
+
+   Options offered: "Yes, accept it (Recommended)" or "Keep as proposal". The owner
+   chose:
+   > Yes, accept it (Recommended)
+
+   ADR-072 enters [document 16](../spec/16-decision-register.md) as accepted.

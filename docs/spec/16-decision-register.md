@@ -83,6 +83,7 @@ Accepted design direction is not R0 approval or implementation completion. Provi
 - [ADR-069 — Adverse known answers are an eighth frozen input](#adr-069--adverse-known-answers-are-an-eighth-frozen-input)
 - [ADR-070 — Pixel 3a stands in for the A14 class in the R1 experiment](#adr-070--pixel-3a-stands-in-for-the-a14-class-in-the-r1-experiment)
 - [ADR-071 — Candidate C selected on a quick A3; remaining R1 gates deferred](#adr-071--candidate-c-selected-on-a-quick-a3-remaining-r1-gates-deferred)
+- [ADR-072 — Online and local persistence shape](#adr-072--online-and-local-persistence-shape)
 - [ADR-073 — One Mix application with strict boundaries, not an umbrella](#adr-073--one-mix-application-with-strict-boundaries-not-an-umbrella)
 - [ADR-074 — TypeScript-first rules until a server consumes them](#adr-074--typescript-first-rules-until-a-server-consumes-them)
 
@@ -876,6 +877,12 @@ The Google Pixel 3a (G020G, 3.5 GB kernel-visible memory) stands in for the `gal
 **Status:** Accepted by the owner, 2026-09-24 ([record](../decisions/owner-decisions-2026-09-24.md), item 4; [quick A3](../decisions/owner-decision-a3-2026-09-24.md)); full text in [the proposal](../decisions/adr-071-072-proposal.md). Amended by ADR-074.
 
 Candidate C (Elixir on the server, TypeScript on Hermes) is selected for R2 with the `touched-1` boundary variant, on a quick A3 rather than the full envelope procedure. This is not R1 acceptance: the failed phone checkpoint round trip (Medium, Stress) is recorded as accepted risk, and the unmeasured rows are deferred to R6P and R10 as the proposal lists. Reopens if a deferred measurement fails because of the TypeScript-on-Hermes kernel; then B is evaluated.
+
+## ADR-072 — Online and local persistence shape
+
+**Status:** Accepted by the owner, 2026-09-24 ([record](../decisions/owner-decisions-r3-open-questions-2026-09-24.md), item 3), after delegating the design ([hand-off](../decisions/owner-decisions-2026-09-24.md), item 3); full text in [the proposal](../decisions/adr-071-072-proposal.md).
+
+The world owner holds the world in memory and rules read only memory. Rules are pure (`decide(state, command) → proposal`) and never write memory or storage. The host commits only the changed rows plus the receipt and outbox rows in one transaction, then adopts the proposal into memory, then replies. Kernels use structural sharing. No periodic or rest-point snapshots; a full canonical checkpoint exists only for export, backup and the round-trip measurement. ADR-006 and ADR-007 are unchanged.
 
 ## ADR-073 — One Mix application with strict boundaries, not an umbrella
 
