@@ -372,7 +372,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Consume a due job occurrence when its run_job commits, so it is never selected again (04 §5.4). Target: job (job_id). Preconditions: the job is pending and its due_time is not later than the visited logical time (the clock at ordinary admission, or the job's visited due time during an explicit advance; 04 §5.4).",
+          "description": "Consume a due job occurrence when its run_job commits, so it is never selected again (04 §5.4). Target: job (job_id). Preconditions: the job is pending and its due_time is not later than the visited logical time (the clock at ordinary admission, or the job's visited due time during an explicit advance; 04 §5.4). It is proposed only by the job's own run_job at its visited due time.",
           "type": "object",
           "properties": {
             "op": {
@@ -455,7 +455,7 @@
           "op": "quest.transition",
           "writer_group": 1,
           "instance_id": "55555555-6666-8777-8888-999999999999",
-          "from": "active",
+          "from": "objectives_complete",
           "to": "resolved",
           "outcome": "carry"
         },

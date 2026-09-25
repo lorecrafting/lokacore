@@ -65,6 +65,7 @@ export function target(op: DeltaOp): MutationTarget {
 
 export function compose(state: State, delta: StateDelta): Result {
   const { ops } = delta;
+  if (typeof state.clock !== 'number') return fault('precondition_failed', { kind: 'clock' });
   if (overBudget(state, ops)) return { fault: { kind: 'fault', code: 'budget_exceeded' } };
   let horizon = state.clock;
   for (const op of ops) if (op.op === 'time.advance') horizon = op.to;
@@ -168,10 +169,11 @@ function transfer(e: string, source: string, d: string, row: Json | undefined, c
   if (row !== source) return { code: 'precondition_failed' };
   if (inside(d, e, ctx)) return { code: 'containment_cycle' };
   const cap = get(section(ctx.state, 'capacities'), d) as number | undefined;
+  if (cap === undefined) return { value: d };
   const held = rows('containment', 'containers', 'entity_id', ctx).filter(
     ([x, c]) => c === d && x !== e,
   );
-  if (cap !== undefined && held.length >= cap) return { code: 'capacity_exceeded' };
+  if (held.length >= cap) return { code: 'capacity_exceeded' };
   return { value: d };
 }
 

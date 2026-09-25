@@ -103,28 +103,38 @@ defmodule Loka.Core.ComposeTest do
   defp over?(state, ops),
     do: Compose.compose(Map.put(state, "clock", 6), %{"ops" => ops}) == budget()
 
+  defp changes(state, ops),
+    do: Compose.compose(Map.put(state, "clock", 6), %{"ops" => ops})["changes"]
+
   defp budget, do: %{"fault" => %{"kind" => "fault", "code" => "budget_exceeded"}}
 
-  test "composition-profile budgets: at the limit composes, one over faults" do
+  test "composition-profile budgets: at the limit composes with the expected changes, one over faults" do
     advance = fn n ->
       for t <- 6..(5 + n),
           do: %{"op" => "time.advance", "writer_group" => 0, "from" => t, "to" => t + 1}
     end
 
     ops = @limits["operations"]
-    refute over?(%{}, advance.(ops))
+
+    assert changes(%{}, advance.(ops)) == [
+             %{"target" => %{"kind" => "clock"}, "value" => 6 + ops}
+           ]
+
     assert over?(%{}, advance.(ops + 1))
 
     created = @limits["created_jobs"]
-    refute over?(%{}, Enum.map(1..created, &schedule/1))
+    assert length(changes(%{}, Enum.map(1..created, &schedule/1))) == created
     assert over?(%{}, Enum.map(1..(created + 1), &schedule/1))
 
     pending = @limits["pending_jobs"]
-    refute over?(%{"jobs" => jobs(pending - 1, 100)}, [schedule(pending)])
+
+    assert [%{"value" => %{"status" => "pending"}}] =
+             changes(%{"jobs" => jobs(pending - 1, 100)}, [schedule(pending)])
+
     assert over?(%{"jobs" => jobs(pending, 100)}, [schedule(pending + 1)])
 
     due = @limits["due_jobs_per_advance"]
-    refute over?(%{"jobs" => jobs(due, 1)}, Enum.map(1..due, &complete/1))
+    assert length(changes(%{"jobs" => jobs(due, 1)}, Enum.map(1..due, &complete/1))) == due
     assert over?(%{"jobs" => jobs(due + 1, 1)}, Enum.map(1..(due + 1), &complete/1))
   end
 

@@ -81,6 +81,8 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
     }
     return 'fault' in result || [...groups.values()].every((g) => g.size === 1);
   },
+  // Checks only the read -> write value chain per target, not capacity, revision, cycle or
+  // time bounds.
   delta_preconditions_hold: ({ state, delta, result }) => {
     if ('fault' in result) return true;
     const seen = new Map<string, Json | undefined>();

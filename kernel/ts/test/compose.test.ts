@@ -79,17 +79,28 @@ const over = (s: object, ops: object[]) =>
   encode(compose({ ...s, clock: 6 } as State, { ops } as never) as Json) ===
   '{"fault":{"code":"budget_exceeded","kind":"fault"}}';
 
-test('composition-profile budgets: at the limit composes, one over faults', () => {
+const changes = (s: object, ops: object[]) =>
+  (compose({ ...s, clock: 6 } as State, { ops } as never) as { changes: { value: Json }[] })
+    .changes;
+
+test('composition-profile budgets: at the limit composes with the expected changes, one over faults', () => {
   const advance = (n: number) =>
     range(n).map((i) => ({ op: 'time.advance', writer_group: 0, from: 5 + i, to: 6 + i }));
-  assert.ok(!over({}, advance(limits.operations)));
+  assert.equal(
+    encode(changes({}, advance(limits.operations)) as never),
+    `[{"target":{"kind":"clock"},"value":${6 + limits.operations}}]`,
+  );
   assert.ok(over({}, advance(limits.operations + 1)));
-  assert.ok(!over({}, range(limits.created_jobs).map(schedule)));
+  assert.equal(changes({}, range(limits.created_jobs).map(schedule)).length, limits.created_jobs);
   assert.ok(over({}, range(limits.created_jobs + 1).map(schedule)));
   const pending = limits.pending_jobs;
-  assert.ok(!over({ jobs: jobs(pending - 1, 100) }, [schedule(pending)]));
+  assert.equal(
+    (changes({ jobs: jobs(pending - 1, 100) }, [schedule(pending)])[0]!.value as { status: string })
+      .status,
+    'pending',
+  );
   assert.ok(over({ jobs: jobs(pending, 100) }, [schedule(pending + 1)]));
   const due = limits.due_jobs_per_advance;
-  assert.ok(!over({ jobs: jobs(due, 1) }, range(due).map(complete)));
+  assert.equal(changes({ jobs: jobs(due, 1) }, range(due).map(complete)).length, due);
   assert.ok(over({ jobs: jobs(due + 1, 1) }, range(due + 1).map(complete)));
 });

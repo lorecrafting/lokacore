@@ -10,7 +10,8 @@ defmodule Loka.Core.Compose do
 
   Base state, a JSON object (absent sections are empty):
 
-  - `"clock"`: the committed logical time;
+  - `"clock"`: the committed logical time, required: without an integer clock every delta
+    faults `precondition_failed` on the clock target (fail closed);
   - `"facts"`: canonical fact MutationTarget text => FactValue (compared as opaque values);
   - `"fact_defaults"`: canonical DefinitionRef text => FactValue for unset facts;
   - `"containers"`: EntityId => its one container (03 §23); `"capacities"`: EntityId =>
@@ -46,15 +47,19 @@ defmodule Loka.Core.Compose do
 
   @spec compose(map(), map()) :: %{String.t() => term()}
   def compose(state, %{"ops" => ops}) do
-    if over_budget?(state, ops) do
-      fault("budget_exceeded", nil)
-    else
-      horizon = Enum.reduce(ops, state["clock"], &advance_target/2)
+    cond do
+      not is_integer(state["clock"]) -> fault("precondition_failed", %{"kind" => "clock"})
+      over_budget?(state, ops) -> fault("budget_exceeded", nil)
+      true -> apply_all(state, ops)
+    end
+  end
 
-      case Enum.reduce_while(ops, %{}, &step(&1, &2, {state, horizon})) do
-        %{"fault" => _} = f -> f
-        overlay -> %{"changes" => overlay |> Enum.sort() |> Enum.map(&row/1)}
-      end
+  defp apply_all(state, ops) do
+    horizon = Enum.reduce(ops, state["clock"], &advance_target/2)
+
+    case Enum.reduce_while(ops, %{}, &step(&1, &2, {state, horizon})) do
+      %{"fault" => _} = f -> f
+      overlay -> %{"changes" => overlay |> Enum.sort() |> Enum.map(&row/1)}
     end
   end
 

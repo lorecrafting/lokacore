@@ -46,6 +46,8 @@ defmodule Loka.Core.Invariants do
     Map.has_key?(r, "fault") or Enum.all?(groups, fn {_, gs} -> length(Enum.uniq(gs)) == 1 end)
   end
 
+  # Checks only the read -> write value chain per target (fact value, container, quest state,
+  # continuation or job status, clock), not capacity, revision, cycle or time bounds.
   def check("delta_preconditions_hold", %{"state" => s, "delta" => %{"ops" => ops}, "result" => r}) do
     Map.has_key?(r, "fault") or
       Enum.reduce_while(ops, %{}, fn op, seen ->
