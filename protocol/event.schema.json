@@ -305,7 +305,7 @@
           "additionalProperties": false
         },
         {
-          "description": "A fact changed from old to new (03 §7).",
+          "description": "A fact changed from old to new (03 §7). subject_id is present exactly when the fact.assign that changed it had one.",
           "type": "object",
           "properties": {
             "type": {
@@ -313,6 +313,9 @@
             },
             "fact": {
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "subject_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
             },
             "old": {
               "$ref": "delta.schema.json#/$defs/FactValue"
@@ -384,6 +387,18 @@
             "kind": "fact",
             "key": "search_plan"
           },
+          "old": "undecided",
+          "new": "party_led"
+        },
+        {
+          "type": "fact_changed",
+          "fact": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "fact",
+            "key": "search_plan"
+          },
+          "subject_id": "11111111-2222-4333-8444-555555555555",
           "old": "undecided",
           "new": "party_led"
         }

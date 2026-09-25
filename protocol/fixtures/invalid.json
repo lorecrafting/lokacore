@@ -189,5 +189,6 @@
   {"contract": "EffectRegistryEntry", "value": {"durability": "ephemeral", "type": "x", "idempotency": "required", "retry": "none", "allowed_origins": []}, "errors": [{"path": "/allowed_origins", "code": "too_few_items"}]},
   {"contract": "DecisionResult", "value": {"kind": "accepted"}, "errors": [{"path": "/delta", "code": "missing_property"}, {"path": "/effects", "code": "missing_property"}, {"path": "/events", "code": "missing_property"}, {"path": "/outcome", "code": "missing_property"}, {"path": "/rng", "code": "missing_property"}]},
   {"contract": "DecisionResult", "value": {"kind": "rejected"}, "errors": [{"path": "/error", "code": "missing_property"}]},
-  {"contract": "DecisionResult", "value": {"kind": "fault"}, "errors": [{"path": "/code", "code": "missing_property"}]}
+  {"contract": "DecisionResult", "value": {"kind": "fault"}, "errors": [{"path": "/code", "code": "missing_property"}]},
+  {"contract": "EventPayload", "value": {"type": "fact_changed", "fact": {"cartridge_id": "ferrymans_lantern", "cartridge_version": "0.1.0", "kind": "fact", "key": "search_plan"}, "subject_id": "bram", "old": "undecided", "new": "party_led"}, "errors": [{"path": "/subject_id", "code": "pattern_mismatch"}]}
 ]
