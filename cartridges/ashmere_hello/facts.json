@@ -1,0 +1,15 @@
+{
+  "facts": {
+    "village.arrived": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The lantern was fetched for Bram; the village green reads differently."
+    }
+  }
+}

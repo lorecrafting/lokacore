@@ -11,6 +11,10 @@ defmodule Loka.Core.Canonical do
 
   @type value :: nil | boolean() | integer() | binary() | [value()] | %{binary() => value()}
 
+  @doc "The most containers that may nest, the outermost included."
+  @spec max_depth() :: pos_integer()
+  def max_depth, do: @max_depth
+
   @doc "An integer in the profile's safe range, [-(2^53 - 1), 2^53 - 1]."
   defguard is_safe_integer(n) when is_integer(n) and abs(n) <= @safe
 
