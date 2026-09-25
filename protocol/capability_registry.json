@@ -196,6 +196,7 @@
     "portability": "portable",
     "residency": "portable_capability",
     "commands": [
+      "wait",
       "run_job"
     ]
   },
@@ -221,10 +222,7 @@
     "key": "calendar",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability",
-    "commands": [
-      "wait"
-    ]
+    "residency": "portable_capability"
   },
   {
     "key": "tide",
