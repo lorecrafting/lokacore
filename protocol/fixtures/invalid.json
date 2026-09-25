@@ -36,5 +36,7 @@
   {"contract": "FeatureEnvelope", "value": {"kind": "barrier", "version": "1"}, "errors": [{"path": "/version", "code": "invalid_type"}]},
   {"contract": "FeatureEnvelope", "value": {"kind": "barrier", "version": 0}, "errors": [{"path": "/version", "code": "below_minimum"}]},
   {"contract": "FeatureEnvelope", "value": {"kind": "barrier", "version": 1, "body": {"open": true}}, "errors": [{"path": "/body", "code": "unknown_property"}]},
-  {"contract": "FeatureRegistryEntry", "value": {"kind": "barrier", "spec": "", "freeze": "R6"}, "errors": [{"path": "/freeze", "code": "not_in_enum"}, {"path": "/spec", "code": "too_short"}]}
+  {"contract": "FeatureRegistryEntry", "value": {"kind": "barrier", "spec": "", "freeze": "R6"}, "errors": [{"path": "/freeze", "code": "not_in_enum"}, {"path": "/spec", "code": "too_short"}]},
+  {"contract": "FeatureEnvelope", "value": {}, "errors": [{"path": "/kind", "code": "missing_property"}, {"path": "/version", "code": "missing_property"}]},
+  {"contract": "FeatureRegistryEntry", "value": {"kind": "barrier", "spec": "21 §5 Barrier"}, "errors": [{"path": "/freeze", "code": "missing_property"}]}
 ]
