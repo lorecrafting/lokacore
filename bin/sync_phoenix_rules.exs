@@ -14,6 +14,7 @@ defmodule SyncPhoenixRules do
   @files ~w(elixir.md ecto.md)
   @dest Path.expand("../docs/conventions/phoenix", __DIR__)
 
+  @spec main([String.t()]) :: [:ok]
   def main(args) do
     tags = remote_tags()
 
