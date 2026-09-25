@@ -22,6 +22,13 @@ contract amendment; document 16 is not edited here. Evidence:
 
 ## ADR-071 — Candidate C selected on a quick A3; remaining R1 gates deferred
 
+Amended 2026-09-24 by [ADR-074](adr-074-ts-first-proposal.md) (crosswalk rows): C's Elixir
+rules arrive at the ADR-074 trigger; the on-device differential below is replaced by
+Node-recorded per-step bytes replayed on Hermes; the server load, scheduler, faults under
+load, server fault-record items and the §10/§11 maintenance and fault-containment
+comparison are deferred to that trigger; the mutant check, iPhone timing and R6P phone rows
+stay. Results recorded below are unchanged.
+
 **Decision.** Candidate C (Elixir on the server, TypeScript on Hermes) is selected
 for R2 with the `touched-1` boundary variant. Candidates B and A are not built.
 This selection rests on a quick A3, not the full envelope procedure, by owner

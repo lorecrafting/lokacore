@@ -56,7 +56,7 @@ This exact split MAY be adjusted after a compile-dependency spike, but dependenc
 - `loka_store` depends on `loka_core`; it implements persistence ports and contains no game rules.
 - `loka_platform` depends on `loka_core` plus persistence/platform adapters; it owns account/catalog/entitlement/purchase-restore application rules, not world simulation.
 - `loka_runtime` depends on `loka_core`, `loka_content`, and persistence ports; it owns online world/session/scheduler authority.
-- `loka_builder` depends on content/compiler/Lab contracts and may orchestrate runtime test hosts; production runtime MUST NOT depend on builder.
+- `loka_builder` depends on content/compiler/Lab contracts and may orchestrate runtime test hosts; production runtime MUST NOT depend on builder. Until the [ADR-074 trigger](../decisions/adr-074-ts-first-proposal.md#3-the-proposal), the Lab drives the TypeScript kernel headless as its rules host.
 - `loka_web` depends inward on application/runtime/builder interfaces and is an external transport adapter only.
 
 `loka_core` MUST NOT depend on Phoenix, Ecto, filesystem, network, or runtime processes. Portable rule semantics that must execute offline MUST cross the narrow portable-rules port selected by R1; whether that port reaches one shared native implementation or a conformant host implementation is an implementation decision, not a domain dependency.

@@ -404,7 +404,7 @@ Establish world/state mechanics needed by everything else.
 
 ### Gate R5
 
-Golden vectors pass through the R1-selected portable-rules implementation(s) and every accepted authoritative host path.
+Golden vectors pass through the R1-selected portable-rules implementation(s) and every accepted authoritative host path that runs the rules. Under [ADR-074](../decisions/adr-074-ts-first-proposal.md), `portable_capability` rules run on the TypeScript kernel only until the [ADR-074 trigger](../decisions/adr-074-ts-first-proposal.md#3-the-proposal); the portable semantic foundation stays in both kernels.
 
 ## R6 — Offline authority and save system
 
@@ -561,7 +561,7 @@ Document 09 §1a and the generated release matrix select the first-release gates
 - autonomous simulation;
 - adversarial scenario import/generation interface;
 - fault injection for local authority;
-- cross-host differential/conformance runner;
+- cross-host differential/conformance runner over the hosts that run the rules (before the [ADR-074 trigger](../decisions/adr-074-ts-first-proposal.md#3-the-proposal), the TypeScript kernel headless on Node: authoring, not server hosting);
 - semantic-review evidence bundle support;
 - content-addressed CertificationEvidenceBundle + repro export.
 
@@ -642,7 +642,7 @@ The cartridge MUST still prove that quests and living-world systems interact thr
 
 ### Gate R10
 
-Full applicable `offline_private` certification plus a **developer-harness physical-device smoke** using the minimal Expo/native integration established by R1/R2/R6. Polished non-developer product-shell acceptance belongs to R12.
+Full applicable `offline_private` certification on the hosts that run the rules ([ADR-074](../decisions/adr-074-ts-first-proposal.md)) plus a **developer-harness physical-device smoke** using the minimal Expo/native integration established by R1/R2/R6. Polished non-developer product-shell acceptance belongs to R12.
 
 Its two intended endings emit the declared durable `prologue_completed` milestone after the final dawn consequence. Local pending-report capture is part of crash/retry evidence; the public account service is R12A.
 
@@ -761,7 +761,7 @@ Run the same cartridge rules online under OTP.
 
 ### Gate R14
 
-Same cartridge golden playthrough matches offline domain trace where host-specific effects are excluded.
+Same cartridge golden playthrough matches offline domain trace where host-specific effects are excluded. Before this gate, the Elixir port of the cartridge's `portable_capability` rules passes the retained fixtures and the cross-kernel differential ([ADR-074](../decisions/adr-074-ts-first-proposal.md)).
 
 Chaos tests around every commit boundary pass. Where the deployment requires prologues, entry and re-entry enforce current account/progress/policy state on the server; duplicate reports, stale client unlock caches and withdrawn evidence cannot bypass admission.
 

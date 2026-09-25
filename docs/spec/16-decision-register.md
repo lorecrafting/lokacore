@@ -81,6 +81,7 @@ Accepted design direction is not R0 approval or implementation completion. Provi
 - [ADR-067 — Bounded start, early representation review, no speculative expansion](#adr-067--bounded-start-early-representation-review-no-speculative-expansion)
 - [ADR-068 — Candidate C first, with randomized differential testing](#adr-068--candidate-c-first-with-randomized-differential-testing)
 - [ADR-069 — Adverse known answers are an eighth frozen input](#adr-069--adverse-known-answers-are-an-eighth-frozen-input)
+- [ADR-074 — TypeScript-first rules until a server consumes them](#adr-074--typescript-first-rules-until-a-server-consumes-them)
 
 </details>
 <!-- packet-navigation:end -->
@@ -152,7 +153,7 @@ Offline competitive/economic state is not trusted as MMO authority.
 
 **Status:** Provisional
 
-One portable deterministic semantic contract serves offline mobile and online BEAM hosts. ADR-068 tests dual implementations of it first; a single shared kernel remains a candidate.
+One portable deterministic semantic contract serves offline mobile and online BEAM hosts. ADR-068 tests dual implementations of it first; a single shared kernel remains a candidate. ADR-071 selected C; under ADR-074, C's Elixir `portable_capability` rules arrive at the ADR-074 trigger.
 
 R1 compares three candidates against a pre-registered envelope: (A) one TypeScript kernel native in React Native and reached from BEAM through a Port; (B) one Rust kernel behind a pre-registered NIF/isolated-worker BEAM boundary and native mobile bindings; (C) dual Elixir/TypeScript implementations with golden-vector conformance and randomized differential testing. ADR-068 sets the order C, then B, then A.
 
@@ -853,8 +854,16 @@ The owner wants the online server to stay a single Elixir/OTP runtime, without a
 
 A 2026-09-23 feasibility probe (`probes/elixir-wasm/`, not R1 evidence) found that the Hermes version in the retained lock has no WebAssembly, SharedArrayBuffer, Atomics or Worker, so an Elixir kernel cannot run in React Native's engine; the hidden-WebView alternative was declined by the owner. C accepts permanent two-implementation maintenance; differential testing and shared fixtures are its drift control, not a proof of correctness.
 
+Amended by ADR-074 (2026-09-24): the Elixir `portable_capability` rules and their differential arrive at the ADR-074 trigger; the portable semantic foundation keeps both kernels and its differential now.
+
 ## ADR-069 — Adverse known answers are an eighth frozen input
 
 **Status:** Proposed amendment to the accepted R0 contract `aaadaffff02e459dbf04e71d6ddc81d75eacf986`, 2026-09-23, chosen by the owner after the independent oracle review; expected-answer review and owner acceptance pending.
 
 The oracle review of the seven inputs (`reviews/2026-09-23-oracle-review.md`, finding F1) found that they freeze only success paths. Failed checks, rejections, conflicts, stale views, rollback, unknown COMMIT, response loss, budgets, bounds, rejection sampling and the adverse Lantern paths existed only as Python assertions, which no input hash binds; a candidate that restores the RNG after a failed check passed every frozen fixture. `conformance/adverse-cases.json` now freezes those answers as data, in the existing `cases.json`, `composition-cases.json` and `lantern-traces.json` shapes, and becomes the eighth input bound by both readiness checkers, the setup and oracle records and `spec_tools/preserved-inputs.json`. It records what the retained checks already asserted, plus two rejection-sampling rows the review verified independently; it adds no contract behavior. The review of those bytes (`reviews/2026-09-23-oracle-review-adverse.md`, A1) found the model checked authorization before envelope validation, against 03 §14; the model and the one affected answer (`bad-envelopes`, request `{}` → `invalid_envelope`) were corrected before approval. Publication is frozen only where the contract requires it (nothing before COMMIT, no duplicate on response loss), because document 04 §2 permits but does not require fan-out of committed events after recovery. Selector overflow stays a model-level check: no registered operation reaches it.
+
+## ADR-074 — TypeScript-first rules until a server consumes them
+
+**Status:** Accepted by the owner, 2026-09-24 ([record](../decisions/owner-decision-adr-074-2026-09-24.md)); full text and applicability crosswalk in [ADR-074](../decisions/adr-074-ts-first-proposal.md).
+
+`portable_semantic_foundation` contracts stay in both kernels with their differential. `portable_capability` rules and their invariant checks are TypeScript-only until the trigger: the first planned server consumer of any `portable_capability` semantics (Story content on a server host, a Realm-native cartridge using a portable capability, or a trusted trace-verification service). It is checked mechanically: a `portable_capability` row gaining an Elixir host adapter needs a declared cross-kernel differential (`bin/contracts.exs`). Static compilation and TypeScript test execution, including the R5 simulation and the R9/R11 Lab running the TypeScript kernel headless, do not fire it. Before that consumer is enabled the owner chooses a route and the Elixir-versus-TypeScript conformance evidence passes. TypeScript host conformance (Node, Android Hermes, iOS Hermes) is retained.

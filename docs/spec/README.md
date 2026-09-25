@@ -202,14 +202,14 @@ The rebuild MUST use the strengths of Elixir/OTP intentionally:
 
 The rebuild MUST NOT turn every room, item, quest, or NPC into a GenServer merely because the BEAM makes processes cheap.
 
-The online authority/orchestration layer SHOULD remain idiomatic Elixir/OTP. Rules that must execute both offline and online MUST follow the portable deterministic semantic contract selected by R1. R1 tests C (dual Elixir/TypeScript with randomized differential testing) first, B (one Rust kernel) only if C fails, and A (one TypeScript kernel) if B fails (ADR-068). No execution strategy is selected before its applicable gates pass; golden conformance preserves the same semantic contract for every candidate. Server-only orchestration and capability adapters remain Elixir.
+The online authority/orchestration layer SHOULD remain idiomatic Elixir/OTP. Rules that must execute both offline and online MUST follow the portable deterministic semantic contract selected by R1. R1 tests C (dual Elixir/TypeScript with randomized differential testing) first, B (one Rust kernel) only if C fails, and A (one TypeScript kernel) if B fails (ADR-068). No execution strategy is selected before its applicable gates pass; golden conformance preserves the same semantic contract for every candidate. C was selected (ADR-071); under [ADR-074](../decisions/adr-074-ts-first-proposal.md), `portable_capability` rules are TypeScript-only until the first planned server consumer of them, while the portable semantic foundation stays in both kernels with its differential. Server-only orchestration and capability adapters remain Elixir.
 
 ## 6. Working top-level decisions
 
 | Topic | Current draft direction |
 |---|---|
 | Online language/runtime | Elixir on BEAM/OTP |
-| Portable offline rules | One deterministic portable semantic contract; R1 tests dual Elixir/TypeScript implementations with golden conformance and randomized differential testing first, then a shared Rust or TypeScript kernel (ADR-068) |
+| Portable offline rules | One deterministic portable semantic contract; R1 tests dual Elixir/TypeScript implementations with golden conformance and randomized differential testing first, then a shared Rust or TypeScript kernel (ADR-068); C selected (ADR-071), rules TypeScript-first (ADR-074) |
 | Server UI/API | Phoenix |
 | Mobile | One React Native / Expo app with strict Story Mode (local authority) and Realm Mode (remote BEAM authority) session boundaries |
 | Persistence | PostgreSQL for online/platform durability when those phases arrive; offline Story saves use local SQLite |

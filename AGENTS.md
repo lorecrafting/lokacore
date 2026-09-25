@@ -23,9 +23,13 @@ at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
 
 ## Architecture decisions already made (do not reopen silently)
 
-- **Candidate C (R1):** rules are implemented twice, in Elixir (server) and TypeScript
-  (phone), held to the same reviewed fixtures and to randomized differential testing.
-  [Proposed ADR-071](docs/decisions/adr-071-072-proposal.md).
+- **Candidate C (R1), TypeScript first:** the portable semantic foundation (canonical
+  encoding and hash, numbers, RNG, IdSource, delta algebra, invariant registry) is built in
+  Elixir and TypeScript, held to the reviewed fixtures and randomized differential testing.
+  Story rules (`portable_capability`) are TypeScript-only until a server first consumes
+  them; an Elixir host adapter on one needs a declared differential (`bin/contracts.exs`).
+  [Proposed ADR-071](docs/decisions/adr-071-072-proposal.md),
+  [ADR-074](docs/decisions/adr-074-ts-first-proposal.md).
 - **Persistence shape (proposed ADR-072):** the world lives in memory; rules are pure
   (`decide(state, command) → proposal`) and never write memory or storage; the host
   commits only the changed rows plus the receipt in one transaction, then adopts the
@@ -93,8 +97,8 @@ A test exists to catch a specific break. Adapted from
   registry's size), it is a change detector: test the behavior that depends on it instead.
 - **Expected values never come from the code under test.** Use the frozen conformance
   fixtures, hand-checked literals, or table rows with literal answers. Never compute the
-  answer with the implementation, its helpers, or the other kernel (Elixir and TypeScript
-  are compared to the fixtures, then to each other, never only to each other).
+  answer with the implementation, its helpers, or the other kernel (where both kernels
+  implement it, they are compared to the fixtures, then to each other, never only to each other).
 - **Behavior, not text.** Run scripts and checks on controlled input and assert output or
   exit status; do not grep source.
 - **Test our contract, not the library.** No tests for trivial structs, getters or
@@ -147,16 +151,19 @@ A test exists to catch a specific break. Adapted from
   Any `credo:disable` comment gives its reason on the same line; the reviewer checks it.
 - `elixir bin/contracts.exs --check`: `kernel/ts/src/contracts.gen.ts`, the
   [capability/schema docs](docs/contracts.gen.md) and the capability/residency matrix
-  (`docs/residency.gen.json`) match `protocol/` (run without `--check` to regenerate).
+  (`docs/residency.gen.json`) match `protocol/` (run without `--check` to regenerate); an
+  Elixir host adapter on a `portable_capability` without a differential fails (ADR-074).
 - `elixir bin/red_controls.exs`: plants a boundary violation, a cycle, a compile edge, an
   oversized AGENTS.md, size-limit cases, one violation per Credo check, a stale and an
-  out-of-subset schema, and a PartyId passed where a CharacterId is matched (nominal ids,
-  `Loka.Core.Contracts`), and requires each check to fail.
+  out-of-subset schema, an Elixir adapter without a differential, and a PartyId passed
+  where a CharacterId is matched (nominal ids, `Loka.Core.Contracts`), and requires each
+  check to fail.
 - `elixir bin/check_docs.exs`: links resolve; every doc is reachable; AGENTS.md stays
   within its word budget (it is loaded by every agent, every session).
 - CI: pull requests and pushes to main, superseded runs cancelled. Planned: native mobile
-  builds only when mobile code changes or on manual trigger; the differential runs
-  at least 10,000 fresh sequences on every fast CI run (r1-acceptance-envelope.md).
+  builds only when mobile code changes or on manual trigger; the differential (the
+  foundation across both kernels; rules on Node, a Hermes replay sample at R6P: ADR-074) runs at least
+  10,000 fresh sequences on every fast CI run (r1-acceptance-envelope.md §3).
 
 Run everything locally: `bin/check_all.sh` (what pre-push runs).
 

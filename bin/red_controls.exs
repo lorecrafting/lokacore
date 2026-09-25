@@ -137,6 +137,36 @@ failures =
     failures + 1
   end
 
+# ADR-074 trigger: a registry copy (never the real file) giving a portable_capability an
+# Elixir host adapter without a differential must fail contracts --check.
+registry =
+  Path.join(System.tmp_dir!(), "loka-red-registry-#{System.unique_integer([:positive])}.json")
+
+entry =
+  ~s({"key": "movement", "version": 1, "portability": "portable", "residency": "portable_capability", "host_adapters": ["elixir"]})
+
+File.write!(registry, "[#{entry}]")
+
+{out, status} =
+  try do
+    System.cmd("elixir", ["bin/contracts.exs", "--check", registry],
+      cd: root,
+      stderr_to_stdout: true
+    )
+  after
+    File.rm(registry)
+  end
+
+failures =
+  if status != 0 and
+       String.contains?(out, "movement@1: duplicate host adapter, or elixir without") do
+    IO.puts("ok   contracts: elixir host adapter without a differential (ADR-074)")
+    failures
+  else
+    IO.puts("FAIL contracts: elixir host adapter without a differential: exit #{status}\n#{out}")
+    failures + 1
+  end
+
 # Size limits, checked on the planted files only (fresh directories, removed afterwards):
 # one line over each limit fails, exactly at it passes; markers at 1.5x pass, and over it,
 # without a reason, not needed or not attached fail. L/ is under lib/, T/ under test/.

@@ -195,7 +195,7 @@ Offline Story authority and online BEAM authority must implement the same portab
 
 Define one **portable deterministic semantic contract**: canonical commands, state/deltas, RNG/time behavior, rule IR, errors, and conformance vectors. Every supported authoritative host must conform to it.
 
-R1 tests candidate C first (ADR-068): separate Elixir and mobile implementations organized around the same schemas and held to golden cross-host conformance and randomized differential testing. A shared portable kernel, candidate B and then A, is evaluated only after a documented C failure.
+R1 tests candidate C first (ADR-068): separate Elixir and mobile implementations organized around the same schemas and held to golden cross-host conformance and randomized differential testing. A shared portable kernel, candidate B and then A, is evaluated only after a documented C failure. Under [ADR-074](../decisions/adr-074-ts-first-proposal.md), the BEAM path joins this conformance for `portable_capability` rules at the [ADR-074 trigger](../decisions/adr-074-ts-first-proposal.md#3-the-proposal).
 
 ### R1 candidates
 
@@ -481,7 +481,7 @@ After R1 selects the execution strategy, CI runs golden vectors through every re
 - the iOS Story authority path;
 - the Android Story authority path.
 
-Under candidate A these concretely become the TypeScript kernel plus an Erlang Port runner and the React Native JavaScript engine on both devices; under candidate B, a Rust core plus its declared BEAM boundary and iOS/Android native bindings. If R1 selects candidate C, tested first, the same conformance obligation applies to the accepted Elixir and mobile implementations instead.
+Under candidate A these concretely become the TypeScript kernel plus an Erlang Port runner and the React Native JavaScript engine on both devices; under candidate B, a Rust core plus its declared BEAM boundary and iOS/Android native bindings. If R1 selects candidate C, tested first, the same conformance obligation applies to the accepted Elixir and mobile implementations instead. Under [ADR-074](../decisions/adr-074-ts-first-proposal.md), the BEAM adapter joins for `portable_capability` rules at the [ADR-074 trigger](../decisions/adr-074-ts-first-proposal.md#3-the-proposal); before it, the direct implementation is the TypeScript kernel on Node.
 
 Any semantic divergence blocks release. Retain and compare per-step canonical state, decision, event/effect and RNG bytes as well as hashes; see `conformance/README.md`. Final transcript/hash agreement alone is insufficient.
 
