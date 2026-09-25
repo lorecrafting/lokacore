@@ -2,7 +2,8 @@
 
 Each record is written by a fresh agent that authored none of the reviewed work (AGENTS.md).
 One line per record: PR, commit reviewed, verdict, and the final round's commit and verdict
-when there were fixes. Findings, dispositions and cross-vendor (Astra) reviews are in the records.
+when there were fixes. Findings, dispositions and cross-vendor (Astra) reviews are in the records
+(PR #1: dispositions in the PR).
 
 ## R0/R1
 

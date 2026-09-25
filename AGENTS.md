@@ -161,8 +161,8 @@ A test exists to catch a specific break. Adapted from
   by links from README.md, AGENTS.md or CLAUDE.md; AGENTS.md stays
   within its word budget (it is loaded by every agent, every session).
 - CI (`.github/workflows/`): `ci.yml` on pull requests and pushes to main, superseded runs
-  cancelled; `mobile.yml` builds the native apps when `mobile/` or `kernel/` changes, or on
-  manual trigger. Planned: the differential (the foundation across both kernels; rules on
+  cancelled; `mobile.yml` builds the native apps on pull requests that touch `mobile/` or
+  `kernel/`, and on manual runs. Planned: the differential (the foundation across both kernels; rules on
   Node, a Hermes replay sample at R6P: ADR-074) runs at least 10,000 fresh sequences on
   every fast CI run (r1-acceptance-envelope.md §3).
 

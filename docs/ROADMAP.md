@@ -47,4 +47,5 @@ filter on top. Adapted from Datadog's
 26 slices after R3. Estimate ([ADR-074 §6](decisions/adr-074-ts-first-proposal.md#6-re-estimate-to-r6p-estimates-not-measurements),
 from R3's approximate counts): about 8.5 to 9.2 million subagent tokens to R6P; PM
 coordination is extra and unmeasured. Calendar time is bounded by owner approvals and
-device sessions. Re-estimate after the first two R5 slices.
+device sessions. Re-estimate after the first two R5 slices, including the R5 set-up items (`loka play`, rule
+lint, feature map).
