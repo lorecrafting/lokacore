@@ -3,17 +3,7 @@ language: tsx
 severity: error
 message: Realm code never imports Story code (spec document 14 §R2).
 files: [mobile/features/realm/**, mobile/authority/remote-realm/**]
-# Only module specifiers: import/export ... from '<here>', import('<here>'), require('<here>').
 rule:
   kind: string_fragment
   regex: '(^|/)(story|local-story)(/|$)'
-  inside:
-    kind: string
-    any:
-      - inside: { kind: import_statement, field: source }
-      - inside: { kind: export_statement, field: source }
-      - inside:
-          kind: arguments
-          inside:
-            kind: call_expression
-            has: { field: function, regex: '^(import|require)$' }
+  inside: { matches: module-specifier }

@@ -1,7 +1,7 @@
 id: ts-kernel-pure
 language: tsx
 severity: error
-message: Kernel code must stay pure (spec document 01 A6, proposed ADR-072). No clock, randomness, locale or dynamic loading. Host and Node APIs are already type errors via "lib"/"types" in kernel/ts/tsconfig.json.
+message: Kernel code must stay pure (spec document 01 A6, ADR-072). No clock, randomness, locale or dynamic loading. Host and Node APIs are already type errors via "lib"/"types" in kernel/ts/tsconfig.json.
 files: [kernel/ts/src/**]
 rule:
   any:

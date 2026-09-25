@@ -1,12 +1,11 @@
 // Pure invariant checks by id, twin of lib/loka/core/invariants.ex (its moduledoc states the
 // observation fields). check(id, observation) is true when the invariant holds.
 import type { Json } from './canonical.ts';
-import { key, target, type Result } from './compose.ts';
+import { key, same, target, type Result } from './compose.ts';
 import { EVALUATION_FAULTS, type DeltaOp } from './contracts.gen.ts';
 
 // Observations are decoded JSON; fields are read loosely, as in the Elixir twin.
 type Any = any;
-const same = (a: unknown, b: unknown): boolean => key(a ?? null) === key(b ?? null);
 
 const moved = (r: Result): [string, Json][] =>
   ('changes' in r ? r.changes : [])

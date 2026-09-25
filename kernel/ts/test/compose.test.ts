@@ -2,14 +2,12 @@
 // JSON.parse so they never pass through the code under test. Results are compared as
 // canonical bytes, the form the Elixir kernel must match.
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { encode, type Json } from '../src/canonical.ts';
 import { compose, key, type State } from '../src/compose.ts';
 import { check } from '../src/invariants.ts';
+import { read } from './read.ts';
 
-const read = (path: string) =>
-  JSON.parse(readFileSync(new URL(`../../../${path}`, import.meta.url), 'utf8'));
 const fixture = read('protocol/fixtures/composition.json');
 const limits = read('docs/spec/conformance/composition-profile.json').limits;
 const registered: string[] = read('protocol/invariants.json')
@@ -167,9 +165,7 @@ test('failed or unknown commits and faults adopt and deliver nothing; a commit a
 
 const jobId = (n: number) => uuid('d0', n);
 const jobs = (n: number, due: number) =>
-  Object.fromEntries(
-    [...Array(n).keys()].map((i) => [jobId(i + 1), { due_time: due, status: 'pending' }]),
-  );
+  Object.fromEntries(range(n).map((i) => [jobId(i), { due_time: due, status: 'pending' }]));
 const over = (s: object, ops: object[]) =>
   encode(compose({ ...s, clock: 6 } as State, { ops } as never) as Json) ===
   '{"fault":{"code":"budget_exceeded","kind":"fault"}}';
