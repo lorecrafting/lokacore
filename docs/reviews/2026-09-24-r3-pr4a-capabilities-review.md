@@ -199,3 +199,52 @@ In plain language, with whether the owner is really needed.
 
 Truly needing the owner: 5 (a spec deviation), and a nod on 6 and 7 when they come up.
 The rest can take the PM's defaults.
+
+## Cross-vendor review (Astra), relayed verbatim by the owner
+
+Reviewed commit `0995551`, independently of the review above. The PM checked A1 against the spec before forwarding it: 07 §3 defines `party` and `shared_area`, and 09 §20 says these names reuse the canonical execution-profile vocabulary.
+
+```text
+VERDICT: CHANGES REQUIRED
+
+FINDINGS:
+
+A1 [should-fix] protocol/manifest.schema.json:24-27 (at 0995551380119e5a1d82cdfd2caa669cb977b41b) — ExecutionProfile rejects two profiles already explicitly named by the specification.
+   Failure scenario: take an otherwise valid DeploymentManifest and change only profile to "party" or "shared_area" → [{"path":"/profile","code":"not_in_enum"}]. The same omission rejects these values in CartridgeManifest.supported_profiles.
+   docs/spec/07-offline-storypacks-to-mmo.md §3 defines both exact spellings; docs/spec/09-cartridge-lab-certification.md §20 also explicitly selects them. Therefore the schema description and open question 6 incorrectly claim their names are unspecified.
+   Add both enum members, regenerate the TypeScript contracts, and exercise valid manifests using each. Correct the invalid DeploymentManifest fixture that currently expects "party" to produce not_in_enum. This adds constitutional vocabulary, not multiplayer implementation.
+
+QUESTIONS:
+
+AQ1 — Is the exhaustive portability→residency mapping intended to become an explicitly approved policy? protocol/capability.schema.json makes server_only→realm_only_capability and client_presentation_only→client_presentation mandatory, and rejects null for both while accepting null for portable. I reproduced the null rejection. The known-class pairings are a reasonable interpretation of 05 §6’s responsibility boundaries, but that section does not explicitly prescribe this complete validation table or its asymmetric treatment of unclassified entries. Please distinguish the adopted implementation choice from a rule already stated by the specification. I would not demand an unrestricted cross-product: portable authoritative semantics living solely in a Realm evaluator would contradict the architecture. Without a demonstrated required counterexample, I am treating this as a policy-clarification question, not another correctness blocker.
+
+VIEWS ON OPEN QUESTIONS 1–9:
+
+1 — Accept the tagged lock hash. Independently reconstructed canonical UTF-8 is 545 bytes, with 37 capability keys and no trailing newline. Its SHA-256 is df07f06a4900fa8e7b9c5a9528d6350ab23983b76ffa270564c552f6bd4df0ee, exactly matching protocol/fixtures/capability_lock_hash.json. The format field supplies domain separation; do not include the resulting hash inside the lock being hashed.
+
+2 — Accept capability→exact-version pins in the lock, with kernel_api, rule_ir and content_schema remaining separate manifest requirements. The schemas preserve these distinctions, also separating api_version, release version and client_features. Keeping Realm protocol_version out of the offline requirements is appropriate. R4 must resolve registry dependencies and bind both requirements and the resolved lock into the semantic artifact hash; schema validity alone does not establish registry membership or dependency closure.
+
+3 — Accept deferring concrete adapter/fixture references until their implementation slices, and generated documentation/matrix output until the R3 gate. The gate report should distinguish declared residency from evidence that an implementation exists; missing bindings must not imply conformance. The expressly deferred version-immutability check is not a finding here, but it must precede the first certified/published dependency on a capability version.
+
+4 — Keep the three null residencies for this PR rather than guess. Classify the actual responsibility being registered: shared value/result/AST contracts can be foundational, while their gameplay evaluators can be capability implementations. Being listed under R3A does not by itself settle the evaluator’s residency.
+
+5 — Accept the half-open {at_least, below} representation as a deliberately selected minimal normalized range, not as something the example alone mandates. Explicitly approve the MAJOR.MINOR restriction. R4 should reject empty/reversed ranges and compare version components without lexical-order or unsafe-number errors; no generalized SemVer-range library is needed here.
+
+6 — Fix A1: the existing names are "party" and "shared_area". “Embedded instance” does not justify inventing another ExecutionProfile solely from the prose; its relationship to hosting profile and placement/composition can remain an explicit later decision.
+
+7 — No invented collection quotas are required to merge this contract slice. Choose resource limits before untrusted ingestion, at the responsible boundary. For deletion/simplification, replace repeated full chapter-one locks in ordinary manifest/schema examples with small representative locks; retain the independent 37-key hash fixture because it exercises the >32-key canonical-ordering case. Do not add caching or a larger registry framework merely to reduce small amounts of schema repetition.
+
+8 — Accept the minimal pinned-release envelopes without speculative overlay, deployment-ID or continuity dictionaries. Before those features are exercised, specify typed fields and their hash ownership. Semantic overrides must receive the separately hashed/certified treatment required by 05 §22; they must not silently mutate the pinned cartridge.
+
+9 — Accept the illustrative-field deferrals under R3B, provided each field freezes before its first dependent artifact or implementing slice. In particular, a compiler slice that needs entry or localization cannot postpone those contracts merely because the full chapter ships later. Continuing to reject unspecified fields is preferable to introducing an untyped escape hatch.
+
+VERIFICATION:
+
+Reviewed only 0995551380119e5a1d82cdfd2caa669cb977b41b; no repository or PR changes were made.
+
+The map subset, Elixir validator, TypeScript validator and generator were inspected. I found no additional defect in map-versus-closed-object admission, schema-valued additionalProperties traversal/reference rewriting, generated Readonly<Record<string, T>>, empty-key pointers, ~ and / escaping, simultaneous key/value diagnostics, or inclusive maxProperties comparison.
+
+Executed the unchanged TypeScript validator, verified against its Git blob hash, using validation-relevant schema slices from this commit: 13 map/lock cases, 14 count-boundary cases including limits 0, 1, 2, 32 and 33, and 512 Unicode diagnostic-order probes. Those passed their expected results. The profile rejection above was reproduced separately. Elixir and the generator were reviewed statically; BEAM was unavailable, so this is not a claim to have rerun the full suite or executed cross-kernel differential tests.
+
+The new TypeScript comparator matches UTF-8 lexical ordering for valid Unicode scalar strings, including BMP-versus-astral ordering and prefixes; comparing the ASCII error-code names also matches Elixir’s ordering. Importantly, loka-numeric-v1 rejects non-ASCII object keys before contract validation. The Unicode-key fixtures therefore exercise direct-validator diagnostics, not newly accepted wire inputs. I found no remaining ordering discrepancy within the documented decoded-value domain.
+```
