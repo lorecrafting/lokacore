@@ -72,11 +72,52 @@ defmodule Loka.Content.Checks do
   defp nesting(v) when is_list(v), do: 1 + Enum.reduce(v, 0, &max(nesting(&1), &2))
   defp nesting(_), do: 0
 
-  defp owners(registry) do
+  defp owners(registry, fields \\ ["commands", "policies"]) do
     for c <- registry,
-        name <- Map.get(c, "commands", []) ++ Map.get(c, "policies", []),
+        name <- Enum.flat_map(fields, &Map.get(c, &1, [])),
         into: %{},
         do: {name, {c["key"], "#{c["key"]}@#{c["version"]}"}}
+  end
+
+  @doc """
+  Diagnostics for a v2 source (`{entry, text}`; nil for v1): the entry is present, each room's
+  owning capability is required, exits and the entry name rooms of this cartridge, and each
+  room's text keys have a catalog entry (unless the catalog was rejected, `:unknown`).
+  """
+  @spec rooms(map() | nil, map(), {map() | nil, map() | :unknown} | nil, [map()]) :: [map()]
+  def rooms(_, _, nil, _), do: []
+
+  def rooms(m, defs, {entry, text}, registry) do
+    rooms = for {_, {rel, [], r}} <- defs["room"], do: {rel, r}
+
+    entry(m, entry, defs) ++
+      Enum.flat_map(rooms, &text_keys(&1, text)) ++
+      if(m, do: Enum.flat_map(rooms, &room(&1, m, defs, registry)), else: [])
+  end
+
+  defp entry(_, nil, _),
+    do: [diag("SCHEMA_VIOLATION", "cartridge.entry", %{"error" => "missing_property"})]
+
+  defp entry(nil, _, _), do: []
+
+  defp entry(m, ref, defs),
+    do: reference("cartridge.json", [], {"entry", "room"}, %{"entry" => ref}, m, defs)
+
+  defp room({rel, r}, m, defs, registry) do
+    required = {m["requires"]["capabilities"], owners(registry, ["definitions"])}
+
+    owned(at(rel, []), "room", required) ++
+      for {dir, exit} <- r["exits"],
+          d <- reference(rel, ["exits", dir], {"to", "room"}, exit, m, defs),
+          do: d
+  end
+
+  defp text_keys(_, :unknown), do: []
+
+  defp text_keys({rel, r}, text) do
+    for field <- ~w(title description), not is_map_key(text, r[field]) do
+      diag("UNRESOLVED_REFERENCE", at(rel, [field]), %{"target" => r[field]})
+    end
   end
 
   defp uses(m, defs, owners) do
@@ -136,10 +177,13 @@ defmodule Loka.Content.Checks do
       else: [diag("UNDECLARED_CAPABILITY", path, %{"capability" => key}, [pin])]
   end
 
-  defp reference(rel, steps, field, n, m, defs) do
+  defp reference(rel, steps, field, n, m, defs) when is_binary(field),
+    do: reference(rel, steps, {field, field}, n, m, defs)
+
+  defp reference(rel, steps, {field, kind}, n, m, defs) do
     ref = n[field]
 
-    case resolve(ref, field, m, defs) do
+    case resolve(ref, kind, m, defs) do
       :unresolved ->
         s = "#{ref["cartridge_id"]}@#{ref["cartridge_version"]}:#{ref["kind"]}/#{ref["key"]}"
         [diag("UNRESOLVED_REFERENCE", at(rel, steps ++ [field]), %{"target" => s})]

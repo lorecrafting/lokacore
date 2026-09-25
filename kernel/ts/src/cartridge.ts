@@ -68,7 +68,7 @@ export function loadCartridge(bytes: Uint8Array, installed: Installed): LoadResu
     return fail([diag('INVALID_JSON', '')]);
   }
   const c = isObj(doc) ? (doc as Obj).cartridge : undefined;
-  if (!isObj(c) || c.format !== 'loka-cartridge-v1')
+  if (!isObj(c) || !['loka-cartridge-v1', 'loka-cartridge-v2'].includes(c.format))
     return fail([diag('UNKNOWN_FORMAT', '.cartridge.format')]);
   const computed = hash(c);
   const stages = [
@@ -84,6 +84,7 @@ export function loadCartridge(bytes: Uint8Array, installed: Installed): LoadResu
           ],
     () => keyStage(c),
     () => lockStage(c),
+    () => refStage(c),
     () => installedStage(c, installed),
   ];
   for (const stage of stages) {
@@ -137,8 +138,8 @@ const schemaStage = (doc: Json) =>
 // The schema's propertyNames pattern already holds the key's shape and kind.
 function keyStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
-  for (const map of ['facts', 'policies', 'actions']) {
-    for (const [ref, def] of Object.entries(c[map] as Obj)) {
+  for (const map of ['facts', 'policies', 'actions', 'rooms']) {
+    for (const [ref, def] of Object.entries((c[map] ?? {}) as Obj)) {
       const [, id, version, key] = ref.match(/^(.*)@(.*):[a-z]+\/(.*)$/)!;
       const expected: [string, string, unknown][] = [
         ['cartridge_id', id, c.manifest.id],
@@ -172,7 +173,7 @@ function lockStage(c: Obj): Diagnostic[] {
     if (Object.hasOwn(locked, key)) data.locked = locked[key];
     out.push(diag('LOCK_MANIFEST_MISMATCH', `.cartridge.lock.capabilities${step(key)}`, data));
   }
-  const use = (kind: 'command' | 'policy', name: string, path: string) => {
+  const use = (kind: 'command' | 'policy' | 'definition', name: string, path: string) => {
     const owners = CAPABILITY_OWNERS[kind];
     // The schema closes policy ops, so only a command can be unowned.
     if (!Object.hasOwn(owners, name)) return void out.push(diag('UNKNOWN_COMMAND', path));
@@ -192,6 +193,32 @@ function lockStage(c: Obj): Diagnostic[] {
   }
   for (const [ref, p] of Object.entries(c.policies as Obj))
     walk(p.root, `.cartridge.policies${step(ref)}.root`);
+  for (const ref of Object.keys(c.rooms ?? {}))
+    use('definition', 'room', `.cartridge.rooms${step(ref)}`);
+  return out;
+}
+
+// v2: the entry and every exit name a room of this cartridge, and every room text key has a
+// catalog entry.
+function refStage(c: Obj): Diagnostic[] {
+  if (c.format !== 'loka-cartridge-v2') return [];
+  const { id, version } = c.manifest;
+  const out: Diagnostic[] = [];
+  const room = (r: Obj, path: string) => {
+    const target = `${r.cartridge_id}@${r.cartridge_version}:${r.kind}/${r.key}`;
+    const ok = r.cartridge_id === id && r.cartridge_version === version && r.kind === 'room';
+    if (!(ok && Object.hasOwn(c.rooms, target)))
+      out.push(diag('UNRESOLVED_REFERENCE', path, { target }));
+  };
+  room(c.entry, '.cartridge.entry');
+  for (const [ref, r] of Object.entries(c.rooms as Obj)) {
+    const at = `.cartridge.rooms${step(ref)}`;
+    for (const field of ['title', 'description'])
+      if (!Object.hasOwn(c.text, r[field]))
+        out.push(diag('UNRESOLVED_REFERENCE', `${at}.${field}`, { target: r[field] }));
+    for (const [dir, exit] of Object.entries(r.exits as Obj))
+      room(exit.to, `${at}.exits.${dir}.to`);
+  }
   return out;
 }
 

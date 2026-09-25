@@ -4,12 +4,13 @@
 set -u
 cd "$(dirname "$0")/.."
 # Mobile plants are .tsx and the kernel plant is .ts, so both file types are proven covered.
-planted="lib/loka/core/red_control.ex kernel/ts/src/red_control.ts mobile/packages/ui/red_control.tsx
+planted="lib/loka/core/red_control.ex kernel/ts/src/red_control.ts kernel/ts/src/rules/red_control.ts mobile/packages/ui/red_control.tsx
 mobile/features/story/red_control.tsx mobile/features/realm/red_control.tsx"
 mkdir -p lib/loka/core
 trap 'rm -f $planted; rmdir lib/loka/core 2>/dev/null' EXIT
 echo 'defmodule Loka.Core.RedControl do def x, do: File.read!("x") end' > lib/loka/core/red_control.ex
-echo 'export const t = Date.now();' > kernel/ts/src/red_control.ts
+printf 'export const t = Date.now();\nexport const decide = () => 0;\n' > kernel/ts/src/red_control.ts
+printf "import { readFileSync } from 'node:fs';\nexport const f = (w) => { w.state.clock = 1; };\n" > kernel/ts/src/rules/red_control.ts
 echo "import { a } from '../../authority/local-story';" > mobile/packages/ui/red_control.tsx
 printf "const b = () => import('../realm');\nimport { k } from '../../../kernel/ts/src';\nexport const P = () => <>{k}</>;\n" > mobile/features/story/red_control.tsx
 echo "import { c } from '../story';" > mobile/features/realm/red_control.tsx

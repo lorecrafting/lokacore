@@ -202,12 +202,29 @@ faults =
 
 limits = read.("docs/spec/conformance/composition-profile.json")["limits"]
 
-# Owning capability (key@version) of each command and policy op, for the loader's
-# UNDECLARED_CAPABILITY re-check (cartridge.schema.json DiagnosticCode). Events join when a
-# frozen definition kind references one.
+# Owning capability (key@version) of each command, policy op and definition kind, for the
+# loader's UNDECLARED_CAPABILITY re-check and command routing (cartridge.schema.json
+# DiagnosticCode). Events join when a frozen definition kind references one.
 owners =
-  for {kind, field} <- [{"command", "commands"}, {"policy", "policies"}], into: %{} do
+  for {kind, field} <- [
+        {"command", "commands"},
+        {"policy", "policies"},
+        {"definition", "definitions"}
+      ],
+      into: %{} do
     {kind, for(e <- registry, name <- e[field] || [], into: %{}, do: {name, pin.(e)})}
+  end
+
+# Per capability that owns a command or event: the command and event type names it owns, as
+# TypeScript literal unions (never for none). Rule modules are typed by it, so one that
+# handles or emits another capability's command or event fails typecheck (kernel/ts/src/world.ts).
+owned_union = fn names ->
+  if names == [], do: "never", else: Enum.map_join(names, " | ", &Gen.lit/1)
+end
+
+owned =
+  for e <- registry, (e["commands"] || []) ++ (e["events"] || []) != [] do
+    "#{Gen.lit(e["key"])}: { command: #{owned_union.(e["commands"] || [])}; event: #{owned_union.(e["events"] || [])} }"
   end
 
 {:ok, probe} =
@@ -222,7 +239,8 @@ targets = %{
         [
           "export const EVALUATION_FAULTS: readonly ErrorCode[] = #{Gen.lit(faults)};",
           "export const LIMITS: Readonly<Record<string, number>> = JSON.parse(#{Gen.lit(Gen.lit(limits))});",
-          "export const CAPABILITY_OWNERS: Readonly<Record<'command' | 'policy', Readonly<Record<string, string>>>> = JSON.parse(#{Gen.lit(Gen.lit(owners))});",
+          "export const CAPABILITY_OWNERS: Readonly<Record<'command' | 'policy' | 'definition', Readonly<Record<string, string>>>> = JSON.parse(#{Gen.lit(Gen.lit(owners))});",
+          "export type Owned = { #{Enum.join(owned, "; ")} };",
           "export const ARTIFACT_MAX_BYTES = #{Loka.Core.Contracts.defs()["ArtifactSize"]["maximum"]};",
           ""
         ],

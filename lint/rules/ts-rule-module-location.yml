@@ -1,0 +1,15 @@
+id: ts-rule-module-location
+language: tsx
+severity: error
+message: Rule modules live only in kernel/ts/src/rules/<capability>.ts (owner decision, docs/decisions/owner-decision-r5-setup-2026-09-25.md); a decide or a Rule-typed value elsewhere in the kernel is a rule outside that place.
+files: [kernel/ts/src/**]
+ignores: [kernel/ts/src/rules/**]
+rule:
+  any:
+    - pattern: 'export const decide = $V'
+    - pattern: 'export const decide: $T = $V'
+    - pattern: 'export function decide($$$) { $$$ }'
+    - kind: variable_declarator
+      has:
+        field: type
+        has: { kind: generic_type, regex: '^Rule<' }

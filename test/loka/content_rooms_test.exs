@@ -1,0 +1,131 @@
+defmodule Loka.ContentRoomsTest do
+  # Rooms, exits, the entry room and the text catalog (R5 S1; 05 §17, §18; 21 §5). Expected
+  # diagnostics are hand-written from protocol/cartridge.schema.json DiagnosticCode; the known
+  # answer is protocol/fixtures/cartridge_rooms_hash.json (Python), decoded with the stdlib JSON.
+  use ExUnit.Case, async: true
+
+  @moduletag :tmp_dir
+  @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_rooms_hash.json"))
+
+  defp ref(key, kind \\ "room"),
+    do: %{"cartridge_id" => "c", "cartridge_version" => "1.0.0", "kind" => kind, "key" => key}
+
+  @manifest %{
+    "api_version" => "loka/v3",
+    "id" => "c",
+    "version" => "1.0.0",
+    "title" => "t",
+    "requires" => %{
+      "kernel_api" => %{"at_least" => "1.0", "below" => "2.0"},
+      "content_schema" => 1,
+      "rule_ir" => 1,
+      "capabilities" => %{"movement" => 1},
+      "client_features" => []
+    },
+    "supported_profiles" => ["offline_private"]
+  }
+
+  defp room(exits), do: %{"title" => "r.t", "description" => "r.d", "exits" => exits}
+
+  # A two-room source (a north to b), with `files` merged over it; nil removes a file.
+  defp compile(dir, files) do
+    base = %{
+      "cartridge.json" => Map.put(@manifest, "entry", ref("a")),
+      "rooms/a.json" => room(%{"north" => %{"to" => ref("b")}}),
+      "rooms/b.json" => room(%{}),
+      "text.json" => %{"r.t" => "Room", "r.d" => "A room."}
+    }
+
+    for {rel, v} <- Map.merge(base, files), v != nil do
+      File.mkdir_p!(Path.join(dir, Path.dirname(rel)))
+      File.write!(Path.join(dir, rel), JSON.encode!(v))
+    end
+
+    Loka.Content.compile(dir)
+  end
+
+  defp d(code, path, data \\ %{}, suggested \\ []) do
+    %{
+      "severity" => "error",
+      "code" => code,
+      "path" => path,
+      "message_key" => "diagnostics." <> String.downcase(code),
+      "data" => data,
+      "suggested_capabilities" => suggested
+    }
+  end
+
+  # Breaks if the v2 payload drops or renames a field, or keys rooms wrongly.
+  test "ashmere_rooms compiles to the Python known answer" do
+    expected = ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
+    assert Loka.Content.compile("cartridges/ashmere_rooms") == {:ok, expected}
+  end
+
+  test "a two-room source compiles to v2 with its entry and text", %{tmp_dir: dir} do
+    assert {:ok, bytes} = compile(dir, %{})
+    %{"cartridge" => c} = JSON.decode!(bytes)
+    assert c["format"] == "loka-cartridge-v2"
+    assert Map.keys(c["rooms"]) == ["c@1.0.0:room/a", "c@1.0.0:room/b"]
+    assert c["rooms"]["c@1.0.0:room/a"]["key"] == "a"
+    assert c["entry"] == ref("a")
+    refute Map.has_key?(c["manifest"], "entry")
+  end
+
+  test "an exit or entry naming no room is UNRESOLVED_REFERENCE", %{tmp_dir: dir} do
+    files = %{
+      "cartridge.json" => Map.put(@manifest, "entry", ref("nowhere")),
+      "rooms/a.json" =>
+        room(%{"north" => %{"to" => ref("x")}, "up" => %{"to" => ref("b", "fact")}})
+    }
+
+    assert compile(dir, files) ==
+             {:error,
+              [
+                d("UNRESOLVED_REFERENCE", "cartridge.entry", %{"target" => "c@1.0.0:room/nowhere"}),
+                d("UNRESOLVED_REFERENCE", "rooms/a.exits.north.to", %{
+                  "target" => "c@1.0.0:room/x"
+                }),
+                d("UNRESOLVED_REFERENCE", "rooms/a.exits.up.to", %{"target" => "c@1.0.0:fact/b"})
+              ]}
+  end
+
+  test "a room without movement required is UNDECLARED_CAPABILITY", %{tmp_dir: dir} do
+    m = put_in(@manifest, ["requires", "capabilities"], %{"fact" => 1})
+
+    assert compile(dir, %{"cartridge.json" => Map.put(m, "entry", ref("a"))}) ==
+             {:error,
+              [
+                d("UNDECLARED_CAPABILITY", "rooms/a", %{"capability" => "movement"}, [
+                  "movement@1"
+                ]),
+                d("UNDECLARED_CAPABILITY", "rooms/b", %{"capability" => "movement"}, [
+                  "movement@1"
+                ])
+              ]}
+  end
+
+  test "a text key without a catalog entry is UNRESOLVED_REFERENCE", %{tmp_dir: dir} do
+    assert compile(dir, %{"text.json" => %{"r.t" => "Room"}}) ==
+             {:error,
+              [
+                d("UNRESOLVED_REFERENCE", "rooms/a.description", %{"target" => "r.d"}),
+                d("UNRESOLVED_REFERENCE", "rooms/b.description", %{"target" => "r.d"})
+              ]}
+  end
+
+  test "rooms without an entry, a bad direction and empty text are rejected", %{tmp_dir: dir} do
+    files = %{
+      "cartridge.json" => @manifest,
+      "rooms/b.json" => room(%{"northeast" => %{"to" => ref("a")}}),
+      "text.json" => %{"r.t" => "Room", "r.d" => ""}
+    }
+
+    assert compile(dir, files) ==
+             {:error,
+              [
+                d("SCHEMA_VIOLATION", "cartridge.entry", %{"error" => "missing_property"}),
+                d("UNKNOWN_FIELD", "rooms/b.exits.northeast"),
+                d("SCHEMA_VIOLATION", "text[\"r.d\"]", %{"error" => "too_short"})
+              ]}
+  end
+end

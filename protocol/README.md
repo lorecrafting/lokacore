@@ -14,7 +14,7 @@ lists only what a file adds to that.
 | `identity.schema.json` | definition and runtime ids, each its own type; CommandId | 03 §2, §3, §6; 05 §4 | `command_id.json` |
 | `scope.schema.json` | StateScope, AudiencePolicy | 03 §6 | |
 | `relation.schema.json` | typed relations, entity provenance | 21 §4; 03 §3, §11; 05 §25 | |
-| `text.schema.json` | localized text ids and bindings | 04 §15; 05 §18; 06 §43 | |
+| `text.schema.json` | localized text ids and bindings; the default-locale text catalog | 04 §15; 05 §18; 06 §43 | |
 | **Rules and state change** | | | |
 | `command.schema.json` | the portable Command registry | 04 §1, §3, §21; 14 §R3A | |
 | `action.schema.json` | action definitions, invocation, targets | 04 §1, §2, §18, §19; 06 §20; 21 §7 | |
@@ -29,12 +29,13 @@ lists only what a file adds to that.
 | **Content and capabilities** | | | |
 | `capability.schema.json`, `capability_registry.json` | capability versions, the lock, residency, owned commands, events and policy ops | 05 §3, §6, §11; 09 §21 | `capability_lock_hash.json` |
 | `residency.json` | 05 §6 rows that are not capabilities | 05 §6 | each row names its own |
+| `room.schema.json` | rooms and their exits (Connection), owned by movement | 21 §5; 05 §17; 00 §4.10; 00a §2 | `cartridge_rooms_hash.json` |
 | `manifest.schema.json` | cartridge, deployment, campaign manifests | 05 §3, §20, §22; 07 §15; 01 A5 | |
-| `cartridge.schema.json` | compiled cartridge, artifact file and byte cap, diagnostics | 05 §8, §11, §20; 08 §6; 14 §R4 | `cartridge_hash.json`, `cartridge_loader.json` (loader corpus, TypeScript) |
+| `cartridge.schema.json` | compiled cartridge (v1, and v2 with rooms, entry and text), artifact file and byte cap, diagnostics | 05 §8, §11, §18, §20; 08 §6; 14 §R4, §R5 | `cartridge_hash.json` (v1), `cartridge_rooms_hash.json` (v2), `cartridge_loader.json` (loader corpus, TypeScript) |
 | `feature.schema.json`, `feature_registry.json` | R3B feature envelopes | 14 §R3B | |
 | **Host, platform, verification** | | | |
 | `account.schema.json` | account/run binding, milestone reports, admission | 23 §2-§7, §11; 03 §25-§27 | |
-| `observation.schema.json`, `event_registry.json` | the observation record envelope, stores, correlation ids, game-trace entry, and the registered event names | 11 §11-§15; 08 §6; 09 §2, §7; [ADR-075](../docs/decisions/adr-075-observability-proposal.md) (proposed) | |
+| `observation.schema.json`, `event_registry.json` | the observation record envelope, stores, correlation ids, game-trace entry, and the registered event names | 11 §11-§15; 08 §6; 09 §2, §7; [ADR-075](../docs/decisions/adr-075-observability-proposal.md) | `delta_digest.json` |
 | `invariant.schema.json`, `invariants.json` | registered invariants, checked by id | [roadmap](../docs/ROADMAP.md) | `composition.json` |
 
 `fixtures/subset.schema.json` is a test-only probe for subset keywords no contract uses yet.

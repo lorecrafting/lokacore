@@ -1,0 +1,9 @@
+id: ts-rule-module-imports
+language: tsx
+severity: error
+message: A rule module imports only kernel modules (../*.ts), never I/O, a package or another rule module; its capability's commands and events come through the typed Rule contract (kernel/ts/src/decision.ts).
+files: [kernel/ts/src/rules/**]
+rule:
+  kind: string
+  matches: module-specifier
+  not: { regex: "^['\"]\\.\\./[a-z_.]+\\.ts['\"]$" }

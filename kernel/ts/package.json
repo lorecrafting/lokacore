@@ -7,7 +7,7 @@
     "node": "24.21.0"
   },
   "scripts": {
-    "typecheck": "tsc && tsc -p test",
+    "typecheck": "tsc && tsc -p test && tsc -p play",
     "test": "node --test \"test/**/*.test.ts\""
   },
   "devDependencies": {

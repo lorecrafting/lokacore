@@ -1,0 +1,19 @@
+id: ts-rule-module-pure
+valid:
+  - "export const decide: Rule<'movement'> = (w, c) => accepted(w, 'moved', [], []);"
+  - "const t = { op: 'entity.transfer', writer_group: 0 } as const;"
+  - "const next = { ...w.state, clock: 1 }; const ok = xs.map((x) => x + 1).filter(Boolean);"
+  - "let n = 0; n = 1;"
+invalid:
+  - "w.state.clock = 1;"
+  - "w.rooms[id] = r;"
+  - "n += 1;"
+  - "n++;"
+  - "delete w.rooms[id];"
+  - "out.push(x);"
+  - "xs.sort();"
+  - "Object.assign(w, { clock: 1 });"
+  - "m.set(k, v);"
+  - "const d = direction as Key;"
+  - "const d = direction as unknown as Key;"
+  - "const x: any = 1;"

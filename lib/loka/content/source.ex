@@ -8,7 +8,8 @@ defmodule Loka.Content.Source do
   alias Loka.Core.Canonical
 
   @type steps :: [String.t() | non_neg_integer()]
-  @type file :: :manifest | :facts | {:policy, String.t()} | {:action, String.t()}
+  @type file ::
+          :manifest | :facts | :text | {:policy | :action | :room, String.t()}
 
   @doc """
   Every `.json` regular file under `dir` (dot files included) as `{relative path, kind,
@@ -72,11 +73,13 @@ defmodule Loka.Content.Source do
 
   defp classify("cartridge.json"), do: :manifest
   defp classify("facts.json"), do: :facts
+  defp classify("text.json"), do: :text
 
   defp classify(rel) do
     case Path.split(rel) do
       ["policies", file] -> {:policy, Path.rootname(file)}
       ["actions", file] -> {:action, Path.rootname(file)}
+      ["rooms", file] -> {:room, Path.rootname(file)}
       _ -> :unknown
     end
   end

@@ -47,3 +47,7 @@ text. This directory also holds the owner's decisions retained verbatim.
   joined by ids, a registered event-name list, the game-trace entry
   ([accepted by the owner](owner-decision-adr-075-2026-09-25.md)).
 - Owner decisions: [ADR-075 kernel version and dev-evidence ledger](owner-decisions-adr-075-2026-09-25.md).
+
+## R5
+
+- Owner decisions: [R5 slice plan; MUD-style `loka play`, networked terminal later (R14)](owner-decisions-r5-plan-2026-09-25.md).

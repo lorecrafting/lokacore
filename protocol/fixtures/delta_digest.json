@@ -1,0 +1,16 @@
+{
+  "description": "Known answer for the trace.command delta_digest (ADR-075 \u00a74; observation.schema.json TraceDecision): SHA-256 of the canonical bytes of a StateDelta, here one move's entity.transfer. canonical was produced by Python json.dumps(sort_keys=True, separators=(',', ':'), ensure_ascii=False) and sha256 by shasum -a 256 over its UTF-8 bytes, never by the kernels.",
+  "value": {
+    "ops": [
+      {
+        "op": "entity.transfer",
+        "writer_group": 0,
+        "entity_id": "2d5f9533-15ca-8b6c-ad12-30874875d709",
+        "source_id": "5a3b6f0e-1c2d-8e4f-9a0b-1c2d3e4f5a6b",
+        "destination_id": "5661d412-dbfd-8f84-94a1-2f6be3bc6793"
+      }
+    ]
+  },
+  "canonical": "{\"ops\":[{\"destination_id\":\"5661d412-dbfd-8f84-94a1-2f6be3bc6793\",\"entity_id\":\"2d5f9533-15ca-8b6c-ad12-30874875d709\",\"op\":\"entity.transfer\",\"source_id\":\"5a3b6f0e-1c2d-8e4f-9a0b-1c2d3e4f5a6b\",\"writer_group\":0}]}",
+  "sha256": "98ca4cb449b5e473b6ac22ccf4cdbdb227d1f83c65017720287334a3a7828ecb"
+}

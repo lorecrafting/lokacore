@@ -1,0 +1,25 @@
+id: ts-rule-module-pure
+language: tsx
+severity: error
+message: A rule module returns a proposal and never mutates (ADR-072; 04 §5.1). No assignment to a property or element, ++/--/+=, delete, mutating methods or Object.assign, and no casts or any (they would evade the typed ownership check, kernel/ts/src/decision.ts Rule).
+files: [kernel/ts/src/rules/**]
+rule:
+  any:
+    - kind: assignment_expression
+      has: { field: left, kind: member_expression }
+    - kind: assignment_expression
+      has: { field: left, kind: subscript_expression }
+    - kind: augmented_assignment_expression
+    - kind: update_expression
+    - pattern: delete $X
+    - kind: call_expression
+      has:
+        field: function
+        kind: member_expression
+        has:
+          field: property
+          regex: ^(push|pop|shift|unshift|splice|sort|reverse|fill|copyWithin|set|add|clear|delete|assign|defineProperty|defineProperties|setPrototypeOf)$
+    - kind: as_expression
+      not: { regex: 'as const$' }
+    - kind: predefined_type
+      regex: ^any$
