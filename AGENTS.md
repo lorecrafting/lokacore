@@ -15,7 +15,7 @@ at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
 - [docs/spec/](docs/spec/README.md): the R0-accepted specification, imported at the R2
   cutover ([import record](docs/spec/IMPORT.md)). Its README §8 says which documents are
   normative. Two normative documents disagreeing is a defect: stop and ask.
-- [docs/decisions/](docs/decisions/README.md): proposed ADRs and verbatim owner decisions
+- [docs/decisions/](docs/decisions/README.md): full ADR texts and verbatim owner decisions
   since R0. [docs/reference/](docs/reference/README.md): informative material, linked in
   the legacy repository, never authority.
 - Amend the spec here first, get it reviewed, then change code (spec README §11). Cite
@@ -28,9 +28,9 @@ at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
   Elixir and TypeScript, held to the reviewed fixtures and randomized differential testing.
   Story rules (`portable_capability`) are TypeScript-only until a server first consumes
   them; an Elixir host adapter on one needs a declared differential (`bin/contracts.exs`).
-  [Proposed ADR-071](docs/decisions/adr-071-072-proposal.md),
+  [ADR-071](docs/decisions/adr-071-072-proposal.md),
   [ADR-074](docs/decisions/adr-074-ts-first-proposal.md).
-- **Persistence shape (proposed ADR-072):** the world lives in memory; rules are pure
+- **Persistence shape (ADR-072):** the world lives in memory; rules are pure
   (`decide(state, command) → proposal`) and never write memory or storage; the host
   commits only the changed rows plus the receipt in one transaction, then adopts the
   proposal into memory, then replies. Kernels use structural sharing. No periodic or
