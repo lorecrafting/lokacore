@@ -210,17 +210,13 @@ test('composition-profile budgets: at the limit composes with the expected chang
   );
   assert.ok(over({ jobs: jobs(pending, 100) }, [schedule(jobId(pending + 1))]));
   const due = limits.due_jobs_per_advance;
-  assert.equal(
-    changes(
-      { jobs: jobs(due, 1) },
-      range(due).map((n) => complete(jobId(n))),
-    ).length,
-    due,
-  );
+  assert.equal(changes({ jobs: jobs(due, 1) }, range(due).map(jobId).map(complete)).length, due);
   assert.ok(
     over(
       { jobs: jobs(due + 1, 1) },
-      range(due + 1).map((n) => complete(jobId(n))),
+      range(due + 1)
+        .map(jobId)
+        .map(complete),
     ),
   );
 });
