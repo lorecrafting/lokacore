@@ -4,7 +4,7 @@
   "description": "The capability registry vocabulary, exact capability versions and the capability lock (05 §3, §6, §11; 09 §21). The registry itself is protocol/capability_registry.json.",
   "$defs": {
     "CapabilityKey": {
-      "description": "A capability key (05 §6), lowercase snake_case of at most 64 characters. A capability contract is key@version.",
+      "description": "A capability key (05 §6), lowercase snake_case, at most 64 characters. A capability contract is key@version.",
       "type": "string",
       "pattern": "^[a-z][a-z0-9_]{0,63}$",
       "examples": [
@@ -64,42 +64,7 @@
           "format": "loka-capability-lock-v1",
           "capabilities": {
             "movement": 1,
-            "barrier": 1,
-            "containment": 1,
-            "equipment": 1,
-            "inspectable_detail": 1,
-            "description_variant": 1,
-            "target_resolution": 1,
-            "policy": 1,
-            "fact": 1,
-            "resource": 1,
-            "attributes": 1,
-            "position": 1,
-            "skills": 1,
-            "status": 1,
-            "check": 1,
-            "combat": 1,
-            "death": 1,
-            "quest": 1,
-            "dialogue": 1,
-            "scene": 1,
-            "action_recipe": 1,
-            "reaction": 1,
-            "behavior": 1,
-            "schedule": 1,
-            "population": 1,
-            "commerce": 1,
-            "service": 1,
-            "calendar": 1,
-            "tide": 1,
-            "light": 1,
-            "liquid": 1,
-            "readable": 1,
-            "topics": 1,
-            "relationship": 1,
-            "faction": 1,
-            "narration": 1,
-            "sense_cue": 1
+            "fact": 1
           }
         },
         {
@@ -109,7 +74,7 @@
       ]
     },
     "CapabilitySpec": {
-      "description": "One registry entry (05 §6): a capability version, its portability, and its semantic residency from the residency matrix (05 §6 'Capability semantic residency matrix'). Portability limits residency: a portable capability is a portable semantic foundation or portable capability implementation, server_only is a Realm-only semantic capability, client_presentation_only is client presentation; authority-host coordination and authoring/certification are never capabilities (05 §6). A null residency is not yet classified. Commands, events, effects and policies join by name once their registries exist (R3 PR 3).",
+      "description": "One registry entry (05 §6): a capability version, its portability, and its semantic residency from the residency matrix (05 §6 'Capability semantic residency matrix'). Portability limits residency (this table is the PM's adopted reading of 05 §6, not spec text): a portable capability is a portable semantic foundation or portable capability implementation, server_only is a Realm-only semantic capability, client_presentation_only is client presentation; authority-host coordination and authoring/certification are never capabilities (05 §6). A null residency is not yet classified. Commands, events, effects and policies join by name once their registries exist (R3 PR 3).",
       "oneOf": [
         {
           "description": "Runs on every host, Story and Realm (05 §6).",

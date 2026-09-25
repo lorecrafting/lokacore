@@ -30,17 +30,18 @@ test('invalid fixtures fail with exactly the listed errors', () => {
   }
 });
 
-test('the capability registry: valid entries, key@version unique, covers the chapter-one lock', () => {
-  const pins = new Set<string>();
+test('the capability registry: valid entries, key@version unique, covers the chapter-one lock, all portable', () => {
+  const pins = new Map<string, { portability: string }>();
   for (const entry of read('capability_registry.json')) {
     assert.deepEqual(validate('CapabilitySpec', entry), [], JSON.stringify(entry));
     const pin = `${entry.key}@${entry.version}`;
     assert.ok(!pins.has(pin), pin);
-    pins.add(pin);
+    pins.set(pin, entry);
   }
+  // 00a §1: every chapter-one capability is portable (offline_private).
   const lock = read('fixtures/capability_lock_hash.json').value;
   for (const [key, version] of Object.entries(lock.capabilities))
-    assert.ok(pins.has(`${key}@${version}`), key);
+    assert.equal(pins.get(`${key}@${version}`)?.portability, 'portable', key);
 });
 
 test('the capability lock encodes and hashes to the independent known answer', () => {

@@ -61,13 +61,17 @@ defmodule Loka.Core.ContractsTest do
     for %{"errors" => es} <- @invalid, %{"code" => c} <- es, do: assert(c in registered, c)
   end
 
-  test "the capability registry: valid entries, key@version unique, covers the chapter-one lock" do
+  test "the capability registry: valid entries, key@version unique, covers the chapter-one lock, all portable" do
     for entry <- @capabilities,
         do: assert(Contracts.validate("CapabilitySpec", entry) == :ok, inspect(entry))
 
     pins = for %{"key" => k, "version" => v} <- @capabilities, do: {k, v}
     assert pins == Enum.uniq(pins)
-    for pin <- @lock_kat["value"]["capabilities"], do: assert(pin in pins, inspect(pin))
+    by_pin = Map.new(@capabilities, &{{&1["key"], &1["version"]}, &1})
+
+    # 00a §1: every chapter-one capability is portable (offline_private).
+    for pin <- @lock_kat["value"]["capabilities"],
+        do: assert(by_pin[pin]["portability"] == "portable", inspect(pin))
   end
 
   # 37 keys: over 32, so the map iterates unsorted and the encoder must sort (AGENTS.md).

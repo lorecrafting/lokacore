@@ -12,7 +12,7 @@
       ]
     },
     "ContentHash": {
-      "description": "A semantic hash: hash(v) under loka-numeric-v1, 64 lowercase hex digits (docs/spec/conformance/numeric-profile.md). A cartridge hash covers the semantic payload only, never signatures, certificates or package bytes (05 §11 'Hash domains and attestations').",
+      "description": "A semantic content hash: SHA-256 as 64 lowercase hex digits. It covers the semantic payload only, never signatures, certificates or package bytes (05 §11 'Hash domains and attestations'); how the payload is formed is the compiler's (R4).",
       "type": "string",
       "pattern": "^[0-9a-f]{64}$",
       "examples": [
@@ -20,17 +20,21 @@
       ]
     },
     "ExecutionProfile": {
-      "description": "A hosting profile a cartridge supports or a deployment uses (05 §3, §6, §22). Only the profiles the spec names are listed; others are added when specified.",
+      "description": "A hosting profile a cartridge supports or a deployment uses: the canonical execution-profile vocabulary (07 §3; 09 §20 reuses it).",
       "enum": [
         "offline_private",
-        "online_private"
+        "online_private",
+        "party",
+        "shared_area"
       ],
       "examples": [
-        "offline_private"
+        "offline_private",
+        "party",
+        "shared_area"
       ]
     },
     "ClientFeature": {
-      "description": "A presentation/input capability of the installed Loka app (05 §3 client_features), lowercase snake_case of at most 64 characters.",
+      "description": "A presentation/input capability of the installed Loka app (05 §3 client_features), lowercase snake_case, at most 64 characters.",
       "type": "string",
       "pattern": "^[a-z][a-z0-9_]{0,63}$",
       "examples": [
@@ -113,42 +117,7 @@
           "rule_ir": 1,
           "capabilities": {
             "movement": 1,
-            "barrier": 1,
-            "containment": 1,
-            "equipment": 1,
-            "inspectable_detail": 1,
-            "description_variant": 1,
-            "target_resolution": 1,
-            "policy": 1,
-            "fact": 1,
-            "resource": 1,
-            "attributes": 1,
-            "position": 1,
-            "skills": 1,
-            "status": 1,
-            "check": 1,
-            "combat": 1,
-            "death": 1,
-            "quest": 1,
-            "dialogue": 1,
-            "scene": 1,
-            "action_recipe": 1,
-            "reaction": 1,
-            "behavior": 1,
-            "schedule": 1,
-            "population": 1,
-            "commerce": 1,
-            "service": 1,
-            "calendar": 1,
-            "tide": 1,
-            "light": 1,
-            "liquid": 1,
-            "readable": 1,
-            "topics": 1,
-            "relationship": 1,
-            "faction": 1,
-            "narration": 1,
-            "sense_cue": 1
+            "fact": 1
           },
           "client_features": [
             "contextual_actions_v1",
@@ -184,8 +153,7 @@
           "$ref": "identity.schema.json#/$defs/ReleaseVersion"
         },
         "title": {
-          "type": "string",
-          "minLength": 1
+          "type": "string"
         },
         "requires": {
           "$ref": "#/$defs/CompatibilityRequirements"
@@ -222,42 +190,7 @@
             "rule_ir": 1,
             "capabilities": {
               "movement": 1,
-              "barrier": 1,
-              "containment": 1,
-              "equipment": 1,
-              "inspectable_detail": 1,
-              "description_variant": 1,
-              "target_resolution": 1,
-              "policy": 1,
-              "fact": 1,
-              "resource": 1,
-              "attributes": 1,
-              "position": 1,
-              "skills": 1,
-              "status": 1,
-              "check": 1,
-              "combat": 1,
-              "death": 1,
-              "quest": 1,
-              "dialogue": 1,
-              "scene": 1,
-              "action_recipe": 1,
-              "reaction": 1,
-              "behavior": 1,
-              "schedule": 1,
-              "population": 1,
-              "commerce": 1,
-              "service": 1,
-              "calendar": 1,
-              "tide": 1,
-              "light": 1,
-              "liquid": 1,
-              "readable": 1,
-              "topics": 1,
-              "relationship": 1,
-              "faction": 1,
-              "narration": 1,
-              "sense_cue": 1
+              "fact": 1
             },
             "client_features": [
               "contextual_actions_v1",
@@ -338,49 +271,46 @@
             "format": "loka-capability-lock-v1",
             "capabilities": {
               "movement": 1,
-              "barrier": 1,
-              "containment": 1,
-              "equipment": 1,
-              "inspectable_detail": 1,
-              "description_variant": 1,
-              "target_resolution": 1,
-              "policy": 1,
-              "fact": 1,
-              "resource": 1,
-              "attributes": 1,
-              "position": 1,
-              "skills": 1,
-              "status": 1,
-              "check": 1,
-              "combat": 1,
-              "death": 1,
-              "quest": 1,
-              "dialogue": 1,
-              "scene": 1,
-              "action_recipe": 1,
-              "reaction": 1,
-              "behavior": 1,
-              "schedule": 1,
-              "population": 1,
-              "commerce": 1,
-              "service": 1,
-              "calendar": 1,
-              "tide": 1,
-              "light": 1,
-              "liquid": 1,
-              "readable": 1,
-              "topics": 1,
-              "relationship": 1,
-              "faction": 1,
-              "narration": 1,
-              "sense_cue": 1
+              "fact": 1
+            }
+          }
+        },
+        {
+          "api_version": "loka/v3",
+          "cartridge": {
+            "cartridge_id": "ashmere_1_the_missing_child",
+            "cartridge_version": "1.0.0",
+            "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+          },
+          "profile": "party",
+          "capability_lock": {
+            "format": "loka-capability-lock-v1",
+            "capabilities": {
+              "movement": 1,
+              "fact": 1
+            }
+          }
+        },
+        {
+          "api_version": "loka/v3",
+          "cartridge": {
+            "cartridge_id": "ashmere_1_the_missing_child",
+            "cartridge_version": "1.0.0",
+            "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+          },
+          "profile": "shared_area",
+          "capability_lock": {
+            "format": "loka-capability-lock-v1",
+            "capabilities": {
+              "movement": 1,
+              "fact": 1
             }
           }
         }
       ]
     },
     "CampaignId": {
-      "description": "A campaign identity (07 §15), lowercase snake_case of at most 64 characters.",
+      "description": "A campaign identity (07 §15), lowercase snake_case, at most 64 characters.",
       "type": "string",
       "pattern": "^[a-z][a-z0-9_]{0,63}$",
       "examples": [
