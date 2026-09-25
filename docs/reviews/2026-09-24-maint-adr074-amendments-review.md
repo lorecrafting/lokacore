@@ -168,3 +168,22 @@ conflict textually with this PR (and this record's index line). It does not touc
   `movement@1: duplicate host adapter, or elixir without` string, and with the check
   neutered the script's output is the stale-matrix message, which the control rejects
   (verified). Nothing to add there.
+
+## Cross-vendor review (Astra), relayed verbatim by the owner
+
+Reviewed commit `e7b1625`, independently of the review above.
+
+```text
+VERDICT: APPROVE WITH NOTES
+
+FINDINGS:
+A1 [nit] docs/spec/README.md:233 (at e7b1625) — The “Intentionally unresolved evidence gates” subsection still describes the kernel/binding choice as unresolved and prohibits treating it as settled before its evidence gate passes. Meanwhile, lines 205 and 212 now record Candidate C’s selection and ADR-074’s TypeScript-first direction. Line 205 also retains the unqualified pre-selection gate wording — the entry-point documentation blurs “implementation strategy selected with accepted risks” with “R1 measurement gates passed,” potentially prompting agents to reopen selection or stop already-authorized work. Explicitly distinguish the accepted ADR-071/074 implementation direction from the failed/unmeasured evidence that remains outstanding; do not relabel that evidence as passed.
+
+A2 [should-fix] bin/red_controls.exs:145 (at e7b1625) — The new control exercises an omitted differential field, but not a supplied, syntactically valid path whose file does not exist. The invalid schema fixture checks path syntax, not filesystem existence — replacing the File.regular? requirement with a metadata-presence check would leave these controls green while allowing a dangling differential declaration. Add that second negative case and require the ADR-074 diagnostic, not merely a nonzero exit caused by stale generated files. The current production predicate in bin/contracts.exs:106 does reject both missing metadata and nonexistent files by inspection; this is a regression-coverage gap, not a demonstrated bypass in e7b1625. Existing CI logs confirm that the missing-field control fires; I did not independently execute the nonexistent-path case.
+
+REMAINING CONTRADICTIONS:
+- docs/spec/README.md:205,233–238 — the current selection-status wording described in A1 needs reconciliation with accepted ADR-071/074. This is not a remaining requirement to implement Story rules in both kernels before the trigger.
+- No other substantive ADR-074 contradiction identified. The explicitly retained R1 procedures, historical results, foundation differential, client/server protocol obligations, and future Story/Realm reuse requirements are not contradictions.
+
+OWNER DECISIONS NEEDED: none
+```
