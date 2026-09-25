@@ -8,8 +8,7 @@ defmodule Loka.Content.Source do
   alias Loka.Core.Canonical
 
   @type steps :: [String.t() | non_neg_integer()]
-  @type file ::
-          :manifest | :facts | {:policy, String.t()} | {:action, String.t()} | :unknown
+  @type file :: :manifest | :facts | {:policy, String.t()} | {:action, String.t()}
 
   @doc """
   Every `.json` regular file under `dir` (dot files included) as `{relative path, kind,
@@ -51,9 +50,9 @@ defmodule Loka.Content.Source do
     pairs = Enum.reverse(pairs)
     keys = Enum.map(pairs, &elem(&1, 0))
 
-    case keys -- Enum.uniq(keys) do
+    case for {k, n} <- Enum.frequencies(keys), n > 1, do: k do
       [] -> {Map.new(pairs), old}
-      repeated -> {{:duplicate_keys, Enum.uniq(repeated), Map.new(pairs)}, old}
+      repeated -> {{:duplicate_keys, repeated, Map.new(pairs)}, old}
     end
   end
 
