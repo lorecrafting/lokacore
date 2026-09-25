@@ -86,6 +86,7 @@ Accepted design direction is not R0 approval or implementation completion. Provi
 - [ADR-072 — Online and local persistence shape](#adr-072--online-and-local-persistence-shape)
 - [ADR-073 — One Mix application with strict boundaries, not an umbrella](#adr-073--one-mix-application-with-strict-boundaries-not-an-umbrella)
 - [ADR-074 — TypeScript-first rules until a server consumes them](#adr-074--typescript-first-rules-until-a-server-consumes-them)
+- [ADR-075 — One observation record format, four stores, a registered name list](#adr-075--one-observation-record-format-four-stores-a-registered-name-list)
 
 </details>
 <!-- packet-navigation:end -->
@@ -895,3 +896,9 @@ The server is one Mix application, `:loka`, whose document 02 §1 areas are top-
 **Status:** Accepted by the owner, 2026-09-24 ([record](../decisions/owner-decision-adr-074-2026-09-24.md)); full text and applicability crosswalk in [ADR-074](../decisions/adr-074-ts-first-proposal.md).
 
 `portable_semantic_foundation` contracts stay in both kernels with their differential. `portable_capability` rules and their invariant checks are TypeScript-only until the trigger: the first planned server consumer of any `portable_capability` semantics (Story content on a server host, a Realm-native cartridge using a portable capability, or a trusted trace-verification service). It is checked mechanically: a `portable_capability` row gaining an Elixir host adapter needs a declared cross-kernel differential (`bin/contracts.exs`). Static compilation and TypeScript test execution, including the R5 simulation and the R9/R11 Lab running the TypeScript kernel headless, do not fire it. Before that consumer is enabled the owner chooses a route and the Elixir-versus-TypeScript conformance evidence passes. TypeScript host conformance (Node, Android Hermes, iOS Hermes) is retained.
+
+## ADR-075 — One observation record format, four stores, a registered name list
+
+**Status:** Accepted by the owner, 2026-09-25 ([record](../decisions/owner-decision-adr-075-2026-09-25.md)); full text in [ADR-075](../decisions/adr-075-observability-proposal.md).
+
+Every log, trace, metric and dev-evidence record is an `ObservationRecord` (`protocol/observation.schema.json`, format `loka-obs-v1`) in canonical JSON Lines, named in `protocol/event_registry.json`. Four stores (`game_trace`, `diagnostics`, `operations`, `dev_evidence`) are joined by closed, per-store correlation ids; `kernel_version` is the source revision, and a build from uncommitted changes reports `<commit>-dirty` and is never an exact repro key. Unknown is explicit and never 0; unavailable carries its cause and is never empty or absent; both apply to measures, the commit outcome, RNG draws and the run header. Observation explains and never decides: replay reads only the `trace.run` header and the Commands in ordinal order, never a recorded decision or commit outcome, and a fix is proven by replaying the seed. A name is registered with its first producer, and every producer validates its records in CI, including a schema-valid leak (a home path, a device serial) that its redaction must strip or reject.

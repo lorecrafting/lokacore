@@ -63,7 +63,7 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
    rewrote a core piece or the slice freezes a contract or closes a gate. At most two fix
    rounds; anything still open goes to the owner.
 7. **Merge (PM).** Merge with a merge commit once the verdict is APPROVE or APPROVE WITH
-   NOTES with nothing open and every CI job that ran is green on the head
+   NOTES with nothing open and every CI job started on the head has finished green
    ([owner decision](decisions/owner-decisions-r3-lanes-2026-09-24.md),
    [which jobs run](decisions/owner-decision-ci-mobile-builds-2026-09-25.md)); then tell the owner:
    PR link, verdict, notes. Owner decisions, anything open after fix round 2 and Astra

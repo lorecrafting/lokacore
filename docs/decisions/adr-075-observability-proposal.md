@@ -1,7 +1,7 @@
 # ADR-075 — One observation record format, four stores, a registered name list — 2026-09-25
 
-**Status: Proposed.** The owner accepts or rejects it after review; it enters
-[document 16](../spec/16-decision-register.md) only then. Written by the developer agent
+**Status: Accepted by the owner 2026-09-25 ([record](owner-decision-adr-075-2026-09-25.md));
+entered [document 16](../spec/16-decision-register.md) 2026-09-25.** Written by the developer agent
 (Claude Code, Claude Opus) for the observability design slice
 ([owner decision](owner-decisions-observability-astra-2026-09-25.md)).
 
