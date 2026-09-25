@@ -54,7 +54,7 @@ may appear at all:
 |---|---|---|---|
 | ReplayIds | `trace.command`, `simulation.invariant_failed` | content_hash, kernel_version, seed, run_id, command_id, revision | none |
 | BuildIds | `content.diagnostic` | kernel_version | content_hash (absent when compiling failed before hashing) |
-| HostIds | `kernel.decision_latency` | kernel_version, host | content_hash, run_id, command_id |
+| HostIds | `kernel.decision_latency` | kernel_version, host | run_id, command_id |
 | WorkIds | `agent.work` | pull_request | none |
 
 **Kernel version.** `<KERNEL_ID>@<full git commit>`, for example
@@ -143,7 +143,7 @@ validators.
 - OpenTelemetry export and cross-store search come later, when records from more than one
   machine must be searched together (at the latest the R14 server). Field names are chosen
   so the mapping is direct: `run_id` → trace id (both 128 bits), `command_id` → span,
-  `event` → span or log name, `kernel_version`, `host` and `content_hash` → resource
+  `event` → span or log name, `kernel_version` and `host` → resource
   attributes, an observed Measure → a data point (11 §14).
 
 ## 9. Alternatives considered

@@ -21,8 +21,7 @@
     "name": "kernel.decision_latency",
     "store": "operations",
     "kind": "metric",
-    "unit": "microseconds",
-    "description": "Kernel decision latency of one command on one host (11 §13 Runtime). Producers: loka play and the simulator on Node (R5), the local authority on Hermes (R6, R6P phone timing)."
+    "description": "Kernel decision latency of one command, in microseconds, on one host (11 §13 Runtime). Producers: loka play and the simulator on Node (R5), the local authority on Hermes (R6, R6P phone timing)."
   },
   {
     "name": "agent.work",

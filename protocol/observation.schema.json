@@ -32,73 +32,34 @@
         "runtime.command.rejected"
       ]
     },
-    "MetricUnit": {
-      "description": "The unit of a registered metric's observed value.",
-      "enum": [
-        "microseconds"
-      ],
-      "examples": [
-        "microseconds"
-      ]
-    },
     "EventRegistryEntry": {
-      "description": "One entry of protocol/event_registry.json: a name, its store, whether it is an event or a metric (a metric's data is a Measure in its unit), and a description citing the spec and naming its producers.",
-      "oneOf": [
-        {
-          "type": "object",
-          "properties": {
-            "name": {
-              "$ref": "#/$defs/EventName"
-            },
-            "store": {
-              "$ref": "#/$defs/ObservationStore"
-            },
-            "kind": {
-              "const": "event"
-            },
-            "description": {
-              "type": "string",
-              "minLength": 1
-            }
-          },
-          "required": [
-            "name",
-            "store",
-            "kind",
-            "description"
-          ],
-          "additionalProperties": false
+      "description": "One entry of protocol/event_registry.json: a name, its store, whether it is an event or a metric (a metric's data is a Measure; the description gives its unit), and a description citing the spec and naming its producers.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/EventName"
         },
-        {
-          "type": "object",
-          "properties": {
-            "name": {
-              "$ref": "#/$defs/EventName"
-            },
-            "store": {
-              "$ref": "#/$defs/ObservationStore"
-            },
-            "kind": {
-              "const": "metric"
-            },
-            "unit": {
-              "$ref": "#/$defs/MetricUnit"
-            },
-            "description": {
-              "type": "string",
-              "minLength": 1
-            }
-          },
-          "required": [
-            "name",
-            "store",
-            "kind",
-            "unit",
-            "description"
-          ],
-          "additionalProperties": false
+        "store": {
+          "$ref": "#/$defs/ObservationStore"
+        },
+        "kind": {
+          "enum": [
+            "event",
+            "metric"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
         }
+      },
+      "required": [
+        "name",
+        "store",
+        "kind",
+        "description"
       ],
+      "additionalProperties": false,
       "examples": [
         {
           "name": "trace.command",
@@ -110,8 +71,7 @@
           "name": "kernel.decision_latency",
           "store": "operations",
           "kind": "metric",
-          "unit": "microseconds",
-          "description": "Kernel decision latency (11 §13)."
+          "description": "Kernel decision latency in microseconds (11 §13)."
         }
       ]
     },
@@ -278,7 +238,7 @@
       ]
     },
     "HostIds": {
-      "description": "The correlation ids of an operations record: the code revision and the host kind, and where the measure belongs to one, the cartridge, run and command it joins.",
+      "description": "The correlation ids of an operations record: the code revision and the host kind, and where the measure belongs to one, the run and command it joins (the trace carries the rest).",
       "type": "object",
       "properties": {
         "kernel_version": {
@@ -286,9 +246,6 @@
         },
         "host": {
           "$ref": "#/$defs/HostKind"
-        },
-        "content_hash": {
-          "$ref": "manifest.schema.json#/$defs/ContentHash"
         },
         "run_id": {
           "$ref": "account.schema.json#/$defs/StoryRunId"
