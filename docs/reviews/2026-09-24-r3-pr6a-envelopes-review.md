@@ -116,3 +116,23 @@ Either say "PM split, not an owner decision" beside 4a/4b or leave as is.
    SceneInstance and ServiceJob is per-kind field vocabulary too (06 §33 lists `id` and
    `definition_ref` in its representative state), so leaving it to R7/R8 is within 14 §R3B.
    Not a spec gap.
+
+## Re-review (fix round 1)
+
+- Reviewed commits: `11bb5d7`, `b4803f5`, `b966814` (head `b966814`); scoped to the fixes
+- Checks in a throwaway detached worktree at `b966814`: `mix test --force` 69/69, kernel/ts
+  22/22, `elixir bin/contracts.exs --check` exit 0
+
+### Verdict: APPROVE
+
+- **F1, fixed (`11bb5d7`).** Two fixtures in `protocol/fixtures/invalid.json`: `{}` against
+  FeatureEnvelope expects `missing_property` at `/kind` and `/version`, and a registry entry
+  without `freeze` expects `missing_property` at `/freeze`. Expected errors are hand-written.
+  Re-ran the mutants: M7 (`required: ["kind"]`), M9 (`required: []`) and M10 (registry
+  `required` drops `freeze`) each now fail one Elixir test and one TypeScript test.
+- **F2, fixed (`b4803f5`).** `consequence_operator` freezes at R5; nothing else in the
+  registry changed, and the registry test still passes.
+- **N1, fixed (`b966814`).** The roadmap now says the decision predates the PM's later 4a/4b
+  split. Accurate; the verbatim decision record is untouched.
+
+Nothing open.
