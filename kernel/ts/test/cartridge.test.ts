@@ -7,9 +7,16 @@ import { read } from './read.ts';
 
 const bytes = (text: string) => new TextEncoder().encode(text);
 const corpus = read('protocol/fixtures/cartridge_loader.json');
-const installed: Installed = corpus.cases.find(
-  (c: { name: string }) => c.name === 'hash_mismatch',
-).installed;
+// The hello fixture's lock, every capability at version 1.
+const hello =
+  'movement containment inspectable_detail description_variant equipment fact policy target_resolution narration quest dialogue topics check behavior schedule';
+const installed: Installed = {
+  kernel_api: '1.0',
+  capabilities: Object.fromEntries(hello.split(' ').map((k) => [k, [1]])),
+  content_schema: 1,
+  rule_ir: 1,
+  client_features: [],
+};
 const diagnostic = (code: string, path: string, data: object) => ({
   severity: 'error',
   code,
@@ -30,15 +37,14 @@ test('the known-answer cartridge loads and its hash is the fixture literal', () 
   assert.deepEqual(JSON.parse(JSON.stringify(result.cartridge)), value); // plain prototypes
 });
 
-// Each case's `break` names the bug it catches.
-test('each invalid artifact yields exactly its hand-written diagnostic', () => {
-  for (const c of corpus.cases)
+// One test per corpus case; each case's `break` names the bug it catches.
+for (const c of corpus.cases)
+  test(`corpus ${c.name}: yields exactly its hand-written diagnostic`, () =>
     assert.deepEqual(
       loadCartridge(bytes(c.artifact), c.installed),
       { ok: false, diagnostic: c.expected },
-      `${c.name}: ${c.break}`,
-    );
-});
+      c.break,
+    ));
 
 // Breaks: the cap is checked after decoding (over-cap bytes are also undecodable, so a late
 // check reports INVALID_JSON), or the cap is exclusive.
