@@ -10,10 +10,10 @@ defmodule Loka.Core.Contracts do
   an ordinary JSON decoder loses or changes that information before validation sees it. Its
   nesting limit of 128 also bounds recursion through a recursive `$ref`.
   """
+  import Loka.Core.Canonical, only: [is_safe_integer: 1]
   alias Loka.Core.Canonical
   alias Loka.Core.Contracts.Schema
 
-  @safe 9_007_199_254_740_991
   @dir Path.expand("../../../protocol", __DIR__)
   # The directory's mtime changes when a schema file is added or removed.
   @external_resource @dir
@@ -164,7 +164,7 @@ defmodule Loka.Core.Contracts do
   defp type?("object", v), do: is_map(v)
   defp type?("array", v), do: is_list(v)
   defp type?("string", v), do: is_binary(v) and String.valid?(v)
-  defp type?("integer", v), do: is_integer(v) and v in -@safe..@safe
+  defp type?("integer", v), do: is_safe_integer(v)
   defp type?("boolean", v), do: is_boolean(v)
   defp type?("null", v), do: v == nil
 

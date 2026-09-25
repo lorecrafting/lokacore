@@ -292,7 +292,7 @@ defmodule Loka.Core.ComposeTest do
       index(%{
         @base
         | "clock" => pick(0..10),
-          "capacities" => %{"30000000-0000-4000-8000-000000000000" => pick(0..1)},
+          "capacities" => Map.new(@base["capacities"], fn {e, _} -> {e, pick(0..1)} end),
           "facts" => Enum.take(@base["facts"], pick(0..1))
       })
 
@@ -302,7 +302,7 @@ defmodule Loka.Core.ComposeTest do
     }
   end
 
-  @ents Map.keys(@base["containers"]) ++ ["10000000-0000-4000-8000-000000000000"]
+  @ents Map.keys(@base["containers"]) ++ [@hub]
 
   defp random_op(pool, state),
     do: vary(%{pick(pool) | "writer_group" => pick([0, 0, 0, 1, 2])}, state)

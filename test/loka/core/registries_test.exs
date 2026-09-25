@@ -118,7 +118,8 @@ defmodule Loka.Core.RegistriesTest do
         do: assert(by_pin[pin]["portability"] == "portable", inspect(pin))
   end
 
-  # 37 keys: over 32, so the map iterates unsorted and the encoder must sort (AGENTS.md).
+  # 37 keys: over 32, so the map iterates unsorted and the encoder must sort
+  # (docs/lessons/contracts.md).
   test "the capability lock encodes and hashes to the independent known answer" do
     %{"value" => lock, "canonical" => canonical, "sha256" => sha} = @lock_kat
     assert Contracts.validate("CapabilityLock", lock) == :ok

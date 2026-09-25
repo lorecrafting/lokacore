@@ -1,7 +1,7 @@
 id: elixir-kernel-pure
 language: elixir
 severity: error
-message: Kernel code must stay pure (spec document 01 A6, proposed ADR-072). Take time, randomness, storage and processes from the host.
+message: Kernel code must stay pure (spec document 01 A6, ADR-072). Take time, randomness, storage and processes from the host.
 files: [lib/loka/core.ex, lib/loka/core/**]
 rule:
   any:

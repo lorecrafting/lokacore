@@ -11,9 +11,8 @@ defmodule Loka.Core.IdSource do
   authority-internal command such as `run_job` uses a different tag over its own identity.
   """
   import Bitwise
+  import Loka.Core.Canonical, only: [is_safe_integer: 1]
   alias Loka.Core.Canonical
-
-  @safe 9_007_199_254_740_991
 
   @doc """
   `:invalid_id` unless both ids are binaries, `:invalid_ordinal` unless the ordinal is an
@@ -24,7 +23,7 @@ defmodule Loka.Core.IdSource do
   def id(world_context_id, command_id, ordinal) do
     cond do
       not (is_binary(world_context_id) and is_binary(command_id)) -> {:error, :invalid_id}
-      not (is_integer(ordinal) and ordinal in 0..@safe) -> {:error, :invalid_ordinal}
+      not (is_safe_integer(ordinal) and ordinal >= 0) -> {:error, :invalid_ordinal}
       true -> uuid(Canonical.encode(["loka-id-v1", world_context_id, command_id, ordinal]))
     end
   end
