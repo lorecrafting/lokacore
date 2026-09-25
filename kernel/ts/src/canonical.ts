@@ -9,7 +9,7 @@ export type Json = null | boolean | number | string | Json[] | { [key: string]: 
 
 export const SAFE = 9007199254740991;
 /** Deepest container nesting the profile allows; one more is invalid_json / invalid_canonical. */
-export const MAX_DEPTH = 128;
+const MAX_DEPTH = 128;
 
 const invalid = (): never => {
   throw new KernelError('invalid_json');
@@ -34,13 +34,14 @@ export function decode(text: string): Json {
   return v;
 }
 
-// Cursor over the text. `depth` counts the containers already open around a value.
+// Cursor over the text.
 type Parser = { s: string; i: number };
 
 function ws(p: Parser): void {
   for (let c = p.s[p.i]; c === ' ' || c === '\t' || c === '\n' || c === '\r'; c = p.s[++p.i]);
 }
 
+// `depth` counts the containers already open around the value.
 function value(p: Parser, depth: number): Json {
   ws(p);
   const c = p.s[p.i];

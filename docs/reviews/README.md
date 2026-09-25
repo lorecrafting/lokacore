@@ -121,6 +121,12 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
   A1 agreed, A2 agreed in part); Astra's review appended verbatim; re-review of the fixes
   at `7b5f5b0`, APPROVE (every disposition verified, four mutants die, merge with #20 kept
   every README entry).
+- [2026-09-25 pre-R4 sweep: TypeScript + mobile](2026-09-25-sweep-ts-review.md): PR #21 at
+  `08be6f5`, APPROVE (cleanup, proportionate review: the shared module-specifier util
+  gives the same 42 matches as the four inline copies on a planted 108-case corpus; every
+  portable_abi test body is unchanged except the shared reader; the `same()` mutant dies;
+  33/33, check_all green; recommends typechecking tests now, since a probe finds 3 latent
+  errors in `validate.test.ts`).
 - [2026-09-25 pre-R4 sweep: Elixir + scripts](2026-09-25-sweep-elixir-review.md): PR #23 at
   `c1e8b18`, APPROVE WITH NOTES (cleanup, proportionate review: shared safe-integer guard
   equivalent at all four sites, xref green, generated files byte-identical, ADR-074 trigger
