@@ -23,6 +23,10 @@ defmodule Gen do
   def type(%{"const" => c}), do: lit(c)
   def type(%{"enum" => e}), do: Enum.map_join(e, " | ", &lit/1)
   def type(%{"type" => "array", "items" => i}), do: "readonly (#{type(i)})[]"
+
+  def type(%{"type" => "object", "additionalProperties" => v}) when is_map(v),
+    do: "Readonly<Record<string, #{type(v)}>>"
+
   def type(%{"type" => "object", "properties" => ps}) when ps == %{}, do: "Record<string, never>"
 
   def type(%{"type" => "object", "properties" => ps} = s) do

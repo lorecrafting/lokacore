@@ -8,13 +8,16 @@ defmodule Loka.Core.Contracts.Schema do
 
   The subset: annotations `$schema`, `$id`, `title`, `description`, `examples` (`$defs` only
   at document level); a schema has one `type` or else exactly one of `$ref`, `enum`,
-  `const`, `oneOf`. Per type: object `properties`, `required`, `additionalProperties`
-  (always `false`); array `items` (required), `minItems`, `maxItems`; string `pattern`,
-  `minLength`, `maxLength`; integer `minimum`, `maximum`; string, integer and boolean
-  `enum`, `const`. `enum` and `const` values are scalars. `oneOf` branches are inline
-  objects, each with exactly one `const` property, the same required property in every
-  branch with distinct values (the discriminator). A `$ref` may name its own or an enclosing
-  contract; recursion is bounded by the value, and decoded values by the canonical depth limit.
+  `const`, `oneOf`. Per type: object either `properties`, `required`,
+  `additionalProperties` (always `false`), or, as a map, no `properties` and
+  `additionalProperties` as the schema of every value, with optional `propertyNames`
+  (exactly `{"pattern": ...}`) and `maxProperties`; array `items` (required), `minItems`,
+  `maxItems`; string `pattern`, `minLength`, `maxLength`; integer `minimum`, `maximum`;
+  string, integer and boolean `enum`, `const`. `enum` and `const` values are scalars.
+  `oneOf` branches are inline objects, each with exactly one `const` property, the same
+  required property in every branch with distinct values (the discriminator). A `$ref` may
+  name its own or an enclosing contract; recursion is bounded by the value, and decoded
+  values by the canonical depth limit.
 
   `pattern` is limited to a grammar that PCRE (Elixir, compiled with
   `[:unicode, :dollar_endonly]`) and JavaScript (`u` flag) read the same way: anchored
@@ -27,7 +30,7 @@ defmodule Loka.Core.Contracts.Schema do
 
   @annotations ~w($schema $id title description examples)
   @by_type %{
-    "object" => ~w(type properties required additionalProperties),
+    "object" => ~w(type properties required additionalProperties propertyNames maxProperties),
     "array" => ~w(type items minItems maxItems),
     "string" => ~w(type enum const pattern minLength maxLength),
     "integer" => ~w(type enum const minimum maximum),
@@ -35,7 +38,7 @@ defmodule Loka.Core.Contracts.Schema do
     "null" => ~w(type)
   }
   @untyped ~w($ref enum const oneOf)
-  @counts ~w(minItems maxItems minLength maxLength)
+  @counts ~w(minItems maxItems minLength maxLength maxProperties)
   @class_atom ~S"(?:[A-Za-z0-9_.](?:-[A-Za-z0-9_.])?|\\[.-])"
   @atom ~S"(?:[A-Za-z0-9_@:/-]|\\\.|\[\^?" <> @class_atom <> ~S"+-?\])"
   @token "(?:" <> @atom <> ~S"(?:(?:[?*+]|\{[0-9]+(?:,[0-9]+)?\})\??)?|\((?:\?=|(?!\?))|\)|\|)"
@@ -108,7 +111,12 @@ defmodule Loka.Core.Contracts.Schema do
   end
 
   defp keyword("required", r, _, at, _), do: ok(is_list(r) and Enum.all?(r, &is_binary/1), at)
+  defp keyword("additionalProperties", a, _, at, ctx) when is_map(a), do: check(a, at, ctx)
   defp keyword("additionalProperties", a, _, at, _), do: ok(a === false, at)
+
+  defp keyword("propertyNames", %{"pattern" => p} = n, s, at, ctx) when map_size(n) == 1,
+    do: keyword("pattern", p, s, at <> "/pattern", ctx)
+
   defp keyword("items", sub, _, at, ctx), do: check(sub, at, ctx)
   defp keyword("oneOf", bs, _, at, ctx) when is_list(bs), do: one_of(bs, at, ctx)
 
@@ -124,17 +132,25 @@ defmodule Loka.Core.Contracts.Schema do
 
   defp keyword("$ref", ref, _, at, ctx), do: ok(resolves?(ref, ctx), at)
 
+  defp keyword("type", "object", %{"properties" => _} = s, at, _),
+    do: ok(s["additionalProperties"] === false and not map?(s), at)
+
   defp keyword("type", "object", s, at, _),
-    do: ok(is_map_key(s, "properties") and is_map_key(s, "additionalProperties"), at)
+    do: ok(is_map(s["additionalProperties"]) and not is_map_key(s, "required"), at)
 
   defp keyword("type", "array", s, at, _), do: ok(is_map_key(s, "items"), at)
   defp keyword(k, n, _, at, _) when k in @counts, do: ok(is_integer(n) and n >= 0, at)
   defp keyword(k, n, _, at, _) when k in ~w(minimum maximum), do: ok(is_integer(n), at)
-  defp keyword(k, _, _, at, _) when k in ~w(properties oneOf), do: ["#{at}: invalid"]
+
+  defp keyword(k, _, _, at, _) when k in ~w(properties oneOf propertyNames),
+    do: ["#{at}: invalid"]
+
   defp keyword(_, _, _, _, _), do: []
 
   defp ok(true, _), do: []
   defp ok(false, at), do: ["#{at}: invalid"]
+
+  defp map?(s), do: is_map_key(s, "propertyNames") or is_map_key(s, "maxProperties")
 
   defp scalar?(v), do: is_binary(v) or is_integer(v) or is_boolean(v) or is_nil(v)
 
@@ -181,6 +197,6 @@ defmodule Loka.Core.Contracts.Schema do
   # Only schema positions are rewritten; `examples`, `enum` and `const` hold values.
   defp rewrite(ps, "properties"), do: Map.new(ps, fn {k, v} -> {k, rewrite(v)} end)
   defp rewrite(bs, "oneOf"), do: Enum.map(bs, &rewrite/1)
-  defp rewrite(sub, "items"), do: rewrite(sub)
+  defp rewrite(sub, k) when k in ~w(items additionalProperties), do: rewrite(sub)
   defp rewrite(v, _), do: v
 end

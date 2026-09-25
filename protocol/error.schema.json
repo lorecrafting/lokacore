@@ -44,6 +44,7 @@
         "too_long",
         "too_few_items",
         "too_many_items",
+        "too_many_properties",
         "conflicting_write"
       ],
       "examples": [

@@ -65,7 +65,12 @@ controls = [
    %{
      "protocol/red_control.schema.json" =>
        ~s({"$defs": {"RedControl": {"type": "string", "format": "uuid"}}})
-   }, ~w(elixir bin/contracts.exs --check), "unsupported keyword format"}
+   }, ~w(elixir bin/contracts.exs --check), "unsupported keyword format"},
+  {"contracts: a map with declared properties fails compilation",
+   %{
+     "protocol/red_control.schema.json" =>
+       ~s({"$defs": {"RedControl": {"type": "object", "properties": {}, "additionalProperties": {"type": "null"}}}})
+   }, ~w(mix compile --warnings-as-errors --force), "RedControl/type: invalid"}
 ]
 
 failures =
