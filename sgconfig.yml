@@ -1,5 +1,6 @@
 # ast-grep lint rules: `ast-grep scan` (code) and `ast-grep test` (each rule's red cases).
 ruleDirs: [lint/rules]
+utilDirs: [lint/utils]
 testConfigs:
   - testDir: lint/tests
 # Parse .ts with the TSX grammar too, so each TypeScript rule covers .ts and .tsx.
