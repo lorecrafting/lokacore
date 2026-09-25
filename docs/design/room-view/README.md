@@ -14,6 +14,10 @@ Open [room-view.html](room-view.html) in a browser to play the Lantern loop on t
   - **One status line:** `06:00 · standing · hp 300/300  ma 120/120  mv 200/200`. Tapping the position cycles standing, sitting, resting, meditating and sleeping (you must stand to walk). Tapping the numbers opens Character.
   - Swiping up on the footer (away from the map), or tapping the small handle, opens the text drawer. Every tap shows up there as its command.
 
+## Departures from 00 §4.10
+
+The map joystick with stair nodes replaces the six-way compass ring. Full pages replace the action sheets. The position and current/max resources in the status line are new. Adopting any of these would need a spec amendment.
+
 ## Open questions
 
 1. **Discoverability.** Neither "tap the title to look" nor "press the map to walk" is visible on screen. P5 needs a non-developer to finish without instructions, so both need a first-run hint (the joystick has one) and a real device test.
@@ -23,22 +27,21 @@ Open [room-view.html](room-view.html) in a browser to play the Lantern loop on t
 
 ## GameView needs
 
-Compared against [protocol/gameview.schema.json](../../../protocol/gameview.schema.json) at `4e8f40b`, which already covers several of the first-pass notes: exit and action reasons with an optional message, text bindings, the choice prompt, speaker and `closable`, `NarrationRecord`, and the current `time`. "Must" means the Lantern loop can't be played by touch without it.
+Compared against [protocol/gameview.schema.json](../../../protocol/gameview.schema.json) at `4e8f40b`, which already covers several of the first-pass notes: exit and action reasons with an optional message, text bindings, the choice prompt, speaker and `closable`, `NarrationRecord`, the current `time`, and `up`/`down` exits (ExitView directions are keys, with the same reasons). None of the gaps below blocks the Lantern loop by touch. This table supersedes the numbered notes panels inside the HTML pages, which are the first-pass drafts.
 
-| # | Need | For | Nearest today |
+| # | Need (nice to have) | For | Nearest today |
 |---|---|---|---|
-| 1 | must: exits for `up` and `down` in the same ExitView list, with the same reasons | the joystick's stair nodes | ExitView.direction (keys already allow it) |
-| 2 | nice: resources as current/max with a band (`hale`, `hurt`, `badly_hurt`), so the UI never invents thresholds | the status line and Character | none |
-| 3 | nice: the actor's position (standing, sitting, resting, meditating, sleeping) and the actions that change it, with a typed reason when movement needs standing | the status line; "Stand up first" | none |
-| 4 | nice: discovered map places with grid coordinates and z, the edges between them, and which are visited | the minimap and Map page | none ("map joins with its capability") |
-| 5 | nice: a closed door told apart from a barred way (openable or not) | the dashed stair ring and struck exits | UnavailableReason.code (only `exit_locked`) |
-| 6 | nice: per-entity visible status (the lantern is lit) and a long description | thing pages; "(lit)" in Carrying | EntityView {id, name, kind, actions} |
-| 7 | nice: inspectable details marked as targetable non-entities | the tappable mooring post | none |
-| 8 | nice: the objective or stage text of each quest | Journal; tracked objective | QuestView {quest, state, title} |
-| 9 | nice: discovered dialogue topics per NPC | "Ask about" chips | none |
-| 10 | nice: text aliases per action and target | text drawer suggestions and echoes | ActionDefinition notes they arrive with the parser |
-| 11 | nice: the accessibility text key on each advertised action | screen readers | ActionDefinition.accessibility (not projected) |
-| 12 | nice: the destination name of an exit the player already knows | screen-reader labels; the Map page | none |
+| 1 | resources as current/max with a band (`hale`, `hurt`, `badly_hurt`), so the UI never invents thresholds | the status line and Character | none |
+| 2 | the actor's position (standing, sitting, resting, meditating, sleeping) and the actions that change it, with a typed reason when movement needs standing | the status line; "Stand up first" | none |
+| 3 | discovered map places with grid coordinates and z, the edges between them, and which are visited | the minimap and Map page | none ("map joins with its capability") |
+| 4 | a typed distinction between a closed door and a barred way (openable or not); the player-facing `message` already tells them apart | the dashed stair ring and struck exits | UnavailableReason.code (only `exit_locked`) |
+| 5 | per-entity visible status (the lantern is lit) and a long description | thing pages; "(lit)" in Carrying | EntityView {id, name, kind, actions} |
+| 6 | inspectable details marked as targetable non-entities | the tappable mooring post | none |
+| 7 | the objective or stage text of each quest | Journal; tracked objective | QuestView {quest, state, title} |
+| 8 | discovered dialogue topics per NPC | "Ask about" chips | none |
+| 9 | text aliases per action and target | text drawer suggestions and echoes | ActionDefinition notes they arrive with the parser |
+| 10 | the accessibility text key on each advertised action | screen readers | ActionDefinition.accessibility (not projected) |
+| 11 | the destination name of an exit the player already knows | screen-reader labels; the Map page | none |
 
 Questions for the engine rather than needs:
 

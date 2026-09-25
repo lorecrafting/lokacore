@@ -1,7 +1,7 @@
 # Reference material (informative, not authority)
 
 These explain why decisions were made. They do not override [docs/spec](../spec/IMPORT.md).
-They stay in the archived legacy repository at `997a7a8`; they are not copied here.
+The legacy studies below stay in the archived legacy repository at `997a7a8`; they are not copied here.
 
 - Studies: [12 Evennia lessons](https://github.com/lorecrafting/lokacore-v2-legacy/blob/997a7a8/docs/rewrite-v3/12-evennia-lessons.md),
   [20 classic MUD lessons](https://github.com/lorecrafting/lokacore-v2-legacy/blob/997a7a8/docs/rewrite-v3/20-classic-mud-lessons.md),
