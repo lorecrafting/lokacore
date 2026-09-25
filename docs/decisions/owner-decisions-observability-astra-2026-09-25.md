@@ -26,6 +26,12 @@ not tokens; export (OpenTelemetry) and cross-store search come after the records
 One docs/contract slice between R4 and R5, so `loka play` and the simulator emit the format
 from their first slice.
 
+Corrections to that summary (PR #28 review): Foundry's early telemetry was deleted with
+its daemon stack in the clean-room batch A1; its producer/validator drift is a separate
+FR-18B finding. Foundry keeps token usage as a required measure and ties it to accepted
+outcomes; it does not measure outcomes instead of tokens. The game trace records decisions,
+including rejected ones and failed commits, not only committed state.
+
 The owner answered:
 
 > yes add the observability design piece between R4 and R5
