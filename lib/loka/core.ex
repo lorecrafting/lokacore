@@ -4,5 +4,5 @@ defmodule Loka.Core do
 
   Dependency rules: spec document 02 §1.
   """
-  use Boundary, deps: [], exports: []
+  use Boundary, deps: [], exports: [Canonical, Contracts]
 end

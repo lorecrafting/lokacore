@@ -1,0 +1,19 @@
+{
+  "label": "actions.talk",
+  "target": {
+    "kind": "entity",
+    "scopes": [
+      "room_occupants"
+    ]
+  },
+  "command": "talk",
+  "priority": 100,
+  "input": [],
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "target_present"
+    }
+  },
+  "accessibility": "actions.talk.a11y"
+}

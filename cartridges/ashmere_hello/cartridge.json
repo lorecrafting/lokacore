@@ -1,0 +1,35 @@
+{
+  "api_version": "loka/v3",
+  "id": "ashmere_hello",
+  "version": "0.0.1",
+  "title": "Ashmere — Hello World",
+  "requires": {
+    "kernel_api": {
+      "at_least": "1.0",
+      "below": "2.0"
+    },
+    "content_schema": 1,
+    "rule_ir": 1,
+    "capabilities": {
+      "movement": 1,
+      "containment": 1,
+      "inspectable_detail": 1,
+      "description_variant": 1,
+      "equipment": 1,
+      "fact": 1,
+      "policy": 1,
+      "target_resolution": 1,
+      "narration": 1,
+      "quest": 1,
+      "dialogue": 1,
+      "topics": 1,
+      "check": 1,
+      "behavior": 1,
+      "schedule": 1
+    },
+    "client_features": []
+  },
+  "supported_profiles": [
+    "offline_private"
+  ]
+}

@@ -1,0 +1,183 @@
+defmodule Loka.Content.Checks do
+  @moduledoc """
+  Manifest requirements, capability ownership, references and fact types (05 §3, §4, §6;
+  06 §20–21). `registry` is a decoded capability registry (CapabilitySpec entries, like
+  protocol/capability_registry.json); ownership comes from its commands and policies.
+  """
+  import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2]
+  alias Loka.Core.Canonical
+  alias Loka.Core.Contracts
+
+  @supported_pin 1
+  @ref_fields %{"fact_compare" => "fact", "has_item" => "item", "quest_state" => "quest"}
+  # A definition sits inside the artifact, the cartridge and its kind's map.
+  @enclosing 3
+
+  @doc "Diagnostics for a schema-valid manifest's requires and supported_profiles."
+  @spec requirements(String.t(), map(), [map()]) :: [map()]
+  def requirements(rel, %{"requires" => req} = m, registry) do
+    offline? = "offline_private" in m["supported_profiles"]
+
+    range(rel, req["kernel_api"]) ++
+      pins(rel, req) ++
+      Enum.flat_map(req["capabilities"], &capability(rel, &1, offline?, registry))
+  end
+
+  defp range(rel, %{"at_least" => low, "below" => high}) do
+    if version(low) >= version(high),
+      do: [diag("KERNEL_API_RANGE_INVALID", at(rel, ["requires", "kernel_api"]))],
+      else: []
+  end
+
+  defp pins(rel, req) do
+    for field <- ~w(content_schema rule_ir), req[field] != @supported_pin do
+      data = %{"field" => field, "declared" => req[field], "supported" => @supported_pin}
+      diag("PINNED_VERSION_UNSUPPORTED", at(rel, ["requires", field]), data)
+    end
+  end
+
+  defp version(v), do: v |> String.split(".") |> Enum.map(&String.to_integer/1)
+
+  defp capability(rel, {key, v}, offline?, registry) do
+    path = at(rel, ["requires", "capabilities", key])
+
+    case Enum.find(registry, &(&1["key"] == key and &1["version"] == v)) do
+      nil -> [diag("UNKNOWN_CAPABILITY", path)]
+      %{"portability" => "server_only"} when offline? -> [diag("SERVER_ONLY_CAPABILITY", path)]
+      _ -> []
+    end
+  end
+
+  @doc """
+  Diagnostics across the schema-valid definitions (`kind => key => {rel, steps, value}`):
+  nesting depth, and, given a valid manifest, commands, policy ops and references.
+  """
+  @spec check(map() | nil, map(), [map()]) :: [map()]
+  def check(manifest, defs, registry) do
+    all = for {_, ds} <- defs, is_map(ds), {_, {_, _, _} = d} <- ds, do: d
+
+    Enum.flat_map(all, &depth/1) ++
+      if(manifest, do: uses(manifest, defs, owners(registry)), else: [])
+  end
+
+  defp depth({rel, steps, value}) do
+    max = Canonical.max_depth()
+
+    if @enclosing + nesting(value) > max,
+      do: [diag("NESTING_TOO_DEEP", at(rel, steps), %{"maximum" => max})],
+      else: []
+  end
+
+  defp nesting(v) when is_map(v), do: 1 + Enum.reduce(v, 0, &max(nesting(elem(&1, 1)), &2))
+  defp nesting(v) when is_list(v), do: 1 + Enum.reduce(v, 0, &max(nesting(&1), &2))
+  defp nesting(_), do: 0
+
+  defp owners(registry) do
+    for c <- registry,
+        name <- Map.get(c, "commands", []) ++ Map.get(c, "policies", []),
+        into: %{},
+        do: {name, {c["key"], "#{c["key"]}@#{c["version"]}"}}
+  end
+
+  defp uses(m, defs, owners) do
+    required = {m["requires"]["capabilities"], owners}
+    actions = for {_, {rel, [], a}} <- defs["action"], do: {rel, a}
+
+    Enum.flat_map(actions, fn {rel, a} -> command(rel, a["command"], required) end) ++
+      Enum.flat_map(trees(defs, actions), &tree(&1, {m, defs, required}))
+  end
+
+  defp tree({rel, steps, root}, ctx),
+    do: for({node, at} <- nodes(root, steps), d <- node(rel, at, node, ctx), do: d)
+
+  # Every policy tree: a named policy's root and each action's inline one.
+  defp trees(defs, actions) do
+    for({_, {rel, [], p}} <- defs["policy"], do: {rel, ["root"], p["root"]}) ++
+      for {rel, a} <- actions, do: {rel, ["policy", "root"], a["policy"]["root"]}
+  end
+
+  defp command(rel, name, required) do
+    if name in commands(),
+      do: owned(at(rel, ["command"]), name, required),
+      else: [diag("UNKNOWN_COMMAND", at(rel, ["command"]))]
+  end
+
+  defp commands,
+    do:
+      for(b <- Contracts.defs()["CommandPayload"]["oneOf"], do: b["properties"]["type"]["const"])
+
+  defp nodes(%{"op" => op, "items" => items} = n, steps) when op in ~w(all any) do
+    children =
+      items
+      |> Enum.with_index()
+      |> Enum.flat_map(fn {c, i} -> nodes(c, steps ++ ["items", i]) end)
+
+    [{n, steps} | children]
+  end
+
+  defp nodes(%{"op" => "not", "item" => item} = n, steps),
+    do: [{n, steps} | nodes(item, steps ++ ["item"])]
+
+  defp nodes(n, steps), do: [{n, steps}]
+
+  defp node(rel, steps, %{"op" => op} = n, {m, defs, required}) do
+    owned(at(rel, steps ++ ["op"]), op, required) ++
+      case @ref_fields[op] do
+        nil -> []
+        field -> reference(rel, steps, field, n, m, defs)
+      end
+  end
+
+  defp owned(path, name, {required, owners}) do
+    {key, pin} = owners[name]
+
+    if is_map_key(required, key),
+      do: [],
+      else: [diag("UNDECLARED_CAPABILITY", path, %{"capability" => key}, [pin])]
+  end
+
+  defp reference(rel, steps, field, n, m, defs) do
+    ref = n[field]
+
+    case resolve(ref, field, m, defs) do
+      :unresolved ->
+        s = "#{ref["cartridge_id"]}@#{ref["cartridge_version"]}:#{ref["kind"]}/#{ref["key"]}"
+        [diag("UNRESOLVED_REFERENCE", at(rel, steps ++ [field]), %{"target" => s})]
+
+      {_, _, %{"value_type" => t}} ->
+        if typed?(n["equals"], t),
+          do: [],
+          else: [diag("FACT_TYPE_MISMATCH", at(rel, steps ++ ["equals"]))]
+
+      _ ->
+        []
+    end
+  end
+
+  # A ref names this cartridge and the kind its field is named after (fact, item, quest).
+  # An :invalid definition or an :unknown namespace (rejected facts.json) counts as
+  # resolved: the real error is already reported there.
+  defp resolve(
+         %{"cartridge_id" => id, "cartridge_version" => v, "kind" => k, "key" => key},
+         k,
+         %{
+           "id" => id,
+           "version" => v
+         },
+         defs
+       ) do
+    case defs[k] do
+      %{^key => target} -> target
+      :unknown -> :unknown
+      _ -> :unresolved
+    end
+  end
+
+  defp resolve(_, _, _, _), do: :unresolved
+
+  defp typed?(v, %{"type" => "bool"}), do: is_boolean(v)
+  defp typed?(v, %{"type" => "enum", "values" => vs}), do: v in vs
+
+  defp typed?(v, %{"type" => "int"} = t),
+    do: is_integer(v) and v >= Map.get(t, "minimum", v) and v <= Map.get(t, "maximum", v)
+end
