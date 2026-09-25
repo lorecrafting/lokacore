@@ -77,3 +77,20 @@
   whether spec amendments are in or out. The parenthetical also mixes examples, an
   exclusion, a decider and a citation in one clause, and l.23 is unwrapped (about 150
   characters against the file's 90).
+
+## Fix round 1 (`0af7b91`)
+
+Same reviewer, scoped to the fix commit (`git diff e216cc8 0af7b91`); PM-authored fixes.
+
+| Finding | Disposition | Verified |
+|---|---|---|
+| S1 estimate | Fixed | `ROADMAP.md:49`: the ADR-074 figure is scoped to "the 26 slices it counted, plus about 0.4 million for the observability slice", which matches ADR-074 §6 (0.4M per slice, 26 slices). |
+| S2 trace scope | Fixed | `ROADMAP.md:42`: "accepted and rejected decisions, failed commits; never authority", which matches 11 §12 (`runtime.command.rejected`, `runtime.commit.failed`) and 09 §7. |
+| N1 attribution | Fixed | `WORKFLOW.md:20-25` and `decisions/README.md:41` now say the owner delegated the judgment to the PM, which matches the owner's "I leave it up to you". |
+| N2 Foundry summary | Fixed | The record adds a labeled "Corrections to that summary" paragraph and keeps the original as what the owner was shown. Deletion with the daemon stack (OBSERVABILITY.md) and token usage tied to accepted outcomes (FR-18B) are both stated correctly. Its last sentence corrects a claim the summary never made (the "committed state" wording was in ROADMAP). It is accurate and harmless. |
+| N3 row | Fixed | The row is cut to what the slice freezes and cites 09 §7. It no longer restates the principles the record holds. |
+| N4 Astra examples | Fixed | The examples now cover the Fable list: spec amendments, identity and delta contracts. There is one sentence per clause, and it is rewrapped. The rule is unambiguous and consistent with the "Astra relays" line in step 6. |
+
+No new findings. `ROADMAP.md:49` is unwrapped, which I leave as is.
+
+**Verdict at `0af7b91`: APPROVE.**
