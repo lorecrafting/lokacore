@@ -2,7 +2,8 @@ defmodule Loka.Core.Invariants do
   @moduledoc """
   Pure checks for the invariants `protocol/invariants.json` assigns to `r3_pr5`, by id
   (docs/ROADMAP.md, verification harness). `kernel/ts/src/invariants.ts` is the TypeScript
-  twin; both run `protocol/fixtures/invariant_checks.json`.
+  twin; both run the `"invariants"` cases of
+  `protocol/fixtures/composition.json`.
 
   `check(id, observation)` is true when the invariant holds. Observation fields:
 
