@@ -99,9 +99,9 @@ const command = (r: Run, parsed: Exclude<Parsed, 'quit' | null>): Command =>
 
 // Decides one command, prints what the player sees, the state hash and the step time, and
 // returns its game_trace line; the latency metric goes to operations.
-function turn(r: Run, cmd: Command): string {
+function turn(r: Run, cmd: Command, measured = true): string {
   const { trace, latency, decision } = decide(r, cmd);
-  append('operations', r.ids.run_id, line(latency));
+  if (measured) append('operations', r.ids.run_id, line(latency)); // a replay's ids repeat the run's
   const shown = decision.kind === 'accepted' ? room(cartridge, r.world) : `${reason(decision)}\n`;
   const micros = latency.data.value;
   process.stdout.write(`${shown}[state ${hash(r.world.state as never)}  step ${micros} µs]\n`);
@@ -134,7 +134,7 @@ function replay(path: string | undefined) {
   if (head.ids.content_hash !== content_hash) fail(`${path}: a transcript of another cartridge`);
   const context = entries[0]?.data.command.world_context_id ?? randomUUID();
   const r = start(head.ids.run_id, context, head.ids.seed);
-  const out = [header(r), ...entries.map((e) => turn(r, e.data.command))];
+  const out = [header(r), ...entries.map((e) => turn(r, e.data.command, false))];
   const differs = out.findIndex((l, i) => l !== `${lines[i]}\n`);
   if (differs >= 0) fail(`replay differs at ${path}:${differs + 1}`);
   process.stdout.write(`replay: ${out.length} records identical\n`);

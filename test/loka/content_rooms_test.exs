@@ -128,4 +128,13 @@ defmodule Loka.ContentRoomsTest do
                 d("SCHEMA_VIOLATION", "text[\"r.d\"]", %{"error" => "too_short"})
               ]}
   end
+
+  # Breaks: an entry reported missing when cartridge.json was rejected (it may hold one).
+  test "a rejected manifest does not also report the entry missing", %{tmp_dir: dir} do
+    m = @manifest |> Map.delete("title") |> Map.put("entry", ref("a"))
+
+    assert compile(dir, %{"cartridge.json" => m}) ==
+             {:error,
+              [d("SCHEMA_VIOLATION", "cartridge.title", %{"error" => "missing_property"})]}
+  end
 end

@@ -21,9 +21,10 @@ for (const d of COMPASS) WORDS[d] = WORDS[d[0]] = { type: 'move', direction: d }
  */
 export function parse(text: string): Parsed {
   const words = text.trim().toLowerCase().split(/\s+/);
-  if (words.length === 1) return WORDS[words[0]] ?? null;
+  const word = (w: string) => (Object.hasOwn(WORDS, w) ? WORDS[w] : null);
+  if (words.length === 1) return word(words[0]);
   if (words.length !== 2 || words[0] !== 'go') return null;
-  const known = WORDS[words[1]];
+  const known = word(words[1]);
   if (known && typeof known === 'object' && known.type === 'move') return known;
   return /^[a-z][a-z0-9_]{0,63}$/.test(words[1]) ? { type: 'move', direction: words[1] } : null;
 }

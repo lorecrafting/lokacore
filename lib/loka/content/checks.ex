@@ -95,10 +95,11 @@ defmodule Loka.Content.Checks do
       if(m, do: Enum.flat_map(rooms, &room(&1, m, defs, registry)), else: [])
   end
 
+  # Without a valid manifest the entry is unknown, not missing.
+  defp entry(nil, _, _), do: []
+
   defp entry(_, nil, _),
     do: [diag("SCHEMA_VIOLATION", "cartridge.entry", %{"error" => "missing_property"})]
-
-  defp entry(nil, _, _), do: []
 
   defp entry(m, ref, defs),
     do: reference("cartridge.json", [], {"entry", "room"}, %{"entry" => ref}, m, defs)

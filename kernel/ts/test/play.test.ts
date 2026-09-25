@@ -34,7 +34,7 @@ const records = (rel: string) =>
 const hashes = (out: string) => [...out.matchAll(/\[state ([0-9a-f]{64})/g)].map((m) => m[1]);
 
 const script = join(dir, 'walk.txt');
-writeFileSync(script, 'l\nn\ngo sideways\nnorth\ndance\ngo south\nw\nquit\nnorth\n');
+writeFileSync(script, 'l\nn\ngo sideways\nnorth\ndance\nconstructor\ngo south\nw\nquit\nnorth\n');
 const first = play([artifact, script]);
 const transcript = first.out.match(/transcript: (\S+)/)![1];
 const trace = records(transcript);
@@ -54,6 +54,7 @@ test('a scripted walk prints the rooms and rejections a player expects', () => {
   assert.match(first.out, /> go sideways\nThat isn't a direction\.\n/);
   assert.match(first.out, /> north\nYou can't go that way\.\n/);
   assert.match(first.out, /> dance\nI don't understand that\.\n/);
+  assert.match(first.out, /> constructor\nI don't understand that\.\n/); // not a prototype key
   assert.equal(hashes(first.out).length, 6); // six commands; dance and quit are not commands
 });
 
@@ -109,12 +110,15 @@ test('every record validates and the game_trace keeps the ADR-075 §4 relationsh
 
 // Breaks: anything nondeterministic in a decision or a record (a clock, a fresh id, map order).
 test('replaying the transcript twice reproduces its records and state hashes byte for byte', () => {
+  const ops = () => records(transcript.replace('game_trace', 'operations')).length;
+  const before = ops();
   for (let i = 0; i < 2; i++) {
     const again = play([artifact, '--replay', ROOT + transcript]);
     assert.equal(again.status, 0, again.err);
     assert.match(again.out, /replay: 7 records identical/);
     assert.deepEqual(hashes(again.out), hashes(first.out));
   }
+  assert.equal(ops(), before); // a replay's latency would repeat the run's ids
   const tampered = join(dir, 'tampered.jsonl');
   const lines = readFileSync(ROOT + transcript, 'utf8').replace(
     '"direction":"north"',
