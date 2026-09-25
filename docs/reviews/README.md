@@ -32,3 +32,8 @@ Each record is written by a fresh agent that authored none of the reviewed work 
   verified with mutants; 127-value differential with zero disagreements; one should-fix: the
   pattern grammar still admits three forms that throw in TypeScript); round 2 at `bb4a7fb`,
   APPROVE (grammar closed; 65-pattern differential with zero disagreements).
+- [2026-09-24 R3 PR 6a envelopes](2026-09-24-r3-pr6a-envelopes-review.md): PR #11 at
+  `018ccbf`, CHANGES REQUIRED (test-the-tests on the contract; one blocker: the envelope's
+  and registry entry's `required` lists survive mutation; one should-fix:
+  `consequence_operator` must freeze at R5, where ActionRecipe executes over registered
+  consequences; docs part accurate, decision record byte-identical).
