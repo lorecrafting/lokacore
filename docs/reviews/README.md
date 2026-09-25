@@ -2,28 +2,26 @@
 
 Each record is written by a fresh agent that authored none of the reviewed work (AGENTS.md).
 
+## R0/R1
+
+Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy) (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
+
+## R2: foundation, delivery process, plan
+
 - [2026-09-24 R2 foundation](2026-09-24-r2-foundation-review.md): PR #1 at `acccda6`,
   APPROVE WITH NOTES; findings and their disposition are in the PR.
 - [2026-09-24 delivery workflow](2026-09-24-workflow-review.md): PR #2 at `7b2e7ab`,
   APPROVE WITH NOTES (docs-only, short review).
 - [2026-09-24 docs budget](2026-09-24-docs-budget-review.md): PR #3 at `910b6a6`,
   APPROVE WITH NOTES (tooling/docs, short review).
-- [2026-09-24 local hooks](2026-09-24-local-hooks-review.md): PR #7 at `0673d90`,
-  APPROVE WITH NOTES (tooling, short review; hooks run on planted cases).
 - [2026-09-24 roadmap](2026-09-24-roadmap-review.md): PR #5 at `3638143`,
   APPROVE WITH NOTES (docs-only planning, short review).
+
+## R3: contract slices and gate
+
 - [2026-09-24 R3 PR 1 portable ABI](2026-09-24-r3-pr1-portable-abi-review.md): PR #4 at
   `99b9b37`, APPROVE WITH NOTES (full review, contract freeze); re-review of the fixes at
   `e258bff`, APPROVE WITH NOTES (one test-gap should-fix; freeze owner-approved in `eb6dd03`).
-- [2026-09-24 lessons split](2026-09-24-lessons-split-review.md): PR #8 at `9bbd478`,
-  APPROVE WITH NOTES (docs-only, short review); re-review of the fixes at `9ab9094`, APPROVE.
-- [2026-09-24 size limits](2026-09-24-size-limits-review.md): PR #6 at `6c02aee`,
-  CHANGES REQUIRED (tooling, full review with mutation check); broad re-review of
-  `aa58475`: CHANGES REQUIRED (one blocker, two should-fix); final round `24c72ea`:
-  APPROVE WITH NOTES.
-- [2026-09-24 Prettier](2026-09-24-prettier-review.md): PR #10 at `7d8d7c8`,
-  APPROVE WITH NOTES (tooling, short review; hooks and checks run on planted cases);
-  re-review of the fixes at `7e05205`, APPROVE.
 - [2026-09-24 R3 PR 2 contracts](2026-09-24-r3-pr2-contracts-review.md): PR #9 at
   `324015c`, APPROVE WITH NOTES (full review, contract freeze; 8,653-case differential with
   zero disagreements; three should-fix: pattern syntax not closed, boundary test gap,
@@ -69,11 +67,6 @@ Each record is written by a fresh agent that authored none of the reviewed work 
   adjudicated (A1 not a compose blocker: an R5 coordinator obligation to register; A4 and
   AQ1 accepted; A2, A3, A5 deferred with follow-ups), verdict unchanged; re-review of the
   fixes at `2812a71`, APPROVE (every item verified, six mutants die, differential identical).
-- [2026-09-24 room view prototype](2026-09-24-room-view-prototype-review.md): PR #17 at
-  `ba5e572`, APPROVE WITH NOTES (docs-only design record, short review; schema cells
-  verified against `4e8f40b`; two one-line should-fix: the lone "must" row is neither a
-  must nor a gap, and the needs list lives in three places; three nits); re-review of
-  the fixes at `9cc66f6`, APPROVE (all five dispositions verified).
 - [2026-09-24 R3 gate](2026-09-24-r3-gate-review.md): PR #16 at `5ee2aa7`, APPROVE WITH
   NOTES (full Fable review of the gate PR: ten type-checker probes, eight mutants, full
   check line; two documentation should-fix, two nits); **Gate R3: PASS WITH NOTED GAPS**
@@ -83,6 +76,28 @@ Each record is written by a fresh agent that authored none of the reviewed work 
   composite Elixir types, A3 observed boundary, A4 guarantee overstated); re-review of the
   fixes at `94b15fb`, APPROVE, **Gate R3: PASS WITH NOTED GAPS** (six-class view, boundary
   test with five dying mutants in both kernels, probe test, owner-approved amendment).
+
+## R3: tooling and design
+
+- [2026-09-24 local hooks](2026-09-24-local-hooks-review.md): PR #7 at `0673d90`,
+  APPROVE WITH NOTES (tooling, short review; hooks run on planted cases).
+- [2026-09-24 lessons split](2026-09-24-lessons-split-review.md): PR #8 at `9bbd478`,
+  APPROVE WITH NOTES (docs-only, short review); re-review of the fixes at `9ab9094`, APPROVE.
+- [2026-09-24 size limits](2026-09-24-size-limits-review.md): PR #6 at `6c02aee`,
+  CHANGES REQUIRED (tooling, full review with mutation check); broad re-review of
+  `aa58475`: CHANGES REQUIRED (one blocker, two should-fix); final round `24c72ea`:
+  APPROVE WITH NOTES.
+- [2026-09-24 Prettier](2026-09-24-prettier-review.md): PR #10 at `7d8d7c8`,
+  APPROVE WITH NOTES (tooling, short review; hooks and checks run on planted cases);
+  re-review of the fixes at `7e05205`, APPROVE.
+- [2026-09-24 room view prototype](2026-09-24-room-view-prototype-review.md): PR #17 at
+  `ba5e572`, APPROVE WITH NOTES (docs-only design record, short review; schema cells
+  verified against `4e8f40b`; two one-line should-fix: the lone "must" row is neither a
+  must nor a gap, and the needs list lives in three places; three nits); re-review of
+  the fixes at `9cc66f6`, APPROVE (all five dispositions verified).
+
+## Post-R3
+
 - [2026-09-24 ADR-074 TypeScript-first proposal](2026-09-24-adr-074-ts-first-review.md): PR #18
   at `0f7c4f6`, CHANGES REQUIRED (Fable design review of the proposal document: citations
   and re-estimate arithmetic verified; six should-fix: the R9 Lab runs rules before the
@@ -92,6 +107,10 @@ Each record is written by a fresh agent that authored none of the reviewed work 
   the post-release "TypeScript becomes the rulebook" consequence is missing, and the
   amendment list is incomplete; four nits, one question; owner recommendation: accept
   the direction after the fixes); re-review of the fixes at `1545b82`, APPROVE (every disposition verified, arithmetic reproduced, crosswalk complete but for two reading aids; fit for the owner to decide).
+- [2026-09-24 maintenance cleanup](2026-09-24-maint-cleanup-review.md): PR #20 at `d387b93`,
+  APPROVE WITH NOTES (cleanup, proportionate review: case lists and differential inputs
+  byte-identical to `main` in both kernels, PR #15 mutants still die; one should-fix: the
+  fixture description does not say how to rebuild the three built cases); re-review of the fix at `54688e7`, APPROVE.
 - [2026-09-24 maintenance: ADR-074 amendments](2026-09-24-maint-adr074-amendments-review.md):
   PR #19 at `e7b1625`, CHANGES REQUIRED, no blocker (Fable design review: every spec hunk
   traced to a crosswalk row, five owner records read, trigger check planted six ways and

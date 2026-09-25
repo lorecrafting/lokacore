@@ -31,8 +31,10 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
    decided.
 3. **Build and self-review (developer).** Implement; run the full local check line from
    AGENTS.md; run `/ponytail-review` (skill `ponytail:ponytail-review`, a user plugin) on the diff and a correctness pass over it
-   (`/code-review medium`); fix what they find. Commit, push, open the PR (description cites
-   spec sections and includes the ponytail result). Hand back a short note: what changed,
+   (`/code-review medium`), both in the developer's worktree or on the PR number, never
+   the main checkout; fix what they find. A PR that adds or changes a schema also runs the
+   schema mutant sweep in the [contract lessons](lessons/contracts.md). Commit, push, open
+   the PR (description cites spec sections and includes the ponytail result). Hand back a short note: what changed,
    check output, self-review findings and dispositions, open questions.
 4. **Verify and review.** PM does not relay claims: it confirms CI is green on the pushed
    commit (or reruns the check line) before review. Then it spawns a *fresh* `reviewer`
@@ -72,8 +74,8 @@ now enforced by a check, a doc turning into a catch-all. Findings are fixed in t
   (`git worktree add --detach`) and removes it before finishing.
 - The reviewer commits only its record, in a detached worktree at `origin/<branch>`,
   pushes from there with `git push origin HEAD:<branch>`, and removes the worktree.
-- A new worktree has no `deps/`, `_build/` or `node_modules`: run `mix deps.get` and
-  `npm ci` there first.
+- A new worktree has no `deps/`, `_build/` or `node_modules`: run `mix deps.get` there
+  first, and `npm ci` at the root, in `kernel/ts` and in `mobile/app`.
 - Git hooks are set once per clone ([AGENTS.md, Working rules](../AGENTS.md#working-rules));
   worktrees share that setting.
 - Agent types in `.claude/agents/` register only when a session starts. If one is missing,
