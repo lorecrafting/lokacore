@@ -1,0 +1,273 @@
+<title>Loka Bottom Bars</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap">
+<style>
+:root{
+  --bg:#eceee9; --fg:#1d2320; --muted:#56615b; --line:#cfd5ce; --accent:#7b2d20; --panel:#f6f7f3;
+  --head:'IM Fell English',Georgia,serif; --sc:'IM Fell English SC',Georgia,serif; --body:'EB Garamond',Georgia,serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark; --bg:#121614; --fg:#e2e5df; --muted:#9aa59e; --line:#2a322e; --accent:#d9937a; --panel:#181d1a}}
+:root[data-theme="dark"]{color-scheme:dark; --bg:#121614; --fg:#e2e5df; --muted:#9aa59e; --line:#2a322e; --accent:#d9937a; --panel:#181d1a}
+body{background:var(--bg); color:var(--fg); font:17px/1.55 var(--body); padding-inline:16px; padding-block:28px 64px}
+.wrap{max-width:1180px; margin:0 auto}
+h1{font:400 clamp(2rem,5vw,3rem)/1.05 var(--head); margin:0 0 .3em; text-wrap:balance}
+.lede{max-width:66ch; color:var(--muted); margin:0 0 1em}
+.lede b{color:var(--fg); font-weight:500}
+.ctl{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0 0 28px; padding:10px 0; border-block:1px solid var(--line); font-size:.95rem}
+.ctl button{font:inherit; padding:4px 12px; border:1px solid var(--line); background:var(--panel); color:var(--fg); border-radius:4px; cursor:pointer}
+.ctl button[aria-pressed="true"]{background:var(--fg); color:var(--bg); border-color:var(--fg)}
+.gallery{display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,318px),1fr)); gap:40px 26px}
+figure{margin:0; display:flex; flex-direction:column; gap:10px}
+figcaption h2{font:400 1.2rem/1.2 var(--head); margin:0; display:flex; gap:.5em; align-items:baseline}
+figcaption h2 span{font:.95rem var(--sc); color:var(--accent); letter-spacing:.04em}
+figcaption p{margin:.2em 0 0; color:var(--muted); font-size:.95rem; line-height:1.45}
+
+/* ---------- the phone slice ---------- */
+.frame{--p-bg:#ebe6d7; --p-fg:#241f19; --p-dim:#645c4f; --p-line:#d0c7b0; --p-acc:#7b2d20; --p-card:#e4decd; --p-bad:#7b2d20; --seal:#7b2d20; --paper:#f1ecdf;
+  width:min(344px,100%); margin:0 auto; height:292px; display:flex; flex-direction:column; justify-content:flex-end;
+  background:var(--p-bg); color:var(--p-fg); border:8px solid #1a1b1a; border-top:0; border-radius:0 0 34px 34px; overflow:hidden; position:relative; font:15px/1.35 var(--body)}
+.night .frame{--p-bg:#0c0b09; --p-fg:#ecdfc3; --p-dim:#a79a83; --p-line:#2d271f; --p-acc:#e6a650; --p-card:#17140f; --p-bad:#eb9676; --seal:#8a3a22; --paper:#ecdfc3; color-scheme:dark}
+.frame button{font:inherit; color:inherit; background:none; border:0; padding:0; cursor:pointer}
+.frame :focus-visible{outline:2px solid var(--p-acc); outline-offset:2px}
+.ctx{flex:1; padding:18px 22px 0; font-size:16.5px; line-height:1.5; -webkit-mask-image:linear-gradient(transparent,#000 55%); mask-image:linear-gradient(transparent,#000 55%); overflow:hidden; display:flex; flex-direction:column; justify-content:flex-end}
+.ctx p{margin:0 0 .35em}
+.ctx b{font-weight:500; border-bottom:1.5px dotted currentColor}
+.said{font-style:italic; color:var(--p-acc); min-height:1.4em}
+.bar{position:relative; padding:8px 14px 14px; display:flex; flex-direction:column; gap:6px}
+.pr{text-align:center; font:12px var(--sc); letter-spacing:.06em; color:var(--p-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.row3{display:grid; grid-template-columns:1fr auto 1fr; align-items:center}
+.row3>:first-child{justify-self:start} .row3>:last-child{justify-self:end}
+.tx{min-height:44px; min-width:52px; font:13px var(--sc)!important; letter-spacing:.08em; color:var(--p-dim)!important}
+.k{font:14px var(--sc)!important; letter-spacing:.04em; min-width:36px; min-height:36px; border-radius:8px}
+.k.none{opacity:.22}
+.k.barred{color:var(--p-bad)!important; text-decoration:line-through}
+.k.open{color:var(--p-fg)}
+.sm{font-size:11px!important; color:var(--p-dim)!important}
+.mm{border-radius:50%; border:1px solid var(--p-fg); background:var(--p-card); overflow:hidden; flex-shrink:0; display:block}
+.mm svg{width:100%; height:100%; display:block}
+.l{stroke:var(--p-dim); stroke-width:1.6; fill:none} .f{stroke:var(--p-dim); stroke-width:1.2; stroke-dasharray:1.5 2} .b{stroke:var(--p-bad); stroke-width:1.6}
+.r{fill:var(--p-dim)} .cur{fill:var(--p-acc)}
+.hair{border-top:1px solid var(--p-line)}
+
+/* 1 cross */
+.v1 .pad{display:grid; grid-template-columns:40px 50px 40px; grid-template-rows:36px 50px 36px; place-items:center}
+/* 2 one line */
+.v2 .line{display:flex; align-items:center; justify-content:center; gap:4px}
+.v2 .line .k{min-width:40px}
+.v2 .sep{width:1px; height:22px; background:var(--p-line); margin:0 6px}
+/* 3 rose */
+.v3 .rose{position:relative; width:150px; height:132px}
+.v3 .rose svg.star{position:absolute; left:19px; top:10px; width:112px; height:112px}
+.v3 .rose .k{position:absolute}
+.v3 .n{left:57px; top:-8px}.v3 .s{left:57px; bottom:-8px}.v3 .w{left:-6px; top:48px}.v3 .e{right:-6px; top:48px}
+.v3 .rose .mm{position:absolute; left:55px; top:46px; width:40px; height:40px}
+.v3 .ud{display:flex; flex-direction:column}
+.dark-pt{fill:var(--p-fg)} .light-pt{fill:var(--p-bg); stroke:var(--p-fg); stroke-width:.8} .dia{fill:var(--p-line)}
+/* 4 side map */
+.v4 .mapbox{width:118px; height:84px; border-radius:10px; border:1px solid var(--p-fg); background:var(--p-card); overflow:hidden; display:block; position:relative}
+.v4 .mapbox svg{width:100%; height:100%}
+.v4 .mapbox small{position:absolute; left:8px; bottom:4px; font:10.5px var(--sc); letter-spacing:.06em; color:var(--p-dim)}
+.v4 .pad{display:grid; grid-template-columns:repeat(3,36px); grid-template-rows:repeat(3,34px); place-items:center}
+.v4 .dot{width:6px; height:6px; border-radius:50%; background:var(--p-acc)}
+/* 5 arc */
+.v5 .arcwrap{display:flex; justify-content:space-between; align-items:flex-end}
+.v5 .lefty{display:flex; flex-direction:column; gap:2px; align-items:flex-start; padding-bottom:4px}
+.v5 .lefty .pr{text-align:left; white-space:normal; max-width:130px; line-height:1.5}
+.v5 .arc{position:relative; width:170px; height:150px; margin:0 -14px -14px 0}
+.v5 .arc::before{content:''; position:absolute; right:-112px; bottom:-112px; width:224px; height:224px; border-radius:50%; border:1px solid var(--p-line)}
+.v5 .arc .k{position:absolute; font-size:12.5px!important; min-width:48px}
+.v5 .arc .mm{position:absolute; right:10px; bottom:10px; width:54px; height:54px}
+/* 6 exit words */
+.v6 .exits{margin:0; text-align:center; font-size:16px}
+.v6 .exits .lbl{font:12px var(--sc); letter-spacing:.08em; color:var(--p-dim); margin-right:.3em}
+.v6 .exits button{border-bottom:1px solid currentColor; padding:8px 0}
+.v6 .exits .barred{color:var(--p-bad); text-decoration:line-through; border-bottom:0}
+.v6 .foot{display:flex; justify-content:space-between; align-items:center}
+.v6 .foot .pr{flex:1}
+/* 7 thumb index */
+.v7 .bar{padding-bottom:0}
+.v7 .top{display:flex; align-items:center; gap:10px}
+.v7 .top .pr{flex:1}
+.v7 .tabs{display:grid; grid-template-columns:repeat(6,1fr); gap:5px; align-items:end; margin:0 -6px}
+.v7 .tab{height:30px; border:1px solid var(--p-line); border-bottom:0; border-radius:9px 9px 0 0; background:var(--p-card); font:13px var(--sc)!important; letter-spacing:.04em; display:flex; flex-direction:column; justify-content:flex-start; padding-top:5px}
+.v7 .tab.open{height:58px; background:var(--p-fg); color:var(--p-bg)!important; border-color:var(--p-fg)}
+.v7 .tab.barred{height:50px; color:var(--p-bad)!important; text-decoration:line-through}
+.v7 .tab.none{opacity:.45}
+.v7 .tab i{font:italic 10.5px var(--body); letter-spacing:0; opacity:.8; margin-top:2px}
+/* 8 seal */
+.v8 .sealwrap{position:relative; width:132px; height:128px}
+.v8 .seal{position:absolute; left:22px; top:20px; width:88px; height:88px; border-radius:50%; background:var(--seal); box-shadow:inset 0 0 0 5px color-mix(in srgb,var(--seal) 80%,#000),inset 0 0 0 7px color-mix(in srgb,var(--paper) 25%,transparent),0 2px 0 color-mix(in srgb,var(--seal) 60%,#000); display:grid; place-items:center}
+.v8 .seal svg{width:62px; height:62px}
+.v8 .seal .l,.v8 .seal .f{stroke:var(--paper)} .v8 .seal .r{fill:var(--paper)} .v8 .seal .cur{fill:#f3c27a} .v8 .seal .b{stroke:#f3c27a}
+.v8 .sealwrap .k{position:absolute}
+.v8 .n{left:48px; top:-10px}.v8 .s{left:48px; bottom:-10px}.v8 .w{left:-14px; top:46px}.v8 .e{right:-14px; top:46px}
+/* 9 split thumbs */
+.v9 .top{display:flex; justify-content:space-between; align-items:center}
+.v9 .split{display:grid; grid-template-columns:56px 1fr 56px; align-items:center}
+.v9 .edge{height:96px; border:1px solid var(--p-line); background:var(--p-card); font:15px var(--sc)!important; border-radius:12px}
+.v9 .edge.barred{color:var(--p-bad)!important; text-decoration:line-through; border-style:dashed}
+.v9 .edge.none{opacity:.25}
+.v9 .mid{display:flex; flex-direction:column; align-items:center; gap:0}
+.v9 .mid .ud{display:flex; gap:22px; margin-top:-2px}
+/* 10 running footer */
+.v10 .rule{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:10px}
+.v10 .words{display:flex; gap:14px; font:14px var(--sc)!important}
+.v10 .words.lft{justify-content:flex-end} .v10 .words.rgt{justify-content:flex-start}
+.v10 .words .k{min-width:0; font-size:15px!important}
+.v10 .rule .mm{width:44px; height:44px}
+.v10 .line2{display:flex; justify-content:center; gap:18px; align-items:center}
+.v10 .line2 .pr{font-style:italic}
+.v10 .orn{height:1px; background:var(--p-line)}
+/* 11 letterpress sorts */
+.v11 .top{display:flex; align-items:center; gap:10px}
+.v11 .top .pr{flex:1}
+.v11 .sorts{display:grid; grid-template-columns:repeat(6,1fr); gap:6px}
+.v11 .sort{height:56px; border-radius:3px; font:26px/1 var(--head)!important; color:#2b2016!important; background:linear-gradient(160deg,#dccaa2,#bda77b); box-shadow:0 3px 0 #8f7a52,inset 0 1px 0 rgba(255,255,255,.45)}
+.v11 .sort small{display:block; font:10px var(--sc); letter-spacing:.06em; margin-top:3px; color:#5b4a33}
+.v11 .sort.none{box-shadow:inset 0 2px 4px rgba(0,0,0,.35); transform:translateY(3px); opacity:.45}
+.v11 .sort.barred{color:#7b2d20!important; text-decoration:line-through}
+/* 12 exit list */
+.v12 .body{display:flex; gap:14px; align-items:center}
+.v12 .body .mm{width:92px; height:92px}
+.v12 .list{flex:1; display:flex; flex-direction:column}
+.v12 .list button{display:flex; justify-content:space-between; align-items:baseline; min-height:40px; border-bottom:1px solid var(--p-line); text-align:left; font-size:15.5px}
+.v12 .list button b{font:400 13px var(--sc); letter-spacing:.06em}
+.v12 .list .barred{color:var(--p-bad); } .v12 .list .barred span{text-decoration:line-through}
+.v12 .list .tx{align-self:flex-end; border:0; min-height:36px}
+/* 13 map as control */
+.v13 .bigmm{width:132px; height:132px; border-radius:50%; border:1px solid var(--p-fg); background:var(--p-card); position:relative; overflow:hidden}
+.v13 .bigmm svg{width:100%; height:100%; display:block}
+.v13 .bigmm text{font:9.5px var(--sc); fill:var(--p-fg); letter-spacing:.03em}
+.v13 .bigmm .hit{fill:transparent; cursor:pointer}
+.v13 .ud{display:flex; flex-direction:column}
+/* 14 swipe pad */
+.v14 .padz{position:relative; height:112px; border:1px solid var(--p-line); border-radius:22px; background:var(--p-card); display:grid; place-items:center}
+.v14 .padz .ch{position:absolute; font:15px var(--sc)!important; min-width:44px; min-height:40px}
+.v14 .ch.n{top:0; left:calc(50% - 22px)}.v14 .ch.s{bottom:0; left:calc(50% - 22px)}.v14 .ch.w{left:4px; top:calc(50% - 20px)}.v14 .ch.e{right:4px; top:calc(50% - 20px)}
+.v14 .hint{display:flex; flex-direction:column; align-items:center; gap:4px; font:11px var(--sc); letter-spacing:.08em; color:var(--p-dim)}
+.v14 .foot{display:flex; justify-content:space-between; align-items:center}
+/* 15 sundial */
+.v15 .dial{position:relative; width:236px; height:128px; margin:0 auto}
+.v15 .dial svg{position:absolute; inset:0; width:100%; height:100%; overflow:visible}
+.v15 .dial .k{position:absolute}
+.v15 .n{left:100px; top:-6px}.v15 .w{left:-10px; bottom:18px}.v15 .e{right:-10px; bottom:18px}.v15 .s{left:100px; bottom:-14px}
+.v15 .dial .mm{position:absolute; left:98px; bottom:22px; width:40px; height:40px}
+.v15 .sun{fill:var(--p-acc)}
+.v15 .tick{stroke:var(--p-line); stroke-width:1}
+.v15 .hr{font:9px var(--sc); fill:var(--p-dim)}
+.v15 .corner{position:absolute; right:10px; bottom:8px}
+/* 16 segmented */
+.v16 .top{display:flex; align-items:center; gap:10px}
+.v16 .top .pr{flex:1}
+.v16 .seg{display:grid; grid-template-columns:.7fr 1fr 1fr 1fr 1fr .7fr; border:1px solid var(--p-fg); border-radius:12px; overflow:hidden}
+.v16 .seg .k{border-radius:0; min-height:46px; border-right:1px solid var(--p-line); font-size:13.5px!important}
+.v16 .seg .k:last-child{border-right:0}
+.v16 .seg .open{background:var(--p-fg); color:var(--p-bg)!important}
+/* 17 glyph line */
+.v17 .one{display:flex; align-items:center; gap:4px; border-top:1px solid var(--p-line); padding-top:8px}
+.v17 .one .pr{text-align:left; flex:1}
+.v17 .one .k{font:19px var(--body)!important; min-width:34px}
+.v17 .one .mm{width:30px; height:30px}
+/* 18 manicules */
+.v18 .hands{display:grid; grid-template-columns:1fr auto 1fr; grid-template-rows:auto auto auto; align-items:center; justify-items:center; row-gap:0}
+.v18 .hands .k{font:15px var(--body)!important; letter-spacing:0; padding:0 6px}
+.v18 .hands .k i{font-style:normal; font-size:21px; vertical-align:-2px}
+.v18 .hands .n{grid-column:2; grid-row:1}.v18 .hands .w{grid-column:1; grid-row:2; justify-self:end}.v18 .hands .e{grid-column:3; grid-row:2; justify-self:start}.v18 .hands .s{grid-column:2; grid-row:3}
+.v18 .hands .mm{grid-column:2; grid-row:2; width:42px; height:42px; margin:0 6px}
+.v18 .corner{position:absolute; right:12px; bottom:10px}
+.v18 .cornerl{position:absolute; left:12px; bottom:10px; display:flex; flex-direction:column}
+/* 19 card fan */
+.v19 .fan{position:relative; width:150px; height:104px}
+.v19 .card{position:absolute; bottom:0; width:74px; height:98px; border-radius:7px; border:1px solid var(--p-fg); background:var(--paper); color:#241f19!important; display:flex; flex-direction:column; justify-content:space-between; padding:7px 7px; text-align:left; box-shadow:0 3px 8px rgba(0,0,0,.18)}
+.v19 .card b{font:400 15px var(--sc); letter-spacing:.04em}
+.v19 .card span{font:italic 12.5px/1.2 var(--body)}
+.v19 .card.c1{left:10px; transform:rotate(-7deg); transform-origin:bottom center}
+.v19 .card.c2{left:66px; transform:rotate(6deg); transform-origin:bottom center; background:repeating-linear-gradient(45deg,#7b2d20 0 6px,#6c2619 6px 12px); color:#f1ecdf!important}
+.v19 .card.c2 span{text-decoration:line-through}
+/* 20 floating pill */
+.v20 .bar{align-items:center; padding-bottom:18px}
+.v20 .pill{display:flex; align-items:center; gap:2px; padding:4px 6px 4px 4px; border:1px solid var(--p-line); border-radius:28px; background:var(--p-card); box-shadow:0 6px 18px -8px rgba(0,0,0,.35)}
+.v20 .pill .mm{width:38px; height:38px}
+.v20 .pill .k{font-size:13px!important; padding:0 8px; min-height:40px}
+.v20 .pill .k em{font:italic 13px var(--body); letter-spacing:0; margin-left:.35em}
+.v20 .pill .sep{width:1px; height:22px; background:var(--p-line)}
+.v20 .pr{font-size:11px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <h1>Twenty bottom bars</h1>
+  <p class="lede">Each one is the bottom of the same phone at the <b>Ferry Landing</b>, 06:00. North leads to the Village Green, west is <b>barred</b> by the tide, and there are no other exits. Every variant shows the same four things: exits, the prompt, the Contents (reached through the map), and the text drawer. Tap anything and the line above the bar says what would happen.</p>
+  <div class="ctl" role="group" aria-label="Page"><span>Page</span><button data-t="paper" aria-pressed="true">Paper</button><button data-t="night" aria-pressed="false">Night</button></div>
+  <div class="gallery" id="g"></div>
+</div>
+
+<script>
+const X={n:{to:'Village Green'},w:{bar:'The causeway west is under the tide.'}};
+const NM={n:'North',e:'East',s:'South',w:'West',u:'Up',d:'Down'};
+const st=d=>X[d]?.to?'open':X[d]?.bar?'barred':'none';
+const lab=d=>X[d]?.to?`${NM[d]}, to ${X[d].to}`:X[d]?.bar?`${NM[d]}, barred: ${X[d].bar}`:`${NM[d]}, no exit`;
+const k=(d,t,c='')=>`<button class="k ${d} ${st(d)} ${c}" data-go="${d}" aria-label="${lab(d)}" ${st(d)==='none'?'aria-disabled="true"':''}>${t??d.toUpperCase()}</button>`;
+const P=(t='06:00 · Daylight · Fetch Bram’s lantern')=>`<div class="pr" role="status">${t}</div>`;
+const TX=(t='Type')=>`<button class="tx" data-go="type" aria-label="Open the text drawer">${t}</button>`;
+const G=`<line x1="0" y1="0" x2="0" y2="-17" class="l"/><line x1="0" y1="-17" x2="9" y2="-17" class="f"/><line x1="0" y1="0" x2="-8" y2="0" class="b"/><line x1="-8" y1="-3.5" x2="-8" y2="3.5" class="b"/><circle cx="0" cy="-17" r="3.3" class="r"/><circle cx="0" cy="0" r="5" class="cur"/>`;
+const svg=(vb='-27 -27 54 54')=>`<svg viewBox="${vb}" aria-hidden="true">${G}</svg>`;
+const MM=(s,c='')=>`<button class="mm ${c}" data-go="map" aria-label="Contents: map, carrying, equipment, character" style="width:${s}px;height:${s}px">${svg()}</button>`;
+const UD=(c='sm')=>`<div class="ud">${k('u','Up',c)}${k('d','Down',c)}</div>`;
+
+const V=[
+ ['Cross','The current design: a plain cross with the minimap in the middle and Up and Down in the corners. Familiar, compact and fully spatial.',
+  `${P()}<div class="row3"><span></span><div class="pad"><span></span>${k('n')}${k('u','Up','sm')}${k('w')}${MM(48)}${k('e')}<span></span>${k('s')}${k('d','Dn','sm')}</div>${TX()}</div>`],
+ ['One line','All six directions on a single row, with the minimap as the hinge. It takes the least height of any keyed layout, but rows aren’t spatial: north isn’t “up”.',
+  `${P()}<div class="line">${k('u','Up','sm')}${k('w')}${k('n')}${MM(40)}${k('s')}${k('e')}${k('d','Dn','sm')}<span class="sep"></span>${TX()}</div>`],
+ ['Compass rose','A drawn eight-point rose. The letters sit at the tips and the map is at the heart. The most decorative, and the diagonal points invite taps that go nowhere.',
+  `${P()}<div class="row3">${UD()}<div class="rose"><svg class="star" viewBox="-60 -60 120 120" aria-hidden="true">${[45,135,225,315].map(a=>`<polygon points="0,-40 6,-6 0,0 -6,-6" class="dia" transform="rotate(${a})"/>`).join('')}${[0,90,180,270].map(a=>`<g transform="rotate(${a})"><polygon points="0,-58 8,-8 0,0" class="dark-pt"/><polygon points="0,-58 -8,-8 0,0" class="light-pt"/></g>`).join('')}</svg>${k('n')}${k('w')}${k('e')}${k('s')}${MM(40)}</div>${TX()}</div>`],
+ ['Map at the side','A wide rectangular map on the left for context, and a small cross on the right for moving. Better for reading the land, but it splits your eye.',
+  `${P()}<div class="row3"><button class="mapbox" data-go="map" aria-label="Contents: map">${svg('-44 -30 88 62')}<small>Contents</small></button><div class="pad"><span></span>${k('n')}${k('u','Up','sm')}${k('w')}<i class="dot"></i>${k('e')}<span></span>${k('s')}${k('d','Dn','sm')}</div>${TX()}</div>`],
+ ['Thumb arc','Directions fanned along the arc a right thumb sweeps, with the map at the pivot. The best ergonomics, but the order along the arc isn’t geography.',
+  `<div class="arcwrap"><div class="lefty">${P('06:00 · Daylight<br>Fetch Bram’s lantern')}${TX()}</div><div class="arc">${[['n',182],['e',199],['s',216],['w',233],['u',250],['d',267]].map(([d,deg])=>{const a=deg*Math.PI/180,x=133+Math.cos(a)*100,y=113+Math.sin(a)*100;return k(d,NM[d]).replace('class="k','style="left:'+Math.round(x-24)+'px;top:'+Math.round(y-18)+'px" class="k')}).join('')}${MM(54)}</div></div>`],
+ ['Obvious exits','No compass at all. The exits are a line of prose, as in a Diku “Obvious exits:” line. It reads beautifully, but you need to read it to move.',
+  `${P()}<p class="exits"><span class="lbl">Exits</span><button data-go="n" aria-label="${lab('n')}">north</button> to the Village Green, and <button class="barred" data-go="w" aria-label="${lab('w')}">west</button>, barred.</p><div class="foot hair" style="padding-top:6px">${MM(34)}<span></span>${TX()}</div>`],
+ ['Thumb index','Six tabs cut into the book’s edge, like a dictionary’s thumb index. Open exits stand tall, the barred one is struck through, and the missing ones sink.',
+  `<div class="top">${MM(38)}${P()}${TX()}</div><div class="tabs">${['w','n','u','d','s','e'].map(d=>`<button class="tab ${st(d)}" data-go="${d}" aria-label="${lab(d)}">${NM[d]}${X[d]?.to?`<i>${X[d].to}</i>`:X[d]?.bar?'<i>barred</i>':''}</button>`).join('')}</div>`],
+ ['Wax seal','The map pressed into an oxblood seal, with the cardinal letters around it. One strong object at the center of the bar.',
+  `${P()}<div class="row3">${UD()}<div class="sealwrap"><button class="seal" data-go="map" aria-label="Contents: map">${svg()}</button>${k('n')}${k('w')}${k('e')}${k('s')}</div>${TX('Write')}</div>`],
+ ['Two thumbs','West and East become tall buttons on the screen edges, so each thumb owns a side. North, the map and South stack in the middle. Built for a phone held in two hands.',
+  `<div class="top">${P()}${TX()}</div><div class="split"><button class="edge ${st('w')}" data-go="w" aria-label="${lab('w')}">W</button><div class="mid">${k('n')}${MM(46)}${k('s')}<div class="ud">${k('u','Up','sm')}${k('d','Down','sm')}</div></div><button class="edge ${st('e')}" data-go="e" aria-label="${lab('e')}">E</button></div>`],
+ ['Running footer','Like a printed page’s footer: a rule, a medallion where the page number would be, and the directions as small caps. The quietest option.',
+  `<div class="rule"><div class="words lft">${k('w','west')}${k('n','north')}</div>${MM(44)}<div class="words rgt">${k('s','south')}${k('e','east')}</div></div><div class="line2">${k('u','up','sm')}${P()}${k('d','down','sm')}</div><div style="position:absolute;right:12px;bottom:40px">${TX()}</div>`],
+ ['Letterpress sorts','Six blocks of wood type. Open exits are raised and ready to print, and missing ones are sunk into the case. A tactile row that is lovely to press.',
+  `<div class="top">${MM(38)}${P()}${TX()}</div><div class="sorts">${['w','n','u','d','s','e'].map(d=>`<button class="sort ${st(d)}" data-go="${d}" aria-label="${lab(d)}">${d.toUpperCase()}<small>${NM[d]}</small></button>`).join('')}</div>`],
+ ['Exit list','A big map on the left, and on the right only the exits that exist, named. Nothing greyed out and nothing to decode, which is the clearest option for a first-time player.',
+  `${P()}<div class="body">${MM(92)}<div class="list"><button data-go="n" aria-label="${lab('n')}"><span>Village Green</span><b>North</b></button><button class="barred" data-go="w" aria-label="${lab('w')}"><span>The causeway</span><b>West</b></button>${TX()}</div></div>`],
+ ['The map is the compass','No direction keys. Tap a neighboring place on the map to walk there, and tap yourself to open the Contents. It teaches the map, but it’s harder to hit.',
+  `${P()}<div class="row3">${UD()}<div class="bigmm"><svg viewBox="-40 -40 80 80" aria-label="Map"><line x1="0" y1="0" x2="0" y2="-24" class="l"/><line x1="0" y1="-24" x2="12" y2="-24" class="f"/><line x1="0" y1="0" x2="-14" y2="0" class="b"/><line x1="-14" y1="-4" x2="-14" y2="4" class="b"/><circle cx="0" cy="-24" r="4" class="r"/><text x="0" y="-31" text-anchor="middle">Village Green</text><text x="-15" y="12" text-anchor="middle">barred</text><circle cx="0" cy="0" r="6" class="cur"/><text x="0" y="16" text-anchor="middle">you</text><circle cx="0" cy="-24" r="12" class="hit" data-go="n"/><circle cx="-14" cy="0" r="10" class="hit" data-go="w"/><circle cx="0" cy="2" r="11" class="hit" data-go="map"/></svg></div>${TX()}</div>`],
+ ['Swipe pad','A soft pad you swipe across to walk, with the edge marks tappable too. Forgiving for a thumb, but swiping is invisible until someone learns it.',
+  `${P()}<div class="padz">${['n','s','w','e'].map(d=>`<button class="k ch ${d} ${st(d)}" data-go="${d}" aria-label="${lab(d)}">${{n:'︿',s:'﹀',w:'〈',e:'〉'}[d]}</button>`).join('')}<div class="hint">${MM(40)}<span>swipe to walk</span></div></div><div class="foot">${k('u','Up','sm')}${k('d','Down','sm')}${TX()}</div>`],
+ ['Sundial','A half dial. The sun sits at the hour and rises in the east, so the clock leaves the prompt. North is at the top of the arc, and South sits under the gnomon.',
+  `${P('Daylight · Fetch Bram’s lantern')}<div class="dial"><svg viewBox="0 0 236 128" aria-hidden="true"><path d="M20 108 A98 98 0 0 1 216 108" class="l"/>${Array.from({length:13},(_,i)=>{const a=Math.PI*(i/12),x=118-Math.cos(a)*98,y=108-Math.sin(a)*98;return `<line x1="${x}" y1="${y}" x2="${118-Math.cos(a)*90}" y2="${108-Math.sin(a)*90}" class="tick"/>`}).join('')}<line x1="14" y1="108" x2="222" y2="108" class="l"/><circle cx="216" cy="108" r="7" class="sun"/><text x="206" y="94" class="hr">06</text><text x="112" y="24" class="hr">12</text><text x="22" y="94" class="hr">18</text></svg>${k('n')}${k('w')}${k('e')}${k('s')}${MM(40)}</div><div class="corner">${TX()}</div><div style="position:absolute;left:12px;bottom:8px;display:flex;flex-direction:column">${k('u','Up','sm')}${k('d','Dn','sm')}</div>`],
+ ['Segmented','A single segmented control: Up, West, North, South, East, Down. Open exits are filled in ink. Unambiguous and very accessible, with no sense of place.',
+  `<div class="top">${MM(32)}${P()}${TX()}</div><div class="seg">${k('u','Up')}${k('w','West')}${k('n','North')}${k('s','South')}${k('e','East')}${k('d','Down')}</div>`],
+ ['Glyph line','Everything on one 48px strip: prompt, map, arrows and Type. It gives the most room to the prose, at the cost of small targets.',
+  `<div class="one">${P('06:00 · Daylight')}${MM(30)}${k('w','←')}${k('n','↑')}${k('s','↓')}${k('e','→')}${TX()}</div>`],
+ ['Manicules','The pointing hands of old manuscripts, ☜ West and East ☞, around the map. Bookish and witty, and the words make the targets generous.',
+  `${P()}<div class="hands">${k('n','<i>☝︎</i> North')}${k('w','<i>☜</i> West')}${MM(42)}${k('e','East <i>☞</i>')}${k('s','<i>☟</i> South')}</div><div class="corner">${TX()}</div><div class="cornerl">${k('u','Up','sm')}${k('d','Dn','sm')}</div>`],
+ ['Card fan','The exits dealt as cards: Village Green face up, the barred causeway face down in oxblood. Missing directions aren’t dealt. A playful fit with the book.',
+  `${P()}<div class="row3">${MM(44)}<div class="fan"><button class="card c1" data-go="n" aria-label="${lab('n')}"><b>North</b><span>Village Green</span></button><button class="card c2" data-go="w" aria-label="${lab('w')}"><b>West</b><span>the causeway</span></button></div>${TX()}</div>`],
+ ['Floating pill','No bar at all. One pill floats over the page, holding the map, the real exits, and Type. It gives the most reading space and looks the most like a modern app.',
+  `${P()}<div class="pill">${MM(38)}${k('n','N','')}<em style="font:italic 13px var(--body);margin-right:4px">Village Green</em><span class="sep"></span>${k('w','W')}<span class="sep"></span>${TX()}</div>`],
+];
+
+const ctx='<p>Reeds crowd a slick wooden landing. A mooring post leans into the current. Across the water, a lantern swings once between the reeds and goes dark.</p><p><b>Bram</b> the ferryman stands here, one boot on the ferry.</p><p class="said"></p>';
+document.getElementById('g').innerHTML=V.map(([n,d,h],i)=>`<figure><div class="frame v${i+1}"><div class="ctx">${ctx}</div><div class="bar">${h}</div></div><figcaption><h2><span>${i+1}</span>${n}</h2><p>${d}</p></figcaption></figure>`).join('');
+
+document.getElementById('g').addEventListener('click',e=>{
+  const b=e.target.closest('[data-go]'); if(!b) return;
+  const g=b.dataset.go, said=b.closest('.frame').querySelector('.said');
+  said.textContent=g==='map'?'The Contents page would turn: map, carrying, equipment, character.':g==='type'?'The text drawer would open.':X[g]?.to?`You go ${NM[g].toLowerCase()} to the ${X[g].to}.`:X[g]?.bar?`Barred. ${X[g].bar}`:`There is no way ${NM[g].toLowerCase()} from here.`;
+});
+document.querySelectorAll('.ctl [data-t]').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.ctl [data-t]').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  document.getElementById('g').classList.toggle('night',b.dataset.t==='night');
+});
+</script>
