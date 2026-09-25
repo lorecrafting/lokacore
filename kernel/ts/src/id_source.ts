@@ -3,7 +3,9 @@
 // SHA-256 over the canonical JSON ["loka-id-v1", worldContextId, commandId, ordinal].
 // commandId derives the stable CommandId (04 §3, 03 §14) the same way from
 // ["loka-command-v1", idempotencyScopeId, invocationId]; authority placement never enters it
-// (owner decision docs/decisions/owner-decisions-r3-lanes-2026-09-24.md).
+// (owner decision docs/decisions/owner-decisions-r3-lanes-2026-09-24.md; rule in
+// docs/spec/conformance/numeric-profile.md). It is for invocation-derived commands only: an
+// authority-internal command such as run_job uses a different tag over its own identity.
 import { encode } from './canonical.ts';
 import { KernelError } from './error.ts';
 import { sha256, utf8 } from './sha256.ts';

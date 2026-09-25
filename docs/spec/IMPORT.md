@@ -38,6 +38,10 @@ The table below describes the files as imported. Later amendments are in git his
 - 2026-09-24, R3 PR 1: [conformance/numeric-profile.md](conformance/numeric-profile.md)
   frozen as `loka-numeric-v1` (owner-approved 2026-09-24), adding the parse, encode,
   depth, hash, budget, error-code and IdSource rules. No fixture JSON changed.
+- 2026-09-24, R3 PR 3: [conformance/numeric-profile.md](conformance/numeric-profile.md)
+  gains the CommandId rule beside IdSource (additive; owner decision
+  [R3 lanes](../decisions/owner-decisions-r3-lanes-2026-09-24.md)). No existing rule or
+  fixture changed.
 
 ## Link rewrites (the only byte changes at import)
 

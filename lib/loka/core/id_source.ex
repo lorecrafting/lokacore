@@ -6,7 +6,9 @@ defmodule Loka.Core.IdSource do
 
   `command_id/2` derives the stable CommandId (04 §3, 03 §14) the same way from
   `["loka-command-v1", idempotency_scope_id, invocation_id]`; authority placement never enters
-  it (owner decision `docs/decisions/owner-decisions-r3-lanes-2026-09-24.md`).
+  it (owner decision `docs/decisions/owner-decisions-r3-lanes-2026-09-24.md`; rule in
+  `docs/spec/conformance/numeric-profile.md`). It is for invocation-derived commands only: an
+  authority-internal command such as `run_job` uses a different tag over its own identity.
   """
   import Bitwise
   alias Loka.Core.Canonical
