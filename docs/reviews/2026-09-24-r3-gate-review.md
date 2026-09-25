@@ -314,3 +314,39 @@ OWNER DECISIONS NEEDED:
 
 No additional owner decision is needed for the lesson relocation, WORKFLOW link-based deduplication or the compact generation approach. I found no additional material docs-tidy or over-engineering defect in those changes.
 ```
+
+## Re-review (fix round 1)
+
+- Commits reviewed: `9d4e894` (six-class residency view, sequenced boundary test,
+  nominal-id probes), `94b15fb` (owner decisions, Gate R3 Elixir-types amendment, roadmap),
+  head `94b15fb`; plus the merge `a346056` of `main` (PR #17), whose only conflict was the
+  reviews index (both entries present, checked).
+- Scope per the role file: each disposition, the code each fix touched, its direct callers.
+- Checks: `bin/check_all.sh` in a detached worktree at `94b15fb`, exit 0 (`mix test` 113,
+  `node --test` 34, 25 red controls ok, `check_docs` 79 docs / 0 broken / 0 unreachable).
+
+### Verdicts
+
+- **PR #16: APPROVE.** Every item verified; the new tests fail on the mutants they exist
+  for; nothing open.
+- **Gate R3: PASS WITH NOTED GAPS.** Astra's A1-A3 are closed under the current text or
+  under the owner's recorded amendment; the remaining gaps (1-6 in the PR body) are
+  deferrals 05 §6, 14 §R3B and 14 §R6 permit, each tied to its trigger.
+
+### Dispositions
+
+| Item | Fix | Verified |
+|---|---|---|
+| A1 / F2: six classes | `ResidencyClass` enum (`capability.schema.json`) with all six 05 §6 classes; `Responsibility` contract; `protocol/residency.json` with 20 rows (9 foundation with fixture paths, 7 host, 4 authoring); generator keys the matrix by the enum, not by what `CapabilitySpec` admits; each class carries `capabilities` and `responsibilities`; a docs section lists the rows | Matrix has 7 keys (six classes + `unclassified`). Mutants: a row dropped without regenerating → `--check` reports both docs stale; a fixture path that does not exist → `contracts_test` fails; `authority_host_coordination` removed from the enum → the example and residency-row tests fail. Every listed fixture is read by at least one Elixir and one TypeScript test (grep). Vocabulary is protocol-owned and independent of capability admission, as A1 asked; no host service became a capability. |
+| Gap 6 (foundation fixtures declared, not proved) | Stated in the PR body: the test checks the files exist, not that both kernels read them; `id_source` shows `null` because its known answers are inline literals, not a file | Honest and sufficient for R3: the declared paths are the actual files the kernel tests load today (checked by hand), the unbound rows say `null` rather than `[]`, and the docs header says "declared, not evidence". A "both kernels read this fixture" check would be a change detector on test source; not asked for. |
+| A3: observed boundary | Test-only sequenced boundary in both kernels (`compose_test.exs:71-121`, `compose.test.ts:63-102`): compose, record the commit outcome, adopt and deliver only on `committed`, in order; runs a failed commit, an unknown commit, a composition fault, then a successful commit | Planted five mutants: Elixir eager delivery before the commit check, Elixir adopt-on-any-status, Elixir deliver-on-fault, TypeScript eager delivery, TypeScript deliver-before-adopt order swap. Each fails exactly the new test. The failed and unknown cases are real (the helper receives `failed`/`unknown` after composing real ops), so this is an observed sequence, not a status-to-list table. Real SQLite faults and unknown-outcome recovery stay R6 (gap 4), which 14 §R6 and the ROADMAP place there. |
+| A4 / F1 / AQ1: the guarantee | `contracts.ex:40-46` comment and `docs/lessons/contracts.md` restated; `test/loka/core/nominal_ids_test.exs` compiles six shapes on the pinned toolchain with `infer_signatures: [:elixir]` and asserts the hand-recorded warn/no-warn per shape | Recorded results (cross-module: warns; tag in a map: warns; `@spec`-only receiver: no; runtime-chosen union forwarded: no; through `Enum`: no; control: no) match this review's own probes at `5ee2aa7`. Flipping either a `true` or a `false` fails the test. The wording claims no more than the test shows and names the rule (construct at the boundary, match the tag in every domain function head). |
+| A2: composite Elixir types | Owner chose Option A; amendment in `docs/spec/IMPORT.md` "Amendments since import"; decision record `docs/decisions/owner-decisions-r3-gate-2026-09-24.md`, indexed | The record quotes the owner verbatim ("And for the capaability category, whatever you recommend"; "A, go with your recommendation") and states what was recommended. The amendment says exactly what Option A offered: validators plus nominal id types satisfy the row in R3; composite types arrive with their first Elixir consumer, generated from or checked against `protocol/`; 14's text unchanged. Registered as an R5 follow-up in the PR body. |
+| AQ2: wire-to-tag boundary | R5 follow-up in the PR body: one conversion place, tagged tuples never enter `Canonical.encode` | Appropriate; nothing to verify in code yet. |
+| N1 | ROADMAP marks PR 6b done (#16) | Done. |
+| N2 | `contracts_test.exs:231-242`: constructor set equals the TypeScript-branded set | Mutant: Elixir skips `PartyId` → three tests fail, including this one. (Dropping the `enum`/`const` guards is an equivalent mutant: no string contract carries `enum`, and the one `const` string is excluded either way.) |
+| Residency of policy/target_resolution/fact | Owner: "whatever you recommend" → `portable_capability` | Recorded; matches this review's and Astra's view. |
+
+No new findings. The fixes touched `bin/contracts.exs` (its only caller is `--check` in
+`check_all.sh`, CI and the red controls, all green), `Loka.Core.Contracts` (comment only;
+constructors unchanged), and test code.
