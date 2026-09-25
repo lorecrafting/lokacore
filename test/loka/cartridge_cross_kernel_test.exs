@@ -22,7 +22,7 @@ defmodule Loka.CartridgeCrossKernelTest do
     "client_features" => []
   }
 
-  # Runs mix loka.compile; sends {:exit, :ok} or {:exit, reason}.
+  # Runs mix loka.compile; sends {:exit, :ok} or {:exit, reason}; returns its stderr.
   defp compile(dir, out) do
     capture_io(:stderr, fn ->
       result =
@@ -145,12 +145,13 @@ defmodule Loka.CartridgeCrossKernelTest do
     has_item = %{"op" => "has_item", "item" => %{fact("lantern") | "kind" => "item"}}
     talk = put_in(read("actions/talk.json"), ["policy", "root"], has_item)
 
-    for {name, files} <- [
-          {"undeclared", %{"cartridge.json" => undeclared}},
-          {"unresolved", %{"actions/talk.json" => talk}}
+    for {name, files, code} <- [
+          {"undeclared", %{"cartridge.json" => undeclared}, "UNDECLARED_CAPABILITY"},
+          {"unresolved", %{"actions/talk.json" => talk}, "UNRESOLVED_REFERENCE"}
         ] do
       out = Path.join(tmp, "#{name}.artifact.json")
-      compile(variant(Path.join(tmp, name), files), out)
+      stderr = compile(variant(Path.join(tmp, name), files), out)
+      assert stderr =~ ~s("code":"#{code}"), name
       assert_received {:exit, {:shutdown, 1}}
       refute File.exists?(out), name
     end
