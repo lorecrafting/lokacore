@@ -118,4 +118,6 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
   the declared-but-absent differential case, `minItems`/`maxItems` on `host_adapters` have
   no fixture in either validator, README §5/§7 still call the kernel choice open, 14 §R9
   names Node as the only pre-trigger host against 09 §5 and 15 DET-02; three nits; Astra
-  A1 agreed, A2 agreed in part).
+  A1 agreed, A2 agreed in part); Astra's review appended verbatim; re-review of the fixes
+  at `7b5f5b0`, APPROVE (every disposition verified, four mutants die, merge with #20 kept
+  every README entry).

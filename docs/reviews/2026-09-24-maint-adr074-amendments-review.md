@@ -187,3 +187,48 @@ REMAINING CONTRADICTIONS:
 
 OWNER DECISIONS NEEDED: none
 ```
+
+## Re-review (fix round 1)
+
+Head `7b5f5b0` (`74cb10f` merges `origin/main` with PR #20; `7b5f5b0` is the fix commit).
+Scoped to the fix commit, the two README merge resolutions, and mutants on S1/S2. Line
+numbers are at `7b5f5b0`. The owner waived an Astra re-check; this is the last gate.
+
+**Verdict: APPROVE.** Every disposition verified; all four mutants die.
+
+- **S1, fixed.** `bin/red_controls.exs:151` plants two entries on the registry copy:
+  `movement@1` with no differential and `barrier@1` with the well-formed absent path
+  `test/loka/core/absent_test.exs`; l.166 requires the ADR-074 diagnostic for both
+  pins. Mutants: the presence test at `bin/contracts.exs:104` replaced by a declaration
+  test (`is_nil(e["differential"])`) → control reports FAIL (barrier passes the check);
+  the halt at l.107 neutered → FAIL. The real check: `ok`, `--check` exits 0.
+- **S2, fixed.** `protocol/fixtures/invalid.json:117-118` add `host_adapters: []`
+  (`too_few_items`) and three entries (`too_many_items`) on the portable variant. Mutants
+  in both validators: `minItems` removed → 7/8 Elixir, 32/33 TypeScript; `maxItems` 2→9 →
+  same. Baseline 8/8 and 33/33 (counts changed with PR #20's test split, merged in
+  `74cb10f`).
+- **S3 and Astra A1, fixed.** README §5 (l.205) drops "No execution strategy is selected
+  before its applicable gates pass" and states the accepted direction (C on a quick A3,
+  ADR-071) with its failed phone checkpoint row and unmeasured rows as accepted risk
+  deferred to R6P and R10; §6 item 1 (l.235) is now "portable kernel evidence": direction
+  decided, evidence open, B evaluated if a deferred measurement fails because of the
+  Hermes kernel, matching 16's ADR-071 entry; l.238 follows. IMPORT.md l.74 records it.
+- **S4, fixed.** 14 §R9 (l.564): "the TypeScript hosts: Node plus the Android and iOS
+  Hermes replays; the Lab's headless Node run is authoring, not server hosting", which
+  agrees with 09 §5, 15 DET-02 and the envelope note. IMPORT.md l.69 records it.
+- **N1, fixed.** The three ADR files drop "Proposed" from their titles; ADR-071/072's
+  paragraph now says they entered document 16; ADR-074's status line says "Accepted" once.
+- **N2, fixed by deletion.** The duplicate-adapter branch is gone; `bin/contracts.exs:103-104`
+  is now two plain filters with one diagnostic. Duplicates in `host_adapters` need no
+  guard: `maxItems: 2` bounds the list, `"elixir" in ...` is unaffected by repetition,
+  and the only effect of `["elixir","elixir"]` is a cosmetic row in the generated
+  residency matrix, which is documentation and would be caught in review of the registry
+  change that declared it.
+- **N3, fixed.** IMPORT.md l.66 says 09 §1a's Determinism row was amended to the
+  crosswalk's gloss.
+- **Merge `74cb10f`.** `docs/decisions/README.md`: PR #20's regrouped sections kept, PR
+  #19's changes applied inside them (the "Proposed" labels dropped, the R3 open-questions
+  link added, the ADR-074 line reworded); diff against the `main` parent shows only
+  #19's intended changes. `docs/reviews/README.md`: 19 bullets on each parent, 20 on
+  HEAD (main's set plus this record's line); no entry lost.
+- `bin/check_docs.exs`: 86 docs, 0 broken, 0 unreachable.
