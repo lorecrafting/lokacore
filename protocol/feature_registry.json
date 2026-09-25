@@ -32,7 +32,7 @@
   {
     "kind": "consequence_operator",
     "spec": "21 §11 Shared consequence vocabulary",
-    "freeze": "R7"
+    "freeze": "R5"
   },
   {
     "kind": "narration_spec",
