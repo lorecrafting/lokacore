@@ -33,12 +33,12 @@ filter on top. Adapted from Datadog's
 
 | Stage | Slices | Content |
 |---|---|---|
-| R3 | 8 | Every item of [14 §R3A/§R3B and Gate R3](spec/14-implementation-plan.md#r3--contractschema-foundation) is the checklist. Done: PR 1 portable ABI (#4); PR 2 schema toolchain + identity/scope/error contracts (#9); PR 3 action/command/delta/event/effect/result, policy AST, TargetResolution + invariant registry (#13); PR 4a capability registry/lock, manifests (#12); PR 4b facts, relations/provenance, GameView, account/progress envelopes (#14); PR 5 StateDelta composition in both kernels + invariant checks (#15); PR 6a R3B envelopes (#11). Open: PR 6b gate review, docs tidy pass, generated capability docs and residency matrix |
+| R3 | 8 | Every item of [14 §R3A/§R3B and Gate R3](spec/14-implementation-plan.md#r3--contractschema-foundation) is the checklist. Done: PR 1 portable ABI (#4); PR 2 schema toolchain + identity/scope/error contracts (#9); PR 3 action/command/delta/event/effect/result, policy AST, TargetResolution + invariant registry (#13); PR 4a capability registry/lock, manifests (#12); PR 4b facts, relations/provenance, GameView, account/progress envelopes (#14); PR 5 StateDelta composition in both kernels + invariant checks (#15); PR 6a R3B envelopes (#11); PR 6b gate review, docs tidy pass, generated capability docs and residency matrix (#16) |
 | R4 minimal | 3 | loader, validation, reference resolution, capability lock, canonical artifact hash, diagnostics |
 | R5 subset | 7 + 1 | world rules the Lantern needs, in both kernels; plus the deterministic simulation slice |
 | R6 | 5 + 1 | the [14 §R6](spec/14-implementation-plan.md#r6--offline-authority-and-save-system) build list as R6P needs it (including the fake synchronization adapter); plus fault simulation |
 | Early R7/R8 | 5 | one quest, a dialogue choice, a schedule, reactions, narration |
-| R6P | 4 | compiled Lantern cartridge, touch UI, device and human proof |
+| R6P | 4 | compiled Lantern cartridge, touch UI, device and human proof; the UI slices and GameView v2 take [the room view's GameView needs](design/room-view/README.md#gameview-needs) as input |
 
 About 34 slices. Estimate (2026-09-24, from one measured slice): 8 to 18 million tokens,
 most likely about 13 million; 2 to 5 weeks of calendar time, bounded by owner approvals and

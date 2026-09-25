@@ -14,4 +14,5 @@ decisions retained verbatim.
   [other 2026-09-24 quotes](owner-decisions-2026-09-24.md), [R2](owner-decision-r2-2026-09-24.md),
   [R3 plan and verification harness](owner-decision-roadmap-2026-09-24.md),
   [R3](owner-decisions-r3-2026-09-24.md), [R3 lanes, CommandId, auto-merge](owner-decisions-r3-lanes-2026-09-24.md),
-  [R3 PR 4a manifest forms and limits](owner-decisions-r3-pr4a-2026-09-24.md).
+  [R3 PR 4a manifest forms and limits](owner-decisions-r3-pr4a-2026-09-24.md),
+  [Gate R3 residency and Elixir types](owner-decisions-r3-gate-2026-09-24.md).

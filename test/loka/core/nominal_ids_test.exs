@@ -39,25 +39,22 @@ defmodule Loka.Core.NominalIdsTest do
     Code.put_compiler_option(:infer_signatures, [:elixir])
 
     try do
-      compile = fn ->
-        send(
-          self(),
-          Kernel.ParallelCompiler.compile_to_path(files, dir, return_diagnostics: true)
-        )
-      end
-
-      ExUnit.CaptureIO.capture_io(:stderr, compile)
-      assert_received {:ok, _, diagnostics}
-
-      Enum.any?(
-        diagnostics.compile_warnings ++ diagnostics.runtime_warnings,
-        &(&1.message =~ "incompatible types")
-      )
+      compile(files, dir)
     after
       Code.put_compiler_option(:infer_signatures, previous)
       for m <- [Probe.Receiver, Probe.User], do: :code.purge(m) && :code.delete(m)
       File.rm_rf!(dir)
     end
+  end
+
+  defp compile(files, dir) do
+    run = fn ->
+      send(self(), Kernel.ParallelCompiler.compile_to_path(files, dir, return_diagnostics: true))
+    end
+
+    ExUnit.CaptureIO.capture_io(:stderr, run)
+    assert_received {:ok, _, %{compile_warnings: cw, runtime_warnings: rw}}
+    Enum.any?(cw ++ rw, &(&1.message =~ "incompatible types"))
   end
 
   defp user(body), do: "defmodule Probe.User do\nalias Loka.Core.Contracts\n#{body}\nend\n"
