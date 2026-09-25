@@ -107,3 +107,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
   the post-release "TypeScript becomes the rulebook" consequence is missing, and the
   amendment list is incomplete; four nits, one question; owner recommendation: accept
   the direction after the fixes); re-review of the fixes at `1545b82`, APPROVE (every disposition verified, arithmetic reproduced, crosswalk complete but for two reading aids; fit for the owner to decide).
+- [2026-09-24 maintenance cleanup](2026-09-24-maint-cleanup-review.md): PR #20 at `d387b93`,
+  APPROVE WITH NOTES (cleanup, proportionate review: case lists and differential inputs
+  byte-identical to `main` in both kernels, PR #15 mutants still die; one should-fix: the
+  fixture description does not say how to rebuild the three built cases).
