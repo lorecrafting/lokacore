@@ -248,3 +248,45 @@ Executed the unchanged TypeScript validator, verified against its Git blob hash,
 
 The new TypeScript comparator matches UTF-8 lexical ordering for valid Unicode scalar strings, including BMP-versus-astral ordering and prefixes; comparing the ASCII error-code names also matches Elixir’s ordering. Importantly, loka-numeric-v1 rejects non-ASCII object keys before contract validation. The Unicode-key fixtures therefore exercise direct-validator diagnostics, not newly accepted wire inputs. I found no remaining ordering discrepancy within the documented decoded-value domain.
 ```
+
+## Re-review (fix round 1)
+
+- Reviewed commit: `1c9947d` (`0d9ea71` is a merge of `origin/main` with regeneration;
+  `6e4dda0` appended the Astra review above). Same reviewer, scoped to the fixes.
+- Checks in a fresh detached worktree at `1c9947d`: `bin/check_all.sh` end to end, exit 0
+  (Elixir half by the script, TypeScript half by hand after `npm ci` in `mobile/app`):
+  `mix test` 82/82, `node --test` 24/24, `contracts.exs --check`, all red controls, Credo,
+  size, ast-grep, docs, Prettier, both `tsc`.
+- Merge `0d9ea71`: its tree equals the clean merge of its parents (`git merge-tree`) except
+  the two conflicted files, which were resolved as the plain union (one comma added in
+  `invalid.json`); `elixir bin/contracts.exs --check` also passes at the merge commit itself.
+- Owner decision record `docs/decisions/owner-decisions-r3-pr4a-2026-09-24.md`: byte-identical
+  to the PM's copy (SHA-256 `b3d5d673…a187f`).
+
+### Verdict: APPROVE
+
+| Finding | Disposition | Verified |
+|---|---|---|
+| F1 chapter-one lock portability untested | Fixed: both kernels assert each lock pin's registry entry is `portable` (`test/loka/core/contracts_test.exs:64-75`, `kernel/ts/test/validate.test.ts:33-45`); an unregistered pin still fails (`nil["portability"]` / `undefined?.portability`). | Mutants: `commerce@1` flipped to `server_only`/`realm_only_capability` (a valid entry) now fails 1 test in each kernel; `tide@1` deleted from the registry fails 1 test in each kernel. |
+| F2 normalized manifest forms unrecorded | Fixed: amendment line in `docs/spec/IMPORT.md` "Amendments since import" naming `{at_least, below}` (MAJOR.MINOR, half-open) and the key-to-version map, with the owner decision ("yes to both") linked and indexed in `docs/decisions/README.md`. | Read; decision byte-identical. |
+| N1 three spellings of "snake_case ≤64" | Fixed: `CartridgeId` now `^[a-z][a-z0-9_]{0,63}$`, `maxLength` dropped; descriptions aligned. Side effect judged below. | Differential, 16 values, zero disagreements. |
+| N2 `ContentHash` over-committed to `hash(v)` | Fixed: "SHA-256 as 64 lowercase hex digits"; payload formation left to R4. | Read. |
+| N3 `title minLength: 1` | Dropped, fixture updated. | Read; fixture passes in both kernels. |
+| N4 key/value errors share a pointer | Design note; no change asked. | n/a |
+| Astra A1 `party`, `shared_area` missing | Fixed: both added to `ExecutionProfile`, examples for each (`ExecutionProfile` and `DeploymentManifest`), invalid fixture now uses `shared_realm`. Confirmed against 07 §3 (`### party`, `### shared_area`) and 09 §20 ("intentionally reuse the canonical execution-profile vocabulary"); `embedded_instance` correctly not invented. | Mutants (regenerated each time): `party` removed fails the examples test in both kernels; `shared_area` misspelled fails 2 tests in both. |
+| Astra AQ1 residency table provenance | Description now says the table is the PM's adopted reading of 05 §6, not spec text. | Read. |
+| Astra view 7 smaller example locks | Examples reduced to `{movement, fact}`; the 37-key known-answer fixture and the registry are byte-unchanged in this round. | `git diff --stat` shows neither file touched. |
+
+**Side effect of N1 (CartridgeId).** A 65-character `cartridge_id` now reports
+`pattern_mismatch` instead of `too_long` on `DefinitionRef` (merged in PR #9) and on the
+new manifest contracts. Both kernels agree on every probe (65- and 64-character ids, empty
+id, uppercase, non-ASCII; `DefinitionRef`, `CartridgeRelease`, `CartridgeManifest`,
+`CampaignManifest`). `DefinitionRefString` has its own pattern and is byte-unchanged;
+`ReleaseVersion`, `kind` and `key` still use `maxLength` and still report `too_long`.
+Acceptable: no consumer reads these codes yet (nothing is published before R4), the
+change is one code for one violation, and the fixtures were updated deliberately. If the
+developer prefers one convention repo-wide, `kind`/`key`/`ReleaseVersion` are the remaining
+`maxLength` users; not required.
+
+Nothing else in `1c9947d` touched validator, checker or generator code; the direct callers
+of the changed tests are the fixtures and the registry, both checked above.
