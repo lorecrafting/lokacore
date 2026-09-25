@@ -45,3 +45,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Pre-R4 sweep: docs, protocol, CI](2026-09-25-sweep-docs-review.md): PR #22 at `8cd606c`, APPROVE WITH NOTES.
 - [Type-check the TypeScript tests](2026-09-25-ts-test-types-review.md): PR #24 at `f3d83b7`, APPROVE WITH NOTES.
 - [R4 S1: compiled-cartridge and diagnostic contracts](2026-09-25-r4-s1-review.md): PR #25 at `7015b00`, CHANGES REQUIRED; fixes `695473b`, APPROVE; Astra relay + `870d822`, APPROVE WITH NOTES.
+- [R4 S3: TypeScript cartridge loader](2026-09-25-r4-s3-review.md): PR #26 at `0bb540b`, APPROVE WITH NOTES (Test 4 cross-kernel proof pending, scoped follow-up).
