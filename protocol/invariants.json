@@ -54,6 +54,15 @@
     "implemented_in": "r3_pr5"
   },
   {
+    "id": "fault_codes_are_evaluation_faults",
+    "citation": {
+      "document": "04-command-event-effect-protocol.md",
+      "heading": "### 5.2 Initial immediate-composition profile"
+    },
+    "statement": "A fault DecisionResult carries only an evaluation_fault code from protocol/error_registry.json, never a gameplay rejection code.",
+    "implemented_in": "r3_pr5"
+  },
+  {
     "id": "target_candidates_ordered",
     "citation": {
       "document": "21-composable-world-primitives.md",
