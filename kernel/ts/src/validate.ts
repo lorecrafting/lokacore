@@ -26,7 +26,13 @@ const check = (ok: boolean, path: string, code: ErrorCode) => (ok ? [] : err(pat
 const child = (path: string, key: string | number) =>
   `${path}/${String(key).replaceAll('~', '~0').replaceAll('/', '~1')}`;
 const codePoints = (s: string) => [...s].length;
-const cmp = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+// Code-point order, which is Elixir's UTF-8 byte order; `<` compares UTF-16 code units.
+function cmp(a: string, b: string): number {
+  const [x, y] = [[...a], [...b]];
+  for (let i = 0; i < Math.min(x.length, y.length); i++)
+    if (x[i] !== y[i]) return x[i].codePointAt(0)! - y[i].codePointAt(0)!;
+  return x.length - y.length;
+}
 
 const types: Record<string, (v: Value) => boolean> = {
   object: isObj,
@@ -65,6 +71,7 @@ const tests: Record<string, [(v: any, arg: any) => boolean, ErrorCode]> = {
   maxLength: [(v, arg) => codePoints(v) <= arg, 'too_long'],
   minItems: [(v, arg) => v.length >= arg, 'too_few_items'],
   maxItems: [(v, arg) => v.length <= arg, 'too_many_items'],
+  maxProperties: [(v, arg) => Object.keys(v).length <= arg, 'too_many_properties'],
   // ponytail: recompiles the pattern on every call; cache per contract if it shows up in profiles.
   pattern: [(v, arg) => new RegExp(arg, 'u').test(v), 'pattern_mismatch'],
 };
@@ -76,13 +83,22 @@ function keyword(k: string, arg: any, v: any, path: string, defs: Defs): Contrac
       return errors(defs[arg], v, path, defs);
     case 'items':
       return (v as Value[]).flatMap((x, i) => errors(arg, x, child(path, i), defs));
-    // additionalProperties is always false (the subset), so undeclared keys are errors here.
+    // declared properties imply additionalProperties false (the subset): undeclared keys are errors.
     case 'properties':
       return Object.keys(v).flatMap((key) =>
         Object.hasOwn(arg, key)
           ? errors(arg[key], v[key], child(path, key), defs)
           : err(child(path, key), 'unknown_property'),
       );
+    // A map's keys and values (the subset's map form of an object).
+    case 'propertyNames':
+      return Object.keys(v).flatMap((key) =>
+        check(tests.pattern[0](key, arg.pattern), child(path, key), 'pattern_mismatch'),
+      );
+    case 'additionalProperties':
+      return arg === false
+        ? []
+        : Object.keys(v).flatMap((key) => errors(arg, v[key], child(path, key), defs));
     case 'required':
       return (arg as string[]).flatMap((key) =>
         Object.hasOwn(v, key) ? [] : err(child(path, key), 'missing_property'),

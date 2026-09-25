@@ -12,6 +12,8 @@ defmodule Loka.Core.ContractsTest do
   @defs Map.merge(Contracts.defs(), @probe)
   @invalid JSON.decode!(File.read!("protocol/fixtures/invalid.json"))
   @registry JSON.decode!(File.read!("protocol/error_registry.json"))
+  @capabilities JSON.decode!(File.read!("protocol/capability_registry.json"))
+  @lock_kat JSON.decode!(File.read!("protocol/fixtures/capability_lock_hash.json"))
 
   test "every contract has examples and every example validates" do
     for {name, schema} <- @defs do
@@ -59,6 +61,27 @@ defmodule Loka.Core.ContractsTest do
     for %{"errors" => es} <- @invalid, %{"code" => c} <- es, do: assert(c in registered, c)
   end
 
+  test "the capability registry: valid entries, key@version unique, covers the chapter-one lock, all portable" do
+    for entry <- @capabilities,
+        do: assert(Contracts.validate("CapabilitySpec", entry) == :ok, inspect(entry))
+
+    pins = for %{"key" => k, "version" => v} <- @capabilities, do: {k, v}
+    assert pins == Enum.uniq(pins)
+    by_pin = Map.new(@capabilities, &{{&1["key"], &1["version"]}, &1})
+
+    # 00a §1: every chapter-one capability is portable (offline_private).
+    for pin <- @lock_kat["value"]["capabilities"],
+        do: assert(by_pin[pin]["portability"] == "portable", inspect(pin))
+  end
+
+  # 37 keys: over 32, so the map iterates unsorted and the encoder must sort (AGENTS.md).
+  test "the capability lock encodes and hashes to the independent known answer" do
+    %{"value" => lock, "canonical" => canonical, "sha256" => sha} = @lock_kat
+    assert Contracts.validate("CapabilityLock", lock) == :ok
+    assert Loka.Core.Canonical.encode(lock) == {:ok, canonical}
+    assert Loka.Core.Canonical.hash(lock) == {:ok, sha}
+  end
+
   test "a declared __proto__ property is accepted" do
     assert Contracts.validate("SubsetProbe", JSON.decode!(~s({"__proto__":"ok"})), @defs) == :ok
   end
@@ -80,6 +103,13 @@ defmodule Loka.Core.ContractsTest do
     tagged = &obj.(%{"kind" => %{"const" => &1}}, ["kind"])
     one_of = &%{"A" => %{"oneOf" => &1}}
     object = &%{"A" => Map.merge(%{"type" => "object", "properties" => %{}}, &1)}
+
+    map =
+      &%{
+        "A" => Map.merge(%{"type" => "object", "additionalProperties" => %{"type" => "null"}}, &1)
+      }
+
+    closed = &object.(Map.put(&1, "additionalProperties", false))
 
     for {name, defs} <-
           [
@@ -104,7 +134,21 @@ defmodule Loka.Core.ContractsTest do
             {"an optional tag",
              one_of.([tagged.("a"), obj.(%{"kind" => %{"const" => "b"}}, [])])},
             {"different discriminators",
-             one_of.([tagged.("a"), obj.(%{"k" => %{"const" => "b"}}, ["k"])])}
+             one_of.([tagged.("a"), obj.(%{"k" => %{"const" => "b"}}, ["k"])])},
+            {"a map with properties", map.(%{"properties" => %{}})},
+            {"a map with required", map.(%{"required" => []})},
+            {"a map with open values", map.(%{"additionalProperties" => true})},
+            {"a map without a value schema", %{"A" => %{"type" => "object"}}},
+            {"a bad map value schema",
+             map.(%{"additionalProperties" => %{"type" => "null", "format" => "x"}})},
+            {"propertyNames on a closed object",
+             closed.(%{"propertyNames" => %{"pattern" => "^a$"}})},
+            {"maxProperties on a closed object", closed.(%{"maxProperties" => 1})},
+            {"propertyNames without a pattern", map.(%{"propertyNames" => %{}})},
+            {"propertyNames with another keyword",
+             map.(%{"propertyNames" => %{"pattern" => "^a$", "maxLength" => 1}})},
+            {"a non-portable key pattern", map.(%{"propertyNames" => %{"pattern" => "^\\w$"}})},
+            {"a negative maxProperties", map.(%{"maxProperties" => -1})}
           ] ++
             for(
               p <-
