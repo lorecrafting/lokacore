@@ -29,7 +29,7 @@ const LEGAL: Record<string, string[]> = {
 const OPEN = ['active', 'objectives_complete'];
 
 export const key = (value: unknown): string => encode(value as Json);
-const same = (a: unknown, b: unknown): boolean => key(a ?? null) === key(b ?? null);
+export const same = (a: unknown, b: unknown): boolean => key(a ?? null) === key(b ?? null);
 const get = (o: Json | undefined, k: string): Json | undefined =>
   o !== null && typeof o === 'object' && !Array.isArray(o) && Object.hasOwn(o, k)
     ? (o as Obj)[k]

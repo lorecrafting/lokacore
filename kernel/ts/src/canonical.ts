@@ -34,13 +34,14 @@ export function decode(text: string): Json {
   return v;
 }
 
-// Cursor over the text. `depth` counts the containers already open around a value.
+// Cursor over the text.
 type Parser = { s: string; i: number };
 
 function ws(p: Parser): void {
   for (let c = p.s[p.i]; c === ' ' || c === '\t' || c === '\n' || c === '\r'; c = p.s[++p.i]);
 }
 
+// `depth` counts the containers already open around the value.
 function value(p: Parser, depth: number): Json {
   ws(p);
   const c = p.s[p.i];
