@@ -38,3 +38,18 @@ test('values outside the canonical profile are rejected at decode, before valida
   for (const text of ['{"n":1.0}', '{"n":1e0}', '{"n":1,"n":1}'])
     assert.throws(() => decode(text), { code: 'invalid_json' }, text);
 });
+
+// validate() on an in-memory value never passes the canonical depth cap, so a recursive
+// contract must still return (not overflow the stack) on a value far deeper than 128.
+test('recursive contracts validate deep values', () => {
+  let deep: unknown = { n: 0 };
+  let bad: unknown = { n: 'x' };
+  for (let i = 1; i <= 200; i++) {
+    deep = { n: i, next: deep };
+    bad = { n: i, next: bad };
+  }
+  assert.deepEqual(validate('RecursiveProbe', deep, defs), []);
+  assert.deepEqual(validate('RecursiveProbe', bad, defs), [
+    { path: `${'/next'.repeat(200)}/n`, code: 'invalid_type' },
+  ]);
+});

@@ -1,0 +1,110 @@
+[
+  {
+    "id": "one_container_per_item",
+    "citation": {
+      "document": "03-domain-state-persistence.md",
+      "heading": "## 23. Inventory/location invariant"
+    },
+    "statement": "Every item has exactly one authoritative container; inventory is derived from it, never stored twice.",
+    "implemented_in": "r3_pr5"
+  },
+  {
+    "id": "no_proposed_event_escapes",
+    "citation": {
+      "document": "04-command-event-effect-protocol.md",
+      "heading": "### 5.1 Proposal-state semantics and StateDelta composition"
+    },
+    "statement": "No proposed DomainEvent, Effect or projection hint is published when the decision is rejected, faults or its commit fails.",
+    "implemented_in": "r3_pr5"
+  },
+  {
+    "id": "no_last_writer_wins",
+    "citation": {
+      "document": "04-command-event-effect-protocol.md",
+      "heading": "### 5.1 Proposal-state semantics and StateDelta composition"
+    },
+    "statement": "Two writer groups writing one mutation target without a registered composition rule fault with conflicting_write.",
+    "implemented_in": "r3_pr5"
+  },
+  {
+    "id": "delta_preconditions_hold",
+    "citation": {
+      "document": "04-command-event-effect-protocol.md",
+      "heading": "### 5.1 Proposal-state semantics and StateDelta composition"
+    },
+    "statement": "Every delta op's precondition holds against the overlay of the ops before it, or the decision faults.",
+    "implemented_in": "r3_pr5"
+  },
+  {
+    "id": "containment_acyclic",
+    "citation": {
+      "document": "04-command-event-effect-protocol.md",
+      "heading": "### 5.3 Minimal operation and conflict matrix"
+    },
+    "statement": "No entity contains itself directly or transitively, and no container exceeds its capacity.",
+    "implemented_in": "r3_pr5"
+  },
+  {
+    "id": "fault_discards_whole_proposal",
+    "citation": {
+      "document": "04-command-event-effect-protocol.md",
+      "heading": "### 5.2 Initial immediate-composition profile"
+    },
+    "statement": "A budget, conflict or evaluator fault commits nothing: no state, receipt, RNG or time advance.",
+    "implemented_in": "r3_pr5"
+  },
+  {
+    "id": "target_candidates_ordered",
+    "citation": {
+      "document": "21-composable-world-primitives.md",
+      "heading": "### TargetSpec / TargetResolution"
+    },
+    "statement": "Ambiguous candidate_ids are distinct and in the order the TargetResolution contract (protocol/action.schema.json) states.",
+    "implemented_in": "r3_pr5"
+  },
+  {
+    "id": "unknown_types_fail_closed",
+    "citation": {
+      "document": "04-command-event-effect-protocol.md",
+      "heading": "### 5.3 Minimal operation and conflict matrix"
+    },
+    "statement": "An unregistered command, delta op, policy operator, event or effect type is invalid, never permissive.",
+    "implemented_in": "r3_pr3"
+  },
+  {
+    "id": "command_id_ignores_placement",
+    "citation": {
+      "document": "04-command-event-effect-protocol.md",
+      "heading": "## 3. Canonical command representation"
+    },
+    "statement": "CommandId depends only on the idempotency scope and InvocationId, never on routing or authority placement.",
+    "implemented_in": "r3_pr3"
+  },
+  {
+    "id": "rejection_consumes_nothing",
+    "citation": {
+      "document": "04-command-event-effect-protocol.md",
+      "heading": "### 5.0 Rejection is not a failed attempt"
+    },
+    "statement": "A rejected decision changes no gameplay state, RNG, logical time or cost.",
+    "implemented_in": "r5"
+  },
+  {
+    "id": "retry_replays_receipt",
+    "citation": {
+      "document": "03-domain-state-persistence.md",
+      "heading": "## 14. Command receipts and retry admission"
+    },
+    "statement": "A retry with matching intent replays the original receipted outcome and never rerolls RNG or reruns effects.",
+    "implemented_in": "r6"
+  },
+  {
+    "id": "idempotency_payload_conflict",
+    "citation": {
+      "document": "01-core-principles.md",
+      "heading": "### A9. Idempotency at retryable boundaries"
+    },
+    "statement": "Reusing an idempotency identity with a different semantic payload fails as an integrity conflict, with no mutation.",
+    "implemented_in": "r6"
+  }
+]

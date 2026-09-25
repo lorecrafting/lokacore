@@ -12,6 +12,8 @@ defmodule Loka.Core.ContractsTest do
   @defs Map.merge(Contracts.defs(), @probe)
   @invalid JSON.decode!(File.read!("protocol/fixtures/invalid.json"))
   @registry JSON.decode!(File.read!("protocol/error_registry.json"))
+  @effects JSON.decode!(File.read!("protocol/effect_registry.json"))
+  @invariants JSON.decode!(File.read!("protocol/invariants.json"))
 
   test "every contract has examples and every example validates" do
     for {name, schema} <- @defs do
@@ -40,6 +42,76 @@ defmodule Loka.Core.ContractsTest do
   test "every code the fixtures expect is a registered abi_validation code" do
     registered = for %{"code" => c, "category" => "abi_validation"} <- @registry, do: c
     for %{"errors" => es} <- @invalid, %{"code" => c} <- es, do: assert(c in registered, c)
+  end
+
+  test "the effect registry classifies exactly the EffectPayload types, each entry valid" do
+    for entry <- @effects,
+        do: assert(Contracts.validate("EffectRegistryEntry", entry) == :ok, inspect(entry))
+
+    types =
+      for b <- Contracts.defs()["EffectPayload"]["oneOf"], do: b["properties"]["type"]["const"]
+
+    assert Enum.sort(for e <- @effects, do: e["type"]) == Enum.sort(types)
+  end
+
+  # Invariants are checked by id (docs/ROADMAP.md), so an id must name one invariant, and a
+  # citation must point at a real docs/spec heading.
+  defp invariant_problems(entries) do
+    dupes = for {id, n} <- Enum.frequencies_by(entries, & &1["id"]), n > 1, do: {:duplicate, id}
+
+    dupes ++
+      for e <- entries,
+          problem <- [entry_problem(e)],
+          problem != nil,
+          do: {problem, e["id"]}
+  end
+
+  defp entry_problem(e) do
+    with :ok <- Contracts.validate("InvariantEntry", e),
+         {:ok, text} <- File.read(Path.join("docs/spec", e["citation"]["document"])) do
+      if e["citation"]["heading"] in String.split(text, "\n"), do: nil, else: :no_heading
+    else
+      {:error, :enoent} -> :no_document
+      {:error, _} -> :invalid
+    end
+  end
+
+  test "the invariant registry has unique ids and real citations" do
+    assert invariant_problems(@invariants) == []
+  end
+
+  test "the invariant check catches a duplicate id and bad or missing citations" do
+    [a, b | _] = @invariants
+    cite = &put_in(b, ["citation", &1], &2)
+
+    planted = [
+      a,
+      %{b | "id" => a["id"]},
+      Map.delete(b, "citation") |> Map.put("id", "no_citation"),
+      cite.("document", "99-missing.md") |> Map.put("id", "no_document"),
+      cite.("heading", "## 99. Not a heading") |> Map.put("id", "no_heading")
+    ]
+
+    assert Enum.sort(invariant_problems(planted)) ==
+             Enum.sort([
+               {:duplicate, a["id"]},
+               {:invalid, "no_citation"},
+               {:no_document, "no_document"},
+               {:no_heading, "no_heading"}
+             ])
+  end
+
+  # validate/3 on an in-memory value never passes the canonical depth cap, so a recursive
+  # contract must still return (not overflow) on a value far deeper than 128.
+  test "recursive contracts validate deep values" do
+    deep = Enum.reduce(1..200, %{"n" => 0}, &%{"n" => &1, "next" => &2})
+    assert Contracts.validate("RecursiveProbe", deep, @defs) == :ok
+
+    bad = Enum.reduce(1..200, %{"n" => "x"}, &%{"n" => &1, "next" => &2})
+    path = String.duplicate("/next", 200) <> "/n"
+
+    assert Contracts.validate("RecursiveProbe", bad, @defs) ==
+             {:error, [%{path: path, code: :invalid_type}]}
   end
 
   test "a declared __proto__ property is accepted" do

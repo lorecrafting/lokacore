@@ -215,4 +215,23 @@ defmodule Loka.Core.PortableAbiTest do
     assert IdSource.id("世界", "c\"1", 9_007_199_254_740_991) ==
              {:ok, "1711b795-4ff1-81d8-a547-80b2011ee4d1"}
   end
+
+  # Catches a wrong domain tag, swapped arguments or any other input entering the hash: each
+  # changes every id. The expected ids in protocol/fixtures/command_id.json were computed with
+  # the Python one-liner above (tag "loka-command-v1", no ordinal) and checked with shasum; the
+  # TypeScript suite reads the same file, so the two kernels agree through it.
+  test "CommandId known answers" do
+    for c <- JSON.decode!(File.read!("protocol/fixtures/command_id.json")) do
+      assert IdSource.command_id(c["idempotency_scope_id"], c["invocation_id"]) ==
+               {:ok, c["command_id"]},
+             inspect(c)
+    end
+  end
+
+  # Catches a non-string or non-UTF-8 id crashing or hashing instead of TypeScript's typed error.
+  test "CommandId rejects bad ids" do
+    assert IdSource.command_id(nil, "i") == {:error, :invalid_id}
+    assert IdSource.command_id("s", 1) == {:error, :invalid_id}
+    assert IdSource.command_id(<<0xFF>>, "i") == {:error, :invalid_canonical}
+  end
 end

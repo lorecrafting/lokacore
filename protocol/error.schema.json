@@ -43,7 +43,8 @@
         "too_short",
         "too_long",
         "too_few_items",
-        "too_many_items"
+        "too_many_items",
+        "conflicting_write"
       ],
       "examples": [
         "not_found",
@@ -70,7 +71,7 @@
       ]
     },
     "ErrorRegistryEntry": {
-      "description": "One entry of protocol/error_registry.json (04 §7): gameplay rejections, and ABI or contract-validation failures (numeric-profile.md, protocol/).",
+      "description": "One entry of protocol/error_registry.json (04 §7): gameplay rejections, ABI or contract-validation failures (numeric-profile.md, protocol/), and evaluation faults that discard a whole proposal (04 §5.2).",
       "type": "object",
       "properties": {
         "code": {
@@ -79,7 +80,8 @@
         "category": {
           "enum": [
             "gameplay_rejection",
-            "abi_validation"
+            "abi_validation",
+            "evaluation_fault"
           ]
         },
         "description": {

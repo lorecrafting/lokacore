@@ -1,0 +1,222 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Effect contracts",
+  "description": "Effects and the effect registry's durability and idempotency classifications (04 §1, §10, §11; 03 §16; 14 §R3A). Same-authority changes are StateDelta, never Effects.",
+  "$defs": {
+    "EffectId": {
+      "description": "An Effect; also its idempotency identity at the receiver (04 §10), created from IdSource. Lowercase hyphenated UUID, any version.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "examples": [
+        "88888888-9999-8aaa-8bbb-cccccccccccc"
+      ]
+    },
+    "Effect": {
+      "description": "An instruction produced by a decision, applied only after commit (04 §1, §10). Its type's classification is in protocol/effect_registry.json.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/EffectId"
+        },
+        "causation_id": {
+          "$ref": "event.schema.json#/$defs/CausationId"
+        },
+        "correlation_id": {
+          "$ref": "event.schema.json#/$defs/CorrelationId"
+        },
+        "payload": {
+          "$ref": "#/$defs/EffectPayload"
+        }
+      },
+      "required": [
+        "id",
+        "causation_id",
+        "correlation_id",
+        "payload"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "id": "88888888-9999-8aaa-8bbb-cccccccccccc",
+          "causation_id": "77777777-8888-8999-8aaa-bbbbbbbbbbbb",
+          "correlation_id": "99999999-aaaa-4bbb-8ccc-dddddddddddd",
+          "payload": {
+            "type": "client_notification",
+            "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+            "message_key": "narration.lantern.taken"
+          }
+        }
+      ]
+    },
+    "EffectPayload": {
+      "description": "The registered effect types (04 §10): the two ephemeral post-commit effects 04 §1 names that the R6P proof needs. Durable types arrive with their first cross-authority use.",
+      "oneOf": [
+        {
+          "description": "An ephemeral notification to one character.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "client_notification"
+            },
+            "character_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "message_key": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_.]*$",
+              "maxLength": 128
+            }
+          },
+          "required": [
+            "type",
+            "character_id",
+            "message_key"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Wake the scheduler after a job was committed.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "scheduler_wake"
+            },
+            "job_id": {
+              "$ref": "delta.schema.json#/$defs/JobId"
+            },
+            "due_time": {
+              "$ref": "command.schema.json#/$defs/LogicalTime"
+            }
+          },
+          "required": [
+            "type",
+            "job_id",
+            "due_time"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "type": "client_notification",
+          "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "message_key": "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
+        },
+        {
+          "type": "scheduler_wake",
+          "job_id": "66666666-7777-8888-8999-aaaaaaaaaaaa",
+          "due_time": 19
+        }
+      ]
+    },
+    "EffectRegistryEntry": {
+      "description": "One entry of protocol/effect_registry.json: an effect type's classification (04 §10). Durable effects use the outbox, at-least-once with idempotent application (never 'exactly once'), always require an idempotency identity, retry until a terminal disposition and declare their reconciliation. Ephemeral effects run after commit and may be dropped or reconstructed.",
+      "oneOf": [
+        {
+          "description": "Crosses a boundary that cannot commit atomically (outbox).",
+          "type": "object",
+          "properties": {
+            "durability": {
+              "const": "durable"
+            },
+            "type": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "idempotency": {
+              "enum": [
+                "required"
+              ]
+            },
+            "retry": {
+              "enum": [
+                "until_terminal"
+              ]
+            },
+            "terminal_failure": {
+              "enum": [
+                "reconcile",
+                "operator_visible"
+              ]
+            },
+            "allowed_origins": {
+              "type": "array",
+              "items": {
+                "$ref": "action.schema.json#/$defs/Key"
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "durability",
+            "type",
+            "idempotency",
+            "retry",
+            "terminal_failure",
+            "allowed_origins"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Post-commit presentation or notification.",
+          "type": "object",
+          "properties": {
+            "durability": {
+              "const": "ephemeral"
+            },
+            "type": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "idempotency": {
+              "enum": [
+                "required",
+                "not_required"
+              ]
+            },
+            "retry": {
+              "enum": [
+                "none",
+                "reconstruct"
+              ]
+            },
+            "allowed_origins": {
+              "type": "array",
+              "items": {
+                "$ref": "action.schema.json#/$defs/Key"
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "durability",
+            "type",
+            "idempotency",
+            "retry",
+            "allowed_origins"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "durability": "durable",
+          "type": "entity_transfer_request",
+          "idempotency": "required",
+          "retry": "until_terminal",
+          "terminal_failure": "reconcile",
+          "allowed_origins": [
+            "containment"
+          ]
+        },
+        {
+          "durability": "ephemeral",
+          "type": "client_notification",
+          "idempotency": "not_required",
+          "retry": "none",
+          "allowed_origins": [
+            "narration"
+          ]
+        }
+      ]
+    }
+  }
+}

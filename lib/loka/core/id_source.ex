@@ -3,6 +3,10 @@ defmodule Loka.Core.IdSource do
   Deterministic gameplay ids (spec 01 A8; owner decision
   `docs/decisions/owner-decisions-r3-2026-09-24.md`): a UUIDv8 from the first 16 bytes of
   SHA-256 over the canonical JSON `["loka-id-v1", world_context_id, command_id, ordinal]`.
+
+  `command_id/2` derives the stable CommandId (04 §3, 03 §14) the same way from
+  `["loka-command-v1", idempotency_scope_id, invocation_id]`; authority placement never enters
+  it (owner decision `docs/decisions/owner-decisions-r3-lanes-2026-09-24.md`).
   """
   import Bitwise
   alias Loka.Core.Canonical
@@ -22,6 +26,14 @@ defmodule Loka.Core.IdSource do
       true -> uuid(Canonical.encode(["loka-id-v1", world_context_id, command_id, ordinal]))
     end
   end
+
+  @doc "`:invalid_id` unless both ids are binaries, `:invalid_canonical` if one is not valid UTF-8."
+  @spec command_id(term(), term()) ::
+          {:ok, String.t()} | {:error, :invalid_id | :invalid_canonical}
+  def command_id(scope_id, invocation_id) when is_binary(scope_id) and is_binary(invocation_id),
+    do: uuid(Canonical.encode(["loka-command-v1", scope_id, invocation_id]))
+
+  def command_id(_, _), do: {:error, :invalid_id}
 
   defp uuid({:error, _} = error), do: error
 

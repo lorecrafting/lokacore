@@ -188,5 +188,10 @@
     "code": "too_many_items",
     "category": "abi_validation",
     "description": "Contract validation: array longer than maxItems."
+  },
+  {
+    "code": "conflicting_write",
+    "category": "evaluation_fault",
+    "description": "Two writer groups wrote one mutation target without a registered composition rule (04 \u00a75.1, \u00a75.3)."
   }
 ]

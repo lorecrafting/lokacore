@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Invariant registry contract",
+  "description": "Registered invariants (docs/ROADMAP.md, verification harness): stable id, spec citation, statement, and the slice that implements the check.",
+  "$defs": {
+    "InvariantEntry": {
+      "description": "One entry of protocol/invariants.json. citation names a docs/spec/ document and one of its exact heading lines (the contract-links.json convention); a test requires both to exist. implemented_in is the slice whose check enforces it.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "citation": {
+          "type": "object",
+          "properties": {
+            "document": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+\\.md$",
+              "maxLength": 64
+            },
+            "heading": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          },
+          "required": [
+            "document",
+            "heading"
+          ],
+          "additionalProperties": false
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "implemented_in": {
+          "enum": [
+            "r3_pr3",
+            "r3_pr5",
+            "r5",
+            "r6"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "citation",
+        "statement",
+        "implemented_in"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "id": "one_container_per_item",
+          "citation": {
+            "document": "03-domain-state-persistence.md",
+            "heading": "## 23. Inventory/location invariant"
+          },
+          "statement": "Every item has exactly one authoritative container.",
+          "implemented_in": "r3_pr5"
+        },
+        {
+          "id": "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+          "citation": {
+            "document": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.md",
+            "heading": "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+          },
+          "statement": "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+          "implemented_in": "r6"
+        }
+      ]
+    }
+  }
+}
