@@ -33,7 +33,7 @@ filter on top. Adapted from Datadog's
 
 | Stage | Slices | Content |
 |---|---|---|
-| R3 | 6 | Every item of [14 §R3A/§R3B and Gate R3](spec/14-implementation-plan.md#r3--contractschema-foundation) is the checklist. PR 1 portable ABI; PR 2 schema toolchain + identity/scope/error contracts; PR 3 action/command/delta/event/effect/result, policy AST, TargetResolution + invariant registry; PR 4 capability registry/lock/residency matrix, manifests, facts, relations/provenance, GameView, account/progress, generated docs; PR 5 StateDelta composition in both kernels + invariant checks; PR 6 R3B envelopes, gate review, docs tidy pass |
+| R3 | 6 | Every item of [14 §R3A/§R3B and Gate R3](spec/14-implementation-plan.md#r3--contractschema-foundation) is the checklist. PR 1 portable ABI; PR 2 schema toolchain + identity/scope/error contracts; PR 3 action/command/delta/event/effect/result, policy AST, TargetResolution + invariant registry; PR 4 capability registry/lock/residency matrix, manifests, facts, relations/provenance, GameView, account/progress, generated docs; PR 5 StateDelta composition in both kernels + invariant checks; PR 6a R3B envelopes; PR 6b gate review, docs tidy pass. PR 3, PR 4 and PR 6a run in parallel, then PR 5, then PR 6b ([decision](decisions/owner-decisions-r3-lanes-2026-09-24.md)) |
 | R4 minimal | 3 | loader, validation, reference resolution, capability lock, canonical artifact hash, diagnostics |
 | R5 subset | 7 + 1 | world rules the Lantern needs, in both kernels; plus the deterministic simulation slice |
 | R6 | 5 + 1 | the [14 §R6](spec/14-implementation-plan.md#r6--offline-authority-and-save-system) build list as R6P needs it (including the fake synchronization adapter); plus fault simulation |
