@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Localized text contracts",
+  "description": "Localized text as string ids plus bindings (04 §15; 05 §18; 06 §43), shared by GameView and DecisionResult narration.",
+  "$defs": {
+    "TextKey": {
+      "description": "A localization string id, never display text (04 §15; 05 §18): lowercase dotted snake_case of at most 128 characters, the ActionDefinition label rule. Interpolation data is added with its first use.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.]*$",
+      "maxLength": 128,
+      "examples": [
+        "room.ferry_landing.title",
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ]
+    },
+    "TextValue": {
+      "description": "A value interpolated into localized text (04 §15 'interpolation data'; 06 §43 'bindings'): a TextKey (localized in turn, so a Key such as a direction also fits), an integer (a count, a time) or a boolean.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TextKey"
+        },
+        {
+          "type": "integer"
+        },
+        {
+          "type": "boolean"
+        }
+      ],
+      "examples": [
+        "room.village_green.title",
+        "north",
+        420,
+        true
+      ]
+    },
+    "Text": {
+      "description": "Localized text: a string id and its named bindings (04 §15 'localized string IDs plus interpolation data'; 06 §43 'pinned text keys and bindings'). Binding names are lowercase snake_case, at most 64 characters.",
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/TextKey"
+        },
+        "bindings": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/TextValue"
+          }
+        }
+      },
+      "required": [
+        "key"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "key": "narration.move"
+        },
+        {
+          "key": "narration.move",
+          "bindings": {
+            "direction": "north",
+            "destination": "room.village_green.title"
+          }
+        },
+        {
+          "key": "clock.time",
+          "bindings": {
+            "minutes": 420
+          }
+        },
+        {
+          "key": "k",
+          "bindings": {}
+        }
+      ]
+    }
+  }
+}

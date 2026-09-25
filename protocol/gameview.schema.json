@@ -3,16 +3,6 @@
   "title": "GameView contracts",
   "description": "The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-release-proof.md P5). One schema for Story and Realm hosts; React Native renders it and never re-derives legality (04 §15).",
   "$defs": {
-    "TextKey": {
-      "description": "A localization string id, never display text (04 §15; 05 §18): lowercase dotted snake_case of at most 128 characters, the ActionDefinition label rule. Interpolation data is added with its first use.",
-      "type": "string",
-      "pattern": "^[a-z][a-z0-9_.]*$",
-      "maxLength": 128,
-      "examples": [
-        "room.ferry_landing.title",
-        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-      ]
-    },
     "AdvertisedAction": {
       "description": "One action of a resolved ActionSet (04 §19), for the entity or place it is listed under: invoking it builds an ActionInvocation with this action_key (action.schema.json). Lists are in presentation order, highest priority first (00 §4.10).",
       "oneOf": [
@@ -27,7 +17,7 @@
               "$ref": "action.schema.json#/$defs/Key"
             },
             "label": {
-              "$ref": "#/$defs/TextKey"
+              "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
           "required": [
@@ -48,7 +38,7 @@
               "$ref": "action.schema.json#/$defs/Key"
             },
             "label": {
-              "$ref": "#/$defs/TextKey"
+              "$ref": "text.schema.json#/$defs/TextKey"
             },
             "reason": {
               "$ref": "#/$defs/UnavailableReason"
@@ -93,7 +83,7 @@
               "$ref": "action.schema.json#/$defs/Key"
             },
             "label": {
-              "$ref": "#/$defs/TextKey"
+              "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
           "required": [
@@ -114,7 +104,7 @@
               "$ref": "action.schema.json#/$defs/Key"
             },
             "label": {
-              "$ref": "#/$defs/TextKey"
+              "$ref": "text.schema.json#/$defs/TextKey"
             },
             "reason": {
               "$ref": "#/$defs/UnavailableReason"
@@ -209,7 +199,7 @@
           "$ref": "identity.schema.json#/$defs/EntityId"
         },
         "name": {
-          "$ref": "#/$defs/TextKey"
+          "$ref": "text.schema.json#/$defs/TextKey"
         },
         "kind": {
           "$ref": "action.schema.json#/$defs/Key"
@@ -254,7 +244,7 @@
           "$ref": "identity.schema.json#/$defs/EntityId"
         },
         "prompt": {
-          "$ref": "#/$defs/Text"
+          "$ref": "text.schema.json#/$defs/Text"
         },
         "closable": {
           "type": "boolean"
@@ -327,7 +317,7 @@
           "$ref": "policy.schema.json#/$defs/QuestState"
         },
         "title": {
-          "$ref": "#/$defs/TextKey"
+          "$ref": "text.schema.json#/$defs/TextKey"
         }
       },
       "required": [
@@ -357,10 +347,10 @@
           "$ref": "identity.schema.json#/$defs/EntityId"
         },
         "title": {
-          "$ref": "#/$defs/Text"
+          "$ref": "text.schema.json#/$defs/Text"
         },
         "description": {
-          "$ref": "#/$defs/Text"
+          "$ref": "text.schema.json#/$defs/Text"
         }
       },
       "required": [
@@ -798,70 +788,6 @@
         }
       ]
     },
-    "TextValue": {
-      "description": "A value interpolated into localized text (04 §15 'interpolation data'; 06 §43 'bindings'): a TextKey (localized in turn, so a Key such as a direction also fits), an integer (a count, a time) or a boolean.",
-      "anyOf": [
-        {
-          "$ref": "#/$defs/TextKey"
-        },
-        {
-          "type": "integer"
-        },
-        {
-          "type": "boolean"
-        }
-      ],
-      "examples": [
-        "room.village_green.title",
-        "north",
-        420,
-        true
-      ]
-    },
-    "Text": {
-      "description": "Localized text: a string id and its named bindings (04 §15 'localized string IDs plus interpolation data'; 06 §43 'pinned text keys and bindings'). Binding names are lowercase snake_case, at most 64 characters.",
-      "type": "object",
-      "properties": {
-        "key": {
-          "$ref": "#/$defs/TextKey"
-        },
-        "bindings": {
-          "type": "object",
-          "propertyNames": {
-            "pattern": "^[a-z][a-z0-9_]{0,63}$"
-          },
-          "additionalProperties": {
-            "$ref": "#/$defs/TextValue"
-          }
-        }
-      },
-      "required": [
-        "key"
-      ],
-      "additionalProperties": false,
-      "examples": [
-        {
-          "key": "narration.move"
-        },
-        {
-          "key": "narration.move",
-          "bindings": {
-            "direction": "north",
-            "destination": "room.village_green.title"
-          }
-        },
-        {
-          "key": "clock.time",
-          "bindings": {
-            "minutes": 420
-          }
-        },
-        {
-          "key": "k",
-          "bindings": {}
-        }
-      ]
-    },
     "UnavailableReason": {
       "description": "Why an action, choice or exit is shown but not legal now (00 §4.10: greyed with the reason, badge when locked; P5 'clear unavailable-action feedback'): the typed code, and optionally the player-facing sentence that tells apart two reasons with one code (a locked door, a causeway under the tide). A GameView presentation field, so GameError and the error registry stay unchanged.",
       "type": "object",
@@ -870,7 +796,7 @@
           "$ref": "error.schema.json#/$defs/ErrorCode"
         },
         "message": {
-          "$ref": "#/$defs/Text"
+          "$ref": "text.schema.json#/$defs/Text"
         }
       },
       "required": [
@@ -890,7 +816,7 @@
       ]
     },
     "NarrationRecord": {
-      "description": "The committed narration of one accepted command, as this actor sees it (06 §43: required narration is committed with its consequence as a stable record of pinned text keys and bindings; 04 §5.2 steps 7-8). Redisplay is read-only. A retry of that command replays its receipt and returns this same record (same command_id) with a current GameView (06 §43; 03 §14).",
+      "description": "The committed narration of one accepted command, as this actor sees it: the lines of that command's DecisionResult narration (decision.schema.json), keyed by its command_id (06 §43: required narration is committed with its consequence as a stable record of pinned text keys and bindings; 04 §5.2 steps 7-8). Redisplay is read-only. A retry of that command replays its receipt and returns this same record with a current GameView (06 §43; 03 §14).",
       "type": "object",
       "properties": {
         "command_id": {
@@ -899,9 +825,10 @@
         "lines": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/Text"
+            "$ref": "text.schema.json#/$defs/Text"
           },
-          "minItems": 1
+          "minItems": 1,
+          "maxItems": 64
         }
       },
       "required": [
@@ -919,6 +846,203 @@
                 "direction": "north",
                 "destination": "room.village_green.title"
               }
+            }
+          ]
+        },
+        {
+          "command_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+          "lines": [
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
+            },
+            {
+              "key": "n"
             }
           ]
         }
