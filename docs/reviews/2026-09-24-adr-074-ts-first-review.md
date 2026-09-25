@@ -236,3 +236,62 @@ MISSED DEPENDENCIES:
 - Neither R6 local authority nor first-release milestone acceptance introduces a hidden requirement to replay Story rules in Elixir. Document 23 separates local milestone production from authenticated, idempotent platform acceptance; R6P uses a fake synchronization adapter. These are dependencies to preserve, not reasons to pull the full Elixir world kernel forward.
 ```
 ````
+
+## Re-review (fix round 1)
+
+Reviewed `1545b82` only (the proposal at that commit; line numbers below are at
+`1545b82`). Scope: each disposition of S1–S6, N1–N4, Q1, Astra's A1–A7 and the five
+missed dependencies; the plain-words section; the crosswalk against the grep in S6.
+
+**Verdict: APPROVE. The document is fit for the owner to decide on.**
+
+| Finding | Where | Verified |
+|---|---|---|
+| S1 Lab runs rules before release | L74–80; appendix 02 §1, 09 §5, 09 §10 | Resolved: R5 simulation, R9 Lab and R11 Lab control run the TypeScript kernel headless on Node against compiled artifacts; stated not to fire the trigger; the three amendment rows are present. |
+| S2 deferral boundary and trigger by residency | L63–72, L90–96 | Resolved: `portable_semantic_foundation` stays dual with its differential (a new delta operator lands in both); `portable_capability` is TypeScript-only; the trigger is "first planned server consumer of any `portable_capability` semantics", names the Realm-native case, excludes compilation and TS test execution, and is checkable on `docs/residency.gen.json` `host_adapters` (the rows carry that field today); owner route choice and conformance evidence precede enabling, regardless of milestone. |
+| S3 on-device differential | L82–88; appendix ADR-071 row | Resolved: Node, Android Hermes and iOS Hermes named as distinct hosts; per-step bytes recorded on Node and replayed on device; 10,000 fresh sequences plus regression seeds on Node every fast CI run, a device sample at R6P; the Node-not-device reduction is stated as an owner-approved assurance change. |
+| S4 plain words | L11–25 | Resolved: "No story rule has been written yet"; the plan, not the repo, writes twice; the R12A account server is named; the total-goes-up sentence is there with both numbers; the recommendation is now conditional ("unless you are sure stories will go online"). Accurate for a non-engineer. |
+| S5 immutability after release | L104–110 | Resolved, and the plain-words section points to it. |
+| S6 amendment list | appendix L174–204 | Resolved for every normative item in the grep (09 §5 and its BEAM boot mode, 09 §10, 05 §6 last paragraph, 10 line 482, AGENTS.md "Writing tests" and CI line, pre-release-proof.md, 02 §1, 04 §20 and 14 §R1 marked unaffected). Two mention-only omissions remain (nit below). |
+| N1 compiler/runtime seam | L77–80 | Resolved: compiler stays Elixir; artifact loaded through the TypeScript path with the same bytes, hash, lock and deterministic rejection. |
+| N2 estimate caveats | L159–162 | Resolved (56% review share; rule vs contract slices; re-estimate after two R5 slices). |
+| N3 route (a) larger than (b) | L130–137 | Resolved; also carries A5's additions. |
+| N4 §2 duplication | L51–59 | Resolved; §2 is two sentences plus a pointer to the appendix. |
+| Q1 compiler language | L77 | Answered: Elixir. |
+| A1 envelope "MUST for C" | L82–88, appendix envelope row | Resolved: deferred Elixir pair distinguished from retained TS host conformance; where the sequences run is stated; reduction identified. |
+| A2 crosswalk | appendix | Resolved: retained / replaced / deferred / amend / unaffected per row; DET-08, the ADR-071 server-load, fault-record and maintenance items, AGENTS CI line all dispositioned; historical results stay. |
+| A3 trigger predicate | L90–96 | Resolved (see S2). |
+| A4 port estimate scope | L164–166 | Resolved: Lantern subset only; later rules unestimated. |
+| A5 route (a) footprint | L130–137 | Resolved: R14 gate, R18, R19, 07 §17 embedded/shared reuse, 05 §6 immutability; separately named Realm mechanics allowed. |
+| A6 table arithmetic | L146–157 | Resolved and reproduced: R5 7 × 0.4 × (0.60..0.75) + 0.4 = 2.08–2.50; R7/R8 1.20–1.50; totals 8.48–9.20; saving 12 × 0.4 × (0.25..0.40) = 1.20–1.92. The simulation slice is no longer discounted. |
+| A7 opening | L11–15 | Resolved. |
+| Missed dep 1 (R4 producer/consumer tests) | L77–80 | Resolved. |
+| Missed dep 2 (execution path before Realm) | L74–76 | Resolved. |
+| Missed dep 3 (R6P assurance retained) | L87–88; appendix "Retained" rows | Resolved: mutant check, iPhone timing, phone rows, storage-fault recovery, adapter evidence. |
+| Missed dep 4 (port targets an inventory) | L112–115 | Resolved. |
+| Missed dep 5 (no hidden Elixir replay) | L39–41, L44–45 | Preserved. |
+
+**Crosswalk completeness against the S6 grep.** Every normative hit is dispositioned.
+Not listed, mention-only: the reading aids (R-MILESTONES R1 row, INDEX line 232), which
+"do not introduce new requirements" (README §8), and 07 §14 line 521 (the R1 comparison
+procedure, history like 14 §R1). Nit, not a condition.
+
+**One suggestion for the amendment slice, not for this document:** the trigger is
+"checkable" on `docs/residency.gen.json`; the slice that amends the spec should also add
+the one-line check (a `portable_capability` row with an Elixir host adapter and no listed
+differential fails), so the trigger is checked, not just checkable.
+
+### Owner recommendation, restated
+
+The document is now honest and complete enough to decide on. It says, correctly: nothing
+is written twice yet; the plan would write each new rule twice; writing only TypeScript
+saves about 1.2–1.9M tokens before R6P; if stories later go online, the Elixir copy costs
+about 1.5–3M or more for the proof subset alone, so the total goes up; what you buy is
+time and the freedom to change course.
+
+Decide on one question: **how sure are you that stories will go online?** If you are
+sure (that is the spec's plan), write both now: cheaper overall, and spec mistakes get
+found while the spec can still win; after the first release the TypeScript behaviour
+becomes the rulebook. If you are genuinely unsure, accept: the trigger is now keyed to
+code, not to a feature name, and cannot be slipped past without the owner's route choice
+and passing conformance evidence.

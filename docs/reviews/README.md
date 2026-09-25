@@ -91,4 +91,4 @@ Each record is written by a fresh agent that authored none of the reviewed work 
   without reason, the plain-words section misstates the present and omits the net cost,
   the post-release "TypeScript becomes the rulebook" consequence is missing, and the
   amendment list is incomplete; four nits, one question; owner recommendation: accept
-  the direction after the fixes).
+  the direction after the fixes); re-review of the fixes at `1545b82`, APPROVE (every disposition verified, arithmetic reproduced, crosswalk complete but for two reading aids; fit for the owner to decide).
