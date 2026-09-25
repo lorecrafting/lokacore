@@ -1,8 +1,8 @@
 # Decisions after R0
 
 Accepted ADRs live in [document 16](../spec/16-decision-register.md); ADR-070 to ADR-074
-entered it on 2026-09-24, and their files here hold the full text. This directory also
-holds the owner's decisions retained verbatim.
+entered it on 2026-09-24 and ADR-075 on 2026-09-25, and their files here hold the full
+text. This directory also holds the owner's decisions retained verbatim.
 
 ## R0/R1
 
@@ -43,6 +43,7 @@ holds the owner's decisions retained verbatim.
 
 ## Observability design
 
-- [ADR-075](adr-075-observability-proposal.md) (proposed): one observation record format,
-  four stores joined by ids, a registered event-name list, the game-trace entry.
+- [ADR-075](adr-075-observability-proposal.md): one observation record format, four stores
+  joined by ids, a registered event-name list, the game-trace entry
+  ([accepted by the owner](owner-decision-adr-075-2026-09-25.md)).
 - Owner decisions: [ADR-075 kernel version and dev-evidence ledger](owner-decisions-adr-075-2026-09-25.md).

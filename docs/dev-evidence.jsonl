@@ -1,0 +1,7 @@
+{"data":{"instance":1,"model":"opus","pr_disposition":"merged","role":"pm","tokens":{"state":"unknown"}},"event":"agent.work","format":"loka-obs-v1","ids":{"pull_request":29},"store":"dev_evidence"}
+{"data":{"instance":1,"model":"opus","pr_disposition":"merged","role":"developer","tokens":{"state":"observed","value":714818}},"event":"agent.work","format":"loka-obs-v1","ids":{"pull_request":29},"store":"dev_evidence"}
+{"data":{"instance":1,"model":"fable","pr_disposition":"merged","role":"reviewer","tokens":{"state":"observed","value":777244}},"event":"agent.work","format":"loka-obs-v1","ids":{"pull_request":29},"store":"dev_evidence"}
+{"data":{"instance":2,"model":"astra","pr_disposition":"merged","role":"reviewer","tokens":{"state":"unknown"}},"event":"agent.work","format":"loka-obs-v1","ids":{"pull_request":29},"store":"dev_evidence"}
+{"data":{"instance":1,"model":"opus","pr_disposition":"merged","role":"pm","tokens":{"state":"unknown"}},"event":"agent.work","format":"loka-obs-v1","ids":{"pull_request":30},"store":"dev_evidence"}
+{"data":{"instance":1,"model":"opus","pr_disposition":"merged","role":"developer","tokens":{"state":"observed","value":95895}},"event":"agent.work","format":"loka-obs-v1","ids":{"pull_request":30},"store":"dev_evidence"}
+{"data":{"instance":1,"model":"opus","pr_disposition":"merged","role":"reviewer","tokens":{"state":"observed","value":73212}},"event":"agent.work","format":"loka-obs-v1","ids":{"pull_request":30},"store":"dev_evidence"}
