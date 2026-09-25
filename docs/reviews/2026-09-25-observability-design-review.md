@@ -573,3 +573,29 @@ None new. The PM's reading that `-dirty` and `input_digest` are technical, not o
 decisions, is right: neither changes what the owner decided (the git commit as the
 version; the committed ledger), and both are producer-side constructions with a stated
 known-answer obligation.
+
+## Fix round 2: `dc44543` (R1-R3), final
+
+Scoped to R1-R3, as the PM asked. Detached worktree at `dc44543`.
+**Verdict: APPROVE.**
+
+- Checks at `dc44543`: `mix test --force` 147 passed; `bin/contracts.exs --check` clean;
+  `kernel/ts` 66 passed; `check_docs` 101 docs, 0 broken, 0 unreachable; my mutant sweep
+  unchanged at 165 mutants, 0 survivors (the round changed no `required`, bound, enum or
+  const, so the developer's 106/106 over their mutant classes is consistent).
+- **R1 fixed.** ADR §4 now holds one ordinal rule: 1, 2, 3 with no gaps, unique per run,
+  the one exception being exactly one follow-up entry after an `unknown` commit with an
+  identical command and decision and the resolved outcome; a retry after a confirmed
+  non-commit is a new decision and takes the next ordinal. That is consistent with 03 §15
+  (only confirmed non-commit permits retrying the original identity) and with 03 §14 (a
+  committed command replays its receipt, never a second decision). The duplicated sentence
+  later in §4 is gone. The second `trace.command` example now has its own `command_id`
+  (`f6a7b8c9-...`), so it no longer depicts a second decision for a committed command.
+  Producer-test rule, as it must be: the subset cannot relate two records.
+- **R2 fixed.** The `RunHeader` example is a fresh start; the description and ADR §3 say a
+  snapshot start uses `unavailable, not_collected` until R6 checkpoints define an identity.
+  Acceptable: the value is not recorded, which is what `not_collected` means, and the
+  sentence tells R6 what to replace.
+- **R3 fixed.** ADR §2: a sum that includes an unknown round is `unknown`.
+- N2/R4 (registry `kind`) stay as accepted. Nothing open. Android and iOS CI were still
+  running when this was written; they do not touch this slice's files.
