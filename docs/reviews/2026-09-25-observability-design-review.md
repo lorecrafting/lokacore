@@ -466,3 +466,110 @@ A trace viewer may show a proposal reconstructed by replay, clearly labeled
 as reconstructed and uncommitted. It must not present it as a recovered
 committed event history or use it to repair authoritative state.
 ```
+
+## Fix round 1: `59b55e2` (fixes) and `e2847af` (owner record), head `e2847af`
+
+Broad re-review of the frozen shapes, as the PM asked (a new record `trace.run` and a
+reshaped `TraceEntry`), plus every disposition. Detached worktree at `e2847af`.
+**Verdict: APPROVE WITH NOTES** (one should-fix in the ADR text and one example; three nits).
+
+### Checks
+
+- `mix test --force` 147 passed; `bin/contracts.exs --check` clean; `kernel/ts` 66 passed;
+  `check_docs` 101 docs, 0 broken, 0 unreachable. The owner record is linked from the
+  decisions index.
+- Mutant sweep (same script as round 0) over the reshaped schema: **165 mutants, 119
+  killed, 46 rejected at load (discriminators), 0 survivors**. New parts covered: `RunIds`,
+  `RunHeader` (both oneOfs), `ordinal`, `rng_state`, fault `target`, commit `cause` enums,
+  `input_digest`, `KernelVersion` `-dirty`, `AgentWork` `model`/`instance`/`pr_disposition`.
+- Dev-evidence check, planted by hand in `docs/dev-evidence.jsonl` (one case per run): a
+  valid canonical record passes (16/16); two instances of one role pass; a duplicate
+  (pull_request, role, instance), a non-canonical line, a schema-valid record of another
+  event, a bare `tokens` number and a `model` with a hyphen each fail (15/16). An observed
+  `0` tokens passes the schema, as designed (the ADR's "never 0" is a producer rule).
+- A3 counterexample verified against the kernel: `Loka.Core.Rng.uniform([1,2,3,4], 20, 8)`
+  returns draw `0` and next state `[7, 0, 1026, 12288]`, the values in the two accepted
+  examples that differ only in `rng_state`.
+- (b) 09 §2 coverage: kernel revision and protocol versions → `kernel_version`; cartridge →
+  `content_hash`; initial snapshot → `RunHeader.initial_state` (fresh, or unavailable until
+  R6 names snapshots); logical clock → virtual, follows from the initial state and the
+  explicit advances, which are commands; RNG → `seed` + kernel version; ordered command
+  stream → the full `Command`s by `ordinal` (with `world_context_id`, which IdSource uses);
+  fault schedule → `RunHeader.fault_schedule` digest; expected/observed invariant →
+  `simulation.invariant_failed`; deployment hash → R14 (stated). Complete for R5/R6; the
+  digest names a fault schedule but does not contain it, so the R6 slice that defines the
+  schedule must also say where the artifact lives (as `content_hash` names a cartridge).
+- (c) Host or wall-clock leak into `game_trace`: walked every field of `RunHeader` and
+  `TraceEntry` (ordinal, Command id/world_context_id/payload, outcome, digests, draws,
+  rng_state, GameError, ErrorCode, MutationTarget, commit state/revision/events/effect_ids/
+  cause). None is a time, duration, device or host value. `WorldContextId` is a logical
+  context id (03 §6), part of the replay input. `cause: storage_error` is an observation
+  label; the host detail is routed to operations. `-dirty` reveals nothing about the host.
+- (d) Over-engineering from the fixes: `RunIds` is the closed ids object the envelope rule
+  requires; `RunHeader`'s two two-branch oneOfs are the minimum for an explicit unavailable;
+  `instance` is what makes the ledger key unique; the `cause` enums are two values each,
+  both with a producer (R6 fault simulation, `loka play`). Nothing to cut.
+
+### Dispositions
+
+| Finding | Disposition | Verified |
+|---|---|---|
+| S1 replay inputs | Fixed: `run_id` is replay input; full `Command` with ids; equality only under identical inputs (ADR §3-§4) | yes |
+| S2 decision-commit matrix | Fixed: table in ADR §4, receipted rejection included | yes |
+| S3 fault target | Fixed: optional `MutationTarget`, example | yes |
+| S4 ledger check | Fixed: file, check, planted-case test; my own plants above | yes |
+| N1 RngTrace unknown | Overridden by A4 (PM ruled for Astra's scenario): `unknown` branch added, fixture inverted; ADR §5 now defines the three states | accepted |
+| N2 registry `kind` | Disputed, kept: the test checks `kind` against the `Measure` data ref. That is a check that two copies of one fact agree; it earns its line only as documentation for a reader of the registry. Not worth a round; recorded as accepted | accepted |
+| N3 11 §22 | Fixed (ADR §3) | yes |
+| N4 additive fields | Fixed (ADR §7) | yes |
+| N5 compiler producer | Fixed: deferred to the slice that stores compiler diagnostics | yes |
+| Q1 reconciled unknown | Answered: second entry, same ordinal. See R1 | open |
+| Q2 explicit advance | Answered: one entry; jobs in its committed events | yes |
+| A1 command inputs | Fixed: full `Command`, `ordinal`, `trace.run` header with `RunIds`, required relationship in ADR §4 | yes |
+| A2 commit diagnosis, equality claim | Fixed: typed `cause` on failed and unknown; host detail to operations under a name R6 registers; claim narrowed; replay never reads outcomes | yes |
+| A3 returned RNG state | Fixed: `rng_state` required on accepted; examples differ only in it (verified against the kernel). No comparison exists yet to assert on; the first trace-comparison slice must turn the pair into a failing test | yes |
+| A4 RngTrace unknown | Fixed | yes |
+| A5 build identity | Fixed: required `input_digest`, construction stated for compiler and loader, KAT with the first producer, never a stand-in for `content_hash` | yes |
+| A6 schema-valid leaks | Fixed: ADR §6 producer acceptance rule (absolute path in `path`, serial in `data`) | yes |
+| Astra Q1 kernel version | Owner decided (record item 1); `-dirty` suffix is technical, I agree with the PM | yes |
+| Astra Q2 ledger | Owner decided (record item 2); `model`, `instance`, `pr_disposition`; tokens unknown when unreported | yes, see R3 |
+
+### New findings (round 1)
+
+- **R1 (should-fix)** `docs/decisions/adr-075-observability-proposal.md:104-105, 119-120`
+  and `protocol/observation.schema.json:1109-1110, 1180-1184`. "Ordinals are consecutive
+  from 1" and "a reconciled unknown commit gets a second entry with the same ordinal"
+  together leave ordinal uniqueness undefined, and the retry case is not covered.
+  Scenarios: (1) a producer test that checks consecutive ordinals rejects the reconciliation
+  entry, or one that allows repeats accepts an accidental double write of a committed
+  entry; (2) after a confirmed non-commit, 03 §15 permits retrying the original identity,
+  which is a new decision: the ADR does not say whether that entry takes the same ordinal
+  or the next one, and a consumer joining on `command_id` finds two decisions for one
+  command either way. The second `trace.command` example already depicts this: ordinal 2
+  carries the same `command_id` as ordinal 1, decided against revision 19 after ordinal 1
+  committed at 19, which 03 §14 forbids (a retry of a committed command replays its
+  receipt). Fix: one rule in §4: an ordinal appears once, except that an entry whose commit
+  is `unknown` may be followed by exactly one entry with the same ordinal, identical
+  command and decision, and commit `committed` or `failed`; a retry admitted after a
+  confirmed non-commit is a new decision and takes the next ordinal (or the reverse, but
+  say which). And give the second example its own `command_id`.
+- **R2 (nit)** `protocol/observation.schema.json:757-760` and the `RunHeader` description.
+  The "start from a snapshot" example uses `unavailable/not_collected`, but neither cause
+  fits: the identity is not switched off, it does not exist yet. Say which cause R6 uses
+  until snapshots have an identity (or that R6 adds a `snapshot` branch and `unavailable`
+  is for now `not_applicable`).
+- **R3 (nit)** `docs/decisions/adr-075-observability-proposal.md:37`. "Summing its rounds"
+  with one unreported round: the ADR says unknown is never 0, but not that a sum with an
+  unknown round is `unknown` rather than a partial `observed`. One clause, Astra Q2's last
+  sentence.
+- **R4 (nit)** `test/loka/core/registries_test.exs:34`. With N2 kept, the check that
+  `kind` agrees with the data `$ref` is a change detector on a duplicated fact
+  (AGENTS.md "each fact lives in one place"); acceptable as documentation, recorded so it is
+  not cited as a behavior test.
+
+### Owner decisions
+
+None new. The PM's reading that `-dirty` and `input_digest` are technical, not owner
+decisions, is right: neither changes what the owner decided (the git commit as the
+version; the committed ledger), and both are producer-side constructions with a stated
+known-answer obligation.
