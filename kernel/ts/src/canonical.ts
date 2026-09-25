@@ -9,7 +9,7 @@ export type Json = null | boolean | number | string | Json[] | { [key: string]: 
 
 export const SAFE = 9007199254740991;
 /** Deepest container nesting the profile allows; one more is invalid_json / invalid_canonical. */
-export const MAX_DEPTH = 128;
+const MAX_DEPTH = 128;
 
 const invalid = (): never => {
   throw new KernelError('invalid_json');
