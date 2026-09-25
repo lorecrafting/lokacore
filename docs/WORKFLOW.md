@@ -17,8 +17,10 @@ change (a spec amendment, a canonical encoding, an identity or delta contract, a
 review), or an Opus reviewer and the developer disagreeing twice. The PM passes
 `model: "fable"` when spawning that reviewer (the file's default is Opus). Everything else
 stays on Opus.
-**Cross-vendor review (Astra)** runs beside the Fable review on the same kinds of slice:
-once CI is green, the PM gives the owner a paste-ready prompt (PR, head SHA, spec sections,
+**Cross-vendor review (Astra)** runs beside the Fable review only on foundational freezes
+later work builds on (a new encoding, hash domain or core contract, a gate review; not
+the implementation of a contract Astra already reviewed; the PM decides,
+[owner decision](decisions/owner-decisions-observability-astra-2026-09-25.md)): once CI is green, the PM gives the owner a paste-ready prompt (PR, head SHA, spec sections,
 focus, and the output format: verdict, then findings with id, severity, `path:line` at that
 SHA and a failure scenario, in one fenced block). The owner runs it and pastes the answer
 back; the reviewer appends it verbatim to its record, and its findings join the fix list.
@@ -77,6 +79,8 @@ now enforced by a check, a doc turning into a catch-all. Findings are fixed in t
 - Every developer works in its own worktree on its own branch; the main checkout stays
   with the PM. The reviewer mutates code only in a throwaway detached worktree
   (`git worktree add --detach`) and removes it before finishing.
+- Parallel agents share one scratchpad: use file names unique to the slice (a shared
+  `pr-body.md` once put one PR's description on another).
 - The reviewer commits only its record, in a detached worktree at `origin/<branch>`,
   pushes from there with `git push origin HEAD:<branch>`, and removes the worktree.
 - A new worktree has no `deps/`, `_build/` or `node_modules`: run `mix deps.get` there
