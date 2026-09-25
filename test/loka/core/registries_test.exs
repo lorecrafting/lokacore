@@ -59,8 +59,8 @@ defmodule Loka.Core.RegistriesTest do
   end
 
   # Gate R3 gap 2: every registered command, event and policy op has exactly one owning
-  # capability, recorded on the capability's registry entry, so the owner is always a
-  # registered capability; the schemas stay the only catalogs of names.
+  # capability key (each version of it lists the name), recorded on the registry entry, so
+  # the owner is always a registered capability; the schemas stay the only catalogs of names.
   @owned for {field, contract, tag} <- [
                {"commands", "CommandPayload", "type"},
                {"events", "EventPayload", "type"},
@@ -72,11 +72,17 @@ defmodule Loka.Core.RegistriesTest do
 
   defp ownership_problems(registry) do
     for {field, names} <- @owned,
-        owned = for(c <- registry, n <- c[field] || [], do: n),
-        n <- Enum.uniq(names ++ owned),
-        problem = ownership(n in names, Enum.count(owned, &(&1 == n))),
+        owners = owner_counts(registry, field),
+        n <- Enum.uniq(names ++ Map.keys(owners)),
+        problem = ownership(n in names, Map.get(owners, n, 0)),
         problem != nil,
         do: {problem, n}
+  end
+
+  # name => how many distinct capability keys list it
+  defp owner_counts(registry, field) do
+    for(c <- registry, n <- c[field] || [], uniq: true, do: {n, c["key"]})
+    |> Enum.frequencies_by(&elem(&1, 0))
   end
 
   defp ownership(false, _), do: :unknown
@@ -88,9 +94,11 @@ defmodule Loka.Core.RegistriesTest do
     assert ownership_problems(@capabilities) == []
   end
 
-  test "the ownership check catches an unowned, a doubly owned and an unknown name" do
+  test "the ownership check catches an unowned, a doubly owned and an unknown name, not a second version" do
+    dialogue = Enum.find(@capabilities, &(&1["key"] == "dialogue"))
+
     planted =
-      for c <- @capabilities do
+      for c <- [%{dialogue | "version" => 2} | @capabilities] do
         case c["key"] do
           "movement" -> Map.delete(c, "commands")
           "quest" -> Map.update!(c, "commands", &["take", "fly" | &1])
