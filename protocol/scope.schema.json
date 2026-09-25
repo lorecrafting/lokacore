@@ -1,0 +1,280 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Scope and audience contracts",
+  "description": "StateScope and AudiencePolicy (03 §6).",
+  "$defs": {
+    "StateScope": {
+      "description": "Who owns or experiences a gameplay truth (03 §6). Exactly one of player, party, instance or realm, each with its typed id. There is no default: a missing kind or id is invalid, never realm (03 §6). Scope is not authority placement.",
+      "oneOf": [
+        {
+          "description": "State of one character.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "player"
+            },
+            "character_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            }
+          },
+          "required": [
+            "kind",
+            "character_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "State shared by a party.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "party"
+            },
+            "party_id": {
+              "$ref": "identity.schema.json#/$defs/PartyId"
+            }
+          },
+          "required": [
+            "kind",
+            "party_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "State of one logical world instance.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "instance"
+            },
+            "world_context_id": {
+              "$ref": "identity.schema.json#/$defs/WorldContextId"
+            }
+          },
+          "required": [
+            "kind",
+            "world_context_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "State of a persistent Realm.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "realm"
+            },
+            "realm_id": {
+              "$ref": "identity.schema.json#/$defs/RealmId"
+            }
+          },
+          "required": [
+            "kind",
+            "realm_id"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "kind": "player",
+          "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+        },
+        {
+          "kind": "party",
+          "party_id": "18293a4b-5c6d-4e7f-8091-a2b3c4d5e6f7"
+        },
+        {
+          "kind": "instance",
+          "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+        },
+        {
+          "kind": "realm",
+          "realm_id": "c3d4e5f6-a7b8-4c9d-8e0f-2a3b4c5d6e7f"
+        }
+      ]
+    },
+    "AudiencePolicy": {
+      "description": "Who may perceive or interact with a runtime entity or projection, independent of state ownership (03 §6, 'Audience / visibility policy'). Governs GameView inclusion, target resolution, interaction and narration; the authority rejects actors outside it.",
+      "oneOf": [
+        {
+          "description": "Everyone.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "public"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "One character.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "player"
+            },
+            "character_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            }
+          },
+          "required": [
+            "kind",
+            "character_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "The members of one party.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "party"
+            },
+            "party_id": {
+              "$ref": "identity.schema.json#/$defs/PartyId"
+            }
+          },
+          "required": [
+            "kind",
+            "party_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Everyone in one world instance.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "instance"
+            },
+            "world_context_id": {
+              "$ref": "identity.schema.json#/$defs/WorldContextId"
+            }
+          },
+          "required": [
+            "kind",
+            "world_context_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "An explicit set of characters, 1 to 64 entries. Order and duplicates carry no meaning (set semantics).",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "audience_set"
+            },
+            "character_ids": {
+              "type": "array",
+              "items": {
+                "$ref": "identity.schema.json#/$defs/CharacterId"
+              },
+              "minItems": 1,
+              "maxItems": 64
+            }
+          },
+          "required": [
+            "kind",
+            "character_ids"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "kind": "public"
+        },
+        {
+          "kind": "player",
+          "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+        },
+        {
+          "kind": "audience_set",
+          "character_ids": [
+            "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+            "b8c9d0e1-f2a3-4b4c-8d5e-7f8a9b0c1d2e"
+          ]
+        },
+        {
+          "kind": "audience_set",
+          "character_ids": [
+            "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+          ]
+        },
+        {
+          "kind": "audience_set",
+          "character_ids": [
+            "00000000-0000-4000-8000-000000000000",
+            "00000001-0000-4000-8000-000000000000",
+            "00000002-0000-4000-8000-000000000000",
+            "00000003-0000-4000-8000-000000000000",
+            "00000004-0000-4000-8000-000000000000",
+            "00000005-0000-4000-8000-000000000000",
+            "00000006-0000-4000-8000-000000000000",
+            "00000007-0000-4000-8000-000000000000",
+            "00000008-0000-4000-8000-000000000000",
+            "00000009-0000-4000-8000-000000000000",
+            "0000000a-0000-4000-8000-000000000000",
+            "0000000b-0000-4000-8000-000000000000",
+            "0000000c-0000-4000-8000-000000000000",
+            "0000000d-0000-4000-8000-000000000000",
+            "0000000e-0000-4000-8000-000000000000",
+            "0000000f-0000-4000-8000-000000000000",
+            "00000010-0000-4000-8000-000000000000",
+            "00000011-0000-4000-8000-000000000000",
+            "00000012-0000-4000-8000-000000000000",
+            "00000013-0000-4000-8000-000000000000",
+            "00000014-0000-4000-8000-000000000000",
+            "00000015-0000-4000-8000-000000000000",
+            "00000016-0000-4000-8000-000000000000",
+            "00000017-0000-4000-8000-000000000000",
+            "00000018-0000-4000-8000-000000000000",
+            "00000019-0000-4000-8000-000000000000",
+            "0000001a-0000-4000-8000-000000000000",
+            "0000001b-0000-4000-8000-000000000000",
+            "0000001c-0000-4000-8000-000000000000",
+            "0000001d-0000-4000-8000-000000000000",
+            "0000001e-0000-4000-8000-000000000000",
+            "0000001f-0000-4000-8000-000000000000",
+            "00000020-0000-4000-8000-000000000000",
+            "00000021-0000-4000-8000-000000000000",
+            "00000022-0000-4000-8000-000000000000",
+            "00000023-0000-4000-8000-000000000000",
+            "00000024-0000-4000-8000-000000000000",
+            "00000025-0000-4000-8000-000000000000",
+            "00000026-0000-4000-8000-000000000000",
+            "00000027-0000-4000-8000-000000000000",
+            "00000028-0000-4000-8000-000000000000",
+            "00000029-0000-4000-8000-000000000000",
+            "0000002a-0000-4000-8000-000000000000",
+            "0000002b-0000-4000-8000-000000000000",
+            "0000002c-0000-4000-8000-000000000000",
+            "0000002d-0000-4000-8000-000000000000",
+            "0000002e-0000-4000-8000-000000000000",
+            "0000002f-0000-4000-8000-000000000000",
+            "00000030-0000-4000-8000-000000000000",
+            "00000031-0000-4000-8000-000000000000",
+            "00000032-0000-4000-8000-000000000000",
+            "00000033-0000-4000-8000-000000000000",
+            "00000034-0000-4000-8000-000000000000",
+            "00000035-0000-4000-8000-000000000000",
+            "00000036-0000-4000-8000-000000000000",
+            "00000037-0000-4000-8000-000000000000",
+            "00000038-0000-4000-8000-000000000000",
+            "00000039-0000-4000-8000-000000000000",
+            "0000003a-0000-4000-8000-000000000000",
+            "0000003b-0000-4000-8000-000000000000",
+            "0000003c-0000-4000-8000-000000000000",
+            "0000003d-0000-4000-8000-000000000000",
+            "0000003e-0000-4000-8000-000000000000",
+            "0000003f-0000-4000-8000-000000000000"
+          ]
+        }
+      ]
+    }
+  }
+}

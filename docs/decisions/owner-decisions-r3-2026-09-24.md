@@ -26,3 +26,18 @@ checker can verify these quotes against the chat.
    > okay yes
 
    Recorded in the [numeric profile](../spec/conformance/numeric-profile.md) status.
+3. **Identity, scope and error contract choices** (R3 PR 2, PR #9). Asked the six choices
+   with the PM's recommendations:
+   > Q1 accept all ids as lowercase UUIDs (CommandId included, derived deterministically in
+   > PR 3); Q2 accept lowercase snake_case segments ≤64 chars and plain MAJOR.MINOR.PATCH;
+   > Q3 accept `audience_set` as 1–64 character ids, duplicates carry no meaning; Q4 accept
+   > instance scope using `world_context_id`; Q5 drop `GameError.data` for now (adding it
+   > later as optional is compatible, retyping a required `{}` is not); Q6 keep the
+   > ErrorCode enum plus registry with the equality test (Astra dissented and preferred
+   > deriving it).
+
+   The owner answered:
+   > with your recommendation
+
+   Implemented in R3 PR 2 (`protocol/identity.schema.json`, `protocol/scope.schema.json`,
+   `protocol/error.schema.json`, `protocol/error_registry.json`).

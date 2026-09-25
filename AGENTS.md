@@ -148,9 +148,11 @@ A test exists to catch a specific break. Adapted from
   a split would be worse.
 - `mix credo --strict`: cyclomatic complexity 9, nesting 2, ABC size 30, arity 6; nothing else.
   Any `credo:disable` comment gives its reason on the same line; the reviewer checks it.
+- `elixir bin/contracts.exs --check`: `kernel/ts/src/contracts.gen.ts` matches the
+  `protocol/` schemas (run without `--check` to regenerate).
 - `elixir bin/red_controls.exs`: plants a boundary violation, a cycle, a compile edge, an
-  oversized AGENTS.md, size-limit cases and one violation per Credo check, and requires
-  each check to fail.
+  oversized AGENTS.md, size-limit cases, one violation per Credo check, and a stale and an
+  out-of-subset schema, and requires each check to fail.
 - `elixir bin/check_docs.exs`: links resolve; every doc is reachable; AGENTS.md stays
   within its word budget (it is loaded by every agent, every session).
 - CI: pull requests and pushes to main, superseded runs cancelled. Planned: native mobile

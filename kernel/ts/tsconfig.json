@@ -10,5 +10,5 @@
     "types": [],
     "lib": ["ES2022"]
   },
-  "include": ["src"]
+  "include": ["src", "test/subset.gen.ts"]
 }
