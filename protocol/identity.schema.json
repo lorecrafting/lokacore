@@ -3,19 +3,35 @@
   "title": "Identity contracts",
   "description": "Definition identity and runtime identities (03 §2, §3, §6; 05 §4). Each id is its own named type; the types are not interchangeable (03 §6).",
   "$defs": {
+    "CartridgeId": {
+      "description": "A cartridge identity (05 §3 id, 05 §4), lowercase snake_case of at most 64 characters.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "maxLength": 64,
+      "examples": [
+        "fox_spirit_of_yunmeng",
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ]
+    },
+    "ReleaseVersion": {
+      "description": "A release version (05 §3 version, §12): MAJOR.MINOR.PATCH without leading zeros, pre-release or build metadata, at most 64 characters.",
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "maxLength": 64,
+      "examples": [
+        "1.2.0",
+        "0.0.0"
+      ]
+    },
     "DefinitionRef": {
       "description": "Globally stable, immutable reference to a content definition (03 §2; 05 §4: no global content-key namespace). cartridge_id, kind and key are lowercase snake_case of at most 64 characters; cartridge_version is MAJOR.MINOR.PATCH without leading zeros, pre-release or build metadata.",
       "type": "object",
       "properties": {
         "cartridge_id": {
-          "type": "string",
-          "pattern": "^[a-z][a-z0-9_]*$",
-          "maxLength": 64
+          "$ref": "#/$defs/CartridgeId"
         },
         "cartridge_version": {
-          "type": "string",
-          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
-          "maxLength": 64
+          "$ref": "#/$defs/ReleaseVersion"
         },
         "kind": {
           "type": "string",

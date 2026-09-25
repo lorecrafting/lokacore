@@ -1,0 +1,224 @@
+[
+  {
+    "key": "movement",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "barrier",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "containment",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "equipment",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "inspectable_detail",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "description_variant",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "target_resolution",
+    "version": 1,
+    "portability": "portable",
+    "residency": null
+  },
+  {
+    "key": "policy",
+    "version": 1,
+    "portability": "portable",
+    "residency": null
+  },
+  {
+    "key": "fact",
+    "version": 1,
+    "portability": "portable",
+    "residency": null
+  },
+  {
+    "key": "resource",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "attributes",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "position",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "skills",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "status",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "check",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "combat",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "death",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "quest",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "dialogue",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "scene",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "action_recipe",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "reaction",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "behavior",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "schedule",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "population",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "commerce",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "service",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "calendar",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "tide",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "light",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "liquid",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "readable",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "topics",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "relationship",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "faction",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "narration",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  },
+  {
+    "key": "sense_cue",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability"
+  }
+]

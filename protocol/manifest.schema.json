@@ -1,0 +1,434 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Manifest contracts",
+  "description": "Cartridge, deployment and campaign manifests and their version fields (05 §3, §20, §22; 07 §15 campaign manifest; 01 A5). Each version field owns one thing; none stands in for another (05 §3 'Version vocabulary').",
+  "$defs": {
+    "ApiVersion": {
+      "description": "api_version: the authored source document/schema family (05 §3).",
+      "type": "string",
+      "const": "loka/v3",
+      "examples": [
+        "loka/v3"
+      ]
+    },
+    "ContentHash": {
+      "description": "A semantic hash: hash(v) under loka-numeric-v1, 64 lowercase hex digits (docs/spec/conformance/numeric-profile.md). A cartridge hash covers the semantic payload only, never signatures, certificates or package bytes (05 §11 'Hash domains and attestations').",
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "examples": [
+        "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+      ]
+    },
+    "ExecutionProfile": {
+      "description": "A hosting profile a cartridge supports or a deployment uses (05 §3, §6, §22). Only the profiles the spec names are listed; others are added when specified.",
+      "enum": [
+        "offline_private",
+        "online_private"
+      ],
+      "examples": [
+        "offline_private"
+      ]
+    },
+    "ClientFeature": {
+      "description": "A presentation/input capability of the installed Loka app (05 §3 client_features), lowercase snake_case of at most 64 characters.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,63}$",
+      "examples": [
+        "contextual_actions_v1"
+      ]
+    },
+    "KernelApiVersion": {
+      "description": "A kernel_api version, MAJOR.MINOR without leading zeros (05 §3).",
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "maxLength": 64,
+      "examples": [
+        "1.3",
+        "0.0"
+      ]
+    },
+    "KernelApiRange": {
+      "description": "The kernel_api compatibility range a cartridge declares (05 §3 'Compatibility versions'): at_least inclusive, below exclusive, so '>=1.3 <2.0' is at_least 1.3, below 2.0.",
+      "type": "object",
+      "properties": {
+        "at_least": {
+          "$ref": "#/$defs/KernelApiVersion"
+        },
+        "below": {
+          "$ref": "#/$defs/KernelApiVersion"
+        }
+      },
+      "required": [
+        "at_least",
+        "below"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "at_least": "1.3",
+          "below": "2.0"
+        }
+      ]
+    },
+    "CompatibilityRequirements": {
+      "description": "requires (05 §3): a kernel_api range, exact rule_ir and content_schema versions (published cartridges pin them exactly), exact capability versions and required client features. protocol_version is Realm-only and not here (05 §3 'Version vocabulary').",
+      "type": "object",
+      "properties": {
+        "kernel_api": {
+          "$ref": "#/$defs/KernelApiRange"
+        },
+        "rule_ir": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "content_schema": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "capabilities": {
+          "$ref": "capability.schema.json#/$defs/CapabilityVersions"
+        },
+        "client_features": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ClientFeature"
+          }
+        }
+      },
+      "required": [
+        "kernel_api",
+        "rule_ir",
+        "content_schema",
+        "capabilities",
+        "client_features"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kernel_api": {
+            "at_least": "1.0",
+            "below": "2.0"
+          },
+          "content_schema": 1,
+          "rule_ir": 1,
+          "capabilities": {
+            "movement": 1,
+            "barrier": 1,
+            "containment": 1,
+            "equipment": 1,
+            "inspectable_detail": 1,
+            "description_variant": 1,
+            "target_resolution": 1,
+            "policy": 1,
+            "fact": 1,
+            "resource": 1,
+            "attributes": 1,
+            "position": 1,
+            "skills": 1,
+            "status": 1,
+            "check": 1,
+            "combat": 1,
+            "death": 1,
+            "quest": 1,
+            "dialogue": 1,
+            "scene": 1,
+            "action_recipe": 1,
+            "reaction": 1,
+            "behavior": 1,
+            "schedule": 1,
+            "population": 1,
+            "commerce": 1,
+            "service": 1,
+            "calendar": 1,
+            "tide": 1,
+            "light": 1,
+            "liquid": 1,
+            "readable": 1,
+            "topics": 1,
+            "relationship": 1,
+            "faction": 1,
+            "narration": 1,
+            "sense_cue": 1
+          },
+          "client_features": [
+            "contextual_actions_v1",
+            "dialogue_choices_v1",
+            "paper_doll_v1",
+            "compass_six_v1",
+            "letter_bank_v1"
+          ]
+        },
+        {
+          "kernel_api": {
+            "at_least": "1.0",
+            "below": "1.1"
+          },
+          "rule_ir": 1,
+          "content_schema": 1,
+          "capabilities": {},
+          "client_features": []
+        }
+      ]
+    },
+    "CartridgeManifest": {
+      "description": "A cartridge's manifest (05 §3, §20): identity, title, compatibility requirements and supported profiles (at least one; order and duplicates carry no meaning). Fields that freeze with their feature (entry, locales, activation groups, continuity, time policy) are added then (14 §R3B).",
+      "type": "object",
+      "properties": {
+        "api_version": {
+          "$ref": "#/$defs/ApiVersion"
+        },
+        "id": {
+          "$ref": "identity.schema.json#/$defs/CartridgeId"
+        },
+        "version": {
+          "$ref": "identity.schema.json#/$defs/ReleaseVersion"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requires": {
+          "$ref": "#/$defs/CompatibilityRequirements"
+        },
+        "supported_profiles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExecutionProfile"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "api_version",
+        "id",
+        "version",
+        "title",
+        "requires",
+        "supported_profiles"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "api_version": "loka/v3",
+          "id": "ashmere_1_the_missing_child",
+          "version": "1.0.0",
+          "title": "The Fox of Ashmere — Chapter One: The Missing Child",
+          "requires": {
+            "kernel_api": {
+              "at_least": "1.0",
+              "below": "2.0"
+            },
+            "content_schema": 1,
+            "rule_ir": 1,
+            "capabilities": {
+              "movement": 1,
+              "barrier": 1,
+              "containment": 1,
+              "equipment": 1,
+              "inspectable_detail": 1,
+              "description_variant": 1,
+              "target_resolution": 1,
+              "policy": 1,
+              "fact": 1,
+              "resource": 1,
+              "attributes": 1,
+              "position": 1,
+              "skills": 1,
+              "status": 1,
+              "check": 1,
+              "combat": 1,
+              "death": 1,
+              "quest": 1,
+              "dialogue": 1,
+              "scene": 1,
+              "action_recipe": 1,
+              "reaction": 1,
+              "behavior": 1,
+              "schedule": 1,
+              "population": 1,
+              "commerce": 1,
+              "service": 1,
+              "calendar": 1,
+              "tide": 1,
+              "light": 1,
+              "liquid": 1,
+              "readable": 1,
+              "topics": 1,
+              "relationship": 1,
+              "faction": 1,
+              "narration": 1,
+              "sense_cue": 1
+            },
+            "client_features": [
+              "contextual_actions_v1",
+              "dialogue_choices_v1",
+              "paper_doll_v1",
+              "compass_six_v1",
+              "letter_bank_v1"
+            ]
+          },
+          "supported_profiles": [
+            "offline_private"
+          ]
+        }
+      ]
+    },
+    "CartridgeRelease": {
+      "description": "An exact immutable cartridge release: cartridge_id@version names exactly one semantic hash (05 §12).",
+      "type": "object",
+      "properties": {
+        "cartridge_id": {
+          "$ref": "identity.schema.json#/$defs/CartridgeId"
+        },
+        "cartridge_version": {
+          "$ref": "identity.schema.json#/$defs/ReleaseVersion"
+        },
+        "cartridge_hash": {
+          "$ref": "#/$defs/ContentHash"
+        }
+      },
+      "required": [
+        "cartridge_id",
+        "cartridge_version",
+        "cartridge_hash"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "cartridge_id": "ashmere_1_the_missing_child",
+          "cartridge_version": "1.0.0",
+          "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+        }
+      ]
+    },
+    "DeploymentManifest": {
+      "description": "How one exact cartridge release is hosted (05 §22): its profile and the exact capability lock it runs (05 §6: deployments pin exact capability versions). Hosting-policy and semantic overlays, each separately hashed and certified, are added when specified.",
+      "type": "object",
+      "properties": {
+        "api_version": {
+          "$ref": "#/$defs/ApiVersion"
+        },
+        "cartridge": {
+          "$ref": "#/$defs/CartridgeRelease"
+        },
+        "profile": {
+          "$ref": "#/$defs/ExecutionProfile"
+        },
+        "capability_lock": {
+          "$ref": "capability.schema.json#/$defs/CapabilityLock"
+        }
+      },
+      "required": [
+        "api_version",
+        "cartridge",
+        "profile",
+        "capability_lock"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "api_version": "loka/v3",
+          "cartridge": {
+            "cartridge_id": "ashmere_1_the_missing_child",
+            "cartridge_version": "1.0.0",
+            "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+          },
+          "profile": "offline_private",
+          "capability_lock": {
+            "format": "loka-capability-lock-v1",
+            "capabilities": {
+              "movement": 1,
+              "barrier": 1,
+              "containment": 1,
+              "equipment": 1,
+              "inspectable_detail": 1,
+              "description_variant": 1,
+              "target_resolution": 1,
+              "policy": 1,
+              "fact": 1,
+              "resource": 1,
+              "attributes": 1,
+              "position": 1,
+              "skills": 1,
+              "status": 1,
+              "check": 1,
+              "combat": 1,
+              "death": 1,
+              "quest": 1,
+              "dialogue": 1,
+              "scene": 1,
+              "action_recipe": 1,
+              "reaction": 1,
+              "behavior": 1,
+              "schedule": 1,
+              "population": 1,
+              "commerce": 1,
+              "service": 1,
+              "calendar": 1,
+              "tide": 1,
+              "light": 1,
+              "liquid": 1,
+              "readable": 1,
+              "topics": 1,
+              "relationship": 1,
+              "faction": 1,
+              "narration": 1,
+              "sense_cue": 1
+            }
+          }
+        }
+      ]
+    },
+    "CampaignId": {
+      "description": "A campaign identity (07 §15), lowercase snake_case of at most 64 characters.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,63}$",
+      "examples": [
+        "the_fox_of_ashmere"
+      ]
+    },
+    "CampaignManifest": {
+      "description": "A versioned campaign manifest (07 §15, 05 §23): the exact cartridge releases a save lineage composes, at least one. An expansion changes this manifest, never an existing artifact.",
+      "type": "object",
+      "properties": {
+        "api_version": {
+          "$ref": "#/$defs/ApiVersion"
+        },
+        "id": {
+          "$ref": "#/$defs/CampaignId"
+        },
+        "version": {
+          "$ref": "identity.schema.json#/$defs/ReleaseVersion"
+        },
+        "cartridges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CartridgeRelease"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "api_version",
+        "id",
+        "version",
+        "cartridges"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "api_version": "loka/v3",
+          "id": "the_fox_of_ashmere",
+          "version": "1.0.0",
+          "cartridges": [
+            {
+              "cartridge_id": "ashmere_1_the_missing_child",
+              "cartridge_version": "1.0.0",
+              "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

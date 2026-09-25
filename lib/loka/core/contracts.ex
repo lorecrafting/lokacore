@@ -80,17 +80,27 @@ defmodule Loka.Core.Contracts do
   defp keyword("minItems", n, v, path, _), do: check(length(v) >= n, path, :too_few_items)
   defp keyword("maxItems", n, v, path, _), do: check(length(v) <= n, path, :too_many_items)
 
+  defp keyword("maxProperties", n, v, path, _),
+    do: check(map_size(v) <= n, path, :too_many_properties)
+
   # ponytail: recompiles the pattern on every call; precompile per contract if it shows up in profiles.
   defp keyword("pattern", p, v, path, _) do
     matched = :re.run(v, p, [:unicode, :dollar_endonly, capture: :none]) == :match
     check(matched, path, :pattern_mismatch)
   end
 
+  # A map's keys and values (the subset's map form of an object).
+  defp keyword("propertyNames", %{"pattern" => p}, v, path, defs),
+    do: Enum.flat_map(v, fn {k, _} -> keyword("pattern", p, k, child(path, k), defs) end)
+
+  defp keyword("additionalProperties", sub, v, path, defs) when is_map(sub),
+    do: Enum.flat_map(v, fn {k, x} -> errors(sub, x, child(path, k), defs) end)
+
   defp keyword("items", sub, v, path, defs) do
     v |> Enum.with_index() |> Enum.flat_map(fn {x, i} -> errors(sub, x, "#{path}/#{i}", defs) end)
   end
 
-  # additionalProperties is always false (the subset), so undeclared keys are errors here.
+  # declared properties imply additionalProperties false (the subset): undeclared keys are errors.
   defp keyword("properties", ps, v, path, defs) do
     Enum.flat_map(v, fn {k, x} ->
       case ps do

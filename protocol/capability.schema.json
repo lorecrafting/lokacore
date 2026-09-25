@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Capability contracts",
+  "description": "The capability registry vocabulary, exact capability versions and the capability lock (05 §3, §6, §11; 09 §21). The registry itself is protocol/capability_registry.json.",
+  "$defs": {
+    "CapabilityKey": {
+      "description": "A capability key (05 §6), lowercase snake_case of at most 64 characters. A capability contract is key@version.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,63}$",
+      "examples": [
+        "movement",
+        "inspectable_detail",
+        "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk"
+      ]
+    },
+    "CapabilityVersion": {
+      "description": "A capability contract version (05 §6): a positive integer. key@version is immutable in meaning once published; a breaking change takes a new version (05 §6, 'Capability version immutability').",
+      "type": "integer",
+      "minimum": 1,
+      "examples": [
+        1,
+        9007199254740991
+      ]
+    },
+    "CapabilityVersions": {
+      "description": "Exact capability pins, capability key to version (05 §3 requires.capabilities; 05 §6). A map, so one version per key: the canonical decoder rejects a repeated key, and canonical encoding sorts keys.",
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9_]{0,63}$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/CapabilityVersion"
+      },
+      "examples": [
+        {},
+        {
+          "movement": 1,
+          "dialogue": 2
+        },
+        {
+          "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk": 9007199254740991
+        }
+      ]
+    },
+    "CapabilityLock": {
+      "description": "The exact capability lock of a compiled cartridge or deployment (05 §3 'Compatibility versions', §6, §11): every capability version it executes. capability_lock_hash (09 §21) is hash(lock) under loka-numeric-v1; format is the hash domain tag, and any change to this format takes a new tag. Resolving a manifest's requirements and registry dependencies into a lock is the compiler's job (R4).",
+      "type": "object",
+      "properties": {
+        "format": {
+          "type": "string",
+          "const": "loka-capability-lock-v1"
+        },
+        "capabilities": {
+          "$ref": "#/$defs/CapabilityVersions"
+        }
+      },
+      "required": [
+        "format",
+        "capabilities"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "format": "loka-capability-lock-v1",
+          "capabilities": {
+            "movement": 1,
+            "barrier": 1,
+            "containment": 1,
+            "equipment": 1,
+            "inspectable_detail": 1,
+            "description_variant": 1,
+            "target_resolution": 1,
+            "policy": 1,
+            "fact": 1,
+            "resource": 1,
+            "attributes": 1,
+            "position": 1,
+            "skills": 1,
+            "status": 1,
+            "check": 1,
+            "combat": 1,
+            "death": 1,
+            "quest": 1,
+            "dialogue": 1,
+            "scene": 1,
+            "action_recipe": 1,
+            "reaction": 1,
+            "behavior": 1,
+            "schedule": 1,
+            "population": 1,
+            "commerce": 1,
+            "service": 1,
+            "calendar": 1,
+            "tide": 1,
+            "light": 1,
+            "liquid": 1,
+            "readable": 1,
+            "topics": 1,
+            "relationship": 1,
+            "faction": 1,
+            "narration": 1,
+            "sense_cue": 1
+          }
+        },
+        {
+          "format": "loka-capability-lock-v1",
+          "capabilities": {}
+        }
+      ]
+    },
+    "CapabilitySpec": {
+      "description": "One registry entry (05 §6): a capability version, its portability, and its semantic residency from the residency matrix (05 §6 'Capability semantic residency matrix'). Portability limits residency: a portable capability is a portable semantic foundation or portable capability implementation, server_only is a Realm-only semantic capability, client_presentation_only is client presentation; authority-host coordination and authoring/certification are never capabilities (05 §6). A null residency is not yet classified. Commands, events, effects and policies join by name once their registries exist (R3 PR 3).",
+      "oneOf": [
+        {
+          "description": "Runs on every host, Story and Realm (05 §6).",
+          "type": "object",
+          "properties": {
+            "key": {
+              "$ref": "#/$defs/CapabilityKey"
+            },
+            "version": {
+              "$ref": "#/$defs/CapabilityVersion"
+            },
+            "portability": {
+              "const": "portable"
+            },
+            "residency": {
+              "enum": [
+                "portable_semantic_foundation",
+                "portable_capability",
+                null
+              ]
+            }
+          },
+          "required": [
+            "key",
+            "version",
+            "portability",
+            "residency"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Realm-only; an offline_private cartridge cannot depend on it for gameplay (05 §6).",
+          "type": "object",
+          "properties": {
+            "key": {
+              "$ref": "#/$defs/CapabilityKey"
+            },
+            "version": {
+              "$ref": "#/$defs/CapabilityVersion"
+            },
+            "portability": {
+              "const": "server_only"
+            },
+            "residency": {
+              "enum": [
+                "realm_only_capability"
+              ]
+            }
+          },
+          "required": [
+            "key",
+            "version",
+            "portability",
+            "residency"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Presentation only, never gameplay legality or authoritative mutation (05 §6).",
+          "type": "object",
+          "properties": {
+            "key": {
+              "$ref": "#/$defs/CapabilityKey"
+            },
+            "version": {
+              "$ref": "#/$defs/CapabilityVersion"
+            },
+            "portability": {
+              "const": "client_presentation_only"
+            },
+            "residency": {
+              "enum": [
+                "client_presentation"
+              ]
+            }
+          },
+          "required": [
+            "key",
+            "version",
+            "portability",
+            "residency"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "key": "movement",
+          "version": 1,
+          "portability": "portable",
+          "residency": "portable_capability"
+        },
+        {
+          "key": "fact",
+          "version": 1,
+          "portability": "portable",
+          "residency": null
+        },
+        {
+          "key": "guild_market",
+          "version": 1,
+          "portability": "server_only",
+          "residency": "realm_only_capability"
+        },
+        {
+          "key": "haptics",
+          "version": 1,
+          "portability": "client_presentation_only",
+          "residency": "client_presentation"
+        }
+      ]
+    }
+  }
+}
