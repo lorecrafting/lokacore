@@ -55,8 +55,8 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
    NOTES with nothing open and every CI job is green on the head
    ([owner decision](decisions/owner-decisions-r3-lanes-2026-09-24.md)); then tell the owner:
    PR link, verdict, notes. Owner decisions, anything open after fix round 2 and Astra
-   relays still go to the owner. If the slice taught a lesson, record it in its area
-   file under `docs/lessons/` (AGENTS.md only if it applies to all work).
+   relays still go to the owner. If the slice taught a lesson, record it as
+   [AGENTS.md, Hard-won lessons](../AGENTS.md#hard-won-lessons) says.
 
 ## Milestone gate: docs tidy pass
 

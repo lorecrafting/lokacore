@@ -204,6 +204,13 @@ defmodule Loka.Core.ContractsTest do
     assert Loka.Core.Canonical.hash(lock) == {:ok, sha}
   end
 
+  # Breaks if a constructor tags without validating, or tags with another contract's name.
+  test "a nominal id constructor validates, then tags with its own contract" do
+    uuid = "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+    assert Contracts.party_id(uuid) == {:ok, {:party_id, uuid}}
+    assert Contracts.party_id("A7B8") == {:error, [%{path: "", code: :pattern_mismatch}]}
+  end
+
   test "a declared __proto__ property is accepted" do
     assert Contracts.validate("SubsetProbe", JSON.decode!(~s({"__proto__":"ok"})), @defs) == :ok
   end

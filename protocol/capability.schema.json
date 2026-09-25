@@ -74,7 +74,7 @@
       ]
     },
     "CapabilitySpec": {
-      "description": "One registry entry (05 §6): a capability version, its portability, and its semantic residency from the residency matrix (05 §6 'Capability semantic residency matrix'). Portability limits residency (this table is the PM's adopted reading of 05 §6, not spec text): a portable capability is a portable semantic foundation or portable capability implementation, server_only is a Realm-only semantic capability, client_presentation_only is client presentation; authority-host coordination and authoring/certification are never capabilities (05 §6). A null residency is not yet classified. Commands, events, effects and policies join by name once their registries exist (R3 PR 3).",
+      "description": "One registry entry (05 §6): a capability version, its portability, and its semantic residency from the residency matrix (05 §6 'Capability semantic residency matrix'). Portability limits residency (this table is the PM's adopted reading of 05 §6, not spec text): a portable capability is a portable semantic foundation or portable capability implementation, server_only is a Realm-only semantic capability, client_presentation_only is client presentation; authority-host coordination and authoring/certification are never capabilities (05 §6). A null residency is not yet classified. An Effect names the capabilities that may emit it (allowed_origins in protocol/effect_registry.json); commands, events and policies name no capability yet.",
       "oneOf": [
         {
           "description": "Runs on every host, Story and Realm (05 §6).",
