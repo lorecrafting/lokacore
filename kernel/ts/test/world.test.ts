@@ -197,7 +197,7 @@ test('a foreign event faults unowned_event, and a rule mutating the world throws
   const w = freeze(fresh());
   const payload = JSON.parse(`{"type":"item_acquired","item_id":"${BODY}","holder_id":"${BODY}"}`);
   const mint = allocator(w, { id: CMD as Command['id'] });
-  const foreign = accepted(w, 'moved', [], [event(w, move('north'), mint, 1, payload)]);
+  const foreign = accepted(w, 'moved', [], [event(w, move('north') as never, mint, 1, payload)]);
   assert.deepEqual(admit('movement', foreign as never), { kind: 'fault', code: 'unowned_event' });
   const own = step(w, move('north')).decision;
   assert.equal(admit('movement', own), own);

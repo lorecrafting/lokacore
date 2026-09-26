@@ -78,7 +78,7 @@
       ]
     },
     "TextCatalog": {
-      "description": "The cartridge's default-locale strings (05 §18: stable string ids, inline defaults extracted into a catalog): each TextKey to its display text, 1 to 4,096 characters. One locale only; per-locale catalogs, plural rules and binding placeholders join later under a new cartridge format tag. Every text key a room (title, description) or an action (label, accessibility) uses has an entry; the compiler and loader report a missing one as UNRESOLVED_REFERENCE.",
+      "description": "The cartridge's default-locale strings (05 §18: stable string ids, inline defaults extracted into a catalog): each TextKey to its display text, 1 to 4,096 characters. One locale only; per-locale catalogs, plural rules and binding placeholders join later under a new cartridge format tag. Every text key a room, detail, variant, item, NPC (short, room_line, description) or action (label, accessibility) uses has an entry; a string marks its tappable words inline as touch links (owner decision 2026-09-25, Q3): the words in square brackets, which link the thing whose text it is, optionally followed at once by a target key in parentheses, which links that detail of the room or item or NPC of the cartridge instead (DiagnosticCode UNRESOLVED_REFERENCE, TOUCH_LINK_MISSING), so each locale marks its own words; a host showing plain text shows the words without the brackets and target; the compiler and loader report a missing one as UNRESOLVED_REFERENCE.",
       "type": "object",
       "propertyNames": {
         "pattern": "^[a-z][a-z0-9_.]{0,127}$"

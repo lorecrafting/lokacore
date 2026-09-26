@@ -5,13 +5,19 @@ import { decode, encode, hash, type Json } from './canonical.ts';
 import {
   ARTIFACT_MAX_BYTES,
   CAPABILITY_OWNERS,
-  type DefinitionRef,
   type CompiledCartridge,
   type Diagnostic,
-  type DiagnosticCode,
-  type TextKey,
 } from './contracts.gen.ts';
-import { refString } from './decision.ts';
+import {
+  diag,
+  isObj,
+  nodes,
+  parts,
+  refStage,
+  step,
+  type Data,
+  type Obj,
+} from './cartridge_refs.ts';
 import { fromUtf8 } from './sha256.ts';
 import { cmp, validate } from './validate.ts';
 
@@ -26,28 +32,6 @@ export interface Installed {
 
 export type LoadResult =
   { ok: true; cartridge: CompiledCartridge; hash: string } | { ok: false; diagnostic: Diagnostic };
-
-type Data = Record<string, string | number>;
-type Obj = { [key: string]: any };
-
-const isObj = (v: unknown): v is Obj => typeof v === 'object' && v !== null && !Array.isArray(v);
-
-const diag = (
-  code: DiagnosticCode,
-  path: string,
-  data: Data = {},
-  suggested: string[] = [],
-): Diagnostic => ({
-  severity: 'error',
-  code,
-  path,
-  message_key: `diagnostics.${code.toLowerCase()}` as TextKey,
-  data,
-  suggested_capabilities: suggested,
-});
-
-// A member step in the loader path grammar (DiagnosticCode, Diagnostic.path).
-const step = (name: string) => (/^[a-z0-9_]+$/.test(name) ? `.${name}` : `[${encode(name)}]`);
 
 // The first diagnostic in list order: path, then code (UTF-8 byte order), then the whole.
 const first = (ds: Diagnostic[]): Diagnostic =>
@@ -121,7 +105,7 @@ const schemaStage = (doc: Json) =>
 // The schema's propertyNames pattern already holds the key's shape and kind.
 function keyStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
-  for (const map of ['facts', 'policies', 'actions', 'rooms']) {
+  for (const map of ['facts', 'policies', 'actions', 'rooms', 'npcs', 'items']) {
     for (const [ref, def] of Object.entries((c[map] ?? {}) as Obj)) {
       const [, id, version, key] = ref.match(/^(.*)@(.*):[a-z]+\/(.*)$/)!;
       const expected: [string, string, unknown][] = [
@@ -143,45 +127,9 @@ function keyStage(c: Obj): Diagnostic[] {
   return out;
 }
 
-// Each room, detail and description variant (v2), with its kind (registry definitions) and path.
-function parts(c: Obj): [string, Obj, string][] {
-  const out: [string, Obj, string][] = [];
-  const add = (kind: string, d: Obj, at: string) => {
-    out.push([kind, d, at]);
-    (d.variants ?? []).forEach((v: Obj, i: number) =>
-      out.push(['variant', v, `${at}.variants[${i}]`]),
-    );
-  };
-  for (const [ref, r] of Object.entries((c.rooms ?? {}) as Obj)) {
-    add('room', r, `.cartridge.rooms${step(ref)}`);
-    for (const [key, d] of Object.entries((r.details ?? {}) as Obj))
-      add('detail', d, `.cartridge.rooms${step(ref)}.details${step(key)}`);
-  }
-  return out;
-}
-
-// Each node, with its path, of every action's, named policy's and variant's condition.
-function nodes(c: Obj): [Obj, string][] {
-  const walk = (p: Obj, at: string): [Obj, string][] => [
-    [p, at],
-    ...(p.op === 'not' ? walk(p.item, `${at}.item`) : []),
-    ...(p.items ?? []).flatMap((x: Obj, i: number) => walk(x, `${at}.items[${i}]`)),
-  ];
-  return [
-    ...Object.entries(c.actions as Obj).flatMap(([ref, a]) =>
-      walk(a.policy.root, `.cartridge.actions${step(ref)}.policy.root`),
-    ),
-    ...Object.entries(c.policies as Obj).flatMap(([ref, p]) =>
-      walk(p.root, `.cartridge.policies${step(ref)}.root`),
-    ),
-    ...parts(c).flatMap(([k, v, at]) =>
-      k === 'variant' ? walk(v.when.root, `${at}.when.root`) : [],
-    ),
-  ];
-}
-
 // The lock equals requires.capabilities, every command is owned, and every command, policy op
-// and definition kind (room, detail, variant) the cartridge uses has its owner in the lock.
+// and definition kind (room, detail, NPC, item, variant) the cartridge uses has its owner in
+// the lock.
 function lockStage(c: Obj): Diagnostic[] {
   const locked: Obj = c.lock.capabilities;
   const required: Obj = c.manifest.requires.capabilities;
@@ -205,48 +153,6 @@ function lockStage(c: Obj): Diagnostic[] {
     use('command', a.command, `.cartridge.actions${step(ref)}.command`);
   for (const [n, at] of nodes(c)) use('policy', n.op, `${at}.op`);
   for (const [kind, , at] of parts(c)) use('definition', kind, at);
-  return out;
-}
-
-// v2: the entry and every exit name a room of this cartridge, every text key a room, a detail,
-// a variant or an action uses has a catalog entry, every fact_compare names a fact of this
-// cartridge (the kernel reads it), and every detail's first alias is its own and typable.
-function refStage(c: Obj): Diagnostic[] {
-  if (c.format !== 'loka-cartridge-v2') return [];
-  const { id, version } = c.manifest;
-  const out: Diagnostic[] = [];
-  const text = (def: Obj, fields: string[], at: string) => {
-    for (const field of fields)
-      if (!Object.hasOwn(c.text, def[field]))
-        out.push(diag('UNRESOLVED_REFERENCE', `${at}.${field}`, { target: def[field] }));
-  };
-  const room = (r: Obj, path: string) => {
-    const target = refString(r as DefinitionRef);
-    const ok = r.cartridge_id === id && r.cartridge_version === version && r.kind === 'room';
-    if (!(ok && Object.hasOwn(c.rooms, target)))
-      out.push(diag('UNRESOLVED_REFERENCE', path, { target }));
-  };
-  room(c.entry, '.cartridge.entry');
-  for (const [ref, r] of Object.entries(c.rooms as Obj)) {
-    const at = `.cartridge.rooms${step(ref)}`;
-    for (const [dir, exit] of Object.entries(r.exits as Obj))
-      room(exit.to, `${at}.exits.${dir}.to`);
-    const details: Obj = r.details ?? {};
-    for (const [key, d] of Object.entries(details)) {
-      const others = Object.entries(details).flatMap(([k, o]) => (k === key ? [] : o.aliases));
-      const [first, ...words] = d.aliases[0].split('_');
-      const typable = ![first, ...words].includes('') && !['at', 'the', 'a', 'an'].includes(first);
-      if (!typable || others.includes(d.aliases[0]))
-        out.push(diag('UNREACHABLE_DETAIL', `${at}.details.${key}`));
-    }
-  }
-  for (const [ref, a] of Object.entries(c.actions as Obj))
-    text(a, ['label', 'accessibility'], `.cartridge.actions${step(ref)}`);
-  for (const [kind, d, at] of parts(c))
-    text(d, kind === 'room' ? ['title', 'description'] : ['description'], at);
-  for (const [n, at] of nodes(c))
-    if (n.op === 'fact_compare' && !Object.hasOwn(c.facts, refString(n.fact)))
-      out.push(diag('UNRESOLVED_REFERENCE', `${at}.fact`, { target: refString(n.fact) }));
   return out;
 }
 

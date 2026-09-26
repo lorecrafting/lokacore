@@ -1,0 +1,250 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Item and NPC contracts",
+  "description": "Items and NPCs, the things containment moves and holds (21 §8 Containment; 03 §23; 00 §4.4; 00a §5, §12), owned by containment (capability_registry.json). R5 slice 4: what take, drop and give need. Each is a RuntimeEntity: a fresh world gives it an EntityId (numeric profile, Initial world ids) and one container, the only place its location is stored (03 §23); a holder's contents and an actor's inventory are derived from it. Text follows the four LegendMUD tiers (owner decision 2026-09-25, Q1): keywords the player types, a short description for action messages and the inventory, a room line for the room's contents, and a description for examine. Stacking, equipment, weight and put join with their capabilities as optional fields.",
+  "$defs": {
+    "ItemLocation": {
+      "description": "Where an item starts (00a §12 location): in a room, held by an NPC, or inside another item of the same cartridge, named by the field its kind selects. The containers an artifact's items start in form no cycle (CONTAINMENT_CYCLE) and hold at most their capacity (CAPACITY_EXCEEDED).",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "in": {
+              "const": "room"
+            },
+            "room": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "in",
+            "room"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "in": {
+              "const": "npc"
+            },
+            "npc": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "in",
+            "npc"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "in": {
+              "const": "item"
+            },
+            "item": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "in",
+            "item"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "in": "room",
+          "room": {
+            "cartridge_id": "ashmere_items",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "ferry_landing"
+          }
+        },
+        {
+          "in": "item",
+          "item": {
+            "cartridge_id": "ashmere_items",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "satchel"
+          }
+        }
+      ]
+    },
+    "ItemDefinition": {
+      "description": "A portable thing (21 §8): its key; keywords, the Alias words a player names it by (target resolution); short, the text key of its short description (\"a brass lantern\"); room_line, the text key of the line a room shows while it lies there (\"A brass lantern sits here.\"), with room_line_variants (DescriptionVariant, first match wins, as for a room's description); description, the text key examine shows; location, where a fresh world puts it; and optionally capacity, the most items it holds directly (any item can hold items; without capacity it has no limit).",
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "$ref": "room.schema.json#/$defs/Alias"
+          },
+          "minItems": 1,
+          "maxItems": 16
+        },
+        "short": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "room_line": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "room_line_variants": {
+          "type": "array",
+          "items": {
+            "$ref": "room.schema.json#/$defs/DescriptionVariant"
+          },
+          "minItems": 1,
+          "maxItems": 16
+        },
+        "description": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "location": {
+          "$ref": "#/$defs/ItemLocation"
+        },
+        "capacity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1024
+        }
+      },
+      "required": [
+        "key",
+        "keywords",
+        "short",
+        "room_line",
+        "description",
+        "location"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "key": "lantern",
+          "keywords": [
+            "lantern",
+            "brass_lantern"
+          ],
+          "short": "item.lantern.short",
+          "room_line": "item.lantern.room",
+          "description": "item.lantern.description",
+          "location": {
+            "in": "room",
+            "room": {
+              "cartridge_id": "ashmere_items",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "ferry_landing"
+            }
+          }
+        },
+        {
+          "key": "satchel",
+          "keywords": [
+            "satchel"
+          ],
+          "short": "item.satchel.short",
+          "room_line": "item.satchel.room",
+          "room_line_variants": [
+            {
+              "when": {
+                "policy_version": 1,
+                "root": {
+                  "op": "has_item",
+                  "item": {
+                    "cartridge_id": "ashmere_items",
+                    "cartridge_version": "0.0.1",
+                    "kind": "item",
+                    "key": "lantern"
+                  }
+                }
+              },
+              "description": "item.satchel.room_empty"
+            }
+          ],
+          "description": "item.satchel.description",
+          "location": {
+            "in": "npc",
+            "npc": {
+              "cartridge_id": "ashmere_items",
+              "cartridge_version": "0.0.1",
+              "kind": "npc",
+              "key": "bram"
+            }
+          },
+          "capacity": 2
+        }
+      ]
+    },
+    "NpcDefinition": {
+      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Dialogue, schedules and behavior join with their capabilities as optional fields.",
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "$ref": "room.schema.json#/$defs/Alias"
+          },
+          "minItems": 1,
+          "maxItems": 16
+        },
+        "short": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "room_line": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "description": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "room": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "capacity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1024
+        }
+      },
+      "required": [
+        "key",
+        "keywords",
+        "short",
+        "room_line",
+        "description",
+        "room"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "key": "bram",
+          "keywords": [
+            "bram",
+            "ferryman"
+          ],
+          "short": "npc.bram.short",
+          "room_line": "npc.bram.room",
+          "description": "npc.bram.description",
+          "room": {
+            "cartridge_id": "ashmere_items",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "ferry_landing"
+          },
+          "capacity": 1
+        }
+      ]
+    }
+  }
+}

@@ -129,7 +129,7 @@ function turn(r: Run, cmd: Command, measured = true): string {
 // Command at the resolved id; none and ambiguous build no Command and write one
 // target.unresolved record to diagnostics (owner request, R5 S2) with the words redacted.
 function lookup(r: Run, words: string) {
-  const res = resolve(r.world, words);
+  const res = resolve(r.world, r.world.character, words);
   if (res.kind === 'unique') {
     const cmd = command(r, { type: 'look', target_id: res.target_id });
     return void append('game_trace', r.ids.run_id, turn(r, cmd));

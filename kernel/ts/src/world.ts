@@ -4,17 +4,21 @@
 // capability that owns it (capability_registry.json), composes the delta and commits it.
 import { encode } from './canonical.ts';
 import type { Installed } from './cartridge.ts';
-import { compose, key } from './compose.ts';
+import { compose, key, same, target } from './compose.ts';
 import {
   CAPABILITY_OWNERS,
   LIMITS,
   type CharacterId,
   type Command,
   type DecisionResult,
+  type DefinitionRef,
+  type DeltaOp,
   type EntityId,
+  type EntityView,
   type ErrorCode,
   type FactValue,
   type GameView,
+  type Key,
   type Owned,
   type TextKey,
   type WorldContextId,
@@ -22,18 +26,21 @@ import {
 import {
   allocator,
   COMPASS,
+  event,
   refString,
   rejected,
   type Cartridge,
   type Detail,
+  type Entity,
   type Mint,
   type Rule,
   type World,
 } from './decision.ts';
-import { invariants as factInvariants } from './fact.ts';
+import { invariants as factInvariants, typedFact } from './fact.ts';
 import { id } from './id_source.ts';
 import type { RngState } from './rng.ts';
 import { utf8 } from './sha256.ts';
+import * as containment from './rules/containment.ts';
 import * as description_variant from './rules/description_variant.ts';
 import * as movement from './rules/movement.ts';
 import { cmp } from './validate.ts';
@@ -42,6 +49,7 @@ import { cmp } from './validate.ts';
 const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
   movement: movement.decide,
   description_variant: description_variant.decide,
+  containment: containment.decide,
 };
 
 // Capabilities that own no command, so no rule: what the rules and the GameView call implements
@@ -62,8 +70,10 @@ const NIL = '00000000-0000-0000-0000-000000000000';
 /**
  * A fresh world: IdSource ids under the nil CommandId (ordinal 0 the player's CharacterId, 1 its
  * body entity, then each room in DefinitionRefString order, then each room's details in the same
- * room order and detail-key order: numeric profile, Initial world ids), the body in the entry
- * room, time 0, each fact's default by its canonical DefinitionRef text and no fact set.
+ * room order and detail-key order, then each NPC, then each item, both in DefinitionRefString
+ * order: numeric profile, Initial world ids), the body in the entry room, each NPC in its room
+ * and each item at its location, time 0, each fact's default by its canonical DefinitionRef text
+ * and no fact set.
  */
 export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: RngState): World {
   let ordinal = 0;
@@ -77,6 +87,8 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
       cmp(a, b),
     ))
       details[mint()] = { ...d, room: roomIds[r], key };
+  const { entities, entityIds, containers, capacities } = place(cartridge, roomIds, mint);
+  containers[body] = roomIds[refString(cartridge.entry)];
   const { id: cartridge_id, version: cartridge_version } = cartridge.manifest;
   const factDefaults = Object.fromEntries(
     Object.values(cartridge.facts).map((f) => [
@@ -92,8 +104,42 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
     rooms: Object.fromEntries(refs.map((r) => [roomIds[r], cartridge.rooms[r]])),
     roomIds,
     details,
+    entities,
+    entityIds,
+    capacities,
     factDefaults,
-    state: { clock: 0, containers: { [body]: roomIds[refString(cartridge.entry)] }, rng: seed },
+    state: { clock: 0, containers, rng: seed },
+  };
+}
+
+// Each NPC, then each item, in DefinitionRefString order, with its minted id, its container (an
+// NPC's room, an item's location) and its declared capacity.
+function place(
+  cartridge: Cartridge,
+  roomIds: Readonly<Record<string, EntityId>>,
+  mint: () => EntityId,
+) {
+  const sorted = <T>(m?: Readonly<Record<string, T>>) =>
+    Object.entries(m ?? {}).sort(([a], [b]) => cmp(a, b));
+  const defs: [string, Entity][] = [
+    ...sorted(cartridge.npcs).map(([r, d]): [string, Entity] => [r, { ...d, kind: 'npc' }]),
+    ...sorted(cartridge.items).map(([r, d]): [string, Entity] => [r, { ...d, kind: 'item' }]),
+  ];
+  const entityIds = Object.fromEntries(defs.map(([r]) => [r, mint()]));
+  const ids = { ...roomIds, ...entityIds };
+  const containers: Record<string, EntityId> = {};
+  for (const [r, e] of defs) {
+    const l = e.kind === 'item' ? e.location : { in: 'room' as const, room: e.room };
+    containers[entityIds[r]] =
+      ids[refString(l.in === 'room' ? l.room : l.in === 'npc' ? l.npc : l.item)];
+  }
+  return {
+    entities: Object.fromEntries(defs.map(([r, e]) => [entityIds[r], e])),
+    entityIds,
+    containers,
+    capacities: Object.fromEntries(
+      defs.flatMap(([r, e]) => (e.capacity === undefined ? [] : [[entityIds[r], e.capacity]])),
+    ),
   };
 }
 
@@ -111,6 +157,7 @@ export function step(world: World, command: Command): Stepped {
 }
 
 type Stepped = { decision: DecisionResult; world: World };
+type Actor = Parameters<typeof event>[1];
 type AnyRule = (w: World, c: Command, mint: Mint) => DecisionResult;
 
 /**
@@ -125,16 +172,24 @@ function decideWith(world: World, command: Command, owner: string, rule: AnyRule
   if (command.world_context_id !== world.context) return reject('not_found');
   if (!('actor_id' in command.payload) || command.payload.actor_id !== world.character)
     return reject('not_found');
-  return adopt(world, admit(owner, rule(world, command, allocator(world, command))));
+  const mint = allocator(world, command);
+  return adopt(world, admit(owner, rule(world, command, mint)), command as Actor, mint);
 }
 
 /**
- * Composes an admitted decision's delta over the state and the fact defaults and adopts its
- * containment and fact changes; only admit() makes an Admitted.
+ * Composes an admitted decision's delta over the state, the fact defaults and the declared
+ * capacities and adopts its containment and fact changes; only admit() makes an Admitted. A
+ * fact.assign whose fact, scope kind or value its FactSpec does not allow faults
+ * precondition_failed (03 §7; 04 §5.1), and each that changes its fact appends fact_changed
+ * after the rule's events, in op order, with ids from the command's `mint` (04 §5.2).
  */
-export function adopt(world: World, decision: Admitted): Stepped {
+export function adopt(world: World, decision: Admitted, command: Actor, mint: Mint): Stepped {
   if (decision.kind !== 'accepted') return { decision, world };
-  const base = { ...world.state, fact_defaults: world.factDefaults };
+  const assigns = decision.delta.ops.filter((o) => o.op === 'fact.assign') as Assign[];
+  const bad = assigns.find((o) => !typedFact(world, o.fact, o.scope.kind, o.value));
+  if (bad)
+    return { decision: { kind: 'fault', code: 'precondition_failed', target: target(bad) }, world };
+  const base = { ...world.state, fact_defaults: world.factDefaults, capacities: world.capacities };
   const result = compose(base as unknown as Parameters<typeof compose>[0], decision.delta);
   if ('fault' in result) return { decision: result.fault, world };
   // ponytail: copies the containers and facts maps per step (O(rows)); persistent maps when big.
@@ -144,12 +199,27 @@ export function adopt(world: World, decision: Admitted): Stepped {
     if (target.kind === 'containment') containers[target.entity_id] = value as EntityId;
     else if (target.kind === 'fact') facts[key(target)] = value as FactValue;
   const state = { ...world.state, containers, rng: decision.rng };
+  const changed = assigns.filter((o) => !same(o.expected, o.value));
+  const events = changed.map((o, i) => {
+    const subject = o.subject_id === undefined ? {} : { subject_id: o.subject_id };
+    const payload = {
+      type: 'fact_changed',
+      fact: o.fact,
+      ...subject,
+      old: o.expected,
+      new: o.value,
+    };
+    const position = decision.events.length + i + 1;
+    return { ...event(world, command, mint, position, payload as never), scope: o.scope };
+  });
   // No facts key until one is set, so a world without facts keeps its pre-fact state hash.
   return {
-    decision,
+    decision: events.length ? { ...decision, events: [...decision.events, ...events] } : decision,
     world: { ...world, state: Object.keys(facts).length ? { ...state, facts } : state },
   };
 }
+
+type Assign = Extract<DeltaOp, { op: 'fact.assign' }>;
 
 /**
  * An accepted rule result as the host admits it (04 §5.2 step 7): an event type the owning
@@ -173,7 +243,7 @@ declare const ADMITTED: unique symbol;
 /** A DecisionResult that passed admit(); adopt() takes only this, so step cannot skip admit. */
 export type Admitted = DecisionResult & { readonly [ADMITTED]: true };
 
-const INVARIANTS = { ...movement.invariants, ...factInvariants };
+const INVARIANTS = { ...movement.invariants, ...factInvariants, ...containment.invariants };
 
 /** True when the registered invariant holds for the world; throws for an unknown id. */
 export function holds(id: string, world: World): boolean {
@@ -183,10 +253,16 @@ export function holds(id: string, world: World): boolean {
 
 /**
  * The player's GameView of the current place (04 §14; 00 §4.10): its description the variant
- * the player sees (description_variant.describe), exits in compass order.
+ * the player sees (description_variant.describe), exits in compass order, the NPCs and items in
+ * the room and the items the player's body holds (03 §23), each named by its short description,
+ * NPCs first, then in DefinitionRefString order.
  */
 export function gameView(world: World): GameView {
   const here = world.state.containers[world.body];
+  const within = (holder: EntityId): EntityView[] =>
+    Object.entries(world.entities)
+      .filter(([id]) => world.state.containers[id] === holder)
+      .map(([id, e]) => ({ id: id as EntityId, name: e.short, kind: e.kind as Key, actions: [] }));
   const room = world.rooms[here];
   const text = (key: TextKey) => ({ key });
   const description = text(description_variant.describe(world, world.character, room));
@@ -198,8 +274,8 @@ export function gameView(world: World): GameView {
       direction,
     })),
     actions: [],
-    entities: [],
-    inventory: [],
+    entities: within(here),
+    inventory: within(world.body),
     journal: [],
     time: world.state.clock,
   };

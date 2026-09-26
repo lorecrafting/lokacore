@@ -16,7 +16,9 @@ import {
   type EventPayload,
   type FactValue,
   type InspectableDetail,
+  type ItemDefinition,
   type Key,
+  type NpcDefinition,
   type Owned,
   type RoomDefinition,
   type StateDelta,
@@ -48,12 +50,27 @@ export type World = {
   readonly rooms: Readonly<Record<string, RoomDefinition>>; // by room EntityId
   readonly roomIds: Readonly<Record<string, EntityId>>; // by DefinitionRefString
   readonly details: Readonly<Record<string, Detail>>; // by detail target id
+  readonly entities: Readonly<Record<string, Entity>>; // items and NPCs, by EntityId
+  readonly entityIds: Readonly<Record<string, EntityId>>; // by DefinitionRefString
+  readonly capacities: Readonly<Record<string, number>>; // by EntityId, where declared
   readonly factDefaults: Readonly<Record<string, FactValue>>; // by canonical DefinitionRef text
   readonly state: State;
 };
 
 /** A room's InspectableDetail, with the room and key its target id stands for (21 §6). */
 export type Detail = InspectableDetail & { readonly room: EntityId; readonly key: string };
+
+/** An item or NPC definition, tagged with its kind (entity.schema.json). */
+export type Entity =
+  (ItemDefinition & { readonly kind: 'item' }) | (NpcDefinition & { readonly kind: 'npc' });
+
+/**
+ * The body entity `actor` acts through, if it has one here (21 §9). One body per world until
+ * admission accepts a second actor; puppeting changes this lookup, not the rules (contract
+ * lessons).
+ */
+export const bodyOf = (world: World, actor: CharacterId): EntityId | undefined =>
+  actor === world.character ? world.body : undefined;
 
 type Accepted = Extract<DecisionResult, { kind: 'accepted' }>;
 type Event<E> = Omit<DomainEvent, 'payload'> & {
@@ -98,10 +115,13 @@ export function allocator(world: World, command: { readonly id: Command['id'] })
   return () => id(world.context, command.id, ordinal++);
 }
 
-/** The DomainEvent at one-based causal `position` (04 §5.2, §8, §11), its id from `mint`. */
+/**
+ * The DomainEvent at one-based causal `position` (04 §5.2, §8, §11), its id from `mint`, for
+ * the command's actor.
+ */
 export function event<P extends EventPayload>(
   world: World,
-  command: { readonly id: Command['id'] },
+  command: { readonly id: Command['id']; readonly payload: { readonly actor_id: CharacterId } },
   mint: Mint,
   position: number,
   payload: P,
@@ -109,8 +129,8 @@ export function event<P extends EventPayload>(
   return {
     id: mint() as DomainEvent['id'],
     world_context_id: world.context,
-    scope: { kind: 'player', character_id: world.character },
-    actor_id: world.character,
+    scope: { kind: 'player', character_id: command.payload.actor_id },
+    actor_id: command.payload.actor_id,
     logical_time: world.state.clock,
     position,
     causation_id: command.id as string as DomainEvent['causation_id'],
@@ -141,3 +161,4 @@ export const exitTo = (room: RoomDefinition, direction: string): DefinitionRef |
 /** Own-key test and values for rule modules, which may not name Object (ts-rule-module-pure). */
 export const has = (o: object, key: string): boolean => Object.hasOwn(o, key);
 export const values = <T>(o: Readonly<Record<string, T>>): T[] => Object.values(o);
+export const keys = (o: object): string[] => Object.keys(o);

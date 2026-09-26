@@ -131,6 +131,31 @@
           "additionalProperties": false
         },
         {
+          "description": "Give a held item to another character in the same place (00 §4.4).",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "give"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "item_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "recipient_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "item_id",
+            "recipient_id"
+          ],
+          "additionalProperties": false
+        },
+        {
           "description": "Talk to a character.",
           "type": "object",
           "properties": {
@@ -281,6 +306,12 @@
           "type": "drop",
           "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
           "item_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+        },
+        {
+          "type": "give",
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "item_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+          "recipient_id": "11111111-2222-4333-8444-555555555555"
         },
         {
           "type": "talk",

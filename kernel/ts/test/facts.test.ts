@@ -7,11 +7,12 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import { hash } from '../src/canonical.ts';
+import { key } from '../src/compose.ts';
 import type { CharacterId, Command, Policy } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { holds as condition } from '../src/policy.ts';
 import { describe } from '../src/rules/description_variant.ts';
-import { accepted } from '../src/decision.ts';
+import { accepted, allocator } from '../src/decision.ts';
 import { admit, adopt, gameView, holds, INSTALLED, newWorld, step } from '../src/world.ts';
 import { read } from './read.ts';
 
@@ -39,6 +40,11 @@ const fact = (key: string) => ({
 const instance = { kind: 'instance', world_context_id: CONTEXT };
 const player = (character_id: string) => ({ kind: 'player', character_id });
 
+const SET = {
+  id: 'e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b',
+  payload: { actor_id: CHARACTER },
+} as never;
+
 // Sets facts as a rule will: an accepted decision with fact.assign ops, admitted, composed and
 // adopted (world.ts adopt).
 type Assign = [key: string, scope: object, expected: unknown, value: unknown];
@@ -52,7 +58,7 @@ function set(w: World, ...assigns: Assign[]): World {
     value,
   }));
   const decision = admit('fact', accepted(w, 'set', ops as never, []) as never);
-  const { decision: d, world } = adopt(w, decision);
+  const { decision: d, world } = adopt(w, decision, SET, allocator(w, SET));
   assert.equal(d.kind, 'accepted', JSON.stringify(d));
   return world;
 }
@@ -103,7 +109,12 @@ test('fact.assign through the delta path commits one record, at the Python state
       value: false,
     },
   ] as never;
-  const stale = adopt(w, admit('fact', accepted(w, 'set', ops, []) as never));
+  const stale = adopt(
+    w,
+    admit('fact', accepted(w, 'set', ops, []) as never),
+    SET,
+    allocator(w, SET),
+  );
   assert.deepEqual(stale.decision, {
     kind: 'fault',
     code: 'precondition_failed',
@@ -183,11 +194,46 @@ test('facts_typed holds for typed facts and fails on each kind of bad record', (
     ['village_child_status', instance, 'missing', 'found'],
     ['chapel_bell_rung', player(CHARACTER), false, true],
   ];
-  for (const assign of bad) assert.equal(holds('facts_typed', set(fresh(), assign)), false);
+  for (const [k, scope, , v] of bad) {
+    const w = fresh();
+    const facts = { [key({ kind: 'fact', fact: fact(k), scope })]: v as never };
+    assert.equal(holds('facts_typed', { ...w, state: { ...w.state, facts } }), false);
+  }
   const w = rung(fresh());
   const facts = { ...w.cartridge.facts };
   delete facts['ashmere_facts@0.0.1:fact/chapel_bell_rung'];
   assert.equal(holds('facts_typed', { ...w, cartridge: { ...w.cartridge, facts } }), false);
+});
+
+// Breaks: an untyped fact committed (03 §7; 04 §5.1: validated before persistence), or a
+// partial commit of a decision with one bad assign.
+test('a fact.assign its FactSpec does not allow faults precondition_failed', () => {
+  const w = fresh();
+  const ok = ['village_child_status', instance, 'missing', 'rescued'];
+  for (const bad of [
+    ['chapel_bell_rung', instance, false, 'yes'],
+    ['village_child_status', instance, 'missing', 'found'],
+    ['chapel_bell_rung', player(CHARACTER), false, true],
+    ['no_such_fact', instance, false, true],
+  ]) {
+    const ops = [ok, bad].map(([k, scope, expected, value]) => ({
+      op: 'fact.assign',
+      writer_group: 0,
+      fact: fact(k as string),
+      scope,
+      expected,
+      value,
+    }));
+    const r = adopt(
+      w,
+      admit('fact', accepted(w, 'set', ops as never, []) as never),
+      SET,
+      allocator(w, SET),
+    );
+    const target = { kind: 'fact', fact: fact(bad[0] as string), scope: bad[1] };
+    assert.deepEqual(r.decision, { kind: 'fault', code: 'precondition_failed', target });
+    assert.equal(r.world, w);
+  }
 });
 
 // The loader on facts and variants (protocol/cartridge.schema.json DiagnosticCode). Mutants
