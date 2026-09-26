@@ -4,7 +4,7 @@
   "description": "The portable semantic Command registry (04 §1, §3, §21; 14 §R3A). Host-only CommandContext (session, receipt time) is not part of it.",
   "$defs": {
     "LogicalTime": {
-      "description": "Explicit logical time (01 A6; 04 §4). Units are fixed by the world calendar, not here.",
+      "description": "Explicit logical time (01 A6; 04 §4). Units are fixed by the world calendar; until calendar@1 (R8) the kernel fixes them (PM ruling, R5 S6): one unit is one game second, a day is 24 hours (86400 units), and time 0 is midnight of day 1, so the hour of day is floor(t / 3600) mod 24 (policy.schema.json time_of_day).",
       "type": "integer",
       "minimum": 0,
       "examples": [
@@ -268,7 +268,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Advance logical time to `until`.",
+          "description": "Advance logical time to `until` (schedule@1): accepted only when `until` is later than the world's time (else invalid_state, and nothing changes); the decision is one time.advance and no event. Due jobs join the advance with the schedule slice (04 §5.4).",
           "type": "object",
           "properties": {
             "type": {

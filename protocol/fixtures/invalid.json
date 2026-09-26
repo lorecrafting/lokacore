@@ -9833,5 +9833,796 @@
         "code": "unknown_property"
       }
     ]
+  },
+  {
+    "contract": "RecipeCheck",
+    "value": {},
+    "errors": [
+      {
+        "path": "/chance",
+        "code": "missing_property"
+      },
+      {
+        "path": "/key",
+        "code": "missing_property"
+      },
+      {
+        "path": "/kind",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeCheck",
+    "value": {
+      "key": "k",
+      "kind": "luck",
+      "chance": 0
+    },
+    "errors": [
+      {
+        "path": "/chance",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeCheck",
+    "value": {
+      "key": "k",
+      "kind": "luck",
+      "chance": 100
+    },
+    "errors": [
+      {
+        "path": "/chance",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeCheck",
+    "value": {
+      "key": "k",
+      "kind": "luck",
+      "chance": 50.5
+    },
+    "errors": [
+      {
+        "path": "/chance",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeCheck",
+    "value": {
+      "key": "k",
+      "kind": "skill",
+      "chance": 50
+    },
+    "errors": [
+      {
+        "path": "/kind",
+        "code": "const_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeCheck",
+    "value": {
+      "key": "K",
+      "kind": "luck",
+      "chance": 50,
+      "dc": 10
+    },
+    "errors": [
+      {
+        "path": "/dc",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/key",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "pry_lid",
+      "label": "actions.ring_bell",
+      "aliases": [
+        "ring",
+        "pull"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "ashmere_bell",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "belfry"
+        },
+        "detail": "bell"
+      },
+      "priority": 10,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "not",
+          "item": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "ashmere_bell",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "chapel_bell_rung"
+            },
+            "equals": true
+          }
+        }
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "ashmere_bell",
+                "cartridge_version": "0.0.1",
+                "kind": "fact",
+                "key": "chapel_bell_rung"
+              },
+              "value": true
+            },
+            {
+              "op": "event.emit",
+              "event": "bell_rung"
+            }
+          ],
+          "narration": {
+            "actor": "narration.ring_bell.actor",
+            "observers": "narration.ring_bell.observers"
+          }
+        },
+        "failure": {
+          "sequence": [],
+          "narration": {
+            "actor": "narration.pry_lid.failure"
+          }
+        }
+      },
+      "check": {
+        "key": "k",
+        "kind": "luck"
+      },
+      "duration": 60
+    },
+    "errors": [
+      {
+        "path": "/check/chance",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "pry_lid",
+      "label": "actions.ring_bell",
+      "aliases": [
+        "ring",
+        "pull"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "ashmere_bell",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "belfry"
+        },
+        "detail": "bell"
+      },
+      "priority": 10,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "not",
+          "item": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "ashmere_bell",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "chapel_bell_rung"
+            },
+            "equals": true
+          }
+        }
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "ashmere_bell",
+                "cartridge_version": "0.0.1",
+                "kind": "fact",
+                "key": "chapel_bell_rung"
+              },
+              "value": true
+            },
+            {
+              "op": "event.emit",
+              "event": "bell_rung"
+            }
+          ],
+          "narration": {
+            "actor": "narration.ring_bell.actor",
+            "observers": "narration.ring_bell.observers"
+          }
+        },
+        "failure": {
+          "sequence": [],
+          "narration": {
+            "actor": "narration.pry_lid.failure"
+          }
+        }
+      },
+      "check": {
+        "key": "pry_lid",
+        "kind": "luck",
+        "chance": 50
+      },
+      "duration": 0
+    },
+    "errors": [
+      {
+        "path": "/duration",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "pry_lid",
+      "label": "actions.ring_bell",
+      "aliases": [
+        "ring",
+        "pull"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "ashmere_bell",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "belfry"
+        },
+        "detail": "bell"
+      },
+      "priority": 10,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "not",
+          "item": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "ashmere_bell",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "chapel_bell_rung"
+            },
+            "equals": true
+          }
+        }
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "ashmere_bell",
+                "cartridge_version": "0.0.1",
+                "kind": "fact",
+                "key": "chapel_bell_rung"
+              },
+              "value": true
+            },
+            {
+              "op": "event.emit",
+              "event": "bell_rung"
+            }
+          ],
+          "narration": {
+            "actor": "narration.ring_bell.actor",
+            "observers": "narration.ring_bell.observers"
+          }
+        },
+        "failure": {
+          "sequence": [],
+          "narration": {
+            "actor": "narration.pry_lid.failure"
+          }
+        }
+      },
+      "check": {
+        "key": "pry_lid",
+        "kind": "luck",
+        "chance": 50
+      },
+      "duration": "1m"
+    },
+    "errors": [
+      {
+        "path": "/duration",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "pry_lid",
+      "label": "actions.ring_bell",
+      "aliases": [
+        "ring",
+        "pull"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "ashmere_bell",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "belfry"
+        },
+        "detail": "bell"
+      },
+      "priority": 10,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "not",
+          "item": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "ashmere_bell",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "chapel_bell_rung"
+            },
+            "equals": true
+          }
+        }
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "ashmere_bell",
+                "cartridge_version": "0.0.1",
+                "kind": "fact",
+                "key": "chapel_bell_rung"
+              },
+              "value": true
+            },
+            {
+              "op": "event.emit",
+              "event": "bell_rung"
+            }
+          ],
+          "narration": {
+            "actor": "narration.ring_bell.actor",
+            "observers": "narration.ring_bell.observers"
+          }
+        },
+        "failure": {}
+      },
+      "check": {
+        "key": "pry_lid",
+        "kind": "luck",
+        "chance": 50
+      },
+      "duration": 60
+    },
+    "errors": [
+      {
+        "path": "/outcomes/failure/narration",
+        "code": "missing_property"
+      },
+      {
+        "path": "/outcomes/failure/sequence",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "pry_lid",
+      "label": "actions.ring_bell",
+      "aliases": [
+        "ring",
+        "pull"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "ashmere_bell",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "belfry"
+        },
+        "detail": "bell"
+      },
+      "priority": 10,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "not",
+          "item": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "ashmere_bell",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "chapel_bell_rung"
+            },
+            "equals": true
+          }
+        }
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "ashmere_bell",
+                "cartridge_version": "0.0.1",
+                "kind": "fact",
+                "key": "chapel_bell_rung"
+              },
+              "value": true
+            },
+            {
+              "op": "event.emit",
+              "event": "bell_rung"
+            }
+          ],
+          "narration": {
+            "actor": "narration.ring_bell.actor",
+            "observers": "narration.ring_bell.observers"
+          }
+        },
+        "failure": {
+          "sequence": [],
+          "narration": {},
+          "z": 1
+        }
+      },
+      "check": {
+        "key": "pry_lid",
+        "kind": "luck",
+        "chance": 50
+      },
+      "duration": 60
+    },
+    "errors": [
+      {
+        "path": "/outcomes/failure/narration/actor",
+        "code": "missing_property"
+      },
+      {
+        "path": "/outcomes/failure/z",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "pry_lid",
+      "label": "actions.ring_bell",
+      "aliases": [
+        "ring",
+        "pull"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "ashmere_bell",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "belfry"
+        },
+        "detail": "bell"
+      },
+      "priority": 10,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "not",
+          "item": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "ashmere_bell",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "chapel_bell_rung"
+            },
+            "equals": true
+          }
+        }
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "ashmere_bell",
+                "cartridge_version": "0.0.1",
+                "kind": "fact",
+                "key": "chapel_bell_rung"
+              },
+              "value": true
+            },
+            {
+              "op": "event.emit",
+              "event": "bell_rung"
+            }
+          ],
+          "narration": {
+            "actor": "narration.ring_bell.actor",
+            "observers": "narration.ring_bell.observers"
+          }
+        },
+        "failure": {
+          "sequence": [
+            {
+              "op": "event.emit",
+              "event": "e"
+            },
+            {
+              "op": "event.emit",
+              "event": "e"
+            },
+            {
+              "op": "event.emit",
+              "event": "e"
+            },
+            {
+              "op": "event.emit",
+              "event": "e"
+            },
+            {
+              "op": "event.emit",
+              "event": "e"
+            },
+            {
+              "op": "event.emit",
+              "event": "e"
+            },
+            {
+              "op": "event.emit",
+              "event": "e"
+            },
+            {
+              "op": "event.emit",
+              "event": "e"
+            },
+            {
+              "op": "event.emit",
+              "event": "e"
+            },
+            {
+              "op": "event.emit",
+              "event": "e"
+            },
+            {
+              "op": "event.emit",
+              "event": "e"
+            },
+            {
+              "op": "event.emit",
+              "event": "e"
+            },
+            {
+              "op": "event.emit",
+              "event": "e"
+            },
+            {
+              "op": "event.emit",
+              "event": "e"
+            },
+            {
+              "op": "event.emit",
+              "event": "e"
+            },
+            {
+              "op": "event.emit",
+              "event": "e"
+            },
+            {
+              "op": "event.emit",
+              "event": "e"
+            }
+          ],
+          "narration": {
+            "actor": "n",
+            "w": "x"
+          }
+        }
+      },
+      "check": {
+        "key": "pry_lid",
+        "kind": "luck",
+        "chance": 50
+      },
+      "duration": 60
+    },
+    "errors": [
+      {
+        "path": "/outcomes/failure/narration/w",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/outcomes/failure/sequence",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "time_of_day"
+    },
+    "errors": [
+      {
+        "path": "/from",
+        "code": "missing_property"
+      },
+      {
+        "path": "/to",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "time_of_day",
+      "from": -1,
+      "to": 24
+    },
+    "errors": [
+      {
+        "path": "/from",
+        "code": "below_minimum"
+      },
+      {
+        "path": "/to",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "time_of_day",
+      "from": 18.5,
+      "to": 6,
+      "days": 1
+    },
+    "errors": [
+      {
+        "path": "/days",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/from",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "EventPayload",
+    "value": {
+      "type": "check_passed"
+    },
+    "errors": [
+      {
+        "path": "/check",
+        "code": "missing_property"
+      },
+      {
+        "path": "/subject_id",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "EventPayload",
+    "value": {
+      "type": "check_passed",
+      "check": {
+        "cartridge_id": "ashmere_dusk",
+        "cartridge_version": "0.0.1",
+        "kind": "check",
+        "key": "pick_lock"
+      },
+      "subject_id": "953a909b-3a29-8c5c-9e3f-4105b9a47c4b",
+      "roll": 20
+    },
+    "errors": [
+      {
+        "path": "/roll",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "EventPayload",
+    "value": {
+      "type": "check_failed"
+    },
+    "errors": [
+      {
+        "path": "/check",
+        "code": "missing_property"
+      },
+      {
+        "path": "/subject_id",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "EventPayload",
+    "value": {
+      "type": "check_failed",
+      "check": {
+        "cartridge_id": "ashmere_dusk",
+        "cartridge_version": "0.0.1",
+        "kind": "check",
+        "key": "pick_lock"
+      },
+      "subject_id": "953a909b-3a29-8c5c-9e3f-4105b9a47c4b",
+      "roll": 20
+    },
+    "errors": [
+      {
+        "path": "/roll",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "time_of_day",
+      "from": 24,
+      "to": -1
+    },
+    "errors": [
+      {
+        "path": "/from",
+        "code": "above_maximum"
+      },
+      {
+        "path": "/to",
+        "code": "below_minimum"
+      }
+    ]
   }
 ]
