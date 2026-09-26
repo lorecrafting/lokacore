@@ -12,7 +12,7 @@ import { read } from './read.ts';
 const kat = read('protocol/fixtures/cartridge_rooms_hash.json');
 const installed: Installed = {
   kernel_api: '1.0',
-  capabilities: { movement: [1], description_variant: [1], fact: [1] },
+  capabilities: { movement: [1], description_variant: [1], fact: [1], policy: [1] },
   content_schema: 1,
   rule_ir: 1,
   client_features: [],
@@ -128,4 +128,26 @@ test('a v1 artifact carrying rooms is UNKNOWN_FIELD', () =>
     'UNKNOWN_FIELD',
     '.cartridge.entry',
     {},
+  ));
+
+// Review F5. Breaks: a v2 action's label reaches the player as a raw key.
+test('an action text key missing from the catalog is UNRESOLVED_REFERENCE', () =>
+  fails(
+    mutant((c) => {
+      c.manifest.requires.capabilities.policy = 1;
+      c.lock.capabilities.policy = 1;
+      c.actions['ashmere_rooms@0.0.1:action/go'] = {
+        key: 'go',
+        label: 'room.boathouse.title',
+        target: { kind: 'none' },
+        command: 'move',
+        priority: 0,
+        input: [],
+        policy: { policy_version: 1, root: { op: 'all', items: [] } },
+        accessibility: 'actions.go.a11y',
+      };
+    }),
+    'UNRESOLVED_REFERENCE',
+    '.cartridge.actions["ashmere_rooms@0.0.1:action/go"].accessibility',
+    { target: 'actions.go.a11y' },
   ));

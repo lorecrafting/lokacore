@@ -82,7 +82,8 @@ defmodule Loka.Content.Checks do
   @doc """
   Diagnostics for a v2 source (`{entry, text}`; nil for v1): the entry is present, each room's
   owning capability is required, exits and the entry name rooms of this cartridge, and each
-  room's text keys have a catalog entry (unless the catalog was rejected, `:unknown`).
+  room's and action's text keys have a catalog entry (unless the catalog was rejected,
+  `:unknown`).
   """
   @spec rooms(map() | nil, map(), {map() | nil, map() | :unknown} | nil, [map()]) :: [map()]
   def rooms(_, _, nil, _), do: []
@@ -90,8 +91,11 @@ defmodule Loka.Content.Checks do
   def rooms(m, defs, {entry, text}, registry) do
     rooms = for {_, {rel, [], r}} <- defs["room"], do: {rel, r}
 
+    actions = for {_, {rel, [], a}} <- defs["action"], do: {rel, a}
+
     entry(m, entry, defs) ++
-      Enum.flat_map(rooms, &text_keys(&1, text)) ++
+      Enum.flat_map(rooms, &text_keys(&1, ~w(title description), text)) ++
+      Enum.flat_map(actions, &text_keys(&1, ~w(label accessibility), text)) ++
       if(m, do: Enum.flat_map(rooms, &room(&1, m, defs, registry)), else: [])
   end
 
@@ -113,10 +117,10 @@ defmodule Loka.Content.Checks do
           do: d
   end
 
-  defp text_keys(_, :unknown), do: []
+  defp text_keys(_, _, :unknown), do: []
 
-  defp text_keys({rel, r}, text) do
-    for field <- ~w(title description), not is_map_key(text, r[field]) do
+  defp text_keys({rel, r}, fields, text) do
+    for field <- fields, not is_map_key(text, r[field]) do
       diag("UNRESOLVED_REFERENCE", at(rel, [field]), %{"target" => r[field]})
     end
   end

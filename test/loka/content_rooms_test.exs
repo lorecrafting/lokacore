@@ -137,4 +137,39 @@ defmodule Loka.ContentRoomsTest do
              {:error,
               [d("SCHEMA_VIOLATION", "cartridge.title", %{"error" => "missing_property"})]}
   end
+
+  # Review F5. Breaks: a v2 action label or accessibility key reaches the player unresolved.
+  test "an action text key without a catalog entry is UNRESOLVED_REFERENCE", %{tmp_dir: dir} do
+    talk = %{
+      "label" => "act.talk",
+      "target" => %{"kind" => "none"},
+      "command" => "move",
+      "priority" => 0,
+      "input" => [],
+      "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}},
+      "accessibility" => "r.t"
+    }
+
+    m = put_in(@manifest, ["requires", "capabilities", "policy"], 1)
+
+    assert compile(dir, %{
+             "cartridge.json" => Map.put(m, "entry", ref("a")),
+             "actions/go.json" => talk
+           }) ==
+             {:error, [d("UNRESOLVED_REFERENCE", "actions/go.label", %{"target" => "act.talk"})]}
+  end
+
+  # Review F6. Breaks: v2 keyed on rooms alone, so text.json or an entry is silently dropped.
+  test "text.json or an entry without rooms is still v2 and fails for its missing room",
+       %{tmp_dir: dir} do
+    no_rooms = %{"rooms/a.json" => nil, "rooms/b.json" => nil}
+
+    assert compile(dir, Map.put(no_rooms, "cartridge.json", @manifest)) ==
+             {:error,
+              [d("SCHEMA_VIOLATION", "cartridge.entry", %{"error" => "missing_property"})]}
+
+    assert compile(dir, Map.put(no_rooms, "text.json", nil)) ==
+             {:error,
+              [d("UNRESOLVED_REFERENCE", "cartridge.entry", %{"target" => "c@1.0.0:room/a"})]}
+  end
 end

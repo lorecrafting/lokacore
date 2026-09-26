@@ -5,11 +5,13 @@ import { decode, encode, hash, type Json } from './canonical.ts';
 import {
   ARTIFACT_MAX_BYTES,
   CAPABILITY_OWNERS,
+  type DefinitionRef,
   type CompiledCartridge,
   type Diagnostic,
   type DiagnosticCode,
   type TextKey,
 } from './contracts.gen.ts';
+import { refString } from './decision.ts';
 import { utf8 } from './sha256.ts';
 import { cmp, validate } from './validate.ts';
 
@@ -198,14 +200,19 @@ function lockStage(c: Obj): Diagnostic[] {
   return out;
 }
 
-// v2: the entry and every exit name a room of this cartridge, and every room text key has a
-// catalog entry.
+// v2: the entry and every exit name a room of this cartridge, and every text key a room or an
+// action uses has a catalog entry.
 function refStage(c: Obj): Diagnostic[] {
   if (c.format !== 'loka-cartridge-v2') return [];
   const { id, version } = c.manifest;
   const out: Diagnostic[] = [];
+  const text = (def: Obj, fields: string[], at: string) => {
+    for (const field of fields)
+      if (!Object.hasOwn(c.text, def[field]))
+        out.push(diag('UNRESOLVED_REFERENCE', `${at}.${field}`, { target: def[field] }));
+  };
   const room = (r: Obj, path: string) => {
-    const target = `${r.cartridge_id}@${r.cartridge_version}:${r.kind}/${r.key}`;
+    const target = refString(r as DefinitionRef);
     const ok = r.cartridge_id === id && r.cartridge_version === version && r.kind === 'room';
     if (!(ok && Object.hasOwn(c.rooms, target)))
       out.push(diag('UNRESOLVED_REFERENCE', path, { target }));
@@ -213,12 +220,12 @@ function refStage(c: Obj): Diagnostic[] {
   room(c.entry, '.cartridge.entry');
   for (const [ref, r] of Object.entries(c.rooms as Obj)) {
     const at = `.cartridge.rooms${step(ref)}`;
-    for (const field of ['title', 'description'])
-      if (!Object.hasOwn(c.text, r[field]))
-        out.push(diag('UNRESOLVED_REFERENCE', `${at}.${field}`, { target: r[field] }));
+    text(r, ['title', 'description'], at);
     for (const [dir, exit] of Object.entries(r.exits as Obj))
       room(exit.to, `${at}.exits.${dir}.to`);
   }
+  for (const [ref, a] of Object.entries(c.actions as Obj))
+    text(a, ['label', 'accessibility'], `.cartridge.actions${step(ref)}`);
   return out;
 }
 
